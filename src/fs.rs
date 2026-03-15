@@ -14,6 +14,9 @@ pub fn read_file(path: &Path) -> Option<String> {
 }
 
 /// Read a file to string, returning the error.
+///
+/// # Errors
+/// Returns `std::io::Error` if the file cannot be read.
 #[allow(clippy::disallowed_methods)] // reason: centralized fs module
 pub fn read_file_err(path: &Path) -> Result<String, std::io::Error> {
     std::fs::read_to_string(path)
@@ -41,6 +44,9 @@ pub fn metadata(path: &Path) -> Option<std::fs::Metadata> {
 }
 
 /// Write content to a file, creating parent directories.
+///
+/// # Errors
+/// Returns `std::io::Error` if the file cannot be written or directories cannot be created.
 #[allow(clippy::disallowed_methods)] // reason: centralized fs module
 pub fn write_file(path: &Path, content: &str) -> Result<(), std::io::Error> {
     if let Some(parent) = path.parent() {
@@ -52,6 +58,9 @@ pub fn write_file(path: &Path, content: &str) -> Result<(), std::io::Error> {
 /// Create directory and all parent directories.
 ///
 /// Returns `Ok(())` if the directory already exists.
+///
+/// # Errors
+/// Returns `std::io::Error` if the directories cannot be created.
 #[allow(clippy::disallowed_methods)] // reason: centralized fs module
 pub fn create_dir_all(path: &Path) -> Result<(), std::io::Error> {
     let target = path.to_path_buf();
@@ -59,6 +68,9 @@ pub fn create_dir_all(path: &Path) -> Result<(), std::io::Error> {
 }
 
 /// Set file permissions.
+///
+/// # Errors
+/// Returns `std::io::Error` if permissions cannot be set.
 #[allow(clippy::disallowed_methods)] // reason: centralized fs module
 pub fn set_permissions(path: &Path, perm: std::fs::Permissions) -> Result<(), std::io::Error> {
     std::fs::set_permissions(path, perm)

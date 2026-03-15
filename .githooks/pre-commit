@@ -81,7 +81,7 @@ fi
 
 # 2. Item-level allow without reason comment
 ALLOW_PAT='#\[allow('
-STAGED_RS=$(echo "$STAGED_FILES" | grep -E '\.rs$' | grep -v '/target/' | grep -v '/tests/' || true)
+STAGED_RS=$(echo "$STAGED_FILES" | grep -E '\.rs$' | grep -v '/target/' | grep -v '/tests/' | grep -v '^tests/' || true)
 if [ -n "$STAGED_RS" ]; then
     while IFS= read -r file; do
         [ -n "$file" ] || continue
@@ -96,7 +96,7 @@ if [ -n "$STAGED_RS" ]; then
 fi
 
 # 3. Config relaxation detection
-GUARDRAIL_FILES=$(echo "$STAGED_FILES" | grep -E '(eslint\.config\.mjs|tsconfig\.base\.json|\.jscpd\.json|Cargo\.toml|clippy\.toml|deny\.toml|rustfmt\.toml)$' || true)
+GUARDRAIL_FILES=$(echo "$STAGED_FILES" | grep -E '(eslint\.config\.mjs|tsconfig\.base\.json|\.jscpd\.json|Cargo\.toml|clippy\.toml|deny\.toml|rustfmt\.toml)$' | grep -v '^tests/fixtures/' || true)
 while IFS= read -r gf; do
     [ -n "$gf" ] || continue
     added=$(git diff --cached -- "$gf" | grep '^+' | grep -v '^+++' || true)
