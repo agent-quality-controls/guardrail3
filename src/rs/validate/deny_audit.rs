@@ -32,7 +32,7 @@ const EXPECTED_BANS: &[&str] = &[
     "flatbuffers",
 ];
 
-pub fn check(workspace_root: &Path) -> Vec<CheckResult> {
+pub fn check(workspace_root: &Path, profile: Option<&str>) -> Vec<CheckResult> {
     let mut results = Vec::new();
     let deny_path = workspace_root.join("deny.toml");
 
@@ -110,7 +110,7 @@ pub fn check(workspace_root: &Path) -> Vec<CheckResult> {
     check_advisory_values(&table, &deny_path, &mut results);
 
     // R12-R13: Check bans deny list
-    check_ban_list(&table, &deny_path, &mut results);
+    check_ban_list(&table, &deny_path, profile, &mut results);
 
     // R14-R15: Check licenses allow list
     check_licenses(&table, &deny_path, &mut results);
@@ -239,7 +239,7 @@ fn check_advisory_values(
     }
 }
 
-fn check_ban_list(table: &toml::Value, file_path: &Path, results: &mut Vec<CheckResult>) {
+fn check_ban_list(table: &toml::Value, file_path: &Path, profile: Option<&str>, results: &mut Vec<CheckResult>) {
     let bans = match table.get("bans") {
         Some(b) => b,
         None => {
@@ -334,8 +334,12 @@ fn check_ban_list(table: &toml::Value, file_path: &Path, results: &mut Vec<Check
         }
     }
 
+    let expected_bans: &[&str] = match profile {
+        Some("minimal") => &[],
+        _ => EXPECTED_BANS,
+    };
     let expected_set: BTreeSet<String> =
-        EXPECTED_BANS.iter().map(|s| (*s).to_string()).collect();
+        expected_bans.iter().map(|s| (*s).to_string()).collect();
 
     for exp in &expected_set {
         if !found_bans.contains(exp) {

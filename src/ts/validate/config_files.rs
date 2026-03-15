@@ -554,6 +554,7 @@ fn check_npmrc(path: &Path, results: &mut Vec<CheckResult>) {
         ("minimum-release-age", "1440"),
         ("block-exotic-subdeps", "true"),
         ("trust-policy", "warn"),
+        ("public-hoist-pattern", ""),
         ("save-prefix", ""),
         ("shamefully-hoist", "false"),
     ];

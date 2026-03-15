@@ -39,7 +39,25 @@ const EXPECTED_TYPE_BANS: &[&str] = &[
     "std::fs::File",
 ];
 
-pub fn check(workspace_root: &Path) -> Vec<CheckResult> {
+const MINIMAL_EXPECTED_METHOD_BANS: &[&str] = &[
+    "std::env::var",
+    "std::env::var_os",
+    "std::env::vars",
+    "std::env::set_var",
+    "std::env::remove_var",
+    "std::process::exit",
+    "std::process::Command::new",
+    "std::thread::sleep",
+];
+
+const MINIMAL_EXPECTED_TYPE_BANS: &[&str] = &[
+    "std::collections::HashMap",
+    "std::collections::HashSet",
+    "std::sync::Mutex",
+    "std::sync::RwLock",
+];
+
+pub fn check(workspace_root: &Path, profile: Option<&str>) -> Vec<CheckResult> {
     let mut results = Vec::new();
     let clippy_path = workspace_root.join("clippy.toml");
 
@@ -85,11 +103,20 @@ pub fn check(workspace_root: &Path) -> Vec<CheckResult> {
         }
     };
 
+    let expected_methods = match profile {
+        Some("minimal") => MINIMAL_EXPECTED_METHOD_BANS,
+        _ => EXPECTED_METHOD_BANS,
+    };
+    let expected_types = match profile {
+        Some("minimal") => MINIMAL_EXPECTED_TYPE_BANS,
+        _ => EXPECTED_TYPE_BANS,
+    };
+
     // Check disallowed-methods: R4=missing, R6=extras
     check_ban_list(
         &table,
         "disallowed-methods",
-        EXPECTED_METHOD_BANS,
+        expected_methods,
         "R4",
         "R6",
         "method ban",
@@ -101,7 +128,7 @@ pub fn check(workspace_root: &Path) -> Vec<CheckResult> {
     check_ban_list(
         &table,
         "disallowed-types",
-        EXPECTED_TYPE_BANS,
+        expected_types,
         "R5",
         "R7",
         "type ban",

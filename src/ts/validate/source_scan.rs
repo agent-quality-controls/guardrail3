@@ -56,6 +56,7 @@ fn collect_ts_files(root: &Path) -> Vec<String> {
                 && name != "target"
                 && name != "coverage"
                 && name != ".git"
+                && name != ".claude"
         })
     {
         if let Ok(entry) = entry {
@@ -128,6 +129,31 @@ fn check_eslint_disable(path: &Path, content: &str, results: &mut Vec<CheckResul
                 });
             }
         }
+
+        // eslint-disable-line (T25/T26 — inline suppression)
+        if trimmed.contains("eslint-disable-line") && !trimmed.contains("eslint-disable-line-") {
+            if trimmed.contains("-- ") {
+                // T26: with reason
+                results.push(CheckResult {
+                    id: "T26".to_string(),
+                    severity: Severity::Info,
+                    title: "eslint-disable-line with reason".to_string(),
+                    message: trimmed.to_string(),
+                    file: Some(path.display().to_string()),
+                    line: Some(line_number),
+                });
+            } else {
+                // T25: without reason
+                results.push(CheckResult {
+                    id: "T25".to_string(),
+                    severity: Severity::Error,
+                    title: "eslint-disable-line without reason".to_string(),
+                    message: format!("Missing `-- ` reason: {trimmed}"),
+                    file: Some(path.display().to_string()),
+                    line: Some(line_number),
+                });
+            }
+        }
     }
 }
 
@@ -192,7 +218,8 @@ fn check_process_env(path: &Path, content: &str, results: &mut Vec<CheckResult>)
         return;
     }
 
-    for (line_num, line) in content.lines().enumerate() {
+    let lines: Vec<&str> = content.lines().collect();
+    for (line_num, line) in lines.iter().enumerate() {
         let trimmed = line.trim();
         // Skip comment lines
         if trimmed.starts_with("//") || trimmed.starts_with("*") || trimmed.starts_with("/*") {
@@ -201,11 +228,33 @@ fn check_process_env(path: &Path, content: &str, results: &mut Vec<CheckResult>)
 
         if trimmed.contains("process.env.") || trimmed.contains("process.env[") {
             let line_number = line_num.saturating_add(1);
+
+            // Check if the previous line contains eslint-disable-next-line
+            let prev_line = if line_num > 0 {
+                lines.get(line_num.saturating_sub(1))
+            } else {
+                None
+            };
+            let is_suppressed = prev_line
+                .map_or(false, |pl| pl.contains("eslint-disable-next-line"));
+
+            let severity = if is_suppressed {
+                Severity::Info
+            } else {
+                Severity::Error
+            };
+
+            let message = if is_suppressed {
+                format!("ESLint-suppressed process.env access: {trimmed}")
+            } else {
+                format!("Use env() import instead: {trimmed}")
+            };
+
             results.push(CheckResult {
                 id: "T30".to_string(),
-                severity: Severity::Error,
+                severity,
                 title: "Direct process.env access".to_string(),
-                message: format!("Use env() import instead: {trimmed}"),
+                message,
                 file: Some(path.display().to_string()),
                 line: Some(line_number),
             });

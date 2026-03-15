@@ -38,7 +38,7 @@ pub fn check(
         check_file_length(path, &content, &mut results);
         check_use_count(path, &content, &mut results);
         check_unsafe(path, &content, &mut results);
-        check_todo_macros(path, &content, &mut results);
+        check_todo_macros(path, &content, is_test_file, &mut results);
 
         if !is_test_file {
             check_unwrap_expect(path, &content, &mut results);
@@ -69,7 +69,7 @@ fn collect_rs_files(root: &Path) -> Vec<String> {
         .into_iter()
         .filter_entry(|e| {
             let name = e.file_name().to_string_lossy();
-            name != "target" && name != "node_modules" && name != ".git"
+            name != "target" && name != "node_modules" && name != ".git" && name != ".claude"
         })
     {
         if let Ok(entry) = entry {
@@ -546,7 +546,7 @@ fn check_unsafe(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
 }
 
 // R43: todo!/unimplemented! (Warn) and unreachable! (Info)
-fn check_todo_macros(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
+fn check_todo_macros(path: &Path, content: &str, is_test_file: bool, results: &mut Vec<CheckResult>) {
     let non_comment_lines = filter_non_comment_lines(content);
 
     for (line_num, trimmed) in &non_comment_lines {
@@ -565,7 +565,8 @@ fn check_todo_macros(path: &Path, content: &str, results: &mut Vec<CheckResult>)
         }
 
         // unreachable! is Info — legitimately used in exhaustive matches
-        if trimmed.contains("unreachable!(") {
+        // Skip unreachable! in test files — it's a normal assertion pattern
+        if trimmed.contains("unreachable!(") && !is_test_file {
             let line_number = line_num.saturating_add(1);
             results.push(CheckResult {
                 id: "R43".to_string(),

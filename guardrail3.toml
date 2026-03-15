@@ -1,0 +1,13 @@
+version = "0.1"
+
+[profile]
+name = "minimal"
+
+[rust]
+workspace_root = "."
+
+[local]
+clippy_methods = "local/clippy-methods.toml"
+clippy_types = "local/clippy-types.toml"
+deny_bans = "local/deny-bans.toml"
+deny_skip = "local/deny-skip.toml"

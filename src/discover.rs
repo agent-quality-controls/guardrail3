@@ -23,10 +23,16 @@ pub fn detect_project(path: &Path) -> ProjectInfo {
     // Check for Cargo.toml at path itself
     detect_rust(path, &mut info);
 
-    // If not found, check apps/backend/ (monorepo structure)
-    if !info.has_rust {
+    // If not found, or workspace has zero members (marker Cargo.toml for rust-analyzer),
+    // check apps/backend/ (monorepo structure)
+    if !info.has_rust || (info.has_rust && info.workspace_members.is_empty()) {
         let backend_path = path.join("apps").join("backend");
         if backend_path.exists() {
+            // Reset rust state if we're falling through from an empty marker workspace
+            info.has_rust = false;
+            info.cargo_workspace_root = None;
+            info.workspace_members.clear();
+            info.workspace_member_dirs.clear();
             detect_rust(&backend_path, &mut info);
         }
     }
@@ -141,6 +147,7 @@ fn detect_rust(path: &Path, info: &mut ProjectInfo) {
         info.cargo_workspace_root = Some(path.to_path_buf());
         let crate_name = read_crate_name(path);
         info.workspace_members.push(crate_name);
+        info.workspace_member_dirs.push(".".to_string());
     }
 }
 
