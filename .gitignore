@@ -4,3 +4,6 @@
 .mcp.json
 .gitnexus
 .env
+fuzz/target/
+fuzz/corpus/
+fuzz/artifacts/
