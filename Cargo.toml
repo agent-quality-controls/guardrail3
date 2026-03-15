@@ -83,6 +83,8 @@ serde_json = "1"
 glob = "0.3"
 colored = "2"
 walkdir = "2"
+syn = { version = "2", features = ["full", "parsing", "visit"] }
+proc-macro2 = { version = "1", features = ["span-locations"] }
 
 [dev-dependencies]
 proptest = "1"
