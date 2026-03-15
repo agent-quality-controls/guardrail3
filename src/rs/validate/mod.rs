@@ -1,13 +1,17 @@
+mod allow_checks;
 pub mod cargo_lints;
 pub mod clippy_coverage;
+mod code_quality_checks;
 pub mod config_files;
 pub mod deny_audit;
 mod deny_bans;
 mod deny_inventory;
 mod deny_licenses;
+mod dependency_direction;
 pub mod dependency_scan;
 mod rustfmt_check;
 pub mod source_scan;
+mod structure_checks;
 mod toolchain_check;
 mod workspace_metadata;
 

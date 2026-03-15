@@ -377,6 +377,9 @@ fn check_all_eslint_rules(content: &str, eslint_path: &Path, results: &mut Vec<C
         ("T78", "prefer-nullish-coalescing", Severity::Warn),
         ("T79", "prefer-optional-chain", Severity::Warn),
         ("T80", "no-deprecated", Severity::Warn),
+        ("T81", "restrict-template-expressions", Severity::Warn),
+        ("T82", "no-throw-literal", Severity::Warn),
+        ("T83", "no-empty", Severity::Warn),
     ];
 
     for (id, rule_name, severity) in rules {

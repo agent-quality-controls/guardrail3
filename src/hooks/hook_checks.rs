@@ -135,7 +135,10 @@ pub fn check_hooks(
             .map(|d| d.as_secs())
             .unwrap_or(0)
     });
-    let size = metadata.as_ref().map_or(0, std::fs::Metadata::len);
+    let size = match metadata.as_ref() {
+        Some(m) => m.len(),
+        None => 0,
+    };
 
     results.push(CheckResult {
         id: "H6".to_owned(),
