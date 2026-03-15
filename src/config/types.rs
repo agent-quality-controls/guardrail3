@@ -3,6 +3,7 @@ use std::collections::BTreeMap;
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)] // reason: fields deserialized from guardrail3.toml, used by generate features
 pub struct GuardrailConfig {
     pub version: Option<String>,
     pub profile: Option<ProfileConfig>,
@@ -18,9 +19,11 @@ pub struct ProfileConfig {
 }
 
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)] // reason: fields deserialized from guardrail3.toml, used by generate features
 pub struct RustConfig {
     pub workspace_root: Option<String>,
     pub workspaces: Option<Vec<String>>,
+    #[allow(clippy::type_complexity)] // reason: legitimate complex type
     pub crates: Option<BTreeMap<String, CrateConfig>>,
 }
 
@@ -30,6 +33,7 @@ pub struct CrateConfig {
 }
 
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)] // reason: fields deserialized from guardrail3.toml, used by generate features
 pub struct TypeScriptConfig {
     pub apps: Option<Vec<String>>,
     pub migrations: Option<String>,
@@ -59,6 +63,7 @@ pub struct LocalConfig {
 }
 
 #[derive(Debug, Deserialize)]
+#[allow(dead_code)] // reason: fields deserialized from guardrail3.toml, used by generate features
 pub struct HooksConfig {
     pub extra_dir: Option<String>,
 }

@@ -1,5 +1,4 @@
 use std::path::Path;
-use std::process::Command;
 
 use crate::cli::ValidateArgs;
 use crate::discover;
@@ -9,14 +8,12 @@ use crate::report::types::Report;
 use crate::rs;
 use crate::ts;
 
+#[allow(clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — stderr output and exit codes
 pub fn run(args: &ValidateArgs) {
     let path = Path::new(&args.path);
-    let abs_path = match path.canonicalize() {
-        Ok(p) => p,
-        Err(e) => {
-            eprintln!("Error: cannot resolve path '{}': {e}", args.path);
-            std::process::exit(1);
-        }
+    let Some(abs_path) = path.canonicalize().ok() else {
+        eprintln!("Error: cannot resolve path '{}'", args.path);
+        std::process::exit(1);
     };
 
     let project = discover::detect_project(&abs_path);
@@ -24,22 +21,19 @@ pub fn run(args: &ValidateArgs) {
     let scoped_files = resolve_scoped_files(args, &abs_path);
     let scoped_ref = scoped_files.as_deref();
 
-    let mut combined_report = Report::new(
-        abs_path.display().to_string(),
-        {
-            let mut stacks = Vec::new();
-            if project.has_rust {
-                stacks.push("Rust".to_string());
-            }
-            if project.has_typescript {
-                stacks.push("TypeScript".to_string());
-            }
-            if stacks.is_empty() {
-                stacks.push("Unknown".to_string());
-            }
-            stacks
-        },
-    );
+    let mut combined_report = Report::new(abs_path.display().to_string(), {
+        let mut stacks = Vec::new();
+        if project.has_rust {
+            stacks.push("Rust".to_owned());
+        }
+        if project.has_typescript {
+            stacks.push("TypeScript".to_owned());
+        }
+        if stacks.is_empty() {
+            stacks.push("Unknown".to_owned());
+        }
+        stacks
+    });
 
     if project.has_rust {
         let rust_report = rs::validate::run(&abs_path, &project, scoped_ref);
@@ -56,11 +50,7 @@ pub fn run(args: &ValidateArgs) {
     }
 
     // Hook and deployment checks
-    let hooks_report = hooks::validate::run(
-        &abs_path,
-        project.has_rust,
-        project.has_typescript,
-    );
+    let hooks_report = hooks::validate::run(&abs_path, project.has_rust, project.has_typescript);
     for section in hooks_report.sections {
         combined_report.add_section(section);
     }
@@ -69,7 +59,7 @@ pub fn run(args: &ValidateArgs) {
         "json" => report::json::print_report(&combined_report),
         "md" | "markdown" => report::markdown::print_report(&combined_report),
         _ => report::text::print_report(&combined_report),
-    };
+    }
 
     // Exit with error code if errors found
     if combined_report.error_count() > 0 {
@@ -81,6 +71,7 @@ pub fn resolve_scoped_files_pub(args: &ValidateArgs, project_path: &Path) -> Opt
     resolve_scoped_files(args, project_path)
 }
 
+#[allow(clippy::disallowed_methods)] // reason: CLI tool runs git commands for scoped file detection
 fn resolve_scoped_files(args: &ValidateArgs, project_path: &Path) -> Option<Vec<String>> {
     if !args.files.is_empty() {
         return Some(args.files.clone());
@@ -101,8 +92,9 @@ fn resolve_scoped_files(args: &ValidateArgs, project_path: &Path) -> Option<Vec<
     None
 }
 
+#[allow(clippy::disallowed_methods)] // reason: CLI tool runs git commands
 fn git_staged_files(project_path: &Path) -> Option<Vec<String>> {
-    let output = Command::new("git")
+    let output = std::process::Command::new("git")
         .args(["diff", "--cached", "--name-only", "--diff-filter=ACM"])
         .current_dir(project_path)
         .output()
@@ -120,14 +112,15 @@ fn git_staged_files(project_path: &Path) -> Option<Vec<String>> {
     Some(files)
 }
 
+#[allow(clippy::disallowed_methods)] // reason: CLI tool runs git commands
 fn git_dirty_files(project_path: &Path) -> Option<Vec<String>> {
-    let staged = Command::new("git")
+    let staged = std::process::Command::new("git")
         .args(["diff", "--cached", "--name-only"])
         .current_dir(project_path)
         .output()
         .ok()?;
 
-    let unstaged = Command::new("git")
+    let unstaged = std::process::Command::new("git")
         .args(["diff", "--name-only"])
         .current_dir(project_path)
         .output()
@@ -154,8 +147,9 @@ fn git_dirty_files(project_path: &Path) -> Option<Vec<String>> {
     Some(files)
 }
 
+#[allow(clippy::disallowed_methods)] // reason: CLI tool runs git commands
 fn git_commit_files(project_path: &Path, n: usize) -> Option<Vec<String>> {
-    let output = Command::new("git")
+    let output = std::process::Command::new("git")
         .args([
             "log",
             "--name-only",

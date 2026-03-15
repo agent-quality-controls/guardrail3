@@ -2,6 +2,7 @@ use serde_json::{Map, Number, Value, json};
 
 use super::types::{Report, Severity};
 
+#[allow(clippy::print_stdout)] // reason: CLI report output to stdout
 pub fn print_report(report: &Report) {
     let sections: Vec<Value> = report
         .sections
@@ -18,29 +19,21 @@ pub fn print_report(report: &Report) {
                     };
 
                     let mut obj = Map::new();
-                    obj.insert("id".into(), Value::String(r.id.clone()));
-                    obj.insert(
-                        "severity".into(),
-                        Value::String(severity_str.into()),
-                    );
-                    obj.insert("title".into(), Value::String(r.title.clone()));
-                    obj.insert(
-                        "message".into(),
-                        Value::String(r.message.clone()),
-                    );
-                    obj.insert(
+                    let _ = obj.insert("id".into(), Value::String(r.id.clone()));
+                    let _ = obj.insert("severity".into(), Value::String(severity_str.into()));
+                    let _ = obj.insert("title".into(), Value::String(r.title.clone()));
+                    let _ = obj.insert("message".into(), Value::String(r.message.clone()));
+                    let _ = obj.insert(
                         "file".into(),
                         match &r.file {
                             Some(f) => Value::String(f.clone()),
                             None => Value::Null,
                         },
                     );
-                    obj.insert(
+                    let _ = obj.insert(
                         "line".into(),
                         match r.line {
-                            Some(l) => {
-                                Value::Number(Number::from(l))
-                            }
+                            Some(l) => Value::Number(Number::from(l)),
                             None => Value::Null,
                         },
                     );
@@ -68,7 +61,6 @@ pub fn print_report(report: &Report) {
 
     println!(
         "{}",
-        serde_json::to_string_pretty(&output)
-            .unwrap_or_else(|e| format!("{{\"error\": \"{e}\"}}"))
+        serde_json::to_string_pretty(&output).unwrap_or_else(|e| format!("{{\"error\": \"{e}\"}}"))
     );
 }

@@ -29,7 +29,7 @@ pub struct Report {
 }
 
 impl Report {
-    pub fn new(project_path: String, stacks: Vec<String>) -> Self {
+    pub const fn new(project_path: String, stacks: Vec<String>) -> Self {
         Self {
             project_path,
             stacks,
@@ -64,5 +64,4 @@ impl Report {
             .filter(|r| r.severity == Severity::Info)
             .count()
     }
-
 }

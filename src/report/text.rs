@@ -2,29 +2,18 @@ use colored::Colorize;
 
 use super::types::{CheckResult, Report, Severity};
 
+#[allow(clippy::print_stdout)] // reason: CLI report output to stdout
 pub fn print_report(report: &Report) {
     println!();
     println!(
         "{}",
-        format!(
-            "Guardrail Report: {}",
-            report.project_path
-        )
-        .bold()
+        format!("Guardrail Report: {}", report.project_path).bold()
     );
-    println!(
-        "Stacks: {}",
-        report.stacks.join(", ").cyan()
-    );
+    println!("Stacks: {}", report.stacks.join(", ").cyan());
     println!();
 
     for section in &report.sections {
-        println!(
-            "{} {} {}",
-            "===".bold(),
-            section.name.bold(),
-            "===".bold()
-        );
+        println!("{} {} {}", "===".bold(), section.name.bold(), "===".bold());
         if section.results.is_empty() {
             println!("  {} No checks in this section", "(empty)".dimmed());
         }
@@ -37,6 +26,7 @@ pub fn print_report(report: &Report) {
     print_summary(report);
 }
 
+#[allow(clippy::print_stdout)] // reason: CLI report output to stdout
 fn print_result(result: &CheckResult) {
     let icon = match result.severity {
         Severity::Error => "\u{2717}".red().bold(),
@@ -51,8 +41,8 @@ fn print_result(result: &CheckResult) {
     };
 
     let location = match (&result.file, result.line) {
-        (Some(f), Some(l)) => format!(" ({}:{})", f, l),
-        (Some(f), None) => format!(" ({})", f),
+        (Some(f), Some(l)) => format!(" ({f}:{l})"),
+        (Some(f), None) => format!(" ({f})"),
         _ => String::new(),
     };
 
@@ -66,6 +56,7 @@ fn print_result(result: &CheckResult) {
     );
 }
 
+#[allow(clippy::print_stdout)] // reason: CLI report output to stdout
 fn print_summary(report: &Report) {
     let errors = report.error_count();
     let warns = report.warn_count();

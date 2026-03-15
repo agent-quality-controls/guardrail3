@@ -1,5 +1,6 @@
 use crate::modules;
 
+#[allow(clippy::print_stdout)] // reason: CLI command — module listing output to stdout
 pub fn list_modules() {
     let all = modules::all_modules();
 
@@ -7,24 +8,21 @@ pub fn list_modules() {
     let mut current_category = String::new();
 
     for module in &all {
-        let category = module
-            .name
-            .split('/')
-            .next()
-            .unwrap_or(module.name);
+        let category = module.name.split('/').next().unwrap_or(module.name);
 
         if category != current_category {
             if !current_category.is_empty() {
                 println!();
             }
             println!("=== {category} ===");
-            current_category = category.to_string();
+            category.clone_into(&mut current_category);
         }
 
         println!("  {:<40} {}", module.name, module.description);
     }
 }
 
+#[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
 pub fn show_module(name: &str) {
     match modules::find_module(name) {
         Some(module) => {

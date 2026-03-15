@@ -2,6 +2,7 @@ pub mod types;
 
 use std::path::Path;
 
+#[allow(clippy::print_stderr)] // reason: CLI tool — config parse errors reported to stderr
 pub fn load_config(path: &Path) -> Option<types::GuardrailConfig> {
     let config_path = path.join("guardrail3.toml");
     let content = std::fs::read_to_string(&config_path).ok()?;

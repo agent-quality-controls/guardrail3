@@ -3,15 +3,13 @@ use std::path::Path;
 
 use crate::commands::generate;
 
+#[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
 pub fn run(path: &str) {
     let project_path = Path::new(path);
 
-    let expected = match generate::generate_expected(project_path) {
-        Some(e) => e,
-        None => {
-            eprintln!("Error: guardrail3.toml not found or invalid at {path}");
-            std::process::exit(1);
-        }
+    let Some(expected) = generate::generate_expected(project_path) else {
+        eprintln!("Error: guardrail3.toml not found or invalid at {path}");
+        std::process::exit(1);
     };
 
     let mut has_diff = false;
@@ -40,13 +38,14 @@ pub fn run(path: &str) {
         }
     }
 
-    if !has_diff {
-        println!("No changes. All generated files are current.");
-    } else {
+    if has_diff {
         std::process::exit(1);
+    } else {
+        println!("No changes. All generated files are current.");
     }
 }
 
+#[allow(clippy::print_stdout)] // reason: CLI command — diff output to stdout
 fn print_simple_diff(actual: &str, expected: &str) {
     let actual_lines: Vec<&str> = actual.lines().collect();
     let expected_lines: Vec<&str> = expected.lines().collect();
@@ -60,11 +59,11 @@ fn print_simple_diff(actual: &str, expected: &str) {
 
         match (a, b) {
             (Some(al), Some(bl)) => {
-                if al != bl {
+                if al == bl {
+                    println!(" {al}");
+                } else {
                     println!("-{al}");
                     println!("+{bl}");
-                } else {
-                    println!(" {al}");
                 }
             }
             (Some(al), None) => {

@@ -59,14 +59,13 @@ fn check_tool_installed(
     missing_severity: Severity,
     results: &mut Vec<CheckResult>,
 ) {
-    let cmd_result = Command::new("which")
-        .arg(tool)
-        .output();
+    #[allow(clippy::disallowed_methods)] // reason: CLI tool checks tool installation with which
+    let cmd_result = Command::new("which").arg(tool).output();
 
     match cmd_result {
         Ok(output) if output.status.success() => {
             results.push(CheckResult {
-                id: check_id.to_string(),
+                id: check_id.to_owned(),
                 severity: Severity::Info,
                 title: format!("{tool} installed"),
                 message: format!("{tool} found on PATH"),
@@ -76,7 +75,7 @@ fn check_tool_installed(
         }
         _ => {
             results.push(CheckResult {
-                id: check_id.to_string(),
+                id: check_id.to_owned(),
                 severity: missing_severity,
                 title: format!("{tool} not installed"),
                 message: format!("{tool} not found — install with: cargo install {tool}"),
@@ -87,14 +86,15 @@ fn check_tool_installed(
     }
 }
 
+#[allow(clippy::too_many_lines)] // reason: cargo lock scanning
 fn check_cargo_lock(workspace_root: &Path, results: &mut Vec<CheckResult>) {
     let lock_path = workspace_root.join("Cargo.lock");
     if !lock_path.exists() {
         results.push(CheckResult {
-            id: "R50".to_string(),
+            id: "R50".to_owned(),
             severity: Severity::Warn,
-            title: "Cargo.lock not found".to_string(),
-            message: "Cannot check for banned crates without Cargo.lock".to_string(),
+            title: "Cargo.lock not found".to_owned(),
+            message: "Cannot check for banned crates without Cargo.lock".to_owned(),
             file: Some(workspace_root.display().to_string()),
             line: None,
         });
@@ -102,12 +102,12 @@ fn check_cargo_lock(workspace_root: &Path, results: &mut Vec<CheckResult>) {
     }
 
     let content = match std::fs::read_to_string(&lock_path) {
-        Ok(c) => c,
+        Ok(content) => content,
         Err(e) => {
             results.push(CheckResult {
-                id: "R50".to_string(),
+                id: "R50".to_owned(),
                 severity: Severity::Error,
-                title: "Cargo.lock unreadable".to_string(),
+                title: "Cargo.lock unreadable".to_owned(),
                 message: format!("Failed to read: {e}"),
                 file: Some(lock_path.display().to_string()),
                 line: None,
@@ -120,9 +120,9 @@ fn check_cargo_lock(workspace_root: &Path, results: &mut Vec<CheckResult>) {
         Ok(v) => v,
         Err(e) => {
             results.push(CheckResult {
-                id: "R50".to_string(),
+                id: "R50".to_owned(),
                 severity: Severity::Error,
-                title: "Cargo.lock parse error".to_string(),
+                title: "Cargo.lock parse error".to_owned(),
                 message: format!("Invalid TOML: {e}"),
                 file: Some(lock_path.display().to_string()),
                 line: None,
@@ -131,9 +131,8 @@ fn check_cargo_lock(workspace_root: &Path, results: &mut Vec<CheckResult>) {
         }
     };
 
-    let packages = match table.get("package").and_then(|p| p.as_array()) {
-        Some(arr) => arr,
-        None => return,
+    let Some(packages) = table.get("package").and_then(|p| p.as_array()) else {
+        return;
     };
 
     let mut found_banned = Vec::new();
@@ -151,19 +150,19 @@ fn check_cargo_lock(workspace_root: &Path, results: &mut Vec<CheckResult>) {
 
     if found_banned.is_empty() {
         results.push(CheckResult {
-            id: "R50".to_string(),
+            id: "R50".to_owned(),
             severity: Severity::Info,
-            title: "No banned crates in lockfile".to_string(),
-            message: "Cargo.lock is clean".to_string(),
+            title: "No banned crates in lockfile".to_owned(),
+            message: "Cargo.lock is clean".to_owned(),
             file: Some(lock_path.display().to_string()),
             line: None,
         });
     } else {
         for banned in &found_banned {
             results.push(CheckResult {
-                id: "R50".to_string(),
+                id: "R50".to_owned(),
                 severity: Severity::Error,
-                title: "Banned crate in lockfile".to_string(),
+                title: "Banned crate in lockfile".to_owned(),
                 message: format!("Found banned crate: {banned}"),
                 file: Some(lock_path.display().to_string()),
                 line: None,

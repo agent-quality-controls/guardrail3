@@ -1,9 +1,4 @@
-use super::Module;
-
-pub const PRE_COMMIT_SCRIPT: Module = Module {
-    name: "hooks/pre-commit",
-    description: "Pre-commit hook dispatcher script",
-    content: r#"#!/usr/bin/env bash
+#!/usr/bin/env bash
 set -uo pipefail
 
 # Rust workspace root — override with GUARDRAIL3_RUST_WORKSPACE env var
@@ -84,16 +79,15 @@ if [ -n "$STAGED_TS" ]; then
     done <<< "$STAGED_TS"
 fi
 
-# 2. Item-level allow without reason comment
-ALLOW_PAT='#\[allow('
+# 2. #[allow(...)] without reason comment
 STAGED_RS=$(echo "$STAGED_FILES" | grep -E '\.rs$' | grep -v '/target/' | grep -v '/tests/' || true)
 if [ -n "$STAGED_RS" ]; then
     while IFS= read -r file; do
         [ -n "$file" ] || continue
         [ -f "$file" ] || continue
-        bad_allows=$(grep -n "$ALLOW_PAT" "$file" | grep -v '#!\[allow' | grep -v '//' || true)
+        bad_allows=$(grep -n '#\[allow(' "$file" | grep -v '#!\[allow' | grep -v '//' || true)
         if [ -n "$bad_allows" ]; then
-            echo "FAIL: $file has item-level allow without a justification comment:"
+            echo "FAIL: $file has #[allow(...)] without a justification comment:"
             echo "$bad_allows"
             tamper_fail=1
         fi
@@ -251,5 +245,3 @@ if [ "$TS_CHANGED" -gt 0 ] || [ "$RUST_CHANGED" -gt 0 ] || [ "$CARGO_CHANGED" -g
 fi
 
 echo "All pre-commit checks passed."
-"#,
-};

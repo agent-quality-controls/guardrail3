@@ -11,6 +11,63 @@ publish = false
 name = "guardrail3"
 path = "src/main.rs"
 
+[lints]
+workspace = true
+
+[workspace.lints.rust]
+warnings = "deny"
+unsafe_code = "forbid"
+dead_code = "deny"
+unused_results = "deny"
+unused_crate_dependencies = "deny"
+
+[workspace.lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "deny", priority = -1 }
+cargo = { level = "deny", priority = -1 }
+nursery = { level = "deny", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+unimplemented = "deny"
+todo = "deny"
+dbg_macro = "deny"
+print_stdout = "deny"
+print_stderr = "deny"
+disallowed_methods = "deny"
+disallowed_types = "deny"
+indexing_slicing = "deny"
+string_slice = "deny"
+arithmetic_side_effects = "deny"
+shadow_unrelated = "deny"
+missing_assert_message = "deny"
+partial_pub_fields = "deny"
+str_to_string = "deny"
+implicit_clone = "deny"
+as_conversions = "deny"
+float_cmp = "deny"
+lossy_float_literal = "deny"
+wildcard_enum_match_arm = "deny"
+rest_pat_in_fully_bound_structs = "deny"
+large_stack_arrays = "deny"
+needless_pass_by_value = "deny"
+redundant_else = "deny"
+large_futures = "deny"
+semicolon_if_nothing_returned = "deny"
+redundant_closure_for_method_calls = "deny"
+map_unwrap_or = "deny"
+verbose_file_reads = "deny"
+# Pedantic/nursery overrides
+missing_docs_in_private_items = "allow" # EXCEPTION: internal tool, docs added incrementally
+module_name_repetitions = "allow" # EXCEPTION: types like CheckResult in check module
+must_use_candidate = "allow" # EXCEPTION: not every function needs #[must_use]
+option_if_let_else = "allow" # EXCEPTION: if let is often clearer
+empty_line_after_doc_comments = "allow" # EXCEPTION: stylistic
+single_match_else = "allow" # EXCEPTION: match sometimes clearer
+ref_option_ref = "allow" # EXCEPTION: valid in function signatures
+trivially_copy_pass_by_ref = "allow" # EXCEPTION: pedantic micro-optimization
+multiple_crate_versions = "allow" # EXCEPTION: defer to deny.toml
+
 [dependencies]
 clap = { version = "4", features = ["derive"] }
 toml = "0.8"
