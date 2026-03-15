@@ -211,11 +211,6 @@ pub fn library_profile_ban_entries() -> Vec<&'static Module> {
     entries
 }
 
-/// Returns ban entry modules for the "minimal" profile (no bans).
-pub const fn minimal_profile_ban_entries() -> Vec<&'static Module> {
-    Vec::new()
-}
-
 /// Build the full deny.toml content using default service profile entries.
 /// `extra_bans`, `extra_skip`, and `extra_feature_bans` come from local override files.
 pub fn build_deny_toml(

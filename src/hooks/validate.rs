@@ -32,12 +32,8 @@ pub fn run(path: &Path, has_rust: bool, has_typescript: bool) -> Report {
 
 #[allow(clippy::case_sensitive_file_extension_comparisons)] // reason: only checking .json files
 fn has_railpack_files(path: &Path) -> bool {
-    #[allow(clippy::manual_let_else)] // reason: complex let-else with implicit return
-    let entries = match std::fs::read_dir(path) {
-        Ok(e) => e,
-        Err(_) => return false,
-    };
-    for entry in entries.flatten() {
+    let entries = crate::fs::list_dir(path);
+    for entry in entries {
         if let Some(name) = entry.file_name().to_str() {
             #[allow(clippy::case_sensitive_file_extension_comparisons)] // reason: .json check
             if name.starts_with("railpack-") && name.ends_with(".json") {

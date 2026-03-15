@@ -51,33 +51,33 @@ pub const METHOD_BLOCKING_SLEEP: Module = Module {
 
 pub const METHOD_FILESYSTEM: Module = Module {
     name: "clippy/methods/filesystem",
-    description: "Ban direct filesystem operations (use centralized io module)",
+    description: "Ban direct filesystem operations (create a centralized fs module)",
     content: r#"    # Reads
-    { path = "std::fs::read_to_string", reason = "Use centralized io module for all file operations" },
-    { path = "std::fs::read", reason = "Use centralized io module for all file operations" },
-    { path = "std::fs::read_dir", reason = "Use centralized io module for all file operations" },
-    { path = "std::fs::read_link", reason = "Use centralized io module for all file operations" },
+    { path = "std::fs::read_to_string", reason = "BANNED: Create a centralized fs module and route all filesystem operations through it -- no scattered std::fs calls" },
+    { path = "std::fs::read", reason = "BANNED: Create a centralized fs module and route all filesystem operations through it -- no scattered std::fs calls" },
+    { path = "std::fs::read_dir", reason = "BANNED: Create a centralized fs module and route all filesystem operations through it -- no scattered std::fs calls" },
+    { path = "std::fs::read_link", reason = "BANNED: Create a centralized fs module and route all filesystem operations through it -- no scattered std::fs calls" },
 
     # Writes
-    { path = "std::fs::write", reason = "Use centralized io module for all file operations" },
+    { path = "std::fs::write", reason = "BANNED: Create a centralized fs module and route all filesystem operations through it -- no scattered std::fs calls" },
 
     # Destructive operations
-    { path = "std::fs::remove_file", reason = "Use centralized io module for all file operations" },
-    { path = "std::fs::remove_dir_all", reason = "Use centralized io module for all file operations" },
+    { path = "std::fs::remove_file", reason = "BANNED: Create a centralized fs module and route all filesystem operations through it -- no scattered std::fs calls" },
+    { path = "std::fs::remove_dir_all", reason = "BANNED: Create a centralized fs module and route all filesystem operations through it -- no scattered std::fs calls" },
 
     # Directory creation
-    { path = "std::fs::create_dir_all", reason = "Use centralized io module for all file operations" },
+    { path = "std::fs::create_dir_all", reason = "BANNED: Create a centralized fs module and route all filesystem operations through it -- no scattered std::fs calls" },
 
     # Move / copy
-    { path = "std::fs::rename", reason = "Use centralized io module for all file operations" },
-    { path = "std::fs::copy", reason = "Use centralized io module for all file operations" },
+    { path = "std::fs::rename", reason = "BANNED: Create a centralized fs module and route all filesystem operations through it -- no scattered std::fs calls" },
+    { path = "std::fs::copy", reason = "BANNED: Create a centralized fs module and route all filesystem operations through it -- no scattered std::fs calls" },
 
     # Metadata and inspection
-    { path = "std::fs::metadata", reason = "Use centralized io module for all file operations" },
-    { path = "std::fs::symlink_metadata", reason = "Use centralized io module for all file operations" },
-    { path = "std::fs::canonicalize", reason = "Use centralized io module for all file operations" },
-    { path = "std::fs::set_permissions", reason = "Use centralized io module for all file operations" },
-    { path = "std::fs::hard_link", reason = "Use centralized io module for all file operations" },"#,
+    { path = "std::fs::metadata", reason = "BANNED: Create a centralized fs module and route all filesystem operations through it -- no scattered std::fs calls" },
+    { path = "std::fs::symlink_metadata", reason = "BANNED: Create a centralized fs module and route all filesystem operations through it -- no scattered std::fs calls" },
+    { path = "std::fs::canonicalize", reason = "BANNED: Create a centralized fs module and route all filesystem operations through it -- no scattered std::fs calls" },
+    { path = "std::fs::set_permissions", reason = "BANNED: Create a centralized fs module and route all filesystem operations through it -- no scattered std::fs calls" },
+    { path = "std::fs::hard_link", reason = "BANNED: Create a centralized fs module and route all filesystem operations through it -- no scattered std::fs calls" },"#,
 };
 
 pub const METHOD_HTTP_CLIENT: Module = Module {
@@ -107,8 +107,8 @@ pub const TYPE_SYNC: Module = Module {
 
 pub const TYPE_FILESYSTEM: Module = Module {
     name: "clippy/types/filesystem",
-    description: "Ban std::fs::File (use centralized io module)",
-    content: r#"    { path = "std::fs::File", reason = "Use centralized io module -- no direct file handle construction" },"#,
+    description: "Ban std::fs::File (use centralized fs module)",
+    content: r#"    { path = "std::fs::File", reason = "BANNED: Create a centralized fs module -- no direct file handle construction" },"#,
 };
 
 pub const TYPE_GLOBAL_STATE: Module = Module {
@@ -158,21 +158,6 @@ pub fn library_profile_types() -> Vec<&'static Module> {
     ]
 }
 
-/// Returns the method modules for the "minimal" profile (subset).
-pub fn minimal_profile_methods() -> Vec<&'static Module> {
-    vec![
-        &METHOD_ENV_VARS,
-        &METHOD_ENV_MUTATION,
-        &METHOD_PROCESS_CONTROL,
-        &METHOD_BLOCKING_SLEEP,
-    ]
-}
-
-/// Returns the type modules for the "minimal" profile (subset).
-pub fn minimal_profile_types() -> Vec<&'static Module> {
-    vec![&TYPE_COLLECTIONS, &TYPE_SYNC]
-}
-
 /// Build the full clippy.toml content for a workspace root or crate.
 /// `is_pure_layer` adds global-state type bans (for service/monorepo profiles).
 /// `extra_methods` and `extra_types` are appended from local override files.
@@ -184,13 +169,11 @@ pub fn build_clippy_toml(
 ) -> String {
     let methods = match profile {
         "library" => library_profile_methods(),
-        "minimal" => minimal_profile_methods(),
         _ => service_profile_methods(),
     };
 
     let types = match profile {
         "library" => library_profile_types(),
-        "minimal" => minimal_profile_types(),
         _ => {
             let mut t = service_profile_types();
             if is_pure_layer {

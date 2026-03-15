@@ -10,7 +10,7 @@ pub fn check_package_json(path: &Path, results: &mut Vec<CheckResult>) {
         return;
     }
 
-    let Ok(content) = std::fs::read_to_string(&pkg_path) else {
+    let Some(content) = crate::fs::read_file(&pkg_path) else {
         return;
     };
 
@@ -100,6 +100,9 @@ pub fn check_package_json(path: &Path, results: &mut Vec<CheckResult>) {
         "node-fetch",
         "isomorphic-fetch",
         "underscore",
+        "request-promise",
+        "postgres",
+        "cross-fetch",
     ];
     let banned_prefixes: &[&str] = &["embla-carousel"];
 

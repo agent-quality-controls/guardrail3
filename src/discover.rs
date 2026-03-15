@@ -55,7 +55,7 @@ fn detect_rust(path: &Path, info: &mut ProjectInfo) {
 
     info.has_rust = true;
 
-    let Ok(content) = std::fs::read_to_string(&cargo_path) else {
+    let Some(content) = crate::fs::read_file(&cargo_path) else {
         info.cargo_workspace_root = Some(path.to_path_buf());
         return;
     };
@@ -150,7 +150,7 @@ fn detect_rust(path: &Path, info: &mut ProjectInfo) {
 
 fn read_crate_name(path: &Path) -> String {
     let cargo_path = path.join("Cargo.toml");
-    let Ok(content) = std::fs::read_to_string(&cargo_path) else {
+    let Some(content) = crate::fs::read_file(&cargo_path) else {
         return path
             .file_name()
             .and_then(|n| n.to_str())
@@ -188,14 +188,12 @@ fn detect_typescript(path: &Path, info: &mut ProjectInfo) {
     // Check apps/ subdirectories
     let applications_dir = path.join("apps");
     if applications_dir.exists() {
-        if let Ok(entries) = std::fs::read_dir(&applications_dir) {
-            for entry in entries.flatten() {
-                let app_pkg = entry.path().join("package.json");
-                if app_pkg.exists() {
-                    info.has_typescript = true;
-                    info.package_json_path = Some(app_pkg);
-                    return;
-                }
+        for entry in crate::fs::list_dir(&applications_dir) {
+            let app_pkg = entry.path().join("package.json");
+            if app_pkg.exists() {
+                info.has_typescript = true;
+                info.package_json_path = Some(app_pkg);
+                return;
             }
         }
     }

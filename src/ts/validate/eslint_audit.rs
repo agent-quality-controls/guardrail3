@@ -12,10 +12,8 @@ pub fn check(path: &Path) -> Vec<CheckResult> {
         return results;
     }
 
-    #[allow(clippy::manual_let_else)] // reason: complex early return pattern
-    let content = match std::fs::read_to_string(&eslint_path) {
-        Ok(c) => c,
-        Err(_) => return results,
+    let Some(content) = crate::fs::read_file(&eslint_path) else {
+        return results;
     };
 
     // T36: Zone definitions

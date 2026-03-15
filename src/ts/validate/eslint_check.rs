@@ -2,6 +2,9 @@ use std::path::Path;
 
 use crate::report::types::{CheckResult, Severity};
 
+/// A rule definition: (`check_id`, `rule_name`, `severity_if_missing`).
+type RuleDef = (&'static str, &'static str, Severity);
+
 #[allow(clippy::too_many_lines)] // reason: comprehensive ESLint config validation
 pub fn check_eslint_config(path: &Path, results: &mut Vec<CheckResult>) {
     let eslint_path = path.join("eslint.config.mjs");
@@ -26,7 +29,7 @@ pub fn check_eslint_config(path: &Path, results: &mut Vec<CheckResult>) {
         line: None,
     });
 
-    let Ok(content) = std::fs::read_to_string(&eslint_path) else {
+    let Some(content) = crate::fs::read_file(&eslint_path) else {
         return;
     };
 
@@ -205,6 +208,9 @@ pub fn check_eslint_config(path: &Path, results: &mut Vec<CheckResult>) {
         results,
     );
 
+    // T60+: Additional ESLint rule presence checks
+    check_all_eslint_rules(&content, &eslint_path, results);
+
     // T49: Test file relaxations
     for (line_num, line) in content.lines().enumerate() {
         let trimmed = line.trim();
@@ -342,6 +348,39 @@ fn check_eslint_rule(
             file: Some(eslint_path.display().to_string()),
             line: None,
         });
+    }
+}
+
+/// Check all expected `ESLint` rules from the template.
+/// Each rule is checked for presence (`content.contains(rule_name)`).
+fn check_all_eslint_rules(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
+    // (check_id, rule_name, severity_if_missing)
+    let rules: &[RuleDef] = &[
+        ("T60", "no-misused-promises", Severity::Warn),
+        ("T61", "await-thenable", Severity::Warn),
+        ("T62", "consistent-type-imports", Severity::Warn),
+        ("T63", "no-non-null-assertion", Severity::Warn),
+        ("T64", "switch-exhaustiveness-check", Severity::Warn),
+        ("T65", "no-unused-vars", Severity::Warn),
+        ("T66", "require-await", Severity::Warn),
+        ("T67", "no-param-reassign", Severity::Warn),
+        ("T68", "no-unsafe-assignment", Severity::Warn),
+        ("T69", "no-unsafe-member-access", Severity::Warn),
+        ("T70", "no-unsafe-call", Severity::Warn),
+        ("T71", "no-unsafe-return", Severity::Warn),
+        ("T72", "no-unsafe-argument", Severity::Warn),
+        ("T73", "explicit-module-boundary-types", Severity::Warn),
+        ("T74", "promise-function-async", Severity::Warn),
+        ("T75", "consistent-type-exports", Severity::Warn),
+        ("T76", "consistent-type-definitions", Severity::Warn),
+        ("T77", "no-unnecessary-condition", Severity::Warn),
+        ("T78", "prefer-nullish-coalescing", Severity::Warn),
+        ("T79", "prefer-optional-chain", Severity::Warn),
+        ("T80", "no-deprecated", Severity::Warn),
+    ];
+
+    for (id, rule_name, severity) in rules {
+        check_eslint_rule_presence(content, eslint_path, id, rule_name, *severity, results);
     }
 }
 

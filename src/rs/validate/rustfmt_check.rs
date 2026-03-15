@@ -6,7 +6,7 @@ use crate::report::types::{CheckResult, Severity};
 #[allow(clippy::too_many_lines)] // reason: rustfmt settings validation
 #[allow(clippy::or_fun_call)] // reason: map_or with function call is intentional for display
 pub fn check_rustfmt_settings(path: &Path, results: &mut Vec<CheckResult>) {
-    let content = match std::fs::read_to_string(path) {
+    let content = match crate::fs::read_file_err(path) {
         Ok(c) => c,
         Err(e) => {
             results.push(CheckResult {

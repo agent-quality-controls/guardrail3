@@ -125,7 +125,7 @@ pub fn check_per_crate_clippy(workspace_root: &Path, member_dirs: &[String]) -> 
 }
 
 fn check_per_crate_clippy_content(path: &Path, member: &str, results: &mut Vec<CheckResult>) {
-    let Ok(content) = std::fs::read_to_string(path) else {
+    let Some(content) = crate::fs::read_file(path) else {
         return;
     };
 
@@ -180,7 +180,7 @@ fn check_per_crate_clippy_content(path: &Path, member: &str, results: &mut Vec<C
 
 #[allow(clippy::too_many_lines)] // reason: clippy threshold validation
 fn check_clippy_thresholds(path: &Path, results: &mut Vec<CheckResult>) {
-    let content = match std::fs::read_to_string(path) {
+    let content = match crate::fs::read_file_err(path) {
         Ok(content) => content,
         Err(e) => {
             results.push(CheckResult {

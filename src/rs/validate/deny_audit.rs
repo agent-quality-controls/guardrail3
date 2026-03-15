@@ -61,7 +61,7 @@ pub fn check(workspace_root: &Path, profile: Option<&str>) -> Vec<CheckResult> {
         line: None,
     });
 
-    let content = match std::fs::read_to_string(&deny_path) {
+    let content = match crate::fs::read_file_err(&deny_path) {
         Ok(content) => content,
         Err(e) => {
             results.push(CheckResult {

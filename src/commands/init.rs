@@ -1,4 +1,3 @@
-use std::fs;
 use std::path::Path;
 
 use crate::cli::InitArgs;
@@ -19,14 +18,14 @@ pub fn run(args: &InitArgs) {
 
     let config_content = generate_config_content(&args.profile);
 
-    if let Err(e) = fs::write(&config_path, &config_content) {
+    if let Err(e) = crate::fs::write_file(&config_path, &config_content) {
         eprintln!("Error writing guardrail3.toml: {e}");
         std::process::exit(1);
     }
 
     // Create local/ directory with empty override files
     let local_dir = project_path.join("local");
-    if let Err(e) = fs::create_dir_all(&local_dir) {
+    if let Err(e) = crate::fs::create_dir_all(&local_dir) {
         eprintln!("Error creating local/ directory: {e}");
         std::process::exit(1);
     }
@@ -60,7 +59,7 @@ pub fn run(args: &InitArgs) {
             println!("  Skipping existing: local/{filename}");
             continue;
         }
-        if let Err(e) = fs::write(&file_path, content) {
+        if let Err(e) = crate::fs::write_file(&file_path, content) {
             eprintln!("Error writing local/{filename}: {e}");
             std::process::exit(1);
         }
@@ -109,26 +108,6 @@ name = "{profile}"
 
 # Library profile: all crates are treated as "pure" — global-state bans apply everywhere.
 # No [crates.*] section needed unless you want per-crate method/type overrides.
-
-[rust]
-workspace_root = "."
-
-[local]
-clippy_methods = "local/clippy-methods.toml"
-clippy_types = "local/clippy-types.toml"
-deny_bans = "local/deny-bans.toml"
-deny_skip = "local/deny-skip.toml"
-deny_feature_bans = "local/deny-feature-bans.toml"
-"#
-        ),
-        "minimal" => format!(
-            r#"version = "0.1"
-
-[profile]
-name = "{profile}"
-
-# Minimal profile: fewer expected bans (no filesystem, no http-client method bans;
-# no File type ban; no deny.toml crate bans expected).
 
 [rust]
 workspace_root = "."

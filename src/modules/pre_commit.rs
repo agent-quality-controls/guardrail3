@@ -2,8 +2,13 @@ use super::Module;
 
 pub const PRE_COMMIT_SCRIPT: Module = Module {
     name: "hooks/pre-commit",
-    description: "Pre-commit hook dispatcher script",
-    content: r#"#!/usr/bin/env bash
+    description: "Pre-commit hook dispatcher script (base — without duplication section)",
+    content: PRE_COMMIT_BASE,
+};
+
+/// Base pre-commit script — everything except the duplication detection section.
+/// The duplication section is appended by the generate command based on profile/config.
+pub const PRE_COMMIT_BASE: &str = r#"#!/usr/bin/env bash
 set -uo pipefail
 
 # Rust workspace root — override with GUARDRAIL3_RUST_WORKSPACE env var
@@ -240,16 +245,61 @@ if [ "$RUST_CHANGED" -gt 0 ] || [ "$CARGO_CHANGED" -gt 0 ]; then
         exit 1
     fi
 fi
+"#;
 
-# --- Copy-paste detection (shared across stacks) ---
-if [ "$TS_CHANGED" -gt 0 ] || [ "$RUST_CHANGED" -gt 0 ] || [ "$CARGO_CHANGED" -gt 0 ]; then
-    echo "Running copy-paste detection..."
-    if ! pnpm exec jscpd .; then
-        echo "Copy-paste detection found duplicates. Refactor before committing."
+/// Duplication detection section for Rust projects using cargo-dupes (AST-aware).
+pub const DUPLICATION_CARGO_DUPES: &str = r#"
+# === Copy-paste detection (cargo-dupes, AST-aware) ===
+if [ "$RUST_CHANGED" -gt 0 ]; then
+    echo "Running Rust copy-paste detection..."
+    if ! command -v cargo-dupes &> /dev/null; then
+        echo "ERROR: cargo-dupes not installed. Install: cargo install cargo-dupes"
+        exit 1
+    fi
+    if ! (cd "$RUST_WORKSPACE" && cargo dupes check --max-exact 0 --max-exact-percent 0); then
+        echo "Duplicate Rust code detected. Refactor before committing."
         exit 1
     fi
 fi
+"#;
 
+/// Duplication detection section for TypeScript projects using jscpd.
+pub const DUPLICATION_JSCPD: &str = r#"
+# === Copy-paste detection (jscpd, TypeScript) ===
+if [ "$TS_CHANGED" -gt 0 ]; then
+    echo "Running TypeScript copy-paste detection..."
+    if ! pnpm exec jscpd --format typescript .; then
+        echo "Duplicate TypeScript code detected. Refactor before committing."
+        exit 1
+    fi
+fi
+"#;
+
+/// Footer for the pre-commit script (final success message).
+pub const PRE_COMMIT_FOOTER: &str = r#"
 echo "All pre-commit checks passed."
-"#,
-};
+"#;
+
+/// Build the complete pre-commit script with the appropriate duplication section(s).
+/// - Rust-only (service/library without TypeScript): cargo-dupes only
+/// - TS-only (no Rust): jscpd only
+/// - Mixed (monorepo or both stacks present): both cargo-dupes and jscpd
+pub fn build_pre_commit_script(has_rust: bool, has_typescript: bool) -> String {
+    let mut script = PRE_COMMIT_BASE.to_owned();
+
+    if has_rust {
+        script.push_str(DUPLICATION_CARGO_DUPES);
+    }
+    if has_typescript {
+        script.push_str(DUPLICATION_JSCPD);
+    }
+
+    // If neither stack is detected, include both as a safe default
+    if !has_rust && !has_typescript {
+        script.push_str(DUPLICATION_CARGO_DUPES);
+        script.push_str(DUPLICATION_JSCPD);
+    }
+
+    script.push_str(PRE_COMMIT_FOOTER);
+    script
+}

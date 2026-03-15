@@ -1,6 +1,7 @@
 use std::path::Path;
 use std::process::Command;
 
+use super::tool_checks::{check_duplication_tools, check_required_tools};
 use crate::report::types::{CheckResult, Severity};
 
 #[allow(clippy::too_many_lines)] // reason: comprehensive hook validation
@@ -64,7 +65,7 @@ pub fn check_hooks(
         });
     }
 
-    let pre_commit_content = std::fs::read_to_string(&pre_commit_path).unwrap_or_default();
+    let pre_commit_content = crate::fs::read_file(&pre_commit_path).unwrap_or_default();
 
     // H4: Dispatcher script
     if is_modular {
@@ -116,20 +117,25 @@ pub fn check_hooks(
         );
     }
 
+    // H12: Duplication tool checks
+    check_duplication_tools(
+        &pre_commit_content,
+        &pre_commit_path,
+        has_rust,
+        has_typescript,
+        results,
+    );
+
     // H6: Script checksums (monolithic)
     let line_count = pre_commit_content.lines().count();
-    let metadata = std::fs::metadata(&pre_commit_path);
-    let modified = metadata
-        .as_ref()
-        .ok()
-        .and_then(|m| m.modified().ok())
-        .map(|t| {
-            // Format as rough timestamp
-            t.duration_since(std::time::SystemTime::UNIX_EPOCH)
-                .map(|d| d.as_secs())
-                .unwrap_or(0)
-        });
-    let size = metadata.as_ref().ok().map_or(0, std::fs::Metadata::len);
+    let metadata = crate::fs::metadata(&pre_commit_path);
+    let modified = metadata.as_ref().and_then(|m| m.modified().ok()).map(|t| {
+        // Format as rough timestamp
+        t.duration_since(std::time::SystemTime::UNIX_EPOCH)
+            .map(|d| d.as_secs())
+            .unwrap_or(0)
+    });
+    let size = metadata.as_ref().map_or(0, std::fs::Metadata::len);
 
     results.push(CheckResult {
         id: "H6".to_owned(),
@@ -357,12 +363,10 @@ fn check_modular_scripts(
 ) {
     // Read all script contents to search for patterns
     let mut all_content = String::new();
-    if let Ok(entries) = std::fs::read_dir(pre_commit_d) {
-        for entry in entries.flatten() {
-            if let Ok(content) = std::fs::read_to_string(entry.path()) {
-                all_content.push_str(&content);
-                all_content.push('\n');
-            }
+    for entry in crate::fs::list_dir(pre_commit_d) {
+        if let Some(content) = crate::fs::read_file(&entry.path()) {
+            all_content.push_str(&content);
+            all_content.push('\n');
         }
     }
 
@@ -380,8 +384,8 @@ fn check_permissions(file_path: &Path, results: &mut Vec<CheckResult>) {
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
-        match std::fs::metadata(file_path) {
-            Ok(meta) => {
+        match crate::fs::metadata(file_path) {
+            Some(meta) => {
                 let mode = meta.permissions().mode();
                 let is_executable = mode & 0o111 != 0;
                 if is_executable {
@@ -404,12 +408,12 @@ fn check_permissions(file_path: &Path, results: &mut Vec<CheckResult>) {
                     });
                 }
             }
-            Err(e) => {
+            None => {
                 results.push(CheckResult {
                     id: "H7".to_owned(),
                     severity: Severity::Error,
                     title: "Cannot read pre-commit permissions".to_owned(),
-                    message: format!("{e}"),
+                    message: "Failed to read file metadata".to_owned(),
                     file: Some(file_path.display().to_string()),
                     line: None,
                 });
@@ -430,83 +434,45 @@ fn check_permissions(file_path: &Path, results: &mut Vec<CheckResult>) {
     }
 }
 
-fn check_required_tools(results: &mut Vec<CheckResult>) {
-    let tools = [
-        ("gitleaks", Severity::Error),
-        ("cargo-deny", Severity::Error),
-        ("cargo-machete", Severity::Error),
-    ];
+fn inventory_scripts(dir: &Path, id: &str, title_prefix: &str, results: &mut Vec<CheckResult>) {
+    if !dir.exists() {
+        results.push(CheckResult {
+            id: id.to_owned(),
+            severity: Severity::Warn,
+            title: format!("{title_prefix}: unreadable"),
+            message: "Directory does not exist".to_owned(),
+            file: Some(dir.display().to_string()),
+            line: None,
+        });
+        return;
+    }
 
-    for (tool, severity) in &tools {
-        #[allow(clippy::disallowed_methods)] // reason: CLI tool checks tool installation with which
-        let found = Command::new("which")
-            .arg(tool)
-            .output()
-            .map(|o| o.status.success())
-            .unwrap_or(false);
-
-        if found {
-            results.push(CheckResult {
-                id: "H8".to_owned(),
-                severity: Severity::Info,
-                title: format!("{tool} installed"),
-                message: "Found on PATH".to_owned(),
-                file: None,
-                line: None,
-            });
-        } else {
-            results.push(CheckResult {
-                id: "H8".to_owned(),
-                severity: *severity,
-                title: format!("{tool} not installed"),
-                message: format!("{tool} not found on PATH"),
-                file: None,
-                line: None,
-            });
+    let entries = crate::fs::list_dir(dir);
+    let mut names: Vec<String> = Vec::new();
+    for entry in entries {
+        if let Some(name) = entry.file_name().to_str() {
+            names.push(name.to_owned());
         }
     }
-}
+    names.sort();
 
-fn inventory_scripts(dir: &Path, id: &str, title_prefix: &str, results: &mut Vec<CheckResult>) {
-    match std::fs::read_dir(dir) {
-        Ok(entries) => {
-            let mut names: Vec<String> = Vec::new();
-            for entry in entries.flatten() {
-                if let Some(name) = entry.file_name().to_str() {
-                    names.push(name.to_owned());
-                }
-            }
-            names.sort();
-
-            if names.is_empty() {
-                results.push(CheckResult {
-                    id: id.to_owned(),
-                    severity: Severity::Info,
-                    title: format!("{title_prefix}: empty"),
-                    message: "No scripts found".to_owned(),
-                    file: Some(dir.display().to_string()),
-                    line: None,
-                });
-            } else {
-                results.push(CheckResult {
-                    id: id.to_owned(),
-                    severity: Severity::Info,
-                    title: format!("{title_prefix}: {} scripts", names.len()),
-                    message: names.join(", "),
-                    file: Some(dir.display().to_string()),
-                    line: None,
-                });
-            }
-        }
-        Err(e) => {
-            results.push(CheckResult {
-                id: id.to_owned(),
-                severity: Severity::Warn,
-                title: format!("{title_prefix}: unreadable"),
-                message: format!("{e}"),
-                file: Some(dir.display().to_string()),
-                line: None,
-            });
-        }
+    if names.is_empty() {
+        results.push(CheckResult {
+            id: id.to_owned(),
+            severity: Severity::Info,
+            title: format!("{title_prefix}: empty"),
+            message: "No scripts found".to_owned(),
+            file: Some(dir.display().to_string()),
+            line: None,
+        });
+    } else {
+        results.push(CheckResult {
+            id: id.to_owned(),
+            severity: Severity::Info,
+            title: format!("{title_prefix}: {} scripts", names.len()),
+            message: names.join(", "),
+            file: Some(dir.display().to_string()),
+            line: None,
+        });
     }
 }

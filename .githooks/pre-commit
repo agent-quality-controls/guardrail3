@@ -79,15 +79,16 @@ if [ -n "$STAGED_TS" ]; then
     done <<< "$STAGED_TS"
 fi
 
-# 2. #[allow(...)] without reason comment
+# 2. Item-level allow without reason comment
+ALLOW_PAT='#\[allow('
 STAGED_RS=$(echo "$STAGED_FILES" | grep -E '\.rs$' | grep -v '/target/' | grep -v '/tests/' || true)
 if [ -n "$STAGED_RS" ]; then
     while IFS= read -r file; do
         [ -n "$file" ] || continue
         [ -f "$file" ] || continue
-        bad_allows=$(grep -n '#\[allow(' "$file" | grep -v '#!\[allow' | grep -v '//' || true)
+        bad_allows=$(grep -n "$ALLOW_PAT" "$file" | grep -v '#!\[allow' | grep -v '//' || true)
         if [ -n "$bad_allows" ]; then
-            echo "FAIL: $file has #[allow(...)] without a justification comment:"
+            echo "FAIL: $file has item-level allow without a justification comment:"
             echo "$bad_allows"
             tamper_fail=1
         fi
@@ -235,11 +236,15 @@ if [ "$RUST_CHANGED" -gt 0 ] || [ "$CARGO_CHANGED" -gt 0 ]; then
     fi
 fi
 
-# --- Copy-paste detection (shared across stacks) ---
-if [ "$TS_CHANGED" -gt 0 ] || [ "$RUST_CHANGED" -gt 0 ] || [ "$CARGO_CHANGED" -gt 0 ]; then
-    echo "Running copy-paste detection..."
-    if ! pnpm exec jscpd .; then
-        echo "Copy-paste detection found duplicates. Refactor before committing."
+# === Copy-paste detection (cargo-dupes, AST-aware) ===
+if [ "$RUST_CHANGED" -gt 0 ]; then
+    echo "Running Rust copy-paste detection..."
+    if ! command -v cargo-dupes &> /dev/null; then
+        echo "ERROR: cargo-dupes not installed. Install: cargo install cargo-dupes"
+        exit 1
+    fi
+    if ! (cd "$RUST_WORKSPACE" && cargo dupes check --max-exact 0 --max-exact-percent 0); then
+        echo "Duplicate Rust code detected. Refactor before committing."
         exit 1
     fi
 fi

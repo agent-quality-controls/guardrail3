@@ -4,7 +4,7 @@ use crate::report::types::{CheckResult, Severity};
 
 #[allow(clippy::too_many_lines)] // reason: toolchain settings validation
 pub fn check_toolchain_settings(path: &Path, results: &mut Vec<CheckResult>) {
-    let content = match std::fs::read_to_string(path) {
+    let content = match crate::fs::read_file_err(path) {
         Ok(c) => c,
         Err(e) => {
             results.push(CheckResult {
