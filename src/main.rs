@@ -39,7 +39,27 @@ fn main() {
         }
         Commands::Rs { command } => match command {
             RsCommands::Validate(args) => {
-                commands::validate::run(&args);
+                let path = std::path::Path::new(&args.path);
+                let abs_path = match path.canonicalize() {
+                    Ok(p) => p,
+                    Err(e) => {
+                        eprintln!("Error: cannot resolve path '{}': {e}", args.path);
+                        std::process::exit(1);
+                    }
+                };
+                let project = discover::detect_project(&abs_path);
+                let scoped_files =
+                    commands::validate::resolve_scoped_files_pub(&args, &abs_path);
+                let report =
+                    rs::validate::run(&abs_path, &project, scoped_files.as_deref());
+                match args.format.as_str() {
+                    "json" => report::json::print_report(&report),
+                    "md" | "markdown" => report::markdown::print_report(&report),
+                    _ => report::text::print_report(&report),
+                };
+                if report.error_count() > 0 {
+                    std::process::exit(1);
+                }
             }
             RsCommands::Generate(args) => {
                 commands::generate::run_rs(&args);

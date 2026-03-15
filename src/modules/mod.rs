@@ -53,6 +53,12 @@ pub fn all_modules() -> Vec<&'static Module> {
     // Pre-commit modules
     modules.push(&pre_commit::PRE_COMMIT_SCRIPT);
 
+    // TS canonical modules
+    modules.push(&canonical::NPMRC);
+    modules.push(&canonical::TSCONFIG_BASE);
+    modules.push(&canonical::JSCPD);
+    modules.push(&canonical::ESLINT_STARTER);
+
     modules
 }
 

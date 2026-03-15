@@ -183,10 +183,67 @@ pub fn service_profile_ban_entries() -> Vec<&'static Module> {
     ]
 }
 
-/// Build the full deny.toml content.
+/// Library IO bans -- ban all I/O framework crates in library crates.
+pub const DENY_BANS_LIBRARY_IO: Module = Module {
+    name: "deny/bans/library-io",
+    description: "Ban I/O framework crates in library crates",
+    content: r#"    # --- Library IO bans: no I/O frameworks in pure libraries ---
+    { name = "axum", wrappers = [] },
+    { name = "tokio", wrappers = [] },
+    { name = "async-std", wrappers = [] },
+    { name = "reqwest", wrappers = [] },
+    { name = "sqlx", wrappers = [] },
+    { name = "hyper", wrappers = [] },
+    { name = "warp", wrappers = [] },
+    { name = "rocket", wrappers = [] },
+    { name = "actix-web", wrappers = [] },
+    { name = "poem", wrappers = [] },
+    { name = "ureq", wrappers = [] },
+    { name = "surf", wrappers = [] },
+    { name = "isahc", wrappers = [] },"#,
+};
+
+/// Returns all ban entry modules for the "library" profile.
+/// Includes all service bans plus library-io bans.
+pub fn library_profile_ban_entries() -> Vec<&'static Module> {
+    let mut entries = service_profile_ban_entries();
+    entries.push(&DENY_BANS_LIBRARY_IO);
+    entries
+}
+
+/// Returns ban entry modules for the "minimal" profile (no bans).
+pub fn minimal_profile_ban_entries() -> Vec<&'static Module> {
+    Vec::new()
+}
+
+/// Returns the tokio feature ban content string.
+pub fn tokio_feature_ban() -> &'static str {
+    DENY_FEATURE_BANS_TOKIO.content
+}
+
+/// Build the full deny.toml content using default service profile entries.
 /// `extra_bans`, `extra_skip`, and `extra_feature_bans` come from local override files.
 pub fn build_deny_toml(
     profile: &str,
+    extra_bans: &str,
+    extra_skip: &str,
+    extra_feature_bans: &str,
+) -> String {
+    build_deny_toml_with_entries(
+        profile,
+        &service_profile_ban_entries(),
+        Some(DENY_FEATURE_BANS_TOKIO.content),
+        extra_bans,
+        extra_skip,
+        extra_feature_bans,
+    )
+}
+
+/// Build the full deny.toml content with explicit ban entries and optional feature ban.
+pub fn build_deny_toml_with_entries(
+    profile: &str,
+    ban_entries: &[&Module],
+    feature_ban_content: Option<&str>,
     extra_bans: &str,
     extra_skip: &str,
     extra_feature_bans: &str,
@@ -221,7 +278,7 @@ pub fn build_deny_toml(
 
     // Deny entries
     out.push_str("deny = [\n");
-    for module in service_profile_ban_entries() {
+    for module in ban_entries {
         out.push_str(module.content);
         out.push('\n');
     }
@@ -233,9 +290,11 @@ pub fn build_deny_toml(
     out.push_str("]\n\n");
 
     // Feature bans
-    out.push_str("# Feature-level bans -- prevent agents from enabling kitchen-sink features\n");
-    out.push_str(DENY_FEATURE_BANS_TOKIO.content);
-    out.push('\n');
+    if let Some(fb_content) = feature_ban_content {
+        out.push_str("# Feature-level bans -- prevent agents from enabling kitchen-sink features\n");
+        out.push_str(fb_content);
+        out.push('\n');
+    }
     if !extra_feature_bans.trim().is_empty() {
         out.push('\n');
         out.push_str(extra_feature_bans);

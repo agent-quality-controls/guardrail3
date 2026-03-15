@@ -10,6 +10,8 @@ pub fn check(path: &Path) -> Vec<CheckResult> {
     check_npmrc(path, &mut results);
     check_package_json(path, &mut results);
     check_jscpd(path, &mut results);
+    check_content_import_restriction(path, &mut results);
+    check_velite_config(path, &mut results);
 
     results
 }
@@ -924,5 +926,74 @@ fn check_jscpd(path: &Path, results: &mut Vec<CheckResult>) {
                 });
             }
         }
+    }
+}
+
+// ── T60: Content import restriction ──
+
+fn check_content_import_restriction(path: &Path, results: &mut Vec<CheckResult>) {
+    // Only applies if there's a landing/content app
+    let landing_dir = path.join("apps").join("landing");
+    if !landing_dir.exists() {
+        return;
+    }
+
+    let eslint_path = path.join("eslint.config.mjs");
+    if !eslint_path.exists() {
+        return;
+    }
+
+    let content = match std::fs::read_to_string(&eslint_path) {
+        Ok(c) => c,
+        Err(_) => return,
+    };
+
+    if content.contains("content/") || content.contains("content/**") {
+        results.push(CheckResult {
+            id: "T60".to_string(),
+            severity: Severity::Info,
+            title: "Content import restriction configured".to_string(),
+            message: "Content import restriction pattern found in ESLint config".to_string(),
+            file: Some(eslint_path.display().to_string()),
+            line: None,
+        });
+    } else {
+        results.push(CheckResult {
+            id: "T60".to_string(),
+            severity: Severity::Warn,
+            title: "No content import restriction".to_string(),
+            message: "No content/ import restriction in ESLint config (landing app detected)"
+                .to_string(),
+            file: Some(eslint_path.display().to_string()),
+            line: None,
+        });
+    }
+}
+
+// ── T61: Velite config exists ──
+
+fn check_velite_config(path: &Path, results: &mut Vec<CheckResult>) {
+    let landing_dir = path.join("apps").join("landing");
+    if !landing_dir.exists() {
+        return;
+    }
+
+    let velite_path = landing_dir.join("velite.config.mjs");
+    let velite_ts_path = landing_dir.join("velite.config.ts");
+
+    if velite_path.exists() || velite_ts_path.exists() {
+        let found_path = if velite_path.exists() {
+            &velite_path
+        } else {
+            &velite_ts_path
+        };
+        results.push(CheckResult {
+            id: "T61".to_string(),
+            severity: Severity::Info,
+            title: "Velite config exists".to_string(),
+            message: format!("Found: {}", found_path.display()),
+            file: Some(found_path.display().to_string()),
+            line: None,
+        });
     }
 }

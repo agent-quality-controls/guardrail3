@@ -101,15 +101,43 @@ pub fn run_rs(args: &GenerateArgs) {
     }
 }
 
-/// Generate only TypeScript config files (placeholder for now).
+/// Generate only TypeScript config files.
 pub fn run_ts(args: &GenerateArgs) {
     let project_path = Path::new(&args.path);
-    let cfg = config::load_config(project_path);
-    if cfg.is_none() {
-        eprintln!("Error: guardrail3.toml not found at {}", project_path.display());
-        std::process::exit(1);
+    let cfg = match config::load_config(project_path) {
+        Some(c) => c,
+        None => {
+            eprintln!(
+                "Error: guardrail3.toml not found at {}",
+                project_path.display()
+            );
+            std::process::exit(1);
+        }
+    };
+
+    let files = generate_ts_files(&cfg);
+
+    if files.is_empty() {
+        println!("No TypeScript files to generate (check [typescript.canonical] in guardrail3.toml).");
+        return;
     }
-    println!("TypeScript config generation not yet implemented.");
+
+    let mut written = 0usize;
+    for gf in &files {
+        let target = project_path.join(&gf.path);
+        if let Some(parent) = target.parent() {
+            let _ = fs::create_dir_all(parent);
+        }
+        if let Err(e) = fs::write(&target, &gf.content) {
+            eprintln!("Error writing {}: {e}", gf.path);
+            continue;
+        }
+        println!("  wrote: {}", gf.path);
+        written = written.saturating_add(1);
+    }
+
+    println!();
+    println!("Generated {written} TypeScript config files.");
 }
 
 /// Install pre-commit hooks.
@@ -256,11 +284,77 @@ fn generate_all_files(
         files.extend(rust_files);
     }
 
+    if cfg.typescript.is_some() {
+        let ts_files = generate_ts_files(cfg);
+        files.extend(ts_files);
+    }
+
     // Hooks
     files.push(GeneratedFile {
         path: ".githooks/pre-commit".to_string(),
         content: crate::modules::pre_commit::PRE_COMMIT_SCRIPT.content.to_string(),
     });
+
+    files
+}
+
+fn generate_ts_files(
+    cfg: &config::types::GuardrailConfig,
+) -> Vec<GeneratedFile> {
+    let mut files = Vec::new();
+
+    let ts_cfg = match cfg.typescript.as_ref() {
+        Some(t) => t,
+        None => return files,
+    };
+
+    let canonical_cfg = ts_cfg.canonical.as_ref();
+
+    // .npmrc -- generate unless explicitly disabled
+    let gen_npmrc = canonical_cfg
+        .and_then(|c| c.npmrc)
+        .unwrap_or(true);
+    if gen_npmrc {
+        files.push(GeneratedFile {
+            path: ".npmrc".to_string(),
+            content: canonical::NPMRC.content.to_string(),
+        });
+    }
+
+    // tsconfig.base.json -- generate unless explicitly disabled
+    let gen_tsconfig = canonical_cfg
+        .and_then(|c| c.tsconfig_base)
+        .unwrap_or(true);
+    if gen_tsconfig {
+        files.push(GeneratedFile {
+            path: "tsconfig.base.json".to_string(),
+            content: canonical::TSCONFIG_BASE.content.to_string(),
+        });
+    }
+
+    // .jscpd.json -- generate unless explicitly disabled
+    let gen_jscpd = canonical_cfg
+        .and_then(|c| c.jscpd)
+        .unwrap_or(true);
+    if gen_jscpd {
+        files.push(GeneratedFile {
+            path: ".jscpd.json".to_string(),
+            content: canonical::JSCPD.content.to_string(),
+        });
+    }
+
+    // eslint.config.mjs -- only generate if eslint mode is "generate" or "starter"
+    let gen_eslint = ts_cfg
+        .eslint
+        .as_ref()
+        .and_then(|e| e.mode.as_deref())
+        .is_some_and(|m| m == "generate" || m == "starter");
+    if gen_eslint {
+        files.push(GeneratedFile {
+            path: "eslint.config.mjs".to_string(),
+            content: canonical::ESLINT_STARTER.content.to_string(),
+        });
+    }
 
     files
 }
@@ -278,10 +372,13 @@ fn generate_rust_files(
         format!("{rust_root}/")
     };
 
-    // Workspace-root clippy.toml (not pure layer -- composition root level)
+    // For library profile, root clippy is always "pure" (includes global-state bans)
+    let root_is_pure = profile == "library";
+
+    // Workspace-root clippy.toml
     let root_clippy = clippy::build_clippy_toml(
         profile,
-        false,
+        root_is_pure,
         &local.clippy_methods,
         &local.clippy_types,
     );
@@ -299,10 +396,12 @@ fn generate_rust_files(
         .unwrap_or_default();
 
     for (crate_path, crate_cfg) in &crate_configs {
-        let is_pure = crate_cfg
-            .layer
-            .as_deref()
-            .is_some_and(|l| l == "pure");
+        // Library profile: all crates are pure. Otherwise check layer config.
+        let is_pure = profile == "library"
+            || crate_cfg
+                .layer
+                .as_deref()
+                .is_some_and(|l| l == "pure");
 
         let crate_clippy = clippy::build_clippy_toml(
             profile,
@@ -316,8 +415,8 @@ fn generate_rust_files(
         });
     }
 
-    // deny.toml
-    let deny_content = deny::build_deny_toml(
+    // deny.toml -- profile-aware
+    let deny_content = build_deny_for_profile(
         profile,
         &local.deny_bans,
         &local.deny_skip,
@@ -341,6 +440,38 @@ fn generate_rust_files(
     });
 
     files
+}
+
+fn build_deny_for_profile(
+    profile: &str,
+    extra_bans: &str,
+    extra_skip: &str,
+    extra_feature_bans: &str,
+) -> String {
+    match profile {
+        "library" => deny::build_deny_toml_with_entries(
+            profile,
+            &deny::library_profile_ban_entries(),
+            None, // no tokio feature ban (tokio banned entirely)
+            extra_bans,
+            extra_skip,
+            extra_feature_bans,
+        ),
+        "minimal" => deny::build_deny_toml_with_entries(
+            profile,
+            &deny::minimal_profile_ban_entries(),
+            None, // no feature bans
+            extra_bans,
+            extra_skip,
+            extra_feature_bans,
+        ),
+        _ => deny::build_deny_toml(
+            profile,
+            extra_bans,
+            extra_skip,
+            extra_feature_bans,
+        ),
+    }
 }
 
 /// Generate expected file contents without writing -- used by check and diff.

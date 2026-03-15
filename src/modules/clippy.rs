@@ -142,8 +142,33 @@ pub fn pure_layer_extra_types() -> Vec<&'static Module> {
     vec![&TYPE_GLOBAL_STATE]
 }
 
+/// Returns the method modules for the "library" profile (same as service).
+pub fn library_profile_methods() -> Vec<&'static Module> {
+    service_profile_methods()
+}
+
+/// Returns the type modules for the "library" profile.
+/// Always includes global-state bans (all crates are "pure" in a library).
+pub fn library_profile_types() -> Vec<&'static Module> {
+    vec![&TYPE_COLLECTIONS, &TYPE_SYNC, &TYPE_FILESYSTEM, &TYPE_GLOBAL_STATE]
+}
+
+/// Returns the method modules for the "minimal" profile (subset).
+pub fn minimal_profile_methods() -> Vec<&'static Module> {
+    vec![
+        &METHOD_ENV_VARS,
+        &METHOD_PROCESS_CONTROL,
+        &METHOD_BLOCKING_SLEEP,
+    ]
+}
+
+/// Returns the type modules for the "minimal" profile (subset).
+pub fn minimal_profile_types() -> Vec<&'static Module> {
+    vec![&TYPE_COLLECTIONS, &TYPE_SYNC]
+}
+
 /// Build the full clippy.toml content for a workspace root or crate.
-/// `is_pure_layer` adds global-state type bans.
+/// `is_pure_layer` adds global-state type bans (for service/monorepo profiles).
 /// `extra_methods` and `extra_types` are appended from local override files.
 pub fn build_clippy_toml(
     profile: &str,
@@ -151,6 +176,24 @@ pub fn build_clippy_toml(
     extra_methods: &str,
     extra_types: &str,
 ) -> String {
+    let methods = match profile {
+        "library" => library_profile_methods(),
+        "minimal" => minimal_profile_methods(),
+        _ => service_profile_methods(),
+    };
+
+    let types = match profile {
+        "library" => library_profile_types(),
+        "minimal" => minimal_profile_types(),
+        _ => {
+            let mut t = service_profile_types();
+            if is_pure_layer {
+                t.extend(pure_layer_extra_types());
+            }
+            t
+        }
+    };
+
     let mut out = String::new();
 
     out.push_str("# =============================================================================\n");
@@ -168,7 +211,7 @@ pub fn build_clippy_toml(
     // Disallowed methods
     out.push_str("# DISALLOWED METHODS\n");
     out.push_str("disallowed-methods = [\n");
-    for module in service_profile_methods() {
+    for module in &methods {
         out.push_str(&format!("    # --- {} ---\n", module.description));
         out.push_str(module.content);
         out.push('\n');
@@ -183,17 +226,10 @@ pub fn build_clippy_toml(
     // Disallowed types
     out.push_str("# DISALLOWED TYPES\n");
     out.push_str("disallowed-types = [\n");
-    for module in service_profile_types() {
+    for module in &types {
         out.push_str(&format!("    # --- {} ---\n", module.description));
         out.push_str(module.content);
         out.push('\n');
-    }
-    if is_pure_layer {
-        for module in pure_layer_extra_types() {
-            out.push_str(&format!("    # --- {} ---\n", module.description));
-            out.push_str(module.content);
-            out.push('\n');
-        }
     }
     if !extra_types.trim().is_empty() {
         out.push_str("    # --- Local overrides ---\n");
