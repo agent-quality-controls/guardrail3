@@ -25,7 +25,7 @@ pub fn detect_project(path: &Path) -> ProjectInfo {
 
     // If not found, or workspace has zero members (marker Cargo.toml for rust-analyzer),
     // check apps/backend/ (monorepo structure)
-    if !info.has_rust || (info.has_rust && info.workspace_members.is_empty()) {
+    if !info.has_rust || info.workspace_members.is_empty() {
         let backend_path = path.join("apps").join("backend");
         if backend_path.exists() {
             // Reset rust state if we're falling through from an empty marker workspace
@@ -43,6 +43,10 @@ pub fn detect_project(path: &Path) -> ProjectInfo {
     info
 }
 
+#[allow(clippy::too_many_lines)] // reason: complex workspace detection logic
+#[allow(clippy::manual_let_else)] // reason: match with early return is clearer here
+#[allow(clippy::string_slice)] // reason: parsing on known ASCII Cargo.toml content
+#[allow(clippy::needless_collect)] // reason: collect needed for ownership
 fn detect_rust(path: &Path, info: &mut ProjectInfo) {
     let cargo_path = path.join("Cargo.toml");
     if !cargo_path.exists() {
@@ -51,12 +55,9 @@ fn detect_rust(path: &Path, info: &mut ProjectInfo) {
 
     info.has_rust = true;
 
-    let content = match std::fs::read_to_string(&cargo_path) {
-        Ok(c) => c,
-        Err(_) => {
-            info.cargo_workspace_root = Some(path.to_path_buf());
-            return;
-        }
+    let Ok(content) = std::fs::read_to_string(&cargo_path) else {
+        info.cargo_workspace_root = Some(path.to_path_buf());
+        return;
     };
 
     let table: toml::Value = match content.parse() {
@@ -67,10 +68,11 @@ fn detect_rust(path: &Path, info: &mut ProjectInfo) {
         }
     };
 
+    // Both branches set cargo_workspace_root
+    info.cargo_workspace_root = Some(path.to_path_buf());
+
     // Check for [workspace] section
     if let Some(workspace) = table.get("workspace") {
-        info.cargo_workspace_root = Some(path.to_path_buf());
-
         // Parse workspace exclude patterns
         let mut exclude_dirs: std::collections::BTreeSet<String> =
             std::collections::BTreeSet::new();
@@ -82,12 +84,12 @@ fn detect_rust(path: &Path, info: &mut ProjectInfo) {
                     if let Ok(paths) = glob::glob(&excl_pattern_str) {
                         for entry in paths.flatten() {
                             if let Ok(rel) = entry.strip_prefix(path) {
-                                exclude_dirs.insert(rel.display().to_string());
+                                let _ = exclude_dirs.insert(rel.display().to_string());
                             }
                         }
                     }
                     // Also add the literal pattern
-                    exclude_dirs.insert(excl_str.to_string());
+                    let _ = exclude_dirs.insert(excl_str.to_owned());
                 }
             }
         }
@@ -102,26 +104,23 @@ fn detect_rust(path: &Path, info: &mut ProjectInfo) {
 
                     match glob::glob(&pattern_str) {
                         Ok(paths) => {
-                            for entry in paths {
-                                if let Ok(member_path) = entry {
-                                    if member_path.join("Cargo.toml").exists() {
-                                        // Check if excluded
-                                        if let Ok(rel) = member_path.strip_prefix(path) {
-                                            let rel_str = rel.display().to_string();
-                                            if exclude_dirs.contains(&rel_str) {
-                                                continue;
-                                            }
+                            for member_path in paths.flatten() {
+                                if member_path.join("Cargo.toml").exists() {
+                                    // Check if excluded
+                                    if let Ok(rel) = member_path.strip_prefix(path) {
+                                        let rel_str = rel.display().to_string();
+                                        if exclude_dirs.contains(&rel_str) {
+                                            continue;
                                         }
+                                    }
 
-                                        // Get crate name from Cargo.toml
-                                        let crate_name = read_crate_name(&member_path);
-                                        info.workspace_members.push(crate_name);
+                                    // Get crate name from Cargo.toml
+                                    let crate_name = read_crate_name(&member_path);
+                                    info.workspace_members.push(crate_name);
 
-                                        // Store relative dir
-                                        if let Ok(rel) = member_path.strip_prefix(path) {
-                                            info.workspace_member_dirs
-                                                .push(rel.display().to_string());
-                                        }
+                                    // Store relative dir
+                                    if let Ok(rel) = member_path.strip_prefix(path) {
+                                        info.workspace_member_dirs.push(rel.display().to_string());
                                     }
                                 }
                             }
@@ -133,8 +132,7 @@ fn detect_rust(path: &Path, info: &mut ProjectInfo) {
                                 if member_path.join("Cargo.toml").exists() {
                                     let crate_name = read_crate_name(&member_path);
                                     info.workspace_members.push(crate_name);
-                                    info.workspace_member_dirs
-                                        .push(member_str.to_string());
+                                    info.workspace_member_dirs.push(member_str.to_owned());
                                 }
                             }
                         }
@@ -144,24 +142,20 @@ fn detect_rust(path: &Path, info: &mut ProjectInfo) {
         }
     } else {
         // Single crate project
-        info.cargo_workspace_root = Some(path.to_path_buf());
         let crate_name = read_crate_name(path);
         info.workspace_members.push(crate_name);
-        info.workspace_member_dirs.push(".".to_string());
+        info.workspace_member_dirs.push(".".to_owned());
     }
 }
 
 fn read_crate_name(path: &Path) -> String {
     let cargo_path = path.join("Cargo.toml");
-    let content = match std::fs::read_to_string(&cargo_path) {
-        Ok(c) => c,
-        Err(_) => {
-            return path
-                .file_name()
-                .and_then(|n| n.to_str())
-                .unwrap_or("unknown")
-                .to_string();
-        }
+    let Ok(content) = std::fs::read_to_string(&cargo_path) else {
+        return path
+            .file_name()
+            .and_then(|n| n.to_str())
+            .unwrap_or("unknown")
+            .to_owned();
     };
 
     let table: toml::Value = match content.parse() {
@@ -171,7 +165,7 @@ fn read_crate_name(path: &Path) -> String {
                 .file_name()
                 .and_then(|n| n.to_str())
                 .unwrap_or("unknown")
-                .to_string();
+                .to_owned();
         }
     };
 
@@ -180,7 +174,7 @@ fn read_crate_name(path: &Path) -> String {
         .and_then(|p| p.get("name"))
         .and_then(|n| n.as_str())
         .unwrap_or("unknown")
-        .to_string()
+        .to_owned()
 }
 
 fn detect_typescript(path: &Path, info: &mut ProjectInfo) {
@@ -192,9 +186,9 @@ fn detect_typescript(path: &Path, info: &mut ProjectInfo) {
     }
 
     // Check apps/ subdirectories
-    let apps_dir = path.join("apps");
-    if apps_dir.exists() {
-        if let Ok(entries) = std::fs::read_dir(&apps_dir) {
+    let applications_dir = path.join("apps");
+    if applications_dir.exists() {
+        if let Ok(entries) = std::fs::read_dir(&applications_dir) {
             for entry in entries.flatten() {
                 let app_pkg = entry.path().join("package.json");
                 if app_pkg.exists() {

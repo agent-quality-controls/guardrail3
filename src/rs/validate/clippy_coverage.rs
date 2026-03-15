@@ -63,10 +63,10 @@ pub fn check(workspace_root: &Path, profile: Option<&str>) -> Vec<CheckResult> {
 
     if !clippy_path.exists() {
         results.push(CheckResult {
-            id: "R4".to_string(),
+            id: "R4".to_owned(),
             severity: Severity::Error,
-            title: "Cannot check clippy bans".to_string(),
-            message: "clippy.toml not found".to_string(),
+            title: "Cannot check clippy bans".to_owned(),
+            message: "clippy.toml not found".to_owned(),
             file: Some(workspace_root.display().to_string()),
             line: None,
         });
@@ -74,12 +74,12 @@ pub fn check(workspace_root: &Path, profile: Option<&str>) -> Vec<CheckResult> {
     }
 
     let content = match std::fs::read_to_string(&clippy_path) {
-        Ok(c) => c,
+        Ok(content) => content,
         Err(e) => {
             results.push(CheckResult {
-                id: "R4".to_string(),
+                id: "R4".to_owned(),
                 severity: Severity::Error,
-                title: "clippy.toml unreadable".to_string(),
+                title: "clippy.toml unreadable".to_owned(),
                 message: format!("Failed to read: {e}"),
                 file: Some(clippy_path.display().to_string()),
                 line: None,
@@ -92,9 +92,9 @@ pub fn check(workspace_root: &Path, profile: Option<&str>) -> Vec<CheckResult> {
         Ok(v) => v,
         Err(e) => {
             results.push(CheckResult {
-                id: "R4".to_string(),
+                id: "R4".to_owned(),
                 severity: Severity::Error,
-                title: "clippy.toml parse error".to_string(),
+                title: "clippy.toml parse error".to_owned(),
                 message: format!("Invalid TOML: {e}"),
                 file: Some(clippy_path.display().to_string()),
                 line: None,
@@ -139,6 +139,7 @@ pub fn check(workspace_root: &Path, profile: Option<&str>) -> Vec<CheckResult> {
     results
 }
 
+#[allow(clippy::too_many_arguments)] // reason: validation function needs all context parameters
 fn check_ban_list(
     table: &toml::Value,
     key: &str,
@@ -149,39 +150,36 @@ fn check_ban_list(
     file_path: &Path,
     results: &mut Vec<CheckResult>,
 ) {
-    let bans = match table.get(key).and_then(|v| v.as_array()) {
-        Some(arr) => arr,
-        None => {
-            results.push(CheckResult {
-                id: missing_id.to_string(),
-                severity: Severity::Error,
-                title: format!("No {key} section"),
-                message: format!("{key} array missing from clippy.toml"),
-                file: Some(file_path.display().to_string()),
-                line: None,
-            });
-            return;
-        }
+    let Some(bans) = table.get(key).and_then(|v| v.as_array()) else {
+        results.push(CheckResult {
+            id: missing_id.to_owned(),
+            severity: Severity::Error,
+            title: format!("No {key} section"),
+            message: format!("{key} array missing from clippy.toml"),
+            file: Some(file_path.display().to_string()),
+            line: None,
+        });
+        return;
     };
 
     // Extract paths from the ban entries
     let mut found_paths: BTreeSet<String> = BTreeSet::new();
     for ban in bans {
         if let Some(path) = ban.get("path").and_then(|p| p.as_str()) {
-            found_paths.insert(path.to_string());
+            let _ = found_paths.insert(path.to_owned());
         } else if let Some(path) = ban.as_str() {
             // Simple string format
-            found_paths.insert(path.to_string());
+            let _ = found_paths.insert(path.to_owned());
         }
     }
 
-    let expected_set: BTreeSet<String> = expected.iter().map(|s| (*s).to_string()).collect();
+    let expected_set: BTreeSet<String> = expected.iter().map(|s| (*s).to_owned()).collect();
 
     // Check for missing expected bans
     for exp in &expected_set {
         if found_paths.contains(exp) {
             results.push(CheckResult {
-                id: missing_id.to_string(),
+                id: missing_id.to_owned(),
                 severity: Severity::Info,
                 title: format!("{label} present"),
                 message: exp.clone(),
@@ -190,7 +188,7 @@ fn check_ban_list(
             });
         } else {
             results.push(CheckResult {
-                id: missing_id.to_string(),
+                id: missing_id.to_owned(),
                 severity: Severity::Error,
                 title: format!("Missing {label}"),
                 message: format!("Expected ban for {exp}"),
@@ -204,7 +202,7 @@ fn check_ban_list(
     for found in &found_paths {
         if !expected_set.contains(found) {
             results.push(CheckResult {
-                id: extra_id.to_string(),
+                id: extra_id.to_owned(),
                 severity: Severity::Info,
                 title: format!("Extra {label}"),
                 message: format!("extra ban: {found}"),

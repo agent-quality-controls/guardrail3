@@ -3,6 +3,7 @@ use std::path::Path;
 
 use crate::cli::InitArgs;
 
+#[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
 pub fn run(args: &InitArgs) {
     let project_path = Path::new(&args.path);
 
@@ -16,89 +17,7 @@ pub fn run(args: &InitArgs) {
         std::process::exit(1);
     }
 
-    let config_content = match args.profile.as_str() {
-        "monorepo" => format!(
-            r#"version = "0.1"
-
-[profile]
-name = "{profile}"
-
-[rust]
-workspace_root = "apps/backend"
-
-[typescript]
-# apps = ["apps/web", "apps/landing"]
-
-[local]
-clippy_methods = "local/clippy-methods.toml"
-clippy_types = "local/clippy-types.toml"
-deny_bans = "local/deny-bans.toml"
-deny_skip = "local/deny-skip.toml"
-deny_feature_bans = "local/deny-feature-bans.toml"
-"#,
-            profile = args.profile
-        ),
-        "library" => format!(
-            r#"version = "0.1"
-
-[profile]
-name = "{profile}"
-
-# Library profile: all crates are treated as "pure" — global-state bans apply everywhere.
-# No [crates.*] section needed unless you want per-crate method/type overrides.
-
-[rust]
-workspace_root = "."
-
-[local]
-clippy_methods = "local/clippy-methods.toml"
-clippy_types = "local/clippy-types.toml"
-deny_bans = "local/deny-bans.toml"
-deny_skip = "local/deny-skip.toml"
-deny_feature_bans = "local/deny-feature-bans.toml"
-"#,
-            profile = args.profile
-        ),
-        "minimal" => format!(
-            r#"version = "0.1"
-
-[profile]
-name = "{profile}"
-
-# Minimal profile: fewer expected bans (no filesystem, no http-client method bans;
-# no File type ban; no deny.toml crate bans expected).
-
-[rust]
-workspace_root = "."
-
-[local]
-clippy_methods = "local/clippy-methods.toml"
-clippy_types = "local/clippy-types.toml"
-deny_bans = "local/deny-bans.toml"
-deny_skip = "local/deny-skip.toml"
-deny_feature_bans = "local/deny-feature-bans.toml"
-"#,
-            profile = args.profile
-        ),
-        _ => format!(
-            r#"version = "0.1"
-
-[profile]
-name = "{profile}"
-
-[rust]
-workspace_root = "."
-
-[local]
-clippy_methods = "local/clippy-methods.toml"
-clippy_types = "local/clippy-types.toml"
-deny_bans = "local/deny-bans.toml"
-deny_skip = "local/deny-skip.toml"
-deny_feature_bans = "local/deny-feature-bans.toml"
-"#,
-            profile = args.profile
-        ),
-    };
+    let config_content = generate_config_content(&args.profile);
 
     if let Err(e) = fs::write(&config_path, &config_content) {
         eprintln!("Error writing guardrail3.toml: {e}");
@@ -147,7 +66,10 @@ deny_feature_bans = "local/deny-feature-bans.toml"
         }
     }
 
-    println!("Initialized guardrail3 project at {}", project_path.display());
+    println!(
+        "Initialized guardrail3 project at {}",
+        project_path.display()
+    );
     println!("  Created: guardrail3.toml (profile: {})", args.profile);
     println!("  Created: local/ directory with override files");
     println!();
@@ -155,4 +77,86 @@ deny_feature_bans = "local/deny-feature-bans.toml"
     println!("  1. Edit guardrail3.toml to configure your project");
     println!("  2. Add project-specific overrides in local/*.toml");
     println!("  3. Run: guardrail3 generate");
+}
+
+fn generate_config_content(profile: &str) -> String {
+    match profile {
+        "monorepo" => format!(
+            r#"version = "0.1"
+
+[profile]
+name = "{profile}"
+
+[rust]
+workspace_root = "apps/backend"
+
+[typescript]
+# apps = ["apps/web", "apps/landing"]
+
+[local]
+clippy_methods = "local/clippy-methods.toml"
+clippy_types = "local/clippy-types.toml"
+deny_bans = "local/deny-bans.toml"
+deny_skip = "local/deny-skip.toml"
+deny_feature_bans = "local/deny-feature-bans.toml"
+"#
+        ),
+        "library" => format!(
+            r#"version = "0.1"
+
+[profile]
+name = "{profile}"
+
+# Library profile: all crates are treated as "pure" — global-state bans apply everywhere.
+# No [crates.*] section needed unless you want per-crate method/type overrides.
+
+[rust]
+workspace_root = "."
+
+[local]
+clippy_methods = "local/clippy-methods.toml"
+clippy_types = "local/clippy-types.toml"
+deny_bans = "local/deny-bans.toml"
+deny_skip = "local/deny-skip.toml"
+deny_feature_bans = "local/deny-feature-bans.toml"
+"#
+        ),
+        "minimal" => format!(
+            r#"version = "0.1"
+
+[profile]
+name = "{profile}"
+
+# Minimal profile: fewer expected bans (no filesystem, no http-client method bans;
+# no File type ban; no deny.toml crate bans expected).
+
+[rust]
+workspace_root = "."
+
+[local]
+clippy_methods = "local/clippy-methods.toml"
+clippy_types = "local/clippy-types.toml"
+deny_bans = "local/deny-bans.toml"
+deny_skip = "local/deny-skip.toml"
+deny_feature_bans = "local/deny-feature-bans.toml"
+"#
+        ),
+        _ => format!(
+            r#"version = "0.1"
+
+[profile]
+name = "{profile}"
+
+[rust]
+workspace_root = "."
+
+[local]
+clippy_methods = "local/clippy-methods.toml"
+clippy_types = "local/clippy-types.toml"
+deny_bans = "local/deny-bans.toml"
+deny_skip = "local/deny-skip.toml"
+deny_feature_bans = "local/deny-feature-bans.toml"
+"#
+        ),
+    }
 }

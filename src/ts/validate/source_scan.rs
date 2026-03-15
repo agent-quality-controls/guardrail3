@@ -8,19 +8,14 @@ pub fn check(path: &Path, scoped_files: Option<&[String]>) -> Vec<CheckResult> {
     let mut results = Vec::new();
 
     let ts_files: Vec<String> = match scoped_files {
-        Some(files) => files
-            .iter()
-            .filter(|f| is_ts_file(f))
-            .cloned()
-            .collect(),
+        Some(files) => files.iter().filter(|f| is_ts_file(f)).cloned().collect(),
         None => collect_ts_files(path),
     };
 
     for file_path in &ts_files {
         let fp = Path::new(file_path);
-        let content = match std::fs::read_to_string(fp) {
-            Ok(c) => c,
-            Err(_) => continue,
+        let Ok(content) = std::fs::read_to_string(fp) else {
+            continue;
         };
 
         check_eslint_disable(fp, &content, &mut results);
@@ -38,10 +33,9 @@ pub fn check(path: &Path, scoped_files: Option<&[String]>) -> Vec<CheckResult> {
     results
 }
 
+#[allow(clippy::case_sensitive_file_extension_comparisons)] // reason: only checking .ts/.tsx/.mjs files
 fn is_ts_file(path: &str) -> bool {
-    path.ends_with(".ts")
-        || path.ends_with(".tsx")
-        || path.ends_with(".mjs")
+    path.ends_with(".ts") || path.ends_with(".tsx") || path.ends_with(".mjs")
 }
 
 fn collect_ts_files(root: &Path) -> Vec<String> {
@@ -58,13 +52,12 @@ fn collect_ts_files(root: &Path) -> Vec<String> {
                 && name != ".git"
                 && name != ".claude"
         })
+        .flatten()
     {
-        if let Ok(entry) = entry {
-            if entry.file_type().is_file() {
-                let path_str = entry.path().display().to_string();
-                if is_ts_file(&path_str) {
-                    files.push(path_str);
-                }
+        if entry.file_type().is_file() {
+            let path_str = entry.path().display().to_string();
+            if is_ts_file(&path_str) {
+                files.push(path_str);
             }
         }
     }
@@ -85,19 +78,19 @@ fn check_eslint_disable(path: &Path, content: &str, results: &mut Vec<CheckResul
             if trimmed.contains("-- ") {
                 // T24: with reason
                 results.push(CheckResult {
-                    id: "T24".to_string(),
+                    id: "T24".to_owned(),
                     severity: Severity::Info,
-                    title: "eslint-disable with reason".to_string(),
-                    message: trimmed.to_string(),
+                    title: "eslint-disable with reason".to_owned(),
+                    message: trimmed.to_owned(),
                     file: Some(path.display().to_string()),
                     line: Some(line_number),
                 });
             } else {
                 // T23: without reason
                 results.push(CheckResult {
-                    id: "T23".to_string(),
+                    id: "T23".to_owned(),
                     severity: Severity::Error,
-                    title: "eslint-disable without reason".to_string(),
+                    title: "eslint-disable without reason".to_owned(),
                     message: format!("eslint-disable missing `-- ` reason: {trimmed}"),
                     file: Some(path.display().to_string()),
                     line: Some(line_number),
@@ -110,19 +103,19 @@ fn check_eslint_disable(path: &Path, content: &str, results: &mut Vec<CheckResul
             if trimmed.contains("-- ") {
                 // T26: with reason
                 results.push(CheckResult {
-                    id: "T26".to_string(),
+                    id: "T26".to_owned(),
                     severity: Severity::Info,
-                    title: "eslint-disable-next-line with reason".to_string(),
-                    message: trimmed.to_string(),
+                    title: "eslint-disable-next-line with reason".to_owned(),
+                    message: trimmed.to_owned(),
                     file: Some(path.display().to_string()),
                     line: Some(line_number),
                 });
             } else {
                 // T25: without reason
                 results.push(CheckResult {
-                    id: "T25".to_string(),
+                    id: "T25".to_owned(),
                     severity: Severity::Error,
-                    title: "eslint-disable-next-line without reason".to_string(),
+                    title: "eslint-disable-next-line without reason".to_owned(),
                     message: format!("Missing `-- ` reason: {trimmed}"),
                     file: Some(path.display().to_string()),
                     line: Some(line_number),
@@ -135,19 +128,19 @@ fn check_eslint_disable(path: &Path, content: &str, results: &mut Vec<CheckResul
             if trimmed.contains("-- ") {
                 // T26: with reason
                 results.push(CheckResult {
-                    id: "T26".to_string(),
+                    id: "T26".to_owned(),
                     severity: Severity::Info,
-                    title: "eslint-disable-line with reason".to_string(),
-                    message: trimmed.to_string(),
+                    title: "eslint-disable-line with reason".to_owned(),
+                    message: trimmed.to_owned(),
                     file: Some(path.display().to_string()),
                     line: Some(line_number),
                 });
             } else {
                 // T25: without reason
                 results.push(CheckResult {
-                    id: "T25".to_string(),
+                    id: "T25".to_owned(),
                     severity: Severity::Error,
-                    title: "eslint-disable-line without reason".to_string(),
+                    title: "eslint-disable-line without reason".to_owned(),
                     message: format!("Missing `-- ` reason: {trimmed}"),
                     file: Some(path.display().to_string()),
                     line: Some(line_number),
@@ -166,9 +159,9 @@ fn check_ts_ignore(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
         // T27: @ts-ignore
         if trimmed.contains("@ts-ignore") {
             results.push(CheckResult {
-                id: "T27".to_string(),
+                id: "T27".to_owned(),
                 severity: Severity::Error,
-                title: "@ts-ignore usage".to_string(),
+                title: "@ts-ignore usage".to_owned(),
                 message: format!("Use @ts-expect-error instead: {trimmed}"),
                 file: Some(path.display().to_string()),
                 line: Some(line_number),
@@ -179,24 +172,25 @@ fn check_ts_ignore(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
         if trimmed.contains("@ts-expect-error") {
             // Check if there's text after @ts-expect-error
             if let Some(pos) = trimmed.find("@ts-expect-error") {
+                #[allow(clippy::string_slice)] // reason: ts-expect-error ASCII parsing
                 let after = trimmed[pos.saturating_add(16)..].trim();
                 if after.is_empty() || after == "*/" {
                     // T28: without explanation
                     results.push(CheckResult {
-                        id: "T28".to_string(),
+                        id: "T28".to_owned(),
                         severity: Severity::Warn,
-                        title: "@ts-expect-error without explanation".to_string(),
-                        message: trimmed.to_string(),
+                        title: "@ts-expect-error without explanation".to_owned(),
+                        message: trimmed.to_owned(),
                         file: Some(path.display().to_string()),
                         line: Some(line_number),
                     });
                 } else {
                     // T29: with explanation
                     results.push(CheckResult {
-                        id: "T29".to_string(),
+                        id: "T29".to_owned(),
                         severity: Severity::Info,
-                        title: "@ts-expect-error with explanation".to_string(),
-                        message: trimmed.to_string(),
+                        title: "@ts-expect-error with explanation".to_owned(),
+                        message: trimmed.to_owned(),
                         file: Some(path.display().to_string()),
                         line: Some(line_number),
                     });
@@ -208,10 +202,7 @@ fn check_ts_ignore(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
 
 // T30: process.env direct access
 fn check_process_env(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
-    let file_name = path
-        .file_name()
-        .and_then(|n| n.to_str())
-        .unwrap_or("");
+    let file_name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
 
     // Skip env.ts and env.mjs files
     if file_name == "env.ts" || file_name == "env.mjs" {
@@ -222,7 +213,7 @@ fn check_process_env(path: &Path, content: &str, results: &mut Vec<CheckResult>)
     for (line_num, line) in lines.iter().enumerate() {
         let trimmed = line.trim();
         // Skip comment lines
-        if trimmed.starts_with("//") || trimmed.starts_with("*") || trimmed.starts_with("/*") {
+        if trimmed.starts_with("//") || trimmed.starts_with('*') || trimmed.starts_with("/*") {
             continue;
         }
 
@@ -235,8 +226,7 @@ fn check_process_env(path: &Path, content: &str, results: &mut Vec<CheckResult>)
             } else {
                 None
             };
-            let is_suppressed = prev_line
-                .map_or(false, |pl| pl.contains("eslint-disable-next-line"));
+            let is_suppressed = prev_line.is_some_and(|pl| pl.contains("eslint-disable-next-line"));
 
             let severity = if is_suppressed {
                 Severity::Info
@@ -251,9 +241,9 @@ fn check_process_env(path: &Path, content: &str, results: &mut Vec<CheckResult>)
             };
 
             results.push(CheckResult {
-                id: "T30".to_string(),
+                id: "T30".to_owned(),
                 severity,
-                title: "Direct process.env access".to_string(),
+                title: "Direct process.env access".to_owned(),
                 message,
                 file: Some(path.display().to_string()),
                 line: Some(line_number),
@@ -267,17 +257,17 @@ fn check_any_types(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
     for (line_num, line) in content.lines().enumerate() {
         let trimmed = line.trim();
         // Skip comment lines
-        if trimmed.starts_with("//") || trimmed.starts_with("*") || trimmed.starts_with("/*") {
+        if trimmed.starts_with("//") || trimmed.starts_with('*') || trimmed.starts_with("/*") {
             continue;
         }
 
         if trimmed.contains("as any") || trimmed.contains(": any") {
             let line_number = line_num.saturating_add(1);
             results.push(CheckResult {
-                id: "T31".to_string(),
+                id: "T31".to_owned(),
                 severity: Severity::Info,
-                title: "any type usage".to_string(),
-                message: trimmed.to_string(),
+                title: "any type usage".to_owned(),
+                message: trimmed.to_owned(),
                 file: Some(path.display().to_string()),
                 line: Some(line_number),
             });
@@ -291,26 +281,24 @@ fn check_file_length(path: &Path, content: &str, results: &mut Vec<CheckResult>)
         .lines()
         .filter(|line| {
             let trimmed = line.trim();
-            !trimmed.is_empty()
-                && !trimmed.starts_with("//")
-                && !trimmed.starts_with("*")
+            !trimmed.is_empty() && !trimmed.starts_with("//") && !trimmed.starts_with('*')
         })
         .count();
 
     if effective_lines > 300 {
         results.push(CheckResult {
-            id: "T32".to_string(),
+            id: "T32".to_owned(),
             severity: Severity::Warn,
-            title: "File too long".to_string(),
+            title: "File too long".to_owned(),
             message: format!("{effective_lines} effective lines (max 300)"),
             file: Some(path.display().to_string()),
             line: None,
         });
     } else if effective_lines > 250 {
         results.push(CheckResult {
-            id: "T33".to_string(),
+            id: "T33".to_owned(),
             severity: Severity::Info,
-            title: "File approaching limit".to_string(),
+            title: "File approaching limit".to_owned(),
             message: format!("{effective_lines} effective lines (warn at 300)"),
             file: Some(path.display().to_string()),
             line: None,
@@ -324,10 +312,10 @@ fn check_noinspection(path: &Path, content: &str, results: &mut Vec<CheckResult>
         if line.contains("// noinspection") || line.contains("/* noinspection") {
             let line_number = line_num.saturating_add(1);
             results.push(CheckResult {
-                id: "T34".to_string(),
+                id: "T34".to_owned(),
                 severity: Severity::Info,
-                title: "noinspection comment".to_string(),
-                message: line.trim().to_string(),
+                title: "noinspection comment".to_owned(),
+                message: line.trim().to_owned(),
                 file: Some(path.display().to_string()),
                 line: Some(line_number),
             });
@@ -341,10 +329,10 @@ fn check_coverage_ignore(path: &Path, content: &str, results: &mut Vec<CheckResu
         if line.contains("istanbul ignore") || line.contains("c8 ignore") {
             let line_number = line_num.saturating_add(1);
             results.push(CheckResult {
-                id: "T35".to_string(),
+                id: "T35".to_owned(),
                 severity: Severity::Info,
-                title: "Coverage ignore comment".to_string(),
-                message: line.trim().to_string(),
+                title: "Coverage ignore comment".to_owned(),
+                message: line.trim().to_owned(),
                 file: Some(path.display().to_string()),
                 line: Some(line_number),
             });
@@ -360,9 +348,22 @@ fn check_banned_in_node_modules(path: &Path, results: &mut Vec<CheckResult>) {
     }
 
     let banned: &[&str] = &[
-        "axios", "lodash", "moment", "uuid", "nanoid", "pg", "express",
-        "classnames", "winston", "pino", "request", "got", "superagent",
-        "node-fetch", "isomorphic-fetch", "underscore",
+        "axios",
+        "lodash",
+        "moment",
+        "uuid",
+        "nanoid",
+        "pg",
+        "express",
+        "classnames",
+        "winston",
+        "pino",
+        "request",
+        "got",
+        "superagent",
+        "node-fetch",
+        "isomorphic-fetch",
+        "underscore",
     ];
     let banned_prefixes: &[&str] = &["embla-carousel"];
 
@@ -370,7 +371,7 @@ fn check_banned_in_node_modules(path: &Path, results: &mut Vec<CheckResult>) {
         let dep_path = nm_path.join(dep);
         if dep_path.exists() {
             results.push(CheckResult {
-                id: "T59".to_string(),
+                id: "T59".to_owned(),
                 severity: Severity::Error,
                 title: format!("Banned package in node_modules: {dep}"),
                 message: format!("{dep} found in node_modules (transitive dependency?)"),
@@ -383,10 +384,10 @@ fn check_banned_in_node_modules(path: &Path, results: &mut Vec<CheckResult>) {
     // Check embla-carousel prefix
     if let Ok(entries) = std::fs::read_dir(&nm_path) {
         for entry in entries.flatten() {
-            let name = entry.file_name().to_string_lossy().to_string();
+            let name = entry.file_name().to_string_lossy().into_owned();
             if banned_prefixes.iter().any(|p| name.starts_with(p)) {
                 results.push(CheckResult {
-                    id: "T59".to_string(),
+                    id: "T59".to_owned(),
                     severity: Severity::Error,
                     title: format!("Banned package in node_modules: {name}"),
                     message: format!("{name} found in node_modules"),

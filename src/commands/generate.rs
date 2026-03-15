@@ -12,25 +12,23 @@ struct GeneratedFile {
 }
 
 /// Main generate command -- generates all config files from guardrail3.toml.
+#[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
 pub fn run(args: &GenerateArgs) {
     let project_path = Path::new(&args.path);
-    let cfg = match config::load_config(project_path) {
-        Some(c) => c,
-        None => {
-            eprintln!(
-                "Error: guardrail3.toml not found or invalid at {}",
-                project_path.display()
-            );
-            eprintln!("Run 'guardrail3 init' to create one.");
-            std::process::exit(1);
-        }
+    let Some(cfg) = config::load_config(project_path) else {
+        eprintln!(
+            "Error: guardrail3.toml not found or invalid at {}",
+            project_path.display()
+        );
+        eprintln!("Run 'guardrail3 init' to create one.");
+        std::process::exit(1);
     };
 
     let profile = cfg
         .profile
         .as_ref()
         .map_or("service", |p| p.name.as_str())
-        .to_string();
+        .to_owned();
 
     let files = generate_all_files(project_path, &cfg, &profile);
 
@@ -64,27 +62,25 @@ pub fn run(args: &GenerateArgs) {
 }
 
 /// Generate only Rust config files.
+#[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
 pub fn run_rs(args: &GenerateArgs) {
     let project_path = Path::new(&args.path);
-    let cfg = match config::load_config(project_path) {
-        Some(c) => c,
-        None => {
-            eprintln!(
-                "Error: guardrail3.toml not found or invalid at {}",
-                project_path.display()
-            );
-            std::process::exit(1);
-        }
+    let Some(cfg) = config::load_config(project_path) else {
+        eprintln!(
+            "Error: guardrail3.toml not found or invalid at {}",
+            project_path.display()
+        );
+        std::process::exit(1);
     };
 
     let profile = cfg
         .profile
         .as_ref()
         .map_or("service", |p| p.name.as_str())
-        .to_string();
+        .to_owned();
 
     let local = load_local_overrides(project_path, &cfg);
-    let rust_root = resolve_rust_root(project_path, &cfg);
+    let rust_root = resolve_rust_root(&cfg);
 
     let files = generate_rust_files(&rust_root, &cfg, &profile, &local);
 
@@ -102,23 +98,23 @@ pub fn run_rs(args: &GenerateArgs) {
 }
 
 /// Generate only TypeScript config files.
+#[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
 pub fn run_ts(args: &GenerateArgs) {
     let project_path = Path::new(&args.path);
-    let cfg = match config::load_config(project_path) {
-        Some(c) => c,
-        None => {
-            eprintln!(
-                "Error: guardrail3.toml not found at {}",
-                project_path.display()
-            );
-            std::process::exit(1);
-        }
+    let Some(cfg) = config::load_config(project_path) else {
+        eprintln!(
+            "Error: guardrail3.toml not found at {}",
+            project_path.display()
+        );
+        std::process::exit(1);
     };
 
     let files = generate_ts_files(&cfg);
 
     if files.is_empty() {
-        println!("No TypeScript files to generate (check [typescript.canonical] in guardrail3.toml).");
+        println!(
+            "No TypeScript files to generate (check [typescript.canonical] in guardrail3.toml)."
+        );
         return;
     }
 
@@ -141,6 +137,7 @@ pub fn run_ts(args: &GenerateArgs) {
 }
 
 /// Install pre-commit hooks.
+#[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
 pub fn run_hooks(args: &GenerateArgs) {
     let project_path = Path::new(&args.path);
     let hook_content = crate::modules::pre_commit::PRE_COMMIT_SCRIPT.content;
@@ -209,64 +206,12 @@ fn load_local_overrides(
     }
 }
 
-fn resolve_rust_root(
-    _project_path: &Path,
-    cfg: &config::types::GuardrailConfig,
-) -> String {
+fn resolve_rust_root(cfg: &config::types::GuardrailConfig) -> String {
     cfg.rust
         .as_ref()
         .and_then(|r| r.workspace_root.as_deref())
         .unwrap_or(".")
-        .to_string()
-}
-
-/// Discover workspace member crates from Cargo.toml.
-/// Used during generate to auto-discover crates when not explicitly listed in config.
-pub fn discover_workspace_crates(project_path: &Path, rust_root: &str) -> Vec<String> {
-    let cargo_path = project_path.join(rust_root).join("Cargo.toml");
-    let content = match fs::read_to_string(&cargo_path) {
-        Ok(c) => c,
-        Err(_) => return Vec::new(),
-    };
-
-    let parsed: toml::Value = match toml::from_str(&content) {
-        Ok(v) => v,
-        Err(_) => return Vec::new(),
-    };
-
-    let mut crates = Vec::new();
-
-    if let Some(members) = parsed
-        .get("workspace")
-        .and_then(|w| w.get("members"))
-        .and_then(|m| m.as_array())
-    {
-        for member in members {
-            if let Some(s) = member.as_str() {
-                // Expand globs
-                if s.contains('*') {
-                    let pattern = project_path
-                        .join(rust_root)
-                        .join(s)
-                        .display()
-                        .to_string();
-                    if let Ok(paths) = glob::glob(&pattern) {
-                        for entry in paths.flatten() {
-                            if entry.join("Cargo.toml").exists() {
-                                if let Ok(rel) = entry.strip_prefix(project_path.join(rust_root)) {
-                                    crates.push(rel.display().to_string());
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    crates.push(s.to_string());
-                }
-            }
-        }
-    }
-
-    crates
+        .to_owned()
 }
 
 fn generate_all_files(
@@ -279,7 +224,7 @@ fn generate_all_files(
     let local = load_local_overrides(project_path, cfg);
 
     if cfg.rust.is_some() {
-        let rust_root = resolve_rust_root(project_path, cfg);
+        let rust_root = resolve_rust_root(cfg);
         let rust_files = generate_rust_files(&rust_root, cfg, profile, &local);
         files.extend(rust_files);
     }
@@ -302,55 +247,46 @@ fn generate_all_files(
             &format!("GUARDRAIL3_RUST_WORKSPACE:-{rust_workspace_root}}}"),
         );
     files.push(GeneratedFile {
-        path: ".githooks/pre-commit".to_string(),
+        path: ".githooks/pre-commit".to_owned(),
         content: hook_content,
     });
 
     files
 }
 
-fn generate_ts_files(
-    cfg: &config::types::GuardrailConfig,
-) -> Vec<GeneratedFile> {
+fn generate_ts_files(cfg: &config::types::GuardrailConfig) -> Vec<GeneratedFile> {
     let mut files = Vec::new();
 
-    let ts_cfg = match cfg.typescript.as_ref() {
-        Some(t) => t,
-        None => return files,
+    let Some(ts_cfg) = cfg.typescript.as_ref() else {
+        return files;
     };
 
     let canonical_cfg = ts_cfg.canonical.as_ref();
 
     // .npmrc -- generate unless explicitly disabled
-    let gen_npmrc = canonical_cfg
-        .and_then(|c| c.npmrc)
-        .unwrap_or(true);
+    let gen_npmrc = canonical_cfg.and_then(|c| c.npmrc).unwrap_or(true);
     if gen_npmrc {
         files.push(GeneratedFile {
-            path: ".npmrc".to_string(),
-            content: canonical::NPMRC.content.to_string(),
+            path: ".npmrc".to_owned(),
+            content: canonical::NPMRC.content.to_owned(),
         });
     }
 
     // tsconfig.base.json -- generate unless explicitly disabled
-    let gen_tsconfig = canonical_cfg
-        .and_then(|c| c.tsconfig_base)
-        .unwrap_or(true);
+    let gen_tsconfig = canonical_cfg.and_then(|c| c.tsconfig_base).unwrap_or(true);
     if gen_tsconfig {
         files.push(GeneratedFile {
-            path: "tsconfig.base.json".to_string(),
-            content: canonical::TSCONFIG_BASE.content.to_string(),
+            path: "tsconfig.base.json".to_owned(),
+            content: canonical::TSCONFIG_BASE.content.to_owned(),
         });
     }
 
     // .jscpd.json -- generate unless explicitly disabled
-    let gen_jscpd = canonical_cfg
-        .and_then(|c| c.jscpd)
-        .unwrap_or(true);
+    let gen_jscpd = canonical_cfg.and_then(|c| c.jscpd).unwrap_or(true);
     if gen_jscpd {
         files.push(GeneratedFile {
-            path: ".jscpd.json".to_string(),
-            content: canonical::JSCPD.content.to_string(),
+            path: ".jscpd.json".to_owned(),
+            content: canonical::JSCPD.content.to_owned(),
         });
     }
 
@@ -362,8 +298,8 @@ fn generate_ts_files(
         .is_some_and(|m| m == "generate" || m == "starter");
     if gen_eslint {
         files.push(GeneratedFile {
-            path: "eslint.config.mjs".to_string(),
-            content: canonical::ESLINT_STARTER.content.to_string(),
+            path: "eslint.config.mjs".to_owned(),
+            content: canonical::ESLINT_STARTER.content.to_owned(),
         });
     }
 
@@ -408,18 +344,11 @@ fn generate_rust_files(
 
     for (crate_path, crate_cfg) in &crate_configs {
         // Library profile: all crates are pure. Otherwise check layer config.
-        let is_pure = profile == "library"
-            || crate_cfg
-                .layer
-                .as_deref()
-                .is_some_and(|l| l == "pure");
+        let is_pure =
+            profile == "library" || crate_cfg.layer.as_deref().is_some_and(|l| l == "pure");
 
-        let crate_clippy = clippy::build_clippy_toml(
-            profile,
-            is_pure,
-            &local.clippy_methods,
-            &local.clippy_types,
-        );
+        let crate_clippy =
+            clippy::build_clippy_toml(profile, is_pure, &local.clippy_methods, &local.clippy_types);
         files.push(GeneratedFile {
             path: format!("{root_prefix}{crate_path}/clippy.toml"),
             content: crate_clippy,
@@ -441,13 +370,13 @@ fn generate_rust_files(
     // rustfmt.toml
     files.push(GeneratedFile {
         path: format!("{root_prefix}rustfmt.toml"),
-        content: canonical::RUSTFMT.content.to_string(),
+        content: canonical::RUSTFMT.content.to_owned(),
     });
 
     // rust-toolchain.toml
     files.push(GeneratedFile {
         path: format!("{root_prefix}rust-toolchain.toml"),
-        content: canonical::RUST_TOOLCHAIN.content.to_string(),
+        content: canonical::RUST_TOOLCHAIN.content.to_owned(),
     });
 
     files
@@ -476,37 +405,20 @@ fn build_deny_for_profile(
             extra_skip,
             extra_feature_bans,
         ),
-        "monorepo" => deny::build_deny_toml(
-            profile,
-            extra_bans,
-            extra_skip,
-            extra_feature_bans,
-        ),
-        _ => deny::build_deny_toml(
-            profile,
-            extra_bans,
-            extra_skip,
-            extra_feature_bans,
-        ),
+        _ => deny::build_deny_toml(profile, extra_bans, extra_skip, extra_feature_bans),
     }
 }
 
 /// Generate expected file contents without writing -- used by check and diff.
-pub fn generate_expected(
-    project_path: &Path,
-) -> Option<Vec<(String, String)>> {
+#[allow(clippy::type_complexity)] // reason: legitimate complex type
+pub fn generate_expected(project_path: &Path) -> Option<Vec<(String, String)>> {
     let cfg = config::load_config(project_path)?;
     let profile = cfg
         .profile
         .as_ref()
         .map_or("service", |p| p.name.as_str())
-        .to_string();
+        .to_owned();
 
     let files = generate_all_files(project_path, &cfg, &profile);
-    Some(
-        files
-            .into_iter()
-            .map(|gf| (gf.path, gf.content))
-            .collect(),
-    )
+    Some(files.into_iter().map(|gf| (gf.path, gf.content)).collect())
 }

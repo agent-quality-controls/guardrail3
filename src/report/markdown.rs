@@ -1,5 +1,6 @@
 use super::types::{Report, Severity};
 
+#[allow(clippy::print_stdout)] // reason: CLI report output to stdout
 pub fn print_report(report: &Report) {
     println!("# Guardrail3 Validation Report");
     println!();

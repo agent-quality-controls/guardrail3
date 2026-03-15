@@ -3,15 +3,13 @@ use std::path::Path;
 
 use crate::commands::generate;
 
+#[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
 pub fn run(path: &str) {
     let project_path = Path::new(path);
 
-    let expected = match generate::generate_expected(project_path) {
-        Some(e) => e,
-        None => {
-            eprintln!("Error: guardrail3.toml not found or invalid at {path}");
-            std::process::exit(1);
-        }
+    let Some(expected) = generate::generate_expected(project_path) else {
+        eprintln!("Error: guardrail3.toml not found or invalid at {path}");
+        std::process::exit(1);
     };
 
     let mut stale_count = 0usize;

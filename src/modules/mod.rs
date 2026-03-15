@@ -10,6 +10,7 @@ pub struct Module {
 }
 
 /// Returns all registered modules across all categories.
+#[allow(clippy::vec_init_then_push)] // reason: push-based construction is clearer for module registry
 pub fn all_modules() -> Vec<&'static Module> {
     let mut modules: Vec<&'static Module> = Vec::new();
 
