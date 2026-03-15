@@ -3,11 +3,14 @@
 //! Uses proptest to generate random inputs and verify invariants:
 //! no panics, consistent results, correct pattern detection.
 
-// Suppress unused crate dependency warnings for crates used only by the main binary
+// Suppress unused crate dependency warnings for crates used by the lib crate
 use clap as _;
 use colored as _;
 use glob as _;
+use guardrail3 as _;
 use serde as _;
+use serde_json as _;
+use toml as _;
 use walkdir as _;
 
 use std::fmt::Write as _;

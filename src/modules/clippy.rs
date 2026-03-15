@@ -188,6 +188,7 @@ pub fn library_profile_types() -> Vec<&'static Module> {
 }
 
 /// Build the full clippy.toml content for a workspace root or crate.
+///
 /// `is_pure_layer` adds global-state type bans (for service/monorepo profiles).
 /// `extra_methods` and `extra_types` are appended from local override files.
 pub fn build_clippy_toml(

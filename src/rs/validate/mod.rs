@@ -1,7 +1,7 @@
-mod allow_checks;
+pub mod allow_checks;
 pub mod cargo_lints;
 pub mod clippy_coverage;
-mod code_quality_checks;
+pub mod code_quality_checks;
 pub mod config_files;
 pub mod deny_audit;
 mod deny_bans;
@@ -17,7 +17,7 @@ pub mod release_crate_deps;
 pub mod release_repo_checks;
 mod rustfmt_check;
 pub mod source_scan;
-mod structure_checks;
+pub mod structure_checks;
 pub mod test_checks;
 mod test_quality_checks;
 mod toolchain_check;
