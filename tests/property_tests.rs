@@ -8,8 +8,10 @@ use clap as _;
 use colored as _;
 use glob as _;
 use guardrail3 as _;
+use proc_macro2 as _;
 use serde as _;
 use serde_json as _;
+use syn as _;
 use toml as _;
 use walkdir as _;
 

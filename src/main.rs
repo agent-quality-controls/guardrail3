@@ -2,8 +2,10 @@
 // Suppress false positives from unused_crate_dependencies.
 use colored as _;
 use glob as _;
+use proc_macro2 as _;
 use serde as _;
 use serde_json as _;
+use syn as _;
 use toml as _;
 use walkdir as _;
 
