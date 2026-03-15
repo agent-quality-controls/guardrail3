@@ -1,4 +1,3 @@
-use std::fs;
 use std::path::Path;
 
 use crate::commands::generate;
@@ -16,7 +15,7 @@ pub fn run(path: &str) {
 
     for (rel_path, expected_content) in &expected {
         let full_path = project_path.join(rel_path);
-        match fs::read_to_string(&full_path) {
+        match crate::fs::read_file_err(&full_path) {
             Ok(actual) => {
                 if actual != *expected_content {
                     has_diff = true;

@@ -220,8 +220,11 @@ fn check_ts_ignore(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
 fn check_process_env(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
     let file_name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
 
-    // Skip env.ts and env.mjs files
+    // Skip env.ts, env.mjs files, and all .mjs files (config files that legitimately use process.env)
     if file_name == "env.ts" || file_name == "env.mjs" {
+        return;
+    }
+    if path.extension().and_then(|e| e.to_str()) == Some("mjs") {
         return;
     }
 
