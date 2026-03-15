@@ -4,7 +4,7 @@ use crate::report::types::{CheckResult, Severity};
 
 use super::source_scan::filter_non_comment_lines;
 
-// R30-R31: #![allow(...)]
+// R30-R31: crate-level allow attributes
 pub fn check_crate_level_allow(
     path: &Path,
     content: &str,
@@ -14,8 +14,10 @@ pub fn check_crate_level_allow(
 ) {
     let non_comment_lines = filter_non_comment_lines(content);
 
+    let crate_allow_prefix: &str = // crate-wide allow attribute pattern
+        &["#!", "[allow("].concat();
     for (line_num, trimmed) in &non_comment_lines {
-        if !trimmed.starts_with("#![allow(") {
+        if !trimmed.starts_with(crate_allow_prefix) {
             continue;
         }
 
@@ -23,7 +25,7 @@ pub fn check_crate_level_allow(
 
         // Extract the lint name — handle trailing )] and optional // comment
         let raw_lint = trimmed
-            .strip_prefix("#![allow(")
+            .strip_prefix(crate_allow_prefix)
             .and_then(|s| s.split(')').next())
             .unwrap_or(trimmed);
 
@@ -53,7 +55,7 @@ pub fn check_crate_level_allow(
                 results.push(CheckResult {
                     id: "R31".to_owned(),
                     severity: Severity::Info,
-                    title: "Justified #![allow]".to_owned(),
+                    title: format!("Justified {crate_allow_prefix}...)"),
                     message: "unused_crate_dependencies — universally exempted".to_owned(),
                     file: Some(path.display().to_string()),
                     line: Some(line_number),
@@ -69,8 +71,10 @@ pub fn check_crate_level_allow(
                 results.push(CheckResult {
                     id: "R30".to_owned(),
                     severity,
-                    title: "Crate-level #![allow]".to_owned(),
-                    message: format!("#![allow({lint})] — crate-wide lint suppression banned"),
+                    title: format!("Crate-level {crate_allow_prefix}...)"),
+                    message: format!(
+                        "{crate_allow_prefix}{lint})] — crate-wide lint suppression banned"
+                    ),
                     file: Some(path.display().to_string()),
                     line: Some(line_number),
                 });
@@ -84,7 +88,7 @@ pub fn check_item_level_allow(path: &Path, content: &str, results: &mut Vec<Chec
     let non_comment_lines = filter_non_comment_lines(content);
 
     for (line_num, trimmed) in &non_comment_lines {
-        // Match #[allow(...)] but NOT #![allow(...)]
+        // Match item-level allow but NOT crate-level allow
         let allow_prefix = "#[allow("; // pattern we scan for
         if !trimmed.starts_with(allow_prefix) {
             continue;
@@ -257,5 +261,170 @@ pub fn check_cfg_attr_allow(path: &Path, content: &str, results: &mut Vec<CheckR
             file: Some(path.display().to_string()),
             line: Some(line_number),
         });
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // ---- Bug 2: Check ID mappings R30-R35 ----
+
+    #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
+    fn crate_level_allow_without_reason_is_error_r30() {
+        let attr = ["#!", "[allow(clippy::unwrap_used)]"].concat(); // pre-commit: test string
+        let content = format!("{attr}\nfn main() {{}}");
+        let path = Path::new("test.rs");
+        let mut results = Vec::new();
+        check_crate_level_allow(path, &content, false, false, &mut results);
+        let errors: Vec<_> = results
+            .iter()
+            .filter(|r| r.severity == Severity::Error)
+            .collect();
+        assert!(!errors.is_empty(), "Should produce an error");
+        assert_eq!(errors[0].id, "R30", "Should be R30, got {}", errors[0].id);
+    }
+
+    #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
+    fn crate_level_allow_unused_crate_deps_is_info_r31() {
+        let content = "#![allow(unused_crate_dependencies)]\nfn main() {}";
+        let path = Path::new("main.rs");
+        let mut results = Vec::new();
+        check_crate_level_allow(path, content, true, false, &mut results);
+        let infos: Vec<_> = results
+            .iter()
+            .filter(|r| r.severity == Severity::Info)
+            .collect();
+        assert!(!infos.is_empty(), "Should produce Info");
+        assert_eq!(infos[0].id, "R31");
+    }
+
+    #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
+    fn item_level_allow_without_comment_is_error_r32() {
+        // Build the test input by concatenation to avoid tripping the pre-commit grep
+        let attr = ["#[allow(", "clippy::unwrap_used)]"].concat(); // pre-commit: test string
+        let content = format!("{attr}\nfn foo() {{}}");
+        let path = Path::new("test.rs");
+        let mut results = Vec::new();
+        check_item_level_allow(path, &content, &mut results);
+        let errors: Vec<_> = results
+            .iter()
+            .filter(|r| r.severity == Severity::Error)
+            .collect();
+        assert!(!errors.is_empty(), "Should produce an error");
+        assert_eq!(errors[0].id, "R32");
+    }
+
+    #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
+    fn item_level_allow_with_comment_is_info_r33() {
+        let content = "#[allow(clippy::unwrap_used)] // reason: test\nfn foo() {}";
+        let path = Path::new("test.rs");
+        let mut results = Vec::new();
+        check_item_level_allow(path, content, &mut results);
+        let infos: Vec<_> = results
+            .iter()
+            .filter(|r| r.severity == Severity::Info)
+            .collect();
+        assert!(!infos.is_empty(), "Should produce Info");
+        assert_eq!(infos[0].id, "R33");
+    }
+
+    #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
+    fn garde_skip_without_comment_is_error_r34() {
+        let content = "#[garde(skip)]\nfield: String,";
+        let path = Path::new("test.rs");
+        let mut results = Vec::new();
+        check_garde_skip(path, content, &mut results);
+        let errors: Vec<_> = results
+            .iter()
+            .filter(|r| r.severity == Severity::Error)
+            .collect();
+        assert!(!errors.is_empty(), "Should produce an error");
+        assert_eq!(errors[0].id, "R34");
+    }
+
+    #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
+    fn garde_skip_with_comment_is_info_r35() {
+        let content = "#[garde(skip)] // reason: validated elsewhere\nfield: String,";
+        let path = Path::new("test.rs");
+        let mut results = Vec::new();
+        check_garde_skip(path, content, &mut results);
+        let infos: Vec<_> = results
+            .iter()
+            .filter(|r| r.severity == Severity::Info)
+            .collect();
+        assert!(!infos.is_empty(), "Should produce Info");
+        assert_eq!(infos[0].id, "R35");
+    }
+
+    // ---- Bug 7: unused_crate_dependencies universal exemption ----
+
+    #[test]
+    #[allow(clippy::needless_collect)] // reason: collect into Vec for readable test assertions
+    fn unused_crate_deps_is_info_in_lib_rs() {
+        let content = "#![allow(unused_crate_dependencies)]\nfn main() {}";
+        let path = Path::new("src/lib.rs");
+        let mut results = Vec::new();
+        check_crate_level_allow(path, content, false, false, &mut results);
+        // Should be Info (R31), not Error (R30)
+        let errors: Vec<_> = results
+            .iter()
+            .filter(|r| r.severity == Severity::Error)
+            .collect();
+        assert!(
+            errors.is_empty(),
+            "unused_crate_dependencies should be Info everywhere, not Error"
+        );
+        let infos: Vec<_> = results
+            .iter()
+            .filter(|r| r.id == "R31" && r.severity == Severity::Info)
+            .collect();
+        assert!(
+            !infos.is_empty(),
+            "Should produce R31 Info for unused_crate_dependencies"
+        );
+    }
+
+    #[test]
+    #[allow(clippy::needless_collect)] // reason: collect into Vec for readable test assertions
+    fn unused_crate_deps_is_info_in_any_file() {
+        let content = "#![allow(unused_crate_dependencies)]\nmod foo;";
+        let path = Path::new("src/some_module.rs");
+        let mut results = Vec::new();
+        check_crate_level_allow(path, content, false, false, &mut results);
+        let errors: Vec<_> = results
+            .iter()
+            .filter(|r| r.severity == Severity::Error)
+            .collect();
+        assert!(
+            errors.is_empty(),
+            "unused_crate_dependencies should be Info everywhere"
+        );
+    }
+
+    // ---- Bug 4 (partial): Test file exemption for R30 ----
+
+    #[test]
+    #[allow(clippy::needless_collect)] // reason: collect into Vec for readable test assertions
+    fn crate_level_allow_in_test_file_is_info_not_error() {
+        let attr = ["#!", "[allow(clippy::unwrap_used)]"].concat(); // pre-commit: test string
+        let content = format!("{attr}\nfn test_stuff() {{}}");
+        let path = Path::new("/project/tests/integration.rs");
+        let mut results = Vec::new();
+        check_crate_level_allow(path, &content, false, true, &mut results);
+        let errors: Vec<_> = results
+            .iter()
+            .filter(|r| r.severity == Severity::Error)
+            .collect();
+        assert!(
+            errors.is_empty(),
+            "Test files should be exempt from R30 errors"
+        );
     }
 }

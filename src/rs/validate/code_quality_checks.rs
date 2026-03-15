@@ -160,3 +160,94 @@ pub fn check_direct_fs_usage(
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // ---- Bug 5: R58 direct std::fs detection ----
+
+    #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
+    fn r58_catches_use_std_fs() {
+        let content = "use std::fs;\nfn main() {}";
+        let path = Path::new("src/foo.rs");
+        let mut results = Vec::new();
+        check_direct_fs_usage(path, content, false, &mut results);
+        assert!(!results.is_empty(), "Should catch 'use std::fs'");
+        assert_eq!(results[0].id, "R58");
+    }
+
+    #[test]
+    fn r58_allows_fs_module() {
+        let content = "use std::fs;\nfn main() {}";
+        let path = Path::new("src/fs.rs");
+        let mut results = Vec::new();
+        check_direct_fs_usage(path, content, false, &mut results);
+        assert!(results.is_empty(), "fs.rs should be exempt from R58");
+    }
+
+    #[test]
+    fn r58_allows_string_literals_in_modules() {
+        let content = r#"let ban = "std::fs::read_to_string";"#;
+        let path = Path::new("src/modules/clippy.rs");
+        let mut results = Vec::new();
+        check_direct_fs_usage(path, content, false, &mut results);
+        assert!(
+            results.is_empty(),
+            "String literals in modules/ should be exempt"
+        );
+    }
+
+    #[test]
+    fn r58_allows_type_references() {
+        let content = "let p = std::fs::Permissions::from_mode(0o755);";
+        let path = Path::new("src/foo.rs");
+        let mut results = Vec::new();
+        check_direct_fs_usage(path, content, false, &mut results);
+        assert!(
+            results.is_empty(),
+            "Type references (Permissions) should be exempt"
+        );
+    }
+
+    #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
+    fn r58_catches_read_to_string() {
+        let content = "let s = std::fs::read_to_string(path);";
+        let path = Path::new("src/foo.rs");
+        let mut results = Vec::new();
+        check_direct_fs_usage(path, content, false, &mut results);
+        assert!(
+            !results.is_empty(),
+            "Direct std::fs::read_to_string should be caught"
+        );
+        assert_eq!(results[0].id, "R58");
+    }
+
+    #[test]
+    fn r58_allows_metadata_type() {
+        let content = "fn check(m: std::fs::Metadata) {}";
+        let path = Path::new("src/foo.rs");
+        let mut results = Vec::new();
+        check_direct_fs_usage(path, content, false, &mut results);
+        assert!(
+            results.is_empty(),
+            "std::fs::Metadata type reference should be exempt"
+        );
+    }
+
+    // ---- R43 todo macro tests ----
+
+    #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
+    fn todo_macro_produces_warn() {
+        let content = "fn foo() { todo!(); }";
+        let path = Path::new("src/foo.rs");
+        let mut results = Vec::new();
+        check_todo_macros(path, content, false, &mut results);
+        assert!(!results.is_empty());
+        assert_eq!(results[0].severity, Severity::Warn);
+        assert_eq!(results[0].id, "R43");
+    }
+}
