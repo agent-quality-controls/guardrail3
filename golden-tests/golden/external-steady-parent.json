@@ -1,0 +1,4976 @@
+{
+  "project": ".",
+  "sections": [
+    {
+      "name": "Config files",
+      "results": [
+        {
+          "file": ".",
+          "id": "R1",
+          "line": null,
+          "message": "No clippy.toml found at workspace root",
+          "severity": "error",
+          "title": "clippy.toml missing"
+        },
+        {
+          "file": "./packages/low-expectations",
+          "id": "R2",
+          "line": null,
+          "message": "No clippy.toml for packages/low-expectations",
+          "severity": "warn",
+          "title": "Per-crate clippy.toml missing"
+        },
+        {
+          "file": "./packages/seo-site-files",
+          "id": "R2",
+          "line": null,
+          "message": "No clippy.toml for packages/seo-site-files",
+          "severity": "warn",
+          "title": "Per-crate clippy.toml missing"
+        },
+        {
+          "file": ".",
+          "id": "R21",
+          "line": null,
+          "message": "No rustfmt.toml found at workspace root",
+          "severity": "error",
+          "title": "rustfmt.toml missing"
+        },
+        {
+          "file": ".",
+          "id": "R24",
+          "line": null,
+          "message": "No rust-toolchain.toml found at workspace root",
+          "severity": "error",
+          "title": "rust-toolchain.toml missing"
+        }
+      ]
+    },
+    {
+      "name": "Clippy ban coverage",
+      "results": [
+        {
+          "file": ".",
+          "id": "R4",
+          "line": null,
+          "message": "clippy.toml not found",
+          "severity": "error",
+          "title": "Cannot check clippy bans"
+        }
+      ]
+    },
+    {
+      "name": "deny.toml audit",
+      "results": [
+        {
+          "file": ".",
+          "id": "R8",
+          "line": null,
+          "message": "No deny.toml found at workspace root",
+          "severity": "error",
+          "title": "deny.toml missing"
+        }
+      ]
+    },
+    {
+      "name": "Cargo workspace lints",
+      "results": [
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "No Rust lint configuration in workspace",
+          "severity": "error",
+          "title": "[workspace.lints.rust] missing"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R27",
+          "line": null,
+          "message": "No Clippy lint configuration in workspace",
+          "severity": "error",
+          "title": "[workspace.lints.clippy] missing"
+        },
+        {
+          "file": "./packages/low-expectations/Cargo.toml",
+          "id": "R29",
+          "line": null,
+          "message": "packages/low-expectations: missing [lints] workspace = true",
+          "severity": "error",
+          "title": "Workspace lints not inherited"
+        },
+        {
+          "file": "./packages/seo-site-files/Cargo.toml",
+          "id": "R29",
+          "line": null,
+          "message": "packages/seo-site-files: missing [lints] workspace = true",
+          "severity": "error",
+          "title": "Workspace lints not inherited"
+        }
+      ]
+    },
+    {
+      "name": "Source code scan",
+      "results": [
+        {
+          "file": "./packages/low-expectations/tests/gx_compat.rs",
+          "id": "R30",
+          "line": 4,
+          "message": "#![allow(clippy::cognitive_complexity)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/tests/dump_actual.rs",
+          "id": "R30",
+          "line": 5,
+          "message": "#![allow(clippy::disallowed_methods)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/tests/dump_actual.rs",
+          "id": "R30",
+          "line": 8,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/tests/golden_courses.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/tests/golden_ctas.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/tests/golden_emails.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/tests/golden_linking.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/tests/golden_mailing.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/tests/golden_taxonomy.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/low-expectations/tests/gx_compat.rs",
+          "id": "R30",
+          "line": 4,
+          "message": "#![allow(clippy::float_cmp)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/seo-site-files/tests/llms_test.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/seo-site-files/tests/robots_test.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/seo-site-files/tests/sitemap_test.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/tests/dump_actual.rs",
+          "id": "R30",
+          "line": 6,
+          "message": "#![allow(clippy::print_stderr)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/tests/dump_actual.rs",
+          "id": "R30",
+          "line": 7,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./apps/substack-publisher/src/main.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/tests/dump_actual.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/tests/golden_courses.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/tests/golden_ctas.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/tests/golden_emails.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/tests/golden_linking.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/tests/golden_mailing.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/tests/golden_taxonomy.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./packages/seo-site-files/tests/llms_test.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./packages/seo-site-files/tests/sitemap_test.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/src/check/json_ld.rs",
+          "id": "R32",
+          "line": 40,
+          "message": "#[allow(clippy::cast_possible_wrap, clippy::as_conversions)] has no // comment justification",
+          "severity": "error",
+          "title": "#[allow] without reason"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/src/check/text.rs",
+          "id": "R32",
+          "line": 138,
+          "message": "#[allow(clippy::cast_possible_wrap, clippy::as_conversions)] has no // comment justification",
+          "severity": "error",
+          "title": "#[allow] without reason"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/build.rs",
+          "id": "R32",
+          "line": 36,
+          "message": "#[allow(clippy::disallowed_methods)] has no // comment justification",
+          "severity": "error",
+          "title": "#[allow] without reason"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/src/constraints.rs",
+          "id": "R32",
+          "line": 1,
+          "message": "#[allow(clippy::disallowed_types)] has no // comment justification",
+          "severity": "error",
+          "title": "#[allow] without reason"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/src/spec/emails.rs",
+          "id": "R32",
+          "line": 4,
+          "message": "#[allow(clippy::disallowed_types)] has no // comment justification",
+          "severity": "error",
+          "title": "#[allow] without reason"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/src/spec/taxonomy/mod.rs",
+          "id": "R32",
+          "line": 4,
+          "message": "#[allow(clippy::disallowed_types)] has no // comment justification",
+          "severity": "error",
+          "title": "#[allow] without reason"
+        },
+        {
+          "file": "./packages/low-expectations/src/suite_batch.rs",
+          "id": "R32",
+          "line": 103,
+          "message": "#[allow(clippy::float_cmp)] has no // comment justification",
+          "severity": "error",
+          "title": "#[allow] without reason"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/src/time_utils.rs",
+          "id": "R33",
+          "line": 48,
+          "message": "clippy::arithmetic_side_effects — Division on u64, no overflow",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/src/time_utils.rs",
+          "id": "R33",
+          "line": 7,
+          "message": "clippy::arithmetic_side_effects — Division/modulo on u64, no overflow",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/src/time_utils.rs",
+          "id": "R33",
+          "line": 25,
+          "message": "clippy::arithmetic_side_effects — Pure math on u64, no overflow for realistic dates",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/src/main.rs",
+          "id": "R33",
+          "line": 55,
+          "message": "clippy::as_conversions — Arc<Concrete> → Arc<dyn Trait> coercion requires `as`",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/outbound/src/image_checker.rs",
+          "id": "R33",
+          "line": 21,
+          "message": "clippy::disallowed_methods — Adapter constructor — builds shared HTTP client at startup",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/outbound/src/kit_client.rs",
+          "id": "R33",
+          "line": 56,
+          "message": "clippy::disallowed_methods — Adapter constructor — builds shared HTTP client at startup",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/outbound/src/page_fetcher.rs",
+          "id": "R33",
+          "line": 30,
+          "message": "clippy::disallowed_methods — Adapter constructor — builds shared HTTP client at startup",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/outbound/src/lighthouse.rs",
+          "id": "R33",
+          "line": 16,
+          "message": "clippy::disallowed_methods — Adapter constructor — builds shared PSI client at startup",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/src/config.rs",
+          "id": "R33",
+          "line": 18,
+          "message": "clippy::disallowed_methods — Approved env::var site — all env reads centralized in Config",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/outbound/src/structured_data.rs",
+          "id": "R33",
+          "line": 16,
+          "message": "clippy::disallowed_methods — Temp-file I/O required to exchange data with external Node process",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/src/constraints.rs",
+          "id": "R33",
+          "line": 31,
+          "message": "clippy::disallowed_methods — approved accessor — sole source of constraint data",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/src/constraints.rs",
+          "id": "R33",
+          "line": 37,
+          "message": "clippy::disallowed_methods — approved accessor — sole source of metadata",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/substack-publisher/src/config.rs",
+          "id": "R33",
+          "line": 17,
+          "message": "clippy::disallowed_methods — env::var is banned project-wide; Config::from_env is the single entry point",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/src/spec/emails.rs",
+          "id": "R33",
+          "line": 18,
+          "message": "clippy::disallowed_types — Compile-once regex cache — immutable after init, not mutable global state",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/src/spec/taxonomy/mod.rs",
+          "id": "R33",
+          "line": 28,
+          "message": "clippy::disallowed_types — Compile-once regex cache — immutable after init, not mutable global state",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/src/spec/taxonomy/mod.rs",
+          "id": "R33",
+          "line": 34,
+          "message": "clippy::disallowed_types — Compile-once regex cache — immutable after init, not mutable global state",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/src/spec/taxonomy/mod.rs",
+          "id": "R33",
+          "line": 40,
+          "message": "clippy::disallowed_types — Compile-once regex cache — immutable after init, not mutable global state",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/src/constraints.rs",
+          "id": "R33",
+          "line": 10,
+          "message": "clippy::disallowed_types — Composition root — LazyLock is the approved pattern for embedded config",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/src/constraints.rs",
+          "id": "R33",
+          "line": 17,
+          "message": "clippy::disallowed_types — Composition root — LazyLock is the approved pattern for embedded config",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/src/constraints.rs",
+          "id": "R33",
+          "line": 9,
+          "message": "clippy::expect_used — Startup fail-fast: malformed embedded JSON is unrecoverable",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/src/constraints.rs",
+          "id": "R33",
+          "line": 16,
+          "message": "clippy::expect_used — Startup fail-fast: malformed embedded JSON is unrecoverable",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/src/main.rs",
+          "id": "R33",
+          "line": 119,
+          "message": "clippy::expect_used — Startup: adapter construction failures are unrecoverable",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/src/main.rs",
+          "id": "R33",
+          "line": 18,
+          "message": "clippy::expect_used — Startup: binding/serving failures are unrecoverable",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/outbound/src/link_checker.rs",
+          "id": "R33",
+          "line": 17,
+          "message": "clippy::expect_used — Static CSS selector — panic on invalid is a compile-time bug",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/outbound/src/link_checker.rs",
+          "id": "R33",
+          "line": 19,
+          "message": "clippy::expect_used — Static CSS selector — panic on invalid is a compile-time bug",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/outbound/src/link_checker.rs",
+          "id": "R33",
+          "line": 21,
+          "message": "clippy::expect_used — Static CSS selector — panic on invalid is a compile-time bug",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/outbound/src/link_checker.rs",
+          "id": "R33",
+          "line": 23,
+          "message": "clippy::expect_used — Static CSS selector — panic on invalid is a compile-time bug",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/outbound/src/html_parser.rs",
+          "id": "R33",
+          "line": 15,
+          "message": "clippy::expect_used — Static CSS selector — panic on invalid selector is a build-time bug",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/src/spec/emails.rs",
+          "id": "R33",
+          "line": 17,
+          "message": "clippy::expect_used — Static regex pattern — panic on invalid regex is a build-time bug",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/src/spec/taxonomy/mod.rs",
+          "id": "R33",
+          "line": 23,
+          "message": "clippy::expect_used — Static regex pattern — panic on invalid regex is a build-time bug",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/substack-publisher/src/prosemirror.rs",
+          "id": "R33",
+          "line": 424,
+          "message": "clippy::indexing_slicing, clippy::expect_used — tests are allowed to panic on bad indices",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/seo-site-files/src/robots/checks.rs",
+          "id": "R33",
+          "line": 81,
+          "message": "clippy::result_large_err — CheckResult is our standard type; boxing adds no value here",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/domain/src/constraints.rs",
+          "id": "R33",
+          "line": 349,
+          "message": "clippy::struct_excessive_bools — Mirrors JSON schema — bool fields represent per-check-type flags",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/src/live/json_ld_checker/orchestration.rs",
+          "id": "R33",
+          "line": 41,
+          "message": "clippy::too_many_arguments — orchestration entry point — all params are distinct constraint groups",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/src/spec/mailing/columns.rs",
+          "id": "R33",
+          "line": 99,
+          "message": "clippy::too_many_lines — Declarative column definitions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/src/spec/mailing/columns.rs",
+          "id": "R33",
+          "line": 179,
+          "message": "clippy::too_many_lines — Declarative column definitions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/src/spec/mailing/columns.rs",
+          "id": "R33",
+          "line": 14,
+          "message": "clippy::too_many_lines — Declarative column definitions — splitting would obscure the table structure",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/seo-site-files/src/llms/checks.rs",
+          "id": "R33",
+          "line": 50,
+          "message": "clippy::trivial_regex — fallback for dead branch — never matches real input",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/build.rs",
+          "id": "R33",
+          "line": 3,
+          "message": "clippy::unwrap_used, clippy::disallowed_methods, clippy::panic — Build script: panics are the standard error-reporting mechanism",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/outbound/src/url_validator.rs",
+          "id": "R33",
+          "line": 129,
+          "message": "clippy::unwrap_used, clippy::expect_used — Test code: unwrap/expect are idiomatic for asserting test preconditions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/low-expectations/src/suite.rs",
+          "id": "R39",
+          "line": null,
+          "message": "415 effective lines (warn at 400, max 500)",
+          "severity": "warn",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/src/spec/ctas.rs",
+          "id": "R39",
+          "line": null,
+          "message": "418 effective lines (warn at 400, max 500)",
+          "severity": "warn",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/src/spec/taxonomy/domains.rs",
+          "id": "R39",
+          "line": null,
+          "message": "418 effective lines (warn at 400, max 500)",
+          "severity": "warn",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/src/live/articles/orchestration.rs",
+          "id": "R39",
+          "line": null,
+          "message": "426 effective lines (warn at 400, max 500)",
+          "severity": "warn",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/src/live/courses/runner.rs",
+          "id": "R39",
+          "line": null,
+          "message": "436 effective lines (warn at 400, max 500)",
+          "severity": "warn",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/src/live/quizzes/runner.rs",
+          "id": "R39",
+          "line": null,
+          "message": "457 effective lines (warn at 400, max 500)",
+          "severity": "warn",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/src/live/links.rs",
+          "id": "R39",
+          "line": null,
+          "message": "462 effective lines (warn at 400, max 500)",
+          "severity": "warn",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./apps/validator-rust/crates/domain/src/constraints.rs",
+          "id": "R39",
+          "line": null,
+          "message": "469 effective lines (warn at 400, max 500)",
+          "severity": "warn",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/outbound/src/html_parser.rs",
+          "id": "R39",
+          "line": null,
+          "message": "488 effective lines (warn at 400, max 500)",
+          "severity": "warn",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/src/live/ctas_v2.rs",
+          "id": "R39",
+          "line": null,
+          "message": "495 effective lines (warn at 400, max 500)",
+          "severity": "warn",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/src/spec/quizzes.rs",
+          "id": "R39",
+          "line": null,
+          "message": "500 effective lines (warn at 400, max 500)",
+          "severity": "warn",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/src/live/ctas_v2.rs",
+          "id": "R41",
+          "line": null,
+          "message": "16 use statements (warn at 15, max 20)",
+          "severity": "warn",
+          "title": "Many use statements"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/src/live/courses/runner.rs",
+          "id": "R41",
+          "line": null,
+          "message": "17 use statements (warn at 15, max 20)",
+          "severity": "warn",
+          "title": "Many use statements"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/src/live/ctas/mod.rs",
+          "id": "R41",
+          "line": null,
+          "message": "19 use statements (warn at 15, max 20)",
+          "severity": "warn",
+          "title": "Many use statements"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/src/live/articles/orchestration.rs",
+          "id": "R41",
+          "line": null,
+          "message": "20 use statements (warn at 15, max 20)",
+          "severity": "warn",
+          "title": "Many use statements"
+        },
+        {
+          "file": "./packages/seo-site-files/src/llms/checks.rs",
+          "id": "R43",
+          "line": 53,
+          "message": "Err(_) => unreachable!(), // \"^\\\\b$\" is always a valid regex",
+          "severity": "info",
+          "title": "unreachable! macro"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/src/main.rs",
+          "id": "R44",
+          "line": 95,
+          "message": ".expect(\"failed to bind port\");",
+          "severity": "warn",
+          "title": ".expect() usage"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/src/main.rs",
+          "id": "R44",
+          "line": 48,
+          "message": ".expect(\"failed to build Kit client\");",
+          "severity": "warn",
+          "title": ".expect() usage"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/src/main.rs",
+          "id": "R44",
+          "line": 133,
+          "message": ".expect(\"failed to build external page fetcher\");",
+          "severity": "warn",
+          "title": ".expect() usage"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/src/main.rs",
+          "id": "R44",
+          "line": 51,
+          "message": ".expect(\"failed to build image checker\");",
+          "severity": "warn",
+          "title": ".expect() usage"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/src/main.rs",
+          "id": "R44",
+          "line": 43,
+          "message": ".expect(\"failed to build page fetcher\");",
+          "severity": "warn",
+          "title": ".expect() usage"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/src/main.rs",
+          "id": "R44",
+          "line": 100,
+          "message": ".expect(\"server error\");",
+          "severity": "warn",
+          "title": ".expect() usage"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/src/spec/emails.rs",
+          "id": "R44",
+          "line": 21,
+          "message": "RE.get_or_init(|| Regex::new(r\"\\{\\{\\s*(\\w+)\\s*\\}\\}\").expect(\"invalid template var regex\"))",
+          "severity": "warn",
+          "title": ".expect() usage"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/src/spec/taxonomy/mod.rs",
+          "id": "R44",
+          "line": 25,
+          "message": "Regex::new(pattern).expect(\"static regex pattern must be valid\")",
+          "severity": "warn",
+          "title": ".expect() usage"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/outbound/src/html_parser.rs",
+          "id": "R44",
+          "line": 17,
+          "message": "Selector::parse(s).expect(\"static selector must be valid CSS\")",
+          "severity": "warn",
+          "title": ".expect() usage"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/src/main.rs",
+          "id": "R44",
+          "line": 134,
+          "message": "let psi_client = adapters::build_psi_client().expect(\"failed to build PSI client\");",
+          "severity": "warn",
+          "title": ".expect() usage"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/outbound/src/link_checker.rs",
+          "id": "R44",
+          "line": 18,
+          "message": "let sel_a = Selector::parse(\"a[href]\").expect(\"static CSS selector\");",
+          "severity": "warn",
+          "title": ".expect() usage"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/outbound/src/link_checker.rs",
+          "id": "R44",
+          "line": 20,
+          "message": "let sel_img = Selector::parse(\"img[src]\").expect(\"static CSS selector\");",
+          "severity": "warn",
+          "title": ".expect() usage"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/outbound/src/link_checker.rs",
+          "id": "R44",
+          "line": 22,
+          "message": "let sel_link = Selector::parse(\"link[href]\").expect(\"static CSS selector\");",
+          "severity": "warn",
+          "title": ".expect() usage"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/outbound/src/link_checker.rs",
+          "id": "R44",
+          "line": 24,
+          "message": "let sel_script = Selector::parse(\"script[src]\").expect(\"static CSS selector\");",
+          "severity": "warn",
+          "title": ".expect() usage"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/src/constraints.rs",
+          "id": "R44",
+          "line": 13,
+          "message": "serde_json::from_str(json).expect(\"failed to parse constraints.json\")",
+          "severity": "warn",
+          "title": ".expect() usage"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/src/constraints.rs",
+          "id": "R44",
+          "line": 20,
+          "message": "serde_json::from_str(json).expect(\"failed to parse metadata.json\")",
+          "severity": "warn",
+          "title": ".expect() usage"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/build.rs",
+          "id": "R44",
+          "line": 9,
+          "message": ".unwrap()",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/build.rs",
+          "id": "R44",
+          "line": 11,
+          "message": ".unwrap()",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/build.rs",
+          "id": "R44",
+          "line": 13,
+          "message": ".unwrap()",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/build.rs",
+          "id": "R44",
+          "line": 15,
+          "message": ".unwrap()",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/build.rs",
+          "id": "R44",
+          "line": 17,
+          "message": ".unwrap()",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/build.rs",
+          "id": "R44",
+          "line": 19,
+          "message": ".unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/build.rs",
+          "id": "R44",
+          "line": 21,
+          "message": "let out_dir = std::env::var(\"OUT_DIR\").unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./CLAUDE.md",
+          "id": "R49",
+          "line": null,
+          "message": "Found at project root",
+          "severity": "info",
+          "title": "CLAUDE.md exists"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/outbound/src/structured_data.rs",
+          "id": "R58",
+          "line": 55,
+          "message": "Use centralized fs module instead of direct std::fs call: let _ = std::fs::remove_dir_all(&temp_dir);",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/build.rs",
+          "id": "R58",
+          "line": 38,
+          "message": "Use centralized fs module instead of direct std::fs call: let _bytes = std::fs::copy(&src, &dst).unwrap_or_else(|e| {",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/outbound/src/structured_data.rs",
+          "id": "R58",
+          "line": 76,
+          "message": "Use centralized fs module instead of direct std::fs call: let output_json = match std::fs::read_to_string(&output_path) {",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/outbound/src/structured_data.rs",
+          "id": "R58",
+          "line": 22,
+          "message": "Use centralized fs module instead of direct std::fs call: std::fs::create_dir_all(&temp_dir)?;",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/outbound/src/structured_data.rs",
+          "id": "R58",
+          "line": 38,
+          "message": "Use centralized fs module instead of direct std::fs call: std::fs::write(&input_path, &input_json)?;",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/tests/dump_actual.rs",
+          "id": "R58",
+          "line": 10,
+          "message": "Use centralized fs module instead of direct std::fs import: use std::fs;",
+          "severity": "error",
+          "title": "Direct std::fs import"
+        }
+      ]
+    },
+    {
+      "name": "Dependency & tool checks",
+      "results": [
+        {
+          "file": null,
+          "id": "R45",
+          "line": null,
+          "message": "cargo-deny found on PATH",
+          "severity": "info",
+          "title": "cargo-deny installed"
+        },
+        {
+          "file": null,
+          "id": "R46",
+          "line": null,
+          "message": "cargo-machete found on PATH",
+          "severity": "info",
+          "title": "cargo-machete installed"
+        },
+        {
+          "file": null,
+          "id": "R47",
+          "line": null,
+          "message": "cargo-dupes found on PATH",
+          "severity": "info",
+          "title": "cargo-dupes installed"
+        },
+        {
+          "file": null,
+          "id": "R48",
+          "line": null,
+          "message": "gitleaks found on PATH",
+          "severity": "info",
+          "title": "gitleaks installed"
+        },
+        {
+          "file": "./Cargo.lock",
+          "id": "R50",
+          "line": null,
+          "message": "Found banned crate: anyhow@1.0.102",
+          "severity": "error",
+          "title": "Banned crate in lockfile"
+        }
+      ]
+    },
+    {
+      "name": "Architecture checks",
+      "results": []
+    },
+    {
+      "name": "Garde boundary validation",
+      "results": [
+        {
+          "file": null,
+          "id": "R-GARDE-01",
+          "line": null,
+          "message": "garde is not in [workspace.dependencies] or [dependencies]",
+          "severity": "info",
+          "title": "garde dependency missing"
+        },
+        {
+          "file": "./clippy.toml",
+          "id": "R-GARDE-02",
+          "line": null,
+          "message": "Cannot check Garde method/type bans without clippy.toml",
+          "severity": "warn",
+          "title": "clippy.toml not found"
+        },
+        {
+          "file": ".",
+          "id": "R-GARDE-05",
+          "line": null,
+          "message": "0 structs derive Deserialize + Validate, 258 derive Deserialize without Validate",
+          "severity": "info",
+          "title": "Deserialize + Validate inventory"
+        }
+      ]
+    },
+    {
+      "name": "Test quality",
+      "results": [
+        {
+          "file": null,
+          "id": "R-TEST-01",
+          "line": null,
+          "message": "cargo-mutants found on PATH",
+          "severity": "info",
+          "title": "cargo-mutants installed"
+        },
+        {
+          "file": "./.cargo/mutants.toml",
+          "id": "R-TEST-02",
+          "line": null,
+          "message": "Create .cargo/mutants.toml to configure mutation testing",
+          "severity": "warn",
+          "title": ".cargo/mutants.toml missing"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R-TEST-03",
+          "line": null,
+          "message": "Add [profile.mutants] to Cargo.toml for faster mutation testing",
+          "severity": "info",
+          "title": "[profile.mutants] missing"
+        },
+        {
+          "file": null,
+          "id": "R-TEST-04",
+          "line": null,
+          "message": "At least one #[test] or #[tokio::test] found",
+          "severity": "info",
+          "title": "Tests exist"
+        },
+        {
+          "file": null,
+          "id": "R-TEST-05",
+          "line": null,
+          "message": "0 public functions, 224 test functions (ratio: 0%)",
+          "severity": "info",
+          "title": "Test coverage inventory"
+        },
+        {
+          "file": "./packages/seo-site-files/tests",
+          "id": "R-TEST-06",
+          "line": null,
+          "message": "tests/ directory with .rs files found at /Users/tartakovsky/Projects/steady-parent/packages/seo-site-files/tests",
+          "severity": "info",
+          "title": "Integration tests exist"
+        },
+        {
+          "file": null,
+          "id": "R-TEST-07",
+          "line": null,
+          "message": "No bare #[ignore] attributes found",
+          "severity": "info",
+          "title": "All #[ignore] have reasons"
+        },
+        {
+          "file": null,
+          "id": "R-TEST-08",
+          "line": null,
+          "message": "No mutation testing hook found in .claude/ or .git/hooks/pre-commit",
+          "severity": "info",
+          "title": "No mutation test hook"
+        }
+      ]
+    },
+    {
+      "name": "Release readiness",
+      "results": [
+        {
+          "file": null,
+          "id": "R-BIN-01",
+          "line": null,
+          "message": "No workflow building --release with action-gh-release",
+          "severity": "info",
+          "title": "api: no binary release workflow"
+        },
+        {
+          "file": null,
+          "id": "R-BIN-01",
+          "line": null,
+          "message": "No workflow building --release with action-gh-release",
+          "severity": "info",
+          "title": "substack-publisher: no binary release workflow"
+        },
+        {
+          "file": null,
+          "id": "R-BIN-02",
+          "line": null,
+          "message": "Workflow references linux/x86_64/amd64/ubuntu",
+          "severity": "info",
+          "title": "api: linux target in workflow"
+        },
+        {
+          "file": null,
+          "id": "R-BIN-02",
+          "line": null,
+          "message": "Workflow references linux/x86_64/amd64/ubuntu",
+          "severity": "info",
+          "title": "substack-publisher: linux target in workflow"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/Cargo.toml",
+          "id": "R-BIN-03",
+          "line": null,
+          "message": "No [package.metadata.binstall] in Cargo.toml",
+          "severity": "info",
+          "title": "api: no binstall metadata"
+        },
+        {
+          "file": "./apps/substack-publisher/Cargo.toml",
+          "id": "R-BIN-03",
+          "line": null,
+          "message": "No [package.metadata.binstall] in Cargo.toml",
+          "severity": "info",
+          "title": "substack-publisher: no binstall metadata"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/outbound/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml has [package].description",
+          "severity": "info",
+          "title": "adapters: description present"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml has [package].description",
+          "severity": "info",
+          "title": "api: description present"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml has [package].description",
+          "severity": "info",
+          "title": "app: description present"
+        },
+        {
+          "file": "./apps/validator-rust/crates/domain/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml has [package].description",
+          "severity": "info",
+          "title": "domain: description present"
+        },
+        {
+          "file": "./apps/validator-rust/crates/ports/outbound/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml has [package].description",
+          "severity": "info",
+          "title": "ports: description present"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/outbound/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml [package] has neither license nor license-file",
+          "severity": "error",
+          "title": "adapters: missing license"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml [package] has neither license nor license-file",
+          "severity": "error",
+          "title": "api: missing license"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml [package] has neither license nor license-file",
+          "severity": "error",
+          "title": "app: missing license"
+        },
+        {
+          "file": "./apps/validator-rust/crates/domain/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml [package] has neither license nor license-file",
+          "severity": "error",
+          "title": "domain: missing license"
+        },
+        {
+          "file": "./apps/validator-rust/crates/ports/outbound/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml [package] has neither license nor license-file",
+          "severity": "error",
+          "title": "ports: missing license"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/outbound/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml [package].repository is missing or empty",
+          "severity": "error",
+          "title": "adapters: missing repository"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml [package].repository is missing or empty",
+          "severity": "error",
+          "title": "api: missing repository"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml [package].repository is missing or empty",
+          "severity": "error",
+          "title": "app: missing repository"
+        },
+        {
+          "file": "./apps/validator-rust/crates/domain/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml [package].repository is missing or empty",
+          "severity": "error",
+          "title": "domain: missing repository"
+        },
+        {
+          "file": "./apps/validator-rust/crates/ports/outbound/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml [package].repository is missing or empty",
+          "severity": "error",
+          "title": "ports: missing repository"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/outbound/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "No readme field and no README.md at crate root",
+          "severity": "warn",
+          "title": "adapters: readme missing"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "No readme field and no README.md at crate root",
+          "severity": "warn",
+          "title": "api: readme missing"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "No readme field and no README.md at crate root",
+          "severity": "warn",
+          "title": "app: readme missing"
+        },
+        {
+          "file": "./apps/validator-rust/crates/domain/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "No readme field and no README.md at crate root",
+          "severity": "warn",
+          "title": "domain: readme missing"
+        },
+        {
+          "file": "./apps/validator-rust/crates/ports/outbound/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "No readme field and no README.md at crate root",
+          "severity": "warn",
+          "title": "ports: readme missing"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/outbound/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "Cargo.toml [package].keywords is missing",
+          "severity": "warn",
+          "title": "adapters: keywords missing"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "Cargo.toml [package].keywords is missing",
+          "severity": "warn",
+          "title": "api: keywords missing"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "Cargo.toml [package].keywords is missing",
+          "severity": "warn",
+          "title": "app: keywords missing"
+        },
+        {
+          "file": "./apps/validator-rust/crates/domain/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "Cargo.toml [package].keywords is missing",
+          "severity": "warn",
+          "title": "domain: keywords missing"
+        },
+        {
+          "file": "./apps/validator-rust/crates/ports/outbound/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "Cargo.toml [package].keywords is missing",
+          "severity": "warn",
+          "title": "ports: keywords missing"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/outbound/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml [package].categories is missing or empty",
+          "severity": "warn",
+          "title": "adapters: categories missing"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml [package].categories is missing or empty",
+          "severity": "warn",
+          "title": "api: categories missing"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml [package].categories is missing or empty",
+          "severity": "warn",
+          "title": "app: categories missing"
+        },
+        {
+          "file": "./apps/validator-rust/crates/domain/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml [package].categories is missing or empty",
+          "severity": "warn",
+          "title": "domain: categories missing"
+        },
+        {
+          "file": "./apps/validator-rust/crates/ports/outbound/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml [package].categories is missing or empty",
+          "severity": "warn",
+          "title": "ports: categories missing"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/outbound/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "Cargo.toml [package].version is missing",
+          "severity": "error",
+          "title": "adapters: version missing"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "Cargo.toml [package].version is missing",
+          "severity": "error",
+          "title": "api: version missing"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "Cargo.toml [package].version is missing",
+          "severity": "error",
+          "title": "app: version missing"
+        },
+        {
+          "file": "./apps/validator-rust/crates/domain/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "Cargo.toml [package].version is missing",
+          "severity": "error",
+          "title": "domain: version missing"
+        },
+        {
+          "file": "./apps/validator-rust/crates/ports/outbound/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "Cargo.toml [package].version is missing",
+          "severity": "error",
+          "title": "ports: version missing"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "Depends on low-expectations (in [dependencies]) which is not publishable",
+          "severity": "error",
+          "title": "api: path dep to non-publishable crate"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "Depends on low-expectations (in [dependencies]) which is not publishable",
+          "severity": "error",
+          "title": "app: path dep to non-publishable crate"
+        },
+        {
+          "file": "./apps/validator-rust/crates/app/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "Depends on seo-site-files (in [dependencies]) which is not publishable",
+          "severity": "error",
+          "title": "app: path dep to non-publishable crate"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/outbound/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "No path dependencies to non-publishable crates",
+          "severity": "info",
+          "title": "adapters: path deps OK"
+        },
+        {
+          "file": "./apps/validator-rust/crates/domain/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "No path dependencies to non-publishable crates",
+          "severity": "info",
+          "title": "domain: path deps OK"
+        },
+        {
+          "file": "./apps/validator-rust/crates/ports/outbound/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "No path dependencies to non-publishable crates",
+          "severity": "info",
+          "title": "ports: path deps OK"
+        },
+        {
+          "file": null,
+          "id": "R-PUB-12",
+          "line": null,
+          "message": "5 publishable, 3 publish=false",
+          "severity": "info",
+          "title": "Crate inventory"
+        },
+        {
+          "file": ".",
+          "id": "R-REL-01",
+          "line": null,
+          "message": "No LICENSE, LICENSE-MIT, LICENSE-APACHE, or LICENSE.md at repo root",
+          "severity": "error",
+          "title": "LICENSE file missing"
+        },
+        {
+          "file": ".",
+          "id": "R-REL-02",
+          "line": null,
+          "message": "No release-plz.toml at repo root",
+          "severity": "warn",
+          "title": "release-plz.toml missing"
+        },
+        {
+          "file": ".",
+          "id": "R-REL-04",
+          "line": null,
+          "message": "No cliff.toml found at project root",
+          "severity": "warn",
+          "title": "cliff.toml missing"
+        },
+        {
+          "file": null,
+          "id": "R-REL-05",
+          "line": null,
+          "message": "No .github/workflows/*.yml containing \"release-plz\"",
+          "severity": "warn",
+          "title": "No release workflow"
+        },
+        {
+          "file": null,
+          "id": "R-REL-06",
+          "line": null,
+          "message": "No workflow with \"cargo publish --dry-run\"",
+          "severity": "warn",
+          "title": "No publish dry-run in CI"
+        },
+        {
+          "file": null,
+          "id": "R-REL-07",
+          "line": null,
+          "message": "No workflow references CARGO_REGISTRY_TOKEN",
+          "severity": "warn",
+          "title": "No CARGO_REGISTRY_TOKEN in workflows"
+        },
+        {
+          "file": null,
+          "id": "R-REL-08",
+          "line": null,
+          "message": "Install with: cargo install cargo-semver-checks",
+          "severity": "warn",
+          "title": "cargo-semver-checks not installed"
+        }
+      ]
+    },
+    {
+      "name": "TS config files",
+      "results": [
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T1",
+          "line": null,
+          "message": "Found at project root",
+          "severity": "info",
+          "title": "eslint.config.mjs exists"
+        },
+        {
+          "file": "./.npmrc",
+          "id": "T11",
+          "line": null,
+          "message": "Found at project root",
+          "severity": "info",
+          "title": ".npmrc exists"
+        },
+        {
+          "file": "./package.json",
+          "id": "T18",
+          "line": null,
+          "message": "packageManager = \"pnpm@10.32.0\"",
+          "severity": "info",
+          "title": "packageManager field present"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T19",
+          "line": null,
+          "message": "Found at project root",
+          "severity": "info",
+          "title": ".jscpd.json exists"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T2",
+          "line": null,
+          "message": "max-lines found but expected value 300 not detected",
+          "severity": "error",
+          "title": "max-lines value mismatch"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T20",
+          "line": null,
+          "message": "threshold = 10, expected 0",
+          "severity": "error",
+          "title": "jscpd threshold not 0"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/*.generated.*",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/.next/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/.plans/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/.worklogs/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/__mocks__/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/__tests__/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/components/pro-blocks/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/components/ui/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/coverage/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/dist/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/drizzle/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/golden/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/legacy/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/lib/utils.ts",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/node_modules/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/target/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/test/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "content/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "packages/validation/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T3",
+          "line": null,
+          "message": "No max-lines-per-function rule found in ESLint config",
+          "severity": "warn",
+          "title": "max-lines-per-function not configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T4",
+          "line": null,
+          "message": "No complexity rule found in ESLint config",
+          "severity": "warn",
+          "title": "complexity not configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T40",
+          "line": null,
+          "message": "no-floating-promises found in ESLint config",
+          "severity": "info",
+          "title": "no-floating-promises configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T41",
+          "line": null,
+          "message": "no-explicit-any found in ESLint config",
+          "severity": "info",
+          "title": "no-explicit-any configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T42",
+          "line": null,
+          "message": "no-console found in ESLint config",
+          "severity": "info",
+          "title": "no-console configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T43",
+          "line": null,
+          "message": "eqeqeq found in ESLint config",
+          "severity": "info",
+          "title": "eqeqeq configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T44",
+          "line": null,
+          "message": "No no-restricted-globals rule in ESLint config",
+          "severity": "error",
+          "title": "no-restricted-globals missing"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T45",
+          "line": null,
+          "message": "no-cycle found in ESLint config",
+          "severity": "info",
+          "title": "no-cycle configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T46",
+          "line": null,
+          "message": "max-dependencies found in ESLint config",
+          "severity": "info",
+          "title": "max-dependencies configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T47",
+          "line": null,
+          "message": "explicit-function-return-type found in ESLint config",
+          "severity": "info",
+          "title": "explicit-function-return-type configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T48",
+          "line": null,
+          "message": "strict-boolean-expressions found in ESLint config",
+          "severity": "info",
+          "title": "strict-boolean-expressions configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T49",
+          "line": 25,
+          "message": "'tests/**/*.js', // Ignore plain JS test files",
+          "severity": "info",
+          "title": "Test file relaxation"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T49",
+          "line": 212,
+          "message": "files: ['**/*.test.ts', '**/*.test.tsx', '**/__tests__/**/*.ts'],",
+          "severity": "info",
+          "title": "Test file relaxation"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T5",
+          "line": null,
+          "message": "no-restricted-imports rule found in ESLint config",
+          "severity": "info",
+          "title": "no-restricted-imports configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T50",
+          "line": null,
+          "message": "No withBody/withRoute patterns in ESLint config",
+          "severity": "warn",
+          "title": "No route wrapper enforcement"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T51",
+          "line": null,
+          "message": "No process.env restriction in ESLint config",
+          "severity": "error",
+          "title": "No process.env ban"
+        },
+        {
+          "file": "./tsconfig.base.json",
+          "id": "T52",
+          "line": null,
+          "message": "noUncheckedIndexedAccess is enabled",
+          "severity": "info",
+          "title": "noUncheckedIndexedAccess: true"
+        },
+        {
+          "file": "./tsconfig.base.json",
+          "id": "T53",
+          "line": null,
+          "message": "exactOptionalPropertyTypes is enabled",
+          "severity": "info",
+          "title": "exactOptionalPropertyTypes: true"
+        },
+        {
+          "file": "./tsconfig.base.json",
+          "id": "T54",
+          "line": null,
+          "message": "isolatedModules is enabled",
+          "severity": "info",
+          "title": "isolatedModules: true"
+        },
+        {
+          "file": "./package.json",
+          "id": "T55",
+          "line": null,
+          "message": "preinstall script contains only-allow pnpm",
+          "severity": "info",
+          "title": "preinstall enforces pnpm"
+        },
+        {
+          "file": "./package.json",
+          "id": "T56",
+          "line": null,
+          "message": "prepare script found",
+          "severity": "info",
+          "title": "prepare script exists"
+        },
+        {
+          "file": "./package.json",
+          "id": "T57",
+          "line": null,
+          "message": "engines = {\"node\":\">=24\"}",
+          "severity": "info",
+          "title": "engines field present"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T6",
+          "line": null,
+          "message": "eslint-plugin-boundaries found in config",
+          "severity": "info",
+          "title": "Boundary enforcement configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T60",
+          "line": null,
+          "message": "Content import restriction pattern found in ESLint config",
+          "severity": "info",
+          "title": "Content import restriction configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T60",
+          "line": null,
+          "message": "no-misused-promises found in ESLint config",
+          "severity": "info",
+          "title": "no-misused-promises configured"
+        },
+        {
+          "file": "./tsconfig.base.json",
+          "id": "T60",
+          "line": null,
+          "message": "noPropertyAccessFromIndexSignature is enabled",
+          "severity": "info",
+          "title": "noPropertyAccessFromIndexSignature: true"
+        },
+        {
+          "file": "./apps/landing/velite.config.ts",
+          "id": "T61",
+          "line": null,
+          "message": "Found: /Users/tartakovsky/Projects/steady-parent/apps/landing/velite.config.ts",
+          "severity": "info",
+          "title": "Velite config exists"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T61",
+          "line": null,
+          "message": "await-thenable found in ESLint config",
+          "severity": "info",
+          "title": "await-thenable configured"
+        },
+        {
+          "file": "./tsconfig.base.json",
+          "id": "T61",
+          "line": null,
+          "message": "noImplicitOverride is enabled",
+          "severity": "info",
+          "title": "noImplicitOverride: true"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T62",
+          "line": null,
+          "message": "consistent-type-imports found in ESLint config",
+          "severity": "info",
+          "title": "consistent-type-imports configured"
+        },
+        {
+          "file": "./tsconfig.base.json",
+          "id": "T62",
+          "line": null,
+          "message": "noFallthroughCasesInSwitch is enabled",
+          "severity": "info",
+          "title": "noFallthroughCasesInSwitch: true"
+        },
+        {
+          "file": "./tsconfig.base.json",
+          "id": "T63",
+          "line": null,
+          "message": "allowUnreachableCode is correctly set to false",
+          "severity": "info",
+          "title": "allowUnreachableCode: false"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T63",
+          "line": null,
+          "message": "no-non-null-assertion found in ESLint config",
+          "severity": "info",
+          "title": "no-non-null-assertion configured"
+        },
+        {
+          "file": "./tsconfig.base.json",
+          "id": "T64",
+          "line": null,
+          "message": "allowUnusedLabels is correctly set to false",
+          "severity": "info",
+          "title": "allowUnusedLabels: false"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T64",
+          "line": null,
+          "message": "No switch-exhaustiveness-check rule in ESLint config",
+          "severity": "warn",
+          "title": "switch-exhaustiveness-check missing"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T65",
+          "line": null,
+          "message": "no-unused-vars found in ESLint config",
+          "severity": "info",
+          "title": "no-unused-vars configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T66",
+          "line": null,
+          "message": "require-await found in ESLint config",
+          "severity": "info",
+          "title": "require-await configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T67",
+          "line": null,
+          "message": "No no-param-reassign rule in ESLint config",
+          "severity": "warn",
+          "title": "no-param-reassign missing"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T68",
+          "line": null,
+          "message": "no-unsafe-assignment found in ESLint config",
+          "severity": "info",
+          "title": "no-unsafe-assignment configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T69",
+          "line": null,
+          "message": "no-unsafe-member-access found in ESLint config",
+          "severity": "info",
+          "title": "no-unsafe-member-access configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T7",
+          "line": 221,
+          "message": "'@typescript-eslint/explicit-function-return-type': 'off',",
+          "severity": "info",
+          "title": "Relaxed ESLint rule"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T7",
+          "line": 239,
+          "message": "'@typescript-eslint/explicit-function-return-type': 'off',",
+          "severity": "info",
+          "title": "Relaxed ESLint rule"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T7",
+          "line": 222,
+          "message": "'@typescript-eslint/explicit-module-boundary-types': 'off',",
+          "severity": "info",
+          "title": "Relaxed ESLint rule"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T7",
+          "line": 240,
+          "message": "'@typescript-eslint/explicit-module-boundary-types': 'off',",
+          "severity": "info",
+          "title": "Relaxed ESLint rule"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T7",
+          "line": 214,
+          "message": "'@typescript-eslint/no-explicit-any': 'warn',",
+          "severity": "info",
+          "title": "Relaxed ESLint rule"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T7",
+          "line": 224,
+          "message": "'@typescript-eslint/no-floating-promises': 'off',",
+          "severity": "info",
+          "title": "Relaxed ESLint rule"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T7",
+          "line": 220,
+          "message": "'@typescript-eslint/no-non-null-assertion': 'off',",
+          "severity": "info",
+          "title": "Relaxed ESLint rule"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T7",
+          "line": 226,
+          "message": "'@typescript-eslint/no-redundant-type-constituents': 'off',",
+          "severity": "info",
+          "title": "Relaxed ESLint rule"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T7",
+          "line": 218,
+          "message": "'@typescript-eslint/no-unsafe-argument': 'warn',",
+          "severity": "info",
+          "title": "Relaxed ESLint rule"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T7",
+          "line": 215,
+          "message": "'@typescript-eslint/no-unsafe-assignment': 'warn',",
+          "severity": "info",
+          "title": "Relaxed ESLint rule"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T7",
+          "line": 217,
+          "message": "'@typescript-eslint/no-unsafe-call': 'warn',",
+          "severity": "info",
+          "title": "Relaxed ESLint rule"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T7",
+          "line": 216,
+          "message": "'@typescript-eslint/no-unsafe-member-access': 'warn',",
+          "severity": "info",
+          "title": "Relaxed ESLint rule"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T7",
+          "line": 219,
+          "message": "'@typescript-eslint/no-unsafe-return': 'warn',",
+          "severity": "info",
+          "title": "Relaxed ESLint rule"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T7",
+          "line": 227,
+          "message": "'@typescript-eslint/prefer-nullish-coalescing': 'off',",
+          "severity": "info",
+          "title": "Relaxed ESLint rule"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T7",
+          "line": 225,
+          "message": "'@typescript-eslint/require-await': 'off',",
+          "severity": "info",
+          "title": "Relaxed ESLint rule"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T7",
+          "line": 228,
+          "message": "'@typescript-eslint/restrict-template-expressions': 'off',",
+          "severity": "info",
+          "title": "Relaxed ESLint rule"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T7",
+          "line": 223,
+          "message": "'@typescript-eslint/strict-boolean-expressions': 'off',",
+          "severity": "info",
+          "title": "Relaxed ESLint rule"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T7",
+          "line": 231,
+          "message": "'import-x/max-dependencies': 'off',",
+          "severity": "info",
+          "title": "Relaxed ESLint rule"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T7",
+          "line": 230,
+          "message": "'max-lines': 'off',",
+          "severity": "info",
+          "title": "Relaxed ESLint rule"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T7",
+          "line": 186,
+          "message": "'no-console': 'off',",
+          "severity": "info",
+          "title": "Relaxed ESLint rule"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T7",
+          "line": 229,
+          "message": "'no-console': 'off',",
+          "severity": "info",
+          "title": "Relaxed ESLint rule"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T70",
+          "line": null,
+          "message": "no-unsafe-call found in ESLint config",
+          "severity": "info",
+          "title": "no-unsafe-call configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T71",
+          "line": null,
+          "message": "no-unsafe-return found in ESLint config",
+          "severity": "info",
+          "title": "no-unsafe-return configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T72",
+          "line": null,
+          "message": "no-unsafe-argument found in ESLint config",
+          "severity": "info",
+          "title": "no-unsafe-argument configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T73",
+          "line": null,
+          "message": "explicit-module-boundary-types found in ESLint config",
+          "severity": "info",
+          "title": "explicit-module-boundary-types configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T74",
+          "line": null,
+          "message": "promise-function-async found in ESLint config",
+          "severity": "info",
+          "title": "promise-function-async configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T75",
+          "line": null,
+          "message": "consistent-type-exports found in ESLint config",
+          "severity": "info",
+          "title": "consistent-type-exports configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T76",
+          "line": null,
+          "message": "consistent-type-definitions found in ESLint config",
+          "severity": "info",
+          "title": "consistent-type-definitions configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T77",
+          "line": null,
+          "message": "no-unnecessary-condition found in ESLint config",
+          "severity": "info",
+          "title": "no-unnecessary-condition configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T78",
+          "line": null,
+          "message": "prefer-nullish-coalescing found in ESLint config",
+          "severity": "info",
+          "title": "prefer-nullish-coalescing configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T79",
+          "line": null,
+          "message": "prefer-optional-chain found in ESLint config",
+          "severity": "info",
+          "title": "prefer-optional-chain configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T8",
+          "line": 212,
+          "message": "files: ['**/*.test.ts', '**/*.test.tsx', '**/__tests__/**/*.ts'],",
+          "severity": "info",
+          "title": "File-specific override"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T8",
+          "line": 82,
+          "message": "files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],",
+          "severity": "info",
+          "title": "File-specific override"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T8",
+          "line": 113,
+          "message": "files: ['**/*.ts', '**/*.tsx'],",
+          "severity": "info",
+          "title": "File-specific override"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T8",
+          "line": 196,
+          "message": "files: ['**/*.ts', '**/*.tsx'],",
+          "severity": "info",
+          "title": "File-specific override"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T8",
+          "line": 94,
+          "message": "files: ['**/*.tsx', '**/*.jsx'],",
+          "severity": "info",
+          "title": "File-specific override"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T8",
+          "line": 237,
+          "message": "files: ['*.config.ts', '*.config.mjs', '*.config.js', 'drizzle.config.ts'],",
+          "severity": "info",
+          "title": "File-specific override"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T8",
+          "line": 257,
+          "message": "files: ['apps/admin/src/modules/**/*.ts'],",
+          "severity": "info",
+          "title": "File-specific override"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T8",
+          "line": 314,
+          "message": "files: ['apps/landing/**/*.ts', 'apps/landing/**/*.tsx'],",
+          "severity": "info",
+          "title": "File-specific override"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T8",
+          "line": 341,
+          "message": "files: ['apps/landing/**/*.tsx'],",
+          "severity": "info",
+          "title": "File-specific override"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T8",
+          "line": 375,
+          "message": "files: ['packages/generator/pipeline/**/*.ts'],",
+          "severity": "info",
+          "title": "File-specific override"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T8",
+          "line": 354,
+          "message": "files: ['packages/metadata/**/*.ts'],",
+          "severity": "info",
+          "title": "File-specific override"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T80",
+          "line": null,
+          "message": "no-deprecated found in ESLint config",
+          "severity": "info",
+          "title": "no-deprecated configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T81",
+          "line": null,
+          "message": "restrict-template-expressions found in ESLint config",
+          "severity": "info",
+          "title": "restrict-template-expressions configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T82",
+          "line": null,
+          "message": "No no-throw-literal rule in ESLint config",
+          "severity": "warn",
+          "title": "no-throw-literal missing"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T83",
+          "line": null,
+          "message": "No no-empty rule in ESLint config",
+          "severity": "warn",
+          "title": "no-empty missing"
+        },
+        {
+          "file": "./tsconfig.base.json",
+          "id": "T9",
+          "line": null,
+          "message": "forceConsistentCasingInFileNames is enabled",
+          "severity": "info",
+          "title": "forceConsistentCasingInFileNames: true"
+        },
+        {
+          "file": "./tsconfig.base.json",
+          "id": "T9",
+          "line": null,
+          "message": "noImplicitReturns is enabled",
+          "severity": "info",
+          "title": "noImplicitReturns: true"
+        },
+        {
+          "file": "./tsconfig.base.json",
+          "id": "T9",
+          "line": null,
+          "message": "noUnusedLocals is enabled",
+          "severity": "info",
+          "title": "noUnusedLocals: true"
+        },
+        {
+          "file": "./tsconfig.base.json",
+          "id": "T9",
+          "line": null,
+          "message": "noUnusedParameters is enabled",
+          "severity": "info",
+          "title": "noUnusedParameters: true"
+        },
+        {
+          "file": "./tsconfig.base.json",
+          "id": "T9",
+          "line": null,
+          "message": "strict is enabled",
+          "severity": "info",
+          "title": "strict: true"
+        },
+        {
+          "file": "./tsconfig.base.json",
+          "id": "T9",
+          "line": null,
+          "message": "Found: /Users/tartakovsky/Projects/steady-parent/tsconfig.base.json",
+          "severity": "info",
+          "title": "tsconfig exists"
+        }
+      ]
+    },
+    {
+      "name": "TS source code scan",
+      "results": [
+        {
+          "file": "./packages/generator/pipeline/6_write/scripts/backfill-ai-answers.ts",
+          "id": "T24",
+          "line": 1,
+          "message": "/* eslint-disable -- one-time pipeline utility script */",
+          "severity": "info",
+          "title": "eslint-disable with reason"
+        },
+        {
+          "file": "./packages/generator/pipeline/6_write/scripts/backfill-descriptions.ts",
+          "id": "T24",
+          "line": 1,
+          "message": "/* eslint-disable -- one-time pipeline utility script */",
+          "severity": "info",
+          "title": "eslint-disable with reason"
+        },
+        {
+          "file": "./packages/generator/pipeline/7_rewrite_articles/scripts/check-fm-body-sync.ts",
+          "id": "T24",
+          "line": 1,
+          "message": "/* eslint-disable -- one-time pipeline utility script */",
+          "severity": "info",
+          "title": "eslint-disable with reason"
+        },
+        {
+          "file": "./packages/generator/pipeline/7_rewrite_articles/scripts/find-remaining-mismatches.ts",
+          "id": "T24",
+          "line": 1,
+          "message": "/* eslint-disable -- one-time pipeline utility script */",
+          "severity": "info",
+          "title": "eslint-disable with reason"
+        },
+        {
+          "file": "./packages/generator/pipeline/7_rewrite_articles/scripts/fix-production-bans.ts",
+          "id": "T24",
+          "line": 1,
+          "message": "/* eslint-disable -- one-time pipeline utility script */",
+          "severity": "info",
+          "title": "eslint-disable with reason"
+        },
+        {
+          "file": "./packages/generator/pipeline/7_rewrite_articles/scripts/fix-remaining-bans.ts",
+          "id": "T24",
+          "line": 1,
+          "message": "/* eslint-disable -- one-time pipeline utility script */",
+          "severity": "info",
+          "title": "eslint-disable with reason"
+        },
+        {
+          "file": "./packages/generator/pipeline/7_rewrite_articles/scripts/fix-remaining-mismatches.ts",
+          "id": "T24",
+          "line": 1,
+          "message": "/* eslint-disable -- one-time pipeline utility script */",
+          "severity": "info",
+          "title": "eslint-disable with reason"
+        },
+        {
+          "file": "./packages/generator/pipeline/7_rewrite_articles/scripts/merge-frontmatter.ts",
+          "id": "T24",
+          "line": 1,
+          "message": "/* eslint-disable -- one-time pipeline utility script */",
+          "severity": "info",
+          "title": "eslint-disable with reason"
+        },
+        {
+          "file": "./packages/generator/pipeline/7_rewrite_articles/scripts/sync-frontmatter.ts",
+          "id": "T24",
+          "line": 1,
+          "message": "/* eslint-disable -- one-time pipeline utility script */",
+          "severity": "info",
+          "title": "eslint-disable with reason"
+        },
+        {
+          "file": "./packages/content-constraints/index.ts",
+          "id": "T24",
+          "line": 1,
+          "message": "/* eslint-disable import-x/max-dependencies -- barrel file re-exports all constraint domains */",
+          "severity": "info",
+          "title": "eslint-disable with reason"
+        },
+        {
+          "file": "./apps/landing/src/components/quiz/quiz-container.tsx",
+          "id": "T24",
+          "line": 1,
+          "message": "/* eslint-disable import-x/max-dependencies -- quiz container orchestrates all quiz sub-components and result layouts */",
+          "severity": "info",
+          "title": "eslint-disable with reason"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/carousel/media-dialog.tsx",
+          "id": "T25",
+          "line": 42,
+          "message": "Missing `-- ` reason: // eslint-disable-next-line @next/next/no-img-element",
+          "severity": "error",
+          "title": "eslint-disable-next-line without reason"
+        },
+        {
+          "file": "./legacy/apps/landing/mdx-components.tsx",
+          "id": "T25",
+          "line": 87,
+          "message": "Missing `-- ` reason: // eslint-disable-next-line @typescript-eslint/no-explicit-any",
+          "severity": "error",
+          "title": "eslint-disable-next-line without reason"
+        },
+        {
+          "file": "./legacy/apps/landing/mdx-components.tsx",
+          "id": "T25",
+          "line": 25,
+          "message": "Missing `-- ` reason: {/* eslint-disable-next-line @next/next/no-img-element */}",
+          "severity": "error",
+          "title": "eslint-disable-next-line without reason"
+        },
+        {
+          "file": "./legacy/apps/landing/src/app/(public)/blog/[category]/page.tsx",
+          "id": "T25",
+          "line": 144,
+          "message": "Missing `-- ` reason: {/* eslint-disable-next-line @next/next/no-img-element */}",
+          "severity": "error",
+          "title": "eslint-disable-next-line without reason"
+        },
+        {
+          "file": "./legacy/apps/landing/src/app/(public)/blog/page.tsx",
+          "id": "T25",
+          "line": 132,
+          "message": "Missing `-- ` reason: {/* eslint-disable-next-line @next/next/no-img-element */}",
+          "severity": "error",
+          "title": "eslint-disable-next-line without reason"
+        },
+        {
+          "file": "./legacy/apps/landing/src/app/api/og/route.tsx",
+          "id": "T25",
+          "line": 129,
+          "message": "Missing `-- ` reason: {/* eslint-disable-next-line @next/next/no-img-element */}",
+          "severity": "error",
+          "title": "eslint-disable-next-line without reason"
+        },
+        {
+          "file": "./legacy/apps/landing/src/app/api/og/route.tsx",
+          "id": "T25",
+          "line": 332,
+          "message": "Missing `-- ` reason: {/* eslint-disable-next-line @next/next/no-img-element */}",
+          "severity": "error",
+          "title": "eslint-disable-next-line without reason"
+        },
+        {
+          "file": "./legacy/apps/landing/src/app/api/og/route.tsx",
+          "id": "T25",
+          "line": 445,
+          "message": "Missing `-- ` reason: {/* eslint-disable-next-line @next/next/no-img-element */}",
+          "severity": "error",
+          "title": "eslint-disable-next-line without reason"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/blog-image.tsx",
+          "id": "T25",
+          "line": 10,
+          "message": "Missing `-- ` reason: {/* eslint-disable-next-line @next/next/no-img-element */}",
+          "severity": "error",
+          "title": "eslint-disable-next-line without reason"
+        },
+        {
+          "file": "./apps/landing/src/components/quiz/likert-quiz.tsx",
+          "id": "T26",
+          "line": 172,
+          "message": "restoreFromUrl(); // eslint-disable-line react-hooks/set-state-in-effect -- mount-only URL hydration requires synchronous setState",
+          "severity": "info",
+          "title": "eslint-disable-line with reason"
+        },
+        {
+          "file": "./apps/landing/src/components/quiz/quiz-container.tsx",
+          "id": "T26",
+          "line": 171,
+          "message": "restoreFromUrl(); // eslint-disable-line react-hooks/set-state-in-effect -- mount-only URL hydration requires synchronous setState",
+          "severity": "info",
+          "title": "eslint-disable-line with reason"
+        },
+        {
+          "file": "./apps/landing/src/components/carousel/css-carousel.tsx",
+          "id": "T26",
+          "line": 153,
+          "message": "}, []); // eslint-disable-line react-hooks/exhaustive-deps -- reads refs only",
+          "severity": "info",
+          "title": "eslint-disable-line with reason"
+        },
+        {
+          "file": "./apps/landing/src/components/carousel/css-carousel.tsx",
+          "id": "T26",
+          "line": 191,
+          "message": "}, []); // eslint-disable-line react-hooks/exhaustive-deps -- reads refs only",
+          "severity": "info",
+          "title": "eslint-disable-line with reason"
+        },
+        {
+          "file": "./apps/landing/src/components/cdn-image.tsx",
+          "id": "T26",
+          "line": 40,
+          "message": "// eslint-disable-next-line @next/next/no-img-element -- CdnImage IS the sanctioned image component; it handles srcSet/sizes via Cloudflare transformations",
+          "severity": "info",
+          "title": "eslint-disable-next-line with reason"
+        },
+        {
+          "file": "./apps/landing/src/lib/blog-mdx-content.tsx",
+          "id": "T26",
+          "line": 30,
+          "message": "// eslint-disable-next-line @typescript-eslint/no-explicit-any -- MDX component map is inherently heterogeneous; each component has different props",
+          "severity": "info",
+          "title": "eslint-disable-next-line with reason"
+        },
+        {
+          "file": "./apps/landing/src/lib/mdx-content.tsx",
+          "id": "T26",
+          "line": 9,
+          "message": "// eslint-disable-next-line @typescript-eslint/no-explicit-any -- MDX component props are inherently dynamic and untyped",
+          "severity": "info",
+          "title": "eslint-disable-next-line with reason"
+        },
+        {
+          "file": "./apps/landing/src/lib/mdx-content.tsx",
+          "id": "T26",
+          "line": 28,
+          "message": "// eslint-disable-next-line @typescript-eslint/no-explicit-any -- MDX component props are inherently dynamic and untyped",
+          "severity": "info",
+          "title": "eslint-disable-next-line with reason"
+        },
+        {
+          "file": "./packages/generator/lib/mdx-parser.ts",
+          "id": "T26",
+          "line": 156,
+          "message": "// eslint-disable-next-line @typescript-eslint/no-implied-eval -- Intentional eval of JSX expressions from our own generated MDX files",
+          "severity": "info",
+          "title": "eslint-disable-next-line with reason"
+        },
+        {
+          "file": "./apps/landing/src/lib/blog-mdx-content.tsx",
+          "id": "T26",
+          "line": 56,
+          "message": "// eslint-disable-next-line @typescript-eslint/no-implied-eval -- Velite compiles MDX to a function body string; Function constructor is the intended hydration method",
+          "severity": "info",
+          "title": "eslint-disable-next-line with reason"
+        },
+        {
+          "file": "./apps/landing/src/lib/mdx-content.tsx",
+          "id": "T26",
+          "line": 33,
+          "message": "// eslint-disable-next-line @typescript-eslint/no-implied-eval -- Velite compiles MDX to a function body string; Function constructor is the intended hydration method",
+          "severity": "info",
+          "title": "eslint-disable-next-line with reason"
+        },
+        {
+          "file": "./packages/generator/lib/mdx-parser-compare.ts",
+          "id": "T26",
+          "line": 59,
+          "message": "// eslint-disable-next-line @typescript-eslint/no-implied-eval -- intentional eval for comparison testing against remark parser",
+          "severity": "info",
+          "title": "eslint-disable-next-line with reason"
+        },
+        {
+          "file": "./packages/generator/lib/_archived/article-checks.ts",
+          "id": "T26",
+          "line": 69,
+          "message": "// eslint-disable-next-line @typescript-eslint/no-implied-eval -- parsing JSX prop value that contains JS object literals; JSON.parse cannot handle unquoted keys/trailing commas",
+          "severity": "info",
+          "title": "eslint-disable-next-line with reason"
+        },
+        {
+          "file": "./packages/generator/lib/_archived/article-checks.ts",
+          "id": "T26",
+          "line": 87,
+          "message": "// eslint-disable-next-line @typescript-eslint/no-implied-eval -- parsing JSX prop value that contains JS object literals; JSON.parse cannot handle unquoted keys/trailing commas",
+          "severity": "info",
+          "title": "eslint-disable-next-line with reason"
+        },
+        {
+          "file": "./packages/generator/lib/_archived/article-checks.ts",
+          "id": "T26",
+          "line": 105,
+          "message": "// eslint-disable-next-line @typescript-eslint/no-implied-eval -- parsing JSX prop value that contains JS object literals; JSON.parse cannot handle unquoted keys/trailing commas",
+          "severity": "info",
+          "title": "eslint-disable-next-line with reason"
+        },
+        {
+          "file": "./packages/generator/lib/mdx-parser.ts",
+          "id": "T26",
+          "line": 201,
+          "message": "// eslint-disable-next-line @typescript-eslint/no-implied-eval -- parsing JSX prop value; JSON.parse cannot handle unquoted keys/trailing commas",
+          "severity": "info",
+          "title": "eslint-disable-next-line with reason"
+        },
+        {
+          "file": "./packages/generator/lib/mdx-parser.ts",
+          "id": "T26",
+          "line": 214,
+          "message": "// eslint-disable-next-line @typescript-eslint/no-implied-eval -- parsing JSX prop value; JSON.parse cannot handle unquoted keys/trailing commas",
+          "severity": "info",
+          "title": "eslint-disable-next-line with reason"
+        },
+        {
+          "file": "./packages/generator/lib/mdx-parser.ts",
+          "id": "T26",
+          "line": 227,
+          "message": "// eslint-disable-next-line @typescript-eslint/no-implied-eval -- parsing JSX prop value; JSON.parse cannot handle unquoted keys/trailing commas",
+          "severity": "info",
+          "title": "eslint-disable-next-line with reason"
+        },
+        {
+          "file": "./packages/generator/pipeline/lib/validate-via-rust.ts",
+          "id": "T26",
+          "line": 57,
+          "message": "// eslint-disable-next-line @typescript-eslint/no-implied-eval -- parsing JSX prop value; JSON.parse cannot handle unquoted keys/trailing commas",
+          "severity": "info",
+          "title": "eslint-disable-next-line with reason"
+        },
+        {
+          "file": "./packages/generator/pipeline/lib/validate-via-rust.ts",
+          "id": "T26",
+          "line": 70,
+          "message": "// eslint-disable-next-line @typescript-eslint/no-implied-eval -- parsing JSX prop value; JSON.parse cannot handle unquoted keys/trailing commas",
+          "severity": "info",
+          "title": "eslint-disable-next-line with reason"
+        },
+        {
+          "file": "./packages/generator/pipeline/lib/validate-via-rust.ts",
+          "id": "T26",
+          "line": 83,
+          "message": "// eslint-disable-next-line @typescript-eslint/no-implied-eval -- parsing JSX prop value; JSON.parse cannot handle unquoted keys/trailing commas",
+          "severity": "info",
+          "title": "eslint-disable-next-line with reason"
+        },
+        {
+          "file": "./packages/generator/pipeline/10_generate_covers/scripts/generate.ts",
+          "id": "T26",
+          "line": 297,
+          "message": "// eslint-disable-next-line @typescript-eslint/no-misused-spread -- ASCII-only article keys",
+          "severity": "info",
+          "title": "eslint-disable-next-line with reason"
+        },
+        {
+          "file": "./apps/landing/src/lib/kit-config.ts",
+          "id": "T26",
+          "line": 259,
+          "message": "// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- locale is cast; runtime key may be invalid",
+          "severity": "info",
+          "title": "eslint-disable-next-line with reason"
+        },
+        {
+          "file": "./apps/admin/src/app/[locale]/live/external/lighthouse/_components/lighthouse-store.ts",
+          "id": "T26",
+          "line": 185,
+          "message": "// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- mutates between awaits",
+          "severity": "info",
+          "title": "eslint-disable-next-line with reason"
+        },
+        {
+          "file": "./packages/generator/pipeline/lib/schedulr.ts",
+          "id": "T26",
+          "line": 16,
+          "message": "// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call -- undici types not hoisted in pnpm workspace",
+          "severity": "info",
+          "title": "eslint-disable-next-line with reason"
+        },
+        {
+          "file": "./packages/generator/pipeline/6_write/scripts/_archived/validate-article.ts",
+          "id": "T26",
+          "line": 11,
+          "message": "// eslint-disable-next-line no-restricted-imports -- generator/lib is the shared utility layer",
+          "severity": "info",
+          "title": "eslint-disable-next-line with reason"
+        },
+        {
+          "file": "./packages/generator/pipeline/6_write/scripts/_archived/validate-article.ts",
+          "id": "T26",
+          "line": 13,
+          "message": "// eslint-disable-next-line no-restricted-imports -- generator/lib is the shared utility layer",
+          "severity": "info",
+          "title": "eslint-disable-next-line with reason"
+        },
+        {
+          "file": "./apps/admin/src/app/[locale]/spec/_components/courses-tab.tsx",
+          "id": "T26",
+          "line": 52,
+          "message": "// eslint-disable-next-line react-hooks/exhaustive-deps -- Intentional: only re-filter when search/sort changes, not on every render",
+          "severity": "info",
+          "title": "eslint-disable-next-line with reason"
+        },
+        {
+          "file": "./apps/landing/src/app/api/og/_helpers.tsx",
+          "id": "T26",
+          "line": 51,
+          "message": "{/* eslint-disable-next-line @next/next/no-img-element -- OG image generation uses satori which requires plain img elements */}",
+          "severity": "info",
+          "title": "eslint-disable-next-line with reason"
+        },
+        {
+          "file": "./apps/landing/src/app/api/og/_helpers.tsx",
+          "id": "T26",
+          "line": 164,
+          "message": "{/* eslint-disable-next-line @next/next/no-img-element -- OG image generation uses satori which requires plain img elements */}",
+          "severity": "info",
+          "title": "eslint-disable-next-line with reason"
+        },
+        {
+          "file": "./apps/landing/src/app/api/og/route.tsx",
+          "id": "T26",
+          "line": 121,
+          "message": "{/* eslint-disable-next-line @next/next/no-img-element -- OG image generation uses satori which requires plain img elements */}",
+          "severity": "info",
+          "title": "eslint-disable-next-line with reason"
+        },
+        {
+          "file": "./packages/generator/pipeline/lib/schedulr.ts",
+          "id": "T29",
+          "line": 44,
+          "message": "// @ts-expect-error — undici dispatcher not in lib.dom fetch types",
+          "severity": "info",
+          "title": "@ts-expect-error with explanation"
+        },
+        {
+          "file": "./apps/admin/src/middleware.ts",
+          "id": "T30",
+          "line": 20,
+          "message": "Use env() import instead: const ADMIN_PASS = process.env[\"ADMIN_AUTH_PASSWORD\"] ?? \"\";",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./apps/admin/src/middleware.ts",
+          "id": "T30",
+          "line": 19,
+          "message": "Use env() import instead: const ADMIN_USER = process.env[\"ADMIN_AUTH_USER\"] ?? \"\";",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./content/freebies/big-feelings/generate-test-face.ts",
+          "id": "T30",
+          "line": 14,
+          "message": "Use env() import instead: const API_KEY = process.env.OPENROUTER_API_KEY;",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./legacy/packages/validation/src/deployed/html/fetcher.ts",
+          "id": "T30",
+          "line": 1,
+          "message": "Use env() import instead: const CONCURRENCY = parseInt(process.env[\"VALIDATOR_CONCURRENCY\"] ?? \"10\", 10);",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./legacy/packages/validation/src/cli.ts",
+          "id": "T30",
+          "line": 22,
+          "message": "Use env() import instead: const SITE_BASE_URL = process.env[\"SITE_BASE_URL\"] ?? \"https://steady-parent.com\";",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./packages/generator/pipeline/lib/rust-checks.ts",
+          "id": "T30",
+          "line": 12,
+          "message": "Use env() import instead: const VALIDATOR_URL = process.env.VALIDATOR_URL ?? \"http://localhost:3103\";",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./apps/landing/src/lib/r2.ts",
+          "id": "T30",
+          "line": 31,
+          "message": "Use env() import instead: const accessKeyId = process.env[\"R2_ACCESS_KEY_ID\"];",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./legacy/apps/landing/src/lib/r2.ts",
+          "id": "T30",
+          "line": 32,
+          "message": "Use env() import instead: const accessKeyId = process.env[\"R2_ACCESS_KEY_ID\"];",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./packages/generator/images/upload.ts",
+          "id": "T30",
+          "line": 27,
+          "message": "Use env() import instead: const accessKeyId = process.env[\"R2_ACCESS_KEY_ID\"];",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./apps/landing/src/lib/r2.ts",
+          "id": "T30",
+          "line": 30,
+          "message": "Use env() import instead: const accountId = process.env[\"R2_ACCOUNT_ID\"];",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./legacy/apps/landing/src/lib/r2.ts",
+          "id": "T30",
+          "line": 31,
+          "message": "Use env() import instead: const accountId = process.env[\"R2_ACCOUNT_ID\"];",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./packages/generator/images/upload.ts",
+          "id": "T30",
+          "line": 26,
+          "message": "Use env() import instead: const accountId = process.env[\"R2_ACCOUNT_ID\"];",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./packages/generator/images/providers/index.ts",
+          "id": "T30",
+          "line": 31,
+          "message": "Use env() import instead: const apiKey = overrides?.apiKey || process.env.OPENROUTER_API_KEY;",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./packages/generator/images/generate-cover-test.ts",
+          "id": "T30",
+          "line": 246,
+          "message": "Use env() import instead: const apiKey = process.env.OPENROUTER_API_KEY;",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./packages/generator/images/generate-covers.ts",
+          "id": "T30",
+          "line": 178,
+          "message": "Use env() import instead: const apiKey = process.env.OPENROUTER_API_KEY;",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./packages/generator/images/generate-quiz.ts",
+          "id": "T30",
+          "line": 91,
+          "message": "Use env() import instead: const apiKey = process.env.OPENROUTER_API_KEY;",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./packages/generator/pipeline/10_generate_covers/runner.ts",
+          "id": "T30",
+          "line": 152,
+          "message": "Use env() import instead: const apiKey = process.env.OPENROUTER_API_KEY;",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./packages/generator/pipeline/12_generate_inlines/runner.ts",
+          "id": "T30",
+          "line": 137,
+          "message": "Use env() import instead: const apiKey = process.env.OPENROUTER_API_KEY;",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./packages/generator/images/upload.ts",
+          "id": "T30",
+          "line": 64,
+          "message": "Use env() import instead: const bucketName = process.env[\"R2_BUCKET_NAME\"];",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./packages/mail-tester/src/cli.ts",
+          "id": "T30",
+          "line": 144,
+          "message": "Use env() import instead: const gmailPassword = process.env[\"GMAIL_APP_PASSWORD\"];",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./packages/mail-tester/src/cli.ts",
+          "id": "T30",
+          "line": 143,
+          "message": "Use env() import instead: const gmailUser = process.env[\"GMAIL_USER\"];",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./apps/landing/src/lib/kit-api.ts",
+          "id": "T30",
+          "line": 11,
+          "message": "Use env() import instead: const key = process.env[\"KIT_API_KEY\"];",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./legacy/apps/landing/src/lib/kit-api.ts",
+          "id": "T30",
+          "line": 11,
+          "message": "Use env() import instead: const key = process.env[\"KIT_API_KEY\"];",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./packages/mail-tester/src/index.ts",
+          "id": "T30",
+          "line": 102,
+          "message": "Use env() import instead: const kitApiKey = process.env[\"KIT_API_KEY\"];",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./scripts/notify-google-indexing.ts",
+          "id": "T30",
+          "line": 29,
+          "message": "Use env() import instead: const raw = process.env.GOOGLE_SA_KEY;",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./packages/mail-tester/src/config/loader.ts",
+          "id": "T30",
+          "line": 23,
+          "message": "Use env() import instead: const resolved = process.env[varName];",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./apps/landing/src/lib/r2.ts",
+          "id": "T30",
+          "line": 32,
+          "message": "Use env() import instead: const secretAccessKey = process.env[\"R2_SECRET_ACCESS_KEY\"];",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./legacy/apps/landing/src/lib/r2.ts",
+          "id": "T30",
+          "line": 33,
+          "message": "Use env() import instead: const secretAccessKey = process.env[\"R2_SECRET_ACCESS_KEY\"];",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./packages/generator/images/upload.ts",
+          "id": "T30",
+          "line": 28,
+          "message": "Use env() import instead: const secretAccessKey = process.env[\"R2_SECRET_ACCESS_KEY\"];",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./apps/landing/src/lib/site-config.ts",
+          "id": "T30",
+          "line": 4,
+          "message": "Use env() import instead: export const SITE_URL = process.env[\"NEXT_PUBLIC_SITE_URL\"] ?? site.url;",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./apps/landing/src/lib/kit-taxonomy.ts",
+          "id": "T30",
+          "line": 59,
+          "message": "Use env() import instead: if (process.env.NODE_ENV === \"production\") {",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./apps/landing/src/components/blog/community-cta.tsx",
+          "id": "T30",
+          "line": 29,
+          "message": "Use env() import instead: if (process.env[\"NEXT_PUBLIC_COMMUNITY_ENABLED\"] !== \"true\") return null;",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./legacy/apps/landing/src/lib/kit-taxonomy.ts",
+          "id": "T30",
+          "line": 39,
+          "message": "Use env() import instead: if (process.env[\"NODE_ENV\"] === \"production\") {",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./apps/landing/src/lib/posts.ts",
+          "id": "T30",
+          "line": 14,
+          "message": "Use env() import instead: if (process.env['SHOW_ALL_POSTS'] === \"true\") return true;",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./apps/landing/src/lib/posts.ts",
+          "id": "T30",
+          "line": 7,
+          "message": "Use env() import instead: let filtered: Post[] = process.env['SHOW_ALL_POSTS'] === \"true\" ? [...posts] : posts.filter((p) => p.published);",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./legacy/apps/landing/src/content/landing/content-steady-parent-method.ts",
+          "id": "T30",
+          "line": 21,
+          "message": "Use env() import instead: process.env[\"NEXT_PUBLIC_R2_PUBLIC_BASE_URL\"];",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./legacy/apps/landing/src/content/landing/content.ts",
+          "id": "T30",
+          "line": 24,
+          "message": "Use env() import instead: process.env[\"NEXT_PUBLIC_R2_PUBLIC_BASE_URL\"];",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./legacy/apps/landing/src/content/pages/about/content.ts",
+          "id": "T30",
+          "line": 4,
+          "message": "Use env() import instead: process.env[\"NEXT_PUBLIC_R2_PUBLIC_BASE_URL\"];",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./apps/landing/src/app/api/expected-urls/route.ts",
+          "id": "T30",
+          "line": 6,
+          "message": "Use env() import instead: process.env[\"SHOW_ALL_POSTS\"] === \"true\"",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./apps/landing/src/app/llms.txt/route.ts",
+          "id": "T30",
+          "line": 6,
+          "message": "Use env() import instead: process.env[\"SHOW_ALL_POSTS\"] === \"true\"",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./legacy/packages/validation/src/deployed/html/fetcher.ts",
+          "id": "T30",
+          "line": 3,
+          "message": "Use env() import instead: process.env[\"VALIDATOR_FETCH_TIMEOUT_MS\"] ?? \"15000\",",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./packages/generator/pipeline/13_generate_captions/scripts/validate-cli.ts",
+          "id": "T30",
+          "line": 22,
+          "message": "Use env() import instead: process.env[\"VALIDATOR_URL\"] ?? \"http://localhost:3103\";",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./packages/generator/pipeline/13_generate_captions/scripts/validate.ts",
+          "id": "T30",
+          "line": 17,
+          "message": "Use env() import instead: process.env[\"VALIDATOR_URL\"] ?? \"http://localhost:3103\";",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./apps/landing/src/app/sitemap.ts",
+          "id": "T30",
+          "line": 14,
+          "message": "Use env() import instead: process.env['SHOW_ALL_POSTS'] === \"true\"",
+          "severity": "error",
+          "title": "Direct process.env access"
+        },
+        {
+          "file": "./legacy/scripts/revalidate-raw.ts",
+          "id": "T31",
+          "line": 28,
+          "message": "const maxPts = Math.max(...q.options.map((o: any) => o.points));",
+          "severity": "info",
+          "title": "any type usage"
+        },
+        {
+          "file": "./packages/generator/images/render.ts",
+          "id": "T31",
+          "line": 64,
+          "message": "const rc = rough.canvas(canvas as any);",
+          "severity": "info",
+          "title": "any type usage"
+        },
+        {
+          "file": "./legacy/scripts/revalidate-raw.ts",
+          "id": "T31",
+          "line": 42,
+          "message": "const results = Object.values(parsed.results) as any[];",
+          "severity": "info",
+          "title": "any type usage"
+        },
+        {
+          "file": "./legacy/scripts/revalidate-raw.ts",
+          "id": "T31",
+          "line": 41,
+          "message": "const totalMax = Object.values(parsed.domains).reduce((s: number, d: any) => s + d.maxPoints, 0);",
+          "severity": "info",
+          "title": "any type usage"
+        },
+        {
+          "file": "./packages/generator/images/render.ts",
+          "id": "T31",
+          "line": 56,
+          "message": "drawFn: (rc: any, ctx: any, helpers: { k: string; F: typeof F; O: typeof O; B: typeof B }) => void,",
+          "severity": "info",
+          "title": "any type usage"
+        },
+        {
+          "file": "./packages/generator/images/render.ts",
+          "id": "T31",
+          "line": 72,
+          "message": "drawFn: (rc: any, ctx: any, helpers: { k: string; F: typeof F; O: typeof O; B: typeof B }) => void,",
+          "severity": "info",
+          "title": "any type usage"
+        },
+        {
+          "file": "./legacy/packages/validation/src/spec/mailing/results.ts",
+          "id": "T31",
+          "line": 122,
+          "message": "entry, FREEBIE_FORM_CONSTRAINTS, freebieZodIssues as any, basePath,",
+          "severity": "info",
+          "title": "any type usage"
+        },
+        {
+          "file": "./legacy/packages/validation/src/spec/mailing/results.ts",
+          "id": "T31",
+          "line": 161,
+          "message": "entry, QUIZ_GATE_FORM_CONSTRAINTS, quizZodIssues as any, basePath,",
+          "severity": "info",
+          "title": "any type usage"
+        },
+        {
+          "file": "./legacy/packages/validation/src/spec/mailing/results.ts",
+          "id": "T31",
+          "line": 143,
+          "message": "entry, WAITLIST_FORM_CONSTRAINTS, waitlistZodIssues as any, basePath,",
+          "severity": "info",
+          "title": "any type usage"
+        },
+        {
+          "file": "./legacy/packages/validation/src/spec/ctas/results.ts",
+          "id": "T31",
+          "line": 94,
+          "message": "entry.community, COMMUNITY_CTA_CONSTRAINTS, communityZodIssues as any, `${basePath}/community`,",
+          "severity": "info",
+          "title": "any type usage"
+        },
+        {
+          "file": "./legacy/packages/validation/src/spec/ctas/results.ts",
+          "id": "T31",
+          "line": 122,
+          "message": "entry.community, COMMUNITY_CTA_CONSTRAINTS, quizZodIssues as any, `quiz/${slug}/community`,",
+          "severity": "info",
+          "title": "any type usage"
+        },
+        {
+          "file": "./legacy/packages/validation/src/spec/ctas/results.ts",
+          "id": "T31",
+          "line": 105,
+          "message": "entry.course, COURSE_CTA_CONSTRAINTS, courseZodIssues as any, `${basePath}/course`,",
+          "severity": "info",
+          "title": "any type usage"
+        },
+        {
+          "file": "./legacy/apps/landing/mdx-components.tsx",
+          "id": "T31",
+          "line": 88,
+          "message": "img: MdxImage as any,",
+          "severity": "info",
+          "title": "any type usage"
+        },
+        {
+          "file": "./legacy/scripts/revalidate-raw.ts",
+          "id": "T31",
+          "line": 43,
+          "message": "results.sort((a: any, b: any) => a.scoreRange.min - b.scoreRange.min);",
+          "severity": "info",
+          "title": "any type usage"
+        },
+        {
+          "file": "./legacy/apps/landing/src/content/blog/posts.ts",
+          "id": "T32",
+          "line": null,
+          "message": "2571 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./packages/generator/pipeline/9_validate_articles/runner.ts",
+          "id": "T32",
+          "line": null,
+          "message": "302 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/app/[locale]/(public)/blog/[category]/[slug]/page.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "306 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/application/app-shells/app-shell-2.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "306 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T32",
+          "line": null,
+          "message": "306 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/application/app-shells/app-shell-2.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "306 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/components/quiz/quiz-container.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "309 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/quiz/quiz-container.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "309 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/packages/validation/src/spec/linking/linking-vs-taxonomy.ts",
+          "id": "T32",
+          "line": null,
+          "message": "310 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/content-spec/src/validator/kit-integration.ts",
+          "id": "T32",
+          "line": null,
+          "message": "311 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./packages/generator/pipeline/13_generate_captions/scripts/inlines.ts",
+          "id": "T32",
+          "line": null,
+          "message": "311 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./packages/generator/articles/validate-and-assemble-helpers.ts",
+          "id": "T32",
+          "line": null,
+          "message": "313 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./packages/generator/pipeline/8_assemble_articles/runner.ts",
+          "id": "T32",
+          "line": null,
+          "message": "316 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/application/app-shells/app-shell-1.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "319 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/application/app-shells/app-shell-1.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "319 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/components/quiz/quiz-preview-parts.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "322 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/quiz/quiz-result.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "325 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/content-spec/src/validator/quiz.ts",
+          "id": "T32",
+          "line": null,
+          "message": "325 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./packages/generator/articles/assemble-prompt-helpers.ts",
+          "id": "T32",
+          "line": null,
+          "message": "327 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./packages/generator/articles/validate.ts",
+          "id": "T32",
+          "line": null,
+          "message": "329 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/velite.config.ts",
+          "id": "T32",
+          "line": null,
+          "message": "332 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/content-spec/src/validate-plans.ts",
+          "id": "T32",
+          "line": null,
+          "message": "349 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./packages/generator/images/output/staying-calm/how-to-stay-calm/inline-3.mjs",
+          "id": "T32",
+          "line": null,
+          "message": "351 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/packages/validation/src/spec/mailing/mailing-vs-taxonomy.ts",
+          "id": "T32",
+          "line": null,
+          "message": "360 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/components/quiz/likert-result.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "371 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/components/quiz/identity-result.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "375 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./packages/seo-gen/src/jsonld.ts",
+          "id": "T32",
+          "line": null,
+          "message": "380 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/components/quiz/profile-result.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "389 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/application/settings/settings-4.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "398 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/application/settings/settings-4.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "398 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./packages/generator/images/output/staying-calm/how-to-apologize/cover.mjs",
+          "id": "T32",
+          "line": null,
+          "message": "399 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/components/quiz/recommendation-result.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "401 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/quiz/likert-result.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "401 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/packages/validation/src/deployed/check/jsonld-deep-checks.ts",
+          "id": "T32",
+          "line": null,
+          "message": "404 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/quiz/identity-result.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "405 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./packages/generator/lib/mdx-parser.ts",
+          "id": "T32",
+          "line": null,
+          "message": "406 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/quiz/profile-result.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "413 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/application/settings/settings-6.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "414 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/application/settings/settings-6.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "414 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./scripts/compare-live-validators.mjs",
+          "id": "T32",
+          "line": null,
+          "message": "415 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/content-spec/src/validator/cta.ts",
+          "id": "T32",
+          "line": null,
+          "message": "417 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/quiz/recommendation-result.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "426 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/content/landing/content.ts",
+          "id": "T32",
+          "line": null,
+          "message": "428 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/e-commerce/store-navbars/store-navbar-1.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "434 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/e-commerce/store-navbars/store-navbar-1.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "434 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/application/settings/settings-1.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "441 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/application/settings/settings-1.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "441 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/application/settings/settings-2.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "443 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/application/settings/settings-2.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "443 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/application/settings/settings-7.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "454 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/application/settings/settings-7.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "454 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/application/settings/settings-5.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "467 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/application/settings/settings-5.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "467 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/app/api/og/route.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "473 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/packages/validation/src/spec/taxonomy/structural.ts",
+          "id": "T32",
+          "line": null,
+          "message": "482 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/quiz/quiz-preview.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "484 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/e-commerce/store-navbars/store-navbar-4.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "494 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/e-commerce/store-navbars/store-navbar-4.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "494 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/e-commerce/checkouts/checkout-2.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "519 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/e-commerce/checkouts/checkout-2.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "519 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/application/settings/settings-3.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "523 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/application/settings/settings-3.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "523 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/e-commerce/store-navbars/store-navbar-3.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "527 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/e-commerce/store-navbars/store-navbar-3.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "527 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/e-commerce/store-navbars/store-navbar-2.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "529 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/e-commerce/store-navbars/store-navbar-2.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "529 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/e-commerce/product-list-filters/product-list-filters-3.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "539 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/e-commerce/product-list-filters/product-list-filters-3.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "539 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/e-commerce/product-list-filters/product-list-filters-1.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "542 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/e-commerce/product-list-filters/product-list-filters-1.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "542 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/e-commerce/product-list-filters/product-list-filters-2.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "553 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/e-commerce/product-list-filters/product-list-filters-2.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "553 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/lib/quiz/quiz-prompt.ts",
+          "id": "T32",
+          "line": null,
+          "message": "555 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/lib/quiz/quiz-schema.ts",
+          "id": "T32",
+          "line": null,
+          "message": "568 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/quiz-schema.ts",
+          "id": "T32",
+          "line": null,
+          "message": "568 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/lib/quiz/quiz-engine.ts",
+          "id": "T32",
+          "line": null,
+          "message": "578 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/e-commerce/checkouts/checkout-1.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "585 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/e-commerce/checkouts/checkout-1.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "585 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/scripts/issue-certificates.ts",
+          "id": "T32",
+          "line": null,
+          "message": "599 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/content/landing/content-steady-parent-method.ts",
+          "id": "T32",
+          "line": null,
+          "message": "618 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/e-commerce/product-headers/product-header-3.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "677 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/e-commerce/product-headers/product-header-3.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "677 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/e-commerce/product-headers/product-header-4.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "682 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/e-commerce/product-headers/product-header-4.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "682 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/e-commerce/product-headers/product-header-5.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "702 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/e-commerce/product-headers/product-header-5.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "702 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/e-commerce/product-headers/product-header-1.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "713 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/e-commerce/product-headers/product-header-1.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "713 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/e-commerce/product-headers/product-header-7.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "717 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/e-commerce/product-headers/product-header-7.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "717 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/e-commerce/product-headers/product-header-2.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "720 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/e-commerce/product-headers/product-header-2.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "720 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/e-commerce/product-headers/product-header-6.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "740 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/e-commerce/product-headers/product-header-6.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "740 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./tools/freebie-renderer/src/styles.ts",
+          "id": "T32",
+          "line": null,
+          "message": "816 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/application/application-examples/dashboard-1.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "825 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/application/application-examples/dashboard-1.tsx",
+          "id": "T32",
+          "line": null,
+          "message": "825 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./scripts/generate-check-inventory.ts",
+          "id": "T32",
+          "line": null,
+          "message": "829 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        },
+        {
+          "file": "./content/freebies/big-feelings/build-poster.ts",
+          "id": "T33",
+          "line": null,
+          "message": "252 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./legacy/scripts/migrate-blocks-landing-pages.ts",
+          "id": "T33",
+          "line": null,
+          "message": "253 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./legacy/packages/validation/src/spec/mailing/factory.ts",
+          "id": "T33",
+          "line": null,
+          "message": "254 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./packages/generator/images/generate-cover-test.ts",
+          "id": "T33",
+          "line": null,
+          "message": "254 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./apps/admin/src/app/[locale]/spec/_components/taxonomy-tab.tsx",
+          "id": "T33",
+          "line": null,
+          "message": "255 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./packages/generator/images/generate.ts",
+          "id": "T33",
+          "line": null,
+          "message": "255 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/application/navbars/navbar-1.tsx",
+          "id": "T33",
+          "line": null,
+          "message": "260 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/application/navbars/navbar-1.tsx",
+          "id": "T33",
+          "line": null,
+          "message": "260 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./legacy/packages/validation/src/spec/linking/factory.ts",
+          "id": "T33",
+          "line": null,
+          "message": "260 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./packages/generator/lib/mdx-parser-compare.ts",
+          "id": "T33",
+          "line": null,
+          "message": "260 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./legacy/content-spec/src/validator/reality-check.ts",
+          "id": "T33",
+          "line": null,
+          "message": "263 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./tools/freebie-renderer/src/components/index.ts",
+          "id": "T33",
+          "line": null,
+          "message": "263 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./packages/generator/pipeline/13_generate_captions/scripts/generate.ts",
+          "id": "T33",
+          "line": null,
+          "message": "264 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./packages/validator-types/src/spec-data.ts",
+          "id": "T33",
+          "line": null,
+          "message": "266 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./apps/landing/src/app/api/og/route.tsx",
+          "id": "T33",
+          "line": null,
+          "message": "267 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./legacy/packages/validation/src/orchestrate.ts",
+          "id": "T33",
+          "line": null,
+          "message": "268 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./packages/generator/pipeline/lib/validate-via-rust.ts",
+          "id": "T33",
+          "line": null,
+          "message": "270 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./legacy/packages/validation/src/deployed/articles/article-checks.ts",
+          "id": "T33",
+          "line": null,
+          "message": "273 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./apps/admin/src/app/[locale]/spec/_components/mailing-tab.tsx",
+          "id": "T33",
+          "line": null,
+          "message": "275 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/application/app-shells/app-shell-3.tsx",
+          "id": "T33",
+          "line": null,
+          "message": "276 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/landing-page/feature-sections/feature-section-19.tsx",
+          "id": "T33",
+          "line": null,
+          "message": "276 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/application/app-shells/app-shell-3.tsx",
+          "id": "T33",
+          "line": null,
+          "message": "276 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/landing-page/feature-sections/feature-section-19.tsx",
+          "id": "T33",
+          "line": null,
+          "message": "276 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./legacy/packages/validation/src/deployed/ctas/cta-checks.ts",
+          "id": "T33",
+          "line": null,
+          "message": "277 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./packages/generator/lib/_archived/article-checks.ts",
+          "id": "T33",
+          "line": null,
+          "message": "277 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./packages/mail-tester/src/runner/sequence.ts",
+          "id": "T33",
+          "line": null,
+          "message": "279 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./content/quizzes/quiz-engine.ts",
+          "id": "T33",
+          "line": null,
+          "message": "284 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./apps/landing/src/components/quiz/likert-quiz.tsx",
+          "id": "T33",
+          "line": null,
+          "message": "289 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/e-commerce/checkouts/checkout-3.tsx",
+          "id": "T33",
+          "line": null,
+          "message": "290 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/landing-page/feature-sections/feature-section-20.tsx",
+          "id": "T33",
+          "line": null,
+          "message": "290 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/e-commerce/checkouts/checkout-3.tsx",
+          "id": "T33",
+          "line": null,
+          "message": "290 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/landing-page/feature-sections/feature-section-20.tsx",
+          "id": "T33",
+          "line": null,
+          "message": "290 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./packages/generator/pipeline/6_write/scripts/backfill-ai-answers.ts",
+          "id": "T33",
+          "line": null,
+          "message": "290 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./packages/generator/pipeline/6_write/scripts/backfill-descriptions.ts",
+          "id": "T33",
+          "line": null,
+          "message": "290 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./packages/generator/pipeline/7_rewrite_articles/runner.ts",
+          "id": "T33",
+          "line": null,
+          "message": "290 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./apps/admin/src/app/[locale]/live/quizzes/page.tsx",
+          "id": "T33",
+          "line": null,
+          "message": "291 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./packages/content-constraints/types.ts",
+          "id": "T33",
+          "line": null,
+          "message": "291 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./apps/admin/src/app/[locale]/live/external/structured-data/page.tsx",
+          "id": "T33",
+          "line": null,
+          "message": "294 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/e-commerce/order-summary-sections/order-summary-section-4.tsx",
+          "id": "T33",
+          "line": null,
+          "message": "296 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./apps/landing/src/components/pro-blocks/landing-page/lp-navbars/lp-navbar-7.tsx",
+          "id": "T33",
+          "line": null,
+          "message": "296 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/e-commerce/order-summary-sections/order-summary-section-4.tsx",
+          "id": "T33",
+          "line": null,
+          "message": "296 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/pro-blocks/landing-page/lp-navbars/lp-navbar-7.tsx",
+          "id": "T33",
+          "line": null,
+          "message": "296 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./apps/landing/src/components/quiz/quiz-result.tsx",
+          "id": "T33",
+          "line": null,
+          "message": "297 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./legacy/apps/landing/src/components/quiz/likert-quiz.tsx",
+          "id": "T33",
+          "line": null,
+          "message": "298 effective lines (warn at 300)",
+          "severity": "info",
+          "title": "File approaching limit"
+        }
+      ]
+    },
+    {
+      "name": "ESLint boundary audit",
+      "results": [
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T36",
+          "line": null,
+          "message": "Zone definitions found in ESLint config",
+          "severity": "info",
+          "title": "Boundary zones configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T37",
+          "line": null,
+          "message": "boundaries/element-types found",
+          "severity": "info",
+          "title": "Import direction rules configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T38",
+          "line": null,
+          "message": "boundaries/entry-point found",
+          "severity": "info",
+          "title": "Entry-point enforcement configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T39",
+          "line": null,
+          "message": "boundaries/external not found in ESLint config",
+          "severity": "error",
+          "title": "No external dependency bans"
+        }
+      ]
+    },
+    {
+      "name": "TS test quality",
+      "results": [
+        {
+          "file": null,
+          "id": "T-TEST-01",
+          "line": null,
+          "message": "No stryker.config.json or stryker.config.mjs found — mutation testing not configured",
+          "severity": "warn",
+          "title": "No Stryker config"
+        },
+        {
+          "file": null,
+          "id": "T-TEST-02",
+          "line": null,
+          "message": "No .test.ts, .spec.ts, .test.tsx, or .spec.tsx files found",
+          "severity": "error",
+          "title": "No test files"
+        },
+        {
+          "file": null,
+          "id": "T-TEST-03",
+          "line": null,
+          "message": "No vitest.config.ts/mts or jest.config.ts/js/mjs found",
+          "severity": "warn",
+          "title": "No test runner config"
+        }
+      ]
+    },
+    {
+      "name": "Hook checks",
+      "results": [
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H1",
+          "line": null,
+          "message": "Found",
+          "severity": "info",
+          "title": ".githooks/pre-commit exists"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H10",
+          "line": null,
+          "message": "10996 bytes",
+          "severity": "info",
+          "title": "Pre-commit file size"
+        },
+        {
+          "file": null,
+          "id": "H11",
+          "line": null,
+          "message": "No local hook overrides found",
+          "severity": "info",
+          "title": "No local/pre-commit.d/ directory"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H12",
+          "line": null,
+          "message": "TypeScript copy-paste detection using jscpd",
+          "severity": "info",
+          "title": "jscpd configured for TypeScript"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H12",
+          "line": null,
+          "message": "Rust project should use cargo-dupes for copy-paste detection",
+          "severity": "warn",
+          "title": "Missing cargo-dupes for Rust"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H12",
+          "line": null,
+          "message": "Using jscpd for Rust -- consider cargo-dupes (AST-aware, no Node.js dependency)",
+          "severity": "warn",
+          "title": "Using jscpd for Rust"
+        },
+        {
+          "file": null,
+          "id": "H2",
+          "line": null,
+          "message": "core.hooksPath = .githooks",
+          "severity": "info",
+          "title": "core.hooksPath configured"
+        },
+        {
+          "file": "./.githooks",
+          "id": "H3",
+          "line": null,
+          "message": "Using monolithic pre-commit script",
+          "severity": "info",
+          "title": "No pre-commit.d/ directory"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H4",
+          "line": null,
+          "message": "No pre-commit.d/, so no dispatcher check",
+          "severity": "info",
+          "title": "Monolithic script (no dispatcher needed)"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H5",
+          "line": null,
+          "message": "Pattern present in monolithic script",
+          "severity": "info",
+          "title": "cargo clippy found in pre-commit"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H5",
+          "line": null,
+          "message": "Pattern present in monolithic script",
+          "severity": "info",
+          "title": "cargo deny found in pre-commit"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H5",
+          "line": null,
+          "message": "Pattern missing from monolithic script",
+          "severity": "info",
+          "title": "cargo dupes not found in pre-commit"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H5",
+          "line": null,
+          "message": "Pattern present in monolithic script",
+          "severity": "info",
+          "title": "cargo fmt / rustfmt found in pre-commit"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H5",
+          "line": null,
+          "message": "Pattern present in monolithic script",
+          "severity": "info",
+          "title": "cargo machete found in pre-commit"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H5",
+          "line": null,
+          "message": "Pattern present in monolithic script",
+          "severity": "info",
+          "title": "cargo test found in pre-commit"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H5",
+          "line": null,
+          "message": "Pattern present in monolithic script",
+          "severity": "info",
+          "title": "eslint found in pre-commit"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H5",
+          "line": null,
+          "message": "Pattern present in monolithic script",
+          "severity": "info",
+          "title": "gitleaks found in pre-commit"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H5",
+          "line": null,
+          "message": "Pattern present in monolithic script",
+          "severity": "info",
+          "title": "jscpd found in pre-commit"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H5",
+          "line": null,
+          "message": "Pattern present in monolithic script",
+          "severity": "info",
+          "title": "tsc / --noEmit found in pre-commit"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H6",
+          "line": null,
+          "message": "273 lines, 10996 bytes, mtime unix 1773401148",
+          "severity": "info",
+          "title": "Pre-commit script stats"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H7",
+          "line": null,
+          "message": "mode: 100755",
+          "severity": "info",
+          "title": "Pre-commit is executable"
+        },
+        {
+          "file": null,
+          "id": "H8",
+          "line": null,
+          "message": "Found on PATH",
+          "severity": "info",
+          "title": "cargo-deny installed"
+        },
+        {
+          "file": null,
+          "id": "H8",
+          "line": null,
+          "message": "Found on PATH",
+          "severity": "info",
+          "title": "cargo-machete installed"
+        },
+        {
+          "file": null,
+          "id": "H8",
+          "line": null,
+          "message": "Found on PATH",
+          "severity": "info",
+          "title": "gitleaks installed"
+        }
+      ]
+    },
+    {
+      "name": "Deployment checks",
+      "results": [
+        {
+          "file": ".",
+          "id": "D1",
+          "line": null,
+          "message": "railpack-admin.json, railpack-landing.json, railpack-substack-publisher.json, railpack-validator-rust.json",
+          "severity": "info",
+          "title": "Found 4 railpack config(s)"
+        },
+        {
+          "file": "./railpack-admin.json",
+          "id": "D2",
+          "line": null,
+          "message": "Provider field present",
+          "severity": "info",
+          "title": "railpack-admin.json: provider = \"node\""
+        },
+        {
+          "file": "./railpack-landing.json",
+          "id": "D2",
+          "line": null,
+          "message": "Provider field present",
+          "severity": "info",
+          "title": "railpack-landing.json: provider = \"node\""
+        },
+        {
+          "file": "./railpack-substack-publisher.json",
+          "id": "D2",
+          "line": null,
+          "message": "Provider field present",
+          "severity": "info",
+          "title": "railpack-substack-publisher.json: provider = \"rust\""
+        },
+        {
+          "file": "./railpack-validator-rust.json",
+          "id": "D2",
+          "line": null,
+          "message": "Provider field present",
+          "severity": "info",
+          "title": "railpack-validator-rust.json: provider = \"rust\""
+        },
+        {
+          "file": "./apps/admin/next.config.ts",
+          "id": "D3",
+          "line": null,
+          "message": "output: \"standalone\" found",
+          "severity": "info",
+          "title": "admin: standalone output configured"
+        },
+        {
+          "file": "./apps/landing/next.config.mjs",
+          "id": "D3",
+          "line": null,
+          "message": "output: \"standalone\" found",
+          "severity": "info",
+          "title": "landing: standalone output configured"
+        },
+        {
+          "file": "./apps/admin/next.config.ts",
+          "id": "D4",
+          "line": null,
+          "message": "outputFileTracingRoot found",
+          "severity": "info",
+          "title": "admin: outputFileTracingRoot configured"
+        },
+        {
+          "file": "./apps/landing/next.config.mjs",
+          "id": "D4",
+          "line": null,
+          "message": "outputFileTracingRoot found",
+          "severity": "info",
+          "title": "landing: outputFileTracingRoot configured"
+        },
+        {
+          "file": "./apps/admin/package.json",
+          "id": "D5",
+          "line": null,
+          "message": "Correctly in dependencies (not devDependencies)",
+          "severity": "info",
+          "title": "admin: tailwindcss in dependencies"
+        },
+        {
+          "file": "./apps/landing/package.json",
+          "id": "D5",
+          "line": null,
+          "message": "Railway skips devDeps — move tailwindcss to dependencies",
+          "severity": "warn",
+          "title": "landing: tailwindcss in devDependencies"
+        }
+      ]
+    }
+  ],
+  "stacks": [
+    "Rust",
+    "TypeScript"
+  ]
+}
