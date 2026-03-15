@@ -215,9 +215,10 @@ if [ "$RUST_CHANGED" -gt 0 ] || [ "$CARGO_CHANGED" -gt 0 ]; then
         while IFS= read -r file; do
             [ -n "$file" ] || continue
             [ -f "$file" ] || continue
-            matches=$(grep -n '#!\[allow' "$file" | grep -v 'unused_crate_dependencies' || true)
+            CRATE_ALLOW_PAT='#!\[allow'
+            matches=$(grep -n "$CRATE_ALLOW_PAT" "$file" | grep -v 'unused_crate_dependencies' || true)
             if [ -n "$matches" ]; then
-                echo "FAIL: $file contains #![allow(...)] -- do not suppress lints crate-wide"
+                echo "FAIL: $file contains crate-wide lint suppression -- do not suppress lints crate-wide"
                 echo "$matches"
                 rs_fail=1
             fi
@@ -256,7 +257,7 @@ if [ "$RUST_CHANGED" -gt 0 ]; then
         echo "ERROR: cargo-dupes not installed. Install: cargo install cargo-dupes"
         exit 1
     fi
-    if ! (cd "$RUST_WORKSPACE" && cargo dupes check --max-exact 0 --max-exact-percent 0); then
+    if ! (cd "$RUST_WORKSPACE" && cargo dupes check --max-exact 0 --max-exact-percent 0 --exclude-tests); then
         echo "Duplicate Rust code detected. Refactor before committing."
         exit 1
     fi

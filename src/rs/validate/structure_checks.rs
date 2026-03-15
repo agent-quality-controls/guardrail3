@@ -175,3 +175,67 @@ pub fn check_unsafe_code_forbid(workspace_root: &Path, results: &mut Vec<CheckRe
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // ---- Bug 4: Test file exemptions for R38 ----
+
+    #[test]
+    fn file_length_skips_test_files() {
+        let long_content = "fn x() {}\n".repeat(600);
+        let path = Path::new("/project/tests/my_test.rs");
+        let mut results = Vec::new();
+        check_file_length(path, &long_content, true, &mut results);
+        assert!(
+            results.is_empty(),
+            "Test files should be exempt from length check"
+        );
+    }
+
+    #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
+    fn file_length_flags_source_files_over_500() {
+        let long_content = "fn x() {}\n".repeat(600);
+        let path = Path::new("/project/src/main.rs");
+        let mut results = Vec::new();
+        check_file_length(path, &long_content, false, &mut results);
+        assert!(
+            !results.is_empty(),
+            "Source files over 500 lines should be flagged"
+        );
+        assert_eq!(results[0].id, "R38");
+        assert_eq!(results[0].severity, Severity::Error);
+    }
+
+    #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
+    fn file_length_warns_between_400_and_500() {
+        // Generate content that has ~450 effective lines
+        let content = "fn x() {}\n".repeat(450);
+        let path = Path::new("/project/src/foo.rs");
+        let mut results = Vec::new();
+        check_file_length(path, &content, false, &mut results);
+        assert!(
+            !results.is_empty(),
+            "Files between 400-500 lines should produce a warning"
+        );
+        assert_eq!(results[0].id, "R39");
+        assert_eq!(results[0].severity, Severity::Warn);
+    }
+
+    #[test]
+    fn use_count_skips_test_files() {
+        let mut lines: Vec<String> = (0..25).map(|i| format!("use crate::module{i};")).collect();
+        lines.push("fn test() {}".to_owned());
+        let content = lines.join("\n");
+        let path = Path::new("/project/tests/my_test.rs");
+        let mut results = Vec::new();
+        check_use_count(path, &content, true, &mut results);
+        assert!(
+            results.is_empty(),
+            "Test files should be exempt from use-count check"
+        );
+    }
+}

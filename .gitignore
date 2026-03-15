@@ -1,3 +1,4 @@
 /target/
 .plans/
 .claude/
+.mcp.json
