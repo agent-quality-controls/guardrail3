@@ -2,6 +2,7 @@ pub mod canonical;
 pub mod clippy;
 pub mod deny;
 pub mod pre_commit;
+pub mod release;
 
 pub struct Module {
     pub name: &'static str,
@@ -21,12 +22,14 @@ pub fn all_modules() -> Vec<&'static Module> {
     modules.push(&clippy::METHOD_BLOCKING_SLEEP);
     modules.push(&clippy::METHOD_FILESYSTEM);
     modules.push(&clippy::METHOD_HTTP_CLIENT);
+    modules.push(&clippy::METHOD_GARDE_DESERIALIZATION);
 
     // Clippy type modules
     modules.push(&clippy::TYPE_COLLECTIONS);
     modules.push(&clippy::TYPE_SYNC);
     modules.push(&clippy::TYPE_FILESYSTEM);
     modules.push(&clippy::TYPE_GLOBAL_STATE);
+    modules.push(&clippy::TYPE_GARDE_EXTRACTORS);
 
     // Deny modules
     modules.push(&deny::DENY_GRAPH);
@@ -59,6 +62,10 @@ pub fn all_modules() -> Vec<&'static Module> {
     modules.push(&canonical::TSCONFIG_BASE);
     modules.push(&canonical::JSCPD);
     modules.push(&canonical::ESLINT_STARTER);
+
+    // Release modules
+    modules.push(&release::RELEASE_PLZ_TOML);
+    modules.push(&release::CLIFF_TOML);
 
     modules
 }

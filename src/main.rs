@@ -11,7 +11,8 @@ mod ts;
 
 use clap::Parser;
 
-use cli::{Cli, Commands, HooksCommands, RsCommands, TsCommands};
+use cli::{Cli, Commands, HooksCommands, RsCommands, TsCommands, ValidateArgs};
+use rs::validate::ValidateDomains;
 
 #[allow(clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI entry point — stderr output and process::exit for error codes are intentional
 #[allow(clippy::too_many_lines)] // reason: CLI dispatch for all subcommands
@@ -47,9 +48,16 @@ fn main() {
                     eprintln!("Error: cannot resolve path '{}'", args.path);
                     std::process::exit(1);
                 };
+                let domains = domains_from_args(&args);
                 let project = discover::detect_project(&abs_path);
                 let scoped_files = commands::validate::resolve_scoped_files_pub(&args, &abs_path);
-                let report = rs::validate::run(&abs_path, &project, scoped_files.as_deref());
+                let report = rs::validate::run(
+                    &abs_path,
+                    &project,
+                    scoped_files.as_deref(),
+                    &domains,
+                    args.thorough,
+                );
                 match args.format.as_str() {
                     "json" => report::json::print_report(&report),
                     "md" | "markdown" => report::markdown::print_report(&report),
@@ -70,9 +78,10 @@ fn main() {
                     eprintln!("Error: cannot resolve path '{}'", args.path);
                     std::process::exit(1);
                 };
+                let domains = domains_from_args(&args);
                 let scoped_files = commands::validate::resolve_scoped_files_pub(&args, &abs_path);
                 let scoped_ref = scoped_files.as_deref();
-                let report = ts::validate::run(&abs_path, scoped_ref);
+                let report = ts::validate::run(&abs_path, scoped_ref, &domains);
                 match args.format.as_str() {
                     "json" => report::json::print_report(&report),
                     "md" | "markdown" => report::markdown::print_report(&report),
@@ -93,9 +102,14 @@ fn main() {
                     eprintln!("Error: cannot resolve path '{}'", args.path);
                     std::process::exit(1);
                 };
+                let domains = domains_from_args(&args);
                 let project = discover::detect_project(&abs_path);
-                let report =
-                    hooks::validate::run(&abs_path, project.has_rust, project.has_typescript);
+                let report = hooks::validate::run(
+                    &abs_path,
+                    project.has_rust,
+                    project.has_typescript,
+                    &domains,
+                );
                 match args.format.as_str() {
                     "json" => report::json::print_report(&report),
                     "md" | "markdown" => report::markdown::print_report(&report),
@@ -109,5 +123,15 @@ fn main() {
                 commands::generate::run_hooks(&args);
             }
         },
+    }
+}
+
+const fn domains_from_args(args: &ValidateArgs) -> ValidateDomains {
+    let run_all = !args.code && !args.architecture && !args.release && !args.tests;
+    ValidateDomains {
+        code: run_all || args.code,
+        architecture: run_all || args.architecture,
+        release: run_all || args.release,
+        tests: run_all || args.tests,
     }
 }

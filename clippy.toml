@@ -65,6 +65,15 @@ disallowed-methods = [
     # --- Ban per-request HTTP client construction (use shared client via DI) ---
     { path = "reqwest::Client::new", reason = "Use shared client from AppState -- per-request construction skips connection pooling" },
     { path = "reqwest::Client::builder", reason = "Use shared client from AppState -- construct once at startup and inject via DI" },
+    # --- Ban raw serde deserialization (use Validated<T>::new() for external data) ---
+    { path = "serde_json::from_str", reason = "BANNED: Use Validated<T>::new(value, &ctx) instead. (1) Add #[derive(garde::Validate)] to your response/data type. (2) Add garde rules to each field -- #[garde(length(chars, min = 1, max = N))] for strings, #[garde(range(min = 0))] for numbers, #[garde(dive)] for nested structs, #[garde(length(min = 1))] for non-empty vecs. (3) Deserialize into the raw type, then wrap with Validated::new()." },
+    { path = "serde_json::from_slice", reason = "BANNED: Use Validated<T>::new(value, &ctx) instead. (1) Add #[derive(garde::Validate)] to your response/data type. (2) Add garde rules to each field -- #[garde(length(chars, min = 1, max = N))] for strings, #[garde(range(min = 0))] for numbers, #[garde(dive)] for nested structs, #[garde(length(min = 1))] for non-empty vecs. (3) Deserialize into the raw type, then wrap with Validated::new()." },
+    { path = "serde_json::from_value", reason = "BANNED: Use Validated<T>::new(value, &ctx) instead. (1) Add #[derive(garde::Validate)] to your response/data type. (2) Add garde rules to each field -- #[garde(length(chars, min = 1, max = N))] for strings, #[garde(range(min = 0))] for numbers, #[garde(dive)] for nested structs, #[garde(length(min = 1))] for non-empty vecs. (3) Deserialize into the raw type, then wrap with Validated::new()." },
+    { path = "serde_json::from_reader", reason = "BANNED: Use Validated<T>::new(value, &ctx) instead. (1) Add #[derive(garde::Validate)] to your response/data type. (2) Add garde rules to each field -- #[garde(length(chars, min = 1, max = N))] for strings, #[garde(range(min = 0))] for numbers, #[garde(dive)] for nested structs, #[garde(length(min = 1))] for non-empty vecs. (3) Deserialize into the raw type, then wrap with Validated::new()." },
+    { path = "reqwest::Response::json", reason = "BANNED: Use Validated<T>::new(value, &ctx) instead. (1) Add #[derive(garde::Validate)] to your response/data type. (2) Add garde rules to each field -- #[garde(length(chars, min = 1, max = N))] for strings, #[garde(range(min = 0))] for numbers, #[garde(dive)] for nested structs, #[garde(length(min = 1))] for non-empty vecs. (3) Deserialize into the raw type, then wrap with Validated::new()." },
+    { path = "toml::from_str", reason = "BANNED: Use Validated<T>::new(value, &ctx) instead. (1) Add #[derive(garde::Validate)] to your response/data type. (2) Add garde rules to each field -- #[garde(length(chars, min = 1, max = N))] for strings, #[garde(range(min = 0))] for numbers, #[garde(dive)] for nested structs, #[garde(length(min = 1))] for non-empty vecs. (3) Deserialize into the raw type, then wrap with Validated::new()." },
+    { path = "serde_yaml::from_str", reason = "BANNED: Use Validated<T>::new(value, &ctx) instead. (1) Add #[derive(garde::Validate)] to your response/data type. (2) Add garde rules to each field -- #[garde(length(chars, min = 1, max = N))] for strings, #[garde(range(min = 0))] for numbers, #[garde(dive)] for nested structs, #[garde(length(min = 1))] for non-empty vecs. (3) Deserialize into the raw type, then wrap with Validated::new()." },
+    { path = "serde_yaml::from_reader", reason = "BANNED: Use Validated<T>::new(value, &ctx) instead. (1) Add #[derive(garde::Validate)] to your response/data type. (2) Add garde rules to each field -- #[garde(length(chars, min = 1, max = N))] for strings, #[garde(range(min = 0))] for numbers, #[garde(dive)] for nested structs, #[garde(length(min = 1))] for non-empty vecs. (3) Deserialize into the raw type, then wrap with Validated::new()." },
     # --- Local overrides ---
 # Additional disallowed-methods entries (TOML array-of-tables format)
 # Example:
@@ -82,6 +91,11 @@ disallowed-types = [
     { path = "std::sync::RwLock", reason = "Use parking_lot::RwLock -- no poisoning, better performance" },
     # --- Ban std::fs::File (use centralized fs module) ---
     { path = "std::fs::File", reason = "BANNED: Create a centralized fs module -- no direct file handle construction" },
+    # --- Ban raw Axum extractors (use ValidatedJson/ValidatedQuery/ValidatedForm) ---
+    { path = "axum::extract::Json", reason = "BANNED: Use ValidatedJson<T>/ValidatedQuery<T>/ValidatedForm<T> instead. Requires #[derive(garde::Validate)] on the request type." },
+    { path = "axum::Json", reason = "BANNED: Use ValidatedJson<T>/ValidatedQuery<T>/ValidatedForm<T> instead. Requires #[derive(garde::Validate)] on the request type." },
+    { path = "axum::extract::Query", reason = "BANNED: Use ValidatedJson<T>/ValidatedQuery<T>/ValidatedForm<T> instead. Requires #[derive(garde::Validate)] on the request type." },
+    { path = "axum::extract::Form", reason = "BANNED: Use ValidatedJson<T>/ValidatedQuery<T>/ValidatedForm<T> instead. Requires #[derive(garde::Validate)] on the request type." },
     # --- Local overrides ---
 # Additional disallowed-types entries (TOML array-of-tables format)
 # Example:

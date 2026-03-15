@@ -76,6 +76,7 @@ pub enum HooksCommands {
 }
 
 #[derive(Parser, Debug, Clone)]
+#[allow(clippy::struct_excessive_bools)] // reason: CLI argument struct — each bool is an independent flag
 pub struct ValidateArgs {
     /// Output format
     #[arg(long, default_value = "text")]
@@ -100,6 +101,26 @@ pub struct ValidateArgs {
     /// Project path (defaults to current directory)
     #[arg(default_value = ".")]
     pub path: String,
+
+    /// Only run code quality checks
+    #[arg(long)]
+    pub code: bool,
+
+    /// Only run architecture checks
+    #[arg(long)]
+    pub architecture: bool,
+
+    /// Only run release readiness checks
+    #[arg(long)]
+    pub release: bool,
+
+    /// Only run test quality checks
+    #[arg(long)]
+    pub tests: bool,
+
+    /// Run slow checks (cargo publish --dry-run, etc.)
+    #[arg(long)]
+    pub thorough: bool,
 }
 
 #[derive(Parser, Debug)]

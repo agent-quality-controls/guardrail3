@@ -75,28 +75,47 @@ pub fn check_unwrap_expect(path: &Path, content: &str, results: &mut Vec<CheckRe
     }
 }
 
-// R49: CLAUDE.md
-pub fn check_claude_md(workspace_root: &Path, results: &mut Vec<CheckResult>) {
-    let claude_path = workspace_root.join("CLAUDE.md");
-    if claude_path.exists() {
+/// Check if a file exists at a given root, emitting Info if found, Warn if missing.
+pub fn check_file_exists_at_root(
+    root: &Path,
+    filename: &str,
+    check_id: &str,
+    found_title: &str,
+    missing_title: &str,
+    results: &mut Vec<CheckResult>,
+) {
+    let file_path = root.join(filename);
+    if file_path.exists() {
         results.push(CheckResult {
-            id: "R49".to_owned(),
+            id: check_id.to_owned(),
             severity: Severity::Info,
-            title: "CLAUDE.md exists".to_owned(),
+            title: found_title.to_owned(),
             message: "Found at project root".to_owned(),
-            file: Some(claude_path.display().to_string()),
+            file: Some(file_path.display().to_string()),
             line: None,
         });
     } else {
         results.push(CheckResult {
-            id: "R49".to_owned(),
+            id: check_id.to_owned(),
             severity: Severity::Warn,
-            title: "CLAUDE.md missing".to_owned(),
-            message: "No CLAUDE.md found at project root".to_owned(),
-            file: Some(workspace_root.display().to_string()),
+            title: missing_title.to_owned(),
+            message: format!("No {filename} found at project root"),
+            file: Some(root.display().to_string()),
             line: None,
         });
     }
+}
+
+// R49: CLAUDE.md
+pub fn check_claude_md(workspace_root: &Path, results: &mut Vec<CheckResult>) {
+    check_file_exists_at_root(
+        workspace_root,
+        "CLAUDE.md",
+        "R49",
+        "CLAUDE.md exists",
+        "CLAUDE.md missing",
+        results,
+    );
 }
 
 // R58: Direct std::fs usage — belt-and-suspenders check
@@ -113,11 +132,35 @@ pub fn check_direct_fs_usage(
         return;
     }
 
+    // Track whether we've entered a #[cfg(test)] block.
+    // Once we see `#[cfg(test)]` followed by an opening brace, skip everything
+    // from that point to the end of the file. Convention: #[cfg(test)] mod tests
+    // is always the last item in a Rust source file, so we don't need to track
+    // when the block closes. This avoids false positives from brace counting
+    // being confused by string literals containing braces in test code.
+    let mut seen_cfg_test = false;
+    let mut in_cfg_test_block = false;
+
     for (line_num, line) in content.lines().enumerate() {
         let trimmed = line.trim();
 
         // Skip comments
         if trimmed.starts_with("//") || trimmed.starts_with('*') || trimmed.starts_with("/*") {
+            continue;
+        }
+
+        // Detect #[cfg(test)] — mark that the next block is test code
+        if trimmed.contains("#[cfg(test)]") && !trimmed.contains('"') {
+            seen_cfg_test = true;
+        }
+
+        // Once we've seen #[cfg(test)] and hit a line with an opening brace,
+        // we're inside the test module — skip everything from here on
+        if seen_cfg_test && !in_cfg_test_block && trimmed.contains('{') {
+            in_cfg_test_block = true;
+        }
+
+        if in_cfg_test_block {
             continue;
         }
 
@@ -234,6 +277,55 @@ mod tests {
         assert!(
             results.is_empty(),
             "std::fs::Metadata type reference should be exempt"
+        );
+    }
+
+    #[test]
+    fn r58_skips_cfg_test_block() {
+        let content = "\
+fn production_code() {}
+
+#[cfg(test)]
+mod tests {
+    use std::fs;
+    fn helper() {
+        let _ = std::fs::read_to_string(\"test.txt\");
+    }
+}";
+        let path = Path::new("src/foo.rs");
+        let mut results = Vec::new();
+        check_direct_fs_usage(path, content, false, &mut results);
+        assert!(
+            results.is_empty(),
+            "std::fs usage inside #[cfg(test)] block should not trigger R58, got: {results:?}"
+        );
+    }
+
+    #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
+    fn r58_still_catches_production_fs_before_cfg_test() {
+        let content = "\
+use std::fs;
+
+fn production_code() {}
+
+#[cfg(test)]
+mod tests {
+    use std::fs;
+}";
+        let path = Path::new("src/foo.rs");
+        let mut results = Vec::new();
+        check_direct_fs_usage(path, content, false, &mut results);
+        assert_eq!(
+            results.len(),
+            1,
+            "Should catch production std::fs but not the one in #[cfg(test)]"
+        );
+        assert_eq!(results[0].id, "R58");
+        assert_eq!(
+            results[0].line,
+            Some(1),
+            "Should flag line 1 (production code), not line 7 (test code)"
         );
     }
 

@@ -2,7 +2,7 @@ use std::path::Path;
 
 use crate::report::types::{CheckResult, Severity};
 
-#[allow(clippy::too_many_lines)] // reason: jscpd config validation
+#[allow(clippy::too_many_lines, clippy::disallowed_methods)] // reason: jscpd config validation; guardrail3 JSON config inspection — not a trust boundary
 pub fn check_jscpd(path: &Path, results: &mut Vec<CheckResult>) {
     let jscpd_path = path.join(".jscpd.json");
     if !jscpd_path.exists() {

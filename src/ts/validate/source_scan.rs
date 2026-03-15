@@ -54,20 +54,23 @@ fn is_ts_file(path: &str) -> bool {
     path.ends_with(".ts") || path.ends_with(".tsx") || path.ends_with(".mjs")
 }
 
+/// Check if a walkdir entry is a directory that should be excluded from TypeScript source scanning.
+pub fn is_excluded_ts_dir(entry: &walkdir::DirEntry) -> bool {
+    let name = entry.file_name().to_string_lossy();
+    name == "node_modules"
+        || name == ".next"
+        || name == "dist"
+        || name == "target"
+        || name == "coverage"
+        || name == ".git"
+        || name == ".claude"
+}
+
 fn collect_ts_files(root: &Path) -> Vec<String> {
     let mut files = Vec::new();
     for entry in WalkDir::new(root)
         .into_iter()
-        .filter_entry(|e| {
-            let name = e.file_name().to_string_lossy();
-            name != "node_modules"
-                && name != ".next"
-                && name != "dist"
-                && name != "target"
-                && name != "coverage"
-                && name != ".git"
-                && name != ".claude"
-        })
+        .filter_entry(|e| !is_excluded_ts_dir(e))
         .flatten()
     {
         if entry.file_type().is_file() {

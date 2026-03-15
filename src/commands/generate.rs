@@ -3,7 +3,7 @@ use std::path::Path;
 
 use crate::cli::GenerateArgs;
 use crate::config;
-use crate::modules::{canonical, clippy, deny};
+use crate::modules::{canonical, clippy, deny, release};
 
 struct GeneratedFile {
     path: String,
@@ -383,6 +383,18 @@ fn generate_rust_files(
         path: format!("{root_prefix}rust-toolchain.toml"),
         content: canonical::RUST_TOOLCHAIN.content.to_owned(),
     });
+
+    // release-plz.toml and cliff.toml — service and monorepo profiles only
+    if profile == "service" || profile == "monorepo" {
+        files.push(GeneratedFile {
+            path: "release-plz.toml".to_owned(),
+            content: release::RELEASE_PLZ_TOML.content.to_owned(),
+        });
+        files.push(GeneratedFile {
+            path: "cliff.toml".to_owned(),
+            content: release::CLIFF_TOML.content.to_owned(),
+        });
+    }
 
     files
 }

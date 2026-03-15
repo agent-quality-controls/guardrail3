@@ -55,6 +55,7 @@ fn find_railpack_configs(path: &Path) -> Vec<std::path::PathBuf> {
     configs
 }
 
+#[allow(clippy::disallowed_methods)] // reason: guardrail3 JSON config inspection — not a trust boundary
 fn check_railpack_provider(config_path: &Path, results: &mut Vec<CheckResult>) {
     let content = match crate::fs::read_file_err(config_path) {
         Ok(content) => content,
@@ -209,6 +210,7 @@ fn check_nextjs_configs(path: &Path, results: &mut Vec<CheckResult>) {
     }
 }
 
+#[allow(clippy::disallowed_methods)] // reason: guardrail3 JSON config inspection — not a trust boundary
 fn check_tailwind_deps(path: &Path, results: &mut Vec<CheckResult>) {
     let apps_parent = path.join("apps");
     if !apps_parent.is_dir() {

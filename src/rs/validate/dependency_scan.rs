@@ -1,3 +1,4 @@
+use std::collections::BTreeSet;
 use std::path::Path;
 use std::process::Command;
 
@@ -86,6 +87,38 @@ fn check_tool_installed(
     }
 }
 
+/// Parse deny.toml skip entries to get crate names that should be excluded from R50.
+fn parse_deny_skip_crate_names(workspace_root: &Path) -> BTreeSet<String> {
+    let mut skipped = BTreeSet::new();
+    let deny_path = workspace_root.join("deny.toml");
+    let Some(content) = crate::fs::read_file(&deny_path) else {
+        return skipped;
+    };
+    let Ok(table) = content.parse::<toml::Value>() else {
+        return skipped;
+    };
+    let Some(bans) = table.get("bans") else {
+        return skipped;
+    };
+    let Some(skip) = bans.get("skip").and_then(|s| s.as_array()) else {
+        return skipped;
+    };
+
+    for entry in skip {
+        // Format: { crate = "name@version" }
+        if let Some(crate_field) = entry.get("crate").and_then(|c| c.as_str()) {
+            let name = crate_field.split('@').next().unwrap_or(crate_field);
+            let _ = skipped.insert(name.to_owned());
+        } else if let Some(s) = entry.as_str() {
+            let _ = skipped.insert(s.to_owned());
+        } else if let Some(n) = entry.get("name").and_then(|n| n.as_str()) {
+            let _ = skipped.insert(n.to_owned());
+        }
+    }
+
+    skipped
+}
+
 #[allow(clippy::too_many_lines)] // reason: cargo lock scanning
 fn check_cargo_lock(workspace_root: &Path, results: &mut Vec<CheckResult>) {
     let lock_path = workspace_root.join("Cargo.lock");
@@ -135,10 +168,12 @@ fn check_cargo_lock(workspace_root: &Path, results: &mut Vec<CheckResult>) {
         return;
     };
 
+    let skipped = parse_deny_skip_crate_names(workspace_root);
+
     let mut found_banned = Vec::new();
     for pkg in packages {
         if let Some(name) = pkg.get("name").and_then(|n| n.as_str()) {
-            if BANNED_CRATE_NAMES.contains(&name) {
+            if BANNED_CRATE_NAMES.contains(&name) && !skipped.contains(name) {
                 let version = pkg
                     .get("version")
                     .and_then(|v| v.as_str())
