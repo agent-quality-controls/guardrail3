@@ -9,6 +9,9 @@ mod report;
 mod rs;
 mod ts;
 
+#[cfg(test)]
+use proptest as _;
+
 use clap::Parser;
 
 use cli::{Cli, Commands, HooksCommands, RsCommands, TsCommands, ValidateArgs};
