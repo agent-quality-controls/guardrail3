@@ -121,7 +121,7 @@ pub fn check(workspace_root: &Path) -> Vec<CheckResult> {
         return results;
     }
 
-    let content = match std::fs::read_to_string(&cargo_path) {
+    let content = match crate::fs::read_file_err(&cargo_path) {
         Ok(content) => content,
         Err(e) => {
             results.push(CheckResult {
@@ -289,7 +289,7 @@ pub fn check_workspace_inheritance(
             continue;
         }
 
-        let Ok(content) = std::fs::read_to_string(&crate_cargo) else {
+        let Some(content) = crate::fs::read_file(&crate_cargo) else {
             continue;
         };
 

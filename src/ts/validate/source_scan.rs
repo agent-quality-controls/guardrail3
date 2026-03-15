@@ -14,7 +14,7 @@ pub fn check(path: &Path, scoped_files: Option<&[String]>) -> Vec<CheckResult> {
 
     for file_path in &ts_files {
         let fp = Path::new(file_path);
-        let Ok(content) = std::fs::read_to_string(fp) else {
+        let Some(content) = crate::fs::read_file(fp) else {
             continue;
         };
 
@@ -23,8 +23,24 @@ pub fn check(path: &Path, scoped_files: Option<&[String]>) -> Vec<CheckResult> {
         check_process_env(fp, &content, &mut results);
         check_any_types(fp, &content, &mut results);
         check_file_length(fp, &content, &mut results);
-        check_noinspection(fp, &content, &mut results);
-        check_coverage_ignore(fp, &content, &mut results);
+        // T34: // noinspection
+        check_comment_pattern(
+            fp,
+            &content,
+            &["// noinspection", "/* noinspection"],
+            "T34",
+            "noinspection comment",
+            &mut results,
+        );
+        // T35: istanbul ignore / c8 ignore
+        check_comment_pattern(
+            fp,
+            &content,
+            &["istanbul ignore", "c8 ignore"],
+            "T35",
+            "Coverage ignore comment",
+            &mut results,
+        );
     }
 
     // T59: Banned packages in node_modules
@@ -306,32 +322,22 @@ fn check_file_length(path: &Path, content: &str, results: &mut Vec<CheckResult>)
     }
 }
 
-// T34: // noinspection
-fn check_noinspection(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
+/// Scan lines for comment patterns and emit an info-level `CheckResult` for each match.
+fn check_comment_pattern(
+    path: &Path,
+    content: &str,
+    patterns: &[&str],
+    check_id: &str,
+    title: &str,
+    results: &mut Vec<CheckResult>,
+) {
     for (line_num, line) in content.lines().enumerate() {
-        if line.contains("// noinspection") || line.contains("/* noinspection") {
+        if patterns.iter().any(|p| line.contains(p)) {
             let line_number = line_num.saturating_add(1);
             results.push(CheckResult {
-                id: "T34".to_owned(),
+                id: check_id.to_owned(),
                 severity: Severity::Info,
-                title: "noinspection comment".to_owned(),
-                message: line.trim().to_owned(),
-                file: Some(path.display().to_string()),
-                line: Some(line_number),
-            });
-        }
-    }
-}
-
-// T35: istanbul ignore / c8 ignore
-fn check_coverage_ignore(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
-    for (line_num, line) in content.lines().enumerate() {
-        if line.contains("istanbul ignore") || line.contains("c8 ignore") {
-            let line_number = line_num.saturating_add(1);
-            results.push(CheckResult {
-                id: "T35".to_owned(),
-                severity: Severity::Info,
-                title: "Coverage ignore comment".to_owned(),
+                title: title.to_owned(),
                 message: line.trim().to_owned(),
                 file: Some(path.display().to_string()),
                 line: Some(line_number),
@@ -364,6 +370,9 @@ fn check_banned_in_node_modules(path: &Path, results: &mut Vec<CheckResult>) {
         "node-fetch",
         "isomorphic-fetch",
         "underscore",
+        "request-promise",
+        "postgres",
+        "cross-fetch",
     ];
     let banned_prefixes: &[&str] = &["embla-carousel"];
 
@@ -382,19 +391,17 @@ fn check_banned_in_node_modules(path: &Path, results: &mut Vec<CheckResult>) {
     }
 
     // Check embla-carousel prefix
-    if let Ok(entries) = std::fs::read_dir(&nm_path) {
-        for entry in entries.flatten() {
-            let name = entry.file_name().to_string_lossy().into_owned();
-            if banned_prefixes.iter().any(|p| name.starts_with(p)) {
-                results.push(CheckResult {
-                    id: "T59".to_owned(),
-                    severity: Severity::Error,
-                    title: format!("Banned package in node_modules: {name}"),
-                    message: format!("{name} found in node_modules"),
-                    file: Some(entry.path().display().to_string()),
-                    line: None,
-                });
-            }
+    for entry in crate::fs::list_dir(&nm_path) {
+        let name = entry.file_name().to_string_lossy().into_owned();
+        if banned_prefixes.iter().any(|p| name.starts_with(p)) {
+            results.push(CheckResult {
+                id: "T59".to_owned(),
+                severity: Severity::Error,
+                title: format!("Banned package in node_modules: {name}"),
+                message: format!("{name} found in node_modules"),
+                file: Some(entry.path().display().to_string()),
+                line: None,
+            });
         }
     }
 }

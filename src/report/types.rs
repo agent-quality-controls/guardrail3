@@ -41,27 +41,26 @@ impl Report {
         self.sections.push(section);
     }
 
-    pub fn error_count(&self) -> usize {
+    fn count_by_severity(&self, severity: Severity) -> usize {
         self.sections
             .iter()
             .flat_map(|s| &s.results)
-            .filter(|r| r.severity == Severity::Error)
-            .count()
-    }
-
-    pub fn warn_count(&self) -> usize {
-        self.sections
-            .iter()
-            .flat_map(|s| &s.results)
-            .filter(|r| r.severity == Severity::Warn)
-            .count()
-    }
-
-    pub fn info_count(&self) -> usize {
-        self.sections
-            .iter()
-            .flat_map(|s| &s.results)
-            .filter(|r| r.severity == Severity::Info)
+            .filter(|r| r.severity == severity)
             .count()
     }
 }
+
+/// Generate a severity-count method on `Report` to avoid structural duplication.
+macro_rules! severity_counter {
+    ($name:ident, $variant:ident) => {
+        impl Report {
+            pub fn $name(&self) -> usize {
+                self.count_by_severity(Severity::$variant)
+            }
+        }
+    };
+}
+
+severity_counter!(error_count, Error);
+severity_counter!(warn_count, Warn);
+severity_counter!(info_count, Info);

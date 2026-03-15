@@ -2,6 +2,7 @@ mod cli;
 mod commands;
 mod config;
 mod discover;
+mod fs;
 mod hooks;
 mod modules;
 mod report;

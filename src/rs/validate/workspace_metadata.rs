@@ -10,7 +10,7 @@ pub fn check_workspace_metadata(workspace_root: &Path, results: &mut Vec<CheckRe
         return;
     }
 
-    let Ok(content) = std::fs::read_to_string(&cargo_path) else {
+    let Some(content) = crate::fs::read_file(&cargo_path) else {
         return;
     };
 
@@ -20,29 +20,8 @@ pub fn check_workspace_metadata(workspace_root: &Path, results: &mut Vec<CheckRe
     };
 
     // R55: Report workspace edition and rust-version
-    let edition = table
-        .get("workspace")
-        .and_then(|w| w.get("package"))
-        .and_then(|p| p.get("edition"))
-        .and_then(|e| e.as_str())
-        .or_else(|| {
-            table
-                .get("package")
-                .and_then(|p| p.get("edition"))
-                .and_then(|e| e.as_str())
-        });
-
-    let rust_version = table
-        .get("workspace")
-        .and_then(|w| w.get("package"))
-        .and_then(|p| p.get("rust-version"))
-        .and_then(|r| r.as_str())
-        .or_else(|| {
-            table
-                .get("package")
-                .and_then(|p| p.get("rust-version"))
-                .and_then(|r| r.as_str())
-        });
+    let edition = get_package_str_field(&table, "edition");
+    let rust_version = get_package_str_field(&table, "rust-version");
 
     let mut meta_parts = Vec::new();
     if let Some(ed) = edition {
@@ -100,4 +79,19 @@ pub fn check_workspace_metadata(workspace_root: &Path, results: &mut Vec<CheckRe
             });
         }
     }
+}
+
+/// Look up a string field in `[workspace.package]`, falling back to `[package]`.
+fn get_package_str_field<'a>(table: &'a toml::Value, field: &str) -> Option<&'a str> {
+    table
+        .get("workspace")
+        .and_then(|w| w.get("package"))
+        .and_then(|p| p.get(field))
+        .and_then(|v| v.as_str())
+        .or_else(|| {
+            table
+                .get("package")
+                .and_then(|p| p.get(field))
+                .and_then(|v| v.as_str())
+        })
 }

@@ -39,25 +39,7 @@ const EXPECTED_TYPE_BANS: &[&str] = &[
     "std::fs::File",
 ];
 
-const MINIMAL_EXPECTED_METHOD_BANS: &[&str] = &[
-    "std::env::var",
-    "std::env::var_os",
-    "std::env::vars",
-    "std::env::set_var",
-    "std::env::remove_var",
-    "std::process::exit",
-    "std::process::Command::new",
-    "std::thread::sleep",
-];
-
-const MINIMAL_EXPECTED_TYPE_BANS: &[&str] = &[
-    "std::collections::HashMap",
-    "std::collections::HashSet",
-    "std::sync::Mutex",
-    "std::sync::RwLock",
-];
-
-pub fn check(workspace_root: &Path, profile: Option<&str>) -> Vec<CheckResult> {
+pub fn check(workspace_root: &Path, _profile: Option<&str>) -> Vec<CheckResult> {
     let mut results = Vec::new();
     let clippy_path = workspace_root.join("clippy.toml");
 
@@ -73,7 +55,7 @@ pub fn check(workspace_root: &Path, profile: Option<&str>) -> Vec<CheckResult> {
         return results;
     }
 
-    let content = match std::fs::read_to_string(&clippy_path) {
+    let content = match crate::fs::read_file_err(&clippy_path) {
         Ok(content) => content,
         Err(e) => {
             results.push(CheckResult {
@@ -103,14 +85,10 @@ pub fn check(workspace_root: &Path, profile: Option<&str>) -> Vec<CheckResult> {
         }
     };
 
-    let expected_methods = match profile {
-        Some("minimal") => MINIMAL_EXPECTED_METHOD_BANS,
-        _ => EXPECTED_METHOD_BANS,
-    };
-    let expected_types = match profile {
-        Some("minimal") => MINIMAL_EXPECTED_TYPE_BANS,
-        _ => EXPECTED_TYPE_BANS,
-    };
+    // All profiles (service, library, monorepo) use the same expected bans.
+    // Unknown/missing profiles default to service (the most comprehensive set).
+    let expected_methods = EXPECTED_METHOD_BANS;
+    let expected_types = EXPECTED_TYPE_BANS;
 
     // Check disallowed-methods: R4=missing, R6=extras
     check_ban_list(

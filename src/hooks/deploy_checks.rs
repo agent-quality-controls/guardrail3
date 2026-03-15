@@ -44,12 +44,10 @@ pub fn check_deployment(path: &Path, results: &mut Vec<CheckResult>) {
 #[allow(clippy::case_sensitive_file_extension_comparisons)] // reason: only checking .json files which are always lowercase
 fn find_railpack_configs(path: &Path) -> Vec<std::path::PathBuf> {
     let mut configs = Vec::new();
-    if let Ok(entries) = std::fs::read_dir(path) {
-        for entry in entries.flatten() {
-            if let Some(name) = entry.file_name().to_str() {
-                if name.starts_with("railpack-") && name.ends_with(".json") {
-                    configs.push(entry.path());
-                }
+    for entry in crate::fs::list_dir(path) {
+        if let Some(name) = entry.file_name().to_str() {
+            if name.starts_with("railpack-") && name.ends_with(".json") {
+                configs.push(entry.path());
             }
         }
     }
@@ -58,7 +56,7 @@ fn find_railpack_configs(path: &Path) -> Vec<std::path::PathBuf> {
 }
 
 fn check_railpack_provider(config_path: &Path, results: &mut Vec<CheckResult>) {
-    let content = match std::fs::read_to_string(config_path) {
+    let content = match crate::fs::read_file_err(config_path) {
         Ok(content) => content,
         Err(e) => {
             results.push(CheckResult {
@@ -137,11 +135,7 @@ fn check_nextjs_configs(path: &Path, results: &mut Vec<CheckResult>) {
         return;
     }
 
-    let Ok(entries) = std::fs::read_dir(&apps_parent) else {
-        return;
-    };
-
-    for entry in entries.flatten() {
+    for entry in crate::fs::list_dir(&apps_parent) {
         let entry_dir = entry.path();
         if !entry_dir.is_dir() {
             continue;
@@ -162,7 +156,7 @@ fn check_nextjs_configs(path: &Path, results: &mut Vec<CheckResult>) {
             continue; // Not a Next.js app
         };
 
-        let Ok(content) = std::fs::read_to_string(&config_path) else {
+        let Some(content) = crate::fs::read_file(&config_path) else {
             continue;
         };
 
@@ -221,18 +215,14 @@ fn check_tailwind_deps(path: &Path, results: &mut Vec<CheckResult>) {
         return;
     }
 
-    let Ok(entries) = std::fs::read_dir(&apps_parent) else {
-        return;
-    };
-
-    for entry in entries.flatten() {
+    for entry in crate::fs::list_dir(&apps_parent) {
         let entry_dir = entry.path();
         let pkg_json_path = entry_dir.join("package.json");
         if !pkg_json_path.exists() {
             continue;
         }
 
-        let Ok(content) = std::fs::read_to_string(&pkg_json_path) else {
+        let Some(content) = crate::fs::read_file(&pkg_json_path) else {
             continue;
         };
 

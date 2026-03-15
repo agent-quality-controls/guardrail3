@@ -8,6 +8,11 @@ use crate::report::types::Report;
 use crate::rs;
 use crate::ts;
 
+/// Convert a repo-relative path to an absolute path string.
+fn to_abs_path(project_path: &Path, relative: &str) -> String {
+    project_path.join(relative).display().to_string()
+}
+
 #[allow(clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — stderr output and exit codes
 pub fn run(args: &ValidateArgs) {
     let path = Path::new(&args.path);
@@ -106,7 +111,7 @@ fn git_staged_files(project_path: &Path) -> Option<Vec<String>> {
 
     let files: Vec<String> = String::from_utf8_lossy(&output.stdout)
         .lines()
-        .map(|l| project_path.join(l).display().to_string())
+        .map(|l| to_abs_path(project_path, l))
         .collect();
 
     Some(files)
@@ -168,7 +173,7 @@ fn git_commit_files(project_path: &Path, n: usize) -> Option<Vec<String>> {
     let files: Vec<String> = String::from_utf8_lossy(&output.stdout)
         .lines()
         .filter(|l| !l.is_empty())
-        .map(|l| project_path.join(l).display().to_string())
+        .map(|l| to_abs_path(project_path, l))
         .collect();
 
     Some(files)

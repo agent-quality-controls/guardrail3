@@ -7,7 +7,7 @@ use crate::report::types::{CheckResult, Severity};
 pub fn check_ban_list(
     table: &toml::Value,
     file_path: &Path,
-    profile: Option<&str>,
+    _profile: Option<&str>,
     results: &mut Vec<CheckResult>,
 ) {
     let Some(bans) = table.get("bans") else {
@@ -98,10 +98,8 @@ pub fn check_ban_list(
         }
     }
 
-    let expected_bans: &[&str] = match profile {
-        Some("minimal") => &[],
-        _ => super::deny_audit::EXPECTED_BANS,
-    };
+    // All profiles use the same expected bans. Unknown/missing defaults to service.
+    let expected_bans: &[&str] = super::deny_audit::EXPECTED_BANS;
     let expected_set: BTreeSet<String> = expected_bans.iter().map(|s| (*s).to_owned()).collect();
 
     for exp in &expected_set {

@@ -26,7 +26,7 @@ pub fn check_jscpd(path: &Path, results: &mut Vec<CheckResult>) {
         line: None,
     });
 
-    let Ok(content) = std::fs::read_to_string(&jscpd_path) else {
+    let Some(content) = crate::fs::read_file(&jscpd_path) else {
         return;
     };
 
@@ -116,7 +116,7 @@ pub fn check_content_import_restriction(path: &Path, results: &mut Vec<CheckResu
         return;
     }
 
-    let Ok(content) = std::fs::read_to_string(&eslint_path) else {
+    let Some(content) = crate::fs::read_file(&eslint_path) else {
         return;
     };
 

@@ -29,7 +29,7 @@ pub fn check_npmrc(path: &Path, results: &mut Vec<CheckResult>) {
         line: None,
     });
 
-    let Ok(content) = std::fs::read_to_string(&npmrc_path) else {
+    let Some(content) = crate::fs::read_file(&npmrc_path) else {
         return;
     };
 

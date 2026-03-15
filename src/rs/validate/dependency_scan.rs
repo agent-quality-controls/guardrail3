@@ -101,7 +101,7 @@ fn check_cargo_lock(workspace_root: &Path, results: &mut Vec<CheckResult>) {
         return;
     }
 
-    let content = match std::fs::read_to_string(&lock_path) {
+    let content = match crate::fs::read_file_err(&lock_path) {
         Ok(content) => content,
         Err(e) => {
             results.push(CheckResult {

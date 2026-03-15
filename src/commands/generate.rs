@@ -1,5 +1,4 @@
 use std::collections::BTreeMap;
-use std::fs;
 use std::path::Path;
 
 use crate::cli::GenerateArgs;
@@ -12,7 +11,7 @@ struct GeneratedFile {
 }
 
 /// Main generate command -- generates all config files from guardrail3.toml.
-#[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
+#[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and process::exit for error codes
 pub fn run(args: &GenerateArgs) {
     let project_path = Path::new(&args.path);
     let Some(cfg) = config::load_config(project_path) else {
@@ -36,12 +35,12 @@ pub fn run(args: &GenerateArgs) {
     for gf in &files {
         let target = project_path.join(&gf.path);
         if let Some(parent) = target.parent() {
-            if let Err(e) = fs::create_dir_all(parent) {
+            if let Err(e) = crate::fs::create_dir_all(parent) {
                 eprintln!("Error creating directory {}: {e}", parent.display());
                 continue;
             }
         }
-        if let Err(e) = fs::write(&target, &gf.content) {
+        if let Err(e) = crate::fs::write_file(&target, &gf.content) {
             eprintln!("Error writing {}: {e}", gf.path);
             continue;
         }
@@ -87,9 +86,9 @@ pub fn run_rs(args: &GenerateArgs) {
     for gf in &files {
         let target = project_path.join(&gf.path);
         if let Some(parent) = target.parent() {
-            let _ = fs::create_dir_all(parent);
+            let _ = crate::fs::create_dir_all(parent);
         }
-        if let Err(e) = fs::write(&target, &gf.content) {
+        if let Err(e) = crate::fs::write_file(&target, &gf.content) {
             eprintln!("Error writing {}: {e}", gf.path);
             continue;
         }
@@ -122,9 +121,9 @@ pub fn run_ts(args: &GenerateArgs) {
     for gf in &files {
         let target = project_path.join(&gf.path);
         if let Some(parent) = target.parent() {
-            let _ = fs::create_dir_all(parent);
+            let _ = crate::fs::create_dir_all(parent);
         }
-        if let Err(e) = fs::write(&target, &gf.content) {
+        if let Err(e) = crate::fs::write_file(&target, &gf.content) {
             eprintln!("Error writing {}: {e}", gf.path);
             continue;
         }
@@ -140,16 +139,21 @@ pub fn run_ts(args: &GenerateArgs) {
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
 pub fn run_hooks(args: &GenerateArgs) {
     let project_path = Path::new(&args.path);
-    let hook_content = crate::modules::pre_commit::PRE_COMMIT_SCRIPT.content;
+    let cfg = config::load_config(project_path);
+
+    let has_rust = cfg.as_ref().and_then(|c| c.rust.as_ref()).is_some();
+    let has_typescript = cfg.as_ref().and_then(|c| c.typescript.as_ref()).is_some();
+    let hook_content =
+        crate::modules::pre_commit::build_pre_commit_script(has_rust, has_typescript);
 
     let hooks_dir = project_path.join(".githooks");
-    if let Err(e) = fs::create_dir_all(&hooks_dir) {
+    if let Err(e) = crate::fs::create_dir_all(&hooks_dir) {
         eprintln!("Error creating .githooks/ directory: {e}");
         std::process::exit(1);
     }
 
     let hook_path = hooks_dir.join("pre-commit");
-    if let Err(e) = fs::write(&hook_path, hook_content) {
+    if let Err(e) = crate::fs::write_file(&hook_path, &hook_content) {
         eprintln!("Error writing pre-commit hook: {e}");
         std::process::exit(1);
     }
@@ -158,8 +162,8 @@ pub fn run_hooks(args: &GenerateArgs) {
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
-        let perms = fs::Permissions::from_mode(0o755);
-        if let Err(e) = fs::set_permissions(&hook_path, perms) {
+        let perms = std::fs::Permissions::from_mode(0o755);
+        if let Err(e) = crate::fs::set_permissions(&hook_path, perms) {
             eprintln!("Warning: could not set executable permission: {e}");
         }
     }
@@ -191,7 +195,7 @@ fn load_local_overrides(
         match field {
             Some(rel) => {
                 let path = project_path.join(rel);
-                fs::read_to_string(&path).unwrap_or_default()
+                crate::fs::read_file(&path).unwrap_or_default()
             }
             None => String::new(),
         }
@@ -234,15 +238,16 @@ fn generate_all_files(
         files.extend(ts_files);
     }
 
-    // Hooks — replace default workspace root with configured value
+    // Hooks — build script with appropriate duplication sections and workspace root
+    let has_rust = cfg.rust.is_some();
+    let has_typescript = cfg.typescript.is_some();
     let rust_workspace_root = cfg
         .rust
         .as_ref()
         .and_then(|r| r.workspace_root.as_deref())
         .unwrap_or(".");
-    let hook_content = crate::modules::pre_commit::PRE_COMMIT_SCRIPT
-        .content
-        .replace(
+    let hook_content =
+        crate::modules::pre_commit::build_pre_commit_script(has_rust, has_typescript).replace(
             "GUARDRAIL3_RUST_WORKSPACE:-.}",
             &format!("GUARDRAIL3_RUST_WORKSPACE:-{rust_workspace_root}}}"),
         );
@@ -393,14 +398,6 @@ fn build_deny_for_profile(
             profile,
             &deny::library_profile_ban_entries(),
             None, // no tokio feature ban (tokio banned entirely)
-            extra_bans,
-            extra_skip,
-            extra_feature_bans,
-        ),
-        "minimal" => deny::build_deny_toml_with_entries(
-            profile,
-            &deny::minimal_profile_ban_entries(),
-            None, // no feature bans
             extra_bans,
             extra_skip,
             extra_feature_bans,

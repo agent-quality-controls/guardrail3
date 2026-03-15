@@ -2,6 +2,9 @@ use std::path::Path;
 
 use crate::report::types::{CheckResult, Severity};
 
+/// A tsconfig boolean check: (`setting_name`, `check_id`).
+type TsConfigBool = (&'static str, &'static str);
+
 #[allow(clippy::too_many_lines)] // reason: comprehensive tsconfig validation
 #[allow(clippy::or_fun_call)] // reason: map_or with function call is intentional for display
 pub fn check_tsconfig(path: &Path, results: &mut Vec<CheckResult>) {
@@ -34,7 +37,7 @@ pub fn check_tsconfig(path: &Path, results: &mut Vec<CheckResult>) {
         line: None,
     });
 
-    let Ok(content) = std::fs::read_to_string(&tsconfig_path) else {
+    let Some(content) = crate::fs::read_file(&tsconfig_path) else {
         return;
     };
 
@@ -54,8 +57,7 @@ pub fn check_tsconfig(path: &Path, results: &mut Vec<CheckResult>) {
     };
 
     let compiler_options = json.get("compilerOptions");
-    #[allow(clippy::type_complexity)] // reason: legitimate complex type
-    let required_bools: &[(&str, &str)] = &[
+    let required_bools: &[TsConfigBool] = &[
         ("strict", "T9"),
         ("noImplicitReturns", "T9"),
         ("noUnusedLocals", "T9"),
@@ -65,8 +67,20 @@ pub fn check_tsconfig(path: &Path, results: &mut Vec<CheckResult>) {
         ("forceConsistentCasingInFileNames", "T9"),
     ];
 
-    #[allow(clippy::type_complexity)] // reason: legitimate type for tsconfig checks
-    let warn_bools: &[(&str, &str)] = &[("isolatedModules", "T54")];
+    // Settings that must be true
+    let additional_required_bools: &[TsConfigBool] = &[
+        ("noPropertyAccessFromIndexSignature", "T60"),
+        ("noImplicitOverride", "T61"),
+        ("noFallthroughCasesInSwitch", "T62"),
+    ];
+
+    // Settings that must be false
+    let required_false_bools: &[TsConfigBool] = &[
+        ("allowUnreachableCode", "T63"),
+        ("allowUnusedLabels", "T64"),
+    ];
+
+    let warn_bools: &[TsConfigBool] = &[("isolatedModules", "T54")];
 
     for (key, id) in required_bools {
         let val = compiler_options
@@ -136,6 +150,86 @@ pub fn check_tsconfig(path: &Path, results: &mut Vec<CheckResult>) {
         }
     }
 
+    // Additional required true bools
+    for (key, id) in additional_required_bools {
+        let val = compiler_options
+            .and_then(|co| co.get(key))
+            .and_then(serde_json::Value::as_bool);
+
+        match val {
+            Some(true) => {
+                results.push(CheckResult {
+                    id: (*id).to_owned(),
+                    severity: Severity::Info,
+                    title: format!("{key}: true"),
+                    message: format!("{key} is enabled"),
+                    file: Some(tsconfig_path.display().to_string()),
+                    line: None,
+                });
+            }
+            Some(false) => {
+                results.push(CheckResult {
+                    id: (*id).to_owned(),
+                    severity: Severity::Error,
+                    title: format!("{key}: false"),
+                    message: format!("{key} should be true"),
+                    file: Some(tsconfig_path.display().to_string()),
+                    line: None,
+                });
+            }
+            None => {
+                results.push(CheckResult {
+                    id: (*id).to_owned(),
+                    severity: Severity::Error,
+                    title: format!("{key} missing"),
+                    message: format!("{key} not set in compilerOptions"),
+                    file: Some(tsconfig_path.display().to_string()),
+                    line: None,
+                });
+            }
+        }
+    }
+
+    // Required false bools (must be explicitly set to false)
+    for (key, id) in required_false_bools {
+        let val = compiler_options
+            .and_then(|co| co.get(key))
+            .and_then(serde_json::Value::as_bool);
+
+        match val {
+            Some(false) => {
+                results.push(CheckResult {
+                    id: (*id).to_owned(),
+                    severity: Severity::Info,
+                    title: format!("{key}: false"),
+                    message: format!("{key} is correctly set to false"),
+                    file: Some(tsconfig_path.display().to_string()),
+                    line: None,
+                });
+            }
+            Some(true) => {
+                results.push(CheckResult {
+                    id: (*id).to_owned(),
+                    severity: Severity::Error,
+                    title: format!("{key}: true"),
+                    message: format!("{key} should be false"),
+                    file: Some(tsconfig_path.display().to_string()),
+                    line: None,
+                });
+            }
+            None => {
+                results.push(CheckResult {
+                    id: (*id).to_owned(),
+                    severity: Severity::Error,
+                    title: format!("{key} missing"),
+                    message: format!("{key} not set in compilerOptions (should be false)"),
+                    file: Some(tsconfig_path.display().to_string()),
+                    line: None,
+                });
+            }
+        }
+    }
+
     // T10: Extra compiler options — Info inventory
     let known_keys: &[&str] = &[
         "strict",
@@ -146,6 +240,11 @@ pub fn check_tsconfig(path: &Path, results: &mut Vec<CheckResult>) {
         "exactOptionalPropertyTypes",
         "forceConsistentCasingInFileNames",
         "isolatedModules",
+        "noPropertyAccessFromIndexSignature",
+        "noImplicitOverride",
+        "noFallthroughCasesInSwitch",
+        "allowUnreachableCode",
+        "allowUnusedLabels",
         // Common standard options (not flagged as "extra")
         "target",
         "module",

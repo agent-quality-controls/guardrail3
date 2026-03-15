@@ -24,14 +24,14 @@ pub fn check(
 
     for file_path in &rs_files {
         let path = Path::new(file_path);
-        let Ok(content) = std::fs::read_to_string(path) else {
+        let Some(content) = crate::fs::read_file(path) else {
             continue;
         };
 
         let is_bin_entry = is_bin_crate_entry(path);
         let is_test_file = is_test(path);
 
-        check_crate_level_allow(path, &content, is_bin_entry, &mut results);
+        check_crate_level_allow(path, &content, is_bin_entry, is_test_file, &mut results);
         check_item_level_allow(path, &content, &mut results);
         check_garde_skip(path, &content, &mut results);
         check_cfg_attr_allow(path, &content, &mut results);
@@ -195,6 +195,7 @@ fn check_crate_level_allow(
     path: &Path,
     content: &str,
     _is_bin_entry: bool,
+    is_test_file: bool,
     results: &mut Vec<CheckResult>,
 ) {
     let non_comment_lines = filter_non_comment_lines(content);
@@ -244,9 +245,16 @@ fn check_crate_level_allow(
                     line: Some(line_number),
                 });
             } else {
+                // Test files are exempt from R30 (matches pre-commit hook behavior
+                // which excludes /tests/ from source scanning)
+                let severity = if is_test_file {
+                    Severity::Info
+                } else {
+                    Severity::Error
+                };
                 results.push(CheckResult {
                     id: "R30".to_owned(),
-                    severity: Severity::Error,
+                    severity,
                     title: "Crate-level #![allow]".to_owned(),
                     message: format!("#![allow({lint})] — crate-wide lint suppression banned"),
                     file: Some(path.display().to_string()),
@@ -381,7 +389,7 @@ fn check_exception_comments(workspace_root: &Path, results: &mut Vec<CheckResult
             continue;
         }
 
-        let Ok(content) = std::fs::read_to_string(&path) else {
+        let Some(content) = crate::fs::read_file(&path) else {
             continue;
         };
 
@@ -656,7 +664,7 @@ fn check_all_dependency_directions(
 }
 
 fn check_dependency_direction(cargo_path: &Path, member_dir: &str, results: &mut Vec<CheckResult>) {
-    let Ok(content) = std::fs::read_to_string(cargo_path) else {
+    let Some(content) = crate::fs::read_file(cargo_path) else {
         return;
     };
 
@@ -756,7 +764,7 @@ fn check_dependency_graph(
             continue;
         }
 
-        let Ok(content) = std::fs::read_to_string(&cargo_path) else {
+        let Some(content) = crate::fs::read_file(&cargo_path) else {
             continue;
         };
 
@@ -808,7 +816,7 @@ fn check_unsafe_code_forbid(workspace_root: &Path, results: &mut Vec<CheckResult
         return;
     }
 
-    let Ok(content) = std::fs::read_to_string(&cargo_path) else {
+    let Some(content) = crate::fs::read_file(&cargo_path) else {
         return;
     };
 

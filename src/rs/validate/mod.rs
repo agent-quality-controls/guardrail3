@@ -19,7 +19,7 @@ use crate::report::types::{Report, Section};
 /// Try to load the profile name from guardrail3.toml if it exists.
 fn detect_profile(path: &Path) -> Option<String> {
     let config_path = path.join("guardrail3.toml");
-    let content = std::fs::read_to_string(&config_path).ok()?;
+    let content = crate::fs::read_file(&config_path)?;
     let table: toml::Value = content.parse().ok()?;
     table
         .get("profile")
