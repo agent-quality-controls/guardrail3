@@ -179,13 +179,13 @@ pub fn build_clippy_toml(
     let methods = match profile {
         "library" => library_profile_methods(),
         "minimal" => minimal_profile_methods(),
-        _ => service_profile_methods(),
+        "monorepo" | "service" | _ => service_profile_methods(),
     };
 
     let types = match profile {
         "library" => library_profile_types(),
         "minimal" => minimal_profile_types(),
-        _ => {
+        "monorepo" | "service" | _ => {
             let mut t = service_profile_types();
             if is_pure_layer {
                 t.extend(pure_layer_extra_types());

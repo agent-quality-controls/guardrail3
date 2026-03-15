@@ -1,0 +1,3 @@
+# Skip entries for deny.toml [bans] section
+# Example:
+#     { crate = "windows-sys@0.60.2", reason = "transitive dep conflict" },

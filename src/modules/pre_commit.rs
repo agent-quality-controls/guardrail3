@@ -6,6 +6,9 @@ pub const PRE_COMMIT_SCRIPT: Module = Module {
     content: r#"#!/usr/bin/env bash
 set -uo pipefail
 
+# Rust workspace root — override with GUARDRAIL3_RUST_WORKSPACE env var
+RUST_WORKSPACE="${GUARDRAIL3_RUST_WORKSPACE:-.}"
+
 # Collect staged files once
 STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
 
@@ -151,13 +154,13 @@ fi
 # --- Rust checks (only if Rust or Cargo files changed) ---
 if [ "$RUST_CHANGED" -gt 0 ] || [ "$CARGO_CHANGED" -gt 0 ]; then
     echo "Running Rust format check..."
-    if ! (cd apps/backend && cargo fmt --all -- --check); then
-        echo "Rust formatting check failed. Run 'cd apps/backend && cargo fmt --all' to fix."
+    if ! (cd "$RUST_WORKSPACE" && cargo fmt --all -- --check); then
+        echo "Rust formatting check failed. Run 'cd "$RUST_WORKSPACE" && cargo fmt --all' to fix."
         exit 1
     fi
 
     echo "Running Rust clippy..."
-    if ! (cd apps/backend && cargo clippy --workspace --all-targets --all-features -- -D warnings); then
+    if ! (cd "$RUST_WORKSPACE" && cargo clippy --workspace --all-targets --all-features -- -D warnings); then
         echo "Clippy failed. Fix errors before committing."
         exit 1
     fi
@@ -167,7 +170,7 @@ if [ "$RUST_CHANGED" -gt 0 ] || [ "$CARGO_CHANGED" -gt 0 ]; then
         echo "ERROR: cargo-deny not installed. Install: cargo install cargo-deny"
         exit 1
     fi
-    if ! (cd apps/backend && cargo deny check); then
+    if ! (cd "$RUST_WORKSPACE" && cargo deny check); then
         echo "cargo-deny check failed. Fix dependency issues before committing."
         exit 1
     fi
@@ -225,13 +228,13 @@ if [ "$RUST_CHANGED" -gt 0 ] || [ "$CARGO_CHANGED" -gt 0 ]; then
         echo "ERROR: cargo-machete not installed. Install: cargo install cargo-machete"
         exit 1
     fi
-    if ! (cd apps/backend && cargo machete); then
+    if ! (cd "$RUST_WORKSPACE" && cargo machete); then
         echo "Unused dependencies found. Remove them from Cargo.toml."
         exit 1
     fi
 
     echo "Running Rust tests..."
-    if ! (cd apps/backend && cargo test --workspace); then
+    if ! (cd "$RUST_WORKSPACE" && cargo test --workspace); then
         echo "Rust tests failed. Fix tests before committing."
         exit 1
     fi

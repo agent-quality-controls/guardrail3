@@ -16,8 +16,72 @@ pub fn run(args: &InitArgs) {
         std::process::exit(1);
     }
 
-    let config_content = format!(
-        r#"version = "0.1"
+    let config_content = match args.profile.as_str() {
+        "monorepo" => format!(
+            r#"version = "0.1"
+
+[profile]
+name = "{profile}"
+
+[rust]
+workspace_root = "apps/backend"
+
+[typescript]
+# apps = ["apps/web", "apps/landing"]
+
+[local]
+clippy_methods = "local/clippy-methods.toml"
+clippy_types = "local/clippy-types.toml"
+deny_bans = "local/deny-bans.toml"
+deny_skip = "local/deny-skip.toml"
+deny_feature_bans = "local/deny-feature-bans.toml"
+"#,
+            profile = args.profile
+        ),
+        "library" => format!(
+            r#"version = "0.1"
+
+[profile]
+name = "{profile}"
+
+# Library profile: all crates are treated as "pure" — global-state bans apply everywhere.
+# No [crates.*] section needed unless you want per-crate method/type overrides.
+
+[rust]
+workspace_root = "."
+
+[local]
+clippy_methods = "local/clippy-methods.toml"
+clippy_types = "local/clippy-types.toml"
+deny_bans = "local/deny-bans.toml"
+deny_skip = "local/deny-skip.toml"
+deny_feature_bans = "local/deny-feature-bans.toml"
+"#,
+            profile = args.profile
+        ),
+        "minimal" => format!(
+            r#"version = "0.1"
+
+[profile]
+name = "{profile}"
+
+# Minimal profile: fewer expected bans (no filesystem, no http-client method bans;
+# no File type ban; no deny.toml crate bans expected).
+
+[rust]
+workspace_root = "."
+
+[local]
+clippy_methods = "local/clippy-methods.toml"
+clippy_types = "local/clippy-types.toml"
+deny_bans = "local/deny-bans.toml"
+deny_skip = "local/deny-skip.toml"
+deny_feature_bans = "local/deny-feature-bans.toml"
+"#,
+            profile = args.profile
+        ),
+        _ => format!(
+            r#"version = "0.1"
 
 [profile]
 name = "{profile}"
@@ -30,9 +94,11 @@ clippy_methods = "local/clippy-methods.toml"
 clippy_types = "local/clippy-types.toml"
 deny_bans = "local/deny-bans.toml"
 deny_skip = "local/deny-skip.toml"
+deny_feature_bans = "local/deny-feature-bans.toml"
 "#,
-        profile = args.profile
-    );
+            profile = args.profile
+        ),
+    };
 
     if let Err(e) = fs::write(&config_path, &config_content) {
         eprintln!("Error writing guardrail3.toml: {e}");
@@ -62,6 +128,10 @@ deny_skip = "local/deny-skip.toml"
         (
             "deny-skip.toml",
             "# Skip entries for deny.toml [bans] section\n# Example:\n#     { crate = \"windows-sys@0.60.2\", reason = \"transitive dep conflict\" },\n",
+        ),
+        (
+            "deny-feature-bans.toml",
+            "# Additional [[bans.features]] entries for deny.toml\n# Example:\n#     [[bans.features]]\n#     name = \"some-crate\"\n#     deny = [\"full\"]\n",
         ),
     ];
 

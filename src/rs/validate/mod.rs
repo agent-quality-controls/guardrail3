@@ -10,11 +10,27 @@ use std::path::Path;
 use crate::discover::ProjectInfo;
 use crate::report::types::{Report, Section};
 
+/// Try to load the profile name from guardrail3.toml if it exists.
+fn detect_profile(path: &Path) -> Option<String> {
+    let config_path = path.join("guardrail3.toml");
+    let content = std::fs::read_to_string(&config_path).ok()?;
+    let table: toml::Value = content.parse().ok()?;
+    table
+        .get("profile")
+        .and_then(|p| p.get("name"))
+        .and_then(|n| n.as_str())
+        .map(|s| s.to_string())
+}
+
 pub fn run(path: &Path, project: &ProjectInfo, scoped_files: Option<&[String]>) -> Report {
     let workspace_root = project
         .cargo_workspace_root
         .as_deref()
         .unwrap_or(path);
+
+    // Try to detect the profile from guardrail3.toml at the project root
+    let profile = detect_profile(path);
+    let profile_ref = profile.as_deref();
 
     let mut report = Report::new(
         path.display().to_string(),
@@ -35,14 +51,14 @@ pub fn run(path: &Path, project: &ProjectInfo, scoped_files: Option<&[String]>) 
     });
 
     // Clippy ban coverage
-    let clippy_results = clippy_coverage::check(workspace_root);
+    let clippy_results = clippy_coverage::check(workspace_root, profile_ref);
     report.add_section(Section {
         name: "Clippy ban coverage".to_string(),
         results: clippy_results,
     });
 
     // deny.toml audit
-    let deny_results = deny_audit::check(workspace_root);
+    let deny_results = deny_audit::check(workspace_root, profile_ref);
     report.add_section(Section {
         name: "deny.toml audit".to_string(),
         results: deny_results,

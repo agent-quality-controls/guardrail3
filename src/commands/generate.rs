@@ -289,10 +289,21 @@ fn generate_all_files(
         files.extend(ts_files);
     }
 
-    // Hooks
+    // Hooks — replace default workspace root with configured value
+    let rust_workspace_root = cfg
+        .rust
+        .as_ref()
+        .and_then(|r| r.workspace_root.as_deref())
+        .unwrap_or(".");
+    let hook_content = crate::modules::pre_commit::PRE_COMMIT_SCRIPT
+        .content
+        .replace(
+            "GUARDRAIL3_RUST_WORKSPACE:-.}",
+            &format!("GUARDRAIL3_RUST_WORKSPACE:-{rust_workspace_root}}}"),
+        );
     files.push(GeneratedFile {
         path: ".githooks/pre-commit".to_string(),
-        content: crate::modules::pre_commit::PRE_COMMIT_SCRIPT.content.to_string(),
+        content: hook_content,
     });
 
     files
@@ -461,6 +472,12 @@ fn build_deny_for_profile(
             profile,
             &deny::minimal_profile_ban_entries(),
             None, // no feature bans
+            extra_bans,
+            extra_skip,
+            extra_feature_bans,
+        ),
+        "monorepo" => deny::build_deny_toml(
+            profile,
             extra_bans,
             extra_skip,
             extra_feature_bans,
