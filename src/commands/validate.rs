@@ -6,6 +6,7 @@ use crate::hooks;
 use crate::report;
 use crate::report::types::Report;
 use crate::rs;
+use crate::rs::validate::ValidateDomains;
 use crate::ts;
 
 /// Convert a repo-relative path to an absolute path string.
@@ -19,6 +20,14 @@ pub fn run(args: &ValidateArgs) {
     let Some(abs_path) = path.canonicalize().ok() else {
         eprintln!("Error: cannot resolve path '{}'", args.path);
         std::process::exit(1);
+    };
+
+    let run_all = !args.code && !args.architecture && !args.release && !args.tests;
+    let domains = ValidateDomains {
+        code: run_all || args.code,
+        architecture: run_all || args.architecture,
+        release: run_all || args.release,
+        tests: run_all || args.tests,
     };
 
     let project = discover::detect_project(&abs_path);
@@ -41,21 +50,27 @@ pub fn run(args: &ValidateArgs) {
     });
 
     if project.has_rust {
-        let rust_report = rs::validate::run(&abs_path, &project, scoped_ref);
+        let rust_report =
+            rs::validate::run(&abs_path, &project, scoped_ref, &domains, args.thorough);
         for section in rust_report.sections {
             combined_report.add_section(section);
         }
     }
 
     if project.has_typescript {
-        let ts_report = ts::validate::run(&abs_path, scoped_ref);
+        let ts_report = ts::validate::run(&abs_path, scoped_ref, &domains);
         for section in ts_report.sections {
             combined_report.add_section(section);
         }
     }
 
     // Hook and deployment checks
-    let hooks_report = hooks::validate::run(&abs_path, project.has_rust, project.has_typescript);
+    let hooks_report = hooks::validate::run(
+        &abs_path,
+        project.has_rust,
+        project.has_typescript,
+        &domains,
+    );
     for section in hooks_report.sections {
         combined_report.add_section(section);
     }

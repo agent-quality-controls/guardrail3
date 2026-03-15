@@ -87,6 +87,19 @@ pub const METHOD_HTTP_CLIENT: Module = Module {
     { path = "reqwest::Client::builder", reason = "Use shared client from AppState -- construct once at startup and inject via DI" },"#,
 };
 
+pub const METHOD_GARDE_DESERIALIZATION: Module = Module {
+    name: "clippy/methods/garde-deserialization",
+    description: "Ban raw serde deserialization (use Validated<T>::new() for external data)",
+    content: r#"    { path = "serde_json::from_str", reason = "BANNED: Use Validated<T>::new(value, &ctx) instead. (1) Add #[derive(garde::Validate)] to your response/data type. (2) Add garde rules to each field -- #[garde(length(chars, min = 1, max = N))] for strings, #[garde(range(min = 0))] for numbers, #[garde(dive)] for nested structs, #[garde(length(min = 1))] for non-empty vecs. (3) Deserialize into the raw type, then wrap with Validated::new()." },
+    { path = "serde_json::from_slice", reason = "BANNED: Use Validated<T>::new(value, &ctx) instead. (1) Add #[derive(garde::Validate)] to your response/data type. (2) Add garde rules to each field -- #[garde(length(chars, min = 1, max = N))] for strings, #[garde(range(min = 0))] for numbers, #[garde(dive)] for nested structs, #[garde(length(min = 1))] for non-empty vecs. (3) Deserialize into the raw type, then wrap with Validated::new()." },
+    { path = "serde_json::from_value", reason = "BANNED: Use Validated<T>::new(value, &ctx) instead. (1) Add #[derive(garde::Validate)] to your response/data type. (2) Add garde rules to each field -- #[garde(length(chars, min = 1, max = N))] for strings, #[garde(range(min = 0))] for numbers, #[garde(dive)] for nested structs, #[garde(length(min = 1))] for non-empty vecs. (3) Deserialize into the raw type, then wrap with Validated::new()." },
+    { path = "serde_json::from_reader", reason = "BANNED: Use Validated<T>::new(value, &ctx) instead. (1) Add #[derive(garde::Validate)] to your response/data type. (2) Add garde rules to each field -- #[garde(length(chars, min = 1, max = N))] for strings, #[garde(range(min = 0))] for numbers, #[garde(dive)] for nested structs, #[garde(length(min = 1))] for non-empty vecs. (3) Deserialize into the raw type, then wrap with Validated::new()." },
+    { path = "reqwest::Response::json", reason = "BANNED: Use Validated<T>::new(value, &ctx) instead. (1) Add #[derive(garde::Validate)] to your response/data type. (2) Add garde rules to each field -- #[garde(length(chars, min = 1, max = N))] for strings, #[garde(range(min = 0))] for numbers, #[garde(dive)] for nested structs, #[garde(length(min = 1))] for non-empty vecs. (3) Deserialize into the raw type, then wrap with Validated::new()." },
+    { path = "toml::from_str", reason = "BANNED: Use Validated<T>::new(value, &ctx) instead. (1) Add #[derive(garde::Validate)] to your response/data type. (2) Add garde rules to each field -- #[garde(length(chars, min = 1, max = N))] for strings, #[garde(range(min = 0))] for numbers, #[garde(dive)] for nested structs, #[garde(length(min = 1))] for non-empty vecs. (3) Deserialize into the raw type, then wrap with Validated::new()." },
+    { path = "serde_yaml::from_str", reason = "BANNED: Use Validated<T>::new(value, &ctx) instead. (1) Add #[derive(garde::Validate)] to your response/data type. (2) Add garde rules to each field -- #[garde(length(chars, min = 1, max = N))] for strings, #[garde(range(min = 0))] for numbers, #[garde(dive)] for nested structs, #[garde(length(min = 1))] for non-empty vecs. (3) Deserialize into the raw type, then wrap with Validated::new()." },
+    { path = "serde_yaml::from_reader", reason = "BANNED: Use Validated<T>::new(value, &ctx) instead. (1) Add #[derive(garde::Validate)] to your response/data type. (2) Add garde rules to each field -- #[garde(length(chars, min = 1, max = N))] for strings, #[garde(range(min = 0))] for numbers, #[garde(dive)] for nested structs, #[garde(length(min = 1))] for non-empty vecs. (3) Deserialize into the raw type, then wrap with Validated::new()." },"#,
+};
+
 // ---------------------------------------------------------------------------
 // Disallowed type modules
 // ---------------------------------------------------------------------------
@@ -120,6 +133,15 @@ pub const TYPE_GLOBAL_STATE: Module = Module {
     { path = "once_cell::sync::OnceCell", reason = "No global state in business logic -- inject dependencies instead" },"#,
 };
 
+pub const TYPE_GARDE_EXTRACTORS: Module = Module {
+    name: "clippy/types/garde-extractors",
+    description: "Ban raw Axum extractors (use ValidatedJson/ValidatedQuery/ValidatedForm)",
+    content: r#"    { path = "axum::extract::Json", reason = "BANNED: Use ValidatedJson<T>/ValidatedQuery<T>/ValidatedForm<T> instead. Requires #[derive(garde::Validate)] on the request type." },
+    { path = "axum::Json", reason = "BANNED: Use ValidatedJson<T>/ValidatedQuery<T>/ValidatedForm<T> instead. Requires #[derive(garde::Validate)] on the request type." },
+    { path = "axum::extract::Query", reason = "BANNED: Use ValidatedJson<T>/ValidatedQuery<T>/ValidatedForm<T> instead. Requires #[derive(garde::Validate)] on the request type." },
+    { path = "axum::extract::Form", reason = "BANNED: Use ValidatedJson<T>/ValidatedQuery<T>/ValidatedForm<T> instead. Requires #[derive(garde::Validate)] on the request type." },"#,
+};
+
 /// Returns the list of method modules included in the "service" profile.
 pub fn service_profile_methods() -> Vec<&'static Module> {
     vec![
@@ -129,12 +151,18 @@ pub fn service_profile_methods() -> Vec<&'static Module> {
         &METHOD_BLOCKING_SLEEP,
         &METHOD_FILESYSTEM,
         &METHOD_HTTP_CLIENT,
+        &METHOD_GARDE_DESERIALIZATION,
     ]
 }
 
 /// Returns the list of type modules included in the "service" profile (workspace-wide).
 pub fn service_profile_types() -> Vec<&'static Module> {
-    vec![&TYPE_COLLECTIONS, &TYPE_SYNC, &TYPE_FILESYSTEM]
+    vec![
+        &TYPE_COLLECTIONS,
+        &TYPE_SYNC,
+        &TYPE_FILESYSTEM,
+        &TYPE_GARDE_EXTRACTORS,
+    ]
 }
 
 /// Returns extra type modules for "pure" layer crates (no global state).
@@ -155,6 +183,7 @@ pub fn library_profile_types() -> Vec<&'static Module> {
         &TYPE_SYNC,
         &TYPE_FILESYSTEM,
         &TYPE_GLOBAL_STATE,
+        &TYPE_GARDE_EXTRACTORS,
     ]
 }
 

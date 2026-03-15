@@ -29,6 +29,14 @@ const EXPECTED_METHOD_BANS: &[&str] = &[
     "std::fs::hard_link",
     "reqwest::Client::new",
     "reqwest::Client::builder",
+    "serde_json::from_str",
+    "serde_json::from_slice",
+    "serde_json::from_value",
+    "serde_json::from_reader",
+    "reqwest::Response::json",
+    "toml::from_str",
+    "serde_yaml::from_str",
+    "serde_yaml::from_reader",
 ];
 
 const EXPECTED_TYPE_BANS: &[&str] = &[
@@ -37,6 +45,10 @@ const EXPECTED_TYPE_BANS: &[&str] = &[
     "std::sync::Mutex",
     "std::sync::RwLock",
     "std::fs::File",
+    "axum::extract::Json",
+    "axum::Json",
+    "axum::extract::Query",
+    "axum::extract::Form",
 ];
 
 pub fn check(workspace_root: &Path, _profile: Option<&str>) -> Vec<CheckResult> {

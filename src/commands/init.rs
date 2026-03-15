@@ -2,7 +2,10 @@ use std::path::Path;
 
 use crate::cli::InitArgs;
 
-#[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
+#[allow(clippy::print_stdout)] // reason: CLI command — user-facing output
+#[allow(clippy::print_stderr)] // reason: CLI command — error output
+#[allow(clippy::disallowed_methods)] // reason: CLI command — exit codes and fs operations
+#[allow(clippy::too_many_lines)] // reason: sequential scaffolding steps are clearer as one function
 pub fn run(args: &InitArgs) {
     let project_path = Path::new(&args.path);
 
@@ -65,12 +68,38 @@ pub fn run(args: &InitArgs) {
         }
     }
 
+    // Scaffold release config files for service and monorepo profiles
+    if args.profile == "service" || args.profile == "monorepo" {
+        let release_files = [
+            (
+                "release-plz.toml",
+                crate::modules::release::RELEASE_PLZ_TOML.content,
+            ),
+            ("cliff.toml", crate::modules::release::CLIFF_TOML.content),
+        ];
+
+        for (filename, content) in &release_files {
+            let file_path = project_path.join(filename);
+            if file_path.exists() && !args.force {
+                println!("  Skipping existing: {filename}");
+                continue;
+            }
+            if let Err(e) = crate::fs::write_file(&file_path, content) {
+                eprintln!("Error writing {filename}: {e}");
+                std::process::exit(1);
+            }
+        }
+    }
+
     println!(
         "Initialized guardrail3 project at {}",
         project_path.display()
     );
     println!("  Created: guardrail3.toml (profile: {})", args.profile);
     println!("  Created: local/ directory with override files");
+    if args.profile == "service" || args.profile == "monorepo" {
+        println!("  Created: release-plz.toml and cliff.toml");
+    }
     println!();
     println!("Next steps:");
     println!("  1. Edit guardrail3.toml to configure your project");

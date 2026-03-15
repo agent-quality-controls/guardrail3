@@ -2,20 +2,14 @@ use std::path::Path;
 
 use walkdir::WalkDir;
 
-use crate::discover::ProjectInfo;
 use crate::report::types::CheckResult;
 
 use super::allow_checks;
 use super::code_quality_checks;
-use super::dependency_direction;
 use super::structure_checks;
 
 #[allow(clippy::case_sensitive_file_extension_comparisons)] // reason: only checking .rs files
-pub fn check(
-    workspace_root: &Path,
-    scoped_files: Option<&[String]>,
-    project: &ProjectInfo,
-) -> Vec<CheckResult> {
+pub fn check(workspace_root: &Path, scoped_files: Option<&[String]>) -> Vec<CheckResult> {
     let mut results = Vec::new();
 
     let rs_files: Vec<String> = match scoped_files {
@@ -62,32 +56,26 @@ pub fn check(
         }
     }
 
-    // R51: Dependency direction — check each workspace member's Cargo.toml
-    dependency_direction::check_all_dependency_directions(workspace_root, project, &mut results);
-
-    // R52: Dependency graph inventory
-    dependency_direction::check_dependency_graph(workspace_root, project, &mut results);
-
     // R36: EXCEPTION comments in config files
     allow_checks::check_exception_comments(workspace_root, &mut results);
 
     // R49: CLAUDE.md exists
     code_quality_checks::check_claude_md(workspace_root, &mut results);
 
-    // R53: unsafe_code = "forbid" specifically
-    structure_checks::check_unsafe_code_forbid(workspace_root, &mut results);
-
     results
 }
 
-fn collect_rs_files(root: &Path) -> Vec<String> {
+/// Check if a walkdir entry is a directory that should be excluded from Rust source scanning.
+pub fn is_excluded_dir(entry: &walkdir::DirEntry) -> bool {
+    let name = entry.file_name().to_string_lossy();
+    name == "target" || name == "node_modules" || name == ".git" || name == ".claude"
+}
+
+pub fn collect_rs_files(root: &Path) -> Vec<String> {
     let mut files = Vec::new();
     for entry in WalkDir::new(root)
         .into_iter()
-        .filter_entry(|e| {
-            let name = e.file_name().to_string_lossy();
-            name != "target" && name != "node_modules" && name != ".git" && name != ".claude"
-        })
+        .filter_entry(|e| !is_excluded_dir(e))
         .flatten()
     {
         if entry.file_type().is_file() {

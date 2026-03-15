@@ -2,7 +2,7 @@ use std::path::Path;
 
 use crate::report::types::{CheckResult, Severity};
 
-#[allow(clippy::too_many_lines)] // reason: comprehensive package.json validation
+#[allow(clippy::too_many_lines, clippy::disallowed_methods)] // reason: comprehensive package.json validation; guardrail3 JSON config inspection
 #[allow(clippy::or_fun_call)] // reason: map_or with function call is intentional for display
 pub fn check_package_json(path: &Path, results: &mut Vec<CheckResult>) {
     let pkg_path = path.join("package.json");

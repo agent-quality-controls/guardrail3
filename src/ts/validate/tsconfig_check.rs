@@ -5,7 +5,7 @@ use crate::report::types::{CheckResult, Severity};
 /// A tsconfig boolean check: (`setting_name`, `check_id`).
 type TsConfigBool = (&'static str, &'static str);
 
-#[allow(clippy::too_many_lines)] // reason: comprehensive tsconfig validation
+#[allow(clippy::too_many_lines, clippy::disallowed_methods)] // reason: comprehensive tsconfig validation; guardrail3 JSON config inspection
 #[allow(clippy::or_fun_call)] // reason: map_or with function call is intentional for display
 pub fn check_tsconfig(path: &Path, results: &mut Vec<CheckResult>) {
     let tsconfig_path = path.join("tsconfig.base.json");
