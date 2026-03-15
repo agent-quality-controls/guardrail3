@@ -1,21 +1,22 @@
-mod cli;
-mod commands;
-mod config;
-mod discover;
-mod fs;
-mod hooks;
-mod modules;
-mod report;
-mod rs;
-mod ts;
+// These crates are used by the lib, not directly by the binary.
+// Suppress false positives from unused_crate_dependencies.
+use colored as _;
+use glob as _;
+use serde as _;
+use serde_json as _;
+use toml as _;
+use walkdir as _;
 
 #[cfg(test)]
 use proptest as _;
+#[cfg(test)]
+use tempfile as _;
 
 use clap::Parser;
 
-use cli::{Cli, Commands, HooksCommands, RsCommands, TsCommands, ValidateArgs};
-use rs::validate::ValidateDomains;
+use guardrail3::cli::{Cli, Commands, HooksCommands, RsCommands, TsCommands, ValidateArgs};
+use guardrail3::rs::validate::ValidateDomains;
+use guardrail3::{commands, discover, hooks, report, rs, ts};
 
 #[allow(clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI entry point — stderr output and process::exit for error codes are intentional
 #[allow(clippy::too_many_lines)] // reason: CLI dispatch for all subcommands

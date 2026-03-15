@@ -5,7 +5,14 @@ edition = "2024"
 rust-version = "1.85"
 description = "Composable code guardrails for Rust and TypeScript projects"
 license = "MIT OR Apache-2.0"
-publish = false
+repository = "https://github.com/websmasher/guardrail3"
+readme = "README.md"
+keywords = ["guardrails", "linting", "clippy", "rust", "typescript"]
+categories = ["development-tools", "command-line-utilities"]
+
+[lib]
+name = "guardrail3"
+path = "src/lib.rs"
 
 [[bin]]
 name = "guardrail3"
@@ -80,3 +87,8 @@ walkdir = "2"
 [dev-dependencies]
 proptest = "1"
 tempfile = "3"
+
+[package.metadata.binstall]
+pkg-url = "{ repo }/releases/download/v{ version }/{ name }-{ target }{ archive-suffix }"
+bin-dir = "{ bin }{ binary-ext }"
+pkg-fmt = "tgz"
