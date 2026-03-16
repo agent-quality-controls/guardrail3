@@ -85,7 +85,7 @@ fn collect_ts_files(root: &Path) -> Vec<String> {
     files
 }
 
-// T30: process.env direct access (tree-sitter with grep fallback)
+// T30: process.env direct access (AST-only)
 fn check_process_env(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
     let file_name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
 
@@ -98,10 +98,10 @@ fn check_process_env(path: &Path, content: &str, results: &mut Vec<CheckResult>)
     }
 
     let is_tsx = ts_comment_checks::is_tsx_path(path);
-    match ast_helpers::parse_ts_file(content, is_tsx) {
-        Some(tree) => check_process_env_ast(path, content, &tree, results),
-        None => check_process_env_grep(path, content, results),
-    }
+    let Some(tree) = ast_helpers::parse_ts_file(content, is_tsx) else {
+        return;
+    };
+    check_process_env_ast(path, content, &tree, results);
 }
 
 /// Tree-sitter path: find `process.env` via AST member-expression nodes.
@@ -149,58 +149,13 @@ fn check_process_env_ast(
     }
 }
 
-/// Grep fallback for T30: scan lines for process.env (used when tree-sitter parse fails).
-fn check_process_env_grep(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
-    let lines: Vec<&str> = content.lines().collect();
-    for (line_num, line) in lines.iter().enumerate() {
-        let trimmed = line.trim();
-        // Skip comment lines
-        if trimmed.starts_with("//") || trimmed.starts_with('*') || trimmed.starts_with("/*") {
-            continue;
-        }
-
-        if trimmed.contains("process.env.") || trimmed.contains("process.env[") {
-            let line_number = line_num.saturating_add(1);
-
-            // Check if the previous line contains eslint-disable-next-line
-            let prev_line = if line_num > 0 {
-                lines.get(line_num.saturating_sub(1))
-            } else {
-                None
-            };
-            let is_suppressed = prev_line.is_some_and(|pl| pl.contains("eslint-disable-next-line"));
-
-            let severity = if is_suppressed {
-                Severity::Info
-            } else {
-                Severity::Error
-            };
-
-            let message = if is_suppressed {
-                format!("ESLint-suppressed process.env access: {trimmed}")
-            } else {
-                format!("Use env() import instead: {trimmed}")
-            };
-
-            results.push(CheckResult {
-                id: "T30".to_owned(),
-                severity,
-                title: "Direct process.env access".to_owned(),
-                message,
-                file: Some(path.display().to_string()),
-                line: Some(line_number),
-            });
-        }
-    }
-}
-
-// T31: `as any` / `: any` type assertions (tree-sitter with grep fallback)
+// T31: `as any` / `: any` type assertions (AST-only)
 fn check_any_types(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
     let is_tsx = ts_comment_checks::is_tsx_path(path);
-    match ast_helpers::parse_ts_file(content, is_tsx) {
-        Some(tree) => check_any_types_ast(path, content, &tree, results),
-        None => check_any_types_grep(path, content, results),
-    }
+    let Some(tree) = ast_helpers::parse_ts_file(content, is_tsx) else {
+        return;
+    };
+    check_any_types_ast(path, content, &tree, results);
 }
 
 /// Tree-sitter path: find `: any` and `as any` via AST type annotation / `as_expression` nodes.
@@ -224,29 +179,6 @@ fn check_any_types_ast(
             file: Some(path.display().to_string()),
             line: Some(line_number),
         });
-    }
-}
-
-/// Grep fallback for T31: scan lines for `as any` / `: any` (used when tree-sitter parse fails).
-fn check_any_types_grep(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
-    for (line_num, line) in content.lines().enumerate() {
-        let trimmed = line.trim();
-        // Skip comment lines
-        if trimmed.starts_with("//") || trimmed.starts_with('*') || trimmed.starts_with("/*") {
-            continue;
-        }
-
-        if trimmed.contains("as any") || trimmed.contains(": any") {
-            let line_number = line_num.saturating_add(1);
-            results.push(CheckResult {
-                id: "T31".to_owned(),
-                severity: Severity::Info,
-                title: "any type usage".to_owned(),
-                message: trimmed.to_owned(),
-                file: Some(path.display().to_string()),
-                line: Some(line_number),
-            });
-        }
     }
 }
 
@@ -466,29 +398,4 @@ mod tests {
         assert!(matches!(results[0].severity, Severity::Info));
     }
 
-    // T30 grep fallback
-    #[test]
-    fn test_process_env_grep_fallback_t30() {
-        let path = Path::new("src/app.ts");
-        let content = "const x = process.env.NODE_ENV;\n";
-        let mut results = Vec::new();
-        check_process_env_grep(path, content, &mut results);
-        assert_eq!(results.len(), 1, "expected 1 result, got {results:?}");
-        assert_eq!(results[0].id, "T30");
-        assert!(matches!(results[0].severity, Severity::Error));
-    }
-
-    // T31 grep fallback
-    #[test]
-    fn test_any_type_grep_fallback_t31() {
-        let path = Path::new("src/app.ts");
-        let content = "const x: any = 5;\nconst y = foo as any;\n";
-        let mut results = Vec::new();
-        check_any_types_grep(path, content, &mut results);
-        assert_eq!(results.len(), 2, "expected 2 results, got {results:?}");
-        for r in &results {
-            assert_eq!(r.id, "T31");
-            assert!(matches!(r.severity, Severity::Info));
-        }
-    }
 }

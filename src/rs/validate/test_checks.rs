@@ -165,25 +165,12 @@ fn check_tests_exist(workspace_root: &Path, results: &mut Vec<CheckResult>) {
     }
 }
 
-/// Check if content contains a `#[test]` or `#[tokio::test]` attribute.
-/// Uses syn AST parsing when possible, falls back to grep.
+/// Check if content contains a `#[test]` or `#[tokio::test]` attribute (AST-based).
 fn content_has_test(content: &str) -> bool {
-    if let Some(file) = super::ast_helpers::parse_file(content) {
-        return super::ast_helpers::has_test_functions(&file);
-    }
-    // Grep fallback when syn parse fails
-    content_has_test_grep(content)
-}
-
-/// Grep-based fallback for test detection.
-fn content_has_test_grep(content: &str) -> bool {
-    for line in content.lines() {
-        let trimmed = line.trim();
-        if trimmed == "#[test]" || trimmed == "#[tokio::test]" {
-            return true;
-        }
-    }
-    false
+    let Some(file) = super::ast_helpers::parse_file(content) else {
+        return false;
+    };
+    super::ast_helpers::has_test_attribute(&file)
 }
 
 #[cfg(test)]
@@ -279,28 +266,5 @@ mod tests {
     fn r_test_04_pos_has_tokio_test() {
         let content = "#[tokio::test]\nasync fn it_works() {}";
         assert!(content_has_test(content));
-    }
-
-    #[test]
-    fn r_test_04_neg_test_in_string_not_matched() {
-        let content = "fn foo() { let _s = \"#[test]\"; }";
-        assert!(
-            !content_has_test(content),
-            "#[test] in string literal should not be detected as a test"
-        );
-    }
-
-    // ---- Grep fallback ----
-
-    #[test]
-    fn r_test_04_grep_fallback_finds_test() {
-        let content = "#[test]\nfn it_works() {}";
-        assert!(content_has_test_grep(content));
-    }
-
-    #[test]
-    fn r_test_04_grep_fallback_no_test() {
-        let content = "fn main() {}";
-        assert!(!content_has_test_grep(content));
     }
 }

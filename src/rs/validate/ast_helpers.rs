@@ -2,25 +2,26 @@
 //!
 //! These functions parse Rust source into an AST and inspect it
 //! structurally — no grep, no false positives from strings/comments.
-//!
-//! Visitor-based checks (unsafe, forbidden macros, unwrap/expect, derive,
-//! test functions, pub functions, ignore attributes) live in [`super::ast_visitors`].
 
 use proc_macro2 as _; // reason: span-locations feature needed for syn span.start()
 use syn::spanned::Spanned;
 use syn::visit::Visit;
 
 /// A source location (1-based line number) paired with a descriptive string (lint name, method name, etc.).
-pub(crate) type Located = (usize, String);
+pub(super) type Located = (usize, String);
 
-// Re-export all public items from ast_visitors so callers don't need to change imports.
-pub use super::ast_visitors::{
-    count_pub_functions, count_test_functions, find_derive_attributes, find_forbidden_macros,
-    find_ignore_attributes, find_unsafe_usage, find_unwrap_expect, has_test_functions, DeriveInfo,
-};
+/// Information about a `#[derive(...)]` attribute on an item.
+pub struct DeriveInfo {
+    /// 1-based line number of the derive attribute.
+    pub line: usize,
+    /// Names of the derive macros (e.g. `["Deserialize", "Validate"]`).
+    pub macros: Vec<String>,
+}
 
 /// Parse a Rust source file. Returns `None` if parsing fails.
+/// Strips UTF-8 BOM if present.
 pub fn parse_file(source: &str) -> Option<syn::File> {
+    let source = source.strip_prefix('\u{feff}').unwrap_or(source);
     syn::parse_file(source).ok()
 }
 
@@ -60,19 +61,96 @@ pub fn find_garde_skips(file: &syn::File) -> Vec<usize> {
     v.out
 }
 
+/// Find lines with `unsafe` blocks or `unsafe fn` declarations.
+pub fn find_unsafe_usage(file: &syn::File) -> Vec<usize> {
+    let mut v = UnsafeVisitor { out: Vec::new() };
+    v.visit_file(file);
+    v.out
+}
+
+/// Find `todo!()`, `unimplemented!()`, `panic!()`. Returns `(line, macro_name)`.
+pub fn find_forbidden_macros(file: &syn::File) -> Vec<Located> {
+    let mut v = ForbiddenMacroVisitor { out: Vec::new() };
+    v.visit_file(file);
+    v.out
+}
+
+/// Find `.unwrap()` and `.expect()` calls. Returns `(line, method_name)`.
+pub fn find_unwrap_expect(file: &syn::File) -> Vec<Located> {
+    let mut v = UnwrapExpectVisitor { out: Vec::new() };
+    v.visit_file(file);
+    v.out
+}
+
+/// Find all `#[derive(...)]` attributes in a parsed file.
+/// Returns one `DeriveInfo` per derive attribute found, with its line and macro names.
+pub fn find_derive_attributes(file: &syn::File) -> Vec<DeriveInfo> {
+    let mut v = DeriveVisitor { out: Vec::new() };
+    v.visit_file(file);
+    v.out
+}
+
 /// Find `use std::fs` import lines. Skips imports gated by `#[cfg(test)]`.
 pub fn find_std_fs_imports(file: &syn::File) -> Vec<usize> {
     file.items
         .iter()
         .filter_map(|item| {
             if let syn::Item::Use(u) = item {
-                if use_tree_matches_std_fs(&u.tree) && !has_cfg_test_attr(&u.attrs) {
+                // Skip cfg(test)-gated imports
+                if u.attrs.iter().any(|a| is_cfg_test_attr(a)) {
+                    return None;
+                }
+                if use_tree_matches_std_fs(&u.tree) {
                     return Some(u.span().start().line);
                 }
             }
             None
         })
         .collect()
+}
+
+/// Check if an attribute is `#[cfg(test)]`.
+fn is_cfg_test_attr(attr: &syn::Attribute) -> bool {
+    if !attr.path().is_ident("cfg") {
+        return false;
+    }
+    let Ok(nested) = attr.parse_args::<syn::Ident>() else {
+        return false;
+    };
+    nested == "test"
+}
+
+/// Check if the file contains at least one `#[test]` or `#[tokio::test]` attribute.
+pub fn has_test_attribute(file: &syn::File) -> bool {
+    let mut v = TestAttrVisitor { found: false };
+    v.visit_file(file);
+    v.found
+}
+
+/// Count `pub fn` declarations (including in impl blocks and traits).
+pub fn count_pub_fn_decls(file: &syn::File) -> usize {
+    let mut v = PubFnVisitor { count: 0 };
+    v.visit_file(file);
+    v.count
+}
+
+/// Count `#[test]` and `#[tokio::test]` attributes.
+pub fn count_test_attrs(file: &syn::File) -> usize {
+    let mut v = TestCountVisitor { count: 0 };
+    v.visit_file(file);
+    v.count
+}
+
+/// Find `#[ignore]` attributes without a `// reason:` comment on same or previous line.
+/// Returns 1-based line numbers of violations.
+/// Requires the original source to check for reason comments.
+pub fn find_ignore_without_reason(file: &syn::File, source: &str) -> Vec<usize> {
+    let mut v = IgnoreVisitor {
+        lines: source.lines().collect(),
+        violations: Vec::new(),
+    };
+    v.visit_file(file);
+    v.violations
 }
 
 /// Count top-level `use` statements.
@@ -84,19 +162,11 @@ pub fn count_use_statements(file: &syn::File) -> usize {
 }
 
 // ---------------------------------------------------------------------------
-// Internal helpers (pub(super) for use by ast_visitors)
+// Internal
 // ---------------------------------------------------------------------------
 
 pub(super) fn span_line(span: proc_macro2::Span) -> usize {
     span.start().line
-}
-
-pub(super) fn path_to_string(path: &syn::Path) -> String {
-    path.segments
-        .iter()
-        .map(|seg| seg.ident.to_string())
-        .collect::<Vec<_>>()
-        .join("::")
 }
 
 fn extract_allow_lints(attr: &syn::Attribute, out: &mut Vec<Located>) {
@@ -146,22 +216,6 @@ impl syn::parse::Parse for LintList {
     }
 }
 
-/// Check if an attribute list contains `#[cfg(test)]`.
-fn has_cfg_test_attr(attrs: &[syn::Attribute]) -> bool {
-    for attr in attrs {
-        if !attr.path().is_ident("cfg") {
-            continue;
-        }
-        // Parse the cfg argument and check if it's just `test`
-        if let Ok(nested) = attr.parse_args::<syn::Ident>() {
-            if nested == "test" {
-                return true;
-            }
-        }
-    }
-    false
-}
-
 fn use_tree_matches_std_fs(tree: &syn::UseTree) -> bool {
     if let syn::UseTree::Path(p) = tree {
         if p.ident == "std" {
@@ -179,6 +233,14 @@ fn use_subtree_is_fs(tree: &syn::UseTree) -> bool {
         syn::UseTree::Group(g) => g.items.iter().any(use_subtree_is_fs),
         syn::UseTree::Glob(_) => false,
     }
+}
+
+pub(super) fn path_to_string(path: &syn::Path) -> String {
+    path.segments
+        .iter()
+        .map(|seg| seg.ident.to_string())
+        .collect::<Vec<_>>()
+        .join("::")
 }
 
 fn has_garde_skip(attrs: &[syn::Attribute]) -> Option<usize> {
@@ -251,7 +313,7 @@ fn trait_item_attrs(item: &syn::TraitItem) -> &[syn::Attribute] {
 }
 
 // ---------------------------------------------------------------------------
-// Visitors (allow/cfg_attr/garde — kept here with their helper functions)
+// Visitors
 // ---------------------------------------------------------------------------
 
 struct ItemAllowVisitor {
@@ -302,6 +364,220 @@ impl<'ast> Visit<'ast> for GardeSkipVisitor {
         }
         syn::visit::visit_item_struct(self, n);
     }
+}
+
+struct UnsafeVisitor {
+    out: Vec<usize>,
+}
+impl<'ast> Visit<'ast> for UnsafeVisitor {
+    fn visit_expr_unsafe(&mut self, n: &'ast syn::ExprUnsafe) {
+        self.out.push(span_line(n.unsafe_token.span));
+        syn::visit::visit_expr_unsafe(self, n);
+    }
+    fn visit_item_fn(&mut self, n: &'ast syn::ItemFn) {
+        if let Some(tok) = n.sig.unsafety {
+            self.out.push(span_line(tok.span));
+        }
+        syn::visit::visit_item_fn(self, n);
+    }
+    fn visit_impl_item_fn(&mut self, n: &'ast syn::ImplItemFn) {
+        if let Some(tok) = n.sig.unsafety {
+            self.out.push(span_line(tok.span));
+        }
+        syn::visit::visit_impl_item_fn(self, n);
+    }
+    fn visit_item_impl(&mut self, n: &'ast syn::ItemImpl) {
+        if let Some(tok) = n.unsafety {
+            self.out.push(span_line(tok.span));
+        }
+        syn::visit::visit_item_impl(self, n);
+    }
+    fn visit_item_trait(&mut self, n: &'ast syn::ItemTrait) {
+        if let Some(tok) = n.unsafety {
+            self.out.push(span_line(tok.span));
+        }
+        syn::visit::visit_item_trait(self, n);
+    }
+}
+
+struct ForbiddenMacroVisitor {
+    out: Vec<Located>,
+}
+impl<'ast> Visit<'ast> for ForbiddenMacroVisitor {
+    fn visit_macro(&mut self, n: &'ast syn::Macro) {
+        let name = path_to_string(&n.path);
+        if matches!(name.as_str(), "todo" | "unimplemented" | "unreachable" | "panic") {
+            self.out.push((span_line(n.path.span()), name));
+        }
+        syn::visit::visit_macro(self, n);
+    }
+}
+
+struct UnwrapExpectVisitor {
+    out: Vec<Located>,
+}
+impl<'ast> Visit<'ast> for UnwrapExpectVisitor {
+    fn visit_expr_method_call(&mut self, n: &'ast syn::ExprMethodCall) {
+        let m = n.method.to_string();
+        if m == "unwrap" || m == "expect" {
+            self.out.push((span_line(n.method.span()), m));
+        }
+        syn::visit::visit_expr_method_call(self, n);
+    }
+}
+
+struct DeriveVisitor {
+    out: Vec<DeriveInfo>,
+}
+impl DeriveVisitor {
+    fn collect_derives(&mut self, attrs: &[syn::Attribute]) {
+        for attr in attrs {
+            if !attr.path().is_ident("derive") {
+                continue;
+            }
+            let line = span_line(attr.span());
+            if let syn::Meta::List(list) = &attr.meta {
+                if let Ok(paths) = list.parse_args_with(
+                    syn::punctuated::Punctuated::<syn::Path, syn::Token![,]>::parse_terminated,
+                ) {
+                    let macros: Vec<String> = paths.iter().map(path_to_string).collect();
+                    if !macros.is_empty() {
+                        self.out.push(DeriveInfo { line, macros });
+                    }
+                }
+            }
+        }
+    }
+}
+impl<'ast> Visit<'ast> for DeriveVisitor {
+    fn visit_item(&mut self, i: &'ast syn::Item) {
+        self.collect_derives(item_attrs(i));
+        syn::visit::visit_item(self, i);
+    }
+    fn visit_impl_item(&mut self, i: &'ast syn::ImplItem) {
+        self.collect_derives(impl_item_attrs(i));
+        syn::visit::visit_impl_item(self, i);
+    }
+}
+
+struct TestAttrVisitor {
+    found: bool,
+}
+impl<'ast> Visit<'ast> for TestAttrVisitor {
+    fn visit_item_fn(&mut self, n: &'ast syn::ItemFn) {
+        if !self.found && has_test_or_tokio_test(&n.attrs) {
+            self.found = true;
+        }
+        if !self.found {
+            syn::visit::visit_item_fn(self, n);
+        }
+    }
+    fn visit_impl_item_fn(&mut self, n: &'ast syn::ImplItemFn) {
+        if !self.found && has_test_or_tokio_test(&n.attrs) {
+            self.found = true;
+        }
+        if !self.found {
+            syn::visit::visit_impl_item_fn(self, n);
+        }
+    }
+}
+
+struct PubFnVisitor {
+    count: usize,
+}
+impl<'ast> Visit<'ast> for PubFnVisitor {
+    fn visit_item_fn(&mut self, n: &'ast syn::ItemFn) {
+        if matches!(n.vis, syn::Visibility::Public(_)) {
+            self.count = self.count.saturating_add(1);
+        }
+        syn::visit::visit_item_fn(self, n);
+    }
+    fn visit_impl_item_fn(&mut self, n: &'ast syn::ImplItemFn) {
+        if matches!(n.vis, syn::Visibility::Public(_)) {
+            self.count = self.count.saturating_add(1);
+        }
+        syn::visit::visit_impl_item_fn(self, n);
+    }
+}
+
+struct TestCountVisitor {
+    count: usize,
+}
+impl<'ast> Visit<'ast> for TestCountVisitor {
+    fn visit_item_fn(&mut self, n: &'ast syn::ItemFn) {
+        if has_test_or_tokio_test(&n.attrs) {
+            self.count = self.count.saturating_add(1);
+        }
+        syn::visit::visit_item_fn(self, n);
+    }
+    fn visit_impl_item_fn(&mut self, n: &'ast syn::ImplItemFn) {
+        if has_test_or_tokio_test(&n.attrs) {
+            self.count = self.count.saturating_add(1);
+        }
+        syn::visit::visit_impl_item_fn(self, n);
+    }
+}
+
+struct IgnoreVisitor<'s> {
+    lines: Vec<&'s str>,
+    violations: Vec<usize>,
+}
+impl<'ast> Visit<'ast> for IgnoreVisitor<'_> {
+    fn visit_item_fn(&mut self, n: &'ast syn::ItemFn) {
+        self.check_ignore_attrs(&n.attrs);
+        syn::visit::visit_item_fn(self, n);
+    }
+    fn visit_impl_item_fn(&mut self, n: &'ast syn::ImplItemFn) {
+        self.check_ignore_attrs(&n.attrs);
+        syn::visit::visit_impl_item_fn(self, n);
+    }
+}
+impl IgnoreVisitor<'_> {
+    fn check_ignore_attrs(&mut self, attrs: &[syn::Attribute]) {
+        for attr in attrs {
+            if !attr.path().is_ident("ignore") {
+                continue;
+            }
+            let line = span_line(attr.span());
+            // 1-based to 0-based index
+            let idx = line.saturating_sub(1);
+            // Check same line for reason comment
+            if let Some(same_line) = self.lines.get(idx) {
+                if same_line.contains("// reason:") || same_line.contains("//reason:") {
+                    continue;
+                }
+            }
+            // Check previous line for reason comment
+            if idx > 0 {
+                if let Some(prev_line) = self.lines.get(idx.saturating_sub(1)) {
+                    if prev_line.contains("// reason:") || prev_line.contains("//reason:") {
+                        continue;
+                    }
+                }
+            }
+            self.violations.push(line);
+        }
+    }
+}
+
+/// Check if attributes contain `#[test]` or `#[tokio::test]`.
+fn has_test_or_tokio_test(attrs: &[syn::Attribute]) -> bool {
+    for attr in attrs {
+        let path = attr.path();
+        if path.is_ident("test") {
+            return true;
+        }
+        // Check for tokio::test
+        if path.segments.len() == 2 {
+            let mut iter = path.segments.iter();
+            if let (Some(first), Some(second)) = (iter.next(), iter.next()) {
+                if first.ident == "tokio" && second.ident == "test" {
+                    return true;
+                }
+            }
+        }
+    }
+    false
 }
 
 #[cfg(test)]
@@ -416,6 +692,77 @@ mod tests {
     }
 
     #[test]
+    fn unsafe_block_found() {
+        let src = "fn foo() { unsafe { std::ptr::null::<u8>(); } }";
+        assert_eq!(
+            find_unsafe_usage(&must_parse(src)).len(),
+            1,
+            "should find unsafe block"
+        );
+    }
+
+    #[test]
+    fn unsafe_fn_found() {
+        assert_eq!(
+            find_unsafe_usage(&must_parse("unsafe fn d() {}")).len(),
+            1,
+            "unsafe fn"
+        );
+    }
+
+    #[test]
+    fn unsafe_in_string_not_found() {
+        let src = "fn foo() { let _s = \"unsafe { bad() }\"; }";
+        assert!(
+            find_unsafe_usage(&must_parse(src)).is_empty(),
+            "no match in string"
+        );
+    }
+
+    #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion on known-length vector
+    fn forbidden_macros_found() {
+        let m1 = find_forbidden_macros(&must_parse("fn f() { todo!(); }"));
+        assert_eq!(m1.len(), 1, "todo found");
+        assert_eq!(m1[0].1, "todo");
+        let m2 = find_forbidden_macros(&must_parse("fn f() { unimplemented!(); }"));
+        assert_eq!(m2.len(), 1, "unimplemented found");
+        assert_eq!(m2[0].1, "unimplemented");
+        let m3 = find_forbidden_macros(&must_parse("fn f() { panic!(\"oh\"); }"));
+        assert_eq!(m3.len(), 1, "panic found");
+        assert_eq!(m3[0].1, "panic");
+    }
+
+    #[test]
+    fn todo_in_string_not_found() {
+        let src = "fn foo() { let _s = \"todo!()\"; }";
+        assert!(
+            find_forbidden_macros(&must_parse(src)).is_empty(),
+            "no match in string"
+        );
+    }
+
+    #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion on known-length vector
+    fn unwrap_expect_found() {
+        let u = find_unwrap_expect(&must_parse("fn f() { Some(1).unwrap(); }"));
+        assert_eq!(u.len(), 1, "unwrap found");
+        assert_eq!(u[0].1, "unwrap");
+        let e = find_unwrap_expect(&must_parse("fn f() { Some(1).expect(\"m\"); }"));
+        assert_eq!(e.len(), 1, "expect found");
+        assert_eq!(e[0].1, "expect");
+    }
+
+    #[test]
+    fn unwrap_in_string_not_found() {
+        let src = "fn foo() { let _s = \".unwrap()\"; }";
+        assert!(
+            find_unwrap_expect(&must_parse(src)).is_empty(),
+            "no match in string"
+        );
+    }
+
+    #[test]
     fn std_fs_import_found() {
         assert_eq!(
             find_std_fs_imports(&must_parse("use std::fs;\nfn main() {}")).len(),
@@ -455,16 +802,5 @@ mod tests {
             0,
             "no uses"
         );
-    }
-
-    #[test]
-    fn count_use_statements_ignores_strings() {
-        let code = r#"
-fn foo() {
-    let s = "use std::fs;";
-    let t = "use std::collections::BTreeMap;";
-}
-"#;
-        assert_eq!(count_use_statements(&must_parse(code)), 0);
     }
 }

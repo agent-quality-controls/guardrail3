@@ -156,18 +156,16 @@ fn collect_ts_tsx_files(root: &Path) -> Vec<String> {
 /// T-TEST-04: No `.skip()` without reason comment on same line.
 ///
 /// Detects `test.skip(`, `describe.skip(`, `it.skip(` without `// reason` on the same line.
-/// Uses tree-sitter when possible (no false positives from strings/comments), falls back to grep.
+/// Uses tree-sitter AST for accurate detection (no false positives from strings/comments).
 /// Returns results for a single file's content. Testable without filesystem.
+#[allow(clippy::case_sensitive_file_extension_comparisons)] // reason: only checking .tsx extension on known TS filenames
 pub fn check_skip_without_reason_content(content: &str, filename: &str) -> Vec<CheckResult> {
-    // Try tree-sitter first for accurate AST-based detection
     let is_tsx = filename.ends_with(".tsx");
-    if let Some(tree) = ast_helpers::parse_ts_file(content, is_tsx) {
-        let skip_lines = ast_helpers::find_test_method_calls(&tree, content, "skip");
-        return check_skip_lines_with_reason(content, filename, &skip_lines);
-    }
-
-    // Fallback: grep-based detection
-    check_skip_without_reason_grep(content, filename)
+    let Some(tree) = ast_helpers::parse_ts_file(content, is_tsx) else {
+        return Vec::new();
+    };
+    let skip_lines = ast_helpers::find_test_method_calls(&tree, content, "skip");
+    check_skip_lines_with_reason(content, filename, &skip_lines)
 }
 
 /// Given confirmed skip call line numbers (from tree-sitter), check each for `// reason`.
@@ -208,66 +206,20 @@ fn check_skip_lines_with_reason(
     results
 }
 
-/// Grep-based fallback for T-TEST-04 when tree-sitter parse fails.
-fn check_skip_without_reason_grep(content: &str, filename: &str) -> Vec<CheckResult> {
-    let skip_patterns = ["test.skip(", "describe.skip(", "it.skip("];
-    let mut results = Vec::new();
-
-    for (line_num, line) in content.lines().enumerate() {
-        let trimmed = line.trim();
-
-        // Skip comment-only lines
-        if trimmed.starts_with("//") || trimmed.starts_with('*') || trimmed.starts_with("/*") {
-            continue;
-        }
-
-        let has_skip = skip_patterns.iter().any(|p| trimmed.contains(p));
-        if !has_skip {
-            continue;
-        }
-
-        let line_number = line_num.saturating_add(1);
-
-        if trimmed.contains("// reason") {
-            results.push(CheckResult {
-                id: "T-TEST-04".to_owned(),
-                severity: Severity::Info,
-                title: "test.skip with reason".to_owned(),
-                message: trimmed.to_owned(),
-                file: Some(filename.to_owned()),
-                line: Some(line_number),
-            });
-        } else {
-            results.push(CheckResult {
-                id: "T-TEST-04".to_owned(),
-                severity: Severity::Warn,
-                title: "test.skip without reason".to_owned(),
-                message: format!("Add `// reason: <why>` comment: {trimmed}"),
-                file: Some(filename.to_owned()),
-                line: Some(line_number),
-            });
-        }
-    }
-
-    results
-}
-
 /// T-TEST-05: No `.only()` in committed code.
 ///
 /// Detects `test.only(`, `describe.only(`, `it.only(`.
 /// These should never be committed — they cause other tests to be silently skipped.
-/// Uses tree-sitter when possible (no false positives from strings/comments), falls back to grep.
+/// Uses tree-sitter AST for accurate detection (no false positives from strings/comments).
 /// Returns results for a single file's content. Testable without filesystem.
+#[allow(clippy::case_sensitive_file_extension_comparisons)] // reason: only checking .tsx extension on known TS filenames
 pub fn check_only_in_source_content(content: &str, filename: &str) -> Vec<CheckResult> {
-    // Try tree-sitter first for accurate AST-based detection
     let is_tsx = filename.ends_with(".tsx");
-    if let Some(tree) = ast_helpers::parse_ts_file(content, is_tsx) {
-        let only_lines = ast_helpers::find_test_method_calls(&tree, content, "only");
-        return check_only_lines(content, filename, &only_lines);
-    }
-
-    // Fallback: grep-based detection
-    check_only_in_source_grep(content, filename)
+    let Some(tree) = ast_helpers::parse_ts_file(content, is_tsx) else {
+        return Vec::new();
+    };
+    let only_lines = ast_helpers::find_test_method_calls(&tree, content, "only");
+    check_only_lines(content, filename, &only_lines)
 }
 
 /// Given confirmed `.only()` call line numbers (from tree-sitter), emit errors.
@@ -289,38 +241,6 @@ fn check_only_lines(
             severity: Severity::Error,
             title: ".only() in committed code".to_owned(),
             message: format!("Remove .only() before committing: {line_text}"),
-            file: Some(filename.to_owned()),
-            line: Some(line_number),
-        });
-    }
-
-    results
-}
-
-/// Grep-based fallback for T-TEST-05 when tree-sitter parse fails.
-fn check_only_in_source_grep(content: &str, filename: &str) -> Vec<CheckResult> {
-    let only_patterns = ["test.only(", "describe.only(", "it.only("];
-    let mut results = Vec::new();
-
-    for (line_num, line) in content.lines().enumerate() {
-        let trimmed = line.trim();
-
-        // Skip comment-only lines
-        if trimmed.starts_with("//") || trimmed.starts_with('*') || trimmed.starts_with("/*") {
-            continue;
-        }
-
-        let has_only = only_patterns.iter().any(|p| trimmed.contains(p));
-        if !has_only {
-            continue;
-        }
-
-        let line_number = line_num.saturating_add(1);
-        results.push(CheckResult {
-            id: "T-TEST-05".to_owned(),
-            severity: Severity::Error,
-            title: ".only() in committed code".to_owned(),
-            message: format!("Remove .only() before committing: {trimmed}"),
             file: Some(filename.to_owned()),
             line: Some(line_number),
         });

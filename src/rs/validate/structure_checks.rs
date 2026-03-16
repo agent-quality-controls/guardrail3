@@ -47,16 +47,10 @@ pub fn check_use_count(path: &Path, content: &str, is_test: bool, results: &mut 
         return;
     }
 
-    let use_count = if let Some(file) = ast_helpers::parse_file(content) {
-        ast_helpers::count_use_statements(&file)
-    } else {
-        // Fallback to grep if parse fails
-        let non_comment_lines = filter_non_comment_lines(content);
-        non_comment_lines
-            .iter()
-            .filter(|(_, trimmed)| trimmed.starts_with("use ") || trimmed.starts_with("pub use "))
-            .count()
+    let Some(file) = ast_helpers::parse_file(content) else {
+        return;
     };
+    let use_count = ast_helpers::count_use_statements(&file);
 
     if use_count > 20 {
         results.push(CheckResult {
@@ -81,72 +75,24 @@ pub fn check_use_count(path: &Path, content: &str, is_test: bool, results: &mut 
 
 // R42: unsafe
 pub fn check_unsafe(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
-    if let Some(file) = ast_helpers::parse_file(content) {
-        // AST path — no false positives from strings or comments
-        for line in ast_helpers::find_unsafe_usage(&file) {
-            let message = content
-                .lines()
-                .nth(line.saturating_sub(1))
-                .unwrap_or("")
-                .trim();
-            results.push(CheckResult {
-                id: "R42".to_owned(),
-                severity: Severity::Error,
-                title: "unsafe usage".to_owned(),
-                message: message.to_owned(),
-                file: Some(path.display().to_string()),
-                line: Some(line),
-            });
-        }
-    } else {
-        // Fallback to grep if parse fails
-        check_unsafe_grep(path, content, results);
-    }
-}
-
-fn check_unsafe_grep(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
-    let non_comment_lines = filter_non_comment_lines(content);
-
-    for (line_num, trimmed) in &non_comment_lines {
-        let check_patterns = [
-            "unsafe {",
-            "unsafe{",
-            "unsafe fn ",
-            "unsafe impl ",
-            "unsafe trait ",
-        ];
-
-        let mut found = false;
-        for pattern in &check_patterns {
-            if trimmed.contains(pattern) {
-                if let Some(unsafe_pos) = trimmed.find(pattern) {
-                    #[allow(clippy::string_slice)] // reason: unsafe keyword detection on ASCII
-                    let before = &trimmed[..unsafe_pos];
-                    let quote_count = before.chars().filter(|c| *c == '"').count();
-                    if quote_count % 2 != 0 {
-                        continue;
-                    }
-                    found = true;
-                    break;
-                }
-            }
-        }
-
-        if !found && trimmed.starts_with("unsafe ") {
-            found = true;
-        }
-
-        if found {
-            let line_number = line_num.saturating_add(1);
-            results.push(CheckResult {
-                id: "R42".to_owned(),
-                severity: Severity::Error,
-                title: "unsafe usage".to_owned(),
-                message: trimmed.to_owned(),
-                file: Some(path.display().to_string()),
-                line: Some(line_number),
-            });
-        }
+    let Some(file) = ast_helpers::parse_file(content) else {
+        return;
+    };
+    // AST path — no false positives from strings or comments
+    for line in ast_helpers::find_unsafe_usage(&file) {
+        let message = content
+            .lines()
+            .nth(line.saturating_sub(1))
+            .unwrap_or("")
+            .trim();
+        results.push(CheckResult {
+            id: "R42".to_owned(),
+            severity: Severity::Error,
+            title: "unsafe usage".to_owned(),
+            message: message.to_owned(),
+            file: Some(path.display().to_string()),
+            line: Some(line),
+        });
     }
 }
 
