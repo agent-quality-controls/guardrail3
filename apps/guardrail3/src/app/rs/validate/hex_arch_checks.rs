@@ -7,7 +7,7 @@ use crate::domain::report::{CheckResult, Severity};
 use crate::ports::outbound::FileSystem;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum Layer {
+pub enum Layer {
     Domain,
     Ports,
     App,
@@ -34,7 +34,7 @@ impl Layer {
     }
 }
 
-fn layer_from_config(value: &str) -> Option<Layer> {
+pub fn layer_from_config(value: &str) -> Option<Layer> {
     match value {
         "domain" | "pure" => Some(Layer::Domain),
         "ports" => Some(Layer::Ports),
@@ -44,7 +44,7 @@ fn layer_from_config(value: &str) -> Option<Layer> {
     }
 }
 
-fn layer_from_path(dir: &str) -> Option<Layer> {
+pub fn layer_from_path(dir: &str) -> Option<Layer> {
     if contains_segment(dir, "domain") {
         Some(Layer::Domain)
     } else if contains_segment(dir, "ports") {
@@ -58,7 +58,7 @@ fn layer_from_path(dir: &str) -> Option<Layer> {
     }
 }
 
-fn contains_segment(path: &str, segment: &str) -> bool {
+pub fn contains_segment(path: &str, segment: &str) -> bool {
     path.split('/').any(|s| s == segment)
 }
 
@@ -196,7 +196,7 @@ fn resolve_dep_layer(
     None
 }
 
-fn normalize_path(base: &str, rel: &str) -> String {
+pub fn normalize_path(base: &str, rel: &str) -> String {
     let mut parts: Vec<&str> = base.split('/').collect();
     for seg in rel.split('/') {
         match seg {
@@ -325,14 +325,10 @@ pub fn check_unconfigured_members(
     }
 }
 
-fn is_service_internal(path: &str) -> bool {
+pub fn is_service_internal(path: &str) -> bool {
     let parts: Vec<&str> = path.split('/').collect();
     parts.len() >= 4
         && parts.first().is_some_and(|s| *s == "apps")
         && parts.get(2).is_some_and(|s| *s == "crates")
 }
 
-#[cfg(test)]
-#[allow(clippy::indexing_slicing, clippy::expect_used)] // reason: test assertions
-#[path = "hex_arch_checks_tests.rs"]
-mod tests;

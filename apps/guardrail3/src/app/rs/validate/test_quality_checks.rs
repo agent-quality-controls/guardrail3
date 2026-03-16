@@ -18,7 +18,7 @@ pub fn check(fs: &dyn FileSystem, workspace_root: &Path, results: &mut Vec<Check
 // R-TEST-05: Test coverage inventory
 // ---------------------------------------------------------------------------
 
-fn check_test_coverage_inventory(
+pub fn check_test_coverage_inventory(
     fs: &dyn FileSystem,
     workspace_root: &Path,
     results: &mut Vec<CheckResult>,
@@ -86,7 +86,7 @@ fn check_test_coverage_inventory(
 }
 
 /// Count `pub fn` declarations in content (AST-based).
-fn count_pub_fns(content: &str) -> usize {
+pub fn count_pub_fns(content: &str) -> usize {
     let Some(file) = super::ast_helpers::parse_file(content) else {
         return 0;
     };
@@ -94,7 +94,7 @@ fn count_pub_fns(content: &str) -> usize {
 }
 
 /// Count `#[test]` and `#[tokio::test]` attributes in content (AST-based).
-fn count_test_fns(content: &str) -> usize {
+pub fn count_test_fns(content: &str) -> usize {
     let Some(file) = super::ast_helpers::parse_file(content) else {
         return 0;
     };
@@ -105,7 +105,7 @@ fn count_test_fns(content: &str) -> usize {
 // R-TEST-06: Integration tests exist
 // ---------------------------------------------------------------------------
 
-fn check_integration_tests(
+pub fn check_integration_tests(
     fs: &dyn FileSystem,
     workspace_root: &Path,
     results: &mut Vec<CheckResult>,
@@ -180,7 +180,7 @@ fn has_rs_files_in_dir(fs: &dyn FileSystem, dir: &Path) -> bool {
 // R-TEST-07: No #[ignore] without reason
 // ---------------------------------------------------------------------------
 
-fn check_ignore_without_reason(
+pub fn check_ignore_without_reason(
     fs: &dyn FileSystem,
     workspace_root: &Path,
     results: &mut Vec<CheckResult>,
@@ -231,7 +231,7 @@ fn check_ignore_without_reason(
 
 /// Find lines with #[ignore] that lack a reason comment (AST-based).
 /// Returns 1-based line numbers of violations.
-fn find_ignore_without_reason(content: &str) -> Vec<usize> {
+pub fn find_ignore_without_reason(content: &str) -> Vec<usize> {
     let Some(file) = super::ast_helpers::parse_file(content) else {
         return Vec::new();
     };
@@ -242,7 +242,7 @@ fn find_ignore_without_reason(content: &str) -> Vec<usize> {
 // R-TEST-08: Mutation test hook configured
 // ---------------------------------------------------------------------------
 
-fn check_mutation_hook(fs: &dyn FileSystem, workspace_root: &Path, results: &mut Vec<CheckResult>) {
+pub fn check_mutation_hook(fs: &dyn FileSystem, workspace_root: &Path, results: &mut Vec<CheckResult>) {
     // Check .claude/ directory for hook configs mentioning "mutant"
     let claude_dir = workspace_root.join(".claude");
     if claude_dir.exists() {
@@ -293,173 +293,3 @@ fn check_mutation_hook(fs: &dyn FileSystem, workspace_root: &Path, results: &mut
     });
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::fs as stdfs; // only in tests — not production code
-
-    #[allow(clippy::expect_used)] // reason: test infra — panic on temp dir failure is fine
-    fn make_temp_dir() -> tempfile::TempDir {
-        tempfile::tempdir().expect("failed to create temp dir")
-    }
-
-    // ---- R-TEST-05: Test coverage inventory ----
-
-    #[test]
-    fn r_test_05_counts_pub_fns() {
-        let content = "pub fn foo() {}\nfn bar() {}\npub fn baz() {}";
-        assert_eq!(count_pub_fns(content), 2);
-    }
-
-    #[test]
-    fn r_test_05_counts_test_fns() {
-        let content = "#[test]\nfn a() {}\n#[test]\nfn b() {}\nfn c() {}";
-        assert_eq!(count_test_fns(content), 2);
-    }
-
-    #[test]
-    #[allow(clippy::expect_used, clippy::disallowed_methods)] // reason: test setup and assertions
-    fn r_test_05_emits_inventory() {
-        let fs = crate::adapters::outbound::fs::RealFileSystem;
-        let tmp = make_temp_dir();
-        let src_dir = tmp.path().join("src");
-        stdfs::create_dir_all(&src_dir).expect("mkdir");
-        stdfs::write(
-            src_dir.join("lib.rs"),
-            "pub fn foo() {}\npub fn bar() {}\n#[test]\nfn test_foo() {}",
-        )
-        .expect("write");
-        let mut results = Vec::new();
-        check_test_coverage_inventory(&fs, tmp.path(), &mut results);
-        assert_eq!(results.len(), 1);
-        let r = results.first().expect("should have result");
-        assert_eq!(r.id, "R-TEST-05");
-        assert_eq!(r.severity, Severity::Info);
-        assert!(r.message.contains("2 public functions"));
-        assert!(r.message.contains("1 test functions"));
-    }
-
-    // ---- R-TEST-06: Integration tests exist ----
-
-    #[test]
-    #[allow(clippy::expect_used)] // reason: test assertion
-    fn r_test_06_neg_no_tests_dir() {
-        let fs = crate::adapters::outbound::fs::RealFileSystem;
-        let tmp = make_temp_dir();
-        let mut results = Vec::new();
-        check_integration_tests(&fs, tmp.path(), &mut results);
-        assert_eq!(results.len(), 1);
-        let r = results.first().expect("should have result");
-        assert_eq!(r.id, "R-TEST-06");
-        assert!(r.title.contains("No integration"));
-    }
-
-    #[test]
-    #[allow(clippy::expect_used, clippy::disallowed_methods)] // reason: test setup and assertions
-    fn r_test_06_pos_tests_dir_with_rs() {
-        let fs = crate::adapters::outbound::fs::RealFileSystem;
-        let tmp = make_temp_dir();
-        let tests_dir = tmp.path().join("tests");
-        stdfs::create_dir_all(&tests_dir).expect("mkdir");
-        stdfs::write(tests_dir.join("integration.rs"), "#[test]\nfn it() {}").expect("write");
-        let mut results = Vec::new();
-        check_integration_tests(&fs, tmp.path(), &mut results);
-        assert_eq!(results.len(), 1);
-        let r = results.first().expect("should have result");
-        assert_eq!(r.id, "R-TEST-06");
-        assert!(r.title.contains("Integration tests exist"));
-    }
-
-    // ---- R-TEST-07: No #[ignore] without reason ----
-
-    #[test]
-    #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
-    fn r_test_07_neg_bare_ignore() {
-        let content = "#[test]\n#[ignore]\nfn slow_test() {}";
-        let violations = find_ignore_without_reason(content);
-        assert_eq!(violations.len(), 1);
-        assert_eq!(violations[0], 2); // line 2, 1-based
-    }
-
-    #[test]
-    fn r_test_07_pos_ignore_with_reason_same_line() {
-        let content = "#[test]\n#[ignore] // reason: requires network\nfn slow_test() {}";
-        let violations = find_ignore_without_reason(content);
-        assert!(violations.is_empty(), "Should accept reason on same line");
-    }
-
-    #[test]
-    fn r_test_07_pos_ignore_with_reason_prev_line() {
-        let content = "#[test]\n// reason: requires database\n#[ignore]\nfn slow_test() {}";
-        let violations = find_ignore_without_reason(content);
-        assert!(
-            violations.is_empty(),
-            "Should accept reason on previous line"
-        );
-    }
-
-    #[test]
-    fn r_test_07_pos_ignore_with_name_value_reason() {
-        let content = "#[test]\n#[ignore = \"requires network\"]\nfn slow_test() {}";
-        let violations = find_ignore_without_reason(content);
-        assert!(
-            violations.is_empty(),
-            "ignore with = reason should not be flagged"
-        );
-    }
-
-    // ---- R-TEST-08: Mutation test hook configured ----
-
-    #[test]
-    #[allow(clippy::expect_used)] // reason: test assertion
-    fn r_test_08_neg_no_hook() {
-        let fs = crate::adapters::outbound::fs::RealFileSystem;
-        let tmp = make_temp_dir();
-        let mut results = Vec::new();
-        check_mutation_hook(&fs, tmp.path(), &mut results);
-        assert_eq!(results.len(), 1);
-        let r = results.first().expect("should have result");
-        assert_eq!(r.id, "R-TEST-08");
-        assert!(r.title.contains("No mutation"));
-    }
-
-    #[test]
-    #[allow(clippy::expect_used, clippy::disallowed_methods)] // reason: test setup and assertions
-    fn r_test_08_pos_claude_hook() {
-        let fs = crate::adapters::outbound::fs::RealFileSystem;
-        let tmp = make_temp_dir();
-        let claude_dir = tmp.path().join(".claude");
-        stdfs::create_dir_all(&claude_dir).expect("mkdir");
-        stdfs::write(
-            claude_dir.join("hooks.json"),
-            r#"{"hooks": [{"command": "cargo-mutants --in-diff"}]}"#,
-        )
-        .expect("write");
-        let mut results = Vec::new();
-        check_mutation_hook(&fs, tmp.path(), &mut results);
-        assert_eq!(results.len(), 1);
-        let r = results.first().expect("should have result");
-        assert_eq!(r.id, "R-TEST-08");
-        assert!(r.title.contains("Mutation test hook configured"));
-    }
-
-    #[test]
-    #[allow(clippy::expect_used, clippy::disallowed_methods)] // reason: test setup and assertions
-    fn r_test_08_pos_pre_commit_hook() {
-        let fs = crate::adapters::outbound::fs::RealFileSystem;
-        let tmp = make_temp_dir();
-        let hooks_dir = tmp.path().join(".git").join("hooks");
-        stdfs::create_dir_all(&hooks_dir).expect("mkdir");
-        stdfs::write(
-            hooks_dir.join("pre-commit"),
-            "#!/bin/bash\ncargo mutants --in-diff -\n",
-        )
-        .expect("write");
-        let mut results = Vec::new();
-        check_mutation_hook(&fs, tmp.path(), &mut results);
-        assert_eq!(results.len(), 1);
-        let r = results.first().expect("should have result");
-        assert_eq!(r.id, "R-TEST-08");
-        assert!(r.title.contains("Mutation test hook configured"));
-    }
-}

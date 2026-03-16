@@ -4,7 +4,7 @@ use std::path::Path;
 use crate::domain::report::{CheckResult, Severity};
 use crate::ports::outbound::FileSystem;
 /// Expected serde/toml/yaml deserialization method bans for Garde boundary validation.
-const EXPECTED_SERDE_METHOD_BANS: &[&str] = &[
+pub const EXPECTED_SERDE_METHOD_BANS: &[&str] = &[
     "serde_json::from_str",
     "serde_json::from_slice",
     "serde_json::from_value",
@@ -15,7 +15,7 @@ const EXPECTED_SERDE_METHOD_BANS: &[&str] = &[
 ];
 
 /// Expected axum extractor type bans for Garde boundary validation.
-const EXPECTED_AXUM_TYPE_BANS: &[&str] = &[
+pub const EXPECTED_AXUM_TYPE_BANS: &[&str] = &[
     "axum::extract::Json",
     "axum::Json",
     "axum::extract::Query",
@@ -91,7 +91,7 @@ pub fn check(fs: &dyn FileSystem, workspace_root: &Path) -> Vec<CheckResult> {
 // R-GARDE-01: garde dependency presence
 // ---------------------------------------------------------------------------
 
-fn check_garde_dependency(cargo_content: Option<&str>) -> Vec<CheckResult> {
+pub fn check_garde_dependency(cargo_content: Option<&str>) -> Vec<CheckResult> {
     let Some(content) = cargo_content else {
         return vec![CheckResult {
             id: "R-GARDE-01".to_owned(),
@@ -126,7 +126,7 @@ fn check_garde_dependency(cargo_content: Option<&str>) -> Vec<CheckResult> {
 
 /// Check if content contains a garde dependency entry.
 /// Looks for lines like `garde = ` or `garde = {` in dependency sections.
-fn content_has_garde_dependency(content: &str) -> bool {
+pub fn content_has_garde_dependency(content: &str) -> bool {
     let mut in_deps_section = false;
     for line in content.lines() {
         let trimmed = line.trim();
@@ -156,7 +156,7 @@ fn content_has_garde_dependency(content: &str) -> bool {
 // R-GARDE-04: reqwest::Response::json ban in clippy.toml
 // ---------------------------------------------------------------------------
 
-fn check_reqwest_json_ban_from_table(table: &toml::Value, file: &str) -> Vec<CheckResult> {
+pub fn check_reqwest_json_ban_from_table(table: &toml::Value, file: &str) -> Vec<CheckResult> {
     check_ban_presence(
         table,
         "disallowed-methods",
@@ -172,9 +172,9 @@ fn check_reqwest_json_ban_from_table(table: &toml::Value, file: &str) -> Vec<Che
 // ---------------------------------------------------------------------------
 
 /// The four input boundary derives that require `Validate`.
-const INPUT_BOUNDARY_DERIVES: &[&str] = &["Deserialize", "Parser", "Args", "FromRow"];
+pub const INPUT_BOUNDARY_DERIVES: &[&str] = &["Deserialize", "Parser", "Args", "FromRow"];
 
-fn check_derive_inventory(
+pub fn check_derive_inventory(
     fs: &dyn FileSystem,
     rs_files: &[String],
     workspace_root: &Path,
@@ -217,7 +217,7 @@ fn check_derive_inventory(
 
 /// Check if a macro name matches any of the input boundary derives,
 /// accounting for path-qualified forms like `serde::Deserialize` or `clap::Parser`.
-fn is_input_boundary_derive(macro_name: &str) -> bool {
+pub fn is_input_boundary_derive(macro_name: &str) -> bool {
     INPUT_BOUNDARY_DERIVES.iter().any(|&d| {
         macro_name == d || macro_name.ends_with(&format!("::{d}"))
     })
@@ -225,7 +225,7 @@ fn is_input_boundary_derive(macro_name: &str) -> bool {
 
 /// Count structs that derive any input boundary trait (`Deserialize`, `Parser`, `Args`, `FromRow`)
 /// and check whether they also derive `Validate`.
-fn count_unvalidated_input_structs(
+pub fn count_unvalidated_input_structs(
     derives: &[super::ast_helpers::DeriveInfo],
 ) -> (usize, usize) {
     let mut with_validate: usize = 0;
@@ -258,7 +258,7 @@ fn count_unvalidated_input_structs(
 // ---------------------------------------------------------------------------
 
 /// Extract paths from a clippy.toml ban array (disallowed-methods or disallowed-types).
-fn extract_ban_paths(table: &toml::Value, key: &str) -> BTreeSet<String> {
+pub fn extract_ban_paths(table: &toml::Value, key: &str) -> BTreeSet<String> {
     let mut paths = BTreeSet::new();
     if let Some(bans) = table.get(key).and_then(|v| v.as_array()) {
         for ban in bans {
@@ -275,7 +275,7 @@ fn extract_ban_paths(table: &toml::Value, key: &str) -> BTreeSet<String> {
 /// Check that all expected bans are present in a clippy.toml ban list.
 /// Returns a single Warn if any are missing (listing the missing ones),
 /// or a single Info if all are present.
-fn check_ban_presence(
+pub fn check_ban_presence(
     table: &toml::Value,
     key: &str,
     expected: &[&str],
@@ -311,6 +311,3 @@ fn check_ban_presence(
     }
 }
 
-#[cfg(test)]
-#[path = "garde_checks_tests.rs"]
-mod tests;

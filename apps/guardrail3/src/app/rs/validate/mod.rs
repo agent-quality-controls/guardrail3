@@ -1,16 +1,16 @@
 pub mod allow_checks;
 pub mod ast_helpers;
-mod ast_visitors;
+pub mod ast_visitors;
 pub mod cargo_lints;
 pub mod clippy_coverage;
 pub mod code_quality_checks;
 pub mod config_files;
 pub mod deny_audit;
 mod deny_bans;
-mod deny_inventory;
+pub mod deny_inventory;
 mod deny_licenses;
 pub mod dependency_allowlist;
-mod hex_arch_checks;
+pub mod hex_arch_checks;
 pub mod dependency_scan;
 pub mod garde_checks;
 pub mod release_bin_checks;
@@ -22,7 +22,7 @@ mod rustfmt_check;
 pub mod source_scan;
 pub mod structure_checks;
 pub mod test_checks;
-mod test_quality_checks;
+pub mod test_quality_checks;
 mod toolchain_check;
 mod workspace_metadata;
 

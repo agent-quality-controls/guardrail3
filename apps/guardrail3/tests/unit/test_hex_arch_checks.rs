@@ -1,10 +1,27 @@
-use super::*;
-use std::path::PathBuf;
+#![allow(clippy::indexing_slicing, clippy::expect_used)] // reason: test assertions
 
-struct StubFs { files: BTreeMap<PathBuf, String> }
+use std::collections::BTreeMap;
+use std::path::{Path, PathBuf};
+
+use guardrail3::app::discover::ProjectInfo;
+use guardrail3::app::rs::validate::hex_arch_checks::{
+    check_dependency_flow, check_hex_arch_structure, check_library_service_boundary,
+    contains_segment, is_service_internal, layer_from_config, normalize_path, Layer,
+};
+use guardrail3::domain::config::types::CrateConfig;
+use guardrail3::domain::report::Severity;
+use guardrail3::ports::outbound::FileSystem;
+
+struct StubFs {
+    files: BTreeMap<PathBuf, String>,
+}
 
 impl StubFs {
-    fn new() -> Self { Self { files: BTreeMap::new() } }
+    fn new() -> Self {
+        Self {
+            files: BTreeMap::new(),
+        }
+    }
     fn add(&mut self, p: &str, c: &str) -> &mut Self {
         let _ = self.files.insert(PathBuf::from(p), c.to_owned());
         self
@@ -21,8 +38,12 @@ impl FileSystem for StubFs {
             std::io::Error::new(std::io::ErrorKind::NotFound, "stub")
         })
     }
-    fn list_dir(&self, _: &Path) -> Vec<std::fs::DirEntry> { Vec::new() }
-    fn metadata(&self, _: &Path) -> Option<std::fs::Metadata> { None }
+    fn list_dir(&self, _: &Path) -> Vec<std::fs::DirEntry> {
+        Vec::new()
+    }
+    fn metadata(&self, _: &Path) -> Option<std::fs::Metadata> {
+        None
+    }
 }
 
 #[allow(clippy::type_complexity)] // reason: test helper tuple pairs

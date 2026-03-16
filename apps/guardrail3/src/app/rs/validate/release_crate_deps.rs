@@ -287,8 +287,3 @@ pub fn is_valid_semver(version: &str) -> bool {
         .iter()
         .all(|p| !p.is_empty() && p.parse::<u64>().is_ok())
 }
-
-
-#[cfg(test)]
-#[path = "release_crate_deps_tests.rs"]
-mod tests;

@@ -1,5 +1,10 @@
-use super::*;
+use std::collections::BTreeSet;
 
+use guardrail3::app::rs::validate::release_repo_checks::{
+    check_cliff_toml, check_license_file, check_release_plz_toml, check_semver_checks_installed,
+    check_workflow_contains,
+};
+use guardrail3::domain::report::Severity;
 
 // --- R-REL-01 ---
 
@@ -49,7 +54,7 @@ fn rel02_neg_no_release_plz() {
 
     let mut r = Vec::new();
     let names = BTreeSet::new();
-    let fs = crate::adapters::outbound::fs::RealFileSystem;
+    let fs = guardrail3::adapters::outbound::fs::RealFileSystem;
     check_release_plz_toml(&fs, &tmp, &names, &mut r);
     assert!(
         r.iter()
@@ -72,7 +77,7 @@ fn rel02_pos_release_plz_exists() {
 
     let mut r = Vec::new();
     let names = BTreeSet::from(["x".to_owned()]);
-    let fs = crate::adapters::outbound::fs::RealFileSystem;
+    let fs = guardrail3::adapters::outbound::fs::RealFileSystem;
     check_release_plz_toml(&fs, &tmp, &names, &mut r);
     assert!(
         r.iter()
@@ -94,7 +99,7 @@ fn rel03_neg_invalid_toml() {
 
     let mut r = Vec::new();
     let names = BTreeSet::new();
-    let fs = crate::adapters::outbound::fs::RealFileSystem;
+    let fs = guardrail3::adapters::outbound::fs::RealFileSystem;
     check_release_plz_toml(&fs, &tmp, &names, &mut r);
     assert!(
         r.iter()
@@ -117,7 +122,7 @@ fn rel03_pos_valid_covers_crates() {
 
     let mut r = Vec::new();
     let names = BTreeSet::from(["a".to_owned(), "b".to_owned()]);
-    let fs = crate::adapters::outbound::fs::RealFileSystem;
+    let fs = guardrail3::adapters::outbound::fs::RealFileSystem;
     check_release_plz_toml(&fs, &tmp, &names, &mut r);
     assert!(
         r.iter()
@@ -175,7 +180,7 @@ fn rel05_neg_no_release_workflow() {
     let _ = std::fs::write(tmp.join(".github/workflows/ci.yml"), "name: CI\n");
 
     let mut r = Vec::new();
-    let fs = crate::adapters::outbound::fs::RealFileSystem;
+    let fs = guardrail3::adapters::outbound::fs::RealFileSystem;
     check_workflow_contains(&fs, &tmp, "release-plz", "R-REL-05", "", "", "", "", &mut r);
     assert!(
         r.iter()
@@ -197,7 +202,7 @@ fn rel05_pos_has_release_workflow() {
     );
 
     let mut r = Vec::new();
-    let fs = crate::adapters::outbound::fs::RealFileSystem;
+    let fs = guardrail3::adapters::outbound::fs::RealFileSystem;
     check_workflow_contains(&fs, &tmp, "release-plz", "R-REL-05", "", "", "", "", &mut r);
     assert!(
         r.iter()
@@ -221,7 +226,7 @@ fn rel06_neg_no_dry_run() {
     );
 
     let mut r = Vec::new();
-    let fs = crate::adapters::outbound::fs::RealFileSystem;
+    let fs = guardrail3::adapters::outbound::fs::RealFileSystem;
     check_workflow_contains(
         &fs,
         &tmp,
@@ -253,7 +258,7 @@ fn rel06_pos_has_dry_run() {
     );
 
     let mut r = Vec::new();
-    let fs = crate::adapters::outbound::fs::RealFileSystem;
+    let fs = guardrail3::adapters::outbound::fs::RealFileSystem;
     check_workflow_contains(
         &fs,
         &tmp,
@@ -284,7 +289,7 @@ fn rel07_neg_no_token() {
     let _ = std::fs::write(tmp.join(".github/workflows/ci.yml"), "name: CI\n");
 
     let mut r = Vec::new();
-    let fs = crate::adapters::outbound::fs::RealFileSystem;
+    let fs = guardrail3::adapters::outbound::fs::RealFileSystem;
     check_workflow_contains(
         &fs,
         &tmp,
@@ -316,7 +321,7 @@ fn rel07_pos_has_token() {
     );
 
     let mut r = Vec::new();
-    let fs = crate::adapters::outbound::fs::RealFileSystem;
+    let fs = guardrail3::adapters::outbound::fs::RealFileSystem;
     check_workflow_contains(
         &fs,
         &tmp,
@@ -341,7 +346,7 @@ fn rel07_pos_has_token() {
 #[test]
 fn rel08_emits_result() {
     let mut r = Vec::new();
-    let tc = crate::adapters::outbound::tool_runner::RealToolChecker;
+    let tc = guardrail3::adapters::outbound::tool_runner::RealToolChecker;
     check_semver_checks_installed(&tc, &mut r);
     // Should emit exactly one result with id R-REL-08
     assert_eq!(r.len(), 1);
