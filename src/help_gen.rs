@@ -45,25 +45,105 @@ fn inject_ts_help(cmd: Command) -> Command {
 // ---------------------------------------------------------------------------
 
 const TOP_LEVEL_HELP: &str = "\
-GETTING STARTED:
-  guardrail3 rs init --profile service   Set up Rust guardrails
-  guardrail3 ts init                     Set up TypeScript guardrails
-  guardrail3 rs generate                 Generate tool configs (clippy.toml, deny.toml, etc.)
-  guardrail3 rs validate .               Run all Rust checks
+QUICK START (single Rust crate):
+  guardrail3 rs init --profile service .
+  guardrail3 rs generate
+  guardrail3 rs validate .
 
-PROFILES (for rs init):
-  service   HTTP services (Axum/tokio). Full clippy bans, deny bans, tokio feature gating.
-            Composition-root crates may use LazyLock for global config.
-  library   Pure logic packages. Same as service PLUS bans ALL I/O crates
-            (axum, tokio, reqwest, sqlx) and global-state types everywhere.
+QUICK START (Rust workspace / monorepo):
+  guardrail3 rs init --profile service .
+  # Edit guardrail3.toml — see CONFIG REFERENCE below
+  guardrail3 rs generate
+  guardrail3 rs validate .
 
-WORKFLOW:
-  1. guardrail3 rs init --profile service    Create config
-  2. Edit guardrail3.toml                    Set workspace_root, crate layers
-  3. guardrail3 rs generate                  Produce clippy.toml, deny.toml, etc.
-  4. guardrail3 rs validate .                Check compliance
-  5. guardrail3 hooks install                Install pre-commit hook
-  6. guardrail3 check                        CI: verify configs not stale
+QUICK START (TypeScript project):
+  guardrail3 ts init .
+  guardrail3 ts generate
+  guardrail3 ts validate .
+
+QUICK START (monorepo with both Rust + TypeScript):
+  guardrail3 rs init --profile service .
+  guardrail3 ts init .
+  # Edit guardrail3.toml — see CONFIG REFERENCE below
+  guardrail3 rs generate && guardrail3 ts generate
+  guardrail3 validate .
+
+PROFILES (Rust only — TypeScript has no profiles):
+  service   For HTTP services (Axum/tokio). Bans dangerous methods (std::fs,
+            process::exit, env mutation) and types (HashMap→BTreeMap,
+            Mutex→parking_lot). Allows LazyLock in composition-root crates.
+  library   Everything in service PLUS bans ALL I/O crates (axum, tokio,
+            reqwest, sqlx) and global-state types (LazyLock, OnceLock) in
+            every crate. For pure logic packages with zero side effects.
+
+WORKFLOW — WHAT EACH STEP DOES:
+
+  1. rs init --profile service     Creates guardrail3.toml + local/ override dir.
+     │                             guardrail3.toml defines your profile, workspace
+     │                             root, and per-crate settings.
+     │
+  2. Edit guardrail3.toml          Configure per-crate profiles and dependency
+     │                             allowlists (see CONFIG REFERENCE below).
+     │
+  3. rs generate                   Reads guardrail3.toml and PRODUCES actual tool
+     │                             config files that cargo clippy, cargo deny, etc.
+     │                             read: clippy.toml, deny.toml, rustfmt.toml,
+     │                             rust-toolchain.toml, Cargo.toml [lints] section.
+     │                             Also produces per-crate clippy.toml for workspace
+     │                             crates with custom layers/profiles.
+     │
+  4. rs validate .                 Runs ALL checks against the project. Reports
+     │                             errors/warnings/info. Does NOT modify files.
+     │                             Exit code 1 if any errors found.
+     │
+  5. hooks install                 Generates and installs a pre-commit hook that
+     │                             runs: gitleaks, cargo fmt, cargo clippy,
+     │                             cargo-deny, cargo-machete, cargo test,
+     │                             cargo-dupes, structural health checks.
+     │
+  6. check (CI)                    Verifies generated files match what 'generate'
+                                   would produce. Fails if configs are stale.
+                                   Add to CI: guardrail3 check
+
+CONFIG REFERENCE (guardrail3.toml):
+
+  Single crate:
+    [profile]
+    name = \"service\"               # or \"library\"
+    [rust]
+    workspace_root = \".\"
+
+  Workspace with per-crate settings:
+    [profile]
+    name = \"service\"               # workspace default
+    [rust]
+    workspace_root = \".\"
+
+    [rust.crates.my-api]            # HTTP service — full access
+    profile = \"service\"
+    layer = \"composition-root\"     # allows LazyLock for global config
+
+    [rust.crates.my-domain]         # pure logic — locked down
+    profile = \"library\"
+    layer = \"pure\"
+    allowed_deps = [\"serde\", \"thiserror\", \"chrono\"]
+
+    [rust.crates.my-sdk]            # HTTP client library — needs network
+    profile = \"library\"
+    allowed_deps = [\"serde\", \"reqwest\", \"tokio\", \"thiserror\"]
+
+  Per-crate fields:
+    profile       \"service\" or \"library\" — overrides workspace profile for this crate
+    layer         \"composition-root\" (allows global state) or \"pure\" (bans it)
+    allowed_deps  Dependency allowlist — any dep NOT listed is an error (R-DEPS-01)
+                  Only checks [dependencies], not [dev-dependencies] or [build-dependencies]
+
+  local/ overrides (created by init):
+    local/clippy-methods.toml     Extra disallowed methods
+    local/clippy-types.toml       Extra disallowed types
+    local/deny-bans.toml          Extra crate bans
+    local/deny-skip.toml          Advisory skip entries
+    local/deny-feature-bans.toml  Feature bans
 
 COMMANDS:
   rs init [--profile service|library]    Scaffold Rust config + local overrides
@@ -361,7 +441,7 @@ mod tests {
             .get_after_help()
             .expect("after_help set")
             .to_string();
-        assert!(after.contains("GETTING STARTED"), "missing GETTING STARTED in help");
+        assert!(after.contains("QUICK START"), "missing QUICK START in help");
         assert!(after.contains("PROFILES"), "missing PROFILES in help");
         assert!(after.contains("WORKFLOW"), "missing WORKFLOW in help");
     }
