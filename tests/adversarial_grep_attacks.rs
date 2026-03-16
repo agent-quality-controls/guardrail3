@@ -441,11 +441,11 @@ fn grep_before_edge_multiple_allows_one_line() {
 
 #[test]
 fn grep_before_edge_attribute_on_expression() {
-    // AST-ONLY: expression-level #[allow] (on let bindings, match arms, loop bodies)
-    // is not visited by syn's ItemAllowVisitor — it only visits item-level attributes.
-    // This is a known limitation of AST-only analysis.
+    // Expression-level #[allow] on let bindings and match arms is now detected.
+    // All three allows in the fixture have // reason: comments, so they appear as R33 info.
     let r = validate_grep_attack_fixture("edge-cases", "attribute_on_expression.rs");
-    assert_no_hits(&r, "attribute_on_expression.rs");
+    assert_has_check(&r, "attribute_on_expression.rs", "R33", "info");
+    assert_no_check(&r, "attribute_on_expression.rs", "R32");
 }
 
 #[test]

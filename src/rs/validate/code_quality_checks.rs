@@ -22,7 +22,8 @@ pub fn check_todo_macros(
             .nth(line.saturating_sub(1))
             .unwrap_or("")
             .trim();
-        match name.as_str() {
+        let base_name = name.rsplit("::").next().unwrap_or(&name);
+        match base_name {
             "todo" | "unimplemented" => {
                 results.push(CheckResult {
                     id: "R43".to_owned(),
@@ -218,18 +219,20 @@ mod tests {
     }
 
     #[test]
-    fn r58_allows_type_references() {
+    fn r58_catches_type_method_call() {
+        // std::fs::Permissions::from_mode IS a std::fs call in expression context — should be caught
         let content = "fn foo() { let p = std::fs::Permissions::from_mode(0o755); }";
         let path = Path::new("src/foo.rs");
         let mut results = Vec::new();
         check_direct_fs_usage(path, content, false, &mut results);
         assert!(
-            results.is_empty(),
-            "Type references (Permissions) should be exempt"
+            !results.is_empty(),
+            "std::fs::Permissions::from_mode in expression context should be caught"
         );
     }
 
     #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
     fn r58_catches_read_to_string() {
         let content = "fn foo() { let s = std::fs::read_to_string(\"x\").unwrap(); }";
         let path = Path::new("src/foo.rs");
@@ -314,6 +317,33 @@ mod tests {
         let mut results = Vec::new();
         check_todo_macros(path, content, false, &mut results);
         assert!(!results.is_empty());
+        assert_eq!(results[0].severity, Severity::Warn);
+        assert_eq!(results[0].id, "R43");
+    }
+
+    #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
+    fn path_qualified_todo_macro_produces_warn() {
+        let content = "fn foo() { std::todo!(); }";
+        let path = Path::new("src/foo.rs");
+        let mut results = Vec::new();
+        check_todo_macros(path, content, false, &mut results);
+        assert!(!results.is_empty(), "std::todo!() should be caught by R43");
+        assert_eq!(results[0].severity, Severity::Warn);
+        assert_eq!(results[0].id, "R43");
+    }
+
+    #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
+    fn core_unimplemented_macro_produces_warn() {
+        let content = "fn foo() { core::unimplemented!(); }";
+        let path = Path::new("src/foo.rs");
+        let mut results = Vec::new();
+        check_todo_macros(path, content, false, &mut results);
+        assert!(
+            !results.is_empty(),
+            "core::unimplemented!() should be caught by R43"
+        );
         assert_eq!(results[0].severity, Severity::Warn);
         assert_eq!(results[0].id, "R43");
     }

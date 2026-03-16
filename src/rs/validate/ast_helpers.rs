@@ -7,6 +7,12 @@ use proc_macro2 as _; // reason: span-locations feature needed for syn span.star
 use syn::spanned::Spanned;
 use syn::visit::Visit;
 
+use super::ast_visitors::{
+    CfgAttrAllowVisitor, DeriveVisitor, ForbiddenMacroVisitor, GardeSkipVisitor, IgnoreVisitor,
+    InlineStdFsVisitor, ItemAllowVisitor, PubFnVisitor, TestAttrVisitor, TestCountVisitor,
+    UnwrapExpectVisitor, UnsafeVisitor,
+};
+
 /// A source location (1-based line number) paired with a descriptive string (lint name, method name, etc.).
 pub(super) type Located = (usize, String);
 
@@ -97,7 +103,7 @@ pub fn find_std_fs_imports(file: &syn::File) -> Vec<usize> {
         .filter_map(|item| {
             if let syn::Item::Use(u) = item {
                 // Skip cfg(test)-gated imports
-                if u.attrs.iter().any(|a| is_cfg_test_attr(a)) {
+                if u.attrs.iter().any(is_cfg_test_attr) {
                     return None;
                 }
                 if use_tree_matches_std_fs(&u.tree) {
@@ -118,17 +124,6 @@ pub fn find_inline_std_fs_calls(file: &syn::File) -> Vec<usize> {
     };
     v.visit_file(file);
     v.out
-}
-
-/// Check if an attribute is `#[cfg(test)]`.
-fn is_cfg_test_attr(attr: &syn::Attribute) -> bool {
-    if !attr.path().is_ident("cfg") {
-        return false;
-    }
-    let Ok(nested) = attr.parse_args::<syn::Ident>() else {
-        return false;
-    };
-    nested == "test"
 }
 
 /// Check if the file contains at least one `#[test]` or `#[tokio::test]` attribute.
@@ -173,14 +168,14 @@ pub fn count_use_statements(file: &syn::File) -> usize {
 }
 
 // ---------------------------------------------------------------------------
-// Internal
+// Internal helpers (shared with ast_visitors via pub(super))
 // ---------------------------------------------------------------------------
 
 pub(super) fn span_line(span: proc_macro2::Span) -> usize {
     span.start().line
 }
 
-fn extract_allow_lints(attr: &syn::Attribute, out: &mut Vec<Located>) {
+pub(super) fn extract_allow_lints(attr: &syn::Attribute, out: &mut Vec<Located>) {
     if !attr.path().is_ident("allow") {
         return;
     }
@@ -194,7 +189,7 @@ fn extract_allow_lints(attr: &syn::Attribute, out: &mut Vec<Located>) {
     }
 }
 
-fn extract_cfg_attr_allow_lints(attr: &syn::Attribute, out: &mut Vec<Located>) {
+pub(super) fn extract_cfg_attr_allow_lints(attr: &syn::Attribute, out: &mut Vec<Located>) {
     if !attr.path().is_ident("cfg_attr") {
         return;
     }
@@ -254,36 +249,15 @@ pub(super) fn path_to_string(path: &syn::Path) -> String {
         .join("::")
 }
 
-fn has_garde_skip(attrs: &[syn::Attribute]) -> Option<usize> {
-    for attr in attrs {
-        if !attr.path().is_ident("garde") {
-            continue;
-        }
-        if let Ok(nested) = attr.parse_args_with(
-            syn::punctuated::Punctuated::<syn::Path, syn::Token![,]>::parse_terminated,
-        ) {
-            for path in &nested {
-                if path.is_ident("skip") {
-                    return Some(span_line(attr.span()));
-                }
-            }
-        }
+/// Check if an attribute is `#[cfg(test)]`.
+pub(super) fn is_cfg_test_attr(attr: &syn::Attribute) -> bool {
+    if !attr.path().is_ident("cfg") {
+        return false;
     }
-    None
-}
-
-fn collect_outer_allows(attrs: &[syn::Attribute], out: &mut Vec<Located>) {
-    for attr in attrs {
-        if !matches!(attr.style, syn::AttrStyle::Inner(_)) {
-            extract_allow_lints(attr, out);
-        }
-    }
-}
-
-fn collect_cfg_attr_allows(attrs: &[syn::Attribute], out: &mut Vec<Located>) {
-    for attr in attrs {
-        extract_cfg_attr_allow_lints(attr, out);
-    }
+    let Ok(nested) = attr.parse_args::<syn::Ident>() else {
+        return false;
+    };
+    nested == "test"
 }
 
 #[allow(clippy::wildcard_enum_match_arm)] // reason: syn Item has many variants, exhaustive match is impractical
@@ -313,349 +287,9 @@ pub(super) fn impl_item_attrs(item: &syn::ImplItem) -> &[syn::Attribute] {
     }
 }
 
-#[allow(clippy::wildcard_enum_match_arm)] // reason: syn TraitItem has many variants, exhaustive match is impractical
-fn trait_item_attrs(item: &syn::TraitItem) -> &[syn::Attribute] {
-    match item {
-        syn::TraitItem::Fn(f) => &f.attrs,
-        syn::TraitItem::Type(t) => &t.attrs,
-        syn::TraitItem::Const(c) => &c.attrs,
-        _ => &[],
-    }
-}
-
 // ---------------------------------------------------------------------------
-// Visitors
+// Tests
 // ---------------------------------------------------------------------------
-
-struct ItemAllowVisitor {
-    out: Vec<Located>,
-}
-impl<'ast> Visit<'ast> for ItemAllowVisitor {
-    fn visit_item(&mut self, i: &'ast syn::Item) {
-        collect_outer_allows(item_attrs(i), &mut self.out);
-        syn::visit::visit_item(self, i);
-    }
-    fn visit_impl_item(&mut self, i: &'ast syn::ImplItem) {
-        collect_outer_allows(impl_item_attrs(i), &mut self.out);
-        syn::visit::visit_impl_item(self, i);
-    }
-    fn visit_trait_item(&mut self, i: &'ast syn::TraitItem) {
-        collect_outer_allows(trait_item_attrs(i), &mut self.out);
-        syn::visit::visit_trait_item(self, i);
-    }
-}
-
-struct CfgAttrAllowVisitor<'a> {
-    out: &'a mut Vec<Located>,
-}
-impl<'ast> Visit<'ast> for CfgAttrAllowVisitor<'_> {
-    fn visit_item(&mut self, i: &'ast syn::Item) {
-        collect_cfg_attr_allows(item_attrs(i), self.out);
-        syn::visit::visit_item(self, i);
-    }
-    fn visit_impl_item(&mut self, i: &'ast syn::ImplItem) {
-        collect_cfg_attr_allows(impl_item_attrs(i), self.out);
-        syn::visit::visit_impl_item(self, i);
-    }
-}
-
-struct GardeSkipVisitor {
-    out: Vec<usize>,
-}
-impl<'ast> Visit<'ast> for GardeSkipVisitor {
-    fn visit_field(&mut self, f: &'ast syn::Field) {
-        if let Some(line) = has_garde_skip(&f.attrs) {
-            self.out.push(line);
-        }
-        syn::visit::visit_field(self, f);
-    }
-    fn visit_item_struct(&mut self, n: &'ast syn::ItemStruct) {
-        if let Some(line) = has_garde_skip(&n.attrs) {
-            self.out.push(line);
-        }
-        syn::visit::visit_item_struct(self, n);
-    }
-}
-
-struct UnsafeVisitor {
-    out: Vec<usize>,
-}
-impl<'ast> Visit<'ast> for UnsafeVisitor {
-    fn visit_expr_unsafe(&mut self, n: &'ast syn::ExprUnsafe) {
-        self.out.push(span_line(n.unsafe_token.span));
-        syn::visit::visit_expr_unsafe(self, n);
-    }
-    fn visit_item_fn(&mut self, n: &'ast syn::ItemFn) {
-        if let Some(tok) = n.sig.unsafety {
-            self.out.push(span_line(tok.span));
-        }
-        syn::visit::visit_item_fn(self, n);
-    }
-    fn visit_impl_item_fn(&mut self, n: &'ast syn::ImplItemFn) {
-        if let Some(tok) = n.sig.unsafety {
-            self.out.push(span_line(tok.span));
-        }
-        syn::visit::visit_impl_item_fn(self, n);
-    }
-    fn visit_item_impl(&mut self, n: &'ast syn::ItemImpl) {
-        if let Some(tok) = n.unsafety {
-            self.out.push(span_line(tok.span));
-        }
-        syn::visit::visit_item_impl(self, n);
-    }
-    fn visit_item_trait(&mut self, n: &'ast syn::ItemTrait) {
-        if let Some(tok) = n.unsafety {
-            self.out.push(span_line(tok.span));
-        }
-        syn::visit::visit_item_trait(self, n);
-    }
-}
-
-struct ForbiddenMacroVisitor {
-    out: Vec<Located>,
-}
-impl<'ast> Visit<'ast> for ForbiddenMacroVisitor {
-    fn visit_macro(&mut self, n: &'ast syn::Macro) {
-        let name = path_to_string(&n.path);
-        if matches!(name.as_str(), "todo" | "unimplemented" | "unreachable" | "panic") {
-            self.out.push((span_line(n.path.span()), name));
-        }
-        syn::visit::visit_macro(self, n);
-    }
-}
-
-struct UnwrapExpectVisitor {
-    out: Vec<Located>,
-}
-impl<'ast> Visit<'ast> for UnwrapExpectVisitor {
-    fn visit_expr_method_call(&mut self, n: &'ast syn::ExprMethodCall) {
-        let m = n.method.to_string();
-        if m == "unwrap" || m == "expect" {
-            self.out.push((span_line(n.method.span()), m));
-        }
-        syn::visit::visit_expr_method_call(self, n);
-    }
-}
-
-struct DeriveVisitor {
-    out: Vec<DeriveInfo>,
-}
-impl DeriveVisitor {
-    fn collect_derives(&mut self, attrs: &[syn::Attribute]) {
-        for attr in attrs {
-            if !attr.path().is_ident("derive") {
-                continue;
-            }
-            let line = span_line(attr.span());
-            if let syn::Meta::List(list) = &attr.meta {
-                if let Ok(paths) = list.parse_args_with(
-                    syn::punctuated::Punctuated::<syn::Path, syn::Token![,]>::parse_terminated,
-                ) {
-                    let macros: Vec<String> = paths.iter().map(path_to_string).collect();
-                    if !macros.is_empty() {
-                        self.out.push(DeriveInfo { line, macros });
-                    }
-                }
-            }
-        }
-    }
-}
-impl<'ast> Visit<'ast> for DeriveVisitor {
-    fn visit_item(&mut self, i: &'ast syn::Item) {
-        self.collect_derives(item_attrs(i));
-        syn::visit::visit_item(self, i);
-    }
-    fn visit_impl_item(&mut self, i: &'ast syn::ImplItem) {
-        self.collect_derives(impl_item_attrs(i));
-        syn::visit::visit_impl_item(self, i);
-    }
-}
-
-struct TestAttrVisitor {
-    found: bool,
-}
-impl<'ast> Visit<'ast> for TestAttrVisitor {
-    fn visit_item_fn(&mut self, n: &'ast syn::ItemFn) {
-        if !self.found && has_test_or_tokio_test(&n.attrs) {
-            self.found = true;
-        }
-        if !self.found {
-            syn::visit::visit_item_fn(self, n);
-        }
-    }
-    fn visit_impl_item_fn(&mut self, n: &'ast syn::ImplItemFn) {
-        if !self.found && has_test_or_tokio_test(&n.attrs) {
-            self.found = true;
-        }
-        if !self.found {
-            syn::visit::visit_impl_item_fn(self, n);
-        }
-    }
-}
-
-struct PubFnVisitor {
-    count: usize,
-}
-impl<'ast> Visit<'ast> for PubFnVisitor {
-    fn visit_item_fn(&mut self, n: &'ast syn::ItemFn) {
-        if matches!(n.vis, syn::Visibility::Public(_)) {
-            self.count = self.count.saturating_add(1);
-        }
-        syn::visit::visit_item_fn(self, n);
-    }
-    fn visit_impl_item_fn(&mut self, n: &'ast syn::ImplItemFn) {
-        if matches!(n.vis, syn::Visibility::Public(_)) {
-            self.count = self.count.saturating_add(1);
-        }
-        syn::visit::visit_impl_item_fn(self, n);
-    }
-}
-
-struct TestCountVisitor {
-    count: usize,
-}
-impl<'ast> Visit<'ast> for TestCountVisitor {
-    fn visit_item_fn(&mut self, n: &'ast syn::ItemFn) {
-        if has_test_or_tokio_test(&n.attrs) {
-            self.count = self.count.saturating_add(1);
-        }
-        syn::visit::visit_item_fn(self, n);
-    }
-    fn visit_impl_item_fn(&mut self, n: &'ast syn::ImplItemFn) {
-        if has_test_or_tokio_test(&n.attrs) {
-            self.count = self.count.saturating_add(1);
-        }
-        syn::visit::visit_impl_item_fn(self, n);
-    }
-}
-
-struct IgnoreVisitor<'s> {
-    lines: Vec<&'s str>,
-    violations: Vec<usize>,
-}
-impl<'ast> Visit<'ast> for IgnoreVisitor<'_> {
-    fn visit_item_fn(&mut self, n: &'ast syn::ItemFn) {
-        self.check_ignore_attrs(&n.attrs);
-        syn::visit::visit_item_fn(self, n);
-    }
-    fn visit_impl_item_fn(&mut self, n: &'ast syn::ImplItemFn) {
-        self.check_ignore_attrs(&n.attrs);
-        syn::visit::visit_impl_item_fn(self, n);
-    }
-}
-impl IgnoreVisitor<'_> {
-    fn check_ignore_attrs(&mut self, attrs: &[syn::Attribute]) {
-        for attr in attrs {
-            if !attr.path().is_ident("ignore") {
-                continue;
-            }
-            let line = span_line(attr.span());
-            // 1-based to 0-based index
-            let idx = line.saturating_sub(1);
-            // Check same line for reason comment
-            if let Some(same_line) = self.lines.get(idx) {
-                if same_line.contains("// reason:") || same_line.contains("//reason:") {
-                    continue;
-                }
-            }
-            // Check previous line for reason comment
-            if idx > 0 {
-                if let Some(prev_line) = self.lines.get(idx.saturating_sub(1)) {
-                    if prev_line.contains("// reason:") || prev_line.contains("//reason:") {
-                        continue;
-                    }
-                }
-            }
-            self.violations.push(line);
-        }
-    }
-}
-
-/// Check if attributes contain `#[test]` or `#[tokio::test]`.
-fn has_test_or_tokio_test(attrs: &[syn::Attribute]) -> bool {
-    for attr in attrs {
-        let path = attr.path();
-        if path.is_ident("test") {
-            return true;
-        }
-        // Check for tokio::test
-        if path.segments.len() == 2 {
-            let mut iter = path.segments.iter();
-            if let (Some(first), Some(second)) = (iter.next(), iter.next()) {
-                if first.ident == "tokio" && second.ident == "test" {
-                    return true;
-                }
-            }
-        }
-    }
-    false
-}
-
-struct InlineStdFsVisitor {
-    out: Vec<usize>,
-    in_cfg_test: bool,
-}
-
-impl InlineStdFsVisitor {
-    /// Check if a path is a direct std::fs function call like `std::fs::read_to_string`.
-    /// Excludes type references like `std::fs::Permissions::from_mode` (4+ segments with
-    /// capitalized 3rd segment = type, not function).
-    fn path_is_std_fs_call(path: &syn::Path) -> bool {
-        let segs: Vec<_> = path.segments.iter().map(|s| s.ident.to_string()).collect();
-        if segs.len() < 3 || segs[0] != "std" || segs[1] != "fs" {
-            return false;
-        }
-        // If exactly 3 segments (std::fs::read_to_string), check if the function
-        // name starts with lowercase (function, not type)
-        if segs.len() == 3 {
-            return segs[2].starts_with(|c: char| c.is_ascii_lowercase());
-        }
-        // 4+ segments like std::fs::Permissions::from_mode — this is a type method call, skip
-        false
-    }
-}
-
-impl<'ast> Visit<'ast> for InlineStdFsVisitor {
-    fn visit_item_mod(&mut self, n: &'ast syn::ItemMod) {
-        let was = self.in_cfg_test;
-        if n.attrs.iter().any(|a| is_cfg_test_attr(a)) {
-            self.in_cfg_test = true;
-        }
-        syn::visit::visit_item_mod(self, n);
-        self.in_cfg_test = was;
-    }
-
-    fn visit_item_fn(&mut self, n: &'ast syn::ItemFn) {
-        let was = self.in_cfg_test;
-        if n.attrs.iter().any(|a| is_cfg_test_attr(a)) {
-            self.in_cfg_test = true;
-        }
-        syn::visit::visit_item_fn(self, n);
-        self.in_cfg_test = was;
-    }
-
-    fn visit_expr_call(&mut self, n: &'ast syn::ExprCall) {
-        if !self.in_cfg_test {
-            if let syn::Expr::Path(ep) = &*n.func {
-                if Self::path_is_std_fs_call(&ep.path) {
-                    self.out.push(span_line(ep.path.span()));
-                }
-            }
-        }
-        syn::visit::visit_expr_call(self, n);
-    }
-
-    fn visit_expr_path(&mut self, n: &'ast syn::ExprPath) {
-        // Catch function pointers: `let f = std::fs::read_to_string;`
-        if !self.in_cfg_test && Self::path_is_std_fs_call(&n.path) {
-            let line = span_line(n.path.span());
-            if !self.out.contains(&line) {
-                self.out.push(line);
-            }
-        }
-        syn::visit::visit_expr_path(self, n);
-    }
-}
 
 #[cfg(test)]
 mod tests {
@@ -879,5 +513,37 @@ mod tests {
             0,
             "no uses"
         );
+    }
+
+    #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion on known-length vector
+    fn split_derives_merged_into_one_derive_info() {
+        let src = r"
+#[derive(Deserialize)]
+#[derive(Validate)]
+struct Foo {}
+
+#[derive(Serialize, Clone)]
+struct Bar {}
+";
+        let parsed = must_parse(src);
+        let derives = find_derive_attributes(&parsed);
+        assert_eq!(derives.len(), 2, "two items, two DeriveInfo entries");
+        // Foo: split derives merged into one entry
+        assert_eq!(
+            derives[0].macros.len(),
+            2,
+            "Foo should have 2 macros from split derives"
+        );
+        assert_eq!(derives[0].macros[0], "Deserialize");
+        assert_eq!(derives[0].macros[1], "Validate");
+        // Bar: single derive with two macros
+        assert_eq!(
+            derives[1].macros.len(),
+            2,
+            "Bar should have 2 macros from single derive"
+        );
+        assert_eq!(derives[1].macros[0], "Serialize");
+        assert_eq!(derives[1].macros[1], "Clone");
     }
 }
