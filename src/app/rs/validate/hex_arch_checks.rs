@@ -246,6 +246,81 @@ pub fn check_library_service_boundary(
     }
 }
 
+// R-ARCH-04: Workspace members must be configured + single-crate service must be in apps/
+pub fn check_unconfigured_members(
+    fs: &dyn FileSystem,
+    root: &Path,
+    project: &ProjectInfo,
+    cfgs: &BTreeMap<String, CrateConfig>,
+    profile: &str,
+    results: &mut Vec<CheckResult>,
+) {
+    // Single crate (no workspace): if profile is service, check for apps/ structure
+    if project.workspace_member_dirs.is_empty() {
+        if profile == "service" {
+            // Check if this is already inside an apps/ directory
+            let root_str = root.display().to_string();
+            let in_apps = root_str.contains("/apps/");
+
+            // Check if apps/ exists at the root (workspace that should have apps/)
+            let has_apps_dir = fs.read_file(&root.join("apps")).is_some()
+                || root.join("apps").exists();
+
+            if !in_apps && !has_apps_dir {
+                results.push(CheckResult {
+                    id: "R-ARCH-04".to_owned(),
+                    severity: Severity::Error,
+                    title: "Service not in apps/ directory".to_owned(),
+                    message: "Profile is \"service\" but project is not inside an apps/ \
+                             directory. Services must live in apps/<name>/ with hex arch \
+                             structure (crates/domain, crates/ports, crates/app, \
+                             crates/adapters). Shared libraries go in packages/."
+                        .to_owned(),
+                    file: Some("guardrail3.toml".to_owned()),
+                    line: None,
+                });
+            }
+        }
+        return;
+    }
+
+    // Workspace: if profile is service and no per-crate configs, error
+    if cfgs.is_empty() && profile == "service" {
+        results.push(CheckResult {
+            id: "R-ARCH-04".to_owned(),
+            severity: Severity::Error,
+            title: "No per-crate configuration".to_owned(),
+            message: format!(
+                "Profile is \"service\" but no [rust.crates.*] sections in guardrail3.toml. \
+                 Configure each workspace member with profile and layer. \
+                 Members: {}",
+                project.workspace_member_dirs.join(", ")
+            ),
+            file: Some("guardrail3.toml".to_owned()),
+            line: None,
+        });
+        return;
+    }
+
+    // Check each workspace member has a config entry
+    for member_dir in &project.workspace_member_dirs {
+        let crate_name = member_dir.rsplit('/').next().unwrap_or(member_dir);
+        if !cfgs.contains_key(crate_name) && !cfgs.contains_key(member_dir.as_str()) {
+            results.push(CheckResult {
+                id: "R-ARCH-04".to_owned(),
+                severity: Severity::Warn,
+                title: format!("Workspace member `{crate_name}` not configured"),
+                message: format!(
+                    "No [rust.crates.{crate_name}] in guardrail3.toml. \
+                     Add profile, layer, and allowed_deps."
+                ),
+                file: Some("guardrail3.toml".to_owned()),
+                line: None,
+            });
+        }
+    }
+}
+
 fn is_service_internal(path: &str) -> bool {
     let parts: Vec<&str> = path.split('/').collect();
     parts.len() >= 4

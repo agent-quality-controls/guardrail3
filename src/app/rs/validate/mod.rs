@@ -157,6 +157,14 @@ pub fn run(
                 crate_configs,
                 &mut arch_results,
             );
+            hex_arch_checks::check_unconfigured_members(
+                fs,
+                workspace_root,
+                project,
+                crate_configs,
+                profile.as_deref().unwrap_or("service"),
+                &mut arch_results,
+            );
         }
 
         // Dependency allowlist checks (R-DEPS-01, R-DEPS-02)
