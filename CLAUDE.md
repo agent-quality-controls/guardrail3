@@ -40,7 +40,8 @@ Single Rust binary (`cargo install guardrail3`) that:
 | `guardrail3 rs validate [path]` | No | Rust checks only |
 | `guardrail3 ts validate [path]` | No | TypeScript checks only |
 | `guardrail3 hooks validate [path]` | No | Hook + deployment checks |
-| `guardrail3 init --profile <name>` | No (creates it) | Scaffold guardrail3.toml + local/ |
+| `guardrail3 rs init --profile <name>` | No (creates it) | Scaffold Rust guardrail3.toml + local/ |
+| `guardrail3 ts init` | No (creates it) | Scaffold TypeScript section in guardrail3.toml |
 | `guardrail3 generate` | Yes | Produce config files from modules + profile |
 | `guardrail3 check` | Yes | CI: verify generated files are current |
 | `guardrail3 diff` | Yes | Dry run of generate with diffs |

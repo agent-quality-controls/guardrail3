@@ -31,9 +31,6 @@ fn main() {
         Commands::Validate(args) => {
             commands::validate::run(&args);
         }
-        Commands::Init(args) => {
-            commands::init::run(&args);
-        }
         Commands::Generate(args) => {
             commands::generate::run(&args);
         }
