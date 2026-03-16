@@ -7,10 +7,21 @@ use crate::cli::InitArgs;
 #[allow(clippy::disallowed_methods)] // reason: CLI command — exit codes and fs operations
 #[allow(clippy::too_many_lines)] // reason: sequential scaffolding steps are clearer as one function
 pub fn run(args: &InitArgs) {
-    let project_path = Path::new(&args.path);
+    run_rs(&args.profile, &args.path, args.force);
+    run_ts(&args.path, args.force);
+}
+
+/// Initialize Rust guardrail3 configuration: creates guardrail3.toml with [rust] + [local] sections,
+/// creates local/ directory with Rust override files, and scaffolds release config for service profile.
+#[allow(clippy::print_stdout)] // reason: CLI command — user-facing output
+#[allow(clippy::print_stderr)] // reason: CLI command — error output
+#[allow(clippy::disallowed_methods)] // reason: CLI command — exit codes and fs operations
+#[allow(clippy::too_many_lines)] // reason: sequential scaffolding steps are clearer as one function
+pub fn run_rs(profile: &str, path: &str, force: bool) {
+    let project_path = Path::new(path);
 
     let config_path = project_path.join("guardrail3.toml");
-    if config_path.exists() && !args.force {
+    if config_path.exists() && !force {
         eprintln!(
             "Error: guardrail3.toml already exists at {}",
             config_path.display()
@@ -19,7 +30,7 @@ pub fn run(args: &InitArgs) {
         std::process::exit(1);
     }
 
-    let config_content = generate_config_content(&args.profile);
+    let config_content = generate_rs_config_content(profile);
 
     if let Err(e) = crate::fs::write_file(&config_path, &config_content) {
         eprintln!("Error writing guardrail3.toml: {e}");
@@ -58,7 +69,7 @@ pub fn run(args: &InitArgs) {
 
     for (filename, content) in &local_files {
         let file_path = local_dir.join(filename);
-        if file_path.exists() && !args.force {
+        if file_path.exists() && !force {
             println!("  Skipping existing: local/{filename}");
             continue;
         }
@@ -68,8 +79,8 @@ pub fn run(args: &InitArgs) {
         }
     }
 
-    // Scaffold release config files for service and monorepo profiles
-    if args.profile == "service" || args.profile == "monorepo" {
+    // Scaffold release config files for service profile
+    if profile == "service" {
         let release_files = [
             (
                 "release-plz.toml",
@@ -80,7 +91,7 @@ pub fn run(args: &InitArgs) {
 
         for (filename, content) in &release_files {
             let file_path = project_path.join(filename);
-            if file_path.exists() && !args.force {
+            if file_path.exists() && !force {
                 println!("  Skipping existing: {filename}");
                 continue;
             }
@@ -92,12 +103,12 @@ pub fn run(args: &InitArgs) {
     }
 
     println!(
-        "Initialized guardrail3 project at {}",
+        "Initialized Rust guardrail3 project at {}",
         project_path.display()
     );
-    println!("  Created: guardrail3.toml (profile: {})", args.profile);
+    println!("  Created: guardrail3.toml (profile: {profile})");
     println!("  Created: local/ directory with override files");
-    if args.profile == "service" || args.profile == "monorepo" {
+    if profile == "service" {
         println!("  Created: release-plz.toml and cliff.toml");
     }
     println!();
@@ -107,28 +118,110 @@ pub fn run(args: &InitArgs) {
     println!("  3. Run: guardrail3 generate");
 }
 
-fn generate_config_content(profile: &str) -> String {
+/// Initialize TypeScript guardrail3 configuration: appends [typescript] section to existing
+/// guardrail3.toml, or creates a minimal one with only [typescript] if none exists.
+#[allow(clippy::print_stdout)] // reason: CLI command — user-facing output
+#[allow(clippy::print_stderr)] // reason: CLI command — error output
+#[allow(clippy::disallowed_methods)] // reason: CLI command — exit codes and fs operations
+pub fn run_ts(path: &str, force: bool) {
+    let project_path = Path::new(path);
+    let config_path = project_path.join("guardrail3.toml");
+
+    let ts_section = "\n[typescript]\n# apps = [\"apps/web\", \"apps/landing\"]\n";
+
+    if config_path.exists() {
+        // Read existing content and check if [typescript] section already exists
+        let existing = crate::fs::read_file(&config_path).unwrap_or_default();
+        if existing.contains("[typescript]") && !force {
+            eprintln!("Error: [typescript] section already exists in guardrail3.toml");
+            eprintln!("Use --force to overwrite.");
+            std::process::exit(1);
+        }
+
+        if existing.contains("[typescript]") {
+            // Force mode: replace existing [typescript] section
+            // Find [typescript] and replace everything from there to next section or EOF
+            let new_content = replace_typescript_section(&existing, ts_section);
+            if let Err(e) = crate::fs::write_file(&config_path, &new_content) {
+                eprintln!("Error writing guardrail3.toml: {e}");
+                std::process::exit(1);
+            }
+        } else {
+            // Append [typescript] section
+            let new_content = format!("{existing}{ts_section}");
+            if let Err(e) = crate::fs::write_file(&config_path, &new_content) {
+                eprintln!("Error writing guardrail3.toml: {e}");
+                std::process::exit(1);
+            }
+        }
+
+        println!("Added [typescript] section to guardrail3.toml");
+    } else {
+        // Create minimal guardrail3.toml with only [typescript]
+        let config_content = format!("version = \"0.1\"\n{ts_section}");
+        if let Err(e) = crate::fs::write_file(&config_path, &config_content) {
+            eprintln!("Error writing guardrail3.toml: {e}");
+            std::process::exit(1);
+        }
+        println!(
+            "Initialized TypeScript guardrail3 project at {}",
+            project_path.display()
+        );
+        println!("  Created: guardrail3.toml (typescript only)");
+    }
+
+    println!();
+    println!("Next steps:");
+    println!("  1. Edit guardrail3.toml to configure your TypeScript apps");
+    println!("  2. Run: guardrail3 ts generate");
+}
+
+/// Replace an existing [typescript] section in the config content.
+/// Collects lines before `[typescript]`, skips the old section, inserts the new one,
+/// then appends any lines from the next section onward.
+fn replace_typescript_section(existing: &str, new_ts_section: &str) -> String {
+    let mut result = String::new();
+    let mut lines = existing.lines().peekable();
+    let mut found_ts = false;
+
+    // Copy lines before [typescript]
+    while let Some(line) = lines.peek() {
+        if line.trim() == "[typescript]" {
+            found_ts = true;
+            break;
+        }
+        result.push_str(lines.next().unwrap_or_default());
+        result.push('\n');
+    }
+
+    if !found_ts {
+        return format!("{existing}{new_ts_section}");
+    }
+
+    // Skip old [typescript] section (header + body lines until next [section] or EOF)
+    let _ = lines.next(); // skip [typescript] line
+    while let Some(line) = lines.peek() {
+        if line.starts_with('[') {
+            break;
+        }
+        let _ = lines.next();
+    }
+
+    // Insert new [typescript] section
+    result.push_str(new_ts_section.trim_start_matches('\n'));
+    result.push('\n');
+
+    // Copy remaining sections
+    for line in lines {
+        result.push_str(line);
+        result.push('\n');
+    }
+
+    result
+}
+
+fn generate_rs_config_content(profile: &str) -> String {
     match profile {
-        "monorepo" => format!(
-            r#"version = "0.1"
-
-[profile]
-name = "{profile}"
-
-[rust]
-workspace_root = "apps/backend"
-
-[typescript]
-# apps = ["apps/web", "apps/landing"]
-
-[local]
-clippy_methods = "local/clippy-methods.toml"
-clippy_types = "local/clippy-types.toml"
-deny_bans = "local/deny-bans.toml"
-deny_skip = "local/deny-skip.toml"
-deny_feature_bans = "local/deny-feature-bans.toml"
-"#
-        ),
         "library" => format!(
             r#"version = "0.1"
 

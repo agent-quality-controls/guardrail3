@@ -19,7 +19,7 @@ use tempfile as _;
 use clap::Parser;
 
 use guardrail3::cli::{Cli, Commands, HooksCommands, RsCommands, TsCommands, ValidateArgs};
-use guardrail3::rs::validate::ValidateDomains;
+use guardrail3::report::types::ValidateDomains;
 use guardrail3::{commands, discover, hooks, report, rs, ts};
 
 #[allow(clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI entry point — stderr output and process::exit for error codes are intentional
@@ -78,6 +78,13 @@ fn main() {
             RsCommands::Generate(args) => {
                 commands::generate::run_rs(&args);
             }
+            RsCommands::Init {
+                profile,
+                path,
+                force,
+            } => {
+                commands::init::run_rs(&profile, &path, force);
+            }
         },
         Commands::Ts { command } => match command {
             TsCommands::Validate(args) => {
@@ -101,6 +108,9 @@ fn main() {
             }
             TsCommands::Generate(args) => {
                 commands::generate::run_ts(&args);
+            }
+            TsCommands::Init { path, force } => {
+                commands::init::run_ts(&path, force);
             }
         },
         Commands::Hooks { command } => match command {

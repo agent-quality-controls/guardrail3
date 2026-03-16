@@ -384,8 +384,8 @@ fn generate_rust_files(
         content: canonical::RUST_TOOLCHAIN.content.to_owned(),
     });
 
-    // release-plz.toml and cliff.toml — service and monorepo profiles only
-    if profile == "service" || profile == "monorepo" {
+    // release-plz.toml and cliff.toml — service profile only
+    if profile == "service" {
         files.push(GeneratedFile {
             path: "release-plz.toml".to_owned(),
             content: release::RELEASE_PLZ_TOML.content.to_owned(),

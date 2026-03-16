@@ -169,7 +169,7 @@ proptest! {
     #[allow(clippy::disallowed_methods)] // reason: toml::from_str needed to test config parsing
     fn property_config_round_trip(
         version in "[0-9]\\.[0-9]",
-        profile_name in prop::sample::select(vec!["service", "library", "monorepo"]),
+        profile_name in prop::sample::select(vec!["service", "library"]),
     ) {
         let toml_content = format!(
             "version = \"{version}\"\n\n[profile]\nname = \"{profile_name}\"\n"
@@ -206,7 +206,7 @@ proptest! {
     #[allow(clippy::unwrap_used)] // reason: test assertions
     #[allow(clippy::disallowed_methods)] // reason: tests need direct fs access and toml parsing
     fn property_init_profile_never_panics(
-        profile in prop::sample::select(vec!["service", "library", "monorepo"]),
+        profile in prop::sample::select(vec!["service", "library"]),
     ) {
         let dir = TempDir::new().expect("create temp dir");
         let dir_str = dir.path().display().to_string();
