@@ -86,7 +86,12 @@ pub fn collect_rs_files(root: &Path) -> Vec<String> {
         if entry.file_type().is_file() {
             let path = entry.path();
             if path.extension().and_then(|e| e.to_str()) == Some("rs") {
-                files.push(path.display().to_string());
+                let path_str = path.display().to_string();
+                // Skip test fixture files — adversarial test data designed to have violations
+                if path_str.contains("tests/fixtures/") {
+                    continue;
+                }
+                files.push(path_str);
             }
         }
     }

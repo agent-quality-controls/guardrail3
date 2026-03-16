@@ -215,9 +215,12 @@ pub fn run_hooks(args: &GenerateArgs) {
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
-        let perms = std::fs::Permissions::from_mode(0o755);
-        if let Err(e) = crate::fs::set_permissions(&hook_path, perms) {
-            eprintln!("Warning: could not set executable permission: {e}");
+        if let Some(meta) = crate::fs::metadata(&hook_path) {
+            let mut perms = meta.permissions();
+            perms.set_mode(0o755);
+            if let Err(e) = crate::fs::set_permissions(&hook_path, perms) {
+                eprintln!("Warning: could not set executable permission: {e}");
+            }
         }
     }
 

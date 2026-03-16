@@ -1,11 +1,12 @@
 use clap::{Parser, Subcommand};
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, garde::Validate)]
 #[command(name = "guardrail3")]
 #[command(about = "Composable code guardrails for Rust and TypeScript projects")]
 #[command(version)]
 pub struct Cli {
     #[command(subcommand)]
+    #[garde(skip)] // reason: subcommand validated by clap
     pub command: Commands,
 }
 
@@ -23,8 +24,8 @@ pub enum Commands {
         command: TsCommands,
     },
 
-    /// Generate GUARDRAIL3_GUIDE.md in the current directory
-    Guide,
+    /// Generate `GUARDRAIL3_GUIDE.md` in the current directory
+    DumpGuide,
 }
 
 #[derive(Subcommand, Debug)]
@@ -80,70 +81,84 @@ pub enum TsCommands {
     HooksValidate(ValidateArgs),
 }
 
-#[derive(Parser, Debug, Clone)]
+#[derive(Parser, Debug, Clone, garde::Validate)]
 #[allow(clippy::struct_excessive_bools)] // reason: CLI argument struct — each bool is an independent flag
 pub struct ValidateArgs {
     /// Output format
     #[arg(long, default_value = "text")]
+    #[garde(skip)] // reason: clap validates arg types; business rule validation not needed for format string
     pub format: String,
 
     /// Only check staged files (git diff --cached)
     #[arg(long)]
+    #[garde(skip)] // reason: boolean flag, no validation needed
     pub staged: bool,
 
     /// Only check dirty files (staged + unstaged)
     #[arg(long)]
+    #[garde(skip)] // reason: boolean flag, no validation needed
     pub dirty: bool,
 
     /// Only check files changed in last N commits
     #[arg(long)]
+    #[garde(skip)] // reason: clap validates type; no business rule constraint
     pub commits: Option<usize>,
 
     /// Specific files to check
     #[arg(long)]
+    #[garde(skip)] // reason: file paths validated at use site
     pub files: Vec<String>,
 
     /// Project path (defaults to current directory)
     #[arg(default_value = ".")]
+    #[garde(skip)] // reason: path validated by resolve_path at use site
     pub path: String,
 
     /// Only run code quality checks
     #[arg(long)]
+    #[garde(skip)] // reason: boolean flag, no validation needed
     pub code: bool,
 
     /// Only run architecture checks
     #[arg(long)]
+    #[garde(skip)] // reason: boolean flag, no validation needed
     pub architecture: bool,
 
     /// Only run release readiness checks
     #[arg(long)]
+    #[garde(skip)] // reason: boolean flag, no validation needed
     pub release: bool,
 
     /// Only run test quality checks
     #[arg(long)]
+    #[garde(skip)] // reason: boolean flag, no validation needed
     pub tests: bool,
 
     /// Run slow checks (cargo publish --dry-run, etc.)
     #[arg(long)]
+    #[garde(skip)] // reason: boolean flag, no validation needed
     pub thorough: bool,
 }
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, garde::Validate)]
 pub struct GenerateArgs {
     /// Project path
     #[arg(default_value = ".")]
+    #[garde(skip)] // reason: path validated at use site
     pub path: String,
 }
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, garde::Validate)]
 pub struct PathArg {
     /// Project path
     #[arg(default_value = ".")]
+    #[garde(skip)] // reason: path validated at use site
     pub path: String,
 }
 
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, garde::Validate)]
 pub struct ShowModuleArgs {
     /// Module name
+    #[garde(skip)] // reason: module name validated by show_module at use site
     pub name: String,
 }

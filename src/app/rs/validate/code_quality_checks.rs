@@ -125,11 +125,16 @@ pub fn check_claude_md(workspace_root: &Path, results: &mut Vec<CheckResult>) {
 pub fn check_direct_fs_usage(
     path: &Path,
     content: &str,
-    _is_test: bool,
+    is_test: bool,
     results: &mut Vec<CheckResult>,
 ) {
     // Skip the centralized fs module itself
     if path.ends_with("fs.rs") {
+        return;
+    }
+
+    // Skip test files — tests legitimately need std::fs for temp dirs and fixtures
+    if is_test {
         return;
     }
 

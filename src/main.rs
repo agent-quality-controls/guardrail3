@@ -1,6 +1,7 @@
 // These crates are used by the lib, not directly by the binary.
 // Suppress false positives from unused_crate_dependencies.
 use colored as _;
+use garde as _;
 use glob as _;
 use proc_macro2 as _;
 use serde as _;
@@ -18,14 +19,14 @@ use tempfile as _;
 
 use clap::{CommandFactory, FromArgMatches};
 
-use guardrail3::adapters::outbound::fs::RealFileSystem;
-use guardrail3::adapters::outbound::tool_runner::RealToolChecker;
-use guardrail3::app::discover;
-use guardrail3::app::{hooks, rs, ts};
-use guardrail3::cli::{Cli, Commands, RsCommands, TsCommands, ValidateArgs};
-use guardrail3::domain::report::ValidateDomains;
-use guardrail3::help_gen;
-use guardrail3::{commands, report};
+use guardrail3::{
+    adapters::outbound::{fs::RealFileSystem, tool_runner::RealToolChecker},
+    app::{discover, hooks, rs, ts},
+    cli::{Cli, Commands, RsCommands, TsCommands, ValidateArgs},
+    commands, help_gen,
+    domain::report::ValidateDomains,
+    report,
+};
 
 #[allow(clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI entry point — stderr output and process::exit for error codes are intentional
 #[allow(clippy::too_many_lines)] // reason: CLI dispatch for all subcommands
@@ -46,15 +47,15 @@ fn main() {
     match cli.command {
         Commands::Rs { command } => handle_rs(command),
         Commands::Ts { command } => handle_ts(command),
-        Commands::Guide => handle_guide(),
+        Commands::DumpGuide => handle_guide(),
     }
 }
 
-#[allow(clippy::print_stdout, clippy::disallowed_methods)] // reason: CLI — writes file and prints path
+#[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI — writes file and prints path
 fn handle_guide() {
     let path = std::path::Path::new("GUARDRAIL3_GUIDE.md");
     let content = guardrail3::domain::modules::guide::GUIDE_CONTENT;
-    if let Err(e) = std::fs::write(path, content) {
+    if let Err(e) = guardrail3::fs::write_file(path, content) {
         eprintln!("Error writing GUARDRAIL3_GUIDE.md: {e}");
         std::process::exit(1);
     }
