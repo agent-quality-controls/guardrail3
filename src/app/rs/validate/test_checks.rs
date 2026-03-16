@@ -73,7 +73,11 @@ fn check_mutants_toml(workspace_root: &Path, results: &mut Vec<CheckResult>) {
 // R-TEST-03: [profile.mutants] in Cargo.toml
 // ---------------------------------------------------------------------------
 
-fn check_mutants_profile(fs: &dyn FileSystem, workspace_root: &Path, results: &mut Vec<CheckResult>) {
+fn check_mutants_profile(
+    fs: &dyn FileSystem,
+    workspace_root: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     let cargo_path = workspace_root.join("Cargo.toml");
     let Some(content) = fs.read_file(&cargo_path) else {
         results.push(CheckResult {

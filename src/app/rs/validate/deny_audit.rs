@@ -36,7 +36,11 @@ pub const EXPECTED_BANS: &[&str] = &[
     "flatbuffers",
 ];
 
-pub fn check(fs: &dyn FileSystem, workspace_root: &Path, profile: Option<&str>) -> Vec<CheckResult> {
+pub fn check(
+    fs: &dyn FileSystem,
+    workspace_root: &Path,
+    profile: Option<&str>,
+) -> Vec<CheckResult> {
     let mut results = Vec::new();
     let deny_path = workspace_root.join("deny.toml");
 

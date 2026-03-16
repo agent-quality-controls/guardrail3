@@ -52,7 +52,11 @@ const EXPECTED_TYPE_BANS: &[&str] = &[
     "axum::extract::Form",
 ];
 
-pub fn check(fs: &dyn FileSystem, workspace_root: &Path, _profile: Option<&str>) -> Vec<CheckResult> {
+pub fn check(
+    fs: &dyn FileSystem,
+    workspace_root: &Path,
+    _profile: Option<&str>,
+) -> Vec<CheckResult> {
     let mut results = Vec::new();
     let clippy_path = workspace_root.join("clippy.toml");
 

@@ -47,7 +47,8 @@ fn extract_profile(cfg: &GuardrailConfig) -> Option<String> {
 }
 
 #[allow(clippy::too_many_lines)] // reason: validation orchestrator — each section is a simple block, splitting would reduce readability
-pub fn run(fs: &dyn FileSystem,
+pub fn run(
+    fs: &dyn FileSystem,
     path: &Path,
     project: &ProjectInfo,
     scoped_files: Option<&[String]>,
@@ -67,8 +68,11 @@ pub fn run(fs: &dyn FileSystem,
     if domains.code {
         // Config file checks
         let config_results = config_files::check(fs, workspace_root);
-        let per_crate_results =
-            config_files::check_per_crate_clippy(fs, workspace_root, &project.workspace_member_dirs);
+        let per_crate_results = config_files::check_per_crate_clippy(
+            fs,
+            workspace_root,
+            &project.workspace_member_dirs,
+        );
         let mut config_section_results = config_results;
         config_section_results.extend(per_crate_results);
         report.add_section(Section {
@@ -92,7 +96,8 @@ pub fn run(fs: &dyn FileSystem,
 
         // Cargo workspace lints
         let lint_results = cargo_lints::check(fs, workspace_root);
-        let inheritance_results = cargo_lints::check_workspace_inheritance(fs, 
+        let inheritance_results = cargo_lints::check_workspace_inheritance(
+            fs,
             workspace_root,
             &project.workspace_member_dirs,
         );
@@ -121,12 +126,18 @@ pub fn run(fs: &dyn FileSystem,
     if domains.architecture {
         // Architecture checks: dependency direction + graph + unsafe_code forbid
         let mut arch_results = Vec::new();
-        dependency_direction::check_all_dependency_directions(fs, 
+        dependency_direction::check_all_dependency_directions(
+            fs,
             workspace_root,
             project,
             &mut arch_results,
         );
-        dependency_direction::check_dependency_graph(fs, workspace_root, project, &mut arch_results);
+        dependency_direction::check_dependency_graph(
+            fs,
+            workspace_root,
+            project,
+            &mut arch_results,
+        );
         structure_checks::check_unsafe_code_forbid(fs, workspace_root, &mut arch_results);
 
         // Dependency allowlist checks (R-DEPS-01, R-DEPS-02)

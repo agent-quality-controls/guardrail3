@@ -5,7 +5,11 @@ use crate::ports::outbound::FileSystem;
 
 // R55-R57: workspace metadata & release profile
 #[allow(clippy::too_many_lines)] // reason: workspace metadata validation
-pub fn check_workspace_metadata(fs: &dyn FileSystem, workspace_root: &Path, results: &mut Vec<CheckResult>) {
+pub fn check_workspace_metadata(
+    fs: &dyn FileSystem,
+    workspace_root: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     let cargo_path = workspace_root.join("Cargo.toml");
     if !cargo_path.exists() {
         return;

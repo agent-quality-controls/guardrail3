@@ -7,7 +7,11 @@ use super::ts_comment_checks;
 use crate::domain::report::{CheckResult, Severity};
 use crate::ports::outbound::FileSystem;
 
-pub fn check(fs: &dyn FileSystem, path: &Path, scoped_files: Option<&[String]>) -> Vec<CheckResult> {
+pub fn check(
+    fs: &dyn FileSystem,
+    path: &Path,
+    scoped_files: Option<&[String]>,
+) -> Vec<CheckResult> {
     let mut results = Vec::new();
 
     let ts_files: Vec<String> = match scoped_files {
@@ -403,5 +407,4 @@ mod tests {
         assert_eq!(results[0].id, "T35");
         assert!(matches!(results[0].severity, Severity::Info));
     }
-
 }

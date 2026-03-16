@@ -7,7 +7,11 @@ use super::release_checks::CrateInfo;
 
 // --- R-PUB-09: cargo publish --dry-run ---
 
-pub fn check_publish_dry_run(tc: &dyn ToolChecker, krate: &CrateInfo, results: &mut Vec<CheckResult>) {
+pub fn check_publish_dry_run(
+    tc: &dyn ToolChecker,
+    krate: &CrateInfo,
+    results: &mut Vec<CheckResult>,
+) {
     match tc.run_cargo_publish_dry_run(&krate.dir) {
         Some(stderr) if stderr.is_empty() || !stderr.contains("error") => {
             results.push(CheckResult {
@@ -315,8 +319,8 @@ mod tests {
         let mut r = Vec::new();
         // Call the parent module's check_per_crate to verify thorough=false skips R-PUB-09
         let tc = crate::adapters::outbound::tool_runner::RealToolChecker;
-        super::super::release_crate_checks::check_per_crate(&fs, &tc,
-            &krate, &names, &versions, false, &mut r,
+        super::super::release_crate_checks::check_per_crate(
+            &fs, &tc, &krate, &names, &versions, false, &mut r,
         );
         assert!(
             !r.iter().any(|c| c.id == "R-PUB-09"),

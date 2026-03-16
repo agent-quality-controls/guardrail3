@@ -7,8 +7,8 @@ use syn::spanned::Spanned;
 use syn::visit::Visit;
 
 use super::ast_helpers::{
-    extract_allow_lints, extract_cfg_attr_allow_lints, impl_item_attrs, is_cfg_test_attr,
-    item_attrs, path_to_string, span_line, DeriveInfo, Located,
+    DeriveInfo, Located, extract_allow_lints, extract_cfg_attr_allow_lints, impl_item_attrs,
+    is_cfg_test_attr, item_attrs, path_to_string, span_line,
 };
 
 // ---------------------------------------------------------------------------

@@ -57,7 +57,7 @@ fn run_rs_validate(dir: &std::path::Path) -> (i32, String, String) {
 fn run_validate(dir: &std::path::Path) -> (i32, String, String) {
     let dir_str = dir.display().to_string();
     let output = Command::new(binary_path())
-        .args(["validate", "--format", "json"])
+        .args(["rs", "validate", "--format", "json"])
         .arg(&dir_str)
         .output()
         .expect("Failed to run guardrail3");
@@ -143,7 +143,7 @@ proptest! {
 
         // Run the tool -- it should not panic regardless of config content
         let output = Command::new(binary_path())
-            .args(["validate", "--format", "json"])
+            .args(["rs", "validate", "--format", "json"])
             .arg(&dir_str)
             .output()
             .expect("Failed to run guardrail3");

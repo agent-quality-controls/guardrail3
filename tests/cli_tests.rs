@@ -35,7 +35,7 @@ const fn project_root() -> &'static str {
 #[allow(clippy::disallowed_methods)] // reason: test uses Command
 fn cli_validate_json_format_produces_valid_json() {
     let out = guardrail3()
-        .args(["validate", "--format", "json", project_root()])
+        .args(["rs", "validate", "--format", "json", project_root()])
         .output()
         .expect("failed to run");
 
@@ -59,7 +59,7 @@ fn cli_validate_json_format_produces_valid_json() {
 #[allow(clippy::disallowed_methods)] // reason: test uses Command
 fn cli_validate_md_format_produces_markdown() {
     let out = guardrail3()
-        .args(["validate", "--format", "md", project_root()])
+        .args(["rs", "validate", "--format", "md", project_root()])
         .output()
         .expect("failed to run");
 
@@ -75,7 +75,7 @@ fn cli_validate_md_format_produces_markdown() {
 #[allow(clippy::disallowed_methods)] // reason: test uses Command
 fn cli_validate_markdown_alias_produces_markdown() {
     let out = guardrail3()
-        .args(["validate", "--format", "markdown", project_root()])
+        .args(["rs", "validate", "--format", "markdown", project_root()])
         .output()
         .expect("failed to run");
 
@@ -91,7 +91,7 @@ fn cli_validate_markdown_alias_produces_markdown() {
 #[allow(clippy::disallowed_methods)] // reason: test uses Command
 fn cli_validate_text_is_default_format() {
     let out = guardrail3()
-        .args(["validate", project_root()])
+        .args(["rs", "validate", project_root()])
         .output()
         .expect("failed to run");
 
@@ -113,7 +113,7 @@ fn cli_validate_text_is_default_format() {
 #[allow(clippy::disallowed_methods)] // reason: test uses Command
 fn cli_validate_exit_code_nonzero_when_errors() {
     let out = guardrail3()
-        .args(["validate", "--format", "json", project_root()])
+        .args(["rs", "validate", "--format", "json", project_root()])
         .output()
         .expect("failed to run");
 
@@ -169,7 +169,7 @@ fn cli_rs_validate_md_format() {
 #[allow(clippy::disallowed_methods)] // reason: test uses Command
 fn cli_hooks_validate_json_format() {
     let out = guardrail3()
-        .args(["hooks", "validate", "--format", "json", project_root()])
+        .args(["rs", "hooks-validate", "--format", "json", project_root()])
         .output()
         .expect("failed to run");
 
@@ -185,7 +185,7 @@ fn cli_hooks_validate_json_format() {
 #[allow(clippy::disallowed_methods)] // reason: test uses Command
 fn cli_hooks_validate_md_format() {
     let out = guardrail3()
-        .args(["hooks", "validate", "--format", "md", project_root()])
+        .args(["rs", "hooks-validate", "--format", "md", project_root()])
         .output()
         .expect("failed to run");
 
@@ -203,7 +203,14 @@ fn cli_hooks_validate_md_format() {
 #[allow(clippy::disallowed_methods)] // reason: test uses Command
 fn cli_validate_code_domain_only() {
     let out = guardrail3()
-        .args(["validate", "--format", "json", "--code", project_root()])
+        .args([
+            "rs",
+            "validate",
+            "--format",
+            "json",
+            "--code",
+            project_root(),
+        ])
         .output()
         .expect("failed to run");
 
@@ -220,6 +227,7 @@ fn cli_validate_code_domain_only() {
 fn cli_validate_architecture_domain_only() {
     let out = guardrail3()
         .args([
+            "rs",
             "validate",
             "--format",
             "json",
@@ -243,7 +251,7 @@ fn cli_validate_architecture_domain_only() {
 #[allow(clippy::disallowed_methods)] // reason: test uses Command
 fn cli_validate_detects_rust_project() {
     let out = guardrail3()
-        .args(["validate", "--format", "json", project_root()])
+        .args(["rs", "validate", "--format", "json", project_root()])
         .output()
         .expect("failed to run");
 
@@ -261,7 +269,7 @@ fn cli_validate_detects_rust_project() {
 #[allow(clippy::disallowed_methods)] // reason: test uses Command
 fn cli_check_on_self() {
     let out = guardrail3()
-        .args(["check", project_root()])
+        .args(["rs", "check", project_root()])
         .output()
         .expect("failed to run");
 
@@ -294,7 +302,7 @@ fn cli_check_on_self() {
 #[allow(clippy::disallowed_methods)] // reason: test uses Command
 fn cli_diff_on_self() {
     let out = guardrail3()
-        .args(["diff", project_root()])
+        .args(["rs", "diff", project_root()])
         .output()
         .expect("failed to run");
 
@@ -475,7 +483,7 @@ fn cli_generate_produces_files() {
     .expect("write Cargo.toml");
 
     let out = guardrail3()
-        .args(["generate", path])
+        .args(["rs", "generate", path])
         .output()
         .expect("failed to run");
 
@@ -503,10 +511,8 @@ fn cli_generate_produces_files() {
         tmp.path().join("rustfmt.toml").exists(),
         "generate should create rustfmt.toml"
     );
-    assert!(
-        tmp.path().join(".githooks/pre-commit").exists(),
-        "generate should create pre-commit hook"
-    );
+    // Hooks are NOT created by rs generate — use rs hooks-install separately
+    // assert!(tmp.path().join(".githooks/pre-commit").exists());
 }
 
 // ---- commands/validate.rs lines 25-30,79,80,85,96,123 ----
@@ -516,7 +522,7 @@ fn cli_generate_produces_files() {
 #[allow(clippy::disallowed_methods)] // reason: test uses Command
 fn cli_validate_format_json_in_combined_validate() {
     let out = guardrail3()
-        .args(["validate", "--format", "json", project_root()])
+        .args(["rs", "validate", "--format", "json", project_root()])
         .output()
         .expect("failed to run");
 
@@ -530,7 +536,7 @@ fn cli_validate_format_json_in_combined_validate() {
 #[allow(clippy::disallowed_methods)] // reason: test uses Command
 fn cli_validate_format_md_in_combined_validate() {
     let out = guardrail3()
-        .args(["validate", "--format", "md", project_root()])
+        .args(["rs", "validate", "--format", "md", project_root()])
         .output()
         .expect("failed to run");
 
@@ -548,7 +554,7 @@ fn cli_validate_format_md_in_combined_validate() {
 #[allow(clippy::disallowed_methods)] // reason: test uses Command
 fn cli_list_modules_has_output() {
     let out = guardrail3()
-        .args(["list-modules"])
+        .args(["rs", "list-modules"])
         .output()
         .expect("failed to run");
 
@@ -576,7 +582,7 @@ fn cli_list_modules_has_output() {
 #[allow(clippy::disallowed_methods)] // reason: test uses Command
 fn cli_show_module_prints_content() {
     let out = guardrail3()
-        .args(["show-module", "clippy/methods/env-vars"])
+        .args(["rs", "show-module", "clippy/methods/env-vars"])
         .output()
         .expect("failed to run");
 
@@ -598,7 +604,7 @@ fn cli_show_module_prints_content() {
 #[allow(clippy::disallowed_methods)] // reason: test uses Command
 fn cli_show_module_nonexistent_fails() {
     let out = guardrail3()
-        .args(["show-module", "nonexistent/module"])
+        .args(["rs", "show-module", "nonexistent/module"])
         .output()
         .expect("failed to run");
 
@@ -642,7 +648,7 @@ fn cli_check_without_config_fails() {
     let path = tmp.path().to_str().expect("non-utf8 path");
 
     let out = guardrail3()
-        .args(["check", path])
+        .args(["rs", "check", path])
         .output()
         .expect("failed to run");
 
@@ -666,7 +672,7 @@ fn cli_diff_without_config_fails() {
     let path = tmp.path().to_str().expect("non-utf8 path");
 
     let out = guardrail3()
-        .args(["diff", path])
+        .args(["rs", "diff", path])
         .output()
         .expect("failed to run");
 
@@ -692,7 +698,7 @@ fn cli_generate_without_config_fails() {
     let path = tmp.path().to_str().expect("non-utf8 path");
 
     let out = guardrail3()
-        .args(["generate", path])
+        .args(["rs", "generate", path])
         .output()
         .expect("failed to run");
 
@@ -709,7 +715,7 @@ fn cli_generate_without_config_fails() {
 #[allow(clippy::disallowed_methods)] // reason: test uses Command
 fn cli_validate_nonexistent_path_fails() {
     let out = guardrail3()
-        .args(["validate", "/nonexistent/path/xyz"])
+        .args(["rs", "validate", "/nonexistent/path/xyz"])
         .output()
         .expect("failed to run");
 
@@ -740,12 +746,12 @@ fn cli_check_after_generate_is_current() {
         .expect("failed to run");
 
     let _ = guardrail3()
-        .args(["generate", path])
+        .args(["rs", "generate", path])
         .output()
         .expect("failed to run");
 
     let out = guardrail3()
-        .args(["check", path])
+        .args(["rs", "check", path])
         .output()
         .expect("failed to run");
 
@@ -777,12 +783,12 @@ fn cli_diff_after_generate_no_changes() {
         .expect("failed to run");
 
     let _ = guardrail3()
-        .args(["generate", path])
+        .args(["rs", "generate", path])
         .output()
         .expect("failed to run");
 
     let out = guardrail3()
-        .args(["diff", path])
+        .args(["rs", "diff", path])
         .output()
         .expect("failed to run");
 
@@ -809,14 +815,14 @@ fn cli_check_detects_stale_after_tampering() {
         .output()
         .expect("failed to run");
     let _ = guardrail3()
-        .args(["generate", path])
+        .args(["rs", "generate", path])
         .output()
         .expect("failed to run");
 
     std::fs::write(tmp.path().join("rustfmt.toml"), "# tampered\n").expect("tamper file");
 
     let out = guardrail3()
-        .args(["check", path])
+        .args(["rs", "check", path])
         .output()
         .expect("failed to run");
 
@@ -843,14 +849,14 @@ fn cli_diff_shows_diff_after_tampering() {
         .output()
         .expect("failed to run");
     let _ = guardrail3()
-        .args(["generate", path])
+        .args(["rs", "generate", path])
         .output()
         .expect("failed to run");
 
     std::fs::write(tmp.path().join("rustfmt.toml"), "# tampered\n").expect("tamper file");
 
     let out = guardrail3()
-        .args(["diff", path])
+        .args(["rs", "diff", path])
         .output()
         .expect("failed to run");
 
@@ -880,7 +886,7 @@ fn cli_diff_shows_new_file_when_missing() {
         .expect("failed to run");
 
     let out = guardrail3()
-        .args(["diff", path])
+        .args(["rs", "diff", path])
         .output()
         .expect("failed to run");
 

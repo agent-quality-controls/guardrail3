@@ -136,7 +136,7 @@ fn check_ts_ignore_from_comments(
         // T28/T29: @ts-expect-error
         if text.contains("@ts-expect-error") {
             if let Some(pos) = text.find("@ts-expect-error") {
-                #[allow(clippy::string_slice)] // reason: @ts-expect-error is ASCII, byte offset + 16 is safe
+                #[allow(clippy::string_slice)] // reason: ASCII offset safe
                 let after = text.get(pos.saturating_add(16)..).unwrap_or("").trim();
                 if after.is_empty() || after == "*/" {
                     results.push(CheckResult {

@@ -224,11 +224,7 @@ pub fn check_only_in_source_content(content: &str, filename: &str) -> Vec<CheckR
 }
 
 /// Given confirmed `.only()` call line numbers (from tree-sitter), emit errors.
-fn check_only_lines(
-    content: &str,
-    filename: &str,
-    only_lines: &[usize],
-) -> Vec<CheckResult> {
+fn check_only_lines(content: &str, filename: &str, only_lines: &[usize]) -> Vec<CheckResult> {
     let lines: Vec<&str> = content.lines().collect();
     let mut results = Vec::new();
 
@@ -430,7 +426,11 @@ mod tests {
         // JSX syntax that would fail TypeScript-only grammar, forcing grep fallback
         let content = "const App = () => <div>test</div>;\ndescribe.skip('test', () => {});";
         let results = check_skip_without_reason_content(content, "app.test.tsx");
-        assert_eq!(results.len(), 1, "Should detect .skip() in TSX via tree-sitter");
+        assert_eq!(
+            results.len(),
+            1,
+            "Should detect .skip() in TSX via tree-sitter"
+        );
         assert_eq!(results[0].id, "T-TEST-04");
         assert_eq!(results[0].severity, Severity::Warn);
         assert_eq!(results[0].line, Some(2));
@@ -440,8 +440,7 @@ mod tests {
     fn t_test_04_tsx_skip_in_string_not_flagged() {
         // TSX content with JSX AND test.skip inside a string — tree-sitter should reject it,
         // but grep fallback would false-positive. This proves TSX grammar is used.
-        let content =
-            "const App = () => <div>{\"test.skip('broken', () => {})\"}</div>;\nexport default App;";
+        let content = "const App = () => <div>{\"test.skip('broken', () => {})\"}</div>;\nexport default App;";
         let results = check_skip_without_reason_content(content, "app.test.tsx");
         assert!(
             results.is_empty(),
@@ -455,7 +454,11 @@ mod tests {
         // JSX syntax that would fail TypeScript-only grammar, forcing grep fallback
         let content = "const App = () => <div>test</div>;\nit.only('test', () => {});";
         let results = check_only_in_source_content(content, "app.test.tsx");
-        assert_eq!(results.len(), 1, "Should detect .only() in TSX via tree-sitter");
+        assert_eq!(
+            results.len(),
+            1,
+            "Should detect .only() in TSX via tree-sitter"
+        );
         assert_eq!(results[0].id, "T-TEST-05");
         assert_eq!(results[0].severity, Severity::Error);
         assert_eq!(results[0].line, Some(2));

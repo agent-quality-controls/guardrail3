@@ -108,6 +108,10 @@ pub fn run_rs(args: &GenerateArgs) {
         }
         println!("  wrote: {}", gf.path);
     }
+
+    // Also generate pre-commit hook
+    let has_typescript = cfg.typescript.is_some();
+    generate_and_install_hooks(project_path, true, has_typescript);
 }
 
 /// Generate only TypeScript config files.
@@ -147,9 +151,44 @@ pub fn run_ts(args: &GenerateArgs) {
 
     println!();
     println!("Generated {written} TypeScript config files.");
+
+    // Also generate pre-commit hook
+    let has_rust = cfg.rust.is_some();
+    generate_and_install_hooks(project_path, has_rust, true);
 }
 
-/// Install pre-commit hooks.
+/// Generate and install pre-commit hooks for the detected stacks.
+#[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI output
+fn generate_and_install_hooks(project_path: &Path, has_rust: bool, has_typescript: bool) {
+    let hook_content =
+        crate::domain::modules::pre_commit::build_pre_commit_script(has_rust, has_typescript);
+
+    let hooks_dir = project_path.join(".githooks");
+    let _ = crate::fs::create_dir_all(&hooks_dir);
+    let hook_path = hooks_dir.join("pre-commit");
+    if let Err(e) = crate::fs::write_file(&hook_path, &hook_content) {
+        eprintln!("Error writing pre-commit hook: {e}");
+        return;
+    }
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        if let Some(meta) = crate::fs::metadata(&hook_path) {
+            let mut perms = meta.permissions();
+            perms.set_mode(0o755);
+            let _ = crate::fs::set_permissions(&hook_path, perms);
+        }
+    }
+    println!("  wrote: .githooks/pre-commit");
+
+    // Configure git to use .githooks/
+    let _ = std::process::Command::new("git")
+        .args(["config", "core.hooksPath", ".githooks"])
+        .current_dir(project_path)
+        .output();
+}
+
+/// Install pre-commit hooks (standalone command).
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
 pub fn run_hooks(args: &GenerateArgs) {
     let project_path = Path::new(&args.path);
@@ -261,10 +300,11 @@ fn generate_all_files(
         .and_then(|r| r.workspace_root.as_deref())
         .unwrap_or(".");
     let hook_content =
-        crate::domain::modules::pre_commit::build_pre_commit_script(has_rust, has_typescript).replace(
-            "GUARDRAIL3_RUST_WORKSPACE:-.}",
-            &format!("GUARDRAIL3_RUST_WORKSPACE:-{rust_workspace_root}}}"),
-        );
+        crate::domain::modules::pre_commit::build_pre_commit_script(has_rust, has_typescript)
+            .replace(
+                "GUARDRAIL3_RUST_WORKSPACE:-.}",
+                &format!("GUARDRAIL3_RUST_WORKSPACE:-{rust_workspace_root}}}"),
+            );
     files.push(GeneratedFile {
         path: ".githooks/pre-commit".to_owned(),
         content: hook_content,
@@ -363,10 +403,7 @@ fn generate_rust_files(
 
     for (crate_path, crate_cfg) in &crate_configs {
         // Per-crate profile overrides workspace profile
-        let effective_profile = crate_cfg
-            .profile
-            .as_deref()
-            .unwrap_or(profile);
+        let effective_profile = crate_cfg.profile.as_deref().unwrap_or(profile);
 
         // Library profile (workspace or per-crate): all crates are pure.
         // Otherwise check layer config.

@@ -70,7 +70,10 @@ pub fn run_rs(profile: &str, path: &str, force: bool) {
                 "release-plz.toml",
                 crate::domain::modules::release::RELEASE_PLZ_TOML.content,
             ),
-            ("cliff.toml", crate::domain::modules::release::CLIFF_TOML.content),
+            (
+                "cliff.toml",
+                crate::domain::modules::release::CLIFF_TOML.content,
+            ),
         ];
 
         for (filename, content) in &release_files {

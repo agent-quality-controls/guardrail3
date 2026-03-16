@@ -22,7 +22,7 @@ use guardrail3::adapters::outbound::fs::RealFileSystem;
 use guardrail3::adapters::outbound::tool_runner::RealToolChecker;
 use guardrail3::app::discover;
 use guardrail3::app::{hooks, rs, ts};
-use guardrail3::cli::{Cli, Commands, HooksCommands, RsCommands, TsCommands, ValidateArgs};
+use guardrail3::cli::{Cli, Commands, RsCommands, TsCommands, ValidateArgs};
 use guardrail3::domain::report::ValidateDomains;
 use guardrail3::help_gen;
 use guardrail3::{commands, report};
@@ -44,125 +44,144 @@ fn main() {
     };
 
     match cli.command {
-        Commands::Validate(args) => {
-            commands::validate::run(&args);
+        Commands::Rs { command } => handle_rs(command),
+        Commands::Ts { command } => handle_ts(command),
+    }
+}
+
+#[allow(clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI dispatch
+fn handle_rs(command: RsCommands) {
+    match command {
+        RsCommands::Init {
+            profile,
+            path,
+            force,
+        } => {
+            commands::init::run_rs(&profile, &path, force);
         }
-        Commands::Generate(args) => {
-            commands::generate::run(&args);
+        RsCommands::Generate(args) => {
+            commands::generate::run_rs(&args);
         }
-        Commands::Check(args) => {
+        RsCommands::Validate(args) => {
+            let (report, _) = run_rs_validate(&args);
+            print_report(&args, &report);
+        }
+        RsCommands::Check(args) => {
             commands::check::run(&args.path);
         }
-        Commands::Diff(args) => {
+        RsCommands::Diff(args) => {
             commands::diff::run(&args.path);
         }
-        Commands::ListModules => {
+        RsCommands::HooksInstall(args) => {
+            commands::generate::run_hooks(&args);
+        }
+        RsCommands::HooksValidate(args) => {
+            let path = resolve_path(&args.path);
+            let fs = RealFileSystem;
+            let tc = RealToolChecker;
+            let domains = domains_from_args(&args);
+            let project = discover::detect_project(&fs, &path);
+            let report = hooks::validate::run(
+                &fs,
+                &path,
+                project.has_rust,
+                project.has_typescript,
+                &domains,
+                &tc,
+            );
+            print_report(&args, &report);
+        }
+        RsCommands::ListModules => {
             commands::modules_cmd::list_modules();
         }
-        Commands::ShowModule(args) => {
+        RsCommands::ShowModule(args) => {
             commands::modules_cmd::show_module(&args.name);
         }
-        Commands::Rs { command } => match command {
-            RsCommands::Validate(args) => {
-                let path = std::path::Path::new(&args.path);
-                let Some(abs_path) = path.canonicalize().ok() else {
-                    eprintln!("Error: cannot resolve path '{}'", args.path);
-                    std::process::exit(1);
-                };
-                let fs = RealFileSystem;
-                let tc = RealToolChecker;
-                let domains = domains_from_args(&args);
-                let project = discover::detect_project(&fs, &abs_path);
-                let scoped_files = commands::validate::resolve_scoped_files_pub(&args, &abs_path);
-                let report = rs::validate::run(
-                    &fs,
-                    &abs_path,
-                    &project,
-                    scoped_files.as_deref(),
-                    &domains,
-                    args.thorough,
-                    &tc,
-                );
-                match args.format.as_str() {
-                    "json" => report::json::print_report(&report),
-                    "md" | "markdown" => report::markdown::print_report(&report),
-                    _ => report::text::print_report(&report),
-                }
-                if report.error_count() > 0 {
-                    std::process::exit(1);
-                }
-            }
-            RsCommands::Generate(args) => {
-                commands::generate::run_rs(&args);
-            }
-            RsCommands::Init {
-                profile,
-                path,
-                force,
-            } => {
-                commands::init::run_rs(&profile, &path, force);
-            }
-        },
-        Commands::Ts { command } => match command {
-            TsCommands::Validate(args) => {
-                let path = std::path::Path::new(&args.path);
-                let Some(abs_path) = path.canonicalize().ok() else {
-                    eprintln!("Error: cannot resolve path '{}'", args.path);
-                    std::process::exit(1);
-                };
-                let fs = RealFileSystem;
-                let domains = domains_from_args(&args);
-                let scoped_files = commands::validate::resolve_scoped_files_pub(&args, &abs_path);
-                let scoped_ref = scoped_files.as_deref();
-                let report = ts::validate::run(&fs, &abs_path, scoped_ref, &domains);
-                match args.format.as_str() {
-                    "json" => report::json::print_report(&report),
-                    "md" | "markdown" => report::markdown::print_report(&report),
-                    _ => report::text::print_report(&report),
-                }
-                if report.error_count() > 0 {
-                    std::process::exit(1);
-                }
-            }
-            TsCommands::Generate(args) => {
-                commands::generate::run_ts(&args);
-            }
-            TsCommands::Init { path, force } => {
-                commands::init::run_ts(&path, force);
-            }
-        },
-        Commands::Hooks { command } => match command {
-            HooksCommands::Validate(args) => {
-                let path = std::path::Path::new(&args.path);
-                let Some(abs_path) = path.canonicalize().ok() else {
-                    eprintln!("Error: cannot resolve path '{}'", args.path);
-                    std::process::exit(1);
-                };
-                let fs = RealFileSystem;
-                let tc = RealToolChecker;
-                let domains = domains_from_args(&args);
-                let project = discover::detect_project(&fs, &abs_path);
-                let report = hooks::validate::run(
-                    &fs,
-                    &abs_path,
-                    project.has_rust,
-                    project.has_typescript,
-                    &domains,
-                    &tc,
-                );
-                match args.format.as_str() {
-                    "json" => report::json::print_report(&report),
-                    "md" | "markdown" => report::markdown::print_report(&report),
-                    _ => report::text::print_report(&report),
-                }
-                if report.error_count() > 0 {
-                    std::process::exit(1);
-                }
-            }
-            HooksCommands::Install(args) => {
-                commands::generate::run_hooks(&args);
-            }
-        },
+    }
+}
+
+#[allow(clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI dispatch
+fn handle_ts(command: TsCommands) {
+    match command {
+        TsCommands::Init { path, force } => {
+            commands::init::run_ts(&path, force);
+        }
+        TsCommands::Generate(args) => {
+            commands::generate::run_ts(&args);
+        }
+        TsCommands::Validate(args) => {
+            let path = resolve_path(&args.path);
+            let fs = RealFileSystem;
+            let domains = domains_from_args(&args);
+            let scoped_files = commands::validate::resolve_scoped_files_pub(&args, &path);
+            let report = ts::validate::run(&fs, &path, scoped_files.as_deref(), &domains);
+            print_report(&args, &report);
+        }
+        TsCommands::HooksInstall(args) => {
+            commands::generate::run_hooks(&args);
+        }
+        TsCommands::HooksValidate(args) => {
+            let path = resolve_path(&args.path);
+            let fs = RealFileSystem;
+            let tc = RealToolChecker;
+            let domains = domains_from_args(&args);
+            let project = discover::detect_project(&fs, &path);
+            let report = hooks::validate::run(
+                &fs,
+                &path,
+                project.has_rust,
+                project.has_typescript,
+                &domains,
+                &tc,
+            );
+            print_report(&args, &report);
+        }
+    }
+}
+
+#[allow(clippy::disallowed_methods)] // reason: CLI — process::exit for error codes
+fn run_rs_validate(
+    args: &ValidateArgs,
+) -> (guardrail3::domain::report::Report, std::path::PathBuf) {
+    let path = resolve_path(&args.path);
+    let fs = RealFileSystem;
+    let tc = RealToolChecker;
+    let domains = domains_from_args(args);
+    let project = discover::detect_project(&fs, &path);
+    let scoped_files = commands::validate::resolve_scoped_files_pub(args, &path);
+    let report = rs::validate::run(
+        &fs,
+        &path,
+        &project,
+        scoped_files.as_deref(),
+        &domains,
+        args.thorough,
+        &tc,
+    );
+    (report, path)
+}
+
+#[allow(clippy::disallowed_methods)] // reason: CLI — process::exit
+fn print_report(args: &ValidateArgs, report: &guardrail3::domain::report::Report) {
+    match args.format.as_str() {
+        "json" => report::json::print_report(report),
+        "md" | "markdown" => report::markdown::print_report(report),
+        _ => report::text::print_report(report),
+    }
+    if report.error_count() > 0 {
+        std::process::exit(1);
+    }
+}
+
+#[allow(clippy::disallowed_methods, clippy::print_stderr)] // reason: CLI — process::exit + error output
+fn resolve_path(path_str: &str) -> std::path::PathBuf {
+    let path = std::path::Path::new(path_str);
+    match path.canonicalize() {
+        Ok(p) => p,
+        Err(_) => {
+            eprintln!("Error: cannot resolve path '{path_str}'");
+            std::process::exit(1);
+        }
     }
 }
 

@@ -1,13 +1,15 @@
+use crate::ports::outbound::ToolChecker;
 use std::path::Path;
 use std::process::Command;
-use crate::ports::outbound::ToolChecker;
 
 use super::tool_checks::{check_duplication_tools, check_required_tools};
 use crate::domain::report::{CheckResult, Severity};
 use crate::ports::outbound::FileSystem;
 
 #[allow(clippy::too_many_lines)] // reason: comprehensive hook validation
-pub fn check_hooks(fs: &dyn FileSystem, tc: &dyn ToolChecker, 
+pub fn check_hooks(
+    fs: &dyn FileSystem,
+    tc: &dyn ToolChecker,
     path: &Path,
     has_rust: bool,
     has_typescript: bool,
@@ -162,7 +164,8 @@ pub fn check_hooks(fs: &dyn FileSystem, tc: &dyn ToolChecker,
 
     // H9: Extra scripts in pre-commit.d/
     if is_modular {
-        inventory_scripts(fs, 
+        inventory_scripts(
+            fs,
             &pre_commit_d,
             "H9",
             "Extra scripts in pre-commit.d/",
@@ -360,7 +363,8 @@ fn check_monolithic_patterns(
     }
 }
 
-fn check_modular_scripts(fs: &dyn FileSystem, 
+fn check_modular_scripts(
+    fs: &dyn FileSystem,
     pre_commit_d: &Path,
     has_rust: bool,
     has_typescript: bool,
@@ -439,7 +443,13 @@ fn check_permissions(fs: &dyn FileSystem, file_path: &Path, results: &mut Vec<Ch
     }
 }
 
-fn inventory_scripts(fs: &dyn FileSystem, dir: &Path, id: &str, title_prefix: &str, results: &mut Vec<CheckResult>) {
+fn inventory_scripts(
+    fs: &dyn FileSystem,
+    dir: &Path,
+    id: &str,
+    title_prefix: &str,
+    results: &mut Vec<CheckResult>,
+) {
     if !dir.exists() {
         results.push(CheckResult {
             id: id.to_owned(),

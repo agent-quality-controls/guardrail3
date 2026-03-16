@@ -159,7 +159,10 @@ pub fn check_direct_fs_usage(
     // Inline std::fs:: calls via syn expression visitor
     for line_num in ast_helpers::find_inline_std_fs_calls(&parsed) {
         // Skip if already reported by use-import check
-        if results.iter().any(|r| r.id == "R58" && r.line == Some(line_num)) {
+        if results
+            .iter()
+            .any(|r| r.id == "R58" && r.line == Some(line_num))
+        {
             continue;
         }
         let trimmed = content
@@ -171,9 +174,7 @@ pub fn check_direct_fs_usage(
             id: "R58".to_owned(),
             severity: Severity::Error,
             title: "Direct std::fs call".to_owned(),
-            message: format!(
-                "Use centralized fs module instead of direct std::fs call: {trimmed}"
-            ),
+            message: format!("Use centralized fs module instead of direct std::fs call: {trimmed}"),
             file: Some(path.display().to_string()),
             line: Some(line_num),
         });
