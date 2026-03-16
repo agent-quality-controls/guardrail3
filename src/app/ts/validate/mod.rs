@@ -7,6 +7,7 @@ mod npmrc_check;
 mod package_check;
 pub mod source_scan;
 pub mod test_checks;
+pub mod ts_arch_checks;
 pub mod ts_code_analysis;
 mod ts_comment_checks;
 mod tsconfig_check;
@@ -46,6 +47,16 @@ pub fn run(
         report.add_section(Section {
             name: "ESLint boundary audit".to_owned(),
             results: eslint_results,
+        });
+
+        // TS hex arch checks
+        let arch_structure = ts_arch_checks::check_hex_arch_structure(fs, path);
+        let arch_imports = ts_arch_checks::check_import_boundaries(fs, path);
+        let mut arch_results = arch_structure;
+        arch_results.extend(arch_imports);
+        report.add_section(Section {
+            name: "TS architecture".to_owned(),
+            results: arch_results,
         });
     }
 

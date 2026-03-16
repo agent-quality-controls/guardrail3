@@ -1,6 +1,7 @@
 pub mod canonical;
 pub mod clippy;
 pub mod deny;
+pub mod guide;
 pub mod pre_commit;
 pub mod release;
 

@@ -22,6 +22,9 @@ pub enum Commands {
         #[command(subcommand)]
         command: TsCommands,
     },
+
+    /// Generate GUARDRAIL3_GUIDE.md in the current directory
+    Guide,
 }
 
 #[derive(Subcommand, Debug)]

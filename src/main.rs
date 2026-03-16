@@ -46,7 +46,20 @@ fn main() {
     match cli.command {
         Commands::Rs { command } => handle_rs(command),
         Commands::Ts { command } => handle_ts(command),
+        Commands::Guide => handle_guide(),
     }
+}
+
+#[allow(clippy::print_stdout, clippy::disallowed_methods)] // reason: CLI — writes file and prints path
+fn handle_guide() {
+    let path = std::path::Path::new("GUARDRAIL3_GUIDE.md");
+    let content = guardrail3::domain::modules::guide::GUIDE_CONTENT;
+    if let Err(e) = std::fs::write(path, content) {
+        eprintln!("Error writing GUARDRAIL3_GUIDE.md: {e}");
+        std::process::exit(1);
+    }
+    println!("Generated: {}", path.display());
+    println!("Commit this file so agents and contributors can find it.");
 }
 
 #[allow(clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI dispatch
