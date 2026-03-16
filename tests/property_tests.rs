@@ -212,10 +212,10 @@ proptest! {
         let dir_str = dir.path().display().to_string();
 
         let output = Command::new(binary_path())
-            .args(["init", "--profile", profile])
+            .args(["rs", "init", "--profile", profile])
             .arg(&dir_str)
             .output()
-            .expect("Failed to run guardrail3 init");
+            .expect("Failed to run guardrail3 rs init");
 
         let code = output.status.code().unwrap_or(-1);
         prop_assert!(

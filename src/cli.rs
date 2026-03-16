@@ -14,9 +14,6 @@ pub enum Commands {
     /// Validate project guardrails (auto-detects stacks)
     Validate(ValidateArgs),
 
-    /// Initialize guardrail3 configuration
-    Init(InitArgs),
-
     /// Generate config files from guardrail3.toml
     Generate(GenerateArgs),
 
@@ -142,21 +139,6 @@ pub struct ValidateArgs {
     /// Run slow checks (cargo publish --dry-run, etc.)
     #[arg(long)]
     pub thorough: bool,
-}
-
-#[derive(Parser, Debug)]
-pub struct InitArgs {
-    /// Profile to use
-    #[arg(long, default_value = "service")]
-    pub profile: String,
-
-    /// Overwrite existing files
-    #[arg(long)]
-    pub force: bool,
-
-    /// Project path
-    #[arg(default_value = ".")]
-    pub path: String,
 }
 
 #[derive(Parser, Debug)]
