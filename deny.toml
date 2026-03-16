@@ -20,7 +20,8 @@ highlight = "all"
 
 skip = [
 # Skip entries for deny.toml [bans] section
-    { crate = "windows-sys@0.59.0", reason = "transitive: colored v2 depends on older windows-sys" },
+# Example:
+#     { crate = "windows-sys@0.60.2", reason = "transitive dep conflict" },
 
 ]
 
