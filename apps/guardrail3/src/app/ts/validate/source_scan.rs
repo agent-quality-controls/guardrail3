@@ -16,7 +16,7 @@ pub fn check(
 
     let ts_files: Vec<String> = match scoped_files {
         Some(files) => files.iter().filter(|f| is_ts_file(f)).cloned().collect(),
-        None => collect_ts_files(path),
+        None => collect_ts_files(fs, path),
     };
 
     for file_path in &ts_files {
@@ -64,6 +64,13 @@ fn is_ts_file(path: &str) -> bool {
 
 /// Check if a walkdir entry is a directory that should be excluded from TypeScript source scanning.
 pub fn is_excluded_ts_dir(entry: &walkdir::DirEntry) -> bool {
+    is_excluded_ts_dir_with_gitignore(entry, &std::collections::BTreeSet::new())
+}
+
+pub fn is_excluded_ts_dir_with_gitignore(
+    entry: &walkdir::DirEntry,
+    gitignored: &std::collections::BTreeSet<String>,
+) -> bool {
     let name = entry.file_name().to_string_lossy();
     name == "node_modules"
         || name == ".next"
@@ -72,13 +79,15 @@ pub fn is_excluded_ts_dir(entry: &walkdir::DirEntry) -> bool {
         || name == "coverage"
         || name == ".git"
         || name == ".claude"
+        || gitignored.contains(name.as_ref())
 }
 
-fn collect_ts_files(root: &Path) -> Vec<String> {
+fn collect_ts_files(fs: &dyn FileSystem, root: &Path) -> Vec<String> {
     let mut files = Vec::new();
+    let gitignored = crate::app::gitignore::load_gitignore_dirs(fs, root);
     for entry in WalkDir::new(root)
         .into_iter()
-        .filter_entry(|e| !is_excluded_ts_dir(e))
+        .filter_entry(|e| !is_excluded_ts_dir_with_gitignore(e, &gitignored))
         .flatten()
     {
         if entry.file_type().is_file() {
