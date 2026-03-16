@@ -195,6 +195,21 @@ fn layer_from_import(import_path: &str, file_dir: &Path) -> Option<TsLayer> {
         };
     }
 
+    // Handle direct layer aliases: @domain/..., @adapters/..., @application/..., @ports/...
+    // These are common tsconfig path aliases that map directly to modules/ subdirs
+    if import_path.starts_with("@domain") {
+        return Some(TsLayer::Domain);
+    }
+    if import_path.starts_with("@ports") {
+        return Some(TsLayer::Ports);
+    }
+    if import_path.starts_with("@application") {
+        return Some(TsLayer::Application);
+    }
+    if import_path.starts_with("@adapters") {
+        return Some(TsLayer::Adapters);
+    }
+
     // Handle relative imports: resolve ../.. segments
     if import_path.starts_with('.') {
         let resolved = resolve_relative(file_dir, import_path);
