@@ -2,7 +2,6 @@ use std::path::Path;
 
 use crate::domain::report::{CheckResult, Severity};
 
-#[allow(clippy::too_many_lines)] // reason: license validation
 pub fn check_licenses(table: &toml::Value, file_path: &Path, results: &mut Vec<CheckResult>) {
     let Some(licenses) = table.get("licenses") else {
         results.push(CheckResult {
@@ -17,7 +16,16 @@ pub fn check_licenses(table: &toml::Value, file_path: &Path, results: &mut Vec<C
         return;
     };
 
-    // R14: license allow-list
+    check_license_allow_list(licenses, file_path, results);
+    check_license_private_ignore(licenses, file_path, results);
+    check_confidence_threshold(licenses, file_path, results);
+}
+
+fn check_license_allow_list(
+    licenses: &toml::Value,
+    file_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     match licenses.get("allow").and_then(|a| a.as_array()) {
         Some(arr) if !arr.is_empty() => {
             let license_list: Vec<&str> = arr.iter().filter_map(|v| v.as_str()).collect();
@@ -43,11 +51,13 @@ pub fn check_licenses(table: &toml::Value, file_path: &Path, results: &mut Vec<C
             });
         }
     }
+}
 
-    // R15: license extras — report any non-standard licenses as Info
-    // (We don't know the "standard" set, so just report the full list)
-
-    // Check [licenses.private] ignore = true
+fn check_license_private_ignore(
+    licenses: &toml::Value,
+    file_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     let private_ignore = licenses
         .get("private")
         .and_then(|p| p.get("ignore"))
@@ -80,8 +90,13 @@ pub fn check_licenses(table: &toml::Value, file_path: &Path, results: &mut Vec<C
             });
         }
     }
+}
 
-    // Check confidence-threshold
+fn check_confidence_threshold(
+    licenses: &toml::Value,
+    file_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     match licenses.get("confidence-threshold") {
         Some(toml::Value::Float(v)) => {
             // Compare with tolerance
@@ -113,7 +128,6 @@ pub fn check_licenses(table: &toml::Value, file_path: &Path, results: &mut Vec<C
     }
 }
 
-#[allow(clippy::too_many_lines)] // reason: source validation
 #[allow(clippy::branches_sharing_code)] // reason: separate branches for readability
 pub fn check_sources(table: &toml::Value, file_path: &Path, results: &mut Vec<CheckResult>) {
     let Some(sources) = table.get("sources") else {
@@ -129,6 +143,16 @@ pub fn check_sources(table: &toml::Value, file_path: &Path, results: &mut Vec<Ch
         return;
     };
 
+    check_unknown_source_policies(sources, file_path, results);
+    check_allow_registry(sources, file_path, results);
+    check_allow_git(sources, file_path, results);
+}
+
+fn check_unknown_source_policies(
+    sources: &toml::Value,
+    file_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     for key in &["unknown-registry", "unknown-git"] {
         match sources.get(key).and_then(|v| v.as_str()) {
             Some("deny") => {
@@ -166,8 +190,13 @@ pub fn check_sources(table: &toml::Value, file_path: &Path, results: &mut Vec<Ch
             }
         }
     }
+}
 
-    // Check allow-registry contains only crates.io
+fn check_allow_registry(
+    sources: &toml::Value,
+    file_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     if let Some(allow_reg) = sources.get("allow-registry").and_then(|v| v.as_array()) {
         let registries: Vec<&str> = allow_reg.iter().filter_map(|v| v.as_str()).collect();
         let has_non_cratesio = registries.iter().any(|r| !r.contains("crates.io"));
@@ -183,8 +212,13 @@ pub fn check_sources(table: &toml::Value, file_path: &Path, results: &mut Vec<Ch
             });
         }
     }
+}
 
-    // Check allow-git = [] (empty)
+fn check_allow_git(
+    sources: &toml::Value,
+    file_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     match sources.get("allow-git").and_then(|v| v.as_array()) {
         Some(arr) if !arr.is_empty() => {
             let git_sources: Vec<&str> = arr.iter().filter_map(|v| v.as_str()).collect();

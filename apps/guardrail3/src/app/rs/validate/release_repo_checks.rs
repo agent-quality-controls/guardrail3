@@ -86,7 +86,6 @@ pub fn check_license_file(workspace_root: &Path, results: &mut Vec<CheckResult>)
 
 // --- R-REL-02 + R-REL-03: release-plz.toml ---
 
-#[allow(clippy::too_many_lines)] // reason: R-REL-02 + R-REL-03 combined with early returns
 pub fn check_release_plz_toml(
     fs: &dyn FileSystem,
     workspace_root: &Path,
@@ -117,8 +116,19 @@ pub fn check_release_plz_toml(
         inventory: false,
     }.as_inventory());
 
-    // R-REL-03: validate content
-    let Some(content) = fs.read_file(&plz_path) else {
+    let Some(table) = parse_release_plz_toml(fs, &plz_path, results) else {
+        return;
+    };
+
+    validate_release_plz_content(&table, &plz_path, publishable_names, results);
+}
+
+fn parse_release_plz_toml(
+    fs: &dyn FileSystem,
+    plz_path: &Path,
+    results: &mut Vec<CheckResult>,
+) -> Option<toml::Value> {
+    let Some(content) = fs.read_file(plz_path) else {
         results.push(CheckResult {
             id: "R-REL-03".to_owned(),
             severity: Severity::Warn,
@@ -128,11 +138,11 @@ pub fn check_release_plz_toml(
             line: None,
             inventory: false,
         });
-        return;
+        return None;
     };
 
-    let table: toml::Value = match content.parse() {
-        Ok(v) => v,
+    match content.parse() {
+        Ok(v) => Some(v),
         Err(e) => {
             results.push(CheckResult {
                 id: "R-REL-03".to_owned(),
@@ -143,10 +153,17 @@ pub fn check_release_plz_toml(
                 line: None,
                 inventory: false,
             });
-            return;
+            None
         }
-    };
+    }
+}
 
+fn validate_release_plz_content(
+    table: &toml::Value,
+    plz_path: &Path,
+    publishable_names: &BTreeSet<String>,
+    results: &mut Vec<CheckResult>,
+) {
     // Check [workspace] section
     if table.get("workspace").is_none() {
         results.push(CheckResult {

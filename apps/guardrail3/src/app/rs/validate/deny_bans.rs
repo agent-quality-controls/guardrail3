@@ -3,7 +3,6 @@ use std::path::Path;
 
 use crate::domain::report::{CheckResult, Severity};
 
-#[allow(clippy::too_many_lines)] // reason: ban list validation
 pub fn check_ban_list(
     table: &toml::Value,
     file_path: &Path,
@@ -23,6 +22,15 @@ pub fn check_ban_list(
         return;
     };
 
+    check_bans_settings(bans, file_path, results);
+    check_deny_list_coverage(bans, file_path, results);
+}
+
+fn check_bans_settings(
+    bans: &toml::Value,
+    file_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     // Check multiple-versions = "deny"
     match bans.get("multiple-versions").and_then(|v| v.as_str()) {
         Some("deny") => {
@@ -80,7 +88,13 @@ pub fn check_ban_list(
             });
         }
     }
+}
 
+fn check_deny_list_coverage(
+    bans: &toml::Value,
+    file_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     let Some(deny_list) = bans.get("deny").and_then(|d| d.as_array()) else {
         results.push(CheckResult {
             id: "R12".to_owned(),

@@ -3,7 +3,6 @@ use std::path::Path;
 use crate::domain::report::{CheckResult, Severity};
 use crate::ports::outbound::FileSystem;
 
-#[allow(clippy::too_many_lines)] // reason: toolchain settings validation
 pub fn check_toolchain_settings(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResult>) {
     let content = match fs.read_file_err(path) {
         Ok(c) => c,
@@ -37,7 +36,15 @@ pub fn check_toolchain_settings(fs: &dyn FileSystem, path: &Path, results: &mut 
         }
     };
 
-    // Check channel = "stable"
+    check_toolchain_channel(&table, path, results);
+    check_toolchain_components(&table, path, results);
+}
+
+fn check_toolchain_channel(
+    table: &toml::Value,
+    path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     let channel = table
         .get("toolchain")
         .and_then(|t| t.get("channel"))
@@ -78,8 +85,13 @@ pub fn check_toolchain_settings(fs: &dyn FileSystem, path: &Path, results: &mut 
             });
         }
     }
+}
 
-    // Check components include clippy + rustfmt
+fn check_toolchain_components(
+    table: &toml::Value,
+    path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     let components = table
         .get("toolchain")
         .and_then(|t| t.get("components"))

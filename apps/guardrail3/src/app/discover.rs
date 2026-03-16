@@ -44,7 +44,6 @@ pub fn detect_project(fs: &dyn FileSystem, path: &Path) -> ProjectInfo {
     info
 }
 
-#[allow(clippy::too_many_lines)] // reason: complex workspace detection logic
 #[allow(clippy::manual_let_else)] // reason: match with early return is clearer here
 #[allow(clippy::string_slice)] // reason: parsing on known ASCII Cargo.toml content
 #[allow(clippy::needless_collect)] // reason: collect needed for ownership
@@ -69,83 +68,96 @@ fn detect_rust(fs: &dyn FileSystem, path: &Path, info: &mut ProjectInfo) {
         }
     };
 
-    // Both branches set cargo_workspace_root
     info.cargo_workspace_root = Some(path.to_path_buf());
 
-    // Check for [workspace] section
     if let Some(workspace) = table.get("workspace") {
-        // Parse workspace exclude patterns
-        let mut exclude_dirs: std::collections::BTreeSet<String> =
-            std::collections::BTreeSet::new();
-        if let Some(excludes) = workspace.get("exclude").and_then(|e| e.as_array()) {
-            for excl in excludes {
-                if let Some(excl_str) = excl.as_str() {
-                    let excl_pattern = path.join(excl_str);
-                    let excl_pattern_str = excl_pattern.display().to_string();
-                    if let Ok(paths) = glob::glob(&excl_pattern_str) {
-                        for entry in paths.flatten() {
-                            if let Ok(rel) = entry.strip_prefix(path) {
-                                let _ = exclude_dirs.insert(rel.display().to_string());
-                            }
-                        }
-                    }
-                    // Also add the literal pattern
-                    let _ = exclude_dirs.insert(excl_str.to_owned());
-                }
-            }
-        }
-
-        // Parse workspace members
-        if let Some(members) = workspace.get("members").and_then(|m| m.as_array()) {
-            for member in members {
-                if let Some(member_str) = member.as_str() {
-                    // Expand glob patterns
-                    let pattern = path.join(member_str);
-                    let pattern_str = pattern.display().to_string();
-
-                    match glob::glob(&pattern_str) {
-                        Ok(paths) => {
-                            for member_path in paths.flatten() {
-                                if member_path.join("Cargo.toml").exists() {
-                                    // Check if excluded
-                                    if let Ok(rel) = member_path.strip_prefix(path) {
-                                        let rel_str = rel.display().to_string();
-                                        if exclude_dirs.contains(&rel_str) {
-                                            continue;
-                                        }
-                                    }
-
-                                    // Get crate name from Cargo.toml
-                                    let crate_name = read_crate_name(fs, &member_path);
-                                    info.workspace_members.push(crate_name);
-
-                                    // Store relative dir
-                                    if let Ok(rel) = member_path.strip_prefix(path) {
-                                        info.workspace_member_dirs.push(rel.display().to_string());
-                                    }
-                                }
-                            }
-                        }
-                        Err(_) => {
-                            // Not a glob pattern, treat as literal
-                            if !exclude_dirs.contains(member_str) {
-                                let member_path = path.join(member_str);
-                                if member_path.join("Cargo.toml").exists() {
-                                    let crate_name = read_crate_name(fs, &member_path);
-                                    info.workspace_members.push(crate_name);
-                                    info.workspace_member_dirs.push(member_str.to_owned());
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        let exclude_dirs = parse_workspace_excludes(workspace, path);
+        parse_workspace_members(fs, workspace, path, &exclude_dirs, info);
     } else {
         // Single crate project
         let crate_name = read_crate_name(fs, path);
         info.workspace_members.push(crate_name);
         info.workspace_member_dirs.push(".".to_owned());
+    }
+}
+
+fn parse_workspace_excludes(
+    workspace: &toml::Value,
+    path: &Path,
+) -> std::collections::BTreeSet<String> {
+    let mut exclude_dirs: std::collections::BTreeSet<String> =
+        std::collections::BTreeSet::new();
+    let Some(excludes) = workspace.get("exclude").and_then(|e| e.as_array()) else {
+        return exclude_dirs;
+    };
+
+    for excl in excludes {
+        if let Some(excl_str) = excl.as_str() {
+            let excl_pattern = path.join(excl_str);
+            let excl_pattern_str = excl_pattern.display().to_string();
+            if let Ok(paths) = glob::glob(&excl_pattern_str) {
+                for entry in paths.flatten() {
+                    if let Ok(rel) = entry.strip_prefix(path) {
+                        let _ = exclude_dirs.insert(rel.display().to_string());
+                    }
+                }
+            }
+            // Also add the literal pattern
+            let _ = exclude_dirs.insert(excl_str.to_owned());
+        }
+    }
+
+    exclude_dirs
+}
+
+fn parse_workspace_members(
+    fs: &dyn FileSystem,
+    workspace: &toml::Value,
+    path: &Path,
+    exclude_dirs: &std::collections::BTreeSet<String>,
+    info: &mut ProjectInfo,
+) {
+    let Some(members) = workspace.get("members").and_then(|m| m.as_array()) else {
+        return;
+    };
+
+    for member in members {
+        if let Some(member_str) = member.as_str() {
+            let pattern = path.join(member_str);
+            let pattern_str = pattern.display().to_string();
+
+            match glob::glob(&pattern_str) {
+                Ok(paths) => {
+                    for member_path in paths.flatten() {
+                        if member_path.join("Cargo.toml").exists() {
+                            if let Ok(rel) = member_path.strip_prefix(path) {
+                                let rel_str = rel.display().to_string();
+                                if exclude_dirs.contains(&rel_str) {
+                                    continue;
+                                }
+                            }
+
+                            let crate_name = read_crate_name(fs, &member_path);
+                            info.workspace_members.push(crate_name);
+
+                            if let Ok(rel) = member_path.strip_prefix(path) {
+                                info.workspace_member_dirs.push(rel.display().to_string());
+                            }
+                        }
+                    }
+                }
+                Err(_) => {
+                    if !exclude_dirs.contains(member_str) {
+                        let member_path = path.join(member_str);
+                        if member_path.join("Cargo.toml").exists() {
+                            let crate_name = read_crate_name(fs, &member_path);
+                            info.workspace_members.push(crate_name);
+                            info.workspace_member_dirs.push(member_str.to_owned());
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

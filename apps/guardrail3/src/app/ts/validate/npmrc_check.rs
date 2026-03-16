@@ -4,8 +4,8 @@ use crate::domain::report::{CheckResult, Severity};
 use crate::ports::outbound::FileSystem;
 
 type NpmrcExpectation<'a> = (&'a str, &'a str);
+type NpmrcSettings = Vec<(String, String)>;
 
-#[allow(clippy::too_many_lines)] // reason: npmrc settings validation
 #[allow(clippy::string_slice)] // reason: parsing known ASCII key=value pairs
 pub fn check_npmrc(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResult>) {
     let npmrc_path = path.join(".npmrc");
@@ -36,9 +36,15 @@ pub fn check_npmrc(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
         return;
     };
 
-    #[allow(clippy::type_complexity)] // reason: legitimate complex type
-    // Parse key=value pairs
-    let mut settings: Vec<(String, String)> = Vec::new();
+    let settings = parse_npmrc_settings(&content);
+    check_expected_settings(&settings, &npmrc_path, results);
+    check_extra_settings(&settings, &npmrc_path, results);
+}
+
+/// Parse key=value pairs from .npmrc content, skipping comments and blank lines.
+#[allow(clippy::string_slice)] // reason: parsing known ASCII key=value pairs
+fn parse_npmrc_settings(content: &str) -> NpmrcSettings {
+    let mut settings = Vec::new();
     for line in content.lines() {
         let trimmed = line.trim();
         if trimmed.is_empty() || trimmed.starts_with('#') || trimmed.starts_with(';') {
@@ -51,7 +57,15 @@ pub fn check_npmrc(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
             settings.push((key, value));
         }
     }
+    settings
+}
 
+/// T12/T13: Check each expected .npmrc setting is present with correct value.
+fn check_expected_settings(
+    settings: &NpmrcSettings,
+    npmrc_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     let expected: &[NpmrcExpectation<'_>] = &[
         ("strict-peer-dependencies", "true"),
         ("disallow-workspace-cycles", "true"),
@@ -68,9 +82,6 @@ pub fn check_npmrc(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
         ("shamefully-hoist", "false"),
     ];
 
-    let expected_keys: Vec<&str> = expected.iter().map(|(k, _)| *k).collect();
-
-    // T12: Check each expected setting
     for (key, expected_val) in expected {
         let found = settings.iter().find(|(k, _)| k == key);
         match found {
@@ -102,9 +113,31 @@ pub fn check_npmrc(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
             }
         }
     }
+}
 
-    // T14: Extra settings not in expected list
-    for (key, val) in &settings {
+/// T14: Extra settings not in expected list.
+fn check_extra_settings(
+    settings: &NpmrcSettings,
+    npmrc_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
+    let expected_keys: &[&str] = &[
+        "strict-peer-dependencies",
+        "disallow-workspace-cycles",
+        "save-workspace-protocol",
+        "engine-strict",
+        "package-manager-strict-version",
+        "strict-dep-builds",
+        "verify-deps-before-run",
+        "minimum-release-age",
+        "block-exotic-subdeps",
+        "trust-policy",
+        "public-hoist-pattern",
+        "save-prefix",
+        "shamefully-hoist",
+    ];
+
+    for (key, val) in settings {
         if !expected_keys.contains(&key.as_str()) {
             results.push(CheckResult {
                 id: "T14".to_owned(),

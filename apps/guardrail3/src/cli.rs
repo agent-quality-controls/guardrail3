@@ -152,6 +152,11 @@ pub struct ValidateArgs {
     #[arg(long)]
     #[garde(skip)] // reason: boolean flag, inherently valid
     pub inventory: bool,
+
+    /// Show every audit trail item (by default, high-count check IDs are summarized)
+    #[arg(long)]
+    #[garde(skip)] // reason: boolean flag, inherently valid
+    pub verbose: bool,
 }
 
 #[derive(Parser, Debug, garde::Validate)]

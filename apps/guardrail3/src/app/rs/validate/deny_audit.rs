@@ -44,7 +44,28 @@ pub fn check(
     let mut results = Vec::new();
     let deny_path = workspace_root.join("deny.toml");
 
-    // R8: Check existence
+    let Some(table) = read_and_parse_deny_toml(fs, &deny_path, workspace_root, &mut results) else {
+        return results;
+    };
+
+    check_deprecated_advisory_fields(&table, &deny_path, &mut results);
+    check_advisory_values(&table, &deny_path, &mut results);
+    deny_bans::check_ban_list(&table, &deny_path, profile, &mut results);
+    deny_licenses::check_licenses(&table, &deny_path, &mut results);
+    deny_licenses::check_sources(&table, &deny_path, &mut results);
+    deny_bans::check_tokio_feature_ban(&table, &deny_path, &mut results);
+    deny_inventory::check_skip_entries(&table, &deny_path, &mut results);
+    deny_inventory::check_advisory_ignores(&table, &deny_path, &mut results);
+
+    results
+}
+
+fn read_and_parse_deny_toml(
+    fs: &dyn FileSystem,
+    deny_path: &Path,
+    workspace_root: &Path,
+    results: &mut Vec<CheckResult>,
+) -> Option<toml::Value> {
     if !deny_path.exists() {
         results.push(CheckResult {
             id: "R8".to_owned(),
@@ -55,7 +76,7 @@ pub fn check(
             line: None,
             inventory: false,
         });
-        return results;
+        return None;
     }
 
     results.push(CheckResult {
@@ -68,7 +89,7 @@ pub fn check(
         inventory: false,
     }.as_inventory());
 
-    let content = match fs.read_file_err(&deny_path) {
+    let content = match fs.read_file_err(deny_path) {
         Ok(content) => content,
         Err(e) => {
             results.push(CheckResult {
@@ -80,12 +101,12 @@ pub fn check(
                 line: None,
                 inventory: false,
             });
-            return results;
+            return None;
         }
     };
 
-    let table: toml::Value = match content.parse() {
-        Ok(v) => v,
+    match content.parse() {
+        Ok(v) => Some(v),
         Err(e) => {
             results.push(CheckResult {
                 id: "R8".to_owned(),
@@ -96,52 +117,35 @@ pub fn check(
                 line: None,
                 inventory: false,
             });
-            return results;
-        }
-    };
-
-    // R9: Check for deprecated fields in [advisories]
-    if let Some(advisories) = table.get("advisories") {
-        for deprecated in &["vulnerability", "notice", "unsound"] {
-            if advisories.get(deprecated).is_some() {
-                results.push(CheckResult {
-                    id: "R9".to_owned(),
-                    severity: Severity::Warn,
-                    title: format!("Deprecated field: {deprecated}"),
-                    message: format!("[advisories].{deprecated} is deprecated in deny.toml 0.19+"),
-                    file: Some(deny_path.display().to_string()),
-                    line: None,
-                    inventory: false,
-                });
-            }
+            None
         }
     }
-
-    // R10-R11: Check unmaintained and yanked values
-    check_advisory_values(&table, &deny_path, &mut results);
-
-    // R12-R13: Check bans deny list
-    deny_bans::check_ban_list(&table, &deny_path, profile, &mut results);
-
-    // R14-R15: Check licenses allow list
-    deny_licenses::check_licenses(&table, &deny_path, &mut results);
-
-    // R16: Check sources
-    deny_licenses::check_sources(&table, &deny_path, &mut results);
-
-    // R17-R18: Check tokio full ban
-    deny_bans::check_tokio_feature_ban(&table, &deny_path, &mut results);
-
-    // R19: Inventory skip entries
-    deny_inventory::check_skip_entries(&table, &deny_path, &mut results);
-
-    // R20: Inventory advisory ignore entries
-    deny_inventory::check_advisory_ignores(&table, &deny_path, &mut results);
-
-    results
 }
 
-#[allow(clippy::too_many_lines)] // reason: advisory value checking
+fn check_deprecated_advisory_fields(
+    table: &toml::Value,
+    deny_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
+    let Some(advisories) = table.get("advisories") else {
+        return;
+    };
+
+    for deprecated in &["vulnerability", "notice", "unsound"] {
+        if advisories.get(deprecated).is_some() {
+            results.push(CheckResult {
+                id: "R9".to_owned(),
+                severity: Severity::Warn,
+                title: format!("Deprecated field: {deprecated}"),
+                message: format!("[advisories].{deprecated} is deprecated in deny.toml 0.19+"),
+                file: Some(deny_path.display().to_string()),
+                line: None,
+                inventory: false,
+            });
+        }
+    }
+}
+
 fn check_advisory_values(table: &toml::Value, file_path: &Path, results: &mut Vec<CheckResult>) {
     let Some(advisories) = table.get("advisories") else {
         results.push(CheckResult {
@@ -156,7 +160,15 @@ fn check_advisory_values(table: &toml::Value, file_path: &Path, results: &mut Ve
         return;
     };
 
-    // unmaintained
+    check_unmaintained_value(advisories, file_path, results);
+    check_yanked_value(advisories, file_path, results);
+}
+
+fn check_unmaintained_value(
+    advisories: &toml::Value,
+    file_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     match advisories.get("unmaintained").and_then(|v| v.as_str()) {
         Some("workspace") => {
             results.push(CheckResult {
@@ -203,8 +215,13 @@ fn check_advisory_values(table: &toml::Value, file_path: &Path, results: &mut Ve
             });
         }
     }
+}
 
-    // yanked
+fn check_yanked_value(
+    advisories: &toml::Value,
+    file_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     match advisories.get("yanked").and_then(|v| v.as_str()) {
         Some("warn") => {
             results.push(CheckResult {
