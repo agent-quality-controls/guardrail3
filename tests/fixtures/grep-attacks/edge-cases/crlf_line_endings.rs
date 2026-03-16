@@ -3,7 +3,7 @@
 #[allow(dead_code)] // reason: testing CRLF handling
 fn crlf_function() {
     let x = 42;
-    println\!("{}", x);
+    println!("{}", x);
 }
 
 #[allow(unused_variables)] // reason: CRLF test

@@ -222,12 +222,11 @@ fn check_derive_inventory(rs_files: &[String], workspace_root: &Path) -> Vec<Che
         let Some(content) = crate::fs::read_file(path) else {
             continue;
         };
-        let (w, wo) = if let Some(parsed) = super::ast_helpers::parse_file(&content) {
-            let derives = super::ast_helpers::find_derive_attributes(&parsed);
-            count_deserialize_structs_ast(&derives)
-        } else {
-            count_deserialize_structs(&content)
+        let Some(parsed) = super::ast_helpers::parse_file(&content) else {
+            continue;
         };
+        let derives = super::ast_helpers::find_derive_attributes(&parsed);
+        let (w, wo) = count_deserialize_structs_ast(&derives);
         with_validate = with_validate.saturating_add(w);
         without_validate = without_validate.saturating_add(wo);
     }
@@ -265,53 +264,6 @@ fn count_deserialize_structs_ast(derives: &[super::ast_helpers::DeriveInfo]) -> 
         } else {
             without_validate = without_validate.saturating_add(1);
         }
-    }
-
-    (with_validate, without_validate)
-}
-
-/// Count structs that derive Deserialize, and how many of those also have Validate.
-///
-/// A struct with `#[derive(...Deserialize...)]` is counted. If ANY derive attribute on
-/// adjacent lines also contains `Validate` (from garde), it counts as "with". Otherwise "without".
-fn count_deserialize_structs(content: &str) -> (usize, usize) {
-    let lines: Vec<&str> = content.lines().collect();
-    let mut with_validate: usize = 0;
-    let mut without_validate: usize = 0;
-
-    let mut i: usize = 0;
-    while i < lines.len() {
-        let Some(line) = lines.get(i) else { break };
-        let trimmed = line.trim();
-
-        // Look for #[derive(...)] containing Deserialize
-        if trimmed.starts_with("#[derive(") && trimmed.contains("Deserialize") {
-            // Collect all adjacent derive/attribute lines to check for Validate
-            let mut block = String::from(trimmed);
-            let mut j = i.saturating_add(1);
-            while j < lines.len() {
-                let Some(next_line) = lines.get(j) else { break };
-                let next = next_line.trim();
-                if next.starts_with("#[") {
-                    block.push(' ');
-                    block.push_str(next);
-                    j = j.saturating_add(1);
-                } else {
-                    break;
-                }
-            }
-
-            if block.contains("Validate") {
-                with_validate = with_validate.saturating_add(1);
-            } else {
-                without_validate = without_validate.saturating_add(1);
-            }
-
-            i = j;
-            continue;
-        }
-
-        i = i.saturating_add(1);
     }
 
     (with_validate, without_validate)
@@ -569,9 +521,10 @@ disallowed-methods = [
     // ---------------------------------------------------------------------------
 
     #[test]
-    #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
-    fn r_garde_05_counts_deserialize_structs() {
-        let content_both = r"
+    fn r_garde_05_counts_deserialize_structs_ast() {
+        let content_both = r#"
+use serde::Deserialize;
+
 #[derive(Deserialize, garde::Validate)]
 struct Foo {
     name: String,
@@ -586,8 +539,10 @@ struct Bar {
 struct Baz {
     id: i64,
 }
-";
-        let (with, without) = count_deserialize_structs(content_both);
+"#;
+        let parsed = syn::parse_file(content_both).expect("should parse");
+        let derives = super::super::ast_helpers::find_derive_attributes(&parsed);
+        let (with, without) = count_deserialize_structs_ast(&derives);
         assert_eq!(with, 1, "Foo has both Deserialize + Validate");
         assert_eq!(without, 1, "Bar has Deserialize without Validate");
     }

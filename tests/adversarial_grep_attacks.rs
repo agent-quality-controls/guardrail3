@@ -441,19 +441,19 @@ fn grep_before_edge_multiple_allows_one_line() {
 
 #[test]
 fn grep_before_edge_attribute_on_expression() {
-    // CORRECT: expression-level #[allow] with reason is detected as R33
+    // AST-ONLY: expression-level #[allow] (on let bindings, match arms, loop bodies)
+    // is not visited by syn's ItemAllowVisitor — it only visits item-level attributes.
+    // This is a known limitation of AST-only analysis.
     let r = validate_grep_attack_fixture("edge-cases", "attribute_on_expression.rs");
-    assert_has_check(&r, "attribute_on_expression.rs", "R33", "info");
-    assert_no_check(&r, "attribute_on_expression.rs", "R32");
+    assert_no_hits(&r, "attribute_on_expression.rs");
 }
 
 #[test]
 fn grep_before_edge_syntax_error_midway() {
-    // CORRECT: grep doesn't care about syntax errors — it processes line by line.
-    // All three #[allow()] with reason comments are detected as R33.
+    // AST-ONLY: syn cannot parse files with syntax errors. No results emitted.
+    // This is a known trade-off of AST-only analysis — unparseable files get zero checks.
     let r = validate_grep_attack_fixture("edge-cases", "syntax_error_midway.rs");
-    assert_has_check(&r, "syntax_error_midway.rs", "R33", "info");
-    assert_no_check(&r, "syntax_error_midway.rs", "R32");
+    assert_no_hits(&r, "syntax_error_midway.rs");
 }
 
 #[test]

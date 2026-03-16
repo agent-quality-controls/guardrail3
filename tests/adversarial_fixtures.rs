@@ -162,11 +162,15 @@ fn adversarial_r32_multiline_allow_detected() {
 }
 
 #[test]
-fn adversarial_r32_allow_in_macro_detected() {
-    // Allow inside a macro_rules! body — the checker does line-by-line text matching
-    // so it should still see `#[allow(clippy::unwrap_used)]`
+fn adversarial_r32_allow_in_macro_invisible_to_ast() {
+    // Allow inside a macro_rules! body is INVISIBLE to syn AST analysis.
+    // syn does not expand macros, so the body is opaque tokens.
+    // This is a known limitation of AST-only analysis — no grep fallback.
     let result = validate_fixture("allow_in_macro.rs");
-    assert_contains_check(&result, "R32", "error");
+    assert!(
+        !result.contains("\"R32\""),
+        "AST-only analysis should NOT see #[allow] inside macro_rules! bodies"
+    );
 }
 
 #[test]
