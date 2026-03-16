@@ -43,7 +43,7 @@ fn emit_crate_allow_result(
             id: "R31".to_owned(),
             severity: Severity::Info,
             title: format!("Justified {CRATE_ALLOW_PREFIX}...)"),
-            message: "unused_crate_dependencies — universally exempted".to_owned(),
+            message: "unused_crate_dependencies — universally exempted (this lint produces false positives in bin crates and integration tests). Approved exception, no action needed.".to_owned(),
             file: Some(path.display().to_string()),
             line: Some(line_number),
             inventory: false,
@@ -56,11 +56,16 @@ fn emit_crate_allow_result(
         } else {
             Severity::Error
         };
+        let action = if is_test_file {
+            "Test file — exempt from R30.".to_owned()
+        } else {
+            format!("Crate-wide `{CRATE_ALLOW_PREFIX}{lint})]` suppresses the lint for the entire crate, hiding real issues. Use per-function `#[allow({lint})] // reason: <justification>` instead, or fix the underlying lint violations.")
+        };
         results.push(CheckResult {
             id: "R30".to_owned(),
             severity,
             title: format!("Crate-level {CRATE_ALLOW_PREFIX}...)"),
-            message: format!("{CRATE_ALLOW_PREFIX}{lint})] — crate-wide lint suppression banned"),
+            message: action,
             file: Some(path.display().to_string()),
             line: Some(line_number),
             inventory: false,
@@ -96,8 +101,8 @@ fn check_item_level_allow_ast(
             results.push(CheckResult {
                 id: "R33".to_owned(),
                 severity: Severity::Info,
-                title: "Justified #[allow]".to_owned(),
-                message: format!("{lint} — {reason}"),
+                title: "Lint suppression with reason — review with --verbose to audit".to_owned(),
+                message: format!("#[allow({lint})] with documented reason: {reason}. Lint suppression with justification — approved exception, no action needed."),
                 file: Some(path.display().to_string()),
                 line: Some(line_1based),
                 inventory: false,
@@ -107,7 +112,7 @@ fn check_item_level_allow_ast(
                 id: "R32".to_owned(),
                 severity: Severity::Error,
                 title: "#[allow] without reason".to_owned(),
-                message: format!("#[allow({lint})] has no // comment justification"),
+                message: format!("`#[allow({lint})]` suppresses a clippy/rustc lint without documenting why. Undocumented suppressions hide real bugs and make auditing impossible. Add `// reason: <justification>` on the same line as the #[allow]."),
                 file: Some(path.display().to_string()),
                 line: Some(line_1based),
                 inventory: false,
@@ -143,8 +148,8 @@ fn check_garde_skip_ast(
             results.push(CheckResult {
                 id: "R35".to_owned(),
                 severity: Severity::Info,
-                title: "Justified garde(skip)".to_owned(),
-                message: format!("garde(skip) — {reason}"),
+                title: "#[garde(skip)] — field skips input validation — review with --verbose to audit".to_owned(),
+                message: format!("#[garde(skip)] skips runtime input validation on this field with documented reason: {reason}. Approved exception, no action needed."),
                 file: Some(path.display().to_string()),
                 line: Some(line_1based),
                 inventory: false,
@@ -154,7 +159,7 @@ fn check_garde_skip_ast(
                 id: "R34".to_owned(),
                 severity: Severity::Error,
                 title: "garde(skip) without reason".to_owned(),
-                message: "garde(skip) has no // comment justification".to_owned(),
+                message: "`#[garde(skip)]` bypasses runtime input validation on this field without documenting why. Unvalidated input at adapter boundaries can cause data corruption or security issues. Add `// reason: <justification>` on the same line.".to_owned(),
                 file: Some(path.display().to_string()),
                 line: Some(line_1based),
                 inventory: false,
@@ -187,8 +192,8 @@ pub fn check_exception_comments(
                 results.push(CheckResult {
                     id: "R36".to_owned(),
                     severity: Severity::Info,
-                    title: "EXCEPTION comment".to_owned(),
-                    message: line.trim().to_owned(),
+                    title: "Config override (EXCEPTION in clippy/deny config) — review with --verbose".to_owned(),
+                    message: format!("EXCEPTION override in config file: {}. This relaxes a default guardrail rule with a documented reason. Review to verify the exception is still justified.", line.trim()),
                     file: Some(path.display().to_string()),
                     line: Some(line_number),
                     inventory: false,
@@ -222,7 +227,7 @@ fn check_cfg_attr_allow_ast(
             id: "R37".to_owned(),
             severity: Severity::Info,
             title: "cfg_attr allow".to_owned(),
-            message,
+            message: format!("Conditional lint suppression `#[cfg_attr(..., allow({lint}))]`: {message}. Active only under specific cfg conditions (e.g., test builds). Audit to confirm the condition is appropriate."),
             file: Some(path.display().to_string()),
             line: Some(line_1based),
             inventory: false,

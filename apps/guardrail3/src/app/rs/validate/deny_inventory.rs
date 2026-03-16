@@ -32,21 +32,16 @@ pub fn check_skip_entries(table: &toml::Value, file_path: &Path, results: &mut V
             };
 
             let reason = entry.get("reason").and_then(|r| r.as_str()).unwrap_or("");
-            let message = if reason.is_empty() {
-                format!("{name} {version}")
-            } else {
-                format!("{name} {version} — {reason}")
-            };
 
             results.push(CheckResult {
                 id: "R19".to_owned(),
                 severity: Severity::Info,
-                title: "Skip entry".to_owned(),
-                message,
+                title: "deny.toml skip entry".to_owned(),
+                message: format!("Dependency `{name}` ({version}) is banned but skipped in deny.toml [bans.skip]{reason_suffix}. This is an approved exception to the duplicate-version ban — the crate is a transitive dependency that cannot be deduplicated. No action needed.", reason_suffix = if reason.is_empty() { String::new() } else { format!(" because {reason}") }),
                 file: Some(file_path.display().to_string()),
                 line: None,
                 inventory: false,
-            });
+            }.as_inventory());
         }
     }
 }
@@ -67,7 +62,7 @@ pub fn check_advisory_ignores(
                 id: "R20".to_owned(),
                 severity: Severity::Info,
                 title: "Advisory ignore".to_owned(),
-                message: id.to_owned(),
+                message: format!("Security advisory `{id}` is explicitly ignored in deny.toml [advisories.ignore]. This suppresses a known vulnerability alert — verify the advisory does not apply to your usage or has an accepted risk."),
                 file: Some(file_path.display().to_string()),
                 line: None,
                 inventory: false,

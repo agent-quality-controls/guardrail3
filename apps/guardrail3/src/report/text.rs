@@ -23,14 +23,8 @@ pub fn print_report(report: &Report, show_inventory: bool, verbose: bool) {
             .iter()
             .filter(|r| show_inventory || !r.inventory)
             .collect();
-        if visible.is_empty() && section.results.is_empty() {
-            println!("{} {} {}", "===".bold(), section.name.bold(), "===".bold());
-            println!("  {} No checks in this section", "(empty)".dimmed());
-            println!();
-            continue;
-        }
         if visible.is_empty() {
-            // All results were inventory — skip section entirely
+            // No visible results — skip section entirely (whether empty or all inventory)
             continue;
         }
         println!("{} {} {}", "===".bold(), section.name.bold(), "===".bold());
@@ -95,8 +89,8 @@ fn print_summary_line(group: &[&&CheckResult]) {
     };
 
     println!(
-        "  {} [{}] {}: {} entries (use --verbose to list each)",
-        icon, id_colored, first.title, count,
+        "  {} [{}] {}: {count} (use --verbose to list each)",
+        icon, id_colored, first.title,
     );
 }
 

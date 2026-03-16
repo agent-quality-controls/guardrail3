@@ -111,7 +111,7 @@ pub fn check_garde_dependency(cargo_content: Option<&str>) -> Vec<CheckResult> {
             id: "R-GARDE-01".to_owned(),
             severity: Severity::Info,
             title: "garde dependency found".to_owned(),
-            message: "garde is listed in workspace or crate dependencies".to_owned(),
+            message: "garde (runtime validation library) is listed in workspace or crate dependencies. Enables `#[derive(Validate)]` for input boundary struct validation. No action needed.".to_owned(),
             file: None,
             line: None,
             inventory: false,
@@ -121,7 +121,7 @@ pub fn check_garde_dependency(cargo_content: Option<&str>) -> Vec<CheckResult> {
             id: "R-GARDE-01".to_owned(),
             severity: Severity::Error,
             title: "garde dependency missing".to_owned(),
-            message: "garde is not in [workspace.dependencies] or [dependencies] — every project MUST have garde for runtime validation".to_owned(),
+            message: "garde is not in [workspace.dependencies] or [dependencies]. Every project MUST have garde for runtime input validation at adapter boundaries. Without it, deserialized input is not validated, risking data corruption. Add `garde = { version = \"...\", features = [\"derive\"] }` to [workspace.dependencies].".to_owned(),
             file: None,
             line: None,
             inventory: false,
@@ -207,18 +207,26 @@ pub fn check_derive_inventory(
         Severity::Info
     };
 
-    vec![CheckResult {
+    let message = if without_validate == 0 {
+        format!(
+            "{with_validate} input boundary structs (Deserialize/Parser/Args/FromRow) all derive `Validate` for runtime input validation. No structs are missing validation. No action needed."
+        )
+    } else {
+        format!(
+            "{with_validate} input boundary structs have `Validate`, but {without_validate} structs deriving Deserialize/Parser/Args/FromRow are missing `#[derive(Validate)]`. Without `Validate`, deserialized input bypasses runtime validation. Add `#[derive(Validate)]` and garde field attributes to each missing struct."
+        )
+    };
+    let result = CheckResult {
         id: "R-GARDE-05".to_owned(),
         severity,
         title: "Input boundary struct validation inventory".to_owned(),
-        message: format!(
-            "{with_validate} input boundary structs (Deserialize/Parser/Args/FromRow) have Validate, \
-             {without_validate} are missing Validate"
-        ),
+        message,
         file: Some(workspace_root.display().to_string()),
         line: None,
         inventory: false,
-    }]
+    };
+    // Mark as inventory when nothing is missing (confirmation only)
+    vec![if without_validate == 0 { result.as_inventory() } else { result }]
 }
 
 /// Check if a macro name matches any of the input boundary derives,
@@ -301,7 +309,7 @@ pub fn check_ban_presence(
             id: check_id.to_owned(),
             severity: Severity::Info,
             title: format!("All {label}s present"),
-            message: format!("All {} expected bans found in {key}", expected.len()),
+            message: format!("All {} expected {label}s found in clippy.toml {key}. These bans force usage of validated wrapper types instead of raw deserialization. No action needed.", expected.len()),
             file: Some(file.to_owned()),
             line: None,
             inventory: false,
@@ -311,7 +319,7 @@ pub fn check_ban_presence(
             id: check_id.to_owned(),
             severity: Severity::Warn,
             title: format!("Missing {label}s"),
-            message: format!("Missing from {key}: {}", missing.join(", ")),
+            message: format!("Missing from clippy.toml {key}: {}. Without these bans, code can bypass the Validated<T> wrapper and deserialize input without runtime validation. Add them to clippy.toml or run `guardrail3 generate`.", missing.join(", ")),
             file: Some(file.to_owned()),
             line: None,
             inventory: false,

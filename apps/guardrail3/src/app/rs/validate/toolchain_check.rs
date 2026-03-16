@@ -56,7 +56,7 @@ fn check_toolchain_channel(
                 id: "R25".to_owned(),
                 severity: Severity::Info,
                 title: "Toolchain channel correct".to_owned(),
-                message: "channel = \"stable\"".to_owned(),
+                message: "channel = \"stable\" in rust-toolchain.toml. Using the stable Rust release channel ensures reproducible builds across all developers and CI. No action needed.".to_owned(),
                 file: Some(path.display().to_string()),
                 line: None,
                 inventory: false,
@@ -107,17 +107,17 @@ fn check_toolchain_components(
                         id: "R25".to_owned(),
                         severity: Severity::Info,
                         title: format!("Component {expected} present"),
-                        message: format!("{expected} in components list"),
+                        message: format!("`{expected}` listed in rust-toolchain.toml components. This ensures `{expected}` is automatically installed with the toolchain. No action needed."),
                         file: Some(path.display().to_string()),
                         line: None,
                         inventory: false,
-                    });
+                    }.as_inventory());
                 } else {
                     results.push(CheckResult {
                         id: "R25".to_owned(),
                         severity: Severity::Warn,
                         title: format!("Component {expected} missing"),
-                        message: format!("`{expected}` missing from components. Add `\"{expected}\"` to `components` array in [toolchain] in rust-toolchain.toml."),
+                        message: format!("`{expected}` is not in the components list. Without it, developers must manually install `{expected}` and pre-commit hooks may fail. Add `\"{expected}\"` to the `components` array in [toolchain] in rust-toolchain.toml."),
                         file: Some(path.display().to_string()),
                         line: None,
                         inventory: false,

@@ -122,14 +122,14 @@ pub fn check(
         severity: Severity::Info,
         title: "Crate inventory".to_owned(),
         message: format!(
-            "{} publishable, {} publish=false",
+            "Workspace has {} publishable crate(s) and {} with publish=false. Publishable crates will be checked for release metadata (description, license, readme, keywords, categories, semver). Informational inventory, no action needed.",
             publishable.len(),
             publish_false_count
         ),
         file: None,
         line: None,
         inventory: false,
-    });
+    }.as_inventory());
 
     // Repo-level checks
     super::release_repo_checks::check_repo_level(
