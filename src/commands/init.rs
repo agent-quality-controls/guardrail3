@@ -1,16 +1,5 @@
 use std::path::Path;
 
-use crate::cli::InitArgs;
-
-#[allow(clippy::print_stdout)] // reason: CLI command — user-facing output
-#[allow(clippy::print_stderr)] // reason: CLI command — error output
-#[allow(clippy::disallowed_methods)] // reason: CLI command — exit codes and fs operations
-#[allow(clippy::too_many_lines)] // reason: sequential scaffolding steps are clearer as one function
-pub fn run(args: &InitArgs) {
-    run_rs(&args.profile, &args.path, args.force);
-    run_ts(&args.path, args.force);
-}
-
 /// Initialize Rust guardrail3 configuration: creates guardrail3.toml with [rust] + [local] sections,
 /// creates local/ directory with Rust override files, and scaffolds release config for service profile.
 #[allow(clippy::print_stdout)] // reason: CLI command — user-facing output

@@ -330,7 +330,7 @@ fn cli_init_service_profile() {
     let path = tmp.path().to_str().expect("non-utf8 path");
 
     let out = guardrail3()
-        .args(["init", "--profile", "service", path])
+        .args(["rs", "init", "--profile", "service", path])
         .output()
         .expect("failed to run");
 
@@ -377,7 +377,7 @@ fn cli_init_library_profile_differs_from_service() {
     let path = tmp.path().to_str().expect("non-utf8 path");
 
     let out = guardrail3()
-        .args(["init", "--profile", "library", path])
+        .args(["rs", "init", "--profile", "library", path])
         .output()
         .expect("failed to run");
 
@@ -407,12 +407,12 @@ fn cli_init_refuses_overwrite_without_force() {
     let path = tmp.path().to_str().expect("non-utf8 path");
 
     let _ = guardrail3()
-        .args(["init", "--profile", "service", path])
+        .args(["rs", "init", "--profile", "service", path])
         .output()
         .expect("failed to run");
 
     let out = guardrail3()
-        .args(["init", "--profile", "service", path])
+        .args(["rs", "init", "--profile", "service", path])
         .output()
         .expect("failed to run");
 
@@ -435,12 +435,12 @@ fn cli_init_force_overwrites() {
     let path = tmp.path().to_str().expect("non-utf8 path");
 
     let _ = guardrail3()
-        .args(["init", "--profile", "service", path])
+        .args(["rs", "init", "--profile", "service", path])
         .output()
         .expect("failed to run");
 
     let out = guardrail3()
-        .args(["init", "--profile", "library", "--force", path])
+        .args(["rs", "init", "--profile", "library", "--force", path])
         .output()
         .expect("failed to run");
 
@@ -464,7 +464,7 @@ fn cli_generate_produces_files() {
     let path = tmp.path().to_str().expect("non-utf8 path");
 
     let _ = guardrail3()
-        .args(["init", "--profile", "service", path])
+        .args(["rs", "init", "--profile", "service", path])
         .output()
         .expect("failed to run");
 
@@ -735,7 +735,7 @@ fn cli_check_after_generate_is_current() {
     let path = tmp.path().to_str().expect("non-utf8 path");
 
     let _ = guardrail3()
-        .args(["init", "--profile", "service", path])
+        .args(["rs", "init", "--profile", "service", path])
         .output()
         .expect("failed to run");
 
@@ -772,7 +772,7 @@ fn cli_diff_after_generate_no_changes() {
     let path = tmp.path().to_str().expect("non-utf8 path");
 
     let _ = guardrail3()
-        .args(["init", "--profile", "service", path])
+        .args(["rs", "init", "--profile", "service", path])
         .output()
         .expect("failed to run");
 
@@ -805,7 +805,7 @@ fn cli_check_detects_stale_after_tampering() {
     let path = tmp.path().to_str().expect("non-utf8 path");
 
     let _ = guardrail3()
-        .args(["init", "--profile", "service", path])
+        .args(["rs", "init", "--profile", "service", path])
         .output()
         .expect("failed to run");
     let _ = guardrail3()
@@ -839,7 +839,7 @@ fn cli_diff_shows_diff_after_tampering() {
     let path = tmp.path().to_str().expect("non-utf8 path");
 
     let _ = guardrail3()
-        .args(["init", "--profile", "service", path])
+        .args(["rs", "init", "--profile", "service", path])
         .output()
         .expect("failed to run");
     let _ = guardrail3()
@@ -875,7 +875,7 @@ fn cli_diff_shows_new_file_when_missing() {
     let path = tmp.path().to_str().expect("non-utf8 path");
 
     let _ = guardrail3()
-        .args(["init", "--profile", "service", path])
+        .args(["rs", "init", "--profile", "service", path])
         .output()
         .expect("failed to run");
 
