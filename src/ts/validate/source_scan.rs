@@ -2,6 +2,7 @@ use std::path::Path;
 
 use walkdir::WalkDir;
 
+use super::ast_helpers::{self, CommentInfo};
 use crate::report::types::{CheckResult, Severity};
 
 pub fn check(path: &Path, scoped_files: Option<&[String]>) -> Vec<CheckResult> {
@@ -83,8 +84,109 @@ fn collect_ts_files(root: &Path) -> Vec<String> {
     files
 }
 
-// T23-T26: eslint-disable checks
+/// Determine whether a file path refers to a TSX file.
+#[allow(clippy::case_sensitive_file_extension_comparisons)] // reason: only checking .tsx extension
+fn is_tsx_path(path: &Path) -> bool {
+    path.to_string_lossy().ends_with(".tsx")
+}
+
+// T23-T26: eslint-disable checks (tree-sitter with grep fallback)
 fn check_eslint_disable(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
+    match ast_helpers::parse_ts_file(content, is_tsx_path(path)) {
+        Some(tree) => {
+            let comments = ast_helpers::find_comments(&tree, content);
+            check_eslint_disable_from_comments(path, &comments, results);
+        }
+        None => check_eslint_disable_grep(path, content, results),
+    }
+}
+
+/// Tree-sitter path: only inspect actual comment nodes for eslint-disable patterns.
+fn check_eslint_disable_from_comments(
+    path: &Path,
+    comments: &[CommentInfo],
+    results: &mut Vec<CheckResult>,
+) {
+    for comment in comments {
+        let text = comment.text.trim();
+        let line_number = comment.line;
+
+        // Block-level eslint-disable (T23/T24)
+        if text.contains("eslint-disable")
+            && !text.contains("eslint-disable-next-line")
+            && !text.contains("eslint-disable-line")
+        {
+            if text.contains("-- ") {
+                results.push(CheckResult {
+                    id: "T24".to_owned(),
+                    severity: Severity::Info,
+                    title: "eslint-disable with reason".to_owned(),
+                    message: text.to_owned(),
+                    file: Some(path.display().to_string()),
+                    line: Some(line_number),
+                });
+            } else {
+                results.push(CheckResult {
+                    id: "T23".to_owned(),
+                    severity: Severity::Error,
+                    title: "eslint-disable without reason".to_owned(),
+                    message: format!("eslint-disable missing `-- ` reason: {text}"),
+                    file: Some(path.display().to_string()),
+                    line: Some(line_number),
+                });
+            }
+        }
+
+        // eslint-disable-next-line (T25/T26)
+        if text.contains("eslint-disable-next-line") {
+            if text.contains("-- ") {
+                results.push(CheckResult {
+                    id: "T26".to_owned(),
+                    severity: Severity::Info,
+                    title: "eslint-disable-next-line with reason".to_owned(),
+                    message: text.to_owned(),
+                    file: Some(path.display().to_string()),
+                    line: Some(line_number),
+                });
+            } else {
+                results.push(CheckResult {
+                    id: "T25".to_owned(),
+                    severity: Severity::Error,
+                    title: "eslint-disable-next-line without reason".to_owned(),
+                    message: format!("Missing `-- ` reason: {text}"),
+                    file: Some(path.display().to_string()),
+                    line: Some(line_number),
+                });
+            }
+        }
+
+        // eslint-disable-line (T25/T26 — inline suppression)
+        if text.contains("eslint-disable-line") && !text.contains("eslint-disable-line-") {
+            if text.contains("-- ") {
+                results.push(CheckResult {
+                    id: "T26".to_owned(),
+                    severity: Severity::Info,
+                    title: "eslint-disable-line with reason".to_owned(),
+                    message: text.to_owned(),
+                    file: Some(path.display().to_string()),
+                    line: Some(line_number),
+                });
+            } else {
+                results.push(CheckResult {
+                    id: "T25".to_owned(),
+                    severity: Severity::Error,
+                    title: "eslint-disable-line without reason".to_owned(),
+                    message: format!("Missing `-- ` reason: {text}"),
+                    file: Some(path.display().to_string()),
+                    line: Some(line_number),
+                });
+            }
+        }
+    }
+}
+
+/// Grep fallback: scan all lines (used when tree-sitter parse fails).
+fn check_eslint_disable_grep(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
     for (line_num, line) in content.lines().enumerate() {
         let trimmed = line.trim();
         let line_number = line_num.saturating_add(1);
@@ -95,7 +197,6 @@ fn check_eslint_disable(path: &Path, content: &str, results: &mut Vec<CheckResul
             && !trimmed.contains("eslint-disable-line")
         {
             if trimmed.contains("-- ") {
-                // T24: with reason
                 results.push(CheckResult {
                     id: "T24".to_owned(),
                     severity: Severity::Info,
@@ -105,7 +206,6 @@ fn check_eslint_disable(path: &Path, content: &str, results: &mut Vec<CheckResul
                     line: Some(line_number),
                 });
             } else {
-                // T23: without reason
                 results.push(CheckResult {
                     id: "T23".to_owned(),
                     severity: Severity::Error,
@@ -120,7 +220,6 @@ fn check_eslint_disable(path: &Path, content: &str, results: &mut Vec<CheckResul
         // eslint-disable-next-line (T25/T26)
         if trimmed.contains("eslint-disable-next-line") {
             if trimmed.contains("-- ") {
-                // T26: with reason
                 results.push(CheckResult {
                     id: "T26".to_owned(),
                     severity: Severity::Info,
@@ -130,7 +229,6 @@ fn check_eslint_disable(path: &Path, content: &str, results: &mut Vec<CheckResul
                     line: Some(line_number),
                 });
             } else {
-                // T25: without reason
                 results.push(CheckResult {
                     id: "T25".to_owned(),
                     severity: Severity::Error,
@@ -145,7 +243,6 @@ fn check_eslint_disable(path: &Path, content: &str, results: &mut Vec<CheckResul
         // eslint-disable-line (T25/T26 — inline suppression)
         if trimmed.contains("eslint-disable-line") && !trimmed.contains("eslint-disable-line-") {
             if trimmed.contains("-- ") {
-                // T26: with reason
                 results.push(CheckResult {
                     id: "T26".to_owned(),
                     severity: Severity::Info,
@@ -155,7 +252,6 @@ fn check_eslint_disable(path: &Path, content: &str, results: &mut Vec<CheckResul
                     line: Some(line_number),
                 });
             } else {
-                // T25: without reason
                 results.push(CheckResult {
                     id: "T25".to_owned(),
                     severity: Severity::Error,
@@ -169,8 +265,70 @@ fn check_eslint_disable(path: &Path, content: &str, results: &mut Vec<CheckResul
     }
 }
 
-// T27-T29: @ts-ignore / @ts-expect-error
+// T27-T29: @ts-ignore / @ts-expect-error (tree-sitter with grep fallback)
 fn check_ts_ignore(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
+    match ast_helpers::parse_ts_file(content, is_tsx_path(path)) {
+        Some(tree) => {
+            let comments = ast_helpers::find_comments(&tree, content);
+            check_ts_ignore_from_comments(path, &comments, results);
+        }
+        None => check_ts_ignore_grep(path, content, results),
+    }
+}
+
+/// Tree-sitter path: only inspect actual comment nodes for ts-ignore/ts-expect-error.
+fn check_ts_ignore_from_comments(
+    path: &Path,
+    comments: &[CommentInfo],
+    results: &mut Vec<CheckResult>,
+) {
+    for comment in comments {
+        let text = comment.text.trim();
+        let line_number = comment.line;
+
+        // T27: @ts-ignore
+        if text.contains("@ts-ignore") {
+            results.push(CheckResult {
+                id: "T27".to_owned(),
+                severity: Severity::Error,
+                title: "@ts-ignore usage".to_owned(),
+                message: format!("Use @ts-expect-error instead: {text}"),
+                file: Some(path.display().to_string()),
+                line: Some(line_number),
+            });
+        }
+
+        // T28/T29: @ts-expect-error
+        if text.contains("@ts-expect-error") {
+            if let Some(pos) = text.find("@ts-expect-error") {
+                #[allow(clippy::string_slice)] // reason: @ts-expect-error is ASCII, byte offset + 16 is safe
+                let after = text.get(pos.saturating_add(16)..).unwrap_or("").trim();
+                if after.is_empty() || after == "*/" {
+                    results.push(CheckResult {
+                        id: "T28".to_owned(),
+                        severity: Severity::Warn,
+                        title: "@ts-expect-error without explanation".to_owned(),
+                        message: text.to_owned(),
+                        file: Some(path.display().to_string()),
+                        line: Some(line_number),
+                    });
+                } else {
+                    results.push(CheckResult {
+                        id: "T29".to_owned(),
+                        severity: Severity::Info,
+                        title: "@ts-expect-error with explanation".to_owned(),
+                        message: text.to_owned(),
+                        file: Some(path.display().to_string()),
+                        line: Some(line_number),
+                    });
+                }
+            }
+        }
+    }
+}
+
+/// Grep fallback: scan all lines (used when tree-sitter parse fails).
+fn check_ts_ignore_grep(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
     for (line_num, line) in content.lines().enumerate() {
         let trimmed = line.trim();
         let line_number = line_num.saturating_add(1);
@@ -189,12 +347,10 @@ fn check_ts_ignore(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
 
         // T28/T29: @ts-expect-error
         if trimmed.contains("@ts-expect-error") {
-            // Check if there's text after @ts-expect-error
             if let Some(pos) = trimmed.find("@ts-expect-error") {
-                #[allow(clippy::string_slice)] // reason: ts-expect-error ASCII parsing
+                #[allow(clippy::string_slice)] // reason: @ts-expect-error is ASCII, byte offset + 16 is safe
                 let after = trimmed[pos.saturating_add(16)..].trim();
                 if after.is_empty() || after == "*/" {
-                    // T28: without explanation
                     results.push(CheckResult {
                         id: "T28".to_owned(),
                         severity: Severity::Warn,
@@ -204,7 +360,6 @@ fn check_ts_ignore(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
                         line: Some(line_number),
                     });
                 } else {
-                    // T29: with explanation
                     results.push(CheckResult {
                         id: "T29".to_owned(),
                         severity: Severity::Info,
@@ -219,7 +374,7 @@ fn check_ts_ignore(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
     }
 }
 
-// T30: process.env direct access
+// T30: process.env direct access (tree-sitter with grep fallback)
 fn check_process_env(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
     let file_name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
 
@@ -231,6 +386,60 @@ fn check_process_env(path: &Path, content: &str, results: &mut Vec<CheckResult>)
         return;
     }
 
+    let is_tsx = is_tsx_path(path);
+    match ast_helpers::parse_ts_file(content, is_tsx) {
+        Some(tree) => check_process_env_ast(path, content, &tree, results),
+        None => check_process_env_grep(path, content, results),
+    }
+}
+
+/// Tree-sitter path: find `process.env` via AST member-expression nodes.
+fn check_process_env_ast(
+    path: &Path,
+    content: &str,
+    tree: &tree_sitter::Tree,
+    results: &mut Vec<CheckResult>,
+) {
+    let lines: Vec<&str> = content.lines().collect();
+    let hit_lines = ast_helpers::find_process_env(tree, content);
+
+    for line_number in hit_lines {
+        let line_idx = line_number.saturating_sub(1);
+        let trimmed = lines.get(line_idx).unwrap_or(&"").trim();
+
+        // Check if the previous line contains eslint-disable-next-line
+        let prev_line = if line_idx > 0 {
+            lines.get(line_idx.saturating_sub(1))
+        } else {
+            None
+        };
+        let is_suppressed = prev_line.is_some_and(|pl| pl.contains("eslint-disable-next-line"));
+
+        let severity = if is_suppressed {
+            Severity::Info
+        } else {
+            Severity::Error
+        };
+
+        let message = if is_suppressed {
+            format!("ESLint-suppressed process.env access: {trimmed}")
+        } else {
+            format!("Use env() import instead: {trimmed}")
+        };
+
+        results.push(CheckResult {
+            id: "T30".to_owned(),
+            severity,
+            title: "Direct process.env access".to_owned(),
+            message,
+            file: Some(path.display().to_string()),
+            line: Some(line_number),
+        });
+    }
+}
+
+/// Grep fallback for T30: scan lines for process.env (used when tree-sitter parse fails).
+fn check_process_env_grep(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
     let lines: Vec<&str> = content.lines().collect();
     for (line_num, line) in lines.iter().enumerate() {
         let trimmed = line.trim();
@@ -274,8 +483,41 @@ fn check_process_env(path: &Path, content: &str, results: &mut Vec<CheckResult>)
     }
 }
 
-// T31: `as any` / `: any` type assertions
+// T31: `as any` / `: any` type assertions (tree-sitter with grep fallback)
 fn check_any_types(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
+    let is_tsx = is_tsx_path(path);
+    match ast_helpers::parse_ts_file(content, is_tsx) {
+        Some(tree) => check_any_types_ast(path, content, &tree, results),
+        None => check_any_types_grep(path, content, results),
+    }
+}
+
+/// Tree-sitter path: find `: any` and `as any` via AST type annotation / `as_expression` nodes.
+fn check_any_types_ast(
+    path: &Path,
+    content: &str,
+    tree: &tree_sitter::Tree,
+    results: &mut Vec<CheckResult>,
+) {
+    let lines: Vec<&str> = content.lines().collect();
+    let hit_lines = ast_helpers::find_any_types(tree, content);
+
+    for line_number in hit_lines {
+        let line_idx = line_number.saturating_sub(1);
+        let trimmed = lines.get(line_idx).unwrap_or(&"").trim();
+        results.push(CheckResult {
+            id: "T31".to_owned(),
+            severity: Severity::Info,
+            title: "any type usage".to_owned(),
+            message: trimmed.to_owned(),
+            file: Some(path.display().to_string()),
+            line: Some(line_number),
+        });
+    }
+}
+
+/// Grep fallback for T31: scan lines for `as any` / `: any` (used when tree-sitter parse fails).
+fn check_any_types_grep(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
     for (line_num, line) in content.lines().enumerate() {
         let trimmed = line.trim();
         // Skip comment lines

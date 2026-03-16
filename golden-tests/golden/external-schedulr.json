@@ -1,0 +1,3121 @@
+{
+  "project": ".",
+  "sections": [
+    {
+      "name": "Config files",
+      "results": [
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R1",
+          "line": null,
+          "message": "Found at workspace root",
+          "severity": "info",
+          "title": "clippy.toml exists"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/inbound/api/clippy.toml",
+          "id": "R2",
+          "line": null,
+          "message": "Found for crates/adapters/inbound/api",
+          "severity": "info",
+          "title": "Per-crate clippy.toml"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/outbound/db/clippy.toml",
+          "id": "R2",
+          "line": null,
+          "message": "Found for crates/adapters/outbound/db",
+          "severity": "info",
+          "title": "Per-crate clippy.toml"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/outbound/subprocess/clippy.toml",
+          "id": "R2",
+          "line": null,
+          "message": "Found for crates/adapters/outbound/subprocess",
+          "severity": "info",
+          "title": "Per-crate clippy.toml"
+        },
+        {
+          "file": "./apps/backend/crates/app/commands/clippy.toml",
+          "id": "R2",
+          "line": null,
+          "message": "Found for crates/app/commands",
+          "severity": "info",
+          "title": "Per-crate clippy.toml"
+        },
+        {
+          "file": "./apps/backend/crates/domain/types/clippy.toml",
+          "id": "R2",
+          "line": null,
+          "message": "Found for crates/domain/types",
+          "severity": "info",
+          "title": "Per-crate clippy.toml"
+        },
+        {
+          "file": "./apps/backend/crates/ports/outbound/repo/clippy.toml",
+          "id": "R2",
+          "line": null,
+          "message": "Found for crates/ports/outbound/repo",
+          "severity": "info",
+          "title": "Per-crate clippy.toml"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/inbound/api/clippy.toml",
+          "id": "R2",
+          "line": null,
+          "message": "No LazyLock/OnceLock/once_cell bans in per-crate clippy.toml",
+          "severity": "info",
+          "title": "crates/adapters/inbound/api: no global-state type bans"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/outbound/db/clippy.toml",
+          "id": "R2",
+          "line": null,
+          "message": "Bans: std::sync::LazyLock, std::sync::OnceLock, once_cell::sync::OnceCell, once_cell::sync::Lazy",
+          "severity": "info",
+          "title": "crates/adapters/outbound/db: global-state type bans present"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/outbound/subprocess/clippy.toml",
+          "id": "R2",
+          "line": null,
+          "message": "Bans: std::sync::LazyLock, std::sync::OnceLock, once_cell::sync::OnceCell, once_cell::sync::Lazy",
+          "severity": "info",
+          "title": "crates/adapters/outbound/subprocess: global-state type bans present"
+        },
+        {
+          "file": "./apps/backend/crates/app/commands/clippy.toml",
+          "id": "R2",
+          "line": null,
+          "message": "Bans: std::sync::LazyLock, std::sync::OnceLock, once_cell::sync::OnceCell, once_cell::sync::Lazy",
+          "severity": "info",
+          "title": "crates/app/commands: global-state type bans present"
+        },
+        {
+          "file": "./apps/backend/crates/domain/types/clippy.toml",
+          "id": "R2",
+          "line": null,
+          "message": "Bans: std::sync::LazyLock, std::sync::OnceLock, once_cell::sync::OnceCell, once_cell::sync::Lazy",
+          "severity": "info",
+          "title": "crates/domain/types: global-state type bans present"
+        },
+        {
+          "file": "./apps/backend/crates/ports/outbound/repo/clippy.toml",
+          "id": "R2",
+          "line": null,
+          "message": "Bans: std::sync::LazyLock, std::sync::OnceLock, once_cell::sync::OnceCell, once_cell::sync::Lazy",
+          "severity": "info",
+          "title": "crates/ports/outbound/repo: global-state type bans present"
+        },
+        {
+          "file": "./apps/backend/rustfmt.toml",
+          "id": "R21",
+          "line": null,
+          "message": "Found at workspace root",
+          "severity": "info",
+          "title": "rustfmt.toml exists"
+        },
+        {
+          "file": "./apps/backend/rust-toolchain.toml",
+          "id": "R24",
+          "line": null,
+          "message": "Found at workspace root",
+          "severity": "info",
+          "title": "rust-toolchain.toml exists"
+        },
+        {
+          "file": "./apps/backend/rust-toolchain.toml",
+          "id": "R25",
+          "line": null,
+          "message": "clippy in components list",
+          "severity": "info",
+          "title": "Component clippy present"
+        },
+        {
+          "file": "./apps/backend/rust-toolchain.toml",
+          "id": "R25",
+          "line": null,
+          "message": "rustfmt in components list",
+          "severity": "info",
+          "title": "Component rustfmt present"
+        },
+        {
+          "file": "./apps/backend/rust-toolchain.toml",
+          "id": "R25",
+          "line": null,
+          "message": "channel = \"stable\"",
+          "severity": "info",
+          "title": "Toolchain channel correct"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R3",
+          "line": null,
+          "message": "cognitive-complexity-threshold = 15",
+          "severity": "info",
+          "title": "cognitive-complexity-threshold correct"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R3",
+          "line": null,
+          "message": "max-struct-bools = 3",
+          "severity": "info",
+          "title": "max-struct-bools correct"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R3",
+          "line": null,
+          "message": "too-many-arguments-threshold = 7",
+          "severity": "info",
+          "title": "too-many-arguments-threshold correct"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R3",
+          "line": null,
+          "message": "too-many-lines-threshold = 75",
+          "severity": "info",
+          "title": "too-many-lines-threshold correct"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R3",
+          "line": null,
+          "message": "type-complexity-threshold = 75",
+          "severity": "info",
+          "title": "type-complexity-threshold correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R55",
+          "line": null,
+          "message": "edition = 2024, rust-version = 1.85",
+          "severity": "info",
+          "title": "Workspace metadata"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R56",
+          "line": null,
+          "message": "publish = false",
+          "severity": "info",
+          "title": "Publish status"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R57",
+          "line": null,
+          "message": "codegen-units = 1, lto = \"thin\", opt-level = 3, panic = \"abort\", strip = true",
+          "severity": "info",
+          "title": "Release profile"
+        }
+      ]
+    },
+    {
+      "name": "Clippy ban coverage",
+      "results": [
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "Expected ban for reqwest::Response::json",
+          "severity": "error",
+          "title": "Missing method ban"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "Expected ban for serde_json::from_reader",
+          "severity": "error",
+          "title": "Missing method ban"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "Expected ban for serde_json::from_slice",
+          "severity": "error",
+          "title": "Missing method ban"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "Expected ban for serde_json::from_str",
+          "severity": "error",
+          "title": "Missing method ban"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "Expected ban for serde_json::from_value",
+          "severity": "error",
+          "title": "Missing method ban"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "Expected ban for serde_yaml::from_reader",
+          "severity": "error",
+          "title": "Missing method ban"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "Expected ban for serde_yaml::from_str",
+          "severity": "error",
+          "title": "Missing method ban"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "Expected ban for toml::from_str",
+          "severity": "error",
+          "title": "Missing method ban"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "reqwest::Client::builder",
+          "severity": "info",
+          "title": "method ban present"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "reqwest::Client::new",
+          "severity": "info",
+          "title": "method ban present"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "std::env::remove_var",
+          "severity": "info",
+          "title": "method ban present"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "std::env::set_var",
+          "severity": "info",
+          "title": "method ban present"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "std::env::var",
+          "severity": "info",
+          "title": "method ban present"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "std::env::var_os",
+          "severity": "info",
+          "title": "method ban present"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "std::env::vars",
+          "severity": "info",
+          "title": "method ban present"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "std::fs::canonicalize",
+          "severity": "info",
+          "title": "method ban present"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "std::fs::copy",
+          "severity": "info",
+          "title": "method ban present"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "std::fs::create_dir_all",
+          "severity": "info",
+          "title": "method ban present"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "std::fs::hard_link",
+          "severity": "info",
+          "title": "method ban present"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "std::fs::metadata",
+          "severity": "info",
+          "title": "method ban present"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "std::fs::read",
+          "severity": "info",
+          "title": "method ban present"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "std::fs::read_dir",
+          "severity": "info",
+          "title": "method ban present"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "std::fs::read_link",
+          "severity": "info",
+          "title": "method ban present"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "std::fs::read_to_string",
+          "severity": "info",
+          "title": "method ban present"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "std::fs::remove_dir_all",
+          "severity": "info",
+          "title": "method ban present"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "std::fs::remove_file",
+          "severity": "info",
+          "title": "method ban present"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "std::fs::rename",
+          "severity": "info",
+          "title": "method ban present"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "std::fs::set_permissions",
+          "severity": "info",
+          "title": "method ban present"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "std::fs::symlink_metadata",
+          "severity": "info",
+          "title": "method ban present"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "std::fs::write",
+          "severity": "info",
+          "title": "method ban present"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "std::process::Command::new",
+          "severity": "info",
+          "title": "method ban present"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "std::process::exit",
+          "severity": "info",
+          "title": "method ban present"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R4",
+          "line": null,
+          "message": "std::thread::sleep",
+          "severity": "info",
+          "title": "method ban present"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R5",
+          "line": null,
+          "message": "Expected ban for axum::Json",
+          "severity": "error",
+          "title": "Missing type ban"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R5",
+          "line": null,
+          "message": "Expected ban for axum::extract::Form",
+          "severity": "error",
+          "title": "Missing type ban"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R5",
+          "line": null,
+          "message": "Expected ban for axum::extract::Json",
+          "severity": "error",
+          "title": "Missing type ban"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R5",
+          "line": null,
+          "message": "Expected ban for axum::extract::Query",
+          "severity": "error",
+          "title": "Missing type ban"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R5",
+          "line": null,
+          "message": "std::collections::HashMap",
+          "severity": "info",
+          "title": "type ban present"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R5",
+          "line": null,
+          "message": "std::collections::HashSet",
+          "severity": "info",
+          "title": "type ban present"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R5",
+          "line": null,
+          "message": "std::fs::File",
+          "severity": "info",
+          "title": "type ban present"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R5",
+          "line": null,
+          "message": "std::sync::Mutex",
+          "severity": "info",
+          "title": "type ban present"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R5",
+          "line": null,
+          "message": "std::sync::RwLock",
+          "severity": "info",
+          "title": "type ban present"
+        }
+      ]
+    },
+    {
+      "name": "deny.toml audit",
+      "results": [
+        {
+          "file": "./apps/backend/deny.toml",
+          "id": "R10",
+          "line": null,
+          "message": "unmaintained = \"workspace\"",
+          "severity": "info",
+          "title": "unmaintained correct"
+        },
+        {
+          "file": "./apps/backend/deny.toml",
+          "id": "R11",
+          "line": null,
+          "message": "yanked = \"deny\" (expected \"warn\")",
+          "severity": "info",
+          "title": "yanked stricter than expected"
+        },
+        {
+          "file": "./apps/backend/deny.toml",
+          "id": "R14",
+          "line": null,
+          "message": "Allowed: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, Unicode-DFS-2016, Unicode-3.0, Zlib, CC0-1.0, OpenSSL, BSL-1.0, MPL-2.0, CDLA-Permissive-2.0",
+          "severity": "info",
+          "title": "License allow list present"
+        },
+        {
+          "file": "./apps/backend/deny.toml",
+          "id": "R16",
+          "line": null,
+          "message": "unknown-git = \"deny\"",
+          "severity": "info",
+          "title": "unknown-git correct"
+        },
+        {
+          "file": "./apps/backend/deny.toml",
+          "id": "R16",
+          "line": null,
+          "message": "unknown-registry = \"deny\"",
+          "severity": "info",
+          "title": "unknown-registry correct"
+        },
+        {
+          "file": "./apps/backend/deny.toml",
+          "id": "R17",
+          "line": null,
+          "message": "[[bans.features]] denies tokio/full",
+          "severity": "info",
+          "title": "tokio full feature banned"
+        },
+        {
+          "file": "./apps/backend/deny.toml",
+          "id": "R19",
+          "line": null,
+          "message": "windows-sys 0.60.2 — socket2 lags behind other crates on windows-sys version",
+          "severity": "info",
+          "title": "Skip entry"
+        },
+        {
+          "file": "./apps/backend/deny.toml",
+          "id": "R8",
+          "line": null,
+          "message": "Found at workspace root",
+          "severity": "info",
+          "title": "deny.toml exists"
+        }
+      ]
+    },
+    {
+      "name": "Cargo workspace lints",
+      "results": [
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "all = deny (priority -1)",
+          "severity": "info",
+          "title": "all correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "arithmetic_side_effects = deny",
+          "severity": "info",
+          "title": "arithmetic_side_effects correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "as_conversions = deny",
+          "severity": "info",
+          "title": "as_conversions correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "cargo = deny (priority -1)",
+          "severity": "info",
+          "title": "cargo correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "dbg_macro = deny",
+          "severity": "info",
+          "title": "dbg_macro correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "dead_code = deny",
+          "severity": "info",
+          "title": "dead_code correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "disallowed_methods = deny",
+          "severity": "info",
+          "title": "disallowed_methods correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "disallowed_types = deny",
+          "severity": "info",
+          "title": "disallowed_types correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "expect_used = deny",
+          "severity": "info",
+          "title": "expect_used correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "float_cmp = deny",
+          "severity": "info",
+          "title": "float_cmp correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "implicit_clone = deny",
+          "severity": "info",
+          "title": "implicit_clone correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "indexing_slicing = deny",
+          "severity": "info",
+          "title": "indexing_slicing correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "large_futures = deny",
+          "severity": "info",
+          "title": "large_futures correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "large_stack_arrays = deny",
+          "severity": "info",
+          "title": "large_stack_arrays correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "lossy_float_literal = deny",
+          "severity": "info",
+          "title": "lossy_float_literal correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "map_unwrap_or = deny",
+          "severity": "info",
+          "title": "map_unwrap_or correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "missing_assert_message = deny",
+          "severity": "info",
+          "title": "missing_assert_message correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "needless_pass_by_value = deny",
+          "severity": "info",
+          "title": "needless_pass_by_value correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "nursery = deny (priority -1)",
+          "severity": "info",
+          "title": "nursery correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "panic = deny",
+          "severity": "info",
+          "title": "panic correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "partial_pub_fields = deny",
+          "severity": "info",
+          "title": "partial_pub_fields correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "pedantic = deny (priority -1)",
+          "severity": "info",
+          "title": "pedantic correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "print_stderr = deny",
+          "severity": "info",
+          "title": "print_stderr correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "print_stdout = deny",
+          "severity": "info",
+          "title": "print_stdout correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "redundant_closure_for_method_calls = deny",
+          "severity": "info",
+          "title": "redundant_closure_for_method_calls correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "redundant_else = deny",
+          "severity": "info",
+          "title": "redundant_else correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "rest_pat_in_fully_bound_structs = deny",
+          "severity": "info",
+          "title": "rest_pat_in_fully_bound_structs correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "semicolon_if_nothing_returned = deny",
+          "severity": "info",
+          "title": "semicolon_if_nothing_returned correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "shadow_unrelated = deny",
+          "severity": "info",
+          "title": "shadow_unrelated correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "str_to_string = deny",
+          "severity": "info",
+          "title": "str_to_string correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "string_slice = deny",
+          "severity": "info",
+          "title": "string_slice correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "todo = deny",
+          "severity": "info",
+          "title": "todo correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "unimplemented = deny",
+          "severity": "info",
+          "title": "unimplemented correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "unsafe_code = forbid",
+          "severity": "info",
+          "title": "unsafe_code correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "unused_crate_dependencies = deny",
+          "severity": "info",
+          "title": "unused_crate_dependencies correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "unused_results = deny",
+          "severity": "info",
+          "title": "unused_results correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "unwrap_used = deny",
+          "severity": "info",
+          "title": "unwrap_used correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "verbose_file_reads = deny",
+          "severity": "info",
+          "title": "verbose_file_reads correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "warnings = deny",
+          "severity": "info",
+          "title": "warnings correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "wildcard_enum_match_arm = deny",
+          "severity": "info",
+          "title": "wildcard_enum_match_arm correct"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R28",
+          "line": null,
+          "message": "empty_line_after_doc_comments = allow",
+          "severity": "info",
+          "title": "Allow deviation: empty_line_after_doc_comments"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R28",
+          "line": null,
+          "message": "missing_docs_in_private_items = allow",
+          "severity": "info",
+          "title": "Allow deviation: missing_docs_in_private_items"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R28",
+          "line": null,
+          "message": "module_name_repetitions = allow",
+          "severity": "info",
+          "title": "Allow deviation: module_name_repetitions"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R28",
+          "line": null,
+          "message": "multiple_crate_versions = allow",
+          "severity": "info",
+          "title": "Allow deviation: multiple_crate_versions"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R28",
+          "line": null,
+          "message": "must_use_candidate = allow",
+          "severity": "info",
+          "title": "Allow deviation: must_use_candidate"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R28",
+          "line": null,
+          "message": "option_if_let_else = allow",
+          "severity": "info",
+          "title": "Allow deviation: option_if_let_else"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R28",
+          "line": null,
+          "message": "ref_option_ref = allow",
+          "severity": "info",
+          "title": "Allow deviation: ref_option_ref"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R28",
+          "line": null,
+          "message": "single_match_else = allow",
+          "severity": "info",
+          "title": "Allow deviation: single_match_else"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R28",
+          "line": null,
+          "message": "trivially_copy_pass_by_ref = allow",
+          "severity": "info",
+          "title": "Allow deviation: trivially_copy_pass_by_ref"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/inbound/api/Cargo.toml",
+          "id": "R29",
+          "line": null,
+          "message": "crates/adapters/inbound/api: [lints] workspace = true",
+          "severity": "info",
+          "title": "Workspace lints inherited"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/outbound/db/Cargo.toml",
+          "id": "R29",
+          "line": null,
+          "message": "crates/adapters/outbound/db: [lints] workspace = true",
+          "severity": "info",
+          "title": "Workspace lints inherited"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/outbound/subprocess/Cargo.toml",
+          "id": "R29",
+          "line": null,
+          "message": "crates/adapters/outbound/subprocess: [lints] workspace = true",
+          "severity": "info",
+          "title": "Workspace lints inherited"
+        },
+        {
+          "file": "./apps/backend/crates/app/commands/Cargo.toml",
+          "id": "R29",
+          "line": null,
+          "message": "crates/app/commands: [lints] workspace = true",
+          "severity": "info",
+          "title": "Workspace lints inherited"
+        },
+        {
+          "file": "./apps/backend/crates/domain/types/Cargo.toml",
+          "id": "R29",
+          "line": null,
+          "message": "crates/domain/types: [lints] workspace = true",
+          "severity": "info",
+          "title": "Workspace lints inherited"
+        },
+        {
+          "file": "./apps/backend/crates/ports/outbound/repo/Cargo.toml",
+          "id": "R29",
+          "line": null,
+          "message": "crates/ports/outbound/repo: [lints] workspace = true",
+          "severity": "info",
+          "title": "Workspace lints inherited"
+        }
+      ]
+    },
+    {
+      "name": "Source code scan",
+      "results": [
+        {
+          "file": "./apps/backend/crates/adapters/inbound/api/src/main.rs",
+          "id": "R31",
+          "line": 2,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./apps/backend/crates/app/commands/src/execute.rs",
+          "id": "R33",
+          "line": 366,
+          "message": "clippy::arithmetic_side_effects — all values are bounded by calendar math",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/backend/crates/app/commands/src/execute.rs",
+          "id": "R33",
+          "line": 388,
+          "message": "clippy::arithmetic_side_effects — calendar algorithm with bounded values",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/outbound/db/src/circuit_breaker.rs",
+          "id": "R33",
+          "line": 57,
+          "message": "clippy::arithmetic_side_effects — f64 div of positive bounded counts",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/outbound/db/src/retry.rs",
+          "id": "R33",
+          "line": 43,
+          "message": "clippy::arithmetic_side_effects — f64 mul of Duration secs by bounded exponent",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/outbound/db/src/circuit_breaker.rs",
+          "id": "R33",
+          "line": 59,
+          "message": "clippy::arithmetic_side_effects — f64 mul of [0,1] by 100.0",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/backend/crates/app/commands/src/parser.rs",
+          "id": "R33",
+          "line": 177,
+          "message": "clippy::arithmetic_side_effects — f64 multiply for small duration values",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/inbound/api/src/main.rs",
+          "id": "R33",
+          "line": 28,
+          "message": "clippy::disallowed_methods — CLI must set exit code",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/inbound/api/src/cli.rs",
+          "id": "R33",
+          "line": 116,
+          "message": "clippy::disallowed_methods — CLI needs to read task YAML files from disk",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/inbound/api/src/main.rs",
+          "id": "R33",
+          "line": 58,
+          "message": "clippy::disallowed_methods — Startup: env var reading is confined to main()",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/inbound/api/src/main.rs",
+          "id": "R33",
+          "line": 80,
+          "message": "clippy::expect_used — Startup: binding failure is unrecoverable",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/inbound/api/src/main.rs",
+          "id": "R33",
+          "line": 87,
+          "message": "clippy::expect_used — Startup: server failure is unrecoverable",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/inbound/api/src/cli.rs",
+          "id": "R33",
+          "line": 66,
+          "message": "clippy::expect_used — Startup: tokio runtime creation failure is unrecoverable",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/inbound/api/src/main.rs",
+          "id": "R33",
+          "line": 38,
+          "message": "clippy::expect_used — Startup: tokio runtime creation failure is unrecoverable",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/inbound/api/src/cli.rs",
+          "id": "R33",
+          "line": 160,
+          "message": "clippy::print_stderr — CLI error: intentional user-facing error display",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/inbound/api/src/cli.rs",
+          "id": "R33",
+          "line": 167,
+          "message": "clippy::print_stderr — CLI error: intentional user-facing error display",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/inbound/api/src/cli.rs",
+          "id": "R33",
+          "line": 150,
+          "message": "clippy::print_stdout — CLI output: intentional user-facing display",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/inbound/api/src/cli.rs",
+          "id": "R33",
+          "line": 179,
+          "message": "clippy::print_stdout — CLI output: intentional user-facing display",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/inbound/api/src/cli.rs",
+          "id": "R33",
+          "line": 125,
+          "message": "clippy::too_many_arguments — CLI dispatch collects all flags",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/backend/crates/domain/types/src/duration_serde.rs",
+          "id": "R33",
+          "line": 15,
+          "message": "clippy::type_complexity — serde `with` protocol requires this exact signature",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/backend/crates/domain/types/src/duration_serde.rs",
+          "id": "R33",
+          "line": 25,
+          "message": "clippy::type_complexity — serde `with` protocol requires this exact signature",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/backend/crates/domain/types/src/duration_serde.rs",
+          "id": "R33",
+          "line": 41,
+          "message": "clippy::type_complexity — serde `with` protocol requires this exact signature",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/backend/crates/domain/types/src/duration_serde.rs",
+          "id": "R33",
+          "line": 57,
+          "message": "clippy::type_complexity — serde `with` protocol requires this exact signature",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/outbound/subprocess/src/lib.rs",
+          "id": "R33",
+          "line": 372,
+          "message": "clippy::unwrap_used — reason: test code, panics are acceptable",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/outbound/subprocess/src/lib.rs",
+          "id": "R33",
+          "line": 405,
+          "message": "clippy::unwrap_used — reason: test code, panics are acceptable",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/backend/crates/app/commands/src/execute.rs",
+          "id": "R39",
+          "line": null,
+          "message": "484 effective lines (warn at 400, max 500)",
+          "severity": "warn",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/inbound/api/src/main.rs",
+          "id": "R44",
+          "line": 83,
+          "message": ".expect(\"failed to bind TCP listener\");",
+          "severity": "warn",
+          "title": ".expect() usage"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/inbound/api/src/main.rs",
+          "id": "R44",
+          "line": 88,
+          "message": "axum::serve(listener, app).await.expect(\"server error\");",
+          "severity": "warn",
+          "title": ".expect() usage"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/inbound/api/src/cli.rs",
+          "id": "R44",
+          "line": 67,
+          "message": "let rt = tokio::runtime::Runtime::new().expect(\"failed to create tokio runtime\");",
+          "severity": "warn",
+          "title": ".expect() usage"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/inbound/api/src/main.rs",
+          "id": "R44",
+          "line": 39,
+          "message": "let rt = tokio::runtime::Runtime::new().expect(\"failed to create tokio runtime\");",
+          "severity": "warn",
+          "title": ".expect() usage"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/outbound/subprocess/src/lib.rs",
+          "id": "R44",
+          "line": 424,
+          "message": "let result = result.unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./apps/backend/CLAUDE.md",
+          "id": "R49",
+          "line": null,
+          "message": "Found at project root",
+          "severity": "info",
+          "title": "CLAUDE.md exists"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/inbound/api/src/cli.rs",
+          "id": "R58",
+          "line": 117,
+          "message": "Use centralized fs module instead of direct std::fs call: let content = std::fs::read_to_string(path);",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        }
+      ]
+    },
+    {
+      "name": "Dependency & tool checks",
+      "results": [
+        {
+          "file": null,
+          "id": "R45",
+          "line": null,
+          "message": "cargo-deny found on PATH",
+          "severity": "info",
+          "title": "cargo-deny installed"
+        },
+        {
+          "file": null,
+          "id": "R46",
+          "line": null,
+          "message": "cargo-machete found on PATH",
+          "severity": "info",
+          "title": "cargo-machete installed"
+        },
+        {
+          "file": null,
+          "id": "R47",
+          "line": null,
+          "message": "cargo-dupes found on PATH",
+          "severity": "info",
+          "title": "cargo-dupes installed"
+        },
+        {
+          "file": null,
+          "id": "R48",
+          "line": null,
+          "message": "gitleaks found on PATH",
+          "severity": "info",
+          "title": "gitleaks installed"
+        },
+        {
+          "file": "./apps/backend/Cargo.lock",
+          "id": "R50",
+          "line": null,
+          "message": "Cargo.lock is clean",
+          "severity": "info",
+          "title": "No banned crates in lockfile"
+        }
+      ]
+    },
+    {
+      "name": "Architecture checks",
+      "results": [
+        {
+          "file": "./apps/backend/crates/adapters/inbound/api/Cargo.toml",
+          "id": "R52",
+          "line": null,
+          "message": "depends on: commands, domain-types, state, subprocess",
+          "severity": "info",
+          "title": "api internal deps"
+        },
+        {
+          "file": "./apps/backend/crates/app/commands/Cargo.toml",
+          "id": "R52",
+          "line": null,
+          "message": "depends on: domain-types, repo",
+          "severity": "info",
+          "title": "commands internal deps"
+        },
+        {
+          "file": "./apps/backend/crates/ports/outbound/repo/Cargo.toml",
+          "id": "R52",
+          "line": null,
+          "message": "depends on: domain-types",
+          "severity": "info",
+          "title": "repo internal deps"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/outbound/db/Cargo.toml",
+          "id": "R52",
+          "line": null,
+          "message": "depends on: domain-types, repo",
+          "severity": "info",
+          "title": "state internal deps"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/outbound/subprocess/Cargo.toml",
+          "id": "R52",
+          "line": null,
+          "message": "depends on: domain-types, repo",
+          "severity": "info",
+          "title": "subprocess internal deps"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R53",
+          "line": null,
+          "message": "unsafe_code is forbidden (cannot be overridden per-crate)",
+          "severity": "info",
+          "title": "unsafe_code = forbid"
+        }
+      ]
+    },
+    {
+      "name": "Garde boundary validation",
+      "results": [
+        {
+          "file": null,
+          "id": "R-GARDE-01",
+          "line": null,
+          "message": "garde is not in [workspace.dependencies] or [dependencies]",
+          "severity": "info",
+          "title": "garde dependency missing"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R-GARDE-02",
+          "line": null,
+          "message": "Missing from disallowed-methods: serde_json::from_str, serde_json::from_slice, serde_json::from_value, serde_json::from_reader, toml::from_str, serde_yaml::from_str, serde_yaml::from_reader",
+          "severity": "warn",
+          "title": "Missing Garde serde method bans"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R-GARDE-03",
+          "line": null,
+          "message": "Missing from disallowed-types: axum::extract::Json, axum::Json, axum::extract::Query, axum::extract::Form",
+          "severity": "warn",
+          "title": "Missing Garde axum type bans"
+        },
+        {
+          "file": "./apps/backend/clippy.toml",
+          "id": "R-GARDE-04",
+          "line": null,
+          "message": "Missing from disallowed-methods: reqwest::Response::json",
+          "severity": "warn",
+          "title": "Missing Garde reqwest method bans"
+        },
+        {
+          "file": "./apps/backend",
+          "id": "R-GARDE-05",
+          "line": null,
+          "message": "0 structs derive Deserialize + Validate, 12 derive Deserialize without Validate",
+          "severity": "info",
+          "title": "Deserialize + Validate inventory"
+        }
+      ]
+    },
+    {
+      "name": "Test quality",
+      "results": [
+        {
+          "file": null,
+          "id": "R-TEST-01",
+          "line": null,
+          "message": "cargo-mutants found on PATH",
+          "severity": "info",
+          "title": "cargo-mutants installed"
+        },
+        {
+          "file": "./apps/backend/.cargo/mutants.toml",
+          "id": "R-TEST-02",
+          "line": null,
+          "message": "Create .cargo/mutants.toml to configure mutation testing",
+          "severity": "warn",
+          "title": ".cargo/mutants.toml missing"
+        },
+        {
+          "file": "./apps/backend/Cargo.toml",
+          "id": "R-TEST-03",
+          "line": null,
+          "message": "Add [profile.mutants] to Cargo.toml for faster mutation testing",
+          "severity": "info",
+          "title": "[profile.mutants] missing"
+        },
+        {
+          "file": null,
+          "id": "R-TEST-04",
+          "line": null,
+          "message": "At least one #[test] or #[tokio::test] found",
+          "severity": "info",
+          "title": "Tests exist"
+        },
+        {
+          "file": null,
+          "id": "R-TEST-05",
+          "line": null,
+          "message": "0 public functions, 22 test functions (ratio: 0%)",
+          "severity": "info",
+          "title": "Test coverage inventory"
+        },
+        {
+          "file": null,
+          "id": "R-TEST-06",
+          "line": null,
+          "message": "No tests/ directory with .rs files found",
+          "severity": "info",
+          "title": "No integration tests"
+        },
+        {
+          "file": null,
+          "id": "R-TEST-07",
+          "line": null,
+          "message": "No bare #[ignore] attributes found",
+          "severity": "info",
+          "title": "All #[ignore] have reasons"
+        },
+        {
+          "file": null,
+          "id": "R-TEST-08",
+          "line": null,
+          "message": "No mutation testing hook found in .claude/ or .git/hooks/pre-commit",
+          "severity": "info",
+          "title": "No mutation test hook"
+        }
+      ]
+    },
+    {
+      "name": "Release readiness",
+      "results": [
+        {
+          "file": null,
+          "id": "R-BIN-01",
+          "line": null,
+          "message": "No workflow building --release with action-gh-release",
+          "severity": "info",
+          "title": "api: no binary release workflow"
+        },
+        {
+          "file": null,
+          "id": "R-BIN-02",
+          "line": null,
+          "message": "No workflow references linux/x86_64/amd64/ubuntu",
+          "severity": "info",
+          "title": "api: no linux target in workflow"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/inbound/api/Cargo.toml",
+          "id": "R-BIN-03",
+          "line": null,
+          "message": "No [package.metadata.binstall] in Cargo.toml",
+          "severity": "info",
+          "title": "api: no binstall metadata"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/inbound/api/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml has [package].description",
+          "severity": "info",
+          "title": "api: description present"
+        },
+        {
+          "file": "./apps/backend/crates/app/commands/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml has [package].description",
+          "severity": "info",
+          "title": "commands: description present"
+        },
+        {
+          "file": "./apps/backend/crates/domain/types/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml has [package].description",
+          "severity": "info",
+          "title": "domain-types: description present"
+        },
+        {
+          "file": "./apps/backend/crates/ports/outbound/repo/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml has [package].description",
+          "severity": "info",
+          "title": "repo: description present"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/outbound/db/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml has [package].description",
+          "severity": "info",
+          "title": "state: description present"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/outbound/subprocess/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml has [package].description",
+          "severity": "info",
+          "title": "subprocess: description present"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/inbound/api/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml [package] has neither license nor license-file",
+          "severity": "error",
+          "title": "api: missing license"
+        },
+        {
+          "file": "./apps/backend/crates/app/commands/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml [package] has neither license nor license-file",
+          "severity": "error",
+          "title": "commands: missing license"
+        },
+        {
+          "file": "./apps/backend/crates/domain/types/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml [package] has neither license nor license-file",
+          "severity": "error",
+          "title": "domain-types: missing license"
+        },
+        {
+          "file": "./apps/backend/crates/ports/outbound/repo/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml [package] has neither license nor license-file",
+          "severity": "error",
+          "title": "repo: missing license"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/outbound/db/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml [package] has neither license nor license-file",
+          "severity": "error",
+          "title": "state: missing license"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/outbound/subprocess/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml [package] has neither license nor license-file",
+          "severity": "error",
+          "title": "subprocess: missing license"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/inbound/api/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml [package].repository is missing or empty",
+          "severity": "error",
+          "title": "api: missing repository"
+        },
+        {
+          "file": "./apps/backend/crates/app/commands/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml [package].repository is missing or empty",
+          "severity": "error",
+          "title": "commands: missing repository"
+        },
+        {
+          "file": "./apps/backend/crates/domain/types/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml [package].repository is missing or empty",
+          "severity": "error",
+          "title": "domain-types: missing repository"
+        },
+        {
+          "file": "./apps/backend/crates/ports/outbound/repo/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml [package].repository is missing or empty",
+          "severity": "error",
+          "title": "repo: missing repository"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/outbound/db/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml [package].repository is missing or empty",
+          "severity": "error",
+          "title": "state: missing repository"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/outbound/subprocess/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml [package].repository is missing or empty",
+          "severity": "error",
+          "title": "subprocess: missing repository"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/inbound/api/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "No readme field and no README.md at crate root",
+          "severity": "warn",
+          "title": "api: readme missing"
+        },
+        {
+          "file": "./apps/backend/crates/app/commands/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "No readme field and no README.md at crate root",
+          "severity": "warn",
+          "title": "commands: readme missing"
+        },
+        {
+          "file": "./apps/backend/crates/domain/types/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "No readme field and no README.md at crate root",
+          "severity": "warn",
+          "title": "domain-types: readme missing"
+        },
+        {
+          "file": "./apps/backend/crates/ports/outbound/repo/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "No readme field and no README.md at crate root",
+          "severity": "warn",
+          "title": "repo: readme missing"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/outbound/db/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "No readme field and no README.md at crate root",
+          "severity": "warn",
+          "title": "state: readme missing"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/outbound/subprocess/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "No readme field and no README.md at crate root",
+          "severity": "warn",
+          "title": "subprocess: readme missing"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/inbound/api/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "Cargo.toml [package].keywords is missing",
+          "severity": "warn",
+          "title": "api: keywords missing"
+        },
+        {
+          "file": "./apps/backend/crates/app/commands/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "Cargo.toml [package].keywords is missing",
+          "severity": "warn",
+          "title": "commands: keywords missing"
+        },
+        {
+          "file": "./apps/backend/crates/domain/types/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "Cargo.toml [package].keywords is missing",
+          "severity": "warn",
+          "title": "domain-types: keywords missing"
+        },
+        {
+          "file": "./apps/backend/crates/ports/outbound/repo/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "Cargo.toml [package].keywords is missing",
+          "severity": "warn",
+          "title": "repo: keywords missing"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/outbound/db/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "Cargo.toml [package].keywords is missing",
+          "severity": "warn",
+          "title": "state: keywords missing"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/outbound/subprocess/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "Cargo.toml [package].keywords is missing",
+          "severity": "warn",
+          "title": "subprocess: keywords missing"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/inbound/api/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml [package].categories is missing or empty",
+          "severity": "warn",
+          "title": "api: categories missing"
+        },
+        {
+          "file": "./apps/backend/crates/app/commands/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml [package].categories is missing or empty",
+          "severity": "warn",
+          "title": "commands: categories missing"
+        },
+        {
+          "file": "./apps/backend/crates/domain/types/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml [package].categories is missing or empty",
+          "severity": "warn",
+          "title": "domain-types: categories missing"
+        },
+        {
+          "file": "./apps/backend/crates/ports/outbound/repo/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml [package].categories is missing or empty",
+          "severity": "warn",
+          "title": "repo: categories missing"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/outbound/db/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml [package].categories is missing or empty",
+          "severity": "warn",
+          "title": "state: categories missing"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/outbound/subprocess/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml [package].categories is missing or empty",
+          "severity": "warn",
+          "title": "subprocess: categories missing"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/inbound/api/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "Cargo.toml [package].version is missing",
+          "severity": "error",
+          "title": "api: version missing"
+        },
+        {
+          "file": "./apps/backend/crates/app/commands/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "Cargo.toml [package].version is missing",
+          "severity": "error",
+          "title": "commands: version missing"
+        },
+        {
+          "file": "./apps/backend/crates/domain/types/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "Cargo.toml [package].version is missing",
+          "severity": "error",
+          "title": "domain-types: version missing"
+        },
+        {
+          "file": "./apps/backend/crates/ports/outbound/repo/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "Cargo.toml [package].version is missing",
+          "severity": "error",
+          "title": "repo: version missing"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/outbound/db/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "Cargo.toml [package].version is missing",
+          "severity": "error",
+          "title": "state: version missing"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/outbound/subprocess/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "Cargo.toml [package].version is missing",
+          "severity": "error",
+          "title": "subprocess: version missing"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/inbound/api/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "No path dependencies to non-publishable crates",
+          "severity": "info",
+          "title": "api: path deps OK"
+        },
+        {
+          "file": "./apps/backend/crates/app/commands/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "No path dependencies to non-publishable crates",
+          "severity": "info",
+          "title": "commands: path deps OK"
+        },
+        {
+          "file": "./apps/backend/crates/domain/types/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "No path dependencies to non-publishable crates",
+          "severity": "info",
+          "title": "domain-types: path deps OK"
+        },
+        {
+          "file": "./apps/backend/crates/ports/outbound/repo/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "No path dependencies to non-publishable crates",
+          "severity": "info",
+          "title": "repo: path deps OK"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/outbound/db/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "No path dependencies to non-publishable crates",
+          "severity": "info",
+          "title": "state: path deps OK"
+        },
+        {
+          "file": "./apps/backend/crates/adapters/outbound/subprocess/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "No path dependencies to non-publishable crates",
+          "severity": "info",
+          "title": "subprocess: path deps OK"
+        },
+        {
+          "file": null,
+          "id": "R-PUB-12",
+          "line": null,
+          "message": "6 publishable, 0 publish=false",
+          "severity": "info",
+          "title": "Crate inventory"
+        },
+        {
+          "file": "./apps/backend",
+          "id": "R-REL-01",
+          "line": null,
+          "message": "No LICENSE, LICENSE-MIT, LICENSE-APACHE, or LICENSE.md at repo root",
+          "severity": "error",
+          "title": "LICENSE file missing"
+        },
+        {
+          "file": "./apps/backend",
+          "id": "R-REL-02",
+          "line": null,
+          "message": "No release-plz.toml at repo root",
+          "severity": "warn",
+          "title": "release-plz.toml missing"
+        },
+        {
+          "file": "./apps/backend",
+          "id": "R-REL-04",
+          "line": null,
+          "message": "No cliff.toml found at project root",
+          "severity": "warn",
+          "title": "cliff.toml missing"
+        },
+        {
+          "file": null,
+          "id": "R-REL-05",
+          "line": null,
+          "message": "No .github/workflows/*.yml containing \"release-plz\"",
+          "severity": "warn",
+          "title": "No release workflow"
+        },
+        {
+          "file": null,
+          "id": "R-REL-06",
+          "line": null,
+          "message": "No workflow with \"cargo publish --dry-run\"",
+          "severity": "warn",
+          "title": "No publish dry-run in CI"
+        },
+        {
+          "file": null,
+          "id": "R-REL-07",
+          "line": null,
+          "message": "No workflow references CARGO_REGISTRY_TOKEN",
+          "severity": "warn",
+          "title": "No CARGO_REGISTRY_TOKEN in workflows"
+        },
+        {
+          "file": null,
+          "id": "R-REL-08",
+          "line": null,
+          "message": "Install with: cargo install cargo-semver-checks",
+          "severity": "warn",
+          "title": "cargo-semver-checks not installed"
+        }
+      ]
+    },
+    {
+      "name": "TS config files",
+      "results": [
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T1",
+          "line": null,
+          "message": "Found at project root",
+          "severity": "info",
+          "title": "eslint.config.mjs exists"
+        },
+        {
+          "file": "./.npmrc",
+          "id": "T11",
+          "line": null,
+          "message": "Found at project root",
+          "severity": "info",
+          "title": ".npmrc exists"
+        },
+        {
+          "file": "./package.json",
+          "id": "T18",
+          "line": null,
+          "message": "packageManager = \"pnpm@10.32.0\"",
+          "severity": "info",
+          "title": "packageManager field present"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T19",
+          "line": null,
+          "message": "Found at project root",
+          "severity": "info",
+          "title": ".jscpd.json exists"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T2",
+          "line": null,
+          "message": "max-lines with value 300",
+          "severity": "info",
+          "title": "max-lines configured"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T20",
+          "line": null,
+          "message": "threshold = 0",
+          "severity": "info",
+          "title": "jscpd threshold correct"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/*.generated.*",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/.claude/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/.next/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/.plans/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/.worklogs/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/__mocks__/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/__tests__/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/components/pro-blocks/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/components/ui/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/coverage/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/dist/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/drizzle/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/golden/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/lib/utils.ts",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/node_modules/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/target/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/test-data/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./.jscpd.json",
+          "id": "T22",
+          "line": null,
+          "message": "**/test/**",
+          "severity": "info",
+          "title": "jscpd ignore pattern"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T3",
+          "line": null,
+          "message": "max-lines-per-function with value 100",
+          "severity": "info",
+          "title": "max-lines-per-function configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T4",
+          "line": null,
+          "message": "complexity with value 25",
+          "severity": "info",
+          "title": "complexity configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T40",
+          "line": null,
+          "message": "no-floating-promises found in ESLint config",
+          "severity": "info",
+          "title": "no-floating-promises configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T41",
+          "line": null,
+          "message": "no-explicit-any found in ESLint config",
+          "severity": "info",
+          "title": "no-explicit-any configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T42",
+          "line": null,
+          "message": "no-console found in ESLint config",
+          "severity": "info",
+          "title": "no-console configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T43",
+          "line": null,
+          "message": "eqeqeq found in ESLint config",
+          "severity": "info",
+          "title": "eqeqeq configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T44",
+          "line": null,
+          "message": "no-restricted-globals found in ESLint config",
+          "severity": "info",
+          "title": "no-restricted-globals configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T45",
+          "line": null,
+          "message": "no-cycle found in ESLint config",
+          "severity": "info",
+          "title": "no-cycle configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T46",
+          "line": null,
+          "message": "max-dependencies found in ESLint config",
+          "severity": "info",
+          "title": "max-dependencies configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T47",
+          "line": null,
+          "message": "explicit-function-return-type found in ESLint config",
+          "severity": "info",
+          "title": "explicit-function-return-type configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T48",
+          "line": null,
+          "message": "strict-boolean-expressions found in ESLint config",
+          "severity": "info",
+          "title": "strict-boolean-expressions configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T49",
+          "line": 246,
+          "message": "// Test file overrides — relax quality rules for tests",
+          "severity": "info",
+          "title": "Test file relaxation"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T49",
+          "line": 248,
+          "message": "files: [\"**/*.test.ts\", \"**/*.spec.ts\", \"**/__tests__/**\"],",
+          "severity": "info",
+          "title": "Test file relaxation"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T5",
+          "line": null,
+          "message": "no-restricted-imports rule found in ESLint config",
+          "severity": "info",
+          "title": "no-restricted-imports configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T50",
+          "line": null,
+          "message": "withBody/withRoute patterns found",
+          "severity": "info",
+          "title": "Route wrapper enforcement configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T51",
+          "line": null,
+          "message": "process.env ban found in ESLint config",
+          "severity": "info",
+          "title": "process.env restriction configured"
+        },
+        {
+          "file": "./tsconfig.base.json",
+          "id": "T52",
+          "line": null,
+          "message": "noUncheckedIndexedAccess is enabled",
+          "severity": "info",
+          "title": "noUncheckedIndexedAccess: true"
+        },
+        {
+          "file": "./tsconfig.base.json",
+          "id": "T53",
+          "line": null,
+          "message": "exactOptionalPropertyTypes is enabled",
+          "severity": "info",
+          "title": "exactOptionalPropertyTypes: true"
+        },
+        {
+          "file": "./tsconfig.base.json",
+          "id": "T54",
+          "line": null,
+          "message": "isolatedModules is enabled",
+          "severity": "info",
+          "title": "isolatedModules: true"
+        },
+        {
+          "file": "./package.json",
+          "id": "T55",
+          "line": null,
+          "message": "preinstall script contains only-allow pnpm",
+          "severity": "info",
+          "title": "preinstall enforces pnpm"
+        },
+        {
+          "file": "./package.json",
+          "id": "T56",
+          "line": null,
+          "message": "prepare script found",
+          "severity": "info",
+          "title": "prepare script exists"
+        },
+        {
+          "file": "./package.json",
+          "id": "T57",
+          "line": null,
+          "message": "engines = {\"node\":\">=22\"}",
+          "severity": "info",
+          "title": "engines field present"
+        },
+        {
+          "file": "./package.json",
+          "id": "T58",
+          "line": null,
+          "message": "onlyBuiltDependencies = [\"esbuild\",\"@img/sharp-darwin-arm64\",\"@img/sharp-linux-x64\",\"unrs-resolver\"]",
+          "severity": "info",
+          "title": "onlyBuiltDependencies configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T6",
+          "line": null,
+          "message": "eslint-plugin-boundaries found in config",
+          "severity": "info",
+          "title": "Boundary enforcement configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T60",
+          "line": null,
+          "message": "no-misused-promises found in ESLint config",
+          "severity": "info",
+          "title": "no-misused-promises configured"
+        },
+        {
+          "file": "./tsconfig.base.json",
+          "id": "T60",
+          "line": null,
+          "message": "noPropertyAccessFromIndexSignature is enabled",
+          "severity": "info",
+          "title": "noPropertyAccessFromIndexSignature: true"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T61",
+          "line": null,
+          "message": "await-thenable found in ESLint config",
+          "severity": "info",
+          "title": "await-thenable configured"
+        },
+        {
+          "file": "./tsconfig.base.json",
+          "id": "T61",
+          "line": null,
+          "message": "noImplicitOverride is enabled",
+          "severity": "info",
+          "title": "noImplicitOverride: true"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T62",
+          "line": null,
+          "message": "consistent-type-imports found in ESLint config",
+          "severity": "info",
+          "title": "consistent-type-imports configured"
+        },
+        {
+          "file": "./tsconfig.base.json",
+          "id": "T62",
+          "line": null,
+          "message": "noFallthroughCasesInSwitch is enabled",
+          "severity": "info",
+          "title": "noFallthroughCasesInSwitch: true"
+        },
+        {
+          "file": "./tsconfig.base.json",
+          "id": "T63",
+          "line": null,
+          "message": "allowUnreachableCode is correctly set to false",
+          "severity": "info",
+          "title": "allowUnreachableCode: false"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T63",
+          "line": null,
+          "message": "no-non-null-assertion found in ESLint config",
+          "severity": "info",
+          "title": "no-non-null-assertion configured"
+        },
+        {
+          "file": "./tsconfig.base.json",
+          "id": "T64",
+          "line": null,
+          "message": "allowUnusedLabels is correctly set to false",
+          "severity": "info",
+          "title": "allowUnusedLabels: false"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T64",
+          "line": null,
+          "message": "switch-exhaustiveness-check found in ESLint config",
+          "severity": "info",
+          "title": "switch-exhaustiveness-check configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T65",
+          "line": null,
+          "message": "no-unused-vars found in ESLint config",
+          "severity": "info",
+          "title": "no-unused-vars configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T66",
+          "line": null,
+          "message": "require-await found in ESLint config",
+          "severity": "info",
+          "title": "require-await configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T67",
+          "line": null,
+          "message": "no-param-reassign found in ESLint config",
+          "severity": "info",
+          "title": "no-param-reassign configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T68",
+          "line": null,
+          "message": "no-unsafe-assignment found in ESLint config",
+          "severity": "info",
+          "title": "no-unsafe-assignment configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T69",
+          "line": null,
+          "message": "no-unsafe-member-access found in ESLint config",
+          "severity": "info",
+          "title": "no-unsafe-member-access configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T7",
+          "line": 254,
+          "message": "\"@typescript-eslint/explicit-function-return-type\": \"off\",",
+          "severity": "info",
+          "title": "Relaxed ESLint rule"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T7",
+          "line": 255,
+          "message": "\"@typescript-eslint/no-unsafe-assignment\": \"off\",",
+          "severity": "info",
+          "title": "Relaxed ESLint rule"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T7",
+          "line": 256,
+          "message": "\"import-x/max-dependencies\": \"off\",",
+          "severity": "info",
+          "title": "Relaxed ESLint rule"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T7",
+          "line": 250,
+          "message": "\"max-lines\": \"off\",",
+          "severity": "info",
+          "title": "Relaxed ESLint rule"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T7",
+          "line": 251,
+          "message": "\"max-lines-per-function\": \"off\",",
+          "severity": "info",
+          "title": "Relaxed ESLint rule"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T7",
+          "line": 253,
+          "message": "\"no-console\": \"off\",",
+          "severity": "info",
+          "title": "Relaxed ESLint rule"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T7",
+          "line": 252,
+          "message": "complexity: \"off\",",
+          "severity": "info",
+          "title": "Relaxed ESLint rule"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T70",
+          "line": null,
+          "message": "no-unsafe-call found in ESLint config",
+          "severity": "info",
+          "title": "no-unsafe-call configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T71",
+          "line": null,
+          "message": "no-unsafe-return found in ESLint config",
+          "severity": "info",
+          "title": "no-unsafe-return configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T72",
+          "line": null,
+          "message": "no-unsafe-argument found in ESLint config",
+          "severity": "info",
+          "title": "no-unsafe-argument configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T73",
+          "line": null,
+          "message": "explicit-module-boundary-types found in ESLint config",
+          "severity": "info",
+          "title": "explicit-module-boundary-types configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T74",
+          "line": null,
+          "message": "promise-function-async found in ESLint config",
+          "severity": "info",
+          "title": "promise-function-async configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T75",
+          "line": null,
+          "message": "consistent-type-exports found in ESLint config",
+          "severity": "info",
+          "title": "consistent-type-exports configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T76",
+          "line": null,
+          "message": "consistent-type-definitions found in ESLint config",
+          "severity": "info",
+          "title": "consistent-type-definitions configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T77",
+          "line": null,
+          "message": "no-unnecessary-condition found in ESLint config",
+          "severity": "info",
+          "title": "no-unnecessary-condition configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T78",
+          "line": null,
+          "message": "prefer-nullish-coalescing found in ESLint config",
+          "severity": "info",
+          "title": "prefer-nullish-coalescing configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T79",
+          "line": null,
+          "message": "prefer-optional-chain found in ESLint config",
+          "severity": "info",
+          "title": "prefer-optional-chain configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T8",
+          "line": 135,
+          "message": "files: [\"**/*.mjs\"],",
+          "severity": "info",
+          "title": "File-specific override"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T8",
+          "line": 463,
+          "message": "files: [\"**/*.mjs\"],",
+          "severity": "info",
+          "title": "File-specific override"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T8",
+          "line": 248,
+          "message": "files: [\"**/*.test.ts\", \"**/*.spec.ts\", \"**/__tests__/**\"],",
+          "severity": "info",
+          "title": "File-specific override"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T8",
+          "line": 141,
+          "message": "files: [\"**/*.ts\", \"**/*.tsx\"],",
+          "severity": "info",
+          "title": "File-specific override"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T8",
+          "line": 235,
+          "message": "files: [\"**/*.ts\", \"**/*.tsx\"],",
+          "severity": "info",
+          "title": "File-specific override"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T8",
+          "line": 263,
+          "message": "files: [\"**/*.ts\", \"**/*.tsx\"],",
+          "severity": "info",
+          "title": "File-specific override"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T8",
+          "line": 280,
+          "message": "files: [\"**/app/api/**/route.ts\"],",
+          "severity": "info",
+          "title": "File-specific override"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T8",
+          "line": 481,
+          "message": "files: [\"eslint.config.mjs\"],",
+          "severity": "info",
+          "title": "File-specific override"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T80",
+          "line": null,
+          "message": "no-deprecated found in ESLint config",
+          "severity": "info",
+          "title": "no-deprecated configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T81",
+          "line": null,
+          "message": "restrict-template-expressions found in ESLint config",
+          "severity": "info",
+          "title": "restrict-template-expressions configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T82",
+          "line": null,
+          "message": "no-throw-literal found in ESLint config",
+          "severity": "info",
+          "title": "no-throw-literal configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T83",
+          "line": null,
+          "message": "no-empty found in ESLint config",
+          "severity": "info",
+          "title": "no-empty configured"
+        },
+        {
+          "file": "./tsconfig.base.json",
+          "id": "T9",
+          "line": null,
+          "message": "forceConsistentCasingInFileNames is enabled",
+          "severity": "info",
+          "title": "forceConsistentCasingInFileNames: true"
+        },
+        {
+          "file": "./tsconfig.base.json",
+          "id": "T9",
+          "line": null,
+          "message": "noImplicitReturns is enabled",
+          "severity": "info",
+          "title": "noImplicitReturns: true"
+        },
+        {
+          "file": "./tsconfig.base.json",
+          "id": "T9",
+          "line": null,
+          "message": "noUnusedLocals is enabled",
+          "severity": "info",
+          "title": "noUnusedLocals: true"
+        },
+        {
+          "file": "./tsconfig.base.json",
+          "id": "T9",
+          "line": null,
+          "message": "noUnusedParameters is enabled",
+          "severity": "info",
+          "title": "noUnusedParameters: true"
+        },
+        {
+          "file": "./tsconfig.base.json",
+          "id": "T9",
+          "line": null,
+          "message": "strict is enabled",
+          "severity": "info",
+          "title": "strict: true"
+        },
+        {
+          "file": "./tsconfig.base.json",
+          "id": "T9",
+          "line": null,
+          "message": "Found: /Users/tartakovsky/Projects/websmasher/schedulr/tsconfig.base.json",
+          "severity": "info",
+          "title": "tsconfig exists"
+        }
+      ]
+    },
+    {
+      "name": "TS source code scan",
+      "results": [
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T32",
+          "line": null,
+          "message": "391 effective lines (max 300)",
+          "severity": "warn",
+          "title": "File too long"
+        }
+      ]
+    },
+    {
+      "name": "ESLint boundary audit",
+      "results": [
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T36",
+          "line": null,
+          "message": "Zone definitions found in ESLint config",
+          "severity": "info",
+          "title": "Boundary zones configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T37",
+          "line": null,
+          "message": "boundaries/element-types found",
+          "severity": "info",
+          "title": "Import direction rules configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T38",
+          "line": null,
+          "message": "boundaries/entry-point found",
+          "severity": "info",
+          "title": "Entry-point enforcement configured"
+        },
+        {
+          "file": "./eslint.config.mjs",
+          "id": "T39",
+          "line": null,
+          "message": "boundaries/external found",
+          "severity": "info",
+          "title": "External dependency bans configured"
+        }
+      ]
+    },
+    {
+      "name": "TS test quality",
+      "results": [
+        {
+          "file": null,
+          "id": "T-TEST-01",
+          "line": null,
+          "message": "No stryker.config.json or stryker.config.mjs found — mutation testing not configured",
+          "severity": "warn",
+          "title": "No Stryker config"
+        },
+        {
+          "file": null,
+          "id": "T-TEST-02",
+          "line": null,
+          "message": "No .test.ts, .spec.ts, .test.tsx, or .spec.tsx files found",
+          "severity": "error",
+          "title": "No test files"
+        },
+        {
+          "file": null,
+          "id": "T-TEST-03",
+          "line": null,
+          "message": "No vitest.config.ts/mts or jest.config.ts/js/mjs found",
+          "severity": "warn",
+          "title": "No test runner config"
+        }
+      ]
+    },
+    {
+      "name": "Hook checks",
+      "results": [
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H1",
+          "line": null,
+          "message": "Found",
+          "severity": "info",
+          "title": ".githooks/pre-commit exists"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H10",
+          "line": null,
+          "message": "10070 bytes",
+          "severity": "info",
+          "title": "Pre-commit file size"
+        },
+        {
+          "file": null,
+          "id": "H11",
+          "line": null,
+          "message": "No local hook overrides found",
+          "severity": "info",
+          "title": "No local/pre-commit.d/ directory"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H12",
+          "line": null,
+          "message": "TypeScript copy-paste detection using jscpd",
+          "severity": "info",
+          "title": "jscpd configured for TypeScript"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H12",
+          "line": null,
+          "message": "Rust project should use cargo-dupes for copy-paste detection",
+          "severity": "warn",
+          "title": "Missing cargo-dupes for Rust"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H12",
+          "line": null,
+          "message": "Using jscpd for Rust -- consider cargo-dupes (AST-aware, no Node.js dependency)",
+          "severity": "warn",
+          "title": "Using jscpd for Rust"
+        },
+        {
+          "file": null,
+          "id": "H2",
+          "line": null,
+          "message": "core.hooksPath = .githooks",
+          "severity": "info",
+          "title": "core.hooksPath configured"
+        },
+        {
+          "file": "./.githooks",
+          "id": "H3",
+          "line": null,
+          "message": "Using monolithic pre-commit script",
+          "severity": "info",
+          "title": "No pre-commit.d/ directory"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H4",
+          "line": null,
+          "message": "No pre-commit.d/, so no dispatcher check",
+          "severity": "info",
+          "title": "Monolithic script (no dispatcher needed)"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H5",
+          "line": null,
+          "message": "Pattern present in monolithic script",
+          "severity": "info",
+          "title": "cargo clippy found in pre-commit"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H5",
+          "line": null,
+          "message": "Pattern present in monolithic script",
+          "severity": "info",
+          "title": "cargo deny found in pre-commit"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H5",
+          "line": null,
+          "message": "Pattern missing from monolithic script",
+          "severity": "info",
+          "title": "cargo dupes not found in pre-commit"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H5",
+          "line": null,
+          "message": "Pattern present in monolithic script",
+          "severity": "info",
+          "title": "cargo fmt / rustfmt found in pre-commit"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H5",
+          "line": null,
+          "message": "Pattern present in monolithic script",
+          "severity": "info",
+          "title": "cargo machete found in pre-commit"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H5",
+          "line": null,
+          "message": "Pattern present in monolithic script",
+          "severity": "info",
+          "title": "cargo test found in pre-commit"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H5",
+          "line": null,
+          "message": "Pattern present in monolithic script",
+          "severity": "info",
+          "title": "eslint found in pre-commit"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H5",
+          "line": null,
+          "message": "Pattern present in monolithic script",
+          "severity": "info",
+          "title": "gitleaks found in pre-commit"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H5",
+          "line": null,
+          "message": "Pattern present in monolithic script",
+          "severity": "info",
+          "title": "jscpd found in pre-commit"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H5",
+          "line": null,
+          "message": "Pattern present in monolithic script",
+          "severity": "info",
+          "title": "tsc / --noEmit found in pre-commit"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H6",
+          "line": null,
+          "message": "257 lines, 10070 bytes, mtime unix 1773234588",
+          "severity": "info",
+          "title": "Pre-commit script stats"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H7",
+          "line": null,
+          "message": "mode: 100755",
+          "severity": "info",
+          "title": "Pre-commit is executable"
+        },
+        {
+          "file": null,
+          "id": "H8",
+          "line": null,
+          "message": "Found on PATH",
+          "severity": "info",
+          "title": "cargo-deny installed"
+        },
+        {
+          "file": null,
+          "id": "H8",
+          "line": null,
+          "message": "Found on PATH",
+          "severity": "info",
+          "title": "cargo-machete installed"
+        },
+        {
+          "file": null,
+          "id": "H8",
+          "line": null,
+          "message": "Found on PATH",
+          "severity": "info",
+          "title": "gitleaks installed"
+        }
+      ]
+    },
+    {
+      "name": "Deployment checks",
+      "results": [
+        {
+          "file": ".",
+          "id": "D1",
+          "line": null,
+          "message": "railpack-backend.json",
+          "severity": "info",
+          "title": "Found 1 railpack config(s)"
+        },
+        {
+          "file": "./railpack-backend.json",
+          "id": "D2",
+          "line": null,
+          "message": "Provider field present",
+          "severity": "info",
+          "title": "railpack-backend.json: provider = \"rust\""
+        }
+      ]
+    }
+  ],
+  "stacks": [
+    "Rust",
+    "TypeScript"
+  ]
+}
