@@ -109,6 +109,17 @@ pub fn find_std_fs_imports(file: &syn::File) -> Vec<usize> {
         .collect()
 }
 
+/// Find inline `std::fs::*` calls (e.g., `std::fs::read_to_string(...)`).
+/// Skips calls inside `#[cfg(test)]` functions and modules.
+pub fn find_inline_std_fs_calls(file: &syn::File) -> Vec<usize> {
+    let mut v = InlineStdFsVisitor {
+        out: Vec::new(),
+        in_cfg_test: false,
+    };
+    v.visit_file(file);
+    v.out
+}
+
 /// Check if an attribute is `#[cfg(test)]`.
 fn is_cfg_test_attr(attr: &syn::Attribute) -> bool {
     if !attr.path().is_ident("cfg") {
@@ -578,6 +589,72 @@ fn has_test_or_tokio_test(attrs: &[syn::Attribute]) -> bool {
         }
     }
     false
+}
+
+struct InlineStdFsVisitor {
+    out: Vec<usize>,
+    in_cfg_test: bool,
+}
+
+impl InlineStdFsVisitor {
+    /// Check if a path is a direct std::fs function call like `std::fs::read_to_string`.
+    /// Excludes type references like `std::fs::Permissions::from_mode` (4+ segments with
+    /// capitalized 3rd segment = type, not function).
+    fn path_is_std_fs_call(path: &syn::Path) -> bool {
+        let segs: Vec<_> = path.segments.iter().map(|s| s.ident.to_string()).collect();
+        if segs.len() < 3 || segs[0] != "std" || segs[1] != "fs" {
+            return false;
+        }
+        // If exactly 3 segments (std::fs::read_to_string), check if the function
+        // name starts with lowercase (function, not type)
+        if segs.len() == 3 {
+            return segs[2].starts_with(|c: char| c.is_ascii_lowercase());
+        }
+        // 4+ segments like std::fs::Permissions::from_mode — this is a type method call, skip
+        false
+    }
+}
+
+impl<'ast> Visit<'ast> for InlineStdFsVisitor {
+    fn visit_item_mod(&mut self, n: &'ast syn::ItemMod) {
+        let was = self.in_cfg_test;
+        if n.attrs.iter().any(|a| is_cfg_test_attr(a)) {
+            self.in_cfg_test = true;
+        }
+        syn::visit::visit_item_mod(self, n);
+        self.in_cfg_test = was;
+    }
+
+    fn visit_item_fn(&mut self, n: &'ast syn::ItemFn) {
+        let was = self.in_cfg_test;
+        if n.attrs.iter().any(|a| is_cfg_test_attr(a)) {
+            self.in_cfg_test = true;
+        }
+        syn::visit::visit_item_fn(self, n);
+        self.in_cfg_test = was;
+    }
+
+    fn visit_expr_call(&mut self, n: &'ast syn::ExprCall) {
+        if !self.in_cfg_test {
+            if let syn::Expr::Path(ep) = &*n.func {
+                if Self::path_is_std_fs_call(&ep.path) {
+                    self.out.push(span_line(ep.path.span()));
+                }
+            }
+        }
+        syn::visit::visit_expr_call(self, n);
+    }
+
+    fn visit_expr_path(&mut self, n: &'ast syn::ExprPath) {
+        // Catch function pointers: `let f = std::fs::read_to_string;`
+        if !self.in_cfg_test && Self::path_is_std_fs_call(&n.path) {
+            let line = span_line(n.path.span());
+            if !self.out.contains(&line) {
+                self.out.push(line);
+            }
+        }
+        syn::visit::visit_expr_path(self, n);
+    }
 }
 
 #[cfg(test)]
