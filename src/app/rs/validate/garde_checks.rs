@@ -112,9 +112,9 @@ fn check_garde_dependency(cargo_content: Option<&str>) -> Vec<CheckResult> {
     } else {
         vec![CheckResult {
             id: "R-GARDE-01".to_owned(),
-            severity: Severity::Info,
+            severity: Severity::Error,
             title: "garde dependency missing".to_owned(),
-            message: "garde is not in [workspace.dependencies] or [dependencies]".to_owned(),
+            message: "garde is not in [workspace.dependencies] or [dependencies] — every project MUST have garde for runtime validation".to_owned(),
             file: None,
             line: None,
         }]
@@ -213,6 +213,9 @@ fn check_reqwest_json_ban(content: &str, file: &str) -> Vec<CheckResult> {
 // R-GARDE-05: derive inventory scan
 // ---------------------------------------------------------------------------
 
+/// The four input boundary derives that require `Validate`.
+const INPUT_BOUNDARY_DERIVES: &[&str] = &["Deserialize", "Parser", "Args", "FromRow"];
+
 fn check_derive_inventory(
     fs: &dyn FileSystem,
     rs_files: &[String],
@@ -230,35 +233,52 @@ fn check_derive_inventory(
             continue;
         };
         let derives = super::ast_helpers::find_derive_attributes(&parsed);
-        let (w, wo) = count_deserialize_structs_ast(&derives);
+        let (w, wo) = count_unvalidated_input_structs(&derives);
         with_validate = with_validate.saturating_add(w);
         without_validate = without_validate.saturating_add(wo);
     }
 
+    let severity = if without_validate > 0 {
+        Severity::Error
+    } else {
+        Severity::Info
+    };
+
     vec![CheckResult {
         id: "R-GARDE-05".to_owned(),
-        severity: Severity::Info,
-        title: "Deserialize + Validate inventory".to_owned(),
+        severity,
+        title: "Input boundary struct validation inventory".to_owned(),
         message: format!(
-            "{with_validate} structs derive Deserialize + Validate, \
-             {without_validate} derive Deserialize without Validate"
+            "{with_validate} input boundary structs (Deserialize/Parser/Args/FromRow) have Validate, \
+             {without_validate} are missing Validate"
         ),
         file: Some(workspace_root.display().to_string()),
         line: None,
     }]
 }
 
-/// Count structs that derive Deserialize using AST when possible, grep fallback otherwise.
-fn count_deserialize_structs_ast(derives: &[super::ast_helpers::DeriveInfo]) -> (usize, usize) {
+/// Check if a macro name matches any of the input boundary derives,
+/// accounting for path-qualified forms like `serde::Deserialize` or `clap::Parser`.
+fn is_input_boundary_derive(macro_name: &str) -> bool {
+    INPUT_BOUNDARY_DERIVES.iter().any(|&d| {
+        macro_name == d || macro_name.ends_with(&format!("::{d}"))
+    })
+}
+
+/// Count structs that derive any input boundary trait (`Deserialize`, `Parser`, `Args`, `FromRow`)
+/// and check whether they also derive `Validate`.
+fn count_unvalidated_input_structs(
+    derives: &[super::ast_helpers::DeriveInfo],
+) -> (usize, usize) {
     let mut with_validate: usize = 0;
     let mut without_validate: usize = 0;
 
     for info in derives {
-        let has_deserialize = info
+        let has_input_boundary = info
             .macros
             .iter()
-            .any(|m| m == "Deserialize" || m.ends_with("::Deserialize"));
-        if !has_deserialize {
+            .any(|m| is_input_boundary_derive(m));
+        if !has_input_boundary {
             continue;
         }
         let has_validate = info
@@ -549,8 +569,119 @@ struct Baz {
         #[allow(clippy::expect_used)] // reason: test — panic on parse failure is correct
         let parsed = syn::parse_file(content_both).expect("should parse");
         let derives = super::super::ast_helpers::find_derive_attributes(&parsed);
-        let (with, without) = count_deserialize_structs_ast(&derives);
+        let (with, without) = count_unvalidated_input_structs(&derives);
         assert_eq!(with, 1, "Foo has both Deserialize + Validate");
         assert_eq!(without, 1, "Bar has Deserialize without Validate");
+    }
+
+    #[test]
+    fn parser_without_validate_flagged() {
+        let content = r"
+use clap::Parser;
+
+#[derive(Parser)]
+struct Cli {
+    #[arg(short)]
+    name: String,
+}
+";
+        #[allow(clippy::expect_used)] // reason: test — panic on parse failure is correct
+        let parsed = syn::parse_file(content).expect("should parse");
+        let derives = super::super::ast_helpers::find_derive_attributes(&parsed);
+        let (with, without) = count_unvalidated_input_structs(&derives);
+        assert_eq!(with, 0);
+        assert_eq!(without, 1, "Parser without Validate should be flagged");
+    }
+
+    #[test]
+    fn args_without_validate_flagged() {
+        let content = r"
+use clap::Args;
+
+#[derive(Args)]
+struct SubCmd {
+    #[arg(long)]
+    output: String,
+}
+";
+        #[allow(clippy::expect_used)] // reason: test — panic on parse failure is correct
+        let parsed = syn::parse_file(content).expect("should parse");
+        let derives = super::super::ast_helpers::find_derive_attributes(&parsed);
+        let (with, without) = count_unvalidated_input_structs(&derives);
+        assert_eq!(with, 0);
+        assert_eq!(without, 1, "Args without Validate should be flagged");
+    }
+
+    #[test]
+    fn from_row_without_validate_flagged() {
+        let content = r"
+use sqlx::FromRow;
+
+#[derive(FromRow)]
+struct UserRow {
+    id: i64,
+    name: String,
+}
+";
+        #[allow(clippy::expect_used)] // reason: test — panic on parse failure is correct
+        let parsed = syn::parse_file(content).expect("should parse");
+        let derives = super::super::ast_helpers::find_derive_attributes(&parsed);
+        let (with, without) = count_unvalidated_input_structs(&derives);
+        assert_eq!(with, 0);
+        assert_eq!(without, 1, "FromRow without Validate should be flagged");
+    }
+
+    #[test]
+    fn parser_with_validate_ok() {
+        let content = r"
+use clap::Parser;
+
+#[derive(Parser, garde::Validate)]
+struct Cli {
+    #[arg(short)]
+    name: String,
+}
+";
+        #[allow(clippy::expect_used)] // reason: test — panic on parse failure is correct
+        let parsed = syn::parse_file(content).expect("should parse");
+        let derives = super::super::ast_helpers::find_derive_attributes(&parsed);
+        let (with, without) = count_unvalidated_input_structs(&derives);
+        assert_eq!(with, 1, "Parser + Validate should be counted as validated");
+        assert_eq!(without, 0);
+    }
+
+    #[test]
+    fn deserialize_with_validate_ok() {
+        let content = r"
+use serde::Deserialize;
+
+#[derive(Deserialize, garde::Validate)]
+struct Input {
+    name: String,
+}
+";
+        #[allow(clippy::expect_used)] // reason: test — panic on parse failure is correct
+        let parsed = syn::parse_file(content).expect("should parse");
+        let derives = super::super::ast_helpers::find_derive_attributes(&parsed);
+        let (with, without) = count_unvalidated_input_structs(&derives);
+        assert_eq!(with, 1, "Deserialize + Validate should be counted as validated");
+        assert_eq!(without, 0);
+    }
+
+    #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
+    fn garde_missing_is_error() {
+        let cargo = r#"
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+"#;
+        let results = check_garde_dependency(Some(cargo));
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].id, "R-GARDE-01");
+        assert_eq!(
+            results[0].severity,
+            Severity::Error,
+            "Missing garde dependency must be Error severity"
+        );
     }
 }
