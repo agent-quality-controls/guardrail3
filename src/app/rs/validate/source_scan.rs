@@ -10,7 +10,11 @@ use super::structure_checks;
 use crate::ports::outbound::FileSystem;
 
 #[allow(clippy::case_sensitive_file_extension_comparisons)] // reason: only checking .rs files
-pub fn check(fs: &dyn FileSystem, workspace_root: &Path, scoped_files: Option<&[String]>) -> Vec<CheckResult> {
+pub fn check(
+    fs: &dyn FileSystem,
+    workspace_root: &Path,
+    scoped_files: Option<&[String]>,
+) -> Vec<CheckResult> {
     let mut results = Vec::new();
 
     let rs_files: Vec<String> = match scoped_files {

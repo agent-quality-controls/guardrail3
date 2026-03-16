@@ -92,7 +92,11 @@ pub fn check(fs: &dyn FileSystem, workspace_root: &Path) -> Vec<CheckResult> {
     results
 }
 
-pub fn check_per_crate_clippy(fs: &dyn FileSystem, workspace_root: &Path, member_dirs: &[String]) -> Vec<CheckResult> {
+pub fn check_per_crate_clippy(
+    fs: &dyn FileSystem,
+    workspace_root: &Path,
+    member_dirs: &[String],
+) -> Vec<CheckResult> {
     let mut results = Vec::new();
 
     for member in member_dirs {
@@ -125,7 +129,12 @@ pub fn check_per_crate_clippy(fs: &dyn FileSystem, workspace_root: &Path, member
     results
 }
 
-fn check_per_crate_clippy_content(fs: &dyn FileSystem, path: &Path, member: &str, results: &mut Vec<CheckResult>) {
+fn check_per_crate_clippy_content(
+    fs: &dyn FileSystem,
+    path: &Path,
+    member: &str,
+    results: &mut Vec<CheckResult>,
+) {
     let Some(content) = fs.read_file(path) else {
         return;
     };

@@ -5,7 +5,8 @@ use crate::domain::report::{CheckResult, Severity};
 use crate::ports::outbound::FileSystem;
 
 // R51: Dependency direction — iterate workspace member Cargo.tomls
-pub fn check_all_dependency_directions(fs: &dyn FileSystem, 
+pub fn check_all_dependency_directions(
+    fs: &dyn FileSystem,
     workspace_root: &Path,
     project: &ProjectInfo,
     results: &mut Vec<CheckResult>,
@@ -19,7 +20,12 @@ pub fn check_all_dependency_directions(fs: &dyn FileSystem,
     }
 }
 
-fn check_dependency_direction(fs: &dyn FileSystem, cargo_path: &Path, member_dir: &str, results: &mut Vec<CheckResult>) {
+fn check_dependency_direction(
+    fs: &dyn FileSystem,
+    cargo_path: &Path,
+    member_dir: &str,
+    results: &mut Vec<CheckResult>,
+) {
     let Some(content) = fs.read_file(cargo_path) else {
         return;
     };
@@ -109,7 +115,8 @@ fn check_dependency_direction(fs: &dyn FileSystem, cargo_path: &Path, member_dir
 }
 
 // R52: Dependency graph inventory
-pub fn check_dependency_graph(fs: &dyn FileSystem, 
+pub fn check_dependency_graph(
+    fs: &dyn FileSystem,
     workspace_root: &Path,
     project: &ProjectInfo,
     results: &mut Vec<CheckResult>,

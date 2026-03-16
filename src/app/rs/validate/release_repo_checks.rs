@@ -5,7 +5,9 @@ use crate::domain::report::{CheckResult, Severity};
 use crate::ports::outbound::{FileSystem, ToolChecker};
 
 /// Run all repo-level release checks (R-REL-01 through R-REL-08).
-pub fn check_repo_level(fs: &dyn FileSystem, tc: &dyn ToolChecker,
+pub fn check_repo_level(
+    fs: &dyn FileSystem,
+    tc: &dyn ToolChecker,
     workspace_root: &Path,
     publishable_names: &BTreeSet<String>,
     results: &mut Vec<CheckResult>,
@@ -13,7 +15,8 @@ pub fn check_repo_level(fs: &dyn FileSystem, tc: &dyn ToolChecker,
     check_license_file(workspace_root, results);
     check_release_plz_toml(fs, workspace_root, publishable_names, results);
     check_cliff_toml(workspace_root, results);
-    check_workflow_contains(fs,
+    check_workflow_contains(
+        fs,
         workspace_root,
         "release-plz",
         "R-REL-05",
@@ -23,7 +26,8 @@ pub fn check_repo_level(fs: &dyn FileSystem, tc: &dyn ToolChecker,
         "No .github/workflows/*.yml containing \"release-plz\"",
         results,
     );
-    check_workflow_contains(fs,
+    check_workflow_contains(
+        fs,
         workspace_root,
         "cargo publish --dry-run",
         "R-REL-06",
@@ -33,7 +37,8 @@ pub fn check_repo_level(fs: &dyn FileSystem, tc: &dyn ToolChecker,
         "No workflow with \"cargo publish --dry-run\"",
         results,
     );
-    check_workflow_contains(fs,
+    check_workflow_contains(
+        fs,
         workspace_root,
         "CARGO_REGISTRY_TOKEN",
         "R-REL-07",
@@ -80,7 +85,8 @@ fn check_license_file(workspace_root: &Path, results: &mut Vec<CheckResult>) {
 // --- R-REL-02 + R-REL-03: release-plz.toml ---
 
 #[allow(clippy::too_many_lines)] // reason: R-REL-02 + R-REL-03 combined with early returns
-fn check_release_plz_toml(fs: &dyn FileSystem, 
+fn check_release_plz_toml(
+    fs: &dyn FileSystem,
     workspace_root: &Path,
     publishable_names: &BTreeSet<String>,
     results: &mut Vec<CheckResult>,
@@ -236,7 +242,8 @@ pub fn read_workflow_files(fs: &dyn FileSystem, workspace_root: &Path) -> Workfl
 
 /// Check if any workflow file contains a pattern, emitting an appropriate result.
 #[allow(clippy::too_many_arguments)] // reason: dedup helper — all args are distinct semantic values
-fn check_workflow_contains(fs: &dyn FileSystem, 
+fn check_workflow_contains(
+    fs: &dyn FileSystem,
     workspace_root: &Path,
     pattern: &str,
     check_id: &str,
@@ -538,7 +545,8 @@ mod tests {
 
         let mut r = Vec::new();
         let fs = crate::adapters::outbound::fs::RealFileSystem;
-        check_workflow_contains(&fs, 
+        check_workflow_contains(
+            &fs,
             &tmp,
             "cargo publish --dry-run",
             "R-REL-06",
@@ -569,7 +577,8 @@ mod tests {
 
         let mut r = Vec::new();
         let fs = crate::adapters::outbound::fs::RealFileSystem;
-        check_workflow_contains(&fs, 
+        check_workflow_contains(
+            &fs,
             &tmp,
             "cargo publish --dry-run",
             "R-REL-06",
@@ -599,7 +608,8 @@ mod tests {
 
         let mut r = Vec::new();
         let fs = crate::adapters::outbound::fs::RealFileSystem;
-        check_workflow_contains(&fs, 
+        check_workflow_contains(
+            &fs,
             &tmp,
             "CARGO_REGISTRY_TOKEN",
             "R-REL-07",
@@ -630,7 +640,8 @@ mod tests {
 
         let mut r = Vec::new();
         let fs = crate::adapters::outbound::fs::RealFileSystem;
-        check_workflow_contains(&fs, 
+        check_workflow_contains(
+            &fs,
             &tmp,
             "CARGO_REGISTRY_TOKEN",
             "R-REL-07",

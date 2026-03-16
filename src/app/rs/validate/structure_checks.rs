@@ -98,7 +98,11 @@ pub fn check_unsafe(path: &Path, content: &str, results: &mut Vec<CheckResult>) 
 }
 
 // R53: unsafe_code = "forbid"
-pub fn check_unsafe_code_forbid(fs: &dyn FileSystem, workspace_root: &Path, results: &mut Vec<CheckResult>) {
+pub fn check_unsafe_code_forbid(
+    fs: &dyn FileSystem,
+    workspace_root: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     let cargo_path = workspace_root.join("Cargo.toml");
     if !cargo_path.exists() {
         return;

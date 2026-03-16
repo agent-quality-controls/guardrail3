@@ -37,7 +37,11 @@ pub fn parse_tsx(source: &str) -> Option<Tree> {
 
 /// Parse a TypeScript or TSX file (chosen by extension hint).
 pub fn parse_ts_file(source: &str, is_tsx: bool) -> Option<Tree> {
-    if is_tsx { parse_tsx(source) } else { parse_typescript(source) }
+    if is_tsx {
+        parse_tsx(source)
+    } else {
+        parse_typescript(source)
+    }
 }
 
 /// Extract all comment nodes from a parsed tree.

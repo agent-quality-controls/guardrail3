@@ -59,9 +59,7 @@ fn emit_crate_allow_result(
             id: "R30".to_owned(),
             severity,
             title: format!("Crate-level {CRATE_ALLOW_PREFIX}...)"),
-            message: format!(
-                "{CRATE_ALLOW_PREFIX}{lint})] — crate-wide lint suppression banned"
-            ),
+            message: format!("{CRATE_ALLOW_PREFIX}{lint})] — crate-wide lint suppression banned"),
             file: Some(path.display().to_string()),
             line: Some(line_number),
         });
@@ -160,7 +158,11 @@ fn check_garde_skip_ast(
 }
 
 // R36: EXCEPTION comments
-pub fn check_exception_comments(fs: &dyn FileSystem, workspace_root: &Path, results: &mut Vec<CheckResult>) {
+pub fn check_exception_comments(
+    fs: &dyn FileSystem,
+    workspace_root: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     let config_files = ["clippy.toml", "deny.toml", "Cargo.toml", "rustfmt.toml"];
 
     for config_file in &config_files {
@@ -205,9 +207,10 @@ fn check_cfg_attr_allow_ast(
 ) {
     let raw_lines: Vec<&str> = content.lines().collect();
     for (line_1based, lint) in ast_helpers::find_cfg_attr_allows(file) {
-        let message = raw_lines
-            .get(line_1based.wrapping_sub(1))
-            .map_or_else(|| format!("cfg_attr allow: {lint}"), |l| l.trim().to_owned());
+        let message = raw_lines.get(line_1based.wrapping_sub(1)).map_or_else(
+            || format!("cfg_attr allow: {lint}"),
+            |l| l.trim().to_owned(),
+        );
         results.push(CheckResult {
             id: "R37".to_owned(),
             severity: Severity::Info,

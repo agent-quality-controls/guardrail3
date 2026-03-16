@@ -6,7 +6,12 @@ use super::release_checks::CrateInfo;
 use super::release_repo_checks::read_workflow_files;
 use crate::ports::outbound::FileSystem;
 /// Run binary-specific checks (R-BIN-01 through R-BIN-03).
-pub fn check_binary(fs: &dyn FileSystem, workspace_root: &Path, krate: &CrateInfo, results: &mut Vec<CheckResult>) {
+pub fn check_binary(
+    fs: &dyn FileSystem,
+    workspace_root: &Path,
+    krate: &CrateInfo,
+    results: &mut Vec<CheckResult>,
+) {
     check_binary_release_workflow(fs, workspace_root, &krate.name, results);
     check_binary_linux_target(fs, workspace_root, &krate.name, results);
     check_binstall_metadata(krate, results);
@@ -14,7 +19,8 @@ pub fn check_binary(fs: &dyn FileSystem, workspace_root: &Path, krate: &CrateInf
 
 // --- R-BIN-01: binary release workflow ---
 
-fn check_binary_release_workflow(fs: &dyn FileSystem, 
+fn check_binary_release_workflow(
+    fs: &dyn FileSystem,
     workspace_root: &Path,
     name: &str,
     results: &mut Vec<CheckResult>,
@@ -47,7 +53,12 @@ fn check_binary_release_workflow(fs: &dyn FileSystem,
 
 // --- R-BIN-02: linux target ---
 
-fn check_binary_linux_target(fs: &dyn FileSystem, workspace_root: &Path, name: &str, results: &mut Vec<CheckResult>) {
+fn check_binary_linux_target(
+    fs: &dyn FileSystem,
+    workspace_root: &Path,
+    name: &str,
+    results: &mut Vec<CheckResult>,
+) {
     let workflows = read_workflow_files(fs, workspace_root);
     let has_linux = workflows.iter().any(|(_, content)| {
         let lower = content.to_lowercase();

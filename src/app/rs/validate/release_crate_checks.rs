@@ -8,7 +8,9 @@ use super::release_crate_deps;
 use crate::ports::outbound::{FileSystem, ToolChecker};
 
 /// Run all per-crate checks on a single publishable crate.
-pub fn check_per_crate(fs: &dyn FileSystem, tc: &dyn ToolChecker,
+pub fn check_per_crate(
+    fs: &dyn FileSystem,
+    tc: &dyn ToolChecker,
     krate: &CrateInfo,
     publishable_names: &BTreeSet<String>,
     version_map: &BTreeMap<String, String>,
@@ -108,7 +110,8 @@ fn check_license(
 
 // --- R-PUB-04 + R-PUB-05: readme ---
 
-fn check_readme(fs: &dyn FileSystem, 
+fn check_readme(
+    fs: &dyn FileSystem,
     pkg: Option<&toml::Value>,
     krate: &CrateInfo,
     file: Option<&str>,
@@ -166,7 +169,8 @@ fn check_readme(fs: &dyn FileSystem,
     }
 }
 
-fn check_readme_quality(fs: &dyn FileSystem, 
+fn check_readme_quality(
+    fs: &dyn FileSystem,
     readme_path: &Path,
     name: &str,
     file: Option<&str>,

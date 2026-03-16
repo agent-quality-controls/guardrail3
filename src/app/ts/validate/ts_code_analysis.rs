@@ -143,12 +143,7 @@ fn has_predefined_any_child(node: &Node<'_>, source: &[u8]) -> bool {
 /// Test runner object names that can have `.skip()` / `.only()`.
 const TEST_RUNNER_OBJECTS: &[&str] = &["test", "describe", "it", "beforeEach", "afterEach"];
 
-fn collect_test_method_calls(
-    node: &Node<'_>,
-    source: &[u8],
-    method: &str,
-    out: &mut Vec<usize>,
-) {
+fn collect_test_method_calls(node: &Node<'_>, source: &[u8], method: &str, out: &mut Vec<usize>) {
     // call_expression → function: member_expression(object, property)
     if node.kind() == "call_expression" {
         if let Some(callee) = node.child_by_field_name("function") {
@@ -159,9 +154,7 @@ fn collect_test_method_calls(
                 ) {
                     let obj_text = node_text(&obj, source);
                     let prop_text = node_text(&prop, source);
-                    if prop_text == method
-                        && TEST_RUNNER_OBJECTS.contains(&obj_text)
-                    {
+                    if prop_text == method && TEST_RUNNER_OBJECTS.contains(&obj_text) {
                         let line = node.start_position().row.saturating_add(1);
                         if !out.contains(&line) {
                             out.push(line);

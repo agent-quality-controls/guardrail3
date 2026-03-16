@@ -21,8 +21,7 @@ fn inject_rs_help(cmd: Command) -> Command {
                 .after_long_help(RS_VALIDATE_HELP)
         })
         .mut_subcommand("init", |i| {
-            i.after_help(RS_INIT_HELP)
-                .after_long_help(RS_INIT_HELP)
+            i.after_help(RS_INIT_HELP).after_long_help(RS_INIT_HELP)
         })
     })
 }
@@ -34,8 +33,7 @@ fn inject_ts_help(cmd: Command) -> Command {
                 .after_long_help(TS_VALIDATE_HELP)
         })
         .mut_subcommand("init", |i| {
-            i.after_help(TS_INIT_HELP)
-                .after_long_help(TS_INIT_HELP)
+            i.after_help(TS_INIT_HELP).after_long_help(TS_INIT_HELP)
         })
     })
 }
@@ -437,10 +435,7 @@ mod tests {
         let cmd = Cli::command();
         let cmd = inject_help(cmd);
         // Verify help contains our injected text
-        let after = cmd
-            .get_after_help()
-            .expect("after_help set")
-            .to_string();
+        let after = cmd.get_after_help().expect("after_help set").to_string();
         assert!(after.contains("QUICK START"), "missing QUICK START in help");
         assert!(after.contains("PROFILES"), "missing PROFILES in help");
         assert!(after.contains("WORKFLOW"), "missing WORKFLOW in help");

@@ -67,7 +67,13 @@ fn discover_crates(fs: &dyn FileSystem, workspace_root: &Path) -> Vec<CrateInfo>
 }
 
 /// Main orchestrator for release checks.
-pub fn check(fs: &dyn FileSystem, tc: &dyn ToolChecker, workspace_root: &Path, _project: &ProjectInfo, thorough: bool) -> Vec<CheckResult> {
+pub fn check(
+    fs: &dyn FileSystem,
+    tc: &dyn ToolChecker,
+    workspace_root: &Path,
+    _project: &ProjectInfo,
+    thorough: bool,
+) -> Vec<CheckResult> {
     let mut results = Vec::new();
     let crates = discover_crates(fs, workspace_root);
 
@@ -94,7 +100,9 @@ pub fn check(fs: &dyn FileSystem, tc: &dyn ToolChecker, workspace_root: &Path, _
 
     // Per-crate checks
     for krate in &publishable {
-        super::release_crate_checks::check_per_crate(fs, tc,
+        super::release_crate_checks::check_per_crate(
+            fs,
+            tc,
             krate,
             &publishable_names,
             &version_map,
@@ -118,7 +126,13 @@ pub fn check(fs: &dyn FileSystem, tc: &dyn ToolChecker, workspace_root: &Path, _
     });
 
     // Repo-level checks
-    super::release_repo_checks::check_repo_level(fs, tc, workspace_root, &publishable_names, &mut results);
+    super::release_repo_checks::check_repo_level(
+        fs,
+        tc,
+        workspace_root,
+        &publishable_names,
+        &mut results,
+    );
 
     // Binary checks
     for krate in &crates {

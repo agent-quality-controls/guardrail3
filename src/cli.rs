@@ -11,52 +11,24 @@ pub struct Cli {
 
 #[derive(Subcommand, Debug)]
 pub enum Commands {
-    /// Validate project guardrails (auto-detects stacks)
-    Validate(ValidateArgs),
-
-    /// Generate config files from guardrail3.toml
-    Generate(GenerateArgs),
-
-    /// Check if generated files are current
-    Check(PathArg),
-
-    /// Show what generate would change (dry run)
-    Diff(PathArg),
-
-    /// List available modules
-    ListModules,
-
-    /// Show contents of a module
-    ShowModule(ShowModuleArgs),
-
-    /// Rust-specific commands
+    /// Rust guardrails
     Rs {
         #[command(subcommand)]
         command: RsCommands,
     },
 
-    /// TypeScript-specific commands
+    /// TypeScript guardrails
     Ts {
         #[command(subcommand)]
         command: TsCommands,
-    },
-
-    /// Pre-commit hook commands
-    Hooks {
-        #[command(subcommand)]
-        command: HooksCommands,
     },
 }
 
 #[derive(Subcommand, Debug)]
 pub enum RsCommands {
-    /// Validate Rust project guardrails
-    Validate(ValidateArgs),
-    /// Generate Rust config files from guardrail3.toml
-    Generate(GenerateArgs),
     /// Initialize Rust guardrail3 configuration
     Init {
-        /// Profile to use
+        /// Profile: "service" (HTTP/CLI binary) or "library" (pure logic, no I/O)
         #[arg(long, default_value = "service")]
         profile: String,
         /// Project path
@@ -66,14 +38,26 @@ pub enum RsCommands {
         #[arg(long)]
         force: bool,
     },
+    /// Generate Rust config files (clippy.toml, deny.toml, etc.) from guardrail3.toml
+    Generate(GenerateArgs),
+    /// Validate Rust project guardrails
+    Validate(ValidateArgs),
+    /// Verify generated Rust configs are current (for CI)
+    Check(PathArg),
+    /// Show what rs generate would change (dry run)
+    Diff(PathArg),
+    /// Install Rust pre-commit hook
+    HooksInstall(GenerateArgs),
+    /// Validate Rust pre-commit hook configuration
+    HooksValidate(ValidateArgs),
+    /// List embedded Rust config modules
+    ListModules,
+    /// Show contents of an embedded Rust module
+    ShowModule(ShowModuleArgs),
 }
 
 #[derive(Subcommand, Debug)]
 pub enum TsCommands {
-    /// Validate TypeScript project guardrails
-    Validate(ValidateArgs),
-    /// Generate TypeScript config files from guardrail3.toml
-    Generate(GenerateArgs),
     /// Initialize TypeScript guardrail3 configuration
     Init {
         /// Project path
@@ -83,14 +67,14 @@ pub enum TsCommands {
         #[arg(long)]
         force: bool,
     },
-}
-
-#[derive(Subcommand, Debug)]
-pub enum HooksCommands {
-    /// Validate pre-commit hook configuration
+    /// Generate TypeScript config files (eslint, tsconfig, etc.) from guardrail3.toml
+    Generate(GenerateArgs),
+    /// Validate TypeScript project guardrails
     Validate(ValidateArgs),
-    /// Install pre-commit hooks from guardrail3.toml
-    Install(GenerateArgs),
+    /// Install TypeScript pre-commit hook
+    HooksInstall(GenerateArgs),
+    /// Validate TypeScript pre-commit hook configuration
+    HooksValidate(ValidateArgs),
 }
 
 #[derive(Parser, Debug, Clone)]

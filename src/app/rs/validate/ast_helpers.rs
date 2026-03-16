@@ -10,7 +10,7 @@ use syn::visit::Visit;
 use super::ast_visitors::{
     CfgAttrAllowVisitor, DeriveVisitor, ForbiddenMacroVisitor, GardeSkipVisitor, IgnoreVisitor,
     InlineStdFsVisitor, ItemAllowVisitor, PubFnVisitor, TestAttrVisitor, TestCountVisitor,
-    UnwrapExpectVisitor, UnsafeVisitor,
+    UnsafeVisitor, UnwrapExpectVisitor,
 };
 
 /// A source location (1-based line number) paired with a descriptive string (lint name, method name, etc.).

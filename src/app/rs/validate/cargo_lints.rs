@@ -278,7 +278,8 @@ fn check_clippy_lints(
     }
 }
 
-pub fn check_workspace_inheritance(fs: &dyn FileSystem, 
+pub fn check_workspace_inheritance(
+    fs: &dyn FileSystem,
     workspace_root: &Path,
     member_dirs: &[String],
 ) -> Vec<CheckResult> {

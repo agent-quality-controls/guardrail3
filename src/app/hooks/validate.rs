@@ -1,13 +1,20 @@
 use std::path::Path;
 
-use crate::domain::report::{Report, Section};
 use crate::domain::report::ValidateDomains;
+use crate::domain::report::{Report, Section};
 
 use super::deploy_checks;
 use super::hook_checks;
 use crate::ports::outbound::{FileSystem, ToolChecker};
 
-pub fn run(fs: &dyn FileSystem, path: &Path, has_rust: bool, has_typescript: bool, domains: &ValidateDomains, tc: &dyn ToolChecker) -> Report {
+pub fn run(
+    fs: &dyn FileSystem,
+    path: &Path,
+    has_rust: bool,
+    has_typescript: bool,
+    domains: &ValidateDomains,
+    tc: &dyn ToolChecker,
+) -> Report {
     let mut report = Report::new(path.display().to_string(), vec!["Hooks".to_owned()]);
 
     if domains.code {

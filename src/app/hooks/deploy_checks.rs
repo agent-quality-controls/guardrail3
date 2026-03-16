@@ -57,7 +57,11 @@ fn find_railpack_configs(fs: &dyn FileSystem, path: &Path) -> Vec<std::path::Pat
 }
 
 #[allow(clippy::disallowed_methods)] // reason: guardrail3 JSON config inspection — not a trust boundary
-fn check_railpack_provider(fs: &dyn FileSystem, config_path: &Path, results: &mut Vec<CheckResult>) {
+fn check_railpack_provider(
+    fs: &dyn FileSystem,
+    config_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     let content = match fs.read_file_err(config_path) {
         Ok(content) => content,
         Err(e) => {

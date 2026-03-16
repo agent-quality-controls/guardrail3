@@ -13,10 +13,15 @@ mod tsconfig_check;
 
 use std::path::Path;
 
-use crate::domain::report::{Report, Section};
 use crate::domain::report::ValidateDomains;
+use crate::domain::report::{Report, Section};
 use crate::ports::outbound::FileSystem;
-pub fn run(fs: &dyn FileSystem, path: &Path, scoped_files: Option<&[String]>, domains: &ValidateDomains) -> Report {
+pub fn run(
+    fs: &dyn FileSystem,
+    path: &Path,
+    scoped_files: Option<&[String]>,
+    domains: &ValidateDomains,
+) -> Report {
     let mut report = Report::new(path.display().to_string(), vec!["TypeScript".to_owned()]);
 
     if domains.code {

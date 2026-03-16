@@ -65,7 +65,7 @@ echo "Checking guardrail integrity..."
 tamper_fail=0
 
 # 1. eslint-disable without reason
-STAGED_TS=$(echo "$STAGED_FILES" | grep -E '\.(ts|tsx)$' | grep -v 'tests/fixtures/' || true)
+STAGED_TS=$(echo "$STAGED_FILES" | grep -E '\.(ts|tsx)$' || true)
 if [ -n "$STAGED_TS" ]; then
     while IFS= read -r file; do
         [ -n "$file" ] || continue
@@ -81,7 +81,7 @@ fi
 
 # 2. Item-level allow without reason comment
 ALLOW_PAT='#\[allow('
-STAGED_RS=$(echo "$STAGED_FILES" | grep -E '\.rs$' | grep -v '/target/' | grep -v '/tests/' | grep -v '^tests/' || true)
+STAGED_RS=$(echo "$STAGED_FILES" | grep -E '\.rs$' | grep -v '/target/' | grep -v '/tests/' || true)
 if [ -n "$STAGED_RS" ]; then
     while IFS= read -r file; do
         [ -n "$file" ] || continue
@@ -96,7 +96,7 @@ if [ -n "$STAGED_RS" ]; then
 fi
 
 # 3. Config relaxation detection
-GUARDRAIL_FILES=$(echo "$STAGED_FILES" | grep -E '(eslint\.config\.mjs|tsconfig\.base\.json|\.jscpd\.json|Cargo\.toml|clippy\.toml|deny\.toml|rustfmt\.toml)$' | grep -v '^tests/fixtures/' || true)
+GUARDRAIL_FILES=$(echo "$STAGED_FILES" | grep -E '(eslint\.config\.mjs|tsconfig\.base\.json|\.jscpd\.json|Cargo\.toml|clippy\.toml|deny\.toml|rustfmt\.toml)$' || true)
 while IFS= read -r gf; do
     [ -n "$gf" ] || continue
     added=$(git diff --cached -- "$gf" | grep '^+' | grep -v '^+++' || true)
@@ -121,7 +121,7 @@ if [ "$tamper_fail" -ne 0 ]; then
 fi
 
 # --- Detect which stacks changed ---
-TS_CHANGED=$(echo "$STAGED_FILES" | grep -v 'tests/fixtures/' | grep -cE '\.(ts|tsx|mjs)$' || true)
+TS_CHANGED=$(echo "$STAGED_FILES" | grep -cE '\.(ts|tsx|mjs)$' || true)
 RUST_CHANGED=$(echo "$STAGED_FILES" | grep -cE '\.(rs)$' || true)
 CARGO_CHANGED=$(echo "$STAGED_FILES" | grep -cE '(Cargo\.toml|Cargo\.lock)$' || true)
 
@@ -244,7 +244,7 @@ if [ "$RUST_CHANGED" -gt 0 ]; then
         echo "ERROR: cargo-dupes not installed. Install: cargo install cargo-dupes"
         exit 1
     fi
-    if ! (cd "$RUST_WORKSPACE" && cargo dupes check --max-exact 0 --max-exact-percent 0 --exclude-tests --exclude "tests/fixtures"); then
+    if ! (cd "$RUST_WORKSPACE" && cargo dupes check --max-exact 0 --max-exact-percent 0 --exclude-tests); then
         echo "Duplicate Rust code detected. Refactor before committing."
         exit 1
     fi

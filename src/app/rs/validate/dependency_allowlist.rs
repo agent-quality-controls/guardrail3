@@ -135,7 +135,9 @@ serde = "1"
 tokio = "1"
 thiserror = "1"
 "#;
-        let fs = StubFs { content: cargo_toml.to_owned() };
+        let fs = StubFs {
+            content: cargo_toml.to_owned(),
+        };
         let mut results = Vec::new();
         let allowed = vec!["serde".to_owned(), "thiserror".to_owned()];
 
@@ -163,7 +165,9 @@ name = "my-domain"
 serde = "1"
 thiserror = "1"
 "#;
-        let fs = StubFs { content: cargo_toml.to_owned() };
+        let fs = StubFs {
+            content: cargo_toml.to_owned(),
+        };
         let mut results = Vec::new();
         let allowed = vec!["serde".to_owned(), "thiserror".to_owned()];
 
@@ -190,7 +194,9 @@ serde = "1"
 [dev-dependencies]
 tokio = { version = "1", features = ["test-util"] }
 "#;
-        let fs = StubFs { content: cargo_toml.to_owned() };
+        let fs = StubFs {
+            content: cargo_toml.to_owned(),
+        };
         let mut results = Vec::new();
         let allowed = vec!["serde".to_owned()];
 
@@ -246,7 +252,9 @@ serde = "1"
 my-domain = { path = "../my-domain" }
 my-types = { workspace = true }
 "#;
-        let fs = StubFs { content: cargo_toml.to_owned() };
+        let fs = StubFs {
+            content: cargo_toml.to_owned(),
+        };
         let mut results = Vec::new();
         let allowed = vec!["serde".to_owned()];
 

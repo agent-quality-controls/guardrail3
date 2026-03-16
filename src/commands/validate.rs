@@ -1,12 +1,12 @@
 use std::path::Path;
 
-use crate::cli::ValidateArgs;
 use crate::adapters::outbound::fs::RealFileSystem;
 use crate::adapters::outbound::tool_runner::RealToolChecker;
 use crate::app::discover;
 use crate::app::hooks;
 use crate::app::rs;
 use crate::app::ts;
+use crate::cli::ValidateArgs;
 use crate::domain::report::{Report, ValidateDomains};
 use crate::report;
 
@@ -53,8 +53,15 @@ pub fn run(args: &ValidateArgs) {
     });
 
     if project.has_rust {
-        let rust_report =
-            rs::validate::run(&fs, &abs_path, &project, scoped_ref, &domains, args.thorough, &tc);
+        let rust_report = rs::validate::run(
+            &fs,
+            &abs_path,
+            &project,
+            scoped_ref,
+            &domains,
+            args.thorough,
+            &tc,
+        );
         for section in rust_report.sections {
             combined_report.add_section(section);
         }

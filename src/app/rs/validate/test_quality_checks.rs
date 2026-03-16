@@ -18,7 +18,11 @@ pub fn check(fs: &dyn FileSystem, workspace_root: &Path, results: &mut Vec<Check
 // R-TEST-05: Test coverage inventory
 // ---------------------------------------------------------------------------
 
-fn check_test_coverage_inventory(fs: &dyn FileSystem, workspace_root: &Path, results: &mut Vec<CheckResult>) {
+fn check_test_coverage_inventory(
+    fs: &dyn FileSystem,
+    workspace_root: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     let mut pub_fn_count: usize = 0;
     let mut test_fn_count: usize = 0;
 
@@ -101,7 +105,11 @@ fn count_test_fns(content: &str) -> usize {
 // R-TEST-06: Integration tests exist
 // ---------------------------------------------------------------------------
 
-fn check_integration_tests(fs: &dyn FileSystem, workspace_root: &Path, results: &mut Vec<CheckResult>) {
+fn check_integration_tests(
+    fs: &dyn FileSystem,
+    workspace_root: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     let tests_dir = workspace_root.join("tests");
     if has_rs_files_in_dir(fs, &tests_dir) {
         results.push(CheckResult {
@@ -172,7 +180,11 @@ fn has_rs_files_in_dir(fs: &dyn FileSystem, dir: &Path) -> bool {
 // R-TEST-07: No #[ignore] without reason
 // ---------------------------------------------------------------------------
 
-fn check_ignore_without_reason(fs: &dyn FileSystem, workspace_root: &Path, results: &mut Vec<CheckResult>) {
+fn check_ignore_without_reason(
+    fs: &dyn FileSystem,
+    workspace_root: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     let mut found_violation = false;
 
     for entry in WalkDir::new(workspace_root)

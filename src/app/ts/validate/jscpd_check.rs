@@ -105,7 +105,11 @@ pub fn check_jscpd(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
 }
 
 // T60: Content import restriction
-pub fn check_content_import_restriction(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResult>) {
+pub fn check_content_import_restriction(
+    fs: &dyn FileSystem,
+    path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     // Only applies if there's a landing/content app
     let landing_dir = path.join("apps").join("landing");
     if !landing_dir.exists() {

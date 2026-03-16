@@ -1,1 +1,2 @@
-    { crate = "windows-sys@0.59.0", reason = "colored 2.2 pins 0.59, clap/walkdir use 0.61" },
+# Skip entries for deny.toml [bans] section
+    { crate = "windows-sys@0.59.0", reason = "transitive: colored v2 depends on older windows-sys" },
