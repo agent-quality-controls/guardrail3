@@ -250,6 +250,7 @@ fn check_direct_fs_usage_grep(
 ) {
     let mut seen_cfg_test = false;
     let mut in_cfg_test_block = false;
+    let mut cfg_test_brace_depth: usize = 0;
 
     for (line_num, line) in content.lines().enumerate() {
         let trimmed = line.trim();
@@ -264,9 +265,16 @@ fn check_direct_fs_usage_grep(
 
         if seen_cfg_test && !in_cfg_test_block && trimmed.contains('{') {
             in_cfg_test_block = true;
+            cfg_test_brace_depth = 0;
         }
 
         if in_cfg_test_block {
+            cfg_test_brace_depth += trimmed.matches('{').count();
+            cfg_test_brace_depth = cfg_test_brace_depth.saturating_sub(trimmed.matches('}').count());
+            if cfg_test_brace_depth == 0 {
+                in_cfg_test_block = false;
+                seen_cfg_test = false;
+            }
             continue;
         }
 
@@ -295,6 +303,7 @@ fn check_inline_std_fs_calls(
 ) {
     let mut seen_cfg_test = false;
     let mut in_cfg_test_block = false;
+    let mut cfg_test_brace_depth: usize = 0;
 
     for (line_num, line) in content.lines().enumerate() {
         let trimmed = line.trim();
@@ -309,9 +318,16 @@ fn check_inline_std_fs_calls(
 
         if seen_cfg_test && !in_cfg_test_block && trimmed.contains('{') {
             in_cfg_test_block = true;
+            cfg_test_brace_depth = 0;
         }
 
         if in_cfg_test_block {
+            cfg_test_brace_depth += trimmed.matches('{').count();
+            cfg_test_brace_depth = cfg_test_brace_depth.saturating_sub(trimmed.matches('}').count());
+            if cfg_test_brace_depth == 0 {
+                in_cfg_test_block = false;
+                seen_cfg_test = false;
+            }
             continue;
         }
 
@@ -472,6 +488,37 @@ mod tests {
         );
     }
 
+    #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
+    fn r58_catches_production_fs_after_cfg_test() {
+        let content = r#"
+use std::collections::BTreeMap;
+
+#[cfg(test)]
+mod tests {
+    use std::fs;
+    fn test_foo() { fs::read_to_string("x"); }
+}
+
+fn late_production() {
+    let _ = std::fs::read_to_string("important.txt");
+}
+"#;
+        let path = Path::new("src/foo.rs");
+        let mut results = Vec::new();
+        check_direct_fs_usage(path, content, false, &mut results);
+        assert!(
+            !results.is_empty(),
+            "Should catch production std::fs usage AFTER #[cfg(test)] block, got no results"
+        );
+        assert_eq!(results[0].id, "R58");
+        assert!(
+            results[0].line.is_some_and(|l| l > 9), // reason: the hit must be after the test module
+            "R58 hit should be on the production line after the test module, got line {:?}",
+            results[0].line
+        );
+    }
+
     // ---- R43 todo macro tests ----
 
     #[test]
@@ -484,5 +531,19 @@ mod tests {
         assert!(!results.is_empty());
         assert_eq!(results[0].severity, Severity::Warn);
         assert_eq!(results[0].id, "R43");
+    }
+
+    // ---- R44: .unwrap() / .expect() ----
+
+    #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
+    fn r44_unwrap_detected() {
+        let content = "fn foo() { let x = some_option().unwrap(); }";
+        let path = Path::new("src/foo.rs");
+        let mut results = Vec::new();
+        check_unwrap_expect(path, content, &mut results);
+        assert!(!results.is_empty(), "Should detect .unwrap()");
+        assert_eq!(results[0].id, "R44");
+        assert_eq!(results[0].severity, Severity::Warn);
     }
 }

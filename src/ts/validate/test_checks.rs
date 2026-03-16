@@ -2,6 +2,7 @@ use std::path::Path;
 
 use walkdir::WalkDir;
 
+use super::ast_helpers;
 use super::source_scan::is_excluded_ts_dir;
 use crate::report::types::{CheckResult, Severity};
 
@@ -155,8 +156,60 @@ fn collect_ts_tsx_files(root: &Path) -> Vec<String> {
 /// T-TEST-04: No `.skip()` without reason comment on same line.
 ///
 /// Detects `test.skip(`, `describe.skip(`, `it.skip(` without `// reason` on the same line.
+/// Uses tree-sitter when possible (no false positives from strings/comments), falls back to grep.
 /// Returns results for a single file's content. Testable without filesystem.
 pub fn check_skip_without_reason_content(content: &str, filename: &str) -> Vec<CheckResult> {
+    // Try tree-sitter first for accurate AST-based detection
+    let is_tsx = filename.ends_with(".tsx");
+    if let Some(tree) = ast_helpers::parse_ts_file(content, is_tsx) {
+        let skip_lines = ast_helpers::find_test_method_calls(&tree, content, "skip");
+        return check_skip_lines_with_reason(content, filename, &skip_lines);
+    }
+
+    // Fallback: grep-based detection
+    check_skip_without_reason_grep(content, filename)
+}
+
+/// Given confirmed skip call line numbers (from tree-sitter), check each for `// reason`.
+fn check_skip_lines_with_reason(
+    content: &str,
+    filename: &str,
+    skip_lines: &[usize],
+) -> Vec<CheckResult> {
+    let lines: Vec<&str> = content.lines().collect();
+    let mut results = Vec::new();
+
+    for &line_number in skip_lines {
+        let line_text = lines
+            .get(line_number.saturating_sub(1))
+            .map_or("", |l| l.trim());
+
+        if line_text.contains("// reason") {
+            results.push(CheckResult {
+                id: "T-TEST-04".to_owned(),
+                severity: Severity::Info,
+                title: "test.skip with reason".to_owned(),
+                message: line_text.to_owned(),
+                file: Some(filename.to_owned()),
+                line: Some(line_number),
+            });
+        } else {
+            results.push(CheckResult {
+                id: "T-TEST-04".to_owned(),
+                severity: Severity::Warn,
+                title: "test.skip without reason".to_owned(),
+                message: format!("Add `// reason: <why>` comment: {line_text}"),
+                file: Some(filename.to_owned()),
+                line: Some(line_number),
+            });
+        }
+    }
+
+    results
+}
+
+/// Grep-based fallback for T-TEST-04 when tree-sitter parse fails.
+fn check_skip_without_reason_grep(content: &str, filename: &str) -> Vec<CheckResult> {
     let skip_patterns = ["test.skip(", "describe.skip(", "it.skip("];
     let mut results = Vec::new();
 
@@ -203,8 +256,49 @@ pub fn check_skip_without_reason_content(content: &str, filename: &str) -> Vec<C
 ///
 /// Detects `test.only(`, `describe.only(`, `it.only(`.
 /// These should never be committed — they cause other tests to be silently skipped.
+/// Uses tree-sitter when possible (no false positives from strings/comments), falls back to grep.
 /// Returns results for a single file's content. Testable without filesystem.
 pub fn check_only_in_source_content(content: &str, filename: &str) -> Vec<CheckResult> {
+    // Try tree-sitter first for accurate AST-based detection
+    let is_tsx = filename.ends_with(".tsx");
+    if let Some(tree) = ast_helpers::parse_ts_file(content, is_tsx) {
+        let only_lines = ast_helpers::find_test_method_calls(&tree, content, "only");
+        return check_only_lines(content, filename, &only_lines);
+    }
+
+    // Fallback: grep-based detection
+    check_only_in_source_grep(content, filename)
+}
+
+/// Given confirmed `.only()` call line numbers (from tree-sitter), emit errors.
+fn check_only_lines(
+    content: &str,
+    filename: &str,
+    only_lines: &[usize],
+) -> Vec<CheckResult> {
+    let lines: Vec<&str> = content.lines().collect();
+    let mut results = Vec::new();
+
+    for &line_number in only_lines {
+        let line_text = lines
+            .get(line_number.saturating_sub(1))
+            .map_or("", |l| l.trim());
+
+        results.push(CheckResult {
+            id: "T-TEST-05".to_owned(),
+            severity: Severity::Error,
+            title: ".only() in committed code".to_owned(),
+            message: format!("Remove .only() before committing: {line_text}"),
+            file: Some(filename.to_owned()),
+            line: Some(line_number),
+        });
+    }
+
+    results
+}
+
+/// Grep-based fallback for T-TEST-05 when tree-sitter parse fails.
+fn check_only_in_source_grep(content: &str, filename: &str) -> Vec<CheckResult> {
     let only_patterns = ["test.only(", "describe.only(", "it.only("];
     let mut results = Vec::new();
 
@@ -373,5 +467,120 @@ mod tests {
             results.is_empty(),
             "Clean source should produce no T-TEST-05 results"
         );
+    }
+
+    // ---- T-TEST-04 tree-sitter: string false-positive rejection ----
+
+    #[test]
+    fn t_test_04_skip_in_string_not_flagged() {
+        let content = "const s = \"test.skip('broken', () => {})\";\nexport default s;";
+        let results = check_skip_without_reason_content(content, "app.test.ts");
+        assert!(
+            results.is_empty(),
+            "test.skip inside string should not be flagged (tree-sitter)"
+        );
+    }
+
+    #[test]
+    fn t_test_04_skip_in_comment_not_flagged() {
+        let content = "// test.skip('broken', () => {})\nconst x = 1;";
+        let results = check_skip_without_reason_content(content, "app.test.ts");
+        assert!(
+            results.is_empty(),
+            "test.skip inside comment should not be flagged (tree-sitter)"
+        );
+    }
+
+    #[test]
+    fn t_test_04_skip_in_template_not_flagged() {
+        let content = "const s = `test.skip('broken', () => {})`;\nexport default s;";
+        let results = check_skip_without_reason_content(content, "app.test.ts");
+        assert!(
+            results.is_empty(),
+            "test.skip inside template literal should not be flagged (tree-sitter)"
+        );
+    }
+
+    // ---- T-TEST-04 / T-TEST-05: TSX files parse with TSX grammar, not TS ----
+
+    #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion on known-length vec
+    fn t_test_04_tsx_jsx_content_uses_treesitter() {
+        // JSX syntax that would fail TypeScript-only grammar, forcing grep fallback
+        let content = "const App = () => <div>test</div>;\ndescribe.skip('test', () => {});";
+        let results = check_skip_without_reason_content(content, "app.test.tsx");
+        assert_eq!(results.len(), 1, "Should detect .skip() in TSX via tree-sitter");
+        assert_eq!(results[0].id, "T-TEST-04");
+        assert_eq!(results[0].severity, Severity::Warn);
+        assert_eq!(results[0].line, Some(2));
+    }
+
+    #[test]
+    fn t_test_04_tsx_skip_in_string_not_flagged() {
+        // TSX content with JSX AND test.skip inside a string — tree-sitter should reject it,
+        // but grep fallback would false-positive. This proves TSX grammar is used.
+        let content =
+            "const App = () => <div>{\"test.skip('broken', () => {})\"}</div>;\nexport default App;";
+        let results = check_skip_without_reason_content(content, "app.test.tsx");
+        assert!(
+            results.is_empty(),
+            "test.skip inside JSX string should not be flagged when TSX grammar is used"
+        );
+    }
+
+    #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion on known-length vec
+    fn t_test_05_tsx_jsx_content_uses_treesitter() {
+        // JSX syntax that would fail TypeScript-only grammar, forcing grep fallback
+        let content = "const App = () => <div>test</div>;\nit.only('test', () => {});";
+        let results = check_only_in_source_content(content, "app.test.tsx");
+        assert_eq!(results.len(), 1, "Should detect .only() in TSX via tree-sitter");
+        assert_eq!(results[0].id, "T-TEST-05");
+        assert_eq!(results[0].severity, Severity::Error);
+        assert_eq!(results[0].line, Some(2));
+    }
+
+    #[test]
+    fn t_test_05_tsx_only_in_string_not_flagged() {
+        // TSX content with JSX AND describe.only inside a string — tree-sitter should reject it,
+        // but grep fallback would false-positive. This proves TSX grammar is used.
+        let content = "const App = () => <div>{\"describe.only('suite', () => {})\"}</div>;\nexport default App;";
+        let results = check_only_in_source_content(content, "app.test.tsx");
+        assert!(
+            results.is_empty(),
+            "describe.only inside JSX string should not be flagged when TSX grammar is used"
+        );
+    }
+
+    // ---- T-TEST-05 tree-sitter: string false-positive rejection ----
+
+    #[test]
+    fn t_test_05_only_in_string_not_flagged() {
+        let content = "const s = \"describe.only('suite', () => {})\";\nexport default s;";
+        let results = check_only_in_source_content(content, "app.test.ts");
+        assert!(
+            results.is_empty(),
+            "describe.only inside string should not be flagged (tree-sitter)"
+        );
+    }
+
+    #[test]
+    fn t_test_05_only_in_comment_not_flagged() {
+        let content = "// it.only('test', () => {})\nconst x = 1;";
+        let results = check_only_in_source_content(content, "app.test.ts");
+        assert!(
+            results.is_empty(),
+            "it.only inside comment should not be flagged (tree-sitter)"
+        );
+    }
+
+    #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion on known-length vec
+    fn t_test_05_only_multiple_detected() {
+        let content = "it.only('a', () => {});\ndescribe.only('b', () => {});";
+        let results = check_only_in_source_content(content, "app.test.ts");
+        assert_eq!(results.len(), 2, "Should flag both .only() calls");
+        assert_eq!(results[0].id, "T-TEST-05");
+        assert_eq!(results[1].id, "T-TEST-05");
     }
 }

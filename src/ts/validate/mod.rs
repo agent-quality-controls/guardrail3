@@ -7,6 +7,7 @@ mod npmrc_check;
 mod package_check;
 pub mod source_scan;
 pub mod test_checks;
+mod ts_comment_checks;
 mod tsconfig_check;
 
 use std::path::Path;

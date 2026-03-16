@@ -222,7 +222,12 @@ fn check_derive_inventory(rs_files: &[String], workspace_root: &Path) -> Vec<Che
         let Some(content) = crate::fs::read_file(path) else {
             continue;
         };
-        let (w, wo) = count_deserialize_structs(&content);
+        let (w, wo) = if let Some(parsed) = super::ast_helpers::parse_file(&content) {
+            let derives = super::ast_helpers::find_derive_attributes(&parsed);
+            count_deserialize_structs_ast(&derives)
+        } else {
+            count_deserialize_structs(&content)
+        };
         with_validate = with_validate.saturating_add(w);
         without_validate = without_validate.saturating_add(wo);
     }
@@ -238,6 +243,31 @@ fn check_derive_inventory(rs_files: &[String], workspace_root: &Path) -> Vec<Che
         file: Some(workspace_root.display().to_string()),
         line: None,
     }]
+}
+
+/// Count structs that derive Deserialize using AST when possible, grep fallback otherwise.
+fn count_deserialize_structs_ast(derives: &[super::ast_helpers::DeriveInfo]) -> (usize, usize) {
+    let mut with_validate: usize = 0;
+    let mut without_validate: usize = 0;
+
+    for info in derives {
+        let has_deserialize = info.macros.iter().any(|m| {
+            m == "Deserialize" || m.ends_with("::Deserialize")
+        });
+        if !has_deserialize {
+            continue;
+        }
+        let has_validate = info.macros.iter().any(|m| {
+            m == "Validate" || m.ends_with("::Validate")
+        });
+        if has_validate {
+            with_validate = with_validate.saturating_add(1);
+        } else {
+            without_validate = without_validate.saturating_add(1);
+        }
+    }
+
+    (with_validate, without_validate)
 }
 
 /// Count structs that derive Deserialize, and how many of those also have Validate.

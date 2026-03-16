@@ -2,13 +2,22 @@
 //!
 //! These functions parse Rust source into an AST and inspect it
 //! structurally — no grep, no false positives from strings/comments.
+//!
+//! Visitor-based checks (unsafe, forbidden macros, unwrap/expect, derive,
+//! test functions, pub functions, ignore attributes) live in [`super::ast_visitors`].
 
 use proc_macro2 as _; // reason: span-locations feature needed for syn span.start()
 use syn::spanned::Spanned;
 use syn::visit::Visit;
 
 /// A source location (1-based line number) paired with a descriptive string (lint name, method name, etc.).
-type Located = (usize, String);
+pub(crate) type Located = (usize, String);
+
+// Re-export all public items from ast_visitors so callers don't need to change imports.
+pub use super::ast_visitors::{
+    count_pub_functions, count_test_functions, find_derive_attributes, find_forbidden_macros,
+    find_ignore_attributes, find_unsafe_usage, find_unwrap_expect, has_test_functions, DeriveInfo,
+};
 
 /// Parse a Rust source file. Returns `None` if parsing fails.
 pub fn parse_file(source: &str) -> Option<syn::File> {
@@ -51,34 +60,13 @@ pub fn find_garde_skips(file: &syn::File) -> Vec<usize> {
     v.out
 }
 
-/// Find lines with `unsafe` blocks or `unsafe fn` declarations.
-pub fn find_unsafe_usage(file: &syn::File) -> Vec<usize> {
-    let mut v = UnsafeVisitor { out: Vec::new() };
-    v.visit_file(file);
-    v.out
-}
-
-/// Find `todo!()`, `unimplemented!()`, `panic!()`. Returns `(line, macro_name)`.
-pub fn find_forbidden_macros(file: &syn::File) -> Vec<Located> {
-    let mut v = ForbiddenMacroVisitor { out: Vec::new() };
-    v.visit_file(file);
-    v.out
-}
-
-/// Find `.unwrap()` and `.expect()` calls. Returns `(line, method_name)`.
-pub fn find_unwrap_expect(file: &syn::File) -> Vec<Located> {
-    let mut v = UnwrapExpectVisitor { out: Vec::new() };
-    v.visit_file(file);
-    v.out
-}
-
-/// Find `use std::fs` import lines.
+/// Find `use std::fs` import lines. Skips imports gated by `#[cfg(test)]`.
 pub fn find_std_fs_imports(file: &syn::File) -> Vec<usize> {
     file.items
         .iter()
         .filter_map(|item| {
             if let syn::Item::Use(u) = item {
-                if use_tree_matches_std_fs(&u.tree) {
+                if use_tree_matches_std_fs(&u.tree) && !has_cfg_test_attr(&u.attrs) {
                     return Some(u.span().start().line);
                 }
             }
@@ -96,11 +84,19 @@ pub fn count_use_statements(file: &syn::File) -> usize {
 }
 
 // ---------------------------------------------------------------------------
-// Internal
+// Internal helpers (pub(super) for use by ast_visitors)
 // ---------------------------------------------------------------------------
 
-fn span_line(span: proc_macro2::Span) -> usize {
+pub(super) fn span_line(span: proc_macro2::Span) -> usize {
     span.start().line
+}
+
+pub(super) fn path_to_string(path: &syn::Path) -> String {
+    path.segments
+        .iter()
+        .map(|seg| seg.ident.to_string())
+        .collect::<Vec<_>>()
+        .join("::")
 }
 
 fn extract_allow_lints(attr: &syn::Attribute, out: &mut Vec<Located>) {
@@ -150,6 +146,22 @@ impl syn::parse::Parse for LintList {
     }
 }
 
+/// Check if an attribute list contains `#[cfg(test)]`.
+fn has_cfg_test_attr(attrs: &[syn::Attribute]) -> bool {
+    for attr in attrs {
+        if !attr.path().is_ident("cfg") {
+            continue;
+        }
+        // Parse the cfg argument and check if it's just `test`
+        if let Ok(nested) = attr.parse_args::<syn::Ident>() {
+            if nested == "test" {
+                return true;
+            }
+        }
+    }
+    false
+}
+
 fn use_tree_matches_std_fs(tree: &syn::UseTree) -> bool {
     if let syn::UseTree::Path(p) = tree {
         if p.ident == "std" {
@@ -167,14 +179,6 @@ fn use_subtree_is_fs(tree: &syn::UseTree) -> bool {
         syn::UseTree::Group(g) => g.items.iter().any(use_subtree_is_fs),
         syn::UseTree::Glob(_) => false,
     }
-}
-
-fn path_to_string(path: &syn::Path) -> String {
-    path.segments
-        .iter()
-        .map(|seg| seg.ident.to_string())
-        .collect::<Vec<_>>()
-        .join("::")
 }
 
 fn has_garde_skip(attrs: &[syn::Attribute]) -> Option<usize> {
@@ -210,7 +214,7 @@ fn collect_cfg_attr_allows(attrs: &[syn::Attribute], out: &mut Vec<Located>) {
 }
 
 #[allow(clippy::wildcard_enum_match_arm)] // reason: syn Item has many variants, exhaustive match is impractical
-fn item_attrs(item: &syn::Item) -> &[syn::Attribute] {
+pub(super) fn item_attrs(item: &syn::Item) -> &[syn::Attribute] {
     match item {
         syn::Item::Fn(f) => &f.attrs,
         syn::Item::Struct(s) => &s.attrs,
@@ -227,7 +231,7 @@ fn item_attrs(item: &syn::Item) -> &[syn::Attribute] {
 }
 
 #[allow(clippy::wildcard_enum_match_arm)] // reason: syn ImplItem has many variants, exhaustive match is impractical
-fn impl_item_attrs(item: &syn::ImplItem) -> &[syn::Attribute] {
+pub(super) fn impl_item_attrs(item: &syn::ImplItem) -> &[syn::Attribute] {
     match item {
         syn::ImplItem::Fn(f) => &f.attrs,
         syn::ImplItem::Type(t) => &t.attrs,
@@ -247,7 +251,7 @@ fn trait_item_attrs(item: &syn::TraitItem) -> &[syn::Attribute] {
 }
 
 // ---------------------------------------------------------------------------
-// Visitors
+// Visitors (allow/cfg_attr/garde — kept here with their helper functions)
 // ---------------------------------------------------------------------------
 
 struct ItemAllowVisitor {
@@ -297,66 +301,6 @@ impl<'ast> Visit<'ast> for GardeSkipVisitor {
             self.out.push(line);
         }
         syn::visit::visit_item_struct(self, n);
-    }
-}
-
-struct UnsafeVisitor {
-    out: Vec<usize>,
-}
-impl<'ast> Visit<'ast> for UnsafeVisitor {
-    fn visit_expr_unsafe(&mut self, n: &'ast syn::ExprUnsafe) {
-        self.out.push(span_line(n.unsafe_token.span));
-        syn::visit::visit_expr_unsafe(self, n);
-    }
-    fn visit_item_fn(&mut self, n: &'ast syn::ItemFn) {
-        if let Some(tok) = n.sig.unsafety {
-            self.out.push(span_line(tok.span));
-        }
-        syn::visit::visit_item_fn(self, n);
-    }
-    fn visit_impl_item_fn(&mut self, n: &'ast syn::ImplItemFn) {
-        if let Some(tok) = n.sig.unsafety {
-            self.out.push(span_line(tok.span));
-        }
-        syn::visit::visit_impl_item_fn(self, n);
-    }
-    fn visit_item_impl(&mut self, n: &'ast syn::ItemImpl) {
-        if let Some(tok) = n.unsafety {
-            self.out.push(span_line(tok.span));
-        }
-        syn::visit::visit_item_impl(self, n);
-    }
-    fn visit_item_trait(&mut self, n: &'ast syn::ItemTrait) {
-        if let Some(tok) = n.unsafety {
-            self.out.push(span_line(tok.span));
-        }
-        syn::visit::visit_item_trait(self, n);
-    }
-}
-
-struct ForbiddenMacroVisitor {
-    out: Vec<Located>,
-}
-impl<'ast> Visit<'ast> for ForbiddenMacroVisitor {
-    fn visit_macro(&mut self, n: &'ast syn::Macro) {
-        let name = path_to_string(&n.path);
-        if matches!(name.as_str(), "todo" | "unimplemented" | "unreachable" | "panic") {
-            self.out.push((span_line(n.path.span()), name));
-        }
-        syn::visit::visit_macro(self, n);
-    }
-}
-
-struct UnwrapExpectVisitor {
-    out: Vec<Located>,
-}
-impl<'ast> Visit<'ast> for UnwrapExpectVisitor {
-    fn visit_expr_method_call(&mut self, n: &'ast syn::ExprMethodCall) {
-        let m = n.method.to_string();
-        if m == "unwrap" || m == "expect" {
-            self.out.push((span_line(n.method.span()), m));
-        }
-        syn::visit::visit_expr_method_call(self, n);
     }
 }
 
@@ -472,77 +416,6 @@ mod tests {
     }
 
     #[test]
-    fn unsafe_block_found() {
-        let src = "fn foo() { unsafe { std::ptr::null::<u8>(); } }";
-        assert_eq!(
-            find_unsafe_usage(&must_parse(src)).len(),
-            1,
-            "should find unsafe block"
-        );
-    }
-
-    #[test]
-    fn unsafe_fn_found() {
-        assert_eq!(
-            find_unsafe_usage(&must_parse("unsafe fn d() {}")).len(),
-            1,
-            "unsafe fn"
-        );
-    }
-
-    #[test]
-    fn unsafe_in_string_not_found() {
-        let src = "fn foo() { let _s = \"unsafe { bad() }\"; }";
-        assert!(
-            find_unsafe_usage(&must_parse(src)).is_empty(),
-            "no match in string"
-        );
-    }
-
-    #[test]
-    #[allow(clippy::indexing_slicing)] // reason: test assertion on known-length vector
-    fn forbidden_macros_found() {
-        let m1 = find_forbidden_macros(&must_parse("fn f() { todo!(); }"));
-        assert_eq!(m1.len(), 1, "todo found");
-        assert_eq!(m1[0].1, "todo");
-        let m2 = find_forbidden_macros(&must_parse("fn f() { unimplemented!(); }"));
-        assert_eq!(m2.len(), 1, "unimplemented found");
-        assert_eq!(m2[0].1, "unimplemented");
-        let m3 = find_forbidden_macros(&must_parse("fn f() { panic!(\"oh\"); }"));
-        assert_eq!(m3.len(), 1, "panic found");
-        assert_eq!(m3[0].1, "panic");
-    }
-
-    #[test]
-    fn todo_in_string_not_found() {
-        let src = "fn foo() { let _s = \"todo!()\"; }";
-        assert!(
-            find_forbidden_macros(&must_parse(src)).is_empty(),
-            "no match in string"
-        );
-    }
-
-    #[test]
-    #[allow(clippy::indexing_slicing)] // reason: test assertion on known-length vector
-    fn unwrap_expect_found() {
-        let u = find_unwrap_expect(&must_parse("fn f() { Some(1).unwrap(); }"));
-        assert_eq!(u.len(), 1, "unwrap found");
-        assert_eq!(u[0].1, "unwrap");
-        let e = find_unwrap_expect(&must_parse("fn f() { Some(1).expect(\"m\"); }"));
-        assert_eq!(e.len(), 1, "expect found");
-        assert_eq!(e[0].1, "expect");
-    }
-
-    #[test]
-    fn unwrap_in_string_not_found() {
-        let src = "fn foo() { let _s = \".unwrap()\"; }";
-        assert!(
-            find_unwrap_expect(&must_parse(src)).is_empty(),
-            "no match in string"
-        );
-    }
-
-    #[test]
     fn std_fs_import_found() {
         assert_eq!(
             find_std_fs_imports(&must_parse("use std::fs;\nfn main() {}")).len(),
@@ -582,5 +455,16 @@ mod tests {
             0,
             "no uses"
         );
+    }
+
+    #[test]
+    fn count_use_statements_ignores_strings() {
+        let code = r#"
+fn foo() {
+    let s = "use std::fs;";
+    let t = "use std::collections::BTreeMap;";
+}
+"#;
+        assert_eq!(count_use_statements(&must_parse(code)), 0);
     }
 }
