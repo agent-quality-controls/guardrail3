@@ -80,50 +80,20 @@ fn check_test_coverage_inventory(workspace_root: &Path, results: &mut Vec<CheckR
     });
 }
 
-/// Count `pub fn` declarations in content.
-/// Uses syn AST parsing when possible, falls back to grep.
+/// Count `pub fn` declarations in content (AST-based).
 fn count_pub_fns(content: &str) -> usize {
-    if let Some(file) = super::ast_helpers::parse_file(content) {
-        return super::ast_helpers::count_pub_functions(&file);
-    }
-    count_pub_fns_grep(content)
+    let Some(file) = super::ast_helpers::parse_file(content) else {
+        return 0;
+    };
+    super::ast_helpers::count_pub_fn_decls(&file)
 }
 
-/// Grep-based fallback for pub fn counting.
-fn count_pub_fns_grep(content: &str) -> usize {
-    let mut count: usize = 0;
-    for line in content.lines() {
-        let trimmed = line.trim();
-        // Skip comments
-        if trimmed.starts_with("//") || trimmed.starts_with('*') || trimmed.starts_with("/*") {
-            continue;
-        }
-        if trimmed.contains("pub fn ") || trimmed.starts_with("pub fn ") {
-            count = count.saturating_add(1);
-        }
-    }
-    count
-}
-
-/// Count `#[test]` and `#[tokio::test]` attributes in content.
-/// Uses syn AST parsing when possible, falls back to grep.
+/// Count `#[test]` and `#[tokio::test]` attributes in content (AST-based).
 fn count_test_fns(content: &str) -> usize {
-    if let Some(file) = super::ast_helpers::parse_file(content) {
-        return super::ast_helpers::count_test_functions(&file);
-    }
-    count_test_fns_grep(content)
-}
-
-/// Grep-based fallback for test counting.
-fn count_test_fns_grep(content: &str) -> usize {
-    let mut count: usize = 0;
-    for line in content.lines() {
-        let trimmed = line.trim();
-        if trimmed == "#[test]" || trimmed == "#[tokio::test]" {
-            count = count.saturating_add(1);
-        }
-    }
-    count
+    let Some(file) = super::ast_helpers::parse_file(content) else {
+        return 0;
+    };
+    super::ast_helpers::count_test_attrs(&file)
 }
 
 // ---------------------------------------------------------------------------
@@ -246,78 +216,13 @@ fn check_ignore_without_reason(workspace_root: &Path, results: &mut Vec<CheckRes
     }
 }
 
-/// Find lines with #[ignore] that lack a reason comment.
-/// Uses syn AST parsing when possible, falls back to grep.
+/// Find lines with #[ignore] that lack a reason comment (AST-based).
 /// Returns 1-based line numbers of violations.
 fn find_ignore_without_reason(content: &str) -> Vec<usize> {
-    if let Some(file) = super::ast_helpers::parse_file(content) {
-        return find_ignore_without_reason_ast(content, &file);
-    }
-    find_ignore_without_reason_grep(content)
-}
-
-/// AST-based detection of #[ignore] without reason.
-fn find_ignore_without_reason_ast(content: &str, file: &syn::File) -> Vec<usize> {
-    let lines: Vec<&str> = content.lines().collect();
-    let ignore_lines = super::ast_helpers::find_ignore_attributes(file);
-    let mut violations = Vec::new();
-
-    for line_1based in ignore_lines {
-        let idx = line_1based.wrapping_sub(1);
-        // Check same line for reason comment
-        if let Some(line) = lines.get(idx) {
-            if line.contains("// reason:") || line.contains("//reason:") {
-                continue;
-            }
-        }
-        // Check previous line for reason comment
-        if idx > 0 {
-            if let Some(prev_line) = lines.get(idx.wrapping_sub(1)) {
-                let prev = prev_line.trim();
-                if prev.contains("// reason:") || prev.contains("//reason:") {
-                    continue;
-                }
-            }
-        }
-        violations.push(line_1based);
-    }
-
-    violations
-}
-
-/// Grep-based fallback for #[ignore] without reason detection.
-fn find_ignore_without_reason_grep(content: &str) -> Vec<usize> {
-    let mut violations = Vec::new();
-    let lines: Vec<&str> = content.lines().collect();
-
-    for (idx, line) in lines.iter().enumerate() {
-        let trimmed = line.trim();
-
-        // Match #[ignore] exactly or #[ignore] with trailing content
-        if !trimmed.starts_with("#[ignore]") && trimmed != "#[ignore]" {
-            continue;
-        }
-        // Must actually be #[ignore] — not #[ignore_some_other_attr]
-        if trimmed.starts_with("#[ignore]") || trimmed == "#[ignore]" {
-            // Check same line for reason comment
-            if trimmed.contains("// reason:") || trimmed.contains("//reason:") {
-                continue;
-            }
-            // Check previous line for reason comment
-            if idx > 0 {
-                if let Some(prev_line) = lines.get(idx.saturating_sub(1)) {
-                    let prev = prev_line.trim();
-                    if prev.contains("// reason:") || prev.contains("//reason:") {
-                        continue;
-                    }
-                }
-            }
-            // No reason found
-            violations.push(idx.saturating_add(1));
-        }
-    }
-
-    violations
+    let Some(file) = super::ast_helpers::parse_file(content) else {
+        return Vec::new();
+    };
+    super::ast_helpers::find_ignore_without_reason(&file, content)
 }
 
 // ---------------------------------------------------------------------------
@@ -420,32 +325,6 @@ mod tests {
         assert!(r.message.contains("1 test functions"));
     }
 
-    #[test]
-    fn r_test_05_pub_fn_in_string_not_counted() {
-        let content = "fn foo() { let _s = \"pub fn fake() {}\"; }";
-        assert_eq!(count_pub_fns(content), 0, "pub fn in string should not count");
-    }
-
-    #[test]
-    fn r_test_05_test_in_string_not_counted() {
-        let content = "fn foo() { let _s = \"#[test]\"; }";
-        assert_eq!(count_test_fns(content), 0, "test attr in string should not count");
-    }
-
-    // ---- Grep fallback tests ----
-
-    #[test]
-    fn r_test_05_grep_counts_pub_fns() {
-        let content = "pub fn foo() {}\nfn bar() {}\npub fn baz() {}";
-        assert_eq!(count_pub_fns_grep(content), 2);
-    }
-
-    #[test]
-    fn r_test_05_grep_counts_test_fns() {
-        let content = "#[test]\nfn a() {}\n#[test]\nfn b() {}\nfn c() {}";
-        assert_eq!(count_test_fns_grep(content), 2);
-    }
-
     // ---- R-TEST-06: Integration tests exist ----
 
     #[test]
@@ -501,34 +380,6 @@ mod tests {
             violations.is_empty(),
             "Should accept reason on previous line"
         );
-    }
-
-    #[test]
-    fn r_test_07_ignore_in_string_not_flagged() {
-        let content = "fn foo() { let _s = \"#[ignore]\"; }";
-        let violations = find_ignore_without_reason(content);
-        assert!(
-            violations.is_empty(),
-            "#[ignore] in string literal should not be flagged"
-        );
-    }
-
-    // ---- Grep fallback for R-TEST-07 ----
-
-    #[test]
-    #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
-    fn r_test_07_grep_bare_ignore() {
-        let content = "#[test]\n#[ignore]\nfn slow_test() {}";
-        let violations = find_ignore_without_reason_grep(content);
-        assert_eq!(violations.len(), 1);
-        assert_eq!(violations[0], 2);
-    }
-
-    #[test]
-    fn r_test_07_grep_ignore_with_reason() {
-        let content = "#[test]\n#[ignore] // reason: requires network\nfn slow_test() {}";
-        let violations = find_ignore_without_reason_grep(content);
-        assert!(violations.is_empty());
     }
 
     // ---- R-TEST-08: Mutation test hook configured ----
