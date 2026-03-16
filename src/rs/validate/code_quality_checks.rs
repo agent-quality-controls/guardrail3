@@ -155,7 +155,28 @@ pub fn check_direct_fs_usage(
         });
     }
 
-    // TODO: add syn visitor for inline std::fs:: calls (task #37)
+    // Inline std::fs:: calls via syn expression visitor
+    for line_num in ast_helpers::find_inline_std_fs_calls(&parsed) {
+        // Skip if already reported by use-import check
+        if results.iter().any(|r| r.id == "R58" && r.line == Some(line_num)) {
+            continue;
+        }
+        let trimmed = content
+            .lines()
+            .nth(line_num.saturating_sub(1))
+            .unwrap_or("")
+            .trim();
+        results.push(CheckResult {
+            id: "R58".to_owned(),
+            severity: Severity::Error,
+            title: "Direct std::fs call".to_owned(),
+            message: format!(
+                "Use centralized fs module instead of direct std::fs call: {trimmed}"
+            ),
+            file: Some(path.display().to_string()),
+            line: Some(line_num),
+        });
+    }
 }
 
 #[cfg(test)]
@@ -197,9 +218,8 @@ mod tests {
     }
 
     #[test]
-    #[ignore] // reason: inline std::fs:: type detection will be added by task #37
     fn r58_allows_type_references() {
-        let content = "let p = std::fs::Permissions::from_mode(0o755);";
+        let content = "fn foo() { let p = std::fs::Permissions::from_mode(0o755); }";
         let path = Path::new("src/foo.rs");
         let mut results = Vec::new();
         check_direct_fs_usage(path, content, false, &mut results);
@@ -210,9 +230,8 @@ mod tests {
     }
 
     #[test]
-    #[ignore] // reason: inline std::fs:: call detection will be added by task #37
     fn r58_catches_read_to_string() {
-        let content = "let s = std::fs::read_to_string(path);";
+        let content = "fn foo() { let s = std::fs::read_to_string(\"x\").unwrap(); }";
         let path = Path::new("src/foo.rs");
         let mut results = Vec::new();
         check_direct_fs_usage(path, content, false, &mut results);
@@ -224,8 +243,8 @@ mod tests {
     }
 
     #[test]
-    #[ignore] // reason: inline std::fs:: type detection will be added by task #37
     fn r58_allows_metadata_type() {
+        // Type in function signature — syn treats this as Type::Path, not Expr::Path
         let content = "fn check(m: std::fs::Metadata) {}";
         let path = Path::new("src/foo.rs");
         let mut results = Vec::new();
