@@ -18,7 +18,7 @@ release_always = false
 name = "your-crate-name"
 publish = true
 
-# Add more [[package]] entries for monorepos
+# Add more [[package]] entries for workspaces with multiple publishable crates
 "#,
 };
 
