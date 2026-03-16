@@ -6,7 +6,7 @@
 
 use libfuzzer_sys::fuzz_target;
 
-use guardrail3::config::types::GuardrailConfig;
+use guardrail3::domain::config::types::GuardrailConfig;
 
 fuzz_target!(|data: &[u8]| {
     // Only try valid UTF-8 — TOML is text-based

@@ -18,9 +18,13 @@ use tempfile as _;
 
 use clap::Parser;
 
+use guardrail3::adapters::outbound::fs::RealFileSystem;
+use guardrail3::adapters::outbound::tool_runner::RealToolChecker;
+use guardrail3::app::discover;
+use guardrail3::app::{hooks, rs, ts};
 use guardrail3::cli::{Cli, Commands, HooksCommands, RsCommands, TsCommands, ValidateArgs};
-use guardrail3::report::types::ValidateDomains;
-use guardrail3::{commands, discover, hooks, report, rs, ts};
+use guardrail3::domain::report::ValidateDomains;
+use guardrail3::{commands, report};
 
 #[allow(clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI entry point — stderr output and process::exit for error codes are intentional
 #[allow(clippy::too_many_lines)] // reason: CLI dispatch for all subcommands
@@ -53,15 +57,19 @@ fn main() {
                     eprintln!("Error: cannot resolve path '{}'", args.path);
                     std::process::exit(1);
                 };
+                let fs = RealFileSystem;
+                let tc = RealToolChecker;
                 let domains = domains_from_args(&args);
-                let project = discover::detect_project(&abs_path);
+                let project = discover::detect_project(&fs, &abs_path);
                 let scoped_files = commands::validate::resolve_scoped_files_pub(&args, &abs_path);
                 let report = rs::validate::run(
+                    &fs,
                     &abs_path,
                     &project,
                     scoped_files.as_deref(),
                     &domains,
                     args.thorough,
+                    &tc,
                 );
                 match args.format.as_str() {
                     "json" => report::json::print_report(&report),
@@ -90,10 +98,11 @@ fn main() {
                     eprintln!("Error: cannot resolve path '{}'", args.path);
                     std::process::exit(1);
                 };
+                let fs = RealFileSystem;
                 let domains = domains_from_args(&args);
                 let scoped_files = commands::validate::resolve_scoped_files_pub(&args, &abs_path);
                 let scoped_ref = scoped_files.as_deref();
-                let report = ts::validate::run(&abs_path, scoped_ref, &domains);
+                let report = ts::validate::run(&fs, &abs_path, scoped_ref, &domains);
                 match args.format.as_str() {
                     "json" => report::json::print_report(&report),
                     "md" | "markdown" => report::markdown::print_report(&report),
@@ -117,13 +126,17 @@ fn main() {
                     eprintln!("Error: cannot resolve path '{}'", args.path);
                     std::process::exit(1);
                 };
+                let fs = RealFileSystem;
+                let tc = RealToolChecker;
                 let domains = domains_from_args(&args);
-                let project = discover::detect_project(&abs_path);
+                let project = discover::detect_project(&fs, &abs_path);
                 let report = hooks::validate::run(
+                    &fs,
                     &abs_path,
                     project.has_rust,
                     project.has_typescript,
                     &domains,
+                    &tc,
                 );
                 match args.format.as_str() {
                     "json" => report::json::print_report(&report),

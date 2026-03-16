@@ -8,7 +8,10 @@ use std::path::Path;
 #[allow(clippy::too_many_lines)] // reason: sequential scaffolding steps are clearer as one function
 pub fn run_rs(profile: &str, path: &str, force: bool) {
     let project_path = Path::new(path);
+    let mut created: Vec<String> = Vec::new();
+    let mut skipped: Vec<String> = Vec::new();
 
+    // guardrail3.toml
     let config_path = project_path.join("guardrail3.toml");
     if config_path.exists() && !force {
         eprintln!(
@@ -18,15 +21,13 @@ pub fn run_rs(profile: &str, path: &str, force: bool) {
         eprintln!("Use --force to overwrite.");
         std::process::exit(1);
     }
-
-    let config_content = generate_rs_config_content(profile);
-
-    if let Err(e) = crate::fs::write_file(&config_path, &config_content) {
+    if let Err(e) = crate::fs::write_file(&config_path, &generate_rs_config_content(profile)) {
         eprintln!("Error writing guardrail3.toml: {e}");
         std::process::exit(1);
     }
+    created.push(format!("guardrail3.toml (profile: {profile})"));
 
-    // Create local/ directory with empty override files
+    // local/ directory with override files
     let local_dir = project_path.join("local");
     if let Err(e) = crate::fs::create_dir_all(&local_dir) {
         eprintln!("Error creating local/ directory: {e}");
@@ -34,77 +35,77 @@ pub fn run_rs(profile: &str, path: &str, force: bool) {
     }
 
     let local_files = [
-        (
-            "clippy-methods.toml",
-            "# Additional disallowed-methods entries (TOML array-of-tables format)\n# Example:\n#     { path = \"some::method\", reason = \"Use alternative instead\" },\n",
-        ),
-        (
-            "clippy-types.toml",
-            "# Additional disallowed-types entries (TOML array-of-tables format)\n# Example:\n#     { path = \"some::Type\", reason = \"Use alternative instead\" },\n",
-        ),
-        (
-            "deny-bans.toml",
-            "# Additional [bans] deny entries for deny.toml\n# Example:\n#     { name = \"some-crate\", wrappers = [] },\n",
-        ),
-        (
-            "deny-skip.toml",
-            "# Skip entries for deny.toml [bans] section\n# Example:\n#     { crate = \"windows-sys@0.60.2\", reason = \"transitive dep conflict\" },\n",
-        ),
-        (
-            "deny-feature-bans.toml",
-            "# Additional [[bans.features]] entries for deny.toml\n# Example:\n#     [[bans.features]]\n#     name = \"some-crate\"\n#     deny = [\"full\"]\n",
-        ),
+        "clippy-methods.toml",
+        "clippy-types.toml",
+        "deny-bans.toml",
+        "deny-skip.toml",
+        "deny-feature-bans.toml",
     ];
 
-    for (filename, content) in &local_files {
+    let local_templates = [
+        "# Additional disallowed-methods entries (TOML array-of-tables format)\n# Example:\n#     { path = \"some::method\", reason = \"Use alternative instead\" },\n",
+        "# Additional disallowed-types entries (TOML array-of-tables format)\n# Example:\n#     { path = \"some::Type\", reason = \"Use alternative instead\" },\n",
+        "# Additional [bans] deny entries for deny.toml\n# Example:\n#     { name = \"some-crate\", wrappers = [] },\n",
+        "# Skip entries for deny.toml [bans] section\n# Example:\n#     { crate = \"windows-sys@0.60.2\", reason = \"transitive dep conflict\" },\n",
+        "# Additional [[bans.features]] entries for deny.toml\n# Example:\n#     [[bans.features]]\n#     name = \"some-crate\"\n#     deny = [\"full\"]\n",
+    ];
+
+    for (filename, content) in local_files.iter().zip(local_templates.iter()) {
         let file_path = local_dir.join(filename);
         if file_path.exists() && !force {
-            println!("  Skipping existing: local/{filename}");
+            skipped.push(format!("local/{filename}"));
             continue;
         }
         if let Err(e) = crate::fs::write_file(&file_path, content) {
             eprintln!("Error writing local/{filename}: {e}");
             std::process::exit(1);
         }
+        created.push(format!("local/{filename}"));
     }
 
-    // Scaffold release config files for service profile
+    // Release config files for service profile
     if profile == "service" {
         let release_files = [
             (
                 "release-plz.toml",
-                crate::modules::release::RELEASE_PLZ_TOML.content,
+                crate::domain::modules::release::RELEASE_PLZ_TOML.content,
             ),
-            ("cliff.toml", crate::modules::release::CLIFF_TOML.content),
+            ("cliff.toml", crate::domain::modules::release::CLIFF_TOML.content),
         ];
 
         for (filename, content) in &release_files {
             let file_path = project_path.join(filename);
             if file_path.exists() && !force {
-                println!("  Skipping existing: {filename}");
+                skipped.push((*filename).to_owned());
                 continue;
             }
             if let Err(e) = crate::fs::write_file(&file_path, content) {
                 eprintln!("Error writing {filename}: {e}");
                 std::process::exit(1);
             }
+            created.push((*filename).to_owned());
         }
     }
 
+    // Honest summary
     println!(
         "Initialized Rust guardrail3 project at {}",
         project_path.display()
     );
-    println!("  Created: guardrail3.toml (profile: {profile})");
-    println!("  Created: local/ directory with override files");
-    if profile == "service" {
-        println!("  Created: release-plz.toml and cliff.toml");
+    for f in &created {
+        println!("  Created: {f}");
+    }
+    for f in &skipped {
+        println!("  Skipped (already exists): {f}");
+    }
+    if !skipped.is_empty() {
+        println!("  Use --force to overwrite existing files.");
     }
     println!();
     println!("Next steps:");
-    println!("  1. Edit guardrail3.toml to configure your project");
+    println!("  1. Edit guardrail3.toml to set workspace_root and crate layers");
     println!("  2. Add project-specific overrides in local/*.toml");
-    println!("  3. Run: guardrail3 generate");
+    println!("  3. Run: guardrail3 rs generate");
 }
 
 /// Initialize TypeScript guardrail3 configuration: appends [typescript] section to existing

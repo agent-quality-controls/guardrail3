@@ -1,4 +1,4 @@
-use super::types::{Report, Severity};
+use crate::domain::report::{Report, Severity};
 
 #[allow(clippy::print_stdout)] // reason: CLI report output to stdout
 pub fn print_report(report: &Report) {

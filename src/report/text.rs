@@ -1,6 +1,6 @@
 use colored::Colorize;
 
-use super::types::{CheckResult, Report, Severity};
+use crate::domain::report::{CheckResult, Report, Severity};
 
 #[allow(clippy::print_stdout)] // reason: CLI report output to stdout
 pub fn print_report(report: &Report) {
