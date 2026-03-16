@@ -369,6 +369,142 @@
           "title": "Crate-level #![allow(...)"
         },
         {
+          "file": "./packages/websmasher-security-txt-parser/tests/comments.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::bool_assert_comparison)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/edge_cases_1.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::bool_assert_comparison)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/edge_cases_2.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::bool_assert_comparison)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/edge_cases_3.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::bool_assert_comparison)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/extensions_1.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::bool_assert_comparison)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/extensions_2.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::bool_assert_comparison)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_1.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::bool_assert_comparison)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_2.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::bool_assert_comparison)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_3.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::bool_assert_comparison)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_4.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::bool_assert_comparison)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_5.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::bool_assert_comparison)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_6.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::bool_assert_comparison)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_7.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::bool_assert_comparison)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/multi_value.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::bool_assert_comparison)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/signature_1.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::bool_assert_comparison)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/signature_2.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::bool_assert_comparison)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/signature_3.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::bool_assert_comparison)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
           "file": "./packages/low-expectations/tests/golden_compare.rs",
           "id": "R30",
           "line": 4,
@@ -657,6 +793,310 @@
           "title": "Crate-level #![allow(...)"
         },
         {
+          "file": "./packages/websmasher-sitemap-parser/tests/basic_urlset.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::doc_markdown)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/bom_encoding.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::doc_markdown)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/cdata.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::doc_markdown)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_hreflang.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::doc_markdown)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_image.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::doc_markdown)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_mobile.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::doc_markdown)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_news.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::doc_markdown)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_pagemaps.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::doc_markdown)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_video.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::doc_markdown)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/malformed_xml.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::doc_markdown)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/multi_extension.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::doc_markdown)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/namespace.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::doc_markdown)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/partial_parse.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::doc_markdown)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/round_trip.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::doc_markdown)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/security.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::doc_markdown)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/sitemapindex.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::doc_markdown)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/size_limits.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::doc_markdown)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/type_detection.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::doc_markdown)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/whitespace.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::doc_markdown)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/wordpress_edge_cases.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::doc_markdown)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/xml_declaration.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::doc_markdown)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/adversarial.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::duplicated_attributes)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/file_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::duplicated_attributes)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/golden.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::duplicated_attributes)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/integration.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::duplicated_attributes)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/link_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::duplicated_attributes)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/structure_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::duplicated_attributes)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/summary_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::duplicated_attributes)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/title_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::duplicated_attributes)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/adversarial.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/common/mod.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/file_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/golden.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/integration.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/link_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/structure_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/summary_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/title_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
           "file": "./packages/websmasher-llms-txt-parser/tests/adversarial.rs",
           "id": "R30",
           "line": 2,
@@ -897,6 +1337,142 @@
           "title": "Crate-level #![allow(...)"
         },
         {
+          "file": "./packages/websmasher-security-txt-parser/tests/comments.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/edge_cases_1.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/edge_cases_2.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/edge_cases_3.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/extensions_1.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/extensions_2.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_1.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_2.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_3.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_4.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_5.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_6.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_7.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/multi_value.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/signature_1.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/signature_2.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/signature_3.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
           "file": "./packages/websmasher-sitemap-parser/tests/adversarial.rs",
           "id": "R30",
           "line": 2,
@@ -905,9 +1481,177 @@
           "title": "Crate-level #![allow(...)"
         },
         {
+          "file": "./packages/websmasher-sitemap-parser/tests/basic_urlset.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/bom_encoding.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/cdata.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_hreflang.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_image.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_mobile.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_news.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_pagemaps.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_video.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
           "file": "./packages/websmasher-sitemap-parser/tests/golden.rs",
           "id": "R30",
           "line": 2,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/malformed_xml.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/multi_extension.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/namespace.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/partial_parse.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/round_trip.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/security.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/sitemapindex.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/size_limits.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/type_detection.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/whitespace.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/wordpress_edge_cases.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/xml_declaration.rs",
+          "id": "R30",
+          "line": 1,
           "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
           "severity": "info",
           "title": "Crate-level #![allow(...)"
@@ -933,6 +1677,326 @@
           "id": "R30",
           "line": 7,
           "message": "#![allow(clippy::format_push_string)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/basic_urlset.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::format_push_string)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/bom_encoding.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::format_push_string)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/cdata.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::format_push_string)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_hreflang.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::format_push_string)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_image.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::format_push_string)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_mobile.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::format_push_string)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_news.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::format_push_string)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_pagemaps.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::format_push_string)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_video.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::format_push_string)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/malformed_xml.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::format_push_string)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/multi_extension.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::format_push_string)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/namespace.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::format_push_string)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/partial_parse.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::format_push_string)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/security.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::format_push_string)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/sitemapindex.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::format_push_string)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/size_limits.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::format_push_string)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/type_detection.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::format_push_string)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/whitespace.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::format_push_string)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/wordpress_edge_cases.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::format_push_string)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/xml_declaration.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::format_push_string)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/basic_urlset.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::get_first)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/bom_encoding.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::get_first)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/cdata.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::get_first)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_hreflang.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::get_first)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_image.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::get_first)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_mobile.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::get_first)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_news.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::get_first)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_pagemaps.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::get_first)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_video.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::get_first)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/malformed_xml.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::get_first)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/multi_extension.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::get_first)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/namespace.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::get_first)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/partial_parse.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::get_first)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/security.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::get_first)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/sitemapindex.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::get_first)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/size_limits.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::get_first)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/type_detection.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::get_first)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/whitespace.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::get_first)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/wordpress_edge_cases.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::get_first)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/xml_declaration.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::get_first)] — crate-wide lint suppression banned",
           "severity": "info",
           "title": "Crate-level #![allow(...)"
         },
@@ -1130,6 +2194,310 @@
         },
         {
           "file": "./packages/websmasher-robots-txt-parser/tests/sitemaps.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/comments.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/edge_cases_1.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/edge_cases_2.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/edge_cases_3.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/extensions_1.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/extensions_2.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_1.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_2.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_3.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_4.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_5.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_6.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_7.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/multi_value.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/signature_1.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/signature_2.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/signature_3.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/basic_urlset.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/bom_encoding.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/cdata.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_hreflang.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_image.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_mobile.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_news.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_pagemaps.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_video.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/malformed_xml.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/multi_extension.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/namespace.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/partial_parse.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/round_trip.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/security.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/sitemapindex.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/size_limits.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/type_detection.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/whitespace.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/wordpress_edge_cases.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/xml_declaration.rs",
           "id": "R30",
           "line": 1,
           "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
@@ -1297,6 +2665,302 @@
           "title": "Crate-level #![allow(...)"
         },
         {
+          "file": "./packages/websmasher-security-txt-parser/tests/comments.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/edge_cases_1.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/edge_cases_2.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/edge_cases_3.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/extensions_1.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/extensions_2.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_1.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_2.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_3.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_4.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_5.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_6.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_7.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/multi_value.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/signature_1.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/signature_2.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/signature_3.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/basic_urlset.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/bom_encoding.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/cdata.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_hreflang.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_image.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_mobile.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_news.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_pagemaps.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_video.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/malformed_xml.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/multi_extension.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/namespace.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/partial_parse.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/security.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/sitemapindex.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/size_limits.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/type_detection.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/whitespace.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/wordpress_edge_cases.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/xml_declaration.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::many_single_char_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
           "file": "./packages/websmasher-robots-txt-parser/tests/adversarial.rs",
           "id": "R30",
           "line": 8,
@@ -1425,6 +3089,78 @@
           "title": "Crate-level #![allow(...)"
         },
         {
+          "file": "./packages/websmasher-llms-txt-audit/tests/adversarial.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::missing_assert_message)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/common/mod.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::missing_assert_message)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/file_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::missing_assert_message)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/golden.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::missing_assert_message)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/integration.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::missing_assert_message)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/link_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::missing_assert_message)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/structure_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::missing_assert_message)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/summary_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::missing_assert_message)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/title_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::missing_assert_message)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
           "file": "./packages/websmasher-sitemap-parser/tests/adversarial.rs",
           "id": "R30",
           "line": 3,
@@ -1433,9 +3169,177 @@
           "title": "Crate-level #![allow(...)"
         },
         {
+          "file": "./packages/websmasher-sitemap-parser/tests/basic_urlset.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::missing_assert_message)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/bom_encoding.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::missing_assert_message)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/cdata.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::missing_assert_message)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_hreflang.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::missing_assert_message)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_image.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::missing_assert_message)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_mobile.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::missing_assert_message)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_news.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::missing_assert_message)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_pagemaps.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::missing_assert_message)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_video.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::missing_assert_message)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
           "file": "./packages/websmasher-sitemap-parser/tests/golden.rs",
           "id": "R30",
           "line": 3,
+          "message": "#![allow(clippy::missing_assert_message)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/malformed_xml.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::missing_assert_message)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/multi_extension.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::missing_assert_message)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/namespace.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::missing_assert_message)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/partial_parse.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::missing_assert_message)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/round_trip.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::missing_assert_message)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/security.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::missing_assert_message)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/sitemapindex.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::missing_assert_message)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/size_limits.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::missing_assert_message)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/type_detection.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::missing_assert_message)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/whitespace.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::missing_assert_message)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/wordpress_edge_cases.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::missing_assert_message)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/xml_declaration.rs",
+          "id": "R30",
+          "line": 1,
           "message": "#![allow(clippy::missing_assert_message)] — crate-wide lint suppression banned",
           "severity": "info",
           "title": "Crate-level #![allow(...)"
@@ -1569,9 +3473,409 @@
           "title": "Crate-level #![allow(...)"
         },
         {
+          "file": "./packages/websmasher-llms-txt-audit/tests/adversarial.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_pass_by_value)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/common/mod.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::needless_pass_by_value)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/file_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_pass_by_value)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/golden.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_pass_by_value)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/integration.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_pass_by_value)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/link_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_pass_by_value)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/structure_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_pass_by_value)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/summary_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_pass_by_value)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/title_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_pass_by_value)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/basic_urlset.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_pass_by_value)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/bom_encoding.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_pass_by_value)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/cdata.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_pass_by_value)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_hreflang.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_pass_by_value)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_image.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_pass_by_value)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_mobile.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_pass_by_value)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_news.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_pass_by_value)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_pagemaps.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_pass_by_value)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_video.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_pass_by_value)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/malformed_xml.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_pass_by_value)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/multi_extension.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_pass_by_value)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/namespace.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_pass_by_value)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/partial_parse.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_pass_by_value)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/round_trip.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_pass_by_value)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/security.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_pass_by_value)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/sitemapindex.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_pass_by_value)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/size_limits.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_pass_by_value)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/type_detection.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_pass_by_value)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/whitespace.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_pass_by_value)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/wordpress_edge_cases.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_pass_by_value)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/xml_declaration.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_pass_by_value)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
           "file": "./packages/websmasher-sitemap-audit/tests/adversarial.rs",
           "id": "R30",
           "line": 9,
+          "message": "#![allow(clippy::needless_raw_string_hashes)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/basic_urlset.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_raw_string_hashes)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/bom_encoding.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_raw_string_hashes)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/cdata.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_raw_string_hashes)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_hreflang.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_raw_string_hashes)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_image.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_raw_string_hashes)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_mobile.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_raw_string_hashes)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_news.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_raw_string_hashes)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_pagemaps.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_raw_string_hashes)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_video.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_raw_string_hashes)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/malformed_xml.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_raw_string_hashes)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/multi_extension.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_raw_string_hashes)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/namespace.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_raw_string_hashes)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/partial_parse.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_raw_string_hashes)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/security.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_raw_string_hashes)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/sitemapindex.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_raw_string_hashes)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/size_limits.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_raw_string_hashes)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/type_detection.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_raw_string_hashes)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/whitespace.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_raw_string_hashes)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/wordpress_edge_cases.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::needless_raw_string_hashes)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/xml_declaration.rs",
+          "id": "R30",
+          "line": 1,
           "message": "#![allow(clippy::needless_raw_string_hashes)] — crate-wide lint suppression banned",
           "severity": "info",
           "title": "Crate-level #![allow(...)"
@@ -1628,6 +3932,78 @@
           "file": "./packages/seo-site-files/tests/sitemap_test.rs",
           "id": "R30",
           "line": 2,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/adversarial.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/common/mod.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/file_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/golden.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/integration.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/link_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/structure_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/summary_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/title_checks.rs",
+          "id": "R30",
+          "line": 1,
           "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
           "severity": "info",
           "title": "Crate-level #![allow(...)"
@@ -1716,6 +4092,310 @@
           "file": "./packages/websmasher-robots-txt-parser/tests/google_spec.rs",
           "id": "R30",
           "line": 9,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/comments.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/edge_cases_1.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/edge_cases_2.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/edge_cases_3.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/extensions_1.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/extensions_2.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_1.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_2.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_3.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_4.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_5.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_6.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_7.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/multi_value.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/signature_1.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/signature_2.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/signature_3.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/basic_urlset.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/bom_encoding.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/cdata.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_hreflang.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_image.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_mobile.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_news.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_pagemaps.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_video.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/malformed_xml.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/multi_extension.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/namespace.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/partial_parse.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/round_trip.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/security.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/sitemapindex.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/size_limits.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/type_detection.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/whitespace.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/wordpress_edge_cases.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/xml_declaration.rs",
+          "id": "R30",
+          "line": 1,
           "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
           "severity": "info",
           "title": "Crate-level #![allow(...)"
@@ -1905,6 +4585,142 @@
           "title": "Crate-level #![allow(...)"
         },
         {
+          "file": "./packages/websmasher-security-txt-parser/tests/comments.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::shadow_unrelated)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/edge_cases_1.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::shadow_unrelated)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/edge_cases_2.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::shadow_unrelated)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/edge_cases_3.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::shadow_unrelated)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/extensions_1.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::shadow_unrelated)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/extensions_2.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::shadow_unrelated)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_1.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::shadow_unrelated)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_2.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::shadow_unrelated)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_3.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::shadow_unrelated)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_4.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::shadow_unrelated)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_5.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::shadow_unrelated)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_6.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::shadow_unrelated)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_7.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::shadow_unrelated)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/multi_value.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::shadow_unrelated)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/signature_1.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::shadow_unrelated)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/signature_2.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::shadow_unrelated)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/signature_3.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::shadow_unrelated)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
           "file": "./packages/websmasher-robots-txt-parser/tests/adversarial.rs",
           "id": "R30",
           "line": 9,
@@ -2033,6 +4849,142 @@
           "title": "Crate-level #![allow(...)"
         },
         {
+          "file": "./packages/websmasher-security-txt-parser/tests/comments.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::similar_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/edge_cases_1.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::similar_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/edge_cases_2.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::similar_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/edge_cases_3.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::similar_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/extensions_1.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::similar_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/extensions_2.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::similar_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_1.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::similar_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_2.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::similar_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_3.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::similar_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_4.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::similar_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_5.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::similar_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_6.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::similar_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_7.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::similar_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/multi_value.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::similar_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/signature_1.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::similar_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/signature_2.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::similar_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/signature_3.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::similar_names)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
           "file": "./packages/seo-site-files/tests/golden_test.rs",
           "id": "R30",
           "line": 3,
@@ -2133,6 +5085,246 @@
           "id": "R30",
           "line": 6,
           "message": "#![allow(clippy::too_many_lines)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_4.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::too_many_lines)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/basic_urlset.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::too_many_lines)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/bom_encoding.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::too_many_lines)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/cdata.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::too_many_lines)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_hreflang.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::too_many_lines)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_image.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::too_many_lines)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_mobile.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::too_many_lines)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_news.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::too_many_lines)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_pagemaps.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::too_many_lines)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_video.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::too_many_lines)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/malformed_xml.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::too_many_lines)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/multi_extension.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::too_many_lines)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/namespace.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::too_many_lines)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/partial_parse.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::too_many_lines)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/round_trip.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::too_many_lines)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/security.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::too_many_lines)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/sitemapindex.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::too_many_lines)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/size_limits.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::too_many_lines)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/type_detection.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::too_many_lines)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/whitespace.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::too_many_lines)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/wordpress_edge_cases.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::too_many_lines)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/xml_declaration.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::too_many_lines)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/adversarial.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::uninlined_format_args)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/file_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::uninlined_format_args)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/golden.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::uninlined_format_args)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/integration.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::uninlined_format_args)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/link_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::uninlined_format_args)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/structure_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::uninlined_format_args)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/summary_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::uninlined_format_args)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/title_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::uninlined_format_args)] — crate-wide lint suppression banned",
           "severity": "info",
           "title": "Crate-level #![allow(...)"
         },
@@ -2321,10 +5513,402 @@
           "title": "Crate-level #![allow(...)"
         },
         {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_4.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::uninlined_format_args)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/adversarial.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/common/mod.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/file_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/golden.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/integration.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/link_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/structure_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/summary_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/title_checks.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
           "file": "./packages/websmasher-robots-txt-parser/tests/google_spec.rs",
           "id": "R30",
           "line": 8,
           "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/comments.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/edge_cases_1.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/edge_cases_2.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/edge_cases_3.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/extensions_1.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/extensions_2.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_1.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_2.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_3.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_4.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_5.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_6.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/field_parsing_7.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/multi_value.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/signature_1.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/signature_2.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-security-txt-parser/tests/signature_3.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/basic_urlset.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/bom_encoding.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/cdata.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_hreflang.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_image.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_mobile.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_news.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_pagemaps.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_video.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/malformed_xml.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/multi_extension.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/namespace.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/partial_parse.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/round_trip.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/security.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/sitemapindex.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/size_limits.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/type_detection.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/whitespace.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/wordpress_edge_cases.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/xml_declaration.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(clippy::unwrap_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/common/mod.rs",
+          "id": "R30",
+          "line": 2,
+          "message": "#![allow(dead_code)] — crate-wide lint suppression banned",
           "severity": "info",
           "title": "Crate-level #![allow(...)"
         },
@@ -2386,6 +5970,70 @@
         },
         {
           "file": "./packages/seo-site-files/tests/sitemap_test.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/adversarial.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/file_checks.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/golden.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/integration.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/link_checks.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/structure_checks.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/summary_checks.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-llms-txt-audit/tests/title_checks.rs",
           "id": "R31",
           "line": 1,
           "message": "unused_crate_dependencies — universally exempted",
@@ -2697,7 +6345,175 @@
           "title": "Justified #![allow(...)"
         },
         {
+          "file": "./packages/websmasher-sitemap-parser/tests/basic_urlset.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/bom_encoding.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/cdata.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_hreflang.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_image.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_mobile.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_news.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_pagemaps.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/ext_video.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
           "file": "./packages/websmasher-sitemap-parser/tests/golden.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/malformed_xml.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/multi_extension.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/namespace.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/partial_parse.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/round_trip.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/security.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/sitemapindex.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/size_limits.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/type_detection.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/whitespace.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/wordpress_edge_cases.rs",
+          "id": "R31",
+          "line": 1,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-parser/tests/xml_declaration.rs",
           "id": "R31",
           "line": 1,
           "message": "unused_crate_dependencies — universally exempted",
@@ -2727,102 +6543,6 @@
           "message": "unused_crate_dependencies — universally exempted",
           "severity": "info",
           "title": "Justified #![allow(...)"
-        },
-        {
-          "file": "./packages/websmasher-sitemap-audit/src/checks/business.rs",
-          "id": "R33",
-          "line": 86,
-          "message": "// reason: test assertions need these... — reason: test assertions need these",
-          "severity": "info",
-          "title": "Justified #[allow]"
-        },
-        {
-          "file": "./packages/websmasher-sitemap-audit/src/checks/enums.rs",
-          "id": "R33",
-          "line": 184,
-          "message": "// reason: test assertions need these... — reason: test assertions need these",
-          "severity": "info",
-          "title": "Justified #[allow]"
-        },
-        {
-          "file": "./packages/websmasher-sitemap-audit/src/checks/extensions/hreflang.rs",
-          "id": "R33",
-          "line": 60,
-          "message": "// reason: test assertions need these... — reason: test assertions need these",
-          "severity": "info",
-          "title": "Justified #[allow]"
-        },
-        {
-          "file": "./packages/websmasher-sitemap-audit/src/checks/extensions/image.rs",
-          "id": "R33",
-          "line": 49,
-          "message": "// reason: test assertions need these... — reason: test assertions need these",
-          "severity": "info",
-          "title": "Justified #[allow]"
-        },
-        {
-          "file": "./packages/websmasher-sitemap-audit/src/checks/extensions/mod.rs",
-          "id": "R33",
-          "line": 247,
-          "message": "// reason: test assertions need these... — reason: test assertions need these",
-          "severity": "info",
-          "title": "Justified #[allow]"
-        },
-        {
-          "file": "./packages/websmasher-sitemap-audit/src/checks/extensions/news.rs",
-          "id": "R33",
-          "line": 126,
-          "message": "// reason: test assertions need these... — reason: test assertions need these",
-          "severity": "info",
-          "title": "Justified #[allow]"
-        },
-        {
-          "file": "./packages/websmasher-sitemap-audit/src/checks/extensions/video.rs",
-          "id": "R33",
-          "line": 100,
-          "message": "// reason: test assertions need these... — reason: test assertions need these",
-          "severity": "info",
-          "title": "Justified #[allow]"
-        },
-        {
-          "file": "./packages/websmasher-sitemap-audit/src/checks/extensions/video_ranges.rs",
-          "id": "R33",
-          "line": 111,
-          "message": "// reason: test assertions need these... — reason: test assertions need these",
-          "severity": "info",
-          "title": "Justified #[allow]"
-        },
-        {
-          "file": "./packages/websmasher-sitemap-audit/src/checks/index.rs",
-          "id": "R33",
-          "line": 133,
-          "message": "// reason: test assertions need these... — reason: test assertions need these",
-          "severity": "info",
-          "title": "Justified #[allow]"
-        },
-        {
-          "file": "./packages/websmasher-sitemap-audit/src/checks/structure.rs",
-          "id": "R33",
-          "line": 135,
-          "message": "// reason: test assertions need these... — reason: test assertions need these",
-          "severity": "info",
-          "title": "Justified #[allow]"
-        },
-        {
-          "file": "./packages/websmasher-sitemap-audit/src/checks/urls.rs",
-          "id": "R33",
-          "line": 204,
-          "message": "// reason: test assertions need these... — reason: test assertions need these",
-          "severity": "info",
-          "title": "Justified #[allow]"
-        },
-        {
-          "file": "./packages/websmasher-sitemap-audit/src/checks/urls_dedup.rs",
-          "id": "R33",
-          "line": 93,
-          "message": "// reason: test assertions need these... — reason: test assertions need these",
-          "severity": "info",
-          "title": "Justified #[allow]"
         },
         {
           "file": "./packages/websmasher-sitemap-audit/src/checks/extensions/news.rs",
@@ -2857,6 +6577,110 @@
           "title": "Justified #[allow]"
         },
         {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/business.rs",
+          "id": "R33",
+          "line": 86,
+          "message": "clippy::doc_markdown — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/dates.rs",
+          "id": "R33",
+          "line": 344,
+          "message": "clippy::doc_markdown — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/enums.rs",
+          "id": "R33",
+          "line": 184,
+          "message": "clippy::doc_markdown — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/extensions/hreflang.rs",
+          "id": "R33",
+          "line": 60,
+          "message": "clippy::doc_markdown — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/extensions/image.rs",
+          "id": "R33",
+          "line": 49,
+          "message": "clippy::doc_markdown — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/extensions/mod.rs",
+          "id": "R33",
+          "line": 247,
+          "message": "clippy::doc_markdown — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/extensions/news.rs",
+          "id": "R33",
+          "line": 126,
+          "message": "clippy::doc_markdown — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/extensions/video.rs",
+          "id": "R33",
+          "line": 100,
+          "message": "clippy::doc_markdown — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/extensions/video_ranges.rs",
+          "id": "R33",
+          "line": 111,
+          "message": "clippy::doc_markdown — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/index.rs",
+          "id": "R33",
+          "line": 133,
+          "message": "clippy::doc_markdown — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/structure.rs",
+          "id": "R33",
+          "line": 135,
+          "message": "clippy::doc_markdown — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/urls.rs",
+          "id": "R33",
+          "line": 204,
+          "message": "clippy::doc_markdown — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/urls_dedup.rs",
+          "id": "R33",
+          "line": 93,
+          "message": "clippy::doc_markdown — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
           "file": "./apps/backend/crates/adapters/inbound/api/src/main.rs",
           "id": "R33",
           "line": 43,
@@ -2881,10 +6705,114 @@
           "title": "Justified #[allow]"
         },
         {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/business.rs",
+          "id": "R33",
+          "line": 86,
+          "message": "clippy::expect_used — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
           "file": "./packages/websmasher-sitemap-audit/src/checks/dates.rs",
           "id": "R33",
           "line": 344,
-          "message": "clippy::expect_used, clippy::doc_markdown — reason: test assertions need these",
+          "message": "clippy::expect_used — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/enums.rs",
+          "id": "R33",
+          "line": 184,
+          "message": "clippy::expect_used — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/extensions/hreflang.rs",
+          "id": "R33",
+          "line": 60,
+          "message": "clippy::expect_used — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/extensions/image.rs",
+          "id": "R33",
+          "line": 49,
+          "message": "clippy::expect_used — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/extensions/mod.rs",
+          "id": "R33",
+          "line": 247,
+          "message": "clippy::expect_used — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/extensions/news.rs",
+          "id": "R33",
+          "line": 126,
+          "message": "clippy::expect_used — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/extensions/video.rs",
+          "id": "R33",
+          "line": 100,
+          "message": "clippy::expect_used — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/extensions/video_ranges.rs",
+          "id": "R33",
+          "line": 111,
+          "message": "clippy::expect_used — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/index.rs",
+          "id": "R33",
+          "line": 133,
+          "message": "clippy::expect_used — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/structure.rs",
+          "id": "R33",
+          "line": 135,
+          "message": "clippy::expect_used — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/urls.rs",
+          "id": "R33",
+          "line": 204,
+          "message": "clippy::expect_used — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/urls_dedup.rs",
+          "id": "R33",
+          "line": 93,
+          "message": "clippy::expect_used — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/test_helpers.rs",
+          "id": "R33",
+          "line": 30,
+          "message": "clippy::expect_used — reason: test helper, panic on missing check is intentional",
           "severity": "info",
           "title": "Justified #[allow]"
         },
@@ -2897,10 +6825,106 @@
           "title": "Justified #[allow]"
         },
         {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/business.rs",
+          "id": "R33",
+          "line": 86,
+          "message": "clippy::panic — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/enums.rs",
+          "id": "R33",
+          "line": 184,
+          "message": "clippy::panic — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/extensions/hreflang.rs",
+          "id": "R33",
+          "line": 60,
+          "message": "clippy::panic — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/extensions/image.rs",
+          "id": "R33",
+          "line": 49,
+          "message": "clippy::panic — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/extensions/mod.rs",
+          "id": "R33",
+          "line": 247,
+          "message": "clippy::panic — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/extensions/news.rs",
+          "id": "R33",
+          "line": 126,
+          "message": "clippy::panic — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/extensions/video.rs",
+          "id": "R33",
+          "line": 100,
+          "message": "clippy::panic — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/extensions/video_ranges.rs",
+          "id": "R33",
+          "line": 111,
+          "message": "clippy::panic — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/index.rs",
+          "id": "R33",
+          "line": 133,
+          "message": "clippy::panic — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/structure.rs",
+          "id": "R33",
+          "line": 135,
+          "message": "clippy::panic — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/urls.rs",
+          "id": "R33",
+          "line": 204,
+          "message": "clippy::panic — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/urls_dedup.rs",
+          "id": "R33",
+          "line": 93,
+          "message": "clippy::panic — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
           "file": "./packages/websmasher-sitemap-audit/src/checks/test_helpers.rs",
           "id": "R33",
           "line": 30,
-          "message": "clippy::panic, clippy::expect_used — reason: test helper, panic on missing check is intentional",
+          "message": "clippy::panic — reason: test helper, panic on missing check is intentional",
           "severity": "info",
           "title": "Justified #[allow]"
         },
@@ -2917,6 +6941,102 @@
           "id": "R33",
           "line": 52,
           "message": "clippy::redundant_closure_call — reason: macro-generated closure call",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/business.rs",
+          "id": "R33",
+          "line": 86,
+          "message": "clippy::similar_names — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/enums.rs",
+          "id": "R33",
+          "line": 184,
+          "message": "clippy::similar_names — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/extensions/hreflang.rs",
+          "id": "R33",
+          "line": 60,
+          "message": "clippy::similar_names — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/extensions/image.rs",
+          "id": "R33",
+          "line": 49,
+          "message": "clippy::similar_names — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/extensions/mod.rs",
+          "id": "R33",
+          "line": 247,
+          "message": "clippy::similar_names — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/extensions/news.rs",
+          "id": "R33",
+          "line": 126,
+          "message": "clippy::similar_names — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/extensions/video.rs",
+          "id": "R33",
+          "line": 100,
+          "message": "clippy::similar_names — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/extensions/video_ranges.rs",
+          "id": "R33",
+          "line": 111,
+          "message": "clippy::similar_names — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/index.rs",
+          "id": "R33",
+          "line": 133,
+          "message": "clippy::similar_names — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/structure.rs",
+          "id": "R33",
+          "line": 135,
+          "message": "clippy::similar_names — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/urls.rs",
+          "id": "R33",
+          "line": 204,
+          "message": "clippy::similar_names — reason: test assertions need these",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/websmasher-sitemap-audit/src/checks/urls_dedup.rs",
+          "id": "R33",
+          "line": 93,
+          "message": "clippy::similar_names — reason: test assertions need these",
           "severity": "info",
           "title": "Justified #[allow]"
         },
@@ -4501,14 +8621,6 @@
           "id": "R44",
           "line": 216,
           "message": "let tests = super::super::extract::extract_tests(&source).unwrap();",
-          "severity": "warn",
-          "title": ".unwrap() usage"
-        },
-        {
-          "file": "./tools/dev-process/src/test_tool/extract.rs",
-          "id": "R44",
-          "line": 483,
-          "message": "tests.first().unwrap().name,",
           "severity": "warn",
           "title": ".unwrap() usage"
         },

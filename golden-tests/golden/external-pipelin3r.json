@@ -801,6 +801,86 @@
           "title": "Justified #[allow]"
         },
         {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/src/auth.rs",
+          "id": "R33",
+          "line": 51,
+          "message": "clippy::expect_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/outbound/db/src/lib.rs",
+          "id": "R33",
+          "line": 6,
+          "message": "clippy::expect_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/bulkhead.rs",
+          "id": "R33",
+          "line": 157,
+          "message": "clippy::expect_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R33",
+          "line": 246,
+          "message": "clippy::expect_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/config.rs",
+          "id": "R33",
+          "line": 135,
+          "message": "clippy::expect_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/duration_serde.rs",
+          "id": "R33",
+          "line": 37,
+          "message": "clippy::expect_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/duration_serde.rs",
+          "id": "R33",
+          "line": 108,
+          "message": "clippy::expect_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/duration_serde.rs",
+          "id": "R33",
+          "line": 254,
+          "message": "clippy::expect_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/rate_limiter.rs",
+          "id": "R33",
+          "line": 165,
+          "message": "clippy::expect_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/retry.rs",
+          "id": "R33",
+          "line": 109,
+          "message": "clippy::expect_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
           "file": "./apps/shedul3r/crates/adapters/inbound/api/src/cli.rs",
           "id": "R33",
           "line": 160,
@@ -1041,6 +1121,86 @@
           "title": "Justified #[allow]"
         },
         {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/src/auth.rs",
+          "id": "R33",
+          "line": 51,
+          "message": "clippy::unwrap_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/outbound/db/src/lib.rs",
+          "id": "R33",
+          "line": 6,
+          "message": "clippy::unwrap_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/bulkhead.rs",
+          "id": "R33",
+          "line": 157,
+          "message": "clippy::unwrap_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R33",
+          "line": 246,
+          "message": "clippy::unwrap_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/config.rs",
+          "id": "R33",
+          "line": 135,
+          "message": "clippy::unwrap_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/duration_serde.rs",
+          "id": "R33",
+          "line": 37,
+          "message": "clippy::unwrap_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/duration_serde.rs",
+          "id": "R33",
+          "line": 108,
+          "message": "clippy::unwrap_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/duration_serde.rs",
+          "id": "R33",
+          "line": 254,
+          "message": "clippy::unwrap_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/rate_limiter.rs",
+          "id": "R33",
+          "line": 165,
+          "message": "clippy::unwrap_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/retry.rs",
+          "id": "R33",
+          "line": 109,
+          "message": "clippy::unwrap_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
           "file": "./packages/pipelin3r/src/agent.rs",
           "id": "R33",
           "line": 905,
@@ -1161,86 +1321,6 @@
           "title": "Justified #[allow]"
         },
         {
-          "file": "./apps/shedul3r/crates/adapters/inbound/api/src/auth.rs",
-          "id": "R33",
-          "line": 51,
-          "message": "clippy::unwrap_used, clippy::expect_used — reason: test assertions",
-          "severity": "info",
-          "title": "Justified #[allow]"
-        },
-        {
-          "file": "./apps/shedul3r/crates/adapters/outbound/db/src/lib.rs",
-          "id": "R33",
-          "line": 6,
-          "message": "clippy::unwrap_used, clippy::expect_used — reason: test assertions",
-          "severity": "info",
-          "title": "Justified #[allow]"
-        },
-        {
-          "file": "./packages/limit3r/src/bulkhead.rs",
-          "id": "R33",
-          "line": 157,
-          "message": "clippy::unwrap_used, clippy::expect_used — reason: test assertions",
-          "severity": "info",
-          "title": "Justified #[allow]"
-        },
-        {
-          "file": "./packages/limit3r/src/circuit_breaker.rs",
-          "id": "R33",
-          "line": 246,
-          "message": "clippy::unwrap_used, clippy::expect_used — reason: test assertions",
-          "severity": "info",
-          "title": "Justified #[allow]"
-        },
-        {
-          "file": "./packages/limit3r/src/config.rs",
-          "id": "R33",
-          "line": 135,
-          "message": "clippy::unwrap_used, clippy::expect_used — reason: test assertions",
-          "severity": "info",
-          "title": "Justified #[allow]"
-        },
-        {
-          "file": "./packages/limit3r/src/duration_serde.rs",
-          "id": "R33",
-          "line": 37,
-          "message": "clippy::unwrap_used, clippy::expect_used — reason: test assertions",
-          "severity": "info",
-          "title": "Justified #[allow]"
-        },
-        {
-          "file": "./packages/limit3r/src/duration_serde.rs",
-          "id": "R33",
-          "line": 108,
-          "message": "clippy::unwrap_used, clippy::expect_used — reason: test assertions",
-          "severity": "info",
-          "title": "Justified #[allow]"
-        },
-        {
-          "file": "./packages/limit3r/src/duration_serde.rs",
-          "id": "R33",
-          "line": 254,
-          "message": "clippy::unwrap_used, clippy::expect_used — reason: test assertions",
-          "severity": "info",
-          "title": "Justified #[allow]"
-        },
-        {
-          "file": "./packages/limit3r/src/rate_limiter.rs",
-          "id": "R33",
-          "line": 165,
-          "message": "clippy::unwrap_used, clippy::expect_used — reason: test assertions",
-          "severity": "info",
-          "title": "Justified #[allow]"
-        },
-        {
-          "file": "./packages/limit3r/src/retry.rs",
-          "id": "R33",
-          "line": 109,
-          "message": "clippy::unwrap_used, clippy::expect_used — reason: test assertions",
-          "severity": "info",
-          "title": "Justified #[allow]"
-        },
-        {
           "file": "./apps/shedul3r/crates/app/commands/src/execute.rs",
           "id": "R38",
           "line": null,
@@ -1313,14 +1393,6 @@
           "title": ".expect() usage"
         },
         {
-          "file": "./packages/limit3r/src/duration_serde.rs",
-          "id": "R44",
-          "line": 247,
-          "message": "pos.expect(\"positive must succeed\"),",
-          "severity": "warn",
-          "title": ".expect() usage"
-        },
-        {
           "file": "./packages/pipelin3r/src/agent.rs",
           "id": "R44",
           "line": 842,
@@ -1331,7 +1403,7 @@
         {
           "file": "./packages/pipelin3r/src/bundle.rs",
           "id": "R44",
-          "line": 149,
+          "line": 151,
           "message": ".unwrap()",
           "severity": "warn",
           "title": ".unwrap() usage"
@@ -1339,7 +1411,7 @@
         {
           "file": "./packages/pipelin3r/src/bundle.rs",
           "id": "R44",
-          "line": 151,
+          "line": 149,
           "message": ".unwrap()",
           "severity": "warn",
           "title": ".unwrap() usage"
@@ -1541,22 +1613,6 @@
           "id": "R44",
           "line": 995,
           "message": ".unwrap();",
-          "severity": "warn",
-          "title": ".unwrap() usage"
-        },
-        {
-          "file": "./packages/pipelin3r/src/bundle.rs",
-          "id": "R44",
-          "line": 258,
-          "message": "assert_eq!(ok.unwrap().file_count(), 1, \"file should be added\");",
-          "severity": "warn",
-          "title": ".unwrap() usage"
-        },
-        {
-          "file": "./packages/limit3r/src/duration_serde.rs",
-          "id": "R44",
-          "line": 308,
-          "message": "assert_eq!(pos.unwrap(), Duration::from_secs_f64(1.0));",
           "severity": "warn",
           "title": ".unwrap() usage"
         },

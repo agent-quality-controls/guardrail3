@@ -441,6 +441,14 @@
           "title": "Justified #[allow]"
         },
         {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/build.rs",
+          "id": "R33",
+          "line": 3,
+          "message": "clippy::disallowed_methods — Build script: panics are the standard error-reporting mechanism",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
           "file": "./apps/validator-rust/crates/adapters/outbound/src/structured_data.rs",
           "id": "R33",
           "line": 16,
@@ -609,10 +617,34 @@
           "title": "Justified #[allow]"
         },
         {
+          "file": "./apps/validator-rust/crates/adapters/outbound/src/url_validator.rs",
+          "id": "R33",
+          "line": 129,
+          "message": "clippy::expect_used — Test code: unwrap/expect are idiomatic for asserting test preconditions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
           "file": "./apps/substack-publisher/src/prosemirror.rs",
           "id": "R33",
           "line": 424,
-          "message": "clippy::indexing_slicing, clippy::expect_used — tests are allowed to panic on bad indices",
+          "message": "clippy::expect_used — tests are allowed to panic on bad indices",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/substack-publisher/src/prosemirror.rs",
+          "id": "R33",
+          "line": 424,
+          "message": "clippy::indexing_slicing — tests are allowed to panic on bad indices",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/build.rs",
+          "id": "R33",
+          "line": 3,
+          "message": "clippy::panic — Build script: panics are the standard error-reporting mechanism",
           "severity": "info",
           "title": "Justified #[allow]"
         },
@@ -676,7 +708,7 @@
           "file": "./apps/validator-rust/crates/adapters/inbound/api/build.rs",
           "id": "R33",
           "line": 3,
-          "message": "clippy::unwrap_used, clippy::disallowed_methods, clippy::panic — Build script: panics are the standard error-reporting mechanism",
+          "message": "clippy::unwrap_used — Build script: panics are the standard error-reporting mechanism",
           "severity": "info",
           "title": "Justified #[allow]"
         },
@@ -684,7 +716,7 @@
           "file": "./apps/validator-rust/crates/adapters/outbound/src/url_validator.rs",
           "id": "R33",
           "line": 129,
-          "message": "clippy::unwrap_used, clippy::expect_used — Test code: unwrap/expect are idiomatic for asserting test preconditions",
+          "message": "clippy::unwrap_used — Test code: unwrap/expect are idiomatic for asserting test preconditions",
           "severity": "info",
           "title": "Justified #[allow]"
         },
@@ -947,23 +979,7 @@
         {
           "file": "./apps/validator-rust/crates/adapters/inbound/api/build.rs",
           "id": "R44",
-          "line": 9,
-          "message": ".unwrap()",
-          "severity": "warn",
-          "title": ".unwrap() usage"
-        },
-        {
-          "file": "./apps/validator-rust/crates/adapters/inbound/api/build.rs",
-          "id": "R44",
-          "line": 11,
-          "message": ".unwrap()",
-          "severity": "warn",
-          "title": ".unwrap() usage"
-        },
-        {
-          "file": "./apps/validator-rust/crates/adapters/inbound/api/build.rs",
-          "id": "R44",
-          "line": 13,
+          "line": 17,
           "message": ".unwrap()",
           "severity": "warn",
           "title": ".unwrap() usage"
@@ -979,7 +995,23 @@
         {
           "file": "./apps/validator-rust/crates/adapters/inbound/api/build.rs",
           "id": "R44",
-          "line": 17,
+          "line": 13,
+          "message": ".unwrap()",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/build.rs",
+          "id": "R44",
+          "line": 11,
+          "message": ".unwrap()",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./apps/validator-rust/crates/adapters/inbound/api/build.rs",
+          "id": "R44",
+          "line": 9,
           "message": ".unwrap()",
           "severity": "warn",
           "title": ".unwrap() usage"
