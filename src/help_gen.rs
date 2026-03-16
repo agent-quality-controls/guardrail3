@@ -392,6 +392,10 @@ SOURCE SCAN (AST-based via tree-sitter — immune to strings/comments):
   T34-T35   IDE/coverage suppressions
   T59       Banned packages in node_modules
 
+ARCHITECTURE:
+  T-ARCH-01   TS app missing hex arch structure (domain/adapters in src/modules/)
+  T-ARCH-02   Import boundary violation (layer imports from forbidden layer)
+
 TESTS: T-TEST-01..05  Test naming, describe blocks, assertions, co-location, coverage";
 
 // ---------------------------------------------------------------------------
