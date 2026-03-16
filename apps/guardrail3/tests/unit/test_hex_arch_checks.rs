@@ -72,9 +72,10 @@ fn r_arch_01_service_missing_domain_dir() {
     let _ = fs.add("/ws/apps/api/Cargo.toml", "[package]\nname = \"api\"");
     let _ = fs.add("/ws/apps/api/crates/adapters/Cargo.toml", "[package]\nname = \"a\"");
     let mut cfgs = BTreeMap::new();
-    let _ = cfgs.insert("apps/api".to_owned(), service_cfg());
+    let _ = cfgs.insert("api".to_owned(), service_cfg());
+    let p = project(&[("api", "apps/api")]);
     let mut r = Vec::new();
-    check_hex_arch_structure(&fs, Path::new("/ws"), &cfgs, &mut r);
+    check_hex_arch_structure(&fs, Path::new("/ws"), &p, &cfgs, &mut r);
     assert_eq!(r.len(), 1);
     assert_eq!(r[0].id, "R-ARCH-01");
     assert_eq!(r[0].severity, Severity::Warn);
@@ -87,9 +88,10 @@ fn r_arch_01_service_with_full_structure_ok() {
     let _ = fs.add("/ws/apps/api/crates/domain/Cargo.toml", "[package]\nname=\"d\"");
     let _ = fs.add("/ws/apps/api/crates/adapters/Cargo.toml", "[package]\nname=\"a\"");
     let mut cfgs = BTreeMap::new();
-    let _ = cfgs.insert("apps/api".to_owned(), service_cfg());
+    let _ = cfgs.insert("api".to_owned(), service_cfg());
+    let p = project(&[("api", "apps/api")]);
     let mut r = Vec::new();
-    check_hex_arch_structure(&fs, Path::new("/ws"), &cfgs, &mut r);
+    check_hex_arch_structure(&fs, Path::new("/ws"), &p, &cfgs, &mut r);
     assert!(r.is_empty(), "expected no warnings, got: {r:?}");
 }
 
