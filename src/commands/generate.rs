@@ -362,12 +362,23 @@ fn generate_rust_files(
         .unwrap_or_default();
 
     for (crate_path, crate_cfg) in &crate_configs {
-        // Library profile: all crates are pure. Otherwise check layer config.
-        let is_pure =
-            profile == "library" || crate_cfg.layer.as_deref().is_some_and(|l| l == "pure");
+        // Per-crate profile overrides workspace profile
+        let effective_profile = crate_cfg
+            .profile
+            .as_deref()
+            .unwrap_or(profile);
 
-        let crate_clippy =
-            clippy::build_clippy_toml(profile, is_pure, &local.clippy_methods, &local.clippy_types);
+        // Library profile (workspace or per-crate): all crates are pure.
+        // Otherwise check layer config.
+        let is_pure = effective_profile == "library"
+            || crate_cfg.layer.as_deref().is_some_and(|l| l == "pure");
+
+        let crate_clippy = clippy::build_clippy_toml(
+            effective_profile,
+            is_pure,
+            &local.clippy_methods,
+            &local.clippy_types,
+        );
         files.push(GeneratedFile {
             path: format!("{root_prefix}{crate_path}/clippy.toml"),
             content: crate_clippy,

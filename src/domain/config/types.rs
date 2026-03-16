@@ -30,6 +30,8 @@ pub struct RustConfig {
 #[derive(Debug, Deserialize)]
 pub struct CrateConfig {
     pub layer: Option<String>,
+    pub profile: Option<String>,
+    pub allowed_deps: Option<Vec<String>>,
 }
 
 #[derive(Debug, Deserialize)]
