@@ -16,166 +16,201 @@ pub fn inject_help(cmd: Command) -> Command {
 
 fn inject_rs_help(cmd: Command) -> Command {
     cmd.mut_subcommand("rs", |rs| {
-        rs.mut_subcommand("validate", |v| {
-            v.after_help(RS_VALIDATE_HELP)
-                .after_long_help(RS_VALIDATE_HELP)
-        })
-        .mut_subcommand("init", |i| {
-            i.after_help(RS_INIT_HELP).after_long_help(RS_INIT_HELP)
-        })
+        rs.after_help(RS_HELP)
+            .after_long_help(RS_HELP)
+            .mut_subcommand("validate", |v| {
+                v.after_help(RS_VALIDATE_HELP)
+                    .after_long_help(RS_VALIDATE_HELP)
+            })
+            .mut_subcommand("init", |i| {
+                i.after_help(RS_INIT_HELP).after_long_help(RS_INIT_HELP)
+            })
     })
 }
 
 fn inject_ts_help(cmd: Command) -> Command {
     cmd.mut_subcommand("ts", |ts| {
-        ts.mut_subcommand("validate", |v| {
-            v.after_help(TS_VALIDATE_HELP)
-                .after_long_help(TS_VALIDATE_HELP)
-        })
-        .mut_subcommand("init", |i| {
-            i.after_help(TS_INIT_HELP).after_long_help(TS_INIT_HELP)
-        })
+        ts.after_help(TS_HELP)
+            .after_long_help(TS_HELP)
+            .mut_subcommand("validate", |v| {
+                v.after_help(TS_VALIDATE_HELP)
+                    .after_long_help(TS_VALIDATE_HELP)
+            })
+            .mut_subcommand("init", |i| {
+                i.after_help(TS_INIT_HELP).after_long_help(TS_INIT_HELP)
+            })
     })
 }
 
 // ---------------------------------------------------------------------------
-// Top-level help
+// Top-level help (guardrail3 --help)
 // ---------------------------------------------------------------------------
 
 const TOP_LEVEL_HELP: &str = "\
-QUICK START (single Rust crate):
-  guardrail3 rs init --profile service .
-  guardrail3 rs generate
-  guardrail3 rs validate .
+===============================================================================
+COMMAND REFERENCE
+===============================================================================
 
-QUICK START (Rust workspace / monorepo):
-  guardrail3 rs init --profile service .
-  # Edit guardrail3.toml — see CONFIG REFERENCE below
-  guardrail3 rs generate
-  guardrail3 rs validate .
+RUST:
+  guardrail3 rs init [PATH] [OPTIONS]
+    --profile <service|library>        Default: service
+    --force                            Overwrite existing files
 
-QUICK START (TypeScript project):
-  guardrail3 ts init .
-  guardrail3 ts generate
-  guardrail3 ts validate .
+  guardrail3 rs generate [PATH]
+    Produces: clippy.toml, deny.toml, rustfmt.toml, rust-toolchain.toml,
+    per-crate clippy.toml, .githooks/pre-commit
 
-QUICK START (monorepo with both Rust + TypeScript):
-  guardrail3 rs init --profile service .
-  guardrail3 ts init .
-  # Edit guardrail3.toml — see CONFIG REFERENCE below
-  guardrail3 rs generate && guardrail3 ts generate
-  guardrail3 validate .
+  guardrail3 rs validate [PATH] [OPTIONS]
+    --format <text|json|md>            Default: text
+    --staged                           Only git-staged files
+    --dirty                            Staged + unstaged files
+    --commits <N>                      Files changed in last N commits
+    --files <FILE...>                  Specific files only
+    --code                             Only code quality checks
+    --architecture                     Only architecture checks
+    --release                          Only release readiness checks
+    --tests                            Only test quality checks
+    --thorough                         Include slow checks (cargo publish --dry-run)
 
-PROFILES (Rust only — TypeScript has no profiles):
-  service   For HTTP services (Axum/tokio). Bans dangerous methods (std::fs,
-            process::exit, env mutation) and types (HashMap→BTreeMap,
-            Mutex→parking_lot). Allows LazyLock in composition-root crates.
-  library   Everything in service PLUS bans ALL I/O crates (axum, tokio,
-            reqwest, sqlx) and global-state types (LazyLock, OnceLock) in
-            every crate. For pure logic packages with zero side effects.
+  guardrail3 rs check [PATH]           CI: verify configs not stale
+  guardrail3 rs diff [PATH]            Dry-run of rs generate (show diffs)
+  guardrail3 rs hooks-install [PATH]   Regenerate pre-commit hook only
+  guardrail3 rs hooks-validate [PATH]  Check hook setup
+  guardrail3 rs list-modules           List embedded config modules
+  guardrail3 rs show-module <NAME>     Print module content
 
-WORKFLOW — WHAT EACH STEP DOES:
+TYPESCRIPT:
+  guardrail3 ts init [PATH] [OPTIONS]
+    --force                            Overwrite existing config
 
-  1. rs init --profile service     Creates guardrail3.toml + local/ override dir.
-     │                             guardrail3.toml defines your profile, workspace
-     │                             root, and per-crate settings.
-     │
-  2. Edit guardrail3.toml          Configure per-crate profiles and dependency
-     │                             allowlists (see CONFIG REFERENCE below).
-     │
-  3. rs generate                   Reads guardrail3.toml and PRODUCES actual tool
-     │                             config files that cargo clippy, cargo deny, etc.
-     │                             read: clippy.toml, deny.toml, rustfmt.toml,
-     │                             rust-toolchain.toml, Cargo.toml [lints] section.
-     │                             Also produces per-crate clippy.toml for workspace
-     │                             crates with custom layers/profiles.
-     │
-  4. rs validate .                 Runs ALL checks against the project. Reports
-     │                             errors/warnings/info. Does NOT modify files.
-     │                             Exit code 1 if any errors found.
-     │
-  5. hooks install                 Generates and installs a pre-commit hook that
-     │                             runs: gitleaks, cargo fmt, cargo clippy,
-     │                             cargo-deny, cargo-machete, cargo test,
-     │                             cargo-dupes, structural health checks.
-     │
-  6. check (CI)                    Verifies generated files match what 'generate'
-                                   would produce. Fails if configs are stale.
-                                   Add to CI: guardrail3 check
+  guardrail3 ts generate [PATH]
+    Produces: eslint.config.mjs, tsconfig-base.json, .npmrc, .jscpd.json,
+    .githooks/pre-commit
 
-CONFIG REFERENCE (guardrail3.toml):
+  guardrail3 ts validate [PATH] [OPTIONS]
+    Same flags as rs validate.
 
-  Single crate:
+  guardrail3 ts hooks-install [PATH]   Regenerate pre-commit hook only
+  guardrail3 ts hooks-validate [PATH]  Check hook setup
+
+===============================================================================
+PROFILES (Rust only — TypeScript has no profiles)
+===============================================================================
+
+  service    For HTTP services, CLI tools, binaries that do I/O.
+             Bans: std::fs (must use centralized module), process::exit,
+               env mutation, HashMap (use BTreeMap), Mutex (use parking_lot).
+             Allows: axum, tokio, reqwest, sqlx.
+             Composition-root crates may use LazyLock for global config.
+
+  library    Everything in service, PLUS:
+             Bans ALL I/O crates: axum, tokio, reqwest, sqlx, hyper, diesel.
+             Bans ALL global state: LazyLock, OnceLock, once_cell.
+             For pure logic packages that take inputs and return outputs.
+
+===============================================================================
+CONFIG FILE (guardrail3.toml)
+===============================================================================
+
+  Only needed for generate/check/diff. Not needed for validate.
+
+  Minimal (single crate):
     [profile]
-    name = \"service\"               # or \"library\"
+    name = \"service\"
     [rust]
     workspace_root = \".\"
 
-  Workspace with per-crate settings:
+  Full (workspace with per-crate settings):
     [profile]
-    name = \"service\"               # workspace default
+    name = \"service\"
     [rust]
     workspace_root = \".\"
-
-    [rust.crates.my-api]            # HTTP service — full access
+    [rust.crates.my-api]
     profile = \"service\"
-    layer = \"composition-root\"     # allows LazyLock for global config
-
-    [rust.crates.my-domain]         # pure logic — locked down
+    layer = \"composition-root\"
+    [rust.crates.my-domain]
     profile = \"library\"
     layer = \"pure\"
-    allowed_deps = [\"serde\", \"thiserror\", \"chrono\"]
+    allowed_deps = [\"serde\", \"thiserror\"]
 
-    [rust.crates.my-sdk]            # HTTP client library — needs network
-    profile = \"library\"
-    allowed_deps = [\"serde\", \"reqwest\", \"tokio\", \"thiserror\"]
+  local/ overrides (created by rs init):
+    local/clippy-methods.toml          Extra disallowed methods
+    local/clippy-types.toml            Extra disallowed types
+    local/deny-bans.toml               Extra crate bans
+    local/deny-skip.toml               Duplicate crate skip list
+    local/deny-feature-bans.toml       Feature bans
 
-  Per-crate fields:
-    profile       \"service\" or \"library\" — overrides workspace profile for this crate
-    layer         \"composition-root\" (allows global state) or \"pure\" (bans it)
-    allowed_deps  Dependency allowlist — any dep NOT listed is an error (R-DEPS-01)
-                  Only checks [dependencies], not [dev-dependencies] or [build-dependencies]
+===============================================================================
+SETUP GUIDE
+===============================================================================
 
-  local/ overrides (created by init):
-    local/clippy-methods.toml     Extra disallowed methods
-    local/clippy-types.toml       Extra disallowed types
-    local/deny-bans.toml          Extra crate bans
-    local/deny-skip.toml          Advisory skip entries
-    local/deny-feature-bans.toml  Feature bans
+Step 1: IDENTIFY YOUR PROJECT TYPE
 
-COMMANDS:
-  rs init [--profile service|library]    Scaffold Rust config + local overrides
-  rs validate [path] [--format json]     Run Rust checks
-  rs generate                            Produce clippy.toml, deny.toml, rustfmt.toml
-  ts init                                Scaffold TypeScript config
-  ts validate [path]                     Run TypeScript checks
-  ts generate                            Produce eslint.config, tsconfig, npmrc
-  validate [path]                        Auto-detect stacks, run both
-  generate                               Generate all config files
-  check                                  CI: verify generated files current
-  diff                                   Dry-run generate with diffs
-  hooks install                          Install pre-commit hook
-  hooks validate                         Check hook setup
-  list-modules                           List embedded config modules
-  show-module <name>                     Print module content
+  A) Single Rust crate (binary or library)
+     → guardrail3 rs init --profile service .     (for binaries/services)
+     → guardrail3 rs init --profile library .      (for pure logic libraries)
 
-OUTPUT FORMATS:
-  --format text    Colored terminal (default)
-  --format json    Machine-readable JSON
-  --format md      Markdown tables
+  B) Rust workspace (multiple crates)
+     → guardrail3 rs init --profile service .
+     → Edit guardrail3.toml to configure per-crate profiles (see CONFIG FILE above)
 
-SCOPE (for validate):
-  --staged           Only staged files
-  --dirty            Staged + unstaged changes
-  --commits N        Files changed in last N commits
-  --files a.rs b.rs  Specific files only
+  C) TypeScript project
+     → guardrail3 ts init .
 
-DOMAIN FILTERS (for validate):
-  --code             Only code quality checks
-  --architecture     Only architecture checks
-  --release          Only release readiness checks
-  --tests            Only test quality checks
-  --thorough         Run slow checks (cargo publish --dry-run, etc.)";
+  D) Monorepo with Rust + TypeScript
+     → guardrail3 rs init --profile service .
+     → guardrail3 ts init .
+     → Edit guardrail3.toml to configure per-crate profiles (see CONFIG FILE above)
+
+Step 2: CONFIGURE PER-CRATE SETTINGS (workspaces only — skip for single crates)
+
+  Open guardrail3.toml. Read Cargo.toml [workspace.members] to find crates.
+  For each crate, add a [rust.crates.NAME] section (see CONFIG FILE above).
+
+Step 3: GENERATE CONFIG FILES
+
+    guardrail3 rs generate             (Rust: clippy.toml, deny.toml, hooks, etc.)
+    guardrail3 ts generate             (TypeScript: eslint, tsconfig, hooks, etc.)
+
+  Reads guardrail3.toml → writes tool config files + pre-commit hook.
+  Re-run after editing guardrail3.toml or updating guardrail3.
+
+Step 4: VALIDATE
+
+    guardrail3 rs validate .           (Rust checks)
+    guardrail3 ts validate .           (TypeScript checks)
+
+  Reports violations. Fix errors, re-run until clean. Exit code 1 = errors found.
+
+Step 5: CI
+
+    guardrail3 rs check                (fails if generated configs are stale)";
+
+// ---------------------------------------------------------------------------
+// rs --help
+// ---------------------------------------------------------------------------
+
+const RS_HELP: &str = "\
+  init        Create guardrail3.toml + local/ overrides
+  generate    Produce clippy.toml, deny.toml, rustfmt.toml, hooks
+  validate    Run all Rust checks
+  check       CI: verify generated configs are current
+  diff        Dry-run generate (show what would change)
+  hooks-install    Regenerate pre-commit hook
+  hooks-validate   Check hook configuration
+  list-modules     List embedded config modules
+  show-module      Print module content";
+
+// ---------------------------------------------------------------------------
+// ts --help
+// ---------------------------------------------------------------------------
+
+const TS_HELP: &str = "\
+  init        Create [typescript] section in guardrail3.toml
+  generate    Produce eslint.config, tsconfig, npmrc, jscpd, hooks
+  validate    Run all TypeScript checks
+  hooks-install    Regenerate pre-commit hook
+  hooks-validate   Check hook configuration";
 
 // ---------------------------------------------------------------------------
 // rs validate help
@@ -216,73 +251,43 @@ CONFIG COMPLETENESS:
   R29       Cargo.toml lint inheritance issues
 
 SOURCE SCAN (AST-based via syn — immune to strings/comments):
-  R30       Crate-level #![allow] without reason comment (error)
-  R31       Crate-level #![allow(unused_crate_dependencies)] inventory (info)
-  R32       Item-level #[allow] without reason comment (error)
-  R33       Item-level #[allow] with reason (info inventory)
-  R34       #[garde(skip)] without reason comment (error)
-  R35       #[garde(skip)] with reason (info inventory)
+  R30       Crate-level allow without reason (error)
+  R31       Crate-level allow(unused_crate_dependencies) (info)
+  R32       Item-level allow without reason (error)
+  R33       Item-level allow with reason (info inventory)
+  R34       garde(skip) without reason (error)
+  R35       garde(skip) with reason (info inventory)
   R36       EXCEPTION comments in config files
   R37       cfg_attr with allow
   R38       File length > 500 lines (error)
   R39       File length > 400 lines (warn)
-  R40       Use statement count > 20 (error)
-  R41       Use statement count > 15 (warn)
+  R40       Use count > 20 (error)
+  R41       Use count > 15 (warn)
   R42       Unsafe usage
   R43       todo!/unimplemented! macros
   R44       .unwrap()/.expect() calls
-  R58       Direct std::fs usage (bypassing centralized fs module)
+  R58       Direct std::fs usage
 
 TOOLS & DEPENDENCIES:
-  R45       cargo-deny installed
-  R46       cargo-machete installed
-  R47       cargo-dupes installed
-  R48       gitleaks installed
+  R45-R48   cargo-deny, cargo-machete, cargo-dupes, gitleaks installed
   R49       CLAUDE.md exists
   R50       Banned crates in Cargo.lock
+  R-DEPS-01 Unauthorized dependency (not in allowed_deps)
+  R-DEPS-02 Library crate without allowed_deps (warn)
 
 ARCHITECTURE:
   R51       Dependency direction violations
   R52       Dependency graph inventory
-  R53       unsafe_code = \"forbid\" in workspace lints
-  R55       Workspace metadata: edition
-  R56       Workspace metadata: publish
-  R57       Workspace metadata: release profile
+  R53       unsafe_code = forbid in lints
+  R55-R57   Workspace metadata (edition, publish, release profile)
 
-RELEASE READINESS:
-  R-REL-01  Release workflow exists
-  R-REL-02  Changelog configuration
-  R-REL-03  Release-plz configuration
+RELEASE:
+  R-REL-*   Release workflow, changelog, release-plz config
+  R-PUB-*   Crate metadata (description, license, repository, etc.)
+  R-BIN-*   Binary release workflow, binstall metadata
 
-  R-PUB-02  Crate description
-  R-PUB-04  Crate metadata (license, repository, etc.)
-  R-PUB-05  Crate keywords/categories
-  R-PUB-06  Path dependencies have version
-  R-PUB-07  Git dependencies
-  R-PUB-08  Crate readme
-  R-PUB-09  Dependency version requirements
-  R-PUB-10  Wildcard dependencies
-  R-PUB-11  Unpublished dependencies
-  R-PUB-12  Cargo publish dry-run (--thorough only)
-
-BINARY RELEASE:
-  R-BIN-01  Binary release workflow exists
-  R-BIN-02  Linux target in release workflow
-  R-BIN-03  Binstall metadata in Cargo.toml
-
-GARDE VALIDATION:
-  R-GARDE-01  Garde dependency detection
-  R-GARDE-02  Garde clippy bans in clippy.toml
-  R-GARDE-05  Garde validation patterns
-
-TEST QUALITY:
-  R-TEST-02  Test file naming convention
-  R-TEST-03  Test module structure
-  R-TEST-04  Test assertion quality
-  R-TEST-05  Test coverage indicators
-  R-TEST-06  Test isolation
-  R-TEST-07  Test naming patterns
-  R-TEST-08  Integration test structure";
+GARDE: R-GARDE-01/02/05  Garde dependency, clippy bans, validation patterns
+TESTS: R-TEST-02..08     Test files, structure, assertions, coverage, isolation";
 
 // ---------------------------------------------------------------------------
 // ts validate help
@@ -291,87 +296,36 @@ TEST QUALITY:
 const TS_VALIDATE_HELP: &str = "\
 TYPESCRIPT CHECKS:
 
-ESLINT CONFIGURATION:
-  T1        eslint.config.mjs exists
-  T2        ESLint TypeScript plugin
-  T3        ESLint import plugin
-  T4        ESLint unused-imports plugin
-  T5        ESLint boundaries plugin
-  T6        ESLint flat config format
-  T7        ESLint strict type-checking
-  T8        ESLint file pattern coverage
-
-ESLINT AUDIT (rule presence):
-  T36       no-explicit-any rule
-  T37       no-unused-vars rule
-  T38       consistent-type-imports rule
-  T39       naming-convention rule
-  T40       no-floating-promises rule
-  T41       no-misused-promises rule
-  T42       require-await rule
-  T43       no-unsafe-assignment rule
-  T44       no-unsafe-member-access rule
-  T45       no-unsafe-call rule
-  T46       no-unsafe-return rule
-  T47       no-unsafe-argument rule
-  T48       restrict-template-expressions rule
-  T49       boundaries/element-types rule
-  T50       no-console rule
-  T51       import-x/no-cycle rule
+ESLINT:
+  T1-T8     eslint.config.mjs existence, plugins, strict mode, file patterns
+  T36-T51   Individual ESLint rule presence (no-explicit-any, naming, promises, etc.)
 
 TSCONFIG:
-  T9        tsconfig.json exists and parses
-  T10       TypeScript strict mode settings
-  T52       noUncheckedIndexedAccess
-  T53       exactOptionalPropertyTypes
-  T54       isolatedModules
+  T9-T10    tsconfig.json existence + strict settings
+  T52-T54   noUncheckedIndexedAccess, exactOptionalPropertyTypes, isolatedModules
 
 NPMRC:
-  T11       .npmrc exists
-  T12       strict-peer-dependencies
-  T13       auto-install-peers
-  T14       Additional npmrc settings
+  T11-T14   .npmrc existence + strict peer deps + settings
 
 PACKAGE.JSON:
-  T15       package.json exists and parses
-  T16       pnpm overrides
-  T17       engine-strict / packageManager
-  T18       Banned dependencies
-  T55       Build script exists
-  T56       Lint script exists
-  T57       Type-check script exists
-  T58       Test script exists
+  T15-T18   package.json existence, overrides, engine-strict, banned deps
+  T55-T58   Build/lint/type-check/test scripts
 
-JSCPD / DUPLICATION:
-  T19       .jscpd.json exists
-  T20       jscpd threshold settings
-  T21       jscpd reporters
-  T22       jscpd file patterns
-  T60       Content imports pattern
-  T61       Velite configuration
+JSCPD:
+  T19-T22   .jscpd.json existence, thresholds, reporters, patterns
+  T60-T61   Content imports, Velite configuration
 
-SOURCE SCAN:
-  T23       eslint-disable without reason (error)
-  T24       eslint-disable with reason (info inventory)
-  T25       eslint-disable-next-line without reason (error)
-  T26       eslint-disable-next-line with reason (info inventory)
+SOURCE SCAN (AST-based via tree-sitter — immune to strings/comments):
+  T23-T26   eslint-disable without/with reason
   T27       @ts-ignore usage
-  T28       @ts-expect-error without reason
-  T29       @ts-expect-error with reason (info inventory)
+  T28-T29   @ts-expect-error without/with reason
   T30       Direct process.env usage
   T31       Explicit any type usage
-  T32       File length > 300 lines (error)
-  T33       File length > 200 lines (warn)
-  T34       IDE-generated suppressions
-  T35       Coverage tool suppressions
+  T32-T33   File length (>300 error, >200 warn)
+  T34-T35   IDE/coverage suppressions
   T59       Banned packages in node_modules
 
-TEST QUALITY:
-  T-TEST-01 Test file naming convention
-  T-TEST-02 Test describe blocks
-  T-TEST-03 Test assertion patterns
-  T-TEST-04 Test file co-location
-  T-TEST-05 Test coverage configuration";
+TESTS: T-TEST-01..05  Test naming, describe blocks, assertions, co-location, coverage";
 
 // ---------------------------------------------------------------------------
 // rs init help
@@ -379,48 +333,46 @@ TEST QUALITY:
 
 const RS_INIT_HELP: &str = "\
 PROFILES:
-  service    HTTP service guardrails. Includes:
-             - 6 clippy method ban modules (env-vars, filesystem, http, etc.)
-             - 4 clippy type ban modules (collections, sync, filesystem, global-state)
-             - 16 deny.toml ban categories (json, tls, http, async, etc.)
-             - Pre-commit hook with cargo fmt/clippy/deny/test/dupes
-
-  library    Everything in service, PLUS:
-             - Bans ALL I/O crates (axum, tokio, reqwest, sqlx, etc.)
-             - Global-state bans on ALL crates (no LazyLock anywhere)
-             - For pure logic packages with zero side effects
+  service    For HTTP services, CLI tools, binaries.
+             Bans dangerous methods and types. Allows I/O crates.
+  library    For pure logic packages. Bans ALL I/O crates and global state.
 
 FILES CREATED:
-  guardrail3.toml              Project config (profile, workspace, crate layers)
-  local/clippy-methods.toml    Extra disallowed methods (project-specific)
-  local/clippy-types.toml      Extra disallowed types (project-specific)
-  local/deny-bans.toml         Extra crate bans (project-specific)
-  local/deny-skip.toml         Advisory skip list
-  local/deny-feature-bans.toml Feature bans (project-specific)
-  release-plz.toml             Release automation config (service only)
-  cliff.toml                   Changelog generation config (service only)
+  guardrail3.toml              Config file (profile, workspace, crate settings)
+  local/clippy-methods.toml    Extra disallowed methods
+  local/clippy-types.toml      Extra disallowed types
+  local/deny-bans.toml         Extra crate bans
+  local/deny-skip.toml         Duplicate crate skip list
+  local/deny-feature-bans.toml Feature bans
+  release-plz.toml             Release automation (service only)
+  cliff.toml                   Changelog generation (service only)
+
+AFTER INIT:
+  For single crates:  guardrail3 rs generate && guardrail3 rs validate .
+  For workspaces:     Edit guardrail3.toml (add [rust.crates.*] sections),
+                      then guardrail3 rs generate && guardrail3 rs validate .
 
 EXAMPLES:
-  guardrail3 rs init --profile service          New service project
-  guardrail3 rs init --profile library           New library
-  guardrail3 rs init --profile service --force   Overwrite existing";
+  guardrail3 rs init --profile service .         Service project
+  guardrail3 rs init --profile library .          Pure logic library
+  guardrail3 rs init --profile service --force .  Overwrite existing";
 
 // ---------------------------------------------------------------------------
 // ts init help
 // ---------------------------------------------------------------------------
 
 const TS_INIT_HELP: &str = "\
-WHAT IT CREATES:
-  guardrail3.toml              Project config (adds [typescript] section)
+Creates or appends a [typescript] section to guardrail3.toml.
+Does NOT create local/ or any Rust-specific files.
 
 AFTER INIT:
-  guardrail3 ts generate       Produce eslint.config.mjs, tsconfig.json, .npmrc, .jscpd.json
-  guardrail3 ts validate .     Check TypeScript compliance
+  guardrail3 ts generate        Produce eslint.config, tsconfig, npmrc, jscpd
+  guardrail3 ts validate .      Check TypeScript compliance
 
 EXAMPLES:
-  guardrail3 ts init                     New TypeScript project
-  guardrail3 ts init --force             Overwrite existing config
-  guardrail3 ts init /path/to/project    Specific project directory";
+  guardrail3 ts init .                  New TypeScript project
+  guardrail3 ts init --force .          Overwrite existing config
+  guardrail3 ts init /path/to/project   Specific directory";
 
 #[cfg(test)]
 mod tests {
@@ -430,22 +382,26 @@ mod tests {
     use crate::cli::Cli;
 
     #[test]
-    #[allow(clippy::expect_used, clippy::indexing_slicing)] // reason: test assertions
+    #[allow(clippy::expect_used)] // reason: test assertions
     fn inject_help_does_not_panic() {
         let cmd = Cli::command();
         let cmd = inject_help(cmd);
-        // Verify help contains our injected text
         let after = cmd.get_after_help().expect("after_help set").to_string();
-        assert!(after.contains("QUICK START"), "missing QUICK START in help");
+        assert!(
+            after.contains("COMMAND REFERENCE"),
+            "missing COMMAND REFERENCE"
+        );
+        assert!(
+            after.contains("SETUP GUIDE"),
+            "missing SETUP GUIDE in help"
+        );
         assert!(after.contains("PROFILES"), "missing PROFILES in help");
-        assert!(after.contains("WORKFLOW"), "missing WORKFLOW in help");
     }
 
     #[test]
     #[allow(clippy::expect_used)] // reason: test assertions
     fn rs_validate_help_contains_check_ids() {
         let cmd = inject_help(Cli::command());
-        // Navigate to rs > validate
         let rs = cmd
             .get_subcommands()
             .find(|c| c.get_name() == "rs")
@@ -456,11 +412,12 @@ mod tests {
             .expect("validate subcommand");
         let after = validate
             .get_after_help()
-            .expect("after_long_help set")
+            .expect("after_help set")
             .to_string();
         assert!(after.contains("R1"));
         assert!(after.contains("R58"));
-        assert!(after.contains("R-TEST-08"));
+        assert!(after.contains("R-DEPS-01"));
+        assert!(after.contains("R-TEST-"));
     }
 
     #[test]
@@ -477,9 +434,9 @@ mod tests {
             .expect("validate subcommand");
         let after = validate
             .get_after_help()
-            .expect("after_long_help set")
+            .expect("after_help set")
             .to_string();
         assert!(after.contains("T1"));
-        assert!(after.contains("T-TEST-05"));
+        assert!(after.contains("T-TEST-"));
     }
 }
