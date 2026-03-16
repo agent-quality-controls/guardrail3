@@ -38,7 +38,8 @@ pub fn check_binary_release_workflow(
             message: "Workflow builds --release with action-gh-release".to_owned(),
             file: None,
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         results.push(CheckResult {
             id: "R-BIN-01".to_owned(),
@@ -47,6 +48,7 @@ pub fn check_binary_release_workflow(
             message: "No workflow building --release with action-gh-release".to_owned(),
             file: None,
             line: None,
+            inventory: false,
         });
     }
 }
@@ -76,7 +78,8 @@ pub fn check_binary_linux_target(
             message: "Workflow references linux/x86_64/amd64/ubuntu".to_owned(),
             file: None,
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         results.push(CheckResult {
             id: "R-BIN-02".to_owned(),
@@ -85,7 +88,8 @@ pub fn check_binary_linux_target(
             message: "No workflow references linux/x86_64/amd64/ubuntu".to_owned(),
             file: None,
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     }
 }
 
@@ -107,7 +111,8 @@ pub fn check_binstall_metadata(krate: &CrateInfo, results: &mut Vec<CheckResult>
             message: "[package.metadata.binstall] found in Cargo.toml".to_owned(),
             file: Some(krate.cargo_toml_path.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         results.push(CheckResult {
             id: "R-BIN-03".to_owned(),
@@ -116,6 +121,7 @@ pub fn check_binstall_metadata(krate: &CrateInfo, results: &mut Vec<CheckResult>
             message: "No [package.metadata.binstall] in Cargo.toml".to_owned(),
             file: Some(krate.cargo_toml_path.display().to_string()),
             line: None,
+            inventory: false,
         });
     }
 }

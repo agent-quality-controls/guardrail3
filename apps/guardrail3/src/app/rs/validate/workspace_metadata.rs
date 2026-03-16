@@ -44,7 +44,8 @@ pub fn check_workspace_metadata(
             message: meta_parts.join(", "),
             file: Some(cargo_path.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     }
 
     // R56: Report workspace publish status
@@ -62,7 +63,8 @@ pub fn check_workspace_metadata(
             message: format!("publish = {p}"),
             file: Some(cargo_path.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     }
 
     // R57: Release profile
@@ -81,7 +83,8 @@ pub fn check_workspace_metadata(
                 message: settings.join(", "),
                 file: Some(cargo_path.display().to_string()),
                 line: None,
-            });
+                inventory: false,
+            }.as_inventory());
         }
     }
 }

@@ -69,7 +69,8 @@ fn check_tool_installed(
             message: format!("{tool} found on PATH"),
             file: None,
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         results.push(CheckResult {
             id: check_id.to_owned(),
@@ -78,6 +79,7 @@ fn check_tool_installed(
             message: format!("{tool} not found — install with: cargo install {tool}"),
             file: None,
             line: None,
+            inventory: false,
         });
     }
 }
@@ -125,6 +127,7 @@ fn check_cargo_lock(fs: &dyn FileSystem, workspace_root: &Path, results: &mut Ve
             message: "Cannot check for banned crates without Cargo.lock".to_owned(),
             file: Some(workspace_root.display().to_string()),
             line: None,
+            inventory: false,
         });
         return;
     }
@@ -139,6 +142,7 @@ fn check_cargo_lock(fs: &dyn FileSystem, workspace_root: &Path, results: &mut Ve
                 message: format!("Failed to read: {e}"),
                 file: Some(lock_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
             return;
         }
@@ -154,6 +158,7 @@ fn check_cargo_lock(fs: &dyn FileSystem, workspace_root: &Path, results: &mut Ve
                 message: format!("Invalid TOML: {e}"),
                 file: Some(lock_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
             return;
         }
@@ -186,7 +191,8 @@ fn check_cargo_lock(fs: &dyn FileSystem, workspace_root: &Path, results: &mut Ve
             message: "Cargo.lock is clean".to_owned(),
             file: Some(lock_path.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         for banned in &found_banned {
             results.push(CheckResult {
@@ -196,6 +202,7 @@ fn check_cargo_lock(fs: &dyn FileSystem, workspace_root: &Path, results: &mut Ve
                 message: format!("Found banned crate: {banned}"),
                 file: Some(lock_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
     }

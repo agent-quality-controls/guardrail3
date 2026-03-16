@@ -118,6 +118,7 @@ pub fn check(fs: &dyn FileSystem, workspace_root: &Path) -> Vec<CheckResult> {
             message: "Cannot check workspace lints".to_owned(),
             file: Some(workspace_root.display().to_string()),
             line: None,
+            inventory: false,
         });
         return results;
     }
@@ -132,6 +133,7 @@ pub fn check(fs: &dyn FileSystem, workspace_root: &Path) -> Vec<CheckResult> {
                 message: format!("Failed to read: {e}"),
                 file: Some(cargo_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
             return results;
         }
@@ -147,6 +149,7 @@ pub fn check(fs: &dyn FileSystem, workspace_root: &Path) -> Vec<CheckResult> {
                 message: format!("Invalid TOML: {e}"),
                 file: Some(cargo_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
             return results;
         }
@@ -184,6 +187,7 @@ fn check_rust_lints(
             message: "No Rust lint configuration in workspace".to_owned(),
             file: Some(file_path.display().to_string()),
             line: None,
+            inventory: false,
         });
         return;
     };
@@ -215,6 +219,7 @@ fn check_clippy_lints(
             message: "No Clippy lint configuration in workspace".to_owned(),
             file: Some(file_path.display().to_string()),
             line: None,
+            inventory: false,
         });
         return;
     };
@@ -252,7 +257,8 @@ fn check_clippy_lints(
                     message: format!("{lint_name} = allow"),
                     file: Some(file_path.display().to_string()),
                     line: None,
-                });
+                    inventory: false,
+                }.as_inventory());
             }
             Some(other) => {
                 results.push(CheckResult {
@@ -262,7 +268,8 @@ fn check_clippy_lints(
                     message: format!("{lint_name} = \"{other}\" (expected \"allow\")"),
                     file: Some(file_path.display().to_string()),
                     line: None,
-                });
+                    inventory: false,
+                }.as_inventory());
             }
             None => {
                 results.push(CheckResult {
@@ -272,7 +279,8 @@ fn check_clippy_lints(
                     message: format!("{lint_name} not configured (expected allow)"),
                     file: Some(file_path.display().to_string()),
                     line: None,
-                });
+                    inventory: false,
+                }.as_inventory());
             }
         }
     }
@@ -314,7 +322,8 @@ pub fn check_workspace_inheritance(
                 message: format!("{member}: [lints] workspace = true"),
                 file: Some(crate_cargo.display().to_string()),
                 line: None,
-            });
+                inventory: false,
+            }.as_inventory());
         } else {
             results.push(CheckResult {
                 id: "R29".to_owned(),
@@ -323,6 +332,7 @@ pub fn check_workspace_inheritance(
                 message: format!("{member}: missing [lints] workspace = true"),
                 file: Some(crate_cargo.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
     }
@@ -350,7 +360,6 @@ fn get_lint_priority(lints: &toml::Value, name: &str) -> Option<i64> {
 
 #[allow(clippy::too_many_lines)] // reason: lint level validation with priority checking
 #[allow(clippy::too_many_arguments)] // reason: lint validation requires all context params
-#[allow(clippy::or_fun_call)] // reason: map_or with function call is intentional for error display
 fn check_lint_level(
     lints: &toml::Value,
     name: &str,
@@ -376,7 +385,8 @@ fn check_lint_level(
                         message: format!("{name} = {expected_level} (priority {exp_pri})"),
                         file: Some(file_path.display().to_string()),
                         line: None,
-                    });
+                        inventory: false,
+                    }.as_inventory());
                 } else {
                     results.push(CheckResult {
                         id: check_id_wrong.to_owned(),
@@ -384,10 +394,11 @@ fn check_lint_level(
                         title: format!("{name} priority wrong"),
                         message: format!(
                             "Expected priority {exp_pri}, got {}",
-                            actual_pri.map_or("none".to_owned(), |p| p.to_string())
+                            actual_pri.map_or_else(|| "none".to_owned(), |p| p.to_string())
                         ),
                         file: Some(file_path.display().to_string()),
                         line: None,
+                        inventory: false,
                     });
                 }
             } else {
@@ -398,7 +409,8 @@ fn check_lint_level(
                     message: format!("{name} = {expected_level}"),
                     file: Some(file_path.display().to_string()),
                     line: None,
-                });
+                    inventory: false,
+                }.as_inventory());
             }
         }
         Some("forbid") if expected_level == "deny" => {
@@ -410,7 +422,8 @@ fn check_lint_level(
                 message: format!("{name} = \"forbid\" (expected \"{expected_level}\")"),
                 file: Some(file_path.display().to_string()),
                 line: None,
-            });
+                inventory: false,
+            }.as_inventory());
         }
         Some(l) => {
             // Found but wrong level — use check_id_wrong (R27 for relaxed)
@@ -429,6 +442,7 @@ fn check_lint_level(
                 message: format!("Expected \"{expected_level}\", got \"{l}\""),
                 file: Some(file_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
         None => {
@@ -440,6 +454,7 @@ fn check_lint_level(
                 message: format!("Expected {name} = \"{expected_level}\""),
                 file: Some(file_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
     }

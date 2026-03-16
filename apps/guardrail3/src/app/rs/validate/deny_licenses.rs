@@ -12,6 +12,7 @@ pub fn check_licenses(table: &toml::Value, file_path: &Path, results: &mut Vec<C
             message: "deny.toml has no [licenses] section".to_owned(),
             file: Some(file_path.display().to_string()),
             line: None,
+            inventory: false,
         });
         return;
     };
@@ -27,7 +28,8 @@ pub fn check_licenses(table: &toml::Value, file_path: &Path, results: &mut Vec<C
                 message: format!("Allowed: {}", license_list.join(", ")),
                 file: Some(file_path.display().to_string()),
                 line: None,
-            });
+                inventory: false,
+            }.as_inventory());
         }
         _ => {
             results.push(CheckResult {
@@ -37,6 +39,7 @@ pub fn check_licenses(table: &toml::Value, file_path: &Path, results: &mut Vec<C
                 message: "[licenses].allow is missing or empty".to_owned(),
                 file: Some(file_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
     }
@@ -62,6 +65,7 @@ pub fn check_licenses(table: &toml::Value, file_path: &Path, results: &mut Vec<C
                 message: "Expected [licenses.private] ignore = true".to_owned(),
                 file: Some(file_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
         None => {
@@ -72,6 +76,7 @@ pub fn check_licenses(table: &toml::Value, file_path: &Path, results: &mut Vec<C
                 message: "Expected [licenses.private] ignore = true".to_owned(),
                 file: Some(file_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
     }
@@ -89,7 +94,8 @@ pub fn check_licenses(table: &toml::Value, file_path: &Path, results: &mut Vec<C
                     message: format!("confidence-threshold = {v} (expected 0.8)"),
                     file: Some(file_path.display().to_string()),
                     line: None,
-                });
+                    inventory: false,
+                }.as_inventory());
             }
         }
         None => {
@@ -100,7 +106,8 @@ pub fn check_licenses(table: &toml::Value, file_path: &Path, results: &mut Vec<C
                 message: "Expected confidence-threshold = 0.8".to_owned(),
                 file: Some(file_path.display().to_string()),
                 line: None,
-            });
+                inventory: false,
+            }.as_inventory());
         }
         _ => {}
     }
@@ -117,6 +124,7 @@ pub fn check_sources(table: &toml::Value, file_path: &Path, results: &mut Vec<Ch
             message: "deny.toml has no [sources] section".to_owned(),
             file: Some(file_path.display().to_string()),
             line: None,
+            inventory: false,
         });
         return;
     };
@@ -131,7 +139,8 @@ pub fn check_sources(table: &toml::Value, file_path: &Path, results: &mut Vec<Ch
                     message: format!("{key} = \"deny\""),
                     file: Some(file_path.display().to_string()),
                     line: None,
-                });
+                    inventory: false,
+                }.as_inventory());
             }
             Some(other) => {
                 results.push(CheckResult {
@@ -141,6 +150,7 @@ pub fn check_sources(table: &toml::Value, file_path: &Path, results: &mut Vec<Ch
                     message: format!("Expected \"deny\", got \"{other}\""),
                     file: Some(file_path.display().to_string()),
                     line: None,
+                    inventory: false,
                 });
             }
             None => {
@@ -151,6 +161,7 @@ pub fn check_sources(table: &toml::Value, file_path: &Path, results: &mut Vec<Ch
                     message: format!("Expected {key} = \"deny\""),
                     file: Some(file_path.display().to_string()),
                     line: None,
+                    inventory: false,
                 });
             }
         }
@@ -168,6 +179,7 @@ pub fn check_sources(table: &toml::Value, file_path: &Path, results: &mut Vec<Ch
                 message: format!("allow-registry contains: {}", registries.join(", ")),
                 file: Some(file_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
     }
@@ -183,6 +195,7 @@ pub fn check_sources(table: &toml::Value, file_path: &Path, results: &mut Vec<Ch
                 message: format!("allow-git contains: {}", git_sources.join(", ")),
                 file: Some(file_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
         Some(_) | None => {

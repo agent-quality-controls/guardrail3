@@ -65,11 +65,12 @@ pub fn check_required_string_field(
         message: if has_field {
             format!("Cargo.toml has [package].{field_name}")
         } else {
-            format!("Cargo.toml [package].{field_name} is missing or empty")
+            format!("[package].{field_name} is missing or empty in Cargo.toml. Add `{field_name} = \"...\"` to [package].")
         },
         file: file.map(std::borrow::ToOwned::to_owned),
         line: None,
-    });
+        inventory: false,
+    }.as_inventory());
 }
 
 // --- R-PUB-02: license ---
@@ -101,10 +102,11 @@ pub fn check_license(
         message: if ok {
             "Cargo.toml has license or license-file".to_owned()
         } else {
-            "Cargo.toml [package] has neither license nor license-file".to_owned()
+            "No license specified. Add `license = \"MIT\"` (or your license) to [package] in Cargo.toml.".to_owned()
         },
         file: file.map(std::borrow::ToOwned::to_owned),
         line: None,
+        inventory: false,
     });
 }
 
@@ -130,7 +132,8 @@ pub fn check_readme(
                     message: "README.md exists at crate root (no explicit readme field)".to_owned(),
                     file: file.map(std::borrow::ToOwned::to_owned),
                     line: None,
-                });
+                    inventory: false,
+                }.as_inventory());
                 check_readme_quality(fs, &default_readme, &krate.name, file, results);
             } else {
                 results.push(CheckResult {
@@ -140,6 +143,7 @@ pub fn check_readme(
                     message: "No readme field and no README.md at crate root".to_owned(),
                     file: file.map(std::borrow::ToOwned::to_owned),
                     line: None,
+                    inventory: false,
                 });
             }
         }
@@ -153,7 +157,8 @@ pub fn check_readme(
                     message: format!("readme = \"{readme_path}\" exists on disk"),
                     file: file.map(std::borrow::ToOwned::to_owned),
                     line: None,
-                });
+                    inventory: false,
+                }.as_inventory());
                 check_readme_quality(fs, &full_path, &krate.name, file, results);
             } else {
                 results.push(CheckResult {
@@ -163,6 +168,7 @@ pub fn check_readme(
                     message: format!("readme = \"{readme_path}\" but file does not exist"),
                     file: file.map(std::borrow::ToOwned::to_owned),
                     line: None,
+                    inventory: false,
                 });
             }
         }
@@ -209,6 +215,7 @@ pub fn check_readme_quality(
         message,
         file: file.map(std::borrow::ToOwned::to_owned),
         line: None,
+        inventory: false,
     });
 }
 
@@ -247,6 +254,7 @@ pub fn check_version(
         message,
         file: file.map(std::borrow::ToOwned::to_owned),
         line: None,
+        inventory: false,
     });
 }
 

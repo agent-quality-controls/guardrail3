@@ -190,9 +190,9 @@ fn run_rs_validate(
 #[allow(clippy::disallowed_methods)] // reason: CLI — process::exit
 fn print_report(args: &ValidateArgs, report: &guardrail3::domain::report::Report) {
     match args.format.as_str() {
-        "json" => report::json::print_report(report),
-        "md" | "markdown" => report::markdown::print_report(report),
-        _ => report::text::print_report(report),
+        "json" => report::json::print_report(report, args.inventory),
+        "md" | "markdown" => report::markdown::print_report(report, args.inventory),
+        _ => report::text::print_report(report, args.inventory),
     }
     if report.error_count() > 0 {
         std::process::exit(1);

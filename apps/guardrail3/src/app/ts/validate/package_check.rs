@@ -4,7 +4,6 @@ use crate::domain::report::{CheckResult, Severity};
 use crate::ports::outbound::FileSystem;
 
 #[allow(clippy::too_many_lines, clippy::disallowed_methods)] // reason: comprehensive package.json validation; guardrail3 JSON config inspection
-#[allow(clippy::or_fun_call)] // reason: map_or with function call is intentional for display
 pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResult>) {
     let pkg_path = path.join("package.json");
     if !pkg_path.exists() {
@@ -38,6 +37,7 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
                     message: "No zod override in pnpm.overrides".to_owned(),
                     file: Some(pkg_path.display().to_string()),
                     line: None,
+                    inventory: false,
                 });
             }
             if !has_eslint_js {
@@ -48,6 +48,7 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
                     message: "No @eslint/js override in pnpm.overrides".to_owned(),
                     file: Some(pkg_path.display().to_string()),
                     line: None,
+                    inventory: false,
                 });
             }
 
@@ -63,10 +64,11 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
                             "{key} = {}",
                             ov_obj
                                 .get(key)
-                                .map_or("?".to_owned(), std::string::ToString::to_string)
+                                .map_or_else(|| "?".to_owned(), std::string::ToString::to_string)
                         ),
                         file: Some(pkg_path.display().to_string()),
                         line: None,
+                        inventory: false,
                     });
                 }
             }
@@ -79,6 +81,7 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
                 message: "No pnpm.overrides section in package.json".to_owned(),
                 file: Some(pkg_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
     }
@@ -121,6 +124,7 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
                         message: format!("{dep_name} found in {section_name}"),
                         file: Some(pkg_path.display().to_string()),
                         line: None,
+                        inventory: false,
                     });
                 }
             }
@@ -136,11 +140,12 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
             message: format!(
                 "packageManager = {}",
                 json.get("packageManager")
-                    .map_or("?".to_owned(), std::string::ToString::to_string)
+                    .map_or_else(|| "?".to_owned(), std::string::ToString::to_string)
             ),
             file: Some(pkg_path.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         results.push(CheckResult {
             id: "T18".to_owned(),
@@ -149,6 +154,7 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
             message: "No packageManager field in package.json".to_owned(),
             file: Some(pkg_path.display().to_string()),
             line: None,
+            inventory: false,
         });
     }
 
@@ -167,7 +173,8 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
                 message: "preinstall script contains only-allow pnpm".to_owned(),
                 file: Some(pkg_path.display().to_string()),
                 line: None,
-            });
+                inventory: false,
+            }.as_inventory());
         }
         _ => {
             results.push(CheckResult {
@@ -177,6 +184,7 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
                 message: "No preinstall script with only-allow pnpm".to_owned(),
                 file: Some(pkg_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
     }
@@ -192,7 +200,8 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
             message: "prepare script found".to_owned(),
             file: Some(pkg_path.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         results.push(CheckResult {
             id: "T56".to_owned(),
@@ -201,6 +210,7 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
             message: "No prepare script in package.json".to_owned(),
             file: Some(pkg_path.display().to_string()),
             line: None,
+            inventory: false,
         });
     }
 
@@ -213,11 +223,12 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
             message: format!(
                 "engines = {}",
                 json.get("engines")
-                    .map_or("?".to_owned(), std::string::ToString::to_string)
+                    .map_or_else(|| "?".to_owned(), std::string::ToString::to_string)
             ),
             file: Some(pkg_path.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         results.push(CheckResult {
             id: "T57".to_owned(),
@@ -226,6 +237,7 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
             message: "No engines field in package.json".to_owned(),
             file: Some(pkg_path.display().to_string()),
             line: None,
+            inventory: false,
         });
     }
 
@@ -241,6 +253,7 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
             message: format!("onlyBuiltDependencies = {obd}"),
             file: Some(pkg_path.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     }
 }

@@ -4,8 +4,10 @@ use std::path::Path;
 use crate::domain::report::{CheckResult, Severity};
 use crate::ports::outbound::FileSystem;
 
+type ExpectedStr<'a> = (&'a str, &'a str);
+type ExpectedInt<'a> = (&'a str, i64);
+type ExpectedBool<'a> = (&'a str, bool);
 #[allow(clippy::too_many_lines)] // reason: rustfmt settings validation
-#[allow(clippy::or_fun_call)] // reason: map_or with function call is intentional for display
 pub fn check_rustfmt_settings(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResult>) {
     let content = match fs.read_file_err(path) {
         Ok(c) => c,
@@ -17,6 +19,7 @@ pub fn check_rustfmt_settings(fs: &dyn FileSystem, path: &Path, results: &mut Ve
                 message: format!("Failed to read: {e}"),
                 file: Some(path.display().to_string()),
                 line: None,
+                inventory: false,
             });
             return;
         }
@@ -32,19 +35,17 @@ pub fn check_rustfmt_settings(fs: &dyn FileSystem, path: &Path, results: &mut Ve
                 message: format!("Invalid TOML: {e}"),
                 file: Some(path.display().to_string()),
                 line: None,
+                inventory: false,
             });
             return;
         }
     };
 
     let mut expected_keys: BTreeSet<String> = BTreeSet::new();
-    #[allow(clippy::type_complexity)] // reason: legitimate complex type
-    let expected_strings: &[(&str, &str)] = &[("edition", "2024")];
-    #[allow(clippy::type_complexity)] // reason: legitimate complex type
-    let expected_ints: &[(&str, i64)] = &[("max_width", 100), ("tab_spaces", 4)];
+    let expected_strings: &[ExpectedStr<'_>] = &[("edition", "2024")];
+    let expected_ints: &[ExpectedInt<'_>] = &[("max_width", 100), ("tab_spaces", 4)];
 
-    #[allow(clippy::type_complexity)] // reason: legitimate type for expected settings
-    let expected_bools: &[(&str, bool)] = &[
+    let expected_bools: &[ExpectedBool<'_>] = &[
         ("use_field_init_shorthand", true),
         ("use_try_shorthand", true),
         ("reorder_imports", true),
@@ -62,9 +63,10 @@ pub fn check_rustfmt_settings(fs: &dyn FileSystem, path: &Path, results: &mut Ve
                     id: "R22".to_owned(),
                     severity: Severity::Warn,
                     title: format!("rustfmt {key} wrong"),
-                    message: format!("Expected \"{expected_val}\", got {v}"),
+                    message: format!("{key} = {v} but should be \"{expected_val}\". Set `{key} = \"{expected_val}\"` in rustfmt.toml."),
                     file: Some(path.display().to_string()),
                     line: None,
+                    inventory: false,
                 });
             }
             None => {
@@ -72,9 +74,10 @@ pub fn check_rustfmt_settings(fs: &dyn FileSystem, path: &Path, results: &mut Ve
                     id: "R22".to_owned(),
                     severity: Severity::Warn,
                     title: format!("rustfmt {key} missing"),
-                    message: format!("Expected {key} = \"{expected_val}\""),
+                    message: format!("{key} not set. Add `{key} = \"{expected_val}\"` to rustfmt.toml."),
                     file: Some(path.display().to_string()),
                     line: None,
+                    inventory: false,
                 });
             }
         }
@@ -91,9 +94,10 @@ pub fn check_rustfmt_settings(fs: &dyn FileSystem, path: &Path, results: &mut Ve
                     id: "R22".to_owned(),
                     severity: Severity::Warn,
                     title: format!("rustfmt {key} wrong"),
-                    message: format!("Expected {expected_val}, got {v}"),
+                    message: format!("{key} = {v} but should be {expected_val}. Set `{key} = {expected_val}` in rustfmt.toml."),
                     file: Some(path.display().to_string()),
                     line: None,
+                    inventory: false,
                 });
             }
             None => {
@@ -101,9 +105,10 @@ pub fn check_rustfmt_settings(fs: &dyn FileSystem, path: &Path, results: &mut Ve
                     id: "R22".to_owned(),
                     severity: Severity::Warn,
                     title: format!("rustfmt {key} missing"),
-                    message: format!("Expected {key} = {expected_val}"),
+                    message: format!("{key} not set. Add `{key} = {expected_val}` to rustfmt.toml."),
                     file: Some(path.display().to_string()),
                     line: None,
+                    inventory: false,
                 });
             }
         }
@@ -120,9 +125,10 @@ pub fn check_rustfmt_settings(fs: &dyn FileSystem, path: &Path, results: &mut Ve
                     id: "R22".to_owned(),
                     severity: Severity::Warn,
                     title: format!("rustfmt {key} wrong"),
-                    message: format!("Expected {expected_val}, got {v}"),
+                    message: format!("{key} = {v} but should be {expected_val}. Set `{key} = {expected_val}` in rustfmt.toml."),
                     file: Some(path.display().to_string()),
                     line: None,
+                    inventory: false,
                 });
             }
             None => {
@@ -130,9 +136,10 @@ pub fn check_rustfmt_settings(fs: &dyn FileSystem, path: &Path, results: &mut Ve
                     id: "R22".to_owned(),
                     severity: Severity::Warn,
                     title: format!("rustfmt {key} missing"),
-                    message: format!("Expected {key} = {expected_val}"),
+                    message: format!("{key} not set. Add `{key} = {expected_val}` to rustfmt.toml."),
                     file: Some(path.display().to_string()),
                     line: None,
+                    inventory: false,
                 });
             }
         }
@@ -149,10 +156,11 @@ pub fn check_rustfmt_settings(fs: &dyn FileSystem, path: &Path, results: &mut Ve
                     message: format!(
                         "{key} = {}",
                         tbl.get(key)
-                            .map_or("?".to_owned(), std::string::ToString::to_string)
+                            .map_or_else(|| "?".to_owned(), std::string::ToString::to_string)
                     ),
                     file: Some(path.display().to_string()),
                     line: None,
+                    inventory: false,
                 });
             }
         }

@@ -3,7 +3,7 @@ use serde_json::{Map, Number, Value, json};
 use crate::domain::report::{Report, Severity};
 
 #[allow(clippy::print_stdout)] // reason: CLI report output to stdout
-pub fn print_report(report: &Report) {
+pub fn print_report(report: &Report, show_inventory: bool) {
     let sections: Vec<Value> = report
         .sections
         .iter()
@@ -11,6 +11,7 @@ pub fn print_report(report: &Report) {
             let results: Vec<Value> = section
                 .results
                 .iter()
+                .filter(|r| show_inventory || !r.inventory)
                 .map(|r| {
                     let severity_str = match r.severity {
                         Severity::Error => "error",
@@ -37,6 +38,7 @@ pub fn print_report(report: &Report) {
                             None => Value::Null,
                         },
                     );
+                    let _ = obj.insert("inventory".into(), Value::Bool(r.inventory));
                     Value::Object(obj)
                 })
                 .collect();
@@ -48,6 +50,7 @@ pub fn print_report(report: &Report) {
         })
         .collect();
 
+    let inventory_hidden = report.inventory_count();
     let output = json!({
         "project": report.project_path,
         "stacks": report.stacks,
@@ -56,6 +59,7 @@ pub fn print_report(report: &Report) {
             "errors": report.error_count(),
             "warnings": report.warn_count(),
             "info": report.info_count(),
+            "inventory_hidden": if show_inventory { 0 } else { inventory_hidden },
         }
     });
 

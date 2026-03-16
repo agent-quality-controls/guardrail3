@@ -83,6 +83,7 @@ pub fn check_single_app_structure(
             ),
             file: Some(app_dir.display().to_string()),
             line: None,
+            inventory: false,
         });
     }
 }
@@ -295,9 +296,10 @@ fn is_ts_test_file(path: &str) -> bool {
         || path.contains("/tests/")
 }
 
-#[allow(clippy::case_sensitive_file_extension_comparisons)] // reason: only checking .ts/.tsx
 fn is_ts_source(path: &str) -> bool {
-    path.ends_with(".ts") || path.ends_with(".tsx")
+    std::path::Path::new(path)
+        .extension()
+        .is_some_and(|e| e == "ts" || e == "tsx")
 }
 
 /// Check a single file's imports for boundary violations.
@@ -341,6 +343,7 @@ pub fn check_file_imports(
                 ),
                 file: Some(file_path.display().to_string()),
                 line: Some(line_number),
+                inventory: false,
             });
         }
     }

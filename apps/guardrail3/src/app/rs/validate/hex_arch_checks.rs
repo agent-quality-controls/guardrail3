@@ -126,6 +126,7 @@ pub fn check_hex_arch_structure(
                     ),
                     file: Some(dir.display().to_string()),
                     line: None,
+                    inventory: false,
                 });
             }
         }
@@ -184,6 +185,7 @@ pub fn check_dependency_flow(
                         ),
                         file: Some(cargo.display().to_string()),
                         line: None,
+                        inventory: false,
                     });
                 }
             }
@@ -263,6 +265,7 @@ pub fn check_library_service_boundary(
                     ),
                     file: Some(cargo.display().to_string()),
                     line: None,
+                    inventory: false,
                 });
             }
         }
@@ -301,6 +304,7 @@ pub fn check_unconfigured_members(
                         .to_owned(),
                     file: Some("guardrail3.toml".to_owned()),
                     line: None,
+                    inventory: false,
                 });
             }
         }
@@ -321,6 +325,7 @@ pub fn check_unconfigured_members(
             ),
             file: Some("guardrail3.toml".to_owned()),
             line: None,
+            inventory: false,
         });
         return;
     }
@@ -334,11 +339,11 @@ pub fn check_unconfigured_members(
                 severity: Severity::Warn,
                 title: format!("Workspace member `{crate_name}` not configured"),
                 message: format!(
-                    "No [rust.crates.{crate_name}] in guardrail3.toml. \
-                     Add profile, layer, and allowed_deps."
+                    "Workspace member `{crate_name}` has no config. Add `[rust.crates.{crate_name}]` to guardrail3.toml with `profile`, `layer`, and optionally `allowed_deps`."
                 ),
                 file: Some("guardrail3.toml".to_owned()),
                 line: None,
+                inventory: false,
             });
         }
     }

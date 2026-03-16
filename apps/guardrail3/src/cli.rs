@@ -147,6 +147,11 @@ pub struct ValidateArgs {
     #[arg(long)]
     #[garde(skip)] // reason: boolean flag, inherently valid
     pub thorough: bool,
+
+    /// Show inventory items (passing confirmations hidden by default)
+    #[arg(long)]
+    #[garde(skip)] // reason: boolean flag, inherently valid
+    pub inventory: bool,
 }
 
 #[derive(Parser, Debug, garde::Validate)]

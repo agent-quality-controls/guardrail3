@@ -7,6 +7,7 @@ use super::toolchain_check;
 use super::workspace_metadata;
 use crate::ports::outbound::FileSystem;
 
+type ExpectedInt<'a> = (&'a str, i64);
 pub fn check(fs: &dyn FileSystem, workspace_root: &Path) -> Vec<CheckResult> {
     let mut results = Vec::new();
 
@@ -20,7 +21,8 @@ pub fn check(fs: &dyn FileSystem, workspace_root: &Path) -> Vec<CheckResult> {
             message: "Found at workspace root".to_owned(),
             file: Some(clippy_path.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
 
         // R3: Thresholds
         check_clippy_thresholds(fs, &clippy_path, &mut results);
@@ -32,6 +34,7 @@ pub fn check(fs: &dyn FileSystem, workspace_root: &Path) -> Vec<CheckResult> {
             message: "No clippy.toml found at workspace root".to_owned(),
             file: Some(workspace_root.display().to_string()),
             line: None,
+            inventory: false,
         });
     }
 
@@ -45,7 +48,8 @@ pub fn check(fs: &dyn FileSystem, workspace_root: &Path) -> Vec<CheckResult> {
             message: "Found at workspace root".to_owned(),
             file: Some(rustfmt_path.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
 
         // R22: rustfmt.toml settings differ (Warn)
         // R23: rustfmt.toml extra settings (Info)
@@ -58,6 +62,7 @@ pub fn check(fs: &dyn FileSystem, workspace_root: &Path) -> Vec<CheckResult> {
             message: "No rustfmt.toml found at workspace root".to_owned(),
             file: Some(workspace_root.display().to_string()),
             line: None,
+            inventory: false,
         });
     }
 
@@ -71,7 +76,8 @@ pub fn check(fs: &dyn FileSystem, workspace_root: &Path) -> Vec<CheckResult> {
             message: "Found at workspace root".to_owned(),
             file: Some(toolchain_path.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
 
         // R25: rust-toolchain.toml settings
         toolchain_check::check_toolchain_settings(fs, &toolchain_path, &mut results);
@@ -83,6 +89,7 @@ pub fn check(fs: &dyn FileSystem, workspace_root: &Path) -> Vec<CheckResult> {
             message: "No rust-toolchain.toml found at workspace root".to_owned(),
             file: Some(workspace_root.display().to_string()),
             line: None,
+            inventory: false,
         });
     }
 
@@ -110,7 +117,8 @@ pub fn check_per_crate_clippy(
                 message: format!("Found for {member}"),
                 file: Some(crate_clippy.display().to_string()),
                 line: None,
-            });
+                inventory: false,
+            }.as_inventory());
 
             // Check per-crate clippy.toml content for global-state type bans
             check_per_crate_clippy_content(fs, &crate_clippy, member, &mut results);
@@ -122,6 +130,7 @@ pub fn check_per_crate_clippy(
                 message: format!("No clippy.toml for {member}"),
                 file: Some(crate_dir.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
     }
@@ -174,7 +183,8 @@ fn check_per_crate_clippy_content(
                 message: "No LazyLock/OnceLock/once_cell bans in per-crate clippy.toml".to_owned(),
                 file: Some(path.display().to_string()),
                 line: None,
-            });
+                inventory: false,
+            }.as_inventory());
         } else {
             results.push(CheckResult {
                 id: "R2".to_owned(),
@@ -183,7 +193,8 @@ fn check_per_crate_clippy_content(
                 message: format!("Bans: {}", found_global_bans.join(", ")),
                 file: Some(path.display().to_string()),
                 line: None,
-            });
+                inventory: false,
+            }.as_inventory());
         }
     }
 }
@@ -200,6 +211,7 @@ fn check_clippy_thresholds(fs: &dyn FileSystem, path: &Path, results: &mut Vec<C
                 message: format!("Failed to read: {e}"),
                 file: Some(path.display().to_string()),
                 line: None,
+                inventory: false,
             });
             return;
         }
@@ -215,12 +227,12 @@ fn check_clippy_thresholds(fs: &dyn FileSystem, path: &Path, results: &mut Vec<C
                 message: format!("Invalid TOML: {e}"),
                 file: Some(path.display().to_string()),
                 line: None,
+                inventory: false,
             });
             return;
         }
     };
-    #[allow(clippy::type_complexity)] // reason: legitimate complex type
-    let expected: &[(&str, i64)] = &[
+    let expected: &[ExpectedInt<'_>] = &[
         ("too-many-lines-threshold", 75),
         ("cognitive-complexity-threshold", 15),
         ("too-many-arguments-threshold", 7),
@@ -238,7 +250,8 @@ fn check_clippy_thresholds(fs: &dyn FileSystem, path: &Path, results: &mut Vec<C
                     message: format!("{key} = {v}"),
                     file: Some(path.display().to_string()),
                     line: None,
-                });
+                    inventory: false,
+                }.as_inventory());
             }
             Some(toml::Value::Integer(v)) => {
                 results.push(CheckResult {
@@ -248,6 +261,7 @@ fn check_clippy_thresholds(fs: &dyn FileSystem, path: &Path, results: &mut Vec<C
                     message: format!("Expected {expected_val}, got {v}"),
                     file: Some(path.display().to_string()),
                     line: None,
+                    inventory: false,
                 });
             }
             Some(_) => {
@@ -258,6 +272,7 @@ fn check_clippy_thresholds(fs: &dyn FileSystem, path: &Path, results: &mut Vec<C
                     message: format!("Expected integer {expected_val}"),
                     file: Some(path.display().to_string()),
                     line: None,
+                    inventory: false,
                 });
             }
             None => {
@@ -268,6 +283,7 @@ fn check_clippy_thresholds(fs: &dyn FileSystem, path: &Path, results: &mut Vec<C
                     message: format!("Expected {key} = {expected_val}"),
                     file: Some(path.display().to_string()),
                     line: None,
+                    inventory: false,
                 });
             }
         }

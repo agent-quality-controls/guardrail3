@@ -13,6 +13,16 @@ pub struct CheckResult {
     pub message: String,
     pub file: Option<String>,
     pub line: Option<usize>,
+    pub inventory: bool,
+}
+
+impl CheckResult {
+    /// Mark this result as inventory (hidden unless `--inventory` flag is set).
+    /// Only use for passing/confirmation Info results — never for problems or audit trails.
+    pub fn as_inventory(mut self) -> Self {
+        self.inventory = true;
+        self
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -56,6 +66,14 @@ impl Report {
             .iter()
             .flat_map(|s| &s.results)
             .filter(|r| r.severity == severity)
+            .count()
+    }
+
+    pub fn inventory_count(&self) -> usize {
+        self.sections
+            .iter()
+            .flat_map(|s| &s.results)
+            .filter(|r| r.inventory)
             .count()
     }
 }

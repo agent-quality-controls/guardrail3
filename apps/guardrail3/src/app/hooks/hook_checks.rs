@@ -27,7 +27,8 @@ pub fn check_hooks(
             message: "Found".to_owned(),
             file: Some(pre_commit_path.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         results.push(CheckResult {
             id: "H1".to_owned(),
@@ -36,6 +37,7 @@ pub fn check_hooks(
             message: "No pre-commit hook found".to_owned(),
             file: Some(path.join(".githooks").display().to_string()),
             line: None,
+            inventory: false,
         });
         // Can't do further hook checks without the file
         check_hooks_path(path, results);
@@ -57,7 +59,8 @@ pub fn check_hooks(
             message: "Using modular hook scripts".to_owned(),
             file: Some(pre_commit_d.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         results.push(CheckResult {
             id: "H3".to_owned(),
@@ -66,7 +69,8 @@ pub fn check_hooks(
             message: "Using monolithic pre-commit script".to_owned(),
             file: Some(path.join(".githooks").display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     }
 
     let pre_commit_content = fs.read_file(&pre_commit_path).unwrap_or_default();
@@ -86,7 +90,8 @@ pub fn check_hooks(
                 message: "pre-commit sources scripts from pre-commit.d/".to_owned(),
                 file: Some(pre_commit_path.display().to_string()),
                 line: None,
-            });
+                inventory: false,
+            }.as_inventory());
         } else {
             results.push(CheckResult {
                 id: "H4".to_owned(),
@@ -95,6 +100,7 @@ pub fn check_hooks(
                 message: "pre-commit.d/ exists but pre-commit doesn't dispatch to it".to_owned(),
                 file: Some(pre_commit_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
     } else {
@@ -105,7 +111,8 @@ pub fn check_hooks(
             message: "No pre-commit.d/, so no dispatcher check".to_owned(),
             file: Some(pre_commit_path.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     }
 
     // H5: Expected scripts/patterns present
@@ -154,7 +161,8 @@ pub fn check_hooks(
         ),
         file: Some(pre_commit_path.display().to_string()),
         line: None,
-    });
+        inventory: false,
+    }.as_inventory());
 
     // H7: Script permissions
     check_permissions(fs, &pre_commit_path, results);
@@ -182,7 +190,8 @@ pub fn check_hooks(
         message: format!("{size} bytes"),
         file: Some(pre_commit_path.display().to_string()),
         line: None,
-    });
+        inventory: false,
+    }.as_inventory());
 
     // H11: Local pre-commit scripts
     let local_d = path.join("local").join("pre-commit.d");
@@ -196,7 +205,8 @@ pub fn check_hooks(
             message: "No local hook overrides found".to_owned(),
             file: None,
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     }
 }
 
@@ -218,7 +228,8 @@ fn check_hooks_path(path: &Path, results: &mut Vec<CheckResult>) {
                     message: "core.hooksPath = .githooks".to_owned(),
                     file: None,
                     line: None,
-                });
+                    inventory: false,
+                }.as_inventory());
             } else {
                 results.push(CheckResult {
                     id: "H2".to_owned(),
@@ -227,6 +238,7 @@ fn check_hooks_path(path: &Path, results: &mut Vec<CheckResult>) {
                     message: format!("Expected .githooks, got \"{val}\""),
                     file: None,
                     line: None,
+                    inventory: false,
                 });
             }
         }
@@ -238,6 +250,7 @@ fn check_hooks_path(path: &Path, results: &mut Vec<CheckResult>) {
                 message: "Run: git config core.hooksPath .githooks".to_owned(),
                 file: None,
                 line: None,
+                inventory: false,
             });
         }
     }
@@ -349,6 +362,7 @@ fn check_monolithic_patterns(
                 message: "Pattern present in monolithic script".to_owned(),
                 file: Some(file_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         } else {
             results.push(CheckResult {
@@ -358,6 +372,7 @@ fn check_monolithic_patterns(
                 message: "Pattern missing from monolithic script".to_owned(),
                 file: Some(file_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
     }
@@ -405,7 +420,8 @@ fn check_permissions(fs: &dyn FileSystem, file_path: &Path, results: &mut Vec<Ch
                         message: format!("mode: {mode:o}"),
                         file: Some(file_path.display().to_string()),
                         line: None,
-                    });
+                        inventory: false,
+                    }.as_inventory());
                 } else {
                     results.push(CheckResult {
                         id: "H7".to_owned(),
@@ -414,6 +430,7 @@ fn check_permissions(fs: &dyn FileSystem, file_path: &Path, results: &mut Vec<Ch
                         message: format!("mode: {mode:o} — run: chmod +x {}", file_path.display()),
                         file: Some(file_path.display().to_string()),
                         line: None,
+                        inventory: false,
                     });
                 }
             }
@@ -425,6 +442,7 @@ fn check_permissions(fs: &dyn FileSystem, file_path: &Path, results: &mut Vec<Ch
                     message: "Failed to read file metadata".to_owned(),
                     file: Some(file_path.display().to_string()),
                     line: None,
+                    inventory: false,
                 });
             }
         }
@@ -439,7 +457,8 @@ fn check_permissions(fs: &dyn FileSystem, file_path: &Path, results: &mut Vec<Ch
             message: "Not on Unix — cannot check executable bit".to_owned(),
             file: Some(file_path.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     }
 }
 
@@ -458,6 +477,7 @@ fn inventory_scripts(
             message: "Directory does not exist".to_owned(),
             file: Some(dir.display().to_string()),
             line: None,
+            inventory: false,
         });
         return;
     }
@@ -479,7 +499,8 @@ fn inventory_scripts(
             message: "No scripts found".to_owned(),
             file: Some(dir.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         results.push(CheckResult {
             id: id.to_owned(),
@@ -488,6 +509,7 @@ fn inventory_scripts(
             message: names.join(", "),
             file: Some(dir.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     }
 }

@@ -53,6 +53,7 @@ pub fn check(
             message: "No deny.toml found at workspace root".to_owned(),
             file: Some(workspace_root.display().to_string()),
             line: None,
+            inventory: false,
         });
         return results;
     }
@@ -64,7 +65,8 @@ pub fn check(
         message: "Found at workspace root".to_owned(),
         file: Some(deny_path.display().to_string()),
         line: None,
-    });
+        inventory: false,
+    }.as_inventory());
 
     let content = match fs.read_file_err(&deny_path) {
         Ok(content) => content,
@@ -76,6 +78,7 @@ pub fn check(
                 message: format!("Failed to read: {e}"),
                 file: Some(deny_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
             return results;
         }
@@ -91,6 +94,7 @@ pub fn check(
                 message: format!("Invalid TOML: {e}"),
                 file: Some(deny_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
             return results;
         }
@@ -107,6 +111,7 @@ pub fn check(
                     message: format!("[advisories].{deprecated} is deprecated in deny.toml 0.19+"),
                     file: Some(deny_path.display().to_string()),
                     line: None,
+                    inventory: false,
                 });
             }
         }
@@ -146,6 +151,7 @@ fn check_advisory_values(table: &toml::Value, file_path: &Path, results: &mut Ve
             message: "deny.toml has no [advisories] section".to_owned(),
             file: Some(file_path.display().to_string()),
             line: None,
+            inventory: false,
         });
         return;
     };
@@ -160,7 +166,8 @@ fn check_advisory_values(table: &toml::Value, file_path: &Path, results: &mut Ve
                 message: "unmaintained = \"workspace\"".to_owned(),
                 file: Some(file_path.display().to_string()),
                 line: None,
-            });
+                inventory: false,
+            }.as_inventory());
         }
         Some("deny") => {
             results.push(CheckResult {
@@ -170,7 +177,8 @@ fn check_advisory_values(table: &toml::Value, file_path: &Path, results: &mut Ve
                 message: "unmaintained = \"deny\" (expected \"workspace\")".to_owned(),
                 file: Some(file_path.display().to_string()),
                 line: None,
-            });
+                inventory: false,
+            }.as_inventory());
         }
         Some(other) => {
             results.push(CheckResult {
@@ -180,6 +188,7 @@ fn check_advisory_values(table: &toml::Value, file_path: &Path, results: &mut Ve
                 message: format!("Expected \"workspace\", got \"{other}\""),
                 file: Some(file_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
         None => {
@@ -190,6 +199,7 @@ fn check_advisory_values(table: &toml::Value, file_path: &Path, results: &mut Ve
                 message: "Expected unmaintained = \"workspace\"".to_owned(),
                 file: Some(file_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
     }
@@ -204,7 +214,8 @@ fn check_advisory_values(table: &toml::Value, file_path: &Path, results: &mut Ve
                 message: "yanked = \"warn\"".to_owned(),
                 file: Some(file_path.display().to_string()),
                 line: None,
-            });
+                inventory: false,
+            }.as_inventory());
         }
         Some("deny") => {
             results.push(CheckResult {
@@ -214,7 +225,8 @@ fn check_advisory_values(table: &toml::Value, file_path: &Path, results: &mut Ve
                 message: "yanked = \"deny\" (expected \"warn\")".to_owned(),
                 file: Some(file_path.display().to_string()),
                 line: None,
-            });
+                inventory: false,
+            }.as_inventory());
         }
         Some(other) => {
             results.push(CheckResult {
@@ -224,6 +236,7 @@ fn check_advisory_values(table: &toml::Value, file_path: &Path, results: &mut Ve
                 message: format!("Expected \"warn\", got \"{other}\""),
                 file: Some(file_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
         None => {
@@ -234,6 +247,7 @@ fn check_advisory_values(table: &toml::Value, file_path: &Path, results: &mut Ve
                 message: "Expected yanked = \"warn\"".to_owned(),
                 file: Some(file_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
     }

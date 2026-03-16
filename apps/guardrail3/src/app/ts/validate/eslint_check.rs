@@ -17,6 +17,7 @@ pub fn check_eslint_config(fs: &dyn FileSystem, path: &Path, results: &mut Vec<C
             message: "No eslint.config.mjs found at project root".to_owned(),
             file: Some(path.display().to_string()),
             line: None,
+            inventory: false,
         });
         return;
     }
@@ -28,7 +29,8 @@ pub fn check_eslint_config(fs: &dyn FileSystem, path: &Path, results: &mut Vec<C
         message: "Found at project root".to_owned(),
         file: Some(eslint_path.display().to_string()),
         line: None,
-    });
+        inventory: false,
+    }.as_inventory());
 
     let Some(content) = fs.read_file(&eslint_path) else {
         return;
@@ -87,7 +89,8 @@ pub fn check_eslint_config(fs: &dyn FileSystem, path: &Path, results: &mut Vec<C
             message: "eslint-plugin-boundaries found in config".to_owned(),
             file: Some(eslint_path.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         results.push(CheckResult {
             id: "T6".to_owned(),
@@ -96,6 +99,7 @@ pub fn check_eslint_config(fs: &dyn FileSystem, path: &Path, results: &mut Vec<C
             message: "No boundaries or eslint-plugin-boundaries in config".to_owned(),
             file: Some(eslint_path.display().to_string()),
             line: None,
+            inventory: false,
         });
     }
 
@@ -116,6 +120,7 @@ pub fn check_eslint_config(fs: &dyn FileSystem, path: &Path, results: &mut Vec<C
                 message: trimmed.to_owned(),
                 file: Some(eslint_path.display().to_string()),
                 line: Some(line_num.saturating_add(1)),
+                inventory: false,
             });
         }
     }
@@ -131,6 +136,7 @@ pub fn check_eslint_config(fs: &dyn FileSystem, path: &Path, results: &mut Vec<C
                 message: trimmed.to_owned(),
                 file: Some(eslint_path.display().to_string()),
                 line: Some(line_num.saturating_add(1)),
+                inventory: false,
             });
         }
     }
@@ -225,7 +231,8 @@ pub fn check_eslint_config(fs: &dyn FileSystem, path: &Path, results: &mut Vec<C
                 message: trimmed.to_owned(),
                 file: Some(eslint_path.display().to_string()),
                 line: Some(line_num.saturating_add(1)),
-            });
+                inventory: false,
+            }.as_inventory());
         }
     }
 
@@ -238,7 +245,8 @@ pub fn check_eslint_config(fs: &dyn FileSystem, path: &Path, results: &mut Vec<C
             message: "withBody/withRoute patterns found".to_owned(),
             file: Some(eslint_path.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         results.push(CheckResult {
             id: "T50".to_owned(),
@@ -247,6 +255,7 @@ pub fn check_eslint_config(fs: &dyn FileSystem, path: &Path, results: &mut Vec<C
             message: "No withBody/withRoute patterns in ESLint config".to_owned(),
             file: Some(eslint_path.display().to_string()),
             line: None,
+            inventory: false,
         });
     }
 
@@ -259,7 +268,8 @@ pub fn check_eslint_config(fs: &dyn FileSystem, path: &Path, results: &mut Vec<C
             message: "process.env ban found in ESLint config".to_owned(),
             file: Some(eslint_path.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         results.push(CheckResult {
             id: "T51".to_owned(),
@@ -268,6 +278,7 @@ pub fn check_eslint_config(fs: &dyn FileSystem, path: &Path, results: &mut Vec<C
             message: "No process.env restriction in ESLint config".to_owned(),
             file: Some(eslint_path.display().to_string()),
             line: None,
+            inventory: false,
         });
     }
 }
@@ -290,6 +301,7 @@ fn check_eslint_rule(
             message: format!("No {rule_name} rule found in ESLint config"),
             file: Some(eslint_path.display().to_string()),
             line: None,
+            inventory: false,
         });
         return;
     }
@@ -329,7 +341,8 @@ fn check_eslint_rule(
                 message: format!("{rule_name} with value {val}"),
                 file: Some(eslint_path.display().to_string()),
                 line: None,
-            });
+                inventory: false,
+            }.as_inventory());
         } else {
             results.push(CheckResult {
                 id: id.to_owned(),
@@ -338,6 +351,7 @@ fn check_eslint_rule(
                 message: format!("{rule_name} found but expected value {val} not detected"),
                 file: Some(eslint_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
     } else {
@@ -348,7 +362,8 @@ fn check_eslint_rule(
             message: format!("{rule_name} rule found in ESLint config"),
             file: Some(eslint_path.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     }
 }
 
@@ -404,7 +419,8 @@ fn check_eslint_rule_presence(
             message: format!("{rule_name} found in ESLint config"),
             file: Some(eslint_path.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         results.push(CheckResult {
             id: id.to_owned(),
@@ -413,6 +429,7 @@ fn check_eslint_rule_presence(
             message: format!("No {rule_name} rule in ESLint config"),
             file: Some(eslint_path.display().to_string()),
             line: None,
+            inventory: false,
         });
     }
 }

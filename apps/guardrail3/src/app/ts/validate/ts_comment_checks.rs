@@ -4,9 +4,8 @@ use super::ast_helpers::{self, CommentInfo};
 use crate::domain::report::{CheckResult, Severity};
 
 /// Determine whether a file path refers to a TSX file.
-#[allow(clippy::case_sensitive_file_extension_comparisons)] // reason: only checking .tsx extension
 pub(super) fn is_tsx_path(path: &Path) -> bool {
-    path.to_string_lossy().ends_with(".tsx")
+    path.extension().is_some_and(|e| e == "tsx")
 }
 
 // T23-T26: eslint-disable checks (AST-only)
@@ -41,6 +40,7 @@ fn check_eslint_disable_from_comments(
                     message: text.to_owned(),
                     file: Some(path.display().to_string()),
                     line: Some(line_number),
+                    inventory: false,
                 });
             } else {
                 results.push(CheckResult {
@@ -50,6 +50,7 @@ fn check_eslint_disable_from_comments(
                     message: format!("eslint-disable missing `-- ` reason: {text}"),
                     file: Some(path.display().to_string()),
                     line: Some(line_number),
+                    inventory: false,
                 });
             }
         }
@@ -64,6 +65,7 @@ fn check_eslint_disable_from_comments(
                     message: text.to_owned(),
                     file: Some(path.display().to_string()),
                     line: Some(line_number),
+                    inventory: false,
                 });
             } else {
                 results.push(CheckResult {
@@ -73,6 +75,7 @@ fn check_eslint_disable_from_comments(
                     message: format!("Missing `-- ` reason: {text}"),
                     file: Some(path.display().to_string()),
                     line: Some(line_number),
+                    inventory: false,
                 });
             }
         }
@@ -87,6 +90,7 @@ fn check_eslint_disable_from_comments(
                     message: text.to_owned(),
                     file: Some(path.display().to_string()),
                     line: Some(line_number),
+                    inventory: false,
                 });
             } else {
                 results.push(CheckResult {
@@ -96,6 +100,7 @@ fn check_eslint_disable_from_comments(
                     message: format!("Missing `-- ` reason: {text}"),
                     file: Some(path.display().to_string()),
                     line: Some(line_number),
+                    inventory: false,
                 });
             }
         }
@@ -130,6 +135,7 @@ fn check_ts_ignore_from_comments(
                 message: format!("Use @ts-expect-error instead: {text}"),
                 file: Some(path.display().to_string()),
                 line: Some(line_number),
+                inventory: false,
             });
         }
 
@@ -146,6 +152,7 @@ fn check_ts_ignore_from_comments(
                         message: text.to_owned(),
                         file: Some(path.display().to_string()),
                         line: Some(line_number),
+                        inventory: false,
                     });
                 } else {
                     results.push(CheckResult {
@@ -155,6 +162,7 @@ fn check_ts_ignore_from_comments(
                         message: text.to_owned(),
                         file: Some(path.display().to_string()),
                         line: Some(line_number),
+                        inventory: false,
                     });
                 }
             }
