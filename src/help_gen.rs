@@ -97,16 +97,53 @@ TYPESCRIPT:
 PROFILES (Rust only — TypeScript has no profiles)
 ===============================================================================
 
-  service    For HTTP services, CLI tools, binaries that do I/O.
+  service    For binaries and services that do I/O (HTTP servers, CLI tools).
+             Services MUST use hex arch: crates/domain, crates/ports,
+             crates/adapters, crates/app. Services go in apps/.
              Bans: std::fs (must use centralized module), process::exit,
                env mutation, HashMap (use BTreeMap), Mutex (use parking_lot).
-             Allows: axum, tokio, reqwest, sqlx.
-             Composition-root crates may use LazyLock for global config.
+             Allows: axum, tokio, reqwest, sqlx (in adapter crates only).
+             Composition-root crate may use LazyLock for global config.
 
-  library    Everything in service, PLUS:
+  library    For shared packages with zero I/O and zero side effects.
+             Libraries go in packages/. Everything in service, PLUS:
              Bans ALL I/O crates: axum, tokio, reqwest, sqlx, hyper, diesel.
              Bans ALL global state: LazyLock, OnceLock, once_cell.
-             For pure logic packages that take inputs and return outputs.
+             MUST have allowed_deps listing every permitted dependency.
+
+===============================================================================
+ARCHITECTURE CONVENTION
+===============================================================================
+
+  Standard project layout:
+
+    apps/                              Services (hex arch, profile = service)
+      my-api/
+        crates/
+          domain/                      Pure types, zero deps on ports/adapters
+          ports/
+            inbound/                   Traits for incoming requests
+            outbound/                  Traits for external services
+          app/                         Business logic, uses ports via traits
+          adapters/
+            inbound/api/               HTTP handlers (axum, etc.)
+            outbound/                  DB, HTTP clients, filesystem
+
+    packages/                          Shared libraries (profile = library)
+      my-lib/                          Pure logic, allowed_deps enforced
+      my-sdk/                          May need network — allowed_deps = [\"reqwest\", ...]
+
+  Dependency flow (enforced by R51):
+    domain   → nothing (pure types)
+    ports    → domain only
+    app      → domain + ports (via trait bounds, never adapters)
+    adapters → everything (implements ports, wires dependencies)
+
+  Services in apps/ get profile = \"service\", layer = \"composition-root\"
+    on the top-level crate (allows LazyLock for config/DI wiring).
+    Internal crates (domain, ports, app) get layer = \"pure\".
+
+  Libraries in packages/ get profile = \"library\" + allowed_deps.
 
 ===============================================================================
 CONFIG FILE (guardrail3.toml)
@@ -114,24 +151,45 @@ CONFIG FILE (guardrail3.toml)
 
   Only needed for generate/check/diff. Not needed for validate.
 
-  Minimal (single crate):
+  Single crate (service):
     [profile]
     name = \"service\"
     [rust]
     workspace_root = \".\"
 
-  Full (workspace with per-crate settings):
+  Single crate (library):
+    [profile]
+    name = \"library\"
+    [rust]
+    workspace_root = \".\"
+
+  Workspace / monorepo:
     [profile]
     name = \"service\"
     [rust]
     workspace_root = \".\"
+
+    # --- Services (in apps/) ---
     [rust.crates.my-api]
     profile = \"service\"
     layer = \"composition-root\"
-    [rust.crates.my-domain]
+
+    # --- Libraries (in packages/) ---
+    [rust.crates.my-lib]
     profile = \"library\"
     layer = \"pure\"
     allowed_deps = [\"serde\", \"thiserror\"]
+
+    [rust.crates.my-sdk]
+    profile = \"library\"
+    allowed_deps = [\"serde\", \"serde_json\", \"reqwest\", \"tokio\", \"thiserror\"]
+
+  Per-crate fields:
+    profile       \"service\" or \"library\" — overrides workspace default
+    layer         \"composition-root\" (allows LazyLock) or \"pure\" (bans global state)
+    allowed_deps  Dependency allowlist. Any [dependencies] NOT listed = error (R-DEPS-01).
+                  [dev-dependencies] and [build-dependencies] are NOT checked.
+                  Workspace path deps (path = \"...\") and workspace = true are NOT checked.
 
   local/ overrides (created by rs init):
     local/clippy-methods.toml          Extra disallowed methods
@@ -144,43 +202,50 @@ CONFIG FILE (guardrail3.toml)
 SETUP GUIDE
 ===============================================================================
 
-Step 1: IDENTIFY YOUR PROJECT TYPE
+Step 1: IDENTIFY YOUR PROJECT TYPE and run init
 
-  A) Single Rust crate (binary or library)
-     → guardrail3 rs init --profile service .     (for binaries/services)
-     → guardrail3 rs init --profile library .      (for pure logic libraries)
-
-  B) Rust workspace (multiple crates)
+  A) Single Rust service or CLI tool
      → guardrail3 rs init --profile service .
-     → Edit guardrail3.toml to configure per-crate profiles (see CONFIG FILE above)
 
-  C) TypeScript project
+  B) Single Rust library (no I/O)
+     → guardrail3 rs init --profile library .
+
+  C) Rust workspace (apps/ + packages/)
+     → guardrail3 rs init --profile service .
+     → Then configure per-crate settings (Step 2)
+
+  D) TypeScript project
      → guardrail3 ts init .
 
-  D) Monorepo with Rust + TypeScript
+  E) Monorepo with Rust + TypeScript
      → guardrail3 rs init --profile service .
      → guardrail3 ts init .
-     → Edit guardrail3.toml to configure per-crate profiles (see CONFIG FILE above)
+     → Then configure per-crate settings (Step 2)
 
-Step 2: CONFIGURE PER-CRATE SETTINGS (workspaces only — skip for single crates)
+Step 2: CONFIGURE guardrail3.toml (workspaces only — skip for single crates)
 
-  Open guardrail3.toml. Read Cargo.toml [workspace.members] to find crates.
-  For each crate, add a [rust.crates.NAME] section (see CONFIG FILE above).
+  Read Cargo.toml [workspace.members] to find all crates. For each:
+  - Crates in apps/   → profile = \"service\", layer = \"composition-root\"
+  - Crates in packages/ → profile = \"library\", layer = \"pure\", allowed_deps = [...]
 
-Step 3: GENERATE CONFIG FILES
+  For allowed_deps: read the crate's Cargo.toml [dependencies] and list every
+  dependency explicitly. This is the allowlist — anything not listed will be
+  flagged as R-DEPS-01 error on validate.
 
-    guardrail3 rs generate             (Rust: clippy.toml, deny.toml, hooks, etc.)
-    guardrail3 ts generate             (TypeScript: eslint, tsconfig, hooks, etc.)
+Step 3: GENERATE
 
-  Reads guardrail3.toml → writes tool config files + pre-commit hook.
+    guardrail3 rs generate             (Rust configs + hooks)
+    guardrail3 ts generate             (TypeScript configs + hooks)
+
+  Reads guardrail3.toml → writes tool configs + pre-commit hook.
   Re-run after editing guardrail3.toml or updating guardrail3.
 
 Step 4: VALIDATE
 
-    guardrail3 rs validate .           (Rust checks)
-    guardrail3 ts validate .           (TypeScript checks)
+    guardrail3 rs validate .           (Rust)
+    guardrail3 ts validate .           (TypeScript)
 
-  Reports violations. Fix errors, re-run until clean. Exit code 1 = errors found.
+  Fix errors, re-run until clean. Exit code 1 = errors found.
 
 Step 5: CI
 
