@@ -303,6 +303,7 @@ mod tests {
 
     // T30: process.env direct access
     #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
     fn test_process_env_direct_access_t30() {
         let path = Path::new("src/app.ts");
         let content = "const x = process.env.NODE_ENV;\n";
@@ -332,6 +333,7 @@ mod tests {
 
     // T32: file length over 300 effective lines
     #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
     fn test_file_length_over_300_t32() {
         let path = Path::new("src/big.ts");
         let content: String = (0..310)
@@ -347,6 +349,7 @@ mod tests {
 
     // T33: file length 250-300 effective lines
     #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
     fn test_file_length_250_to_300_t33() {
         let path = Path::new("src/medium.ts");
         let content: String = (0..260)
@@ -362,6 +365,7 @@ mod tests {
 
     // T34: noinspection comment
     #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
     fn test_noinspection_comment_t34() {
         let path = Path::new("src/app.ts");
         let content = "// noinspection TypeScriptValidateTypes\nconst x = 1;\n";
@@ -381,6 +385,7 @@ mod tests {
 
     // T35: istanbul ignore
     #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
     fn test_istanbul_ignore_t35() {
         let path = Path::new("src/app.ts");
         let content = "/* istanbul ignore next */\nfunction foo() {}\n";

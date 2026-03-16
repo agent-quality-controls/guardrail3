@@ -382,6 +382,16 @@ mod tests {
         );
     }
 
+    #[test]
+    fn r_test_07_pos_ignore_with_name_value_reason() {
+        let content = "#[test]\n#[ignore = \"requires network\"]\nfn slow_test() {}";
+        let violations = find_ignore_without_reason(content);
+        assert!(
+            violations.is_empty(),
+            "ignore with = reason should not be flagged"
+        );
+    }
+
     // ---- R-TEST-08: Mutation test hook configured ----
 
     #[test]

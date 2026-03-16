@@ -522,7 +522,7 @@ disallowed-methods = [
 
     #[test]
     fn r_garde_05_counts_deserialize_structs_ast() {
-        let content_both = r#"
+        let content_both = r"
 use serde::Deserialize;
 
 #[derive(Deserialize, garde::Validate)]
@@ -539,7 +539,8 @@ struct Bar {
 struct Baz {
     id: i64,
 }
-"#;
+";
+        #[allow(clippy::expect_used)] // reason: test — panic on parse failure is correct
         let parsed = syn::parse_file(content_both).expect("should parse");
         let derives = super::super::ast_helpers::find_derive_attributes(&parsed);
         let (with, without) = count_deserialize_structs_ast(&derives);

@@ -7,6 +7,7 @@ mod npmrc_check;
 mod package_check;
 pub mod source_scan;
 pub mod test_checks;
+pub mod ts_code_analysis;
 mod ts_comment_checks;
 mod tsconfig_check;
 

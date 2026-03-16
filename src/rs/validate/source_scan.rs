@@ -207,25 +207,28 @@ fn strip_inline_block_comments(line: &str) -> String {
 /// Strip string literals from a line for comment-detection purposes.
 /// This prevents `"/*"` inside strings from being treated as comment delimiters.
 /// Handles both regular strings (`"..."`) and raw strings (`r"..."`, `r#"..."#`, etc.).
+#[allow(clippy::indexing_slicing)] // reason: all char indices are bounds-checked against len before access
+#[allow(clippy::string_slice)] // reason: pos from str::find is guaranteed to be a valid UTF-8 boundary
 fn strip_string_literals(line: &str) -> String {
     let mut result = String::with_capacity(line.len());
-    let bytes = line.as_bytes();
+    let chars: Vec<char> = line.chars().collect();
+    let len = chars.len();
     let mut i = 0;
 
-    while i < bytes.len() {
+    while i < len {
         // Detect raw string opener: r followed by optional #s then "
-        if bytes[i] == b'r' {
+        if chars[i] == 'r' {
             let mut hashes: usize = 0;
             let mut j = i.saturating_add(1);
-            while j < bytes.len() && bytes[j] == b'#' {
+            while j < len && chars[j] == '#' {
                 hashes = hashes.saturating_add(1);
                 j = j.saturating_add(1);
             }
-            if j < bytes.len() && bytes[j] == b'"' && (hashes > 0 || j == i.saturating_add(1)) {
+            if j < len && chars[j] == '"' && (hashes > 0 || j == i.saturating_add(1)) {
                 // Verify `r` is not part of an identifier
                 let is_ident_char = i > 0
-                    && (bytes[i.saturating_sub(1)].is_ascii_alphanumeric()
-                        || bytes[i.saturating_sub(1)] == b'_');
+                    && (chars[i.saturating_sub(1)].is_ascii_alphanumeric()
+                        || chars[i.saturating_sub(1)] == '_');
                 if !is_ident_char {
                     // Build closing delimiter: `"` followed by `hashes` `#` chars
                     let mut closer = String::with_capacity(hashes.saturating_add(1));
@@ -235,9 +238,12 @@ fn strip_string_literals(line: &str) -> String {
                     }
                     // Skip past opening delimiter
                     i = j.saturating_add(1);
-                    // Find closing delimiter
-                    if let Some(pos) = line[i..].find(closer.as_str()) {
-                        i = i.saturating_add(pos).saturating_add(closer.len());
+                    // Find closing delimiter in remaining chars
+                    let remaining: String = chars[i..].iter().collect();
+                    if let Some(pos) = remaining.find(closer.as_str()) {
+                        // pos is byte offset; convert to char count
+                        let char_offset = remaining[..pos].chars().count();
+                        i = i.saturating_add(char_offset).saturating_add(closer.len());
                     } else {
                         // Unclosed raw string — skip rest of line
                         break;
@@ -248,15 +254,15 @@ fn strip_string_literals(line: &str) -> String {
         }
 
         // Regular string
-        if bytes[i] == b'"' {
+        if chars[i] == '"' {
             i = i.saturating_add(1);
             // Skip until closing quote
-            while i < bytes.len() {
-                if bytes[i] == b'\\' {
+            while i < len {
+                if chars[i] == '\\' {
                     i = i.saturating_add(2); // skip escape sequence
                     continue;
                 }
-                if bytes[i] == b'"' {
+                if chars[i] == '"' {
                     i = i.saturating_add(1);
                     break;
                 }
@@ -266,7 +272,7 @@ fn strip_string_literals(line: &str) -> String {
         }
 
         // Not in a string — keep the character
-        result.push(bytes[i] as char);
+        result.push(chars[i]);
         i = i.saturating_add(1);
     }
     result
