@@ -30,7 +30,6 @@ use guardrail3::{
 };
 
 #[allow(clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI entry point — stderr output and process::exit for error codes are intentional
-#[allow(clippy::too_many_lines)] // reason: CLI dispatch for all subcommands
 fn main() {
     let cmd = help_gen::inject_help(Cli::command());
     let matches = match cmd.try_get_matches() {
@@ -191,8 +190,8 @@ fn run_rs_validate(
 fn print_report(args: &ValidateArgs, report: &guardrail3::domain::report::Report) {
     match args.format.as_str() {
         "json" => report::json::print_report(report, args.inventory),
-        "md" | "markdown" => report::markdown::print_report(report, args.inventory),
-        _ => report::text::print_report(report, args.inventory),
+        "md" | "markdown" => report::markdown::print_report(report, args.inventory, args.verbose),
+        _ => report::text::print_report(report, args.inventory, args.verbose),
     }
     if report.error_count() > 0 {
         std::process::exit(1);

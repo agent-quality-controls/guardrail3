@@ -34,6 +34,7 @@ guardrail3 rs validate [PATH] [OPTIONS]
   --release                     Only release readiness checks
   --tests                       Only test quality checks
   --thorough                    Include slow checks (cargo publish --dry-run)
+  --verbose                     Show every audit trail item individually
 ```
 
 ```

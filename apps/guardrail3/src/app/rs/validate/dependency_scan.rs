@@ -116,7 +116,6 @@ fn parse_deny_skip_crate_names(fs: &dyn FileSystem, workspace_root: &Path) -> BT
     skipped
 }
 
-#[allow(clippy::too_many_lines)] // reason: cargo lock scanning
 fn check_cargo_lock(fs: &dyn FileSystem, workspace_root: &Path, results: &mut Vec<CheckResult>) {
     let lock_path = workspace_root.join("Cargo.lock");
     if !lock_path.exists() {
@@ -132,7 +131,23 @@ fn check_cargo_lock(fs: &dyn FileSystem, workspace_root: &Path, results: &mut Ve
         return;
     }
 
-    let content = match fs.read_file_err(&lock_path) {
+    let Some(table) = parse_cargo_lock(fs, &lock_path, results) else {
+        return;
+    };
+
+    let Some(packages) = table.get("package").and_then(|p| p.as_array()) else {
+        return;
+    };
+
+    scan_banned_crates(fs, workspace_root, packages, &lock_path, results);
+}
+
+fn parse_cargo_lock(
+    fs: &dyn FileSystem,
+    lock_path: &Path,
+    results: &mut Vec<CheckResult>,
+) -> Option<toml::Value> {
+    let content = match fs.read_file_err(lock_path) {
         Ok(content) => content,
         Err(e) => {
             results.push(CheckResult {
@@ -144,12 +159,12 @@ fn check_cargo_lock(fs: &dyn FileSystem, workspace_root: &Path, results: &mut Ve
                 line: None,
                 inventory: false,
             });
-            return;
+            return None;
         }
     };
 
-    let table: toml::Value = match content.parse() {
-        Ok(v) => v,
+    match content.parse() {
+        Ok(v) => Some(v),
         Err(e) => {
             results.push(CheckResult {
                 id: "R50".to_owned(),
@@ -160,14 +175,18 @@ fn check_cargo_lock(fs: &dyn FileSystem, workspace_root: &Path, results: &mut Ve
                 line: None,
                 inventory: false,
             });
-            return;
+            None
         }
-    };
+    }
+}
 
-    let Some(packages) = table.get("package").and_then(|p| p.as_array()) else {
-        return;
-    };
-
+fn scan_banned_crates(
+    fs: &dyn FileSystem,
+    workspace_root: &Path,
+    packages: &[toml::Value],
+    lock_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     let skipped = parse_deny_skip_crate_names(fs, workspace_root);
 
     let mut found_banned = Vec::new();

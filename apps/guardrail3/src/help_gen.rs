@@ -71,6 +71,7 @@ RUST:
     --release                          Only release readiness checks
     --tests                            Only test quality checks
     --thorough                         Include slow checks (cargo publish --dry-run)
+    --verbose                          Show every audit trail item individually
 
   guardrail3 rs check [PATH]           CI: verify configs not stale
   guardrail3 rs diff [PATH]            Dry-run of rs generate (show diffs)

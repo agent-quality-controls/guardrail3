@@ -358,7 +358,16 @@ fn get_lint_priority(lints: &toml::Value, name: &str) -> Option<i64> {
     }
 }
 
-#[allow(clippy::too_many_lines)] // reason: lint level validation with priority checking
+struct LintCheck<'a> {
+    lints: &'a toml::Value,
+    name: &'a str,
+    expected_level: &'a str,
+    expected_priority: Option<i64>,
+    check_id_missing: &'a str,
+    check_id_wrong: &'a str,
+    file_path: &'a Path,
+}
+
 #[allow(clippy::too_many_arguments)] // reason: lint validation requires all context params
 fn check_lint_level(
     lints: &toml::Value,
@@ -370,51 +379,17 @@ fn check_lint_level(
     file_path: &Path,
     results: &mut Vec<CheckResult>,
 ) {
+    let ctx = LintCheck {
+        lints, name, expected_level, expected_priority,
+        check_id_missing, check_id_wrong, file_path,
+    };
     let level = get_lint_level(lints, name);
 
     match level.as_deref() {
         Some(l) if l == expected_level => {
-            // Check priority if expected
-            if let Some(exp_pri) = expected_priority {
-                let actual_pri = get_lint_priority(lints, name);
-                if actual_pri == Some(exp_pri) {
-                    results.push(CheckResult {
-                        id: check_id_missing.to_owned(),
-                        severity: Severity::Info,
-                        title: format!("{name} correct"),
-                        message: format!("{name} = {expected_level} (priority {exp_pri})"),
-                        file: Some(file_path.display().to_string()),
-                        line: None,
-                        inventory: false,
-                    }.as_inventory());
-                } else {
-                    results.push(CheckResult {
-                        id: check_id_wrong.to_owned(),
-                        severity: Severity::Warn,
-                        title: format!("{name} priority wrong"),
-                        message: format!(
-                            "Expected priority {exp_pri}, got {}",
-                            actual_pri.map_or_else(|| "none".to_owned(), |p| p.to_string())
-                        ),
-                        file: Some(file_path.display().to_string()),
-                        line: None,
-                        inventory: false,
-                    });
-                }
-            } else {
-                results.push(CheckResult {
-                    id: check_id_missing.to_owned(),
-                    severity: Severity::Info,
-                    title: format!("{name} correct"),
-                    message: format!("{name} = {expected_level}"),
-                    file: Some(file_path.display().to_string()),
-                    line: None,
-                    inventory: false,
-                }.as_inventory());
-            }
+            emit_lint_correct(&ctx, results);
         }
         Some("forbid") if expected_level == "deny" => {
-            // Stricter is fine
             results.push(CheckResult {
                 id: check_id_missing.to_owned(),
                 severity: Severity::Info,
@@ -426,27 +401,9 @@ fn check_lint_level(
             }.as_inventory());
         }
         Some(l) => {
-            // Found but wrong level — use check_id_wrong (R27 for relaxed)
-            let is_weakened = matches!(
-                (expected_level, l),
-                ("deny" | "forbid", "warn" | "allow") | ("forbid", "deny")
-            );
-            results.push(CheckResult {
-                id: check_id_wrong.to_owned(),
-                severity: if is_weakened {
-                    Severity::Error
-                } else {
-                    Severity::Warn
-                },
-                title: format!("{name} wrong level"),
-                message: format!("Expected \"{expected_level}\", got \"{l}\""),
-                file: Some(file_path.display().to_string()),
-                line: None,
-                inventory: false,
-            });
+            emit_lint_wrong(name, expected_level, l, check_id_wrong, file_path, results);
         }
         None => {
-            // Missing — use check_id_missing (R26 for completeness)
             results.push(CheckResult {
                 id: check_id_missing.to_owned(),
                 severity: Severity::Error,
@@ -458,4 +415,71 @@ fn check_lint_level(
             });
         }
     }
+}
+
+fn emit_lint_correct(ctx: &LintCheck<'_>, results: &mut Vec<CheckResult>) {
+    if let Some(exp_pri) = ctx.expected_priority {
+        let actual_pri = get_lint_priority(ctx.lints, ctx.name);
+        if actual_pri == Some(exp_pri) {
+            results.push(CheckResult {
+                id: ctx.check_id_missing.to_owned(),
+                severity: Severity::Info,
+                title: format!("{} correct", ctx.name),
+                message: format!("{} = {} (priority {exp_pri})", ctx.name, ctx.expected_level),
+                file: Some(ctx.file_path.display().to_string()),
+                line: None,
+                inventory: false,
+            }.as_inventory());
+        } else {
+            results.push(CheckResult {
+                id: ctx.check_id_wrong.to_owned(),
+                severity: Severity::Warn,
+                title: format!("{} priority wrong", ctx.name),
+                message: format!(
+                    "Expected priority {exp_pri}, got {}",
+                    actual_pri.map_or_else(|| "none".to_owned(), |p| p.to_string())
+                ),
+                file: Some(ctx.file_path.display().to_string()),
+                line: None,
+                inventory: false,
+            });
+        }
+    } else {
+        results.push(CheckResult {
+            id: ctx.check_id_missing.to_owned(),
+            severity: Severity::Info,
+            title: format!("{} correct", ctx.name),
+            message: format!("{} = {}", ctx.name, ctx.expected_level),
+            file: Some(ctx.file_path.display().to_string()),
+            line: None,
+            inventory: false,
+        }.as_inventory());
+    }
+}
+
+fn emit_lint_wrong(
+    name: &str,
+    expected_level: &str,
+    actual_level: &str,
+    check_id_wrong: &str,
+    file_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
+    let is_weakened = matches!(
+        (expected_level, actual_level),
+        ("deny" | "forbid", "warn" | "allow") | ("forbid", "deny")
+    );
+    results.push(CheckResult {
+        id: check_id_wrong.to_owned(),
+        severity: if is_weakened {
+            Severity::Error
+        } else {
+            Severity::Warn
+        },
+        title: format!("{name} wrong level"),
+        message: format!("Expected \"{expected_level}\", got \"{actual_level}\""),
+        file: Some(file_path.display().to_string()),
+        line: None,
+        inventory: false,
+    });
 }

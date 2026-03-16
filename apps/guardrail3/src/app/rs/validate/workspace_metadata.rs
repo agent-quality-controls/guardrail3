@@ -4,7 +4,6 @@ use crate::domain::report::{CheckResult, Severity};
 use crate::ports::outbound::FileSystem;
 
 // R55-R57: workspace metadata & release profile
-#[allow(clippy::too_many_lines)] // reason: workspace metadata validation
 pub fn check_workspace_metadata(
     fs: &dyn FileSystem,
     workspace_root: &Path,
@@ -24,9 +23,18 @@ pub fn check_workspace_metadata(
         Err(_) => return,
     };
 
-    // R55: Report workspace edition and rust-version
-    let edition = get_package_str_field(&table, "edition");
-    let rust_version = get_package_str_field(&table, "rust-version");
+    check_edition_and_rust_version(&table, &cargo_path, results);
+    check_publish_status(&table, &cargo_path, results);
+    check_release_profile(&table, &cargo_path, results);
+}
+
+fn check_edition_and_rust_version(
+    table: &toml::Value,
+    cargo_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
+    let edition = get_package_str_field(table, "edition");
+    let rust_version = get_package_str_field(table, "rust-version");
 
     let mut meta_parts = Vec::new();
     if let Some(ed) = edition {
@@ -47,8 +55,13 @@ pub fn check_workspace_metadata(
             inventory: false,
         }.as_inventory());
     }
+}
 
-    // R56: Report workspace publish status
+fn check_publish_status(
+    table: &toml::Value,
+    cargo_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     let publish = table
         .get("workspace")
         .and_then(|w| w.get("package"))
@@ -66,8 +79,13 @@ pub fn check_workspace_metadata(
             inventory: false,
         }.as_inventory());
     }
+}
 
-    // R57: Release profile
+fn check_release_profile(
+    table: &toml::Value,
+    cargo_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     let release = table.get("profile").and_then(|p| p.get("release"));
 
     if let Some(rel) = release {

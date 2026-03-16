@@ -6,7 +6,6 @@ use super::tool_checks::{check_duplication_tools, check_required_tools};
 use crate::domain::report::{CheckResult, Severity};
 use crate::ports::outbound::FileSystem;
 
-#[allow(clippy::too_many_lines)] // reason: comprehensive hook validation
 pub fn check_hooks(
     fs: &dyn FileSystem,
     tc: &dyn ToolChecker,
@@ -19,6 +18,41 @@ pub fn check_hooks(
     let pre_commit_d = path.join(".githooks").join("pre-commit.d");
 
     // H1: .githooks/pre-commit exists
+    if !check_pre_commit_exists(&pre_commit_path, path, tc, results) {
+        return;
+    }
+
+    // H2: core.hooksPath configured
+    check_hooks_path(path, results);
+
+    let is_modular = pre_commit_d.is_dir();
+    let pre_commit_content = fs.read_file(&pre_commit_path).unwrap_or_default();
+
+    let ctx = HookContext {
+        pre_commit_path: &pre_commit_path,
+        pre_commit_d: &pre_commit_d,
+        is_modular,
+        pre_commit_content: &pre_commit_content,
+    };
+
+    check_hook_structure(fs, &ctx, path, has_rust, has_typescript, results);
+    check_hook_stats_and_tools(fs, tc, &ctx, path, results);
+}
+
+struct HookContext<'a> {
+    pre_commit_path: &'a Path,
+    pre_commit_d: &'a Path,
+    is_modular: bool,
+    pre_commit_content: &'a str,
+}
+
+/// H1: check pre-commit exists. Returns false if missing (caller should return early).
+fn check_pre_commit_exists(
+    pre_commit_path: &Path,
+    path: &Path,
+    tc: &dyn ToolChecker,
+    results: &mut Vec<CheckResult>,
+) -> bool {
     if pre_commit_path.exists() {
         results.push(CheckResult {
             id: "H1".to_owned(),
@@ -29,6 +63,7 @@ pub fn check_hooks(
             line: None,
             inventory: false,
         }.as_inventory());
+        true
     } else {
         results.push(CheckResult {
             id: "H1".to_owned(),
@@ -39,25 +74,29 @@ pub fn check_hooks(
             line: None,
             inventory: false,
         });
-        // Can't do further hook checks without the file
         check_hooks_path(path, results);
         check_required_tools(tc, results);
-        return;
+        false
     }
+}
 
-    // H2: core.hooksPath configured
-    check_hooks_path(path, results);
-
-    let is_modular = pre_commit_d.is_dir();
-
+/// H3, H4, H5, H12: hook structure checks (modular vs monolithic, dispatcher, patterns)
+fn check_hook_structure(
+    fs: &dyn FileSystem,
+    ctx: &HookContext<'_>,
+    path: &Path,
+    has_rust: bool,
+    has_typescript: bool,
+    results: &mut Vec<CheckResult>,
+) {
     // H3: pre-commit.d/ directory
-    if is_modular {
+    if ctx.is_modular {
         results.push(CheckResult {
             id: "H3".to_owned(),
             severity: Severity::Info,
             title: "pre-commit.d/ exists".to_owned(),
             message: "Using modular hook scripts".to_owned(),
-            file: Some(pre_commit_d.display().to_string()),
+            file: Some(ctx.pre_commit_d.display().to_string()),
             line: None,
             inventory: false,
         }.as_inventory());
@@ -73,9 +112,26 @@ pub fn check_hooks(
         }.as_inventory());
     }
 
-    let pre_commit_content = fs.read_file(&pre_commit_path).unwrap_or_default();
-
     // H4: Dispatcher script
+    check_dispatcher_pattern(ctx.pre_commit_path, ctx.is_modular, ctx.pre_commit_content, results);
+
+    // H5: Expected scripts/patterns present
+    if ctx.is_modular {
+        check_modular_scripts(fs, ctx.pre_commit_d, has_rust, has_typescript, results);
+    } else {
+        check_monolithic_patterns(ctx.pre_commit_content, ctx.pre_commit_path, has_rust, has_typescript, results);
+    }
+
+    // H12: Duplication tool checks
+    check_duplication_tools(ctx.pre_commit_content, ctx.pre_commit_path, has_rust, has_typescript, results);
+}
+
+fn check_dispatcher_pattern(
+    pre_commit_path: &Path,
+    is_modular: bool,
+    pre_commit_content: &str,
+    results: &mut Vec<CheckResult>,
+) {
     if is_modular {
         let has_dispatcher = pre_commit_content.contains("pre-commit.d")
             && (pre_commit_content.contains("source ")
@@ -114,34 +170,54 @@ pub fn check_hooks(
             inventory: false,
         }.as_inventory());
     }
+}
 
-    // H5: Expected scripts/patterns present
-    if is_modular {
-        check_modular_scripts(fs, &pre_commit_d, has_rust, has_typescript, results);
-    } else {
-        check_monolithic_patterns(
-            &pre_commit_content,
-            &pre_commit_path,
-            has_rust,
-            has_typescript,
-            results,
-        );
+/// H6-H11: script stats, permissions, tools, inventory
+fn check_hook_stats_and_tools(
+    fs: &dyn FileSystem,
+    tc: &dyn ToolChecker,
+    ctx: &HookContext<'_>,
+    path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
+    let (_line_count, size) = emit_script_stats(fs, ctx.pre_commit_path, ctx.pre_commit_content, results);
+
+    // H7: Script permissions
+    check_permissions(fs, ctx.pre_commit_path, results);
+
+    // H8: Required tools installed
+    check_required_tools(tc, results);
+
+    // H9: Extra scripts in pre-commit.d/
+    if ctx.is_modular {
+        inventory_scripts(fs, ctx.pre_commit_d, "H9", "Extra scripts in pre-commit.d/", results);
     }
 
-    // H12: Duplication tool checks
-    check_duplication_tools(
-        &pre_commit_content,
-        &pre_commit_path,
-        has_rust,
-        has_typescript,
-        results,
-    );
+    // H10: Script modifications
+    results.push(CheckResult {
+        id: "H10".to_owned(),
+        severity: Severity::Info,
+        title: "Pre-commit file size".to_owned(),
+        message: format!("{size} bytes"),
+        file: Some(ctx.pre_commit_path.display().to_string()),
+        line: None,
+        inventory: false,
+    }.as_inventory());
 
-    // H6: Script checksums (monolithic)
+    // H11: Local pre-commit scripts
+    check_local_scripts(fs, path, results);
+}
+
+/// H6: emit script stats. Returns (line_count, size).
+fn emit_script_stats(
+    fs: &dyn FileSystem,
+    pre_commit_path: &Path,
+    pre_commit_content: &str,
+    results: &mut Vec<CheckResult>,
+) -> (usize, u64) {
     let line_count = pre_commit_content.lines().count();
-    let metadata = fs.metadata(&pre_commit_path);
+    let metadata = fs.metadata(pre_commit_path);
     let modified = metadata.as_ref().and_then(|m| m.modified().ok()).map(|t| {
-        // Format as rough timestamp
         t.duration_since(std::time::SystemTime::UNIX_EPOCH)
             .map(|d| d.as_secs())
             .unwrap_or(0)
@@ -164,36 +240,14 @@ pub fn check_hooks(
         inventory: false,
     }.as_inventory());
 
-    // H7: Script permissions
-    check_permissions(fs, &pre_commit_path, results);
+    (line_count, size)
+}
 
-    // H8: Required tools installed
-    check_required_tools(tc, results);
-
-    // H9: Extra scripts in pre-commit.d/
-    if is_modular {
-        inventory_scripts(
-            fs,
-            &pre_commit_d,
-            "H9",
-            "Extra scripts in pre-commit.d/",
-            results,
-        );
-    }
-
-    // H10: Script modifications (already covered by H6 size/hash, but
-    // report the file size as a separate line for clarity)
-    results.push(CheckResult {
-        id: "H10".to_owned(),
-        severity: Severity::Info,
-        title: "Pre-commit file size".to_owned(),
-        message: format!("{size} bytes"),
-        file: Some(pre_commit_path.display().to_string()),
-        line: None,
-        inventory: false,
-    }.as_inventory());
-
-    // H11: Local pre-commit scripts
+fn check_local_scripts(
+    fs: &dyn FileSystem,
+    path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     let local_d = path.join("local").join("pre-commit.d");
     if local_d.is_dir() {
         inventory_scripts(fs, &local_d, "H11", "Local pre-commit scripts", results);
@@ -256,7 +310,87 @@ fn check_hooks_path(path: &Path, results: &mut Vec<CheckResult>) {
     }
 }
 
-#[allow(clippy::too_many_lines)] // reason: hook pattern checking across multiple tools
+struct PatternCheck {
+    pattern: &'static [&'static str],
+    label: &'static str,
+    severity_if_missing: Severity,
+    requires_rust: bool,
+    requires_ts: bool,
+}
+
+const HOOK_PATTERN_CHECKS: &[PatternCheck] = &[
+    PatternCheck {
+        pattern: &["gitleaks"],
+        label: "gitleaks",
+        severity_if_missing: Severity::Error,
+        requires_rust: false,
+        requires_ts: false,
+    },
+    PatternCheck {
+        pattern: &["cargo fmt", "rustfmt"],
+        label: "cargo fmt / rustfmt",
+        severity_if_missing: Severity::Error,
+        requires_rust: true,
+        requires_ts: false,
+    },
+    PatternCheck {
+        pattern: &["cargo clippy", "clippy"],
+        label: "cargo clippy",
+        severity_if_missing: Severity::Error,
+        requires_rust: true,
+        requires_ts: false,
+    },
+    PatternCheck {
+        pattern: &["cargo deny", "cargo-deny"],
+        label: "cargo deny",
+        severity_if_missing: Severity::Error,
+        requires_rust: true,
+        requires_ts: false,
+    },
+    PatternCheck {
+        pattern: &["cargo test"],
+        label: "cargo test",
+        severity_if_missing: Severity::Warn,
+        requires_rust: true,
+        requires_ts: false,
+    },
+    PatternCheck {
+        pattern: &["cargo machete", "cargo-machete"],
+        label: "cargo machete",
+        severity_if_missing: Severity::Warn,
+        requires_rust: true,
+        requires_ts: false,
+    },
+    PatternCheck {
+        pattern: &["tsc", "--noEmit"],
+        label: "tsc / --noEmit",
+        severity_if_missing: Severity::Warn,
+        requires_rust: false,
+        requires_ts: true,
+    },
+    PatternCheck {
+        pattern: &["eslint"],
+        label: "eslint",
+        severity_if_missing: Severity::Warn,
+        requires_rust: false,
+        requires_ts: true,
+    },
+    PatternCheck {
+        pattern: &["jscpd"],
+        label: "jscpd",
+        severity_if_missing: Severity::Warn,
+        requires_rust: false,
+        requires_ts: false,
+    },
+    PatternCheck {
+        pattern: &["cargo dupes", "cargo-dupes"],
+        label: "cargo dupes",
+        severity_if_missing: Severity::Info,
+        requires_rust: true,
+        requires_ts: false,
+    },
+];
+
 fn check_monolithic_patterns(
     content: &str,
     file_path: &Path,
@@ -264,88 +398,7 @@ fn check_monolithic_patterns(
     has_typescript: bool,
     results: &mut Vec<CheckResult>,
 ) {
-    struct PatternCheck {
-        pattern: &'static [&'static str],
-        label: &'static str,
-        severity_if_missing: Severity,
-        requires_rust: bool,
-        requires_ts: bool,
-    }
-
-    let checks = [
-        PatternCheck {
-            pattern: &["gitleaks"],
-            label: "gitleaks",
-            severity_if_missing: Severity::Error,
-            requires_rust: false,
-            requires_ts: false,
-        },
-        PatternCheck {
-            pattern: &["cargo fmt", "rustfmt"],
-            label: "cargo fmt / rustfmt",
-            severity_if_missing: Severity::Error,
-            requires_rust: true,
-            requires_ts: false,
-        },
-        PatternCheck {
-            pattern: &["cargo clippy", "clippy"],
-            label: "cargo clippy",
-            severity_if_missing: Severity::Error,
-            requires_rust: true,
-            requires_ts: false,
-        },
-        PatternCheck {
-            pattern: &["cargo deny", "cargo-deny"],
-            label: "cargo deny",
-            severity_if_missing: Severity::Error,
-            requires_rust: true,
-            requires_ts: false,
-        },
-        PatternCheck {
-            pattern: &["cargo test"],
-            label: "cargo test",
-            severity_if_missing: Severity::Warn,
-            requires_rust: true,
-            requires_ts: false,
-        },
-        PatternCheck {
-            pattern: &["cargo machete", "cargo-machete"],
-            label: "cargo machete",
-            severity_if_missing: Severity::Warn,
-            requires_rust: true,
-            requires_ts: false,
-        },
-        PatternCheck {
-            pattern: &["tsc", "--noEmit"],
-            label: "tsc / --noEmit",
-            severity_if_missing: Severity::Warn,
-            requires_rust: false,
-            requires_ts: true,
-        },
-        PatternCheck {
-            pattern: &["eslint"],
-            label: "eslint",
-            severity_if_missing: Severity::Warn,
-            requires_rust: false,
-            requires_ts: true,
-        },
-        PatternCheck {
-            pattern: &["jscpd"],
-            label: "jscpd",
-            severity_if_missing: Severity::Warn,
-            requires_rust: false,
-            requires_ts: false,
-        },
-        PatternCheck {
-            pattern: &["cargo dupes", "cargo-dupes"],
-            label: "cargo dupes",
-            severity_if_missing: Severity::Info,
-            requires_rust: true,
-            requires_ts: false,
-        },
-    ];
-
-    for check in &checks {
+    for check in HOOK_PATTERN_CHECKS {
         if check.requires_rust && !has_rust {
             continue;
         }

@@ -3,7 +3,6 @@ use std::path::Path;
 use crate::domain::report::{CheckResult, Severity};
 use crate::ports::outbound::FileSystem;
 
-#[allow(clippy::too_many_lines)] // reason: ESLint audit analysis
 pub fn check(fs: &dyn FileSystem, path: &Path) -> Vec<CheckResult> {
     let mut results = Vec::new();
 
@@ -17,7 +16,16 @@ pub fn check(fs: &dyn FileSystem, path: &Path) -> Vec<CheckResult> {
         return results;
     };
 
-    // T36: Zone definitions
+    check_zone_definitions(&content, &eslint_path, &mut results);
+    check_import_direction(&content, &eslint_path, &mut results);
+    check_entry_point(&content, &eslint_path, &mut results);
+    check_external_deps(&content, &eslint_path, &mut results);
+
+    results
+}
+
+/// T36: Zone definitions
+fn check_zone_definitions(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
     let has_zones = content.contains("element-types")
         || content.contains("domain")
             && (content.contains("commands") || content.contains("adapters"));
@@ -43,8 +51,10 @@ pub fn check(fs: &dyn FileSystem, path: &Path) -> Vec<CheckResult> {
             inventory: false,
         });
     }
+}
 
-    // T37: Import direction rules
+/// T37: Import direction rules
+fn check_import_direction(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
     if content.contains("boundaries/element-types") {
         results.push(CheckResult {
             id: "T37".to_owned(),
@@ -66,8 +76,10 @@ pub fn check(fs: &dyn FileSystem, path: &Path) -> Vec<CheckResult> {
             inventory: false,
         });
     }
+}
 
-    // T38: Entry-point barrel enforcement
+/// T38: Entry-point barrel enforcement
+fn check_entry_point(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
     if content.contains("boundaries/entry-point") {
         results.push(CheckResult {
             id: "T38".to_owned(),
@@ -89,8 +101,10 @@ pub fn check(fs: &dyn FileSystem, path: &Path) -> Vec<CheckResult> {
             inventory: false,
         });
     }
+}
 
-    // T39: External dependency per-zone bans
+/// T39: External dependency per-zone bans
+fn check_external_deps(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
     if content.contains("boundaries/external") {
         results.push(CheckResult {
             id: "T39".to_owned(),
@@ -112,6 +126,4 @@ pub fn check(fs: &dyn FileSystem, path: &Path) -> Vec<CheckResult> {
             inventory: false,
         });
     }
-
-    results
 }

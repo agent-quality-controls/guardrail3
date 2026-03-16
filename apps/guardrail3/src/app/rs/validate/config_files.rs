@@ -199,7 +199,6 @@ fn check_per_crate_clippy_content(
     }
 }
 
-#[allow(clippy::too_many_lines)] // reason: clippy threshold validation
 fn check_clippy_thresholds(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResult>) {
     let content = match fs.read_file_err(path) {
         Ok(content) => content,
@@ -232,6 +231,7 @@ fn check_clippy_thresholds(fs: &dyn FileSystem, path: &Path, results: &mut Vec<C
             return;
         }
     };
+
     let expected: &[ExpectedInt<'_>] = &[
         ("too-many-lines-threshold", 75),
         ("cognitive-complexity-threshold", 15),
@@ -241,51 +241,61 @@ fn check_clippy_thresholds(fs: &dyn FileSystem, path: &Path, results: &mut Vec<C
     ];
 
     for (key, expected_val) in expected {
-        match table.get(key) {
-            Some(toml::Value::Integer(v)) if *v == *expected_val => {
-                results.push(CheckResult {
-                    id: "R3".to_owned(),
-                    severity: Severity::Info,
-                    title: format!("{key} correct"),
-                    message: format!("{key} = {v}"),
-                    file: Some(path.display().to_string()),
-                    line: None,
-                    inventory: false,
-                }.as_inventory());
-            }
-            Some(toml::Value::Integer(v)) => {
-                results.push(CheckResult {
-                    id: "R3".to_owned(),
-                    severity: Severity::Error,
-                    title: format!("{key} wrong value"),
-                    message: format!("Expected {expected_val}, got {v}"),
-                    file: Some(path.display().to_string()),
-                    line: None,
-                    inventory: false,
-                });
-            }
-            Some(_) => {
-                results.push(CheckResult {
-                    id: "R3".to_owned(),
-                    severity: Severity::Error,
-                    title: format!("{key} wrong type"),
-                    message: format!("Expected integer {expected_val}"),
-                    file: Some(path.display().to_string()),
-                    line: None,
-                    inventory: false,
-                });
-            }
-            None => {
-                results.push(CheckResult {
-                    id: "R3".to_owned(),
-                    severity: Severity::Error,
-                    title: format!("{key} missing"),
-                    message: format!("Expected {key} = {expected_val}"),
-                    file: Some(path.display().to_string()),
-                    line: None,
-                    inventory: false,
-                });
-            }
+        check_clippy_int_threshold(&table, key, *expected_val, path, results);
+    }
+}
+
+fn check_clippy_int_threshold(
+    table: &toml::Value,
+    key: &str,
+    expected_val: i64,
+    path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
+    match table.get(key) {
+        Some(toml::Value::Integer(v)) if *v == expected_val => {
+            results.push(CheckResult {
+                id: "R3".to_owned(),
+                severity: Severity::Info,
+                title: format!("{key} correct"),
+                message: format!("{key} = {v}"),
+                file: Some(path.display().to_string()),
+                line: None,
+                inventory: false,
+            }.as_inventory());
+        }
+        Some(toml::Value::Integer(v)) => {
+            results.push(CheckResult {
+                id: "R3".to_owned(),
+                severity: Severity::Error,
+                title: format!("{key} wrong value"),
+                message: format!("Expected {expected_val}, got {v}"),
+                file: Some(path.display().to_string()),
+                line: None,
+                inventory: false,
+            });
+        }
+        Some(_) => {
+            results.push(CheckResult {
+                id: "R3".to_owned(),
+                severity: Severity::Error,
+                title: format!("{key} wrong type"),
+                message: format!("Expected integer {expected_val}"),
+                file: Some(path.display().to_string()),
+                line: None,
+                inventory: false,
+            });
+        }
+        None => {
+            results.push(CheckResult {
+                id: "R3".to_owned(),
+                severity: Severity::Error,
+                title: format!("{key} missing"),
+                message: format!("Expected {key} = {expected_val}"),
+                file: Some(path.display().to_string()),
+                line: None,
+                inventory: false,
+            });
         }
     }
 }

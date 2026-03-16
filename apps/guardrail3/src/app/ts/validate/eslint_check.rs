@@ -6,7 +6,6 @@ use crate::ports::outbound::FileSystem;
 /// A rule definition: (`check_id`, `rule_name`, `severity_if_missing`).
 type RuleDef = (&'static str, &'static str, Severity);
 
-#[allow(clippy::too_many_lines)] // reason: comprehensive ESLint config validation
 pub fn check_eslint_config(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResult>) {
     let eslint_path = path.join("eslint.config.mjs");
     if !eslint_path.exists() {
@@ -36,51 +35,27 @@ pub fn check_eslint_config(fs: &dyn FileSystem, path: &Path, results: &mut Vec<C
         return;
     };
 
-    // T2: max-lines with value 300
-    check_eslint_rule(
-        &content,
-        &eslint_path,
-        "T2",
-        "max-lines",
-        Some("300"),
-        Severity::Error,
-        results,
-    );
+    check_eslint_value_rules(&content, &eslint_path, results);
+    check_boundary_enforcement(&content, &eslint_path, results);
+    check_relaxed_rules(&content, &eslint_path, results);
+    check_file_overrides(&content, &eslint_path, results);
+    check_rule_presence_t40_t48(&content, &eslint_path, results);
+    check_all_eslint_rules(&content, &eslint_path, results);
+    check_test_relaxations(&content, &eslint_path, results);
+    check_route_wrappers(&content, &eslint_path, results);
+    check_process_env_ban(&content, &eslint_path, results);
+}
 
-    // T3: max-lines-per-function with value 100
-    check_eslint_rule(
-        &content,
-        &eslint_path,
-        "T3",
-        "max-lines-per-function",
-        Some("100"),
-        Severity::Warn,
-        results,
-    );
+/// T2-T5: `ESLint` rules with expected values.
+fn check_eslint_value_rules(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
+    check_eslint_rule(content, eslint_path, "T2", "max-lines", Some("300"), Severity::Error, results);
+    check_eslint_rule(content, eslint_path, "T3", "max-lines-per-function", Some("100"), Severity::Warn, results);
+    check_eslint_rule(content, eslint_path, "T4", "complexity", Some("25"), Severity::Warn, results);
+    check_eslint_rule(content, eslint_path, "T5", "no-restricted-imports", None, Severity::Error, results);
+}
 
-    // T4: complexity with value 25
-    check_eslint_rule(
-        &content,
-        &eslint_path,
-        "T4",
-        "complexity",
-        Some("25"),
-        Severity::Warn,
-        results,
-    );
-
-    // T5: no-restricted-imports
-    check_eslint_rule(
-        &content,
-        &eslint_path,
-        "T5",
-        "no-restricted-imports",
-        None,
-        Severity::Error,
-        results,
-    );
-
-    // T6: boundaries or eslint-plugin-boundaries
+/// T6: Boundary enforcement (boundaries or eslint-plugin-boundaries).
+fn check_boundary_enforcement(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
     if content.contains("boundaries") || content.contains("eslint-plugin-boundaries") {
         results.push(CheckResult {
             id: "T6".to_owned(),
@@ -102,8 +77,11 @@ pub fn check_eslint_config(fs: &dyn FileSystem, path: &Path, results: &mut Vec<C
             inventory: false,
         });
     }
+}
 
-    // T7: Lines containing "off" or "warn" — Info inventory
+/// T7: Lines containing "off" or "warn" — Info inventory.
+/// T8: File-specific overrides.
+fn check_relaxed_rules(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
     for (line_num, line) in content.lines().enumerate() {
         let trimmed = line.trim();
         if (trimmed.contains("\"off\"")
@@ -124,8 +102,10 @@ pub fn check_eslint_config(fs: &dyn FileSystem, path: &Path, results: &mut Vec<C
             });
         }
     }
+}
 
-    // T8: File-specific overrides
+/// T8: File-specific overrides.
+fn check_file_overrides(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
     for (line_num, line) in content.lines().enumerate() {
         let trimmed = line.trim();
         if trimmed.contains("files:") || trimmed.contains("files =") {
@@ -140,85 +120,23 @@ pub fn check_eslint_config(fs: &dyn FileSystem, path: &Path, results: &mut Vec<C
             });
         }
     }
+}
 
-    // T40-T49: ESLint rule presence checks
-    check_eslint_rule_presence(
-        &content,
-        &eslint_path,
-        "T40",
-        "no-floating-promises",
-        Severity::Error,
-        results,
-    );
-    check_eslint_rule_presence(
-        &content,
-        &eslint_path,
-        "T41",
-        "no-explicit-any",
-        Severity::Error,
-        results,
-    );
-    check_eslint_rule_presence(
-        &content,
-        &eslint_path,
-        "T42",
-        "no-console",
-        Severity::Warn,
-        results,
-    );
-    check_eslint_rule_presence(
-        &content,
-        &eslint_path,
-        "T43",
-        "eqeqeq",
-        Severity::Warn,
-        results,
-    );
-    check_eslint_rule_presence(
-        &content,
-        &eslint_path,
-        "T44",
-        "no-restricted-globals",
-        Severity::Error,
-        results,
-    );
-    check_eslint_rule_presence(
-        &content,
-        &eslint_path,
-        "T45",
-        "no-cycle",
-        Severity::Error,
-        results,
-    );
-    check_eslint_rule_presence(
-        &content,
-        &eslint_path,
-        "T46",
-        "max-dependencies",
-        Severity::Warn,
-        results,
-    );
-    check_eslint_rule_presence(
-        &content,
-        &eslint_path,
-        "T47",
-        "explicit-function-return-type",
-        Severity::Warn,
-        results,
-    );
-    check_eslint_rule_presence(
-        &content,
-        &eslint_path,
-        "T48",
-        "strict-boolean-expressions",
-        Severity::Warn,
-        results,
-    );
+/// T40-T48: `ESLint` rule presence checks.
+fn check_rule_presence_t40_t48(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
+    check_eslint_rule_presence(content, eslint_path, "T40", "no-floating-promises", Severity::Error, results);
+    check_eslint_rule_presence(content, eslint_path, "T41", "no-explicit-any", Severity::Error, results);
+    check_eslint_rule_presence(content, eslint_path, "T42", "no-console", Severity::Warn, results);
+    check_eslint_rule_presence(content, eslint_path, "T43", "eqeqeq", Severity::Warn, results);
+    check_eslint_rule_presence(content, eslint_path, "T44", "no-restricted-globals", Severity::Error, results);
+    check_eslint_rule_presence(content, eslint_path, "T45", "no-cycle", Severity::Error, results);
+    check_eslint_rule_presence(content, eslint_path, "T46", "max-dependencies", Severity::Warn, results);
+    check_eslint_rule_presence(content, eslint_path, "T47", "explicit-function-return-type", Severity::Warn, results);
+    check_eslint_rule_presence(content, eslint_path, "T48", "strict-boolean-expressions", Severity::Warn, results);
+}
 
-    // T60+: Additional ESLint rule presence checks
-    check_all_eslint_rules(&content, &eslint_path, results);
-
-    // T49: Test file relaxations
+/// T49: Test file relaxations.
+fn check_test_relaxations(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
     for (line_num, line) in content.lines().enumerate() {
         let trimmed = line.trim();
         if (trimmed.contains("test") || trimmed.contains("spec"))
@@ -235,8 +153,10 @@ pub fn check_eslint_config(fs: &dyn FileSystem, path: &Path, results: &mut Vec<C
             }.as_inventory());
         }
     }
+}
 
-    // T50: Route wrapper enforcement
+/// T50: Route wrapper enforcement.
+fn check_route_wrappers(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
     if content.contains("withBody") || content.contains("withRoute") {
         results.push(CheckResult {
             id: "T50".to_owned(),
@@ -258,8 +178,10 @@ pub fn check_eslint_config(fs: &dyn FileSystem, path: &Path, results: &mut Vec<C
             inventory: false,
         });
     }
+}
 
-    // T51: process.env ban
+/// T51: process.env ban.
+fn check_process_env_ban(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
     if content.contains("process.env") {
         results.push(CheckResult {
             id: "T51".to_owned(),

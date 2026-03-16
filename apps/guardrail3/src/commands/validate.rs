@@ -89,8 +89,8 @@ pub fn run(args: &ValidateArgs) {
 
     match args.format.as_str() {
         "json" => report::json::print_report(&combined_report, args.inventory),
-        "md" | "markdown" => report::markdown::print_report(&combined_report, args.inventory),
-        _ => report::text::print_report(&combined_report, args.inventory),
+        "md" | "markdown" => report::markdown::print_report(&combined_report, args.inventory, args.verbose),
+        _ => report::text::print_report(&combined_report, args.inventory, args.verbose),
     }
 
     // Exit with error code if errors found

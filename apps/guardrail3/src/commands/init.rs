@@ -5,7 +5,6 @@ use std::path::Path;
 #[allow(clippy::print_stdout)] // reason: CLI command — user-facing output
 #[allow(clippy::print_stderr)] // reason: CLI command — error output
 #[allow(clippy::disallowed_methods)] // reason: CLI command — exit codes and fs operations
-#[allow(clippy::too_many_lines)] // reason: sequential scaffolding steps are clearer as one function
 pub fn run_rs(profile: &str, path: &str, force: bool) {
     if profile != "service" && profile != "library" {
         eprintln!("Error: unknown profile '{profile}'. Must be 'service' or 'library'.");
@@ -15,7 +14,18 @@ pub fn run_rs(profile: &str, path: &str, force: bool) {
     let mut created: Vec<String> = Vec::new();
     let mut skipped: Vec<String> = Vec::new();
 
-    // guardrail3.toml
+    scaffold_config(project_path, profile, force, &mut created);
+    scaffold_local_dir(project_path, force, &mut created, &mut skipped);
+    if profile == "service" {
+        scaffold_release_files(project_path, force, &mut created, &mut skipped);
+    }
+    print_rs_summary(project_path, &created, &skipped);
+}
+
+/// Write guardrail3.toml config file.
+#[allow(clippy::print_stderr)] // reason: CLI command — error output
+#[allow(clippy::disallowed_methods)] // reason: CLI command — exit codes
+fn scaffold_config(project_path: &Path, profile: &str, force: bool, created: &mut Vec<String>) {
     let config_path = project_path.join("guardrail3.toml");
     if config_path.exists() && !force {
         eprintln!(
@@ -30,8 +40,17 @@ pub fn run_rs(profile: &str, path: &str, force: bool) {
         std::process::exit(1);
     }
     created.push(format!("guardrail3.toml (profile: {profile})"));
+}
 
-    // local/ directory with override files
+/// Create local/ directory with override template files.
+#[allow(clippy::print_stderr)] // reason: CLI command — error output
+#[allow(clippy::disallowed_methods)] // reason: CLI command — exit codes
+fn scaffold_local_dir(
+    project_path: &Path,
+    force: bool,
+    created: &mut Vec<String>,
+    skipped: &mut Vec<String>,
+) {
     let local_dir = project_path.join("local");
     if let Err(e) = crate::fs::create_dir_all(&local_dir) {
         eprintln!("Error creating local/ directory: {e}");
@@ -66,43 +85,53 @@ pub fn run_rs(profile: &str, path: &str, force: bool) {
         }
         created.push(format!("local/{filename}"));
     }
+}
 
-    // Release config files for service profile
-    if profile == "service" {
-        let release_files = [
-            (
-                "release-plz.toml",
-                crate::domain::modules::release::RELEASE_PLZ_TOML.content,
-            ),
-            (
-                "cliff.toml",
-                crate::domain::modules::release::CLIFF_TOML.content,
-            ),
-        ];
+/// Write release config files (release-plz.toml, cliff.toml) for service profile.
+#[allow(clippy::print_stderr)] // reason: CLI command — error output
+#[allow(clippy::disallowed_methods)] // reason: CLI command — exit codes
+fn scaffold_release_files(
+    project_path: &Path,
+    force: bool,
+    created: &mut Vec<String>,
+    skipped: &mut Vec<String>,
+) {
+    let release_files = [
+        (
+            "release-plz.toml",
+            crate::domain::modules::release::RELEASE_PLZ_TOML.content,
+        ),
+        (
+            "cliff.toml",
+            crate::domain::modules::release::CLIFF_TOML.content,
+        ),
+    ];
 
-        for (filename, content) in &release_files {
-            let file_path = project_path.join(filename);
-            if file_path.exists() && !force {
-                skipped.push((*filename).to_owned());
-                continue;
-            }
-            if let Err(e) = crate::fs::write_file(&file_path, content) {
-                eprintln!("Error writing {filename}: {e}");
-                std::process::exit(1);
-            }
-            created.push((*filename).to_owned());
+    for (filename, content) in &release_files {
+        let file_path = project_path.join(filename);
+        if file_path.exists() && !force {
+            skipped.push((*filename).to_owned());
+            continue;
         }
+        if let Err(e) = crate::fs::write_file(&file_path, content) {
+            eprintln!("Error writing {filename}: {e}");
+            std::process::exit(1);
+        }
+        created.push((*filename).to_owned());
     }
+}
 
-    // Honest summary
+/// Print the summary of what was created/skipped.
+#[allow(clippy::print_stdout)] // reason: CLI command — user-facing output
+fn print_rs_summary(project_path: &Path, created: &[String], skipped: &[String]) {
     println!(
         "Initialized Rust guardrail3 project at {}",
         project_path.display()
     );
-    for f in &created {
+    for f in created {
         println!("  Created: {f}");
     }
-    for f in &skipped {
+    for f in skipped {
         println!("  Skipped (already exists): {f}");
     }
     if !skipped.is_empty() {
