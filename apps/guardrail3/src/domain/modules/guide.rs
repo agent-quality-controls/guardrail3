@@ -266,7 +266,7 @@ guardrail3 rs check       # Fails if generated configs are stale
 R1-R3 clippy.toml, R4-R7 ban completeness, R8-R20 deny.toml, R21-R25 rustfmt/toolchain, R26-R29 workspace lints.
 
 **Source scan (AST-based via syn):**
-R30-R31 crate-level allow, R32-R33 item-level allow, R34-R35 garde(skip), R36 EXCEPTION comments, R37 cfg_attr allow, R38-R39 file length, R40-R41 use count, R42 unsafe, R43 todo/unimplemented, R44 unwrap/expect, R58 direct std::fs.
+R30-R31 crate-level allow, R32-R33 item-level allow, R34-R35 garde(skip), R36 EXCEPTION comments, R37 cfg_attr allow, R38 file length, R40-R41 use count, R42 unsafe, R43 todo/unimplemented, R44 unwrap/expect, R58 direct std::fs.
 
 **Dependencies:**
 R45-R48 tools installed, R49 CLAUDE.md, R50 banned crates, R-DEPS-01 unauthorized dep, R-DEPS-02 library without allowlist.
@@ -276,7 +276,7 @@ R53 unsafe_code=forbid, R55-R57 workspace metadata, R-ARCH-01 service missing he
 
 **Release:** R-REL-*, R-PUB-*, R-BIN-* (workflow, metadata, binary release).
 **Garde:** R-GARDE-01 garde dependency (error if missing), R-GARDE-02 clippy bans, R-GARDE-05 input boundary structs (Deserialize/Parser/Args/FromRow) without Validate.
-**Tests:** R-TEST-02..08.
+**Tests:** R-TEST-02..09 (R-TEST-09: no inline tests in src/).
 
 ### TypeScript Checks
 

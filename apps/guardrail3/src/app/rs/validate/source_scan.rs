@@ -35,24 +35,28 @@ pub fn check(
         let is_bin_entry = is_bin_crate_entry(path);
         let is_test_file = is_test(path);
 
-        // Allow/attribute checks (R30-R37)
-        allow_checks::check_crate_level_allow(
-            path,
-            &content,
-            is_bin_entry,
-            is_test_file,
-            &mut results,
-        );
-        allow_checks::check_item_level_allow(path, &content, &mut results);
-        allow_checks::check_garde_skip(path, &content, &mut results);
-        allow_checks::check_cfg_attr_allow(path, &content, &mut results);
+        // Allow/attribute checks (R30-R37) — R30-R35, R37 excluded for test files
+        if !is_test_file {
+            allow_checks::check_crate_level_allow(
+                path,
+                &content,
+                is_bin_entry,
+                is_test_file,
+                &mut results,
+            );
+            allow_checks::check_item_level_allow(path, &content, &mut results);
+            allow_checks::check_garde_skip(path, &content, &mut results);
+            allow_checks::check_cfg_attr_allow(path, &content, &mut results);
+        }
 
-        // Structure checks (R38-R42)
+        // Structure checks (R38, R40-R42) — R42 excluded for test files
         structure_checks::check_file_length(path, &content, is_test_file, &mut results);
         structure_checks::check_use_count(path, &content, is_test_file, &mut results);
-        structure_checks::check_unsafe(path, &content, &mut results);
+        if !is_test_file {
+            structure_checks::check_unsafe(path, &content, &mut results);
+        }
 
-        // Code quality checks (R43-R44, R58)
+        // Code quality checks (R43-R44, R58) — R44 excluded for test files
         code_quality_checks::check_todo_macros(path, &content, is_test_file, &mut results);
         code_quality_checks::check_direct_fs_usage(path, &content, is_test_file, &mut results);
 
@@ -105,6 +109,11 @@ fn is_bin_crate_entry(path: &Path) -> bool {
 
 fn is_test(path: &Path) -> bool {
     let path_str = path.display().to_string();
+    is_test_path(&path_str)
+}
+
+/// Check if a file path belongs to a test file.
+pub fn is_test_path(path_str: &str) -> bool {
     path_str.contains("/tests/")
         || path_str.contains("/test/")
         || path_str.contains("__tests__")

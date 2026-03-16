@@ -6,7 +6,7 @@ use super::source_scan::is_excluded_dir;
 use crate::domain::report::{CheckResult, Severity};
 use crate::ports::outbound::{FileSystem, ToolChecker};
 
-/// Run all test quality checks (R-TEST-01 through R-TEST-08).
+/// Run all test quality checks (R-TEST-01 through R-TEST-09).
 pub fn check(fs: &dyn FileSystem, tc: &dyn ToolChecker, workspace_root: &Path) -> Vec<CheckResult> {
     let mut results = Vec::new();
 
@@ -24,6 +24,9 @@ pub fn check(fs: &dyn FileSystem, tc: &dyn ToolChecker, workspace_root: &Path) -
 
     // R-TEST-05 through R-TEST-08: quality checks
     super::test_quality_checks::check(fs, workspace_root, &mut results);
+
+    // R-TEST-09: No test code in production source
+    check_no_tests_in_src(fs, workspace_root, &mut results);
 
     results
 }
@@ -179,6 +182,93 @@ fn content_has_test(content: &str) -> bool {
     super::ast_helpers::has_test_attribute(&file)
 }
 
+// ---------------------------------------------------------------------------
+// R-TEST-09: No test code in production source files
+// ---------------------------------------------------------------------------
+
+/// Walk all `.rs` files under `src/` and flag any that contain `#[test]`/`#[tokio::test]`
+/// attributes or `#[cfg(test)]` modules. Test code belongs in `tests/` directories.
+pub fn check_no_tests_in_src(
+    fs: &dyn FileSystem,
+    workspace_root: &Path,
+    results: &mut Vec<CheckResult>,
+) {
+    for entry in WalkDir::new(workspace_root)
+        .into_iter()
+        .filter_entry(|e| !is_excluded_dir(e))
+        .flatten()
+    {
+        if !entry.file_type().is_file() {
+            continue;
+        }
+        let path = entry.path();
+        if path.extension().and_then(|e| e.to_str()) != Some("rs") {
+            continue;
+        }
+
+        let path_str = path.display().to_string();
+
+        // Only check files in src/ directories
+        if !path_str.contains("/src/") {
+            continue;
+        }
+
+        // Skip files in tests/ paths (e.g. src/tests/)
+        if path_str.contains("/tests/") {
+            continue;
+        }
+
+        // Skip test fixture files
+        if path_str.contains("tests/fixtures/") {
+            continue;
+        }
+
+        let Some(content) = fs.read_file(path) else {
+            continue;
+        };
+
+        let Some(parsed) = super::ast_helpers::parse_file(&content) else {
+            continue;
+        };
+
+        // Check for #[test] or #[tokio::test] attributes
+        let has_test_attr = super::ast_helpers::has_test_attribute(&parsed);
+
+        // Check for #[cfg(test)] modules
+        let has_cfg_test = file_has_cfg_test_module(&parsed);
+
+        if has_test_attr || has_cfg_test {
+            let relative = path
+                .strip_prefix(workspace_root)
+                .unwrap_or(path)
+                .display()
+                .to_string();
+            results.push(CheckResult {
+                id: "R-TEST-09".to_owned(),
+                severity: Severity::Error,
+                title: "Test code in production source".to_owned(),
+                message: format!(
+                    "Test code found in production source: {relative}. Move tests to tests/ directory."
+                ),
+                file: Some(path_str),
+                line: None,
+            });
+        }
+    }
+}
+
+/// Check if a parsed file has any `#[cfg(test)] mod ...` at the top level.
+fn file_has_cfg_test_module(file: &syn::File) -> bool {
+    for item in &file.items {
+        if let syn::Item::Mod(m) = item {
+            if m.attrs.iter().any(super::ast_helpers::is_cfg_test_attr) {
+                return true;
+            }
+        }
+    }
+    false
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -274,5 +364,23 @@ mod tests {
     fn r_test_04_pos_has_tokio_test() {
         let content = "#[tokio::test]\nasync fn it_works() {}";
         assert!(content_has_test(content));
+    }
+
+    // ---- R-TEST-09: No test code in production source ----
+
+    #[test]
+    fn r_test_09_detects_cfg_test_module() {
+        let content = "fn production() {}\n\n#[cfg(test)]\nmod tests {\n    #[test]\n    fn it_works() {}\n}";
+        let parsed = super::super::ast_helpers::parse_file(content);
+        assert!(parsed.is_some());
+        assert!(file_has_cfg_test_module(&parsed.unwrap()));
+    }
+
+    #[test]
+    fn r_test_09_no_cfg_test_is_clean() {
+        let content = "fn production() {}";
+        let parsed = super::super::ast_helpers::parse_file(content);
+        assert!(parsed.is_some());
+        assert!(!file_has_cfg_test_module(&parsed.unwrap()));
     }
 }

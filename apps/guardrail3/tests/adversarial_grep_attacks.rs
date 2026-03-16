@@ -346,10 +346,9 @@ fn grep_before_structural_exactly_21_uses() {
 #[test]
 fn grep_before_structural_exactly_500_lines() {
     // BOUNDARY: exactly 500 effective lines. R38 fires on > 500, so should NOT fire.
-    // R39 (warn) fires on > 400, so it SHOULD fire.
+    // R39 was removed — no warning for 400-500 range.
     let r = validate_grep_attack_fixture("rust-structural", "exactly_500_lines.rs");
     assert_no_check(&r, "exactly_500_lines.rs", "R38");
-    assert_has_check(&r, "exactly_500_lines.rs", "R39", "warn");
 }
 
 #[test]
