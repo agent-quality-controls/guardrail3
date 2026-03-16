@@ -1,4 +1,4 @@
-use crate::modules;
+use crate::domain::modules;
 
 #[allow(clippy::print_stdout)] // reason: CLI command — module listing output to stdout
 pub fn list_modules() {

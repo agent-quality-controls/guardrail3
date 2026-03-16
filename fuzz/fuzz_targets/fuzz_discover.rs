@@ -7,7 +7,7 @@
 
 use libfuzzer_sys::fuzz_target;
 
-use guardrail3::discover;
+use guardrail3::app::discover;
 
 fuzz_target!(|data: &[u8]| {
     // Only try valid UTF-8

@@ -1,13 +1,14 @@
 use std::path::Path;
 
 use crate::cli::ValidateArgs;
-use crate::discover;
-use crate::hooks;
+use crate::adapters::outbound::fs::RealFileSystem;
+use crate::adapters::outbound::tool_runner::RealToolChecker;
+use crate::app::discover;
+use crate::app::hooks;
+use crate::app::rs;
+use crate::app::ts;
+use crate::domain::report::{Report, ValidateDomains};
 use crate::report;
-use crate::report::types::Report;
-use crate::rs;
-use crate::report::types::ValidateDomains;
-use crate::ts;
 
 /// Convert a repo-relative path to an absolute path string.
 fn to_abs_path(project_path: &Path, relative: &str) -> String {
@@ -30,7 +31,9 @@ pub fn run(args: &ValidateArgs) {
         tests: run_all || args.tests,
     };
 
-    let project = discover::detect_project(&abs_path);
+    let fs = RealFileSystem;
+    let tc = RealToolChecker;
+    let project = discover::detect_project(&fs, &abs_path);
 
     let scoped_files = resolve_scoped_files(args, &abs_path);
     let scoped_ref = scoped_files.as_deref();
@@ -51,14 +54,14 @@ pub fn run(args: &ValidateArgs) {
 
     if project.has_rust {
         let rust_report =
-            rs::validate::run(&abs_path, &project, scoped_ref, &domains, args.thorough);
+            rs::validate::run(&fs, &abs_path, &project, scoped_ref, &domains, args.thorough, &tc);
         for section in rust_report.sections {
             combined_report.add_section(section);
         }
     }
 
     if project.has_typescript {
-        let ts_report = ts::validate::run(&abs_path, scoped_ref, &domains);
+        let ts_report = ts::validate::run(&fs, &abs_path, scoped_ref, &domains);
         for section in ts_report.sections {
             combined_report.add_section(section);
         }
@@ -66,10 +69,12 @@ pub fn run(args: &ValidateArgs) {
 
     // Hook and deployment checks
     let hooks_report = hooks::validate::run(
+        &fs,
         &abs_path,
         project.has_rust,
         project.has_typescript,
         &domains,
+        &tc,
     );
     for section in hooks_report.sections {
         combined_report.add_section(section);

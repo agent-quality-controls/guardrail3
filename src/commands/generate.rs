@@ -2,8 +2,22 @@ use std::collections::BTreeMap;
 use std::path::Path;
 
 use crate::cli::GenerateArgs;
-use crate::config;
-use crate::modules::{canonical, clippy, deny, release};
+use crate::domain::config;
+use crate::domain::modules::{canonical, clippy, deny, release};
+
+/// Load guardrail3.toml configuration from a project path.
+#[allow(clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI tool — config parse errors reported to stderr; guardrail3 config parsing — no garde validation needed for own config
+fn load_config(path: &Path) -> Option<config::types::GuardrailConfig> {
+    let config_path = path.join("guardrail3.toml");
+    let content = crate::fs::read_file(&config_path)?;
+    match toml::from_str(&content) {
+        Ok(cfg) => Some(cfg),
+        Err(e) => {
+            eprintln!("Error parsing guardrail3.toml: {e}");
+            None
+        }
+    }
+}
 
 struct GeneratedFile {
     path: String,
@@ -14,7 +28,7 @@ struct GeneratedFile {
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and process::exit for error codes
 pub fn run(args: &GenerateArgs) {
     let project_path = Path::new(&args.path);
-    let Some(cfg) = config::load_config(project_path) else {
+    let Some(cfg) = load_config(project_path) else {
         eprintln!(
             "Error: guardrail3.toml not found or invalid at {}",
             project_path.display()
@@ -64,7 +78,7 @@ pub fn run(args: &GenerateArgs) {
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
 pub fn run_rs(args: &GenerateArgs) {
     let project_path = Path::new(&args.path);
-    let Some(cfg) = config::load_config(project_path) else {
+    let Some(cfg) = load_config(project_path) else {
         eprintln!(
             "Error: guardrail3.toml not found or invalid at {}",
             project_path.display()
@@ -100,7 +114,7 @@ pub fn run_rs(args: &GenerateArgs) {
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
 pub fn run_ts(args: &GenerateArgs) {
     let project_path = Path::new(&args.path);
-    let Some(cfg) = config::load_config(project_path) else {
+    let Some(cfg) = load_config(project_path) else {
         eprintln!(
             "Error: guardrail3.toml not found at {}",
             project_path.display()
@@ -139,12 +153,12 @@ pub fn run_ts(args: &GenerateArgs) {
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
 pub fn run_hooks(args: &GenerateArgs) {
     let project_path = Path::new(&args.path);
-    let cfg = config::load_config(project_path);
+    let cfg = load_config(project_path);
 
     let has_rust = cfg.as_ref().and_then(|c| c.rust.as_ref()).is_some();
     let has_typescript = cfg.as_ref().and_then(|c| c.typescript.as_ref()).is_some();
     let hook_content =
-        crate::modules::pre_commit::build_pre_commit_script(has_rust, has_typescript);
+        crate::domain::modules::pre_commit::build_pre_commit_script(has_rust, has_typescript);
 
     let hooks_dir = project_path.join(".githooks");
     if let Err(e) = crate::fs::create_dir_all(&hooks_dir) {
@@ -247,7 +261,7 @@ fn generate_all_files(
         .and_then(|r| r.workspace_root.as_deref())
         .unwrap_or(".");
     let hook_content =
-        crate::modules::pre_commit::build_pre_commit_script(has_rust, has_typescript).replace(
+        crate::domain::modules::pre_commit::build_pre_commit_script(has_rust, has_typescript).replace(
             "GUARDRAIL3_RUST_WORKSPACE:-.}",
             &format!("GUARDRAIL3_RUST_WORKSPACE:-{rust_workspace_root}}}"),
         );
@@ -340,7 +354,7 @@ fn generate_rust_files(
     });
 
     // Per-crate clippy.toml for crates with layer config
-    let crate_configs: BTreeMap<String, &crate::config::types::CrateConfig> = cfg
+    let crate_configs: BTreeMap<String, &crate::domain::config::types::CrateConfig> = cfg
         .rust
         .as_ref()
         .and_then(|r| r.crates.as_ref())
@@ -421,7 +435,7 @@ fn build_deny_for_profile(
 /// Generate expected file contents without writing -- used by check and diff.
 #[allow(clippy::type_complexity)] // reason: legitimate complex type
 pub fn generate_expected(project_path: &Path) -> Option<Vec<(String, String)>> {
-    let cfg = config::load_config(project_path)?;
+    let cfg = load_config(project_path)?;
     let profile = cfg
         .profile
         .as_ref()

@@ -9,10 +9,10 @@ use libfuzzer_sys::fuzz_target;
 
 use std::path::Path;
 
-use guardrail3::rs::validate::allow_checks;
-use guardrail3::rs::validate::code_quality_checks;
-use guardrail3::rs::validate::source_scan;
-use guardrail3::rs::validate::structure_checks;
+use guardrail3::app::rs::validate::allow_checks;
+use guardrail3::app::rs::validate::code_quality_checks;
+use guardrail3::app::rs::validate::source_scan;
+use guardrail3::app::rs::validate::structure_checks;
 
 fuzz_target!(|data: &[u8]| {
     // Only try valid UTF-8 — Rust source is text
