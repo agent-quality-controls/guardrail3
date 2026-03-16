@@ -140,6 +140,7 @@ pub fn run(
             hex_arch_checks::check_hex_arch_structure(
                 fs,
                 workspace_root,
+                project,
                 crate_configs,
                 &mut arch_results,
             );

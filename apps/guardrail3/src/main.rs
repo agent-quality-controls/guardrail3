@@ -18,6 +18,7 @@ use proptest as _;
 use tempfile as _;
 
 use clap::{CommandFactory, FromArgMatches};
+use garde::Validate;
 
 use guardrail3::{
     adapters::outbound::{fs::RealFileSystem, tool_runner::RealToolChecker},
@@ -74,22 +75,28 @@ fn handle_rs(command: RsCommands) {
             commands::init::run_rs(&profile, &path, force);
         }
         RsCommands::Generate(args) => {
+            validate_or_exit(&args);
             commands::generate::run_rs(&args);
         }
         RsCommands::Validate(args) => {
+            validate_or_exit(&args);
             let (report, _) = run_rs_validate(&args);
             print_report(&args, &report);
         }
         RsCommands::Check(args) => {
+            validate_or_exit(&args);
             commands::check::run(&args.path);
         }
         RsCommands::Diff(args) => {
+            validate_or_exit(&args);
             commands::diff::run(&args.path);
         }
         RsCommands::HooksInstall(args) => {
+            validate_or_exit(&args);
             commands::generate::run_hooks(&args);
         }
         RsCommands::HooksValidate(args) => {
+            validate_or_exit(&args);
             let path = resolve_path(&args.path);
             let fs = RealFileSystem;
             let tc = RealToolChecker;
@@ -109,6 +116,7 @@ fn handle_rs(command: RsCommands) {
             commands::modules_cmd::list_modules();
         }
         RsCommands::ShowModule(args) => {
+            validate_or_exit(&args);
             commands::modules_cmd::show_module(&args.name);
         }
     }
@@ -121,9 +129,11 @@ fn handle_ts(command: TsCommands) {
             commands::init::run_ts(&path, force);
         }
         TsCommands::Generate(args) => {
+            validate_or_exit(&args);
             commands::generate::run_ts(&args);
         }
         TsCommands::Validate(args) => {
+            validate_or_exit(&args);
             let path = resolve_path(&args.path);
             let fs = RealFileSystem;
             let domains = domains_from_args(&args);
@@ -132,9 +142,11 @@ fn handle_ts(command: TsCommands) {
             print_report(&args, &report);
         }
         TsCommands::HooksInstall(args) => {
+            validate_or_exit(&args);
             commands::generate::run_hooks(&args);
         }
         TsCommands::HooksValidate(args) => {
+            validate_or_exit(&args);
             let path = resolve_path(&args.path);
             let fs = RealFileSystem;
             let tc = RealToolChecker;
@@ -184,6 +196,14 @@ fn print_report(args: &ValidateArgs, report: &guardrail3::domain::report::Report
     }
     if report.error_count() > 0 {
         std::process::exit(1);
+    }
+}
+
+#[allow(clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI — validation error output + exit
+fn validate_or_exit<T: Validate<Context = ()>>(args: &T) {
+    if let Err(e) = args.validate() {
+        eprintln!("Validation error: {e}");
+        std::process::exit(2);
     }
 }
 

@@ -7,6 +7,10 @@ use std::path::Path;
 #[allow(clippy::disallowed_methods)] // reason: CLI command — exit codes and fs operations
 #[allow(clippy::too_many_lines)] // reason: sequential scaffolding steps are clearer as one function
 pub fn run_rs(profile: &str, path: &str, force: bool) {
+    if profile != "service" && profile != "library" {
+        eprintln!("Error: unknown profile '{profile}'. Must be 'service' or 'library'.");
+        std::process::exit(1);
+    }
     let project_path = Path::new(path);
     let mut created: Vec<String> = Vec::new();
     let mut skipped: Vec<String> = Vec::new();

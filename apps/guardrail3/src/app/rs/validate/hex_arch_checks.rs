@@ -81,10 +81,28 @@ fn resolve_layer(
 /// Maps crate name to (`member_dir`, layer).
 type CrateLayerMap = BTreeMap<String, (String, Layer)>;
 
+/// Resolve a crate config key to its workspace member directory.
+/// Falls back to the key itself if no matching member is found.
+fn resolve_member_dir(name: &str, project: &ProjectInfo) -> String {
+    for (idx, member_name) in project.workspace_members.iter().enumerate() {
+        if member_name == name {
+            if let Some(dir) = project.workspace_member_dirs.get(idx) {
+                return dir.clone();
+            }
+        }
+    }
+    // Also check if the name itself matches a member dir
+    if project.workspace_member_dirs.iter().any(|d| d == name) {
+        return name.to_owned();
+    }
+    name.to_owned()
+}
+
 // R-ARCH-01: Service must have hex arch structure
 pub fn check_hex_arch_structure(
     fs: &dyn FileSystem,
     root: &Path,
+    project: &ProjectInfo,
     cfgs: &BTreeMap<String, CrateConfig>,
     results: &mut Vec<CheckResult>,
 ) {
@@ -92,7 +110,8 @@ pub fn check_hex_arch_structure(
         if cfg.profile.as_deref().is_none_or(|p| p != "service") {
             continue;
         }
-        let dir = root.join(name);
+        let member_dir = resolve_member_dir(name, project);
+        let dir = root.join(&member_dir);
         for sub in &["domain", "adapters"] {
             let ws = dir.join("crates").join(sub).join("Cargo.toml");
             let sc = dir.join("src").join(sub).join("mod.rs");
