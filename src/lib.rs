@@ -1,5 +1,7 @@
 //! guardrail3 — composable code guardrails for Rust and TypeScript projects.
 
+use proc_macro2 as _;
+
 #[cfg(test)]
 use proptest as _;
 

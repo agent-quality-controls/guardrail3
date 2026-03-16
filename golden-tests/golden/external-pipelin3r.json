@@ -1,0 +1,3964 @@
+{
+  "project": ".",
+  "sections": [
+    {
+      "name": "Config files",
+      "results": [
+        {
+          "file": ".",
+          "id": "R1",
+          "line": null,
+          "message": "No clippy.toml found at workspace root",
+          "severity": "error",
+          "title": "clippy.toml missing"
+        },
+        {
+          "file": "./packages/limit3r",
+          "id": "R2",
+          "line": null,
+          "message": "No clippy.toml for packages/limit3r",
+          "severity": "warn",
+          "title": "Per-crate clippy.toml missing"
+        },
+        {
+          "file": "./packages/pipelin3r",
+          "id": "R2",
+          "line": null,
+          "message": "No clippy.toml for packages/pipelin3r",
+          "severity": "warn",
+          "title": "Per-crate clippy.toml missing"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk",
+          "id": "R2",
+          "line": null,
+          "message": "No clippy.toml for packages/shedul3r-rs-sdk",
+          "severity": "warn",
+          "title": "Per-crate clippy.toml missing"
+        },
+        {
+          "file": ".",
+          "id": "R21",
+          "line": null,
+          "message": "No rustfmt.toml found at workspace root",
+          "severity": "error",
+          "title": "rustfmt.toml missing"
+        },
+        {
+          "file": ".",
+          "id": "R24",
+          "line": null,
+          "message": "No rust-toolchain.toml found at workspace root",
+          "severity": "error",
+          "title": "rust-toolchain.toml missing"
+        }
+      ]
+    },
+    {
+      "name": "Clippy ban coverage",
+      "results": [
+        {
+          "file": ".",
+          "id": "R4",
+          "line": null,
+          "message": "clippy.toml not found",
+          "severity": "error",
+          "title": "Cannot check clippy bans"
+        }
+      ]
+    },
+    {
+      "name": "deny.toml audit",
+      "results": [
+        {
+          "file": "./deny.toml",
+          "id": "R10",
+          "line": null,
+          "message": "unmaintained = \"workspace\"",
+          "severity": "info",
+          "title": "unmaintained correct"
+        },
+        {
+          "file": "./deny.toml",
+          "id": "R11",
+          "line": null,
+          "message": "yanked = \"deny\" (expected \"warn\")",
+          "severity": "info",
+          "title": "yanked stricter than expected"
+        },
+        {
+          "file": "./deny.toml",
+          "id": "R12",
+          "line": null,
+          "message": "Expected ban for actix-web",
+          "severity": "error",
+          "title": "Missing ban"
+        },
+        {
+          "file": "./deny.toml",
+          "id": "R12",
+          "line": null,
+          "message": "Expected ban for anyhow",
+          "severity": "error",
+          "title": "Missing ban"
+        },
+        {
+          "file": "./deny.toml",
+          "id": "R12",
+          "line": null,
+          "message": "Expected ban for diesel",
+          "severity": "error",
+          "title": "Missing ban"
+        },
+        {
+          "file": "./deny.toml",
+          "id": "R12",
+          "line": null,
+          "message": "Expected ban for isahc",
+          "severity": "error",
+          "title": "Missing ban"
+        },
+        {
+          "file": "./deny.toml",
+          "id": "R12",
+          "line": null,
+          "message": "Expected ban for json5",
+          "severity": "error",
+          "title": "Missing ban"
+        },
+        {
+          "file": "./deny.toml",
+          "id": "R12",
+          "line": null,
+          "message": "Expected ban for openssl",
+          "severity": "error",
+          "title": "Missing ban"
+        },
+        {
+          "file": "./deny.toml",
+          "id": "R12",
+          "line": null,
+          "message": "Expected ban for openssl-sys",
+          "severity": "error",
+          "title": "Missing ban"
+        },
+        {
+          "file": "./deny.toml",
+          "id": "R12",
+          "line": null,
+          "message": "Expected ban for poem",
+          "severity": "error",
+          "title": "Missing ban"
+        },
+        {
+          "file": "./deny.toml",
+          "id": "R12",
+          "line": null,
+          "message": "Expected ban for rocket",
+          "severity": "error",
+          "title": "Missing ban"
+        },
+        {
+          "file": "./deny.toml",
+          "id": "R12",
+          "line": null,
+          "message": "Expected ban for sea-orm",
+          "severity": "error",
+          "title": "Missing ban"
+        },
+        {
+          "file": "./deny.toml",
+          "id": "R12",
+          "line": null,
+          "message": "Expected ban for simd-json",
+          "severity": "error",
+          "title": "Missing ban"
+        },
+        {
+          "file": "./deny.toml",
+          "id": "R12",
+          "line": null,
+          "message": "Expected ban for sonic-rs",
+          "severity": "error",
+          "title": "Missing ban"
+        },
+        {
+          "file": "./deny.toml",
+          "id": "R12",
+          "line": null,
+          "message": "Expected ban for surf",
+          "severity": "error",
+          "title": "Missing ban"
+        },
+        {
+          "file": "./deny.toml",
+          "id": "R12",
+          "line": null,
+          "message": "Expected ban for ureq",
+          "severity": "error",
+          "title": "Missing ban"
+        },
+        {
+          "file": "./deny.toml",
+          "id": "R12",
+          "line": null,
+          "message": "Expected ban for warp",
+          "severity": "error",
+          "title": "Missing ban"
+        },
+        {
+          "file": "./deny.toml",
+          "id": "R14",
+          "line": null,
+          "message": "Allowed: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, Unicode-3.0, Unlicense, Unicode-DFS-2016, Zlib, CC0-1.0, OpenSSL, BSL-1.0, MPL-2.0",
+          "severity": "info",
+          "title": "License allow list present"
+        },
+        {
+          "file": "./deny.toml",
+          "id": "R16",
+          "line": null,
+          "message": "unknown-git = \"deny\"",
+          "severity": "info",
+          "title": "unknown-git correct"
+        },
+        {
+          "file": "./deny.toml",
+          "id": "R16",
+          "line": null,
+          "message": "unknown-registry = \"deny\"",
+          "severity": "info",
+          "title": "unknown-registry correct"
+        },
+        {
+          "file": "./deny.toml",
+          "id": "R17",
+          "line": null,
+          "message": "No feature bans configured",
+          "severity": "warn",
+          "title": "No [[bans.features]]"
+        },
+        {
+          "file": "./deny.toml",
+          "id": "R19",
+          "line": null,
+          "message": "core-foundation 0.9.4 — system-configuration lags behind security-framework on core-foundation version",
+          "severity": "info",
+          "title": "Skip entry"
+        },
+        {
+          "file": "./deny.toml",
+          "id": "R8",
+          "line": null,
+          "message": "Found at workspace root",
+          "severity": "info",
+          "title": "deny.toml exists"
+        }
+      ]
+    },
+    {
+      "name": "Cargo workspace lints",
+      "results": [
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "Expected partial_pub_fields = \"deny\"",
+          "severity": "error",
+          "title": "partial_pub_fields missing"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "Expected warnings = \"deny\"",
+          "severity": "error",
+          "title": "warnings missing"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "all = deny (priority -1)",
+          "severity": "info",
+          "title": "all correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "arithmetic_side_effects = deny",
+          "severity": "info",
+          "title": "arithmetic_side_effects correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "as_conversions = deny",
+          "severity": "info",
+          "title": "as_conversions correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "cargo = deny (priority -1)",
+          "severity": "info",
+          "title": "cargo correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "dbg_macro = deny",
+          "severity": "info",
+          "title": "dbg_macro correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "dead_code = deny",
+          "severity": "info",
+          "title": "dead_code correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "disallowed_methods = deny",
+          "severity": "info",
+          "title": "disallowed_methods correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "disallowed_types = deny",
+          "severity": "info",
+          "title": "disallowed_types correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "expect_used = deny",
+          "severity": "info",
+          "title": "expect_used correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "float_cmp = deny",
+          "severity": "info",
+          "title": "float_cmp correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "implicit_clone = deny",
+          "severity": "info",
+          "title": "implicit_clone correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "indexing_slicing = deny",
+          "severity": "info",
+          "title": "indexing_slicing correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "large_futures = deny",
+          "severity": "info",
+          "title": "large_futures correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "large_stack_arrays = deny",
+          "severity": "info",
+          "title": "large_stack_arrays correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "lossy_float_literal = deny",
+          "severity": "info",
+          "title": "lossy_float_literal correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "map_unwrap_or = deny",
+          "severity": "info",
+          "title": "map_unwrap_or correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "missing_assert_message = deny",
+          "severity": "info",
+          "title": "missing_assert_message correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "needless_pass_by_value = deny",
+          "severity": "info",
+          "title": "needless_pass_by_value correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "nursery = deny (priority -1)",
+          "severity": "info",
+          "title": "nursery correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "panic = deny",
+          "severity": "info",
+          "title": "panic correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "pedantic = deny (priority -1)",
+          "severity": "info",
+          "title": "pedantic correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "print_stderr = deny",
+          "severity": "info",
+          "title": "print_stderr correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "print_stdout = deny",
+          "severity": "info",
+          "title": "print_stdout correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "redundant_closure_for_method_calls = deny",
+          "severity": "info",
+          "title": "redundant_closure_for_method_calls correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "redundant_else = deny",
+          "severity": "info",
+          "title": "redundant_else correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "rest_pat_in_fully_bound_structs = deny",
+          "severity": "info",
+          "title": "rest_pat_in_fully_bound_structs correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "semicolon_if_nothing_returned = deny",
+          "severity": "info",
+          "title": "semicolon_if_nothing_returned correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "shadow_unrelated = deny",
+          "severity": "info",
+          "title": "shadow_unrelated correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "str_to_string = deny",
+          "severity": "info",
+          "title": "str_to_string correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "string_slice = deny",
+          "severity": "info",
+          "title": "string_slice correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "todo = deny",
+          "severity": "info",
+          "title": "todo correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "unimplemented = deny",
+          "severity": "info",
+          "title": "unimplemented correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "unsafe_code = forbid",
+          "severity": "info",
+          "title": "unsafe_code correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "unused_crate_dependencies = deny",
+          "severity": "info",
+          "title": "unused_crate_dependencies correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "unused_results = deny",
+          "severity": "info",
+          "title": "unused_results correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "unwrap_used = deny",
+          "severity": "info",
+          "title": "unwrap_used correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "verbose_file_reads = deny",
+          "severity": "info",
+          "title": "verbose_file_reads correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R26",
+          "line": null,
+          "message": "wildcard_enum_match_arm = deny",
+          "severity": "info",
+          "title": "wildcard_enum_match_arm correct"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R28",
+          "line": null,
+          "message": "empty_line_after_doc_comments = allow",
+          "severity": "info",
+          "title": "Allow deviation: empty_line_after_doc_comments"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R28",
+          "line": null,
+          "message": "missing_docs_in_private_items = allow",
+          "severity": "info",
+          "title": "Allow deviation: missing_docs_in_private_items"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R28",
+          "line": null,
+          "message": "module_name_repetitions = allow",
+          "severity": "info",
+          "title": "Allow deviation: module_name_repetitions"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R28",
+          "line": null,
+          "message": "multiple_crate_versions = allow",
+          "severity": "info",
+          "title": "Allow deviation: multiple_crate_versions"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R28",
+          "line": null,
+          "message": "must_use_candidate = allow",
+          "severity": "info",
+          "title": "Allow deviation: must_use_candidate"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R28",
+          "line": null,
+          "message": "option_if_let_else = allow",
+          "severity": "info",
+          "title": "Allow deviation: option_if_let_else"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R28",
+          "line": null,
+          "message": "ref_option_ref = allow",
+          "severity": "info",
+          "title": "Allow deviation: ref_option_ref"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R28",
+          "line": null,
+          "message": "single_match_else = allow",
+          "severity": "info",
+          "title": "Allow deviation: single_match_else"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R28",
+          "line": null,
+          "message": "trivially_copy_pass_by_ref = allow",
+          "severity": "info",
+          "title": "Allow deviation: trivially_copy_pass_by_ref"
+        },
+        {
+          "file": "./packages/limit3r/Cargo.toml",
+          "id": "R29",
+          "line": null,
+          "message": "packages/limit3r: [lints] workspace = true",
+          "severity": "info",
+          "title": "Workspace lints inherited"
+        },
+        {
+          "file": "./packages/pipelin3r/Cargo.toml",
+          "id": "R29",
+          "line": null,
+          "message": "packages/pipelin3r: [lints] workspace = true",
+          "severity": "info",
+          "title": "Workspace lints inherited"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/Cargo.toml",
+          "id": "R29",
+          "line": null,
+          "message": "packages/shedul3r-rs-sdk: [lints] workspace = true",
+          "severity": "info",
+          "title": "Workspace lints inherited"
+        }
+      ]
+    },
+    {
+      "name": "Source code scan",
+      "results": [
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/src/main.rs",
+          "id": "R31",
+          "line": 2,
+          "message": "unused_crate_dependencies — universally exempted",
+          "severity": "info",
+          "title": "Justified #![allow(...)"
+        },
+        {
+          "file": "./apps/shedul3r/crates/app/commands/src/execute.rs",
+          "id": "R33",
+          "line": 423,
+          "message": "clippy::arithmetic_side_effects — all values are bounded by calendar math",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/shedul3r/crates/app/commands/src/execute.rs",
+          "id": "R33",
+          "line": 445,
+          "message": "clippy::arithmetic_side_effects — calendar algorithm with bounded values",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R33",
+          "line": 59,
+          "message": "clippy::arithmetic_side_effects — f64 div of positive bounded counts",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/retry.rs",
+          "id": "R33",
+          "line": 45,
+          "message": "clippy::arithmetic_side_effects — f64 mul of Duration secs by bounded exponent",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R33",
+          "line": 61,
+          "message": "clippy::arithmetic_side_effects — f64 mul of [0,1] by 100.0",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/shedul3r/crates/app/commands/src/parser.rs",
+          "id": "R33",
+          "line": 182,
+          "message": "clippy::arithmetic_side_effects — f64 multiply for small duration values",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/src/main.rs",
+          "id": "R33",
+          "line": 30,
+          "message": "clippy::disallowed_methods — CLI must set exit code",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/src/cli.rs",
+          "id": "R33",
+          "line": 116,
+          "message": "clippy::disallowed_methods — CLI needs to read task YAML files from disk",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/src/main.rs",
+          "id": "R33",
+          "line": 66,
+          "message": "clippy::disallowed_methods — Startup: env var reading is confined to main()",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/src/main.rs",
+          "id": "R33",
+          "line": 90,
+          "message": "clippy::disallowed_methods — Startup: env var reading is confined to main()",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/src/main.rs",
+          "id": "R33",
+          "line": 113,
+          "message": "clippy::expect_used — Startup: binding failure is unrecoverable",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/src/main.rs",
+          "id": "R33",
+          "line": 120,
+          "message": "clippy::expect_used — Startup: server failure is unrecoverable",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/src/cli.rs",
+          "id": "R33",
+          "line": 66,
+          "message": "clippy::expect_used — Startup: tokio runtime creation failure is unrecoverable",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/src/main.rs",
+          "id": "R33",
+          "line": 40,
+          "message": "clippy::expect_used — Startup: tokio runtime creation failure is unrecoverable",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/src/auth.rs",
+          "id": "R33",
+          "line": 51,
+          "message": "clippy::expect_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/outbound/db/src/lib.rs",
+          "id": "R33",
+          "line": 6,
+          "message": "clippy::expect_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/bulkhead.rs",
+          "id": "R33",
+          "line": 157,
+          "message": "clippy::expect_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R33",
+          "line": 246,
+          "message": "clippy::expect_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/config.rs",
+          "id": "R33",
+          "line": 135,
+          "message": "clippy::expect_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/duration_serde.rs",
+          "id": "R33",
+          "line": 37,
+          "message": "clippy::expect_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/duration_serde.rs",
+          "id": "R33",
+          "line": 108,
+          "message": "clippy::expect_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/duration_serde.rs",
+          "id": "R33",
+          "line": 254,
+          "message": "clippy::expect_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/rate_limiter.rs",
+          "id": "R33",
+          "line": 165,
+          "message": "clippy::expect_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/retry.rs",
+          "id": "R33",
+          "line": 109,
+          "message": "clippy::expect_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/src/cli.rs",
+          "id": "R33",
+          "line": 160,
+          "message": "clippy::print_stderr — CLI error: intentional user-facing error display",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/src/cli.rs",
+          "id": "R33",
+          "line": 167,
+          "message": "clippy::print_stderr — CLI error: intentional user-facing error display",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/src/cli.rs",
+          "id": "R33",
+          "line": 150,
+          "message": "clippy::print_stdout — CLI output: intentional user-facing display",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/src/cli.rs",
+          "id": "R33",
+          "line": 179,
+          "message": "clippy::print_stdout — CLI output: intentional user-facing display",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/src/cli.rs",
+          "id": "R33",
+          "line": 125,
+          "message": "clippy::too_many_arguments — CLI dispatch collects all flags",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/pipelin3r/src/agent.rs",
+          "id": "R33",
+          "line": 562,
+          "message": "clippy::too_many_arguments — reason: flat param list avoids an intermediate struct for a private helper",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/duration_serde.rs",
+          "id": "R33",
+          "line": 15,
+          "message": "clippy::type_complexity — serde `with` protocol requires this exact signature",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/duration_serde.rs",
+          "id": "R33",
+          "line": 25,
+          "message": "clippy::type_complexity — serde `with` protocol requires this exact signature",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/duration_serde.rs",
+          "id": "R33",
+          "line": 322,
+          "message": "clippy::type_complexity — serde `with` protocol requires this exact signature",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/duration_serde.rs",
+          "id": "R33",
+          "line": 338,
+          "message": "clippy::type_complexity — serde `with` protocol requires this exact signature",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/pipelin3r/tests/integration.rs",
+          "id": "R33",
+          "line": 19,
+          "message": "clippy::unwrap_used — reason: integration test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/pipelin3r/tests/integration.rs",
+          "id": "R33",
+          "line": 69,
+          "message": "clippy::unwrap_used — reason: integration test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/pipelin3r/tests/integration.rs",
+          "id": "R33",
+          "line": 131,
+          "message": "clippy::unwrap_used — reason: integration test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/pipelin3r/tests/integration.rs",
+          "id": "R33",
+          "line": 193,
+          "message": "clippy::unwrap_used — reason: integration test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/pipelin3r/tests/integration.rs",
+          "id": "R33",
+          "line": 237,
+          "message": "clippy::unwrap_used — reason: integration test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/duration_serde.rs",
+          "id": "R33",
+          "line": 291,
+          "message": "clippy::unwrap_used — reason: test",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/src/client.rs",
+          "id": "R33",
+          "line": 927,
+          "message": "clippy::unwrap_used — reason: test",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/src/client.rs",
+          "id": "R33",
+          "line": 967,
+          "message": "clippy::unwrap_used — reason: test",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/pipelin3r/src/agent.rs",
+          "id": "R33",
+          "line": 839,
+          "message": "clippy::unwrap_used — reason: test assertion",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/pipelin3r/src/pool.rs",
+          "id": "R33",
+          "line": 79,
+          "message": "clippy::unwrap_used — reason: test assertion",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/pipelin3r/src/task.rs",
+          "id": "R33",
+          "line": 83,
+          "message": "clippy::unwrap_used — reason: test assertion",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/pipelin3r/src/task.rs",
+          "id": "R33",
+          "line": 115,
+          "message": "clippy::unwrap_used — reason: test assertion",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/pipelin3r/src/transform.rs",
+          "id": "R33",
+          "line": 248,
+          "message": "clippy::unwrap_used — reason: test assertion",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/pipelin3r/src/agent.rs",
+          "id": "R33",
+          "line": 740,
+          "message": "clippy::unwrap_used — reason: test assertion on known-Err value",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/pipelin3r/src/bundle.rs",
+          "id": "R33",
+          "line": 145,
+          "message": "clippy::unwrap_used — reason: test assertion on known-Ok value",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/pipelin3r/src/bundle.rs",
+          "id": "R33",
+          "line": 168,
+          "message": "clippy::unwrap_used — reason: test assertion on known-Ok value",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/pipelin3r/src/auth.rs",
+          "id": "R33",
+          "line": 204,
+          "message": "clippy::unwrap_used — reason: test assertion on known-Some value",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/pipelin3r/src/template.rs",
+          "id": "R33",
+          "line": 258,
+          "message": "clippy::unwrap_used — reason: test assertion with tempdir",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/pipelin3r/src/transform.rs",
+          "id": "R33",
+          "line": 152,
+          "message": "clippy::unwrap_used — reason: test assertion with tempdir",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/pipelin3r/src/transform.rs",
+          "id": "R33",
+          "line": 207,
+          "message": "clippy::unwrap_used — reason: test assertion with tempdir",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/src/auth.rs",
+          "id": "R33",
+          "line": 51,
+          "message": "clippy::unwrap_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/outbound/db/src/lib.rs",
+          "id": "R33",
+          "line": 6,
+          "message": "clippy::unwrap_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/bulkhead.rs",
+          "id": "R33",
+          "line": 157,
+          "message": "clippy::unwrap_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R33",
+          "line": 246,
+          "message": "clippy::unwrap_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/config.rs",
+          "id": "R33",
+          "line": 135,
+          "message": "clippy::unwrap_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/duration_serde.rs",
+          "id": "R33",
+          "line": 37,
+          "message": "clippy::unwrap_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/duration_serde.rs",
+          "id": "R33",
+          "line": 108,
+          "message": "clippy::unwrap_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/duration_serde.rs",
+          "id": "R33",
+          "line": 254,
+          "message": "clippy::unwrap_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/rate_limiter.rs",
+          "id": "R33",
+          "line": 165,
+          "message": "clippy::unwrap_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/limit3r/src/retry.rs",
+          "id": "R33",
+          "line": 109,
+          "message": "clippy::unwrap_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/pipelin3r/src/agent.rs",
+          "id": "R33",
+          "line": 905,
+          "message": "clippy::unwrap_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/pipelin3r/src/agent.rs",
+          "id": "R33",
+          "line": 945,
+          "message": "clippy::unwrap_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/pipelin3r/src/agent.rs",
+          "id": "R33",
+          "line": 973,
+          "message": "clippy::unwrap_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/pipelin3r/src/bundle.rs",
+          "id": "R33",
+          "line": 237,
+          "message": "clippy::unwrap_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/src/client.rs",
+          "id": "R33",
+          "line": 624,
+          "message": "clippy::unwrap_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/src/client.rs",
+          "id": "R33",
+          "line": 654,
+          "message": "clippy::unwrap_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/src/client.rs",
+          "id": "R33",
+          "line": 723,
+          "message": "clippy::unwrap_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/src/client.rs",
+          "id": "R33",
+          "line": 768,
+          "message": "clippy::unwrap_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/src/client.rs",
+          "id": "R33",
+          "line": 794,
+          "message": "clippy::unwrap_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/src/client.rs",
+          "id": "R33",
+          "line": 810,
+          "message": "clippy::unwrap_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/src/client.rs",
+          "id": "R33",
+          "line": 1038,
+          "message": "clippy::unwrap_used — reason: test assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./packages/pipelin3r/src/template.rs",
+          "id": "R33",
+          "line": 379,
+          "message": "clippy::unwrap_used — reason: test assertions with tempdir",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/outbound/subprocess/src/lib.rs",
+          "id": "R33",
+          "line": 372,
+          "message": "clippy::unwrap_used — reason: test code, panics are acceptable",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/outbound/subprocess/src/lib.rs",
+          "id": "R33",
+          "line": 397,
+          "message": "clippy::unwrap_used — reason: test code, panics are acceptable",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/outbound/subprocess/src/lib.rs",
+          "id": "R33",
+          "line": 430,
+          "message": "clippy::unwrap_used — reason: test code, panics are acceptable",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./apps/shedul3r/crates/app/commands/src/execute.rs",
+          "id": "R38",
+          "line": null,
+          "message": "517 effective lines (max 500)",
+          "severity": "error",
+          "title": "File too long"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R38",
+          "line": null,
+          "message": "534 effective lines (max 500)",
+          "severity": "error",
+          "title": "File too long"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/src/client.rs",
+          "id": "R38",
+          "line": null,
+          "message": "827 effective lines (max 500)",
+          "severity": "error",
+          "title": "File too long"
+        },
+        {
+          "file": "./packages/pipelin3r/src/agent.rs",
+          "id": "R38",
+          "line": null,
+          "message": "902 effective lines (max 500)",
+          "severity": "error",
+          "title": "File too long"
+        },
+        {
+          "file": "./packages/pipelin3r/src/model.rs",
+          "id": "R39",
+          "line": null,
+          "message": "449 effective lines (warn at 400, max 500)",
+          "severity": "warn",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/src/main.rs",
+          "id": "R44",
+          "line": 116,
+          "message": ".expect(\"failed to bind TCP listener\");",
+          "severity": "warn",
+          "title": ".expect() usage"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/src/main.rs",
+          "id": "R44",
+          "line": 121,
+          "message": "axum::serve(listener, app).await.expect(\"server error\");",
+          "severity": "warn",
+          "title": ".expect() usage"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/src/cli.rs",
+          "id": "R44",
+          "line": 67,
+          "message": "let rt = tokio::runtime::Runtime::new().expect(\"failed to create tokio runtime\");",
+          "severity": "warn",
+          "title": ".expect() usage"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/src/main.rs",
+          "id": "R44",
+          "line": 41,
+          "message": "let rt = tokio::runtime::Runtime::new().expect(\"failed to create tokio runtime\");",
+          "severity": "warn",
+          "title": ".expect() usage"
+        },
+        {
+          "file": "./packages/pipelin3r/src/agent.rs",
+          "id": "R44",
+          "line": 842,
+          "message": ".unwrap()",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/pipelin3r/src/bundle.rs",
+          "id": "R44",
+          "line": 151,
+          "message": ".unwrap()",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/pipelin3r/src/bundle.rs",
+          "id": "R44",
+          "line": 149,
+          "message": ".unwrap()",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/pipelin3r/src/bundle.rs",
+          "id": "R44",
+          "line": 172,
+          "message": ".unwrap()",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/src/auth.rs",
+          "id": "R44",
+          "line": 86,
+          "message": ".unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/src/auth.rs",
+          "id": "R44",
+          "line": 113,
+          "message": ".unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/src/auth.rs",
+          "id": "R44",
+          "line": 132,
+          "message": ".unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/rate_limiter.rs",
+          "id": "R44",
+          "line": 234,
+          "message": ".unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/rate_limiter.rs",
+          "id": "R44",
+          "line": 240,
+          "message": ".unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/rate_limiter.rs",
+          "id": "R44",
+          "line": 265,
+          "message": ".unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/rate_limiter.rs",
+          "id": "R44",
+          "line": 292,
+          "message": ".unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/rate_limiter.rs",
+          "id": "R44",
+          "line": 299,
+          "message": ".unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/rate_limiter.rs",
+          "id": "R44",
+          "line": 328,
+          "message": ".unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/rate_limiter.rs",
+          "id": "R44",
+          "line": 341,
+          "message": ".unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/rate_limiter.rs",
+          "id": "R44",
+          "line": 374,
+          "message": ".unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/rate_limiter.rs",
+          "id": "R44",
+          "line": 401,
+          "message": ".unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/rate_limiter.rs",
+          "id": "R44",
+          "line": 408,
+          "message": ".unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/rate_limiter.rs",
+          "id": "R44",
+          "line": 414,
+          "message": ".unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/pipelin3r/src/agent.rs",
+          "id": "R44",
+          "line": 858,
+          "message": ".unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/pipelin3r/src/agent.rs",
+          "id": "R44",
+          "line": 957,
+          "message": ".unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/pipelin3r/src/agent.rs",
+          "id": "R44",
+          "line": 963,
+          "message": ".unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/pipelin3r/src/agent.rs",
+          "id": "R44",
+          "line": 989,
+          "message": ".unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/pipelin3r/src/bundle.rs",
+          "id": "R44",
+          "line": 174,
+          "message": ".unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/pipelin3r/src/transform.rs",
+          "id": "R44",
+          "line": 186,
+          "message": ".unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/pipelin3r/src/transform.rs",
+          "id": "R44",
+          "line": 234,
+          "message": ".unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/pipelin3r/src/transform.rs",
+          "id": "R44",
+          "line": 256,
+          "message": ".unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/src/client.rs",
+          "id": "R44",
+          "line": 956,
+          "message": ".unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/src/client.rs",
+          "id": "R44",
+          "line": 995,
+          "message": ".unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/bulkhead.rs",
+          "id": "R44",
+          "line": 331,
+          "message": "bh.acquire(\"busy-key\", &config).await.unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/bulkhead.rs",
+          "id": "R44",
+          "line": 184,
+          "message": "bh.acquire(\"key-a\", &config).await.unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/bulkhead.rs",
+          "id": "R44",
+          "line": 314,
+          "message": "bh.acquire(\"key-a\", &config).await.unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/bulkhead.rs",
+          "id": "R44",
+          "line": 357,
+          "message": "bh.acquire(\"key-a\", &config).await.unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/bulkhead.rs",
+          "id": "R44",
+          "line": 291,
+          "message": "bh.acquire(\"key-x\", &config2).await.unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/bulkhead.rs",
+          "id": "R44",
+          "line": 296,
+          "message": "bh.acquire(\"key-x\", &config5).await.unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/bulkhead.rs",
+          "id": "R44",
+          "line": 208,
+          "message": "bh.acquire(\"target-key\", &config).await.unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/bulkhead.rs",
+          "id": "R44",
+          "line": 259,
+          "message": "bh.acquire(\"trigger\", &config).await.unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/bulkhead.rs",
+          "id": "R44",
+          "line": 341,
+          "message": "bh.acquire(\"trigger-evict\", &config).await.unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/bulkhead.rs",
+          "id": "R44",
+          "line": 211,
+          "message": "bh.acquire(\"trigger-eviction\", &config).await.unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/bulkhead.rs",
+          "id": "R44",
+          "line": 203,
+          "message": "bh.acquire(&key, &config).await.unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/bulkhead.rs",
+          "id": "R44",
+          "line": 232,
+          "message": "bh.acquire(&key, &config).await.unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/bulkhead.rs",
+          "id": "R44",
+          "line": 254,
+          "message": "bh.acquire(&key, &config).await.unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/bulkhead.rs",
+          "id": "R44",
+          "line": 277,
+          "message": "bh.acquire(&key, &config).await.unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/bulkhead.rs",
+          "id": "R44",
+          "line": 336,
+          "message": "bh.acquire(&key, &config).await.unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 651,
+          "message": "cb.check_permitted(\"current-key\", &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 654,
+          "message": "cb.check_permitted(\"current-key\", &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 682,
+          "message": "cb.check_permitted(\"eviction-trigger\", &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 502,
+          "message": "cb.check_permitted(\"has-history\", &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 563,
+          "message": "cb.check_permitted(\"important-key\", &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 453,
+          "message": "cb.check_permitted(\"key-5\", &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 274,
+          "message": "cb.check_permitted(\"key-a\", &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 292,
+          "message": "cb.check_permitted(\"key-a\", &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 309,
+          "message": "cb.check_permitted(\"key-a\", &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 329,
+          "message": "cb.check_permitted(\"key-a\", &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 356,
+          "message": "cb.check_permitted(\"key-a\", &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 373,
+          "message": "cb.check_permitted(\"key-a\", &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 392,
+          "message": "cb.check_permitted(\"key-a\", &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 410,
+          "message": "cb.check_permitted(\"key-a\", &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 589,
+          "message": "cb.check_permitted(\"key-a\", &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 604,
+          "message": "cb.check_permitted(\"key-a\", &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 741,
+          "message": "cb.check_permitted(\"key-a\", &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 337,
+          "message": "cb.check_permitted(\"key-a\", &config).unwrap(); // half-open probe",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 749,
+          "message": "cb.check_permitted(\"key-a\", &config).unwrap(); // half-open probe",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 535,
+          "message": "cb.check_permitted(\"lots-of-history\", &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 670,
+          "message": "cb.check_permitted(\"must-survive-open\", &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 474,
+          "message": "cb.check_permitted(\"open-key\", &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 541,
+          "message": "cb.check_permitted(\"trigger\", &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 486,
+          "message": "cb.check_permitted(\"trigger-evict\", &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 512,
+          "message": "cb.check_permitted(\"trigger-evict\", &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 721,
+          "message": "cb.check_permitted(\"trigger-evict-2\", &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 569,
+          "message": "cb.check_permitted(\"trigger-eviction\", &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 620,
+          "message": "cb.check_permitted(\"trim-key\", &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 626,
+          "message": "cb.check_permitted(\"trim-key\", &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 508,
+          "message": "cb.check_permitted(&format!(\"empty-{i}\"), &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 559,
+          "message": "cb.check_permitted(&format!(\"filler-{i}\"), &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 482,
+          "message": "cb.check_permitted(&format!(\"idle-{i}\"), &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 678,
+          "message": "cb.check_permitted(&format!(\"idle-{i}\"), &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 429,
+          "message": "cb.check_permitted(&format!(\"key-{i}\"), &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 449,
+          "message": "cb.check_permitted(&format!(\"key-{i}\"), &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 530,
+          "message": "cb.check_permitted(&key, &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 646,
+          "message": "cb.check_permitted(&key, &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 706,
+          "message": "cb.check_permitted(&key, &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 716,
+          "message": "cb.check_permitted(&key, &config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/src/client.rs",
+          "id": "R44",
+          "line": 667,
+          "message": "let api_resp: ApiResponse = serde_json::from_value(json).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/src/client.rs",
+          "id": "R44",
+          "line": 820,
+          "message": "let api_resp: ApiResponse = serde_json::from_value(json_success).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/src/client.rs",
+          "id": "R44",
+          "line": 847,
+          "message": "let api_resp_fail: ApiResponse = serde_json::from_value(json_failure).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/src/auth.rs",
+          "id": "R44",
+          "line": 95,
+          "message": "let body = resp.into_body().collect().await.unwrap().to_bytes();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 689,
+          "message": "let circuit = map.get(\"must-survive-open\").unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/circuit_breaker.rs",
+          "id": "R44",
+          "line": 629,
+          "message": "let circuit = map.get(\"trim-key\").unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/src/client.rs",
+          "id": "R44",
+          "line": 633,
+          "message": "let client = Client::new(config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/src/client.rs",
+          "id": "R44",
+          "line": 801,
+          "message": "let client = Client::new(config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/src/client.rs",
+          "id": "R44",
+          "line": 940,
+          "message": "let client = Client::new(config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/src/client.rs",
+          "id": "R44",
+          "line": 979,
+          "message": "let client = Client::new(config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/pipelin3r/src/template.rs",
+          "id": "R44",
+          "line": 386,
+          "message": "let content = TemplateFiller::from_file(&path).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/outbound/db/src/lib.rs",
+          "id": "R44",
+          "line": 29,
+          "message": "let content = std::fs::read_to_string(&path).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/config.rs",
+          "id": "R44",
+          "line": 439,
+          "message": "let deserialized: BulkheadConfig = serde_json::from_str(&json).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/config.rs",
+          "id": "R44",
+          "line": 164,
+          "message": "let deserialized: CircuitBreakerConfig = serde_json::from_str(&json).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/config.rs",
+          "id": "R44",
+          "line": 147,
+          "message": "let deserialized: RateLimitConfig = serde_json::from_str(&json).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/config.rs",
+          "id": "R44",
+          "line": 188,
+          "message": "let deserialized: RetryConfig = serde_json::from_str(&json).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/duration_serde.rs",
+          "id": "R44",
+          "line": 55,
+          "message": "let deserialized: Wrapper = serde_json::from_str(&json).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/duration_serde.rs",
+          "id": "R44",
+          "line": 65,
+          "message": "let deserialized: Wrapper = serde_json::from_str(&json).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/pipelin3r/src/template.rs",
+          "id": "R44",
+          "line": 260,
+          "message": "let dir = tempfile::tempdir().unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/pipelin3r/src/template.rs",
+          "id": "R44",
+          "line": 382,
+          "message": "let dir = tempfile::tempdir().unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/pipelin3r/src/transform.rs",
+          "id": "R44",
+          "line": 154,
+          "message": "let dir = tempfile::tempdir().unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/pipelin3r/src/transform.rs",
+          "id": "R44",
+          "line": 209,
+          "message": "let dir = tempfile::tempdir().unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/src/client.rs",
+          "id": "R44",
+          "line": 727,
+          "message": "let dir = tempfile::tempdir().unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/pipelin3r/src/agent.rs",
+          "id": "R44",
+          "line": 910,
+          "message": "let executor = Executor::with_defaults().unwrap()",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/pipelin3r/src/agent.rs",
+          "id": "R44",
+          "line": 949,
+          "message": "let executor = Executor::with_defaults().unwrap()",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/pipelin3r/src/agent.rs",
+          "id": "R44",
+          "line": 978,
+          "message": "let executor = Executor::with_defaults().unwrap()",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/config.rs",
+          "id": "R44",
+          "line": 146,
+          "message": "let json = serde_json::to_string(&config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/config.rs",
+          "id": "R44",
+          "line": 163,
+          "message": "let json = serde_json::to_string(&config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/config.rs",
+          "id": "R44",
+          "line": 187,
+          "message": "let json = serde_json::to_string(&config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/config.rs",
+          "id": "R44",
+          "line": 438,
+          "message": "let json = serde_json::to_string(&config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/duration_serde.rs",
+          "id": "R44",
+          "line": 54,
+          "message": "let json = serde_json::to_string(&w).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/duration_serde.rs",
+          "id": "R44",
+          "line": 64,
+          "message": "let json = serde_json::to_string(&w).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/src/client.rs",
+          "id": "R44",
+          "line": 780,
+          "message": "let json = serde_json::to_value(&payload).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/src/client.rs",
+          "id": "R44",
+          "line": 1050,
+          "message": "let json = serde_json::to_value(&payload).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/src/auth.rs",
+          "id": "R44",
+          "line": 96,
+          "message": "let json: serde_json::Value = serde_json::from_slice(&body).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/duration_serde.rs",
+          "id": "R44",
+          "line": 124,
+          "message": "let parsed: OptDuration = serde_json::from_str(json).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/duration_serde.rs",
+          "id": "R44",
+          "line": 136,
+          "message": "let parsed: OptDuration = serde_json::from_str(json).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/duration_serde.rs",
+          "id": "R44",
+          "line": 147,
+          "message": "let parsed: OptDuration = serde_json::from_str(json).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/duration_serde.rs",
+          "id": "R44",
+          "line": 181,
+          "message": "let parsed: OptDuration = serde_json::from_str(json).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/duration_serde.rs",
+          "id": "R44",
+          "line": 207,
+          "message": "let parsed: OptDuration = serde_json::from_str(json).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/duration_serde.rs",
+          "id": "R44",
+          "line": 282,
+          "message": "let parsed: Wrapper = serde_json::from_str(json).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/src/auth.rs",
+          "id": "R44",
+          "line": 88,
+          "message": "let resp = app.oneshot(req).await.unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/src/auth.rs",
+          "id": "R44",
+          "line": 115,
+          "message": "let resp = app.oneshot(req).await.unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/src/auth.rs",
+          "id": "R44",
+          "line": 134,
+          "message": "let resp = app.oneshot(req).await.unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/pipelin3r/src/task.rs",
+          "id": "R44",
+          "line": 110,
+          "message": "let result = build_task_yaml(&config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/pipelin3r/src/task.rs",
+          "id": "R44",
+          "line": 128,
+          "message": "let result = build_task_yaml(&config).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/pipelin3r/src/auth.rs",
+          "id": "R44",
+          "line": 214,
+          "message": "let result = merge_env(base, Some(&overlay)).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/outbound/subprocess/src/lib.rs",
+          "id": "R44",
+          "line": 449,
+          "message": "let result = result.unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/outbound/subprocess/src/lib.rs",
+          "id": "R44",
+          "line": 390,
+          "message": "let result = runner.run(cmd).await.unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/pipelin3r/src/transform.rs",
+          "id": "R44",
+          "line": 239,
+          "message": "let written = std::fs::read(&output_path).unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/rate_limiter.rs",
+          "id": "R44",
+          "line": 193,
+          "message": "limiter.acquire_permission(\"key-a\", &config).await.unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/rate_limiter.rs",
+          "id": "R44",
+          "line": 206,
+          "message": "limiter.acquire_permission(\"key-a\", &config).await.unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/rate_limiter.rs",
+          "id": "R44",
+          "line": 435,
+          "message": "limiter.acquire_permission(\"key-a\", &config).await.unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/rate_limiter.rs",
+          "id": "R44",
+          "line": 497,
+          "message": "limiter.acquire_permission(\"key-a\", &config).await.unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/rate_limiter.rs",
+          "id": "R44",
+          "line": 451,
+          "message": "limiter.acquire_permission(\"tight\", &config).await.unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/limit3r/src/rate_limiter.rs",
+          "id": "R44",
+          "line": 227,
+          "message": "limiter.acquire_permission(&key, &config).await.unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/pipelin3r/src/transform.rs",
+          "id": "R44",
+          "line": 213,
+          "message": "std::fs::write(&input, b\"hello world\").unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/pipelin3r/src/transform.rs",
+          "id": "R44",
+          "line": 161,
+          "message": "std::fs::write(&input_a, b\"keep-a\").unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/pipelin3r/src/transform.rs",
+          "id": "R44",
+          "line": 162,
+          "message": "std::fs::write(&input_b, b\"skip-b\").unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/pipelin3r/src/transform.rs",
+          "id": "R44",
+          "line": 163,
+          "message": "std::fs::write(&input_c, b\"keep-c\").unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/pipelin3r/src/template.rs",
+          "id": "R44",
+          "line": 262,
+          "message": "std::fs::write(&path, \"Hello {{NAME}}\").unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./packages/pipelin3r/src/template.rs",
+          "id": "R44",
+          "line": 384,
+          "message": "std::fs::write(&path, \"Hello {{WORLD}}, count={{N}}\").unwrap();",
+          "severity": "warn",
+          "title": ".unwrap() usage"
+        },
+        {
+          "file": "./CLAUDE.md",
+          "id": "R49",
+          "line": null,
+          "message": "Found at project root",
+          "severity": "info",
+          "title": "CLAUDE.md exists"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/src/client.rs",
+          "id": "R58",
+          "line": 205,
+          "message": "Use centralized fs module instead of direct std::fs call: let _ = std::fs::remove_file(expected_output);",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./packages/pipelin3r/tests/integration.rs",
+          "id": "R58",
+          "line": 167,
+          "message": "Use centralized fs module instead of direct std::fs call: let combined = std::fs::read_to_string(output_dir.join(\"combined.txt\")).unwrap();",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./packages/pipelin3r/src/transform.rs",
+          "id": "R58",
+          "line": 93,
+          "message": "Use centralized fs module instead of direct std::fs call: let content = std::fs::read(path).map_err(|e| {",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./packages/pipelin3r/src/model.rs",
+          "id": "R58",
+          "line": 152,
+          "message": "Use centralized fs module instead of direct std::fs call: let content = std::fs::read_to_string(path).map_err(|e| {",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/src/cli.rs",
+          "id": "R58",
+          "line": 117,
+          "message": "Use centralized fs module instead of direct std::fs call: let content = std::fs::read_to_string(path);",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./packages/pipelin3r/tests/integration.rs",
+          "id": "R58",
+          "line": 217,
+          "message": "Use centralized fs module instead of direct std::fs call: let meta_content = std::fs::read_to_string(&meta_path).unwrap();",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./packages/pipelin3r/tests/integration.rs",
+          "id": "R58",
+          "line": 266,
+          "message": "Use centralized fs module instead of direct std::fs call: let meta_content = std::fs::read_to_string(&meta_path).unwrap();",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./packages/pipelin3r/tests/integration.rs",
+          "id": "R58",
+          "line": 60,
+          "message": "Use centralized fs module instead of direct std::fs call: let meta_content = std::fs::read_to_string(step_dir.join(\"meta.json\")).unwrap();",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./packages/pipelin3r/tests/integration.rs",
+          "id": "R58",
+          "line": 117,
+          "message": "Use centralized fs module instead of direct std::fs call: let prompt_0 = std::fs::read_to_string(step_dir.join(\"0\").join(\"prompt.md\")).unwrap();",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./packages/pipelin3r/tests/integration.rs",
+          "id": "R58",
+          "line": 118,
+          "message": "Use centralized fs module instead of direct std::fs call: let prompt_2 = std::fs::read_to_string(step_dir.join(\"2\").join(\"prompt.md\")).unwrap();",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./packages/pipelin3r/tests/integration.rs",
+          "id": "R58",
+          "line": 53,
+          "message": "Use centralized fs module instead of direct std::fs call: let prompt_content = std::fs::read_to_string(step_dir.join(\"prompt.md\")).unwrap();",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./packages/pipelin3r/src/agent.rs",
+          "id": "R58",
+          "line": 482,
+          "message": "Use centralized fs module instead of direct std::fs call: std::fs::create_dir_all(&capture_dir)?;",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./packages/pipelin3r/tests/integration.rs",
+          "id": "R58",
+          "line": 138,
+          "message": "Use centralized fs module instead of direct std::fs call: std::fs::create_dir_all(&input_dir).unwrap();",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./packages/pipelin3r/src/transform.rs",
+          "id": "R58",
+          "line": 117,
+          "message": "Use centralized fs module instead of direct std::fs call: std::fs::create_dir_all(parent).map_err(|e| {",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./packages/pipelin3r/src/bundle.rs",
+          "id": "R58",
+          "line": 98,
+          "message": "Use centralized fs module instead of direct std::fs call: std::fs::create_dir_all(parent)?;",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./packages/pipelin3r/src/template.rs",
+          "id": "R58",
+          "line": 37,
+          "message": "Use centralized fs module instead of direct std::fs call: std::fs::read_to_string(path).map_err(|e| {",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./packages/pipelin3r/src/agent.rs",
+          "id": "R58",
+          "line": 502,
+          "message": "Use centralized fs module instead of direct std::fs call: std::fs::write(",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./packages/pipelin3r/src/bundle.rs",
+          "id": "R58",
+          "line": 100,
+          "message": "Use centralized fs module instead of direct std::fs call: std::fs::write(&file_path, content)?;",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./packages/pipelin3r/src/agent.rs",
+          "id": "R58",
+          "line": 483,
+          "message": "Use centralized fs module instead of direct std::fs call: std::fs::write(capture_dir.join(\"prompt.md\"), prompt)?;",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./packages/pipelin3r/src/agent.rs",
+          "id": "R58",
+          "line": 484,
+          "message": "Use centralized fs module instead of direct std::fs call: std::fs::write(capture_dir.join(\"task.yaml\"), task_yaml)?;",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./packages/pipelin3r/tests/integration.rs",
+          "id": "R58",
+          "line": 139,
+          "message": "Use centralized fs module instead of direct std::fs call: std::fs::write(input_dir.join(\"a.txt\"), b\"hello\").unwrap();",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./packages/pipelin3r/tests/integration.rs",
+          "id": "R58",
+          "line": 140,
+          "message": "Use centralized fs module instead of direct std::fs call: std::fs::write(input_dir.join(\"b.txt\"), b\"world\").unwrap();",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./packages/pipelin3r/src/transform.rs",
+          "id": "R58",
+          "line": 126,
+          "message": "Use centralized fs module instead of direct std::fs call: std::fs::write(path, content).map_err(|e| {",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        }
+      ]
+    },
+    {
+      "name": "Dependency & tool checks",
+      "results": [
+        {
+          "file": null,
+          "id": "R45",
+          "line": null,
+          "message": "cargo-deny found on PATH",
+          "severity": "info",
+          "title": "cargo-deny installed"
+        },
+        {
+          "file": null,
+          "id": "R46",
+          "line": null,
+          "message": "cargo-machete found on PATH",
+          "severity": "info",
+          "title": "cargo-machete installed"
+        },
+        {
+          "file": null,
+          "id": "R47",
+          "line": null,
+          "message": "cargo-dupes found on PATH",
+          "severity": "info",
+          "title": "cargo-dupes installed"
+        },
+        {
+          "file": null,
+          "id": "R48",
+          "line": null,
+          "message": "gitleaks found on PATH",
+          "severity": "info",
+          "title": "gitleaks installed"
+        },
+        {
+          "file": "./Cargo.lock",
+          "id": "R50",
+          "line": null,
+          "message": "Found banned crate: anyhow@1.0.102",
+          "severity": "error",
+          "title": "Banned crate in lockfile"
+        },
+        {
+          "file": "./Cargo.lock",
+          "id": "R50",
+          "line": null,
+          "message": "Found banned crate: openssl-sys@0.9.112",
+          "severity": "error",
+          "title": "Banned crate in lockfile"
+        },
+        {
+          "file": "./Cargo.lock",
+          "id": "R50",
+          "line": null,
+          "message": "Found banned crate: openssl@0.10.76",
+          "severity": "error",
+          "title": "Banned crate in lockfile"
+        }
+      ]
+    },
+    {
+      "name": "Architecture checks",
+      "results": [
+        {
+          "file": "./packages/pipelin3r/Cargo.toml",
+          "id": "R52",
+          "line": null,
+          "message": "depends on: shedul3r-rs-sdk",
+          "severity": "info",
+          "title": "pipelin3r internal deps"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R53",
+          "line": null,
+          "message": "unsafe_code is forbidden (cannot be overridden per-crate)",
+          "severity": "info",
+          "title": "unsafe_code = forbid"
+        }
+      ]
+    },
+    {
+      "name": "Garde boundary validation",
+      "results": [
+        {
+          "file": null,
+          "id": "R-GARDE-01",
+          "line": null,
+          "message": "garde is not in [workspace.dependencies] or [dependencies]",
+          "severity": "info",
+          "title": "garde dependency missing"
+        },
+        {
+          "file": "./clippy.toml",
+          "id": "R-GARDE-02",
+          "line": null,
+          "message": "Cannot check Garde method/type bans without clippy.toml",
+          "severity": "warn",
+          "title": "clippy.toml not found"
+        },
+        {
+          "file": ".",
+          "id": "R-GARDE-05",
+          "line": null,
+          "message": "0 structs derive Deserialize + Validate, 20 derive Deserialize without Validate",
+          "severity": "info",
+          "title": "Deserialize + Validate inventory"
+        }
+      ]
+    },
+    {
+      "name": "Test quality",
+      "results": [
+        {
+          "file": null,
+          "id": "R-TEST-01",
+          "line": null,
+          "message": "cargo-mutants found on PATH",
+          "severity": "info",
+          "title": "cargo-mutants installed"
+        },
+        {
+          "file": "./.cargo/mutants.toml",
+          "id": "R-TEST-02",
+          "line": null,
+          "message": "Create .cargo/mutants.toml to configure mutation testing",
+          "severity": "warn",
+          "title": ".cargo/mutants.toml missing"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R-TEST-03",
+          "line": null,
+          "message": "Add [profile.mutants] to Cargo.toml for faster mutation testing",
+          "severity": "info",
+          "title": "[profile.mutants] missing"
+        },
+        {
+          "file": null,
+          "id": "R-TEST-04",
+          "line": null,
+          "message": "At least one #[test] or #[tokio::test] found",
+          "severity": "info",
+          "title": "Tests exist"
+        },
+        {
+          "file": null,
+          "id": "R-TEST-05",
+          "line": null,
+          "message": "0 public functions, 286 test functions (ratio: 0%)",
+          "severity": "info",
+          "title": "Test coverage inventory"
+        },
+        {
+          "file": "./packages/pipelin3r/tests",
+          "id": "R-TEST-06",
+          "line": null,
+          "message": "tests/ directory with .rs files found at /Users/tartakovsky/Projects/websmasher/pipelin3r/packages/pipelin3r/tests",
+          "severity": "info",
+          "title": "Integration tests exist"
+        },
+        {
+          "file": null,
+          "id": "R-TEST-07",
+          "line": null,
+          "message": "No bare #[ignore] attributes found",
+          "severity": "info",
+          "title": "All #[ignore] have reasons"
+        },
+        {
+          "file": null,
+          "id": "R-TEST-08",
+          "line": null,
+          "message": "No mutation testing hook found in .claude/ or .git/hooks/pre-commit",
+          "severity": "info",
+          "title": "No mutation test hook"
+        }
+      ]
+    },
+    {
+      "name": "Release readiness",
+      "results": [
+        {
+          "file": null,
+          "id": "R-BIN-01",
+          "line": null,
+          "message": "No workflow building --release with action-gh-release",
+          "severity": "info",
+          "title": "api: no binary release workflow"
+        },
+        {
+          "file": null,
+          "id": "R-BIN-01",
+          "line": null,
+          "message": "No workflow building --release with action-gh-release",
+          "severity": "info",
+          "title": "shedul3r: no binary release workflow"
+        },
+        {
+          "file": null,
+          "id": "R-BIN-02",
+          "line": null,
+          "message": "Workflow references linux/x86_64/amd64/ubuntu",
+          "severity": "info",
+          "title": "api: linux target in workflow"
+        },
+        {
+          "file": null,
+          "id": "R-BIN-02",
+          "line": null,
+          "message": "Workflow references linux/x86_64/amd64/ubuntu",
+          "severity": "info",
+          "title": "shedul3r: linux target in workflow"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/Cargo.toml",
+          "id": "R-BIN-03",
+          "line": null,
+          "message": "No [package.metadata.binstall] in Cargo.toml",
+          "severity": "info",
+          "title": "api: no binstall metadata"
+        },
+        {
+          "file": "./packages/shedul3r-bin/Cargo.toml",
+          "id": "R-BIN-03",
+          "line": null,
+          "message": "[package.metadata.binstall] found in Cargo.toml",
+          "severity": "info",
+          "title": "shedul3r: binstall metadata present"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml has [package].description",
+          "severity": "info",
+          "title": "api: description present"
+        },
+        {
+          "file": "./apps/shedul3r/crates/app/commands/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml has [package].description",
+          "severity": "info",
+          "title": "commands: description present"
+        },
+        {
+          "file": "./apps/shedul3r/crates/domain/types/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml has [package].description",
+          "severity": "info",
+          "title": "domain-types: description present"
+        },
+        {
+          "file": "./packages/limit3r/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml has [package].description",
+          "severity": "info",
+          "title": "limit3r: description present"
+        },
+        {
+          "file": "./packages/pipelin3r/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml has [package].description",
+          "severity": "info",
+          "title": "pipelin3r: description present"
+        },
+        {
+          "file": "./apps/shedul3r/crates/ports/outbound/repo/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml has [package].description",
+          "severity": "info",
+          "title": "repo: description present"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml has [package].description",
+          "severity": "info",
+          "title": "shedul3r-rs-sdk: description present"
+        },
+        {
+          "file": "./packages/shedul3r-bin/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml has [package].description",
+          "severity": "info",
+          "title": "shedul3r: description present"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/outbound/db/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml has [package].description",
+          "severity": "info",
+          "title": "state: description present"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/outbound/subprocess/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml has [package].description",
+          "severity": "info",
+          "title": "subprocess: description present"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml [package] has neither license nor license-file",
+          "severity": "error",
+          "title": "api: missing license"
+        },
+        {
+          "file": "./apps/shedul3r/crates/app/commands/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml [package] has neither license nor license-file",
+          "severity": "error",
+          "title": "commands: missing license"
+        },
+        {
+          "file": "./apps/shedul3r/crates/domain/types/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml [package] has neither license nor license-file",
+          "severity": "error",
+          "title": "domain-types: missing license"
+        },
+        {
+          "file": "./apps/shedul3r/crates/ports/outbound/repo/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml [package] has neither license nor license-file",
+          "severity": "error",
+          "title": "repo: missing license"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/outbound/db/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml [package] has neither license nor license-file",
+          "severity": "error",
+          "title": "state: missing license"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/outbound/subprocess/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml [package] has neither license nor license-file",
+          "severity": "error",
+          "title": "subprocess: missing license"
+        },
+        {
+          "file": "./packages/limit3r/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml has license or license-file",
+          "severity": "info",
+          "title": "limit3r: license present"
+        },
+        {
+          "file": "./packages/pipelin3r/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml has license or license-file",
+          "severity": "info",
+          "title": "pipelin3r: license present"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml has license or license-file",
+          "severity": "info",
+          "title": "shedul3r-rs-sdk: license present"
+        },
+        {
+          "file": "./packages/shedul3r-bin/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml has license or license-file",
+          "severity": "info",
+          "title": "shedul3r: license present"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml [package].repository is missing or empty",
+          "severity": "error",
+          "title": "api: missing repository"
+        },
+        {
+          "file": "./apps/shedul3r/crates/app/commands/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml [package].repository is missing or empty",
+          "severity": "error",
+          "title": "commands: missing repository"
+        },
+        {
+          "file": "./apps/shedul3r/crates/domain/types/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml [package].repository is missing or empty",
+          "severity": "error",
+          "title": "domain-types: missing repository"
+        },
+        {
+          "file": "./apps/shedul3r/crates/ports/outbound/repo/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml [package].repository is missing or empty",
+          "severity": "error",
+          "title": "repo: missing repository"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/outbound/db/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml [package].repository is missing or empty",
+          "severity": "error",
+          "title": "state: missing repository"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/outbound/subprocess/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml [package].repository is missing or empty",
+          "severity": "error",
+          "title": "subprocess: missing repository"
+        },
+        {
+          "file": "./packages/limit3r/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml has [package].repository",
+          "severity": "info",
+          "title": "limit3r: repository present"
+        },
+        {
+          "file": "./packages/pipelin3r/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml has [package].repository",
+          "severity": "info",
+          "title": "pipelin3r: repository present"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml has [package].repository",
+          "severity": "info",
+          "title": "shedul3r-rs-sdk: repository present"
+        },
+        {
+          "file": "./packages/shedul3r-bin/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml has [package].repository",
+          "severity": "info",
+          "title": "shedul3r: repository present"
+        },
+        {
+          "file": "./packages/limit3r/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "readme = \"README.md\" exists on disk",
+          "severity": "info",
+          "title": "limit3r: readme present"
+        },
+        {
+          "file": "./packages/pipelin3r/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "readme = \"README.md\" exists on disk",
+          "severity": "info",
+          "title": "pipelin3r: readme present"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "readme = \"README.md\" exists on disk",
+          "severity": "info",
+          "title": "shedul3r-rs-sdk: readme present"
+        },
+        {
+          "file": "./packages/shedul3r-bin/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "readme = \"README.md\" exists on disk",
+          "severity": "info",
+          "title": "shedul3r: readme present"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "No readme field and no README.md at crate root",
+          "severity": "warn",
+          "title": "api: readme missing"
+        },
+        {
+          "file": "./apps/shedul3r/crates/app/commands/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "No readme field and no README.md at crate root",
+          "severity": "warn",
+          "title": "commands: readme missing"
+        },
+        {
+          "file": "./apps/shedul3r/crates/domain/types/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "No readme field and no README.md at crate root",
+          "severity": "warn",
+          "title": "domain-types: readme missing"
+        },
+        {
+          "file": "./apps/shedul3r/crates/ports/outbound/repo/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "No readme field and no README.md at crate root",
+          "severity": "warn",
+          "title": "repo: readme missing"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/outbound/db/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "No readme field and no README.md at crate root",
+          "severity": "warn",
+          "title": "state: readme missing"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/outbound/subprocess/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "No readme field and no README.md at crate root",
+          "severity": "warn",
+          "title": "subprocess: readme missing"
+        },
+        {
+          "file": "./packages/limit3r/Cargo.toml",
+          "id": "R-PUB-05",
+          "line": null,
+          "message": "1184 bytes with headings",
+          "severity": "info",
+          "title": "limit3r: README looks good"
+        },
+        {
+          "file": "./packages/pipelin3r/Cargo.toml",
+          "id": "R-PUB-05",
+          "line": null,
+          "message": "1784 bytes with headings",
+          "severity": "info",
+          "title": "pipelin3r: README looks good"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/Cargo.toml",
+          "id": "R-PUB-05",
+          "line": null,
+          "message": "1127 bytes with headings",
+          "severity": "info",
+          "title": "shedul3r-rs-sdk: README looks good"
+        },
+        {
+          "file": "./packages/shedul3r-bin/Cargo.toml",
+          "id": "R-PUB-05",
+          "line": null,
+          "message": "1281 bytes with headings",
+          "severity": "info",
+          "title": "shedul3r: README looks good"
+        },
+        {
+          "file": "./packages/limit3r/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "4 keywords",
+          "severity": "info",
+          "title": "limit3r: keywords present"
+        },
+        {
+          "file": "./packages/pipelin3r/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "4 keywords",
+          "severity": "info",
+          "title": "pipelin3r: keywords present"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "4 keywords",
+          "severity": "info",
+          "title": "shedul3r-rs-sdk: keywords present"
+        },
+        {
+          "file": "./packages/shedul3r-bin/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "4 keywords",
+          "severity": "info",
+          "title": "shedul3r: keywords present"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "Cargo.toml [package].keywords is missing",
+          "severity": "warn",
+          "title": "api: keywords missing"
+        },
+        {
+          "file": "./apps/shedul3r/crates/app/commands/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "Cargo.toml [package].keywords is missing",
+          "severity": "warn",
+          "title": "commands: keywords missing"
+        },
+        {
+          "file": "./apps/shedul3r/crates/domain/types/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "Cargo.toml [package].keywords is missing",
+          "severity": "warn",
+          "title": "domain-types: keywords missing"
+        },
+        {
+          "file": "./apps/shedul3r/crates/ports/outbound/repo/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "Cargo.toml [package].keywords is missing",
+          "severity": "warn",
+          "title": "repo: keywords missing"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/outbound/db/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "Cargo.toml [package].keywords is missing",
+          "severity": "warn",
+          "title": "state: keywords missing"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/outbound/subprocess/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "Cargo.toml [package].keywords is missing",
+          "severity": "warn",
+          "title": "subprocess: keywords missing"
+        },
+        {
+          "file": "./packages/limit3r/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml has [package].categories",
+          "severity": "info",
+          "title": "limit3r: categories present"
+        },
+        {
+          "file": "./packages/pipelin3r/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml has [package].categories",
+          "severity": "info",
+          "title": "pipelin3r: categories present"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml has [package].categories",
+          "severity": "info",
+          "title": "shedul3r-rs-sdk: categories present"
+        },
+        {
+          "file": "./packages/shedul3r-bin/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml has [package].categories",
+          "severity": "info",
+          "title": "shedul3r: categories present"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml [package].categories is missing or empty",
+          "severity": "warn",
+          "title": "api: categories missing"
+        },
+        {
+          "file": "./apps/shedul3r/crates/app/commands/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml [package].categories is missing or empty",
+          "severity": "warn",
+          "title": "commands: categories missing"
+        },
+        {
+          "file": "./apps/shedul3r/crates/domain/types/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml [package].categories is missing or empty",
+          "severity": "warn",
+          "title": "domain-types: categories missing"
+        },
+        {
+          "file": "./apps/shedul3r/crates/ports/outbound/repo/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml [package].categories is missing or empty",
+          "severity": "warn",
+          "title": "repo: categories missing"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/outbound/db/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml [package].categories is missing or empty",
+          "severity": "warn",
+          "title": "state: categories missing"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/outbound/subprocess/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml [package].categories is missing or empty",
+          "severity": "warn",
+          "title": "subprocess: categories missing"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "Cargo.toml [package].version is missing",
+          "severity": "error",
+          "title": "api: version missing"
+        },
+        {
+          "file": "./apps/shedul3r/crates/app/commands/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "Cargo.toml [package].version is missing",
+          "severity": "error",
+          "title": "commands: version missing"
+        },
+        {
+          "file": "./apps/shedul3r/crates/domain/types/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "Cargo.toml [package].version is missing",
+          "severity": "error",
+          "title": "domain-types: version missing"
+        },
+        {
+          "file": "./apps/shedul3r/crates/ports/outbound/repo/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "Cargo.toml [package].version is missing",
+          "severity": "error",
+          "title": "repo: version missing"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/outbound/db/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "Cargo.toml [package].version is missing",
+          "severity": "error",
+          "title": "state: version missing"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/outbound/subprocess/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "Cargo.toml [package].version is missing",
+          "severity": "error",
+          "title": "subprocess: version missing"
+        },
+        {
+          "file": "./packages/limit3r/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "version = \"0.1.0\"",
+          "severity": "info",
+          "title": "limit3r: valid semver"
+        },
+        {
+          "file": "./packages/pipelin3r/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "version = \"0.1.0\"",
+          "severity": "info",
+          "title": "pipelin3r: valid semver"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "version = \"0.1.0\"",
+          "severity": "info",
+          "title": "shedul3r-rs-sdk: valid semver"
+        },
+        {
+          "file": "./packages/shedul3r-bin/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "version = \"0.2.0\"",
+          "severity": "info",
+          "title": "shedul3r: valid semver"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/inbound/api/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "No path dependencies to non-publishable crates",
+          "severity": "info",
+          "title": "api: path deps OK"
+        },
+        {
+          "file": "./apps/shedul3r/crates/app/commands/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "No path dependencies to non-publishable crates",
+          "severity": "info",
+          "title": "commands: path deps OK"
+        },
+        {
+          "file": "./apps/shedul3r/crates/domain/types/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "No path dependencies to non-publishable crates",
+          "severity": "info",
+          "title": "domain-types: path deps OK"
+        },
+        {
+          "file": "./packages/limit3r/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "No path dependencies to non-publishable crates",
+          "severity": "info",
+          "title": "limit3r: path deps OK"
+        },
+        {
+          "file": "./packages/pipelin3r/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "No path dependencies to non-publishable crates",
+          "severity": "info",
+          "title": "pipelin3r: path deps OK"
+        },
+        {
+          "file": "./apps/shedul3r/crates/ports/outbound/repo/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "No path dependencies to non-publishable crates",
+          "severity": "info",
+          "title": "repo: path deps OK"
+        },
+        {
+          "file": "./packages/shedul3r-rs-sdk/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "No path dependencies to non-publishable crates",
+          "severity": "info",
+          "title": "shedul3r-rs-sdk: path deps OK"
+        },
+        {
+          "file": "./packages/shedul3r-bin/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "No path dependencies to non-publishable crates",
+          "severity": "info",
+          "title": "shedul3r: path deps OK"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/outbound/db/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "No path dependencies to non-publishable crates",
+          "severity": "info",
+          "title": "state: path deps OK"
+        },
+        {
+          "file": "./apps/shedul3r/crates/adapters/outbound/subprocess/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "No path dependencies to non-publishable crates",
+          "severity": "info",
+          "title": "subprocess: path deps OK"
+        },
+        {
+          "file": null,
+          "id": "R-PUB-12",
+          "line": null,
+          "message": "10 publishable, 0 publish=false",
+          "severity": "info",
+          "title": "Crate inventory"
+        },
+        {
+          "file": ".",
+          "id": "R-REL-01",
+          "line": null,
+          "message": "Found at repo root",
+          "severity": "info",
+          "title": "LICENSE file exists"
+        },
+        {
+          "file": "./release-plz.toml",
+          "id": "R-REL-02",
+          "line": null,
+          "message": "Found at repo root",
+          "severity": "info",
+          "title": "release-plz.toml exists"
+        },
+        {
+          "file": "./release-plz.toml",
+          "id": "R-REL-03",
+          "line": null,
+          "message": "Publishable crate \"api\" has no [[package]] entry",
+          "severity": "warn",
+          "title": "release-plz.toml missing package \"api\""
+        },
+        {
+          "file": "./release-plz.toml",
+          "id": "R-REL-03",
+          "line": null,
+          "message": "Publishable crate \"commands\" has no [[package]] entry",
+          "severity": "warn",
+          "title": "release-plz.toml missing package \"commands\""
+        },
+        {
+          "file": "./release-plz.toml",
+          "id": "R-REL-03",
+          "line": null,
+          "message": "Publishable crate \"domain-types\" has no [[package]] entry",
+          "severity": "warn",
+          "title": "release-plz.toml missing package \"domain-types\""
+        },
+        {
+          "file": "./release-plz.toml",
+          "id": "R-REL-03",
+          "line": null,
+          "message": "Publishable crate \"repo\" has no [[package]] entry",
+          "severity": "warn",
+          "title": "release-plz.toml missing package \"repo\""
+        },
+        {
+          "file": "./release-plz.toml",
+          "id": "R-REL-03",
+          "line": null,
+          "message": "Publishable crate \"shedul3r\" has no [[package]] entry",
+          "severity": "warn",
+          "title": "release-plz.toml missing package \"shedul3r\""
+        },
+        {
+          "file": "./release-plz.toml",
+          "id": "R-REL-03",
+          "line": null,
+          "message": "Publishable crate \"state\" has no [[package]] entry",
+          "severity": "warn",
+          "title": "release-plz.toml missing package \"state\""
+        },
+        {
+          "file": "./release-plz.toml",
+          "id": "R-REL-03",
+          "line": null,
+          "message": "Publishable crate \"subprocess\" has no [[package]] entry",
+          "severity": "warn",
+          "title": "release-plz.toml missing package \"subprocess\""
+        },
+        {
+          "file": "./cliff.toml",
+          "id": "R-REL-04",
+          "line": null,
+          "message": "Found at project root",
+          "severity": "info",
+          "title": "cliff.toml exists"
+        },
+        {
+          "file": null,
+          "id": "R-REL-05",
+          "line": null,
+          "message": "A workflow references release-plz",
+          "severity": "info",
+          "title": "Release workflow found"
+        },
+        {
+          "file": null,
+          "id": "R-REL-06",
+          "line": null,
+          "message": "A workflow contains \"cargo publish --dry-run\"",
+          "severity": "info",
+          "title": "Publish dry-run in CI"
+        },
+        {
+          "file": null,
+          "id": "R-REL-07",
+          "line": null,
+          "message": "A workflow references CARGO_REGISTRY_TOKEN",
+          "severity": "info",
+          "title": "CARGO_REGISTRY_TOKEN referenced"
+        },
+        {
+          "file": null,
+          "id": "R-REL-08",
+          "line": null,
+          "message": "Install with: cargo install cargo-semver-checks",
+          "severity": "warn",
+          "title": "cargo-semver-checks not installed"
+        }
+      ]
+    },
+    {
+      "name": "Hook checks",
+      "results": [
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H1",
+          "line": null,
+          "message": "Found",
+          "severity": "info",
+          "title": ".githooks/pre-commit exists"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H10",
+          "line": null,
+          "message": "10070 bytes",
+          "severity": "info",
+          "title": "Pre-commit file size"
+        },
+        {
+          "file": null,
+          "id": "H11",
+          "line": null,
+          "message": "No local hook overrides found",
+          "severity": "info",
+          "title": "No local/pre-commit.d/ directory"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H12",
+          "line": null,
+          "message": "Rust project should use cargo-dupes for copy-paste detection",
+          "severity": "warn",
+          "title": "Missing cargo-dupes for Rust"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H12",
+          "line": null,
+          "message": "Rust-only project running jscpd requires Node.js -- use cargo-dupes instead",
+          "severity": "warn",
+          "title": "Rust-only project running jscpd"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H12",
+          "line": null,
+          "message": "Using jscpd for Rust -- consider cargo-dupes (AST-aware, no Node.js dependency)",
+          "severity": "warn",
+          "title": "Using jscpd for Rust"
+        },
+        {
+          "file": null,
+          "id": "H2",
+          "line": null,
+          "message": "Run: git config core.hooksPath .githooks",
+          "severity": "error",
+          "title": "core.hooksPath not configured"
+        },
+        {
+          "file": "./.githooks",
+          "id": "H3",
+          "line": null,
+          "message": "Using monolithic pre-commit script",
+          "severity": "info",
+          "title": "No pre-commit.d/ directory"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H4",
+          "line": null,
+          "message": "No pre-commit.d/, so no dispatcher check",
+          "severity": "info",
+          "title": "Monolithic script (no dispatcher needed)"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H5",
+          "line": null,
+          "message": "Pattern present in monolithic script",
+          "severity": "info",
+          "title": "cargo clippy found in pre-commit"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H5",
+          "line": null,
+          "message": "Pattern present in monolithic script",
+          "severity": "info",
+          "title": "cargo deny found in pre-commit"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H5",
+          "line": null,
+          "message": "Pattern missing from monolithic script",
+          "severity": "info",
+          "title": "cargo dupes not found in pre-commit"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H5",
+          "line": null,
+          "message": "Pattern present in monolithic script",
+          "severity": "info",
+          "title": "cargo fmt / rustfmt found in pre-commit"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H5",
+          "line": null,
+          "message": "Pattern present in monolithic script",
+          "severity": "info",
+          "title": "cargo machete found in pre-commit"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H5",
+          "line": null,
+          "message": "Pattern present in monolithic script",
+          "severity": "info",
+          "title": "cargo test found in pre-commit"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H5",
+          "line": null,
+          "message": "Pattern present in monolithic script",
+          "severity": "info",
+          "title": "gitleaks found in pre-commit"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H5",
+          "line": null,
+          "message": "Pattern present in monolithic script",
+          "severity": "info",
+          "title": "jscpd found in pre-commit"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H6",
+          "line": null,
+          "message": "257 lines, 10070 bytes, mtime unix 1773576663",
+          "severity": "info",
+          "title": "Pre-commit script stats"
+        },
+        {
+          "file": "./.githooks/pre-commit",
+          "id": "H7",
+          "line": null,
+          "message": "mode: 100755",
+          "severity": "info",
+          "title": "Pre-commit is executable"
+        },
+        {
+          "file": null,
+          "id": "H8",
+          "line": null,
+          "message": "Found on PATH",
+          "severity": "info",
+          "title": "cargo-deny installed"
+        },
+        {
+          "file": null,
+          "id": "H8",
+          "line": null,
+          "message": "Found on PATH",
+          "severity": "info",
+          "title": "cargo-machete installed"
+        },
+        {
+          "file": null,
+          "id": "H8",
+          "line": null,
+          "message": "Found on PATH",
+          "severity": "info",
+          "title": "gitleaks installed"
+        }
+      ]
+    },
+    {
+      "name": "Deployment checks",
+      "results": [
+        {
+          "file": ".",
+          "id": "D1",
+          "line": null,
+          "message": "Expected railpack-*.json in project root",
+          "severity": "warn",
+          "title": "No railpack config files found"
+        }
+      ]
+    }
+  ],
+  "stacks": [
+    "Rust"
+  ]
+}

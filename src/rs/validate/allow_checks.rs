@@ -2,10 +2,77 @@ use std::path::Path;
 
 use crate::report::types::{CheckResult, Severity};
 
+use super::ast_helpers;
 use super::source_scan::filter_non_comment_lines;
 
-// R30-R31: crate-level allow attributes
+/// Prefix constant used in R30-R31 messages.
+const CRATE_ALLOW_PREFIX: &str = "#![allow(";
+
+// R30-R31: crate-level allow attributes (syn-based with grep fallback)
 pub fn check_crate_level_allow(
+    path: &Path,
+    content: &str,
+    is_bin_entry: bool,
+    is_test_file: bool,
+    results: &mut Vec<CheckResult>,
+) {
+    if let Some(file) = ast_helpers::parse_file(content) {
+        // syn parse succeeded — use AST-based detection
+        let source_lines: Vec<&str> = content.lines().collect();
+        for (line, lint) in &ast_helpers::find_crate_level_allows(&file) {
+            emit_crate_allow_result(path, lint, *line, is_test_file, results);
+        }
+        // source_lines available for future comment inspection (e.g. // reason: checks)
+        let _ = &source_lines;
+    } else {
+        // Parse failed — fall back to grep-based scanning
+        check_crate_level_allow_grep(path, content, is_bin_entry, is_test_file, results);
+    }
+}
+
+/// Emit a single R30 or R31 result for one lint in a crate-level allow.
+fn emit_crate_allow_result(
+    path: &Path,
+    lint: &str,
+    line_number: usize,
+    is_test_file: bool,
+    results: &mut Vec<CheckResult>,
+) {
+    if lint == "unused_crate_dependencies" {
+        // Always Info — pre-commit hook exempts this lint universally
+        // (it produces false positives in bin crates, integration tests,
+        // lib crates with proc macros, etc.)
+        results.push(CheckResult {
+            id: "R31".to_owned(),
+            severity: Severity::Info,
+            title: format!("Justified {CRATE_ALLOW_PREFIX}...)"),
+            message: "unused_crate_dependencies — universally exempted".to_owned(),
+            file: Some(path.display().to_string()),
+            line: Some(line_number),
+        });
+    } else {
+        // Test files are exempt from R30 (matches pre-commit hook behavior
+        // which excludes /tests/ from source scanning)
+        let severity = if is_test_file {
+            Severity::Info
+        } else {
+            Severity::Error
+        };
+        results.push(CheckResult {
+            id: "R30".to_owned(),
+            severity,
+            title: format!("Crate-level {CRATE_ALLOW_PREFIX}...)"),
+            message: format!(
+                "{CRATE_ALLOW_PREFIX}{lint})] — crate-wide lint suppression banned"
+            ),
+            file: Some(path.display().to_string()),
+            line: Some(line_number),
+        });
+    }
+}
+
+// Grep-based fallback for R30-R31 when syn parsing fails.
+fn check_crate_level_allow_grep(
     path: &Path,
     content: &str,
     _is_bin_entry: bool,
@@ -48,43 +115,126 @@ pub fn check_crate_level_allow(
         };
 
         for lint in lints {
-            if lint == "unused_crate_dependencies" {
-                // Always Info — pre-commit hook exempts this lint universally
-                // (it produces false positives in bin crates, integration tests,
-                // lib crates with proc macros, etc.)
-                results.push(CheckResult {
-                    id: "R31".to_owned(),
-                    severity: Severity::Info,
-                    title: format!("Justified {crate_allow_prefix}...)"),
-                    message: "unused_crate_dependencies — universally exempted".to_owned(),
-                    file: Some(path.display().to_string()),
-                    line: Some(line_number),
-                });
-            } else {
-                // Test files are exempt from R30 (matches pre-commit hook behavior
-                // which excludes /tests/ from source scanning)
-                let severity = if is_test_file {
-                    Severity::Info
-                } else {
-                    Severity::Error
-                };
-                results.push(CheckResult {
-                    id: "R30".to_owned(),
-                    severity,
-                    title: format!("Crate-level {crate_allow_prefix}...)"),
-                    message: format!(
-                        "{crate_allow_prefix}{lint})] — crate-wide lint suppression banned"
-                    ),
-                    file: Some(path.display().to_string()),
-                    line: Some(line_number),
-                });
-            }
+            emit_crate_allow_result(path, lint, line_number, is_test_file, results);
         }
     }
 }
 
 // R32-R33: #[allow(...)] — item-level
 pub fn check_item_level_allow(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
+    if let Some(file) = ast_helpers::parse_file(content) {
+        // AST path: accurate detection for items syn can see.
+        // Then grep catches allows inside macro bodies that syn skips.
+        let ast_lines = check_item_level_allow_ast(path, content, &file, results);
+        check_item_level_allow_grep_supplement(path, content, &ast_lines, results);
+    } else {
+        check_item_level_allow_grep(path, content, results);
+    }
+}
+
+/// Run AST-based detection. Returns the set of 1-based line numbers already reported.
+fn check_item_level_allow_ast(
+    path: &Path,
+    content: &str,
+    file: &syn::File,
+    results: &mut Vec<CheckResult>,
+) -> std::collections::BTreeSet<usize> {
+    let raw_lines: Vec<&str> = content.lines().collect();
+    let mut covered = std::collections::BTreeSet::new();
+    for (line_1based, lint) in ast_helpers::find_item_allows(file) {
+        let _ = covered.insert(line_1based);
+        let has_comment = raw_lines
+            .get(line_1based.wrapping_sub(1))
+            .is_some_and(|l| l.contains("//"));
+        if has_comment {
+            let reason = raw_lines
+                .get(line_1based.wrapping_sub(1))
+                .and_then(|l| l.split("//").nth(1))
+                .map_or("no reason given", str::trim);
+            results.push(CheckResult {
+                id: "R33".to_owned(),
+                severity: Severity::Info,
+                title: "Justified #[allow]".to_owned(),
+                message: format!("{lint} — {reason}"),
+                file: Some(path.display().to_string()),
+                line: Some(line_1based),
+            });
+        } else {
+            results.push(CheckResult {
+                id: "R32".to_owned(),
+                severity: Severity::Error,
+                title: "#[allow] without reason".to_owned(),
+                message: format!("#[allow({lint})] has no // comment justification"),
+                file: Some(path.display().to_string()),
+                line: Some(line_1based),
+            });
+        }
+    }
+    covered
+}
+
+/// Grep supplement: catch #[allow(..)] inside macro bodies that syn cannot visit.
+/// Skips lines already reported by the AST pass.
+fn check_item_level_allow_grep_supplement(
+    path: &Path,
+    content: &str,
+    ast_covered: &std::collections::BTreeSet<usize>,
+    results: &mut Vec<CheckResult>,
+) {
+    let non_comment_lines = filter_non_comment_lines(content);
+
+    for (line_num, trimmed) in &non_comment_lines {
+        let allow_prefix = "#[allow("; // pattern we scan for
+        if !trimmed.starts_with(allow_prefix) {
+            continue;
+        }
+        let line_number = line_num.saturating_add(1);
+        // Skip lines already reported by AST pass
+        if ast_covered.contains(&line_number) {
+            continue;
+        }
+        let lint = if trimmed.contains(')') {
+            trimmed
+                .strip_prefix(allow_prefix)
+                .and_then(|s| s.split(')').next())
+                .unwrap_or(trimmed)
+                .to_owned()
+        } else {
+            trimmed
+                .strip_prefix(allow_prefix)
+                .unwrap_or(trimmed)
+                .trim()
+                .to_owned()
+                + "..."
+        };
+        let has_comment = trimmed.contains("//");
+        if has_comment {
+            let reason = trimmed
+                .split("//")
+                .nth(1)
+                .map_or("no reason given", str::trim);
+            results.push(CheckResult {
+                id: "R33".to_owned(),
+                severity: Severity::Info,
+                title: "Justified #[allow]".to_owned(),
+                message: format!("{lint} — {reason}"),
+                file: Some(path.display().to_string()),
+                line: Some(line_number),
+            });
+        } else {
+            results.push(CheckResult {
+                id: "R32".to_owned(),
+                severity: Severity::Error,
+                title: "#[allow] without reason".to_owned(),
+                message: format!("#[allow({lint})] has no // comment justification"),
+                file: Some(path.display().to_string()),
+                line: Some(line_number),
+            });
+        }
+    }
+}
+
+fn check_item_level_allow_grep(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
     let non_comment_lines = filter_non_comment_lines(content);
 
     for (line_num, trimmed) in &non_comment_lines {
@@ -143,18 +293,59 @@ pub fn check_item_level_allow(path: &Path, content: &str, results: &mut Vec<Chec
 }
 
 // R34-R35: #[garde(skip)]
-#[allow(clippy::string_slice)] // reason: garde attribute parsing on known ASCII content
 pub fn check_garde_skip(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
+    if let Some(file) = ast_helpers::parse_file(content) {
+        check_garde_skip_ast(path, content, &file, results);
+    } else {
+        check_garde_skip_grep(path, content, results);
+    }
+}
+
+fn check_garde_skip_ast(
+    path: &Path,
+    content: &str,
+    file: &syn::File,
+    results: &mut Vec<CheckResult>,
+) {
+    let raw_lines: Vec<&str> = content.lines().collect();
+    for line_1based in ast_helpers::find_garde_skips(file) {
+        let has_comment = raw_lines
+            .get(line_1based.wrapping_sub(1))
+            .is_some_and(|l| l.contains("//"));
+        if has_comment {
+            let reason = raw_lines
+                .get(line_1based.wrapping_sub(1))
+                .and_then(|l| l.split("//").nth(1))
+                .map_or("no reason given", str::trim);
+            results.push(CheckResult {
+                id: "R35".to_owned(),
+                severity: Severity::Info,
+                title: "Justified garde(skip)".to_owned(),
+                message: format!("garde(skip) — {reason}"),
+                file: Some(path.display().to_string()),
+                line: Some(line_1based),
+            });
+        } else {
+            results.push(CheckResult {
+                id: "R34".to_owned(),
+                severity: Severity::Error,
+                title: "garde(skip) without reason".to_owned(),
+                message: "garde(skip) has no // comment justification".to_owned(),
+                file: Some(path.display().to_string()),
+                line: Some(line_1based),
+            });
+        }
+    }
+}
+
+#[allow(clippy::string_slice)] // reason: garde attribute parsing on known ASCII content
+fn check_garde_skip_grep(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
     let non_comment_lines = filter_non_comment_lines(content);
 
     for (line_num, trimmed) in &non_comment_lines {
-        // Must be an actual attribute — look for #[garde(skip)] or #[...garde(skip)...]
         if !trimmed.contains("garde(skip)") {
             continue;
         }
-
-        // Skip if garde(skip) only appears inside a string literal
-        // Simple heuristic: if there's a `"` before the occurrence, it's in a string
         if let Some(pos) = trimmed.find("garde(skip)") {
             let before = &trimmed[..pos];
             let quote_count = before.chars().filter(|c| *c == '"').count();
@@ -162,15 +353,11 @@ pub fn check_garde_skip(path: &Path, content: &str, results: &mut Vec<CheckResul
                 continue;
             }
         }
-
-        // Must look like an attribute context (contains #[ or starts with garde)
         if !trimmed.contains("#[") && !trimmed.starts_with("garde(") {
             continue;
         }
-
         let line_number = line_num.saturating_add(1);
         let has_comment = trimmed.contains("//");
-
         if has_comment {
             let reason = trimmed
                 .split("//")
@@ -228,21 +415,47 @@ pub fn check_exception_comments(workspace_root: &Path, results: &mut Vec<CheckRe
 }
 
 // R37: cfg_attr allow — must be an actual attribute (#[cfg_attr(..., allow(...))])
-#[allow(clippy::string_slice)] // reason: cfg_attr parsing on known ASCII content
 pub fn check_cfg_attr_allow(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
+    if let Some(file) = ast_helpers::parse_file(content) {
+        check_cfg_attr_allow_ast(path, content, &file, results);
+    } else {
+        check_cfg_attr_allow_grep(path, content, results);
+    }
+}
+
+fn check_cfg_attr_allow_ast(
+    path: &Path,
+    content: &str,
+    file: &syn::File,
+    results: &mut Vec<CheckResult>,
+) {
+    let raw_lines: Vec<&str> = content.lines().collect();
+    for (line_1based, lint) in ast_helpers::find_cfg_attr_allows(file) {
+        let message = raw_lines
+            .get(line_1based.wrapping_sub(1))
+            .map_or_else(|| format!("cfg_attr allow: {lint}"), |l| l.trim().to_owned());
+        results.push(CheckResult {
+            id: "R37".to_owned(),
+            severity: Severity::Info,
+            title: "cfg_attr allow".to_owned(),
+            message,
+            file: Some(path.display().to_string()),
+            line: Some(line_1based),
+        });
+    }
+}
+
+#[allow(clippy::string_slice)] // reason: cfg_attr parsing on known ASCII content
+fn check_cfg_attr_allow_grep(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
     let non_comment_lines = filter_non_comment_lines(content);
 
     for (line_num, trimmed) in &non_comment_lines {
-        // Must be an attribute line containing #[cfg_attr or #![cfg_attr
         if !trimmed.contains("#[cfg_attr(") && !trimmed.contains("#![cfg_attr(") {
             continue;
         }
-
         if !trimmed.contains("allow(") {
             continue;
         }
-
-        // Skip if it's inside a string literal
         if let Some(pos) = trimmed.find("cfg_attr") {
             let before = &trimmed[..pos];
             let quote_count = before.chars().filter(|c| *c == '"').count();
@@ -250,9 +463,7 @@ pub fn check_cfg_attr_allow(path: &Path, content: &str, results: &mut Vec<CheckR
                 continue;
             }
         }
-
         let line_number = line_num.saturating_add(1);
-
         results.push(CheckResult {
             id: "R37".to_owned(),
             severity: Severity::Info,

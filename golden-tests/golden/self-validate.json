@@ -99,14 +99,6 @@
           "message": "edition = 2024, rust-version = 1.85",
           "severity": "info",
           "title": "Workspace metadata"
-        },
-        {
-          "file": "./Cargo.toml",
-          "id": "R56",
-          "line": null,
-          "message": "publish = false",
-          "severity": "info",
-          "title": "Publish status"
         }
       ]
     },
@@ -929,6 +921,158 @@
       "name": "Source code scan",
       "results": [
         {
+          "file": "./tests/adversarial_config_tests.rs",
+          "id": "R30",
+          "line": 4,
+          "message": "#![allow(clippy::disallowed_methods)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./tests/adversarial_config_tests.rs",
+          "id": "R30",
+          "line": 4,
+          "message": "#![allow(clippy::expect_used)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./tests/adversarial_config_tests.rs",
+          "id": "R30",
+          "line": 4,
+          "message": "#![allow(clippy::indexing_slicing)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./tests/adversarial_config_tests.rs",
+          "id": "R30",
+          "line": 4,
+          "message": "#![allow(clippy::manual_assert)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./tests/adversarial_config_tests.rs",
+          "id": "R30",
+          "line": 4,
+          "message": "#![allow(clippy::panic)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./tests/fixtures/adversarial/allow_crate_wide.rs",
+          "id": "R30",
+          "line": 1,
+          "message": "#![allow(dead_code)] — crate-wide lint suppression banned",
+          "severity": "info",
+          "title": "Crate-level #![allow(...)"
+        },
+        {
+          "file": "./tests/fixtures/grep-attacks/rust-allow/multiline_string.rs",
+          "id": "R32",
+          "line": 6,
+          "message": "#[allow(\\...)] has no // comment justification",
+          "severity": "error",
+          "title": "#[allow] without reason"
+        },
+        {
+          "file": "./tests/adversarial_fixtures.rs",
+          "id": "R32",
+          "line": 71,
+          "message": "#[allow(clippy::disallowed_methods)] has no // comment justification",
+          "severity": "error",
+          "title": "#[allow] without reason"
+        },
+        {
+          "file": "./tests/adversarial_fixtures.rs",
+          "id": "R32",
+          "line": 103,
+          "message": "#[allow(clippy::disallowed_methods)] has no // comment justification",
+          "severity": "error",
+          "title": "#[allow] without reason"
+        },
+        {
+          "file": "./tests/adversarial_fixtures.rs",
+          "id": "R32",
+          "line": 71,
+          "message": "#[allow(clippy::expect_used)] has no // comment justification",
+          "severity": "error",
+          "title": "#[allow] without reason"
+        },
+        {
+          "file": "./tests/adversarial_fixtures.rs",
+          "id": "R32",
+          "line": 103,
+          "message": "#[allow(clippy::expect_used)] has no // comment justification",
+          "severity": "error",
+          "title": "#[allow] without reason"
+        },
+        {
+          "file": "./tests/adversarial_fixtures.rs",
+          "id": "R32",
+          "line": 71,
+          "message": "#[allow(clippy::indexing_slicing)] has no // comment justification",
+          "severity": "error",
+          "title": "#[allow] without reason"
+        },
+        {
+          "file": "./tests/adversarial_fixtures.rs",
+          "id": "R32",
+          "line": 103,
+          "message": "#[allow(clippy::indexing_slicing)] has no // comment justification",
+          "severity": "error",
+          "title": "#[allow] without reason"
+        },
+        {
+          "file": "./tests/adversarial_grep_attacks.rs",
+          "id": "R32",
+          "line": 87,
+          "message": "#[allow(clippy::indexing_slicing)] has no // comment justification",
+          "severity": "error",
+          "title": "#[allow] without reason"
+        },
+        {
+          "file": "./tests/adversarial_fixtures.rs",
+          "id": "R32",
+          "line": 103,
+          "message": "#[allow(clippy::panic)] has no // comment justification",
+          "severity": "error",
+          "title": "#[allow] without reason"
+        },
+        {
+          "file": "./tests/fixtures/adversarial/allow_in_macro.rs",
+          "id": "R32",
+          "line": 3,
+          "message": "#[allow(clippy::unwrap_used)] has no // comment justification",
+          "severity": "error",
+          "title": "#[allow] without reason"
+        },
+        {
+          "file": "./tests/fixtures/adversarial/allow_multiline.rs",
+          "id": "R32",
+          "line": 1,
+          "message": "#[allow(clippy::unwrap_used)] has no // comment justification",
+          "severity": "error",
+          "title": "#[allow] without reason"
+        },
+        {
+          "file": "./tests/fixtures/adversarial/allow_no_reason.rs",
+          "id": "R32",
+          "line": 1,
+          "message": "#[allow(clippy::unwrap_used)] has no // comment justification",
+          "severity": "error",
+          "title": "#[allow] without reason"
+        },
+        {
+          "file": "./tests/fixtures/adversarial/allow_reason_wrong_line.rs",
+          "id": "R32",
+          "line": 1,
+          "message": "#[allow(clippy::unwrap_used)] has no // comment justification",
+          "severity": "error",
+          "title": "#[allow] without reason"
+        },
+        {
           "file": "./src/rs/validate/test_quality_checks.rs",
           "id": "R33",
           "line": 64,
@@ -995,8 +1139,16 @@
         {
           "file": "./src/ts/validate/source_scan.rs",
           "id": "R33",
-          "line": 52,
+          "line": 53,
           "message": "clippy::case_sensitive_file_extension_comparisons — reason: only checking .ts/.tsx/.mjs files",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/ts/validate/source_scan.rs",
+          "id": "R33",
+          "line": 88,
+          "message": "clippy::case_sensitive_file_extension_comparisons — reason: only checking .tsx extension",
           "severity": "info",
           "title": "Justified #[allow]"
         },
@@ -1013,6 +1165,78 @@
           "id": "R33",
           "line": 7,
           "message": "clippy::disallowed_methods — reason: CLI command — exit codes and fs operations",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/commands/validate.rs",
+          "id": "R33",
+          "line": 17,
+          "message": "clippy::disallowed_methods — reason: CLI command — stderr output and exit codes",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/commands/check.rs",
+          "id": "R33",
+          "line": 5,
+          "message": "clippy::disallowed_methods — reason: CLI command — user-facing output and exit codes",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/commands/diff.rs",
+          "id": "R33",
+          "line": 5,
+          "message": "clippy::disallowed_methods — reason: CLI command — user-facing output and exit codes",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/commands/generate.rs",
+          "id": "R33",
+          "line": 64,
+          "message": "clippy::disallowed_methods — reason: CLI command — user-facing output and exit codes",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/commands/generate.rs",
+          "id": "R33",
+          "line": 100,
+          "message": "clippy::disallowed_methods — reason: CLI command — user-facing output and exit codes",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/commands/generate.rs",
+          "id": "R33",
+          "line": 139,
+          "message": "clippy::disallowed_methods — reason: CLI command — user-facing output and exit codes",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/commands/modules_cmd.rs",
+          "id": "R33",
+          "line": 25,
+          "message": "clippy::disallowed_methods — reason: CLI command — user-facing output and exit codes",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/commands/generate.rs",
+          "id": "R33",
+          "line": 14,
+          "message": "clippy::disallowed_methods — reason: CLI command — user-facing output and process::exit for error codes",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/main.rs",
+          "id": "R33",
+          "line": 25,
+          "message": "clippy::disallowed_methods — reason: CLI entry point — stderr output and process::exit for error codes are intentional",
           "severity": "info",
           "title": "Justified #[allow]"
         },
@@ -1081,9 +1305,33 @@
           "title": "Justified #[allow]"
         },
         {
-          "file": "./tests/property_tests.rs",
+          "file": "./src/config/mod.rs",
           "id": "R33",
-          "line": 32,
+          "line": 5,
+          "message": "clippy::disallowed_methods — reason: CLI tool — config parse errors reported to stderr; guardrail3 config parsing — no garde validation needed for own config",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/adversarial_fixtures.rs",
+          "id": "R33",
+          "line": 38,
+          "message": "clippy::disallowed_methods — reason: Command::new needed to invoke binary under test",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/adversarial_grep_attacks.rs",
+          "id": "R33",
+          "line": 51,
+          "message": "clippy::disallowed_methods — reason: Command::new needed to invoke binary under test",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 22,
           "message": "clippy::disallowed_methods — reason: Command::new needed to invoke binary under test",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -1091,7 +1339,15 @@
         {
           "file": "./tests/property_tests.rs",
           "id": "R33",
-          "line": 49,
+          "line": 39,
+          "message": "clippy::disallowed_methods — reason: Command::new needed to invoke binary under test",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/property_tests.rs",
+          "id": "R33",
+          "line": 56,
           "message": "clippy::disallowed_methods — reason: Command::new needed to invoke binary under test",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -1107,7 +1363,7 @@
         {
           "file": "./src/fs.rs",
           "id": "R33",
-          "line": 17,
+          "line": 20,
           "message": "clippy::disallowed_methods — reason: centralized fs module",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -1115,7 +1371,7 @@
         {
           "file": "./src/fs.rs",
           "id": "R33",
-          "line": 23,
+          "line": 26,
           "message": "clippy::disallowed_methods — reason: centralized fs module",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -1123,7 +1379,7 @@
         {
           "file": "./src/fs.rs",
           "id": "R33",
-          "line": 34,
+          "line": 37,
           "message": "clippy::disallowed_methods — reason: centralized fs module",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -1131,7 +1387,7 @@
         {
           "file": "./src/fs.rs",
           "id": "R33",
-          "line": 44,
+          "line": 50,
           "message": "clippy::disallowed_methods — reason: centralized fs module",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -1139,7 +1395,7 @@
         {
           "file": "./src/fs.rs",
           "id": "R33",
-          "line": 55,
+          "line": 64,
           "message": "clippy::disallowed_methods — reason: centralized fs module",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -1147,8 +1403,24 @@
         {
           "file": "./src/fs.rs",
           "id": "R33",
-          "line": 62,
+          "line": 74,
           "message": "clippy::disallowed_methods — reason: centralized fs module",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/ts/validate/package_check.rs",
+          "id": "R33",
+          "line": 5,
+          "message": "clippy::disallowed_methods — reason: comprehensive package.json validation; guardrail3 JSON config inspection",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/ts/validate/tsconfig_check.rs",
+          "id": "R33",
+          "line": 8,
+          "message": "clippy::disallowed_methods — reason: comprehensive tsconfig validation; guardrail3 JSON config inspection",
           "severity": "info",
           "title": "Justified #[allow]"
         },
@@ -1169,9 +1441,17 @@
           "title": "Justified #[allow]"
         },
         {
+          "file": "./src/ts/validate/jscpd_check.rs",
+          "id": "R33",
+          "line": 5,
+          "message": "clippy::disallowed_methods — reason: jscpd config validation; guardrail3 JSON config inspection — not a trust boundary",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
           "file": "./tests/property_tests.rs",
           "id": "R33",
-          "line": 75,
+          "line": 82,
           "message": "clippy::disallowed_methods — reason: serde_json::from_str needed to parse test output",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -1201,9 +1481,329 @@
           "title": "Justified #[allow]"
         },
         {
+          "file": "./src/rs/validate/test_checks.rs",
+          "id": "R33",
+          "line": 226,
+          "message": "clippy::disallowed_methods — reason: test setup and assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/rs/validate/test_quality_checks.rs",
+          "id": "R33",
+          "line": 347,
+          "message": "clippy::disallowed_methods — reason: test setup and assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/rs/validate/test_quality_checks.rs",
+          "id": "R33",
+          "line": 382,
+          "message": "clippy::disallowed_methods — reason: test setup and assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/rs/validate/test_quality_checks.rs",
+          "id": "R33",
+          "line": 439,
+          "message": "clippy::disallowed_methods — reason: test setup and assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/rs/validate/test_quality_checks.rs",
+          "id": "R33",
+          "line": 458,
+          "message": "clippy::disallowed_methods — reason: test setup and assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 35,
+          "message": "clippy::disallowed_methods — reason: test uses Command",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 59,
+          "message": "clippy::disallowed_methods — reason: test uses Command",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 75,
+          "message": "clippy::disallowed_methods — reason: test uses Command",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 91,
+          "message": "clippy::disallowed_methods — reason: test uses Command",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 113,
+          "message": "clippy::disallowed_methods — reason: test uses Command",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 135,
+          "message": "clippy::disallowed_methods — reason: test uses Command",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 151,
+          "message": "clippy::disallowed_methods — reason: test uses Command",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 169,
+          "message": "clippy::disallowed_methods — reason: test uses Command",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 185,
+          "message": "clippy::disallowed_methods — reason: test uses Command",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 203,
+          "message": "clippy::disallowed_methods — reason: test uses Command",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 219,
+          "message": "clippy::disallowed_methods — reason: test uses Command",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 243,
+          "message": "clippy::disallowed_methods — reason: test uses Command",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 261,
+          "message": "clippy::disallowed_methods — reason: test uses Command",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 294,
+          "message": "clippy::disallowed_methods — reason: test uses Command",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 431,
+          "message": "clippy::disallowed_methods — reason: test uses Command",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 543,
+          "message": "clippy::disallowed_methods — reason: test uses Command",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 557,
+          "message": "clippy::disallowed_methods — reason: test uses Command",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 575,
+          "message": "clippy::disallowed_methods — reason: test uses Command",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 603,
+          "message": "clippy::disallowed_methods — reason: test uses Command",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 625,
+          "message": "clippy::disallowed_methods — reason: test uses Command",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 648,
+          "message": "clippy::disallowed_methods — reason: test uses Command",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 666,
+          "message": "clippy::disallowed_methods — reason: test uses Command",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 690,
+          "message": "clippy::disallowed_methods — reason: test uses Command",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 716,
+          "message": "clippy::disallowed_methods — reason: test uses Command",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 736,
+          "message": "clippy::disallowed_methods — reason: test uses Command",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 759,
+          "message": "clippy::disallowed_methods — reason: test uses Command",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 796,
+          "message": "clippy::disallowed_methods — reason: test uses Command",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 899,
+          "message": "clippy::disallowed_methods — reason: test uses Command",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 327,
+          "message": "clippy::disallowed_methods — reason: test uses Command and fs",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 374,
+          "message": "clippy::disallowed_methods — reason: test uses Command and fs",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 404,
+          "message": "clippy::disallowed_methods — reason: test uses Command and fs",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 459,
+          "message": "clippy::disallowed_methods — reason: test uses Command and fs",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 488,
+          "message": "clippy::disallowed_methods — reason: test uses Command and fs",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 829,
+          "message": "clippy::disallowed_methods — reason: test uses Command and fs",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 863,
+          "message": "clippy::disallowed_methods — reason: test uses Command and fs",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
           "file": "./tests/property_tests.rs",
           "id": "R33",
-          "line": 200,
+          "line": 207,
           "message": "clippy::disallowed_methods — reason: tests need direct fs access and toml parsing",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -1427,7 +2027,7 @@
         {
           "file": "./tests/property_tests.rs",
           "id": "R33",
-          "line": 101,
+          "line": 108,
           "message": "clippy::disallowed_methods — reason: tests need direct fs access for temp dirs",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -1435,7 +2035,7 @@
         {
           "file": "./tests/property_tests.rs",
           "id": "R33",
-          "line": 129,
+          "line": 474,
           "message": "clippy::disallowed_methods — reason: tests need direct fs access for temp dirs",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -1443,7 +2043,7 @@
         {
           "file": "./tests/property_tests.rs",
           "id": "R33",
-          "line": 465,
+          "line": 505,
           "message": "clippy::disallowed_methods — reason: tests need direct fs access for temp dirs",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -1451,7 +2051,7 @@
         {
           "file": "./tests/property_tests.rs",
           "id": "R33",
-          "line": 496,
+          "line": 136,
           "message": "clippy::disallowed_methods — reason: tests need direct fs access for temp dirs",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -1459,7 +2059,7 @@
         {
           "file": "./tests/property_tests.rs",
           "id": "R33",
-          "line": 162,
+          "line": 169,
           "message": "clippy::disallowed_methods — reason: toml::from_str needed to test config parsing",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -1475,7 +2075,7 @@
         {
           "file": "./tests/property_tests.rs",
           "id": "R33",
-          "line": 128,
+          "line": 473,
           "message": "clippy::expect_used — reason: test -- panics indicate broken test setup",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -1483,7 +2083,7 @@
         {
           "file": "./tests/property_tests.rs",
           "id": "R33",
-          "line": 198,
+          "line": 504,
           "message": "clippy::expect_used — reason: test -- panics indicate broken test setup",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -1491,7 +2091,7 @@
         {
           "file": "./tests/property_tests.rs",
           "id": "R33",
-          "line": 241,
+          "line": 135,
           "message": "clippy::expect_used — reason: test -- panics indicate broken test setup",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -1499,7 +2099,7 @@
         {
           "file": "./tests/property_tests.rs",
           "id": "R33",
-          "line": 266,
+          "line": 205,
           "message": "clippy::expect_used — reason: test -- panics indicate broken test setup",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -1507,7 +2107,7 @@
         {
           "file": "./tests/property_tests.rs",
           "id": "R33",
-          "line": 295,
+          "line": 248,
           "message": "clippy::expect_used — reason: test -- panics indicate broken test setup",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -1515,7 +2115,7 @@
         {
           "file": "./tests/property_tests.rs",
           "id": "R33",
-          "line": 325,
+          "line": 273,
           "message": "clippy::expect_used — reason: test -- panics indicate broken test setup",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -1523,7 +2123,7 @@
         {
           "file": "./tests/property_tests.rs",
           "id": "R33",
-          "line": 374,
+          "line": 302,
           "message": "clippy::expect_used — reason: test -- panics indicate broken test setup",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -1531,7 +2131,7 @@
         {
           "file": "./tests/property_tests.rs",
           "id": "R33",
-          "line": 431,
+          "line": 332,
           "message": "clippy::expect_used — reason: test -- panics indicate broken test setup",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -1539,7 +2139,7 @@
         {
           "file": "./tests/property_tests.rs",
           "id": "R33",
-          "line": 464,
+          "line": 381,
           "message": "clippy::expect_used — reason: test -- panics indicate broken test setup",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -1547,7 +2147,7 @@
         {
           "file": "./tests/property_tests.rs",
           "id": "R33",
-          "line": 495,
+          "line": 440,
           "message": "clippy::expect_used — reason: test -- panics indicate broken test setup",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -1795,7 +2395,7 @@
         {
           "file": "./tests/property_tests.rs",
           "id": "R33",
-          "line": 31,
+          "line": 38,
           "message": "clippy::expect_used — reason: test helper -- panics indicate broken test setup",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -1803,7 +2403,7 @@
         {
           "file": "./tests/property_tests.rs",
           "id": "R33",
-          "line": 48,
+          "line": 55,
           "message": "clippy::expect_used — reason: test helper -- panics indicate broken test setup",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -1811,8 +2411,40 @@
         {
           "file": "./tests/property_tests.rs",
           "id": "R33",
-          "line": 100,
+          "line": 107,
           "message": "clippy::expect_used — reason: test helper -- panics indicate broken test setup",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/rs/validate/ast_helpers.rs",
+          "id": "R33",
+          "line": 368,
+          "message": "clippy::expect_used — reason: test helper — panic on bad input is correct",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/ts/validate/ast_helpers.rs",
+          "id": "R33",
+          "line": 227,
+          "message": "clippy::expect_used — reason: test helper — panic on bad input is correct",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/adversarial_fixtures.rs",
+          "id": "R33",
+          "line": 39,
+          "message": "clippy::expect_used — reason: test helper — panics indicate broken test infrastructure",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/adversarial_grep_attacks.rs",
+          "id": "R33",
+          "line": 52,
+          "message": "clippy::expect_used — reason: test helper — panics indicate broken test infrastructure",
           "severity": "info",
           "title": "Justified #[allow]"
         },
@@ -1889,6 +2521,46 @@
           "title": "Justified #[allow]"
         },
         {
+          "file": "./src/rs/validate/test_checks.rs",
+          "id": "R33",
+          "line": 226,
+          "message": "clippy::expect_used — reason: test setup and assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/rs/validate/test_quality_checks.rs",
+          "id": "R33",
+          "line": 347,
+          "message": "clippy::expect_used — reason: test setup and assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/rs/validate/test_quality_checks.rs",
+          "id": "R33",
+          "line": 382,
+          "message": "clippy::expect_used — reason: test setup and assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/rs/validate/test_quality_checks.rs",
+          "id": "R33",
+          "line": 439,
+          "message": "clippy::expect_used — reason: test setup and assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/rs/validate/test_quality_checks.rs",
+          "id": "R33",
+          "line": 458,
+          "message": "clippy::expect_used — reason: test setup and assertions",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
           "file": "./src/rs/validate/deny_inventory.rs",
           "id": "R33",
           "line": 85,
@@ -1945,49 +2617,289 @@
           "title": "Justified #[allow]"
         },
         {
-          "file": "./src/rs/validate/test_checks.rs",
+          "file": "./tests/cli_tests.rs",
           "id": "R33",
-          "line": 226,
-          "message": "clippy::expect_used, clippy::disallowed_methods — reason: test setup and assertions",
+          "line": 34,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
           "severity": "info",
           "title": "Justified #[allow]"
         },
         {
-          "file": "./src/rs/validate/test_quality_checks.rs",
+          "file": "./tests/cli_tests.rs",
           "id": "R33",
-          "line": 347,
-          "message": "clippy::expect_used, clippy::disallowed_methods — reason: test setup and assertions",
+          "line": 58,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
           "severity": "info",
           "title": "Justified #[allow]"
         },
         {
-          "file": "./src/rs/validate/test_quality_checks.rs",
+          "file": "./tests/cli_tests.rs",
           "id": "R33",
-          "line": 382,
-          "message": "clippy::expect_used, clippy::disallowed_methods — reason: test setup and assertions",
+          "line": 74,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
           "severity": "info",
           "title": "Justified #[allow]"
         },
         {
-          "file": "./src/rs/validate/test_quality_checks.rs",
+          "file": "./tests/cli_tests.rs",
           "id": "R33",
-          "line": 439,
-          "message": "clippy::expect_used, clippy::disallowed_methods — reason: test setup and assertions",
+          "line": 90,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
           "severity": "info",
           "title": "Justified #[allow]"
         },
         {
-          "file": "./src/rs/validate/test_quality_checks.rs",
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 112,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 134,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 150,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 168,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 184,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 202,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 218,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 242,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 260,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 293,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 326,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 373,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 403,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 430,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
           "id": "R33",
           "line": 458,
-          "message": "clippy::expect_used, clippy::disallowed_methods — reason: test setup and assertions",
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 487,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 542,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 556,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 574,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 602,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 624,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 647,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 665,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 689,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 715,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 735,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 758,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 795,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 828,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 862,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R33",
+          "line": 898,
+          "message": "clippy::expect_used — reason: test — panics indicate broken test infrastructure",
           "severity": "info",
           "title": "Justified #[allow]"
         },
         {
           "file": "./src/modules/clippy.rs",
           "id": "R33",
-          "line": 220,
+          "line": 221,
           "message": "clippy::format_push_string — reason: format! in push_str for template generation",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -1995,7 +2907,7 @@
         {
           "file": "./src/modules/clippy.rs",
           "id": "R33",
-          "line": 238,
+          "line": 239,
           "message": "clippy::format_push_string — reason: format! in push_str for template generation",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -2003,7 +2915,7 @@
         {
           "file": "./src/modules/clippy.rs",
           "id": "R33",
-          "line": 254,
+          "line": 255,
           "message": "clippy::format_push_string — reason: format! in push_str for template generation",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -2013,6 +2925,14 @@
           "id": "R33",
           "line": 246,
           "message": "clippy::format_push_string — reason: format! in push_str for template generation",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/fixtures/grep-attacks/edge-cases/attribute_on_expression.rs",
+          "id": "R33",
+          "line": 27,
+          "message": "clippy::identity_op — reason: loop body attribute test",
           "severity": "info",
           "title": "Justified #[allow]"
         },
@@ -2027,7 +2947,7 @@
         {
           "file": "./src/rs/validate/allow_checks.rs",
           "id": "R33",
-          "line": 274,
+          "line": 485,
           "message": "clippy::indexing_slicing — reason: test assertion indexes into results",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -2035,7 +2955,7 @@
         {
           "file": "./src/rs/validate/allow_checks.rs",
           "id": "R33",
-          "line": 290,
+          "line": 501,
           "message": "clippy::indexing_slicing — reason: test assertion indexes into results",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -2043,7 +2963,7 @@
         {
           "file": "./src/rs/validate/allow_checks.rs",
           "id": "R33",
-          "line": 305,
+          "line": 516,
           "message": "clippy::indexing_slicing — reason: test assertion indexes into results",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -2051,7 +2971,7 @@
         {
           "file": "./src/rs/validate/allow_checks.rs",
           "id": "R33",
-          "line": 322,
+          "line": 533,
           "message": "clippy::indexing_slicing — reason: test assertion indexes into results",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -2059,7 +2979,7 @@
         {
           "file": "./src/rs/validate/allow_checks.rs",
           "id": "R33",
-          "line": 337,
+          "line": 548,
           "message": "clippy::indexing_slicing — reason: test assertion indexes into results",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -2067,7 +2987,7 @@
         {
           "file": "./src/rs/validate/allow_checks.rs",
           "id": "R33",
-          "line": 352,
+          "line": 563,
           "message": "clippy::indexing_slicing — reason: test assertion indexes into results",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -2075,7 +2995,7 @@
         {
           "file": "./src/rs/validate/code_quality_checks.rs",
           "id": "R33",
-          "line": 214,
+          "line": 357,
           "message": "clippy::indexing_slicing — reason: test assertion indexes into results",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -2083,7 +3003,7 @@
         {
           "file": "./src/rs/validate/code_quality_checks.rs",
           "id": "R33",
-          "line": 258,
+          "line": 401,
           "message": "clippy::indexing_slicing — reason: test assertion indexes into results",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -2091,7 +3011,7 @@
         {
           "file": "./src/rs/validate/code_quality_checks.rs",
           "id": "R33",
-          "line": 305,
+          "line": 448,
           "message": "clippy::indexing_slicing — reason: test assertion indexes into results",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -2099,7 +3019,7 @@
         {
           "file": "./src/rs/validate/code_quality_checks.rs",
           "id": "R33",
-          "line": 335,
+          "line": 478,
           "message": "clippy::indexing_slicing — reason: test assertion indexes into results",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -2225,9 +3145,41 @@
           "title": "Justified #[allow]"
         },
         {
-          "file": "./src/rs/validate/structure_checks.rs",
+          "file": "./src/rs/validate/source_scan.rs",
           "id": "R33",
-          "line": 198,
+          "line": 242,
+          "message": "clippy::indexing_slicing — reason: test assertion indexes into results",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/rs/validate/source_scan.rs",
+          "id": "R33",
+          "line": 260,
+          "message": "clippy::indexing_slicing — reason: test assertion indexes into results",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/rs/validate/source_scan.rs",
+          "id": "R33",
+          "line": 270,
+          "message": "clippy::indexing_slicing — reason: test assertion indexes into results",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/rs/validate/source_scan.rs",
+          "id": "R33",
+          "line": 280,
+          "message": "clippy::indexing_slicing — reason: test assertion indexes into results",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/rs/validate/source_scan.rs",
+          "id": "R33",
+          "line": 289,
           "message": "clippy::indexing_slicing — reason: test assertion indexes into results",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -2235,7 +3187,15 @@
         {
           "file": "./src/rs/validate/structure_checks.rs",
           "id": "R33",
-          "line": 213,
+          "line": 222,
+          "message": "clippy::indexing_slicing — reason: test assertion indexes into results",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/rs/validate/structure_checks.rs",
+          "id": "R33",
+          "line": 237,
           "message": "clippy::indexing_slicing — reason: test assertion indexes into results",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -2321,6 +3281,46 @@
           "title": "Justified #[allow]"
         },
         {
+          "file": "./src/rs/validate/ast_helpers.rs",
+          "id": "R33",
+          "line": 405,
+          "message": "clippy::indexing_slicing — reason: test assertion on known-length vector",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/rs/validate/ast_helpers.rs",
+          "id": "R33",
+          "line": 425,
+          "message": "clippy::indexing_slicing — reason: test assertion on known-length vector",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/rs/validate/ast_helpers.rs",
+          "id": "R33",
+          "line": 435,
+          "message": "clippy::indexing_slicing — reason: test assertion on known-length vector",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/rs/validate/ast_helpers.rs",
+          "id": "R33",
+          "line": 503,
+          "message": "clippy::indexing_slicing — reason: test assertion on known-length vector",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/rs/validate/ast_helpers.rs",
+          "id": "R33",
+          "line": 526,
+          "message": "clippy::indexing_slicing — reason: test assertion on known-length vector",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
           "file": "./src/discover.rs",
           "id": "R33",
           "line": 47,
@@ -2331,7 +3331,7 @@
         {
           "file": "./src/fs.rs",
           "id": "R33",
-          "line": 35,
+          "line": 38,
           "message": "clippy::manual_ok_err — reason: structurally distinct from read_file to avoid cargo-dupes match",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -2347,7 +3347,7 @@
         {
           "file": "./src/rs/validate/allow_checks.rs",
           "id": "R33",
-          "line": 369,
+          "line": 580,
           "message": "clippy::needless_collect — reason: collect into Vec for readable test assertions",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -2355,7 +3355,7 @@
         {
           "file": "./src/rs/validate/allow_checks.rs",
           "id": "R33",
-          "line": 395,
+          "line": 606,
           "message": "clippy::needless_collect — reason: collect into Vec for readable test assertions",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -2363,7 +3363,7 @@
         {
           "file": "./src/rs/validate/allow_checks.rs",
           "id": "R33",
-          "line": 414,
+          "line": 625,
           "message": "clippy::needless_collect — reason: collect into Vec for readable test assertions",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -2411,7 +3411,7 @@
         {
           "file": "./tests/property_tests.rs",
           "id": "R33",
-          "line": 74,
+          "line": 81,
           "message": "clippy::panic — reason: test helper -- invalid JSON means broken test setup",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -2428,15 +3428,71 @@
           "file": "./src/commands/validate.rs",
           "id": "R33",
           "line": 17,
-          "message": "clippy::print_stderr, clippy::disallowed_methods — reason: CLI command — stderr output and exit codes",
+          "message": "clippy::print_stderr — reason: CLI command — stderr output and exit codes",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/commands/check.rs",
+          "id": "R33",
+          "line": 5,
+          "message": "clippy::print_stderr — reason: CLI command — user-facing output and exit codes",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/commands/diff.rs",
+          "id": "R33",
+          "line": 5,
+          "message": "clippy::print_stderr — reason: CLI command — user-facing output and exit codes",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/commands/generate.rs",
+          "id": "R33",
+          "line": 64,
+          "message": "clippy::print_stderr — reason: CLI command — user-facing output and exit codes",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/commands/generate.rs",
+          "id": "R33",
+          "line": 100,
+          "message": "clippy::print_stderr — reason: CLI command — user-facing output and exit codes",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/commands/generate.rs",
+          "id": "R33",
+          "line": 139,
+          "message": "clippy::print_stderr — reason: CLI command — user-facing output and exit codes",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/commands/modules_cmd.rs",
+          "id": "R33",
+          "line": 25,
+          "message": "clippy::print_stderr — reason: CLI command — user-facing output and exit codes",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/commands/generate.rs",
+          "id": "R33",
+          "line": 14,
+          "message": "clippy::print_stderr — reason: CLI command — user-facing output and process::exit for error codes",
           "severity": "info",
           "title": "Justified #[allow]"
         },
         {
           "file": "./src/main.rs",
           "id": "R33",
-          "line": 20,
-          "message": "clippy::print_stderr, clippy::disallowed_methods — reason: CLI entry point — stderr output and process::exit for error codes are intentional",
+          "line": 25,
+          "message": "clippy::print_stderr — reason: CLI entry point — stderr output and process::exit for error codes are intentional",
           "severity": "info",
           "title": "Justified #[allow]"
         },
@@ -2444,7 +3500,7 @@
           "file": "./src/config/mod.rs",
           "id": "R33",
           "line": 5,
-          "message": "clippy::print_stderr, clippy::disallowed_methods — reason: CLI tool — config parse errors reported to stderr; guardrail3 config parsing — no garde validation needed for own config",
+          "message": "clippy::print_stderr — reason: CLI tool — config parse errors reported to stderr; guardrail3 config parsing — no garde validation needed for own config",
           "severity": "info",
           "title": "Justified #[allow]"
         },
@@ -2469,6 +3525,62 @@
           "id": "R33",
           "line": 5,
           "message": "clippy::print_stdout — reason: CLI command — user-facing output",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/commands/check.rs",
+          "id": "R33",
+          "line": 5,
+          "message": "clippy::print_stdout — reason: CLI command — user-facing output and exit codes",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/commands/diff.rs",
+          "id": "R33",
+          "line": 5,
+          "message": "clippy::print_stdout — reason: CLI command — user-facing output and exit codes",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/commands/generate.rs",
+          "id": "R33",
+          "line": 64,
+          "message": "clippy::print_stdout — reason: CLI command — user-facing output and exit codes",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/commands/generate.rs",
+          "id": "R33",
+          "line": 100,
+          "message": "clippy::print_stdout — reason: CLI command — user-facing output and exit codes",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/commands/generate.rs",
+          "id": "R33",
+          "line": 139,
+          "message": "clippy::print_stdout — reason: CLI command — user-facing output and exit codes",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/commands/modules_cmd.rs",
+          "id": "R33",
+          "line": 25,
+          "message": "clippy::print_stdout — reason: CLI command — user-facing output and exit codes",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/commands/generate.rs",
+          "id": "R33",
+          "line": 14,
+          "message": "clippy::print_stdout — reason: CLI command — user-facing output and process::exit for error codes",
           "severity": "info",
           "title": "Justified #[allow]"
         },
@@ -2513,58 +3625,18 @@
           "title": "Justified #[allow]"
         },
         {
-          "file": "./src/commands/check.rs",
+          "file": "./src/ts/validate/source_scan.rs",
           "id": "R33",
-          "line": 5,
-          "message": "clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods — reason: CLI command — user-facing output and exit codes",
+          "line": 304,
+          "message": "clippy::string_slice — reason: @ts-expect-error is ASCII, byte offset + 16 is safe",
           "severity": "info",
           "title": "Justified #[allow]"
         },
         {
-          "file": "./src/commands/diff.rs",
+          "file": "./src/ts/validate/source_scan.rs",
           "id": "R33",
-          "line": 5,
-          "message": "clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods — reason: CLI command — user-facing output and exit codes",
-          "severity": "info",
-          "title": "Justified #[allow]"
-        },
-        {
-          "file": "./src/commands/generate.rs",
-          "id": "R33",
-          "line": 64,
-          "message": "clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods — reason: CLI command — user-facing output and exit codes",
-          "severity": "info",
-          "title": "Justified #[allow]"
-        },
-        {
-          "file": "./src/commands/generate.rs",
-          "id": "R33",
-          "line": 100,
-          "message": "clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods — reason: CLI command — user-facing output and exit codes",
-          "severity": "info",
-          "title": "Justified #[allow]"
-        },
-        {
-          "file": "./src/commands/generate.rs",
-          "id": "R33",
-          "line": 139,
-          "message": "clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods — reason: CLI command — user-facing output and exit codes",
-          "severity": "info",
-          "title": "Justified #[allow]"
-        },
-        {
-          "file": "./src/commands/modules_cmd.rs",
-          "id": "R33",
-          "line": 25,
-          "message": "clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods — reason: CLI command — user-facing output and exit codes",
-          "severity": "info",
-          "title": "Justified #[allow]"
-        },
-        {
-          "file": "./src/commands/generate.rs",
-          "id": "R33",
-          "line": 14,
-          "message": "clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods — reason: CLI command — user-facing output and process::exit for error codes",
+          "line": 351,
+          "message": "clippy::string_slice — reason: @ts-expect-error is ASCII, byte offset + 16 is safe",
           "severity": "info",
           "title": "Justified #[allow]"
         },
@@ -2579,7 +3651,7 @@
         {
           "file": "./src/rs/validate/allow_checks.rs",
           "id": "R33",
-          "line": 231,
+          "line": 448,
           "message": "clippy::string_slice — reason: cfg_attr parsing on known ASCII content",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -2587,7 +3659,7 @@
         {
           "file": "./src/rs/validate/allow_checks.rs",
           "id": "R33",
-          "line": 146,
+          "line": 341,
           "message": "clippy::string_slice — reason: garde attribute parsing on known ASCII content",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -2596,7 +3668,7 @@
           "file": "./src/rs/validate/source_scan.rs",
           "id": "R33",
           "line": 172,
-          "message": "clippy::string_slice — reason: inline comment stripping on known ASCII delimiters",
+          "message": "clippy::string_slice — reason: inline comment stripping on known ASCII delimiters /* and */",
           "severity": "info",
           "title": "Justified #[allow]"
         },
@@ -2633,17 +3705,9 @@
           "title": "Justified #[allow]"
         },
         {
-          "file": "./src/ts/validate/source_scan.rs",
-          "id": "R33",
-          "line": 194,
-          "message": "clippy::string_slice — reason: ts-expect-error ASCII parsing",
-          "severity": "info",
-          "title": "Justified #[allow]"
-        },
-        {
           "file": "./src/rs/validate/structure_checks.rs",
           "id": "R33",
-          "line": 97,
+          "line": 123,
           "message": "clippy::string_slice — reason: unsafe keyword detection on ASCII",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -2659,7 +3723,7 @@
         {
           "file": "./src/rs/validate/mod.rs",
           "id": "R33",
-          "line": 33,
+          "line": 34,
           "message": "clippy::struct_excessive_bools — reason: domain flags are independent toggles, not a state machine",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -2669,6 +3733,14 @@
           "id": "R33",
           "line": 146,
           "message": "clippy::suspicious_operation_groupings — reason: tuple comparison (a_minor,a_patch)>=(r_minor,r_patch) is intentional",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/fixtures/grep-attacks/edge-cases/multiple_allows_one_line.rs",
+          "id": "R33",
+          "line": 21,
+          "message": "clippy::todo — reason: compact form test",
           "severity": "info",
           "title": "Justified #[allow]"
         },
@@ -2699,7 +3771,7 @@
         {
           "file": "./src/main.rs",
           "id": "R33",
-          "line": 21,
+          "line": 26,
           "message": "clippy::too_many_lines — reason: CLI dispatch for all subcommands",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -2777,10 +3849,34 @@
           "title": "Justified #[allow]"
         },
         {
+          "file": "./src/ts/validate/package_check.rs",
+          "id": "R33",
+          "line": 5,
+          "message": "clippy::too_many_lines — reason: comprehensive package.json validation; guardrail3 JSON config inspection",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/ts/validate/tsconfig_check.rs",
+          "id": "R33",
+          "line": 8,
+          "message": "clippy::too_many_lines — reason: comprehensive tsconfig validation; guardrail3 JSON config inspection",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
           "file": "./src/hooks/hook_checks.rs",
           "id": "R33",
           "line": 241,
           "message": "clippy::too_many_lines — reason: hook pattern checking across multiple tools",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/ts/validate/jscpd_check.rs",
+          "id": "R33",
+          "line": 5,
+          "message": "clippy::too_many_lines — reason: jscpd config validation; guardrail3 JSON config inspection — not a trust boundary",
           "severity": "info",
           "title": "Justified #[allow]"
         },
@@ -2843,7 +3939,7 @@
         {
           "file": "./src/rs/validate/mod.rs",
           "id": "R33",
-          "line": 53,
+          "line": 54,
           "message": "clippy::too_many_lines — reason: validation orchestrator — each section is a simple block, splitting would reduce readability",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -2857,26 +3953,10 @@
           "title": "Justified #[allow]"
         },
         {
-          "file": "./src/ts/validate/package_check.rs",
+          "file": "./tests/adversarial_grep_attacks.rs",
           "id": "R33",
-          "line": 5,
-          "message": "clippy::too_many_lines, clippy::disallowed_methods — reason: comprehensive package.json validation; guardrail3 JSON config inspection",
-          "severity": "info",
-          "title": "Justified #[allow]"
-        },
-        {
-          "file": "./src/ts/validate/tsconfig_check.rs",
-          "id": "R33",
-          "line": 8,
-          "message": "clippy::too_many_lines, clippy::disallowed_methods — reason: comprehensive tsconfig validation; guardrail3 JSON config inspection",
-          "severity": "info",
-          "title": "Justified #[allow]"
-        },
-        {
-          "file": "./src/ts/validate/jscpd_check.rs",
-          "id": "R33",
-          "line": 5,
-          "message": "clippy::too_many_lines, clippy::disallowed_methods — reason: jscpd config validation; guardrail3 JSON config inspection — not a trust boundary",
+          "line": 43,
+          "message": "clippy::type_complexity — reason: (id, severity) tuple is clear in context",
           "severity": "info",
           "title": "Justified #[allow]"
         },
@@ -2947,7 +4027,7 @@
         {
           "file": "./tests/property_tests.rs",
           "id": "R33",
-          "line": 102,
+          "line": 109,
           "message": "clippy::type_complexity — reason: slice of tuples is the clearest API here",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -2955,7 +4035,7 @@
         {
           "file": "./tests/property_tests.rs",
           "id": "R33",
-          "line": 73,
+          "line": 80,
           "message": "clippy::type_complexity — reason: tuple type is clear in context",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -2969,9 +4049,25 @@
           "title": "Justified #[allow]"
         },
         {
+          "file": "./tests/fixtures/adversarial/unicode_allow.rs",
+          "id": "R33",
+          "line": 1,
+          "message": "clippy::unwrap_used — rea&#x200b;son: has zero-width space in \"reason\"",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/fixtures/grep-attacks/edge-cases/multiple_allows_one_line.rs",
+          "id": "R33",
+          "line": 21,
+          "message": "clippy::unwrap_used — reason: compact form test",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
           "file": "./tests/property_tests.rs",
           "id": "R33",
-          "line": 199,
+          "line": 206,
           "message": "clippy::unwrap_used — reason: test assertions",
           "severity": "info",
           "title": "Justified #[allow]"
@@ -2979,8 +4075,24 @@
         {
           "file": "./tests/property_tests.rs",
           "id": "R33",
-          "line": 161,
+          "line": 168,
           "message": "clippy::unwrap_used — reason: test assertions use unwrap for clarity",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/fixtures/adversarial/allow_with_reason.rs",
+          "id": "R33",
+          "line": 1,
+          "message": "clippy::unwrap_used — reason: test helper needs unwrap",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/fixtures/grep-attacks/edge-cases/multiple_allows_one_line.rs",
+          "id": "R33",
+          "line": 5,
+          "message": "clippy::unwrap_used — reason: testing multiple lints in one attribute",
           "severity": "info",
           "title": "Justified #[allow]"
         },
@@ -2993,10 +4105,42 @@
           "title": "Justified #[allow]"
         },
         {
+          "file": "./src/rs/validate/ast_helpers.rs",
+          "id": "R33",
+          "line": 229,
+          "message": "clippy::wildcard_enum_match_arm — reason: syn ImplItem has many variants, exhaustive match is impractical",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/rs/validate/ast_helpers.rs",
+          "id": "R33",
+          "line": 212,
+          "message": "clippy::wildcard_enum_match_arm — reason: syn Item has many variants, exhaustive match is impractical",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./src/rs/validate/ast_helpers.rs",
+          "id": "R33",
+          "line": 239,
+          "message": "clippy::wildcard_enum_match_arm — reason: syn TraitItem has many variants, exhaustive match is impractical",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
           "file": "./src/rs/validate/deny_bans.rs",
           "id": "R33",
           "line": 133,
           "message": "clippy::wildcard_in_or_patterns — reason: explicit handling of all feature patterns",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/fixtures/grep-attacks/edge-cases/multiple_allows_one_line.rs",
+          "id": "R33",
+          "line": 21,
+          "message": "dead_code — reason: compact form test",
           "severity": "info",
           "title": "Justified #[allow]"
         },
@@ -3033,9 +4177,137 @@
           "title": "Justified #[allow]"
         },
         {
+          "file": "./tests/fixtures/grep-attacks/edge-cases/no_main_lib.rs",
+          "id": "R33",
+          "line": 12,
+          "message": "dead_code — reason: lib-style unused function test",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/fixtures/grep-attacks/edge-cases/syntax_error_midway.rs",
+          "id": "R33",
+          "line": 31,
+          "message": "dead_code — reason: post-error allow — can parser see this?",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/fixtures/grep-attacks/edge-cases/multiple_allows_one_line.rs",
+          "id": "R33",
+          "line": 15,
+          "message": "dead_code — reason: test",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/fixtures/grep-attacks/edge-cases/unicode_bom.rs",
+          "id": "R33",
+          "line": 3,
+          "message": "dead_code — reason: testing BOM handling",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/fixtures/grep-attacks/edge-cases/crlf_line_endings.rs",
+          "id": "R33",
+          "line": 3,
+          "message": "dead_code — reason: testing CRLF handling",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/fixtures/grep-attacks/edge-cases/multiple_allows_one_line.rs",
+          "id": "R33",
+          "line": 5,
+          "message": "dead_code — reason: testing multiple lints in one attribute",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/fixtures/grep-attacks/edge-cases/syntax_error_midway.rs",
+          "id": "R33",
+          "line": 8,
+          "message": "dead_code — reason: valid code before syntax error",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/fixtures/grep-attacks/edge-cases/syntax_error_midway.rs",
+          "id": "R33",
+          "line": 15,
+          "message": "unused — reason: another valid allow before the error",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/fixtures/grep-attacks/edge-cases/multiple_allows_one_line.rs",
+          "id": "R33",
+          "line": 21,
+          "message": "unused — reason: compact form test",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/fixtures/grep-attacks/edge-cases/no_main_lib.rs",
+          "id": "R33",
+          "line": 18,
+          "message": "unused — reason: inner module test",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/fixtures/grep-attacks/edge-cases/multiple_allows_one_line.rs",
+          "id": "R33",
+          "line": 13,
+          "message": "unused — reason: test",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/fixtures/grep-attacks/edge-cases/multiple_allows_one_line.rs",
+          "id": "R33",
+          "line": 5,
+          "message": "unused — reason: testing multiple lints in one attribute",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/fixtures/grep-attacks/edge-cases/crlf_line_endings.rs",
+          "id": "R33",
+          "line": 9,
+          "message": "unused_variables — reason: CRLF test",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/fixtures/grep-attacks/edge-cases/attribute_on_expression.rs",
+          "id": "R33",
+          "line": 7,
+          "message": "unused_variables — reason: expression-level attribute test",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/fixtures/grep-attacks/edge-cases/attribute_on_expression.rs",
+          "id": "R33",
+          "line": 17,
+          "message": "unused_variables — reason: match arm attribute test",
+          "severity": "info",
+          "title": "Justified #[allow]"
+        },
+        {
+          "file": "./tests/fixtures/adversarial/garde_skip_no_reason.rs",
+          "id": "R34",
+          "line": 2,
+          "message": "garde(skip) has no // comment justification",
+          "severity": "error",
+          "title": "garde(skip) without reason"
+        },
+        {
           "file": "./Cargo.toml",
           "id": "R36",
-          "line": 65,
+          "line": 72,
           "message": "empty_line_after_doc_comments = \"allow\" # EXCEPTION: stylistic",
           "severity": "info",
           "title": "EXCEPTION comment"
@@ -3043,7 +4315,7 @@
         {
           "file": "./Cargo.toml",
           "id": "R36",
-          "line": 61,
+          "line": 68,
           "message": "missing_docs_in_private_items = \"allow\" # EXCEPTION: internal tool, docs added incrementally",
           "severity": "info",
           "title": "EXCEPTION comment"
@@ -3051,7 +4323,7 @@
         {
           "file": "./Cargo.toml",
           "id": "R36",
-          "line": 62,
+          "line": 69,
           "message": "module_name_repetitions = \"allow\" # EXCEPTION: types like CheckResult in check module",
           "severity": "info",
           "title": "EXCEPTION comment"
@@ -3059,7 +4331,7 @@
         {
           "file": "./Cargo.toml",
           "id": "R36",
-          "line": 69,
+          "line": 76,
           "message": "multiple_crate_versions = \"allow\" # EXCEPTION: defer to deny.toml",
           "severity": "info",
           "title": "EXCEPTION comment"
@@ -3067,7 +4339,7 @@
         {
           "file": "./Cargo.toml",
           "id": "R36",
-          "line": 63,
+          "line": 70,
           "message": "must_use_candidate = \"allow\" # EXCEPTION: not every function needs #[must_use]",
           "severity": "info",
           "title": "EXCEPTION comment"
@@ -3075,7 +4347,7 @@
         {
           "file": "./Cargo.toml",
           "id": "R36",
-          "line": 64,
+          "line": 71,
           "message": "option_if_let_else = \"allow\" # EXCEPTION: if let is often clearer",
           "severity": "info",
           "title": "EXCEPTION comment"
@@ -3083,7 +4355,7 @@
         {
           "file": "./Cargo.toml",
           "id": "R36",
-          "line": 67,
+          "line": 74,
           "message": "ref_option_ref = \"allow\" # EXCEPTION: valid in function signatures",
           "severity": "info",
           "title": "EXCEPTION comment"
@@ -3091,7 +4363,7 @@
         {
           "file": "./Cargo.toml",
           "id": "R36",
-          "line": 66,
+          "line": 73,
           "message": "single_match_else = \"allow\" # EXCEPTION: match sometimes clearer",
           "severity": "info",
           "title": "EXCEPTION comment"
@@ -3099,7 +4371,7 @@
         {
           "file": "./Cargo.toml",
           "id": "R36",
-          "line": 68,
+          "line": 75,
           "message": "trivially_copy_pass_by_ref = \"allow\" # EXCEPTION: pedantic micro-optimization",
           "severity": "info",
           "title": "EXCEPTION comment"
@@ -3111,6 +4383,30 @@
           "message": "yanked = \"warn\" # EXCEPTION: yanked crates in transitive deps are not actionable -- warn instead of deny",
           "severity": "info",
           "title": "EXCEPTION comment"
+        },
+        {
+          "file": "./tests/fixtures/grep-attacks/edge-cases/nested_cfg_attr.rs",
+          "id": "R37",
+          "line": 23,
+          "message": "#[cfg_attr(feature = \"x\", derive(Debug), allow(clippy::unwrap_used))]",
+          "severity": "info",
+          "title": "cfg_attr allow"
+        },
+        {
+          "file": "./tests/fixtures/adversarial/allow_in_cfg_attr.rs",
+          "id": "R37",
+          "line": 1,
+          "message": "#[cfg_attr(test, allow(clippy::panic))]",
+          "severity": "info",
+          "title": "cfg_attr allow"
+        },
+        {
+          "file": "./src/rs/validate/ast_helpers.rs",
+          "id": "R38",
+          "line": null,
+          "message": "508 effective lines (max 500)",
+          "severity": "error",
+          "title": "File too long"
         },
         {
           "file": "./src/rs/validate/release_crate_deps.rs",
@@ -3129,6 +4425,22 @@
           "title": "File too long"
         },
         {
+          "file": "./src/rs/validate/allow_checks.rs",
+          "id": "R38",
+          "line": null,
+          "message": "558 effective lines (max 500)",
+          "severity": "error",
+          "title": "File too long"
+        },
+        {
+          "file": "./src/ts/validate/source_scan.rs",
+          "id": "R38",
+          "line": null,
+          "message": "564 effective lines (max 500)",
+          "severity": "error",
+          "title": "File too long"
+        },
+        {
           "file": "./src/rs/validate/cargo_lints.rs",
           "id": "R39",
           "line": null,
@@ -3137,10 +4449,26 @@
           "title": "File approaching limit"
         },
         {
+          "file": "./src/rs/validate/code_quality_checks.rs",
+          "id": "R39",
+          "line": null,
+          "message": "416 effective lines (warn at 400, max 500)",
+          "severity": "warn",
+          "title": "File approaching limit"
+        },
+        {
           "file": "./src/hooks/hook_checks.rs",
           "id": "R39",
           "line": null,
           "message": "434 effective lines (warn at 400, max 500)",
+          "severity": "warn",
+          "title": "File approaching limit"
+        },
+        {
+          "file": "./src/ts/validate/ast_helpers.rs",
+          "id": "R39",
+          "line": null,
+          "message": "435 effective lines (warn at 400, max 500)",
           "severity": "warn",
           "title": "File approaching limit"
         },
@@ -3161,36 +4489,28 @@
           "title": "File approaching limit"
         },
         {
-          "file": "./src/rs/validate/code_quality_checks.rs",
-          "id": "R43",
-          "line": 33,
-          "message": "if trimmed.contains(\"unreachable!(\") && !is_test_file {",
-          "severity": "info",
-          "title": "unreachable! macro"
+          "file": "./src/main.rs",
+          "id": "R41",
+          "line": null,
+          "message": "16 use statements (warn at 15, max 20)",
+          "severity": "warn",
+          "title": "Many use statements"
         },
         {
-          "file": "./src/rs/validate/code_quality_checks.rs",
+          "file": "./tests/fixtures/adversarial/has_unsafe.rs",
+          "id": "R42",
+          "line": 2,
+          "message": "unsafe {",
+          "severity": "error",
+          "title": "unsafe usage"
+        },
+        {
+          "file": "./tests/fixtures/adversarial/has_todo.rs",
           "id": "R43",
-          "line": 17,
-          "message": "for macro_name in &[\"todo!(\", \"unimplemented!(\"] {",
+          "line": 2,
+          "message": "todo!(\"finish this later\");",
           "severity": "warn",
           "title": "todo! macro"
-        },
-        {
-          "file": "./src/rs/validate/code_quality_checks.rs",
-          "id": "R43",
-          "line": 337,
-          "message": "let content = \"fn foo() { todo!(); }\";",
-          "severity": "warn",
-          "title": "todo! macro"
-        },
-        {
-          "file": "./src/rs/validate/code_quality_checks.rs",
-          "id": "R43",
-          "line": 17,
-          "message": "for macro_name in &[\"todo!(\", \"unimplemented!(\"] {",
-          "severity": "warn",
-          "title": "unimplemented! macro"
         },
         {
           "file": "./src/rs/validate/release_crate_deps.rs",
@@ -3333,14 +4653,6 @@
           "id": "R44",
           "line": 467,
           "message": ".expect(\"write\");",
-          "severity": "warn",
-          "title": ".expect() usage"
-        },
-        {
-          "file": "./src/rs/validate/code_quality_checks.rs",
-          "id": "R44",
-          "line": 64,
-          "message": "if trimmed.contains(\".expect(\") {",
           "severity": "warn",
           "title": ".expect() usage"
         },
@@ -3569,10 +4881,26 @@
           "title": ".expect() usage"
         },
         {
+          "file": "./src/rs/validate/ast_helpers.rs",
+          "id": "R44",
+          "line": 369,
+          "message": "parse_file(source).expect(\"test input should be valid Rust\")",
+          "severity": "warn",
+          "title": ".expect() usage"
+        },
+        {
           "file": "./src/rs/validate/release_crate_deps.rs",
           "id": "R44",
           "line": 500,
           "message": "parse_toml(\"[package]\\nname = \\\"x\\\"\\nkeywords = [\\\"a\\\",\\\"b\\\",\\\"c\\\"]\").expect(\"parse\"); // reason: test",
+          "severity": "warn",
+          "title": ".expect() usage"
+        },
+        {
+          "file": "./src/ts/validate/ast_helpers.rs",
+          "id": "R44",
+          "line": 228,
+          "message": "parse_typescript(source).expect(\"test input should be valid TypeScript\")",
           "severity": "warn",
           "title": ".expect() usage"
         },
@@ -3665,30 +4993,6 @@
           "title": ".expect() usage"
         },
         {
-          "file": "./src/rs/validate/code_quality_checks.rs",
-          "id": "R44",
-          "line": 69,
-          "message": "title: \".expect() usage\".to_owned(),",
-          "severity": "warn",
-          "title": ".expect() usage"
-        },
-        {
-          "file": "./src/rs/validate/code_quality_checks.rs",
-          "id": "R44",
-          "line": 52,
-          "message": "if trimmed.contains(\".unwrap()\") {",
-          "severity": "warn",
-          "title": ".unwrap() usage"
-        },
-        {
-          "file": "./src/rs/validate/code_quality_checks.rs",
-          "id": "R44",
-          "line": 57,
-          "message": "title: \".unwrap() usage\".to_owned(),",
-          "severity": "warn",
-          "title": ".unwrap() usage"
-        },
-        {
           "file": "./CLAUDE.md",
           "id": "R49",
           "line": null,
@@ -3697,9 +5001,169 @@
           "title": "CLAUDE.md exists"
         },
         {
+          "file": "./fuzz/fuzz_targets/fuzz_discover.rs",
+          "id": "R58",
+          "line": 40,
+          "message": "Use centralized fs module instead of direct std::fs call: let _ = std::fs::create_dir_all(&apps_backend);",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./fuzz/fuzz_targets/fuzz_discover.rs",
+          "id": "R58",
+          "line": 41,
+          "message": "Use centralized fs module instead of direct std::fs call: let _ = std::fs::write(apps_backend.join(\"Cargo.toml\"), content);",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./fuzz/fuzz_targets/fuzz_discover.rs",
+          "id": "R58",
+          "line": 29,
+          "message": "Use centralized fs module instead of direct std::fs call: let _ = std::fs::write(dir.path().join(\"Cargo.toml\"), content);",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./fuzz/fuzz_targets/fuzz_discover.rs",
+          "id": "R58",
+          "line": 35,
+          "message": "Use centralized fs module instead of direct std::fs call: let _ = std::fs::write(dir.path().join(\"package.json\"), content);",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./tests/adversarial_fixtures.rs",
+          "id": "R58",
+          "line": 53,
+          "message": "Use centralized fs module instead of direct std::fs call: let content = std::fs::read_to_string(&fixture_path).expect(\"read fixture\");",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./tests/adversarial_grep_attacks.rs",
+          "id": "R58",
+          "line": 67,
+          "message": "Use centralized fs module instead of direct std::fs call: let content = std::fs::read_to_string(&fixture_path).expect(\"read fixture\");",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./tests/adversarial_fixtures.rs",
+          "id": "R58",
+          "line": 47,
+          "message": "Use centralized fs module instead of direct std::fs call: std::fs::create_dir_all(&src_dir).expect(\"create src/\");",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./tests/adversarial_grep_attacks.rs",
+          "id": "R58",
+          "line": 61,
+          "message": "Use centralized fs module instead of direct std::fs call: std::fs::create_dir_all(&src_dir).expect(\"create src/\");",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R58",
+          "line": 395,
+          "message": "Use centralized fs module instead of direct std::fs call: std::fs::read_to_string(tmp.path().join(\"guardrail3.toml\")).expect(\"should read config\");",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R58",
+          "line": 422,
+          "message": "Use centralized fs module instead of direct std::fs call: std::fs::read_to_string(tmp.path().join(\"guardrail3.toml\")).expect(\"should read config\");",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R58",
+          "line": 477,
+          "message": "Use centralized fs module instead of direct std::fs call: std::fs::read_to_string(tmp.path().join(\"guardrail3.toml\")).expect(\"should read config\");",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R58",
+          "line": 498,
+          "message": "Use centralized fs module instead of direct std::fs call: std::fs::write(",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./tests/adversarial_fixtures.rs",
+          "id": "R58",
+          "line": 54,
+          "message": "Use centralized fs module instead of direct std::fs call: std::fs::write(src_dir.join(\"lib.rs\"), &content).expect(\"write lib.rs\");",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./tests/adversarial_grep_attacks.rs",
+          "id": "R58",
+          "line": 68,
+          "message": "Use centralized fs module instead of direct std::fs call: std::fs::write(src_dir.join(\"lib.rs\"), &content).expect(\"write lib.rs\");",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./tests/adversarial_fixtures.rs",
+          "id": "R58",
+          "line": 50,
+          "message": "Use centralized fs module instead of direct std::fs call: std::fs::write(tmp.path().join(\"Cargo.toml\"), MINIMAL_CARGO_TOML).expect(\"write Cargo.toml\");",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./tests/adversarial_grep_attacks.rs",
+          "id": "R58",
+          "line": 64,
+          "message": "Use centralized fs module instead of direct std::fs call: std::fs::write(tmp.path().join(\"Cargo.toml\"), MINIMAL_CARGO_TOML).expect(\"write Cargo.toml\");",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R58",
+          "line": 843,
+          "message": "Use centralized fs module instead of direct std::fs call: std::fs::write(tmp.path().join(\"rustfmt.toml\"), \"# tampered\\n\").expect(\"tamper file\");",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./tests/cli_tests.rs",
+          "id": "R58",
+          "line": 877,
+          "message": "Use centralized fs module instead of direct std::fs call: std::fs::write(tmp.path().join(\"rustfmt.toml\"), \"# tampered\\n\").expect(\"tamper file\");",
+          "severity": "error",
+          "title": "Direct std::fs call"
+        },
+        {
+          "file": "./tests/fixtures/grep-attacks/rust-structural/cfg_gated_use.rs",
+          "id": "R58",
+          "line": 6,
+          "message": "Use centralized fs module instead of direct std::fs import: #[cfg(test)]",
+          "severity": "error",
+          "title": "Direct std::fs import"
+        },
+        {
+          "file": "./tests/fixtures/adversarial/direct_std_fs.rs",
+          "id": "R58",
+          "line": 1,
+          "message": "Use centralized fs module instead of direct std::fs import: use std::fs;",
+          "severity": "error",
+          "title": "Direct std::fs import"
+        },
+        {
           "file": "./tests/property_tests.rs",
           "id": "R58",
-          "line": 14,
+          "line": 21,
           "message": "Use centralized fs module instead of direct std::fs import: use std::fs;",
           "severity": "error",
           "title": "Direct std::fs import"
@@ -3848,7 +5312,7 @@
           "file": null,
           "id": "R-TEST-05",
           "line": null,
-          "message": "116 public functions, 150 test functions (ratio: 129%)",
+          "message": "134 public functions, 313 test functions (ratio: 233%)",
           "severity": "info",
           "title": "Test coverage inventory"
         },
@@ -3885,31 +5349,895 @@
           "file": null,
           "id": "R-BIN-01",
           "line": null,
-          "message": "No workflow building --release with action-gh-release",
+          "message": "Workflow builds --release with action-gh-release",
           "severity": "info",
-          "title": "guardrail3: no binary release workflow"
+          "title": "guardrail3-fuzz: binary release workflow found"
+        },
+        {
+          "file": null,
+          "id": "R-BIN-01",
+          "line": null,
+          "message": "Workflow builds --release with action-gh-release",
+          "severity": "info",
+          "title": "guardrail3: binary release workflow found"
         },
         {
           "file": null,
           "id": "R-BIN-02",
           "line": null,
-          "message": "No workflow references linux/x86_64/amd64/ubuntu",
+          "message": "Workflow references linux/x86_64/amd64/ubuntu",
           "severity": "info",
-          "title": "guardrail3: no linux target in workflow"
+          "title": "guardrail3-fuzz: linux target in workflow"
+        },
+        {
+          "file": null,
+          "id": "R-BIN-02",
+          "line": null,
+          "message": "Workflow references linux/x86_64/amd64/ubuntu",
+          "severity": "info",
+          "title": "guardrail3: linux target in workflow"
+        },
+        {
+          "file": "./fuzz/Cargo.toml",
+          "id": "R-BIN-03",
+          "line": null,
+          "message": "No [package.metadata.binstall] in Cargo.toml",
+          "severity": "info",
+          "title": "guardrail3-fuzz: no binstall metadata"
         },
         {
           "file": "./Cargo.toml",
           "id": "R-BIN-03",
           "line": null,
-          "message": "No [package.metadata.binstall] in Cargo.toml",
+          "message": "[package.metadata.binstall] found in Cargo.toml",
           "severity": "info",
-          "title": "guardrail3: no binstall metadata"
+          "title": "guardrail3: binstall metadata present"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/incomplete-clippy/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml [package].description is missing or empty",
+          "severity": "error",
+          "title": "incomplete-clippy: missing description"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/incomplete-deny-bans/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml [package].description is missing or empty",
+          "severity": "error",
+          "title": "incomplete-deny-bans: missing description"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/missing-cargo-lints/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml [package].description is missing or empty",
+          "severity": "error",
+          "title": "missing-cargo-lints: missing description"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/missing-deny-licenses/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml [package].description is missing or empty",
+          "severity": "error",
+          "title": "missing-deny-licenses: missing description"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/missing-deny-sources/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml [package].description is missing or empty",
+          "severity": "error",
+          "title": "missing-deny-sources: missing description"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-claude-md/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml [package].description is missing or empty",
+          "severity": "error",
+          "title": "no-claude-md: missing description"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-clippy-toml/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml [package].description is missing or empty",
+          "severity": "error",
+          "title": "no-clippy-toml: missing description"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-deny-toml/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml [package].description is missing or empty",
+          "severity": "error",
+          "title": "no-deny-toml: missing description"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-rustfmt-toml/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml [package].description is missing or empty",
+          "severity": "error",
+          "title": "no-rustfmt-toml: missing description"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-toolchain/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml [package].description is missing or empty",
+          "severity": "error",
+          "title": "no-toolchain: missing description"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/relaxed-clippy-lint/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml [package].description is missing or empty",
+          "severity": "error",
+          "title": "relaxed-clippy-lint: missing description"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-lint-inheritance/subcrate/Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml [package].description is missing or empty",
+          "severity": "error",
+          "title": "subcrate: missing description"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R-PUB-01",
+          "line": null,
+          "message": "Cargo.toml has [package].description",
+          "severity": "info",
+          "title": "guardrail3: description present"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/incomplete-clippy/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml [package] has neither license nor license-file",
+          "severity": "error",
+          "title": "incomplete-clippy: missing license"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/incomplete-deny-bans/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml [package] has neither license nor license-file",
+          "severity": "error",
+          "title": "incomplete-deny-bans: missing license"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/missing-cargo-lints/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml [package] has neither license nor license-file",
+          "severity": "error",
+          "title": "missing-cargo-lints: missing license"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/missing-deny-licenses/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml [package] has neither license nor license-file",
+          "severity": "error",
+          "title": "missing-deny-licenses: missing license"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/missing-deny-sources/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml [package] has neither license nor license-file",
+          "severity": "error",
+          "title": "missing-deny-sources: missing license"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-claude-md/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml [package] has neither license nor license-file",
+          "severity": "error",
+          "title": "no-claude-md: missing license"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-clippy-toml/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml [package] has neither license nor license-file",
+          "severity": "error",
+          "title": "no-clippy-toml: missing license"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-deny-toml/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml [package] has neither license nor license-file",
+          "severity": "error",
+          "title": "no-deny-toml: missing license"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-rustfmt-toml/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml [package] has neither license nor license-file",
+          "severity": "error",
+          "title": "no-rustfmt-toml: missing license"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-toolchain/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml [package] has neither license nor license-file",
+          "severity": "error",
+          "title": "no-toolchain: missing license"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/relaxed-clippy-lint/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml [package] has neither license nor license-file",
+          "severity": "error",
+          "title": "relaxed-clippy-lint: missing license"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-lint-inheritance/subcrate/Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml [package] has neither license nor license-file",
+          "severity": "error",
+          "title": "subcrate: missing license"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R-PUB-02",
+          "line": null,
+          "message": "Cargo.toml has license or license-file",
+          "severity": "info",
+          "title": "guardrail3: license present"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/incomplete-clippy/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml [package].repository is missing or empty",
+          "severity": "error",
+          "title": "incomplete-clippy: missing repository"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/incomplete-deny-bans/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml [package].repository is missing or empty",
+          "severity": "error",
+          "title": "incomplete-deny-bans: missing repository"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/missing-cargo-lints/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml [package].repository is missing or empty",
+          "severity": "error",
+          "title": "missing-cargo-lints: missing repository"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/missing-deny-licenses/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml [package].repository is missing or empty",
+          "severity": "error",
+          "title": "missing-deny-licenses: missing repository"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/missing-deny-sources/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml [package].repository is missing or empty",
+          "severity": "error",
+          "title": "missing-deny-sources: missing repository"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-claude-md/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml [package].repository is missing or empty",
+          "severity": "error",
+          "title": "no-claude-md: missing repository"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-clippy-toml/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml [package].repository is missing or empty",
+          "severity": "error",
+          "title": "no-clippy-toml: missing repository"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-deny-toml/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml [package].repository is missing or empty",
+          "severity": "error",
+          "title": "no-deny-toml: missing repository"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-rustfmt-toml/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml [package].repository is missing or empty",
+          "severity": "error",
+          "title": "no-rustfmt-toml: missing repository"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-toolchain/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml [package].repository is missing or empty",
+          "severity": "error",
+          "title": "no-toolchain: missing repository"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/relaxed-clippy-lint/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml [package].repository is missing or empty",
+          "severity": "error",
+          "title": "relaxed-clippy-lint: missing repository"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-lint-inheritance/subcrate/Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml [package].repository is missing or empty",
+          "severity": "error",
+          "title": "subcrate: missing repository"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R-PUB-03",
+          "line": null,
+          "message": "Cargo.toml has [package].repository",
+          "severity": "info",
+          "title": "guardrail3: repository present"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "readme = \"README.md\" exists on disk",
+          "severity": "info",
+          "title": "guardrail3: readme present"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/incomplete-clippy/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "No readme field and no README.md at crate root",
+          "severity": "warn",
+          "title": "incomplete-clippy: readme missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/incomplete-deny-bans/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "No readme field and no README.md at crate root",
+          "severity": "warn",
+          "title": "incomplete-deny-bans: readme missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/missing-cargo-lints/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "No readme field and no README.md at crate root",
+          "severity": "warn",
+          "title": "missing-cargo-lints: readme missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/missing-deny-licenses/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "No readme field and no README.md at crate root",
+          "severity": "warn",
+          "title": "missing-deny-licenses: readme missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/missing-deny-sources/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "No readme field and no README.md at crate root",
+          "severity": "warn",
+          "title": "missing-deny-sources: readme missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-claude-md/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "No readme field and no README.md at crate root",
+          "severity": "warn",
+          "title": "no-claude-md: readme missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-clippy-toml/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "No readme field and no README.md at crate root",
+          "severity": "warn",
+          "title": "no-clippy-toml: readme missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-deny-toml/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "No readme field and no README.md at crate root",
+          "severity": "warn",
+          "title": "no-deny-toml: readme missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-rustfmt-toml/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "No readme field and no README.md at crate root",
+          "severity": "warn",
+          "title": "no-rustfmt-toml: readme missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-toolchain/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "No readme field and no README.md at crate root",
+          "severity": "warn",
+          "title": "no-toolchain: readme missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/relaxed-clippy-lint/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "No readme field and no README.md at crate root",
+          "severity": "warn",
+          "title": "relaxed-clippy-lint: readme missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-lint-inheritance/subcrate/Cargo.toml",
+          "id": "R-PUB-04",
+          "line": null,
+          "message": "No readme field and no README.md at crate root",
+          "severity": "warn",
+          "title": "subcrate: readme missing"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R-PUB-05",
+          "line": null,
+          "message": "5990 bytes with headings",
+          "severity": "info",
+          "title": "guardrail3: README looks good"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "5 keywords",
+          "severity": "info",
+          "title": "guardrail3: keywords present"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/incomplete-clippy/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "Cargo.toml [package].keywords is missing",
+          "severity": "warn",
+          "title": "incomplete-clippy: keywords missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/incomplete-deny-bans/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "Cargo.toml [package].keywords is missing",
+          "severity": "warn",
+          "title": "incomplete-deny-bans: keywords missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/missing-cargo-lints/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "Cargo.toml [package].keywords is missing",
+          "severity": "warn",
+          "title": "missing-cargo-lints: keywords missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/missing-deny-licenses/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "Cargo.toml [package].keywords is missing",
+          "severity": "warn",
+          "title": "missing-deny-licenses: keywords missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/missing-deny-sources/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "Cargo.toml [package].keywords is missing",
+          "severity": "warn",
+          "title": "missing-deny-sources: keywords missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-claude-md/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "Cargo.toml [package].keywords is missing",
+          "severity": "warn",
+          "title": "no-claude-md: keywords missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-clippy-toml/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "Cargo.toml [package].keywords is missing",
+          "severity": "warn",
+          "title": "no-clippy-toml: keywords missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-deny-toml/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "Cargo.toml [package].keywords is missing",
+          "severity": "warn",
+          "title": "no-deny-toml: keywords missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-rustfmt-toml/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "Cargo.toml [package].keywords is missing",
+          "severity": "warn",
+          "title": "no-rustfmt-toml: keywords missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-toolchain/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "Cargo.toml [package].keywords is missing",
+          "severity": "warn",
+          "title": "no-toolchain: keywords missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/relaxed-clippy-lint/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "Cargo.toml [package].keywords is missing",
+          "severity": "warn",
+          "title": "relaxed-clippy-lint: keywords missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-lint-inheritance/subcrate/Cargo.toml",
+          "id": "R-PUB-06",
+          "line": null,
+          "message": "Cargo.toml [package].keywords is missing",
+          "severity": "warn",
+          "title": "subcrate: keywords missing"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml has [package].categories",
+          "severity": "info",
+          "title": "guardrail3: categories present"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/incomplete-clippy/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml [package].categories is missing or empty",
+          "severity": "warn",
+          "title": "incomplete-clippy: categories missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/incomplete-deny-bans/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml [package].categories is missing or empty",
+          "severity": "warn",
+          "title": "incomplete-deny-bans: categories missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/missing-cargo-lints/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml [package].categories is missing or empty",
+          "severity": "warn",
+          "title": "missing-cargo-lints: categories missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/missing-deny-licenses/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml [package].categories is missing or empty",
+          "severity": "warn",
+          "title": "missing-deny-licenses: categories missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/missing-deny-sources/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml [package].categories is missing or empty",
+          "severity": "warn",
+          "title": "missing-deny-sources: categories missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-claude-md/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml [package].categories is missing or empty",
+          "severity": "warn",
+          "title": "no-claude-md: categories missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-clippy-toml/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml [package].categories is missing or empty",
+          "severity": "warn",
+          "title": "no-clippy-toml: categories missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-deny-toml/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml [package].categories is missing or empty",
+          "severity": "warn",
+          "title": "no-deny-toml: categories missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-rustfmt-toml/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml [package].categories is missing or empty",
+          "severity": "warn",
+          "title": "no-rustfmt-toml: categories missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-toolchain/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml [package].categories is missing or empty",
+          "severity": "warn",
+          "title": "no-toolchain: categories missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/relaxed-clippy-lint/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml [package].categories is missing or empty",
+          "severity": "warn",
+          "title": "relaxed-clippy-lint: categories missing"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-lint-inheritance/subcrate/Cargo.toml",
+          "id": "R-PUB-07",
+          "line": null,
+          "message": "Cargo.toml [package].categories is missing or empty",
+          "severity": "warn",
+          "title": "subcrate: categories missing"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "version = \"0.1.0\"",
+          "severity": "info",
+          "title": "guardrail3: valid semver"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/incomplete-clippy/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "version = \"0.1.0\"",
+          "severity": "info",
+          "title": "incomplete-clippy: valid semver"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/incomplete-deny-bans/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "version = \"0.1.0\"",
+          "severity": "info",
+          "title": "incomplete-deny-bans: valid semver"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/missing-cargo-lints/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "version = \"0.1.0\"",
+          "severity": "info",
+          "title": "missing-cargo-lints: valid semver"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/missing-deny-licenses/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "version = \"0.1.0\"",
+          "severity": "info",
+          "title": "missing-deny-licenses: valid semver"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/missing-deny-sources/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "version = \"0.1.0\"",
+          "severity": "info",
+          "title": "missing-deny-sources: valid semver"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-claude-md/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "version = \"0.1.0\"",
+          "severity": "info",
+          "title": "no-claude-md: valid semver"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-clippy-toml/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "version = \"0.1.0\"",
+          "severity": "info",
+          "title": "no-clippy-toml: valid semver"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-deny-toml/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "version = \"0.1.0\"",
+          "severity": "info",
+          "title": "no-deny-toml: valid semver"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-rustfmt-toml/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "version = \"0.1.0\"",
+          "severity": "info",
+          "title": "no-rustfmt-toml: valid semver"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-toolchain/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "version = \"0.1.0\"",
+          "severity": "info",
+          "title": "no-toolchain: valid semver"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/relaxed-clippy-lint/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "version = \"0.1.0\"",
+          "severity": "info",
+          "title": "relaxed-clippy-lint: valid semver"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-lint-inheritance/subcrate/Cargo.toml",
+          "id": "R-PUB-08",
+          "line": null,
+          "message": "version = \"0.1.0\"",
+          "severity": "info",
+          "title": "subcrate: valid semver"
+        },
+        {
+          "file": "./Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "No path dependencies to non-publishable crates",
+          "severity": "info",
+          "title": "guardrail3: path deps OK"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/incomplete-clippy/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "No path dependencies to non-publishable crates",
+          "severity": "info",
+          "title": "incomplete-clippy: path deps OK"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/incomplete-deny-bans/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "No path dependencies to non-publishable crates",
+          "severity": "info",
+          "title": "incomplete-deny-bans: path deps OK"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/missing-cargo-lints/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "No path dependencies to non-publishable crates",
+          "severity": "info",
+          "title": "missing-cargo-lints: path deps OK"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/missing-deny-licenses/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "No path dependencies to non-publishable crates",
+          "severity": "info",
+          "title": "missing-deny-licenses: path deps OK"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/missing-deny-sources/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "No path dependencies to non-publishable crates",
+          "severity": "info",
+          "title": "missing-deny-sources: path deps OK"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-claude-md/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "No path dependencies to non-publishable crates",
+          "severity": "info",
+          "title": "no-claude-md: path deps OK"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-clippy-toml/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "No path dependencies to non-publishable crates",
+          "severity": "info",
+          "title": "no-clippy-toml: path deps OK"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-deny-toml/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "No path dependencies to non-publishable crates",
+          "severity": "info",
+          "title": "no-deny-toml: path deps OK"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-rustfmt-toml/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "No path dependencies to non-publishable crates",
+          "severity": "info",
+          "title": "no-rustfmt-toml: path deps OK"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-toolchain/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "No path dependencies to non-publishable crates",
+          "severity": "info",
+          "title": "no-toolchain: path deps OK"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/relaxed-clippy-lint/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "No path dependencies to non-publishable crates",
+          "severity": "info",
+          "title": "relaxed-clippy-lint: path deps OK"
+        },
+        {
+          "file": "./tests/fixtures/adversarial-configs/no-lint-inheritance/subcrate/Cargo.toml",
+          "id": "R-PUB-10",
+          "line": null,
+          "message": "No path dependencies to non-publishable crates",
+          "severity": "info",
+          "title": "subcrate: path deps OK"
         },
         {
           "file": null,
           "id": "R-PUB-12",
           "line": null,
-          "message": "0 publishable, 1 publish=false",
+          "message": "13 publishable, 1 publish=false",
           "severity": "info",
           "title": "Crate inventory"
         },
@@ -3933,9 +6261,97 @@
           "file": "./release-plz.toml",
           "id": "R-REL-03",
           "line": null,
-          "message": "All publishable crates have [[package]] entries",
-          "severity": "info",
-          "title": "release-plz.toml covers all crates"
+          "message": "Publishable crate \"incomplete-clippy\" has no [[package]] entry",
+          "severity": "warn",
+          "title": "release-plz.toml missing package \"incomplete-clippy\""
+        },
+        {
+          "file": "./release-plz.toml",
+          "id": "R-REL-03",
+          "line": null,
+          "message": "Publishable crate \"incomplete-deny-bans\" has no [[package]] entry",
+          "severity": "warn",
+          "title": "release-plz.toml missing package \"incomplete-deny-bans\""
+        },
+        {
+          "file": "./release-plz.toml",
+          "id": "R-REL-03",
+          "line": null,
+          "message": "Publishable crate \"missing-cargo-lints\" has no [[package]] entry",
+          "severity": "warn",
+          "title": "release-plz.toml missing package \"missing-cargo-lints\""
+        },
+        {
+          "file": "./release-plz.toml",
+          "id": "R-REL-03",
+          "line": null,
+          "message": "Publishable crate \"missing-deny-licenses\" has no [[package]] entry",
+          "severity": "warn",
+          "title": "release-plz.toml missing package \"missing-deny-licenses\""
+        },
+        {
+          "file": "./release-plz.toml",
+          "id": "R-REL-03",
+          "line": null,
+          "message": "Publishable crate \"missing-deny-sources\" has no [[package]] entry",
+          "severity": "warn",
+          "title": "release-plz.toml missing package \"missing-deny-sources\""
+        },
+        {
+          "file": "./release-plz.toml",
+          "id": "R-REL-03",
+          "line": null,
+          "message": "Publishable crate \"no-claude-md\" has no [[package]] entry",
+          "severity": "warn",
+          "title": "release-plz.toml missing package \"no-claude-md\""
+        },
+        {
+          "file": "./release-plz.toml",
+          "id": "R-REL-03",
+          "line": null,
+          "message": "Publishable crate \"no-clippy-toml\" has no [[package]] entry",
+          "severity": "warn",
+          "title": "release-plz.toml missing package \"no-clippy-toml\""
+        },
+        {
+          "file": "./release-plz.toml",
+          "id": "R-REL-03",
+          "line": null,
+          "message": "Publishable crate \"no-deny-toml\" has no [[package]] entry",
+          "severity": "warn",
+          "title": "release-plz.toml missing package \"no-deny-toml\""
+        },
+        {
+          "file": "./release-plz.toml",
+          "id": "R-REL-03",
+          "line": null,
+          "message": "Publishable crate \"no-rustfmt-toml\" has no [[package]] entry",
+          "severity": "warn",
+          "title": "release-plz.toml missing package \"no-rustfmt-toml\""
+        },
+        {
+          "file": "./release-plz.toml",
+          "id": "R-REL-03",
+          "line": null,
+          "message": "Publishable crate \"no-toolchain\" has no [[package]] entry",
+          "severity": "warn",
+          "title": "release-plz.toml missing package \"no-toolchain\""
+        },
+        {
+          "file": "./release-plz.toml",
+          "id": "R-REL-03",
+          "line": null,
+          "message": "Publishable crate \"relaxed-clippy-lint\" has no [[package]] entry",
+          "severity": "warn",
+          "title": "release-plz.toml missing package \"relaxed-clippy-lint\""
+        },
+        {
+          "file": "./release-plz.toml",
+          "id": "R-REL-03",
+          "line": null,
+          "message": "Publishable crate \"subcrate\" has no [[package]] entry",
+          "severity": "warn",
+          "title": "release-plz.toml missing package \"subcrate\""
         },
         {
           "file": "./cliff.toml",
@@ -3949,25 +6365,25 @@
           "file": null,
           "id": "R-REL-05",
           "line": null,
-          "message": "No .github/workflows/*.yml containing \"release-plz\"",
-          "severity": "warn",
-          "title": "No release workflow"
+          "message": "A workflow references release-plz",
+          "severity": "info",
+          "title": "Release workflow found"
         },
         {
           "file": null,
           "id": "R-REL-06",
           "line": null,
-          "message": "No workflow with \"cargo publish --dry-run\"",
-          "severity": "warn",
-          "title": "No publish dry-run in CI"
+          "message": "A workflow contains \"cargo publish --dry-run\"",
+          "severity": "info",
+          "title": "Publish dry-run in CI"
         },
         {
           "file": null,
           "id": "R-REL-07",
           "line": null,
-          "message": "No workflow references CARGO_REGISTRY_TOKEN",
-          "severity": "warn",
-          "title": "No CARGO_REGISTRY_TOKEN in workflows"
+          "message": "A workflow references CARGO_REGISTRY_TOKEN",
+          "severity": "info",
+          "title": "CARGO_REGISTRY_TOKEN referenced"
         },
         {
           "file": null,
@@ -3994,7 +6410,7 @@
           "file": "./.githooks/pre-commit",
           "id": "H10",
           "line": null,
-          "message": "9458 bytes",
+          "message": "9590 bytes",
           "severity": "info",
           "title": "Pre-commit file size"
         },
@@ -4106,7 +6522,7 @@
           "file": "./.githooks/pre-commit",
           "id": "H6",
           "line": null,
-          "message": "253 lines, 9458 bytes, mtime unix 1773604876",
+          "message": "253 lines, 9590 bytes, mtime unix 1773614037",
           "severity": "info",
           "title": "Pre-commit script stats"
         },
