@@ -353,7 +353,7 @@ RELEASE:
   R-PUB-*   Crate metadata (description, license, repository, etc.)
   R-BIN-*   Binary release workflow, binstall metadata
 
-GARDE: R-GARDE-01/02/05  Garde dependency, clippy bans, validation patterns
+GARDE: R-GARDE-01/02/05  Garde dependency, clippy bans, input boundary structs (Deserialize/Parser/Args/FromRow) without Validate
 TESTS: R-TEST-02..08     Test files, structure, assertions, coverage, isolation";
 
 // ---------------------------------------------------------------------------

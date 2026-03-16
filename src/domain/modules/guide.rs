@@ -275,7 +275,7 @@ R45-R48 tools installed, R49 CLAUDE.md, R50 banned crates, R-DEPS-01 unauthorize
 R53 unsafe_code=forbid, R55-R57 workspace metadata, R-ARCH-01 service missing hex arch, R-ARCH-02 dependency flow violation, R-ARCH-03 library depends on service internals, R-ARCH-04 unconfigured workspace members.
 
 **Release:** R-REL-*, R-PUB-*, R-BIN-* (workflow, metadata, binary release).
-**Garde:** R-GARDE-01/02/05.
+**Garde:** R-GARDE-01 garde dependency (error if missing), R-GARDE-02 clippy bans, R-GARDE-05 input boundary structs (Deserialize/Parser/Args/FromRow) without Validate.
 **Tests:** R-TEST-02..08.
 
 ### TypeScript Checks
