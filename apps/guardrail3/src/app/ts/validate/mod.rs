@@ -9,7 +9,7 @@ pub mod source_scan;
 pub mod test_checks;
 pub mod ts_arch_checks;
 pub mod ts_code_analysis;
-mod ts_comment_checks;
+pub mod ts_comment_checks;
 mod tsconfig_check;
 
 use std::path::Path;

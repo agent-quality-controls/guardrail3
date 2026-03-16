@@ -48,7 +48,7 @@ fn discover_ts_apps(fs: &dyn FileSystem, root: &Path) -> Vec<std::path::PathBuf>
 }
 
 /// Check a single TS app for hex arch structure.
-fn check_single_app_structure(
+pub fn check_single_app_structure(
     fs: &dyn FileSystem,
     app_dir: &Path,
     results: &mut Vec<CheckResult>,
@@ -106,7 +106,7 @@ fn dir_exists_via_probe(fs: &dyn FileSystem, dir: &Path) -> bool {
 // -----------------------------------------------------------------------
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum TsLayer {
+pub enum TsLayer {
     Domain,
     Ports,
     Application,
@@ -115,7 +115,7 @@ enum TsLayer {
 
 impl TsLayer {
     /// Returns the layers that this layer is NOT allowed to import from.
-    const fn forbidden(self) -> &'static [Self] {
+    pub const fn forbidden(self) -> &'static [Self] {
         match self {
             Self::Domain => &[Self::Application, Self::Adapters, Self::Ports],
             Self::Ports => &[Self::Application, Self::Adapters],
@@ -135,7 +135,7 @@ impl TsLayer {
 }
 
 /// Determine which layer a file belongs to based on its path.
-fn layer_from_path(path: &Path) -> Option<TsLayer> {
+pub fn layer_from_path(path: &Path) -> Option<TsLayer> {
     let path_str = path.display().to_string();
     // Look for /modules/<layer>/ in the path
     let segments: Vec<&str> = path_str.split('/').collect();
@@ -184,7 +184,7 @@ fn layer_from_import(import_path: &str, file_dir: &Path) -> Option<TsLayer> {
 }
 
 /// Resolve a relative import path against the file's directory.
-fn resolve_relative(base: &Path, rel: &str) -> String {
+pub fn resolve_relative(base: &Path, rel: &str) -> String {
     let base_str = base.to_string_lossy();
     let mut parts: Vec<String> = base_str
         .split('/')
@@ -227,7 +227,7 @@ fn layer_from_resolved_path(resolved: &str) -> Option<TsLayer> {
 
 /// Extract import path from a line containing `from '...'`, `from "..."`, or `require('...')`.
 #[allow(clippy::string_slice)] // reason: all indices are validated ASCII positions from find()
-fn extract_import_path(line: &str) -> Option<&str> {
+pub fn extract_import_path(line: &str) -> Option<&str> {
     extract_between_after(line, "from '", '\'')
         .or_else(|| extract_between_after(line, "from \"", '"'))
         .or_else(|| extract_between_after(line, "require('", '\''))
@@ -301,7 +301,7 @@ fn is_ts_source(path: &str) -> bool {
 }
 
 /// Check a single file's imports for boundary violations.
-fn check_file_imports(
+pub fn check_file_imports(
     file_path: &Path,
     content: &str,
     results: &mut Vec<CheckResult>,
@@ -345,9 +345,3 @@ fn check_file_imports(
         }
     }
 }
-
-
-#[cfg(test)]
-#[allow(clippy::indexing_slicing)] // reason: test assertions index into results
-#[path = "ts_arch_checks_tests.rs"]
-mod tests;

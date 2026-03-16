@@ -53,7 +53,7 @@ pub fn check_repo_level(
 
 // --- R-REL-01: LICENSE file at repo root ---
 
-fn check_license_file(workspace_root: &Path, results: &mut Vec<CheckResult>) {
+pub fn check_license_file(workspace_root: &Path, results: &mut Vec<CheckResult>) {
     let license_names = ["LICENSE", "LICENSE-MIT", "LICENSE-APACHE", "LICENSE.md"];
 
     let found = license_names
@@ -85,7 +85,7 @@ fn check_license_file(workspace_root: &Path, results: &mut Vec<CheckResult>) {
 // --- R-REL-02 + R-REL-03: release-plz.toml ---
 
 #[allow(clippy::too_many_lines)] // reason: R-REL-02 + R-REL-03 combined with early returns
-fn check_release_plz_toml(
+pub fn check_release_plz_toml(
     fs: &dyn FileSystem,
     workspace_root: &Path,
     publishable_names: &BTreeSet<String>,
@@ -197,7 +197,7 @@ fn check_release_plz_toml(
 
 // --- R-REL-04: cliff.toml ---
 
-fn check_cliff_toml(workspace_root: &Path, results: &mut Vec<CheckResult>) {
+pub fn check_cliff_toml(workspace_root: &Path, results: &mut Vec<CheckResult>) {
     super::code_quality_checks::check_file_exists_at_root(
         workspace_root,
         "cliff.toml",
@@ -242,7 +242,7 @@ pub fn read_workflow_files(fs: &dyn FileSystem, workspace_root: &Path) -> Workfl
 
 /// Check if any workflow file contains a pattern, emitting an appropriate result.
 #[allow(clippy::too_many_arguments)] // reason: dedup helper — all args are distinct semantic values
-fn check_workflow_contains(
+pub fn check_workflow_contains(
     fs: &dyn FileSystem,
     workspace_root: &Path,
     pattern: &str,
@@ -310,7 +310,7 @@ pub fn check_tool_installed(
     }
 }
 
-fn check_semver_checks_installed(tc: &dyn ToolChecker, results: &mut Vec<CheckResult>) {
+pub fn check_semver_checks_installed(tc: &dyn ToolChecker, results: &mut Vec<CheckResult>) {
     check_tool_installed(
         tc,
         "cargo-semver-checks",
@@ -319,8 +319,3 @@ fn check_semver_checks_installed(tc: &dyn ToolChecker, results: &mut Vec<CheckRe
         results,
     );
 }
-
-
-#[cfg(test)]
-#[path = "release_repo_checks_tests.rs"]
-mod tests;

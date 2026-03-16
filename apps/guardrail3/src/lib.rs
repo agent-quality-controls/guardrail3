@@ -4,6 +4,8 @@ use proc_macro2 as _;
 
 #[cfg(test)]
 use proptest as _;
+#[cfg(test)]
+use tempfile as _;
 
 pub mod adapters;
 pub mod app;

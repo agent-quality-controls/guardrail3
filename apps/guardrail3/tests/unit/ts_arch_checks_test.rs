@@ -1,7 +1,21 @@
-use std::collections::BTreeMap;
-use std::path::PathBuf;
+//! Tests extracted from app::ts::validate::ts_arch_checks
+#![allow(
+    clippy::expect_used,
+    clippy::disallowed_methods,
+    clippy::indexing_slicing,
+    clippy::panic,
+    clippy::manual_assert
+)] // reason: test crate
 
-use super::*;
+use std::collections::BTreeMap;
+use std::path::{Path, PathBuf};
+
+use guardrail3::app::ts::validate::ts_arch_checks::{
+    check_file_imports, check_single_app_structure, extract_import_path, layer_from_path,
+    resolve_relative, TsLayer,
+};
+use guardrail3::domain::report::Severity;
+use guardrail3::ports::outbound::FileSystem;
 
 struct StubFs {
     files: BTreeMap<PathBuf, String>,
@@ -44,7 +58,6 @@ impl FileSystem for StubFs {
 
 #[test]
 fn t_arch_01_app_missing_modules_dir() {
-    // Test the inner function directly since StubFs can't do list_dir
     let fs = StubFs::new();
     let app_dir = Path::new("/project/apps/my-app");
     let mut results = Vec::new();
@@ -84,8 +97,7 @@ fn t_arch_01_app_with_full_structure() {
 
 #[test]
 fn t_arch_02_domain_imports_adapters_fails() {
-    let file_path =
-        Path::new("/project/apps/my-app/src/modules/domain/user.ts");
+    let file_path = Path::new("/project/apps/my-app/src/modules/domain/user.ts");
     let content = "import { DbAdapter } from '../adapters/outbound/db';\n";
     let mut results = Vec::new();
     check_file_imports(file_path, content, &mut results);
@@ -98,10 +110,8 @@ fn t_arch_02_domain_imports_adapters_fails() {
 
 #[test]
 fn t_arch_02_domain_imports_application_fails() {
-    let file_path =
-        Path::new("/project/apps/my-app/src/modules/domain/types.ts");
-    let content =
-        "import { CreateUser } from '../application/commands/create-user';\n";
+    let file_path = Path::new("/project/apps/my-app/src/modules/domain/types.ts");
+    let content = "import { CreateUser } from '../application/commands/create-user';\n";
     let mut results = Vec::new();
     check_file_imports(file_path, content, &mut results);
     assert_eq!(results.len(), 1, "expected 1 error, got {results:?}");
@@ -160,10 +170,8 @@ import { CreateUser } from '../../application/commands/create-user';
 
 #[test]
 fn t_arch_02_alias_import_detected() {
-    let file_path =
-        Path::new("/project/apps/my-app/src/modules/domain/user.ts");
-    let content =
-        "import { DbAdapter } from '@/modules/adapters/outbound/db';\n";
+    let file_path = Path::new("/project/apps/my-app/src/modules/domain/user.ts");
+    let content = "import { DbAdapter } from '@/modules/adapters/outbound/db';\n";
     let mut results = Vec::new();
     check_file_imports(file_path, content, &mut results);
     assert_eq!(results.len(), 1, "expected 1 error, got {results:?}");

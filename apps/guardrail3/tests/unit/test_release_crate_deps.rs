@@ -1,5 +1,12 @@
-use super::*;
+use std::collections::{BTreeMap, BTreeSet};
+use std::path::PathBuf;
 
+use guardrail3::app::rs::validate::release_checks::CrateInfo;
+use guardrail3::app::rs::validate::release_crate_deps::{
+    check_categories, check_keywords, check_path_deps, check_version_consistency, is_valid_semver,
+    version_satisfies,
+};
+use guardrail3::domain::report::Severity;
 
 fn parse_toml(content: &str) -> Option<toml::Value> {
     content.parse().ok()
@@ -10,7 +17,7 @@ fn parse_toml(content: &str) -> Option<toml::Value> {
 #[test]
 #[allow(clippy::expect_used)] // reason: test assertion
 fn pub09_not_run_without_thorough() {
-    let fs = crate::adapters::outbound::fs::RealFileSystem;
+    let fs = guardrail3::adapters::outbound::fs::RealFileSystem;
     let t = parse_toml(
         "[package]\nname = \"x\"\nversion = \"0.1.0\"\ndescription = \"d\"\nlicense = \"MIT\"\nrepository = \"https://x\"",
     ).expect("parse"); // reason: test
@@ -26,9 +33,9 @@ fn pub09_not_run_without_thorough() {
     let names = BTreeSet::new();
     let versions = BTreeMap::new();
     let mut r = Vec::new();
-    // Call the parent module's check_per_crate to verify thorough=false skips R-PUB-09
-    let tc = crate::adapters::outbound::tool_runner::RealToolChecker;
-    super::super::release_crate_checks::check_per_crate(
+    // Call check_per_crate to verify thorough=false skips R-PUB-09
+    let tc = guardrail3::adapters::outbound::tool_runner::RealToolChecker;
+    guardrail3::app::rs::validate::release_crate_checks::check_per_crate(
         &fs, &tc, &krate, &names, &versions, false, &mut r,
     );
     assert!(
@@ -49,8 +56,8 @@ fn pub10_neg_path_to_unpublishable() {
     let publishable = BTreeSet::from(["a".to_owned()]);
     let krate = CrateInfo {
         name: "a".to_owned(),
-        cargo_toml_path: std::path::PathBuf::from("Cargo.toml"),
-        dir: std::path::PathBuf::from("."),
+        cargo_toml_path: PathBuf::from("Cargo.toml"),
+        dir: PathBuf::from("."),
         publishable: true,
         is_binary: false,
         table: t.clone(),
@@ -74,8 +81,8 @@ fn pub10_pos_dev_deps_exempt() {
     let publishable = BTreeSet::from(["a".to_owned()]);
     let krate = CrateInfo {
         name: "a".to_owned(),
-        cargo_toml_path: std::path::PathBuf::from("Cargo.toml"),
-        dir: std::path::PathBuf::from("."),
+        cargo_toml_path: PathBuf::from("Cargo.toml"),
+        dir: PathBuf::from("."),
         publishable: true,
         is_binary: false,
         table: t.clone(),
@@ -99,8 +106,8 @@ fn pub10_pos_copublished_member() {
     let publishable = BTreeSet::from(["a".to_owned(), "b".to_owned()]);
     let krate = CrateInfo {
         name: "a".to_owned(),
-        cargo_toml_path: std::path::PathBuf::from("Cargo.toml"),
-        dir: std::path::PathBuf::from("."),
+        cargo_toml_path: PathBuf::from("Cargo.toml"),
+        dir: PathBuf::from("."),
         publishable: true,
         is_binary: false,
         table: t.clone(),
@@ -128,8 +135,8 @@ fn pub11_neg_version_mismatch() {
     ]);
     let krate = CrateInfo {
         name: "a".to_owned(),
-        cargo_toml_path: std::path::PathBuf::from("Cargo.toml"),
-        dir: std::path::PathBuf::from("."),
+        cargo_toml_path: PathBuf::from("Cargo.toml"),
+        dir: PathBuf::from("."),
         publishable: true,
         is_binary: false,
         table: t.clone(),
@@ -155,8 +162,8 @@ fn pub11_pos_compatible_version() {
     ]);
     let krate = CrateInfo {
         name: "a".to_owned(),
-        cargo_toml_path: std::path::PathBuf::from("Cargo.toml"),
-        dir: std::path::PathBuf::from("."),
+        cargo_toml_path: PathBuf::from("Cargo.toml"),
+        dir: PathBuf::from("."),
         publishable: true,
         is_binary: false,
         table: t.clone(),
