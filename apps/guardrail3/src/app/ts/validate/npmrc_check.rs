@@ -13,8 +13,12 @@ pub fn check_npmrc(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
         results.push(CheckResult {
             id: "T11".to_owned(),
             severity: Severity::Error,
-            title: ".npmrc missing".to_owned(),
-            message: "No .npmrc found at project root".to_owned(),
+            title: "`.npmrc` config file not found".to_owned(),
+            message: "No `.npmrc` found at project root. The `.npmrc` file configures pnpm behavior — \
+                     strict peer dependencies, workspace cycle prevention, supply chain security settings. \
+                     Without it, pnpm uses permissive defaults that allow dependency conflicts and security \
+                     issues. Create `.npmrc` with the guardrail baseline settings or run `guardrail3 ts generate`."
+                .to_owned(),
             file: Some(path.display().to_string()),
             line: None,
             inventory: false,
@@ -25,8 +29,8 @@ pub fn check_npmrc(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
     results.push(CheckResult {
         id: "T11".to_owned(),
         severity: Severity::Info,
-        title: ".npmrc exists".to_owned(),
-        message: "Found at project root".to_owned(),
+        title: "`.npmrc` config exists".to_owned(),
+        message: "pnpm configuration file `.npmrc` found at project root.".to_owned(),
         file: Some(npmrc_path.display().to_string()),
         line: None,
         inventory: false,
@@ -93,8 +97,12 @@ fn check_expected_settings(
                 results.push(CheckResult {
                     id: "T13".to_owned(),
                     severity: Severity::Error,
-                    title: format!(".npmrc {key} wrong value"),
-                    message: format!("Expected \"{expected_val}\", got \"{val}\""),
+                    title: format!("`.npmrc` setting `{key}` has wrong value"),
+                    message: format!(
+                        "`{key}` is set to `{val}` but should be `{expected_val}`. \
+                         This setting controls pnpm strictness — a weaker value reduces protection against \
+                         dependency conflicts or supply chain issues. Update `.npmrc` to set `{key}={expected_val}`."
+                    ),
                     file: Some(npmrc_path.display().to_string()),
                     line: None,
                     inventory: false,
@@ -104,8 +112,11 @@ fn check_expected_settings(
                 results.push(CheckResult {
                     id: "T12".to_owned(),
                     severity: Severity::Error,
-                    title: format!(".npmrc {key} missing"),
-                    message: format!("Expected {key}={expected_val}"),
+                    title: format!("`.npmrc` setting `{key}` missing"),
+                    message: format!(
+                        "`{key}` not found in `.npmrc`. This setting is required for guardrail compliance. \
+                         Add `{key}={expected_val}` to `.npmrc`."
+                    ),
                     file: Some(npmrc_path.display().to_string()),
                     line: None,
                     inventory: false,
@@ -142,12 +153,15 @@ fn check_extra_settings(
             results.push(CheckResult {
                 id: "T14".to_owned(),
                 severity: Severity::Info,
-                title: format!(".npmrc extra setting: {key}"),
-                message: format!("{key}={val}"),
+                title: format!("Extra `.npmrc` setting: `{key}`"),
+                message: format!(
+                    "Non-baseline `.npmrc` setting `{key}={val}`. This setting is not in the guardrail baseline. \
+                     Verify it is intentional and document why it's needed."
+                ),
                 file: Some(npmrc_path.display().to_string()),
                 line: None,
                 inventory: false,
-            });
+            }.as_inventory());
         }
     }
 }

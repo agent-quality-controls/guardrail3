@@ -25,7 +25,8 @@ pub fn check_hex_arch_structure(
 }
 
 /// Discover TypeScript apps under `<root>/apps/`.
-/// An app is a subdirectory that has `package.json` or `src/`.
+/// An app is a subdirectory that has TypeScript files (.ts, .tsx) or `package.json`.
+/// Rust-only apps (no TS files, no package.json) are skipped.
 fn discover_ts_apps(fs: &dyn FileSystem, root: &Path) -> Vec<std::path::PathBuf> {
     let apps_dir = root.join("apps");
     let mut found = Vec::new();
@@ -36,15 +37,32 @@ fn discover_ts_apps(fs: &dyn FileSystem, root: &Path) -> Vec<std::path::PathBuf>
         if !path.is_dir() {
             continue;
         }
-        // Check if it's a TS app (has package.json or src/)
+        // Must have package.json to be considered a TS app
         let has_package_json = fs.read_file(&path.join("package.json")).is_some();
-        let has_src = fs.read_file(&path.join("src")).is_some()
-            || path.join("src").is_dir();
-        if has_package_json || has_src {
-            found.push(path);
+        if !has_package_json {
+            // No package.json — check if there are any .ts/.tsx files
+            if !has_ts_files(&path) {
+                continue; // Rust-only app, skip
+            }
         }
+        found.push(path);
     }
     found
+}
+
+/// Check if a directory contains any TypeScript files (.ts, .tsx).
+fn has_ts_files(dir: &Path) -> bool {
+    WalkDir::new(dir)
+        .into_iter()
+        .filter_entry(|e| !is_excluded_ts_dir(e))
+        .flatten()
+        .any(|entry| {
+            entry.file_type().is_file()
+                && entry
+                    .path()
+                    .extension()
+                    .is_some_and(|e| e == "ts" || e == "tsx")
+        })
 }
 
 /// Check a single TS app for hex arch structure.
@@ -75,11 +93,13 @@ pub fn check_single_app_structure(
         results.push(CheckResult {
             id: "T-ARCH-01".to_owned(),
             severity: Severity::Warn,
-            title: format!("TS app `{app_name}` missing hex arch layers"),
+            title: format!("TS app `{app_name}` missing hexagonal architecture layers"),
             message: format!(
-                "App `{app_name}` is missing src/modules/{} subdirectories. \
-                 Expected: src/modules/domain/, src/modules/adapters/",
-                missing.join(", src/modules/"),
+                "App `{app_name}` is missing `src/modules/{}` subdirectories. Hexagonal architecture \
+                 separates business logic (domain) from external integrations (adapters), making code \
+                 testable and swappable. Create the missing directories: `src/modules/domain/` for \
+                 business logic and `src/modules/adapters/` for external integrations (DB, HTTP, etc.).",
+                missing.join("`, `src/modules/"),
             ),
             file: Some(app_dir.display().to_string()),
             line: None,
@@ -335,9 +355,14 @@ pub fn check_file_imports(
             results.push(CheckResult {
                 id: "T-ARCH-02".to_owned(),
                 severity: Severity::Error,
-                title: "Import boundary violation".to_owned(),
+                title: "Hexagonal architecture import boundary violation".to_owned(),
                 message: format!(
-                    "{} layer imports from {} layer: `{import_path}`",
+                    "The `{}` layer imports from the `{}` layer: `{import_path}`. In hexagonal architecture, \
+                     imports must flow inward (adapters -> application -> ports -> domain). The `{}` layer \
+                     must not depend on `{}`. Move shared types to a common layer, or invert the dependency \
+                     using an interface/port.",
+                    source_layer.label(),
+                    target_layer.label(),
                     source_layer.label(),
                     target_layer.label(),
                 ),

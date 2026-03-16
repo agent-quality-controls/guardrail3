@@ -1,5 +1,6 @@
 // Suppress unused crate dependency warnings for crates used only by the main binary/lib
 use clap as _;
+use quote as _;
 use colored as _;
 use garde as _;
 use glob as _;

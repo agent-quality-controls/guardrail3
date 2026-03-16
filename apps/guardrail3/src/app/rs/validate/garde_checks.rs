@@ -239,6 +239,9 @@ pub fn is_input_boundary_derive(macro_name: &str) -> bool {
 
 /// Count structs that derive any input boundary trait (`Deserialize`, `Parser`, `Args`, `FromRow`)
 /// and check whether they also derive `Validate`.
+///
+/// Structs where ALL fields are primitives (bool, numeric) do not require Validate,
+/// since garde validation is unnecessary for primitive-only types.
 pub fn count_unvalidated_input_structs(
     derives: &[super::ast_helpers::DeriveInfo],
 ) -> (usize, usize) {
@@ -251,6 +254,10 @@ pub fn count_unvalidated_input_structs(
             .iter()
             .any(|m| is_input_boundary_derive(m));
         if !has_input_boundary {
+            continue;
+        }
+        // All-primitive structs don't need Validate — skip them
+        if !info.has_non_primitive_fields {
             continue;
         }
         let has_validate = info

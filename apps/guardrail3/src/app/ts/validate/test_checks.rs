@@ -43,8 +43,10 @@ pub fn check_stryker_config(path: &Path, results: &mut Vec<CheckResult>) {
         results.push(CheckResult {
             id: "T-TEST-01".to_owned(),
             severity: Severity::Info,
-            title: "Stryker config found".to_owned(),
-            message: "Mutation testing config present".to_owned(),
+            title: "Stryker mutation testing config found".to_owned(),
+            message: "Stryker config present. Mutation testing verifies test quality by introducing bugs and \
+                     checking that tests catch them — tests that pass with mutations are ineffective."
+                .to_owned(),
             file: None,
             line: None,
             inventory: false,
@@ -53,8 +55,12 @@ pub fn check_stryker_config(path: &Path, results: &mut Vec<CheckResult>) {
         results.push(CheckResult {
             id: "T-TEST-01".to_owned(),
             severity: Severity::Warn,
-            title: "No Stryker config".to_owned(),
-            message: "No stryker.config.json or stryker.config.mjs found — mutation testing not configured".to_owned(),
+            title: "No Stryker mutation testing config".to_owned(),
+            message: "No `stryker.config.json` or `stryker.config.mjs` found. Mutation testing verifies test \
+                     quality by introducing bugs and checking that tests catch them. Without it, tests may pass \
+                     but not actually verify behavior. Install Stryker: `pnpm add -D @stryker-mutator/core` and \
+                     create a config file."
+                .to_owned(),
             file: None,
             line: None,
             inventory: false,
@@ -80,8 +86,10 @@ pub fn check_test_files_exist(path: &Path, results: &mut Vec<CheckResult>) {
         results.push(CheckResult {
             id: "T-TEST-02".to_owned(),
             severity: Severity::Info,
-            title: "Test files found".to_owned(),
-            message: "At least one .test.ts/.spec.ts/.test.tsx/.spec.tsx file exists".to_owned(),
+            title: "TypeScript test files found".to_owned(),
+            message: "At least one `.test.ts`/`.spec.ts`/`.test.tsx`/`.spec.tsx` file exists. \
+                     Tests verify code works correctly and catch regressions before deployment."
+                .to_owned(),
             file: None,
             line: None,
             inventory: false,
@@ -90,8 +98,11 @@ pub fn check_test_files_exist(path: &Path, results: &mut Vec<CheckResult>) {
         results.push(CheckResult {
             id: "T-TEST-02".to_owned(),
             severity: Severity::Error,
-            title: "No test files".to_owned(),
-            message: "No .test.ts, .spec.ts, .test.tsx, or .spec.tsx files found".to_owned(),
+            title: "No TypeScript test files found".to_owned(),
+            message: "No `.test.ts`, `.spec.ts`, `.test.tsx`, or `.spec.tsx` files found. Tests verify code \
+                     works correctly and catch regressions before deployment. Create test files alongside source \
+                     files using Vitest or Jest (e.g., `myModule.test.ts`)."
+                .to_owned(),
             file: None,
             line: None,
             inventory: false,
@@ -124,7 +135,9 @@ pub fn check_test_runner_config(path: &Path, results: &mut Vec<CheckResult>) {
             id: "T-TEST-03".to_owned(),
             severity: Severity::Info,
             title: "Test runner configured".to_owned(),
-            message: "Test runner config found".to_owned(),
+            message: "Test runner config found (Vitest or Jest). The test runner executes tests, generates \
+                     coverage reports, and integrates with CI."
+                .to_owned(),
             file: None,
             line: None,
             inventory: false,
@@ -133,8 +146,11 @@ pub fn check_test_runner_config(path: &Path, results: &mut Vec<CheckResult>) {
         results.push(CheckResult {
             id: "T-TEST-03".to_owned(),
             severity: Severity::Warn,
-            title: "No test runner config".to_owned(),
-            message: "No vitest.config.ts/mts or jest.config.ts/js/mjs found".to_owned(),
+            title: "No test runner config found".to_owned(),
+            message: "No `vitest.config.ts`/`.mts` or `jest.config.ts`/`.js`/`.mjs` found. Without a test \
+                     runner config, tests may not run with correct settings (path aliases, transforms, coverage). \
+                     Create a config file — Vitest is recommended: `pnpm add -D vitest` and create `vitest.config.ts`."
+                .to_owned(),
             file: None,
             line: None,
             inventory: false,
@@ -152,8 +168,13 @@ fn collect_ts_tsx_files(root: &Path) -> Vec<String> {
     {
         if entry.file_type().is_file() {
             let ep = entry.path();
+            let path_str = ep.display().to_string();
+            // Skip test fixture files — adversarial test data designed to have violations
+            if path_str.contains("tests/fixtures/") {
+                continue;
+            }
             if ep.extension().is_some_and(|e| e == "ts" || e == "tsx") {
-                files.push(ep.display().to_string());
+                files.push(path_str);
             }
         }
     }
@@ -192,18 +213,25 @@ fn check_skip_lines_with_reason(
             results.push(CheckResult {
                 id: "T-TEST-04".to_owned(),
                 severity: Severity::Info,
-                title: "test.skip with reason".to_owned(),
-                message: line_text.to_owned(),
+                title: "`.skip()` with documented reason".to_owned(),
+                message: format!(
+                    "Skipped test with reason: `{line_text}`. Tracked for audit — skipped tests should \
+                     be temporary and re-enabled when the blocking issue is resolved."
+                ),
                 file: Some(filename.to_owned()),
                 line: Some(line_number),
                 inventory: false,
-            });
+            }.as_inventory());
         } else {
             results.push(CheckResult {
                 id: "T-TEST-04".to_owned(),
                 severity: Severity::Warn,
-                title: "test.skip without reason".to_owned(),
-                message: format!("Add `// reason: <why>` comment: {line_text}"),
+                title: "`.skip()` without documented reason".to_owned(),
+                message: format!(
+                    "Skipped test without explanation: `{line_text}`. Skipped tests silently reduce coverage \
+                     and often stay skipped forever. Add `// reason: <why this test is skipped>` on the same \
+                     line, or remove `.skip()` and fix the test."
+                ),
                 file: Some(filename.to_owned()),
                 line: Some(line_number),
                 inventory: false,
@@ -242,8 +270,12 @@ fn check_only_lines(content: &str, filename: &str, only_lines: &[usize]) -> Vec<
         results.push(CheckResult {
             id: "T-TEST-05".to_owned(),
             severity: Severity::Error,
-            title: ".only() in committed code".to_owned(),
-            message: format!("Remove .only() before committing: {line_text}"),
+            title: "`.only()` in committed code".to_owned(),
+            message: format!(
+                "`.only()` found in committed code: `{line_text}`. When `.only()` is present, the test runner \
+                 executes ONLY that test and silently skips all others — meaning the entire rest of the test suite \
+                 provides zero protection. Remove `.only()` before committing."
+            ),
             file: Some(filename.to_owned()),
             line: Some(line_number),
             inventory: false,

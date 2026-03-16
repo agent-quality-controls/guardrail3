@@ -4,6 +4,7 @@ use colored as _;
 use garde as _;
 use glob as _;
 use proc_macro2 as _;
+use quote as _;
 use serde as _;
 use serde_json as _;
 use syn as _;

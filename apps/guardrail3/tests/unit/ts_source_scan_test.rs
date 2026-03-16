@@ -58,9 +58,10 @@ fn test_file_length_over_300_t32() {
     assert!(matches!(results[0].severity, Severity::Warn));
 }
 
-// T33: file length 250-300 effective lines
+// T33 was killed — files between 250-300 lines no longer produce a warning.
+// Only T32 (>300 effective lines) remains.
 #[test]
-fn test_file_length_250_to_300_t33() {
+fn test_file_length_250_to_300_no_warning() {
     let path = Path::new("src/medium.ts");
     let content: String = (0..260)
         .map(|i| format!("const x{i} = {i};"))
@@ -68,9 +69,7 @@ fn test_file_length_250_to_300_t33() {
         .join("\n");
     let mut results = Vec::new();
     check_file_length(path, &content, &mut results);
-    assert_eq!(results.len(), 1, "expected 1 result, got {results:?}");
-    assert_eq!(results[0].id, "T33");
-    assert!(matches!(results[0].severity, Severity::Info));
+    assert_eq!(results.len(), 0, "expected no results for 260 lines, got {results:?}");
 }
 
 // T34: noinspection comment

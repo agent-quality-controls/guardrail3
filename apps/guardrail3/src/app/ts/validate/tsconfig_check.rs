@@ -6,6 +6,26 @@ use crate::ports::outbound::FileSystem;
 /// A tsconfig boolean check: (`setting_name`, `check_id`).
 type TsConfigBool = (&'static str, &'static str);
 
+/// Return a short explanation of what a tsconfig setting does and why it matters.
+fn tsconfig_explanation(key: &str) -> &'static str {
+    match key {
+        "strict" => " Enables all strict type-checking options (strictNullChecks, strictFunctionTypes, etc.), catching a wide class of bugs at compile time.",
+        "noImplicitReturns" => " Ensures every code path in a function returns a value, preventing undefined-at-runtime bugs.",
+        "noUnusedLocals" => " Catches declared but unused variables, which are dead code or indicate forgotten logic.",
+        "noUnusedParameters" => " Catches unused function parameters, which may indicate incomplete implementation.",
+        "noUncheckedIndexedAccess" => " Array/object index access returns `T | undefined` instead of just `T`, forcing null checks on dynamic access.",
+        "exactOptionalPropertyTypes" => " Distinguishes between `undefined` (property exists with no value) and missing (property not set), catching subtle bugs.",
+        "forceConsistentCasingInFileNames" => " Prevents import path casing mismatches that work on macOS/Windows but fail on Linux CI.",
+        "isolatedModules" => " Ensures each file can be independently transpiled (required by swc, esbuild, and other fast bundlers).",
+        "noPropertyAccessFromIndexSignature" => " Forces bracket notation for index signature access, making it clear when a property might not exist.",
+        "noImplicitOverride" => " Requires explicit `override` keyword when overriding base class methods, catching accidental name collisions.",
+        "noFallthroughCasesInSwitch" => " Catches switch cases that fall through to the next case without `break`, which is almost always a bug.",
+        "allowUnreachableCode" => " When false, catches code after return/throw/break that can never execute, indicating logic errors.",
+        "allowUnusedLabels" => " When false, catches unused labels which are dead code and often indicate copy-paste errors.",
+        _ => "",
+    }
+}
+
 #[allow(clippy::too_many_lines, clippy::disallowed_methods)] // reason: comprehensive tsconfig validation; guardrail3 JSON config inspection
 pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResult>) {
     let tsconfig_path = path.join("tsconfig.base.json");
@@ -19,8 +39,12 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
             results.push(CheckResult {
                 id: "T9".to_owned(),
                 severity: Severity::Error,
-                title: "tsconfig missing".to_owned(),
-                message: "No tsconfig.base.json or tsconfig.json found".to_owned(),
+                title: "TypeScript config file not found".to_owned(),
+                message: "No `tsconfig.base.json` or `tsconfig.json` found. The TypeScript compiler config \
+                         controls type checking strictness, module resolution, and output settings. Without it, \
+                         TypeScript uses permissive defaults that miss real bugs. Create `tsconfig.json` with \
+                         `strict: true` and other guardrail settings, or run `guardrail3 ts generate`."
+                    .to_owned(),
                 file: Some(path.display().to_string()),
                 line: None,
                 inventory: false,
@@ -32,12 +56,12 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
     results.push(CheckResult {
         id: "T9".to_owned(),
         severity: Severity::Info,
-        title: "tsconfig exists".to_owned(),
-        message: format!("Found: {}", tsconfig_path.display()),
+        title: "TypeScript config exists".to_owned(),
+        message: format!("TypeScript compiler config found: `{}`.", tsconfig_path.display()),
         file: Some(tsconfig_path.display().to_string()),
         line: None,
         inventory: false,
-    });
+    }.as_inventory());
 
     let Some(content) = fs.read_file(&tsconfig_path) else {
         return;
@@ -49,8 +73,12 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
             results.push(CheckResult {
                 id: "T9".to_owned(),
                 severity: Severity::Error,
-                title: "tsconfig parse error".to_owned(),
-                message: format!("Invalid JSON: {e}"),
+                title: "TypeScript config has invalid JSON".to_owned(),
+                message: format!(
+                    "Failed to parse tsconfig as JSON: {e}. The TypeScript compiler cannot read this file. \
+                     Fix the JSON syntax error — common causes are trailing commas, missing quotes, or comments \
+                     (use `jsonc` format if comments are needed)."
+                ),
                 file: Some(tsconfig_path.display().to_string()),
                 line: None,
                 inventory: false,
@@ -89,14 +117,15 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
         let val = compiler_options
             .and_then(|co| co.get(key))
             .and_then(serde_json::Value::as_bool);
+        let explanation = tsconfig_explanation(key);
 
         match val {
             Some(true) => {
                 results.push(CheckResult {
                     id: (*id).to_owned(),
                     severity: Severity::Info,
-                    title: format!("{key}: true"),
-                    message: format!("{key} is enabled"),
+                    title: format!("`{key}` enabled in tsconfig"),
+                    message: format!("`{key}` is correctly set to `true`.{explanation}"),
                     file: Some(tsconfig_path.display().to_string()),
                     line: None,
                     inventory: false,
@@ -106,8 +135,11 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
                 results.push(CheckResult {
                     id: (*id).to_owned(),
                     severity: Severity::Error,
-                    title: format!("{key}: false"),
-                    message: format!("{key} should be true"),
+                    title: format!("`{key}` disabled in tsconfig"),
+                    message: format!(
+                        "`{key}` is set to `false` but should be `true`.{explanation} \
+                         Set `\"{key}\": true` in compilerOptions."
+                    ),
                     file: Some(tsconfig_path.display().to_string()),
                     line: None,
                     inventory: false,
@@ -117,8 +149,11 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
                 results.push(CheckResult {
                     id: (*id).to_owned(),
                     severity: Severity::Error,
-                    title: format!("{key} missing"),
-                    message: format!("{key} not set in compilerOptions"),
+                    title: format!("`{key}` missing from tsconfig"),
+                    message: format!(
+                        "`{key}` not set in compilerOptions.{explanation} \
+                         Add `\"{key}\": true` to compilerOptions in tsconfig."
+                    ),
                     file: Some(tsconfig_path.display().to_string()),
                     line: None,
                     inventory: false,
@@ -131,14 +166,15 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
         let val = compiler_options
             .and_then(|co| co.get(key))
             .and_then(serde_json::Value::as_bool);
+        let explanation = tsconfig_explanation(key);
 
         match val {
             Some(true) => {
                 results.push(CheckResult {
                     id: (*id).to_owned(),
                     severity: Severity::Info,
-                    title: format!("{key}: true"),
-                    message: format!("{key} is enabled"),
+                    title: format!("`{key}` enabled in tsconfig"),
+                    message: format!("`{key}` is correctly set to `true`.{explanation}"),
                     file: Some(tsconfig_path.display().to_string()),
                     line: None,
                     inventory: false,
@@ -148,8 +184,11 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
                 results.push(CheckResult {
                     id: (*id).to_owned(),
                     severity: Severity::Warn,
-                    title: format!("{key} not enabled"),
-                    message: format!("{key} should be true"),
+                    title: format!("`{key}` not enabled in tsconfig"),
+                    message: format!(
+                        "`{key}` is not set to `true`.{explanation} \
+                         Add `\"{key}\": true` to compilerOptions in tsconfig."
+                    ),
                     file: Some(tsconfig_path.display().to_string()),
                     line: None,
                     inventory: false,
@@ -163,14 +202,15 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
         let val = compiler_options
             .and_then(|co| co.get(key))
             .and_then(serde_json::Value::as_bool);
+        let explanation = tsconfig_explanation(key);
 
         match val {
             Some(true) => {
                 results.push(CheckResult {
                     id: (*id).to_owned(),
                     severity: Severity::Info,
-                    title: format!("{key}: true"),
-                    message: format!("{key} is enabled"),
+                    title: format!("`{key}` enabled in tsconfig"),
+                    message: format!("`{key}` is correctly set to `true`.{explanation}"),
                     file: Some(tsconfig_path.display().to_string()),
                     line: None,
                     inventory: false,
@@ -180,8 +220,11 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
                 results.push(CheckResult {
                     id: (*id).to_owned(),
                     severity: Severity::Error,
-                    title: format!("{key}: false"),
-                    message: format!("{key} should be true"),
+                    title: format!("`{key}` disabled in tsconfig"),
+                    message: format!(
+                        "`{key}` is set to `false` but should be `true`.{explanation} \
+                         Set `\"{key}\": true` in compilerOptions."
+                    ),
                     file: Some(tsconfig_path.display().to_string()),
                     line: None,
                     inventory: false,
@@ -191,8 +234,11 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
                 results.push(CheckResult {
                     id: (*id).to_owned(),
                     severity: Severity::Error,
-                    title: format!("{key} missing"),
-                    message: format!("{key} not set in compilerOptions"),
+                    title: format!("`{key}` missing from tsconfig"),
+                    message: format!(
+                        "`{key}` not set in compilerOptions.{explanation} \
+                         Add `\"{key}\": true` to compilerOptions in tsconfig."
+                    ),
                     file: Some(tsconfig_path.display().to_string()),
                     line: None,
                     inventory: false,
@@ -206,14 +252,15 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
         let val = compiler_options
             .and_then(|co| co.get(key))
             .and_then(serde_json::Value::as_bool);
+        let explanation = tsconfig_explanation(key);
 
         match val {
             Some(false) => {
                 results.push(CheckResult {
                     id: (*id).to_owned(),
                     severity: Severity::Info,
-                    title: format!("{key}: false"),
-                    message: format!("{key} is correctly set to false"),
+                    title: format!("`{key}` correctly set to false"),
+                    message: format!("`{key}` is correctly set to `false`.{explanation}"),
                     file: Some(tsconfig_path.display().to_string()),
                     line: None,
                     inventory: false,
@@ -223,8 +270,11 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
                 results.push(CheckResult {
                     id: (*id).to_owned(),
                     severity: Severity::Error,
-                    title: format!("{key}: true"),
-                    message: format!("{key} should be false"),
+                    title: format!("`{key}` incorrectly set to true"),
+                    message: format!(
+                        "`{key}` is set to `true` but should be `false`.{explanation} \
+                         Set `\"{key}\": false` in compilerOptions."
+                    ),
                     file: Some(tsconfig_path.display().to_string()),
                     line: None,
                     inventory: false,
@@ -234,8 +284,11 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
                 results.push(CheckResult {
                     id: (*id).to_owned(),
                     severity: Severity::Error,
-                    title: format!("{key} missing"),
-                    message: format!("{key} not set in compilerOptions (should be false)"),
+                    title: format!("`{key}` missing from tsconfig"),
+                    message: format!(
+                        "`{key}` not set in compilerOptions.{explanation} \
+                         Add `\"{key}\": false` to compilerOptions in tsconfig."
+                    ),
                     file: Some(tsconfig_path.display().to_string()),
                     line: None,
                     inventory: false,
@@ -291,16 +344,17 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
                 results.push(CheckResult {
                     id: "T10".to_owned(),
                     severity: Severity::Info,
-                    title: format!("Extra tsconfig option: {key}"),
+                    title: format!("Extra tsconfig compilerOption: `{key}`"),
                     message: format!(
-                        "{key} = {}",
+                        "Non-standard compilerOption `{key}` = {}. This setting is not in the guardrail baseline. \
+                         Verify it is intentional and document why it's needed.",
                         co.get(key)
                             .map_or_else(|| "?".to_owned(), std::string::ToString::to_string)
                     ),
                     file: Some(tsconfig_path.display().to_string()),
                     line: None,
                     inventory: false,
-                });
+                }.as_inventory());
             }
         }
     }

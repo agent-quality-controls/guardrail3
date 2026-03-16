@@ -85,17 +85,75 @@ fn garde_skip_without_comment_is_error_r34() {
 
 #[test]
 #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
-fn garde_skip_with_comment_is_info_r35() {
+fn garde_skip_with_comment_on_non_primitive_is_error_r35() {
     let content = "struct Foo {\n    #[garde(skip)] // reason: validated elsewhere\n    field: String,\n}";
     let path = Path::new("test.rs");
     let mut results = Vec::new();
     check_garde_skip(path, content, &mut results);
-    let infos: Vec<_> = results
+    let errors: Vec<_> = results
         .iter()
-        .filter(|r| r.severity == Severity::Info)
+        .filter(|r| r.severity == Severity::Error)
         .collect();
-    assert!(!infos.is_empty(), "Should produce Info");
-    assert_eq!(infos[0].id, "R35");
+    assert!(!errors.is_empty(), "Should produce Error for non-primitive");
+    assert_eq!(errors[0].id, "R35");
+}
+
+// ---- R35 type-aware: garde(skip) on primitives vs non-primitives ----
+
+#[test]
+fn garde_skip_on_bool_silent() {
+    let content = "struct Foo {\n    #[garde(skip)]\n    active: bool,\n}";
+    let path = Path::new("test.rs");
+    let mut results = Vec::new();
+    check_garde_skip(path, content, &mut results);
+    assert!(
+        results.is_empty(),
+        "garde(skip) on bool should produce no result, got: {results:?}"
+    );
+}
+
+#[test]
+#[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
+fn garde_skip_on_string_error() {
+    let content = "struct Foo {\n    #[garde(skip)] // reason: legacy\n    name: String,\n}";
+    let path = Path::new("test.rs");
+    let mut results = Vec::new();
+    check_garde_skip(path, content, &mut results);
+    assert_eq!(results.len(), 1, "Should produce one result");
+    assert_eq!(results[0].id, "R35");
+    assert_eq!(results[0].severity, Severity::Error);
+    assert!(
+        results[0].message.contains("non-primitive"),
+        "Message should mention non-primitive"
+    );
+}
+
+#[test]
+fn garde_skip_on_option_usize_silent() {
+    let content = "struct Foo {\n    #[garde(skip)]\n    count: Option<usize>,\n}";
+    let path = Path::new("test.rs");
+    let mut results = Vec::new();
+    check_garde_skip(path, content, &mut results);
+    assert!(
+        results.is_empty(),
+        "garde(skip) on Option<usize> should produce no result, got: {results:?}"
+    );
+}
+
+#[test]
+#[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
+fn garde_skip_on_vec_string_error() {
+    let content = "struct Foo {\n    #[garde(skip)]\n    items: Vec<String>,\n}";
+    let path = Path::new("test.rs");
+    let mut results = Vec::new();
+    check_garde_skip(path, content, &mut results);
+    assert_eq!(results.len(), 1, "Should produce one result");
+    assert_eq!(results[0].id, "R34");
+    assert_eq!(results[0].severity, Severity::Error);
+    assert!(
+        results[0].message.contains("non-primitive"),
+        "Message should mention non-primitive"
+    );
 }
 
 // ---- Bug 7: unused_crate_dependencies universal exemption ----

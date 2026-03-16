@@ -36,7 +36,7 @@ pub fn check(
             &content,
             &["// noinspection", "/* noinspection"],
             "T34",
-            "noinspection comment",
+            "IDE noinspection suppression",
             &mut results,
         );
         // T35: istanbul ignore / c8 ignore
@@ -45,7 +45,7 @@ pub fn check(
             &content,
             &["istanbul ignore", "c8 ignore"],
             "T35",
-            "Coverage ignore comment",
+            "Coverage ignore directive",
             &mut results,
         );
     }
@@ -83,6 +83,10 @@ fn collect_ts_files(root: &Path) -> Vec<String> {
     {
         if entry.file_type().is_file() {
             let path_str = entry.path().display().to_string();
+            // Skip test fixture files — adversarial test data designed to have violations
+            if path_str.contains("tests/fixtures/") {
+                continue;
+            }
             if is_ts_file(&path_str) {
                 files.push(path_str);
             }
@@ -139,9 +143,18 @@ fn check_process_env_ast(
         };
 
         let message = if is_suppressed {
-            format!("ESLint-suppressed process.env access: {trimmed}")
+            format!(
+                "ESLint-suppressed `process.env` access (acknowledged via eslint-disable): `{trimmed}`. \
+                 Direct env access scatters configuration reads across the codebase, making it hard to audit \
+                 what config a service needs. This instance is suppressed but still tracked."
+            )
         } else {
-            format!("Use env() import instead: {trimmed}")
+            format!(
+                "Direct `process.env` access found: `{trimmed}`. Reading environment variables directly \
+                 scatters configuration across the codebase, making it impossible to see all config in one place \
+                 and easy to misspell variable names. Create a centralized `env.ts` module that reads all env vars \
+                 once with validation, then import from it."
+            )
         };
 
         results.push(CheckResult {
@@ -181,8 +194,12 @@ fn check_any_types_ast(
         results.push(CheckResult {
             id: "T31".to_owned(),
             severity: Severity::Info,
-            title: "any type usage".to_owned(),
-            message: trimmed.to_owned(),
+            title: "`any` type usage".to_owned(),
+            message: format!(
+                "`any` type found: `{trimmed}`. The `any` type disables TypeScript's type checker for this value, \
+                 allowing type errors to propagate silently at runtime. Replace with a specific type, `unknown` \
+                 (forces runtime checks), or a generic type parameter."
+            ),
             file: Some(path.display().to_string()),
             line: Some(line_number),
             inventory: false,
@@ -190,7 +207,7 @@ fn check_any_types_ast(
     }
 }
 
-// T32-T33: File line count
+// T32: File line count
 pub fn check_file_length(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
     let effective_lines = content
         .lines()
@@ -204,18 +221,12 @@ pub fn check_file_length(path: &Path, content: &str, results: &mut Vec<CheckResu
         results.push(CheckResult {
             id: "T32".to_owned(),
             severity: Severity::Warn,
-            title: "File too long".to_owned(),
-            message: format!("{effective_lines} effective lines (max 300)"),
-            file: Some(path.display().to_string()),
-            line: None,
-            inventory: false,
-        });
-    } else if effective_lines > 250 {
-        results.push(CheckResult {
-            id: "T33".to_owned(),
-            severity: Severity::Info,
-            title: "File approaching limit".to_owned(),
-            message: format!("{effective_lines} effective lines (warn at 300)"),
+            title: "File exceeds 300 effective lines".to_owned(),
+            message: format!(
+                "{effective_lines} effective lines (blank/comment lines excluded). \
+                 Large files are harder for agents and humans to reason about, increasing bug risk. \
+                 Split into focused modules — extract related functions into separate files with clear boundaries."
+            ),
             file: Some(path.display().to_string()),
             line: None,
             inventory: false,
@@ -232,14 +243,24 @@ pub fn check_comment_pattern(
     title: &str,
     results: &mut Vec<CheckResult>,
 ) {
+    let explanation = match check_id {
+        "T34" => " `noinspection` is a JetBrains IDE directive that suppresses inspections. \
+                   These are IDE-specific and should not be in source control. \
+                   Remove the comment and fix the underlying issue instead.",
+        "T35" => " Coverage ignore directives (`istanbul ignore`/`c8 ignore`) hide untested code \
+                   from coverage reports, masking gaps. Remove the directive and write tests for the code, \
+                   or if truly untestable, document why in a code comment.",
+        _ => "",
+    };
     for (line_num, line) in content.lines().enumerate() {
         if patterns.iter().any(|p| line.contains(p)) {
             let line_number = line_num.saturating_add(1);
+            let trimmed = line.trim();
             results.push(CheckResult {
                 id: check_id.to_owned(),
                 severity: Severity::Info,
                 title: title.to_owned(),
-                message: line.trim().to_owned(),
+                message: format!("{trimmed}.{explanation}"),
                 file: Some(path.display().to_string()),
                 line: Some(line_number),
                 inventory: false,
@@ -284,8 +305,13 @@ fn check_banned_in_node_modules(fs: &dyn FileSystem, path: &Path, results: &mut 
             results.push(CheckResult {
                 id: "T59".to_owned(),
                 severity: Severity::Error,
-                title: format!("Banned package in node_modules: {dep}"),
-                message: format!("{dep} found in node_modules (transitive dependency?)"),
+                title: format!("Banned package `{dep}` in node_modules"),
+                message: format!(
+                    "`{dep}` found in node_modules. Banned packages have preferred alternatives \
+                     (e.g., native fetch over axios, date-fns over moment, crypto.randomUUID over uuid). \
+                     If this is a transitive dependency, add a pnpm override to replace it. \
+                     If direct, remove from package.json and switch to the approved alternative."
+                ),
                 file: Some(dep_path.display().to_string()),
                 line: None,
                 inventory: false,
@@ -300,8 +326,12 @@ fn check_banned_in_node_modules(fs: &dyn FileSystem, path: &Path, results: &mut 
             results.push(CheckResult {
                 id: "T59".to_owned(),
                 severity: Severity::Error,
-                title: format!("Banned package in node_modules: {name}"),
-                message: format!("{name} found in node_modules"),
+                title: format!("Banned package `{name}` in node_modules"),
+                message: format!(
+                    "`{name}` found in node_modules. Banned packages have preferred alternatives. \
+                     If this is a transitive dependency, add a pnpm override to replace it. \
+                     If direct, remove from package.json and switch to the approved alternative."
+                ),
                 file: Some(entry.path().display().to_string()),
                 line: None,
                 inventory: false,

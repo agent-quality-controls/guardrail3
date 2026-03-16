@@ -27,83 +27,116 @@ fn check_eslint_disable_from_comments(
         let text = comment.text.trim();
         let line_number = comment.line;
 
-        // Block-level eslint-disable (T23/T24)
-        if text.contains("eslint-disable")
-            && !text.contains("eslint-disable-next-line")
-            && !text.contains("eslint-disable-line")
-        {
-            if text.contains("-- ") {
-                results.push(CheckResult {
-                    id: "T24".to_owned(),
-                    severity: Severity::Info,
-                    title: "eslint-disable with reason".to_owned(),
-                    message: text.to_owned(),
-                    file: Some(path.display().to_string()),
-                    line: Some(line_number),
-                    inventory: false,
-                });
-            } else {
-                results.push(CheckResult {
-                    id: "T23".to_owned(),
-                    severity: Severity::Error,
-                    title: "eslint-disable without reason".to_owned(),
-                    message: format!("eslint-disable missing `-- ` reason: {text}"),
-                    file: Some(path.display().to_string()),
-                    line: Some(line_number),
-                    inventory: false,
-                });
-            }
-        }
+        check_block_eslint_disable(path, text, line_number, results);
+        check_next_line_eslint_disable(path, text, line_number, results);
+        check_inline_eslint_disable(path, text, line_number, results);
+    }
+}
 
-        // eslint-disable-next-line (T25/T26)
-        if text.contains("eslint-disable-next-line") {
-            if text.contains("-- ") {
-                results.push(CheckResult {
-                    id: "T26".to_owned(),
-                    severity: Severity::Info,
-                    title: "eslint-disable-next-line with reason".to_owned(),
-                    message: text.to_owned(),
-                    file: Some(path.display().to_string()),
-                    line: Some(line_number),
-                    inventory: false,
-                });
-            } else {
-                results.push(CheckResult {
-                    id: "T25".to_owned(),
-                    severity: Severity::Error,
-                    title: "eslint-disable-next-line without reason".to_owned(),
-                    message: format!("Missing `-- ` reason: {text}"),
-                    file: Some(path.display().to_string()),
-                    line: Some(line_number),
-                    inventory: false,
-                });
-            }
-        }
+/// T23/T24: Block-level eslint-disable.
+fn check_block_eslint_disable(
+    path: &Path,
+    text: &str,
+    line_number: usize,
+    results: &mut Vec<CheckResult>,
+) {
+    if !text.contains("eslint-disable")
+        || text.contains("eslint-disable-next-line")
+        || text.contains("eslint-disable-line")
+    {
+        return;
+    }
+    if text.contains("-- ") {
+        results.push(CheckResult {
+            id: "T24".to_owned(),
+            severity: Severity::Info,
+            title: "Block eslint-disable with reason".to_owned(),
+            message: format!(
+                "Block-level `eslint-disable` with documented reason: `{text}`. \
+                 Block disables suppress ESLint rules for an entire section. Tracked for audit."
+            ),
+            file: Some(path.display().to_string()),
+            line: Some(line_number),
+            inventory: false,
+        }.as_inventory());
+    } else {
+        results.push(CheckResult {
+            id: "T23".to_owned(),
+            severity: Severity::Error,
+            title: "Block eslint-disable without reason".to_owned(),
+            message: format!(
+                "Block-level `eslint-disable` missing reason: `{text}`. \
+                 Disabling ESLint rules hides potential bugs. Every suppression must document WHY \
+                 the rule doesn't apply. Add `-- <reason>` after the rule name, e.g., \
+                 `/* eslint-disable no-console -- CLI tool needs console output */`."
+            ),
+            file: Some(path.display().to_string()),
+            line: Some(line_number),
+            inventory: false,
+        });
+    }
+}
 
-        // eslint-disable-line (T25/T26 -- inline suppression)
-        if text.contains("eslint-disable-line") && !text.contains("eslint-disable-line-") {
-            if text.contains("-- ") {
-                results.push(CheckResult {
-                    id: "T26".to_owned(),
-                    severity: Severity::Info,
-                    title: "eslint-disable-line with reason".to_owned(),
-                    message: text.to_owned(),
-                    file: Some(path.display().to_string()),
-                    line: Some(line_number),
-                    inventory: false,
-                });
-            } else {
-                results.push(CheckResult {
-                    id: "T25".to_owned(),
-                    severity: Severity::Error,
-                    title: "eslint-disable-line without reason".to_owned(),
-                    message: format!("Missing `-- ` reason: {text}"),
-                    file: Some(path.display().to_string()),
-                    line: Some(line_number),
-                    inventory: false,
-                });
-            }
-        }
+/// T25/T26: eslint-disable-next-line.
+fn check_next_line_eslint_disable(
+    path: &Path,
+    text: &str,
+    line_number: usize,
+    results: &mut Vec<CheckResult>,
+) {
+    if !text.contains("eslint-disable-next-line") {
+        return;
+    }
+    emit_line_suppression_result(path, text, line_number, "Line-level", results);
+}
+
+/// T25/T26: eslint-disable-line (inline suppression).
+fn check_inline_eslint_disable(
+    path: &Path,
+    text: &str,
+    line_number: usize,
+    results: &mut Vec<CheckResult>,
+) {
+    if !text.contains("eslint-disable-line") || text.contains("eslint-disable-line-") {
+        return;
+    }
+    emit_line_suppression_result(path, text, line_number, "Inline", results);
+}
+
+/// Emit a T25 (error, no reason) or T26 (info, with reason) result for line-level suppressions.
+fn emit_line_suppression_result(
+    path: &Path,
+    text: &str,
+    line_number: usize,
+    kind: &str,
+    results: &mut Vec<CheckResult>,
+) {
+    if text.contains("-- ") {
+        results.push(CheckResult {
+            id: "T26".to_owned(),
+            severity: Severity::Info,
+            title: format!("{kind} eslint-disable with reason"),
+            message: format!(
+                "{kind} ESLint suppression with documented reason: `{text}`. Tracked for audit."
+            ),
+            file: Some(path.display().to_string()),
+            line: Some(line_number),
+            inventory: false,
+        }.as_inventory());
+    } else {
+        results.push(CheckResult {
+            id: "T25".to_owned(),
+            severity: Severity::Error,
+            title: format!("{kind} eslint-disable without reason"),
+            message: format!(
+                "{kind} ESLint suppression missing reason: `{text}`. \
+                 Every suppression must explain WHY the rule doesn't apply here. \
+                 Add `-- <reason>` after the rule name."
+            ),
+            file: Some(path.display().to_string()),
+            line: Some(line_number),
+            inventory: false,
+        });
     }
 }
 
@@ -131,8 +164,13 @@ fn check_ts_ignore_from_comments(
             results.push(CheckResult {
                 id: "T27".to_owned(),
                 severity: Severity::Error,
-                title: "@ts-ignore usage".to_owned(),
-                message: format!("Use @ts-expect-error instead: {text}"),
+                title: "`@ts-ignore` suppresses type checking".to_owned(),
+                message: format!(
+                    "`@ts-ignore` found: `{text}`. This suppresses TypeScript type checking on the next line \
+                     without explanation, hiding type errors that indicate real bugs. Unlike `@ts-expect-error`, \
+                     it stays silent even after the underlying error is fixed, leaving dead suppressions. \
+                     Replace with `@ts-expect-error: <reason>` which documents why and fails if the error is resolved."
+                ),
                 file: Some(path.display().to_string()),
                 line: Some(line_number),
                 inventory: false,
@@ -148,8 +186,13 @@ fn check_ts_ignore_from_comments(
                     results.push(CheckResult {
                         id: "T28".to_owned(),
                         severity: Severity::Warn,
-                        title: "@ts-expect-error without explanation".to_owned(),
-                        message: text.to_owned(),
+                        title: "`@ts-expect-error` without explanation".to_owned(),
+                        message: format!(
+                            "`@ts-expect-error` without explanation: `{text}`. While better than `@ts-ignore` \
+                             (it fails when the error is fixed), it still needs a reason so reviewers understand \
+                             why the type error is expected. Add an explanation after the directive: \
+                             `// @ts-expect-error: <reason>`."
+                        ),
                         file: Some(path.display().to_string()),
                         line: Some(line_number),
                         inventory: false,
@@ -158,12 +201,15 @@ fn check_ts_ignore_from_comments(
                     results.push(CheckResult {
                         id: "T29".to_owned(),
                         severity: Severity::Info,
-                        title: "@ts-expect-error with explanation".to_owned(),
-                        message: text.to_owned(),
+                        title: "`@ts-expect-error` with explanation".to_owned(),
+                        message: format!(
+                            "Documented type suppression: `{text}`. This will fail if the underlying \
+                             type error is fixed, ensuring the suppression doesn't outlive its need. Tracked for audit."
+                        ),
                         file: Some(path.display().to_string()),
                         line: Some(line_number),
                         inventory: false,
-                    });
+                    }.as_inventory());
                 }
             }
         }

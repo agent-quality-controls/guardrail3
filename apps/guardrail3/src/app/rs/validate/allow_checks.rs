@@ -136,20 +136,21 @@ fn check_garde_skip_ast(
     results: &mut Vec<CheckResult>,
 ) {
     let raw_lines: Vec<&str> = content.lines().collect();
-    for line_1based in ast_helpers::find_garde_skips(file) {
+    for info in ast_helpers::find_garde_skips_with_types(file) {
+        // Primitives (bool, numeric, Option<primitive>) are always valid to skip — no result
+        if info.is_primitive {
+            continue;
+        }
+        let line_1based = info.line;
         let has_comment = raw_lines
             .get(line_1based.wrapping_sub(1))
             .is_some_and(|l| l.contains("//"));
         if has_comment {
-            let reason = raw_lines
-                .get(line_1based.wrapping_sub(1))
-                .and_then(|l| l.split("//").nth(1))
-                .map_or("no reason given", str::trim);
             results.push(CheckResult {
                 id: "R35".to_owned(),
-                severity: Severity::Info,
-                title: "#[garde(skip)] — field skips input validation — review with --verbose to audit".to_owned(),
-                message: format!("#[garde(skip)] skips runtime input validation on this field with documented reason: {reason}. Approved exception, no action needed."),
+                severity: Severity::Error,
+                title: format!("`#[garde(skip)]` on non-primitive field `{}: {}`", info.field_name, info.field_type),
+                message: format!("`#[garde(skip)]` on non-primitive field `{}: {}`. Non-primitive fields must have a real garde validator (e.g., `#[garde(length(min=1))]` for strings). Only primitive types (bool, numeric) can use skip.", info.field_name, info.field_type),
                 file: Some(path.display().to_string()),
                 line: Some(line_1based),
                 inventory: false,
@@ -159,7 +160,7 @@ fn check_garde_skip_ast(
                 id: "R34".to_owned(),
                 severity: Severity::Error,
                 title: "garde(skip) without reason".to_owned(),
-                message: "`#[garde(skip)]` bypasses runtime input validation on this field without documenting why. Unvalidated input at adapter boundaries can cause data corruption or security issues. Add `// reason: <justification>` on the same line.".to_owned(),
+                message: format!("`#[garde(skip)]` on non-primitive field `{}: {}` bypasses runtime input validation without documenting why. Non-primitive fields must have a real garde validator (e.g., `#[garde(length(min=1))]` for strings). Only primitive types (bool, numeric) can use skip.", info.field_name, info.field_type),
                 file: Some(path.display().to_string()),
                 line: Some(line_1based),
                 inventory: false,

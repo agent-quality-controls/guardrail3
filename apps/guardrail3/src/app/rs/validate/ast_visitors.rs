@@ -139,6 +139,110 @@ impl<'ast> Visit<'ast> for GardeSkipVisitor {
     }
 }
 
+/// Known primitive types that are always valid to skip with `#[garde(skip)]`.
+/// Types that are always valid to skip in garde — either primitives or types
+/// that garde fundamentally cannot validate (maps, trait objects).
+const SKIP_OK_TYPES: &[&str] = &[
+    // Primitives
+    "bool", "u8", "u16", "u32", "u64", "u128", "usize", "i8", "i16", "i32", "i64", "i128",
+    "isize", "f32", "f64",
+    // Collections where garde can't dive into values
+    "BTreeMap", "HashMap", "BTreeSet", "HashSet",
+];
+
+/// Information about a `#[garde(skip)]` field, including its type.
+pub struct GardeSkipInfo {
+    pub line: usize,
+    pub field_name: String,
+    pub field_type: String,
+    pub is_primitive: bool,
+    pub has_subcommand_attr: bool,
+}
+
+/// Check if a type is one that garde cannot meaningfully validate.
+#[allow(clippy::wildcard_enum_match_arm)] // reason: syn Type has many variants
+fn type_is_unvalidatable(ty: &syn::Type) -> bool {
+    match ty {
+        syn::Type::Path(tp) => {
+            let last_seg = tp.path.segments.last();
+            let Some(seg) = last_seg else {
+                return false;
+            };
+            let ident = seg.ident.to_string();
+            if SKIP_OK_TYPES.iter().any(|&p| p == ident) {
+                return true;
+            }
+            // Type aliases ending in Map/Set are likely BTreeMap/HashMap aliases
+            if ident.ends_with("Map") || ident.ends_with("Set") {
+                return true;
+            }
+            // Option<unvalidatable> is also unvalidatable
+            if ident == "Option" {
+                if let syn::PathArguments::AngleBracketed(args) = &seg.arguments {
+                    if args.args.len() == 1 {
+                        if let Some(syn::GenericArgument::Type(inner)) = args.args.first() {
+                            return type_is_unvalidatable(inner);
+                        }
+                    }
+                }
+            }
+            false
+        }
+        // Trait objects, references, etc. — can't validate
+        syn::Type::TraitObject(_) | syn::Type::Reference(_) => true,
+        _ => false,
+    }
+}
+
+fn type_to_string(ty: &syn::Type) -> String {
+    use quote::ToTokens;
+    ty.to_token_stream().to_string().replace(' ', "")
+}
+
+pub struct GardeSkipTypedVisitor {
+    pub out: Vec<GardeSkipInfo>,
+}
+impl<'ast> Visit<'ast> for GardeSkipTypedVisitor {
+    fn visit_field(&mut self, f: &'ast syn::Field) {
+        if let Some(line) = has_garde_skip(&f.attrs) {
+            let field_name = f
+                .ident
+                .as_ref()
+                .map_or_else(|| "<unnamed>".to_owned(), std::string::ToString::to_string);
+            let field_type = type_to_string(&f.ty);
+            let is_primitive = type_is_unvalidatable(&f.ty);
+            // Check if field has #[command(subcommand)] — clap subcommand enums can't be validated
+            let has_subcommand_attr = f.attrs.iter().any(|a| {
+                a.path().is_ident("command")
+                    && a.meta
+                        .require_list()
+                        .ok()
+                        .and_then(|list| list.parse_args::<syn::Ident>().ok())
+                        .is_some_and(|ident| ident == "subcommand")
+            });
+            self.out.push(GardeSkipInfo {
+                line,
+                field_name,
+                field_type,
+                is_primitive: is_primitive || has_subcommand_attr,
+                has_subcommand_attr,
+            });
+        }
+        syn::visit::visit_field(self, f);
+    }
+}
+
+/// Check if a struct (given its fields) has any non-primitive fields.
+pub fn struct_has_non_primitive_fields(item: &syn::ItemStruct) -> bool {
+    match &item.fields {
+        syn::Fields::Named(fields) => fields.named.iter().any(|f| !type_is_unvalidatable(&f.ty)),
+        syn::Fields::Unnamed(fields) => {
+            fields.unnamed.iter().any(|f| !type_is_unvalidatable(&f.ty))
+        }
+        syn::Fields::Unit => false,
+    }
+}
+
 pub struct UnsafeVisitor {
     pub out: Vec<usize>,
 }
@@ -208,7 +312,7 @@ impl DeriveVisitor {
     /// into ONE `DeriveInfo`. This correctly handles split derives like
     /// `#[derive(Deserialize)] #[derive(Validate)]` — they produce a single entry
     /// with macros `["Deserialize", "Validate"]`.
-    fn collect_derives(&mut self, attrs: &[syn::Attribute]) {
+    fn collect_derives(&mut self, attrs: &[syn::Attribute], has_non_primitive: bool) {
         let mut macros = Vec::new();
         let mut first_line: Option<usize> = None;
 
@@ -230,18 +334,28 @@ impl DeriveVisitor {
 
         if let Some(line) = first_line {
             if !macros.is_empty() {
-                self.out.push(DeriveInfo { line, macros });
+                self.out.push(DeriveInfo {
+                    line,
+                    macros,
+                    has_non_primitive_fields: has_non_primitive,
+                });
             }
         }
     }
 }
 impl<'ast> Visit<'ast> for DeriveVisitor {
     fn visit_item(&mut self, i: &'ast syn::Item) {
-        self.collect_derives(item_attrs(i));
+        let has_non_primitive = if let syn::Item::Struct(s) = i {
+            struct_has_non_primitive_fields(s)
+        } else {
+            // Enums and other items: conservatively assume they have non-primitive fields
+            true
+        };
+        self.collect_derives(item_attrs(i), has_non_primitive);
         syn::visit::visit_item(self, i);
     }
     fn visit_impl_item(&mut self, i: &'ast syn::ImplItem) {
-        self.collect_derives(impl_item_attrs(i));
+        self.collect_derives(impl_item_attrs(i), true);
         syn::visit::visit_impl_item(self, i);
     }
 }
