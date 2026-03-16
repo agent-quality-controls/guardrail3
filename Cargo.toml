@@ -85,6 +85,8 @@ colored = "2"
 walkdir = "2"
 syn = { version = "2", features = ["full", "parsing", "visit"] }
 proc-macro2 = { version = "1", features = ["span-locations"] }
+tree-sitter = "0.26"
+tree-sitter-typescript = "0.23"
 
 [dev-dependencies]
 proptest = "1"

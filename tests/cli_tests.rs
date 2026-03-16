@@ -13,6 +13,8 @@ use proptest as _;
 use serde as _;
 use syn as _;
 use toml as _;
+use tree_sitter as _;
+use tree_sitter_typescript as _;
 use walkdir as _;
 
 use std::process::Command;
