@@ -2,6 +2,7 @@ use std::path::Path;
 
 use crate::report::types::{CheckResult, Severity};
 
+use super::ast_helpers;
 use super::source_scan::filter_non_comment_lines;
 
 // R38-R39: File line count
@@ -46,11 +47,16 @@ pub fn check_use_count(path: &Path, content: &str, is_test: bool, results: &mut 
         return;
     }
 
-    let non_comment_lines = filter_non_comment_lines(content);
-    let use_count = non_comment_lines
-        .iter()
-        .filter(|(_, trimmed)| trimmed.starts_with("use ") || trimmed.starts_with("pub use "))
-        .count();
+    let use_count = if let Some(file) = ast_helpers::parse_file(content) {
+        ast_helpers::count_use_statements(&file)
+    } else {
+        // Fallback to grep if parse fails
+        let non_comment_lines = filter_non_comment_lines(content);
+        non_comment_lines
+            .iter()
+            .filter(|(_, trimmed)| trimmed.starts_with("use ") || trimmed.starts_with("pub use "))
+            .count()
+    };
 
     if use_count > 20 {
         results.push(CheckResult {
@@ -75,11 +81,33 @@ pub fn check_use_count(path: &Path, content: &str, is_test: bool, results: &mut 
 
 // R42: unsafe
 pub fn check_unsafe(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
+    if let Some(file) = ast_helpers::parse_file(content) {
+        // AST path — no false positives from strings or comments
+        for line in ast_helpers::find_unsafe_usage(&file) {
+            let message = content
+                .lines()
+                .nth(line.saturating_sub(1))
+                .unwrap_or("")
+                .trim();
+            results.push(CheckResult {
+                id: "R42".to_owned(),
+                severity: Severity::Error,
+                title: "unsafe usage".to_owned(),
+                message: message.to_owned(),
+                file: Some(path.display().to_string()),
+                line: Some(line),
+            });
+        }
+    } else {
+        // Fallback to grep if parse fails
+        check_unsafe_grep(path, content, results);
+    }
+}
+
+fn check_unsafe_grep(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
     let non_comment_lines = filter_non_comment_lines(content);
 
     for (line_num, trimmed) in &non_comment_lines {
-        // Check for unsafe as a keyword — must be preceded by whitespace/start-of-line
-        // and followed by '{', ' fn', ' impl', ' trait', or whitespace
         let check_patterns = [
             "unsafe {",
             "unsafe{",
@@ -91,12 +119,9 @@ pub fn check_unsafe(path: &Path, content: &str, results: &mut Vec<CheckResult>) 
         let mut found = false;
         for pattern in &check_patterns {
             if trimmed.contains(pattern) {
-                // Make sure it's not inside a string literal
-                // Simple heuristic: if a `"` appears before the unsafe keyword, skip
                 if let Some(unsafe_pos) = trimmed.find(pattern) {
                     #[allow(clippy::string_slice)] // reason: unsafe keyword detection on ASCII
                     let before = &trimmed[..unsafe_pos];
-                    // Count quotes before — if odd, we're inside a string
                     let quote_count = before.chars().filter(|c| *c == '"').count();
                     if quote_count % 2 != 0 {
                         continue;
@@ -107,7 +132,6 @@ pub fn check_unsafe(path: &Path, content: &str, results: &mut Vec<CheckResult>) 
             }
         }
 
-        // Also check if line starts with "unsafe " — at start of line, can't be in a string
         if !found && trimmed.starts_with("unsafe ") {
             found = true;
         }

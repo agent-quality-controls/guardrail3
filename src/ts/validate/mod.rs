@@ -1,3 +1,4 @@
+pub mod ast_helpers;
 pub mod config_files;
 pub mod eslint_audit;
 mod eslint_check;
