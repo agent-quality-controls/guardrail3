@@ -18,6 +18,7 @@ use glob as _;
 use guardrail3 as _;
 use proc_macro2 as _;
 use proptest as _;
+use quote as _;
 use serde as _;
 use syn as _;
 use toml as _;
@@ -618,18 +619,18 @@ fn grep_before_typescript_generic_any() {
 fn grep_before_typescript_exactly_300_lines() {
     // BOUNDARY: exactly 300 total lines, 298 effective lines (2 comment lines excluded).
     // T32 fires on > 300 effective lines, so should NOT fire.
-    // T33 fires on > 250 effective lines, so SHOULD fire (298 > 250).
+    // T33 was killed — no "approaching limit" warning anymore.
     let r = validate_ts_grep_attack_fixture("exactly_300_lines.ts");
     assert_no_check(&r, "exactly_300_lines.ts", "T32");
-    assert_has_check(&r, "exactly_300_lines.ts", "T33", "info");
+    assert_no_check(&r, "exactly_300_lines.ts", "T33");
 }
 
 #[test]
 fn grep_before_typescript_exactly_301_lines() {
     // BOUNDARY: exactly 301 total lines, 299 effective lines (2 comment lines excluded).
     // T32 fires on > 300 effective lines — 299 is NOT > 300, so T32 should NOT fire.
-    // T33 fires on > 250 effective lines, so SHOULD fire (299 > 250).
+    // T33 was killed — no "approaching limit" warning anymore.
     let r = validate_ts_grep_attack_fixture("exactly_301_lines.ts");
     assert_no_check(&r, "exactly_301_lines.ts", "T32");
-    assert_has_check(&r, "exactly_301_lines.ts", "T33", "info");
+    assert_no_check(&r, "exactly_301_lines.ts", "T33");
 }

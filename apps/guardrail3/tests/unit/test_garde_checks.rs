@@ -242,7 +242,7 @@ struct Foo {
 
 #[derive(Deserialize)]
 struct Bar {
-    age: u32,
+    label: String,
 }
 
 #[derive(Serialize)]
@@ -255,7 +255,7 @@ struct Baz {
     let derives = guardrail3::app::rs::validate::ast_helpers::find_derive_attributes(&parsed);
     let (with, without) = count_unvalidated_input_structs(&derives);
     assert_eq!(with, 1, "Foo has both Deserialize + Validate");
-    assert_eq!(without, 1, "Bar has Deserialize without Validate");
+    assert_eq!(without, 1, "Bar has Deserialize without Validate (has non-primitive field)");
 }
 
 #[test]
@@ -350,6 +350,32 @@ struct Input {
     let (with, without) = count_unvalidated_input_structs(&derives);
     assert_eq!(with, 1, "Deserialize + Validate should be counted as validated");
     assert_eq!(without, 0);
+}
+
+#[test]
+fn garde_05_all_bool_struct_no_validate_needed() {
+    let content = r"
+use serde::Deserialize;
+
+#[derive(Deserialize)]
+struct Config {
+    enabled: bool,
+    active: bool,
+    count: u32,
+}
+";
+    #[allow(clippy::expect_used)] // reason: test — panic on parse failure is correct
+    let parsed = syn::parse_file(content).expect("should parse");
+    let derives = guardrail3::app::rs::validate::ast_helpers::find_derive_attributes(&parsed);
+    let (with, without) = count_unvalidated_input_structs(&derives);
+    assert_eq!(
+        with, 0,
+        "All-primitive struct should not be counted as needing Validate"
+    );
+    assert_eq!(
+        without, 0,
+        "All-primitive struct should not be flagged as missing Validate"
+    );
 }
 
 #[test]

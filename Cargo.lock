@@ -292,6 +292,7 @@ dependencies = [
  "glob",
  "proc-macro2",
  "proptest",
+ "quote",
  "serde",
  "serde_json",
  "syn",

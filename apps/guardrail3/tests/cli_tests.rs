@@ -11,6 +11,7 @@ use glob as _;
 use guardrail3 as _;
 use proc_macro2 as _;
 use proptest as _;
+use quote as _;
 use serde as _;
 use syn as _;
 use toml as _;

@@ -33,8 +33,11 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
                 results.push(CheckResult {
                     id: "T15".to_owned(),
                     severity: Severity::Error,
-                    title: "pnpm.overrides missing zod".to_owned(),
-                    message: "No zod override in pnpm.overrides".to_owned(),
+                    title: "`pnpm.overrides` missing `zod` pin".to_owned(),
+                    message: "No `zod` override in `pnpm.overrides`. Overrides pin transitive dependency \
+                             versions to a single copy, preventing version conflicts and reducing bundle size. \
+                             Add `\"zod\": \"<version>\"` to `pnpm.overrides` in `package.json`."
+                        .to_owned(),
                     file: Some(pkg_path.display().to_string()),
                     line: None,
                     inventory: false,
@@ -44,8 +47,11 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
                 results.push(CheckResult {
                     id: "T15".to_owned(),
                     severity: Severity::Error,
-                    title: "pnpm.overrides missing @eslint/js".to_owned(),
-                    message: "No @eslint/js override in pnpm.overrides".to_owned(),
+                    title: "`pnpm.overrides` missing `@eslint/js` pin".to_owned(),
+                    message: "No `@eslint/js` override in `pnpm.overrides`. Overrides pin transitive dependency \
+                             versions to a single copy. Add `\"@eslint/js\": \"<version>\"` to `pnpm.overrides` \
+                             in `package.json`."
+                        .to_owned(),
                     file: Some(pkg_path.display().to_string()),
                     line: None,
                     inventory: false,
@@ -59,9 +65,10 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
                     results.push(CheckResult {
                         id: "T16".to_owned(),
                         severity: Severity::Info,
-                        title: format!("Extra pnpm override: {key}"),
+                        title: format!("Extra pnpm override: `{key}`"),
                         message: format!(
-                            "{key} = {}",
+                            "Non-baseline pnpm override `{key}` = {}. Extra overrides pin transitive \
+                             dependency versions. Verify this is intentional and the pinned version is current.",
                             ov_obj
                                 .get(key)
                                 .map_or_else(|| "?".to_owned(), std::string::ToString::to_string)
@@ -69,7 +76,7 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
                         file: Some(pkg_path.display().to_string()),
                         line: None,
                         inventory: false,
-                    });
+                    }.as_inventory());
                 }
             }
         }
@@ -77,8 +84,11 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
             results.push(CheckResult {
                 id: "T15".to_owned(),
                 severity: Severity::Error,
-                title: "pnpm.overrides missing".to_owned(),
-                message: "No pnpm.overrides section in package.json".to_owned(),
+                title: "`pnpm.overrides` section missing from `package.json`".to_owned(),
+                message: "No `pnpm.overrides` section in `package.json`. Overrides pin transitive dependency \
+                         versions to prevent duplicate packages and version conflicts. Add a `pnpm.overrides` \
+                         section with at least `zod` and `@eslint/js` pinned to workspace versions."
+                    .to_owned(),
                 file: Some(pkg_path.display().to_string()),
                 line: None,
                 inventory: false,
@@ -120,8 +130,12 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
                     results.push(CheckResult {
                         id: "T17".to_owned(),
                         severity: Severity::Error,
-                        title: format!("Banned dependency: {dep_name}"),
-                        message: format!("{dep_name} found in {section_name}"),
+                        title: format!("Banned dependency `{dep_name}` in `{section_name}`"),
+                        message: format!(
+                            "`{dep_name}` found in `{section_name}`. This package is banned because a preferred \
+                             alternative exists (e.g., native fetch over axios, date-fns over moment, \
+                             crypto.randomUUID over uuid). Remove it and switch to the approved alternative."
+                        ),
                         file: Some(pkg_path.display().to_string()),
                         line: None,
                         inventory: false,
@@ -136,9 +150,10 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
         results.push(CheckResult {
             id: "T18".to_owned(),
             severity: Severity::Info,
-            title: "packageManager field present".to_owned(),
+            title: "`packageManager` field set in `package.json`".to_owned(),
             message: format!(
-                "packageManager = {}",
+                "`packageManager` = {}. This field pins the package manager version via corepack, \
+                 ensuring all developers and CI use the same pnpm version.",
                 json.get("packageManager")
                     .map_or_else(|| "?".to_owned(), std::string::ToString::to_string)
             ),
@@ -150,8 +165,11 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
         results.push(CheckResult {
             id: "T18".to_owned(),
             severity: Severity::Warn,
-            title: "packageManager field missing".to_owned(),
-            message: "No packageManager field in package.json".to_owned(),
+            title: "`packageManager` field missing from `package.json`".to_owned(),
+            message: "No `packageManager` field in `package.json`. Without this, developers may use different \
+                     pnpm versions, causing lockfile conflicts and inconsistent behavior. Add \
+                     `\"packageManager\": \"pnpm@<version>\"` to `package.json` and enable corepack."
+                .to_owned(),
             file: Some(pkg_path.display().to_string()),
             line: None,
             inventory: false,
@@ -169,8 +187,10 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
             results.push(CheckResult {
                 id: "T55".to_owned(),
                 severity: Severity::Info,
-                title: "preinstall enforces pnpm".to_owned(),
-                message: "preinstall script contains only-allow pnpm".to_owned(),
+                title: "`preinstall` script enforces pnpm".to_owned(),
+                message: "`preinstall` script contains `only-allow pnpm`. This prevents accidentally running \
+                         `npm install` or `yarn install`, which would create a conflicting lockfile."
+                    .to_owned(),
                 file: Some(pkg_path.display().to_string()),
                 line: None,
                 inventory: false,
@@ -180,8 +200,11 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
             results.push(CheckResult {
                 id: "T55".to_owned(),
                 severity: Severity::Warn,
-                title: "preinstall missing pnpm enforcement".to_owned(),
-                message: "No preinstall script with only-allow pnpm".to_owned(),
+                title: "`preinstall` script missing pnpm enforcement".to_owned(),
+                message: "No `preinstall` script with `only-allow pnpm`. Without this, running `npm install` \
+                         or `yarn install` would create a conflicting lockfile. Add \
+                         `\"preinstall\": \"npx only-allow pnpm\"` to scripts in `package.json`."
+                    .to_owned(),
                 file: Some(pkg_path.display().to_string()),
                 line: None,
                 inventory: false,
@@ -196,8 +219,10 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
         results.push(CheckResult {
             id: "T56".to_owned(),
             severity: Severity::Info,
-            title: "prepare script exists".to_owned(),
-            message: "prepare script found".to_owned(),
+            title: "`prepare` script exists in `package.json`".to_owned(),
+            message: "`prepare` script found. This runs after `pnpm install`, typically setting up \
+                     git hooks (e.g., husky) or building required artifacts."
+                .to_owned(),
             file: Some(pkg_path.display().to_string()),
             line: None,
             inventory: false,
@@ -206,8 +231,11 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
         results.push(CheckResult {
             id: "T56".to_owned(),
             severity: Severity::Warn,
-            title: "prepare script missing".to_owned(),
-            message: "No prepare script in package.json".to_owned(),
+            title: "`prepare` script missing from `package.json`".to_owned(),
+            message: "No `prepare` script in `package.json`. The `prepare` script runs after `pnpm install` \
+                     and is typically used to set up git hooks (e.g., `\"prepare\": \"husky\"`). Without it, \
+                     new developers won't get pre-commit hooks installed automatically."
+                .to_owned(),
             file: Some(pkg_path.display().to_string()),
             line: None,
             inventory: false,
@@ -219,9 +247,10 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
         results.push(CheckResult {
             id: "T57".to_owned(),
             severity: Severity::Info,
-            title: "engines field present".to_owned(),
+            title: "`engines` field set in `package.json`".to_owned(),
             message: format!(
-                "engines = {}",
+                "`engines` = {}. This specifies the minimum Node.js version required, preventing \
+                 deployment to incompatible runtimes.",
                 json.get("engines")
                     .map_or_else(|| "?".to_owned(), std::string::ToString::to_string)
             ),
@@ -233,8 +262,11 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
         results.push(CheckResult {
             id: "T57".to_owned(),
             severity: Severity::Warn,
-            title: "engines field missing".to_owned(),
-            message: "No engines field in package.json".to_owned(),
+            title: "`engines` field missing from `package.json`".to_owned(),
+            message: "No `engines` field in `package.json`. Without this, the project may be deployed to an \
+                     incompatible Node.js version. Add `\"engines\": { \"node\": \">=20\" }` (or your minimum \
+                     supported version) to `package.json`."
+                .to_owned(),
             file: Some(pkg_path.display().to_string()),
             line: None,
             inventory: false,
@@ -249,8 +281,11 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
         results.push(CheckResult {
             id: "T58".to_owned(),
             severity: Severity::Info,
-            title: "onlyBuiltDependencies configured".to_owned(),
-            message: format!("onlyBuiltDependencies = {obd}"),
+            title: "`onlyBuiltDependencies` configured in pnpm".to_owned(),
+            message: format!(
+                "`onlyBuiltDependencies` = {obd}. This restricts which packages can run post-install scripts, \
+                 reducing supply chain attack surface by blocking arbitrary code execution from dependencies."
+            ),
             file: Some(pkg_path.display().to_string()),
             line: None,
             inventory: false,

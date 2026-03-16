@@ -34,8 +34,10 @@ fn check_zone_definitions(content: &str, eslint_path: &Path, results: &mut Vec<C
         results.push(CheckResult {
             id: "T36".to_owned(),
             severity: Severity::Info,
-            title: "Boundary zones configured".to_owned(),
-            message: "Zone definitions found in ESLint config".to_owned(),
+            title: "Boundary zone definitions configured".to_owned(),
+            message: "Zone definitions (element-types, domain/adapters) found in ESLint boundaries config. \
+                     Zones define architectural layers so the boundaries plugin can enforce import direction rules."
+                .to_owned(),
             file: Some(eslint_path.display().to_string()),
             line: None,
             inventory: false,
@@ -44,8 +46,12 @@ fn check_zone_definitions(content: &str, eslint_path: &Path, results: &mut Vec<C
         results.push(CheckResult {
             id: "T36".to_owned(),
             severity: Severity::Error,
-            title: "No boundary zones".to_owned(),
-            message: "No boundary zone definitions found in ESLint config".to_owned(),
+            title: "No boundary zone definitions".to_owned(),
+            message: "No boundary zone definitions found in ESLint config. Zones define architectural layers \
+                     (domain, ports, adapters, application) so the boundaries plugin can enforce import direction. \
+                     Without zones, boundaries enforcement has no layers to protect. Add `element-types` \
+                     configuration to `eslint.config.mjs`."
+                .to_owned(),
             file: Some(eslint_path.display().to_string()),
             line: None,
             inventory: false,
@@ -60,7 +66,9 @@ fn check_import_direction(content: &str, eslint_path: &Path, results: &mut Vec<C
             id: "T37".to_owned(),
             severity: Severity::Info,
             title: "Import direction rules configured".to_owned(),
-            message: "boundaries/element-types found".to_owned(),
+            message: "`boundaries/element-types` rule found. This enforces that imports flow inward \
+                     (adapters -> application -> domain), preventing domain from depending on infrastructure."
+                .to_owned(),
             file: Some(eslint_path.display().to_string()),
             line: None,
             inventory: false,
@@ -69,8 +77,12 @@ fn check_import_direction(content: &str, eslint_path: &Path, results: &mut Vec<C
         results.push(CheckResult {
             id: "T37".to_owned(),
             severity: Severity::Error,
-            title: "No import direction rules".to_owned(),
-            message: "boundaries/element-types not found in ESLint config".to_owned(),
+            title: "No import direction rules configured".to_owned(),
+            message: "`boundaries/element-types` not found in ESLint config. This rule enforces that imports \
+                     flow inward (adapters -> application -> domain), preventing domain code from depending on \
+                     infrastructure. Add `boundaries/element-types` with allowed import directions to \
+                     `eslint.config.mjs`."
+                .to_owned(),
             file: Some(eslint_path.display().to_string()),
             line: None,
             inventory: false,
@@ -84,8 +96,10 @@ fn check_entry_point(content: &str, eslint_path: &Path, results: &mut Vec<CheckR
         results.push(CheckResult {
             id: "T38".to_owned(),
             severity: Severity::Info,
-            title: "Entry-point enforcement configured".to_owned(),
-            message: "boundaries/entry-point found".to_owned(),
+            title: "Entry-point barrel enforcement configured".to_owned(),
+            message: "`boundaries/entry-point` found. This ensures modules are only imported through their \
+                     public barrel files (index.ts), preventing deep imports into internal implementation."
+                .to_owned(),
             file: Some(eslint_path.display().to_string()),
             line: None,
             inventory: false,
@@ -94,8 +108,11 @@ fn check_entry_point(content: &str, eslint_path: &Path, results: &mut Vec<CheckR
         results.push(CheckResult {
             id: "T38".to_owned(),
             severity: Severity::Error,
-            title: "No entry-point enforcement".to_owned(),
-            message: "boundaries/entry-point not found in ESLint config".to_owned(),
+            title: "No entry-point barrel enforcement".to_owned(),
+            message: "`boundaries/entry-point` not found in ESLint config. Without this, any file can import \
+                     internal implementation details of any module, creating tight coupling. Add \
+                     `boundaries/entry-point` to enforce imports through barrel files (index.ts) only."
+                .to_owned(),
             file: Some(eslint_path.display().to_string()),
             line: None,
             inventory: false,
@@ -109,8 +126,10 @@ fn check_external_deps(content: &str, eslint_path: &Path, results: &mut Vec<Chec
         results.push(CheckResult {
             id: "T39".to_owned(),
             severity: Severity::Info,
-            title: "External dependency bans configured".to_owned(),
-            message: "boundaries/external found".to_owned(),
+            title: "External dependency per-zone bans configured".to_owned(),
+            message: "`boundaries/external` found. This restricts which external packages each architectural \
+                     zone can import (e.g., domain cannot import database drivers)."
+                .to_owned(),
             file: Some(eslint_path.display().to_string()),
             line: None,
             inventory: false,
@@ -119,8 +138,11 @@ fn check_external_deps(content: &str, eslint_path: &Path, results: &mut Vec<Chec
         results.push(CheckResult {
             id: "T39".to_owned(),
             severity: Severity::Error,
-            title: "No external dependency bans".to_owned(),
-            message: "boundaries/external not found in ESLint config".to_owned(),
+            title: "No external dependency per-zone bans".to_owned(),
+            message: "`boundaries/external` not found in ESLint config. Without this, any layer can import \
+                     any npm package — domain code could import database drivers or HTTP clients directly. \
+                     Add `boundaries/external` rules to restrict which external packages each zone can use."
+                .to_owned(),
             file: Some(eslint_path.display().to_string()),
             line: None,
             inventory: false,

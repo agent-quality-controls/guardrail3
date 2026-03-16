@@ -115,12 +115,12 @@ pub struct ValidateArgs {
 
     /// Specific files to check
     #[arg(long)]
-    #[garde(skip)] // reason: validated at use site
+    #[garde(inner(length(min = 1)))] // reason: each file path must be non-empty
     pub files: Vec<String>,
 
     /// Project path (defaults to current directory)
     #[arg(default_value = ".")]
-    #[garde(skip)] // reason: validated at runtime when path is resolved
+    #[garde(length(min = 1))] // reason: path must be non-empty
     pub path: String,
 
     /// Only run code quality checks
@@ -163,7 +163,7 @@ pub struct ValidateArgs {
 pub struct GenerateArgs {
     /// Project path
     #[arg(default_value = ".")]
-    #[garde(skip)] // reason: validated at runtime when path is resolved
+    #[garde(length(min = 1))] // reason: path must be non-empty
     pub path: String,
 }
 
@@ -171,13 +171,13 @@ pub struct GenerateArgs {
 pub struct PathArg {
     /// Project path
     #[arg(default_value = ".")]
-    #[garde(skip)] // reason: validated at runtime when path is resolved
+    #[garde(length(min = 1))] // reason: path must be non-empty
     pub path: String,
 }
 
 #[derive(Parser, Debug, garde::Validate)]
 pub struct ShowModuleArgs {
     /// Module name
-    #[garde(skip)] // reason: validated by show_module function at use site
+    #[garde(length(min = 1))] // reason: module name must be non-empty
     pub name: String,
 }

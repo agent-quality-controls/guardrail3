@@ -8,10 +8,12 @@ use syn::spanned::Spanned;
 use syn::visit::Visit;
 
 use super::ast_visitors::{
-    CfgAttrAllowVisitor, DeriveVisitor, ForbiddenMacroVisitor, GardeSkipVisitor, IgnoreVisitor,
-    InlineStdFsVisitor, ItemAllowVisitor, PubFnVisitor, TestAttrVisitor, TestCountVisitor,
-    UnsafeVisitor, UnwrapExpectVisitor,
+    CfgAttrAllowVisitor, DeriveVisitor, ForbiddenMacroVisitor, GardeSkipTypedVisitor,
+    GardeSkipVisitor, IgnoreVisitor, InlineStdFsVisitor, ItemAllowVisitor, PubFnVisitor,
+    TestAttrVisitor, TestCountVisitor, UnsafeVisitor, UnwrapExpectVisitor,
 };
+
+pub use super::ast_visitors::{GardeSkipInfo, struct_has_non_primitive_fields};
 
 /// A source location (1-based line number) paired with a descriptive string (lint name, method name, etc.).
 pub(super) type Located = (usize, String);
@@ -22,6 +24,9 @@ pub struct DeriveInfo {
     pub line: usize,
     /// Names of the derive macros (e.g. `["Deserialize", "Validate"]`).
     pub macros: Vec<String>,
+    /// Whether the struct has at least one non-primitive field (String, Vec, custom types, etc.).
+    /// `false` for enums, unit structs, or structs with only primitive fields.
+    pub has_non_primitive_fields: bool,
 }
 
 /// Parse a Rust source file. Returns `None` if parsing fails.
@@ -63,6 +68,13 @@ pub fn find_cfg_attr_allows(file: &syn::File) -> Vec<Located> {
 /// Find lines with `#[garde(skip)]`.
 pub fn find_garde_skips(file: &syn::File) -> Vec<usize> {
     let mut v = GardeSkipVisitor { out: Vec::new() };
+    v.visit_file(file);
+    v.out
+}
+
+/// Find `#[garde(skip)]` fields with type information.
+pub fn find_garde_skips_with_types(file: &syn::File) -> Vec<GardeSkipInfo> {
+    let mut v = GardeSkipTypedVisitor { out: Vec::new() };
     v.visit_file(file);
     v.out
 }
