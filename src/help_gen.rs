@@ -133,7 +133,7 @@ ARCHITECTURE CONVENTION
       my-lib/                          Pure logic, allowed_deps enforced
       my-sdk/                          May need network — allowed_deps = [\"reqwest\", ...]
 
-  Dependency flow (enforced by R51):
+  Dependency flow (enforced by R-ARCH-02):
     domain   → nothing (pure types)
     ports    → domain only
     app      → domain + ports (via trait bounds, never adapters)
@@ -341,8 +341,6 @@ TOOLS & DEPENDENCIES:
   R-DEPS-02 Library crate without allowed_deps (warn)
 
 ARCHITECTURE:
-  R51       Dependency direction violations
-  R52       Dependency graph inventory
   R53       unsafe_code = forbid in lints
   R55-R57   Workspace metadata (edition, publish, release profile)
   R-ARCH-01 Service missing hex arch structure (domain/adapters layers)

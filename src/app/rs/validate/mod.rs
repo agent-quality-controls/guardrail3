@@ -10,7 +10,6 @@ mod deny_bans;
 mod deny_inventory;
 mod deny_licenses;
 pub mod dependency_allowlist;
-mod dependency_direction;
 mod hex_arch_checks;
 pub mod dependency_scan;
 pub mod garde_checks;
@@ -125,20 +124,8 @@ pub fn run(
     }
 
     if domains.architecture {
-        // Architecture checks: dependency direction + graph + unsafe_code forbid
+        // Architecture checks: unsafe_code forbid + hex arch enforcement
         let mut arch_results = Vec::new();
-        dependency_direction::check_all_dependency_directions(
-            fs,
-            workspace_root,
-            project,
-            &mut arch_results,
-        );
-        dependency_direction::check_dependency_graph(
-            fs,
-            workspace_root,
-            project,
-            &mut arch_results,
-        );
         structure_checks::check_unsafe_code_forbid(fs, workspace_root, &mut arch_results);
 
         // Hex arch enforcement (R-ARCH-01, R-ARCH-02, R-ARCH-03)
