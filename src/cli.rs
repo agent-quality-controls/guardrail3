@@ -14,9 +14,6 @@ pub enum Commands {
     /// Validate project guardrails (auto-detects stacks)
     Validate(ValidateArgs),
 
-    /// Initialize guardrail3 configuration
-    Init(InitArgs),
-
     /// Generate config files from guardrail3.toml
     Generate(GenerateArgs),
 
@@ -57,6 +54,18 @@ pub enum RsCommands {
     Validate(ValidateArgs),
     /// Generate Rust config files from guardrail3.toml
     Generate(GenerateArgs),
+    /// Initialize Rust guardrail3 configuration
+    Init {
+        /// Profile to use
+        #[arg(long, default_value = "service")]
+        profile: String,
+        /// Project path
+        #[arg(default_value = ".")]
+        path: String,
+        /// Overwrite existing files
+        #[arg(long)]
+        force: bool,
+    },
 }
 
 #[derive(Subcommand, Debug)]
@@ -65,6 +74,15 @@ pub enum TsCommands {
     Validate(ValidateArgs),
     /// Generate TypeScript config files from guardrail3.toml
     Generate(GenerateArgs),
+    /// Initialize TypeScript guardrail3 configuration
+    Init {
+        /// Project path
+        #[arg(default_value = ".")]
+        path: String,
+        /// Overwrite existing files
+        #[arg(long)]
+        force: bool,
+    },
 }
 
 #[derive(Subcommand, Debug)]
@@ -121,21 +139,6 @@ pub struct ValidateArgs {
     /// Run slow checks (cargo publish --dry-run, etc.)
     #[arg(long)]
     pub thorough: bool,
-}
-
-#[derive(Parser, Debug)]
-pub struct InitArgs {
-    /// Profile to use
-    #[arg(long, default_value = "service")]
-    pub profile: String,
-
-    /// Overwrite existing files
-    #[arg(long)]
-    pub force: bool,
-
-    /// Project path
-    #[arg(default_value = ".")]
-    pub path: String,
 }
 
 #[derive(Parser, Debug)]

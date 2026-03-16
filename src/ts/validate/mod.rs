@@ -7,12 +7,14 @@ mod npmrc_check;
 mod package_check;
 pub mod source_scan;
 pub mod test_checks;
+pub mod ts_code_analysis;
+mod ts_comment_checks;
 mod tsconfig_check;
 
 use std::path::Path;
 
 use crate::report::types::{Report, Section};
-use crate::rs::validate::ValidateDomains;
+use crate::report::types::ValidateDomains;
 
 pub fn run(path: &Path, scoped_files: Option<&[String]>, domains: &ValidateDomains) -> Report {
     let mut report = Report::new(path.display().to_string(), vec!["TypeScript".to_owned()]);

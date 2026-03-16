@@ -1,5 +1,6 @@
 pub mod allow_checks;
 pub mod ast_helpers;
+mod ast_visitors;
 pub mod cargo_lints;
 pub mod clippy_coverage;
 pub mod code_quality_checks;
@@ -27,17 +28,7 @@ mod workspace_metadata;
 use std::path::Path;
 
 use crate::discover::ProjectInfo;
-use crate::report::types::{Report, Section};
-
-/// Controls which validation domains are active.
-#[derive(Debug, Clone)]
-#[allow(clippy::struct_excessive_bools)] // reason: domain flags are independent toggles, not a state machine
-pub struct ValidateDomains {
-    pub code: bool,
-    pub architecture: bool,
-    pub release: bool,
-    pub tests: bool,
-}
+use crate::report::types::{Report, Section, ValidateDomains};
 
 /// Try to load the profile name from guardrail3.toml if it exists.
 fn detect_profile(path: &Path) -> Option<String> {

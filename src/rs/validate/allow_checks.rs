@@ -3,31 +3,27 @@ use std::path::Path;
 use crate::report::types::{CheckResult, Severity};
 
 use super::ast_helpers;
-use super::source_scan::filter_non_comment_lines;
 
 /// Prefix constant used in R30-R31 messages.
 const CRATE_ALLOW_PREFIX: &str = "#![allow(";
 
-// R30-R31: crate-level allow attributes (syn-based with grep fallback)
+// R30-R31: crate-level allow attributes (syn-based)
 pub fn check_crate_level_allow(
     path: &Path,
     content: &str,
-    is_bin_entry: bool,
+    _is_bin_entry: bool,
     is_test_file: bool,
     results: &mut Vec<CheckResult>,
 ) {
-    if let Some(file) = ast_helpers::parse_file(content) {
-        // syn parse succeeded — use AST-based detection
-        let source_lines: Vec<&str> = content.lines().collect();
-        for (line, lint) in &ast_helpers::find_crate_level_allows(&file) {
-            emit_crate_allow_result(path, lint, *line, is_test_file, results);
-        }
-        // source_lines available for future comment inspection (e.g. // reason: checks)
-        let _ = &source_lines;
-    } else {
-        // Parse failed — fall back to grep-based scanning
-        check_crate_level_allow_grep(path, content, is_bin_entry, is_test_file, results);
+    let Some(file) = ast_helpers::parse_file(content) else {
+        return;
+    };
+    let source_lines: Vec<&str> = content.lines().collect();
+    for (line, lint) in &ast_helpers::find_crate_level_allows(&file) {
+        emit_crate_allow_result(path, lint, *line, is_test_file, results);
     }
+    // source_lines available for future comment inspection (e.g. // reason: checks)
+    let _ = &source_lines;
 }
 
 /// Emit a single R30 or R31 result for one lint in a crate-level allow.
@@ -71,78 +67,23 @@ fn emit_crate_allow_result(
     }
 }
 
-// Grep-based fallback for R30-R31 when syn parsing fails.
-fn check_crate_level_allow_grep(
-    path: &Path,
-    content: &str,
-    _is_bin_entry: bool,
-    is_test_file: bool,
-    results: &mut Vec<CheckResult>,
-) {
-    let non_comment_lines = filter_non_comment_lines(content);
-
-    let crate_allow_prefix: &str = // crate-wide allow attribute pattern
-        &["#!", "[allow("].concat();
-    for (line_num, trimmed) in &non_comment_lines {
-        if !trimmed.starts_with(crate_allow_prefix) {
-            continue;
-        }
-
-        let line_number = line_num.saturating_add(1);
-
-        // Extract the lint name — handle trailing )] and optional // comment
-        let raw_lint = trimmed
-            .strip_prefix(crate_allow_prefix)
-            .and_then(|s| s.split(')').next())
-            .unwrap_or(trimmed);
-
-        // Skip empty/whitespace-only lint names — these are multi-line attributes
-        // that we can't properly parse line-by-line
-        if raw_lint.trim().is_empty() {
-            continue;
-        }
-
-        // If the extracted lint contains commas (e.g., `clippy::foo, clippy::bar`),
-        // split on comma and process each lint separately
-        let lints: Vec<&str> = if raw_lint.contains(',') {
-            raw_lint
-                .split(',')
-                .map(str::trim)
-                .filter(|s| !s.is_empty())
-                .collect()
-        } else {
-            vec![raw_lint.trim()]
-        };
-
-        for lint in lints {
-            emit_crate_allow_result(path, lint, line_number, is_test_file, results);
-        }
-    }
-}
-
 // R32-R33: #[allow(...)] — item-level
 pub fn check_item_level_allow(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
-    if let Some(file) = ast_helpers::parse_file(content) {
-        // AST path: accurate detection for items syn can see.
-        // Then grep catches allows inside macro bodies that syn skips.
-        let ast_lines = check_item_level_allow_ast(path, content, &file, results);
-        check_item_level_allow_grep_supplement(path, content, &ast_lines, results);
-    } else {
-        check_item_level_allow_grep(path, content, results);
-    }
+    let Some(file) = ast_helpers::parse_file(content) else {
+        return;
+    };
+    check_item_level_allow_ast(path, content, &file, results);
 }
 
-/// Run AST-based detection. Returns the set of 1-based line numbers already reported.
+/// Run AST-based detection for item-level #[allow(...)] attributes.
 fn check_item_level_allow_ast(
     path: &Path,
     content: &str,
     file: &syn::File,
     results: &mut Vec<CheckResult>,
-) -> std::collections::BTreeSet<usize> {
+) {
     let raw_lines: Vec<&str> = content.lines().collect();
-    let mut covered = std::collections::BTreeSet::new();
     for (line_1based, lint) in ast_helpers::find_item_allows(file) {
-        let _ = covered.insert(line_1based);
         let has_comment = raw_lines
             .get(line_1based.wrapping_sub(1))
             .is_some_and(|l| l.contains("//"));
@@ -170,135 +111,14 @@ fn check_item_level_allow_ast(
             });
         }
     }
-    covered
-}
-
-/// Grep supplement: catch #[allow(..)] inside macro bodies that syn cannot visit.
-/// Skips lines already reported by the AST pass.
-fn check_item_level_allow_grep_supplement(
-    path: &Path,
-    content: &str,
-    ast_covered: &std::collections::BTreeSet<usize>,
-    results: &mut Vec<CheckResult>,
-) {
-    let non_comment_lines = filter_non_comment_lines(content);
-
-    for (line_num, trimmed) in &non_comment_lines {
-        let allow_prefix = "#[allow("; // pattern we scan for
-        if !trimmed.starts_with(allow_prefix) {
-            continue;
-        }
-        let line_number = line_num.saturating_add(1);
-        // Skip lines already reported by AST pass
-        if ast_covered.contains(&line_number) {
-            continue;
-        }
-        let lint = if trimmed.contains(')') {
-            trimmed
-                .strip_prefix(allow_prefix)
-                .and_then(|s| s.split(')').next())
-                .unwrap_or(trimmed)
-                .to_owned()
-        } else {
-            trimmed
-                .strip_prefix(allow_prefix)
-                .unwrap_or(trimmed)
-                .trim()
-                .to_owned()
-                + "..."
-        };
-        let has_comment = trimmed.contains("//");
-        if has_comment {
-            let reason = trimmed
-                .split("//")
-                .nth(1)
-                .map_or("no reason given", str::trim);
-            results.push(CheckResult {
-                id: "R33".to_owned(),
-                severity: Severity::Info,
-                title: "Justified #[allow]".to_owned(),
-                message: format!("{lint} — {reason}"),
-                file: Some(path.display().to_string()),
-                line: Some(line_number),
-            });
-        } else {
-            results.push(CheckResult {
-                id: "R32".to_owned(),
-                severity: Severity::Error,
-                title: "#[allow] without reason".to_owned(),
-                message: format!("#[allow({lint})] has no // comment justification"),
-                file: Some(path.display().to_string()),
-                line: Some(line_number),
-            });
-        }
-    }
-}
-
-fn check_item_level_allow_grep(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
-    let non_comment_lines = filter_non_comment_lines(content);
-
-    for (line_num, trimmed) in &non_comment_lines {
-        // Match item-level allow but NOT crate-level allow
-        let allow_prefix = "#[allow("; // pattern we scan for
-        if !trimmed.starts_with(allow_prefix) {
-            continue;
-        }
-
-        let line_number = line_num.saturating_add(1);
-
-        // Handle multi-line: if no closing ), gather the lint name from what we have
-        let lint = if trimmed.contains(')') {
-            trimmed
-                .strip_prefix(allow_prefix) // extract lint name
-                .and_then(|s| s.split(')').next())
-                .unwrap_or(trimmed)
-                .to_owned()
-        } else {
-            // Multi-line attribute — take what's after the opening paren
-            trimmed
-                .strip_prefix(allow_prefix) // extract partial lint
-                .unwrap_or(trimmed)
-                .trim()
-                .to_owned()
-                + "..."
-        };
-
-        // Check if same line has a // comment
-        let has_comment = trimmed.contains("//");
-
-        if has_comment {
-            let reason = trimmed
-                .split("//")
-                .nth(1)
-                .map_or("no reason given", str::trim);
-            results.push(CheckResult {
-                id: "R33".to_owned(),
-                severity: Severity::Info,
-                title: "Justified #[allow]".to_owned(),
-                message: format!("{lint} — {reason}"),
-                file: Some(path.display().to_string()),
-                line: Some(line_number),
-            });
-        } else {
-            results.push(CheckResult {
-                id: "R32".to_owned(),
-                severity: Severity::Error,
-                title: "#[allow] without reason".to_owned(),
-                message: format!("#[allow({lint})] has no // comment justification"),
-                file: Some(path.display().to_string()),
-                line: Some(line_number),
-            });
-        }
-    }
 }
 
 // R34-R35: #[garde(skip)]
 pub fn check_garde_skip(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
-    if let Some(file) = ast_helpers::parse_file(content) {
-        check_garde_skip_ast(path, content, &file, results);
-    } else {
-        check_garde_skip_grep(path, content, results);
-    }
+    let Some(file) = ast_helpers::parse_file(content) else {
+        return;
+    };
+    check_garde_skip_ast(path, content, &file, results);
 }
 
 fn check_garde_skip_ast(
@@ -338,52 +158,6 @@ fn check_garde_skip_ast(
     }
 }
 
-#[allow(clippy::string_slice)] // reason: garde attribute parsing on known ASCII content
-fn check_garde_skip_grep(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
-    let non_comment_lines = filter_non_comment_lines(content);
-
-    for (line_num, trimmed) in &non_comment_lines {
-        if !trimmed.contains("garde(skip)") {
-            continue;
-        }
-        if let Some(pos) = trimmed.find("garde(skip)") {
-            let before = &trimmed[..pos];
-            let quote_count = before.chars().filter(|c| *c == '"').count();
-            if quote_count % 2 != 0 {
-                continue;
-            }
-        }
-        if !trimmed.contains("#[") && !trimmed.starts_with("garde(") {
-            continue;
-        }
-        let line_number = line_num.saturating_add(1);
-        let has_comment = trimmed.contains("//");
-        if has_comment {
-            let reason = trimmed
-                .split("//")
-                .nth(1)
-                .map_or("no reason given", str::trim);
-            results.push(CheckResult {
-                id: "R35".to_owned(),
-                severity: Severity::Info,
-                title: "Justified garde(skip)".to_owned(),
-                message: format!("garde(skip) — {reason}"),
-                file: Some(path.display().to_string()),
-                line: Some(line_number),
-            });
-        } else {
-            results.push(CheckResult {
-                id: "R34".to_owned(),
-                severity: Severity::Error,
-                title: "garde(skip) without reason".to_owned(),
-                message: "garde(skip) has no // comment justification".to_owned(),
-                file: Some(path.display().to_string()),
-                line: Some(line_number),
-            });
-        }
-    }
-}
-
 // R36: EXCEPTION comments
 pub fn check_exception_comments(workspace_root: &Path, results: &mut Vec<CheckResult>) {
     let config_files = ["clippy.toml", "deny.toml", "Cargo.toml", "rustfmt.toml"];
@@ -416,11 +190,10 @@ pub fn check_exception_comments(workspace_root: &Path, results: &mut Vec<CheckRe
 
 // R37: cfg_attr allow — must be an actual attribute (#[cfg_attr(..., allow(...))])
 pub fn check_cfg_attr_allow(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
-    if let Some(file) = ast_helpers::parse_file(content) {
-        check_cfg_attr_allow_ast(path, content, &file, results);
-    } else {
-        check_cfg_attr_allow_grep(path, content, results);
-    }
+    let Some(file) = ast_helpers::parse_file(content) else {
+        return;
+    };
+    check_cfg_attr_allow_ast(path, content, &file, results);
 }
 
 fn check_cfg_attr_allow_ast(
@@ -441,36 +214,6 @@ fn check_cfg_attr_allow_ast(
             message,
             file: Some(path.display().to_string()),
             line: Some(line_1based),
-        });
-    }
-}
-
-#[allow(clippy::string_slice)] // reason: cfg_attr parsing on known ASCII content
-fn check_cfg_attr_allow_grep(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
-    let non_comment_lines = filter_non_comment_lines(content);
-
-    for (line_num, trimmed) in &non_comment_lines {
-        if !trimmed.contains("#[cfg_attr(") && !trimmed.contains("#![cfg_attr(") {
-            continue;
-        }
-        if !trimmed.contains("allow(") {
-            continue;
-        }
-        if let Some(pos) = trimmed.find("cfg_attr") {
-            let before = &trimmed[..pos];
-            let quote_count = before.chars().filter(|c| *c == '"').count();
-            if quote_count % 2 != 0 {
-                continue;
-            }
-        }
-        let line_number = line_num.saturating_add(1);
-        results.push(CheckResult {
-            id: "R37".to_owned(),
-            severity: Severity::Info,
-            title: "cfg_attr allow".to_owned(),
-            message: trimmed.to_owned(),
-            file: Some(path.display().to_string()),
-            line: Some(line_number),
         });
     }
 }
@@ -547,7 +290,7 @@ mod tests {
     #[test]
     #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
     fn garde_skip_without_comment_is_error_r34() {
-        let content = "#[garde(skip)]\nfield: String,";
+        let content = "struct Foo {\n    #[garde(skip)]\n    field: String,\n}";
         let path = Path::new("test.rs");
         let mut results = Vec::new();
         check_garde_skip(path, content, &mut results);
@@ -562,7 +305,7 @@ mod tests {
     #[test]
     #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
     fn garde_skip_with_comment_is_info_r35() {
-        let content = "#[garde(skip)] // reason: validated elsewhere\nfield: String,";
+        let content = "struct Foo {\n    #[garde(skip)] // reason: validated elsewhere\n    field: String,\n}";
         let path = Path::new("test.rs");
         let mut results = Vec::new();
         check_garde_skip(path, content, &mut results);

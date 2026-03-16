@@ -165,15 +165,12 @@ fn check_tests_exist(workspace_root: &Path, results: &mut Vec<CheckResult>) {
     }
 }
 
-/// Check if content contains a `#[test]` or `#[tokio::test]` attribute.
+/// Check if content contains a `#[test]` or `#[tokio::test]` attribute (AST-based).
 fn content_has_test(content: &str) -> bool {
-    for line in content.lines() {
-        let trimmed = line.trim();
-        if trimmed == "#[test]" || trimmed == "#[tokio::test]" {
-            return true;
-        }
-    }
-    false
+    let Some(file) = super::ast_helpers::parse_file(content) else {
+        return false;
+    };
+    super::ast_helpers::has_test_attribute(&file)
 }
 
 #[cfg(test)]

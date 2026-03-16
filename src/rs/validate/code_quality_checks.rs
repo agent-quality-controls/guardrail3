@@ -3,7 +3,6 @@ use std::path::Path;
 use crate::report::types::{CheckResult, Severity};
 
 use super::ast_helpers;
-use super::source_scan::filter_non_comment_lines;
 
 // R43: todo!/unimplemented! (Warn) and unreachable! (Info)
 pub fn check_todo_macros(
@@ -12,136 +11,66 @@ pub fn check_todo_macros(
     is_test_file: bool,
     results: &mut Vec<CheckResult>,
 ) {
-    if let Some(file) = ast_helpers::parse_file(content) {
-        // AST path — no false positives from strings, comments, or identifiers
-        for (line, name) in ast_helpers::find_forbidden_macros(&file) {
-            let message = content
-                .lines()
-                .nth(line.saturating_sub(1))
-                .unwrap_or("")
-                .trim();
-            match name.as_str() {
-                "todo" | "unimplemented" => {
-                    results.push(CheckResult {
-                        id: "R43".to_owned(),
-                        severity: Severity::Warn,
-                        title: format!("{name}! macro"),
-                        message: message.to_owned(),
-                        file: Some(path.display().to_string()),
-                        line: Some(line),
-                    });
-                }
-                "unreachable" if !is_test_file => {
-                    results.push(CheckResult {
-                        id: "R43".to_owned(),
-                        severity: Severity::Info,
-                        title: "unreachable! macro".to_owned(),
-                        message: message.to_owned(),
-                        file: Some(path.display().to_string()),
-                        line: Some(line),
-                    });
-                }
-                // panic and unreachable-in-tests: not flagged by R43
-                _ => {}
-            }
-        }
-    } else {
-        // Fallback to grep if parse fails
-        check_todo_macros_grep(path, content, is_test_file, results);
-    }
-}
+    let Some(file) = ast_helpers::parse_file(content) else {
+        return;
+    };
 
-fn check_todo_macros_grep(
-    path: &Path,
-    content: &str,
-    is_test_file: bool,
-    results: &mut Vec<CheckResult>,
-) {
-    let non_comment_lines = filter_non_comment_lines(content);
-
-    for (line_num, trimmed) in &non_comment_lines {
-        for macro_name in &["todo!(", "unimplemented!("] {
-            if trimmed.contains(macro_name) {
-                let line_number = line_num.saturating_add(1);
+    // AST path — no false positives from strings, comments, or identifiers
+    for (line, name) in ast_helpers::find_forbidden_macros(&file) {
+        let message = content
+            .lines()
+            .nth(line.saturating_sub(1))
+            .unwrap_or("")
+            .trim();
+        let base_name = name.rsplit("::").next().unwrap_or(&name);
+        match base_name {
+            "todo" | "unimplemented" => {
                 results.push(CheckResult {
                     id: "R43".to_owned(),
                     severity: Severity::Warn,
-                    title: format!("{} macro", macro_name.trim_end_matches('(')),
-                    message: trimmed.to_owned(),
+                    title: format!("{name}! macro"),
+                    message: message.to_owned(),
                     file: Some(path.display().to_string()),
-                    line: Some(line_number),
+                    line: Some(line),
                 });
             }
-        }
-
-        // unreachable! is Info — legitimately used in exhaustive matches
-        // Skip unreachable! in test files — it's a normal assertion pattern
-        if trimmed.contains("unreachable!(") && !is_test_file {
-            let line_number = line_num.saturating_add(1);
-            results.push(CheckResult {
-                id: "R43".to_owned(),
-                severity: Severity::Info,
-                title: "unreachable! macro".to_owned(),
-                message: trimmed.to_owned(),
-                file: Some(path.display().to_string()),
-                line: Some(line_number),
-            });
+            "unreachable" if !is_test_file => {
+                results.push(CheckResult {
+                    id: "R43".to_owned(),
+                    severity: Severity::Info,
+                    title: "unreachable! macro".to_owned(),
+                    message: message.to_owned(),
+                    file: Some(path.display().to_string()),
+                    line: Some(line),
+                });
+            }
+            // panic and unreachable-in-tests: not flagged by R43
+            _ => {}
         }
     }
 }
 
 // R44: .unwrap() / .expect()
 pub fn check_unwrap_expect(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
-    if let Some(file) = ast_helpers::parse_file(content) {
-        // AST path — no false positives from strings or field names
-        for (line, method) in ast_helpers::find_unwrap_expect(&file) {
-            let message = content
-                .lines()
-                .nth(line.saturating_sub(1))
-                .unwrap_or("")
-                .trim();
-            results.push(CheckResult {
-                id: "R44".to_owned(),
-                severity: Severity::Warn,
-                title: format!(".{method}() usage"),
-                message: message.to_owned(),
-                file: Some(path.display().to_string()),
-                line: Some(line),
-            });
-        }
-    } else {
-        // Fallback to grep if parse fails
-        check_unwrap_expect_grep(path, content, results);
-    }
-}
+    let Some(file) = ast_helpers::parse_file(content) else {
+        return;
+    };
 
-fn check_unwrap_expect_grep(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
-    let non_comment_lines = filter_non_comment_lines(content);
-
-    for (line_num, trimmed) in &non_comment_lines {
-        if trimmed.contains(".unwrap()") {
-            let line_number = line_num.saturating_add(1);
-            results.push(CheckResult {
-                id: "R44".to_owned(),
-                severity: Severity::Warn,
-                title: ".unwrap() usage".to_owned(),
-                message: trimmed.to_owned(),
-                file: Some(path.display().to_string()),
-                line: Some(line_number),
-            });
-        }
-
-        if trimmed.contains(".expect(") {
-            let line_number = line_num.saturating_add(1);
-            results.push(CheckResult {
-                id: "R44".to_owned(),
-                severity: Severity::Warn,
-                title: ".expect() usage".to_owned(),
-                message: trimmed.to_owned(),
-                file: Some(path.display().to_string()),
-                line: Some(line_number),
-            });
-        }
+    // AST path — no false positives from strings or field names
+    for (line, method) in ast_helpers::find_unwrap_expect(&file) {
+        let message = content
+            .lines()
+            .nth(line.saturating_sub(1))
+            .unwrap_or("")
+            .trim();
+        results.push(CheckResult {
+            id: "R44".to_owned(),
+            severity: Severity::Warn,
+            title: format!(".{method}() usage"),
+            message: message.to_owned(),
+            file: Some(path.display().to_string()),
+            line: Some(line),
+        });
     }
 }
 
@@ -192,8 +121,7 @@ pub fn check_claude_md(workspace_root: &Path, results: &mut Vec<CheckResult>) {
 // Clippy's disallowed_methods doesn't always catch `use std::fs; fs::read_to_string()`
 // when the import aliases the module. This source-level scan fills that gap.
 //
-// Uses syn AST parsing when possible (no false positives on comments/strings).
-// Falls back to grep if parsing fails.
+// Uses syn AST parsing for use-item detection (no false positives on comments/strings).
 pub fn check_direct_fs_usage(
     path: &Path,
     content: &str,
@@ -205,22 +133,12 @@ pub fn check_direct_fs_usage(
         return;
     }
 
-    if let Some(parsed) = ast_helpers::parse_file(content) {
-        check_direct_fs_usage_ast(path, content, &parsed, results);
-    } else {
-        check_direct_fs_usage_grep(path, content, results);
-    }
-}
+    let Some(parsed) = ast_helpers::parse_file(content) else {
+        return;
+    };
 
-/// AST-based R58: use `find_std_fs_imports` for use-items, grep for inline `std::fs::` calls.
-fn check_direct_fs_usage_ast(
-    path: &Path,
-    content: &str,
-    parsed: &syn::File,
-    results: &mut Vec<CheckResult>,
-) {
     // Use-imports via syn — immune to comments/strings
-    for line_num in ast_helpers::find_std_fs_imports(parsed) {
+    for line_num in ast_helpers::find_std_fs_imports(&parsed) {
         let trimmed = content
             .lines()
             .nth(line_num.saturating_sub(1))
@@ -238,102 +156,17 @@ fn check_direct_fs_usage_ast(
         });
     }
 
-    // Inline std::fs:: calls — still grep-based but with cfg(test) skipping
-    check_inline_std_fs_calls(path, content, results);
-}
-
-/// Grep fallback for unparseable files.
-fn check_direct_fs_usage_grep(
-    path: &Path,
-    content: &str,
-    results: &mut Vec<CheckResult>,
-) {
-    let mut seen_cfg_test = false;
-    let mut in_cfg_test_block = false;
-
-    for (line_num, line) in content.lines().enumerate() {
-        let trimmed = line.trim();
-
-        if trimmed.starts_with("//") || trimmed.starts_with('*') || trimmed.starts_with("/*") {
+    // Inline std::fs:: calls via syn expression visitor
+    for line_num in ast_helpers::find_inline_std_fs_calls(&parsed) {
+        // Skip if already reported by use-import check
+        if results.iter().any(|r| r.id == "R58" && r.line == Some(line_num)) {
             continue;
         }
-
-        if trimmed.contains("#[cfg(test)]") && !trimmed.contains('"') {
-            seen_cfg_test = true;
-        }
-
-        if seen_cfg_test && !in_cfg_test_block && trimmed.contains('{') {
-            in_cfg_test_block = true;
-        }
-
-        if in_cfg_test_block {
-            continue;
-        }
-
-        if trimmed.starts_with("use std::fs") && !trimmed.contains('"') {
-            results.push(CheckResult {
-                id: "R58".to_owned(),
-                severity: Severity::Error,
-                title: "Direct std::fs import".to_owned(),
-                message: format!(
-                    "Use centralized fs module instead of direct std::fs import: {trimmed}"
-                ),
-                file: Some(path.display().to_string()),
-                line: Some(line_num.saturating_add(1)),
-            });
-        }
-
-        check_inline_std_fs_line(path, trimmed, line_num, results);
-    }
-}
-
-/// Inline `std::fs::` call detection shared by both AST and grep paths.
-fn check_inline_std_fs_calls(
-    path: &Path,
-    content: &str,
-    results: &mut Vec<CheckResult>,
-) {
-    let mut seen_cfg_test = false;
-    let mut in_cfg_test_block = false;
-
-    for (line_num, line) in content.lines().enumerate() {
-        let trimmed = line.trim();
-
-        if trimmed.starts_with("//") || trimmed.starts_with('*') || trimmed.starts_with("/*") {
-            continue;
-        }
-
-        if trimmed.contains("#[cfg(test)]") && !trimmed.contains('"') {
-            seen_cfg_test = true;
-        }
-
-        if seen_cfg_test && !in_cfg_test_block && trimmed.contains('{') {
-            in_cfg_test_block = true;
-        }
-
-        if in_cfg_test_block {
-            continue;
-        }
-
-        check_inline_std_fs_line(path, trimmed, line_num, results);
-    }
-}
-
-fn check_inline_std_fs_line(
-    path: &Path,
-    trimmed: &str,
-    line_num: usize,
-    results: &mut Vec<CheckResult>,
-) {
-    if !path.to_string_lossy().contains("modules/")
-        && trimmed.contains("std::fs::")
-        && !trimmed.starts_with("//")
-        && !trimmed.starts_with('"')
-        && !trimmed.contains("\"std::fs::")
-        && !trimmed.contains("std::fs::Permissions")
-        && !trimmed.contains("std::fs::Metadata")
-        && !trimmed.contains("std::fs::DirEntry")
-    {
+        let trimmed = content
+            .lines()
+            .nth(line_num.saturating_sub(1))
+            .unwrap_or("")
+            .trim();
         results.push(CheckResult {
             id: "R58".to_owned(),
             severity: Severity::Error,
@@ -342,7 +175,7 @@ fn check_inline_std_fs_line(
                 "Use centralized fs module instead of direct std::fs call: {trimmed}"
             ),
             file: Some(path.display().to_string()),
-            line: Some(line_num.saturating_add(1)),
+            line: Some(line_num),
         });
     }
 }
@@ -386,21 +219,22 @@ mod tests {
     }
 
     #[test]
-    fn r58_allows_type_references() {
-        let content = "let p = std::fs::Permissions::from_mode(0o755);";
+    fn r58_catches_type_method_call() {
+        // std::fs::Permissions::from_mode IS a std::fs call in expression context — should be caught
+        let content = "fn foo() { let p = std::fs::Permissions::from_mode(0o755); }";
         let path = Path::new("src/foo.rs");
         let mut results = Vec::new();
         check_direct_fs_usage(path, content, false, &mut results);
         assert!(
-            results.is_empty(),
-            "Type references (Permissions) should be exempt"
+            !results.is_empty(),
+            "std::fs::Permissions::from_mode in expression context should be caught"
         );
     }
 
     #[test]
     #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
     fn r58_catches_read_to_string() {
-        let content = "let s = std::fs::read_to_string(path);";
+        let content = "fn foo() { let s = std::fs::read_to_string(\"x\").unwrap(); }";
         let path = Path::new("src/foo.rs");
         let mut results = Vec::new();
         check_direct_fs_usage(path, content, false, &mut results);
@@ -413,6 +247,7 @@ mod tests {
 
     #[test]
     fn r58_allows_metadata_type() {
+        // Type in function signature — syn treats this as Type::Path, not Expr::Path
         let content = "fn check(m: std::fs::Metadata) {}";
         let path = Path::new("src/foo.rs");
         let mut results = Vec::new();
@@ -482,6 +317,33 @@ mod tests {
         let mut results = Vec::new();
         check_todo_macros(path, content, false, &mut results);
         assert!(!results.is_empty());
+        assert_eq!(results[0].severity, Severity::Warn);
+        assert_eq!(results[0].id, "R43");
+    }
+
+    #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
+    fn path_qualified_todo_macro_produces_warn() {
+        let content = "fn foo() { std::todo!(); }";
+        let path = Path::new("src/foo.rs");
+        let mut results = Vec::new();
+        check_todo_macros(path, content, false, &mut results);
+        assert!(!results.is_empty(), "std::todo!() should be caught by R43");
+        assert_eq!(results[0].severity, Severity::Warn);
+        assert_eq!(results[0].id, "R43");
+    }
+
+    #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
+    fn core_unimplemented_macro_produces_warn() {
+        let content = "fn foo() { core::unimplemented!(); }";
+        let path = Path::new("src/foo.rs");
+        let mut results = Vec::new();
+        check_todo_macros(path, content, false, &mut results);
+        assert!(
+            !results.is_empty(),
+            "core::unimplemented!() should be caught by R43"
+        );
         assert_eq!(results[0].severity, Severity::Warn);
         assert_eq!(results[0].id, "R43");
     }

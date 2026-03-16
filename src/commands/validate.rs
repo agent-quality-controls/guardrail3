@@ -6,7 +6,7 @@ use crate::hooks;
 use crate::report;
 use crate::report::types::Report;
 use crate::rs;
-use crate::rs::validate::ValidateDomains;
+use crate::report::types::ValidateDomains;
 use crate::ts;
 
 /// Convert a repo-relative path to an absolute path string.

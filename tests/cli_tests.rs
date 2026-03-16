@@ -330,7 +330,7 @@ fn cli_init_service_profile() {
     let path = tmp.path().to_str().expect("non-utf8 path");
 
     let out = guardrail3()
-        .args(["init", "--profile", "service", path])
+        .args(["rs", "init", "--profile", "service", path])
         .output()
         .expect("failed to run");
 
@@ -342,7 +342,7 @@ fn cli_init_service_profile() {
 
     let stdout = String::from_utf8_lossy(&out.stdout);
     assert!(
-        stdout.contains("Initialized guardrail3 project"),
+        stdout.contains("Initialized Rust guardrail3 project"),
         "Should print init message"
     );
     assert!(stdout.contains("service"), "Should mention service profile");
@@ -377,7 +377,7 @@ fn cli_init_library_profile_differs_from_service() {
     let path = tmp.path().to_str().expect("non-utf8 path");
 
     let out = guardrail3()
-        .args(["init", "--profile", "library", path])
+        .args(["rs", "init", "--profile", "library", path])
         .output()
         .expect("failed to run");
 
@@ -401,45 +401,18 @@ fn cli_init_library_profile_differs_from_service() {
 
 #[test]
 #[allow(clippy::expect_used)] // reason: test — panics indicate broken test infrastructure
-#[allow(clippy::disallowed_methods)] // reason: test uses Command and fs
-fn cli_init_monorepo_profile() {
-    let tmp = tempfile::tempdir().expect("failed to create temp dir");
-    let path = tmp.path().to_str().expect("non-utf8 path");
-
-    let out = guardrail3()
-        .args(["init", "--profile", "monorepo", path])
-        .output()
-        .expect("failed to run");
-
-    assert!(out.status.success(), "init monorepo should succeed");
-
-    assert!(
-        tmp.path().join("release-plz.toml").exists(),
-        "Monorepo should create release-plz.toml"
-    );
-
-    let config =
-        std::fs::read_to_string(tmp.path().join("guardrail3.toml")).expect("should read config");
-    assert!(
-        config.contains("[typescript]"),
-        "Monorepo config should have typescript section"
-    );
-}
-
-#[test]
-#[allow(clippy::expect_used)] // reason: test — panics indicate broken test infrastructure
 #[allow(clippy::disallowed_methods)] // reason: test uses Command
 fn cli_init_refuses_overwrite_without_force() {
     let tmp = tempfile::tempdir().expect("failed to create temp dir");
     let path = tmp.path().to_str().expect("non-utf8 path");
 
     let _ = guardrail3()
-        .args(["init", "--profile", "service", path])
+        .args(["rs", "init", "--profile", "service", path])
         .output()
         .expect("failed to run");
 
     let out = guardrail3()
-        .args(["init", "--profile", "service", path])
+        .args(["rs", "init", "--profile", "service", path])
         .output()
         .expect("failed to run");
 
@@ -462,12 +435,12 @@ fn cli_init_force_overwrites() {
     let path = tmp.path().to_str().expect("non-utf8 path");
 
     let _ = guardrail3()
-        .args(["init", "--profile", "service", path])
+        .args(["rs", "init", "--profile", "service", path])
         .output()
         .expect("failed to run");
 
     let out = guardrail3()
-        .args(["init", "--profile", "library", "--force", path])
+        .args(["rs", "init", "--profile", "library", "--force", path])
         .output()
         .expect("failed to run");
 
@@ -491,7 +464,7 @@ fn cli_generate_produces_files() {
     let path = tmp.path().to_str().expect("non-utf8 path");
 
     let _ = guardrail3()
-        .args(["init", "--profile", "service", path])
+        .args(["rs", "init", "--profile", "service", path])
         .output()
         .expect("failed to run");
 
@@ -762,7 +735,7 @@ fn cli_check_after_generate_is_current() {
     let path = tmp.path().to_str().expect("non-utf8 path");
 
     let _ = guardrail3()
-        .args(["init", "--profile", "service", path])
+        .args(["rs", "init", "--profile", "service", path])
         .output()
         .expect("failed to run");
 
@@ -799,7 +772,7 @@ fn cli_diff_after_generate_no_changes() {
     let path = tmp.path().to_str().expect("non-utf8 path");
 
     let _ = guardrail3()
-        .args(["init", "--profile", "service", path])
+        .args(["rs", "init", "--profile", "service", path])
         .output()
         .expect("failed to run");
 
@@ -832,7 +805,7 @@ fn cli_check_detects_stale_after_tampering() {
     let path = tmp.path().to_str().expect("non-utf8 path");
 
     let _ = guardrail3()
-        .args(["init", "--profile", "service", path])
+        .args(["rs", "init", "--profile", "service", path])
         .output()
         .expect("failed to run");
     let _ = guardrail3()
@@ -866,7 +839,7 @@ fn cli_diff_shows_diff_after_tampering() {
     let path = tmp.path().to_str().expect("non-utf8 path");
 
     let _ = guardrail3()
-        .args(["init", "--profile", "service", path])
+        .args(["rs", "init", "--profile", "service", path])
         .output()
         .expect("failed to run");
     let _ = guardrail3()
@@ -902,7 +875,7 @@ fn cli_diff_shows_new_file_when_missing() {
     let path = tmp.path().to_str().expect("non-utf8 path");
 
     let _ = guardrail3()
-        .args(["init", "--profile", "service", path])
+        .args(["rs", "init", "--profile", "service", path])
         .output()
         .expect("failed to run");
 

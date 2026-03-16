@@ -80,32 +80,20 @@ fn check_test_coverage_inventory(workspace_root: &Path, results: &mut Vec<CheckR
     });
 }
 
-/// Count `pub fn` declarations in content.
+/// Count `pub fn` declarations in content (AST-based).
 fn count_pub_fns(content: &str) -> usize {
-    let mut count: usize = 0;
-    for line in content.lines() {
-        let trimmed = line.trim();
-        // Skip comments
-        if trimmed.starts_with("//") || trimmed.starts_with('*') || trimmed.starts_with("/*") {
-            continue;
-        }
-        if trimmed.contains("pub fn ") || trimmed.starts_with("pub fn ") {
-            count = count.saturating_add(1);
-        }
-    }
-    count
+    let Some(file) = super::ast_helpers::parse_file(content) else {
+        return 0;
+    };
+    super::ast_helpers::count_pub_fn_decls(&file)
 }
 
-/// Count `#[test]` and `#[tokio::test]` attributes in content.
+/// Count `#[test]` and `#[tokio::test]` attributes in content (AST-based).
 fn count_test_fns(content: &str) -> usize {
-    let mut count: usize = 0;
-    for line in content.lines() {
-        let trimmed = line.trim();
-        if trimmed == "#[test]" || trimmed == "#[tokio::test]" {
-            count = count.saturating_add(1);
-        }
-    }
-    count
+    let Some(file) = super::ast_helpers::parse_file(content) else {
+        return 0;
+    };
+    super::ast_helpers::count_test_attrs(&file)
 }
 
 // ---------------------------------------------------------------------------
@@ -228,40 +216,13 @@ fn check_ignore_without_reason(workspace_root: &Path, results: &mut Vec<CheckRes
     }
 }
 
-/// Find lines with #[ignore] that lack a reason comment.
+/// Find lines with #[ignore] that lack a reason comment (AST-based).
 /// Returns 1-based line numbers of violations.
 fn find_ignore_without_reason(content: &str) -> Vec<usize> {
-    let mut violations = Vec::new();
-    let lines: Vec<&str> = content.lines().collect();
-
-    for (idx, line) in lines.iter().enumerate() {
-        let trimmed = line.trim();
-
-        // Match #[ignore] exactly or #[ignore] with trailing content
-        if !trimmed.starts_with("#[ignore]") && trimmed != "#[ignore]" {
-            continue;
-        }
-        // Must actually be #[ignore] — not #[ignore_some_other_attr]
-        if trimmed.starts_with("#[ignore]") || trimmed == "#[ignore]" {
-            // Check same line for reason comment
-            if trimmed.contains("// reason:") || trimmed.contains("//reason:") {
-                continue;
-            }
-            // Check previous line for reason comment
-            if idx > 0 {
-                if let Some(prev_line) = lines.get(idx.saturating_sub(1)) {
-                    let prev = prev_line.trim();
-                    if prev.contains("// reason:") || prev.contains("//reason:") {
-                        continue;
-                    }
-                }
-            }
-            // No reason found
-            violations.push(idx.saturating_add(1));
-        }
-    }
-
-    violations
+    let Some(file) = super::ast_helpers::parse_file(content) else {
+        return Vec::new();
+    };
+    super::ast_helpers::find_ignore_without_reason(&file, content)
 }
 
 // ---------------------------------------------------------------------------
@@ -418,6 +379,16 @@ mod tests {
         assert!(
             violations.is_empty(),
             "Should accept reason on previous line"
+        );
+    }
+
+    #[test]
+    fn r_test_07_pos_ignore_with_name_value_reason() {
+        let content = "#[test]\n#[ignore = \"requires network\"]\nfn slow_test() {}";
+        let violations = find_ignore_without_reason(content);
+        assert!(
+            violations.is_empty(),
+            "ignore with = reason should not be flagged"
         );
     }
 

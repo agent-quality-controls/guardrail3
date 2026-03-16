@@ -202,11 +202,11 @@ fn grep_before_rust_allow_concat_string() {
 
 #[test]
 fn grep_before_rust_allow_multiline_string() {
-    // GREP_BUG: multiline string continuation `"\n#[allow(\n..."` fools the
-    // line-by-line scanner. The continuation line starts with `#[allow(` after
-    // the string literal stripping fails across lines.
+    // FIXED: multi-line string tracking in the grep supplement now correctly
+    // detects that `#[allow(` on a continuation line is inside a string literal.
+    // Previously the line-by-line scanner couldn't track quote parity across lines.
     let r = validate_grep_attack_fixture("rust-allow", "multiline_string.rs");
-    assert_has_check(&r, "multiline_string.rs", "R32", "error");
+    assert_no_hits(&r, "multiline_string.rs");
 }
 
 #[test]
@@ -280,6 +280,7 @@ fn grep_before_code_quality_string_unsafe() {
 
 #[test]
 fn grep_before_code_quality_string_unwrap() {
+    // BEFORE MIGRATION: grep scanner produced R44 false positive on .unwrap() inside string literal
     // FIXED: syn AST correctly ignores `.unwrap()` in a string literal.
     // Previously grep false-positived because filter_non_comment_lines returns the
     // original trimmed line (not the stripped version), so `.unwrap()` inside a
@@ -310,12 +311,11 @@ fn grep_before_structural_blank_lines_only() {
 
 #[test]
 fn grep_before_structural_cfg_gated_use() {
-    // GREP_BUG (debatable): `#[cfg(test)] use std::fs;` is flagged by R58.
-    // The R58 check does skip code inside `#[cfg(test)] mod tests { ... }` blocks,
-    // but a standalone `#[cfg(test)] use std::fs;` at module level is still flagged
-    // because the cfg_test block detection only works for `mod tests { }` patterns.
+    // FIXED: `find_std_fs_imports` in AST path now checks for `#[cfg(test)]` attribute
+    // on use items and skips them. A standalone `#[cfg(test)] use std::fs;` at module
+    // level is no longer flagged by R58.
     let r = validate_grep_attack_fixture("rust-structural", "cfg_gated_use.rs");
-    assert_has_check(&r, "cfg_gated_use.rs", "R58", "error");
+    assert_no_check(&r, "cfg_gated_use.rs", "R58");
 }
 
 #[test]
@@ -441,7 +441,8 @@ fn grep_before_edge_multiple_allows_one_line() {
 
 #[test]
 fn grep_before_edge_attribute_on_expression() {
-    // CORRECT: expression-level #[allow] with reason is detected as R33
+    // Expression-level #[allow] on let bindings and match arms is now detected.
+    // All three allows in the fixture have // reason: comments, so they appear as R33 info.
     let r = validate_grep_attack_fixture("edge-cases", "attribute_on_expression.rs");
     assert_has_check(&r, "attribute_on_expression.rs", "R33", "info");
     assert_no_check(&r, "attribute_on_expression.rs", "R32");
@@ -449,11 +450,10 @@ fn grep_before_edge_attribute_on_expression() {
 
 #[test]
 fn grep_before_edge_syntax_error_midway() {
-    // CORRECT: grep doesn't care about syntax errors — it processes line by line.
-    // All three #[allow()] with reason comments are detected as R33.
+    // AST-ONLY: syn cannot parse files with syntax errors. No results emitted.
+    // This is a known trade-off of AST-only analysis — unparseable files get zero checks.
     let r = validate_grep_attack_fixture("edge-cases", "syntax_error_midway.rs");
-    assert_has_check(&r, "syntax_error_midway.rs", "R33", "info");
-    assert_no_check(&r, "syntax_error_midway.rs", "R32");
+    assert_no_hits(&r, "syntax_error_midway.rs");
 }
 
 #[test]
@@ -462,4 +462,174 @@ fn grep_before_edge_no_main_lib() {
     let r = validate_grep_attack_fixture("edge-cases", "no_main_lib.rs");
     assert_has_check(&r, "no_main_lib.rs", "R33", "info");
     assert_no_check(&r, "no_main_lib.rs", "R32");
+}
+
+// ============================================================
+// typescript/ — eslint-disable/ts-ignore/process.env/any in non-code contexts
+// ============================================================
+
+/// Copy a TS fixture file into a temp directory and run `guardrail3 ts validate` on it.
+/// Returns only the TS source-scan results (T23-T35, T59).
+#[allow(clippy::disallowed_methods)] // reason: Command::new needed to invoke binary under test
+#[allow(clippy::expect_used)] // reason: test helper — panics indicate broken test infrastructure
+fn validate_ts_grep_attack_fixture(fixture_name: &str) -> FixtureResult {
+    let fixture_path = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures/grep-attacks/typescript")
+        .join(fixture_name);
+
+    let tmp = tempfile::tempdir().expect("failed to create temp dir");
+
+    // Copy fixture into the temp directory, preserving the .ts filename
+    let content = std::fs::read_to_string(&fixture_path).expect("read fixture");
+    std::fs::write(tmp.path().join(fixture_name), &content).expect("write fixture");
+
+    let out = Command::new(env!("CARGO_BIN_EXE_guardrail3"))
+        .args([
+            "ts",
+            "validate",
+            "--format",
+            "json",
+            tmp.path().to_str().expect("path"),
+        ])
+        .output()
+        .expect("failed to run guardrail3");
+
+    let json_str = String::from_utf8_lossy(&out.stdout);
+    let parsed: serde_json::Value =
+        serde_json::from_str(&json_str).expect("guardrail3 output should be valid JSON");
+
+    let mut checks = Vec::new();
+
+    #[allow(clippy::indexing_slicing)]
+    // reason: JSON structure is known from guardrail3 output format
+    if let Some(sections) = parsed["sections"].as_array() {
+        for section in sections {
+            if section["name"].as_str() == Some("TS source code scan") {
+                if let Some(results) = section["results"].as_array() {
+                    for result in results {
+                        let id = result["id"].as_str().unwrap_or("").to_owned();
+                        let severity = result["severity"].as_str().unwrap_or("").to_owned();
+                        checks.push((id, severity));
+                    }
+                }
+            }
+        }
+    }
+
+    FixtureResult { checks }
+}
+
+#[test]
+fn grep_before_typescript_string_eslint_disable() {
+    // The string literal `"eslint-disable-next-line"` is correctly ignored by tree-sitter.
+    // However, the fixture's own comment line 1 says "eslint-disable pattern" which
+    // IS a real comment containing "eslint-disable" — tree-sitter correctly flags it as T23.
+    // The key test: the string on line 3 does NOT produce an additional T25 hit.
+    let r = validate_ts_grep_attack_fixture("string_eslint_disable.ts");
+    assert_has_check(&r, "string_eslint_disable.ts", "T23", "error");
+    // Should be exactly 1 hit (from the fixture comment), not 2 (which would mean the string was also flagged)
+    let t23_count = r.checks.iter().filter(|(id, _)| id == "T23").count();
+    assert!(
+        t23_count == 1,
+        "string_eslint_disable.ts: expected exactly 1 T23 hit (from fixture comment), got {t23_count}"
+    );
+    assert_no_check(&r, "string_eslint_disable.ts", "T25");
+}
+
+#[test]
+fn grep_before_typescript_template_eslint_disable() {
+    // The template literal `\`eslint-disable\`` is correctly ignored by tree-sitter.
+    // However, the fixture's own comment line 1 says "eslint-disable pattern" which
+    // IS a real comment containing "eslint-disable" — tree-sitter correctly flags it as T23.
+    let r = validate_ts_grep_attack_fixture("template_eslint_disable.ts");
+    assert_has_check(&r, "template_eslint_disable.ts", "T23", "error");
+    let t23_count = r.checks.iter().filter(|(id, _)| id == "T23").count();
+    assert!(
+        t23_count == 1,
+        "template_eslint_disable.ts: expected exactly 1 T23 hit (from fixture comment), got {t23_count}"
+    );
+}
+
+#[test]
+fn grep_before_typescript_comment_about_eslint() {
+    // This is a comment ABOUT eslint-disable, not an actual directive.
+    // The tree-sitter path looks at comment nodes and finds "eslint-disable" in the text.
+    // The first comment line "// We use eslint-disable sparingly..." contains "eslint-disable"
+    // but NOT "eslint-disable-next-line" or "eslint-disable-line", so it matches the
+    // block-level eslint-disable pattern (T23/T24). Since it lacks "-- ", it's T23.
+    let r = validate_ts_grep_attack_fixture("comment_about_eslint.ts");
+    assert_has_check(&r, "comment_about_eslint.ts", "T23", "error");
+}
+
+#[test]
+fn grep_before_typescript_string_ts_ignore() {
+    // The string literal `"@ts-ignore"` is correctly ignored by tree-sitter.
+    // However, the fixture's own comment line 1 says "@ts-ignore pattern" which
+    // IS a real comment containing "@ts-ignore" — tree-sitter correctly flags it as T27.
+    // The key test: the string on line 3 does NOT produce an additional T27 hit.
+    let r = validate_ts_grep_attack_fixture("string_ts_ignore.ts");
+    assert_has_check(&r, "string_ts_ignore.ts", "T27", "error");
+    let t27_count = r.checks.iter().filter(|(id, _)| id == "T27").count();
+    assert!(
+        t27_count == 1,
+        "string_ts_ignore.ts: expected exactly 1 T27 hit (from fixture comment), got {t27_count}"
+    );
+}
+
+#[test]
+fn grep_before_typescript_string_process_env() {
+    // FIXED: tree-sitter AST correctly ignores `"process.env.NODE_ENV"` inside a string literal.
+    // BEFORE MIGRATION: grep scanner produced T30 false positive on process.env inside string literal
+    let r = validate_ts_grep_attack_fixture("string_process_env.ts");
+    assert_no_check(&r, "string_process_env.ts", "T30");
+}
+
+#[test]
+fn grep_before_typescript_comment_process_env() {
+    // CORRECT: both grep and tree-sitter correctly ignore `process.env` in a comment.
+    // The grep fallback skips comment lines (starts with "//"), and tree-sitter
+    // only looks at AST member-expression nodes, not comments.
+    let r = validate_ts_grep_attack_fixture("comment_process_env.ts");
+    assert_no_check(&r, "comment_process_env.ts", "T30");
+}
+
+#[test]
+fn grep_before_typescript_type_any_in_string() {
+    // FIXED: tree-sitter AST correctly ignores `": any"` inside a string literal.
+    // BEFORE MIGRATION: grep scanner produced T31 false positive on ": any" inside string literal
+    let r = validate_ts_grep_attack_fixture("type_any_in_string.ts");
+    assert_no_check(&r, "type_any_in_string.ts", "T31");
+}
+
+#[test]
+fn grep_before_typescript_generic_any() {
+    // `function foo<T = any>()` is a real `any` type usage.
+    // However, tree-sitter's `collect_any_types` only detects `any` in `type_annotation`
+    // (`: any`) and `as_expression` (`as any`). A default type parameter (`<T = any>`)
+    // uses a `default_type` node inside `type_parameter`, which is not covered.
+    // The grep fallback also doesn't match because it checks for `as any` / `: any`,
+    // and `= any` matches neither pattern.
+    // KNOWN GAP: `<T = any>` is not detected by either path.
+    let r = validate_ts_grep_attack_fixture("generic_any.ts");
+    assert_no_check(&r, "generic_any.ts", "T31");
+}
+
+#[test]
+fn grep_before_typescript_exactly_300_lines() {
+    // BOUNDARY: exactly 300 total lines, 298 effective lines (2 comment lines excluded).
+    // T32 fires on > 300 effective lines, so should NOT fire.
+    // T33 fires on > 250 effective lines, so SHOULD fire (298 > 250).
+    let r = validate_ts_grep_attack_fixture("exactly_300_lines.ts");
+    assert_no_check(&r, "exactly_300_lines.ts", "T32");
+    assert_has_check(&r, "exactly_300_lines.ts", "T33", "info");
+}
+
+#[test]
+fn grep_before_typescript_exactly_301_lines() {
+    // BOUNDARY: exactly 301 total lines, 299 effective lines (2 comment lines excluded).
+    // T32 fires on > 300 effective lines — 299 is NOT > 300, so T32 should NOT fire.
+    // T33 fires on > 250 effective lines, so SHOULD fire (299 > 250).
+    let r = validate_ts_grep_attack_fixture("exactly_301_lines.ts");
+    assert_no_check(&r, "exactly_301_lines.ts", "T32");
+    assert_has_check(&r, "exactly_301_lines.ts", "T33", "info");
 }

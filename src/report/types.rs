@@ -28,6 +28,16 @@ pub struct Report {
     pub sections: Vec<Section>,
 }
 
+/// Controls which validation domains are active.
+#[derive(Debug, Clone)]
+#[allow(clippy::struct_excessive_bools)] // reason: domain flags are independent toggles, not a state machine
+pub struct ValidateDomains {
+    pub code: bool,
+    pub architecture: bool,
+    pub release: bool,
+    pub tests: bool,
+}
+
 impl Report {
     pub const fn new(project_path: String, stacks: Vec<String>) -> Self {
         Self {

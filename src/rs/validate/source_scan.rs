@@ -206,30 +206,74 @@ fn strip_inline_block_comments(line: &str) -> String {
 
 /// Strip string literals from a line for comment-detection purposes.
 /// This prevents `"/*"` inside strings from being treated as comment delimiters.
+/// Handles both regular strings (`"..."`) and raw strings (`r"..."`, `r#"..."#`, etc.).
+#[allow(clippy::indexing_slicing)] // reason: all char indices are bounds-checked against len before access
+#[allow(clippy::string_slice)] // reason: pos from str::find is guaranteed to be a valid UTF-8 boundary
 fn strip_string_literals(line: &str) -> String {
     let mut result = String::with_capacity(line.len());
-    let mut in_string = false;
-    let mut prev_was_escape = false;
+    let chars: Vec<char> = line.chars().collect();
+    let len = chars.len();
+    let mut i = 0;
 
-    for c in line.chars() {
-        if prev_was_escape {
-            prev_was_escape = false;
-            if !in_string {
-                result.push(c);
+    while i < len {
+        // Detect raw string opener: r followed by optional #s then "
+        if chars[i] == 'r' {
+            let mut hashes: usize = 0;
+            let mut j = i.saturating_add(1);
+            while j < len && chars[j] == '#' {
+                hashes = hashes.saturating_add(1);
+                j = j.saturating_add(1);
+            }
+            if j < len && chars[j] == '"' && (hashes > 0 || j == i.saturating_add(1)) {
+                // Verify `r` is not part of an identifier
+                let is_ident_char = i > 0
+                    && (chars[i.saturating_sub(1)].is_ascii_alphanumeric()
+                        || chars[i.saturating_sub(1)] == '_');
+                if !is_ident_char {
+                    // Build closing delimiter: `"` followed by `hashes` `#` chars
+                    let mut closer = String::with_capacity(hashes.saturating_add(1));
+                    closer.push('"');
+                    for _ in 0..hashes {
+                        closer.push('#');
+                    }
+                    // Skip past opening delimiter
+                    i = j.saturating_add(1);
+                    // Find closing delimiter in remaining chars
+                    let remaining: String = chars[i..].iter().collect();
+                    if let Some(pos) = remaining.find(closer.as_str()) {
+                        // pos is byte offset; convert to char count
+                        let char_offset = remaining[..pos].chars().count();
+                        i = i.saturating_add(char_offset).saturating_add(closer.len());
+                    } else {
+                        // Unclosed raw string — skip rest of line
+                        break;
+                    }
+                    continue;
+                }
+            }
+        }
+
+        // Regular string
+        if chars[i] == '"' {
+            i = i.saturating_add(1);
+            // Skip until closing quote
+            while i < len {
+                if chars[i] == '\\' {
+                    i = i.saturating_add(2); // skip escape sequence
+                    continue;
+                }
+                if chars[i] == '"' {
+                    i = i.saturating_add(1);
+                    break;
+                }
+                i = i.saturating_add(1);
             }
             continue;
         }
-        if c == '\\' && in_string {
-            prev_was_escape = true;
-            continue;
-        }
-        if c == '"' {
-            in_string = !in_string;
-            continue;
-        }
-        if !in_string {
-            result.push(c);
-        }
+
+        // Not in a string — keep the character
+        result.push(chars[i]);
+        i = i.saturating_add(1);
     }
     result
 }
@@ -347,6 +391,31 @@ mod tests {
         let result = strip_string_literals("let x = 42; /* comment */");
         assert!(result.contains("let x = 42"));
         assert!(result.contains("/* comment */"));
+    }
+
+    #[test]
+    fn strip_string_literals_handles_raw_strings() {
+        // Raw string r#"..."# should have its content stripped
+        let result = strip_string_literals(r##"let x = r#"hello /* world */"#;"##);
+        assert!(
+            !result.contains("hello"),
+            "Raw string content should be stripped, got: {result}"
+        );
+        assert!(
+            !result.contains("/*"),
+            "Comment delimiters inside raw string should be stripped, got: {result}"
+        );
+        assert!(
+            result.contains("let x = "),
+            "Code outside raw string should be preserved, got: {result}"
+        );
+
+        // Simple raw string r"..." should also work
+        let result2 = strip_string_literals(r#"let y = r"some content";"#);
+        assert!(
+            !result2.contains("some content"),
+            "Simple raw string content should be stripped, got: {result2}"
+        );
     }
 
     #[test]

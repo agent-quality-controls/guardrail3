@@ -7,11 +7,27 @@ use proc_macro2 as _; // reason: span-locations feature needed for syn span.star
 use syn::spanned::Spanned;
 use syn::visit::Visit;
 
+use super::ast_visitors::{
+    CfgAttrAllowVisitor, DeriveVisitor, ForbiddenMacroVisitor, GardeSkipVisitor, IgnoreVisitor,
+    InlineStdFsVisitor, ItemAllowVisitor, PubFnVisitor, TestAttrVisitor, TestCountVisitor,
+    UnwrapExpectVisitor, UnsafeVisitor,
+};
+
 /// A source location (1-based line number) paired with a descriptive string (lint name, method name, etc.).
-type Located = (usize, String);
+pub(super) type Located = (usize, String);
+
+/// Information about a `#[derive(...)]` attribute on an item.
+pub struct DeriveInfo {
+    /// 1-based line number of the derive attribute.
+    pub line: usize,
+    /// Names of the derive macros (e.g. `["Deserialize", "Validate"]`).
+    pub macros: Vec<String>,
+}
 
 /// Parse a Rust source file. Returns `None` if parsing fails.
+/// Strips UTF-8 BOM if present.
 pub fn parse_file(source: &str) -> Option<syn::File> {
+    let source = source.strip_prefix('\u{feff}').unwrap_or(source);
     syn::parse_file(source).ok()
 }
 
@@ -72,12 +88,24 @@ pub fn find_unwrap_expect(file: &syn::File) -> Vec<Located> {
     v.out
 }
 
-/// Find `use std::fs` import lines.
+/// Find all `#[derive(...)]` attributes in a parsed file.
+/// Returns one `DeriveInfo` per derive attribute found, with its line and macro names.
+pub fn find_derive_attributes(file: &syn::File) -> Vec<DeriveInfo> {
+    let mut v = DeriveVisitor { out: Vec::new() };
+    v.visit_file(file);
+    v.out
+}
+
+/// Find `use std::fs` import lines. Skips imports gated by `#[cfg(test)]`.
 pub fn find_std_fs_imports(file: &syn::File) -> Vec<usize> {
     file.items
         .iter()
         .filter_map(|item| {
             if let syn::Item::Use(u) = item {
+                // Skip cfg(test)-gated imports
+                if u.attrs.iter().any(is_cfg_test_attr) {
+                    return None;
+                }
                 if use_tree_matches_std_fs(&u.tree) {
                     return Some(u.span().start().line);
                 }
@@ -85,6 +113,50 @@ pub fn find_std_fs_imports(file: &syn::File) -> Vec<usize> {
             None
         })
         .collect()
+}
+
+/// Find inline `std::fs::*` calls (e.g., `std::fs::read_to_string(...)`).
+/// Skips calls inside `#[cfg(test)]` functions and modules.
+pub fn find_inline_std_fs_calls(file: &syn::File) -> Vec<usize> {
+    let mut v = InlineStdFsVisitor {
+        out: Vec::new(),
+        in_cfg_test: false,
+    };
+    v.visit_file(file);
+    v.out
+}
+
+/// Check if the file contains at least one `#[test]` or `#[tokio::test]` attribute.
+pub fn has_test_attribute(file: &syn::File) -> bool {
+    let mut v = TestAttrVisitor { found: false };
+    v.visit_file(file);
+    v.found
+}
+
+/// Count `pub fn` declarations (including in impl blocks and traits).
+pub fn count_pub_fn_decls(file: &syn::File) -> usize {
+    let mut v = PubFnVisitor { count: 0 };
+    v.visit_file(file);
+    v.count
+}
+
+/// Count `#[test]` and `#[tokio::test]` attributes.
+pub fn count_test_attrs(file: &syn::File) -> usize {
+    let mut v = TestCountVisitor { count: 0 };
+    v.visit_file(file);
+    v.count
+}
+
+/// Find `#[ignore]` attributes without a `// reason:` comment on same or previous line.
+/// Returns 1-based line numbers of violations.
+/// Requires the original source to check for reason comments.
+pub fn find_ignore_without_reason(file: &syn::File, source: &str) -> Vec<usize> {
+    let mut v = IgnoreVisitor {
+        lines: source.lines().collect(),
+        violations: Vec::new(),
+    };
+    v.visit_file(file);
+    v.violations
 }
 
 /// Count top-level `use` statements.
@@ -96,14 +168,14 @@ pub fn count_use_statements(file: &syn::File) -> usize {
 }
 
 // ---------------------------------------------------------------------------
-// Internal
+// Internal helpers (shared with ast_visitors via pub(super))
 // ---------------------------------------------------------------------------
 
-fn span_line(span: proc_macro2::Span) -> usize {
+pub(super) fn span_line(span: proc_macro2::Span) -> usize {
     span.start().line
 }
 
-fn extract_allow_lints(attr: &syn::Attribute, out: &mut Vec<Located>) {
+pub(super) fn extract_allow_lints(attr: &syn::Attribute, out: &mut Vec<Located>) {
     if !attr.path().is_ident("allow") {
         return;
     }
@@ -117,7 +189,7 @@ fn extract_allow_lints(attr: &syn::Attribute, out: &mut Vec<Located>) {
     }
 }
 
-fn extract_cfg_attr_allow_lints(attr: &syn::Attribute, out: &mut Vec<Located>) {
+pub(super) fn extract_cfg_attr_allow_lints(attr: &syn::Attribute, out: &mut Vec<Located>) {
     if !attr.path().is_ident("cfg_attr") {
         return;
     }
@@ -169,7 +241,7 @@ fn use_subtree_is_fs(tree: &syn::UseTree) -> bool {
     }
 }
 
-fn path_to_string(path: &syn::Path) -> String {
+pub(super) fn path_to_string(path: &syn::Path) -> String {
     path.segments
         .iter()
         .map(|seg| seg.ident.to_string())
@@ -177,40 +249,19 @@ fn path_to_string(path: &syn::Path) -> String {
         .join("::")
 }
 
-fn has_garde_skip(attrs: &[syn::Attribute]) -> Option<usize> {
-    for attr in attrs {
-        if !attr.path().is_ident("garde") {
-            continue;
-        }
-        if let Ok(nested) = attr.parse_args_with(
-            syn::punctuated::Punctuated::<syn::Path, syn::Token![,]>::parse_terminated,
-        ) {
-            for path in &nested {
-                if path.is_ident("skip") {
-                    return Some(span_line(attr.span()));
-                }
-            }
-        }
+/// Check if an attribute is `#[cfg(test)]`.
+pub(super) fn is_cfg_test_attr(attr: &syn::Attribute) -> bool {
+    if !attr.path().is_ident("cfg") {
+        return false;
     }
-    None
-}
-
-fn collect_outer_allows(attrs: &[syn::Attribute], out: &mut Vec<Located>) {
-    for attr in attrs {
-        if !matches!(attr.style, syn::AttrStyle::Inner(_)) {
-            extract_allow_lints(attr, out);
-        }
-    }
-}
-
-fn collect_cfg_attr_allows(attrs: &[syn::Attribute], out: &mut Vec<Located>) {
-    for attr in attrs {
-        extract_cfg_attr_allow_lints(attr, out);
-    }
+    let Ok(nested) = attr.parse_args::<syn::Ident>() else {
+        return false;
+    };
+    nested == "test"
 }
 
 #[allow(clippy::wildcard_enum_match_arm)] // reason: syn Item has many variants, exhaustive match is impractical
-fn item_attrs(item: &syn::Item) -> &[syn::Attribute] {
+pub(super) fn item_attrs(item: &syn::Item) -> &[syn::Attribute] {
     match item {
         syn::Item::Fn(f) => &f.attrs,
         syn::Item::Struct(s) => &s.attrs,
@@ -227,7 +278,7 @@ fn item_attrs(item: &syn::Item) -> &[syn::Attribute] {
 }
 
 #[allow(clippy::wildcard_enum_match_arm)] // reason: syn ImplItem has many variants, exhaustive match is impractical
-fn impl_item_attrs(item: &syn::ImplItem) -> &[syn::Attribute] {
+pub(super) fn impl_item_attrs(item: &syn::ImplItem) -> &[syn::Attribute] {
     match item {
         syn::ImplItem::Fn(f) => &f.attrs,
         syn::ImplItem::Type(t) => &t.attrs,
@@ -236,129 +287,9 @@ fn impl_item_attrs(item: &syn::ImplItem) -> &[syn::Attribute] {
     }
 }
 
-#[allow(clippy::wildcard_enum_match_arm)] // reason: syn TraitItem has many variants, exhaustive match is impractical
-fn trait_item_attrs(item: &syn::TraitItem) -> &[syn::Attribute] {
-    match item {
-        syn::TraitItem::Fn(f) => &f.attrs,
-        syn::TraitItem::Type(t) => &t.attrs,
-        syn::TraitItem::Const(c) => &c.attrs,
-        _ => &[],
-    }
-}
-
 // ---------------------------------------------------------------------------
-// Visitors
+// Tests
 // ---------------------------------------------------------------------------
-
-struct ItemAllowVisitor {
-    out: Vec<Located>,
-}
-impl<'ast> Visit<'ast> for ItemAllowVisitor {
-    fn visit_item(&mut self, i: &'ast syn::Item) {
-        collect_outer_allows(item_attrs(i), &mut self.out);
-        syn::visit::visit_item(self, i);
-    }
-    fn visit_impl_item(&mut self, i: &'ast syn::ImplItem) {
-        collect_outer_allows(impl_item_attrs(i), &mut self.out);
-        syn::visit::visit_impl_item(self, i);
-    }
-    fn visit_trait_item(&mut self, i: &'ast syn::TraitItem) {
-        collect_outer_allows(trait_item_attrs(i), &mut self.out);
-        syn::visit::visit_trait_item(self, i);
-    }
-}
-
-struct CfgAttrAllowVisitor<'a> {
-    out: &'a mut Vec<Located>,
-}
-impl<'ast> Visit<'ast> for CfgAttrAllowVisitor<'_> {
-    fn visit_item(&mut self, i: &'ast syn::Item) {
-        collect_cfg_attr_allows(item_attrs(i), self.out);
-        syn::visit::visit_item(self, i);
-    }
-    fn visit_impl_item(&mut self, i: &'ast syn::ImplItem) {
-        collect_cfg_attr_allows(impl_item_attrs(i), self.out);
-        syn::visit::visit_impl_item(self, i);
-    }
-}
-
-struct GardeSkipVisitor {
-    out: Vec<usize>,
-}
-impl<'ast> Visit<'ast> for GardeSkipVisitor {
-    fn visit_field(&mut self, f: &'ast syn::Field) {
-        if let Some(line) = has_garde_skip(&f.attrs) {
-            self.out.push(line);
-        }
-        syn::visit::visit_field(self, f);
-    }
-    fn visit_item_struct(&mut self, n: &'ast syn::ItemStruct) {
-        if let Some(line) = has_garde_skip(&n.attrs) {
-            self.out.push(line);
-        }
-        syn::visit::visit_item_struct(self, n);
-    }
-}
-
-struct UnsafeVisitor {
-    out: Vec<usize>,
-}
-impl<'ast> Visit<'ast> for UnsafeVisitor {
-    fn visit_expr_unsafe(&mut self, n: &'ast syn::ExprUnsafe) {
-        self.out.push(span_line(n.unsafe_token.span));
-        syn::visit::visit_expr_unsafe(self, n);
-    }
-    fn visit_item_fn(&mut self, n: &'ast syn::ItemFn) {
-        if let Some(tok) = n.sig.unsafety {
-            self.out.push(span_line(tok.span));
-        }
-        syn::visit::visit_item_fn(self, n);
-    }
-    fn visit_impl_item_fn(&mut self, n: &'ast syn::ImplItemFn) {
-        if let Some(tok) = n.sig.unsafety {
-            self.out.push(span_line(tok.span));
-        }
-        syn::visit::visit_impl_item_fn(self, n);
-    }
-    fn visit_item_impl(&mut self, n: &'ast syn::ItemImpl) {
-        if let Some(tok) = n.unsafety {
-            self.out.push(span_line(tok.span));
-        }
-        syn::visit::visit_item_impl(self, n);
-    }
-    fn visit_item_trait(&mut self, n: &'ast syn::ItemTrait) {
-        if let Some(tok) = n.unsafety {
-            self.out.push(span_line(tok.span));
-        }
-        syn::visit::visit_item_trait(self, n);
-    }
-}
-
-struct ForbiddenMacroVisitor {
-    out: Vec<Located>,
-}
-impl<'ast> Visit<'ast> for ForbiddenMacroVisitor {
-    fn visit_macro(&mut self, n: &'ast syn::Macro) {
-        let name = path_to_string(&n.path);
-        if matches!(name.as_str(), "todo" | "unimplemented" | "unreachable" | "panic") {
-            self.out.push((span_line(n.path.span()), name));
-        }
-        syn::visit::visit_macro(self, n);
-    }
-}
-
-struct UnwrapExpectVisitor {
-    out: Vec<Located>,
-}
-impl<'ast> Visit<'ast> for UnwrapExpectVisitor {
-    fn visit_expr_method_call(&mut self, n: &'ast syn::ExprMethodCall) {
-        let m = n.method.to_string();
-        if m == "unwrap" || m == "expect" {
-            self.out.push((span_line(n.method.span()), m));
-        }
-        syn::visit::visit_expr_method_call(self, n);
-    }
-}
 
 #[cfg(test)]
 mod tests {
@@ -582,5 +513,37 @@ mod tests {
             0,
             "no uses"
         );
+    }
+
+    #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion on known-length vector
+    fn split_derives_merged_into_one_derive_info() {
+        let src = r"
+#[derive(Deserialize)]
+#[derive(Validate)]
+struct Foo {}
+
+#[derive(Serialize, Clone)]
+struct Bar {}
+";
+        let parsed = must_parse(src);
+        let derives = find_derive_attributes(&parsed);
+        assert_eq!(derives.len(), 2, "two items, two DeriveInfo entries");
+        // Foo: split derives merged into one entry
+        assert_eq!(
+            derives[0].macros.len(),
+            2,
+            "Foo should have 2 macros from split derives"
+        );
+        assert_eq!(derives[0].macros[0], "Deserialize");
+        assert_eq!(derives[0].macros[1], "Validate");
+        // Bar: single derive with two macros
+        assert_eq!(
+            derives[1].macros.len(),
+            2,
+            "Bar should have 2 macros from single derive"
+        );
+        assert_eq!(derives[1].macros[0], "Serialize");
+        assert_eq!(derives[1].macros[1], "Clone");
     }
 }
