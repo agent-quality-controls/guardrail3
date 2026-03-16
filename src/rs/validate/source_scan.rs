@@ -206,30 +206,68 @@ fn strip_inline_block_comments(line: &str) -> String {
 
 /// Strip string literals from a line for comment-detection purposes.
 /// This prevents `"/*"` inside strings from being treated as comment delimiters.
+/// Handles both regular strings (`"..."`) and raw strings (`r"..."`, `r#"..."#`, etc.).
 fn strip_string_literals(line: &str) -> String {
     let mut result = String::with_capacity(line.len());
-    let mut in_string = false;
-    let mut prev_was_escape = false;
+    let bytes = line.as_bytes();
+    let mut i = 0;
 
-    for c in line.chars() {
-        if prev_was_escape {
-            prev_was_escape = false;
-            if !in_string {
-                result.push(c);
+    while i < bytes.len() {
+        // Detect raw string opener: r followed by optional #s then "
+        if bytes[i] == b'r' {
+            let mut hashes: usize = 0;
+            let mut j = i.saturating_add(1);
+            while j < bytes.len() && bytes[j] == b'#' {
+                hashes = hashes.saturating_add(1);
+                j = j.saturating_add(1);
+            }
+            if j < bytes.len() && bytes[j] == b'"' && (hashes > 0 || j == i.saturating_add(1)) {
+                // Verify `r` is not part of an identifier
+                let is_ident_char = i > 0
+                    && (bytes[i.saturating_sub(1)].is_ascii_alphanumeric()
+                        || bytes[i.saturating_sub(1)] == b'_');
+                if !is_ident_char {
+                    // Build closing delimiter: `"` followed by `hashes` `#` chars
+                    let mut closer = String::with_capacity(hashes.saturating_add(1));
+                    closer.push('"');
+                    for _ in 0..hashes {
+                        closer.push('#');
+                    }
+                    // Skip past opening delimiter
+                    i = j.saturating_add(1);
+                    // Find closing delimiter
+                    if let Some(pos) = line[i..].find(closer.as_str()) {
+                        i = i.saturating_add(pos).saturating_add(closer.len());
+                    } else {
+                        // Unclosed raw string — skip rest of line
+                        break;
+                    }
+                    continue;
+                }
+            }
+        }
+
+        // Regular string
+        if bytes[i] == b'"' {
+            i = i.saturating_add(1);
+            // Skip until closing quote
+            while i < bytes.len() {
+                if bytes[i] == b'\\' {
+                    i = i.saturating_add(2); // skip escape sequence
+                    continue;
+                }
+                if bytes[i] == b'"' {
+                    i = i.saturating_add(1);
+                    break;
+                }
+                i = i.saturating_add(1);
             }
             continue;
         }
-        if c == '\\' && in_string {
-            prev_was_escape = true;
-            continue;
-        }
-        if c == '"' {
-            in_string = !in_string;
-            continue;
-        }
-        if !in_string {
-            result.push(c);
-        }
+
+        // Not in a string — keep the character
+        result.push(bytes[i] as char);
+        i = i.saturating_add(1);
     }
     result
 }
@@ -347,6 +385,31 @@ mod tests {
         let result = strip_string_literals("let x = 42; /* comment */");
         assert!(result.contains("let x = 42"));
         assert!(result.contains("/* comment */"));
+    }
+
+    #[test]
+    fn strip_string_literals_handles_raw_strings() {
+        // Raw string r#"..."# should have its content stripped
+        let result = strip_string_literals(r##"let x = r#"hello /* world */"#;"##);
+        assert!(
+            !result.contains("hello"),
+            "Raw string content should be stripped, got: {result}"
+        );
+        assert!(
+            !result.contains("/*"),
+            "Comment delimiters inside raw string should be stripped, got: {result}"
+        );
+        assert!(
+            result.contains("let x = "),
+            "Code outside raw string should be preserved, got: {result}"
+        );
+
+        // Simple raw string r"..." should also work
+        let result2 = strip_string_literals(r#"let y = r"some content";"#);
+        assert!(
+            !result2.contains("some content"),
+            "Simple raw string content should be stripped, got: {result2}"
+        );
     }
 
     #[test]

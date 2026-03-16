@@ -1,5 +1,6 @@
 pub mod allow_checks;
 pub mod ast_helpers;
+mod ast_visitors;
 pub mod cargo_lints;
 pub mod clippy_coverage;
 pub mod code_quality_checks;

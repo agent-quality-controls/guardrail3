@@ -81,6 +81,18 @@ pub fn find_any_types(tree: &Tree, source: &str) -> Vec<usize> {
     out
 }
 
+/// Find test method calls like `describe.skip(`, `it.only(`, etc.
+///
+/// Matches call expressions where the callee is a member expression with
+/// property matching `method` (e.g., "skip" or "only") on objects named
+/// "test", "describe", "it", "beforeEach", or "afterEach".
+/// Returns 1-based line numbers. Ignores occurrences inside strings/comments.
+pub fn find_test_method_calls(tree: &Tree, source: &str, method: &str) -> Vec<usize> {
+    let mut out = Vec::new();
+    collect_test_method_calls(&tree.root_node(), source.as_bytes(), method, &mut out);
+    out
+}
+
 // ---------------------------------------------------------------------------
 // Internal — recursive tree walkers
 // ---------------------------------------------------------------------------
@@ -208,6 +220,44 @@ fn has_predefined_any_child(node: &Node<'_>, source: &[u8]) -> bool {
         }
     }
     false
+}
+
+/// Test runner object names that can have `.skip()` / `.only()`.
+const TEST_RUNNER_OBJECTS: &[&str] = &["test", "describe", "it", "beforeEach", "afterEach"];
+
+fn collect_test_method_calls(
+    node: &Node<'_>,
+    source: &[u8],
+    method: &str,
+    out: &mut Vec<usize>,
+) {
+    // call_expression → function: member_expression(object, property)
+    if node.kind() == "call_expression" {
+        if let Some(callee) = node.child_by_field_name("function") {
+            if callee.kind() == "member_expression" {
+                if let (Some(obj), Some(prop)) = (
+                    callee.child_by_field_name("object"),
+                    callee.child_by_field_name("property"),
+                ) {
+                    let obj_text = node_text(&obj, source);
+                    let prop_text = node_text(&prop, source);
+                    if prop_text == method
+                        && TEST_RUNNER_OBJECTS.contains(&obj_text)
+                    {
+                        let line = node.start_position().row.saturating_add(1);
+                        if !out.contains(&line) {
+                            out.push(line);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    let mut cursor = node.walk();
+    for child in node.children(&mut cursor) {
+        collect_test_method_calls(&child, source, method, out);
+    }
 }
 
 fn node_text<'a>(node: &Node<'_>, source: &'a [u8]) -> &'a str {
@@ -550,5 +600,87 @@ mod tests {
         let tree = must_parse(src);
         let hits = find_any_types(&tree, src);
         assert!(hits.is_empty(), "should NOT match string or number types");
+    }
+
+    // -----------------------------------------------------------------------
+    // find_test_method_calls
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn test_skip_calls_found() {
+        let src = "describe.skip(\"test\", () => {});";
+        let tree = must_parse(src);
+        let hits = find_test_method_calls(&tree, src, "skip");
+        assert_eq!(hits.len(), 1, "should find describe.skip call");
+        assert_eq!(hits.first().copied(), Some(1));
+    }
+
+    #[test]
+    fn test_skip_in_string_not_found() {
+        let src = "const s = \"describe.skip()\";\nexport default s;";
+        let tree = must_parse(src);
+        let hits = find_test_method_calls(&tree, src, "skip");
+        assert!(
+            hits.is_empty(),
+            "describe.skip inside string literal should not be detected"
+        );
+    }
+
+    #[test]
+    fn test_only_calls_found() {
+        let src = "it.only(\"test\", () => {});";
+        let tree = must_parse(src);
+        let hits = find_test_method_calls(&tree, src, "only");
+        assert_eq!(hits.len(), 1, "should find it.only call");
+        assert_eq!(hits.first().copied(), Some(1));
+    }
+
+    #[test]
+    fn test_only_in_string_not_found() {
+        let src = "const s = \"it.only()\";\nexport default s;";
+        let tree = must_parse(src);
+        let hits = find_test_method_calls(&tree, src, "only");
+        assert!(
+            hits.is_empty(),
+            "it.only inside string literal should not be detected"
+        );
+    }
+
+    #[test]
+    fn test_skip_in_comment_not_found() {
+        let src = "// test.skip(\"broken\", () => {});\nconst x = 1;";
+        let tree = must_parse(src);
+        let hits = find_test_method_calls(&tree, src, "skip");
+        assert!(
+            hits.is_empty(),
+            "test.skip inside comment should not be detected"
+        );
+    }
+
+    #[test]
+    fn test_only_multiple_lines() {
+        let src = "it.only(\"a\", () => {});\ndescribe.only(\"b\", () => {});";
+        let tree = must_parse(src);
+        let hits = find_test_method_calls(&tree, src, "only");
+        assert_eq!(hits.len(), 2, "should find both .only calls");
+    }
+
+    #[test]
+    fn test_before_each_skip() {
+        let src = "beforeEach.skip(() => {});";
+        let tree = must_parse(src);
+        let hits = find_test_method_calls(&tree, src, "skip");
+        assert_eq!(hits.len(), 1, "should find beforeEach.skip");
+    }
+
+    #[test]
+    fn test_non_test_object_not_found() {
+        let src = "foo.skip(\"test\");";
+        let tree = must_parse(src);
+        let hits = find_test_method_calls(&tree, src, "skip");
+        assert!(
+            hits.is_empty(),
+            "foo.skip should not match — foo is not a test runner object"
+        );
     }
 }

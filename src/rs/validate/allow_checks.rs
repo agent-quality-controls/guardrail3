@@ -5,6 +5,95 @@ use crate::report::types::{CheckResult, Severity};
 use super::ast_helpers;
 use super::source_scan::filter_non_comment_lines;
 
+/// Compute which 0-based line numbers are inside multi-line string literals.
+/// Tracks quote parity across lines, accounting for escaped quotes,
+/// line continuations (`\` at end of line inside a string), and raw strings
+/// (`r"..."`, `r#"..."#`, `r##"..."##`, etc.).
+fn compute_multiline_string_lines(content: &str) -> std::collections::BTreeSet<usize> {
+    let mut in_string = false;
+    let mut string_lines = std::collections::BTreeSet::new();
+    // When inside a raw string, this holds the closing delimiter: `"` + N `#` chars.
+    // When empty, we are not inside a raw string (but may be inside a regular string).
+    let mut raw_close: Option<String> = None;
+
+    for (line_num, line) in content.lines().enumerate() {
+        if in_string {
+            let _ = string_lines.insert(line_num);
+        }
+
+        let bytes = line.as_bytes();
+        let mut i = 0;
+        while i < bytes.len() {
+            // --- Inside a raw string: scan for the closing delimiter ---
+            if let Some(ref closer) = raw_close {
+                if let Some(pos) = line[i..].find(closer.as_str()) {
+                    i = i.saturating_add(pos).saturating_add(closer.len());
+                    raw_close = None;
+                    in_string = false;
+                } else {
+                    // Closing delimiter not on this line — whole rest is string
+                    break;
+                }
+                continue;
+            }
+
+            // --- Inside a regular (non-raw) string ---
+            if in_string {
+                if bytes[i] == b'\\' {
+                    // skip escaped char
+                    i = i.saturating_add(2);
+                    continue;
+                }
+                if bytes[i] == b'"' {
+                    in_string = false;
+                    i = i.saturating_add(1);
+                    continue;
+                }
+                i = i.saturating_add(1);
+                continue;
+            }
+
+            // --- Not inside any string ---
+            if bytes[i] == b'"' {
+                in_string = true;
+                i = i.saturating_add(1);
+                continue;
+            }
+            // Detect raw string opener: r followed by optional #s then "
+            if bytes[i] == b'r' {
+                let mut hashes: usize = 0;
+                let mut j = i.saturating_add(1);
+                while j < bytes.len() && bytes[j] == b'#' {
+                    hashes = hashes.saturating_add(1);
+                    j = j.saturating_add(1);
+                }
+                if j < bytes.len() && bytes[j] == b'"' && (hashes > 0 || j == i.saturating_add(1))
+                {
+                    // Verify `r` is not part of an identifier: check char before
+                    let is_ident_char = i > 0
+                        && (bytes[i.saturating_sub(1)].is_ascii_alphanumeric()
+                            || bytes[i.saturating_sub(1)] == b'_');
+                    if !is_ident_char {
+                        // Build the closing delimiter: `"` followed by `hashes` `#` chars
+                        let mut closer = String::with_capacity(hashes.saturating_add(1));
+                        closer.push('"');
+                        for _ in 0..hashes {
+                            closer.push('#');
+                        }
+                        raw_close = Some(closer);
+                        in_string = true;
+                        i = j.saturating_add(1); // skip past the opening `"`
+                        continue;
+                    }
+                }
+            }
+            i = i.saturating_add(1);
+        }
+    }
+
+    string_lines
+}
+
 /// Prefix constant used in R30-R31 messages.
 const CRATE_ALLOW_PREFIX: &str = "#![allow(";
 
@@ -182,6 +271,7 @@ fn check_item_level_allow_grep_supplement(
     results: &mut Vec<CheckResult>,
 ) {
     let non_comment_lines = filter_non_comment_lines(content);
+    let string_lines = compute_multiline_string_lines(content);
 
     for (line_num, trimmed) in &non_comment_lines {
         let allow_prefix = "#[allow("; // pattern we scan for
@@ -191,6 +281,10 @@ fn check_item_level_allow_grep_supplement(
         let line_number = line_num.saturating_add(1);
         // Skip lines already reported by AST pass
         if ast_covered.contains(&line_number) {
+            continue;
+        }
+        // Skip lines inside multi-line string literals
+        if string_lines.contains(line_num) {
             continue;
         }
         let lint = if trimmed.contains(')') {
@@ -637,5 +731,63 @@ mod tests {
             errors.is_empty(),
             "Test files should be exempt from R30 errors"
         );
+    }
+
+    // ---- Raw string handling in compute_multiline_string_lines ----
+
+    #[test]
+    fn multiline_string_lines_handles_raw_strings() {
+        // r#"..."# containing a quote and an allow-like pattern must be treated as string
+        let content = "let s = r#\"#[allow(unused)]\n  inner line\n\"#;\nreal code";
+        let string_lines = compute_multiline_string_lines(content);
+        // Line 0 starts the raw string (the opening r#" is on it — rest is string content)
+        // Line 1 is inside the raw string
+        // Line 2 closes the raw string — the "# is consumed, so this line started in-string
+        assert!(
+            string_lines.contains(&1),
+            "Line 1 should be inside raw string, got: {string_lines:?}"
+        );
+        assert!(
+            string_lines.contains(&2),
+            "Line 2 should be inside raw string (started in-string), got: {string_lines:?}"
+        );
+        assert!(
+            !string_lines.contains(&3),
+            "Line 3 should NOT be inside raw string, got: {string_lines:?}"
+        );
+    }
+
+    // ---- R36: EXCEPTION comments ----
+
+    #[test]
+    #[allow(clippy::expect_used, clippy::disallowed_methods)] // reason: test setup needs temp dir and direct fs
+    fn r36_exception_comment_in_config_file() {
+        use std::fs as stdfs;
+        let tmp = tempfile::tempdir().expect("failed to create temp dir");
+        let clippy_path = tmp.path().join("clippy.toml");
+        stdfs::write(
+            &clippy_path,
+            "# EXCEPTION: allowing foo because bar\nsome_setting = true\n",
+        )
+        .expect("write clippy.toml");
+        let mut results = Vec::new();
+        check_exception_comments(tmp.path(), &mut results);
+        assert!(!results.is_empty(), "Should detect EXCEPTION comment");
+        assert_eq!(results[0].id, "R36");
+        assert_eq!(results[0].severity, Severity::Info);
+    }
+
+    // ---- R37: cfg_attr allow ----
+
+    #[test]
+    #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
+    fn r37_cfg_attr_allow_detected() {
+        let content = "#[cfg_attr(test, allow(unused))]\nfn foo() {}";
+        let path = Path::new("test.rs");
+        let mut results = Vec::new();
+        check_cfg_attr_allow(path, content, &mut results);
+        assert!(!results.is_empty(), "Should detect cfg_attr allow");
+        assert_eq!(results[0].id, "R37");
+        assert_eq!(results[0].severity, Severity::Info);
     }
 }
