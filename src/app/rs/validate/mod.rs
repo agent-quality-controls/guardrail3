@@ -9,6 +9,7 @@ pub mod deny_audit;
 mod deny_bans;
 mod deny_inventory;
 mod deny_licenses;
+pub mod dependency_allowlist;
 mod dependency_direction;
 pub mod dependency_scan;
 pub mod garde_checks;
@@ -28,19 +29,21 @@ mod workspace_metadata;
 use std::path::Path;
 
 use crate::app::discover::ProjectInfo;
+use crate::domain::config::types::GuardrailConfig;
 use crate::domain::report::{Report, Section, ValidateDomains};
 use crate::ports::outbound::{FileSystem, ToolChecker};
 
-/// Try to load the profile name from guardrail3.toml if it exists.
-fn detect_profile(fs: &dyn FileSystem, path: &Path) -> Option<String> {
+/// Try to load guardrail3.toml as a typed config.
+#[allow(clippy::disallowed_methods)] // reason: guardrail3 config parsing — no garde validation needed for own config
+fn load_guardrail_config(fs: &dyn FileSystem, path: &Path) -> Option<GuardrailConfig> {
     let config_path = path.join("guardrail3.toml");
     let content = fs.read_file(&config_path)?;
-    let table: toml::Value = content.parse().ok()?;
-    table
-        .get("profile")
-        .and_then(|p| p.get("name"))
-        .and_then(|n| n.as_str())
-        .map(std::borrow::ToOwned::to_owned)
+    toml::from_str(&content).ok()
+}
+
+/// Extract profile name from the loaded config.
+fn extract_profile(cfg: &GuardrailConfig) -> Option<String> {
+    cfg.profile.as_ref().map(|p| p.name.clone())
 }
 
 #[allow(clippy::too_many_lines)] // reason: validation orchestrator — each section is a simple block, splitting would reduce readability
@@ -54,8 +57,9 @@ pub fn run(fs: &dyn FileSystem,
 ) -> Report {
     let workspace_root = project.cargo_workspace_root.as_deref().unwrap_or(path);
 
-    // Try to detect the profile from guardrail3.toml at the project root
-    let profile = detect_profile(fs, path);
+    // Load guardrail3.toml config (used for profile + per-crate settings)
+    let guardrail_cfg = load_guardrail_config(fs, path);
+    let profile = guardrail_cfg.as_ref().and_then(extract_profile);
     let profile_ref = profile.as_deref();
 
     let mut report = Report::new(path.display().to_string(), vec!["Rust".to_owned()]);
@@ -124,6 +128,35 @@ pub fn run(fs: &dyn FileSystem,
         );
         dependency_direction::check_dependency_graph(fs, workspace_root, project, &mut arch_results);
         structure_checks::check_unsafe_code_forbid(fs, workspace_root, &mut arch_results);
+
+        // Dependency allowlist checks (R-DEPS-01, R-DEPS-02)
+        if let Some(crate_map) = guardrail_cfg
+            .as_ref()
+            .and_then(|c| c.rust.as_ref())
+            .and_then(|r| r.crates.as_ref())
+        {
+            for (crate_name, crate_cfg) in crate_map {
+                // R-DEPS-01: check allowed_deps against actual Cargo.toml dependencies
+                if let Some(allowed) = &crate_cfg.allowed_deps {
+                    let cargo_path = workspace_root.join(crate_name).join("Cargo.toml");
+                    dependency_allowlist::check_dependency_allowlist(
+                        &cargo_path,
+                        crate_name,
+                        allowed,
+                        fs,
+                        &mut arch_results,
+                    );
+                }
+
+                // R-DEPS-02: library crate without allowlist
+                dependency_allowlist::check_library_has_allowlist(
+                    crate_name,
+                    crate_cfg,
+                    &mut arch_results,
+                );
+            }
+        }
+
         report.add_section(Section {
             name: "Architecture checks".to_owned(),
             results: arch_results,

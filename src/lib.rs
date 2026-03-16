@@ -11,5 +11,6 @@ pub mod cli;
 pub mod commands;
 pub mod domain;
 pub mod fs;
+pub mod help_gen;
 pub mod ports;
 pub mod report;

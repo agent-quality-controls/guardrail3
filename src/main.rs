@@ -16,7 +16,7 @@ use proptest as _;
 #[cfg(test)]
 use tempfile as _;
 
-use clap::Parser;
+use clap::{CommandFactory, FromArgMatches};
 
 use guardrail3::adapters::outbound::fs::RealFileSystem;
 use guardrail3::adapters::outbound::tool_runner::RealToolChecker;
@@ -24,12 +24,24 @@ use guardrail3::app::discover;
 use guardrail3::app::{hooks, rs, ts};
 use guardrail3::cli::{Cli, Commands, HooksCommands, RsCommands, TsCommands, ValidateArgs};
 use guardrail3::domain::report::ValidateDomains;
+use guardrail3::help_gen;
 use guardrail3::{commands, report};
 
 #[allow(clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI entry point — stderr output and process::exit for error codes are intentional
 #[allow(clippy::too_many_lines)] // reason: CLI dispatch for all subcommands
 fn main() {
-    let cli = Cli::parse();
+    let cmd = help_gen::inject_help(Cli::command());
+    let matches = match cmd.try_get_matches() {
+        Ok(m) => m,
+        Err(e) => e.exit(),
+    };
+    let cli = match Cli::from_arg_matches(&matches) {
+        Ok(cli) => cli,
+        Err(e) => {
+            eprintln!("{e}");
+            std::process::exit(2);
+        }
+    };
 
     match cli.command {
         Commands::Validate(args) => {
