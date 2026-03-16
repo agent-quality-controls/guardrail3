@@ -11,6 +11,7 @@ mod deny_inventory;
 mod deny_licenses;
 pub mod dependency_allowlist;
 mod dependency_direction;
+mod hex_arch_checks;
 pub mod dependency_scan;
 pub mod garde_checks;
 pub mod release_bin_checks;
@@ -139,6 +140,37 @@ pub fn run(
             &mut arch_results,
         );
         structure_checks::check_unsafe_code_forbid(fs, workspace_root, &mut arch_results);
+
+        // Hex arch enforcement (R-ARCH-01, R-ARCH-02, R-ARCH-03)
+        {
+            let empty = std::collections::BTreeMap::new();
+            let crate_configs = guardrail_cfg
+                .as_ref()
+                .and_then(|c| c.rust.as_ref())
+                .and_then(|r| r.crates.as_ref())
+                .unwrap_or(&empty);
+
+            hex_arch_checks::check_hex_arch_structure(
+                fs,
+                workspace_root,
+                crate_configs,
+                &mut arch_results,
+            );
+            hex_arch_checks::check_dependency_flow(
+                fs,
+                workspace_root,
+                project,
+                crate_configs,
+                &mut arch_results,
+            );
+            hex_arch_checks::check_library_service_boundary(
+                fs,
+                workspace_root,
+                project,
+                crate_configs,
+                &mut arch_results,
+            );
+        }
 
         // Dependency allowlist checks (R-DEPS-01, R-DEPS-02)
         if let Some(crate_map) = guardrail_cfg

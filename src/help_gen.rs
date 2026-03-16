@@ -345,6 +345,9 @@ ARCHITECTURE:
   R52       Dependency graph inventory
   R53       unsafe_code = forbid in lints
   R55-R57   Workspace metadata (edition, publish, release profile)
+  R-ARCH-01 Service missing hex arch structure (domain/adapters layers)
+  R-ARCH-02 Dependency flow violation (layer depends on forbidden layer)
+  R-ARCH-03 Library depends on service internals (packages/ → apps/*/crates/)
 
 RELEASE:
   R-REL-*   Release workflow, changelog, release-plz config
