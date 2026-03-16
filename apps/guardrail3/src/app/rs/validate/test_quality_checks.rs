@@ -82,6 +82,7 @@ pub fn check_test_coverage_inventory(
         ),
         file: None,
         line: None,
+        inventory: false,
     });
 }
 
@@ -119,7 +120,8 @@ pub fn check_integration_tests(
             message: "tests/ directory with .rs files found".to_owned(),
             file: Some(tests_dir.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
         return;
     }
 
@@ -145,7 +147,8 @@ pub fn check_integration_tests(
                 ),
                 file: Some(entry.path().display().to_string()),
                 line: None,
-            });
+                inventory: false,
+            }.as_inventory());
             return;
         }
     }
@@ -157,18 +160,18 @@ pub fn check_integration_tests(
         message: "No tests/ directory with .rs files found".to_owned(),
         file: None,
         line: None,
+        inventory: false,
     });
 }
 
 /// Check if a directory exists and contains at least one .rs file.
-#[allow(clippy::case_sensitive_file_extension_comparisons)] // reason: only checking .rs files
 fn has_rs_files_in_dir(fs: &dyn FileSystem, dir: &Path) -> bool {
     if !dir.exists() {
         return false;
     }
     for entry in fs.list_dir(dir) {
         if let Some(name) = entry.file_name().to_str() {
-            if name.ends_with(".rs") {
+            if Path::new(name).extension().is_some_and(|e| e == "rs") {
                 return true;
             }
         }
@@ -209,10 +212,11 @@ pub fn check_ignore_without_reason(
                 id: "R-TEST-07".to_owned(),
                 severity: Severity::Warn,
                 title: "#[ignore] without reason".to_owned(),
-                message: "#[ignore] should have a // reason: comment on same or previous line"
+                message: "`#[ignore]` without reason. Add `// reason: <why this test is ignored>` on the same line or the line before. Example: `#[ignore] // reason: requires external service`"
                     .to_owned(),
                 file: Some(entry.path().display().to_string()),
                 line: Some(*line_num),
+                inventory: false,
             });
         }
     }
@@ -225,7 +229,8 @@ pub fn check_ignore_without_reason(
             message: "No bare #[ignore] attributes found".to_owned(),
             file: None,
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     }
 }
 
@@ -257,7 +262,8 @@ pub fn check_mutation_hook(fs: &dyn FileSystem, workspace_root: &Path, results: 
                         message: format!("Mutation testing hook found in {}", path.display()),
                         file: Some(path.display().to_string()),
                         line: None,
-                    });
+                        inventory: false,
+                    }.as_inventory());
                     return;
                 }
             }
@@ -278,7 +284,8 @@ pub fn check_mutation_hook(fs: &dyn FileSystem, workspace_root: &Path, results: 
                 message: "Mutation testing found in pre-commit hook".to_owned(),
                 file: Some(pre_commit.display().to_string()),
                 line: None,
-            });
+                inventory: false,
+            }.as_inventory());
             return;
         }
     }
@@ -290,6 +297,7 @@ pub fn check_mutation_hook(fs: &dyn FileSystem, workspace_root: &Path, results: 
         message: "No mutation testing hook found in .claude/ or .git/hooks/pre-commit".to_owned(),
         file: None,
         line: None,
+        inventory: false,
     });
 }
 

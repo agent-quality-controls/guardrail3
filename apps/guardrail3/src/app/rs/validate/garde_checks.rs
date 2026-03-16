@@ -63,6 +63,7 @@ pub fn check(fs: &dyn FileSystem, workspace_root: &Path) -> Vec<CheckResult> {
                     message: format!("Cannot check Garde bans: {e}"),
                     file: Some(file_display),
                     line: None,
+                    inventory: false,
                 });
             }
         }
@@ -74,6 +75,7 @@ pub fn check(fs: &dyn FileSystem, workspace_root: &Path) -> Vec<CheckResult> {
             message: "Cannot check Garde method/type bans without clippy.toml".to_owned(),
             file: Some(clippy_path.display().to_string()),
             line: None,
+            inventory: false,
         });
     }
 
@@ -100,7 +102,8 @@ pub fn check_garde_dependency(cargo_content: Option<&str>) -> Vec<CheckResult> {
             message: "Cannot check for garde dependency".to_owned(),
             file: None,
             line: None,
-        }];
+            inventory: false,
+        }.as_inventory()];
     };
 
     if content_has_garde_dependency(content) {
@@ -111,7 +114,8 @@ pub fn check_garde_dependency(cargo_content: Option<&str>) -> Vec<CheckResult> {
             message: "garde is listed in workspace or crate dependencies".to_owned(),
             file: None,
             line: None,
-        }]
+            inventory: false,
+        }.as_inventory()]
     } else {
         vec![CheckResult {
             id: "R-GARDE-01".to_owned(),
@@ -120,6 +124,7 @@ pub fn check_garde_dependency(cargo_content: Option<&str>) -> Vec<CheckResult> {
             message: "garde is not in [workspace.dependencies] or [dependencies] — every project MUST have garde for runtime validation".to_owned(),
             file: None,
             line: None,
+            inventory: false,
         }]
     }
 }
@@ -212,6 +217,7 @@ pub fn check_derive_inventory(
         ),
         file: Some(workspace_root.display().to_string()),
         line: None,
+        inventory: false,
     }]
 }
 
@@ -298,7 +304,8 @@ pub fn check_ban_presence(
             message: format!("All {} expected bans found in {key}", expected.len()),
             file: Some(file.to_owned()),
             line: None,
-        }]
+            inventory: false,
+        }.as_inventory()]
     } else {
         vec![CheckResult {
             id: check_id.to_owned(),
@@ -307,6 +314,7 @@ pub fn check_ban_presence(
             message: format!("Missing from {key}: {}", missing.join(", ")),
             file: Some(file.to_owned()),
             line: None,
+            inventory: false,
         }]
     }
 }

@@ -32,6 +32,7 @@ pub fn check_todo_macros(
                     message: message.to_owned(),
                     file: Some(path.display().to_string()),
                     line: Some(line),
+                    inventory: false,
                 });
             }
             "unreachable" if !is_test_file => {
@@ -42,6 +43,7 @@ pub fn check_todo_macros(
                     message: message.to_owned(),
                     file: Some(path.display().to_string()),
                     line: Some(line),
+                    inventory: false,
                 });
             }
             // panic and unreachable-in-tests: not flagged by R43
@@ -70,6 +72,7 @@ pub fn check_unwrap_expect(path: &Path, content: &str, results: &mut Vec<CheckRe
             message: message.to_owned(),
             file: Some(path.display().to_string()),
             line: Some(line),
+            inventory: false,
         });
     }
 }
@@ -92,7 +95,8 @@ pub fn check_file_exists_at_root(
             message: "Found at project root".to_owned(),
             file: Some(file_path.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         results.push(CheckResult {
             id: check_id.to_owned(),
@@ -101,6 +105,7 @@ pub fn check_file_exists_at_root(
             message: format!("No {filename} found at project root"),
             file: Some(root.display().to_string()),
             line: None,
+            inventory: false,
         });
     }
 }
@@ -158,6 +163,7 @@ pub fn check_direct_fs_usage(
             ),
             file: Some(path.display().to_string()),
             line: Some(line_num),
+            inventory: false,
         });
     }
 
@@ -182,6 +188,7 @@ pub fn check_direct_fs_usage(
             message: format!("Use centralized fs module instead of direct std::fs call: {trimmed}"),
             file: Some(path.display().to_string()),
             line: Some(line_num),
+            inventory: false,
         });
     }
 }

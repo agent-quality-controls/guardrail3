@@ -15,6 +15,7 @@ pub fn check_toolchain_settings(fs: &dyn FileSystem, path: &Path, results: &mut 
                 message: format!("Failed to read: {e}"),
                 file: Some(path.display().to_string()),
                 line: None,
+                inventory: false,
             });
             return;
         }
@@ -30,6 +31,7 @@ pub fn check_toolchain_settings(fs: &dyn FileSystem, path: &Path, results: &mut 
                 message: format!("Invalid TOML: {e}"),
                 file: Some(path.display().to_string()),
                 line: None,
+                inventory: false,
             });
             return;
         }
@@ -50,16 +52,18 @@ pub fn check_toolchain_settings(fs: &dyn FileSystem, path: &Path, results: &mut 
                 message: "channel = \"stable\"".to_owned(),
                 file: Some(path.display().to_string()),
                 line: None,
-            });
+                inventory: false,
+            }.as_inventory());
         }
         Some(other) => {
             results.push(CheckResult {
                 id: "R25".to_owned(),
                 severity: Severity::Warn,
                 title: "Toolchain channel not stable".to_owned(),
-                message: format!("channel = \"{other}\", expected \"stable\""),
+                message: format!("channel = \"{other}\" but should be \"stable\". Set `channel = \"stable\"` in [toolchain] in rust-toolchain.toml."),
                 file: Some(path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
         None => {
@@ -67,9 +71,10 @@ pub fn check_toolchain_settings(fs: &dyn FileSystem, path: &Path, results: &mut 
                 id: "R25".to_owned(),
                 severity: Severity::Warn,
                 title: "Toolchain channel missing".to_owned(),
-                message: "Expected [toolchain] channel = \"stable\"".to_owned(),
+                message: "Toolchain channel not set. Add `channel = \"stable\"` to [toolchain] in rust-toolchain.toml.".to_owned(),
                 file: Some(path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
     }
@@ -93,15 +98,17 @@ pub fn check_toolchain_settings(fs: &dyn FileSystem, path: &Path, results: &mut 
                         message: format!("{expected} in components list"),
                         file: Some(path.display().to_string()),
                         line: None,
+                        inventory: false,
                     });
                 } else {
                     results.push(CheckResult {
                         id: "R25".to_owned(),
                         severity: Severity::Warn,
                         title: format!("Component {expected} missing"),
-                        message: format!("{expected} not in components list"),
+                        message: format!("`{expected}` missing from components. Add `\"{expected}\"` to `components` array in [toolchain] in rust-toolchain.toml."),
                         file: Some(path.display().to_string()),
                         line: None,
+                        inventory: false,
                     });
                 }
             }
@@ -111,9 +118,10 @@ pub fn check_toolchain_settings(fs: &dyn FileSystem, path: &Path, results: &mut 
                 id: "R25".to_owned(),
                 severity: Severity::Warn,
                 title: "No components list".to_owned(),
-                message: "Expected [toolchain] components = [\"clippy\", \"rustfmt\"]".to_owned(),
+                message: "No components list in [toolchain]. Add `components = [\"clippy\", \"rustfmt\"]` to rust-toolchain.toml.".to_owned(),
                 file: Some(path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
     }

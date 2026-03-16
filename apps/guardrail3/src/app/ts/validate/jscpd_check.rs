@@ -14,6 +14,7 @@ pub fn check_jscpd(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
             message: "No .jscpd.json found at project root".to_owned(),
             file: Some(path.display().to_string()),
             line: None,
+            inventory: false,
         });
         return;
     }
@@ -25,7 +26,8 @@ pub fn check_jscpd(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
         message: "Found at project root".to_owned(),
         file: Some(jscpd_path.display().to_string()),
         line: None,
-    });
+        inventory: false,
+    }.as_inventory());
 
     let Some(content) = fs.read_file(&jscpd_path) else {
         return;
@@ -48,7 +50,8 @@ pub fn check_jscpd(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
                     message: "threshold = 0".to_owned(),
                     file: Some(jscpd_path.display().to_string()),
                     line: None,
-                });
+                    inventory: false,
+                }.as_inventory());
             } else {
                 results.push(CheckResult {
                     id: "T20".to_owned(),
@@ -57,6 +60,7 @@ pub fn check_jscpd(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
                     message: format!("threshold = {n}, expected 0"),
                     file: Some(jscpd_path.display().to_string()),
                     line: None,
+                    inventory: false,
                 });
             }
         }
@@ -68,6 +72,7 @@ pub fn check_jscpd(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
                 message: "No threshold field in .jscpd.json".to_owned(),
                 file: Some(jscpd_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
     }
@@ -83,7 +88,8 @@ pub fn check_jscpd(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
                 message: format!("minTokens = {val} (default is 50)"),
                 file: Some(jscpd_path.display().to_string()),
                 line: None,
-            });
+                inventory: false,
+            }.as_inventory());
         }
     }
 
@@ -98,7 +104,8 @@ pub fn check_jscpd(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
                     message: p.to_owned(),
                     file: Some(jscpd_path.display().to_string()),
                     line: None,
-                });
+                    inventory: false,
+                }.as_inventory());
             }
         }
     }
@@ -133,7 +140,8 @@ pub fn check_content_import_restriction(
             message: "Content import restriction pattern found in ESLint config".to_owned(),
             file: Some(eslint_path.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         results.push(CheckResult {
             id: "T60".to_owned(),
@@ -143,6 +151,7 @@ pub fn check_content_import_restriction(
                 .to_owned(),
             file: Some(eslint_path.display().to_string()),
             line: None,
+            inventory: false,
         });
     }
 }
@@ -170,6 +179,7 @@ pub fn check_velite_config(path: &Path, results: &mut Vec<CheckResult>) {
             message: format!("Found: {}", found_path.display()),
             file: Some(found_path.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     }
 }

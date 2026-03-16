@@ -46,6 +46,7 @@ fn emit_crate_allow_result(
             message: "unused_crate_dependencies — universally exempted".to_owned(),
             file: Some(path.display().to_string()),
             line: Some(line_number),
+            inventory: false,
         });
     } else {
         // Test files are exempt from R30 (matches pre-commit hook behavior
@@ -62,6 +63,7 @@ fn emit_crate_allow_result(
             message: format!("{CRATE_ALLOW_PREFIX}{lint})] — crate-wide lint suppression banned"),
             file: Some(path.display().to_string()),
             line: Some(line_number),
+            inventory: false,
         });
     }
 }
@@ -98,6 +100,7 @@ fn check_item_level_allow_ast(
                 message: format!("{lint} — {reason}"),
                 file: Some(path.display().to_string()),
                 line: Some(line_1based),
+                inventory: false,
             });
         } else {
             results.push(CheckResult {
@@ -107,6 +110,7 @@ fn check_item_level_allow_ast(
                 message: format!("#[allow({lint})] has no // comment justification"),
                 file: Some(path.display().to_string()),
                 line: Some(line_1based),
+                inventory: false,
             });
         }
     }
@@ -143,6 +147,7 @@ fn check_garde_skip_ast(
                 message: format!("garde(skip) — {reason}"),
                 file: Some(path.display().to_string()),
                 line: Some(line_1based),
+                inventory: false,
             });
         } else {
             results.push(CheckResult {
@@ -152,6 +157,7 @@ fn check_garde_skip_ast(
                 message: "garde(skip) has no // comment justification".to_owned(),
                 file: Some(path.display().to_string()),
                 line: Some(line_1based),
+                inventory: false,
             });
         }
     }
@@ -185,6 +191,7 @@ pub fn check_exception_comments(
                     message: line.trim().to_owned(),
                     file: Some(path.display().to_string()),
                     line: Some(line_number),
+                    inventory: false,
                 });
             }
         }
@@ -218,6 +225,7 @@ fn check_cfg_attr_allow_ast(
             message,
             file: Some(path.display().to_string()),
             line: Some(line_1based),
+            inventory: false,
         });
     }
 }

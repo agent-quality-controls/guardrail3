@@ -17,6 +17,7 @@ pub fn check_npmrc(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
             message: "No .npmrc found at project root".to_owned(),
             file: Some(path.display().to_string()),
             line: None,
+            inventory: false,
         });
         return;
     }
@@ -28,7 +29,8 @@ pub fn check_npmrc(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
         message: "Found at project root".to_owned(),
         file: Some(npmrc_path.display().to_string()),
         line: None,
-    });
+        inventory: false,
+    }.as_inventory());
 
     let Some(content) = fs.read_file(&npmrc_path) else {
         return;
@@ -84,6 +86,7 @@ pub fn check_npmrc(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
                     message: format!("Expected \"{expected_val}\", got \"{val}\""),
                     file: Some(npmrc_path.display().to_string()),
                     line: None,
+                    inventory: false,
                 });
             }
             None => {
@@ -94,6 +97,7 @@ pub fn check_npmrc(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
                     message: format!("Expected {key}={expected_val}"),
                     file: Some(npmrc_path.display().to_string()),
                     line: None,
+                    inventory: false,
                 });
             }
         }
@@ -109,6 +113,7 @@ pub fn check_npmrc(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
                 message: format!("{key}={val}"),
                 file: Some(npmrc_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
     }

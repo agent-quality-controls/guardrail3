@@ -56,9 +56,10 @@ pub fn check(
     results
 }
 
-#[allow(clippy::case_sensitive_file_extension_comparisons)] // reason: only checking .ts/.tsx/.mjs files
 fn is_ts_file(path: &str) -> bool {
-    path.ends_with(".ts") || path.ends_with(".tsx") || path.ends_with(".mjs")
+    Path::new(path)
+        .extension()
+        .is_some_and(|e| e == "ts" || e == "tsx" || e == "mjs")
 }
 
 /// Check if a walkdir entry is a directory that should be excluded from TypeScript source scanning.
@@ -150,6 +151,7 @@ fn check_process_env_ast(
             message,
             file: Some(path.display().to_string()),
             line: Some(line_number),
+            inventory: false,
         });
     }
 }
@@ -183,6 +185,7 @@ fn check_any_types_ast(
             message: trimmed.to_owned(),
             file: Some(path.display().to_string()),
             line: Some(line_number),
+            inventory: false,
         });
     }
 }
@@ -205,6 +208,7 @@ pub fn check_file_length(path: &Path, content: &str, results: &mut Vec<CheckResu
             message: format!("{effective_lines} effective lines (max 300)"),
             file: Some(path.display().to_string()),
             line: None,
+            inventory: false,
         });
     } else if effective_lines > 250 {
         results.push(CheckResult {
@@ -214,6 +218,7 @@ pub fn check_file_length(path: &Path, content: &str, results: &mut Vec<CheckResu
             message: format!("{effective_lines} effective lines (warn at 300)"),
             file: Some(path.display().to_string()),
             line: None,
+            inventory: false,
         });
     }
 }
@@ -237,7 +242,8 @@ pub fn check_comment_pattern(
                 message: line.trim().to_owned(),
                 file: Some(path.display().to_string()),
                 line: Some(line_number),
-            });
+                inventory: false,
+            }.as_inventory());
         }
     }
 }
@@ -282,6 +288,7 @@ fn check_banned_in_node_modules(fs: &dyn FileSystem, path: &Path, results: &mut 
                 message: format!("{dep} found in node_modules (transitive dependency?)"),
                 file: Some(dep_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
     }
@@ -297,6 +304,7 @@ fn check_banned_in_node_modules(fs: &dyn FileSystem, path: &Path, results: &mut 
                 message: format!("{name} found in node_modules"),
                 file: Some(entry.path().display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
     }

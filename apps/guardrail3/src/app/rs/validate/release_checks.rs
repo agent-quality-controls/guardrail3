@@ -128,6 +128,7 @@ pub fn check(
         ),
         file: None,
         line: None,
+        inventory: false,
     });
 
     // Repo-level checks

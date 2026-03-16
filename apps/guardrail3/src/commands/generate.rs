@@ -5,6 +5,9 @@ use crate::cli::GenerateArgs;
 use crate::domain::config;
 use crate::domain::modules::{canonical, clippy, deny, release};
 
+/// A (`relative_path`, `content`) pair for a generated file.
+type GeneratedPair = (String, String);
+
 /// Load guardrail3.toml configuration from a project path.
 #[allow(clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI tool — config parse errors reported to stderr; guardrail3 config parsing — no garde validation needed for own config
 fn load_config(path: &Path) -> Option<config::types::GuardrailConfig> {
@@ -484,8 +487,7 @@ fn build_deny_for_profile(
 }
 
 /// Generate expected file contents without writing -- used by check and diff.
-#[allow(clippy::type_complexity)] // reason: legitimate complex type
-pub fn generate_expected(project_path: &Path) -> Option<Vec<(String, String)>> {
+pub fn generate_expected(project_path: &Path) -> Option<Vec<GeneratedPair>> {
     let cfg = load_config(project_path)?;
     let profile = cfg
         .profile

@@ -9,7 +9,9 @@ use super::code_quality_checks;
 use super::structure_checks;
 use crate::ports::outbound::FileSystem;
 
-#[allow(clippy::case_sensitive_file_extension_comparisons)] // reason: only checking .rs files
+/// A line number (0-based) paired with its trimmed content.
+pub type NumberedLine = (usize, String);
+
 pub fn check(
     fs: &dyn FileSystem,
     workspace_root: &Path,
@@ -20,7 +22,7 @@ pub fn check(
     let rs_files: Vec<String> = match scoped_files {
         Some(files) => files
             .iter()
-            .filter(|f| f.ends_with(".rs"))
+            .filter(|f| Path::new(f).extension().is_some_and(|e| e == "rs"))
             .cloned()
             .collect(),
         None => collect_rs_files(workspace_root),
@@ -124,8 +126,7 @@ pub fn is_test_path(path_str: &str) -> bool {
 /// Track whether we are inside a block comment (`/* ... */`).
 /// Returns a filtered list of (`line_num`, `trimmed_line`) pairs that are NOT inside
 /// block comments and NOT single-line comments.
-#[allow(clippy::type_complexity)] // reason: legitimate complex type
-pub fn filter_non_comment_lines(content: &str) -> Vec<(usize, String)> {
+pub fn filter_non_comment_lines(content: &str) -> Vec<NumberedLine> {
     let mut result = Vec::new();
     let mut in_block_comment = false;
     #[allow(clippy::string_slice)] // reason: block comment parsing needs ASCII slicing

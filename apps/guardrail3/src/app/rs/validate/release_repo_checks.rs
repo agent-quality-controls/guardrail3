@@ -68,16 +68,18 @@ pub fn check_license_file(workspace_root: &Path, results: &mut Vec<CheckResult>)
             message: "Found at repo root".to_owned(),
             file: Some(workspace_root.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         results.push(CheckResult {
             id: "R-REL-01".to_owned(),
             severity: Severity::Error,
             title: "LICENSE file missing".to_owned(),
-            message: "No LICENSE, LICENSE-MIT, LICENSE-APACHE, or LICENSE.md at repo root"
+            message: "No LICENSE file at repo root. Create `LICENSE` (or `LICENSE-MIT`, `LICENSE-APACHE`) with your license text."
                 .to_owned(),
             file: Some(workspace_root.display().to_string()),
             line: None,
+            inventory: false,
         });
     }
 }
@@ -100,6 +102,7 @@ pub fn check_release_plz_toml(
             message: "No release-plz.toml at repo root".to_owned(),
             file: Some(workspace_root.display().to_string()),
             line: None,
+            inventory: false,
         });
         return;
     }
@@ -111,7 +114,8 @@ pub fn check_release_plz_toml(
         message: "Found at repo root".to_owned(),
         file: Some(plz_path.display().to_string()),
         line: None,
-    });
+        inventory: false,
+    }.as_inventory());
 
     // R-REL-03: validate content
     let Some(content) = fs.read_file(&plz_path) else {
@@ -122,6 +126,7 @@ pub fn check_release_plz_toml(
             message: "Could not read file".to_owned(),
             file: Some(plz_path.display().to_string()),
             line: None,
+            inventory: false,
         });
         return;
     };
@@ -136,6 +141,7 @@ pub fn check_release_plz_toml(
                 message: format!("Parse error: {e}"),
                 file: Some(plz_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
             return;
         }
@@ -150,6 +156,7 @@ pub fn check_release_plz_toml(
             message: "No [workspace] section found".to_owned(),
             file: Some(plz_path.display().to_string()),
             line: None,
+            inventory: false,
         });
         return;
     }
@@ -180,7 +187,8 @@ pub fn check_release_plz_toml(
             message: "All publishable crates have [[package]] entries".to_owned(),
             file: Some(plz_path.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         for name in &missing {
             results.push(CheckResult {
@@ -190,6 +198,7 @@ pub fn check_release_plz_toml(
                 message: format!("Publishable crate \"{name}\" has no [[package]] entry"),
                 file: Some(plz_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
     }
@@ -266,7 +275,8 @@ pub fn check_workflow_contains(
             message: found_msg.to_owned(),
             file: None,
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         results.push(CheckResult {
             id: check_id.to_owned(),
@@ -275,6 +285,7 @@ pub fn check_workflow_contains(
             message: missing_msg.to_owned(),
             file: None,
             line: None,
+            inventory: false,
         });
     }
 }
@@ -297,7 +308,8 @@ pub fn check_tool_installed(
             message: format!("{tool_name} found on PATH"),
             file: None,
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         results.push(CheckResult {
             id: check_id.to_owned(),
@@ -306,6 +318,7 @@ pub fn check_tool_installed(
             message: format!("Install with: {install_cmd}"),
             file: None,
             line: None,
+            inventory: false,
         });
     }
 }

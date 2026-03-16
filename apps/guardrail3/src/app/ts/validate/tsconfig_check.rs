@@ -7,7 +7,6 @@ use crate::ports::outbound::FileSystem;
 type TsConfigBool = (&'static str, &'static str);
 
 #[allow(clippy::too_many_lines, clippy::disallowed_methods)] // reason: comprehensive tsconfig validation; guardrail3 JSON config inspection
-#[allow(clippy::or_fun_call)] // reason: map_or with function call is intentional for display
 pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResult>) {
     let tsconfig_path = path.join("tsconfig.base.json");
     let tsconfig_path = if tsconfig_path.exists() {
@@ -24,6 +23,7 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
                 message: "No tsconfig.base.json or tsconfig.json found".to_owned(),
                 file: Some(path.display().to_string()),
                 line: None,
+                inventory: false,
             });
             return;
         }
@@ -36,6 +36,7 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
         message: format!("Found: {}", tsconfig_path.display()),
         file: Some(tsconfig_path.display().to_string()),
         line: None,
+        inventory: false,
     });
 
     let Some(content) = fs.read_file(&tsconfig_path) else {
@@ -52,6 +53,7 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
                 message: format!("Invalid JSON: {e}"),
                 file: Some(tsconfig_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
             return;
         }
@@ -97,7 +99,8 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
                     message: format!("{key} is enabled"),
                     file: Some(tsconfig_path.display().to_string()),
                     line: None,
-                });
+                    inventory: false,
+                }.as_inventory());
             }
             Some(false) => {
                 results.push(CheckResult {
@@ -107,6 +110,7 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
                     message: format!("{key} should be true"),
                     file: Some(tsconfig_path.display().to_string()),
                     line: None,
+                    inventory: false,
                 });
             }
             None => {
@@ -117,6 +121,7 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
                     message: format!("{key} not set in compilerOptions"),
                     file: Some(tsconfig_path.display().to_string()),
                     line: None,
+                    inventory: false,
                 });
             }
         }
@@ -136,7 +141,8 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
                     message: format!("{key} is enabled"),
                     file: Some(tsconfig_path.display().to_string()),
                     line: None,
-                });
+                    inventory: false,
+                }.as_inventory());
             }
             _ => {
                 results.push(CheckResult {
@@ -146,6 +152,7 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
                     message: format!("{key} should be true"),
                     file: Some(tsconfig_path.display().to_string()),
                     line: None,
+                    inventory: false,
                 });
             }
         }
@@ -166,7 +173,8 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
                     message: format!("{key} is enabled"),
                     file: Some(tsconfig_path.display().to_string()),
                     line: None,
-                });
+                    inventory: false,
+                }.as_inventory());
             }
             Some(false) => {
                 results.push(CheckResult {
@@ -176,6 +184,7 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
                     message: format!("{key} should be true"),
                     file: Some(tsconfig_path.display().to_string()),
                     line: None,
+                    inventory: false,
                 });
             }
             None => {
@@ -186,6 +195,7 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
                     message: format!("{key} not set in compilerOptions"),
                     file: Some(tsconfig_path.display().to_string()),
                     line: None,
+                    inventory: false,
                 });
             }
         }
@@ -206,7 +216,8 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
                     message: format!("{key} is correctly set to false"),
                     file: Some(tsconfig_path.display().to_string()),
                     line: None,
-                });
+                    inventory: false,
+                }.as_inventory());
             }
             Some(true) => {
                 results.push(CheckResult {
@@ -216,6 +227,7 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
                     message: format!("{key} should be false"),
                     file: Some(tsconfig_path.display().to_string()),
                     line: None,
+                    inventory: false,
                 });
             }
             None => {
@@ -226,6 +238,7 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
                     message: format!("{key} not set in compilerOptions (should be false)"),
                     file: Some(tsconfig_path.display().to_string()),
                     line: None,
+                    inventory: false,
                 });
             }
         }
@@ -282,10 +295,11 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
                     message: format!(
                         "{key} = {}",
                         co.get(key)
-                            .map_or("?".to_owned(), std::string::ToString::to_string)
+                            .map_or_else(|| "?".to_owned(), std::string::ToString::to_string)
                     ),
                     file: Some(tsconfig_path.display().to_string()),
                     line: None,
+                    inventory: false,
                 });
             }
         }

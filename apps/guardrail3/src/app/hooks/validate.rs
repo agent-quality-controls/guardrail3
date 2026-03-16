@@ -41,13 +41,13 @@ pub fn run(
     report
 }
 
-#[allow(clippy::case_sensitive_file_extension_comparisons)] // reason: only checking .json files
 fn has_railpack_files(fs: &dyn FileSystem, path: &Path) -> bool {
     let entries = fs.list_dir(path);
     for entry in entries {
         if let Some(name) = entry.file_name().to_str() {
-            #[allow(clippy::case_sensitive_file_extension_comparisons)] // reason: .json check
-            if name.starts_with("railpack-") && name.ends_with(".json") {
+            if name.starts_with("railpack-")
+                && Path::new(name).extension().is_some_and(|e| e == "json")
+            {
                 return true;
             }
         }

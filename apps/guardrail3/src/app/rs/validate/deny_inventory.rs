@@ -45,6 +45,7 @@ pub fn check_skip_entries(table: &toml::Value, file_path: &Path, results: &mut V
                 message,
                 file: Some(file_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
     }
@@ -69,6 +70,7 @@ pub fn check_advisory_ignores(
                 message: id.to_owned(),
                 file: Some(file_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
     }

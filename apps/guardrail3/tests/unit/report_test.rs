@@ -15,6 +15,7 @@ fn error_count_only_counts_errors() {
                 message: "m".to_owned(),
                 file: None,
                 line: None,
+                inventory: false,
             },
             CheckResult {
                 id: "R2".to_owned(),
@@ -23,6 +24,7 @@ fn error_count_only_counts_errors() {
                 message: "m".to_owned(),
                 file: None,
                 line: None,
+                inventory: false,
             },
             CheckResult {
                 id: "R3".to_owned(),
@@ -31,6 +33,7 @@ fn error_count_only_counts_errors() {
                 message: "m".to_owned(),
                 file: None,
                 line: None,
+                inventory: false,
             },
         ],
     });
@@ -51,6 +54,7 @@ fn counts_across_multiple_sections() {
             message: "m".to_owned(),
             file: None,
             line: None,
+            inventory: false,
         }],
     });
     report.add_section(Section {
@@ -62,6 +66,7 @@ fn counts_across_multiple_sections() {
             message: "m".to_owned(),
             file: None,
             line: None,
+            inventory: false,
         }],
     });
     assert_eq!(

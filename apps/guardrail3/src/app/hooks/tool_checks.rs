@@ -21,6 +21,7 @@ pub fn check_duplication_tools(
             message: "Rust project should use cargo-dupes for copy-paste detection".to_owned(),
             file: Some(file_path.display().to_string()),
             line: None,
+            inventory: false,
         });
     }
 
@@ -32,6 +33,7 @@ pub fn check_duplication_tools(
             message: "TypeScript project should use jscpd for copy-paste detection".to_owned(),
             file: Some(file_path.display().to_string()),
             line: None,
+            inventory: false,
         });
     }
 
@@ -45,6 +47,7 @@ pub fn check_duplication_tools(
                     .to_owned(),
             file: Some(file_path.display().to_string()),
             line: None,
+            inventory: false,
         });
     }
 
@@ -57,6 +60,7 @@ pub fn check_duplication_tools(
                 .to_owned(),
             file: Some(file_path.display().to_string()),
             line: None,
+            inventory: false,
         });
     }
 
@@ -68,7 +72,8 @@ pub fn check_duplication_tools(
             message: "Rust copy-paste detection using cargo-dupes".to_owned(),
             file: Some(file_path.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     }
 
     if has_typescript && has_jscpd {
@@ -79,7 +84,8 @@ pub fn check_duplication_tools(
             message: "TypeScript copy-paste detection using jscpd".to_owned(),
             file: Some(file_path.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     }
 }
 
@@ -99,6 +105,7 @@ pub fn check_required_tools(tc: &dyn ToolChecker, results: &mut Vec<CheckResult>
                 message: "Found on PATH".to_owned(),
                 file: None,
                 line: None,
+                inventory: false,
             });
         } else {
             results.push(CheckResult {
@@ -108,6 +115,7 @@ pub fn check_required_tools(tc: &dyn ToolChecker, results: &mut Vec<CheckResult>
                 message: format!("{tool} not found on PATH"),
                 file: None,
                 line: None,
+                inventory: false,
             });
         }
     }

@@ -46,6 +46,7 @@ pub fn check_dependency_allowlist(
                 ),
                 file: Some(cargo_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
     }
@@ -90,6 +91,7 @@ pub fn check_library_has_allowlist(
             ),
             file: None,
             line: None,
+            inventory: false,
         });
     }
 }

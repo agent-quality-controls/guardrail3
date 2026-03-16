@@ -21,7 +21,8 @@ pub fn check_publish_dry_run(
                 message: "cargo publish --dry-run succeeded".to_owned(),
                 file: Some(krate.cargo_toml_path.display().to_string()),
                 line: None,
-            });
+                inventory: false,
+            }.as_inventory());
         }
         Some(stderr) => {
             results.push(CheckResult {
@@ -34,6 +35,7 @@ pub fn check_publish_dry_run(
                 ),
                 file: Some(krate.cargo_toml_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
         None => {
@@ -44,6 +46,7 @@ pub fn check_publish_dry_run(
                 message: "Could not run cargo publish --dry-run".to_owned(),
                 file: Some(krate.cargo_toml_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
     }
@@ -84,7 +87,8 @@ pub fn check_path_deps(
             message: "No path dependencies to non-publishable crates".to_owned(),
             file: file.map(std::borrow::ToOwned::to_owned),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         for bad in &bad_deps {
             results.push(CheckResult {
@@ -94,6 +98,7 @@ pub fn check_path_deps(
                 message: format!("Depends on {bad} which is not publishable"),
                 file: file.map(std::borrow::ToOwned::to_owned),
                 line: None,
+                inventory: false,
             });
         }
     }
@@ -134,6 +139,7 @@ pub fn check_version_consistency(
                 ),
                 file: file.map(std::borrow::ToOwned::to_owned),
                 line: None,
+                inventory: false,
             });
         }
     }
@@ -234,6 +240,7 @@ pub fn check_keywords(
         message,
         file: file.map(std::borrow::ToOwned::to_owned),
         line: None,
+        inventory: false,
     });
 }
 
@@ -273,6 +280,7 @@ pub fn check_categories(
         },
         file: file.map(std::borrow::ToOwned::to_owned),
         line: None,
+        inventory: false,
     });
 }
 

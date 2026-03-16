@@ -28,6 +28,7 @@ pub fn check_file_length(
             message: format!("{effective_lines} effective lines (max 500)"),
             file: Some(path.display().to_string()),
             line: None,
+            inventory: false,
         });
     }
 }
@@ -52,6 +53,7 @@ pub fn check_use_count(path: &Path, content: &str, is_test: bool, results: &mut 
             message: format!("{use_count} use statements (max 20)"),
             file: Some(path.display().to_string()),
             line: None,
+            inventory: false,
         });
     } else if use_count > 15 {
         results.push(CheckResult {
@@ -61,6 +63,7 @@ pub fn check_use_count(path: &Path, content: &str, is_test: bool, results: &mut 
             message: format!("{use_count} use statements (warn at 15, max 20)"),
             file: Some(path.display().to_string()),
             line: None,
+            inventory: false,
         });
     }
 }
@@ -84,6 +87,7 @@ pub fn check_unsafe(path: &Path, content: &str, results: &mut Vec<CheckResult>) 
             message: message.to_owned(),
             file: Some(path.display().to_string()),
             line: Some(line),
+            inventory: false,
         });
     }
 }
@@ -123,7 +127,8 @@ pub fn check_unsafe_code_forbid(
                 message: "unsafe_code is forbidden (cannot be overridden per-crate)".to_owned(),
                 file: Some(cargo_path.display().to_string()),
                 line: None,
-            });
+                inventory: false,
+            }.as_inventory());
         }
         Some(toml::Value::String(s)) if s == "deny" => {
             results.push(CheckResult {
@@ -134,6 +139,7 @@ pub fn check_unsafe_code_forbid(
                     .to_owned(),
                 file: Some(cargo_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
         _ => {

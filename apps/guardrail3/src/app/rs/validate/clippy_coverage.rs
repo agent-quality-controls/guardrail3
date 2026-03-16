@@ -68,6 +68,7 @@ pub fn check(
             message: "clippy.toml not found".to_owned(),
             file: Some(workspace_root.display().to_string()),
             line: None,
+            inventory: false,
         });
         return results;
     }
@@ -82,6 +83,7 @@ pub fn check(
                 message: format!("Failed to read: {e}"),
                 file: Some(clippy_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
             return results;
         }
@@ -97,6 +99,7 @@ pub fn check(
                 message: format!("Invalid TOML: {e}"),
                 file: Some(clippy_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
             return results;
         }
@@ -153,6 +156,7 @@ fn check_ban_list(
             message: format!("{key} array missing from clippy.toml"),
             file: Some(file_path.display().to_string()),
             line: None,
+            inventory: false,
         });
         return;
     };
@@ -180,7 +184,8 @@ fn check_ban_list(
                 message: exp.clone(),
                 file: Some(file_path.display().to_string()),
                 line: None,
-            });
+                inventory: false,
+            }.as_inventory());
         } else {
             results.push(CheckResult {
                 id: missing_id.to_owned(),
@@ -189,6 +194,7 @@ fn check_ban_list(
                 message: format!("Expected ban for {exp}"),
                 file: Some(file_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
     }
@@ -203,7 +209,8 @@ fn check_ban_list(
                 message: format!("extra ban: {found}"),
                 file: Some(file_path.display().to_string()),
                 line: None,
-            });
+                inventory: false,
+            }.as_inventory());
         }
     }
 }

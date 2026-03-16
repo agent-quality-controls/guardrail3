@@ -18,6 +18,7 @@ pub fn check_ban_list(
             message: "deny.toml has no [bans] section".to_owned(),
             file: Some(file_path.display().to_string()),
             line: None,
+            inventory: false,
         });
         return;
     };
@@ -35,6 +36,7 @@ pub fn check_ban_list(
                 message: format!("Expected \"deny\", got \"{other}\""),
                 file: Some(file_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
         None => {
@@ -45,6 +47,7 @@ pub fn check_ban_list(
                 message: "Expected multiple-versions = \"deny\"".to_owned(),
                 file: Some(file_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
     }
@@ -62,6 +65,7 @@ pub fn check_ban_list(
                 message: format!("highlight = \"{other}\" (expected \"all\")"),
                 file: Some(file_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
         None => {
@@ -72,6 +76,7 @@ pub fn check_ban_list(
                 message: "Expected highlight = \"all\"".to_owned(),
                 file: Some(file_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
     }
@@ -84,6 +89,7 @@ pub fn check_ban_list(
             message: "[bans].deny array missing".to_owned(),
             file: Some(file_path.display().to_string()),
             line: None,
+            inventory: false,
         });
         return;
     };
@@ -111,6 +117,7 @@ pub fn check_ban_list(
                 message: format!("Expected ban for {exp}"),
                 file: Some(file_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
     }
@@ -124,6 +131,7 @@ pub fn check_ban_list(
                 message: format!("extra ban: {found}"),
                 file: Some(file_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
     }
@@ -148,6 +156,7 @@ pub fn check_tokio_feature_ban(
             message: "No feature bans configured".to_owned(),
             file: Some(file_path.display().to_string()),
             line: None,
+            inventory: false,
         });
         return;
     };
@@ -184,7 +193,8 @@ pub fn check_tokio_feature_ban(
             message: "[[bans.features]] denies tokio/full".to_owned(),
             file: Some(file_path.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         results.push(CheckResult {
             id: "R17".to_owned(),
@@ -193,6 +203,7 @@ pub fn check_tokio_feature_ban(
             message: "Expected [[bans.features]] to deny tokio/full".to_owned(),
             file: Some(file_path.display().to_string()),
             line: None,
+            inventory: false,
         });
     }
 
@@ -205,6 +216,7 @@ pub fn check_tokio_feature_ban(
             message: format!("Feature ban for: {extra}"),
             file: Some(file_path.display().to_string()),
             line: None,
+            inventory: false,
         });
     }
 }

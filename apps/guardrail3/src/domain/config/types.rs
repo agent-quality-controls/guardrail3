@@ -2,8 +2,10 @@ use std::collections::BTreeMap;
 
 use serde::Deserialize;
 
+/// Type alias for crate configuration map.
+type CrateMap = BTreeMap<String, CrateConfig>;
+
 #[derive(Debug, Deserialize, garde::Validate)]
-#[allow(dead_code)] // reason: fields deserialized from guardrail3.toml, used by generate features
 pub struct GuardrailConfig {
     #[garde(skip)] // reason: guardrail3's own config — validated by TOML schema, not runtime garde
     pub version: Option<String>,
@@ -26,15 +28,13 @@ pub struct ProfileConfig {
 }
 
 #[derive(Debug, Deserialize, garde::Validate)]
-#[allow(dead_code)] // reason: fields deserialized from guardrail3.toml, used by generate features
 pub struct RustConfig {
     #[garde(skip)] // reason: validated at use site
     pub workspace_root: Option<String>,
     #[garde(skip)] // reason: validated at use site
     pub workspaces: Option<Vec<String>>,
-    #[allow(clippy::type_complexity)] // reason: legitimate complex type
     #[garde(skip)] // reason: validated at use site
-    pub crates: Option<BTreeMap<String, CrateConfig>>,
+    pub crates: Option<CrateMap>,
 }
 
 #[derive(Debug, Deserialize, garde::Validate)]
@@ -48,7 +48,6 @@ pub struct CrateConfig {
 }
 
 #[derive(Debug, Deserialize, garde::Validate)]
-#[allow(dead_code)] // reason: fields deserialized from guardrail3.toml, used by generate features
 pub struct TypeScriptConfig {
     #[garde(skip)] // reason: validated at use site
     pub apps: Option<Vec<String>>,
@@ -91,7 +90,6 @@ pub struct LocalConfig {
 }
 
 #[derive(Debug, Deserialize, garde::Validate)]
-#[allow(dead_code)] // reason: fields deserialized from guardrail3.toml, used by generate features
 pub struct HooksConfig {
     #[garde(skip)] // reason: validated at use site
     pub extra_dir: Option<String>,

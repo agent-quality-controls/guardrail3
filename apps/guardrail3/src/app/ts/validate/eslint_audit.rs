@@ -30,7 +30,8 @@ pub fn check(fs: &dyn FileSystem, path: &Path) -> Vec<CheckResult> {
             message: "Zone definitions found in ESLint config".to_owned(),
             file: Some(eslint_path.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         results.push(CheckResult {
             id: "T36".to_owned(),
@@ -39,6 +40,7 @@ pub fn check(fs: &dyn FileSystem, path: &Path) -> Vec<CheckResult> {
             message: "No boundary zone definitions found in ESLint config".to_owned(),
             file: Some(eslint_path.display().to_string()),
             line: None,
+            inventory: false,
         });
     }
 
@@ -51,7 +53,8 @@ pub fn check(fs: &dyn FileSystem, path: &Path) -> Vec<CheckResult> {
             message: "boundaries/element-types found".to_owned(),
             file: Some(eslint_path.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         results.push(CheckResult {
             id: "T37".to_owned(),
@@ -60,6 +63,7 @@ pub fn check(fs: &dyn FileSystem, path: &Path) -> Vec<CheckResult> {
             message: "boundaries/element-types not found in ESLint config".to_owned(),
             file: Some(eslint_path.display().to_string()),
             line: None,
+            inventory: false,
         });
     }
 
@@ -72,7 +76,8 @@ pub fn check(fs: &dyn FileSystem, path: &Path) -> Vec<CheckResult> {
             message: "boundaries/entry-point found".to_owned(),
             file: Some(eslint_path.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         results.push(CheckResult {
             id: "T38".to_owned(),
@@ -81,6 +86,7 @@ pub fn check(fs: &dyn FileSystem, path: &Path) -> Vec<CheckResult> {
             message: "boundaries/entry-point not found in ESLint config".to_owned(),
             file: Some(eslint_path.display().to_string()),
             line: None,
+            inventory: false,
         });
     }
 
@@ -93,7 +99,8 @@ pub fn check(fs: &dyn FileSystem, path: &Path) -> Vec<CheckResult> {
             message: "boundaries/external found".to_owned(),
             file: Some(eslint_path.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         results.push(CheckResult {
             id: "T39".to_owned(),
@@ -102,6 +109,7 @@ pub fn check(fs: &dyn FileSystem, path: &Path) -> Vec<CheckResult> {
             message: "boundaries/external not found in ESLint config".to_owned(),
             file: Some(eslint_path.display().to_string()),
             line: None,
+            inventory: false,
         });
     }
 

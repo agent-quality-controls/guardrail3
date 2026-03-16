@@ -14,6 +14,7 @@ pub fn check_deployment(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Chec
             message: "Expected railpack-*.json in project root".to_owned(),
             file: Some(path.display().to_string()),
             line: None,
+            inventory: false,
         });
     } else {
         results.push(CheckResult {
@@ -27,6 +28,7 @@ pub fn check_deployment(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Chec
                 .join(", "),
             file: Some(path.display().to_string()),
             line: None,
+            inventory: false,
         });
 
         // D2: Check provider field in each config
@@ -42,12 +44,11 @@ pub fn check_deployment(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Chec
     check_tailwind_deps(fs, path, results);
 }
 
-#[allow(clippy::case_sensitive_file_extension_comparisons)] // reason: only checking .json files which are always lowercase
 fn find_railpack_configs(fs: &dyn FileSystem, path: &Path) -> Vec<std::path::PathBuf> {
     let mut configs = Vec::new();
     for entry in fs.list_dir(path) {
         if let Some(name) = entry.file_name().to_str() {
-            if name.starts_with("railpack-") && name.ends_with(".json") {
+            if name.starts_with("railpack-") && Path::new(name).extension().is_some_and(|e| e == "json") {
                 configs.push(entry.path());
             }
         }
@@ -72,6 +73,7 @@ fn check_railpack_provider(
                 message: format!("{e}"),
                 file: Some(config_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
             return;
         }
@@ -87,6 +89,7 @@ fn check_railpack_provider(
                 message: format!("{e}"),
                 file: Some(config_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
             return;
         }
@@ -110,6 +113,7 @@ fn check_railpack_provider(
                 message: "Provider field present".to_owned(),
                 file: Some(config_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
         None => {
@@ -130,6 +134,7 @@ fn check_railpack_provider(
                 },
                 file: Some(config_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
     }
@@ -180,6 +185,7 @@ fn check_nextjs_configs(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Chec
                 message: "output: \"standalone\" found".to_owned(),
                 file: Some(config_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         } else {
             results.push(CheckResult {
@@ -189,6 +195,7 @@ fn check_nextjs_configs(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Chec
                 message: "Next.js needs output: \"standalone\" for Railway deployment".to_owned(),
                 file: Some(config_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
 
@@ -201,6 +208,7 @@ fn check_nextjs_configs(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Chec
                 message: "outputFileTracingRoot found".to_owned(),
                 file: Some(config_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         } else {
             results.push(CheckResult {
@@ -210,6 +218,7 @@ fn check_nextjs_configs(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Chec
                 message: "Monorepo needs outputFileTracingRoot pointing to repo root".to_owned(),
                 file: Some(config_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
     }
@@ -260,6 +269,7 @@ fn check_tailwind_deps(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Check
                 message: "Railway skips devDeps — move tailwindcss to dependencies".to_owned(),
                 file: Some(pkg_json_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         } else if in_deps {
             results.push(CheckResult {
@@ -269,6 +279,7 @@ fn check_tailwind_deps(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Check
                 message: "Correctly in dependencies (not devDependencies)".to_owned(),
                 file: Some(pkg_json_path.display().to_string()),
                 line: None,
+                inventory: false,
             });
         }
         // If neither, it's not a Tailwind app — skip silently

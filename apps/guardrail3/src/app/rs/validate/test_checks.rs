@@ -59,7 +59,8 @@ pub fn check_mutants_toml(workspace_root: &Path, results: &mut Vec<CheckResult>)
             message: "Mutation testing configuration found".to_owned(),
             file: Some(mutants_path.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         results.push(CheckResult {
             id: "R-TEST-02".to_owned(),
@@ -68,6 +69,7 @@ pub fn check_mutants_toml(workspace_root: &Path, results: &mut Vec<CheckResult>)
             message: "Create .cargo/mutants.toml to configure mutation testing".to_owned(),
             file: Some(mutants_path.display().to_string()),
             line: None,
+            inventory: false,
         });
     }
 }
@@ -90,6 +92,7 @@ fn check_mutants_profile(
             message: "Cannot check for [profile.mutants] without Cargo.toml".to_owned(),
             file: None,
             line: None,
+            inventory: false,
         });
         return;
     };
@@ -102,7 +105,8 @@ fn check_mutants_profile(
             message: "Optimized build profile for mutation testing found in Cargo.toml".to_owned(),
             file: Some(cargo_path.display().to_string()),
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         results.push(CheckResult {
             id: "R-TEST-03".to_owned(),
@@ -111,6 +115,7 @@ fn check_mutants_profile(
             message: "Add [profile.mutants] to Cargo.toml for faster mutation testing".to_owned(),
             file: Some(cargo_path.display().to_string()),
             line: None,
+            inventory: false,
         });
     }
 }
@@ -161,15 +166,17 @@ fn check_tests_exist(fs: &dyn FileSystem, workspace_root: &Path, results: &mut V
             message: "At least one #[test] or #[tokio::test] found".to_owned(),
             file: None,
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         results.push(CheckResult {
             id: "R-TEST-04".to_owned(),
             severity: Severity::Error,
             title: "No tests found".to_owned(),
-            message: "No .rs files contain #[test] or #[tokio::test]".to_owned(),
+            message: "No test functions found. Add `#[test]` or `#[tokio::test]` functions in a `tests/` directory.".to_owned(),
             file: None,
             line: None,
+            inventory: false,
         });
     }
 }
@@ -248,10 +255,11 @@ pub fn check_no_tests_in_src(
                 severity: Severity::Error,
                 title: "Test code in production source".to_owned(),
                 message: format!(
-                    "Test code found in production source: {relative}. Move tests to tests/ directory."
+                    "Test code found in `{relative}`. Move the `#[cfg(test)]` block and `#[test]` functions to a file in the `tests/` directory."
                 ),
                 file: Some(path_str),
                 line: None,
+                inventory: false,
             });
         }
     }

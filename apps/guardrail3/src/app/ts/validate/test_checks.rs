@@ -47,7 +47,8 @@ pub fn check_stryker_config(path: &Path, results: &mut Vec<CheckResult>) {
             message: "Mutation testing config present".to_owned(),
             file: None,
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         results.push(CheckResult {
             id: "T-TEST-01".to_owned(),
@@ -56,6 +57,7 @@ pub fn check_stryker_config(path: &Path, results: &mut Vec<CheckResult>) {
             message: "No stryker.config.json or stryker.config.mjs found — mutation testing not configured".to_owned(),
             file: None,
             line: None,
+            inventory: false,
         });
     }
 }
@@ -82,7 +84,8 @@ pub fn check_test_files_exist(path: &Path, results: &mut Vec<CheckResult>) {
             message: "At least one .test.ts/.spec.ts/.test.tsx/.spec.tsx file exists".to_owned(),
             file: None,
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         results.push(CheckResult {
             id: "T-TEST-02".to_owned(),
@@ -91,19 +94,21 @@ pub fn check_test_files_exist(path: &Path, results: &mut Vec<CheckResult>) {
             message: "No .test.ts, .spec.ts, .test.tsx, or .spec.tsx files found".to_owned(),
             file: None,
             line: None,
+            inventory: false,
         });
     }
 }
 
-#[allow(clippy::case_sensitive_file_extension_comparisons)] // reason: test file extensions are always lowercase ASCII
 fn is_test_file(name: &str) -> bool {
-    name.ends_with(".test.ts")
-        || name.ends_with(".spec.ts")
-        || name.ends_with(".test.tsx")
-        || name.ends_with(".spec.tsx")
-}
-
-/// T-TEST-03: Test runner configured.
+    let p = Path::new(name);
+    let ext_matches = p.extension().is_some_and(|e| e == "ts" || e == "tsx");
+    if !ext_matches {
+        return false;
+    }
+    let stem = p.file_stem().unwrap_or_default();
+    let stem_path = Path::new(stem);
+    stem_path.extension().is_some_and(|e| e == "test" || e == "spec")
+}/// T-TEST-03: Test runner configured.
 pub fn check_test_runner_config(path: &Path, results: &mut Vec<CheckResult>) {
     let candidates = [
         "vitest.config.ts",
@@ -122,7 +127,8 @@ pub fn check_test_runner_config(path: &Path, results: &mut Vec<CheckResult>) {
             message: "Test runner config found".to_owned(),
             file: None,
             line: None,
-        });
+            inventory: false,
+        }.as_inventory());
     } else {
         results.push(CheckResult {
             id: "T-TEST-03".to_owned(),
@@ -131,12 +137,12 @@ pub fn check_test_runner_config(path: &Path, results: &mut Vec<CheckResult>) {
             message: "No vitest.config.ts/mts or jest.config.ts/js/mjs found".to_owned(),
             file: None,
             line: None,
+            inventory: false,
         });
     }
 }
 
 /// Collect .ts and .tsx files, skipping common non-source directories.
-#[allow(clippy::case_sensitive_file_extension_comparisons)] // reason: only checking .ts/.tsx files
 fn collect_ts_tsx_files(root: &Path) -> Vec<String> {
     let mut files = Vec::new();
     for entry in WalkDir::new(root)
@@ -145,9 +151,9 @@ fn collect_ts_tsx_files(root: &Path) -> Vec<String> {
         .flatten()
     {
         if entry.file_type().is_file() {
-            let path_str = entry.path().display().to_string();
-            if path_str.ends_with(".ts") || path_str.ends_with(".tsx") {
-                files.push(path_str);
+            let ep = entry.path();
+            if ep.extension().is_some_and(|e| e == "ts" || e == "tsx") {
+                files.push(ep.display().to_string());
             }
         }
     }
@@ -159,9 +165,8 @@ fn collect_ts_tsx_files(root: &Path) -> Vec<String> {
 /// Detects `test.skip(`, `describe.skip(`, `it.skip(` without `// reason` on the same line.
 /// Uses tree-sitter AST for accurate detection (no false positives from strings/comments).
 /// Returns results for a single file's content. Testable without filesystem.
-#[allow(clippy::case_sensitive_file_extension_comparisons)] // reason: only checking .tsx extension on known TS filenames
 pub fn check_skip_without_reason_content(content: &str, filename: &str) -> Vec<CheckResult> {
-    let is_tsx = filename.ends_with(".tsx");
+    let is_tsx = Path::new(filename).extension().is_some_and(|e| e == "tsx");
     let Some(tree) = ast_helpers::parse_ts_file(content, is_tsx) else {
         return Vec::new();
     };
@@ -191,6 +196,7 @@ fn check_skip_lines_with_reason(
                 message: line_text.to_owned(),
                 file: Some(filename.to_owned()),
                 line: Some(line_number),
+                inventory: false,
             });
         } else {
             results.push(CheckResult {
@@ -200,6 +206,7 @@ fn check_skip_lines_with_reason(
                 message: format!("Add `// reason: <why>` comment: {line_text}"),
                 file: Some(filename.to_owned()),
                 line: Some(line_number),
+                inventory: false,
             });
         }
     }
@@ -213,9 +220,8 @@ fn check_skip_lines_with_reason(
 /// These should never be committed — they cause other tests to be silently skipped.
 /// Uses tree-sitter AST for accurate detection (no false positives from strings/comments).
 /// Returns results for a single file's content. Testable without filesystem.
-#[allow(clippy::case_sensitive_file_extension_comparisons)] // reason: only checking .tsx extension on known TS filenames
 pub fn check_only_in_source_content(content: &str, filename: &str) -> Vec<CheckResult> {
-    let is_tsx = filename.ends_with(".tsx");
+    let is_tsx = Path::new(filename).extension().is_some_and(|e| e == "tsx");
     let Some(tree) = ast_helpers::parse_ts_file(content, is_tsx) else {
         return Vec::new();
     };
@@ -240,6 +246,7 @@ fn check_only_lines(content: &str, filename: &str, only_lines: &[usize]) -> Vec<
             message: format!("Remove .only() before committing: {line_text}"),
             file: Some(filename.to_owned()),
             line: Some(line_number),
+            inventory: false,
         });
     }
 
