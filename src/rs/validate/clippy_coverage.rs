@@ -97,7 +97,7 @@ pub fn check(workspace_root: &Path, _profile: Option<&str>) -> Vec<CheckResult> 
         }
     };
 
-    // All profiles (service, library, monorepo) use the same expected bans.
+    // All profiles (service, library) use the same expected bans.
     // Unknown/missing profiles default to service (the most comprehensive set).
     let expected_methods = EXPECTED_METHOD_BANS;
     let expected_types = EXPECTED_TYPE_BANS;

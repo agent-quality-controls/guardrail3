@@ -284,7 +284,7 @@ echo "All pre-commit checks passed."
 /// Build the complete pre-commit script with the appropriate duplication section(s).
 /// - Rust-only (service/library without TypeScript): cargo-dupes only
 /// - TS-only (no Rust): jscpd only
-/// - Mixed (monorepo or both stacks present): both cargo-dupes and jscpd
+/// - Mixed (both stacks present): both cargo-dupes and jscpd
 pub fn build_pre_commit_script(has_rust: bool, has_typescript: bool) -> String {
     let mut script = PRE_COMMIT_BASE.to_owned();
 

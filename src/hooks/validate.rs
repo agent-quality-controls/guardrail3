@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use crate::report::types::{Report, Section};
-use crate::rs::validate::ValidateDomains;
+use crate::report::types::ValidateDomains;
 
 use super::deploy_checks;
 use super::hook_checks;

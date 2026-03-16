@@ -57,6 +57,18 @@ pub enum RsCommands {
     Validate(ValidateArgs),
     /// Generate Rust config files from guardrail3.toml
     Generate(GenerateArgs),
+    /// Initialize Rust guardrail3 configuration
+    Init {
+        /// Profile to use
+        #[arg(long, default_value = "service")]
+        profile: String,
+        /// Project path
+        #[arg(default_value = ".")]
+        path: String,
+        /// Overwrite existing files
+        #[arg(long)]
+        force: bool,
+    },
 }
 
 #[derive(Subcommand, Debug)]
@@ -65,6 +77,15 @@ pub enum TsCommands {
     Validate(ValidateArgs),
     /// Generate TypeScript config files from guardrail3.toml
     Generate(GenerateArgs),
+    /// Initialize TypeScript guardrail3 configuration
+    Init {
+        /// Project path
+        #[arg(default_value = ".")]
+        path: String,
+        /// Overwrite existing files
+        #[arg(long)]
+        force: bool,
+    },
 }
 
 #[derive(Subcommand, Debug)]

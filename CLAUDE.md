@@ -14,7 +14,7 @@ guardrail3 exists because **agents break things**. Code must be resilient to age
 
 3. **Total visibility.** The `validate` command reports EVERYTHING — not just violations, but every deviation, suppression, exception, and override. Justified items are `info`, unjustified items are `error`. The report is a complete X-ray. You decide what to act on — the tool hides nothing.
 
-4. **Modular by language.** Rust guardrails (clippy, deny, cargo lints) and TypeScript guardrails (ESLint, tsconfig, npmrc) are completely independent. A Rust-only project never sees TypeScript checks. A TS-only project never sees Rust checks. For monorepos, both run. The duplication tool is language-specific: cargo-dupes for Rust (AST-aware), jscpd for TypeScript.
+4. **Modular by language.** Rust guardrails (clippy, deny, cargo lints) and TypeScript guardrails (ESLint, tsconfig, npmrc) are completely independent. A Rust-only project never sees TypeScript checks. A TS-only project never sees Rust checks. For monorepos, run `guardrail3 rs init` and `guardrail3 ts init` separately. The duplication tool is language-specific: cargo-dupes for Rust (AST-aware), jscpd for TypeScript.
 
 5. **Centralized I/O.** All filesystem operations go through `src/fs.rs`. All other source files are banned from calling `std::fs::*` directly. This is enforced by clippy's `disallowed_methods` AND by guardrail3's own R58 source scan (belt-and-suspenders, since clippy has a known hole with aliased imports).
 
@@ -66,7 +66,8 @@ Single Rust binary (`cargo install guardrail3`) that:
 |---|---|
 | `service` | Full guardrails for Axum/tokio HTTP services. All clippy bans, all deny bans, tokio feature gating. |
 | `library` | Same as service + ban ALL I/O crates (axum, tokio, reqwest, sqlx, etc.) + global-state bans on every crate (no composition root exception). |
-| `monorepo` | Same as service for Rust side. Enables TS config generation. |
+
+For monorepos, run `guardrail3 rs init` and `guardrail3 ts init` separately — there is no dedicated monorepo profile.
 
 The `minimal` profile was removed. If you need fewer bans, use `local/` overrides to add exceptions — don't weaken the baseline.
 
@@ -195,10 +196,10 @@ Only needed for `generate`/`check`/`diff`. Not needed for `validate`.
 version = "0.1"
 
 [profile]
-name = "service"           # service | library | monorepo
+name = "service"           # service | library
 
 [rust]
-workspace_root = "."       # or "apps/backend" for monorepos
+workspace_root = "."       # or "apps/backend" for monorepos (run rs init + ts init separately)
 
 [rust.crates.api]
 layer = "composition-root" # allows LazyLock (no global-state ban)
