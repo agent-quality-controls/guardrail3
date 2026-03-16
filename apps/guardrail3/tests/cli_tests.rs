@@ -29,6 +29,17 @@ const fn project_root() -> &'static str {
     env!("CARGO_MANIFEST_DIR")
 }
 
+/// Workspace root is two directories up from the crate manifest dir (apps/guardrail3/ -> .)
+#[allow(clippy::expect_used)] // reason: test helper — panics indicate broken test infrastructure
+fn workspace_root() -> std::path::PathBuf {
+    std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .expect("parent of crate dir")
+        .parent()
+        .expect("workspace root")
+        .to_path_buf()
+}
+
 // ---- Format matching (main.rs lines 62,86,114: json arm; 87,115: md arm) ----
 
 #[test]
@@ -269,8 +280,10 @@ fn cli_validate_detects_rust_project() {
 #[allow(clippy::expect_used)] // reason: test — panics indicate broken test infrastructure
 #[allow(clippy::disallowed_methods)] // reason: test uses Command
 fn cli_check_on_self() {
+    let ws = workspace_root();
     let out = guardrail3()
-        .args(["rs", "check", project_root()])
+        .args(["rs", "check"])
+        .arg(&ws)
         .output()
         .expect("failed to run");
 
@@ -302,8 +315,10 @@ fn cli_check_on_self() {
 #[allow(clippy::expect_used)] // reason: test — panics indicate broken test infrastructure
 #[allow(clippy::disallowed_methods)] // reason: test uses Command
 fn cli_diff_on_self() {
+    let ws = workspace_root();
     let out = guardrail3()
-        .args(["rs", "diff", project_root()])
+        .args(["rs", "diff"])
+        .arg(&ws)
         .output()
         .expect("failed to run");
 

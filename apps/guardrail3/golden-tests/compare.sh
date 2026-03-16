@@ -8,7 +8,8 @@
 set -eu
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+CRATE_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+PROJECT_ROOT="$(cd "$CRATE_ROOT/../.." && pwd)"
 GOLDEN_DIR="$SCRIPT_DIR/golden"
 NORMALIZE="$SCRIPT_DIR/normalize.sh"
 GOLDEN_FILE="$GOLDEN_DIR/self-validate.json"
@@ -20,7 +21,7 @@ if [ ! -f "$GOLDEN_FILE" ]; then
 fi
 
 echo "Building guardrail3 (release)..."
-cargo build --release --manifest-path "$PROJECT_ROOT/Cargo.toml" 2>&1 | tail -1
+cargo build --release --manifest-path "$CRATE_ROOT/Cargo.toml" 2>&1 | tail -1
 
 BINARY="$PROJECT_ROOT/target/release/guardrail3"
 ACTUAL_FILE="$(mktemp)"
