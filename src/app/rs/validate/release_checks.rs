@@ -28,6 +28,11 @@ fn discover_crates(fs: &dyn FileSystem, workspace_root: &Path) -> Vec<CrateInfo>
         if entry.file_name() != "Cargo.toml" {
             continue;
         }
+        // Skip test fixture Cargo.toml files — adversarial test data
+        let entry_path_str = entry.path().display().to_string();
+        if entry_path_str.contains("tests/fixtures/") {
+            continue;
+        }
         let path = entry.path();
         let Some(content) = fs.read_file(path) else {
             continue;

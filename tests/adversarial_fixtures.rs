@@ -3,6 +3,7 @@
 //! Each test creates a minimal Rust project in a temp directory with a single
 //! fixture file, runs `guardrail3 rs validate --format json`, and asserts the
 //! expected check ID appears (or doesn't appear for clean fixtures).
+use garde as _;
 
 // Suppress unused crate dependency warnings for crates used only by the main binary
 use clap as _;
@@ -68,11 +69,7 @@ fn validate_fixture(fixture_name: &str) -> String {
 }
 
 /// Assert that the JSON output contains at least one result with the given check ID and severity.
-#[allow(
-    clippy::expect_used,
-    clippy::disallowed_methods,
-    clippy::indexing_slicing
-)] // reason: test helper — JSON parsing + indexing for assertion
+#[allow(clippy::expect_used, clippy::disallowed_methods, clippy::indexing_slicing)] // reason: test helper — JSON parsing + indexing for assertion
 fn assert_contains_check(json_output: &str, check_id: &str, severity: &str) {
     let parsed: serde_json::Value =
         serde_json::from_str(json_output).expect("guardrail3 output should be valid JSON");
@@ -100,12 +97,7 @@ fn assert_contains_check(json_output: &str, check_id: &str, severity: &str) {
 }
 
 /// Assert that the JSON output does NOT contain any result with the given check ID and severity.
-#[allow(
-    clippy::expect_used,
-    clippy::disallowed_methods,
-    clippy::indexing_slicing,
-    clippy::panic
-)] // reason: test helper — JSON parsing + indexing + panic for assertion
+#[allow(clippy::expect_used, clippy::disallowed_methods, clippy::indexing_slicing, clippy::panic)] // reason: test helper — JSON parsing + indexing + panic for assertion
 fn assert_not_contains_check(json_output: &str, check_id: &str, severity: &str) {
     let parsed: serde_json::Value =
         serde_json::from_str(json_output).expect("guardrail3 output should be valid JSON");

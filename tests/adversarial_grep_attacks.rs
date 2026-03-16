@@ -9,6 +9,7 @@
 //! - `GREP_BUG`: grep incorrectly flags a non-code pattern (false positive)
 //! - CORRECT: grep correctly flags a real violation or correctly doesn't flag
 //! - BOUNDARY: exact boundary test result (correct by specification)
+use garde as _;
 
 // Suppress unused crate dependency warnings for crates used only by the main binary
 use clap as _;

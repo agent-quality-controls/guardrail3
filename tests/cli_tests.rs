@@ -2,6 +2,7 @@
 //!
 //! These tests invoke the compiled binary and check exit codes + output
 //! to kill known surviving mutants in the CLI layer.
+use garde as _;
 
 // Suppress unused crate dependency warnings for crates used only by the main binary
 use clap as _;

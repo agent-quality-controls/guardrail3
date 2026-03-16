@@ -2,6 +2,7 @@
 //!
 //! Uses proptest to generate random inputs and verify invariants:
 //! no panics, consistent results, correct pattern detection.
+use garde as _;
 
 // Suppress unused crate dependency warnings for crates used by the lib crate
 use clap as _;
