@@ -13,7 +13,7 @@ tempfile = "3"
 toml = "0.8"
 
 [dependencies.guardrail3]
-path = ".."
+path = "../apps/guardrail3"
 
 # Prevent this from interfering with workspaces
 [workspace]

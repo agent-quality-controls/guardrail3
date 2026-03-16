@@ -4,11 +4,15 @@ version = "0.1"
 name = "service"
 
 [rust]
-workspace_root = "."
+workspace_root = "apps/guardrail3"
+
+[rust.crates.guardrail3]
+profile = "service"
+layer = "composition-root"
 
 [local]
-clippy_methods = "local/clippy-methods.toml"
-clippy_types = "local/clippy-types.toml"
-deny_bans = "local/deny-bans.toml"
-deny_skip = "local/deny-skip.toml"
-deny_feature_bans = "local/deny-feature-bans.toml"
+clippy_methods = "apps/guardrail3/local/clippy-methods.toml"
+clippy_types = "apps/guardrail3/local/clippy-types.toml"
+deny_bans = "apps/guardrail3/local/deny-bans.toml"
+deny_skip = "apps/guardrail3/local/deny-skip.toml"
+deny_feature_bans = "apps/guardrail3/local/deny-feature-bans.toml"

@@ -1,25 +1,9 @@
-[package]
-name = "guardrail3"
-version = "0.2.0"
-edition = "2024"
-rust-version = "1.85"
-description = "Composable code guardrails for Rust and TypeScript projects"
-license = "MIT"
-repository = "https://github.com/websmasher/guardrail3"
-readme = "README.md"
-keywords = ["guardrails", "linting", "clippy", "rust", "typescript"]
-categories = ["development-tools", "command-line-utilities"]
+[workspace]
+members = ["apps/guardrail3"]
+resolver = "2"
 
-[lib]
-name = "guardrail3"
-path = "src/lib.rs"
-
-[[bin]]
-name = "guardrail3"
-path = "src/main.rs"
-
-[lints]
-workspace = true
+[workspace.dependencies]
+garde = { version = "0.22", features = ["derive"] }
 
 [workspace.lints.rust]
 warnings = "deny"
@@ -74,26 +58,3 @@ single_match_else = "allow" # EXCEPTION: match sometimes clearer
 ref_option_ref = "allow" # EXCEPTION: valid in function signatures
 trivially_copy_pass_by_ref = "allow" # EXCEPTION: pedantic micro-optimization
 multiple_crate_versions = "allow" # EXCEPTION: defer to deny.toml
-
-[dependencies]
-clap = { version = "4", features = ["derive"] }
-toml = "0.8"
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-glob = "0.3"
-colored = "2"
-walkdir = "2"
-syn = { version = "2", features = ["full", "parsing", "visit"] }
-proc-macro2 = { version = "1", features = ["span-locations"] }
-tree-sitter = "0.26"
-tree-sitter-typescript = "0.23"
-garde = { version = "0.22.1", features = ["derive"] }
-
-[dev-dependencies]
-proptest = "1"
-tempfile = "3"
-
-[package.metadata.binstall]
-pkg-url = "{ repo }/releases/download/v{ version }/{ name }-{ target }{ archive-suffix }"
-bin-dir = "{ bin }{ binary-ext }"
-pkg-fmt = "tgz"

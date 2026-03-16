@@ -52,15 +52,22 @@ fn validate_project(fixture_name: &str) -> Vec<Check> {
         fixture_path.display()
     );
 
-    // Find the binary — prefer release, fall back to debug
-    let bin = manifest_dir
+    // Find the binary — workspace target dir is at workspace root (two levels up from crate)
+    let workspace_root = manifest_dir
+        .parent()
+        .and_then(|p| p.parent())
+        .unwrap_or(&manifest_dir);
+    let bin = workspace_root
         .join("target")
         .join("release")
         .join("guardrail3");
     let bin = if bin.exists() {
         bin
     } else {
-        manifest_dir.join("target").join("debug").join("guardrail3")
+        workspace_root
+            .join("target")
+            .join("debug")
+            .join("guardrail3")
     };
 
     assert!(
