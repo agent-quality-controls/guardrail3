@@ -137,6 +137,10 @@ pub fn check_dependency_flow(
     }
 
     for (crate_name, (member_dir, src_layer)) in &layers {
+        // Skip test crates — tests wire layers together by design
+        if member_dir.contains("/tests/") || member_dir.contains("tests/") {
+            continue;
+        }
         let cargo = root.join(member_dir).join("Cargo.toml");
         let Some(content) = fs.read_file(&cargo) else { continue };
         let Ok(table) = content.parse::<toml::Value>() else { continue };

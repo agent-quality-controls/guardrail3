@@ -278,12 +278,21 @@ fn collect_module_ts_files(root: &Path) -> Vec<String> {
         if !is_ts_source(&path_str) {
             continue;
         }
-        // Only files inside a modules/ directory
-        if path_str.contains("/modules/") {
+        // Only files inside a modules/ directory, excluding test files
+        if path_str.contains("/modules/") && !is_ts_test_file(&path_str) {
             files.push(path_str);
         }
     }
     files
+}
+
+/// Check if a TS file is a test file (by path convention).
+fn is_ts_test_file(path: &str) -> bool {
+    path.contains("/__tests__/")
+        || path.contains(".test.")
+        || path.contains(".spec.")
+        || path.contains("/test/")
+        || path.contains("/tests/")
 }
 
 #[allow(clippy::case_sensitive_file_extension_comparisons)] // reason: only checking .ts/.tsx

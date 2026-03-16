@@ -325,7 +325,6 @@ SOURCE SCAN (AST-based via syn — immune to strings/comments):
   R36       EXCEPTION comments in config files
   R37       cfg_attr with allow
   R38       File length > 500 lines (error)
-  R39       File length > 400 lines (warn)
   R40       Use count > 20 (error)
   R41       Use count > 15 (warn)
   R42       Unsafe usage
@@ -354,7 +353,7 @@ RELEASE:
   R-BIN-*   Binary release workflow, binstall metadata
 
 GARDE: R-GARDE-01/02/05  Garde dependency, clippy bans, input boundary structs (Deserialize/Parser/Args/FromRow) without Validate
-TESTS: R-TEST-02..08     Test files, structure, assertions, coverage, isolation";
+TESTS: R-TEST-02..09     Test files, structure, assertions, coverage, isolation, no inline tests in src/";
 
 // ---------------------------------------------------------------------------
 // ts validate help

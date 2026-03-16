@@ -77,8 +77,11 @@ pub fn check(fs: &dyn FileSystem, workspace_root: &Path) -> Vec<CheckResult> {
         });
     }
 
-    // R-GARDE-05: derive inventory scan
-    let rs_files = super::source_scan::collect_rs_files(workspace_root);
+    // R-GARDE-05: derive inventory scan (excludes test files)
+    let rs_files: Vec<String> = super::source_scan::collect_rs_files(workspace_root)
+        .into_iter()
+        .filter(|f| !super::source_scan::is_test_path(f))
+        .collect();
     results.extend(check_derive_inventory(fs, &rs_files, workspace_root));
 
     results

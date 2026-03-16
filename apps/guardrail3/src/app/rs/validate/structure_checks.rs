@@ -6,7 +6,7 @@ use super::ast_helpers;
 use super::source_scan::filter_non_comment_lines;
 use crate::ports::outbound::FileSystem;
 
-// R38-R39: File line count
+// R38: File line count (>500 effective lines = error)
 pub fn check_file_length(
     path: &Path,
     content: &str,
@@ -26,15 +26,6 @@ pub fn check_file_length(
             severity: Severity::Error,
             title: "File too long".to_owned(),
             message: format!("{effective_lines} effective lines (max 500)"),
-            file: Some(path.display().to_string()),
-            line: None,
-        });
-    } else if effective_lines > 400 {
-        results.push(CheckResult {
-            id: "R39".to_owned(),
-            severity: Severity::Warn,
-            title: "File approaching limit".to_owned(),
-            message: format!("{effective_lines} effective lines (warn at 400, max 500)"),
             file: Some(path.display().to_string()),
             line: None,
         });
@@ -182,22 +173,6 @@ mod tests {
         );
         assert_eq!(results[0].id, "R38");
         assert_eq!(results[0].severity, Severity::Error);
-    }
-
-    #[test]
-    #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
-    fn file_length_warns_between_400_and_500() {
-        // Generate content that has ~450 effective lines
-        let content = "fn x() {}\n".repeat(450);
-        let path = Path::new("/project/src/foo.rs");
-        let mut results = Vec::new();
-        check_file_length(path, &content, false, &mut results);
-        assert!(
-            !results.is_empty(),
-            "Files between 400-500 lines should produce a warning"
-        );
-        assert_eq!(results[0].id, "R39");
-        assert_eq!(results[0].severity, Severity::Warn);
     }
 
     #[test]
