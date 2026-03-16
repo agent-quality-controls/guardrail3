@@ -278,16 +278,13 @@ fn grep_before_code_quality_string_unsafe() {
 
 #[test]
 fn grep_before_code_quality_string_unwrap() {
-    // GREP_BUG: grep false-positives on `".unwrap()"` in a string literal.
-    // The filter_non_comment_lines strips string *contents* but the line
-    // `let method = ".unwrap()";` after stripping becomes `let method = ;`
-    // which does NOT contain `.unwrap()`. BUT the check runs on the original
-    // trimmed line from filter_non_comment_lines, which preserves the full line.
-    // Actually: filter_non_comment_lines returns the ORIGINAL trimmed line, not
-    // the stripped version. The stripped version is only used for comment detection.
-    // So `.unwrap()` inside a string on a non-comment line DOES get flagged.
+    // FIXED: syn AST correctly ignores `.unwrap()` in a string literal.
+    // Previously grep false-positived because filter_non_comment_lines returns the
+    // original trimmed line (not the stripped version), so `.unwrap()` inside a
+    // string on a non-comment line was flagged. With AST-based detection,
+    // only actual method calls are detected.
     let r = validate_grep_attack_fixture("rust-code-quality", "string_unwrap.rs");
-    assert_has_check(&r, "string_unwrap.rs", "R44", "warn");
+    assert_no_hits(&r, "string_unwrap.rs");
 }
 
 #[test]

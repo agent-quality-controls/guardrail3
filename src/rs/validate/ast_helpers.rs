@@ -340,7 +340,7 @@ struct ForbiddenMacroVisitor {
 impl<'ast> Visit<'ast> for ForbiddenMacroVisitor {
     fn visit_macro(&mut self, n: &'ast syn::Macro) {
         let name = path_to_string(&n.path);
-        if matches!(name.as_str(), "todo" | "unimplemented" | "panic") {
+        if matches!(name.as_str(), "todo" | "unimplemented" | "unreachable" | "panic") {
             self.out.push((span_line(n.path.span()), name));
         }
         syn::visit::visit_macro(self, n);

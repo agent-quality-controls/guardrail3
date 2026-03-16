@@ -2,10 +2,56 @@ use std::path::Path;
 
 use crate::report::types::{CheckResult, Severity};
 
+use super::ast_helpers;
 use super::source_scan::filter_non_comment_lines;
 
 // R43: todo!/unimplemented! (Warn) and unreachable! (Info)
 pub fn check_todo_macros(
+    path: &Path,
+    content: &str,
+    is_test_file: bool,
+    results: &mut Vec<CheckResult>,
+) {
+    if let Some(file) = ast_helpers::parse_file(content) {
+        // AST path — no false positives from strings, comments, or identifiers
+        for (line, name) in ast_helpers::find_forbidden_macros(&file) {
+            let message = content
+                .lines()
+                .nth(line.saturating_sub(1))
+                .unwrap_or("")
+                .trim();
+            match name.as_str() {
+                "todo" | "unimplemented" => {
+                    results.push(CheckResult {
+                        id: "R43".to_owned(),
+                        severity: Severity::Warn,
+                        title: format!("{name}! macro"),
+                        message: message.to_owned(),
+                        file: Some(path.display().to_string()),
+                        line: Some(line),
+                    });
+                }
+                "unreachable" if !is_test_file => {
+                    results.push(CheckResult {
+                        id: "R43".to_owned(),
+                        severity: Severity::Info,
+                        title: "unreachable! macro".to_owned(),
+                        message: message.to_owned(),
+                        file: Some(path.display().to_string()),
+                        line: Some(line),
+                    });
+                }
+                // panic and unreachable-in-tests: not flagged by R43
+                _ => {}
+            }
+        }
+    } else {
+        // Fallback to grep if parse fails
+        check_todo_macros_grep(path, content, is_test_file, results);
+    }
+}
+
+fn check_todo_macros_grep(
     path: &Path,
     content: &str,
     is_test_file: bool,
@@ -46,6 +92,30 @@ pub fn check_todo_macros(
 
 // R44: .unwrap() / .expect()
 pub fn check_unwrap_expect(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
+    if let Some(file) = ast_helpers::parse_file(content) {
+        // AST path — no false positives from strings or field names
+        for (line, method) in ast_helpers::find_unwrap_expect(&file) {
+            let message = content
+                .lines()
+                .nth(line.saturating_sub(1))
+                .unwrap_or("")
+                .trim();
+            results.push(CheckResult {
+                id: "R44".to_owned(),
+                severity: Severity::Warn,
+                title: format!(".{method}() usage"),
+                message: message.to_owned(),
+                file: Some(path.display().to_string()),
+                line: Some(line),
+            });
+        }
+    } else {
+        // Fallback to grep if parse fails
+        check_unwrap_expect_grep(path, content, results);
+    }
+}
+
+fn check_unwrap_expect_grep(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
     let non_comment_lines = filter_non_comment_lines(content);
 
     for (line_num, trimmed) in &non_comment_lines {
@@ -121,6 +191,9 @@ pub fn check_claude_md(workspace_root: &Path, results: &mut Vec<CheckResult>) {
 // R58: Direct std::fs usage — belt-and-suspenders check
 // Clippy's disallowed_methods doesn't always catch `use std::fs; fs::read_to_string()`
 // when the import aliases the module. This source-level scan fills that gap.
+//
+// Uses syn AST parsing when possible (no false positives on comments/strings).
+// Falls back to grep if parsing fails.
 pub fn check_direct_fs_usage(
     path: &Path,
     content: &str,
@@ -132,30 +205,63 @@ pub fn check_direct_fs_usage(
         return;
     }
 
-    // Track whether we've entered a #[cfg(test)] block.
-    // Once we see `#[cfg(test)]` followed by an opening brace, skip everything
-    // from that point to the end of the file. Convention: #[cfg(test)] mod tests
-    // is always the last item in a Rust source file, so we don't need to track
-    // when the block closes. This avoids false positives from brace counting
-    // being confused by string literals containing braces in test code.
+    if let Some(parsed) = ast_helpers::parse_file(content) {
+        check_direct_fs_usage_ast(path, content, &parsed, results);
+    } else {
+        check_direct_fs_usage_grep(path, content, results);
+    }
+}
+
+/// AST-based R58: use `find_std_fs_imports` for use-items, grep for inline `std::fs::` calls.
+fn check_direct_fs_usage_ast(
+    path: &Path,
+    content: &str,
+    parsed: &syn::File,
+    results: &mut Vec<CheckResult>,
+) {
+    // Use-imports via syn — immune to comments/strings
+    for line_num in ast_helpers::find_std_fs_imports(parsed) {
+        let trimmed = content
+            .lines()
+            .nth(line_num.saturating_sub(1))
+            .unwrap_or("")
+            .trim();
+        results.push(CheckResult {
+            id: "R58".to_owned(),
+            severity: Severity::Error,
+            title: "Direct std::fs import".to_owned(),
+            message: format!(
+                "Use centralized fs module instead of direct std::fs import: {trimmed}"
+            ),
+            file: Some(path.display().to_string()),
+            line: Some(line_num),
+        });
+    }
+
+    // Inline std::fs:: calls — still grep-based but with cfg(test) skipping
+    check_inline_std_fs_calls(path, content, results);
+}
+
+/// Grep fallback for unparseable files.
+fn check_direct_fs_usage_grep(
+    path: &Path,
+    content: &str,
+    results: &mut Vec<CheckResult>,
+) {
     let mut seen_cfg_test = false;
     let mut in_cfg_test_block = false;
 
     for (line_num, line) in content.lines().enumerate() {
         let trimmed = line.trim();
 
-        // Skip comments
         if trimmed.starts_with("//") || trimmed.starts_with('*') || trimmed.starts_with("/*") {
             continue;
         }
 
-        // Detect #[cfg(test)] — mark that the next block is test code
         if trimmed.contains("#[cfg(test)]") && !trimmed.contains('"') {
             seen_cfg_test = true;
         }
 
-        // Once we've seen #[cfg(test)] and hit a line with an opening brace,
-        // we're inside the test module — skip everything from here on
         if seen_cfg_test && !in_cfg_test_block && trimmed.contains('{') {
             in_cfg_test_block = true;
         }
@@ -164,7 +270,6 @@ pub fn check_direct_fs_usage(
             continue;
         }
 
-        // Check for `use std::fs` imports (but not in string literals)
         if trimmed.starts_with("use std::fs") && !trimmed.contains('"') {
             results.push(CheckResult {
                 id: "R58".to_owned(),
@@ -178,29 +283,67 @@ pub fn check_direct_fs_usage(
             });
         }
 
-        // Check for inline std::fs:: calls (not in the fs.rs module itself)
-        // Skip files in modules/ directory — they contain string literals with "std::fs::"
-        // Skip type references (Permissions, Metadata, DirEntry) — these are not fs operations
-        if !path.to_string_lossy().contains("modules/")
-            && trimmed.contains("std::fs::")
-            && !trimmed.starts_with("//")
-            && !trimmed.starts_with('"')
-            && !trimmed.contains("\"std::fs::")
-            && !trimmed.contains("std::fs::Permissions")
-            && !trimmed.contains("std::fs::Metadata")
-            && !trimmed.contains("std::fs::DirEntry")
-        {
-            results.push(CheckResult {
-                id: "R58".to_owned(),
-                severity: Severity::Error,
-                title: "Direct std::fs call".to_owned(),
-                message: format!(
-                    "Use centralized fs module instead of direct std::fs call: {trimmed}"
-                ),
-                file: Some(path.display().to_string()),
-                line: Some(line_num.saturating_add(1)),
-            });
+        check_inline_std_fs_line(path, trimmed, line_num, results);
+    }
+}
+
+/// Inline `std::fs::` call detection shared by both AST and grep paths.
+fn check_inline_std_fs_calls(
+    path: &Path,
+    content: &str,
+    results: &mut Vec<CheckResult>,
+) {
+    let mut seen_cfg_test = false;
+    let mut in_cfg_test_block = false;
+
+    for (line_num, line) in content.lines().enumerate() {
+        let trimmed = line.trim();
+
+        if trimmed.starts_with("//") || trimmed.starts_with('*') || trimmed.starts_with("/*") {
+            continue;
         }
+
+        if trimmed.contains("#[cfg(test)]") && !trimmed.contains('"') {
+            seen_cfg_test = true;
+        }
+
+        if seen_cfg_test && !in_cfg_test_block && trimmed.contains('{') {
+            in_cfg_test_block = true;
+        }
+
+        if in_cfg_test_block {
+            continue;
+        }
+
+        check_inline_std_fs_line(path, trimmed, line_num, results);
+    }
+}
+
+fn check_inline_std_fs_line(
+    path: &Path,
+    trimmed: &str,
+    line_num: usize,
+    results: &mut Vec<CheckResult>,
+) {
+    if !path.to_string_lossy().contains("modules/")
+        && trimmed.contains("std::fs::")
+        && !trimmed.starts_with("//")
+        && !trimmed.starts_with('"')
+        && !trimmed.contains("\"std::fs::")
+        && !trimmed.contains("std::fs::Permissions")
+        && !trimmed.contains("std::fs::Metadata")
+        && !trimmed.contains("std::fs::DirEntry")
+    {
+        results.push(CheckResult {
+            id: "R58".to_owned(),
+            severity: Severity::Error,
+            title: "Direct std::fs call".to_owned(),
+            message: format!(
+                "Use centralized fs module instead of direct std::fs call: {trimmed}"
+            ),
+            file: Some(path.display().to_string()),
+            line: Some(line_num.saturating_add(1)),
+        });
     }
 }
 
