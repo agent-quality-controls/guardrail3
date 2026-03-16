@@ -63,9 +63,9 @@ pub fn check_required_string_field(
             format!("{crate_name}: missing {field_name}")
         },
         message: if has_field {
-            format!("Cargo.toml has [package].{field_name}")
+            format!("Cargo.toml [package].{field_name} is set. Required for crates.io publishing. No action needed.")
         } else {
-            format!("[package].{field_name} is missing or empty in Cargo.toml. Add `{field_name} = \"...\"` to [package].")
+            format!("[package].{field_name} is missing or empty in Cargo.toml. Required for crates.io publishing — `cargo publish` will fail without it. Add `{field_name} = \"...\"` to [package].")
         },
         file: file.map(std::borrow::ToOwned::to_owned),
         line: None,
@@ -100,14 +100,14 @@ pub fn check_license(
             format!("{name}: missing license")
         },
         message: if ok {
-            "Cargo.toml has license or license-file".to_owned()
+            "Cargo.toml has `license` or `license-file` field. Required for crates.io publishing and legal compliance. No action needed.".to_owned()
         } else {
-            "No license specified. Add `license = \"MIT\"` (or your license) to [package] in Cargo.toml.".to_owned()
+            "No license specified in Cargo.toml. crates.io requires a license for publishing, and users cannot legally use unlicensed code. Add `license = \"MIT\"` (or your license) to [package].".to_owned()
         },
         file: file.map(std::borrow::ToOwned::to_owned),
         line: None,
         inventory: false,
-    });
+    }.as_inventory());
 }
 
 // --- R-PUB-04 + R-PUB-05: readme ---
@@ -208,7 +208,7 @@ pub fn check_readme_quality(
         )
     };
 
-    results.push(CheckResult {
+    let result = CheckResult {
         id: "R-PUB-05".to_owned(),
         severity,
         title,
@@ -216,7 +216,8 @@ pub fn check_readme_quality(
         file: file.map(std::borrow::ToOwned::to_owned),
         line: None,
         inventory: false,
-    });
+    };
+    results.push(if severity == Severity::Info { result.as_inventory() } else { result });
 }
 
 // --- R-PUB-08: semver version ---
@@ -247,7 +248,7 @@ pub fn check_version(
         ),
     };
 
-    results.push(CheckResult {
+    let result = CheckResult {
         id: "R-PUB-08".to_owned(),
         severity,
         title,
@@ -255,6 +256,7 @@ pub fn check_version(
         file: file.map(std::borrow::ToOwned::to_owned),
         line: None,
         inventory: false,
-    });
+    };
+    results.push(if severity == Severity::Info { result.as_inventory() } else { result });
 }
 

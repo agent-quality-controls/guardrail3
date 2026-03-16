@@ -108,7 +108,7 @@ pub fn check_binstall_metadata(krate: &CrateInfo, results: &mut Vec<CheckResult>
             id: "R-BIN-03".to_owned(),
             severity: Severity::Info,
             title: format!("{}: binstall metadata present", krate.name),
-            message: "[package.metadata.binstall] found in Cargo.toml".to_owned(),
+            message: "[package.metadata.binstall] found in Cargo.toml. cargo-binstall can download pre-built binaries instead of compiling from source. No action needed.".to_owned(),
             file: Some(krate.cargo_toml_path.display().to_string()),
             line: None,
             inventory: false,
@@ -116,9 +116,9 @@ pub fn check_binstall_metadata(krate: &CrateInfo, results: &mut Vec<CheckResult>
     } else {
         results.push(CheckResult {
             id: "R-BIN-03".to_owned(),
-            severity: Severity::Info,
+            severity: Severity::Warn,
             title: format!("{}: no binstall metadata", krate.name),
-            message: "No [package.metadata.binstall] in Cargo.toml".to_owned(),
+            message: "No [package.metadata.binstall] in Cargo.toml. Without this, `cargo binstall` cannot find pre-built binaries and falls back to compiling from source (slow). Add a `[package.metadata.binstall]` section with `pkg-url` and `bin-dir` fields.".to_owned(),
             file: Some(krate.cargo_toml_path.display().to_string()),
             line: None,
             inventory: false,

@@ -233,7 +233,7 @@ pub fn check_keywords(
         ),
     };
 
-    results.push(CheckResult {
+    let result = CheckResult {
         id: "R-PUB-06".to_owned(),
         severity,
         title,
@@ -241,7 +241,8 @@ pub fn check_keywords(
         file: file.map(std::borrow::ToOwned::to_owned),
         line: None,
         inventory: false,
-    });
+    };
+    results.push(if severity == Severity::Info { result.as_inventory() } else { result });
 }
 
 // --- R-PUB-07: categories ---
@@ -261,7 +262,7 @@ pub fn check_categories(
         Some(arr) => arr.is_empty(),
     };
 
-    results.push(CheckResult {
+    let result = CheckResult {
         id: "R-PUB-07".to_owned(),
         severity: if is_missing_or_empty {
             Severity::Warn
@@ -281,7 +282,8 @@ pub fn check_categories(
         file: file.map(std::borrow::ToOwned::to_owned),
         line: None,
         inventory: false,
-    });
+    };
+    results.push(if is_missing_or_empty { result } else { result.as_inventory() });
 }
 
 /// Check if a version string is valid semver (X.Y.Z with optional -prerelease).

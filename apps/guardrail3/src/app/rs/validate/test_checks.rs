@@ -66,7 +66,7 @@ pub fn check_mutants_toml(workspace_root: &Path, results: &mut Vec<CheckResult>)
             id: "R-TEST-02".to_owned(),
             severity: Severity::Warn,
             title: ".cargo/mutants.toml missing".to_owned(),
-            message: "Create .cargo/mutants.toml to configure mutation testing".to_owned(),
+            message: "Mutation testing config `.cargo/mutants.toml` not found. Mutation testing (cargo-mutants) injects bugs into code to verify tests catch them — without config, it uses defaults that may be too slow or skip important targets. Create `.cargo/mutants.toml` with `timeout_multiplier = 2.0`.".to_owned(),
             file: Some(mutants_path.display().to_string()),
             line: None,
             inventory: false,
@@ -110,9 +110,9 @@ fn check_mutants_profile(
     } else {
         results.push(CheckResult {
             id: "R-TEST-03".to_owned(),
-            severity: Severity::Info,
+            severity: Severity::Warn,
             title: "[profile.mutants] missing".to_owned(),
-            message: "Add [profile.mutants] to Cargo.toml for faster mutation testing".to_owned(),
+            message: "No [profile.mutants] section in Cargo.toml. This custom build profile optimizes mutation testing speed (e.g., opt-level=0, no LTO). Without it, cargo-mutants uses the `dev` profile which may be slower. Add `[profile.mutants]` with `inherits = \"dev\"` and `opt-level = 0`.".to_owned(),
             file: Some(cargo_path.display().to_string()),
             line: None,
             inventory: false,
@@ -163,7 +163,7 @@ fn check_tests_exist(fs: &dyn FileSystem, workspace_root: &Path, results: &mut V
             id: "R-TEST-04".to_owned(),
             severity: Severity::Info,
             title: "Tests exist".to_owned(),
-            message: "At least one #[test] or #[tokio::test] found".to_owned(),
+            message: "At least one `#[test]` or `#[tokio::test]` function found in the workspace. Test presence confirmed, no action needed.".to_owned(),
             file: None,
             line: None,
             inventory: false,
@@ -173,7 +173,7 @@ fn check_tests_exist(fs: &dyn FileSystem, workspace_root: &Path, results: &mut V
             id: "R-TEST-04".to_owned(),
             severity: Severity::Error,
             title: "No tests found".to_owned(),
-            message: "No test functions found. Add `#[test]` or `#[tokio::test]` functions in a `tests/` directory.".to_owned(),
+            message: "No `#[test]` or `#[tokio::test]` functions found anywhere in the workspace. Without tests, bugs go undetected and refactoring is unsafe. Add test functions in a `tests/` directory.".to_owned(),
             file: None,
             line: None,
             inventory: false,
@@ -255,7 +255,7 @@ pub fn check_no_tests_in_src(
                 severity: Severity::Error,
                 title: "Test code in production source".to_owned(),
                 message: format!(
-                    "Test code found in `{relative}`. Move the `#[cfg(test)]` block and `#[test]` functions to a file in the `tests/` directory."
+                    "`#[cfg(test)]` or `#[test]` found in production source file `{relative}`. Test code in src/ increases compile time for the main binary and may accidentally include test-only dependencies. Move the `#[cfg(test)]` block and `#[test]` functions to a file in the `tests/` directory."
                 ),
                 file: Some(path_str),
                 line: None,

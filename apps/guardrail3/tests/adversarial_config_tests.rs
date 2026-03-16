@@ -81,6 +81,7 @@ fn validate_project(fixture_name: &str) -> Vec<Check> {
         .arg(&fixture_path)
         .arg("--format")
         .arg("json")
+        .arg("--inventory")
         .output()
         .expect("failed to run guardrail3");
 

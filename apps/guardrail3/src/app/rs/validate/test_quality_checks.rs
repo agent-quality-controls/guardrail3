@@ -26,30 +26,7 @@ pub fn check_test_coverage_inventory(
     let mut pub_fn_count: usize = 0;
     let mut test_fn_count: usize = 0;
 
-    // Count pub fn in src/ files
-    let src_dir = workspace_root.join("src");
-    if src_dir.exists() {
-        for entry in WalkDir::new(&src_dir)
-            .into_iter()
-            .filter_entry(|e| {
-                let name = e.file_name().to_string_lossy();
-                name != "target" && name != "node_modules" && name != ".git"
-            })
-            .flatten()
-        {
-            if !entry.file_type().is_file() {
-                continue;
-            }
-            if entry.path().extension().and_then(|e| e.to_str()) != Some("rs") {
-                continue;
-            }
-            if let Some(content) = fs.read_file(entry.path()) {
-                pub_fn_count = pub_fn_count.saturating_add(count_pub_fns(&content));
-            }
-        }
-    }
-
-    // Count #[test] in all .rs files
+    // Walk ALL .rs files under workspace for both pub fn and test fn counts
     for entry in WalkDir::new(workspace_root)
         .into_iter()
         .filter_entry(|e| !is_excluded_dir(e))
@@ -61,9 +38,22 @@ pub fn check_test_coverage_inventory(
         if entry.path().extension().and_then(|e| e.to_str()) != Some("rs") {
             continue;
         }
-        if let Some(content) = fs.read_file(entry.path()) {
-            test_fn_count = test_fn_count.saturating_add(count_test_fns(&content));
+        // Skip test fixture files
+        let path_str = entry.path().display().to_string();
+        if path_str.contains("tests/fixtures/") {
+            continue;
         }
+        let Some(content) = fs.read_file(entry.path()) else {
+            continue;
+        };
+
+        // Count pub fns only in src/ directories (production code)
+        if path_str.contains("/src/") && !path_str.contains("/tests/") {
+            pub_fn_count = pub_fn_count.saturating_add(count_pub_fns(&content));
+        }
+
+        // Count test fns in all files
+        test_fn_count = test_fn_count.saturating_add(count_test_fns(&content));
     }
 
     #[allow(clippy::arithmetic_side_effects)] // reason: division by zero guarded by if check above
@@ -78,12 +68,12 @@ pub fn check_test_coverage_inventory(
         severity: Severity::Info,
         title: "Test coverage inventory".to_owned(),
         message: format!(
-            "{pub_fn_count} public functions, {test_fn_count} test functions (ratio: {ratio}%)"
+            "{pub_fn_count} public functions in production code, {test_fn_count} test functions across all files (test-to-function ratio: {ratio}%). This is an informational inventory — not a pass/fail check. A ratio below 100% may indicate untested public API surface."
         ),
         file: None,
         line: None,
         inventory: false,
-    });
+    }.as_inventory());
 }
 
 /// Count `pub fn` declarations in content (AST-based).
@@ -212,7 +202,7 @@ pub fn check_ignore_without_reason(
                 id: "R-TEST-07".to_owned(),
                 severity: Severity::Warn,
                 title: "#[ignore] without reason".to_owned(),
-                message: "`#[ignore]` without reason. Add `// reason: <why this test is ignored>` on the same line or the line before. Example: `#[ignore] // reason: requires external service`"
+                message: "`#[ignore]` attribute without a documented reason. Ignored tests without reasons become permanently forgotten — no one knows if the issue was fixed or if the test is still relevant. Add `// reason: <why>` on the same line. Example: `#[ignore] // reason: requires external service`"
                     .to_owned(),
                 file: Some(entry.path().display().to_string()),
                 line: Some(*line_num),
@@ -226,7 +216,7 @@ pub fn check_ignore_without_reason(
             id: "R-TEST-07".to_owned(),
             severity: Severity::Info,
             title: "All #[ignore] have reasons".to_owned(),
-            message: "No bare #[ignore] attributes found".to_owned(),
+            message: "No bare `#[ignore]` attributes found — all ignored tests have documented reasons. This ensures ignored tests are tracked and revisited. No action needed.".to_owned(),
             file: None,
             line: None,
             inventory: false,
@@ -292,9 +282,9 @@ pub fn check_mutation_hook(fs: &dyn FileSystem, workspace_root: &Path, results: 
 
     results.push(CheckResult {
         id: "R-TEST-08".to_owned(),
-        severity: Severity::Info,
+        severity: Severity::Warn,
         title: "No mutation test hook".to_owned(),
-        message: "No mutation testing hook found in .claude/ or .git/hooks/pre-commit".to_owned(),
+        message: "No mutation testing hook found in `.claude/` or `.git/hooks/pre-commit`. Mutation testing (cargo-mutants) injects bugs to verify tests catch them — without a hook, it won't run automatically. Add a `.claude/` hook config or a pre-commit hook step that runs `cargo mutants`.".to_owned(),
         file: None,
         line: None,
         inventory: false,
