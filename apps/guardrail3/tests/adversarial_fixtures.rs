@@ -184,23 +184,9 @@ fn adversarial_r40_too_many_uses_detected() {
     assert_contains_check(&result, "R40", "error");
 }
 
-#[test]
-fn adversarial_r42_unsafe_detected() {
-    let result = validate_fixture("has_unsafe.rs");
-    assert_contains_check(&result, "R42", "error");
-}
-
-#[test]
-fn adversarial_r43_todo_detected() {
-    let result = validate_fixture("has_todo.rs");
-    assert_contains_check(&result, "R43", "warn");
-}
-
-#[test]
-fn adversarial_r44_unwrap_detected() {
-    let result = validate_fixture("has_unwrap.rs");
-    assert_contains_check(&result, "R44", "warn");
-}
+// R42, R43, R44 REMOVED — these are enforced by clippy lints (configured via R26),
+// not by guardrail3 source scanning. guardrail3's job is to verify the lint
+// configuration exists, not to re-implement the linter.
 
 #[test]
 fn adversarial_r58_direct_std_fs_detected() {

@@ -6,23 +6,48 @@
 
 guardrail3 exists because **agents break things**. Code must be resilient to agents making mistakes. The solution: machine-enforced guardrails that agents literally cannot bypass without the violation being detected and reported.
 
+**What guardrail3 IS and IS NOT:**
+
+guardrail3 is NOT a linter. It does NOT re-implement clippy, rustc, ESLint, or any existing tool. Those tools already catch code-level violations (unused variables, unwrap calls, unsafe blocks, etc.).
+
+guardrail3 is a **configuration and architecture enforcer**. It ensures that:
+1. The right linter rules ARE configured (clippy lints, ESLint rules, deny.toml bans)
+2. The project structure follows hex arch (domain/ports/app/adapters)
+3. Every escape hatch is documented (every `#[allow]` has a reason)
+4. Dependency boundaries are respected (libraries can't use I/O crates)
+5. Input validation exists at every trust boundary (garde/Validate on all input structs)
+
+**The division of labor:**
+- **Clippy/rustc** catch code violations (unwrap, unsafe, todo, etc.) at compile time
+- **R26** verifies that those clippy lints are correctly configured in `[workspace.lints]`
+- **R4-R7** verify that clippy.toml has the right method/type bans
+- **guardrail3 does NOT scan source for what clippy already catches** — that would be redundant
+
+The only source scan checks guardrail3 performs are for things NO existing tool catches:
+- **R30-R36**: Suppression hygiene (`#[allow]` without reason, garde skip, EXCEPTION comments)
+- **R38, R40-R41**: Structural health (file length, import count)
+- **R58**: The clippy aliased-import hole (`use std::fs; fs::read()` bypasses clippy bans)
+- **R-TEST-09**: Test code organization (inline tests vs separate files)
+- **R-ARCH-01/02/03/04**: Hex arch structure and dependency flow
+- **R-DEPS-01/02**: Dependency allowlists
+
 **Core principles:**
 
 1. **Least privilege.** Ban everything by default. Allow only what's explicitly needed, with a justification comment. If a method, type, or crate isn't on the allow-list, it's banned.
 
-2. **Self-validating.** guardrail3 enforces the same rules on itself that it enforces on other projects. If it can't pass its own validation, it has no business validating others. Every commit goes through the full pre-commit hook: gitleaks, cargo fmt, cargo clippy, cargo-deny, structural health, cargo-machete, cargo test, cargo-dupes.
+2. **Self-validating.** guardrail3 enforces the same rules on itself that it enforces on other projects. If it can't pass its own validation, it has no business validating others.
 
-3. **Total visibility.** The `validate` command reports EVERYTHING — not just violations, but every deviation, suppression, exception, and override. Justified items are `info`, unjustified items are `error`. The report is a complete X-ray. You decide what to act on — the tool hides nothing.
+3. **Total visibility.** Every suppression (`#[allow]`, `#[garde(skip)]`, `eslint-disable`, EXCEPTION comments) is reported as an audit trail. Use `--verbose` to see each individually, `--inventory` to see passing confirmations.
 
-4. **Modular by language.** Rust guardrails (clippy, deny, cargo lints) and TypeScript guardrails (ESLint, tsconfig, npmrc) are completely independent. A Rust-only project never sees TypeScript checks. A TS-only project never sees Rust checks. For monorepos, run `guardrail3 rs init` and `guardrail3 ts init` separately. The duplication tool is language-specific: cargo-dupes for Rust (AST-aware), jscpd for TypeScript.
+4. **Modular by language.** Rust guardrails and TypeScript guardrails are completely independent. Each has its own `init`, `generate`, `validate` commands. For monorepos, run both.
 
-5. **Centralized I/O.** All filesystem operations go through `src/fs.rs`. All other source files are banned from calling `std::fs::*` directly. This is enforced by clippy's `disallowed_methods` AND by guardrail3's own R58 source scan (belt-and-suspenders, since clippy has a known hole with aliased imports).
+5. **Every escape hatch is documented.** Every `#[allow(...)]` must have a `// reason:` comment on the same line. Every `#[garde(skip)]` on a non-primitive field is an error — use a real validator. Every config relaxation must have `// EXCEPTION: reason`.
 
-6. **Every escape hatch is documented.** Every `#[allow(...)]` must have a `// reason:` comment on the same line. Every `#[garde(skip)]` must have a reason. Every `eslint-disable` must have a `-- reason`. Every config relaxation must have `// EXCEPTION: reason`. The pre-commit hook enforces all of these.
+6. **Enforce configuration, not violations.** guardrail3 checks that clippy is configured to catch unwrap. Clippy catches the actual unwrap at compile time. guardrail3 checks that deny.toml bans dangerous crates. cargo-deny enforces the ban. guardrail3 is the meta-tool that ensures all other tools are properly configured.
 
-7. **Guardrails catch violations before humans fix them.** When we found that `check.rs` and `diff.rs` bypassed the centralized fs module, we first added R58 (the check that catches it), verified it flagged the violation, THEN fixed the code. The guardrail must exist before the fix.
+7. **AST-based scanning only.** All source scan checks use syn (Rust) or tree-sitter (TypeScript) for AST parsing. Zero grep, zero line matching. This eliminates false positives from strings, comments, and macros.
 
-8. **Tests prove guardrails work.** Every bug fix has a regression test. Every test is mutation-verified — we temporarily reintroduce the bug and confirm the test fails. A test that passes regardless of the bug is useless.
+8. **Tests prove guardrails work.** Every new check has adversarial test fixtures that try to break it. Every bug fix has a regression test.
 
 ## What This Tool Does
 

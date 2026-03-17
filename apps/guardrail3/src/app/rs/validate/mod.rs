@@ -155,7 +155,6 @@ fn run_architecture_checks(
     report: &mut Report,
 ) {
     let mut arch_results = Vec::new();
-    structure_checks::check_unsafe_code_forbid(fs, workspace_root, &mut arch_results);
 
     {
         let empty = std::collections::BTreeMap::new();
