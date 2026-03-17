@@ -338,3 +338,155 @@ export default [
     // T-ESLP-10 should fire — missing 16 of 17 built-in rules
     assert_has_check(&ids, "T-ESLP-10", &output);
 }
+
+// ---------------------------------------------------------------------------
+// Warn-severity helpers
+// ---------------------------------------------------------------------------
+
+/// Assert that a specific check ID fired as warn.
+#[allow(clippy::type_complexity)] // reason: test helper — tuple vec is clear in context
+fn assert_has_warn(ids: &[(String, String)], check_id: &str, json_output: &str) {
+    let found = ids.iter().any(|(id, sev)| id == check_id && sev == "warn");
+    assert!(
+        found,
+        "Expected check '{check_id}' to fire as warn.\nCheck IDs found: {ids:?}\nFull output:\n{json_output}"
+    );
+}
+
+/// Create a content-type TS project with eslint config (for content-only checks).
+#[allow(clippy::disallowed_methods)] // reason: test helper — fs operations for content project with eslint
+#[allow(clippy::expect_used)] // reason: test helper — panics indicate broken test infrastructure
+fn setup_content_ts_with_eslint(eslint_content: &str) -> tempfile::TempDir {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    std::fs::write(tmp.path().join("package.json"), r#"{"name":"test"}"#).expect("pkg");
+    std::fs::write(tmp.path().join("eslint.config.mjs"), eslint_content).expect("eslint");
+
+    let src = tmp.path().join("src");
+    std::fs::create_dir_all(&src).expect("src");
+    std::fs::write(src.join("index.ts"), "export const x = 1;").expect("ts");
+
+    // Content-type config
+    std::fs::write(
+        tmp.path().join("guardrail3.toml"),
+        r#"
+version = "0.1"
+
+[profile]
+name = "service"
+
+[typescript.checks]
+content = true
+"#,
+    )
+    .expect("config");
+
+    tmp
+}
+
+// ---------------------------------------------------------------------------
+// Gap-fix adversarial tests
+// ---------------------------------------------------------------------------
+
+/// T-ESLP-12: tailwind-ban rule present but no `denyList` keyword → fires as warn.
+#[test]
+fn t_eslp_12_tailwind_ban_no_denylist() {
+    // eslint config has tailwind-ban rule but no denyList configuration
+    let eslint = r"
+import tailwindBan from 'eslint-plugin-tailwind-ban';
+
+export default [
+  {
+    plugins: { 'tailwind-ban': tailwindBan },
+    rules: {
+      'tailwind-ban/ban-classes': 'error',
+    }
+  }
+];
+";
+    let tmp = setup_content_ts_with_eslint(eslint);
+    let output = run_ts_validate(tmp.path());
+    let ids = collect_check_ids(&output);
+
+    // T-ESLP-12 should fire as warn — tailwind-ban present but no denyList
+    assert_has_warn(&ids, "T-ESLP-12", &output);
+}
+
+/// T-ESLP-10: naming-convention rule present but no `selector` keyword → fires as warn.
+#[test]
+fn t_eslp_10_naming_convention_no_selector() {
+    // eslint config has naming-convention rule but no selector configuration
+    let eslint = r"
+import unicorn from 'eslint-plugin-unicorn';
+
+export default [
+  unicorn.configs['flat/recommended'],
+  {
+    rules: {
+      'no-param-reassign': 'error',
+      '@typescript-eslint/no-shadow': 'error',
+      'complexity': ['error', 10],
+      'max-depth': ['error', 4],
+      'max-params': ['error', 4],
+      'max-nested-callbacks': ['error', 3],
+      'no-return-assign': 'error',
+      '@typescript-eslint/only-throw-error': 'error',
+      'prefer-template': 'error',
+      'object-shorthand': 'error',
+      'no-sequences': 'error',
+      'no-void': 'error',
+      '@typescript-eslint/switch-exhaustiveness-check': 'error',
+      '@typescript-eslint/no-confusing-void-expression': 'error',
+      '@typescript-eslint/naming-convention': 'error',
+      '@typescript-eslint/method-signature-style': 'error',
+      'react/jsx-no-leaked-render': 'error',
+    }
+  }
+];
+";
+    let tmp = setup_ts_with_eslint(eslint, None);
+    let output = run_ts_validate(tmp.path());
+    let ids = collect_check_ids(&output);
+
+    // T-ESLP-10 should fire as warn — naming-convention present but no selector
+    assert_has_warn(&ids, "T-ESLP-10", &output);
+}
+
+/// T-ESLP-10: jsx-no-leaked-render rule present but no `validStrategies` → fires as warn.
+#[test]
+fn t_eslp_10_leaked_render_no_strategies() {
+    // eslint config has jsx-no-leaked-render but no validStrategies configuration
+    let eslint = r"
+import unicorn from 'eslint-plugin-unicorn';
+
+export default [
+  unicorn.configs['flat/recommended'],
+  {
+    rules: {
+      'no-param-reassign': 'error',
+      '@typescript-eslint/no-shadow': 'error',
+      'complexity': ['error', 10],
+      'max-depth': ['error', 4],
+      'max-params': ['error', 4],
+      'max-nested-callbacks': ['error', 3],
+      'no-return-assign': 'error',
+      '@typescript-eslint/only-throw-error': 'error',
+      'prefer-template': 'error',
+      'object-shorthand': 'error',
+      'no-sequences': 'error',
+      'no-void': 'error',
+      '@typescript-eslint/switch-exhaustiveness-check': 'error',
+      '@typescript-eslint/no-confusing-void-expression': 'error',
+      '@typescript-eslint/naming-convention': ['error', { selector: 'default', format: ['camelCase'] }],
+      '@typescript-eslint/method-signature-style': 'error',
+      'react/jsx-no-leaked-render': 'error',
+    }
+  }
+];
+";
+    let tmp = setup_ts_with_eslint(eslint, None);
+    let output = run_ts_validate(tmp.path());
+    let ids = collect_check_ids(&output);
+
+    // T-ESLP-10 should fire as warn — jsx-no-leaked-render present but no validStrategies
+    assert_has_warn(&ids, "T-ESLP-10", &output);
+}

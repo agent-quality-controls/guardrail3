@@ -309,3 +309,108 @@ type = "content"
     // Also verify no T-PLUG errors at all via prefix check
     assert_no_check_prefix(&error_ids, "T-PLUG-", &output);
 }
+
+// ---------------------------------------------------------------------------
+// Warn-severity helper
+// ---------------------------------------------------------------------------
+
+/// Collect check IDs with their severity from JSON output.
+#[allow(clippy::expect_used, clippy::indexing_slicing, clippy::type_complexity)] // reason: test helper — JSON parsing for assertion; tuple vec is clear in context
+fn collect_checks_with_severity(json_output: &str) -> Vec<(String, String)> {
+    #[allow(clippy::disallowed_methods)] // reason: test helper — JSON parsing of guardrail3 output
+    let parsed: serde_json::Value =
+        serde_json::from_str(json_output).expect("guardrail3 output should be valid JSON");
+
+    let sections = parsed["sections"]
+        .as_array()
+        .expect("sections should be array");
+
+    let mut ids = Vec::new();
+    for section in sections {
+        let results = section["results"].as_array().expect("results array");
+        for result in results {
+            let id = result["id"].as_str().unwrap_or("").to_owned();
+            let severity = result["severity"].as_str().unwrap_or("").to_owned();
+            ids.push((id, severity));
+        }
+    }
+    ids
+}
+
+/// Assert that a specific check ID fired as warn.
+#[allow(clippy::type_complexity)] // reason: test helper — tuple vec is clear in context
+fn assert_has_warn(ids: &[(String, String)], check_id: &str, json_output: &str) {
+    let found = ids.iter().any(|(id, sev)| id == check_id && sev == "warn");
+    assert!(
+        found,
+        "Expected check '{check_id}' to fire as warn.\nCheck IDs found: {ids:?}\nFull output:\n{json_output}"
+    );
+}
+
+/// Assert that a specific check ID did NOT fire as warn or error.
+#[allow(clippy::type_complexity)] // reason: test helper — tuple vec is clear in context
+fn assert_no_warn_or_error(ids: &[(String, String)], check_id: &str, json_output: &str) {
+    let found = ids
+        .iter()
+        .any(|(id, sev)| id == check_id && (sev == "warn" || sev == "error"));
+    assert!(
+        !found,
+        "Did NOT expect check '{check_id}' as warn/error, but it was present.\nCheck IDs found: {ids:?}\nFull output:\n{json_output}"
+    );
+}
+
+// ============================================================
+// Test 7: T-PLUG-11 fires when knip dep present but no script
+// ============================================================
+
+#[test]
+#[allow(clippy::disallowed_methods)] // reason: test — writing custom package.json for knip script test
+#[allow(clippy::expect_used)] // reason: test — panics indicate broken test infrastructure
+fn t_plug_11_knip_script_missing() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+
+    // knip in devDeps but NO "knip" script
+    std::fs::write(
+        tmp.path().join("package.json"),
+        r#"{"name":"test","devDependencies":{"knip":"*"},"scripts":{}}"#,
+    )
+    .expect("write package.json");
+
+    let src = tmp.path().join("src");
+    std::fs::create_dir_all(&src).expect("create src");
+    std::fs::write(src.join("index.ts"), "export const x = 1;").expect("write ts");
+
+    let output = run_ts_validate(tmp.path(), &[]);
+    let ids = collect_checks_with_severity(&output);
+
+    // T-PLUG-11 should fire as warn — knip dep present but no script to run it
+    assert_has_warn(&ids, "T-PLUG-11", &output);
+}
+
+// ============================================================
+// Test 8: T-PLUG-11 does NOT fire when knip script is present
+// ============================================================
+
+#[test]
+#[allow(clippy::disallowed_methods)] // reason: test — writing custom package.json for knip script test
+#[allow(clippy::expect_used)] // reason: test — panics indicate broken test infrastructure
+fn t_plug_11_knip_script_present() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+
+    // knip in devDeps AND "knip" script present
+    std::fs::write(
+        tmp.path().join("package.json"),
+        r#"{"name":"test","devDependencies":{"knip":"*"},"scripts":{"knip":"knip"}}"#,
+    )
+    .expect("write package.json");
+
+    let src = tmp.path().join("src");
+    std::fs::create_dir_all(&src).expect("create src");
+    std::fs::write(src.join("index.ts"), "export const x = 1;").expect("write ts");
+
+    let output = run_ts_validate(tmp.path(), &[]);
+    let ids = collect_checks_with_severity(&output);
+
+    // T-PLUG-11 should NOT fire as warn/error — knip script exists
+    assert_no_warn_or_error(&ids, "T-PLUG-11", &output);
+}
