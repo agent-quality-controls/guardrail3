@@ -70,6 +70,8 @@ pub struct TsChecksConfig {
     #[garde(skip)] // reason: Option<bool> — inherently valid
     pub architecture: Option<bool>,
     #[garde(skip)] // reason: Option<bool> — inherently valid
+    pub content: Option<bool>,
+    #[garde(skip)] // reason: Option<bool> — inherently valid
     pub tests: Option<bool>,
 }
 
