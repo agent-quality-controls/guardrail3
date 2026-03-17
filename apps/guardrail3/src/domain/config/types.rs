@@ -51,11 +51,17 @@ pub struct CrateConfig {
     pub layer: Option<String>,
     #[garde(inner(length(min = 1)))] // reason: profile name must be non-empty when present
     pub profile: Option<String>,
+    /// App type — unified alias for `profile` (matches TS convention)
+    #[serde(rename = "type")]
+    #[garde(inner(length(min = 1)))] // reason: type name must be non-empty when present
+    pub type_: Option<String>,
     #[garde(inner(inner(length(min = 1))))] // reason: each allowed dep name must be non-empty
     pub allowed_deps: Option<Vec<String>>,
+    #[garde(dive)] // reason: recursively validate nested RustChecksConfig
+    pub checks: Option<RustChecksConfig>,
 }
 
-#[derive(Debug, Deserialize, garde::Validate)]
+#[derive(Debug, Clone, Deserialize, garde::Validate)]
 pub struct RustChecksConfig {
     #[garde(skip)] // reason: Option<bool> — inherently valid
     pub architecture: Option<bool>,

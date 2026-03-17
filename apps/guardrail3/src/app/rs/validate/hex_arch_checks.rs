@@ -104,7 +104,8 @@ pub fn check_hex_arch_structure(
     results: &mut Vec<CheckResult>,
 ) {
     for (name, cfg) in cfgs {
-        if cfg.profile.as_deref().is_none_or(|p| p != "service") {
+        let resolved_profile = cfg.profile.as_deref().or(cfg.type_.as_deref());
+        if resolved_profile.is_none_or(|p| p != "service") {
             continue;
         }
         let member_dir = resolve_member_dir(name, project);
@@ -252,8 +253,7 @@ pub fn check_library_service_boundary(
             let dir = &member.dir;
             let lib_by_cfg = cfgs
                 .get(name.as_str())
-                .and_then(|c| c.profile.as_deref())
-                .is_some_and(|p| p == "library");
+                .is_some_and(|c| c.profile.as_deref().or(c.type_.as_deref()) == Some("library"));
             if !lib_by_cfg && !dir.starts_with("packages/") {
                 continue;
             }

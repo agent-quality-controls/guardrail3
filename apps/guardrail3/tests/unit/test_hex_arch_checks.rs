@@ -70,7 +70,9 @@ fn service_cfg() -> CrateConfig {
     CrateConfig {
         layer: Some("composition-root".to_owned()),
         profile: Some("service".to_owned()),
+        type_: None,
         allowed_deps: None,
+        checks: None,
     }
 }
 
