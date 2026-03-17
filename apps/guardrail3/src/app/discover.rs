@@ -236,8 +236,7 @@ fn parse_workspace_excludes(
     workspace: &toml::Value,
     path: &Path,
 ) -> std::collections::BTreeSet<String> {
-    let mut exclude_dirs: std::collections::BTreeSet<String> =
-        std::collections::BTreeSet::new();
+    let mut exclude_dirs: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
     let Some(excludes) = workspace.get("exclude").and_then(|e| e.as_array()) else {
         return exclude_dirs;
     };

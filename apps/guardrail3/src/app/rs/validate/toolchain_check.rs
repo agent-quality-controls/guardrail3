@@ -40,11 +40,7 @@ pub fn check_toolchain_settings(fs: &dyn FileSystem, path: &Path, results: &mut 
     check_toolchain_components(&table, path, results);
 }
 
-fn check_toolchain_channel(
-    table: &toml::Value,
-    path: &Path,
-    results: &mut Vec<CheckResult>,
-) {
+fn check_toolchain_channel(table: &toml::Value, path: &Path, results: &mut Vec<CheckResult>) {
     let channel = table
         .get("toolchain")
         .and_then(|t| t.get("channel"))
@@ -87,11 +83,7 @@ fn check_toolchain_channel(
     }
 }
 
-fn check_toolchain_components(
-    table: &toml::Value,
-    path: &Path,
-    results: &mut Vec<CheckResult>,
-) {
+fn check_toolchain_components(table: &toml::Value, path: &Path, results: &mut Vec<CheckResult>) {
     let components = table
         .get("toolchain")
         .and_then(|t| t.get("components"))

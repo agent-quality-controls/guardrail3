@@ -5,8 +5,7 @@ use crate::domain::report::{Report, Severity};
 /// Strip the project root prefix from a file path to produce a relative path.
 fn relative_path<'a>(file: &'a str, project_root: &str) -> &'a str {
     file.strip_prefix(project_root)
-        .map(|s| s.strip_prefix('/').unwrap_or(s))
-        .unwrap_or(file)
+        .map_or(file, |s| s.strip_prefix('/').unwrap_or(s))
 }
 
 #[allow(clippy::print_stdout)] // reason: CLI report output to stdout
@@ -43,9 +42,7 @@ pub fn print_report(report: &Report, _show_inventory: bool) {
                     let _ = obj.insert(
                         "file_relative".into(),
                         match &r.file {
-                            Some(f) => Value::String(
-                                relative_path(f, project_root).to_owned(),
-                            ),
+                            Some(f) => Value::String(relative_path(f, project_root).to_owned()),
                             None => Value::Null,
                         },
                     );

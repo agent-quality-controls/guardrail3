@@ -1,4 +1,4 @@
-//! Tests extracted from app::rs::validate::structure_checks
+//! Tests extracted from `app::rs::validate::structure_checks`
 #![allow(
     clippy::expect_used,
     clippy::disallowed_methods,

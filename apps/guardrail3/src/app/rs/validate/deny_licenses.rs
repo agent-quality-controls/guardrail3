@@ -102,27 +102,33 @@ fn check_confidence_threshold(
             // Compare with tolerance
             let diff = (*v - 0.8_f64).abs();
             if diff > 0.001 {
-                results.push(CheckResult {
-                    id: "R15".to_owned(),
-                    severity: Severity::Info,
-                    title: "confidence-threshold differs".to_owned(),
-                    message: format!("confidence-threshold = {v} (expected 0.8)"),
-                    file: Some(file_path.display().to_string()),
-                    line: None,
-                    inventory: false,
-                }.as_inventory());
+                results.push(
+                    CheckResult {
+                        id: "R15".to_owned(),
+                        severity: Severity::Info,
+                        title: "confidence-threshold differs".to_owned(),
+                        message: format!("confidence-threshold = {v} (expected 0.8)"),
+                        file: Some(file_path.display().to_string()),
+                        line: None,
+                        inventory: false,
+                    }
+                    .as_inventory(),
+                );
             }
         }
         None => {
-            results.push(CheckResult {
-                id: "R15".to_owned(),
-                severity: Severity::Info,
-                title: "confidence-threshold not set".to_owned(),
-                message: "Expected confidence-threshold = 0.8".to_owned(),
-                file: Some(file_path.display().to_string()),
-                line: None,
-                inventory: false,
-            }.as_inventory());
+            results.push(
+                CheckResult {
+                    id: "R15".to_owned(),
+                    severity: Severity::Info,
+                    title: "confidence-threshold not set".to_owned(),
+                    message: "Expected confidence-threshold = 0.8".to_owned(),
+                    file: Some(file_path.display().to_string()),
+                    line: None,
+                    inventory: false,
+                }
+                .as_inventory(),
+            );
         }
         _ => {}
     }
@@ -156,15 +162,18 @@ fn check_unknown_source_policies(
     for key in &["unknown-registry", "unknown-git"] {
         match sources.get(key).and_then(|v| v.as_str()) {
             Some("deny") => {
-                results.push(CheckResult {
-                    id: "R16".to_owned(),
-                    severity: Severity::Info,
-                    title: format!("{key} correct"),
-                    message: format!("{key} = \"deny\""),
-                    file: Some(file_path.display().to_string()),
-                    line: None,
-                    inventory: false,
-                }.as_inventory());
+                results.push(
+                    CheckResult {
+                        id: "R16".to_owned(),
+                        severity: Severity::Info,
+                        title: format!("{key} correct"),
+                        message: format!("{key} = \"deny\""),
+                        file: Some(file_path.display().to_string()),
+                        line: None,
+                        inventory: false,
+                    }
+                    .as_inventory(),
+                );
             }
             Some(other) => {
                 results.push(CheckResult {
@@ -192,11 +201,7 @@ fn check_unknown_source_policies(
     }
 }
 
-fn check_allow_registry(
-    sources: &toml::Value,
-    file_path: &Path,
-    results: &mut Vec<CheckResult>,
-) {
+fn check_allow_registry(sources: &toml::Value, file_path: &Path, results: &mut Vec<CheckResult>) {
     if let Some(allow_reg) = sources.get("allow-registry").and_then(|v| v.as_array()) {
         let registries: Vec<&str> = allow_reg.iter().filter_map(|v| v.as_str()).collect();
         let has_non_cratesio = registries.iter().any(|r| !r.contains("crates.io"));
@@ -214,11 +219,7 @@ fn check_allow_registry(
     }
 }
 
-fn check_allow_git(
-    sources: &toml::Value,
-    file_path: &Path,
-    results: &mut Vec<CheckResult>,
-) {
+fn check_allow_git(sources: &toml::Value, file_path: &Path, results: &mut Vec<CheckResult>) {
     match sources.get("allow-git").and_then(|v| v.as_array()) {
         Some(arr) if !arr.is_empty() => {
             let git_sources: Vec<&str> = arr.iter().filter_map(|v| v.as_str()).collect();

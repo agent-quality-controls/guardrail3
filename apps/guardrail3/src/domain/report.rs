@@ -19,7 +19,8 @@ pub struct CheckResult {
 impl CheckResult {
     /// Mark this result as inventory (hidden unless `--inventory` flag is set).
     /// Only use for passing/confirmation Info results — never for problems or audit trails.
-    pub fn as_inventory(mut self) -> Self {
+    #[must_use]
+    pub const fn as_inventory(mut self) -> Self {
         self.inventory = true;
         self
     }
@@ -46,6 +47,45 @@ pub struct ValidateDomains {
     pub architecture: bool,
     pub release: bool,
     pub tests: bool,
+}
+
+/// Resolved check categories for Rust validation.
+/// Built by merging guardrail3.toml [rust.checks] with CLI flags.
+#[derive(Debug, Clone)]
+#[allow(clippy::struct_excessive_bools)] // reason: check category flags are independent toggles, not a state machine
+pub struct RustCheckCategories {
+    pub architecture: bool,
+    pub garde: bool,
+    pub tests: bool,
+    pub release: bool,
+}
+
+impl Default for RustCheckCategories {
+    fn default() -> Self {
+        Self {
+            architecture: false,
+            garde: false,
+            tests: true,
+            release: false,
+        }
+    }
+}
+
+/// Resolved check categories for TypeScript validation.
+/// Built by merging guardrail3.toml [typescript.checks] with CLI flags.
+#[derive(Debug, Clone)]
+pub struct TsCheckCategories {
+    pub architecture: bool,
+    pub tests: bool,
+}
+
+impl Default for TsCheckCategories {
+    fn default() -> Self {
+        Self {
+            architecture: false,
+            tests: true,
+        }
+    }
 }
 
 impl Report {

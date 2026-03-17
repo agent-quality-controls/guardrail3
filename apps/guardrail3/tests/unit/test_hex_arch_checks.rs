@@ -5,8 +5,8 @@ use std::path::{Path, PathBuf};
 
 use guardrail3::app::discover::{ProjectInfo, RustWorkspace, WorkspaceMember};
 use guardrail3::app::rs::validate::hex_arch_checks::{
-    check_dependency_flow, check_hex_arch_structure, check_library_service_boundary,
-    contains_segment, is_service_internal, layer_from_config, normalize_path, Layer,
+    Layer, check_dependency_flow, check_hex_arch_structure, check_library_service_boundary,
+    contains_segment, is_service_internal, layer_from_config, normalize_path,
 };
 use guardrail3::domain::config::types::CrateConfig;
 use guardrail3::domain::report::Severity;
@@ -17,7 +17,7 @@ struct StubFs {
 }
 
 impl StubFs {
-    fn new() -> Self {
+    const fn new() -> Self {
         Self {
             files: BTreeMap::new(),
         }
@@ -34,9 +34,10 @@ impl FileSystem for StubFs {
     }
     #[allow(clippy::unnecessary_wraps)] // reason: trait requires Result
     fn read_file_err(&self, path: &Path) -> Result<String, std::io::Error> {
-        self.files.get(path).cloned().ok_or_else(|| {
-            std::io::Error::new(std::io::ErrorKind::NotFound, "stub")
-        })
+        self.files
+            .get(path)
+            .cloned()
+            .ok_or_else(|| std::io::Error::new(std::io::ErrorKind::NotFound, "stub"))
     }
     fn list_dir(&self, _: &Path) -> Vec<std::fs::DirEntry> {
         Vec::new()
@@ -77,7 +78,10 @@ fn service_cfg() -> CrateConfig {
 fn r_arch_01_service_missing_domain_dir() {
     let mut fs = StubFs::new();
     let _ = fs.add("/ws/apps/api/Cargo.toml", "[package]\nname = \"api\"");
-    let _ = fs.add("/ws/apps/api/crates/adapters/Cargo.toml", "[package]\nname = \"a\"");
+    let _ = fs.add(
+        "/ws/apps/api/crates/adapters/Cargo.toml",
+        "[package]\nname = \"a\"",
+    );
     let mut cfgs = BTreeMap::new();
     let _ = cfgs.insert("api".to_owned(), service_cfg());
     let p = project(&[("api", "apps/api")]);
@@ -92,8 +96,14 @@ fn r_arch_01_service_missing_domain_dir() {
 #[test]
 fn r_arch_01_service_with_full_structure_ok() {
     let mut fs = StubFs::new();
-    let _ = fs.add("/ws/apps/api/crates/domain/Cargo.toml", "[package]\nname=\"d\"");
-    let _ = fs.add("/ws/apps/api/crates/adapters/Cargo.toml", "[package]\nname=\"a\"");
+    let _ = fs.add(
+        "/ws/apps/api/crates/domain/Cargo.toml",
+        "[package]\nname=\"d\"",
+    );
+    let _ = fs.add(
+        "/ws/apps/api/crates/adapters/Cargo.toml",
+        "[package]\nname=\"a\"",
+    );
     let mut cfgs = BTreeMap::new();
     let _ = cfgs.insert("api".to_owned(), service_cfg());
     let p = project(&[("api", "apps/api")]);
@@ -105,10 +115,15 @@ fn r_arch_01_service_with_full_structure_ok() {
 #[test]
 fn r_arch_02_domain_depends_on_adapters() {
     let mut fs = StubFs::new();
-    let _ = fs.add("/ws/crates/domain/Cargo.toml",
-        "[package]\nname=\"domain\"\n[dependencies]\nadapters = { path = \"../adapters\" }\n");
-    let _ = fs.add("/ws/crates/adapters/Cargo.toml", "[package]\nname=\"adapters\"");
-    let p = project(&[("domain","crates/domain"),("adapters","crates/adapters")]);
+    let _ = fs.add(
+        "/ws/crates/domain/Cargo.toml",
+        "[package]\nname=\"domain\"\n[dependencies]\nadapters = { path = \"../adapters\" }\n",
+    );
+    let _ = fs.add(
+        "/ws/crates/adapters/Cargo.toml",
+        "[package]\nname=\"adapters\"",
+    );
+    let p = project(&[("domain", "crates/domain"), ("adapters", "crates/adapters")]);
     let mut r = Vec::new();
     check_dependency_flow(&fs, Path::new("/ws"), &p, &BTreeMap::new(), &mut r);
     assert_eq!(r.len(), 1);
@@ -121,10 +136,12 @@ fn r_arch_02_domain_depends_on_adapters() {
 #[test]
 fn r_arch_02_app_depends_on_domain_ok() {
     let mut fs = StubFs::new();
-    let _ = fs.add("/ws/crates/app/Cargo.toml",
-        "[package]\nname=\"app\"\n[dependencies]\ndomain = { path = \"../domain\" }\n");
+    let _ = fs.add(
+        "/ws/crates/app/Cargo.toml",
+        "[package]\nname=\"app\"\n[dependencies]\ndomain = { path = \"../domain\" }\n",
+    );
     let _ = fs.add("/ws/crates/domain/Cargo.toml", "[package]\nname=\"domain\"");
-    let p = project(&[("app","crates/app"),("domain","crates/domain")]);
+    let p = project(&[("app", "crates/app"), ("domain", "crates/domain")]);
     let mut r = Vec::new();
     check_dependency_flow(&fs, Path::new("/ws"), &p, &BTreeMap::new(), &mut r);
     assert!(r.is_empty(), "expected no errors, got: {r:?}");
@@ -133,10 +150,12 @@ fn r_arch_02_app_depends_on_domain_ok() {
 #[test]
 fn r_arch_02_ports_depends_on_app() {
     let mut fs = StubFs::new();
-    let _ = fs.add("/ws/crates/ports/Cargo.toml",
-        "[package]\nname=\"ports\"\n[dependencies]\napp = { path = \"../app\" }\n");
+    let _ = fs.add(
+        "/ws/crates/ports/Cargo.toml",
+        "[package]\nname=\"ports\"\n[dependencies]\napp = { path = \"../app\" }\n",
+    );
     let _ = fs.add("/ws/crates/app/Cargo.toml", "[package]\nname=\"app\"");
-    let p = project(&[("ports","crates/ports"),("app","crates/app")]);
+    let p = project(&[("ports", "crates/ports"), ("app", "crates/app")]);
     let mut r = Vec::new();
     check_dependency_flow(&fs, Path::new("/ws"), &p, &BTreeMap::new(), &mut r);
     assert_eq!(r.len(), 1);
@@ -149,9 +168,14 @@ fn r_arch_02_ports_depends_on_app() {
 #[test]
 fn r_arch_03_library_depends_on_service_internal() {
     let mut fs = StubFs::new();
-    let _ = fs.add("/ws/packages/lib/Cargo.toml",
-        "[package]\nname=\"lib\"\n[dependencies]\ndomain={path=\"../../apps/api/crates/domain\"}\n");
-    let p = project(&[("lib","packages/lib"),("domain","apps/api/crates/domain")]);
+    let _ = fs.add(
+        "/ws/packages/lib/Cargo.toml",
+        "[package]\nname=\"lib\"\n[dependencies]\ndomain={path=\"../../apps/api/crates/domain\"}\n",
+    );
+    let p = project(&[
+        ("lib", "packages/lib"),
+        ("domain", "apps/api/crates/domain"),
+    ]);
     let mut r = Vec::new();
     check_library_service_boundary(&fs, Path::new("/ws"), &p, &BTreeMap::new(), &mut r);
     assert_eq!(r.len(), 1);
@@ -163,9 +187,11 @@ fn r_arch_03_library_depends_on_service_internal() {
 #[test]
 fn r_arch_03_library_depends_on_other_package_ok() {
     let mut fs = StubFs::new();
-    let _ = fs.add("/ws/packages/lib/Cargo.toml",
-        "[package]\nname=\"lib\"\n[dependencies]\ntypes={path=\"../types\"}\n");
-    let p = project(&[("lib","packages/lib"),("types","packages/types")]);
+    let _ = fs.add(
+        "/ws/packages/lib/Cargo.toml",
+        "[package]\nname=\"lib\"\n[dependencies]\ntypes={path=\"../types\"}\n",
+    );
+    let p = project(&[("lib", "packages/lib"), ("types", "packages/types")]);
     let mut r = Vec::new();
     check_library_service_boundary(&fs, Path::new("/ws"), &p, &BTreeMap::new(), &mut r);
     assert!(r.is_empty(), "expected no errors, got: {r:?}");
@@ -178,7 +204,10 @@ fn normalize_path_resolves_parent() {
 
 #[test]
 fn normalize_path_resolves_deep_parent() {
-    assert_eq!(normalize_path("packages/lib", "../../apps/api/crates/d"), "apps/api/crates/d");
+    assert_eq!(
+        normalize_path("packages/lib", "../../apps/api/crates/d"),
+        "apps/api/crates/d"
+    );
 }
 
 #[test]
@@ -215,67 +244,107 @@ fn layer_from_config_maps_correctly() {
 #[test]
 fn r_arch_02_domain_depends_on_ports_fails() {
     let mut fs = StubFs::new();
-    let _ = fs.add("/ws/crates/domain/Cargo.toml",
-        "[package]\nname=\"domain\"\n[dependencies]\nports = { path = \"../ports\" }\n");
+    let _ = fs.add(
+        "/ws/crates/domain/Cargo.toml",
+        "[package]\nname=\"domain\"\n[dependencies]\nports = { path = \"../ports\" }\n",
+    );
     let _ = fs.add("/ws/crates/ports/Cargo.toml", "[package]\nname=\"ports\"");
-    let p = project(&[("domain","crates/domain"),("ports","crates/ports")]);
+    let p = project(&[("domain", "crates/domain"), ("ports", "crates/ports")]);
     let mut r = Vec::new();
     check_dependency_flow(&fs, Path::new("/ws"), &p, &BTreeMap::new(), &mut r);
     assert_eq!(r.len(), 1);
     assert_eq!(r[0].id, "R-ARCH-02");
-    assert!(r[0].message.contains("domain"), "should mention domain: {}", r[0].message);
-    assert!(r[0].message.contains("ports"), "should mention ports: {}", r[0].message);
+    assert!(
+        r[0].message.contains("domain"),
+        "should mention domain: {}",
+        r[0].message
+    );
+    assert!(
+        r[0].message.contains("ports"),
+        "should mention ports: {}",
+        r[0].message
+    );
 }
 
 #[test]
 fn r_arch_02_domain_depends_on_app_fails() {
     let mut fs = StubFs::new();
-    let _ = fs.add("/ws/crates/domain/Cargo.toml",
-        "[package]\nname=\"domain\"\n[dependencies]\napp = { path = \"../app\" }\n");
+    let _ = fs.add(
+        "/ws/crates/domain/Cargo.toml",
+        "[package]\nname=\"domain\"\n[dependencies]\napp = { path = \"../app\" }\n",
+    );
     let _ = fs.add("/ws/crates/app/Cargo.toml", "[package]\nname=\"app\"");
-    let p = project(&[("domain","crates/domain"),("app","crates/app")]);
+    let p = project(&[("domain", "crates/domain"), ("app", "crates/app")]);
     let mut r = Vec::new();
     check_dependency_flow(&fs, Path::new("/ws"), &p, &BTreeMap::new(), &mut r);
     assert_eq!(r.len(), 1);
     assert_eq!(r[0].id, "R-ARCH-02");
-    assert!(r[0].message.contains("domain"), "should mention domain: {}", r[0].message);
-    assert!(r[0].message.contains("app"), "should mention app: {}", r[0].message);
+    assert!(
+        r[0].message.contains("domain"),
+        "should mention domain: {}",
+        r[0].message
+    );
+    assert!(
+        r[0].message.contains("app"),
+        "should mention app: {}",
+        r[0].message
+    );
 }
 
 #[test]
 fn r_arch_02_ports_depends_on_domain_ok() {
     let mut fs = StubFs::new();
-    let _ = fs.add("/ws/crates/ports/Cargo.toml",
-        "[package]\nname=\"ports\"\n[dependencies]\ndomain = { path = \"../domain\" }\n");
+    let _ = fs.add(
+        "/ws/crates/ports/Cargo.toml",
+        "[package]\nname=\"ports\"\n[dependencies]\ndomain = { path = \"../domain\" }\n",
+    );
     let _ = fs.add("/ws/crates/domain/Cargo.toml", "[package]\nname=\"domain\"");
-    let p = project(&[("ports","crates/ports"),("domain","crates/domain")]);
+    let p = project(&[("ports", "crates/ports"), ("domain", "crates/domain")]);
     let mut r = Vec::new();
     check_dependency_flow(&fs, Path::new("/ws"), &p, &BTreeMap::new(), &mut r);
-    assert!(r.is_empty(), "ports -> domain should be allowed, got: {r:?}");
+    assert!(
+        r.is_empty(),
+        "ports -> domain should be allowed, got: {r:?}"
+    );
 }
 
 #[test]
 fn r_arch_02_ports_depends_on_adapters_fails() {
     let mut fs = StubFs::new();
-    let _ = fs.add("/ws/crates/ports/Cargo.toml",
-        "[package]\nname=\"ports\"\n[dependencies]\nadapters = { path = \"../adapters\" }\n");
-    let _ = fs.add("/ws/crates/adapters/Cargo.toml", "[package]\nname=\"adapters\"");
-    let p = project(&[("ports","crates/ports"),("adapters","crates/adapters")]);
+    let _ = fs.add(
+        "/ws/crates/ports/Cargo.toml",
+        "[package]\nname=\"ports\"\n[dependencies]\nadapters = { path = \"../adapters\" }\n",
+    );
+    let _ = fs.add(
+        "/ws/crates/adapters/Cargo.toml",
+        "[package]\nname=\"adapters\"",
+    );
+    let p = project(&[("ports", "crates/ports"), ("adapters", "crates/adapters")]);
     let mut r = Vec::new();
     check_dependency_flow(&fs, Path::new("/ws"), &p, &BTreeMap::new(), &mut r);
     assert_eq!(r.len(), 1);
     assert_eq!(r[0].id, "R-ARCH-02");
-    assert!(r[0].message.contains("ports"), "should mention ports: {}", r[0].message);
-    assert!(r[0].message.contains("adapters"), "should mention adapters: {}", r[0].message);
+    assert!(
+        r[0].message.contains("ports"),
+        "should mention ports: {}",
+        r[0].message
+    );
+    assert!(
+        r[0].message.contains("adapters"),
+        "should mention adapters: {}",
+        r[0].message
+    );
 }
 
 #[test]
 fn r_arch_02_app_depends_on_ports_ok() {
     let mut fs = StubFs::new();
-    let _ = fs.add("/ws/crates/app/Cargo.toml",
-        "[package]\nname=\"app\"\n[dependencies]\nports = { path = \"../ports\" }\n");
+    let _ = fs.add(
+        "/ws/crates/app/Cargo.toml",
+        "[package]\nname=\"app\"\n[dependencies]\nports = { path = \"../ports\" }\n",
+    );
     let _ = fs.add("/ws/crates/ports/Cargo.toml", "[package]\nname=\"ports\"");
-    let p = project(&[("app","crates/app"),("ports","crates/ports")]);
+    let p = project(&[("app", "crates/app"), ("ports", "crates/ports")]);
     let mut r = Vec::new();
     check_dependency_flow(&fs, Path::new("/ws"), &p, &BTreeMap::new(), &mut r);
     assert!(r.is_empty(), "app -> ports should be allowed, got: {r:?}");
@@ -284,53 +353,76 @@ fn r_arch_02_app_depends_on_ports_ok() {
 #[test]
 fn r_arch_02_app_depends_on_adapters_fails() {
     let mut fs = StubFs::new();
-    let _ = fs.add("/ws/crates/app/Cargo.toml",
-        "[package]\nname=\"app\"\n[dependencies]\nadapters = { path = \"../adapters\" }\n");
-    let _ = fs.add("/ws/crates/adapters/Cargo.toml", "[package]\nname=\"adapters\"");
-    let p = project(&[("app","crates/app"),("adapters","crates/adapters")]);
+    let _ = fs.add(
+        "/ws/crates/app/Cargo.toml",
+        "[package]\nname=\"app\"\n[dependencies]\nadapters = { path = \"../adapters\" }\n",
+    );
+    let _ = fs.add(
+        "/ws/crates/adapters/Cargo.toml",
+        "[package]\nname=\"adapters\"",
+    );
+    let p = project(&[("app", "crates/app"), ("adapters", "crates/adapters")]);
     let mut r = Vec::new();
     check_dependency_flow(&fs, Path::new("/ws"), &p, &BTreeMap::new(), &mut r);
     assert_eq!(r.len(), 1);
     assert_eq!(r[0].id, "R-ARCH-02");
-    assert!(r[0].message.contains("app"), "should mention app: {}", r[0].message);
-    assert!(r[0].message.contains("adapters"), "should mention adapters: {}", r[0].message);
+    assert!(
+        r[0].message.contains("app"),
+        "should mention app: {}",
+        r[0].message
+    );
+    assert!(
+        r[0].message.contains("adapters"),
+        "should mention adapters: {}",
+        r[0].message
+    );
 }
 
 #[test]
 fn r_arch_02_adapters_depends_on_everything_ok() {
     let mut fs = StubFs::new();
-    let _ = fs.add("/ws/crates/adapters/Cargo.toml",
+    let _ = fs.add(
+        "/ws/crates/adapters/Cargo.toml",
         "[package]\nname=\"adapters\"\n[dependencies]\n\
          domain = { path = \"../domain\" }\n\
          ports = { path = \"../ports\" }\n\
-         app = { path = \"../app\" }\n");
+         app = { path = \"../app\" }\n",
+    );
     let _ = fs.add("/ws/crates/domain/Cargo.toml", "[package]\nname=\"domain\"");
     let _ = fs.add("/ws/crates/ports/Cargo.toml", "[package]\nname=\"ports\"");
     let _ = fs.add("/ws/crates/app/Cargo.toml", "[package]\nname=\"app\"");
     let p = project(&[
-        ("adapters","crates/adapters"),
-        ("domain","crates/domain"),
-        ("ports","crates/ports"),
-        ("app","crates/app"),
+        ("adapters", "crates/adapters"),
+        ("domain", "crates/domain"),
+        ("ports", "crates/ports"),
+        ("app", "crates/app"),
     ]);
     let mut r = Vec::new();
     check_dependency_flow(&fs, Path::new("/ws"), &p, &BTreeMap::new(), &mut r);
-    assert!(r.is_empty(), "adapters -> domain+ports+app should be allowed, got: {r:?}");
+    assert!(
+        r.is_empty(),
+        "adapters -> domain+ports+app should be allowed, got: {r:?}"
+    );
 }
 
 #[test]
 fn r_arch_02_multiple_violations_all_reported() {
     let mut fs = StubFs::new();
-    let _ = fs.add("/ws/crates/domain/Cargo.toml",
+    let _ = fs.add(
+        "/ws/crates/domain/Cargo.toml",
         "[package]\nname=\"domain\"\n[dependencies]\n\
          ports = { path = \"../ports\" }\n\
-         adapters = { path = \"../adapters\" }\n");
+         adapters = { path = \"../adapters\" }\n",
+    );
     let _ = fs.add("/ws/crates/ports/Cargo.toml", "[package]\nname=\"ports\"");
-    let _ = fs.add("/ws/crates/adapters/Cargo.toml", "[package]\nname=\"adapters\"");
+    let _ = fs.add(
+        "/ws/crates/adapters/Cargo.toml",
+        "[package]\nname=\"adapters\"",
+    );
     let p = project(&[
-        ("domain","crates/domain"),
-        ("ports","crates/ports"),
-        ("adapters","crates/adapters"),
+        ("domain", "crates/domain"),
+        ("ports", "crates/ports"),
+        ("adapters", "crates/adapters"),
     ]);
     let mut r = Vec::new();
     check_dependency_flow(&fs, Path::new("/ws"), &p, &BTreeMap::new(), &mut r);
@@ -345,13 +437,18 @@ fn r_arch_02_multiple_violations_all_reported() {
 #[test]
 fn r_arch_03_library_depends_on_other_library_ok() {
     let mut fs = StubFs::new();
-    let _ = fs.add("/ws/packages/a/Cargo.toml",
-        "[package]\nname=\"a\"\n[dependencies]\nb = { path = \"../b\" }\n");
+    let _ = fs.add(
+        "/ws/packages/a/Cargo.toml",
+        "[package]\nname=\"a\"\n[dependencies]\nb = { path = \"../b\" }\n",
+    );
     let _ = fs.add("/ws/packages/b/Cargo.toml", "[package]\nname=\"b\"");
-    let p = project(&[("a","packages/a"),("b","packages/b")]);
+    let p = project(&[("a", "packages/a"), ("b", "packages/b")]);
     let mut r = Vec::new();
     check_library_service_boundary(&fs, Path::new("/ws"), &p, &BTreeMap::new(), &mut r);
-    assert!(r.is_empty(), "packages/a -> packages/b should be allowed, got: {r:?}");
+    assert!(
+        r.is_empty(),
+        "packages/a -> packages/b should be allowed, got: {r:?}"
+    );
 }
 
 #[test]
@@ -361,12 +458,15 @@ fn r_arch_03_service_internal_depends_on_package_ok() {
         "[package]\nname=\"x-adapters\"\n[dependencies]\ny = { path = \"../../../../packages/y\" }\n");
     let _ = fs.add("/ws/packages/y/Cargo.toml", "[package]\nname=\"y\"");
     let p = project(&[
-        ("x-adapters","apps/x/crates/adapters"),
-        ("y","packages/y"),
+        ("x-adapters", "apps/x/crates/adapters"),
+        ("y", "packages/y"),
     ]);
     let mut r = Vec::new();
     check_library_service_boundary(&fs, Path::new("/ws"), &p, &BTreeMap::new(), &mut r);
-    assert!(r.is_empty(), "service internal -> package should not trigger R-ARCH-03, got: {r:?}");
+    assert!(
+        r.is_empty(),
+        "service internal -> package should not trigger R-ARCH-03, got: {r:?}"
+    );
 }
 
 // -----------------------------------------------------------------------
@@ -376,22 +476,32 @@ fn r_arch_03_service_internal_depends_on_package_ok() {
 #[test]
 fn r_arch_02_crate_with_no_layer_skipped() {
     let mut fs = StubFs::new();
-    let _ = fs.add("/ws/crates/utils/Cargo.toml",
-        "[package]\nname=\"utils\"\n[dependencies]\ndomain = { path = \"../domain\" }\n");
+    let _ = fs.add(
+        "/ws/crates/utils/Cargo.toml",
+        "[package]\nname=\"utils\"\n[dependencies]\ndomain = { path = \"../domain\" }\n",
+    );
     let _ = fs.add("/ws/crates/domain/Cargo.toml", "[package]\nname=\"domain\"");
-    let p = project(&[("utils","crates/utils"),("domain","crates/domain")]);
+    let p = project(&[("utils", "crates/utils"), ("domain", "crates/domain")]);
     let mut r = Vec::new();
     check_dependency_flow(&fs, Path::new("/ws"), &p, &BTreeMap::new(), &mut r);
-    assert!(r.is_empty(), "crate with no layer should be skipped, got: {r:?}");
+    assert!(
+        r.is_empty(),
+        "crate with no layer should be skipped, got: {r:?}"
+    );
 }
 
 #[test]
 fn r_arch_02_external_dep_not_checked() {
     let mut fs = StubFs::new();
-    let _ = fs.add("/ws/crates/domain/Cargo.toml",
-        "[package]\nname=\"domain\"\n[dependencies]\nserde = \"1\"\n");
-    let p = project(&[("domain","crates/domain")]);
+    let _ = fs.add(
+        "/ws/crates/domain/Cargo.toml",
+        "[package]\nname=\"domain\"\n[dependencies]\nserde = \"1\"\n",
+    );
+    let p = project(&[("domain", "crates/domain")]);
     let mut r = Vec::new();
     check_dependency_flow(&fs, Path::new("/ws"), &p, &BTreeMap::new(), &mut r);
-    assert!(r.is_empty(), "external (non-path) deps should not trigger R-ARCH-02, got: {r:?}");
+    assert!(
+        r.is_empty(),
+        "external (non-path) deps should not trigger R-ARCH-02, got: {r:?}"
+    );
 }

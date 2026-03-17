@@ -9,9 +9,10 @@ use syn::visit::Visit;
 
 use super::ast_visitors::{
     CfgAttrAllowVisitor, DeriveVisitor, ForbiddenMacroVisitor, GardeSkipTypedVisitor,
-    GardeSkipVisitor, IgnoreVisitor, InlineStdFsVisitor, ItemAllowVisitor, PubFnVisitor,
-    TestAttrVisitor, TestCountVisitor, UnsafeVisitor, UnwrapExpectVisitor,
+    GardeSkipVisitor, ItemAllowVisitor, PubFnVisitor, TestAttrVisitor, TestCountVisitor,
+    UnsafeVisitor, UnwrapExpectVisitor,
 };
+use super::extra_visitors::{IgnoreVisitor, InlineStdFsVisitor};
 
 pub use super::ast_visitors::{GardeSkipInfo, struct_has_non_primitive_fields};
 
@@ -309,7 +310,7 @@ pub(super) fn is_cfg_test_attr(attr: &syn::Attribute) -> bool {
 
 /// Extract the identifier (name) from a syn Item, if it has one.
 #[allow(clippy::wildcard_enum_match_arm)] // reason: syn Item has many variants, exhaustive match is impractical
-pub(super) fn item_ident(item: &syn::Item) -> Option<&syn::Ident> {
+pub(super) const fn item_ident(item: &syn::Item) -> Option<&syn::Ident> {
     match item {
         syn::Item::Fn(f) => Some(&f.sig.ident),
         syn::Item::Struct(s) => Some(&s.ident),
@@ -394,4 +395,3 @@ pub(super) fn expr_attrs(expr: &syn::Expr) -> &[syn::Attribute] {
         _ => &[],
     }
 }
-

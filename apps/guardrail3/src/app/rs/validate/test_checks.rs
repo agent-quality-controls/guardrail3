@@ -52,15 +52,18 @@ pub fn check_cargo_mutants_installed(tc: &dyn ToolChecker, results: &mut Vec<Che
 pub fn check_mutants_toml(workspace_root: &Path, results: &mut Vec<CheckResult>) {
     let mutants_path = workspace_root.join(".cargo").join("mutants.toml");
     if mutants_path.exists() {
-        results.push(CheckResult {
-            id: "R-TEST-02".to_owned(),
-            severity: Severity::Info,
-            title: ".cargo/mutants.toml exists".to_owned(),
-            message: "Mutation testing configuration found".to_owned(),
-            file: Some(mutants_path.display().to_string()),
-            line: None,
-            inventory: false,
-        }.as_inventory());
+        results.push(
+            CheckResult {
+                id: "R-TEST-02".to_owned(),
+                severity: Severity::Info,
+                title: ".cargo/mutants.toml exists".to_owned(),
+                message: "Mutation testing configuration found".to_owned(),
+                file: Some(mutants_path.display().to_string()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
     } else {
         results.push(CheckResult {
             id: "R-TEST-02".to_owned(),
@@ -98,15 +101,19 @@ fn check_mutants_profile(
     };
 
     if has_mutants_profile(&content) {
-        results.push(CheckResult {
-            id: "R-TEST-03".to_owned(),
-            severity: Severity::Info,
-            title: "[profile.mutants] configured".to_owned(),
-            message: "Optimized build profile for mutation testing found in Cargo.toml".to_owned(),
-            file: Some(cargo_path.display().to_string()),
-            line: None,
-            inventory: false,
-        }.as_inventory());
+        results.push(
+            CheckResult {
+                id: "R-TEST-03".to_owned(),
+                severity: Severity::Info,
+                title: "[profile.mutants] configured".to_owned(),
+                message: "Optimized build profile for mutation testing found in Cargo.toml"
+                    .to_owned(),
+                file: Some(cargo_path.display().to_string()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
     } else {
         results.push(CheckResult {
             id: "R-TEST-03".to_owned(),
@@ -314,4 +321,3 @@ fn file_has_inline_cfg_test_module(file: &syn::File) -> bool {
     }
     false
 }
-

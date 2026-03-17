@@ -14,15 +14,18 @@ pub fn check_publish_dry_run(
 ) {
     match tc.run_cargo_publish_dry_run(&krate.dir) {
         Some(stderr) if stderr.is_empty() || !stderr.contains("error") => {
-            results.push(CheckResult {
-                id: "R-PUB-09".to_owned(),
-                severity: Severity::Info,
-                title: format!("{}: publish dry-run passed", krate.name),
-                message: "cargo publish --dry-run succeeded".to_owned(),
-                file: Some(krate.cargo_toml_path.display().to_string()),
-                line: None,
-                inventory: false,
-            }.as_inventory());
+            results.push(
+                CheckResult {
+                    id: "R-PUB-09".to_owned(),
+                    severity: Severity::Info,
+                    title: format!("{}: publish dry-run passed", krate.name),
+                    message: "cargo publish --dry-run succeeded".to_owned(),
+                    file: Some(krate.cargo_toml_path.display().to_string()),
+                    line: None,
+                    inventory: false,
+                }
+                .as_inventory(),
+            );
         }
         Some(stderr) => {
             results.push(CheckResult {
@@ -80,15 +83,18 @@ pub fn check_path_deps(
     }
 
     if bad_deps.is_empty() {
-        results.push(CheckResult {
-            id: "R-PUB-10".to_owned(),
-            severity: Severity::Info,
-            title: format!("{}: path deps OK", krate.name),
-            message: "No path dependencies to non-publishable crates".to_owned(),
-            file: file.map(std::borrow::ToOwned::to_owned),
-            line: None,
-            inventory: false,
-        }.as_inventory());
+        results.push(
+            CheckResult {
+                id: "R-PUB-10".to_owned(),
+                severity: Severity::Info,
+                title: format!("{}: path deps OK", krate.name),
+                message: "No path dependencies to non-publishable crates".to_owned(),
+                file: file.map(std::borrow::ToOwned::to_owned),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
     } else {
         for bad in &bad_deps {
             results.push(CheckResult {
@@ -242,7 +248,11 @@ pub fn check_keywords(
         line: None,
         inventory: false,
     };
-    results.push(if severity == Severity::Info { result.as_inventory() } else { result });
+    results.push(if severity == Severity::Info {
+        result.as_inventory()
+    } else {
+        result
+    });
 }
 
 // --- R-PUB-07: categories ---
@@ -283,7 +293,11 @@ pub fn check_categories(
         line: None,
         inventory: false,
     };
-    results.push(if is_missing_or_empty { result } else { result.as_inventory() });
+    results.push(if is_missing_or_empty {
+        result
+    } else {
+        result.as_inventory()
+    });
 }
 
 /// Check if a version string is valid semver (X.Y.Z with optional -prerelease).

@@ -26,11 +26,7 @@ pub fn check_ban_list(
     check_deny_list_coverage(bans, file_path, results);
 }
 
-fn check_bans_settings(
-    bans: &toml::Value,
-    file_path: &Path,
-    results: &mut Vec<CheckResult>,
-) {
+fn check_bans_settings(bans: &toml::Value, file_path: &Path, results: &mut Vec<CheckResult>) {
     // Check multiple-versions = "deny"
     match bans.get("multiple-versions").and_then(|v| v.as_str()) {
         Some("deny") => {
@@ -90,11 +86,7 @@ fn check_bans_settings(
     }
 }
 
-fn check_deny_list_coverage(
-    bans: &toml::Value,
-    file_path: &Path,
-    results: &mut Vec<CheckResult>,
-) {
+fn check_deny_list_coverage(bans: &toml::Value, file_path: &Path, results: &mut Vec<CheckResult>) {
     let Some(deny_list) = bans.get("deny").and_then(|d| d.as_array()) else {
         results.push(CheckResult {
             id: "R12".to_owned(),

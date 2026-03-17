@@ -147,4 +147,3 @@ pub fn check_unsafe_code_forbid(
         }
     }
 }
-

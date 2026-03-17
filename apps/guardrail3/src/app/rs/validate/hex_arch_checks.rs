@@ -62,11 +62,7 @@ pub fn contains_segment(path: &str, segment: &str) -> bool {
     path.split('/').any(|s| s == segment)
 }
 
-fn resolve_layer(
-    name: &str,
-    dir: &str,
-    cfgs: &BTreeMap<String, CrateConfig>,
-) -> Option<Layer> {
+fn resolve_layer(name: &str, dir: &str, cfgs: &BTreeMap<String, CrateConfig>) -> Option<Layer> {
     if let Some(cfg) = cfgs.get(name) {
         if let Some(ref l) = cfg.layer {
             let resolved = layer_from_config(l);
@@ -163,15 +159,21 @@ pub fn check_dependency_flow(
             continue;
         }
         let cargo = root.join(member_dir).join("Cargo.toml");
-        let Some(content) = fs.read_file(&cargo) else { continue };
-        let Ok(table) = content.parse::<toml::Value>() else { continue };
+        let Some(content) = fs.read_file(&cargo) else {
+            continue;
+        };
+        let Ok(table) = content.parse::<toml::Value>() else {
+            continue;
+        };
         let Some(deps) = table.get("dependencies").and_then(|d| d.as_table()) else {
             continue;
         };
         let forbidden = src_layer.forbidden();
         for (dep_name, dep_val) in deps {
             let dep_path = extract_path_dep(dep_val);
-            if dep_path.is_none() { continue; }
+            if dep_path.is_none() {
+                continue;
+            }
             let tgt = resolve_dep_layer(dep_name, dep_path, member_dir, &layers, &dir_to_layer);
             if let Some(tgt_layer) = tgt {
                 if forbidden.contains(&tgt_layer) {
@@ -182,7 +184,8 @@ pub fn check_dependency_flow(
                         message: format!(
                             "{} crate `{crate_name}` ({member_dir}) depends on \
                              {} crate `{dep_name}`",
-                            src_layer.label(), tgt_layer.label(),
+                            src_layer.label(),
+                            tgt_layer.label(),
                         ),
                         file: Some(cargo.display().to_string()),
                         line: None,
@@ -195,7 +198,10 @@ pub fn check_dependency_flow(
 }
 
 fn extract_path_dep(value: &toml::Value) -> Option<&str> {
-    value.as_table().and_then(|t| t.get("path")).and_then(|p| p.as_str())
+    value
+        .as_table()
+        .and_then(|t| t.get("path"))
+        .and_then(|p| p.as_str())
 }
 
 fn resolve_dep_layer(
@@ -222,7 +228,9 @@ pub fn normalize_path(base: &str, rel: &str) -> String {
     let mut parts: Vec<&str> = base.split('/').collect();
     for seg in rel.split('/') {
         match seg {
-            ".." => { let _ = parts.pop(); }
+            ".." => {
+                let _ = parts.pop();
+            }
             "." | "" => {}
             s => parts.push(s),
         }
@@ -242,19 +250,28 @@ pub fn check_library_service_boundary(
         for member in &ws.members {
             let name = &member.name;
             let dir = &member.dir;
-            let lib_by_cfg = cfgs.get(name.as_str())
+            let lib_by_cfg = cfgs
+                .get(name.as_str())
                 .and_then(|c| c.profile.as_deref())
                 .is_some_and(|p| p == "library");
-            if !lib_by_cfg && !dir.starts_with("packages/") { continue; }
+            if !lib_by_cfg && !dir.starts_with("packages/") {
+                continue;
+            }
 
             let cargo = root.join(dir).join("Cargo.toml");
-            let Some(content) = fs.read_file(&cargo) else { continue };
-            let Ok(table) = content.parse::<toml::Value>() else { continue };
+            let Some(content) = fs.read_file(&cargo) else {
+                continue;
+            };
+            let Ok(table) = content.parse::<toml::Value>() else {
+                continue;
+            };
             let Some(deps) = table.get("dependencies").and_then(|d| d.as_table()) else {
                 continue;
             };
             for (dep_name, dep_val) in deps {
-                let Some(rel) = extract_path_dep(dep_val) else { continue };
+                let Some(rel) = extract_path_dep(dep_val) else {
+                    continue;
+                };
                 let resolved = normalize_path(dir, rel);
                 if is_service_internal(&resolved) {
                     results.push(CheckResult {
@@ -294,8 +311,8 @@ pub fn check_unconfigured_members(
             let in_apps = root_str.contains("/apps/");
 
             // Check if apps/ exists at the root (workspace that should have apps/)
-            let has_apps_dir = fs.read_file(&root.join("apps")).is_some()
-                || root.join("apps").exists();
+            let has_apps_dir =
+                fs.read_file(&root.join("apps")).is_some() || root.join("apps").exists();
 
             if !in_apps && !has_apps_dir {
                 results.push(CheckResult {
@@ -340,7 +357,10 @@ pub fn check_unconfigured_members(
         let ws_root_display = ws.root.display().to_string();
         for member in &ws.members {
             let crate_name = member.dir.rsplit('/').next().unwrap_or(&member.dir);
-            if !cfgs.contains_key(crate_name) && !cfgs.contains_key(member.dir.as_str()) && !cfgs.contains_key(&member.name) {
+            if !cfgs.contains_key(crate_name)
+                && !cfgs.contains_key(member.dir.as_str())
+                && !cfgs.contains_key(&member.name)
+            {
                 results.push(CheckResult {
                     id: "R-ARCH-04".to_owned(),
                     severity: Severity::Warn,
@@ -370,4 +390,3 @@ pub fn is_service_internal(path: &str) -> bool {
         && parts.first().is_some_and(|s| *s == "apps")
         && parts.get(2).is_some_and(|s| *s == "crates")
 }
-

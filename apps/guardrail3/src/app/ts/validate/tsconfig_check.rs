@@ -9,19 +9,45 @@ type TsConfigBool = (&'static str, &'static str);
 /// Return a short explanation of what a tsconfig setting does and why it matters.
 fn tsconfig_explanation(key: &str) -> &'static str {
     match key {
-        "strict" => " Enables all strict type-checking options (strictNullChecks, strictFunctionTypes, etc.), catching a wide class of bugs at compile time.",
-        "noImplicitReturns" => " Ensures every code path in a function returns a value, preventing undefined-at-runtime bugs.",
-        "noUnusedLocals" => " Catches declared but unused variables, which are dead code or indicate forgotten logic.",
-        "noUnusedParameters" => " Catches unused function parameters, which may indicate incomplete implementation.",
-        "noUncheckedIndexedAccess" => " Array/object index access returns `T | undefined` instead of just `T`, forcing null checks on dynamic access.",
-        "exactOptionalPropertyTypes" => " Distinguishes between `undefined` (property exists with no value) and missing (property not set), catching subtle bugs.",
-        "forceConsistentCasingInFileNames" => " Prevents import path casing mismatches that work on macOS/Windows but fail on Linux CI.",
-        "isolatedModules" => " Ensures each file can be independently transpiled (required by swc, esbuild, and other fast bundlers).",
-        "noPropertyAccessFromIndexSignature" => " Forces bracket notation for index signature access, making it clear when a property might not exist.",
-        "noImplicitOverride" => " Requires explicit `override` keyword when overriding base class methods, catching accidental name collisions.",
-        "noFallthroughCasesInSwitch" => " Catches switch cases that fall through to the next case without `break`, which is almost always a bug.",
-        "allowUnreachableCode" => " When false, catches code after return/throw/break that can never execute, indicating logic errors.",
-        "allowUnusedLabels" => " When false, catches unused labels which are dead code and often indicate copy-paste errors.",
+        "strict" => {
+            " Enables all strict type-checking options (strictNullChecks, strictFunctionTypes, etc.), catching a wide class of bugs at compile time."
+        }
+        "noImplicitReturns" => {
+            " Ensures every code path in a function returns a value, preventing undefined-at-runtime bugs."
+        }
+        "noUnusedLocals" => {
+            " Catches declared but unused variables, which are dead code or indicate forgotten logic."
+        }
+        "noUnusedParameters" => {
+            " Catches unused function parameters, which may indicate incomplete implementation."
+        }
+        "noUncheckedIndexedAccess" => {
+            " Array/object index access returns `T | undefined` instead of just `T`, forcing null checks on dynamic access."
+        }
+        "exactOptionalPropertyTypes" => {
+            " Distinguishes between `undefined` (property exists with no value) and missing (property not set), catching subtle bugs."
+        }
+        "forceConsistentCasingInFileNames" => {
+            " Prevents import path casing mismatches that work on macOS/Windows but fail on Linux CI."
+        }
+        "isolatedModules" => {
+            " Ensures each file can be independently transpiled (required by swc, esbuild, and other fast bundlers)."
+        }
+        "noPropertyAccessFromIndexSignature" => {
+            " Forces bracket notation for index signature access, making it clear when a property might not exist."
+        }
+        "noImplicitOverride" => {
+            " Requires explicit `override` keyword when overriding base class methods, catching accidental name collisions."
+        }
+        "noFallthroughCasesInSwitch" => {
+            " Catches switch cases that fall through to the next case without `break`, which is almost always a bug."
+        }
+        "allowUnreachableCode" => {
+            " When false, catches code after return/throw/break that can never execute, indicating logic errors."
+        }
+        "allowUnusedLabels" => {
+            " When false, catches unused labels which are dead code and often indicate copy-paste errors."
+        }
         _ => "",
     }
 }
@@ -53,15 +79,21 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
         }
     };
 
-    results.push(CheckResult {
-        id: "T9".to_owned(),
-        severity: Severity::Info,
-        title: "TypeScript config exists".to_owned(),
-        message: format!("TypeScript compiler config found: `{}`.", tsconfig_path.display()),
-        file: Some(tsconfig_path.display().to_string()),
-        line: None,
-        inventory: false,
-    }.as_inventory());
+    results.push(
+        CheckResult {
+            id: "T9".to_owned(),
+            severity: Severity::Info,
+            title: "TypeScript config exists".to_owned(),
+            message: format!(
+                "TypeScript compiler config found: `{}`.",
+                tsconfig_path.display()
+            ),
+            file: Some(tsconfig_path.display().to_string()),
+            line: None,
+            inventory: false,
+        }
+        .as_inventory(),
+    );
 
     let Some(content) = fs.read_file(&tsconfig_path) else {
         return;
@@ -121,15 +153,18 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
 
         match val {
             Some(true) => {
-                results.push(CheckResult {
-                    id: (*id).to_owned(),
-                    severity: Severity::Info,
-                    title: format!("`{key}` enabled in tsconfig"),
-                    message: format!("`{key}` is correctly set to `true`.{explanation}"),
-                    file: Some(tsconfig_path.display().to_string()),
-                    line: None,
-                    inventory: false,
-                }.as_inventory());
+                results.push(
+                    CheckResult {
+                        id: (*id).to_owned(),
+                        severity: Severity::Info,
+                        title: format!("`{key}` enabled in tsconfig"),
+                        message: format!("`{key}` is correctly set to `true`.{explanation}"),
+                        file: Some(tsconfig_path.display().to_string()),
+                        line: None,
+                        inventory: false,
+                    }
+                    .as_inventory(),
+                );
             }
             Some(false) => {
                 results.push(CheckResult {
@@ -170,15 +205,18 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
 
         match val {
             Some(true) => {
-                results.push(CheckResult {
-                    id: (*id).to_owned(),
-                    severity: Severity::Info,
-                    title: format!("`{key}` enabled in tsconfig"),
-                    message: format!("`{key}` is correctly set to `true`.{explanation}"),
-                    file: Some(tsconfig_path.display().to_string()),
-                    line: None,
-                    inventory: false,
-                }.as_inventory());
+                results.push(
+                    CheckResult {
+                        id: (*id).to_owned(),
+                        severity: Severity::Info,
+                        title: format!("`{key}` enabled in tsconfig"),
+                        message: format!("`{key}` is correctly set to `true`.{explanation}"),
+                        file: Some(tsconfig_path.display().to_string()),
+                        line: None,
+                        inventory: false,
+                    }
+                    .as_inventory(),
+                );
             }
             _ => {
                 results.push(CheckResult {
@@ -206,15 +244,18 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
 
         match val {
             Some(true) => {
-                results.push(CheckResult {
-                    id: (*id).to_owned(),
-                    severity: Severity::Info,
-                    title: format!("`{key}` enabled in tsconfig"),
-                    message: format!("`{key}` is correctly set to `true`.{explanation}"),
-                    file: Some(tsconfig_path.display().to_string()),
-                    line: None,
-                    inventory: false,
-                }.as_inventory());
+                results.push(
+                    CheckResult {
+                        id: (*id).to_owned(),
+                        severity: Severity::Info,
+                        title: format!("`{key}` enabled in tsconfig"),
+                        message: format!("`{key}` is correctly set to `true`.{explanation}"),
+                        file: Some(tsconfig_path.display().to_string()),
+                        line: None,
+                        inventory: false,
+                    }
+                    .as_inventory(),
+                );
             }
             Some(false) => {
                 results.push(CheckResult {
@@ -256,15 +297,18 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
 
         match val {
             Some(false) => {
-                results.push(CheckResult {
-                    id: (*id).to_owned(),
-                    severity: Severity::Info,
-                    title: format!("`{key}` correctly set to false"),
-                    message: format!("`{key}` is correctly set to `false`.{explanation}"),
-                    file: Some(tsconfig_path.display().to_string()),
-                    line: None,
-                    inventory: false,
-                }.as_inventory());
+                results.push(
+                    CheckResult {
+                        id: (*id).to_owned(),
+                        severity: Severity::Info,
+                        title: format!("`{key}` correctly set to false"),
+                        message: format!("`{key}` is correctly set to `false`.{explanation}"),
+                        file: Some(tsconfig_path.display().to_string()),
+                        line: None,
+                        inventory: false,
+                    }
+                    .as_inventory(),
+                );
             }
             Some(true) => {
                 results.push(CheckResult {

@@ -57,11 +57,7 @@ fn check_edition_and_rust_version(
     }
 }
 
-fn check_publish_status(
-    table: &toml::Value,
-    cargo_path: &Path,
-    results: &mut Vec<CheckResult>,
-) {
+fn check_publish_status(table: &toml::Value, cargo_path: &Path, results: &mut Vec<CheckResult>) {
     let publish = table
         .get("workspace")
         .and_then(|w| w.get("package"))
@@ -81,11 +77,7 @@ fn check_publish_status(
     }
 }
 
-fn check_release_profile(
-    table: &toml::Value,
-    cargo_path: &Path,
-    results: &mut Vec<CheckResult>,
-) {
+fn check_release_profile(table: &toml::Value, cargo_path: &Path, results: &mut Vec<CheckResult>) {
     let release = table.get("profile").and_then(|p| p.get("release"));
 
     if let Some(rel) = release {

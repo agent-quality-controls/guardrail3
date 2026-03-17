@@ -1,4 +1,4 @@
-//! Tests extracted from app::ts::validate::ts_arch_checks
+//! Tests extracted from `app::ts::validate::ts_arch_checks`
 #![allow(
     clippy::expect_used,
     clippy::disallowed_methods,
@@ -11,8 +11,8 @@ use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 use guardrail3::app::ts::validate::ts_arch_checks::{
-    check_file_imports, check_single_app_structure, extract_import_path, layer_from_path,
-    resolve_relative, TsLayer,
+    TsLayer, check_file_imports, check_single_app_structure, extract_import_path, layer_from_path,
+    resolve_relative,
 };
 use guardrail3::domain::report::Severity;
 use guardrail3::ports::outbound::FileSystem;
@@ -22,7 +22,7 @@ struct StubFs {
 }
 
 impl StubFs {
-    fn new() -> Self {
+    const fn new() -> Self {
         Self {
             files: BTreeMap::new(),
         }
@@ -85,10 +85,7 @@ fn t_arch_01_app_with_full_structure() {
     let app_dir = Path::new("/project/apps/my-app");
     let mut results = Vec::new();
     check_single_app_structure(&fs, app_dir, &mut results);
-    assert!(
-        results.is_empty(),
-        "expected no warnings, got: {results:?}"
-    );
+    assert!(results.is_empty(), "expected no warnings, got: {results:?}");
 }
 
 // -------------------------------------------------------------------
@@ -123,9 +120,8 @@ fn t_arch_02_domain_imports_application_fails() {
 
 #[test]
 fn t_arch_02_application_imports_domain_ok() {
-    let file_path = Path::new(
-        "/project/apps/my-app/src/modules/application/commands/create-user.ts",
-    );
+    let file_path =
+        Path::new("/project/apps/my-app/src/modules/application/commands/create-user.ts");
     let content = "import { User } from '../../domain/types';\n";
     let mut results = Vec::new();
     check_file_imports(file_path, content, &mut results);
@@ -137,9 +133,8 @@ fn t_arch_02_application_imports_domain_ok() {
 
 #[test]
 fn t_arch_02_application_imports_adapters_fails() {
-    let file_path = Path::new(
-        "/project/apps/my-app/src/modules/application/commands/create-user.ts",
-    );
+    let file_path =
+        Path::new("/project/apps/my-app/src/modules/application/commands/create-user.ts");
     let content = "import { db } from '../../adapters/outbound/db';\n";
     let mut results = Vec::new();
     check_file_imports(file_path, content, &mut results);
@@ -152,9 +147,7 @@ fn t_arch_02_application_imports_adapters_fails() {
 
 #[test]
 fn t_arch_02_adapters_imports_everything_ok() {
-    let file_path = Path::new(
-        "/project/apps/my-app/src/modules/adapters/outbound/db.ts",
-    );
+    let file_path = Path::new("/project/apps/my-app/src/modules/adapters/outbound/db.ts");
     let content = "\
 import { User } from '../../domain/types';
 import { UserRepo } from '../../ports/outbound/user-repo';
@@ -196,19 +189,14 @@ fn layer_from_path_detects_layers() {
         Some(TsLayer::Ports)
     );
     assert_eq!(
-        layer_from_path(Path::new(
-            "/p/src/modules/application/commands/create.ts"
-        )),
+        layer_from_path(Path::new("/p/src/modules/application/commands/create.ts")),
         Some(TsLayer::Application)
     );
     assert_eq!(
         layer_from_path(Path::new("/p/src/modules/adapters/outbound/db.ts")),
         Some(TsLayer::Adapters)
     );
-    assert_eq!(
-        layer_from_path(Path::new("/p/src/utils/helper.ts")),
-        None
-    );
+    assert_eq!(layer_from_path(Path::new("/p/src/utils/helper.ts")), None);
 }
 
 #[test]

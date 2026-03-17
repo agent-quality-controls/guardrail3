@@ -298,7 +298,7 @@ The Garde pattern (from `docs/GARDE_GUARDRAILS.md` in the template) enforces val
 
 3. **walkdir bypasses fs.rs.** The `walkdir` crate does directory traversal outside the centralized fs module. clippy.toml only bans `std::fs`, not third-party crate I/O. This is a design gap.
 
-4. **Pre-commit hook grep is dumb.** The tamper detection greps for `#[allow(` and `#![allow(` as literal text. Source files that check for these patterns (like guardrail3's own allow_checks.rs) must use string concatenation to avoid false matches.
+4. **Pre-commit hook uses guardrail3 validate.** The hook runs `guardrail3 rs validate --staged` and `guardrail3 ts validate --staged` for AST-based tamper detection instead of grep. This eliminates false positives from string literals containing patterns like `#[allow(`.
 
 ## Adding a New Check
 

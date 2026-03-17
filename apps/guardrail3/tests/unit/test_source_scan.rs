@@ -1,6 +1,4 @@
-use guardrail3::app::rs::validate::source_scan::{
-    filter_non_comment_lines, strip_string_literals,
-};
+use guardrail3::app::rs::validate::source_scan::{filter_non_comment_lines, strip_string_literals};
 
 #[test]
 #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results

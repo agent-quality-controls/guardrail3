@@ -110,15 +110,18 @@ pub fn check_per_crate_clippy(
         let crate_dir = workspace_root.join(member);
         let crate_clippy = crate_dir.join("clippy.toml");
         if crate_clippy.exists() {
-            results.push(CheckResult {
-                id: "R2".to_owned(),
-                severity: Severity::Info,
-                title: "Per-crate clippy.toml".to_owned(),
-                message: format!("Found for {member}"),
-                file: Some(crate_clippy.display().to_string()),
-                line: None,
-                inventory: false,
-            }.as_inventory());
+            results.push(
+                CheckResult {
+                    id: "R2".to_owned(),
+                    severity: Severity::Info,
+                    title: "Per-crate clippy.toml".to_owned(),
+                    message: format!("Found for {member}"),
+                    file: Some(crate_clippy.display().to_string()),
+                    line: None,
+                    inventory: false,
+                }
+                .as_inventory(),
+            );
 
             // Check per-crate clippy.toml content for global-state type bans
             check_per_crate_clippy_content(fs, &crate_clippy, member, &mut results);
@@ -176,25 +179,32 @@ fn check_per_crate_clippy_content(
         }
 
         if found_global_bans.is_empty() {
-            results.push(CheckResult {
-                id: "R2".to_owned(),
-                severity: Severity::Info,
-                title: format!("{member}: no global-state type bans"),
-                message: "No LazyLock/OnceLock/once_cell bans in per-crate clippy.toml".to_owned(),
-                file: Some(path.display().to_string()),
-                line: None,
-                inventory: false,
-            }.as_inventory());
+            results.push(
+                CheckResult {
+                    id: "R2".to_owned(),
+                    severity: Severity::Info,
+                    title: format!("{member}: no global-state type bans"),
+                    message: "No LazyLock/OnceLock/once_cell bans in per-crate clippy.toml"
+                        .to_owned(),
+                    file: Some(path.display().to_string()),
+                    line: None,
+                    inventory: false,
+                }
+                .as_inventory(),
+            );
         } else {
-            results.push(CheckResult {
-                id: "R2".to_owned(),
-                severity: Severity::Info,
-                title: format!("{member}: global-state type bans present"),
-                message: format!("Bans: {}", found_global_bans.join(", ")),
-                file: Some(path.display().to_string()),
-                line: None,
-                inventory: false,
-            }.as_inventory());
+            results.push(
+                CheckResult {
+                    id: "R2".to_owned(),
+                    severity: Severity::Info,
+                    title: format!("{member}: global-state type bans present"),
+                    message: format!("Bans: {}", found_global_bans.join(", ")),
+                    file: Some(path.display().to_string()),
+                    line: None,
+                    inventory: false,
+                }
+                .as_inventory(),
+            );
         }
     }
 }
@@ -254,15 +264,18 @@ fn check_clippy_int_threshold(
 ) {
     match table.get(key) {
         Some(toml::Value::Integer(v)) if *v == expected_val => {
-            results.push(CheckResult {
-                id: "R3".to_owned(),
-                severity: Severity::Info,
-                title: format!("{key} correct"),
-                message: format!("{key} = {v}"),
-                file: Some(path.display().to_string()),
-                line: None,
-                inventory: false,
-            }.as_inventory());
+            results.push(
+                CheckResult {
+                    id: "R3".to_owned(),
+                    severity: Severity::Info,
+                    title: format!("{key} correct"),
+                    message: format!("{key} = {v}"),
+                    file: Some(path.display().to_string()),
+                    line: None,
+                    inventory: false,
+                }
+                .as_inventory(),
+            );
         }
         Some(toml::Value::Integer(v)) => {
             results.push(CheckResult {

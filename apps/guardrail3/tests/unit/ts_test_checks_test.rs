@@ -1,4 +1,4 @@
-//! Tests extracted from app::ts::validate::test_checks
+//! Tests extracted from `app::ts::validate::test_checks`
 #![allow(
     clippy::expect_used,
     clippy::disallowed_methods,
@@ -57,8 +57,7 @@ fn t_test_02_no_test_files() {
 #[test]
 fn t_test_02_test_file_exists() {
     let dir = make_temp_dir();
-    stdfs::write(dir.path().join("foo.test.ts"), "test('a', () => {})")
-        .expect("write test file");
+    stdfs::write(dir.path().join("foo.test.ts"), "test('a', () => {})").expect("write test file");
     let mut results = Vec::new();
     check_test_files_exist(dir.path(), &mut results);
     assert_eq!(results.len(), 1, "Should produce exactly one result");
@@ -81,8 +80,7 @@ fn t_test_03_no_runner_config() {
 #[test]
 fn t_test_03_vitest_config_exists() {
     let dir = make_temp_dir();
-    stdfs::write(dir.path().join("vitest.config.ts"), "export default {}")
-        .expect("write config");
+    stdfs::write(dir.path().join("vitest.config.ts"), "export default {}").expect("write config");
     let mut results = Vec::new();
     check_test_runner_config(dir.path(), &mut results);
     assert_eq!(results.len(), 1, "Should produce exactly one result");
@@ -181,7 +179,8 @@ fn t_test_04_tsx_jsx_content_uses_treesitter() {
 
 #[test]
 fn t_test_04_tsx_skip_in_string_not_flagged() {
-    let content = "const App = () => <div>{\"test.skip('broken', () => {})\"}</div>;\nexport default App;";
+    let content =
+        "const App = () => <div>{\"test.skip('broken', () => {})\"}</div>;\nexport default App;";
     let results = check_skip_without_reason_content(content, "app.test.tsx");
     assert!(
         results.is_empty(),
@@ -205,7 +204,8 @@ fn t_test_05_tsx_jsx_content_uses_treesitter() {
 
 #[test]
 fn t_test_05_tsx_only_in_string_not_flagged() {
-    let content = "const App = () => <div>{\"describe.only('suite', () => {})\"}</div>;\nexport default App;";
+    let content =
+        "const App = () => <div>{\"describe.only('suite', () => {})\"}</div>;\nexport default App;";
     let results = check_only_in_source_content(content, "app.test.tsx");
     assert!(
         results.is_empty(),

@@ -103,7 +103,50 @@ fn check_rustfmt_str(
                 id: "R22".to_owned(),
                 severity: Severity::Warn,
                 title: format!("rustfmt {key} missing"),
-                message: format!("{key} not set. Add `{key} = \"{expected_val}\"` to rustfmt.toml."),
+                message: format!(
+                    "{key} not set. Add `{key} = \"{expected_val}\"` to rustfmt.toml."
+                ),
+                file: Some(path.display().to_string()),
+                line: None,
+                inventory: false,
+            });
+        }
+    }
+}
+
+/// Check a rustfmt.toml setting against an expected value.
+/// Works for both integer and boolean settings by comparing the TOML value's display form.
+fn check_rustfmt_setting(
+    table: &toml::Value,
+    key: &str,
+    expected_display: &str,
+    matches: impl Fn(&toml::Value) -> bool,
+    path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
+    match table.get(key) {
+        Some(v) if matches(v) => {}
+        Some(v) => {
+            results.push(CheckResult {
+                id: "R22".to_owned(),
+                severity: Severity::Warn,
+                title: format!("rustfmt {key} wrong"),
+                message: format!(
+                    "{key} = {v} but should be {expected_display}. Set `{key} = {expected_display}` in rustfmt.toml."
+                ),
+                file: Some(path.display().to_string()),
+                line: None,
+                inventory: false,
+            });
+        }
+        None => {
+            results.push(CheckResult {
+                id: "R22".to_owned(),
+                severity: Severity::Warn,
+                title: format!("rustfmt {key} missing"),
+                message: format!(
+                    "{key} not set. Add `{key} = {expected_display}` to rustfmt.toml."
+                ),
                 file: Some(path.display().to_string()),
                 line: None,
                 inventory: false,
@@ -119,31 +162,15 @@ fn check_rustfmt_int(
     path: &Path,
     results: &mut Vec<CheckResult>,
 ) {
-    match table.get(key) {
-        Some(toml::Value::Integer(v)) if *v == expected_val => {}
-        Some(v) => {
-            results.push(CheckResult {
-                id: "R22".to_owned(),
-                severity: Severity::Warn,
-                title: format!("rustfmt {key} wrong"),
-                message: format!("{key} = {v} but should be {expected_val}. Set `{key} = {expected_val}` in rustfmt.toml."),
-                file: Some(path.display().to_string()),
-                line: None,
-                inventory: false,
-            });
-        }
-        None => {
-            results.push(CheckResult {
-                id: "R22".to_owned(),
-                severity: Severity::Warn,
-                title: format!("rustfmt {key} missing"),
-                message: format!("{key} not set. Add `{key} = {expected_val}` to rustfmt.toml."),
-                file: Some(path.display().to_string()),
-                line: None,
-                inventory: false,
-            });
-        }
-    }
+    let expected_display = expected_val.to_string();
+    check_rustfmt_setting(
+        table,
+        key,
+        &expected_display,
+        |v| v.as_integer() == Some(expected_val),
+        path,
+        results,
+    );
 }
 
 fn check_rustfmt_bool(
@@ -153,31 +180,15 @@ fn check_rustfmt_bool(
     path: &Path,
     results: &mut Vec<CheckResult>,
 ) {
-    match table.get(key) {
-        Some(toml::Value::Boolean(v)) if *v == expected_val => {}
-        Some(v) => {
-            results.push(CheckResult {
-                id: "R22".to_owned(),
-                severity: Severity::Warn,
-                title: format!("rustfmt {key} wrong"),
-                message: format!("{key} = {v} but should be {expected_val}. Set `{key} = {expected_val}` in rustfmt.toml."),
-                file: Some(path.display().to_string()),
-                line: None,
-                inventory: false,
-            });
-        }
-        None => {
-            results.push(CheckResult {
-                id: "R22".to_owned(),
-                severity: Severity::Warn,
-                title: format!("rustfmt {key} missing"),
-                message: format!("{key} not set. Add `{key} = {expected_val}` to rustfmt.toml."),
-                file: Some(path.display().to_string()),
-                line: None,
-                inventory: false,
-            });
-        }
-    }
+    let expected_display = expected_val.to_string();
+    check_rustfmt_setting(
+        table,
+        key,
+        &expected_display,
+        |v| v.as_bool() == Some(expected_val),
+        path,
+        results,
+    );
 }
 
 fn check_rustfmt_extra_settings(

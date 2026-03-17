@@ -99,15 +99,8 @@ fn is_process_dot_env(node: &Node<'_>, source: &[u8]) -> bool {
 
 fn collect_any_types(node: &Node<'_>, source: &[u8], out: &mut Vec<usize>) {
     match node.kind() {
-        // `: any` in type annotations
-        "type_annotation" => {
-            if has_predefined_any_child(node, source) {
-                let line = node.start_position().row.saturating_add(1);
-                out.push(line);
-            }
-        }
-        // `as any` and `as Record<string, any>` expressions
-        "as_expression" => {
+        // `: any` in type annotations, `as any` and `as Record<string, any>` expressions
+        "type_annotation" | "as_expression" => {
             if has_predefined_any_child(node, source) {
                 let line = node.start_position().row.saturating_add(1);
                 out.push(line);
@@ -200,4 +193,3 @@ fn node_text<'a>(node: &Node<'_>, source: &'a [u8]) -> &'a str {
         .and_then(|b| std::str::from_utf8(b).ok())
         .unwrap_or("")
 }
-

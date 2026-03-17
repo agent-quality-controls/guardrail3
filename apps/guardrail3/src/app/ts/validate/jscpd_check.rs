@@ -23,15 +23,18 @@ pub fn check_jscpd(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
         return;
     }
 
-    results.push(CheckResult {
-        id: "T19".to_owned(),
-        severity: Severity::Info,
-        title: "Copy-paste detection config `.jscpd.json` exists".to_owned(),
-        message: "jscpd configuration file found at project root.".to_owned(),
-        file: Some(jscpd_path.display().to_string()),
-        line: None,
-        inventory: false,
-    }.as_inventory());
+    results.push(
+        CheckResult {
+            id: "T19".to_owned(),
+            severity: Severity::Info,
+            title: "Copy-paste detection config `.jscpd.json` exists".to_owned(),
+            message: "jscpd configuration file found at project root.".to_owned(),
+            file: Some(jscpd_path.display().to_string()),
+            line: None,
+            inventory: false,
+        }
+        .as_inventory(),
+    );
 
     let Some(content) = fs.read_file(&jscpd_path) else {
         return;
@@ -113,18 +116,21 @@ pub fn check_jscpd(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
     if let Some(serde_json::Value::Array(ignore)) = json.get("ignore") {
         for pattern in ignore {
             if let Some(p) = pattern.as_str() {
-                results.push(CheckResult {
-                    id: "T22".to_owned(),
-                    severity: Severity::Info,
-                    title: "jscpd ignore pattern configured".to_owned(),
-                    message: format!(
-                        "Ignore pattern: `{p}`. Files matching this pattern are excluded from \
+                results.push(
+                    CheckResult {
+                        id: "T22".to_owned(),
+                        severity: Severity::Info,
+                        title: "jscpd ignore pattern configured".to_owned(),
+                        message: format!(
+                            "Ignore pattern: `{p}`. Files matching this pattern are excluded from \
                          copy-paste detection. Verify this exclusion is justified."
-                    ),
-                    file: Some(jscpd_path.display().to_string()),
-                    line: None,
-                    inventory: false,
-                }.as_inventory());
+                        ),
+                        file: Some(jscpd_path.display().to_string()),
+                        line: None,
+                        inventory: false,
+                    }
+                    .as_inventory(),
+                );
             }
         }
     }
@@ -195,18 +201,21 @@ pub fn check_velite_config(path: &Path, results: &mut Vec<CheckResult>) {
         } else {
             &velite_ts_path
         };
-        results.push(CheckResult {
-            id: "T61".to_owned(),
-            severity: Severity::Info,
-            title: "Velite content config exists".to_owned(),
-            message: format!(
-                "Velite config found: `{}`. Velite processes MDX/markdown content into typed, \
+        results.push(
+            CheckResult {
+                id: "T61".to_owned(),
+                severity: Severity::Info,
+                title: "Velite content config exists".to_owned(),
+                message: format!(
+                    "Velite config found: `{}`. Velite processes MDX/markdown content into typed, \
                  validated collections at build time.",
-                found_path.display()
-            ),
-            file: Some(found_path.display().to_string()),
-            line: None,
-            inventory: false,
-        }.as_inventory());
+                    found_path.display()
+                ),
+                file: Some(found_path.display().to_string()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
     }
 }

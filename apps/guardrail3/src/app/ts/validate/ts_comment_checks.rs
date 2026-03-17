@@ -47,18 +47,21 @@ fn check_block_eslint_disable(
         return;
     }
     if text.contains("-- ") {
-        results.push(CheckResult {
-            id: "T24".to_owned(),
-            severity: Severity::Info,
-            title: "Block eslint-disable with reason".to_owned(),
-            message: format!(
-                "Block-level `eslint-disable` with documented reason: `{text}`. \
+        results.push(
+            CheckResult {
+                id: "T24".to_owned(),
+                severity: Severity::Info,
+                title: "Block eslint-disable with reason".to_owned(),
+                message: format!(
+                    "Block-level `eslint-disable` with documented reason: `{text}`. \
                  Block disables suppress ESLint rules for an entire section. Tracked for audit."
-            ),
-            file: Some(path.display().to_string()),
-            line: Some(line_number),
-            inventory: false,
-        }.as_inventory());
+                ),
+                file: Some(path.display().to_string()),
+                line: Some(line_number),
+                inventory: false,
+            }
+            .as_inventory(),
+        );
     } else {
         results.push(CheckResult {
             id: "T23".to_owned(),
@@ -112,17 +115,20 @@ fn emit_line_suppression_result(
     results: &mut Vec<CheckResult>,
 ) {
     if text.contains("-- ") {
-        results.push(CheckResult {
-            id: "T26".to_owned(),
-            severity: Severity::Info,
-            title: format!("{kind} eslint-disable with reason"),
-            message: format!(
-                "{kind} ESLint suppression with documented reason: `{text}`. Tracked for audit."
-            ),
-            file: Some(path.display().to_string()),
-            line: Some(line_number),
-            inventory: false,
-        }.as_inventory());
+        results.push(
+            CheckResult {
+                id: "T26".to_owned(),
+                severity: Severity::Info,
+                title: format!("{kind} eslint-disable with reason"),
+                message: format!(
+                    "{kind} ESLint suppression with documented reason: `{text}`. Tracked for audit."
+                ),
+                file: Some(path.display().to_string()),
+                line: Some(line_number),
+                inventory: false,
+            }
+            .as_inventory(),
+        );
     } else {
         results.push(CheckResult {
             id: "T25".to_owned(),

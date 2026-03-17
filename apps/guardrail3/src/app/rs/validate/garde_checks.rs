@@ -3,6 +3,10 @@ use std::path::Path;
 
 use crate::domain::report::{CheckResult, Severity};
 use crate::ports::outbound::FileSystem;
+
+/// Result of scanning for unvalidated input structs: (count with validate, missing struct names).
+pub type UnvalidatedInputResult = (usize, Vec<String>);
+
 /// Expected serde/toml/yaml deserialization method bans for Garde boundary validation.
 pub const EXPECTED_SERDE_METHOD_BANS: &[&str] = &[
     "serde_json::from_str",
@@ -101,15 +105,18 @@ pub fn check(fs: &dyn FileSystem, workspace_root: &Path) -> Vec<CheckResult> {
 
 pub fn check_garde_dependency(cargo_content: Option<&str>) -> Vec<CheckResult> {
     let Some(content) = cargo_content else {
-        return vec![CheckResult {
-            id: "R-GARDE-01".to_owned(),
-            severity: Severity::Info,
-            title: "Cargo.toml not found".to_owned(),
-            message: "Cannot check for garde dependency".to_owned(),
-            file: None,
-            line: None,
-            inventory: false,
-        }.as_inventory()];
+        return vec![
+            CheckResult {
+                id: "R-GARDE-01".to_owned(),
+                severity: Severity::Info,
+                title: "Cargo.toml not found".to_owned(),
+                message: "Cannot check for garde dependency".to_owned(),
+                file: None,
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        ];
     };
 
     if content_has_garde_dependency(content) {
@@ -259,9 +266,9 @@ pub fn check_derive_inventory(
 /// Check if a macro name matches any of the input boundary derives,
 /// accounting for path-qualified forms like `serde::Deserialize` or `clap::Parser`.
 pub fn is_input_boundary_derive(macro_name: &str) -> bool {
-    INPUT_BOUNDARY_DERIVES.iter().any(|&d| {
-        macro_name == d || macro_name.ends_with(&format!("::{d}"))
-    })
+    INPUT_BOUNDARY_DERIVES
+        .iter()
+        .any(|&d| macro_name == d || macro_name.ends_with(&format!("::{d}")))
 }
 
 /// Count structs that derive any input boundary trait (`Deserialize`, `Parser`, `Args`, `FromRow`)
@@ -277,18 +284,15 @@ pub fn count_unvalidated_input_structs(
 }
 
 /// Find structs that derive input boundary traits but are missing `Validate`.
-/// Returns (count_with_validate, vec_of_missing_struct_names).
+/// Returns (`count_with_validate`, `vec_of_missing_struct_names`).
 pub fn find_unvalidated_input_structs(
     derives: &[super::ast_helpers::DeriveInfo],
-) -> (usize, Vec<String>) {
+) -> UnvalidatedInputResult {
     let mut with_validate: usize = 0;
     let mut missing_names: Vec<String> = Vec::new();
 
     for info in derives {
-        let has_input_boundary = info
-            .macros
-            .iter()
-            .any(|m| is_input_boundary_derive(m));
+        let has_input_boundary = info.macros.iter().any(|m| is_input_boundary_derive(m));
         if !has_input_boundary {
             continue;
         }
@@ -366,11 +370,13 @@ pub fn check_ban_presence(
             id: check_id.to_owned(),
             severity: Severity::Warn,
             title: format!("Missing {label}s"),
-            message: format!("Missing from clippy.toml {key}: {}. Without these bans, code can bypass the Validated<T> wrapper and deserialize input without runtime validation. Add them to clippy.toml or run `guardrail3 generate`.", missing.join(", ")),
+            message: format!(
+                "Missing from clippy.toml {key}: {}. Without these bans, code can bypass the Validated<T> wrapper and deserialize input without runtime validation. Add them to clippy.toml or run `guardrail3 generate`.",
+                missing.join(", ")
+            ),
             file: Some(file.to_owned()),
             line: None,
             inventory: false,
         }]
     }
 }
-

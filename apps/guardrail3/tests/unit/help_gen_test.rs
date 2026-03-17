@@ -13,10 +13,7 @@ fn inject_help_does_not_panic() {
         after.contains("COMMAND REFERENCE"),
         "missing COMMAND REFERENCE"
     );
-    assert!(
-        after.contains("SETUP GUIDE"),
-        "missing SETUP GUIDE in help"
-    );
+    assert!(after.contains("SETUP GUIDE"), "missing SETUP GUIDE in help");
     assert!(after.contains("PROFILES"), "missing PROFILES in help");
 }
 

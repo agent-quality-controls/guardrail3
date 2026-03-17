@@ -33,8 +33,11 @@ pub struct RustConfig {
     pub workspace_root: Option<String>,
     #[garde(inner(inner(length(min = 1))))] // reason: each workspace path must be non-empty
     pub workspaces: Option<Vec<String>>,
-    #[garde(skip)] // reason: BTreeMap values — garde cannot dive into map values; validated by layer_from_config
+    #[garde(skip)]
+    // reason: BTreeMap values — garde cannot dive into map values; validated by layer_from_config
     pub crates: Option<CrateMap>,
+    #[garde(dive)] // reason: recursively validate nested RustChecksConfig
+    pub checks: Option<RustChecksConfig>,
 }
 
 #[derive(Debug, Deserialize, garde::Validate)]
@@ -48,6 +51,26 @@ pub struct CrateConfig {
 }
 
 #[derive(Debug, Deserialize, garde::Validate)]
+pub struct RustChecksConfig {
+    #[garde(skip)] // reason: Option<bool> — inherently valid
+    pub architecture: Option<bool>,
+    #[garde(skip)] // reason: Option<bool> — inherently valid
+    pub garde: Option<bool>,
+    #[garde(skip)] // reason: Option<bool> — inherently valid
+    pub tests: Option<bool>,
+    #[garde(skip)] // reason: Option<bool> — inherently valid
+    pub release: Option<bool>,
+}
+
+#[derive(Debug, Deserialize, garde::Validate)]
+pub struct TsChecksConfig {
+    #[garde(skip)] // reason: Option<bool> — inherently valid
+    pub architecture: Option<bool>,
+    #[garde(skip)] // reason: Option<bool> — inherently valid
+    pub tests: Option<bool>,
+}
+
+#[derive(Debug, Deserialize, garde::Validate)]
 pub struct TypeScriptConfig {
     #[garde(inner(inner(length(min = 1))))] // reason: each app path must be non-empty
     pub apps: Option<Vec<String>>,
@@ -57,6 +80,8 @@ pub struct TypeScriptConfig {
     pub eslint: Option<EslintConfig>,
     #[garde(dive)] // reason: recursively validate nested CanonicalConfig
     pub canonical: Option<CanonicalConfig>,
+    #[garde(dive)] // reason: recursively validate nested TsChecksConfig
+    pub checks: Option<TsChecksConfig>,
 }
 
 #[derive(Debug, Deserialize, garde::Validate)]
