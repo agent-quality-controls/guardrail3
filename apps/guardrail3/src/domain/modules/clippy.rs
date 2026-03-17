@@ -242,10 +242,10 @@ pub fn build_clippy_toml(
         out.push_str(module.content);
         out.push('\n');
     }
-    if !extra_methods.trim().is_empty() {
+    let deduped_methods = crate::commands::generate::deduplicated_override(&out, extra_methods);
+    if !deduped_methods.trim().is_empty() {
         out.push_str("    # --- Local overrides ---\n");
-        out.push_str(extra_methods);
-        out.push('\n');
+        out.push_str(&deduped_methods);
     }
     out.push_str("]\n\n");
 
@@ -257,10 +257,10 @@ pub fn build_clippy_toml(
         out.push_str(module.content);
         out.push('\n');
     }
-    if !extra_types.trim().is_empty() {
+    let deduped_types = crate::commands::generate::deduplicated_override(&out, extra_types);
+    if !deduped_types.trim().is_empty() {
         out.push_str("    # --- Local overrides ---\n");
-        out.push_str(extra_types);
-        out.push('\n');
+        out.push_str(&deduped_types);
     }
     out.push_str("]\n");
 

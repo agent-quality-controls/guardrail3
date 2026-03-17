@@ -174,19 +174,68 @@ fn extract_custom_entries(actual: &str, generated: &str) -> Vec<String> {
 }
 
 /// Collect all `{ path = ... }` and `{ name = ... }` entry lines from TOML content.
+///
+/// Handles multiline entries (joins continuation lines until `}` is found),
+/// no-space syntax (`{path=`), and section-aware keying so that identical
+/// entries in different TOML sections (e.g. `disallowed-methods` vs
+/// `disallowed-types`) are not incorrectly deduplicated.
 fn collect_toml_entries(content: &str) -> BTreeSet<String> {
     let mut entries = BTreeSet::new();
-    for line in content.lines() {
+    let mut current_section = String::new();
+    let mut lines = content.lines();
+
+    while let Some(line) = lines.next() {
         let trimmed = line.trim();
-        if trimmed.starts_with("{ path =")
-            || trimmed.starts_with("{path =")
-            || trimmed.starts_with("{ name =")
-            || trimmed.starts_with("{name =")
-        {
-            // Normalize: strip trailing comma if present, then trim
-            let normalized = trimmed.trim_end_matches(',').trim().to_owned();
-            let _new = entries.insert(normalized);
+
+        // Detect section headers
+        if trimmed.contains("disallowed-methods") && trimmed.contains('[') {
+            "methods".clone_into(&mut current_section);
+            continue;
         }
+        if trimmed.contains("disallowed-types") && trimmed.contains('[') {
+            "types".clone_into(&mut current_section);
+            continue;
+        }
+        if trimmed.contains("deny") && trimmed.contains('[') {
+            "deny".clone_into(&mut current_section);
+            continue;
+        }
+        if trimmed == "]" {
+            current_section.clear();
+            continue;
+        }
+
+        // Check if this is an entry line (space-insensitive prefix match)
+        let normalized = trimmed.replace(' ', "");
+        let is_entry = normalized.starts_with("{path=") || normalized.starts_with("{name=");
+        if !is_entry {
+            continue;
+        }
+
+        // Handle multiline: if line doesn't contain '}', join with next lines
+        let mut full_entry = trimmed.to_owned();
+        if !full_entry.contains('}') {
+            for next in lines.by_ref() {
+                let next_trimmed = next.trim();
+                full_entry.push(' ');
+                full_entry.push_str(next_trimmed);
+                if next_trimmed.contains('}') {
+                    break;
+                }
+            }
+        }
+
+        // Normalize: strip trailing comma, trim
+        let clean = full_entry.trim_end_matches(',').trim().to_owned();
+
+        // Prefix with section for section-aware comparison
+        let key = if current_section.is_empty() {
+            clean
+        } else {
+            format!("{current_section}:{clean}")
+        };
+
+        let _ = entries.insert(key);
     }
     entries
 }
