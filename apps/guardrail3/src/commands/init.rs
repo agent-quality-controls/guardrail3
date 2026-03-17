@@ -1,4 +1,11 @@
+use std::fmt::Write;
 use std::path::Path;
+
+use crate::adapters::outbound::fs::RealFileSystem;
+use crate::app::ts::validate::auto_detect_app_type;
+use crate::app::ts::validate::ts_arch_checks::discover_ts_apps;
+use crate::domain::report::TsAppType;
+use crate::ports::outbound::FileSystem;
 
 /// Initialize Rust guardrail3 configuration: creates guardrail3.toml with [rust] + [local] sections,
 /// creates local/ directory with Rust override files, and scaffolds release config for service profile.
@@ -192,13 +199,15 @@ pub fn run_ts(path: &str, force: bool, dry_run: bool) {
     let project_path = Path::new(path);
     let config_path = project_path.join("guardrail3.toml");
 
-    let ts_section = "\n[typescript]\n\n[typescript.apps.my-app]\ntype = \"service\"         # service | content | library\n\n[typescript.checks]\narchitecture = true      # T-ARCH-*, eslint boundary audit — hex arch enforcement\ntests = true             # T-TEST-* — test quality enforcement\n";
+    // Analyze project to discover apps and their types
+    let fs = RealFileSystem;
+    let ts_section = generate_ts_section(&fs, project_path);
 
     if dry_run {
         if config_path.exists() {
             let existing = crate::fs::read_file(&config_path).unwrap_or_default();
             let new_content = if existing.contains("[typescript]") {
-                replace_typescript_section(&existing, ts_section)
+                replace_typescript_section(&existing, &ts_section)
             } else {
                 format!("{existing}{ts_section}")
             };
@@ -224,7 +233,7 @@ pub fn run_ts(path: &str, force: bool, dry_run: bool) {
         if existing.contains("[typescript]") {
             // Force mode: replace existing [typescript] section
             // Find [typescript] and replace everything from there to next section or EOF
-            let new_content = replace_typescript_section(&existing, ts_section);
+            let new_content = replace_typescript_section(&existing, &ts_section);
             if let Err(e) = crate::fs::write_file(&config_path, &new_content) {
                 eprintln!("Error writing guardrail3.toml: {e}");
                 std::process::exit(1);
@@ -324,11 +333,10 @@ fn show_file_diff(path: &Path, new_content: &str) {
             }
         }
     } else {
-        println!(
-            "  {} — would create ({} bytes)",
-            path.display(),
-            new_content.len()
-        );
+        println!("  {} — would create:", path.display());
+        for line in new_content.lines() {
+            println!("    + {line}");
+        }
     }
 }
 
@@ -383,5 +391,69 @@ deny_skip = "local/deny-skip.toml"
 deny_feature_bans = "local/deny-feature-bans.toml"
 "#
         ),
+    }
+}
+
+/// Generate the `[typescript]` TOML section by discovering apps and auto-detecting their types.
+/// Falls back to a generic template when no apps are found under `apps/`.
+fn generate_ts_section(fs: &dyn FileSystem, project_path: &Path) -> String {
+    let apps = discover_ts_apps(fs, project_path);
+
+    let mut section = String::from("\n[typescript]\n");
+
+    if apps.is_empty() {
+        // No apps discovered — use generic template
+        section.push_str(
+            "\n[typescript.apps.my-app]\ntype = \"service\"         # service | content | library\n",
+        );
+    } else {
+        for app_path in &apps {
+            let name = app_path
+                .file_name()
+                .and_then(|n| n.to_str())
+                .unwrap_or("unknown");
+
+            let detected_type = auto_detect_app_type(fs, app_path);
+            let type_name = match detected_type {
+                Some(TsAppType::Content) => "content",
+                Some(TsAppType::Library) => "library",
+                _ => "service",
+            };
+
+            let reason = detect_reason(app_path, detected_type);
+
+            writeln!(section, "\n[typescript.apps.{name}]").unwrap_or_default();
+            writeln!(section, "type = \"{type_name}\"         # {reason}").unwrap_or_default();
+        }
+    }
+
+    section.push_str(
+        "\n[typescript.checks]\narchitecture = true      \
+         # T-ARCH-*, eslint boundary audit — hex arch enforcement\n\
+         tests = true             # T-TEST-* — test quality enforcement\n",
+    );
+
+    section
+}
+
+/// Return a human-readable reason for the detected app type, used as a TOML comment.
+fn detect_reason(app_path: &Path, detected: Option<TsAppType>) -> &'static str {
+    match detected {
+        Some(TsAppType::Content) => {
+            if app_path.join("content").is_dir() {
+                "auto-detected: content/ directory"
+            } else {
+                "auto-detected: content dependencies"
+            }
+        }
+        Some(TsAppType::Service) => {
+            if app_path.join("src/modules/domain").is_dir() {
+                "auto-detected: hex arch structure"
+            } else {
+                "auto-detected: backend framework"
+            }
+        }
+        Some(TsAppType::Library) => "auto-detected: library",
+        None => "default (no auto-detection signal)",
     }
 }

@@ -157,6 +157,10 @@ fn handle_ts(command: TsCommands) {
             );
             print_report(&args, &report);
         }
+        TsCommands::Diff(args) => {
+            validate_or_exit(&args);
+            commands::diff::run_ts(&args.path);
+        }
         TsCommands::HooksInstall(args) => {
             validate_or_exit(&args);
             commands::generate::run_hooks(&args);

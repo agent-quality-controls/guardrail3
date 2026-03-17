@@ -501,6 +501,25 @@ fn build_deny_for_profile(
     }
 }
 
+/// Generate expected TS file contents without writing -- used by ts diff.
+pub fn generate_expected_ts(project_path: &Path) -> Option<Vec<GeneratedPair>> {
+    let cfg = load_config(project_path)?;
+
+    let files = generate_ts_files(&cfg);
+    if files.is_empty() {
+        return Some(Vec::new());
+    }
+
+    let mut pairs: Vec<GeneratedPair> = files.into_iter().map(|gf| (gf.path, gf.content)).collect();
+
+    // Include pre-commit hook (same as run_ts)
+    let has_rust = cfg.rust.is_some();
+    let hook_content = crate::domain::modules::pre_commit::build_pre_commit_script(has_rust, true);
+    pairs.push((".githooks/pre-commit".to_owned(), hook_content));
+
+    Some(pairs)
+}
+
 /// Generate expected file contents without writing -- used by check and diff.
 pub fn generate_expected(project_path: &Path) -> Option<Vec<GeneratedPair>> {
     let cfg = load_config(project_path)?;
