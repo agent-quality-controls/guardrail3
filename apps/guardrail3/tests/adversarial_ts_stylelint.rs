@@ -260,3 +260,121 @@ type = "service"
     // Service project → no T-STYL checks should appear at all
     assert_no_check_prefix(&ids, "T-STYL-", &output);
 }
+
+// ---------------------------------------------------------------------------
+// Severity-aware helpers for warn checks
+// ---------------------------------------------------------------------------
+
+/// Collect check IDs with their severity from JSON output.
+#[allow(clippy::expect_used, clippy::indexing_slicing, clippy::type_complexity)] // reason: test helper — JSON parsing for severity assertion; tuple vec is clear in context
+fn collect_checks_with_severity(json_output: &str) -> Vec<(String, String)> {
+    #[allow(clippy::disallowed_methods)] // reason: test helper — JSON parsing of guardrail3 output
+    let parsed: serde_json::Value =
+        serde_json::from_str(json_output).expect("guardrail3 output should be valid JSON");
+
+    let sections = parsed["sections"]
+        .as_array()
+        .expect("sections should be array");
+
+    let mut ids = Vec::new();
+    for section in sections {
+        let results = section["results"].as_array().expect("results array");
+        for result in results {
+            let id = result["id"].as_str().unwrap_or("").to_owned();
+            let severity = result["severity"].as_str().unwrap_or("").to_owned();
+            ids.push((id, severity));
+        }
+    }
+    ids
+}
+
+/// Assert that a specific check ID fired as warn.
+#[allow(clippy::type_complexity)] // reason: test helper — tuple vec is clear in context
+fn assert_has_warn(ids: &[(String, String)], check_id: &str, json_output: &str) {
+    let found = ids.iter().any(|(id, sev)| id == check_id && sev == "warn");
+    assert!(
+        found,
+        "Expected check '{check_id}' to fire as warn.\nCheck IDs found: {ids:?}\nFull output:\n{json_output}"
+    );
+}
+
+/// Assert that a specific check ID did NOT fire as warn or error.
+#[allow(clippy::type_complexity)] // reason: test helper — tuple vec is clear in context
+fn assert_no_warn_or_error(ids: &[(String, String)], check_id: &str, json_output: &str) {
+    let found = ids
+        .iter()
+        .any(|(id, sev)| id == check_id && (sev == "warn" || sev == "error"));
+    assert!(
+        !found,
+        "Did NOT expect check '{check_id}' as warn/error, but it was present.\nCheck IDs found: {ids:?}\nFull output:\n{json_output}"
+    );
+}
+
+// ===========================================================================
+// Test 6: T-STYL-06 fires when a11y rules present but exception rules missing
+// ===========================================================================
+
+#[test]
+fn t_styl_06_missing_exceptions() {
+    // Config has all 11 a11y rules but does NOT include the exception rules
+    // (a11y/media-prefers-color-scheme and no-duplicate-selectors)
+    let config = r"export default {
+  extends: ['stylelint-config-standard', 'stylelint-config-tailwindcss'],
+  plugins: ['@double-great/stylelint-a11y'],
+  rules: {
+    'a11y/content-property-no-static-value': true,
+    'a11y/font-size-is-readable': true,
+    'a11y/line-height-is-vertical-rhythmed': true,
+    'a11y/media-prefers-reduced-motion': true,
+    'a11y/no-display-none': true,
+    'a11y/no-obsolete-attribute': true,
+    'a11y/no-obsolete-element': true,
+    'a11y/no-outline-none': true,
+    'a11y/no-spread-text': true,
+    'a11y/no-text-align-justify': true,
+    'a11y/selector-pseudo-class-focus': true,
+  },
+};";
+
+    let tmp = setup_content_project_with_stylelint(Some(config));
+    let output = run_ts_validate(tmp.path());
+    let ids = collect_checks_with_severity(&output);
+
+    // T-STYL-06 should fire as warn — exception rules not present
+    assert_has_warn(&ids, "T-STYL-06", &output);
+}
+
+// ===========================================================================
+// Test 7: T-STYL-06 does NOT fire when exception rules are present
+// ===========================================================================
+
+#[test]
+fn t_styl_06_exceptions_present() {
+    // Config has all 11 a11y rules AND both exception rules disabled via null
+    let config = r"export default {
+  extends: ['stylelint-config-standard', 'stylelint-config-tailwindcss'],
+  plugins: ['@double-great/stylelint-a11y'],
+  rules: {
+    'a11y/content-property-no-static-value': true,
+    'a11y/font-size-is-readable': true,
+    'a11y/line-height-is-vertical-rhythmed': true,
+    'a11y/media-prefers-reduced-motion': true,
+    'a11y/no-display-none': true,
+    'a11y/no-obsolete-attribute': true,
+    'a11y/no-obsolete-element': true,
+    'a11y/no-outline-none': true,
+    'a11y/no-spread-text': true,
+    'a11y/no-text-align-justify': true,
+    'a11y/selector-pseudo-class-focus': true,
+    'a11y/media-prefers-color-scheme': null,
+    'no-duplicate-selectors': null,
+  },
+};";
+
+    let tmp = setup_content_project_with_stylelint(Some(config));
+    let output = run_ts_validate(tmp.path());
+    let ids = collect_checks_with_severity(&output);
+
+    // T-STYL-06 should NOT fire as warn/error — exception rules are present
+    assert_no_warn_or_error(&ids, "T-STYL-06", &output);
+}
