@@ -236,29 +236,37 @@ workspace_root = "."
 
     let members = project.all_member_dirs();
     if !members.is_empty() {
-        // Multi-crate workspace — apps get individual entries, packages get one entry
+        // Group workspace members by top-level directory under apps/
+        // Internal crates (apps/my-app/crates/domain) belong to my-app, not as separate apps
+        let mut seen_apps: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
         let mut has_packages = false;
 
         for ws in &project.workspaces {
             for member in &ws.members {
-                let name = &member.name;
                 let dir = &member.dir;
-                let is_package = dir.starts_with("packages/") || dir.contains("/packages/");
 
-                if is_package {
+                if dir.starts_with("packages/") || dir.contains("/packages/") {
                     has_packages = true;
                     continue;
                 }
 
-                let detected_layer = if dir.starts_with("apps/") || dir.contains("/apps/") {
-                    "composition-root"
+                // Extract top-level app name from dir path
+                // e.g., "apps/validator-rust/crates/domain" → "validator-rust"
+                // e.g., "apps/guardrail3" → "guardrail3"
+                let app_name = if dir.starts_with("apps/") {
+                    dir.strip_prefix("apps/")
+                        .and_then(|rest| rest.split('/').next())
+                        .unwrap_or(&member.name)
                 } else {
-                    "app"
+                    &member.name
                 };
 
-                writeln!(config, "\n[rust.apps.{name}]").unwrap_or_default();
-                writeln!(config, "profile = \"{profile}\"").unwrap_or_default();
-                writeln!(config, "layer = \"{detected_layer}\"").unwrap_or_default();
+                if !seen_apps.contains(app_name) {
+                    let _ = seen_apps.insert(app_name.to_owned());
+                    writeln!(config, "\n[rust.apps.{app_name}]").unwrap_or_default();
+                    writeln!(config, "profile = \"{profile}\"").unwrap_or_default();
+                    writeln!(config, "layer = \"composition-root\"").unwrap_or_default();
+                }
             }
         }
 
