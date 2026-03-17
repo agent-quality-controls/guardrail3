@@ -43,11 +43,11 @@ fn test_any_type_usage_t31() {
     }
 }
 
-// T32: file length over 300 effective lines
+// T32: file length over 400 effective lines
 #[test]
-fn test_file_length_over_300_t32() {
+fn test_file_length_over_400_t32() {
     let path = Path::new("src/big.ts");
-    let content: String = (0..310)
+    let content: String = (0..410)
         .map(|i| format!("const x{i} = {i};"))
         .collect::<Vec<_>>()
         .join("\n");

@@ -56,7 +56,7 @@ pub fn run(
     }
 
     // Plugin packages in devDependencies
-    let content_enabled = has_content_app(config);
+    let content_enabled = has_content_app(fs, path, config);
     let mut plug_results = Vec::new();
     package_check::check_lint_plugins(fs, path, content_enabled, &mut plug_results);
     if !plug_results.is_empty() {
@@ -165,31 +165,92 @@ pub fn run(
 }
 
 /// Check if any app in the project is configured as content type,
-/// or if the global content category is enabled.
-fn has_content_app(config: Option<&GuardrailConfig>) -> bool {
-    let Some(ts) = config.and_then(|c| c.typescript.as_ref()) else {
-        return false;
-    };
-
-    // Check global content setting
-    if let Some(checks) = &ts.checks {
-        if checks.content == Some(true) {
-            return true;
+/// or if the global content category is enabled, or if auto-detection
+/// finds content signals in any discovered app.
+fn has_content_app(fs: &dyn FileSystem, root: &Path, config: Option<&GuardrailConfig>) -> bool {
+    // Check explicit config first
+    if let Some(ts) = config.and_then(|c| c.typescript.as_ref()) {
+        // Check global content setting
+        if let Some(checks) = &ts.checks {
+            if checks.content == Some(true) {
+                return true;
+            }
         }
-    }
 
-    // Check per-app types
-    if let Some(apps) = &ts.apps {
-        for app_cfg in apps.values() {
-            if let Some(t) = &app_cfg.type_ {
-                if t.eq_ignore_ascii_case("content") {
-                    return true;
+        // Check per-app types
+        if let Some(apps) = &ts.apps {
+            for app_cfg in apps.values() {
+                if let Some(t) = &app_cfg.type_ {
+                    if t.eq_ignore_ascii_case("content") {
+                        return true;
+                    }
                 }
             }
         }
     }
 
+    // Auto-detect: scan discovered apps for content signals
+    let discovered = ts_arch_checks::discover_ts_apps(fs, root);
+    for app_path in &discovered {
+        if auto_detect_app_type(fs, app_path) == Some(TsAppType::Content) {
+            return true;
+        }
+    }
+
     false
+}
+
+/// Auto-detect app type from directory structure and package.json dependencies.
+/// Returns None if no clear signal is found.
+#[allow(clippy::disallowed_methods)] // reason: serde_json for per-app package.json inspection
+fn auto_detect_app_type(fs: &dyn FileSystem, app_path: &Path) -> Option<TsAppType> {
+    // Signal 1: hex arch structure → Service
+    let has_modules_domain = app_path.join("src/modules/domain").is_dir();
+    if has_modules_domain {
+        return Some(TsAppType::Service);
+    }
+
+    // Signal 2: content directory at app root → Content
+    let has_content_dir = app_path.join("content").is_dir();
+    if has_content_dir {
+        return Some(TsAppType::Content);
+    }
+
+    // Signal 3: check package.json dependencies
+    let pkg_path = app_path.join("package.json");
+    if let Some(content) = fs.read_file(&pkg_path) {
+        if let Ok(json) = serde_json::from_str::<serde_json::Value>(&content) {
+            let deps = json.get("dependencies").and_then(|d| d.as_object());
+            if let Some(deps) = deps {
+                // Backend framework → Service
+                let backend_frameworks = ["express", "fastify", "hono", "koa", "nestjs"];
+                if backend_frameworks.iter().any(|f| deps.contains_key(*f)) {
+                    return Some(TsAppType::Service);
+                }
+
+                // Content pipeline tool → Content
+                let content_signals = [
+                    "velite",
+                    "@mdx-js/loader",
+                    "@mdx-js/react",
+                    "contentlayer",
+                    "nextra",
+                ];
+                if content_signals.iter().any(|s| deps.contains_key(*s)) {
+                    return Some(TsAppType::Content);
+                }
+
+                // Next.js without hex arch or backend → likely Content
+                // (services using Next.js would have src/modules/)
+                if deps.contains_key("next") && !has_modules_domain {
+                    return Some(TsAppType::Content);
+                }
+            }
+        }
+    }
+
+    // No clear signal → None (caller decides default)
+    None
 }
 
 /// Discover TS apps and resolve per-app type and categories from config.
@@ -216,10 +277,12 @@ fn resolve_app_contexts(
             // Look up per-app config
             let app_cfg = app_configs.and_then(|apps| apps.get(&name));
 
-            // Resolve type: config > default (service)
+            // Resolve type: config > auto-detect > default (service)
             let app_type = app_cfg
                 .and_then(|c| c.type_.as_deref())
-                .map_or(TsAppType::Service, TsAppType::from_str_or_default);
+                .map(TsAppType::from_str_or_default)
+                .or_else(|| auto_detect_app_type(fs, &app_path))
+                .unwrap_or(TsAppType::Service);
 
             // Resolve categories: type defaults > per-app overrides
             let type_defaults = app_type.default_categories();

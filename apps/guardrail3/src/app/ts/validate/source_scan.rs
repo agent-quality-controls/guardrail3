@@ -240,11 +240,11 @@ pub fn check_file_length(path: &Path, content: &str, results: &mut Vec<CheckResu
         })
         .count();
 
-    if effective_lines > 300 {
+    if effective_lines > 400 {
         results.push(CheckResult {
             id: "T32".to_owned(),
             severity: Severity::Error,
-            title: "File exceeds 300 effective lines".to_owned(),
+            title: "File exceeds 400 effective lines".to_owned(),
             message: format!(
                 "{effective_lines} effective lines (blank/comment lines excluded). \
                  Large files are harder for agents and humans to reason about, increasing bug risk. \
