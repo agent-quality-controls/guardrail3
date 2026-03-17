@@ -25,10 +25,15 @@ pub fn check(
             continue;
         };
 
-        ts_comment_checks::check_eslint_disable(fp, &content, &mut results);
-        ts_comment_checks::check_ts_ignore(fp, &content, &mut results);
-        check_process_env(fp, &content, &mut results);
-        check_any_types(fp, &content, &mut results);
+        let is_test = is_ts_test_file(file_path);
+
+        // T23-T31: skip source quality checks on test files
+        if !is_test {
+            ts_comment_checks::check_eslint_disable(fp, &content, &mut results);
+            ts_comment_checks::check_ts_ignore(fp, &content, &mut results);
+            check_process_env(fp, &content, &mut results);
+            check_any_types(fp, &content, &mut results);
+        }
         check_file_length(fp, &content, &mut results);
         // T34: // noinspection
         check_comment_pattern(
@@ -54,6 +59,15 @@ pub fn check(
     check_banned_in_node_modules(fs, path, &mut results);
 
     results
+}
+
+/// Check if a TypeScript file is a test file (should skip source quality checks T23-T31).
+fn is_ts_test_file(path: &str) -> bool {
+    path.ends_with(".test.ts")
+        || path.ends_with(".spec.ts")
+        || path.ends_with(".test.tsx")
+        || path.ends_with(".spec.tsx")
+        || path.contains("__tests__/")
 }
 
 fn is_ts_file(path: &str) -> bool {
@@ -229,7 +243,7 @@ pub fn check_file_length(path: &Path, content: &str, results: &mut Vec<CheckResu
     if effective_lines > 300 {
         results.push(CheckResult {
             id: "T32".to_owned(),
-            severity: Severity::Warn,
+            severity: Severity::Error,
             title: "File exceeds 300 effective lines".to_owned(),
             message: format!(
                 "{effective_lines} effective lines (blank/comment lines excluded). \
@@ -243,7 +257,10 @@ pub fn check_file_length(path: &Path, content: &str, results: &mut Vec<CheckResu
     }
 }
 
-/// Scan lines for comment patterns and emit an info-level `CheckResult` for each match.
+/// Scan **comment nodes only** for patterns and emit an info-level `CheckResult` for each match.
+///
+/// Uses tree-sitter to parse the file and extract comment nodes, so patterns inside
+/// string literals or template literals are never matched.
 pub fn check_comment_pattern(
     path: &Path,
     content: &str,
@@ -261,17 +278,28 @@ pub fn check_comment_pattern(
                    or if truly untestable, document why in a code comment.",
         _ => "",
     };
-    for (line_num, line) in content.lines().enumerate() {
-        if patterns.iter().any(|p| line.contains(p)) {
-            let line_number = line_num.saturating_add(1);
-            let trimmed = line.trim();
+
+    let is_tsx = ts_comment_checks::is_tsx_path(path);
+    let Some(tree) = ast_helpers::parse_ts_file(content, is_tsx) else {
+        return;
+    };
+
+    let lines: Vec<&str> = content.lines().collect();
+    let comments = ast_helpers::find_comments(&tree, content);
+
+    for comment in &comments {
+        if patterns.iter().any(|p| comment.text.contains(p)) {
+            let trimmed = lines
+                .get(comment.line.saturating_sub(1))
+                .unwrap_or(&"")
+                .trim();
             results.push(CheckResult {
                 id: check_id.to_owned(),
                 severity: Severity::Info,
                 title: title.to_owned(),
                 message: format!("{trimmed}.{explanation}"),
                 file: Some(path.display().to_string()),
-                line: Some(line_number),
+                line: Some(comment.line),
                 inventory: false,
             }.as_inventory());
         }

@@ -5,12 +5,21 @@ use crate::domain::report::{CheckResult, Report, Severity};
 /// Maximum number of results per check ID before summarizing.
 const VERBOSE_THRESHOLD: usize = 3;
 
+/// Strip the project root prefix from a file path to produce a relative path.
+fn relative_path<'a>(file: &'a str, project_root: &str) -> &'a str {
+    file.strip_prefix(project_root)
+        .map(|s| s.strip_prefix('/').unwrap_or(s))
+        .unwrap_or(file)
+}
+
 #[allow(clippy::print_stdout)] // reason: CLI report output to stdout
 pub fn print_report(report: &Report, show_inventory: bool, verbose: bool) {
     println!("# Guardrail3 Validation Report");
     println!();
     println!("**Project:** {}", report.project_path);
     println!("**Stacks:** {}", report.stacks.join(", "));
+
+    let project_root = &report.project_path;
 
     for section in &report.sections {
         let visible: Vec<_> = section
@@ -39,10 +48,10 @@ pub fn print_report(report: &Report, show_inventory: bool, verbose: bool) {
 
         if verbose {
             for result in &visible {
-                print_result_row(result);
+                print_result_row(result, project_root);
             }
         } else {
-            print_with_summarization(&visible);
+            print_with_summarization(&visible, project_root);
         }
     }
 
@@ -68,7 +77,7 @@ pub fn print_report(report: &Report, show_inventory: bool, verbose: bool) {
 
 /// Print results, summarizing check IDs that exceed the threshold.
 #[allow(clippy::print_stdout)] // reason: CLI report output to stdout
-fn print_with_summarization(results: &[&CheckResult]) {
+fn print_with_summarization(results: &[&CheckResult], project_root: &str) {
     let mut groups: BTreeMap<&str, Vec<&&CheckResult>> = BTreeMap::new();
     let mut order: Vec<&str> = Vec::new();
     for result in results {
@@ -84,7 +93,7 @@ fn print_with_summarization(results: &[&CheckResult]) {
         let group = &groups[*id];
         if group.len() <= VERBOSE_THRESHOLD {
             for result in group {
-                print_result_row(result);
+                print_result_row(result, project_root);
             }
         } else {
             print_summary_row(group);
@@ -113,7 +122,7 @@ fn print_summary_row(group: &[&&CheckResult]) {
 }
 
 #[allow(clippy::print_stdout)] // reason: CLI report output to stdout
-fn print_result_row(result: &CheckResult) {
+fn print_result_row(result: &CheckResult, project_root: &str) {
     let icon = match result.severity {
         Severity::Error => "\u{2717}",
         Severity::Warn => "\u{26a0}",
@@ -121,8 +130,8 @@ fn print_result_row(result: &CheckResult) {
     };
 
     let location = match (&result.file, result.line) {
-        (Some(f), Some(l)) => format!("{f}:{l}"),
-        (Some(f), None) => f.clone(),
+        (Some(f), Some(l)) => format!("{}:{l}", relative_path(f, project_root)),
+        (Some(f), None) => relative_path(f, project_root).to_owned(),
         _ => String::new(),
     };
 

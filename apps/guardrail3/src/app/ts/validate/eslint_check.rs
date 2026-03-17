@@ -308,38 +308,14 @@ fn check_eslint_rule(
     }
 
     if let Some(val) = expected_value {
-        // Check if the expected value appears near the rule name
-        let has_value = content
-            .lines()
-            .any(|line| line.contains(rule_name) && line.contains(val))
-            || {
-                // Check within a few lines of the rule mention
-                let lines: Vec<&str> = content.lines().collect();
-                let mut found = false;
-                for (i, line) in lines.iter().enumerate() {
-                    if line.contains(rule_name) {
-                        // Check surrounding lines (up to 5 lines after)
-                        let end = (i.saturating_add(6)).min(lines.len());
-                        for check_line in lines.get(i..end).unwrap_or_default() {
-                            if check_line.contains(val) {
-                                found = true;
-                                break;
-                            }
-                        }
-                    }
-                    if found {
-                        break;
-                    }
-                }
-                found
-            };
+        let value_result = check_rule_value(content, rule_name, val);
 
-        if has_value {
+        if value_result == RuleValueResult::Pass {
             results.push(CheckResult {
                 id: id.to_owned(),
                 severity: Severity::Info,
                 title: format!("ESLint rule `{rule_name}` configured correctly"),
-                message: format!("`{rule_name}` set to {val}.{rule_explanation}"),
+                message: format!("`{rule_name}` set to {val} or stricter.{rule_explanation}"),
                 file: Some(eslint_path.display().to_string()),
                 line: None,
                 inventory: false,
@@ -350,7 +326,7 @@ fn check_eslint_rule(
                 severity: missing_severity,
                 title: format!("ESLint rule `{rule_name}` value mismatch"),
                 message: format!(
-                    "`{rule_name}` found but expected value {val} not detected.{rule_explanation} \
+                    "`{rule_name}` found but expected value {val} (or stricter) not detected.{rule_explanation} \
                      Update the rule value in `eslint.config.mjs`."
                 ),
                 file: Some(eslint_path.display().to_string()),
@@ -405,6 +381,89 @@ fn check_all_eslint_rules(content: &str, eslint_path: &Path, results: &mut Vec<C
     for (id, rule_name, severity) in rules {
         check_eslint_rule_presence(content, eslint_path, id, rule_name, *severity, results);
     }
+}
+
+/// Result of comparing an ESLint rule's actual value against the expected value.
+#[derive(Debug, PartialEq, Eq)]
+enum RuleValueResult {
+    Pass,
+    Fail,
+}
+
+/// Check if a rule's configured value matches or is stricter than the expected value.
+///
+/// For numeric values (e.g., max-lines: 200 vs expected 300), actual <= expected means
+/// stricter, which passes. For non-numeric values, falls back to exact string matching.
+fn check_rule_value(content: &str, rule_name: &str, expected_value: &str) -> RuleValueResult {
+    let lines: Vec<&str> = content.lines().collect();
+    let expected_num: Option<u64> = expected_value.parse().ok();
+
+    // Collect all number tokens found near the rule name (same line + up to 5 lines after)
+    for (i, line) in lines.iter().enumerate() {
+        if !line.contains(rule_name) {
+            continue;
+        }
+
+        // Check same line and up to 5 lines after
+        let end = (i.saturating_add(6)).min(lines.len());
+        for check_line in lines.get(i..end).unwrap_or_default() {
+            if let Some(expected_n) = expected_num {
+                // Numeric comparison: stricter (<=) passes
+                if let Some(actual_n) = extract_number_from_line(check_line) {
+                    if actual_n <= expected_n {
+                        return RuleValueResult::Pass;
+                    }
+                    return RuleValueResult::Fail;
+                }
+            } else {
+                // Non-numeric: exact string match (with word boundary awareness)
+                if check_line.contains(expected_value) {
+                    return RuleValueResult::Pass;
+                }
+            }
+        }
+    }
+
+    RuleValueResult::Fail
+}
+
+/// Extract the first bare integer from a line (skipping things that look like rule names).
+///
+/// Looks for patterns like `: 200`, `max: 200`, `"max": 200`, etc.
+fn extract_number_from_line(line: &str) -> Option<u64> {
+    // Match digits preceded by non-alphanumeric (to avoid matching inside rule names)
+    let trimmed = line.trim();
+    // Skip comment lines
+    if trimmed.starts_with("//") || trimmed.starts_with('*') {
+        return None;
+    }
+    // Find numbers in the line — look for digit sequences
+    let mut chars = trimmed.char_indices().peekable();
+    while let Some((idx, ch)) = chars.next() {
+        if ch.is_ascii_digit() {
+            // Make sure it's not part of a word (like a rule name "T2")
+            if idx > 0 {
+                let prev = trimmed.as_bytes().get(idx.saturating_sub(1)).copied();
+                if prev.is_some_and(|c| c.is_ascii_alphanumeric() || c == b'_') {
+                    continue;
+                }
+            }
+            let start = idx;
+            let mut end = idx + 1;
+            while let Some(&(next_idx, next_ch)) = chars.peek() {
+                if next_ch.is_ascii_digit() {
+                    end = next_idx + 1;
+                    let _ = chars.next();
+                } else {
+                    break;
+                }
+            }
+            if let Ok(n) = trimmed.get(start..end).unwrap_or("").parse::<u64>() {
+                return Some(n);
+            }
+        }
+    }
+    None
 }
 
 fn check_eslint_rule_presence(

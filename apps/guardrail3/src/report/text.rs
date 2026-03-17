@@ -7,6 +7,13 @@ use crate::domain::report::{CheckResult, Report, Severity};
 /// Maximum number of results per check ID before summarizing.
 const VERBOSE_THRESHOLD: usize = 3;
 
+/// Strip the project root prefix from a file path to produce a relative path.
+fn relative_path<'a>(file: &'a str, project_root: &str) -> &'a str {
+    file.strip_prefix(project_root)
+        .map(|s| s.strip_prefix('/').unwrap_or(s))
+        .unwrap_or(file)
+}
+
 #[allow(clippy::print_stdout)] // reason: CLI report output to stdout
 pub fn print_report(report: &Report, show_inventory: bool, verbose: bool) {
     println!();
@@ -16,6 +23,8 @@ pub fn print_report(report: &Report, show_inventory: bool, verbose: bool) {
     );
     println!("Stacks: {}", report.stacks.join(", ").cyan());
     println!();
+
+    let project_root = &report.project_path;
 
     for section in &report.sections {
         let visible: Vec<&CheckResult> = section
@@ -31,10 +40,10 @@ pub fn print_report(report: &Report, show_inventory: bool, verbose: bool) {
 
         if verbose {
             for result in &visible {
-                print_result(result);
+                print_result(result, project_root);
             }
         } else {
-            print_with_summarization(&visible);
+            print_with_summarization(&visible, project_root);
         }
 
         println!();
@@ -45,7 +54,7 @@ pub fn print_report(report: &Report, show_inventory: bool, verbose: bool) {
 
 /// Print results, summarizing check IDs that exceed the threshold.
 #[allow(clippy::print_stdout)] // reason: CLI report output to stdout
-fn print_with_summarization(results: &[&CheckResult]) {
+fn print_with_summarization(results: &[&CheckResult], project_root: &str) {
     // Group by check ID preserving first-seen order
     let mut groups: BTreeMap<&str, Vec<&&CheckResult>> = BTreeMap::new();
     let mut order: Vec<&str> = Vec::new();
@@ -62,7 +71,7 @@ fn print_with_summarization(results: &[&CheckResult]) {
         let group = &groups[*id];
         if group.len() <= VERBOSE_THRESHOLD {
             for result in group {
-                print_result(result);
+                print_result(result, project_root);
             }
         } else {
             print_summary_line(group);
@@ -95,7 +104,7 @@ fn print_summary_line(group: &[&&CheckResult]) {
 }
 
 #[allow(clippy::print_stdout)] // reason: CLI report output to stdout
-fn print_result(result: &CheckResult) {
+fn print_result(result: &CheckResult, project_root: &str) {
     let icon = match result.severity {
         Severity::Error => "\u{2717}".red().bold(),
         Severity::Warn => "\u{26a0}".yellow().bold(),
@@ -109,8 +118,8 @@ fn print_result(result: &CheckResult) {
     };
 
     let location = match (&result.file, result.line) {
-        (Some(f), Some(l)) => format!(" ({f}:{l})"),
-        (Some(f), None) => format!(" ({f})"),
+        (Some(f), Some(l)) => format!(" ({}:{l})", relative_path(f, project_root)),
+        (Some(f), None) => format!(" ({})", relative_path(f, project_root)),
         _ => String::new(),
     };
 

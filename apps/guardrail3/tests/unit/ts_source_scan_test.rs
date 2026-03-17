@@ -55,7 +55,7 @@ fn test_file_length_over_300_t32() {
     check_file_length(path, &content, &mut results);
     assert_eq!(results.len(), 1, "expected 1 result, got {results:?}");
     assert_eq!(results[0].id, "T32");
-    assert!(matches!(results[0].severity, Severity::Warn));
+    assert!(matches!(results[0].severity, Severity::Error));
 }
 
 // T33 was killed — files between 250-300 lines no longer produce a warning.

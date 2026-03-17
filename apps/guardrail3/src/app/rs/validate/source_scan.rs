@@ -25,7 +25,7 @@ pub fn check(
             .filter(|f| Path::new(f).extension().is_some_and(|e| e == "rs"))
             .cloned()
             .collect(),
-        None => collect_rs_files(workspace_root),
+        None => collect_rs_files(fs, workspace_root),
     };
 
     for file_path in &rs_files {
@@ -78,15 +78,27 @@ pub fn check(
 
 /// Check if a walkdir entry is a directory that should be excluded from Rust source scanning.
 pub fn is_excluded_dir(entry: &walkdir::DirEntry) -> bool {
-    let name = entry.file_name().to_string_lossy();
-    name == "target" || name == "node_modules" || name == ".git" || name == ".claude"
+    is_excluded_dir_with_gitignore(entry, &std::collections::BTreeSet::new())
 }
 
-pub fn collect_rs_files(root: &Path) -> Vec<String> {
+pub fn is_excluded_dir_with_gitignore(
+    entry: &walkdir::DirEntry,
+    gitignored: &std::collections::BTreeSet<String>,
+) -> bool {
+    let name = entry.file_name().to_string_lossy();
+    name == "target"
+        || name == "node_modules"
+        || name == ".git"
+        || name == ".claude"
+        || gitignored.contains(name.as_ref())
+}
+
+pub fn collect_rs_files(fs: &dyn FileSystem, root: &Path) -> Vec<String> {
     let mut files = Vec::new();
+    let gitignored = crate::app::gitignore::load_gitignore_dirs(fs, root);
     for entry in WalkDir::new(root)
         .into_iter()
-        .filter_entry(|e| !is_excluded_dir(e))
+        .filter_entry(|e| !is_excluded_dir_with_gitignore(e, &gitignored))
         .flatten()
     {
         if entry.file_type().is_file() {
