@@ -178,6 +178,11 @@ pub struct GenerateArgs {
     #[arg(default_value = ".")]
     #[garde(length(min = 1))] // reason: path must be non-empty
     pub path: String,
+
+    /// Show what would change without writing (dry run)
+    #[arg(long)]
+    #[garde(skip)] // reason: boolean flag, inherently valid
+    pub dry_run: bool,
 }
 
 #[derive(Parser, Debug, garde::Validate)]
