@@ -4,7 +4,7 @@ use std::process::Command;
 
 use super::hook_script_checks::{
     check_dispatcher_pattern, check_local_scripts, check_modular_scripts,
-    check_monolithic_patterns, emit_script_stats, inventory_scripts,
+    check_monolithic_patterns, check_stylelint_hook, emit_script_stats, inventory_scripts,
 };
 use super::tool_checks::{check_duplication_tools, check_required_tools};
 use crate::domain::report::{CheckResult, Severity};
@@ -154,6 +154,11 @@ fn check_hook_structure(
         has_typescript,
         results,
     );
+
+    // H-CSS-01: Stylelint in pre-commit (only relevant for web/TS projects)
+    if has_typescript {
+        check_stylelint_hook(ctx.pre_commit_content, results);
+    }
 }
 
 /// H6-H11: script stats, permissions, tools, inventory

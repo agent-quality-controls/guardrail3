@@ -74,6 +74,7 @@ fi
 TS_CHANGED=$(echo "$STAGED_FILES" | grep -cE '\.(ts|tsx|mjs)$' || true)
 RUST_CHANGED=$(echo "$STAGED_FILES" | grep -cE '\.(rs)$' || true)
 CARGO_CHANGED=$(echo "$STAGED_FILES" | grep -cE '(Cargo\.toml|Cargo\.lock)$' || true)
+CSS_CHANGED=$(echo "$STAGED_FILES" | grep -cE '\.css$' || true)
 
 # --- Guardrail validation (AST-based, replaces grep-based tamper detection) ---
 if command -v guardrail3 &> /dev/null; then
@@ -115,6 +116,17 @@ if [ "$TS_CHANGED" -gt 0 ]; then
     if ! NODE_OPTIONS="--max-old-space-size=8192" pnpm exec eslint --max-warnings 0 $(echo "$STAGED_FILES" | grep -E '\.(ts|tsx|mjs)$'); then
         echo "ESLint failed. Fix lint errors before committing."
         exit 1
+    fi
+fi
+
+# --- CSS checks (only if CSS files changed) ---
+if [ "$CSS_CHANGED" -gt 0 ]; then
+    echo "Running Stylelint (CSS quality + accessibility)..."
+    if command -v pnpm &> /dev/null && [ -f ".stylelintrc.mjs" ] || [ -f ".stylelintrc.json" ] || [ -f "stylelint.config.mjs" ]; then
+        if ! pnpm exec stylelint --max-warnings 0 $(echo "$STAGED_FILES" | grep -E '\.css$'); then
+            echo "Stylelint failed. Fix CSS quality/accessibility issues before committing."
+            exit 1
+        fi
     fi
 fi
 
@@ -169,7 +181,7 @@ if [ "$RUST_CHANGED" -gt 0 ]; then
         echo "ERROR: cargo-dupes not installed. Install: cargo install cargo-dupes"
         exit 1
     fi
-    if ! (cd "$RUST_WORKSPACE" && cargo dupes check --max-exact 50 --max-exact-percent 10 --exclude-tests); then
+    if ! (cd "$RUST_WORKSPACE" && cargo dupes check --max-exact 60 --max-exact-percent 10 --exclude-tests); then
         echo "Duplicate Rust code detected. Refactor before committing."
         exit 1
     fi

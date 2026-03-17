@@ -254,6 +254,22 @@ CHECK CATEGORIES
       type = \"service\"
       checks.architecture = false   # service but skip hex arch
 
+  CONTENT PROFILE (TS apps with type = \"content\"):
+    Additional checks for content sites (marketing, blog, docs):
+    - T-PLUG-04..09: Accessibility and CSS quality packages installed
+    - T-ESLP-07/08: jsx-a11y strict config in ESLint
+    - T-ESLP-12: tailwind-ban design token enforcement
+    - T-STYL-01..05: Stylelint + a11y plugin configured
+    - H-CSS-01: Stylelint in pre-commit hook
+    These only fire for apps with type = \"content\" in guardrail3.toml.
+
+  ESLINT PLUGIN CHECKS (all TS projects):
+    T-PLUG-01..03/10: Core lint plugins installed (unicorn, regexp,
+    sonarjs, knip) in devDependencies.
+    T-ESLP-01..06: Plugin presets configured in eslint.config.mjs.
+    T-ESLP-09..11: React rules, built-in ESLint/TS rules, and test
+    file relaxations present.
+
   Disable in guardrail3.toml:
     [rust.checks]
     architecture = false   # disable hex arch checks

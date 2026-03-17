@@ -2,11 +2,13 @@ pub mod ast_helpers;
 pub mod config_files;
 pub mod eslint_audit;
 mod eslint_check;
+mod eslint_plugin_checks;
 mod eslint_rule_infra;
 mod jscpd_check;
 mod npmrc_check;
 mod package_check;
 pub mod source_scan;
+mod stylelint_check;
 pub mod test_checks;
 pub mod ts_arch_checks;
 pub mod ts_code_analysis;
@@ -19,6 +21,7 @@ use crate::domain::config::types::GuardrailConfig;
 use crate::domain::report::{Report, Section, TsAppContext, TsAppType, TsCheckCategories};
 use crate::ports::outbound::FileSystem;
 
+#[allow(clippy::too_many_lines)] // reason: TS validation orchestrator wires all check modules
 pub fn run(
     fs: &dyn FileSystem,
     path: &Path,
@@ -34,6 +37,57 @@ pub fn run(
         name: "TS config files".to_owned(),
         results: config_results,
     });
+
+    // ESLint plugin configuration (core — always run)
+    let eslint_path = path.join("eslint.config.mjs");
+    if let Some(eslint_content) = fs.read_file(&eslint_path) {
+        let mut plugin_results = Vec::new();
+        eslint_plugin_checks::check_core_plugins(
+            &eslint_content,
+            &eslint_path,
+            &mut plugin_results,
+        );
+        report.add_section(Section {
+            name: "ESLint plugin configuration".to_owned(),
+            results: plugin_results,
+        });
+    }
+
+    // Plugin packages in devDependencies
+    let content_enabled = has_content_app(config);
+    let mut plug_results = Vec::new();
+    package_check::check_lint_plugins(fs, path, content_enabled, &mut plug_results);
+    if !plug_results.is_empty() {
+        report.add_section(Section {
+            name: "Lint plugin packages".to_owned(),
+            results: plug_results,
+        });
+    }
+
+    // Content-profile checks (only if project has content-type apps)
+    if content_enabled {
+        // ESLint content plugins (jsx-a11y, tailwind-ban)
+        if let Some(eslint_content) = fs.read_file(&path.join("eslint.config.mjs")) {
+            let mut content_plugin_results = Vec::new();
+            eslint_plugin_checks::check_content_plugins(
+                &eslint_content,
+                &path.join("eslint.config.mjs"),
+                &mut content_plugin_results,
+            );
+            report.add_section(Section {
+                name: "Content profile: ESLint accessibility".to_owned(),
+                results: content_plugin_results,
+            });
+        }
+
+        // Stylelint (T-STYL-01..05)
+        let mut styl_results = Vec::new();
+        stylelint_check::check_stylelint(fs, path, &mut styl_results);
+        report.add_section(Section {
+            name: "Content profile: Stylelint + a11y".to_owned(),
+            results: styl_results,
+        });
+    }
 
     // Source code scan (respects scope flags)
     let source_results = source_scan::check(fs, path, scoped_files);
@@ -78,6 +132,34 @@ pub fn run(
     report
 }
 
+/// Check if any app in the project is configured as content type,
+/// or if the global content category is enabled.
+fn has_content_app(config: Option<&GuardrailConfig>) -> bool {
+    let Some(ts) = config.and_then(|c| c.typescript.as_ref()) else {
+        return false;
+    };
+
+    // Check global content setting
+    if let Some(checks) = &ts.checks {
+        if checks.content == Some(true) {
+            return true;
+        }
+    }
+
+    // Check per-app types
+    if let Some(apps) = &ts.apps {
+        for app_cfg in apps.values() {
+            if let Some(t) = &app_cfg.type_ {
+                if t.eq_ignore_ascii_case("content") {
+                    return true;
+                }
+            }
+        }
+    }
+
+    false
+}
+
 /// Discover TS apps and resolve per-app type and categories from config.
 fn resolve_app_contexts(
     fs: &dyn FileSystem,
@@ -112,6 +194,7 @@ fn resolve_app_contexts(
             let categories = if let Some(checks) = app_cfg.and_then(|c| c.checks.as_ref()) {
                 TsCheckCategories {
                     architecture: checks.architecture.unwrap_or(type_defaults.architecture),
+                    content: checks.content.unwrap_or(type_defaults.content),
                     tests: checks.tests.unwrap_or(type_defaults.tests),
                 }
             } else {

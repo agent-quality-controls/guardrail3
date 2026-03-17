@@ -296,3 +296,67 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
         }.as_inventory());
     }
 }
+
+#[allow(clippy::disallowed_methods)] // reason: serde_json::from_str for package.json inspection
+pub fn check_lint_plugins(
+    fs: &dyn FileSystem,
+    path: &Path,
+    content_enabled: bool,
+    results: &mut Vec<CheckResult>,
+) {
+    let pkg_path = path.join("package.json");
+    let Some(content) = fs.read_file(&pkg_path) else {
+        return;
+    };
+    let Ok(json) = serde_json::from_str::<serde_json::Value>(&content) else {
+        return;
+    };
+
+    let dev_deps = json.get("devDependencies").and_then(|d| d.as_object());
+
+    let check_pkg = |id: &str, pkg: &str, out: &mut Vec<CheckResult>| {
+        let found = dev_deps.is_some_and(|d| d.contains_key(pkg));
+        if found {
+            out.push(
+                CheckResult {
+                    id: id.to_owned(),
+                    severity: Severity::Info,
+                    title: format!("{pkg} installed"),
+                    message: format!("{pkg} found in devDependencies."),
+                    file: Some(pkg_path.display().to_string()),
+                    line: None,
+                    inventory: false,
+                }
+                .as_inventory(),
+            );
+        } else {
+            out.push(CheckResult {
+                id: id.to_owned(),
+                severity: Severity::Error,
+                title: format!("{pkg} missing"),
+                message: format!(
+                    "{pkg} not found in devDependencies. Install with: pnpm add -Dw {pkg}"
+                ),
+                file: Some(pkg_path.display().to_string()),
+                line: None,
+                inventory: false,
+            });
+        }
+    };
+
+    // Core plugins (always)
+    check_pkg("T-PLUG-01", "eslint-plugin-unicorn", results);
+    check_pkg("T-PLUG-02", "eslint-plugin-regexp", results);
+    check_pkg("T-PLUG-03", "eslint-plugin-sonarjs", results);
+    check_pkg("T-PLUG-10", "knip", results);
+
+    // Content-profile plugins
+    if content_enabled {
+        check_pkg("T-PLUG-04", "eslint-plugin-jsx-a11y", results);
+        check_pkg("T-PLUG-05", "stylelint", results);
+        check_pkg("T-PLUG-06", "@double-great/stylelint-a11y", results);
+        check_pkg("T-PLUG-07", "stylelint-config-standard", results);
+        check_pkg("T-PLUG-08", "stylelint-config-tailwindcss", results);
+        check_pkg("T-PLUG-09", "eslint-plugin-tailwind-ban", results);
+    }
+}

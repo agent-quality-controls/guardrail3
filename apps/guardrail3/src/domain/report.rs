@@ -76,6 +76,7 @@ impl Default for RustCheckCategories {
 #[derive(Debug, Clone)]
 pub struct TsCheckCategories {
     pub architecture: bool,
+    pub content: bool,
     pub tests: bool,
 }
 
@@ -83,6 +84,7 @@ impl Default for TsCheckCategories {
     fn default() -> Self {
         Self {
             architecture: true,
+            content: true,
             tests: true,
         }
     }
@@ -115,10 +117,17 @@ impl TsAppType {
         match self {
             Self::Service => TsCheckCategories {
                 architecture: true,
+                content: false,
                 tests: true,
             },
-            Self::Content | Self::Library => TsCheckCategories {
+            Self::Content => TsCheckCategories {
                 architecture: false,
+                content: true,
+                tests: true,
+            },
+            Self::Library => TsCheckCategories {
+                architecture: false,
+                content: false,
                 tests: true,
             },
         }

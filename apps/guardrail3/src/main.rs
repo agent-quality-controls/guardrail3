@@ -304,17 +304,22 @@ fn build_ts_categories(
     let cfg_arch = checks
         .and_then(|c| c.architecture)
         .unwrap_or(ts_defaults.architecture);
+    let cfg_content = checks
+        .and_then(|c| c.content)
+        .unwrap_or(ts_defaults.content);
     let cfg_tests = checks.and_then(|c| c.tests).unwrap_or(ts_defaults.tests);
 
     let any_cli = args.code || args.architecture || args.tests || args.release || args.garde;
     if any_cli {
         TsCheckCategories {
             architecture: args.architecture,
+            content: false,
             tests: args.tests,
         }
     } else {
         TsCheckCategories {
             architecture: cfg_arch,
+            content: cfg_content,
             tests: cfg_tests,
         }
     }

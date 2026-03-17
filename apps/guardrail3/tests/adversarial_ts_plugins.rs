@@ -1,0 +1,311 @@
+//! Adversarial integration tests for T-PLUG package check IDs.
+//!
+//! Each test creates a minimal TypeScript project in a temp directory, runs
+//! `guardrail3 ts validate --format json`, and asserts T-PLUG check presence/absence
+//! based on devDependencies and content-type configuration.
+use garde as _;
+
+// Suppress unused crate dependency warnings for crates used only by the main binary
+use clap as _;
+use colored as _;
+use glob as _;
+use guardrail3 as _;
+use proc_macro2 as _;
+use proptest as _;
+use quote as _;
+use serde as _;
+use syn as _;
+use toml as _;
+use tree_sitter as _;
+use tree_sitter_typescript as _;
+use walkdir as _;
+
+use std::path::Path;
+use std::process::Command;
+
+/// Create a TS project with package.json containing specified devDependencies.
+#[allow(clippy::disallowed_methods)] // reason: test helper — fs operations to set up temp project
+#[allow(clippy::expect_used)] // reason: test helper — panics indicate broken test infrastructure
+fn setup_ts_project(dev_deps: &[&str], config: Option<&str>) -> tempfile::TempDir {
+    let tmp = tempfile::tempdir().expect("tempdir");
+
+    let deps_json: Vec<String> = dev_deps.iter().map(|d| format!("\"{d}\": \"*\"")).collect();
+    let pkg = format!(
+        r#"{{"name": "test", "devDependencies": {{{}}}}}"#,
+        deps_json.join(", ")
+    );
+    std::fs::write(tmp.path().join("package.json"), pkg).expect("write package.json");
+
+    // Need at least one .ts file for TS detection
+    let src = tmp.path().join("src");
+    std::fs::create_dir_all(&src).expect("create src");
+    std::fs::write(src.join("index.ts"), "export const x = 1;").expect("write ts");
+
+    if let Some(cfg) = config {
+        std::fs::write(tmp.path().join("guardrail3.toml"), cfg).expect("write config");
+    }
+
+    tmp
+}
+
+/// Create a TS project with a content-type app directory structure.
+#[allow(clippy::disallowed_methods)] // reason: test helper — fs operations to set up temp project with apps
+#[allow(clippy::expect_used)] // reason: test helper — panics indicate broken test infrastructure
+fn setup_ts_project_with_app(dev_deps: &[&str], config: &str, app_name: &str) -> tempfile::TempDir {
+    let tmp = tempfile::tempdir().expect("tempdir");
+
+    let deps_json: Vec<String> = dev_deps.iter().map(|d| format!("\"{d}\": \"*\"")).collect();
+    let pkg = format!(
+        r#"{{"name": "test-monorepo", "private": true, "devDependencies": {{{}}}}}"#,
+        deps_json.join(", ")
+    );
+    std::fs::write(tmp.path().join("package.json"), pkg).expect("write package.json");
+
+    // Create the app directory with a .ts file
+    let app_dir = tmp.path().join("apps").join(app_name);
+    let app_src = app_dir.join("src");
+    std::fs::create_dir_all(&app_src).expect("create app src");
+    std::fs::write(
+        app_dir.join("package.json"),
+        format!(r#"{{"name": "{app_name}", "version": "0.1.0"}}"#),
+    )
+    .expect("write app package.json");
+    std::fs::write(app_src.join("index.ts"), "export const x = 1;").expect("write app ts");
+
+    std::fs::write(tmp.path().join("guardrail3.toml"), config).expect("write config");
+
+    tmp
+}
+
+/// Run guardrail3 ts validate --format json on the given path with extra CLI args.
+#[allow(clippy::disallowed_methods)] // reason: test helper — Command::new for binary under test
+#[allow(clippy::expect_used)] // reason: test helper — panics indicate broken test infrastructure
+fn run_ts_validate(path: &Path, extra_args: &[&str]) -> String {
+    let mut args = vec!["ts", "validate", "--format", "json"];
+    args.extend_from_slice(extra_args);
+    args.push(path.to_str().expect("path"));
+
+    let out = Command::new(env!("CARGO_BIN_EXE_guardrail3"))
+        .args(&args)
+        .output()
+        .expect("failed to run guardrail3");
+
+    String::from_utf8_lossy(&out.stdout).to_string()
+}
+
+/// Collect all check IDs from the JSON output into a Vec.
+#[allow(clippy::expect_used, clippy::indexing_slicing)] // reason: test helper — JSON parsing for assertion
+fn collect_check_ids(json_output: &str) -> Vec<String> {
+    #[allow(clippy::disallowed_methods)] // reason: test helper — JSON parsing of guardrail3 output
+    let parsed: serde_json::Value =
+        serde_json::from_str(json_output).expect("guardrail3 output should be valid JSON");
+
+    let sections = parsed["sections"]
+        .as_array()
+        .expect("sections should be array");
+
+    let mut ids = Vec::new();
+    for section in sections {
+        let results = section["results"].as_array().expect("results array");
+        for result in results {
+            if let Some(id) = result["id"].as_str() {
+                ids.push(id.to_owned());
+            }
+        }
+    }
+    ids
+}
+
+/// Collect check IDs that have severity "error" from the JSON output.
+#[allow(clippy::expect_used, clippy::indexing_slicing)] // reason: test helper — JSON parsing for assertion
+fn collect_error_check_ids(json_output: &str) -> Vec<String> {
+    #[allow(clippy::disallowed_methods)] // reason: test helper — JSON parsing of guardrail3 output
+    let parsed: serde_json::Value =
+        serde_json::from_str(json_output).expect("guardrail3 output should be valid JSON");
+
+    let sections = parsed["sections"]
+        .as_array()
+        .expect("sections should be array");
+
+    let mut ids = Vec::new();
+    for section in sections {
+        let results = section["results"].as_array().expect("results array");
+        for result in results {
+            if result["severity"].as_str() == Some("error") {
+                if let Some(id) = result["id"].as_str() {
+                    ids.push(id.to_owned());
+                }
+            }
+        }
+    }
+    ids
+}
+
+/// Assert a specific check ID exists in the output.
+#[allow(clippy::expect_used)] // reason: test assertion helper
+fn assert_has_check(ids: &[String], check_id: &str, json_output: &str) {
+    let found = ids.iter().any(|id| id == check_id);
+    assert!(
+        found,
+        "Expected check '{check_id}' in output.\nCheck IDs found: {ids:?}\nFull output:\n{json_output}"
+    );
+}
+
+/// Assert a specific check ID does NOT exist in the output.
+fn assert_no_check(ids: &[String], check_id: &str, json_output: &str) {
+    assert!(
+        !ids.iter().any(|id| id == check_id),
+        "Did NOT expect check '{check_id}', but it was present.\nFull output:\n{json_output}"
+    );
+}
+
+/// Assert that NO check ID matching the prefix exists in the output.
+fn assert_no_check_prefix(ids: &[String], prefix: &str, json_output: &str) {
+    let matching: Vec<_> = ids.iter().filter(|id| id.starts_with(prefix)).collect();
+    assert!(
+        matching.is_empty(),
+        "Did NOT expect any check starting with '{prefix}', but found: {matching:?}\nFull output:\n{json_output}"
+    );
+}
+
+// ============================================================
+// Test 1: Missing eslint-plugin-unicorn fires T-PLUG-01
+// ============================================================
+
+#[test]
+fn t_plug_01_missing_unicorn() {
+    // Project without eslint-plugin-unicorn in devDependencies
+    let tmp = setup_ts_project(&[], None);
+    let output = run_ts_validate(tmp.path(), &[]);
+    let error_ids = collect_error_check_ids(&output);
+
+    // T-PLUG-01 should fire as error because eslint-plugin-unicorn is missing
+    assert_has_check(&error_ids, "T-PLUG-01", &output);
+}
+
+// ============================================================
+// Test 2: Present eslint-plugin-unicorn — T-PLUG-01 not error
+// ============================================================
+
+#[test]
+fn t_plug_01_present_unicorn() {
+    // Project WITH eslint-plugin-unicorn in devDependencies
+    let tmp = setup_ts_project(&["eslint-plugin-unicorn"], None);
+    let output = run_ts_validate(tmp.path(), &[]);
+    let error_ids = collect_error_check_ids(&output);
+
+    // T-PLUG-01 should NOT fire as error — plugin is present (will be inventory/info)
+    assert_no_check(&error_ids, "T-PLUG-01", &output);
+}
+
+// ============================================================
+// Test 3: All 4 core plugins present — no T-PLUG errors for 01/02/03/10
+// ============================================================
+
+#[test]
+fn t_plug_core_all_present() {
+    let tmp = setup_ts_project(
+        &[
+            "eslint-plugin-unicorn",
+            "eslint-plugin-regexp",
+            "eslint-plugin-sonarjs",
+            "knip",
+        ],
+        None,
+    );
+    let output = run_ts_validate(tmp.path(), &[]);
+    let error_ids = collect_error_check_ids(&output);
+
+    // None of the core plugin checks should fire as errors
+    assert_no_check(&error_ids, "T-PLUG-01", &output);
+    assert_no_check(&error_ids, "T-PLUG-02", &output);
+    assert_no_check(&error_ids, "T-PLUG-03", &output);
+    assert_no_check(&error_ids, "T-PLUG-10", &output);
+}
+
+// ============================================================
+// Test 4: Content plugins NOT checked without content type
+// ============================================================
+
+#[test]
+fn t_plug_content_not_checked_without_content_type() {
+    // Project WITHOUT content type config — content plugins should not be checked at all.
+    // Even though jsx-a11y is missing, T-PLUG-04 should NOT appear.
+    let tmp = setup_ts_project(&[], None);
+    let output = run_ts_validate(tmp.path(), &[]);
+    let all_ids = collect_check_ids(&output);
+
+    // Content-profile plugin checks should not appear at all (not even as inventory)
+    assert_no_check(&all_ids, "T-PLUG-04", &output);
+    assert_no_check(&all_ids, "T-PLUG-05", &output);
+    assert_no_check(&all_ids, "T-PLUG-06", &output);
+    assert_no_check(&all_ids, "T-PLUG-07", &output);
+    assert_no_check(&all_ids, "T-PLUG-08", &output);
+    assert_no_check(&all_ids, "T-PLUG-09", &output);
+}
+
+// ============================================================
+// Test 5: Content-type project missing jsx-a11y fires T-PLUG-04
+// ============================================================
+
+#[test]
+fn t_plug_content_checked_with_content_type() {
+    let config = r#"
+version = "0.1"
+
+[typescript.apps.landing]
+type = "content"
+"#;
+    // Content-type project with NO content plugins installed
+    let tmp = setup_ts_project_with_app(&[], config, "landing");
+    let output = run_ts_validate(tmp.path(), &[]);
+    let error_ids = collect_error_check_ids(&output);
+
+    // T-PLUG-04 should fire as error because jsx-a11y is missing
+    assert_has_check(&error_ids, "T-PLUG-04", &output);
+}
+
+// ============================================================
+// Test 6: Content project with all content plugins — no T-PLUG-04..09 errors
+// ============================================================
+
+#[test]
+fn t_plug_content_all_present() {
+    let config = r#"
+version = "0.1"
+
+[typescript.apps.landing]
+type = "content"
+"#;
+    let tmp = setup_ts_project_with_app(
+        &[
+            // Core plugins (to avoid T-PLUG-01/02/03/10 errors)
+            "eslint-plugin-unicorn",
+            "eslint-plugin-regexp",
+            "eslint-plugin-sonarjs",
+            "knip",
+            // Content plugins
+            "eslint-plugin-jsx-a11y",
+            "stylelint",
+            "@double-great/stylelint-a11y",
+            "stylelint-config-standard",
+            "stylelint-config-tailwindcss",
+            "eslint-plugin-tailwind-ban",
+        ],
+        config,
+        "landing",
+    );
+    let output = run_ts_validate(tmp.path(), &[]);
+    let error_ids = collect_error_check_ids(&output);
+
+    // None of the content plugin checks should fire as errors
+    assert_no_check(&error_ids, "T-PLUG-04", &output);
+    assert_no_check(&error_ids, "T-PLUG-05", &output);
+    assert_no_check(&error_ids, "T-PLUG-06", &output);
+    assert_no_check(&error_ids, "T-PLUG-07", &output);
+    assert_no_check(&error_ids, "T-PLUG-08", &output);
+    assert_no_check(&error_ids, "T-PLUG-09", &output);
+
+    // Also verify no T-PLUG errors at all via prefix check
+    assert_no_check_prefix(&error_ids, "T-PLUG-", &output);
+}

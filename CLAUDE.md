@@ -156,7 +156,7 @@ src/
     markdown.rs                  — markdown tables
 ```
 
-## Validation Checks (134 total)
+## Validation Checks (162 total)
 
 ### Rust (R1-R58)
 

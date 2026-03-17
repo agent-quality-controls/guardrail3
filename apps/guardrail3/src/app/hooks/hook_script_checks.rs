@@ -265,6 +265,37 @@ pub(super) fn check_modular_scripts(
     );
 }
 
+/// H-CSS-01: Check that pre-commit hook runs stylelint on CSS files.
+pub(super) fn check_stylelint_hook(pre_commit_content: &str, results: &mut Vec<CheckResult>) {
+    let has_stylelint = pre_commit_content.contains("stylelint");
+    let has_css_detection = pre_commit_content.contains(".css");
+
+    if has_stylelint && has_css_detection {
+        results.push(
+            CheckResult {
+                id: "H-CSS-01".to_owned(),
+                severity: Severity::Info,
+                title: "Stylelint configured in pre-commit hook".to_owned(),
+                message: "Pre-commit hook runs stylelint on staged CSS files for quality and accessibility checking.".to_owned(),
+                file: None,
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
+    } else {
+        results.push(CheckResult {
+            id: "H-CSS-01".to_owned(),
+            severity: Severity::Warn,
+            title: "No stylelint in pre-commit hook".to_owned(),
+            message: "Pre-commit hook does not run stylelint on CSS files. CSS quality and accessibility issues won't be caught before commit. Add a stylelint step to .githooks/pre-commit that runs on staged .css files.".to_owned(),
+            file: None,
+            line: None,
+            inventory: false,
+        });
+    }
+}
+
 pub(super) fn inventory_scripts(
     fs: &dyn FileSystem,
     dir: &Path,
