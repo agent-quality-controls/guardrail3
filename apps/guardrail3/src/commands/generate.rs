@@ -262,18 +262,72 @@ struct LocalOverrides {
 fn load_local_overrides(project_path: &Path) -> LocalOverrides {
     let overrides_dir = project_path.join(".guardrail3/overrides");
 
-    let read_override = |name: &str| -> String {
+    let read_and_validate = |name: &str| -> String {
         let path = overrides_dir.join(name);
-        crate::fs::read_file(&path).unwrap_or_default()
+        let raw = crate::fs::read_file(&path).unwrap_or_default();
+        if raw.trim().is_empty() {
+            return String::new();
+        }
+        validate_override_content(&raw, name)
     };
 
     LocalOverrides {
-        clippy_methods: read_override("clippy-methods.toml"),
-        clippy_types: read_override("clippy-types.toml"),
-        deny_bans: read_override("deny-bans.toml"),
-        deny_skip: read_override("deny-skip.toml"),
-        deny_feature_bans: read_override("deny-feature-bans.toml"),
+        clippy_methods: read_and_validate("clippy-methods.toml"),
+        clippy_types: read_and_validate("clippy-types.toml"),
+        deny_bans: read_and_validate("deny-bans.toml"),
+        deny_skip: read_and_validate("deny-skip.toml"),
+        deny_feature_bans: read_and_validate("deny-feature-bans.toml"),
     }
+}
+
+/// Validate override content — skip lines that don't match expected TOML entry patterns.
+/// Valid patterns: `{ path = "..." }`, `{ name = "..." }`, `[[...]]` section headers.
+/// Comments and blank lines are silently stripped (not injected).
+#[allow(clippy::print_stderr)] // reason: CLI tool — malformed override warnings reported to stderr
+fn validate_override_content(content: &str, file_name: &str) -> String {
+    let mut valid = String::new();
+    for line in content.lines() {
+        let trimmed = line.trim();
+        if trimmed.is_empty() || trimmed.starts_with('#') {
+            continue;
+        }
+        let normalized = trimmed.replace(' ', "");
+        if normalized.starts_with("{path=")
+            || normalized.starts_with("{name=")
+            || normalized.starts_with("[[")
+        {
+            valid.push_str(line);
+            valid.push('\n');
+        } else {
+            eprintln!("  warning: skipping invalid line in {file_name}: {trimmed}");
+        }
+    }
+    valid
+}
+
+/// Remove override entries that already exist in the base content.
+/// For TOML array entries, compares by the trimmed line (minus trailing comma).
+pub(crate) fn deduplicated_override(base: &str, override_content: &str) -> String {
+    if override_content.trim().is_empty() {
+        return String::new();
+    }
+
+    let mut result = String::new();
+    for line in override_content.lines() {
+        let trimmed = line.trim();
+        // Skip empty lines and comments (already stripped by validation, but be defensive)
+        if trimmed.is_empty() || trimmed.starts_with('#') {
+            continue;
+        }
+        // Check if this exact entry already exists in base (ignore trailing comma differences)
+        let key = trimmed.trim_end_matches(',');
+        if base.contains(key) {
+            continue;
+        }
+        result.push_str(line);
+        result.push('\n');
+    }
+    result
 }
 
 fn resolve_rust_root(cfg: &config::types::GuardrailConfig) -> String {

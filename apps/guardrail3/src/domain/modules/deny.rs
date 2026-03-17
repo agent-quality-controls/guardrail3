@@ -267,9 +267,9 @@ pub fn build_deny_toml_with_entries(
 
     // Skip entries
     out.push_str("skip = [\n");
-    if !extra_skip.trim().is_empty() {
-        out.push_str(extra_skip);
-        out.push('\n');
+    let deduped_skip = crate::commands::generate::deduplicated_override(&out, extra_skip);
+    if !deduped_skip.trim().is_empty() {
+        out.push_str(&deduped_skip);
     }
     out.push_str("]\n\n");
 
@@ -279,10 +279,10 @@ pub fn build_deny_toml_with_entries(
         out.push_str(module.content);
         out.push('\n');
     }
-    if !extra_bans.trim().is_empty() {
+    let deduped_bans = crate::commands::generate::deduplicated_override(&out, extra_bans);
+    if !deduped_bans.trim().is_empty() {
         out.push_str("    # --- Local overrides ---\n");
-        out.push_str(extra_bans);
-        out.push('\n');
+        out.push_str(&deduped_bans);
     }
     out.push_str("]\n\n");
 
@@ -294,10 +294,11 @@ pub fn build_deny_toml_with_entries(
         out.push_str(fb_content);
         out.push('\n');
     }
-    if !extra_feature_bans.trim().is_empty() {
+    let deduped_feature_bans =
+        crate::commands::generate::deduplicated_override(&out, extra_feature_bans);
+    if !deduped_feature_bans.trim().is_empty() {
         out.push('\n');
-        out.push_str(extra_feature_bans);
-        out.push('\n');
+        out.push_str(&deduped_feature_bans);
     }
     out.push('\n');
 

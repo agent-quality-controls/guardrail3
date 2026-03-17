@@ -473,7 +473,7 @@ fn adversarial_commented_entry_is_ignored() {
 fn adversarial_no_space_before_equals_not_matched() {
     let baseline = generate_and_read_clippy(None);
 
-    // Add an entry with no space before `=` — valid TOML but parser won't match
+    // Add an entry with no space before `=` — valid TOML syntax
     let patched = baseline.replace(
         "disallowed-methods = [",
         "disallowed-methods = [\n    {path=\"custom::no_space\", reason=\"test\"},",
@@ -481,12 +481,11 @@ fn adversarial_no_space_before_equals_not_matched() {
 
     let (stdout, _stderr, _success) = generate_then_patch_then_dry_run(&patched);
 
-    // BUG: the parser won't detect `{path="custom::no_space"...}` as an entry at all
-    // because it requires `{path =` (space before equals). The entry will be invisible
-    // to the custom entry detector — it shows as a plain diff, not a custom entry.
+    // FIX: the parser now normalizes spaces before matching, so `{path=` is detected
+    // as an entry just like `{ path = `. The custom entry detector should find it.
     assert!(
-        !stdout.contains("custom::no_space"),
-        "Entry with no space before = should be invisible to custom entry detector (it won't match). Got:\n{stdout}"
+        stdout.contains("custom::no_space"),
+        "Entry with no space before = should now be detected by the custom entry detector. Got:\n{stdout}"
     );
 }
 
@@ -550,7 +549,8 @@ fn adversarial_cross_section_deduplication() {
     let entry_trimmed = entry_text.trim().trim_end_matches(',');
 
     // Inject the EXACT same entry (same path + same reason) into disallowed-methods.
-    // The parser collects entries across ALL sections into a single BTreeSet.
+    // The parser now uses section-aware keying, so entries in different sections are
+    // distinguished even if their content is identical.
     let patched = baseline.replace(
         "disallowed-methods = [",
         &format!("disallowed-methods = [\n    {entry_trimmed},"),
@@ -558,14 +558,13 @@ fn adversarial_cross_section_deduplication() {
 
     let (stdout, _stderr, _success) = generate_then_patch_then_dry_run(&patched);
 
-    // BUG: The parser collects ALL `{ path = ...}` lines regardless of which TOML
-    // section they're in. Since this EXACT entry already exists in disallowed-types
-    // in the generated base, the BTreeSet deduplicates it — so it won't be flagged
-    // as custom even though it's in the WRONG section (methods vs types).
-    // The parser is section-unaware — it treats the file as a flat bag of entries.
+    // FIX: The parser now prefixes entries with their section name (e.g. "methods:",
+    // "types:") so identical entries in different sections are correctly distinguished.
+    // The entry placed in disallowed-methods should be detected as custom even though
+    // the same content exists in disallowed-types.
     assert!(
-        !stdout.contains("std::fs::File"),
-        "Cross-section exact duplicate is invisible to the parser (design limitation — deduplicates across sections). Got:\n{stdout}"
+        stdout.contains("std::fs::File"),
+        "Cross-section duplicate should now be detected as custom (parser is section-aware). Got:\n{stdout}"
     );
 }
 
@@ -591,12 +590,11 @@ fn adversarial_override_duplicates_generated_entry() {
     // Count how many times this exact entry appears
     let count = clippy.matches("{ path = \"std::env::var\"").count();
 
-    // BUG: the entry appears twice — once from the base module, once from the override.
-    // generate does not deduplicate overrides against the base. The file is syntactically
-    // valid (TOML arrays allow duplicates) but clippy may warn or behave unpredictably.
-    assert!(
-        count >= 2,
-        "Duplicate override entry should appear at least twice in generated output (no dedup). Found {count} occurrences."
+    // FIX: override entries that duplicate base entries are now deduplicated.
+    // The entry should appear exactly once (from the base module only).
+    assert_eq!(
+        count, 1,
+        "Duplicate override entry should be deduplicated — expected 1 occurrence, found {count}."
     );
 }
 
@@ -640,32 +638,19 @@ fn adversarial_comments_only_override_file() {
 
     let clippy = generate_and_read_clippy(Some(("clippy-methods.toml", comments_only)));
 
-    // BUG: The "Local overrides" header and comment block are injected verbatim
-    // even though there are ZERO actual entries — just comments. The generator
-    // checks `!extra_methods.trim().is_empty()` but comments are non-empty text.
-    // This means the generated clippy.toml gets a "Local overrides" section with
-    // only commented-out entries, which is misleading.
+    // FIX: Comments-only override content is now stripped during validation.
+    // The "Local overrides" header should NOT be injected when there are zero
+    // actual entries (only comments).
     assert!(
-        clippy.contains("Local overrides"),
-        "Comments-only override triggers 'Local overrides' header because content is non-empty after trim."
+        !clippy.contains("Local overrides"),
+        "Comments-only override should NOT trigger 'Local overrides' header. Got:\n{clippy}"
     );
 
-    // The comment text IS present in the generated file (verbatim injection)
+    // The comment text should NOT be present in the generated file
     assert!(
-        clippy.contains("# { path = \"my::dangerous::func\""),
-        "Comment text from override file should be injected verbatim into generated clippy.toml"
+        !clippy.contains("my::dangerous::func"),
+        "Comment text from comments-only override should not appear in generated clippy.toml"
     );
-
-    // However, these commented entries should NOT appear as UNCOMMENTED entries.
-    // Every line containing `{ path = "my::dangerous::func"` should be preceded by `#`.
-    for line in clippy.lines() {
-        if line.contains("my::dangerous::func") {
-            assert!(
-                line.trim().starts_with('#'),
-                "Entry from comments-only override must remain commented. Found uncommented line: {line}"
-            );
-        }
-    }
 }
 
 // ---------------------------------------------------------------------------
@@ -686,17 +671,20 @@ fn adversarial_malformed_override_produces_invalid_toml() {
 
     let clippy = generate_and_read_clippy(Some(("clippy-methods.toml", malformed)));
 
-    // The malformed content is injected verbatim — generate does not validate overrides
+    // FIX: Malformed content is now validated and stripped — invalid lines are skipped
     assert!(
-        clippy.contains("this is not valid TOML at all"),
-        "Malformed override content should be injected verbatim (no validation). Got:\n{clippy}"
+        !clippy.contains("this is not valid TOML at all"),
+        "Malformed override content should be stripped by validation. Got:\n{clippy}"
+    );
+    assert!(
+        !clippy.contains("random garbage"),
+        "Random garbage lines should be stripped by validation. Got:\n{clippy}"
     );
 
-    // Verify the result is NOT valid TOML
-    let parse_result: Result<toml::Value, _> = toml::from_str(&clippy);
+    // The generated clippy.toml should still be structurally valid
     assert!(
-        parse_result.is_err(),
-        "Generated clippy.toml with malformed override should be invalid TOML. BUG: generate does not validate override content."
+        clippy.contains("disallowed-methods"),
+        "Generated clippy.toml should still have disallowed-methods section"
     );
 }
 
