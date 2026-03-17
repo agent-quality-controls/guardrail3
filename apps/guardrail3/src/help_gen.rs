@@ -270,6 +270,20 @@ CHECK CATEGORIES
     T-ESLP-09..11: React rules, built-in ESLint/TS rules, and test
     file relaxations present.
 
+  ADDITIONAL TOOLS (all TS projects):
+    T-TOOL-01..04: Tool packages (cspell, type-coverage, license-checker,
+    prettier) in devDependencies.
+    T-TOOL-07: cspell.json config exists.
+    T-TOOL-08..10: Scripts (type-coverage, license-check, audit) in
+    package.json.
+    H-TOOL-01..05: Pre-commit hook steps (cspell, conflict markers,
+    lockfile integrity, prettier, pnpm audit).
+
+  CONTENT TOOLS (content-type apps only):
+    T-TOOL-05/06: size-limit packages in devDependencies.
+    T-TOOL-11: size-limit config in package.json.
+    T-TOOL-12: i18n locale completeness (auto-detects next-intl/i18next).
+
   Disable in guardrail3.toml:
     [rust.checks]
     architecture = false   # disable hex arch checks

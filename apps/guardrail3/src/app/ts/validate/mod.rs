@@ -4,12 +4,14 @@ pub mod eslint_audit;
 mod eslint_check;
 mod eslint_plugin_checks;
 mod eslint_rule_infra;
+pub mod i18n_check;
 mod jscpd_check;
 mod npmrc_check;
 mod package_check;
 pub mod source_scan;
 mod stylelint_check;
 pub mod test_checks;
+mod tool_config_checks;
 pub mod ts_arch_checks;
 pub mod ts_code_analysis;
 pub mod ts_comment_checks;
@@ -64,6 +66,26 @@ pub fn run(
         });
     }
 
+    // Additional tool packages (T-TOOL-01..06)
+    let mut tool_pkg_results = Vec::new();
+    package_check::check_additional_tools(fs, path, content_enabled, &mut tool_pkg_results);
+    if !tool_pkg_results.is_empty() {
+        report.add_section(Section {
+            name: "Additional tool packages".to_owned(),
+            results: tool_pkg_results,
+        });
+    }
+
+    // Tool configurations and scripts (T-TOOL-07..11)
+    let mut tool_cfg_results = Vec::new();
+    tool_config_checks::check_tool_configs(fs, path, content_enabled, &mut tool_cfg_results);
+    if !tool_cfg_results.is_empty() {
+        report.add_section(Section {
+            name: "Tool configuration".to_owned(),
+            results: tool_cfg_results,
+        });
+    }
+
     // Content-profile checks (only if project has content-type apps)
     if content_enabled {
         // ESLint content plugins (jsx-a11y, tailwind-ban)
@@ -87,6 +109,16 @@ pub fn run(
             name: "Content profile: Stylelint + a11y".to_owned(),
             results: styl_results,
         });
+
+        // i18n completeness (T-TOOL-12) — content profile
+        let mut i18n_results = Vec::new();
+        i18n_check::check_i18n(fs, path, &mut i18n_results);
+        if !i18n_results.is_empty() {
+            report.add_section(Section {
+                name: "Content profile: i18n completeness".to_owned(),
+                results: i18n_results,
+            });
+        }
     }
 
     // Source code scan (respects scope flags)

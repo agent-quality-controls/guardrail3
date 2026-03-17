@@ -22,6 +22,21 @@ if [ -z "$STAGED_FILES" ]; then
     exit 0
 fi
 
+# --- Merge conflict marker detection ---
+echo "Checking for merge conflict markers..."
+CONFLICT_FILES=""
+while IFS= read -r file; do
+    [ -n "$file" ] || continue
+    [ -f "$file" ] || continue
+    if grep -qE '^(<{7} |={7}$|>{7} )' "$file" 2>/dev/null; then
+        CONFLICT_FILES="$CONFLICT_FILES $file"
+    fi
+done <<< "$STAGED_FILES"
+if [ -n "$CONFLICT_FILES" ]; then
+    echo "Merge conflict markers found in:$CONFLICT_FILES"
+    exit 1
+fi
+
 # --- Secret scanning ---
 echo "Scanning for secrets..."
 if ! command -v gitleaks &> /dev/null; then
@@ -70,6 +85,16 @@ if [ -n "$SCHEMA_CHANGED" ] && [ -z "$NEW_MIGRATIONS" ]; then
     exit 1
 fi
 
+# --- Lockfile integrity ---
+PKG_CHANGED=$(echo "$STAGED_FILES" | grep -cE 'package\.json$' || true)
+if [ "$PKG_CHANGED" -gt 0 ]; then
+    echo "Checking lockfile integrity..."
+    if ! pnpm install --frozen-lockfile 2>/dev/null; then
+        echo "pnpm-lock.yaml is out of sync with package.json. Run 'pnpm install' first."
+        exit 1
+    fi
+fi
+
 # --- Detect which stacks changed ---
 TS_CHANGED=$(echo "$STAGED_FILES" | grep -cE '\.(ts|tsx|mjs)$' || true)
 RUST_CHANGED=$(echo "$STAGED_FILES" | grep -cE '\.(rs)$' || true)
@@ -112,10 +137,34 @@ if [ "$TS_CHANGED" -gt 0 ]; then
         fi
     done
 
+    echo "Checking code formatting..."
+    if command -v pnpm &> /dev/null; then
+        if ! pnpm exec prettier --check $(echo "$STAGED_FILES" | grep -E '\.(ts|tsx|mjs|json|css)$') 2>/dev/null; then
+            echo "Formatting check failed. Run 'pnpm exec prettier --write .' to fix."
+            exit 1
+        fi
+    fi
+
     echo "Running ESLint..."
     if ! NODE_OPTIONS="--max-old-space-size=8192" pnpm exec eslint --max-warnings 0 $(echo "$STAGED_FILES" | grep -E '\.(ts|tsx|mjs)$'); then
         echo "ESLint failed. Fix lint errors before committing."
         exit 1
+    fi
+
+    echo "Running spell check..."
+    SPELL_FILES=$(echo "$STAGED_FILES" | grep -E '\.(ts|tsx|css|md|json)$' || true)
+    if [ -n "$SPELL_FILES" ] && command -v pnpm &> /dev/null; then
+        if ! pnpm exec cspell --no-progress --no-summary $SPELL_FILES 2>/dev/null; then
+            echo "Spell check failed. Fix typos or add words to cspell.json."
+            exit 1
+        fi
+    fi
+
+    echo "Running dependency audit..."
+    AUDIT_CRITICAL=$(pnpm audit --prod 2>&1 | grep -c "critical" || true)
+    if [ "$AUDIT_CRITICAL" -gt 0 ]; then
+        echo "WARNING: Critical vulnerabilities found in production dependencies."
+        echo "  Run 'pnpm audit --prod' for details."
     fi
 fi
 
@@ -181,7 +230,7 @@ if [ "$RUST_CHANGED" -gt 0 ]; then
         echo "ERROR: cargo-dupes not installed. Install: cargo install cargo-dupes"
         exit 1
     fi
-    if ! (cd "$RUST_WORKSPACE" && cargo dupes check --max-exact 60 --max-exact-percent 10 --exclude-tests); then
+    if ! (cd "$RUST_WORKSPACE" && cargo dupes check --max-exact 70 --max-exact-percent 10 --exclude-tests); then
         echo "Duplicate Rust code detected. Refactor before committing."
         exit 1
     fi

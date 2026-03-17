@@ -391,3 +391,65 @@ pub fn check_lint_plugins(
         });
     }
 }
+
+/// Check additional tool packages in devDependencies.
+#[allow(clippy::disallowed_methods)] // reason: serde_json::from_str for package.json inspection
+#[allow(clippy::too_many_lines)] // reason: checks multiple tools sequentially
+pub fn check_additional_tools(
+    fs: &dyn FileSystem,
+    path: &Path,
+    content_enabled: bool,
+    results: &mut Vec<CheckResult>,
+) {
+    let pkg_path = path.join("package.json");
+    let Some(content) = fs.read_file(&pkg_path) else {
+        return;
+    };
+    let Ok(json) = serde_json::from_str::<serde_json::Value>(&content) else {
+        return;
+    };
+
+    let dev_deps = json.get("devDependencies").and_then(|d| d.as_object());
+
+    let check_pkg = |id: &str, pkg: &str, out: &mut Vec<CheckResult>| {
+        let found = dev_deps.is_some_and(|d| d.contains_key(pkg));
+        if found {
+            out.push(
+                CheckResult {
+                    id: id.to_owned(),
+                    severity: Severity::Info,
+                    title: format!("{pkg} installed"),
+                    message: format!("{pkg} found in devDependencies."),
+                    file: Some(pkg_path.display().to_string()),
+                    line: None,
+                    inventory: false,
+                }
+                .as_inventory(),
+            );
+        } else {
+            out.push(CheckResult {
+                id: id.to_owned(),
+                severity: Severity::Error,
+                title: format!("{pkg} missing"),
+                message: format!(
+                    "{pkg} not found in devDependencies. Install with: pnpm add -Dw {pkg}"
+                ),
+                file: Some(pkg_path.display().to_string()),
+                line: None,
+                inventory: false,
+            });
+        }
+    };
+
+    // Core tools (always)
+    check_pkg("T-TOOL-01", "cspell", results);
+    check_pkg("T-TOOL-02", "type-coverage", results);
+    check_pkg("T-TOOL-03", "license-checker", results);
+    check_pkg("T-TOOL-04", "prettier", results);
+
+    // Content-profile tools
+    if content_enabled {
+        check_pkg("T-TOOL-05", "size-limit", results);
+        check_pkg("T-TOOL-06", "@size-limit/preset-app", results);
+    }
+}
