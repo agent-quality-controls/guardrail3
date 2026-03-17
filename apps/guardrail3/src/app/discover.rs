@@ -24,12 +24,22 @@ pub fn detect_project(fs: &dyn FileSystem, path: &Path) -> ProjectInfo {
     // Check for Cargo.toml at path itself
     detect_rust(fs, path, &mut info);
 
-    // If not found, or workspace has zero members (marker Cargo.toml for rust-analyzer),
-    // check apps/backend/ (monorepo structure)
+    // Fallback: check crates/ for polyglot projects (e.g., graf)
+    if !info.has_rust || info.workspace_members.is_empty() {
+        let crates_path = path.join("crates");
+        if crates_path.join("Cargo.toml").exists() {
+            info.has_rust = false;
+            info.cargo_workspace_root = None;
+            info.workspace_members.clear();
+            info.workspace_member_dirs.clear();
+            detect_rust(fs, &crates_path, &mut info);
+        }
+    }
+
+    // Fallback: check apps/backend/ for monorepo structure
     if !info.has_rust || info.workspace_members.is_empty() {
         let backend_path = path.join("apps").join("backend");
         if backend_path.exists() {
-            // Reset rust state if we're falling through from an empty marker workspace
             info.has_rust = false;
             info.cargo_workspace_root = None;
             info.workspace_members.clear();
@@ -38,10 +48,102 @@ pub fn detect_project(fs: &dyn FileSystem, path: &Path) -> ProjectInfo {
         }
     }
 
+    // Discover additional workspaces in apps/*/ (nested workspace pattern)
+    // e.g., apps/shedul3r/ has its own [workspace] with internal crates
+    discover_nested_workspaces(fs, path, &mut info);
+
     // Check for package.json
     detect_typescript(fs, path, &mut info);
 
     info
+}
+
+/// Find additional Cargo workspaces inside apps/*/ directories.
+/// Merges their members into the existing ProjectInfo.
+fn discover_nested_workspaces(fs: &dyn FileSystem, root: &Path, info: &mut ProjectInfo) {
+    let apps_dir = root.join("apps");
+    if !apps_dir.exists() {
+        return;
+    }
+
+    for entry in fs.list_dir(&apps_dir) {
+        if !entry.file_type().is_ok_and(|ft| ft.is_dir()) {
+            continue;
+        }
+        let app_cargo = entry.path().join("Cargo.toml");
+        let Some(content) = fs.read_file(&app_cargo) else {
+            continue;
+        };
+        let Ok(table) = content.parse::<toml::Value>() else {
+            continue;
+        };
+        // Only process if it has [workspace] (it's its own workspace, not just a crate)
+        let Some(workspace) = table.get("workspace") else {
+            continue;
+        };
+
+        // Skip if this is the same workspace we already found
+        if info
+            .cargo_workspace_root
+            .as_ref()
+            .is_some_and(|r| *r == entry.path())
+        {
+            continue;
+        }
+
+        info.has_rust = true;
+
+        // Set workspace root to the first one found if not already set
+        if info.cargo_workspace_root.is_none() {
+            info.cargo_workspace_root = Some(entry.path().to_path_buf());
+        }
+
+        let exclude_dirs = parse_workspace_excludes(workspace, &entry.path());
+        let app_rel = entry
+            .path()
+            .strip_prefix(root)
+            .unwrap_or(&entry.path())
+            .display()
+            .to_string();
+
+        // Parse members but prefix their dirs with the app's relative path
+        if let Some(members) = workspace.get("members").and_then(|m| m.as_array()) {
+            for member in members {
+                if let Some(member_str) = member.as_str() {
+                    let pattern = entry.path().join(member_str);
+                    let pattern_str = pattern.display().to_string();
+                    if let Ok(paths) = glob::glob(&pattern_str) {
+                        for member_path in paths.flatten() {
+                            if !member_path.join("Cargo.toml").exists() {
+                                continue;
+                            }
+                            if let Ok(rel) = member_path.strip_prefix(&entry.path()) {
+                                let rel_str = rel.display().to_string();
+                                if exclude_dirs.contains(&rel_str) {
+                                    continue;
+                                }
+                            }
+                            let crate_name = read_crate_name(fs, &member_path);
+                            info.workspace_members.push(crate_name);
+                            if let Ok(rel) = member_path.strip_prefix(root) {
+                                info.workspace_member_dirs
+                                    .push(rel.display().to_string());
+                            } else {
+                                let full_rel = format!(
+                                    "{app_rel}/{}",
+                                    member_path
+                                        .strip_prefix(&entry.path())
+                                        .unwrap_or(&member_path)
+                                        .display()
+                                );
+                                info.workspace_member_dirs.push(full_rel);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 #[allow(clippy::manual_let_else)] // reason: match with early return is clearer here
