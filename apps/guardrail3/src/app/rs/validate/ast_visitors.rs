@@ -7,8 +7,9 @@ use syn::spanned::Spanned;
 use syn::visit::Visit;
 
 use super::ast_helpers::{
-    DeriveInfo, Located, extract_allow_lints, extract_cfg_attr_allow_lints, impl_item_attrs,
-    is_cfg_test_attr, item_attrs, item_ident, path_to_string, span_line,
+    DeriveInfo, Located, attrs_have_allow_lint, expr_attrs, extract_allow_lints,
+    extract_cfg_attr_allow_lints, impl_item_attrs, is_cfg_test_attr, item_attrs, item_ident,
+    path_to_string, span_line,
 };
 
 // ---------------------------------------------------------------------------
@@ -104,6 +105,13 @@ impl<'ast> Visit<'ast> for ItemAllowVisitor {
     fn visit_arm(&mut self, n: &'ast syn::Arm) {
         collect_outer_allows(&n.attrs, &mut self.out);
         syn::visit::visit_arm(self, n);
+    }
+    fn visit_stmt(&mut self, n: &'ast syn::Stmt) {
+        // Catch #[allow(...)] on expression statements (not covered by visit_item or visit_local)
+        if let syn::Stmt::Expr(expr, _) = n {
+            collect_outer_allows(expr_attrs(expr), &mut self.out);
+        }
+        syn::visit::visit_stmt(self, n);
     }
 }
 
@@ -291,13 +299,57 @@ impl<'ast> Visit<'ast> for ForbiddenMacroVisitor {
     }
 }
 
+#[derive(Default)]
 pub struct UnwrapExpectVisitor {
     pub out: Vec<Located>,
+    /// Scope has #[allow(clippy::unwrap_used)]
+    unwrap_allowed: bool,
+    /// Scope has #[allow(clippy::expect_used)]
+    expect_allowed: bool,
 }
+
+impl UnwrapExpectVisitor {
+    fn save_and_apply(&mut self, attrs: &[syn::Attribute]) -> (bool, bool) {
+        let was = (self.unwrap_allowed, self.expect_allowed);
+        self.unwrap_allowed |= attrs_have_allow_lint(attrs, "unwrap_used");
+        self.expect_allowed |= attrs_have_allow_lint(attrs, "expect_used");
+        was
+    }
+    fn restore(&mut self, was: (bool, bool)) {
+        self.unwrap_allowed = was.0;
+        self.expect_allowed = was.1;
+    }
+}
+
 impl<'ast> Visit<'ast> for UnwrapExpectVisitor {
+    fn visit_item_fn(&mut self, n: &'ast syn::ItemFn) {
+        let was = self.save_and_apply(&n.attrs);
+        syn::visit::visit_item_fn(self, n);
+        self.restore(was);
+    }
+    fn visit_impl_item_fn(&mut self, n: &'ast syn::ImplItemFn) {
+        let was = self.save_and_apply(&n.attrs);
+        syn::visit::visit_impl_item_fn(self, n);
+        self.restore(was);
+    }
+    fn visit_item_mod(&mut self, n: &'ast syn::ItemMod) {
+        let was = self.save_and_apply(&n.attrs);
+        syn::visit::visit_item_mod(self, n);
+        self.restore(was);
+    }
+    fn visit_local(&mut self, n: &'ast syn::Local) {
+        let was = self.save_and_apply(&n.attrs);
+        syn::visit::visit_local(self, n);
+        self.restore(was);
+    }
     fn visit_expr_method_call(&mut self, n: &'ast syn::ExprMethodCall) {
         let m = n.method.to_string();
-        if m == "unwrap" || m == "expect" {
+        let skip = match m.as_str() {
+            "unwrap" => self.unwrap_allowed,
+            "expect" => self.expect_allowed,
+            _ => true, // not unwrap/expect, always skip
+        };
+        if !skip {
             self.out.push((span_line(n.method.span()), m));
         }
         syn::visit::visit_expr_method_call(self, n);
@@ -475,6 +527,7 @@ impl IgnoreVisitor<'_> {
 pub struct InlineStdFsVisitor {
     pub out: Vec<usize>,
     pub in_cfg_test: bool,
+    pub in_allowed_scope: bool,
 }
 
 impl InlineStdFsVisitor {
@@ -491,25 +544,27 @@ impl InlineStdFsVisitor {
 
 impl<'ast> Visit<'ast> for InlineStdFsVisitor {
     fn visit_item_mod(&mut self, n: &'ast syn::ItemMod) {
-        let was = self.in_cfg_test;
-        if n.attrs.iter().any(is_cfg_test_attr) {
-            self.in_cfg_test = true;
-        }
+        let (was_test, was_allow) = (self.in_cfg_test, self.in_allowed_scope);
+        self.in_cfg_test |= n.attrs.iter().any(is_cfg_test_attr);
+        self.in_allowed_scope |= attrs_have_allow_lint(&n.attrs, "disallowed_methods");
         syn::visit::visit_item_mod(self, n);
-        self.in_cfg_test = was;
+        (self.in_cfg_test, self.in_allowed_scope) = (was_test, was_allow);
     }
-
     fn visit_item_fn(&mut self, n: &'ast syn::ItemFn) {
-        let was = self.in_cfg_test;
-        if n.attrs.iter().any(is_cfg_test_attr) {
-            self.in_cfg_test = true;
-        }
+        let (was_test, was_allow) = (self.in_cfg_test, self.in_allowed_scope);
+        self.in_cfg_test |= n.attrs.iter().any(is_cfg_test_attr);
+        self.in_allowed_scope |= attrs_have_allow_lint(&n.attrs, "disallowed_methods");
         syn::visit::visit_item_fn(self, n);
-        self.in_cfg_test = was;
+        (self.in_cfg_test, self.in_allowed_scope) = (was_test, was_allow);
     }
-
+    fn visit_impl_item_fn(&mut self, n: &'ast syn::ImplItemFn) {
+        let was = self.in_allowed_scope;
+        self.in_allowed_scope |= attrs_have_allow_lint(&n.attrs, "disallowed_methods");
+        syn::visit::visit_impl_item_fn(self, n);
+        self.in_allowed_scope = was;
+    }
     fn visit_expr_call(&mut self, n: &'ast syn::ExprCall) {
-        if !self.in_cfg_test {
+        if !self.in_cfg_test && !self.in_allowed_scope {
             if let syn::Expr::Path(ep) = &*n.func {
                 if Self::path_is_std_fs_call(&ep.path) {
                     self.out.push(span_line(ep.path.span()));
@@ -521,7 +576,7 @@ impl<'ast> Visit<'ast> for InlineStdFsVisitor {
 
     fn visit_expr_path(&mut self, n: &'ast syn::ExprPath) {
         // Catch function pointers: `let f = std::fs::read_to_string;`
-        if !self.in_cfg_test && Self::path_is_std_fs_call(&n.path) {
+        if !self.in_cfg_test && !self.in_allowed_scope && Self::path_is_std_fs_call(&n.path) {
             let line = span_line(n.path.span());
             if !self.out.contains(&line) {
                 self.out.push(line);

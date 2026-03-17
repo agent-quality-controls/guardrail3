@@ -96,8 +96,10 @@ pub fn find_forbidden_macros(file: &syn::File) -> Vec<Located> {
 }
 
 /// Find `.unwrap()` and `.expect()` calls. Returns `(line, method_name)`.
+/// Skips calls in functions/modules annotated with `#[allow(clippy::unwrap_used)]`
+/// or `#[allow(clippy::expect_used)]`.
 pub fn find_unwrap_expect(file: &syn::File) -> Vec<Located> {
-    let mut v = UnwrapExpectVisitor { out: Vec::new() };
+    let mut v = UnwrapExpectVisitor::default();
     v.visit_file(file);
     v.out
 }
@@ -130,11 +132,14 @@ pub fn find_std_fs_imports(file: &syn::File) -> Vec<usize> {
 }
 
 /// Find inline `std::fs::*` calls (e.g., `std::fs::read_to_string(...)`).
-/// Skips calls inside `#[cfg(test)]` functions and modules.
+///
+/// Skips calls inside `#[cfg(test)]` functions/modules and functions/modules
+/// annotated with `#[allow(clippy::disallowed_methods)]`.
 pub fn find_inline_std_fs_calls(file: &syn::File) -> Vec<usize> {
     let mut v = InlineStdFsVisitor {
         out: Vec::new(),
         in_cfg_test: false,
+        in_allowed_scope: false,
     };
     v.visit_file(file);
     v.out
@@ -187,6 +192,34 @@ pub fn count_use_statements(file: &syn::File) -> usize {
 
 pub(super) fn span_line(span: proc_macro2::Span) -> usize {
     span.start().line
+}
+
+/// Check if an attribute is `#[allow(clippy::X)]` where X matches the given lint name.
+fn has_allow_lint(attr: &syn::Attribute, lint_name: &str) -> bool {
+    if !attr.path().is_ident("allow") {
+        return false;
+    }
+    let Ok(nested) = attr.parse_args_with(
+        syn::punctuated::Punctuated::<syn::Path, syn::Token![,]>::parse_terminated,
+    ) else {
+        return false;
+    };
+    nested.iter().any(|path| {
+        // Match clippy::lint_name (exactly 2 segments)
+        let mut iter = path.segments.iter();
+        let Some(first) = iter.next() else {
+            return false;
+        };
+        let Some(second) = iter.next() else {
+            return false;
+        };
+        iter.next().is_none() && first.ident == "clippy" && second.ident == lint_name
+    })
+}
+
+/// Check if any attribute in a slice has `#[allow(clippy::X)]` for a given lint name.
+pub(super) fn attrs_have_allow_lint(attrs: &[syn::Attribute], lint_name: &str) -> bool {
+    attrs.iter().any(|a| has_allow_lint(a, lint_name))
 }
 
 pub(super) fn extract_allow_lints(attr: &syn::Attribute, out: &mut Vec<Located>) {
@@ -313,6 +346,51 @@ pub(super) fn impl_item_attrs(item: &syn::ImplItem) -> &[syn::Attribute] {
         syn::ImplItem::Fn(f) => &f.attrs,
         syn::ImplItem::Type(t) => &t.attrs,
         syn::ImplItem::Const(c) => &c.attrs,
+        _ => &[],
+    }
+}
+
+/// Extract attributes from an expression (if the variant carries them).
+#[allow(clippy::wildcard_enum_match_arm)] // reason: syn Expr has many variants, exhaustive match is impractical
+pub(super) fn expr_attrs(expr: &syn::Expr) -> &[syn::Attribute] {
+    match expr {
+        syn::Expr::Array(e) => &e.attrs,
+        syn::Expr::Assign(e) => &e.attrs,
+        syn::Expr::Async(e) => &e.attrs,
+        syn::Expr::Await(e) => &e.attrs,
+        syn::Expr::Binary(e) => &e.attrs,
+        syn::Expr::Block(e) => &e.attrs,
+        syn::Expr::Break(e) => &e.attrs,
+        syn::Expr::Call(e) => &e.attrs,
+        syn::Expr::Cast(e) => &e.attrs,
+        syn::Expr::Closure(e) => &e.attrs,
+        syn::Expr::Const(e) => &e.attrs,
+        syn::Expr::Continue(e) => &e.attrs,
+        syn::Expr::Field(e) => &e.attrs,
+        syn::Expr::ForLoop(e) => &e.attrs,
+        syn::Expr::Group(e) => &e.attrs,
+        syn::Expr::If(e) => &e.attrs,
+        syn::Expr::Index(e) => &e.attrs,
+        syn::Expr::Let(e) => &e.attrs,
+        syn::Expr::Lit(e) => &e.attrs,
+        syn::Expr::Loop(e) => &e.attrs,
+        syn::Expr::Macro(e) => &e.attrs,
+        syn::Expr::Match(e) => &e.attrs,
+        syn::Expr::MethodCall(e) => &e.attrs,
+        syn::Expr::Paren(e) => &e.attrs,
+        syn::Expr::Path(e) => &e.attrs,
+        syn::Expr::Range(e) => &e.attrs,
+        syn::Expr::Reference(e) => &e.attrs,
+        syn::Expr::Repeat(e) => &e.attrs,
+        syn::Expr::Return(e) => &e.attrs,
+        syn::Expr::Struct(e) => &e.attrs,
+        syn::Expr::Try(e) => &e.attrs,
+        syn::Expr::TryBlock(e) => &e.attrs,
+        syn::Expr::Tuple(e) => &e.attrs,
+        syn::Expr::Unary(e) => &e.attrs,
+        syn::Expr::Unsafe(e) => &e.attrs,
+        syn::Expr::While(e) => &e.attrs,
+        syn::Expr::Yield(e) => &e.attrs,
         _ => &[],
     }
 }

@@ -85,7 +85,7 @@ pub fn check(fs: &dyn FileSystem, workspace_root: &Path) -> Vec<CheckResult> {
         .iter()
         .any(|r| r.id == "R-GARDE-01" && r.severity == Severity::Info);
     if garde_in_deps {
-        let rs_files: Vec<String> = super::source_scan::collect_rs_files(workspace_root)
+        let rs_files: Vec<String> = super::source_scan::collect_rs_files(fs, workspace_root)
             .into_iter()
             .filter(|f| !super::source_scan::is_test_path(f))
             .collect();

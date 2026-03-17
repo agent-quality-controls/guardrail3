@@ -106,24 +106,45 @@ fn collect_any_types(node: &Node<'_>, source: &[u8], out: &mut Vec<usize>) {
                 out.push(line);
             }
         }
-        // `as any` expressions
+        // `as any` and `as Record<string, any>` expressions
         "as_expression" => {
-            let mut cursor = node.walk();
-            for child in node.children(&mut cursor) {
-                if child.kind() == "predefined_type" && node_text(&child, source) == "any" {
-                    let line = node.start_position().row.saturating_add(1);
-                    out.push(line);
-                    break;
-                }
+            if has_predefined_any_child(node, source) {
+                let line = node.start_position().row.saturating_add(1);
+                out.push(line);
+            }
+        }
+        // `type X = any` or `type X = Record<string, any>` — bare `predefined_type` nodes
+        // that are NOT already inside a `type_annotation` or `as_expression` (those are
+        // handled above). This catches type alias declarations like `type X = Record<string, any>`.
+        "predefined_type" => {
+            if node_text(node, source) == "any" && !is_inside_type_annotation_or_as(node) {
+                let line = node.start_position().row.saturating_add(1);
+                out.push(line);
             }
         }
         _ => {}
     }
 
-    let mut cursor = node.walk();
-    for child in node.children(&mut cursor) {
-        collect_any_types(&child, source, out);
+    // For `predefined_type` we already handled it — don't recurse into it.
+    // For other nodes, recurse into children.
+    if node.kind() != "predefined_type" {
+        let mut cursor = node.walk();
+        for child in node.children(&mut cursor) {
+            collect_any_types(&child, source, out);
+        }
     }
+}
+
+/// Check if a node is a descendant of a `type_annotation` or `as_expression`.
+fn is_inside_type_annotation_or_as(node: &Node<'_>) -> bool {
+    let mut current = node.parent();
+    while let Some(parent) = current {
+        match parent.kind() {
+            "type_annotation" | "as_expression" => return true,
+            _ => current = parent.parent(),
+        }
+    }
+    false
 }
 
 /// Check if a node contains a `predefined_type` descendant with text `any`.

@@ -434,10 +434,10 @@ fn grep_before_edge_nested_cfg_attr() {
 #[test]
 fn grep_before_edge_multiple_allows_one_line() {
     // CORRECT: multiple #[allow()] attributes on separate lines are each detected as R33
-    // Also detects R44 for .unwrap() usage inside the function body
+    // R44 is suppressed because the function has #[allow(clippy::unwrap_used)]
     let r = validate_grep_attack_fixture("edge-cases", "multiple_allows_one_line.rs");
     assert_has_check(&r, "multiple_allows_one_line.rs", "R33", "info");
-    assert_has_check(&r, "multiple_allows_one_line.rs", "R44", "warn");
+    assert_no_check(&r, "multiple_allows_one_line.rs", "R44");
 }
 
 #[test]
@@ -605,14 +605,10 @@ fn grep_before_typescript_type_any_in_string() {
 #[test]
 fn grep_before_typescript_generic_any() {
     // `function foo<T = any>()` is a real `any` type usage.
-    // However, tree-sitter's `collect_any_types` only detects `any` in `type_annotation`
-    // (`: any`) and `as_expression` (`as any`). A default type parameter (`<T = any>`)
-    // uses a `default_type` node inside `type_parameter`, which is not covered.
-    // The grep fallback also doesn't match because it checks for `as any` / `: any`,
-    // and `= any` matches neither pattern.
-    // KNOWN GAP: `<T = any>` is not detected by either path.
+    // FIXED: `collect_any_types` now matches bare `predefined_type` nodes with text "any",
+    // catching `<T = any>` which uses a `default_type` node inside `type_parameter`.
     let r = validate_ts_grep_attack_fixture("generic_any.ts");
-    assert_no_check(&r, "generic_any.ts", "T31");
+    assert_has_check(&r, "generic_any.ts", "T31", "info");
 }
 
 #[test]
