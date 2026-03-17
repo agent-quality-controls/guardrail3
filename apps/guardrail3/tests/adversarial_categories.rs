@@ -726,3 +726,368 @@ type = "content"
         );
     }
 }
+
+// ============================================================
+// Adversarial tests: T-ARCH-02 import boundary with per-app types
+// ============================================================
+
+/// Helper: write a file with a forbidden domain→adapters import into an app.
+#[allow(clippy::disallowed_methods)] // reason: test helper — creates violation fixture file
+#[allow(clippy::expect_used)] // reason: test helper — panics indicate broken test infrastructure
+fn inject_import_violation(tmp: &tempfile::TempDir, app_name: &str) {
+    let bad_file = tmp
+        .path()
+        .join("apps")
+        .join(app_name)
+        .join("src/modules/domain/bad_import.ts");
+    std::fs::write(&bad_file, "import { something } from '../adapters/db';\n")
+        .expect("write bad_import.ts");
+}
+
+#[test]
+fn ts_content_app_import_violation_not_flagged() {
+    // Content app with a domain→adapters import violation.
+    // T-ARCH-02 should NOT fire because content apps skip architecture checks.
+    let config = r#"
+version = "0.1"
+
+[profile]
+name = "service"
+
+[typescript.apps.landing]
+type = "content"
+"#;
+    let tmp = setup_ts_monorepo(Some(config), &[("landing", true)]);
+    inject_import_violation(&tmp, "landing");
+
+    let output = run_ts_validate(tmp.path(), &[]);
+    let ids = collect_check_ids(&output);
+
+    assert_no_check(&ids, "T-ARCH-02", &output);
+}
+
+#[test]
+fn ts_service_app_import_violation_flagged() {
+    // Service app with a domain→adapters import violation.
+    // T-ARCH-02 SHOULD fire because service apps enforce architecture checks.
+    let config = r#"
+version = "0.1"
+
+[profile]
+name = "service"
+
+[typescript.apps.api]
+type = "service"
+"#;
+    let tmp = setup_ts_monorepo(Some(config), &[("api", true)]);
+    inject_import_violation(&tmp, "api");
+
+    let output = run_ts_validate(tmp.path(), &[]);
+    let ids = collect_check_ids(&output);
+
+    assert_has_check(&ids, "T-ARCH-02", &output);
+}
+
+#[test]
+fn ts_library_app_import_violation_not_flagged() {
+    // Library app with a domain→adapters import violation.
+    // T-ARCH-02 should NOT fire because library apps skip architecture checks.
+    let config = r#"
+version = "0.1"
+
+[profile]
+name = "service"
+
+[typescript.apps.utils]
+type = "library"
+"#;
+    let tmp = setup_ts_monorepo(Some(config), &[("utils", true)]);
+    inject_import_violation(&tmp, "utils");
+
+    let output = run_ts_validate(tmp.path(), &[]);
+    let ids = collect_check_ids(&output);
+
+    assert_no_check(&ids, "T-ARCH-02", &output);
+}
+
+// ============================================================
+// Adversarial tests: per-app type profile edge cases
+// ============================================================
+
+/// Typo in app type config (`"servce"` instead of `"service"`).
+/// `from_str_or_default` treats unknown strings as Service, so arch checks should
+/// still fire for a service-like app missing hex arch structure.
+#[test]
+fn ts_app_config_typo_in_type_defaults_to_service() {
+    let config = r#"
+version = "0.1"
+
+[profile]
+name = "service"
+
+[typescript.apps.api]
+type = "servce"
+"#;
+    let tmp = setup_ts_monorepo(Some(config), &[("api", false)]);
+    let output = run_ts_validate(tmp.path(), &[]);
+    let ids = collect_check_ids(&output);
+
+    // Typo in type → defaults to Service → arch checks enabled → T-ARCH-01 fires
+    assert_has_check(&ids, "T-ARCH-01", &output);
+}
+
+/// Config has `[typescript.apps.wrong-name]` but the actual app dir is `apps/api`.
+/// The config entry doesn't match any discovered app — `api` should get default
+/// (service) behavior since its name has no config entry.
+#[test]
+fn ts_app_config_name_mismatch_ignored() {
+    let config = r#"
+version = "0.1"
+
+[profile]
+name = "service"
+
+[typescript.apps.wrong-name]
+type = "content"
+"#;
+    // Actual app is "api", but config only has "wrong-name"
+    let tmp = setup_ts_monorepo(Some(config), &[("api", false)]);
+    let output = run_ts_validate(tmp.path(), &[]);
+    let ids = collect_check_ids(&output);
+
+    // "api" has no matching config → defaults to Service → arch checks fire
+    assert_has_check(&ids, "T-ARCH-01", &output);
+}
+
+/// Config has `[typescript.apps.ghost-app]` for an app that doesn't exist on disk.
+/// Discovery is disk-based, so the ghost config should be silently ignored.
+/// No crash, no spurious results.
+#[test]
+fn ts_app_extra_config_no_matching_dir() {
+    let config = r#"
+version = "0.1"
+
+[profile]
+name = "service"
+
+[typescript.apps.ghost-app]
+type = "service"
+
+[typescript.apps.api]
+type = "content"
+"#;
+    // Only "api" exists on disk; "ghost-app" is in config but has no directory
+    let tmp = setup_ts_monorepo(Some(config), &[("api", false)]);
+    let output = run_ts_validate(tmp.path(), &[]);
+    let ids = collect_check_ids(&output);
+
+    // "api" is content type → arch skipped → T-ARCH-01 should NOT fire
+    assert_no_check(&ids, "T-ARCH-01", &output);
+
+    // Should not crash — if we got valid JSON, we're good
+    assert!(
+        !output.is_empty(),
+        "Output should be non-empty valid JSON, not a crash"
+    );
+}
+
+/// Library type app without hex arch should NOT get T-ARCH-01.
+/// Libraries skip architecture checks the same way content does.
+#[test]
+fn ts_app_library_type_skips_arch() {
+    let config = r#"
+version = "0.1"
+
+[profile]
+name = "service"
+
+[typescript.apps.utils]
+type = "library"
+"#;
+    let tmp = setup_ts_monorepo(Some(config), &[("utils", false)]);
+    let output = run_ts_validate(tmp.path(), &[]);
+    let ids = collect_check_ids(&output);
+
+    // Library type → architecture defaults to false → T-ARCH-01 should NOT fire
+    assert_no_check(&ids, "T-ARCH-01", &output);
+}
+
+/// Config has `type = "Content"` (uppercase C).
+/// `from_str_or_default` is case-insensitive, so "Content" correctly matches content type.
+#[test]
+fn ts_app_type_case_insensitive() {
+    let config = r#"
+version = "0.1"
+
+[profile]
+name = "service"
+
+[typescript.apps.landing]
+type = "Content"
+"#;
+    let tmp = setup_ts_monorepo(Some(config), &[("landing", false)]);
+    let output = run_ts_validate(tmp.path(), &[]);
+    let ids = collect_check_ids(&output);
+
+    // "Content" (capital C) matches content type → architecture skipped → no T-ARCH-01
+    assert_no_check(&ids, "T-ARCH-01", &output);
+}
+
+/// Service app with `checks.architecture = false` — the per-app override should
+/// suppress T-ARCH checks even though service type defaults to architecture=true.
+#[test]
+fn ts_app_checks_override_false_on_service() {
+    let config = r#"
+version = "0.1"
+
+[profile]
+name = "service"
+
+[typescript.apps.api]
+type = "service"
+
+[typescript.apps.api.checks]
+architecture = false
+"#;
+    let tmp = setup_ts_monorepo(Some(config), &[("api", false)]);
+    let output = run_ts_validate(tmp.path(), &[]);
+    let ids = collect_check_ids(&output);
+
+    // Service type defaults to architecture=true, but per-app override sets it false
+    // → T-ARCH-01 should NOT fire
+    assert_no_check(&ids, "T-ARCH-01", &output);
+}
+
+/// Three apps — one service (no arch, gets T-ARCH-01), one content (no arch, skips),
+/// one library (no arch, skips). Verify only the service app triggers T-ARCH-01.
+#[test]
+#[allow(clippy::indexing_slicing)] // reason: test assertion — JSON access for verifying per-app results
+#[allow(clippy::expect_used)] // reason: test assertion — JSON parsing
+fn ts_monorepo_three_types_mixed() {
+    let config = r#"
+version = "0.1"
+
+[profile]
+name = "service"
+
+[typescript.apps.api]
+type = "service"
+
+[typescript.apps.landing]
+type = "content"
+
+[typescript.apps.utils]
+type = "library"
+"#;
+    let tmp = setup_ts_monorepo(
+        Some(config),
+        &[("api", false), ("landing", false), ("utils", false)],
+    );
+    let output = run_ts_validate(tmp.path(), &[]);
+    let ids = collect_check_ids(&output);
+
+    // T-ARCH-01 should fire (for the service app "api")
+    assert_has_check(&ids, "T-ARCH-01", &output);
+
+    // Verify T-ARCH-01 only references "api", not "landing" or "utils"
+    #[allow(clippy::disallowed_methods)] // reason: test assertion — JSON parsing
+    {
+        let parsed: serde_json::Value = serde_json::from_str(&output).expect("valid JSON output");
+        let sections = parsed["sections"].as_array().expect("sections array");
+
+        let arch_results: Vec<_> = sections
+            .iter()
+            .flat_map(|s| {
+                s["results"]
+                    .as_array()
+                    .expect("results array")
+                    .iter()
+                    .filter(|r| r["id"].as_str() == Some("T-ARCH-01"))
+                    .collect::<Vec<_>>()
+            })
+            .collect();
+
+        // Should NOT mention content or library apps
+        for result in &arch_results {
+            let title = result["title"].as_str().unwrap_or("");
+            let message = result["message"].as_str().unwrap_or("");
+            let combined = format!("{title} {message}");
+
+            assert!(
+                !combined.contains("landing"),
+                "T-ARCH-01 should not mention content app 'landing'.\nResult: {result}"
+            );
+            assert!(
+                !combined.contains("utils"),
+                "T-ARCH-01 should not mention library app 'utils'.\nResult: {result}"
+            );
+        }
+    }
+}
+
+/// Project has package.json at root but no apps/ directory.
+/// Should not crash, should produce no T-ARCH results.
+#[test]
+#[allow(clippy::disallowed_methods)] // reason: test setup — fs operations to create minimal project
+#[allow(clippy::expect_used)] // reason: test setup — panics indicate broken test infrastructure
+fn ts_app_no_apps_dir_no_crash() {
+    let tmp = tempfile::tempdir().expect("failed to create temp dir");
+
+    // Root package.json only, no apps/ directory at all
+    std::fs::write(
+        tmp.path().join("package.json"),
+        r#"{"name": "test-project", "private": true}"#,
+    )
+    .expect("write package.json");
+
+    // A .ts file at the root level so it's detected as a TS project
+    let src_dir = tmp.path().join("src");
+    std::fs::create_dir_all(&src_dir).expect("create src/");
+    std::fs::write(src_dir.join("index.ts"), "export const x = 1;").expect("write ts file");
+
+    let output = run_ts_validate(tmp.path(), &[]);
+    let ids = collect_check_ids(&output);
+
+    // No apps/ dir means no apps discovered → no T-ARCH-01
+    assert_no_check_prefix(&ids, "T-ARCH-", &output);
+
+    // Should not crash — valid JSON output
+    assert!(
+        !output.is_empty(),
+        "Output should be non-empty valid JSON, not a crash"
+    );
+}
+
+/// Global `[typescript.checks] architecture = false` should override service type defaults.
+///
+/// The global `categories.architecture` flag gates the entire arch section in
+/// `ts::validate::run()` (line 45: `if categories.architecture`). If global is false,
+/// `resolve_app_contexts` is never called, so per-app type defaults are irrelevant.
+/// This tests that the global setting wins over service type defaults.
+#[test]
+fn ts_global_architecture_false_overrides_service_type() {
+    let config = r#"
+version = "0.1"
+
+[profile]
+name = "service"
+
+[typescript.checks]
+architecture = false
+
+[typescript.apps.api]
+type = "service"
+"#;
+    // Service app without hex arch — would normally trigger T-ARCH-01
+    let tmp = setup_ts_monorepo(Some(config), &[("api", false)]);
+    let output = run_ts_validate(tmp.path(), &[]);
+    let ids = collect_check_ids(&output);
+
+    // Global architecture=false gates the entire arch section → T-ARCH-01 should NOT fire
+    // even though the app type is "service" (which defaults to architecture=true).
+    // This is the current behavior: global wins because it short-circuits before per-app
+    // resolution. Whether this is a bug or feature depends on design intent — but this
+    // test documents what actually happens.
+    assert_no_check(&ids, "T-ARCH-01", &output);
+    assert_no_check_prefix(&ids, "T-ARCH-", &output);
+}
