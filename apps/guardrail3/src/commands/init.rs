@@ -294,7 +294,7 @@ workspace_root = "."
             .unwrap_or_default();
             writeln!(
                 config,
-                "garde = false            # libraries are pure types"
+                "garde = false            # no input boundary validation for shared packages"
             )
             .unwrap_or_default();
             writeln!(config, "tests = true             # R-TEST-*").unwrap_or_default();
