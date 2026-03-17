@@ -153,22 +153,66 @@ fn categories_default_no_config_has_core_checks() {
 }
 
 #[test]
-fn categories_default_no_config_no_architecture_checks() {
+fn categories_default_no_config_has_architecture_checks() {
     let tmp = setup_project(None);
     let output = run_validate(tmp.path(), &[]);
     let ids = collect_check_ids(&output);
 
-    // Architecture checks should NOT appear by default
+    // Architecture checks SHOULD appear by default (all categories on)
+    assert_has_check_prefix(&ids, "R-ARCH-", &output);
+}
+
+#[test]
+fn categories_default_no_config_has_garde_checks() {
+    let tmp = setup_project(None);
+    let output = run_validate(tmp.path(), &[]);
+    let ids = collect_check_ids(&output);
+
+    // Garde checks SHOULD appear by default (all categories on)
+    assert_has_check_prefix(&ids, "R-GARDE-", &output);
+}
+
+#[test]
+fn categories_config_disables_architecture() {
+    let config = r#"
+version = "0.1"
+
+[profile]
+name = "service"
+
+[rust]
+workspace_root = "."
+
+[rust.checks]
+architecture = false
+"#;
+    let tmp = setup_project(Some(config));
+    let output = run_validate(tmp.path(), &[]);
+    let ids = collect_check_ids(&output);
+
+    // Architecture checks should NOT appear when config disables them
     assert_no_check_prefix(&ids, "R-ARCH-", &output);
 }
 
 #[test]
-fn categories_default_no_config_no_garde_checks() {
-    let tmp = setup_project(None);
+fn categories_config_disables_garde() {
+    let config = r#"
+version = "0.1"
+
+[profile]
+name = "service"
+
+[rust]
+workspace_root = "."
+
+[rust.checks]
+garde = false
+"#;
+    let tmp = setup_project(Some(config));
     let output = run_validate(tmp.path(), &[]);
     let ids = collect_check_ids(&output);
 
-    // Garde checks should NOT appear by default
+    // Garde checks should NOT appear when config disables them
     assert_no_check_prefix(&ids, "R-GARDE-", &output);
 }
 
@@ -383,7 +427,7 @@ tests = true
 
 #[test]
 fn categories_empty_checks_section_uses_defaults() {
-    // Config has [rust.checks] but no fields — should use defaults (tests=true, rest=false)
+    // Config has [rust.checks] but no fields — should use defaults (all on)
     let config = r#"
 version = "0.1"
 
@@ -399,15 +443,15 @@ workspace_root = "."
     let output = run_validate(tmp.path(), &[]);
     let ids = collect_check_ids(&output);
 
-    // Default: tests on, architecture/garde off
+    // All categories on by default
     assert_has_check_prefix(&ids, "R-TEST-", &output);
-    assert_no_check_prefix(&ids, "R-ARCH-", &output);
-    assert_no_check_prefix(&ids, "R-GARDE-", &output);
+    assert_has_check_prefix(&ids, "R-ARCH-", &output);
+    assert_has_check_prefix(&ids, "R-GARDE-", &output);
 }
 
 #[test]
 fn categories_config_without_checks_section_uses_defaults() {
-    // Config has [rust] but no [rust.checks] — should use defaults
+    // Config has [rust] but no [rust.checks] — should use defaults (all on)
     let config = r#"
 version = "0.1"
 
@@ -421,8 +465,8 @@ workspace_root = "."
     let output = run_validate(tmp.path(), &[]);
     let ids = collect_check_ids(&output);
 
-    // Default: tests on, architecture/garde off
+    // All categories on by default
     assert_has_check_prefix(&ids, "R-TEST-", &output);
-    assert_no_check_prefix(&ids, "R-ARCH-", &output);
-    assert_no_check_prefix(&ids, "R-GARDE-", &output);
+    assert_has_check_prefix(&ids, "R-ARCH-", &output);
+    assert_has_check_prefix(&ids, "R-GARDE-", &output);
 }

@@ -230,10 +230,15 @@ fn build_rs_categories(args: &ValidateArgs, cfg: Option<&GuardrailConfig>) -> Ru
         .and_then(|c| c.rust.as_ref())
         .and_then(|r| r.checks.as_ref());
 
-    let cfg_arch = checks.and_then(|c| c.architecture).unwrap_or(false);
-    let cfg_garde = checks.and_then(|c| c.garde).unwrap_or(false);
-    let cfg_tests = checks.and_then(|c| c.tests).unwrap_or(true);
-    let cfg_release = checks.and_then(|c| c.release).unwrap_or(false);
+    let rs_defaults = RustCheckCategories::default();
+    let cfg_arch = checks
+        .and_then(|c| c.architecture)
+        .unwrap_or(rs_defaults.architecture);
+    let cfg_garde = checks.and_then(|c| c.garde).unwrap_or(rs_defaults.garde);
+    let cfg_tests = checks.and_then(|c| c.tests).unwrap_or(rs_defaults.tests);
+    let cfg_release = checks
+        .and_then(|c| c.release)
+        .unwrap_or(rs_defaults.release);
 
     let any_cli = args.code || args.architecture || args.tests || args.release || args.garde;
     if any_cli {
@@ -259,8 +264,11 @@ fn build_ts_categories(args: &ValidateArgs, cfg: Option<&GuardrailConfig>) -> Ts
         .and_then(|c| c.typescript.as_ref())
         .and_then(|t| t.checks.as_ref());
 
-    let cfg_arch = checks.and_then(|c| c.architecture).unwrap_or(false);
-    let cfg_tests = checks.and_then(|c| c.tests).unwrap_or(true);
+    let ts_defaults = TsCheckCategories::default();
+    let cfg_arch = checks
+        .and_then(|c| c.architecture)
+        .unwrap_or(ts_defaults.architecture);
+    let cfg_tests = checks.and_then(|c| c.tests).unwrap_or(ts_defaults.tests);
 
     let any_cli = args.code || args.architecture || args.tests || args.release || args.garde;
     if any_cli {

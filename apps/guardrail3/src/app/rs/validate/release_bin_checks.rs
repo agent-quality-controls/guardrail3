@@ -105,6 +105,11 @@ pub fn check_binary_linux_target(
 // --- R-BIN-03: binstall metadata ---
 
 pub fn check_binstall_metadata(krate: &CrateInfo, results: &mut Vec<CheckResult>) {
+    // Skip publish=false crates — binstall metadata is only relevant for publishable binaries
+    if !krate.publishable {
+        return;
+    }
+
     let has_binstall = krate
         .table
         .get("package")
