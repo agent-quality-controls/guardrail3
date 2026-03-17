@@ -3,7 +3,7 @@
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
-use guardrail3::app::discover::ProjectInfo;
+use guardrail3::app::discover::{ProjectInfo, RustWorkspace, WorkspaceMember};
 use guardrail3::app::rs::validate::hex_arch_checks::{
     check_dependency_flow, check_hex_arch_structure, check_library_service_boundary,
     contains_segment, is_service_internal, layer_from_config, normalize_path, Layer,
@@ -51,9 +51,16 @@ fn project(members: &[(&str, &str)]) -> ProjectInfo {
     ProjectInfo {
         has_rust: true,
         has_typescript: false,
-        cargo_workspace_root: Some(PathBuf::from("/ws")),
-        workspace_members: members.iter().map(|(n, _)| n.to_string()).collect(),
-        workspace_member_dirs: members.iter().map(|(_, d)| d.to_string()).collect(),
+        workspaces: vec![RustWorkspace {
+            root: PathBuf::from("/ws"),
+            members: members
+                .iter()
+                .map(|(n, d)| WorkspaceMember {
+                    name: n.to_string(),
+                    dir: d.to_string(),
+                })
+                .collect(),
+        }],
         package_json_path: None,
     }
 }

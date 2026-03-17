@@ -17,9 +17,13 @@ fn pub12_emits_inventory() {
     let project = guardrail3::app::discover::ProjectInfo {
         has_rust: true,
         has_typescript: false,
-        cargo_workspace_root: Some(tmp.clone()),
-        workspace_members: vec!["x".to_owned()],
-        workspace_member_dirs: vec![".".to_owned()],
+        workspaces: vec![guardrail3::app::discover::RustWorkspace {
+            root: tmp.clone(),
+            members: vec![guardrail3::app::discover::WorkspaceMember {
+                name: "x".to_owned(),
+                dir: ".".to_owned(),
+            }],
+        }],
         package_json_path: None,
     };
     let tc = guardrail3::adapters::outbound::tool_runner::RealToolChecker;

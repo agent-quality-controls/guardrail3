@@ -84,15 +84,16 @@ type CrateLayerMap = BTreeMap<String, (String, Layer)>;
 /// Resolve a crate config key to its workspace member directory.
 /// Falls back to the key itself if no matching member is found.
 fn resolve_member_dir(name: &str, project: &ProjectInfo) -> String {
-    for (idx, member_name) in project.workspace_members.iter().enumerate() {
-        if member_name == name {
-            if let Some(dir) = project.workspace_member_dirs.get(idx) {
-                return dir.clone();
+    for ws in &project.workspaces {
+        for member in &ws.members {
+            if member.name == name {
+                return member.dir.clone();
             }
         }
     }
     // Also check if the name itself matches a member dir
-    if project.workspace_member_dirs.iter().any(|d| d == name) {
+    let all_dirs = project.all_member_dirs();
+    if all_dirs.iter().any(|d| d == name) {
         return name.to_owned();
     }
     name.to_owned()
@@ -142,11 +143,11 @@ pub fn check_dependency_flow(
     results: &mut Vec<CheckResult>,
 ) {
     let mut layers: CrateLayerMap = BTreeMap::new();
-    for (idx, dir) in project.workspace_member_dirs.iter().enumerate() {
-        let name = project.workspace_members.get(idx)
-            .map_or(dir.as_str(), std::string::String::as_str);
-        if let Some(layer) = resolve_layer(name, dir, cfgs) {
-            let _ = layers.insert(name.to_owned(), (dir.clone(), layer));
+    for ws in &project.workspaces {
+        for member in &ws.members {
+            if let Some(layer) = resolve_layer(&member.name, &member.dir, cfgs) {
+                let _ = layers.insert(member.name.clone(), (member.dir.clone(), layer));
+            }
         }
     }
 
@@ -237,36 +238,38 @@ pub fn check_library_service_boundary(
     cfgs: &BTreeMap<String, CrateConfig>,
     results: &mut Vec<CheckResult>,
 ) {
-    for (idx, dir) in project.workspace_member_dirs.iter().enumerate() {
-        let name = project.workspace_members.get(idx)
-            .map_or(dir.as_str(), std::string::String::as_str);
-        let lib_by_cfg = cfgs.get(name)
-            .and_then(|c| c.profile.as_deref())
-            .is_some_and(|p| p == "library");
-        if !lib_by_cfg && !dir.starts_with("packages/") { continue; }
+    for ws in &project.workspaces {
+        for member in &ws.members {
+            let name = &member.name;
+            let dir = &member.dir;
+            let lib_by_cfg = cfgs.get(name.as_str())
+                .and_then(|c| c.profile.as_deref())
+                .is_some_and(|p| p == "library");
+            if !lib_by_cfg && !dir.starts_with("packages/") { continue; }
 
-        let cargo = root.join(dir).join("Cargo.toml");
-        let Some(content) = fs.read_file(&cargo) else { continue };
-        let Ok(table) = content.parse::<toml::Value>() else { continue };
-        let Some(deps) = table.get("dependencies").and_then(|d| d.as_table()) else {
-            continue;
-        };
-        for (dep_name, dep_val) in deps {
-            let Some(rel) = extract_path_dep(dep_val) else { continue };
-            let resolved = normalize_path(dir, rel);
-            if is_service_internal(&resolved) {
-                results.push(CheckResult {
-                    id: "R-ARCH-03".to_owned(),
-                    severity: Severity::Error,
-                    title: "Library depends on service internals".to_owned(),
-                    message: format!(
-                        "Library `{name}` ({dir}) depends on `{dep_name}` \
-                         which resolves to {resolved} inside a service's crates."
-                    ),
-                    file: Some(cargo.display().to_string()),
-                    line: None,
-                    inventory: false,
-                });
+            let cargo = root.join(dir).join("Cargo.toml");
+            let Some(content) = fs.read_file(&cargo) else { continue };
+            let Ok(table) = content.parse::<toml::Value>() else { continue };
+            let Some(deps) = table.get("dependencies").and_then(|d| d.as_table()) else {
+                continue;
+            };
+            for (dep_name, dep_val) in deps {
+                let Some(rel) = extract_path_dep(dep_val) else { continue };
+                let resolved = normalize_path(dir, rel);
+                if is_service_internal(&resolved) {
+                    results.push(CheckResult {
+                        id: "R-ARCH-03".to_owned(),
+                        severity: Severity::Error,
+                        title: "Library depends on service internals".to_owned(),
+                        message: format!(
+                            "Library `{name}` ({dir}) depends on `{dep_name}` \
+                             which resolves to {resolved} inside a service's crates."
+                        ),
+                        file: Some(cargo.display().to_string()),
+                        line: None,
+                        inventory: false,
+                    });
+                }
             }
         }
     }
@@ -281,8 +284,10 @@ pub fn check_unconfigured_members(
     profile: &str,
     results: &mut Vec<CheckResult>,
 ) {
+    let all_member_dirs = project.all_member_dirs();
+
     // Single crate (no workspace): if profile is service, check for apps/ structure
-    if project.workspace_member_dirs.is_empty() {
+    if all_member_dirs.is_empty() {
         if profile == "service" {
             // Check if this is already inside an apps/ directory
             let root_str = root.display().to_string();
@@ -321,7 +326,7 @@ pub fn check_unconfigured_members(
                 "Profile is \"service\" but no [rust.crates.*] sections in guardrail3.toml. \
                  Configure each workspace member with profile and layer. \
                  Members: {}",
-                project.workspace_member_dirs.join(", ")
+                all_member_dirs.join(", ")
             ),
             file: Some("guardrail3.toml".to_owned()),
             line: None,
@@ -331,20 +336,30 @@ pub fn check_unconfigured_members(
     }
 
     // Check each workspace member has a config entry
-    for member_dir in &project.workspace_member_dirs {
-        let crate_name = member_dir.rsplit('/').next().unwrap_or(member_dir);
-        if !cfgs.contains_key(crate_name) && !cfgs.contains_key(member_dir.as_str()) {
-            results.push(CheckResult {
-                id: "R-ARCH-04".to_owned(),
-                severity: Severity::Warn,
-                title: format!("Workspace member `{crate_name}` not configured"),
-                message: format!(
-                    "Workspace member `{crate_name}` has no config. Add `[rust.crates.{crate_name}]` to guardrail3.toml with `profile`, `layer`, and optionally `allowed_deps`."
-                ),
-                file: Some("guardrail3.toml".to_owned()),
-                line: None,
-                inventory: false,
-            });
+    for ws in &project.workspaces {
+        let ws_root_display = ws.root.display().to_string();
+        for member in &ws.members {
+            let crate_name = member.dir.rsplit('/').next().unwrap_or(&member.dir);
+            if !cfgs.contains_key(crate_name) && !cfgs.contains_key(member.dir.as_str()) && !cfgs.contains_key(&member.name) {
+                results.push(CheckResult {
+                    id: "R-ARCH-04".to_owned(),
+                    severity: Severity::Warn,
+                    title: format!("Workspace member `{crate_name}` not configured"),
+                    message: format!(
+                        "Crate `{name}` (workspace: {ws_root}) has no [rust.crates.{name}] section in guardrail3.toml. Add it to declare the crate's role:\n\n  \
+                         [rust.crates.{name}]\n  \
+                         profile = \"library\"          # or \"service\"\n  \
+                         layer = \"domain\"             # or \"ports\", \"app\", \"adapters\", \"composition-root\", \"pure\"\n  \
+                         allowed_deps = [\"serde\"]     # required for library profile\n\n\
+                         Without this, guardrail3 cannot enforce the correct clippy bans, dependency allowlists, or architectural rules for this crate.",
+                        name = member.name,
+                        ws_root = ws_root_display,
+                    ),
+                    file: Some("guardrail3.toml".to_owned()),
+                    line: None,
+                    inventory: false,
+                });
+            }
         }
     }
 }

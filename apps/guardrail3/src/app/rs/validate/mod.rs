@@ -55,7 +55,7 @@ pub fn run(
     thorough: bool,
     tc: &dyn ToolChecker,
 ) -> Report {
-    let workspace_root = project.cargo_workspace_root.as_deref().unwrap_or(path);
+    let workspace_root = project.primary_workspace_root().unwrap_or(path);
 
     let guardrail_cfg = load_guardrail_config(fs, path);
     let profile = guardrail_cfg.as_ref().and_then(extract_profile);
@@ -99,8 +99,9 @@ fn run_code_checks(
     report: &mut Report,
 ) {
     let config_results = config_files::check(fs, workspace_root);
+    let member_dirs = project.all_member_dirs();
     let per_crate_results = config_files::check_per_crate_clippy(
-        fs, workspace_root, &project.workspace_member_dirs,
+        fs, workspace_root, &member_dirs,
     );
     let mut config_section_results = config_results;
     config_section_results.extend(per_crate_results);
@@ -123,7 +124,7 @@ fn run_code_checks(
 
     let lint_results = cargo_lints::check(fs, workspace_root);
     let inheritance_results = cargo_lints::check_workspace_inheritance(
-        fs, workspace_root, &project.workspace_member_dirs,
+        fs, workspace_root, &member_dirs,
     );
     let mut lint_section = lint_results;
     lint_section.extend(inheritance_results);
