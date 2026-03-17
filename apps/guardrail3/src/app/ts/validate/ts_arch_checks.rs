@@ -24,7 +24,7 @@ pub fn check_hex_arch_structure(fs: &dyn FileSystem, root: &Path) -> Vec<CheckRe
 /// Discover TypeScript apps under `<root>/apps/`.
 /// An app is a subdirectory that has TypeScript files (.ts, .tsx) or `package.json`.
 /// Rust-only apps (no TS files, no package.json) are skipped.
-pub(super) fn discover_ts_apps(fs: &dyn FileSystem, root: &Path) -> Vec<std::path::PathBuf> {
+pub fn discover_ts_apps(fs: &dyn FileSystem, root: &Path) -> Vec<std::path::PathBuf> {
     let apps_dir = root.join("apps");
     let mut found = Vec::new();
 

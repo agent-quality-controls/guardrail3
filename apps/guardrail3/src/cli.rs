@@ -90,6 +90,8 @@ pub enum TsCommands {
     Generate(GenerateArgs),
     /// Validate TypeScript project guardrails
     Validate(ValidateArgs),
+    /// Show what ts generate would change (dry run)
+    Diff(PathArg),
     /// Install TypeScript pre-commit hook
     HooksInstall(GenerateArgs),
     /// Validate TypeScript pre-commit hook configuration

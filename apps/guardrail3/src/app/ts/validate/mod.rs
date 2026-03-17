@@ -203,7 +203,7 @@ fn has_content_app(fs: &dyn FileSystem, root: &Path, config: Option<&GuardrailCo
 /// Auto-detect app type from directory structure and package.json dependencies.
 /// Returns None if no clear signal is found.
 #[allow(clippy::disallowed_methods)] // reason: serde_json for per-app package.json inspection
-fn auto_detect_app_type(fs: &dyn FileSystem, app_path: &Path) -> Option<TsAppType> {
+pub fn auto_detect_app_type(fs: &dyn FileSystem, app_path: &Path) -> Option<TsAppType> {
     // Signal 1: hex arch structure → Service
     let has_modules_domain = app_path.join("src/modules/domain").is_dir();
     if has_modules_domain {
