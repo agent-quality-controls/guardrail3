@@ -203,6 +203,7 @@ fn check_config_import(
 // ---------------------------------------------------------------------------
 
 /// Check `ESLint` plugin configurations that apply to every `TypeScript` project.
+#[allow(clippy::too_many_lines)] // reason: validates many plugin groups sequentially, splitting would fragment the orchestration
 pub fn check_core_plugins(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
     // T-ESLP-01: unicorn config import
     check_unicorn_import(content, eslint_path, results);
@@ -276,6 +277,38 @@ pub fn check_core_plugins(content: &str, eslint_path: &Path, results: &mut Vec<C
         eslint_path,
         results,
     );
+
+    // Verify naming-convention has selector config (not just rule name)
+    if content.contains("@typescript-eslint/naming-convention") && !content.contains("selector") {
+        results.push(CheckResult {
+            id: "T-ESLP-10".to_owned(),
+            severity: Severity::Warn,
+            title: "naming-convention missing selector config".to_owned(),
+            message: "@typescript-eslint/naming-convention is present but no 'selector' \
+                     configuration found. The rule needs selector-specific format rules \
+                     (default, variable, typeLike, etc.) to be effective."
+                .to_owned(),
+            file: Some(eslint_path.display().to_string()),
+            line: None,
+            inventory: false,
+        });
+    }
+
+    // Verify jsx-no-leaked-render has validStrategies config
+    if content.contains("jsx-no-leaked-render") && !content.contains("validStrategies") {
+        results.push(CheckResult {
+            id: "T-ESLP-10".to_owned(),
+            severity: Severity::Warn,
+            title: "jsx-no-leaked-render missing validStrategies".to_owned(),
+            message: "react/jsx-no-leaked-render is present but validStrategies option not \
+                     found. Without it, the rule may flag valid ternary/coerce patterns. \
+                     Add `{ validStrategies: ['ternary', 'coerce'] }`."
+                .to_owned(),
+            file: Some(eslint_path.display().to_string()),
+            line: None,
+            inventory: false,
+        });
+    }
 
     // T-ESLP-11: test file relaxations
     check_test_relaxations(content, eslint_path, results);
@@ -465,6 +498,21 @@ fn check_tailwind_ban(content: &str, eslint_path: &Path, results: &mut Vec<Check
             }
             .as_inventory(),
         );
+        // Also verify denyList is configured
+        if !content.contains("denyList") && !content.contains("deny-list") {
+            results.push(CheckResult {
+                id: "T-ESLP-12".to_owned(),
+                severity: Severity::Warn,
+                title: "tailwind-ban missing denyList".to_owned(),
+                message: "eslint-plugin-tailwind-ban is configured but no denyList found. \
+                         Without a denyList, the plugin has nothing to enforce. Add a denyList \
+                         with banned Tailwind tokens that have semantic design token replacements."
+                    .to_owned(),
+                file: Some(eslint_path.display().to_string()),
+                line: None,
+                inventory: false,
+            });
+        }
     } else {
         results.push(CheckResult {
             id: "T-ESLP-12".to_owned(),

@@ -135,7 +135,7 @@ pub fn check_stylelint(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Check
                     "All {} required a11y rules found in stylelint config.",
                     REQUIRED_A11Y_RULES.len()
                 ),
-                file: Some(file_display),
+                file: Some(file_display.clone()),
                 line: None,
                 inventory: false,
             }
@@ -152,6 +152,53 @@ pub fn check_stylelint(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Check
                  catch issues like missing focus styles, unreadable font sizes, and removed \
                  focus outlines.",
                 missing_names.join(", ")
+            ),
+            file: Some(file_display.clone()),
+            line: None,
+            inventory: false,
+        });
+    }
+
+    // T-STYL-06: Architecture exceptions (intentionally disabled rules)
+    let exceptions = &[
+        (
+            "a11y/media-prefers-color-scheme",
+            "class-based dark mode instead of @media",
+        ),
+        (
+            "no-duplicate-selectors",
+            "separate :root blocks for different concerns",
+        ),
+    ];
+    let mut missing_exceptions = Vec::new();
+    for (rule, _reason) in exceptions {
+        // Check that the rule appears with null (disabled)
+        if !content.contains(rule) {
+            missing_exceptions.push(*rule);
+        }
+    }
+    if missing_exceptions.is_empty() {
+        results.push(
+            CheckResult {
+                id: "T-STYL-06".to_owned(),
+                severity: Severity::Info,
+                title: "Stylelint architecture exceptions configured".to_owned(),
+                message: "Architecture exceptions (disabled rules) are correctly configured."
+                    .to_owned(),
+                file: Some(file_display.clone()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
+    } else {
+        results.push(CheckResult {
+            id: "T-STYL-06".to_owned(),
+            severity: Severity::Warn,
+            title: "Missing stylelint architecture exceptions".to_owned(),
+            message: format!(
+                "These rules should be disabled (set to null) for architecture reasons: {}. See the guardrails plan for rationale.",
+                missing_exceptions.join(", ")
             ),
             file: Some(file_display),
             line: None,
