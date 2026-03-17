@@ -228,24 +228,48 @@ pub fn check_version(
     file: Option<&str>,
     results: &mut Vec<CheckResult>,
 ) {
-    let version = pkg.and_then(|p| p.get("version")).and_then(|v| v.as_str());
+    let version_val = pkg.and_then(|p| p.get("version"));
 
-    let (severity, title, message) = match version {
-        None => (
-            Severity::Error,
-            format!("{name}: version missing"),
-            "Cargo.toml [package].version is missing".to_owned(),
-        ),
-        Some(v) if release_crate_deps::is_valid_semver(v) => (
+    // Check for version.workspace = true (table form)
+    let is_workspace_version = version_val
+        .and_then(|v| v.as_table())
+        .and_then(|t| t.get("workspace"))
+        .and_then(toml::Value::as_bool)
+        .unwrap_or(false);
+
+    let version = if is_workspace_version {
+        // version.workspace = true means the version comes from the workspace root.
+        // We can't resolve the actual version here (no access to workspace root Cargo.toml),
+        // so we treat it as valid — the workspace root's version will be checked separately.
+        None
+    } else {
+        version_val.and_then(|v| v.as_str())
+    };
+
+    let (severity, title, message) = if is_workspace_version {
+        (
             Severity::Info,
-            format!("{name}: valid semver"),
-            format!("version = \"{v}\""),
-        ),
-        Some(v) => (
-            Severity::Error,
-            format!("{name}: invalid semver"),
-            format!("version = \"{v}\" does not parse as X.Y.Z"),
-        ),
+            format!("{name}: version inherited from workspace"),
+            "version.workspace = true — version is inherited from workspace root Cargo.toml".to_owned(),
+        )
+    } else {
+        match version {
+            None => (
+                Severity::Error,
+                format!("{name}: version missing"),
+                "Cargo.toml [package].version is missing".to_owned(),
+            ),
+            Some(v) if release_crate_deps::is_valid_semver(v) => (
+                Severity::Info,
+                format!("{name}: valid semver"),
+                format!("version = \"{v}\""),
+            ),
+            Some(v) => (
+                Severity::Error,
+                format!("{name}: invalid semver"),
+                format!("version = \"{v}\" does not parse as X.Y.Z"),
+            ),
+        }
     };
 
     let result = CheckResult {

@@ -45,22 +45,22 @@ fn detects_workspace_in_apps_backend() {
     assert!(project.has_typescript, "Should detect TypeScript");
 
     let workspace_root = project
-        .cargo_workspace_root
-        .as_ref()
+        .primary_workspace_root()
         .expect("Should have workspace root");
     assert!(
         workspace_root.ends_with("apps/backend"),
         "Workspace root should be apps/backend, got {:?}",
         workspace_root
     );
+    let member_names = project.all_member_names();
     assert!(
-        !project.workspace_members.is_empty(),
+        !member_names.is_empty(),
         "Should have detected workspace members"
     );
     assert!(
-        project.workspace_members.contains(&"api".to_owned()),
+        member_names.contains(&"api".to_owned()),
         "Should find 'api' crate, got {:?}",
-        project.workspace_members
+        member_names
     );
 
     // Cleanup
@@ -90,12 +90,11 @@ fn direct_workspace_detected_at_root() {
     assert!(project.has_rust);
 
     let workspace_root = project
-        .cargo_workspace_root
-        .as_ref()
+        .primary_workspace_root()
         .expect("Should have workspace root");
     // Should be the root itself, not apps/backend
     assert_eq!(
-        workspace_root.as_path(),
+        workspace_root,
         tmp.as_path(),
         "Direct workspace should have root as workspace root"
     );

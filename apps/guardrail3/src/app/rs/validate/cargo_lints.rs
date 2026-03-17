@@ -201,6 +201,7 @@ fn check_rust_lints(
             "R26",
             "R26",
             file_path,
+            Some("[workspace.lints.rust]"),
             results,
         );
     }
@@ -234,6 +235,7 @@ fn check_clippy_lints(
             "R26",
             "R27",
             file_path,
+            Some("[workspace.lints.clippy]"),
             results,
         );
     }
@@ -241,7 +243,9 @@ fn check_clippy_lints(
     // Check specific deny lints — missing = R26 (completeness), wrong level = R27 (relaxed)
     for lint_name in EXPECTED_CLIPPY_DENY {
         check_lint_level(
-            lints, lint_name, "deny", None, "R26", "R27", file_path, results,
+            lints, lint_name, "deny", None, "R26", "R27", file_path,
+            Some("[workspace.lints.clippy]"),
+            results,
         );
     }
 
@@ -377,6 +381,7 @@ fn check_lint_level(
     check_id_missing: &str,
     check_id_wrong: &str,
     file_path: &Path,
+    section_hint: Option<&str>,
     results: &mut Vec<CheckResult>,
 ) {
     let ctx = LintCheck {
@@ -404,11 +409,13 @@ fn check_lint_level(
             emit_lint_wrong(name, expected_level, l, check_id_wrong, file_path, results);
         }
         None => {
+            let section_msg = section_hint
+                .map_or_else(String::new, |s| format!(" in {s}"));
             results.push(CheckResult {
                 id: check_id_missing.to_owned(),
                 severity: Severity::Error,
                 title: format!("{name} missing"),
-                message: format!("Expected {name} = \"{expected_level}\""),
+                message: format!("Expected {name} = \"{expected_level}\"{section_msg}"),
                 file: Some(file_path.display().to_string()),
                 line: None,
                 inventory: false,
