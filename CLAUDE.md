@@ -136,17 +136,19 @@ src/
     rustfmt_check.rs             — R21-R23
     toolchain_check.rs           — R24-R25
     workspace_metadata.rs        — R55-R57
-  ts/validate/                   — TypeScript validation (61+ checks)
+  ts/validate/                   — TypeScript validation (78+ checks)
     mod.rs                       — orchestrator
     eslint_check.rs              — T1-T8, T36-T51, T60+ (ESLint config, boundaries, rules)
     tsconfig_check.rs            — T9-T10, T52-T54 (tsconfig strict settings)
     npmrc_check.rs               — T11-T14 (pnpm strict settings)
-    package_check.rs             — T15-T18, T55-T58 (package.json overrides, banned deps, scripts)
+    package_check.rs             — T15-T18, T55-T58, T-TOOL-01..06 (package.json overrides, banned deps, scripts, tool packages)
+    tool_config_checks.rs        — T-TOOL-07..11 (cspell config, scripts, size-limit config)
+    i18n_check.rs                — T-TOOL-12 (i18n locale completeness)
     jscpd_check.rs               — T19-T22, T60-T61 (jscpd config, content imports, velite)
     source_scan.rs               — T23-T35, T59 (eslint-disable, ts-ignore, process.env, any, file length)
   hooks/                         — Hook + deployment validation
     mod.rs, validate.rs          — orchestrator
-    hook_checks.rs               — H1-H11 (pre-commit existence, patterns, permissions)
+    hook_checks.rs               — H1-H11, H-TOOL-01..05 (pre-commit existence, patterns, permissions, tool hooks)
     tool_checks.rs               — H8, H12 (tool installation, duplication tool detection)
     deploy_checks.rs             — D1-D5 (railpack, next.js standalone, tailwind)
   report/
@@ -156,7 +158,7 @@ src/
     markdown.rs                  — markdown tables
 ```
 
-## Validation Checks (162 total)
+## Validation Checks (179 total)
 
 ### Rust (R1-R58)
 
@@ -168,15 +170,17 @@ src/
 
 **Architecture:** Dependency direction violations (R51), dependency graph inventory (R52), unsafe_code=forbid (R53), workspace metadata (R55-R57), direct std::fs usage (R58).
 
-### TypeScript (T1-T83)
+### TypeScript (T1-T83, T-TOOL-01..12)
 
 **Config completeness:** ESLint config + rules (T1-T8, T36-T51, T60-T83), tsconfig strict settings (T9-T10, T52-T54), npmrc settings (T11-T14), package.json overrides + banned deps + scripts (T15-T18, T55-T58), jscpd config (T19-T22), content/velite (T60-T61).
 
+**Tool packages + configs:** cspell, type-coverage, license-checker, prettier in devDependencies (T-TOOL-01..04), size-limit packages (T-TOOL-05..06, content only), cspell.json config (T-TOOL-07), scripts for type-coverage/license-check/audit (T-TOOL-08..10), size-limit config (T-TOOL-11, content only), i18n locale completeness (T-TOOL-12, content only).
+
 **Source scan:** eslint-disable without reason (T23-T26), @ts-ignore (T27), @ts-expect-error (T28-T29), process.env direct access (T30), any type usage (T31), file length >300 (T32-T33), IDE/coverage suppressions (T34-T35), banned packages in node_modules (T59).
 
-### Hooks + Deployment (H1-H12, D1-D5)
+### Hooks + Deployment (H1-H12, H-TOOL-01..05, D1-D5)
 
-**Hooks:** Pre-commit existence + hooksPath (H1-H2), script structure (H3-H7), tool installation (H8), script inventory (H9-H11), duplication tool detection (H12 — warns when wrong tool for project type).
+**Hooks:** Pre-commit existence + hooksPath (H1-H2), script structure (H3-H7), tool installation (H8), script inventory (H9-H11), duplication tool detection (H12 — warns when wrong tool for project type). Tool hook steps: cspell, conflict markers, lockfile integrity, prettier, pnpm audit (H-TOOL-01..05).
 
 **Deployment:** Railpack configs (D1-D2), Next.js standalone + tracing root (D3-D4), Tailwind in deps not devDeps (D5).
 

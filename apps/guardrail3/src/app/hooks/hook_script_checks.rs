@@ -296,6 +296,147 @@ pub(super) fn check_stylelint_hook(pre_commit_content: &str, results: &mut Vec<C
     }
 }
 
+/// H-TOOL-01: cspell in pre-commit hook
+pub(super) fn check_cspell_hook(content: &str, results: &mut Vec<CheckResult>) {
+    if content.contains("cspell") {
+        results.push(
+            CheckResult {
+                id: "H-TOOL-01".to_owned(),
+                severity: Severity::Info,
+                title: "cspell configured in hook".to_owned(),
+                message: "Pre-commit hook runs cspell.".to_owned(),
+                file: None,
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
+    } else {
+        results.push(CheckResult {
+            id: "H-TOOL-01".to_owned(),
+            severity: Severity::Warn,
+            title: "No cspell in hook".to_owned(),
+            message: "Pre-commit hook does not run cspell. Add spell checking step.".to_owned(),
+            file: None,
+            line: None,
+            inventory: false,
+        });
+    }
+}
+
+/// H-TOOL-02: merge conflict markers in hook
+pub(super) fn check_conflict_marker_hook(content: &str, results: &mut Vec<CheckResult>) {
+    if content.contains("conflict marker") || content.contains("<{7}") || content.contains("<<<") {
+        results.push(
+            CheckResult {
+                id: "H-TOOL-02".to_owned(),
+                severity: Severity::Info,
+                title: "Conflict marker check in hook".to_owned(),
+                message: "Pre-commit hook checks for merge conflict markers.".to_owned(),
+                file: None,
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
+    } else {
+        results.push(CheckResult {
+            id: "H-TOOL-02".to_owned(),
+            severity: Severity::Warn,
+            title: "No conflict marker check in hook".to_owned(),
+            message: "Pre-commit hook does not check for merge conflict markers. Add grep for <<<<<<< ======= >>>>>>>.".to_owned(),
+            file: None,
+            line: None,
+            inventory: false,
+        });
+    }
+}
+
+/// H-TOOL-03: lockfile integrity in hook
+pub(super) fn check_lockfile_hook(content: &str, results: &mut Vec<CheckResult>) {
+    if content.contains("frozen-lockfile") || content.contains("lockfile") {
+        results.push(
+            CheckResult {
+                id: "H-TOOL-03".to_owned(),
+                severity: Severity::Info,
+                title: "Lockfile integrity check in hook".to_owned(),
+                message: "Pre-commit hook verifies lockfile integrity.".to_owned(),
+                file: None,
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
+    } else {
+        results.push(CheckResult {
+            id: "H-TOOL-03".to_owned(),
+            severity: Severity::Warn,
+            title: "No lockfile check in hook".to_owned(),
+            message: "Pre-commit hook does not check lockfile integrity. Add pnpm install --frozen-lockfile.".to_owned(),
+            file: None,
+            line: None,
+            inventory: false,
+        });
+    }
+}
+
+/// H-TOOL-04: prettier format check in hook
+pub(super) fn check_prettier_hook(content: &str, results: &mut Vec<CheckResult>) {
+    if content.contains("prettier") && content.contains("--check") {
+        results.push(
+            CheckResult {
+                id: "H-TOOL-04".to_owned(),
+                severity: Severity::Info,
+                title: "Prettier format check in hook".to_owned(),
+                message: "Pre-commit hook runs prettier --check.".to_owned(),
+                file: None,
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
+    } else {
+        results.push(CheckResult {
+            id: "H-TOOL-04".to_owned(),
+            severity: Severity::Warn,
+            title: "No prettier in hook".to_owned(),
+            message: "Pre-commit hook does not run prettier --check. Add formatting verification."
+                .to_owned(),
+            file: None,
+            line: None,
+            inventory: false,
+        });
+    }
+}
+
+/// H-TOOL-05: pnpm audit in hook
+pub(super) fn check_audit_hook(content: &str, results: &mut Vec<CheckResult>) {
+    if content.contains("pnpm audit") {
+        results.push(
+            CheckResult {
+                id: "H-TOOL-05".to_owned(),
+                severity: Severity::Info,
+                title: "Dependency audit in hook".to_owned(),
+                message: "Pre-commit hook runs pnpm audit.".to_owned(),
+                file: None,
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
+    } else {
+        results.push(CheckResult {
+            id: "H-TOOL-05".to_owned(),
+            severity: Severity::Warn,
+            title: "No dependency audit in hook".to_owned(),
+            message: "Pre-commit hook does not run pnpm audit. Add informational dependency vulnerability scan.".to_owned(),
+            file: None,
+            line: None,
+            inventory: false,
+        });
+    }
+}
+
 pub(super) fn inventory_scripts(
     fs: &dyn FileSystem,
     dir: &Path,
