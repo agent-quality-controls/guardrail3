@@ -50,6 +50,9 @@ pub enum RsCommands {
         /// Overwrite existing files
         #[arg(long)]
         force: bool,
+        /// Show what would change without writing (dry run)
+        #[arg(long)]
+        dry_run: bool,
     },
     /// Generate Rust config files (clippy.toml, deny.toml, etc.) from guardrail3.toml
     Generate(GenerateArgs),
@@ -79,6 +82,9 @@ pub enum TsCommands {
         /// Overwrite existing files
         #[arg(long)]
         force: bool,
+        /// Show what would change without writing (dry run)
+        #[arg(long)]
+        dry_run: bool,
     },
     /// Generate TypeScript config files (eslint, tsconfig, etc.) from guardrail3.toml
     Generate(GenerateArgs),
