@@ -13,8 +13,7 @@ tests = true
 release = true
 
 [rust.apps.guardrail3]
-profile = "service"
-layer = "composition-root"
+type = "service"
 
 [local]
 clippy_methods = "apps/guardrail3/local/clippy-methods.toml"

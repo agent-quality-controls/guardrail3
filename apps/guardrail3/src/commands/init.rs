@@ -219,6 +219,7 @@ fn show_file_diff(path: &Path, new_content: &str) {
     }
 }
 
+#[allow(clippy::too_many_lines)] // reason: generates per-app config sections sequentially
 fn generate_rs_config_content(profile: &str, project_path: &Path) -> String {
     let fs = RealFileSystem;
     let project = crate::app::discover::detect_project(&fs, project_path);
@@ -235,24 +236,29 @@ workspace_root = "."
     );
 
     let members = project.all_member_dirs();
-    if !members.is_empty() {
-        // Group workspace members by top-level directory under apps/
-        // Internal crates (apps/my-app/crates/domain) belong to my-app, not as separate apps
+    if members.is_empty() {
+        // Single-crate — workspace-level checks
+        writeln!(config, "\n[rust.checks]").unwrap_or_default();
+        writeln!(config, "architecture = true      # R-ARCH-*, R-DEPS-*").unwrap_or_default();
+        writeln!(config, "garde = true             # R-GARDE-*").unwrap_or_default();
+        writeln!(config, "tests = true             # R-TEST-*").unwrap_or_default();
+        writeln!(
+            config,
+            "release = true           # R-REL-*, R-PUB-*, R-BIN-*"
+        )
+        .unwrap_or_default();
+    } else {
+        // Multi-crate workspace — per-app + packages
         let mut seen_apps: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
         let mut has_packages = false;
 
         for ws in &project.workspaces {
             for member in &ws.members {
                 let dir = &member.dir;
-
                 if dir.starts_with("packages/") || dir.contains("/packages/") {
                     has_packages = true;
                     continue;
                 }
-
-                // Extract top-level app name from dir path
-                // e.g., "apps/validator-rust/crates/domain" → "validator-rust"
-                // e.g., "apps/guardrail3" → "guardrail3"
                 let app_name = if dir.starts_with("apps/") {
                     dir.strip_prefix("apps/")
                         .and_then(|rest| rest.split('/').next())
@@ -260,33 +266,45 @@ workspace_root = "."
                 } else {
                     &member.name
                 };
-
                 if !seen_apps.contains(app_name) {
                     let _ = seen_apps.insert(app_name.to_owned());
                     writeln!(config, "\n[rust.apps.{app_name}]").unwrap_or_default();
-                    writeln!(config, "profile = \"{profile}\"").unwrap_or_default();
-                    writeln!(config, "layer = \"composition-root\"").unwrap_or_default();
+                    writeln!(config, "type = \"service\"").unwrap_or_default();
+                    writeln!(config, "\n[rust.apps.{app_name}.checks]").unwrap_or_default();
+                    writeln!(config, "architecture = true      # R-ARCH-*, R-DEPS-*")
+                        .unwrap_or_default();
+                    writeln!(config, "garde = true             # R-GARDE-*").unwrap_or_default();
+                    writeln!(config, "tests = true             # R-TEST-*").unwrap_or_default();
+                    writeln!(
+                        config,
+                        "release = true           # R-REL-*, R-PUB-*, R-BIN-*"
+                    )
+                    .unwrap_or_default();
                 }
             }
         }
-
         if has_packages {
             writeln!(config, "\n[rust.packages]").unwrap_or_default();
-            writeln!(config, "profile = \"library\"").unwrap_or_default();
-            writeln!(config, "layer = \"pure\"").unwrap_or_default();
+            writeln!(config, "type = \"library\"").unwrap_or_default();
+            writeln!(config, "\n[rust.packages.checks]").unwrap_or_default();
+            writeln!(
+                config,
+                "architecture = false     # libraries don't use hex arch"
+            )
+            .unwrap_or_default();
+            writeln!(
+                config,
+                "garde = false            # libraries are pure types"
+            )
+            .unwrap_or_default();
+            writeln!(config, "tests = true             # R-TEST-*").unwrap_or_default();
+            writeln!(
+                config,
+                "release = false          # packages published with the app"
+            )
+            .unwrap_or_default();
         }
     }
-
-    // Workspace-level checks (always)
-    writeln!(config, "\n[rust.checks]").unwrap_or_default();
-    writeln!(config, "architecture = true      # R-ARCH-*, R-DEPS-*").unwrap_or_default();
-    writeln!(config, "garde = true             # R-GARDE-*").unwrap_or_default();
-    writeln!(config, "tests = true             # R-TEST-*").unwrap_or_default();
-    writeln!(
-        config,
-        "release = true           # R-REL-*, R-PUB-*, R-BIN-*"
-    )
-    .unwrap_or_default();
 
     config
 }

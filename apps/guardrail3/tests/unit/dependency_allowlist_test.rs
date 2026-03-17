@@ -125,7 +125,9 @@ fn r_deps_02_library_without_allowlist_warns() {
     let cfg = CrateConfig {
         layer: None,
         profile: Some("library".to_owned()),
+        type_: None,
         allowed_deps: None,
+        checks: None,
     };
     let mut results = Vec::new();
 
@@ -142,7 +144,9 @@ fn r_deps_02_service_without_allowlist_ok() {
     let cfg = CrateConfig {
         layer: None,
         profile: Some("service".to_owned()),
+        type_: None,
         allowed_deps: None,
+        checks: None,
     };
     let mut results = Vec::new();
 
