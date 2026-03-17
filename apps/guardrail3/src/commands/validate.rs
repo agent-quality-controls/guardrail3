@@ -76,7 +76,7 @@ pub fn run(args: &ValidateArgs) {
     }
 
     if project.has_typescript {
-        let ts_report = ts::validate::run(&fs, &abs_path, scoped_ref, &ts_categories);
+        let ts_report = ts::validate::run(&fs, &abs_path, scoped_ref, &ts_categories, cfg.as_ref());
         for section in ts_report.sections {
             combined_report.add_section(section);
         }

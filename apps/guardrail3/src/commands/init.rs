@@ -153,7 +153,7 @@ pub fn run_ts(path: &str, force: bool) {
     let project_path = Path::new(path);
     let config_path = project_path.join("guardrail3.toml");
 
-    let ts_section = "\n[typescript]\n# apps = [\"apps/web\", \"apps/landing\"]\n\n[typescript.checks]\narchitecture = true      # T-ARCH-*, eslint boundary audit — hex arch enforcement\ntests = true             # T-TEST-* — test quality enforcement\n";
+    let ts_section = "\n[typescript]\n\n[typescript.apps.my-app]\ntype = \"service\"         # service | content | library\n\n[typescript.checks]\narchitecture = true      # T-ARCH-*, eslint boundary audit — hex arch enforcement\ntests = true             # T-TEST-* — test quality enforcement\n";
 
     if config_path.exists() {
         // Read existing content and check if [typescript] section already exists
