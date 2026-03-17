@@ -38,12 +38,14 @@ pub struct RustConfig {
     pub workspaces: Option<Vec<String>>,
     #[garde(skip)]
     // reason: BTreeMap values — garde cannot dive into map values; validated by layer_from_config
-    pub crates: Option<CrateMap>,
+    pub apps: Option<CrateMap>,
+    #[garde(dive)] // reason: recursively validate nested CrateConfig for packages
+    pub packages: Option<CrateConfig>,
     #[garde(dive)] // reason: recursively validate nested RustChecksConfig
     pub checks: Option<RustChecksConfig>,
 }
 
-#[derive(Debug, Deserialize, garde::Validate)]
+#[derive(Debug, Clone, Deserialize, garde::Validate)]
 pub struct CrateConfig {
     #[garde(inner(length(min = 1)))] // reason: layer name must be non-empty when present
     pub layer: Option<String>,

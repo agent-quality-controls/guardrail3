@@ -12,7 +12,7 @@ garde = true
 tests = true
 release = true
 
-[rust.crates.guardrail3]
+[rust.apps.guardrail3]
 profile = "service"
 layer = "composition-root"
 

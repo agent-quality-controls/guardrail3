@@ -418,7 +418,7 @@ fn generate_rust_files(
     let crate_configs: BTreeMap<String, &crate::domain::config::types::CrateConfig> = cfg
         .rust
         .as_ref()
-        .and_then(|r| r.crates.as_ref())
+        .and_then(|r| r.apps.as_ref())
         .map(|c| c.iter().map(|(k, v)| (k.clone(), v)).collect())
         .unwrap_or_default();
 

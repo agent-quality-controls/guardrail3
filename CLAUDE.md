@@ -231,10 +231,10 @@ name = "service"           # service | library
 [rust]
 workspace_root = "."       # or "apps/backend" for monorepos (run rs init + ts init separately)
 
-[rust.crates.api]
+[rust.apps.api]
 layer = "composition-root" # allows LazyLock (no global-state ban)
 
-[rust.crates.domain-types]
+[rust.apps.domain-types]
 layer = "pure"             # gets global-state ban
 
 [local]
