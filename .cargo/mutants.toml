@@ -1,0 +1,12 @@
+# cargo-mutants configuration
+# Run: cargo mutants --workspace
+
+timeout_multiplier = 2.0
+
+# Exclude test infrastructure and fuzz targets from mutation
+exclude_globs = [
+    "tests/**",
+    "fuzz/**",
+    "src/main.rs",          # CLI entry point — mutations here just change exit codes
+    "src/report/**",        # Output formatting — mutations change display, not logic
+]

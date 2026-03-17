@@ -63,10 +63,10 @@ pub struct RustCheckCategories {
 impl Default for RustCheckCategories {
     fn default() -> Self {
         Self {
-            architecture: false,
-            garde: false,
+            architecture: true,
+            garde: true,
             tests: true,
-            release: false,
+            release: true,
         }
     }
 }
@@ -82,7 +82,7 @@ pub struct TsCheckCategories {
 impl Default for TsCheckCategories {
     fn default() -> Self {
         Self {
-            architecture: false,
+            architecture: true,
             tests: true,
         }
     }

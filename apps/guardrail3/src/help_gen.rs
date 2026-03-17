@@ -211,39 +211,39 @@ CHECK CATEGORIES
     T23-T35), source health (R38-R42, T32-T33), tools & dependencies
     (R45-R50, T55-T59), hooks (H1-H12), deployment (D1-D5).
 
-  ARCHITECTURE (off by default):
+  ARCHITECTURE (on by default):
     Hex arch structure and dependency flow enforcement.
     Rust: R-ARCH-01..04, R-DEPS-01..02. TypeScript: T-ARCH-01..02,
-    eslint boundary rules. Enable with --architecture flag or in config.
+    eslint boundary rules. Disable with architecture = false in config.
 
-  GARDE (off by default, Rust only):
+  GARDE (on by default, Rust only):
     Input boundary validation with the garde crate. Ensures every struct
     that crosses a trust boundary (Deserialize, Parser, Args, FromRow)
     derives Validate. Checks: R-GARDE-01/02/05, R34/R35 (garde skip
-    hygiene). Enable with --garde flag or in config.
+    hygiene). Disable with garde = false in config.
 
   TESTS (on by default):
     Test quality and organization. Rust: R-TEST-02..09. TypeScript:
     T-TEST-01..05. Checks test file structure, assertions, coverage,
-    isolation, and no inline tests in src/. Enable/disable with --tests
-    flag or in config.
+    isolation, and no inline tests in src/. Disable with tests = false
+    in config.
 
-  RELEASE (off by default, Rust only):
+  RELEASE (on by default, Rust only):
     Crate publish readiness. R-REL-* (release workflow, changelog,
     release-plz config), R-PUB-* (crate metadata: description, license,
     repository, etc.), R-BIN-* (binary release workflow, binstall
-    metadata). Enable with --release flag or in config.
+    metadata). Disable with release = false in config.
 
-  Enable in guardrail3.toml:
+  Disable in guardrail3.toml:
     [rust.checks]
-    architecture = true
-    garde = true
-    release = true
+    architecture = false   # disable hex arch checks
+    garde = false           # disable garde boundary checks
+    release = false         # disable release readiness checks
 
     [typescript.checks]
-    architecture = true
+    architecture = false   # disable hex arch checks
 
-  CLI flags override config for a single run:
+  CLI flags filter for a single run (only run selected categories):
     guardrail3 rs validate --architecture    Run only architecture checks
     guardrail3 rs validate --tests           Run only test quality checks
     guardrail3 rs validate --release         Run only release checks

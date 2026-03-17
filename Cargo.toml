@@ -5,6 +5,11 @@ resolver = "2"
 [workspace.dependencies]
 garde = { version = "0.22", features = ["derive"] }
 
+[profile.mutants]
+inherits = "dev"
+opt-level = 0
+debug = false
+
 [workspace.lints.rust]
 warnings = "deny"
 unsafe_code = "forbid"
