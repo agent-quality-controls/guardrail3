@@ -81,7 +81,11 @@ fn handle_rs(command: RsCommands) {
         }
         RsCommands::Generate(args) => {
             validate_or_exit(&args);
-            commands::generate::run_rs(&args);
+            if args.dry_run {
+                commands::diff::run(&args.path);
+            } else {
+                commands::generate::run_rs(&args);
+            }
         }
         RsCommands::Validate(args) => {
             validate_or_exit(&args);
@@ -139,7 +143,11 @@ fn handle_ts(command: TsCommands) {
         }
         TsCommands::Generate(args) => {
             validate_or_exit(&args);
-            commands::generate::run_ts(&args);
+            if args.dry_run {
+                commands::diff::run_ts(&args.path);
+            } else {
+                commands::generate::run_ts(&args);
+            }
         }
         TsCommands::Validate(args) => {
             validate_or_exit(&args);
