@@ -18,8 +18,6 @@ pub struct GuardrailConfig {
     pub rust: Option<RustConfig>,
     #[garde(dive)] // reason: recursively validate nested TypeScriptConfig
     pub typescript: Option<TypeScriptConfig>,
-    #[garde(dive)] // reason: recursively validate nested LocalConfig
-    pub local: Option<LocalConfig>,
     #[garde(dive)] // reason: recursively validate nested HooksConfig
     pub hooks: Option<HooksConfig>,
 }
@@ -122,20 +120,6 @@ pub struct CanonicalConfig {
     pub tsconfig_base: Option<bool>,
     #[garde(skip)] // reason: Option<bool> — inherently valid, no string validation needed
     pub jscpd: Option<bool>,
-}
-
-#[derive(Debug, Deserialize, garde::Validate)]
-pub struct LocalConfig {
-    #[garde(inner(length(min = 1)))] // reason: file path must be non-empty when present
-    pub clippy_methods: Option<String>,
-    #[garde(inner(length(min = 1)))] // reason: file path must be non-empty when present
-    pub clippy_types: Option<String>,
-    #[garde(inner(length(min = 1)))] // reason: file path must be non-empty when present
-    pub deny_bans: Option<String>,
-    #[garde(inner(length(min = 1)))] // reason: file path must be non-empty when present
-    pub deny_skip: Option<String>,
-    #[garde(inner(length(min = 1)))] // reason: file path must be non-empty when present
-    pub deny_feature_bans: Option<String>,
 }
 
 #[derive(Debug, Deserialize, garde::Validate)]

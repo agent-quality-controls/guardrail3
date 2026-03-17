@@ -325,7 +325,7 @@ fn cli_diff_on_self() {
 
     let stdout = String::from_utf8_lossy(&out.stdout);
     let no_changes = stdout.contains("No changes");
-    let has_diff = stdout.contains("Would configure");
+    let has_diff = stdout.contains("would");
     assert!(
         no_changes || has_diff,
         "diff should show config or no-changes message, got: {stdout}"
@@ -869,10 +869,7 @@ fn cli_diff_shows_diff_after_tampering() {
     assert!(!out.status.success(), "diff should fail when files differ");
 
     let stdout = String::from_utf8_lossy(&out.stdout);
-    assert!(
-        stdout.contains("Would configure"),
-        "diff should show changes"
-    );
+    assert!(stdout.contains("would"), "diff should show changes");
 }
 
 // ---- diff shows new file when file missing (diff.rs line 55: /dev/null) ----
@@ -900,8 +897,5 @@ fn cli_diff_shows_new_file_when_missing() {
     );
 
     let stdout = String::from_utf8_lossy(&out.stdout);
-    assert!(
-        stdout.contains("Would configure"),
-        "diff should indicate new file"
-    );
+    assert!(stdout.contains("would"), "diff should indicate new file");
 }

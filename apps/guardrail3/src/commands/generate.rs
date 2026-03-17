@@ -96,7 +96,7 @@ pub fn run_rs(args: &GenerateArgs) {
         .map_or("service", |p| p.name.as_str())
         .to_owned();
 
-    let local = load_local_overrides(project_path, &cfg);
+    let local = load_local_overrides(project_path);
     let rust_root = resolve_rust_root(&cfg);
 
     let files = generate_rust_files(&rust_root, &cfg, &profile, &local);
@@ -241,7 +241,7 @@ fn warn_if_overwriting(target: &Path, relative_path: &str, new_content: &str) {
     if let Some(existing) = crate::fs::read_file(target) {
         if existing != new_content {
             eprintln!(
-                "  warning: Overwriting {relative_path} — manual edits will be lost. Use local/ overrides for project-specific customization."
+                "  warning: Overwriting {relative_path} — manual edits will be lost. Use .guardrail3/overrides/ for project-specific customization."
             );
         }
     }
@@ -259,28 +259,20 @@ struct LocalOverrides {
     deny_feature_bans: String,
 }
 
-fn load_local_overrides(
-    project_path: &Path,
-    cfg: &config::types::GuardrailConfig,
-) -> LocalOverrides {
-    let local = cfg.local.as_ref();
+fn load_local_overrides(project_path: &Path) -> LocalOverrides {
+    let overrides_dir = project_path.join(".guardrail3/overrides");
 
-    let read_local = |field: Option<&String>| -> String {
-        match field {
-            Some(rel) => {
-                let path = project_path.join(rel);
-                crate::fs::read_file(&path).unwrap_or_default()
-            }
-            None => String::new(),
-        }
+    let read_override = |name: &str| -> String {
+        let path = overrides_dir.join(name);
+        crate::fs::read_file(&path).unwrap_or_default()
     };
 
     LocalOverrides {
-        clippy_methods: read_local(local.and_then(|l| l.clippy_methods.as_ref())),
-        clippy_types: read_local(local.and_then(|l| l.clippy_types.as_ref())),
-        deny_bans: read_local(local.and_then(|l| l.deny_bans.as_ref())),
-        deny_skip: read_local(local.and_then(|l| l.deny_skip.as_ref())),
-        deny_feature_bans: read_local(local.and_then(|l| l.deny_feature_bans.as_ref())),
+        clippy_methods: read_override("clippy-methods.toml"),
+        clippy_types: read_override("clippy-types.toml"),
+        deny_bans: read_override("deny-bans.toml"),
+        deny_skip: read_override("deny-skip.toml"),
+        deny_feature_bans: read_override("deny-feature-bans.toml"),
     }
 }
 
@@ -299,7 +291,7 @@ fn generate_all_files(
 ) -> Vec<GeneratedFile> {
     let mut files = Vec::new();
 
-    let local = load_local_overrides(project_path, cfg);
+    let local = load_local_overrides(project_path);
 
     if cfg.rust.is_some() {
         let rust_root = resolve_rust_root(cfg);

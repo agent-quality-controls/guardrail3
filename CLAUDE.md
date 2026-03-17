@@ -65,7 +65,7 @@ Single Rust binary (`cargo install guardrail3`) that:
 | `guardrail3 rs validate [path]` | No | Rust checks only |
 | `guardrail3 ts validate [path]` | No | TypeScript checks only |
 | `guardrail3 hooks validate [path]` | No | Hook + deployment checks |
-| `guardrail3 rs init --profile <name>` | No (creates it) | Scaffold Rust guardrail3.toml + local/ |
+| `guardrail3 rs init --profile <name>` | No (creates it) | Scaffold Rust guardrail3.toml |
 | `guardrail3 ts init` | No (creates it) | Scaffold TypeScript section in guardrail3.toml |
 | `guardrail3 generate` | Yes | Produce config files from modules + profile |
 | `guardrail3 check` | Yes | CI: verify generated files are current |
@@ -95,7 +95,7 @@ Single Rust binary (`cargo install guardrail3`) that:
 
 For monorepos, run `guardrail3 rs init` and `guardrail3 ts init` separately — there is no dedicated monorepo profile.
 
-The `minimal` profile was removed. If you need fewer bans, use `local/` overrides to add exceptions — don't weaken the baseline.
+The `minimal` profile was removed. If you need fewer bans, use `.guardrail3/overrides/` to add exceptions — don't weaken the baseline.
 
 ## Architecture
 
@@ -114,7 +114,7 @@ src/
   commands/
     validate.rs                  — top-level validate orchestrator + git scope resolution
     generate.rs                  — config file generation from modules + profile
-    init.rs                      — scaffold guardrail3.toml + local/
+    init.rs                      — scaffold guardrail3.toml
     check.rs                     — staleness verification
     diff.rs                      — dry run with diffs
     modules_cmd.rs               — list-modules, show-module
@@ -237,13 +237,14 @@ layer = "composition-root" # allows LazyLock (no global-state ban)
 [rust.apps.domain-types]
 layer = "pure"             # gets global-state ban
 
-[local]
-clippy_methods = "local/clippy-methods.toml"
-clippy_types = "local/clippy-types.toml"
-deny_bans = "local/deny-bans.toml"
-deny_skip = "local/deny-skip.toml"
-deny_feature_bans = "local/deny-feature-bans.toml"
 ```
+
+Override files are discovered by convention at `.guardrail3/overrides/`:
+- `.guardrail3/overrides/clippy-methods.toml` — Extra disallowed methods
+- `.guardrail3/overrides/clippy-types.toml` — Extra disallowed types
+- `.guardrail3/overrides/deny-bans.toml` — Extra crate bans
+- `.guardrail3/overrides/deny-skip.toml` — Duplicate crate skip list
+- `.guardrail3/overrides/deny-feature-bans.toml` — Feature bans
 
 ## Centralized Filesystem Module (src/fs.rs)
 

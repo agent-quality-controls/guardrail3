@@ -192,12 +192,12 @@ CONFIG FILE (guardrail3.toml)
                   [dev-dependencies] and [build-dependencies] are NOT checked.
                   Workspace path deps (path = \"...\") and workspace = true are NOT checked.
 
-  local/ overrides (created by rs init):
-    local/clippy-methods.toml          Extra disallowed methods
-    local/clippy-types.toml            Extra disallowed types
-    local/deny-bans.toml               Extra crate bans
-    local/deny-skip.toml               Duplicate crate skip list
-    local/deny-feature-bans.toml       Feature bans
+  .guardrail3/overrides/ (convention path, no config needed):
+    .guardrail3/overrides/clippy-methods.toml    Extra disallowed methods
+    .guardrail3/overrides/clippy-types.toml      Extra disallowed types
+    .guardrail3/overrides/deny-bans.toml         Extra crate bans
+    .guardrail3/overrides/deny-skip.toml         Duplicate crate skip list
+    .guardrail3/overrides/deny-feature-bans.toml Feature bans
 
 ===============================================================================
 CHECK CATEGORIES
@@ -357,7 +357,7 @@ Step 5: CI
 // ---------------------------------------------------------------------------
 
 const RS_HELP: &str = "\
-  init        Create guardrail3.toml + local/ overrides
+  init        Create guardrail3.toml
   generate    Produce clippy.toml, deny.toml, rustfmt.toml, hooks
   validate    Run all Rust checks
   check       CI: verify generated configs are current
@@ -505,13 +505,15 @@ PROFILES:
 
 FILES CREATED:
   guardrail3.toml              Config file (profile, workspace, crate settings)
-  local/clippy-methods.toml    Extra disallowed methods
-  local/clippy-types.toml      Extra disallowed types
-  local/deny-bans.toml         Extra crate bans
-  local/deny-skip.toml         Duplicate crate skip list
-  local/deny-feature-bans.toml Feature bans
   release-plz.toml             Release automation (service only)
   cliff.toml                   Changelog generation (service only)
+
+OVERRIDES (convention path, no config needed):
+  .guardrail3/overrides/clippy-methods.toml    Extra disallowed methods
+  .guardrail3/overrides/clippy-types.toml      Extra disallowed types
+  .guardrail3/overrides/deny-bans.toml         Extra crate bans
+  .guardrail3/overrides/deny-skip.toml         Duplicate crate skip list
+  .guardrail3/overrides/deny-feature-bans.toml Feature bans
 
 AFTER INIT:
   For single crates:  guardrail3 rs generate && guardrail3 rs validate .
@@ -529,7 +531,7 @@ EXAMPLES:
 
 const TS_INIT_HELP: &str = "\
 Creates or appends a [typescript] section to guardrail3.toml.
-Does NOT create local/ or any Rust-specific files.
+Does NOT create .guardrail3/overrides/ or any Rust-specific files.
 
 AFTER INIT:
   guardrail3 ts generate        Produce eslint.config, tsconfig, npmrc, jscpd
