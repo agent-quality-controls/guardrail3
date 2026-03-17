@@ -228,13 +228,15 @@ fn auto_detect_app_type(fs: &dyn FileSystem, app_path: &Path) -> Option<TsAppTyp
                     return Some(TsAppType::Service);
                 }
 
-                // Content pipeline tool → Content
+                // Content pipeline / SEO tool → Content
+                // Only strong signals — remark/rehype/shiki/mdx are markdown
+                // rendering libs that any app (including admin) could use
                 let content_signals = [
                     "velite",
-                    "@mdx-js/loader",
-                    "@mdx-js/react",
                     "contentlayer",
                     "nextra",
+                    "next-seo",
+                    "next-sitemap",
                 ];
                 if content_signals.iter().any(|s| deps.contains_key(*s)) {
                     return Some(TsAppType::Content);
