@@ -20,39 +20,39 @@ pub fn run_rs(profile: &str, path: &str, force: bool, dry_run: bool) {
     let project_path = Path::new(path);
 
     if dry_run {
-        println!("Dry run — showing what rs init --profile {profile} would do:\n");
+        println!("Dry run — rs init --profile {profile}\n");
 
+        // Show the guardrail3.toml config (the important part)
         let config_path = project_path.join("guardrail3.toml");
         let config_content = generate_rs_config_content(profile);
         show_file_diff(&config_path, &config_content);
 
-        let local_files = [
-            "clippy-methods.toml",
-            "clippy-types.toml",
-            "deny-bans.toml",
-            "deny-skip.toml",
-            "deny-feature-bans.toml",
+        // Just list other files that would be created (no content dump)
+        let other_files = [
+            "local/clippy-methods.toml",
+            "local/clippy-types.toml",
+            "local/deny-bans.toml",
+            "local/deny-skip.toml",
+            "local/deny-feature-bans.toml",
         ];
-        let local_templates = [
-            "# Additional disallowed-methods entries (TOML array-of-tables format)\n# Example:\n#     { path = \"some::method\", reason = \"Use alternative instead\" },\n",
-            "# Additional disallowed-types entries (TOML array-of-tables format)\n# Example:\n#     { path = \"some::Type\", reason = \"Use alternative instead\" },\n",
-            "# Additional [bans] deny entries for deny.toml\n# Example:\n#     { name = \"some-crate\", wrappers = [] },\n",
-            "# Skip entries for deny.toml [bans] section\n# Example:\n#     { crate = \"windows-sys@0.60.2\", reason = \"transitive dep conflict\" },\n",
-            "# Additional [[bans.features]] entries for deny.toml\n# Example:\n#     [[bans.features]]\n#     name = \"some-crate\"\n#     deny = [\"full\"]\n",
-        ];
-        for (filename, content) in local_files.iter().zip(local_templates.iter()) {
-            show_file_diff(&project_path.join("local").join(filename), content);
+        println!("\n  Would also create:");
+        for f in &other_files {
+            let full = project_path.join(f);
+            if full.exists() {
+                println!("    {f} (already exists, skip without --force)");
+            } else {
+                println!("    {f} (override template)");
+            }
         }
-
         if profile == "service" {
-            show_file_diff(
-                &project_path.join("release-plz.toml"),
-                crate::domain::modules::release::RELEASE_PLZ_TOML.content,
-            );
-            show_file_diff(
-                &project_path.join("cliff.toml"),
-                crate::domain::modules::release::CLIFF_TOML.content,
-            );
+            for f in &["release-plz.toml", "cliff.toml"] {
+                let full = project_path.join(f);
+                if full.exists() {
+                    println!("    {f} (already exists, skip without --force)");
+                } else {
+                    println!("    {f} (release config)");
+                }
+            }
         }
         return;
     }
