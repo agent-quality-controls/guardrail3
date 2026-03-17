@@ -330,14 +330,9 @@ SOURCE SCAN (AST-based via syn — immune to strings/comments):
   R41       Use count > 15 (warn)
   R58       Direct std::fs usage (catches clippy aliased-import hole)
 
-  NOTE: unsafe (R42), todo!/unimplemented! (R43), .unwrap()/.expect() (R44)
-  are NOT scanned — they are enforced by clippy lints configured via R26.
-  guardrail3 verifies the lint configuration exists, clippy enforces it.
-
 TOOLS & DEPENDENCIES:
   R45-R48   cargo-deny, cargo-machete, cargo-dupes, gitleaks installed
   R49       CLAUDE.md exists
-  R50       Banned crates in Cargo.lock
   R-DEPS-01 Unauthorized dependency (not in allowed_deps)
   R-DEPS-02 Library crate without allowed_deps (warn)
 

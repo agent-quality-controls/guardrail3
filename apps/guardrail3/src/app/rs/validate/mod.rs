@@ -139,7 +139,7 @@ fn run_code_checks(
         results: source_results,
     });
 
-    let dep_results = dependency_scan::check(fs, tc, workspace_root);
+    let dep_results = dependency_scan::check(tc);
     report.add_section(Section {
         name: "Dependency & tool checks".to_owned(),
         results: dep_results,
