@@ -298,6 +298,7 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
 }
 
 #[allow(clippy::disallowed_methods)] // reason: serde_json::from_str for package.json inspection
+#[allow(clippy::too_many_lines)] // reason: checks 11 packages + script sequentially
 pub fn check_lint_plugins(
     fs: &dyn FileSystem,
     path: &Path,
@@ -358,5 +359,35 @@ pub fn check_lint_plugins(
         check_pkg("T-PLUG-07", "stylelint-config-standard", results);
         check_pkg("T-PLUG-08", "stylelint-config-tailwindcss", results);
         check_pkg("T-PLUG-09", "eslint-plugin-tailwind-ban", results);
+    }
+
+    // T-PLUG-11: knip script in package.json
+    let has_knip_script = json
+        .get("scripts")
+        .and_then(|s| s.as_object())
+        .is_some_and(|scripts| scripts.contains_key("knip"));
+    if has_knip_script {
+        results.push(
+            CheckResult {
+                id: "T-PLUG-11".to_owned(),
+                severity: Severity::Info,
+                title: "knip script configured".to_owned(),
+                message: "\"knip\" script found in package.json scripts.".to_owned(),
+                file: Some(pkg_path.display().to_string()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
+    } else {
+        results.push(CheckResult {
+            id: "T-PLUG-11".to_owned(),
+            severity: Severity::Warn,
+            title: "knip script missing".to_owned(),
+            message: "No \"knip\" script in package.json. Add `\"knip\": \"knip\"` to scripts for dead code detection.".to_owned(),
+            file: Some(pkg_path.display().to_string()),
+            line: None,
+            inventory: false,
+        });
     }
 }
