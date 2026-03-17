@@ -121,6 +121,7 @@ pub fn is_test_path(path_str: &str) -> bool {
         || path_str.contains("__tests__")
         || path_str.contains("_test.rs")
         || path_str.ends_with("_tests.rs")
+        || path_str.ends_with("/tests.rs")
 }
 
 /// Track whether we are inside a block comment (`/* ... */`).
