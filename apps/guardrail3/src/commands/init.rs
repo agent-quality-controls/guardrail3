@@ -315,12 +315,17 @@ fn replace_typescript_section(existing: &str, new_ts_section: &str) -> String {
 /// Show a simple diff of what would change for a single file during dry run.
 #[allow(clippy::print_stdout)] // reason: CLI dry-run output
 fn show_file_diff(path: &Path, new_content: &str) {
+    let name = path
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or("unknown");
+
     if path.exists() {
         let existing = crate::fs::read_file(path).unwrap_or_default();
         if existing == new_content {
-            println!("  {} — no changes", path.display());
+            println!("  No changes to {name}");
         } else {
-            println!("  {} — would change:", path.display());
+            println!("  Would update {name}:");
             for line in existing.lines() {
                 if !new_content.contains(line) {
                     println!("    - {line}");
@@ -333,9 +338,9 @@ fn show_file_diff(path: &Path, new_content: &str) {
             }
         }
     } else {
-        println!("  {} — would create:", path.display());
+        println!("  Would create {name}:");
         for line in new_content.lines() {
-            println!("    + {line}");
+            println!("    {line}");
         }
     }
 }
@@ -395,17 +400,20 @@ deny_feature_bans = "local/deny-feature-bans.toml"
 }
 
 /// Generate the `[typescript]` TOML section by discovering apps and auto-detecting their types.
-/// Falls back to a generic template when no apps are found under `apps/`.
+/// Each app gets explicit check flags based on its detected type. No global `[typescript.checks]`.
 fn generate_ts_section(fs: &dyn FileSystem, project_path: &Path) -> String {
     let apps = discover_ts_apps(fs, project_path);
 
     let mut section = String::from("\n[typescript]\n");
 
     if apps.is_empty() {
-        // No apps discovered — use generic template
-        section.push_str(
-            "\n[typescript.apps.my-app]\ntype = \"service\"         # service | content | library\n",
-        );
+        section.push_str("\n[typescript.apps.my-app]\n");
+        section.push_str("type = \"service\"         # service | content | library\n");
+        section.push_str("\n[typescript.apps.my-app.checks]\n");
+        section.push_str("architecture = true      # T-ARCH-* — hex arch enforcement\n");
+        section
+            .push_str("content = false          # T-STYL-*, T-ESLP-07/08 — accessibility, SEO\n");
+        section.push_str("tests = true             # T-TEST-* — test quality\n");
     } else {
         for app_path in &apps {
             let name = app_path
@@ -419,19 +427,33 @@ fn generate_ts_section(fs: &dyn FileSystem, project_path: &Path) -> String {
                 Some(TsAppType::Library) => "library",
                 _ => "service",
             };
+            let cats = match detected_type {
+                Some(TsAppType::Content) => ("false", "true", "true"),
+                Some(TsAppType::Library) => ("false", "false", "true"),
+                _ => ("true", "false", "true"),
+            };
 
             let reason = detect_reason(app_path, detected_type);
 
             writeln!(section, "\n[typescript.apps.{name}]").unwrap_or_default();
             writeln!(section, "type = \"{type_name}\"         # {reason}").unwrap_or_default();
+            writeln!(section, "\n[typescript.apps.{name}.checks]").unwrap_or_default();
+            writeln!(
+                section,
+                "architecture = {:<9}# T-ARCH-* — hex arch enforcement",
+                cats.0
+            )
+            .unwrap_or_default();
+            writeln!(
+                section,
+                "content = {:<14}# T-STYL-*, T-ESLP-07/08 — accessibility, SEO",
+                cats.1
+            )
+            .unwrap_or_default();
+            writeln!(section, "tests = {:<16}# T-TEST-* — test quality", cats.2)
+                .unwrap_or_default();
         }
     }
-
-    section.push_str(
-        "\n[typescript.checks]\narchitecture = true      \
-         # T-ARCH-*, eslint boundary audit — hex arch enforcement\n\
-         tests = true             # T-TEST-* — test quality enforcement\n",
-    );
 
     section
 }
