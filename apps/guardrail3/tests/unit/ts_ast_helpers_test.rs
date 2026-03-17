@@ -1,4 +1,4 @@
-//! Tests extracted from app::ts::validate::ast_helpers
+//! Tests extracted from `app::ts::validate::ast_helpers`
 #![allow(
     clippy::expect_used,
     clippy::disallowed_methods,

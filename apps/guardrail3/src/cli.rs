@@ -143,6 +143,11 @@ pub struct ValidateArgs {
     #[garde(skip)] // reason: boolean flag, inherently valid
     pub tests: bool,
 
+    /// Only run garde boundary validation checks
+    #[arg(long)]
+    #[garde(skip)] // reason: boolean flag, inherently valid
+    pub garde: bool,
+
     /// Run slow checks (cargo publish --dry-run, etc.)
     #[arg(long)]
     #[garde(skip)] // reason: boolean flag, inherently valid

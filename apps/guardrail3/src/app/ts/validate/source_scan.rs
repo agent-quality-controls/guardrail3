@@ -270,12 +270,16 @@ pub fn check_comment_pattern(
     results: &mut Vec<CheckResult>,
 ) {
     let explanation = match check_id {
-        "T34" => " `noinspection` is a JetBrains IDE directive that suppresses inspections. \
+        "T34" => {
+            " `noinspection` is a JetBrains IDE directive that suppresses inspections. \
                    These are IDE-specific and should not be in source control. \
-                   Remove the comment and fix the underlying issue instead.",
-        "T35" => " Coverage ignore directives (`istanbul ignore`/`c8 ignore`) hide untested code \
+                   Remove the comment and fix the underlying issue instead."
+        }
+        "T35" => {
+            " Coverage ignore directives (`istanbul ignore`/`c8 ignore`) hide untested code \
                    from coverage reports, masking gaps. Remove the directive and write tests for the code, \
-                   or if truly untestable, document why in a code comment.",
+                   or if truly untestable, document why in a code comment."
+        }
         _ => "",
     };
 
@@ -293,15 +297,18 @@ pub fn check_comment_pattern(
                 .get(comment.line.saturating_sub(1))
                 .unwrap_or(&"")
                 .trim();
-            results.push(CheckResult {
-                id: check_id.to_owned(),
-                severity: Severity::Info,
-                title: title.to_owned(),
-                message: format!("{trimmed}.{explanation}"),
-                file: Some(path.display().to_string()),
-                line: Some(comment.line),
-                inventory: false,
-            }.as_inventory());
+            results.push(
+                CheckResult {
+                    id: check_id.to_owned(),
+                    severity: Severity::Info,
+                    title: title.to_owned(),
+                    message: format!("{trimmed}.{explanation}"),
+                    file: Some(path.display().to_string()),
+                    line: Some(comment.line),
+                    inventory: false,
+                }
+                .as_inventory(),
+            );
         }
     }
 }
@@ -376,4 +383,3 @@ fn check_banned_in_node_modules(fs: &dyn FileSystem, path: &Path, results: &mut 
         }
     }
 }
-

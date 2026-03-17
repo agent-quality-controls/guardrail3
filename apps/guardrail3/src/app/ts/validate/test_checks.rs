@@ -83,17 +83,20 @@ pub fn check_test_files_exist(path: &Path, results: &mut Vec<CheckResult>) {
         });
 
     if has_tests {
-        results.push(CheckResult {
-            id: "T-TEST-02".to_owned(),
-            severity: Severity::Info,
-            title: "TypeScript test files found".to_owned(),
-            message: "At least one `.test.ts`/`.spec.ts`/`.test.tsx`/`.spec.tsx` file exists. \
+        results.push(
+            CheckResult {
+                id: "T-TEST-02".to_owned(),
+                severity: Severity::Info,
+                title: "TypeScript test files found".to_owned(),
+                message: "At least one `.test.ts`/`.spec.ts`/`.test.tsx`/`.spec.tsx` file exists. \
                      Tests verify code works correctly and catch regressions before deployment."
-                .to_owned(),
-            file: None,
-            line: None,
-            inventory: false,
-        }.as_inventory());
+                    .to_owned(),
+                file: None,
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
     } else {
         results.push(CheckResult {
             id: "T-TEST-02".to_owned(),
@@ -118,8 +121,11 @@ fn is_test_file(name: &str) -> bool {
     }
     let stem = p.file_stem().unwrap_or_default();
     let stem_path = Path::new(stem);
-    stem_path.extension().is_some_and(|e| e == "test" || e == "spec")
-}/// T-TEST-03: Test runner configured.
+    stem_path
+        .extension()
+        .is_some_and(|e| e == "test" || e == "spec")
+}
+/// T-TEST-03: Test runner configured.
 pub fn check_test_runner_config(path: &Path, results: &mut Vec<CheckResult>) {
     let candidates = [
         "vitest.config.ts",
@@ -284,4 +290,3 @@ fn check_only_lines(content: &str, filename: &str, only_lines: &[usize]) -> Vec<
 
     results
 }
-

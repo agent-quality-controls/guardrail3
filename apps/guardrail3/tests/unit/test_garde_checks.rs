@@ -1,6 +1,6 @@
 use guardrail3::app::rs::validate::garde_checks::{
-    check_ban_presence, check_garde_dependency, check_reqwest_json_ban_from_table,
-    count_unvalidated_input_structs, EXPECTED_AXUM_TYPE_BANS, EXPECTED_SERDE_METHOD_BANS,
+    EXPECTED_AXUM_TYPE_BANS, EXPECTED_SERDE_METHOD_BANS, check_ban_presence,
+    check_garde_dependency, check_reqwest_json_ban_from_table, count_unvalidated_input_structs,
 };
 use guardrail3::domain::report::{CheckResult, Severity};
 
@@ -255,7 +255,10 @@ struct Baz {
     let derives = guardrail3::app::rs::validate::ast_helpers::find_derive_attributes(&parsed);
     let (with, without) = count_unvalidated_input_structs(&derives);
     assert_eq!(with, 1, "Foo has both Deserialize + Validate");
-    assert_eq!(without, 1, "Bar has Deserialize without Validate (has non-primitive field)");
+    assert_eq!(
+        without, 1,
+        "Bar has Deserialize without Validate (has non-primitive field)"
+    );
 }
 
 #[test]
@@ -348,7 +351,10 @@ struct Input {
     let parsed = syn::parse_file(content).expect("should parse");
     let derives = guardrail3::app::rs::validate::ast_helpers::find_derive_attributes(&parsed);
     let (with, without) = count_unvalidated_input_structs(&derives);
-    assert_eq!(with, 1, "Deserialize + Validate should be counted as validated");
+    assert_eq!(
+        with, 1,
+        "Deserialize + Validate should be counted as validated"
+    );
     assert_eq!(without, 0);
 }
 

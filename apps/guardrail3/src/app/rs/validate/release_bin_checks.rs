@@ -31,15 +31,18 @@ pub fn check_binary_release_workflow(
         .any(|(_, content)| content.contains("--release") && content.contains("action-gh-release"));
 
     if has_release_build {
-        results.push(CheckResult {
-            id: "R-BIN-01".to_owned(),
-            severity: Severity::Info,
-            title: format!("{name}: binary release workflow found"),
-            message: "Workflow builds --release with action-gh-release".to_owned(),
-            file: None,
-            line: None,
-            inventory: false,
-        }.as_inventory());
+        results.push(
+            CheckResult {
+                id: "R-BIN-01".to_owned(),
+                severity: Severity::Info,
+                title: format!("{name}: binary release workflow found"),
+                message: "Workflow builds --release with action-gh-release".to_owned(),
+                file: None,
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
     } else {
         results.push(CheckResult {
             id: "R-BIN-01".to_owned(),
@@ -71,25 +74,31 @@ pub fn check_binary_linux_target(
     });
 
     if has_linux {
-        results.push(CheckResult {
-            id: "R-BIN-02".to_owned(),
-            severity: Severity::Info,
-            title: format!("{name}: linux target in workflow"),
-            message: "Workflow references linux/x86_64/amd64/ubuntu".to_owned(),
-            file: None,
-            line: None,
-            inventory: false,
-        }.as_inventory());
+        results.push(
+            CheckResult {
+                id: "R-BIN-02".to_owned(),
+                severity: Severity::Info,
+                title: format!("{name}: linux target in workflow"),
+                message: "Workflow references linux/x86_64/amd64/ubuntu".to_owned(),
+                file: None,
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
     } else {
-        results.push(CheckResult {
-            id: "R-BIN-02".to_owned(),
-            severity: Severity::Info,
-            title: format!("{name}: no linux target in workflow"),
-            message: "No workflow references linux/x86_64/amd64/ubuntu".to_owned(),
-            file: None,
-            line: None,
-            inventory: false,
-        }.as_inventory());
+        results.push(
+            CheckResult {
+                id: "R-BIN-02".to_owned(),
+                severity: Severity::Info,
+                title: format!("{name}: no linux target in workflow"),
+                message: "No workflow references linux/x86_64/amd64/ubuntu".to_owned(),
+                file: None,
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
     }
 }
 
@@ -125,4 +134,3 @@ pub fn check_binstall_metadata(krate: &CrateInfo, results: &mut Vec<CheckResult>
         });
     }
 }
-

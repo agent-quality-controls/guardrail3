@@ -59,7 +59,9 @@ fn emit_crate_allow_result(
         let action = if is_test_file {
             "Test file — exempt from R30.".to_owned()
         } else {
-            format!("Crate-wide `{CRATE_ALLOW_PREFIX}{lint})]` suppresses the lint for the entire crate, hiding real issues. Use per-function `#[allow({lint})] // reason: <justification>` instead, or fix the underlying lint violations.")
+            format!(
+                "Crate-wide `{CRATE_ALLOW_PREFIX}{lint})]` suppresses the lint for the entire crate, hiding real issues. Use per-function `#[allow({lint})] // reason: <justification>` instead, or fix the underlying lint violations."
+            )
         };
         results.push(CheckResult {
             id: "R30".to_owned(),
@@ -235,4 +237,3 @@ fn check_cfg_attr_allow_ast(
         });
     }
 }
-

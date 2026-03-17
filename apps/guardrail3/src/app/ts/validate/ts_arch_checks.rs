@@ -12,10 +12,7 @@ use crate::ports::outbound::FileSystem;
 
 /// Scan `apps/` for TypeScript apps and check that each has
 /// `src/modules/domain/` and `src/modules/adapters/` subdirectories.
-pub fn check_hex_arch_structure(
-    fs: &dyn FileSystem,
-    root: &Path,
-) -> Vec<CheckResult> {
+pub fn check_hex_arch_structure(fs: &dyn FileSystem, root: &Path) -> Vec<CheckResult> {
     let mut results = Vec::new();
     let apps = discover_ts_apps(fs, root);
     for app_dir in &apps {
@@ -283,10 +280,7 @@ fn extract_between_after<'a>(line: &'a str, prefix: &str, closing: char) -> Opti
 }
 
 /// Scan all `.ts`/`.tsx` files under `src/modules/` for import boundary violations.
-pub fn check_import_boundaries(
-    fs: &dyn FileSystem,
-    root: &Path,
-) -> Vec<CheckResult> {
+pub fn check_import_boundaries(fs: &dyn FileSystem, root: &Path) -> Vec<CheckResult> {
     let mut results = Vec::new();
     let ts_files = collect_module_ts_files(root);
     for file_path_str in &ts_files {
@@ -338,11 +332,7 @@ fn is_ts_source(path: &str) -> bool {
 }
 
 /// Check a single file's imports for boundary violations.
-pub fn check_file_imports(
-    file_path: &Path,
-    content: &str,
-    results: &mut Vec<CheckResult>,
-) {
+pub fn check_file_imports(file_path: &Path, content: &str, results: &mut Vec<CheckResult>) {
     let Some(source_layer) = layer_from_path(file_path) else {
         return;
     };

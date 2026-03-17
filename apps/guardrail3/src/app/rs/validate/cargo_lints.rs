@@ -207,6 +207,7 @@ fn check_rust_lints(
     }
 }
 
+#[allow(clippy::too_many_lines)] // reason: lint check function covers all expected workspace lints sequentially
 fn check_clippy_lints(
     clippy_lints: Option<&toml::Value>,
     file_path: &Path,
@@ -243,7 +244,13 @@ fn check_clippy_lints(
     // Check specific deny lints — missing = R26 (completeness), wrong level = R27 (relaxed)
     for lint_name in EXPECTED_CLIPPY_DENY {
         check_lint_level(
-            lints, lint_name, "deny", None, "R26", "R27", file_path,
+            lints,
+            lint_name,
+            "deny",
+            None,
+            "R26",
+            "R27",
+            file_path,
             Some("[workspace.lints.clippy]"),
             results,
         );
@@ -385,8 +392,13 @@ fn check_lint_level(
     results: &mut Vec<CheckResult>,
 ) {
     let ctx = LintCheck {
-        lints, name, expected_level, expected_priority,
-        check_id_missing, check_id_wrong, file_path,
+        lints,
+        name,
+        expected_level,
+        expected_priority,
+        check_id_missing,
+        check_id_wrong,
+        file_path,
     };
     let level = get_lint_level(lints, name);
 
@@ -395,22 +407,24 @@ fn check_lint_level(
             emit_lint_correct(&ctx, results);
         }
         Some("forbid") if expected_level == "deny" => {
-            results.push(CheckResult {
-                id: check_id_missing.to_owned(),
-                severity: Severity::Info,
-                title: format!("{name} stricter than expected"),
-                message: format!("{name} = \"forbid\" (expected \"{expected_level}\")"),
-                file: Some(file_path.display().to_string()),
-                line: None,
-                inventory: false,
-            }.as_inventory());
+            results.push(
+                CheckResult {
+                    id: check_id_missing.to_owned(),
+                    severity: Severity::Info,
+                    title: format!("{name} stricter than expected"),
+                    message: format!("{name} = \"forbid\" (expected \"{expected_level}\")"),
+                    file: Some(file_path.display().to_string()),
+                    line: None,
+                    inventory: false,
+                }
+                .as_inventory(),
+            );
         }
         Some(l) => {
             emit_lint_wrong(name, expected_level, l, check_id_wrong, file_path, results);
         }
         None => {
-            let section_msg = section_hint
-                .map_or_else(String::new, |s| format!(" in {s}"));
+            let section_msg = section_hint.map_or_else(String::new, |s| format!(" in {s}"));
             results.push(CheckResult {
                 id: check_id_missing.to_owned(),
                 severity: Severity::Error,
@@ -428,15 +442,18 @@ fn emit_lint_correct(ctx: &LintCheck<'_>, results: &mut Vec<CheckResult>) {
     if let Some(exp_pri) = ctx.expected_priority {
         let actual_pri = get_lint_priority(ctx.lints, ctx.name);
         if actual_pri == Some(exp_pri) {
-            results.push(CheckResult {
-                id: ctx.check_id_missing.to_owned(),
-                severity: Severity::Info,
-                title: format!("{} correct", ctx.name),
-                message: format!("{} = {} (priority {exp_pri})", ctx.name, ctx.expected_level),
-                file: Some(ctx.file_path.display().to_string()),
-                line: None,
-                inventory: false,
-            }.as_inventory());
+            results.push(
+                CheckResult {
+                    id: ctx.check_id_missing.to_owned(),
+                    severity: Severity::Info,
+                    title: format!("{} correct", ctx.name),
+                    message: format!("{} = {} (priority {exp_pri})", ctx.name, ctx.expected_level),
+                    file: Some(ctx.file_path.display().to_string()),
+                    line: None,
+                    inventory: false,
+                }
+                .as_inventory(),
+            );
         } else {
             results.push(CheckResult {
                 id: ctx.check_id_wrong.to_owned(),
@@ -452,15 +469,18 @@ fn emit_lint_correct(ctx: &LintCheck<'_>, results: &mut Vec<CheckResult>) {
             });
         }
     } else {
-        results.push(CheckResult {
-            id: ctx.check_id_missing.to_owned(),
-            severity: Severity::Info,
-            title: format!("{} correct", ctx.name),
-            message: format!("{} = {}", ctx.name, ctx.expected_level),
-            file: Some(ctx.file_path.display().to_string()),
-            line: None,
-            inventory: false,
-        }.as_inventory());
+        results.push(
+            CheckResult {
+                id: ctx.check_id_missing.to_owned(),
+                severity: Severity::Info,
+                title: format!("{} correct", ctx.name),
+                message: format!("{} = {}", ctx.name, ctx.expected_level),
+                file: Some(ctx.file_path.display().to_string()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
     }
 }
 

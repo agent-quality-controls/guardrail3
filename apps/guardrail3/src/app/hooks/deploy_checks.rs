@@ -48,7 +48,9 @@ fn find_railpack_configs(fs: &dyn FileSystem, path: &Path) -> Vec<std::path::Pat
     let mut configs = Vec::new();
     for entry in fs.list_dir(path) {
         if let Some(name) = entry.file_name().to_str() {
-            if name.starts_with("railpack-") && Path::new(name).extension().is_some_and(|e| e == "json") {
+            if name.starts_with("railpack-")
+                && Path::new(name).extension().is_some_and(|e| e == "json")
+            {
                 configs.push(entry.path());
             }
         }

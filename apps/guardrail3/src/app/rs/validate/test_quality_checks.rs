@@ -103,15 +103,18 @@ pub fn check_integration_tests(
 ) {
     let tests_dir = workspace_root.join("tests");
     if has_rs_files_in_dir(fs, &tests_dir) {
-        results.push(CheckResult {
-            id: "R-TEST-06".to_owned(),
-            severity: Severity::Info,
-            title: "Integration tests exist".to_owned(),
-            message: "tests/ directory with .rs files found".to_owned(),
-            file: Some(tests_dir.display().to_string()),
-            line: None,
-            inventory: false,
-        }.as_inventory());
+        results.push(
+            CheckResult {
+                id: "R-TEST-06".to_owned(),
+                severity: Severity::Info,
+                title: "Integration tests exist".to_owned(),
+                message: "tests/ directory with .rs files found".to_owned(),
+                file: Some(tests_dir.display().to_string()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
         return;
     }
 
@@ -127,18 +130,21 @@ pub fn check_integration_tests(
             && entry.file_name() == "tests"
             && has_rs_files_in_dir(fs, entry.path())
         {
-            results.push(CheckResult {
-                id: "R-TEST-06".to_owned(),
-                severity: Severity::Info,
-                title: "Integration tests exist".to_owned(),
-                message: format!(
-                    "tests/ directory with .rs files found at {}",
-                    entry.path().display()
-                ),
-                file: Some(entry.path().display().to_string()),
-                line: None,
-                inventory: false,
-            }.as_inventory());
+            results.push(
+                CheckResult {
+                    id: "R-TEST-06".to_owned(),
+                    severity: Severity::Info,
+                    title: "Integration tests exist".to_owned(),
+                    message: format!(
+                        "tests/ directory with .rs files found at {}",
+                        entry.path().display()
+                    ),
+                    file: Some(entry.path().display().to_string()),
+                    line: None,
+                    inventory: false,
+                }
+                .as_inventory(),
+            );
             return;
         }
     }
@@ -237,7 +243,11 @@ pub fn find_ignore_without_reason(content: &str) -> Vec<usize> {
 // R-TEST-08: Mutation test hook configured
 // ---------------------------------------------------------------------------
 
-pub fn check_mutation_hook(fs: &dyn FileSystem, workspace_root: &Path, results: &mut Vec<CheckResult>) {
+pub fn check_mutation_hook(
+    fs: &dyn FileSystem,
+    workspace_root: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     // Check .claude/ directory for hook configs mentioning "mutant"
     let claude_dir = workspace_root.join(".claude");
     if claude_dir.exists() {
@@ -245,15 +255,18 @@ pub fn check_mutation_hook(fs: &dyn FileSystem, workspace_root: &Path, results: 
             let path = entry.path();
             if let Some(content) = fs.read_file(&path) {
                 if content.contains("mutant") || content.contains("cargo-mutants") {
-                    results.push(CheckResult {
-                        id: "R-TEST-08".to_owned(),
-                        severity: Severity::Info,
-                        title: "Mutation test hook configured".to_owned(),
-                        message: format!("Mutation testing hook found in {}", path.display()),
-                        file: Some(path.display().to_string()),
-                        line: None,
-                        inventory: false,
-                    }.as_inventory());
+                    results.push(
+                        CheckResult {
+                            id: "R-TEST-08".to_owned(),
+                            severity: Severity::Info,
+                            title: "Mutation test hook configured".to_owned(),
+                            message: format!("Mutation testing hook found in {}", path.display()),
+                            file: Some(path.display().to_string()),
+                            line: None,
+                            inventory: false,
+                        }
+                        .as_inventory(),
+                    );
                     return;
                 }
             }
@@ -267,15 +280,18 @@ pub fn check_mutation_hook(fs: &dyn FileSystem, workspace_root: &Path, results: 
             || content.contains("cargo-mutants")
             || content.contains("stryker")
         {
-            results.push(CheckResult {
-                id: "R-TEST-08".to_owned(),
-                severity: Severity::Info,
-                title: "Mutation test hook configured".to_owned(),
-                message: "Mutation testing found in pre-commit hook".to_owned(),
-                file: Some(pre_commit.display().to_string()),
-                line: None,
-                inventory: false,
-            }.as_inventory());
+            results.push(
+                CheckResult {
+                    id: "R-TEST-08".to_owned(),
+                    severity: Severity::Info,
+                    title: "Mutation test hook configured".to_owned(),
+                    message: "Mutation testing found in pre-commit hook".to_owned(),
+                    file: Some(pre_commit.display().to_string()),
+                    line: None,
+                    inventory: false,
+                }
+                .as_inventory(),
+            );
             return;
         }
     }
@@ -290,4 +306,3 @@ pub fn check_mutation_hook(fs: &dyn FileSystem, workspace_root: &Path, results: 
         inventory: false,
     });
 }
-

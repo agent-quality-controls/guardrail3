@@ -171,26 +171,32 @@ fn check_unmaintained_value(
 ) {
     match advisories.get("unmaintained").and_then(|v| v.as_str()) {
         Some("workspace") => {
-            results.push(CheckResult {
-                id: "R10".to_owned(),
-                severity: Severity::Info,
-                title: "unmaintained correct".to_owned(),
-                message: "unmaintained = \"workspace\"".to_owned(),
-                file: Some(file_path.display().to_string()),
-                line: None,
-                inventory: false,
-            }.as_inventory());
+            results.push(
+                CheckResult {
+                    id: "R10".to_owned(),
+                    severity: Severity::Info,
+                    title: "unmaintained correct".to_owned(),
+                    message: "unmaintained = \"workspace\"".to_owned(),
+                    file: Some(file_path.display().to_string()),
+                    line: None,
+                    inventory: false,
+                }
+                .as_inventory(),
+            );
         }
         Some("deny") => {
-            results.push(CheckResult {
-                id: "R11".to_owned(),
-                severity: Severity::Info,
-                title: "unmaintained stricter than expected".to_owned(),
-                message: "unmaintained = \"deny\" (expected \"workspace\")".to_owned(),
-                file: Some(file_path.display().to_string()),
-                line: None,
-                inventory: false,
-            }.as_inventory());
+            results.push(
+                CheckResult {
+                    id: "R11".to_owned(),
+                    severity: Severity::Info,
+                    title: "unmaintained stricter than expected".to_owned(),
+                    message: "unmaintained = \"deny\" (expected \"workspace\")".to_owned(),
+                    file: Some(file_path.display().to_string()),
+                    line: None,
+                    inventory: false,
+                }
+                .as_inventory(),
+            );
         }
         Some(other) => {
             results.push(CheckResult {
@@ -217,33 +223,35 @@ fn check_unmaintained_value(
     }
 }
 
-fn check_yanked_value(
-    advisories: &toml::Value,
-    file_path: &Path,
-    results: &mut Vec<CheckResult>,
-) {
+fn check_yanked_value(advisories: &toml::Value, file_path: &Path, results: &mut Vec<CheckResult>) {
     match advisories.get("yanked").and_then(|v| v.as_str()) {
         Some("warn") => {
-            results.push(CheckResult {
-                id: "R10".to_owned(),
-                severity: Severity::Info,
-                title: "yanked correct".to_owned(),
-                message: "yanked = \"warn\"".to_owned(),
-                file: Some(file_path.display().to_string()),
-                line: None,
-                inventory: false,
-            }.as_inventory());
+            results.push(
+                CheckResult {
+                    id: "R10".to_owned(),
+                    severity: Severity::Info,
+                    title: "yanked correct".to_owned(),
+                    message: "yanked = \"warn\"".to_owned(),
+                    file: Some(file_path.display().to_string()),
+                    line: None,
+                    inventory: false,
+                }
+                .as_inventory(),
+            );
         }
         Some("deny") => {
-            results.push(CheckResult {
-                id: "R11".to_owned(),
-                severity: Severity::Info,
-                title: "yanked stricter than expected".to_owned(),
-                message: "yanked = \"deny\" (expected \"warn\")".to_owned(),
-                file: Some(file_path.display().to_string()),
-                line: None,
-                inventory: false,
-            }.as_inventory());
+            results.push(
+                CheckResult {
+                    id: "R11".to_owned(),
+                    severity: Severity::Info,
+                    title: "yanked stricter than expected".to_owned(),
+                    message: "yanked = \"deny\" (expected \"warn\")".to_owned(),
+                    file: Some(file_path.display().to_string()),
+                    line: None,
+                    inventory: false,
+                }
+                .as_inventory(),
+            );
         }
         Some(other) => {
             results.push(CheckResult {

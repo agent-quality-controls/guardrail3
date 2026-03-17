@@ -16,6 +16,7 @@ pub fn check(
     fs: &dyn FileSystem,
     workspace_root: &Path,
     scoped_files: Option<&[String]>,
+    garde_enabled: bool,
 ) -> Vec<CheckResult> {
     let mut results = Vec::new();
 
@@ -47,7 +48,9 @@ pub fn check(
                 &mut results,
             );
             allow_checks::check_item_level_allow(path, &content, &mut results);
-            allow_checks::check_garde_skip(path, &content, &mut results);
+            if garde_enabled {
+                allow_checks::check_garde_skip(path, &content, &mut results);
+            }
             allow_checks::check_cfg_attr_allow(path, &content, &mut results);
         }
 
@@ -230,6 +233,7 @@ pub fn strip_inline_block_comments(line: &str) -> String {
 }
 
 /// Strip string literals from a line for comment-detection purposes.
+///
 /// This prevents `"/*"` inside strings from being treated as comment delimiters.
 /// Handles both regular strings (`"..."`) and raw strings (`r"..."`, `r#"..."#`, etc.).
 #[allow(clippy::indexing_slicing)] // reason: all char indices are bounds-checked against len before access
@@ -302,4 +306,3 @@ pub fn strip_string_literals(line: &str) -> String {
     }
     result
 }
-

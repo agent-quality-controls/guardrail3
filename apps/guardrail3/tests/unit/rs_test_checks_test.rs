@@ -1,4 +1,4 @@
-//! Tests extracted from app::rs::validate::test_checks
+//! Tests extracted from `app::rs::validate::test_checks`
 #![allow(
     clippy::expect_used,
     clippy::disallowed_methods,
@@ -111,9 +111,7 @@ fn r_test_09_detects_cfg_test_module() {
         "fn production() {}\n\n#[cfg(test)]\nmod tests {\n    #[test]\n    fn it_works() {}\n}";
     let parsed = guardrail3::app::rs::validate::ast_helpers::parse_file(content);
     assert!(parsed.is_some());
-    assert!(file_has_cfg_test_module(
-        &parsed.expect("should parse")
-    ));
+    assert!(file_has_cfg_test_module(&parsed.expect("should parse")));
 }
 
 #[test]
@@ -121,7 +119,5 @@ fn r_test_09_no_cfg_test_is_clean() {
     let content = "fn production() {}";
     let parsed = guardrail3::app::rs::validate::ast_helpers::parse_file(content);
     assert!(parsed.is_some());
-    assert!(!file_has_cfg_test_module(
-        &parsed.expect("should parse")
-    ));
+    assert!(!file_has_cfg_test_module(&parsed.expect("should parse")));
 }

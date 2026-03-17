@@ -4,6 +4,7 @@ use std::path::Path;
 use crate::ports::outbound::FileSystem;
 
 /// Load `.gitignore` patterns from the project root.
+///
 /// Returns a set of directory/file names that should be excluded from scanning.
 /// Only handles simple patterns (directory names, file globs). Does not handle
 /// negation (`!`), nested gitignores, or complex glob patterns.

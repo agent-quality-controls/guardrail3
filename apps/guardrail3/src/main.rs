@@ -25,8 +25,11 @@ use guardrail3::{
     adapters::outbound::{fs::RealFileSystem, tool_runner::RealToolChecker},
     app::{discover, hooks, rs, ts},
     cli::{Cli, Commands, RsCommands, TsCommands, ValidateArgs},
-    commands, help_gen,
-    domain::report::ValidateDomains,
+    commands,
+    domain::config::types::GuardrailConfig,
+    domain::report::{RustCheckCategories, TsCheckCategories, ValidateDomains},
+    help_gen,
+    ports::outbound::FileSystem,
     report,
 };
 
@@ -136,9 +139,9 @@ fn handle_ts(command: TsCommands) {
             validate_or_exit(&args);
             let path = resolve_path(&args.path);
             let fs = RealFileSystem;
-            let domains = domains_from_args(&args);
+            let categories = build_ts_categories(&args, &fs, &path);
             let scoped_files = commands::validate::resolve_scoped_files_pub(&args, &path);
-            let report = ts::validate::run(&fs, &path, scoped_files.as_deref(), &domains);
+            let report = ts::validate::run(&fs, &path, scoped_files.as_deref(), &categories);
             print_report(&args, &report);
         }
         TsCommands::HooksInstall(args) => {
@@ -165,14 +168,13 @@ fn handle_ts(command: TsCommands) {
     }
 }
 
-#[allow(clippy::disallowed_methods)] // reason: CLI — process::exit for error codes
 fn run_rs_validate(
     args: &ValidateArgs,
 ) -> (guardrail3::domain::report::Report, std::path::PathBuf) {
     let path = resolve_path(&args.path);
     let fs = RealFileSystem;
     let tc = RealToolChecker;
-    let domains = domains_from_args(args);
+    let categories = build_rs_categories(args, &fs, &path);
     let project = discover::detect_project(&fs, &path);
     let scoped_files = commands::validate::resolve_scoped_files_pub(args, &path);
     let report = rs::validate::run(
@@ -180,7 +182,7 @@ fn run_rs_validate(
         &path,
         &project,
         scoped_files.as_deref(),
-        &domains,
+        &categories,
         args.thorough,
         &tc,
     );
@@ -220,11 +222,85 @@ fn resolve_path(path_str: &str) -> std::path::PathBuf {
 }
 
 const fn domains_from_args(args: &ValidateArgs) -> ValidateDomains {
-    let run_all = !args.code && !args.architecture && !args.release && !args.tests;
+    let run_all = !args.code && !args.architecture && !args.release && !args.tests && !args.garde;
     ValidateDomains {
         code: run_all || args.code,
         architecture: run_all || args.architecture,
         release: run_all || args.release,
         tests: run_all || args.tests,
+    }
+}
+
+/// Load guardrail3.toml config, if present.
+#[allow(clippy::disallowed_methods)] // reason: guardrail3 config parsing
+fn load_config(fs: &RealFileSystem, path: &std::path::Path) -> Option<GuardrailConfig> {
+    let config_path = path.join("guardrail3.toml");
+    let content = fs.read_file(&config_path)?;
+    toml::from_str(&content).ok()
+}
+
+/// Build `RustCheckCategories` by merging config defaults with CLI flags.
+fn build_rs_categories(
+    args: &ValidateArgs,
+    fs: &RealFileSystem,
+    path: &std::path::Path,
+) -> RustCheckCategories {
+    let cfg = load_config(fs, path);
+    let checks = cfg
+        .as_ref()
+        .and_then(|c| c.rust.as_ref())
+        .and_then(|r| r.checks.as_ref());
+
+    // Config defaults (tests=true, rest=false)
+    let cfg_arch = checks.and_then(|c| c.architecture).unwrap_or(false);
+    let cfg_garde = checks.and_then(|c| c.garde).unwrap_or(false);
+    let cfg_tests = checks.and_then(|c| c.tests).unwrap_or(true);
+    let cfg_release = checks.and_then(|c| c.release).unwrap_or(false);
+
+    // If any CLI domain flag is set, it acts as a filter (only run those)
+    let any_cli = args.code || args.architecture || args.tests || args.release || args.garde;
+    if any_cli {
+        RustCheckCategories {
+            architecture: args.architecture,
+            garde: args.garde,
+            tests: args.tests,
+            release: args.release,
+        }
+    } else {
+        RustCheckCategories {
+            architecture: cfg_arch,
+            garde: cfg_garde,
+            tests: cfg_tests,
+            release: cfg_release,
+        }
+    }
+}
+
+/// Build `TsCheckCategories` by merging config defaults with CLI flags.
+fn build_ts_categories(
+    args: &ValidateArgs,
+    fs: &RealFileSystem,
+    path: &std::path::Path,
+) -> TsCheckCategories {
+    let cfg = load_config(fs, path);
+    let checks = cfg
+        .as_ref()
+        .and_then(|c| c.typescript.as_ref())
+        .and_then(|t| t.checks.as_ref());
+
+    let cfg_arch = checks.and_then(|c| c.architecture).unwrap_or(false);
+    let cfg_tests = checks.and_then(|c| c.tests).unwrap_or(true);
+
+    let any_cli = args.code || args.architecture || args.tests || args.release || args.garde;
+    if any_cli {
+        TsCheckCategories {
+            architecture: args.architecture,
+            tests: args.tests,
+        }
+    } else {
+        TsCheckCategories {
+            architecture: cfg_arch,
+            tests: cfg_tests,
+        }
     }
 }

@@ -95,4 +95,3 @@ pub fn check_library_has_allowlist(
         });
     }
 }
-

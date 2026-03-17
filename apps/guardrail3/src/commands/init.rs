@@ -153,7 +153,7 @@ pub fn run_ts(path: &str, force: bool) {
     let project_path = Path::new(path);
     let config_path = project_path.join("guardrail3.toml");
 
-    let ts_section = "\n[typescript]\n# apps = [\"apps/web\", \"apps/landing\"]\n";
+    let ts_section = "\n[typescript]\n# apps = [\"apps/web\", \"apps/landing\"]\n\n[typescript.checks]\n# architecture = false  # T-ARCH-*, eslint boundary audit — hex arch enforcement\ntests = true             # T-TEST-* — test quality enforcement\n";
 
     if config_path.exists() {
         // Read existing content and check if [typescript] section already exists
@@ -260,6 +260,12 @@ name = "{profile}"
 [rust]
 workspace_root = "."
 
+[rust.checks]
+# architecture = false  # R-ARCH-*, R-DEPS-* — hex arch structure and dependency flow
+# garde = false          # R-GARDE-*, R34/R35 — input boundary validation (requires garde crate)
+tests = true             # R-TEST-* — test quality and organization
+# release = false        # R-REL-*, R-PUB-*, R-BIN-* — crate publish readiness
+
 [local]
 clippy_methods = "local/clippy-methods.toml"
 clippy_types = "local/clippy-types.toml"
@@ -276,6 +282,12 @@ name = "{profile}"
 
 [rust]
 workspace_root = "."
+
+[rust.checks]
+# architecture = false  # R-ARCH-*, R-DEPS-* — hex arch structure and dependency flow
+# garde = false          # R-GARDE-*, R34/R35 — input boundary validation (requires garde crate)
+tests = true             # R-TEST-* — test quality and organization
+# release = false        # R-REL-*, R-PUB-*, R-BIN-* — crate publish readiness
 
 [local]
 clippy_methods = "local/clippy-methods.toml"

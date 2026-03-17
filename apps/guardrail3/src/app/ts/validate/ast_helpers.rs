@@ -109,4 +109,3 @@ fn node_text<'a>(node: &tree_sitter::Node<'_>, source: &'a [u8]) -> &'a str {
         .and_then(|b| std::str::from_utf8(b).ok())
         .unwrap_or("")
 }
-

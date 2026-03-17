@@ -3,6 +3,7 @@ use std::path::Path;
 use crate::domain::report::{CheckResult, Severity};
 use crate::ports::outbound::ToolChecker;
 
+#[allow(clippy::too_many_lines)] // reason: check function validates multiple tools sequentially, splitting would fragment the logic
 pub fn check_duplication_tools(
     content: &str,
     file_path: &Path,
@@ -65,27 +66,33 @@ pub fn check_duplication_tools(
     }
 
     if has_rust && has_cargo_dupes {
-        results.push(CheckResult {
-            id: "H12".to_owned(),
-            severity: Severity::Info,
-            title: "cargo-dupes configured for Rust".to_owned(),
-            message: "Rust copy-paste detection using cargo-dupes".to_owned(),
-            file: Some(file_path.display().to_string()),
-            line: None,
-            inventory: false,
-        }.as_inventory());
+        results.push(
+            CheckResult {
+                id: "H12".to_owned(),
+                severity: Severity::Info,
+                title: "cargo-dupes configured for Rust".to_owned(),
+                message: "Rust copy-paste detection using cargo-dupes".to_owned(),
+                file: Some(file_path.display().to_string()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
     }
 
     if has_typescript && has_jscpd {
-        results.push(CheckResult {
-            id: "H12".to_owned(),
-            severity: Severity::Info,
-            title: "jscpd configured for TypeScript".to_owned(),
-            message: "TypeScript copy-paste detection using jscpd".to_owned(),
-            file: Some(file_path.display().to_string()),
-            line: None,
-            inventory: false,
-        }.as_inventory());
+        results.push(
+            CheckResult {
+                id: "H12".to_owned(),
+                severity: Severity::Info,
+                title: "jscpd configured for TypeScript".to_owned(),
+                message: "TypeScript copy-paste detection using jscpd".to_owned(),
+                file: Some(file_path.display().to_string()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
     }
 }
 

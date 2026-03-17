@@ -1,4 +1,4 @@
-//! Tests extracted from app::ts::validate::ts_code_analysis
+//! Tests extracted from `app::ts::validate::ts_code_analysis`
 #![allow(
     clippy::expect_used,
     clippy::disallowed_methods,

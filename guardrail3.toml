@@ -6,6 +6,12 @@ name = "service"
 [rust]
 workspace_root = "apps/guardrail3"
 
+[rust.checks]
+architecture = true
+garde = true
+tests = true
+release = true
+
 [rust.crates.guardrail3]
 profile = "service"
 layer = "composition-root"

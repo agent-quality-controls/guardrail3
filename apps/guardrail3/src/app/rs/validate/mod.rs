@@ -10,9 +10,10 @@ mod deny_bans;
 pub mod deny_inventory;
 mod deny_licenses;
 pub mod dependency_allowlist;
-pub mod hex_arch_checks;
 pub mod dependency_scan;
+pub mod extra_visitors;
 pub mod garde_checks;
+pub mod hex_arch_checks;
 pub mod release_bin_checks;
 pub mod release_checks;
 pub mod release_crate_checks;
@@ -30,7 +31,7 @@ use std::path::Path;
 
 use crate::app::discover::ProjectInfo;
 use crate::domain::config::types::GuardrailConfig;
-use crate::domain::report::{Report, Section, ValidateDomains};
+use crate::domain::report::{Report, RustCheckCategories, Section};
 use crate::ports::outbound::{FileSystem, ToolChecker};
 
 /// Try to load guardrail3.toml as a typed config.
@@ -51,7 +52,7 @@ pub fn run(
     path: &Path,
     project: &ProjectInfo,
     scoped_files: Option<&[String]>,
-    domains: &ValidateDomains,
+    categories: &RustCheckCategories,
     thorough: bool,
     tc: &dyn ToolChecker,
 ) -> Report {
@@ -62,15 +63,37 @@ pub fn run(
 
     let mut report = Report::new(path.display().to_string(), vec!["Rust".to_owned()]);
 
-    if domains.code {
-        run_code_checks(fs, tc, workspace_root, project, scoped_files, profile.as_deref(), &mut report);
+    run_code_checks(
+        fs,
+        tc,
+        workspace_root,
+        project,
+        scoped_files,
+        profile.as_deref(),
+        categories.garde,
+        &mut report,
+    );
+
+    if categories.architecture {
+        run_architecture_checks(
+            fs,
+            workspace_root,
+            project,
+            guardrail_cfg.as_ref(),
+            profile.as_ref(),
+            &mut report,
+        );
     }
 
-    if domains.architecture {
-        run_architecture_checks(fs, workspace_root, project, &guardrail_cfg, &profile, &mut report);
+    if categories.garde {
+        let garde_results = garde_checks::check(fs, workspace_root);
+        report.add_section(Section {
+            name: "Garde boundary validation".to_owned(),
+            results: garde_results,
+        });
     }
 
-    if domains.tests {
+    if categories.tests {
         let test_results = test_checks::check(fs, tc, workspace_root);
         report.add_section(Section {
             name: "Test quality".to_owned(),
@@ -78,7 +101,7 @@ pub fn run(
         });
     }
 
-    if domains.release {
+    if categories.release {
         let release_results = release_checks::check(fs, tc, workspace_root, project, thorough);
         report.add_section(Section {
             name: "Release readiness".to_owned(),
@@ -89,6 +112,7 @@ pub fn run(
     report
 }
 
+#[allow(clippy::too_many_arguments)] // reason: validation orchestrator passes all context to sub-checks
 fn run_code_checks(
     fs: &dyn FileSystem,
     tc: &dyn ToolChecker,
@@ -96,13 +120,12 @@ fn run_code_checks(
     project: &ProjectInfo,
     scoped_files: Option<&[String]>,
     profile_ref: Option<&str>,
+    garde_enabled: bool,
     report: &mut Report,
 ) {
     let config_results = config_files::check(fs, workspace_root);
     let member_dirs = project.all_member_dirs();
-    let per_crate_results = config_files::check_per_crate_clippy(
-        fs, workspace_root, &member_dirs,
-    );
+    let per_crate_results = config_files::check_per_crate_clippy(fs, workspace_root, &member_dirs);
     let mut config_section_results = config_results;
     config_section_results.extend(per_crate_results);
     report.add_section(Section {
@@ -123,9 +146,8 @@ fn run_code_checks(
     });
 
     let lint_results = cargo_lints::check(fs, workspace_root);
-    let inheritance_results = cargo_lints::check_workspace_inheritance(
-        fs, workspace_root, &member_dirs,
-    );
+    let inheritance_results =
+        cargo_lints::check_workspace_inheritance(fs, workspace_root, &member_dirs);
     let mut lint_section = lint_results;
     lint_section.extend(inheritance_results);
     report.add_section(Section {
@@ -133,7 +155,7 @@ fn run_code_checks(
         results: lint_section,
     });
 
-    let source_results = source_scan::check(fs, workspace_root, scoped_files);
+    let source_results = source_scan::check(fs, workspace_root, scoped_files, garde_enabled);
     report.add_section(Section {
         name: "Source code scan".to_owned(),
         results: source_results,
@@ -150,8 +172,8 @@ fn run_architecture_checks(
     fs: &dyn FileSystem,
     workspace_root: &Path,
     project: &ProjectInfo,
-    guardrail_cfg: &Option<GuardrailConfig>,
-    profile: &Option<String>,
+    guardrail_cfg: Option<&GuardrailConfig>,
+    profile: Option<&String>,
     report: &mut Report,
 ) {
     let mut arch_results = Vec::new();
@@ -165,17 +187,32 @@ fn run_architecture_checks(
             .unwrap_or(&empty);
 
         hex_arch_checks::check_hex_arch_structure(
-            fs, workspace_root, project, crate_configs, &mut arch_results,
+            fs,
+            workspace_root,
+            project,
+            crate_configs,
+            &mut arch_results,
         );
         hex_arch_checks::check_dependency_flow(
-            fs, workspace_root, project, crate_configs, &mut arch_results,
+            fs,
+            workspace_root,
+            project,
+            crate_configs,
+            &mut arch_results,
         );
         hex_arch_checks::check_library_service_boundary(
-            fs, workspace_root, project, crate_configs, &mut arch_results,
+            fs,
+            workspace_root,
+            project,
+            crate_configs,
+            &mut arch_results,
         );
         hex_arch_checks::check_unconfigured_members(
-            fs, workspace_root, project, crate_configs,
-            profile.as_deref().unwrap_or("service"),
+            fs,
+            workspace_root,
+            project,
+            crate_configs,
+            profile.map_or("service", String::as_str),
             &mut arch_results,
         );
     }
@@ -189,11 +226,17 @@ fn run_architecture_checks(
             if let Some(allowed) = &crate_cfg.allowed_deps {
                 let cargo_path = workspace_root.join(crate_name).join("Cargo.toml");
                 dependency_allowlist::check_dependency_allowlist(
-                    &cargo_path, crate_name, allowed, fs, &mut arch_results,
+                    &cargo_path,
+                    crate_name,
+                    allowed,
+                    fs,
+                    &mut arch_results,
                 );
             }
             dependency_allowlist::check_library_has_allowlist(
-                crate_name, crate_cfg, &mut arch_results,
+                crate_name,
+                crate_cfg,
+                &mut arch_results,
             );
         }
     }
@@ -201,11 +244,5 @@ fn run_architecture_checks(
     report.add_section(Section {
         name: "Architecture checks".to_owned(),
         results: arch_results,
-    });
-
-    let garde_results = garde_checks::check(fs, workspace_root);
-    report.add_section(Section {
-        name: "Garde boundary validation".to_owned(),
-        results: garde_results,
     });
 }

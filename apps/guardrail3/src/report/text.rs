@@ -4,14 +4,16 @@ use colored::Colorize;
 
 use crate::domain::report::{CheckResult, Report, Severity};
 
+// Clippy wants a type alias for `BTreeMap<&str, Vec<&&CheckResult>>` but the double-reference
+// lifetimes make a clean alias impossible without GATs. Suppress at usage site instead.
+
 /// Maximum number of results per check ID before summarizing.
 const VERBOSE_THRESHOLD: usize = 3;
 
 /// Strip the project root prefix from a file path to produce a relative path.
 fn relative_path<'a>(file: &'a str, project_root: &str) -> &'a str {
     file.strip_prefix(project_root)
-        .map(|s| s.strip_prefix('/').unwrap_or(s))
-        .unwrap_or(file)
+        .map_or(file, |s| s.strip_prefix('/').unwrap_or(s))
 }
 
 #[allow(clippy::print_stdout)] // reason: CLI report output to stdout
@@ -56,6 +58,7 @@ pub fn print_report(report: &Report, show_inventory: bool, verbose: bool) {
 #[allow(clippy::print_stdout)] // reason: CLI report output to stdout
 fn print_with_summarization(results: &[&CheckResult], project_root: &str) {
     // Group by check ID preserving first-seen order
+    #[allow(clippy::type_complexity)] // reason: double-reference lifetime prevents clean type alias
     let mut groups: BTreeMap<&str, Vec<&&CheckResult>> = BTreeMap::new();
     let mut order: Vec<&str> = Vec::new();
     for result in results {
@@ -68,13 +71,14 @@ fn print_with_summarization(results: &[&CheckResult], project_root: &str) {
     }
 
     for id in &order {
-        let group = &groups[*id];
-        if group.len() <= VERBOSE_THRESHOLD {
-            for result in group {
-                print_result(result, project_root);
+        if let Some(group) = groups.get(*id) {
+            if group.len() <= VERBOSE_THRESHOLD {
+                for result in group {
+                    print_result(result, project_root);
+                }
+            } else {
+                print_summary_line(group);
             }
-        } else {
-            print_summary_line(group);
         }
     }
 }
@@ -82,7 +86,7 @@ fn print_with_summarization(results: &[&CheckResult], project_root: &str) {
 /// Print a single summary line for a group of results with the same check ID.
 #[allow(clippy::print_stdout)] // reason: CLI report output to stdout
 fn print_summary_line(group: &[&&CheckResult]) {
-    let first = group[0];
+    let Some(first) = group.first() else { return };
     let count = group.len();
 
     let icon = match first.severity {
@@ -143,10 +147,7 @@ fn print_summary(report: &Report, show_inventory: bool) {
     println!("{}", "=== Summary ===".bold());
 
     let info_display = if !show_inventory && inventory_hidden > 0 {
-        format!(
-            "{} info ({} hidden, use --inventory to show all)",
-            infos, inventory_hidden
-        )
+        format!("{infos} info ({inventory_hidden} hidden, use --inventory to show all)")
     } else {
         format!("{infos} info")
     };

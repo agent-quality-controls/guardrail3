@@ -1,4 +1,4 @@
-//! Tests extracted from app::rs::validate::test_quality_checks
+//! Tests extracted from `app::rs::validate::test_quality_checks`
 #![allow(
     clippy::expect_used,
     clippy::disallowed_methods,

@@ -200,6 +200,56 @@ CONFIG FILE (guardrail3.toml)
     local/deny-feature-bans.toml       Feature bans
 
 ===============================================================================
+CHECK CATEGORIES
+===============================================================================
+
+  guardrail3 organizes checks into 5 categories. Core checks always run;
+  optional categories can be enabled in config or selected via CLI flags.
+
+  CORE (always on):
+    Config file completeness (R1-R29, T1-T22), suppression hygiene (R30-R37,
+    T23-T35), source health (R38-R42, T32-T33), tools & dependencies
+    (R45-R50, T55-T59), hooks (H1-H12), deployment (D1-D5).
+
+  ARCHITECTURE (off by default):
+    Hex arch structure and dependency flow enforcement.
+    Rust: R-ARCH-01..04, R-DEPS-01..02. TypeScript: T-ARCH-01..02,
+    eslint boundary rules. Enable with --architecture flag or in config.
+
+  GARDE (off by default, Rust only):
+    Input boundary validation with the garde crate. Ensures every struct
+    that crosses a trust boundary (Deserialize, Parser, Args, FromRow)
+    derives Validate. Checks: R-GARDE-01/02/05, R34/R35 (garde skip
+    hygiene). Enable with --garde flag or in config.
+
+  TESTS (on by default):
+    Test quality and organization. Rust: R-TEST-02..09. TypeScript:
+    T-TEST-01..05. Checks test file structure, assertions, coverage,
+    isolation, and no inline tests in src/. Enable/disable with --tests
+    flag or in config.
+
+  RELEASE (off by default, Rust only):
+    Crate publish readiness. R-REL-* (release workflow, changelog,
+    release-plz config), R-PUB-* (crate metadata: description, license,
+    repository, etc.), R-BIN-* (binary release workflow, binstall
+    metadata). Enable with --release flag or in config.
+
+  Enable in guardrail3.toml:
+    [rust.checks]
+    architecture = true
+    garde = true
+    release = true
+
+    [typescript.checks]
+    architecture = true
+
+  CLI flags override config for a single run:
+    guardrail3 rs validate --architecture    Run only architecture checks
+    guardrail3 rs validate --tests           Run only test quality checks
+    guardrail3 rs validate --release         Run only release checks
+    guardrail3 rs validate --garde           Run only garde checks
+
+===============================================================================
 SETUP GUIDE
 ===============================================================================
 

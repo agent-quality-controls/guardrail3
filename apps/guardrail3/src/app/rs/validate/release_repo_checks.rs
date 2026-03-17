@@ -106,15 +106,18 @@ pub fn check_release_plz_toml(
         return;
     }
 
-    results.push(CheckResult {
-        id: "R-REL-02".to_owned(),
-        severity: Severity::Info,
-        title: "release-plz.toml exists".to_owned(),
-        message: "Found at repo root".to_owned(),
-        file: Some(plz_path.display().to_string()),
-        line: None,
-        inventory: false,
-    }.as_inventory());
+    results.push(
+        CheckResult {
+            id: "R-REL-02".to_owned(),
+            severity: Severity::Info,
+            title: "release-plz.toml exists".to_owned(),
+            message: "Found at repo root".to_owned(),
+            file: Some(plz_path.display().to_string()),
+            line: None,
+            inventory: false,
+        }
+        .as_inventory(),
+    );
 
     let Some(table) = parse_release_plz_toml(fs, &plz_path, results) else {
         return;
@@ -197,15 +200,18 @@ fn validate_release_plz_content(
     let missing: BTreeSet<_> = publishable_names.difference(&configured_names).collect();
 
     if missing.is_empty() {
-        results.push(CheckResult {
-            id: "R-REL-03".to_owned(),
-            severity: Severity::Info,
-            title: "release-plz.toml covers all crates".to_owned(),
-            message: "All publishable crates have [[package]] entries".to_owned(),
-            file: Some(plz_path.display().to_string()),
-            line: None,
-            inventory: false,
-        }.as_inventory());
+        results.push(
+            CheckResult {
+                id: "R-REL-03".to_owned(),
+                severity: Severity::Info,
+                title: "release-plz.toml covers all crates".to_owned(),
+                message: "All publishable crates have [[package]] entries".to_owned(),
+                file: Some(plz_path.display().to_string()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
     } else {
         for name in &missing {
             results.push(CheckResult {
@@ -285,15 +291,20 @@ pub fn check_workflow_contains(
         .any(|(_, content)| content.contains(pattern));
 
     if found {
-        results.push(CheckResult {
-            id: check_id.to_owned(),
-            severity: Severity::Info,
-            title: found_title.to_owned(),
-            message: format!("{found_msg}. CI workflow configuration confirmed. No action needed."),
-            file: None,
-            line: None,
-            inventory: false,
-        }.as_inventory());
+        results.push(
+            CheckResult {
+                id: check_id.to_owned(),
+                severity: Severity::Info,
+                title: found_title.to_owned(),
+                message: format!(
+                    "{found_msg}. CI workflow configuration confirmed. No action needed."
+                ),
+                file: None,
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
     } else {
         results.push(CheckResult {
             id: check_id.to_owned(),

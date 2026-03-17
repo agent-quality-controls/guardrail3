@@ -1,4 +1,4 @@
-//! Tests extracted from app::ts::validate::source_scan
+//! Tests extracted from `app::ts::validate::source_scan`
 #![allow(
     clippy::expect_used,
     clippy::disallowed_methods,
@@ -69,7 +69,11 @@ fn test_file_length_250_to_300_no_warning() {
         .join("\n");
     let mut results = Vec::new();
     check_file_length(path, &content, &mut results);
-    assert_eq!(results.len(), 0, "expected no results for 260 lines, got {results:?}");
+    assert_eq!(
+        results.len(),
+        0,
+        "expected no results for 260 lines, got {results:?}"
+    );
 }
 
 // T34: noinspection comment

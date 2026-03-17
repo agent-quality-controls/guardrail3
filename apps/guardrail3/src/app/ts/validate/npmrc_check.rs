@@ -26,15 +26,18 @@ pub fn check_npmrc(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
         return;
     }
 
-    results.push(CheckResult {
-        id: "T11".to_owned(),
-        severity: Severity::Info,
-        title: "`.npmrc` config exists".to_owned(),
-        message: "pnpm configuration file `.npmrc` found at project root.".to_owned(),
-        file: Some(npmrc_path.display().to_string()),
-        line: None,
-        inventory: false,
-    }.as_inventory());
+    results.push(
+        CheckResult {
+            id: "T11".to_owned(),
+            severity: Severity::Info,
+            title: "`.npmrc` config exists".to_owned(),
+            message: "pnpm configuration file `.npmrc` found at project root.".to_owned(),
+            file: Some(npmrc_path.display().to_string()),
+            line: None,
+            inventory: false,
+        }
+        .as_inventory(),
+    );
 
     let Some(content) = fs.read_file(&npmrc_path) else {
         return;

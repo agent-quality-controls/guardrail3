@@ -196,9 +196,8 @@ fn pub06_neg_missing_keywords() {
 #[test]
 #[allow(clippy::expect_used)] // reason: test assertion
 fn pub06_neg_too_many() {
-    let t =
-        parse_toml("[package]\nname = \"x\"\nkeywords = [\"a\",\"b\",\"c\",\"d\",\"e\",\"f\"]")
-            .expect("parse"); // reason: test
+    let t = parse_toml("[package]\nname = \"x\"\nkeywords = [\"a\",\"b\",\"c\",\"d\",\"e\",\"f\"]")
+        .expect("parse"); // reason: test
     let pkg = t.get("package");
     let mut r = Vec::new();
     check_keywords(pkg, "x", None, &mut r);
@@ -212,8 +211,7 @@ fn pub06_neg_too_many() {
 #[test]
 #[allow(clippy::expect_used)] // reason: test assertion
 fn pub06_pos_good_keywords() {
-    let t =
-        parse_toml("[package]\nname = \"x\"\nkeywords = [\"a\",\"b\",\"c\"]").expect("parse"); // reason: test
+    let t = parse_toml("[package]\nname = \"x\"\nkeywords = [\"a\",\"b\",\"c\"]").expect("parse"); // reason: test
     let pkg = t.get("package");
     let mut r = Vec::new();
     check_keywords(pkg, "x", None, &mut r);
@@ -243,8 +241,8 @@ fn pub07_neg_no_categories() {
 #[test]
 #[allow(clippy::expect_used)] // reason: test assertion
 fn pub07_pos_has_categories() {
-    let t = parse_toml("[package]\nname = \"x\"\ncategories = [\"development-tools\"]")
-        .expect("parse"); // reason: test
+    let t =
+        parse_toml("[package]\nname = \"x\"\ncategories = [\"development-tools\"]").expect("parse"); // reason: test
     let pkg = t.get("package");
     let mut r = Vec::new();
     check_categories(pkg, "x", None, &mut r);

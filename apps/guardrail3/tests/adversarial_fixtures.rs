@@ -40,6 +40,13 @@ unsafe_code = "forbid"
 #[allow(clippy::disallowed_methods)] // reason: Command::new needed to invoke binary under test
 #[allow(clippy::expect_used)] // reason: test helper — panics indicate broken test infrastructure
 fn validate_fixture(fixture_name: &str) -> String {
+    validate_fixture_with_args(fixture_name, &[])
+}
+
+/// Like `validate_fixture` but with extra CLI args (e.g., `--garde` to enable garde checks).
+#[allow(clippy::disallowed_methods)] // reason: Command::new needed to invoke binary under test
+#[allow(clippy::expect_used)] // reason: test helper — panics indicate broken test infrastructure
+fn validate_fixture_with_args(fixture_name: &str, extra_args: &[&str]) -> String {
     let fixture_path = Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests/fixtures/adversarial")
         .join(fixture_name);
@@ -55,14 +62,12 @@ fn validate_fixture(fixture_name: &str) -> String {
     let content = std::fs::read_to_string(&fixture_path).expect("read fixture");
     std::fs::write(src_dir.join("lib.rs"), &content).expect("write lib.rs");
 
+    let mut args = vec!["rs", "validate", "--format", "json"];
+    args.extend_from_slice(extra_args);
+    args.push(tmp.path().to_str().expect("path"));
+
     let out = Command::new(env!("CARGO_BIN_EXE_guardrail3"))
-        .args([
-            "rs",
-            "validate",
-            "--format",
-            "json",
-            tmp.path().to_str().expect("path"),
-        ])
+        .args(&args)
         .output()
         .expect("failed to run guardrail3");
 
@@ -70,7 +75,11 @@ fn validate_fixture(fixture_name: &str) -> String {
 }
 
 /// Assert that the JSON output contains at least one result with the given check ID and severity.
-#[allow(clippy::expect_used, clippy::disallowed_methods, clippy::indexing_slicing)] // reason: test helper — JSON parsing + indexing for assertion
+#[allow(
+    clippy::expect_used,
+    clippy::disallowed_methods,
+    clippy::indexing_slicing
+)] // reason: test helper — JSON parsing + indexing for assertion
 fn assert_contains_check(json_output: &str, check_id: &str, severity: &str) {
     let parsed: serde_json::Value =
         serde_json::from_str(json_output).expect("guardrail3 output should be valid JSON");
@@ -98,7 +107,12 @@ fn assert_contains_check(json_output: &str, check_id: &str, severity: &str) {
 }
 
 /// Assert that the JSON output does NOT contain any result with the given check ID and severity.
-#[allow(clippy::expect_used, clippy::disallowed_methods, clippy::indexing_slicing, clippy::panic)] // reason: test helper — JSON parsing + indexing + panic for assertion
+#[allow(
+    clippy::expect_used,
+    clippy::disallowed_methods,
+    clippy::indexing_slicing,
+    clippy::panic
+)] // reason: test helper — JSON parsing + indexing + panic for assertion
 fn assert_not_contains_check(json_output: &str, check_id: &str, severity: &str) {
     let parsed: serde_json::Value =
         serde_json::from_str(json_output).expect("guardrail3 output should be valid JSON");
@@ -168,7 +182,7 @@ fn adversarial_r32_allow_in_macro_invisible_to_ast() {
 
 #[test]
 fn adversarial_r34_garde_skip_no_reason_detected() {
-    let result = validate_fixture("garde_skip_no_reason.rs");
+    let result = validate_fixture_with_args("garde_skip_no_reason.rs", &["--garde"]);
     assert_contains_check(&result, "R34", "error");
 }
 

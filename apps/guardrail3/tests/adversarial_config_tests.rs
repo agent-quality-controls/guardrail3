@@ -11,8 +11,8 @@
 
 // Suppress unused-crate-dependencies for workspace deps not used in this test binary.
 use clap as _;
-use garde as _;
 use colored as _;
+use garde as _;
 use glob as _;
 use guardrail3 as _;
 use proc_macro2 as _;

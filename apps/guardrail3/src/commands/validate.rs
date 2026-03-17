@@ -7,7 +7,9 @@ use crate::app::hooks;
 use crate::app::rs;
 use crate::app::ts;
 use crate::cli::ValidateArgs;
-use crate::domain::report::{Report, ValidateDomains};
+use crate::domain::config::types::GuardrailConfig;
+use crate::domain::report::{Report, RustCheckCategories, TsCheckCategories, ValidateDomains};
+use crate::ports::outbound::FileSystem;
 use crate::report;
 
 /// Convert a repo-relative path to an absolute path string.
@@ -23,7 +25,7 @@ pub fn run(args: &ValidateArgs) {
         std::process::exit(1);
     };
 
-    let run_all = !args.code && !args.architecture && !args.release && !args.tests;
+    let run_all = !args.code && !args.architecture && !args.release && !args.tests && !args.garde;
     let domains = ValidateDomains {
         code: run_all || args.code,
         architecture: run_all || args.architecture,
@@ -33,6 +35,12 @@ pub fn run(args: &ValidateArgs) {
 
     let fs = RealFileSystem;
     let tc = RealToolChecker;
+
+    // Load config once and build categories for each language
+    let cfg = load_config(&fs, &abs_path);
+    let rs_categories = build_rs_categories(args, cfg.as_ref());
+    let ts_categories = build_ts_categories(args, cfg.as_ref());
+
     let project = discover::detect_project(&fs, &abs_path);
 
     let scoped_files = resolve_scoped_files(args, &abs_path);
@@ -58,7 +66,7 @@ pub fn run(args: &ValidateArgs) {
             &abs_path,
             &project,
             scoped_ref,
-            &domains,
+            &rs_categories,
             args.thorough,
             &tc,
         );
@@ -68,13 +76,13 @@ pub fn run(args: &ValidateArgs) {
     }
 
     if project.has_typescript {
-        let ts_report = ts::validate::run(&fs, &abs_path, scoped_ref, &domains);
+        let ts_report = ts::validate::run(&fs, &abs_path, scoped_ref, &ts_categories);
         for section in ts_report.sections {
             combined_report.add_section(section);
         }
     }
 
-    // Hook and deployment checks
+    // Hook and deployment checks (hooks still use ValidateDomains)
     let hooks_report = hooks::validate::run(
         &fs,
         &abs_path,
@@ -89,7 +97,9 @@ pub fn run(args: &ValidateArgs) {
 
     match args.format.as_str() {
         "json" => report::json::print_report(&combined_report, args.inventory),
-        "md" | "markdown" => report::markdown::print_report(&combined_report, args.inventory, args.verbose),
+        "md" | "markdown" => {
+            report::markdown::print_report(&combined_report, args.inventory, args.verbose);
+        }
         _ => report::text::print_report(&combined_report, args.inventory, args.verbose),
     }
 
@@ -204,4 +214,64 @@ fn git_commit_files(project_path: &Path, n: usize) -> Option<Vec<String>> {
         .collect();
 
     Some(files)
+}
+
+/// Load guardrail3.toml config, if present.
+#[allow(clippy::disallowed_methods)] // reason: guardrail3 config parsing
+fn load_config(fs: &RealFileSystem, path: &Path) -> Option<GuardrailConfig> {
+    let config_path = path.join("guardrail3.toml");
+    let content = fs.read_file(&config_path)?;
+    toml::from_str(&content).ok()
+}
+
+/// Build `RustCheckCategories` by merging config defaults with CLI flags.
+fn build_rs_categories(args: &ValidateArgs, cfg: Option<&GuardrailConfig>) -> RustCheckCategories {
+    let checks = cfg
+        .and_then(|c| c.rust.as_ref())
+        .and_then(|r| r.checks.as_ref());
+
+    let cfg_arch = checks.and_then(|c| c.architecture).unwrap_or(false);
+    let cfg_garde = checks.and_then(|c| c.garde).unwrap_or(false);
+    let cfg_tests = checks.and_then(|c| c.tests).unwrap_or(true);
+    let cfg_release = checks.and_then(|c| c.release).unwrap_or(false);
+
+    let any_cli = args.code || args.architecture || args.tests || args.release || args.garde;
+    if any_cli {
+        RustCheckCategories {
+            architecture: args.architecture,
+            garde: args.garde,
+            tests: args.tests,
+            release: args.release,
+        }
+    } else {
+        RustCheckCategories {
+            architecture: cfg_arch,
+            garde: cfg_garde,
+            tests: cfg_tests,
+            release: cfg_release,
+        }
+    }
+}
+
+/// Build `TsCheckCategories` by merging config defaults with CLI flags.
+fn build_ts_categories(args: &ValidateArgs, cfg: Option<&GuardrailConfig>) -> TsCheckCategories {
+    let checks = cfg
+        .and_then(|c| c.typescript.as_ref())
+        .and_then(|t| t.checks.as_ref());
+
+    let cfg_arch = checks.and_then(|c| c.architecture).unwrap_or(false);
+    let cfg_tests = checks.and_then(|c| c.tests).unwrap_or(true);
+
+    let any_cli = args.code || args.architecture || args.tests || args.release || args.garde;
+    if any_cli {
+        TsCheckCategories {
+            architecture: args.architecture,
+            tests: args.tests,
+        }
+    } else {
+        TsCheckCategories {
+            architecture: cfg_arch,
+            tests: cfg_tests,
+        }
+    }
 }

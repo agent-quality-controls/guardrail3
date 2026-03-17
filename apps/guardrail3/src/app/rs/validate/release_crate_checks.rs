@@ -125,15 +125,19 @@ pub fn check_readme(
         None => {
             let default_readme = krate.dir.join("README.md");
             if default_readme.exists() {
-                results.push(CheckResult {
-                    id: "R-PUB-04".to_owned(),
-                    severity: Severity::Info,
-                    title: format!("{}: readme found (default)", krate.name),
-                    message: "README.md exists at crate root (no explicit readme field)".to_owned(),
-                    file: file.map(std::borrow::ToOwned::to_owned),
-                    line: None,
-                    inventory: false,
-                }.as_inventory());
+                results.push(
+                    CheckResult {
+                        id: "R-PUB-04".to_owned(),
+                        severity: Severity::Info,
+                        title: format!("{}: readme found (default)", krate.name),
+                        message: "README.md exists at crate root (no explicit readme field)"
+                            .to_owned(),
+                        file: file.map(std::borrow::ToOwned::to_owned),
+                        line: None,
+                        inventory: false,
+                    }
+                    .as_inventory(),
+                );
                 check_readme_quality(fs, &default_readme, &krate.name, file, results);
             } else {
                 results.push(CheckResult {
@@ -150,15 +154,18 @@ pub fn check_readme(
         Some(readme_path) => {
             let full_path = krate.dir.join(readme_path);
             if full_path.exists() {
-                results.push(CheckResult {
-                    id: "R-PUB-04".to_owned(),
-                    severity: Severity::Info,
-                    title: format!("{}: readme present", krate.name),
-                    message: format!("readme = \"{readme_path}\" exists on disk"),
-                    file: file.map(std::borrow::ToOwned::to_owned),
-                    line: None,
-                    inventory: false,
-                }.as_inventory());
+                results.push(
+                    CheckResult {
+                        id: "R-PUB-04".to_owned(),
+                        severity: Severity::Info,
+                        title: format!("{}: readme present", krate.name),
+                        message: format!("readme = \"{readme_path}\" exists on disk"),
+                        file: file.map(std::borrow::ToOwned::to_owned),
+                        line: None,
+                        inventory: false,
+                    }
+                    .as_inventory(),
+                );
                 check_readme_quality(fs, &full_path, &krate.name, file, results);
             } else {
                 results.push(CheckResult {
@@ -217,7 +224,11 @@ pub fn check_readme_quality(
         line: None,
         inventory: false,
     };
-    results.push(if severity == Severity::Info { result.as_inventory() } else { result });
+    results.push(if severity == Severity::Info {
+        result.as_inventory()
+    } else {
+        result
+    });
 }
 
 // --- R-PUB-08: semver version ---
@@ -250,7 +261,8 @@ pub fn check_version(
         (
             Severity::Info,
             format!("{name}: version inherited from workspace"),
-            "version.workspace = true — version is inherited from workspace root Cargo.toml".to_owned(),
+            "version.workspace = true — version is inherited from workspace root Cargo.toml"
+                .to_owned(),
         )
     } else {
         match version {
@@ -281,6 +293,9 @@ pub fn check_version(
         line: None,
         inventory: false,
     };
-    results.push(if severity == Severity::Info { result.as_inventory() } else { result });
+    results.push(if severity == Severity::Info {
+        result.as_inventory()
+    } else {
+        result
+    });
 }
-

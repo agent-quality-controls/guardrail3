@@ -70,4 +70,3 @@ pub fn check_advisory_ignores(
         }
     }
 }
-

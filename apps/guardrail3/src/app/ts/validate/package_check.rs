@@ -216,17 +216,21 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
     let prepare = json.get("scripts").and_then(|s| s.get("prepare"));
 
     if prepare.is_some() {
-        results.push(CheckResult {
-            id: "T56".to_owned(),
-            severity: Severity::Info,
-            title: "`prepare` script exists in `package.json`".to_owned(),
-            message: "`prepare` script found. This runs after `pnpm install`, typically setting up \
+        results.push(
+            CheckResult {
+                id: "T56".to_owned(),
+                severity: Severity::Info,
+                title: "`prepare` script exists in `package.json`".to_owned(),
+                message:
+                    "`prepare` script found. This runs after `pnpm install`, typically setting up \
                      git hooks (e.g., husky) or building required artifacts."
-                .to_owned(),
-            file: Some(pkg_path.display().to_string()),
-            line: None,
-            inventory: false,
-        }.as_inventory());
+                        .to_owned(),
+                file: Some(pkg_path.display().to_string()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
     } else {
         results.push(CheckResult {
             id: "T56".to_owned(),

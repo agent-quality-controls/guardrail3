@@ -86,7 +86,8 @@ fn garde_skip_without_comment_is_error_r34() {
 #[test]
 #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results
 fn garde_skip_with_comment_on_non_primitive_is_error_r35() {
-    let content = "struct Foo {\n    #[garde(skip)] // reason: validated elsewhere\n    field: String,\n}";
+    let content =
+        "struct Foo {\n    #[garde(skip)] // reason: validated elsewhere\n    field: String,\n}";
     let path = Path::new("test.rs");
     let mut results = Vec::new();
     check_garde_skip(path, content, &mut results);
