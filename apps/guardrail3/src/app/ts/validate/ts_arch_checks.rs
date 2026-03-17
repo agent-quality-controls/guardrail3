@@ -3,7 +3,7 @@ use std::path::Path;
 use walkdir::WalkDir;
 
 use super::source_scan::is_excluded_ts_dir;
-use crate::domain::report::{CheckResult, Severity};
+use crate::domain::report::{CheckResult, Severity, TsAppContext};
 use crate::ports::outbound::FileSystem;
 
 // -----------------------------------------------------------------------
@@ -24,7 +24,7 @@ pub fn check_hex_arch_structure(fs: &dyn FileSystem, root: &Path) -> Vec<CheckRe
 /// Discover TypeScript apps under `<root>/apps/`.
 /// An app is a subdirectory that has TypeScript files (.ts, .tsx) or `package.json`.
 /// Rust-only apps (no TS files, no package.json) are skipped.
-fn discover_ts_apps(fs: &dyn FileSystem, root: &Path) -> Vec<std::path::PathBuf> {
+pub(super) fn discover_ts_apps(fs: &dyn FileSystem, root: &Path) -> Vec<std::path::PathBuf> {
     let apps_dir = root.join("apps");
     let mut found = Vec::new();
 
@@ -45,6 +45,41 @@ fn discover_ts_apps(fs: &dyn FileSystem, root: &Path) -> Vec<std::path::PathBuf>
         found.push(path);
     }
     found
+}
+
+/// Run hex arch structure checks only on service-type apps.
+pub fn check_hex_arch_structure_for_apps(
+    fs: &dyn FileSystem,
+    app_contexts: &[TsAppContext],
+) -> Vec<CheckResult> {
+    let mut results = Vec::new();
+    for ctx in app_contexts {
+        if ctx.categories.architecture {
+            check_single_app_structure(fs, &ctx.path, &mut results);
+        }
+    }
+    results
+}
+
+/// Run import boundary checks only on service-type apps.
+pub fn check_import_boundaries_for_apps(
+    fs: &dyn FileSystem,
+    app_contexts: &[TsAppContext],
+) -> Vec<CheckResult> {
+    let mut results = Vec::new();
+    for ctx in app_contexts {
+        if ctx.categories.architecture {
+            let ts_files = collect_module_ts_files(&ctx.path);
+            for file_path_str in &ts_files {
+                let file_path = Path::new(file_path_str);
+                let Some(content) = fs.read_file(file_path) else {
+                    continue;
+                };
+                check_file_imports(file_path, &content, &mut results);
+            }
+        }
+    }
+    results
 }
 
 /// Check if a directory contains any TypeScript files (.ts, .tsx).

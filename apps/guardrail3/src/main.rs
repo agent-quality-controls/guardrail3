@@ -140,9 +140,16 @@ fn handle_ts(command: TsCommands) {
             validate_or_exit(&args);
             let path = resolve_path(&args.path);
             let fs = RealFileSystem;
+            let cfg = load_config(&fs, &path);
             let categories = build_ts_categories(&args, &fs, &path);
             let scoped_files = commands::validate::resolve_scoped_files_pub(&args, &path);
-            let report = ts::validate::run(&fs, &path, scoped_files.as_deref(), &categories);
+            let report = ts::validate::run(
+                &fs,
+                &path,
+                scoped_files.as_deref(),
+                &categories,
+                cfg.as_ref(),
+            );
             print_report(&args, &report);
         }
         TsCommands::HooksInstall(args) => {

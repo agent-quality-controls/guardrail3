@@ -470,3 +470,259 @@ workspace_root = "."
     assert_has_check_prefix(&ids, "R-ARCH-", &output);
     assert_has_check_prefix(&ids, "R-GARDE-", &output);
 }
+
+// ============================================================
+// TypeScript per-app type profile tests
+// ============================================================
+
+/// Create a temp TS monorepo with root package.json, per-app dirs, and optional guardrail3.toml.
+/// `apps` is a slice of `(name, has_hex_arch)` tuples.
+#[allow(clippy::disallowed_methods)] // reason: test helper — creates temp TS project structure
+#[allow(clippy::expect_used)] // reason: test helper — panics indicate broken test infrastructure
+#[allow(clippy::type_complexity)] // reason: test helper — tuple slice parameter is clear in context
+fn setup_ts_monorepo(config: Option<&str>, apps: &[(&str, bool)]) -> tempfile::TempDir {
+    let tmp = tempfile::tempdir().expect("failed to create temp dir");
+
+    // Root package.json
+    std::fs::write(
+        tmp.path().join("package.json"),
+        r#"{"name": "test-monorepo", "private": true}"#,
+    )
+    .expect("write root package.json");
+
+    // Create each app
+    for (name, has_hex_arch) in apps {
+        let app_dir = tmp.path().join("apps").join(name);
+        let src_dir = app_dir.join("src");
+        std::fs::create_dir_all(&src_dir).expect("create app src/");
+
+        // App package.json
+        std::fs::write(
+            app_dir.join("package.json"),
+            format!(r#"{{"name": "{name}", "version": "0.1.0"}}"#),
+        )
+        .expect("write app package.json");
+
+        // A .ts file so it's detected as TS app
+        std::fs::write(src_dir.join("index.ts"), "export const x = 1;").expect("write ts file");
+
+        if *has_hex_arch {
+            let modules = src_dir.join("modules");
+            std::fs::create_dir_all(modules.join("domain")).expect("create domain/");
+            std::fs::create_dir_all(modules.join("adapters")).expect("create adapters/");
+            std::fs::write(
+                modules.join("domain").join("index.ts"),
+                "export type X = string;",
+            )
+            .expect("write domain");
+            std::fs::write(
+                modules.join("adapters").join("index.ts"),
+                "export const y = 1;",
+            )
+            .expect("write adapters");
+        }
+    }
+
+    // Write guardrail3.toml if provided
+    if let Some(config_content) = config {
+        std::fs::write(tmp.path().join("guardrail3.toml"), config_content).expect("write config");
+    }
+
+    tmp
+}
+
+/// Run guardrail3 ts validate --format json on the given path with extra CLI args.
+#[allow(clippy::disallowed_methods)] // reason: test helper — Command::new for binary under test
+#[allow(clippy::expect_used)] // reason: test helper
+fn run_ts_validate(path: &std::path::Path, extra_args: &[&str]) -> String {
+    let mut args = vec!["ts", "validate", "--format", "json"];
+    args.extend_from_slice(extra_args);
+    args.push(path.to_str().expect("path"));
+
+    let out = Command::new(env!("CARGO_BIN_EXE_guardrail3"))
+        .args(&args)
+        .output()
+        .expect("failed to run guardrail3");
+
+    String::from_utf8_lossy(&out.stdout).to_string()
+}
+
+// ============================================================
+// Test: Service app type — arch checks fire based on structure
+// ============================================================
+
+#[test]
+fn ts_app_type_service_gets_arch_checks() {
+    // Service app WITH hex arch dirs → T-ARCH-01 should NOT fire (structure exists)
+    let config_with_arch = r#"
+version = "0.1"
+
+[profile]
+name = "service"
+
+[typescript.apps.api]
+type = "service"
+"#;
+    let tmp = setup_ts_monorepo(Some(config_with_arch), &[("api", true)]);
+    let output = run_ts_validate(tmp.path(), &[]);
+    let ids = collect_check_ids(&output);
+
+    // Service app has the hex arch dirs, so T-ARCH-01 should NOT fire
+    assert_no_check(&ids, "T-ARCH-01", &output);
+
+    // Service app WITHOUT hex arch dirs → T-ARCH-01 SHOULD fire (missing structure)
+    let config_no_arch = r#"
+version = "0.1"
+
+[profile]
+name = "service"
+
+[typescript.apps.api]
+type = "service"
+"#;
+    let tmp2 = setup_ts_monorepo(Some(config_no_arch), &[("api", false)]);
+    let output2 = run_ts_validate(tmp2.path(), &[]);
+    let ids2 = collect_check_ids(&output2);
+
+    // Service app missing hex arch dirs — T-ARCH-01 should fire
+    assert_has_check(&ids2, "T-ARCH-01", &output2);
+}
+
+// ============================================================
+// Test: Content app type skips architecture checks
+// ============================================================
+
+#[test]
+fn ts_app_type_content_skips_arch_checks() {
+    // Content app WITHOUT hex arch dirs → T-ARCH-01 should NOT fire
+    // (content apps skip architecture checks entirely)
+    let config = r#"
+version = "0.1"
+
+[profile]
+name = "service"
+
+[typescript.apps.landing]
+type = "content"
+"#;
+    let tmp = setup_ts_monorepo(Some(config), &[("landing", false)]);
+    let output = run_ts_validate(tmp.path(), &[]);
+    let ids = collect_check_ids(&output);
+
+    // Content app — architecture checks should not fire at all
+    assert_no_check(&ids, "T-ARCH-01", &output);
+}
+
+// ============================================================
+// Test: Content app with architecture override enabled
+// ============================================================
+
+#[test]
+fn ts_app_type_content_override_enables_arch() {
+    // Content app with checks.architecture = true → T-ARCH-01 SHOULD fire
+    // (per-app override enables arch checks even for content type)
+    let config = r#"
+version = "0.1"
+
+[profile]
+name = "service"
+
+[typescript.apps.landing]
+type = "content"
+
+[typescript.apps.landing.checks]
+architecture = true
+"#;
+    let tmp = setup_ts_monorepo(Some(config), &[("landing", false)]);
+    let output = run_ts_validate(tmp.path(), &[]);
+    let ids = collect_check_ids(&output);
+
+    // Content app with arch override — T-ARCH-01 should fire (missing structure)
+    assert_has_check(&ids, "T-ARCH-01", &output);
+}
+
+// ============================================================
+// Test: Default app type is service when no type configured
+// ============================================================
+
+#[test]
+fn ts_app_type_default_is_service() {
+    // No [typescript.apps] config at all → app should behave as service
+    // Service type without hex arch → T-ARCH-01 should fire
+    let tmp = setup_ts_monorepo(None, &[("api", false)]);
+    let output = run_ts_validate(tmp.path(), &[]);
+    let ids = collect_check_ids(&output);
+
+    // Default is service — missing arch should fire T-ARCH-01
+    assert_has_check(&ids, "T-ARCH-01", &output);
+}
+
+// ============================================================
+// Test: Mixed monorepo — service gets arch, content skips arch
+// ============================================================
+
+#[test]
+fn ts_mixed_monorepo_per_app_types() {
+    // Two apps: service (no hex arch → should get T-ARCH-01)
+    //           content (no hex arch → should NOT get T-ARCH-01)
+    let config = r#"
+version = "0.1"
+
+[profile]
+name = "service"
+
+[typescript.apps.api]
+type = "service"
+
+[typescript.apps.landing]
+type = "content"
+"#;
+    let tmp = setup_ts_monorepo(Some(config), &[("api", false), ("landing", false)]);
+    let output = run_ts_validate(tmp.path(), &[]);
+    let ids = collect_check_ids(&output);
+
+    // Service app missing arch → T-ARCH-01 should fire (at least once, for api)
+    assert_has_check(&ids, "T-ARCH-01", &output);
+
+    // The T-ARCH-01 messages should reference the service app (api), not the content app (landing)
+    // Parse the full output to verify which app triggered the check
+    #[allow(clippy::disallowed_methods)] // reason: test assertion — JSON parsing
+    #[allow(clippy::expect_used)] // reason: test assertion
+    #[allow(clippy::indexing_slicing)] // reason: test assertion — JSON access
+    {
+        let parsed: serde_json::Value = serde_json::from_str(&output).expect("valid JSON");
+        let sections = parsed["sections"].as_array().expect("sections array");
+
+        let arch_results: Vec<_> = sections
+            .iter()
+            .flat_map(|s| {
+                s["results"]
+                    .as_array()
+                    .expect("results array")
+                    .iter()
+                    .filter(|r| r["id"].as_str() == Some("T-ARCH-01"))
+                    .collect::<Vec<_>>()
+            })
+            .collect();
+
+        // T-ARCH-01 should reference "api" (service app missing arch)
+        let mentions_api = arch_results.iter().any(|r| {
+            r["title"].as_str().is_some_and(|t| t.contains("api"))
+                || r["message"].as_str().is_some_and(|m| m.contains("api"))
+        });
+        assert!(
+            mentions_api,
+            "T-ARCH-01 should fire for the 'api' service app.\nArch results: {arch_results:?}"
+        );
+
+        // T-ARCH-01 should NOT reference "landing" (content app skips arch)
+        let mentions_landing = arch_results.iter().any(|r| {
+            r["title"].as_str().is_some_and(|t| t.contains("landing"))
+                || r["message"].as_str().is_some_and(|m| m.contains("landing"))
+        });
+        assert!(
+            !mentions_landing,
+            "T-ARCH-01 should NOT fire for the 'landing' content app.\nArch results: {arch_results:?}"
+        );
+    }
+}

@@ -88,6 +88,52 @@ impl Default for TsCheckCategories {
     }
 }
 
+/// TypeScript app type — determines which check categories apply by default.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TsAppType {
+    /// HTTP server, API backend — hex arch, route wrappers, full `ESLint` strict
+    Service,
+    /// Marketing site, blog, docs — content checks, SEO, accessibility, static gen
+    Content,
+    /// Shared package, no I/O — dependency restrictions
+    Library,
+}
+
+impl TsAppType {
+    /// Parse from config string, defaulting to Service for unknown values.
+    pub fn from_str_or_default(s: &str) -> Self {
+        match s {
+            "content" => Self::Content,
+            "library" => Self::Library,
+            _ => Self::Service,
+        }
+    }
+
+    /// Default check categories for this app type.
+    #[must_use]
+    pub const fn default_categories(self) -> TsCheckCategories {
+        match self {
+            Self::Service => TsCheckCategories {
+                architecture: true,
+                tests: true,
+            },
+            Self::Content | Self::Library => TsCheckCategories {
+                architecture: false,
+                tests: true,
+            },
+        }
+    }
+}
+
+/// Resolved per-app context for TypeScript validation.
+#[derive(Debug, Clone)]
+pub struct TsAppContext {
+    pub name: String,
+    pub path: std::path::PathBuf,
+    pub app_type: TsAppType,
+    pub categories: TsCheckCategories,
+}
+
 impl Report {
     pub const fn new(project_path: String, stacks: Vec<String>) -> Self {
         Self {

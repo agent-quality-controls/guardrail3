@@ -234,6 +234,26 @@ CHECK CATEGORIES
     repository, etc.), R-BIN-* (binary release workflow, binstall
     metadata). Disable with release = false in config.
 
+  APP TYPES (TypeScript only):
+    Each TS app in a monorepo can have a type that determines which
+    check categories apply by default:
+
+    service (default):  Hex arch, route wrappers, full ESLint strict
+    content:            Content checks, SEO, accessibility (no hex arch)
+    library:            Dependency restrictions (no app-specific checks)
+
+    Configure per-app in guardrail3.toml:
+      [typescript.apps.landing]
+      type = \"content\"
+
+      [typescript.apps.admin]
+      type = \"service\"
+
+    Override specific categories per-app:
+      [typescript.apps.admin]
+      type = \"service\"
+      checks.architecture = false   # service but skip hex arch
+
   Disable in guardrail3.toml:
     [rust.checks]
     architecture = false   # disable hex arch checks

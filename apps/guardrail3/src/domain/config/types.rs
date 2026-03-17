@@ -5,6 +5,9 @@ use serde::Deserialize;
 /// Type alias for crate configuration map.
 type CrateMap = BTreeMap<String, CrateConfig>;
 
+/// Type alias for TypeScript app configuration map.
+type TsAppMap = BTreeMap<String, TsAppConfig>;
+
 #[derive(Debug, Deserialize, garde::Validate)]
 pub struct GuardrailConfig {
     #[garde(inner(length(min = 1)))] // reason: version string must be non-empty when present
@@ -71,9 +74,20 @@ pub struct TsChecksConfig {
 }
 
 #[derive(Debug, Deserialize, garde::Validate)]
+pub struct TsAppConfig {
+    /// App type: "service", "content", or "library"
+    #[serde(rename = "type")]
+    #[garde(inner(length(min = 1)))] // reason: type name must be non-empty when present
+    pub type_: Option<String>,
+    #[garde(dive)] // reason: recursively validate nested TsChecksConfig
+    pub checks: Option<TsChecksConfig>,
+}
+
+#[derive(Debug, Deserialize, garde::Validate)]
 pub struct TypeScriptConfig {
-    #[garde(inner(inner(length(min = 1))))] // reason: each app path must be non-empty
-    pub apps: Option<Vec<String>>,
+    #[garde(skip)]
+    // reason: BTreeMap values — garde cannot dive into map values; validated by type resolution
+    pub apps: Option<TsAppMap>,
     #[garde(inner(length(min = 1)))] // reason: migrations path must be non-empty when present
     pub migrations: Option<String>,
     #[garde(dive)] // reason: recursively validate nested EslintConfig
