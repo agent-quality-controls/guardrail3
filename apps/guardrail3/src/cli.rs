@@ -148,12 +148,12 @@ pub struct ValidateArgs {
     #[garde(skip)] // reason: boolean flag, inherently valid
     pub thorough: bool,
 
-    /// Show inventory items (passing confirmations hidden by default)
+    /// Show passing confirmation checks (e.g., 'clippy.toml exists', 'lint X correct'). These are hidden by default because they require no action.
     #[arg(long)]
     #[garde(skip)] // reason: boolean flag, inherently valid
     pub inventory: bool,
 
-    /// Show every audit trail item (by default, high-count check IDs are summarized)
+    /// Show all individual items for summarized checks (e.g., list each #[allow] instead of showing count). Without this, checks with more than 5 items are summarized to a single line.
     #[arg(long)]
     #[garde(skip)] // reason: boolean flag, inherently valid
     pub verbose: bool,

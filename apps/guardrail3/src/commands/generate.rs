@@ -57,6 +57,7 @@ pub fn run(args: &GenerateArgs) {
                 continue;
             }
         }
+        warn_if_overwriting(&target, &gf.path, &gf.content);
         if let Err(e) = crate::fs::write_file(&target, &gf.content) {
             eprintln!("Error writing {}: {e}", gf.path);
             continue;
@@ -105,6 +106,7 @@ pub fn run_rs(args: &GenerateArgs) {
         if let Some(parent) = target.parent() {
             let _ = crate::fs::create_dir_all(parent);
         }
+        warn_if_overwriting(&target, &gf.path, &gf.content);
         if let Err(e) = crate::fs::write_file(&target, &gf.content) {
             eprintln!("Error writing {}: {e}", gf.path);
             continue;
@@ -144,6 +146,7 @@ pub fn run_ts(args: &GenerateArgs) {
         if let Some(parent) = target.parent() {
             let _ = crate::fs::create_dir_all(parent);
         }
+        warn_if_overwriting(&target, &gf.path, &gf.content);
         if let Err(e) = crate::fs::write_file(&target, &gf.content) {
             eprintln!("Error writing {}: {e}", gf.path);
             continue;
@@ -230,6 +233,18 @@ pub fn run_hooks(args: &GenerateArgs) {
     println!("  wrote: .githooks/pre-commit");
     println!();
     println!("Configure git to use hooks: git config core.hooksPath .githooks");
+}
+
+/// Warn if an existing file has content that differs from what we'd generate.
+#[allow(clippy::print_stderr)] // reason: CLI tool — overwrite warnings reported to stderr
+fn warn_if_overwriting(target: &Path, relative_path: &str, new_content: &str) {
+    if let Some(existing) = crate::fs::read_file(target) {
+        if existing != new_content {
+            eprintln!(
+                "  warning: Overwriting {relative_path} — manual edits will be lost. Use local/ overrides for project-specific customization."
+            );
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------

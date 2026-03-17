@@ -8,7 +8,7 @@ use syn::visit::Visit;
 
 use super::ast_helpers::{
     DeriveInfo, Located, extract_allow_lints, extract_cfg_attr_allow_lints, impl_item_attrs,
-    is_cfg_test_attr, item_attrs, path_to_string, span_line,
+    is_cfg_test_attr, item_attrs, item_ident, path_to_string, span_line,
 };
 
 // ---------------------------------------------------------------------------
@@ -312,7 +312,12 @@ impl DeriveVisitor {
     /// into ONE `DeriveInfo`. This correctly handles split derives like
     /// `#[derive(Deserialize)] #[derive(Validate)]` — they produce a single entry
     /// with macros `["Deserialize", "Validate"]`.
-    fn collect_derives(&mut self, attrs: &[syn::Attribute], has_non_primitive: bool) {
+    fn collect_derives(
+        &mut self,
+        attrs: &[syn::Attribute],
+        has_non_primitive: bool,
+        name: Option<String>,
+    ) {
         let mut macros = Vec::new();
         let mut first_line: Option<usize> = None;
 
@@ -338,6 +343,7 @@ impl DeriveVisitor {
                     line,
                     macros,
                     has_non_primitive_fields: has_non_primitive,
+                    name,
                 });
             }
         }
@@ -351,11 +357,12 @@ impl<'ast> Visit<'ast> for DeriveVisitor {
             // Enums and other items: conservatively assume they have non-primitive fields
             true
         };
-        self.collect_derives(item_attrs(i), has_non_primitive);
+        let item_name = item_ident(i).map(std::string::ToString::to_string);
+        self.collect_derives(item_attrs(i), has_non_primitive, item_name);
         syn::visit::visit_item(self, i);
     }
     fn visit_impl_item(&mut self, i: &'ast syn::ImplItem) {
-        self.collect_derives(impl_item_attrs(i), true);
+        self.collect_derives(impl_item_attrs(i), true, None);
         syn::visit::visit_impl_item(self, i);
     }
 }
