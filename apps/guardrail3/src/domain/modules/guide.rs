@@ -15,7 +15,7 @@ pub const GUIDE_CONTENT: &str = r#"# GUARDRAIL3 GUIDE
 ```
 guardrail3 rs init [PATH] --profile <service|library> [--force]
 ```
-Creates `guardrail3.toml`, `local/` override directory, and release configs (service only).
+Creates `guardrail3.toml` and release configs (service only). Override files go in `.guardrail3/overrides/` (convention path, no config needed).
 
 ```
 guardrail3 rs generate [PATH]
@@ -203,15 +203,15 @@ allowed_deps = ["serde", "serde_json", "reqwest", "tokio", "thiserror"]
 | `layer` | `"composition-root"` or `"pure"` | `composition-root` allows `LazyLock`; `pure` bans global state |
 | `allowed_deps` | `["serde", "thiserror", ...]` | Dependency allowlist. Any `[dependencies]` entry NOT listed = R-DEPS-01 error. `[dev-dependencies]` and `[build-dependencies]` not checked. Workspace path deps not checked. |
 
-### local/ overrides (created by `rs init`)
+### .guardrail3/overrides/ (convention path, no config needed)
 
 | File | Purpose |
 |------|---------|
-| `local/clippy-methods.toml` | Extra disallowed methods |
-| `local/clippy-types.toml` | Extra disallowed types |
-| `local/deny-bans.toml` | Extra crate bans |
-| `local/deny-skip.toml` | Duplicate crate skip entries |
-| `local/deny-feature-bans.toml` | Feature bans |
+| `.guardrail3/overrides/clippy-methods.toml` | Extra disallowed methods |
+| `.guardrail3/overrides/clippy-types.toml` | Extra disallowed types |
+| `.guardrail3/overrides/deny-bans.toml` | Extra crate bans |
+| `.guardrail3/overrides/deny-skip.toml` | Duplicate crate skip entries |
+| `.guardrail3/overrides/deny-feature-bans.toml` | Feature bans |
 
 ---
 

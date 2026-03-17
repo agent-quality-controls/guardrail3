@@ -99,15 +99,15 @@ pub(super) fn check_local_scripts(
     path: &Path,
     results: &mut Vec<CheckResult>,
 ) {
-    let local_d = path.join("local").join("pre-commit.d");
-    if local_d.is_dir() {
-        inventory_scripts(fs, &local_d, "H11", "Local pre-commit scripts", results);
+    let overrides_d = path.join(".guardrail3/overrides/pre-commit.d");
+    if overrides_d.is_dir() {
+        inventory_scripts(fs, &overrides_d, "H11", "Local pre-commit scripts", results);
     } else {
         results.push(
             CheckResult {
                 id: "H11".to_owned(),
                 severity: Severity::Info,
-                title: "No local/pre-commit.d/ directory".to_owned(),
+                title: "No .guardrail3/overrides/pre-commit.d/ directory".to_owned(),
                 message: "No local hook overrides found".to_owned(),
                 file: None,
                 line: None,

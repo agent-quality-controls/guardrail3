@@ -14,10 +14,3 @@ release = true
 
 [rust.apps.guardrail3]
 type = "service"
-
-[local]
-clippy_methods = "apps/guardrail3/local/clippy-methods.toml"
-clippy_types = "apps/guardrail3/local/clippy-types.toml"
-deny_bans = "apps/guardrail3/local/deny-bans.toml"
-deny_skip = "apps/guardrail3/local/deny-skip.toml"
-deny_feature_bans = "apps/guardrail3/local/deny-feature-bans.toml"

@@ -1,0 +1,4 @@
+# Skip entries for deny.toml [bans] section
+# Example:
+#     { crate = "windows-sys@0.60.2", reason = "transitive dep conflict" },
+    { crate = "anyhow", reason = "transitive dep from garde_derive — not a direct dependency" },
