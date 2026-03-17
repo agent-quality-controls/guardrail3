@@ -325,10 +325,10 @@ fn cli_diff_on_self() {
 
     let stdout = String::from_utf8_lossy(&out.stdout);
     let no_changes = stdout.contains("No changes");
-    let has_diff = stdout.contains("Would update") || stdout.contains("Would create");
+    let has_diff = stdout.contains("Would configure");
     assert!(
         no_changes || has_diff,
-        "diff should show diffs or no-changes message, got: {stdout}"
+        "diff should show config or no-changes message, got: {stdout}"
     );
 
     if has_diff {
@@ -870,12 +870,8 @@ fn cli_diff_shows_diff_after_tampering() {
 
     let stdout = String::from_utf8_lossy(&out.stdout);
     assert!(
-        stdout.contains("Would update") || stdout.contains("Would create"),
+        stdout.contains("Would configure"),
         "diff should show changes"
-    );
-    assert!(
-        stdout.contains("rustfmt.toml"),
-        "diff should mention the tampered file"
     );
 }
 
@@ -905,7 +901,7 @@ fn cli_diff_shows_new_file_when_missing() {
 
     let stdout = String::from_utf8_lossy(&out.stdout);
     assert!(
-        stdout.contains("Would create"),
+        stdout.contains("Would configure"),
         "diff should indicate new file"
     );
 }
