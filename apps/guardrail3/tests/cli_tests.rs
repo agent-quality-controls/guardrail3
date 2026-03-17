@@ -367,7 +367,7 @@ fn cli_init_service_profile() {
 
     let stdout = String::from_utf8_lossy(&out.stdout);
     assert!(
-        stdout.contains("Initialized Rust guardrail3 project"),
+        stdout.contains("Initialized Rust guardrail3"),
         "Should print init message"
     );
     assert!(stdout.contains("service"), "Should mention service profile");
@@ -376,21 +376,10 @@ fn cli_init_service_profile() {
         tmp.path().join("guardrail3.toml").exists(),
         "guardrail3.toml should be created"
     );
+    // local/*.toml and release files are created by `generate`, not `init`
     assert!(
-        tmp.path().join("local").exists(),
-        "local/ directory should be created"
-    );
-    assert!(
-        tmp.path().join("local/clippy-methods.toml").exists(),
-        "local/clippy-methods.toml should be created"
-    );
-    assert!(
-        tmp.path().join("release-plz.toml").exists(),
-        "release-plz.toml should be created for service profile"
-    );
-    assert!(
-        tmp.path().join("cliff.toml").exists(),
-        "cliff.toml should be created for service profile"
+        stdout.contains("guardrail3 rs generate"),
+        "Should tell user to run generate next"
     );
 }
 

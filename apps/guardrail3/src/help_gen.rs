@@ -171,17 +171,17 @@ CONFIG FILE (guardrail3.toml)
     workspace_root = \".\"
 
     # --- Services (in apps/) ---
-    [rust.crates.my-api]
+    [rust.apps.my-api]
     profile = \"service\"
     layer = \"composition-root\"
 
     # --- Libraries (in packages/) ---
-    [rust.crates.my-lib]
+    [rust.apps.my-lib]
     profile = \"library\"
     layer = \"pure\"
     allowed_deps = [\"serde\", \"thiserror\"]
 
-    [rust.crates.my-sdk]
+    [rust.apps.my-sdk]
     profile = \"library\"
     allowed_deps = [\"serde\", \"serde_json\", \"reqwest\", \"tokio\", \"thiserror\"]
 
@@ -515,7 +515,7 @@ FILES CREATED:
 
 AFTER INIT:
   For single crates:  guardrail3 rs generate && guardrail3 rs validate .
-  For workspaces:     Edit guardrail3.toml (add [rust.crates.*] sections),
+  For workspaces:     Edit guardrail3.toml (add [rust.apps.*] sections),
                       then guardrail3 rs generate && guardrail3 rs validate .
 
 EXAMPLES:

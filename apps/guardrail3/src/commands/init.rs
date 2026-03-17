@@ -7,8 +7,8 @@ use crate::app::ts::validate::ts_arch_checks::discover_ts_apps;
 use crate::domain::report::TsAppType;
 use crate::ports::outbound::FileSystem;
 
-/// Initialize Rust guardrail3 configuration: creates guardrail3.toml with [rust] + [local] sections,
-/// creates local/ directory with Rust override files, and scaffolds release config for service profile.
+/// Initialize Rust guardrail3 configuration: creates guardrail3.toml with discovered workspace
+/// members and per-crate config. Config files (clippy.toml, deny.toml, etc.) are created by `generate`.
 #[allow(clippy::print_stdout)] // reason: CLI command — user-facing output
 #[allow(clippy::print_stderr)] // reason: CLI command — error output
 #[allow(clippy::disallowed_methods)] // reason: CLI command — exit codes and fs operations
@@ -21,51 +21,24 @@ pub fn run_rs(profile: &str, path: &str, force: bool, dry_run: bool) {
 
     if dry_run {
         println!("Dry run — rs init --profile {profile}\n");
-
-        // Show the guardrail3.toml config (the important part)
         let config_path = project_path.join("guardrail3.toml");
-        let config_content = generate_rs_config_content(profile);
+        let config_content = generate_rs_config_content(profile, project_path);
         show_file_diff(&config_path, &config_content);
-
-        // Just list other files that would be created (no content dump)
-        let other_files = [
-            "local/clippy-methods.toml",
-            "local/clippy-types.toml",
-            "local/deny-bans.toml",
-            "local/deny-skip.toml",
-            "local/deny-feature-bans.toml",
-        ];
-        println!("\n  Would also create:");
-        for f in &other_files {
-            let full = project_path.join(f);
-            if full.exists() {
-                println!("    {f} (already exists, skip without --force)");
-            } else {
-                println!("    {f} (override template)");
-            }
-        }
-        if profile == "service" {
-            for f in &["release-plz.toml", "cliff.toml"] {
-                let full = project_path.join(f);
-                if full.exists() {
-                    println!("    {f} (already exists, skip without --force)");
-                } else {
-                    println!("    {f} (release config)");
-                }
-            }
-        }
+        println!(
+            "\nNext: run `guardrail3 rs generate` to create config files (clippy.toml, deny.toml, etc.)"
+        );
         return;
     }
 
     let mut created: Vec<String> = Vec::new();
-    let mut skipped: Vec<String> = Vec::new();
-
     scaffold_config(project_path, profile, force, &mut created);
-    scaffold_local_dir(project_path, force, &mut created, &mut skipped);
-    if profile == "service" {
-        scaffold_release_files(project_path, force, &mut created, &mut skipped);
+    println!("Initialized Rust guardrail3 at {}", project_path.display());
+    for f in &created {
+        println!("  Created: {f}");
     }
-    print_rs_summary(project_path, &created, &skipped);
+    println!(
+        "\nNext: run `guardrail3 rs generate` to create config files (clippy.toml, deny.toml, etc.)"
+    );
 }
 
 /// Write guardrail3.toml config file.
@@ -81,113 +54,14 @@ fn scaffold_config(project_path: &Path, profile: &str, force: bool, created: &mu
         eprintln!("Use --force to overwrite.");
         std::process::exit(1);
     }
-    if let Err(e) = crate::fs::write_file(&config_path, &generate_rs_config_content(profile)) {
+    if let Err(e) = crate::fs::write_file(
+        &config_path,
+        &generate_rs_config_content(profile, project_path),
+    ) {
         eprintln!("Error writing guardrail3.toml: {e}");
         std::process::exit(1);
     }
     created.push(format!("guardrail3.toml (profile: {profile})"));
-}
-
-/// Create local/ directory with override template files.
-#[allow(clippy::print_stderr)] // reason: CLI command — error output
-#[allow(clippy::disallowed_methods)] // reason: CLI command — exit codes
-fn scaffold_local_dir(
-    project_path: &Path,
-    force: bool,
-    created: &mut Vec<String>,
-    skipped: &mut Vec<String>,
-) {
-    let local_dir = project_path.join("local");
-    if let Err(e) = crate::fs::create_dir_all(&local_dir) {
-        eprintln!("Error creating local/ directory: {e}");
-        std::process::exit(1);
-    }
-
-    let local_files = [
-        "clippy-methods.toml",
-        "clippy-types.toml",
-        "deny-bans.toml",
-        "deny-skip.toml",
-        "deny-feature-bans.toml",
-    ];
-
-    let local_templates = [
-        "# Additional disallowed-methods entries (TOML array-of-tables format)\n# Example:\n#     { path = \"some::method\", reason = \"Use alternative instead\" },\n",
-        "# Additional disallowed-types entries (TOML array-of-tables format)\n# Example:\n#     { path = \"some::Type\", reason = \"Use alternative instead\" },\n",
-        "# Additional [bans] deny entries for deny.toml\n# Example:\n#     { name = \"some-crate\", wrappers = [] },\n",
-        "# Skip entries for deny.toml [bans] section\n# Example:\n#     { crate = \"windows-sys@0.60.2\", reason = \"transitive dep conflict\" },\n",
-        "# Additional [[bans.features]] entries for deny.toml\n# Example:\n#     [[bans.features]]\n#     name = \"some-crate\"\n#     deny = [\"full\"]\n",
-    ];
-
-    for (filename, content) in local_files.iter().zip(local_templates.iter()) {
-        let file_path = local_dir.join(filename);
-        if file_path.exists() && !force {
-            skipped.push(format!("local/{filename}"));
-            continue;
-        }
-        if let Err(e) = crate::fs::write_file(&file_path, content) {
-            eprintln!("Error writing local/{filename}: {e}");
-            std::process::exit(1);
-        }
-        created.push(format!("local/{filename}"));
-    }
-}
-
-/// Write release config files (release-plz.toml, cliff.toml) for service profile.
-#[allow(clippy::print_stderr)] // reason: CLI command — error output
-#[allow(clippy::disallowed_methods)] // reason: CLI command — exit codes
-fn scaffold_release_files(
-    project_path: &Path,
-    force: bool,
-    created: &mut Vec<String>,
-    skipped: &mut Vec<String>,
-) {
-    let release_files = [
-        (
-            "release-plz.toml",
-            crate::domain::modules::release::RELEASE_PLZ_TOML.content,
-        ),
-        (
-            "cliff.toml",
-            crate::domain::modules::release::CLIFF_TOML.content,
-        ),
-    ];
-
-    for (filename, content) in &release_files {
-        let file_path = project_path.join(filename);
-        if file_path.exists() && !force {
-            skipped.push((*filename).to_owned());
-            continue;
-        }
-        if let Err(e) = crate::fs::write_file(&file_path, content) {
-            eprintln!("Error writing {filename}: {e}");
-            std::process::exit(1);
-        }
-        created.push((*filename).to_owned());
-    }
-}
-
-/// Print the summary of what was created/skipped.
-#[allow(clippy::print_stdout)] // reason: CLI command — user-facing output
-fn print_rs_summary(project_path: &Path, created: &[String], skipped: &[String]) {
-    println!(
-        "Initialized Rust guardrail3 project at {}",
-        project_path.display()
-    );
-    for f in created {
-        println!("  Created: {f}");
-    }
-    for f in skipped {
-        println!("  Skipped (already exists): {f}");
-    }
-    if !skipped.is_empty() {
-        println!("  Use --force to overwrite existing files.");
-    }
-    println!();
-    println!("Next steps:");
-    println!("  1. Edit guardrail3.toml to set workspace_root and crate layers");
-    println!("  2. Add project-specific overrides in local/*.toml");
-    println!("  3. Run: guardrail3 rs generate");
 }
 
 /// Initialize TypeScript guardrail3 configuration: appends [typescript] section to existing
@@ -345,58 +219,68 @@ fn show_file_diff(path: &Path, new_content: &str) {
     }
 }
 
-fn generate_rs_config_content(profile: &str) -> String {
-    match profile {
-        "library" => format!(
-            r#"version = "0.1"
+fn generate_rs_config_content(profile: &str, project_path: &Path) -> String {
+    let fs = RealFileSystem;
+    let project = crate::app::discover::detect_project(&fs, project_path);
 
-[profile]
-name = "{profile}"
-
-# Library profile: all crates are treated as "pure" — global-state bans apply everywhere.
-# No [crates.*] section needed unless you want per-crate method/type overrides.
-
-[rust]
-workspace_root = "."
-
-[rust.checks]
-architecture = true      # R-ARCH-*, R-DEPS-* — hex arch structure and dependency flow
-garde = true             # R-GARDE-*, R34/R35 — input boundary validation (requires garde crate)
-tests = true             # R-TEST-* — test quality and organization
-release = true           # R-REL-*, R-PUB-*, R-BIN-* — crate publish readiness
-
-[local]
-clippy_methods = "local/clippy-methods.toml"
-clippy_types = "local/clippy-types.toml"
-deny_bans = "local/deny-bans.toml"
-deny_skip = "local/deny-skip.toml"
-deny_feature_bans = "local/deny-feature-bans.toml"
-"#
-        ),
-        _ => format!(
-            r#"version = "0.1"
+    let mut config = format!(
+        r#"version = "0.1"
 
 [profile]
 name = "{profile}"
 
 [rust]
 workspace_root = "."
-
-[rust.checks]
-architecture = true      # R-ARCH-*, R-DEPS-* — hex arch structure and dependency flow
-garde = true             # R-GARDE-*, R34/R35 — input boundary validation (requires garde crate)
-tests = true             # R-TEST-* — test quality and organization
-release = true           # R-REL-*, R-PUB-*, R-BIN-* — crate publish readiness
-
-[local]
-clippy_methods = "local/clippy-methods.toml"
-clippy_types = "local/clippy-types.toml"
-deny_bans = "local/deny-bans.toml"
-deny_skip = "local/deny-skip.toml"
-deny_feature_bans = "local/deny-feature-bans.toml"
 "#
-        ),
+    );
+
+    let members = project.all_member_dirs();
+    if !members.is_empty() {
+        // Multi-crate workspace — apps get individual entries, packages get one entry
+        let mut has_packages = false;
+
+        for ws in &project.workspaces {
+            for member in &ws.members {
+                let name = &member.name;
+                let dir = &member.dir;
+                let is_package = dir.starts_with("packages/") || dir.contains("/packages/");
+
+                if is_package {
+                    has_packages = true;
+                    continue;
+                }
+
+                let detected_layer = if dir.starts_with("apps/") || dir.contains("/apps/") {
+                    "composition-root"
+                } else {
+                    "app"
+                };
+
+                writeln!(config, "\n[rust.apps.{name}]").unwrap_or_default();
+                writeln!(config, "profile = \"{profile}\"").unwrap_or_default();
+                writeln!(config, "layer = \"{detected_layer}\"").unwrap_or_default();
+            }
+        }
+
+        if has_packages {
+            writeln!(config, "\n[rust.packages]").unwrap_or_default();
+            writeln!(config, "profile = \"library\"").unwrap_or_default();
+            writeln!(config, "layer = \"pure\"").unwrap_or_default();
+        }
     }
+
+    // Workspace-level checks (always)
+    writeln!(config, "\n[rust.checks]").unwrap_or_default();
+    writeln!(config, "architecture = true      # R-ARCH-*, R-DEPS-*").unwrap_or_default();
+    writeln!(config, "garde = true             # R-GARDE-*").unwrap_or_default();
+    writeln!(config, "tests = true             # R-TEST-*").unwrap_or_default();
+    writeln!(
+        config,
+        "release = true           # R-REL-*, R-PUB-*, R-BIN-*"
+    )
+    .unwrap_or_default();
+
+    config
 }
 
 /// Generate the `[typescript]` TOML section by discovering apps and auto-detecting their types.

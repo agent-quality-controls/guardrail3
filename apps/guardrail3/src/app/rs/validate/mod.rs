@@ -168,6 +168,7 @@ fn run_code_checks(
     });
 }
 
+#[allow(clippy::too_many_lines)] // reason: architecture check orchestrator builds merged config and runs multiple checks
 fn run_architecture_checks(
     fs: &dyn FileSystem,
     workspace_root: &Path,
@@ -178,51 +179,65 @@ fn run_architecture_checks(
 ) {
     let mut arch_results = Vec::new();
 
-    {
-        let empty = std::collections::BTreeMap::new();
-        let crate_configs = guardrail_cfg
-            .as_ref()
-            .and_then(|c| c.rust.as_ref())
-            .and_then(|r| r.crates.as_ref())
-            .unwrap_or(&empty);
+    // Build merged config: apps + packages (packages apply to all members in packages/)
+    let empty = std::collections::BTreeMap::new();
+    let app_configs = guardrail_cfg
+        .and_then(|c| c.rust.as_ref())
+        .and_then(|r| r.apps.as_ref())
+        .unwrap_or(&empty);
 
+    let mut crate_configs = app_configs.clone();
+
+    if let Some(pkg_cfg) = guardrail_cfg
+        .and_then(|c| c.rust.as_ref())
+        .and_then(|r| r.packages.as_ref())
+    {
+        for ws in &project.workspaces {
+            for member in &ws.members {
+                if (member.dir.starts_with("packages/") || member.dir.contains("/packages/"))
+                    && !crate_configs.contains_key(member.name.as_str())
+                    && !crate_configs.contains_key(member.dir.as_str())
+                {
+                    let _ = crate_configs.insert(member.name.clone(), pkg_cfg.clone());
+                }
+            }
+        }
+    }
+
+    {
         hex_arch_checks::check_hex_arch_structure(
             fs,
             workspace_root,
             project,
-            crate_configs,
+            &crate_configs,
             &mut arch_results,
         );
         hex_arch_checks::check_dependency_flow(
             fs,
             workspace_root,
             project,
-            crate_configs,
+            &crate_configs,
             &mut arch_results,
         );
         hex_arch_checks::check_library_service_boundary(
             fs,
             workspace_root,
             project,
-            crate_configs,
+            &crate_configs,
             &mut arch_results,
         );
         hex_arch_checks::check_unconfigured_members(
             fs,
             workspace_root,
             project,
-            crate_configs,
+            &crate_configs,
             profile.map_or("service", String::as_str),
             &mut arch_results,
         );
     }
 
-    if let Some(crate_map) = guardrail_cfg
-        .as_ref()
-        .and_then(|c| c.rust.as_ref())
-        .and_then(|r| r.crates.as_ref())
     {
-        for (crate_name, crate_cfg) in crate_map {
+        for (crate_name, crate_cfg) in &crate_configs {
             if let Some(allowed) = &crate_cfg.allowed_deps {
                 let cargo_path = workspace_root.join(crate_name).join("Cargo.toml");
                 dependency_allowlist::check_dependency_allowlist(

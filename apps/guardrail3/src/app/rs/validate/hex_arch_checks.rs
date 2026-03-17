@@ -340,7 +340,7 @@ pub fn check_unconfigured_members(
             severity: Severity::Error,
             title: "No per-crate configuration".to_owned(),
             message: format!(
-                "Profile is \"service\" but no [rust.crates.*] sections in guardrail3.toml. \
+                "Profile is \"service\" but no [rust.apps.*] sections in guardrail3.toml. \
                  Configure each workspace member with profile and layer. \
                  Members: {}",
                 all_member_dirs.join(", ")
@@ -366,8 +366,8 @@ pub fn check_unconfigured_members(
                     severity: Severity::Warn,
                     title: format!("Workspace member `{crate_name}` not configured"),
                     message: format!(
-                        "Crate `{name}` (workspace: {ws_root}) has no [rust.crates.{name}] section in guardrail3.toml. Add it to declare the crate's role:\n\n  \
-                         [rust.crates.{name}]\n  \
+                        "Crate `{name}` (workspace: {ws_root}) has no [rust.apps.{name}] section in guardrail3.toml. Add it to declare the crate's role:\n\n  \
+                         [rust.apps.{name}]\n  \
                          profile = \"library\"          # or \"service\"\n  \
                          layer = \"domain\"             # or \"ports\", \"app\", \"adapters\", \"composition-root\", \"pure\"\n  \
                          allowed_deps = [\"serde\"]     # required for library profile\n\n\
