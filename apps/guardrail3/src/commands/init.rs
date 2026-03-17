@@ -5,12 +5,51 @@ use std::path::Path;
 #[allow(clippy::print_stdout)] // reason: CLI command — user-facing output
 #[allow(clippy::print_stderr)] // reason: CLI command — error output
 #[allow(clippy::disallowed_methods)] // reason: CLI command — exit codes and fs operations
-pub fn run_rs(profile: &str, path: &str, force: bool) {
+pub fn run_rs(profile: &str, path: &str, force: bool, dry_run: bool) {
     if profile != "service" && profile != "library" {
         eprintln!("Error: unknown profile '{profile}'. Must be 'service' or 'library'.");
         std::process::exit(1);
     }
     let project_path = Path::new(path);
+
+    if dry_run {
+        println!("Dry run — showing what rs init --profile {profile} would do:\n");
+
+        let config_path = project_path.join("guardrail3.toml");
+        let config_content = generate_rs_config_content(profile);
+        show_file_diff(&config_path, &config_content);
+
+        let local_files = [
+            "clippy-methods.toml",
+            "clippy-types.toml",
+            "deny-bans.toml",
+            "deny-skip.toml",
+            "deny-feature-bans.toml",
+        ];
+        let local_templates = [
+            "# Additional disallowed-methods entries (TOML array-of-tables format)\n# Example:\n#     { path = \"some::method\", reason = \"Use alternative instead\" },\n",
+            "# Additional disallowed-types entries (TOML array-of-tables format)\n# Example:\n#     { path = \"some::Type\", reason = \"Use alternative instead\" },\n",
+            "# Additional [bans] deny entries for deny.toml\n# Example:\n#     { name = \"some-crate\", wrappers = [] },\n",
+            "# Skip entries for deny.toml [bans] section\n# Example:\n#     { crate = \"windows-sys@0.60.2\", reason = \"transitive dep conflict\" },\n",
+            "# Additional [[bans.features]] entries for deny.toml\n# Example:\n#     [[bans.features]]\n#     name = \"some-crate\"\n#     deny = [\"full\"]\n",
+        ];
+        for (filename, content) in local_files.iter().zip(local_templates.iter()) {
+            show_file_diff(&project_path.join("local").join(filename), content);
+        }
+
+        if profile == "service" {
+            show_file_diff(
+                &project_path.join("release-plz.toml"),
+                crate::domain::modules::release::RELEASE_PLZ_TOML.content,
+            );
+            show_file_diff(
+                &project_path.join("cliff.toml"),
+                crate::domain::modules::release::CLIFF_TOML.content,
+            );
+        }
+        return;
+    }
+
     let mut created: Vec<String> = Vec::new();
     let mut skipped: Vec<String> = Vec::new();
 
@@ -149,11 +188,29 @@ fn print_rs_summary(project_path: &Path, created: &[String], skipped: &[String])
 #[allow(clippy::print_stdout)] // reason: CLI command — user-facing output
 #[allow(clippy::print_stderr)] // reason: CLI command — error output
 #[allow(clippy::disallowed_methods)] // reason: CLI command — exit codes and fs operations
-pub fn run_ts(path: &str, force: bool) {
+pub fn run_ts(path: &str, force: bool, dry_run: bool) {
     let project_path = Path::new(path);
     let config_path = project_path.join("guardrail3.toml");
 
     let ts_section = "\n[typescript]\n\n[typescript.apps.my-app]\ntype = \"service\"         # service | content | library\n\n[typescript.checks]\narchitecture = true      # T-ARCH-*, eslint boundary audit — hex arch enforcement\ntests = true             # T-TEST-* — test quality enforcement\n";
+
+    if dry_run {
+        if config_path.exists() {
+            let existing = crate::fs::read_file(&config_path).unwrap_or_default();
+            let new_content = if existing.contains("[typescript]") {
+                replace_typescript_section(&existing, ts_section)
+            } else {
+                format!("{existing}{ts_section}")
+            };
+            println!("Dry run — showing what ts init would do:\n");
+            show_file_diff(&config_path, &new_content);
+        } else {
+            let config_content = format!("version = \"0.1\"\n{ts_section}");
+            println!("Dry run — showing what ts init would do:\n");
+            show_file_diff(&config_path, &config_content);
+        }
+        return;
+    }
 
     if config_path.exists() {
         // Read existing content and check if [typescript] section already exists
@@ -244,6 +301,35 @@ fn replace_typescript_section(existing: &str, new_ts_section: &str) -> String {
     }
 
     result
+}
+
+/// Show a simple diff of what would change for a single file during dry run.
+#[allow(clippy::print_stdout)] // reason: CLI dry-run output
+fn show_file_diff(path: &Path, new_content: &str) {
+    if path.exists() {
+        let existing = crate::fs::read_file(path).unwrap_or_default();
+        if existing == new_content {
+            println!("  {} — no changes", path.display());
+        } else {
+            println!("  {} — would change:", path.display());
+            for line in existing.lines() {
+                if !new_content.contains(line) {
+                    println!("    - {line}");
+                }
+            }
+            for line in new_content.lines() {
+                if !existing.contains(line) {
+                    println!("    + {line}");
+                }
+            }
+        }
+    } else {
+        println!(
+            "  {} — would create ({} bytes)",
+            path.display(),
+            new_content.len()
+        );
+    }
 }
 
 fn generate_rs_config_content(profile: &str) -> String {

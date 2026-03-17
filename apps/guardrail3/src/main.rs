@@ -75,8 +75,9 @@ fn handle_rs(command: RsCommands) {
             profile,
             path,
             force,
+            dry_run,
         } => {
-            commands::init::run_rs(&profile, &path, force);
+            commands::init::run_rs(&profile, &path, force, dry_run);
         }
         RsCommands::Generate(args) => {
             validate_or_exit(&args);
@@ -129,8 +130,12 @@ fn handle_rs(command: RsCommands) {
 #[allow(clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI dispatch
 fn handle_ts(command: TsCommands) {
     match command {
-        TsCommands::Init { path, force } => {
-            commands::init::run_ts(&path, force);
+        TsCommands::Init {
+            path,
+            force,
+            dry_run,
+        } => {
+            commands::init::run_ts(&path, force, dry_run);
         }
         TsCommands::Generate(args) => {
             validate_or_exit(&args);
