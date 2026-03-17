@@ -27,6 +27,8 @@ pub struct DeriveInfo {
     /// Whether the struct has at least one non-primitive field (String, Vec, custom types, etc.).
     /// `false` for enums, unit structs, or structs with only primitive fields.
     pub has_non_primitive_fields: bool,
+    /// Name of the struct/enum (if identifiable from the item).
+    pub name: Option<String>,
 }
 
 /// Parse a Rust source file. Returns `None` if parsing fails.
@@ -270,6 +272,22 @@ pub(super) fn is_cfg_test_attr(attr: &syn::Attribute) -> bool {
         return false;
     };
     nested == "test"
+}
+
+/// Extract the identifier (name) from a syn Item, if it has one.
+#[allow(clippy::wildcard_enum_match_arm)] // reason: syn Item has many variants, exhaustive match is impractical
+pub(super) fn item_ident(item: &syn::Item) -> Option<&syn::Ident> {
+    match item {
+        syn::Item::Fn(f) => Some(&f.sig.ident),
+        syn::Item::Struct(s) => Some(&s.ident),
+        syn::Item::Enum(e) => Some(&e.ident),
+        syn::Item::Mod(m) => Some(&m.ident),
+        syn::Item::Trait(t) => Some(&t.ident),
+        syn::Item::Type(t) => Some(&t.ident),
+        syn::Item::Const(c) => Some(&c.ident),
+        syn::Item::Static(s) => Some(&s.ident),
+        _ => None,
+    }
 }
 
 #[allow(clippy::wildcard_enum_match_arm)] // reason: syn Item has many variants, exhaustive match is impractical

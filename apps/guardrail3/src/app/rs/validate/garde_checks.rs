@@ -80,11 +80,17 @@ pub fn check(fs: &dyn FileSystem, workspace_root: &Path) -> Vec<CheckResult> {
     }
 
     // R-GARDE-05: derive inventory scan (excludes test files)
-    let rs_files: Vec<String> = super::source_scan::collect_rs_files(workspace_root)
-        .into_iter()
-        .filter(|f| !super::source_scan::is_test_path(f))
-        .collect();
-    results.extend(check_derive_inventory(fs, &rs_files, workspace_root));
+    // Gate: skip if garde is NOT in dependencies (R-GARDE-01 found it missing)
+    let garde_in_deps = results
+        .iter()
+        .any(|r| r.id == "R-GARDE-01" && r.severity == Severity::Info);
+    if garde_in_deps {
+        let rs_files: Vec<String> = super::source_scan::collect_rs_files(workspace_root)
+            .into_iter()
+            .filter(|f| !super::source_scan::is_test_path(f))
+            .collect();
+        results.extend(check_derive_inventory(fs, &rs_files, workspace_root));
+    }
 
     results
 }
@@ -179,13 +185,19 @@ pub fn check_reqwest_json_ban_from_table(table: &toml::Value, file: &str) -> Vec
 /// The four input boundary derives that require `Validate`.
 pub const INPUT_BOUNDARY_DERIVES: &[&str] = &["Deserialize", "Parser", "Args", "FromRow"];
 
+/// Information about a struct missing `#[derive(Validate)]`.
+struct MissingValidateInfo {
+    struct_name: String,
+    file_path: String,
+}
+
 pub fn check_derive_inventory(
     fs: &dyn FileSystem,
     rs_files: &[String],
     workspace_root: &Path,
 ) -> Vec<CheckResult> {
     let mut with_validate: usize = 0;
-    let mut without_validate: usize = 0;
+    let mut missing_structs: Vec<MissingValidateInfo> = Vec::new();
 
     for file_path in rs_files {
         let path = Path::new(file_path);
@@ -196,37 +208,52 @@ pub fn check_derive_inventory(
             continue;
         };
         let derives = super::ast_helpers::find_derive_attributes(&parsed);
-        let (w, wo) = count_unvalidated_input_structs(&derives);
+        let (w, missing) = find_unvalidated_input_structs(&derives);
         with_validate = with_validate.saturating_add(w);
-        without_validate = without_validate.saturating_add(wo);
+        for name in missing {
+            missing_structs.push(MissingValidateInfo {
+                struct_name: name,
+                file_path: file_path.clone(),
+            });
+        }
     }
 
-    let severity = if without_validate > 0 {
-        Severity::Error
+    if missing_structs.is_empty() {
+        let result = CheckResult {
+            id: "R-GARDE-05".to_owned(),
+            severity: Severity::Info,
+            title: "Input boundary struct validation inventory".to_owned(),
+            message: format!(
+                "{with_validate} input boundary structs (Deserialize/Parser/Args/FromRow) all derive `Validate` for runtime input validation. No structs are missing validation. No action needed."
+            ),
+            file: Some(workspace_root.display().to_string()),
+            line: None,
+            inventory: false,
+        };
+        vec![result.as_inventory()]
     } else {
-        Severity::Info
-    };
-
-    let message = if without_validate == 0 {
-        format!(
-            "{with_validate} input boundary structs (Deserialize/Parser/Args/FromRow) all derive `Validate` for runtime input validation. No structs are missing validation. No action needed."
-        )
-    } else {
-        format!(
-            "{with_validate} input boundary structs have `Validate`, but {without_validate} structs deriving Deserialize/Parser/Args/FromRow are missing `#[derive(Validate)]`. Without `Validate`, deserialized input bypasses runtime validation. Add `#[derive(Validate)]` and garde field attributes to each missing struct."
-        )
-    };
-    let result = CheckResult {
-        id: "R-GARDE-05".to_owned(),
-        severity,
-        title: "Input boundary struct validation inventory".to_owned(),
-        message,
-        file: Some(workspace_root.display().to_string()),
-        line: None,
-        inventory: false,
-    };
-    // Mark as inventory when nothing is missing (confirmation only)
-    vec![if without_validate == 0 { result.as_inventory() } else { result }]
+        // One CheckResult per missing struct for --verbose visibility
+        missing_structs
+            .iter()
+            .map(|info| {
+                let relative = Path::new(&info.file_path)
+                    .strip_prefix(workspace_root)
+                    .map_or_else(|_| info.file_path.clone(), |p| p.display().to_string());
+                CheckResult {
+                    id: "R-GARDE-05".to_owned(),
+                    severity: Severity::Error,
+                    title: format!("Missing Validate on `{}`", info.struct_name),
+                    message: format!(
+                        "Struct `{}` in `{relative}` derives Deserialize/Parser/Args/FromRow but is missing `#[derive(Validate)]`. Without `Validate`, deserialized input bypasses runtime validation. Add `#[derive(Validate)]` and garde field attributes.",
+                        info.struct_name
+                    ),
+                    file: Some(info.file_path.clone()),
+                    line: None,
+                    inventory: false,
+                }
+            })
+            .collect()
+    }
 }
 
 /// Check if a macro name matches any of the input boundary derives,
@@ -245,8 +272,17 @@ pub fn is_input_boundary_derive(macro_name: &str) -> bool {
 pub fn count_unvalidated_input_structs(
     derives: &[super::ast_helpers::DeriveInfo],
 ) -> (usize, usize) {
+    let (w, missing) = find_unvalidated_input_structs(derives);
+    (w, missing.len())
+}
+
+/// Find structs that derive input boundary traits but are missing `Validate`.
+/// Returns (count_with_validate, vec_of_missing_struct_names).
+pub fn find_unvalidated_input_structs(
+    derives: &[super::ast_helpers::DeriveInfo],
+) -> (usize, Vec<String>) {
     let mut with_validate: usize = 0;
-    let mut without_validate: usize = 0;
+    let mut missing_names: Vec<String> = Vec::new();
 
     for info in derives {
         let has_input_boundary = info
@@ -267,11 +303,15 @@ pub fn count_unvalidated_input_structs(
         if has_validate {
             with_validate = with_validate.saturating_add(1);
         } else {
-            without_validate = without_validate.saturating_add(1);
+            let name = info
+                .name
+                .clone()
+                .unwrap_or_else(|| format!("<anonymous at line {}>", info.line));
+            missing_names.push(name);
         }
     }
 
-    (with_validate, without_validate)
+    (with_validate, missing_names)
 }
 
 // ---------------------------------------------------------------------------

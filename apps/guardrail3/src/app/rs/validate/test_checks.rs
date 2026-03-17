@@ -193,8 +193,15 @@ pub fn content_has_test(content: &str) -> bool {
 // R-TEST-09: No test code in production source files
 // ---------------------------------------------------------------------------
 
-/// Walk all `.rs` files under `src/` and flag any that contain `#[test]`/`#[tokio::test]`
-/// attributes or `#[cfg(test)]` modules. Test code belongs in `tests/` directories.
+/// Walk all `.rs` files under `src/` and flag any that contain INLINE test code.
+///
+/// Acceptable pattern (NOT flagged):
+///   `#[cfg(test)] #[path = "foo_tests.rs"] mod tests;`  ← pointer to separate file
+///   `_tests.rs` files                                    ← the separate test files
+///
+/// Flagged (inline test code):
+///   `#[cfg(test)] mod tests { #[test] fn ... }`          ← tests inside production file
+///   `#[test] fn ...` directly in a non-test file         ← tests mixed with production
 pub fn check_no_tests_in_src(
     fs: &dyn FileSystem,
     workspace_root: &Path,
@@ -220,13 +227,18 @@ pub fn check_no_tests_in_src(
             continue;
         }
 
-        // Skip files in tests/ paths (e.g. src/tests/)
+        // Skip files in tests/ paths
         if path_str.contains("/tests/") {
             continue;
         }
 
         // Skip test fixture files
         if path_str.contains("tests/fixtures/") {
+            continue;
+        }
+
+        // Skip _tests.rs files — these ARE the separate test files (target of #[path])
+        if path_str.ends_with("_tests.rs") || path_str.ends_with("/tests.rs") {
             continue;
         }
 
@@ -238,13 +250,14 @@ pub fn check_no_tests_in_src(
             continue;
         };
 
-        // Check for #[test] or #[tokio::test] attributes
+        // Check for #[test] functions directly in the file (not in a mod)
         let has_test_attr = super::ast_helpers::has_test_attribute(&parsed);
 
-        // Check for #[cfg(test)] modules
-        let has_cfg_test = file_has_cfg_test_module(&parsed);
+        // Check for #[cfg(test)] modules WITH a body (inline tests).
+        // #[cfg(test)] mod tests; (no body, just declaration) is OK — it's a #[path] pointer.
+        let has_inline_test_module = file_has_inline_cfg_test_module(&parsed);
 
-        if has_test_attr || has_cfg_test {
+        if has_test_attr || has_inline_test_module {
             let relative = path
                 .strip_prefix(workspace_root)
                 .unwrap_or(path)
@@ -253,9 +266,24 @@ pub fn check_no_tests_in_src(
             results.push(CheckResult {
                 id: "R-TEST-09".to_owned(),
                 severity: Severity::Error,
-                title: "Test code in production source".to_owned(),
+                title: "Inline test code in production source".to_owned(),
                 message: format!(
-                    "`#[cfg(test)]` or `#[test]` found in production source file `{relative}`. Test code in src/ increases compile time for the main binary and may accidentally include test-only dependencies. Move the `#[cfg(test)]` block and `#[test]` functions to a file in the `tests/` directory."
+                    "Inline test code found in `{relative}`. \
+                     Extract tests to a separate file using the #[path] pattern:\n\
+                     \n\
+                     In {relative}:\n  \
+                       #[cfg(test)]\n  \
+                       #[path = \"<name>_tests.rs\"]\n  \
+                       mod tests;\n\
+                     \n\
+                     In <name>_tests.rs:\n  \
+                       use super::*;\n  \
+                       #[test]\n  \
+                       fn test_something() {{ ... }}\n\
+                     \n\
+                     This keeps unit test access to private items via `use super::*` \
+                     while separating test code from production code. \
+                     For integration tests that only need the public API, use `tests/` at crate root."
                 ),
                 file: Some(path_str),
                 line: None,
@@ -265,12 +293,22 @@ pub fn check_no_tests_in_src(
     }
 }
 
-/// Check if a parsed file has any `#[cfg(test)] mod ...` at the top level.
+/// Check if a parsed file has `#[cfg(test)] mod tests { ... }` with an INLINE body.
+/// Returns false for `#[cfg(test)] mod tests;` (no body — just a declaration pointing
+/// to a separate file via #[path]).
 pub fn file_has_cfg_test_module(file: &syn::File) -> bool {
+    file_has_inline_cfg_test_module(file)
+}
+
+fn file_has_inline_cfg_test_module(file: &syn::File) -> bool {
     for item in &file.items {
         if let syn::Item::Mod(m) = item {
             if m.attrs.iter().any(super::ast_helpers::is_cfg_test_attr) {
-                return true;
+                // m.content is Some(...) when the module has a body { ... }
+                // m.content is None when it's just `mod tests;` (declaration only)
+                if m.content.is_some() {
+                    return true;
+                }
             }
         }
     }

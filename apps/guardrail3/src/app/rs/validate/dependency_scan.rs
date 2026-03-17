@@ -218,7 +218,7 @@ fn scan_banned_crates(
                 id: "R50".to_owned(),
                 severity: Severity::Error,
                 title: "Banned crate in lockfile".to_owned(),
-                message: format!("Banned crate `{banned}` found in Cargo.lock as a transitive dependency. This crate is on the deny list (deny.toml) because a preferred alternative exists. Remove the dependency that pulls it in, or add a skip entry to deny.toml [bans.skip] with a reason if it cannot be avoided."),
+                message: format!("Banned crate `{banned}` found in Cargo.lock as a transitive dependency. This crate is on the deny list (deny.toml) because a preferred alternative exists. Remove the dependency that pulls it in, or add a skip entry to deny.toml [bans.skip] with a reason if it cannot be avoided. To find what pulls in this dependency, run: `cargo tree -i {} --target all`", banned.split('@').next().unwrap_or(banned)),
                 file: Some(lock_path.display().to_string()),
                 line: None,
                 inventory: false,
