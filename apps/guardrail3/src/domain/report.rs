@@ -100,9 +100,9 @@ pub enum TsAppType {
 }
 
 impl TsAppType {
-    /// Parse from config string, defaulting to Service for unknown values.
+    /// Parse from config string (case-insensitive), defaulting to Service for unknown values.
     pub fn from_str_or_default(s: &str) -> Self {
-        match s {
+        match s.to_ascii_lowercase().as_str() {
             "content" => Self::Content,
             "library" => Self::Library,
             _ => Self::Service,
