@@ -328,10 +328,11 @@ SOURCE SCAN (AST-based via syn — immune to strings/comments):
   R38       File length > 500 lines (error)
   R40       Use count > 20 (error)
   R41       Use count > 15 (warn)
-  R42       Unsafe usage
-  R43       todo!/unimplemented! macros
-  R44       .unwrap()/.expect() calls
-  R58       Direct std::fs usage
+  R58       Direct std::fs usage (catches clippy aliased-import hole)
+
+  NOTE: unsafe (R42), todo!/unimplemented! (R43), .unwrap()/.expect() (R44)
+  are NOT scanned — they are enforced by clippy lints configured via R26.
+  guardrail3 verifies the lint configuration exists, clippy enforces it.
 
 TOOLS & DEPENDENCIES:
   R45-R48   cargo-deny, cargo-machete, cargo-dupes, gitleaks installed
@@ -341,7 +342,6 @@ TOOLS & DEPENDENCIES:
   R-DEPS-02 Library crate without allowed_deps (warn)
 
 ARCHITECTURE:
-  R53       unsafe_code = forbid in lints
   R55-R57   Workspace metadata (edition, publish, release profile)
   R-ARCH-01 Service missing hex arch structure (domain/adapters layers)
   R-ARCH-02 Dependency flow violation (layer depends on forbidden layer)

@@ -51,20 +51,12 @@ pub fn check(
             allow_checks::check_cfg_attr_allow(path, &content, &mut results);
         }
 
-        // Structure checks (R38, R40-R42) — R42 excluded for test files
+        // Structure checks (R38, R40-R41)
         structure_checks::check_file_length(path, &content, is_test_file, &mut results);
         structure_checks::check_use_count(path, &content, is_test_file, &mut results);
-        if !is_test_file {
-            structure_checks::check_unsafe(path, &content, &mut results);
-        }
 
-        // Code quality checks (R43-R44, R58) — R44 excluded for test files
-        code_quality_checks::check_todo_macros(path, &content, is_test_file, &mut results);
+        // R58: std::fs — catches clippy's aliased-import hole
         code_quality_checks::check_direct_fs_usage(path, &content, is_test_file, &mut results);
-
-        if !is_test_file {
-            code_quality_checks::check_unwrap_expect(path, &content, &mut results);
-        }
     }
 
     // R36: EXCEPTION comments in config files
