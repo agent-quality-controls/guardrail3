@@ -187,16 +187,16 @@ fn collect_toml_entries(content: &str) -> BTreeSet<String> {
     while let Some(line) = lines.next() {
         let trimmed = line.trim();
 
-        // Detect section headers
-        if trimmed.contains("disallowed-methods") && trimmed.contains('[') {
+        // Detect section headers — must START with the key (not be inside a value string)
+        if trimmed.starts_with("disallowed-methods") && trimmed.contains('[') {
             "methods".clone_into(&mut current_section);
             continue;
         }
-        if trimmed.contains("disallowed-types") && trimmed.contains('[') {
+        if trimmed.starts_with("disallowed-types") && trimmed.contains('[') {
             "types".clone_into(&mut current_section);
             continue;
         }
-        if trimmed.contains("deny") && trimmed.contains('[') {
+        if trimmed.starts_with("deny") && trimmed.contains('[') {
             "deny".clone_into(&mut current_section);
             continue;
         }
