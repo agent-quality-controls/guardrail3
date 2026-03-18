@@ -47,6 +47,9 @@ pub enum Commands {
         /// Show deny.toml coverage map
         #[arg(long)]
         deny: bool,
+        /// Output format: text or json
+        #[arg(long, default_value = "text")]
+        format: String,
     },
 }
 

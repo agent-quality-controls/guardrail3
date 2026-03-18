@@ -54,12 +54,22 @@ fn main() {
         Commands::Rs { command } => handle_rs(command),
         Commands::Ts { command } => handle_ts(command),
         Commands::DumpGuide => handle_guide(),
-        Commands::Map { path, clippy, deny } => {
+        Commands::Map {
+            path,
+            clippy,
+            deny,
+            format,
+        } => {
             if clippy || deny {
                 let project_path = std::path::Path::new(&path);
                 let crawl_result = guardrail3::app::crawl::crawl(project_path);
+                let is_json = format == "json";
                 if clippy {
-                    commands::coverage::clippy::print(project_path, &crawl_result);
+                    if is_json {
+                        commands::coverage::clippy::print_json(project_path, &crawl_result);
+                    } else {
+                        commands::coverage::clippy::print_tree(project_path, &crawl_result);
+                    }
                 }
                 if deny {
                     // TODO: deny coverage map

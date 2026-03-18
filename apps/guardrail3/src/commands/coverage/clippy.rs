@@ -21,26 +21,84 @@
 
 use std::path::{Path, PathBuf};
 
+use serde::Serialize;
+
 use crate::app::crawl::CrawlResult;
 
-/// Print clippy.toml coverage as a hierarchical tree.
-///
-/// Shows every workspace/package with its Cargo.toml, and whether
-/// each crate is covered by a clippy.toml via walk-up resolution.
-#[allow(clippy::print_stdout)] // reason: CLI command — user-facing output
-#[allow(clippy::too_many_lines)] // reason: tree rendering with multiple node types
-pub fn print(root: &Path, crawl: &CrawlResult) {
-    println!("clippy.toml coverage");
-    println!(
-        "(clippy walks UP from each crate dir — nearest clippy.toml wins, shadows completely)\n"
-    );
+// ---------------------------------------------------------------------------
+// Data model
+// ---------------------------------------------------------------------------
 
-    // Parse all Cargo.tomls into a structure
-    let mut workspaces: Vec<WorkspaceNode> = Vec::new();
+#[derive(Serialize)]
+pub struct ClippyCoverage {
+    pub tool: &'static str,
+    pub resolution: &'static str,
+    pub project: String,
+    pub scopes: Vec<Scope>,
+    pub summary: Summary,
+}
+
+#[derive(Serialize)]
+#[serde(tag = "kind")]
+pub enum Scope {
+    #[serde(rename = "workspace")]
+    Workspace {
+        path: String,
+        cargo_toml: String,
+        members: Vec<String>,
+        #[serde(skip_serializing_if = "Vec::is_empty")]
+        excludes: Vec<String>,
+        clippy_toml: Option<ClippyTomlInfo>,
+        crates: Vec<CrateNode>,
+    },
+    #[serde(rename = "package")]
+    Package {
+        name: String,
+        path: String,
+        cargo_toml: String,
+        clippy_toml: Option<ClippyTomlInfo>,
+        covered_by: Option<String>,
+        shadows: bool,
+    },
+}
+
+#[derive(Serialize)]
+pub struct CrateNode {
+    pub kind: &'static str, // always "package"
+    pub name: String,
+    pub path: String,
+    pub cargo_toml: String,
+    pub covered_by: Option<String>,
+    pub shadows: bool,
+}
+
+#[derive(Serialize)]
+pub struct ClippyTomlInfo {
+    pub path: String,
+    pub methods: usize,
+    pub types: usize,
+}
+
+#[derive(Serialize)]
+pub struct Summary {
+    pub total_crates: u32,
+    pub covered: u32,
+    pub uncovered: u32,
+    pub shadowed: u32,
+}
+
+// ---------------------------------------------------------------------------
+// Build
+// ---------------------------------------------------------------------------
+
+/// Build the clippy coverage data from crawl results.
+#[allow(clippy::too_many_lines)] // reason: builds full project structure in two passes — splitting would obscure the flow
+pub fn build(root: &Path, crawl: &CrawlResult) -> ClippyCoverage {
+    let mut scopes = Vec::new();
     let mut all_member_dirs: std::collections::BTreeSet<PathBuf> =
         std::collections::BTreeSet::new();
 
-    // Pass 1: find workspaces and their members
+    // Pass 1: workspaces
     for cargo_path in &crawl.cargo_tomls {
         let Some(content) = crate::fs::read_file(cargo_path) else {
             continue;
@@ -53,71 +111,65 @@ pub fn print(root: &Path, crawl: &CrawlResult) {
         };
 
         let dir = cargo_path.parent().unwrap_or(root);
-        let rel_dir = rel(root, dir);
-        let has_package = table.get("package").is_some();
+        let rel_dir = rel_str(root, dir);
 
-        let members_arr = ws.get("members").and_then(|m| m.as_array());
-        let excludes: Vec<String> = ws
-            .get("exclude")
-            .and_then(|e| e.as_array())
-            .map(|a| {
-                a.iter()
-                    .filter_map(|v| v.as_str().map(str::to_owned))
-                    .collect()
-            })
-            .unwrap_or_default();
-
-        // Resolve member globs
-        let mut members = Vec::new();
-        if let Some(arr) = members_arr {
-            for member_val in arr {
+        let excludes = parse_string_array(ws.get("exclude"));
+        // Resolve member globs to actual crate directories
+        let mut crate_nodes = Vec::new();
+        if let Some(members_arr) = ws.get("members").and_then(|m| m.as_array()) {
+            for member_val in members_arr {
                 let Some(pattern_str) = member_val.as_str() else {
                     continue;
                 };
                 let pattern = dir.join(pattern_str);
-                if let Ok(paths) = glob::glob(&pattern.display().to_string()) {
-                    for member_path in paths.flatten() {
-                        if !member_path.join("Cargo.toml").exists() {
+                let Ok(paths) = glob::glob(&pattern.display().to_string()) else {
+                    continue;
+                };
+                for member_path in paths.flatten() {
+                    if !member_path.join("Cargo.toml").exists() {
+                        continue;
+                    }
+                    if let Ok(ws_rel) = member_path.strip_prefix(dir) {
+                        if excludes.contains(&ws_rel.display().to_string()) {
                             continue;
                         }
-                        let member_rel = rel(root, &member_path);
-                        // Check exclude
-                        if let Ok(ws_rel) = member_path.strip_prefix(dir) {
-                            if excludes.contains(&ws_rel.display().to_string()) {
-                                continue;
-                            }
-                        }
-                        let name = read_package_name(&member_path);
-                        let covered = find_covering_clippy(&member_path, root, &crawl.clippy_tomls);
-                        let has_own_clippy = crawl
-                            .clippy_tomls
-                            .iter()
-                            .any(|p| p.parent() == Some(member_path.as_path()));
-
-                        let _ = all_member_dirs.insert(member_rel.clone());
-                        members.push(MemberNode {
-                            name,
-                            dir: member_rel,
-                            covered_by: covered.map(|p| rel(root, &p)),
-                            has_own_clippy,
-                        });
                     }
+                    let crate_rel = rel_str(root, &member_path);
+                    let name = read_package_name(&member_path);
+                    let covered = find_covering_clippy(&member_path, root, &crawl.clippy_tomls)
+                        .map(|p| format!("{}/clippy.toml", rel_str(root, &p)));
+                    let shadows = has_own_clippy(&member_path, dir, &crawl.clippy_tomls);
+
+                    let _ = all_member_dirs.insert(member_path.clone());
+
+                    crate_nodes.push(CrateNode {
+                        kind: "package",
+                        name,
+                        cargo_toml: format!("{crate_rel}/Cargo.toml"),
+                        path: crate_rel,
+                        covered_by: covered,
+                        shadows,
+                    });
                 }
             }
         }
 
-        let clippy_info = clippy_summary(dir, &crawl.clippy_tomls);
+        // Resolve members to project-root-relative paths for the JSON output
+        let members_full: Vec<String> = crate_nodes.iter().map(|c| c.path.clone()).collect();
 
-        workspaces.push(WorkspaceNode {
-            dir: rel_dir,
-            has_package,
-            members,
+        let clippy_info = parse_clippy_toml(dir, &crawl.clippy_tomls, root);
+
+        scopes.push(Scope::Workspace {
+            cargo_toml: format!("{rel_dir}/Cargo.toml").replace("./", ""),
+            path: rel_dir,
+            members: members_full,
             excludes,
-            clippy: clippy_info,
+            clippy_toml: clippy_info,
+            crates: crate_nodes,
         });
     }
 
-    // Pass 2: find independent packages (not a member of any workspace)
+    // Pass 2: independent packages
     for cargo_path in &crawl.cargo_tomls {
         let Some(content) = crate::fs::read_file(cargo_path) else {
             continue;
@@ -128,147 +180,216 @@ pub fn print(root: &Path, crawl: &CrawlResult) {
         if table.get("workspace").is_some() {
             continue;
         }
-        let Some(_pkg) = table.get("package") else {
+        if table.get("package").is_none() {
             continue;
-        };
+        }
 
         let dir = cargo_path.parent().unwrap_or(root);
-        let rel_dir = rel(root, dir);
+        let rel_dir_path = root.join("").join(dir.strip_prefix(root).unwrap_or(dir));
 
-        if all_member_dirs.contains(&rel_dir) {
-            continue; // It's a workspace member, already shown
+        if all_member_dirs.contains(dir) {
+            continue;
         }
 
-        let clippy_info = clippy_summary(dir, &crawl.clippy_tomls);
+        let rel_dir = rel_str(root, dir);
+        let name = read_package_name(dir);
+        let clippy_info = parse_clippy_toml(dir, &crawl.clippy_tomls, root);
+        let covered = find_covering_clippy(dir, root, &crawl.clippy_tomls)
+            .map(|p| format!("{}/clippy.toml", rel_str(root, &p)));
 
-        // Show as an independent package (no separate members)
-        workspaces.push(WorkspaceNode {
-            dir: rel_dir.clone(),
-            has_package: true,
-            members: Vec::new(), // No separate members — it IS the member
-            excludes: Vec::new(),
-            clippy: clippy_info,
+        let _ = all_member_dirs.insert(rel_dir_path);
+
+        scopes.push(Scope::Package {
+            name,
+            cargo_toml: format!("{rel_dir}/Cargo.toml").replace("./", ""),
+            path: rel_dir,
+            clippy_toml: clippy_info,
+            covered_by: covered,
+            shadows: false,
         });
-
-        // But we still need coverage info for the summary
-        // Store it as a pseudo-member for counting
-        let _ = all_member_dirs.insert(rel_dir);
     }
 
-    workspaces.sort_by(|a, b| a.dir.cmp(&b.dir));
-
-    // Render tree
-    let mut total_crates = 0u32;
-    let mut covered_crates = 0u32;
-
-    for ws in &workspaces {
-        let dir_display = if ws.dir.as_os_str().is_empty() {
-            ".".to_owned()
-        } else {
-            ws.dir.display().to_string()
+    // Sort scopes by path
+    scopes.sort_by(|a, b| {
+        let path_a = match a {
+            Scope::Workspace { path, .. } | Scope::Package { path, .. } => path,
         };
+        let path_b = match b {
+            Scope::Workspace { path, .. } | Scope::Package { path, .. } => path,
+        };
+        path_a.cmp(path_b)
+    });
 
-        // Workspace/package header
-        if ws.members.is_empty() && ws.has_package {
-            // Independent package
-            println!("{dir_display}/");
-            println!(
-                "  Cargo.toml               [package] {}",
-                read_package_name_from_rel(root, &ws.dir)
-            );
-            match &ws.clippy {
-                Some(info) => println!("  clippy.toml              {info}"),
-                None => println!("  clippy.toml              MISSING"),
-            }
-            // Coverage
-            let covered = find_covering_clippy(&root.join(&ws.dir), root, &crawl.clippy_tomls);
-            total_crates = total_crates.saturating_add(1);
-            if covered.is_some() {
-                covered_crates = covered_crates.saturating_add(1);
-            } else {
-                println!("  ⚠ UNCOVERED");
-            }
-        } else {
-            // Workspace
-            let member_count = ws.members.len();
-            println!("{dir_display}/");
-            if ws.has_package {
-                println!("  Cargo.toml               [workspace+package] members={member_count}");
-            } else {
-                println!("  Cargo.toml               [workspace] members={member_count}");
-            }
-            if !ws.excludes.is_empty() {
-                println!(
-                    "                           excludes: {}",
-                    ws.excludes.join(", ")
-                );
-            }
-            match &ws.clippy {
-                Some(info) => println!("  clippy.toml              {info}"),
-                None => println!("  clippy.toml              MISSING"),
-            }
+    // Summary
+    let mut total: u32 = 0;
+    let mut covered: u32 = 0;
+    let mut shadowed: u32 = 0;
 
-            // Members
-            for (i, member) in ws.members.iter().enumerate() {
-                let is_last = i == member_count.saturating_sub(1);
-                let prefix = if is_last {
-                    "  └── "
-                } else {
-                    "  ├── "
-                };
-                let cont = if is_last { "      " } else { "  │   " };
-
-                // Show member path relative to workspace, not project root
-                let member_rel = member.dir.strip_prefix(&ws.dir).unwrap_or(&member.dir);
-                println!("{prefix}{}/", member_rel.display());
-                println!("{cont}  Cargo.toml             [package] {}", member.name);
-
-                if member.has_own_clippy {
-                    println!("{cont}  clippy.toml           ⚠ SHADOWS workspace clippy.toml");
+    for scope in &scopes {
+        match scope {
+            Scope::Workspace { crates, .. } => {
+                for c in crates {
+                    total = total.saturating_add(1);
+                    if c.covered_by.is_some() {
+                        covered = covered.saturating_add(1);
+                    }
+                    if c.shadows {
+                        shadowed = shadowed.saturating_add(1);
+                    }
                 }
-
-                total_crates = total_crates.saturating_add(1);
-                if member.covered_by.is_some() {
-                    covered_crates = covered_crates.saturating_add(1);
-                } else {
-                    println!("{cont}  ⚠ UNCOVERED");
+            }
+            Scope::Package {
+                covered_by,
+                shadows,
+                ..
+            } => {
+                total = total.saturating_add(1);
+                if covered_by.is_some() {
+                    covered = covered.saturating_add(1);
+                }
+                if *shadows {
+                    shadowed = shadowed.saturating_add(1);
                 }
             }
         }
-        println!();
+    }
+
+    ClippyCoverage {
+        tool: "clippy",
+        resolution: "walk-up from CARGO_MANIFEST_DIR",
+        project: root
+            .canonicalize()
+            .unwrap_or_else(|_| root.to_path_buf())
+            .display()
+            .to_string(),
+        scopes,
+        summary: Summary {
+            total_crates: total,
+            covered,
+            uncovered: total.saturating_sub(covered),
+            shadowed,
+        },
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Print
+// ---------------------------------------------------------------------------
+
+/// Print as JSON.
+#[allow(clippy::print_stdout)] // reason: CLI command — user-facing output
+pub fn print_json(root: &Path, crawl: &CrawlResult) {
+    let data = build(root, crawl);
+    if let Ok(json) = serde_json::to_string_pretty(&data) {
+        println!("{json}");
+    }
+}
+
+/// Print as human-readable tree.
+#[allow(clippy::print_stdout)] // reason: CLI command — user-facing output
+#[allow(clippy::too_many_lines)] // reason: tree rendering with multiple node types
+pub fn print_tree(root: &Path, crawl: &CrawlResult) {
+    let data = build(root, crawl);
+
+    println!("clippy.toml coverage");
+    println!(
+        "(clippy walks UP from each crate dir — nearest clippy.toml wins, shadows completely)\n"
+    );
+
+    for scope in &data.scopes {
+        match scope {
+            Scope::Workspace {
+                path,
+                excludes,
+                clippy_toml,
+                crates,
+                ..
+            } => {
+                let display = if path.is_empty() { "." } else { path.as_str() };
+                let member_count = crates.len();
+                println!("{display}/");
+                println!("  Cargo.toml               [workspace] members={member_count}");
+                if !excludes.is_empty() {
+                    println!(
+                        "                           excludes: {}",
+                        excludes.join(", ")
+                    );
+                }
+                match clippy_toml {
+                    Some(info) => {
+                        println!(
+                            "  clippy.toml              {} methods, {} types",
+                            info.methods, info.types
+                        );
+                    }
+                    None => println!("  clippy.toml              MISSING"),
+                }
+
+                let count = crates.len();
+                for (i, c) in crates.iter().enumerate() {
+                    let is_last = i == count.saturating_sub(1);
+                    let prefix = if is_last {
+                        "  └── "
+                    } else {
+                        "  ├── "
+                    };
+                    let indent = if is_last { "      " } else { "  │   " };
+
+                    // Show path relative to workspace
+                    let member_rel = c
+                        .path
+                        .strip_prefix(path)
+                        .and_then(|s| s.strip_prefix('/'))
+                        .unwrap_or(&c.path);
+                    println!("{prefix}{member_rel}/");
+                    println!("{indent}  Cargo.toml             [package] {}", c.name);
+
+                    if c.shadows {
+                        println!("{indent}  clippy.toml           ⚠ SHADOWS workspace clippy.toml");
+                    }
+                    if c.covered_by.is_none() {
+                        println!("{indent}  ⚠ UNCOVERED");
+                    }
+                }
+                println!();
+            }
+            Scope::Package {
+                name,
+                path,
+                clippy_toml,
+                covered_by,
+                ..
+            } => {
+                println!("{path}/");
+                println!("  Cargo.toml               [package] {name}");
+                match clippy_toml {
+                    Some(info) => {
+                        println!(
+                            "  clippy.toml              {} methods, {} types",
+                            info.methods, info.types
+                        );
+                    }
+                    None => println!("  clippy.toml              MISSING"),
+                }
+                if covered_by.is_none() {
+                    println!("  ⚠ UNCOVERED");
+                }
+                println!();
+            }
+        }
     }
 
     println!(
-        "Summary: {covered_crates}/{total_crates} crates covered, {} uncovered",
-        total_crates.saturating_sub(covered_crates)
+        "Summary: {}/{} crates covered, {} uncovered",
+        data.summary.covered, data.summary.total_crates, data.summary.uncovered
     );
 }
 
 // ---------------------------------------------------------------------------
-// Internal types
+// Helpers
 // ---------------------------------------------------------------------------
 
-struct WorkspaceNode {
-    dir: PathBuf,
-    has_package: bool,
-    members: Vec<MemberNode>,
-    excludes: Vec<String>,
-    clippy: Option<String>,
-}
-
-struct MemberNode {
-    name: String,
-    dir: PathBuf,
-    covered_by: Option<PathBuf>,
-    has_own_clippy: bool,
-}
-
-// ---------------------------------------------------------------------------
-// Resolution
-// ---------------------------------------------------------------------------
-
-/// Simulate clippy's walk-up: from `crate_dir`, walk up parent directories
-/// looking for `clippy.toml` or `.clippy.toml`. Return the directory that has it.
+/// Simulate clippy's walk-up: from `crate_dir`, walk up looking for `clippy.toml`.
 fn find_covering_clippy(
     crate_dir: &Path,
     project_root: &Path,
@@ -289,12 +410,31 @@ fn find_covering_clippy(
     }
 }
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
+/// Check if a crate has its own `clippy.toml` that shadows the workspace one.
+fn has_own_clippy(crate_dir: &Path, workspace_dir: &Path, clippy_tomls: &[PathBuf]) -> bool {
+    if crate_dir == workspace_dir {
+        return false;
+    }
+    clippy_tomls.iter().any(|p| p.parent() == Some(crate_dir))
+}
 
-fn rel(root: &Path, path: &Path) -> PathBuf {
-    path.strip_prefix(root).unwrap_or(path).to_path_buf()
+fn parse_clippy_toml(dir: &Path, clippy_tomls: &[PathBuf], root: &Path) -> Option<ClippyTomlInfo> {
+    let path = clippy_tomls.iter().find(|p| p.parent() == Some(dir))?;
+    let content = crate::fs::read_file(path)?;
+    let table = content.parse::<toml::Value>().ok()?;
+    let methods = table
+        .get("disallowed-methods")
+        .and_then(|v| v.as_array())
+        .map_or(0, Vec::len);
+    let types = table
+        .get("disallowed-types")
+        .and_then(|v| v.as_array())
+        .map_or(0, Vec::len);
+    Some(ClippyTomlInfo {
+        path: rel_str(root, path),
+        methods,
+        types,
+    })
 }
 
 fn read_package_name(dir: &Path) -> String {
@@ -317,21 +457,21 @@ fn read_package_name(dir: &Path) -> String {
         .to_owned()
 }
 
-fn read_package_name_from_rel(root: &Path, rel_path: &Path) -> String {
-    read_package_name(&root.join(rel_path))
+fn parse_string_array(val: Option<&toml::Value>) -> Vec<String> {
+    val.and_then(|v| v.as_array())
+        .map(|a| {
+            a.iter()
+                .filter_map(|v| v.as_str().map(str::to_owned))
+                .collect()
+        })
+        .unwrap_or_default()
 }
 
-fn clippy_summary(dir: &Path, clippy_tomls: &[PathBuf]) -> Option<String> {
-    let path = clippy_tomls.iter().find(|p| p.parent() == Some(dir))?;
-    let content = crate::fs::read_file(path)?;
-    let table = content.parse::<toml::Value>().ok()?;
-    let methods = table
-        .get("disallowed-methods")
-        .and_then(|v| v.as_array())
-        .map_or(0, Vec::len);
-    let types = table
-        .get("disallowed-types")
-        .and_then(|v| v.as_array())
-        .map_or(0, Vec::len);
-    Some(format!("{methods} methods, {types} types"))
+fn rel_str(root: &Path, path: &Path) -> String {
+    let s = path
+        .strip_prefix(root)
+        .unwrap_or(path)
+        .display()
+        .to_string();
+    if s.is_empty() { ".".to_owned() } else { s }
 }
