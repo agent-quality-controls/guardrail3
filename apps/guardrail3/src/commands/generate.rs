@@ -265,10 +265,12 @@ fn load_local_overrides(project_path: &Path) -> LocalOverrides {
     let read_and_validate = |name: &str| -> String {
         let path = overrides_dir.join(name);
         let raw = crate::fs::read_file(&path).unwrap_or_default();
-        if raw.trim().is_empty() {
+        // Strip UTF-8 BOM if present
+        let clean = raw.strip_prefix('\u{FEFF}').unwrap_or(&raw);
+        if clean.trim().is_empty() {
             return String::new();
         }
-        validate_override_content(&raw, name)
+        validate_override_content(clean, name)
     };
 
     LocalOverrides {
@@ -330,12 +332,23 @@ pub(crate) fn deduplicated_override(base: &str, override_content: &str) -> Strin
     result
 }
 
+#[allow(clippy::print_stderr)] // reason: workspace_root traversal warning reported to stderr
 fn resolve_rust_root(cfg: &config::types::GuardrailConfig) -> String {
-    cfg.rust
+    let root = cfg
+        .rust
         .as_ref()
         .and_then(|r| r.workspace_root.as_deref())
-        .unwrap_or(".")
-        .to_owned()
+        .unwrap_or(".");
+
+    // Reject path traversal attempts — workspace_root must not escape the project
+    if root.contains("..") {
+        eprintln!(
+            "Error: workspace_root contains '..', which could write files outside the project. Use a relative path within the project."
+        );
+        return ".".to_owned();
+    }
+
+    root.to_owned()
 }
 
 fn generate_all_files(
