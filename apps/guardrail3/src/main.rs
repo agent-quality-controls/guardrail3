@@ -72,7 +72,11 @@ fn main() {
                     }
                 }
                 if deny {
-                    // TODO: deny coverage map
+                    if is_json {
+                        commands::coverage::deny::print_json(project_path, &crawl_result);
+                    } else {
+                        commands::coverage::deny::print_tree(project_path, &crawl_result);
+                    }
                 }
             } else {
                 commands::map::run(&path);

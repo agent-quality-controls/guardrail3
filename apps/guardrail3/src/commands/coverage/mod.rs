@@ -4,3 +4,4 @@
 //! actual tool resolution rules for that file.
 
 pub mod clippy;
+pub mod deny;
