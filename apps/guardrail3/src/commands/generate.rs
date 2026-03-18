@@ -1,9 +1,15 @@
-use std::collections::BTreeMap;
+#[path = "generate_helpers.rs"]
+mod generate_helpers;
+pub(crate) use generate_helpers::deduplicated_override;
+use generate_helpers::{
+    GeneratedFile, detect_ts_app_types, generate_rust_files, load_local_overrides,
+};
+
 use std::path::Path;
 
 use crate::cli::GenerateArgs;
 use crate::domain::config;
-use crate::domain::modules::{canonical, clippy, deny, release};
+use crate::domain::modules::{canonical, cspell, eslint, stylelint};
 
 /// A (`relative_path`, `content`) pair for a generated file.
 type GeneratedPair = (String, String);
@@ -20,11 +26,6 @@ fn load_config(path: &Path) -> Option<config::types::GuardrailConfig> {
             None
         }
     }
-}
-
-struct GeneratedFile {
-    path: String,
-    content: String,
 }
 
 /// Main generate command -- generates all config files from guardrail3.toml.
@@ -97,9 +98,8 @@ pub fn run_rs(args: &GenerateArgs) {
         .to_owned();
 
     let local = load_local_overrides(project_path);
-    let rust_root = resolve_rust_root(&cfg);
 
-    let files = generate_rust_files(&rust_root, &cfg, &profile, &local);
+    let files = generate_rust_files(project_path, &cfg, &profile, &local);
 
     for gf in &files {
         let target = project_path.join(&gf.path);
@@ -247,110 +247,6 @@ fn warn_if_overwriting(target: &Path, relative_path: &str, new_content: &str) {
     }
 }
 
-// ---------------------------------------------------------------------------
-// Internal helpers
-// ---------------------------------------------------------------------------
-
-struct LocalOverrides {
-    clippy_methods: String,
-    clippy_types: String,
-    deny_bans: String,
-    deny_skip: String,
-    deny_feature_bans: String,
-}
-
-fn load_local_overrides(project_path: &Path) -> LocalOverrides {
-    let overrides_dir = project_path.join(".guardrail3/overrides");
-
-    let read_and_validate = |name: &str| -> String {
-        let path = overrides_dir.join(name);
-        let raw = crate::fs::read_file(&path).unwrap_or_default();
-        // Strip UTF-8 BOM if present
-        let clean = raw.strip_prefix('\u{FEFF}').unwrap_or(&raw);
-        if clean.trim().is_empty() {
-            return String::new();
-        }
-        validate_override_content(clean, name)
-    };
-
-    LocalOverrides {
-        clippy_methods: read_and_validate("clippy-methods.toml"),
-        clippy_types: read_and_validate("clippy-types.toml"),
-        deny_bans: read_and_validate("deny-bans.toml"),
-        deny_skip: read_and_validate("deny-skip.toml"),
-        deny_feature_bans: read_and_validate("deny-feature-bans.toml"),
-    }
-}
-
-/// Validate override content — skip lines that don't match expected TOML entry patterns.
-/// Valid patterns: `{ path = "..." }`, `{ name = "..." }`, `[[...]]` section headers.
-/// Comments and blank lines are silently stripped (not injected).
-#[allow(clippy::print_stderr)] // reason: CLI tool — malformed override warnings reported to stderr
-fn validate_override_content(content: &str, file_name: &str) -> String {
-    let mut valid = String::new();
-    for line in content.lines() {
-        let trimmed = line.trim();
-        if trimmed.is_empty() || trimmed.starts_with('#') {
-            continue;
-        }
-        let normalized = trimmed.replace(' ', "");
-        if normalized.starts_with("{path=")
-            || normalized.starts_with("{name=")
-            || normalized.starts_with("[[")
-        {
-            valid.push_str(line);
-            valid.push('\n');
-        } else {
-            eprintln!("  warning: skipping invalid line in {file_name}: {trimmed}");
-        }
-    }
-    valid
-}
-
-/// Remove override entries that already exist in the base content.
-/// For TOML array entries, compares by the trimmed line (minus trailing comma).
-pub(crate) fn deduplicated_override(base: &str, override_content: &str) -> String {
-    if override_content.trim().is_empty() {
-        return String::new();
-    }
-
-    let mut result = String::new();
-    for line in override_content.lines() {
-        let trimmed = line.trim();
-        // Skip empty lines and comments (already stripped by validation, but be defensive)
-        if trimmed.is_empty() || trimmed.starts_with('#') {
-            continue;
-        }
-        // Check if this exact entry already exists in base (ignore trailing comma differences)
-        let key = trimmed.trim_end_matches(',');
-        if base.contains(key) {
-            continue;
-        }
-        result.push_str(line);
-        result.push('\n');
-    }
-    result
-}
-
-#[allow(clippy::print_stderr)] // reason: workspace_root traversal warning reported to stderr
-fn resolve_rust_root(cfg: &config::types::GuardrailConfig) -> String {
-    let root = cfg
-        .rust
-        .as_ref()
-        .and_then(|r| r.workspace_root.as_deref())
-        .unwrap_or(".");
-
-    // Reject path traversal attempts — workspace_root must not escape the project
-    if root.contains("..") {
-        eprintln!(
-            "Error: workspace_root contains '..', which could write files outside the project. Use a relative path within the project."
-        );
-        return ".".to_owned();
-    }
-
-    root.to_owned()
-}
-
 fn generate_all_files(
     project_path: &Path,
     cfg: &config::types::GuardrailConfig,
@@ -361,8 +257,7 @@ fn generate_all_files(
     let local = load_local_overrides(project_path);
 
     if cfg.rust.is_some() {
-        let rust_root = resolve_rust_root(cfg);
-        let rust_files = generate_rust_files(&rust_root, cfg, profile, &local);
+        let rust_files = generate_rust_files(project_path, cfg, profile, &local);
         files.extend(rust_files);
     }
 
@@ -402,6 +297,9 @@ fn generate_ts_files(cfg: &config::types::GuardrailConfig) -> Vec<GeneratedFile>
 
     let canonical_cfg = ts_cfg.canonical.as_ref();
 
+    // Determine app types from config
+    let (has_content_app, has_service_app) = detect_ts_app_types(ts_cfg);
+
     // .npmrc -- generate unless explicitly disabled
     let gen_npmrc = canonical_cfg.and_then(|c| c.npmrc).unwrap_or(true);
     if gen_npmrc {
@@ -429,135 +327,27 @@ fn generate_ts_files(cfg: &config::types::GuardrailConfig) -> Vec<GeneratedFile>
         });
     }
 
-    // eslint.config.mjs -- only generate if eslint mode is "generate" or "starter"
-    let gen_eslint = ts_cfg
-        .eslint
-        .as_ref()
-        .and_then(|e| e.mode.as_deref())
-        .is_some_and(|m| m == "generate" || m == "starter");
-    if gen_eslint {
+    // eslint.config.mjs -- always generated with full plugin config
+    files.push(GeneratedFile {
+        path: "eslint.config.mjs".to_owned(),
+        content: eslint::build_eslint_config(has_content_app, has_service_app),
+    });
+
+    // cspell.json -- always generated
+    files.push(GeneratedFile {
+        path: "cspell.json".to_owned(),
+        content: cspell::build_cspell_config(),
+    });
+
+    // .stylelintrc.mjs -- only if content app exists
+    if has_content_app {
         files.push(GeneratedFile {
-            path: "eslint.config.mjs".to_owned(),
-            content: canonical::ESLINT_STARTER.content.to_owned(),
+            path: ".stylelintrc.mjs".to_owned(),
+            content: stylelint::build_stylelint_config(),
         });
     }
 
     files
-}
-
-fn generate_rust_files(
-    rust_root: &str,
-    cfg: &config::types::GuardrailConfig,
-    profile: &str,
-    local: &LocalOverrides,
-) -> Vec<GeneratedFile> {
-    let mut files = Vec::new();
-    let root_prefix = if rust_root == "." {
-        String::new()
-    } else {
-        format!("{rust_root}/")
-    };
-
-    // For library profile, root clippy is always "pure" (includes global-state bans)
-    let root_is_pure = profile == "library";
-
-    // Workspace-root clippy.toml
-    let root_clippy = clippy::build_clippy_toml(
-        profile,
-        root_is_pure,
-        &local.clippy_methods,
-        &local.clippy_types,
-    );
-    files.push(GeneratedFile {
-        path: format!("{root_prefix}clippy.toml"),
-        content: root_clippy,
-    });
-
-    // Per-crate clippy.toml for crates with layer config
-    let crate_configs: BTreeMap<String, &crate::domain::config::types::CrateConfig> = cfg
-        .rust
-        .as_ref()
-        .and_then(|r| r.apps.as_ref())
-        .map(|c| c.iter().map(|(k, v)| (k.clone(), v)).collect())
-        .unwrap_or_default();
-
-    for (crate_path, crate_cfg) in &crate_configs {
-        // Per-crate profile overrides workspace profile
-        let effective_profile = crate_cfg.profile.as_deref().unwrap_or(profile);
-
-        // Library profile (workspace or per-crate): all crates are pure.
-        // Otherwise check layer config.
-        let is_pure = effective_profile == "library"
-            || crate_cfg.layer.as_deref().is_some_and(|l| l == "pure");
-
-        let crate_clippy = clippy::build_clippy_toml(
-            effective_profile,
-            is_pure,
-            &local.clippy_methods,
-            &local.clippy_types,
-        );
-        files.push(GeneratedFile {
-            path: format!("{root_prefix}{crate_path}/clippy.toml"),
-            content: crate_clippy,
-        });
-    }
-
-    // deny.toml -- profile-aware
-    let deny_content = build_deny_for_profile(
-        profile,
-        &local.deny_bans,
-        &local.deny_skip,
-        &local.deny_feature_bans,
-    );
-    files.push(GeneratedFile {
-        path: format!("{root_prefix}deny.toml"),
-        content: deny_content,
-    });
-
-    // rustfmt.toml
-    files.push(GeneratedFile {
-        path: format!("{root_prefix}rustfmt.toml"),
-        content: canonical::RUSTFMT.content.to_owned(),
-    });
-
-    // rust-toolchain.toml
-    files.push(GeneratedFile {
-        path: format!("{root_prefix}rust-toolchain.toml"),
-        content: canonical::RUST_TOOLCHAIN.content.to_owned(),
-    });
-
-    // release-plz.toml and cliff.toml — service profile only
-    if profile == "service" {
-        files.push(GeneratedFile {
-            path: "release-plz.toml".to_owned(),
-            content: release::RELEASE_PLZ_TOML.content.to_owned(),
-        });
-        files.push(GeneratedFile {
-            path: "cliff.toml".to_owned(),
-            content: release::CLIFF_TOML.content.to_owned(),
-        });
-    }
-
-    files
-}
-
-fn build_deny_for_profile(
-    profile: &str,
-    extra_bans: &str,
-    extra_skip: &str,
-    extra_feature_bans: &str,
-) -> String {
-    match profile {
-        "library" => deny::build_deny_toml_with_entries(
-            profile,
-            &deny::library_profile_ban_entries(),
-            None, // no tokio feature ban (tokio banned entirely)
-            extra_bans,
-            extra_skip,
-            extra_feature_bans,
-        ),
-        _ => deny::build_deny_toml(profile, extra_bans, extra_skip, extra_feature_bans),
-    }
 }
 
 /// Generate expected TS file contents without writing -- used by ts diff.

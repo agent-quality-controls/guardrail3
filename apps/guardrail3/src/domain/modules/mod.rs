@@ -1,9 +1,12 @@
 pub mod canonical;
 pub mod clippy;
+pub mod cspell;
 pub mod deny;
+pub mod eslint;
 pub mod guide;
 pub mod pre_commit;
 pub mod release;
+pub mod stylelint;
 
 pub struct Module {
     pub name: &'static str,
@@ -67,6 +70,9 @@ pub fn all_modules() -> Vec<&'static Module> {
     // Release modules
     modules.push(&release::RELEASE_PLZ_TOML);
     modules.push(&release::CLIFF_TOML);
+
+    // Cspell module
+    modules.push(&cspell::CSPELL_CONFIG);
 
     modules
 }

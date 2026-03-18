@@ -280,7 +280,7 @@ export default tseslint.config(
   {
     rules: {
       // --- Size guards ---
-      "max-lines": ["error", { max: 300, skipBlankLines: true, skipComments: true }],
+      "max-lines": ["error", { max: 400, skipBlankLines: true, skipComments: true }],
       "max-lines-per-function": ["warn", { max: 100, skipBlankLines: true, skipComments: true }],
       complexity: ["warn", 25],
 
