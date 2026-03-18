@@ -58,9 +58,10 @@ fn main() {
             path,
             clippy,
             deny,
+            rustfmt,
             format,
         } => {
-            if clippy || deny {
+            if clippy || deny || rustfmt {
                 let project_path = std::path::Path::new(&path);
                 let crawl_result = guardrail3::app::crawl::crawl(project_path);
                 let is_json = format == "json";
@@ -76,6 +77,13 @@ fn main() {
                         commands::coverage::deny::print_json(project_path, &crawl_result);
                     } else {
                         commands::coverage::deny::print_tree(project_path, &crawl_result);
+                    }
+                }
+                if rustfmt {
+                    if is_json {
+                        commands::coverage::rustfmt::print_json(project_path, &crawl_result);
+                    } else {
+                        commands::coverage::rustfmt::print_tree(project_path, &crawl_result);
                     }
                 }
             } else {

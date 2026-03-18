@@ -47,6 +47,9 @@ pub enum Commands {
         /// Show deny.toml coverage map
         #[arg(long)]
         deny: bool,
+        /// Show rustfmt.toml coverage map
+        #[arg(long)]
+        rustfmt: bool,
         /// Output format: text or json
         #[arg(long, default_value = "text")]
         format: String,
