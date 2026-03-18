@@ -248,6 +248,21 @@ pub fn auto_detect_app_type(fs: &dyn FileSystem, app_path: &Path) -> Option<TsAp
                     return Some(TsAppType::Content);
                 }
             }
+
+            // Also check devDependencies for content signals (build tools like velite live here)
+            let dev_deps = json.get("devDependencies").and_then(|d| d.as_object());
+            if let Some(dev_deps) = dev_deps {
+                let content_signals = [
+                    "velite",
+                    "contentlayer",
+                    "nextra",
+                    "next-seo",
+                    "next-sitemap",
+                ];
+                if content_signals.iter().any(|s| dev_deps.contains_key(*s)) {
+                    return Some(TsAppType::Content);
+                }
+            }
         }
     }
 

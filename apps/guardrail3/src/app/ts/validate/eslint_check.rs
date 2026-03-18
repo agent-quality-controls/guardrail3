@@ -58,7 +58,7 @@ fn check_eslint_value_rules(content: &str, eslint_path: &Path, results: &mut Vec
         eslint_path,
         "T2",
         "max-lines",
-        Some("300"),
+        Some("400"),
         Severity::Error,
         results,
     );

@@ -167,7 +167,7 @@ fn replace_typescript_section(existing: &str, new_ts_section: &str) -> String {
     // Skip old [typescript] section (header + body lines until next [section] or EOF)
     let _ = lines.next(); // skip [typescript] line
     while let Some(line) = lines.peek() {
-        if line.starts_with('[') {
+        if line.starts_with('[') && !line.starts_with("[typescript") {
             break;
         }
         let _ = lines.next();
