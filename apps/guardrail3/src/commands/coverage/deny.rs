@@ -2,23 +2,25 @@
 //!
 //! ## How `cargo-deny` finds its config (verified by testing):
 //!
-//! 1. If `--config <path>` is passed, use that file
-//! 2. Otherwise, look for `deny.toml` in the current working directory
-//! 3. No walk-up. No parent directory search. CWD only.
+//! 1. If `--config <path>` is passed on the check subcommand, use that file
+//! 2. Otherwise, look for `deny.toml` in the MANIFEST DIRECTORY (same dir as the
+//!    `Cargo.toml` being analyzed, NOT necessarily CWD)
+//! 3. No walk-up. No parent directory search. Manifest directory only.
 //! 4. If not found, falls back to default config with a warning:
 //!    "unable to find a config path, falling back to default config"
-//! 5. Exceptions file: also checks `<cwd>/deny.exceptions.toml`,
-//!    `<cwd>/.deny.exceptions.toml`, `<cwd>/.cargo/deny.exceptions.toml`
+//! 5. Exceptions file: also checks `<manifest-dir>/deny.exceptions.toml`,
+//!    `<manifest-dir>/.deny.exceptions.toml`, `<manifest-dir>/.cargo/deny.exceptions.toml`
 //!
 //! Key behaviors:
-//! - `cargo deny` is typically run from the workspace root (same dir as root `Cargo.toml`)
-//! - For monorepos with multiple workspaces, each workspace needs `cargo deny` run separately
-//!   from its own root, so each needs its own `deny.toml`
-//! - Unlike clippy, there is NO shadowing problem — only one `deny.toml` is ever read per run
+//! - `cargo deny --manifest-path apps/validator-rust/Cargo.toml check` looks for
+//!   `apps/validator-rust/deny.toml` regardless of CWD
+//! - Each workspace needs its own `deny.toml` co-located with its `Cargo.toml`
+//! - No shadowing possible — one `deny.toml` per workspace, no walk-up
 //!
-//! Verified: running `cargo deny check` from `apps/validator-rust/` finds
-//! `apps/validator-rust/deny.toml`. Running from repo root with no `deny.toml` warns
-//! "unable to find a config path, falling back to default config."
+//! Verified:
+//! - `cd apps/validator-rust && cargo deny check` → finds `apps/validator-rust/deny.toml`
+//! - `cargo deny --manifest-path apps/validator-rust/Cargo.toml check` from root → also finds it
+//! - `cargo deny --manifest-path Cargo.toml check` from root → warns "unable to find config"
 //!
 //! Sources:
 //! - <https://embarkstudios.github.io/cargo-deny/cli/check.html>
@@ -66,6 +68,11 @@ pub enum Scope {
     },
 }
 
+/// Crate node in deny coverage.
+///
+/// `covered_by` is derived from the workspace's `deny_toml` —
+/// `cargo-deny` runs per-workspace, so all members of a workspace
+/// with `deny.toml` are covered. No per-crate walk-up resolution.
 #[derive(Serialize)]
 pub struct CrateNode {
     pub kind: &'static str,
@@ -239,7 +246,7 @@ pub fn build(root: &Path, crawl: &CrawlResult) -> DenyCoverage {
 
     DenyCoverage {
         tool: "deny",
-        resolution: "CWD only (no walk-up)",
+        resolution: "manifest directory (co-located with Cargo.toml, no walk-up)",
         project: root
             .canonicalize()
             .unwrap_or_else(|_| root.to_path_buf())
@@ -272,7 +279,7 @@ pub fn print_tree(root: &Path, crawl: &CrawlResult) {
     let data = build(root, crawl);
 
     println!("deny.toml coverage");
-    println!("(cargo-deny uses CWD only — no walk-up, no shadowing)\n");
+    println!("(cargo-deny looks in manifest directory — co-located with Cargo.toml, no walk-up)\n");
 
     for scope in &data.scopes {
         match scope {
