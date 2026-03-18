@@ -9,20 +9,20 @@ use clap as _;
 use colored as _;
 use glob as _;
 use guardrail3 as _;
+use ignore as _;
 use proc_macro2 as _;
 use quote as _;
 use serde as _;
 use serde_json as _;
+use std::fmt::Write as _;
+use std::fs;
+use std::path::PathBuf;
+use std::process::Command;
 use syn as _;
 use toml as _;
 use tree_sitter as _;
 use tree_sitter_typescript as _;
 use walkdir as _;
-
-use std::fmt::Write as _;
-use std::fs;
-use std::path::PathBuf;
-use std::process::Command;
 
 use proptest::prelude::*;
 use tempfile::TempDir;

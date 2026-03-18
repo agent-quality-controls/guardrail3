@@ -3,6 +3,7 @@
 use colored as _;
 use garde as _;
 use glob as _;
+use ignore as _;
 use proc_macro2 as _;
 use quote as _;
 use serde as _;
@@ -53,6 +54,20 @@ fn main() {
         Commands::Rs { command } => handle_rs(command),
         Commands::Ts { command } => handle_ts(command),
         Commands::DumpGuide => handle_guide(),
+        Commands::Map { path, clippy, deny } => {
+            if clippy || deny {
+                let project_path = std::path::Path::new(&path);
+                let crawl_result = guardrail3::app::crawl::crawl(project_path);
+                if clippy {
+                    commands::coverage::clippy::print(project_path, &crawl_result);
+                }
+                if deny {
+                    // TODO: deny coverage map
+                }
+            } else {
+                commands::map::run(&path);
+            }
+        }
     }
 }
 

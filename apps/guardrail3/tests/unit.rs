@@ -3,6 +3,7 @@ use clap as _;
 use colored as _;
 use garde as _;
 use glob as _;
+use ignore as _;
 use proc_macro2 as _;
 use proptest as _;
 use quote as _;
@@ -14,7 +15,6 @@ use toml as _;
 use tree_sitter as _;
 use tree_sitter_typescript as _;
 use walkdir as _;
-
 #[path = "unit/allow_checks_test.rs"]
 mod allow_checks_test;
 #[path = "unit/ast_helpers_test.rs"]

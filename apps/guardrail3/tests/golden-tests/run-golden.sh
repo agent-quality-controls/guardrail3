@@ -1,7 +1,7 @@
 #!/bin/sh
 # run-golden.sh — Capture golden snapshot for guardrail3 self-validation.
 #
-# Usage: ./golden-tests/run-golden.sh
+# Usage: ./tests/golden-tests/run-golden.sh
 #
 # Builds guardrail3 in release mode, runs self-validation with JSON output,
 # normalizes the output, and saves it as the golden snapshot.
@@ -9,7 +9,7 @@
 set -eu
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-CRATE_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+CRATE_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 PROJECT_ROOT="$(cd "$CRATE_ROOT/../.." && pwd)"
 GOLDEN_DIR="$SCRIPT_DIR/golden"
 NORMALIZE="$SCRIPT_DIR/normalize.sh"
