@@ -35,6 +35,19 @@ pub enum Commands {
 
     /// Generate `GUARDRAIL3_GUIDE.md` in the current directory
     DumpGuide,
+
+    /// Crawl project and show discovered structure
+    Map {
+        /// Project path
+        #[arg(default_value = ".")]
+        path: String,
+        /// Show clippy.toml coverage map
+        #[arg(long)]
+        clippy: bool,
+        /// Show deny.toml coverage map
+        #[arg(long)]
+        deny: bool,
+    },
 }
 
 #[derive(Subcommand, Debug)]

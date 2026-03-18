@@ -1,3 +1,0 @@
-# Additional [bans] deny entries for deny.toml
-# Example:
-#     { name = "some-crate", wrappers = [] },

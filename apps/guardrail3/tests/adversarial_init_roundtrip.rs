@@ -13,18 +13,18 @@ use colored as _;
 use garde as _;
 use glob as _;
 use guardrail3 as _;
+use ignore as _;
 use proc_macro2 as _;
 use proptest as _;
 use quote as _;
 use serde as _;
 use serde_json as _;
+use std::process::Command;
 use syn as _;
 use toml as _;
 use tree_sitter as _;
 use tree_sitter_typescript as _;
 use walkdir as _;
-
-use std::process::Command;
 
 #[allow(clippy::disallowed_methods)] // reason: Command::new needed to invoke binary under test
 fn guardrail3() -> Command {
