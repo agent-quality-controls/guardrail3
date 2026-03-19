@@ -1,12 +1,16 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use crate::domain::report::{CheckResult, Severity};
 use crate::ports::outbound::FileSystem;
 
 #[allow(clippy::too_many_lines, clippy::disallowed_methods)] // reason: jscpd config validation; guardrail3 JSON config inspection — not a trust boundary
-pub fn check_jscpd(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResult>) {
-    let jscpd_path = path.join(".jscpd.json");
-    if !jscpd_path.exists() {
+pub fn check_jscpd(
+    fs: &dyn FileSystem,
+    jscpd_configs: &[PathBuf],
+    root: &Path,
+    results: &mut Vec<CheckResult>,
+) {
+    if jscpd_configs.is_empty() {
         results.push(CheckResult {
             id: "T19".to_owned(),
             severity: Severity::Warn,
@@ -16,56 +20,60 @@ pub fn check_jscpd(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
                      duplicates or produce false positives. Create `.jscpd.json` with `threshold: 0` and \
                      appropriate ignore patterns, or run `guardrail3 ts generate`."
                 .to_owned(),
-            file: Some(path.display().to_string()),
+            file: Some(root.display().to_string()),
             line: None,
             inventory: false,
         });
         return;
     }
 
-    results.push(
-        CheckResult {
-            id: "T19".to_owned(),
-            severity: Severity::Info,
-            title: "Copy-paste detection config `.jscpd.json` exists".to_owned(),
-            message: "jscpd configuration file found at project root.".to_owned(),
-            file: Some(jscpd_path.display().to_string()),
-            line: None,
-            inventory: false,
-        }
-        .as_inventory(),
-    );
-
-    let Some(content) = fs.read_file(&jscpd_path) else {
-        return;
-    };
-
-    let content = content.strip_prefix('\u{FEFF}').unwrap_or(&content);
-
-    let json: serde_json::Value = match serde_json::from_str(content) {
-        Ok(v) => v,
-        Err(e) => {
-            results.push(CheckResult {
+    for jscpd_path in jscpd_configs {
+        results.push(
+            CheckResult {
                 id: "T19".to_owned(),
-                severity: Severity::Error,
-                title: "`.jscpd.json` has invalid JSON".to_owned(),
+                severity: Severity::Info,
+                title: "Copy-paste detection config `.jscpd.json` exists".to_owned(),
                 message: format!(
-                    "Failed to parse `.jscpd.json`: {e}. Fix the JSON syntax error so jscpd can read its config."
+                    "jscpd configuration file found: `{}`.",
+                    jscpd_path.display()
                 ),
                 file: Some(jscpd_path.display().to_string()),
                 line: None,
                 inventory: false,
-            });
-            return;
-        }
-    };
+            }
+            .as_inventory(),
+        );
 
-    // T20: threshold = 0
-    match json.get("threshold") {
-        Some(serde_json::Value::Number(n)) => {
-            let val = n.as_f64().unwrap_or(1.0);
-            if val == 0.0 {
+        let Some(content) = fs.read_file(jscpd_path) else {
+            continue;
+        };
+
+        let content = content.strip_prefix('\u{FEFF}').unwrap_or(&content);
+
+        let json: serde_json::Value = match serde_json::from_str(content) {
+            Ok(v) => v,
+            Err(e) => {
                 results.push(CheckResult {
+                    id: "T19".to_owned(),
+                    severity: Severity::Error,
+                    title: "`.jscpd.json` has invalid JSON".to_owned(),
+                    message: format!(
+                        "Failed to parse `.jscpd.json`: {e}. Fix the JSON syntax error so jscpd can read its config."
+                    ),
+                    file: Some(jscpd_path.display().to_string()),
+                    line: None,
+                    inventory: false,
+                });
+                continue;
+            }
+        };
+
+        // T20: threshold = 0
+        match json.get("threshold") {
+            Some(serde_json::Value::Number(n)) => {
+                let val = n.as_f64().unwrap_or(1.0);
+                if val == 0.0 {
+                    results.push(CheckResult {
                     id: "T20".to_owned(),
                     severity: Severity::Info,
                     title: "jscpd threshold correctly set to 0".to_owned(),
@@ -76,8 +84,8 @@ pub fn check_jscpd(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
                     line: None,
                     inventory: false,
                 }.as_inventory());
-            } else {
-                results.push(CheckResult {
+                } else {
+                    results.push(CheckResult {
                     id: "T20".to_owned(),
                     severity: Severity::Error,
                     title: "jscpd threshold is not 0".to_owned(),
@@ -90,10 +98,10 @@ pub fn check_jscpd(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
                     line: None,
                     inventory: false,
                 });
+                }
             }
-        }
-        _ => {
-            results.push(CheckResult {
+            _ => {
+                results.push(CheckResult {
                 id: "T20".to_owned(),
                 severity: Severity::Error,
                 title: "jscpd `threshold` field missing".to_owned(),
@@ -104,14 +112,14 @@ pub fn check_jscpd(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
                 line: None,
                 inventory: false,
             });
+            }
         }
-    }
 
-    // T21: minTokens differs from 50
-    if let Some(serde_json::Value::Number(n)) = json.get("minTokens") {
-        let val = n.as_u64().unwrap_or(0);
-        if val != 50 {
-            results.push(CheckResult {
+        // T21: minTokens differs from 50
+        if let Some(serde_json::Value::Number(n)) = json.get("minTokens") {
+            let val = n.as_u64().unwrap_or(0);
+            if val != 50 {
+                results.push(CheckResult {
                 id: "T21".to_owned(),
                 severity: Severity::Info,
                 title: "jscpd `minTokens` set to non-default value".to_owned(),
@@ -124,14 +132,14 @@ pub fn check_jscpd(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
                 line: None,
                 inventory: false,
             }.as_inventory());
+            }
         }
-    }
 
-    // T22: Extra ignore patterns
-    if let Some(serde_json::Value::Array(ignore)) = json.get("ignore") {
-        for pattern in ignore {
-            if let Some(p) = pattern.as_str() {
-                results.push(
+        // T22: Extra ignore patterns
+        if let Some(serde_json::Value::Array(ignore)) = json.get("ignore") {
+            for pattern in ignore {
+                if let Some(p) = pattern.as_str() {
+                    results.push(
                     CheckResult {
                         id: "T22".to_owned(),
                         severity: Severity::Info,
@@ -146,13 +154,13 @@ pub fn check_jscpd(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
                     }
                     .as_inventory(),
                 );
+                }
             }
         }
-    }
 
-    // T-JSCPD-01: minTokens field missing
-    if json.get("minTokens").is_none() {
-        results.push(CheckResult {
+        // T-JSCPD-01: minTokens field missing
+        if json.get("minTokens").is_none() {
+            results.push(CheckResult {
             id: "T-JSCPD-01".to_owned(),
             severity: Severity::Warn,
             title: "jscpd `minTokens` field missing".to_owned(),
@@ -164,13 +172,13 @@ pub fn check_jscpd(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
             line: None,
             inventory: false,
         });
-    }
+        }
 
-    // T-JSCPD-02: absolute field missing or not true
-    match json.get("absolute") {
-        Some(serde_json::Value::Bool(true)) => {}
-        _ => {
-            results.push(CheckResult {
+        // T-JSCPD-02: absolute field missing or not true
+        match json.get("absolute") {
+            Some(serde_json::Value::Bool(true)) => {}
+            _ => {
+                results.push(CheckResult {
                 id: "T-JSCPD-02".to_owned(),
                 severity: Severity::Warn,
                 title: "jscpd config missing `absolute: true`".to_owned(),
@@ -180,27 +188,27 @@ pub fn check_jscpd(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
                 line: None,
                 inventory: false,
             });
+            }
         }
-    }
 
-    // T-JSCPD-03: Required ignore patterns
-    let required_patterns: &[&str] = &[
-        "**/node_modules/**",
-        "**/.next/**",
-        "**/dist/**",
-        "**/target/**",
-        "**/components/ui/**",
-    ];
+        // T-JSCPD-03: Required ignore patterns
+        let required_patterns: &[&str] = &[
+            "**/node_modules/**",
+            "**/.next/**",
+            "**/dist/**",
+            "**/target/**",
+            "**/components/ui/**",
+        ];
 
-    let configured_ignores: Vec<&str> = json
-        .get("ignore")
-        .and_then(serde_json::Value::as_array)
-        .map(|arr| arr.iter().filter_map(serde_json::Value::as_str).collect())
-        .unwrap_or_default();
+        let configured_ignores: Vec<&str> = json
+            .get("ignore")
+            .and_then(serde_json::Value::as_array)
+            .map(|arr| arr.iter().filter_map(serde_json::Value::as_str).collect())
+            .unwrap_or_default();
 
-    for required in required_patterns {
-        if !configured_ignores.iter().any(|p| p == required) {
-            results.push(CheckResult {
+        for required in required_patterns {
+            if !configured_ignores.iter().any(|p| p == required) {
+                results.push(CheckResult {
                 id: "T-JSCPD-03".to_owned(),
                 severity: Severity::Warn,
                 title: "jscpd missing required ignore pattern".to_owned(),
@@ -212,28 +220,31 @@ pub fn check_jscpd(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
                 line: None,
                 inventory: false,
             });
+            }
         }
-    }
 
-    // T-JSCPD-04: format field missing
-    if json.get("format").is_none() {
-        results.push(CheckResult {
-            id: "T-JSCPD-04".to_owned(),
-            severity: Severity::Warn,
-            title: "jscpd `format` field missing".to_owned(),
-            message: "jscpd config should specify `format` to explicitly list scanned languages \
+        // T-JSCPD-04: format field missing
+        if json.get("format").is_none() {
+            results.push(CheckResult {
+                id: "T-JSCPD-04".to_owned(),
+                severity: Severity::Warn,
+                title: "jscpd `format` field missing".to_owned(),
+                message:
+                    "jscpd config should specify `format` to explicitly list scanned languages \
                      (e.g., `[\"typescript\"]`)."
-                .to_owned(),
-            file: Some(jscpd_path.display().to_string()),
-            line: None,
-            inventory: false,
-        });
-    }
+                        .to_owned(),
+                file: Some(jscpd_path.display().to_string()),
+                line: None,
+                inventory: false,
+            });
+        }
+    } // end for jscpd_path
 }
 
 // T60: Content import restriction
 pub fn check_content_import_restriction(
     fs: &dyn FileSystem,
+    eslint_configs: &[PathBuf],
     path: &Path,
     results: &mut Vec<CheckResult>,
 ) {
@@ -243,12 +254,12 @@ pub fn check_content_import_restriction(
         return;
     }
 
-    let eslint_path = path.join("eslint.config.mjs");
-    if !eslint_path.exists() {
+    // Use first eslint config found
+    let Some(eslint_path) = eslint_configs.first() else {
         return;
-    }
+    };
 
-    let Some(content) = fs.read_file(&eslint_path) else {
+    let Some(content) = fs.read_file(eslint_path) else {
         return;
     };
 
@@ -281,21 +292,8 @@ pub fn check_content_import_restriction(
 }
 
 // T61: Velite config exists
-pub fn check_velite_config(path: &Path, results: &mut Vec<CheckResult>) {
-    let landing_dir = path.join("apps").join("landing");
-    if !landing_dir.exists() {
-        return;
-    }
-
-    let velite_path = landing_dir.join("velite.config.mjs");
-    let velite_ts_path = landing_dir.join("velite.config.ts");
-
-    if velite_path.exists() || velite_ts_path.exists() {
-        let found_path = if velite_path.exists() {
-            &velite_path
-        } else {
-            &velite_ts_path
-        };
+pub fn check_velite_config(velite_configs: &[PathBuf], results: &mut Vec<CheckResult>) {
+    for velite_path in velite_configs {
         results.push(
             CheckResult {
                 id: "T61".to_owned(),
@@ -304,9 +302,9 @@ pub fn check_velite_config(path: &Path, results: &mut Vec<CheckResult>) {
                 message: format!(
                     "Velite config found: `{}`. Velite processes MDX/markdown content into typed, \
                  validated collections at build time.",
-                    found_path.display()
+                    velite_path.display()
                 ),
-                file: Some(found_path.display().to_string()),
+                file: Some(velite_path.display().to_string()),
                 line: None,
                 inventory: false,
             }

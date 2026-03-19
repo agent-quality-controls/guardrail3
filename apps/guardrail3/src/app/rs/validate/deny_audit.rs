@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use crate::domain::report::{CheckResult, Severity};
 
@@ -48,22 +48,45 @@ pub fn check(
     fs: &dyn FileSystem,
     workspace_root: &Path,
     profile: Option<&str>,
+    deny_tomls: &[PathBuf],
 ) -> Vec<CheckResult> {
     let mut results = Vec::new();
-    let deny_path = workspace_root.join("deny.toml");
 
-    let Some(table) = read_and_parse_deny_toml(fs, &deny_path, workspace_root, &mut results) else {
+    // Filter deny.tomls within this workspace
+    let workspace_deny_tomls: Vec<&PathBuf> = deny_tomls
+        .iter()
+        .filter(|p| p.starts_with(workspace_root))
+        .collect();
+
+    if workspace_deny_tomls.is_empty() {
+        results.push(CheckResult {
+            id: "R8".to_owned(),
+            severity: Severity::Error,
+            title: "deny.toml missing".to_owned(),
+            message: "No deny.toml at workspace root. Without it, cargo-deny cannot enforce crate bans, license compliance, or security advisory checks. Run `guardrail3 generate` to create it.".to_owned(),
+            file: Some(workspace_root.display().to_string()),
+            line: None,
+            inventory: false,
+        });
         return results;
-    };
+    }
 
-    check_deprecated_advisory_fields(&table, &deny_path, &mut results);
-    check_advisory_values(&table, &deny_path, &mut results);
-    deny_bans::check_ban_list(&table, &deny_path, profile, &mut results);
-    deny_licenses::check_licenses(&table, &deny_path, &mut results);
-    deny_licenses::check_sources(&table, &deny_path, &mut results);
-    deny_bans::check_tokio_feature_ban(&table, &deny_path, &mut results);
-    deny_inventory::check_skip_entries(&table, &deny_path, &mut results);
-    deny_inventory::check_advisory_ignores(&table, &deny_path, &mut results);
+    // Check each deny.toml found by the crawler within the workspace
+    for deny_path in &workspace_deny_tomls {
+        let Some(table) = read_and_parse_deny_toml(fs, deny_path, workspace_root, &mut results)
+        else {
+            continue;
+        };
+
+        check_deprecated_advisory_fields(&table, deny_path, &mut results);
+        check_advisory_values(&table, deny_path, &mut results);
+        deny_bans::check_ban_list(&table, deny_path, profile, &mut results);
+        deny_licenses::check_licenses(&table, deny_path, &mut results);
+        deny_licenses::check_sources(&table, deny_path, &mut results);
+        deny_bans::check_tokio_feature_ban(&table, deny_path, &mut results);
+        deny_inventory::check_skip_entries(&table, deny_path, &mut results);
+        deny_inventory::check_advisory_ignores(&table, deny_path, &mut results);
+    }
 
     results
 }

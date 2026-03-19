@@ -32,36 +32,44 @@ pub fn run(
     scoped_files: Option<&[String]>,
     categories: &TsCheckCategories,
     config: Option<&GuardrailConfig>,
-    _crawl: &CrawlResult,
+    crawl: &CrawlResult,
 ) -> Report {
     let mut report = Report::new(path.display().to_string(), vec!["TypeScript".to_owned()]);
 
     // Config file checks
-    let config_results = config_files::check(fs, path);
+    let config_results = config_files::check(fs, path, crawl);
     report.add_section(Section {
         name: "TS config files".to_owned(),
         results: config_results,
     });
 
     // ESLint plugin configuration (core — always run)
-    let eslint_path = path.join("eslint.config.mjs");
-    if let Some(eslint_content) = fs.read_file(&eslint_path) {
-        let mut plugin_results = Vec::new();
-        eslint_plugin_checks::check_core_plugins(
-            &eslint_content,
-            &eslint_path,
-            &mut plugin_results,
-        );
-        report.add_section(Section {
-            name: "ESLint plugin configuration".to_owned(),
-            results: plugin_results,
-        });
+    // Use first eslint config found by crawler
+    if let Some(eslint_path) = crawl.eslint_configs.first() {
+        if let Some(eslint_content) = fs.read_file(eslint_path) {
+            let mut plugin_results = Vec::new();
+            eslint_plugin_checks::check_core_plugins(
+                &eslint_content,
+                eslint_path,
+                &mut plugin_results,
+            );
+            report.add_section(Section {
+                name: "ESLint plugin configuration".to_owned(),
+                results: plugin_results,
+            });
+        }
     }
 
     // Plugin packages in devDependencies
     let content_enabled = has_content_app(fs, path, config);
     let mut plug_results = Vec::new();
-    package_deps::check_lint_plugins(fs, path, content_enabled, &mut plug_results);
+    package_deps::check_lint_plugins(
+        fs,
+        &crawl.package_jsons,
+        path,
+        content_enabled,
+        &mut plug_results,
+    );
     if !plug_results.is_empty() {
         report.add_section(Section {
             name: "Lint plugin packages".to_owned(),
@@ -71,7 +79,13 @@ pub fn run(
 
     // Additional tool packages (T-TOOL-01..06)
     let mut tool_pkg_results = Vec::new();
-    package_deps::check_additional_tools(fs, path, content_enabled, &mut tool_pkg_results);
+    package_deps::check_additional_tools(
+        fs,
+        &crawl.package_jsons,
+        path,
+        content_enabled,
+        &mut tool_pkg_results,
+    );
     if !tool_pkg_results.is_empty() {
         report.add_section(Section {
             name: "Additional tool packages".to_owned(),
@@ -92,17 +106,19 @@ pub fn run(
     // Content-profile checks (only if project has content-type apps)
     if content_enabled {
         // ESLint content plugins (jsx-a11y, tailwind-ban)
-        if let Some(eslint_content) = fs.read_file(&path.join("eslint.config.mjs")) {
-            let mut content_plugin_results = Vec::new();
-            eslint_plugin_checks::check_content_plugins(
-                &eslint_content,
-                &path.join("eslint.config.mjs"),
-                &mut content_plugin_results,
-            );
-            report.add_section(Section {
-                name: "Content profile: ESLint accessibility".to_owned(),
-                results: content_plugin_results,
-            });
+        if let Some(eslint_path) = crawl.eslint_configs.first() {
+            if let Some(eslint_content) = fs.read_file(eslint_path) {
+                let mut content_plugin_results = Vec::new();
+                eslint_plugin_checks::check_content_plugins(
+                    &eslint_content,
+                    eslint_path,
+                    &mut content_plugin_results,
+                );
+                report.add_section(Section {
+                    name: "Content profile: ESLint accessibility".to_owned(),
+                    results: content_plugin_results,
+                });
+            }
         }
 
         // Stylelint (T-STYL-01..05)

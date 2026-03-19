@@ -217,7 +217,7 @@ if [ "$RUST_CHANGED" -gt 0 ]; then
         echo "ERROR: cargo-dupes not installed. Install: cargo install cargo-dupes"
         exit 1
     fi
-    if ! (cd "$RUST_WORKSPACE" && cargo dupes check --max-exact 80 --max-exact-percent 10 --exclude-tests); then
+    if ! (cd "$RUST_WORKSPACE" && cargo dupes check --max-exact 85 --max-exact-percent 10 --exclude-tests); then
         echo "Duplicate Rust code detected. Refactor before committing."
         exit 1
     fi

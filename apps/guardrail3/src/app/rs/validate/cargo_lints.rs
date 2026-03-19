@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use crate::domain::report::{CheckResult, Severity};
 use crate::ports::outbound::FileSystem;
@@ -111,24 +111,23 @@ const EXPECTED_CLIPPY_ALLOW: &[&str] = &[
     "multiple_crate_versions",
 ];
 
-pub fn check(fs: &dyn FileSystem, workspace_root: &Path) -> Vec<CheckResult> {
+pub fn check(
+    fs: &dyn FileSystem,
+    workspace_root: &Path,
+    cargo_tomls: &[PathBuf],
+) -> Vec<CheckResult> {
     let mut results = Vec::new();
-    let cargo_path = workspace_root.join("Cargo.toml");
 
-    if !cargo_path.exists() {
-        results.push(CheckResult {
-            id: "R26".to_owned(),
-            severity: Severity::Error,
-            title: "Cargo.toml missing".to_owned(),
-            message: "Cannot check workspace lints".to_owned(),
-            file: Some(workspace_root.display().to_string()),
-            line: None,
-            inventory: false,
-        });
+    // Find the workspace root Cargo.toml from crawler data
+    let root_cargo = cargo_tomls
+        .iter()
+        .find(|p| p.parent() == Some(workspace_root));
+
+    let Some(cargo_path) = root_cargo else {
         return results;
-    }
+    };
 
-    let content = match fs.read_file_err(&cargo_path) {
+    let content = match fs.read_file_err(cargo_path) {
         Ok(content) => content,
         Err(e) => {
             results.push(CheckResult {
@@ -166,7 +165,7 @@ pub fn check(fs: &dyn FileSystem, workspace_root: &Path) -> Vec<CheckResult> {
         .and_then(|w| w.get("lints"))
         .and_then(|l| l.get("rust"));
 
-    check_rust_lints(rust_lints, &cargo_path, &mut results);
+    check_rust_lints(rust_lints, cargo_path, &mut results);
 
     // Check [workspace.lints.clippy]
     let clippy_lints = table
@@ -174,7 +173,7 @@ pub fn check(fs: &dyn FileSystem, workspace_root: &Path) -> Vec<CheckResult> {
         .and_then(|w| w.get("lints"))
         .and_then(|l| l.get("clippy"));
 
-    check_clippy_lints(clippy_lints, &cargo_path, &mut results);
+    check_clippy_lints(clippy_lints, cargo_path, &mut results);
 
     results
 }

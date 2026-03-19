@@ -27,7 +27,7 @@ pub mod test_quality_checks;
 mod toolchain_check;
 mod workspace_metadata;
 
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use crate::app::crawl::CrawlResult;
 use crate::app::discover::ProjectInfo;
@@ -57,12 +57,19 @@ pub fn run(
     categories: &RustCheckCategories,
     thorough: bool,
     tc: &dyn ToolChecker,
-    _crawl: &CrawlResult,
+    crawl: &CrawlResult,
 ) -> Report {
     let workspace_root = project.primary_workspace_root().unwrap_or(path);
 
     let guardrail_cfg = load_guardrail_config(fs, path);
     let profile = guardrail_cfg.as_ref().and_then(extract_profile);
+
+    // Filter crawler data to files within this workspace
+    let ws_clippy_tomls = filter_by_workspace(&crawl.clippy_tomls, workspace_root);
+    let ws_rustfmt_tomls = filter_by_workspace(&crawl.rustfmt_tomls, workspace_root);
+    let ws_rust_toolchains = filter_by_workspace(&crawl.rust_toolchains, workspace_root);
+    let ws_deny_tomls = filter_by_workspace(&crawl.deny_tomls, workspace_root);
+    let ws_cargo_tomls = filter_by_workspace(&crawl.cargo_tomls, workspace_root);
 
     let mut report = Report::new(path.display().to_string(), vec!["Rust".to_owned()]);
 
@@ -75,6 +82,11 @@ pub fn run(
         profile.as_deref(),
         categories.garde,
         &mut report,
+        &ws_clippy_tomls,
+        &ws_rustfmt_tomls,
+        &ws_rust_toolchains,
+        &ws_deny_tomls,
+        &ws_cargo_tomls,
     );
 
     if categories.architecture {
@@ -115,6 +127,15 @@ pub fn run(
     report
 }
 
+/// Filter a list of paths to only those within the given workspace root.
+fn filter_by_workspace(paths: &[PathBuf], workspace_root: &Path) -> Vec<PathBuf> {
+    paths
+        .iter()
+        .filter(|p| p.starts_with(workspace_root))
+        .cloned()
+        .collect()
+}
+
 #[allow(clippy::too_many_arguments)] // reason: validation orchestrator passes all context to sub-checks
 fn run_code_checks(
     fs: &dyn FileSystem,
@@ -125,10 +146,22 @@ fn run_code_checks(
     profile_ref: Option<&str>,
     garde_enabled: bool,
     report: &mut Report,
+    clippy_tomls: &[PathBuf],
+    rustfmt_tomls: &[PathBuf],
+    rust_toolchains: &[PathBuf],
+    deny_tomls: &[PathBuf],
+    cargo_tomls: &[PathBuf],
 ) {
-    let config_results = config_files::check(fs, workspace_root);
+    let config_results = config_files::check(
+        fs,
+        workspace_root,
+        clippy_tomls,
+        rustfmt_tomls,
+        rust_toolchains,
+    );
     let member_dirs = project.all_member_dirs();
-    let per_crate_results = config_files::check_per_crate_clippy(fs, workspace_root, &member_dirs);
+    let per_crate_results =
+        config_files::check_per_crate_clippy(fs, workspace_root, &member_dirs, clippy_tomls);
     let mut config_section_results = config_results;
     config_section_results.extend(per_crate_results);
     report.add_section(Section {
@@ -136,19 +169,19 @@ fn run_code_checks(
         results: config_section_results,
     });
 
-    let clippy_results = clippy_coverage::check(fs, workspace_root, profile_ref);
+    let clippy_results = clippy_coverage::check(fs, workspace_root, profile_ref, clippy_tomls);
     report.add_section(Section {
         name: "Clippy ban coverage".to_owned(),
         results: clippy_results,
     });
 
-    let deny_results = deny_audit::check(fs, workspace_root, profile_ref);
+    let deny_results = deny_audit::check(fs, workspace_root, profile_ref, deny_tomls);
     report.add_section(Section {
         name: "deny.toml audit".to_owned(),
         results: deny_results,
     });
 
-    let lint_results = cargo_lints::check(fs, workspace_root);
+    let lint_results = cargo_lints::check(fs, workspace_root, cargo_tomls);
     let inheritance_results =
         cargo_lints::check_workspace_inheritance(fs, workspace_root, &member_dirs);
     let mut lint_section = lint_results;

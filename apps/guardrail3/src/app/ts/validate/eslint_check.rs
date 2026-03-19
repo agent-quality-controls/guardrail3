@@ -1,13 +1,17 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use crate::domain::report::{CheckResult, Severity};
 use crate::ports::outbound::FileSystem;
 
 use super::eslint_rule_infra::{RuleDef, check_eslint_rule, check_eslint_rule_presence};
 
-pub fn check_eslint_config(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResult>) {
-    let eslint_path = path.join("eslint.config.mjs");
-    if !eslint_path.exists() {
+pub fn check_eslint_config(
+    fs: &dyn FileSystem,
+    eslint_configs: &[PathBuf],
+    root: &Path,
+    results: &mut Vec<CheckResult>,
+) {
+    if eslint_configs.is_empty() {
         results.push(CheckResult {
             id: "T1".to_owned(),
             severity: Severity::Error,
@@ -16,41 +20,43 @@ pub fn check_eslint_config(fs: &dyn FileSystem, path: &Path, results: &mut Vec<C
                      type safety). Without it, no static analysis runs on TypeScript code. \
                      Run `guardrail3 ts generate` to create it, or create `eslint.config.mjs` manually \
                      with the flat config format.".to_owned(),
-            file: Some(path.display().to_string()),
+            file: Some(root.display().to_string()),
             line: None,
             inventory: false,
         });
         return;
     }
 
-    results.push(
-        CheckResult {
-            id: "T1".to_owned(),
-            severity: Severity::Info,
-            title: "ESLint config exists".to_owned(),
-            message: "ESLint flat config `eslint.config.mjs` found at project root.".to_owned(),
-            file: Some(eslint_path.display().to_string()),
-            line: None,
-            inventory: false,
-        }
-        .as_inventory(),
-    );
+    for eslint_path in eslint_configs {
+        results.push(
+            CheckResult {
+                id: "T1".to_owned(),
+                severity: Severity::Info,
+                title: "ESLint config exists".to_owned(),
+                message: format!("ESLint flat config found: `{}`.", eslint_path.display()),
+                file: Some(eslint_path.display().to_string()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
 
-    let Some(content) = fs.read_file(&eslint_path) else {
-        return;
-    };
+        let Some(content) = fs.read_file(eslint_path) else {
+            continue;
+        };
 
-    check_eslint_value_rules(&content, &eslint_path, results);
-    check_boundary_enforcement(&content, &eslint_path, results);
-    check_eslint_presets(&content, &eslint_path, results);
-    check_regex_ban(&content, &eslint_path, results);
-    check_relaxed_rules(&content, &eslint_path, results);
-    check_file_overrides(&content, &eslint_path, results);
-    check_rule_presence_t40_t48(&content, &eslint_path, results);
-    check_all_eslint_rules(&content, &eslint_path, results);
-    check_test_relaxations(&content, &eslint_path, results);
-    check_route_wrappers(&content, &eslint_path, results);
-    check_process_env_ban(&content, &eslint_path, results);
+        check_eslint_value_rules(&content, eslint_path, results);
+        check_boundary_enforcement(&content, eslint_path, results);
+        check_eslint_presets(&content, eslint_path, results);
+        check_regex_ban(&content, eslint_path, results);
+        check_relaxed_rules(&content, eslint_path, results);
+        check_file_overrides(&content, eslint_path, results);
+        check_rule_presence_t40_t48(&content, eslint_path, results);
+        check_all_eslint_rules(&content, eslint_path, results);
+        check_test_relaxations(&content, eslint_path, results);
+        check_route_wrappers(&content, eslint_path, results);
+        check_process_env_ban(&content, eslint_path, results);
+    }
 }
 
 /// T2-T5: `ESLint` rules with expected values.

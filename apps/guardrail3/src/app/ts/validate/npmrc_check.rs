@@ -1,5 +1,5 @@
 use std::collections::BTreeMap;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use crate::domain::report::{CheckResult, Severity};
 use crate::ports::outbound::FileSystem;
@@ -8,9 +8,13 @@ type NpmrcExpectation<'a> = (&'a str, &'a str);
 type NpmrcSettings = Vec<(String, String)>;
 
 #[allow(clippy::string_slice)] // reason: parsing known ASCII key=value pairs
-pub fn check_npmrc(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResult>) {
-    let npmrc_path = path.join(".npmrc");
-    if !npmrc_path.exists() {
+pub fn check_npmrc(
+    fs: &dyn FileSystem,
+    npmrcs: &[PathBuf],
+    root: &Path,
+    results: &mut Vec<CheckResult>,
+) {
+    if npmrcs.is_empty() {
         results.push(CheckResult {
             id: "T11".to_owned(),
             severity: Severity::Error,
@@ -20,34 +24,36 @@ pub fn check_npmrc(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
                      Without it, pnpm uses permissive defaults that allow dependency conflicts and security \
                      issues. Create `.npmrc` with the guardrail baseline settings or run `guardrail3 ts generate`."
                 .to_owned(),
-            file: Some(path.display().to_string()),
+            file: Some(root.display().to_string()),
             line: None,
             inventory: false,
         });
         return;
     }
 
-    results.push(
-        CheckResult {
-            id: "T11".to_owned(),
-            severity: Severity::Info,
-            title: "`.npmrc` config exists".to_owned(),
-            message: "pnpm configuration file `.npmrc` found at project root.".to_owned(),
-            file: Some(npmrc_path.display().to_string()),
-            line: None,
-            inventory: false,
-        }
-        .as_inventory(),
-    );
+    for npmrc_path in npmrcs {
+        results.push(
+            CheckResult {
+                id: "T11".to_owned(),
+                severity: Severity::Info,
+                title: "`.npmrc` config exists".to_owned(),
+                message: format!("pnpm configuration file found: `{}`.", npmrc_path.display()),
+                file: Some(npmrc_path.display().to_string()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
 
-    let Some(content) = fs.read_file(&npmrc_path) else {
-        return;
-    };
+        let Some(content) = fs.read_file(npmrc_path) else {
+            continue;
+        };
 
-    let settings = parse_npmrc_settings(&content);
-    check_duplicate_keys(&settings, &npmrc_path, results);
-    check_expected_settings(&settings, &npmrc_path, results);
-    check_extra_settings(&settings, &npmrc_path, results);
+        let settings = parse_npmrc_settings(&content);
+        check_duplicate_keys(&settings, npmrc_path, results);
+        check_expected_settings(&settings, npmrc_path, results);
+        check_extra_settings(&settings, npmrc_path, results);
+    }
 }
 
 /// Parse key=value pairs from .npmrc content, skipping comments and blank lines.

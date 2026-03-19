@@ -1,5 +1,5 @@
 use crate::ports::outbound::ToolChecker;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use super::hook_script_checks::{
@@ -18,13 +18,19 @@ pub fn check_hooks(
     path: &Path,
     has_rust: bool,
     has_typescript: bool,
+    pre_commit_hooks: &[PathBuf],
     results: &mut Vec<CheckResult>,
 ) {
-    let pre_commit_path = path.join(".githooks").join("pre-commit");
-    let pre_commit_d = path.join(".githooks").join("pre-commit.d");
+    // Use crawler-discovered pre-commit hook, fall back to conventional path
+    let fallback = path.join(".githooks").join("pre-commit");
+    let pre_commit_path = pre_commit_hooks.first().unwrap_or(&fallback);
+    let pre_commit_d = pre_commit_path
+        .parent()
+        .unwrap_or(path)
+        .join("pre-commit.d");
 
     // H1: .githooks/pre-commit exists
-    if !check_pre_commit_exists(&pre_commit_path, path, tc, results) {
+    if !check_pre_commit_exists(pre_commit_path, path, tc, results) {
         return;
     }
 
@@ -32,10 +38,10 @@ pub fn check_hooks(
     check_hooks_path(path, results);
 
     let is_modular = pre_commit_d.is_dir();
-    let pre_commit_content = fs.read_file(&pre_commit_path).unwrap_or_default();
+    let pre_commit_content = fs.read_file(pre_commit_path).unwrap_or_default();
 
     let ctx = HookContext {
-        pre_commit_path: &pre_commit_path,
+        pre_commit_path,
         pre_commit_d: &pre_commit_d,
         is_modular,
         pre_commit_content: &pre_commit_content,
