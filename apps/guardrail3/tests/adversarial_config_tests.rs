@@ -25,6 +25,7 @@ use std::process::Command;
 use syn as _;
 use tempfile as _;
 use toml as _;
+use toml_edit as _;
 use tree_sitter as _;
 use tree_sitter_typescript as _;
 use walkdir as _;

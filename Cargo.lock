@@ -347,6 +347,7 @@ dependencies = [
  "syn",
  "tempfile",
  "toml",
+ "toml_edit",
  "tree-sitter",
  "tree-sitter-typescript",
  "walkdir",

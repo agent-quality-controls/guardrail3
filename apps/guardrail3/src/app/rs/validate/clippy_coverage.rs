@@ -4,7 +4,9 @@ use std::path::Path;
 use crate::domain::report::{CheckResult, Severity};
 use crate::ports::outbound::FileSystem;
 
-const EXPECTED_METHOD_BANS: &[&str] = &[
+/// Required method bans for the service profile.
+/// Used by both validate (`clippy_coverage`) and coverage map details.
+pub const EXPECTED_METHOD_BANS: &[&str] = &[
     "std::env::var",
     "std::env::var_os",
     "std::env::vars",
@@ -40,7 +42,8 @@ const EXPECTED_METHOD_BANS: &[&str] = &[
     "serde_yaml::from_reader",
 ];
 
-const EXPECTED_TYPE_BANS: &[&str] = &[
+/// Required type bans for the service profile.
+pub const EXPECTED_TYPE_BANS: &[&str] = &[
     "std::collections::HashMap",
     "std::collections::HashSet",
     "std::sync::Mutex",
