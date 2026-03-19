@@ -170,6 +170,19 @@ allow-git = []"#,
 };
 
 /// Returns all ban entry modules for the "service" profile.
+pub const DENY_BANS_REGEX: Module = Module {
+    name: "deny/bans/regex",
+    description: "Ban regex crates — use structured parsers (syn, tree-sitter, serde_json, toml)",
+    content: r#"    # --- Parsing: use structured parsers, never regex ---
+    { name = "regex", wrappers = ["tree-sitter", "globset", "ignore"] }, # EXCEPTION: transitive only
+    { name = "fancy-regex", wrappers = [] },
+    { name = "onig", wrappers = [] },
+    { name = "pcre2", wrappers = [] },
+    { name = "grep-cli", wrappers = [] },
+    { name = "grep-regex", wrappers = [] },
+    { name = "grep-matcher", wrappers = [] },"#,
+};
+
 pub fn service_profile_ban_entries() -> Vec<&'static Module> {
     vec![
         &DENY_BANS_JSON,
@@ -182,6 +195,7 @@ pub fn service_profile_ban_entries() -> Vec<&'static Module> {
         &DENY_BANS_DATETIME,
         &DENY_BANS_ORM,
         &DENY_BANS_SERIALIZATION,
+        &DENY_BANS_REGEX,
     ]
 }
 
