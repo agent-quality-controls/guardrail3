@@ -75,9 +75,8 @@ Single Rust binary (`cargo install guardrail3`) that:
 | `guardrail3 hooks validate [path]` | No | Hook + deployment checks |
 | `guardrail3 rs init --profile <name>` | No (creates it) | Scaffold Rust guardrail3.toml |
 | `guardrail3 ts init` | No (creates it) | Scaffold TypeScript section in guardrail3.toml |
-| `guardrail3 generate` | Yes | Produce config files from modules + profile |
+| `guardrail3 generate` | Yes | Produce config files from modules + profile. `--dry-run` shows diffs, `--dump-dir` writes generated files to a directory |
 | `guardrail3 check` | Yes | CI: verify generated files are current |
-| `guardrail3 diff` | Yes | Dry run of generate with diffs |
 | `guardrail3 list-modules` | No | List all embedded modules |
 | `guardrail3 show-module <name>` | No | Print module content |
 | `guardrail3 rs generate` | Yes | Rust configs only |

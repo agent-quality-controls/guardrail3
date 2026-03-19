@@ -173,7 +173,7 @@ fn unknown_type_falls_back_to_service() {
 
     let path_str = dir.to_str().expect("non-utf8 path");
     let out = guardrail3()
-        .args(["rs", "diff", path_str])
+        .args(["rs", "generate", "--dry-run", path_str])
         .output()
         .expect("failed to run");
 
@@ -202,7 +202,7 @@ fn crlf_clippy_detected_as_update() {
 
     let path_str = dir.to_str().expect("non-utf8 path");
     let out = guardrail3()
-        .args(["rs", "diff", path_str])
+        .args(["rs", "generate", "--dry-run", path_str])
         .output()
         .expect("failed to run");
 
@@ -230,7 +230,7 @@ fn bom_deny_toml_handled() {
 
     let path_str = dir.to_str().expect("non-utf8 path");
     let out = guardrail3()
-        .args(["rs", "diff", path_str])
+        .args(["rs", "generate", "--dry-run", path_str])
         .output()
         .expect("failed to run");
 
@@ -260,7 +260,7 @@ fn empty_rustfmt_shows_would_create() {
 
     let path_str = dir.to_str().expect("non-utf8 path");
     let out = guardrail3()
-        .args(["rs", "diff", path_str])
+        .args(["rs", "generate", "--dry-run", path_str])
         .output()
         .expect("failed to run");
 
