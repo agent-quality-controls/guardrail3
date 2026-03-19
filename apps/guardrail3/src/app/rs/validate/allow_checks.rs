@@ -23,6 +23,12 @@ pub fn check_crate_level_allow(
     for (line, lint) in &ast_helpers::find_crate_level_allows(&file) {
         emit_crate_allow_result(path, lint, *line, is_test_file, results);
     }
+
+    // Inline module inner attributes: `mod foo { #![allow(clippy::all)] }`
+    for info in &ast_helpers::find_inline_mod_allows(&file) {
+        emit_inline_mod_allow_result(path, info, is_test_file, results);
+    }
+
     // source_lines available for future comment inspection (e.g. // reason: checks)
     let _ = &source_lines;
 }
@@ -75,6 +81,41 @@ fn emit_crate_allow_result(
     }
 }
 
+/// Emit an R30 result for a `#![allow(...)]` inside an inline module.
+fn emit_inline_mod_allow_result(
+    path: &Path,
+    info: &ast_helpers::InlineModAllow,
+    is_test_file: bool,
+    results: &mut Vec<CheckResult>,
+) {
+    // Test files are exempt from R30 (matches pre-commit hook behavior)
+    let severity = if is_test_file {
+        Severity::Info
+    } else {
+        Severity::Error
+    };
+    let action = if is_test_file {
+        "Test file — exempt from R30.".to_owned()
+    } else {
+        format!(
+            "Module-wide `#![allow({})]` in `mod {}` suppresses the lint for the entire module, hiding real issues. Use per-function `#[allow({})] // reason: <justification>` instead, or fix the underlying lint violations.",
+            info.lint, info.module_path, info.lint
+        )
+    };
+    results.push(CheckResult {
+        id: "R30".to_owned(),
+        severity,
+        title: format!(
+            "Module-level {CRATE_ALLOW_PREFIX}...) in mod {}",
+            info.module_path
+        ),
+        message: action,
+        file: Some(path.display().to_string()),
+        line: Some(info.line),
+        inventory: false,
+    });
+}
+
 // R32-R33: #[allow(...)] — item-level
 pub fn check_item_level_allow(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
     let Some(file) = ast_helpers::parse_file(content) else {
@@ -92,14 +133,23 @@ fn check_item_level_allow_ast(
 ) {
     let raw_lines: Vec<&str> = content.lines().collect();
     for (line_1based, lint) in ast_helpers::find_item_allows(file) {
-        let has_comment = raw_lines
-            .get(line_1based.wrapping_sub(1))
-            .is_some_and(|l| l.contains("//"));
-        if has_comment {
+        let has_reason_comment = raw_lines.get(line_1based.wrapping_sub(1)).is_some_and(|l| {
+            l.split("//").nth(1).is_some_and(|c| {
+                let lower = c.trim().to_ascii_lowercase();
+                lower.starts_with("reason:")
+                    && !lower.trim_start_matches("reason:").trim().is_empty()
+            })
+        });
+        if has_reason_comment {
             let reason = raw_lines
                 .get(line_1based.wrapping_sub(1))
                 .and_then(|l| l.split("//").nth(1))
-                .map_or("no reason given", str::trim);
+                .and_then(|c| {
+                    let trimmed = c.trim();
+                    // Skip past "reason:" prefix (case-insensitive) to get the actual justification
+                    trimmed.get("reason:".len()..).map(str::trim)
+                })
+                .unwrap_or("no reason given");
             results.push(CheckResult {
                 id: "R33".to_owned(),
                 severity: Severity::Info,
@@ -228,19 +278,59 @@ fn check_cfg_attr_allow_ast(
     results: &mut Vec<CheckResult>,
 ) {
     let raw_lines: Vec<&str> = content.lines().collect();
-    for (line_1based, lint) in ast_helpers::find_cfg_attr_allows(file) {
-        let message = raw_lines.get(line_1based.wrapping_sub(1)).map_or_else(
+    for info in ast_helpers::find_cfg_attr_allows(file) {
+        let line_1based = info.line;
+        let lint = &info.lint;
+        let source_line = raw_lines.get(line_1based.wrapping_sub(1)).map_or_else(
             || format!("cfg_attr allow: {lint}"),
             |l| l.trim().to_owned(),
         );
-        results.push(CheckResult {
-            id: "R37".to_owned(),
-            severity: Severity::Info,
-            title: "cfg_attr allow".to_owned(),
-            message: format!("Conditional lint suppression `#[cfg_attr(..., allow({lint}))]`: {message}. Active only under specific cfg conditions (e.g., test builds). Audit to confirm the condition is appropriate."),
-            file: Some(path.display().to_string()),
-            line: Some(line_1based),
-            inventory: false,
-        });
+        if info.is_always_true {
+            // cfg_attr(all(), allow(...)) is functionally identical to #[allow(...)]
+            // — treat as unconditional suppression (R32: allow without reason)
+            let has_comment = raw_lines
+                .get(line_1based.wrapping_sub(1))
+                .is_some_and(|l| l.contains("//"));
+            if has_comment {
+                results.push(CheckResult {
+                    id: "R32".to_owned(),
+                    severity: Severity::Error,
+                    title: "#[allow] bypass via cfg_attr(all(), ...)".to_owned(),
+                    message: format!(
+                        "`#[cfg_attr(all(), allow({lint}))]` uses an always-true condition — \
+                         functionally identical to `#[allow({lint})]`. \
+                         This bypasses cfg_attr inventory detection. \
+                         Replace with plain `#[allow({lint})] // reason: <justification>`."
+                    ),
+                    file: Some(path.display().to_string()),
+                    line: Some(line_1based),
+                    inventory: false,
+                });
+            } else {
+                results.push(CheckResult {
+                    id: "R32".to_owned(),
+                    severity: Severity::Error,
+                    title: "#[allow] bypass via cfg_attr(all(), ...)".to_owned(),
+                    message: format!(
+                        "`#[cfg_attr(all(), allow({lint}))]` uses an always-true condition — \
+                         functionally identical to `#[allow({lint})]` but disguised as conditional. \
+                         Replace with `#[allow({lint})] // reason: <justification>` or fix the lint."
+                    ),
+                    file: Some(path.display().to_string()),
+                    line: Some(line_1based),
+                    inventory: false,
+                });
+            }
+        } else {
+            results.push(CheckResult {
+                id: "R37".to_owned(),
+                severity: Severity::Info,
+                title: "cfg_attr allow".to_owned(),
+                message: format!("Conditional lint suppression `#[cfg_attr(..., allow({lint}))]`: {source_line}. Active only under specific cfg conditions (e.g., test builds). Audit to confirm the condition is appropriate."),
+                file: Some(path.display().to_string()),
+                line: Some(line_1based),
+                inventory: false,
+            });
+        }
     }
 }

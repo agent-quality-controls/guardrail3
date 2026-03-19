@@ -219,11 +219,10 @@ fn adversarial_r32_reason_on_wrong_line_still_flagged() {
 
 #[test]
 fn adversarial_r33_unicode_allow_treated_as_justified() {
-    // The // comment exists on the same line (even though "reason" has a zero-width space).
-    // The checker just checks for `//` presence, so this should be R33 (Info), not R32 (Error).
-    // This is a known weakness — the checker can't validate the reason content.
+    // The comment has a zero-width space in "rea​son" — not a valid `// reason:` prefix.
+    // With the stricter check, this is now correctly caught as R32 (Error).
     let result = validate_fixture("unicode_allow.rs");
-    assert_contains_check(&result, "R33", "info");
+    assert_contains_check(&result, "R32", "error");
 }
 
 // ============================================================

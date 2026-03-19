@@ -175,32 +175,39 @@ pub fn check_dependency_flow(
             });
             continue;
         };
-        let Some(deps) = table.get("dependencies").and_then(|d| d.as_table()) else {
-            continue;
-        };
         let forbidden = src_layer.forbidden();
-        for (dep_name, dep_val) in deps {
-            let dep_path = extract_path_dep(dep_val);
-            if dep_path.is_none() {
+        let dep_sections = [
+            ("dependencies", ""),
+            ("dev-dependencies", " (dev-dependencies)"),
+            ("build-dependencies", " (build-dependencies)"),
+        ];
+        for (section_key, section_label) in &dep_sections {
+            let Some(deps) = table.get(*section_key).and_then(|d| d.as_table()) else {
                 continue;
-            }
-            let tgt = resolve_dep_layer(dep_name, dep_path, member_dir, &layers, &dir_to_layer);
-            if let Some(tgt_layer) = tgt {
-                if forbidden.contains(&tgt_layer) {
-                    results.push(CheckResult {
-                        id: "R-ARCH-02".to_owned(),
-                        severity: Severity::Error,
-                        title: "Dependency flow violation".to_owned(),
-                        message: format!(
-                            "{} crate `{crate_name}` ({member_dir}) depends on \
-                             {} crate `{dep_name}`",
-                            src_layer.label(),
-                            tgt_layer.label(),
-                        ),
-                        file: Some(cargo.display().to_string()),
-                        line: None,
-                        inventory: false,
-                    });
+            };
+            for (dep_name, dep_val) in deps {
+                let dep_path = extract_path_dep(dep_val);
+                if dep_path.is_none() {
+                    continue;
+                }
+                let tgt = resolve_dep_layer(dep_name, dep_path, member_dir, &layers, &dir_to_layer);
+                if let Some(tgt_layer) = tgt {
+                    if forbidden.contains(&tgt_layer) {
+                        results.push(CheckResult {
+                            id: "R-ARCH-02".to_owned(),
+                            severity: Severity::Error,
+                            title: "Dependency flow violation".to_owned(),
+                            message: format!(
+                                "{} crate `{crate_name}` ({member_dir}) depends on \
+                                 {} crate `{dep_name}`{section_label}",
+                                src_layer.label(),
+                                tgt_layer.label(),
+                            ),
+                            file: Some(cargo.display().to_string()),
+                            line: None,
+                            inventory: false,
+                        });
+                    }
                 }
             }
         }
@@ -283,27 +290,30 @@ pub fn check_library_service_boundary(
                 });
                 continue;
             };
-            let Some(deps) = table.get("dependencies").and_then(|d| d.as_table()) else {
-                continue;
-            };
-            for (dep_name, dep_val) in deps {
-                let Some(rel) = extract_path_dep(dep_val) else {
+            let lib_dep_sections = ["dependencies", "dev-dependencies", "build-dependencies"];
+            for section_key in &lib_dep_sections {
+                let Some(deps) = table.get(*section_key).and_then(|d| d.as_table()) else {
                     continue;
                 };
-                let resolved = normalize_path(dir, rel);
-                if is_service_internal(&resolved) {
-                    results.push(CheckResult {
-                        id: "R-ARCH-03".to_owned(),
-                        severity: Severity::Error,
-                        title: "Library depends on service internals".to_owned(),
-                        message: format!(
-                            "Library `{name}` ({dir}) depends on `{dep_name}` \
-                             which resolves to {resolved} inside a service's crates."
-                        ),
-                        file: Some(cargo.display().to_string()),
-                        line: None,
-                        inventory: false,
-                    });
+                for (dep_name, dep_val) in deps {
+                    let Some(rel) = extract_path_dep(dep_val) else {
+                        continue;
+                    };
+                    let resolved = normalize_path(dir, rel);
+                    if is_service_internal(&resolved) {
+                        results.push(CheckResult {
+                            id: "R-ARCH-03".to_owned(),
+                            severity: Severity::Error,
+                            title: "Library depends on service internals".to_owned(),
+                            message: format!(
+                                "Library `{name}` ({dir}) depends on `{dep_name}` \
+                                 which resolves to {resolved} inside a service's crates."
+                            ),
+                            file: Some(cargo.display().to_string()),
+                            line: None,
+                            inventory: false,
+                        });
+                    }
                 }
             }
         }

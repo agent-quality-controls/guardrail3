@@ -507,3 +507,104 @@ fn r_arch_02_external_dep_not_checked() {
         "external (non-path) deps should not trigger R-ARCH-02, got: {r:?}"
     );
 }
+
+// -----------------------------------------------------------------------
+// R-ARCH-02 dev-dependencies and build-dependencies (F-04-03)
+// -----------------------------------------------------------------------
+
+#[test]
+fn r_arch_02_domain_dev_depends_on_adapters_fails() {
+    let mut fs = StubFs::new();
+    let _ = fs.add(
+        "/ws/crates/domain/Cargo.toml",
+        "[package]\nname=\"domain\"\n[dev-dependencies]\nadapters = { path = \"../adapters\" }\n",
+    );
+    let _ = fs.add(
+        "/ws/crates/adapters/Cargo.toml",
+        "[package]\nname=\"adapters\"",
+    );
+    let p = project(&[("domain", "crates/domain"), ("adapters", "crates/adapters")]);
+    let mut r = Vec::new();
+    check_dependency_flow(&fs, Path::new("/ws"), &p, &BTreeMap::new(), &mut r);
+    assert_eq!(r.len(), 1, "dev-dep violation should be caught: {r:?}");
+    assert_eq!(r[0].id, "R-ARCH-02");
+    assert_eq!(r[0].severity, Severity::Error);
+    assert!(
+        r[0].message.contains("dev-dependencies"),
+        "message should mention dev-dependencies: {}",
+        r[0].message
+    );
+}
+
+#[test]
+fn r_arch_02_domain_build_depends_on_adapters_fails() {
+    let mut fs = StubFs::new();
+    let _ = fs.add(
+        "/ws/crates/domain/Cargo.toml",
+        "[package]\nname=\"domain\"\n[build-dependencies]\nadapters = { path = \"../adapters\" }\n",
+    );
+    let _ = fs.add(
+        "/ws/crates/adapters/Cargo.toml",
+        "[package]\nname=\"adapters\"",
+    );
+    let p = project(&[("domain", "crates/domain"), ("adapters", "crates/adapters")]);
+    let mut r = Vec::new();
+    check_dependency_flow(&fs, Path::new("/ws"), &p, &BTreeMap::new(), &mut r);
+    assert_eq!(r.len(), 1, "build-dep violation should be caught: {r:?}");
+    assert_eq!(r[0].id, "R-ARCH-02");
+    assert_eq!(r[0].severity, Severity::Error);
+    assert!(
+        r[0].message.contains("build-dependencies"),
+        "message should mention build-dependencies: {}",
+        r[0].message
+    );
+}
+
+#[test]
+fn r_arch_02_adapters_dev_depends_on_domain_ok() {
+    let mut fs = StubFs::new();
+    let _ = fs.add(
+        "/ws/crates/adapters/Cargo.toml",
+        "[package]\nname=\"adapters\"\n[dev-dependencies]\ndomain = { path = \"../domain\" }\n",
+    );
+    let _ = fs.add("/ws/crates/domain/Cargo.toml", "[package]\nname=\"domain\"");
+    let p = project(&[("adapters", "crates/adapters"), ("domain", "crates/domain")]);
+    let mut r = Vec::new();
+    check_dependency_flow(&fs, Path::new("/ws"), &p, &BTreeMap::new(), &mut r);
+    assert!(
+        r.is_empty(),
+        "adapters dev-depending on domain is allowed (outer->inner), got: {r:?}"
+    );
+}
+
+#[test]
+fn r_arch_02_violations_across_all_sections_reported() {
+    let mut fs = StubFs::new();
+    let _ = fs.add(
+        "/ws/crates/domain/Cargo.toml",
+        "[package]\nname=\"domain\"\n\
+         [dependencies]\nadapters = { path = \"../adapters\" }\n\
+         [dev-dependencies]\nports = { path = \"../ports\" }\n\
+         [build-dependencies]\napp = { path = \"../app\" }\n",
+    );
+    let _ = fs.add(
+        "/ws/crates/adapters/Cargo.toml",
+        "[package]\nname=\"adapters\"",
+    );
+    let _ = fs.add("/ws/crates/ports/Cargo.toml", "[package]\nname=\"ports\"");
+    let _ = fs.add("/ws/crates/app/Cargo.toml", "[package]\nname=\"app\"");
+    let p = project(&[
+        ("domain", "crates/domain"),
+        ("adapters", "crates/adapters"),
+        ("ports", "crates/ports"),
+        ("app", "crates/app"),
+    ]);
+    let mut r = Vec::new();
+    check_dependency_flow(&fs, Path::new("/ws"), &p, &BTreeMap::new(), &mut r);
+    assert_eq!(
+        r.len(),
+        3,
+        "should find violations in all 3 dep sections: {r:?}"
+    );
+    assert!(r.iter().all(|c| c.id == "R-ARCH-02"));
+}

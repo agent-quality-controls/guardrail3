@@ -74,7 +74,11 @@ fn cfg_attr_allow_found() {
         "#[cfg_attr(test, allow(dead_code))]\nfn foo() {}",
     ));
     assert_eq!(allows.len(), 1, "should find cfg_attr allow");
-    assert_eq!(allows[0].1, "dead_code");
+    assert_eq!(allows[0].lint, "dead_code");
+    assert!(
+        !allows[0].is_always_true,
+        "test condition is not always true"
+    );
 }
 
 #[test]
@@ -84,6 +88,43 @@ fn cfg_attr_allow_in_string_not_found() {
     assert!(
         find_cfg_attr_allows(&must_parse(&src)).is_empty(),
         "no match in string"
+    );
+}
+
+#[test]
+#[allow(clippy::indexing_slicing)] // reason: test assertion on known-length vector
+fn cfg_attr_all_empty_is_always_true() {
+    let allows = find_cfg_attr_allows(&must_parse(
+        "#[cfg_attr(all(), allow(dead_code))]\nfn foo() {}",
+    ));
+    assert_eq!(allows.len(), 1, "should find cfg_attr allow");
+    assert_eq!(allows[0].lint, "dead_code");
+    assert!(
+        allows[0].is_always_true,
+        "all() with no args is always true"
+    );
+}
+
+#[test]
+#[allow(clippy::indexing_slicing)] // reason: test assertion on known-length vector
+fn cfg_attr_all_with_args_is_not_always_true() {
+    let allows = find_cfg_attr_allows(&must_parse(
+        "#[cfg_attr(all(unix), allow(dead_code))]\nfn foo() {}",
+    ));
+    assert_eq!(allows.len(), 1, "should find cfg_attr allow");
+    assert_eq!(allows[0].lint, "dead_code");
+    assert!(!allows[0].is_always_true, "all(unix) is not always true");
+}
+
+#[test]
+fn cfg_attr_any_is_not_always_true() {
+    let allows = find_cfg_attr_allows(&must_parse(
+        "#[cfg_attr(any(unix, windows), allow(dead_code))]\nfn foo() {}",
+    ));
+    assert!(!allows.is_empty(), "should find cfg_attr allow");
+    assert!(
+        !allows.iter().any(|a| a.is_always_true),
+        "any(...) is not detected as always-true"
     );
 }
 
@@ -250,4 +291,93 @@ struct Bar {}
     );
     assert_eq!(derives[1].macros[0], "Serialize");
     assert_eq!(derives[1].macros[1], "Clone");
+}
+
+// ---------------------------------------------------------------------------
+// R58: glob import detection (`use std::*` and `use std::fs::*`)
+// ---------------------------------------------------------------------------
+
+#[test]
+fn std_glob_import_detected() {
+    // `use std::*` imports everything including fs — must be caught
+    assert_eq!(
+        find_std_fs_imports(&must_parse("use std::*;\nfn main() {}")).len(),
+        1,
+        "use std::* should be detected as importing std::fs"
+    );
+}
+
+#[test]
+fn std_fs_glob_import_detected() {
+    // `use std::fs::*` imports all fs functions — must be caught
+    assert_eq!(
+        find_std_fs_imports(&must_parse("use std::fs::*;\nfn main() {}")).len(),
+        1,
+        "use std::fs::* should be detected"
+    );
+}
+
+#[test]
+fn std_group_with_glob_detected() {
+    // `use std::{fs::*, io}` — group containing a glob under fs
+    assert_eq!(
+        find_std_fs_imports(&must_parse("use std::{fs::*, io};\nfn main() {}")).len(),
+        1,
+        "use std::{{fs::*, io}} should be detected"
+    );
+}
+
+// ---------------------------------------------------------------------------
+// R30: inline module inner attribute detection
+// ---------------------------------------------------------------------------
+
+#[test]
+#[allow(clippy::indexing_slicing)] // reason: test assertion on known-length vector
+fn inline_mod_allow_detected() {
+    let src = "mod foo {\n    #![allow(dead_code)]\n    fn bar() {}\n}\n";
+    let parsed = must_parse(src);
+    let allows = find_inline_mod_allows(&parsed);
+    assert_eq!(allows.len(), 1, "should find one inline mod allow");
+    assert_eq!(allows[0].lint, "dead_code");
+    assert_eq!(allows[0].module_path, "foo");
+}
+
+#[test]
+fn inline_mod_allow_multiple_lints() {
+    let src = "mod foo {\n    #![allow(dead_code, unused_variables)]\n    fn bar() {}\n}\n";
+    let parsed = must_parse(src);
+    let allows = find_inline_mod_allows(&parsed);
+    assert_eq!(allows.len(), 2, "should find two lints in one allow");
+}
+
+#[test]
+#[allow(clippy::indexing_slicing)] // reason: test assertion on known-length vector
+fn nested_inline_mod_allow_detected() {
+    let src = "mod outer {\n    mod inner {\n        #![allow(clippy::all)]\n        fn baz() {}\n    }\n}\n";
+    let parsed = must_parse(src);
+    let allows = find_inline_mod_allows(&parsed);
+    assert_eq!(allows.len(), 1, "should find nested mod allow");
+    assert_eq!(allows[0].lint, "clippy::all");
+    assert_eq!(allows[0].module_path, "outer::inner");
+}
+
+#[test]
+fn external_mod_no_false_positive() {
+    // `mod foo;` (external module, no body) should not produce results
+    let src = "mod foo;\nfn main() {}\n";
+    let parsed = must_parse(src);
+    let allows = find_inline_mod_allows(&parsed);
+    assert!(allows.is_empty(), "external mod should not produce results");
+}
+
+#[test]
+fn crate_level_allow_not_in_inline_mod() {
+    // `#![allow(dead_code)]` at crate level should NOT appear in inline mod results
+    let src = "#![allow(dead_code)]\nfn main() {}\n";
+    let parsed = must_parse(src);
+    let allows = find_inline_mod_allows(&parsed);
+    assert!(
+        allows.is_empty(),
+        "crate-level allow is not an inline mod allow"
+    );
 }
