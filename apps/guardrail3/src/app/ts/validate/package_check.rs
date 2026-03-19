@@ -374,6 +374,39 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
         });
     }
 
+    // T-PKG-04: engines must include pnpm version constraint
+    let has_pnpm_engine = json
+        .get("engines")
+        .and_then(|e| e.as_object())
+        .is_some_and(|engines| engines.contains_key("pnpm"));
+    if has_pnpm_engine {
+        results.push(
+            CheckResult {
+                id: "T-PKG-04".to_owned(),
+                severity: Severity::Info,
+                title: "`engines.pnpm` version constraint set".to_owned(),
+                message: "pnpm version constraint found in `engines` field.".to_owned(),
+                file: Some(pkg_path.display().to_string()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
+    } else if json.get("engines").is_some() {
+        // Only check if engines exists but lacks pnpm — T57 handles missing engines
+        results.push(CheckResult {
+            id: "T-PKG-04".to_owned(),
+            severity: Severity::Error,
+            title: "`engines.pnpm` version constraint missing".to_owned(),
+            message: "`engines` field exists but has no `pnpm` constraint. \
+                     Add `\"pnpm\": \">=10\"` to `engines` to enforce pnpm version."
+                .to_owned(),
+            file: Some(pkg_path.display().to_string()),
+            line: None,
+            inventory: false,
+        });
+    }
+
     // T58: onlyBuiltDependencies
     if let Some(obd) = json
         .get("pnpm")
