@@ -41,15 +41,9 @@ impl CoverageTool for DenyCoverage {
         };
 
         let bans = diff_bans(&table);
-        let licenses = table
-            .get("licenses")
-            .and_then(|l| l.get("allow"))
-            .and_then(|v| v.as_array())
-            .map_or(0, Vec::len);
 
         serde_json::json!({
-            "bans": bans,
-            "licenses": licenses
+            "bans": bans
         })
     }
 
