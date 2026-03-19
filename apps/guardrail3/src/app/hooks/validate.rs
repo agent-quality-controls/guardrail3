@@ -15,13 +15,21 @@ pub fn run(
     has_typescript: bool,
     domains: &ValidateDomains,
     tc: &dyn ToolChecker,
-    _crawl: &CrawlResult,
+    crawl: &CrawlResult,
 ) -> Report {
     let mut report = Report::new(path.display().to_string(), vec!["Hooks".to_owned()]);
 
     if domains.code {
         let mut hook_results = Vec::new();
-        hook_checks::check_hooks(fs, tc, path, has_rust, has_typescript, &mut hook_results);
+        hook_checks::check_hooks(
+            fs,
+            tc,
+            path,
+            has_rust,
+            has_typescript,
+            &crawl.pre_commit_hooks,
+            &mut hook_results,
+        );
         report.add_section(Section {
             name: "Hook checks".to_owned(),
             results: hook_results,

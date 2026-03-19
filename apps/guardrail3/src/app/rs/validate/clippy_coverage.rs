@@ -1,5 +1,5 @@
 use std::collections::BTreeSet;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use crate::domain::report::{CheckResult, Severity};
 use crate::ports::outbound::FileSystem;
@@ -59,11 +59,16 @@ pub fn check(
     fs: &dyn FileSystem,
     workspace_root: &Path,
     _profile: Option<&str>,
+    clippy_tomls: &[PathBuf],
 ) -> Vec<CheckResult> {
     let mut results = Vec::new();
-    let clippy_path = workspace_root.join("clippy.toml");
 
-    if !clippy_path.exists() {
+    // Find the root clippy.toml from crawler data
+    let root_clippy = clippy_tomls
+        .iter()
+        .find(|p| p.parent() == Some(workspace_root));
+
+    let Some(clippy_path) = root_clippy else {
         results.push(CheckResult {
             id: "R4".to_owned(),
             severity: Severity::Error,
@@ -74,9 +79,9 @@ pub fn check(
             inventory: false,
         });
         return results;
-    }
+    };
 
-    let content = match fs.read_file_err(&clippy_path) {
+    let content = match fs.read_file_err(clippy_path) {
         Ok(content) => content,
         Err(e) => {
             results.push(CheckResult {
@@ -121,7 +126,7 @@ pub fn check(
         "R4",
         "R6",
         "method ban",
-        &clippy_path,
+        clippy_path,
         &mut results,
     );
 
@@ -133,7 +138,7 @@ pub fn check(
         "R5",
         "R7",
         "type ban",
-        &clippy_path,
+        clippy_path,
         &mut results,
     );
 

@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use crate::domain::report::{CheckResult, Severity};
 use crate::ports::outbound::FileSystem;
@@ -59,32 +59,48 @@ fn tsconfig_explanation(key: &str) -> &'static str {
 }
 
 #[allow(clippy::too_many_lines, clippy::disallowed_methods)] // reason: comprehensive tsconfig validation; guardrail3 JSON config inspection
-pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResult>) {
-    let tsconfig_path = path.join("tsconfig.base.json");
-    let tsconfig_path = if tsconfig_path.exists() {
-        tsconfig_path
+pub fn check_tsconfig(
+    fs: &dyn FileSystem,
+    tsconfigs: &[PathBuf],
+    tsconfig_bases: &[PathBuf],
+    root: &Path,
+    results: &mut Vec<CheckResult>,
+) {
+    // Prefer tsconfig.base.json (explicit base), fall back to tsconfig.json
+    let configs_to_check: Vec<&PathBuf> = if tsconfig_bases.is_empty() {
+        tsconfigs.iter().collect()
     } else {
-        let alt = path.join("tsconfig.json");
-        if alt.exists() {
-            alt
-        } else {
-            results.push(CheckResult {
-                id: "T9".to_owned(),
-                severity: Severity::Error,
-                title: "TypeScript config file not found".to_owned(),
-                message: "No `tsconfig.base.json` or `tsconfig.json` found. The TypeScript compiler config \
-                         controls type checking strictness, module resolution, and output settings. Without it, \
-                         TypeScript uses permissive defaults that miss real bugs. Create `tsconfig.json` with \
-                         `strict: true` and other guardrail settings, or run `guardrail3 ts generate`."
-                    .to_owned(),
-                file: Some(path.display().to_string()),
-                line: None,
-                inventory: false,
-            });
-            return;
-        }
+        tsconfig_bases.iter().collect()
     };
 
+    if configs_to_check.is_empty() {
+        results.push(CheckResult {
+            id: "T9".to_owned(),
+            severity: Severity::Error,
+            title: "TypeScript config file not found".to_owned(),
+            message: "No `tsconfig.base.json` or `tsconfig.json` found. The TypeScript compiler config \
+                     controls type checking strictness, module resolution, and output settings. Without it, \
+                     TypeScript uses permissive defaults that miss real bugs. Create `tsconfig.json` with \
+                     `strict: true` and other guardrail settings, or run `guardrail3 ts generate`."
+                .to_owned(),
+            file: Some(root.display().to_string()),
+            line: None,
+            inventory: false,
+        });
+        return;
+    }
+
+    for tsconfig_path in configs_to_check {
+        check_single_tsconfig(fs, tsconfig_path, results);
+    }
+}
+
+#[allow(clippy::too_many_lines, clippy::disallowed_methods)] // reason: comprehensive tsconfig validation; guardrail3 JSON config inspection
+fn check_single_tsconfig(
+    fs: &dyn FileSystem,
+    tsconfig_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     results.push(
         CheckResult {
             id: "T9".to_owned(),
@@ -101,7 +117,7 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
         .as_inventory(),
     );
 
-    let Some(content) = fs.read_file(&tsconfig_path) else {
+    let Some(content) = fs.read_file(tsconfig_path) else {
         return;
     };
 

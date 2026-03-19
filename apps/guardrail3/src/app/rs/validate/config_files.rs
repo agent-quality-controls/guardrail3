@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use crate::domain::report::{CheckResult, Severity};
 
@@ -7,13 +7,24 @@ use super::toolchain_check;
 use super::workspace_metadata;
 use crate::ports::outbound::FileSystem;
 
+/// Find the config file whose parent is exactly `workspace_root`.
+fn find_root_config<'a>(configs: &'a [PathBuf], workspace_root: &Path) -> Option<&'a PathBuf> {
+    configs.iter().find(|p| p.parent() == Some(workspace_root))
+}
+
 type ExpectedInt<'a> = (&'a str, i64);
-pub fn check(fs: &dyn FileSystem, workspace_root: &Path) -> Vec<CheckResult> {
+pub fn check(
+    fs: &dyn FileSystem,
+    workspace_root: &Path,
+    clippy_tomls: &[PathBuf],
+    rustfmt_tomls: &[PathBuf],
+    rust_toolchains: &[PathBuf],
+) -> Vec<CheckResult> {
     let mut results = Vec::new();
 
     // R1: clippy.toml exists at workspace root
-    let clippy_path = workspace_root.join("clippy.toml");
-    if clippy_path.exists() {
+    let root_clippy = find_root_config(clippy_tomls, workspace_root);
+    if let Some(clippy_path) = root_clippy {
         results.push(CheckResult {
             id: "R1".to_owned(),
             severity: Severity::Info,
@@ -25,7 +36,7 @@ pub fn check(fs: &dyn FileSystem, workspace_root: &Path) -> Vec<CheckResult> {
         }.as_inventory());
 
         // R3: Thresholds
-        check_clippy_thresholds(fs, &clippy_path, &mut results);
+        check_clippy_thresholds(fs, clippy_path, &mut results);
     } else {
         results.push(CheckResult {
             id: "R1".to_owned(),
@@ -39,8 +50,8 @@ pub fn check(fs: &dyn FileSystem, workspace_root: &Path) -> Vec<CheckResult> {
     }
 
     // R21: rustfmt.toml exists
-    let rustfmt_path = workspace_root.join("rustfmt.toml");
-    if rustfmt_path.exists() {
+    let root_rustfmt = find_root_config(rustfmt_tomls, workspace_root);
+    if let Some(rustfmt_path) = root_rustfmt {
         results.push(CheckResult {
             id: "R21".to_owned(),
             severity: Severity::Info,
@@ -53,7 +64,7 @@ pub fn check(fs: &dyn FileSystem, workspace_root: &Path) -> Vec<CheckResult> {
 
         // R22: rustfmt.toml settings differ (Warn)
         // R23: rustfmt.toml extra settings (Info)
-        rustfmt_check::check_rustfmt_settings(fs, &rustfmt_path, &mut results);
+        rustfmt_check::check_rustfmt_settings(fs, rustfmt_path, &mut results);
     } else {
         results.push(CheckResult {
             id: "R21".to_owned(),
@@ -67,8 +78,8 @@ pub fn check(fs: &dyn FileSystem, workspace_root: &Path) -> Vec<CheckResult> {
     }
 
     // R24: rust-toolchain.toml exists — Error if missing
-    let toolchain_path = workspace_root.join("rust-toolchain.toml");
-    if toolchain_path.exists() {
+    let root_toolchain = find_root_config(rust_toolchains, workspace_root);
+    if let Some(toolchain_path) = root_toolchain {
         results.push(CheckResult {
             id: "R24".to_owned(),
             severity: Severity::Info,
@@ -80,7 +91,7 @@ pub fn check(fs: &dyn FileSystem, workspace_root: &Path) -> Vec<CheckResult> {
         }.as_inventory());
 
         // R25: rust-toolchain.toml settings
-        toolchain_check::check_toolchain_settings(fs, &toolchain_path, &mut results);
+        toolchain_check::check_toolchain_settings(fs, toolchain_path, &mut results);
     } else {
         results.push(CheckResult {
             id: "R24".to_owned(),
@@ -103,13 +114,18 @@ pub fn check_per_crate_clippy(
     fs: &dyn FileSystem,
     workspace_root: &Path,
     member_dirs: &[String],
+    clippy_tomls: &[PathBuf],
 ) -> Vec<CheckResult> {
     let mut results = Vec::new();
 
     for member in member_dirs {
         let crate_dir = workspace_root.join(member);
-        let crate_clippy = crate_dir.join("clippy.toml");
-        if crate_clippy.exists() {
+        // Find a clippy.toml from the crawler whose parent matches this crate dir
+        let crate_clippy = clippy_tomls
+            .iter()
+            .find(|p| p.parent() == Some(crate_dir.as_path()));
+
+        if let Some(crate_clippy) = crate_clippy {
             results.push(
                 CheckResult {
                     id: "R2".to_owned(),
@@ -124,7 +140,7 @@ pub fn check_per_crate_clippy(
             );
 
             // Check per-crate clippy.toml content for global-state type bans
-            check_per_crate_clippy_content(fs, &crate_clippy, member, &mut results);
+            check_per_crate_clippy_content(fs, crate_clippy, member, &mut results);
         } else {
             results.push(CheckResult {
                 id: "R2".to_owned(),

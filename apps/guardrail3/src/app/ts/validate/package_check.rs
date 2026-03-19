@@ -1,16 +1,26 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use crate::domain::report::{CheckResult, Severity};
 use crate::ports::outbound::FileSystem;
 
 #[allow(clippy::too_many_lines, clippy::disallowed_methods)] // reason: comprehensive package.json validation; guardrail3 JSON config inspection
-pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResult>) {
-    let pkg_path = path.join("package.json");
-    if !pkg_path.exists() {
-        return;
-    }
+pub fn check_package_json(
+    fs: &dyn FileSystem,
+    package_jsons: &[PathBuf],
+    root: &Path,
+    results: &mut Vec<CheckResult>,
+) {
+    // Find root package.json by matching parent to project root.
+    // Per-app package.jsons get banned-dep checks only (T17).
+    let root_pkg = package_jsons
+        .iter()
+        .find(|p| p.parent().is_some_and(|parent| parent == root));
 
-    let Some(content) = fs.read_file(&pkg_path) else {
+    let Some(pkg_path) = root_pkg else {
+        return;
+    };
+
+    let Some(content) = fs.read_file(pkg_path) else {
         return;
     };
 
@@ -427,5 +437,80 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
             line: None,
             inventory: false,
         }.as_inventory());
+    }
+
+    // Per-app package.jsons: check banned deps (T17) only
+    for app_pkg in package_jsons {
+        if app_pkg.parent().is_some_and(|parent| parent == root) {
+            continue; // skip root — already checked above
+        }
+        check_banned_deps_in_package(fs, app_pkg, results);
+    }
+}
+
+/// Check banned dependencies in a single package.json (T17 only).
+#[allow(clippy::disallowed_methods)] // reason: serde_json::from_str for package.json inspection
+fn check_banned_deps_in_package(
+    fs: &dyn FileSystem,
+    pkg_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
+    let Some(content) = fs.read_file(pkg_path) else {
+        return;
+    };
+
+    let json: serde_json::Value = match serde_json::from_str(&content) {
+        Ok(v) => v,
+        Err(_) => return,
+    };
+
+    let banned_deps: &[&str] = &[
+        "axios",
+        "lodash",
+        "moment",
+        "uuid",
+        "nanoid",
+        "pg",
+        "express",
+        "classnames",
+        "winston",
+        "pino",
+        "request",
+        "got",
+        "superagent",
+        "node-fetch",
+        "isomorphic-fetch",
+        "underscore",
+        "request-promise",
+        "postgres",
+        "cross-fetch",
+        "xregexp",
+        "regexp-tree",
+    ];
+    let banned_prefixes: &[&str] = &["embla-carousel"];
+
+    for section_name in &["dependencies", "devDependencies"] {
+        if let Some(deps) = json.get(section_name).and_then(|d| d.as_object()) {
+            for dep_name in deps.keys() {
+                let is_banned = banned_deps.contains(&dep_name.as_str())
+                    || banned_prefixes.iter().any(|p| dep_name.starts_with(p));
+
+                if is_banned {
+                    results.push(CheckResult {
+                        id: "T17".to_owned(),
+                        severity: Severity::Error,
+                        title: format!("Banned dependency `{dep_name}` in `{section_name}`"),
+                        message: format!(
+                            "`{dep_name}` found in `{section_name}`. This package is banned because a preferred \
+                             alternative exists (e.g., native fetch over axios, date-fns over moment, \
+                             crypto.randomUUID over uuid). Remove it and switch to the approved alternative."
+                        ),
+                        file: Some(pkg_path.display().to_string()),
+                        line: None,
+                        inventory: false,
+                    });
+                }
+            }
+        }
     }
 }
