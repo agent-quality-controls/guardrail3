@@ -1,10 +1,12 @@
 //! `.npmrc` coverage — plugs into the generic coverage engine.
 //!
-//! ## Resolution: project root level for workspace installs
+//! ## Resolution (verified via npm/pnpm source, 2026-03-19):
 //!
-//! pnpm reads root `.npmrc` for all workspace packages during `pnpm install`.
-//! Per-package `.npmrc` only used for direct invocation in that directory.
-//! Walk-up behavior: pnpm checks project, user, global levels.
+//! npm walks up from CWD to find project root (first dir with `package.json`
+//! or `node_modules`), then loads `.npmrc` from that project root.
+//! pnpm loads root `.npmrc` for all workspace packages during `pnpm install`.
+//! Settings cascade: project `.npmrc` > user `~/.npmrc` > global.
+//! Higher-priority sources shadow lower ones (no merging within a level).
 
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
@@ -21,7 +23,7 @@ impl CoverageTool for NpmrcCoverage {
     }
 
     fn resolution_description(&self) -> &'static str {
-        "project root for workspace installs, per-directory for direct pnpm invocation"
+        "project root .npmrc (walk-up to package.json) — project > user > global cascade"
     }
 
     fn config_files<'a>(&self, crawl: &'a CrawlResult) -> &'a [PathBuf] {
