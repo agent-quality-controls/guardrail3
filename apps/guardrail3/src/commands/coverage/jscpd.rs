@@ -1,9 +1,12 @@
 //! `.jscpd.json` coverage — plugs into the generic coverage engine.
 //!
-//! ## Resolution: CWD only (no walk-up)
+//! ## Resolution (empirically verified + source verified, 2026-03-19):
 //!
-//! cosmiconfig v9 default `searchStrategy: 'none'` disables parent search.
-//! Config only found at CWD. `--config` flag overrides.
+//! CWD only — NO walk-up. jscpd does NOT use cosmiconfig at all.
+//! Config resolution: `path.resolve(".jscpd.json")` (CWD + filename).
+//! Also checks `package.json` `"jscpd"` key in CWD.
+//! Parent directory configs are completely ignored.
+//! `--config <path>` flag overrides to explicit path.
 
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
@@ -20,7 +23,7 @@ impl CoverageTool for JscpdCoverage {
     }
 
     fn resolution_description(&self) -> &'static str {
-        "CWD only (cosmiconfig v9, no walk-up)"
+        "CWD only (no walk-up, no cosmiconfig) — .jscpd.json resolved from CWD"
     }
 
     fn config_files<'a>(&self, crawl: &'a CrawlResult) -> &'a [PathBuf] {

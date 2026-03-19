@@ -1,10 +1,12 @@
 //! Stylelint coverage — plugs into the generic coverage engine.
 //!
-//! ## Resolution: cosmiconfig walk-up from each linted CSS file.
+//! ## Resolution (verified via source: stylelint 17.4.0, cosmiconfig 9.x, 2026-03-19):
 //!
+//! Walk-up from each linted CSS file (per-file, not per-CWD).
+//! Cosmiconfig `searchStrategy: 'global'` — walks up to `$HOME`.
 //! Nearest `.stylelintrc.*` or `stylelint.config.*` wins.
-//! `extends` MERGES rules (unlike most tools where nearest replaces).
-//! But the config file itself must be found via walk-up first.
+//! `extends` deep-merges rules (later entries override earlier).
+//! Intermediate configs shadow for files below them.
 
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
@@ -21,7 +23,7 @@ impl CoverageTool for StylelintCoverage {
     }
 
     fn resolution_description(&self) -> &'static str {
-        "walk-up from each CSS file (cosmiconfig) — nearest .stylelintrc.* wins"
+        "walk-up from each CSS file (cosmiconfig global) — nearest .stylelintrc.* wins, extends deep-merges"
     }
 
     fn config_files<'a>(&self, crawl: &'a CrawlResult) -> &'a [PathBuf] {

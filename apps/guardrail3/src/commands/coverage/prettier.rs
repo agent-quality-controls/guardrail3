@@ -1,10 +1,11 @@
 //! Prettier coverage — plugs into the generic coverage engine.
 //!
-//! ## Resolution: cosmiconfig walk-up from each formatted file.
+//! ## Resolution (empirically verified with Prettier 3.8.1, 2026-03-19):
 //!
-//! Nearest `.prettierrc.*` or `prettier.config.*` wins.
-//! NO extends mechanism. Walk-up goes all the way to `$HOME`.
-//! Subdirectory config completely replaces root.
+//! Walk-up from each formatted file. Nearest `.prettierrc.*` or
+//! `prettier.config.*` wins. Intermediate configs shadow completely.
+//! NO extends/merge mechanism — subdirectory config replaces root entirely.
+//! Uses editorconfig integration but that doesn't affect config discovery.
 
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
@@ -21,7 +22,7 @@ impl CoverageTool for PrettierCoverage {
     }
 
     fn resolution_description(&self) -> &'static str {
-        "walk-up from each file (cosmiconfig, goes to $HOME) — nearest .prettierrc.* wins"
+        "walk-up from each file — nearest .prettierrc.* wins, no merge/extends"
     }
 
     fn config_files<'a>(&self, crawl: &'a CrawlResult) -> &'a [PathBuf] {

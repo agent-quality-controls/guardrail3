@@ -1,9 +1,12 @@
 //! cspell coverage — plugs into the generic coverage engine.
 //!
-//! ## Resolution: walk-up from each checked file.
+//! ## Resolution (verified via cspell.org docs, 2026-03-19):
 //!
-//! Nearest cspell config wins. No auto-merge.
-//! Subdirectory config must explicitly `import` parent to inherit.
+//! Walk-up from CWD (and from each file being checked). Searches parent
+//! directories for cspell config files. Nearest config wins.
+//! No auto-merge — subdirectory config must explicitly `import` parent.
+//! `--stop-config-search-at` limits walk-up boundary.
+//! `--no-config-search` disables walk-up entirely.
 
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
@@ -20,7 +23,7 @@ impl CoverageTool for CspellCoverage {
     }
 
     fn resolution_description(&self) -> &'static str {
-        "walk-up from each checked file — nearest cspell config wins"
+        "walk-up from CWD/file — nearest cspell config wins, import for explicit inheritance"
     }
 
     fn config_files<'a>(&self, crawl: &'a CrawlResult) -> &'a [PathBuf] {
