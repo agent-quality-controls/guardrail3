@@ -241,38 +241,12 @@ fn walk_up_resolve(
 // Rendering
 // ---------------------------------------------------------------------------
 
-/// Print as JSON.
+/// Print coverage map as JSON (the only output format).
 #[allow(clippy::print_stdout)] // reason: CLI command
-pub fn print_json(map: &CoverageMap) {
+pub fn print(map: &CoverageMap) {
     if let Ok(json) = serde_json::to_string_pretty(map) {
         println!("{json}");
     }
-}
-
-/// Print as human-readable tree.
-#[allow(clippy::print_stdout)] // reason: CLI command
-pub fn print_tree(map: &CoverageMap) {
-    println!("{} coverage", map.tool);
-    println!("({})\n", map.resolution);
-
-    for cfg in &map.configs {
-        println!("  {:<50} {}", cfg.path, format_details(&cfg.details),);
-        for dir in &cfg.covers {
-            println!("    covers: {dir}/");
-        }
-    }
-
-    if !map.uncovered.is_empty() {
-        println!();
-        for dir in &map.uncovered {
-            println!("  ⚠ UNCOVERED: {dir}/");
-        }
-    }
-
-    println!(
-        "\nSummary: {}/{} dirs covered, {} uncovered",
-        map.summary.covered_dirs, map.summary.total_dirs, map.summary.uncovered_dirs
-    );
 }
 
 // ---------------------------------------------------------------------------
@@ -286,15 +260,4 @@ fn rel_str(root: &Path, path: &Path) -> String {
         .display()
         .to_string();
     if s.is_empty() { ".".to_owned() } else { s }
-}
-
-fn format_details(details: &serde_json::Value) -> String {
-    if let Some(obj) = details.as_object() {
-        obj.iter()
-            .map(|(k, v)| format!("{k}={v}"))
-            .collect::<Vec<_>>()
-            .join(", ")
-    } else {
-        String::new()
-    }
 }
