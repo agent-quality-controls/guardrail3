@@ -214,6 +214,7 @@ fn handle_rs(command: RsCommands) {
             let tc = RealToolChecker;
             let domains = domains_from_args(&args);
             let project = discover::detect_project(&fs, &path);
+            let crawl = guardrail3::app::crawl::crawl(&path);
             let report = hooks::validate::run(
                 &fs,
                 &path,
@@ -221,6 +222,7 @@ fn handle_rs(command: RsCommands) {
                 project.has_typescript,
                 &domains,
                 &tc,
+                &crawl,
             );
             print_report(&args, &report);
         }
@@ -258,6 +260,7 @@ fn handle_ts(command: TsCommands) {
             let fs = RealFileSystem;
             let cfg = load_config(&fs, &path);
             let categories = build_ts_categories(&args, &fs, &path);
+            let crawl = guardrail3::app::crawl::crawl(&path);
             let scoped_files = commands::validate::resolve_scoped_files_pub(&args, &path);
             let report = ts::validate::run(
                 &fs,
@@ -265,6 +268,7 @@ fn handle_ts(command: TsCommands) {
                 scoped_files.as_deref(),
                 &categories,
                 cfg.as_ref(),
+                &crawl,
             );
             print_report(&args, &report);
         }
@@ -283,6 +287,7 @@ fn handle_ts(command: TsCommands) {
             let tc = RealToolChecker;
             let domains = domains_from_args(&args);
             let project = discover::detect_project(&fs, &path);
+            let crawl = guardrail3::app::crawl::crawl(&path);
             let report = hooks::validate::run(
                 &fs,
                 &path,
@@ -290,6 +295,7 @@ fn handle_ts(command: TsCommands) {
                 project.has_typescript,
                 &domains,
                 &tc,
+                &crawl,
             );
             print_report(&args, &report);
         }
@@ -304,6 +310,7 @@ fn run_rs_validate(
     let tc = RealToolChecker;
     let categories = build_rs_categories(args, &fs, &path);
     let project = discover::detect_project(&fs, &path);
+    let crawl = guardrail3::app::crawl::crawl(&path);
     let scoped_files = commands::validate::resolve_scoped_files_pub(args, &path);
     let report = rs::validate::run(
         &fs,
@@ -313,6 +320,7 @@ fn run_rs_validate(
         &categories,
         args.thorough,
         &tc,
+        &crawl,
     );
     (report, path)
 }

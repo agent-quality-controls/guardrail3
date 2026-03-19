@@ -29,6 +29,7 @@ mod workspace_metadata;
 
 use std::path::Path;
 
+use crate::app::crawl::CrawlResult;
 use crate::app::discover::ProjectInfo;
 use crate::domain::config::types::GuardrailConfig;
 use crate::domain::report::{Report, RustCheckCategories, Section};
@@ -47,6 +48,7 @@ fn extract_profile(cfg: &GuardrailConfig) -> Option<String> {
     cfg.profile.as_ref().map(|p| p.name.clone())
 }
 
+#[allow(clippy::too_many_arguments)] // reason: orchestrator needs all context — will consolidate into struct in Phase 2
 pub fn run(
     fs: &dyn FileSystem,
     path: &Path,
@@ -55,6 +57,7 @@ pub fn run(
     categories: &RustCheckCategories,
     thorough: bool,
     tc: &dyn ToolChecker,
+    _crawl: &CrawlResult,
 ) -> Report {
     let workspace_root = project.primary_workspace_root().unwrap_or(path);
 
