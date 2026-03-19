@@ -20,6 +20,7 @@ mod tsconfig_check;
 
 use std::path::Path;
 
+use crate::app::crawl::CrawlResult;
 use crate::domain::config::types::GuardrailConfig;
 use crate::domain::report::{Report, Section, TsAppContext, TsAppType, TsCheckCategories};
 use crate::ports::outbound::FileSystem;
@@ -31,6 +32,7 @@ pub fn run(
     scoped_files: Option<&[String]>,
     categories: &TsCheckCategories,
     config: Option<&GuardrailConfig>,
+    _crawl: &CrawlResult,
 ) -> Report {
     let mut report = Report::new(path.display().to_string(), vec!["TypeScript".to_owned()]);
 

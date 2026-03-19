@@ -1,5 +1,6 @@
 use std::path::Path;
 
+use crate::app::crawl::CrawlResult;
 use crate::domain::report::ValidateDomains;
 use crate::domain::report::{Report, Section};
 
@@ -14,6 +15,7 @@ pub fn run(
     has_typescript: bool,
     domains: &ValidateDomains,
     tc: &dyn ToolChecker,
+    _crawl: &CrawlResult,
 ) -> Report {
     let mut report = Report::new(path.display().to_string(), vec!["Hooks".to_owned()]);
 

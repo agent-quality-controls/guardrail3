@@ -17,7 +17,9 @@ fn to_abs_path(project_path: &Path, relative: &str) -> String {
     project_path.join(relative).display().to_string()
 }
 
-#[allow(clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — stderr output and exit codes
+#[allow(clippy::print_stderr)] // reason: CLI command — stderr output for user-facing errors
+#[allow(clippy::disallowed_methods)] // reason: CLI command — process::exit for non-zero exit codes
+#[allow(clippy::too_many_lines)] // reason: CLI orchestrator wiring all validate modules
 pub fn run(args: &ValidateArgs) {
     let path = Path::new(&args.path);
     let Some(abs_path) = path.canonicalize().ok() else {
@@ -42,6 +44,7 @@ pub fn run(args: &ValidateArgs) {
     let ts_categories = build_ts_categories(args, cfg.as_ref());
 
     let project = discover::detect_project(&fs, &abs_path);
+    let crawl = crate::app::crawl::crawl(&abs_path);
 
     let scoped_files = resolve_scoped_files(args, &abs_path);
     let scoped_ref = scoped_files.as_deref();
@@ -69,6 +72,7 @@ pub fn run(args: &ValidateArgs) {
             &rs_categories,
             args.thorough,
             &tc,
+            &crawl,
         );
         for section in rust_report.sections {
             combined_report.add_section(section);
@@ -76,7 +80,14 @@ pub fn run(args: &ValidateArgs) {
     }
 
     if project.has_typescript {
-        let ts_report = ts::validate::run(&fs, &abs_path, scoped_ref, &ts_categories, cfg.as_ref());
+        let ts_report = ts::validate::run(
+            &fs,
+            &abs_path,
+            scoped_ref,
+            &ts_categories,
+            cfg.as_ref(),
+            &crawl,
+        );
         for section in ts_report.sections {
             combined_report.add_section(section);
         }
@@ -90,6 +101,7 @@ pub fn run(args: &ValidateArgs) {
         project.has_typescript,
         &domains,
         &tc,
+        &crawl,
     );
     for section in hooks_report.sections {
         combined_report.add_section(section);
