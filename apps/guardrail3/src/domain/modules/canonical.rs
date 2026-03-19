@@ -323,6 +323,19 @@ export default tseslint.config(
           name: "process",
           message: "Use env() from @/lib/env instead of process.env",
         },
+        {
+          name: "RegExp",
+          message: "Use Zod schemas for validation, structured parsers for parsing — never regex",
+        },
+      ],
+
+      // --- Regex ban (AST-level) ---
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "Literal[regex]",
+          message: "Regex literals are banned — use Zod schemas for validation, structured parsers for parsing",
+        },
       ],
 
       // --- TypeScript strict rules ---
