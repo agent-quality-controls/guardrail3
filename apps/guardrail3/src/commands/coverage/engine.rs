@@ -99,13 +99,15 @@ pub fn build(tool: &dyn CoverageTool, root: &Path, crawl: &CrawlResult) -> Cover
     for dir in source_dirs {
         let resolved = if tool.walks_up() {
             walk_up_resolve(dir, root, config_files)
-        } else if config_files
-            .iter()
-            .any(|cf| cf.parent() == Some(dir.as_path()))
-        {
-            Some(dir.clone())
         } else {
-            None
+            // Non-walk-up tools (e.g., jscpd): a config at directory X covers
+            // all source dirs under X, not just at X. Find the nearest ancestor
+            // config directory.
+            config_files
+                .iter()
+                .filter_map(|cf| cf.parent())
+                .find(|config_dir| dir.starts_with(config_dir))
+                .map(Path::to_path_buf)
         };
 
         if let Some(config_dir) = resolved {
