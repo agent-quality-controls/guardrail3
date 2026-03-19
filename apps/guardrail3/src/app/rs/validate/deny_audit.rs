@@ -34,6 +34,14 @@ pub const EXPECTED_BANS: &[&str] = &[
     "rmp-serde",
     "prost",
     "flatbuffers",
+    // Parsing: use structured parsers (syn, tree-sitter, serde_json, toml), never regex
+    "regex",
+    "fancy-regex",
+    "onig",
+    "pcre2",
+    "grep-cli",
+    "grep-regex",
+    "grep-matcher",
 ];
 
 pub fn check(

@@ -48,6 +48,7 @@ pub fn all_modules() -> Vec<&'static Module> {
     modules.push(&deny::DENY_BANS_DATETIME);
     modules.push(&deny::DENY_BANS_ORM);
     modules.push(&deny::DENY_BANS_SERIALIZATION);
+    modules.push(&deny::DENY_BANS_REGEX);
     modules.push(&deny::DENY_FEATURE_BANS_TOKIO);
     modules.push(&deny::DENY_LICENSES);
     modules.push(&deny::DENY_ADVISORIES);
