@@ -1,9 +1,10 @@
 //! `rust-toolchain.toml` coverage — plugs into the generic coverage engine.
 //!
-//! ## Resolution: walk-up from CWD
+//! ## Resolution (empirically verified 2026-03-19):
 //!
-//! Rustup walks up parent directories looking for `rust-toolchain.toml`
-//! (or legacy `rust-toolchain`). Nearest wins.
+//! Rustup walks up from CWD looking for `rust-toolchain.toml`.
+//! Nearest wins, shadows completely. Crosses workspace boundaries.
+//! Identical walk-up behavior to clippy/deny/rustfmt.
 
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
@@ -27,7 +28,7 @@ impl CoverageTool for RustToolchainCoverage {
     }
 
     fn resolution_description(&self) -> &'static str {
-        "resolved per Rust workspace — nearest rust-toolchain.toml wins"
+        "walk-up — nearest rust-toolchain.toml wins, shadows completely"
     }
 
     fn config_files<'a>(&self, crawl: &'a CrawlResult) -> &'a [PathBuf] {
