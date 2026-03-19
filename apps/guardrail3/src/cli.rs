@@ -50,6 +50,18 @@ pub enum Commands {
         /// Show rustfmt.toml coverage map
         #[arg(long)]
         rustfmt: bool,
+        /// Show `ESLint` coverage map
+        #[arg(long)]
+        eslint: bool,
+        /// Show Stylelint coverage map
+        #[arg(long)]
+        stylelint: bool,
+        /// Show Prettier coverage map
+        #[arg(long)]
+        prettier: bool,
+        /// Show cspell coverage map
+        #[arg(long)]
+        cspell: bool,
         /// Output format: text or json
         #[arg(long, default_value = "text")]
         format: String,

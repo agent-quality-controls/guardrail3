@@ -35,7 +35,9 @@ use guardrail3::{
     report,
 };
 
-#[allow(clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI entry point — stderr output and process::exit for error codes are intentional
+#[allow(clippy::print_stderr)] // reason: CLI entry point — stderr for error output
+#[allow(clippy::disallowed_methods)] // reason: CLI entry point — process::exit for error codes
+#[allow(clippy::too_many_lines)] // reason: CLI entry point — command dispatch
 fn main() {
     let cmd = help_gen::inject_help(Cli::command());
     let matches = match cmd.try_get_matches() {
@@ -59,36 +61,99 @@ fn main() {
             clippy,
             deny,
             rustfmt,
+            eslint,
+            stylelint,
+            prettier,
+            cspell,
             format,
         } => {
-            if clippy || deny || rustfmt {
+            let has_coverage =
+                clippy || deny || rustfmt || eslint || stylelint || prettier || cspell;
+            if has_coverage {
                 let project_path = std::path::Path::new(&path);
                 let crawl_result = guardrail3::app::crawl::crawl(project_path);
                 let is_json = format == "json";
-                if clippy {
-                    if is_json {
-                        commands::coverage::clippy::print_json(project_path, &crawl_result);
-                    } else {
-                        commands::coverage::clippy::print_tree(project_path, &crawl_result);
-                    }
-                }
-                if deny {
-                    if is_json {
-                        commands::coverage::deny::print_json(project_path, &crawl_result);
-                    } else {
-                        commands::coverage::deny::print_tree(project_path, &crawl_result);
-                    }
-                }
-                if rustfmt {
-                    if is_json {
-                        commands::coverage::rustfmt::print_json(project_path, &crawl_result);
-                    } else {
-                        commands::coverage::rustfmt::print_tree(project_path, &crawl_result);
-                    }
-                }
+
+                run_coverage_maps(
+                    project_path,
+                    &crawl_result,
+                    is_json,
+                    clippy,
+                    deny,
+                    rustfmt,
+                    eslint,
+                    stylelint,
+                    prettier,
+                    cspell,
+                );
             } else {
                 commands::map::run(&path);
             }
+        }
+    }
+}
+
+#[allow(clippy::too_many_arguments, clippy::fn_params_excessive_bools)] // reason: one bool per coverage tool — flat dispatch from CLI flags
+fn run_coverage_maps(
+    project_path: &std::path::Path,
+    crawl_result: &guardrail3::app::crawl::CrawlResult,
+    is_json: bool,
+    clippy: bool,
+    deny: bool,
+    rustfmt: bool,
+    eslint: bool,
+    stylelint: bool,
+    prettier: bool,
+    cspell: bool,
+) {
+    use commands::coverage;
+    if clippy {
+        if is_json {
+            coverage::clippy::print_json(project_path, crawl_result);
+        } else {
+            coverage::clippy::print_tree(project_path, crawl_result);
+        }
+    }
+    if deny {
+        if is_json {
+            coverage::deny::print_json(project_path, crawl_result);
+        } else {
+            coverage::deny::print_tree(project_path, crawl_result);
+        }
+    }
+    if rustfmt {
+        if is_json {
+            coverage::rustfmt::print_json(project_path, crawl_result);
+        } else {
+            coverage::rustfmt::print_tree(project_path, crawl_result);
+        }
+    }
+    if eslint {
+        if is_json {
+            coverage::eslint::print_json(project_path, crawl_result);
+        } else {
+            coverage::eslint::print_tree(project_path, crawl_result);
+        }
+    }
+    if stylelint {
+        if is_json {
+            coverage::stylelint::print_json(project_path, crawl_result);
+        } else {
+            coverage::stylelint::print_tree(project_path, crawl_result);
+        }
+    }
+    if prettier {
+        if is_json {
+            coverage::prettier::print_json(project_path, crawl_result);
+        } else {
+            coverage::prettier::print_tree(project_path, crawl_result);
+        }
+    }
+    if cspell {
+        if is_json {
+            coverage::cspell::print_json(project_path, crawl_result);
+        } else {
+            coverage::cspell::print_tree(project_path, crawl_result);
         }
     }
 }
