@@ -41,11 +41,6 @@ impl CoverageTool for DenyCoverage {
         };
 
         let bans = diff_bans(&table);
-        let advisory_ignores = table
-            .get("advisories")
-            .and_then(|a| a.get("ignore"))
-            .and_then(|v| v.as_array())
-            .map_or(0, Vec::len);
         let licenses = table
             .get("licenses")
             .and_then(|l| l.get("allow"))
@@ -54,7 +49,6 @@ impl CoverageTool for DenyCoverage {
 
         serde_json::json!({
             "bans": bans,
-            "advisory_ignores": advisory_ignores,
             "licenses": licenses
         })
     }
@@ -95,6 +89,7 @@ fn diff_bans(table: &toml::Value) -> serde_json::Value {
 
     serde_json::json!({
         "total": total,
+        "required_total": EXPECTED_BANS.len(),
         "required_present": required_present,
         "required_missing": required_missing,
         "user_extra": user_extra
