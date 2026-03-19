@@ -137,7 +137,7 @@ fn resolve_scoped_files(args: &ValidateArgs, project_path: &Path) -> Option<Vec<
 #[allow(clippy::disallowed_methods)] // reason: CLI tool runs git commands
 fn git_staged_files(project_path: &Path) -> Option<Vec<String>> {
     let output = std::process::Command::new("git")
-        .args(["diff", "--cached", "--name-only", "--diff-filter=ACM"])
+        .args(["diff", "--cached", "--name-only", "--diff-filter=ACMR"])
         .current_dir(project_path)
         .output()
         .ok()?;
@@ -168,7 +168,13 @@ fn git_dirty_files(project_path: &Path) -> Option<Vec<String>> {
         .output()
         .ok()?;
 
-    if !staged.status.success() || !unstaged.status.success() {
+    let untracked = std::process::Command::new("git")
+        .args(["ls-files", "--others", "--exclude-standard"])
+        .current_dir(project_path)
+        .output()
+        .ok()?;
+
+    if !staged.status.success() || !unstaged.status.success() || !untracked.status.success() {
         return None;
     }
 
@@ -180,6 +186,12 @@ fn git_dirty_files(project_path: &Path) -> Option<Vec<String>> {
         }
     }
     for line in String::from_utf8_lossy(&unstaged.stdout).lines() {
+        let full = project_path.join(line).display().to_string();
+        if !files.contains(&full) {
+            files.push(full);
+        }
+    }
+    for line in String::from_utf8_lossy(&untracked.stdout).lines() {
         let full = project_path.join(line).display().to_string();
         if !files.contains(&full) {
             files.push(full);

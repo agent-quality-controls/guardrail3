@@ -147,22 +147,22 @@ pub struct ValidateArgs {
     pub format: String,
 
     /// Only check staged files (git diff --cached)
-    #[arg(long)]
+    #[arg(long, group = "scope")]
     #[garde(skip)] // reason: boolean flag, inherently valid
     pub staged: bool,
 
     /// Only check dirty files (staged + unstaged)
-    #[arg(long)]
+    #[arg(long, group = "scope")]
     #[garde(skip)] // reason: boolean flag, inherently valid
     pub dirty: bool,
 
     /// Only check files changed in last N commits
-    #[arg(long)]
+    #[arg(long, group = "scope")]
     #[garde(skip)] // reason: type-validated by clap
     pub commits: Option<usize>,
 
     /// Specific files to check
-    #[arg(long)]
+    #[arg(long, group = "scope")]
     #[garde(inner(length(min = 1)))] // reason: each file path must be non-empty
     pub files: Vec<String>,
 

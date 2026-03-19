@@ -36,8 +36,9 @@ fn detects_workspace_in_apps_backend() {
         "fn main() {}\n",
     );
 
-    // Also add a package.json so TypeScript is detected
+    // Also add a package.json + tsconfig.json so TypeScript is detected
     let _ = stdfs::write(tmp.join("package.json"), "{}");
+    let _ = stdfs::write(tmp.join("tsconfig.json"), "{}");
 
     let project = detect_project(&fs, &tmp);
 

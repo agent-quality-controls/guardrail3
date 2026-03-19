@@ -106,7 +106,8 @@ pub fn build(tool: &dyn CoverageTool, root: &Path, crawl: &CrawlResult) -> Cover
             config_files
                 .iter()
                 .filter_map(|cf| cf.parent())
-                .find(|config_dir| dir.starts_with(config_dir))
+                .filter(|config_dir| dir.starts_with(config_dir))
+                .max_by_key(|config_dir| config_dir.components().count())
                 .map(Path::to_path_buf)
         };
 
@@ -192,7 +193,7 @@ fn detect_shadows(configs: &mut [ConfigInstance]) {
     let mut shadows: Vec<ShadowRelation> = Vec::new();
     for &(i, ref dir_i) in &config_dirs {
         for &(j, ref dir_j) in &config_dirs {
-            if i != j && dir_i != dir_j && dir_i.starts_with(dir_j.as_str()) {
+            if i != j && dir_i != dir_j && Path::new(dir_i).starts_with(Path::new(dir_j)) {
                 shadows.push((i, j, dir_i.clone()));
             }
         }

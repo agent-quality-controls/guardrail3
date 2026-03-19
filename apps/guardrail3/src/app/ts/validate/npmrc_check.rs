@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::path::Path;
 
 use crate::domain::report::{CheckResult, Severity};
@@ -44,6 +45,7 @@ pub fn check_npmrc(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
     };
 
     let settings = parse_npmrc_settings(&content);
+    check_duplicate_keys(&settings, &npmrc_path, results);
     check_expected_settings(&settings, &npmrc_path, results);
     check_extra_settings(&settings, &npmrc_path, results);
 }
@@ -65,6 +67,35 @@ fn parse_npmrc_settings(content: &str) -> NpmrcSettings {
         }
     }
     settings
+}
+
+/// T-NPMRC-01: Detect duplicate keys — pnpm uses last-wins, which may mask earlier values.
+fn check_duplicate_keys(
+    settings: &NpmrcSettings,
+    npmrc_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
+    let mut counts: BTreeMap<&str, usize> = BTreeMap::new();
+    for (key, _) in settings {
+        let entry = counts.entry(key.as_str()).or_insert(0);
+        *entry = entry.saturating_add(1);
+    }
+    for (key, count) in &counts {
+        if *count > 1 {
+            results.push(CheckResult {
+                id: "T-NPMRC-01".to_owned(),
+                severity: Severity::Error,
+                title: format!("Duplicate key `{key}` in `.npmrc`"),
+                message: format!(
+                    "Duplicate key `{key}` in .npmrc \u{2014} pnpm uses the last value, \
+                     which may differ from earlier entries."
+                ),
+                file: Some(npmrc_path.display().to_string()),
+                line: None,
+                inventory: false,
+            });
+        }
+    }
 }
 
 /// T12/T13: Check each expected .npmrc setting is present with correct value.
@@ -90,7 +121,8 @@ fn check_expected_settings(
     ];
 
     for (key, expected_val) in expected {
-        let found = settings.iter().find(|(k, _)| k == key);
+        // Use rfind (last match) because pnpm uses last-wins for duplicate keys
+        let found = settings.iter().rev().find(|(k, _)| k == key);
         match found {
             Some((_, val)) if val == expected_val => {
                 // Correct — no output needed

@@ -68,30 +68,6 @@ pub fn check_use_count(path: &Path, content: &str, is_test: bool, results: &mut 
     }
 }
 
-// R42: unsafe
-pub fn check_unsafe(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
-    let Some(file) = ast_helpers::parse_file(content) else {
-        return;
-    };
-    // AST path — no false positives from strings or comments
-    for line in ast_helpers::find_unsafe_usage(&file) {
-        let message = content
-            .lines()
-            .nth(line.saturating_sub(1))
-            .unwrap_or("")
-            .trim();
-        results.push(CheckResult {
-            id: "R42".to_owned(),
-            severity: Severity::Error,
-            title: "unsafe usage".to_owned(),
-            message: format!("`unsafe` block or function found: {message}. Unsafe code bypasses Rust's memory safety guarantees and is forbidden in this workspace (unsafe_code = \"forbid\"). Rewrite using safe abstractions."),
-            file: Some(path.display().to_string()),
-            line: Some(line),
-            inventory: false,
-        });
-    }
-}
-
 // R53: unsafe_code = "forbid"
 pub fn check_unsafe_code_forbid(
     fs: &dyn FileSystem,
