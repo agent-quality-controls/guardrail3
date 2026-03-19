@@ -52,7 +52,6 @@ unsafe_code = "forbid"
 dead_code = "deny"
 unused_results = "deny"
 unused_crate_dependencies = "deny"
-missing_docs = "deny"                     # All public items must have doc comments
 missing_debug_implementations = "warn"  # Helps catch types that are hard to debug
 
 [workspace.lints.clippy]
@@ -122,7 +121,6 @@ verbose_file_reads = "deny"
 
 # -- Pedantic/nursery overrides --
 # Genuinely unavoidable style preferences
-missing_docs_in_private_items = "allow"   # Private items don't need doc comments
 module_name_repetitions = "allow"         # UserError in user module is fine
 must_use_candidate = "allow"              # Not every function needs #[must_use]
 option_if_let_else = "allow"              # if let Some(x) is often clearer than map_or
