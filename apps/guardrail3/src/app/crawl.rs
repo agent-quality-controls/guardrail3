@@ -23,7 +23,10 @@ pub struct CrawlResult {
     pub pnpm_workspaces: Vec<PathBuf>,
 
     // ── TypeScript guardrail configs ──
+    /// `tsconfig.json` files — participate in walk-up resolution.
     pub tsconfigs: Vec<PathBuf>,
+    /// `tsconfig.base.json` files — only reachable via explicit `extends`, not walk-up.
+    pub tsconfig_bases: Vec<PathBuf>,
     pub eslint_configs: Vec<PathBuf>,
     pub stylelint_configs: Vec<PathBuf>,
     pub cspell_configs: Vec<PathBuf>,
@@ -102,7 +105,8 @@ pub fn crawl(root: &Path) -> CrawlResult {
             "pnpm-workspace.yaml" => result.pnpm_workspaces.push(path),
 
             // ── TypeScript guardrail configs ──
-            "tsconfig.json" | "tsconfig.base.json" => result.tsconfigs.push(path),
+            "tsconfig.json" => result.tsconfigs.push(path),
+            "tsconfig.base.json" => result.tsconfig_bases.push(path),
             ".npmrc" => result.npmrcs.push(path),
             ".jscpd.json" => result.jscpd_configs.push(path),
 
@@ -147,6 +151,7 @@ pub fn crawl(root: &Path) -> CrawlResult {
     result.rustfmt_tomls.sort();
     result.package_jsons.sort();
     result.tsconfigs.sort();
+    result.tsconfig_bases.sort();
     result.eslint_configs.sort();
     result.stylelint_configs.sort();
     result.cspell_configs.sort();
