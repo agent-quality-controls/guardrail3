@@ -1,9 +1,14 @@
 //! `tsconfig.json` coverage — plugs into the generic coverage engine.
 //!
-//! ## Resolution: walk-up from CWD (when no -p or files given)
+//! ## Resolution (empirically verified with TypeScript 5.9.3, 2026-03-19):
 //!
-//! `tsc` walks up from CWD looking for `tsconfig.json`.
-//! With `-p`, uses the specified config. No cascade.
+//! Walk-up from CWD. Nearest `tsconfig.json` wins (exact filename only —
+//! `tsconfig.base.json` is NOT auto-discovered). Intermediate configs shadow.
+//! With `-p`, uses the specified config directly.
+//!
+//! Key difference from Rust tools: `extends` provides deep-merge inheritance
+//! from a parent config. But the walk-up itself is still nearest-wins shadow.
+//! Without `extends`, the found file is the entire config (no implicit merging).
 
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
@@ -20,7 +25,7 @@ impl CoverageTool for TsconfigCoverage {
     }
 
     fn resolution_description(&self) -> &'static str {
-        "walk-up from CWD — nearest tsconfig.json wins"
+        "walk-up from CWD — nearest tsconfig.json wins, extends provides deep-merge inheritance"
     }
 
     fn config_files<'a>(&self, crawl: &'a CrawlResult) -> &'a [PathBuf] {

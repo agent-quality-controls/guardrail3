@@ -458,14 +458,9 @@ fn build_root_configs(root: &Path, crawl: &CrawlResult) -> RootConfigs {
         eslint_config: at_root(&crawl.eslint_configs),
         stylelint_config: at_root(&crawl.stylelint_configs),
         tsconfig_base: crawl
-            .tsconfigs
+            .tsconfig_bases
             .iter()
-            .find(|p| {
-                p.file_name()
-                    .and_then(|n| n.to_str())
-                    .is_some_and(|n| n == "tsconfig.base.json")
-                    && p.parent() == Some(root)
-            })
+            .find(|p| p.parent() == Some(root))
             .cloned(),
         npmrc: at_root(&crawl.npmrcs),
         jscpd_config: at_root(&crawl.jscpd_configs),
