@@ -43,6 +43,7 @@ pub fn check_eslint_config(fs: &dyn FileSystem, path: &Path, results: &mut Vec<C
     check_eslint_value_rules(&content, &eslint_path, results);
     check_boundary_enforcement(&content, &eslint_path, results);
     check_eslint_presets(&content, &eslint_path, results);
+    check_regex_ban(&content, &eslint_path, results);
     check_relaxed_rules(&content, &eslint_path, results);
     check_file_overrides(&content, &eslint_path, results);
     check_rule_presence_t40_t48(&content, &eslint_path, results);
@@ -115,6 +116,40 @@ fn check_boundary_enforcement(content: &str, eslint_path: &Path, results: &mut V
                      domain code can accidentally import from adapters, creating tight coupling that makes \
                      the codebase harder to test and refactor. Install `eslint-plugin-boundaries` and configure \
                      zone definitions in `eslint.config.mjs`."
+                .to_owned(),
+            file: Some(eslint_path.display().to_string()),
+            line: None,
+            inventory: false,
+        });
+    }
+}
+
+/// T-ESLP-15: `RegExp` ban presence check.
+fn check_regex_ban(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
+    // Check that RegExp is banned via no-restricted-globals or no-restricted-syntax with regex selector
+    let has_regexp_ban = content.contains("RegExp") && content.contains("no-restricted");
+    if has_regexp_ban {
+        results.push(
+            CheckResult {
+                id: "T-ESLP-15".to_owned(),
+                severity: Severity::Info,
+                title: "RegExp ban configured in ESLint".to_owned(),
+                message: "RegExp is banned via ESLint rules. Use Zod schemas for validation, \
+                         structured parsers for parsing."
+                    .to_owned(),
+                file: Some(eslint_path.display().to_string()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
+    } else {
+        results.push(CheckResult {
+            id: "T-ESLP-15".to_owned(),
+            severity: Severity::Error,
+            title: "RegExp not banned in ESLint config".to_owned(),
+            message: "ESLint config must ban RegExp via `no-restricted-globals` and regex literals \
+                     via `no-restricted-syntax`. Use Zod for validation, structured parsers for parsing."
                 .to_owned(),
             file: Some(eslint_path.display().to_string()),
             line: None,
