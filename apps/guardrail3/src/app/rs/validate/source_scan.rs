@@ -68,6 +68,9 @@ pub fn check(
     // R49: CLAUDE.md exists
     code_quality_checks::check_claude_md(workspace_root, &mut results);
 
+    // R53: unsafe_code = "forbid" in workspace lints
+    structure_checks::check_unsafe_code_forbid(fs, workspace_root, &mut results);
+
     results
 }
 

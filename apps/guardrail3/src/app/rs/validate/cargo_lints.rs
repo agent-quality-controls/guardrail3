@@ -35,6 +35,16 @@ const EXPECTED_RUST_LINTS: &[LintExpectation] = &[
         expected_level: "deny",
         priority: None,
     },
+    LintExpectation {
+        name: "missing_docs",
+        expected_level: "deny",
+        priority: None,
+    },
+    LintExpectation {
+        name: "missing_debug_implementations",
+        expected_level: "warn",
+        priority: None,
+    },
 ];
 
 const EXPECTED_CLIPPY_GROUPS: &[LintExpectation] = &[

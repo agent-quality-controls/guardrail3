@@ -437,6 +437,37 @@ pub(super) fn check_audit_hook(content: &str, results: &mut Vec<CheckResult>) {
     }
 }
 
+/// H-SAFE-01: pre-commit hook should use `set -e` or `set -euo pipefail`
+pub(super) fn check_set_e_safety(content: &str, results: &mut Vec<CheckResult>) {
+    if content.contains("set -e") || content.contains("set -euo pipefail") {
+        results.push(
+            CheckResult {
+                id: "H-SAFE-01".to_owned(),
+                severity: Severity::Info,
+                title: "Pre-commit hook has shell error handling".to_owned(),
+                message: "Hook script uses `set -e` or `set -euo pipefail`.".to_owned(),
+                file: None,
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
+    } else {
+        results.push(CheckResult {
+            id: "H-SAFE-01".to_owned(),
+            severity: Severity::Warn,
+            title: "Pre-commit hook missing shell error handling".to_owned(),
+            message:
+                "Pre-commit hook missing `set -e` or `set -euo pipefail` \u{2014} commands that \
+                      fail may not abort the hook."
+                    .to_owned(),
+            file: None,
+            line: None,
+            inventory: false,
+        });
+    }
+}
+
 pub(super) fn inventory_scripts(
     fs: &dyn FileSystem,
     dir: &Path,

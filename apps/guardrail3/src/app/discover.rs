@@ -352,7 +352,7 @@ fn read_crate_name(fs: &dyn FileSystem, path: &Path) -> String {
 
 fn detect_typescript(fs: &dyn FileSystem, path: &Path, info: &mut ProjectInfo) {
     let pkg_json = path.join("package.json");
-    if pkg_json.exists() {
+    if pkg_json.exists() && has_typescript_signals(fs, path, &pkg_json) {
         info.has_typescript = true;
         info.package_json_path = Some(pkg_json);
         return;
@@ -363,11 +363,38 @@ fn detect_typescript(fs: &dyn FileSystem, path: &Path, info: &mut ProjectInfo) {
     if applications_dir.exists() {
         for entry in fs.list_dir(&applications_dir) {
             let app_pkg = entry.path().join("package.json");
-            if app_pkg.exists() {
+            if app_pkg.exists() && has_typescript_signals(fs, &entry.path(), &app_pkg) {
                 info.has_typescript = true;
                 info.package_json_path = Some(app_pkg);
                 return;
             }
         }
     }
+}
+
+/// Check for TypeScript signals beyond just having a package.json.
+/// Returns true if tsconfig.json exists OR typescript is in dependencies/devDependencies.
+fn has_typescript_signals(fs: &dyn FileSystem, dir: &Path, pkg_json_path: &Path) -> bool {
+    // Signal 1: tsconfig.json exists
+    if dir.join("tsconfig.json").exists() {
+        return true;
+    }
+
+    // Signal 2: typescript in dependencies or devDependencies
+    if let Some(content) = fs.read_file(pkg_json_path) {
+        #[allow(clippy::disallowed_methods)] // reason: parsing package.json for TS detection signal
+        if let Ok(json) = serde_json::from_str::<serde_json::Value>(&content) {
+            for section in &["dependencies", "devDependencies"] {
+                if json
+                    .get(section)
+                    .and_then(|d| d.get("typescript"))
+                    .is_some()
+                {
+                    return true;
+                }
+            }
+        }
+    }
+
+    false
 }

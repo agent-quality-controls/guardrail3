@@ -35,13 +35,12 @@ fuzz_target!(|data: &[u8]| {
     allow_checks::check_garde_skip(path, content, &mut results);
     allow_checks::check_cfg_attr_allow(path, content, &mut results);
 
-    // 3. Structure checks (R38-R42)
+    // 3. Structure checks (R38-R41)
     results.clear();
     structure_checks::check_file_length(path, content, false, &mut results);
     structure_checks::check_file_length(path, content, true, &mut results);
     structure_checks::check_use_count(path, content, false, &mut results);
     structure_checks::check_use_count(path, content, true, &mut results);
-    structure_checks::check_unsafe(path, content, &mut results);
 
     // 4. Code quality checks (R43-R44, R58)
     results.clear();

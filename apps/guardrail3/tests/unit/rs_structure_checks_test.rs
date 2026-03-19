@@ -9,9 +9,7 @@
 
 use std::path::Path;
 
-use guardrail3::app::rs::validate::structure_checks::{
-    check_file_length, check_unsafe, check_use_count,
-};
+use guardrail3::app::rs::validate::structure_checks::{check_file_length, check_use_count};
 use guardrail3::domain::report::Severity;
 
 // ---- Bug 4: Test file exemptions for R38 ----
@@ -84,17 +82,4 @@ fn r41_use_count_16_is_warn() {
     assert!(!results.is_empty(), "Should warn at 16 use statements");
     assert_eq!(results[0].id, "R41");
     assert_eq!(results[0].severity, Severity::Warn);
-}
-
-// ---- R42: unsafe usage ----
-
-#[test]
-fn r42_unsafe_block_detected() {
-    let content = "fn foo() { unsafe { do_stuff(); } }";
-    let path = Path::new("src/foo.rs");
-    let mut results = Vec::new();
-    check_unsafe(path, content, &mut results);
-    assert!(!results.is_empty(), "Should detect unsafe block");
-    assert_eq!(results[0].id, "R42");
-    assert_eq!(results[0].severity, Severity::Error);
 }

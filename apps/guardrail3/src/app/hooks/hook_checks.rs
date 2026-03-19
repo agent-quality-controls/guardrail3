@@ -5,7 +5,8 @@ use std::process::Command;
 use super::hook_script_checks::{
     check_audit_hook, check_conflict_marker_hook, check_cspell_hook, check_dispatcher_pattern,
     check_local_scripts, check_lockfile_hook, check_modular_scripts, check_monolithic_patterns,
-    check_prettier_hook, check_stylelint_hook, emit_script_stats, inventory_scripts,
+    check_prettier_hook, check_set_e_safety, check_stylelint_hook, emit_script_stats,
+    inventory_scripts,
 };
 use super::tool_checks::{check_duplication_tools, check_required_tools};
 use crate::domain::report::{CheckResult, Severity};
@@ -160,6 +161,9 @@ fn check_hook_structure(
     if has_typescript {
         check_stylelint_hook(ctx.pre_commit_content, results);
     }
+
+    // H-SAFE-01: Shell error handling (all projects)
+    check_set_e_safety(ctx.pre_commit_content, results);
 
     // H-TOOL-02: Conflict marker check (all projects)
     check_conflict_marker_hook(ctx.pre_commit_content, results);

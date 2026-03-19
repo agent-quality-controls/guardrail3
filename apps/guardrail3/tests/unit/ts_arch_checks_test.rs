@@ -79,6 +79,10 @@ fn t_arch_01_app_with_full_structure() {
         "export type User = { id: string };",
     );
     let _ = fs.add(
+        "/project/apps/my-app/src/modules/application/index.ts",
+        "export function createUser() {}",
+    );
+    let _ = fs.add(
         "/project/apps/my-app/src/modules/adapters/index.ts",
         "export class DbAdapter {}",
     );

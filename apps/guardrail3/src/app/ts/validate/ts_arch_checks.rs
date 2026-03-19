@@ -112,12 +112,16 @@ pub fn check_single_app_structure(
 
     // Check if modules/ directory exists by probing for any known subdirectory
     let has_domain = dir_exists_via_probe(fs, &modules_dir.join("domain"));
+    let has_application = dir_exists_via_probe(fs, &modules_dir.join("application"));
     let has_adapters = dir_exists_via_probe(fs, &modules_dir.join("adapters"));
 
-    if !has_domain || !has_adapters {
+    if !has_domain || !has_application || !has_adapters {
         let mut missing = Vec::new();
         if !has_domain {
             missing.push("domain");
+        }
+        if !has_application {
+            missing.push("application");
         }
         if !has_adapters {
             missing.push("adapters");
@@ -128,9 +132,10 @@ pub fn check_single_app_structure(
             title: format!("TS app `{app_name}` missing hexagonal architecture layers"),
             message: format!(
                 "App `{app_name}` is missing `src/modules/{}` subdirectories. Hexagonal architecture \
-                 separates business logic (domain) from external integrations (adapters), making code \
-                 testable and swappable. Create the missing directories: `src/modules/domain/` for \
-                 business logic and `src/modules/adapters/` for external integrations (DB, HTTP, etc.).",
+                 separates business logic (domain), use cases (application), and external integrations \
+                 (adapters). Create the missing directories: `src/modules/domain/` for business logic, \
+                 `src/modules/application/` for use cases/commands, and `src/modules/adapters/` for \
+                 external integrations (DB, HTTP, etc.).",
                 missing.join("`, `src/modules/"),
             ),
             file: Some(app_dir.display().to_string()),

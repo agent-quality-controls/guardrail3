@@ -96,8 +96,8 @@ fn validate_grep_attack_fixture(category: &str, fixture_name: &str) -> FixtureRe
                     for result in results {
                         let id = result["id"].as_str().unwrap_or("").to_owned();
                         let severity = result["severity"].as_str().unwrap_or("").to_owned();
-                        // Skip R49 (CLAUDE.md) — not relevant to source scan testing
-                        if id != "R49" {
+                        // Skip R49 (CLAUDE.md) and R53 (workspace unsafe_code lint) — not relevant to per-file source scan testing
+                        if id != "R49" && id != "R53" {
                             checks.push((id, severity));
                         }
                     }
