@@ -65,19 +65,15 @@ fn main() {
             stylelint,
             prettier,
             cspell,
-            format,
         } => {
             let has_coverage =
                 clippy || deny || rustfmt || eslint || stylelint || prettier || cspell;
             if has_coverage {
                 let project_path = std::path::Path::new(&path);
                 let crawl_result = guardrail3::app::crawl::crawl(project_path);
-                let is_json = format == "json";
-
                 run_coverage_maps(
                     project_path,
                     &crawl_result,
-                    is_json,
                     clippy,
                     deny,
                     rustfmt,
@@ -97,7 +93,6 @@ fn main() {
 fn run_coverage_maps(
     project_path: &std::path::Path,
     crawl_result: &guardrail3::app::crawl::CrawlResult,
-    is_json: bool,
     clippy: bool,
     deny: bool,
     rustfmt: bool,
@@ -108,53 +103,25 @@ fn run_coverage_maps(
 ) {
     use commands::coverage;
     if clippy {
-        if is_json {
-            coverage::clippy::print_json(project_path, crawl_result);
-        } else {
-            coverage::clippy::print_tree(project_path, crawl_result);
-        }
+        coverage::clippy::print(project_path, crawl_result);
     }
     if deny {
-        if is_json {
-            coverage::deny::print_json(project_path, crawl_result);
-        } else {
-            coverage::deny::print_tree(project_path, crawl_result);
-        }
+        coverage::deny::print(project_path, crawl_result);
     }
     if rustfmt {
-        if is_json {
-            coverage::rustfmt::print_json(project_path, crawl_result);
-        } else {
-            coverage::rustfmt::print_tree(project_path, crawl_result);
-        }
+        coverage::rustfmt::print(project_path, crawl_result);
     }
     if eslint {
-        if is_json {
-            coverage::eslint::print_json(project_path, crawl_result);
-        } else {
-            coverage::eslint::print_tree(project_path, crawl_result);
-        }
+        coverage::eslint::print(project_path, crawl_result);
     }
     if stylelint {
-        if is_json {
-            coverage::stylelint::print_json(project_path, crawl_result);
-        } else {
-            coverage::stylelint::print_tree(project_path, crawl_result);
-        }
+        coverage::stylelint::print(project_path, crawl_result);
     }
     if prettier {
-        if is_json {
-            coverage::prettier::print_json(project_path, crawl_result);
-        } else {
-            coverage::prettier::print_tree(project_path, crawl_result);
-        }
+        coverage::prettier::print(project_path, crawl_result);
     }
     if cspell {
-        if is_json {
-            coverage::cspell::print_json(project_path, crawl_result);
-        } else {
-            coverage::cspell::print_tree(project_path, crawl_result);
-        }
+        coverage::cspell::print(project_path, crawl_result);
     }
 }
 

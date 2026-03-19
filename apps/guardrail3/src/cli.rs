@@ -62,9 +62,6 @@ pub enum Commands {
         /// Show cspell coverage map
         #[arg(long)]
         cspell: bool,
-        /// Output format: text or json
-        #[arg(long, default_value = "text")]
-        format: String,
     },
 }
 

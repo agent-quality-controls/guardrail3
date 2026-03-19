@@ -43,13 +43,7 @@ impl CoverageTool for StylelintCoverage {
 }
 
 #[allow(clippy::print_stdout)] // reason: CLI command
-pub fn print_json(root: &Path, crawl: &CrawlResult) {
+pub fn print(root: &Path, crawl: &CrawlResult) {
     let map = engine::build(&StylelintCoverage, root, crawl);
-    engine::print_json(&map);
-}
-
-#[allow(clippy::print_stdout)] // reason: CLI command
-pub fn print_tree(root: &Path, crawl: &CrawlResult) {
-    let map = engine::build(&StylelintCoverage, root, crawl);
-    engine::print_tree(&map);
+    engine::print(&map);
 }
