@@ -1,12 +1,11 @@
 //! `ESLint` coverage — plugs into the generic coverage engine.
 //!
-//! ## Resolution (`ESLint` v10+, Feb 2026):
+//! ## Resolution (empirically verified with `ESLint` v10.0.3, 2026-03-19):
 //!
 //! Walk-up from each linted file. Nearest `eslint.config.*` wins.
-//! No cascade, no merging. This is the default since v10.
-//!
-//! A per-app `eslint.config.mjs` completely shadows the root config
-//! for all files in that subtree.
+//! No cascade, no merging. Complete replacement — ALL root rules lost.
+//! Crosses directory boundaries. Intermediate configs shadow.
+//! Same walk-up + shadow behavior as all Rust tools.
 
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
