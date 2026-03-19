@@ -1,10 +1,11 @@
 //! `rustfmt.toml` coverage — plugs into the generic coverage engine.
 //!
-//! ## Resolution: walk-up from source file
+//! ## Resolution (empirically verified 2026-03-19):
 //!
-//! `rustfmt` directly: walks up from each source file.
-//! `cargo fmt`: starts from workspace root only (different behavior!).
-//! Coverage map simulates walk-up (matches rustfmt direct + IDE behavior).
+//! Walk-up from source files. Nearest `rustfmt.toml` or `.rustfmt.toml` wins.
+//! Shadows completely. Crosses workspace boundaries.
+//! `.rustfmt.toml` (dot) takes priority over `rustfmt.toml` (no dot).
+//! `cargo fmt -p <crate>` resolves per-crate — intermediate files shadow.
 
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
