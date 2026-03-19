@@ -86,6 +86,7 @@ fn diff_bans(table: &toml::Value, key: &str, required: &[&str]) -> serde_json::V
 
     serde_json::json!({
         "total": total,
+        "required_total": required.len(),
         "required_present": required_present,
         "required_missing": required_missing,
         "user_extra": user_extra
@@ -129,8 +130,11 @@ fn check_thresholds(table: &toml::Value) -> serde_json::Value {
         }
     }
 
+    let total_in_file = required_present.saturating_add(user_extra);
+
     serde_json::json!({
-        "total": total,
+        "total": total_in_file,
+        "required_total": total,
         "required_present": required_present,
         "required_missing": required_missing,
         "user_extra": user_extra,
