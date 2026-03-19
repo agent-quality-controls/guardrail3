@@ -114,15 +114,14 @@ pub fn build(tool: &dyn CoverageTool, root: &Path, crawl: &CrawlResult) -> Cover
     for cf in config_files {
         let cf_rel = rel_str(root, cf);
         let details = tool.parse_details(cf);
-        let raw_covers = config_covered_dirs
-            .get(&cf_rel)
-            .cloned()
-            .unwrap_or_default();
-        let collapsed_covers = collapse_to_ancestors(&raw_covers, root);
+        let count = config_covered_dirs.get(&cf_rel).map_or(0, Vec::len);
+        // The config's directory IS the top-level covered dir.
+        // Everything below it is covered because of walk-up resolution.
+        let config_dir = cf.parent().map(|d| rel_str(root, d)).unwrap_or_default();
         configs.push(ConfigInstance {
             path: cf_rel,
             details,
-            covers: collapsed_covers.iter().map(|d| rel_str(root, d)).collect(),
+            covers: if count > 0 { vec![config_dir] } else { vec![] },
         });
     }
 
