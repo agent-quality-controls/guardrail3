@@ -1,25 +1,56 @@
 # clippy.toml
 
-## Location
+## How clippy finds its config (empirically verified 2026-03-19)
 
-**Where clippy looks:** Walks UP from `CARGO_MANIFEST_DIR` (the directory of the crate being compiled). First `clippy.toml` or `.clippy.toml` found wins. No merging — nearest shadows completely.
+When `cargo clippy` runs, cargo compiles each member crate separately. For each crate, cargo sets `CARGO_MANIFEST_DIR` to that crate's own directory (where its `Cargo.toml` is).
 
-**In steady-parent:**
-- `apps/validator-rust/clippy.toml` — covers all 5 crates in the workspace (domain, ports/outbound, app, adapters/outbound, adapters/inbound/api). None of the inner crates have their own clippy.toml.
-- `apps/substack-publisher/clippy.toml` — covers the single crate.
-- NO root clippy.toml — `packages/low-expectations` and `packages/seo-site-files` have NO clippy.toml covering them at all.
+Clippy then looks for `clippy.toml` or `.clippy.toml` starting from `CARGO_MANIFEST_DIR` and walking UP through parent directories. It checks each directory. First file found wins. No merging — the first one found completely shadows anything higher up.
 
-**Valid locations for guardrail3:**
-1. Per-app workspace root (e.g., `apps/validator-rust/clippy.toml`) — covers all crates in that workspace
-2. Per standalone crate (e.g., `apps/substack-publisher/clippy.toml`)
-3. Root workspace (for root-level packages with no app workspace)
-4. Per inner crate — technically possible but clippy doesn't support per-crate overrides within a workspace (issue #7353). A per-crate clippy.toml SHADOWS the workspace one entirely. Dangerous — avoid.
+### Walk-up does NOT stop at workspace boundaries
 
-**Rule: one clippy.toml per Rust workspace/standalone crate. WARN if per-crate clippy.toml files exist (they shadow the workspace one and could silently drop all guardrail bans).**
+Verified: if `apps/validator-rust/Cargo.toml` has `[workspace]` and there's NO `clippy.toml` at `apps/validator-rust/`, clippy walks up PAST it — through `apps/`, through project root, all the way to filesystem root (then `$HOME`, then `$XDG_CONFIG_HOME/clippy/`). The `[workspace]` boundary is irrelevant for clippy config resolution. Only the filesystem directory tree matters.
 
-**Why not per inner crate — fully analyzed:**
+### Per-crate resolution is independent
 
-Per-crate clippy.toml SHADOWS the workspace one completely (clippy has no merging). If a crate has its own clippy.toml, it loses ALL workspace bans. This is the primary danger.
+Verified: with `cargo clippy --workspace` run from `apps/validator-rust/`, each member crate independently resolves its own config:
+- Put `clippy.toml` with `too-many-lines-threshold = 1` at `crates/domain/` only
+- `cargo clippy --workspace` → domain gets 61 errors (threshold 1), other 4 crates get 0 errors (they walk up past domain's dir to `apps/validator-rust/clippy.toml` with threshold 75)
+- The per-crate file shadows the workspace file FOR THAT CRATE ONLY
+
+### What covers what — verified on steady-parent
+
+- `apps/validator-rust/clippy.toml` — each of the 5 member crates walks up and finds this. Covers all 5 crates.
+- `apps/substack-publisher/clippy.toml` — substack-publisher walks up and finds this immediately (it's in its own dir). Covers 1 crate.
+- `packages/low-expectations/` — no `clippy.toml` in its dir, none at `packages/`, none at project root. Walks all the way up. UNCOVERED (uses clippy defaults — no bans).
+- `packages/seo-site-files/` — same. UNCOVERED.
+- A `clippy.toml` at PROJECT ROOT would cover EVERYTHING — every workspace, every standalone crate. The walk-up goes past all workspace boundaries.
+
+### Shadowing danger
+
+A `clippy.toml` at ANY intermediate directory (e.g., `crates/adapters/clippy.toml`) would shadow the workspace-level file for all crates below that directory. All guardrail bans silently lost for those crates. guardrail3 must ERROR if it finds clippy.toml files below a workspace root that already has one.
+
+### Intermediate directory shadowing — verified
+
+Tested: `clippy.toml` at `crates/adapters/` (between workspace root and `crates/adapters/outbound/` and `crates/adapters/inbound/api/`):
+- `adapters` crate: SHADOWED (57 errors with threshold 1). Walk-up: `crates/adapters/outbound/` → `crates/adapters/` → found.
+- `api` crate: SHADOWED (57 errors). Walk-up: `crates/adapters/inbound/api/` → `crates/adapters/inbound/` → `crates/adapters/` → found.
+- `domain` crate: NOT shadowed (0 errors). Walk-up: `crates/domain/` → `crates/` → `apps/validator-rust/` → found workspace-level file. Domain's path never goes through `crates/adapters/`.
+- `app` crate: NOT shadowed. Same — sibling path.
+
+Tested: `clippy.toml` at `crates/` (one level above all member crates):
+- ALL crates shadowed (62 errors each after `cargo clean`). Every member walks through `crates/`.
+
+### Caching gotcha — verified
+
+Clippy results are CACHED. Changing or adding a `clippy.toml` does NOT automatically recompile affected crates. A stale cache can hide the effect of a rogue config file. Only `cargo clean` or touching source files forces re-checking. This means a developer can add a per-crate `clippy.toml` and not see its effect (positive or negative) until a clean build.
+
+### Recommendation
+
+One `clippy.toml` per workspace/standalone-crate directory. OR one at project root to cover everything. guardrail3 should ERROR on any `clippy.toml` found between a workspace root and its member crates (intermediate shadowing).
+
+## Why not per inner crate
+
+Per-crate `clippy.toml` SHADOWS the workspace one completely. If a crate has its own `clippy.toml`, it loses ALL workspace bans.
 
 Could we generate per-crate files with duplication? Yes, but there's no enforcement benefit:
 
