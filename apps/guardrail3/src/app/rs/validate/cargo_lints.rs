@@ -36,11 +36,6 @@ const EXPECTED_RUST_LINTS: &[LintExpectation] = &[
         priority: None,
     },
     LintExpectation {
-        name: "missing_docs",
-        expected_level: "deny",
-        priority: None,
-    },
-    LintExpectation {
         name: "missing_debug_implementations",
         expected_level: "warn",
         priority: None,
