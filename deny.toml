@@ -59,6 +59,12 @@ deny = [
     { name = "rmp-serde", wrappers = [] },
     { name = "prost", wrappers = [] },
     { name = "flatbuffers", wrappers = [] },
+    # --- Parsing: use structured parsers (syn, tree-sitter, serde_json, toml), never regex ---
+    # regex allowed ONLY as transitive dep of tree-sitter/ignore — never use directly
+    { name = "regex", wrappers = ["tree-sitter", "globset", "ignore"] }, # EXCEPTION: transitive only
+    { name = "fancy-regex", wrappers = [] },
+    { name = "onig", wrappers = [] },
+    { name = "pcre2", wrappers = [] },
     # --- Local overrides ---
 # Additional [bans] deny entries for deny.toml
 # Example:
