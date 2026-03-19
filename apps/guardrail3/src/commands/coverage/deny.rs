@@ -9,6 +9,7 @@ use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
 use crate::app::crawl::CrawlResult;
+use crate::app::rs::validate::deny_audit::EXPECTED_BANS;
 
 use super::engine::{self, CoverageTool};
 
@@ -33,27 +34,71 @@ impl CoverageTool for DenyCoverage {
 
     fn parse_details(&self, config_path: &Path) -> serde_json::Value {
         let Some(content) = crate::fs::read_file(config_path) else {
-            return serde_json::json!({});
+            return serde_json::json!({"error": "unreadable"});
         };
         let Ok(table) = content.parse::<toml::Value>() else {
             return serde_json::json!({"error": "parse error"});
         };
-        let bans = table
-            .get("bans")
-            .and_then(|b| b.get("deny"))
-            .and_then(|v| v.as_array())
-            .map_or(0, Vec::len);
+
+        let bans = diff_bans(&table);
         let advisory_ignores = table
             .get("advisories")
             .and_then(|a| a.get("ignore"))
             .and_then(|v| v.as_array())
             .map_or(0, Vec::len);
-        serde_json::json!({"bans": bans, "advisory_ignores": advisory_ignores})
+        let licenses = table
+            .get("licenses")
+            .and_then(|l| l.get("allow"))
+            .and_then(|v| v.as_array())
+            .map_or(0, Vec::len);
+
+        serde_json::json!({
+            "bans": bans,
+            "advisory_ignores": advisory_ignores,
+            "licenses": licenses
+        })
     }
 
     fn walks_up(&self) -> bool {
         true
     }
+}
+
+/// Diff actual ban entries against required baseline.
+fn diff_bans(table: &toml::Value) -> serde_json::Value {
+    let entries: Vec<String> = table
+        .get("bans")
+        .and_then(|b| b.get("deny"))
+        .and_then(|v| v.as_array())
+        .map(|arr| {
+            arr.iter()
+                .filter_map(|entry| {
+                    entry
+                        .get("name")
+                        .and_then(|n| n.as_str())
+                        .map(str::to_owned)
+                })
+                .collect()
+        })
+        .unwrap_or_default();
+
+    let total = entries.len();
+    let required_present = EXPECTED_BANS
+        .iter()
+        .filter(|r| entries.iter().any(|e| e == **r))
+        .count();
+    let required_missing = EXPECTED_BANS.len().saturating_sub(required_present);
+    let user_extra = entries
+        .iter()
+        .filter(|e| !EXPECTED_BANS.contains(&e.as_str()))
+        .count();
+
+    serde_json::json!({
+        "total": total,
+        "required_present": required_present,
+        "required_missing": required_missing,
+        "user_extra": user_extra
+    })
 }
 
 #[allow(clippy::print_stdout)] // reason: CLI command
