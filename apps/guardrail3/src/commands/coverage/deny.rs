@@ -21,7 +21,7 @@ impl CoverageTool for DenyCoverage {
     }
 
     fn resolution_description(&self) -> &'static str {
-        "walk-up from manifest directory — nearest deny.toml wins, shadows completely"
+        "walk-up from CWD (must have Cargo.toml) — nearest deny.toml wins, shadows completely"
     }
 
     fn config_files<'a>(&self, crawl: &'a CrawlResult) -> &'a [PathBuf] {
