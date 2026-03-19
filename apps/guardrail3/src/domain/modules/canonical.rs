@@ -310,6 +310,8 @@ export default tseslint.config(
             { name: "node-fetch", message: "Use native fetch" },
             { name: "isomorphic-fetch", message: "Use native fetch" },
             { name: "underscore", message: "Use native JS methods" },
+            { name: "xregexp", message: "Use structured parsers (tree-sitter, AST) instead of regex" },
+            { name: "regexp-tree", message: "Use structured parsers (tree-sitter, AST) instead of regex" },
           ],
         },
       ],
