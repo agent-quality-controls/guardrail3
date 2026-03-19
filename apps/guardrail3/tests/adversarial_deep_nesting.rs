@@ -157,7 +157,7 @@ fn platform_resolves_to_apps_platform() {
 
     let path_str = dir.to_str().expect("non-utf8 path");
     let out = guardrail3()
-        .args(["rs", "diff", path_str])
+        .args(["rs", "generate", "--dry-run", path_str])
         .output()
         .expect("failed to run");
 
@@ -182,7 +182,7 @@ fn tools_resolves_to_apps_tools() {
 
     let path_str = dir.to_str().expect("non-utf8 path");
     let out = guardrail3()
-        .args(["rs", "diff", path_str])
+        .args(["rs", "generate", "--dry-run", path_str])
         .output()
         .expect("failed to run");
 
@@ -377,7 +377,7 @@ fn generate_idempotent() {
 
     // Diff should show "No changes needed"
     let diff_out = guardrail3()
-        .args(["rs", "diff", path_str])
+        .args(["rs", "generate", "--dry-run", path_str])
         .output()
         .expect("failed to run diff");
 

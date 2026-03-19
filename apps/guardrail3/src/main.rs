@@ -185,7 +185,7 @@ fn handle_rs(command: RsCommands) {
         RsCommands::Generate(args) => {
             validate_or_exit(&args);
             if args.dry_run {
-                commands::diff::run(&args.path, None);
+                commands::diff::run(&args.path, args.dump_dir.as_deref());
             } else {
                 commands::generate::run_rs(&args);
             }
@@ -198,10 +198,6 @@ fn handle_rs(command: RsCommands) {
         RsCommands::Check(args) => {
             validate_or_exit(&args);
             commands::check::run(&args.path);
-        }
-        RsCommands::Diff(args) => {
-            validate_or_exit(&args);
-            commands::diff::run(&args.path, args.dump_dir.as_deref());
         }
         RsCommands::HooksInstall(args) => {
             validate_or_exit(&args);
@@ -249,7 +245,7 @@ fn handle_ts(command: TsCommands) {
         TsCommands::Generate(args) => {
             validate_or_exit(&args);
             if args.dry_run {
-                commands::diff::run_ts(&args.path, None);
+                commands::diff::run_ts(&args.path, args.dump_dir.as_deref());
             } else {
                 commands::generate::run_ts(&args);
             }
@@ -271,10 +267,6 @@ fn handle_ts(command: TsCommands) {
                 &crawl,
             );
             print_report(&args, &report);
-        }
-        TsCommands::Diff(args) => {
-            validate_or_exit(&args);
-            commands::diff::run_ts(&args.path, args.dump_dir.as_deref());
         }
         TsCommands::HooksInstall(args) => {
             validate_or_exit(&args);

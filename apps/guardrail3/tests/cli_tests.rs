@@ -319,7 +319,7 @@ fn cli_check_on_self() {
 fn cli_diff_on_self() {
     let ws = workspace_root();
     let out = guardrail3()
-        .args(["rs", "diff"])
+        .args(["rs", "generate", "--dry-run"])
         .arg(&ws)
         .output()
         .expect("failed to run");
@@ -679,7 +679,7 @@ fn cli_diff_without_config_fails() {
     let path = tmp.path().to_str().expect("non-utf8 path");
 
     let out = guardrail3()
-        .args(["rs", "diff", path])
+        .args(["rs", "generate", "--dry-run", path])
         .output()
         .expect("failed to run");
 
@@ -795,7 +795,7 @@ fn cli_diff_after_generate_no_changes() {
         .expect("failed to run");
 
     let out = guardrail3()
-        .args(["rs", "diff", path])
+        .args(["rs", "generate", "--dry-run", path])
         .output()
         .expect("failed to run");
 
@@ -863,7 +863,7 @@ fn cli_diff_shows_diff_after_tampering() {
     std::fs::write(tmp.path().join("rustfmt.toml"), "# tampered\n").expect("tamper file");
 
     let out = guardrail3()
-        .args(["rs", "diff", path])
+        .args(["rs", "generate", "--dry-run", path])
         .output()
         .expect("failed to run");
 
@@ -888,7 +888,7 @@ fn cli_diff_shows_new_file_when_missing() {
         .expect("failed to run");
 
     let out = guardrail3()
-        .args(["rs", "diff", path])
+        .args(["rs", "generate", "--dry-run", path])
         .output()
         .expect("failed to run");
 
