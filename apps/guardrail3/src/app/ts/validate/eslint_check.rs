@@ -42,6 +42,7 @@ pub fn check_eslint_config(fs: &dyn FileSystem, path: &Path, results: &mut Vec<C
 
     check_eslint_value_rules(&content, &eslint_path, results);
     check_boundary_enforcement(&content, &eslint_path, results);
+    check_eslint_presets(&content, &eslint_path, results);
     check_relaxed_rules(&content, &eslint_path, results);
     check_file_overrides(&content, &eslint_path, results);
     check_rule_presence_t40_t48(&content, &eslint_path, results);
@@ -115,6 +116,71 @@ fn check_boundary_enforcement(content: &str, eslint_path: &Path, results: &mut V
                      the codebase harder to test and refactor. Install `eslint-plugin-boundaries` and configure \
                      zone definitions in `eslint.config.mjs`."
                 .to_owned(),
+            file: Some(eslint_path.display().to_string()),
+            line: None,
+            inventory: false,
+        });
+    }
+}
+
+/// T-ESLP-13, T-ESLP-14: `ESLint` tseslint preset presence checks.
+fn check_eslint_presets(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
+    if content.contains("strictTypeChecked") {
+        results.push(
+            CheckResult {
+                id: "T-ESLP-13".to_owned(),
+                severity: Severity::Info,
+                title: "ESLint strictTypeChecked preset configured".to_owned(),
+                message:
+                    "`tseslint.configs.strictTypeChecked` found in ESLint config. This preset \
+                         provides 53+ type-aware lint rules."
+                        .to_owned(),
+                file: Some(eslint_path.display().to_string()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
+    } else {
+        results.push(CheckResult {
+            id: "T-ESLP-13".to_owned(),
+            severity: Severity::Error,
+            title: "ESLint strictTypeChecked preset missing".to_owned(),
+            message:
+                "ESLint config must include `tseslint.configs.strictTypeChecked` — this preset \
+                     provides 53+ type-aware lint rules."
+                    .to_owned(),
+            file: Some(eslint_path.display().to_string()),
+            line: None,
+            inventory: false,
+        });
+    }
+
+    if content.contains("stylisticTypeChecked") {
+        results.push(
+            CheckResult {
+                id: "T-ESLP-14".to_owned(),
+                severity: Severity::Info,
+                title: "ESLint stylisticTypeChecked preset configured".to_owned(),
+                message:
+                    "`tseslint.configs.stylisticTypeChecked` found in ESLint config. This preset \
+                         provides 18+ code style rules."
+                        .to_owned(),
+                file: Some(eslint_path.display().to_string()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
+    } else {
+        results.push(CheckResult {
+            id: "T-ESLP-14".to_owned(),
+            severity: Severity::Error,
+            title: "ESLint stylisticTypeChecked preset missing".to_owned(),
+            message:
+                "ESLint config must include `tseslint.configs.stylisticTypeChecked` — this preset \
+                     provides 18+ code style rules."
+                    .to_owned(),
             file: Some(eslint_path.display().to_string()),
             line: None,
             inventory: false,
