@@ -340,6 +340,9 @@ fn check_banned_in_node_modules(fs: &dyn FileSystem, path: &Path, results: &mut 
         "request-promise",
         "postgres",
         "cross-fetch",
+        // Regex: use structured parsers (tree-sitter, AST) instead
+        "xregexp",
+        "regexp-tree",
     ];
     let banned_prefixes: &[&str] = &["embla-carousel"];
 

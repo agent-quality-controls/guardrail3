@@ -150,6 +150,9 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
         "request-promise",
         "postgres",
         "cross-fetch",
+        // Regex: use structured parsers (tree-sitter, AST) instead
+        "xregexp",
+        "regexp-tree",
     ];
     let banned_prefixes: &[&str] = &["embla-carousel"];
 
