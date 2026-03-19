@@ -74,11 +74,6 @@ disallowed-methods = [
     { path = "toml::from_str", reason = "BANNED: Use Validated<T>::new(value, &ctx) instead. (1) Add #[derive(garde::Validate)] to your response/data type. (2) Add garde rules to each field -- #[garde(length(chars, min = 1, max = N))] for strings, #[garde(range(min = 0))] for numbers, #[garde(dive)] for nested structs, #[garde(length(min = 1))] for non-empty vecs. (3) Deserialize into the raw type, then wrap with Validated::new()." },
     { path = "serde_yaml::from_str", reason = "BANNED: Use Validated<T>::new(value, &ctx) instead. (1) Add #[derive(garde::Validate)] to your response/data type. (2) Add garde rules to each field -- #[garde(length(chars, min = 1, max = N))] for strings, #[garde(range(min = 0))] for numbers, #[garde(dive)] for nested structs, #[garde(length(min = 1))] for non-empty vecs. (3) Deserialize into the raw type, then wrap with Validated::new()." },
     { path = "serde_yaml::from_reader", reason = "BANNED: Use Validated<T>::new(value, &ctx) instead. (1) Add #[derive(garde::Validate)] to your response/data type. (2) Add garde rules to each field -- #[garde(length(chars, min = 1, max = N))] for strings, #[garde(range(min = 0))] for numbers, #[garde(dive)] for nested structs, #[garde(length(min = 1))] for non-empty vecs. (3) Deserialize into the raw type, then wrap with Validated::new()." },
-    # --- Local overrides ---
-# Additional disallowed-methods entries (TOML array-of-tables format)
-# Example:
-#     { path = "some::method", reason = "Use alternative instead" },
-
 ]
 
 # DISALLOWED TYPES
@@ -96,9 +91,4 @@ disallowed-types = [
     { path = "axum::Json", reason = "BANNED: Use ValidatedJson<T>/ValidatedQuery<T>/ValidatedForm<T> instead. Requires #[derive(garde::Validate)] on the request type." },
     { path = "axum::extract::Query", reason = "BANNED: Use ValidatedJson<T>/ValidatedQuery<T>/ValidatedForm<T> instead. Requires #[derive(garde::Validate)] on the request type." },
     { path = "axum::extract::Form", reason = "BANNED: Use ValidatedJson<T>/ValidatedQuery<T>/ValidatedForm<T> instead. Requires #[derive(garde::Validate)] on the request type." },
-    # --- Local overrides ---
-# Additional disallowed-types entries (TOML array-of-tables format)
-# Example:
-#     { path = "some::Type", reason = "Use alternative instead" },
-
 ]

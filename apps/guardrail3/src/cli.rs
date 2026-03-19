@@ -100,8 +100,8 @@ pub enum RsCommands {
     Validate(ValidateArgs),
     /// Verify generated Rust configs are current (for CI)
     Check(PathArg),
-    /// Show what rs generate would change (dry run)
-    Diff(PathArg),
+    /// Show what rs generate would change (dry run). Use --dump-dir to inspect generated files.
+    Diff(DiffArgs),
     /// Install Rust pre-commit hook
     HooksInstall(GenerateArgs),
     /// Validate Rust pre-commit hook configuration
@@ -130,8 +130,8 @@ pub enum TsCommands {
     Generate(GenerateArgs),
     /// Validate TypeScript project guardrails
     Validate(ValidateArgs),
-    /// Show what ts generate would change (dry run)
-    Diff(PathArg),
+    /// Show what ts generate would change (dry run). Use --dump-dir to inspect generated files.
+    Diff(DiffArgs),
     /// Install TypeScript pre-commit hook
     HooksInstall(GenerateArgs),
     /// Validate TypeScript pre-commit hook configuration
@@ -231,6 +231,19 @@ pub struct PathArg {
     #[arg(default_value = ".")]
     #[garde(length(min = 1))] // reason: path must be non-empty
     pub path: String,
+}
+
+#[derive(Parser, Debug, garde::Validate)]
+pub struct DiffArgs {
+    /// Project path
+    #[arg(default_value = ".")]
+    #[garde(length(min = 1))] // reason: path must be non-empty
+    pub path: String,
+
+    /// Dump generated files to this directory instead of just showing summary
+    #[arg(long)]
+    #[garde(inner(length(min = 1)))] // reason: if provided, path must be non-empty
+    pub dump_dir: Option<String>,
 }
 
 #[derive(Parser, Debug, garde::Validate)]
