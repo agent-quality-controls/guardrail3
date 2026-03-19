@@ -189,6 +189,16 @@ fn assert_has_warn(ids: &[(String, String)], check_id: &str, json_output: &str) 
     );
 }
 
+/// Assert that a specific check ID fired as error.
+#[allow(clippy::type_complexity)] // reason: test helper — tuple vec is clear in context
+fn assert_has_error(ids: &[(String, String)], check_id: &str, json_output: &str) {
+    let found = ids.iter().any(|(id, sev)| id == check_id && sev == "error");
+    assert!(
+        found,
+        "Expected check '{check_id}' to fire as error.\nCheck IDs found: {ids:?}\nFull output:\n{json_output}"
+    );
+}
+
 /// Assert that a specific check ID did NOT fire as warn or error.
 #[allow(clippy::type_complexity)] // reason: test helper — tuple vec is clear in context
 fn assert_no_warn_or_error(ids: &[(String, String)], check_id: &str, json_output: &str) {
@@ -261,7 +271,7 @@ fn t_tool_07_cspell_config_present() {
 }
 
 // ============================================================
-// Test 5: T-TOOL-08 fires as warn when type-coverage dep present but no script
+// Test 5: T-TOOL-08 fires as error when type-coverage dep present but no script
 // ============================================================
 
 #[test]
@@ -271,7 +281,7 @@ fn t_tool_08_type_coverage_script_missing() {
     let output = run_ts_validate(tmp.path(), &[]);
     let ids = collect_checks_with_severity(&output);
 
-    assert_has_warn(&ids, "T-TOOL-08", &output);
+    assert_has_error(&ids, "T-TOOL-08", &output);
 }
 
 // ============================================================

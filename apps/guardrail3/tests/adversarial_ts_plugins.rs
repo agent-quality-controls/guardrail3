@@ -160,15 +160,6 @@ fn assert_no_check(ids: &[String], check_id: &str, json_output: &str) {
     );
 }
 
-/// Assert that NO check ID matching the prefix exists in the output.
-fn assert_no_check_prefix(ids: &[String], prefix: &str, json_output: &str) {
-    let matching: Vec<_> = ids.iter().filter(|id| id.starts_with(prefix)).collect();
-    assert!(
-        matching.is_empty(),
-        "Did NOT expect any check starting with '{prefix}', but found: {matching:?}\nFull output:\n{json_output}"
-    );
-}
-
 // ============================================================
 // Test 1: Missing eslint-plugin-unicorn fires T-PLUG-01
 // ============================================================
@@ -285,6 +276,15 @@ type = "content"
             "eslint-plugin-regexp",
             "eslint-plugin-sonarjs",
             "knip",
+            // Core toolchain (T-PLUG-12..19)
+            "eslint",
+            "typescript",
+            "typescript-eslint",
+            "eslint-plugin-import-x",
+            "eslint-import-resolver-typescript",
+            "eslint-plugin-boundaries",
+            "only-allow",
+            "jscpd",
             // Content plugins
             "eslint-plugin-jsx-a11y",
             "stylelint",
@@ -306,9 +306,19 @@ type = "content"
     assert_no_check(&error_ids, "T-PLUG-07", &output);
     assert_no_check(&error_ids, "T-PLUG-08", &output);
     assert_no_check(&error_ids, "T-PLUG-09", &output);
-
-    // Also verify no T-PLUG errors at all via prefix check
-    assert_no_check_prefix(&error_ids, "T-PLUG-", &output);
+    // Core plugins should also not fire (all provided in devDeps)
+    assert_no_check(&error_ids, "T-PLUG-01", &output);
+    assert_no_check(&error_ids, "T-PLUG-02", &output);
+    assert_no_check(&error_ids, "T-PLUG-03", &output);
+    assert_no_check(&error_ids, "T-PLUG-10", &output);
+    assert_no_check(&error_ids, "T-PLUG-12", &output);
+    assert_no_check(&error_ids, "T-PLUG-13", &output);
+    assert_no_check(&error_ids, "T-PLUG-14", &output);
+    assert_no_check(&error_ids, "T-PLUG-15", &output);
+    assert_no_check(&error_ids, "T-PLUG-16", &output);
+    assert_no_check(&error_ids, "T-PLUG-17", &output);
+    assert_no_check(&error_ids, "T-PLUG-18", &output);
+    assert_no_check(&error_ids, "T-PLUG-19", &output);
 }
 
 // ---------------------------------------------------------------------------
@@ -338,13 +348,13 @@ fn collect_checks_with_severity(json_output: &str) -> Vec<(String, String)> {
     ids
 }
 
-/// Assert that a specific check ID fired as warn.
+/// Assert that a specific check ID fired as error.
 #[allow(clippy::type_complexity)] // reason: test helper — tuple vec is clear in context
-fn assert_has_warn(ids: &[(String, String)], check_id: &str, json_output: &str) {
-    let found = ids.iter().any(|(id, sev)| id == check_id && sev == "warn");
+fn assert_has_error(ids: &[(String, String)], check_id: &str, json_output: &str) {
+    let found = ids.iter().any(|(id, sev)| id == check_id && sev == "error");
     assert!(
         found,
-        "Expected check '{check_id}' to fire as warn.\nCheck IDs found: {ids:?}\nFull output:\n{json_output}"
+        "Expected check '{check_id}' to fire as error.\nCheck IDs found: {ids:?}\nFull output:\n{json_output}"
     );
 }
 
@@ -384,8 +394,8 @@ fn t_plug_11_knip_script_missing() {
     let output = run_ts_validate(tmp.path(), &[]);
     let ids = collect_checks_with_severity(&output);
 
-    // T-PLUG-11 should fire as warn — knip dep present but no script to run it
-    assert_has_warn(&ids, "T-PLUG-11", &output);
+    // T-PLUG-11 should fire as error — knip dep present but no script to run it
+    assert_has_error(&ids, "T-PLUG-11", &output);
 }
 
 // ============================================================

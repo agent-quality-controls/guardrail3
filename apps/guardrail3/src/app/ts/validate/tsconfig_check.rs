@@ -6,6 +6,9 @@ use crate::ports::outbound::FileSystem;
 /// A tsconfig boolean check: (`setting_name`, `check_id`).
 type TsConfigBool = (&'static str, &'static str);
 
+/// A tsconfig string-value check: (`setting_name`, `expected_value`, `check_id`).
+type TsConfigString = (&'static str, &'static str, &'static str);
+
 /// Return a short explanation of what a tsconfig setting does and why it matters.
 fn tsconfig_explanation(key: &str) -> &'static str {
     match key {
@@ -47,6 +50,9 @@ fn tsconfig_explanation(key: &str) -> &'static str {
         }
         "allowUnusedLabels" => {
             " When false, catches unused labels which are dead code and often indicate copy-paste errors."
+        }
+        "esModuleInterop" => {
+            " Enables correct interop between CommonJS and ES modules, fixing default import issues with CJS packages."
         }
         _ => "",
     }
@@ -135,6 +141,8 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
         ("noPropertyAccessFromIndexSignature", "T60"),
         ("noImplicitOverride", "T61"),
         ("noFallthroughCasesInSwitch", "T62"),
+        ("isolatedModules", "T54"),
+        ("esModuleInterop", "T68"),
     ];
 
     // Settings that must be false
@@ -143,7 +151,7 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
         ("allowUnusedLabels", "T64"),
     ];
 
-    let warn_bools: &[TsConfigBool] = &[("isolatedModules", "T54")];
+    let warn_bools: &[TsConfigBool] = &[];
 
     for (key, id) in required_bools {
         let val = compiler_options
@@ -332,6 +340,64 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
                     message: format!(
                         "`{key}` not set in compilerOptions.{explanation} \
                          Add `\"{key}\": false` to compilerOptions in tsconfig."
+                    ),
+                    file: Some(tsconfig_path.display().to_string()),
+                    line: None,
+                    inventory: false,
+                });
+            }
+        }
+    }
+
+    // T65-T67: Required string values for target, module, moduleResolution
+    let required_strings: &[TsConfigString] = &[
+        ("target", "es2022", "T65"),
+        ("module", "esnext", "T66"),
+        ("moduleResolution", "bundler", "T67"),
+    ];
+
+    for &(key, expected, id) in required_strings {
+        let val = compiler_options
+            .and_then(|co| co.get(key))
+            .and_then(serde_json::Value::as_str);
+
+        match val {
+            Some(actual) if actual.eq_ignore_ascii_case(expected) => {
+                results.push(
+                    CheckResult {
+                        id: id.to_owned(),
+                        severity: Severity::Info,
+                        title: format!("`{key}` correctly set in tsconfig"),
+                        message: format!("`{key}` is correctly set to `\"{actual}\"`."),
+                        file: Some(tsconfig_path.display().to_string()),
+                        line: None,
+                        inventory: false,
+                    }
+                    .as_inventory(),
+                );
+            }
+            Some(actual) => {
+                results.push(CheckResult {
+                    id: id.to_owned(),
+                    severity: Severity::Error,
+                    title: format!("`{key}` has wrong value in tsconfig"),
+                    message: format!(
+                        "`{key}` is set to `\"{actual}\"` but should be `\"{expected}\"`. \
+                         Set `\"{key}\": \"{expected}\"` in compilerOptions."
+                    ),
+                    file: Some(tsconfig_path.display().to_string()),
+                    line: None,
+                    inventory: false,
+                });
+            }
+            None => {
+                results.push(CheckResult {
+                    id: id.to_owned(),
+                    severity: Severity::Error,
+                    title: format!("`{key}` missing from tsconfig"),
+                    message: format!(
+                        "`{key}` not set in compilerOptions. \
+                         Add `\"{key}\": \"{expected}\"` to compilerOptions in tsconfig."
                     ),
                     file: Some(tsconfig_path.display().to_string()),
                     line: None,
