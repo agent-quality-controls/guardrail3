@@ -65,6 +65,9 @@ deny = [
     { name = "fancy-regex", wrappers = [] },
     { name = "onig", wrappers = [] },
     { name = "pcre2", wrappers = [] },
+    { name = "grep-cli", wrappers = [] },
+    { name = "grep-regex", wrappers = [] },
+    { name = "grep-matcher", wrappers = [] },
     # --- Local overrides ---
 # Additional [bans] deny entries for deny.toml
 # Example:
