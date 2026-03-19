@@ -53,12 +53,20 @@ pub struct CrawlResult {
     // ── guardrail3 ──
     pub guardrail3_toml: Option<PathBuf>,
     pub guardrail3_overrides: Vec<PathBuf>,
+
+    // ── Source file directories (for coverage maps) ──
+    // Each set contains directories that have at least one file of that type.
+    // Used to determine which directories need coverage by which tool.
+    pub dirs_with_rs: std::collections::BTreeSet<PathBuf>,
+    pub dirs_with_ts: std::collections::BTreeSet<PathBuf>,
+    pub dirs_with_css: std::collections::BTreeSet<PathBuf>,
 }
 
 /// Walk the project tree from `root`, collecting every file guardrail3 cares about.
 ///
 /// Respects .gitignore — `node_modules`/, target/, dist/ etc. are skipped automatically
 /// if they're in .gitignore (which they should be in any sane project).
+#[allow(clippy::too_many_lines)] // reason: single match on filename — splitting would obscure the classification
 pub fn crawl(root: &Path) -> CrawlResult {
     let mut result = CrawlResult::default();
 
@@ -123,7 +131,11 @@ pub fn crawl(root: &Path) -> CrawlResult {
             "guardrail3.toml" => result.guardrail3_toml = Some(path),
 
             // ── Multi-name configs — check prefix/suffix ──
-            _ => classify_by_pattern(&name, path, &mut result),
+            _ => {
+                // Track source file directories for coverage maps
+                track_source_dir(&path, &mut result);
+                classify_by_pattern(&name, path, &mut result);
+            }
         }
     }
 
@@ -225,5 +237,25 @@ fn classify_by_pattern(name: &str, path: PathBuf, result: &mut CrawlResult) {
         {
             result.guardrail3_overrides.push(path);
         }
+    }
+}
+
+/// Track which directories contain source files, by file extension.
+fn track_source_dir(path: &Path, result: &mut CrawlResult) {
+    let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("");
+    let Some(dir) = path.parent() else {
+        return;
+    };
+    match ext {
+        "rs" => {
+            let _ = result.dirs_with_rs.insert(dir.to_path_buf());
+        }
+        "ts" | "tsx" | "mts" | "js" | "jsx" | "mjs" => {
+            let _ = result.dirs_with_ts.insert(dir.to_path_buf());
+        }
+        "css" => {
+            let _ = result.dirs_with_css.insert(dir.to_path_buf());
+        }
+        _ => {}
     }
 }

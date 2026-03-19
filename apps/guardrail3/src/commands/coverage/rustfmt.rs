@@ -4,18 +4,14 @@
 //!
 //! `rustfmt` directly: walks up from each source file.
 //! `cargo fmt`: starts from workspace root only (different behavior!).
-//! Nearest wins, shadows completely.
-//!
-//! Coverage map simulates walk-up (matches `rustfmt` direct + IDE behavior).
-//!
-//! Verified from rustfmt docs + research.
+//! Coverage map simulates walk-up (matches rustfmt direct + IDE behavior).
 
+use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
 use crate::app::crawl::CrawlResult;
 
-use super::clippy::rust_crate_targets;
-use super::engine::{self, CoverageTool, Target};
+use super::engine::{self, CoverageTool};
 
 pub struct RustfmtCoverage;
 
@@ -32,8 +28,8 @@ impl CoverageTool for RustfmtCoverage {
         &crawl.rustfmt_tomls
     }
 
-    fn targets(&self, crawl: &CrawlResult, root: &Path) -> Vec<Target> {
-        rust_crate_targets(crawl, root)
+    fn source_dirs<'a>(&self, crawl: &'a CrawlResult) -> &'a BTreeSet<PathBuf> {
+        &crawl.dirs_with_rs
     }
 
     fn parse_details(&self, config_path: &Path) -> serde_json::Value {

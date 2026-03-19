@@ -3,16 +3,14 @@
 //! ## Resolution: walk-up from manifest directory
 //!
 //! Checks `deny.toml`, `.deny.toml`, `.cargo/deny.toml` at each parent directory.
-//! Nearest wins, shadows completely. No merging.
-//!
-//! Verified from cargo-deny source: `common.rs`, `common/cfg.rs`
+//! Nearest wins, shadows completely.
 
+use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
 use crate::app::crawl::CrawlResult;
 
-use super::clippy::rust_crate_targets;
-use super::engine::{self, CoverageTool, Target};
+use super::engine::{self, CoverageTool};
 
 pub struct DenyCoverage;
 
@@ -29,8 +27,8 @@ impl CoverageTool for DenyCoverage {
         &crawl.deny_tomls
     }
 
-    fn targets(&self, crawl: &CrawlResult, root: &Path) -> Vec<Target> {
-        rust_crate_targets(crawl, root)
+    fn source_dirs<'a>(&self, crawl: &'a CrawlResult) -> &'a BTreeSet<PathBuf> {
+        &crawl.dirs_with_rs
     }
 
     fn parse_details(&self, config_path: &Path) -> serde_json::Value {
