@@ -5,4 +5,5 @@
 
 pub mod clippy;
 pub mod deny;
+pub mod engine;
 pub mod rustfmt;
