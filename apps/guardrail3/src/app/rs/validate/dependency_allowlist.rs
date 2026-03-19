@@ -17,12 +17,34 @@ pub fn check_dependency_allowlist(
     results: &mut Vec<CheckResult>,
 ) {
     let Some(content) = fs.read_file(cargo_path) else {
+        results.push(CheckResult {
+            id: "R-DEPS-01".to_owned(),
+            severity: Severity::Error,
+            title: format!("Cargo.toml unreadable for {crate_name}"),
+            message: format!(
+                "Failed to read Cargo.toml for dependency allowlist check on crate `{crate_name}`"
+            ),
+            file: Some(cargo_path.display().to_string()),
+            line: None,
+            inventory: false,
+        });
         return;
     };
 
     let table: toml::Value = match content.parse() {
         Ok(v) => v,
-        Err(_) => return,
+        Err(e) => {
+            results.push(CheckResult {
+                id: "R-DEPS-01".to_owned(),
+                severity: Severity::Error,
+                title: format!("Cargo.toml parse error for {crate_name}"),
+                message: format!("Invalid TOML in Cargo.toml for crate `{crate_name}`: {e}"),
+                file: Some(cargo_path.display().to_string()),
+                line: None,
+                inventory: false,
+            });
+            return;
+        }
     };
 
     let Some(deps) = table.get("dependencies").and_then(|d| d.as_table()) else {

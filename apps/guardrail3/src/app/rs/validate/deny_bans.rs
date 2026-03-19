@@ -103,8 +103,19 @@ fn check_deny_list_coverage(bans: &toml::Value, file_path: &Path, results: &mut 
     // Extract crate names from deny list
     let mut found_bans: BTreeSet<String> = BTreeSet::new();
     for entry in deny_list {
-        if let Some(name) = entry.get("name").and_then(|n| n.as_str()) {
-            let _ = found_bans.insert(name.to_owned());
+        if let Some(name) = entry
+            .get("name")
+            .and_then(|n| n.as_str())
+            .map(str::to_owned)
+            .or_else(|| {
+                // cargo-deny 0.19+ format: { crate = "name@version" }
+                entry
+                    .get("crate")
+                    .and_then(|c| c.as_str())
+                    .map(|c| c.split('@').next().unwrap_or(c).to_owned())
+            })
+        {
+            let _ = found_bans.insert(name);
         } else if let Some(name) = entry.as_str() {
             let _ = found_bans.insert(name.to_owned());
         }

@@ -48,7 +48,7 @@ pub fn check(
         check_comment_pattern(
             fp,
             &content,
-            &["istanbul ignore", "c8 ignore"],
+            &["istanbul ignore", "c8 ignore", "v8 ignore"],
             "T35",
             "Coverage ignore directive",
             &mut results,
@@ -64,10 +64,17 @@ pub fn check(
 /// Check if a TypeScript file is a test file (should skip source quality checks T23-T31).
 fn is_ts_test_file(path: &str) -> bool {
     path.ends_with(".test.ts")
-        || path.ends_with(".spec.ts")
         || path.ends_with(".test.tsx")
+        || path.ends_with(".test.mjs")
+        || path.ends_with(".spec.ts")
         || path.ends_with(".spec.tsx")
+        || path.ends_with(".e2e.ts")
+        || path.ends_with(".stories.ts")
+        || path.ends_with(".stories.tsx")
         || path.contains("__tests__/")
+        || path.contains("__mocks__/")
+        || path.contains("/test/")
+        || path.contains("/tests/")
 }
 
 fn is_ts_file(path: &str) -> bool {

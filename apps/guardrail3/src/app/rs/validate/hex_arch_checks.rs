@@ -164,6 +164,15 @@ pub fn check_dependency_flow(
             continue;
         };
         let Ok(table) = content.parse::<toml::Value>() else {
+            results.push(CheckResult {
+                id: "R-ARCH-02".to_owned(),
+                severity: Severity::Error,
+                title: format!("Cargo.toml parse error for {crate_name}"),
+                message: format!("Invalid TOML in Cargo.toml for crate `{crate_name}` ({member_dir}), cannot check dependency flow"),
+                file: Some(cargo.display().to_string()),
+                line: None,
+                inventory: false,
+            });
             continue;
         };
         let Some(deps) = table.get("dependencies").and_then(|d| d.as_table()) else {
@@ -263,6 +272,15 @@ pub fn check_library_service_boundary(
                 continue;
             };
             let Ok(table) = content.parse::<toml::Value>() else {
+                results.push(CheckResult {
+                    id: "R-ARCH-03".to_owned(),
+                    severity: Severity::Error,
+                    title: format!("Cargo.toml parse error for {name}"),
+                    message: format!("Invalid TOML in Cargo.toml for crate `{name}` ({dir}), cannot check library-service boundary"),
+                    file: Some(cargo.display().to_string()),
+                    line: None,
+                    inventory: false,
+                });
                 continue;
             };
             let Some(deps) = table.get("dependencies").and_then(|d| d.as_table()) else {

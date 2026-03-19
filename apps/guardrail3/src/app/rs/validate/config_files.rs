@@ -148,12 +148,32 @@ fn check_per_crate_clippy_content(
     results: &mut Vec<CheckResult>,
 ) {
     let Some(content) = fs.read_file(path) else {
+        results.push(CheckResult {
+            id: "R2".to_owned(),
+            severity: Severity::Error,
+            title: format!("{member}: clippy.toml unreadable"),
+            message: format!("Failed to read per-crate clippy.toml for {member}"),
+            file: Some(path.display().to_string()),
+            line: None,
+            inventory: false,
+        });
         return;
     };
 
     let table: toml::Value = match content.parse() {
         Ok(v) => v,
-        Err(_) => return,
+        Err(e) => {
+            results.push(CheckResult {
+                id: "R2".to_owned(),
+                severity: Severity::Error,
+                title: format!("{member}: clippy.toml parse error"),
+                message: format!("Invalid TOML in per-crate clippy.toml for {member}: {e}"),
+                file: Some(path.display().to_string()),
+                line: None,
+                inventory: false,
+            });
+            return;
+        }
     };
 
     let global_state_types = ["LazyLock", "OnceLock", "once_cell"];

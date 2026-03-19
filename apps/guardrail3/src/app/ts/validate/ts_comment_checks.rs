@@ -8,6 +8,21 @@ pub(super) fn is_tsx_path(path: &Path) -> bool {
     path.extension().is_some_and(|e| e == "tsx")
 }
 
+/// Check whether an eslint-disable comment contains a non-empty reason after `--`.
+///
+/// Accepts: `-- some reason`, `--reason` (no space).
+/// Rejects: no `--` at all, `-- ` followed by nothing/whitespace, trailing `--`.
+fn has_eslint_reason(text: &str) -> bool {
+    // Find the LAST occurrence of "--" to handle rule names containing dashes
+    if let Some(pos) = text.rfind("--") {
+        let after = text.get(pos.saturating_add(2)..).unwrap_or("");
+        // Must have non-whitespace content after the "--"
+        !after.trim().is_empty()
+    } else {
+        false
+    }
+}
+
 // T23-T26: eslint-disable checks (AST-only)
 pub fn check_eslint_disable(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
     let Some(tree) = ast_helpers::parse_ts_file(content, is_tsx_path(path)) else {
@@ -46,7 +61,7 @@ fn check_block_eslint_disable(
     {
         return;
     }
-    if text.contains("-- ") {
+    if has_eslint_reason(text) {
         results.push(
             CheckResult {
                 id: "T24".to_owned(),
@@ -114,7 +129,7 @@ fn emit_line_suppression_result(
     kind: &str,
     results: &mut Vec<CheckResult>,
 ) {
-    if text.contains("-- ") {
+    if has_eslint_reason(text) {
         results.push(
             CheckResult {
                 id: "T26".to_owned(),

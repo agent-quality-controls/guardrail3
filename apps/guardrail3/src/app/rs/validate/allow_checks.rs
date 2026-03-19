@@ -177,7 +177,13 @@ pub fn check_exception_comments(
     workspace_root: &Path,
     results: &mut Vec<CheckResult>,
 ) {
-    let config_files = ["clippy.toml", "deny.toml", "Cargo.toml", "rustfmt.toml"];
+    let config_files = [
+        "clippy.toml",
+        "deny.toml",
+        "Cargo.toml",
+        "rustfmt.toml",
+        "rust-toolchain.toml",
+    ];
 
     for config_file in &config_files {
         let path = workspace_root.join(config_file);
@@ -190,7 +196,8 @@ pub fn check_exception_comments(
         };
 
         for (line_num, line) in content.lines().enumerate() {
-            if line.contains("// EXCEPTION:") || line.contains("# EXCEPTION:") {
+            let line_upper = line.to_uppercase();
+            if line_upper.contains("// EXCEPTION:") || line_upper.contains("# EXCEPTION:") {
                 let line_number = line_num.saturating_add(1);
                 results.push(CheckResult {
                     id: "R36".to_owned(),

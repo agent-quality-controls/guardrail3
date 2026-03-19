@@ -15,12 +15,32 @@ pub fn check_workspace_metadata(
     }
 
     let Some(content) = fs.read_file(&cargo_path) else {
+        results.push(CheckResult {
+            id: "R55".to_owned(),
+            severity: Severity::Error,
+            title: "Cargo.toml unreadable".to_owned(),
+            message: "Failed to read workspace Cargo.toml for metadata checks".to_owned(),
+            file: Some(cargo_path.display().to_string()),
+            line: None,
+            inventory: false,
+        });
         return;
     };
 
     let table: toml::Value = match content.parse() {
         Ok(v) => v,
-        Err(_) => return,
+        Err(e) => {
+            results.push(CheckResult {
+                id: "R55".to_owned(),
+                severity: Severity::Error,
+                title: "Cargo.toml parse error".to_owned(),
+                message: format!("Invalid TOML in workspace Cargo.toml: {e}"),
+                file: Some(cargo_path.display().to_string()),
+                line: None,
+                inventory: false,
+            });
+            return;
+        }
     };
 
     check_edition_and_rust_version(&table, &cargo_path, results);
@@ -45,15 +65,47 @@ fn check_edition_and_rust_version(
     }
 
     if !meta_parts.is_empty() {
-        results.push(CheckResult {
-            id: "R55".to_owned(),
-            severity: Severity::Info,
-            title: "Workspace metadata".to_owned(),
-            message: format!("Workspace Cargo.toml metadata: {}. These settings are inherited by all workspace members. Informational, no action needed.", meta_parts.join(", ")),
-            file: Some(cargo_path.display().to_string()),
-            line: None,
-            inventory: false,
-        }.as_inventory());
+        results.push(
+            CheckResult {
+                id: "R55".to_owned(),
+                severity: Severity::Info,
+                title: "Workspace metadata".to_owned(),
+                message: format!("Workspace Cargo.toml metadata: {}.", meta_parts.join(", ")),
+                file: Some(cargo_path.display().to_string()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
+    }
+
+    // R55: edition must be present and modern (2021 or 2024)
+    match edition {
+        Some(ed) if ed == "2021" || ed == "2024" => {}
+        Some(ed) => {
+            results.push(CheckResult {
+                id: "R55".to_owned(),
+                severity: Severity::Warn,
+                title: "Outdated Rust edition".to_owned(),
+                message: format!(
+                    "Workspace edition is `{ed}`. Use edition `2024` (or `2021` minimum)."
+                ),
+                file: Some(cargo_path.display().to_string()),
+                line: None,
+                inventory: false,
+            });
+        }
+        None => {
+            results.push(CheckResult {
+                id: "R55".to_owned(),
+                severity: Severity::Warn,
+                title: "Rust edition not set in workspace".to_owned(),
+                message: "No `edition` in workspace package metadata. Defaults to 2015. Set `edition = \"2024\"` in `[workspace.package]`.".to_owned(),
+                file: Some(cargo_path.display().to_string()),
+                line: None,
+                inventory: false,
+            });
+        }
     }
 }
 

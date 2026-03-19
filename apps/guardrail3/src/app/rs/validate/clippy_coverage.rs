@@ -141,6 +141,7 @@ pub fn check(
 }
 
 #[allow(clippy::too_many_arguments)] // reason: validation function needs all context parameters
+#[allow(clippy::too_many_lines)] // reason: ban list check with reason validation is inherently sequential
 fn check_ban_list(
     table: &toml::Value,
     key: &str,
@@ -164,13 +165,34 @@ fn check_ban_list(
         return;
     };
 
-    // Extract paths from the ban entries
+    // Extract paths from the ban entries and check for reason fields
     let mut found_paths: BTreeSet<String> = BTreeSet::new();
     for ban in bans {
         if let Some(path) = ban.get("path").and_then(|p| p.as_str()) {
+            // Table entry — check for reason field
+            if ban.get("reason").and_then(|r| r.as_str()).is_none() {
+                results.push(CheckResult {
+                    id: missing_id.to_owned(),
+                    severity: Severity::Warn,
+                    title: format!("{label} without reason"),
+                    message: format!("`{path}` is banned in clippy.toml {key} but has no `reason` field. Add `reason = \"...\"` so developers understand why this API is banned and what alternative to use."),
+                    file: Some(file_path.display().to_string()),
+                    line: None,
+                    inventory: false,
+                });
+            }
             let _ = found_paths.insert(path.to_owned());
         } else if let Some(path) = ban.as_str() {
-            // Simple string format
+            // Simple string format — inherently has no reason
+            results.push(CheckResult {
+                id: missing_id.to_owned(),
+                severity: Severity::Warn,
+                title: format!("{label} without reason"),
+                message: format!("`{path}` is banned in clippy.toml {key} as a plain string with no `reason` field. Use table format `{{ path = \"{path}\", reason = \"...\" }}` so developers understand why this API is banned."),
+                file: Some(file_path.display().to_string()),
+                line: None,
+                inventory: false,
+            });
             let _ = found_paths.insert(path.to_owned());
         }
     }

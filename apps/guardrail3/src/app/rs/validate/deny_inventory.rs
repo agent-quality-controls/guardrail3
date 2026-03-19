@@ -33,6 +33,18 @@ pub fn check_skip_entries(table: &toml::Value, file_path: &Path, results: &mut V
 
             let reason = entry.get("reason").and_then(|r| r.as_str()).unwrap_or("");
 
+            if reason.is_empty() {
+                results.push(CheckResult {
+                    id: "R19".to_owned(),
+                    severity: Severity::Warn,
+                    title: "Skip entry without reason".to_owned(),
+                    message: format!("Dependency `{name}` ({version}) is in deny.toml [bans.skip] without a `reason` field. Add `reason = \"...\"` so reviewers understand why the duplicate is accepted."),
+                    file: Some(file_path.display().to_string()),
+                    line: None,
+                    inventory: false,
+                });
+            }
+
             results.push(CheckResult {
                 id: "R19".to_owned(),
                 severity: Severity::Info,
@@ -57,7 +69,30 @@ pub fn check_advisory_ignores(
 
     if let Some(ignore) = advisories.get("ignore").and_then(|i| i.as_array()) {
         for entry in ignore {
-            let id = entry.as_str().unwrap_or("unknown");
+            // Advisory ignore entries can be plain strings or tables with id + reason
+            let (id, reason) = if let Some(s) = entry.as_str() {
+                (s.to_owned(), None)
+            } else {
+                let id = entry
+                    .get("id")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("unknown");
+                let reason = entry.get("reason").and_then(|v| v.as_str());
+                (id.to_owned(), reason)
+            };
+
+            if reason.is_none() {
+                results.push(CheckResult {
+                    id: "R20".to_owned(),
+                    severity: Severity::Warn,
+                    title: "Advisory ignore without reason".to_owned(),
+                    message: format!("Security advisory `{id}` is ignored in deny.toml [advisories.ignore] without a `reason` field. Add `reason = \"...\"` so reviewers understand why the advisory is suppressed."),
+                    file: Some(file_path.display().to_string()),
+                    line: None,
+                    inventory: false,
+                });
+            }
+
             results.push(CheckResult {
                 id: "R20".to_owned(),
                 severity: Severity::Info,

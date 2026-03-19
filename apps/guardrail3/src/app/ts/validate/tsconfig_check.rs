@@ -105,7 +105,9 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
         return;
     };
 
-    let json: serde_json::Value = match serde_json::from_str(&content) {
+    let content = content.strip_prefix('\u{FEFF}').unwrap_or(&content);
+
+    let json: serde_json::Value = match serde_json::from_str(content) {
         Ok(v) => v,
         Err(e) => {
             results.push(CheckResult {
@@ -138,8 +140,8 @@ pub fn check_tsconfig(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckR
 
     // Settings that must be true
     let additional_required_bools: &[TsConfigBool] = &[
-        ("noPropertyAccessFromIndexSignature", "T60"),
-        ("noImplicitOverride", "T61"),
+        ("noPropertyAccessFromIndexSignature", "T-TSC-60"),
+        ("noImplicitOverride", "T-TSC-61"),
         ("noFallthroughCasesInSwitch", "T62"),
         ("isolatedModules", "T54"),
         ("esModuleInterop", "T68"),
