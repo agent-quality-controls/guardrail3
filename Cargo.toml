@@ -16,6 +16,8 @@ unsafe_code = "forbid"
 dead_code = "deny"
 unused_results = "deny"
 unused_crate_dependencies = "deny"
+# missing_docs = "deny" — TODO: add docs to 470 public items, then enable
+# missing_debug_implementations = "warn" — TODO: add Debug derives to 34 types, then enable
 
 [workspace.lints.clippy]
 all = { level = "deny", priority = -1 }
