@@ -68,7 +68,7 @@ fn check_eslint_value_rules(content: &str, eslint_path: &Path, results: &mut Vec
         "T3",
         "max-lines-per-function",
         Some("100"),
-        Severity::Warn,
+        Severity::Error,
         results,
     );
     check_eslint_rule(
@@ -77,7 +77,7 @@ fn check_eslint_value_rules(content: &str, eslint_path: &Path, results: &mut Vec
         "T4",
         "complexity",
         Some("25"),
-        Severity::Warn,
+        Severity::Error,
         results,
     );
     check_eslint_rule(
@@ -194,7 +194,7 @@ fn check_rule_presence_t40_t48(content: &str, eslint_path: &Path, results: &mut 
         eslint_path,
         "T42",
         "no-console",
-        Severity::Warn,
+        Severity::Error,
         results,
     );
     check_eslint_rule_presence(
@@ -202,7 +202,7 @@ fn check_rule_presence_t40_t48(content: &str, eslint_path: &Path, results: &mut 
         eslint_path,
         "T43",
         "eqeqeq",
-        Severity::Warn,
+        Severity::Error,
         results,
     );
     check_eslint_rule_presence(
@@ -226,7 +226,7 @@ fn check_rule_presence_t40_t48(content: &str, eslint_path: &Path, results: &mut 
         eslint_path,
         "T46",
         "max-dependencies",
-        Severity::Warn,
+        Severity::Error,
         results,
     );
     check_eslint_rule_presence(
@@ -234,7 +234,7 @@ fn check_rule_presence_t40_t48(content: &str, eslint_path: &Path, results: &mut 
         eslint_path,
         "T47",
         "explicit-function-return-type",
-        Severity::Warn,
+        Severity::Error,
         results,
     );
     check_eslint_rule_presence(
@@ -242,7 +242,7 @@ fn check_rule_presence_t40_t48(content: &str, eslint_path: &Path, results: &mut 
         eslint_path,
         "T48",
         "strict-boolean-expressions",
-        Severity::Warn,
+        Severity::Error,
         results,
     );
 }
@@ -341,30 +341,30 @@ fn check_process_env_ban(content: &str, eslint_path: &Path, results: &mut Vec<Ch
 fn check_all_eslint_rules(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
     // (check_id, rule_name, severity_if_missing)
     let rules: &[RuleDef] = &[
-        ("T60", "no-misused-promises", Severity::Warn),
-        ("T61", "await-thenable", Severity::Warn),
-        ("T62", "consistent-type-imports", Severity::Warn),
-        ("T63", "no-non-null-assertion", Severity::Warn),
-        ("T64", "switch-exhaustiveness-check", Severity::Warn),
-        ("T65", "no-unused-vars", Severity::Warn),
-        ("T66", "require-await", Severity::Warn),
-        ("T67", "no-param-reassign", Severity::Warn),
-        ("T68", "no-unsafe-assignment", Severity::Warn),
-        ("T69", "no-unsafe-member-access", Severity::Warn),
-        ("T70", "no-unsafe-call", Severity::Warn),
-        ("T71", "no-unsafe-return", Severity::Warn),
-        ("T72", "no-unsafe-argument", Severity::Warn),
-        ("T73", "explicit-module-boundary-types", Severity::Warn),
-        ("T74", "promise-function-async", Severity::Warn),
-        ("T75", "consistent-type-exports", Severity::Warn),
-        ("T76", "consistent-type-definitions", Severity::Warn),
-        ("T77", "no-unnecessary-condition", Severity::Warn),
-        ("T78", "prefer-nullish-coalescing", Severity::Warn),
-        ("T79", "prefer-optional-chain", Severity::Warn),
-        ("T80", "no-deprecated", Severity::Warn),
-        ("T81", "restrict-template-expressions", Severity::Warn),
-        ("T82", "no-throw-literal", Severity::Warn),
-        ("T83", "no-empty", Severity::Warn),
+        ("T60", "no-misused-promises", Severity::Error),
+        ("T61", "await-thenable", Severity::Error),
+        ("T62", "consistent-type-imports", Severity::Error),
+        ("T63", "no-non-null-assertion", Severity::Error),
+        ("T64", "switch-exhaustiveness-check", Severity::Error),
+        ("T65", "no-unused-vars", Severity::Error),
+        ("T66", "require-await", Severity::Error),
+        ("T67", "no-param-reassign", Severity::Error),
+        ("T68", "no-unsafe-assignment", Severity::Error),
+        ("T69", "no-unsafe-member-access", Severity::Error),
+        ("T70", "no-unsafe-call", Severity::Error),
+        ("T71", "no-unsafe-return", Severity::Error),
+        ("T72", "no-unsafe-argument", Severity::Error),
+        ("T73", "explicit-module-boundary-types", Severity::Error),
+        ("T74", "promise-function-async", Severity::Error),
+        ("T75", "consistent-type-exports", Severity::Error),
+        ("T76", "consistent-type-definitions", Severity::Error),
+        ("T77", "no-unnecessary-condition", Severity::Error),
+        ("T78", "prefer-nullish-coalescing", Severity::Error),
+        ("T79", "prefer-optional-chain", Severity::Error),
+        ("T80", "no-deprecated", Severity::Error),
+        ("T81", "restrict-template-expressions", Severity::Error),
+        ("T82", "no-throw-literal", Severity::Error),
+        ("T83", "no-empty", Severity::Error),
     ];
 
     for (id, rule_name, severity) in rules {

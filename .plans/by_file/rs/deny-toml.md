@@ -1,10 +1,36 @@
 # deny.toml
 
-## Location
+## How cargo-deny finds its config (empirically verified 2026-03-19)
 
-**Where cargo-deny looks:** In the current working directory (same dir as the Cargo.toml being checked). Does NOT walk up parent directories. Falls back to default config if not found. Can be overridden with `--config <path>`.
+cargo deny walks UP from CWD looking for `deny.toml`, `.deny.toml`, or `.cargo/deny.toml`. Nearest wins. No merging.
 
-**Verified:** Running `cargo deny check` from `apps/validator-rust/` finds `apps/validator-rust/deny.toml`. Running from repo root with no deny.toml warns "unable to find a config path, falling back to default config."
+### Walk-up verified
+
+- From `apps/validator-rust/`: finds `apps/validator-rust/deny.toml` immediately.
+- From `apps/validator-rust/crates/domain/`: walks up through `crates/`, finds `apps/validator-rust/deny.toml`.
+- From `apps/validator-rust/crates/adapters/outbound/`: with intermediate `crates/adapters/deny.toml`, walks up to `crates/adapters/` and finds IT — shadows workspace root deny.toml.
+
+### Walk-up crosses workspace boundaries
+
+With no `deny.toml` at `apps/validator-rust/`, running from `apps/validator-rust/` found `deny.toml` at project root. Walk-up does NOT stop at `[workspace]` Cargo.toml boundary — same as clippy.
+
+### Intermediate shadowing verified
+
+`deny.toml` at `crates/adapters/` shadows workspace root for `crates/adapters/outbound/` and `crates/adapters/inbound/api/` but NOT for `crates/domain/` or `crates/app/` (siblings, not children). Exact same behavior as clippy.
+
+### Priority: deny.toml > .deny.toml > .cargo/deny.toml
+
+Verified: when both `deny.toml` and `.deny.toml` exist in the same directory, `deny.toml` (without dot) wins. `.deny.toml` is silently ignored.
+
+All three variants work independently: `deny.toml`, `.deny.toml`, `.cargo/deny.toml`.
+
+### CWD must have Cargo.toml
+
+cargo deny errors if CWD has no `Cargo.toml`. It does NOT walk up to find `Cargo.toml` — only the config file walks up. `--manifest-path` can override.
+
+### Difference from clippy
+
+Config resolution is identical (walk-up, nearest wins, crosses workspace boundaries). The operational difference: cargo deny checks the ENTIRE workspace dependency tree, while clippy checks per-crate with per-crate `CARGO_MANIFEST_DIR`. But for config file resolution, the behavior is the same.
 
 **In steady-parent:**
 - `apps/validator-rust/deny.toml` (109 lines)

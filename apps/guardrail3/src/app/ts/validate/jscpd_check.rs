@@ -134,6 +134,71 @@ pub fn check_jscpd(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
             }
         }
     }
+
+    // T-JSCPD-01: minTokens field missing
+    if json.get("minTokens").is_none() {
+        results.push(CheckResult {
+            id: "T-JSCPD-01".to_owned(),
+            severity: Severity::Warn,
+            title: "jscpd `minTokens` field missing".to_owned(),
+            message: "No `minTokens` field in `.jscpd.json`. Without this, jscpd uses its default minimum \
+                     token count for duplicate detection, which may not be appropriate for the project. \
+                     Set `\"minTokens\": 50` explicitly (or adjust to the desired threshold)."
+                .to_owned(),
+            file: Some(jscpd_path.display().to_string()),
+            line: None,
+            inventory: false,
+        });
+    }
+
+    // T-JSCPD-02: absolute field missing or not true
+    match json.get("absolute") {
+        Some(serde_json::Value::Bool(true)) => {}
+        _ => {
+            results.push(CheckResult {
+                id: "T-JSCPD-02".to_owned(),
+                severity: Severity::Warn,
+                title: "jscpd config missing `absolute: true`".to_owned(),
+                message: "jscpd config missing `absolute: true` — needed for meaningful paths in monorepo output"
+                    .to_owned(),
+                file: Some(jscpd_path.display().to_string()),
+                line: None,
+                inventory: false,
+            });
+        }
+    }
+
+    // T-JSCPD-03: Required ignore patterns
+    let required_patterns: &[&str] = &[
+        "**/node_modules/**",
+        "**/.next/**",
+        "**/dist/**",
+        "**/target/**",
+        "**/components/ui/**",
+    ];
+
+    let configured_ignores: Vec<&str> = json
+        .get("ignore")
+        .and_then(serde_json::Value::as_array)
+        .map(|arr| arr.iter().filter_map(serde_json::Value::as_str).collect())
+        .unwrap_or_default();
+
+    for required in required_patterns {
+        if !configured_ignores.iter().any(|p| p == required) {
+            results.push(CheckResult {
+                id: "T-JSCPD-03".to_owned(),
+                severity: Severity::Warn,
+                title: "jscpd missing required ignore pattern".to_owned(),
+                message: format!(
+                    "Required ignore pattern `{required}` not found in `.jscpd.json` `ignore` array. \
+                     Add it to prevent false-positive duplication reports from generated or vendored files."
+                ),
+                file: Some(jscpd_path.display().to_string()),
+                line: None,
+                inventory: false,
+            });
+        }
+    }
 }
 
 // T60: Content import restriction

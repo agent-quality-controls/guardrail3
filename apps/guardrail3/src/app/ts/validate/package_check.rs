@@ -19,6 +19,39 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
         Err(_) => return,
     };
 
+    // T-PKG-01: private field must be true
+    let is_private = json
+        .get("private")
+        .and_then(serde_json::Value::as_bool)
+        .unwrap_or(false);
+    if is_private {
+        results.push(
+            CheckResult {
+                id: "T-PKG-01".to_owned(),
+                severity: Severity::Info,
+                title: "`private` field set to `true` in `package.json`".to_owned(),
+                message: "`\"private\": true` found in `package.json`. This prevents accidental publication to npm."
+                    .to_owned(),
+                file: Some(pkg_path.display().to_string()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
+    } else {
+        results.push(CheckResult {
+            id: "T-PKG-01".to_owned(),
+            severity: Severity::Error,
+            title: "`private` field missing or not `true` in `package.json`".to_owned(),
+            message: "Root `package.json` must have `\"private\": true` to prevent accidental publication to npm. \
+                     Add `\"private\": true` to `package.json`."
+                .to_owned(),
+            file: Some(pkg_path.display().to_string()),
+            line: None,
+            inventory: false,
+        });
+    }
+
     // T15: pnpm.overrides
     let overrides = json.get("pnpm").and_then(|p| p.get("overrides"));
     match overrides {
@@ -164,7 +197,7 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
     } else {
         results.push(CheckResult {
             id: "T18".to_owned(),
-            severity: Severity::Warn,
+            severity: Severity::Error,
             title: "`packageManager` field missing from `package.json`".to_owned(),
             message: "No `packageManager` field in `package.json`. Without this, developers may use different \
                      pnpm versions, causing lockfile conflicts and inconsistent behavior. Add \
@@ -199,7 +232,7 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
         _ => {
             results.push(CheckResult {
                 id: "T55".to_owned(),
-                severity: Severity::Warn,
+                severity: Severity::Error,
                 title: "`preinstall` script missing pnpm enforcement".to_owned(),
                 message: "No `preinstall` script with `only-allow pnpm`. Without this, running `npm install` \
                          or `yarn install` would create a conflicting lockfile. Add \
@@ -265,7 +298,7 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
     } else {
         results.push(CheckResult {
             id: "T57".to_owned(),
-            severity: Severity::Warn,
+            severity: Severity::Error,
             title: "`engines` field missing from `package.json`".to_owned(),
             message: "No `engines` field in `package.json`. Without this, the project may be deployed to an \
                      incompatible Node.js version. Add `\"engines\": { \"node\": \">=20\" }` (or your minimum \
@@ -298,7 +331,7 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
 }
 
 #[allow(clippy::disallowed_methods)] // reason: serde_json::from_str for package.json inspection
-#[allow(clippy::too_many_lines)] // reason: checks 11 packages + script sequentially
+#[allow(clippy::too_many_lines)] // reason: checks 19 packages + script sequentially
 pub fn check_lint_plugins(
     fs: &dyn FileSystem,
     path: &Path,
@@ -350,6 +383,14 @@ pub fn check_lint_plugins(
     check_pkg("T-PLUG-02", "eslint-plugin-regexp", results);
     check_pkg("T-PLUG-03", "eslint-plugin-sonarjs", results);
     check_pkg("T-PLUG-10", "knip", results);
+    check_pkg("T-PLUG-12", "eslint", results);
+    check_pkg("T-PLUG-13", "typescript", results);
+    check_pkg("T-PLUG-14", "typescript-eslint", results);
+    check_pkg("T-PLUG-15", "eslint-plugin-import-x", results);
+    check_pkg("T-PLUG-16", "eslint-import-resolver-typescript", results);
+    check_pkg("T-PLUG-17", "eslint-plugin-boundaries", results);
+    check_pkg("T-PLUG-18", "only-allow", results);
+    check_pkg("T-PLUG-19", "jscpd", results);
 
     // Content-profile plugins
     if content_enabled {
@@ -382,7 +423,7 @@ pub fn check_lint_plugins(
     } else {
         results.push(CheckResult {
             id: "T-PLUG-11".to_owned(),
-            severity: Severity::Warn,
+            severity: Severity::Error,
             title: "knip script missing".to_owned(),
             message: "No \"knip\" script in package.json. Add `\"knip\": \"knip\"` to scripts for dead code detection.".to_owned(),
             file: Some(pkg_path.display().to_string()),

@@ -37,6 +37,7 @@ pub fn check_tool_configs(
                 "T-TOOL-08",
                 "type-coverage",
                 "type-coverage --at-least 95",
+                Severity::Error,
                 &pkg_path,
                 results,
             );
@@ -47,6 +48,7 @@ pub fn check_tool_configs(
                 "T-TOOL-09",
                 "license-check",
                 "license-checker --onlyAllow '...'",
+                Severity::Error,
                 &pkg_path,
                 results,
             );
@@ -57,6 +59,7 @@ pub fn check_tool_configs(
                 "T-TOOL-10",
                 "audit",
                 "pnpm audit --prod",
+                Severity::Error,
                 &pkg_path,
                 results,
             );
@@ -131,6 +134,7 @@ fn check_script(
     check_id: &str,
     script_name: &str,
     example: &str,
+    missing_severity: Severity,
     pkg_path: &Path,
     results: &mut Vec<CheckResult>,
 ) {
@@ -151,7 +155,7 @@ fn check_script(
     } else {
         results.push(CheckResult {
             id: check_id.to_owned(),
-            severity: Severity::Warn,
+            severity: missing_severity,
             title: format!("\"{script_name}\" script missing"),
             message: format!(
                 "No \"{script_name}\" script in package.json. Add: \"{script_name}\": \"{example}\""
