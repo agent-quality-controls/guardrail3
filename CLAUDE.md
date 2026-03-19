@@ -45,7 +45,15 @@ The only source scan checks guardrail3 performs are for things NO existing tool 
 
 6. **Enforce configuration, not violations.** guardrail3 checks that clippy is configured to catch unwrap. Clippy catches the actual unwrap at compile time. guardrail3 checks that deny.toml bans dangerous crates. cargo-deny enforces the ban. guardrail3 is the meta-tool that ensures all other tools are properly configured.
 
-7. **AST-based scanning only.** All source scan checks use syn (Rust) or tree-sitter (TypeScript) for AST parsing. Zero grep, zero line matching. This eliminates false positives from strings, comments, and macros.
+7. **Structured parsing only.** Every file format has a proper parser — use it, never grep/regex/`contains()`:
+   - **Rust source**: `syn` crate (AST)
+   - **TypeScript/JavaScript source + config**: `tree-sitter-typescript` / `tree-sitter-javascript` (AST)
+   - **JSON/JSONC**: `serde_json` (strip comments first for JSONC)
+   - **TOML**: `toml` crate
+   - **YAML**: `serde_yaml`
+   - **Shell scripts**: only exception — no production Bash parser exists, but check patterns at start of lines (executable context), not anywhere in file
+   - **The `regex` crate is banned** via deny.toml. If you need pattern matching, you need a parser.
+   - This applies to ALL checks: source scans, config file validation, ESLint rule checking, import boundary analysis — everything. `.contains()` on raw file content is a bug, not a shortcut.
 
 8. **Tests prove guardrails work.** Every new check has adversarial test fixtures that try to break it. Every bug fix has a regression test.
 
@@ -338,6 +346,8 @@ The Garde pattern (from `docs/GARDE_GUARDRAILS.md` in the template) enforces val
 10. Don't fix a bug before the guardrail catches it — add the check first, verify it flags the issue, then fix
 11. Don't write tests that pass regardless of the bug — mutation-test them
 12. Don't use `#[cfg(test)] #![allow(...)]` — pre-commit hook can't distinguish from crate-wide allows
+13. Don't use `regex`, `grep`, `.contains()`, or line-by-line parsing on config files or source code — use the proper parser (syn, tree-sitter, serde_json, toml, serde_yaml). The `regex` crate is banned via deny.toml.
+14. Don't add `regex`, `fancy-regex`, `onig`, or `pcre2` to dependencies — they are banned. Use structured parsers instead.
 
 ## Session Cold-Start Reading List
 
