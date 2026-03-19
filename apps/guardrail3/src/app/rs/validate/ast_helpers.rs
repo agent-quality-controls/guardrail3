@@ -19,6 +19,16 @@ pub use super::ast_visitors::{GardeSkipInfo, struct_has_non_primitive_fields};
 /// A source location (1-based line number) paired with a descriptive string (lint name, method name, etc.).
 pub(super) type Located = (usize, String);
 
+/// Information about a `#[cfg_attr(..., allow(...))]` attribute.
+pub struct CfgAttrAllowInfo {
+    /// 1-based line number.
+    pub line: usize,
+    /// Lint name (e.g. `dead_code`, `clippy::unwrap_used`).
+    pub lint: String,
+    /// Whether the cfg condition is always true (e.g. `all()` with no args).
+    pub is_always_true: bool,
+}
+
 /// Information about a `#[derive(...)]` attribute on an item.
 pub struct DeriveInfo {
     /// 1-based line number of the derive attribute.
@@ -50,6 +60,59 @@ pub fn find_crate_level_allows(file: &syn::File) -> Vec<Located> {
     out
 }
 
+/// Information about a `#![allow(...)]` inside an inline module.
+pub struct InlineModAllow {
+    /// 1-based line number of the inner attribute.
+    pub line: usize,
+    /// The lint name (e.g. `clippy::all`).
+    pub lint: String,
+    /// The module path (e.g. `foo` or `foo::bar` for nested modules).
+    pub module_path: String,
+}
+
+/// Find `#![allow(...)]` inner attributes inside inline `mod` blocks.
+/// These are module-wide suppressions that apply to everything inside the module.
+pub fn find_inline_mod_allows(file: &syn::File) -> Vec<InlineModAllow> {
+    let mut out = Vec::new();
+    for item in &file.items {
+        if let syn::Item::Mod(m) = item {
+            collect_mod_inner_allows(m, &m.ident.to_string(), &mut out);
+        }
+    }
+    out
+}
+
+/// Recursively collect `#![allow(...)]` from inline module bodies.
+fn collect_mod_inner_allows(item_mod: &syn::ItemMod, path: &str, out: &mut Vec<InlineModAllow>) {
+    // Only inline modules (with a body) can have inner attributes
+    let Some((_, items)) = &item_mod.content else {
+        return;
+    };
+
+    // Check this module's attributes for inner #![allow(...)]
+    for attr in &item_mod.attrs {
+        if matches!(attr.style, syn::AttrStyle::Inner(_)) {
+            let mut lints = Vec::new();
+            extract_allow_lints(attr, &mut lints);
+            for (line, lint) in lints {
+                out.push(InlineModAllow {
+                    line,
+                    lint,
+                    module_path: path.to_owned(),
+                });
+            }
+        }
+    }
+
+    // Recurse into nested inline modules
+    for item in items {
+        if let syn::Item::Mod(nested) = item {
+            let nested_path = format!("{path}::{}", nested.ident);
+            collect_mod_inner_allows(nested, &nested_path, out);
+        }
+    }
+}
+
 /// Find `#[allow(...)]` item-level attributes. Returns `(line, lint_name)`.
 pub fn find_item_allows(file: &syn::File) -> Vec<Located> {
     let mut v = ItemAllowVisitor { out: Vec::new() };
@@ -57,8 +120,9 @@ pub fn find_item_allows(file: &syn::File) -> Vec<Located> {
     v.out
 }
 
-/// Find `#[cfg_attr(..., allow(...))]` attributes. Returns `(line, lint_name)`.
-pub fn find_cfg_attr_allows(file: &syn::File) -> Vec<Located> {
+/// Find `#[cfg_attr(..., allow(...))]` attributes.
+/// Returns rich info including whether the cfg condition is always true.
+pub fn find_cfg_attr_allows(file: &syn::File) -> Vec<CfgAttrAllowInfo> {
     let mut out = Vec::new();
     for attr in &file.attrs {
         extract_cfg_attr_allow_lints(attr, &mut out);
@@ -237,7 +301,7 @@ pub(super) fn extract_allow_lints(attr: &syn::Attribute, out: &mut Vec<Located>)
     }
 }
 
-pub(super) fn extract_cfg_attr_allow_lints(attr: &syn::Attribute, out: &mut Vec<Located>) {
+pub(super) fn extract_cfg_attr_allow_lints(attr: &syn::Attribute, out: &mut Vec<CfgAttrAllowInfo>) {
     if !attr.path().is_ident("cfg_attr") {
         return;
     }
@@ -245,6 +309,7 @@ pub(super) fn extract_cfg_attr_allow_lints(attr: &syn::Attribute, out: &mut Vec<
     let Ok(meta_list) = attr.meta.require_list() else {
         return;
     };
+    let always_true = is_cfg_attr_always_true(&meta_list.tokens);
     let mut iter = meta_list.tokens.clone().into_iter().peekable();
     while let Some(token) = iter.next() {
         if let proc_macro2::TokenTree::Ident(ref ident) = token {
@@ -253,7 +318,11 @@ pub(super) fn extract_cfg_attr_allow_lints(attr: &syn::Attribute, out: &mut Vec<
                     if group.delimiter() == proc_macro2::Delimiter::Parenthesis {
                         if let Ok(paths) = syn::parse2::<LintList>(group.stream()) {
                             for path in &paths.0 {
-                                out.push((line, path_to_string(path)));
+                                out.push(CfgAttrAllowInfo {
+                                    line,
+                                    lint: path_to_string(path),
+                                    is_always_true: always_true,
+                                });
                             }
                         }
                     }
@@ -261,6 +330,41 @@ pub(super) fn extract_cfg_attr_allow_lints(attr: &syn::Attribute, out: &mut Vec<
             }
         }
     }
+}
+
+/// Detect if a `cfg_attr` condition is always true.
+/// Currently detects `all()` with no arguments.
+fn is_cfg_attr_always_true(tokens: &proc_macro2::TokenStream) -> bool {
+    let mut iter = tokens.clone().into_iter();
+    // First token should be the condition identifier
+    let Some(first) = iter.next() else {
+        return false;
+    };
+    let proc_macro2::TokenTree::Ident(ref ident) = first else {
+        return false;
+    };
+    if ident != "all" {
+        return false;
+    }
+    // Next token should be an empty parenthesized group: `()`
+    let Some(second) = iter.next() else {
+        return false;
+    };
+    let proc_macro2::TokenTree::Group(ref group) = second else {
+        return false;
+    };
+    if group.delimiter() != proc_macro2::Delimiter::Parenthesis {
+        return false;
+    }
+    // `all()` is always true only if the group is empty (no arguments)
+    if !group.stream().is_empty() {
+        return false;
+    }
+    // Next must be a comma (separating condition from the allow)
+    let Some(third) = iter.next() else {
+        return false;
+    };
+    matches!(third, proc_macro2::TokenTree::Punct(ref p) if p.as_char() == ',')
 }
 
 struct LintList(syn::punctuated::Punctuated<syn::Path, syn::Token![,]>);
@@ -285,7 +389,7 @@ fn use_subtree_is_fs(tree: &syn::UseTree) -> bool {
         syn::UseTree::Path(p) => p.ident == "fs",
         syn::UseTree::Rename(r) => r.ident == "fs",
         syn::UseTree::Group(g) => g.items.iter().any(use_subtree_is_fs),
-        syn::UseTree::Glob(_) => false,
+        syn::UseTree::Glob(_) => true, // `use std::*` — glob imports everything including fs
     }
 }
 

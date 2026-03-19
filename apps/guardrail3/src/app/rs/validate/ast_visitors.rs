@@ -7,7 +7,7 @@ use syn::spanned::Spanned;
 use syn::visit::Visit;
 
 use super::ast_helpers::{
-    DeriveInfo, Located, attrs_have_allow_lint, expr_attrs, extract_allow_lints,
+    CfgAttrAllowInfo, DeriveInfo, Located, attrs_have_allow_lint, expr_attrs, extract_allow_lints,
     extract_cfg_attr_allow_lints, impl_item_attrs, item_attrs, item_ident, path_to_string,
     span_line,
 };
@@ -34,7 +34,7 @@ fn collect_outer_allows(attrs: &[syn::Attribute], out: &mut Vec<Located>) {
     }
 }
 
-fn collect_cfg_attr_allows(attrs: &[syn::Attribute], out: &mut Vec<Located>) {
+fn collect_cfg_attr_allows(attrs: &[syn::Attribute], out: &mut Vec<CfgAttrAllowInfo>) {
     for attr in attrs {
         extract_cfg_attr_allow_lints(attr, out);
     }
@@ -116,7 +116,7 @@ impl<'ast> Visit<'ast> for ItemAllowVisitor {
 }
 
 pub struct CfgAttrAllowVisitor<'a> {
-    pub out: &'a mut Vec<Located>,
+    pub out: &'a mut Vec<CfgAttrAllowInfo>,
 }
 impl<'ast> Visit<'ast> for CfgAttrAllowVisitor<'_> {
     fn visit_item(&mut self, i: &'ast syn::Item) {
