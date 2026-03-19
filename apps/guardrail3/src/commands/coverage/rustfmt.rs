@@ -13,6 +13,18 @@ use crate::app::crawl::CrawlResult;
 
 use super::engine::{self, CoverageTool};
 
+/// Required rustfmt settings with their expected values.
+type SettingDef = (&'static str, &'static str);
+const REQUIRED_SETTINGS: &[SettingDef] = &[
+    ("edition", "\"2024\""),
+    ("max_width", "100"),
+    ("tab_spaces", "4"),
+    ("use_field_init_shorthand", "true"),
+    ("use_try_shorthand", "true"),
+    ("reorder_imports", "true"),
+    ("reorder_modules", "true"),
+];
+
 pub struct RustfmtCoverage;
 
 impl CoverageTool for RustfmtCoverage {
@@ -34,21 +46,61 @@ impl CoverageTool for RustfmtCoverage {
 
     fn parse_details(&self, config_path: &Path) -> serde_json::Value {
         let Some(content) = crate::fs::read_file(config_path) else {
-            return serde_json::json!({});
+            return serde_json::json!({"error": "unreadable"});
         };
-        let settings = content
-            .lines()
-            .filter(|l| {
-                let trimmed = l.trim();
-                !trimmed.is_empty() && !trimmed.starts_with('#')
-            })
-            .count();
-        serde_json::json!({"settings": settings})
+        let Ok(table) = content.parse::<toml::Value>() else {
+            return serde_json::json!({"error": "parse error"});
+        };
+
+        let settings = diff_settings(&table);
+        serde_json::json!({
+            "settings": settings
+        })
     }
 
     fn walks_up(&self) -> bool {
         true
     }
+}
+
+fn diff_settings(table: &toml::Value) -> serde_json::Value {
+    let mut required_present = 0usize;
+    let mut required_missing = 0usize;
+    let mut relaxed = 0usize;
+    let mut user_extra = 0usize;
+
+    for (key, expected) in REQUIRED_SETTINGS {
+        if let Some(val) = table.get(*key) {
+            required_present = required_present.saturating_add(1);
+            let val_str = val.to_string();
+            if val_str.trim() != *expected {
+                relaxed = relaxed.saturating_add(1);
+            }
+        } else {
+            required_missing = required_missing.saturating_add(1);
+        }
+    }
+
+    // Count settings in the file that aren't in our required list
+    let known_keys: Vec<&str> = REQUIRED_SETTINGS.iter().map(|(k, _)| *k).collect();
+    if let Some(tbl) = table.as_table() {
+        for key in tbl.keys() {
+            if !known_keys.contains(&key.as_str()) {
+                user_extra = user_extra.saturating_add(1);
+            }
+        }
+    }
+
+    let total = required_present.saturating_add(user_extra);
+
+    serde_json::json!({
+        "total": total,
+        "required_total": REQUIRED_SETTINGS.len(),
+        "required_present": required_present,
+        "required_missing": required_missing,
+        "user_extra": user_extra,
+        "relaxed": relaxed
+    })
 }
 
 #[allow(clippy::print_stdout)] // reason: CLI command

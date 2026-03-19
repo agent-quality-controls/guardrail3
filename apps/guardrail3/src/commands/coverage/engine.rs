@@ -58,6 +58,21 @@ pub struct ConfigInstance {
     pub details: serde_json::Value,
     /// Top-level directories covered by this config (collapsed).
     pub covers: Vec<String>,
+    /// If this config is a shadow — it intercepts coverage from a parent config.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub is_shadow: Option<bool>,
+    /// Which parent config this shadows (if `is_shadow` is true).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub shadows: Option<String>,
+    /// Configs below this one that steal part of its coverage.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub shadowed_by: Vec<ShadowedBy>,
+}
+
+#[derive(Serialize)]
+pub struct ShadowedBy {
+    pub path: String,
+    pub steals: Vec<String>,
 }
 
 #[derive(Serialize)]
@@ -110,19 +125,26 @@ pub fn build(tool: &dyn CoverageTool, root: &Path, crawl: &CrawlResult) -> Cover
     }
 
     // Build config instances with collapsed covers
-    let mut configs = Vec::new();
+    let mut configs: Vec<ConfigInstance> = Vec::new();
     for cf in config_files {
         let cf_rel = rel_str(root, cf);
         let details = tool.parse_details(cf);
         let count = config_covered_dirs.get(&cf_rel).map_or(0, Vec::len);
-        // The config's directory IS the top-level covered dir.
-        // Everything below it is covered because of walk-up resolution.
         let config_dir = cf.parent().map(|d| rel_str(root, d)).unwrap_or_default();
         configs.push(ConfigInstance {
             path: cf_rel,
             details,
             covers: if count > 0 { vec![config_dir] } else { vec![] },
+            is_shadow: None,
+            shadows: None,
+            shadowed_by: Vec::new(),
         });
+    }
+
+    // Detect shadows: if config A's directory is below config B's directory,
+    // A is a shadow of B (A steals coverage from B).
+    if tool.walks_up() {
+        detect_shadows(&mut configs);
     }
 
     let collapsed_uncovered = collapse_to_ancestors(&uncovered_dirs, root);
@@ -146,6 +168,60 @@ pub fn build(tool: &dyn CoverageTool, root: &Path, crawl: &CrawlResult) -> Cover
             covered_dirs: covered_count,
             uncovered_dirs: total.saturating_sub(covered_count),
         },
+    }
+}
+
+/// Detect shadow relationships between configs.
+///
+/// Config A shadows config B if A's coverage directory is nested inside B's.
+/// A intercepts walk-up resolution for source dirs under A, stealing them from B.
+type IndexedDir = (usize, String);
+type ShadowRelation = (usize, usize, String);
+type ShadowMark = (usize, String);
+type ParentMark = (usize, String, String);
+
+fn detect_shadows(configs: &mut [ConfigInstance]) {
+    let config_dirs: Vec<IndexedDir> = configs
+        .iter()
+        .enumerate()
+        .filter_map(|(i, c)| c.covers.first().map(|d| (i, d.clone())))
+        .collect();
+
+    let mut shadows: Vec<ShadowRelation> = Vec::new();
+    for &(i, ref dir_i) in &config_dirs {
+        for &(j, ref dir_j) in &config_dirs {
+            if i != j && dir_i != dir_j && dir_i.starts_with(dir_j.as_str()) {
+                shadows.push((i, j, dir_i.clone()));
+            }
+        }
+    }
+
+    let mut shadow_marks: Vec<ShadowMark> = Vec::new();
+    let mut parent_marks: Vec<ParentMark> = Vec::new();
+
+    for (shadow_idx, parent_idx, stolen_dir) in &shadows {
+        if let Some(parent) = configs.get(*parent_idx) {
+            shadow_marks.push((*shadow_idx, parent.path.clone()));
+        }
+        if let Some(shadow) = configs.get(*shadow_idx) {
+            parent_marks.push((*parent_idx, shadow.path.clone(), stolen_dir.clone()));
+        }
+    }
+
+    for (idx, parent_path) in shadow_marks {
+        if let Some(cfg) = configs.get_mut(idx) {
+            cfg.is_shadow = Some(true);
+            cfg.shadows = Some(parent_path);
+        }
+    }
+
+    for (idx, shadow_path, stolen_dir) in parent_marks {
+        if let Some(cfg) = configs.get_mut(idx) {
+            cfg.shadowed_by.push(ShadowedBy {
+                path: shadow_path,
+                steals: vec![stolen_dir],
+            });
+        }
     }
 }
 
