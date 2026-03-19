@@ -3,6 +3,9 @@ use std::path::Path;
 
 use crate::commands::generate;
 
+/// A (`relative_path`, `content`) pair for a generated file.
+type FilePair = (String, String);
+
 /// Status of a generated file compared to what exists on disk.
 enum FileStatus {
     /// File does not exist yet.
@@ -20,7 +23,7 @@ enum FileStatus {
 
 /// Dry-run for rs generate — shows what would change per file.
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
-pub fn run(path: &str) {
+pub fn run(path: &str, dump_dir: Option<&str>) {
     let project_path = Path::new(path);
 
     let Some(expected) = generate::generate_expected(project_path) else {
@@ -28,12 +31,16 @@ pub fn run(path: &str) {
         std::process::exit(1);
     };
 
-    show_smart_diff(&expected, project_path);
+    if let Some(dir) = dump_dir {
+        dump_files(&expected, dir);
+    } else {
+        show_smart_diff(&expected, project_path);
+    }
 }
 
 /// Dry-run for ts generate — shows what would change per file.
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
-pub fn run_ts(path: &str) {
+pub fn run_ts(path: &str, dump_dir: Option<&str>) {
     let project_path = Path::new(path);
 
     let Some(expected) = generate::generate_expected_ts(project_path) else {
@@ -41,7 +48,36 @@ pub fn run_ts(path: &str) {
         std::process::exit(1);
     };
 
-    show_smart_diff(&expected, project_path);
+    if let Some(dir) = dump_dir {
+        dump_files(&expected, dir);
+    } else {
+        show_smart_diff(&expected, project_path);
+    }
+}
+
+/// Write all generated files to a directory for inspection.
+#[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — writes files for user inspection
+fn dump_files(expected: &[FilePair], dump_dir: &str) {
+    let dump_path = Path::new(dump_dir);
+    if let Err(e) = crate::fs::create_dir_all(dump_path) {
+        eprintln!("Error creating dump directory: {e}");
+        std::process::exit(1);
+    }
+
+    for (rel_path, content) in expected {
+        let full_path = dump_path.join(rel_path);
+        if let Some(parent) = full_path.parent() {
+            if let Err(e) = crate::fs::create_dir_all(parent) {
+                eprintln!("Error creating {}: {e}", parent.display());
+                continue;
+            }
+        }
+        match crate::fs::write_file(&full_path, content) {
+            Ok(()) => println!("  wrote {rel_path}"),
+            Err(e) => eprintln!("  ERROR writing {rel_path}: {e}"),
+        }
+    }
+    println!("\nDumped {} files to {dump_dir}", expected.len());
 }
 
 /// Compare each expected file against disk and print per-file status.
@@ -50,7 +86,7 @@ pub fn run_ts(path: &str) {
 /// details for TOML files), then unchanged files.
 #[allow(clippy::print_stdout)] // reason: CLI dry-run output
 #[allow(clippy::type_complexity)] // reason: slice of tuples from generate_expected
-fn show_smart_diff(expected: &[(String, String)], project_path: &Path) {
+fn show_smart_diff(expected: &[FilePair], project_path: &Path) {
     let mut creates: Vec<&str> = Vec::new();
     let mut updates: Vec<(&str, usize, Vec<String>)> = Vec::new();
     let mut unchanged: Vec<&str> = Vec::new();

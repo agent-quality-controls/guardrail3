@@ -89,6 +89,13 @@ pub fn crawl(root: &Path) -> CrawlResult {
             continue;
         };
 
+        // Config files inside test directories are test data, not project configs.
+        // Source files still get tracked for dirs_with_rs/dirs_with_ts coverage.
+        if is_test_directory(&path) {
+            track_source_dir(&path, &mut result);
+            continue;
+        }
+
         match name.as_str() {
             // ── Rust structure ──
             "Cargo.toml" => result.cargo_tomls.push(path),
@@ -252,6 +259,24 @@ fn classify_by_pattern(name: &str, path: PathBuf, result: &mut CrawlResult) {
             result.guardrail3_overrides.push(path);
         }
     }
+}
+
+/// Check if a file is inside a test/fixture directory.
+/// Config files in these dirs are test data, not project configs.
+fn is_test_directory(path: &Path) -> bool {
+    path.components().any(|c| {
+        let s = c.as_os_str().to_str().unwrap_or("");
+        matches!(
+            s,
+            "tests"
+                | "test"
+                | "__tests__"
+                | "__mocks__"
+                | "fixtures"
+                | "test-data"
+                | "golden-tests"
+        )
+    })
 }
 
 /// Track which directories contain source files, by file extension.

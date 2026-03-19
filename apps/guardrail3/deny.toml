@@ -19,11 +19,6 @@ allow-wildcard-paths = true
 highlight = "all"
 
 skip = [
-# Skip entries for deny.toml [bans] section
-# Example:
-#     { crate = "windows-sys@0.60.2", reason = "transitive dep conflict" },
-    { crate = "anyhow", reason = "transitive dep from garde_derive — not a direct dependency" },
-
 ]
 
 deny = [
@@ -63,11 +58,14 @@ deny = [
     { name = "rmp-serde", wrappers = [] },
     { name = "prost", wrappers = [] },
     { name = "flatbuffers", wrappers = [] },
-    # --- Local overrides ---
-# Additional [bans] deny entries for deny.toml
-# Example:
-#     { name = "some-crate", wrappers = [] },
-
+    # --- Parsing: use structured parsers, never regex ---
+    { name = "regex", wrappers = ["tree-sitter", "globset", "ignore"] }, # EXCEPTION: transitive only
+    { name = "fancy-regex", wrappers = [] },
+    { name = "onig", wrappers = [] },
+    { name = "pcre2", wrappers = [] },
+    { name = "grep-cli", wrappers = [] },
+    { name = "grep-regex", wrappers = [] },
+    { name = "grep-matcher", wrappers = [] },
 ]
 
 # Feature-level bans -- prevent agents from enabling kitchen-sink features
@@ -76,13 +74,6 @@ name = "tokio"
 deny = ["full"]
 # Force explicit feature selection instead of enabling everything
 allow = ["rt-multi-thread", "macros", "net", "sync", "signal", "bytes", "default", "io-util", "time"]
-
-# Additional [[bans.features]] entries for deny.toml
-# Example:
-#     [[bans.features]]
-#     name = "some-crate"
-#     deny = ["full"]
-
 
 # ============================================================
 # LICENSE CHECKING
