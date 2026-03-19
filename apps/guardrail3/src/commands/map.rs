@@ -76,7 +76,7 @@ fn print_rust(map: &ProjectMap) {
         } else {
             println!("    rustfmt.toml                   MISSING");
         }
-        if c.rust_toolchain.is_some() {
+        if !c.rust_toolchains.is_empty() {
             println!("    rust-toolchain.toml");
         }
         if c.jscpd_config.is_some() {
@@ -86,12 +86,12 @@ fn print_rust(map: &ProjectMap) {
     }
 
     // Root-level rust-toolchain (if at project root, not inside a scope)
-    if let Some(rt) = &map.root_configs.rust_toolchain {
+    if let Some(rt) = map.root_configs.rust_toolchains.first() {
         let rt_str = rt.display().to_string();
         let already_shown = map
             .rust_scopes
             .iter()
-            .any(|s| s.configs.rust_toolchain.is_some());
+            .any(|s| !s.configs.rust_toolchains.is_empty());
         if !already_shown {
             println!("  {rt_str}");
             println!();
@@ -236,7 +236,7 @@ fn print_shared(map: &ProjectMap) {
     println!();
 
     // Hooks
-    if let Some(p) = &rc.pre_commit_hook {
+    if let Some(p) = rc.pre_commit_hooks.first() {
         println!(
             "  .githooks/pre-commit             {} lines",
             count_lines(p)
@@ -246,15 +246,15 @@ fn print_shared(map: &ProjectMap) {
     }
 
     // Release
-    if rc.release_plz.is_some() {
-        println!("  release-plz.toml");
-    } else {
+    if rc.release_plz_tomls.is_empty() {
         println!("  release-plz.toml                 MISSING");
-    }
-    if rc.cliff_toml.is_some() {
-        println!("  cliff.toml");
     } else {
+        println!("  release-plz.toml");
+    }
+    if rc.cliff_tomls.is_empty() {
         println!("  cliff.toml                       MISSING");
+    } else {
+        println!("  cliff.toml");
     }
 
     // CI
@@ -266,21 +266,21 @@ fn print_shared(map: &ProjectMap) {
     }
 
     // Repo-level
-    if rc.license_file.is_some() {
-        println!("  LICENSE");
-    } else {
+    if rc.license_files.is_empty() {
         println!("  LICENSE                          MISSING");
+    } else {
+        println!("  LICENSE");
     }
-    if rc.claude_md.is_some() {
+    if !rc.claude_mds.is_empty() {
         println!("  CLAUDE.md");
     }
 
     // guardrail3
     println!();
-    if rc.guardrail3_toml.is_some() {
-        println!("  guardrail3.toml");
-    } else {
+    if rc.guardrail3_tomls.is_empty() {
         println!("  guardrail3.toml                  MISSING (run guardrail3 init)");
+    } else {
+        println!("  guardrail3.toml");
     }
 
     println!();

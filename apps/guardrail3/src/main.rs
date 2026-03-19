@@ -65,9 +65,22 @@ fn main() {
             stylelint,
             prettier,
             cspell,
+            jscpd,
+            tsconfig,
+            rust_toolchain,
+            npmrc,
         } => {
-            let has_coverage =
-                clippy || deny || rustfmt || eslint || stylelint || prettier || cspell;
+            let has_coverage = clippy
+                || deny
+                || rustfmt
+                || eslint
+                || stylelint
+                || prettier
+                || cspell
+                || jscpd
+                || tsconfig
+                || rust_toolchain
+                || npmrc;
             if has_coverage {
                 let project_path = std::path::Path::new(&path);
                 let crawl_result = guardrail3::app::crawl::crawl(project_path);
@@ -81,6 +94,10 @@ fn main() {
                     stylelint,
                     prettier,
                     cspell,
+                    jscpd,
+                    tsconfig,
+                    rust_toolchain,
+                    npmrc,
                 );
             } else {
                 commands::map::run(&path);
@@ -100,6 +117,10 @@ fn run_coverage_maps(
     stylelint: bool,
     prettier: bool,
     cspell: bool,
+    jscpd: bool,
+    tsconfig: bool,
+    rust_toolchain: bool,
+    npmrc: bool,
 ) {
     use commands::coverage;
     if clippy {
@@ -122,6 +143,18 @@ fn run_coverage_maps(
     }
     if cspell {
         coverage::cspell::print(project_path, crawl_result);
+    }
+    if jscpd {
+        coverage::jscpd::print(project_path, crawl_result);
+    }
+    if tsconfig {
+        coverage::tsconfig::print(project_path, crawl_result);
+    }
+    if rust_toolchain {
+        coverage::rust_toolchain::print(project_path, crawl_result);
+    }
+    if npmrc {
+        coverage::npmrc::print(project_path, crawl_result);
     }
 }
 

@@ -16,11 +16,11 @@ pub struct CrawlResult {
     pub clippy_tomls: Vec<PathBuf>,
     pub deny_tomls: Vec<PathBuf>,
     pub rustfmt_tomls: Vec<PathBuf>,
-    pub rust_toolchain: Option<PathBuf>,
+    pub rust_toolchains: Vec<PathBuf>,
 
     // ── TypeScript structure ──
     pub package_jsons: Vec<PathBuf>,
-    pub pnpm_workspace: Option<PathBuf>,
+    pub pnpm_workspaces: Vec<PathBuf>,
 
     // ── TypeScript guardrail configs ──
     pub tsconfigs: Vec<PathBuf>,
@@ -36,22 +36,22 @@ pub struct CrawlResult {
     pub next_configs: Vec<PathBuf>,
 
     // ── Release ──
-    pub release_plz: Option<PathBuf>,
-    pub cliff_toml: Option<PathBuf>,
+    pub release_plz_tomls: Vec<PathBuf>,
+    pub cliff_tomls: Vec<PathBuf>,
 
     // ── CI/CD ──
     pub github_workflows: Vec<PathBuf>,
 
     // ── Hooks ──
-    pub pre_commit_hook: Option<PathBuf>,
+    pub pre_commit_hooks: Vec<PathBuf>,
 
     // ── Repo-level files (validation checks) ──
-    pub license_file: Option<PathBuf>,
-    pub claude_md: Option<PathBuf>,
-    pub cargo_mutants_toml: Option<PathBuf>,
+    pub license_files: Vec<PathBuf>,
+    pub claude_mds: Vec<PathBuf>,
+    pub cargo_mutants_tomls: Vec<PathBuf>,
 
     // ── guardrail3 ──
-    pub guardrail3_toml: Option<PathBuf>,
+    pub guardrail3_tomls: Vec<PathBuf>,
     pub guardrail3_overrides: Vec<PathBuf>,
 
     // ── Source file directories (for coverage maps) ──
@@ -95,11 +95,11 @@ pub fn crawl(root: &Path) -> CrawlResult {
             "clippy.toml" | ".clippy.toml" => result.clippy_tomls.push(path),
             "deny.toml" | ".deny.toml" => result.deny_tomls.push(path),
             "rustfmt.toml" | ".rustfmt.toml" => result.rustfmt_tomls.push(path),
-            "rust-toolchain.toml" => result.rust_toolchain = Some(path),
+            "rust-toolchain.toml" => result.rust_toolchains.push(path),
 
             // ── TypeScript structure ──
             "package.json" => result.package_jsons.push(path),
-            "pnpm-workspace.yaml" => result.pnpm_workspace = Some(path),
+            "pnpm-workspace.yaml" => result.pnpm_workspaces.push(path),
 
             // ── TypeScript guardrail configs ──
             "tsconfig.json" | "tsconfig.base.json" => result.tsconfigs.push(path),
@@ -107,13 +107,13 @@ pub fn crawl(root: &Path) -> CrawlResult {
             ".jscpd.json" => result.jscpd_configs.push(path),
 
             // ── Release ──
-            "release-plz.toml" | ".release-plz.toml" => result.release_plz = Some(path),
-            "cliff.toml" => result.cliff_toml = Some(path),
+            "release-plz.toml" | ".release-plz.toml" => result.release_plz_tomls.push(path),
+            "cliff.toml" => result.cliff_tomls.push(path),
 
             // ── Repo-level files ──
-            "CLAUDE.md" => result.claude_md = Some(path),
+            "CLAUDE.md" => result.claude_mds.push(path),
             "LICENSE" | "LICENSE-MIT" | "LICENSE-APACHE" | "LICENSE.md" => {
-                result.license_file = Some(path);
+                result.license_files.push(path);
             }
             "mutants.toml" => {
                 // Only if inside .cargo/
@@ -123,12 +123,12 @@ pub fn crawl(root: &Path) -> CrawlResult {
                     .and_then(|n| n.to_str())
                     == Some(".cargo")
                 {
-                    result.cargo_mutants_toml = Some(path);
+                    result.cargo_mutants_tomls.push(path);
                 }
             }
 
             // ── guardrail3 ──
-            "guardrail3.toml" => result.guardrail3_toml = Some(path),
+            "guardrail3.toml" => result.guardrail3_tomls.push(path),
 
             // ── Multi-name configs — check prefix/suffix ──
             _ => {
@@ -156,6 +156,15 @@ pub fn crawl(root: &Path) -> CrawlResult {
     result.velite_configs.sort();
     result.next_configs.sort();
     result.github_workflows.sort();
+    result.rust_toolchains.sort();
+    result.pnpm_workspaces.sort();
+    result.release_plz_tomls.sort();
+    result.cliff_tomls.sort();
+    result.pre_commit_hooks.sort();
+    result.license_files.sort();
+    result.claude_mds.sort();
+    result.cargo_mutants_tomls.sort();
+    result.guardrail3_tomls.sort();
     result.guardrail3_overrides.sort();
 
     result
@@ -222,7 +231,7 @@ fn classify_by_pattern(name: &str, path: PathBuf, result: &mut CrawlResult) {
             .and_then(|n| n.to_str())
         {
             if parent == ".githooks" || parent == "hooks" {
-                result.pre_commit_hook = Some(path);
+                result.pre_commit_hooks.push(path);
                 return;
             }
         }

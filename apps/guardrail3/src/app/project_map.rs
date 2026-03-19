@@ -51,7 +51,7 @@ pub struct RustScopeConfigs {
     pub deny_toml: Option<PathBuf>,
     pub rustfmt_toml: Option<PathBuf>,
     pub cargo_lock: Option<PathBuf>,
-    pub rust_toolchain: Option<PathBuf>,
+    pub rust_toolchains: Vec<PathBuf>,
     pub jscpd_config: Option<PathBuf>,
 }
 
@@ -85,9 +85,9 @@ pub struct TsScopeConfigs {
 /// Root-level configs (shared across all scopes).
 #[derive(Debug, Default)]
 pub struct RootConfigs {
-    pub guardrail3_toml: Option<PathBuf>,
+    pub guardrail3_tomls: Vec<PathBuf>,
     pub package_json: Option<PathBuf>,
-    pub pnpm_workspace: Option<PathBuf>,
+    pub pnpm_workspaces: Vec<PathBuf>,
     pub eslint_config: Option<PathBuf>,
     pub stylelint_config: Option<PathBuf>,
     pub tsconfig_base: Option<PathBuf>,
@@ -95,13 +95,13 @@ pub struct RootConfigs {
     pub jscpd_config: Option<PathBuf>,
     pub cspell_config: Option<PathBuf>,
     pub prettier_config: Option<PathBuf>,
-    pub rust_toolchain: Option<PathBuf>,
-    pub release_plz: Option<PathBuf>,
-    pub cliff_toml: Option<PathBuf>,
-    pub pre_commit_hook: Option<PathBuf>,
-    pub license_file: Option<PathBuf>,
-    pub claude_md: Option<PathBuf>,
-    pub cargo_mutants_toml: Option<PathBuf>,
+    pub rust_toolchains: Vec<PathBuf>,
+    pub release_plz_tomls: Vec<PathBuf>,
+    pub cliff_tomls: Vec<PathBuf>,
+    pub pre_commit_hooks: Vec<PathBuf>,
+    pub license_files: Vec<PathBuf>,
+    pub claude_mds: Vec<PathBuf>,
+    pub cargo_mutants_tomls: Vec<PathBuf>,
     pub github_workflows: Vec<PathBuf>,
 }
 
@@ -317,15 +317,12 @@ fn find_rust_configs_at(dir: &Path, crawl: &CrawlResult) -> RustScopeConfigs {
             .iter()
             .find(|p| p.parent() == Some(dir))
             .cloned(),
-        rust_toolchain: if crawl
-            .rust_toolchain
-            .as_ref()
-            .is_some_and(|p| p.parent() == Some(dir))
-        {
-            crawl.rust_toolchain.clone()
-        } else {
-            None
-        },
+        rust_toolchains: crawl
+            .rust_toolchains
+            .iter()
+            .filter(|p| p.parent() == Some(dir))
+            .cloned()
+            .collect(),
         jscpd_config: crawl
             .jscpd_configs
             .iter()
@@ -412,7 +409,7 @@ fn read_package_name(path: &Path) -> String {
 }
 
 fn read_pnpm_patterns(crawl: &CrawlResult) -> Vec<String> {
-    let Some(path) = &crawl.pnpm_workspace else {
+    let Some(path) = crawl.pnpm_workspaces.first() else {
         return Vec::new();
     };
     let Some(content) = crate::fs::read_file(path) else {
@@ -451,13 +448,13 @@ fn build_root_configs(root: &Path, crawl: &CrawlResult) -> RootConfigs {
     };
 
     RootConfigs {
-        guardrail3_toml: crawl.guardrail3_toml.clone(),
+        guardrail3_tomls: crawl.guardrail3_tomls.clone(),
         package_json: crawl
             .package_jsons
             .iter()
             .find(|p| p.parent() == Some(root))
             .cloned(),
-        pnpm_workspace: crawl.pnpm_workspace.clone(),
+        pnpm_workspaces: crawl.pnpm_workspaces.clone(),
         eslint_config: at_root(&crawl.eslint_configs),
         stylelint_config: at_root(&crawl.stylelint_configs),
         tsconfig_base: crawl
@@ -474,17 +471,18 @@ fn build_root_configs(root: &Path, crawl: &CrawlResult) -> RootConfigs {
         jscpd_config: at_root(&crawl.jscpd_configs),
         cspell_config: at_root(&crawl.cspell_configs),
         prettier_config: at_root(&crawl.prettier_configs),
-        rust_toolchain: crawl
-            .rust_toolchain
-            .as_ref()
+        rust_toolchains: crawl
+            .rust_toolchains
+            .iter()
             .filter(|p| p.parent() == Some(root))
-            .cloned(),
-        release_plz: crawl.release_plz.clone(),
-        cliff_toml: crawl.cliff_toml.clone(),
-        pre_commit_hook: crawl.pre_commit_hook.clone(),
-        license_file: crawl.license_file.clone(),
-        claude_md: crawl.claude_md.clone(),
-        cargo_mutants_toml: crawl.cargo_mutants_toml.clone(),
+            .cloned()
+            .collect(),
+        release_plz_tomls: crawl.release_plz_tomls.clone(),
+        cliff_tomls: crawl.cliff_tomls.clone(),
+        pre_commit_hooks: crawl.pre_commit_hooks.clone(),
+        license_files: crawl.license_files.clone(),
+        claude_mds: crawl.claude_mds.clone(),
+        cargo_mutants_tomls: crawl.cargo_mutants_tomls.clone(),
         github_workflows: crawl.github_workflows.clone(),
     }
 }

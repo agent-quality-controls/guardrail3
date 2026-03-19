@@ -62,6 +62,18 @@ pub enum Commands {
         /// Show cspell coverage map
         #[arg(long)]
         cspell: bool,
+        /// Show jscpd coverage map
+        #[arg(long)]
+        jscpd: bool,
+        /// Show tsconfig coverage map
+        #[arg(long)]
+        tsconfig: bool,
+        /// Show rust-toolchain coverage map
+        #[arg(long)]
+        rust_toolchain: bool,
+        /// Show .npmrc coverage map
+        #[arg(long)]
+        npmrc: bool,
     },
 }
 
