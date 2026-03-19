@@ -279,6 +279,70 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
         });
     }
 
+    // T-PKG-02: lint script exists
+    let has_lint_script = json
+        .get("scripts")
+        .and_then(|s| s.as_object())
+        .is_some_and(|scripts| scripts.contains_key("lint"));
+    if has_lint_script {
+        results.push(
+            CheckResult {
+                id: "T-PKG-02".to_owned(),
+                severity: Severity::Info,
+                title: "`lint` script exists in `package.json`".to_owned(),
+                message: "`lint` script found in package.json scripts.".to_owned(),
+                file: Some(pkg_path.display().to_string()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
+    } else {
+        results.push(CheckResult {
+            id: "T-PKG-02".to_owned(),
+            severity: Severity::Error,
+            title: "`lint` script missing".to_owned(),
+            message: "package.json must have a `lint` script for CI linting \
+                     (e.g., `eslint --max-warnings 0 .`)."
+                .to_owned(),
+            file: Some(pkg_path.display().to_string()),
+            line: None,
+            inventory: false,
+        });
+    }
+
+    // T-PKG-03: typecheck script exists
+    let has_typecheck_script = json
+        .get("scripts")
+        .and_then(|s| s.as_object())
+        .is_some_and(|scripts| scripts.contains_key("typecheck"));
+    if has_typecheck_script {
+        results.push(
+            CheckResult {
+                id: "T-PKG-03".to_owned(),
+                severity: Severity::Info,
+                title: "`typecheck` script exists in `package.json`".to_owned(),
+                message: "`typecheck` script found in package.json scripts.".to_owned(),
+                file: Some(pkg_path.display().to_string()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
+    } else {
+        results.push(CheckResult {
+            id: "T-PKG-03".to_owned(),
+            severity: Severity::Error,
+            title: "`typecheck` script missing".to_owned(),
+            message: "package.json must have a `typecheck` script for CI type checking \
+                     (e.g., `tsc --noEmit`)."
+                .to_owned(),
+            file: Some(pkg_path.display().to_string()),
+            line: None,
+            inventory: false,
+        });
+    }
+
     // T57: engines field
     if json.get("engines").is_some() {
         results.push(CheckResult {
@@ -327,170 +391,5 @@ pub fn check_package_json(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Ch
             line: None,
             inventory: false,
         }.as_inventory());
-    }
-}
-
-#[allow(clippy::disallowed_methods)] // reason: serde_json::from_str for package.json inspection
-#[allow(clippy::too_many_lines)] // reason: checks 19 packages + script sequentially
-pub fn check_lint_plugins(
-    fs: &dyn FileSystem,
-    path: &Path,
-    content_enabled: bool,
-    results: &mut Vec<CheckResult>,
-) {
-    let pkg_path = path.join("package.json");
-    let Some(content) = fs.read_file(&pkg_path) else {
-        return;
-    };
-    let Ok(json) = serde_json::from_str::<serde_json::Value>(&content) else {
-        return;
-    };
-
-    let dev_deps = json.get("devDependencies").and_then(|d| d.as_object());
-
-    let check_pkg = |id: &str, pkg: &str, out: &mut Vec<CheckResult>| {
-        let found = dev_deps.is_some_and(|d| d.contains_key(pkg));
-        if found {
-            out.push(
-                CheckResult {
-                    id: id.to_owned(),
-                    severity: Severity::Info,
-                    title: format!("{pkg} installed"),
-                    message: format!("{pkg} found in devDependencies."),
-                    file: Some(pkg_path.display().to_string()),
-                    line: None,
-                    inventory: false,
-                }
-                .as_inventory(),
-            );
-        } else {
-            out.push(CheckResult {
-                id: id.to_owned(),
-                severity: Severity::Error,
-                title: format!("{pkg} missing"),
-                message: format!(
-                    "{pkg} not found in devDependencies. Install with: pnpm add -Dw {pkg}"
-                ),
-                file: Some(pkg_path.display().to_string()),
-                line: None,
-                inventory: false,
-            });
-        }
-    };
-
-    // Core plugins (always)
-    check_pkg("T-PLUG-01", "eslint-plugin-unicorn", results);
-    check_pkg("T-PLUG-02", "eslint-plugin-regexp", results);
-    check_pkg("T-PLUG-03", "eslint-plugin-sonarjs", results);
-    check_pkg("T-PLUG-10", "knip", results);
-    check_pkg("T-PLUG-12", "eslint", results);
-    check_pkg("T-PLUG-13", "typescript", results);
-    check_pkg("T-PLUG-14", "typescript-eslint", results);
-    check_pkg("T-PLUG-15", "eslint-plugin-import-x", results);
-    check_pkg("T-PLUG-16", "eslint-import-resolver-typescript", results);
-    check_pkg("T-PLUG-17", "eslint-plugin-boundaries", results);
-    check_pkg("T-PLUG-18", "only-allow", results);
-    check_pkg("T-PLUG-19", "jscpd", results);
-
-    // Content-profile plugins
-    if content_enabled {
-        check_pkg("T-PLUG-04", "eslint-plugin-jsx-a11y", results);
-        check_pkg("T-PLUG-05", "stylelint", results);
-        check_pkg("T-PLUG-06", "@double-great/stylelint-a11y", results);
-        check_pkg("T-PLUG-07", "stylelint-config-standard", results);
-        check_pkg("T-PLUG-08", "stylelint-config-tailwindcss", results);
-        check_pkg("T-PLUG-09", "eslint-plugin-tailwind-ban", results);
-    }
-
-    // T-PLUG-11: knip script in package.json
-    let has_knip_script = json
-        .get("scripts")
-        .and_then(|s| s.as_object())
-        .is_some_and(|scripts| scripts.contains_key("knip"));
-    if has_knip_script {
-        results.push(
-            CheckResult {
-                id: "T-PLUG-11".to_owned(),
-                severity: Severity::Info,
-                title: "knip script configured".to_owned(),
-                message: "\"knip\" script found in package.json scripts.".to_owned(),
-                file: Some(pkg_path.display().to_string()),
-                line: None,
-                inventory: false,
-            }
-            .as_inventory(),
-        );
-    } else {
-        results.push(CheckResult {
-            id: "T-PLUG-11".to_owned(),
-            severity: Severity::Error,
-            title: "knip script missing".to_owned(),
-            message: "No \"knip\" script in package.json. Add `\"knip\": \"knip\"` to scripts for dead code detection.".to_owned(),
-            file: Some(pkg_path.display().to_string()),
-            line: None,
-            inventory: false,
-        });
-    }
-}
-
-/// Check additional tool packages in devDependencies.
-#[allow(clippy::disallowed_methods)] // reason: serde_json::from_str for package.json inspection
-#[allow(clippy::too_many_lines)] // reason: checks multiple tools sequentially
-pub fn check_additional_tools(
-    fs: &dyn FileSystem,
-    path: &Path,
-    content_enabled: bool,
-    results: &mut Vec<CheckResult>,
-) {
-    let pkg_path = path.join("package.json");
-    let Some(content) = fs.read_file(&pkg_path) else {
-        return;
-    };
-    let Ok(json) = serde_json::from_str::<serde_json::Value>(&content) else {
-        return;
-    };
-
-    let dev_deps = json.get("devDependencies").and_then(|d| d.as_object());
-
-    let check_pkg = |id: &str, pkg: &str, out: &mut Vec<CheckResult>| {
-        let found = dev_deps.is_some_and(|d| d.contains_key(pkg));
-        if found {
-            out.push(
-                CheckResult {
-                    id: id.to_owned(),
-                    severity: Severity::Info,
-                    title: format!("{pkg} installed"),
-                    message: format!("{pkg} found in devDependencies."),
-                    file: Some(pkg_path.display().to_string()),
-                    line: None,
-                    inventory: false,
-                }
-                .as_inventory(),
-            );
-        } else {
-            out.push(CheckResult {
-                id: id.to_owned(),
-                severity: Severity::Error,
-                title: format!("{pkg} missing"),
-                message: format!(
-                    "{pkg} not found in devDependencies. Install with: pnpm add -Dw {pkg}"
-                ),
-                file: Some(pkg_path.display().to_string()),
-                line: None,
-                inventory: false,
-            });
-        }
-    };
-
-    // Core tools (always)
-    check_pkg("T-TOOL-01", "cspell", results);
-    check_pkg("T-TOOL-02", "type-coverage", results);
-    check_pkg("T-TOOL-03", "license-checker", results);
-    check_pkg("T-TOOL-04", "prettier", results);
-
-    // Content-profile tools
-    if content_enabled {
-        check_pkg("T-TOOL-05", "size-limit", results);
-        check_pkg("T-TOOL-06", "@size-limit/preset-app", results);
     }
 }

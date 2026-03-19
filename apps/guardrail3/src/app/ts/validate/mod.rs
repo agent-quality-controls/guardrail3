@@ -8,6 +8,7 @@ pub mod i18n_check;
 mod jscpd_check;
 mod npmrc_check;
 mod package_check;
+mod package_deps;
 pub mod source_scan;
 mod stylelint_check;
 pub mod test_checks;
@@ -58,7 +59,7 @@ pub fn run(
     // Plugin packages in devDependencies
     let content_enabled = has_content_app(fs, path, config);
     let mut plug_results = Vec::new();
-    package_check::check_lint_plugins(fs, path, content_enabled, &mut plug_results);
+    package_deps::check_lint_plugins(fs, path, content_enabled, &mut plug_results);
     if !plug_results.is_empty() {
         report.add_section(Section {
             name: "Lint plugin packages".to_owned(),
@@ -68,7 +69,7 @@ pub fn run(
 
     // Additional tool packages (T-TOOL-01..06)
     let mut tool_pkg_results = Vec::new();
-    package_check::check_additional_tools(fs, path, content_enabled, &mut tool_pkg_results);
+    package_deps::check_additional_tools(fs, path, content_enabled, &mut tool_pkg_results);
     if !tool_pkg_results.is_empty() {
         report.add_section(Section {
             name: "Additional tool packages".to_owned(),

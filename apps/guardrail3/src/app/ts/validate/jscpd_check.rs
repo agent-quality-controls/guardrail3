@@ -199,6 +199,21 @@ pub fn check_jscpd(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
             });
         }
     }
+
+    // T-JSCPD-04: format field missing
+    if json.get("format").is_none() {
+        results.push(CheckResult {
+            id: "T-JSCPD-04".to_owned(),
+            severity: Severity::Warn,
+            title: "jscpd `format` field missing".to_owned(),
+            message: "jscpd config should specify `format` to explicitly list scanned languages \
+                     (e.g., `[\"typescript\"]`)."
+                .to_owned(),
+            file: Some(jscpd_path.display().to_string()),
+            line: None,
+            inventory: false,
+        });
+    }
 }
 
 // T60: Content import restriction
