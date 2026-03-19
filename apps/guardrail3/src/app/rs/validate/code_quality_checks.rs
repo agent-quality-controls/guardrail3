@@ -134,7 +134,7 @@ pub fn check_direct_fs_usage(
     results: &mut Vec<CheckResult>,
 ) {
     // Skip the centralized fs module itself
-    if path.ends_with("fs.rs") {
+    if path.ends_with("src/fs.rs") {
         return;
     }
 

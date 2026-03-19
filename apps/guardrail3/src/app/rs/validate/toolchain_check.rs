@@ -9,7 +9,7 @@ pub fn check_toolchain_settings(fs: &dyn FileSystem, path: &Path, results: &mut 
         Err(e) => {
             results.push(CheckResult {
                 id: "R25".to_owned(),
-                severity: Severity::Warn,
+                severity: Severity::Error,
                 title: "rust-toolchain.toml unreadable".to_owned(),
                 message: format!("Failed to read: {e}"),
                 file: Some(path.display().to_string()),
@@ -25,7 +25,7 @@ pub fn check_toolchain_settings(fs: &dyn FileSystem, path: &Path, results: &mut 
         Err(e) => {
             results.push(CheckResult {
                 id: "R25".to_owned(),
-                severity: Severity::Warn,
+                severity: Severity::Error,
                 title: "rust-toolchain.toml parse error".to_owned(),
                 message: format!("Invalid TOML: {e}"),
                 file: Some(path.display().to_string()),
@@ -58,12 +58,24 @@ fn check_toolchain_channel(table: &toml::Value, path: &Path, results: &mut Vec<C
                 inventory: false,
             }.as_inventory());
         }
-        Some(other) => {
+        Some("nightly") => {
             results.push(CheckResult {
                 id: "R25".to_owned(),
-                severity: Severity::Warn,
-                title: "Toolchain channel not stable".to_owned(),
-                message: format!("channel = \"{other}\" but should be \"stable\". Set `channel = \"stable\"` in [toolchain] in rust-toolchain.toml."),
+                severity: Severity::Error,
+                title: "Toolchain channel is nightly".to_owned(),
+                message: "channel = \"nightly\" is not safe for production. Nightly Rust has unstable features that can break between builds. Set `channel = \"stable\"` in [toolchain] in rust-toolchain.toml.".to_owned(),
+                file: Some(path.display().to_string()),
+                line: None,
+                inventory: false,
+            });
+        }
+        Some(other) => {
+            // Pinned version like "1.75.0" — acceptable, just not "stable"
+            results.push(CheckResult {
+                id: "R25".to_owned(),
+                severity: Severity::Info,
+                title: "Toolchain channel pinned".to_owned(),
+                message: format!("channel = \"{other}\" — pinned version is acceptable but consider using \"stable\" for automatic updates. Set `channel = \"stable\"` in [toolchain] in rust-toolchain.toml if preferred."),
                 file: Some(path.display().to_string()),
                 line: None,
                 inventory: false,

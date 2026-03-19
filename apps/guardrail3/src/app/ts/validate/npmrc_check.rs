@@ -54,6 +54,7 @@ pub fn check_npmrc(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
 #[allow(clippy::string_slice)] // reason: parsing known ASCII key=value pairs
 fn parse_npmrc_settings(content: &str) -> NpmrcSettings {
     let mut settings = Vec::new();
+    let content = content.strip_prefix('\u{FEFF}').unwrap_or(content);
     for line in content.lines() {
         let trimmed = line.trim();
         if trimmed.is_empty() || trimmed.starts_with('#') || trimmed.starts_with(';') {
@@ -62,7 +63,12 @@ fn parse_npmrc_settings(content: &str) -> NpmrcSettings {
         if let Some(eq_pos) = trimmed.find('=') {
             #[allow(clippy::string_slice)] // reason: parsing known ASCII key=value pairs
             let key = trimmed[..eq_pos].trim().to_owned();
-            let value = trimmed[eq_pos.saturating_add(1)..].trim().to_owned();
+            let raw_value = trimmed[eq_pos.saturating_add(1)..].trim();
+            let value = raw_value
+                .strip_prefix('"')
+                .and_then(|v| v.strip_suffix('"'))
+                .unwrap_or(raw_value)
+                .to_owned();
             settings.push((key, value));
         }
     }

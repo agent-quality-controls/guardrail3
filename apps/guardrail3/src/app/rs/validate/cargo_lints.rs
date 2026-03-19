@@ -316,12 +316,32 @@ pub fn check_workspace_inheritance(
         }
 
         let Some(content) = fs.read_file(&crate_cargo) else {
+            results.push(CheckResult {
+                id: "R29".to_owned(),
+                severity: Severity::Error,
+                title: "Crate Cargo.toml unreadable".to_owned(),
+                message: format!("{member}: failed to read Cargo.toml for lint inheritance check"),
+                file: Some(crate_cargo.display().to_string()),
+                line: None,
+                inventory: false,
+            });
             continue;
         };
 
         let table: toml::Value = match content.parse() {
             Ok(v) => v,
-            Err(_) => continue,
+            Err(e) => {
+                results.push(CheckResult {
+                    id: "R29".to_owned(),
+                    severity: Severity::Error,
+                    title: "Crate Cargo.toml parse error".to_owned(),
+                    message: format!("{member}: invalid TOML in Cargo.toml: {e}"),
+                    file: Some(crate_cargo.display().to_string()),
+                    line: None,
+                    inventory: false,
+                });
+                continue;
+            }
         };
 
         let workspace_true = table

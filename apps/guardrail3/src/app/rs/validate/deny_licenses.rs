@@ -204,7 +204,9 @@ fn check_unknown_source_policies(
 fn check_allow_registry(sources: &toml::Value, file_path: &Path, results: &mut Vec<CheckResult>) {
     if let Some(allow_reg) = sources.get("allow-registry").and_then(|v| v.as_array()) {
         let registries: Vec<&str> = allow_reg.iter().filter_map(|v| v.as_str()).collect();
-        let has_non_cratesio = registries.iter().any(|r| !r.contains("crates.io"));
+        let has_non_cratesio = registries
+            .iter()
+            .any(|r| *r != "https://github.com/rust-lang/crates.io-index");
         if has_non_cratesio {
             results.push(CheckResult {
                 id: "R16".to_owned(),

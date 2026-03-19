@@ -14,7 +14,7 @@ pub fn check_rustfmt_settings(fs: &dyn FileSystem, path: &Path, results: &mut Ve
         Err(e) => {
             results.push(CheckResult {
                 id: "R22".to_owned(),
-                severity: Severity::Warn,
+                severity: Severity::Error,
                 title: "rustfmt.toml unreadable".to_owned(),
                 message: format!("Failed to read: {e}"),
                 file: Some(path.display().to_string()),
@@ -30,7 +30,7 @@ pub fn check_rustfmt_settings(fs: &dyn FileSystem, path: &Path, results: &mut Ve
         Err(e) => {
             results.push(CheckResult {
                 id: "R22".to_owned(),
-                severity: Severity::Warn,
+                severity: Severity::Error,
                 title: "rustfmt.toml parse error".to_owned(),
                 message: format!("Invalid TOML: {e}"),
                 file: Some(path.display().to_string()),

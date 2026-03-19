@@ -40,9 +40,24 @@ pub fn check_jscpd(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResu
         return;
     };
 
-    let json: serde_json::Value = match serde_json::from_str(&content) {
+    let content = content.strip_prefix('\u{FEFF}').unwrap_or(&content);
+
+    let json: serde_json::Value = match serde_json::from_str(content) {
         Ok(v) => v,
-        Err(_) => return,
+        Err(e) => {
+            results.push(CheckResult {
+                id: "T19".to_owned(),
+                severity: Severity::Error,
+                title: "`.jscpd.json` has invalid JSON".to_owned(),
+                message: format!(
+                    "Failed to parse `.jscpd.json`: {e}. Fix the JSON syntax error so jscpd can read its config."
+                ),
+                file: Some(jscpd_path.display().to_string()),
+                line: None,
+                inventory: false,
+            });
+            return;
+        }
     };
 
     // T20: threshold = 0
