@@ -2,7 +2,12 @@
 //!
 //! Shared walk-up resolution, data model, and rendering for all config file types.
 //! Each tool module implements `CoverageTool` and plugs into this engine.
+//!
+//! Coverage is DIRECTORY-BASED, not file-based or crate-based.
+//! Every directory with source files is a coverage target.
+//! Uncovered directories are collapsed to top-level ancestors.
 
+use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
 use serde::Serialize;
@@ -24,28 +29,18 @@ pub trait CoverageTool {
     /// Extract all instances of this config file from the crawl result.
     fn config_files<'a>(&self, crawl: &'a CrawlResult) -> &'a [PathBuf];
 
-    /// Extract all targets that need coverage (crates, apps, packages).
-    fn targets(&self, crawl: &CrawlResult, root: &Path) -> Vec<Target>;
+    /// All directories that contain source files this tool would check.
+    fn source_dirs<'a>(&self, crawl: &'a CrawlResult) -> &'a BTreeSet<PathBuf>;
 
-    /// Parse tool-specific details from a config file (e.g., ban count, rule count).
+    /// Parse tool-specific details from a config file.
     fn parse_details(&self, config_path: &Path) -> serde_json::Value;
 
-    /// Whether this tool walks up parent directories (true for most, false for jscpd/gitleaks).
+    /// Whether this tool walks up parent directories.
     fn walks_up(&self) -> bool;
 }
 
-/// A target that needs coverage — a crate, app, or package directory.
-pub struct Target {
-    pub name: String,
-    pub path: PathBuf,
-    pub structure_file: PathBuf,
-    pub structure_kind: &'static str,
-    /// If this target is a member of a group (workspace), the group's path.
-    pub group: Option<PathBuf>,
-}
-
 // ---------------------------------------------------------------------------
-// Output data model (serialized to JSON)
+// Output data model
 // ---------------------------------------------------------------------------
 
 #[derive(Serialize)]
@@ -53,8 +48,10 @@ pub struct CoverageMap {
     pub tool: String,
     pub resolution: String,
     pub project: String,
+    /// Every config file found, with details and how many dirs it covers.
     pub configs: Vec<ConfigInstance>,
-    pub targets: Vec<TargetCoverage>,
+    /// Top-level uncovered directories (collapsed — children implied uncovered).
+    pub uncovered: Vec<String>,
     pub summary: Summary,
 }
 
@@ -62,25 +59,14 @@ pub struct CoverageMap {
 pub struct ConfigInstance {
     pub path: String,
     pub details: serde_json::Value,
-    pub covers: Vec<String>,
-}
-
-#[derive(Serialize)]
-pub struct TargetCoverage {
-    pub kind: String,
-    pub name: String,
-    pub path: String,
-    pub structure_file: String,
-    pub covered_by: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub group: Option<String>,
+    pub covers_dirs: u32,
 }
 
 #[derive(Serialize)]
 pub struct Summary {
-    pub total_targets: u32,
-    pub covered: u32,
-    pub uncovered: u32,
+    pub total_dirs: u32,
+    pub covered_dirs: u32,
+    pub uncovered_dirs: u32,
 }
 
 // ---------------------------------------------------------------------------
@@ -88,75 +74,60 @@ pub struct Summary {
 // ---------------------------------------------------------------------------
 
 /// Build a coverage map for any tool.
+///
+/// 1. Gets all source directories from crawler
+/// 2. For each, resolves which config covers it (walk-up or fixed)
+/// 3. Collapses uncovered directories to top-level ancestors
 pub fn build(tool: &dyn CoverageTool, root: &Path, crawl: &CrawlResult) -> CoverageMap {
     let config_files = tool.config_files(crawl);
-    let targets = tool.targets(crawl, root);
+    let source_dirs = tool.source_dirs(crawl);
 
-    // Resolve coverage for each target
-    let mut target_coverages = Vec::new();
-    for target in &targets {
-        let covered_by = if tool.walks_up() {
-            walk_up_resolve(&root.join(&target.path), root, config_files).map(|p| rel_str(root, &p))
+    let mut covered_count: u32 = 0;
+    let mut uncovered_dirs: Vec<PathBuf> = Vec::new();
+    let mut config_cover_counts: std::collections::BTreeMap<String, u32> =
+        std::collections::BTreeMap::new();
+
+    for dir in source_dirs {
+        let resolved = if tool.walks_up() {
+            walk_up_resolve(dir, root, config_files)
+        } else if config_files
+            .iter()
+            .any(|cf| cf.parent() == Some(dir.as_path()))
+        {
+            Some(dir.clone())
         } else {
-            // Non-walk-up: check if config exists at target's own directory
-            if config_files
-                .iter()
-                .any(|cf| cf.parent() == Some(&root.join(&target.path)))
-            {
-                Some(rel_str(root, &root.join(&target.path)))
-            } else {
-                None
-            }
+            None
         };
 
-        // For walk-up configs: format as "dir/config_filename"
-        let covered_by_display = covered_by.as_ref().map(|dir| {
-            // Find the actual config file at that directory
-            let dir_abs = root.join(dir);
-            config_files
+        if let Some(config_dir) = resolved {
+            covered_count = covered_count.saturating_add(1);
+            if let Some(cf) = config_files
                 .iter()
-                .find(|cf| cf.parent() == Some(dir_abs.as_path()))
-                .map_or_else(|| format!("{dir}/<config>"), |cf| rel_str(root, cf))
-        });
-
-        target_coverages.push(TargetCoverage {
-            kind: target.structure_kind.to_owned(),
-            name: target.name.clone(),
-            path: target.path.display().to_string(),
-            structure_file: target.structure_file.display().to_string(),
-            covered_by: covered_by_display,
-            group: target.group.as_ref().map(|g| g.display().to_string()),
-        });
+                .find(|cf| cf.parent() == Some(config_dir.as_path()))
+            {
+                let count = config_cover_counts.entry(rel_str(root, cf)).or_insert(0);
+                *count = count.saturating_add(1);
+            }
+        } else {
+            uncovered_dirs.push(dir.clone());
+        }
     }
 
-    // Build config instances with coverage info
-    let mut config_instances = Vec::new();
+    let collapsed_uncovered = collapse_to_ancestors(&uncovered_dirs);
+
+    let mut configs = Vec::new();
     for cf in config_files {
         let cf_rel = rel_str(root, cf);
         let details = tool.parse_details(cf);
-
-        let covers: Vec<String> = target_coverages
-            .iter()
-            .filter(|t| t.covered_by.as_deref() == Some(cf_rel.as_str()))
-            .map(|t| t.path.clone())
-            .collect();
-
-        config_instances.push(ConfigInstance {
+        let covers = config_cover_counts.get(&cf_rel).copied().unwrap_or(0);
+        configs.push(ConfigInstance {
             path: cf_rel,
             details,
-            covers,
+            covers_dirs: covers,
         });
     }
 
-    // Summary
-    let total = u32::try_from(target_coverages.len()).unwrap_or(0);
-    let covered = u32::try_from(
-        target_coverages
-            .iter()
-            .filter(|t| t.covered_by.is_some())
-            .count(),
-    )
-    .unwrap_or(0);
+    let total = u32::try_from(source_dirs.len()).unwrap_or(0);
 
     CoverageMap {
         tool: tool.name().to_owned(),
@@ -166,22 +137,89 @@ pub fn build(tool: &dyn CoverageTool, root: &Path, crawl: &CrawlResult) -> Cover
             .unwrap_or_else(|_| root.to_path_buf())
             .display()
             .to_string(),
-        configs: config_instances,
-        targets: target_coverages,
+        configs,
+        uncovered: collapsed_uncovered
+            .iter()
+            .map(|d| rel_str(root, d))
+            .collect(),
         summary: Summary {
-            total_targets: total,
-            covered,
-            uncovered: total.saturating_sub(covered),
+            total_dirs: total,
+            covered_dirs: covered_count,
+            uncovered_dirs: total.saturating_sub(covered_count),
         },
     }
+}
+
+/// Collapse uncovered directories to their highest common ancestors.
+///
+/// Two collapses:
+/// 1. If a parent is in the list, don't list its children (direct ancestor collapse)
+/// 2. If ALL siblings under a parent are uncovered, collapse to the parent
+///    (even if the parent itself has no source files)
+fn collapse_to_ancestors(dirs: &[PathBuf]) -> Vec<PathBuf> {
+    if dirs.is_empty() {
+        return Vec::new();
+    }
+
+    // Repeatedly collapse: if a parent has 2+ children in the set, replace with parent.
+    let mut current: BTreeSet<PathBuf> = dirs.iter().cloned().collect();
+    loop {
+        let mut changed = false;
+        let mut new_set = current.clone();
+
+        // Group by parent
+        let groups = group_by_parent(&current);
+
+        // Collapse parents with 2+ children
+        for (parent, children) in &groups {
+            if children.len() >= 2 {
+                for child in children {
+                    let _removed = new_set.remove(child);
+                }
+                let _inserted = new_set.insert(parent.clone());
+                changed = true;
+            }
+        }
+
+        current = new_set;
+        if !changed {
+            break;
+        }
+    }
+
+    // Remove any dir whose ancestor is already in the set
+    let mut result: Vec<PathBuf> = Vec::new();
+    for dir in &current {
+        let has_ancestor = result.iter().any(|ancestor| dir.starts_with(ancestor));
+        if !has_ancestor {
+            result.push(dir.clone());
+        }
+    }
+
+    result
+}
+
+type DirGroups = std::collections::BTreeMap<PathBuf, Vec<PathBuf>>;
+
+/// Group paths by their parent directory.
+fn group_by_parent(dirs: &BTreeSet<PathBuf>) -> DirGroups {
+    let mut groups = DirGroups::new();
+    for dir in dirs {
+        if let Some(parent) = dir.parent() {
+            groups
+                .entry(parent.to_path_buf())
+                .or_default()
+                .push(dir.clone());
+        }
+    }
+    groups
 }
 
 // ---------------------------------------------------------------------------
 // Walk-up resolution
 // ---------------------------------------------------------------------------
 
-/// Simulate walk-up config resolution: from `start_dir`, walk up parent
-/// directories checking if any config file exists at each level.
+/// Simulate walk-up: from `start_dir`, walk up checking for config files.
 /// Returns the DIRECTORY where the nearest config was found.
 fn walk_up_resolve(
     start_dir: &Path,
@@ -221,50 +259,28 @@ pub fn print_tree(map: &CoverageMap) {
     println!("{} coverage", map.tool);
     println!("({})\n", map.resolution);
 
-    // Group targets by their group (workspace/scope) or show ungrouped
-    let mut current_group: Option<&str> = None;
-
-    for target in &map.targets {
-        let group_str = target.group.as_deref();
-
-        // Print group header when group changes
-        if group_str != current_group {
-            if let Some(g) = group_str {
-                // Find config for this group
-                let group_config = map.configs.iter().find(|c| {
-                    c.path
-                        .strip_suffix(&c.path.rsplit('/').next().unwrap_or(&c.path))
-                        .unwrap_or("")
-                        .trim_end_matches('/')
-                        == g
-                });
-                println!("{g}/");
-                if let Some(cfg) = group_config {
-                    println!(
-                        "  {} {}",
-                        cfg.path.rsplit('/').next().unwrap_or(&cfg.path),
-                        format_details(&cfg.details)
-                    );
-                }
-            }
-            current_group = group_str;
-        }
-
-        let indent = if target.group.is_some() { "    " } else { "" };
-        let covered_str = match &target.covered_by {
-            Some(c) => format!("covered by {c}"),
-            None => "⚠ UNCOVERED".to_owned(),
-        };
-
+    println!("Configs found:");
+    for cfg in &map.configs {
         println!(
-            "{indent}{:<40} [{}] {} — {covered_str}",
-            target.path, target.kind, target.name
+            "  {:<50} {} (covers {} dirs)",
+            cfg.path,
+            format_details(&cfg.details),
+            cfg.covers_dirs
         );
     }
 
+    if map.uncovered.is_empty() {
+        println!("\nAll directories covered.");
+    } else {
+        println!("\n⚠ Uncovered directories:");
+        for dir in &map.uncovered {
+            println!("  {dir}/");
+        }
+    }
+
     println!(
-        "\nSummary: {}/{} targets covered, {} uncovered",
-        map.summary.covered, map.summary.total_targets, map.summary.uncovered
+        "\nSummary: {}/{} dirs covered, {} uncovered",
+        map.summary.covered_dirs, map.summary.total_dirs, map.summary.uncovered_dirs
     );
 }
 
