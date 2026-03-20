@@ -1,0 +1,9 @@
+[workspace]
+members = [
+    "crates/domain/types",
+    "crates/app/core",
+    "crates/ports/outbound/traits",
+    "crates/adapters/inbound/cli",
+    "crates/adapters/outbound/fs",
+]
+resolver = "2"

@@ -1,0 +1,1 @@
+// Sanity CMS adapter

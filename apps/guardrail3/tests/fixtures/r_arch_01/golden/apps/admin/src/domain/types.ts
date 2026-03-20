@@ -1,0 +1,1 @@
+// admin TS domain types

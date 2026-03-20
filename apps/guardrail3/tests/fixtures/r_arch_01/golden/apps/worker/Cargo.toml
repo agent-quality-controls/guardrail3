@@ -1,0 +1,10 @@
+[workspace]
+members = [
+    "crates/domain/jobs",
+    "crates/app/processor",
+    "crates/ports/outbound/queue",
+    "crates/adapters/inbound/poller",
+    "crates/adapters/outbound/sqs",
+    "crates/adapters/outbound/db",
+]
+resolver = "2"
