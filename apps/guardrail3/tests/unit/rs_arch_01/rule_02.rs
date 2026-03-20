@@ -1,9 +1,8 @@
 use super::helpers::{
-    arch_01_errors, copy_golden, remove_dir, remove_file, run_check, write_file,
+    arch_errors, assert_inner_hex, assert_no_packages, assert_no_ts_apps, assert_per_app,
+    copy_fixture, remove_dir, remove_file, run_check, write_file, INNER_HEX, RUST_APPS,
 };
-
-const RUST_APPS: &[&str] = &["devctl", "backend", "worker"];
-const INNER_HEX: &str = "apps/backend/crates/adapters/inbound/mcp/crates";
+use guardrail3::domain::report::CheckResult;
 
 /// All 4 crates/ locations in the golden fixture.
 const ALL_CRATES_DIRS: &[&str] = &[
@@ -26,54 +25,6 @@ fn rule2_errors<'a>(errors: &'a [&CheckResult]) -> Vec<&'a &'a CheckResult> {
         .collect()
 }
 
-use guardrail3::domain::report::CheckResult;
-
-// ============================================================================
-// Shared assertion helpers
-// ============================================================================
-
-/// Assert that each Rust app (devctl, backend, worker) produced at least one error.
-/// For tests that break all 4 locations, this ensures per-location attribution.
-fn assert_per_app(errors: &[&CheckResult]) {
-    for app in RUST_APPS {
-        assert!(
-            errors.iter().any(|e| e.title.contains(app)),
-            "expected error for app `{app}`, got: {errors:#?}"
-        );
-    }
-}
-
-/// Assert that the inner hex (mcp/crates) produced at least one error.
-fn assert_inner_hex(errors: &[&CheckResult]) {
-    assert!(
-        errors
-            .iter()
-            .any(|e| e.file.as_deref().unwrap_or("").contains("mcp/crates")),
-        "expected at least one error from inner hex (mcp/crates), got: {errors:#?}"
-    );
-}
-
-/// Assert no errors mention packages/ items (shared-types, ui-kit).
-fn assert_no_packages(errors: &[&CheckResult]) {
-    assert!(
-        !errors.iter().any(|e| {
-            let t = &e.title;
-            t.contains("shared-types") || t.contains("ui-kit")
-        }),
-        "packages should not be flagged, got: {errors:#?}"
-    );
-}
-
-/// Assert no errors mention TS apps (admin, landing).
-fn assert_no_ts_apps(errors: &[&CheckResult]) {
-    assert!(
-        !errors
-            .iter()
-            .any(|e| e.title.contains("admin") || e.title.contains("landing")),
-        "TS apps should not be flagged, got: {errors:#?}"
-    );
-}
-
 /// Assert every error has a file field containing "crates".
 fn assert_file_field_crates(errors: &[&CheckResult]) {
     for err in errors {
@@ -91,7 +42,7 @@ fn assert_file_field_crates(errors: &[&CheckResult]) {
 
 #[test]
 fn missing_domain_everywhere() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for dir in ALL_CRATES_DIRS {
         remove_dir(tmp.path(), &format!("{dir}/domain"));
     }
@@ -99,7 +50,7 @@ fn missing_domain_everywhere() {
     remove_dir(tmp.path(), "apps/admin/src/modules/domain");
 
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_eq!(
         errors.len(),
         4,
@@ -127,12 +78,12 @@ fn missing_domain_everywhere() {
 
 #[test]
 fn missing_app_everywhere() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for dir in ALL_CRATES_DIRS {
         remove_dir(tmp.path(), &format!("{dir}/app"));
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_eq!(
         errors.len(),
         4,
@@ -155,12 +106,12 @@ fn missing_app_everywhere() {
 
 #[test]
 fn missing_ports_everywhere() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for dir in ALL_CRATES_DIRS {
         remove_dir(tmp.path(), &format!("{dir}/ports"));
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_eq!(
         errors.len(),
         4,
@@ -183,7 +134,7 @@ fn missing_ports_everywhere() {
 
 #[test]
 fn missing_adapters_everywhere() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // Removing adapters/ from outer backend DESTROYS the inner hex path
     // (it's under backend/crates/adapters/inbound/mcp/crates/).
     // So we only get 3 errors (one per outer app), not 4.
@@ -191,7 +142,7 @@ fn missing_adapters_everywhere() {
         remove_dir(tmp.path(), &format!("apps/{app}/crates/adapters"));
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_eq!(
         errors.len(),
         3,
@@ -214,10 +165,10 @@ fn missing_adapters_everywhere() {
 
 #[test]
 fn missing_adapters_inner_hex_only() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     remove_dir(tmp.path(), &format!("{INNER_HEX}/adapters"));
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_eq!(
         errors.len(),
         1,
@@ -240,7 +191,7 @@ fn missing_adapters_inner_hex_only() {
 
 #[test]
 fn missing_two_dirs_everywhere() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for dir in ALL_CRATES_DIRS {
         remove_dir(tmp.path(), &format!("{dir}/domain"));
         remove_dir(tmp.path(), &format!("{dir}/ports"));
@@ -250,7 +201,7 @@ fn missing_two_dirs_everywhere() {
     remove_dir(tmp.path(), "apps/admin/src/modules/ports");
 
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_eq!(
         errors.len(),
         8,
@@ -266,7 +217,7 @@ fn missing_two_dirs_everywhere() {
 
 #[test]
 fn missing_all_four_with_gitkeep() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // Strategy: remove all 4 from the 3 outer apps. For devctl and worker, add .gitkeep.
     // For backend, removing adapters/ kills the inner hex path. But we want to test
     // the inner hex too. So handle backend specially:
@@ -296,7 +247,7 @@ fn missing_all_four_with_gitkeep() {
     write_file(tmp.path(), &format!("{INNER_HEX}/.gitkeep"), "");
 
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     // Rule 2 errors:
     // - devctl: 4 missing (adapters, app, domain, ports)
     // - worker: 4 missing
@@ -350,7 +301,7 @@ fn missing_all_four_with_gitkeep() {
 
 #[test]
 fn unexpected_dir_everywhere() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for dir in ALL_CRATES_DIRS {
         std::fs::create_dir_all(tmp.path().join(format!("{dir}/utils"))).expect("mkdir");
     }
@@ -358,7 +309,7 @@ fn unexpected_dir_everywhere() {
     std::fs::create_dir_all(tmp.path().join("apps/admin/src/modules/utils")).expect("mkdir");
 
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_eq!(
         errors.len(),
         4,
@@ -381,7 +332,7 @@ fn unexpected_dir_everywhere() {
 
 #[test]
 fn unexpected_dir_wrong_case() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // On case-insensitive FS (macOS), Domain/ and domain/ are the same path.
     // Detect this: try creating Domain/ and see if it's distinct from domain/.
     let test_path = tmp.path().join(format!("{}/Domain", ALL_CRATES_DIRS[0]));
@@ -408,7 +359,7 @@ fn unexpected_dir_wrong_case() {
             std::fs::create_dir_all(tmp.path().join(format!("{dir}/domaine"))).expect("mkdir");
         }
         let results = run_check(tmp.path());
-        let errors = arch_01_errors(&results);
+        let errors = arch_errors(&results);
         assert_eq!(
             errors.len(),
             4,
@@ -432,7 +383,7 @@ fn unexpected_dir_wrong_case() {
             std::fs::create_dir_all(tmp.path().join(format!("{dir}/Domain"))).expect("mkdir");
         }
         let results = run_check(tmp.path());
-        let errors = arch_01_errors(&results);
+        let errors = arch_errors(&results);
         assert_eq!(
             errors.len(),
             4,
@@ -453,21 +404,21 @@ fn unexpected_dir_wrong_case() {
     }
     // TS negative assertions (both branches)
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_no_ts_apps(&errors);
     assert_no_packages(&errors);
 }
 
 #[test]
 fn multiple_unexpected_dirs() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for dir in ALL_CRATES_DIRS {
         std::fs::create_dir_all(tmp.path().join(format!("{dir}/utils"))).expect("mkdir");
         std::fs::create_dir_all(tmp.path().join(format!("{dir}/helpers"))).expect("mkdir");
         std::fs::create_dir_all(tmp.path().join(format!("{dir}/config"))).expect("mkdir");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_eq!(
         errors.len(),
         12,
@@ -497,13 +448,13 @@ fn multiple_unexpected_dirs() {
 
 #[test]
 fn unexpected_dir_named_inbound() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // "inbound" is valid deeper in the tree (adapters/inbound) but NOT at crates/ root
     for dir in ALL_CRATES_DIRS {
         std::fs::create_dir_all(tmp.path().join(format!("{dir}/inbound"))).expect("mkdir");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_eq!(
         errors.len(),
         4,
@@ -526,12 +477,12 @@ fn unexpected_dir_named_inbound() {
 
 #[test]
 fn hidden_dir_unexpected() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for dir in ALL_CRATES_DIRS {
         std::fs::create_dir_all(tmp.path().join(format!("{dir}/.hidden"))).expect("mkdir");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_eq!(
         errors.len(),
         4,
@@ -558,7 +509,7 @@ fn hidden_dir_unexpected() {
 
 #[test]
 fn loose_rs_file_everywhere() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for dir in ALL_CRATES_DIRS {
         write_file(tmp.path(), &format!("{dir}/mod.rs"), "// stray");
     }
@@ -567,7 +518,7 @@ fn loose_rs_file_everywhere() {
     write_file(tmp.path(), "apps/landing/src/mod.rs", "// stray");
 
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_eq!(
         errors.len(),
         4,
@@ -590,7 +541,7 @@ fn loose_rs_file_everywhere() {
 
 #[test]
 fn loose_cargo_toml_in_crates() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for dir in ALL_CRATES_DIRS {
         write_file(
             tmp.path(),
@@ -599,7 +550,7 @@ fn loose_cargo_toml_in_crates() {
         );
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_eq!(
         errors.len(),
         4,
@@ -622,12 +573,12 @@ fn loose_cargo_toml_in_crates() {
 
 #[test]
 fn loose_gitignore_not_gitkeep() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for dir in ALL_CRATES_DIRS {
         write_file(tmp.path(), &format!("{dir}/.gitignore"), "target/");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_eq!(
         errors.len(),
         4,
@@ -650,14 +601,14 @@ fn loose_gitignore_not_gitkeep() {
 
 #[test]
 fn multiple_loose_files() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for dir in ALL_CRATES_DIRS {
         write_file(tmp.path(), &format!("{dir}/mod.rs"), "// stray");
         write_file(tmp.path(), &format!("{dir}/lib.rs"), "// stray");
         write_file(tmp.path(), &format!("{dir}/README.md"), "# readme");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     // check_loose_files produces 1 error per directory listing ALL bad files
     assert_eq!(
         errors.len(),
@@ -692,13 +643,13 @@ fn multiple_loose_files() {
 
 #[test]
 fn gitkeep_allowed() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // Add .gitkeep to all 4 crates/ dirs alongside existing content
     for dir in ALL_CRATES_DIRS {
         write_file(tmp.path(), &format!("{dir}/.gitkeep"), "");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_eq!(
         errors.len(),
         0,
@@ -709,13 +660,13 @@ fn gitkeep_allowed() {
 
 #[test]
 fn gitkeep_alongside_loose_files() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for dir in ALL_CRATES_DIRS {
         write_file(tmp.path(), &format!("{dir}/.gitkeep"), "");
         write_file(tmp.path(), &format!("{dir}/mod.rs"), "// stray");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_eq!(
         errors.len(),
         4,
@@ -752,13 +703,13 @@ fn gitkeep_alongside_loose_files() {
 
 #[test]
 fn missing_dir_plus_unexpected_dir() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for dir in ALL_CRATES_DIRS {
         remove_dir(tmp.path(), &format!("{dir}/domain"));
         std::fs::create_dir_all(tmp.path().join(format!("{dir}/utils"))).expect("mkdir");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_eq!(
         errors.len(),
         8,
@@ -792,13 +743,13 @@ fn missing_dir_plus_unexpected_dir() {
 
 #[test]
 fn missing_dir_plus_loose_file() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for dir in ALL_CRATES_DIRS {
         remove_dir(tmp.path(), &format!("{dir}/ports"));
         write_file(tmp.path(), &format!("{dir}/mod.rs"), "// stray");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_eq!(
         errors.len(),
         8,
@@ -832,14 +783,14 @@ fn missing_dir_plus_loose_file() {
 
 #[test]
 fn all_three_violations() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for dir in ALL_CRATES_DIRS {
         remove_dir(tmp.path(), &format!("{dir}/domain"));
         std::fs::create_dir_all(tmp.path().join(format!("{dir}/utils"))).expect("mkdir");
         write_file(tmp.path(), &format!("{dir}/mod.rs"), "// stray");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_eq!(
         errors.len(),
         12,
@@ -882,7 +833,7 @@ fn all_three_violations() {
 
 #[test]
 fn different_breakage_per_app() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // devctl: missing domain/
     remove_dir(tmp.path(), "apps/devctl/crates/domain");
     // worker: unexpected utils/
@@ -895,7 +846,7 @@ fn different_breakage_per_app() {
     remove_dir(tmp.path(), "apps/admin/src/modules/domain");
 
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_eq!(
         errors.len(),
         4,
@@ -947,14 +898,14 @@ fn different_breakage_per_app() {
 
 #[test]
 fn required_dir_replaced_with_file() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for dir in ALL_CRATES_DIRS {
         remove_dir(tmp.path(), &format!("{dir}/domain"));
         // Create a FILE named "domain" (not a directory)
         write_file(tmp.path(), &format!("{dir}/domain"), "not a directory");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     // list_dir_names skips files, so "domain" (file) is invisible.
     // check_02: missing domain/ = 4 errors. check_loose_files: "domain" file = 4 errors.
     let missing: Vec<_> = errors
@@ -1004,7 +955,7 @@ fn required_dir_replaced_with_file() {
 
 #[test]
 fn required_dir_replaced_with_symlink() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for dir in ALL_CRATES_DIRS {
         remove_dir(tmp.path(), &format!("{dir}/domain"));
         // Create a symlink named "domain" -> app/ (DirEntry::file_type() does NOT follow symlinks)
@@ -1015,7 +966,7 @@ fn required_dir_replaced_with_symlink() {
         .expect("symlink");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     // DirEntry::file_type() returns the symlink type, not the target type.
     // On Unix, symlink to dir returns symlink type (not dir). So domain (symlink) won't
     // appear in list_dir_names. check_loose_files checks !ft.is_dir() which is true for
@@ -1054,14 +1005,14 @@ fn required_dir_replaced_with_symlink() {
 
 #[test]
 fn empty_required_dir_still_present() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // Empty out domain/ contents in all 4 (but dir still exists)
     for dir in ALL_CRATES_DIRS {
         remove_dir(tmp.path(), &format!("{dir}/domain"));
         std::fs::create_dir_all(tmp.path().join(format!("{dir}/domain"))).expect("mkdir");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     // Rule 2 only checks dir exists in list_dir_names — dir is present, so no Rule 2 error.
     let rule2_errs: Vec<_> = errors
         .iter()
@@ -1085,7 +1036,7 @@ fn empty_required_dir_still_present() {
 
 #[test]
 fn ts_app_with_cargo_toml_gets_checked() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // Add Cargo.toml to admin (TS app). Now it becomes a "Rust app" for the check.
     write_file(
         tmp.path(),
@@ -1094,7 +1045,7 @@ fn ts_app_with_cargo_toml_gets_checked() {
     );
     // admin has src/ (triggers check_12 src/ ban) and no crates/ (triggers Rule 1)
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let admin_errs: Vec<_> = errors.iter().filter(|e| e.title.contains("admin")).collect();
     assert_eq!(
         admin_errs.len(),
@@ -1117,13 +1068,13 @@ fn ts_app_with_cargo_toml_gets_checked() {
 
 #[test]
 fn app_without_cargo_toml_skipped() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // Remove Cargo.toml from devctl. Break its crates/ structure.
     remove_file(tmp.path(), "apps/devctl/Cargo.toml");
     // Add an unexpected dir to make sure no errors appear if we DID check
     std::fs::create_dir_all(tmp.path().join("apps/devctl/crates/utils")).expect("mkdir");
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert!(
         !errors.iter().any(|e| e.title.contains("devctl")),
         "devctl without Cargo.toml should not be checked, got devctl errors in: {errors:#?}"
@@ -1137,10 +1088,10 @@ fn app_without_cargo_toml_skipped() {
 
 #[test]
 fn loose_file_inner_hex_only() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     write_file(tmp.path(), &format!("{INNER_HEX}/mod.rs"), "// stray");
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_eq!(
         errors.len(),
         1,
@@ -1180,10 +1131,10 @@ fn loose_file_inner_hex_only() {
 
 #[test]
 fn unexpected_dir_inner_hex_only() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     std::fs::create_dir_all(tmp.path().join(format!("{INNER_HEX}/utils"))).expect("mkdir");
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_eq!(
         errors.len(),
         1,
@@ -1223,7 +1174,7 @@ fn unexpected_dir_inner_hex_only() {
 
 #[test]
 fn near_miss_dir_names() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     let near_misses = ["domains", "adapter", "port", "application"];
     for dir in ALL_CRATES_DIRS {
         for name in &near_misses {
@@ -1231,7 +1182,7 @@ fn near_miss_dir_names() {
         }
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let unexpected: Vec<_> = errors
         .iter()
         .filter(|e| e.title.contains("unexpected directory"))
@@ -1272,7 +1223,7 @@ fn near_miss_dir_names() {
 
 #[test]
 fn file_coexists_with_same_named_dir() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // On most filesystems, a file and dir cannot share the same name.
     // Instead, create files whose names echo the required dir names with a suffix,
     // alongside files with completely unrelated names. The key behavior under test:
@@ -1284,7 +1235,7 @@ fn file_coexists_with_same_named_dir() {
         write_file(tmp.path(), &format!("{dir}/ports.rs"), "not a dir");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
 
     // Should have 4 loose-file errors (1 per location, each listing all 4 files)
     let loose: Vec<_> = errors
@@ -1326,7 +1277,7 @@ fn file_coexists_with_same_named_dir() {
 
 #[test]
 fn unicode_lookalike_dir_name() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // Create dir named "d\u{200B}omain" (zero-width space) in all 4 locations.
     // This looks like "domain" but is a different string. The real domain/ still exists,
     // so only 4 unexpected-dir errors should fire (no missing-dir errors).
@@ -1335,7 +1286,7 @@ fn unicode_lookalike_dir_name() {
         std::fs::create_dir_all(tmp.path().join(format!("{dir}/{lookalike}"))).expect("mkdir");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let unexpected: Vec<_> = errors
         .iter()
         .filter(|e| e.title.contains("unexpected directory"))
@@ -1365,7 +1316,7 @@ fn unicode_lookalike_dir_name() {
 
 #[test]
 fn gitkeep_as_directory() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // Create .gitkeep as a DIRECTORY (mkdir .gitkeep) in all 4 locations.
     // The file .gitkeep exemption only applies to files, not dirs.
     // list_dir_names will include ".gitkeep" as a dir name, which is unexpected.
@@ -1373,7 +1324,7 @@ fn gitkeep_as_directory() {
         std::fs::create_dir_all(tmp.path().join(format!("{dir}/.gitkeep"))).expect("mkdir");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let unexpected: Vec<_> = errors
         .iter()
         .filter(|e| e.title.contains("unexpected directory") && e.title.contains(".gitkeep"))
@@ -1393,7 +1344,7 @@ fn gitkeep_as_directory() {
 
 #[test]
 fn packages_not_checked() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // Add broken structure to packages/shared-types: create crates/ with unexpected dirs.
     // packages/ is not under apps/, so check_hex_arch_structure should ignore it entirely.
     std::fs::create_dir_all(tmp.path().join("packages/shared-types/crates/utils")).expect("mkdir");
@@ -1402,7 +1353,7 @@ fn packages_not_checked() {
     std::fs::create_dir_all(tmp.path().join("packages/ui-kit/crates/nonsense")).expect("mkdir");
 
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     // Assert 0 R-ARCH-01 errors from packages
     assert!(
         !errors.iter().any(|e| {
@@ -1423,7 +1374,7 @@ fn packages_not_checked() {
 
 #[test]
 fn new_app_gets_checked() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // Create apps/scheduler/ with Cargo.toml and a broken crates/ structure
     write_file(
         tmp.path(),
@@ -1439,7 +1390,7 @@ fn new_app_gets_checked() {
     );
 
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
 
     // scheduler should have errors for missing adapters/, app/, ports/
     let sched_errs: Vec<_> = errors
@@ -1478,7 +1429,7 @@ fn new_app_gets_checked() {
 
 #[test]
 fn permission_denied_crates() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     let crates_path = tmp.path().join("apps/devctl/crates");
 
     // chmod 000 on devctl's crates/ — list_dir returns empty.
@@ -1494,7 +1445,7 @@ fn permission_denied_crates() {
     let perms_restore = std::fs::Permissions::from_mode(0o755);
     std::fs::set_permissions(&crates_path, perms_restore).expect("chmod 755");
 
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
 
     // devctl crates/ is unreadable: list_dir on crates/ returns empty,
     // so check_01 fires "missing crates/ directory" (1 error) and returns early.
@@ -1529,7 +1480,7 @@ fn permission_denied_crates() {
 
 #[test]
 fn maximally_complex_single_location() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // In devctl/crates/:
     // - adapters/ real (keep)
     // - app/ removed, replaced with symlink to /dev/null (dangling/non-dir target)
@@ -1562,7 +1513,7 @@ fn maximally_complex_single_location() {
     write_file(tmp.path(), &format!("{devctl_crates}/.gitkeep"), "");
 
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
 
     // Only devctl should have errors
     let devctl_errs: Vec<_> = errors
@@ -1671,13 +1622,13 @@ fn maximally_complex_single_location() {
 #[test]
 fn renamed_required_dir_to_near_miss() {
     // Agent renames domain/ to domains/ — missing + unexpected with related names
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for dir in ALL_CRATES_DIRS {
         remove_dir(tmp.path(), &format!("{dir}/domain"));
         std::fs::create_dir_all(tmp.path().join(format!("{dir}/domains"))).expect("mkdir");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
     // Each location: missing domain/ + unexpected domains/ = 2. 4 locations = 8
     assert_eq!(r2.len(), 8, "expected 8 rule2 errors, got: {r2:#?}");
@@ -1695,12 +1646,12 @@ fn renamed_required_dir_to_near_miss() {
 #[test]
 fn inner_hex_all_three_violations_outer_clean() {
     // Only inner hex is broken (all 3 violation types), outer apps clean
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     remove_dir(tmp.path(), &format!("{INNER_HEX}/domain"));
     std::fs::create_dir_all(tmp.path().join(format!("{INNER_HEX}/utils"))).expect("mkdir");
     write_file(tmp.path(), &format!("{INNER_HEX}/mod.rs"), "// stray");
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
     assert_eq!(r2.len(), 3, "expected 3 inner hex errors, got: {r2:#?}");
     // All from inner hex
@@ -1722,14 +1673,14 @@ fn inner_hex_all_three_violations_outer_clean() {
 #[test]
 fn nested_unexpected_dir_tree() {
     // Deep tree inside unexpected dir — only top-level flagged, no recursion into garbage
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for dir in ALL_CRATES_DIRS {
         let deep = format!("{dir}/utils/helpers/deep");
         std::fs::create_dir_all(tmp.path().join(&deep)).expect("mkdir");
         write_file(tmp.path(), &format!("{deep}/lib.rs"), "// buried");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
     assert_eq!(r2.len(), 4, "expected 4 unexpected dir errors, got: {r2:#?}");
     for err in &r2 {
@@ -1749,10 +1700,10 @@ fn nested_unexpected_dir_tree() {
 #[test]
 fn inner_hex_error_label_prefix_is_nested() {
     // Verify inner hex error title contains the FULL nested path, not truncated
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     remove_dir(tmp.path(), &format!("{INNER_HEX}/domain"));
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
     assert_eq!(r2.len(), 1, "expected 1 error, got: {r2:#?}");
     let title = &r2[0].title;
@@ -1773,14 +1724,14 @@ fn inner_hex_error_label_prefix_is_nested() {
 #[test]
 fn idempotent_results() {
     // Running the check twice on the same broken fixture produces identical results
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for dir in ALL_CRATES_DIRS {
         remove_dir(tmp.path(), &format!("{dir}/domain"));
     }
     let results1 = run_check(tmp.path());
     let results2 = run_check(tmp.path());
-    let errors1 = arch_01_errors(&results1);
-    let errors2 = arch_01_errors(&results2);
+    let errors1 = arch_errors(&results1);
+    let errors2 = arch_errors(&results2);
     assert_eq!(errors1.len(), errors2.len(),
         "two runs should produce identical error counts: {} vs {}", errors1.len(), errors2.len());
     // Verify same titles (order may differ, so sort)

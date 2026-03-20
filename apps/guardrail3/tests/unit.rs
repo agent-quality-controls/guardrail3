@@ -69,5 +69,9 @@ mod ts_comment_checks_test;
 mod ts_source_scan_test;
 #[path = "unit/ts_test_checks_test.rs"]
 mod ts_test_checks_test;
+#[path = "unit/test_support/mod.rs"]
+mod test_support;
 #[path = "unit/rs_arch_01/mod.rs"]
 mod rs_arch_01;
+#[path = "unit/ts_arch_01/mod.rs"]
+mod ts_arch_01;

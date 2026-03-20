@@ -1,3 +1,4 @@
+pub mod arch;
 pub mod allow_checks;
 pub mod ast_helpers;
 pub mod ast_visitors;

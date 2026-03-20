@@ -1,4 +1,4 @@
-use super::helpers::{arch_01_errors, assert_single_error, copy_golden, run_check, write_file};
+use super::helpers::{arch_errors, assert_single_error, copy_fixture, run_check, write_file};
 
 // ---------------------------------------------------------------------------
 // Group 1: Basic src/ ban
@@ -6,32 +6,32 @@ use super::helpers::{arch_01_errors, assert_single_error, copy_golden, run_check
 
 #[test]
 fn src_with_rs_files() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     write_file(tmp.path(), "apps/devctl/src/main.rs", "fn main() {}");
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_single_error(&errors, "has src/ directory");
 }
 
 #[test]
 fn src_with_non_rs_files() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // The directory itself is banned, not just .rs files inside it
     write_file(tmp.path(), "apps/devctl/src/README.md", "# readme");
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_single_error(&errors, "has src/ directory");
 }
 
 #[test]
 fn src_empty_dir() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // Create src/ as an empty directory — does the check detect it?
     // list_dir on an empty dir returns empty vec, so behavior depends on
     // whether the check tests for directory existence vs contents.
     std::fs::create_dir_all(tmp.path().join("apps/devctl/src")).expect("mkdir"); // reason: test setup
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let src_errors: Vec<_> = errors.iter().filter(|e| e.title.contains("src/")).collect();
     // An empty src/ directory should still be flagged — the dir itself is banned
     assert_eq!(
@@ -47,11 +47,11 @@ fn src_empty_dir() {
 
 #[test]
 fn src_in_multiple_apps() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     write_file(tmp.path(), "apps/devctl/src/main.rs", "fn main() {}");
     write_file(tmp.path(), "apps/worker/src/main.rs", "fn main() {}");
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let src_errors: Vec<_> = errors.iter().filter(|e| e.title.contains("src/")).collect();
     assert_eq!(
         src_errors.len(),
@@ -62,11 +62,11 @@ fn src_in_multiple_apps() {
 
 #[test]
 fn src_in_one_app_not_others() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     write_file(tmp.path(), "apps/devctl/src/main.rs", "fn main() {}");
     // worker and backend should NOT get src/ errors
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let src_errors: Vec<_> = errors.iter().filter(|e| e.title.contains("src/")).collect();
     assert_eq!(
         src_errors.len(),
@@ -86,12 +86,12 @@ fn src_in_one_app_not_others() {
 
 #[test]
 fn src_alongside_valid_crates() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // devctl already has valid crates/ — adding src/ should trigger exactly 1 error
     // for the src/ ban, not mixed with crates errors
     write_file(tmp.path(), "apps/devctl/src/main.rs", "fn main() {}");
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_single_error(&errors, "has src/ directory");
 }
 
@@ -101,11 +101,11 @@ fn src_alongside_valid_crates() {
 
 #[test]
 fn ts_app_src_not_flagged() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // admin and landing are TS apps (they have package.json, no Cargo.toml)
     // They naturally have src/ directories for Next.js — should NOT trigger R-ARCH-01
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert!(
         !errors
             .iter()
@@ -120,12 +120,12 @@ fn ts_app_src_not_flagged() {
 
 #[test]
 fn src_is_file_not_dir() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // Write "src" as a plain file, not a directory
     // list_dir on a file returns empty, so the check may or may not trigger
     write_file(tmp.path(), "apps/devctl/src", "not a directory");
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let src_errors: Vec<_> = errors.iter().filter(|e| e.title.contains("src")).collect();
     // Document the actual behavior: if the check uses is_dir() or list_dir(),
     // a file named "src" should NOT trigger the src/ ban
@@ -142,7 +142,7 @@ fn src_is_file_not_dir() {
 
 #[test]
 fn src_inside_hex_in_hex() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // The src/ ban is at app level (apps/{name}/src/), not inside hex-in-hex leaves.
     // mcp/ is a hex-in-hex at apps/backend/crates/adapters/inbound/mcp/ — writing
     // src/ directly inside mcp/ should NOT trigger the top-level src/ ban.
@@ -154,7 +154,7 @@ fn src_inside_hex_in_hex() {
         "fn main() {}",
     );
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     // The src/ ban should NOT fire (it only checks apps/{name}/src/, not deeper)
     let src_ban_errors: Vec<_> = errors
         .iter()

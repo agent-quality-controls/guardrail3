@@ -1,8 +1,8 @@
-use super::helpers::{arch_01_errors, copy_golden, run_check, write_file};
+use super::helpers::{
+    arch_errors, assert_file_field, assert_inner_hex, assert_no_packages, assert_no_ts_apps,
+    assert_per_app, copy_fixture, run_check, write_file, INNER_HEX, RUST_APPS,
+};
 use guardrail3::domain::report::CheckResult;
-
-const RUST_APPS: &[&str] = &["devctl", "backend", "worker"];
-const INNER_HEX: &str = "apps/backend/crates/adapters/inbound/mcp/crates";
 
 const CONTAINER_SUFFIXES: &[&str] = &[
     "app",
@@ -45,64 +45,18 @@ fn loose_file_errors<'a>(errors: &'a [&CheckResult]) -> Vec<&'a &'a CheckResult>
         .collect()
 }
 
-fn assert_per_app(errors: &[&CheckResult]) {
-    for app in RUST_APPS {
-        assert!(
-            errors.iter().any(|e| e.title.contains(app)),
-            "expected error for app `{app}`, got: {errors:#?}"
-        );
-    }
-}
-
-fn assert_inner_hex(errors: &[&CheckResult]) {
-    assert!(
-        errors
-            .iter()
-            .any(|e| e.file.as_deref().unwrap_or("").contains("mcp/crates")),
-        "expected at least one error from inner hex (mcp/crates), got: {errors:#?}"
-    );
-}
-
-fn assert_no_ts_apps(errors: &[&CheckResult]) {
-    assert!(
-        !errors
-            .iter()
-            .any(|e| e.title.contains("admin") || e.title.contains("landing")),
-        "TS apps should not be flagged, got: {errors:#?}"
-    );
-}
-
-fn assert_no_packages(errors: &[&CheckResult]) {
-    assert!(
-        !errors.iter().any(|e| {
-            let t = &e.title;
-            t.contains("shared-types") || t.contains("ui-kit")
-        }),
-        "packages should not be flagged, got: {errors:#?}"
-    );
-}
-
-fn assert_file_field(errors: &[&CheckResult]) {
-    for err in errors {
-        assert!(
-            err.file.is_some(),
-            "expected file field to be set, got None for: {err:#?}"
-        );
-    }
-}
-
 // ============================================================================
 // GROUP A: Loose files in each container type
 // ============================================================================
 
 #[test]
 fn loose_file_in_app_containers() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for path in container_paths_for("app") {
         write_file(tmp.path(), &format!("{path}/mod.rs"), "// stray");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     assert_eq!(
         loose.len(),
@@ -134,12 +88,12 @@ fn loose_file_in_app_containers() {
 
 #[test]
 fn loose_file_in_domain_containers() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for path in container_paths_for("domain") {
         write_file(tmp.path(), &format!("{path}/mod.rs"), "// stray");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     assert_eq!(
         loose.len(),
@@ -169,12 +123,12 @@ fn loose_file_in_domain_containers() {
 
 #[test]
 fn loose_file_in_adapters_inbound_containers() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for path in container_paths_for("adapters/inbound") {
         write_file(tmp.path(), &format!("{path}/mod.rs"), "// stray");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     assert_eq!(
         loose.len(),
@@ -204,12 +158,12 @@ fn loose_file_in_adapters_inbound_containers() {
 
 #[test]
 fn loose_file_in_adapters_outbound_containers() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for path in container_paths_for("adapters/outbound") {
         write_file(tmp.path(), &format!("{path}/mod.rs"), "// stray");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     assert_eq!(
         loose.len(),
@@ -239,12 +193,12 @@ fn loose_file_in_adapters_outbound_containers() {
 
 #[test]
 fn loose_file_in_ports_inbound_containers() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for path in container_paths_for("ports/inbound") {
         write_file(tmp.path(), &format!("{path}/mod.rs"), "// stray");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     assert_eq!(
         loose.len(),
@@ -274,12 +228,12 @@ fn loose_file_in_ports_inbound_containers() {
 
 #[test]
 fn loose_file_in_ports_outbound_containers() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for path in container_paths_for("ports/outbound") {
         write_file(tmp.path(), &format!("{path}/mod.rs"), "// stray");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     assert_eq!(
         loose.len(),
@@ -309,12 +263,12 @@ fn loose_file_in_ports_outbound_containers() {
 
 #[test]
 fn loose_file_in_all_containers() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for path in all_container_paths() {
         write_file(tmp.path(), &format!("{path}/mod.rs"), "// stray");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     assert_eq!(
         loose.len(),
@@ -351,12 +305,12 @@ fn loose_file_in_all_containers() {
 
 #[test]
 fn loose_rs_file() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for path in all_container_paths() {
         write_file(tmp.path(), &format!("{path}/stray.rs"), "// stray");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     assert_eq!(
         loose.len(),
@@ -380,12 +334,12 @@ fn loose_rs_file() {
 
 #[test]
 fn loose_toml_file() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for path in all_container_paths() {
         write_file(tmp.path(), &format!("{path}/Cargo.toml"), "[package]");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     assert_eq!(
         loose.len(),
@@ -409,12 +363,12 @@ fn loose_toml_file() {
 
 #[test]
 fn loose_markdown_file() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for path in all_container_paths() {
         write_file(tmp.path(), &format!("{path}/README.md"), "# Readme");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     assert_eq!(
         loose.len(),
@@ -438,12 +392,12 @@ fn loose_markdown_file() {
 
 #[test]
 fn loose_env_file() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for path in all_container_paths() {
         write_file(tmp.path(), &format!("{path}/.env"), "SECRET=123");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     assert_eq!(
         loose.len(),
@@ -467,12 +421,12 @@ fn loose_env_file() {
 
 #[test]
 fn loose_gitignore_not_gitkeep() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for path in all_container_paths() {
         write_file(tmp.path(), &format!("{path}/.gitignore"), "target/");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     assert_eq!(
         loose.len(),
@@ -500,12 +454,12 @@ fn loose_gitignore_not_gitkeep() {
 
 #[test]
 fn gitkeep_allowed_in_containers() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for path in all_container_paths() {
         write_file(tmp.path(), &format!("{path}/.gitkeep"), "");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert!(
         errors.is_empty(),
         "expected 0 errors when only .gitkeep is present, got {}: {errors:#?}",
@@ -515,13 +469,13 @@ fn gitkeep_allowed_in_containers() {
 
 #[test]
 fn gitkeep_alongside_loose_file() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for path in all_container_paths() {
         write_file(tmp.path(), &format!("{path}/.gitkeep"), "");
         write_file(tmp.path(), &format!("{path}/mod.rs"), "// stray");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     assert_eq!(
         loose.len(),
@@ -557,13 +511,13 @@ fn gitkeep_alongside_loose_file() {
 
 #[test]
 fn multiple_loose_files_single_error_per_dir() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for path in all_container_paths() {
         write_file(tmp.path(), &format!("{path}/mod.rs"), "// stray 1");
         write_file(tmp.path(), &format!("{path}/lib.rs"), "// stray 2");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     assert_eq!(
         loose.len(),
@@ -586,7 +540,7 @@ fn multiple_loose_files_single_error_per_dir() {
 
 #[test]
 fn symlink_as_loose_file() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for path in all_container_paths() {
         let dir = tmp.path().join(&path);
         std::fs::create_dir_all(&dir).expect("create dir"); // reason: ensure dir exists
@@ -596,7 +550,7 @@ fn symlink_as_loose_file() {
         std::os::unix::fs::symlink(&target, &link).expect("create symlink"); // reason: test symlink detection
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     // DirEntry::file_type() does NOT follow symlinks — so a symlink is !is_dir() -> flagged.
     assert_eq!(
@@ -620,7 +574,7 @@ fn symlink_as_loose_file() {
 
 #[test]
 fn dangling_symlink_as_loose_file() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for path in all_container_paths() {
         let dir = tmp.path().join(&path);
         std::fs::create_dir_all(&dir).expect("create dir"); // reason: ensure dir exists
@@ -629,7 +583,7 @@ fn dangling_symlink_as_loose_file() {
         std::os::unix::fs::symlink("/nonexistent/target", &link).expect("create dangling symlink"); // reason: test dangling symlink detection
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     // On macOS, DirEntry::file_type() succeeds for dangling symlinks (returns symlink type).
     // Since a symlink is !is_dir(), it gets flagged as a loose file.
@@ -643,12 +597,12 @@ fn dangling_symlink_as_loose_file() {
 
 #[test]
 fn hidden_file_not_gitkeep() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for path in all_container_paths() {
         write_file(tmp.path(), &format!("{path}/.hidden"), "secret");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     assert_eq!(
         loose.len(),
@@ -660,14 +614,14 @@ fn hidden_file_not_gitkeep() {
 
 #[test]
 fn empty_container_no_loose_files() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // Remove all contents from devctl ports/inbound (which has only .gitkeep)
     // This makes it empty — check_05 will fire "empty container" but check_loose_files
     // should produce 0 loose-file errors (no files to flag).
     std::fs::remove_file(tmp.path().join("apps/devctl/crates/ports/inbound/.gitkeep"))
         .expect("remove .gitkeep"); // reason: make container empty
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     assert_eq!(
         loose.len(),
@@ -689,7 +643,7 @@ fn empty_container_no_loose_files() {
 fn permission_denied_container() {
     use std::os::unix::fs::PermissionsExt;
 
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     let domain_dir = tmp.path().join("apps/devctl/crates/domain");
 
     // Remove all perms so list_dir returns empty
@@ -697,7 +651,7 @@ fn permission_denied_container() {
     std::fs::set_permissions(&domain_dir, perms).expect("chmod 000"); // reason: simulate permission denied
 
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
 
     // No loose-file errors for devctl/crates/domain because list_dir is empty
@@ -729,7 +683,7 @@ fn permission_denied_container() {
 
 #[test]
 fn loose_files_across_all_dir_types() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
 
     // Rule 2 locations: crates/ root (4 locations: 3 outer + 1 inner hex)
     let crates_roots = [
@@ -763,7 +717,7 @@ fn loose_files_across_all_dir_types() {
     }
 
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     // 4 (crates root) + 8 (structural) + 24 (containers) = 36
     assert_eq!(
@@ -776,7 +730,7 @@ fn loose_files_across_all_dir_types() {
 
 #[test]
 fn ts_apps_not_checked() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // Add loose files into TS app directories that mirror Rust hex structure
     write_file(
         tmp.path(),
@@ -789,7 +743,7 @@ fn ts_apps_not_checked() {
         "// stray",
     );
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert!(
         errors.is_empty(),
         "TS apps should not produce RS-ARCH-01 errors, got: {errors:#?}"
@@ -798,7 +752,7 @@ fn ts_apps_not_checked() {
 
 #[test]
 fn packages_not_checked() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     write_file(
         tmp.path(),
         "packages/shared-types/stray.rs",
@@ -810,7 +764,7 @@ fn packages_not_checked() {
         "// stray",
     );
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert!(
         errors.is_empty(),
         "packages should not produce RS-ARCH-01 errors, got: {errors:#?}"
@@ -819,7 +773,7 @@ fn packages_not_checked() {
 
 #[test]
 fn inner_hex_loose_file_outer_clean() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // Only add loose files to inner hex containers
     for suffix in CONTAINER_SUFFIXES {
         write_file(
@@ -829,7 +783,7 @@ fn inner_hex_loose_file_outer_clean() {
         );
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     assert_eq!(
         loose.len(),
@@ -868,14 +822,14 @@ fn inner_hex_loose_file_outer_clean() {
 
 #[test]
 fn inner_hex_label_prefix_in_title() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     write_file(
         tmp.path(),
         &format!("{INNER_HEX}/domain/stray.rs"),
         "// stray",
     );
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     assert_eq!(loose.len(), 1, "expected 1 error, got {}: {loose:#?}", loose.len());
     // The title should reference "backend" as the service name
@@ -895,16 +849,16 @@ fn inner_hex_label_prefix_in_title() {
 
 #[test]
 fn idempotent_results() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for path in all_container_paths() {
         write_file(tmp.path(), &format!("{path}/mod.rs"), "// stray");
     }
     let results_1 = run_check(tmp.path());
-    let errors_1 = arch_01_errors(&results_1);
+    let errors_1 = arch_errors(&results_1);
     let loose_1 = loose_file_errors(&errors_1);
 
     let results_2 = run_check(tmp.path());
-    let errors_2 = arch_01_errors(&results_2);
+    let errors_2 = arch_errors(&results_2);
     let loose_2 = loose_file_errors(&errors_2);
 
     assert_eq!(
@@ -931,12 +885,12 @@ fn idempotent_results() {
 
 #[test]
 fn per_app_attribution() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for path in all_container_paths() {
         write_file(tmp.path(), &format!("{path}/mod.rs"), "// stray");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
 
     // Each Rust app must appear in error titles
@@ -963,7 +917,7 @@ fn per_app_attribution() {
 
 #[test]
 fn new_app_gets_checked() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // Create a new Rust app with Cargo.toml and hex arch structure
     write_file(tmp.path(), "apps/scheduler/Cargo.toml", "[workspace]");
     for suffix in CONTAINER_SUFFIXES {
@@ -995,7 +949,7 @@ fn new_app_gets_checked() {
     );
 
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     let scheduler_loose: Vec<_> = loose
         .iter()
@@ -1028,12 +982,12 @@ fn new_app_gets_checked() {
 /// Expected: 24 loose file errors (the .bak file), 0 missing crate errors.
 #[test]
 fn file_coexists_with_same_named_crate_subdir() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for path in all_container_paths() {
         write_file(tmp.path(), &format!("{path}/core.bak"), "backup");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     assert_eq!(
         loose.len(),
@@ -1067,7 +1021,7 @@ fn file_coexists_with_same_named_crate_subdir() {
 /// as a loose file — it is NOT the same as ".gitkeep".
 #[test]
 fn unicode_lookalike_gitkeep() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for path in all_container_paths() {
         write_file(
             tmp.path(),
@@ -1076,7 +1030,7 @@ fn unicode_lookalike_gitkeep() {
         );
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     assert_eq!(
         loose.len(),
@@ -1096,7 +1050,7 @@ fn unicode_lookalike_gitkeep() {
 /// it collides with ".gitkeep" and the FS treats them as the same file.
 #[test]
 fn near_miss_gitkeep_names() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // Only names that are unambiguously distinct from ".gitkeep" on ALL filesystems
     let near_misses = [".git_keep", ".gitkee"];
     for path in all_container_paths() {
@@ -1105,7 +1059,7 @@ fn near_miss_gitkeep_names() {
         }
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     // One error per container (both near-miss files grouped into a single error)
     assert_eq!(
@@ -1135,7 +1089,7 @@ fn near_miss_gitkeep_names() {
 /// loose file). Both check_05 "empty container" AND check_loose_files fire.
 #[test]
 fn container_with_only_loose_files_double_error() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // Remove the "core" subdir from devctl/crates/app/
     super::helpers::remove_dir(tmp.path(), "apps/devctl/crates/app/core");
     // Ensure app/ dir still exists
@@ -1145,7 +1099,7 @@ fn container_with_only_loose_files_double_error() {
     write_file(tmp.path(), "apps/devctl/crates/app/mod.rs", "// stray");
 
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
 
     // check_05 fires: "empty container" (no subdirs, no .gitkeep, but has files)
     let empty: Vec<_> = errors
@@ -1191,12 +1145,12 @@ fn container_with_only_loose_files_double_error() {
 /// file from .gitkeep, it must be flagged.
 #[test]
 fn gitkeep_wrong_case() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for path in all_container_paths() {
         write_file(tmp.path(), &format!("{path}/.GITKEEP"), "");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
 
     // On case-sensitive FS: .GITKEEP != .gitkeep -> flagged (24 errors)
@@ -1238,12 +1192,12 @@ fn gitkeep_wrong_case() {
 /// compares the filename, not the file contents.
 #[test]
 fn non_empty_gitkeep_allowed() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     for path in all_container_paths() {
         write_file(tmp.path(), &format!("{path}/.gitkeep"), "This file has content");
     }
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     assert_eq!(
         loose.len(),
