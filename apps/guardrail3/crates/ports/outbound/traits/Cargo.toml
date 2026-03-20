@@ -1,0 +1,4 @@
+[package]
+name = "guardrail3-ports-outbound-traits"
+version = "0.0.0"
+edition = "2024"

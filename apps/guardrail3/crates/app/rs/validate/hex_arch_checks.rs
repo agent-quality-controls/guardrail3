@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use std::path::Path;
 
-use crate::app::discover::ProjectInfo;
+use crate::app::core::discover::ProjectInfo;
 use crate::domain::config::types::CrateConfig;
 use crate::domain::report::{CheckResult, Severity};
 use crate::ports::outbound::FileSystem;
@@ -76,60 +76,6 @@ fn resolve_layer(name: &str, dir: &str, cfgs: &BTreeMap<String, CrateConfig>) ->
 
 /// Maps crate name to (`member_dir`, layer).
 type CrateLayerMap = BTreeMap<String, (String, Layer)>;
-
-/// Resolve a crate config key to its workspace member directory.
-/// Falls back to the key itself if no matching member is found.
-fn resolve_member_dir(name: &str, project: &ProjectInfo) -> String {
-    for ws in &project.workspaces {
-        for member in &ws.members {
-            if member.name == name {
-                return member.dir.clone();
-            }
-        }
-    }
-    // Also check if the name itself matches a member dir
-    let all_dirs = project.all_member_dirs();
-    if all_dirs.iter().any(|d| d == name) {
-        return name.to_owned();
-    }
-    name.to_owned()
-}
-
-// R-ARCH-01: Service must have hex arch structure
-pub fn check_hex_arch_structure(
-    fs: &dyn FileSystem,
-    root: &Path,
-    project: &ProjectInfo,
-    cfgs: &BTreeMap<String, CrateConfig>,
-    results: &mut Vec<CheckResult>,
-) {
-    for (name, cfg) in cfgs {
-        let resolved_profile = cfg.profile.as_deref().or(cfg.type_.as_deref());
-        if resolved_profile.is_none_or(|p| p != "service") {
-            continue;
-        }
-        let member_dir = resolve_member_dir(name, project);
-        let dir = root.join(&member_dir);
-        for sub in &["domain", "adapters"] {
-            let ws = dir.join("crates").join(sub).join("Cargo.toml");
-            let sc = dir.join("src").join(sub).join("mod.rs");
-            if fs.read_file(&ws).is_none() && fs.read_file(&sc).is_none() {
-                results.push(CheckResult {
-                    id: "R-ARCH-01".to_owned(),
-                    severity: Severity::Warn,
-                    title: format!("Service `{name}` missing {sub} layer"),
-                    message: format!(
-                        "Service `{name}` has profile=\"service\" but no \
-                         crates/{sub}/Cargo.toml or src/{sub}/mod.rs found."
-                    ),
-                    file: Some(dir.display().to_string()),
-                    line: None,
-                    inventory: false,
-                });
-            }
-        }
-    }
-}
 
 // R-ARCH-02: Dependency flow violation
 pub fn check_dependency_flow(

@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use crate::app::crawl::CrawlResult;
+use crate::app::core::crawl::CrawlResult;
 use crate::domain::report::CheckResult;
 
 use super::eslint_check;

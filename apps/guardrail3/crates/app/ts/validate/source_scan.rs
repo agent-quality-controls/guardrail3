@@ -105,7 +105,7 @@ pub fn is_excluded_ts_dir_with_gitignore(
 
 fn collect_ts_files(fs: &dyn FileSystem, root: &Path) -> Vec<String> {
     let mut files = Vec::new();
-    let gitignored = crate::app::gitignore::load_gitignore_dirs(fs, root);
+    let gitignored = crate::app::core::gitignore::load_gitignore_dirs(fs, root);
     for entry in WalkDir::new(root)
         .into_iter()
         .filter_entry(|e| !is_excluded_ts_dir_with_gitignore(e, &gitignored))

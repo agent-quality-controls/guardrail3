@@ -8,12 +8,37 @@ use proptest as _;
 #[cfg(test)]
 use tempfile as _;
 
-pub mod adapters;
-pub mod app;
-pub mod cli;
-pub mod commands;
-pub mod domain;
+pub mod domain {
+    pub mod config;
+    pub mod modules;
+    pub mod report;
+}
+
+pub mod ports {
+    pub mod outbound {
+        #[path = "traits/mod.rs"]
+        pub mod traits;
+        pub use traits::*;
+    }
+}
+
+pub mod app {
+    pub mod core;
+    pub mod hooks;
+    pub mod rs;
+    pub mod ts;
+}
+
+pub mod adapters {
+    pub mod inbound {
+        pub mod cli;
+    }
+    pub mod outbound {
+        pub mod fs;
+        #[path = "tool-runner/mod.rs"]
+        pub mod tool_runner;
+        pub mod report;
+    }
+}
+
 pub mod fs;
-pub mod help_gen;
-pub mod ports;
-pub mod report;
