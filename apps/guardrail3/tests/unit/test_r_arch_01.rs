@@ -234,6 +234,118 @@ fn rule_06_hex_in_hex_broken_inner() {
 }
 
 // =======================================================================
+// Rule 7: each crate subdir must be a member of the app's workspace
+// (NOT YET IMPLEMENTED — these tests MUST fail)
+// =======================================================================
+
+#[test]
+fn rule_07_crate_not_in_workspace_members() {
+    let tmp = copy_golden();
+    // Add a valid crate that is NOT listed in the workspace members
+    write_file(
+        tmp.path(),
+        "apps/devctl/crates/domain/events/Cargo.toml",
+        "[package]\nname = \"devctl-domain-events\"\nversion = \"0.1.0\"\nedition = \"2024\"",
+    );
+    write_file(tmp.path(), "apps/devctl/crates/domain/events/src/lib.rs", "// events");
+    // devctl's Cargo.toml workspace members does NOT include crates/domain/events
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+    assert!(
+        errors.iter().any(|e| e.title.contains("not a workspace member") || e.title.contains("not in workspace")),
+        "expected error about crate not being a workspace member, got: {errors:#?}"
+    );
+}
+
+// =======================================================================
+// Rule 8: apps/{name}/Cargo.toml must be a [workspace]
+// (NOT YET IMPLEMENTED — these tests MUST fail)
+// =======================================================================
+
+#[test]
+fn rule_08_app_cargo_toml_not_workspace() {
+    let tmp = copy_golden();
+    // Replace devctl's workspace Cargo.toml with a plain [package]
+    write_file(
+        tmp.path(),
+        "apps/devctl/Cargo.toml",
+        "[package]\nname = \"devctl\"\nversion = \"0.1.0\"\nedition = \"2024\"",
+    );
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+    assert!(
+        errors.iter().any(|e| e.title.contains("not a workspace") || e.title.contains("must be a workspace")),
+        "expected error about app Cargo.toml not being a workspace, got: {errors:#?}"
+    );
+}
+
+// =======================================================================
+// Rule 9: workspace members must match crate subdirs exactly
+// (NOT YET IMPLEMENTED — these tests MUST fail)
+// =======================================================================
+
+#[test]
+fn rule_09_workspace_has_extra_member() {
+    let tmp = copy_golden();
+    // Add a nonexistent member to devctl's workspace
+    write_file(
+        tmp.path(),
+        "apps/devctl/Cargo.toml",
+        "[workspace]\nmembers = [\n    \"crates/domain/types\",\n    \"crates/app/core\",\n    \"crates/ports/outbound/traits\",\n    \"crates/adapters/inbound/cli\",\n    \"crates/adapters/outbound/fs\",\n    \"crates/domain/phantom\",\n]\nresolver = \"2\"",
+    );
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+    assert!(
+        errors.iter().any(|e| e.title.contains("phantom") || e.title.contains("extra member") || e.title.contains("does not exist")),
+        "expected error about phantom workspace member, got: {errors:#?}"
+    );
+}
+
+// =======================================================================
+// Rule 10: workspace members must not point outside app dir
+// (NOT YET IMPLEMENTED — these tests MUST fail)
+// =======================================================================
+
+#[test]
+fn rule_10_workspace_member_outside_app() {
+    let tmp = copy_golden();
+    // Add a member pointing outside devctl's directory
+    write_file(
+        tmp.path(),
+        "apps/devctl/Cargo.toml",
+        "[workspace]\nmembers = [\n    \"crates/domain/types\",\n    \"crates/app/core\",\n    \"crates/ports/outbound/traits\",\n    \"crates/adapters/inbound/cli\",\n    \"crates/adapters/outbound/fs\",\n    \"../../packages/shared-types\",\n]\nresolver = \"2\"",
+    );
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+    assert!(
+        errors.iter().any(|e| e.title.contains("outside") || e.title.contains("shared-types")),
+        "expected error about workspace member pointing outside app dir, got: {errors:#?}"
+    );
+}
+
+// =======================================================================
+// Rule 11: root workspace must not include apps as members
+// (NOT YET IMPLEMENTED — these tests MUST fail)
+// =======================================================================
+
+#[test]
+fn rule_11_root_workspace_includes_app() {
+    let tmp = copy_golden();
+    // Root Cargo.toml lists an app as a workspace member
+    write_file(
+        tmp.path(),
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"packages/shared-types\", \"apps/devctl\"]\nresolver = \"2\"",
+    );
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+    assert!(
+        errors.iter().any(|e| e.title.contains("root workspace") || e.title.contains("apps/devctl")),
+        "expected error about root workspace including app, got: {errors:#?}"
+    );
+}
+
+// =======================================================================
 // Rule 12: apps/{name}/src/ is banned
 // =======================================================================
 
