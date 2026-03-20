@@ -1,5 +1,5 @@
 use super::helpers::{
-    arch_01_errors, assert_single_error, copy_golden, remove_dir, remove_file, run_check,
+    arch_errors, assert_single_error, copy_fixture, remove_dir, remove_file, run_check,
     write_file,
 };
 
@@ -9,45 +9,45 @@ use super::helpers::{
 
 #[test]
 fn empty_ports_inbound() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // ports/inbound/ has only .gitkeep — remove it to make the dir empty
     remove_file(tmp.path(), "apps/devctl/crates/ports/inbound/.gitkeep");
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_single_error(&errors, "empty container crates/ports/inbound/");
 }
 
 #[test]
 fn empty_app() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // app/ has core/ as its only subdir — remove it, leaving app/ empty
     remove_dir(tmp.path(), "apps/devctl/crates/app/core");
     // Ensure app/ dir itself still exists as an empty dir
     std::fs::create_dir_all(tmp.path().join("apps/devctl/crates/app")).expect("recreate app dir"); // reason: no-op if exists
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_single_error(&errors, "empty container crates/app/");
 }
 
 #[test]
 fn empty_domain() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // domain/ has types/ as its only subdir — remove it
     remove_dir(tmp.path(), "apps/devctl/crates/domain/types");
     std::fs::create_dir_all(tmp.path().join("apps/devctl/crates/domain")).expect("recreate domain dir"); // reason: no-op if exists
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_single_error(&errors, "empty container crates/domain/");
 }
 
 #[test]
 fn empty_adapters_inbound() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // adapters/inbound/ has cli/ as its only subdir — remove it
     remove_dir(tmp.path(), "apps/devctl/crates/adapters/inbound/cli");
     std::fs::create_dir_all(tmp.path().join("apps/devctl/crates/adapters/inbound")).expect("recreate dir"); // reason: no-op if exists
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_eq!(errors.len(), 1, "expected 1 error, got {}: {errors:#?}", errors.len());
     assert!(
         errors[0].title.contains("empty container"),
@@ -58,12 +58,12 @@ fn empty_adapters_inbound() {
 
 #[test]
 fn empty_adapters_outbound() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // adapters/outbound/ has fs/ as its only subdir — remove it
     remove_dir(tmp.path(), "apps/devctl/crates/adapters/outbound/fs");
     std::fs::create_dir_all(tmp.path().join("apps/devctl/crates/adapters/outbound")).expect("recreate dir"); // reason: no-op if exists
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_eq!(errors.len(), 1, "expected 1 error, got {}: {errors:#?}", errors.len());
     assert!(
         errors[0].title.contains("empty container"),
@@ -74,12 +74,12 @@ fn empty_adapters_outbound() {
 
 #[test]
 fn empty_ports_outbound() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // ports/outbound/ has traits/ as its only subdir — remove it
     remove_dir(tmp.path(), "apps/devctl/crates/ports/outbound/traits");
     std::fs::create_dir_all(tmp.path().join("apps/devctl/crates/ports/outbound")).expect("recreate dir"); // reason: no-op if exists
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_eq!(errors.len(), 1, "expected 1 error, got {}: {errors:#?}", errors.len());
     assert!(
         errors[0].title.contains("empty container"),
@@ -94,10 +94,10 @@ fn empty_ports_outbound() {
 
 #[test]
 fn gitkeep_is_valid_placeholder() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // devctl ports/inbound has .gitkeep — should produce 0 errors
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert!(
         errors.is_empty(),
         "expected 0 errors for golden fixture, got: {errors:#?}"
@@ -106,10 +106,10 @@ fn gitkeep_is_valid_placeholder() {
 
 #[test]
 fn subdirs_are_valid() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // devctl app/ has core/ subdir — should produce 0 errors
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert!(
         errors.is_empty(),
         "expected 0 errors for golden fixture with valid subdirs, got: {errors:#?}"
@@ -118,11 +118,11 @@ fn subdirs_are_valid() {
 
 #[test]
 fn gitkeep_alongside_subdirs() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // Add .gitkeep to app/ which already has core/ subdir — still valid
     write_file(tmp.path(), "apps/devctl/crates/app/.gitkeep", "");
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert!(
         errors.is_empty(),
         "expected 0 errors when .gitkeep coexists with subdirs, got: {errors:#?}"
@@ -135,14 +135,14 @@ fn gitkeep_alongside_subdirs() {
 
 #[test]
 fn multiple_empty_containers() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // Empty ports/inbound (remove .gitkeep)
     remove_file(tmp.path(), "apps/devctl/crates/ports/inbound/.gitkeep");
     // Empty ports/outbound (remove traits/ subdir)
     remove_dir(tmp.path(), "apps/devctl/crates/ports/outbound/traits");
     std::fs::create_dir_all(tmp.path().join("apps/devctl/crates/ports/outbound")).expect("recreate dir"); // reason: no-op if exists
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_eq!(
         errors.len(),
         2,
@@ -157,12 +157,12 @@ fn multiple_empty_containers() {
 
 #[test]
 fn empty_in_one_app_valid_in_another() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // Empty devctl ports/inbound (remove .gitkeep)
     remove_file(tmp.path(), "apps/devctl/crates/ports/inbound/.gitkeep");
     // Worker ports/inbound still has .gitkeep — should be fine
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_eq!(errors.len(), 1, "expected 1 error for devctl only, got {}: {errors:#?}", errors.len());
     assert!(
         errors[0].title.contains("devctl"),
@@ -177,14 +177,14 @@ fn empty_in_one_app_valid_in_another() {
 
 #[test]
 fn inner_hex_empty_container() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // Remove .gitkeep from inner hex ports/inbound
     remove_file(
         tmp.path(),
         "apps/backend/crates/adapters/inbound/mcp/crates/ports/inbound/.gitkeep",
     );
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_eq!(errors.len(), 1, "expected 1 error, got {}: {errors:#?}", errors.len());
     assert!(
         errors[0].title.contains("empty container"),
@@ -195,10 +195,10 @@ fn inner_hex_empty_container() {
 
 #[test]
 fn inner_hex_gitkeep_valid() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // Inner hex has .gitkeep in ports/outbound — golden should pass
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert!(
         errors.is_empty(),
         "expected 0 errors for golden inner hex with .gitkeep, got: {errors:#?}"

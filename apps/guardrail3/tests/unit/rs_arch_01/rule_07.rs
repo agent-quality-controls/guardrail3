@@ -1,8 +1,8 @@
-use super::helpers::{arch_01_errors, copy_golden, run_check, write_file};
+use super::helpers::{arch_errors, copy_fixture, run_check, write_file};
 
 #[test]
 fn crate_not_in_workspace_members() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     write_file(
         tmp.path(),
         "apps/devctl/crates/domain/events/Cargo.toml",
@@ -10,7 +10,7 @@ fn crate_not_in_workspace_members() {
     );
     write_file(tmp.path(), "apps/devctl/crates/domain/events/src/lib.rs", "// events");
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert!(
         errors.iter().any(|e| e.title.contains("not a workspace member") || e.title.contains("not in workspace")),
         "expected error about crate not being a workspace member, got: {errors:#?}"

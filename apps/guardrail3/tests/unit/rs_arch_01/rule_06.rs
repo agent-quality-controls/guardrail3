@@ -1,5 +1,5 @@
 use super::helpers::{
-    arch_01_errors, assert_single_error, copy_golden, remove_dir, run_check, write_file,
+    arch_errors, assert_single_error, copy_fixture, remove_dir, run_check, write_file,
 };
 
 // ---------------------------------------------------------------------------
@@ -8,20 +8,20 @@ use super::helpers::{
 
 #[test]
 fn subdir_no_cargo_toml() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     std::fs::create_dir_all(tmp.path().join("apps/devctl/crates/app/orphan/src")).expect("mkdir"); // reason: test setup
     write_file(tmp.path(), "apps/devctl/crates/app/orphan/src/lib.rs", "");
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_single_error(&errors, "crates/app/orphan/ missing Cargo.toml");
 }
 
 #[test]
 fn subdir_completely_empty() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     std::fs::create_dir_all(tmp.path().join("apps/devctl/crates/app/orphan")).expect("mkdir"); // reason: test setup
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     // An empty subdir inside a container has neither Cargo.toml nor crates/ — must error
     assert!(
         !errors.is_empty(),
@@ -41,7 +41,7 @@ fn subdir_completely_empty() {
 
 #[test]
 fn subdir_has_both_cargo_and_crates() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // Create a subdir that has BOTH Cargo.toml and a crates/ directory
     write_file(
         tmp.path(),
@@ -59,7 +59,7 @@ fn subdir_has_both_cargo_and_crates() {
         "",
     );
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert!(
         errors
             .iter()
@@ -74,7 +74,7 @@ fn subdir_has_both_cargo_and_crates() {
 
 #[test]
 fn subdir_with_only_gitkeep() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // A leaf subdir that has only .gitkeep should be treated as a valid placeholder
     // NOTE: If the current code does NOT support .gitkeep-only leaf subdirs,
     // this test will FAIL — that is intentional, proving the gap.
@@ -84,7 +84,7 @@ fn subdir_with_only_gitkeep() {
         "",
     );
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let placeholder_errors: Vec<_> = errors
         .iter()
         .filter(|e| e.title.contains("placeholder"))
@@ -101,7 +101,7 @@ fn subdir_with_only_gitkeep() {
 
 #[test]
 fn gitkeep_alongside_cargo_toml() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // domain/types already has Cargo.toml — adding .gitkeep should be harmless
     write_file(
         tmp.path(),
@@ -109,7 +109,7 @@ fn gitkeep_alongside_cargo_toml() {
         "",
     );
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert!(
         errors.is_empty(),
         "gitkeep alongside Cargo.toml should not cause errors, got: {errors:#?}"
@@ -118,7 +118,7 @@ fn gitkeep_alongside_cargo_toml() {
 
 #[test]
 fn gitkeep_alongside_hex_in_hex() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // mcp/ already has crates/ — adding .gitkeep should be harmless
     write_file(
         tmp.path(),
@@ -126,7 +126,7 @@ fn gitkeep_alongside_hex_in_hex() {
         "",
     );
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert!(
         errors.is_empty(),
         "gitkeep alongside hex-in-hex crates/ should not cause errors, got: {errors:#?}"
@@ -139,10 +139,10 @@ fn gitkeep_alongside_hex_in_hex() {
 
 #[test]
 fn hex_in_hex_valid() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // The golden backend/mcp is a valid hex-in-hex structure — must pass with 0 errors
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert!(
         errors.is_empty(),
         "golden hex-in-hex should pass with 0 errors, got: {errors:#?}"
@@ -155,13 +155,13 @@ fn hex_in_hex_valid() {
 
 #[test]
 fn hex_in_hex_inner_missing_domain() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     remove_dir(
         tmp.path(),
         "apps/backend/crates/adapters/inbound/mcp/crates/domain",
     );
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_single_error(
         &errors,
         "missing crates/adapters/inbound/mcp/crates/domain/",
@@ -170,13 +170,13 @@ fn hex_in_hex_inner_missing_domain() {
 
 #[test]
 fn hex_in_hex_inner_missing_app() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     remove_dir(
         tmp.path(),
         "apps/backend/crates/adapters/inbound/mcp/crates/app",
     );
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     assert_single_error(
         &errors,
         "missing crates/adapters/inbound/mcp/crates/app/",
@@ -189,7 +189,7 @@ fn hex_in_hex_inner_missing_app() {
 
 #[test]
 fn multiple_invalid_in_same_container() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // Two orphan subdirs without Cargo.toml in the same container (app/)
     std::fs::create_dir_all(tmp.path().join("apps/devctl/crates/app/orphan1")).expect("mkdir"); // reason: test setup
     write_file(
@@ -204,7 +204,7 @@ fn multiple_invalid_in_same_container() {
         "",
     );
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let orphan_errors: Vec<_> = errors
         .iter()
         .filter(|e| e.title.contains("orphan"))
@@ -222,7 +222,7 @@ fn multiple_invalid_in_same_container() {
 
 #[test]
 fn invalid_in_different_containers() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // Orphan in app/ container
     write_file(
         tmp.path(),
@@ -236,7 +236,7 @@ fn invalid_in_different_containers() {
         "",
     );
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let orphan_errors: Vec<_> = errors
         .iter()
         .filter(|e| e.title.contains("orphan"))
@@ -254,7 +254,7 @@ fn invalid_in_different_containers() {
 
 #[test]
 fn inner_hex_leaf_no_cargo() {
-    let tmp = copy_golden();
+    let tmp = copy_fixture();
     // Create orphan inside the inner hex app/ container (backend mcp)
     write_file(
         tmp.path(),
@@ -262,7 +262,7 @@ fn inner_hex_leaf_no_cargo() {
         "",
     );
     let results = run_check(tmp.path());
-    let errors = arch_01_errors(&results);
+    let errors = arch_errors(&results);
     let inner_orphan_errors: Vec<_> = errors
         .iter()
         .filter(|e| e.title.contains("orphan_inner"))
