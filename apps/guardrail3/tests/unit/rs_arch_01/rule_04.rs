@@ -1,6 +1,6 @@
 use super::helpers::{
     arch_errors, assert_file_field, assert_inner_hex, assert_no_packages, assert_no_ts_apps,
-    assert_per_app, copy_fixture, run_check, write_file, INNER_HEX, RUST_APPS,
+    assert_per_app, copy_fixture, remove_dir, run_check, write_file, INNER_HEX, RUST_APPS,
 };
 use guardrail3::domain::report::CheckResult;
 
@@ -74,6 +74,7 @@ fn loose_file_in_app_containers() {
     }
     assert_file_field(&errors);
     assert_per_app(&errors);
+    assert_inner_hex(&errors);
     assert_no_ts_apps(&errors);
     assert_no_packages(&errors);
     // Message content: offending filename appears
@@ -110,6 +111,7 @@ fn loose_file_in_domain_containers() {
     }
     assert_file_field(&errors);
     assert_per_app(&errors);
+    assert_inner_hex(&errors);
     assert_no_ts_apps(&errors);
     assert_no_packages(&errors);
     for err in &loose {
@@ -145,6 +147,7 @@ fn loose_file_in_adapters_inbound_containers() {
     }
     assert_file_field(&errors);
     assert_per_app(&errors);
+    assert_inner_hex(&errors);
     assert_no_ts_apps(&errors);
     assert_no_packages(&errors);
     for err in &loose {
@@ -180,6 +183,7 @@ fn loose_file_in_adapters_outbound_containers() {
     }
     assert_file_field(&errors);
     assert_per_app(&errors);
+    assert_inner_hex(&errors);
     assert_no_ts_apps(&errors);
     assert_no_packages(&errors);
     for err in &loose {
@@ -215,6 +219,7 @@ fn loose_file_in_ports_inbound_containers() {
     }
     assert_file_field(&errors);
     assert_per_app(&errors);
+    assert_inner_hex(&errors);
     assert_no_ts_apps(&errors);
     assert_no_packages(&errors);
     for err in &loose {
@@ -250,6 +255,7 @@ fn loose_file_in_ports_outbound_containers() {
     }
     assert_file_field(&errors);
     assert_per_app(&errors);
+    assert_inner_hex(&errors);
     assert_no_ts_apps(&errors);
     assert_no_packages(&errors);
     for err in &loose {
@@ -485,6 +491,7 @@ fn gitkeep_alongside_loose_file() {
     );
     assert_file_field(&errors);
     assert_per_app(&errors);
+    assert_inner_hex(&errors);
     assert_no_ts_apps(&errors);
     assert_no_packages(&errors);
     for err in &loose {
@@ -525,6 +532,11 @@ fn multiple_loose_files_single_error_per_dir() {
         "expected 1 error per dir (24 total), not 1 per file, got {}: {loose:#?}",
         loose.len()
     );
+    assert_file_field(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
     for err in &loose {
         assert!(
             err.message.contains("mod.rs") && err.message.contains("lib.rs"),
@@ -561,6 +573,7 @@ fn symlink_as_loose_file() {
     );
     assert_file_field(&errors);
     assert_per_app(&errors);
+    assert_inner_hex(&errors);
     assert_no_ts_apps(&errors);
     assert_no_packages(&errors);
     for err in &loose {
@@ -593,6 +606,18 @@ fn dangling_symlink_as_loose_file() {
         "dangling symlinks should be flagged as loose files, got {}: {loose:#?}",
         loose.len()
     );
+    assert_file_field(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
+    for err in &loose {
+        assert!(
+            err.message.contains("dangling"),
+            "expected 'dangling' in message, got: '{}'",
+            err.message
+        );
+    }
 }
 
 #[test]
@@ -610,6 +635,18 @@ fn hidden_file_not_gitkeep() {
         ".hidden is not .gitkeep — expected 24 errors, got {}: {loose:#?}",
         loose.len()
     );
+    assert_file_field(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
+    for err in &loose {
+        assert!(
+            err.message.contains(".hidden"),
+            "expected '.hidden' in message, got: '{}'",
+            err.message
+        );
+    }
 }
 
 #[test]
@@ -726,6 +763,18 @@ fn loose_files_across_all_dir_types() {
         "expected 36 total loose-file errors (4 + 8 + 24), got {}: {loose:#?}",
         loose.len()
     );
+    assert_file_field(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
+    for err in &loose {
+        assert!(
+            err.message.contains("stray.rs"),
+            "expected 'stray.rs' in message, got: '{}'",
+            err.message
+        );
+    }
 }
 
 #[test]
@@ -1181,6 +1230,7 @@ fn gitkeep_wrong_case() {
         );
         assert_file_field(&errors);
         assert_per_app(&errors);
+        assert_inner_hex(&errors);
         assert_no_ts_apps(&errors);
         assert_no_packages(&errors);
     }
@@ -1207,4 +1257,319 @@ fn non_empty_gitkeep_allowed() {
     );
     assert_no_ts_apps(&errors);
     assert_no_packages(&errors);
+}
+
+// ============================================================================
+// GROUP H: Advanced parity tests
+// ============================================================================
+
+/// Each app gets a different type of loose file in all 6 of its containers.
+/// devctl -> .rs, worker -> .env, backend outer -> symlink, inner hex -> .hidden.
+/// Assert each app's errors reference the correct filename.
+#[test]
+fn different_breakage_per_app() {
+    let tmp = copy_fixture();
+    // devctl: .rs files in all 6 containers
+    for suffix in CONTAINER_SUFFIXES {
+        write_file(
+            tmp.path(),
+            &format!("apps/devctl/crates/{suffix}/stray.rs"),
+            "// stray",
+        );
+    }
+    // worker: .env files in all 6 containers
+    for suffix in CONTAINER_SUFFIXES {
+        write_file(
+            tmp.path(),
+            &format!("apps/worker/crates/{suffix}/.env"),
+            "SECRET=1",
+        );
+    }
+    // backend outer: symlinks in all 6 containers
+    for suffix in CONTAINER_SUFFIXES {
+        let dir = tmp.path().join(format!("apps/backend/crates/{suffix}"));
+        std::fs::create_dir_all(&dir).expect("create dir"); // reason: ensure dir exists
+        let target = dir.join("..");
+        let link = dir.join("stray_link");
+        #[cfg(unix)]
+        std::os::unix::fs::symlink(&target, &link).expect("create symlink"); // reason: test per-app attribution
+    }
+    // inner hex: .hidden files in all 6 containers
+    for suffix in CONTAINER_SUFFIXES {
+        write_file(
+            tmp.path(),
+            &format!("{INNER_HEX}/{suffix}/.hidden"),
+            "secret",
+        );
+    }
+
+    let results = run_check(tmp.path());
+    let errors = arch_errors(&results);
+    let loose = loose_file_errors(&errors);
+    assert_eq!(
+        loose.len(),
+        24,
+        "expected 24 loose-file errors (6 per app/hex), got {}: {loose:#?}",
+        loose.len()
+    );
+    assert_file_field(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
+
+    // devctl errors mention .rs
+    let devctl_loose: Vec<_> = loose.iter().filter(|e| e.title.contains("devctl")).collect();
+    assert_eq!(devctl_loose.len(), 6, "devctl should have 6 errors, got {}", devctl_loose.len());
+    for err in &devctl_loose {
+        assert!(
+            err.message.contains("stray.rs"),
+            "devctl error should mention stray.rs, got: '{}'",
+            err.message
+        );
+    }
+    // worker errors mention .env
+    let worker_loose: Vec<_> = loose.iter().filter(|e| e.title.contains("worker")).collect();
+    assert_eq!(worker_loose.len(), 6, "worker should have 6 errors, got {}", worker_loose.len());
+    for err in &worker_loose {
+        assert!(
+            err.message.contains(".env"),
+            "worker error should mention .env, got: '{}'",
+            err.message
+        );
+    }
+    // backend errors: 6 outer (symlink) + 6 inner (.hidden) = 12
+    let backend_loose: Vec<_> = loose.iter().filter(|e| e.title.contains("backend")).collect();
+    assert_eq!(
+        backend_loose.len(),
+        12,
+        "backend should have 12 errors (6 outer + 6 inner), got {}",
+        backend_loose.len()
+    );
+    // Outer backend errors mention stray_link
+    let backend_outer: Vec<_> = backend_loose
+        .iter()
+        .filter(|e| !e.file.as_deref().unwrap_or("").contains("mcp/crates"))
+        .collect();
+    for err in &backend_outer {
+        assert!(
+            err.message.contains("stray_link"),
+            "backend outer error should mention stray_link, got: '{}'",
+            err.message
+        );
+    }
+    // Inner hex errors mention .hidden
+    let backend_inner: Vec<_> = backend_loose
+        .iter()
+        .filter(|e| e.file.as_deref().unwrap_or("").contains("mcp/crates"))
+        .collect();
+    for err in &backend_inner {
+        assert!(
+            err.message.contains(".hidden"),
+            "inner hex error should mention .hidden, got: '{}'",
+            err.message
+        );
+    }
+}
+
+/// Single container with maximum complexity: .gitkeep (allowed) + mod.rs +
+/// symlink "stray" + .hidden + .git_keep (near-miss). Assert 1 error listing
+/// 4 bad files but NOT .gitkeep.
+#[test]
+fn maximally_complex_single_container() {
+    let tmp = copy_fixture();
+    let container = "apps/devctl/crates/app";
+    write_file(tmp.path(), &format!("{container}/.gitkeep"), "");
+    write_file(tmp.path(), &format!("{container}/mod.rs"), "// stray");
+    write_file(tmp.path(), &format!("{container}/.hidden"), "secret");
+    write_file(tmp.path(), &format!("{container}/.git_keep"), "");
+    // symlink
+    let dir = tmp.path().join(container);
+    std::fs::create_dir_all(&dir).expect("create dir"); // reason: ensure dir exists
+    let target = dir.join("..");
+    let link = dir.join("stray");
+    #[cfg(unix)]
+    std::os::unix::fs::symlink(&target, &link).expect("create symlink"); // reason: test complex container
+
+    let results = run_check(tmp.path());
+    let errors = arch_errors(&results);
+    let loose = loose_file_errors(&errors);
+    let devctl_app: Vec<_> = loose
+        .iter()
+        .filter(|e| e.title.contains("devctl") && e.title.contains("app"))
+        .collect();
+    assert_eq!(
+        devctl_app.len(),
+        1,
+        "expected 1 error for devctl app container, got {}: {devctl_app:#?}",
+        devctl_app.len()
+    );
+    let msg = &devctl_app[0].message;
+    assert!(msg.contains("mod.rs"), "expected mod.rs in message, got: '{msg}'");
+    assert!(msg.contains("stray"), "expected stray in message, got: '{msg}'");
+    assert!(msg.contains(".hidden"), "expected .hidden in message, got: '{msg}'");
+    assert!(msg.contains(".git_keep"), "expected .git_keep in message, got: '{msg}'");
+    // .gitkeep should NOT appear in the bad-files portion
+    let bad_files_section = msg
+        .split("that don't belong: ")
+        .nth(1)
+        .and_then(|s| s.split(". Only").next())
+        .unwrap_or("");
+    assert!(
+        !bad_files_section.contains(".gitkeep")
+            || bad_files_section.contains(".git_keep"), // .git_keep is expected
+        ".gitkeep (exact) should NOT appear in bad files list, got: '{bad_files_section}'"
+    );
+    assert_file_field(&errors);
+}
+
+/// Inner hex gets .rs, .env, .hidden in all 6 containers. Outer apps stay clean.
+/// Assert 6 errors (1 per container, each listing 3 files). Assert outer = 0.
+#[test]
+fn inner_hex_multiple_types_outer_clean() {
+    let tmp = copy_fixture();
+    for suffix in CONTAINER_SUFFIXES {
+        write_file(
+            tmp.path(),
+            &format!("{INNER_HEX}/{suffix}/stray.rs"),
+            "// stray",
+        );
+        write_file(
+            tmp.path(),
+            &format!("{INNER_HEX}/{suffix}/.env"),
+            "SECRET=1",
+        );
+        write_file(
+            tmp.path(),
+            &format!("{INNER_HEX}/{suffix}/.hidden"),
+            "secret",
+        );
+    }
+    let results = run_check(tmp.path());
+    let errors = arch_errors(&results);
+    let loose = loose_file_errors(&errors);
+    assert_eq!(
+        loose.len(),
+        6,
+        "expected 6 errors from inner hex only, got {}: {loose:#?}",
+        loose.len()
+    );
+    // Each error lists all 3 files
+    for err in &loose {
+        assert!(
+            err.message.contains("stray.rs"),
+            "expected stray.rs in message, got: '{}'",
+            err.message
+        );
+        assert!(
+            err.message.contains(".env"),
+            "expected .env in message, got: '{}'",
+            err.message
+        );
+        assert!(
+            err.message.contains(".hidden"),
+            "expected .hidden in message, got: '{}'",
+            err.message
+        );
+    }
+    // All errors reference mcp/crates
+    for err in &loose {
+        assert!(
+            err.file.as_deref().unwrap_or("").contains("mcp/crates"),
+            "expected inner hex path in file field, got: '{}'",
+            err.file.as_deref().unwrap_or("")
+        );
+    }
+    // No outer app errors
+    let outer: Vec<_> = loose
+        .iter()
+        .filter(|e| !e.file.as_deref().unwrap_or("").contains("mcp/crates"))
+        .collect();
+    assert_eq!(
+        outer.len(),
+        0,
+        "expected 0 errors from outer apps, got {}: {outer:#?}",
+        outer.len()
+    );
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
+}
+
+/// .gitkeep + mod.rs in all 24 containers. Assert 24 loose errors, each
+/// message has mod.rs but NOT .gitkeep in the bad-files list.
+#[test]
+fn gitkeep_plus_valid_subdir_plus_loose() {
+    let tmp = copy_fixture();
+    for path in all_container_paths() {
+        write_file(tmp.path(), &format!("{path}/.gitkeep"), "");
+        write_file(tmp.path(), &format!("{path}/mod.rs"), "// stray");
+    }
+    let results = run_check(tmp.path());
+    let errors = arch_errors(&results);
+    let loose = loose_file_errors(&errors);
+    assert_eq!(
+        loose.len(),
+        24,
+        "expected 24 loose-file errors, got {}: {loose:#?}",
+        loose.len()
+    );
+    assert_file_field(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
+    for err in &loose {
+        assert!(
+            err.message.contains("mod.rs"),
+            "expected mod.rs in message, got: '{}'",
+            err.message
+        );
+        let bad_files_section = err
+            .message
+            .split("that don't belong: ")
+            .nth(1)
+            .and_then(|s| s.split(". Only").next())
+            .unwrap_or("");
+        assert!(
+            !bad_files_section.contains(".gitkeep"),
+            ".gitkeep should NOT appear in bad files list, got: '{bad_files_section}'"
+        );
+    }
+}
+
+/// Remove entire devctl/crates/app/ dir. Assert 0 loose-file errors for that
+/// location — the metadata guard returns early when the dir is absent.
+#[test]
+fn container_dir_absent_entirely() {
+    let tmp = copy_fixture();
+    remove_dir(tmp.path(), "apps/devctl/crates/app");
+    let results = run_check(tmp.path());
+    let errors = arch_errors(&results);
+    let loose = loose_file_errors(&errors);
+    // No loose-file errors for the missing container
+    let devctl_app_loose: Vec<_> = loose
+        .iter()
+        .filter(|e| {
+            e.title.contains("devctl")
+                && e.file
+                    .as_deref()
+                    .unwrap_or("")
+                    .contains("devctl/crates/app")
+        })
+        .collect();
+    assert_eq!(
+        devctl_app_loose.len(),
+        0,
+        "absent container dir should produce 0 loose-file errors, got {}: {devctl_app_loose:#?}",
+        devctl_app_loose.len()
+    );
+    // Other rules catch the missing dir (missing container error)
+    let missing: Vec<_> = errors
+        .iter()
+        .filter(|e| e.title.contains("missing") && e.title.contains("devctl"))
+        .collect();
+    assert!(
+        !missing.is_empty(),
+        "expected at least one missing-container error for devctl, got: {errors:#?}"
+    );
 }
