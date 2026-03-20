@@ -6,7 +6,7 @@ use guardrail3::domain::report::CheckResult;
 
 // Re-export shared utilities so rule files import from super::helpers
 pub use crate::test_support::{
-    assert_file_field, copy_golden, errors_by_id, remove_dir,
+    copy_golden, errors_by_id, remove_dir,
     write_file,
 };
 
