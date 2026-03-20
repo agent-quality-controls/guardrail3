@@ -301,11 +301,14 @@ fn golden_baseline() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r6 = rule6_errors(&errors);
-    assert!(
-        r6.is_empty(),
+    assert_eq!(
+        r6.len(),
+        0,
         "unmodified golden should have 0 rule6 errors, got {}: {r6:#?}",
         r6.len()
     );
+    assert_no_ts_apps(&r6);
+    assert_no_packages(&r6);
 }
 
 #[test]
@@ -330,10 +333,14 @@ fn gitkeep_alongside_cargo_toml() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r6 = rule6_errors(&errors);
-    assert!(
-        r6.is_empty(),
-        "gitkeep alongside Cargo.toml should not cause rule6 errors, got: {r6:#?}"
+    assert_eq!(
+        r6.len(),
+        0,
+        "gitkeep alongside Cargo.toml should not cause rule6 errors, got {}: {r6:#?}",
+        r6.len()
     );
+    assert_no_ts_apps(&r6);
+    assert_no_packages(&r6);
 }
 
 #[test]
@@ -348,23 +355,33 @@ fn gitkeep_alongside_hex_in_hex() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r6 = rule6_errors(&errors);
-    assert!(
-        r6.is_empty(),
-        "gitkeep alongside hex-in-hex crates/ should not cause rule6 errors, got: {r6:#?}"
+    assert_eq!(
+        r6.len(),
+        0,
+        "gitkeep alongside hex-in-hex crates/ should not cause rule6 errors, got {}: {r6:#?}",
+        r6.len()
     );
+    assert_no_ts_apps(&r6);
+    assert_no_packages(&r6);
 }
 
 #[test]
 fn hex_in_hex_valid() {
+    // NOTE: Redundant with golden_baseline — golden already validates hex-in-hex passes.
+    // Kept as explicit documentation that hex-in-hex structure is a rule6 concern.
     let tmp = copy_fixture();
     // Golden backend/mcp is a valid hex-in-hex structure — must pass with 0 rule6 errors.
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r6 = rule6_errors(&errors);
-    assert!(
-        r6.is_empty(),
-        "golden hex-in-hex should pass with 0 rule6 errors, got: {r6:#?}"
+    assert_eq!(
+        r6.len(),
+        0,
+        "golden hex-in-hex should pass with 0 rule6 errors, got {}: {r6:#?}",
+        r6.len()
     );
+    assert_no_ts_apps(&r6);
+    assert_no_packages(&r6);
 }
 
 // ============================================================================
@@ -375,18 +392,31 @@ fn hex_in_hex_valid() {
 fn hex_in_hex_inner_broken() {
     let tmp = copy_fixture();
     // Remove domain/ from inner hex — triggers structural error (not rule6, but rule 02/04).
+    // This tests cross-rule behavior: domain/ is a structural directory, not a leaf subdir,
+    // so removing it is a rule 02 violation (missing required container), NOT a rule 06 error.
     remove_dir(
         tmp.path(),
         "apps/backend/crates/adapters/inbound/mcp/crates/domain",
     );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
+    let r6 = rule6_errors(&errors);
+    // Rule 06 should produce 0 errors — domain/ is a structural container, not a leaf.
+    assert_eq!(
+        r6.len(),
+        0,
+        "removing structural domain/ from inner hex should not produce rule6 errors, got {}: {r6:#?}",
+        r6.len()
+    );
+    // But there should be arch errors from other rules (rule 02) about missing domain/.
     assert!(
         errors
             .iter()
             .any(|e| e.title.contains("domain") && e.file.as_deref().unwrap_or("").contains("mcp/crates")),
-        "expected error about missing domain in inner hex, got: {errors:#?}"
+        "expected error about missing domain in inner hex from other rules, got: {errors:#?}"
     );
+    assert_no_ts_apps(&r6);
+    assert_no_packages(&r6);
 }
 
 #[test]
@@ -403,15 +433,27 @@ fn hex_in_hex_inner_missing_multiple() {
     );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
+    let r6 = rule6_errors(&errors);
+    // Rule 06 should produce 0 errors — domain/ and app/ are structural containers, not leaves.
+    assert_eq!(
+        r6.len(),
+        0,
+        "removing structural dirs from inner hex should not produce rule6 errors, got {}: {r6:#?}",
+        r6.len()
+    );
+    // Other rules should flag the missing structural dirs.
     let inner_errors: Vec<_> = errors
         .iter()
         .filter(|e| e.file.as_deref().unwrap_or("").contains("mcp/crates"))
         .collect();
-    assert!(
-        inner_errors.len() >= 2,
-        "expected at least 2 inner hex errors (domain + app missing), got {}: {inner_errors:#?}",
+    assert_eq!(
+        inner_errors.len(),
+        2,
+        "expected exactly 2 inner hex errors (domain + app missing), got {}: {inner_errors:#?}",
         inner_errors.len()
     );
+    assert_no_ts_apps(&r6);
+    assert_no_packages(&r6);
 }
 
 #[test]
@@ -431,15 +473,15 @@ fn hex_in_hex_at_various_containers() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r6 = rule6_errors(&errors);
-    // types/ is now hex-in-hex, so rule6 should not flag it as missing Cargo.toml.
-    let types_errors: Vec<_> = r6
-        .iter()
-        .filter(|e| e.title.contains("types") && e.title.contains("missing Cargo.toml"))
-        .collect();
-    assert!(
-        types_errors.is_empty(),
-        "hex-in-hex in domain/ should be valid, got: {types_errors:#?}"
+    // types/ is now hex-in-hex, so total rule6 count should be 0.
+    assert_eq!(
+        r6.len(),
+        0,
+        "hex-in-hex in domain/ should produce 0 rule6 errors, got {}: {r6:#?}",
+        r6.len()
     );
+    assert_no_ts_apps(&r6);
+    assert_no_packages(&r6);
 }
 
 #[test]
@@ -462,14 +504,15 @@ fn triple_nested_hex_valid() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r6 = rule6_errors(&errors);
-    let transport_errors: Vec<_> = r6
-        .iter()
-        .filter(|e| e.title.contains("transport") && e.title.contains("missing Cargo.toml"))
-        .collect();
-    assert!(
-        transport_errors.is_empty(),
-        "triple-nested hex-in-hex should be valid, got: {transport_errors:#?}"
+    // Total rule6 count should be 0 for valid triple-nested hex.
+    assert_eq!(
+        r6.len(),
+        0,
+        "triple-nested hex-in-hex should produce 0 rule6 errors, got {}: {r6:#?}",
+        r6.len()
     );
+    assert_no_ts_apps(&r6);
+    assert_no_packages(&r6);
 }
 
 // ============================================================================
@@ -490,6 +533,12 @@ fn subdir_with_only_gitkeep() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r6 = rule6_errors(&errors);
+    assert_eq!(
+        r6.len(),
+        1,
+        "expected exactly 1 total rule6 error for .gitkeep-only leaf subdir, got {}: {r6:#?}",
+        r6.len()
+    );
     let placeholder_errors: Vec<_> = r6
         .iter()
         .filter(|e| e.title.contains("placeholder"))
@@ -506,6 +555,9 @@ fn subdir_with_only_gitkeep() {
         "expected 'missing Cargo.toml' in title for .gitkeep-only leaf, got: '{}'",
         placeholder_errors[0].title
     );
+    assert_file_field(&r6);
+    assert_no_ts_apps(&r6);
+    assert_no_packages(&r6);
 }
 
 #[test]
@@ -521,6 +573,12 @@ fn subdir_is_file_not_dir() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r6 = rule6_errors(&errors);
+    assert_eq!(
+        r6.len(),
+        0,
+        "expected 0 total rule6 errors when adding a file (not dir), got {}: {r6:#?}",
+        r6.len()
+    );
     let file_errors: Vec<_> = r6
         .iter()
         .filter(|e| e.title.contains("not_a_dir"))
@@ -529,6 +587,8 @@ fn subdir_is_file_not_dir() {
         file_errors.is_empty(),
         "a file (not dir) should not be checked by rule 06, got: {file_errors:#?}"
     );
+    assert_no_ts_apps(&r6);
+    assert_no_packages(&r6);
 }
 
 #[test]
@@ -542,6 +602,12 @@ fn symlink_subdir() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r6 = rule6_errors(&errors);
+    assert_eq!(
+        r6.len(),
+        0,
+        "expected 0 total rule6 errors when adding a symlink, got {}: {r6:#?}",
+        r6.len()
+    );
     let link_errors: Vec<_> = r6
         .iter()
         .filter(|e| e.title.contains("link_to_core"))
@@ -550,6 +616,8 @@ fn symlink_subdir() {
         link_errors.is_empty(),
         "symlink should not be checked by rule 06 (not a dir), got: {link_errors:#?}"
     );
+    assert_no_ts_apps(&r6);
+    assert_no_packages(&r6);
 }
 
 #[test]
@@ -566,6 +634,12 @@ fn permission_denied_subdir() {
     std::fs::set_permissions(&target, restore).expect("chmod restore");
     let errors = arch_errors(&results);
     let r6 = rule6_errors(&errors);
+    assert_eq!(
+        r6.len(),
+        1,
+        "expected exactly 1 total rule6 error for permission-denied subdir, got {}: {r6:#?}",
+        r6.len()
+    );
     let core_errors: Vec<_> = r6
         .iter()
         .filter(|e| e.title.contains("core") && e.title.contains("missing Cargo.toml"))
@@ -576,6 +650,9 @@ fn permission_denied_subdir() {
         "expected 1 error for permission-denied subdir (Cargo.toml unreadable), got {}: {core_errors:#?}",
         core_errors.len()
     );
+    assert_file_field(&r6);
+    assert_no_ts_apps(&r6);
+    assert_no_packages(&r6);
 }
 
 #[test]
@@ -591,6 +668,12 @@ fn cargo_toml_exists_but_empty() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r6 = rule6_errors(&errors);
+    assert_eq!(
+        r6.len(),
+        0,
+        "expected 0 total rule6 errors for empty Cargo.toml (content not checked), got {}: {r6:#?}",
+        r6.len()
+    );
     let core_errors: Vec<_> = r6
         .iter()
         .filter(|e| e.title.contains("core"))
@@ -599,6 +682,8 @@ fn cargo_toml_exists_but_empty() {
         core_errors.is_empty(),
         "empty Cargo.toml should still satisfy rule 06 (content not checked), got: {core_errors:#?}"
     );
+    assert_no_ts_apps(&r6);
+    assert_no_packages(&r6);
 }
 
 #[test]
@@ -613,6 +698,12 @@ fn crates_dir_exists_but_empty() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r6 = rule6_errors(&errors);
+    assert_eq!(
+        r6.len(),
+        1,
+        "expected exactly 1 total rule6 error for hollow subdir (empty crates/ dir), got {}: {r6:#?}",
+        r6.len()
+    );
     let hollow_errors: Vec<_> = r6
         .iter()
         .filter(|e| e.title.contains("hollow"))
@@ -628,6 +719,9 @@ fn crates_dir_exists_but_empty() {
         "expected 'missing Cargo.toml' (empty crates/ treated as no crates/), got: '{}'",
         hollow_errors[0].title
     );
+    assert_file_field(&r6);
+    assert_no_ts_apps(&r6);
+    assert_no_packages(&r6);
 }
 
 // ============================================================================
@@ -652,6 +746,12 @@ fn ts_apps_not_checked() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r6 = rule6_errors(&errors);
+    assert_eq!(
+        r6.len(),
+        0,
+        "expected 0 total rule6 errors from TS apps, got {}: {r6:#?}",
+        r6.len()
+    );
     let ts_errors: Vec<_> = r6
         .iter()
         .filter(|e| e.title.contains("admin") || e.title.contains("landing"))
@@ -660,7 +760,8 @@ fn ts_apps_not_checked() {
         ts_errors.is_empty(),
         "TS apps should not produce rule 06 errors, got: {ts_errors:#?}"
     );
-    assert_no_ts_apps(&errors);
+    assert_no_ts_apps(&r6);
+    assert_no_packages(&r6);
 }
 
 #[test]
@@ -680,6 +781,12 @@ fn packages_not_checked() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r6 = rule6_errors(&errors);
+    assert_eq!(
+        r6.len(),
+        0,
+        "expected 0 total rule6 errors from packages, got {}: {r6:#?}",
+        r6.len()
+    );
     let pkg_errors: Vec<_> = r6
         .iter()
         .filter(|e| e.title.contains("shared-types") || e.title.contains("ui-kit"))
@@ -688,7 +795,8 @@ fn packages_not_checked() {
         pkg_errors.is_empty(),
         "packages should not produce rule 06 errors, got: {pkg_errors:#?}"
     );
-    assert_no_packages(&errors);
+    assert_no_ts_apps(&r6);
+    assert_no_packages(&r6);
 }
 
 #[test]
@@ -718,6 +826,12 @@ fn new_app_gets_checked() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r6 = rule6_errors(&errors);
+    assert_eq!(
+        r6.len(),
+        1,
+        "expected exactly 1 total rule6 error for new scheduler app, got {}: {r6:#?}",
+        r6.len()
+    );
     let scheduler_errors: Vec<_> = r6
         .iter()
         .filter(|e| e.title.contains("scheduler") && e.title.contains("invalid_leaf"))
@@ -733,6 +847,9 @@ fn new_app_gets_checked() {
         "expected 'missing Cargo.toml' for scheduler invalid leaf, got: '{}'",
         scheduler_errors[0].title
     );
+    assert_file_field(&r6);
+    assert_no_ts_apps(&r6);
+    assert_no_packages(&r6);
 }
 
 #[test]
@@ -773,6 +890,8 @@ fn inner_hex_leaf_invalid_outer_clean() {
         outer_errors.is_empty(),
         "outer apps should be clean, got: {outer_errors:#?}"
     );
+    assert_no_ts_apps(&r6);
+    assert_no_packages(&r6);
 }
 
 #[test]
@@ -787,6 +906,12 @@ fn inner_hex_label_prefix_correct() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r6 = rule6_errors(&errors);
+    assert_eq!(
+        r6.len(),
+        1,
+        "expected exactly 1 total rule6 error for nested orphan, got {}: {r6:#?}",
+        r6.len()
+    );
     let nested: Vec<_> = r6
         .iter()
         .filter(|e| e.title.contains("nested_orphan"))
@@ -799,6 +924,9 @@ fn inner_hex_label_prefix_correct() {
         "expected nested label path in title, got: '{}'",
         nested[0].title
     );
+    assert_file_field(&r6);
+    assert_no_ts_apps(&r6);
+    assert_no_packages(&r6);
 }
 
 #[test]
@@ -818,6 +946,13 @@ fn idempotent_results() {
     let errors2 = arch_errors(&results2);
     let r6_2 = rule6_errors(&errors2);
 
+    // Absolute count: exactly 1 orphan added, exactly 1 rule6 error expected.
+    assert_eq!(
+        r6_1.len(),
+        1,
+        "expected exactly 1 rule6 error for single orphan, got {}: {r6_1:#?}",
+        r6_1.len()
+    );
     assert_eq!(
         r6_1.len(),
         r6_2.len(),
@@ -830,6 +965,8 @@ fn idempotent_results() {
         assert_eq!(a.message, b.message, "idempotent: message mismatch");
         assert_eq!(a.file, b.file, "idempotent: file mismatch");
     }
+    assert_no_ts_apps(&r6_1);
+    assert_no_packages(&r6_1);
 }
 
 #[test]
@@ -867,6 +1004,14 @@ fn different_breakage_per_app() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r6 = rule6_errors(&errors);
+
+    // Total: 1 devctl orphan + 1 worker conflict + 1 inner hex orphan = 3
+    assert_eq!(
+        r6.len(),
+        3,
+        "expected exactly 3 total rule6 errors (1 devctl + 1 worker + 1 inner hex), got {}: {r6:#?}",
+        r6.len()
+    );
 
     // devctl: missing Cargo.toml
     let devctl_errs: Vec<_> = r6
@@ -919,7 +1064,7 @@ fn different_breakage_per_app() {
         inner_errs[0].file
     );
 
-    assert_file_field(&errors);
-    assert_no_ts_apps(&errors);
-    assert_no_packages(&errors);
+    assert_file_field(&r6);
+    assert_no_ts_apps(&r6);
+    assert_no_packages(&r6);
 }
