@@ -1608,3 +1608,180 @@ fn missing_plus_loose_combo() {
     assert_no_ts_apps(&errors);
     assert_no_packages(&errors);
 }
+
+// -----------------------------------------------------------------------
+// Round 3: parity gaps + scenario gaps
+// -----------------------------------------------------------------------
+
+#[test]
+fn missing_inbound_inner_hex_only() {
+    // Parity with rule_02's missing_adapters_inner_hex_only
+    // Remove only inbound/ from inner hex adapters/, nothing else
+    let tmp = copy_golden();
+    remove_dir(tmp.path(), &format!("{INNER_HEX}/adapters/inbound"));
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+    let r3 = rule3_errors(&errors);
+    assert_eq!(r3.len(), 1, "expected 1 error from inner hex only, got: {r3:#?}");
+    assert!(r3[0].title.contains("missing") && r3[0].title.contains("inbound"),
+        "expected missing inbound error, got: {}", r3[0].title);
+    assert!(r3[0].file.as_deref().unwrap_or("").contains("mcp/crates"),
+        "expected inner hex file path, got: {:?}", r3[0].file);
+    assert!(r3[0].title.contains("mcp/crates"),
+        "expected inner hex label_prefix in title, got: {}", r3[0].title);
+    // Verify outer apps are clean
+    assert!(!r3.iter().any(|e| e.title.contains("devctl")), "devctl should be clean");
+    assert!(!r3.iter().any(|e| e.title.contains("worker")), "worker should be clean");
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
+}
+
+#[test]
+fn loose_cargo_toml_in_structural_dir() {
+    // Parity with rule_02's loose_cargo_toml_in_crates
+    let tmp = copy_golden();
+    for dir in &all_structural_dirs() {
+        write_file(tmp.path(), &format!("{dir}/Cargo.toml"), "[package]\nname = \"stray\"");
+    }
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+    let r3 = rule3_errors(&errors);
+    let loose: Vec<_> = r3.iter().filter(|e| e.title.contains("loose files")).collect();
+    assert_eq!(loose.len(), 8, "expected 8 loose file errors (1 per structural dir), got: {loose:#?}");
+    // Verify each error's message mentions Cargo.toml
+    for err in &loose {
+        assert!(err.message.contains("Cargo.toml"),
+            "expected Cargo.toml in message, got: {}", err.message);
+    }
+    assert_per_app(&r3);
+    assert_inner_hex(&r3);
+    assert_file_field(&r3);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
+}
+
+#[test]
+fn loose_gitignore_not_gitkeep() {
+    // Parity with rule_02's loose_gitignore_not_gitkeep
+    let tmp = copy_golden();
+    for dir in &all_structural_dirs() {
+        write_file(tmp.path(), &format!("{dir}/.gitignore"), "target/");
+    }
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+    let r3 = rule3_errors(&errors);
+    let loose: Vec<_> = r3.iter().filter(|e| e.title.contains("loose files")).collect();
+    assert_eq!(loose.len(), 8, "expected 8 loose file errors, got: {loose:#?}");
+    // .gitignore is NOT .gitkeep — should be flagged
+    for err in &loose {
+        assert!(err.message.contains(".gitignore"),
+            "expected .gitignore in message, got: {}", err.message);
+    }
+    assert_per_app(&r3);
+    assert_inner_hex(&r3);
+    assert_file_field(&r3);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
+}
+
+#[test]
+fn dangling_symlink_silently_skipped() {
+    // Scenario: dangling symlink in adapters/ — DirEntry::file_type() may return Ok(symlink)
+    // or may vary by platform. The symlink should at minimum be caught as a loose file.
+    let tmp = copy_golden();
+    for dir in &all_structural_dirs() {
+        let target = tmp.path().join(format!("{dir}/phantom"));
+        std::os::unix::fs::symlink("/nonexistent/target/that/does/not/exist", &target)
+            .expect("create dangling symlink");
+    }
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+    let r3 = rule3_errors(&errors);
+    // Dangling symlink: file_type() returns Ok(symlink type) on Linux/macOS.
+    // is_dir() is false for symlinks, so it should appear in check_loose_files.
+    // Expected: 8 loose file errors (1 per dir, mentioning "phantom")
+    let loose: Vec<_> = r3.iter().filter(|e| e.title.contains("loose files")).collect();
+    assert_eq!(loose.len(), 8, "expected 8 loose file errors for dangling symlinks, got: {loose:#?}");
+    for err in &loose {
+        assert!(err.message.contains("phantom"),
+            "expected 'phantom' in message, got: {}", err.message);
+    }
+    assert_per_app(&r3);
+    assert_inner_hex(&r3);
+    assert_file_field(&r3);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
+}
+
+#[test]
+fn outbound_wrong_case_tested() {
+    // Scenario hunter gap #6: only Inbound wrong case was tested, not Outbound
+    let tmp = copy_golden();
+    for dir in &all_structural_dirs() {
+        std::fs::create_dir_all(tmp.path().join(format!("{dir}/Outbound"))).expect("mkdir");
+    }
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+    let r3 = rule3_errors(&errors);
+    // On case-sensitive FS: Outbound != outbound, flagged as unexpected. 8 errors.
+    // On case-insensitive FS: Outbound and outbound merge, 0 unexpected errors.
+    if cfg!(target_os = "macos") {
+        // Case-insensitive: creating Outbound/ when outbound/ exists is a no-op
+        // Check if the FS is case-sensitive by probing
+        let probe = tmp.path().join("apps/devctl/crates/adapters/OUTBOUND_PROBE");
+        let probe_lower = tmp.path().join("apps/devctl/crates/adapters/outbound_probe");
+        std::fs::create_dir_all(&probe).expect("mkdir");
+        let is_case_insensitive = probe_lower.exists();
+        let _ = std::fs::remove_dir(&probe);
+        if is_case_insensitive {
+            // Case-insensitive: Outbound/ merges with outbound/, no unexpected error
+            // But we should still have 0 rule3 errors
+            assert!(r3.is_empty() || r3.iter().all(|e| !e.title.contains("Outbound")),
+                "case-insensitive FS should not flag Outbound, got: {r3:#?}");
+        } else {
+            assert_eq!(r3.len(), 8, "case-sensitive: expected 8 unexpected Outbound errors, got: {r3:#?}");
+        }
+    } else {
+        // Linux: always case-sensitive
+        assert_eq!(r3.len(), 8, "expected 8 unexpected Outbound errors, got: {r3:#?}");
+        for err in &r3 {
+            assert!(err.title.contains("unexpected") && err.title.contains("Outbound"),
+                "expected unexpected Outbound, got: {}", err.title);
+        }
+    }
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
+}
+
+#[test]
+fn gitkeep_plus_partial_required_dirs() {
+    // Scenario hunter gap #9: .gitkeep + only inbound/ (no outbound/)
+    let tmp = copy_golden();
+    for dir in &all_structural_dirs() {
+        remove_dir(tmp.path(), &format!("{dir}/outbound"));
+        write_file(tmp.path(), &format!("{dir}/.gitkeep"), "");
+    }
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+    let r3 = rule3_errors(&errors);
+    // adapters/ and ports/ still have inbound/ + .gitkeep
+    // list_dir returns entries (non-empty), so no early return
+    // dir_names = ["inbound"] — outbound missing
+    // .gitkeep is a file, not flagged as loose (name == .gitkeep)
+    // Expected: 1 missing outbound per dir. But removing outbound/ from backend outer
+    // adapters destroys inner hex? No — outbound/ is a sibling of inbound/, removing
+    // outbound/ doesn't affect the inbound/mcp path. So all 8 dirs produce errors.
+    // Wait: ALL_ADAPTERS_DIRS[3] is inner hex adapters. Removing outbound/ from inner hex
+    // adapters is fine. And ALL_PORTS_DIRS[3] is inner hex ports. Removing outbound/ from
+    // inner hex ports is fine (ports/outbound/.gitkeep existed there).
+    let missing: Vec<_> = r3.iter().filter(|e| e.title.contains("missing") && e.title.contains("outbound")).collect();
+    assert_eq!(missing.len(), 8, "expected 8 missing outbound errors, got: {missing:#?}");
+    // .gitkeep should NOT be in any loose file error
+    let loose: Vec<_> = r3.iter().filter(|e| e.title.contains("loose")).collect();
+    assert!(loose.is_empty(), "expected 0 loose file errors (.gitkeep allowed), got: {loose:#?}");
+    assert_per_app(&r3);
+    assert_inner_hex(&r3);
+    assert_file_field(&r3);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
+}
