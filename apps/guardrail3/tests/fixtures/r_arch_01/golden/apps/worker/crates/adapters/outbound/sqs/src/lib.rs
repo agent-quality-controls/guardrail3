@@ -1,1 +1,1 @@
-// sqs adapter
+// outbound sqs adapter

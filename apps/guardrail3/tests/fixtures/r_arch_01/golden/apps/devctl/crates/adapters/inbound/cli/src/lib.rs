@@ -1,1 +1,1 @@
-// cli lib
+// inbound cli adapter

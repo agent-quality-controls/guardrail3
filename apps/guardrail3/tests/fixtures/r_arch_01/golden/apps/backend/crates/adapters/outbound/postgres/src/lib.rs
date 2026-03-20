@@ -1,1 +1,1 @@
-// postgres adapter
+// outbound postgres adapter

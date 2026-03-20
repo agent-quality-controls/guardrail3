@@ -1,1 +1,1 @@
-// queue port trait
+// outbound queue port

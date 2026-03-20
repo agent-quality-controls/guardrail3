@@ -1,1 +1,1 @@
-// port traits
+// outbound traits

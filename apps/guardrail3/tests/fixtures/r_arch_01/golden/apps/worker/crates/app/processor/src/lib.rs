@@ -1,1 +1,1 @@
-// job processor
+// app processor

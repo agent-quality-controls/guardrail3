@@ -1,1 +1,1 @@
-// db adapter
+// outbound db adapter

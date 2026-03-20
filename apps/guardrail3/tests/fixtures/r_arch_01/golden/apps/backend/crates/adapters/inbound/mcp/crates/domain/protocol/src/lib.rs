@@ -1,1 +1,1 @@
-// mcp protocol types
+// mcp domain protocol
