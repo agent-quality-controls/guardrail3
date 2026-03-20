@@ -15,7 +15,7 @@ use guardrail3::domain::report::{CheckResult, Severity};
 // check_single_app_structure: if src/modules/ missing → Severity::Warn
 // ============================================================================
 
-const TS_APPS: &[&str] = &["admin", "landing"];
+const TS_APPS: &[&str] = &["admin", "portal", "landing"];
 
 fn t_arch_01_warns(results: &[CheckResult]) -> Vec<&CheckResult> {
     results
@@ -145,14 +145,15 @@ fn missing_modules_is_warn_not_error() {
 #[test]
 fn all_ts_apps_missing_modules() {
     let tmp = copy_fixture();
-    // Remove admin's modules — landing already has no modules
+    // Remove modules/ from ALL TS service apps — landing already has no modules
     remove_dir(tmp.path(), "apps/admin/src/modules");
+    remove_dir(tmp.path(), "apps/portal/src/modules");
     let results = run_check(tmp.path());
     let warns = t_arch_01_warns(&results);
     assert_eq!(
         warns.len(),
-        2,
-        "expected 2 warnings (admin + landing), got {}: {warns:#?}",
+        3,
+        "expected 3 warnings (admin + portal + landing), got {}: {warns:#?}",
         warns.len()
     );
     // Per-app attribution: each TS app must appear

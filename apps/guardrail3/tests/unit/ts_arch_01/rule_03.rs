@@ -15,6 +15,7 @@ use guardrail3::domain::report::CheckResult;
 
 const ADAPTERS: &str = "apps/admin/src/modules/adapters";
 const PORTS: &str = "apps/admin/src/modules/ports";
+const TS_SERVICE_APPS: &[&str] = &["admin", "portal"];
 
 /// All 4 inbound/outbound locations in admin.
 const ALL_IO_DIRS: &[&str] = &[
@@ -193,19 +194,37 @@ fn missing_both_in_ports() {
 #[test]
 fn missing_all_four() {
     let tmp = copy_fixture();
+    // Break ALL TS service apps (admin + portal)
     for dir in ALL_IO_DIRS {
         remove_dir(tmp.path(), dir);
     }
+    // Portal: remove all 4 io dirs
+    // (removing adapters/inbound destroys payments inner hex, adapters/outbound destroys ai-chat — both unreachable)
+    remove_dir(tmp.path(), "apps/portal/src/modules/adapters/inbound");
+    remove_dir(tmp.path(), "apps/portal/src/modules/adapters/outbound");
+    remove_dir(tmp.path(), "apps/portal/src/modules/ports/inbound");
+    remove_dir(tmp.path(), "apps/portal/src/modules/ports/outbound");
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
-    assert_eq!(r3.len(), 4, "expected 4 missing errors (2 adapters + 2 ports), got {}: {r3:#?}", r3.len());
+    // 4 dirs * 2 apps = 8 errors
+    assert_eq!(r3.len(), 8, "expected 8 missing errors (4 per app * 2 apps), got {}: {r3:#?}", r3.len());
     // Per-parent attribution
     let adapters_errors: Vec<_> = r3.iter().filter(|e| e.title.contains("adapters")).collect();
     let ports_errors: Vec<_> = r3.iter().filter(|e| e.title.contains("ports")).collect();
-    assert_eq!(adapters_errors.len(), 2, "expected 2 adapters errors: {r3:#?}");
-    assert_eq!(ports_errors.len(), 2, "expected 2 ports errors: {r3:#?}");
-    assert_standard(&r3, &errors);
+    assert_eq!(adapters_errors.len(), 4, "expected 4 adapters errors (2 per app): {r3:#?}");
+    assert_eq!(ports_errors.len(), 4, "expected 4 ports errors (2 per app): {r3:#?}");
+    // Per-app attribution
+    for app in TS_SERVICE_APPS {
+        assert!(
+            r3.iter().any(|e| e.title.contains(app)),
+            "expected error for app '{app}', got: {r3:#?}"
+        );
+    }
+    assert_file_field_structural(&r3);
+    assert_no_rust_apps(&errors);
+    assert_no_packages(&errors);
+    assert_no_landing(&errors);
 }
 
 // ============================================================================
@@ -410,31 +429,61 @@ fn missing_plus_loose() {
 #[test]
 fn all_three_violations() {
     let tmp = copy_fixture();
+    // admin: all 3 violation types in adapters/
     remove_dir(tmp.path(), "apps/admin/src/modules/adapters/inbound");
     write_file(tmp.path(), &format!("{ADAPTERS}/middleware/a.ts"), "");
     write_file(tmp.path(), &format!("{ADAPTERS}/stray.ts"), "// stray");
+    // portal: all 3 violation types in ports/ (avoid adapters/ to not destroy inner hexes)
+    remove_dir(tmp.path(), "apps/portal/src/modules/ports/inbound");
+    write_file(tmp.path(), "apps/portal/src/modules/ports/shared/types.ts", "");
+    write_file(tmp.path(), "apps/portal/src/modules/ports/stray.ts", "// stray");
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
-    assert_eq!(r3.len(), 3, "expected 3 errors (missing + unexpected + loose), got {}: {r3:#?}", r3.len());
+    // 3 violations * 2 apps = 6 errors
+    assert_eq!(r3.len(), 6, "expected 6 errors (3 per app * 2 apps), got {}: {r3:#?}", r3.len());
     assert!(r3.iter().any(|e| e.title.contains("missing")), "expected missing");
     assert!(r3.iter().any(|e| e.title.contains("unexpected")), "expected unexpected");
     assert!(r3.iter().any(|e| e.title.contains("loose files")), "expected loose");
-    assert_standard(&r3, &errors);
+    for app in TS_SERVICE_APPS {
+        assert!(
+            r3.iter().any(|e| e.title.contains(app)),
+            "expected error for app '{app}', got: {r3:#?}"
+        );
+    }
+    assert_file_field_structural(&r3);
+    assert_no_rust_apps(&errors);
+    assert_no_packages(&errors);
+    assert_no_landing(&errors);
 }
 
 #[test]
 fn violations_in_both_adapters_and_ports() {
     let tmp = copy_fixture();
+    // admin: missing in adapters + ports
     remove_dir(tmp.path(), "apps/admin/src/modules/adapters/inbound");
     remove_dir(tmp.path(), "apps/admin/src/modules/ports/outbound");
+    // portal: missing in adapters + ports
+    // (removing adapters/inbound destroys payments inner hex — unreachable, no cascade)
+    remove_dir(tmp.path(), "apps/portal/src/modules/adapters/inbound");
+    remove_dir(tmp.path(), "apps/portal/src/modules/ports/outbound");
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
-    assert_eq!(r3.len(), 2, "expected 2 errors (1 adapters + 1 ports), got {}: {r3:#?}", r3.len());
+    // 2 violations * 2 apps = 4 errors
+    assert_eq!(r3.len(), 4, "expected 4 errors (2 per app * 2 apps), got {}: {r3:#?}", r3.len());
     assert!(r3.iter().any(|e| e.title.contains("adapters") && e.title.contains("inbound")), "expected adapters/inbound");
     assert!(r3.iter().any(|e| e.title.contains("ports") && e.title.contains("outbound")), "expected ports/outbound");
-    assert_standard(&r3, &errors);
+    for app in TS_SERVICE_APPS {
+        assert!(
+            r3.iter().any(|e| e.title.contains(app)),
+            "expected error for app '{app}', got: {r3:#?}"
+        );
+    }
+    assert_file_field_structural(&r3);
+    assert_no_rust_apps(&errors);
+    assert_no_packages(&errors);
+    assert_no_landing(&errors);
 }
 
 // ============================================================================
