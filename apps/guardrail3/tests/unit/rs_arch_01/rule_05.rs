@@ -345,7 +345,7 @@ fn gitkeep_alongside_subdirs() {
 #[test]
 fn files_but_no_subdirs() {
     // Remove all subdirs, add mod.rs to one container per app.
-    // Expected: empty-container error with "contains files (mod.rs) but no crate subdirectories".
+    // Expected: empty-container error with "contains files (mod.rs) but no subdirectories".
     let tmp = copy_fixture();
 
     // devctl app/ — remove core/, add mod.rs
@@ -373,8 +373,8 @@ fn files_but_no_subdirs() {
         devctl_r5[0].message
     );
     assert!(
-        devctl_r5[0].message.contains("but no crate subdirectories"),
-        "expected 'but no crate subdirectories' in message, got: '{}'",
+        devctl_r5[0].message.contains("but no subdirectories"),
+        "expected 'but no subdirectories' in message, got: '{}'",
         devctl_r5[0].message
     );
     assert_file_field(&errors);
@@ -956,8 +956,8 @@ fn near_miss_gitkeep_names() {
         devctl_pi[0].message
     );
     assert!(
-        devctl_pi[0].message.contains("but no crate subdirectories"),
-        "expected 'but no crate subdirectories' in message, got: '{}'",
+        devctl_pi[0].message.contains("but no subdirectories"),
+        "expected 'but no subdirectories' in message, got: '{}'",
         devctl_pi[0].message
     );
 }
@@ -1168,7 +1168,7 @@ fn non_empty_gitkeep_prevents_error() {
 fn maximally_complex_empty_container() {
     // In one container: no subdirs, add unicode .gitkeep (not real), add dangling symlink,
     // add .DS_Store, add .git_keep near-miss. dir_names empty, has_gitkeep false,
-    // files = [all the junk]. Fires "contains files (...) but no crate subdirectories".
+    // files = [all the junk]. Fires "contains files (...) but no subdirectories".
     let tmp = copy_fixture();
     let container = "apps/devctl/crates/ports/inbound";
     remove_file(tmp.path(), &format!("{container}/.gitkeep"));
@@ -1200,8 +1200,8 @@ fn maximally_complex_empty_container() {
         devctl_pi[0].message
     );
     assert!(
-        devctl_pi[0].message.contains("but no crate subdirectories"),
-        "expected 'but no crate subdirectories' in message, got: '{}'",
+        devctl_pi[0].message.contains("but no subdirectories"),
+        "expected 'but no subdirectories' in message, got: '{}'",
         devctl_pi[0].message
     );
     // Verify at least some of the junk filenames appear in the message

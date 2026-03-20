@@ -1134,10 +1134,11 @@ fn near_miss_gitkeep_names() {
     }
 }
 
-/// Remove all subdirs from devctl/crates/app/ (leaving it empty or with only a
-/// loose file). Both check_05 "empty container" AND check_loose_files fire.
+/// Remove all subdirs from devctl/crates/app/ (leaving it with only a loose file).
+/// check_container_not_empty fires "empty container" with file listing — no separate
+/// "loose files" error (double-fire fix).
 #[test]
-fn container_with_only_loose_files_double_error() {
+fn container_with_only_loose_files_no_double_fire() {
     let tmp = copy_fixture();
     // Remove the "core" subdir from devctl/crates/app/
     super::helpers::remove_dir(tmp.path(), "apps/devctl/crates/app/core");
@@ -1150,7 +1151,7 @@ fn container_with_only_loose_files_double_error() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
 
-    // check_05 fires: "empty container" (no subdirs, no .gitkeep, but has files)
+    // check_container_not_empty fires: "empty container" with file listing in message
     let empty: Vec<_> = errors
         .iter()
         .filter(|e| e.title.contains("empty container") && e.title.contains("devctl"))
@@ -1161,25 +1162,22 @@ fn container_with_only_loose_files_double_error() {
         "expected 1 empty-container error for devctl app/, got {}: {empty:#?}",
         empty.len()
     );
+    // The empty-container message should list the offending file
+    assert!(
+        empty[0].message.contains("mod.rs"),
+        "empty-container message should list 'mod.rs', got: '{}'",
+        empty[0].message
+    );
 
-    // check_loose_files also fires: "loose files"
+    // No separate "loose files" error — double-fire fixed
     let loose: Vec<_> = errors
         .iter()
         .filter(|e| e.title.contains("loose files") && e.title.contains("devctl") && e.title.contains("app"))
         .collect();
     assert_eq!(
         loose.len(),
-        1,
-        "expected 1 loose-file error for devctl app/, got {}: {loose:#?}",
-        loose.len()
-    );
-
-    // Document: both fire for the same directory
-    assert!(
-        empty.len() + loose.len() >= 2,
-        "both empty-container and loose-file errors should fire for a container with \
-         only loose files (no subdirs, no .gitkeep). empty={}, loose={}",
-        empty.len(),
+        0,
+        "should NOT have a separate loose-file error (double-fire fix), got {}: {loose:#?}",
         loose.len()
     );
 }
