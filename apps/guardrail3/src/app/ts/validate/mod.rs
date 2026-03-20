@@ -2,6 +2,7 @@ pub mod ast_helpers;
 pub mod config_files;
 pub mod eslint_audit;
 mod eslint_check;
+pub mod eslint_parser;
 mod eslint_plugin_checks;
 mod eslint_rule_infra;
 pub mod i18n_check;
@@ -44,20 +45,22 @@ pub fn run(
     });
 
     // ESLint plugin configuration (core — always run)
-    // Use first eslint config found by crawler
-    if let Some(eslint_path) = crawl.eslint_configs.first() {
-        if let Some(eslint_content) = fs.read_file(eslint_path) {
-            let mut plugin_results = Vec::new();
-            eslint_plugin_checks::check_core_plugins(
-                &eslint_content,
-                eslint_path,
-                &mut plugin_results,
-            );
-            report.add_section(Section {
-                name: "ESLint plugin configuration".to_owned(),
-                results: plugin_results,
-            });
-        }
+    // Parse the first eslint config once and reuse for all plugin checks
+    let parsed_eslint = crawl.eslint_configs.first().and_then(|eslint_path| {
+        fs.read_file(eslint_path).map(|content| {
+            let eslint_cfg = eslint_parser::parse_eslint_config(&content)
+                .unwrap_or_else(|| eslint_parser::EslintConfig::fallback(content));
+            (eslint_path.clone(), eslint_cfg)
+        })
+    });
+
+    if let Some((ref eslint_path, ref eslint_cfg)) = parsed_eslint {
+        let mut plugin_results = Vec::new();
+        eslint_plugin_checks::check_core_plugins(eslint_cfg, eslint_path, &mut plugin_results);
+        report.add_section(Section {
+            name: "ESLint plugin configuration".to_owned(),
+            results: plugin_results,
+        });
     }
 
     // Plugin packages in devDependencies
@@ -106,19 +109,17 @@ pub fn run(
     // Content-profile checks (only if project has content-type apps)
     if content_enabled {
         // ESLint content plugins (jsx-a11y, tailwind-ban)
-        if let Some(eslint_path) = crawl.eslint_configs.first() {
-            if let Some(eslint_content) = fs.read_file(eslint_path) {
-                let mut content_plugin_results = Vec::new();
-                eslint_plugin_checks::check_content_plugins(
-                    &eslint_content,
-                    eslint_path,
-                    &mut content_plugin_results,
-                );
-                report.add_section(Section {
-                    name: "Content profile: ESLint accessibility".to_owned(),
-                    results: content_plugin_results,
-                });
-            }
+        if let Some((ref eslint_path, ref eslint_cfg)) = parsed_eslint {
+            let mut content_plugin_results = Vec::new();
+            eslint_plugin_checks::check_content_plugins(
+                eslint_cfg,
+                eslint_path,
+                &mut content_plugin_results,
+            );
+            report.add_section(Section {
+                name: "Content profile: ESLint accessibility".to_owned(),
+                results: content_plugin_results,
+            });
         }
 
         // Stylelint (T-STYL-01..05)

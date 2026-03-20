@@ -2,15 +2,10 @@ use std::path::Path;
 
 use crate::domain::report::{CheckResult, Severity};
 
+use super::eslint_parser::EslintConfig;
+
 /// A rule definition: (`check_id`, `rule_name`, `severity_if_missing`).
 pub type RuleDef = (&'static str, &'static str, Severity);
-
-/// Result of comparing an `ESLint` rule's actual value against the expected value.
-#[derive(Debug, PartialEq, Eq)]
-enum RuleValueResult {
-    Pass,
-    Fail,
-}
 
 #[allow(clippy::too_many_lines)] // reason: ESLint rule explanation maps many rules to descriptions sequentially
 /// Return a short explanation of what an `ESLint` rule does and why it matters.
@@ -131,9 +126,12 @@ fn eslint_rule_explanation(rule_name: &str) -> &'static str {
     }
 }
 
-#[allow(clippy::string_slice)] // reason: parsing known ASCII ESLint rule names
+/// Check an `ESLint` rule using the parsed config struct.
+///
+/// Looks up the rule in `config.rules`, verifies severity and optional numeric value.
+/// Rules that only exist as test overrides are treated as missing.
 pub fn check_eslint_rule(
-    content: &str,
+    config: &EslintConfig,
     eslint_path: &Path,
     id: &str,
     rule_name: &str,
@@ -143,7 +141,13 @@ pub fn check_eslint_rule(
 ) {
     let rule_explanation = eslint_rule_explanation(rule_name);
 
-    if !content.contains(rule_name) {
+    // Look up the rule — try both bare name and common prefixed variants
+    let rule_entry = find_rule(config, rule_name);
+
+    // Filter out test-override-only rules
+    let rule_entry = rule_entry.filter(|r| !r.is_test_override);
+
+    let Some(rule) = rule_entry else {
         results.push(CheckResult {
             id: id.to_owned(),
             severity: missing_severity,
@@ -157,12 +161,12 @@ pub fn check_eslint_rule(
             inventory: false,
         });
         return;
-    }
+    };
 
     if let Some(val) = expected_value {
-        let value_result = check_rule_value(content, rule_name, val);
+        let pass = check_rule_value(rule, val);
 
-        if value_result == RuleValueResult::Pass {
+        if pass {
             results.push(
                 CheckResult {
                     id: id.to_owned(),
@@ -205,8 +209,11 @@ pub fn check_eslint_rule(
     }
 }
 
+/// Check that an `ESLint` rule is present and set to "error" severity.
+///
+/// Rules that only exist as test overrides are treated as missing.
 pub fn check_eslint_rule_presence(
-    content: &str,
+    config: &EslintConfig,
     eslint_path: &Path,
     id: &str,
     rule_name: &str,
@@ -214,19 +221,42 @@ pub fn check_eslint_rule_presence(
     results: &mut Vec<CheckResult>,
 ) {
     let explanation = eslint_rule_explanation(rule_name);
-    if content.contains(rule_name) {
-        results.push(
-            CheckResult {
+
+    // Look up the rule — try both bare name and common prefixed variants
+    let rule_entry = find_rule(config, rule_name);
+
+    // Filter out test-override-only rules
+    let rule_entry = rule_entry.filter(|r| !r.is_test_override);
+
+    if let Some(rule) = rule_entry {
+        if rule.severity == "error" {
+            results.push(
+                CheckResult {
+                    id: id.to_owned(),
+                    severity: Severity::Info,
+                    title: format!("ESLint rule `{rule_name}` configured"),
+                    message: format!("`{rule_name}` found in ESLint config.{explanation}"),
+                    file: Some(eslint_path.display().to_string()),
+                    line: None,
+                    inventory: false,
+                }
+                .as_inventory(),
+            );
+        } else {
+            results.push(CheckResult {
                 id: id.to_owned(),
-                severity: Severity::Info,
-                title: format!("ESLint rule `{rule_name}` configured"),
-                message: format!("`{rule_name}` found in ESLint config.{explanation}"),
+                severity: missing_severity,
+                title: format!("ESLint rule `{rule_name}` not set to error"),
+                message: format!(
+                    "`{rule_name}` found but severity is `{}`, expected `error`.{explanation} \
+                     Update the severity in `eslint.config.mjs`.",
+                    rule.severity
+                ),
                 file: Some(eslint_path.display().to_string()),
                 line: None,
                 inventory: false,
-            }
-            .as_inventory(),
-        );
+            });
+        }
     } else {
         results.push(CheckResult {
             id: id.to_owned(),
@@ -243,78 +273,48 @@ pub fn check_eslint_rule_presence(
     }
 }
 
+/// Find a rule in the parsed config, trying the exact name first,
+/// then common prefixed variants (`@typescript-eslint/`, `import/`).
+fn find_rule<'a>(
+    config: &'a EslintConfig,
+    rule_name: &str,
+) -> Option<&'a super::eslint_parser::RuleConfig> {
+    // Exact match first
+    if let Some(r) = config.rules.get(rule_name) {
+        return Some(r);
+    }
+    // Try with @typescript-eslint/ prefix
+    let ts_prefixed = format!("@typescript-eslint/{rule_name}");
+    if let Some(r) = config.rules.get(&ts_prefixed) {
+        return Some(r);
+    }
+    // Try with import-x/ prefix (eslint-plugin-import-x)
+    let import_x_prefixed = format!("import-x/{rule_name}");
+    if let Some(r) = config.rules.get(&import_x_prefixed) {
+        return Some(r);
+    }
+    // Try with import/ prefix (legacy eslint-plugin-import)
+    let import_prefixed = format!("import/{rule_name}");
+    if let Some(r) = config.rules.get(&import_prefixed) {
+        return Some(r);
+    }
+    None
+}
+
 /// Check if a rule's configured value matches or is stricter than the expected value.
 ///
 /// For numeric values (e.g., max-lines: 200 vs expected 300), actual <= expected means
-/// stricter, which passes. For non-numeric values, falls back to exact string matching.
-fn check_rule_value(content: &str, rule_name: &str, expected_value: &str) -> RuleValueResult {
-    let lines: Vec<&str> = content.lines().collect();
-    let expected_num: Option<u64> = expected_value.parse().ok();
-
-    // Collect all number tokens found near the rule name (same line + up to 5 lines after)
-    for (i, line) in lines.iter().enumerate() {
-        if !line.contains(rule_name) {
-            continue;
+/// stricter, which passes. For non-numeric values, compares against the rule's severity.
+fn check_rule_value(rule: &super::eslint_parser::RuleConfig, expected_value: &str) -> bool {
+    if let Ok(expected_n) = expected_value.parse::<u32>() {
+        // Numeric comparison: rule must have a numeric_value that is <= expected (stricter)
+        if let Some(actual_n) = rule.numeric_value {
+            return actual_n <= expected_n;
         }
-
-        // Check same line and up to 5 lines after
-        let end = (i.saturating_add(6)).min(lines.len());
-        for check_line in lines.get(i..end).unwrap_or_default() {
-            if let Some(expected_n) = expected_num {
-                // Numeric comparison: stricter (<=) passes
-                if let Some(actual_n) = extract_number_from_line(check_line) {
-                    if actual_n <= expected_n {
-                        return RuleValueResult::Pass;
-                    }
-                    return RuleValueResult::Fail;
-                }
-            } else {
-                // Non-numeric: exact string match (with word boundary awareness)
-                if check_line.contains(expected_value) {
-                    return RuleValueResult::Pass;
-                }
-            }
-        }
+        // No numeric value found — fail
+        return false;
     }
 
-    RuleValueResult::Fail
-}
-
-/// Extract the first bare integer from a line (skipping things that look like rule names).
-///
-/// Looks for patterns like `: 200`, `max: 200`, `"max": 200`, etc.
-fn extract_number_from_line(line: &str) -> Option<u64> {
-    // Match digits preceded by non-alphanumeric (to avoid matching inside rule names)
-    let trimmed = line.trim();
-    // Skip comment lines
-    if trimmed.starts_with("//") || trimmed.starts_with('*') {
-        return None;
-    }
-    // Find numbers in the line — look for digit sequences
-    let mut chars = trimmed.char_indices().peekable();
-    while let Some((idx, ch)) = chars.next() {
-        if ch.is_ascii_digit() {
-            // Make sure it's not part of a word (like a rule name "T2")
-            if idx > 0 {
-                let prev = trimmed.as_bytes().get(idx.saturating_sub(1)).copied();
-                if prev.is_some_and(|c| c.is_ascii_alphanumeric() || c == b'_') {
-                    continue;
-                }
-            }
-            let start = idx;
-            let mut end = idx.saturating_add(1);
-            while let Some(&(next_idx, next_ch)) = chars.peek() {
-                if next_ch.is_ascii_digit() {
-                    end = next_idx.saturating_add(1);
-                    let _ = chars.next();
-                } else {
-                    break;
-                }
-            }
-            if let Ok(n) = trimmed.get(start..end).unwrap_or("").parse::<u64>() {
-                return Some(n);
-            }
-        }
-    }
-    None
+    // Non-numeric: check if the severity matches the expected value
+    rule.severity == expected_value
 }

@@ -34,6 +34,7 @@ ignore = "0.4"
 syn = { version = "2", features = ["full", "parsing", "visit"] }
 proc-macro2 = { version = "1", features = ["span-locations"] }
 tree-sitter = "0.26"
+tree-sitter-javascript = "0.25"
 tree-sitter-typescript = "0.23"
 garde = { workspace = true }
 quote = "1.0.45"

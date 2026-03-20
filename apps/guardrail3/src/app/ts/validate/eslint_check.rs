@@ -3,6 +3,7 @@ use std::path::{Path, PathBuf};
 use crate::domain::report::{CheckResult, Severity};
 use crate::ports::outbound::FileSystem;
 
+use super::eslint_parser::{self, EslintConfig};
 use super::eslint_rule_infra::{RuleDef, check_eslint_rule, check_eslint_rule_presence};
 
 pub fn check_eslint_config(
@@ -45,24 +46,32 @@ pub fn check_eslint_config(
             continue;
         };
 
-        check_eslint_value_rules(&content, eslint_path, results);
-        check_boundary_enforcement(&content, eslint_path, results);
-        check_eslint_presets(&content, eslint_path, results);
-        check_regex_ban(&content, eslint_path, results);
-        check_relaxed_rules(&content, eslint_path, results);
-        check_file_overrides(&content, eslint_path, results);
-        check_rule_presence_t40_t48(&content, eslint_path, results);
-        check_all_eslint_rules(&content, eslint_path, results);
-        check_test_relaxations(&content, eslint_path, results);
-        check_route_wrappers(&content, eslint_path, results);
-        check_process_env_ban(&content, eslint_path, results);
+        // Parse once with tree-sitter, fall back to raw content if parsing fails
+        let config = eslint_parser::parse_eslint_config(&content)
+            .unwrap_or_else(|| EslintConfig::fallback(content.clone()));
+
+        check_eslint_value_rules(&config, eslint_path, results);
+        check_boundary_enforcement(&config, eslint_path, results);
+        check_eslint_presets(&config, eslint_path, results);
+        check_regex_ban(&config, eslint_path, results);
+        check_relaxed_rules(&config, eslint_path, results);
+        check_file_overrides(&config, eslint_path, results);
+        check_rule_presence_t40_t48(&config, eslint_path, results);
+        check_all_eslint_rules(&config, eslint_path, results);
+        check_test_relaxations(&config, eslint_path, results);
+        check_route_wrappers(&config, eslint_path, results);
+        check_process_env_ban(&config, eslint_path, results);
     }
 }
 
 /// T2-T5: `ESLint` rules with expected values.
-fn check_eslint_value_rules(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
+fn check_eslint_value_rules(
+    config: &EslintConfig,
+    eslint_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     check_eslint_rule(
-        content,
+        config,
         eslint_path,
         "T2",
         "max-lines",
@@ -71,7 +80,7 @@ fn check_eslint_value_rules(content: &str, eslint_path: &Path, results: &mut Vec
         results,
     );
     check_eslint_rule(
-        content,
+        config,
         eslint_path,
         "T3",
         "max-lines-per-function",
@@ -80,7 +89,7 @@ fn check_eslint_value_rules(content: &str, eslint_path: &Path, results: &mut Vec
         results,
     );
     check_eslint_rule(
-        content,
+        config,
         eslint_path,
         "T4",
         "complexity",
@@ -89,7 +98,7 @@ fn check_eslint_value_rules(content: &str, eslint_path: &Path, results: &mut Vec
         results,
     );
     check_eslint_rule(
-        content,
+        config,
         eslint_path,
         "T5",
         "no-restricted-imports",
@@ -100,8 +109,12 @@ fn check_eslint_value_rules(content: &str, eslint_path: &Path, results: &mut Vec
 }
 
 /// T6: Boundary enforcement (boundaries or eslint-plugin-boundaries).
-fn check_boundary_enforcement(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
-    if content.contains("boundaries") || content.contains("eslint-plugin-boundaries") {
+fn check_boundary_enforcement(
+    config: &EslintConfig,
+    eslint_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
+    if config.has_boundaries {
         results.push(CheckResult {
             id: "T6".to_owned(),
             severity: Severity::Info,
@@ -131,10 +144,8 @@ fn check_boundary_enforcement(content: &str, eslint_path: &Path, results: &mut V
 }
 
 /// T-ESLP-15: `RegExp` ban presence check.
-fn check_regex_ban(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
-    // Check that RegExp is banned via no-restricted-globals or no-restricted-syntax with regex selector
-    let has_regexp_ban = content.contains("RegExp") && content.contains("no-restricted");
-    if has_regexp_ban {
+fn check_regex_ban(config: &EslintConfig, eslint_path: &Path, results: &mut Vec<CheckResult>) {
+    if config.has_regexp_ban {
         results.push(
             CheckResult {
                 id: "T-ESLP-15".to_owned(),
@@ -165,8 +176,12 @@ fn check_regex_ban(content: &str, eslint_path: &Path, results: &mut Vec<CheckRes
 }
 
 /// T-ESLP-13, T-ESLP-14: `ESLint` tseslint preset presence checks.
-fn check_eslint_presets(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
-    if content.contains("strictTypeChecked") {
+fn check_eslint_presets(config: &EslintConfig, eslint_path: &Path, results: &mut Vec<CheckResult>) {
+    if config
+        .presets
+        .iter()
+        .any(|p| p.contains("strictTypeChecked"))
+    {
         results.push(
             CheckResult {
                 id: "T-ESLP-13".to_owned(),
@@ -197,7 +212,11 @@ fn check_eslint_presets(content: &str, eslint_path: &Path, results: &mut Vec<Che
         });
     }
 
-    if content.contains("stylisticTypeChecked") {
+    if config
+        .presets
+        .iter()
+        .any(|p| p.contains("stylisticTypeChecked"))
+    {
         results.push(
             CheckResult {
                 id: "T-ESLP-14".to_owned(),
@@ -229,37 +248,34 @@ fn check_eslint_presets(content: &str, eslint_path: &Path, results: &mut Vec<Che
     }
 }
 
-/// T7: Lines containing "off" or "warn" — Info inventory.
-fn check_relaxed_rules(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
-    for (line_num, line) in content.lines().enumerate() {
-        let trimmed = line.trim();
-        if (trimmed.contains("\"off\"")
-            || trimmed.contains("'off'")
-            || trimmed.contains("\"warn\"")
-            || trimmed.contains("'warn'"))
-            && !trimmed.starts_with("//")
-            && !trimmed.starts_with('*')
-        {
+/// T7: Rules with severity "off" or "warn" (excluding test overrides).
+fn check_relaxed_rules(config: &EslintConfig, eslint_path: &Path, results: &mut Vec<CheckResult>) {
+    for (rule_name, rule) in &config.rules {
+        if rule.is_test_override {
+            continue;
+        }
+        if rule.severity == "off" || rule.severity == "warn" {
             results.push(CheckResult {
                 id: "T7".to_owned(),
                 severity: Severity::Info,
                 title: "ESLint rule relaxed to off/warn".to_owned(),
                 message: format!(
-                    "Rule set to `off` or `warn`: `{trimmed}`. Rules turned off disable protection entirely; \
+                    "Rule `{rule_name}` set to `{}`. Rules turned off disable protection entirely; \
                      rules set to `warn` allow the build to pass with violations. Review whether this relaxation \
-                     is justified and add `// EXCEPTION: <reason>` if intentional."
+                     is justified and add `// EXCEPTION: <reason>` if intentional.",
+                    rule.severity
                 ),
                 file: Some(eslint_path.display().to_string()),
-                line: Some(line_num.saturating_add(1)),
+                line: None,
                 inventory: false,
             }.as_inventory());
         }
     }
 }
 
-/// T8: File-specific overrides.
-fn check_file_overrides(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
-    for (line_num, line) in content.lines().enumerate() {
+/// T8: File-specific overrides (uses raw content for line-level reporting).
+fn check_file_overrides(config: &EslintConfig, eslint_path: &Path, results: &mut Vec<CheckResult>) {
+    for (line_num, line) in config.raw_content.lines().enumerate() {
         let trimmed = line.trim();
         if trimmed.contains("files:") || trimmed.contains("files =") {
             results.push(CheckResult {
@@ -279,9 +295,13 @@ fn check_file_overrides(content: &str, eslint_path: &Path, results: &mut Vec<Che
 }
 
 /// T40-T48: `ESLint` rule presence checks.
-fn check_rule_presence_t40_t48(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
+fn check_rule_presence_t40_t48(
+    config: &EslintConfig,
+    eslint_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     check_eslint_rule_presence(
-        content,
+        config,
         eslint_path,
         "T40",
         "no-floating-promises",
@@ -289,7 +309,7 @@ fn check_rule_presence_t40_t48(content: &str, eslint_path: &Path, results: &mut 
         results,
     );
     check_eslint_rule_presence(
-        content,
+        config,
         eslint_path,
         "T41",
         "no-explicit-any",
@@ -297,7 +317,7 @@ fn check_rule_presence_t40_t48(content: &str, eslint_path: &Path, results: &mut 
         results,
     );
     check_eslint_rule_presence(
-        content,
+        config,
         eslint_path,
         "T42",
         "no-console",
@@ -305,7 +325,7 @@ fn check_rule_presence_t40_t48(content: &str, eslint_path: &Path, results: &mut 
         results,
     );
     check_eslint_rule_presence(
-        content,
+        config,
         eslint_path,
         "T43",
         "eqeqeq",
@@ -313,7 +333,7 @@ fn check_rule_presence_t40_t48(content: &str, eslint_path: &Path, results: &mut 
         results,
     );
     check_eslint_rule_presence(
-        content,
+        config,
         eslint_path,
         "T44",
         "no-restricted-globals",
@@ -321,7 +341,7 @@ fn check_rule_presence_t40_t48(content: &str, eslint_path: &Path, results: &mut 
         results,
     );
     check_eslint_rule_presence(
-        content,
+        config,
         eslint_path,
         "T45",
         "no-cycle",
@@ -329,7 +349,7 @@ fn check_rule_presence_t40_t48(content: &str, eslint_path: &Path, results: &mut 
         results,
     );
     check_eslint_rule_presence(
-        content,
+        config,
         eslint_path,
         "T46",
         "max-dependencies",
@@ -337,7 +357,7 @@ fn check_rule_presence_t40_t48(content: &str, eslint_path: &Path, results: &mut 
         results,
     );
     check_eslint_rule_presence(
-        content,
+        config,
         eslint_path,
         "T47",
         "explicit-function-return-type",
@@ -345,7 +365,7 @@ fn check_rule_presence_t40_t48(content: &str, eslint_path: &Path, results: &mut 
         results,
     );
     check_eslint_rule_presence(
-        content,
+        config,
         eslint_path,
         "T48",
         "strict-boolean-expressions",
@@ -354,9 +374,13 @@ fn check_rule_presence_t40_t48(content: &str, eslint_path: &Path, results: &mut 
     );
 }
 
-/// T49: Test file relaxations.
-fn check_test_relaxations(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
-    for (line_num, line) in content.lines().enumerate() {
+/// T49: Test file relaxations (uses raw content for line-level reporting).
+fn check_test_relaxations(
+    config: &EslintConfig,
+    eslint_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
+    for (line_num, line) in config.raw_content.lines().enumerate() {
         let trimmed = line.trim();
         if (trimmed.contains("test") || trimmed.contains("spec"))
             && (trimmed.contains("files") || trimmed.contains("overrides"))
@@ -379,8 +403,8 @@ fn check_test_relaxations(content: &str, eslint_path: &Path, results: &mut Vec<C
 }
 
 /// T50: Route wrapper enforcement.
-fn check_route_wrappers(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
-    if content.contains("withBody") || content.contains("withRoute") {
+fn check_route_wrappers(config: &EslintConfig, eslint_path: &Path, results: &mut Vec<CheckResult>) {
+    if config.has_route_wrappers {
         results.push(
             CheckResult {
                 id: "T50".to_owned(),
@@ -413,8 +437,12 @@ fn check_route_wrappers(content: &str, eslint_path: &Path, results: &mut Vec<Che
 }
 
 /// T51: process.env ban.
-fn check_process_env_ban(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
-    if content.contains("process.env") {
+fn check_process_env_ban(
+    config: &EslintConfig,
+    eslint_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
+    if config.has_process_env_ban {
         results.push(CheckResult {
             id: "T51".to_owned(),
             severity: Severity::Info,
@@ -444,9 +472,12 @@ fn check_process_env_ban(content: &str, eslint_path: &Path, results: &mut Vec<Ch
 }
 
 /// Check all expected `ESLint` rules from the template.
-/// Each rule is checked for presence (`content.contains(rule_name)`).
-fn check_all_eslint_rules(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
-    // (check_id, rule_name, severity_if_missing)
+/// Each rule is checked for presence in the parsed config with severity "error".
+fn check_all_eslint_rules(
+    config: &EslintConfig,
+    eslint_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     let rules: &[RuleDef] = &[
         ("T60", "no-misused-promises", Severity::Error),
         ("T61", "await-thenable", Severity::Error),
@@ -475,6 +506,6 @@ fn check_all_eslint_rules(content: &str, eslint_path: &Path, results: &mut Vec<C
     ];
 
     for (id, rule_name, severity) in rules {
-        check_eslint_rule_presence(content, eslint_path, id, rule_name, *severity, results);
+        check_eslint_rule_presence(config, eslint_path, id, rule_name, *severity, results);
     }
 }
