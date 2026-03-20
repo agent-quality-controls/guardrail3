@@ -1,0 +1,10 @@
+[workspace]
+members = [
+    "crates/domain/types",
+    "crates/app/core",
+    "crates/adapters/inbound/cli/crates/domain/models",
+    "crates/adapters/inbound/cli/crates/app/handlers",
+    "crates/adapters/inbound/cli/crates/adapters/inbound/clap-defs",
+    "crates/adapters/outbound/db",
+]
+resolver = "2"

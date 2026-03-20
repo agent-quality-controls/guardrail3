@@ -79,27 +79,37 @@ fn check_single_app(
         });
     }
 
-    // crates/ must exist
-    let crates_dir = app_dir.join("crates");
+    check_crates_dir(fs, name, app_dir, "crates", results);
+}
+
+/// Check a `crates/` directory for hex arch structure.
+/// Reusable for both top-level apps and hex-in-hex recursion.
+fn check_crates_dir(
+    fs: &dyn FileSystem,
+    name: &str,
+    parent_dir: &Path,
+    label_prefix: &str,
+    results: &mut Vec<CheckResult>,
+) {
+    let crates_dir = parent_dir.join("crates");
     let crates_entries = fs.list_dir(&crates_dir);
     if crates_entries.is_empty() {
         results.push(CheckResult {
             id: "R-ARCH-01".to_owned(),
             severity: Severity::Error,
-            title: format!("Service `{name}` missing crates/ directory"),
+            title: format!("Service `{name}` missing {label_prefix}/ directory"),
             message: format!(
-                "Service `{name}` has no `crates/` directory. Create it with the hex arch \
-                 template: `crates/{{adapters/{{inbound,outbound}}, app, domain, \
+                "Service `{name}` has no `{label_prefix}/` directory. Create it with the hex arch \
+                 template: `{label_prefix}/{{adapters/{{inbound,outbound}}, app, domain, \
                  ports/{{inbound,outbound}}}}`."
             ),
-            file: Some(app_dir.display().to_string()),
+            file: Some(parent_dir.display().to_string()),
             line: None,
             inventory: false,
         });
-        return; // nothing else to check
+        return;
     }
 
-    // crates/ must contain exactly {adapters, app, domain, ports}
     let crate_dir_names = list_dir_names(fs, &crates_dir);
     let expected_top = ["adapters", "app", "domain", "ports"];
     for expected in &expected_top {
@@ -107,9 +117,9 @@ fn check_single_app(
             results.push(CheckResult {
                 id: "R-ARCH-01".to_owned(),
                 severity: Severity::Error,
-                title: format!("Service `{name}` missing crates/{expected}/ directory"),
+                title: format!("Service `{name}` missing {label_prefix}/{expected}/ directory"),
                 message: format!(
-                    "Service `{name}` is missing `crates/{expected}/`. Create it and add a \
+                    "Service `{name}` is missing `{label_prefix}/{expected}/`. Create it and add a \
                      `.gitkeep` if not needed yet."
                 ),
                 file: Some(crates_dir.display().to_string()),
@@ -119,19 +129,20 @@ fn check_single_app(
         }
     }
 
-    // Check for unexpected directories in crates/ (only files like main.rs and lib.rs are ok)
+    check_loose_files(fs, name, &crates_dir, label_prefix, results);
+
     for dir_name in &crate_dir_names {
         if !expected_top.contains(&dir_name.as_str()) {
             results.push(CheckResult {
                 id: "R-ARCH-01".to_owned(),
                 severity: Severity::Error,
                 title: format!(
-                    "Service `{name}` has unexpected directory crates/{dir_name}/"
+                    "Service `{name}` has unexpected directory {label_prefix}/{dir_name}/"
                 ),
                 message: format!(
-                    "Service `{name}` has `crates/{dir_name}/` which is not part of the hex \
+                    "Service `{name}` has `{label_prefix}/{dir_name}/` which is not part of the hex \
                      arch template. Only `{{adapters, app, domain, ports}}` directories are \
-                     allowed in `crates/`."
+                     allowed in `{label_prefix}/`."
                 ),
                 file: Some(crates_dir.join(dir_name).display().to_string()),
                 line: None,
@@ -140,26 +151,20 @@ fn check_single_app(
         }
     }
 
-    // adapters/ and ports/ must each contain {inbound, outbound}
-    check_inbound_outbound(fs, name, &crates_dir.join("adapters"), "adapters", results);
-    check_inbound_outbound(fs, name, &crates_dir.join("ports"), "ports", results);
+    let adapters_label = format!("{label_prefix}/adapters");
+    let ports_label = format!("{label_prefix}/ports");
+    check_inbound_outbound(fs, name, &crates_dir.join("adapters"), &adapters_label, results);
+    check_inbound_outbound(fs, name, &crates_dir.join("ports"), &ports_label, results);
 
-    // Validate container folders
-    // Top-level containers: app, domain
-    validate_container_folder(fs, name, &crates_dir.join("app"), "crates/app", results);
-    validate_container_folder(
-        fs,
-        name,
-        &crates_dir.join("domain"),
-        "crates/domain",
-        results,
-    );
+    let app_label = format!("{label_prefix}/app");
+    let domain_label = format!("{label_prefix}/domain");
+    validate_container_folder(fs, name, &crates_dir.join("app"), &app_label, results);
+    validate_container_folder(fs, name, &crates_dir.join("domain"), &domain_label, results);
 
-    // Nested containers: adapters/{inbound,outbound}, ports/{inbound,outbound}
     for parent in &["adapters", "ports"] {
         for child in &["inbound", "outbound"] {
             let path = crates_dir.join(parent).join(child);
-            let label = format!("crates/{parent}/{child}");
+            let label = format!("{label_prefix}/{parent}/{child}");
             validate_container_folder(fs, name, &path, &label, results);
         }
     }
@@ -186,10 +191,10 @@ fn check_inbound_outbound(
                 id: "R-ARCH-01".to_owned(),
                 severity: Severity::Error,
                 title: format!(
-                    "Service `{name}` missing crates/{layer}/{expected}/ directory"
+                    "Service `{name}` missing {layer}/{expected}/ directory"
                 ),
                 message: format!(
-                    "Service `{name}` is missing `crates/{layer}/{expected}/`. \
+                    "Service `{name}` is missing `{layer}/{expected}/`. \
                      Create it and add a `.gitkeep` if not needed yet."
                 ),
                 file: Some(dir.display().to_string()),
@@ -206,12 +211,12 @@ fn check_inbound_outbound(
                 id: "R-ARCH-01".to_owned(),
                 severity: Severity::Error,
                 title: format!(
-                    "Service `{name}` has unexpected directory crates/{layer}/{dir_name}/"
+                    "Service `{name}` has unexpected directory {layer}/{dir_name}/"
                 ),
                 message: format!(
-                    "Service `{name}` has `crates/{layer}/{dir_name}/` which is not part of \
+                    "Service `{name}` has `{layer}/{dir_name}/` which is not part of \
                      the hex arch template. Only `{{inbound, outbound}}` directories are \
-                     allowed in `crates/{layer}/`."
+                     allowed in `{layer}/`."
                 ),
                 file: Some(dir.join(dir_name).display().to_string()),
                 line: None,
@@ -221,7 +226,7 @@ fn check_inbound_outbound(
     }
 
     // Check for loose files (not .gitkeep) in structural dirs
-    check_loose_files(fs, name, dir, &format!("crates/{layer}"), results);
+    check_loose_files(fs, name, dir, layer, results);
 }
 
 /// Validate a container folder: must have `.gitkeep` or at least one crate subdir.
@@ -232,12 +237,14 @@ fn validate_container_folder(
     label: &str,
     results: &mut Vec<CheckResult>,
 ) {
-    let entries = fs.list_dir(dir);
-    if entries.is_empty() {
+    // Check if directory exists at all (list_dir returns empty for both
+    // "doesn't exist" and "exists but empty" — we need to distinguish)
+    if fs.metadata(dir).is_none() {
         // Directory doesn't exist — already reported elsewhere
         return;
     }
 
+    let entries = fs.list_dir(dir);
     let mut dirs: Vec<String> = Vec::new();
     let mut files: Vec<String> = Vec::new();
     let has_gitkeep_file = has_gitkeep(fs, dir);
@@ -280,10 +287,19 @@ fn validate_container_folder(
         // Don't return — still check for loose files below
     }
 
-    // Each subdir in a container must have Cargo.toml (i.e. be a crate)
+    // Each subdir in a container must be either:
+    // - a crate (has Cargo.toml with [package]), or
+    // - a hex-in-hex (has crates/ dir) — recurse structural checks
     for subdir in &dirs {
         let sub_path = dir.join(subdir);
-        if fs.read_file(&sub_path.join("Cargo.toml")).is_none() {
+        let has_cargo = fs.read_file(&sub_path.join("Cargo.toml")).is_some();
+        let has_crates = !fs.list_dir(&sub_path.join("crates")).is_empty();
+
+        if has_crates {
+            // Hex-in-hex: recurse structural checks
+            let inner_label = format!("{label}/{subdir}/crates");
+            check_crates_dir(fs, name, &sub_path, &inner_label, results);
+        } else if !has_cargo {
             results.push(CheckResult {
                 id: "R-ARCH-01".to_owned(),
                 severity: Severity::Error,
@@ -291,8 +307,9 @@ fn validate_container_folder(
                     "Service `{name}` subdirectory {label}/{subdir}/ missing Cargo.toml"
                 ),
                 message: format!(
-                    "Service `{name}` has `{label}/{subdir}/` but it has no `Cargo.toml`. \
-                     Every subdirectory in a container folder must be its own crate."
+                    "Service `{name}` has `{label}/{subdir}/` but it has no `Cargo.toml` \
+                     and no `crates/` directory. Every subdirectory in a container folder \
+                     must be its own crate or a hex-in-hex with its own `crates/` structure."
                 ),
                 file: Some(sub_path.display().to_string()),
                 line: None,
