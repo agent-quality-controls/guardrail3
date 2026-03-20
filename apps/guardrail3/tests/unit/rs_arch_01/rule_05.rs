@@ -447,6 +447,7 @@ fn container_dir_nonexistent() {
         0,
         "nonexistent container should not fire empty-container error (other rules catch it), got: {devctl_app:#?}"
     );
+    assert_eq!(r5.len(), 0, "expected 0 total rule5 errors when container doesn't exist");
     assert_no_ts_apps(&r5);
     assert_no_packages(&r5);
 }
@@ -627,6 +628,7 @@ fn ts_apps_not_checked() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
+    assert_eq!(r5.len(), 1, "expected 1 total rule5 error (devctl .gitkeep removed)");
     assert_no_ts_apps(&r5);
     // Verify devctl did fire
     assert!(
@@ -646,6 +648,7 @@ fn packages_not_checked() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
+    assert_eq!(r5.len(), 1, "expected 1 total rule5 error (devctl .gitkeep removed)");
     assert!(!r5.is_empty(), "expected non-empty error list to meaningfully test packages absence");
     assert_no_packages(&r5);
     assert_no_ts_apps(&r5);
@@ -690,6 +693,7 @@ fn new_app_gets_checked() {
             "expected container '{c}' in scheduler errors, got: {scheduler_r5:#?}"
         );
     }
+    assert_eq!(r5.len(), 6, "expected 6 total rule5 errors (all from scheduler)");
     assert_file_field(&scheduler_r5.iter().map(|&&e| e).collect::<Vec<_>>());
     assert_no_ts_apps(&r5);
     assert_no_packages(&r5);
@@ -936,6 +940,7 @@ fn ts_apps_broken_zero_rs_errors() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
+    assert_eq!(r5.len(), 1, "expected 1 total rule5 error (worker .gitkeep removed)");
     assert!(!r5.is_empty(), "expected non-empty error list to meaningfully test TS apps absence");
     assert!(
         !r5.iter().any(|e| e.title.contains("admin") || e.title.contains("landing")),
@@ -1115,6 +1120,7 @@ fn gitkeep_as_directory() {
         0,
         ".gitkeep as directory means dir_names is non-empty → 0 rule5 errors, got: {devctl_pi:#?}"
     );
+    assert_eq!(r5.len(), 0, "expected 0 total rule5 errors (.gitkeep-as-dir counts as subdir)");
     assert_no_ts_apps(&r5);
     assert_no_packages(&r5);
 }
@@ -1308,6 +1314,50 @@ fn maximally_complex_empty_container() {
         devctl_pi[0].message
     );
     assert_file_field(&r5);
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
+}
+
+// ============================================================================
+// GROUP I: Double-fire prevention and loose-files path coverage
+// ============================================================================
+
+#[test]
+fn no_double_fire_files_but_no_subdirs() {
+    let tmp = copy_fixture();
+    remove_dir(tmp.path(), "apps/devctl/crates/app/core");
+    write_file(tmp.path(), "apps/devctl/crates/app/mod.rs", "// stray");
+    let results = run_check(tmp.path());
+    let errors = arch_errors(&results);
+    // The "empty container" error should fire (files but no subdirs)
+    let r5 = rule5_errors(&errors);
+    assert_eq!(r5.len(), 1, "expected exactly 1 empty-container error, got: {r5:#?}");
+    assert!(r5[0].message.contains("mod.rs"), "expected mod.rs in message");
+    // CRITICAL: check_loose_files must NOT also fire — no double-fire
+    let loose: Vec<_> = errors.iter().filter(|e| e.title.contains("loose files")).collect();
+    assert!(loose.is_empty(),
+        "check_loose_files should NOT fire when empty-container already reported the files. \
+         Double-fire detected: {loose:#?}");
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
+}
+
+#[test]
+fn subdirs_plus_loose_files() {
+    let tmp = copy_fixture();
+    // app/ already has core/ subdir from golden. Add a loose file alongside it.
+    write_file(tmp.path(), "apps/devctl/crates/app/mod.rs", "// stray");
+    let results = run_check(tmp.path());
+    let errors = arch_errors(&results);
+    let r5 = rule5_errors(&errors);
+    // Container has subdirs → no "empty container" error
+    assert_eq!(r5.len(), 0, "container with subdirs should not fire empty-container: {r5:#?}");
+    // But check_loose_files should fire for mod.rs
+    let loose: Vec<_> = errors.iter()
+        .filter(|e| e.title.contains("loose files") && e.title.contains("devctl") && e.title.contains("/app"))
+        .collect();
+    assert_eq!(loose.len(), 1, "expected 1 loose-files error for mod.rs alongside subdir, got: {loose:#?}");
+    assert!(loose[0].message.contains("mod.rs"), "expected mod.rs in loose-files message");
     assert_no_ts_apps(&r5);
     assert_no_packages(&r5);
 }
