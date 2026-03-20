@@ -143,6 +143,7 @@ fn empty_adapters_inbound_containers() {
         );
     }
     assert_file_field(&errors);
+    assert_per_app(&errors);
     assert_no_ts_apps(&errors);
     assert_no_packages(&errors);
 }
@@ -157,10 +158,22 @@ fn empty_adapters_inbound_inner_hex_separately() {
     let r5 = rule5_errors(&errors);
     assert_eq!(r5.len(), 1, "expected 1 inner-hex empty-container error, got {}: {r5:#?}", r5.len());
     assert!(
+        r5[0].title.contains("empty container") && r5[0].title.contains("adapters/inbound"),
+        "expected 'empty container' and 'adapters/inbound' in title, got: '{}'",
+        r5[0].title
+    );
+    assert!(
+        r5[0].message.contains("is empty"),
+        "expected 'is empty' in message, got: '{}'",
+        r5[0].message
+    );
+    assert!(
         r5[0].file.as_deref().unwrap_or("").contains("mcp/crates"),
         "expected inner hex path in file field, got: {:?}",
         r5[0].file
     );
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
 #[test]
@@ -344,6 +357,8 @@ fn files_but_no_subdirs() {
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
 
+    assert_eq!(r5.len(), 1, "expected exactly 1 empty-container error total, got {}: {r5:#?}", r5.len());
+
     // Should have at least 1 empty-container error for devctl app/
     let devctl_r5: Vec<_> = r5.iter().filter(|e| e.title.contains("devctl") && e.title.contains("/app")).collect();
     assert_eq!(devctl_r5.len(), 1, "expected 1 error for devctl app/, got {}: {devctl_r5:#?}", devctl_r5.len());
@@ -362,6 +377,9 @@ fn files_but_no_subdirs() {
         "expected 'but no crate subdirectories' in message, got: '{}'",
         devctl_r5[0].message
     );
+    assert_file_field(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
 #[test]
@@ -376,6 +394,8 @@ fn multiple_files_but_no_subdirs() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
+    assert_eq!(r5.len(), 1, "expected exactly 1 empty-container error total, got {}: {r5:#?}", r5.len());
+
     let devctl_r5: Vec<_> = r5.iter().filter(|e| e.title.contains("devctl") && e.title.contains("/app")).collect();
     assert_eq!(devctl_r5.len(), 1, "expected 1 error, got {}: {devctl_r5:#?}", devctl_r5.len());
     // Both filenames should appear in the message
@@ -389,6 +409,9 @@ fn multiple_files_but_no_subdirs() {
         "expected 'contains files' in message, got: '{}'",
         devctl_r5[0].message
     );
+    assert_file_field(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
 // ============================================================================
@@ -423,6 +446,7 @@ fn container_with_only_gitkeep_and_files() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
+    assert_eq!(r5.len(), 0, "expected 0 empty-container errors (.gitkeep suppresses), got {}: {r5:#?}", r5.len());
     let devctl_app_r5: Vec<_> = r5.iter().filter(|e| e.title.contains("devctl") && e.title.contains("/app")).collect();
     assert!(
         devctl_app_r5.is_empty(),
@@ -455,6 +479,16 @@ fn inner_hex_empty_outer_clean() {
             err.file.as_deref().unwrap_or("").contains("mcp/crates"),
             "expected only inner hex errors, but got outer error: {err:#?}"
         );
+        assert!(
+            err.title.contains("empty container"),
+            "expected 'empty container' in title, got: '{}'",
+            err.title
+        );
+        assert!(
+            err.message.contains("is empty"),
+            "expected 'is empty' in message, got: '{}'",
+            err.message
+        );
     }
     // Outer apps should have no empty-container errors
     let outer_r5: Vec<_> = r5.iter().filter(|e| !e.file.as_deref().unwrap_or("").contains("mcp/crates")).collect();
@@ -462,6 +496,8 @@ fn inner_hex_empty_outer_clean() {
         outer_r5.is_empty(),
         "expected 0 outer empty-container errors, got: {outer_r5:#?}"
     );
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
 #[test]
@@ -495,6 +531,13 @@ fn inner_hex_label_prefix_in_title() {
         "expected 'empty container' and 'ports/inbound' in title, got: '{}'",
         r5[0].title
     );
+    assert!(
+        r5[0].message.contains("is empty"),
+        "expected 'is empty' in message, got: '{}'",
+        r5[0].message
+    );
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
 #[test]
@@ -521,6 +564,7 @@ fn permission_denied_container() {
 
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
+    assert_eq!(r5.len(), 1, "expected exactly 1 empty-container error total, got {}: {r5:#?}", r5.len());
     let devctl_app: Vec<_> = r5.iter().filter(|e| e.title.contains("devctl") && e.title.contains("/app")).collect();
     assert_eq!(
         devctl_app.len(),
@@ -528,6 +572,12 @@ fn permission_denied_container() {
         "expected 1 empty-container error (false positive from unreadable dir), got {}: {devctl_app:#?}",
         devctl_app.len()
     );
+    assert!(
+        devctl_app[0].message.contains("is empty"),
+        "expected 'is empty' in message, got: '{}'",
+        devctl_app[0].message
+    );
+    assert_file_field(&errors);
 }
 
 // ============================================================================
@@ -586,6 +636,28 @@ fn new_app_gets_checked() {
         "expected 6 empty-container errors for new scheduler app, got {}: {scheduler_r5:#?}",
         scheduler_r5.len()
     );
+    for err in &scheduler_r5 {
+        assert!(
+            err.title.contains("empty container"),
+            "expected 'empty container' in title, got: '{}'",
+            err.title
+        );
+        assert!(
+            err.message.contains("is empty"),
+            "expected 'is empty' in message, got: '{}'",
+            err.message
+        );
+    }
+    // Verify each container name appears in at least one title
+    for c in CONTAINER_SUFFIXES {
+        assert!(
+            scheduler_r5.iter().any(|e| e.title.contains(c)),
+            "expected container '{c}' in scheduler errors, got: {scheduler_r5:#?}"
+        );
+    }
+    assert_file_field(&scheduler_r5.iter().map(|&&e| e).collect::<Vec<_>>());
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
 #[test]
@@ -631,6 +703,7 @@ fn different_breakage_per_app() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
+    assert_eq!(r5.len(), 3, "expected 3 total empty-container errors, got {}: {r5:#?}", r5.len());
 
     // devctl app/ error: "is empty"
     let devctl: Vec<_> = r5.iter().filter(|e| e.title.contains("devctl")).collect();
@@ -660,6 +733,8 @@ fn different_breakage_per_app() {
         "backend inner hex should say 'is empty', got: '{}'",
         backend_inner[0].message
     );
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
 // ============================================================================
@@ -689,6 +764,11 @@ fn empty_ports_inbound_single_app() {
         r5[0].title
     );
     assert!(r5[0].file.is_some(), "expected file field set");
+    assert!(
+        r5[0].message.contains("is empty"),
+        "expected 'is empty' in message, got: '{}'",
+        r5[0].message
+    );
 }
 
 #[test]
@@ -714,6 +794,14 @@ fn empty_in_one_app_valid_in_another() {
         !r5.iter().any(|e| e.title.contains("backend")),
         "backend should not be flagged"
     );
+    assert!(
+        r5[0].message.contains("is empty"),
+        "expected 'is empty' in message, got: '{}'",
+        r5[0].message
+    );
+    assert_file_field(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
 #[test]
@@ -733,6 +821,12 @@ fn inner_hex_empty_container_single() {
         "expected 'empty container' in title, got: '{}'",
         r5[0].title
     );
+    assert!(
+        r5[0].message.contains("is empty"),
+        "expected 'is empty' in message, got: '{}'",
+        r5[0].message
+    );
+    assert_file_field(&errors);
     assert_inner_hex(&r5.iter().map(|&e| e).collect::<Vec<_>>());
 }
 
@@ -746,6 +840,8 @@ fn multiple_empty_containers_same_app() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
+    assert_eq!(r5.len(), 2, "expected exactly 2 empty-container errors total, got {}: {r5:#?}", r5.len());
+
     let devctl_r5: Vec<_> = r5.iter().filter(|e| e.title.contains("devctl")).collect();
     assert_eq!(
         devctl_r5.len(),
@@ -753,6 +849,23 @@ fn multiple_empty_containers_same_app() {
         "expected 2 empty-container errors for devctl, got {}: {devctl_r5:#?}",
         devctl_r5.len()
     );
+    // Verify both ports/inbound and ports/outbound appear in titles
+    assert!(
+        devctl_r5.iter().any(|e| e.title.contains("ports/inbound")),
+        "expected 'ports/inbound' in one of the titles, got: {devctl_r5:#?}"
+    );
+    assert!(
+        devctl_r5.iter().any(|e| e.title.contains("ports/outbound")),
+        "expected 'ports/outbound' in one of the titles, got: {devctl_r5:#?}"
+    );
+    for err in &devctl_r5 {
+        assert!(
+            err.message.contains("is empty"),
+            "expected 'is empty' in message, got: '{}'",
+            err.message
+        );
+    }
+    assert_file_field(&errors);
 }
 
 // ============================================================================
