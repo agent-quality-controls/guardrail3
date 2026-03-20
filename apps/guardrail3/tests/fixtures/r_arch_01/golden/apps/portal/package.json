@@ -1,0 +1,9 @@
+{
+  "name": "@myorg/portal",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "next": "16.1.0",
+    "react": "19.0.0"
+  }
+}
