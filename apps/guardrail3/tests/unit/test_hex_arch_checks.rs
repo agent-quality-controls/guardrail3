@@ -5,27 +5,141 @@ use std::path::{Path, PathBuf};
 
 use guardrail3::app::discover::{ProjectInfo, RustWorkspace, WorkspaceMember};
 use guardrail3::app::rs::validate::hex_arch_checks::{
-    Layer, check_dependency_flow, check_hex_arch_structure, check_library_service_boundary,
+    Layer, check_dependency_flow, check_library_service_boundary,
     contains_segment, is_service_internal, layer_from_config, normalize_path,
 };
-use guardrail3::domain::config::types::CrateConfig;
+use guardrail3::app::rs::validate::hex_arch_structure::check_hex_arch_structure;
 use guardrail3::domain::report::Severity;
 use guardrail3::ports::outbound::FileSystem;
 
+/// A stub filesystem that supports both file reads and directory listing.
+/// Directories are inferred from file paths: any path prefix that contains
+/// files beneath it is treated as a directory.
 struct StubFs {
     files: BTreeMap<PathBuf, String>,
+    /// Explicit directory entries (directories that exist even without files in them).
+    dirs: std::collections::BTreeSet<PathBuf>,
 }
 
 impl StubFs {
-    const fn new() -> Self {
+    fn new() -> Self {
         Self {
             files: BTreeMap::new(),
+            dirs: std::collections::BTreeSet::new(),
         }
     }
     fn add(&mut self, p: &str, c: &str) -> &mut Self {
-        let _ = self.files.insert(PathBuf::from(p), c.to_owned());
+        let path = PathBuf::from(p);
+        // Register all parent directories
+        let mut parent = path.parent();
+        while let Some(p) = parent {
+            if p.as_os_str().is_empty() {
+                break;
+            }
+            let _ = self.dirs.insert(p.to_path_buf());
+            parent = p.parent();
+        }
+        let _ = self.files.insert(path, c.to_owned());
         self
     }
+    /// Register an empty directory (e.g. for `.gitkeep`-less empty dirs).
+    #[allow(dead_code)] // reason: test utility used by some tests
+    fn add_dir(&mut self, p: &str) -> &mut Self {
+        let path = PathBuf::from(p);
+        let _ = self.dirs.insert(path.clone());
+        // Also register parents
+        let mut parent = path.parent();
+        while let Some(p) = parent {
+            if p.as_os_str().is_empty() {
+                break;
+            }
+            let _ = self.dirs.insert(p.to_path_buf());
+            parent = p.parent();
+        }
+        self
+    }
+}
+
+/// A fake DirEntry that can be constructed in tests.
+/// We use a temporary directory to create real `std::fs::DirEntry` instances.
+fn make_dir_entries(parent: &Path, fs: &StubFs) -> Vec<std::fs::DirEntry> {
+    // Collect immediate children of `parent`
+    let mut children: BTreeMap<String, bool> = BTreeMap::new(); // name -> is_dir
+
+    // Check files
+    for file_path in fs.files.keys() {
+        if let Ok(rest) = file_path.strip_prefix(parent) {
+            let mut comps = rest.components();
+            if let Some(first) = comps.next() {
+                let name = first.as_os_str().to_string_lossy().into_owned();
+                let is_dir = comps.next().is_some(); // has more components = this is a dir
+                let entry = children.entry(name).or_insert(is_dir);
+                if is_dir {
+                    *entry = true; // upgrade to dir if any deeper path exists
+                }
+            }
+        }
+    }
+
+    // Check explicit dirs
+    for dir_path in &fs.dirs {
+        if let Ok(rest) = dir_path.strip_prefix(parent) {
+            let mut comps = rest.components();
+            if let Some(first) = comps.next() {
+                let name = first.as_os_str().to_string_lossy().into_owned();
+                if comps.next().is_none() {
+                    // Direct child directory
+                    let _ = children.entry(name).or_insert(true);
+                } else {
+                    // Deeper path — the first component is a dir
+                    let _ = children.entry(name).or_insert(true);
+                }
+            }
+        }
+    }
+
+    if children.is_empty() {
+        return Vec::new();
+    }
+
+    // Create a real temporary directory and populate it to get real DirEntry values
+    let tmp = std::env::temp_dir().join(format!("guardrail3_test_{}", std::process::id()));
+    let stub_dir = tmp.join(
+        parent
+            .to_string_lossy()
+            .replace('/', "_")
+            .replace('\\', "_"),
+    );
+    let _ = std::fs::create_dir_all(&stub_dir);
+
+    // Clean previous contents
+    if let Ok(entries) = std::fs::read_dir(&stub_dir) {
+        for e in entries.flatten() {
+            let p = e.path();
+            if p.is_dir() {
+                let _ = std::fs::remove_dir_all(&p);
+            } else {
+                let _ = std::fs::remove_file(&p);
+            }
+        }
+    }
+
+    for (name, is_dir) in &children {
+        let child_path = stub_dir.join(name);
+        if *is_dir {
+            let _ = std::fs::create_dir_all(&child_path);
+        } else {
+            let _ = std::fs::write(&child_path, "");
+        }
+    }
+
+    let mut entries: Vec<std::fs::DirEntry> = std::fs::read_dir(&stub_dir)
+        .into_iter()
+        .flatten()
+        .flatten()
+        .collect();
+    entries.sort_by_key(|e| e.file_name());
+    entries
 }
 
 impl FileSystem for StubFs {
@@ -39,8 +153,8 @@ impl FileSystem for StubFs {
             .cloned()
             .ok_or_else(|| std::io::Error::new(std::io::ErrorKind::NotFound, "stub"))
     }
-    fn list_dir(&self, _: &Path) -> Vec<std::fs::DirEntry> {
-        Vec::new()
+    fn list_dir(&self, path: &Path) -> Vec<std::fs::DirEntry> {
+        make_dir_entries(path, self)
     }
     fn metadata(&self, _: &Path) -> Option<std::fs::Metadata> {
         None
@@ -66,52 +180,38 @@ fn project(members: &[(&str, &str)]) -> ProjectInfo {
     }
 }
 
-fn service_cfg() -> CrateConfig {
-    CrateConfig {
-        layer: Some("composition-root".to_owned()),
-        profile: Some("service".to_owned()),
-        type_: None,
-        allowed_deps: None,
-        checks: None,
-    }
-}
 
 #[test]
-fn r_arch_01_service_missing_domain_dir() {
+fn r_arch_01_service_missing_crates_dir() {
     let mut fs = StubFs::new();
     let _ = fs.add("/ws/apps/api/Cargo.toml", "[package]\nname = \"api\"");
-    let _ = fs.add(
-        "/ws/apps/api/crates/adapters/Cargo.toml",
-        "[package]\nname = \"a\"",
-    );
-    let mut cfgs = BTreeMap::new();
-    let _ = cfgs.insert("api".to_owned(), service_cfg());
-    let p = project(&[("api", "apps/api")]);
+    // No crates/ directory at all
     let mut r = Vec::new();
-    check_hex_arch_structure(&fs, Path::new("/ws"), &p, &cfgs, &mut r);
-    assert_eq!(r.len(), 1);
+    check_hex_arch_structure(&fs, Path::new("/ws"), &mut r);
+    assert_eq!(r.len(), 1, "expected 1 error for missing crates/, got: {r:?}");
     assert_eq!(r[0].id, "R-ARCH-01");
-    assert_eq!(r[0].severity, Severity::Warn);
-    assert!(r[0].title.contains("domain"));
+    assert_eq!(r[0].severity, Severity::Error);
+    assert!(
+        r[0].title.contains("missing crates/"),
+        "expected error about missing crates/, got: {}",
+        r[0].title
+    );
 }
 
 #[test]
 fn r_arch_01_service_with_full_structure_ok() {
     let mut fs = StubFs::new();
-    let _ = fs.add(
-        "/ws/apps/api/crates/domain/Cargo.toml",
-        "[package]\nname=\"d\"",
-    );
-    let _ = fs.add(
-        "/ws/apps/api/crates/adapters/Cargo.toml",
-        "[package]\nname=\"a\"",
-    );
-    let mut cfgs = BTreeMap::new();
-    let _ = cfgs.insert("api".to_owned(), service_cfg());
-    let p = project(&[("api", "apps/api")]);
+    let _ = fs.add("/ws/apps/api/Cargo.toml", "[package]\nname=\"api\"");
+    // All 4 top-level crate dirs with proper sub-structure
+    let _ = fs.add("/ws/apps/api/crates/domain/.gitkeep", "");
+    let _ = fs.add("/ws/apps/api/crates/app/.gitkeep", "");
+    let _ = fs.add("/ws/apps/api/crates/ports/inbound/.gitkeep", "");
+    let _ = fs.add("/ws/apps/api/crates/ports/outbound/.gitkeep", "");
+    let _ = fs.add("/ws/apps/api/crates/adapters/inbound/.gitkeep", "");
+    let _ = fs.add("/ws/apps/api/crates/adapters/outbound/.gitkeep", "");
     let mut r = Vec::new();
-    check_hex_arch_structure(&fs, Path::new("/ws"), &p, &cfgs, &mut r);
-    assert!(r.is_empty(), "expected no warnings, got: {r:?}");
+    check_hex_arch_structure(&fs, Path::new("/ws"), &mut r);
+    assert!(r.is_empty(), "expected no errors, got: {r:?}");
 }
 
 #[test]
