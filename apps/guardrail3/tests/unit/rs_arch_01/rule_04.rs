@@ -110,8 +110,26 @@ fn loose_file_in_app_containers() {
         "expected 4 loose-file errors (3 outer + 1 inner), got {}: {loose:#?}",
         loose.len()
     );
+    // Title content: each error mentions "loose files" and its container label
+    for err in &loose {
+        assert!(
+            err.title.contains("loose files") && err.title.contains("app"),
+            "expected title with 'loose files' and 'app', got: '{}'",
+            err.title
+        );
+    }
+    assert_file_field(&errors);
+    assert_per_app(&errors);
     assert_no_ts_apps(&errors);
     assert_no_packages(&errors);
+    // Message content: offending filename appears
+    for err in &loose {
+        assert!(
+            err.message.contains("mod.rs"),
+            "expected 'mod.rs' in message, got: '{}'",
+            err.message
+        );
+    }
 }
 
 #[test]
@@ -129,6 +147,24 @@ fn loose_file_in_domain_containers() {
         "expected 4 loose-file errors, got {}: {loose:#?}",
         loose.len()
     );
+    for err in &loose {
+        assert!(
+            err.title.contains("loose files") && err.title.contains("domain"),
+            "expected title with 'loose files' and 'domain', got: '{}'",
+            err.title
+        );
+    }
+    assert_file_field(&errors);
+    assert_per_app(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
+    for err in &loose {
+        assert!(
+            err.message.contains("mod.rs"),
+            "expected 'mod.rs' in message, got: '{}'",
+            err.message
+        );
+    }
 }
 
 #[test]
@@ -146,6 +182,24 @@ fn loose_file_in_adapters_inbound_containers() {
         "expected 4 loose-file errors, got {}: {loose:#?}",
         loose.len()
     );
+    for err in &loose {
+        assert!(
+            err.title.contains("loose files") && err.title.contains("adapters/inbound"),
+            "expected title with 'loose files' and 'adapters/inbound', got: '{}'",
+            err.title
+        );
+    }
+    assert_file_field(&errors);
+    assert_per_app(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
+    for err in &loose {
+        assert!(
+            err.message.contains("mod.rs"),
+            "expected 'mod.rs' in message, got: '{}'",
+            err.message
+        );
+    }
 }
 
 #[test]
@@ -163,6 +217,24 @@ fn loose_file_in_adapters_outbound_containers() {
         "expected 4 loose-file errors, got {}: {loose:#?}",
         loose.len()
     );
+    for err in &loose {
+        assert!(
+            err.title.contains("loose files") && err.title.contains("adapters/outbound"),
+            "expected title with 'loose files' and 'adapters/outbound', got: '{}'",
+            err.title
+        );
+    }
+    assert_file_field(&errors);
+    assert_per_app(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
+    for err in &loose {
+        assert!(
+            err.message.contains("mod.rs"),
+            "expected 'mod.rs' in message, got: '{}'",
+            err.message
+        );
+    }
 }
 
 #[test]
@@ -180,6 +252,24 @@ fn loose_file_in_ports_inbound_containers() {
         "expected 4 loose-file errors, got {}: {loose:#?}",
         loose.len()
     );
+    for err in &loose {
+        assert!(
+            err.title.contains("loose files") && err.title.contains("ports/inbound"),
+            "expected title with 'loose files' and 'ports/inbound', got: '{}'",
+            err.title
+        );
+    }
+    assert_file_field(&errors);
+    assert_per_app(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
+    for err in &loose {
+        assert!(
+            err.message.contains("mod.rs"),
+            "expected 'mod.rs' in message, got: '{}'",
+            err.message
+        );
+    }
 }
 
 #[test]
@@ -197,6 +287,24 @@ fn loose_file_in_ports_outbound_containers() {
         "expected 4 loose-file errors, got {}: {loose:#?}",
         loose.len()
     );
+    for err in &loose {
+        assert!(
+            err.title.contains("loose files") && err.title.contains("ports/outbound"),
+            "expected title with 'loose files' and 'ports/outbound', got: '{}'",
+            err.title
+        );
+    }
+    assert_file_field(&errors);
+    assert_per_app(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
+    for err in &loose {
+        assert!(
+            err.message.contains("mod.rs"),
+            "expected 'mod.rs' in message, got: '{}'",
+            err.message
+        );
+    }
 }
 
 #[test]
@@ -214,11 +322,27 @@ fn loose_file_in_all_containers() {
         "expected 24 loose-file errors (3 apps x 6 + 1 inner hex x 6), got {}: {loose:#?}",
         loose.len()
     );
+    // Title content
+    for err in &loose {
+        assert!(
+            err.title.contains("loose files"),
+            "expected 'loose files' in title, got: '{}'",
+            err.title
+        );
+    }
     assert_per_app(&errors);
     assert_inner_hex(&errors);
     assert_no_ts_apps(&errors);
     assert_no_packages(&errors);
     assert_file_field(&errors);
+    // Message content
+    for err in &loose {
+        assert!(
+            err.message.contains("mod.rs"),
+            "expected 'mod.rs' in message, got: '{}'",
+            err.message
+        );
+    }
 }
 
 // ============================================================================
@@ -240,6 +364,11 @@ fn loose_rs_file() {
         "expected 24 errors for .rs files, got {}: {loose:#?}",
         loose.len()
     );
+    assert_file_field(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
     for err in &loose {
         assert!(
             err.message.contains("stray.rs"),
@@ -264,6 +393,18 @@ fn loose_toml_file() {
         "expected 24 errors for Cargo.toml files, got {}: {loose:#?}",
         loose.len()
     );
+    assert_file_field(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
+    for err in &loose {
+        assert!(
+            err.message.contains("Cargo.toml"),
+            "expected 'Cargo.toml' in message, got: '{}'",
+            err.message
+        );
+    }
 }
 
 #[test]
@@ -281,6 +422,18 @@ fn loose_markdown_file() {
         "expected 24 errors for README.md files, got {}: {loose:#?}",
         loose.len()
     );
+    assert_file_field(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
+    for err in &loose {
+        assert!(
+            err.message.contains("README.md"),
+            "expected 'README.md' in message, got: '{}'",
+            err.message
+        );
+    }
 }
 
 #[test]
@@ -298,6 +451,18 @@ fn loose_env_file() {
         "expected 24 errors for .env files, got {}: {loose:#?}",
         loose.len()
     );
+    assert_file_field(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
+    for err in &loose {
+        assert!(
+            err.message.contains(".env"),
+            "expected '.env' in message, got: '{}'",
+            err.message
+        );
+    }
 }
 
 #[test]
@@ -315,6 +480,11 @@ fn loose_gitignore_not_gitkeep() {
         ".gitignore is NOT .gitkeep — expected 24 errors, got {}: {loose:#?}",
         loose.len()
     );
+    assert_file_field(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
     for err in &loose {
         assert!(
             err.message.contains(".gitignore"),
@@ -359,6 +529,10 @@ fn gitkeep_alongside_loose_file() {
         ".gitkeep is allowed but mod.rs is not — expected 24 errors, got {}: {loose:#?}",
         loose.len()
     );
+    assert_file_field(&errors);
+    assert_per_app(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
     for err in &loose {
         assert!(
             err.message.contains("mod.rs"),
@@ -424,16 +598,24 @@ fn symlink_as_loose_file() {
     let results = run_check(tmp.path());
     let errors = arch_01_errors(&results);
     let loose = loose_file_errors(&errors);
-    // Symlinks pointing to dirs have is_dir() = true via follow, so they may not be flagged.
-    // Symlinks pointing to files or non-dirs would be flagged.
-    // The ".." target is a directory, but symlink file_type() without follow reports symlink.
-    // DirEntry::file_type() does NOT follow symlinks — so a symlink is !is_dir() → flagged.
+    // DirEntry::file_type() does NOT follow symlinks — so a symlink is !is_dir() -> flagged.
     assert_eq!(
         loose.len(),
         24,
         "symlinks should be flagged as loose files, got {}: {loose:#?}",
         loose.len()
     );
+    assert_file_field(&errors);
+    assert_per_app(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
+    for err in &loose {
+        assert!(
+            err.message.contains("stray"),
+            "expected 'stray' in message, got: '{}'",
+            err.message
+        );
+    }
 }
 
 #[test]
@@ -498,6 +680,47 @@ fn empty_container_no_loose_files() {
         errors.iter().any(|e| e.title.contains("empty container")),
         "expected an 'empty container' error, got: {errors:#?}"
     );
+}
+
+/// chmod 000 on a container directory. `list_dir` returns empty ->
+/// check_loose_files returns 0 errors. Restore perms after test.
+#[test]
+#[cfg(unix)]
+fn permission_denied_container() {
+    use std::os::unix::fs::PermissionsExt;
+
+    let tmp = copy_golden();
+    let domain_dir = tmp.path().join("apps/devctl/crates/domain");
+
+    // Remove all perms so list_dir returns empty
+    let perms = std::fs::Permissions::from_mode(0o000);
+    std::fs::set_permissions(&domain_dir, perms).expect("chmod 000"); // reason: simulate permission denied
+
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+    let loose = loose_file_errors(&errors);
+
+    // No loose-file errors for devctl/crates/domain because list_dir is empty
+    let devctl_domain_loose: Vec<_> = loose
+        .iter()
+        .filter(|e| {
+            e.title.contains("devctl")
+                && e.file
+                    .as_deref()
+                    .unwrap_or("")
+                    .contains("devctl/crates/domain")
+        })
+        .collect();
+    assert_eq!(
+        devctl_domain_loose.len(),
+        0,
+        "permission-denied container should produce 0 loose-file errors, got {}: {devctl_domain_loose:#?}",
+        devctl_domain_loose.len()
+    );
+
+    // Restore permissions so temp dir cleanup works
+    let restore = std::fs::Permissions::from_mode(0o755);
+    std::fs::set_permissions(&domain_dir, restore).expect("restore perms"); // reason: allow temp dir cleanup
 }
 
 // ============================================================================
@@ -631,6 +854,16 @@ fn inner_hex_loose_file_outer_clean() {
         !loose.iter().any(|e| e.title.contains("worker")),
         "worker should have no errors"
     );
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
+    // Message content
+    for err in &loose {
+        assert!(
+            err.message.contains("stray.rs"),
+            "expected 'stray.rs' in message, got: '{}'",
+            err.message
+        );
+    }
 }
 
 #[test]
@@ -681,6 +914,19 @@ fn idempotent_results() {
         loose_1.len(),
         loose_2.len()
     );
+
+    // Compare sorted titles, not just counts
+    let mut titles_1: Vec<&str> = loose_1.iter().map(|e| e.title.as_str()).collect();
+    let mut titles_2: Vec<&str> = loose_2.iter().map(|e| e.title.as_str()).collect();
+    titles_1.sort();
+    titles_2.sort();
+    assert_eq!(
+        titles_1, titles_2,
+        "idempotent check failed: titles differ between runs"
+    );
+
+    assert_no_ts_apps(&errors_1);
+    assert_no_packages(&errors_1);
 }
 
 #[test]
@@ -710,6 +956,9 @@ fn per_app_attribution() {
         "expected 12 errors for backend (6 outer + 6 inner hex), got {}: {backend_errors:#?}",
         backend_errors.len()
     );
+    assert_file_field(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
 #[test]
@@ -758,4 +1007,250 @@ fn new_app_gets_checked() {
         "expected 6 loose-file errors for new scheduler app, got {}: {scheduler_loose:#?}",
         scheduler_loose.len()
     );
+    assert_file_field(&errors);
+    // Message content
+    for err in &scheduler_loose {
+        assert!(
+            err.message.contains("stray.rs"),
+            "expected 'stray.rs' in message, got: '{}'",
+            err.message
+        );
+    }
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
+}
+
+// ============================================================================
+// GROUP F: Parity tests
+// ============================================================================
+
+/// A file named "core.bak" coexists with the real "core/" subdir.
+/// Expected: 24 loose file errors (the .bak file), 0 missing crate errors.
+#[test]
+fn file_coexists_with_same_named_crate_subdir() {
+    let tmp = copy_golden();
+    for path in all_container_paths() {
+        write_file(tmp.path(), &format!("{path}/core.bak"), "backup");
+    }
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+    let loose = loose_file_errors(&errors);
+    assert_eq!(
+        loose.len(),
+        24,
+        "expected 24 loose-file errors for core.bak, got {}: {loose:#?}",
+        loose.len()
+    );
+    // No "missing" errors from this change
+    let missing: Vec<_> = errors.iter().filter(|e| e.title.contains("missing")).collect();
+    assert_eq!(
+        missing.len(),
+        0,
+        "expected 0 missing-crate errors, got {}: {missing:#?}",
+        missing.len()
+    );
+    assert_file_field(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
+    for err in &loose {
+        assert!(
+            err.message.contains("core.bak"),
+            "expected 'core.bak' in message, got: '{}'",
+            err.message
+        );
+    }
+}
+
+/// A file named ".gitke\u{200B}ep" (with zero-width space) should be flagged
+/// as a loose file — it is NOT the same as ".gitkeep".
+#[test]
+fn unicode_lookalike_gitkeep() {
+    let tmp = copy_golden();
+    for path in all_container_paths() {
+        write_file(
+            tmp.path(),
+            &format!("{path}/.gitke\u{200B}ep"),
+            "",
+        );
+    }
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+    let loose = loose_file_errors(&errors);
+    assert_eq!(
+        loose.len(),
+        24,
+        "unicode lookalike .gitkeep should be flagged as loose, got {}: {loose:#?}",
+        loose.len()
+    );
+    assert_file_field(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
+}
+
+/// Near-miss gitkeep names: ".git_keep", ".gitkee" should be flagged as loose.
+/// Note: ".gitKeep" is excluded because on case-insensitive FS (macOS default)
+/// it collides with ".gitkeep" and the FS treats them as the same file.
+#[test]
+fn near_miss_gitkeep_names() {
+    let tmp = copy_golden();
+    // Only names that are unambiguously distinct from ".gitkeep" on ALL filesystems
+    let near_misses = [".git_keep", ".gitkee"];
+    for path in all_container_paths() {
+        for name in &near_misses {
+            write_file(tmp.path(), &format!("{path}/{name}"), "");
+        }
+    }
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+    let loose = loose_file_errors(&errors);
+    // One error per container (both near-miss files grouped into a single error)
+    assert_eq!(
+        loose.len(),
+        24,
+        "near-miss gitkeep names should be flagged, got {}: {loose:#?}",
+        loose.len()
+    );
+    assert_file_field(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
+    // Each near-miss name appears in the message
+    for err in &loose {
+        for name in &near_misses {
+            assert!(
+                err.message.contains(name),
+                "expected '{name}' in message, got: '{}'",
+                err.message
+            );
+        }
+    }
+}
+
+/// Remove all subdirs from devctl/crates/app/ (leaving it empty or with only a
+/// loose file). Both check_05 "empty container" AND check_loose_files fire.
+#[test]
+fn container_with_only_loose_files_double_error() {
+    let tmp = copy_golden();
+    // Remove the "core" subdir from devctl/crates/app/
+    super::helpers::remove_dir(tmp.path(), "apps/devctl/crates/app/core");
+    // Ensure app/ dir still exists
+    std::fs::create_dir_all(tmp.path().join("apps/devctl/crates/app"))
+        .expect("recreate app dir"); // reason: ensure it exists after removing core
+    // Add a loose file (no subdirs, no .gitkeep)
+    write_file(tmp.path(), "apps/devctl/crates/app/mod.rs", "// stray");
+
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+
+    // check_05 fires: "empty container" (no subdirs, no .gitkeep, but has files)
+    let empty: Vec<_> = errors
+        .iter()
+        .filter(|e| e.title.contains("empty container") && e.title.contains("devctl"))
+        .collect();
+    assert_eq!(
+        empty.len(),
+        1,
+        "expected 1 empty-container error for devctl app/, got {}: {empty:#?}",
+        empty.len()
+    );
+
+    // check_loose_files also fires: "loose files"
+    let loose: Vec<_> = errors
+        .iter()
+        .filter(|e| e.title.contains("loose files") && e.title.contains("devctl") && e.title.contains("app"))
+        .collect();
+    assert_eq!(
+        loose.len(),
+        1,
+        "expected 1 loose-file error for devctl app/, got {}: {loose:#?}",
+        loose.len()
+    );
+
+    // Document: both fire for the same directory
+    assert!(
+        empty.len() + loose.len() >= 2,
+        "both empty-container and loose-file errors should fire for a container with \
+         only loose files (no subdirs, no .gitkeep). empty={}, loose={}",
+        empty.len(),
+        loose.len()
+    );
+}
+
+// ============================================================================
+// GROUP G: Scenario tests
+// ============================================================================
+
+/// ".GITKEEP" (wrong case) should be flagged as loose on case-sensitive FS.
+/// On case-insensitive FS (macOS default), the file may merge with existing
+/// .gitkeep. We test the behavior by checking: if .GITKEEP is a distinct
+/// file from .gitkeep, it must be flagged.
+#[test]
+fn gitkeep_wrong_case() {
+    let tmp = copy_golden();
+    for path in all_container_paths() {
+        write_file(tmp.path(), &format!("{path}/.GITKEEP"), "");
+    }
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+    let loose = loose_file_errors(&errors);
+
+    // On case-sensitive FS: .GITKEEP != .gitkeep -> flagged (24 errors)
+    // On case-insensitive FS (macOS HFS+/APFS): .GITKEEP overwrites .gitkeep
+    //   -> if the container had .gitkeep it's now gone (replaced), and we wrote
+    //      ".GITKEEP" which the filesystem may store as ".gitkeep" -> 0 errors
+    //   -> if the container did not have .gitkeep, .GITKEEP is loose -> flagged
+    //
+    // We verify: either all 24 are flagged (case-sensitive) or the count matches
+    // the case-insensitive behavior.
+    let is_case_sensitive = {
+        let test_dir = tmp.path().join("__case_test__");
+        std::fs::create_dir_all(&test_dir).expect("create test dir"); // reason: probe case sensitivity
+        write_file(tmp.path(), "__case_test__/lower", "");
+        write_file(tmp.path(), "__case_test__/LOWER", "");
+        let count = std::fs::read_dir(&test_dir)
+            .expect("read test dir") // reason: count files
+            .count();
+        count == 2 // 2 files = case-sensitive
+    };
+
+    if is_case_sensitive {
+        assert_eq!(
+            loose.len(),
+            24,
+            "on case-sensitive FS, .GITKEEP should be flagged, got {}: {loose:#?}",
+            loose.len()
+        );
+        assert_file_field(&errors);
+        assert_per_app(&errors);
+        assert_no_ts_apps(&errors);
+        assert_no_packages(&errors);
+    }
+    // On case-insensitive FS we accept whatever the system produces —
+    // the important thing is the test runs without panic.
+}
+
+/// A .gitkeep file with content should still be allowed — the check only
+/// compares the filename, not the file contents.
+#[test]
+fn non_empty_gitkeep_allowed() {
+    let tmp = copy_golden();
+    for path in all_container_paths() {
+        write_file(tmp.path(), &format!("{path}/.gitkeep"), "This file has content");
+    }
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+    let loose = loose_file_errors(&errors);
+    assert_eq!(
+        loose.len(),
+        0,
+        ".gitkeep with content should still be allowed, got {}: {loose:#?}",
+        loose.len()
+    );
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
