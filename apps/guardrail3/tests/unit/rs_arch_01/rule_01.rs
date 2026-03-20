@@ -606,3 +606,181 @@ fn inner_hex_error_distinguishable_from_outer() {
         "inner hex error should be distinguishable from outer, got: {errors:#?}"
     );
 }
+
+// -----------------------------------------------------------------------
+// Group: circular and exotic symlinks
+// -----------------------------------------------------------------------
+
+#[test]
+fn inner_hex_crates_symlink_to_outer_crates() {
+    // Circular: inner mcp/crates/ points back to outer crates/
+    let tmp = copy_golden();
+    let inner = tmp.path().join("apps/backend/crates/adapters/inbound/mcp/crates");
+    let outer = tmp.path().join("apps/backend/crates");
+    remove_dir(tmp.path(), "apps/backend/crates/adapters/inbound/mcp/crates");
+    std::os::unix::fs::symlink(&outer, &inner).expect("symlink");
+    let results = run_check(tmp.path());
+    // Should not infinite loop. May pass (symlink resolves to valid structure) or error.
+    // The key assertion is that it terminates.
+    let _ = arch_01_errors(&results);
+}
+
+#[test]
+fn crates_symlink_to_dev_null() {
+    let tmp = copy_golden();
+    remove_dir(tmp.path(), "apps/worker/crates");
+    std::os::unix::fs::symlink("/dev/null", tmp.path().join("apps/worker/crates")).expect("symlink");
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+    assert!(
+        !errors.is_empty(),
+        "expected error for crates/ symlinked to /dev/null, got none"
+    );
+}
+
+// -----------------------------------------------------------------------
+// Group: hex-in-hex detection not triggering
+// -----------------------------------------------------------------------
+
+#[test]
+fn hex_in_hex_leaf_has_cargo_toml_so_no_recursion() {
+    // If a leaf has Cargo.toml, it's a crate — hex-in-hex detection doesn't trigger
+    // even if there happens to be some dirs inside. The check shouldn't recurse.
+    let tmp = copy_golden();
+    // backend/adapters/inbound/rest has Cargo.toml — it's a crate, not hex-in-hex
+    // Add a random dir inside it — should not be checked by hex arch rules
+    std::fs::create_dir_all(
+        tmp.path().join("apps/backend/crates/adapters/inbound/rest/internal/stuff"),
+    )
+    .expect("mkdir");
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+    assert!(errors.is_empty(), "dirs inside a leaf crate should not trigger errors, got: {errors:#?}");
+}
+
+#[test]
+fn outer_exists_inner_is_file_not_dir() {
+    // Outer crates/ valid, inner mcp/crates is a file
+    let tmp = copy_golden();
+    remove_dir(tmp.path(), "apps/backend/crates/adapters/inbound/mcp/crates");
+    write_file(
+        tmp.path(),
+        "apps/backend/crates/adapters/inbound/mcp/crates",
+        "not a directory",
+    );
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+    assert!(
+        !errors.is_empty(),
+        "expected error for inner crates as file, got none"
+    );
+}
+
+// -----------------------------------------------------------------------
+// Group: src/ interaction (additional)
+// -----------------------------------------------------------------------
+
+#[test]
+fn src_and_crates_both_exist() {
+    // src/ ban fires even when crates/ is valid
+    let tmp = copy_golden();
+    write_file(tmp.path(), "apps/devctl/src/main.rs", "fn main() {}");
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+    assert_single_error(&errors, "has src/ directory");
+}
+
+#[test]
+fn inner_hex_has_src() {
+    // src/ inside a hex-in-hex leaf — not at app level, so src/ ban doesn't fire
+    // But mcp/ is detected as hex-in-hex (has crates/), and src/ inside it is a loose dir
+    let tmp = copy_golden();
+    write_file(
+        tmp.path(),
+        "apps/backend/crates/adapters/inbound/mcp/src/main.rs",
+        "fn main() {}",
+    );
+    let results = run_check(tmp.path());
+    // The check_single_app src/ ban only fires at app root level.
+    // src/ inside hex-in-hex is not checked by src/ ban — but it may trigger
+    // other errors (unexpected dir or loose files in the hex-in-hex leaf).
+    // Just verify it doesn't crash and doesn't false-positive on the app.
+    let errors = arch_01_errors(&results);
+    assert!(
+        !errors.iter().any(|e| e.title.contains("backend") && e.title.contains("has src/")),
+        "src/ ban should not fire at inner hex level, got: {errors:#?}"
+    );
+}
+
+// -----------------------------------------------------------------------
+// Group: app detection exotic edge cases
+// -----------------------------------------------------------------------
+
+#[test]
+fn cargo_toml_is_a_directory() {
+    let tmp = copy_golden();
+    // Create a new app where Cargo.toml is a directory, not a file
+    std::fs::create_dir_all(tmp.path().join("apps/broken/Cargo.toml")).expect("mkdir");
+    let results = run_check(tmp.path());
+    // read_file on a directory returns None, so this app should be skipped
+    let errors = arch_01_errors(&results);
+    assert!(
+        !errors.iter().any(|e| e.title.contains("broken")),
+        "app with Cargo.toml-as-directory should be skipped, got: {errors:#?}"
+    );
+}
+
+#[test]
+fn cargo_toml_is_broken_symlink() {
+    let tmp = copy_golden();
+    std::fs::create_dir_all(tmp.path().join("apps/broken")).expect("mkdir");
+    std::os::unix::fs::symlink("/nonexistent", tmp.path().join("apps/broken/Cargo.toml")).expect("symlink");
+    let results = run_check(tmp.path());
+    // read_file on broken symlink returns None, so app should be skipped
+    let errors = arch_01_errors(&results);
+    assert!(
+        !errors.iter().any(|e| e.title.contains("broken")),
+        "app with broken Cargo.toml symlink should be skipped, got: {errors:#?}"
+    );
+}
+
+// -----------------------------------------------------------------------
+// Group: wrong nesting depth
+// -----------------------------------------------------------------------
+
+#[test]
+fn third_level_nesting_at_wrong_place() {
+    // Someone creates apps/devctl/crates/domain/types/crates/ — crates/ inside a leaf crate
+    // types/ has both Cargo.toml AND crates/ — that's a conflict (can't be both a crate and hex-in-hex)
+    let tmp = copy_golden();
+    std::fs::create_dir_all(
+        tmp.path().join("apps/devctl/crates/domain/types/crates/domain/inner"),
+    )
+    .expect("mkdir");
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+    assert_single_error(&errors, "has both Cargo.toml and crates/");
+}
+
+// -----------------------------------------------------------------------
+// Group: filesystem permissions (best-effort)
+// -----------------------------------------------------------------------
+
+#[cfg(unix)]
+#[test]
+fn crates_no_read_permission() {
+    use std::os::unix::fs::PermissionsExt;
+    let tmp = copy_golden();
+    let crates = tmp.path().join("apps/devctl/crates");
+    // Remove read+execute permission
+    std::fs::set_permissions(&crates, std::fs::Permissions::from_mode(0o000)).expect("chmod");
+    let results = run_check(tmp.path());
+    // Restore permissions so tempdir cleanup works
+    std::fs::set_permissions(&crates, std::fs::Permissions::from_mode(0o755)).expect("chmod");
+    let errors = arch_01_errors(&results);
+    // list_dir on unreadable dir returns empty → treated as missing
+    assert!(
+        !errors.is_empty(),
+        "expected error for unreadable crates/, got none"
+    );
+}
