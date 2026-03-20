@@ -15,6 +15,7 @@ use guardrail3::domain::report::CheckResult;
 // ============================================================================
 
 const EXPECTED_DIRS: &[&str] = &["adapters", "application", "domain", "ports"];
+const TS_SERVICE_APPS: &[&str] = &["admin", "portal"];
 
 /// Filter to only rule-02-relevant errors: missing dirs, unexpected dirs, loose files
 /// at the modules/ level. Excludes rule 03+ errors (inbound/outbound, container, leaf).
@@ -174,20 +175,35 @@ fn missing_two_dirs() {
 #[test]
 fn missing_all_four() {
     let tmp = copy_fixture();
-    for dir in EXPECTED_DIRS {
-        remove_dir(tmp.path(), &format!("apps/admin/src/modules/{dir}"));
+    // Break ALL TS service apps (admin + portal)
+    for app in TS_SERVICE_APPS {
+        for dir in EXPECTED_DIRS {
+            remove_dir(tmp.path(), &format!("apps/{app}/src/modules/{dir}"));
+        }
     }
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
-    assert_eq!(r2.len(), 4, "expected 4 missing-dir errors, got {}: {r2:#?}", r2.len());
+    // 4 dirs * 2 apps = 8 errors
+    // (removing portal's adapters/ destroys inner hexes but they're unreachable — no cascade)
+    assert_eq!(r2.len(), 8, "expected 8 missing-dir errors (4 per app * 2 apps), got {}: {r2:#?}", r2.len());
     for dir in EXPECTED_DIRS {
         assert!(
             r2.iter().any(|e| e.title.contains(dir)),
             "expected error mentioning '{dir}', got: {r2:#?}"
         );
     }
-    assert_standard(&r2, &errors);
+    // Per-app attribution: both service apps must appear
+    for app in TS_SERVICE_APPS {
+        assert!(
+            r2.iter().any(|e| e.title.contains(app)),
+            "expected error for app '{app}', got: {r2:#?}"
+        );
+    }
+    assert_file_field_modules(&r2);
+    assert_no_rust_apps(&errors);
+    assert_no_packages(&errors);
+    assert_no_landing(&errors);
 }
 
 // ============================================================================
@@ -426,17 +442,34 @@ fn missing_plus_loose() {
 #[test]
 fn all_three_violations() {
     let tmp = copy_fixture();
+    // Break ALL TS service apps with all 3 violation types
+    // admin: remove domain/, add unexpected services/, add loose stray.ts
     remove_dir(tmp.path(), "apps/admin/src/modules/domain");
     write_file(tmp.path(), "apps/admin/src/modules/services/handler.ts", "");
     write_file(tmp.path(), "apps/admin/src/modules/stray.ts", "// stray");
+    // portal: remove domain/ (no cascade — inner hexes are in adapters/), add unexpected utils/, add loose index.ts
+    remove_dir(tmp.path(), "apps/portal/src/modules/domain");
+    write_file(tmp.path(), "apps/portal/src/modules/utils/helper.ts", "");
+    write_file(tmp.path(), "apps/portal/src/modules/index.ts", "// stray");
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
-    assert_eq!(r2.len(), 3, "expected 3 errors (missing + unexpected + loose), got {}: {r2:#?}", r2.len());
+    // 3 violations * 2 apps = 6 errors
+    assert_eq!(r2.len(), 6, "expected 6 errors (3 per app * 2 apps), got {}: {r2:#?}", r2.len());
     assert!(r2.iter().any(|e| e.title.contains("missing")), "expected missing error");
     assert!(r2.iter().any(|e| e.title.contains("unexpected")), "expected unexpected error");
     assert!(r2.iter().any(|e| e.title.contains("loose files")), "expected loose files error");
-    assert_standard(&r2, &errors);
+    // Per-app attribution
+    for app in TS_SERVICE_APPS {
+        assert!(
+            r2.iter().any(|e| e.title.contains(app)),
+            "expected error for app '{app}', got: {r2:#?}"
+        );
+    }
+    assert_file_field_modules(&r2);
+    assert_no_rust_apps(&errors);
+    assert_no_packages(&errors);
+    assert_no_landing(&errors);
 }
 
 // ============================================================================
