@@ -143,6 +143,11 @@ fn subdir_completely_empty() {
             "expected 'empty_sub' and 'missing Cargo.toml' in title, got: '{}'",
             err.title
         );
+        assert!(
+            err.message.contains("no `Cargo.toml`") || err.message.contains("no `crates/` directory"),
+            "expected message about missing Cargo.toml or crates/, got: '{}'",
+            err.message
+        );
     }
     assert_file_field(&r6);
     assert_per_app(&r6);
@@ -183,6 +188,13 @@ fn multiple_invalid_subdirs() {
         orphan_everywhere_count(),
         orphan2.len()
     );
+    for err in &r6 {
+        assert!(
+            err.message.contains("no `Cargo.toml`") || err.message.contains("no `crates/` directory"),
+            "expected message about missing Cargo.toml or crates/, got: '{}'",
+            err.message
+        );
+    }
     assert_file_field(&r6);
     assert_per_app(&r6);
     assert_inner_hex(&r6);
@@ -538,6 +550,11 @@ fn subdir_with_only_gitkeep() {
         "expected 'missing Cargo.toml' in title for .gitkeep-only leaf, got: '{}'",
         placeholder_errors[0].title
     );
+    assert!(
+        placeholder_errors[0].message.contains("no `Cargo.toml`") || placeholder_errors[0].message.contains("no `crates/` directory"),
+        "expected message about missing Cargo.toml or crates/, got: '{}'",
+        placeholder_errors[0].message
+    );
     assert_file_field(&r6);
     assert_no_ts_apps(&r6);
     assert_no_packages(&r6);
@@ -633,6 +650,11 @@ fn permission_denied_subdir() {
         "expected 1 error for permission-denied subdir (Cargo.toml unreadable), got {}: {core_errors:#?}",
         core_errors.len()
     );
+    assert!(
+        core_errors[0].message.contains("no `Cargo.toml`") || core_errors[0].message.contains("no `crates/` directory"),
+        "expected message about missing Cargo.toml or crates/, got: '{}'",
+        core_errors[0].message
+    );
     assert_file_field(&r6);
     assert_no_ts_apps(&r6);
     assert_no_packages(&r6);
@@ -701,6 +723,11 @@ fn crates_dir_exists_but_empty() {
         hollow_errors[0].title.contains("missing Cargo.toml"),
         "expected 'missing Cargo.toml' (empty crates/ treated as no crates/), got: '{}'",
         hollow_errors[0].title
+    );
+    assert!(
+        hollow_errors[0].message.contains("no `Cargo.toml`") || hollow_errors[0].message.contains("no `crates/` directory"),
+        "expected message about missing Cargo.toml or crates/, got: '{}'",
+        hollow_errors[0].message
     );
     assert_file_field(&r6);
     assert_no_ts_apps(&r6);
@@ -830,6 +857,11 @@ fn new_app_gets_checked() {
         "expected 'missing Cargo.toml' for scheduler invalid leaf, got: '{}'",
         scheduler_errors[0].title
     );
+    assert!(
+        scheduler_errors[0].message.contains("no `Cargo.toml`") || scheduler_errors[0].message.contains("no `crates/` directory"),
+        "expected message about missing Cargo.toml or crates/, got: '{}'",
+        scheduler_errors[0].message
+    );
     assert_file_field(&r6);
     assert_no_ts_apps(&r6);
     assert_no_packages(&r6);
@@ -858,6 +890,11 @@ fn inner_hex_leaf_invalid_outer_clean() {
         r6[0].title.contains("orphan_inner"),
         "expected 'orphan_inner' in title, got: '{}'",
         r6[0].title
+    );
+    assert!(
+        r6[0].message.contains("no `Cargo.toml`") || r6[0].message.contains("no `crates/` directory"),
+        "expected message about missing Cargo.toml or crates/, got: '{}'",
+        r6[0].message
     );
     assert!(
         r6[0].file.as_deref().unwrap_or("").contains("mcp/crates"),
@@ -907,6 +944,11 @@ fn inner_hex_label_prefix_correct() {
         "expected nested label path in title, got: '{}'",
         nested[0].title
     );
+    assert!(
+        nested[0].message.contains("no `Cargo.toml`") || nested[0].message.contains("no `crates/` directory"),
+        "expected message about missing Cargo.toml or crates/, got: '{}'",
+        nested[0].message
+    );
     assert_file_field(&r6);
     assert_no_ts_apps(&r6);
     assert_no_packages(&r6);
@@ -948,6 +990,11 @@ fn idempotent_results() {
         assert_eq!(a.message, b.message, "idempotent: message mismatch");
         assert_eq!(a.file, b.file, "idempotent: file mismatch");
     }
+    assert!(
+        r6_1[0].message.contains("no `Cargo.toml`") || r6_1[0].message.contains("no `crates/` directory"),
+        "expected message about missing Cargo.toml or crates/, got: '{}'",
+        r6_1[0].message
+    );
     assert_no_ts_apps(&r6_1);
     assert_no_packages(&r6_1);
 }
@@ -1012,6 +1059,11 @@ fn different_breakage_per_app() {
         "devctl error should be missing Cargo.toml, got: '{}'",
         devctl_errs[0].title
     );
+    assert!(
+        devctl_errs[0].message.contains("no `Cargo.toml`") || devctl_errs[0].message.contains("no `crates/` directory"),
+        "devctl error message should mention missing Cargo.toml or crates/, got: '{}'",
+        devctl_errs[0].message
+    );
 
     // worker: both conflict
     let worker_errs: Vec<_> = r6
@@ -1029,6 +1081,11 @@ fn different_breakage_per_app() {
         "worker error should be conflict, got: '{}'",
         worker_errs[0].title
     );
+    assert!(
+        worker_errs[0].message.contains("not both") || worker_errs[0].message.contains("either a crate") || worker_errs[0].message.contains("Cargo.toml` and `crates/`"),
+        "worker error message should mention conflict, got: '{}'",
+        worker_errs[0].message
+    );
 
     // backend inner hex: missing Cargo.toml
     let inner_errs: Vec<_> = r6
@@ -1045,6 +1102,11 @@ fn different_breakage_per_app() {
         inner_errs[0].file.as_deref().unwrap_or("").contains("mcp/crates"),
         "inner hex error should reference mcp/crates in file, got: {:?}",
         inner_errs[0].file
+    );
+    assert!(
+        inner_errs[0].message.contains("no `Cargo.toml`") || inner_errs[0].message.contains("no `crates/` directory"),
+        "inner hex error message should mention missing Cargo.toml or crates/, got: '{}'",
+        inner_errs[0].message
     );
 
     assert_file_field(&r6);
@@ -1164,6 +1226,11 @@ fn hidden_dir_as_leaf() {
             "expected 'missing Cargo.toml' for hidden dir, got: '{}'",
             err.title
         );
+        assert!(
+            err.message.contains("no `Cargo.toml`") || err.message.contains("no `crates/` directory"),
+            "expected message about missing Cargo.toml or crates/, got: '{}'",
+            err.message
+        );
     }
     assert_file_field(&r6);
     assert_no_ts_apps(&r6);
@@ -1195,6 +1262,13 @@ fn cargo_toml_wrong_case() {
         "expected 0 (case-insensitive) or 1 (case-sensitive) error for wrong_case, got {}: {wrong_case_errors:#?}",
         wrong_case_errors.len()
     );
+    if !wrong_case_errors.is_empty() {
+        assert!(
+            wrong_case_errors[0].message.contains("no `Cargo.toml`") || wrong_case_errors[0].message.contains("no `crates/` directory"),
+            "expected message about missing Cargo.toml or crates/, got: '{}'",
+            wrong_case_errors[0].message
+        );
+    }
     assert_eq!(
         r6.len(),
         wrong_case_errors.len(),
@@ -1235,6 +1309,11 @@ fn nested_garbage_no_recursion() {
         r6[0].title.contains("missing Cargo.toml"),
         "expected 'missing Cargo.toml' in title, got: '{}'",
         r6[0].title
+    );
+    assert!(
+        r6[0].message.contains("no `Cargo.toml`") || r6[0].message.contains("no `crates/` directory"),
+        "expected message about missing Cargo.toml or crates/, got: '{}'",
+        r6[0].message
     );
     // Verify no error mentions the nested garbage paths
     for err in &r6 {
@@ -1377,10 +1456,25 @@ fn maximally_complex_single_container() {
 
     assert_eq!(orphan_errs.len(), 1, "orphan_no_cargo should fire: {orphan_errs:#?}");
     assert!(orphan_errs[0].title.contains("missing Cargo.toml"));
+    assert!(
+        orphan_errs[0].message.contains("no `Cargo.toml`") || orphan_errs[0].message.contains("no `crates/` directory"),
+        "orphan message should mention missing Cargo.toml or crates/, got: '{}'",
+        orphan_errs[0].message
+    );
     assert_eq!(conflict_errs.len(), 1, "conflict_both should fire: {conflict_errs:#?}");
     assert!(conflict_errs[0].title.contains("both Cargo.toml and crates/"));
+    assert!(
+        conflict_errs[0].message.contains("not both") || conflict_errs[0].message.contains("either a crate") || conflict_errs[0].message.contains("Cargo.toml` and `crates/`"),
+        "conflict message should mention conflict, got: '{}'",
+        conflict_errs[0].message
+    );
     assert_eq!(gitkeep_errs.len(), 1, "gitkeep_only_sub should fire (CHECK BUG): {gitkeep_errs:#?}");
     assert!(gitkeep_errs[0].title.contains("missing Cargo.toml"));
+    assert!(
+        gitkeep_errs[0].message.contains("no `Cargo.toml`") || gitkeep_errs[0].message.contains("no `crates/` directory"),
+        "gitkeep message should mention missing Cargo.toml or crates/, got: '{}'",
+        gitkeep_errs[0].message
+    );
     assert!(valid_errs.is_empty(), "valid_crate should pass: {valid_errs:#?}");
     assert!(hex_errs.is_empty(), "hex_sub should pass: {hex_errs:#?}");
     assert!(loose_errs.is_empty(), "loose_file should be ignored: {loose_errs:#?}");
@@ -1423,6 +1517,11 @@ fn unicode_lookalike_subdir() {
         "expected 'missing Cargo.toml' for unicode subdir, got: '{}'",
         r6[0].title
     );
+    assert!(
+        r6[0].message.contains("no `Cargo.toml`") || r6[0].message.contains("no `crates/` directory"),
+        "expected message about missing Cargo.toml or crates/, got: '{}'",
+        r6[0].message
+    );
     assert_file_field(&r6);
     assert_no_ts_apps(&r6);
     assert_no_packages(&r6);
@@ -1456,6 +1555,11 @@ fn cargo_toml_is_directory() {
         dir_cargo_errors[0].title.contains("missing Cargo.toml"),
         "expected 'missing Cargo.toml' when Cargo.toml is a dir, got: '{}'",
         dir_cargo_errors[0].title
+    );
+    assert!(
+        dir_cargo_errors[0].message.contains("no `Cargo.toml`") || dir_cargo_errors[0].message.contains("no `crates/` directory"),
+        "expected message about missing Cargo.toml or crates/, got: '{}'",
+        dir_cargo_errors[0].message
     );
     assert_eq!(
         r6.len(),
@@ -1504,6 +1608,11 @@ fn subdirs_plus_loose_alongside_valid() {
         orphan_errs[0].title.contains("missing Cargo.toml"),
         "orphan should be 'missing Cargo.toml', got: '{}'",
         orphan_errs[0].title
+    );
+    assert!(
+        orphan_errs[0].message.contains("no `Cargo.toml`") || orphan_errs[0].message.contains("no `crates/` directory"),
+        "orphan message should mention missing Cargo.toml or crates/, got: '{}'",
+        orphan_errs[0].message
     );
     assert!(
         valid_errs.is_empty(),
