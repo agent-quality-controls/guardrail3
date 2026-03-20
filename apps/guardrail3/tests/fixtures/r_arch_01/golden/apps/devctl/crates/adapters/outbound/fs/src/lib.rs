@@ -1,1 +1,1 @@
-// fs adapter
+// outbound fs adapter

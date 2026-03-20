@@ -1,1 +1,1 @@
-// queue adapter
+// outbound queue adapter

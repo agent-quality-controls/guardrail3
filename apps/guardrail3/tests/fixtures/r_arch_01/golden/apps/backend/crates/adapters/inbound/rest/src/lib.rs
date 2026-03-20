@@ -1,1 +1,1 @@
-// rest adapter
+// inbound rest adapter

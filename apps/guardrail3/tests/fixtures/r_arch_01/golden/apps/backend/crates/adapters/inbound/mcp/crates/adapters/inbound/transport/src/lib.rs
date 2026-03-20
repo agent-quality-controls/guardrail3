@@ -1,1 +1,1 @@
-// mcp transport
+// mcp inbound transport adapter

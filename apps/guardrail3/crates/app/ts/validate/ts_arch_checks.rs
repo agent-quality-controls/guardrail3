@@ -110,53 +110,300 @@ pub fn check_single_app_structure(
 
     let modules_dir = app_dir.join("src").join("modules");
 
-    // Check if modules/ directory exists by probing for any known subdirectory
-    let has_domain = dir_exists_via_probe(fs, &modules_dir.join("domain"));
-    let has_application = dir_exists_via_probe(fs, &modules_dir.join("application"));
-    let has_adapters = dir_exists_via_probe(fs, &modules_dir.join("adapters"));
-
-    if !has_domain || !has_application || !has_adapters {
-        let mut missing = Vec::new();
-        if !has_domain {
-            missing.push("domain");
-        }
-        if !has_application {
-            missing.push("application");
-        }
-        if !has_adapters {
-            missing.push("adapters");
-        }
+    // src/modules/ must exist
+    if fs.metadata(&modules_dir).is_none() {
         results.push(CheckResult {
             id: "T-ARCH-01".to_owned(),
             severity: Severity::Warn,
-            title: format!("TS app `{app_name}` missing hexagonal architecture layers"),
+            title: format!("TS app `{app_name}` missing src/modules/ directory"),
             message: format!(
-                "App `{app_name}` is missing `src/modules/{}` subdirectories. Hexagonal architecture \
-                 separates business logic (domain), use cases (application), and external integrations \
-                 (adapters). Create the missing directories: `src/modules/domain/` for business logic, \
-                 `src/modules/application/` for use cases/commands, and `src/modules/adapters/` for \
-                 external integrations (DB, HTTP, etc.).",
-                missing.join("`, `src/modules/"),
+                "App `{app_name}` has no `src/modules/` directory. Create it with the hex arch \
+                 template: `src/modules/{{domain, ports/{{inbound,outbound}}, application, \
+                 adapters/{{inbound,outbound}}}}`."
             ),
             file: Some(app_dir.display().to_string()),
+            line: None,
+            inventory: false,
+        });
+        return;
+    }
+
+    check_ts_modules_dir(fs, app_name, &modules_dir, "src/modules", results);
+}
+
+/// Check a `modules/` directory for TS hex arch structure.
+/// Reusable for both top-level apps and hex-in-hex recursion.
+fn check_ts_modules_dir(
+    fs: &dyn FileSystem,
+    name: &str,
+    modules_dir: &Path,
+    label_prefix: &str,
+    results: &mut Vec<CheckResult>,
+) {
+    // modules/ must contain exactly {adapters, application, domain, ports}
+    let expected_top = ["adapters", "application", "domain", "ports"];
+    let dir_names = list_ts_dir_names(modules_dir);
+
+    for expected in &expected_top {
+        if !dir_names.iter().any(|n| n == expected) {
+            results.push(CheckResult {
+                id: "T-ARCH-01".to_owned(),
+                severity: Severity::Error,
+                title: format!(
+                    "TS app `{name}` missing {label_prefix}/{expected}/ directory"
+                ),
+                message: format!(
+                    "App `{name}` is missing `{label_prefix}/{expected}/`. Create it and add a \
+                     `.gitkeep` if not needed yet."
+                ),
+                file: Some(modules_dir.display().to_string()),
+                line: None,
+                inventory: false,
+            });
+        }
+    }
+
+    // No unexpected dirs
+    for dir_name in &dir_names {
+        if !expected_top.contains(&dir_name.as_str()) {
+            results.push(CheckResult {
+                id: "T-ARCH-01".to_owned(),
+                severity: Severity::Error,
+                title: format!(
+                    "TS app `{name}` has unexpected directory {label_prefix}/{dir_name}/"
+                ),
+                message: format!(
+                    "App `{name}` has `{label_prefix}/{dir_name}/` which is not part of the hex \
+                     arch template. Only `{{adapters, application, domain, ports}}` directories \
+                     are allowed in `{label_prefix}/`."
+                ),
+                file: Some(modules_dir.join(dir_name).display().to_string()),
+                line: None,
+                inventory: false,
+            });
+        }
+    }
+
+    // No loose files in modules/ (structural dir)
+    check_ts_loose_files(fs, name, modules_dir, label_prefix, results);
+
+    // adapters/ and ports/ must each contain {inbound, outbound}
+    let adapters_label = format!("{label_prefix}/adapters");
+    let ports_label = format!("{label_prefix}/ports");
+    check_ts_inbound_outbound(
+        fs,
+        name,
+        &modules_dir.join("adapters"),
+        &adapters_label,
+        results,
+    );
+    check_ts_inbound_outbound(
+        fs,
+        name,
+        &modules_dir.join("ports"),
+        &ports_label,
+        results,
+    );
+
+    // Validate container folders: domain, application, adapters/{in,out}, ports/{in,out}
+    let domain_label = format!("{label_prefix}/domain");
+    let application_label = format!("{label_prefix}/application");
+    validate_ts_container(fs, name, &modules_dir.join("domain"), &domain_label, results);
+    validate_ts_container(
+        fs,
+        name,
+        &modules_dir.join("application"),
+        &application_label,
+        results,
+    );
+    for parent in &["adapters", "ports"] {
+        for child in &["inbound", "outbound"] {
+            let path = modules_dir.join(parent).join(child);
+            let label = format!("{label_prefix}/{parent}/{child}");
+            validate_ts_container(fs, name, &path, &label, results);
+        }
+    }
+}
+
+/// Check that a structural dir contains exactly {inbound, outbound}.
+fn check_ts_inbound_outbound(
+    fs: &dyn FileSystem,
+    name: &str,
+    dir: &Path,
+    label: &str,
+    results: &mut Vec<CheckResult>,
+) {
+    if fs.metadata(dir).is_none() {
+        return; // missing dir already reported
+    }
+
+    let dir_names = list_ts_dir_names(dir);
+    for expected in &["inbound", "outbound"] {
+        if !dir_names.iter().any(|n| n == expected) {
+            results.push(CheckResult {
+                id: "T-ARCH-01".to_owned(),
+                severity: Severity::Error,
+                title: format!("TS app `{name}` missing {label}/{expected}/ directory"),
+                message: format!(
+                    "App `{name}` is missing `{label}/{expected}/`. \
+                     Create it and add a `.gitkeep` if not needed yet."
+                ),
+                file: Some(dir.display().to_string()),
+                line: None,
+                inventory: false,
+            });
+        }
+    }
+
+    for dir_name in &dir_names {
+        if dir_name != "inbound" && dir_name != "outbound" {
+            results.push(CheckResult {
+                id: "T-ARCH-01".to_owned(),
+                severity: Severity::Error,
+                title: format!(
+                    "TS app `{name}` has unexpected directory {label}/{dir_name}/"
+                ),
+                message: format!(
+                    "App `{name}` has `{label}/{dir_name}/` which is not part of the hex \
+                     arch template. Only `{{inbound, outbound}}` directories are \
+                     allowed in `{label}/`."
+                ),
+                file: Some(dir.join(dir_name).display().to_string()),
+                line: None,
+                inventory: false,
+            });
+        }
+    }
+
+    check_ts_loose_files(fs, name, dir, label, results);
+}
+
+/// Validate a TS container folder: must have `.gitkeep` or at least one subdir.
+fn validate_ts_container(
+    fs: &dyn FileSystem,
+    name: &str,
+    dir: &Path,
+    label: &str,
+    results: &mut Vec<CheckResult>,
+) {
+    if fs.metadata(dir).is_none() {
+        return; // missing dir already reported
+    }
+
+    let dirs = list_ts_dir_names(dir);
+    let has_gitkeep = fs.read_file(&dir.join(".gitkeep")).is_some();
+
+    if dirs.is_empty() && !has_gitkeep {
+        results.push(CheckResult {
+            id: "T-ARCH-01".to_owned(),
+            severity: Severity::Error,
+            title: format!("TS app `{name}` empty container {label}/"),
+            message: format!(
+                "App `{name}` container `{label}/` has no subdirectories. \
+                 Add module subdirectories or a `.gitkeep` if this layer is not needed yet."
+            ),
+            file: Some(dir.display().to_string()),
+            line: None,
+            inventory: false,
+        });
+    }
+
+    // Each subdir must have at least one .ts/.tsx file or be a hex-in-hex (has modules/ inside)
+    for subdir in &dirs {
+        let sub_path = dir.join(subdir);
+        let has_modules = fs.metadata(&sub_path.join("modules")).is_some();
+
+        if has_modules {
+            // Hex-in-hex: recurse
+            let inner_label = format!("{label}/{subdir}/modules");
+            check_ts_modules_dir(fs, name, &sub_path.join("modules"), &inner_label, results);
+        } else if !has_ts_source_files(&sub_path)
+            && fs.read_file(&sub_path.join(".gitkeep")).is_none()
+        {
+            results.push(CheckResult {
+                id: "T-ARCH-01".to_owned(),
+                severity: Severity::Error,
+                title: format!(
+                    "TS app `{name}` subdirectory {label}/{subdir}/ has no .ts/.tsx files"
+                ),
+                message: format!(
+                    "App `{name}` has `{label}/{subdir}/` but it contains no TypeScript files. \
+                     Every subdirectory in a container folder must be a module with .ts/.tsx files, \
+                     a hex-in-hex with its own `modules/` structure, or have a `.gitkeep` placeholder."
+                ),
+                file: Some(sub_path.display().to_string()),
+                line: None,
+                inventory: false,
+            });
+        }
+    }
+
+    check_ts_loose_files(fs, name, dir, label, results);
+}
+
+/// Report loose files in a directory (only `.gitkeep` is allowed).
+fn check_ts_loose_files(
+    fs: &dyn FileSystem,
+    name: &str,
+    dir: &Path,
+    label: &str,
+    results: &mut Vec<CheckResult>,
+) {
+    let mut bad_files: Vec<String> = Vec::new();
+    for entry in fs.list_dir(dir) {
+        let entry_name = entry.file_name().to_string_lossy().into_owned();
+        let Ok(ft) = entry.file_type() else {
+            continue;
+        };
+        if !ft.is_dir() && entry_name != ".gitkeep" {
+            bad_files.push(entry_name);
+        }
+    }
+
+    if !bad_files.is_empty() {
+        results.push(CheckResult {
+            id: "T-ARCH-01".to_owned(),
+            severity: Severity::Error,
+            title: format!("TS app `{name}` has loose files in {label}/"),
+            message: format!(
+                "App `{name}` has files in `{label}/` that don't belong: {}. \
+                 Only `.gitkeep` is allowed in structural/container directories. \
+                 Move code into module subdirectories.",
+                bad_files.join(", ")
+            ),
+            file: Some(dir.display().to_string()),
             line: None,
             inventory: false,
         });
     }
 }
 
-/// Check if a directory likely exists by probing for common marker files
-/// or by checking if any files can be read from it via walkdir.
-fn dir_exists_via_probe(fs: &dyn FileSystem, dir: &Path) -> bool {
-    // Try common markers
-    let markers = ["index.ts", "index.tsx", "mod.ts", "types.ts"];
-    for marker in &markers {
-        if fs.read_file(&dir.join(marker)).is_some() {
-            return true;
+/// List subdirectory names in a directory.
+fn list_ts_dir_names(dir: &Path) -> Vec<String> {
+    let mut names = Vec::new();
+    if let Ok(entries) = std::fs::read_dir(dir) {
+        for entry in entries.flatten() {
+            if entry.file_type().is_ok_and(|ft| ft.is_dir()) {
+                names.push(entry.file_name().to_string_lossy().into_owned());
+            }
         }
     }
-    // Fall back to checking if the directory itself exists on the real filesystem
-    dir.is_dir()
+    names
+}
+
+/// Check if a directory contains any .ts or .tsx files (recursively).
+fn has_ts_source_files(dir: &Path) -> bool {
+    WalkDir::new(dir)
+        .into_iter()
+        .filter_entry(|e| !is_excluded_ts_dir(e))
+        .flatten()
+        .any(|entry| {
+            entry.file_type().is_file()
+                && entry
+                    .path()
+                    .extension()
+                    .is_some_and(|e| e == "ts" || e == "tsx")
+        })
 }
 
 // -----------------------------------------------------------------------

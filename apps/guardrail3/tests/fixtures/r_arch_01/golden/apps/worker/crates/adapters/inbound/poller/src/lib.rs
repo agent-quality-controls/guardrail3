@@ -1,1 +1,1 @@
-// poller
+// inbound poller adapter
