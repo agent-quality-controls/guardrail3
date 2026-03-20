@@ -784,3 +784,149 @@ fn crates_no_read_permission() {
         "expected error for unreadable crates/, got none"
     );
 }
+
+// ======= Compound: all apps =======
+
+#[test]
+fn crates_dir_empty_all_apps() {
+    let tmp = copy_golden();
+    for app in &["devctl", "backend", "worker"] {
+        remove_dir(tmp.path(), &format!("apps/{app}/crates"));
+        std::fs::create_dir_all(tmp.path().join(format!("apps/{app}/crates"))).expect("mkdir");
+    }
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+    assert!(
+        errors.len() >= 3,
+        "expected errors for all 3 apps, got {}: {errors:#?}",
+        errors.len()
+    );
+    for app in &["devctl", "backend", "worker"] {
+        assert!(
+            errors.iter().any(|e| e.title.contains(app)),
+            "expected error for {app}, got: {errors:#?}"
+        );
+    }
+}
+
+#[test]
+fn crates_is_file_not_dir_all_apps() {
+    let tmp = copy_golden();
+    for app in &["devctl", "backend", "worker"] {
+        remove_dir(tmp.path(), &format!("apps/{app}/crates"));
+        write_file(tmp.path(), &format!("apps/{app}/crates"), "not a directory");
+    }
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+    assert!(
+        errors.len() >= 3,
+        "expected errors for all 3 apps, got {}: {errors:#?}",
+        errors.len()
+    );
+    for app in &["devctl", "backend", "worker"] {
+        assert!(
+            errors.iter().any(|e| e.title.contains(app)),
+            "expected error for {app}, got: {errors:#?}"
+        );
+    }
+}
+
+#[test]
+fn crates_with_only_gitkeep_all_apps() {
+    let tmp = copy_golden();
+    for app in &["devctl", "backend", "worker"] {
+        remove_dir(tmp.path(), &format!("apps/{app}/crates"));
+        std::fs::create_dir_all(tmp.path().join(format!("apps/{app}/crates"))).expect("mkdir");
+        write_file(tmp.path(), &format!("apps/{app}/crates/.gitkeep"), "");
+    }
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+    assert!(
+        errors.len() >= 3,
+        "expected errors for all 3 apps, got {}: {errors:#?}",
+        errors.len()
+    );
+    for app in &["devctl", "backend", "worker"] {
+        assert!(
+            errors.iter().any(|e| e.title.contains(app)),
+            "expected error for {app}, got: {errors:#?}"
+        );
+    }
+}
+
+#[test]
+fn src_exists_and_crates_missing_all_apps() {
+    let tmp = copy_golden();
+    for app in &["devctl", "backend", "worker"] {
+        remove_dir(tmp.path(), &format!("apps/{app}/crates"));
+        write_file(tmp.path(), &format!("apps/{app}/src/main.rs"), "fn main() {}");
+    }
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+    // Each app should have 2 errors: src/ ban + missing crates/
+    assert!(
+        errors.len() >= 6,
+        "expected at least 6 errors (2 per app), got {}: {errors:#?}",
+        errors.len()
+    );
+    for app in &["devctl", "backend", "worker"] {
+        assert!(
+            errors.iter().any(|e| e.title.contains(app) && e.title.contains("src/")),
+            "expected src/ error for {app}, got: {errors:#?}"
+        );
+        assert!(
+            errors.iter().any(|e| e.title.contains(app) && e.title.contains("missing crates/")),
+            "expected missing crates/ error for {app}, got: {errors:#?}"
+        );
+    }
+}
+
+#[test]
+fn src_and_crates_both_exist_all_apps() {
+    let tmp = copy_golden();
+    for app in &["devctl", "backend", "worker"] {
+        write_file(tmp.path(), &format!("apps/{app}/src/main.rs"), "fn main() {}");
+    }
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+    assert!(
+        errors.len() >= 3,
+        "expected at least 3 src/ errors, got {}: {errors:#?}",
+        errors.len()
+    );
+    for app in &["devctl", "backend", "worker"] {
+        assert!(
+            errors.iter().any(|e| e.title.contains(app) && e.title.contains("src/")),
+            "expected src/ error for {app}, got: {errors:#?}"
+        );
+    }
+}
+
+#[cfg(unix)]
+#[test]
+fn crates_no_read_permission_all_apps() {
+    use std::os::unix::fs::PermissionsExt;
+    let tmp = copy_golden();
+    for app in &["devctl", "backend", "worker"] {
+        let crates = tmp.path().join(format!("apps/{app}/crates"));
+        std::fs::set_permissions(&crates, std::fs::Permissions::from_mode(0o000)).expect("chmod");
+    }
+    let results = run_check(tmp.path());
+    // Restore permissions so tempdir cleanup works
+    for app in &["devctl", "backend", "worker"] {
+        let crates = tmp.path().join(format!("apps/{app}/crates"));
+        std::fs::set_permissions(&crates, std::fs::Permissions::from_mode(0o755)).expect("chmod");
+    }
+    let errors = arch_01_errors(&results);
+    assert!(
+        errors.len() >= 3,
+        "expected errors for all 3 apps, got {}: {errors:#?}",
+        errors.len()
+    );
+    for app in &["devctl", "backend", "worker"] {
+        assert!(
+            errors.iter().any(|e| e.title.contains(app)),
+            "expected error for {app}, got: {errors:#?}"
+        );
+    }
+}
