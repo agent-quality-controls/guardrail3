@@ -28,14 +28,70 @@ fn rule2_errors<'a>(errors: &'a [&CheckResult]) -> Vec<&'a &'a CheckResult> {
 
 use guardrail3::domain::report::CheckResult;
 
-// ==========================================================================
+// ============================================================================
+// Shared assertion helpers
+// ============================================================================
+
+/// Assert that each Rust app (devctl, backend, worker) produced at least one error.
+/// For tests that break all 4 locations, this ensures per-location attribution.
+fn assert_per_app(errors: &[&CheckResult]) {
+    for app in RUST_APPS {
+        assert!(
+            errors.iter().any(|e| e.title.contains(app)),
+            "expected error for app `{app}`, got: {errors:#?}"
+        );
+    }
+}
+
+/// Assert that the inner hex (mcp/crates) produced at least one error.
+fn assert_inner_hex(errors: &[&CheckResult]) {
+    assert!(
+        errors
+            .iter()
+            .any(|e| e.file.as_deref().unwrap_or("").contains("mcp/crates")),
+        "expected at least one error from inner hex (mcp/crates), got: {errors:#?}"
+    );
+}
+
+/// Assert no errors mention packages/ items (shared-types, ui-kit).
+fn assert_no_packages(errors: &[&CheckResult]) {
+    assert!(
+        !errors.iter().any(|e| {
+            let t = &e.title;
+            t.contains("shared-types") || t.contains("ui-kit")
+        }),
+        "packages should not be flagged, got: {errors:#?}"
+    );
+}
+
+/// Assert no errors mention TS apps (admin, landing).
+fn assert_no_ts_apps(errors: &[&CheckResult]) {
+    assert!(
+        !errors
+            .iter()
+            .any(|e| e.title.contains("admin") || e.title.contains("landing")),
+        "TS apps should not be flagged, got: {errors:#?}"
+    );
+}
+
+/// Assert every error has a file field containing "crates".
+fn assert_file_field_crates(errors: &[&CheckResult]) {
+    for err in errors {
+        assert!(
+            err.file.as_deref().unwrap_or("").contains("crates"),
+            "expected file field containing 'crates', got: '{}'",
+            err.file.as_deref().unwrap_or("")
+        );
+    }
+}
+
+// ============================================================================
 // Group A: Missing required dirs
-// ==========================================================================
+// ============================================================================
 
 #[test]
 fn missing_domain_everywhere() {
     let tmp = copy_golden();
-    // Remove domain/ from all 4 crates/ dirs
     for dir in ALL_CRATES_DIRS {
         remove_dir(tmp.path(), &format!("{dir}/domain"));
     }
@@ -50,7 +106,6 @@ fn missing_domain_everywhere() {
         "expected 4 errors (3 outer + 1 inner hex), got {}: {errors:#?}",
         errors.len()
     );
-    // Every error should mention "domain"
     for err in &errors {
         assert!(
             err.title.contains("domain"),
@@ -62,20 +117,12 @@ fn missing_domain_everywhere() {
             "expected title mentioning 'missing', got: '{}'",
             err.title
         );
-        // File field assertion
-        assert!(
-            err.file.as_deref().unwrap_or("").contains("crates"),
-            "expected file field containing 'crates', got: '{}'",
-            err.file.as_deref().unwrap_or("")
-        );
     }
-    // No errors should mention admin or landing
-    assert!(
-        !errors
-            .iter()
-            .any(|e| e.title.contains("admin") || e.title.contains("landing")),
-        "TS apps should not be flagged, got: {errors:#?}"
-    );
+    assert_file_field_crates(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
 #[test]
@@ -98,20 +145,12 @@ fn missing_app_everywhere() {
             "expected title mentioning 'app/', got: '{}'",
             err.title
         );
-        // File field assertion
-        assert!(
-            err.file.as_deref().unwrap_or("").contains("crates"),
-            "expected file field containing 'crates', got: '{}'",
-            err.file.as_deref().unwrap_or("")
-        );
     }
-    // TS negative assertions
-    assert!(
-        !errors
-            .iter()
-            .any(|e| e.title.contains("admin") || e.title.contains("landing")),
-        "TS apps should not be flagged, got: {errors:#?}"
-    );
+    assert_file_field_crates(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
 #[test]
@@ -134,20 +173,12 @@ fn missing_ports_everywhere() {
             "expected title mentioning 'ports', got: '{}'",
             err.title
         );
-        // File field assertion
-        assert!(
-            err.file.as_deref().unwrap_or("").contains("crates"),
-            "expected file field containing 'crates', got: '{}'",
-            err.file.as_deref().unwrap_or("")
-        );
     }
-    // TS negative assertions
-    assert!(
-        !errors
-            .iter()
-            .any(|e| e.title.contains("admin") || e.title.contains("landing")),
-        "TS apps should not be flagged, got: {errors:#?}"
-    );
+    assert_file_field_crates(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
 #[test]
@@ -173,26 +204,17 @@ fn missing_adapters_everywhere() {
             "expected title mentioning 'adapters', got: '{}'",
             err.title
         );
-        // File field assertion
-        assert!(
-            err.file.as_deref().unwrap_or("").contains("crates"),
-            "expected file field containing 'crates', got: '{}'",
-            err.file.as_deref().unwrap_or("")
-        );
     }
-    // TS negative assertions
-    assert!(
-        !errors
-            .iter()
-            .any(|e| e.title.contains("admin") || e.title.contains("landing")),
-        "TS apps should not be flagged, got: {errors:#?}"
-    );
+    assert_file_field_crates(&errors);
+    assert_per_app(&errors);
+    // No inner hex check: removing adapters/ destroys the path
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
 #[test]
 fn missing_adapters_inner_hex_only() {
     let tmp = copy_golden();
-    // Remove adapters/ from the inner hex only
     remove_dir(tmp.path(), &format!("{INNER_HEX}/adapters"));
     let results = run_check(tmp.path());
     let errors = arch_01_errors(&results);
@@ -212,13 +234,8 @@ fn missing_adapters_inner_hex_only() {
         file.contains("mcp/crates"),
         "expected file field referencing mcp/crates, got: '{file}'"
     );
-    // TS negative assertions
-    assert!(
-        !errors
-            .iter()
-            .any(|e| e.title.contains("admin") || e.title.contains("landing")),
-        "TS apps should not be flagged, got: {errors:#?}"
-    );
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
 #[test]
@@ -240,20 +257,11 @@ fn missing_two_dirs_everywhere() {
         "expected 8 errors (2 per location * 4 locations), got {}: {errors:#?}",
         errors.len()
     );
-    for err in &errors {
-        // File field assertion
-        assert!(
-            err.file.as_deref().unwrap_or("").contains("crates"),
-            "expected file field containing 'crates', got: '{}'",
-            err.file.as_deref().unwrap_or("")
-        );
-    }
-    assert!(
-        !errors
-            .iter()
-            .any(|e| e.title.contains("admin") || e.title.contains("landing")),
-        "TS apps should not be flagged, got: {errors:#?}"
-    );
+    assert_file_field_crates(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
 #[test]
@@ -295,9 +303,6 @@ fn missing_all_four_with_gitkeep() {
     // - backend outer: 3 missing (app, domain, ports) — adapters/ still exists
     // - backend inner hex: 4 missing (adapters, app, domain, ports)
     // Total Rule 2: 15 errors
-    // But other rules also fire: check_03 for backend adapters/ missing outbound/,
-    // check_05 for empty containers, etc.
-    // Filter to only Rule 2 errors (missing required dir at crates/ level)
     let rule2_missing: Vec<_> = errors
         .iter()
         .filter(|e| {
@@ -315,25 +320,33 @@ fn missing_all_four_with_gitkeep() {
         rule2_missing.len()
     );
     for err in &rule2_missing {
-        // File field assertion
         assert!(
             err.file.as_deref().unwrap_or("").contains("crates"),
             "expected file field containing 'crates', got: '{}'",
             err.file.as_deref().unwrap_or("")
         );
     }
-    // TS negative assertions
+    // Per-app attribution
+    for app in RUST_APPS {
+        assert!(
+            rule2_missing.iter().any(|e| e.title.contains(app)),
+            "expected missing-dir error for app `{app}`, got: {rule2_missing:#?}"
+        );
+    }
+    // Inner hex attribution
     assert!(
-        !errors
+        rule2_missing
             .iter()
-            .any(|e| e.title.contains("admin") || e.title.contains("landing")),
-        "TS apps should not be flagged, got: {errors:#?}"
+            .any(|e| e.file.as_deref().unwrap_or("").contains("mcp/crates")),
+        "expected at least one error from inner hex (mcp/crates), got: {rule2_missing:#?}"
     );
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
-// ==========================================================================
+// ============================================================================
 // Group B: Unexpected dirs
-// ==========================================================================
+// ============================================================================
 
 #[test]
 fn unexpected_dir_everywhere() {
@@ -358,19 +371,12 @@ fn unexpected_dir_everywhere() {
             "expected title mentioning 'unexpected' and 'utils', got: '{}'",
             err.title
         );
-        // File field assertion: unexpected dir file points to the dir itself
-        assert!(
-            err.file.as_deref().unwrap_or("").contains("crates"),
-            "expected file field containing 'crates', got: '{}'",
-            err.file.as_deref().unwrap_or("")
-        );
     }
-    assert!(
-        !errors
-            .iter()
-            .any(|e| e.title.contains("admin") || e.title.contains("landing")),
-        "TS apps should not be flagged, got: {errors:#?}"
-    );
+    assert_file_field_crates(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
 #[test]
@@ -397,10 +403,7 @@ fn unexpected_dir_wrong_case() {
     // Clean up test probe
     if !is_case_sensitive {
         // Case-insensitive: Domain/ == domain/. Skip this test variant.
-        // Instead, test with a truly distinct wrong-case name that doesn't collide.
-        // Use "DOMAIN" which on case-insensitive FS maps to "domain" — same issue.
-        // On case-insensitive FS, we cannot have both. Just verify the check would
-        // flag a near-miss name like "domaine" (typo).
+        // Use a truly distinct wrong-case name that doesn't collide: "domaine" (typo).
         for dir in ALL_CRATES_DIRS {
             std::fs::create_dir_all(tmp.path().join(format!("{dir}/domaine"))).expect("mkdir");
         }
@@ -414,17 +417,15 @@ fn unexpected_dir_wrong_case() {
         );
         for err in &errors {
             assert!(
-                err.title.contains("domaine"),
-                "expected title mentioning 'domaine', got: '{}'",
+                err.title.contains("unexpected") && err.title.contains("domaine"),
+                "expected title mentioning 'unexpected' and 'domaine', got: '{}'",
                 err.title
             );
-            // File field assertion
-            assert!(
-                err.file.as_deref().unwrap_or("").contains("crates"),
-                "expected file field containing 'crates', got: '{}'",
-                err.file.as_deref().unwrap_or("")
-            );
         }
+        assert_file_field_crates(&errors);
+        assert_per_app(&errors);
+        assert_inner_hex(&errors);
+        assert_no_packages(&errors);
     } else {
         // Case-sensitive FS: Domain/ is distinct from domain/
         for dir in ALL_CRATES_DIRS.iter().skip(1) {
@@ -440,27 +441,21 @@ fn unexpected_dir_wrong_case() {
         );
         for err in &errors {
             assert!(
-                err.title.contains("Domain"),
-                "expected title mentioning 'Domain', got: '{}'",
+                err.title.contains("unexpected") && err.title.contains("Domain"),
+                "expected title mentioning 'unexpected' and 'Domain', got: '{}'",
                 err.title
             );
-            // File field assertion
-            assert!(
-                err.file.as_deref().unwrap_or("").contains("crates"),
-                "expected file field containing 'crates', got: '{}'",
-                err.file.as_deref().unwrap_or("")
-            );
         }
+        assert_file_field_crates(&errors);
+        assert_per_app(&errors);
+        assert_inner_hex(&errors);
+        assert_no_packages(&errors);
     }
     // TS negative assertions (both branches)
     let results = run_check(tmp.path());
     let errors = arch_01_errors(&results);
-    assert!(
-        !errors
-            .iter()
-            .any(|e| e.title.contains("admin") || e.title.contains("landing")),
-        "TS apps should not be flagged, got: {errors:#?}"
-    );
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
 #[test]
@@ -479,7 +474,6 @@ fn multiple_unexpected_dirs() {
         "expected 12 errors (3 unexpected dirs * 4 locations), got {}: {errors:#?}",
         errors.len()
     );
-    // Title content assertions
     for err in &errors {
         assert!(
             err.title.contains("unexpected directory"),
@@ -487,24 +481,18 @@ fn multiple_unexpected_dirs() {
             err.title
         );
         assert!(
-            err.title.contains("utils") || err.title.contains("helpers") || err.title.contains("config"),
+            err.title.contains("utils")
+                || err.title.contains("helpers")
+                || err.title.contains("config"),
             "expected title mentioning utils/helpers/config, got: '{}'",
             err.title
         );
-        // File field assertion
-        assert!(
-            err.file.as_deref().unwrap_or("").contains("crates"),
-            "expected file field containing 'crates', got: '{}'",
-            err.file.as_deref().unwrap_or("")
-        );
     }
-    // TS negative assertions
-    assert!(
-        !errors
-            .iter()
-            .any(|e| e.title.contains("admin") || e.title.contains("landing")),
-        "TS apps should not be flagged, got: {errors:#?}"
-    );
+    assert_file_field_crates(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
 #[test]
@@ -524,24 +512,16 @@ fn unexpected_dir_named_inbound() {
     );
     for err in &errors {
         assert!(
-            err.title.contains("inbound"),
-            "expected title mentioning 'inbound', got: '{}'",
+            err.title.contains("unexpected") && err.title.contains("inbound"),
+            "expected title mentioning 'unexpected' and 'inbound', got: '{}'",
             err.title
         );
-        // File field assertion
-        assert!(
-            err.file.as_deref().unwrap_or("").contains("crates"),
-            "expected file field containing 'crates', got: '{}'",
-            err.file.as_deref().unwrap_or("")
-        );
     }
-    // TS negative assertions
-    assert!(
-        !errors
-            .iter()
-            .any(|e| e.title.contains("admin") || e.title.contains("landing")),
-        "TS apps should not be flagged, got: {errors:#?}"
-    );
+    assert_file_field_crates(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
 #[test]
@@ -560,29 +540,21 @@ fn hidden_dir_unexpected() {
     );
     for err in &errors {
         assert!(
-            err.title.contains(".hidden"),
-            "expected title mentioning '.hidden', got: '{}'",
+            err.title.contains("unexpected") && err.title.contains(".hidden"),
+            "expected title mentioning 'unexpected' and '.hidden', got: '{}'",
             err.title
         );
-        // File field assertion
-        assert!(
-            err.file.as_deref().unwrap_or("").contains("crates"),
-            "expected file field containing 'crates', got: '{}'",
-            err.file.as_deref().unwrap_or("")
-        );
     }
-    // TS negative assertions
-    assert!(
-        !errors
-            .iter()
-            .any(|e| e.title.contains("admin") || e.title.contains("landing")),
-        "TS apps should not be flagged, got: {errors:#?}"
-    );
+    assert_file_field_crates(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
-// ==========================================================================
+// ============================================================================
 // Group C: Loose files
-// ==========================================================================
+// ============================================================================
 
 #[test]
 fn loose_rs_file_everywhere() {
@@ -608,19 +580,12 @@ fn loose_rs_file_everywhere() {
             "expected title mentioning 'loose files', got: '{}'",
             err.title
         );
-        // File field assertion
-        assert!(
-            err.file.as_deref().unwrap_or("").contains("crates"),
-            "expected file field containing 'crates', got: '{}'",
-            err.file.as_deref().unwrap_or("")
-        );
     }
-    assert!(
-        !errors
-            .iter()
-            .any(|e| e.title.contains("admin") || e.title.contains("landing")),
-        "TS apps should not be flagged, got: {errors:#?}"
-    );
+    assert_file_field_crates(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
 #[test]
@@ -647,20 +612,12 @@ fn loose_cargo_toml_in_crates() {
             "expected title mentioning 'loose files', got: '{}'",
             err.title
         );
-        // File field assertion
-        assert!(
-            err.file.as_deref().unwrap_or("").contains("crates"),
-            "expected file field containing 'crates', got: '{}'",
-            err.file.as_deref().unwrap_or("")
-        );
     }
-    // TS negative assertions
-    assert!(
-        !errors
-            .iter()
-            .any(|e| e.title.contains("admin") || e.title.contains("landing")),
-        "TS apps should not be flagged, got: {errors:#?}"
-    );
+    assert_file_field_crates(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
 #[test]
@@ -677,27 +634,18 @@ fn loose_gitignore_not_gitkeep() {
         "expected 4 errors (.gitignore is not .gitkeep), got {}: {errors:#?}",
         errors.len()
     );
-    // Title content assertions
     for err in &errors {
         assert!(
             err.title.contains("loose files"),
             "expected title mentioning 'loose files', got: '{}'",
             err.title
         );
-        // File field assertion
-        assert!(
-            err.file.as_deref().unwrap_or("").contains("crates"),
-            "expected file field containing 'crates', got: '{}'",
-            err.file.as_deref().unwrap_or("")
-        );
     }
-    // TS negative assertions
-    assert!(
-        !errors
-            .iter()
-            .any(|e| e.title.contains("admin") || e.title.contains("landing")),
-        "TS apps should not be flagged, got: {errors:#?}"
-    );
+    assert_file_field_crates(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
 #[test]
@@ -734,20 +682,12 @@ fn multiple_loose_files() {
             "expected message containing 'README.md', got: '{}'",
             err.message
         );
-        // File field assertion
-        assert!(
-            err.file.as_deref().unwrap_or("").contains("crates"),
-            "expected file field containing 'crates', got: '{}'",
-            err.file.as_deref().unwrap_or("")
-        );
     }
-    // TS negative assertions
-    assert!(
-        !errors
-            .iter()
-            .any(|e| e.title.contains("admin") || e.title.contains("landing")),
-        "TS apps should not be flagged, got: {errors:#?}"
-    );
+    assert_file_field_crates(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
 #[test]
@@ -789,7 +729,6 @@ fn gitkeep_alongside_loose_files() {
             err.message
         );
         // The message lists bad files before the "Only `.gitkeep` is allowed" template text.
-        // Extract the file list portion (before "Only") and verify .gitkeep is not in it.
         let file_list = err
             .message
             .split("Only")
@@ -799,25 +738,17 @@ fn gitkeep_alongside_loose_files() {
             !file_list.contains(".gitkeep"),
             "expected .gitkeep NOT listed as a bad file, got file list: '{file_list}'"
         );
-        // File field assertion
-        assert!(
-            err.file.as_deref().unwrap_or("").contains("crates"),
-            "expected file field containing 'crates', got: '{}'",
-            err.file.as_deref().unwrap_or("")
-        );
     }
-    // TS negative assertions
-    assert!(
-        !errors
-            .iter()
-            .any(|e| e.title.contains("admin") || e.title.contains("landing")),
-        "TS apps should not be flagged, got: {errors:#?}"
-    );
+    assert_file_field_crates(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
-// ==========================================================================
+// ============================================================================
 // Group D: Combinations
-// ==========================================================================
+// ============================================================================
 
 #[test]
 fn missing_dir_plus_unexpected_dir() {
@@ -834,7 +765,6 @@ fn missing_dir_plus_unexpected_dir() {
         "expected 8 errors (4 missing + 4 unexpected), got {}: {errors:#?}",
         errors.len()
     );
-    // Title content assertions
     let missing: Vec<_> = errors
         .iter()
         .filter(|e| e.title.contains("missing") && e.title.contains("domain"))
@@ -843,23 +773,21 @@ fn missing_dir_plus_unexpected_dir() {
         .iter()
         .filter(|e| e.title.contains("unexpected") && e.title.contains("utils"))
         .collect();
-    assert_eq!(missing.len(), 4, "expected 4 missing domain/ errors, got: {missing:#?}");
-    assert_eq!(unexpected.len(), 4, "expected 4 unexpected utils/ errors, got: {unexpected:#?}");
-    // File field assertion
-    for err in &errors {
-        assert!(
-            err.file.as_deref().unwrap_or("").contains("crates"),
-            "expected file field containing 'crates', got: '{}'",
-            err.file.as_deref().unwrap_or("")
-        );
-    }
-    // TS negative assertions
-    assert!(
-        !errors
-            .iter()
-            .any(|e| e.title.contains("admin") || e.title.contains("landing")),
-        "TS apps should not be flagged, got: {errors:#?}"
+    assert_eq!(
+        missing.len(),
+        4,
+        "expected 4 missing domain/ errors, got: {missing:#?}"
     );
+    assert_eq!(
+        unexpected.len(),
+        4,
+        "expected 4 unexpected utils/ errors, got: {unexpected:#?}"
+    );
+    assert_file_field_crates(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
 #[test]
@@ -877,7 +805,6 @@ fn missing_dir_plus_loose_file() {
         "expected 8 errors (4 missing + 4 loose), got {}: {errors:#?}",
         errors.len()
     );
-    // Title content assertions
     let missing: Vec<_> = errors
         .iter()
         .filter(|e| e.title.contains("missing") && e.title.contains("ports"))
@@ -886,23 +813,21 @@ fn missing_dir_plus_loose_file() {
         .iter()
         .filter(|e| e.title.contains("loose files"))
         .collect();
-    assert_eq!(missing.len(), 4, "expected 4 missing ports/ errors, got: {missing:#?}");
-    assert_eq!(loose.len(), 4, "expected 4 loose file errors, got: {loose:#?}");
-    // File field assertion
-    for err in &errors {
-        assert!(
-            err.file.as_deref().unwrap_or("").contains("crates"),
-            "expected file field containing 'crates', got: '{}'",
-            err.file.as_deref().unwrap_or("")
-        );
-    }
-    // TS negative assertions
-    assert!(
-        !errors
-            .iter()
-            .any(|e| e.title.contains("admin") || e.title.contains("landing")),
-        "TS apps should not be flagged, got: {errors:#?}"
+    assert_eq!(
+        missing.len(),
+        4,
+        "expected 4 missing ports/ errors, got: {missing:#?}"
     );
+    assert_eq!(
+        loose.len(),
+        4,
+        "expected 4 loose file errors, got: {loose:#?}"
+    );
+    assert_file_field_crates(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
 #[test]
@@ -921,7 +846,6 @@ fn all_three_violations() {
         "expected 12 errors (4 missing + 4 unexpected + 4 loose), got {}: {errors:#?}",
         errors.len()
     );
-    // Title content assertions
     let missing: Vec<_> = errors
         .iter()
         .filter(|e| e.title.contains("missing") && e.title.contains("domain"))
@@ -934,24 +858,26 @@ fn all_three_violations() {
         .iter()
         .filter(|e| e.title.contains("loose files"))
         .collect();
-    assert_eq!(missing.len(), 4, "expected 4 missing domain/ errors, got: {missing:#?}");
-    assert_eq!(unexpected.len(), 4, "expected 4 unexpected utils/ errors, got: {unexpected:#?}");
-    assert_eq!(loose.len(), 4, "expected 4 loose file errors, got: {loose:#?}");
-    // File field assertion
-    for err in &errors {
-        assert!(
-            err.file.as_deref().unwrap_or("").contains("crates"),
-            "expected file field containing 'crates', got: '{}'",
-            err.file.as_deref().unwrap_or("")
-        );
-    }
-    // TS negative assertions
-    assert!(
-        !errors
-            .iter()
-            .any(|e| e.title.contains("admin") || e.title.contains("landing")),
-        "TS apps should not be flagged, got: {errors:#?}"
+    assert_eq!(
+        missing.len(),
+        4,
+        "expected 4 missing domain/ errors, got: {missing:#?}"
     );
+    assert_eq!(
+        unexpected.len(),
+        4,
+        "expected 4 unexpected utils/ errors, got: {unexpected:#?}"
+    );
+    assert_eq!(
+        loose.len(),
+        4,
+        "expected 4 loose file errors, got: {loose:#?}"
+    );
+    assert_file_field_crates(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
 #[test]
@@ -1010,27 +936,14 @@ fn different_breakage_per_app() {
         "expected 2 backend errors (loose file + inner hex missing app/), got: {backend_errs:#?}"
     );
 
-    // File field assertions
-    for err in &errors {
-        assert!(
-            err.file.as_deref().unwrap_or("").contains("crates"),
-            "expected file field containing 'crates', got: '{}'",
-            err.file.as_deref().unwrap_or("")
-        );
-    }
-
-    // No admin or landing errors
-    assert!(
-        !errors
-            .iter()
-            .any(|e| e.title.contains("admin") || e.title.contains("landing")),
-        "TS apps should not be flagged, got: {errors:#?}"
-    );
+    assert_file_field_crates(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
-// ==========================================================================
+// ============================================================================
 // Group E: Edge cases
-// ==========================================================================
+// ============================================================================
 
 #[test]
 fn required_dir_replaced_with_file() {
@@ -1042,11 +955,8 @@ fn required_dir_replaced_with_file() {
     }
     let results = run_check(tmp.path());
     let errors = arch_01_errors(&results);
-    // Rule 2 effects: list_dir_names skips files, so "domain" (file) is invisible.
+    // list_dir_names skips files, so "domain" (file) is invisible.
     // check_02: missing domain/ = 4 errors. check_loose_files: "domain" file = 4 errors.
-    // But other rules also fire: check_05 sees domain/ metadata exists (file),
-    // list_dir_names returns empty => "empty container" error. check_06 also fires.
-    // We filter to ONLY Rule 2 errors and assert exact count of 8.
     let missing: Vec<_> = errors
         .iter()
         .filter(|e| e.title.contains("missing") && e.title.contains("domain"))
@@ -1065,7 +975,6 @@ fn required_dir_replaced_with_file() {
         4,
         "expected 4 loose file errors, got: {loose:#?}"
     );
-    // Filter to only Rule 2 errors by title pattern and assert exact count
     let r2: Vec<_> = rule2_errors(&errors);
     assert_eq!(
         r2.len(),
@@ -1073,7 +982,6 @@ fn required_dir_replaced_with_file() {
         "expected exactly 8 Rule 2 errors (4 missing + 4 loose), got {}: {r2:#?}",
         r2.len()
     );
-    // File field assertions
     for err in &missing {
         assert!(
             err.file.as_deref().unwrap_or("").contains("crates"),
@@ -1088,13 +996,10 @@ fn required_dir_replaced_with_file() {
             err.file.as_deref().unwrap_or("")
         );
     }
-    // TS negative assertions
-    assert!(
-        !errors
-            .iter()
-            .any(|e| e.title.contains("admin") || e.title.contains("landing")),
-        "TS apps should not be flagged, got: {errors:#?}"
-    );
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
 #[test]
@@ -1122,7 +1027,6 @@ fn required_dir_replaced_with_symlink() {
         "expected 8 errors (4 missing domain/ + 4 loose 'domain' symlink), got {}: {errors:#?}",
         errors.len()
     );
-    // Title assertions: 4 missing + 4 loose
     let missing: Vec<_> = errors
         .iter()
         .filter(|e| e.title.contains("missing") && e.title.contains("domain"))
@@ -1141,21 +1045,11 @@ fn required_dir_replaced_with_symlink() {
         4,
         "expected 4 loose file errors, got: {loose:#?}"
     );
-    // File field assertions
-    for err in &errors {
-        assert!(
-            err.file.as_deref().unwrap_or("").contains("crates"),
-            "expected file field containing 'crates', got: '{}'",
-            err.file.as_deref().unwrap_or("")
-        );
-    }
-    // TS negative assertions
-    assert!(
-        !errors
-            .iter()
-            .any(|e| e.title.contains("admin") || e.title.contains("landing")),
-        "TS apps should not be flagged, got: {errors:#?}"
-    );
+    assert_file_field_crates(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
 #[test]
@@ -1169,9 +1063,7 @@ fn empty_required_dir_still_present() {
     let results = run_check(tmp.path());
     let errors = arch_01_errors(&results);
     // Rule 2 only checks dir exists in list_dir_names — dir is present, so no Rule 2 error.
-    // Other rules (check_05, check_06) may fire for empty domain/, but those are separate rules.
-    // Assert that NO Rule 2-type errors exist.
-    let rule2_errors: Vec<_> = errors
+    let rule2_errs: Vec<_> = errors
         .iter()
         .filter(|e| {
             e.title.contains("missing") && e.title.contains("crates/")
@@ -1184,10 +1076,11 @@ fn empty_required_dir_still_present() {
         })
         .collect();
     assert_eq!(
-        rule2_errors.len(),
+        rule2_errs.len(),
         0,
-        "expected 0 Rule 2 errors (dir exists even if empty), got: {rule2_errors:#?}"
+        "expected 0 Rule 2 errors (dir exists even if empty), got: {rule2_errs:#?}"
     );
+    assert_no_packages(&errors);
 }
 
 #[test]
@@ -1202,25 +1095,24 @@ fn ts_app_with_cargo_toml_gets_checked() {
     // admin has src/ (triggers check_12 src/ ban) and no crates/ (triggers Rule 1)
     let results = run_check(tmp.path());
     let errors = arch_01_errors(&results);
-    // admin should now appear in errors
     let admin_errs: Vec<_> = errors.iter().filter(|e| e.title.contains("admin")).collect();
-    // Admin gets Cargo.toml, has no crates/ dir => check_01 fires (1 error "missing crates/").
-    // Admin also has src/ which triggers check_12 (1 error "has src/"). Total for admin: 2 errors.
     assert_eq!(
         admin_errs.len(),
         2,
         "expected 2 admin errors (missing crates/ + src/ ban), got {}: {admin_errs:#?}",
         admin_errs.len()
     );
-    // Should have both a "missing crates/" error and a "src/" error
     assert!(
-        admin_errs.iter().any(|e| e.title.contains("missing crates/")),
+        admin_errs
+            .iter()
+            .any(|e| e.title.contains("missing crates/")),
         "admin should have 'missing crates/' error, got: {admin_errs:#?}"
     );
     assert!(
         admin_errs.iter().any(|e| e.title.contains("src/")),
         "admin should have 'src/' error (check_12), got: {admin_errs:#?}"
     );
+    assert_no_packages(&errors);
 }
 
 #[test]
@@ -1232,21 +1124,20 @@ fn app_without_cargo_toml_skipped() {
     std::fs::create_dir_all(tmp.path().join("apps/devctl/crates/utils")).expect("mkdir");
     let results = run_check(tmp.path());
     let errors = arch_01_errors(&results);
-    // devctl should NOT be checked since it has no Cargo.toml
     assert!(
         !errors.iter().any(|e| e.title.contains("devctl")),
         "devctl without Cargo.toml should not be checked, got devctl errors in: {errors:#?}"
     );
+    assert_no_packages(&errors);
 }
 
-// ==========================================================================
+// ============================================================================
 // Group F: Inner hex isolation
-// ==========================================================================
+// ============================================================================
 
 #[test]
 fn loose_file_inner_hex_only() {
     let tmp = copy_golden();
-    // Add mod.rs to ONLY mcp/crates/
     write_file(tmp.path(), &format!("{INNER_HEX}/mod.rs"), "// stray");
     let results = run_check(tmp.path());
     let errors = arch_01_errors(&results);
@@ -1262,11 +1153,14 @@ fn loose_file_inner_hex_only() {
         errors[0].title
     );
     assert!(
-        errors[0].file.as_deref().unwrap_or("").contains("mcp/crates"),
+        errors[0]
+            .file
+            .as_deref()
+            .unwrap_or("")
+            .contains("mcp/crates"),
         "expected file field referencing mcp/crates, got: '{}'",
         errors[0].file.as_deref().unwrap_or("")
     );
-    // Assert outer apps clean: no errors for devctl, worker, or outer backend crates/
     assert!(
         !errors.iter().any(|e| e.title.contains("devctl")),
         "devctl should have no errors, got: {errors:#?}"
@@ -1275,19 +1169,13 @@ fn loose_file_inner_hex_only() {
         !errors.iter().any(|e| e.title.contains("worker")),
         "worker should have no errors, got: {errors:#?}"
     );
-    // TS negative assertions
-    assert!(
-        !errors
-            .iter()
-            .any(|e| e.title.contains("admin") || e.title.contains("landing")),
-        "TS apps should not be flagged, got: {errors:#?}"
-    );
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
 #[test]
 fn unexpected_dir_inner_hex_only() {
     let tmp = copy_golden();
-    // Add utils/ to ONLY mcp/crates/
     std::fs::create_dir_all(tmp.path().join(format!("{INNER_HEX}/utils"))).expect("mkdir");
     let results = run_check(tmp.path());
     let errors = arch_01_errors(&results);
@@ -1303,11 +1191,14 @@ fn unexpected_dir_inner_hex_only() {
         errors[0].title
     );
     assert!(
-        errors[0].file.as_deref().unwrap_or("").contains("mcp/crates"),
+        errors[0]
+            .file
+            .as_deref()
+            .unwrap_or("")
+            .contains("mcp/crates"),
         "expected file field referencing mcp/crates, got: '{}'",
         errors[0].file.as_deref().unwrap_or("")
     );
-    // Assert outer apps clean
     assert!(
         !errors.iter().any(|e| e.title.contains("devctl")),
         "devctl should have no errors, got: {errors:#?}"
@@ -1316,21 +1207,13 @@ fn unexpected_dir_inner_hex_only() {
         !errors.iter().any(|e| e.title.contains("worker")),
         "worker should have no errors, got: {errors:#?}"
     );
-    // TS negative assertions
-    assert!(
-        !errors
-            .iter()
-            .any(|e| e.title.contains("admin") || e.title.contains("landing")),
-        "TS apps should not be flagged, got: {errors:#?}"
-    );
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
 #[test]
 fn near_miss_dir_names() {
     let tmp = copy_golden();
-    // Add near-miss dir names to all 4 locations:
-    // "domains/" (extra s), "adapter/" (missing s), "port/" (missing s),
-    // "application/" (wrong name, TS name)
     let near_misses = ["domains", "adapter", "port", "application"];
     for dir in ALL_CRATES_DIRS {
         for name in &near_misses {
@@ -1339,7 +1222,6 @@ fn near_miss_dir_names() {
     }
     let results = run_check(tmp.path());
     let errors = arch_01_errors(&results);
-    // 4 near-miss dirs * 4 locations = 16 unexpected errors
     let unexpected: Vec<_> = errors
         .iter()
         .filter(|e| e.title.contains("unexpected directory"))
@@ -1350,9 +1232,6 @@ fn near_miss_dir_names() {
         "expected 16 unexpected errors (4 near-miss dirs * 4 locations), got {}: {unexpected:#?}",
         unexpected.len()
     );
-    // Verify each near-miss name appears in errors.
-    // Title ends with "{name}/" so use ends_with to avoid substring matches
-    // (e.g., "adapter/" as substring of "adapters/" in the label prefix).
     for name in &near_misses {
         let suffix = format!("{name}/");
         let count = unexpected
@@ -1364,7 +1243,6 @@ fn near_miss_dir_names() {
             "expected 4 errors for '{name}/', got {count}: {unexpected:#?}"
         );
     }
-    // File field assertions
     for err in &unexpected {
         assert!(
             err.file.as_deref().unwrap_or("").contains("crates"),
@@ -1372,11 +1250,406 @@ fn near_miss_dir_names() {
             err.file.as_deref().unwrap_or("")
         );
     }
-    // TS negative assertions
-    assert!(
-        !errors
-            .iter()
-            .any(|e| e.title.contains("admin") || e.title.contains("landing")),
-        "TS apps should not be flagged, got: {errors:#?}"
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
+}
+
+// ============================================================================
+// Group G: New scenarios
+// ============================================================================
+
+#[test]
+fn file_coexists_with_same_named_dir() {
+    let tmp = copy_golden();
+    // On most filesystems, a file and dir cannot share the same name.
+    // Instead, create files whose names echo the required dir names with a suffix,
+    // alongside files with completely unrelated names. The key behavior under test:
+    // loose files are flagged while the real dirs remain recognized as present.
+    for dir in ALL_CRATES_DIRS {
+        write_file(tmp.path(), &format!("{dir}/adapters.bak"), "not a dir");
+        write_file(tmp.path(), &format!("{dir}/app.old"), "not a dir");
+        write_file(tmp.path(), &format!("{dir}/domain.txt"), "not a dir");
+        write_file(tmp.path(), &format!("{dir}/ports.rs"), "not a dir");
+    }
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+
+    // Should have 4 loose-file errors (1 per location, each listing all 4 files)
+    let loose: Vec<_> = errors
+        .iter()
+        .filter(|e| e.title.contains("loose files"))
+        .collect();
+    assert_eq!(
+        loose.len(),
+        4,
+        "expected 4 loose file errors (1 per location), got {}: {loose:#?}",
+        loose.len()
     );
+    // Each message should mention the 4 file names
+    for err in &loose {
+        for name in &["adapters.bak", "app.old", "domain.txt", "ports.rs"] {
+            assert!(
+                err.message.contains(name),
+                "expected message to list '{name}', got: '{}'",
+                err.message
+            );
+        }
+    }
+    // No missing-dir errors: the dirs still exist
+    let missing: Vec<_> = errors
+        .iter()
+        .filter(|e| e.title.contains("missing") && e.title.contains("/ directory"))
+        .collect();
+    assert_eq!(
+        missing.len(),
+        0,
+        "expected 0 missing-dir errors (dirs still exist), got: {missing:#?}"
+    );
+    assert_file_field_crates(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
+}
+
+#[test]
+fn unicode_lookalike_dir_name() {
+    let tmp = copy_golden();
+    // Create dir named "d\u{200B}omain" (zero-width space) in all 4 locations.
+    // This looks like "domain" but is a different string. The real domain/ still exists,
+    // so only 4 unexpected-dir errors should fire (no missing-dir errors).
+    let lookalike = "d\u{200B}omain";
+    for dir in ALL_CRATES_DIRS {
+        std::fs::create_dir_all(tmp.path().join(format!("{dir}/{lookalike}"))).expect("mkdir");
+    }
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+    let unexpected: Vec<_> = errors
+        .iter()
+        .filter(|e| e.title.contains("unexpected directory"))
+        .collect();
+    assert_eq!(
+        unexpected.len(),
+        4,
+        "expected 4 unexpected-dir errors for unicode lookalike, got {}: {unexpected:#?}",
+        unexpected.len()
+    );
+    // No missing-dir errors (real domain/ still exists)
+    let missing: Vec<_> = errors
+        .iter()
+        .filter(|e| e.title.contains("missing") && e.title.contains("domain"))
+        .collect();
+    assert_eq!(
+        missing.len(),
+        0,
+        "expected 0 missing domain/ errors (real dir still exists), got: {missing:#?}"
+    );
+    assert_file_field_crates(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
+}
+
+#[test]
+fn gitkeep_as_directory() {
+    let tmp = copy_golden();
+    // Create .gitkeep as a DIRECTORY (mkdir .gitkeep) in all 4 locations.
+    // The file .gitkeep exemption only applies to files, not dirs.
+    // list_dir_names will include ".gitkeep" as a dir name, which is unexpected.
+    for dir in ALL_CRATES_DIRS {
+        std::fs::create_dir_all(tmp.path().join(format!("{dir}/.gitkeep"))).expect("mkdir");
+    }
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+    let unexpected: Vec<_> = errors
+        .iter()
+        .filter(|e| e.title.contains("unexpected directory") && e.title.contains(".gitkeep"))
+        .collect();
+    assert_eq!(
+        unexpected.len(),
+        4,
+        "expected 4 unexpected-dir errors (.gitkeep dir is not in expected set), got {}: {unexpected:#?}",
+        unexpected.len()
+    );
+    assert_file_field_crates(&errors);
+    assert_per_app(&errors);
+    assert_inner_hex(&errors);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
+}
+
+#[test]
+fn packages_not_checked() {
+    let tmp = copy_golden();
+    // Add broken structure to packages/shared-types: create crates/ with unexpected dirs.
+    // packages/ is not under apps/, so check_hex_arch_structure should ignore it entirely.
+    std::fs::create_dir_all(tmp.path().join("packages/shared-types/crates/utils")).expect("mkdir");
+    std::fs::create_dir_all(tmp.path().join("packages/shared-types/crates/garbage"))
+        .expect("mkdir");
+    std::fs::create_dir_all(tmp.path().join("packages/ui-kit/crates/nonsense")).expect("mkdir");
+
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+    // Assert 0 R-ARCH-01 errors from packages
+    assert!(
+        !errors.iter().any(|e| {
+            let t = &e.title;
+            let f = e.file.as_deref().unwrap_or("");
+            t.contains("shared-types") || t.contains("ui-kit") || f.contains("packages/")
+        }),
+        "packages should not produce any R-ARCH-01 errors, got: {errors:#?}"
+    );
+    // Golden fixture is clean, so total errors should be 0
+    assert_eq!(
+        errors.len(),
+        0,
+        "expected 0 errors (golden is clean + packages not checked), got {}: {errors:#?}",
+        errors.len()
+    );
+}
+
+#[test]
+fn new_app_gets_checked() {
+    let tmp = copy_golden();
+    // Create apps/scheduler/ with Cargo.toml and a broken crates/ structure
+    write_file(
+        tmp.path(),
+        "apps/scheduler/Cargo.toml",
+        "[workspace]\nmembers = []\nresolver = \"2\"",
+    );
+    // Create crates/ with only domain/ (missing adapters/, app/, ports/)
+    std::fs::create_dir_all(tmp.path().join("apps/scheduler/crates/domain")).expect("mkdir");
+    write_file(
+        tmp.path(),
+        "apps/scheduler/crates/domain/.gitkeep",
+        "",
+    );
+
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+
+    // scheduler should have errors for missing adapters/, app/, ports/
+    let sched_errs: Vec<_> = errors
+        .iter()
+        .filter(|e| e.title.contains("scheduler"))
+        .collect();
+    assert_eq!(
+        sched_errs.len(),
+        3,
+        "expected 3 scheduler errors (missing adapters/, app/, ports/), got {}: {sched_errs:#?}",
+        sched_errs.len()
+    );
+    for exp_dir in &["adapters", "app", "ports"] {
+        assert!(
+            sched_errs
+                .iter()
+                .any(|e| e.title.contains("missing") && e.title.contains(exp_dir)),
+            "expected scheduler error for missing '{exp_dir}/', got: {sched_errs:#?}"
+        );
+    }
+    // Existing apps should still be clean (no errors for devctl, backend, worker)
+    let existing_app_errs: Vec<_> = errors
+        .iter()
+        .filter(|e| {
+            e.title.contains("devctl") || e.title.contains("backend") || e.title.contains("worker")
+        })
+        .collect();
+    assert_eq!(
+        existing_app_errs.len(),
+        0,
+        "existing apps should still be clean, got: {existing_app_errs:#?}"
+    );
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
+}
+
+#[test]
+fn permission_denied_crates() {
+    let tmp = copy_golden();
+    let crates_path = tmp.path().join("apps/devctl/crates");
+
+    // chmod 000 on devctl's crates/ — list_dir returns empty.
+    // check_01 sees empty list_dir result => "missing crates/" (1 error, early return).
+    // check_02 never runs because check_01 returns false.
+    use std::os::unix::fs::PermissionsExt;
+    let perms_none = std::fs::Permissions::from_mode(0o000);
+    std::fs::set_permissions(&crates_path, perms_none).expect("chmod 000");
+
+    let results = run_check(tmp.path());
+
+    // Restore permissions before any assertions (so tempdir cleanup works)
+    let perms_restore = std::fs::Permissions::from_mode(0o755);
+    std::fs::set_permissions(&crates_path, perms_restore).expect("chmod 755");
+
+    let errors = arch_01_errors(&results);
+
+    // devctl crates/ is unreadable: list_dir on crates/ returns empty,
+    // so check_01 fires "missing crates/ directory" (1 error) and returns early.
+    let devctl_errs: Vec<_> = errors
+        .iter()
+        .filter(|e| e.title.contains("devctl"))
+        .collect();
+    assert_eq!(
+        devctl_errs.len(),
+        1,
+        "expected 1 devctl error ('missing crates/' when unreadable), got {}: {devctl_errs:#?}",
+        devctl_errs.len()
+    );
+    assert!(
+        devctl_errs[0].title.contains("missing") && devctl_errs[0].title.contains("crates/"),
+        "expected 'missing crates/' in devctl error title, got: '{}'",
+        devctl_errs[0].title
+    );
+    // Other apps should be clean
+    let non_devctl_errs: Vec<_> = errors
+        .iter()
+        .filter(|e| !e.title.contains("devctl"))
+        .collect();
+    assert_eq!(
+        non_devctl_errs.len(),
+        0,
+        "expected 0 errors for non-devctl apps, got: {non_devctl_errs:#?}"
+    );
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
+}
+
+#[test]
+fn maximally_complex_single_location() {
+    let tmp = copy_golden();
+    // In devctl/crates/:
+    // - adapters/ real (keep)
+    // - app/ removed, replaced with symlink to /dev/null (dangling/non-dir target)
+    // - domain/ missing entirely (remove)
+    // - ports/ real (keep)
+    // - unexpected utils/ dir
+    // - loose mod.rs file
+    // - .gitkeep file (allowed, should not be flagged)
+
+    let devctl_crates = "apps/devctl/crates";
+
+    // Remove app/ dir and replace with symlink to /dev/null (a non-directory)
+    remove_dir(tmp.path(), &format!("{devctl_crates}/app"));
+    std::os::unix::fs::symlink(
+        "/dev/null",
+        tmp.path().join(format!("{devctl_crates}/app")),
+    )
+    .expect("symlink");
+
+    // Remove domain/ entirely
+    remove_dir(tmp.path(), &format!("{devctl_crates}/domain"));
+
+    // Add unexpected utils/ dir
+    std::fs::create_dir_all(tmp.path().join(format!("{devctl_crates}/utils"))).expect("mkdir");
+
+    // Add loose mod.rs
+    write_file(tmp.path(), &format!("{devctl_crates}/mod.rs"), "// stray");
+
+    // Add .gitkeep (allowed)
+    write_file(tmp.path(), &format!("{devctl_crates}/.gitkeep"), "");
+
+    let results = run_check(tmp.path());
+    let errors = arch_01_errors(&results);
+
+    // Only devctl should have errors
+    let devctl_errs: Vec<_> = errors
+        .iter()
+        .filter(|e| e.title.contains("devctl"))
+        .collect();
+
+    // Expected errors for devctl from check_02 (Rule 2):
+    // 1. missing app/ directory (symlink is not a dir per file_type())
+    // 2. missing domain/ directory (removed entirely)
+    // 3. unexpected directory utils/
+    // 4. loose files: "app" (symlink) + "mod.rs" = 1 loose files error (lists both)
+    //
+    // check_05/check_06 also run on crates/app/ and crates/domain/ but both are
+    // absent/non-dir, so list_dir returns empty and no additional errors fire.
+    let missing_app: Vec<_> = devctl_errs
+        .iter()
+        .filter(|e| {
+            e.title.contains("missing")
+                && e.title.contains("app/")
+                && e.title.contains("crates/app/")
+        })
+        .collect();
+    let missing_domain: Vec<_> = devctl_errs
+        .iter()
+        .filter(|e| e.title.contains("missing") && e.title.contains("domain"))
+        .collect();
+    let unexpected_utils: Vec<_> = devctl_errs
+        .iter()
+        .filter(|e| e.title.contains("unexpected") && e.title.contains("utils"))
+        .collect();
+    let loose: Vec<_> = devctl_errs
+        .iter()
+        .filter(|e| e.title.contains("loose files"))
+        .collect();
+
+    assert!(
+        !missing_app.is_empty(),
+        "expected at least 1 missing app/ error, got: {devctl_errs:#?}"
+    );
+    assert_eq!(
+        missing_domain.len(),
+        1,
+        "expected 1 missing domain/ error, got: {missing_domain:#?}"
+    );
+    assert_eq!(
+        unexpected_utils.len(),
+        1,
+        "expected 1 unexpected utils/ error, got: {unexpected_utils:#?}"
+    );
+    assert_eq!(
+        loose.len(),
+        1,
+        "expected 1 loose files error, got: {loose:#?}"
+    );
+
+    // Loose files message should mention "app" (symlink) and "mod.rs" but NOT ".gitkeep"
+    let loose_msg = &loose[0].message;
+    assert!(
+        loose_msg.contains("app"),
+        "expected loose files message to list 'app' (symlink), got: '{loose_msg}'"
+    );
+    assert!(
+        loose_msg.contains("mod.rs"),
+        "expected loose files message to list 'mod.rs', got: '{loose_msg}'"
+    );
+    let file_list = loose_msg.split("Only").next().unwrap_or(loose_msg);
+    assert!(
+        !file_list.contains(".gitkeep"),
+        "expected .gitkeep NOT in loose file list, got: '{file_list}'"
+    );
+
+    // Verify Rule 2 errors present: at least 2 missing + 1 unexpected + 1 loose = 4
+    let devctl_rule2: Vec<_> = devctl_errs
+        .iter()
+        .filter(|e| {
+            (e.title.contains("missing") && e.title.contains("/ directory"))
+                || e.title.contains("unexpected directory")
+                || e.title.contains("loose files in")
+        })
+        .collect();
+    assert!(
+        devctl_rule2.len() >= 4,
+        "expected at least 4 Rule 2 errors for devctl (2 missing + 1 unexpected + 1 loose), got {}: {devctl_rule2:#?}",
+        devctl_rule2.len()
+    );
+
+    // Other apps should be clean
+    let other_errs: Vec<_> = errors
+        .iter()
+        .filter(|e| !e.title.contains("devctl"))
+        .collect();
+    assert_eq!(
+        other_errs.len(),
+        0,
+        "expected 0 errors for non-devctl apps, got: {other_errs:#?}"
+    );
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
