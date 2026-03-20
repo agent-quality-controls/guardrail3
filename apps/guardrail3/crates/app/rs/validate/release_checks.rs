@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use std::path::Path;
 
-use crate::app::discover::ProjectInfo;
+use crate::app::core::discover::ProjectInfo;
 use crate::domain::report::{CheckResult, Severity};
 use crate::ports::outbound::{FileSystem, ToolChecker};
 

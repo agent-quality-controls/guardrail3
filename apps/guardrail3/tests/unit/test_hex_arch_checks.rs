@@ -3,7 +3,7 @@
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
-use guardrail3::app::discover::{ProjectInfo, RustWorkspace, WorkspaceMember};
+use guardrail3::app::core::discover::{ProjectInfo, RustWorkspace, WorkspaceMember};
 use guardrail3::app::rs::validate::hex_arch_checks::{
     Layer, check_dependency_flow, check_library_service_boundary,
     contains_segment, is_service_internal, layer_from_config, normalize_path,

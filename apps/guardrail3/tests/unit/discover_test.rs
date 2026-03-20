@@ -1,7 +1,7 @@
 use std::fs as stdfs;
 
 use guardrail3::adapters::outbound::fs::RealFileSystem;
-use guardrail3::app::discover::*;
+use guardrail3::app::core::discover::*;
 
 // ---- Bug 8: Monorepo workspace detection ----
 

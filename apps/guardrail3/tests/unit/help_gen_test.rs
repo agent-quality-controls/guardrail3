@@ -1,7 +1,7 @@
 use clap::CommandFactory;
 
-use guardrail3::cli::Cli;
-use guardrail3::help_gen::inject_help;
+use guardrail3::adapters::inbound::cli::cli::Cli;
+use guardrail3::adapters::inbound::cli::help_gen::inject_help;
 
 #[test]
 #[allow(clippy::expect_used)] // reason: test assertions

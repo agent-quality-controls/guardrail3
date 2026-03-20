@@ -14,6 +14,7 @@ pub mod dependency_scan;
 pub mod extra_visitors;
 pub mod garde_checks;
 pub mod hex_arch_checks;
+pub mod hex_arch_structure;
 pub mod release_bin_checks;
 pub mod release_checks;
 pub mod release_crate_checks;
@@ -29,8 +30,8 @@ mod workspace_metadata;
 
 use std::path::{Path, PathBuf};
 
-use crate::app::crawl::CrawlResult;
-use crate::app::discover::ProjectInfo;
+use crate::app::core::crawl::CrawlResult;
+use crate::app::core::discover::ProjectInfo;
 use crate::domain::config::types::GuardrailConfig;
 use crate::domain::report::{Report, RustCheckCategories, Section};
 use crate::ports::outbound::{FileSystem, ToolChecker};
@@ -241,11 +242,9 @@ fn run_architecture_checks(
     }
 
     {
-        hex_arch_checks::check_hex_arch_structure(
+        hex_arch_structure::check_hex_arch_structure(
             fs,
             workspace_root,
-            project,
-            &crate_configs,
             &mut arch_results,
         );
         hex_arch_checks::check_dependency_flow(

@@ -14,12 +14,12 @@ fn pub12_emits_inventory() {
     );
     let _ = std::fs::write(tmp.join("src/lib.rs"), "");
 
-    let project = guardrail3::app::discover::ProjectInfo {
+    let project = guardrail3::app::core::discover::ProjectInfo {
         has_rust: true,
         has_typescript: false,
-        workspaces: vec![guardrail3::app::discover::RustWorkspace {
+        workspaces: vec![guardrail3::app::core::discover::RustWorkspace {
             root: tmp.clone(),
-            members: vec![guardrail3::app::discover::WorkspaceMember {
+            members: vec![guardrail3::app::core::discover::WorkspaceMember {
                 name: "x".to_owned(),
                 dir: ".".to_owned(),
             }],

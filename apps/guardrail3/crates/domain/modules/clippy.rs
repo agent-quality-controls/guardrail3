@@ -242,7 +242,7 @@ pub fn build_clippy_toml(
         out.push_str(module.content);
         out.push('\n');
     }
-    let deduped_methods = crate::commands::generate::deduplicated_override(&out, extra_methods);
+    let deduped_methods = crate::adapters::inbound::cli::generate::deduplicated_override(&out, extra_methods);
     if !deduped_methods.trim().is_empty() {
         out.push_str("    # --- Local overrides ---\n");
         out.push_str(&deduped_methods);
@@ -257,7 +257,7 @@ pub fn build_clippy_toml(
         out.push_str(module.content);
         out.push('\n');
     }
-    let deduped_types = crate::commands::generate::deduplicated_override(&out, extra_types);
+    let deduped_types = crate::adapters::inbound::cli::generate::deduplicated_override(&out, extra_types);
     if !deduped_types.trim().is_empty() {
         out.push_str("    # --- Local overrides ---\n");
         out.push_str(&deduped_types);

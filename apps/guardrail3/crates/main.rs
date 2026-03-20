@@ -24,17 +24,20 @@ use tempfile as _;
 use clap::{CommandFactory, FromArgMatches};
 use garde::Validate;
 use guardrail3::{
-    adapters::outbound::{fs::RealFileSystem, tool_runner::RealToolChecker},
-    app::{discover, hooks, rs, ts},
-    cli::{Cli, Commands, RsCommands, TsCommands, ValidateArgs},
-    commands,
+    adapters::{
+        inbound::cli::{
+            self as commands,
+            cli::{Cli, Commands, RsCommands, TsCommands, ValidateArgs},
+            help_gen,
+        },
+        outbound::{fs::RealFileSystem, report, tool_runner::RealToolChecker},
+    },
+    app::{core::discover, hooks, rs, ts},
     domain::{
         config::types::GuardrailConfig,
         report::{RustCheckCategories, TsCheckCategories, ValidateDomains},
     },
-    help_gen,
     ports::outbound::FileSystem,
-    report,
 };
 
 #[allow(clippy::print_stderr)] // reason: CLI entry point — stderr for error output
@@ -85,7 +88,7 @@ fn main() {
                 || npmrc;
             if has_coverage {
                 let project_path = std::path::Path::new(&path);
-                let crawl_result = guardrail3::app::crawl::crawl(project_path);
+                let crawl_result = guardrail3::app::core::crawl::crawl(project_path);
                 run_coverage_maps(
                     project_path,
                     &crawl_result,
@@ -111,7 +114,7 @@ fn main() {
 #[allow(clippy::too_many_arguments, clippy::fn_params_excessive_bools)] // reason: one bool per coverage tool — flat dispatch from CLI flags
 fn run_coverage_maps(
     project_path: &std::path::Path,
-    crawl_result: &guardrail3::app::crawl::CrawlResult,
+    crawl_result: &guardrail3::app::core::crawl::CrawlResult,
     clippy: bool,
     deny: bool,
     rustfmt: bool,
@@ -211,7 +214,7 @@ fn handle_rs(command: RsCommands) {
             let tc = RealToolChecker;
             let domains = domains_from_args(&args);
             let project = discover::detect_project(&fs, &path);
-            let crawl = guardrail3::app::crawl::crawl(&path);
+            let crawl = guardrail3::app::core::crawl::crawl(&path);
             let report = hooks::validate::run(
                 &fs,
                 &path,
@@ -257,7 +260,7 @@ fn handle_ts(command: TsCommands) {
             let fs = RealFileSystem;
             let cfg = load_config(&fs, &path);
             let categories = build_ts_categories(&args, &fs, &path);
-            let crawl = guardrail3::app::crawl::crawl(&path);
+            let crawl = guardrail3::app::core::crawl::crawl(&path);
             let scoped_files = commands::validate::resolve_scoped_files_pub(&args, &path);
             let report = ts::validate::run(
                 &fs,
@@ -280,7 +283,7 @@ fn handle_ts(command: TsCommands) {
             let tc = RealToolChecker;
             let domains = domains_from_args(&args);
             let project = discover::detect_project(&fs, &path);
-            let crawl = guardrail3::app::crawl::crawl(&path);
+            let crawl = guardrail3::app::core::crawl::crawl(&path);
             let report = hooks::validate::run(
                 &fs,
                 &path,
@@ -303,7 +306,7 @@ fn run_rs_validate(
     let tc = RealToolChecker;
     let categories = build_rs_categories(args, &fs, &path);
     let project = discover::detect_project(&fs, &path);
-    let crawl = guardrail3::app::crawl::crawl(&path);
+    let crawl = guardrail3::app::core::crawl::crawl(&path);
     let scoped_files = commands::validate::resolve_scoped_files_pub(args, &path);
     let report = rs::validate::run(
         &fs,
