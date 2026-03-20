@@ -1,4 +1,0 @@
-[package]
-name = "myapp-cli-adapters-inbound-clap-defs"
-version = "0.1.0"
-edition = "2024"

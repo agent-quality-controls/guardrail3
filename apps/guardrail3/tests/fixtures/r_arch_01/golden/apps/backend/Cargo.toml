@@ -1,0 +1,17 @@
+[workspace]
+members = [
+    "crates/domain/types",
+    "crates/domain/engine",
+    "crates/app/commands",
+    "crates/app/queries",
+    "crates/ports/inbound/api",
+    "crates/ports/outbound/repo",
+    "crates/ports/outbound/events",
+    "crates/adapters/inbound/rest",
+    "crates/adapters/inbound/mcp/crates/domain/protocol",
+    "crates/adapters/inbound/mcp/crates/app/handlers",
+    "crates/adapters/inbound/mcp/crates/adapters/inbound/transport",
+    "crates/adapters/outbound/postgres",
+    "crates/adapters/outbound/queue",
+]
+resolver = "2"

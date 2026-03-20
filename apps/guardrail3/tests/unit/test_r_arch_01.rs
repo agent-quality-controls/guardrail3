@@ -5,6 +5,13 @@
 //! All tests copy the golden fixture into a temp dir, mutate it, run the check,
 //! and assert exactly which error fires (count + title).
 //!
+//! Golden fixture apps:
+//!   devctl   — Rust CLI, simple hex arch
+//!   backend  — Rust server, REST + MCP (hex-in-hex on MCP adapter)
+//!   worker   — Rust async worker, simple hex arch
+//!   admin    — Next.js, no Cargo.toml (skipped by R-ARCH-01)
+//!   landing  — Next.js, no Cargo.toml (skipped by R-ARCH-01)
+//!
 //! Rules tested:
 //!  1. `crates/` must exist
 //!  2. `crates/` must contain exactly `{adapters, app, domain, ports}` — no other files or dirs
@@ -105,7 +112,7 @@ fn golden_passes() {
 #[test]
 fn rule_01_missing_crates_dir() {
     let tmp = copy_golden();
-    remove_dir(tmp.path(), "apps/myapp/crates");
+    remove_dir(tmp.path(), "apps/devctl/crates");
     let results = run_check(tmp.path());
     let errors = arch_01_errors(&results);
     assert_single_error(&errors, "missing crates/");
@@ -118,7 +125,7 @@ fn rule_01_missing_crates_dir() {
 #[test]
 fn rule_02_missing_required_dir() {
     let tmp = copy_golden();
-    remove_dir(tmp.path(), "apps/myapp/crates/ports");
+    remove_dir(tmp.path(), "apps/devctl/crates/ports");
     let results = run_check(tmp.path());
     let errors = arch_01_errors(&results);
     assert_single_error(&errors, "missing crates/ports/");
@@ -127,8 +134,8 @@ fn rule_02_missing_required_dir() {
 #[test]
 fn rule_02_unexpected_dir_in_crates() {
     let tmp = copy_golden();
-    write_file(tmp.path(), "apps/myapp/crates/utils/Cargo.toml", "[package]\nname = \"utils\"");
-    write_file(tmp.path(), "apps/myapp/crates/utils/src/lib.rs", "");
+    write_file(tmp.path(), "apps/devctl/crates/utils/Cargo.toml", "[package]\nname = \"utils\"");
+    write_file(tmp.path(), "apps/devctl/crates/utils/src/lib.rs", "");
     let results = run_check(tmp.path());
     let errors = arch_01_errors(&results);
     assert_single_error(&errors, "unexpected directory crates/utils/");
@@ -137,7 +144,7 @@ fn rule_02_unexpected_dir_in_crates() {
 #[test]
 fn rule_02_loose_file_in_crates() {
     let tmp = copy_golden();
-    write_file(tmp.path(), "apps/myapp/crates/lib.rs", "// stray");
+    write_file(tmp.path(), "apps/devctl/crates/lib.rs", "// stray");
     let results = run_check(tmp.path());
     let errors = arch_01_errors(&results);
     assert_single_error(&errors, "loose files in crates/");
@@ -150,7 +157,7 @@ fn rule_02_loose_file_in_crates() {
 #[test]
 fn rule_03_missing_outbound_in_adapters() {
     let tmp = copy_golden();
-    remove_dir(tmp.path(), "apps/myapp/crates/adapters/outbound");
+    remove_dir(tmp.path(), "apps/devctl/crates/adapters/outbound");
     let results = run_check(tmp.path());
     let errors = arch_01_errors(&results);
     assert_single_error(&errors, "missing crates/adapters/outbound/");
@@ -159,7 +166,7 @@ fn rule_03_missing_outbound_in_adapters() {
 #[test]
 fn rule_03_unexpected_dir_in_ports() {
     let tmp = copy_golden();
-    std::fs::create_dir_all(tmp.path().join("apps/myapp/crates/ports/shared")).expect("mkdir");
+    std::fs::create_dir_all(tmp.path().join("apps/devctl/crates/ports/shared")).expect("mkdir");
     let results = run_check(tmp.path());
     let errors = arch_01_errors(&results);
     assert_single_error(&errors, "unexpected directory crates/ports/shared/");
@@ -172,7 +179,7 @@ fn rule_03_unexpected_dir_in_ports() {
 #[test]
 fn rule_04_loose_file_in_structural_dir() {
     let tmp = copy_golden();
-    write_file(tmp.path(), "apps/myapp/crates/adapters/mod.rs", "pub mod inbound;");
+    write_file(tmp.path(), "apps/devctl/crates/adapters/mod.rs", "pub mod inbound;");
     let results = run_check(tmp.path());
     let errors = arch_01_errors(&results);
     assert_single_error(&errors, "loose files in crates/adapters/");
@@ -181,7 +188,7 @@ fn rule_04_loose_file_in_structural_dir() {
 #[test]
 fn rule_04_loose_file_in_container_dir() {
     let tmp = copy_golden();
-    write_file(tmp.path(), "apps/myapp/crates/domain/mod.rs", "pub mod types;");
+    write_file(tmp.path(), "apps/devctl/crates/domain/mod.rs", "pub mod types;");
     let results = run_check(tmp.path());
     let errors = arch_01_errors(&results);
     assert_single_error(&errors, "loose files in crates/domain/");
@@ -194,10 +201,10 @@ fn rule_04_loose_file_in_container_dir() {
 #[test]
 fn rule_05_empty_container_no_gitkeep() {
     let tmp = copy_golden();
-    remove_file(tmp.path(), "apps/myapp/crates/ports/outbound/.gitkeep");
+    remove_file(tmp.path(), "apps/devctl/crates/ports/inbound/.gitkeep");
     let results = run_check(tmp.path());
     let errors = arch_01_errors(&results);
-    assert_single_error(&errors, "empty container crates/ports/outbound/");
+    assert_single_error(&errors, "empty container crates/ports/inbound/");
 }
 
 // =======================================================================
@@ -207,8 +214,8 @@ fn rule_05_empty_container_no_gitkeep() {
 #[test]
 fn rule_06_subdir_missing_cargo_toml() {
     let tmp = copy_golden();
-    std::fs::create_dir_all(tmp.path().join("apps/myapp/crates/app/orphan/src")).expect("mkdir");
-    write_file(tmp.path(), "apps/myapp/crates/app/orphan/src/lib.rs", "");
+    std::fs::create_dir_all(tmp.path().join("apps/devctl/crates/app/orphan/src")).expect("mkdir");
+    write_file(tmp.path(), "apps/devctl/crates/app/orphan/src/lib.rs", "");
     let results = run_check(tmp.path());
     let errors = arch_01_errors(&results);
     assert_single_error(&errors, "crates/app/orphan/ missing Cargo.toml");
@@ -217,12 +224,12 @@ fn rule_06_subdir_missing_cargo_toml() {
 #[test]
 fn rule_06_hex_in_hex_broken_inner() {
     let tmp = copy_golden();
-    remove_dir(tmp.path(), "apps/myapp/crates/adapters/inbound/cli/crates/domain");
+    remove_dir(tmp.path(), "apps/backend/crates/adapters/inbound/mcp/crates/domain");
     let results = run_check(tmp.path());
     let errors = arch_01_errors(&results);
     assert_single_error(
         &errors,
-        "missing crates/adapters/inbound/cli/crates/domain/",
+        "missing crates/adapters/inbound/mcp/crates/domain/",
     );
 }
 
@@ -233,7 +240,7 @@ fn rule_06_hex_in_hex_broken_inner() {
 #[test]
 fn rule_12_src_dir_banned() {
     let tmp = copy_golden();
-    write_file(tmp.path(), "apps/myapp/src/main.rs", "fn main() {}");
+    write_file(tmp.path(), "apps/devctl/src/main.rs", "fn main() {}");
     let results = run_check(tmp.path());
     let errors = arch_01_errors(&results);
     assert_single_error(&errors, "has src/ directory");
