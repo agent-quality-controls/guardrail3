@@ -23,6 +23,7 @@ pub mod ports {
 }
 
 pub mod app {
+    pub mod arch_helpers;
     pub mod core;
     pub mod hooks;
     pub mod rs;

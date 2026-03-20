@@ -1,44 +1,26 @@
+//! RS-ARCH-01 helpers — re-exports shared arch utilities with RS-specific defaults.
+
 use std::path::Path;
 
-use crate::domain::report::{CheckResult, Severity};
+use crate::app::arch_helpers;
+use crate::domain::report::CheckResult;
 use crate::ports::outbound::FileSystem;
 
-/// List subdirectory names in a directory.
+const ID: &str = "R-ARCH-01";
+const ENTITY: &str = "Service";
+
 pub fn list_dir_names(fs: &dyn FileSystem, dir: &Path) -> Vec<String> {
-    let entries = fs.list_dir(dir);
-    let mut names = Vec::new();
-    for entry in &entries {
-        let Ok(ft) = entry.file_type() else {
-            continue;
-        };
-        if ft.is_dir() {
-            names.push(entry.file_name().to_string_lossy().into_owned());
-        }
-    }
-    names
+    arch_helpers::list_dir_names(fs, dir)
 }
 
-/// List file names (non-directories) in a directory.
 pub fn list_file_names(fs: &dyn FileSystem, dir: &Path) -> Vec<String> {
-    let entries = fs.list_dir(dir);
-    let mut names = Vec::new();
-    for entry in &entries {
-        let Ok(ft) = entry.file_type() else {
-            continue;
-        };
-        if !ft.is_dir() {
-            names.push(entry.file_name().to_string_lossy().into_owned());
-        }
-    }
-    names
+    arch_helpers::list_file_names(fs, dir)
 }
 
-/// Check if a directory contains a `.gitkeep` file.
 pub fn has_gitkeep(fs: &dyn FileSystem, dir: &Path) -> bool {
-    fs.read_file(&dir.join(".gitkeep")).is_some()
+    arch_helpers::has_gitkeep(fs, dir)
 }
 
-/// Report loose files in a directory (only `.gitkeep` is allowed).
 pub fn check_loose_files(
     fs: &dyn FileSystem,
     name: &str,
@@ -46,33 +28,26 @@ pub fn check_loose_files(
     label: &str,
     results: &mut Vec<CheckResult>,
 ) {
-    let entries = fs.list_dir(dir);
-    let mut bad_files: Vec<String> = Vec::new();
+    arch_helpers::check_loose_files(fs, name, dir, label, ID, ENTITY, results);
+}
 
-    for entry in &entries {
-        let entry_name = entry.file_name().to_string_lossy().into_owned();
-        let Ok(ft) = entry.file_type() else {
-            continue;
-        };
-        if !ft.is_dir() && entry_name != ".gitkeep" {
-            bad_files.push(entry_name);
-        }
-    }
+pub fn check_exact_subdirs(
+    fs: &dyn FileSystem,
+    name: &str,
+    dir: &Path,
+    label: &str,
+    expected: &[&str],
+    results: &mut Vec<CheckResult>,
+) {
+    arch_helpers::check_exact_subdirs(fs, name, dir, label, expected, ID, ENTITY, results);
+}
 
-    if !bad_files.is_empty() {
-        results.push(CheckResult {
-            id: "R-ARCH-01".to_owned(),
-            severity: Severity::Error,
-            title: format!("Service `{name}` has loose files in {label}/"),
-            message: format!(
-                "Service `{name}` has files in `{label}/` that don't belong: {}. \
-                 Only `.gitkeep` is allowed in structural/container directories. \
-                 Move code into crate subdirectories.",
-                bad_files.join(", ")
-            ),
-            file: Some(dir.display().to_string()),
-            line: None,
-            inventory: false,
-        });
-    }
+pub fn check_container_not_empty(
+    fs: &dyn FileSystem,
+    name: &str,
+    dir: &Path,
+    label: &str,
+    results: &mut Vec<CheckResult>,
+) {
+    arch_helpers::check_container_not_empty(fs, name, dir, label, ID, ENTITY, results);
 }
