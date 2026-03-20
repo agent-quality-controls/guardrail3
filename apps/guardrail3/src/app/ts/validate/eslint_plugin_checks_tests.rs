@@ -1,48 +1,89 @@
 use super::*;
+use crate::app::ts::validate::eslint_parser;
 use std::path::PathBuf;
 
 fn path() -> PathBuf {
     PathBuf::from("eslint.config.mjs")
 }
 
+/// Helper: parse content into `EslintConfig`, falling back if parse fails.
+fn parse(content: &str) -> EslintConfig {
+    eslint_parser::parse_eslint_config(content)
+        .unwrap_or_else(|| EslintConfig::fallback(content.to_owned()))
+}
+
 #[test]
 fn test_all_unicorn_disabled_present() {
-    let content = UNICORN_DISABLED.join("\n");
-    let missing = find_missing_rules(&content, UNICORN_DISABLED);
+    // Build a valid JS config with all unicorn rules
+    let rules: Vec<String> = UNICORN_DISABLED
+        .iter()
+        .map(|r| format!("            \"{r}\": \"off\""))
+        .collect();
+    let content = format!(
+        "export default [{{ rules: {{\n{}\n}} }}];",
+        rules.join(",\n")
+    );
+    let config = parse(&content);
+    let missing = find_missing_rules(&config, UNICORN_DISABLED);
     assert!(missing.is_empty());
 }
 
 #[test]
 fn test_unicorn_disabled_missing_one() {
-    let rules: Vec<&str> = UNICORN_DISABLED.iter().skip(1).copied().collect();
-    let content = rules.join("\n");
-    let missing = find_missing_rules(&content, UNICORN_DISABLED);
+    let rules: Vec<String> = UNICORN_DISABLED
+        .iter()
+        .skip(1)
+        .map(|r| format!("            \"{r}\": \"off\""))
+        .collect();
+    let content = format!(
+        "export default [{{ rules: {{\n{}\n}} }}];",
+        rules.join(",\n")
+    );
+    let config = parse(&content);
+    let missing = find_missing_rules(&config, UNICORN_DISABLED);
     assert_eq!(missing, vec!["unicorn/no-null"]);
 }
 
 #[test]
 fn test_core_plugins_all_pass() {
-    let mut parts: Vec<&str> = vec![
-        // T-ESLP-01
-        "unicorn",
-        "flat/recommended",
-        // T-ESLP-04
-        "regexp",
-        // T-ESLP-11 test override marker
-        "files: **/*.test.* overrides",
-    ];
-    // All rule lists
-    parts.extend_from_slice(UNICORN_DISABLED);
-    parts.extend_from_slice(UNICORN_EXTRA);
-    parts.extend_from_slice(REGEXP_EXTRA);
-    parts.extend_from_slice(SONARJS_RULES);
-    parts.extend_from_slice(REACT_EXTRA);
-    parts.extend_from_slice(BUILTIN_RULES);
-    parts.extend_from_slice(TEST_RELAXATION_RULES);
+    // Build a valid JS config with all required rules and markers
+    let mut all_rules: Vec<&str> = Vec::new();
+    all_rules.extend_from_slice(UNICORN_DISABLED);
+    all_rules.extend_from_slice(UNICORN_EXTRA);
+    all_rules.extend_from_slice(REGEXP_EXTRA);
+    all_rules.extend_from_slice(SONARJS_RULES);
+    all_rules.extend_from_slice(REACT_EXTRA);
+    all_rules.extend_from_slice(BUILTIN_RULES);
+    all_rules.extend_from_slice(TEST_RELAXATION_RULES);
 
-    let content = parts.join("\n");
+    let rules_entries: Vec<String> = all_rules
+        .iter()
+        .map(|r| format!("        \"{r}\": \"error\""))
+        .collect();
+
+    let content = format!(
+        r#"import unicorn from "eslint-plugin-unicorn";
+import regexp from "eslint-plugin-regexp";
+
+export default [
+    unicorn.configs["flat/recommended"],
+    regexp.configs["flat/recommended"],
+    {{
+        files: ["**/*.test.ts"],
+        rules: {{}}
+    }},
+    {{
+        rules: {{
+{}
+        }}
+    }}
+];"#,
+        rules_entries.join(",\n")
+    );
+
+    let config = parse(&content);
     let mut results = Vec::new();
-    check_core_plugins(&content, &path(), &mut results);
+    check_core_plugins(&config, &path(), &mut results);
 
     let errors: Vec<_> = results
         .iter()
@@ -53,9 +94,22 @@ fn test_core_plugins_all_pass() {
 
 #[test]
 fn test_content_plugins_all_pass() {
-    let content = "jsxA11y strict\njsx-a11y/control-has-associated-label\ntailwind-ban";
+    let content = r#"
+import jsxA11y from "eslint-plugin-jsx-a11y";
+
+export default [
+    jsxA11y.flatConfigs.strict,
+    {
+        rules: {
+            "jsx-a11y/control-has-associated-label": "error",
+        },
+        plugins: ["tailwind-ban"],
+    },
+];
+"#;
+    let config = parse(content);
     let mut results = Vec::new();
-    check_content_plugins(content, &path(), &mut results);
+    check_content_plugins(&config, &path(), &mut results);
 
     let errors: Vec<_> = results
         .iter()
@@ -66,9 +120,10 @@ fn test_content_plugins_all_pass() {
 
 #[test]
 fn test_content_plugins_all_missing() {
-    let content = "// empty config";
+    let content = "export default [];";
+    let config = parse(content);
     let mut results = Vec::new();
-    check_content_plugins(content, &path(), &mut results);
+    check_content_plugins(&config, &path(), &mut results);
 
     let error_count = results
         .iter()
@@ -79,9 +134,10 @@ fn test_content_plugins_all_missing() {
 
 #[test]
 fn test_test_relaxation_missing_section() {
-    let content = "// no test override";
+    let content = "export default [];";
+    let config = parse(content);
     let mut results = Vec::new();
-    check_test_relaxations(content, &path(), &mut results);
+    check_test_relaxations(&config, &path(), &mut results);
     assert_eq!(results.len(), 1);
     if let Some(first) = results.first() {
         assert_eq!(first.severity, Severity::Error);

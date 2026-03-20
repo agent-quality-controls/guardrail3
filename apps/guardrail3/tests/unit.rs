@@ -14,6 +14,7 @@ use tempfile as _;
 use toml as _;
 use toml_edit as _;
 use tree_sitter as _;
+use tree_sitter_javascript as _;
 use tree_sitter_typescript as _;
 use walkdir as _;
 #[path = "unit/allow_checks_test.rs"]

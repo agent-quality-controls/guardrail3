@@ -3,6 +3,8 @@ use std::path::Path;
 use crate::domain::report::{CheckResult, Severity};
 use crate::ports::outbound::FileSystem;
 
+use super::eslint_parser;
+
 pub fn check(fs: &dyn FileSystem, path: &Path) -> Vec<CheckResult> {
     let mut results = Vec::new();
 
@@ -16,19 +18,30 @@ pub fn check(fs: &dyn FileSystem, path: &Path) -> Vec<CheckResult> {
         return results;
     };
 
-    check_zone_definitions(&content, &eslint_path, &mut results);
-    check_import_direction(&content, &eslint_path, &mut results);
-    check_entry_point(&content, &eslint_path, &mut results);
-    check_external_deps(&content, &eslint_path, &mut results);
+    // Parse once with tree-sitter
+    let config = eslint_parser::parse_eslint_config(&content)
+        .unwrap_or_else(|| eslint_parser::EslintConfig::fallback(content));
+
+    check_zone_definitions(&config, &eslint_path, &mut results);
+    check_import_direction(&config, &eslint_path, &mut results);
+    check_entry_point(&config, &eslint_path, &mut results);
+    check_external_deps(&config, &eslint_path, &mut results);
 
     results
 }
 
 /// T36: Zone definitions
-fn check_zone_definitions(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
-    let has_zones = content.contains("element-types")
-        || content.contains("domain")
-            && (content.contains("commands") || content.contains("adapters"));
+fn check_zone_definitions(
+    config: &eslint_parser::EslintConfig,
+    eslint_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
+    // Check for element-types rule in parsed rules, or domain+commands/adapters in raw content
+    let has_zones = config.rules.contains_key("boundaries/element-types")
+        || (config.raw_content.contains("element-types"))
+        || (config.raw_content.contains("domain")
+            && (config.raw_content.contains("commands")
+                || config.raw_content.contains("adapters")));
 
     if has_zones {
         results.push(CheckResult {
@@ -60,8 +73,12 @@ fn check_zone_definitions(content: &str, eslint_path: &Path, results: &mut Vec<C
 }
 
 /// T37: Import direction rules
-fn check_import_direction(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
-    if content.contains("boundaries/element-types") {
+fn check_import_direction(
+    config: &eslint_parser::EslintConfig,
+    eslint_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
+    if config.rules.contains_key("boundaries/element-types") {
         results.push(CheckResult {
             id: "T37".to_owned(),
             severity: Severity::Info,
@@ -91,8 +108,12 @@ fn check_import_direction(content: &str, eslint_path: &Path, results: &mut Vec<C
 }
 
 /// T38: Entry-point barrel enforcement
-fn check_entry_point(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
-    if content.contains("boundaries/entry-point") {
+fn check_entry_point(
+    config: &eslint_parser::EslintConfig,
+    eslint_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
+    if config.rules.contains_key("boundaries/entry-point") {
         results.push(CheckResult {
             id: "T38".to_owned(),
             severity: Severity::Info,
@@ -121,8 +142,12 @@ fn check_entry_point(content: &str, eslint_path: &Path, results: &mut Vec<CheckR
 }
 
 /// T39: External dependency per-zone bans
-fn check_external_deps(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
-    if content.contains("boundaries/external") {
+fn check_external_deps(
+    config: &eslint_parser::EslintConfig,
+    eslint_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
+    if config.rules.contains_key("boundaries/external") {
         results.push(CheckResult {
             id: "T39".to_owned(),
             severity: Severity::Info,

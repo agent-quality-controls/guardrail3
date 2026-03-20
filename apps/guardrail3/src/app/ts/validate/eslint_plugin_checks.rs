@@ -2,6 +2,8 @@ use std::path::Path;
 
 use crate::domain::report::{CheckResult, Severity};
 
+use super::eslint_parser::EslintConfig;
+
 // ---------------------------------------------------------------------------
 // Rule lists (const arrays)
 // ---------------------------------------------------------------------------
@@ -105,11 +107,11 @@ const TEST_RELAXATION_RULES: &[&str] = &[
 // Helpers
 // ---------------------------------------------------------------------------
 
-/// Find which rules from `rules` are NOT present in `content`.
-fn find_missing_rules<'a>(content: &str, rules: &[&'a str]) -> Vec<&'a str> {
+/// Find which rules from `rules` are NOT present in `config.rules`.
+fn find_missing_rules<'a>(config: &EslintConfig, rules: &[&'a str]) -> Vec<&'a str> {
     rules
         .iter()
-        .filter(|rule| !content.contains(**rule))
+        .filter(|rule| !config.rules.contains_key(**rule))
         .copied()
         .collect()
 }
@@ -153,15 +155,17 @@ fn rule_group_result(
     }
 }
 
-/// Check that `content` contains an import/config pattern.
+/// Check that raw content contains an import/config pattern.
+/// Uses `raw_content` because import patterns are not extracted into rules.
 fn check_config_import(
-    content: &str,
+    config: &EslintConfig,
     id: &str,
     plugin_name: &str,
     markers: &[&str],
     eslint_path: &Path,
     results: &mut Vec<CheckResult>,
 ) {
+    let content = &config.raw_content;
     let all_present = markers.iter().all(|m| content.contains(m));
     if all_present {
         results.push(
@@ -204,12 +208,16 @@ fn check_config_import(
 
 /// Check `ESLint` plugin configurations that apply to every `TypeScript` project.
 #[allow(clippy::too_many_lines)] // reason: validates many plugin groups sequentially, splitting would fragment the orchestration
-pub fn check_core_plugins(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
+pub fn check_core_plugins(
+    config: &EslintConfig,
+    eslint_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     // T-ESLP-01: unicorn config import
-    check_unicorn_import(content, eslint_path, results);
+    check_unicorn_import(config, eslint_path, results);
 
     // T-ESLP-02: unicorn disabled rules
-    let missing = find_missing_rules(content, UNICORN_DISABLED);
+    let missing = find_missing_rules(config, UNICORN_DISABLED);
     rule_group_result(
         "T-ESLP-02",
         "unicorn disabled",
@@ -219,7 +227,7 @@ pub fn check_core_plugins(content: &str, eslint_path: &Path, results: &mut Vec<C
     );
 
     // T-ESLP-03: unicorn extra rules
-    let missing_unicorn_extra = find_missing_rules(content, UNICORN_EXTRA);
+    let missing_unicorn_extra = find_missing_rules(config, UNICORN_EXTRA);
     rule_group_result(
         "T-ESLP-03",
         "unicorn extra",
@@ -228,9 +236,9 @@ pub fn check_core_plugins(content: &str, eslint_path: &Path, results: &mut Vec<C
         results,
     );
 
-    // T-ESLP-04: regexp config import
+    // T-ESLP-04: regexp config import (uses raw content for import pattern)
     check_config_import(
-        content,
+        config,
         "T-ESLP-04",
         "regexp",
         &["regexp", "flat/recommended"],
@@ -239,7 +247,7 @@ pub fn check_core_plugins(content: &str, eslint_path: &Path, results: &mut Vec<C
     );
 
     // T-ESLP-05: regexp extra rules
-    let missing_regexp = find_missing_rules(content, REGEXP_EXTRA);
+    let missing_regexp = find_missing_rules(config, REGEXP_EXTRA);
     rule_group_result(
         "T-ESLP-05",
         "regexp extra",
@@ -249,7 +257,7 @@ pub fn check_core_plugins(content: &str, eslint_path: &Path, results: &mut Vec<C
     );
 
     // T-ESLP-06: sonarjs cherry-picked rules
-    let missing_sonarjs = find_missing_rules(content, SONARJS_RULES);
+    let missing_sonarjs = find_missing_rules(config, SONARJS_RULES);
     rule_group_result(
         "T-ESLP-06",
         "sonarjs",
@@ -259,7 +267,7 @@ pub fn check_core_plugins(content: &str, eslint_path: &Path, results: &mut Vec<C
     );
 
     // T-ESLP-09: React extra rules
-    let missing_react = find_missing_rules(content, REACT_EXTRA);
+    let missing_react = find_missing_rules(config, REACT_EXTRA);
     rule_group_result(
         "T-ESLP-09",
         "React extra",
@@ -269,7 +277,7 @@ pub fn check_core_plugins(content: &str, eslint_path: &Path, results: &mut Vec<C
     );
 
     // T-ESLP-10: built-in ESLint/TS rules
-    let missing_builtin = find_missing_rules(content, BUILTIN_RULES);
+    let missing_builtin = find_missing_rules(config, BUILTIN_RULES);
     rule_group_result(
         "T-ESLP-10",
         "built-in ESLint/TS",
@@ -279,7 +287,12 @@ pub fn check_core_plugins(content: &str, eslint_path: &Path, results: &mut Vec<C
     );
 
     // Verify naming-convention has selector config (not just rule name)
-    if content.contains("@typescript-eslint/naming-convention") && !content.contains("selector") {
+    let content = &config.raw_content;
+    if config
+        .rules
+        .contains_key("@typescript-eslint/naming-convention")
+        && !content.contains("selector")
+    {
         results.push(CheckResult {
             id: "T-ESLP-10".to_owned(),
             severity: Severity::Warn,
@@ -295,7 +308,9 @@ pub fn check_core_plugins(content: &str, eslint_path: &Path, results: &mut Vec<C
     }
 
     // Verify jsx-no-leaked-render has validStrategies config
-    if content.contains("jsx-no-leaked-render") && !content.contains("validStrategies") {
+    if config.rules.contains_key("react/jsx-no-leaked-render")
+        && !content.contains("validStrategies")
+    {
         results.push(CheckResult {
             id: "T-ESLP-10".to_owned(),
             severity: Severity::Warn,
@@ -311,11 +326,12 @@ pub fn check_core_plugins(content: &str, eslint_path: &Path, results: &mut Vec<C
     }
 
     // T-ESLP-11: test file relaxations
-    check_test_relaxations(content, eslint_path, results);
+    check_test_relaxations(config, eslint_path, results);
 }
 
 /// T-ESLP-01: Check unicorn config import — `unicorn` + (`flat/recommended` or `configs.recommended`).
-fn check_unicorn_import(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
+fn check_unicorn_import(config: &EslintConfig, eslint_path: &Path, results: &mut Vec<CheckResult>) {
+    let content = &config.raw_content;
     let has_unicorn = content.contains("unicorn");
     let has_config =
         content.contains("flat/recommended") || content.contains("configs.recommended");
@@ -358,9 +374,13 @@ fn check_unicorn_import(content: &str, eslint_path: &Path, results: &mut Vec<Che
 }
 
 /// T-ESLP-11: Check that test file overrides disable the expected relaxation rules.
-fn check_test_relaxations(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
+fn check_test_relaxations(
+    config: &EslintConfig,
+    eslint_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     // Find a test override section: look for lines with test/spec file patterns
-    let has_test_override = content.lines().any(|line| {
+    let has_test_override = config.raw_content.lines().any(|line| {
         let t = line.trim();
         (t.contains(".test.") || t.contains(".spec.") || t.contains("__tests__"))
             && (t.contains("files") || t.contains("overrides"))
@@ -382,7 +402,7 @@ fn check_test_relaxations(content: &str, eslint_path: &Path, results: &mut Vec<C
         return;
     }
 
-    let missing = find_missing_rules(content, TEST_RELAXATION_RULES);
+    let missing = find_missing_rules(config, TEST_RELAXATION_RULES);
     rule_group_result(
         "T-ESLP-11",
         "test file relaxation",
@@ -397,19 +417,28 @@ fn check_test_relaxations(content: &str, eslint_path: &Path, results: &mut Vec<C
 // ---------------------------------------------------------------------------
 
 /// Check `ESLint` plugin configurations that apply to `content-profile` projects.
-pub fn check_content_plugins(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
+pub fn check_content_plugins(
+    config: &EslintConfig,
+    eslint_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     // T-ESLP-07: jsx-a11y strict config
-    check_jsx_a11y_strict(content, eslint_path, results);
+    check_jsx_a11y_strict(config, eslint_path, results);
 
     // T-ESLP-08: jsx-a11y/control-has-associated-label
-    check_a11y_control_label(content, eslint_path, results);
+    check_a11y_control_label(config, eslint_path, results);
 
     // T-ESLP-12: tailwind-ban plugin and rule
-    check_tailwind_ban(content, eslint_path, results);
+    check_tailwind_ban(config, eslint_path, results);
 }
 
 /// T-ESLP-07: Check jsx-a11y strict config (look for `jsxA11y` or `jsx-a11y` and `strict`).
-fn check_jsx_a11y_strict(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
+fn check_jsx_a11y_strict(
+    config: &EslintConfig,
+    eslint_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
+    let content = &config.raw_content;
     let has_a11y = content.contains("jsxA11y") || content.contains("jsx-a11y");
     let has_strict = content.contains("strict");
 
@@ -451,9 +480,13 @@ fn check_jsx_a11y_strict(content: &str, eslint_path: &Path, results: &mut Vec<Ch
 }
 
 /// T-ESLP-08: Check `jsx-a11y/control-has-associated-label` rule.
-fn check_a11y_control_label(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
+fn check_a11y_control_label(
+    config: &EslintConfig,
+    eslint_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     let rule = "jsx-a11y/control-has-associated-label";
-    if content.contains(rule) {
+    if config.rules.contains_key(rule) {
         results.push(
             CheckResult {
                 id: "T-ESLP-08".to_owned(),
@@ -483,7 +516,8 @@ fn check_a11y_control_label(content: &str, eslint_path: &Path, results: &mut Vec
 }
 
 /// T-ESLP-12: Check tailwind-ban plugin and rule.
-fn check_tailwind_ban(content: &str, eslint_path: &Path, results: &mut Vec<CheckResult>) {
+fn check_tailwind_ban(config: &EslintConfig, eslint_path: &Path, results: &mut Vec<CheckResult>) {
+    let content = &config.raw_content;
     let has_plugin = content.contains("tailwind-ban");
     if has_plugin {
         results.push(
