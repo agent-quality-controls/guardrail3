@@ -79,11 +79,11 @@ fn empty_app_containers() {
             err.message
         );
     }
-    assert_file_field(&errors);
-    assert_per_app(&errors);
-    assert_inner_hex(&errors);
-    assert_no_ts_apps(&errors);
-    assert_no_packages(&errors);
+    assert_file_field(&r5);
+    assert_per_app(&r5);
+    assert_inner_hex(&r5);
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
 
 #[test]
@@ -108,11 +108,11 @@ fn empty_domain_containers() {
             err.message
         );
     }
-    assert_file_field(&errors);
-    assert_per_app(&errors);
-    assert_inner_hex(&errors);
-    assert_no_ts_apps(&errors);
-    assert_no_packages(&errors);
+    assert_file_field(&r5);
+    assert_per_app(&r5);
+    assert_inner_hex(&r5);
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
 
 #[test]
@@ -142,10 +142,10 @@ fn empty_adapters_inbound_containers() {
             err.message
         );
     }
-    assert_file_field(&errors);
-    assert_per_app(&errors);
-    assert_no_ts_apps(&errors);
-    assert_no_packages(&errors);
+    assert_file_field(&r5);
+    assert_per_app(&r5);
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
 
 #[test]
@@ -172,8 +172,14 @@ fn empty_adapters_inbound_inner_hex_separately() {
         "expected inner hex path in file field, got: {:?}",
         r5[0].file
     );
-    assert_no_ts_apps(&errors);
-    assert_no_packages(&errors);
+    assert!(
+        r5[0].title.contains("backend"),
+        "expected 'backend' in title (inner hex is part of backend), got: '{}'",
+        r5[0].title
+    );
+    assert_file_field(&r5);
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
 
 #[test]
@@ -198,11 +204,11 @@ fn empty_adapters_outbound_containers() {
             err.message
         );
     }
-    assert_file_field(&errors);
-    assert_per_app(&errors);
-    assert_inner_hex(&errors);
-    assert_no_ts_apps(&errors);
-    assert_no_packages(&errors);
+    assert_file_field(&r5);
+    assert_per_app(&r5);
+    assert_inner_hex(&r5);
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
 
 #[test]
@@ -229,11 +235,11 @@ fn empty_ports_inbound_containers() {
             err.message
         );
     }
-    assert_file_field(&errors);
-    assert_per_app(&errors);
-    assert_inner_hex(&errors);
-    assert_no_ts_apps(&errors);
-    assert_no_packages(&errors);
+    assert_file_field(&r5);
+    assert_per_app(&r5);
+    assert_inner_hex(&r5);
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
 
 #[test]
@@ -258,11 +264,11 @@ fn empty_ports_outbound_containers() {
             err.message
         );
     }
-    assert_file_field(&errors);
-    assert_per_app(&errors);
-    assert_inner_hex(&errors);
-    assert_no_ts_apps(&errors);
-    assert_no_packages(&errors);
+    assert_file_field(&r5);
+    assert_per_app(&r5);
+    assert_inner_hex(&r5);
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
 
 // ============================================================================
@@ -276,10 +282,13 @@ fn gitkeep_already_present_baseline() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
-    assert!(
-        r5.is_empty(),
+    assert_eq!(
+        r5.len(),
+        0,
         "golden fixture should have 0 empty-container errors, got: {r5:#?}"
     );
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
 
 #[test]
@@ -315,11 +324,14 @@ fn gitkeep_prevents_empty() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
-    assert!(
-        r5.is_empty(),
+    assert_eq!(
+        r5.len(),
+        0,
         "expected 0 empty-container errors when .gitkeep present, got {}: {r5:#?}",
         r5.len()
     );
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
 
 #[test]
@@ -332,10 +344,13 @@ fn gitkeep_alongside_subdirs() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
-    assert!(
-        r5.is_empty(),
+    assert_eq!(
+        r5.len(),
+        0,
         "expected 0 errors when .gitkeep coexists with subdirs, got: {r5:#?}"
     );
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
 
 // ============================================================================
@@ -377,9 +392,9 @@ fn files_but_no_subdirs() {
         "expected 'but no subdirectories' in message, got: '{}'",
         devctl_r5[0].message
     );
-    assert_file_field(&errors);
-    assert_no_ts_apps(&errors);
-    assert_no_packages(&errors);
+    assert_file_field(&r5);
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
 
 #[test]
@@ -409,9 +424,9 @@ fn multiple_files_but_no_subdirs() {
         "expected 'contains files' in message, got: '{}'",
         devctl_r5[0].message
     );
-    assert_file_field(&errors);
-    assert_no_ts_apps(&errors);
-    assert_no_packages(&errors);
+    assert_file_field(&r5);
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
 
 // ============================================================================
@@ -427,10 +442,13 @@ fn container_dir_nonexistent() {
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
     let devctl_app: Vec<_> = r5.iter().filter(|e| e.title.contains("devctl") && e.title.contains("/app")).collect();
-    assert!(
-        devctl_app.is_empty(),
+    assert_eq!(
+        devctl_app.len(),
+        0,
         "nonexistent container should not fire empty-container error (other rules catch it), got: {devctl_app:#?}"
     );
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
 
 #[test]
@@ -448,8 +466,9 @@ fn container_with_only_gitkeep_and_files() {
     let r5 = rule5_errors(&errors);
     assert_eq!(r5.len(), 0, "expected 0 empty-container errors (.gitkeep suppresses), got {}: {r5:#?}", r5.len());
     let devctl_app_r5: Vec<_> = r5.iter().filter(|e| e.title.contains("devctl") && e.title.contains("/app")).collect();
-    assert!(
-        devctl_app_r5.is_empty(),
+    assert_eq!(
+        devctl_app_r5.len(),
+        0,
         ".gitkeep present → no empty-container error, got: {devctl_app_r5:#?}"
     );
     // But loose-file error should fire for mod.rs
@@ -460,6 +479,8 @@ fn container_with_only_gitkeep_and_files() {
         "expected 1 loose-file error for mod.rs, got {}: {loose:#?}",
         loose.len()
     );
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
 
 #[test]
@@ -489,15 +510,22 @@ fn inner_hex_empty_outer_clean() {
             "expected 'is empty' in message, got: '{}'",
             err.message
         );
+        assert!(
+            err.title.contains("backend"),
+            "expected 'backend' in title (inner hex is part of backend), got: '{}'",
+            err.title
+        );
     }
     // Outer apps should have no empty-container errors
     let outer_r5: Vec<_> = r5.iter().filter(|e| !e.file.as_deref().unwrap_or("").contains("mcp/crates")).collect();
-    assert!(
-        outer_r5.is_empty(),
+    assert_eq!(
+        outer_r5.len(),
+        0,
         "expected 0 outer empty-container errors, got: {outer_r5:#?}"
     );
-    assert_no_ts_apps(&errors);
-    assert_no_packages(&errors);
+    assert_file_field(&r5);
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
 
 #[test]
@@ -536,8 +564,9 @@ fn inner_hex_label_prefix_in_title() {
         "expected 'is empty' in message, got: '{}'",
         r5[0].message
     );
-    assert_no_ts_apps(&errors);
-    assert_no_packages(&errors);
+    assert_file_field(&r5);
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
 
 #[test]
@@ -577,7 +606,9 @@ fn permission_denied_container() {
         "expected 'is empty' in message, got: '{}'",
         devctl_app[0].message
     );
-    assert_file_field(&errors);
+    assert_file_field(&r5);
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
 
 // ============================================================================
@@ -596,12 +627,14 @@ fn ts_apps_not_checked() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
-    assert_no_ts_apps(&r5.iter().map(|&e| e).collect::<Vec<_>>());
+    assert_no_ts_apps(&r5);
     // Verify devctl did fire
     assert!(
         r5.iter().any(|e| e.title.contains("devctl")),
         "expected devctl error, got: {r5:#?}"
     );
+    assert_no_packages(&r5);
+    assert_file_field(&r5);
 }
 
 #[test]
@@ -614,7 +647,9 @@ fn packages_not_checked() {
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
     assert!(!r5.is_empty(), "expected non-empty error list to meaningfully test packages absence");
-    assert_no_packages(&r5.iter().map(|&e| e).collect::<Vec<_>>());
+    assert_no_packages(&r5);
+    assert_no_ts_apps(&r5);
+    assert_file_field(&r5);
 }
 
 #[test]
@@ -656,8 +691,8 @@ fn new_app_gets_checked() {
         );
     }
     assert_file_field(&scheduler_r5.iter().map(|&&e| e).collect::<Vec<_>>());
-    assert_no_ts_apps(&errors);
-    assert_no_packages(&errors);
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
 
 #[test]
@@ -680,6 +715,9 @@ fn idempotent_results() {
         assert_eq!(a.message, b.message, "idempotent: message mismatch");
         assert_eq!(a.file, b.file, "idempotent: file mismatch");
     }
+    assert_no_ts_apps(&r5_1);
+    assert_no_packages(&r5_1);
+    assert_file_field(&r5_1);
 }
 
 #[test]
@@ -733,8 +771,9 @@ fn different_breakage_per_app() {
         "backend inner hex should say 'is empty', got: '{}'",
         backend_inner[0].message
     );
-    assert_no_ts_apps(&errors);
-    assert_no_packages(&errors);
+    assert_file_field(&r5);
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
 
 // ============================================================================
@@ -769,6 +808,9 @@ fn empty_ports_inbound_single_app() {
         "expected 'is empty' in message, got: '{}'",
         r5[0].message
     );
+    assert_file_field(&r5);
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
 
 #[test]
@@ -799,9 +841,9 @@ fn empty_in_one_app_valid_in_another() {
         "expected 'is empty' in message, got: '{}'",
         r5[0].message
     );
-    assert_file_field(&errors);
-    assert_no_ts_apps(&errors);
-    assert_no_packages(&errors);
+    assert_file_field(&r5);
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
 
 #[test]
@@ -826,8 +868,15 @@ fn inner_hex_empty_container_single() {
         "expected 'is empty' in message, got: '{}'",
         r5[0].message
     );
-    assert_file_field(&errors);
-    assert_inner_hex(&r5.iter().map(|&e| e).collect::<Vec<_>>());
+    assert!(
+        r5[0].title.contains("backend"),
+        "expected 'backend' in title (inner hex is part of backend), got: '{}'",
+        r5[0].title
+    );
+    assert_file_field(&r5);
+    assert_inner_hex(&r5);
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
 
 #[test]
@@ -865,7 +914,9 @@ fn multiple_empty_containers_same_app() {
             err.message
         );
     }
-    assert_file_field(&errors);
+    assert_file_field(&r5);
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
 
 // ============================================================================
@@ -890,6 +941,9 @@ fn ts_apps_broken_zero_rs_errors() {
         !r5.iter().any(|e| e.title.contains("admin") || e.title.contains("landing")),
         "TS apps should not produce empty-container errors, got: {r5:#?}"
     );
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
+    assert_file_field(&r5);
 }
 
 // ============================================================================
@@ -907,6 +961,7 @@ fn unicode_lookalike_gitkeep() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
+    assert_eq!(r5.len(), 1, "expected 1 total rule5 error, got {}: {r5:#?}", r5.len());
     let devctl_pi: Vec<_> = r5
         .iter()
         .filter(|e| e.title.contains("devctl") && e.title.contains("ports/inbound"))
@@ -922,6 +977,9 @@ fn unicode_lookalike_gitkeep() {
         "expected 'contains files' in message, got: '{}'",
         devctl_pi[0].message
     );
+    assert_file_field(&r5);
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
 
 #[test]
@@ -935,6 +993,7 @@ fn near_miss_gitkeep_names() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
+    assert_eq!(r5.len(), 1, "expected 1 total rule5 error, got {}: {r5:#?}", r5.len());
     let devctl_pi: Vec<_> = r5
         .iter()
         .filter(|e| e.title.contains("devctl") && e.title.contains("ports/inbound"))
@@ -960,6 +1019,9 @@ fn near_miss_gitkeep_names() {
         "expected 'but no subdirectories' in message, got: '{}'",
         devctl_pi[0].message
     );
+    assert_file_field(&r5);
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
 
 #[test]
@@ -977,6 +1039,7 @@ fn symlink_as_only_content() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
+    assert_eq!(r5.len(), 1, "expected 1 total rule5 error, got {}: {r5:#?}", r5.len());
     let devctl_pi: Vec<_> = r5
         .iter()
         .filter(|e| e.title.contains("devctl") && e.title.contains("ports/inbound"))
@@ -992,6 +1055,9 @@ fn symlink_as_only_content() {
         "expected 'contains files' with 'link' in message, got: '{}'",
         devctl_pi[0].message
     );
+    assert_file_field(&r5);
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
 
 #[test]
@@ -1006,6 +1072,7 @@ fn dangling_symlink_as_only_content() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
+    assert_eq!(r5.len(), 1, "expected 1 total rule5 error, got {}: {r5:#?}", r5.len());
     let devctl_pi: Vec<_> = r5
         .iter()
         .filter(|e| e.title.contains("devctl") && e.title.contains("ports/inbound"))
@@ -1021,6 +1088,9 @@ fn dangling_symlink_as_only_content() {
         "expected 'contains files' with 'dangling' in message, got: '{}'",
         devctl_pi[0].message
     );
+    assert_file_field(&r5);
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
 
 #[test]
@@ -1040,10 +1110,13 @@ fn gitkeep_as_directory() {
         .iter()
         .filter(|e| e.title.contains("devctl") && e.title.contains("ports/inbound"))
         .collect();
-    assert!(
-        devctl_pi.is_empty(),
+    assert_eq!(
+        devctl_pi.len(),
+        0,
         ".gitkeep as directory means dir_names is non-empty → 0 rule5 errors, got: {devctl_pi:#?}"
     );
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
 
 #[test]
@@ -1069,10 +1142,12 @@ fn gitkeep_wrong_case_in_container() {
         .exists();
     if case_insensitive {
         // macOS default: .GITKEEP is found as .gitkeep → no error
-        assert!(
-            devctl_pi.is_empty(),
+        assert_eq!(
+            devctl_pi.len(),
+            0,
             "case-insensitive FS: .GITKEEP found as .gitkeep → 0 errors, got: {devctl_pi:#?}"
         );
+        assert_eq!(r5.len(), 0, "case-insensitive FS: expected 0 total rule5 errors, got {}: {r5:#?}", r5.len());
     } else {
         // Case-sensitive FS: .GITKEEP is NOT .gitkeep → fires error
         assert_eq!(
@@ -1086,7 +1161,11 @@ fn gitkeep_wrong_case_in_container() {
             "expected 'contains files' in message, got: '{}'",
             devctl_pi[0].message
         );
+        assert_eq!(r5.len(), 1, "case-sensitive FS: expected 1 total rule5 error, got {}: {r5:#?}", r5.len());
+        assert_file_field(&r5);
     }
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
 
 #[test]
@@ -1100,6 +1179,7 @@ fn file_replacing_subdir() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
+    assert_eq!(r5.len(), 1, "expected 1 total rule5 error, got {}: {r5:#?}", r5.len());
     let devctl_app: Vec<_> = r5
         .iter()
         .filter(|e| e.title.contains("devctl") && e.title.contains("/app"))
@@ -1115,6 +1195,9 @@ fn file_replacing_subdir() {
         "expected 'contains files' with 'core' in message, got: '{}'",
         devctl_app[0].message
     );
+    assert_file_field(&r5);
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
 
 #[test]
@@ -1127,6 +1210,7 @@ fn hidden_file_as_sole_content() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
+    assert_eq!(r5.len(), 1, "expected 1 total rule5 error, got {}: {r5:#?}", r5.len());
     let devctl_pi: Vec<_> = r5
         .iter()
         .filter(|e| e.title.contains("devctl") && e.title.contains("ports/inbound"))
@@ -1142,6 +1226,9 @@ fn hidden_file_as_sole_content() {
         "expected 'contains files' with '.DS_Store' in message, got: '{}'",
         devctl_pi[0].message
     );
+    assert_file_field(&r5);
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
 
 #[test]
@@ -1158,10 +1245,14 @@ fn non_empty_gitkeep_prevents_error() {
         .iter()
         .filter(|e| e.title.contains("devctl") && e.title.contains("ports/inbound"))
         .collect();
-    assert!(
-        devctl_pi.is_empty(),
+    assert_eq!(
+        devctl_pi.len(),
+        0,
         ".gitkeep with content still prevents error, got: {devctl_pi:#?}"
     );
+    assert_eq!(r5.len(), 0, "expected 0 total rule5 errors, got {}: {r5:#?}", r5.len());
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
 
 #[test]
@@ -1184,6 +1275,7 @@ fn maximally_complex_empty_container() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
+    assert_eq!(r5.len(), 1, "expected 1 total rule5 error, got {}: {r5:#?}", r5.len());
     let devctl_pi: Vec<_> = r5
         .iter()
         .filter(|e| e.title.contains("devctl") && e.title.contains("ports/inbound"))
@@ -1215,4 +1307,7 @@ fn maximally_complex_empty_container() {
         "expected '.git_keep' in message, got: '{}'",
         devctl_pi[0].message
     );
+    assert_file_field(&r5);
+    assert_no_ts_apps(&r5);
+    assert_no_packages(&r5);
 }
