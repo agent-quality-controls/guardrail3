@@ -510,24 +510,17 @@ fn setup_ts_monorepo(config: Option<&str>, apps: &[(&str, bool)]) -> tempfile::T
 
         if *has_hex_arch {
             let modules = src_dir.join("modules");
-            std::fs::create_dir_all(modules.join("domain")).expect("create domain/");
-            std::fs::create_dir_all(modules.join("application")).expect("create application/");
-            std::fs::create_dir_all(modules.join("adapters")).expect("create adapters/");
-            std::fs::write(
-                modules.join("domain").join("index.ts"),
-                "export type X = string;",
-            )
-            .expect("write domain");
-            std::fs::write(
-                modules.join("application").join("index.ts"),
-                "export const cmd = 1;",
-            )
-            .expect("write application");
-            std::fs::write(
-                modules.join("adapters").join("index.ts"),
-                "export const y = 1;",
-            )
-            .expect("write adapters");
+            // Create full hex arch: domain, application, ports/{inbound,outbound}, adapters/{inbound,outbound}
+            let domain_sub = modules.join("domain").join("types");
+            let app_sub = modules.join("application").join("commands");
+            let ports_in = modules.join("ports").join("inbound").join("http");
+            let ports_out = modules.join("ports").join("outbound").join("db");
+            let adapt_in = modules.join("adapters").join("inbound").join("rest");
+            let adapt_out = modules.join("adapters").join("outbound").join("postgres");
+            for d in [&domain_sub, &app_sub, &ports_in, &ports_out, &adapt_in, &adapt_out] {
+                std::fs::create_dir_all(d).expect("create hex arch dir");
+                std::fs::write(d.join("index.ts"), "export const x = 1;").expect("write ts file");
+            }
         }
     }
 

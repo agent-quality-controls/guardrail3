@@ -698,8 +698,8 @@ fn crates_dir_exists_but_empty() {
         !inner_errors.is_empty(),
         "expected inner structural errors for empty hex-in-hex, got none"
     );
-    assert_no_ts_apps(&errors);
-    assert_no_packages(&errors);
+    assert_no_ts_apps(&r6);
+    assert_no_packages(&r6);
 }
 
 // ============================================================================
@@ -1304,10 +1304,10 @@ fn nested_garbage_no_recursion() {
 #[test]
 fn dangling_symlink_in_crates_dir() {
     // Create a subdir with crates/ containing only a dangling symlink.
-    // list_dir returns the symlink entry (non-empty) -> has_crates=true -> treated as hex-in-hex.
-    // The recursion will then fail on the inner hex structure.
-    // CHECK BUG: dangling symlink makes list_dir non-empty, so has_crates=true,
-    // even though the symlink target doesn't exist. The test documents this behavior.
+    // metadata detects crates/ exists → has_crates=true → treated as hex-in-hex.
+    // Accepted behavior: dangling symlink makes has_crates=true even though
+    // the symlink target doesn't exist. Rule 06 produces 0 errors for phantom/
+    // itself (it has crates/). Inner structural checks handle the broken hex.
     let tmp = copy_fixture();
     let crates_dir = tmp.path().join("apps/devctl/crates/app/phantom/crates");
     std::fs::create_dir_all(&crates_dir).expect("mkdir");
@@ -1316,23 +1316,12 @@ fn dangling_symlink_in_crates_dir() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r6 = rule6_errors(&errors);
-    // The dangling symlink makes has_crates=true (list_dir is non-empty),
-    // so this is treated as hex-in-hex. The recursion into the inner hex
-    // may or may not produce rule6 errors depending on how the check handles
-    // the phantom inner structure. Document whatever happens.
-    // Key assertion: no panic, and the error (if any) is about phantom/, not garbage.
-    let phantom_errors: Vec<_> = r6
-        .iter()
-        .filter(|e| e.title.contains("phantom"))
-        .collect();
-    // phantom/ has crates/ with a dangling symlink -> has_crates=true -> hex-in-hex path
-    // The inner hex has no valid structure, but that's OTHER rules' problem.
-    // Rule 06 should produce 0 errors for phantom itself (it has crates/).
+    // phantom/ has crates/ → has_crates=true → hex-in-hex path.
+    // Rule 06 should produce 0 errors for phantom itself.
     assert_eq!(
         r6.len(),
-        phantom_errors.len(),
-        "all rule6 errors should be about phantom, got r6={}: {r6:#?}",
-        r6.len()
+        0,
+        "phantom/ has crates/ dir, rule06 should not fire (hex-in-hex path), got: {r6:#?}"
     );
     assert_no_ts_apps(&r6);
     assert_no_packages(&r6);
@@ -1399,7 +1388,7 @@ fn maximally_complex_single_container() {
     let link = tmp.path().join("apps/devctl/crates/app/link_valid");
     symlink(&target, &link).expect("create symlink");
 
-    // gitkeep_only_sub: only .gitkeep (CHECK BUG: fires missing Cargo.toml)
+    // gitkeep_only_sub: only .gitkeep — valid placeholder (no error)
     write_file(
         tmp.path(),
         "apps/devctl/crates/app/gitkeep_only_sub/.gitkeep",
@@ -1591,6 +1580,393 @@ fn subdirs_plus_loose_alongside_valid() {
         r6.len()
     );
     assert_file_field(&r6);
+    assert_no_ts_apps(&r6);
+    assert_no_packages(&r6);
+}
+
+// ============================================================================
+// GROUP H: .gitkeep + source files (not a valid placeholder)
+// ============================================================================
+
+#[test]
+fn gitkeep_plus_source_files_fires_everywhere() {
+    // A subdir with .gitkeep + source files is a broken crate, not a placeholder.
+    // .gitkeep alone = placeholder. .gitkeep + other files = missing Cargo.toml.
+    let tmp = copy_fixture();
+    for app in RUST_APPS {
+        for c in OUTER_CONTAINERS {
+            // Add .gitkeep AND a source file — this is NOT a valid placeholder
+            write_file(
+                tmp.path(),
+                &format!("apps/{app}/{c}/broken_placeholder/.gitkeep"),
+                "",
+            );
+            write_file(
+                tmp.path(),
+                &format!("apps/{app}/{c}/broken_placeholder/src/lib.rs"),
+                "// not a valid placeholder",
+            );
+        }
+    }
+    for c in INNER_HEX_CONTAINERS {
+        write_file(
+            tmp.path(),
+            &format!("{INNER_HEX}/{c}/broken_placeholder/.gitkeep"),
+            "",
+        );
+        write_file(
+            tmp.path(),
+            &format!("{INNER_HEX}/{c}/broken_placeholder/src/lib.rs"),
+            "// not a valid placeholder",
+        );
+    }
+    let results = run_check(tmp.path());
+    let errors = arch_errors(&results);
+    let r6 = rule6_errors(&errors);
+    let expected = orphan_everywhere_count(); // 21
+    assert_eq!(
+        r6.len(),
+        expected,
+        "expected {expected} 'missing Cargo.toml' errors for .gitkeep+source combos, got {}: {r6:#?}",
+        r6.len()
+    );
+    for err in &r6 {
+        assert!(
+            err.title.contains("missing Cargo.toml"),
+            "expected 'missing Cargo.toml' in title, got: '{}'",
+            err.title
+        );
+        assert!(
+            err.title.contains("broken_placeholder"),
+            "expected 'broken_placeholder' in title, got: '{}'",
+            err.title
+        );
+        assert!(
+            err.message.contains("no `Cargo.toml`") || err.message.contains("no `crates/` directory"),
+            "message should mention missing Cargo.toml, got: '{}'",
+            err.message
+        );
+    }
+    assert_per_app(&r6);
+    assert_inner_hex(&r6);
+    assert_file_field(&r6);
+    assert_no_ts_apps(&r6);
+    assert_no_packages(&r6);
+}
+
+#[test]
+fn gitkeep_plus_subdir_fires() {
+    // A subdir with .gitkeep + a subdirectory (but no Cargo.toml, no crates/) is broken.
+    let tmp = copy_fixture();
+    write_file(
+        tmp.path(),
+        "apps/devctl/crates/app/mixed_gitkeep/.gitkeep",
+        "",
+    );
+    std::fs::create_dir_all(
+        tmp.path().join("apps/devctl/crates/app/mixed_gitkeep/src"),
+    )
+    .expect("mkdir");
+    let results = run_check(tmp.path());
+    let errors = arch_errors(&results);
+    let r6 = rule6_errors(&errors);
+    assert_eq!(
+        r6.len(),
+        1,
+        "expected 1 'missing Cargo.toml' for .gitkeep+subdir, got {}: {r6:#?}",
+        r6.len()
+    );
+    assert!(
+        r6[0].title.contains("missing Cargo.toml"),
+        "expected 'missing Cargo.toml', got: '{}'",
+        r6[0].title
+    );
+    assert_file_field(&r6);
+    assert_no_ts_apps(&r6);
+    assert_no_packages(&r6);
+}
+
+// ============================================================================
+// GROUP I: gitkeep-only everywhere (strengthened)
+// ============================================================================
+
+#[test]
+fn subdir_with_only_gitkeep_everywhere() {
+    // .gitkeep-only leaf subdirs are valid placeholders — should produce 0 errors.
+    // Tests ALL 21 container locations, not just one.
+    let tmp = copy_fixture();
+    for app in RUST_APPS {
+        for c in OUTER_CONTAINERS {
+            write_file(
+                tmp.path(),
+                &format!("apps/{app}/{c}/future_crate/.gitkeep"),
+                "",
+            );
+        }
+    }
+    for c in INNER_HEX_CONTAINERS {
+        write_file(
+            tmp.path(),
+            &format!("{INNER_HEX}/{c}/future_crate/.gitkeep"),
+            "",
+        );
+    }
+    let results = run_check(tmp.path());
+    let errors = arch_errors(&results);
+    let r6 = rule6_errors(&errors);
+    assert_eq!(
+        r6.len(),
+        0,
+        ".gitkeep-only leaf subdirs should be accepted everywhere, got {}: {r6:#?}",
+        r6.len()
+    );
+    assert_no_ts_apps(&r6);
+    assert_no_packages(&r6);
+}
+
+// ============================================================================
+// GROUP J: crates-dir-empty everywhere (strengthened)
+// ============================================================================
+
+#[test]
+fn crates_dir_exists_but_empty_everywhere() {
+    // Empty crates/ in a leaf subdir = hex-in-hex scaffold.
+    // Rule 06 should NOT fire (it's detected as hex-in-hex).
+    // Inner structural checks will fire for the empty hex structure.
+    // Tests all 21 container locations.
+    let tmp = copy_fixture();
+    for app in RUST_APPS {
+        for c in OUTER_CONTAINERS {
+            std::fs::create_dir_all(
+                tmp.path().join(format!("apps/{app}/{c}/hollow/crates")),
+            )
+            .expect("mkdir");
+        }
+    }
+    for c in INNER_HEX_CONTAINERS {
+        std::fs::create_dir_all(
+            tmp.path().join(format!("{INNER_HEX}/{c}/hollow/crates")),
+        )
+        .expect("mkdir");
+    }
+    let results = run_check(tmp.path());
+    let errors = arch_errors(&results);
+    let r6 = rule6_errors(&errors);
+    assert_eq!(
+        r6.len(),
+        0,
+        "empty crates/ should be detected as hex-in-hex everywhere, got rule6 errors: {r6:#?}"
+    );
+    // Verify inner structural errors DO fire for the empty hex-in-hex scaffolds
+    let hollow_errors: Vec<_> = errors
+        .iter()
+        .filter(|e| e.file.as_deref().unwrap_or("").contains("hollow"))
+        .collect();
+    assert!(
+        !hollow_errors.is_empty(),
+        "expected inner structural errors for empty hex-in-hex scaffolds"
+    );
+    assert_no_ts_apps(&r6);
+    assert_no_packages(&r6);
+}
+
+// ============================================================================
+// GROUP K: crates as a file (not directory) inside a leaf subdir
+// ============================================================================
+
+#[test]
+fn crates_is_file_not_dir_in_leaf() {
+    // If a leaf subdir has a file named "crates" (not a directory),
+    // metadata says it exists but is_dir() returns false → has_crates = false.
+    // No Cargo.toml either → "missing Cargo.toml".
+    let tmp = copy_fixture();
+    write_file(
+        tmp.path(),
+        "apps/devctl/crates/app/fake_hex/crates",
+        "I am a file named crates",
+    );
+    write_file(
+        tmp.path(),
+        "apps/devctl/crates/app/fake_hex/src/lib.rs",
+        "",
+    );
+    let results = run_check(tmp.path());
+    let errors = arch_errors(&results);
+    let r6 = rule6_errors(&errors);
+    let fake_errs: Vec<_> = r6
+        .iter()
+        .filter(|e| e.title.contains("fake_hex"))
+        .collect();
+    assert_eq!(
+        fake_errs.len(),
+        1,
+        "expected 1 'missing Cargo.toml' for crates-as-file, got {}: {fake_errs:#?}",
+        fake_errs.len()
+    );
+    assert!(
+        fake_errs[0].title.contains("missing Cargo.toml"),
+        "expected 'missing Cargo.toml' when crates is a file, got: '{}'",
+        fake_errs[0].title
+    );
+    assert!(
+        fake_errs[0].message.contains("no `Cargo.toml`") || fake_errs[0].message.contains("no `crates/` directory"),
+        "message should explain the issue, got: '{}'",
+        fake_errs[0].message
+    );
+    assert_eq!(
+        r6.len(),
+        1,
+        "expected exactly 1 total rule6 error, got {}: {r6:#?}",
+        r6.len()
+    );
+    assert_file_field(&r6);
+    assert_no_ts_apps(&r6);
+    assert_no_packages(&r6);
+}
+
+// ============================================================================
+// GROUP L: .gitkeep edge cases
+// ============================================================================
+
+#[test]
+fn gitkeep_as_directory_fires() {
+    // If .gitkeep is a directory (not a file), read_file returns None,
+    // so has_gitkeep=false and is_gitkeep_only=false → "missing Cargo.toml".
+    // Analogous to cargo_toml_is_directory.
+    let tmp = copy_fixture();
+    std::fs::create_dir_all(
+        tmp.path().join("apps/devctl/crates/app/fake_placeholder/.gitkeep"),
+    )
+    .expect("mkdir");
+    let results = run_check(tmp.path());
+    let errors = arch_errors(&results);
+    let r6 = rule6_errors(&errors);
+    let fake_errs: Vec<_> = r6
+        .iter()
+        .filter(|e| e.title.contains("fake_placeholder"))
+        .collect();
+    assert_eq!(
+        fake_errs.len(),
+        1,
+        "expected 1 'missing Cargo.toml' when .gitkeep is a dir, got {}: {fake_errs:#?}",
+        fake_errs.len()
+    );
+    assert!(
+        fake_errs[0].title.contains("missing Cargo.toml"),
+        "expected 'missing Cargo.toml', got: '{}'",
+        fake_errs[0].title
+    );
+    assert_eq!(
+        r6.len(),
+        1,
+        "expected exactly 1 total rule6 error, got {}: {r6:#?}",
+        r6.len()
+    );
+    assert_file_field(&r6);
+    assert_no_ts_apps(&r6);
+    assert_no_packages(&r6);
+}
+
+#[test]
+fn gitkeep_plus_flat_files_no_subdirs_fires() {
+    // .gitkeep + another flat file (e.g., README.md) but NO subdirectories.
+    // is_gitkeep_only: has_gitkeep=true, file_names.len()=2 (not 1) → false.
+    // This tests the file_names.len() != 1 branch specifically.
+    let tmp = copy_fixture();
+    write_file(
+        tmp.path(),
+        "apps/devctl/crates/app/mixed_files/.gitkeep",
+        "",
+    );
+    write_file(
+        tmp.path(),
+        "apps/devctl/crates/app/mixed_files/README.md",
+        "# not a valid placeholder",
+    );
+    let results = run_check(tmp.path());
+    let errors = arch_errors(&results);
+    let r6 = rule6_errors(&errors);
+    let mixed_errs: Vec<_> = r6
+        .iter()
+        .filter(|e| e.title.contains("mixed_files"))
+        .collect();
+    assert_eq!(
+        mixed_errs.len(),
+        1,
+        "expected 1 'missing Cargo.toml' for .gitkeep+README.md, got {}: {mixed_errs:#?}",
+        mixed_errs.len()
+    );
+    assert!(
+        mixed_errs[0].title.contains("missing Cargo.toml"),
+        "expected 'missing Cargo.toml', got: '{}'",
+        mixed_errs[0].title
+    );
+    assert_eq!(
+        r6.len(),
+        1,
+        "expected exactly 1 total rule6 error, got {}: {r6:#?}",
+        r6.len()
+    );
+    assert_file_field(&r6);
+    assert_no_ts_apps(&r6);
+    assert_no_packages(&r6);
+}
+
+// ============================================================================
+// GROUP M: Triple-nested hex-in-hex orphan
+// ============================================================================
+
+#[test]
+fn orphan_inside_triple_nested_hex() {
+    // Create triple-nested hex: devctl/crates/app/outer/crates/app/inner/crates/app/
+    // Then add an orphan inside the innermost container.
+    // Verifies recursion detects violations at depth 3.
+    let tmp = copy_fixture();
+    let base = "apps/devctl/crates/app/outer/crates";
+    for container in &["app", "domain", "adapters/inbound", "adapters/outbound", "ports/inbound", "ports/outbound"] {
+        write_file(
+            tmp.path(),
+            &format!("{base}/{container}/.gitkeep"),
+            "",
+        );
+    }
+    let base2 = format!("{base}/app/inner/crates");
+    for container in &["app", "domain", "adapters/inbound", "adapters/outbound", "ports/inbound", "ports/outbound"] {
+        write_file(
+            tmp.path(),
+            &format!("{base2}/{container}/.gitkeep"),
+            "",
+        );
+    }
+    // Add an orphan at the deepest level
+    write_file(
+        tmp.path(),
+        &format!("{base2}/app/deep_orphan/src/lib.rs"),
+        "",
+    );
+    let results = run_check(tmp.path());
+    let errors = arch_errors(&results);
+    let r6 = rule6_errors(&errors);
+    let deep_errs: Vec<_> = r6
+        .iter()
+        .filter(|e| e.title.contains("deep_orphan"))
+        .collect();
+    assert_eq!(
+        deep_errs.len(),
+        1,
+        "expected 1 'missing Cargo.toml' for deep orphan at depth 3, got {}: {deep_errs:#?}",
+        deep_errs.len()
+    );
+    assert!(
+        deep_errs[0].title.contains("missing Cargo.toml"),
+        "expected 'missing Cargo.toml', got: '{}'",
+        deep_errs[0].title
+    );
+    assert!(
+        deep_errs[0].file.as_deref().unwrap_or("").contains("deep_orphan"),
+        "expected file field to reference deep_orphan, got: '{}'",
+        deep_errs[0].file.as_deref().unwrap_or("")
+    );
     assert_no_ts_apps(&r6);
     assert_no_packages(&r6);
 }

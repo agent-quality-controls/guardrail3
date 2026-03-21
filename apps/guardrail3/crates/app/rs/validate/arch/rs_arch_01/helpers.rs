@@ -21,6 +21,10 @@ pub fn has_gitkeep(fs: &dyn FileSystem, dir: &Path) -> bool {
     arch_helpers::has_gitkeep(fs, dir)
 }
 
+pub fn is_gitkeep_only(fs: &dyn FileSystem, dir: &Path) -> bool {
+    arch_helpers::is_gitkeep_only(fs, dir)
+}
+
 pub fn check_loose_files(
     fs: &dyn FileSystem,
     name: &str,

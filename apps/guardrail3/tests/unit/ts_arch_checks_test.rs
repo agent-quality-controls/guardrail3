@@ -27,6 +27,7 @@ impl StubFs {
             files: BTreeMap::new(),
         }
     }
+    #[allow(dead_code)] // reason: kept for future TS arch stub tests
     fn add(&mut self, p: &str, c: &str) -> &mut Self {
         let _ = self.files.insert(PathBuf::from(p), c.to_owned());
         self
@@ -73,22 +74,29 @@ fn t_arch_01_app_missing_modules_dir() {
 
 #[test]
 fn t_arch_01_app_with_full_structure() {
-    let mut fs = StubFs::new();
-    let _ = fs.add(
-        "/project/apps/my-app/src/modules/domain/index.ts",
-        "export type User = { id: string };",
-    );
-    let _ = fs.add(
-        "/project/apps/my-app/src/modules/application/index.ts",
-        "export function createUser() {}",
-    );
-    let _ = fs.add(
-        "/project/apps/my-app/src/modules/adapters/index.ts",
-        "export class DbAdapter {}",
-    );
-    let app_dir = Path::new("/project/apps/my-app");
+    // Use real temp dir because check_single_app_structure calls metadata()
+    // which StubFs cannot satisfy (std::fs::Metadata is not constructable)
+    let tmp = tempfile::tempdir().expect("create temp dir");
+    let app_dir = tmp.path().join("apps").join("my-app");
+    let modules = app_dir.join("src").join("modules");
+
+    // Create full hex arch: domain, application, ports/{inbound,outbound}, adapters/{inbound,outbound}
+    let dirs = [
+        modules.join("domain").join("types"),
+        modules.join("application").join("commands"),
+        modules.join("ports").join("inbound").join("http"),
+        modules.join("ports").join("outbound").join("db"),
+        modules.join("adapters").join("inbound").join("rest"),
+        modules.join("adapters").join("outbound").join("postgres"),
+    ];
+    for d in &dirs {
+        std::fs::create_dir_all(d).expect("create hex arch dir");
+        std::fs::write(d.join("index.ts"), "export const x = 1;").expect("write ts file");
+    }
+
+    let fs = guardrail3::adapters::outbound::fs::RealFileSystem;
     let mut results = Vec::new();
-    check_single_app_structure(&fs, app_dir, &mut results);
+    check_single_app_structure(&fs, &app_dir, &mut results);
     assert!(results.is_empty(), "expected no warnings, got: {results:?}");
 }
 
