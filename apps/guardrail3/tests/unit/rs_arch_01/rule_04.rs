@@ -905,6 +905,7 @@ fn idempotent_results() {
     let results_1 = run_check(tmp.path());
     let errors_1 = arch_errors(&results_1);
     let loose_1 = loose_file_errors(&errors_1);
+    assert!(loose_1.len() > 0, "precondition: expected loose errors from stray files");
 
     let results_2 = run_check(tmp.path());
     let errors_2 = arch_errors(&results_2);
