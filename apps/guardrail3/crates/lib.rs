@@ -11,6 +11,7 @@ use tempfile as _;
 pub mod domain {
     pub mod config;
     pub mod modules;
+    pub mod project_tree;
     pub mod report;
 }
 

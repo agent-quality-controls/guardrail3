@@ -75,3 +75,5 @@ mod test_support;
 mod rs_arch_01;
 #[path = "unit/ts_arch_01/mod.rs"]
 mod ts_arch_01;
+#[path = "unit/project_walker_test.rs"]
+mod project_walker_test;
