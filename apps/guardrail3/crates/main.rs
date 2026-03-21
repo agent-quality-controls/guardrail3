@@ -61,6 +61,7 @@ fn main() {
         Commands::Rs { command } => handle_rs(command),
         Commands::Ts { command } => handle_ts(command),
         Commands::DumpGuide => handle_guide(),
+        Commands::DumpTree { path } => handle_dump_tree(&path),
         Commands::Map {
             path,
             clippy,
@@ -160,6 +161,27 @@ fn run_coverage_maps(
     }
     if npmrc {
         coverage::npmrc::print(project_path, crawl_result);
+    }
+}
+
+#[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI — dumps JSON to stdout
+fn handle_dump_tree(path_str: &str) {
+    let path = std::path::Path::new(path_str);
+    let resolved = match path.canonicalize() {
+        Ok(p) => p,
+        Err(e) => {
+            eprintln!("Error: cannot resolve path '{path_str}': {e}");
+            std::process::exit(1);
+        }
+    };
+    let fs = RealFileSystem;
+    let tree = guardrail3::app::core::project_walker::walk_project(&fs, &resolved);
+    match serde_json::to_string_pretty(&tree) {
+        Ok(json) => println!("{json}"),
+        Err(e) => {
+            eprintln!("Error serializing tree: {e}");
+            std::process::exit(1);
+        }
     }
 }
 
