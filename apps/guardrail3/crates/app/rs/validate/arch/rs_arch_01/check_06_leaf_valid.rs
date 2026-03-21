@@ -51,8 +51,9 @@ pub fn check(
             let inner_label = format!("{label}/{subdir}/crates");
             recurse(fs, name, &sub_path, &inner_label, results);
         } else if !has_cargo {
-            // .gitkeep-only subdirs are valid placeholders (reserving the name for later)
-            if helpers::has_gitkeep(fs, &sub_path) {
+            // .gitkeep-only subdirs are valid placeholders (reserving the name for later).
+            // A subdir with .gitkeep + other files is NOT a placeholder — it's a broken crate.
+            if helpers::is_gitkeep_only(fs, &sub_path) {
                 continue;
             }
             results.push(CheckResult {

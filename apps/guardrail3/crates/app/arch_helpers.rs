@@ -44,6 +44,17 @@ pub fn has_gitkeep(fs: &dyn FileSystem, dir: &Path) -> bool {
     fs.read_file(&dir.join(".gitkeep")).is_some()
 }
 
+/// Check if a directory contains ONLY `.gitkeep` and nothing else (no other files, no subdirs).
+/// A directory with `.gitkeep` + source files is a broken crate, not a placeholder.
+pub fn is_gitkeep_only(fs: &dyn FileSystem, dir: &Path) -> bool {
+    if !has_gitkeep(fs, dir) {
+        return false;
+    }
+    let file_names = list_file_names(fs, dir);
+    let dir_names = list_dir_names(fs, dir);
+    file_names.len() == 1 && file_names[0] == ".gitkeep" && dir_names.is_empty()
+}
+
 /// Report loose files in a directory (only `.gitkeep` is allowed).
 ///
 /// Parameters:
