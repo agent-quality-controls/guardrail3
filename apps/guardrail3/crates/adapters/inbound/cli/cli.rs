@@ -36,6 +36,13 @@ pub enum Commands {
     /// Generate `GUARDRAIL3_GUIDE.md` in the current directory
     DumpGuide,
 
+    /// Dump the project tree as JSON (structure + cached config content)
+    DumpTree {
+        /// Project path
+        #[arg(default_value = ".")]
+        path: String,
+    },
+
     /// Crawl project and show discovered structure
     Map {
         /// Project path
