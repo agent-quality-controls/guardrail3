@@ -517,9 +517,8 @@ fn triple_nested_hex_valid() {
 #[test]
 fn subdir_with_only_gitkeep() {
     let tmp = copy_fixture();
-    // A leaf subdir that has only .gitkeep — no Cargo.toml, no crates/.
-    // KNOWN GAP: .gitkeep-only leaf subdir is NOT accepted by rule 06.
-    // This test expects the error to PROVE the gap exists.
+    // A leaf subdir with only .gitkeep is a valid placeholder — reserves the
+    // name for a future crate without triggering "missing Cargo.toml".
     write_file(
         tmp.path(),
         "apps/devctl/crates/app/placeholder/.gitkeep",
@@ -530,32 +529,9 @@ fn subdir_with_only_gitkeep() {
     let r6 = rule6_errors(&errors);
     assert_eq!(
         r6.len(),
-        1,
-        "expected exactly 1 total rule6 error for .gitkeep-only leaf subdir, got {}: {r6:#?}",
-        r6.len()
+        0,
+        ".gitkeep-only leaf subdir should be accepted as valid placeholder, got: {r6:#?}"
     );
-    let placeholder_errors: Vec<_> = r6
-        .iter()
-        .filter(|e| e.title.contains("placeholder"))
-        .collect();
-    // Expect failure: rule 06 sees no Cargo.toml and no crates/, so it reports an error.
-    assert_eq!(
-        placeholder_errors.len(),
-        1,
-        "expected 1 error for .gitkeep-only leaf subdir (known gap), got {}: {placeholder_errors:#?}",
-        placeholder_errors.len()
-    );
-    assert!(
-        placeholder_errors[0].title.contains("missing Cargo.toml"),
-        "expected 'missing Cargo.toml' in title for .gitkeep-only leaf, got: '{}'",
-        placeholder_errors[0].title
-    );
-    assert!(
-        placeholder_errors[0].message.contains("no `Cargo.toml`") || placeholder_errors[0].message.contains("no `crates/` directory"),
-        "expected message about missing Cargo.toml or crates/, got: '{}'",
-        placeholder_errors[0].message
-    );
-    assert_file_field(&r6);
     assert_no_ts_apps(&r6);
     assert_no_packages(&r6);
 }
@@ -695,7 +671,11 @@ fn cargo_toml_exists_but_empty() {
 fn crates_dir_exists_but_empty() {
     let tmp = copy_fixture();
     // Create a subdir with an empty crates/ directory (no entries inside).
-    // list_dir returns empty -> has_crates = false. No Cargo.toml either -> "missing Cargo.toml".
+    // metadata detects crates/ exists → treated as hex-in-hex → recurse.
+    // The inner hex structure is empty → inner structural checks fire
+    // (missing domain, app, ports, adapters = 4 errors from check_02).
+    // Rule 06 itself produces 0 errors — it correctly identifies this as
+    // hex-in-hex and delegates to inner structural checks.
     std::fs::create_dir_all(
         tmp.path().join("apps/devctl/crates/app/hollow/crates"),
     )
@@ -703,35 +683,23 @@ fn crates_dir_exists_but_empty() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r6 = rule6_errors(&errors);
+    // Rule 06 should NOT fire — hollow/ is detected as hex-in-hex via metadata
     assert_eq!(
         r6.len(),
-        1,
-        "expected exactly 1 total rule6 error for hollow subdir (empty crates/ dir), got {}: {r6:#?}",
-        r6.len()
+        0,
+        "empty crates/ should be detected as hex-in-hex (not 'missing Cargo.toml'), got: {r6:#?}"
     );
-    let hollow_errors: Vec<_> = r6
+    // But inner structural checks should fire (missing required dirs in the empty hex)
+    let inner_errors: Vec<_> = errors
         .iter()
-        .filter(|e| e.title.contains("hollow"))
+        .filter(|e| e.title.contains("hollow") || e.file.as_deref().unwrap_or("").contains("hollow"))
         .collect();
-    assert_eq!(
-        hollow_errors.len(),
-        1,
-        "expected 1 error for hollow subdir (empty crates/ dir), got {}: {hollow_errors:#?}",
-        hollow_errors.len()
-    );
     assert!(
-        hollow_errors[0].title.contains("missing Cargo.toml"),
-        "expected 'missing Cargo.toml' (empty crates/ treated as no crates/), got: '{}'",
-        hollow_errors[0].title
+        !inner_errors.is_empty(),
+        "expected inner structural errors for empty hex-in-hex, got none"
     );
-    assert!(
-        hollow_errors[0].message.contains("no `Cargo.toml`") || hollow_errors[0].message.contains("no `crates/` directory"),
-        "expected message about missing Cargo.toml or crates/, got: '{}'",
-        hollow_errors[0].message
-    );
-    assert_file_field(&r6);
-    assert_no_ts_apps(&r6);
-    assert_no_packages(&r6);
+    assert_no_ts_apps(&errors);
+    assert_no_packages(&errors);
 }
 
 // ============================================================================
@@ -1379,7 +1347,7 @@ fn maximally_complex_single_container() {
     // - hex_sub: crates/ with full hex structure -> passes (hex-in-hex)
     // - loose_file: plain file (not dir) -> ignored by list_dir
     // - link_valid: symlink to valid crate -> ignored (not a dir)
-    // - gitkeep_only_sub: only .gitkeep -> "missing Cargo.toml" (CHECK BUG)
+    // - gitkeep_only_sub: only .gitkeep -> valid placeholder (no error)
     let tmp = copy_fixture();
 
     // valid_crate: has Cargo.toml
@@ -1445,7 +1413,7 @@ fn maximally_complex_single_container() {
     // Expected violations:
     // 1. orphan_no_cargo: missing Cargo.toml
     // 2. conflict_both: both Cargo.toml and crates/
-    // 3. gitkeep_only_sub: missing Cargo.toml (CHECK BUG)
+    // gitkeep_only_sub: .gitkeep placeholder — should NOT fire (valid)
     let orphan_errs: Vec<_> = r6.iter().filter(|e| e.title.contains("orphan_no_cargo")).collect();
     let conflict_errs: Vec<_> = r6.iter().filter(|e| e.title.contains("conflict_both")).collect();
     let gitkeep_errs: Vec<_> = r6.iter().filter(|e| e.title.contains("gitkeep_only_sub")).collect();
@@ -1468,13 +1436,7 @@ fn maximally_complex_single_container() {
         "conflict message should mention conflict, got: '{}'",
         conflict_errs[0].message
     );
-    assert_eq!(gitkeep_errs.len(), 1, "gitkeep_only_sub should fire (CHECK BUG): {gitkeep_errs:#?}");
-    assert!(gitkeep_errs[0].title.contains("missing Cargo.toml"));
-    assert!(
-        gitkeep_errs[0].message.contains("no `Cargo.toml`") || gitkeep_errs[0].message.contains("no `crates/` directory"),
-        "gitkeep message should mention missing Cargo.toml or crates/, got: '{}'",
-        gitkeep_errs[0].message
-    );
+    assert_eq!(gitkeep_errs.len(), 0, "gitkeep_only_sub should be accepted as placeholder: {gitkeep_errs:#?}");
     assert!(valid_errs.is_empty(), "valid_crate should pass: {valid_errs:#?}");
     assert!(hex_errs.is_empty(), "hex_sub should pass: {hex_errs:#?}");
     assert!(loose_errs.is_empty(), "loose_file should be ignored: {loose_errs:#?}");
@@ -1482,8 +1444,8 @@ fn maximally_complex_single_container() {
 
     assert_eq!(
         r6.len(),
-        3,
-        "expected exactly 3 total rule6 errors (orphan + conflict + gitkeep), got {}: {r6:#?}",
+        2,
+        "expected exactly 2 total rule6 errors (orphan + conflict), got {}: {r6:#?}",
         r6.len()
     );
     assert_file_field(&r6);

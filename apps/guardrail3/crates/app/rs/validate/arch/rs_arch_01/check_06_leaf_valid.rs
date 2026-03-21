@@ -5,7 +5,8 @@ use crate::ports::outbound::FileSystem;
 
 use super::helpers;
 
-/// Rule 6: each container subdir must be a crate (Cargo.toml) or hex-in-hex (crates/ dir).
+/// Rule 6: each container subdir must be a crate (Cargo.toml), a hex-in-hex (crates/ dir),
+/// or a placeholder (.gitkeep only).
 /// If hex-in-hex, calls the provided callback to recurse structural checks.
 pub fn check(
     fs: &dyn FileSystem,
@@ -24,7 +25,12 @@ pub fn check(
     for subdir in &dir_names {
         let sub_path = dir.join(subdir);
         let has_cargo = fs.read_file(&sub_path.join("Cargo.toml")).is_some();
-        let has_crates = !fs.list_dir(&sub_path.join("crates")).is_empty();
+        // Use metadata to detect crates/ existence (not list_dir which can't
+        // distinguish empty dir from nonexistent). An empty crates/ is a real
+        // hex-in-hex scaffold — recurse into it so inner structural checks
+        // report the actual problems.
+        let has_crates = fs.metadata(&sub_path.join("crates"))
+            .is_some_and(|m| m.is_dir());
 
         if has_crates && has_cargo {
             results.push(CheckResult {
@@ -45,6 +51,10 @@ pub fn check(
             let inner_label = format!("{label}/{subdir}/crates");
             recurse(fs, name, &sub_path, &inner_label, results);
         } else if !has_cargo {
+            // .gitkeep-only subdirs are valid placeholders (reserving the name for later)
+            if helpers::has_gitkeep(fs, &sub_path) {
+                continue;
+            }
             results.push(CheckResult {
                 id: "R-ARCH-01".to_owned(),
                 severity: Severity::Error,
@@ -54,7 +64,8 @@ pub fn check(
                 message: format!(
                     "Service `{name}` has `{label}/{subdir}/` but it has no `Cargo.toml` \
                      and no `crates/` directory. Every subdirectory in a container folder \
-                     must be its own crate or a hex-in-hex with its own `crates/` structure."
+                     must be its own crate, a hex-in-hex with its own `crates/` structure, \
+                     or a placeholder with `.gitkeep`."
                 ),
                 file: Some(sub_path.display().to_string()),
                 line: None,
