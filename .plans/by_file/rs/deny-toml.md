@@ -65,7 +65,7 @@ Each entry has `name` and `wrappers`. The `wrappers` field is the key per-app cu
 
 **`[bans] skip` array** — user-owned. Crates to skip in duplicate checking. guardrail3 doesn't have baseline skip entries.
 
-**`[[bans.features]]`** — guardrail3 has tokio feature restriction (deny "full", allow specific features). User may disable this (commented out in validator-rust because spider/lychee pull "full" transitively).
+**`[[bans.features]]`** — guardrail3 has tokio feature restriction (deny "full", allow specific features). The checker treats both the deny side and the explicit allow-list as canonical policy. Extra feature-ban entries remain user-owned and are inventoried separately.
 
 **`[licenses]`** — guardrail baseline:
 - `allow` array: 12 licenses (MIT, Apache-2.0, BSD-3-Clause, ISC, Unicode-3.0, BSD-2-Clause, BSL-1.0, MPL-2.0, CDLA-Permissive-2.0, OpenSSL, Zlib, CC0-1.0)
@@ -74,8 +74,12 @@ Each entry has `name` and `wrappers`. The `wrappers` field is the key per-app cu
 - User may need ADDITIONAL licenses (e.g., `"Unicode-DFS-2016"` for ICU deps)
 - `[licenses].exceptions` is user-owned for generate but should be inventoried by validate
 
-**`[advisories]`** — 100% user-owned:
-- `ignore` array: completely different per app. These are transitive dep security advisories that the user has reviewed and accepted. Changes with every dep update. guardrail3 has NO baseline here.
+**`[advisories]`** — split model:
+- guardrail-managed baseline:
+  - `unmaintained = "workspace"`
+  - `yanked = "warn"`
+- user-owned audit surface:
+  - `ignore` array is still completely different per app. These are transitive dep security advisories that the user has reviewed and accepted. Changes with every dep update.
 - validator-rust: RUSTSEC-2025-0057 (fxhash/scraper), RUSTSEC-2024-0388 (derivative/lychee-lib)
 - substack-publisher: RUSTSEC-2025-0134 (rustls-pemfile/aws-sdk), RUSTSEC-2026-0009 (serde_json/aws-sdk)
 

@@ -1,41 +1,33 @@
 use super::super::check;
-use super::super::test_support::root_tree_with_deny;
+use super::super::test_support::{canonical_deny_toml_service, root_tree_with_deny};
 
 #[test]
-fn inventories_ban_entries_without_reason() {
-    let deny = r#"
-[graph]
-all-features = true
-no-default-features = false
+fn inventories_named_ban_entries_without_reason() {
+    let deny = canonical_deny_toml_service().replace(
+        "{ name = \"lazy_static\", wrappers = [] },",
+        "{ name = \"lazy_static\", wrappers = [] },",
+    );
+    let results = check(&root_tree_with_deny(&deny));
 
-[bans]
-multiple-versions = "deny"
-wildcards = "allow"
-allow-wildcard-paths = true
-highlight = "all"
-deny = [
-    { name = "regex", wrappers = [] },
-]
-skip = []
+    assert!(results.iter().any(|result| {
+        result.id == "RS-DENY-26"
+            && result.inventory
+            && result.title == "ban entry missing reason"
+            && result.message.contains("lazy_static")
+    }));
+}
 
-[licenses]
-allow = ["MIT"]
-confidence-threshold = 0.8
+#[test]
+fn inventories_plain_string_ban_entries_without_reason() {
+    let deny = canonical_deny_toml_service().replace(
+        "{ name = \"lazy_static\", wrappers = [] },",
+        "\"lazy_static\",",
+    );
+    let results = check(&root_tree_with_deny(&deny));
 
-[licenses.private]
-ignore = true
-
-[advisories]
-unmaintained = "workspace"
-yanked = "warn"
-ignore = []
-
-[sources]
-unknown-registry = "deny"
-unknown-git = "deny"
-allow-registry = ["https://github.com/rust-lang/crates.io-index"]
-allow-git = []
-"#;
-    let results = check(&root_tree_with_deny(deny));
-    assert!(results.iter().any(|r| r.id == "RS-DENY-26" && r.inventory));
+    assert!(results.iter().any(|result| {
+        result.id == "RS-DENY-26"
+            && result.inventory
+            && result.message.contains("lazy_static")
+    }));
 }

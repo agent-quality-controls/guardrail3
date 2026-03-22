@@ -1,8 +1,10 @@
 use crate::domain::modules::canonical;
+use crate::domain::report::Severity;
 
-use super::super::check;
+use super::super::inputs::WorkspaceCargoInput;
 use super::super::lint_support::EXPECTED_CLIPPY_ALLOW;
-use super::super::test_support::{entry, has_result, tree};
+use super::super::test_support::{collected_facts, entry, has_result, tree};
+use super::check;
 
 #[test]
 fn approved_allow_deviations_are_inventoried() {
@@ -29,8 +31,15 @@ fn approved_allow_deviations_are_inventoried() {
         )],
     );
 
-    let results = check(&tree);
-    assert!(has_result(&results, "RS-CARGO-03", |result| result.inventory));
+    let facts = collected_facts(&tree);
+    let mut results = Vec::new();
+    check(&WorkspaceCargoInput::new(&facts.workspace), &mut results);
+    assert!(has_result(&results, "RS-CARGO-03", |result| {
+        result.inventory
+            && result.severity == Severity::Info
+            && result.title == "allow inventory: `missing_docs_in_private_items`"
+            && result.message == "`missing_docs_in_private_items` is explicitly allowed."
+    }));
 }
 
 #[test]

@@ -152,6 +152,7 @@ pub fn expected_bans_settings() -> (Option<String>, bool, Option<String>) {
 pub struct FeatureConfigEntry {
     pub name: String,
     pub deny: BTreeSet<String>,
+    pub allow: BTreeSet<String>,
     pub unknown_keys: Vec<String>,
 }
 
@@ -192,11 +193,24 @@ pub fn parse_feature_entries_in_config(parsed: &toml::Value) -> Vec<FeatureConfi
                     Some(FeatureConfigEntry {
                         name,
                         deny: string_array(table.get("deny")),
+                        allow: string_array(table.get("allow")),
                         unknown_keys,
                     })
                 })
                 .collect()
         })
+        .unwrap_or_default()
+}
+
+pub fn expected_tokio_allowed_features() -> BTreeSet<String> {
+    let parsed = toml::from_str::<toml::Value>(deny::DENY_FEATURE_BANS_TOKIO.content).ok();
+    parsed
+        .as_ref()
+        .and_then(|value| value.get("bans"))
+        .and_then(|value| value.get("features"))
+        .and_then(toml::Value::as_array)
+        .and_then(|entries| entries.first())
+        .map(|entry| string_array(entry.get("allow")))
         .unwrap_or_default()
 }
 
@@ -228,6 +242,9 @@ pub fn known_section_keys(section: &str) -> BTreeSet<&'static str> {
         ]),
         "sources" => BTreeSet::from(["unknown-registry", "unknown-git", "allow-registry", "allow-git"]),
         "private" => BTreeSet::from(["ignore"]),
+        "exception" => BTreeSet::from(["allow", "name", "crate", "version", "reason"]),
+        "skip" => BTreeSet::from(["name", "crate", "version", "reason"]),
+        "ignore" => BTreeSet::from(["id", "reason"]),
         "feature" => BTreeSet::from(["name", "crate", "deny", "allow", "reason"]),
         _ => BTreeSet::new(),
     }

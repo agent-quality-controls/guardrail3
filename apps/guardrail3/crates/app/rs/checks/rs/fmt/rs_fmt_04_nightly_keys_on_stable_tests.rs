@@ -2,6 +2,7 @@ use std::collections::BTreeMap;
 use std::path::PathBuf;
 
 use crate::domain::project_tree::{DirEntry, ProjectTree};
+use crate::domain::report::Severity;
 
 use super::super::check;
 
@@ -37,5 +38,12 @@ fn reports_nightly_only_keys_on_stable_toolchain() {
     };
 
     let results = check(&tree);
-    assert!(results.iter().any(|r| r.id == "RS-FMT-04"));
+    assert!(results.iter().any(|result| {
+        result.id == "RS-FMT-04"
+            && result.severity == Severity::Warn
+            && result.title == "nightly-only rustfmt setting `group_imports` on stable"
+            && result.message
+                == "`group_imports` is nightly-only, but rust-toolchain.toml uses `stable`."
+            && result.file.as_deref() == Some("rustfmt.toml")
+    }));
 }

@@ -1,8 +1,10 @@
+use crate::domain::report::Severity;
 use crate::domain::modules::canonical;
 
-use super::super::check;
+use super::super::inputs::WorkspaceCargoInput;
 use super::super::lint_support::{EXPECTED_CLIPPY_DENY, EXPECTED_CLIPPY_GROUPS, EXPECTED_RUST_LINTS};
-use super::super::test_support::{entry, has_result, tree};
+use super::super::test_support::{collected_facts, entry, has_result, tree};
+use super::check;
 
 #[test]
 fn complete_workspace_lints_inventory_passes() {
@@ -76,8 +78,15 @@ fn complete_workspace_lints_inventory_passes() {
         )],
     );
 
-    let results = check(&tree);
-    assert!(has_result(&results, "RS-CARGO-01", |result| result.inventory));
+    let facts = collected_facts(&tree);
+    let mut results = Vec::new();
+    check(&WorkspaceCargoInput::new(&facts.workspace), &mut results);
+    assert!(has_result(&results, "RS-CARGO-01", |result| {
+        result.inventory
+            && result.title == "workspace lint completeness satisfied"
+            && result.message == "Workspace rust and clippy lint inventories are complete."
+            && result.file.as_deref() == Some("Cargo.toml")
+    }));
 }
 
 #[test]
@@ -108,8 +117,16 @@ fn library_profile_requires_extra_workspace_rust_lints() {
         ],
     );
 
-    let results = check(&tree);
+    let facts = collected_facts(&tree);
+    let mut results = Vec::new();
+    check(&WorkspaceCargoInput::new(&facts.workspace), &mut results);
     assert!(has_result(&results, "RS-CARGO-01", |result| !result.inventory));
+    assert!(has_result(&results, "RS-CARGO-01", |result| {
+        matches!(result.severity, Severity::Error)
+            && result.title == "missing library rust lint `unreachable_pub`"
+            && result.message
+                == "Library profile expects `unreachable_pub` in `[workspace.lints.rust]`."
+    }));
 }
 
 #[test]

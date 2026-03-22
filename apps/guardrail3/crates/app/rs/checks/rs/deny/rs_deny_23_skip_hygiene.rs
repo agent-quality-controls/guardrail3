@@ -80,7 +80,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
             });
         }
 
-        if !malformed {
+        if !malformed && !non_string_reason && !reason.as_deref().unwrap_or("").trim().is_empty() {
             results.push(
                 CheckResult {
                     id: "RS-DENY-23".to_owned(),

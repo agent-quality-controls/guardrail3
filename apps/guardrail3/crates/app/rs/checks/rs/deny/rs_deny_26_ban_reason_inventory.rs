@@ -1,6 +1,6 @@
 use crate::domain::report::{CheckResult, Severity};
 
-use super::deny_support::section;
+use super::deny_support::{ban_name, section};
 use super::inputs::ConfigDenyInput;
 
 pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
@@ -12,13 +12,15 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         return;
     };
     for entry in deny_entries {
-        let Some(table) = entry.as_table() else {
+        let Some(name) = ban_name(entry) else {
             continue;
         };
-        let Some(name) = table.get("name").and_then(toml::Value::as_str) else {
-            continue;
-        };
-        if table.get("reason").and_then(toml::Value::as_str).unwrap_or("").trim().is_empty() {
+        let reason = entry
+            .as_table()
+            .and_then(|table| table.get("reason"))
+            .and_then(toml::Value::as_str)
+            .unwrap_or("");
+        if reason.trim().is_empty() {
             results.push(
                 CheckResult {
                     id: "RS-DENY-26".to_owned(),

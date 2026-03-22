@@ -66,7 +66,7 @@ Forbidden:
 | RS-DENY-18 | R16 | Error | `[sources].unknown-registry = "deny"` and `unknown-git = "deny"` | Todo |
 | RS-DENY-19 | R16 | Error | `[sources].allow-registry` must contain crates.io (git or sparse URL) | Todo |
 | RS-DENY-20 | — | Warn/Info | `[sources].allow-git` entries are warned and inventoried | Todo |
-| RS-DENY-21 | R17 | Warn | `[[bans.features]]` must ban `tokio` feature `full` | Todo |
+| RS-DENY-21 | R17 | Warn | `[[bans.features]]` must ban `tokio` feature `full` and keep the canonical tokio allow list | Todo |
 | RS-DENY-22 | R18 | Info | Extra feature bans beyond tokio are inventoried | Todo |
 | RS-DENY-23 | R19 | Warn/Info | `[bans.skip]` entries: malformed entry or missing/non-string reason warns; valid entries inventory | Todo |
 | RS-DENY-24 | R20 | Warn/Info | `[advisories].ignore` entries: malformed entry or missing/non-string reason warns; valid entries inventory | Todo |
@@ -74,7 +74,7 @@ Forbidden:
 | RS-DENY-26 | — | Info | `[bans].deny` entries without `reason` are inventoried | Todo |
 | RS-DENY-27 | — | Warn | Duplicate entries in `deny`, `skip`, `ignore`, or `[[bans.features]]` are warned | Todo |
 | RS-DENY-28 | — | Warn | Unknown keys / unsupported schema in critical deny sections are warned | Todo |
-| RS-DENY-29 | — | Warn | Advisory ignore accumulation over threshold is warned | Todo |
+| RS-DENY-29 | — | Warn | Advisory ignore accumulation over threshold `5` is warned | Todo |
 | RS-DENY-30 | — | Error/Info | Ban-entry `wrappers` must match canonical policy where managed; project-specific wrappers inventory otherwise | Todo |
 
 ## Canonical baseline
@@ -217,10 +217,9 @@ Accepted crates.io values:
 
 Guardrail-managed baseline:
 - `tokio` must ban `full`
+- `tokio` must keep the canonical explicit `allow = [...]` set from the generator baseline
 
 Extra feature bans are inventoried.
-
-If we later decide the canonical `allow = [...]` list is also guardrail-owned, add a dedicated rule rather than overloading `RS-DENY-21`.
 
 ### RS-DENY-23 / RS-DENY-24 / RS-DENY-26 / RS-DENY-29 — Exception hygiene
 
@@ -231,7 +230,7 @@ For `skip` and `ignore` entries:
 
 Ban entries without reasons are inventoried.
 
-Excessive advisory ignores warn, but this is a heuristic pressure rule, not a core correctness rule.
+Excessive advisory ignores warn once the count exceeds `5`, but this is a pressure rule, not a core correctness rule.
 
 ### RS-DENY-25 — `[bans].allow` override channel
 

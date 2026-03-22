@@ -1,6 +1,9 @@
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
+use super::discover::collect;
+use super::facts::CargoFamilyFacts;
+use super::inputs::WorkspaceMemberInput;
 use crate::domain::project_tree::{DirEntry, ProjectTree};
 use crate::domain::report::CheckResult;
 
@@ -24,6 +27,20 @@ pub fn tree(structure: &[(&str, DirEntry)], content: &[(&str, &str)]) -> Project
             .collect::<BTreeMap<_, _>>(),
     }
 }
+
+pub fn collected_facts(tree: &ProjectTree) -> CargoFamilyFacts {
+    collect(tree).expect("expected cargo workspace facts")
+}
+
+pub fn member_input<'a>(facts: &'a CargoFamilyFacts, member_rel: &str) -> WorkspaceMemberInput<'a> {
+    let member = facts
+        .members
+        .iter()
+        .find(|member| member.member_rel == member_rel)
+        .expect("expected member facts");
+    WorkspaceMemberInput::new(&facts.workspace, member)
+}
+
 
 pub fn has_result<F>(results: &[CheckResult], id: &str, predicate: F) -> bool
 where
