@@ -11,13 +11,13 @@ fn inventories_max_struct_bools_when_correct() {
     let input = ConfigClippyInput::new(facts.allowed_configs.first().expect("config"));
     let mut results = Vec::new();
     check(&input, &mut results);
-    assert!(results.iter().any(|result| {
-        result.id == "RS-CLIPPY-02"
-            && result.inventory
-            && result.severity == Severity::Info
-            && result.title == "max-struct-bools correct"
-            && result.message == "max-struct-bools = 3"
-    }));
+    assert_eq!(results.len(), 1);
+    let result = &results[0];
+    assert_eq!(result.id, "RS-CLIPPY-02");
+    assert!(result.inventory);
+    assert_eq!(result.severity, Severity::Info);
+    assert_eq!(result.title, "max-struct-bools correct");
+    assert_eq!(result.message, "max-struct-bools = 3");
 }
 
 #[test]
@@ -27,12 +27,12 @@ fn errors_when_max_struct_bools_is_wrong() {
     let input = ConfigClippyInput::new(facts.allowed_configs.first().expect("config"));
     let mut results = Vec::new();
     check(&input, &mut results);
-    assert!(results.iter().any(|result| {
-        result.id == "RS-CLIPPY-02"
-            && result.severity == Severity::Error
-            && result.title == "max-struct-bools wrong value"
-            && result.message == "Expected 3, got 4."
-    }));
+    assert_eq!(results.len(), 1);
+    let result = &results[0];
+    assert_eq!(result.id, "RS-CLIPPY-02");
+    assert_eq!(result.severity, Severity::Error);
+    assert_eq!(result.title, "max-struct-bools wrong value");
+    assert_eq!(result.message, "Expected 3, got 4.");
 }
 
 #[test]
@@ -42,10 +42,10 @@ fn errors_when_max_struct_bools_is_missing() {
     let input = ConfigClippyInput::new(facts.allowed_configs.first().expect("config"));
     let mut results = Vec::new();
     check(&input, &mut results);
-    assert!(results.iter().any(|result| {
-        result.id == "RS-CLIPPY-02"
-            && result.severity == Severity::Error
-            && result.title == "max-struct-bools missing"
-            && result.message == "Expected max-struct-bools = 3."
-    }));
+    assert_eq!(results.len(), 1);
+    let result = &results[0];
+    assert_eq!(result.id, "RS-CLIPPY-02");
+    assert_eq!(result.severity, Severity::Error);
+    assert_eq!(result.title, "max-struct-bools missing");
+    assert_eq!(result.message, "Expected max-struct-bools = 3.");
 }

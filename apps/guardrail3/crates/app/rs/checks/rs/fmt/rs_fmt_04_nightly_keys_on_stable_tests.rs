@@ -28,12 +28,39 @@ group_imports = "StdExternalCrate"
 
     check(&input, &mut results);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-FMT-04"
-            && result.severity == Severity::Warn
-            && result.title == "nightly-only rustfmt setting `group_imports` on stable"
-            && result.message
-                == "`group_imports` is nightly-only, but rust-toolchain.toml uses `stable`."
-            && result.file.as_deref() == Some("rustfmt.toml")
-    }));
+    assert_eq!(results.len(), 1);
+    let result = &results[0];
+    assert_eq!(result.id, "RS-FMT-04");
+    assert_eq!(result.severity, Severity::Warn);
+    assert_eq!(
+        result.title,
+        "nightly-only rustfmt setting `group_imports` on stable"
+    );
+    assert_eq!(
+        result.message,
+        "`group_imports` is nightly-only, but rust-toolchain.toml uses `stable`."
+    );
+    assert_eq!(result.file.as_deref(), Some("rustfmt.toml"));
+}
+
+#[test]
+fn ignores_nightly_keys_when_toolchain_is_not_stable() {
+    let parsed = toml::from_str::<toml::Value>(
+        r#"
+edition = "2024"
+group_imports = "StdExternalCrate"
+"#,
+    )
+    .expect("valid TOML");
+    let input = RustfmtRootInput {
+        config_rel: Some("rustfmt.toml"),
+        parsed: Some(&parsed),
+        workspace_edition: Some("2024"),
+        toolchain_channel: Some("1.85.0"),
+    };
+    let mut results = Vec::new();
+
+    check(&input, &mut results);
+
+    assert!(results.is_empty());
 }

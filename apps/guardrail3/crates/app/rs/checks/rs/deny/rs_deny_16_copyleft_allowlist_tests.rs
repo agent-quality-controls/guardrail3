@@ -6,20 +6,21 @@ use super::check;
 
 #[test]
 fn warns_on_copyleft_license() {
-    let config = config_facts(&canonical_deny_toml_service().replace(
-        "\"MIT\", ",
-        "\"MIT\", \"GPL-3.0\", ",
-    ));
+    let config =
+        config_facts(&canonical_deny_toml_service().replace("\"MIT\", ", "\"MIT\", \"GPL-3.0\", "));
     let input = ConfigDenyInput { config: &config };
     let mut results = Vec::new();
 
     check(&input, &mut results);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-DENY-16"
-            && result.severity == Severity::Warn
-            && result.title == "copyleft license allowed"
-            && result.message == "`deny.toml` allows copyleft license `GPL-3.0`."
-            && result.file.as_deref() == Some("deny.toml")
-    }));
+    assert_eq!(results.len(), 1);
+    let result = &results[0];
+    assert_eq!(result.id, "RS-DENY-16");
+    assert_eq!(result.severity, Severity::Warn);
+    assert_eq!(result.title, "copyleft license allowed");
+    assert_eq!(
+        result.message,
+        "`deny.toml` allows copyleft license `GPL-3.0`."
+    );
+    assert_eq!(result.file.as_deref(), Some("deny.toml"));
 }

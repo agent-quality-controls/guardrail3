@@ -12,11 +12,14 @@ fn errors_when_all_features_missing() {
 
     check(&input, &mut results);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-DENY-07"
-            && result.severity == Severity::Error
-            && result.title == "graph all-features must be true"
-            && result.message == "`deny.toml` must set `[graph].all-features = true`."
-            && result.file.as_deref() == Some("deny.toml")
-    }));
+    assert_eq!(results.len(), 1);
+    let result = &results[0];
+    assert_eq!(result.id, "RS-DENY-07");
+    assert_eq!(result.severity, Severity::Error);
+    assert_eq!(result.title, "graph all-features must be true");
+    assert_eq!(
+        result.message,
+        "`deny.toml` must set `[graph].all-features = true`."
+    );
+    assert_eq!(result.file.as_deref(), Some("deny.toml"));
 }

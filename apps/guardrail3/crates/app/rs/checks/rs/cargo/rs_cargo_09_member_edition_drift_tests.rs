@@ -41,10 +41,13 @@ fn older_member_edition_is_warned() {
     let input = member_input(&facts, "crates/legacy");
     let mut results = Vec::new();
     check(&input, &mut results);
-    assert!(results.iter().any(|result| {
-        result.id == "RS-CARGO-09"
-            && matches!(result.severity, Severity::Warn)
-            && result.title == "member edition older than workspace"
-            && result.message == "crates/legacy sets edition `2021` while workspace uses `2024`."
-    }));
+    assert_eq!(results.len(), 1);
+    let result = &results[0];
+    assert_eq!(result.id, "RS-CARGO-09");
+    assert_eq!(result.severity, Severity::Warn);
+    assert_eq!(result.title, "member edition older than workspace");
+    assert_eq!(
+        result.message,
+        "crates/legacy sets edition `2021` while workspace uses `2024`."
+    );
 }

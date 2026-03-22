@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
-use super::facts::{collect, DenyConfigFacts, DenyFacts};
+use super::facts::{DenyConfigFacts, DenyFacts, collect};
 use super::inputs::{
     CoveredRustUnitInput, ForbiddenDenyConfigInput, SameRootConflictInput, UncoveredRustUnitInput,
 };

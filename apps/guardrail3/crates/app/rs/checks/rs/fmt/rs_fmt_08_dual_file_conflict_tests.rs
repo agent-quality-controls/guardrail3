@@ -10,11 +10,14 @@ fn reports_dual_root_config_conflicts() {
 
     check(&input, &mut results);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-FMT-08"
-            && result.severity == Severity::Warn
-            && result.title == "Conflicting rustfmt config files"
-            && result.message == "Both rustfmt.toml and .rustfmt.toml exist in the same directory"
-            && result.file.as_deref() == Some("rustfmt.toml")
-    }));
+    assert_eq!(results.len(), 1);
+    let result = &results[0];
+    assert_eq!(result.id, "RS-FMT-08");
+    assert_eq!(result.severity, Severity::Warn);
+    assert_eq!(result.title, "Conflicting rustfmt config files");
+    assert_eq!(
+        result.message,
+        "Both rustfmt.toml and .rustfmt.toml exist in the same directory"
+    );
+    assert_eq!(result.file.as_deref(), Some("rustfmt.toml"));
 }

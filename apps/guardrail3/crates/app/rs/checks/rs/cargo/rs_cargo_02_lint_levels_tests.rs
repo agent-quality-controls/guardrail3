@@ -68,14 +68,16 @@ fn matching_workspace_levels_inventory_passes() {
     let facts = collected_facts(&tree);
     let mut results = Vec::new();
     check(&workspace_input(&facts), &mut results);
-    assert!(results.iter().any(|result| {
-        result.id == "RS-CARGO-02"
-            && result.inventory
-            && result.severity == Severity::Info
-            && result.title == "workspace lint levels match policy"
-            && result.message
-                == "Workspace lint levels and group priorities match the expected policy."
-    }));
+    assert_eq!(results.len(), 1);
+    let result = &results[0];
+    assert_eq!(result.id, "RS-CARGO-02");
+    assert!(result.inventory);
+    assert_eq!(result.severity, Severity::Info);
+    assert_eq!(result.title, "workspace lint levels match policy");
+    assert_eq!(
+        result.message,
+        "Workspace lint levels and group priorities match the expected policy."
+    );
 }
 
 #[test]
@@ -106,16 +108,13 @@ fn weakened_lint_levels_error() {
     let facts = collected_facts(&tree);
     let mut results = Vec::new();
     check(&workspace_input(&facts), &mut results);
-    assert!(results.iter().any(|result| {
-        result.id == "RS-CARGO-02"
-            && matches!(result.severity, Severity::Error)
-            && result.title == "lint `warnings` has wrong level"
-            && result.message == "Expected `deny`, got `warn`."
-    }));
-    assert!(results.iter().any(|result| {
-        result.id == "RS-CARGO-02"
-            && matches!(result.severity, Severity::Error)
-            && result.title == "lint `unsafe_code` has wrong level"
-            && result.message == "Expected `forbid`, got `allow`."
-    }));
+    assert_eq!(results.len(), 2);
+    assert_eq!(results[0].id, "RS-CARGO-02");
+    assert_eq!(results[0].severity, Severity::Error);
+    assert_eq!(results[0].title, "lint `warnings` has wrong level");
+    assert_eq!(results[0].message, "Expected `deny`, got `warn`.");
+    assert_eq!(results[1].id, "RS-CARGO-02");
+    assert_eq!(results[1].severity, Severity::Error);
+    assert_eq!(results[1].title, "lint `unsafe_code` has wrong level");
+    assert_eq!(results[1].message, "Expected `forbid`, got `allow`.");
 }

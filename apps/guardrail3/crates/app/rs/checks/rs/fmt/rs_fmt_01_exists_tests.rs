@@ -15,14 +15,14 @@ fn inventories_when_root_rustfmt_config_exists() {
 
     check(&input, &mut results);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-FMT-01"
-            && result.inventory
-            && result.severity == Severity::Info
-            && result.title == "rustfmt config exists"
-            && result.message == "Found rustfmt config at workspace root"
-            && result.file.as_deref() == Some("rustfmt.toml")
-    }));
+    assert_eq!(results.len(), 1);
+    let result = &results[0];
+    assert_eq!(result.id, "RS-FMT-01");
+    assert!(result.inventory);
+    assert_eq!(result.severity, Severity::Info);
+    assert_eq!(result.title, "rustfmt config exists");
+    assert_eq!(result.message, "Found rustfmt config at workspace root");
+    assert_eq!(result.file.as_deref(), Some("rustfmt.toml"));
 }
 
 #[test]
@@ -37,12 +37,15 @@ fn errors_when_root_rustfmt_config_is_missing() {
 
     check(&input, &mut results);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-FMT-01"
-            && !result.inventory
-            && result.severity == Severity::Error
-            && result.title == "rustfmt config missing"
-            && result.message == "Expected rustfmt.toml or .rustfmt.toml at workspace root"
-            && result.file.as_deref() == Some("")
-    }));
+    assert_eq!(results.len(), 1);
+    let result = &results[0];
+    assert_eq!(result.id, "RS-FMT-01");
+    assert!(!result.inventory);
+    assert_eq!(result.severity, Severity::Error);
+    assert_eq!(result.title, "rustfmt config missing");
+    assert_eq!(
+        result.message,
+        "Expected rustfmt.toml or .rustfmt.toml at workspace root"
+    );
+    assert_eq!(result.file.as_deref(), Some(""));
 }

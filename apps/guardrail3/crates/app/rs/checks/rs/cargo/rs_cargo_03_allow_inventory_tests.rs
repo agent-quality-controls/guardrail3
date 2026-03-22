@@ -34,11 +34,24 @@ fn approved_allow_deviations_are_inventoried() {
     let facts = collected_facts(&tree);
     let mut results = Vec::new();
     check(&WorkspaceCargoInput::new(&facts.workspace), &mut results);
+    let rule_results: Vec<_> = results
+        .iter()
+        .filter(|result| result.id == "RS-CARGO-03")
+        .collect();
+    assert!(rule_results.len() >= 2);
+    assert!(rule_results.iter().all(|result| result.inventory));
+    assert!(rule_results.iter().all(|result| result.severity == Severity::Info));
     assert!(has_result(&results, "RS-CARGO-03", |result| {
         result.inventory
             && result.severity == Severity::Info
             && result.title == "allow inventory: `missing_docs_in_private_items`"
             && result.message == "`missing_docs_in_private_items` is explicitly allowed."
+    }));
+    assert!(has_result(&results, "RS-CARGO-03", |result| {
+        result.inventory
+            && result.severity == Severity::Info
+            && result.title == "allow inventory: `module_name_repetitions`"
+            && result.message == "`module_name_repetitions` is explicitly allowed."
     }));
 }
 

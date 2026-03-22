@@ -15,11 +15,14 @@ fn errors_on_unexpected_registry() {
 
     check(&input, &mut results);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-DENY-19"
-            && result.severity == Severity::Error
-            && result.title == "unexpected registry allowed"
-            && result.message == "`deny.toml` allows unexpected registries: https://example.com/index."
-            && result.file.as_deref() == Some("deny.toml")
-    }));
+    assert_eq!(results.len(), 1);
+    let result = &results[0];
+    assert_eq!(result.id, "RS-DENY-19");
+    assert_eq!(result.severity, Severity::Error);
+    assert_eq!(result.title, "unexpected registry allowed");
+    assert_eq!(
+        result.message,
+        "`deny.toml` allows unexpected registries: https://example.com/index."
+    );
+    assert_eq!(result.file.as_deref(), Some("deny.toml"));
 }
