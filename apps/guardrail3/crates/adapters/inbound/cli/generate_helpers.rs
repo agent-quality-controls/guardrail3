@@ -140,37 +140,12 @@ pub fn resolve_app_paths(
         return map;
     };
 
-    // Build a set of all known member dirs from discovery
-    // Member dirs are relative to project root (e.g., "apps/validator-rust/crates/app")
-    // Extract the top-level app directory (e.g., "apps/validator-rust")
-    let mut app_dirs: Vec<String> = Vec::new();
-    for ws in &project.workspaces {
-        for member in &ws.members {
-            let dir = &member.dir;
-            // Extract top-level app path: "apps/X/..." -> "apps/X"
-            let parts: Vec<&str> = dir.split('/').collect();
-            let app_path = if parts.len() >= 2 && parts.first() == Some(&"apps") {
-                format!(
-                    "{}/{}",
-                    parts.first().unwrap_or(&""),
-                    parts.get(1).unwrap_or(&"")
-                )
-            } else {
-                dir.clone()
-            };
-            if !app_dirs.contains(&app_path) {
-                app_dirs.push(app_path);
-            }
-        }
-    }
+    let resolved =
+        crate::app::core::discover::resolve_app_paths_from_member_dirs(project.all_member_dirs());
 
     for app_name in apps.keys() {
-        // Try to find this app in discovered member directories
-        for app_dir in &app_dirs {
-            if app_dir.split('/').next_back() == Some(app_name.as_str()) {
-                let _ = map.insert(app_name.clone(), app_dir.clone());
-                break;
-            }
+        if let Some(app_dir) = resolved.get(app_name) {
+            let _ = map.insert(app_name.clone(), app_dir.clone());
         }
     }
 
