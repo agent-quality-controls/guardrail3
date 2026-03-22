@@ -1,4 +1,4 @@
-# RS-CODE — Rust code file checker (29 rules)
+# RS-CODE — Rust code file checker (30 rules)
 
 **Input:** *.rs files (syn AST parsed)
 **Parser:** syn crate (Rust AST)
@@ -57,6 +57,7 @@
 | RS-CODE-27 | Error | Facade-only lib.rs: should contain only `mod`, `pub use`, doc comments, type/const definitions. No function bodies, no impl blocks. **Library profile only.** | Implemented |
 | RS-CODE-28 | Warn | `pub mod foo { ... }` with inline body in lib.rs. Public modules should be separate files for organization. | Implemented |
 | RS-CODE-29 | Warn/Error | Trait with >8 methods (Warn) or >12 methods (Error). Nearly unimplementable traits. **Library profile only.** | Implemented |
+| RS-CODE-30 | Error | Source/config input failures that would otherwise fail the family open: unreadable Rust source, unparsable Rust source, or unparsable code-family policy inputs (`Cargo.toml`, `guardrail3.toml`). | Implemented |
 
 ## Relocated checks
 
@@ -110,7 +111,8 @@ apps/guardrail3/crates/app/rs/checks/rs/code/
 ├── parse.rs
 ├── rs_code_01_*.rs
 ├── ...
-└── rs_code_29_*.rs
+├── rs_code_29_*.rs
+└── rs_code_30_*.rs
 ```
 
 ### Family responsibilities
@@ -176,6 +178,8 @@ Rules 01-11 and 13-29 should run on one `RustCodeFileInput`.
 
 Rule 12 should run on one `UnsafeCodeLintInput`.
 
+Rule 30 should run on one input-failure surface emitted by the orchestrator when source/config parsing would otherwise be skipped.
+
 ### Rule grouping inside the orchestrator
 
 The orchestrator should parse each Rust file once and then fan the same `RustCodeFileInput` through the rule files that apply to that file.
@@ -189,6 +193,8 @@ Recommended execution buckets:
   - `RS-CODE-13` through `RS-CODE-29`
 
 `RS-CODE-12` should run once from Cargo/workspace lint facts, outside the per-file loop.
+
+`RS-CODE-30` should run from orchestrator-level read/parse failures and must never be skipped.
 
 ### Test strategy
 

@@ -47,3 +47,24 @@ fn foo() {}
 
     assert!(results.is_empty());
 }
+
+#[test]
+fn skips_feature_gated_cfg_attr_allow() {
+    let content = r#"
+#[cfg_attr(feature = "serde", allow(clippy::unwrap_used))]
+fn foo() {}
+"#;
+    let ast = parse_rust_file(content).expect("valid rust");
+    let input = RustCodeFileInput {
+        rel_path: "src/foo.rs",
+        content,
+        ast: &ast,
+        is_test: false,
+        profile_name: None,
+    };
+    let mut results = Vec::new();
+
+    check(&input, &mut results);
+
+    assert!(results.is_empty());
+}

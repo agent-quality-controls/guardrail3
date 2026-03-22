@@ -7,7 +7,7 @@ const ID: &str = "RS-CODE-22";
 
 pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
     for info in find_deny_forbid_attrs(input.ast) {
-        if info.level == "forbid" && info.lint == "unsafe_code" {
+        if info.level == "forbid" && info.lint == "unsafe_code" && info.crate_level_inner {
             results.push(
                 CheckResult {
                     id: ID.to_owned(),

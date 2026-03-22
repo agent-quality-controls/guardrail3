@@ -1,4 +1,5 @@
 use proc_macro2::Span;
+use syn::parse::Parser;
 use syn::spanned::Spanned;
 use syn::visit::Visit;
 
@@ -140,6 +141,7 @@ pub struct DenyForbidInfo {
     pub line: usize,
     pub lint: String,
     pub level: String,
+    pub crate_level_inner: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -224,7 +226,7 @@ pub fn find_std_fs_glob_import_lines(ast: &syn::File) -> Vec<usize> {
 
 pub fn find_deny_forbid_attrs(ast: &syn::File) -> Vec<DenyForbidInfo> {
     let mut out = Vec::new();
-    collect_deny_forbid_attrs(&ast.attrs, &mut out);
+    collect_deny_forbid_attrs(&ast.attrs, true, &mut out);
     let mut visitor = DenyForbidVisitor { out: &mut out };
     visitor.visit_file(ast);
     out
@@ -278,6 +280,33 @@ pub fn find_facade_body_items(ast: &syn::File) -> Vec<FacadeBodyItemInfo> {
                 line: span_line(item_impl.impl_token.span()),
                 kind: "impl",
                 name: "impl".to_owned(),
+            }),
+            syn::Item::Use(item_use) if !matches!(item_use.vis, syn::Visibility::Public(_)) => {
+                Some(FacadeBodyItemInfo {
+                    line: span_line(item_use.span()),
+                    kind: "private use",
+                    name: path_to_string_from_use_tree(&item_use.tree),
+                })
+            }
+            syn::Item::ExternCrate(item) => Some(FacadeBodyItemInfo {
+                line: span_line(item.span()),
+                kind: "extern crate",
+                name: item.ident.to_string(),
+            }),
+            syn::Item::Static(item) => Some(FacadeBodyItemInfo {
+                line: span_line(item.ident.span()),
+                kind: "static",
+                name: item.ident.to_string(),
+            }),
+            syn::Item::ForeignMod(item) => Some(FacadeBodyItemInfo {
+                line: span_line(item.abi.extern_token.span()),
+                kind: "extern block",
+                name: "extern".to_owned(),
+            }),
+            syn::Item::Macro(item) => Some(FacadeBodyItemInfo {
+                line: span_line(item.mac.path.span()),
+                kind: "macro item",
+                name: path_to_string(&item.mac.path),
             }),
             _ => None,
         })
@@ -550,7 +579,11 @@ fn collect_allow_lints(attrs: &[syn::Attribute]) -> Vec<(usize, String)> {
     out
 }
 
-fn collect_deny_forbid_attrs(attrs: &[syn::Attribute], out: &mut Vec<DenyForbidInfo>) {
+fn collect_deny_forbid_attrs(
+    attrs: &[syn::Attribute],
+    crate_level_inner: bool,
+    out: &mut Vec<DenyForbidInfo>,
+) {
     for attr in attrs {
         let level = if attr.path().is_ident("deny") {
             "deny"
@@ -573,6 +606,7 @@ fn collect_deny_forbid_attrs(attrs: &[syn::Attribute], out: &mut Vec<DenyForbidI
                 line,
                 lint: path_to_string(&path),
                 level: level.to_owned(),
+                crate_level_inner: crate_level_inner && matches!(attr.style, syn::AttrStyle::Inner(_)),
             });
         }
     }
@@ -666,8 +700,19 @@ fn use_tree_is_std_fs_glob(tree: &syn::UseTree) -> bool {
             syn::UseTree::Path(fs_path) if fs_path.ident == "fs" => {
                 matches!(&*fs_path.tree, syn::UseTree::Glob(_))
             }
+            syn::UseTree::Group(group) => group.items.iter().any(use_tree_is_std_fs_glob_with_std_prefix),
             _ => false,
         },
+        syn::UseTree::Group(group) => group.items.iter().any(use_tree_is_std_fs_glob),
+        _ => false,
+    }
+}
+
+fn use_tree_is_std_fs_glob_with_std_prefix(tree: &syn::UseTree) -> bool {
+    match tree {
+        syn::UseTree::Path(fs_path) if fs_path.ident == "fs" => {
+            matches!(&*fs_path.tree, syn::UseTree::Glob(_))
+        }
         _ => false,
     }
 }
@@ -683,9 +728,7 @@ fn glob_reexport_target(tree: &syn::UseTree) -> Option<String> {
 
 fn meta_is_always_true(meta: &syn::Meta) -> bool {
     match meta {
-        syn::Meta::Path(path) => path
-            .get_ident()
-            .is_some_and(|ident| is_cfg_ident_always_true(ident.to_string().as_str())),
+        syn::Meta::Path(_) => false,
         syn::Meta::List(list) => {
             let name = path_to_string(&list.path);
             let nested: Vec<syn::Meta> = list
@@ -709,8 +752,7 @@ fn meta_is_always_true(meta: &syn::Meta) -> bool {
                 _ => false,
             }
         }
-        syn::Meta::NameValue(name_value) => path_to_string(&name_value.path) == "feature"
-            && matches!(&name_value.value, syn::Expr::Lit(_)),
+        syn::Meta::NameValue(_) => false,
     }
 }
 
@@ -736,10 +778,6 @@ fn meta_is_always_false(meta: &syn::Meta) -> bool {
         }
         syn::Meta::NameValue(_) => false,
     }
-}
-
-fn is_cfg_ident_always_true(ident: &str) -> bool {
-    matches!(ident, "unix" | "windows")
 }
 
 fn is_cfg_ident_always_false(ident: &str) -> bool {
@@ -773,8 +811,15 @@ fn is_known_exhaustive_any(nested: &[syn::Meta]) -> bool {
     names.iter().any(|name| name == "unix") && names.iter().any(|name| name == "windows")
 }
 
-fn macro_token_expr(mac: &syn::Macro) -> Option<syn::Expr> {
-    syn::parse2::<syn::Expr>(mac.tokens.clone()).ok()
+fn macro_token_exprs(mac: &syn::Macro) -> Vec<syn::Expr> {
+    if let Ok(expr) = syn::parse2::<syn::Expr>(mac.tokens.clone()) {
+        return vec![expr];
+    }
+
+    syn::punctuated::Punctuated::<syn::Expr, syn::Token![,]>::parse_terminated
+        .parse2(mac.tokens.clone())
+        .map(|args| args.into_iter().collect())
+        .unwrap_or_default()
 }
 
 fn expr_contains_out_dir(expr: &syn::Expr) -> bool {
@@ -785,13 +830,13 @@ fn expr_contains_out_dir(expr: &syn::Expr) -> bool {
                 return expr_macro.mac.tokens.to_string().contains("\"OUT_DIR\"");
             }
             if name.ends_with("concat") {
-                if expr_macro.mac.tokens.to_string().contains("OUT_DIR") {
-                    return true;
-                }
-                return macro_token_expr(&expr_macro.mac)
-                    .is_some_and(|nested| expr_contains_out_dir(&nested));
+                return macro_token_exprs(&expr_macro.mac)
+                    .iter()
+                    .any(expr_contains_out_dir);
             }
-            false
+            macro_token_exprs(&expr_macro.mac)
+                .iter()
+                .any(expr_contains_out_dir)
         }
         syn::Expr::Call(call) => {
             expr_contains_out_dir(&call.func) || call.args.iter().any(expr_contains_out_dir)
@@ -807,8 +852,9 @@ fn expr_has_path_traversal(expr: &syn::Expr) -> bool {
             syn::Lit::Str(value) => value.value().contains(".."),
             _ => false,
         },
-        syn::Expr::Macro(expr_macro) => macro_token_expr(&expr_macro.mac)
-            .is_some_and(|nested| expr_has_path_traversal(&nested)),
+        syn::Expr::Macro(expr_macro) => macro_token_exprs(&expr_macro.mac)
+            .iter()
+            .any(expr_has_path_traversal),
         syn::Expr::Call(call) => {
             expr_has_path_traversal(&call.func) || call.args.iter().any(expr_has_path_traversal)
         }
@@ -948,12 +994,12 @@ impl<'ast> Visit<'ast> for ImplAllowVisitor {
 
 impl<'ast> Visit<'ast> for DenyForbidVisitor<'ast> {
     fn visit_item(&mut self, item: &'ast syn::Item) {
-        collect_deny_forbid_attrs(item_attrs(item), self.out);
+        collect_deny_forbid_attrs(item_attrs(item), false, self.out);
         syn::visit::visit_item(self, item);
     }
 
     fn visit_impl_item(&mut self, item: &'ast syn::ImplItem) {
-        collect_deny_forbid_attrs(impl_item_attrs(item), self.out);
+        collect_deny_forbid_attrs(impl_item_attrs(item), false, self.out);
         syn::visit::visit_impl_item(self, item);
     }
 }
@@ -972,9 +1018,9 @@ impl<'ast> Visit<'ast> for IncludeMacroVisitor {
         let name = path_to_string(&macro_call.path);
         let base = name.rsplit("::").next().unwrap_or(&name);
         if matches!(base, "include" | "include_str" | "include_bytes") {
-            let expr = macro_token_expr(macro_call);
-            let build_script_pattern = expr.as_ref().is_some_and(expr_contains_out_dir);
-            let path_traversal = expr.as_ref().is_some_and(expr_has_path_traversal);
+            let exprs = macro_token_exprs(macro_call);
+            let build_script_pattern = exprs.iter().any(expr_contains_out_dir);
+            let path_traversal = exprs.iter().any(expr_has_path_traversal);
             self.out.push(IncludeMacroInfo {
                 line: span_line(macro_call.path.span()),
                 macro_name: base.to_owned(),
@@ -983,6 +1029,21 @@ impl<'ast> Visit<'ast> for IncludeMacroVisitor {
             });
         }
         syn::visit::visit_macro(self, macro_call);
+    }
+}
+
+fn path_to_string_from_use_tree(tree: &syn::UseTree) -> String {
+    match tree {
+        syn::UseTree::Path(path) => format!("{}::{}", path.ident, path_to_string_from_use_tree(&path.tree)),
+        syn::UseTree::Name(name) => name.ident.to_string(),
+        syn::UseTree::Rename(rename) => rename.ident.to_string(),
+        syn::UseTree::Glob(_) => "*".to_owned(),
+        syn::UseTree::Group(group) => group
+            .items
+            .iter()
+            .map(path_to_string_from_use_tree)
+            .collect::<Vec<_>>()
+            .join(", "),
     }
 }
 
