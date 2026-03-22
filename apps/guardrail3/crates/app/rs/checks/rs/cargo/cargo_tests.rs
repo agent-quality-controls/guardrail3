@@ -2,10 +2,12 @@ use std::collections::BTreeMap;
 use std::path::PathBuf;
 
 use crate::domain::project_tree::{DirEntry, ProjectTree};
+use crate::domain::modules::canonical;
 
 use super::check;
 use super::discover::collect;
 use super::inputs::WorkspaceMembersSetInput;
+use super::lint_support::{EXPECTED_CLIPPY_ALLOW, EXPECTED_CLIPPY_DENY, EXPECTED_CLIPPY_GROUPS, EXPECTED_RUST_LINTS};
 
 #[test]
 fn workspace_metadata_and_resolver_are_checked() {
@@ -173,6 +175,39 @@ fn virtual_workspace_missing_resolver_is_reported() {
 }
 
 #[test]
+fn pre_2021_non_virtual_workspace_missing_resolver_is_error() {
+    let tree = ProjectTree {
+        root: PathBuf::from("/tmp/project"),
+        structure: BTreeMap::from([(
+            "".to_owned(),
+            DirEntry {
+                dirs: vec![],
+                files: vec!["Cargo.toml".to_owned()],
+            },
+        )]),
+        content: BTreeMap::from([(
+            "Cargo.toml".to_owned(),
+            r#"
+                [package]
+                name = "app"
+                edition = "2018"
+
+                [workspace]
+                members = []
+            "#
+            .to_owned(),
+        )]),
+    };
+
+    let results = check(&tree);
+    assert!(results.iter().any(|r| {
+        r.id == "RS-CARGO-08"
+            && matches!(r.severity, crate::domain::report::Severity::Error)
+            && r.title.contains("pre-2021")
+    }));
+}
+
+#[test]
 fn declared_members_are_paired_and_membership_sets_are_bound() {
     let tree = ProjectTree {
         root: PathBuf::from("/tmp/project"),
@@ -301,7 +336,7 @@ fn declared_member_without_cargo_toml_is_warned() {
                 "Cargo.toml".to_owned(),
                 r#"
                     [workspace]
-                    members = ["crates/api", "crates/missing"]
+                    members = ["crates/*"]
                     resolver = "2"
 
                     [workspace.package]
@@ -465,6 +500,77 @@ fn weakened_member_override_is_reported() {
 }
 
 #[test]
+fn non_inheriting_member_does_not_also_emit_weakened_override() {
+    let tree = ProjectTree {
+        root: PathBuf::from("/tmp/project"),
+        structure: BTreeMap::from([
+            (
+                "".to_owned(),
+                DirEntry {
+                    dirs: vec!["crates".to_owned()],
+                    files: vec!["Cargo.toml".to_owned()],
+                },
+            ),
+            (
+                "crates".to_owned(),
+                DirEntry {
+                    dirs: vec!["api".to_owned()],
+                    files: vec![],
+                },
+            ),
+            (
+                "crates/api".to_owned(),
+                DirEntry {
+                    dirs: vec![],
+                    files: vec!["Cargo.toml".to_owned()],
+                },
+            ),
+        ]),
+        content: BTreeMap::from([
+            (
+                "Cargo.toml".to_owned(),
+                r#"
+                    [workspace]
+                    members = ["crates/*"]
+                    resolver = "2"
+
+                    [workspace.package]
+                    edition = "2024"
+
+                    [workspace.lints.rust]
+                    warnings = "deny"
+                "#
+                .to_owned(),
+            ),
+            (
+                "crates/api/Cargo.toml".to_owned(),
+                r#"
+                    [package]
+                    name = "api"
+                    edition = "2024"
+
+                    [lints.rust]
+                    warnings = "allow"
+                "#
+                .to_owned(),
+            ),
+        ]),
+    };
+
+    let results = check(&tree);
+    assert!(
+        results
+            .iter()
+            .any(|r| r.id == "RS-CARGO-04" && matches!(r.severity, crate::domain::report::Severity::Error))
+    );
+    assert!(
+        !results
+            .iter()
+            .any(|r| r.id == "RS-CARGO-06" && matches!(r.severity, crate::domain::report::Severity::Error))
+    );
+}
+
+#[test]
 fn negative_specific_lint_priority_is_warned() {
     let tree = ProjectTree {
         root: PathBuf::from("/tmp/project"),
@@ -540,4 +646,52 @@ fn negative_specific_lint_priority_is_warned() {
             .iter()
             .any(|r| r.id == "RS-CARGO-07" && matches!(r.severity, crate::domain::report::Severity::Warn))
     );
+}
+
+#[test]
+fn lint_expectations_match_canonical_module() {
+    let parsed: toml::Value =
+        toml::from_str(canonical::CARGO_LINTS.content).expect("canonical cargo lints should parse");
+    let rust = parsed
+        .get("workspace")
+        .and_then(|value| value.get("lints"))
+        .and_then(|value| value.get("rust"))
+        .and_then(toml::Value::as_table)
+        .expect("canonical rust lints table");
+    let clippy = parsed
+        .get("workspace")
+        .and_then(|value| value.get("lints"))
+        .and_then(|value| value.get("clippy"))
+        .and_then(toml::Value::as_table)
+        .expect("canonical clippy lints table");
+
+    for expected in EXPECTED_RUST_LINTS {
+        assert!(
+            rust.contains_key(expected.name),
+            "canonical cargo lints missing rust lint `{}`",
+            expected.name
+        );
+    }
+
+    for expected in EXPECTED_CLIPPY_GROUPS {
+        assert!(
+            clippy.contains_key(expected.name),
+            "canonical cargo lints missing clippy group `{}`",
+            expected.name
+        );
+    }
+
+    for lint_name in EXPECTED_CLIPPY_DENY {
+        assert!(
+            clippy.contains_key(*lint_name),
+            "canonical cargo lints missing clippy deny lint `{lint_name}`",
+        );
+    }
+
+    for lint_name in EXPECTED_CLIPPY_ALLOW {
+        assert!(
+            clippy.contains_key(*lint_name),
+            "canonical cargo lints missing clippy allow lint `{lint_name}`",
+        );
+    }
 }

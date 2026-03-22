@@ -8,7 +8,8 @@ use super::facts::{CargoFamilyFacts, MemberCargoFacts, WorkspaceCargoFacts};
 
 pub fn collect(tree: &ProjectTree) -> Option<CargoFamilyFacts> {
     let workspace_content = tree.file_content("Cargo.toml")?;
-    let discovered_member_rels = discover_member_dirs(tree);
+    let all_dir_rels = discover_all_dirs(tree);
+    let discovered_member_rels = discover_member_cargo_dirs(tree);
     let workspace_parsed = match toml::from_str::<toml::Value>(workspace_content) {
         Ok(parsed) => parsed,
         Err(err) => {
@@ -34,7 +35,7 @@ pub fn collect(tree: &ProjectTree) -> Option<CargoFamilyFacts> {
         return None;
     }
 
-    let declared_members = resolve_declared_members(&workspace_parsed, &discovered_member_rels);
+    let declared_members = resolve_declared_members(&workspace_parsed, &all_dir_rels);
     let members = declared_members
         .iter()
         .filter(|member_rel| discovered_member_rels.contains(*member_rel))
@@ -62,7 +63,15 @@ pub fn collect(tree: &ProjectTree) -> Option<CargoFamilyFacts> {
     })
 }
 
-fn discover_member_dirs(tree: &ProjectTree) -> BTreeSet<String> {
+fn discover_all_dirs(tree: &ProjectTree) -> BTreeSet<String> {
+    tree.structure
+        .keys()
+        .filter(|dir_rel| !dir_rel.is_empty())
+        .cloned()
+        .collect()
+}
+
+fn discover_member_cargo_dirs(tree: &ProjectTree) -> BTreeSet<String> {
     tree.structure
         .iter()
         .filter_map(|(dir_rel, entry)| {
@@ -77,11 +86,11 @@ fn discover_member_dirs(tree: &ProjectTree) -> BTreeSet<String> {
 
 fn resolve_declared_members(
     workspace_parsed: &toml::Value,
-    discovered_member_rels: &BTreeSet<String>,
+    all_dir_rels: &BTreeSet<String>,
 ) -> BTreeSet<String> {
     raw_member_patterns(workspace_parsed)
         .into_iter()
-        .flat_map(|pattern| expand_member_pattern(&pattern, discovered_member_rels))
+        .flat_map(|pattern| expand_member_pattern(&pattern, all_dir_rels))
         .collect()
 }
 
@@ -100,7 +109,7 @@ fn raw_member_patterns(workspace_parsed: &toml::Value) -> Vec<String> {
         .unwrap_or_default()
 }
 
-fn expand_member_pattern(pattern: &str, discovered_member_rels: &BTreeSet<String>) -> Vec<String> {
+fn expand_member_pattern(pattern: &str, all_dir_rels: &BTreeSet<String>) -> Vec<String> {
     let normalized = normalize_member_rel(pattern);
     if !looks_like_glob(&normalized) {
         return vec![normalized];
@@ -110,7 +119,7 @@ fn expand_member_pattern(pattern: &str, discovered_member_rels: &BTreeSet<String
         return Vec::new();
     };
 
-    discovered_member_rels
+    all_dir_rels
         .iter()
         .filter(|member_rel| pattern.matches(member_rel))
         .cloned()
