@@ -19,11 +19,7 @@ use crate::ports::outbound::FileSystem;
 /// Run all RS-ARCH-01 structural checks.
 ///
 /// Auto-detects service apps by scanning `apps/*/Cargo.toml`.
-pub fn check_hex_arch_structure(
-    fs: &dyn FileSystem,
-    root: &Path,
-    results: &mut Vec<CheckResult>,
-) {
+pub fn check_hex_arch_structure(fs: &dyn FileSystem, root: &Path, results: &mut Vec<CheckResult>) {
     let apps_dir = root.join("apps");
     let apps_entries = fs.list_dir(&apps_dir);
     if apps_entries.is_empty() {
@@ -76,16 +72,42 @@ fn check_crates_dir(
 
     let adapters_label = format!("{label_prefix}/adapters");
     let ports_label = format!("{label_prefix}/ports");
-    check_03_inbound_outbound::check(fs, name, &crates_dir.join("adapters"), &adapters_label, results);
+    check_03_inbound_outbound::check(
+        fs,
+        name,
+        &crates_dir.join("adapters"),
+        &adapters_label,
+        results,
+    );
     check_03_inbound_outbound::check(fs, name, &crates_dir.join("ports"), &ports_label, results);
 
     // Container validation: app, domain
     let app_label = format!("{label_prefix}/app");
     let domain_label = format!("{label_prefix}/domain");
     check_05_container_not_empty::check(fs, name, &crates_dir.join("app"), &app_label, results);
-    check_05_container_not_empty::check(fs, name, &crates_dir.join("domain"), &domain_label, results);
-    check_06_leaf_valid::check(fs, name, &crates_dir.join("app"), &app_label, results, &check_crates_dir);
-    check_06_leaf_valid::check(fs, name, &crates_dir.join("domain"), &domain_label, results, &check_crates_dir);
+    check_05_container_not_empty::check(
+        fs,
+        name,
+        &crates_dir.join("domain"),
+        &domain_label,
+        results,
+    );
+    check_06_leaf_valid::check(
+        fs,
+        name,
+        &crates_dir.join("app"),
+        &app_label,
+        results,
+        &check_crates_dir,
+    );
+    check_06_leaf_valid::check(
+        fs,
+        name,
+        &crates_dir.join("domain"),
+        &domain_label,
+        results,
+        &check_crates_dir,
+    );
 
     // Container validation: adapters/{in,out}, ports/{in,out}
     for parent in &["adapters", "ports"] {

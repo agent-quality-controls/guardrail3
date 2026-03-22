@@ -130,7 +130,12 @@ fn golden_passes() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
-    assert_eq!(loose.len(), 0, "golden should have 0 loose-file errors, got {}: {loose:#?}", loose.len());
+    assert_eq!(
+        loose.len(),
+        0,
+        "golden should have 0 loose-file errors, got {}: {loose:#?}",
+        loose.len()
+    );
 }
 
 // ============================================================================
@@ -140,67 +145,124 @@ fn golden_passes() {
 #[test]
 fn loose_file_in_domain() {
     let tmp = copy_fixture();
-    write_file(tmp.path(), "apps/admin/src/modules/domain/stray.ts", "// stray");
+    write_file(
+        tmp.path(),
+        "apps/admin/src/modules/domain/stray.ts",
+        "// stray",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
-    assert_eq!(loose.len(), 1, "expected 1 loose-file error, got {}: {loose:#?}", loose.len());
-    assert!(loose[0].message.contains("stray.ts"), "expected stray.ts in message");
+    assert_eq!(
+        loose.len(),
+        1,
+        "expected 1 loose-file error, got {}: {loose:#?}",
+        loose.len()
+    );
+    assert!(
+        loose[0].message.contains("stray.ts"),
+        "expected stray.ts in message"
+    );
     assert_standard_admin(&loose, &errors);
 }
 
 #[test]
 fn loose_file_in_application() {
     let tmp = copy_fixture();
-    write_file(tmp.path(), "apps/admin/src/modules/application/stray.ts", "// stray");
+    write_file(
+        tmp.path(),
+        "apps/admin/src/modules/application/stray.ts",
+        "// stray",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
-    assert_eq!(loose.len(), 1, "expected 1 loose-file error, got {}: {loose:#?}", loose.len());
+    assert_eq!(
+        loose.len(),
+        1,
+        "expected 1 loose-file error, got {}: {loose:#?}",
+        loose.len()
+    );
     assert_standard_admin(&loose, &errors);
 }
 
 #[test]
 fn loose_file_in_adapters_inbound() {
     let tmp = copy_fixture();
-    write_file(tmp.path(), "apps/admin/src/modules/adapters/inbound/stray.ts", "// stray");
+    write_file(
+        tmp.path(),
+        "apps/admin/src/modules/adapters/inbound/stray.ts",
+        "// stray",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
-    assert_eq!(loose.len(), 1, "expected 1 loose-file error, got {}: {loose:#?}", loose.len());
+    assert_eq!(
+        loose.len(),
+        1,
+        "expected 1 loose-file error, got {}: {loose:#?}",
+        loose.len()
+    );
     assert_standard_admin(&loose, &errors);
 }
 
 #[test]
 fn loose_file_in_adapters_outbound() {
     let tmp = copy_fixture();
-    write_file(tmp.path(), "apps/admin/src/modules/adapters/outbound/stray.ts", "// stray");
+    write_file(
+        tmp.path(),
+        "apps/admin/src/modules/adapters/outbound/stray.ts",
+        "// stray",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
-    assert_eq!(loose.len(), 1, "expected 1 loose-file error, got {}: {loose:#?}", loose.len());
+    assert_eq!(
+        loose.len(),
+        1,
+        "expected 1 loose-file error, got {}: {loose:#?}",
+        loose.len()
+    );
     assert_standard_admin(&loose, &errors);
 }
 
 #[test]
 fn loose_file_in_ports_inbound() {
     let tmp = copy_fixture();
-    write_file(tmp.path(), "apps/admin/src/modules/ports/inbound/stray.ts", "// stray");
+    write_file(
+        tmp.path(),
+        "apps/admin/src/modules/ports/inbound/stray.ts",
+        "// stray",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
-    assert_eq!(loose.len(), 1, "expected 1 loose-file error, got {}: {loose:#?}", loose.len());
+    assert_eq!(
+        loose.len(),
+        1,
+        "expected 1 loose-file error, got {}: {loose:#?}",
+        loose.len()
+    );
     assert_standard_admin(&loose, &errors);
 }
 
 #[test]
 fn loose_file_in_ports_outbound() {
     let tmp = copy_fixture();
-    write_file(tmp.path(), "apps/admin/src/modules/ports/outbound/stray.ts", "// stray");
+    write_file(
+        tmp.path(),
+        "apps/admin/src/modules/ports/outbound/stray.ts",
+        "// stray",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
-    assert_eq!(loose.len(), 1, "expected 1 loose-file error, got {}: {loose:#?}", loose.len());
+    assert_eq!(
+        loose.len(),
+        1,
+        "expected 1 loose-file error, got {}: {loose:#?}",
+        loose.len()
+    );
     assert_standard_admin(&loose, &errors);
 }
 
@@ -213,7 +275,12 @@ fn loose_file_in_all_admin_containers() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
-    assert_eq!(loose.len(), 6, "expected 6 loose-file errors (1 per container), got {}: {loose:#?}", loose.len());
+    assert_eq!(
+        loose.len(),
+        6,
+        "expected 6 loose-file errors (1 per container), got {}: {loose:#?}",
+        loose.len()
+    );
     assert_standard_admin(&loose, &errors);
 }
 
@@ -231,7 +298,12 @@ fn loose_files_in_all_outer_containers() {
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     // 6 containers * 2 apps = 12 loose-file errors
-    assert_eq!(loose.len(), 12, "expected 12 loose-file errors (6 per app * 2 apps), got {}: {loose:#?}", loose.len());
+    assert_eq!(
+        loose.len(),
+        12,
+        "expected 12 loose-file errors (6 per app * 2 apps), got {}: {loose:#?}",
+        loose.len()
+    );
     // Per-app attribution
     for app in TS_SERVICE_APPS {
         assert!(
@@ -257,7 +329,12 @@ fn loose_file_in_portal_payments_inner_hex() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
-    assert_eq!(loose.len(), 1, "expected 1 loose-file error in payments inner hex, got {}: {loose:#?}", loose.len());
+    assert_eq!(
+        loose.len(),
+        1,
+        "expected 1 loose-file error in payments inner hex, got {}: {loose:#?}",
+        loose.len()
+    );
     assert!(
         loose[0].title.contains("portal"),
         "expected error to mention 'portal', got: '{}'",
@@ -281,8 +358,16 @@ fn loose_file_in_portal_aichat_inner_hex() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
-    assert_eq!(loose.len(), 1, "expected 1 loose-file error in ai-chat inner hex, got {}: {loose:#?}", loose.len());
-    assert!(loose[0].title.contains("portal"), "expected portal in title");
+    assert_eq!(
+        loose.len(),
+        1,
+        "expected 1 loose-file error in ai-chat inner hex, got {}: {loose:#?}",
+        loose.len()
+    );
+    assert!(
+        loose[0].title.contains("portal"),
+        "expected portal in title"
+    );
 }
 
 #[test]
@@ -295,9 +380,18 @@ fn loose_files_in_all_inner_hex_containers() {
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     // 6 containers * 2 inner hexes = 12 loose-file errors
-    assert_eq!(loose.len(), 12, "expected 12 loose-file errors from inner hexes, got {}: {loose:#?}", loose.len());
+    assert_eq!(
+        loose.len(),
+        12,
+        "expected 12 loose-file errors from inner hexes, got {}: {loose:#?}",
+        loose.len()
+    );
     for err in &loose {
-        assert!(err.title.contains("portal"), "expected portal in title, got: '{}'", err.title);
+        assert!(
+            err.title.contains("portal"),
+            "expected portal in title, got: '{}'",
+            err.title
+        );
     }
 }
 
@@ -309,12 +403,21 @@ fn loose_files_in_all_inner_hex_containers() {
 fn loose_tsx_file() {
     let tmp = copy_fixture();
     for path in admin_container_paths() {
-        write_file(tmp.path(), &format!("{path}/Component.tsx"), "export default function() {}");
+        write_file(
+            tmp.path(),
+            &format!("{path}/Component.tsx"),
+            "export default function() {}",
+        );
     }
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
-    assert_eq!(loose.len(), 6, "expected 6 errors for .tsx files, got {}: {loose:#?}", loose.len());
+    assert_eq!(
+        loose.len(),
+        6,
+        "expected 6 errors for .tsx files, got {}: {loose:#?}",
+        loose.len()
+    );
     assert_standard_admin(&loose, &errors);
 }
 
@@ -327,7 +430,12 @@ fn loose_json_file() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
-    assert_eq!(loose.len(), 6, "expected 6 errors for .json files, got {}: {loose:#?}", loose.len());
+    assert_eq!(
+        loose.len(),
+        6,
+        "expected 6 errors for .json files, got {}: {loose:#?}",
+        loose.len()
+    );
     assert_standard_admin(&loose, &errors);
 }
 
@@ -340,7 +448,12 @@ fn loose_env_file() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
-    assert_eq!(loose.len(), 6, "expected 6 errors for .env files, got {}: {loose:#?}", loose.len());
+    assert_eq!(
+        loose.len(),
+        6,
+        "expected 6 errors for .env files, got {}: {loose:#?}",
+        loose.len()
+    );
     assert_standard_admin(&loose, &errors);
 }
 
@@ -353,9 +466,18 @@ fn loose_gitignore_not_gitkeep() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
-    assert_eq!(loose.len(), 6, ".gitignore is NOT .gitkeep — expected 6 errors, got {}: {loose:#?}", loose.len());
+    assert_eq!(
+        loose.len(),
+        6,
+        ".gitignore is NOT .gitkeep — expected 6 errors, got {}: {loose:#?}",
+        loose.len()
+    );
     for err in &loose {
-        assert!(err.message.contains(".gitignore"), "expected .gitignore in message, got: '{}'", err.message);
+        assert!(
+            err.message.contains(".gitignore"),
+            "expected .gitignore in message, got: '{}'",
+            err.message
+        );
     }
     assert_standard_admin(&loose, &errors);
 }
@@ -369,7 +491,12 @@ fn hidden_file_not_gitkeep() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
-    assert_eq!(loose.len(), 6, ".hidden is not .gitkeep — expected 6 errors, got {}: {loose:#?}", loose.len());
+    assert_eq!(
+        loose.len(),
+        6,
+        ".hidden is not .gitkeep — expected 6 errors, got {}: {loose:#?}",
+        loose.len()
+    );
     assert_standard_admin(&loose, &errors);
 }
 
@@ -386,7 +513,12 @@ fn gitkeep_allowed_in_containers() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
-    assert_eq!(loose.len(), 0, "expected 0 loose-file errors when only .gitkeep, got {}: {loose:#?}", loose.len());
+    assert_eq!(
+        loose.len(),
+        0,
+        "expected 0 loose-file errors when only .gitkeep, got {}: {loose:#?}",
+        loose.len()
+    );
 }
 
 #[test]
@@ -399,9 +531,17 @@ fn gitkeep_alongside_loose_file() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
-    assert_eq!(loose.len(), 6, ".gitkeep allowed but stray.ts not — expected 6, got {}: {loose:#?}", loose.len());
+    assert_eq!(
+        loose.len(),
+        6,
+        ".gitkeep allowed but stray.ts not — expected 6, got {}: {loose:#?}",
+        loose.len()
+    );
     for err in &loose {
-        assert!(err.message.contains("stray.ts"), "expected stray.ts in message");
+        assert!(
+            err.message.contains("stray.ts"),
+            "expected stray.ts in message"
+        );
         let bad_files_section = err
             .message
             .split("that don't belong: ")
@@ -426,7 +566,12 @@ fn multiple_loose_files_single_error_per_dir() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
-    assert_eq!(loose.len(), 6, "expected 1 error per dir (6 total), got {}: {loose:#?}", loose.len());
+    assert_eq!(
+        loose.len(),
+        6,
+        "expected 1 error per dir (6 total), got {}: {loose:#?}",
+        loose.len()
+    );
     for err in &loose {
         assert!(
             err.message.contains("index.ts") && err.message.contains("types.ts"),
@@ -448,29 +593,52 @@ fn loose_file_in_modules_root() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
-    assert_eq!(loose.len(), 1, "expected 1 loose-file error in modules/ root, got {}: {loose:#?}", loose.len());
+    assert_eq!(
+        loose.len(),
+        1,
+        "expected 1 loose-file error in modules/ root, got {}: {loose:#?}",
+        loose.len()
+    );
     assert_standard_admin(&loose, &errors);
 }
 
 #[test]
 fn loose_file_in_adapters_root() {
     let tmp = copy_fixture();
-    write_file(tmp.path(), "apps/admin/src/modules/adapters/index.ts", "// stray");
+    write_file(
+        tmp.path(),
+        "apps/admin/src/modules/adapters/index.ts",
+        "// stray",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
-    assert_eq!(loose.len(), 1, "expected 1 loose-file error in adapters/ root, got {}: {loose:#?}", loose.len());
+    assert_eq!(
+        loose.len(),
+        1,
+        "expected 1 loose-file error in adapters/ root, got {}: {loose:#?}",
+        loose.len()
+    );
     assert_standard_admin(&loose, &errors);
 }
 
 #[test]
 fn loose_file_in_ports_root() {
     let tmp = copy_fixture();
-    write_file(tmp.path(), "apps/admin/src/modules/ports/index.ts", "// stray");
+    write_file(
+        tmp.path(),
+        "apps/admin/src/modules/ports/index.ts",
+        "// stray",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
-    assert_eq!(loose.len(), 1, "expected 1 loose-file error in ports/ root, got {}: {loose:#?}", loose.len());
+    assert_eq!(
+        loose.len(),
+        1,
+        "expected 1 loose-file error in ports/ root, got {}: {loose:#?}",
+        loose.len()
+    );
     assert_standard_admin(&loose, &errors);
 }
 
@@ -484,8 +652,16 @@ fn loose_files_across_all_dir_types() {
     // modules/ root
     write_file(tmp.path(), "apps/admin/src/modules/stray.ts", "// stray");
     // structural dirs (adapters/, ports/)
-    write_file(tmp.path(), "apps/admin/src/modules/adapters/stray.ts", "// stray");
-    write_file(tmp.path(), "apps/admin/src/modules/ports/stray.ts", "// stray");
+    write_file(
+        tmp.path(),
+        "apps/admin/src/modules/adapters/stray.ts",
+        "// stray",
+    );
+    write_file(
+        tmp.path(),
+        "apps/admin/src/modules/ports/stray.ts",
+        "// stray",
+    );
     // all 6 containers
     for path in admin_container_paths() {
         write_file(tmp.path(), &format!("{path}/stray.ts"), "// stray");
@@ -494,7 +670,12 @@ fn loose_files_across_all_dir_types() {
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     // 1 (modules root) + 2 (structural) + 6 (containers) = 9
-    assert_eq!(loose.len(), 9, "expected 9 total loose-file errors (1 + 2 + 6), got {}: {loose:#?}", loose.len());
+    assert_eq!(
+        loose.len(),
+        9,
+        "expected 9 total loose-file errors (1 + 2 + 6), got {}: {loose:#?}",
+        loose.len()
+    );
     assert_standard_admin(&loose, &errors);
 }
 
@@ -517,7 +698,12 @@ fn loose_files_everywhere() {
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     // 12 outer (6 * 2 apps) + 12 inner hex (6 * 2 inner hexes) = 24
-    assert_eq!(loose.len(), 24, "expected 24 loose-file errors (12 outer + 12 inner), got {}: {loose:#?}", loose.len());
+    assert_eq!(
+        loose.len(),
+        24,
+        "expected 24 loose-file errors (12 outer + 12 inner), got {}: {loose:#?}",
+        loose.len()
+    );
     for app in TS_SERVICE_APPS {
         assert!(
             loose.iter().any(|e| e.title.contains(app)),
@@ -545,7 +731,12 @@ fn inner_hex_label_prefix_in_title() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
-    assert_eq!(loose.len(), 1, "expected 1 error, got {}: {loose:#?}", loose.len());
+    assert_eq!(
+        loose.len(),
+        1,
+        "expected 1 error, got {}: {loose:#?}",
+        loose.len()
+    );
     // Title should reference the nested path through hex-in-hex recursion
     assert!(
         loose[0].title.contains("payments/modules/domain"),
@@ -564,7 +755,12 @@ fn inner_hex_loose_outer_clean() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
-    assert_eq!(loose.len(), 12, "expected 12 inner hex loose errors, got {}: {loose:#?}", loose.len());
+    assert_eq!(
+        loose.len(),
+        12,
+        "expected 12 inner hex loose errors, got {}: {loose:#?}",
+        loose.len()
+    );
     // All errors should reference inner hex paths
     for err in &loose {
         let file = err.file.as_deref().unwrap_or("");
@@ -598,7 +794,12 @@ fn symlink_as_loose_file() {
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     // DirEntry::file_type() without follow reports symlink → !is_dir() → flagged as loose
-    assert_eq!(loose.len(), 6, "symlinks should be flagged as loose files, got {}: {loose:#?}", loose.len());
+    assert_eq!(
+        loose.len(),
+        6,
+        "symlinks should be flagged as loose files, got {}: {loose:#?}",
+        loose.len()
+    );
     assert_standard_admin(&loose, &errors);
 }
 
@@ -652,7 +853,10 @@ fn idempotent_results() {
     let results_1 = run_check(tmp.path());
     let errors_1 = arch_errors(&results_1);
     let loose_1 = loose_file_errors(&errors_1);
-    assert!(loose_1.len() > 0, "precondition: expected loose errors from stray files");
+    assert!(
+        loose_1.len() > 0,
+        "precondition: expected loose errors from stray files"
+    );
     let results_2 = run_check(tmp.path());
     let errors_2 = arch_errors(&results_2);
     let loose_2 = loose_file_errors(&errors_2);
@@ -686,9 +890,17 @@ fn per_app_attribution_admin() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
-    assert_eq!(loose.len(), 6, "precondition: expected 6 loose errors from admin containers");
+    assert_eq!(
+        loose.len(),
+        6,
+        "precondition: expected 6 loose errors from admin containers"
+    );
     for err in &loose {
-        assert!(err.title.contains("admin"), "expected 'admin' in title, got: '{}'", err.title);
+        assert!(
+            err.title.contains("admin"),
+            "expected 'admin' in title, got: '{}'",
+            err.title
+        );
     }
 }
 
@@ -705,8 +917,16 @@ fn per_app_attribution_portal() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
-    let portal_loose: Vec<_> = loose.iter().filter(|e| e.title.contains("portal")).collect();
-    assert_eq!(portal_loose.len(), 6, "expected 6 portal loose-file errors, got {}: {portal_loose:#?}", portal_loose.len());
+    let portal_loose: Vec<_> = loose
+        .iter()
+        .filter(|e| e.title.contains("portal"))
+        .collect();
+    assert_eq!(
+        portal_loose.len(),
+        6,
+        "expected 6 portal loose-file errors, got {}: {portal_loose:#?}",
+        portal_loose.len()
+    );
 }
 
 // ============================================================================
@@ -748,7 +968,11 @@ fn container_with_only_loose_files_no_double_fire() {
     // Remove all subdirs from admin domain/ (make it "empty" with only loose files)
     super::helpers::remove_dir(tmp.path(), "apps/admin/src/modules/domain");
     std::fs::create_dir_all(tmp.path().join("apps/admin/src/modules/domain")).expect("mkdir");
-    write_file(tmp.path(), "apps/admin/src/modules/domain/stray.ts", "// stray");
+    write_file(
+        tmp.path(),
+        "apps/admin/src/modules/domain/stray.ts",
+        "// stray",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     // check_container_not_empty: no subdirs, no .gitkeep, has files → "empty container" error
@@ -768,7 +992,11 @@ fn container_with_only_loose_files_no_double_fire() {
         .iter()
         .filter(|e| e.title.contains("empty container") && e.title.contains("domain"))
         .collect();
-    assert_eq!(empty.len(), 1, "expected 1 empty-container error for domain/, got: {empty:#?}");
+    assert_eq!(
+        empty.len(),
+        1,
+        "expected 1 empty-container error for domain/, got: {empty:#?}"
+    );
     assert!(
         empty[0].message.contains("stray.ts"),
         "empty-container message should list 'stray.ts', got: '{}'",
@@ -808,14 +1036,32 @@ fn near_miss_gitkeep_names() {
     // These are NOT .gitkeep — should be flagged as loose
     write_file(tmp.path(), "apps/admin/src/modules/domain/.git_keep", "");
     write_file(tmp.path(), "apps/admin/src/modules/application/.gitkee", "");
-    write_file(tmp.path(), "apps/admin/src/modules/adapters/inbound/.gitkeeps", "");
+    write_file(
+        tmp.path(),
+        "apps/admin/src/modules/adapters/inbound/.gitkeeps",
+        "",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
-    assert_eq!(loose.len(), 3, "expected 3 loose-file errors for near-miss .gitkeep names, got {}: {loose:#?}", loose.len());
-    assert!(loose.iter().any(|e| e.message.contains(".git_keep")), "expected .git_keep in message");
-    assert!(loose.iter().any(|e| e.message.contains(".gitkee")), "expected .gitkee in message");
-    assert!(loose.iter().any(|e| e.message.contains(".gitkeeps")), "expected .gitkeeps in message");
+    assert_eq!(
+        loose.len(),
+        3,
+        "expected 3 loose-file errors for near-miss .gitkeep names, got {}: {loose:#?}",
+        loose.len()
+    );
+    assert!(
+        loose.iter().any(|e| e.message.contains(".git_keep")),
+        "expected .git_keep in message"
+    );
+    assert!(
+        loose.iter().any(|e| e.message.contains(".gitkee")),
+        "expected .gitkee in message"
+    );
+    assert!(
+        loose.iter().any(|e| e.message.contains(".gitkeeps")),
+        "expected .gitkeeps in message"
+    );
 }
 
 #[test]
@@ -838,18 +1084,31 @@ fn gitkeep_wrong_case() {
 fn unicode_lookalike_gitkeep() {
     let tmp = copy_fixture();
     // Zero-width space: ".git\u{200B}keep" looks like ".gitkeep" but isn't
-    write_file(tmp.path(), "apps/admin/src/modules/domain/.git\u{200B}keep", "");
+    write_file(
+        tmp.path(),
+        "apps/admin/src/modules/domain/.git\u{200B}keep",
+        "",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
-    assert_eq!(loose.len(), 1, "unicode lookalike .gitkeep should be flagged, got {}: {loose:#?}", loose.len());
+    assert_eq!(
+        loose.len(),
+        1,
+        "unicode lookalike .gitkeep should be flagged, got {}: {loose:#?}",
+        loose.len()
+    );
 }
 
 #[test]
 fn non_empty_gitkeep_allowed() {
     let tmp = copy_fixture();
     // .gitkeep with content — should still be recognized as .gitkeep
-    write_file(tmp.path(), "apps/admin/src/modules/domain/.gitkeep", "this file has content");
+    write_file(
+        tmp.path(),
+        "apps/admin/src/modules/domain/.gitkeep",
+        "this file has content",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
@@ -871,7 +1130,11 @@ fn non_empty_gitkeep_allowed() {
 #[test]
 fn loose_file_in_inner_hex_modules_root() {
     let tmp = copy_fixture();
-    write_file(tmp.path(), &format!("{PORTAL_PAYMENTS_BASE}/stray.ts"), "// stray");
+    write_file(
+        tmp.path(),
+        &format!("{PORTAL_PAYMENTS_BASE}/stray.ts"),
+        "// stray",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
@@ -879,21 +1142,40 @@ fn loose_file_in_inner_hex_modules_root() {
         .iter()
         .filter(|e| e.file.as_deref().unwrap_or("").contains("payments/modules"))
         .collect();
-    assert_eq!(inner_loose.len(), 1, "expected 1 loose error in inner hex modules/ root, got {}: {inner_loose:#?}", inner_loose.len());
+    assert_eq!(
+        inner_loose.len(),
+        1,
+        "expected 1 loose error in inner hex modules/ root, got {}: {inner_loose:#?}",
+        inner_loose.len()
+    );
 }
 
 #[test]
 fn loose_file_in_inner_hex_adapters_root() {
     let tmp = copy_fixture();
-    write_file(tmp.path(), &format!("{PORTAL_PAYMENTS_BASE}/adapters/stray.ts"), "// stray");
+    write_file(
+        tmp.path(),
+        &format!("{PORTAL_PAYMENTS_BASE}/adapters/stray.ts"),
+        "// stray",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     let inner_loose: Vec<_> = loose
         .iter()
-        .filter(|e| e.file.as_deref().unwrap_or("").contains("payments/modules/adapters"))
+        .filter(|e| {
+            e.file
+                .as_deref()
+                .unwrap_or("")
+                .contains("payments/modules/adapters")
+        })
         .collect();
-    assert_eq!(inner_loose.len(), 1, "expected 1 loose error in inner hex adapters/ root, got {}: {inner_loose:#?}", inner_loose.len());
+    assert_eq!(
+        inner_loose.len(),
+        1,
+        "expected 1 loose error in inner hex adapters/ root, got {}: {inner_loose:#?}",
+        inner_loose.len()
+    );
 }
 
 // ============================================================================
@@ -913,7 +1195,12 @@ fn dangling_symlink_as_loose_file() {
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     // Dangling symlinks: file_type() succeeds on macOS (returns symlink type), !is_dir() → flagged
-    assert_eq!(loose.len(), 6, "dangling symlinks should be flagged as loose files, got {}: {loose:#?}", loose.len());
+    assert_eq!(
+        loose.len(),
+        6,
+        "dangling symlinks should be flagged as loose files, got {}: {loose:#?}",
+        loose.len()
+    );
     assert_standard_admin(&loose, &errors);
 }
 
@@ -921,25 +1208,67 @@ fn dangling_symlink_as_loose_file() {
 fn new_app_gets_checked() {
     let tmp = copy_fixture();
     // Create new app with valid hex arch + loose file
-    write_file(tmp.path(), "apps/dashboard/package.json", r#"{"name": "dashboard"}"#);
+    write_file(
+        tmp.path(),
+        "apps/dashboard/package.json",
+        r#"{"name": "dashboard"}"#,
+    );
     for dir in CONTAINER_SUFFIXES {
-        std::fs::create_dir_all(tmp.path().join(format!("apps/dashboard/src/modules/{dir}"))).expect("mkdir");
-        write_file(tmp.path(), &format!("apps/dashboard/src/modules/{dir}/.gitkeep"), "");
+        std::fs::create_dir_all(tmp.path().join(format!("apps/dashboard/src/modules/{dir}")))
+            .expect("mkdir");
+        write_file(
+            tmp.path(),
+            &format!("apps/dashboard/src/modules/{dir}/.gitkeep"),
+            "",
+        );
     }
-    std::fs::create_dir_all(tmp.path().join("apps/dashboard/src/modules/adapters/inbound")).expect("mkdir");
-    std::fs::create_dir_all(tmp.path().join("apps/dashboard/src/modules/adapters/outbound")).expect("mkdir");
-    std::fs::create_dir_all(tmp.path().join("apps/dashboard/src/modules/ports/inbound")).expect("mkdir");
-    std::fs::create_dir_all(tmp.path().join("apps/dashboard/src/modules/ports/outbound")).expect("mkdir");
-    write_file(tmp.path(), "apps/dashboard/src/modules/adapters/inbound/.gitkeep", "");
-    write_file(tmp.path(), "apps/dashboard/src/modules/adapters/outbound/.gitkeep", "");
-    write_file(tmp.path(), "apps/dashboard/src/modules/ports/inbound/.gitkeep", "");
-    write_file(tmp.path(), "apps/dashboard/src/modules/ports/outbound/.gitkeep", "");
+    std::fs::create_dir_all(
+        tmp.path()
+            .join("apps/dashboard/src/modules/adapters/inbound"),
+    )
+    .expect("mkdir");
+    std::fs::create_dir_all(
+        tmp.path()
+            .join("apps/dashboard/src/modules/adapters/outbound"),
+    )
+    .expect("mkdir");
+    std::fs::create_dir_all(tmp.path().join("apps/dashboard/src/modules/ports/inbound"))
+        .expect("mkdir");
+    std::fs::create_dir_all(tmp.path().join("apps/dashboard/src/modules/ports/outbound"))
+        .expect("mkdir");
+    write_file(
+        tmp.path(),
+        "apps/dashboard/src/modules/adapters/inbound/.gitkeep",
+        "",
+    );
+    write_file(
+        tmp.path(),
+        "apps/dashboard/src/modules/adapters/outbound/.gitkeep",
+        "",
+    );
+    write_file(
+        tmp.path(),
+        "apps/dashboard/src/modules/ports/inbound/.gitkeep",
+        "",
+    );
+    write_file(
+        tmp.path(),
+        "apps/dashboard/src/modules/ports/outbound/.gitkeep",
+        "",
+    );
     // Add loose file
-    write_file(tmp.path(), "apps/dashboard/src/modules/domain/stray.ts", "// stray");
+    write_file(
+        tmp.path(),
+        "apps/dashboard/src/modules/domain/stray.ts",
+        "// stray",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
-    let dashboard_loose: Vec<_> = loose.iter().filter(|e| e.title.contains("dashboard")).collect();
+    let dashboard_loose: Vec<_> = loose
+        .iter()
+        .filter(|e| e.title.contains("dashboard"))
+        .collect();
     assert_eq!(
         dashboard_loose.len(),
         1,
@@ -976,7 +1305,11 @@ fn container_dir_absent_no_loose_error() {
 fn file_coexists_with_same_named_subdir() {
     let tmp = copy_fixture();
     // admin domain/ has a "types" subdir. Add a file named "types.bak" alongside it.
-    write_file(tmp.path(), "apps/admin/src/modules/domain/types.bak", "backup");
+    write_file(
+        tmp.path(),
+        "apps/admin/src/modules/domain/types.bak",
+        "backup",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
@@ -985,8 +1318,15 @@ fn file_coexists_with_same_named_subdir() {
         .filter(|e| e.file.as_deref().unwrap_or("").contains("domain"))
         .copied()
         .collect();
-    assert_eq!(domain_loose.len(), 1, "expected 1 loose error for types.bak, got: {domain_loose:#?}");
-    assert!(domain_loose[0].message.contains("types.bak"), "expected types.bak in message");
+    assert_eq!(
+        domain_loose.len(),
+        1,
+        "expected 1 loose error for types.bak, got: {domain_loose:#?}"
+    );
+    assert!(
+        domain_loose[0].message.contains("types.bak"),
+        "expected types.bak in message"
+    );
     // No missing-subdir error (types/ dir still exists)
     assert_standard_admin(&domain_loose, &errors);
 }
@@ -995,18 +1335,43 @@ fn file_coexists_with_same_named_subdir() {
 fn different_breakage_per_app() {
     let tmp = copy_fixture();
     // admin: .ts loose file in domain/
-    write_file(tmp.path(), "apps/admin/src/modules/domain/stray.ts", "// ts stray");
+    write_file(
+        tmp.path(),
+        "apps/admin/src/modules/domain/stray.ts",
+        "// ts stray",
+    );
     // portal: .json loose file in application/
-    write_file(tmp.path(), "apps/portal/src/modules/application/config.json", "{}");
+    write_file(
+        tmp.path(),
+        "apps/portal/src/modules/application/config.json",
+        "{}",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     let admin_loose: Vec<_> = loose.iter().filter(|e| e.title.contains("admin")).collect();
-    let portal_loose: Vec<_> = loose.iter().filter(|e| e.title.contains("portal")).collect();
-    assert_eq!(admin_loose.len(), 1, "expected 1 admin loose error: {admin_loose:#?}");
-    assert_eq!(portal_loose.len(), 1, "expected 1 portal loose error: {portal_loose:#?}");
-    assert!(admin_loose[0].message.contains("stray.ts"), "admin message should list stray.ts");
-    assert!(portal_loose[0].message.contains("config.json"), "portal message should list config.json");
+    let portal_loose: Vec<_> = loose
+        .iter()
+        .filter(|e| e.title.contains("portal"))
+        .collect();
+    assert_eq!(
+        admin_loose.len(),
+        1,
+        "expected 1 admin loose error: {admin_loose:#?}"
+    );
+    assert_eq!(
+        portal_loose.len(),
+        1,
+        "expected 1 portal loose error: {portal_loose:#?}"
+    );
+    assert!(
+        admin_loose[0].message.contains("stray.ts"),
+        "admin message should list stray.ts"
+    );
+    assert!(
+        portal_loose[0].message.contains("config.json"),
+        "portal message should list config.json"
+    );
     assert_no_rust_apps(&errors);
     assert_no_packages(&errors);
     assert_no_landing(&errors);
@@ -1017,10 +1382,22 @@ fn maximally_complex_single_container() {
     let tmp = copy_fixture();
     // Admin domain/: .gitkeep (allowed) + multiple bad files of different types
     write_file(tmp.path(), "apps/admin/src/modules/domain/.gitkeep", "");
-    write_file(tmp.path(), "apps/admin/src/modules/domain/mod.ts", "// stray");
-    write_file(tmp.path(), "apps/admin/src/modules/domain/.hidden", "secret");
+    write_file(
+        tmp.path(),
+        "apps/admin/src/modules/domain/mod.ts",
+        "// stray",
+    );
+    write_file(
+        tmp.path(),
+        "apps/admin/src/modules/domain/.hidden",
+        "secret",
+    );
     write_file(tmp.path(), "apps/admin/src/modules/domain/.env", "SECRET=1");
-    write_file(tmp.path(), "apps/admin/src/modules/domain/README.md", "# docs");
+    write_file(
+        tmp.path(),
+        "apps/admin/src/modules/domain/README.md",
+        "# docs",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
@@ -1030,11 +1407,24 @@ fn maximally_complex_single_container() {
         .copied()
         .collect();
     // 1 error listing 4 bad files (.gitkeep excluded)
-    assert_eq!(domain_loose.len(), 1, "expected 1 loose error listing all bad files: {domain_loose:#?}");
-    assert!(domain_loose[0].message.contains("mod.ts"), "expected mod.ts");
-    assert!(domain_loose[0].message.contains(".hidden"), "expected .hidden");
+    assert_eq!(
+        domain_loose.len(),
+        1,
+        "expected 1 loose error listing all bad files: {domain_loose:#?}"
+    );
+    assert!(
+        domain_loose[0].message.contains("mod.ts"),
+        "expected mod.ts"
+    );
+    assert!(
+        domain_loose[0].message.contains(".hidden"),
+        "expected .hidden"
+    );
     assert!(domain_loose[0].message.contains(".env"), "expected .env");
-    assert!(domain_loose[0].message.contains("README.md"), "expected README.md");
+    assert!(
+        domain_loose[0].message.contains("README.md"),
+        "expected README.md"
+    );
     // .gitkeep must NOT be in bad files list
     let bad_files_section = domain_loose[0]
         .message
@@ -1061,9 +1451,17 @@ fn gitkeep_plus_valid_subdir_plus_loose_all_containers() {
     let errors = arch_errors(&results);
     let loose = loose_file_errors(&errors);
     // 12 loose errors (6 containers * 2 apps), .gitkeep excluded from each
-    assert_eq!(loose.len(), 12, "expected 12 loose errors (all containers, both apps), got {}: {loose:#?}", loose.len());
+    assert_eq!(
+        loose.len(),
+        12,
+        "expected 12 loose errors (all containers, both apps), got {}: {loose:#?}",
+        loose.len()
+    );
     for err in &loose {
-        assert!(err.message.contains("stray.ts"), "expected stray.ts in message");
+        assert!(
+            err.message.contains("stray.ts"),
+            "expected stray.ts in message"
+        );
         let bad_files_section = err
             .message
             .split("that don't belong: ")
@@ -1096,13 +1494,27 @@ fn inner_hex_multiple_file_types() {
         .filter(|e| e.file.as_deref().unwrap_or("").contains("payments/modules"))
         .collect();
     // 6 containers, 1 error each (listing 3 files)
-    assert_eq!(payments_loose.len(), 6, "expected 6 loose errors in payments inner hex: {payments_loose:#?}");
+    assert_eq!(
+        payments_loose.len(),
+        6,
+        "expected 6 loose errors in payments inner hex: {payments_loose:#?}"
+    );
     for err in &payments_loose {
-        assert!(err.message.contains("stray.ts"), "expected stray.ts in message");
+        assert!(
+            err.message.contains("stray.ts"),
+            "expected stray.ts in message"
+        );
         assert!(err.message.contains(".env"), "expected .env in message");
-        assert!(err.message.contains("README.md"), "expected README.md in message");
+        assert!(
+            err.message.contains("README.md"),
+            "expected README.md in message"
+        );
     }
     // Outer containers should be clean
     let admin_loose: Vec<_> = loose.iter().filter(|e| e.title.contains("admin")).collect();
-    assert_eq!(admin_loose.len(), 0, "admin should have 0 loose errors: {admin_loose:#?}");
+    assert_eq!(
+        admin_loose.len(),
+        0,
+        "admin should have 0 loose errors: {admin_loose:#?}"
+    );
 }

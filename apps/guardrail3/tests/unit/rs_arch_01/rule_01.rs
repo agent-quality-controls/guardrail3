@@ -1,6 +1,5 @@
 use super::helpers::{
-    arch_errors, assert_single_error, copy_fixture, remove_dir, run_check, write_file,
-    RUST_APPS,
+    RUST_APPS, arch_errors, assert_single_error, copy_fixture, remove_dir, run_check, write_file,
 };
 
 // -----------------------------------------------------------------------
@@ -16,7 +15,11 @@ fn missing_crates_dir() {
     }
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
-    assert_eq!(errors.len(), 3, "expected 3 errors (one per Rust app), got: {errors:#?}");
+    assert_eq!(
+        errors.len(),
+        3,
+        "expected 3 errors (one per Rust app), got: {errors:#?}"
+    );
     for app in RUST_APPS {
         let app_err = errors
             .iter()
@@ -140,9 +143,15 @@ fn crates_with_only_gitkeep() {
         errors.len()
     );
     for app in RUST_APPS {
-        let app_errors: Vec<_> = errors.iter().filter(|e| {
-            e.file.as_deref().unwrap_or("").contains(&format!("apps/{app}"))
-        }).collect();
+        let app_errors: Vec<_> = errors
+            .iter()
+            .filter(|e| {
+                e.file
+                    .as_deref()
+                    .unwrap_or("")
+                    .contains(&format!("apps/{app}"))
+            })
+            .collect();
         assert_eq!(
             app_errors.len(),
             4,
@@ -160,12 +169,19 @@ fn crates_with_only_gitkeep() {
 fn inner_hex_crates_missing() {
     let tmp = copy_fixture();
     // Keep outer crates/ valid — break ONLY the inner hex-in-hex crates/
-    remove_dir(tmp.path(), "apps/backend/crates/adapters/inbound/mcp/crates");
+    remove_dir(
+        tmp.path(),
+        "apps/backend/crates/adapters/inbound/mcp/crates",
+    );
     // mcp/ dir still exists but has no crates/ inside
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     // Only the inner hex is broken — outer structure for all apps is intact
-    assert_eq!(errors.len(), 1, "expected exactly 1 error (inner hex only), got: {errors:#?}");
+    assert_eq!(
+        errors.len(),
+        1,
+        "expected exactly 1 error (inner hex only), got: {errors:#?}"
+    );
     assert!(
         errors[0].title.contains("missing") && errors[0].title.contains("crates"),
         "expected error about missing inner crates/, got: {errors:#?}"
@@ -178,7 +194,9 @@ fn inner_hex_crates_missing() {
     );
     // No errors for devctl or worker — their structure is intact
     assert!(
-        !errors.iter().any(|e| e.title.contains("devctl") || e.title.contains("worker")),
+        !errors
+            .iter()
+            .any(|e| e.title.contains("devctl") || e.title.contains("worker")),
         "devctl/worker should be clean, got: {errors:#?}"
     );
 }
@@ -190,14 +208,22 @@ fn inner_hex_crates_missing() {
 #[test]
 fn inner_hex_crates_empty() {
     let tmp = copy_fixture();
-    remove_dir(tmp.path(), "apps/backend/crates/adapters/inbound/mcp/crates");
+    remove_dir(
+        tmp.path(),
+        "apps/backend/crates/adapters/inbound/mcp/crates",
+    );
     std::fs::create_dir_all(
-        tmp.path().join("apps/backend/crates/adapters/inbound/mcp/crates"),
+        tmp.path()
+            .join("apps/backend/crates/adapters/inbound/mcp/crates"),
     )
     .expect("mkdir");
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
-    assert_eq!(errors.len(), 1, "expected exactly 1 error for empty inner crates/, got: {errors:#?}");
+    assert_eq!(
+        errors.len(),
+        1,
+        "expected exactly 1 error for empty inner crates/, got: {errors:#?}"
+    );
     assert!(
         errors[0].title.contains("mcp") || errors[0].title.contains("adapters/inbound"),
         "expected title mentioning inner hex path, got: '{}'",
@@ -217,7 +243,10 @@ fn inner_hex_crates_empty() {
 #[test]
 fn inner_hex_crates_is_file() {
     let tmp = copy_fixture();
-    remove_dir(tmp.path(), "apps/backend/crates/adapters/inbound/mcp/crates");
+    remove_dir(
+        tmp.path(),
+        "apps/backend/crates/adapters/inbound/mcp/crates",
+    );
     write_file(
         tmp.path(),
         "apps/backend/crates/adapters/inbound/mcp/crates",
@@ -225,7 +254,11 @@ fn inner_hex_crates_is_file() {
     );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
-    assert_eq!(errors.len(), 1, "expected exactly 1 error when inner crates is a file, got: {errors:#?}");
+    assert_eq!(
+        errors.len(),
+        1,
+        "expected exactly 1 error when inner crates is a file, got: {errors:#?}"
+    );
     // Title must verify "missing" keyword — list_dir on a file returns empty
     assert!(
         errors[0].title.contains("missing"),
@@ -253,10 +286,17 @@ fn outer_missing_inner_never_checked() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     // Should get exactly 3 errors (one per app, outer only), not cascade into inner
-    assert_eq!(errors.len(), 3, "expected 3 errors (outer only, no cascade), got: {errors:#?}");
+    assert_eq!(
+        errors.len(),
+        3,
+        "expected 3 errors (outer only, no cascade), got: {errors:#?}"
+    );
     // backend specifically: 1 error for outer, NOT 2 for outer+inner
     assert_eq!(
-        errors.iter().filter(|e| e.title.contains("backend")).count(),
+        errors
+            .iter()
+            .filter(|e| e.title.contains("backend"))
+            .count(),
         1,
         "backend should have exactly 1 error (outer only), got: {errors:#?}"
     );
@@ -285,7 +325,11 @@ fn outer_crates_file_inner_unreachable() {
     write_file(tmp.path(), "apps/backend/crates", "not a directory");
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
-    assert_eq!(errors.len(), 1, "expected exactly 1 error (only backend broken), got: {errors:#?}");
+    assert_eq!(
+        errors.len(),
+        1,
+        "expected exactly 1 error (only backend broken), got: {errors:#?}"
+    );
     assert!(
         errors[0].title.contains("backend"),
         "expected error for backend, got: '{}'",
@@ -324,7 +368,11 @@ fn three_apps_three_different_failures() {
     std::fs::create_dir_all(tmp.path().join("apps/worker/crates")).expect("mkdir");
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
-    assert_eq!(errors.len(), 3, "expected 3 errors (one per app), got: {errors:#?}");
+    assert_eq!(
+        errors.len(),
+        3,
+        "expected 3 errors (one per app), got: {errors:#?}"
+    );
     // All 3 failure modes (missing, file, empty) produce the same "missing crates/" title
     // because list_dir returns empty for all three. The test can't distinguish them by title —
     // that's a known limitation of the check code.
@@ -365,12 +413,21 @@ fn inner_hex_broken_plus_other_apps_missing() {
     // worker: missing crates/ entirely
     remove_dir(tmp.path(), "apps/worker/crates");
     // backend outer: VALID — but inner hex-in-hex crates/ missing
-    remove_dir(tmp.path(), "apps/backend/crates/adapters/inbound/mcp/crates");
+    remove_dir(
+        tmp.path(),
+        "apps/backend/crates/adapters/inbound/mcp/crates",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
-    assert_eq!(errors.len(), 3, "expected exactly 3 errors (devctl + worker outer + backend inner), got: {errors:#?}");
+    assert_eq!(
+        errors.len(),
+        3,
+        "expected exactly 3 errors (devctl + worker outer + backend inner), got: {errors:#?}"
+    );
     // devctl error
-    let devctl_err = errors.iter().find(|e| e.title.contains("devctl"))
+    let devctl_err = errors
+        .iter()
+        .find(|e| e.title.contains("devctl"))
         .unwrap_or_else(|| panic!("missing devctl error, got: {errors:#?}"));
     let devctl_file = devctl_err.file.as_deref().unwrap_or("");
     assert!(
@@ -378,7 +435,9 @@ fn inner_hex_broken_plus_other_apps_missing() {
         "devctl error file field should reference apps/devctl, got: '{devctl_file}'"
     );
     // worker error
-    let worker_err = errors.iter().find(|e| e.title.contains("worker"))
+    let worker_err = errors
+        .iter()
+        .find(|e| e.title.contains("worker"))
         .unwrap_or_else(|| panic!("missing worker error, got: {errors:#?}"));
     let worker_file = worker_err.file.as_deref().unwrap_or("");
     assert!(
@@ -386,8 +445,12 @@ fn inner_hex_broken_plus_other_apps_missing() {
         "worker error file field should reference apps/worker, got: '{worker_file}'"
     );
     // backend inner hex error — require "mcp" in title (not fallback to "backend")
-    let backend_inner_err = errors.iter().find(|e| e.title.contains("mcp"))
-        .unwrap_or_else(|| panic!("missing backend inner hex error with 'mcp' in title, got: {errors:#?}"));
+    let backend_inner_err = errors
+        .iter()
+        .find(|e| e.title.contains("mcp"))
+        .unwrap_or_else(|| {
+            panic!("missing backend inner hex error with 'mcp' in title, got: {errors:#?}")
+        });
     let backend_file = backend_inner_err.file.as_deref().unwrap_or("");
     assert!(
         backend_file.contains("apps/backend/crates/adapters/inbound/mcp"),
@@ -404,7 +467,11 @@ fn src_exists_and_crates_missing() {
     let tmp = copy_fixture();
     for app in RUST_APPS {
         remove_dir(tmp.path(), &format!("apps/{app}/crates"));
-        write_file(tmp.path(), &format!("apps/{app}/src/main.rs"), "fn main() {}");
+        write_file(
+            tmp.path(),
+            &format!("apps/{app}/src/main.rs"),
+            "fn main() {}",
+        );
     }
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
@@ -416,15 +483,21 @@ fn src_exists_and_crates_missing() {
         errors.len()
     );
     for app in RUST_APPS {
-        let src_err = errors.iter().find(|e| e.title.contains(app) && e.title.contains("src/"))
+        let src_err = errors
+            .iter()
+            .find(|e| e.title.contains(app) && e.title.contains("src/"))
             .unwrap_or_else(|| panic!("expected src/ error for {app}, got: {errors:#?}"));
         let src_file = src_err.file.as_deref().unwrap_or("");
         assert!(
             src_file.contains(&format!("apps/{app}")),
             "src/ error file field should reference apps/{app}, got: '{src_file}'"
         );
-        let crates_err = errors.iter().find(|e| e.title.contains(app) && e.title.contains("missing crates/"))
-            .unwrap_or_else(|| panic!("expected missing crates/ error for {app}, got: {errors:#?}"));
+        let crates_err = errors
+            .iter()
+            .find(|e| e.title.contains(app) && e.title.contains("missing crates/"))
+            .unwrap_or_else(|| {
+                panic!("expected missing crates/ error for {app}, got: {errors:#?}")
+            });
         let crates_file = crates_err.file.as_deref().unwrap_or("");
         assert!(
             crates_file.contains(&format!("apps/{app}")),
@@ -441,7 +514,11 @@ fn src_exists_and_crates_missing() {
 fn src_and_crates_both_exist() {
     let tmp = copy_fixture();
     for app in RUST_APPS {
-        write_file(tmp.path(), &format!("apps/{app}/src/main.rs"), "fn main() {}");
+        write_file(
+            tmp.path(),
+            &format!("apps/{app}/src/main.rs"),
+            "fn main() {}",
+        );
     }
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
@@ -484,7 +561,11 @@ fn inner_hex_has_src() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     // src/ ban only fires at app level, not inside inner hex
-    assert_eq!(errors.len(), 0, "src/ ban should not fire at inner hex level, got: {errors:#?}");
+    assert_eq!(
+        errors.len(),
+        0,
+        "src/ ban should not fire at inner hex level, got: {errors:#?}"
+    );
 }
 
 // -----------------------------------------------------------------------
@@ -497,7 +578,10 @@ fn ts_apps_not_checked() {
     // admin and landing have no Cargo.toml — should produce 0 R-ARCH-01 errors
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
-    assert!(errors.is_empty(), "golden fixture should produce zero R-ARCH-01 errors, got: {errors:#?}");
+    assert!(
+        errors.is_empty(),
+        "golden fixture should produce zero R-ARCH-01 errors, got: {errors:#?}"
+    );
 }
 
 // -----------------------------------------------------------------------
@@ -557,7 +641,10 @@ fn crates_is_symlink_to_other_app() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     // Symlink resolves to a valid crates/ directory — no error expected
-    assert!(errors.is_empty(), "symlink to valid crates/ should be transparent, got: {errors:#?}");
+    assert!(
+        errors.is_empty(),
+        "symlink to valid crates/ should be transparent, got: {errors:#?}"
+    );
 }
 
 // -----------------------------------------------------------------------
@@ -567,15 +654,23 @@ fn crates_is_symlink_to_other_app() {
 #[test]
 fn inner_hex_crates_is_broken_symlink() {
     let tmp = copy_fixture();
-    remove_dir(tmp.path(), "apps/backend/crates/adapters/inbound/mcp/crates");
+    remove_dir(
+        tmp.path(),
+        "apps/backend/crates/adapters/inbound/mcp/crates",
+    );
     std::os::unix::fs::symlink(
         "/nonexistent",
-        tmp.path().join("apps/backend/crates/adapters/inbound/mcp/crates"),
+        tmp.path()
+            .join("apps/backend/crates/adapters/inbound/mcp/crates"),
     )
     .expect("symlink");
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
-    assert_eq!(errors.len(), 1, "expected exactly 1 error for broken inner symlink crates/, got: {errors:#?}");
+    assert_eq!(
+        errors.len(),
+        1,
+        "expected exactly 1 error for broken inner symlink crates/, got: {errors:#?}"
+    );
     assert!(
         errors[0].title.contains("mcp") || errors[0].title.contains("adapters/inbound"),
         "error title should mention inner hex path (mcp or adapters/inbound), got: '{}'",
@@ -595,9 +690,14 @@ fn inner_hex_crates_is_broken_symlink() {
 #[test]
 fn inner_hex_crates_symlink_to_outer_crates() {
     let tmp = copy_fixture();
-    let inner = tmp.path().join("apps/backend/crates/adapters/inbound/mcp/crates");
+    let inner = tmp
+        .path()
+        .join("apps/backend/crates/adapters/inbound/mcp/crates");
     let outer = tmp.path().join("apps/backend/crates");
-    remove_dir(tmp.path(), "apps/backend/crates/adapters/inbound/mcp/crates");
+    remove_dir(
+        tmp.path(),
+        "apps/backend/crates/adapters/inbound/mcp/crates",
+    );
     std::os::unix::fs::symlink(&outer, &inner).expect("symlink");
     let results = run_check(tmp.path());
     // Must terminate without infinite loop.
@@ -622,11 +722,8 @@ fn crates_symlink_to_dev_null() {
     let tmp = copy_fixture();
     for app in RUST_APPS {
         remove_dir(tmp.path(), &format!("apps/{app}/crates"));
-        std::os::unix::fs::symlink(
-            "/dev/null",
-            tmp.path().join(format!("apps/{app}/crates")),
-        )
-        .expect("symlink");
+        std::os::unix::fs::symlink("/dev/null", tmp.path().join(format!("apps/{app}/crates")))
+            .expect("symlink");
     }
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
@@ -663,7 +760,11 @@ fn app_with_only_cargo_toml() {
     );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
-    assert_eq!(errors.len(), 1, "expected exactly 1 error (phantom app missing crates/), got: {errors:#?}");
+    assert_eq!(
+        errors.len(),
+        1,
+        "expected exactly 1 error (phantom app missing crates/), got: {errors:#?}"
+    );
     assert!(
         errors[0].title.contains("phantom") && errors[0].title.contains("missing crates/"),
         "expected error about phantom app missing crates/, got: {errors:#?}"
@@ -685,7 +786,11 @@ fn cargo_toml_is_empty() {
     write_file(tmp.path(), "apps/phantom/Cargo.toml", "");
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
-    assert_eq!(errors.len(), 1, "expected exactly 1 error for phantom app, got: {errors:#?}");
+    assert_eq!(
+        errors.len(),
+        1,
+        "expected exactly 1 error for phantom app, got: {errors:#?}"
+    );
     assert!(
         errors[0].title.contains("missing crates/") && errors[0].title.contains("phantom"),
         "error title should contain 'missing crates/' and 'phantom', got: '{}'",
@@ -701,10 +806,18 @@ fn cargo_toml_is_empty() {
 #[test]
 fn cargo_toml_is_malformed() {
     let tmp = copy_fixture();
-    write_file(tmp.path(), "apps/phantom/Cargo.toml", "this is not valid toml {{{{");
+    write_file(
+        tmp.path(),
+        "apps/phantom/Cargo.toml",
+        "this is not valid toml {{{{",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
-    assert_eq!(errors.len(), 1, "expected exactly 1 error for phantom app, got: {errors:#?}");
+    assert_eq!(
+        errors.len(),
+        1,
+        "expected exactly 1 error for phantom app, got: {errors:#?}"
+    );
     assert!(
         errors[0].title.contains("missing crates/") && errors[0].title.contains("phantom"),
         "error title should contain 'missing crates/' and 'phantom', got: '{}'",
@@ -727,7 +840,10 @@ fn cargo_toml_is_a_directory() {
     std::fs::create_dir_all(tmp.path().join("apps/broken/Cargo.toml")).expect("mkdir");
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
-    assert!(errors.is_empty(), "golden apps clean + broken app skipped should produce zero R-ARCH-01 errors, got: {errors:#?}");
+    assert!(
+        errors.is_empty(),
+        "golden apps clean + broken app skipped should produce zero R-ARCH-01 errors, got: {errors:#?}"
+    );
 }
 
 // -----------------------------------------------------------------------
@@ -742,7 +858,10 @@ fn cargo_toml_is_broken_symlink() {
         .expect("symlink");
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
-    assert!(errors.is_empty(), "golden apps clean + broken symlink app skipped should produce zero R-ARCH-01 errors, got: {errors:#?}");
+    assert!(
+        errors.is_empty(),
+        "golden apps clean + broken symlink app skipped should produce zero R-ARCH-01 errors, got: {errors:#?}"
+    );
 }
 
 // -----------------------------------------------------------------------
@@ -759,7 +878,11 @@ fn unicode_app_name() {
     );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
-    assert_eq!(errors.len(), 1, "expected exactly 1 error for unicode app, got: {errors:#?}");
+    assert_eq!(
+        errors.len(),
+        1,
+        "expected exactly 1 error for unicode app, got: {errors:#?}"
+    );
     assert!(
         errors[0].title.contains("\u{00fc}ber-service"),
         "expected error about unicode app name, got: {errors:#?}"
@@ -781,7 +904,11 @@ fn app_name_with_spaces() {
     );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
-    assert_eq!(errors.len(), 1, "expected exactly 1 error for spaced app name, got: {errors:#?}");
+    assert_eq!(
+        errors.len(),
+        1,
+        "expected exactly 1 error for spaced app name, got: {errors:#?}"
+    );
     assert!(
         errors[0].title.contains("my app"),
         "expected error about spaced app name, got: {errors:#?}"
@@ -807,7 +934,10 @@ fn crates_inside_domain() {
     );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
-    assert!(errors.is_empty(), "golden apps clean + wrong-place crates/ invisible should produce zero R-ARCH-01 errors, got: {errors:#?}");
+    assert!(
+        errors.is_empty(),
+        "golden apps clean + wrong-place crates/ invisible should produce zero R-ARCH-01 errors, got: {errors:#?}"
+    );
 }
 
 #[test]
@@ -838,7 +968,10 @@ fn wrong_casing_crates() {
     std::fs::create_dir_all(tmp.path().join("apps/devctl/Crates/domain")).expect("mkdir");
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
-    assert!(errors.is_empty(), "expected zero R-ARCH-01 errors, got: {errors:#?}");
+    assert!(
+        errors.is_empty(),
+        "expected zero R-ARCH-01 errors, got: {errors:#?}"
+    );
 }
 
 #[test]
@@ -852,7 +985,11 @@ fn typo_crate_singular() {
     );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
-    assert_eq!(errors.len(), 1, "expected exactly 1 error for phantom with typo crate/, got: {errors:#?}");
+    assert_eq!(
+        errors.len(),
+        1,
+        "expected exactly 1 error for phantom with typo crate/, got: {errors:#?}"
+    );
     assert!(
         errors[0].title.contains("phantom") && errors[0].title.contains("missing crates/"),
         "expected error about phantom missing crates/, got: {errors:#?}"
@@ -875,12 +1012,16 @@ fn hex_in_hex_leaf_has_cargo_toml_so_no_recursion() {
     // backend/adapters/inbound/rest has Cargo.toml — it's a crate, not hex-in-hex
     // Add a random dir inside — should not be checked by hex arch rules
     std::fs::create_dir_all(
-        tmp.path().join("apps/backend/crates/adapters/inbound/rest/internal/stuff"),
+        tmp.path()
+            .join("apps/backend/crates/adapters/inbound/rest/internal/stuff"),
     )
     .expect("mkdir");
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
-    assert!(errors.is_empty(), "dirs inside a leaf crate should not trigger errors, got: {errors:#?}");
+    assert!(
+        errors.is_empty(),
+        "dirs inside a leaf crate should not trigger errors, got: {errors:#?}"
+    );
 }
 
 // -----------------------------------------------------------------------
@@ -892,17 +1033,32 @@ fn hex_in_hex_at_different_containers() {
     // Scope: R-ARCH-01 only — hex-in-hex should be valid at any container level (domain, app, etc.)
     let tmp = copy_fixture();
     let base = "apps/devctl/crates/domain/complex/crates";
-    write_file(tmp.path(), &format!("{base}/domain/inner/Cargo.toml"), "[package]\nname=\"inner\"\nversion=\"0.1.0\"\nedition=\"2024\"");
+    write_file(
+        tmp.path(),
+        &format!("{base}/domain/inner/Cargo.toml"),
+        "[package]\nname=\"inner\"\nversion=\"0.1.0\"\nedition=\"2024\"",
+    );
     write_file(tmp.path(), &format!("{base}/domain/inner/src/lib.rs"), "");
-    write_file(tmp.path(), &format!("{base}/app/handler/Cargo.toml"), "[package]\nname=\"handler\"\nversion=\"0.1.0\"\nedition=\"2024\"");
+    write_file(
+        tmp.path(),
+        &format!("{base}/app/handler/Cargo.toml"),
+        "[package]\nname=\"handler\"\nversion=\"0.1.0\"\nedition=\"2024\"",
+    );
     write_file(tmp.path(), &format!("{base}/app/handler/src/lib.rs"), "");
     write_file(tmp.path(), &format!("{base}/ports/inbound/.gitkeep"), "");
     write_file(tmp.path(), &format!("{base}/ports/outbound/.gitkeep"), "");
     write_file(tmp.path(), &format!("{base}/adapters/inbound/.gitkeep"), "");
-    write_file(tmp.path(), &format!("{base}/adapters/outbound/.gitkeep"), "");
+    write_file(
+        tmp.path(),
+        &format!("{base}/adapters/outbound/.gitkeep"),
+        "",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
-    assert!(errors.is_empty(), "hex-in-hex in domain/ should be valid, got: {errors:#?}");
+    assert!(
+        errors.is_empty(),
+        "hex-in-hex in domain/ should be valid, got: {errors:#?}"
+    );
 }
 
 #[test]
@@ -910,17 +1066,32 @@ fn multiple_hex_in_hex_in_same_container() {
     // Scope: R-ARCH-01 only — multiple hex-in-hex in same container (adapters/inbound) should all be valid
     let tmp = copy_fixture();
     let base = "apps/backend/crates/adapters/inbound/grpc/crates";
-    write_file(tmp.path(), &format!("{base}/domain/types/Cargo.toml"), "[package]\nname=\"grpc-domain\"\nversion=\"0.1.0\"\nedition=\"2024\"");
+    write_file(
+        tmp.path(),
+        &format!("{base}/domain/types/Cargo.toml"),
+        "[package]\nname=\"grpc-domain\"\nversion=\"0.1.0\"\nedition=\"2024\"",
+    );
     write_file(tmp.path(), &format!("{base}/domain/types/src/lib.rs"), "");
-    write_file(tmp.path(), &format!("{base}/app/handlers/Cargo.toml"), "[package]\nname=\"grpc-app\"\nversion=\"0.1.0\"\nedition=\"2024\"");
+    write_file(
+        tmp.path(),
+        &format!("{base}/app/handlers/Cargo.toml"),
+        "[package]\nname=\"grpc-app\"\nversion=\"0.1.0\"\nedition=\"2024\"",
+    );
     write_file(tmp.path(), &format!("{base}/app/handlers/src/lib.rs"), "");
     write_file(tmp.path(), &format!("{base}/ports/inbound/.gitkeep"), "");
     write_file(tmp.path(), &format!("{base}/ports/outbound/.gitkeep"), "");
     write_file(tmp.path(), &format!("{base}/adapters/inbound/.gitkeep"), "");
-    write_file(tmp.path(), &format!("{base}/adapters/outbound/.gitkeep"), "");
+    write_file(
+        tmp.path(),
+        &format!("{base}/adapters/outbound/.gitkeep"),
+        "",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
-    assert!(errors.is_empty(), "two hex-in-hex in same container should be valid, got: {errors:#?}");
+    assert!(
+        errors.is_empty(),
+        "two hex-in-hex in same container should be valid, got: {errors:#?}"
+    );
 }
 
 #[test]
@@ -928,17 +1099,32 @@ fn hex_in_hex_in_ports() {
     // Scope: R-ARCH-01 only — hex-in-hex should be valid even in ports/ container
     let tmp = copy_fixture();
     let base = "apps/devctl/crates/ports/outbound/complex/crates";
-    write_file(tmp.path(), &format!("{base}/domain/types/Cargo.toml"), "[package]\nname=\"port-complex\"\nversion=\"0.1.0\"\nedition=\"2024\"");
+    write_file(
+        tmp.path(),
+        &format!("{base}/domain/types/Cargo.toml"),
+        "[package]\nname=\"port-complex\"\nversion=\"0.1.0\"\nedition=\"2024\"",
+    );
     write_file(tmp.path(), &format!("{base}/domain/types/src/lib.rs"), "");
-    write_file(tmp.path(), &format!("{base}/app/core/Cargo.toml"), "[package]\nname=\"port-app\"\nversion=\"0.1.0\"\nedition=\"2024\"");
+    write_file(
+        tmp.path(),
+        &format!("{base}/app/core/Cargo.toml"),
+        "[package]\nname=\"port-app\"\nversion=\"0.1.0\"\nedition=\"2024\"",
+    );
     write_file(tmp.path(), &format!("{base}/app/core/src/lib.rs"), "");
     write_file(tmp.path(), &format!("{base}/ports/inbound/.gitkeep"), "");
     write_file(tmp.path(), &format!("{base}/ports/outbound/.gitkeep"), "");
     write_file(tmp.path(), &format!("{base}/adapters/inbound/.gitkeep"), "");
-    write_file(tmp.path(), &format!("{base}/adapters/outbound/.gitkeep"), "");
+    write_file(
+        tmp.path(),
+        &format!("{base}/adapters/outbound/.gitkeep"),
+        "",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
-    assert!(errors.is_empty(), "hex-in-hex in ports/ should be valid, got: {errors:#?}");
+    assert!(
+        errors.is_empty(),
+        "hex-in-hex in ports/ should be valid, got: {errors:#?}"
+    );
 }
 
 // -----------------------------------------------------------------------
@@ -952,17 +1138,36 @@ fn triple_nested_hex_in_hex() {
     let base = "apps/backend/crates/adapters/inbound/mcp/crates/adapters/inbound/transport";
     remove_dir(tmp.path(), base);
     let inner = format!("{base}/crates");
-    write_file(tmp.path(), &format!("{inner}/domain/types/Cargo.toml"), "[package]\nname=\"deep\"\nversion=\"0.1.0\"\nedition=\"2024\"");
+    write_file(
+        tmp.path(),
+        &format!("{inner}/domain/types/Cargo.toml"),
+        "[package]\nname=\"deep\"\nversion=\"0.1.0\"\nedition=\"2024\"",
+    );
     write_file(tmp.path(), &format!("{inner}/domain/types/src/lib.rs"), "");
-    write_file(tmp.path(), &format!("{inner}/app/core/Cargo.toml"), "[package]\nname=\"deep-app\"\nversion=\"0.1.0\"\nedition=\"2024\"");
+    write_file(
+        tmp.path(),
+        &format!("{inner}/app/core/Cargo.toml"),
+        "[package]\nname=\"deep-app\"\nversion=\"0.1.0\"\nedition=\"2024\"",
+    );
     write_file(tmp.path(), &format!("{inner}/app/core/src/lib.rs"), "");
     write_file(tmp.path(), &format!("{inner}/ports/inbound/.gitkeep"), "");
     write_file(tmp.path(), &format!("{inner}/ports/outbound/.gitkeep"), "");
-    write_file(tmp.path(), &format!("{inner}/adapters/inbound/.gitkeep"), "");
-    write_file(tmp.path(), &format!("{inner}/adapters/outbound/.gitkeep"), "");
+    write_file(
+        tmp.path(),
+        &format!("{inner}/adapters/inbound/.gitkeep"),
+        "",
+    );
+    write_file(
+        tmp.path(),
+        &format!("{inner}/adapters/outbound/.gitkeep"),
+        "",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
-    assert!(errors.is_empty(), "triple-nested hex-in-hex should be valid, got: {errors:#?}");
+    assert!(
+        errors.is_empty(),
+        "triple-nested hex-in-hex should be valid, got: {errors:#?}"
+    );
 }
 
 #[test]
@@ -973,7 +1178,11 @@ fn hex_in_hex_missing_crates_at_third_level() {
     std::fs::create_dir_all(tmp.path().join(format!("{base}/crates"))).expect("mkdir");
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
-    assert_eq!(errors.len(), 1, "expected exactly 1 error for empty third-level crates/, got: {errors:#?}");
+    assert_eq!(
+        errors.len(),
+        1,
+        "expected exactly 1 error for empty third-level crates/, got: {errors:#?}"
+    );
     assert!(
         errors[0].title.contains("transport") || errors[0].title.contains("adapters/inbound"),
         "expected title mentioning third-level hex path, got: '{}'",
@@ -1000,7 +1209,12 @@ fn hex_in_hex_inner_has_wrong_dirs() {
     let errors = arch_errors(&results);
     // Inner hex has crates/ with only src/ — missing 4 required dirs (domain, app, adapters, ports)
     // plus 1 unexpected entry (src/) = 5 errors
-    assert_eq!(errors.len(), 5, "expected 5 errors (4 missing dirs + 1 unexpected src/), got {}: {errors:#?}", errors.len());
+    assert_eq!(
+        errors.len(),
+        5,
+        "expected 5 errors (4 missing dirs + 1 unexpected src/), got {}: {errors:#?}",
+        errors.len()
+    );
     // Tighten title assertions: check each error specifically
     // The 4 missing dirs should mention "domain", "app", "ports", "adapters"
     for required_dir in &["domain", "app", "ports", "adapters"] {
@@ -1032,14 +1246,18 @@ fn hex_in_hex_inner_has_wrong_dirs() {
 fn third_level_nesting_at_wrong_place() {
     let tmp = copy_fixture();
     std::fs::create_dir_all(
-        tmp.path().join("apps/devctl/crates/domain/types/crates/domain/inner"),
+        tmp.path()
+            .join("apps/devctl/crates/domain/types/crates/domain/inner"),
     )
     .expect("mkdir");
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     assert_single_error(&errors, "has both Cargo.toml and crates/");
     let file = errors[0].file.as_deref().unwrap_or("");
-    assert!(file.contains("domain/types"), "file should point to types dir, got: {file}");
+    assert!(
+        file.contains("domain/types"),
+        "file should point to types dir, got: {file}"
+    );
 }
 
 // -----------------------------------------------------------------------
@@ -1088,13 +1306,28 @@ fn crates_no_read_permission() {
 #[test]
 fn inner_hex_crates_with_only_gitkeep() {
     let tmp = copy_fixture();
-    remove_dir(tmp.path(), "apps/backend/crates/adapters/inbound/mcp/crates");
-    std::fs::create_dir_all(tmp.path().join("apps/backend/crates/adapters/inbound/mcp/crates")).expect("mkdir");
-    write_file(tmp.path(), "apps/backend/crates/adapters/inbound/mcp/crates/.gitkeep", "");
+    remove_dir(
+        tmp.path(),
+        "apps/backend/crates/adapters/inbound/mcp/crates",
+    );
+    std::fs::create_dir_all(
+        tmp.path()
+            .join("apps/backend/crates/adapters/inbound/mcp/crates"),
+    )
+    .expect("mkdir");
+    write_file(
+        tmp.path(),
+        "apps/backend/crates/adapters/inbound/mcp/crates/.gitkeep",
+        "",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     // Inner crates/ has .gitkeep — passes check_01 but check_02 fires for 4 missing required dirs
-    assert_eq!(errors.len(), 4, "expected 4 missing dir errors for inner hex, got: {errors:#?}");
+    assert_eq!(
+        errors.len(),
+        4,
+        "expected 4 missing dir errors for inner hex, got: {errors:#?}"
+    );
 }
 
 // -----------------------------------------------------------------------
@@ -1104,11 +1337,23 @@ fn inner_hex_crates_with_only_gitkeep() {
 #[test]
 fn inner_hex_crates_symlink_to_dev_null() {
     let tmp = copy_fixture();
-    remove_dir(tmp.path(), "apps/backend/crates/adapters/inbound/mcp/crates");
-    std::os::unix::fs::symlink("/dev/null", tmp.path().join("apps/backend/crates/adapters/inbound/mcp/crates")).expect("symlink");
+    remove_dir(
+        tmp.path(),
+        "apps/backend/crates/adapters/inbound/mcp/crates",
+    );
+    std::os::unix::fs::symlink(
+        "/dev/null",
+        tmp.path()
+            .join("apps/backend/crates/adapters/inbound/mcp/crates"),
+    )
+    .expect("symlink");
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
-    assert_eq!(errors.len(), 1, "expected 1 error for inner crates/ -> /dev/null, got: {errors:#?}");
+    assert_eq!(
+        errors.len(),
+        1,
+        "expected 1 error for inner crates/ -> /dev/null, got: {errors:#?}"
+    );
 }
 
 // -----------------------------------------------------------------------
@@ -1120,12 +1365,18 @@ fn inner_hex_crates_symlink_to_dev_null() {
 fn inner_hex_crates_no_read_permission() {
     use std::os::unix::fs::PermissionsExt;
     let tmp = copy_fixture();
-    let inner = tmp.path().join("apps/backend/crates/adapters/inbound/mcp/crates");
+    let inner = tmp
+        .path()
+        .join("apps/backend/crates/adapters/inbound/mcp/crates");
     std::fs::set_permissions(&inner, std::fs::Permissions::from_mode(0o000)).expect("chmod");
     let results = run_check(tmp.path());
     std::fs::set_permissions(&inner, std::fs::Permissions::from_mode(0o755)).expect("chmod");
     let errors = arch_errors(&results);
-    assert_eq!(errors.len(), 1, "expected 1 error for unreadable inner crates/, got: {errors:#?}");
+    assert_eq!(
+        errors.len(),
+        1,
+        "expected 1 error for unreadable inner crates/, got: {errors:#?}"
+    );
 }
 
 // -----------------------------------------------------------------------
@@ -1138,7 +1389,11 @@ fn missing_crates_dir_devctl_only() {
     remove_dir(tmp.path(), "apps/devctl/crates");
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
-    assert_eq!(errors.len(), 1, "expected exactly 1 error (devctl only), got: {errors:#?}");
+    assert_eq!(
+        errors.len(),
+        1,
+        "expected exactly 1 error (devctl only), got: {errors:#?}"
+    );
     assert!(
         errors[0].title.contains("devctl"),
         "error should mention devctl, got: '{}'",
@@ -1165,7 +1420,11 @@ fn missing_crates_dir_worker_only() {
     remove_dir(tmp.path(), "apps/worker/crates");
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
-    assert_eq!(errors.len(), 1, "expected exactly 1 error (worker only), got: {errors:#?}");
+    assert_eq!(
+        errors.len(),
+        1,
+        "expected exactly 1 error (worker only), got: {errors:#?}"
+    );
     assert!(
         errors[0].title.contains("worker"),
         "error should mention worker, got: '{}'",

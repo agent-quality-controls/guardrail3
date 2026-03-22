@@ -1,6 +1,6 @@
 use super::helpers::{
-    arch_errors, assert_file_field, assert_inner_hex, assert_no_packages, assert_no_ts_apps,
-    assert_per_app, copy_fixture, remove_dir, run_check, write_file, INNER_HEX, RUST_APPS,
+    INNER_HEX, RUST_APPS, arch_errors, assert_file_field, assert_inner_hex, assert_no_packages,
+    assert_no_ts_apps, assert_per_app, copy_fixture, remove_dir, run_check, write_file,
 };
 use guardrail3::domain::report::CheckResult;
 
@@ -124,9 +124,7 @@ fn missing_inbound_in_ports_everywhere() {
         .iter()
         .copied()
         .filter(|e| {
-            e.title.contains("missing")
-                && e.title.contains("inbound")
-                && e.title.contains("ports")
+            e.title.contains("missing") && e.title.contains("inbound") && e.title.contains("ports")
         })
         .collect();
     assert_eq!(
@@ -154,9 +152,7 @@ fn missing_outbound_in_ports_everywhere() {
         .iter()
         .copied()
         .filter(|e| {
-            e.title.contains("missing")
-                && e.title.contains("outbound")
-                && e.title.contains("ports")
+            e.title.contains("missing") && e.title.contains("outbound") && e.title.contains("ports")
         })
         .collect();
     assert_eq!(
@@ -206,7 +202,9 @@ fn missing_both_in_adapters_everywhere() {
         .copied()
         .filter(|e| {
             e.title.contains("ports")
-                && (e.title.contains("missing") || e.title.contains("unexpected") || e.title.contains("loose files"))
+                && (e.title.contains("missing")
+                    || e.title.contains("unexpected")
+                    || e.title.contains("loose files"))
         })
         .collect();
     assert_eq!(
@@ -251,7 +249,9 @@ fn missing_both_in_ports_everywhere() {
         .copied()
         .filter(|e| {
             e.title.contains("adapters")
-                && (e.title.contains("missing") || e.title.contains("unexpected") || e.title.contains("loose files"))
+                && (e.title.contains("missing")
+                    || e.title.contains("unexpected")
+                    || e.title.contains("loose files"))
         })
         .collect();
     assert_eq!(
@@ -648,7 +648,8 @@ fn missing_plus_unexpected_plus_loose() {
     for app in RUST_APPS {
         remove_dir(tmp.path(), &format!("apps/{app}/crates/adapters/inbound"));
         std::fs::create_dir_all(
-            tmp.path().join(format!("apps/{app}/crates/adapters/shared")),
+            tmp.path()
+                .join(format!("apps/{app}/crates/adapters/shared")),
         )
         .expect("mkdir");
         write_file(
@@ -658,10 +659,8 @@ fn missing_plus_unexpected_plus_loose() {
         );
 
         remove_dir(tmp.path(), &format!("apps/{app}/crates/ports/inbound"));
-        std::fs::create_dir_all(
-            tmp.path().join(format!("apps/{app}/crates/ports/shared")),
-        )
-        .expect("mkdir");
+        std::fs::create_dir_all(tmp.path().join(format!("apps/{app}/crates/ports/shared")))
+            .expect("mkdir");
         write_file(
             tmp.path(),
             &format!("apps/{app}/crates/ports/mod.rs"),
@@ -702,8 +701,7 @@ fn different_breakage_per_structural_dir() {
     // adapters/: missing inbound (devctl only)
     remove_dir(tmp.path(), "apps/devctl/crates/adapters/inbound");
     // ports/: unexpected shared/ (worker only)
-    std::fs::create_dir_all(tmp.path().join("apps/worker/crates/ports/shared"))
-        .expect("mkdir");
+    std::fs::create_dir_all(tmp.path().join("apps/worker/crates/ports/shared")).expect("mkdir");
     // inner hex adapters/: loose file
     write_file(
         tmp.path(),
@@ -770,14 +768,13 @@ fn renamed_inbound_to_incoming() {
     for app in RUST_APPS {
         remove_dir(tmp.path(), &format!("apps/{app}/crates/adapters/inbound"));
         std::fs::create_dir_all(
-            tmp.path().join(format!("apps/{app}/crates/adapters/incoming")),
+            tmp.path()
+                .join(format!("apps/{app}/crates/adapters/incoming")),
         )
         .expect("mkdir");
         remove_dir(tmp.path(), &format!("apps/{app}/crates/ports/inbound"));
-        std::fs::create_dir_all(
-            tmp.path().join(format!("apps/{app}/crates/ports/incoming")),
-        )
-        .expect("mkdir");
+        std::fs::create_dir_all(tmp.path().join(format!("apps/{app}/crates/ports/incoming")))
+            .expect("mkdir");
     }
 
     let results = run_check(tmp.path());
@@ -790,9 +787,20 @@ fn renamed_inbound_to_incoming() {
         r3.len()
     );
     let missing: Vec<_> = r3.iter().filter(|e| e.title.contains("missing")).collect();
-    let unexpected: Vec<_> = r3.iter().filter(|e| e.title.contains("unexpected")).collect();
-    assert_eq!(missing.len(), 6, "expected 6 missing errors, got: {missing:#?}");
-    assert_eq!(unexpected.len(), 6, "expected 6 unexpected errors, got: {unexpected:#?}");
+    let unexpected: Vec<_> = r3
+        .iter()
+        .filter(|e| e.title.contains("unexpected"))
+        .collect();
+    assert_eq!(
+        missing.len(),
+        6,
+        "expected 6 missing errors, got: {missing:#?}"
+    );
+    assert_eq!(
+        unexpected.len(),
+        6,
+        "expected 6 unexpected errors, got: {unexpected:#?}"
+    );
     assert_per_app(&r3);
     assert_no_ts_apps(&errors);
     assert_no_packages(&errors);
@@ -843,8 +851,7 @@ fn inner_hex_label_prefix_correct() {
     let tmp = copy_fixture();
     std::fs::create_dir_all(tmp.path().join(format!("{INNER_HEX}/adapters/shared")))
         .expect("mkdir");
-    std::fs::create_dir_all(tmp.path().join(format!("{INNER_HEX}/ports/shared")))
-        .expect("mkdir");
+    std::fs::create_dir_all(tmp.path().join(format!("{INNER_HEX}/ports/shared"))).expect("mkdir");
 
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
@@ -853,7 +860,11 @@ fn inner_hex_label_prefix_correct() {
         .copied()
         .filter(|e| e.title.contains("unexpected") && e.title.contains("shared"))
         .collect();
-    assert_eq!(r3.len(), 2, "expected 2 errors (inner hex only), got: {r3:#?}");
+    assert_eq!(
+        r3.len(),
+        2,
+        "expected 2 errors (inner hex only), got: {r3:#?}"
+    );
     for err in &r3 {
         assert!(
             err.title.contains("mcp/crates"),
@@ -919,7 +930,10 @@ fn idempotent_results() {
     let mut titles2: Vec<_> = errors2.iter().map(|e| &e.title).collect();
     titles1.sort();
     titles2.sort();
-    assert_eq!(titles1, titles2, "idempotent check failed: different error titles");
+    assert_eq!(
+        titles1, titles2,
+        "idempotent check failed: different error titles"
+    );
     assert_no_ts_apps(&errors1);
     assert_no_packages(&errors1);
 }
@@ -951,8 +965,7 @@ fn ts_apps_not_checked() {
     let tmp = copy_fixture();
     std::fs::create_dir_all(tmp.path().join("apps/admin/src/modules/adapters/wrong"))
         .expect("mkdir");
-    std::fs::create_dir_all(tmp.path().join("apps/admin/src/modules/ports/wrong"))
-        .expect("mkdir");
+    std::fs::create_dir_all(tmp.path().join("apps/admin/src/modules/ports/wrong")).expect("mkdir");
     write_file(
         tmp.path(),
         "apps/admin/src/modules/adapters/mod.rs",
@@ -1034,8 +1047,7 @@ fn required_dir_replaced_with_symlink() {
             .expect("symlink");
         let ports = tmp.path().join(format!("apps/{app}/crates/ports"));
         remove_dir(tmp.path(), &format!("apps/{app}/crates/ports/inbound"));
-        std::os::unix::fs::symlink(ports.join("outbound"), ports.join("inbound"))
-            .expect("symlink");
+        std::os::unix::fs::symlink(ports.join("outbound"), ports.join("inbound")).expect("symlink");
     }
 
     let results = run_check(tmp.path());
@@ -1231,8 +1243,9 @@ fn permission_denied_structural_dir() {
     let tmp = copy_fixture();
     let devctl_adapters = tmp.path().join("apps/devctl/crates/adapters");
     // chmod 000 on devctl adapters/ — list_dir returns empty -> early return
-    let original_perms =
-        std::fs::metadata(&devctl_adapters).expect("metadata").permissions();
+    let original_perms = std::fs::metadata(&devctl_adapters)
+        .expect("metadata")
+        .permissions();
     let mut no_perms = original_perms.clone();
     std::os::unix::fs::PermissionsExt::set_mode(&mut no_perms, 0o000);
     std::fs::set_permissions(&devctl_adapters, no_perms).expect("chmod");
@@ -1251,7 +1264,9 @@ fn permission_denied_structural_dir() {
         .filter(|e| {
             e.title.contains("devctl")
                 && e.title.contains("adapters")
-                && (e.title.contains("missing") || e.title.contains("unexpected") || e.title.contains("loose"))
+                && (e.title.contains("missing")
+                    || e.title.contains("unexpected")
+                    || e.title.contains("loose"))
         })
         .collect();
     assert_eq!(
@@ -1269,7 +1284,11 @@ fn new_app_gets_checked() {
     let tmp = copy_fixture();
     // Create apps/scheduler/ with Cargo.toml + broken crates/adapters/
     let sched = "apps/scheduler";
-    write_file(tmp.path(), &format!("{sched}/Cargo.toml"), "[package]\nname = \"scheduler\"");
+    write_file(
+        tmp.path(),
+        &format!("{sched}/Cargo.toml"),
+        "[package]\nname = \"scheduler\"",
+    );
     std::fs::create_dir_all(tmp.path().join(format!("{sched}/crates/adapters/shared")))
         .expect("mkdir");
     std::fs::create_dir_all(tmp.path().join(format!("{sched}/crates/ports/inbound")))
@@ -1288,11 +1307,15 @@ fn new_app_gets_checked() {
         .collect();
     // scheduler adapters/ has: shared (unexpected), missing inbound, missing outbound
     assert!(
-        sched_r3.iter().any(|e| e.title.contains("missing") && e.title.contains("inbound")),
+        sched_r3
+            .iter()
+            .any(|e| e.title.contains("missing") && e.title.contains("inbound")),
         "expected scheduler missing inbound error, got: {sched_r3:#?}"
     );
     assert!(
-        sched_r3.iter().any(|e| e.title.contains("unexpected") && e.title.contains("shared")),
+        sched_r3
+            .iter()
+            .any(|e| e.title.contains("unexpected") && e.title.contains("shared")),
         "expected scheduler unexpected shared error, got: {sched_r3:#?}"
     );
     assert_file_field(&sched_r3);
@@ -1355,7 +1378,11 @@ fn gitkeep_only_structural_dir() {
     for app in RUST_APPS {
         remove_dir(tmp.path(), &format!("apps/{app}/crates/adapters/inbound"));
         remove_dir(tmp.path(), &format!("apps/{app}/crates/adapters/outbound"));
-        write_file(tmp.path(), &format!("apps/{app}/crates/adapters/.gitkeep"), "");
+        write_file(
+            tmp.path(),
+            &format!("apps/{app}/crates/adapters/.gitkeep"),
+            "",
+        );
         remove_dir(tmp.path(), &format!("apps/{app}/crates/ports/inbound"));
         remove_dir(tmp.path(), &format!("apps/{app}/crates/ports/outbound"));
         write_file(tmp.path(), &format!("apps/{app}/crates/ports/.gitkeep"), "");
@@ -1459,8 +1486,7 @@ fn loose_file_inner_hex_only() {
 #[test]
 fn unexpected_dir_inner_hex_only() {
     let tmp = copy_fixture();
-    std::fs::create_dir_all(tmp.path().join(format!("{INNER_HEX}/ports/shared")))
-        .expect("mkdir");
+    std::fs::create_dir_all(tmp.path().join(format!("{INNER_HEX}/ports/shared"))).expect("mkdir");
 
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
@@ -1502,14 +1528,13 @@ fn missing_plus_unexpected_combo() {
     for app in RUST_APPS {
         remove_dir(tmp.path(), &format!("apps/{app}/crates/adapters/inbound"));
         std::fs::create_dir_all(
-            tmp.path().join(format!("apps/{app}/crates/adapters/shared")),
+            tmp.path()
+                .join(format!("apps/{app}/crates/adapters/shared")),
         )
         .expect("mkdir");
         remove_dir(tmp.path(), &format!("apps/{app}/crates/ports/inbound"));
-        std::fs::create_dir_all(
-            tmp.path().join(format!("apps/{app}/crates/ports/shared")),
-        )
-        .expect("mkdir");
+        std::fs::create_dir_all(tmp.path().join(format!("apps/{app}/crates/ports/shared")))
+            .expect("mkdir");
     }
 
     let results = run_check(tmp.path());
@@ -1522,9 +1547,16 @@ fn missing_plus_unexpected_combo() {
         r3.len()
     );
     let missing: Vec<_> = r3.iter().filter(|e| e.title.contains("missing")).collect();
-    let unexpected: Vec<_> = r3.iter().filter(|e| e.title.contains("unexpected")).collect();
+    let unexpected: Vec<_> = r3
+        .iter()
+        .filter(|e| e.title.contains("unexpected"))
+        .collect();
     assert_eq!(missing.len(), 6, "expected 6 missing, got: {missing:#?}");
-    assert_eq!(unexpected.len(), 6, "expected 6 unexpected, got: {unexpected:#?}");
+    assert_eq!(
+        unexpected.len(),
+        6,
+        "expected 6 unexpected, got: {unexpected:#?}"
+    );
     assert_file_field(&r3);
     assert_no_ts_apps(&errors);
     assert_no_packages(&errors);
@@ -1556,7 +1588,10 @@ fn missing_plus_loose_combo() {
         r3.len()
     );
     let missing: Vec<_> = r3.iter().filter(|e| e.title.contains("missing")).collect();
-    let loose: Vec<_> = r3.iter().filter(|e| e.title.contains("loose files")).collect();
+    let loose: Vec<_> = r3
+        .iter()
+        .filter(|e| e.title.contains("loose files"))
+        .collect();
     assert_eq!(missing.len(), 8, "expected 8 missing, got: {missing:#?}");
     assert_eq!(loose.len(), 8, "expected 8 loose, got: {loose:#?}");
     assert_file_field(&r3);
@@ -1577,16 +1612,35 @@ fn missing_inbound_inner_hex_only() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
-    assert_eq!(r3.len(), 1, "expected 1 error from inner hex only, got: {r3:#?}");
-    assert!(r3[0].title.contains("missing") && r3[0].title.contains("inbound"),
-        "expected missing inbound error, got: {}", r3[0].title);
-    assert!(r3[0].file.as_deref().unwrap_or("").contains("mcp/crates"),
-        "expected inner hex file path, got: {:?}", r3[0].file);
-    assert!(r3[0].title.contains("mcp/crates"),
-        "expected inner hex label_prefix in title, got: {}", r3[0].title);
+    assert_eq!(
+        r3.len(),
+        1,
+        "expected 1 error from inner hex only, got: {r3:#?}"
+    );
+    assert!(
+        r3[0].title.contains("missing") && r3[0].title.contains("inbound"),
+        "expected missing inbound error, got: {}",
+        r3[0].title
+    );
+    assert!(
+        r3[0].file.as_deref().unwrap_or("").contains("mcp/crates"),
+        "expected inner hex file path, got: {:?}",
+        r3[0].file
+    );
+    assert!(
+        r3[0].title.contains("mcp/crates"),
+        "expected inner hex label_prefix in title, got: {}",
+        r3[0].title
+    );
     // Verify outer apps are clean
-    assert!(!r3.iter().any(|e| e.title.contains("devctl")), "devctl should be clean");
-    assert!(!r3.iter().any(|e| e.title.contains("worker")), "worker should be clean");
+    assert!(
+        !r3.iter().any(|e| e.title.contains("devctl")),
+        "devctl should be clean"
+    );
+    assert!(
+        !r3.iter().any(|e| e.title.contains("worker")),
+        "worker should be clean"
+    );
     assert_no_ts_apps(&errors);
     assert_no_packages(&errors);
 }
@@ -1596,17 +1650,31 @@ fn loose_cargo_toml_in_structural_dir() {
     // Parity with rule_02's loose_cargo_toml_in_crates
     let tmp = copy_fixture();
     for dir in &all_structural_dirs() {
-        write_file(tmp.path(), &format!("{dir}/Cargo.toml"), "[package]\nname = \"stray\"");
+        write_file(
+            tmp.path(),
+            &format!("{dir}/Cargo.toml"),
+            "[package]\nname = \"stray\"",
+        );
     }
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
-    let loose: Vec<_> = r3.iter().filter(|e| e.title.contains("loose files")).collect();
-    assert_eq!(loose.len(), 8, "expected 8 loose file errors (1 per structural dir), got: {loose:#?}");
+    let loose: Vec<_> = r3
+        .iter()
+        .filter(|e| e.title.contains("loose files"))
+        .collect();
+    assert_eq!(
+        loose.len(),
+        8,
+        "expected 8 loose file errors (1 per structural dir), got: {loose:#?}"
+    );
     // Verify each error's message mentions Cargo.toml
     for err in &loose {
-        assert!(err.message.contains("Cargo.toml"),
-            "expected Cargo.toml in message, got: {}", err.message);
+        assert!(
+            err.message.contains("Cargo.toml"),
+            "expected Cargo.toml in message, got: {}",
+            err.message
+        );
     }
     assert_per_app(&r3);
     assert_inner_hex(&r3);
@@ -1625,12 +1693,22 @@ fn loose_gitignore_not_gitkeep() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
-    let loose: Vec<_> = r3.iter().filter(|e| e.title.contains("loose files")).collect();
-    assert_eq!(loose.len(), 8, "expected 8 loose file errors, got: {loose:#?}");
+    let loose: Vec<_> = r3
+        .iter()
+        .filter(|e| e.title.contains("loose files"))
+        .collect();
+    assert_eq!(
+        loose.len(),
+        8,
+        "expected 8 loose file errors, got: {loose:#?}"
+    );
     // .gitignore is NOT .gitkeep — should be flagged
     for err in &loose {
-        assert!(err.message.contains(".gitignore"),
-            "expected .gitignore in message, got: {}", err.message);
+        assert!(
+            err.message.contains(".gitignore"),
+            "expected .gitignore in message, got: {}",
+            err.message
+        );
     }
     assert_per_app(&r3);
     assert_inner_hex(&r3);
@@ -1655,11 +1733,21 @@ fn dangling_symlink_silently_skipped() {
     // Dangling symlink: file_type() returns Ok(symlink type) on Linux/macOS.
     // is_dir() is false for symlinks, so it should appear in check_loose_files.
     // Expected: 8 loose file errors (1 per dir, mentioning "phantom")
-    let loose: Vec<_> = r3.iter().filter(|e| e.title.contains("loose files")).collect();
-    assert_eq!(loose.len(), 8, "expected 8 loose file errors for dangling symlinks, got: {loose:#?}");
+    let loose: Vec<_> = r3
+        .iter()
+        .filter(|e| e.title.contains("loose files"))
+        .collect();
+    assert_eq!(
+        loose.len(),
+        8,
+        "expected 8 loose file errors for dangling symlinks, got: {loose:#?}"
+    );
     for err in &loose {
-        assert!(err.message.contains("phantom"),
-            "expected 'phantom' in message, got: {}", err.message);
+        assert!(
+            err.message.contains("phantom"),
+            "expected 'phantom' in message, got: {}",
+            err.message
+        );
     }
     assert_per_app(&r3);
     assert_inner_hex(&r3);
@@ -1683,25 +1771,42 @@ fn outbound_wrong_case_tested() {
     if cfg!(target_os = "macos") {
         // Case-insensitive: creating Outbound/ when outbound/ exists is a no-op
         // Check if the FS is case-sensitive by probing
-        let probe = tmp.path().join("apps/devctl/crates/adapters/OUTBOUND_PROBE");
-        let probe_lower = tmp.path().join("apps/devctl/crates/adapters/outbound_probe");
+        let probe = tmp
+            .path()
+            .join("apps/devctl/crates/adapters/OUTBOUND_PROBE");
+        let probe_lower = tmp
+            .path()
+            .join("apps/devctl/crates/adapters/outbound_probe");
         std::fs::create_dir_all(&probe).expect("mkdir");
         let is_case_insensitive = probe_lower.exists();
         let _ = std::fs::remove_dir(&probe);
         if is_case_insensitive {
             // Case-insensitive: Outbound/ merges with outbound/, no unexpected error
             // But we should still have 0 rule3 errors
-            assert!(r3.is_empty() || r3.iter().all(|e| !e.title.contains("Outbound")),
-                "case-insensitive FS should not flag Outbound, got: {r3:#?}");
+            assert!(
+                r3.is_empty() || r3.iter().all(|e| !e.title.contains("Outbound")),
+                "case-insensitive FS should not flag Outbound, got: {r3:#?}"
+            );
         } else {
-            assert_eq!(r3.len(), 8, "case-sensitive: expected 8 unexpected Outbound errors, got: {r3:#?}");
+            assert_eq!(
+                r3.len(),
+                8,
+                "case-sensitive: expected 8 unexpected Outbound errors, got: {r3:#?}"
+            );
         }
     } else {
         // Linux: always case-sensitive
-        assert_eq!(r3.len(), 8, "expected 8 unexpected Outbound errors, got: {r3:#?}");
+        assert_eq!(
+            r3.len(),
+            8,
+            "expected 8 unexpected Outbound errors, got: {r3:#?}"
+        );
         for err in &r3 {
-            assert!(err.title.contains("unexpected") && err.title.contains("Outbound"),
-                "expected unexpected Outbound, got: {}", err.title);
+            assert!(
+                err.title.contains("unexpected") && err.title.contains("Outbound"),
+                "expected unexpected Outbound, got: {}",
+                err.title
+            );
         }
     }
     assert_no_ts_apps(&errors);
@@ -1729,11 +1834,21 @@ fn gitkeep_plus_partial_required_dirs() {
     // Wait: ALL_ADAPTERS_DIRS[3] is inner hex adapters. Removing outbound/ from inner hex
     // adapters is fine. And ALL_PORTS_DIRS[3] is inner hex ports. Removing outbound/ from
     // inner hex ports is fine (ports/outbound/.gitkeep existed there).
-    let missing: Vec<_> = r3.iter().filter(|e| e.title.contains("missing") && e.title.contains("outbound")).collect();
-    assert_eq!(missing.len(), 8, "expected 8 missing outbound errors, got: {missing:#?}");
+    let missing: Vec<_> = r3
+        .iter()
+        .filter(|e| e.title.contains("missing") && e.title.contains("outbound"))
+        .collect();
+    assert_eq!(
+        missing.len(),
+        8,
+        "expected 8 missing outbound errors, got: {missing:#?}"
+    );
     // .gitkeep should NOT be in any loose file error
     let loose: Vec<_> = r3.iter().filter(|e| e.title.contains("loose")).collect();
-    assert!(loose.is_empty(), "expected 0 loose file errors (.gitkeep allowed), got: {loose:#?}");
+    assert!(
+        loose.is_empty(),
+        "expected 0 loose file errors (.gitkeep allowed), got: {loose:#?}"
+    );
     assert_per_app(&r3);
     assert_inner_hex(&r3);
     assert_file_field(&r3);

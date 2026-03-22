@@ -37,13 +37,11 @@ pub const EXPECTED_RUST_LINTS: &[LintExpectation] = &[
     },
 ];
 
-pub const EXPECTED_LIBRARY_RUST_LINTS: &[LintExpectation] = &[
-    LintExpectation {
-        name: "unreachable_pub",
-        expected_level: "deny",
-        priority: None,
-    },
-];
+pub const EXPECTED_LIBRARY_RUST_LINTS: &[LintExpectation] = &[LintExpectation {
+    name: "unreachable_pub",
+    expected_level: "deny",
+    priority: None,
+}];
 
 pub const EXPECTED_CLIPPY_GROUPS: &[LintExpectation] = &[
     LintExpectation {

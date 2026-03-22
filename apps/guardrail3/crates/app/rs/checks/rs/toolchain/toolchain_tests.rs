@@ -34,8 +34,16 @@ fn stable_toolchain_with_components_passes() {
     };
 
     let results = check(&tree);
-    assert!(results.iter().any(|r| r.id == "RS-TOOLCHAIN-01" && r.inventory));
-    assert!(results.iter().any(|r| r.id == "RS-TOOLCHAIN-02" && r.inventory));
+    assert!(
+        results
+            .iter()
+            .any(|r| r.id == "RS-TOOLCHAIN-01" && r.inventory)
+    );
+    assert!(
+        results
+            .iter()
+            .any(|r| r.id == "RS-TOOLCHAIN-02" && r.inventory)
+    );
 }
 
 #[test]
@@ -67,7 +75,11 @@ fn pinned_toolchain_older_than_msrv_is_warned() {
     };
 
     let results = check(&tree);
-    assert!(results.iter().any(|r| r.id == "RS-TOOLCHAIN-03" && !r.inventory));
+    assert!(
+        results
+            .iter()
+            .any(|r| r.id == "RS-TOOLCHAIN-03" && !r.inventory)
+    );
 }
 
 #[test]
@@ -85,7 +97,11 @@ fn legacy_toolchain_file_is_warned() {
     };
 
     let results = check(&tree);
-    assert!(results.iter().any(|r| r.id == "RS-TOOLCHAIN-01" && !r.inventory));
+    assert!(
+        results
+            .iter()
+            .any(|r| r.id == "RS-TOOLCHAIN-01" && !r.inventory)
+    );
     assert!(results.iter().any(|r| r.id == "RS-TOOLCHAIN-04"));
 }
 
@@ -97,7 +113,10 @@ fn duplicate_toolchain_files_are_warned() {
             "".to_owned(),
             DirEntry {
                 dirs: vec![],
-                files: vec!["rust-toolchain".to_owned(), "rust-toolchain.toml".to_owned()],
+                files: vec![
+                    "rust-toolchain".to_owned(),
+                    "rust-toolchain.toml".to_owned(),
+                ],
             },
         )]),
         content: BTreeMap::from([(

@@ -1,6 +1,6 @@
 use super::helpers::{
-    arch_errors, assert_inner_hex, assert_no_packages, assert_no_ts_apps, assert_per_app,
-    copy_fixture, remove_dir, remove_file, run_check, write_file, INNER_HEX, RUST_APPS,
+    INNER_HEX, RUST_APPS, arch_errors, assert_inner_hex, assert_no_packages, assert_no_ts_apps,
+    assert_per_app, copy_fixture, remove_dir, remove_file, run_check, write_file,
 };
 use guardrail3::domain::report::CheckResult;
 
@@ -680,11 +680,7 @@ fn gitkeep_alongside_loose_files() {
             err.message
         );
         // The message lists bad files before the "Only `.gitkeep` is allowed" template text.
-        let file_list = err
-            .message
-            .split("Only")
-            .next()
-            .unwrap_or(&err.message);
+        let file_list = err.message.split("Only").next().unwrap_or(&err.message);
         assert!(
             !file_list.contains(".gitkeep"),
             "expected .gitkeep NOT listed as a bad file, got file list: '{file_list}'"
@@ -1017,7 +1013,8 @@ fn empty_required_dir_still_present() {
     let rule2_errs: Vec<_> = errors
         .iter()
         .filter(|e| {
-            e.title.contains("missing") && e.title.contains("crates/")
+            e.title.contains("missing")
+                && e.title.contains("crates/")
                 && (e.title.contains("/domain/")
                     || e.title.contains("/app/")
                     || e.title.contains("/ports/")
@@ -1046,7 +1043,10 @@ fn ts_app_with_cargo_toml_gets_checked() {
     // admin has src/ (triggers check_12 src/ ban) and no crates/ (triggers Rule 1)
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
-    let admin_errs: Vec<_> = errors.iter().filter(|e| e.title.contains("admin")).collect();
+    let admin_errs: Vec<_> = errors
+        .iter()
+        .filter(|e| e.title.contains("admin"))
+        .collect();
     assert_eq!(
         admin_errs.len(),
         2,
@@ -1104,7 +1104,8 @@ fn loose_file_inner_hex_only() {
         errors[0].title
     );
     assert!(
-        errors[0].title.contains("mcp/crates") || errors[0].title.contains("adapters/inbound/mcp/crates"),
+        errors[0].title.contains("mcp/crates")
+            || errors[0].title.contains("adapters/inbound/mcp/crates"),
         "expected inner hex title to contain full nested path 'mcp/crates', got: '{}'",
         errors[0].title
     );
@@ -1147,7 +1148,8 @@ fn unexpected_dir_inner_hex_only() {
         errors[0].title
     );
     assert!(
-        errors[0].title.contains("mcp/crates") || errors[0].title.contains("adapters/inbound/mcp/crates"),
+        errors[0].title.contains("mcp/crates")
+            || errors[0].title.contains("adapters/inbound/mcp/crates"),
         "expected inner hex title to contain full nested path 'mcp/crates', got: '{}'",
         errors[0].title
     );
@@ -1383,11 +1385,7 @@ fn new_app_gets_checked() {
     );
     // Create crates/ with only domain/ (missing adapters/, app/, ports/)
     std::fs::create_dir_all(tmp.path().join("apps/scheduler/crates/domain")).expect("mkdir");
-    write_file(
-        tmp.path(),
-        "apps/scheduler/crates/domain/.gitkeep",
-        "",
-    );
+    write_file(tmp.path(), "apps/scheduler/crates/domain/.gitkeep", "");
 
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
@@ -1494,11 +1492,8 @@ fn maximally_complex_single_location() {
 
     // Remove app/ dir and replace with symlink to /dev/null (a non-directory)
     remove_dir(tmp.path(), &format!("{devctl_crates}/app"));
-    std::os::unix::fs::symlink(
-        "/dev/null",
-        tmp.path().join(format!("{devctl_crates}/app")),
-    )
-    .expect("symlink");
+    std::os::unix::fs::symlink("/dev/null", tmp.path().join(format!("{devctl_crates}/app")))
+        .expect("symlink");
 
     // Remove domain/ entirely
     remove_dir(tmp.path(), &format!("{devctl_crates}/domain"));
@@ -1632,8 +1627,14 @@ fn renamed_required_dir_to_near_miss() {
     let r2 = rule2_errors(&errors);
     // Each location: missing domain/ + unexpected domains/ = 2. 4 locations = 8
     assert_eq!(r2.len(), 8, "expected 8 rule2 errors, got: {r2:#?}");
-    let missing: Vec<_> = r2.iter().filter(|e| e.title.contains("missing") && e.title.contains("domain")).collect();
-    let unexpected: Vec<_> = r2.iter().filter(|e| e.title.contains("unexpected") && e.title.contains("domains")).collect();
+    let missing: Vec<_> = r2
+        .iter()
+        .filter(|e| e.title.contains("missing") && e.title.contains("domain"))
+        .collect();
+    let unexpected: Vec<_> = r2
+        .iter()
+        .filter(|e| e.title.contains("unexpected") && e.title.contains("domains"))
+        .collect();
     assert_eq!(missing.len(), 4, "expected 4 missing domain errors");
     assert_eq!(unexpected.len(), 4, "expected 4 unexpected domains errors");
     let r2_flat: Vec<&CheckResult> = r2.iter().map(|e| **e).collect();
@@ -1656,16 +1657,34 @@ fn inner_hex_all_three_violations_outer_clean() {
     assert_eq!(r2.len(), 3, "expected 3 inner hex errors, got: {r2:#?}");
     // All from inner hex
     for err in &r2 {
-        assert!(err.file.as_deref().unwrap_or("").contains("mcp/crates"),
-            "error should be from inner hex, got file: {:?}", err.file);
+        assert!(
+            err.file.as_deref().unwrap_or("").contains("mcp/crates"),
+            "error should be from inner hex, got file: {:?}",
+            err.file
+        );
     }
     // All three categories
-    assert!(r2.iter().any(|e| e.title.contains("missing")), "expected missing error");
-    assert!(r2.iter().any(|e| e.title.contains("unexpected")), "expected unexpected error");
-    assert!(r2.iter().any(|e| e.title.contains("loose")), "expected loose files error");
+    assert!(
+        r2.iter().any(|e| e.title.contains("missing")),
+        "expected missing error"
+    );
+    assert!(
+        r2.iter().any(|e| e.title.contains("unexpected")),
+        "expected unexpected error"
+    );
+    assert!(
+        r2.iter().any(|e| e.title.contains("loose")),
+        "expected loose files error"
+    );
     // Outer apps clean
-    assert!(!r2.iter().any(|e| e.title.contains("devctl")), "devctl should be clean");
-    assert!(!r2.iter().any(|e| e.title.contains("worker")), "worker should be clean");
+    assert!(
+        !r2.iter().any(|e| e.title.contains("devctl")),
+        "devctl should be clean"
+    );
+    assert!(
+        !r2.iter().any(|e| e.title.contains("worker")),
+        "worker should be clean"
+    );
     assert_no_packages(&errors);
     assert_no_ts_apps(&errors);
 }
@@ -1682,13 +1701,26 @@ fn nested_unexpected_dir_tree() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
-    assert_eq!(r2.len(), 4, "expected 4 unexpected dir errors, got: {r2:#?}");
+    assert_eq!(
+        r2.len(),
+        4,
+        "expected 4 unexpected dir errors, got: {r2:#?}"
+    );
     for err in &r2 {
-        assert!(err.title.contains("unexpected") && err.title.contains("utils"),
-            "expected unexpected utils error, got: {}", err.title);
+        assert!(
+            err.title.contains("unexpected") && err.title.contains("utils"),
+            "expected unexpected utils error, got: {}",
+            err.title
+        );
         // Should NOT mention deeper levels
-        assert!(!err.title.contains("helpers"), "should not recurse into unexpected dir");
-        assert!(!err.title.contains("deep"), "should not recurse into unexpected dir");
+        assert!(
+            !err.title.contains("helpers"),
+            "should not recurse into unexpected dir"
+        );
+        assert!(
+            !err.title.contains("deep"),
+            "should not recurse into unexpected dir"
+        );
     }
     let r2_flat: Vec<&CheckResult> = r2.iter().map(|e| **e).collect();
     assert_per_app(&r2_flat);
@@ -1732,12 +1764,20 @@ fn idempotent_results() {
     let results2 = run_check(tmp.path());
     let errors1 = arch_errors(&results1);
     let errors2 = arch_errors(&results2);
-    assert_eq!(errors1.len(), errors2.len(),
-        "two runs should produce identical error counts: {} vs {}", errors1.len(), errors2.len());
+    assert_eq!(
+        errors1.len(),
+        errors2.len(),
+        "two runs should produce identical error counts: {} vs {}",
+        errors1.len(),
+        errors2.len()
+    );
     // Verify same titles (order may differ, so sort)
     let mut titles1: Vec<_> = errors1.iter().map(|e| &e.title).collect();
     let mut titles2: Vec<_> = errors2.iter().map(|e| &e.title).collect();
     titles1.sort();
     titles2.sort();
-    assert_eq!(titles1, titles2, "two runs should produce identical error titles");
+    assert_eq!(
+        titles1, titles2,
+        "two runs should produce identical error titles"
+    );
 }

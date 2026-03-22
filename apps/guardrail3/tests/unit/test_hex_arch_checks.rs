@@ -5,8 +5,8 @@ use std::path::{Path, PathBuf};
 
 use guardrail3::app::core::discover::{ProjectInfo, RustWorkspace, WorkspaceMember};
 use guardrail3::app::rs::validate::hex_arch_checks::{
-    Layer, check_dependency_flow, check_library_service_boundary,
-    contains_segment, is_service_internal, layer_from_config, normalize_path,
+    Layer, check_dependency_flow, check_library_service_boundary, contains_segment,
+    is_service_internal, layer_from_config, normalize_path,
 };
 use guardrail3::app::rs::validate::hex_arch_structure::check_hex_arch_structure;
 use guardrail3::domain::report::Severity;
@@ -180,7 +180,6 @@ fn project(members: &[(&str, &str)]) -> ProjectInfo {
     }
 }
 
-
 #[test]
 fn r_arch_01_service_missing_crates_dir() {
     let mut fs = StubFs::new();
@@ -188,7 +187,11 @@ fn r_arch_01_service_missing_crates_dir() {
     // No crates/ directory at all
     let mut r = Vec::new();
     check_hex_arch_structure(&fs, Path::new("/ws"), &mut r);
-    assert_eq!(r.len(), 1, "expected 1 error for missing crates/, got: {r:?}");
+    assert_eq!(
+        r.len(),
+        1,
+        "expected 1 error for missing crates/, got: {r:?}"
+    );
     assert_eq!(r[0].id, "R-ARCH-01");
     assert_eq!(r[0].severity, Severity::Error);
     assert!(

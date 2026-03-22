@@ -2,8 +2,8 @@ use crate::domain::report::{CheckResult, Severity};
 
 use super::inputs::WorkspaceCargoInput;
 use super::lint_support::{
-    EXPECTED_CLIPPY_DENY, EXPECTED_CLIPPY_GROUPS, EXPECTED_LIBRARY_RUST_LINTS,
-    EXPECTED_RUST_LINTS, lint_level, workspace_lints,
+    EXPECTED_CLIPPY_DENY, EXPECTED_CLIPPY_GROUPS, EXPECTED_LIBRARY_RUST_LINTS, EXPECTED_RUST_LINTS,
+    lint_level, workspace_lints,
 };
 
 const ID: &str = "RS-CARGO-01";
@@ -62,10 +62,7 @@ pub fn check(input: &WorkspaceCargoInput<'_>, results: &mut Vec<CheckResult>) {
                     id: ID.to_owned(),
                     severity: Severity::Error,
                     title: format!("missing workspace rust lint `{}`", expected.name),
-                    message: format!(
-                        "Expected `{}` in `[workspace.lints.rust]`.",
-                        expected.name
-                    ),
+                    message: format!("Expected `{}` in `[workspace.lints.rust]`.", expected.name),
                     file: Some(input.workspace.rel_path.clone()),
                     line: None,
                     inventory: false,

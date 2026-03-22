@@ -24,11 +24,7 @@ use crate::ports::outbound::FileSystem;
 /// Run all R-ARCH-01 structural checks.
 ///
 /// Auto-detects service apps by scanning `apps/*/Cargo.toml`.
-pub fn check_hex_arch_structure(
-    fs: &dyn FileSystem,
-    root: &Path,
-    results: &mut Vec<CheckResult>,
-) {
+pub fn check_hex_arch_structure(fs: &dyn FileSystem, root: &Path, results: &mut Vec<CheckResult>) {
     let apps_dir = root.join("apps");
     let apps_entries = fs.list_dir(&apps_dir);
     if apps_entries.is_empty() {
@@ -153,7 +149,13 @@ fn check_crates_dir(
 
     let adapters_label = format!("{label_prefix}/adapters");
     let ports_label = format!("{label_prefix}/ports");
-    check_inbound_outbound(fs, name, &crates_dir.join("adapters"), &adapters_label, results);
+    check_inbound_outbound(
+        fs,
+        name,
+        &crates_dir.join("adapters"),
+        &adapters_label,
+        results,
+    );
     check_inbound_outbound(fs, name, &crates_dir.join("ports"), &ports_label, results);
 
     let app_label = format!("{label_prefix}/app");
@@ -190,9 +192,7 @@ fn check_inbound_outbound(
             results.push(CheckResult {
                 id: "R-ARCH-01".to_owned(),
                 severity: Severity::Error,
-                title: format!(
-                    "Service `{name}` missing {layer}/{expected}/ directory"
-                ),
+                title: format!("Service `{name}` missing {layer}/{expected}/ directory"),
                 message: format!(
                     "Service `{name}` is missing `{layer}/{expected}/`. \
                      Create it and add a `.gitkeep` if not needed yet."
@@ -210,9 +210,7 @@ fn check_inbound_outbound(
             results.push(CheckResult {
                 id: "R-ARCH-01".to_owned(),
                 severity: Severity::Error,
-                title: format!(
-                    "Service `{name}` has unexpected directory {layer}/{dir_name}/"
-                ),
+                title: format!("Service `{name}` has unexpected directory {layer}/{dir_name}/"),
                 message: format!(
                     "Service `{name}` has `{layer}/{dir_name}/` which is not part of \
                      the hex arch template. Only `{{inbound, outbound}}` directories are \
@@ -347,9 +345,7 @@ fn check_loose_files(
         results.push(CheckResult {
             id: "R-ARCH-01".to_owned(),
             severity: Severity::Error,
-            title: format!(
-                "Service `{name}` has loose files in {label}/"
-            ),
+            title: format!("Service `{name}` has loose files in {label}/"),
             message: format!(
                 "Service `{name}` has files in `{label}/` that don't belong: {}. \
                  Only `.gitkeep` is allowed in structural/container directories. \

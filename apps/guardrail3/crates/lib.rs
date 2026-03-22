@@ -37,9 +37,9 @@ pub mod adapters {
     }
     pub mod outbound {
         pub mod fs;
+        pub mod report;
         #[path = "tool-runner/mod.rs"]
         pub mod tool_runner;
-        pub mod report;
     }
 }
 

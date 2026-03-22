@@ -60,7 +60,10 @@ pub fn collect(tree: &ProjectTree) -> Option<CargoFamilyFacts> {
     })
 }
 
-fn resolve_declared_members(tree: &ProjectTree, workspace_parsed: &toml::Value) -> BTreeSet<String> {
+fn resolve_declared_members(
+    tree: &ProjectTree,
+    workspace_parsed: &toml::Value,
+) -> BTreeSet<String> {
     raw_member_patterns(workspace_parsed)
         .into_iter()
         .flat_map(|pattern| expand_member_pattern(tree, &pattern))

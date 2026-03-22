@@ -23,8 +23,9 @@ pub fn check(input: &ToolchainRootInput<'_>, results: &mut Vec<CheckResult>) {
                 id: ID.to_owned(),
                 severity: Severity::Info,
                 title: "Cargo rust-version not declared".to_owned(),
-                message: "No `rust-version` found in Cargo.toml, so MSRV consistency cannot be checked."
-                    .to_owned(),
+                message:
+                    "No `rust-version` found in Cargo.toml, so MSRV consistency cannot be checked."
+                        .to_owned(),
                 file: Some(rel.to_owned()),
                 line: None,
                 inventory: false,

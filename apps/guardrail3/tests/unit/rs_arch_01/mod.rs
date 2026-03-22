@@ -1,7 +1,7 @@
 #![allow(clippy::expect_used, unused_results)] // reason: test assertions and fs::copy return values
 
-mod helpers;
 mod golden;
+mod helpers;
 mod rule_01;
 mod rule_02;
 mod rule_03;

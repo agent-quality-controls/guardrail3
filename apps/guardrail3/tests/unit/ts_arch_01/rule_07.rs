@@ -26,9 +26,20 @@ fn domain_imports_adapters_fails() {
     );
     let results = run_import_check(tmp.path());
     let errors = import_errors(&results);
-    assert_eq!(errors.len(), 1, "expected 1 import violation, got {}: {errors:#?}", errors.len());
-    assert!(errors[0].message.contains("domain"), "should mention domain layer");
-    assert!(errors[0].message.contains("adapters"), "should mention adapters layer");
+    assert_eq!(
+        errors.len(),
+        1,
+        "expected 1 import violation, got {}: {errors:#?}",
+        errors.len()
+    );
+    assert!(
+        errors[0].message.contains("domain"),
+        "should mention domain layer"
+    );
+    assert!(
+        errors[0].message.contains("adapters"),
+        "should mention adapters layer"
+    );
 }
 
 #[test]
@@ -41,7 +52,12 @@ fn domain_imports_application_fails() {
     );
     let results = run_import_check(tmp.path());
     let errors = import_errors(&results);
-    assert_eq!(errors.len(), 1, "expected 1 import violation, got {}: {errors:#?}", errors.len());
+    assert_eq!(
+        errors.len(),
+        1,
+        "expected 1 import violation, got {}: {errors:#?}",
+        errors.len()
+    );
     assert!(errors[0].message.contains("domain"));
     assert!(errors[0].message.contains("application"));
 }
@@ -56,7 +72,12 @@ fn domain_imports_ports_fails() {
     );
     let results = run_import_check(tmp.path());
     let errors = import_errors(&results);
-    assert_eq!(errors.len(), 1, "expected 1 import violation, got {}: {errors:#?}", errors.len());
+    assert_eq!(
+        errors.len(),
+        1,
+        "expected 1 import violation, got {}: {errors:#?}",
+        errors.len()
+    );
     assert!(errors[0].message.contains("domain"));
     assert!(errors[0].message.contains("ports"));
 }
@@ -103,7 +124,12 @@ fn application_imports_adapters_fails() {
     );
     let results = run_import_check(tmp.path());
     let errors = import_errors(&results);
-    assert_eq!(errors.len(), 1, "expected 1 import violation, got {}: {errors:#?}", errors.len());
+    assert_eq!(
+        errors.len(),
+        1,
+        "expected 1 import violation, got {}: {errors:#?}",
+        errors.len()
+    );
     assert!(errors[0].message.contains("application"));
     assert!(errors[0].message.contains("adapters"));
 }
@@ -134,7 +160,12 @@ fn ports_imports_adapters_fails() {
     );
     let results = run_import_check(tmp.path());
     let errors = import_errors(&results);
-    assert_eq!(errors.len(), 1, "expected 1 import violation, got {}: {errors:#?}", errors.len());
+    assert_eq!(
+        errors.len(),
+        1,
+        "expected 1 import violation, got {}: {errors:#?}",
+        errors.len()
+    );
     assert!(errors[0].message.contains("ports"));
     assert!(errors[0].message.contains("adapters"));
 }
@@ -170,7 +201,12 @@ fn alias_import_at_modules_detected() {
     );
     let results = run_import_check(tmp.path());
     let errors = import_errors(&results);
-    assert_eq!(errors.len(), 1, "expected 1 alias import violation, got {}: {errors:#?}", errors.len());
+    assert_eq!(
+        errors.len(),
+        1,
+        "expected 1 alias import violation, got {}: {errors:#?}",
+        errors.len()
+    );
 }
 
 #[test]
@@ -183,7 +219,12 @@ fn alias_import_tilde_detected() {
     );
     let results = run_import_check(tmp.path());
     let errors = import_errors(&results);
-    assert_eq!(errors.len(), 1, "expected 1 tilde alias import violation, got {}: {errors:#?}", errors.len());
+    assert_eq!(
+        errors.len(),
+        1,
+        "expected 1 tilde alias import violation, got {}: {errors:#?}",
+        errors.len()
+    );
 }
 
 #[test]
@@ -196,7 +237,12 @@ fn direct_layer_alias_detected() {
     );
     let results = run_import_check(tmp.path());
     let errors = import_errors(&results);
-    assert_eq!(errors.len(), 1, "expected 1 direct layer alias violation, got {}: {errors:#?}", errors.len());
+    assert_eq!(
+        errors.len(),
+        1,
+        "expected 1 direct layer alias violation, got {}: {errors:#?}",
+        errors.len()
+    );
 }
 
 #[test]
@@ -271,7 +317,12 @@ fn require_syntax_detected() {
     );
     let results = run_import_check(tmp.path());
     let errors = import_errors(&results);
-    assert_eq!(errors.len(), 1, "expected 1 require() violation, got {}: {errors:#?}", errors.len());
+    assert_eq!(
+        errors.len(),
+        1,
+        "expected 1 require() violation, got {}: {errors:#?}",
+        errors.len()
+    );
 }
 
 #[test]
@@ -285,9 +336,15 @@ fn all_violations_have_file_field() {
     let results = run_import_check(tmp.path());
     let errors = import_errors(&results);
     for err in &errors {
-        assert!(err.file.is_some(), "expected file field set, got None: {err:#?}");
         assert!(
-            err.file.as_deref().unwrap_or("").contains("domain/types/index.ts"),
+            err.file.is_some(),
+            "expected file field set, got None: {err:#?}"
+        );
+        assert!(
+            err.file
+                .as_deref()
+                .unwrap_or("")
+                .contains("domain/types/index.ts"),
             "expected file path to contain source file, got: '{}'",
             err.file.as_deref().unwrap_or("")
         );

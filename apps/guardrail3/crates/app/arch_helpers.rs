@@ -135,9 +135,7 @@ pub fn check_exact_subdirs(
             results.push(CheckResult {
                 id: id.to_owned(),
                 severity: Severity::Error,
-                title: format!(
-                    "{entity} `{name}` has unexpected directory {label}/{dir_name}/"
-                ),
+                title: format!("{entity} `{name}` has unexpected directory {label}/{dir_name}/"),
                 message: format!(
                     "{entity} `{name}` has `{label}/{dir_name}/` which is not part of \
                      the hex arch template. Only `{{{}}}` directories are allowed in `{label}/`.",

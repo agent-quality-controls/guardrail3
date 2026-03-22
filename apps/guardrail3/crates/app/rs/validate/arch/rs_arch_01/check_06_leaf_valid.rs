@@ -29,7 +29,8 @@ pub fn check(
         // distinguish empty dir from nonexistent). An empty crates/ is a real
         // hex-in-hex scaffold — recurse into it so inner structural checks
         // report the actual problems.
-        let has_crates = fs.metadata(&sub_path.join("crates"))
+        let has_crates = fs
+            .metadata(&sub_path.join("crates"))
             .is_some_and(|m| m.is_dir());
 
         if has_crates && has_cargo {

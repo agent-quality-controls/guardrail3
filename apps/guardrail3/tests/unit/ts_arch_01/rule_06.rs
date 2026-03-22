@@ -98,10 +98,8 @@ fn subdir_with_gitkeep_passes() {
 fn empty_subdir_fails() {
     let tmp = copy_fixture();
     // Add an empty subdir to domain/
-    std::fs::create_dir_all(
-        tmp.path().join("apps/admin/src/modules/domain/events"),
-    )
-    .expect("create empty subdir");
+    std::fs::create_dir_all(tmp.path().join("apps/admin/src/modules/domain/events"))
+        .expect("create empty subdir");
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let leaf: Vec<_> = errors
@@ -121,10 +119,22 @@ fn hex_in_hex_triggers_recursion() {
     let tmp = copy_fixture();
     // Add a hex-in-hex inside adapters/inbound/mcp/
     let base = "apps/admin/src/modules/adapters/inbound/mcp/modules";
-    write_file(tmp.path(), &format!("{base}/domain/types/index.ts"), "export type MCP = {};");
-    write_file(tmp.path(), &format!("{base}/application/commands/run.ts"), "export function run() {}");
+    write_file(
+        tmp.path(),
+        &format!("{base}/domain/types/index.ts"),
+        "export type MCP = {};",
+    );
+    write_file(
+        tmp.path(),
+        &format!("{base}/application/commands/run.ts"),
+        "export function run() {}",
+    );
     write_file(tmp.path(), &format!("{base}/adapters/inbound/.gitkeep"), "");
-    write_file(tmp.path(), &format!("{base}/adapters/outbound/.gitkeep"), "");
+    write_file(
+        tmp.path(),
+        &format!("{base}/adapters/outbound/.gitkeep"),
+        "",
+    );
     write_file(tmp.path(), &format!("{base}/ports/inbound/.gitkeep"), "");
     write_file(tmp.path(), &format!("{base}/ports/outbound/.gitkeep"), "");
     let results = run_check(tmp.path());
@@ -146,15 +156,25 @@ fn hex_in_hex_missing_layer() {
     // Add hex-in-hex but missing domain/
     let base = "apps/admin/src/modules/adapters/inbound/mcp/modules";
     // No domain/ — should error
-    write_file(tmp.path(), &format!("{base}/application/commands/run.ts"), "export function run() {}");
+    write_file(
+        tmp.path(),
+        &format!("{base}/application/commands/run.ts"),
+        "export function run() {}",
+    );
     write_file(tmp.path(), &format!("{base}/adapters/inbound/.gitkeep"), "");
-    write_file(tmp.path(), &format!("{base}/adapters/outbound/.gitkeep"), "");
+    write_file(
+        tmp.path(),
+        &format!("{base}/adapters/outbound/.gitkeep"),
+        "",
+    );
     write_file(tmp.path(), &format!("{base}/ports/inbound/.gitkeep"), "");
     write_file(tmp.path(), &format!("{base}/ports/outbound/.gitkeep"), "");
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     assert!(
-        errors.iter().any(|e| e.title.contains("missing") && e.title.contains("domain")),
+        errors
+            .iter()
+            .any(|e| e.title.contains("missing") && e.title.contains("domain")),
         "expected error about missing domain/ in hex-in-hex, got: {errors:#?}"
     );
 }

@@ -11,7 +11,9 @@ fn workspace_has_extra_member() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     assert!(
-        errors.iter().any(|e| e.title.contains("phantom") || e.title.contains("extra member") || e.title.contains("does not exist")),
+        errors.iter().any(|e| e.title.contains("phantom")
+            || e.title.contains("extra member")
+            || e.title.contains("does not exist")),
         "expected error about phantom workspace member, got: {errors:#?}"
     );
 }

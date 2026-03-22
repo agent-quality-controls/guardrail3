@@ -97,7 +97,12 @@ fn missing_domain() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
-    assert_eq!(r2.len(), 1, "expected 1 missing-domain error, got {}: {r2:#?}", r2.len());
+    assert_eq!(
+        r2.len(),
+        1,
+        "expected 1 missing-domain error, got {}: {r2:#?}",
+        r2.len()
+    );
     assert!(
         r2[0].title.contains("missing") && r2[0].title.contains("domain"),
         "expected title about missing domain/, got: '{}'",
@@ -113,7 +118,12 @@ fn missing_ports() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
-    assert_eq!(r2.len(), 1, "expected 1 missing-ports error, got {}: {r2:#?}", r2.len());
+    assert_eq!(
+        r2.len(),
+        1,
+        "expected 1 missing-ports error, got {}: {r2:#?}",
+        r2.len()
+    );
     assert!(
         r2[0].title.contains("missing") && r2[0].title.contains("ports"),
         "expected title about missing ports/, got: '{}'",
@@ -129,7 +139,12 @@ fn missing_application() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
-    assert_eq!(r2.len(), 1, "expected 1 missing-application error, got {}: {r2:#?}", r2.len());
+    assert_eq!(
+        r2.len(),
+        1,
+        "expected 1 missing-application error, got {}: {r2:#?}",
+        r2.len()
+    );
     assert!(
         r2[0].title.contains("missing") && r2[0].title.contains("application"),
         "expected title about missing application/, got: '{}'",
@@ -145,7 +160,12 @@ fn missing_adapters() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
-    assert_eq!(r2.len(), 1, "expected 1 missing-adapters error, got {}: {r2:#?}", r2.len());
+    assert_eq!(
+        r2.len(),
+        1,
+        "expected 1 missing-adapters error, got {}: {r2:#?}",
+        r2.len()
+    );
     assert!(
         r2[0].title.contains("missing") && r2[0].title.contains("adapters"),
         "expected title about missing adapters/, got: '{}'",
@@ -166,9 +186,20 @@ fn missing_two_dirs() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
-    assert_eq!(r2.len(), 2, "expected 2 missing-dir errors, got {}: {r2:#?}", r2.len());
-    assert!(r2.iter().any(|e| e.title.contains("domain")), "expected domain error: {r2:#?}");
-    assert!(r2.iter().any(|e| e.title.contains("ports")), "expected ports error: {r2:#?}");
+    assert_eq!(
+        r2.len(),
+        2,
+        "expected 2 missing-dir errors, got {}: {r2:#?}",
+        r2.len()
+    );
+    assert!(
+        r2.iter().any(|e| e.title.contains("domain")),
+        "expected domain error: {r2:#?}"
+    );
+    assert!(
+        r2.iter().any(|e| e.title.contains("ports")),
+        "expected ports error: {r2:#?}"
+    );
     assert_standard(&r2, &errors);
 }
 
@@ -186,7 +217,12 @@ fn missing_all_four() {
     let r2 = rule2_errors(&errors);
     // 4 dirs * 2 apps = 8 errors
     // (removing portal's adapters/ destroys inner hexes but they're unreachable — no cascade)
-    assert_eq!(r2.len(), 8, "expected 8 missing-dir errors (4 per app * 2 apps), got {}: {r2:#?}", r2.len());
+    assert_eq!(
+        r2.len(),
+        8,
+        "expected 8 missing-dir errors (4 per app * 2 apps), got {}: {r2:#?}",
+        r2.len()
+    );
     for dir in EXPECTED_DIRS {
         assert!(
             r2.iter().any(|e| e.title.contains(dir)),
@@ -221,7 +257,12 @@ fn unexpected_directory() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
-    assert_eq!(r2.len(), 1, "expected 1 unexpected-dir error, got {}: {r2:#?}", r2.len());
+    assert_eq!(
+        r2.len(),
+        1,
+        "expected 1 unexpected-dir error, got {}: {r2:#?}",
+        r2.len()
+    );
     assert!(
         r2[0].title.contains("unexpected") && r2[0].title.contains("services"),
         "expected title about unexpected 'services', got: '{}'",
@@ -245,7 +286,12 @@ fn multiple_unexpected_dirs() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
-    assert_eq!(r2.len(), 3, "expected 3 unexpected-dir errors, got {}: {r2:#?}", r2.len());
+    assert_eq!(
+        r2.len(),
+        3,
+        "expected 3 unexpected-dir errors, got {}: {r2:#?}",
+        r2.len()
+    );
     for name in &["services", "utils", "shared"] {
         assert!(
             r2.iter().any(|e| e.title.contains(name)),
@@ -262,7 +308,12 @@ fn hidden_dir_unexpected() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
-    assert_eq!(r2.len(), 1, "expected 1 unexpected-dir error for .hidden, got {}: {r2:#?}", r2.len());
+    assert_eq!(
+        r2.len(),
+        1,
+        "expected 1 unexpected-dir error for .hidden, got {}: {r2:#?}",
+        r2.len()
+    );
     assert!(
         r2[0].title.contains(".hidden"),
         "expected title mentioning '.hidden', got: '{}'",
@@ -279,7 +330,12 @@ fn unexpected_dir_named_inbound() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
-    assert_eq!(r2.len(), 1, "expected 1 unexpected-dir error for 'inbound' at root, got {}: {r2:#?}", r2.len());
+    assert_eq!(
+        r2.len(),
+        1,
+        "expected 1 unexpected-dir error for 'inbound' at root, got {}: {r2:#?}",
+        r2.len()
+    );
     assert!(
         r2[0].title.contains("unexpected") && r2[0].title.contains("inbound"),
         "expected unexpected 'inbound' error, got: '{}'",
@@ -299,7 +355,12 @@ fn loose_ts_file_in_modules() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
-    assert_eq!(r2.len(), 1, "expected 1 loose-file error, got {}: {r2:#?}", r2.len());
+    assert_eq!(
+        r2.len(),
+        1,
+        "expected 1 loose-file error, got {}: {r2:#?}",
+        r2.len()
+    );
     assert!(
         r2[0].title.contains("loose files"),
         "expected 'loose files' in title, got: '{}'",
@@ -320,20 +381,40 @@ fn loose_json_file_in_modules() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
-    assert_eq!(r2.len(), 1, "expected 1 loose-file error, got {}: {r2:#?}", r2.len());
-    assert!(r2[0].message.contains("config.json"), "expected message to list config.json");
+    assert_eq!(
+        r2.len(),
+        1,
+        "expected 1 loose-file error, got {}: {r2:#?}",
+        r2.len()
+    );
+    assert!(
+        r2[0].message.contains("config.json"),
+        "expected message to list config.json"
+    );
     assert_standard(&r2, &errors);
 }
 
 #[test]
 fn loose_gitignore_not_gitkeep() {
     let tmp = copy_fixture();
-    write_file(tmp.path(), "apps/admin/src/modules/.gitignore", "node_modules/");
+    write_file(
+        tmp.path(),
+        "apps/admin/src/modules/.gitignore",
+        "node_modules/",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
-    assert_eq!(r2.len(), 1, "expected 1 loose-file error for .gitignore, got {}: {r2:#?}", r2.len());
-    assert!(r2[0].message.contains(".gitignore"), "expected message to list .gitignore");
+    assert_eq!(
+        r2.len(),
+        1,
+        "expected 1 loose-file error for .gitignore, got {}: {r2:#?}",
+        r2.len()
+    );
+    assert!(
+        r2[0].message.contains(".gitignore"),
+        "expected message to list .gitignore"
+    );
     assert_standard(&r2, &errors);
 }
 
@@ -346,10 +427,24 @@ fn multiple_loose_files() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
-    assert_eq!(r2.len(), 1, "expected 1 loose-file error (listing all files), got {}: {r2:#?}", r2.len());
-    assert!(r2[0].message.contains("index.ts"), "expected index.ts in message");
-    assert!(r2[0].message.contains("types.ts"), "expected types.ts in message");
-    assert!(r2[0].message.contains("config.json"), "expected config.json in message");
+    assert_eq!(
+        r2.len(),
+        1,
+        "expected 1 loose-file error (listing all files), got {}: {r2:#?}",
+        r2.len()
+    );
+    assert!(
+        r2[0].message.contains("index.ts"),
+        "expected index.ts in message"
+    );
+    assert!(
+        r2[0].message.contains("types.ts"),
+        "expected types.ts in message"
+    );
+    assert!(
+        r2[0].message.contains("config.json"),
+        "expected config.json in message"
+    );
     assert_standard(&r2, &errors);
 }
 
@@ -364,7 +459,12 @@ fn gitkeep_allowed_in_modules() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
-    assert_eq!(r2.len(), 0, "expected 0 rule-02 errors when .gitkeep present, got {}: {r2:#?}", r2.len());
+    assert_eq!(
+        r2.len(),
+        0,
+        "expected 0 rule-02 errors when .gitkeep present, got {}: {r2:#?}",
+        r2.len()
+    );
 }
 
 #[test]
@@ -375,8 +475,16 @@ fn gitkeep_alongside_loose_file() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
-    assert_eq!(r2.len(), 1, "expected 1 loose-file error (stray.ts only), got {}: {r2:#?}", r2.len());
-    assert!(r2[0].message.contains("stray.ts"), "expected stray.ts in message");
+    assert_eq!(
+        r2.len(),
+        1,
+        "expected 1 loose-file error (stray.ts only), got {}: {r2:#?}",
+        r2.len()
+    );
+    assert!(
+        r2[0].message.contains("stray.ts"),
+        "expected stray.ts in message"
+    );
     // .gitkeep should NOT appear in the bad files list
     let bad_files_section = r2[0]
         .message
@@ -398,7 +506,12 @@ fn gitkeep_as_directory() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
-    assert_eq!(r2.len(), 1, "expected 1 unexpected-dir error for .gitkeep/, got {}: {r2:#?}", r2.len());
+    assert_eq!(
+        r2.len(),
+        1,
+        "expected 1 unexpected-dir error for .gitkeep/, got {}: {r2:#?}",
+        r2.len()
+    );
     assert!(
         r2[0].title.contains("unexpected") && r2[0].title.contains(".gitkeep"),
         "expected unexpected .gitkeep/ dir error, got: '{}'",
@@ -419,9 +532,22 @@ fn missing_plus_unexpected() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
-    assert_eq!(r2.len(), 2, "expected 2 errors (1 missing + 1 unexpected), got {}: {r2:#?}", r2.len());
-    assert!(r2.iter().any(|e| e.title.contains("missing") && e.title.contains("domain")), "expected missing domain");
-    assert!(r2.iter().any(|e| e.title.contains("unexpected") && e.title.contains("services")), "expected unexpected services");
+    assert_eq!(
+        r2.len(),
+        2,
+        "expected 2 errors (1 missing + 1 unexpected), got {}: {r2:#?}",
+        r2.len()
+    );
+    assert!(
+        r2.iter()
+            .any(|e| e.title.contains("missing") && e.title.contains("domain")),
+        "expected missing domain"
+    );
+    assert!(
+        r2.iter()
+            .any(|e| e.title.contains("unexpected") && e.title.contains("services")),
+        "expected unexpected services"
+    );
     assert_standard(&r2, &errors);
 }
 
@@ -433,9 +559,21 @@ fn missing_plus_loose() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
-    assert_eq!(r2.len(), 2, "expected 2 errors (1 missing + 1 loose), got {}: {r2:#?}", r2.len());
-    assert!(r2.iter().any(|e| e.title.contains("missing") && e.title.contains("ports")), "expected missing ports");
-    assert!(r2.iter().any(|e| e.title.contains("loose files")), "expected loose files");
+    assert_eq!(
+        r2.len(),
+        2,
+        "expected 2 errors (1 missing + 1 loose), got {}: {r2:#?}",
+        r2.len()
+    );
+    assert!(
+        r2.iter()
+            .any(|e| e.title.contains("missing") && e.title.contains("ports")),
+        "expected missing ports"
+    );
+    assert!(
+        r2.iter().any(|e| e.title.contains("loose files")),
+        "expected loose files"
+    );
     assert_standard(&r2, &errors);
 }
 
@@ -455,10 +593,24 @@ fn all_three_violations() {
     let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
     // 3 violations * 2 apps = 6 errors
-    assert_eq!(r2.len(), 6, "expected 6 errors (3 per app * 2 apps), got {}: {r2:#?}", r2.len());
-    assert!(r2.iter().any(|e| e.title.contains("missing")), "expected missing error");
-    assert!(r2.iter().any(|e| e.title.contains("unexpected")), "expected unexpected error");
-    assert!(r2.iter().any(|e| e.title.contains("loose files")), "expected loose files error");
+    assert_eq!(
+        r2.len(),
+        6,
+        "expected 6 errors (3 per app * 2 apps), got {}: {r2:#?}",
+        r2.len()
+    );
+    assert!(
+        r2.iter().any(|e| e.title.contains("missing")),
+        "expected missing error"
+    );
+    assert!(
+        r2.iter().any(|e| e.title.contains("unexpected")),
+        "expected unexpected error"
+    );
+    assert!(
+        r2.iter().any(|e| e.title.contains("loose files")),
+        "expected loose files error"
+    );
     // Per-app attribution
     for app in TS_SERVICE_APPS {
         assert!(
@@ -480,17 +632,35 @@ fn all_three_violations() {
 fn required_dir_replaced_with_file() {
     let tmp = copy_fixture();
     remove_dir(tmp.path(), "apps/admin/src/modules/domain");
-    write_file(tmp.path(), "apps/admin/src/modules/domain", "not a directory");
+    write_file(
+        tmp.path(),
+        "apps/admin/src/modules/domain",
+        "not a directory",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
     // "domain" as a file: list_dir_names won't see it (not is_dir), so "missing" fires.
     // check_loose_files sees it (not .gitkeep), so "loose files" fires.
-    assert_eq!(r2.len(), 2, "expected 2 errors (missing + loose), got {}: {r2:#?}", r2.len());
-    assert!(r2.iter().any(|e| e.title.contains("missing") && e.title.contains("domain")), "expected missing domain");
-    assert!(r2.iter().any(|e| e.title.contains("loose files")), "expected loose files");
+    assert_eq!(
+        r2.len(),
+        2,
+        "expected 2 errors (missing + loose), got {}: {r2:#?}",
+        r2.len()
+    );
     assert!(
-        r2.iter().filter(|e| e.title.contains("loose files")).any(|e| e.message.contains("domain")),
+        r2.iter()
+            .any(|e| e.title.contains("missing") && e.title.contains("domain")),
+        "expected missing domain"
+    );
+    assert!(
+        r2.iter().any(|e| e.title.contains("loose files")),
+        "expected loose files"
+    );
+    assert!(
+        r2.iter()
+            .filter(|e| e.title.contains("loose files"))
+            .any(|e| e.message.contains("domain")),
         "loose-file message should list 'domain'"
     );
     assert_standard(&r2, &errors);
@@ -505,9 +675,20 @@ fn file_coexists_with_same_named_dir() {
     let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
     // Only loose-file error (adapters.bak is a file, not a dir)
-    assert_eq!(r2.len(), 1, "expected 1 loose-file error, got {}: {r2:#?}", r2.len());
-    assert!(r2[0].title.contains("loose files"), "expected loose files error");
-    assert!(r2[0].message.contains("adapters.bak"), "expected adapters.bak in message");
+    assert_eq!(
+        r2.len(),
+        1,
+        "expected 1 loose-file error, got {}: {r2:#?}",
+        r2.len()
+    );
+    assert!(
+        r2[0].title.contains("loose files"),
+        "expected loose files error"
+    );
+    assert!(
+        r2[0].message.contains("adapters.bak"),
+        "expected adapters.bak in message"
+    );
     // No missing-dir error (adapters/ still exists as a dir)
     assert_standard(&r2, &errors);
 }
@@ -538,8 +719,15 @@ fn required_dir_replaced_with_symlink() {
         "expected 2 errors (missing + loose) for symlink replacing dir, got {}: {r2:#?}",
         r2.len()
     );
-    assert!(r2.iter().any(|e| e.title.contains("missing") && e.title.contains("domain")), "expected missing domain");
-    assert!(r2.iter().any(|e| e.title.contains("loose files")), "expected loose files");
+    assert!(
+        r2.iter()
+            .any(|e| e.title.contains("missing") && e.title.contains("domain")),
+        "expected missing domain"
+    );
+    assert!(
+        r2.iter().any(|e| e.title.contains("loose files")),
+        "expected loose files"
+    );
     assert_standard(&r2, &errors);
 }
 
@@ -556,9 +744,21 @@ fn required_dir_is_broken_symlink() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
-    assert_eq!(r2.len(), 2, "expected 2 errors (missing + loose) for broken symlink, got {}: {r2:#?}", r2.len());
-    assert!(r2.iter().any(|e| e.title.contains("missing") && e.title.contains("domain")), "expected missing domain");
-    assert!(r2.iter().any(|e| e.title.contains("loose files")), "expected loose files");
+    assert_eq!(
+        r2.len(),
+        2,
+        "expected 2 errors (missing + loose) for broken symlink, got {}: {r2:#?}",
+        r2.len()
+    );
+    assert!(
+        r2.iter()
+            .any(|e| e.title.contains("missing") && e.title.contains("domain")),
+        "expected missing domain"
+    );
+    assert!(
+        r2.iter().any(|e| e.title.contains("loose files")),
+        "expected loose files"
+    );
     assert_standard(&r2, &errors);
 }
 
@@ -574,7 +774,12 @@ fn empty_required_dir_passes_rule2() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
-    assert_eq!(r2.len(), 0, "empty dir should pass rule 02, got {}: {r2:#?}", r2.len());
+    assert_eq!(
+        r2.len(),
+        0,
+        "empty dir should pass rule 02, got {}: {r2:#?}",
+        r2.len()
+    );
 }
 
 // ============================================================================
@@ -597,16 +802,23 @@ fn near_miss_dir_names() {
     let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
     // 4 missing (real names) + 4 unexpected (near-misses) = 8 errors
-    assert_eq!(r2.len(), 8, "expected 8 errors (4 missing + 4 unexpected), got {}: {r2:#?}", r2.len());
+    assert_eq!(
+        r2.len(),
+        8,
+        "expected 8 errors (4 missing + 4 unexpected), got {}: {r2:#?}",
+        r2.len()
+    );
     for dir in EXPECTED_DIRS {
         assert!(
-            r2.iter().any(|e| e.title.contains("missing") && e.title.contains(dir)),
+            r2.iter()
+                .any(|e| e.title.contains("missing") && e.title.contains(dir)),
             "expected missing '{dir}' error, got: {r2:#?}"
         );
     }
     for name in &["domains", "port", "adapter", "app"] {
         assert!(
-            r2.iter().any(|e| e.title.contains("unexpected") && e.title.contains(name)),
+            r2.iter()
+                .any(|e| e.title.contains("unexpected") && e.title.contains(name)),
             "expected unexpected '{name}' error, got: {r2:#?}"
         );
     }
@@ -618,14 +830,27 @@ fn unicode_lookalike_dir_name() {
     let tmp = copy_fixture();
     // Zero-width space in dir name: "d\u{200B}omain" looks like "domain" but isn't
     remove_dir(tmp.path(), "apps/admin/src/modules/domain");
-    std::fs::create_dir_all(tmp.path().join("apps/admin/src/modules/d\u{200B}omain")).expect("mkdir");
+    std::fs::create_dir_all(tmp.path().join("apps/admin/src/modules/d\u{200B}omain"))
+        .expect("mkdir");
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
     // "domain" is missing (the lookalike doesn't match), plus unexpected dir
-    assert_eq!(r2.len(), 2, "expected 2 errors (missing domain + unexpected lookalike), got {}: {r2:#?}", r2.len());
-    assert!(r2.iter().any(|e| e.title.contains("missing") && e.title.contains("domain")), "expected missing domain");
-    assert!(r2.iter().any(|e| e.title.contains("unexpected")), "expected unexpected dir");
+    assert_eq!(
+        r2.len(),
+        2,
+        "expected 2 errors (missing domain + unexpected lookalike), got {}: {r2:#?}",
+        r2.len()
+    );
+    assert!(
+        r2.iter()
+            .any(|e| e.title.contains("missing") && e.title.contains("domain")),
+        "expected missing domain"
+    );
+    assert!(
+        r2.iter().any(|e| e.title.contains("unexpected")),
+        "expected unexpected dir"
+    );
     assert_standard(&r2, &errors);
 }
 
@@ -667,18 +892,38 @@ fn landing_not_flagged() {
 #[test]
 fn new_ts_app_with_broken_modules() {
     let tmp = copy_fixture();
-    write_file(tmp.path(), "apps/dashboard/package.json", r#"{"name": "dashboard"}"#);
-    std::fs::create_dir_all(tmp.path().join("apps/dashboard/src/modules/application")).expect("mkdir");
-    std::fs::create_dir_all(tmp.path().join("apps/dashboard/src/modules/adapters/inbound")).expect("mkdir");
-    std::fs::create_dir_all(tmp.path().join("apps/dashboard/src/modules/adapters/outbound")).expect("mkdir");
-    std::fs::create_dir_all(tmp.path().join("apps/dashboard/src/modules/ports/inbound")).expect("mkdir");
-    std::fs::create_dir_all(tmp.path().join("apps/dashboard/src/modules/ports/outbound")).expect("mkdir");
+    write_file(
+        tmp.path(),
+        "apps/dashboard/package.json",
+        r#"{"name": "dashboard"}"#,
+    );
+    std::fs::create_dir_all(tmp.path().join("apps/dashboard/src/modules/application"))
+        .expect("mkdir");
+    std::fs::create_dir_all(
+        tmp.path()
+            .join("apps/dashboard/src/modules/adapters/inbound"),
+    )
+    .expect("mkdir");
+    std::fs::create_dir_all(
+        tmp.path()
+            .join("apps/dashboard/src/modules/adapters/outbound"),
+    )
+    .expect("mkdir");
+    std::fs::create_dir_all(tmp.path().join("apps/dashboard/src/modules/ports/inbound"))
+        .expect("mkdir");
+    std::fs::create_dir_all(tmp.path().join("apps/dashboard/src/modules/ports/outbound"))
+        .expect("mkdir");
     // Missing domain/ (application, adapters, ports are created above) → errors for dashboard
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
-    let dashboard_errors: Vec<_> = errors.iter().filter(|e| e.title.contains("dashboard")).collect();
+    let dashboard_errors: Vec<_> = errors
+        .iter()
+        .filter(|e| e.title.contains("dashboard"))
+        .collect();
     assert!(
-        dashboard_errors.iter().any(|e| e.title.contains("missing") && e.title.contains("domain")),
+        dashboard_errors
+            .iter()
+            .any(|e| e.title.contains("missing") && e.title.contains("domain")),
         "expected missing domain/ for dashboard, got: {dashboard_errors:#?}"
     );
     // admin should still be clean (golden structure)
@@ -696,27 +941,62 @@ fn new_ts_app_with_broken_modules() {
 #[test]
 fn new_ts_app_with_valid_modules() {
     let tmp = copy_fixture();
-    write_file(tmp.path(), "apps/dashboard/package.json", r#"{"name": "dashboard"}"#);
+    write_file(
+        tmp.path(),
+        "apps/dashboard/package.json",
+        r#"{"name": "dashboard"}"#,
+    );
     for dir in EXPECTED_DIRS {
-        std::fs::create_dir_all(
-            tmp.path().join(format!("apps/dashboard/src/modules/{dir}")),
-        )
-        .expect("mkdir");
+        std::fs::create_dir_all(tmp.path().join(format!("apps/dashboard/src/modules/{dir}")))
+            .expect("mkdir");
     }
-    std::fs::create_dir_all(tmp.path().join("apps/dashboard/src/modules/adapters/inbound")).expect("mkdir");
-    std::fs::create_dir_all(tmp.path().join("apps/dashboard/src/modules/adapters/outbound")).expect("mkdir");
-    std::fs::create_dir_all(tmp.path().join("apps/dashboard/src/modules/ports/inbound")).expect("mkdir");
-    std::fs::create_dir_all(tmp.path().join("apps/dashboard/src/modules/ports/outbound")).expect("mkdir");
+    std::fs::create_dir_all(
+        tmp.path()
+            .join("apps/dashboard/src/modules/adapters/inbound"),
+    )
+    .expect("mkdir");
+    std::fs::create_dir_all(
+        tmp.path()
+            .join("apps/dashboard/src/modules/adapters/outbound"),
+    )
+    .expect("mkdir");
+    std::fs::create_dir_all(tmp.path().join("apps/dashboard/src/modules/ports/inbound"))
+        .expect("mkdir");
+    std::fs::create_dir_all(tmp.path().join("apps/dashboard/src/modules/ports/outbound"))
+        .expect("mkdir");
     write_file(tmp.path(), "apps/dashboard/src/modules/domain/.gitkeep", "");
-    write_file(tmp.path(), "apps/dashboard/src/modules/application/.gitkeep", "");
-    write_file(tmp.path(), "apps/dashboard/src/modules/adapters/inbound/.gitkeep", "");
-    write_file(tmp.path(), "apps/dashboard/src/modules/adapters/outbound/.gitkeep", "");
-    write_file(tmp.path(), "apps/dashboard/src/modules/ports/inbound/.gitkeep", "");
-    write_file(tmp.path(), "apps/dashboard/src/modules/ports/outbound/.gitkeep", "");
+    write_file(
+        tmp.path(),
+        "apps/dashboard/src/modules/application/.gitkeep",
+        "",
+    );
+    write_file(
+        tmp.path(),
+        "apps/dashboard/src/modules/adapters/inbound/.gitkeep",
+        "",
+    );
+    write_file(
+        tmp.path(),
+        "apps/dashboard/src/modules/adapters/outbound/.gitkeep",
+        "",
+    );
+    write_file(
+        tmp.path(),
+        "apps/dashboard/src/modules/ports/inbound/.gitkeep",
+        "",
+    );
+    write_file(
+        tmp.path(),
+        "apps/dashboard/src/modules/ports/outbound/.gitkeep",
+        "",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
-    let dashboard_r2: Vec<_> = r2.iter().filter(|e| e.title.contains("dashboard")).collect();
+    let dashboard_r2: Vec<_> = r2
+        .iter()
+        .filter(|e| e.title.contains("dashboard"))
+        .collect();
     assert_eq!(
         dashboard_r2.len(),
         0,
@@ -741,14 +1021,20 @@ fn nested_unexpected_dir_only_top_flagged() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r2 = rule2_errors(&errors);
-    assert_eq!(r2.len(), 1, "expected 1 error (top-level services/ only), got {}: {r2:#?}", r2.len());
+    assert_eq!(
+        r2.len(),
+        1,
+        "expected 1 error (top-level services/ only), got {}: {r2:#?}",
+        r2.len()
+    );
     assert!(
         r2[0].title.contains("services"),
         "expected error about 'services', got: '{}'",
         r2[0].title
     );
     assert!(
-        !r2.iter().any(|e| e.title.contains("internal") || e.title.contains("deep")),
+        !r2.iter()
+            .any(|e| e.title.contains("internal") || e.title.contains("deep")),
         "should not flag nested dirs inside unexpected dir, got: {r2:#?}"
     );
     assert_standard(&r2, &errors);

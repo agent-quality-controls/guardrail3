@@ -38,9 +38,7 @@ pub fn check(input: &RustfmtRootInput<'_>, results: &mut Vec<CheckResult>) {
                 id: ID.to_owned(),
                 severity: Severity::Warn,
                 title: format!("nightly-only rustfmt setting `{key}` on stable"),
-                message: format!(
-                    "`{key}` is nightly-only, but rust-toolchain.toml uses `stable`."
-                ),
+                message: format!("`{key}` is nightly-only, but rust-toolchain.toml uses `stable`."),
                 file: Some(rel.to_owned()),
                 line: None,
                 inventory: false,

@@ -5,10 +5,7 @@ use guardrail3::app::ts::validate::ts_arch_checks;
 use guardrail3::domain::report::CheckResult;
 
 // Re-export shared utilities so rule files import from super::helpers
-pub use crate::test_support::{
-    copy_golden, errors_by_id, remove_dir,
-    write_file,
-};
+pub use crate::test_support::{copy_golden, errors_by_id, remove_dir, write_file};
 
 const GOLDEN: &str = "tests/fixtures/r_arch_01/golden";
 
