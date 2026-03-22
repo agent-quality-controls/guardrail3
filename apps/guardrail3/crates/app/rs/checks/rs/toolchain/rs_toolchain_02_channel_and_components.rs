@@ -127,3 +127,7 @@ fn check_components(parsed: &toml::Value, rel: &str, results: &mut Vec<CheckResu
         }),
     }
 }
+
+#[cfg(test)]
+#[path = "rs_toolchain_02_channel_and_components_tests.rs"]
+mod tests;

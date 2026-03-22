@@ -42,3 +42,7 @@ pub fn check_uncovered(input: &UncoveredRustUnitInput<'_>, results: &mut Vec<Che
         inventory: false,
     });
 }
+
+#[cfg(test)]
+#[path = "rs_clippy_01_coverage_tests.rs"]
+mod tests;

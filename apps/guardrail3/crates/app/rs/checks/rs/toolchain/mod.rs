@@ -24,7 +24,3 @@ pub fn check(tree: &ProjectTree) -> Vec<CheckResult> {
 
     results
 }
-
-#[cfg(test)]
-#[path = "toolchain_tests.rs"]
-mod tests;

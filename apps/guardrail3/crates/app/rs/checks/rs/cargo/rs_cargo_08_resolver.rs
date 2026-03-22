@@ -81,3 +81,7 @@ fn has_modern_package_edition(edition: Option<&str>) -> bool {
         .and_then(|value| value.parse::<u32>().ok())
         .is_some_and(|edition| edition >= 2021)
 }
+
+#[cfg(test)]
+#[path = "rs_cargo_08_resolver_tests.rs"]
+mod tests;

@@ -18,3 +18,7 @@ pub fn check(config: &ClippyConfigFacts, results: &mut Vec<CheckResult>) {
         inventory: false,
     });
 }
+
+#[cfg(test)]
+#[path = "rs_clippy_12_allowed_placement_tests.rs"]
+mod tests;

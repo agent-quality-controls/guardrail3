@@ -1,115 +1,277 @@
-# RS-DENY — deny.toml checker (20 rules)
+# RS-DENY — `deny.toml` checker
 
-**Input:** deny.toml (one per workspace)
+**Input:** effective cargo-deny config coverage over Rust validation roots
+
+Accepted config filenames:
+- `deny.toml`
+- `.deny.toml`
+- `.cargo/deny.toml`
+
+Allowed config roots:
+- validation root
+- workspace roots
+- standalone package roots that are not members of a workspace
+
+Cargo-deny resolution model:
+- config walks up from the manifest directory
+- nearest config wins
+- no merging
+- nested deny configs can silently shadow parent policy
+
+So the checker must validate:
+- coverage: every Rust root is covered by an allowed deny config
+- placement: deny configs only exist at allowed roots
+- shadowing: nested deny configs below an allowed root are forbidden unless the deeper directory is itself another allowed root
+
 **Parser:** TOML (`toml::Value`)
-**Current code:** `deny_audit.rs`, `deny_bans.rs`, `deny_licenses.rs`, `deny_inventory.rs`
+
+## Implementation mapping contract
+
+- exactly one `RS-DENY-*` rule ID per production file
+- exactly one sidecar `*_tests.rs` file per production rule file
+- `mod.rs` orchestrates only
+- `facts.rs`, `inputs.rs`, and `deny_support.rs` may contain shared facts, typed inputs, and canonical baseline helpers only
+
+Forbidden:
+
+- grouped concern files such as `rs_deny_bans.rs`
+- grouped family test files such as `deny_tests.rs`
+- helper files that hide multiple rule predicates behind one API
+
+**Canonical sources:**
+- generator baseline: `apps/guardrail3/crates/domain/modules/deny.rs`
+- historical validator: `deny_audit.rs`, `deny_bans.rs`, `deny_licenses.rs`, `deny_inventory.rs`
 
 ## Rules
 
 | New ID | Old ID | Severity | What | Status |
 |--------|--------|----------|------|--------|
-| RS-DENY-01 | R8 | Error | deny.toml exists at workspace root | Implemented |
-| RS-DENY-02 | R9 | Warn | Deprecated fields in [advisories] (vulnerability, notice, unsound) | Implemented |
-| RS-DENY-03 | R10 | Error | [advisories] section: unmaintained + yanked settings | Implemented |
-| RS-DENY-04 | R11 | Info | Advisory settings stricter than expected (unmaintained=deny, yanked=deny) | Implemented |
-| RS-DENY-05 | R12 | Error | [bans] section: multiple-versions=deny, deny array with 35 expected bans | Implemented |
-| RS-DENY-06 | R13 | Info | Extra bans beyond baseline (inventory) + highlight setting | Implemented |
-| RS-DENY-07 | R14 | Error | [licenses] section: allow list, private.ignore=true | Implemented |
-| RS-DENY-08 | R15 | Info | confidence-threshold setting | Implemented |
-| RS-DENY-09 | R16 | Error | [sources] section: unknown-registry=deny, unknown-git=deny, registries, git sources | Implemented |
-| RS-DENY-10 | R17 | Warn | [[bans.features]] tokio "full" feature banned | Implemented |
-| RS-DENY-11 | R18 | Info | Extra feature bans beyond tokio (inventory) | Implemented |
-| RS-DENY-12 | R19 | Warn/Info | [bans.skip] entries: warn if no reason, info inventory | Implemented |
-| RS-DENY-13 | R20 | Warn/Info | [advisories.ignore] entries: warn if no reason, info inventory | Implemented |
-| RS-DENY-14 | — | Error | [graph] section: all-features=true must be set | Todo |
-| RS-DENY-15 | — | Warn | [bans] wildcards and allow-wildcard-paths consistency | Todo |
-| RS-DENY-16 | — | Error | Library profile: deny list must include IO crate bans (axum, tokio, reqwest, sqlx, hyper, etc.) | Todo |
-| RS-DENY-17 | — | Warn | [licenses] allow list must not contain copyleft licenses (GPL, AGPL, LGPL, SSPL, EUPL) | Todo |
-| RS-DENY-18 | — | Info | [bans] deny entries without a `reason` field (inventory) | Todo |
-| RS-DENY-19 | — | Warn | [advisories.ignore] excessive count (threshold: 5) | Todo |
-| RS-DENY-20 | — | Warn | [bans].allow is non-empty — may override deny entries | Todo |
+| RS-DENY-01 | R8 | Error | Every Rust root is covered by an effective deny config | Todo |
+| RS-DENY-02 | — | Error | deny config files may exist only at allowed roots | Todo |
+| RS-DENY-03 | — | Error | Nested deny configs that shadow a parent root are forbidden | Todo |
+| RS-DENY-04 | R9 | Warn | Deprecated `[advisories]` fields (`vulnerability`, `notice`, `unsound`) | Todo |
+| RS-DENY-05 | R10 | Error | `[advisories]` must set `unmaintained = "workspace"` and `yanked = "warn"` | Todo |
+| RS-DENY-06 | R11 | Info | Advisory settings stricter than baseline are inventoried | Todo |
+| RS-DENY-07 | — | Error | `[graph].all-features = true` must be set | Todo |
+| RS-DENY-08 | — | Error | `[graph].no-default-features = false` must be set | Todo |
+| RS-DENY-09 | R12 | Error | `[bans].deny` must contain the full canonical baseline ban set for the active profile | Todo |
+| RS-DENY-10 | R12 | Warn | `[bans].multiple-versions` weaker than `"deny"` | Todo |
+| RS-DENY-11 | R13 | Info | `[bans].highlight` setting inventoried when it differs from `"all"` | Todo |
+| RS-DENY-12 | — | Error | `[bans].allow-wildcard-paths = true` must be set | Todo |
+| RS-DENY-13 | — | Warn | `[bans].wildcards` missing / default-reliant / weaker-than-expected is inventoried | Todo |
+| RS-DENY-14 | R14 | Error | `[licenses]` must contain the baseline allow list and `[licenses.private].ignore = true` | Todo |
+| RS-DENY-15 | R15 | Warn/Info | `confidence-threshold` must be `0.8` or stricter; stricter values are inventoried | Todo |
+| RS-DENY-16 | — | Warn | `[licenses].allow` must not include copyleft licenses | Todo |
+| RS-DENY-17 | — | Info | `[licenses].exceptions` entries are inventoried | Todo |
+| RS-DENY-18 | R16 | Error | `[sources].unknown-registry = "deny"` and `unknown-git = "deny"` | Todo |
+| RS-DENY-19 | R16 | Error | `[sources].allow-registry` must contain crates.io (git or sparse URL) | Todo |
+| RS-DENY-20 | — | Warn/Info | `[sources].allow-git` entries are warned and inventoried | Todo |
+| RS-DENY-21 | R17 | Warn | `[[bans.features]]` must ban `tokio` feature `full` | Todo |
+| RS-DENY-22 | R18 | Info | Extra feature bans beyond tokio are inventoried | Todo |
+| RS-DENY-23 | R19 | Warn/Info | `[bans.skip]` entries: malformed entry or missing/non-string reason warns; valid entries inventory | Todo |
+| RS-DENY-24 | R20 | Warn/Info | `[advisories].ignore` entries: malformed entry or missing/non-string reason warns; valid entries inventory | Todo |
+| RS-DENY-25 | — | Error/Warn | `[bans].allow` is forbidden; overlap with deny baseline is an explicit error | Todo |
+| RS-DENY-26 | — | Info | `[bans].deny` entries without `reason` are inventoried | Todo |
+| RS-DENY-27 | — | Warn | Duplicate entries in `deny`, `skip`, `ignore`, or `[[bans.features]]` are warned | Todo |
+| RS-DENY-28 | — | Warn | Unknown keys / unsupported schema in critical deny sections are warned | Todo |
+| RS-DENY-29 | — | Warn | Advisory ignore accumulation over threshold is warned | Todo |
+| RS-DENY-30 | — | Error/Info | Ban-entry `wrappers` must match canonical policy where managed; project-specific wrappers inventory otherwise | Todo |
 
-## Expected bans additions
+## Canonical baseline
 
-| Crate | Why | Status |
-|-------|-----|--------|
-| `lazy_static` | Legacy lazy init macro. `std::sync::LazyLock` (stable since 1.80) is the replacement. Unnecessary dependency. | NOT in EXPECTED_BANS — must add |
+Do not hardcode a prose count like “35 expected bans”.
 
-## Bug fixes on existing rules
+The active expected deny set must be derived from the canonical generator baseline in
+`apps/guardrail3/crates/domain/modules/deny.rs`, plus:
+- profile-aware additions for `library`
+- explicit audited additions such as `lazy_static`
 
-| Target | Bug | What |
-|--------|-----|------|
-| RS-DENY-09 | M9 | Accept sparse protocol URL `sparse+https://index.crates.io/` as valid crates.io registry (in addition to existing git URL) |
-| RS-DENY-12 | B1 | Warn on malformed skip entries (missing both `crate` and `name` fields) instead of silently reporting "unknown" |
-| RS-DENY-12 | B2 | Warn when `reason` field is present but not a string instead of treating as empty |
-| RS-DENY-13 | B1 | Same malformed-entry handling as RS-DENY-12 |
-| RS-DENY-13 | B3 | Add missing `.as_inventory()` on advisory ignore Info entries for `--inventory` consistency |
+The checker should have a generator-vs-validator consistency test so the baseline cannot drift silently.
 
-## New rule details
+## Key reconciliations from the audit
 
-### RS-DENY-14 — `[graph]` section validation (Error)
+### Placement and coverage
 
-**What:** The `[graph]` section must exist with `all-features = true`. Without this, cargo-deny only checks the default feature set, missing feature-gated dependencies entirely. This is a silent correctness hole — cargo-deny runs but inspects a subset of the dependency tree.
+The old plan assumed “one `deny.toml` at workspace root”.
+That is not how cargo-deny behaves.
 
-**Check:**
-1. `[graph]` section exists → if missing, Error
-2. `all-features` key exists and is `true` → if missing or `false`, Error
+cargo-deny walks up from the manifest directory and nearest config wins, so:
+- nested deny files can shadow parent policy
+- validation must model effective coverage, not just file existence
+- deny placement must be checked similarly to clippy placement
 
-**Message:** "deny.toml [graph] section must set all-features = true to check all feature-gated dependencies"
+### Ban settings vs ban completeness
 
-### RS-DENY-15 — Wildcards consistency (Warn)
+The old plan merged `[bans].multiple-versions = "deny"` and ban-list completeness into one rule.
+That is wrong.
 
-**What:** The generated template sets `wildcards = "allow"` and `allow-wildcard-paths = true` in `[bans]`. If `wildcards` is set to `"deny"` without `allow-wildcard-paths = true`, workspace path dependencies are rejected. If both are removed, behavior depends on cargo-deny version defaults.
+They are separate concerns:
+- ban-list completeness is hard correctness
+- `multiple-versions` is a threshold-like policy knob and may be relaxed with a warning
 
-**Check:**
-1. If `wildcards` is present and not `"allow"`, and `allow-wildcard-paths` is not `true` → Warn
-2. If neither `wildcards` nor `allow-wildcard-paths` is present → Warn (relying on cargo-deny defaults is fragile)
+### Sources policy
 
-**Message:** "deny.toml [bans] should set wildcards = \"allow\" with allow-wildcard-paths = true for workspace path dependency compatibility"
+The old plan merged all source checks into one rule.
+That hid an important distinction:
+- `unknown-*` policy is guardrail-owned
+- `allow-registry` must include crates.io
+- `allow-git` is user-owned but risky and should be inventoried / warned, not blanket-error'ed
 
-### RS-DENY-16 — Library profile IO crate bans (Error)
+### Graph correctness
 
-**What:** When the project profile is `library`, the deny list must include IO crate bans that prevent libraries from pulling in runtime dependencies. The generator adds these via `DENY_BANS_LIBRARY_IO`, but the validator ignores the `_profile` parameter entirely.
+The old plan only added `all-features = true`.
+That is incomplete.
 
-**Fix approach:** When `profile == Some("library")`, extend the expected ban set with the library-IO crates: `axum`, `tokio`, `reqwest`, `sqlx`, `hyper`, `tonic`, `tower`, `warp`, `actix-web`, `rocket`, `tide`, `poem`, `salvo`. Crates already in the service baseline are naturally deduplicated.
+For hard coverage, the deny checker must also require:
+- `no-default-features = false`
 
-**Check:** Same logic as RS-DENY-05 but with the extended set when profile is `library`.
+Otherwise cargo-deny can still check only a subset of the graph.
 
-**Message:** "Library profile: deny.toml is missing ban for IO crate '{name}' — libraries must not depend on runtime/IO crates"
+## Rule details
 
-### RS-DENY-17 — Copyleft license detection (Warn)
+### RS-DENY-01 — Effective deny coverage (Error)
 
-**What:** The `[licenses].allow` list should only contain permissive licenses. Adding copyleft licenses (GPL, AGPL, LGPL, SSPL, EUPL) defeats the purpose of license checking for most commercial projects.
+Every Rust root must be covered by an effective deny config found via cargo-deny walk-up semantics.
 
-**Blocked licenses:** `GPL-2.0-only`, `GPL-2.0-or-later`, `GPL-3.0-only`, `GPL-3.0-or-later`, `AGPL-3.0-only`, `AGPL-3.0-or-later`, `LGPL-2.1-only`, `LGPL-2.1-or-later`, `LGPL-3.0-only`, `LGPL-3.0-or-later`, `SSPL-1.0`, `EUPL-1.2`
+Covered means:
+- the root itself has an allowed deny config, or
+- an allowed ancestor config is the nearest config cargo-deny would resolve
 
-Also match short forms without suffixes: `GPL-2.0`, `GPL-3.0`, `AGPL-3.0`, `LGPL-2.1`, `LGPL-3.0`
+Uncovered Rust roots are errors.
 
-**Check:** For each entry in `[licenses].allow`, if it matches a copyleft identifier → Warn
+### RS-DENY-02 / RS-DENY-03 — Placement and shadowing (Error)
 
-**Message:** "deny.toml [licenses] allow list contains copyleft license '{license}' — this may have viral licensing implications"
+Deny configs are allowed only at:
+- validation root
+- workspace roots
+- standalone package roots not inside a workspace
 
-### RS-DENY-18 — Ban entry reason inventory (Info)
+Any deny config below one of those roots is an error unless the deeper directory is itself another allowed root.
 
-**What:** Each entry in `[bans].deny` should have a `reason` field explaining why the crate is banned. Consistent with RS-DENY-12 (skip reasons) and RS-DENY-13 (advisory ignore reasons).
+This applies to all accepted filenames:
+- `deny.toml`
+- `.deny.toml`
+- `.cargo/deny.toml`
 
-**Check:** For each entry in `[bans].deny` that is a table (not just a string), if `reason` field is missing or empty → Info inventory
+### RS-DENY-07 / RS-DENY-08 — Graph coverage (Error)
 
-**Message:** "deny.toml ban entry '{name}' has no reason field"
+Required:
+- `[graph]` exists
+- `all-features = true`
+- `no-default-features = false`
 
-### RS-DENY-19 — Advisory ignore accumulation (Warn)
+These are not cosmetic defaults. They control which dependency graph cargo-deny inspects.
 
-**What:** If `[advisories].ignore` has more than 5 entries, the project is suppressing a concerning number of security advisories. This suggests either the dependencies need updating or the ignore list needs pruning.
+### RS-DENY-09 — Canonical ban coverage (Error)
 
-**Check:** Count entries in `[advisories].ignore`. If > 5 → Warn
+`[bans].deny` must contain the full canonical deny baseline for the active profile.
 
-**Message:** "deny.toml [advisories].ignore has {count} entries (threshold: 5) — consider updating dependencies or auditing suppressions"
+That expected set must be derived from the generator baseline, not duplicated manually in prose.
 
-### RS-DENY-20 — Ban allow-list detection (Warn)
+For `library` profile, the baseline includes library-IO bans from the canonical module.
 
-**What:** cargo-deny supports `[bans].allow` to whitelist specific crates, which overrides deny entries. If both `allow` and `deny` contain the same crate, cargo-deny resolves in favor of `allow`, silently permitting a banned crate.
+### RS-DENY-10 — `multiple-versions` floor (Warn)
 
-**Check:** If `[bans].allow` exists and is a non-empty array → Warn. If any entry in `allow` also appears in `deny` → Error (explicit override of a ban).
+`multiple-versions = "deny"` is the preferred hardening baseline.
 
-**Message (Warn):** "deny.toml [bans].allow is non-empty ({count} entries) — allow entries override deny entries"
-**Message (Error):** "deny.toml [bans].allow contains '{name}' which is also in the deny list — this silently overrides the ban"
+If the value is weaker, warn rather than error.
+This is a deliberate design choice: it behaves like a threshold/floor, not like a must-match invariant.
+
+### RS-DENY-12 / RS-DENY-13 — Wildcard policy
+
+Hard requirement:
+- `allow-wildcard-paths = true`
+
+Inventory / warning:
+- `wildcards` missing
+- `wildcards` relying on defaults
+- `wildcards` weaker than expected
+
+Do not treat stricter user values as hard failures.
+
+### RS-DENY-14 / RS-DENY-15 / RS-DENY-16 / RS-DENY-17 — License policy
+
+Guardrail-owned:
+- baseline allow list present
+- `private.ignore = true`
+- `confidence-threshold >= 0.8`
+
+Warn / inventory:
+- copyleft licenses in allow list
+- license exceptions in `[licenses].exceptions`
+
+### RS-DENY-18 / RS-DENY-19 / RS-DENY-20 — Source policy
+
+Guardrail-owned:
+- `unknown-registry = "deny"`
+- `unknown-git = "deny"`
+- crates.io must be in `allow-registry`
+
+Accepted crates.io values:
+- `https://github.com/rust-lang/crates.io-index`
+- `sparse+https://index.crates.io/`
+
+`allow-git` is not automatically forbidden by the plan, but it is risky enough to warn and inventory.
+
+### RS-DENY-21 / RS-DENY-22 — Feature-ban policy
+
+Guardrail-managed baseline:
+- `tokio` must ban `full`
+
+Extra feature bans are inventoried.
+
+If we later decide the canonical `allow = [...]` list is also guardrail-owned, add a dedicated rule rather than overloading `RS-DENY-21`.
+
+### RS-DENY-23 / RS-DENY-24 / RS-DENY-26 / RS-DENY-29 — Exception hygiene
+
+For `skip` and `ignore` entries:
+- malformed entry shape warns
+- missing or non-string `reason` warns
+- valid entries inventory
+
+Ban entries without reasons are inventoried.
+
+Excessive advisory ignores warn, but this is a heuristic pressure rule, not a core correctness rule.
+
+### RS-DENY-25 — `[bans].allow` override channel
+
+`[bans].allow` is a direct escape hatch because allow entries override deny entries.
+
+Policy:
+- non-empty `allow` should be treated as a problem by default
+- any overlap with the deny baseline is an explicit error
+
+### RS-DENY-27 / RS-DENY-28 / RS-DENY-30 — Schema hardening
+
+Warn on:
+- duplicate deny / skip / ignore / feature-ban entries
+- unknown keys in critical sections
+
+Validate `wrappers` deliberately:
+- canonical managed wrapper expectations must be enforced where the baseline requires them
+- otherwise wrappers are at least inventoried so weakening cannot hide behind crate-name-only matching
+
+## Known implementation bugs to fix during migration
+
+- Accept sparse crates.io URL in `allow-registry`
+- Do not use `Path::exists()` directly; stay inside the filesystem abstraction
+- Add proper malformed-entry handling for `skip` / `ignore`
+- Add missing `.as_inventory()` consistency where inventory output is intended
+- Stop validating every deny file under a workspace path bag; validate effective coverage and shadowing instead
+
+## Test focus for implementation
+
+Adversarial tests should try to break the checker, not confirm the happy path.
+
+Must cover:
+- uncovered Rust roots
+- nested shadow `deny.toml`
+- `.deny.toml` / `.cargo/deny.toml` precedence and conflicts
+- missing graph keys
+- sparse crates.io registry URL
+- non-empty `allow-git`
+- non-empty `[bans].allow`
+- malformed `skip` / `ignore` entries
+- duplicate deny / ignore entries
+- wrapper weakening that preserves crate name
+- generator-vs-validator baseline drift

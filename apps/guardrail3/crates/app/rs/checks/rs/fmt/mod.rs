@@ -42,7 +42,3 @@ pub fn check(tree: &ProjectTree) -> Vec<CheckResult> {
 
     results
 }
-
-#[cfg(test)]
-#[path = "fmt_tests.rs"]
-mod tests;

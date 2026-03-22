@@ -30,3 +30,7 @@ pub fn check(input: &ToolchainRootInput<'_>, results: &mut Vec<CheckResult>) {
         });
     }
 }
+
+#[cfg(test)]
+#[path = "rs_toolchain_04_legacy_file_tests.rs"]
+mod tests;

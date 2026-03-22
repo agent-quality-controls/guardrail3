@@ -46,3 +46,7 @@ pub fn check(input: &RustfmtRootInput<'_>, results: &mut Vec<CheckResult>) {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "rs_fmt_04_nightly_keys_on_stable_tests.rs"]
+mod tests;

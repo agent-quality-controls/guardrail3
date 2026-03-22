@@ -37,3 +37,7 @@ fn edition_rank(edition: &str) -> usize {
         _ => 0,
     }
 }
+
+#[cfg(test)]
+#[path = "rs_cargo_09_member_edition_drift_tests.rs"]
+mod tests;

@@ -4,6 +4,18 @@
 **Parser:** TOML
 **Current code:** `config_files.rs` (existence), `rustfmt_check.rs` (settings)
 
+## Implementation mapping contract
+
+- exactly one `RS-FMT-*` rule ID per production file
+- exactly one sidecar `*_tests.rs` file per production rule file
+- `mod.rs` orchestrates only
+- `facts.rs` and `inputs.rs` may contain shared facts and typed inputs only
+
+Forbidden:
+
+- grouped family test files such as `fmt_tests.rs`
+- helper files that hide multiple rule predicates behind one API
+
 ## Rules
 
 | New ID | Old ID | Severity | What | Status |

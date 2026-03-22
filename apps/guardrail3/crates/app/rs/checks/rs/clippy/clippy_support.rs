@@ -4,9 +4,11 @@ use crate::domain::modules::clippy::{
     MAX_FN_PARAMS_BOOLS, MAX_STRUCT_BOOLS, SERVICE_METHOD_PATHS, THRESHOLD_VALUES,
     TOO_MANY_ARGUMENTS_THRESHOLD, TOO_MANY_LINES_THRESHOLD, TYPE_COMPLEXITY_THRESHOLD,
 };
+use crate::domain::report::{CheckResult, Severity};
+
+use super::inputs::ConfigClippyInput;
 
 pub struct ThresholdExpectation {
-    pub id: &'static str,
     pub key: &'static str,
     pub expected: i64,
 }
@@ -22,37 +24,30 @@ pub const EXPECTED_MACRO_BANS: &[&str] = crate::domain::modules::clippy::EXPECTE
 
 pub const THRESHOLD_EXPECTATIONS: &[ThresholdExpectation] = &[
     ThresholdExpectation {
-        id: "RS-CLIPPY-02",
         key: "max-struct-bools",
         expected: MAX_STRUCT_BOOLS,
     },
     ThresholdExpectation {
-        id: "RS-CLIPPY-03",
         key: "max-fn-params-bools",
         expected: MAX_FN_PARAMS_BOOLS,
     },
     ThresholdExpectation {
-        id: "RS-CLIPPY-09",
         key: "too-many-lines-threshold",
         expected: TOO_MANY_LINES_THRESHOLD,
     },
     ThresholdExpectation {
-        id: "RS-CLIPPY-10",
         key: "too-many-arguments-threshold",
         expected: TOO_MANY_ARGUMENTS_THRESHOLD,
     },
     ThresholdExpectation {
-        id: "RS-CLIPPY-11",
         key: "excessive-nesting-threshold",
         expected: EXCESSIVE_NESTING_THRESHOLD,
     },
     ThresholdExpectation {
-        id: "RS-CLIPPY-21",
         key: "cognitive-complexity-threshold",
         expected: COGNITIVE_COMPLEXITY_THRESHOLD,
     },
     ThresholdExpectation {
-        id: "RS-CLIPPY-22",
         key: "type-complexity-threshold",
         expected: TYPE_COMPLEXITY_THRESHOLD,
     },
@@ -139,6 +134,62 @@ pub fn ban_paths(parsed: &toml::Value, key: &str) -> Vec<String> {
 
 pub fn threshold_value(parsed: &toml::Value, key: &str) -> Option<i64> {
     parsed.get(key).and_then(toml::Value::as_integer)
+}
+
+pub fn check_threshold_rule(
+    input: &ConfigClippyInput<'_>,
+    results: &mut Vec<CheckResult>,
+    id: &str,
+    key: &str,
+    expected: i64,
+) {
+    let Some(parsed) = input.config.parsed.as_ref() else {
+        if let Some(parse_error) = &input.config.parse_error {
+            results.push(CheckResult {
+                id: id.to_owned(),
+                severity: Severity::Error,
+                title: "clippy.toml parse error".to_owned(),
+                message: format!("Failed to parse clippy.toml: {parse_error}"),
+                file: Some(input.config.rel_path.clone()),
+                line: None,
+                inventory: false,
+            });
+        }
+        return;
+    };
+
+    match threshold_value(parsed, key) {
+        Some(actual) if actual == expected => results.push(
+            CheckResult {
+                id: id.to_owned(),
+                severity: Severity::Info,
+                title: format!("{key} correct"),
+                message: format!("{key} = {expected}"),
+                file: Some(input.config.rel_path.clone()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        ),
+        Some(actual) => results.push(CheckResult {
+            id: id.to_owned(),
+            severity: Severity::Error,
+            title: format!("{key} wrong value"),
+            message: format!("Expected {expected}, got {actual}."),
+            file: Some(input.config.rel_path.clone()),
+            line: None,
+            inventory: false,
+        }),
+        None => results.push(CheckResult {
+            id: id.to_owned(),
+            severity: Severity::Error,
+            title: format!("{key} missing"),
+            message: format!("Expected {key} = {expected}."),
+            file: Some(input.config.rel_path.clone()),
+            line: None,
+            inventory: false,
+        }),
+    }
 }
 
 pub fn known_top_level_keys() -> Vec<&'static str> {
