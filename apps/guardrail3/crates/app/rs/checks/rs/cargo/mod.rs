@@ -25,7 +25,7 @@ pub fn check(tree: &ProjectTree) -> Vec<CheckResult> {
 
     let mut results = Vec::new();
     let workspace = WorkspaceCargoInput::new(&facts.workspace);
-    let _declared_vs_discovered = WorkspaceMembersSetInput::from_facts(&facts);
+    let declared_vs_discovered = WorkspaceMembersSetInput::from_facts(&facts);
 
     rs_cargo_01_workspace_lints::check(&workspace, &mut results);
     rs_cargo_02_lint_levels::check(&workspace, &mut results);
@@ -33,6 +33,7 @@ pub fn check(tree: &ProjectTree) -> Vec<CheckResult> {
     rs_cargo_05_workspace_metadata::check(&workspace, &mut results);
     rs_cargo_07_priority_order::check(&workspace, &mut results);
     rs_cargo_08_resolver::check(&workspace, &mut results);
+    rs_cargo_04_lint_inheritance::check_missing_member_cargos(&declared_vs_discovered, &mut results);
 
     for member in &facts.members {
         let input = WorkspaceMemberInput::new(&facts.workspace, member);

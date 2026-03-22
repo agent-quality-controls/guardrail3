@@ -9,6 +9,7 @@ pub struct WorkspaceCargoFacts {
     pub workspace_rust_version: Option<String>,
     pub resolver: Option<String>,
     pub has_package: bool,
+    pub profile_name: Option<String>,
     pub parse_error: Option<String>,
 }
 
