@@ -31,16 +31,22 @@ mod rs_code_26_lib_glob_reexport;
 mod rs_code_27_facade_only_lib;
 mod rs_code_28_inline_pub_mod_in_lib;
 mod rs_code_29_large_trait_inventory;
+mod rs_code_30_input_failures;
 
 use crate::domain::project_tree::ProjectTree;
 use crate::domain::report::CheckResult;
 
 use self::facts::collect;
-use self::inputs::{ExceptionCommentInput, RustCodeFileInput, UnsafeCodeLintInput};
+use self::inputs::{CodeInputFailureInput, ExceptionCommentInput, RustCodeFileInput, UnsafeCodeLintInput};
 
 pub fn check(tree: &ProjectTree) -> Vec<CheckResult> {
     let facts = collect(tree);
     let mut results = Vec::new();
+
+    for failure in &facts.input_failures {
+        let input = CodeInputFailureInput::new(failure);
+        rs_code_30_input_failures::check(&input, &mut results);
+    }
 
     for lint in &facts.unsafe_code_lints {
         let input = UnsafeCodeLintInput::new(lint);
@@ -53,11 +59,29 @@ pub fn check(tree: &ProjectTree) -> Vec<CheckResult> {
     }
 
     for file in &facts.files {
-        let Some(content) = crate::fs::read_file(&tree.abs_path(&file.rel_path)) else {
-            continue;
+        let content = match crate::fs::read_file_err(&tree.abs_path(&file.rel_path)) {
+            Ok(content) => content,
+            Err(read_error) => {
+                let message = format!("Failed to read Rust source file: {read_error}");
+                let failure = CodeInputFailureInput {
+                    rel_path: &file.rel_path,
+                    message: &message,
+                };
+                rs_code_30_input_failures::check(&failure, &mut results);
+                continue;
+            }
         };
-        let Ok(ast) = parse::parse_rust_file(&content) else {
-            continue;
+        let ast = match parse::parse_rust_file(&content) {
+            Ok(ast) => ast,
+            Err(parse_error) => {
+                let message = format!("Failed to parse Rust source file: {parse_error}");
+                let failure = CodeInputFailureInput {
+                    rel_path: &file.rel_path,
+                    message: &message,
+                };
+                rs_code_30_input_failures::check(&failure, &mut results);
+                continue;
+            }
         };
 
         let input = RustCodeFileInput::new(file, &content, &ast);

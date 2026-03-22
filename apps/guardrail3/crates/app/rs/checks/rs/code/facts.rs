@@ -22,20 +22,13 @@ pub struct CodeFacts {
     pub files: Vec<RustCodeFileFacts>,
     pub unsafe_code_lints: Vec<UnsafeCodeLintFacts>,
     pub exception_comments: Vec<ExceptionCommentFacts>,
+    pub input_failures: Vec<CodeInputFailureFacts>,
 }
 
 pub fn collect(tree: &ProjectTree) -> CodeFacts {
-    let cargo_roots = collect_cargo_roots(tree);
-    let workspace_members: BTreeSet<_> = cargo_roots
-        .values()
-        .flat_map(|facts| facts.workspace_members.iter().cloned())
-        .collect();
-    let standalone_package_roots: BTreeSet<_> = cargo_roots
-        .values()
-        .filter(|facts| facts.has_package && !workspace_members.contains(&facts.rel_dir))
-        .map(|facts| facts.rel_dir.clone())
-        .collect();
-    let policy_map = read_policy_map(tree, &cargo_roots, &standalone_package_roots);
+    let mut input_failures = Vec::new();
+    let cargo_roots = collect_cargo_roots(tree, &mut input_failures);
+    let policy_map = read_policy_map(tree, &cargo_roots, &mut input_failures);
 
     let files = rust_file_rels(tree)
         .into_iter()
@@ -46,28 +39,36 @@ pub fn collect(tree: &ProjectTree) -> CodeFacts {
         })
         .collect();
 
-    let unsafe_code_lints = cargo_toml_rels(tree)
-        .into_iter()
-        .filter_map(|cargo_rel_path| {
-            let parsed = tree
-                .file_content(&cargo_rel_path)
-                .and_then(|content| toml::from_str::<toml::Value>(content).ok())?;
-            if parsed.get("workspace").is_none() {
-                return None;
+    let mut unsafe_code_lints = Vec::new();
+    for cargo_rel_path in cargo_toml_rels(tree) {
+        let Some(content) = tree.file_content(&cargo_rel_path) else {
+            continue;
+        };
+        let parsed = match toml::from_str::<toml::Value>(content) {
+            Ok(parsed) => parsed,
+            Err(parse_error) => {
+                input_failures.push(CodeInputFailureFacts {
+                    rel_path: cargo_rel_path.clone(),
+                    message: format!("Failed to parse Cargo.toml for code-family context: {parse_error}"),
+                });
+                continue;
             }
-            let lint_level = parsed
-                .get("workspace")
-                .and_then(|workspace| workspace.get("lints"))
-                .and_then(|lints| lints.get("rust"))
-                .and_then(|rust| rust.get("unsafe_code"))
-                .and_then(toml::Value::as_str)
-                .map(str::to_owned);
-            Some(UnsafeCodeLintFacts {
-                cargo_rel_path,
-                lint_level,
-            })
-        })
-        .collect();
+        };
+        if parsed.get("workspace").is_none() {
+            continue;
+        }
+        let lint_level = parsed
+            .get("workspace")
+            .and_then(|workspace| workspace.get("lints"))
+            .and_then(|lints| lints.get("rust"))
+            .and_then(|rust| rust.get("unsafe_code"))
+            .and_then(toml::Value::as_str)
+            .map(str::to_owned);
+        unsafe_code_lints.push(UnsafeCodeLintFacts {
+            cargo_rel_path,
+            lint_level,
+        });
+    }
 
     let exception_comments = collect_exception_comments(tree);
 
@@ -75,6 +76,7 @@ pub fn collect(tree: &ProjectTree) -> CodeFacts {
         files,
         unsafe_code_lints,
         exception_comments,
+        input_failures,
     }
 }
 
@@ -98,25 +100,24 @@ pub struct ExceptionCommentFacts {
     pub line_text: String,
 }
 
+#[derive(Debug, Clone)]
+pub struct CodeInputFailureFacts {
+    pub rel_path: String,
+    pub message: String,
+}
+
 fn collect_exception_comments(tree: &ProjectTree) -> Vec<ExceptionCommentFacts> {
-    let config_rels = [
-        "clippy.toml",
-        "deny.toml",
-        "Cargo.toml",
-        "rustfmt.toml",
-        "rust-toolchain.toml",
-    ];
     let mut comments = Vec::new();
 
-    for rel_path in config_rels {
-        let Some(content) = tree.file_content(rel_path) else {
+    for rel_path in config_comment_rels(tree) {
+        let Some(content) = tree.file_content(&rel_path) else {
             continue;
         };
         for (index, line) in content.lines().enumerate() {
             let upper = line.to_ascii_uppercase();
             if upper.contains("// EXCEPTION:") || upper.contains("# EXCEPTION:") {
                 comments.push(ExceptionCommentFacts {
-                    rel_path: rel_path.to_owned(),
+                    rel_path: rel_path.clone(),
                     line: index.saturating_add(1),
                     line_text: line.trim().to_owned(),
                 });
@@ -127,7 +128,35 @@ fn collect_exception_comments(tree: &ProjectTree) -> Vec<ExceptionCommentFacts> 
     comments
 }
 
-fn collect_cargo_roots(tree: &ProjectTree) -> BTreeMap<String, CargoRootFacts> {
+fn config_comment_rels(tree: &ProjectTree) -> Vec<String> {
+    let config_names = [
+        "guardrail3.toml",
+        "clippy.toml",
+        ".clippy.toml",
+        "deny.toml",
+        ".deny.toml",
+        "Cargo.toml",
+        "rustfmt.toml",
+        "rust-toolchain.toml",
+        "rust-toolchain",
+    ];
+    let mut rels = BTreeSet::new();
+
+    for (dir_rel, entry) in &tree.structure {
+        for file_name in &entry.files {
+            if config_names.contains(&file_name.as_str()) {
+                let _ = rels.insert(ProjectTree::join_rel(dir_rel, file_name));
+            }
+        }
+    }
+
+    rels.into_iter().collect()
+}
+
+fn collect_cargo_roots(
+    tree: &ProjectTree,
+    input_failures: &mut Vec<CodeInputFailureFacts>,
+) -> BTreeMap<String, CargoRootFacts> {
     let mut dirs = BTreeSet::new();
     if tree.file_exists("Cargo.toml") {
         let _ = dirs.insert(String::new());
@@ -141,23 +170,33 @@ fn collect_cargo_roots(tree: &ProjectTree) -> BTreeMap<String, CargoRootFacts> {
             } else {
                 ProjectTree::join_rel(&rel_dir, "Cargo.toml")
             };
-            let parsed = tree
-                .file_content(&rel_path)
-                .and_then(|content| toml::from_str::<toml::Value>(content).ok());
-            let facts = parsed.as_ref().map_or_else(
-                || CargoRootFacts {
+            let parsed = tree.file_content(&rel_path).map(|content| toml::from_str::<toml::Value>(content));
+            let facts = match parsed {
+                Some(Ok(parsed)) => CargoRootFacts {
+                    rel_dir: rel_dir.clone(),
+                    has_workspace: parsed.get("workspace").is_some(),
+                    has_package: parsed.get("package").is_some(),
+                    workspace_members: parse_workspace_members(tree, &rel_dir, &parsed),
+                },
+                Some(Err(parse_error)) => {
+                    input_failures.push(CodeInputFailureFacts {
+                        rel_path: rel_path.clone(),
+                        message: format!("Failed to parse Cargo.toml for code-family root discovery: {parse_error}"),
+                    });
+                    CargoRootFacts {
+                        rel_dir: rel_dir.clone(),
+                        has_workspace: false,
+                        has_package: false,
+                        workspace_members: Vec::new(),
+                    }
+                }
+                None => CargoRootFacts {
                     rel_dir: rel_dir.clone(),
                     has_workspace: false,
                     has_package: false,
                     workspace_members: Vec::new(),
                 },
-                |parsed| CargoRootFacts {
-                    rel_dir: rel_dir.clone(),
-                    has_workspace: parsed.get("workspace").is_some(),
-                    has_package: parsed.get("package").is_some(),
-                    workspace_members: parse_workspace_members(tree, &rel_dir, parsed),
-                },
-            );
+            };
             (rel_dir, facts)
         })
         .collect()
@@ -197,23 +236,31 @@ fn expand_member_pattern(tree: &ProjectTree, workspace_rel: &str, member: &str) 
     }
 }
 
-fn read_profile_name(tree: &ProjectTree) -> Option<String> {
-    let content = tree.file_content("guardrail3.toml")?;
-    let parsed = toml::from_str::<toml::Value>(content).ok()?;
-    parsed
-        .get("profile")
-        .and_then(|value| value.get("name"))
-        .and_then(toml::Value::as_str)
-        .map(str::to_owned)
-}
-
 fn read_policy_map(
     tree: &ProjectTree,
     cargo_roots: &BTreeMap<String, CargoRootFacts>,
-    standalone_package_roots: &BTreeSet<String>,
+    input_failures: &mut Vec<CodeInputFailureFacts>,
 ) -> BTreeMap<String, PolicySettings> {
     let mut map = BTreeMap::new();
-    let default_profile = read_profile_name(tree);
+    let parsed = match tree.file_content("guardrail3.toml") {
+        Some(content) => match toml::from_str::<toml::Value>(content) {
+            Ok(parsed) => Some(parsed),
+            Err(parse_error) => {
+                input_failures.push(CodeInputFailureFacts {
+                    rel_path: "guardrail3.toml".to_owned(),
+                    message: format!("Failed to parse guardrail3.toml for code-family policy resolution: {parse_error}"),
+                });
+                None
+            }
+        },
+        None => None,
+    };
+    let default_profile = parsed
+        .as_ref()
+        .and_then(|parsed| parsed.get("profile"))
+        .and_then(|value| value.get("name"))
+        .and_then(toml::Value::as_str)
+        .map(str::to_owned);
     let _ = map.insert(
         String::new(),
         PolicySettings {
@@ -221,19 +268,17 @@ fn read_policy_map(
         },
     );
 
-    let Some(content) = tree.file_content("guardrail3.toml") else {
-        return map;
-    };
-    let Ok(parsed) = toml::from_str::<toml::Value>(content) else {
+    let Some(parsed) = parsed.as_ref() else {
         return map;
     };
     let rust = parsed.get("rust");
 
+    let resolved_app_paths = resolve_app_paths(cargo_roots);
+    let mut configured_app_roots = BTreeSet::new();
     if let Some(apps) = rust
         .and_then(|value| value.get("apps"))
         .and_then(toml::Value::as_table)
     {
-        let resolved_app_paths = resolve_app_paths(cargo_roots);
         for (app_name, app_cfg) in apps {
             let profile_name = app_cfg
                 .get("type")
@@ -242,6 +287,7 @@ fn read_policy_map(
                 .map(str::to_owned)
                 .or_else(|| default_profile.clone());
             if let Some(rel_dir) = resolved_app_paths.get(app_name) {
+                let _ = configured_app_roots.insert(rel_dir.clone());
                 let _ = map.insert(
                     rel_dir.clone(),
                     PolicySettings {
@@ -252,6 +298,12 @@ fn read_policy_map(
         }
     }
 
+    let package_roots: BTreeSet<_> = cargo_roots
+        .values()
+        .filter(|facts| facts.has_package && !configured_app_roots.contains(&facts.rel_dir))
+        .map(|facts| facts.rel_dir.clone())
+        .collect();
+
     if let Some(packages) = rust.and_then(|value| value.get("packages")) {
         let profile_name = packages
             .get("type")
@@ -260,7 +312,7 @@ fn read_policy_map(
             .map(str::to_owned)
             .or_else(|| Some("library".to_owned()))
             .or_else(|| default_profile.clone());
-        for rel_dir in standalone_package_roots {
+        for rel_dir in &package_roots {
             let _ = map.insert(
                 rel_dir.clone(),
                 PolicySettings {
