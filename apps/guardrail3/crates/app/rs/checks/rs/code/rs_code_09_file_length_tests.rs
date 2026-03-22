@@ -13,6 +13,7 @@ fn errors_when_non_test_file_exceeds_500_effective_lines() {
         content: &content,
         ast: &ast,
         is_test: false,
+        profile_name: None,
     };
     let mut results = Vec::new();
 
@@ -34,6 +35,7 @@ fn skips_test_files() {
         content: &content,
         ast: &ast,
         is_test: true,
+        profile_name: None,
     };
     let mut results = Vec::new();
 

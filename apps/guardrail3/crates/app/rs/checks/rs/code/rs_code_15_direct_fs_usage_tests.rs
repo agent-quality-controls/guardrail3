@@ -13,6 +13,7 @@ fn errors_on_std_fs_import() {
         content,
         ast: &ast,
         is_test: false,
+        profile_name: None,
     };
     let mut results = Vec::new();
 
@@ -44,6 +45,7 @@ mod tests {
         content,
         ast: &ast,
         is_test: false,
+        profile_name: None,
     };
     let mut results = Vec::new();
 

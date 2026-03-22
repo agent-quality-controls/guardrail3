@@ -13,6 +13,7 @@ fn warns_on_unwrap_usage() {
         content,
         ast: &ast,
         is_test: false,
+        profile_name: None,
     };
     let mut results = Vec::new();
 
@@ -36,6 +37,7 @@ fn foo() { let _ = some_option().unwrap(); }
         content,
         ast: &ast,
         is_test: false,
+        profile_name: None,
     };
     let mut results = Vec::new();
 

@@ -17,6 +17,7 @@ fn inventories_large_structs() {
         content: &content,
         ast: &ast,
         is_test: false,
+        profile_name: None,
     };
     let mut results = Vec::new();
 
@@ -42,6 +43,7 @@ fn inventories_large_enums() {
         content: &content,
         ast: &ast,
         is_test: false,
+        profile_name: None,
     };
     let mut results = Vec::new();
 

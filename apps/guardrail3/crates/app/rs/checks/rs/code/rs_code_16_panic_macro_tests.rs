@@ -13,6 +13,7 @@ fn warns_on_panic_macro_in_non_test_code() {
         content,
         ast: &ast,
         is_test: false,
+        profile_name: None,
     };
     let mut results = Vec::new();
 
@@ -33,6 +34,7 @@ fn skips_panic_macro_in_test_files() {
         content,
         ast: &ast,
         is_test: true,
+        profile_name: None,
     };
     let mut results = Vec::new();
 
