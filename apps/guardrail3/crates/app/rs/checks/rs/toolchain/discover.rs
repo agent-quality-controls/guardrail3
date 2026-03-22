@@ -4,11 +4,11 @@ use super::facts::ToolchainFacts;
 
 pub fn collect(tree: &ProjectTree) -> ToolchainFacts {
     let toolchain_toml_rel = tree
-        .dir_contents("")
-        .and_then(|entry| entry.has_file("rust-toolchain.toml").then(|| "rust-toolchain.toml".to_owned()));
+        .file_exists("rust-toolchain.toml")
+        .then(|| "rust-toolchain.toml".to_owned());
     let legacy_toolchain_rel = tree
-        .dir_contents("")
-        .and_then(|entry| entry.has_file("rust-toolchain").then(|| "rust-toolchain".to_owned()));
+        .file_exists("rust-toolchain")
+        .then(|| "rust-toolchain".to_owned());
 
     let (parsed, parse_error) = match toolchain_toml_rel.as_deref().and_then(|rel| tree.file_content(rel)) {
         Some(content) => match toml::from_str::<toml::Value>(content) {

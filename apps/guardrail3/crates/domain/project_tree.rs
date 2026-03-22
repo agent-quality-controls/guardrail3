@@ -13,6 +13,7 @@
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
+use glob::Pattern;
 use serde::{Deserialize, Serialize};
 
 /// The full project tree.
@@ -63,6 +64,52 @@ impl ProjectTree {
         self.content.get(rel).map(String::as_str)
     }
 
+    /// Check if a file exists in the tree by relative path.
+    #[must_use]
+    pub fn file_exists(&self, rel: &str) -> bool {
+        let (parent, name) = split_rel(rel);
+        self.dir_contents(parent).is_some_and(|entry| entry.has_file(name))
+    }
+
+    /// Return all known directory relative paths except the root.
+    #[must_use]
+    pub fn all_dir_rels(&self) -> Vec<String> {
+        self.structure
+            .keys()
+            .filter(|dir_rel| !dir_rel.is_empty())
+            .cloned()
+            .collect()
+    }
+
+    /// Return every directory that contains a child file with the given name.
+    #[must_use]
+    pub fn dirs_with_file(&self, name: &str) -> Vec<String> {
+        self.structure
+            .iter()
+            .filter_map(|(dir_rel, entry)| {
+                if dir_rel.is_empty() || !entry.has_file(name) {
+                    None
+                } else {
+                    Some(dir_rel.clone())
+                }
+            })
+            .collect()
+    }
+
+    /// Return all actual directories whose relative path matches the glob pattern.
+    #[must_use]
+    pub fn matching_dir_rels(&self, pattern: &str) -> Vec<String> {
+        let normalized = pattern.trim_matches('/');
+        let Ok(pattern) = Pattern::new(normalized) else {
+            return Vec::new();
+        };
+
+        self.all_dir_rels()
+            .into_iter()
+            .filter(|dir_rel| pattern.matches(dir_rel))
+            .collect()
+    }
+
     /// Build an absolute path from a relative path.
     #[must_use]
     pub fn abs_path(&self, rel: &str) -> PathBuf {
@@ -98,3 +145,14 @@ impl DirEntry {
         self.dirs.iter().any(|d| d == name)
     }
 }
+
+fn split_rel(rel: &str) -> (&str, &str) {
+    match rel.rsplit_once('/') {
+        Some((parent, name)) => (parent, name),
+        None => ("", rel),
+    }
+}
+
+#[cfg(test)]
+#[path = "project_tree_tests.rs"]
+mod tests;
