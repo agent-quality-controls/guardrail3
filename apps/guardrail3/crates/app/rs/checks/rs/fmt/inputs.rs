@@ -4,6 +4,7 @@ pub struct RustfmtRootInput<'a> {
     pub config_rel: Option<&'a str>,
     pub parsed: Option<&'a toml::Value>,
     pub workspace_edition: Option<&'a str>,
+    pub toolchain_channel: Option<&'a str>,
 }
 
 pub struct RustfmtExtraConfigInput<'a> {
@@ -21,6 +22,7 @@ impl<'a> RustfmtRootInput<'a> {
             config_rel: facts.root_config_rel.as_deref(),
             parsed: facts.root_parsed.as_ref(),
             workspace_edition: facts.workspace_edition.as_deref(),
+            toolchain_channel: facts.toolchain_channel.as_deref(),
         }
     }
 }

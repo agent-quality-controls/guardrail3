@@ -2,8 +2,8 @@ use crate::domain::report::{CheckResult, Severity};
 
 use super::inputs::WorkspaceCargoInput;
 use super::lint_support::{
-    EXPECTED_CLIPPY_DENY, EXPECTED_CLIPPY_GROUPS, EXPECTED_RUST_LINTS, is_weaker, lint_level,
-    lint_priority, workspace_lints,
+    EXPECTED_CLIPPY_DENY, EXPECTED_CLIPPY_GROUPS, EXPECTED_LIBRARY_RUST_LINTS,
+    EXPECTED_RUST_LINTS, is_weaker, lint_level, lint_priority, workspace_lints,
 };
 
 const ID: &str = "RS-CARGO-02";
@@ -36,6 +36,19 @@ pub fn check(input: &WorkspaceCargoInput<'_>, results: &mut Vec<CheckResult>) {
                 None,
                 results,
             );
+        }
+
+        if input.workspace.profile_name.as_deref() == Some("library") {
+            for expected in EXPECTED_LIBRARY_RUST_LINTS {
+                violations += check_expected_level(
+                    input.workspace.rel_path.as_str(),
+                    rust_lints,
+                    expected.name,
+                    expected.expected_level,
+                    None,
+                    results,
+                );
+            }
         }
     }
 

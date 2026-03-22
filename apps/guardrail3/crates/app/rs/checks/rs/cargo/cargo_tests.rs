@@ -97,6 +97,50 @@ fn workspace_metadata_and_resolver_are_checked() {
 }
 
 #[test]
+fn library_profile_requires_extra_rust_lints_and_msrv() {
+    let tree = ProjectTree {
+        root: PathBuf::from("/tmp/project"),
+        structure: BTreeMap::from([(
+            "".to_owned(),
+            DirEntry {
+                dirs: vec![],
+                files: vec!["Cargo.toml".to_owned(), "guardrail3.toml".to_owned()],
+            },
+        )]),
+        content: BTreeMap::from([
+            (
+                "guardrail3.toml".to_owned(),
+                "[profile]\nname = \"library\"".to_owned(),
+            ),
+            (
+                "Cargo.toml".to_owned(),
+                r#"
+                    [workspace]
+                    members = []
+                    resolver = "2"
+
+                    [workspace.package]
+                    edition = "2024"
+
+                    [workspace.lints.rust]
+                    warnings = "deny"
+                    unsafe_code = "forbid"
+                    dead_code = "deny"
+                    unused_results = "deny"
+                    unused_crate_dependencies = "deny"
+                    missing_debug_implementations = "warn"
+                "#
+                .to_owned(),
+            ),
+        ]),
+    };
+
+    let results = check(&tree);
+    assert!(results.iter().any(|r| r.id == "RS-CARGO-01" && !r.inventory));
+    assert!(results.iter().any(|r| r.id == "RS-CARGO-05" && matches!(r.severity, crate::domain::report::Severity::Warn)));
+}
+
+#[test]
 fn virtual_workspace_missing_resolver_is_reported() {
     let tree = ProjectTree {
         root: PathBuf::from("/tmp/project"),
@@ -216,6 +260,76 @@ fn declared_members_are_paired_and_membership_sets_are_bound() {
             .iter()
             .any(|r| r.id == "RS-CARGO-04" && !r.inventory && r.file.as_deref() == Some("crates/domain/Cargo.toml"))
     );
+}
+
+#[test]
+fn declared_member_without_cargo_toml_is_warned() {
+    let tree = ProjectTree {
+        root: PathBuf::from("/tmp/project"),
+        structure: BTreeMap::from([
+            (
+                "".to_owned(),
+                DirEntry {
+                    dirs: vec!["crates".to_owned()],
+                    files: vec!["Cargo.toml".to_owned()],
+                },
+            ),
+            (
+                "crates".to_owned(),
+                DirEntry {
+                    dirs: vec!["api".to_owned(), "missing".to_owned()],
+                    files: vec![],
+                },
+            ),
+            (
+                "crates/api".to_owned(),
+                DirEntry {
+                    dirs: vec![],
+                    files: vec!["Cargo.toml".to_owned()],
+                },
+            ),
+            (
+                "crates/missing".to_owned(),
+                DirEntry {
+                    dirs: vec![],
+                    files: vec![],
+                },
+            ),
+        ]),
+        content: BTreeMap::from([
+            (
+                "Cargo.toml".to_owned(),
+                r#"
+                    [workspace]
+                    members = ["crates/api", "crates/missing"]
+                    resolver = "2"
+
+                    [workspace.package]
+                    edition = "2024"
+                "#
+                .to_owned(),
+            ),
+            (
+                "crates/api/Cargo.toml".to_owned(),
+                r#"
+                    [package]
+                    name = "api"
+                    edition = "2024"
+
+                    [lints]
+                    workspace = true
+                "#
+                .to_owned(),
+            ),
+        ]),
+    };
+
+    let results = check(&tree);
+    assert!(results.iter().any(|r| {
+        r.id == "RS-CARGO-04"
+            && matches!(r.severity, crate::domain::report::Severity::Warn)
+            && r.message.contains("crates/missing")
+    }));
 }
 
 #[test]

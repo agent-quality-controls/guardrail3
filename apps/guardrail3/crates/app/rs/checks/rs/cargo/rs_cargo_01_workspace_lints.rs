@@ -2,7 +2,8 @@ use crate::domain::report::{CheckResult, Severity};
 
 use super::inputs::WorkspaceCargoInput;
 use super::lint_support::{
-    EXPECTED_CLIPPY_DENY, EXPECTED_CLIPPY_GROUPS, EXPECTED_RUST_LINTS, lint_level, workspace_lints,
+    EXPECTED_CLIPPY_DENY, EXPECTED_CLIPPY_GROUPS, EXPECTED_LIBRARY_RUST_LINTS,
+    EXPECTED_RUST_LINTS, lint_level, workspace_lints,
 };
 
 const ID: &str = "RS-CARGO-01";
@@ -69,6 +70,26 @@ pub fn check(input: &WorkspaceCargoInput<'_>, results: &mut Vec<CheckResult>) {
                     line: None,
                     inventory: false,
                 });
+            }
+        }
+
+        if input.workspace.profile_name.as_deref() == Some("library") {
+            for expected in EXPECTED_LIBRARY_RUST_LINTS {
+                if lint_level(rust_lints, expected.name).is_none() {
+                    missing += 1;
+                    results.push(CheckResult {
+                        id: ID.to_owned(),
+                        severity: Severity::Error,
+                        title: format!("missing library rust lint `{}`", expected.name),
+                        message: format!(
+                            "Library profile expects `{}` in `[workspace.lints.rust]`.",
+                            expected.name
+                        ),
+                        file: Some(input.workspace.rel_path.clone()),
+                        line: None,
+                        inventory: false,
+                    });
+                }
             }
         }
     }

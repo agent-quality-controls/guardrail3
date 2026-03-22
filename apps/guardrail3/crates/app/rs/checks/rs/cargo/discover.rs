@@ -21,6 +21,7 @@ pub fn collect(tree: &ProjectTree) -> Option<CargoFamilyFacts> {
                     workspace_rust_version: None,
                     resolver: None,
                     has_package: false,
+                    profile_name: read_profile_name(tree),
                     parse_error: Some(err.to_string()),
                 },
                 members: Vec::new(),
@@ -53,6 +54,7 @@ pub fn collect(tree: &ProjectTree) -> Option<CargoFamilyFacts> {
                 .and_then(toml::Value::as_str)
                 .map(str::to_owned),
             has_package: workspace_parsed.get("package").is_some(),
+            profile_name: read_profile_name(tree),
             parse_error: None,
         },
         members,
@@ -189,4 +191,15 @@ fn workspace_package_field(workspace_parsed: &toml::Value, field: &str) -> Optio
                 .and_then(toml::Value::as_str)
                 .map(str::to_owned)
         })
+}
+
+fn read_profile_name(tree: &ProjectTree) -> Option<String> {
+    let content = tree.file_content("guardrail3.toml")?;
+    let parsed = toml::from_str::<toml::Value>(content).ok()?;
+
+    parsed
+        .get("profile")
+        .and_then(|value| value.get("name"))
+        .and_then(toml::Value::as_str)
+        .map(str::to_owned)
 }

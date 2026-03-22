@@ -64,4 +64,19 @@ pub fn check(input: &WorkspaceCargoInput<'_>, results: &mut Vec<CheckResult>) {
             inventory: false,
         }),
     }
+
+    if input.workspace.profile_name.as_deref() == Some("library")
+        && input.workspace.workspace_rust_version.is_none()
+    {
+        results.push(CheckResult {
+            id: ID.to_owned(),
+            severity: Severity::Warn,
+            title: "library workspace rust-version missing".to_owned(),
+            message: "Library profile should declare `rust-version` as an MSRV contract."
+                .to_owned(),
+            file: Some(input.workspace.rel_path.clone()),
+            line: None,
+            inventory: false,
+        });
+    }
 }

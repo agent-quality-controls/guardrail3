@@ -3,7 +3,10 @@ mod inputs;
 mod rs_fmt_01_exists;
 mod rs_fmt_02_settings;
 mod rs_fmt_03_extra_settings;
+mod rs_fmt_04_nightly_keys_on_stable;
 mod rs_fmt_05_per_crate_override;
+mod rs_fmt_06_edition_mismatch;
+mod rs_fmt_07_ignore_escape_hatch;
 mod rs_fmt_08_dual_file_conflict;
 
 use crate::domain::project_tree::ProjectTree;
@@ -20,6 +23,9 @@ pub fn check(tree: &ProjectTree) -> Vec<CheckResult> {
     rs_fmt_01_exists::check(&root, &mut results);
     rs_fmt_02_settings::check(&root, &mut results);
     rs_fmt_03_extra_settings::check(&root, &mut results);
+    rs_fmt_04_nightly_keys_on_stable::check(&root, &mut results);
+    rs_fmt_06_edition_mismatch::check(&root, &mut results);
+    rs_fmt_07_ignore_escape_hatch::check(&root, &mut results);
 
     for config_rel in &facts.extra_config_rels {
         let input = RustfmtExtraConfigInput {

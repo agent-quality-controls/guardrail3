@@ -45,6 +45,7 @@ fn expected_keys() -> BTreeSet<&'static str> {
         "use_try_shorthand",
         "reorder_imports",
         "reorder_modules",
+        "ignore",
     ]
     .into_iter()
     .collect()

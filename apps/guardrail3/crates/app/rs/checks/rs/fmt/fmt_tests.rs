@@ -119,3 +119,56 @@ fn missing_root_config_reports_error() {
     let results = check(&tree);
     assert!(results.iter().any(|r| r.id == "RS-FMT-01" && !r.inventory));
 }
+
+#[test]
+fn nightly_keys_ignore_and_edition_mismatch_are_reported() {
+    let tree = ProjectTree {
+        root: PathBuf::from("/tmp/project"),
+        structure: BTreeMap::from([(
+            "".to_owned(),
+            DirEntry {
+                dirs: vec![],
+                files: vec![
+                    "Cargo.toml".to_owned(),
+                    "rustfmt.toml".to_owned(),
+                    "rust-toolchain.toml".to_owned(),
+                ],
+            },
+        )]),
+        content: BTreeMap::from([
+            (
+                "Cargo.toml".to_owned(),
+                "[workspace.package]\nedition = \"2024\"".to_owned(),
+            ),
+            (
+                "rust-toolchain.toml".to_owned(),
+                "[toolchain]\nchannel = \"stable\"".to_owned(),
+            ),
+            (
+                "rustfmt.toml".to_owned(),
+                r#"
+                    edition = "2021"
+                    max_width = 100
+                    tab_spaces = 4
+                    use_field_init_shorthand = true
+                    use_try_shorthand = true
+                    reorder_imports = true
+                    reorder_modules = true
+                    group_imports = "StdExternalCrate"
+                    ignore = ["generated/**"]
+                "#
+                .to_owned(),
+            ),
+        ]),
+    };
+
+    let results = check(&tree);
+    assert!(results.iter().any(|r| r.id == "RS-FMT-04"));
+    assert!(results.iter().any(|r| r.id == "RS-FMT-06"));
+    assert!(results.iter().any(|r| r.id == "RS-FMT-07"));
+    assert!(
+        !results
+            .iter()
+            .any(|r| r.id == "RS-FMT-03" && r.title.contains("ignore"))
+    );
+}

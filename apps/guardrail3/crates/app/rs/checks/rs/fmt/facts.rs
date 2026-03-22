@@ -15,6 +15,7 @@ pub struct RustfmtFacts {
     pub extra_config_rels: Vec<String>,
     pub dual_file_conflict_dirs: Vec<String>,
     pub workspace_edition: Option<String>,
+    pub toolchain_channel: Option<String>,
 }
 
 pub fn collect(tree: &ProjectTree) -> RustfmtFacts {
@@ -62,6 +63,7 @@ pub fn collect(tree: &ProjectTree) -> RustfmtFacts {
         extra_config_rels,
         dual_file_conflict_dirs,
         workspace_edition: read_workspace_edition(tree),
+        toolchain_channel: read_toolchain_channel(tree),
     }
 }
 
@@ -82,6 +84,17 @@ fn read_workspace_edition(tree: &ProjectTree) -> Option<String> {
                 .and_then(toml::Value::as_str)
                 .map(str::to_owned)
         })
+}
+
+fn read_toolchain_channel(tree: &ProjectTree) -> Option<String> {
+    let content = tree.file_content("rust-toolchain.toml")?;
+    let parsed = toml::from_str::<toml::Value>(content).ok()?;
+
+    parsed
+        .get("toolchain")
+        .and_then(|value| value.get("channel"))
+        .and_then(toml::Value::as_str)
+        .map(str::to_owned)
 }
 
 pub fn file_name_kind(path: &str) -> RustfmtConfigKind {
