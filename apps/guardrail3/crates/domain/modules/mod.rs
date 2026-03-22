@@ -32,8 +32,10 @@ pub fn all_modules() -> Vec<&'static Module> {
     modules.push(&clippy::TYPE_COLLECTIONS);
     modules.push(&clippy::TYPE_SYNC);
     modules.push(&clippy::TYPE_FILESYSTEM);
+    modules.push(&clippy::TYPE_DYNAMIC);
     modules.push(&clippy::TYPE_GLOBAL_STATE);
     modules.push(&clippy::TYPE_GARDE_EXTRACTORS);
+    modules.push(&clippy::MACRO_DEBUGGING);
 
     // Deny modules
     modules.push(&deny::DENY_GRAPH);
