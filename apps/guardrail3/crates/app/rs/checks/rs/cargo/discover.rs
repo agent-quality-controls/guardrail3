@@ -1,15 +1,12 @@
 use std::collections::BTreeSet;
 
-use glob::Pattern;
-
 use crate::domain::project_tree::ProjectTree;
 
 use super::facts::{CargoFamilyFacts, MemberCargoFacts, WorkspaceCargoFacts};
 
 pub fn collect(tree: &ProjectTree) -> Option<CargoFamilyFacts> {
     let workspace_content = tree.file_content("Cargo.toml")?;
-    let all_dir_rels = discover_all_dirs(tree);
-    let discovered_member_rels = discover_member_cargo_dirs(tree);
+    let discovered_member_rels = tree.dirs_with_file("Cargo.toml").into_iter().collect();
     let workspace_parsed = match toml::from_str::<toml::Value>(workspace_content) {
         Ok(parsed) => parsed,
         Err(err) => {
@@ -35,7 +32,7 @@ pub fn collect(tree: &ProjectTree) -> Option<CargoFamilyFacts> {
         return None;
     }
 
-    let declared_members = resolve_declared_members(&workspace_parsed, &all_dir_rels);
+    let declared_members = resolve_declared_members(tree, &workspace_parsed);
     let members = declared_members
         .iter()
         .filter(|member_rel| discovered_member_rels.contains(*member_rel))
@@ -63,34 +60,10 @@ pub fn collect(tree: &ProjectTree) -> Option<CargoFamilyFacts> {
     })
 }
 
-fn discover_all_dirs(tree: &ProjectTree) -> BTreeSet<String> {
-    tree.structure
-        .keys()
-        .filter(|dir_rel| !dir_rel.is_empty())
-        .cloned()
-        .collect()
-}
-
-fn discover_member_cargo_dirs(tree: &ProjectTree) -> BTreeSet<String> {
-    tree.structure
-        .iter()
-        .filter_map(|(dir_rel, entry)| {
-            if dir_rel.is_empty() || !entry.has_file("Cargo.toml") {
-                None
-            } else {
-                Some(dir_rel.clone())
-            }
-        })
-        .collect()
-}
-
-fn resolve_declared_members(
-    workspace_parsed: &toml::Value,
-    all_dir_rels: &BTreeSet<String>,
-) -> BTreeSet<String> {
+fn resolve_declared_members(tree: &ProjectTree, workspace_parsed: &toml::Value) -> BTreeSet<String> {
     raw_member_patterns(workspace_parsed)
         .into_iter()
-        .flat_map(|pattern| expand_member_pattern(&pattern, all_dir_rels))
+        .flat_map(|pattern| expand_member_pattern(tree, &pattern))
         .collect()
 }
 
@@ -109,21 +82,13 @@ fn raw_member_patterns(workspace_parsed: &toml::Value) -> Vec<String> {
         .unwrap_or_default()
 }
 
-fn expand_member_pattern(pattern: &str, all_dir_rels: &BTreeSet<String>) -> Vec<String> {
+fn expand_member_pattern(tree: &ProjectTree, pattern: &str) -> Vec<String> {
     let normalized = normalize_member_rel(pattern);
     if !looks_like_glob(&normalized) {
         return vec![normalized];
     }
 
-    let Ok(pattern) = Pattern::new(&normalized) else {
-        return Vec::new();
-    };
-
-    all_dir_rels
-        .iter()
-        .filter(|member_rel| pattern.matches(member_rel))
-        .cloned()
-        .collect()
+    tree.matching_dir_rels(&normalized)
 }
 
 fn looks_like_glob(pattern: &str) -> bool {
