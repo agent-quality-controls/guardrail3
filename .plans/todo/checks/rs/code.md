@@ -38,26 +38,25 @@
 
 | New ID | Severity | What | Status |
 |--------|----------|------|--------|
-| RS-CODE-16 | Warn | `panic!` macro in non-test code. Detected by AST walker but currently silently dropped (catch-all `_ => {}`). Strictly worse than `todo!` — crashes in production. Clippy has no lint for this. | Planned (bug fix: add match arm) |
-| RS-CODE-17 | Error | Blanket `#[allow]` on `impl` block covering >3 methods. No legitimate use case — always apply `#[allow]` to individual methods. Invisible blast radius otherwise. | Planned |
-| RS-CODE-18 | Error | Always-true `cfg_attr` bypass. Currently only detects `all()` with empty args. Must also detect `any(unix, windows)`, `not(nonexistent_target)`. Disguised unconditional allows. | Planned |
-| RS-CODE-19 | Info | Large struct (>15 fields) or enum (>20 variants). Architectural smell inventory. Not error, just visibility. | Planned |
-| RS-CODE-20 | Error | `#[allow]` on `extern "C"` blocks. `item_attrs` returns `&[]` for ForeignMod — one-line fix to add `ForeignMod(f) => &f.attrs`. | Planned (code fix) |
-| RS-CODE-21 | Error | `use std::fs::*` glob import bypass. Glob brings all std::fs functions into scope, bypassing clippy's disallowed_methods. Variant of the clippy hole that RS-CODE-15 exists for. | Planned |
+| RS-CODE-16 | Warn | `panic!` macro in non-test code. Detected by AST walker but currently silently dropped (catch-all `_ => {}`). Strictly worse than `todo!` — crashes in production. Clippy has no lint for this. | Implemented |
+| RS-CODE-17 | Error | Blanket `#[allow]` on `impl` block covering >3 methods. No legitimate use case — always apply `#[allow]` to individual methods. Invisible blast radius otherwise. | Implemented |
+| RS-CODE-18 | Error | Always-true `cfg_attr` bypass. Currently only detects `all()` with empty args. Must also detect `any(unix, windows)`, `not(nonexistent_target)`. Disguised unconditional allows. | Implemented |
+| RS-CODE-19 | Info | Large struct (>15 fields) or enum (>20 variants). Architectural smell inventory. Not error, just visibility. | Implemented |
+| RS-CODE-20 | Error | `#[allow]` on `extern "C"` blocks. `item_attrs` returns `&[]` for ForeignMod — one-line fix to add `ForeignMod(f) => &f.attrs`. | Implemented |
+| RS-CODE-21 | Error | `use std::fs::*` glob import bypass. Glob brings all std::fs functions into scope, bypassing clippy's disallowed_methods. Variant of the clippy hole that RS-CODE-15 exists for. | Implemented |
 
 ## New rules from audit round 2
 
 | New ID | Severity | What | Status |
 |--------|----------|------|--------|
-| RS-CODE-22 | Error | `#[deny]`/`#[forbid]` attributes without `// reason:`. Undocumented lint level overrides — same class as `#[allow]`. `#![deny(warnings)]` is an anti-pattern. Exception: `#![forbid(unsafe_code)]` is Info (strengthens safety). | Planned |
-| RS-CODE-23 | Error | `include!()` pulls in unscanned code. Direct bypass of all code scanning. Exception: `include!(concat!(env!("OUT_DIR"), ...))` is Info (build-script pattern). Warn for `include_str!()`/`include_bytes!()` with path traversal (`..`). | Planned |
-| RS-CODE-24 | Error/Warn | `#[path = "..."]` redirects module paths. Error if path contains `..` (escaping directory). Warn for any `#[path]` usage (breaks standard file layout). Require `// reason:` for Warn case. | Planned |
-| RS-CODE-25 | Warn | `Result<T, String>` or `Result<T, Box<dyn Error>>` in `pub fn` return types. Poor error discipline — forces callers to parse strings. **Library profile only.** | Planned |
-| RS-CODE-26 | Warn | `pub use foo::*` glob re-export in lib.rs. Unpredictable API surface — any change to inner module changes library API. **Library profile only.** | Planned |
-| RS-CODE-27 | Error | Facade-only lib.rs: should contain only `mod`, `pub use`, doc comments, type/const definitions. No function bodies, no impl blocks. **Library profile only.** | Planned |
-| RS-CODE-28 | Warn | `pub mod foo { ... }` with inline body in lib.rs. Public modules should be separate files for organization. | Planned |
-| RS-CODE-29 | Warn/Error | Trait with >8 methods (Warn) or >12 methods (Error). Nearly unimplementable traits. **Library profile only.** | Planned |
-| RS-CODE-21 | Error | `use std::fs::*` glob import bypass. Glob brings all std::fs functions into scope, bypassing clippy's disallowed_methods which only matches fully-qualified paths. Variant of the same clippy hole as RS-CODE-15. | Planned |
+| RS-CODE-22 | Error | `#[deny]`/`#[forbid]` attributes without `// reason:`. Undocumented lint level overrides — same class as `#[allow]`. `#![deny(warnings)]` is an anti-pattern. Exception: `#![forbid(unsafe_code)]` is Info (strengthens safety). | Implemented |
+| RS-CODE-23 | Error | `include!()` pulls in unscanned code. Direct bypass of all code scanning. Exception: `include!(concat!(env!("OUT_DIR"), ...))` is Info (build-script pattern). Warn for `include_str!()`/`include_bytes!()` with path traversal (`..`). | Implemented |
+| RS-CODE-24 | Error/Warn | `#[path = "..."]` redirects module paths. Error if path contains `..` (escaping directory). Warn for any `#[path]` usage (breaks standard file layout). Require `// reason:` for Warn case. | Implemented |
+| RS-CODE-25 | Warn | `Result<T, String>` or `Result<T, Box<dyn Error>>` in `pub fn` return types. Poor error discipline — forces callers to parse strings. **Library profile only.** | Implemented |
+| RS-CODE-26 | Warn | `pub use foo::*` glob re-export in lib.rs. Unpredictable API surface — any change to inner module changes library API. **Library profile only.** | Implemented |
+| RS-CODE-27 | Error | Facade-only lib.rs: should contain only `mod`, `pub use`, doc comments, type/const definitions. No function bodies, no impl blocks. **Library profile only.** | Implemented |
+| RS-CODE-28 | Warn | `pub mod foo { ... }` with inline body in lib.rs. Public modules should be separate files for organization. | Implemented |
+| RS-CODE-29 | Warn/Error | Trait with >8 methods (Warn) or >12 methods (Error). Nearly unimplementable traits. **Library profile only.** | Implemented |
 
 ## Relocated checks
 

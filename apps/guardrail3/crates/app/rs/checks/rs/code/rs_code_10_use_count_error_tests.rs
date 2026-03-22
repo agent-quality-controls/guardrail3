@@ -15,6 +15,7 @@ fn errors_above_twenty_top_level_uses() {
         content: &content,
         ast: &ast,
         is_test: false,
+        profile_name: None,
     };
     let mut results = Vec::new();
 

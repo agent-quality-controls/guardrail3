@@ -2,6 +2,8 @@ use proc_macro2::Span;
 use syn::spanned::Spanned;
 use syn::visit::Visit;
 
+pub use crate::app::rs::validate::ast_helpers::{CfgAttrAllowInfo, GardeSkipInfo, InlineModAllow};
+
 pub fn parse_rust_file(content: &str) -> Result<syn::File, syn::Error> {
     syn::parse_file(content.strip_prefix('\u{feff}').unwrap_or(content))
 }
@@ -82,6 +84,223 @@ pub enum LargeTypeItem {
 
 pub fn find_large_type_items(ast: &syn::File) -> Vec<LargeTypeItem> {
     let mut visitor = LargeTypeVisitor { out: Vec::new() };
+    visitor.visit_file(ast);
+    visitor.out
+}
+
+pub fn find_crate_level_allows(ast: &syn::File) -> Vec<(usize, String)> {
+    crate::app::rs::validate::ast_helpers::find_crate_level_allows(ast)
+}
+
+pub fn find_inline_mod_allows(ast: &syn::File) -> Vec<InlineModAllow> {
+    crate::app::rs::validate::ast_helpers::find_inline_mod_allows(ast)
+}
+
+pub fn find_item_allows(ast: &syn::File) -> Vec<(usize, String)> {
+    crate::app::rs::validate::ast_helpers::find_item_allows(ast)
+}
+
+pub fn find_cfg_attr_allows(ast: &syn::File) -> Vec<CfgAttrAllowInfo> {
+    crate::app::rs::validate::ast_helpers::find_cfg_attr_allows(ast)
+}
+
+pub fn find_garde_skips_with_types(ast: &syn::File) -> Vec<GardeSkipInfo> {
+    crate::app::rs::validate::ast_helpers::find_garde_skips_with_types(ast)
+}
+
+pub fn same_line_reason(content: &str, line: usize) -> Option<String> {
+    content
+        .lines()
+        .nth(line.saturating_sub(1))
+        .and_then(|source_line| source_line.split("//").nth(1))
+        .and_then(|comment| {
+            let trimmed = comment.trim();
+            let lower = trimmed.to_ascii_lowercase();
+            if !lower.starts_with("reason:") {
+                return None;
+            }
+            let reason = trimmed.get("reason:".len()..)?.trim();
+            if reason.is_empty() {
+                None
+            } else {
+                Some(reason.to_owned())
+            }
+        })
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ImplAllowInfo {
+    pub line: usize,
+    pub lint: String,
+    pub method_count: usize,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DenyForbidInfo {
+    pub line: usize,
+    pub lint: String,
+    pub level: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct IncludeMacroInfo {
+    pub line: usize,
+    pub macro_name: String,
+    pub build_script_pattern: bool,
+    pub path_traversal: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PathAttrInfo {
+    pub line: usize,
+    pub path: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum PublicResultErrorKind {
+    String,
+    BoxDynError,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PublicResultErrorInfo {
+    pub line: usize,
+    pub fn_name: String,
+    pub kind: PublicResultErrorKind,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FacadeBodyItemInfo {
+    pub line: usize,
+    pub kind: &'static str,
+    pub name: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TraitMethodCountInfo {
+    pub line: usize,
+    pub trait_name: String,
+    pub method_count: usize,
+}
+
+pub fn find_impl_block_allows(ast: &syn::File) -> Vec<ImplAllowInfo> {
+    let mut visitor = ImplAllowVisitor { out: Vec::new() };
+    visitor.visit_file(ast);
+    visitor.out
+}
+
+pub fn find_always_true_cfg_attr_allows(ast: &syn::File) -> Vec<CfgAttrAllowInfo> {
+    let mut out = Vec::new();
+    collect_always_true_cfg_attr_allows(&ast.attrs, &mut out);
+    let mut visitor = AlwaysTrueCfgAttrVisitor { out: &mut out };
+    visitor.visit_file(ast);
+    out
+}
+
+pub fn find_foreign_mod_allows(ast: &syn::File) -> Vec<(usize, String)> {
+    let mut visitor = ForeignModAllowVisitor { out: Vec::new() };
+    visitor.visit_file(ast);
+    visitor.out
+}
+
+pub fn find_std_fs_glob_import_lines(ast: &syn::File) -> Vec<usize> {
+    ast.items
+        .iter()
+        .filter_map(|item| {
+            let syn::Item::Use(use_item) = item else {
+                return None;
+            };
+            if use_item.attrs.iter().any(is_cfg_test_attr) {
+                return None;
+            }
+            if use_tree_is_std_fs_glob(&use_item.tree) {
+                Some(span_line(use_item.span()))
+            } else {
+                None
+            }
+        })
+        .collect()
+}
+
+pub fn find_deny_forbid_attrs(ast: &syn::File) -> Vec<DenyForbidInfo> {
+    let mut out = Vec::new();
+    collect_deny_forbid_attrs(&ast.attrs, &mut out);
+    let mut visitor = DenyForbidVisitor { out: &mut out };
+    visitor.visit_file(ast);
+    out
+}
+
+pub fn find_include_macros(ast: &syn::File) -> Vec<IncludeMacroInfo> {
+    let mut visitor = IncludeMacroVisitor { out: Vec::new() };
+    visitor.visit_file(ast);
+    visitor.out
+}
+
+pub fn find_path_attrs(ast: &syn::File) -> Vec<PathAttrInfo> {
+    let mut out = Vec::new();
+    collect_path_attrs(&ast.attrs, &mut out);
+    let mut visitor = PathAttrVisitor { out: &mut out };
+    visitor.visit_file(ast);
+    out
+}
+
+pub fn find_public_result_error_types(ast: &syn::File) -> Vec<PublicResultErrorInfo> {
+    let mut visitor = PublicResultErrorVisitor { out: Vec::new() };
+    visitor.visit_file(ast);
+    visitor.out
+}
+
+pub fn find_pub_use_glob_reexports(ast: &syn::File) -> Vec<(usize, String)> {
+    ast.items
+        .iter()
+        .filter_map(|item| {
+            let syn::Item::Use(use_item) = item else {
+                return None;
+            };
+            if !matches!(use_item.vis, syn::Visibility::Public(_)) {
+                return None;
+            }
+            glob_reexport_target(&use_item.tree).map(|target| (span_line(use_item.span()), target))
+        })
+        .collect()
+}
+
+pub fn find_facade_body_items(ast: &syn::File) -> Vec<FacadeBodyItemInfo> {
+    ast.items
+        .iter()
+        .filter_map(|item| match item {
+            syn::Item::Fn(item_fn) => Some(FacadeBodyItemInfo {
+                line: span_line(item_fn.sig.ident.span()),
+                kind: "function",
+                name: item_fn.sig.ident.to_string(),
+            }),
+            syn::Item::Impl(item_impl) => Some(FacadeBodyItemInfo {
+                line: span_line(item_impl.impl_token.span()),
+                kind: "impl",
+                name: "impl".to_owned(),
+            }),
+            _ => None,
+        })
+        .collect()
+}
+
+pub fn find_inline_public_modules(ast: &syn::File) -> Vec<(usize, String)> {
+    ast.items
+        .iter()
+        .filter_map(|item| {
+            let syn::Item::Mod(item_mod) = item else {
+                return None;
+            };
+            if item_mod.content.is_none() || !matches!(item_mod.vis, syn::Visibility::Public(_)) {
+                return None;
+            }
+            Some((span_line(item_mod.ident.span()), item_mod.ident.to_string()))
+        })
+        .collect()
+}
+
+pub fn find_large_traits(ast: &syn::File) -> Vec<TraitMethodCountInfo> {
+    let mut visitor = LargeTraitVisitor { out: Vec::new() };
     visitor.visit_file(ast);
     visitor.out
 }
@@ -279,6 +498,151 @@ fn attr_allows_lint(attr: &syn::Attribute, lint_name: &str) -> bool {
     })
 }
 
+fn item_attrs(item: &syn::Item) -> &[syn::Attribute] {
+    match item {
+        syn::Item::Const(item) => &item.attrs,
+        syn::Item::Enum(item) => &item.attrs,
+        syn::Item::ExternCrate(item) => &item.attrs,
+        syn::Item::Fn(item) => &item.attrs,
+        syn::Item::ForeignMod(item) => &item.attrs,
+        syn::Item::Impl(item) => &item.attrs,
+        syn::Item::Macro(item) => &item.attrs,
+        syn::Item::Mod(item) => &item.attrs,
+        syn::Item::Static(item) => &item.attrs,
+        syn::Item::Struct(item) => &item.attrs,
+        syn::Item::Trait(item) => &item.attrs,
+        syn::Item::TraitAlias(item) => &item.attrs,
+        syn::Item::Type(item) => &item.attrs,
+        syn::Item::Union(item) => &item.attrs,
+        syn::Item::Use(item) => &item.attrs,
+        _ => &[],
+    }
+}
+
+fn impl_item_attrs(item: &syn::ImplItem) -> &[syn::Attribute] {
+    match item {
+        syn::ImplItem::Const(item) => &item.attrs,
+        syn::ImplItem::Fn(item) => &item.attrs,
+        syn::ImplItem::Macro(item) => &item.attrs,
+        syn::ImplItem::Type(item) => &item.attrs,
+        _ => &[],
+    }
+}
+
+fn collect_allow_lints(attrs: &[syn::Attribute]) -> Vec<(usize, String)> {
+    let mut out = Vec::new();
+    for attr in attrs {
+        if attr.path().is_ident("allow") {
+            let line = span_line(attr.span());
+            let syn::Meta::List(list) = &attr.meta else {
+                continue;
+            };
+            let Ok(paths) = list.parse_args_with(
+                syn::punctuated::Punctuated::<syn::Path, syn::Token![,]>::parse_terminated,
+            ) else {
+                continue;
+            };
+            for path in paths {
+                out.push((line, path_to_string(&path)));
+            }
+        }
+    }
+    out
+}
+
+fn collect_deny_forbid_attrs(attrs: &[syn::Attribute], out: &mut Vec<DenyForbidInfo>) {
+    for attr in attrs {
+        let level = if attr.path().is_ident("deny") {
+            "deny"
+        } else if attr.path().is_ident("forbid") {
+            "forbid"
+        } else {
+            continue;
+        };
+        let line = span_line(attr.span());
+        let syn::Meta::List(list) = &attr.meta else {
+            continue;
+        };
+        let Ok(paths) = list.parse_args_with(
+            syn::punctuated::Punctuated::<syn::Path, syn::Token![,]>::parse_terminated,
+        ) else {
+            continue;
+        };
+        for path in paths {
+            out.push(DenyForbidInfo {
+                line,
+                lint: path_to_string(&path),
+                level: level.to_owned(),
+            });
+        }
+    }
+}
+
+fn collect_path_attrs(attrs: &[syn::Attribute], out: &mut Vec<PathAttrInfo>) {
+    for attr in attrs {
+        if !attr.path().is_ident("path") {
+            continue;
+        }
+        let syn::Meta::NameValue(name_value) = &attr.meta else {
+            continue;
+        };
+        let syn::Expr::Lit(expr_lit) = &name_value.value else {
+            continue;
+        };
+        let syn::Lit::Str(path_lit) = &expr_lit.lit else {
+            continue;
+        };
+        out.push(PathAttrInfo {
+            line: span_line(attr.span()),
+            path: path_lit.value(),
+        });
+    }
+}
+
+fn collect_always_true_cfg_attr_allows(attrs: &[syn::Attribute], out: &mut Vec<CfgAttrAllowInfo>) {
+    for attr in attrs {
+        if !attr.path().is_ident("cfg_attr") {
+            continue;
+        }
+        let syn::Meta::List(list) = &attr.meta else {
+            continue;
+        };
+        let Ok(args) = list.parse_args_with(
+            syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated,
+        ) else {
+            continue;
+        };
+        let mut args = args.into_iter();
+        let Some(condition) = args.next() else {
+            continue;
+        };
+        if !meta_is_always_true(&condition) {
+            continue;
+        }
+        let line = span_line(attr.span());
+        for meta in args {
+            let syn::Meta::List(inner) = meta else {
+                continue;
+            };
+            if !inner.path.is_ident("allow") {
+                continue;
+            }
+            let Ok(paths) = inner.parse_args_with(
+                syn::punctuated::Punctuated::<syn::Path, syn::Token![,]>::parse_terminated,
+            ) else {
+                continue;
+            };
+            for path in paths {
+                out.push(CfgAttrAllowInfo {
+                    line,
+                    lint: path_to_string(&path),
+                    is_always_true: true,
+                });
+            }
+        }
+    }
+}
+
 fn use_tree_matches_std_fs(tree: &syn::UseTree) -> bool {
     match tree {
         syn::UseTree::Path(path) => {
@@ -296,8 +660,259 @@ fn use_tree_matches_std_fs(tree: &syn::UseTree) -> bool {
     }
 }
 
+fn use_tree_is_std_fs_glob(tree: &syn::UseTree) -> bool {
+    match tree {
+        syn::UseTree::Path(std_path) if std_path.ident == "std" => match &*std_path.tree {
+            syn::UseTree::Path(fs_path) if fs_path.ident == "fs" => {
+                matches!(&*fs_path.tree, syn::UseTree::Glob(_))
+            }
+            _ => false,
+        },
+        _ => false,
+    }
+}
+
+fn glob_reexport_target(tree: &syn::UseTree) -> Option<String> {
+    match tree {
+        syn::UseTree::Path(path) => glob_reexport_target(&path.tree)
+            .map(|target| format!("{}::{target}", path.ident)),
+        syn::UseTree::Glob(_) => Some("*".to_owned()),
+        _ => None,
+    }
+}
+
+fn meta_is_always_true(meta: &syn::Meta) -> bool {
+    match meta {
+        syn::Meta::Path(path) => path
+            .get_ident()
+            .is_some_and(|ident| is_cfg_ident_always_true(ident.to_string().as_str())),
+        syn::Meta::List(list) => {
+            let name = path_to_string(&list.path);
+            let nested: Vec<syn::Meta> = list
+                .parse_args_with(
+                    syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated,
+                )
+                .map(|punctuated| punctuated.into_iter().collect())
+                .unwrap_or_default();
+            match name.as_str() {
+                "all" => nested.iter().all(meta_is_always_true),
+                "any" => {
+                    if nested.is_empty() {
+                        return false;
+                    }
+                    if nested.iter().any(meta_is_always_true) {
+                        return true;
+                    }
+                    is_known_exhaustive_any(&nested)
+                }
+                "not" if nested.len() == 1 => meta_is_always_false(&nested[0]),
+                _ => false,
+            }
+        }
+        syn::Meta::NameValue(name_value) => path_to_string(&name_value.path) == "feature"
+            && matches!(&name_value.value, syn::Expr::Lit(_)),
+    }
+}
+
+fn meta_is_always_false(meta: &syn::Meta) -> bool {
+    match meta {
+        syn::Meta::Path(path) => path
+            .get_ident()
+            .is_some_and(|ident| is_cfg_ident_always_false(ident.to_string().as_str())),
+        syn::Meta::List(list) => {
+            let name = path_to_string(&list.path);
+            let nested: Vec<syn::Meta> = list
+                .parse_args_with(
+                    syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated,
+                )
+                .map(|punctuated| punctuated.into_iter().collect())
+                .unwrap_or_default();
+            match name.as_str() {
+                "all" => nested.iter().any(meta_is_always_false),
+                "any" => nested.iter().all(meta_is_always_false),
+                "not" if nested.len() == 1 => meta_is_always_true(&nested[0]),
+                _ => false,
+            }
+        }
+        syn::Meta::NameValue(_) => false,
+    }
+}
+
+fn is_cfg_ident_always_true(ident: &str) -> bool {
+    matches!(ident, "unix" | "windows")
+}
+
+fn is_cfg_ident_always_false(ident: &str) -> bool {
+    !matches!(
+        ident,
+        "unix"
+            | "windows"
+            | "target_os"
+            | "target_family"
+            | "target_arch"
+            | "target_env"
+            | "target_vendor"
+            | "target_pointer_width"
+            | "target_endian"
+            | "debug_assertions"
+            | "test"
+            | "feature"
+            | "proc_macro"
+            | "panic"
+    )
+}
+
+fn is_known_exhaustive_any(nested: &[syn::Meta]) -> bool {
+    let names: Vec<String> = nested
+        .iter()
+        .filter_map(|meta| match meta {
+            syn::Meta::Path(path) => path.get_ident().map(ToString::to_string),
+            _ => None,
+        })
+        .collect();
+    names.iter().any(|name| name == "unix") && names.iter().any(|name| name == "windows")
+}
+
+fn macro_token_expr(mac: &syn::Macro) -> Option<syn::Expr> {
+    syn::parse2::<syn::Expr>(mac.tokens.clone()).ok()
+}
+
+fn expr_contains_out_dir(expr: &syn::Expr) -> bool {
+    match expr {
+        syn::Expr::Macro(expr_macro) => {
+            let name = path_to_string(&expr_macro.mac.path);
+            if name.ends_with("env") {
+                return expr_macro.mac.tokens.to_string().contains("\"OUT_DIR\"");
+            }
+            if name.ends_with("concat") {
+                if expr_macro.mac.tokens.to_string().contains("OUT_DIR") {
+                    return true;
+                }
+                return macro_token_expr(&expr_macro.mac)
+                    .is_some_and(|nested| expr_contains_out_dir(&nested));
+            }
+            false
+        }
+        syn::Expr::Call(call) => {
+            expr_contains_out_dir(&call.func) || call.args.iter().any(expr_contains_out_dir)
+        }
+        syn::Expr::Path(_) => false,
+        _ => false,
+    }
+}
+
+fn expr_has_path_traversal(expr: &syn::Expr) -> bool {
+    match expr {
+        syn::Expr::Lit(expr_lit) => match &expr_lit.lit {
+            syn::Lit::Str(value) => value.value().contains(".."),
+            _ => false,
+        },
+        syn::Expr::Macro(expr_macro) => macro_token_expr(&expr_macro.mac)
+            .is_some_and(|nested| expr_has_path_traversal(&nested)),
+        syn::Expr::Call(call) => {
+            expr_has_path_traversal(&call.func) || call.args.iter().any(expr_has_path_traversal)
+        }
+        syn::Expr::Array(array) => array.elems.iter().any(expr_has_path_traversal),
+        _ => false,
+    }
+}
+
+fn result_error_kind(ty: &syn::Type) -> Option<PublicResultErrorKind> {
+    let syn::Type::Path(type_path) = ty else {
+        return None;
+    };
+    let last = type_path.path.segments.iter().next_back()?;
+    if last.ident != "Result" {
+        return None;
+    }
+    let syn::PathArguments::AngleBracketed(args) = &last.arguments else {
+        return None;
+    };
+    let second = args.args.iter().nth(1)?;
+    let syn::GenericArgument::Type(err_ty) = second else {
+        return None;
+    };
+    if is_string_type(err_ty) {
+        return Some(PublicResultErrorKind::String);
+    }
+    if is_box_dyn_error(err_ty) {
+        return Some(PublicResultErrorKind::BoxDynError);
+    }
+    None
+}
+
+fn is_string_type(ty: &syn::Type) -> bool {
+    let syn::Type::Path(type_path) = ty else {
+        return false;
+    };
+    type_path
+        .path
+        .segments
+        .iter()
+        .next_back()
+        .is_some_and(|segment| segment.ident == "String")
+}
+
+fn is_box_dyn_error(ty: &syn::Type) -> bool {
+    let syn::Type::Path(type_path) = ty else {
+        return false;
+    };
+    let Some(last) = type_path.path.segments.iter().next_back() else {
+        return false;
+    };
+    if last.ident != "Box" {
+        return false;
+    }
+    let syn::PathArguments::AngleBracketed(args) = &last.arguments else {
+        return false;
+    };
+    let Some(syn::GenericArgument::Type(inner_ty)) = args.args.first() else {
+        return false;
+    };
+    let syn::Type::TraitObject(trait_object) = inner_ty else {
+        return false;
+    };
+    trait_object.bounds.iter().any(|bound| match bound {
+        syn::TypeParamBound::Trait(trait_bound) => trait_bound
+            .path
+            .segments
+            .iter()
+            .next_back()
+            .is_some_and(|segment| segment.ident == "Error"),
+        _ => false,
+    })
+}
+
 struct ForbiddenMacroVisitor {
     out: Vec<(usize, String)>,
+}
+
+struct ImplAllowVisitor {
+    out: Vec<ImplAllowInfo>,
+}
+
+struct DenyForbidVisitor<'a> {
+    out: &'a mut Vec<DenyForbidInfo>,
+}
+
+struct ForeignModAllowVisitor {
+    out: Vec<(usize, String)>,
+}
+
+struct IncludeMacroVisitor {
+    out: Vec<IncludeMacroInfo>,
+}
+
+struct AlwaysTrueCfgAttrVisitor<'a> {
+    out: &'a mut Vec<CfgAttrAllowInfo>,
+}
+
+struct PathAttrVisitor<'a> {
+    out: &'a mut Vec<PathAttrInfo>,
+}
+
+struct PublicResultErrorVisitor {
+    out: Vec<PublicResultErrorInfo>,
 }
 
 impl<'ast> Visit<'ast> for ForbiddenMacroVisitor {
@@ -308,6 +923,119 @@ impl<'ast> Visit<'ast> for ForbiddenMacroVisitor {
             self.out.push((span_line(macro_call.path.span()), name));
         }
         syn::visit::visit_macro(self, macro_call);
+    }
+}
+
+impl<'ast> Visit<'ast> for ImplAllowVisitor {
+    fn visit_item_impl(&mut self, item_impl: &'ast syn::ItemImpl) {
+        let method_count = item_impl
+            .items
+            .iter()
+            .filter(|item| matches!(item, syn::ImplItem::Fn(_)))
+            .count();
+        if method_count > 3 {
+            for (line, lint) in collect_allow_lints(&item_impl.attrs) {
+                self.out.push(ImplAllowInfo {
+                    line,
+                    lint,
+                    method_count,
+                });
+            }
+        }
+        syn::visit::visit_item_impl(self, item_impl);
+    }
+}
+
+impl<'ast> Visit<'ast> for DenyForbidVisitor<'ast> {
+    fn visit_item(&mut self, item: &'ast syn::Item) {
+        collect_deny_forbid_attrs(item_attrs(item), self.out);
+        syn::visit::visit_item(self, item);
+    }
+
+    fn visit_impl_item(&mut self, item: &'ast syn::ImplItem) {
+        collect_deny_forbid_attrs(impl_item_attrs(item), self.out);
+        syn::visit::visit_impl_item(self, item);
+    }
+}
+
+impl<'ast> Visit<'ast> for ForeignModAllowVisitor {
+    fn visit_item_foreign_mod(&mut self, item: &'ast syn::ItemForeignMod) {
+        for (line, lint) in collect_allow_lints(&item.attrs) {
+            self.out.push((line, lint));
+        }
+        syn::visit::visit_item_foreign_mod(self, item);
+    }
+}
+
+impl<'ast> Visit<'ast> for IncludeMacroVisitor {
+    fn visit_macro(&mut self, macro_call: &'ast syn::Macro) {
+        let name = path_to_string(&macro_call.path);
+        let base = name.rsplit("::").next().unwrap_or(&name);
+        if matches!(base, "include" | "include_str" | "include_bytes") {
+            let expr = macro_token_expr(macro_call);
+            let build_script_pattern = expr.as_ref().is_some_and(expr_contains_out_dir);
+            let path_traversal = expr.as_ref().is_some_and(expr_has_path_traversal);
+            self.out.push(IncludeMacroInfo {
+                line: span_line(macro_call.path.span()),
+                macro_name: base.to_owned(),
+                build_script_pattern,
+                path_traversal,
+            });
+        }
+        syn::visit::visit_macro(self, macro_call);
+    }
+}
+
+impl<'ast> Visit<'ast> for AlwaysTrueCfgAttrVisitor<'ast> {
+    fn visit_item(&mut self, item: &'ast syn::Item) {
+        collect_always_true_cfg_attr_allows(item_attrs(item), self.out);
+        syn::visit::visit_item(self, item);
+    }
+
+    fn visit_impl_item(&mut self, item: &'ast syn::ImplItem) {
+        collect_always_true_cfg_attr_allows(impl_item_attrs(item), self.out);
+        syn::visit::visit_impl_item(self, item);
+    }
+}
+
+impl<'ast> Visit<'ast> for PathAttrVisitor<'ast> {
+    fn visit_item(&mut self, item: &'ast syn::Item) {
+        collect_path_attrs(item_attrs(item), self.out);
+        syn::visit::visit_item(self, item);
+    }
+}
+
+impl<'ast> Visit<'ast> for PublicResultErrorVisitor {
+    fn visit_item_fn(&mut self, item_fn: &'ast syn::ItemFn) {
+        if !matches!(item_fn.vis, syn::Visibility::Public(_)) {
+            return syn::visit::visit_item_fn(self, item_fn);
+        }
+        if let syn::ReturnType::Type(_, ty) = &item_fn.sig.output {
+            if let Some(kind) = result_error_kind(ty) {
+                self.out.push(PublicResultErrorInfo {
+                    line: span_line(item_fn.sig.ident.span()),
+                    fn_name: item_fn.sig.ident.to_string(),
+                    kind,
+                });
+            }
+        }
+        syn::visit::visit_item_fn(self, item_fn);
+    }
+
+    fn visit_impl_item_fn(&mut self, item_fn: &'ast syn::ImplItemFn) {
+        if !matches!(item_fn.vis, syn::Visibility::Public(_)) {
+            return syn::visit::visit_impl_item_fn(self, item_fn);
+        }
+        if let syn::ReturnType::Type(_, ty) = &item_fn.sig.output {
+            if let Some(kind) = result_error_kind(ty) {
+                self.out.push(PublicResultErrorInfo {
+                    line: span_line(item_fn.sig.ident.span()),
+                    fn_name: item_fn.sig.ident.to_string(),
+                    kind,
+                });
+            }
+        }
+        syn::visit::visit_impl_item_fn(self, item_fn);
     }
 }
 
@@ -381,6 +1109,10 @@ struct LargeTypeVisitor {
     out: Vec<LargeTypeItem>,
 }
 
+struct LargeTraitVisitor {
+    out: Vec<TraitMethodCountInfo>,
+}
+
 impl<'ast> Visit<'ast> for LargeTypeVisitor {
     fn visit_item_struct(&mut self, item_struct: &'ast syn::ItemStruct) {
         let field_count = match &item_struct.fields {
@@ -408,6 +1140,24 @@ impl<'ast> Visit<'ast> for LargeTypeVisitor {
             });
         }
         syn::visit::visit_item_enum(self, item_enum);
+    }
+}
+
+impl<'ast> Visit<'ast> for LargeTraitVisitor {
+    fn visit_item_trait(&mut self, item_trait: &'ast syn::ItemTrait) {
+        let method_count = item_trait
+            .items
+            .iter()
+            .filter(|item| matches!(item, syn::TraitItem::Fn(_)))
+            .count();
+        if method_count > 8 {
+            self.out.push(TraitMethodCountInfo {
+                line: span_line(item_trait.ident.span()),
+                trait_name: item_trait.ident.to_string(),
+                method_count,
+            });
+        }
+        syn::visit::visit_item_trait(self, item_trait);
     }
 }
 
