@@ -1,4 +1,5 @@
 use crate::ports::outbound::FileSystem;
+use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 #[derive(Debug, Clone)]
@@ -20,6 +21,33 @@ pub struct ProjectInfo {
     pub has_typescript: bool,
     pub workspaces: Vec<RustWorkspace>,
     pub package_json_path: Option<PathBuf>,
+}
+
+pub fn resolve_app_paths_from_member_dirs(
+    member_dirs: impl IntoIterator<Item = String>,
+) -> BTreeMap<String, String> {
+    let mut app_dirs: Vec<String> = Vec::new();
+    for dir in member_dirs {
+        let parts: Vec<&str> = dir.split('/').collect();
+        let app_path = if parts.len() >= 2 && parts.first() == Some(&"apps") {
+            format!("{}/{}", parts[0], parts[1])
+        } else {
+            dir
+        };
+        if !app_dirs.contains(&app_path) {
+            app_dirs.push(app_path);
+        }
+    }
+
+    app_dirs
+        .into_iter()
+        .filter_map(|app_dir| {
+            app_dir
+                .split('/')
+                .next_back()
+                .map(|app_name| (app_name.to_owned(), app_dir.clone()))
+        })
+        .collect()
 }
 
 impl ProjectInfo {

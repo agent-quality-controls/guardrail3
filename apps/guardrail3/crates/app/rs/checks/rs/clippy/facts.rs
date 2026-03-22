@@ -399,30 +399,13 @@ fn read_policy_map(
 }
 
 fn resolve_app_paths(cargo_roots: &BTreeMap<String, CargoRootFacts>) -> BTreeMap<String, String> {
-    let mut app_dirs = Vec::new();
-    for workspace in cargo_roots.values().filter(|facts| facts.has_workspace) {
-        for member_dir in &workspace.workspace_members {
-            let parts: Vec<_> = member_dir.split('/').collect();
-            let app_dir = if parts.len() >= 2 && parts.first() == Some(&"apps") {
-                format!("{}/{}", parts[0], parts[1])
-            } else {
-                member_dir.clone()
-            };
-            if !app_dirs.contains(&app_dir) {
-                app_dirs.push(app_dir);
-            }
-        }
-    }
-
-    app_dirs
-        .into_iter()
-        .filter_map(|app_dir| {
-            app_dir
-                .split('/')
-                .next_back()
-                .map(|app_name| (app_name.to_owned(), app_dir.clone()))
-        })
-        .collect()
+    crate::app::core::discover::resolve_app_paths_from_member_dirs(
+        cargo_roots
+            .values()
+            .filter(|facts| facts.has_workspace)
+            .flat_map(|workspace| workspace.workspace_members.iter().cloned())
+            .collect::<Vec<_>>(),
+    )
 }
 
 fn read_global_garde(tree: &ProjectTree) -> bool {
