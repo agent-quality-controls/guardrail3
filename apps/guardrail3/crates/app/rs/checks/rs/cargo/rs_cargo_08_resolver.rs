@@ -43,18 +43,27 @@ pub fn check(input: &WorkspaceCargoInput<'_>, results: &mut Vec<CheckResult>) {
             line: None,
             inventory: false,
         }),
-        None if input.workspace.has_package => results.push(
+        None if input.workspace.has_package && has_modern_package_edition(input.workspace.workspace_edition.as_deref()) => results.push(
             CheckResult {
                 id: ID.to_owned(),
                 severity: Severity::Info,
                 title: "resolver omitted on non-virtual workspace".to_owned(),
-                message: "Resolver is omitted, but this root package has `[package]` metadata so Cargo can infer a modern resolver.".to_owned(),
+                message: "Resolver is omitted, but this root package uses edition 2021+ so Cargo can infer a modern resolver.".to_owned(),
                 file: Some(input.workspace.rel_path.clone()),
                 line: None,
                 inventory: false,
             }
             .as_inventory(),
         ),
+        None if input.workspace.has_package => results.push(CheckResult {
+            id: ID.to_owned(),
+            severity: Severity::Error,
+            title: "resolver omitted on pre-2021 non-virtual workspace".to_owned(),
+            message: "Non-virtual workspaces without edition 2021+ must set `resolver = \"2\"` or `resolver = \"3\"` explicitly.".to_owned(),
+            file: Some(input.workspace.rel_path.clone()),
+            line: None,
+            inventory: false,
+        }),
         None => results.push(CheckResult {
             id: ID.to_owned(),
             severity: Severity::Error,
@@ -65,4 +74,10 @@ pub fn check(input: &WorkspaceCargoInput<'_>, results: &mut Vec<CheckResult>) {
             inventory: false,
         }),
     }
+}
+
+fn has_modern_package_edition(edition: Option<&str>) -> bool {
+    edition
+        .and_then(|value| value.parse::<u32>().ok())
+        .is_some_and(|edition| edition >= 2021)
 }

@@ -6,6 +6,10 @@ use super::lint_support::{is_weaker, lint_level, member_lints, workspace_lints};
 const ID: &str = "RS-CARGO-06";
 
 pub fn check(input: &WorkspaceMemberInput<'_>, results: &mut Vec<CheckResult>) {
+    if !input.member.lint_workspace_true {
+        return;
+    }
+
     let Some(workspace_parsed) = input.workspace.parsed.as_ref() else {
         return;
     };
