@@ -8,7 +8,7 @@ use super::inputs::ConfigClippyInput;
 const ID: &str = "RS-CLIPPY-14";
 
 pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
-    if input.profile_name != Some("library") {
+    if input.profile_name() != Some("library") {
         return;
     }
     let Some(parsed) = input.config.parsed.as_ref() else {

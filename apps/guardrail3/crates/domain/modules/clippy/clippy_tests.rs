@@ -39,6 +39,7 @@ fn build_clippy_toml_renders_sections_and_overrides() {
     let rendered = build_clippy_toml(
         "library",
         false,
+        true,
         r#"    { path = "custom::method", reason = "custom method override" },"#,
         r#"    { path = "custom::Type", reason = "custom type override" },"#,
     );
@@ -55,4 +56,12 @@ fn build_clippy_toml_renders_sections_and_overrides() {
     for macro_name in EXPECTED_MACRO_BANS {
         assert!(rendered.contains(&format!("path = \"{macro_name}\"")));
     }
+}
+
+#[test]
+fn build_clippy_toml_can_disable_garde_baseline() {
+    let rendered = build_clippy_toml("service", false, false, "", "");
+
+    assert!(!rendered.contains("serde_json::from_str"));
+    assert!(!rendered.contains("axum::extract::Json"));
 }

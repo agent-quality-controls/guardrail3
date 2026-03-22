@@ -4,7 +4,6 @@ use super::facts::{
 
 pub struct ConfigClippyInput<'a> {
     pub config: &'a ClippyConfigFacts,
-    pub profile_name: Option<&'a str>,
 }
 
 pub struct CoveredRustUnitInput<'a> {
@@ -19,19 +18,24 @@ pub struct UncoveredRustUnitInput<'a> {
 }
 
 impl<'a> ConfigClippyInput<'a> {
-    pub fn new(config: &'a ClippyConfigFacts, profile_name: Option<&'a str>) -> Self {
-        Self {
-            config,
-            profile_name,
-        }
+    pub const fn new(config: &'a ClippyConfigFacts) -> Self {
+        Self { config }
     }
 
     pub fn from_facts(facts: &'a ClippyFacts) -> Vec<Self> {
-        facts
-            .allowed_configs
-            .iter()
-            .map(|config| Self::new(config, facts.profile_name.as_deref()))
-            .collect()
+        facts.allowed_configs.iter().map(Self::new).collect()
+    }
+
+    pub fn profile_name(&self) -> Option<&'a str> {
+        self.config.profile_name.as_deref()
+    }
+
+    pub const fn garde_enabled(&self) -> bool {
+        self.config.garde_enabled
+    }
+
+    pub const fn package_publishable(&self) -> bool {
+        self.config.package_publishable
     }
 }
 

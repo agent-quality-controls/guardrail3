@@ -23,6 +23,9 @@ pub struct ClippyConfigFacts {
     pub rel_path: String,
     pub parsed: Option<toml::Value>,
     pub parse_error: Option<String>,
+    pub profile_name: Option<String>,
+    pub garde_enabled: bool,
+    pub package_publishable: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -44,7 +47,6 @@ pub struct ClippyFacts {
     pub forbidden_configs: Vec<ClippyConfigFacts>,
     pub covered_units: Vec<CoveredRustUnitFacts>,
     pub uncovered_units: Vec<UncoveredRustUnitFacts>,
-    pub profile_name: Option<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -53,6 +55,12 @@ struct CargoRootFacts {
     has_workspace: bool,
     has_package: bool,
     workspace_members: Vec<String>,
+}
+
+#[derive(Debug, Clone)]
+struct PolicySettings {
+    profile_name: Option<String>,
+    garde_enabled: bool,
 }
 
 pub fn collect(tree: &ProjectTree) -> ClippyFacts {
@@ -71,12 +79,13 @@ pub fn collect(tree: &ProjectTree) -> ClippyFacts {
         .filter(|facts| facts.has_package && !workspace_members.contains(&facts.rel_dir))
         .map(|facts| facts.rel_dir.clone())
         .collect();
+    let policy_map = read_policy_map(tree, &cargo_roots, &standalone_package_roots);
 
     let mut allowed_policy_roots = BTreeSet::from([String::new()]);
     allowed_policy_roots.extend(workspace_roots.iter().cloned());
     allowed_policy_roots.extend(standalone_package_roots.iter().cloned());
 
-    let configs = collect_configs(tree);
+    let configs = collect_configs(tree, &policy_map);
     let mut allowed_configs = Vec::new();
     let mut forbidden_configs = Vec::new();
     for config in configs {
@@ -118,7 +127,6 @@ pub fn collect(tree: &ProjectTree) -> ClippyFacts {
         forbidden_configs,
         covered_units,
         uncovered_units,
-        profile_name: read_profile_name(tree),
     }
 }
 
@@ -192,22 +200,46 @@ fn expand_member_pattern(tree: &ProjectTree, workspace_rel: &str, member: &str) 
     }
 }
 
-fn collect_configs(tree: &ProjectTree) -> Vec<ClippyConfigFacts> {
-    let root = tree
-        .file_exists("clippy.toml")
-        .then(|| parse_config(tree, "", "clippy.toml"));
-    let extras = tree
-        .dirs_with_file("clippy.toml")
-        .into_iter()
-        .map(|rel_dir| {
-            let rel_path = ProjectTree::join_rel(&rel_dir, "clippy.toml");
-            parse_config(tree, &rel_dir, &rel_path)
-        });
+fn collect_configs(
+    tree: &ProjectTree,
+    policy_map: &BTreeMap<String, PolicySettings>,
+) -> Vec<ClippyConfigFacts> {
+    let mut paths = Vec::new();
+    for file_name in ["clippy.toml", ".clippy.toml"] {
+        if tree.file_exists(file_name) {
+            paths.push(("".to_owned(), file_name.to_owned()));
+        }
+        paths.extend(tree.dirs_with_file(file_name).into_iter().map(|rel_dir| {
+            let rel_path = ProjectTree::join_rel(&rel_dir, file_name);
+            (rel_dir, rel_path)
+        }));
+    }
 
-    root.into_iter().chain(extras).collect()
+    paths
+        .into_iter()
+        .map(|(rel_dir, rel_path)| {
+            let settings = policy_settings_for(rel_dir.as_str(), policy_map);
+            let package_publishable = package_publishable(tree, rel_dir.as_str());
+            parse_config(
+                tree,
+                &rel_dir,
+                &rel_path,
+                settings.profile_name,
+                settings.garde_enabled,
+                package_publishable,
+            )
+        })
+        .collect()
 }
 
-fn parse_config(tree: &ProjectTree, rel_dir: &str, rel_path: &str) -> ClippyConfigFacts {
+fn parse_config(
+    tree: &ProjectTree,
+    rel_dir: &str,
+    rel_path: &str,
+    profile_name: Option<String>,
+    garde_enabled: bool,
+    package_publishable: bool,
+) -> ClippyConfigFacts {
     match tree
         .file_content(rel_path)
         .map(toml::from_str::<toml::Value>)
@@ -217,18 +249,27 @@ fn parse_config(tree: &ProjectTree, rel_dir: &str, rel_path: &str) -> ClippyConf
             rel_path: rel_path.to_owned(),
             parsed: Some(parsed),
             parse_error: None,
+            profile_name,
+            garde_enabled,
+            package_publishable,
         },
         Some(Err(err)) => ClippyConfigFacts {
             rel_dir: rel_dir.to_owned(),
             rel_path: rel_path.to_owned(),
             parsed: None,
             parse_error: Some(err.to_string()),
+            profile_name,
+            garde_enabled,
+            package_publishable,
         },
         None => ClippyConfigFacts {
             rel_dir: rel_dir.to_owned(),
             rel_path: rel_path.to_owned(),
             parsed: None,
             parse_error: Some("clippy.toml content missing from ProjectTree".to_owned()),
+            profile_name,
+            garde_enabled,
+            package_publishable,
         },
     }
 }
@@ -275,4 +316,171 @@ fn read_profile_name(tree: &ProjectTree) -> Option<String> {
         .and_then(|value| value.get("name"))
         .and_then(toml::Value::as_str)
         .map(str::to_owned)
+}
+
+fn read_policy_map(
+    tree: &ProjectTree,
+    cargo_roots: &BTreeMap<String, CargoRootFacts>,
+    standalone_package_roots: &BTreeSet<String>,
+) -> BTreeMap<String, PolicySettings> {
+    let mut map = BTreeMap::new();
+    let default_profile = read_profile_name(tree);
+    let default_garde = read_global_garde(tree);
+    let _ = map.insert(
+        String::new(),
+        PolicySettings {
+            profile_name: default_profile.clone(),
+            garde_enabled: default_garde,
+        },
+    );
+
+    let Some(content) = tree.file_content("guardrail3.toml") else {
+        return map;
+    };
+    let Ok(parsed) = toml::from_str::<toml::Value>(content) else {
+        return map;
+    };
+    let rust = parsed.get("rust");
+
+    if let Some(apps) = rust
+        .and_then(|value| value.get("apps"))
+        .and_then(toml::Value::as_table)
+    {
+        let resolved_app_paths = resolve_app_paths(cargo_roots);
+        for (app_name, app_cfg) in apps {
+            let profile_name = app_cfg
+                .get("type")
+                .or_else(|| app_cfg.get("profile"))
+                .and_then(toml::Value::as_str)
+                .map(str::to_owned)
+                .or_else(|| default_profile.clone());
+            let garde_enabled = app_cfg
+                .get("checks")
+                .and_then(|value| value.get("garde"))
+                .and_then(toml::Value::as_bool)
+                .unwrap_or(default_garde);
+            if let Some(rel_dir) = resolved_app_paths.get(app_name) {
+                let _ = map.insert(
+                    rel_dir.clone(),
+                    PolicySettings {
+                        profile_name: profile_name.clone(),
+                        garde_enabled,
+                    },
+                );
+            }
+        }
+    }
+
+    if let Some(packages) = rust.and_then(|value| value.get("packages")) {
+        let profile_name = packages
+            .get("type")
+            .or_else(|| packages.get("profile"))
+            .and_then(toml::Value::as_str)
+            .map(str::to_owned)
+            .or_else(|| Some("library".to_owned()))
+            .or_else(|| default_profile.clone());
+        let garde_enabled = packages
+            .get("checks")
+            .and_then(|value| value.get("garde"))
+            .and_then(toml::Value::as_bool)
+            .unwrap_or(default_garde);
+        for rel_dir in standalone_package_roots {
+            let _ = map.insert(
+                rel_dir.clone(),
+                PolicySettings {
+                    profile_name: profile_name.clone(),
+                    garde_enabled,
+                },
+            );
+        }
+    }
+
+    map
+}
+
+fn resolve_app_paths(cargo_roots: &BTreeMap<String, CargoRootFacts>) -> BTreeMap<String, String> {
+    let mut app_dirs = Vec::new();
+    for workspace in cargo_roots.values().filter(|facts| facts.has_workspace) {
+        for member_dir in &workspace.workspace_members {
+            let parts: Vec<_> = member_dir.split('/').collect();
+            let app_dir = if parts.len() >= 2 && parts.first() == Some(&"apps") {
+                format!("{}/{}", parts[0], parts[1])
+            } else {
+                member_dir.clone()
+            };
+            if !app_dirs.contains(&app_dir) {
+                app_dirs.push(app_dir);
+            }
+        }
+    }
+
+    app_dirs
+        .into_iter()
+        .filter_map(|app_dir| {
+            app_dir
+                .split('/')
+                .next_back()
+                .map(|app_name| (app_name.to_owned(), app_dir.clone()))
+        })
+        .collect()
+}
+
+fn read_global_garde(tree: &ProjectTree) -> bool {
+    let Some(content) = tree.file_content("guardrail3.toml") else {
+        return true;
+    };
+    let Ok(parsed) = toml::from_str::<toml::Value>(content) else {
+        return true;
+    };
+
+    parsed
+        .get("rust")
+        .and_then(|value| value.get("checks"))
+        .and_then(|value| value.get("garde"))
+        .and_then(toml::Value::as_bool)
+        .unwrap_or(true)
+}
+
+fn policy_settings_for(
+    rel_dir: &str,
+    policy_map: &BTreeMap<String, PolicySettings>,
+) -> PolicySettings {
+    if rel_dir.is_empty() {
+        return policy_map.get("").cloned().unwrap_or(PolicySettings {
+            profile_name: None,
+            garde_enabled: true,
+        });
+    }
+
+    if let Some(settings) = policy_map.get(rel_dir) {
+        return settings.clone();
+    }
+
+    policy_map.get("").cloned().unwrap_or(PolicySettings {
+        profile_name: None,
+        garde_enabled: true,
+    })
+}
+
+fn package_publishable(tree: &ProjectTree, rel_dir: &str) -> bool {
+    let cargo_rel = if rel_dir.is_empty() {
+        "Cargo.toml".to_owned()
+    } else {
+        ProjectTree::join_rel(rel_dir, "Cargo.toml")
+    };
+    let Some(content) = tree.file_content(&cargo_rel) else {
+        return false;
+    };
+    let Ok(parsed) = toml::from_str::<toml::Value>(content) else {
+        return false;
+    };
+    let Some(package) = parsed.get("package") else {
+        return false;
+    };
+    match package.get("publish") {
+        None => true,
+        Some(toml::Value::Boolean(value)) => *value,
+        Some(toml::Value::Array(array)) => !array.is_empty(),
+        _ => true,
+    }
 }
