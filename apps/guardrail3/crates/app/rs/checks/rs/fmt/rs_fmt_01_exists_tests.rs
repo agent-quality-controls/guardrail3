@@ -1,54 +1,48 @@
-use std::collections::BTreeMap;
-use std::path::PathBuf;
+use crate::domain::report::Severity;
 
-use crate::domain::project_tree::{DirEntry, ProjectTree};
-
-use super::super::check;
+use super::super::inputs::RustfmtRootInput;
+use super::check;
 
 #[test]
 fn inventories_when_root_rustfmt_config_exists() {
-    let tree = ProjectTree {
-        root: PathBuf::from("/tmp/project"),
-        structure: BTreeMap::from([(
-            "".to_owned(),
-            DirEntry {
-                dirs: vec![],
-                files: vec!["Cargo.toml".to_owned(), "rustfmt.toml".to_owned()],
-            },
-        )]),
-        content: BTreeMap::from([
-            (
-                "Cargo.toml".to_owned(),
-                "[package]\nedition = \"2024\"".to_owned(),
-            ),
-            (
-                "rustfmt.toml".to_owned(),
-                "edition = \"2024\"\nmax_width = 100\ntab_spaces = 4\nuse_field_init_shorthand = true\nuse_try_shorthand = true\nreorder_imports = true\nreorder_modules = true".to_owned(),
-            ),
-        ]),
+    let input = RustfmtRootInput {
+        config_rel: Some("rustfmt.toml"),
+        parsed: None,
+        workspace_edition: Some("2024"),
+        toolchain_channel: Some("stable"),
     };
+    let mut results = Vec::new();
 
-    let results = check(&tree);
-    assert!(results.iter().any(|r| r.id == "RS-FMT-01" && r.inventory));
+    check(&input, &mut results);
+
+    assert!(results.iter().any(|result| {
+        result.id == "RS-FMT-01"
+            && result.inventory
+            && result.severity == Severity::Info
+            && result.title == "rustfmt config exists"
+            && result.message == "Found rustfmt config at workspace root"
+            && result.file.as_deref() == Some("rustfmt.toml")
+    }));
 }
 
 #[test]
 fn errors_when_root_rustfmt_config_is_missing() {
-    let tree = ProjectTree {
-        root: PathBuf::from("/tmp/project"),
-        structure: BTreeMap::from([(
-            "".to_owned(),
-            DirEntry {
-                dirs: vec![],
-                files: vec!["Cargo.toml".to_owned()],
-            },
-        )]),
-        content: BTreeMap::from([(
-            "Cargo.toml".to_owned(),
-            "[package]\nedition = \"2024\"".to_owned(),
-        )]),
+    let input = RustfmtRootInput {
+        config_rel: None,
+        parsed: None,
+        workspace_edition: Some("2024"),
+        toolchain_channel: Some("stable"),
     };
+    let mut results = Vec::new();
 
-    let results = check(&tree);
-    assert!(results.iter().any(|r| r.id == "RS-FMT-01" && !r.inventory));
+    check(&input, &mut results);
+
+    assert!(results.iter().any(|result| {
+        result.id == "RS-FMT-01"
+            && !result.inventory
+            && result.severity == Severity::Error
+            && result.title == "rustfmt config missing"
+            && result.message == "Expected rustfmt.toml or .rustfmt.toml at workspace root"
+            && result.file.as_deref() == Some("")
+    }));
 }

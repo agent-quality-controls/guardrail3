@@ -1,12 +1,17 @@
 use crate::domain::report::Severity;
 
-use super::super::check;
-use super::super::test_support::{canonical_deny_toml_service, root_tree_with_deny};
+use super::super::inputs::ConfigDenyInput;
+use super::super::test_support::{canonical_deny_toml_service, config_facts};
+use super::check;
 
 #[test]
 fn warns_on_malformed_ignore_entries_without_inventorying_them() {
-    let deny = canonical_deny_toml_service().replace("ignore = []", "ignore = [{ reason = 1 }]");
-    let results = check(&root_tree_with_deny(&deny));
+    let config =
+        config_facts(&canonical_deny_toml_service().replace("ignore = []", "ignore = [{ reason = 1 }]"));
+    let input = ConfigDenyInput { config: &config };
+    let mut results = Vec::new();
+
+    check(&input, &mut results);
 
     assert!(results.iter().any(|result| {
         result.id == "RS-DENY-24"
@@ -20,11 +25,14 @@ fn warns_on_malformed_ignore_entries_without_inventorying_them() {
 
 #[test]
 fn warns_on_missing_ignore_reason_without_inventorying_the_entry() {
-    let deny = canonical_deny_toml_service().replace(
+    let config = config_facts(&canonical_deny_toml_service().replace(
         "ignore = []",
         "ignore = [{ id = \"RUSTSEC-2026-0001\" }]",
-    );
-    let results = check(&root_tree_with_deny(&deny));
+    ));
+    let input = ConfigDenyInput { config: &config };
+    let mut results = Vec::new();
+
+    check(&input, &mut results);
 
     assert!(results.iter().any(|result| {
         result.id == "RS-DENY-24"
@@ -41,11 +49,14 @@ fn warns_on_missing_ignore_reason_without_inventorying_the_entry() {
 
 #[test]
 fn inventories_valid_ignore_entries() {
-    let deny = canonical_deny_toml_service().replace(
+    let config = config_facts(&canonical_deny_toml_service().replace(
         "ignore = []",
         "ignore = [{ id = \"RUSTSEC-2026-0001\", reason = \"good enough reason text\" }]",
-    );
-    let results = check(&root_tree_with_deny(&deny));
+    ));
+    let input = ConfigDenyInput { config: &config };
+    let mut results = Vec::new();
+
+    check(&input, &mut results);
 
     assert!(results.iter().any(|result| {
         result.id == "RS-DENY-24"

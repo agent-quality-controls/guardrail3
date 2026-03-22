@@ -1,7 +1,7 @@
 use crate::domain::report::Severity;
 
-use super::super::check;
-use super::super::test_support::{entry, has_result, tree};
+use super::super::test_support::{collected_facts, entry, tree, workspace_input};
+use super::check;
 
 #[test]
 fn negative_specific_lint_priority_is_warned() {
@@ -65,8 +65,17 @@ fn negative_specific_lint_priority_is_warned() {
         )],
     );
 
-    let results = check(&tree);
-    assert!(has_result(&results, "RS-CARGO-07", |result| {
-        matches!(result.severity, Severity::Warn)
-    }));
+    let facts = collected_facts(&tree);
+    let mut results = Vec::new();
+    check(&workspace_input(&facts), &mut results);
+    assert_eq!(results.len(), 1);
+    let result = &results[0];
+    assert_eq!(result.id, "RS-CARGO-07");
+    assert!(!result.inventory);
+    assert_eq!(result.severity, Severity::Warn);
+    assert_eq!(result.title, "specific lint `unwrap_used` has negative priority");
+    assert_eq!(
+        result.message,
+        "Specific clippy denies should keep default priority so groups do not override them."
+    );
 }

@@ -1,7 +1,7 @@
 use crate::domain::report::Severity;
 
-use super::super::check;
-use super::super::test_support::{entry, has_result, tree};
+use super::super::test_support::{collected_facts, entry, tree, workspace_input};
+use super::check;
 
 #[test]
 fn matching_workspace_levels_inventory_passes() {
@@ -65,8 +65,17 @@ fn matching_workspace_levels_inventory_passes() {
         )],
     );
 
-    let results = check(&tree);
-    assert!(has_result(&results, "RS-CARGO-02", |result| result.inventory));
+    let facts = collected_facts(&tree);
+    let mut results = Vec::new();
+    check(&workspace_input(&facts), &mut results);
+    assert!(results.iter().any(|result| {
+        result.id == "RS-CARGO-02"
+            && result.inventory
+            && result.severity == Severity::Info
+            && result.title == "workspace lint levels match policy"
+            && result.message
+                == "Workspace lint levels and group priorities match the expected policy."
+    }));
 }
 
 #[test]
@@ -94,8 +103,19 @@ fn weakened_lint_levels_error() {
         )],
     );
 
-    let results = check(&tree);
-    assert!(has_result(&results, "RS-CARGO-02", |result| {
-        matches!(result.severity, Severity::Error)
+    let facts = collected_facts(&tree);
+    let mut results = Vec::new();
+    check(&workspace_input(&facts), &mut results);
+    assert!(results.iter().any(|result| {
+        result.id == "RS-CARGO-02"
+            && matches!(result.severity, Severity::Error)
+            && result.title == "lint `warnings` has wrong level"
+            && result.message == "Expected `deny`, got `warn`."
+    }));
+    assert!(results.iter().any(|result| {
+        result.id == "RS-CARGO-02"
+            && matches!(result.severity, Severity::Error)
+            && result.title == "lint `unsafe_code` has wrong level"
+            && result.message == "Expected `forbid`, got `allow`."
     }));
 }

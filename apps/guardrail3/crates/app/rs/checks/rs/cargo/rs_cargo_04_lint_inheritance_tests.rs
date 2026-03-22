@@ -1,7 +1,7 @@
 use crate::domain::report::Severity;
 
-use super::super::check;
-use super::super::test_support::{entry, has_result, tree};
+use super::super::test_support::{collected_facts, entry, member_input, tree};
+use super::check;
 
 #[test]
 fn members_inheriting_workspace_lints_inventory_pass() {
@@ -49,13 +49,35 @@ fn members_inheriting_workspace_lints_inventory_pass() {
         ],
     );
 
-    let results = check(&tree);
-    assert!(has_result(&results, "RS-CARGO-04", |result| {
-        result.inventory && result.file.as_deref() == Some("crates/api/Cargo.toml")
-    }));
-    assert!(has_result(&results, "RS-CARGO-04", |result| {
-        result.inventory && result.file.as_deref() == Some("crates/domain/Cargo.toml")
-    }));
+    let facts = collected_facts(&tree);
+
+    let mut api_results = Vec::new();
+    check(&member_input(&facts, "crates/api"), &mut api_results);
+    assert_eq!(api_results.len(), 1);
+    let api_result = &api_results[0];
+    assert_eq!(api_result.id, "RS-CARGO-04");
+    assert!(api_result.inventory);
+    assert_eq!(api_result.severity, Severity::Info);
+    assert_eq!(api_result.title, "workspace lints inherited");
+    assert_eq!(
+        api_result.message,
+        "api: `[lints] workspace = true` inherits workspace lint policy"
+    );
+    assert_eq!(api_result.file.as_deref(), Some("crates/api/Cargo.toml"));
+
+    let mut domain_results = Vec::new();
+    check(&member_input(&facts, "crates/domain"), &mut domain_results);
+    assert_eq!(domain_results.len(), 1);
+    let domain_result = &domain_results[0];
+    assert_eq!(domain_result.id, "RS-CARGO-04");
+    assert!(domain_result.inventory);
+    assert_eq!(domain_result.severity, Severity::Info);
+    assert_eq!(domain_result.title, "workspace lints inherited");
+    assert_eq!(
+        domain_result.message,
+        "domain: `[lints] workspace = true` inherits workspace lint policy"
+    );
+    assert_eq!(domain_result.file.as_deref(), Some("crates/domain/Cargo.toml"));
 }
 
 #[test]
@@ -95,8 +117,18 @@ fn non_inheriting_member_errors() {
         ],
     );
 
-    let results = check(&tree);
-    assert!(has_result(&results, "RS-CARGO-04", |result| {
-        matches!(result.severity, Severity::Error)
-    }));
+    let facts = collected_facts(&tree);
+    let mut results = Vec::new();
+    check(&member_input(&facts, "crates/api"), &mut results);
+    assert_eq!(results.len(), 1);
+    let result = &results[0];
+    assert_eq!(result.id, "RS-CARGO-04");
+    assert!(!result.inventory);
+    assert_eq!(result.severity, Severity::Error);
+    assert_eq!(result.title, "workspace lints not inherited");
+    assert_eq!(
+        result.message,
+        "crates/api: missing `[lints] workspace = true` in member Cargo.toml"
+    );
+    assert_eq!(result.file.as_deref(), Some("crates/api/Cargo.toml"));
 }

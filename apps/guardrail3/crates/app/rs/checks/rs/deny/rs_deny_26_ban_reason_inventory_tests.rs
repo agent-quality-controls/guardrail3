@@ -1,33 +1,46 @@
-use super::super::check;
-use super::super::test_support::{canonical_deny_toml_service, root_tree_with_deny};
+use crate::domain::report::Severity;
+
+use super::super::inputs::ConfigDenyInput;
+use super::super::test_support::{canonical_deny_toml_service, config_facts};
+use super::check;
 
 #[test]
 fn inventories_named_ban_entries_without_reason() {
-    let deny = canonical_deny_toml_service().replace(
+    let config = config_facts(&canonical_deny_toml_service().replace(
         "{ name = \"lazy_static\", wrappers = [] },",
         "{ name = \"lazy_static\", wrappers = [] },",
-    );
-    let results = check(&root_tree_with_deny(&deny));
+    ));
+    let input = ConfigDenyInput { config: &config };
+    let mut results = Vec::new();
+
+    check(&input, &mut results);
 
     assert!(results.iter().any(|result| {
         result.id == "RS-DENY-26"
             && result.inventory
+            && result.severity == Severity::Info
             && result.title == "ban entry missing reason"
-            && result.message.contains("lazy_static")
+            && result.message == "`deny.toml` ban entry `lazy_static` has no `reason`."
+            && result.file.as_deref() == Some("deny.toml")
     }));
 }
 
 #[test]
 fn inventories_plain_string_ban_entries_without_reason() {
-    let deny = canonical_deny_toml_service().replace(
+    let config = config_facts(&canonical_deny_toml_service().replace(
         "{ name = \"lazy_static\", wrappers = [] },",
         "\"lazy_static\",",
-    );
-    let results = check(&root_tree_with_deny(&deny));
+    ));
+    let input = ConfigDenyInput { config: &config };
+    let mut results = Vec::new();
+
+    check(&input, &mut results);
 
     assert!(results.iter().any(|result| {
         result.id == "RS-DENY-26"
             && result.inventory
-            && result.message.contains("lazy_static")
+            && result.severity == Severity::Info
+            && result.message == "`deny.toml` ban entry `lazy_static` has no `reason`."
+            && result.file.as_deref() == Some("deny.toml")
     }));
 }

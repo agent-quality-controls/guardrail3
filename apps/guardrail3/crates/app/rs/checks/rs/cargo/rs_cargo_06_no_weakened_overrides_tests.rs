@@ -1,7 +1,7 @@
 use crate::domain::report::Severity;
 
-use super::super::check;
-use super::super::test_support::{entry, has_result, tree};
+use super::super::test_support::{collected_facts, entry, member_input, tree};
+use super::check;
 
 #[test]
 fn weakened_member_override_is_reported() {
@@ -43,10 +43,20 @@ fn weakened_member_override_is_reported() {
         ],
     );
 
-    let results = check(&tree);
-    assert!(has_result(&results, "RS-CARGO-06", |result| {
-        matches!(result.severity, Severity::Error)
-    }));
+    let facts = collected_facts(&tree);
+    let mut results = Vec::new();
+    check(&member_input(&facts, "crates/api"), &mut results);
+    assert_eq!(results.len(), 1);
+    let result = &results[0];
+    assert_eq!(result.id, "RS-CARGO-06");
+    assert!(!result.inventory);
+    assert_eq!(result.severity, Severity::Error);
+    assert_eq!(result.title, "weakened member rust override");
+    assert_eq!(
+        result.message,
+        "`warnings` is `allow` in the member but `deny` in the workspace."
+    );
+    assert_eq!(result.file.as_deref(), Some("crates/api/Cargo.toml"));
 }
 
 #[test]
@@ -86,11 +96,8 @@ fn non_inheriting_member_does_not_emit_weakened_override() {
         ],
     );
 
-    let results = check(&tree);
-    assert!(has_result(&results, "RS-CARGO-04", |result| {
-        matches!(result.severity, Severity::Error)
-    }));
-    assert!(!has_result(&results, "RS-CARGO-06", |result| {
-        matches!(result.severity, Severity::Error)
-    }));
+    let facts = collected_facts(&tree);
+    let mut results = Vec::new();
+    check(&member_input(&facts, "crates/api"), &mut results);
+    assert!(results.is_empty());
 }

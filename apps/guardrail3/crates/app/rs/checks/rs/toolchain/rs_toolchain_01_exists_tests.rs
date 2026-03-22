@@ -1,63 +1,50 @@
-use std::collections::BTreeMap;
-use std::path::PathBuf;
+use crate::domain::report::Severity;
 
-use crate::domain::project_tree::{DirEntry, ProjectTree};
-
-use super::super::check;
+use super::super::inputs::ToolchainRootInput;
+use super::check;
 
 #[test]
 fn inventories_when_toolchain_toml_exists() {
-    let tree = ProjectTree {
-        root: PathBuf::from("/tmp/project"),
-        structure: BTreeMap::from([(
-            "".to_owned(),
-            DirEntry {
-                dirs: vec![],
-                files: vec!["Cargo.toml".to_owned(), "rust-toolchain.toml".to_owned()],
-            },
-        )]),
-        content: BTreeMap::from([
-            (
-                "Cargo.toml".to_owned(),
-                "[package]\nrust-version = \"1.85\"".to_owned(),
-            ),
-            (
-                "rust-toolchain.toml".to_owned(),
-                "[toolchain]\nchannel = \"stable\"\ncomponents = [\"clippy\", \"rustfmt\"]"
-                    .to_owned(),
-            ),
-        ]),
+    let input = ToolchainRootInput {
+        toolchain_toml_rel: Some("rust-toolchain.toml"),
+        legacy_toolchain_rel: None,
+        parsed: None,
+        parse_error: None,
+        cargo_rust_version: Some("1.85"),
     };
+    let mut results = Vec::new();
 
-    let results = check(&tree);
-    assert!(
-        results
-            .iter()
-            .any(|r| r.id == "RS-TOOLCHAIN-01" && r.inventory)
-    );
+    check(&input, &mut results);
+
+    assert!(results.iter().any(|result| {
+        result.id == "RS-TOOLCHAIN-01"
+            && result.inventory
+            && result.severity == Severity::Info
+            && result.title == "rust-toolchain.toml exists"
+            && result.message == "Found rust-toolchain.toml at workspace root."
+            && result.file.as_deref() == Some("rust-toolchain.toml")
+    }));
 }
 
 #[test]
 fn errors_when_no_supported_toolchain_file_exists() {
-    let tree = ProjectTree {
-        root: PathBuf::from("/tmp/project"),
-        structure: BTreeMap::from([(
-            "".to_owned(),
-            DirEntry {
-                dirs: vec![],
-                files: vec!["Cargo.toml".to_owned()],
-            },
-        )]),
-        content: BTreeMap::from([(
-            "Cargo.toml".to_owned(),
-            "[package]\nrust-version = \"1.85\"".to_owned(),
-        )]),
+    let input = ToolchainRootInput {
+        toolchain_toml_rel: None,
+        legacy_toolchain_rel: None,
+        parsed: None,
+        parse_error: None,
+        cargo_rust_version: Some("1.85"),
     };
+    let mut results = Vec::new();
 
-    let results = check(&tree);
-    assert!(
-        results
-            .iter()
-            .any(|r| r.id == "RS-TOOLCHAIN-01" && !r.inventory)
-    );
+    check(&input, &mut results);
+
+    assert!(results.iter().any(|result| {
+        result.id == "RS-TOOLCHAIN-01"
+            && !result.inventory
+            && result.severity == Severity::Error
+            && result.title == "rust-toolchain.toml missing"
+            && result.message == "Expected rust-toolchain.toml at workspace root."
+            && result.file.as_deref() == Some("")
+    }));
 }

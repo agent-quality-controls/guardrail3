@@ -1,60 +1,49 @@
-use std::collections::BTreeMap;
-use std::path::PathBuf;
-
-use crate::domain::project_tree::{DirEntry, ProjectTree};
 use crate::domain::report::Severity;
 
-use super::super::check;
+use super::super::inputs::ToolchainRootInput;
+use super::check;
 
 #[test]
 fn warns_when_only_legacy_toolchain_file_exists() {
-    let tree = ProjectTree {
-        root: PathBuf::from("/tmp/project"),
-        structure: BTreeMap::from([(
-            "".to_owned(),
-            DirEntry {
-                dirs: vec![],
-                files: vec!["rust-toolchain".to_owned()],
-            },
-        )]),
-        content: BTreeMap::new(),
+    let input = ToolchainRootInput {
+        toolchain_toml_rel: None,
+        legacy_toolchain_rel: Some("rust-toolchain"),
+        parsed: None,
+        parse_error: None,
+        cargo_rust_version: None,
     };
+    let mut results = Vec::new();
 
-    let results = check(&tree);
+    check(&input, &mut results);
+
     assert!(results.iter().any(|result| {
         result.id == "RS-TOOLCHAIN-04"
             && result.severity == Severity::Warn
             && result.title == "legacy rust-toolchain file present"
+            && result.message
+                == "Migrate `rust-toolchain` to `rust-toolchain.toml` so components can be declared explicitly."
             && result.file.as_deref() == Some("rust-toolchain")
     }));
 }
 
 #[test]
 fn warns_when_both_legacy_and_modern_toolchain_files_exist() {
-    let tree = ProjectTree {
-        root: PathBuf::from("/tmp/project"),
-        structure: BTreeMap::from([(
-            "".to_owned(),
-            DirEntry {
-                dirs: vec![],
-                files: vec![
-                    "rust-toolchain".to_owned(),
-                    "rust-toolchain.toml".to_owned(),
-                ],
-            },
-        )]),
-        content: BTreeMap::from([(
-            "rust-toolchain.toml".to_owned(),
-            "[toolchain]\nchannel = \"stable\"\ncomponents = [\"clippy\", \"rustfmt\"]"
-                .to_owned(),
-        )]),
+    let input = ToolchainRootInput {
+        toolchain_toml_rel: Some("rust-toolchain.toml"),
+        legacy_toolchain_rel: Some("rust-toolchain"),
+        parsed: None,
+        parse_error: None,
+        cargo_rust_version: None,
     };
+    let mut results = Vec::new();
 
-    let results = check(&tree);
+    check(&input, &mut results);
+
     assert!(results.iter().any(|result| {
         result.id == "RS-TOOLCHAIN-04"
             && result.severity == Severity::Warn
             && result.title == "both rust-toolchain files present"
+            && result.message == "Remove the legacy `rust-toolchain` file to avoid ambiguity."
             && result.file.as_deref() == Some("rust-toolchain")
     }));
 }
