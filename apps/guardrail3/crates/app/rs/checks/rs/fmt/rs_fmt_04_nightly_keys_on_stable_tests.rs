@@ -1,43 +1,33 @@
-use std::collections::BTreeMap;
-use std::path::PathBuf;
-
-use crate::domain::project_tree::{DirEntry, ProjectTree};
 use crate::domain::report::Severity;
 
-use super::super::check;
+use super::super::inputs::RustfmtRootInput;
+use super::check;
 
 #[test]
 fn reports_nightly_only_keys_on_stable_toolchain() {
-    let tree = ProjectTree {
-        root: PathBuf::from("/tmp/project"),
-        structure: BTreeMap::from([(
-            "".to_owned(),
-            DirEntry {
-                dirs: vec![],
-                files: vec![
-                    "Cargo.toml".to_owned(),
-                    "rustfmt.toml".to_owned(),
-                    "rust-toolchain.toml".to_owned(),
-                ],
-            },
-        )]),
-        content: BTreeMap::from([
-            (
-                "Cargo.toml".to_owned(),
-                "[workspace.package]\nedition = \"2024\"".to_owned(),
-            ),
-            (
-                "rust-toolchain.toml".to_owned(),
-                "[toolchain]\nchannel = \"stable\"".to_owned(),
-            ),
-            (
-                "rustfmt.toml".to_owned(),
-                "edition = \"2024\"\nmax_width = 100\ntab_spaces = 4\nuse_field_init_shorthand = true\nuse_try_shorthand = true\nreorder_imports = true\nreorder_modules = true\ngroup_imports = \"StdExternalCrate\"".to_owned(),
-            ),
-        ]),
+    let parsed = toml::from_str::<toml::Value>(
+        r#"
+edition = "2024"
+max_width = 100
+tab_spaces = 4
+use_field_init_shorthand = true
+use_try_shorthand = true
+reorder_imports = true
+reorder_modules = true
+group_imports = "StdExternalCrate"
+"#,
+    )
+    .expect("valid TOML");
+    let input = RustfmtRootInput {
+        config_rel: Some("rustfmt.toml"),
+        parsed: Some(&parsed),
+        workspace_edition: Some("2024"),
+        toolchain_channel: Some("stable"),
     };
+    let mut results = Vec::new();
 
-    let results = check(&tree);
+    check(&input, &mut results);
+
     assert!(results.iter().any(|result| {
         result.id == "RS-FMT-04"
             && result.severity == Severity::Warn

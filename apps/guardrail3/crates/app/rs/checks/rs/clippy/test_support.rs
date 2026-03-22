@@ -2,6 +2,7 @@ use std::collections::BTreeMap;
 use std::path::PathBuf;
 
 use super::facts::{collect, ClippyFacts};
+use super::inputs::{ConfigClippyInput, CoveredRustUnitInput, UncoveredRustUnitInput};
 use crate::domain::project_tree::{DirEntry, ProjectTree};
 
 pub fn dir_entry(dirs: &[&str], files: &[&str]) -> DirEntry {
@@ -30,6 +31,33 @@ pub fn project_tree(
 
 pub fn collected_facts(tree: &ProjectTree) -> ClippyFacts {
     collect(tree)
+}
+
+pub fn config_input<'a>(facts: &'a ClippyFacts, rel_path: &str) -> ConfigClippyInput<'a> {
+    let config = facts
+        .allowed_configs
+        .iter()
+        .find(|config| config.rel_path == rel_path)
+        .expect("expected clippy config facts");
+    ConfigClippyInput::new(config)
+}
+
+pub fn covered_input<'a>(facts: &'a ClippyFacts, rel_dir: &str) -> CoveredRustUnitInput<'a> {
+    let covered = facts
+        .covered_units
+        .iter()
+        .find(|covered| covered.rel_dir == rel_dir)
+        .expect("expected covered clippy unit facts");
+    CoveredRustUnitInput::new(covered)
+}
+
+pub fn uncovered_input<'a>(facts: &'a ClippyFacts, rel_dir: &str) -> UncoveredRustUnitInput<'a> {
+    let uncovered = facts
+        .uncovered_units
+        .iter()
+        .find(|unit| unit.rel_dir == rel_dir)
+        .expect("expected uncovered clippy unit facts");
+    UncoveredRustUnitInput::new(uncovered)
 }
 
 pub fn root_workspace_tree(clippy_toml: impl Into<String>) -> ProjectTree {

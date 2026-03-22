@@ -3,7 +3,7 @@ use std::path::PathBuf;
 
 use super::discover::collect;
 use super::facts::CargoFamilyFacts;
-use super::inputs::WorkspaceMemberInput;
+use super::inputs::{WorkspaceCargoInput, WorkspaceMemberInput, WorkspaceMembersSetInput};
 use crate::domain::project_tree::{DirEntry, ProjectTree};
 use crate::domain::report::CheckResult;
 
@@ -41,6 +41,13 @@ pub fn member_input<'a>(facts: &'a CargoFamilyFacts, member_rel: &str) -> Worksp
     WorkspaceMemberInput::new(&facts.workspace, member)
 }
 
+pub fn workspace_input<'a>(facts: &'a CargoFamilyFacts) -> WorkspaceCargoInput<'a> {
+    WorkspaceCargoInput::new(&facts.workspace)
+}
+
+pub fn members_set_input<'a>(facts: &'a CargoFamilyFacts) -> WorkspaceMembersSetInput<'a> {
+    WorkspaceMembersSetInput::from_facts(facts)
+}
 
 pub fn has_result<F>(results: &[CheckResult], id: &str, predicate: F) -> bool
 where

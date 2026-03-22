@@ -1,5 +1,7 @@
-use super::super::check;
-use super::super::test_support::{entry, has_result, tree};
+use crate::domain::report::Severity;
+
+use super::super::test_support::{collected_facts, entry, members_set_input, tree};
+use super::check;
 
 #[test]
 fn declared_member_without_cargo_toml_is_warned() {
@@ -36,8 +38,18 @@ fn declared_member_without_cargo_toml_is_warned() {
         ],
     );
 
-    let results = check(&tree);
-    assert!(has_result(&results, "RS-CARGO-10", |result| {
-        result.message.contains("crates/missing")
-    }));
+    let facts = collected_facts(&tree);
+    let mut results = Vec::new();
+    check(&members_set_input(&facts), &mut results);
+    assert_eq!(results.len(), 1);
+    let result = &results[0];
+    assert_eq!(result.id, "RS-CARGO-10");
+    assert!(!result.inventory);
+    assert_eq!(result.severity, Severity::Warn);
+    assert_eq!(result.title, "declared workspace member missing Cargo.toml");
+    assert_eq!(
+        result.message,
+        "`crates/missing` is declared in `[workspace].members` but no `Cargo.toml` was discovered there."
+    );
+    assert_eq!(result.file.as_deref(), Some("Cargo.toml"));
 }

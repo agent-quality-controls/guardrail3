@@ -1,6 +1,10 @@
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
+use super::facts::{collect, DenyConfigFacts, DenyFacts};
+use super::inputs::{
+    CoveredRustUnitInput, ForbiddenDenyConfigInput, SameRootConflictInput, UncoveredRustUnitInput,
+};
 use crate::domain::project_tree::{DirEntry, ProjectTree};
 
 pub fn dir_entry(dirs: &[&str], files: &[&str]) -> DirEntry {
@@ -10,10 +14,7 @@ pub fn dir_entry(dirs: &[&str], files: &[&str]) -> DirEntry {
     }
 }
 
-pub fn project_tree(
-    structure: Vec<(&str, DirEntry)>,
-    content: Vec<(&str, String)>,
-) -> ProjectTree {
+pub fn project_tree(structure: Vec<(&str, DirEntry)>, content: Vec<(&str, String)>) -> ProjectTree {
     ProjectTree {
         root: PathBuf::from("/tmp/project"),
         structure: structure
@@ -94,27 +95,6 @@ allow-git = []
     .to_owned()
 }
 
-pub fn root_tree_with_deny(deny: &str) -> ProjectTree {
-    project_tree(
-        vec![("", dir_entry(&[], &["Cargo.toml", "deny.toml"]))],
-        vec![
-            ("Cargo.toml", "[package]\nname = \"crate\"\n".to_owned()),
-            ("deny.toml", deny.to_owned()),
-        ],
-    )
-}
-
-pub fn root_tree_with_deny_and_guardrail(deny: &str, guardrail: &str) -> ProjectTree {
-    project_tree(
-        vec![("", dir_entry(&[], &["Cargo.toml", "guardrail3.toml", "deny.toml"]))],
-        vec![
-            ("Cargo.toml", "[package]\nname = \"crate\"\n".to_owned()),
-            ("guardrail3.toml", guardrail.to_owned()),
-            ("deny.toml", deny.to_owned()),
-        ],
-    )
-}
-
 pub fn root_coverage_tree() -> ProjectTree {
     project_tree(
         vec![
@@ -125,9 +105,18 @@ pub fn root_coverage_tree() -> ProjectTree {
             ("standalone", dir_entry(&[], &["Cargo.toml"])),
         ],
         vec![
-            ("workspace/Cargo.toml", "[workspace]\nmembers=[\"crates/*\"]".to_owned()),
-            ("workspace/crates/api/Cargo.toml", "[package]\nname=\"api\"".to_owned()),
-            ("standalone/Cargo.toml", "[package]\nname=\"standalone\"".to_owned()),
+            (
+                "workspace/Cargo.toml",
+                "[workspace]\nmembers=[\"crates/*\"]".to_owned(),
+            ),
+            (
+                "workspace/crates/api/Cargo.toml",
+                "[package]\nname=\"api\"".to_owned(),
+            ),
+            (
+                "standalone/Cargo.toml",
+                "[package]\nname=\"standalone\"".to_owned(),
+            ),
             ("deny.toml", canonical_deny_toml_service()),
         ],
     )
@@ -142,8 +131,14 @@ pub fn uncovered_workspace_tree() -> ProjectTree {
             ("workspace/crates/api", dir_entry(&[], &["Cargo.toml"])),
         ],
         vec![
-            ("workspace/Cargo.toml", "[workspace]\nmembers=[\"crates/*\"]".to_owned()),
-            ("workspace/crates/api/Cargo.toml", "[package]\nname=\"api\"".to_owned()),
+            (
+                "workspace/Cargo.toml",
+                "[workspace]\nmembers=[\"crates/*\"]".to_owned(),
+            ),
+            (
+                "workspace/crates/api/Cargo.toml",
+                "[package]\nname=\"api\"".to_owned(),
+            ),
         ],
     )
 }
@@ -152,13 +147,25 @@ pub fn nested_member_shadow_tree(file_name: &str) -> ProjectTree {
     project_tree(
         vec![
             ("", dir_entry(&["workspace"], &[])),
-            ("workspace", dir_entry(&["crates"], &["Cargo.toml", "deny.toml"])),
+            (
+                "workspace",
+                dir_entry(&["crates"], &["Cargo.toml", "deny.toml"]),
+            ),
             ("workspace/crates", dir_entry(&["core"], &[])),
-            ("workspace/crates/core", dir_entry(&[], &["Cargo.toml", file_name])),
+            (
+                "workspace/crates/core",
+                dir_entry(&[], &["Cargo.toml", file_name]),
+            ),
         ],
         vec![
-            ("workspace/Cargo.toml", "[workspace]\nmembers=[\"crates/*\"]".to_owned()),
-            ("workspace/crates/core/Cargo.toml", "[package]\nname=\"core\"".to_owned()),
+            (
+                "workspace/Cargo.toml",
+                "[workspace]\nmembers=[\"crates/*\"]".to_owned(),
+            ),
+            (
+                "workspace/crates/core/Cargo.toml",
+                "[package]\nname=\"core\"".to_owned(),
+            ),
             ("workspace/deny.toml", canonical_deny_toml_service()),
             (
                 &format!("workspace/crates/core/{file_name}"),
@@ -186,9 +193,60 @@ pub fn same_root_conflict_tree() -> ProjectTree {
     )
 }
 
-pub fn library_profile_tree(deny: &str) -> ProjectTree {
-    root_tree_with_deny_and_guardrail(
-        deny,
-        "[profile]\nname = \"service\"\n\n[rust.packages]\ntype = \"library\"\n",
-    )
+pub fn config_facts(deny: &str) -> DenyConfigFacts {
+    let (parsed, parse_error) = match toml::from_str::<toml::Value>(deny) {
+        Ok(parsed) => (Some(parsed), None),
+        Err(err) => (None, Some(err.to_string())),
+    };
+    DenyConfigFacts {
+        policy_root_rel: String::new(),
+        rel_path: "deny.toml".to_owned(),
+        file_kind: "deny.toml".to_owned(),
+        parsed,
+        parse_error,
+        profile_name: Some("service".to_owned()),
+    }
+}
+
+pub fn collected_facts(tree: &ProjectTree) -> DenyFacts {
+    collect(tree)
+}
+
+pub fn forbidden_input<'a>(facts: &'a DenyFacts, rel_path: &str) -> ForbiddenDenyConfigInput<'a> {
+    let forbidden = facts
+        .forbidden_configs
+        .iter()
+        .find(|config| config.rel_path == rel_path)
+        .expect("expected forbidden deny config facts");
+    ForbiddenDenyConfigInput::new(forbidden)
+}
+
+pub fn same_root_conflict_input<'a>(
+    facts: &'a DenyFacts,
+    policy_root_rel: &str,
+) -> SameRootConflictInput<'a> {
+    let conflict = facts
+        .same_root_conflicts
+        .iter()
+        .find(|conflict| conflict.policy_root_rel == policy_root_rel)
+        .expect("expected same-root deny conflict facts");
+    SameRootConflictInput::new(conflict)
+}
+
+pub fn covered_input<'a>(facts: &'a DenyFacts, rel_dir: &str) -> CoveredRustUnitInput<'a> {
+    let covered = facts
+        .covered_units
+        .iter()
+        .find(|covered| covered.rel_dir == rel_dir)
+        .expect("expected covered rust unit facts");
+    CoveredRustUnitInput::new(covered)
+}
+
+pub fn uncovered_input<'a>(facts: &'a DenyFacts, rel_dir: &str) -> UncoveredRustUnitInput<'a> {
+    let uncovered = facts
+        .uncovered_units
+        .iter()
+        .find(|unit| unit.rel_dir == rel_dir)
+        .expect("expected uncovered rust unit facts");
+    UncoveredRustUnitInput::new(uncovered)
 }

@@ -1,69 +1,92 @@
-use std::collections::BTreeMap;
-use std::path::PathBuf;
+use crate::domain::report::Severity;
 
-use crate::domain::project_tree::{DirEntry, ProjectTree};
-
-use super::super::check;
+use super::super::inputs::ToolchainRootInput;
+use super::check;
 
 #[test]
 fn inventories_when_channel_and_components_match_policy() {
-    let tree = ProjectTree {
-        root: PathBuf::from("/tmp/project"),
-        structure: BTreeMap::from([(
-            "".to_owned(),
-            DirEntry {
-                dirs: vec![],
-                files: vec!["Cargo.toml".to_owned(), "rust-toolchain.toml".to_owned()],
-            },
-        )]),
-        content: BTreeMap::from([
-            (
-                "Cargo.toml".to_owned(),
-                "[package]\nrust-version = \"1.85\"".to_owned(),
-            ),
-            (
-                "rust-toolchain.toml".to_owned(),
-                "[toolchain]\nchannel = \"stable\"\ncomponents = [\"clippy\", \"rustfmt\"]"
-                    .to_owned(),
-            ),
-        ]),
+    let parsed = toml::from_str::<toml::Value>(
+        "[toolchain]\nchannel = \"stable\"\ncomponents = [\"clippy\", \"rustfmt\"]",
+    )
+    .expect("valid TOML");
+    let input = ToolchainRootInput {
+        toolchain_toml_rel: Some("rust-toolchain.toml"),
+        legacy_toolchain_rel: None,
+        parsed: Some(&parsed),
+        parse_error: None,
+        cargo_rust_version: Some("1.85"),
     };
+    let mut results = Vec::new();
 
-    let results = check(&tree);
-    assert!(
-        results
-            .iter()
-            .any(|r| r.id == "RS-TOOLCHAIN-02" && r.inventory)
-    );
+    check(&input, &mut results);
+
+    assert!(results.iter().any(|result| {
+        result.id == "RS-TOOLCHAIN-02"
+            && result.inventory
+            && result.severity == Severity::Info
+            && result.title == "toolchain channel is stable"
+            && result.message == "channel = \"stable\"."
+            && result.file.as_deref() == Some("rust-toolchain.toml")
+    }));
+    assert!(results.iter().any(|result| {
+        result.id == "RS-TOOLCHAIN-02"
+            && result.inventory
+            && result.severity == Severity::Info
+            && result.title == "toolchain component `clippy` present"
+            && result.message == "`clippy` is listed in `components`."
+    }));
+    assert!(results.iter().any(|result| {
+        result.id == "RS-TOOLCHAIN-02"
+            && result.inventory
+            && result.severity == Severity::Info
+            && result.title == "toolchain component `rustfmt` present"
+            && result.message == "`rustfmt` is listed in `components`."
+    }));
 }
 
 #[test]
-fn warns_when_required_components_are_missing() {
-    let tree = ProjectTree {
-        root: PathBuf::from("/tmp/project"),
-        structure: BTreeMap::from([(
-            "".to_owned(),
-            DirEntry {
-                dirs: vec![],
-                files: vec!["Cargo.toml".to_owned(), "rust-toolchain.toml".to_owned()],
-            },
-        )]),
-        content: BTreeMap::from([
-            (
-                "Cargo.toml".to_owned(),
-                "[package]\nrust-version = \"1.85\"".to_owned(),
-            ),
-            (
-                "rust-toolchain.toml".to_owned(),
-                "[toolchain]\nchannel = \"stable\"\ncomponents = [\"clippy\"]".to_owned(),
-            ),
-        ]),
+fn errors_on_parse_failure() {
+    let input = ToolchainRootInput {
+        toolchain_toml_rel: Some("rust-toolchain.toml"),
+        legacy_toolchain_rel: None,
+        parsed: None,
+        parse_error: Some("expected a table"),
+        cargo_rust_version: Some("1.85"),
     };
+    let mut results = Vec::new();
 
-    let results = check(&tree);
-    assert!(
-        results
-            .iter()
-            .any(|r| r.id == "RS-TOOLCHAIN-02" && !r.inventory)
-    );
+    check(&input, &mut results);
+
+    assert!(results.iter().any(|result| {
+        result.id == "RS-TOOLCHAIN-02"
+            && result.severity == Severity::Error
+            && result.title == "rust-toolchain.toml parse error"
+            && result.message == "Invalid TOML: expected a table"
+            && result.file.as_deref() == Some("rust-toolchain.toml")
+    }));
+}
+
+#[test]
+fn warns_when_required_component_is_missing() {
+    let parsed =
+        toml::from_str::<toml::Value>("[toolchain]\nchannel = \"stable\"\ncomponents = [\"clippy\"]")
+            .expect("valid TOML");
+    let input = ToolchainRootInput {
+        toolchain_toml_rel: Some("rust-toolchain.toml"),
+        legacy_toolchain_rel: None,
+        parsed: Some(&parsed),
+        parse_error: None,
+        cargo_rust_version: Some("1.85"),
+    };
+    let mut results = Vec::new();
+
+    check(&input, &mut results);
+
+    assert!(results.iter().any(|result| {
+        result.id == "RS-TOOLCHAIN-02"
+            && result.severity == Severity::Warn
+            && result.title == "toolchain component `rustfmt` missing"
+            && result.message == "Add `rustfmt` to `[toolchain].components`."
+            && result.file.as_deref() == Some("rust-toolchain.toml")
+    }));
 }
