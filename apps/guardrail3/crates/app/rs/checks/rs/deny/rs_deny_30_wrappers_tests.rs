@@ -15,15 +15,17 @@ fn errors_when_managed_wrappers_change() {
 
     check(&input, &mut results);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-DENY-30"
-            && result.inventory
-            && result.severity == Severity::Info
-            && result.title == "project-specific ban wrappers"
-            && result.message
-                == "`deny.toml` ban `anyhow` adds project-specific wrappers `texting_robots`."
-            && result.file.as_deref() == Some("deny.toml")
-    }));
+    assert_eq!(results.len(), 1);
+    let result = &results[0];
+    assert_eq!(result.id, "RS-DENY-30");
+    assert_eq!(result.severity, Severity::Info);
+    assert_eq!(result.title, "project-specific ban wrappers");
+    assert_eq!(
+        result.message,
+        "`deny.toml` ban `anyhow` adds project-specific wrappers `texting_robots`."
+    );
+    assert_eq!(result.file.as_deref(), Some("deny.toml"));
+    assert!(result.inventory);
 }
 
 #[test]
@@ -37,13 +39,15 @@ fn inventories_project_specific_wrappers_for_non_canonical_bans() {
 
     check(&input, &mut results);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-DENY-30"
-            && result.inventory
-            && result.title == "project-specific ban wrappers"
-            && result.severity == Severity::Info
-            && result.message
-                == "`deny.toml` ban `custom-crate` adds project-specific wrappers `adapter`."
-            && result.file.as_deref() == Some("deny.toml")
-    }));
+    assert_eq!(results.len(), 1);
+    let result = &results[0];
+    assert_eq!(result.id, "RS-DENY-30");
+    assert_eq!(result.severity, Severity::Info);
+    assert_eq!(result.title, "project-specific ban wrappers");
+    assert_eq!(
+        result.message,
+        "`deny.toml` ban `custom-crate` adds project-specific wrappers `adapter`."
+    );
+    assert_eq!(result.file.as_deref(), Some("deny.toml"));
+    assert!(result.inventory);
 }

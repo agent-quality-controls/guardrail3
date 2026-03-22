@@ -14,11 +14,14 @@ fn reports_extra_per_crate_rustfmt_configs() {
 
     check(&input, &mut results);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-FMT-05"
-            && result.severity == Severity::Warn
-            && result.title == "Per-crate rustfmt override"
-            && result.message == ".rustfmt.toml below workspace root overrides root formatting policy"
-            && result.file.as_deref() == Some("crates/core/.rustfmt.toml")
-    }));
+    assert_eq!(results.len(), 1);
+    let result = &results[0];
+    assert_eq!(result.id, "RS-FMT-05");
+    assert_eq!(result.severity, Severity::Warn);
+    assert_eq!(result.title, "Per-crate rustfmt override");
+    assert_eq!(
+        result.message,
+        ".rustfmt.toml below workspace root overrides root formatting policy"
+    );
+    assert_eq!(result.file.as_deref(), Some("crates/core/.rustfmt.toml"));
 }

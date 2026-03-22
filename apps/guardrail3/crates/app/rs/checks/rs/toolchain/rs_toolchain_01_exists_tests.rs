@@ -16,14 +16,14 @@ fn inventories_when_toolchain_toml_exists() {
 
     check(&input, &mut results);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-TOOLCHAIN-01"
-            && result.inventory
-            && result.severity == Severity::Info
-            && result.title == "rust-toolchain.toml exists"
-            && result.message == "Found rust-toolchain.toml at workspace root."
-            && result.file.as_deref() == Some("rust-toolchain.toml")
-    }));
+    assert_eq!(results.len(), 1);
+    let result = &results[0];
+    assert_eq!(result.id, "RS-TOOLCHAIN-01");
+    assert!(result.inventory);
+    assert_eq!(result.severity, Severity::Info);
+    assert_eq!(result.title, "rust-toolchain.toml exists");
+    assert_eq!(result.message, "Found rust-toolchain.toml at workspace root.");
+    assert_eq!(result.file.as_deref(), Some("rust-toolchain.toml"));
 }
 
 #[test]
@@ -39,12 +39,12 @@ fn errors_when_no_supported_toolchain_file_exists() {
 
     check(&input, &mut results);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-TOOLCHAIN-01"
-            && !result.inventory
-            && result.severity == Severity::Error
-            && result.title == "rust-toolchain.toml missing"
-            && result.message == "Expected rust-toolchain.toml at workspace root."
-            && result.file.as_deref() == Some("")
-    }));
+    assert_eq!(results.len(), 1);
+    let result = &results[0];
+    assert_eq!(result.id, "RS-TOOLCHAIN-01");
+    assert!(!result.inventory);
+    assert_eq!(result.severity, Severity::Error);
+    assert_eq!(result.title, "rust-toolchain.toml missing");
+    assert_eq!(result.message, "Expected rust-toolchain.toml at workspace root.");
+    assert_eq!(result.file.as_deref(), Some(""));
 }

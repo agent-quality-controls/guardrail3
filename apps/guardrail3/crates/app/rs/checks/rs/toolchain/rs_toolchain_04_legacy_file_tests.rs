@@ -16,14 +16,16 @@ fn warns_when_only_legacy_toolchain_file_exists() {
 
     check(&input, &mut results);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-TOOLCHAIN-04"
-            && result.severity == Severity::Warn
-            && result.title == "legacy rust-toolchain file present"
-            && result.message
-                == "Migrate `rust-toolchain` to `rust-toolchain.toml` so components can be declared explicitly."
-            && result.file.as_deref() == Some("rust-toolchain")
-    }));
+    assert_eq!(results.len(), 1);
+    let result = &results[0];
+    assert_eq!(result.id, "RS-TOOLCHAIN-04");
+    assert_eq!(result.severity, Severity::Warn);
+    assert_eq!(result.title, "legacy rust-toolchain file present");
+    assert_eq!(
+        result.message,
+        "Migrate `rust-toolchain` to `rust-toolchain.toml` so components can be declared explicitly."
+    );
+    assert_eq!(result.file.as_deref(), Some("rust-toolchain"));
 }
 
 #[test]
@@ -39,6 +41,12 @@ fn warns_when_both_legacy_and_modern_toolchain_files_exist() {
 
     check(&input, &mut results);
 
+    assert_eq!(results.len(), 2);
+    assert!(results.iter().any(|result| {
+        result.id == "RS-TOOLCHAIN-04"
+            && result.severity == Severity::Warn
+            && result.title == "legacy rust-toolchain file present"
+    }));
     assert!(results.iter().any(|result| {
         result.id == "RS-TOOLCHAIN-04"
             && result.severity == Severity::Warn

@@ -6,13 +6,15 @@ use super::check;
 
 #[test]
 fn errors_on_bans_allow_entries() {
-    let config =
-        config_facts(&canonical_deny_toml_service().replace("skip = []", "skip = []\nallow = [\"lazy_static\"]"));
+    let config = config_facts(
+        &canonical_deny_toml_service().replace("skip = []", "skip = []\nallow = [\"lazy_static\"]"),
+    );
     let input = ConfigDenyInput { config: &config };
     let mut results = Vec::new();
 
     check(&input, &mut results);
 
+    assert_eq!(results.len(), 2);
     assert!(results.iter().any(|result| {
         result.id == "RS-DENY-25"
             && result.severity == Severity::Error
