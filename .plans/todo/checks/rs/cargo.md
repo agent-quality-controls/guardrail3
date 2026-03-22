@@ -8,7 +8,7 @@
 
 | New ID | Old ID | Severity | What | Status |
 |--------|--------|----------|------|--------|
-| RS-CARGO-01 | R26 | Error | [workspace.lints.rust] + [workspace.lints.clippy] completeness: 6 Rust lints + 30 clippy deny lints + 4 clippy groups present. **Profile-aware:** library profile adds `missing_docs = "deny"` and `unreachable_pub = "deny"` to expected Rust lints. | Implemented (needs profile-awareness) |
+| RS-CARGO-01 | R26 | Error | [workspace.lints.rust] + [workspace.lints.clippy] completeness: 6 Rust lints + 31 clippy deny lints + 4 clippy groups present. **Profile-aware:** library profile adds `unreachable_pub = "deny"` to expected Rust lints. `missing_docs` is intentionally not enforced. | Implemented |
 | RS-CARGO-02 | R27 | Error/Warn | Lint levels correct (deny/warn/forbid/allow match expected). Error if weakened, warn otherwise | Implemented |
 | RS-CARGO-03 | R28 | Info | Approved allow deviations inventory (9 lints: missing_docs_in_private_items, module_name_repetitions, etc.) | Implemented |
 | RS-CARGO-04 | R29 | Error | Per-crate lint inheritance: `[lints] workspace = true` in each member Cargo.toml | Implemented |
