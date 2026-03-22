@@ -517,7 +517,14 @@ fn setup_ts_monorepo(config: Option<&str>, apps: &[(&str, bool)]) -> tempfile::T
             let ports_out = modules.join("ports").join("outbound").join("db");
             let adapt_in = modules.join("adapters").join("inbound").join("rest");
             let adapt_out = modules.join("adapters").join("outbound").join("postgres");
-            for d in [&domain_sub, &app_sub, &ports_in, &ports_out, &adapt_in, &adapt_out] {
+            for d in [
+                &domain_sub,
+                &app_sub,
+                &ports_in,
+                &ports_out,
+                &adapt_in,
+                &adapt_out,
+            ] {
                 std::fs::create_dir_all(d).expect("create hex arch dir");
                 std::fs::write(d.join("index.ts"), "export const x = 1;").expect("write ts file");
             }

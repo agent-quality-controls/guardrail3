@@ -1,7 +1,7 @@
 use super::helpers::{
-    arch_errors, assert_file_field, assert_inner_hex, assert_no_packages, assert_no_ts_apps,
-    assert_per_app, assert_single_error, copy_fixture, remove_dir, remove_file, run_check,
-    write_file, INNER_HEX, RUST_APPS,
+    INNER_HEX, RUST_APPS, arch_errors, assert_file_field, assert_inner_hex, assert_no_packages,
+    assert_no_ts_apps, assert_per_app, assert_single_error, copy_fixture, remove_dir, remove_file,
+    run_check, write_file,
 };
 use guardrail3::domain::report::CheckResult;
 use std::os::unix::fs::PermissionsExt;
@@ -66,7 +66,12 @@ fn empty_app_containers() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
-    assert_eq!(r5.len(), 4, "expected 4 empty-container errors (3 outer + 1 inner), got {}: {r5:#?}", r5.len());
+    assert_eq!(
+        r5.len(),
+        4,
+        "expected 4 empty-container errors (3 outer + 1 inner), got {}: {r5:#?}",
+        r5.len()
+    );
     for err in &r5 {
         assert!(
             err.title.contains("empty container") && err.title.contains("/app"),
@@ -95,7 +100,12 @@ fn empty_domain_containers() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
-    assert_eq!(r5.len(), 4, "expected 4 empty-container errors, got {}: {r5:#?}", r5.len());
+    assert_eq!(
+        r5.len(),
+        4,
+        "expected 4 empty-container errors, got {}: {r5:#?}",
+        r5.len()
+    );
     for err in &r5 {
         assert!(
             err.title.contains("empty container") && err.title.contains("/domain"),
@@ -129,7 +139,12 @@ fn empty_adapters_inbound_containers() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
-    assert_eq!(r5.len(), 3, "expected 3 outer empty-container errors (inner hex path destroyed), got {}: {r5:#?}", r5.len());
+    assert_eq!(
+        r5.len(),
+        3,
+        "expected 3 outer empty-container errors (inner hex path destroyed), got {}: {r5:#?}",
+        r5.len()
+    );
     for err in &r5 {
         assert!(
             err.title.contains("empty container") && err.title.contains("adapters/inbound"),
@@ -156,7 +171,12 @@ fn empty_adapters_inbound_inner_hex_separately() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
-    assert_eq!(r5.len(), 1, "expected 1 inner-hex empty-container error, got {}: {r5:#?}", r5.len());
+    assert_eq!(
+        r5.len(),
+        1,
+        "expected 1 inner-hex empty-container error, got {}: {r5:#?}",
+        r5.len()
+    );
     assert!(
         r5[0].title.contains("empty container") && r5[0].title.contains("adapters/inbound"),
         "expected 'empty container' and 'adapters/inbound' in title, got: '{}'",
@@ -191,7 +211,12 @@ fn empty_adapters_outbound_containers() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
-    assert_eq!(r5.len(), 4, "expected 4 empty-container errors, got {}: {r5:#?}", r5.len());
+    assert_eq!(
+        r5.len(),
+        4,
+        "expected 4 empty-container errors, got {}: {r5:#?}",
+        r5.len()
+    );
     for err in &r5 {
         assert!(
             err.title.contains("empty container") && err.title.contains("adapters/outbound"),
@@ -222,7 +247,12 @@ fn empty_ports_inbound_containers() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
-    assert_eq!(r5.len(), 4, "expected 4 empty-container errors, got {}: {r5:#?}", r5.len());
+    assert_eq!(
+        r5.len(),
+        4,
+        "expected 4 empty-container errors, got {}: {r5:#?}",
+        r5.len()
+    );
     for err in &r5 {
         assert!(
             err.title.contains("empty container") && err.title.contains("ports/inbound"),
@@ -251,7 +281,12 @@ fn empty_ports_outbound_containers() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
-    assert_eq!(r5.len(), 4, "expected 4 empty-container errors, got {}: {r5:#?}", r5.len());
+    assert_eq!(
+        r5.len(),
+        4,
+        "expected 4 empty-container errors, got {}: {r5:#?}",
+        r5.len()
+    );
     for err in &r5 {
         assert!(
             err.title.contains("empty container") && err.title.contains("ports/outbound"),
@@ -340,7 +375,11 @@ fn gitkeep_alongside_subdirs() {
     let tmp = copy_fixture();
     write_file(tmp.path(), "apps/devctl/crates/app/.gitkeep", "");
     write_file(tmp.path(), "apps/backend/crates/domain/.gitkeep", "");
-    write_file(tmp.path(), "apps/worker/crates/adapters/outbound/.gitkeep", "");
+    write_file(
+        tmp.path(),
+        "apps/worker/crates/adapters/outbound/.gitkeep",
+        "",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
@@ -372,11 +411,24 @@ fn files_but_no_subdirs() {
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
 
-    assert_eq!(r5.len(), 1, "expected exactly 1 empty-container error total, got {}: {r5:#?}", r5.len());
+    assert_eq!(
+        r5.len(),
+        1,
+        "expected exactly 1 empty-container error total, got {}: {r5:#?}",
+        r5.len()
+    );
 
     // Should have at least 1 empty-container error for devctl app/
-    let devctl_r5: Vec<_> = r5.iter().filter(|e| e.title.contains("devctl") && e.title.contains("/app")).collect();
-    assert_eq!(devctl_r5.len(), 1, "expected 1 error for devctl app/, got {}: {devctl_r5:#?}", devctl_r5.len());
+    let devctl_r5: Vec<_> = r5
+        .iter()
+        .filter(|e| e.title.contains("devctl") && e.title.contains("/app"))
+        .collect();
+    assert_eq!(
+        devctl_r5.len(),
+        1,
+        "expected 1 error for devctl app/, got {}: {devctl_r5:#?}",
+        devctl_r5.len()
+    );
     assert!(
         devctl_r5[0].message.contains("contains files"),
         "expected 'contains files' in message, got: '{}'",
@@ -409,10 +461,23 @@ fn multiple_files_but_no_subdirs() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
-    assert_eq!(r5.len(), 1, "expected exactly 1 empty-container error total, got {}: {r5:#?}", r5.len());
+    assert_eq!(
+        r5.len(),
+        1,
+        "expected exactly 1 empty-container error total, got {}: {r5:#?}",
+        r5.len()
+    );
 
-    let devctl_r5: Vec<_> = r5.iter().filter(|e| e.title.contains("devctl") && e.title.contains("/app")).collect();
-    assert_eq!(devctl_r5.len(), 1, "expected 1 error, got {}: {devctl_r5:#?}", devctl_r5.len());
+    let devctl_r5: Vec<_> = r5
+        .iter()
+        .filter(|e| e.title.contains("devctl") && e.title.contains("/app"))
+        .collect();
+    assert_eq!(
+        devctl_r5.len(),
+        1,
+        "expected 1 error, got {}: {devctl_r5:#?}",
+        devctl_r5.len()
+    );
     // Both filenames should appear in the message
     assert!(
         devctl_r5[0].message.contains("mod.rs") && devctl_r5[0].message.contains("lib.rs"),
@@ -441,13 +506,20 @@ fn container_dir_nonexistent() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
-    let devctl_app: Vec<_> = r5.iter().filter(|e| e.title.contains("devctl") && e.title.contains("/app")).collect();
+    let devctl_app: Vec<_> = r5
+        .iter()
+        .filter(|e| e.title.contains("devctl") && e.title.contains("/app"))
+        .collect();
     assert_eq!(
         devctl_app.len(),
         0,
         "nonexistent container should not fire empty-container error (other rules catch it), got: {devctl_app:#?}"
     );
-    assert_eq!(r5.len(), 0, "expected 0 total rule5 errors when container doesn't exist");
+    assert_eq!(
+        r5.len(),
+        0,
+        "expected 0 total rule5 errors when container doesn't exist"
+    );
     assert_no_ts_apps(&r5);
     assert_no_packages(&r5);
 }
@@ -465,15 +537,30 @@ fn container_with_only_gitkeep_and_files() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
-    assert_eq!(r5.len(), 0, "expected 0 empty-container errors (.gitkeep suppresses), got {}: {r5:#?}", r5.len());
-    let devctl_app_r5: Vec<_> = r5.iter().filter(|e| e.title.contains("devctl") && e.title.contains("/app")).collect();
+    assert_eq!(
+        r5.len(),
+        0,
+        "expected 0 empty-container errors (.gitkeep suppresses), got {}: {r5:#?}",
+        r5.len()
+    );
+    let devctl_app_r5: Vec<_> = r5
+        .iter()
+        .filter(|e| e.title.contains("devctl") && e.title.contains("/app"))
+        .collect();
     assert_eq!(
         devctl_app_r5.len(),
         0,
         ".gitkeep present → no empty-container error, got: {devctl_app_r5:#?}"
     );
     // But loose-file error should fire for mod.rs
-    let loose: Vec<_> = errors.iter().filter(|e| e.title.contains("loose files") && e.title.contains("devctl") && e.title.contains("/app")).collect();
+    let loose: Vec<_> = errors
+        .iter()
+        .filter(|e| {
+            e.title.contains("loose files")
+                && e.title.contains("devctl")
+                && e.title.contains("/app")
+        })
+        .collect();
     assert_eq!(
         loose.len(),
         1,
@@ -494,7 +581,12 @@ fn inner_hex_empty_outer_clean() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
-    assert_eq!(r5.len(), 6, "expected 6 inner hex empty-container errors, got {}: {r5:#?}", r5.len());
+    assert_eq!(
+        r5.len(),
+        6,
+        "expected 6 inner hex empty-container errors, got {}: {r5:#?}",
+        r5.len()
+    );
     // All r5 errors should be from inner hex, none from outer apps
     for err in &r5 {
         assert!(
@@ -518,7 +610,10 @@ fn inner_hex_empty_outer_clean() {
         );
     }
     // Outer apps should have no empty-container errors
-    let outer_r5: Vec<_> = r5.iter().filter(|e| !e.file.as_deref().unwrap_or("").contains("mcp/crates")).collect();
+    let outer_r5: Vec<_> = r5
+        .iter()
+        .filter(|e| !e.file.as_deref().unwrap_or("").contains("mcp/crates"))
+        .collect();
     assert_eq!(
         outer_r5.len(),
         0,
@@ -534,10 +629,7 @@ fn inner_hex_label_prefix_in_title() {
     // Verify inner hex errors have correct nested label (contains "mcp" in file path).
     let tmp = copy_fixture();
     // Empty inner hex ports/inbound (which had .gitkeep in golden)
-    remove_file(
-        tmp.path(),
-        &format!("{INNER_HEX}/ports/inbound/.gitkeep"),
-    );
+    remove_file(tmp.path(), &format!("{INNER_HEX}/ports/inbound/.gitkeep"));
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
@@ -550,7 +642,11 @@ fn inner_hex_label_prefix_in_title() {
     );
     // File field should contain the inner hex path
     assert!(
-        r5[0].file.as_deref().unwrap_or("").contains("mcp/crates/ports/inbound"),
+        r5[0]
+            .file
+            .as_deref()
+            .unwrap_or("")
+            .contains("mcp/crates/ports/inbound"),
         "expected 'mcp/crates/ports/inbound' in file field, got: {:?}",
         r5[0].file
     );
@@ -578,7 +674,9 @@ fn permission_denied_container() {
     let container = tmp.path().join("apps/devctl/crates/app");
     // Save original perms, chmod 000, run check, restore perms
     {
-        let mut perms = std::fs::metadata(&container).expect("metadata").permissions();
+        let mut perms = std::fs::metadata(&container)
+            .expect("metadata")
+            .permissions();
         perms.set_mode(0o000);
         std::fs::set_permissions(&container, perms).expect("chmod 000");
     }
@@ -587,15 +685,25 @@ fn permission_denied_container() {
 
     // Restore perms before assertions (so cleanup works)
     {
-        let mut perms = std::fs::metadata(&container).expect("metadata").permissions();
+        let mut perms = std::fs::metadata(&container)
+            .expect("metadata")
+            .permissions();
         perms.set_mode(0o755);
         std::fs::set_permissions(&container, perms).expect("restore perms");
     }
 
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
-    assert_eq!(r5.len(), 1, "expected exactly 1 empty-container error total, got {}: {r5:#?}", r5.len());
-    let devctl_app: Vec<_> = r5.iter().filter(|e| e.title.contains("devctl") && e.title.contains("/app")).collect();
+    assert_eq!(
+        r5.len(),
+        1,
+        "expected exactly 1 empty-container error total, got {}: {r5:#?}",
+        r5.len()
+    );
+    let devctl_app: Vec<_> = r5
+        .iter()
+        .filter(|e| e.title.contains("devctl") && e.title.contains("/app"))
+        .collect();
     assert_eq!(
         devctl_app.len(),
         1,
@@ -628,7 +736,11 @@ fn ts_apps_not_checked() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
-    assert_eq!(r5.len(), 1, "expected 1 total rule5 error (devctl .gitkeep removed)");
+    assert_eq!(
+        r5.len(),
+        1,
+        "expected 1 total rule5 error (devctl .gitkeep removed)"
+    );
     assert_no_ts_apps(&r5);
     // Verify devctl did fire
     assert!(
@@ -648,8 +760,15 @@ fn packages_not_checked() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
-    assert_eq!(r5.len(), 1, "expected 1 total rule5 error (devctl .gitkeep removed)");
-    assert!(!r5.is_empty(), "expected non-empty error list to meaningfully test packages absence");
+    assert_eq!(
+        r5.len(),
+        1,
+        "expected 1 total rule5 error (devctl .gitkeep removed)"
+    );
+    assert!(
+        !r5.is_empty(),
+        "expected non-empty error list to meaningfully test packages absence"
+    );
     assert_no_packages(&r5);
     assert_no_ts_apps(&r5);
     assert_file_field(&r5);
@@ -659,15 +778,23 @@ fn packages_not_checked() {
 fn new_app_gets_checked() {
     // Create a new Rust app "scheduler" with Cargo.toml and empty containers.
     let tmp = copy_fixture();
-    write_file(tmp.path(), "apps/scheduler/Cargo.toml", "[package]\nname = \"scheduler\"");
+    write_file(
+        tmp.path(),
+        "apps/scheduler/Cargo.toml",
+        "[package]\nname = \"scheduler\"",
+    );
     // Create crates/ with the 6 container dirs, all empty
     for c in CONTAINER_SUFFIXES {
-        std::fs::create_dir_all(tmp.path().join(format!("apps/scheduler/crates/{c}"))).expect("create container");
+        std::fs::create_dir_all(tmp.path().join(format!("apps/scheduler/crates/{c}")))
+            .expect("create container");
     }
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
-    let scheduler_r5: Vec<_> = r5.iter().filter(|e| e.title.contains("scheduler")).collect();
+    let scheduler_r5: Vec<_> = r5
+        .iter()
+        .filter(|e| e.title.contains("scheduler"))
+        .collect();
     assert_eq!(
         scheduler_r5.len(),
         6,
@@ -693,7 +820,11 @@ fn new_app_gets_checked() {
             "expected container '{c}' in scheduler errors, got: {scheduler_r5:#?}"
         );
     }
-    assert_eq!(r5.len(), 6, "expected 6 total rule5 errors (all from scheduler)");
+    assert_eq!(
+        r5.len(),
+        6,
+        "expected 6 total rule5 errors (all from scheduler)"
+    );
     assert_file_field(&scheduler_r5.iter().map(|&&e| e).collect::<Vec<_>>());
     assert_no_ts_apps(&r5);
     assert_no_packages(&r5);
@@ -737,19 +868,26 @@ fn different_breakage_per_app() {
     write_file(tmp.path(), "apps/worker/crates/domain/mod.rs", "// stray");
 
     // backend inner hex: empty ports/outbound (remove .gitkeep)
-    remove_file(
-        tmp.path(),
-        &format!("{INNER_HEX}/ports/outbound/.gitkeep"),
-    );
+    remove_file(tmp.path(), &format!("{INNER_HEX}/ports/outbound/.gitkeep"));
 
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
-    assert_eq!(r5.len(), 3, "expected 3 total empty-container errors, got {}: {r5:#?}", r5.len());
+    assert_eq!(
+        r5.len(),
+        3,
+        "expected 3 total empty-container errors, got {}: {r5:#?}",
+        r5.len()
+    );
 
     // devctl app/ error: "is empty"
     let devctl: Vec<_> = r5.iter().filter(|e| e.title.contains("devctl")).collect();
-    assert_eq!(devctl.len(), 1, "expected 1 devctl error, got {}: {devctl:#?}", devctl.len());
+    assert_eq!(
+        devctl.len(),
+        1,
+        "expected 1 devctl error, got {}: {devctl:#?}",
+        devctl.len()
+    );
     assert!(
         devctl[0].message.contains("is empty"),
         "devctl should say 'is empty', got: '{}'",
@@ -758,7 +896,12 @@ fn different_breakage_per_app() {
 
     // worker domain/ error: "contains files"
     let worker: Vec<_> = r5.iter().filter(|e| e.title.contains("worker")).collect();
-    assert_eq!(worker.len(), 1, "expected 1 worker error, got {}: {worker:#?}", worker.len());
+    assert_eq!(
+        worker.len(),
+        1,
+        "expected 1 worker error, got {}: {worker:#?}",
+        worker.len()
+    );
     assert!(
         worker[0].message.contains("contains files") && worker[0].message.contains("mod.rs"),
         "worker should say 'contains files' with 'mod.rs', got: '{}'",
@@ -766,10 +909,18 @@ fn different_breakage_per_app() {
     );
 
     // backend inner hex ports/outbound error: "is empty"
-    let backend_inner: Vec<_> = r5.iter().filter(|e| {
-        e.title.contains("backend") && e.file.as_deref().unwrap_or("").contains("mcp/crates")
-    }).collect();
-    assert_eq!(backend_inner.len(), 1, "expected 1 backend inner hex error, got {}: {backend_inner:#?}", backend_inner.len());
+    let backend_inner: Vec<_> = r5
+        .iter()
+        .filter(|e| {
+            e.title.contains("backend") && e.file.as_deref().unwrap_or("").contains("mcp/crates")
+        })
+        .collect();
+    assert_eq!(
+        backend_inner.len(),
+        1,
+        "expected 1 backend inner hex error, got {}: {backend_inner:#?}",
+        backend_inner.len()
+    );
     assert!(
         backend_inner[0].message.contains("is empty"),
         "backend inner hex should say 'is empty', got: '{}'",
@@ -825,7 +976,12 @@ fn empty_in_one_app_valid_in_another() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
-    assert_eq!(r5.len(), 1, "expected 1 error for devctl only, got {}: {r5:#?}", r5.len());
+    assert_eq!(
+        r5.len(),
+        1,
+        "expected 1 error for devctl only, got {}: {r5:#?}",
+        r5.len()
+    );
     assert!(
         r5[0].title.contains("devctl"),
         "expected error for devctl, got: '{}'",
@@ -854,10 +1010,7 @@ fn empty_in_one_app_valid_in_another() {
 fn inner_hex_empty_container_single() {
     // Remove .gitkeep from inner hex ports/inbound → single error
     let tmp = copy_fixture();
-    remove_file(
-        tmp.path(),
-        &format!("{INNER_HEX}/ports/inbound/.gitkeep"),
-    );
+    remove_file(tmp.path(), &format!("{INNER_HEX}/ports/inbound/.gitkeep"));
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
@@ -889,11 +1042,17 @@ fn multiple_empty_containers_same_app() {
     let tmp = copy_fixture();
     remove_file(tmp.path(), "apps/devctl/crates/ports/inbound/.gitkeep");
     remove_dir(tmp.path(), "apps/devctl/crates/ports/outbound/traits");
-    std::fs::create_dir_all(tmp.path().join("apps/devctl/crates/ports/outbound")).expect("recreate");
+    std::fs::create_dir_all(tmp.path().join("apps/devctl/crates/ports/outbound"))
+        .expect("recreate");
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
-    assert_eq!(r5.len(), 2, "expected exactly 2 empty-container errors total, got {}: {r5:#?}", r5.len());
+    assert_eq!(
+        r5.len(),
+        2,
+        "expected exactly 2 empty-container errors total, got {}: {r5:#?}",
+        r5.len()
+    );
 
     let devctl_r5: Vec<_> = r5.iter().filter(|e| e.title.contains("devctl")).collect();
     assert_eq!(
@@ -940,10 +1099,18 @@ fn ts_apps_broken_zero_rs_errors() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
-    assert_eq!(r5.len(), 1, "expected 1 total rule5 error (worker .gitkeep removed)");
-    assert!(!r5.is_empty(), "expected non-empty error list to meaningfully test TS apps absence");
+    assert_eq!(
+        r5.len(),
+        1,
+        "expected 1 total rule5 error (worker .gitkeep removed)"
+    );
     assert!(
-        !r5.iter().any(|e| e.title.contains("admin") || e.title.contains("landing")),
+        !r5.is_empty(),
+        "expected non-empty error list to meaningfully test TS apps absence"
+    );
+    assert!(
+        !r5.iter()
+            .any(|e| e.title.contains("admin") || e.title.contains("landing")),
         "TS apps should not produce empty-container errors, got: {r5:#?}"
     );
     assert_no_ts_apps(&r5);
@@ -966,7 +1133,12 @@ fn unicode_lookalike_gitkeep() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
-    assert_eq!(r5.len(), 1, "expected 1 total rule5 error, got {}: {r5:#?}", r5.len());
+    assert_eq!(
+        r5.len(),
+        1,
+        "expected 1 total rule5 error, got {}: {r5:#?}",
+        r5.len()
+    );
     let devctl_pi: Vec<_> = r5
         .iter()
         .filter(|e| e.title.contains("devctl") && e.title.contains("ports/inbound"))
@@ -998,7 +1170,12 @@ fn near_miss_gitkeep_names() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
-    assert_eq!(r5.len(), 1, "expected 1 total rule5 error, got {}: {r5:#?}", r5.len());
+    assert_eq!(
+        r5.len(),
+        1,
+        "expected 1 total rule5 error, got {}: {r5:#?}",
+        r5.len()
+    );
     let devctl_pi: Vec<_> = r5
         .iter()
         .filter(|e| e.title.contains("devctl") && e.title.contains("ports/inbound"))
@@ -1044,7 +1221,12 @@ fn symlink_as_only_content() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
-    assert_eq!(r5.len(), 1, "expected 1 total rule5 error, got {}: {r5:#?}", r5.len());
+    assert_eq!(
+        r5.len(),
+        1,
+        "expected 1 total rule5 error, got {}: {r5:#?}",
+        r5.len()
+    );
     let devctl_pi: Vec<_> = r5
         .iter()
         .filter(|e| e.title.contains("devctl") && e.title.contains("ports/inbound"))
@@ -1077,7 +1259,12 @@ fn dangling_symlink_as_only_content() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
-    assert_eq!(r5.len(), 1, "expected 1 total rule5 error, got {}: {r5:#?}", r5.len());
+    assert_eq!(
+        r5.len(),
+        1,
+        "expected 1 total rule5 error, got {}: {r5:#?}",
+        r5.len()
+    );
     let devctl_pi: Vec<_> = r5
         .iter()
         .filter(|e| e.title.contains("devctl") && e.title.contains("ports/inbound"))
@@ -1089,7 +1276,8 @@ fn dangling_symlink_as_only_content() {
         devctl_pi.len()
     );
     assert!(
-        devctl_pi[0].message.contains("contains files") && devctl_pi[0].message.contains("dangling"),
+        devctl_pi[0].message.contains("contains files")
+            && devctl_pi[0].message.contains("dangling"),
         "expected 'contains files' with 'dangling' in message, got: '{}'",
         devctl_pi[0].message
     );
@@ -1107,7 +1295,8 @@ fn gitkeep_as_directory() {
     let tmp = copy_fixture();
     let container = "apps/devctl/crates/ports/inbound";
     remove_file(tmp.path(), &format!("{container}/.gitkeep"));
-    std::fs::create_dir_all(tmp.path().join(format!("{container}/.gitkeep"))).expect("mkdir .gitkeep");
+    std::fs::create_dir_all(tmp.path().join(format!("{container}/.gitkeep")))
+        .expect("mkdir .gitkeep");
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
@@ -1120,7 +1309,11 @@ fn gitkeep_as_directory() {
         0,
         ".gitkeep as directory means dir_names is non-empty → 0 rule5 errors, got: {devctl_pi:#?}"
     );
-    assert_eq!(r5.len(), 0, "expected 0 total rule5 errors (.gitkeep-as-dir counts as subdir)");
+    assert_eq!(
+        r5.len(),
+        0,
+        "expected 0 total rule5 errors (.gitkeep-as-dir counts as subdir)"
+    );
     assert_no_ts_apps(&r5);
     assert_no_packages(&r5);
 }
@@ -1142,10 +1335,7 @@ fn gitkeep_wrong_case_in_container() {
         .filter(|e| e.title.contains("devctl") && e.title.contains("ports/inbound"))
         .collect();
     // Detect FS case sensitivity: try reading the wrong-case file
-    let case_insensitive = tmp
-        .path()
-        .join(format!("{container}/.gitkeep"))
-        .exists();
+    let case_insensitive = tmp.path().join(format!("{container}/.gitkeep")).exists();
     if case_insensitive {
         // macOS default: .GITKEEP is found as .gitkeep → no error
         assert_eq!(
@@ -1153,7 +1343,12 @@ fn gitkeep_wrong_case_in_container() {
             0,
             "case-insensitive FS: .GITKEEP found as .gitkeep → 0 errors, got: {devctl_pi:#?}"
         );
-        assert_eq!(r5.len(), 0, "case-insensitive FS: expected 0 total rule5 errors, got {}: {r5:#?}", r5.len());
+        assert_eq!(
+            r5.len(),
+            0,
+            "case-insensitive FS: expected 0 total rule5 errors, got {}: {r5:#?}",
+            r5.len()
+        );
     } else {
         // Case-sensitive FS: .GITKEEP is NOT .gitkeep → fires error
         assert_eq!(
@@ -1167,7 +1362,12 @@ fn gitkeep_wrong_case_in_container() {
             "expected 'contains files' in message, got: '{}'",
             devctl_pi[0].message
         );
-        assert_eq!(r5.len(), 1, "case-sensitive FS: expected 1 total rule5 error, got {}: {r5:#?}", r5.len());
+        assert_eq!(
+            r5.len(),
+            1,
+            "case-sensitive FS: expected 1 total rule5 error, got {}: {r5:#?}",
+            r5.len()
+        );
         assert_file_field(&r5);
     }
     assert_no_ts_apps(&r5);
@@ -1181,11 +1381,20 @@ fn file_replacing_subdir() {
     let tmp = copy_fixture();
     remove_dir(tmp.path(), "apps/devctl/crates/app/core");
     std::fs::create_dir_all(tmp.path().join("apps/devctl/crates/app")).expect("recreate");
-    write_file(tmp.path(), "apps/devctl/crates/app/core", "// I am a file, not a dir");
+    write_file(
+        tmp.path(),
+        "apps/devctl/crates/app/core",
+        "// I am a file, not a dir",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
-    assert_eq!(r5.len(), 1, "expected 1 total rule5 error, got {}: {r5:#?}", r5.len());
+    assert_eq!(
+        r5.len(),
+        1,
+        "expected 1 total rule5 error, got {}: {r5:#?}",
+        r5.len()
+    );
     let devctl_app: Vec<_> = r5
         .iter()
         .filter(|e| e.title.contains("devctl") && e.title.contains("/app"))
@@ -1216,7 +1425,12 @@ fn hidden_file_as_sole_content() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
-    assert_eq!(r5.len(), 1, "expected 1 total rule5 error, got {}: {r5:#?}", r5.len());
+    assert_eq!(
+        r5.len(),
+        1,
+        "expected 1 total rule5 error, got {}: {r5:#?}",
+        r5.len()
+    );
     let devctl_pi: Vec<_> = r5
         .iter()
         .filter(|e| e.title.contains("devctl") && e.title.contains("ports/inbound"))
@@ -1228,7 +1442,8 @@ fn hidden_file_as_sole_content() {
         devctl_pi.len()
     );
     assert!(
-        devctl_pi[0].message.contains("contains files") && devctl_pi[0].message.contains(".DS_Store"),
+        devctl_pi[0].message.contains("contains files")
+            && devctl_pi[0].message.contains(".DS_Store"),
         "expected 'contains files' with '.DS_Store' in message, got: '{}'",
         devctl_pi[0].message
     );
@@ -1243,7 +1458,11 @@ fn non_empty_gitkeep_prevents_error() {
     let tmp = copy_fixture();
     let container = "apps/devctl/crates/ports/inbound";
     remove_file(tmp.path(), &format!("{container}/.gitkeep"));
-    write_file(tmp.path(), &format!("{container}/.gitkeep"), "This file has content");
+    write_file(
+        tmp.path(),
+        &format!("{container}/.gitkeep"),
+        "This file has content",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
@@ -1256,7 +1475,12 @@ fn non_empty_gitkeep_prevents_error() {
         0,
         ".gitkeep with content still prevents error, got: {devctl_pi:#?}"
     );
-    assert_eq!(r5.len(), 0, "expected 0 total rule5 errors, got {}: {r5:#?}", r5.len());
+    assert_eq!(
+        r5.len(),
+        0,
+        "expected 0 total rule5 errors, got {}: {r5:#?}",
+        r5.len()
+    );
     assert_no_ts_apps(&r5);
     assert_no_packages(&r5);
 }
@@ -1281,7 +1505,12 @@ fn maximally_complex_empty_container() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
-    assert_eq!(r5.len(), 1, "expected 1 total rule5 error, got {}: {r5:#?}", r5.len());
+    assert_eq!(
+        r5.len(),
+        1,
+        "expected 1 total rule5 error, got {}: {r5:#?}",
+        r5.len()
+    );
     let devctl_pi: Vec<_> = r5
         .iter()
         .filter(|e| e.title.contains("devctl") && e.title.contains("ports/inbound"))
@@ -1331,13 +1560,25 @@ fn no_double_fire_files_but_no_subdirs() {
     let errors = arch_errors(&results);
     // The "empty container" error should fire (files but no subdirs)
     let r5 = rule5_errors(&errors);
-    assert_eq!(r5.len(), 1, "expected exactly 1 empty-container error, got: {r5:#?}");
-    assert!(r5[0].message.contains("mod.rs"), "expected mod.rs in message");
+    assert_eq!(
+        r5.len(),
+        1,
+        "expected exactly 1 empty-container error, got: {r5:#?}"
+    );
+    assert!(
+        r5[0].message.contains("mod.rs"),
+        "expected mod.rs in message"
+    );
     // CRITICAL: check_loose_files must NOT also fire — no double-fire
-    let loose: Vec<_> = errors.iter().filter(|e| e.title.contains("loose files")).collect();
-    assert!(loose.is_empty(),
+    let loose: Vec<_> = errors
+        .iter()
+        .filter(|e| e.title.contains("loose files"))
+        .collect();
+    assert!(
+        loose.is_empty(),
         "check_loose_files should NOT fire when empty-container already reported the files. \
-         Double-fire detected: {loose:#?}");
+         Double-fire detected: {loose:#?}"
+    );
     assert_no_ts_apps(&r5);
     assert_no_packages(&r5);
 }
@@ -1351,13 +1592,29 @@ fn subdirs_plus_loose_files() {
     let errors = arch_errors(&results);
     let r5 = rule5_errors(&errors);
     // Container has subdirs → no "empty container" error
-    assert_eq!(r5.len(), 0, "container with subdirs should not fire empty-container: {r5:#?}");
+    assert_eq!(
+        r5.len(),
+        0,
+        "container with subdirs should not fire empty-container: {r5:#?}"
+    );
     // But check_loose_files should fire for mod.rs
-    let loose: Vec<_> = errors.iter()
-        .filter(|e| e.title.contains("loose files") && e.title.contains("devctl") && e.title.contains("/app"))
+    let loose: Vec<_> = errors
+        .iter()
+        .filter(|e| {
+            e.title.contains("loose files")
+                && e.title.contains("devctl")
+                && e.title.contains("/app")
+        })
         .collect();
-    assert_eq!(loose.len(), 1, "expected 1 loose-files error for mod.rs alongside subdir, got: {loose:#?}");
-    assert!(loose[0].message.contains("mod.rs"), "expected mod.rs in loose-files message");
+    assert_eq!(
+        loose.len(),
+        1,
+        "expected 1 loose-files error for mod.rs alongside subdir, got: {loose:#?}"
+    );
+    assert!(
+        loose[0].message.contains("mod.rs"),
+        "expected mod.rs in loose-files message"
+    );
     assert_no_ts_apps(&r5);
     assert_no_packages(&r5);
 }

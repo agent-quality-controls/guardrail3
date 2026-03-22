@@ -8,11 +8,18 @@ fn crate_not_in_workspace_members() {
         "apps/devctl/crates/domain/events/Cargo.toml",
         "[package]\nname = \"devctl-domain-events\"\nversion = \"0.1.0\"\nedition = \"2024\"",
     );
-    write_file(tmp.path(), "apps/devctl/crates/domain/events/src/lib.rs", "// events");
+    write_file(
+        tmp.path(),
+        "apps/devctl/crates/domain/events/src/lib.rs",
+        "// events",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     assert!(
-        errors.iter().any(|e| e.title.contains("not a workspace member") || e.title.contains("not in workspace")),
+        errors
+            .iter()
+            .any(|e| e.title.contains("not a workspace member")
+                || e.title.contains("not in workspace")),
         "expected error about crate not being a workspace member, got: {errors:#?}"
     );
 }

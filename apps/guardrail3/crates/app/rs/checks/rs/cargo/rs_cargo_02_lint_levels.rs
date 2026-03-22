@@ -2,8 +2,8 @@ use crate::domain::report::{CheckResult, Severity};
 
 use super::inputs::WorkspaceCargoInput;
 use super::lint_support::{
-    EXPECTED_CLIPPY_DENY, EXPECTED_CLIPPY_GROUPS, EXPECTED_LIBRARY_RUST_LINTS,
-    EXPECTED_RUST_LINTS, is_weaker, lint_level, lint_priority, workspace_lints,
+    EXPECTED_CLIPPY_DENY, EXPECTED_CLIPPY_GROUPS, EXPECTED_LIBRARY_RUST_LINTS, EXPECTED_RUST_LINTS,
+    is_weaker, lint_level, lint_priority, workspace_lints,
 };
 
 const ID: &str = "RS-CARGO-02";

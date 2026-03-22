@@ -33,7 +33,10 @@ pub fn check(tree: &ProjectTree) -> Vec<CheckResult> {
     rs_cargo_05_workspace_metadata::check(&workspace, &mut results);
     rs_cargo_07_priority_order::check(&workspace, &mut results);
     rs_cargo_08_resolver::check(&workspace, &mut results);
-    rs_cargo_04_lint_inheritance::check_missing_member_cargos(&declared_vs_discovered, &mut results);
+    rs_cargo_04_lint_inheritance::check_missing_member_cargos(
+        &declared_vs_discovered,
+        &mut results,
+    );
 
     for member in &facts.members {
         let input = WorkspaceMemberInput::new(&facts.workspace, member);

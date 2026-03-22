@@ -50,9 +50,9 @@ pub fn assert_inner_hex(errors: &[&CheckResult]) {
 
 pub fn assert_no_ts_apps(errors: &[&CheckResult]) {
     assert!(
-        !errors
-            .iter()
-            .any(|e| e.title.contains("admin") || e.title.contains("landing") || e.title.contains("portal")),
+        !errors.iter().any(|e| e.title.contains("admin")
+            || e.title.contains("landing")
+            || e.title.contains("portal")),
         "TS apps should not be flagged, got: {errors:#?}"
     );
 }

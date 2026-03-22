@@ -120,8 +120,7 @@ fn check_components(parsed: &toml::Value, rel: &str, results: &mut Vec<CheckResu
             id: ID.to_owned(),
             severity: Severity::Warn,
             title: "toolchain components missing".to_owned(),
-            message: "Add `components = [\"clippy\", \"rustfmt\"]` under `[toolchain]`."
-                .to_owned(),
+            message: "Add `components = [\"clippy\", \"rustfmt\"]` under `[toolchain]`.".to_owned(),
             file: Some(rel.to_owned()),
             line: None,
             inventory: false,

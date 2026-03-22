@@ -1,16 +1,16 @@
 use std::path::Path;
 
+use crate::adapters::inbound::cli::cli::ValidateArgs;
 use crate::adapters::outbound::fs::RealFileSystem;
+use crate::adapters::outbound::report;
 use crate::adapters::outbound::tool_runner::RealToolChecker;
 use crate::app::core::discover;
 use crate::app::hooks;
 use crate::app::rs;
 use crate::app::ts;
-use crate::adapters::inbound::cli::cli::ValidateArgs;
 use crate::domain::config::types::GuardrailConfig;
 use crate::domain::report::{Report, RustCheckCategories, TsCheckCategories, ValidateDomains};
 use crate::ports::outbound::FileSystem;
-use crate::adapters::outbound::report;
 
 /// Convert a repo-relative path to an absolute path string.
 fn to_abs_path(project_path: &Path, relative: &str) -> String {

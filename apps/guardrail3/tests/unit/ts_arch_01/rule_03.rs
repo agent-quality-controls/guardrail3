@@ -88,7 +88,12 @@ fn golden_passes() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
-    assert_eq!(r3.len(), 0, "golden should have 0 rule-03 errors, got {}: {r3:#?}", r3.len());
+    assert_eq!(
+        r3.len(),
+        0,
+        "golden should have 0 rule-03 errors, got {}: {r3:#?}",
+        r3.len()
+    );
 }
 
 // ============================================================================
@@ -104,7 +109,9 @@ fn missing_adapters_inbound() {
     let r3 = rule3_errors(&errors);
     assert_eq!(r3.len(), 1, "expected 1 error, got {}: {r3:#?}", r3.len());
     assert!(
-        r3[0].title.contains("missing") && r3[0].title.contains("adapters") && r3[0].title.contains("inbound"),
+        r3[0].title.contains("missing")
+            && r3[0].title.contains("adapters")
+            && r3[0].title.contains("inbound"),
         "expected title about missing adapters/inbound/, got: '{}'",
         r3[0].title
     );
@@ -120,7 +127,9 @@ fn missing_adapters_outbound() {
     let r3 = rule3_errors(&errors);
     assert_eq!(r3.len(), 1, "expected 1 error, got {}: {r3:#?}", r3.len());
     assert!(
-        r3[0].title.contains("missing") && r3[0].title.contains("adapters") && r3[0].title.contains("outbound"),
+        r3[0].title.contains("missing")
+            && r3[0].title.contains("adapters")
+            && r3[0].title.contains("outbound"),
         "expected title about missing adapters/outbound/, got: '{}'",
         r3[0].title
     );
@@ -136,7 +145,9 @@ fn missing_ports_inbound() {
     let r3 = rule3_errors(&errors);
     assert_eq!(r3.len(), 1, "expected 1 error, got {}: {r3:#?}", r3.len());
     assert!(
-        r3[0].title.contains("missing") && r3[0].title.contains("ports") && r3[0].title.contains("inbound"),
+        r3[0].title.contains("missing")
+            && r3[0].title.contains("ports")
+            && r3[0].title.contains("inbound"),
         "expected title about missing ports/inbound/, got: '{}'",
         r3[0].title
     );
@@ -152,7 +163,9 @@ fn missing_ports_outbound() {
     let r3 = rule3_errors(&errors);
     assert_eq!(r3.len(), 1, "expected 1 error, got {}: {r3:#?}", r3.len());
     assert!(
-        r3[0].title.contains("missing") && r3[0].title.contains("ports") && r3[0].title.contains("outbound"),
+        r3[0].title.contains("missing")
+            && r3[0].title.contains("ports")
+            && r3[0].title.contains("outbound"),
         "expected title about missing ports/outbound/, got: '{}'",
         r3[0].title
     );
@@ -171,9 +184,20 @@ fn missing_both_in_adapters() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
-    assert_eq!(r3.len(), 2, "expected 2 missing errors in adapters/, got {}: {r3:#?}", r3.len());
-    assert!(r3.iter().any(|e| e.title.contains("inbound")), "expected inbound error");
-    assert!(r3.iter().any(|e| e.title.contains("outbound")), "expected outbound error");
+    assert_eq!(
+        r3.len(),
+        2,
+        "expected 2 missing errors in adapters/, got {}: {r3:#?}",
+        r3.len()
+    );
+    assert!(
+        r3.iter().any(|e| e.title.contains("inbound")),
+        "expected inbound error"
+    );
+    assert!(
+        r3.iter().any(|e| e.title.contains("outbound")),
+        "expected outbound error"
+    );
     assert_standard(&r3, &errors);
 }
 
@@ -185,9 +209,20 @@ fn missing_both_in_ports() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
-    assert_eq!(r3.len(), 2, "expected 2 missing errors in ports/, got {}: {r3:#?}", r3.len());
-    assert!(r3.iter().any(|e| e.title.contains("inbound")), "expected inbound error");
-    assert!(r3.iter().any(|e| e.title.contains("outbound")), "expected outbound error");
+    assert_eq!(
+        r3.len(),
+        2,
+        "expected 2 missing errors in ports/, got {}: {r3:#?}",
+        r3.len()
+    );
+    assert!(
+        r3.iter().any(|e| e.title.contains("inbound")),
+        "expected inbound error"
+    );
+    assert!(
+        r3.iter().any(|e| e.title.contains("outbound")),
+        "expected outbound error"
+    );
     assert_standard(&r3, &errors);
 }
 
@@ -208,12 +243,25 @@ fn missing_all_four() {
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
     // 4 dirs * 2 apps = 8 errors
-    assert_eq!(r3.len(), 8, "expected 8 missing errors (4 per app * 2 apps), got {}: {r3:#?}", r3.len());
+    assert_eq!(
+        r3.len(),
+        8,
+        "expected 8 missing errors (4 per app * 2 apps), got {}: {r3:#?}",
+        r3.len()
+    );
     // Per-parent attribution
     let adapters_errors: Vec<_> = r3.iter().filter(|e| e.title.contains("adapters")).collect();
     let ports_errors: Vec<_> = r3.iter().filter(|e| e.title.contains("ports")).collect();
-    assert_eq!(adapters_errors.len(), 4, "expected 4 adapters errors (2 per app): {r3:#?}");
-    assert_eq!(ports_errors.len(), 4, "expected 4 ports errors (2 per app): {r3:#?}");
+    assert_eq!(
+        adapters_errors.len(),
+        4,
+        "expected 4 adapters errors (2 per app): {r3:#?}"
+    );
+    assert_eq!(
+        ports_errors.len(),
+        4,
+        "expected 4 ports errors (2 per app): {r3:#?}"
+    );
     // Per-app attribution
     for app in TS_SERVICE_APPS {
         assert!(
@@ -234,36 +282,60 @@ fn missing_all_four() {
 #[test]
 fn unexpected_dir_in_adapters() {
     let tmp = copy_fixture();
-    write_file(tmp.path(), &format!("{ADAPTERS}/middleware/auth.ts"), "export function auth() {}");
+    write_file(
+        tmp.path(),
+        &format!("{ADAPTERS}/middleware/auth.ts"),
+        "export function auth() {}",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
-    assert_eq!(r3.len(), 1, "expected 1 unexpected-dir error, got {}: {r3:#?}", r3.len());
+    assert_eq!(
+        r3.len(),
+        1,
+        "expected 1 unexpected-dir error, got {}: {r3:#?}",
+        r3.len()
+    );
     assert!(
         r3[0].title.contains("unexpected") && r3[0].title.contains("middleware"),
         "expected unexpected 'middleware' error, got: '{}'",
         r3[0].title
     );
     let file = r3[0].file.as_deref().unwrap_or("");
-    assert!(file.contains("adapters/middleware"), "expected file field pointing to adapters/middleware, got: '{file}'");
+    assert!(
+        file.contains("adapters/middleware"),
+        "expected file field pointing to adapters/middleware, got: '{file}'"
+    );
     assert_standard(&r3, &errors);
 }
 
 #[test]
 fn unexpected_dir_in_ports() {
     let tmp = copy_fixture();
-    write_file(tmp.path(), &format!("{PORTS}/shared/types.ts"), "export type T = {};");
+    write_file(
+        tmp.path(),
+        &format!("{PORTS}/shared/types.ts"),
+        "export type T = {};",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
-    assert_eq!(r3.len(), 1, "expected 1 unexpected-dir error, got {}: {r3:#?}", r3.len());
+    assert_eq!(
+        r3.len(),
+        1,
+        "expected 1 unexpected-dir error, got {}: {r3:#?}",
+        r3.len()
+    );
     assert!(
         r3[0].title.contains("unexpected") && r3[0].title.contains("shared"),
         "expected unexpected 'shared' error, got: '{}'",
         r3[0].title
     );
     let file = r3[0].file.as_deref().unwrap_or("");
-    assert!(file.contains("ports/shared"), "expected file field pointing to ports/shared, got: '{file}'");
+    assert!(
+        file.contains("ports/shared"),
+        "expected file field pointing to ports/shared, got: '{file}'"
+    );
     assert_standard(&r3, &errors);
 }
 
@@ -276,10 +348,24 @@ fn multiple_unexpected_in_both() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
-    assert_eq!(r3.len(), 3, "expected 3 unexpected-dir errors (2 adapters + 1 ports), got {}: {r3:#?}", r3.len());
-    assert!(r3.iter().any(|e| e.title.contains("middleware")), "expected middleware");
-    assert!(r3.iter().any(|e| e.title.contains("utils")), "expected utils");
-    assert!(r3.iter().any(|e| e.title.contains("shared")), "expected shared");
+    assert_eq!(
+        r3.len(),
+        3,
+        "expected 3 unexpected-dir errors (2 adapters + 1 ports), got {}: {r3:#?}",
+        r3.len()
+    );
+    assert!(
+        r3.iter().any(|e| e.title.contains("middleware")),
+        "expected middleware"
+    );
+    assert!(
+        r3.iter().any(|e| e.title.contains("utils")),
+        "expected utils"
+    );
+    assert!(
+        r3.iter().any(|e| e.title.contains("shared")),
+        "expected shared"
+    );
     assert_standard(&r3, &errors);
 }
 
@@ -291,8 +377,16 @@ fn unexpected_dir_named_domain() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
-    assert_eq!(r3.len(), 1, "expected 1 unexpected 'domain' in adapters/, got {}: {r3:#?}", r3.len());
-    assert!(r3[0].title.contains("unexpected") && r3[0].title.contains("domain"), "expected domain error");
+    assert_eq!(
+        r3.len(),
+        1,
+        "expected 1 unexpected 'domain' in adapters/, got {}: {r3:#?}",
+        r3.len()
+    );
+    assert!(
+        r3[0].title.contains("unexpected") && r3[0].title.contains("domain"),
+        "expected domain error"
+    );
     assert_standard(&r3, &errors);
 }
 
@@ -307,9 +401,20 @@ fn loose_file_in_adapters() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
-    assert_eq!(r3.len(), 1, "expected 1 loose-file error in adapters/, got {}: {r3:#?}", r3.len());
-    assert!(r3[0].title.contains("loose files") && r3[0].title.contains("adapters"), "expected loose in adapters");
-    assert!(r3[0].message.contains("index.ts"), "expected index.ts in message");
+    assert_eq!(
+        r3.len(),
+        1,
+        "expected 1 loose-file error in adapters/, got {}: {r3:#?}",
+        r3.len()
+    );
+    assert!(
+        r3[0].title.contains("loose files") && r3[0].title.contains("adapters"),
+        "expected loose in adapters"
+    );
+    assert!(
+        r3[0].message.contains("index.ts"),
+        "expected index.ts in message"
+    );
     assert_standard(&r3, &errors);
 }
 
@@ -320,9 +425,20 @@ fn loose_file_in_ports() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
-    assert_eq!(r3.len(), 1, "expected 1 loose-file error in ports/, got {}: {r3:#?}", r3.len());
-    assert!(r3[0].title.contains("loose files") && r3[0].title.contains("ports"), "expected loose in ports");
-    assert!(r3[0].message.contains("types.ts"), "expected types.ts in message");
+    assert_eq!(
+        r3.len(),
+        1,
+        "expected 1 loose-file error in ports/, got {}: {r3:#?}",
+        r3.len()
+    );
+    assert!(
+        r3[0].title.contains("loose files") && r3[0].title.contains("ports"),
+        "expected loose in ports"
+    );
+    assert!(
+        r3[0].message.contains("types.ts"),
+        "expected types.ts in message"
+    );
     assert_standard(&r3, &errors);
 }
 
@@ -334,9 +450,20 @@ fn loose_files_in_both() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
-    assert_eq!(r3.len(), 2, "expected 2 loose-file errors (adapters + ports), got {}: {r3:#?}", r3.len());
-    assert!(r3.iter().any(|e| e.title.contains("adapters")), "expected adapters loose");
-    assert!(r3.iter().any(|e| e.title.contains("ports")), "expected ports loose");
+    assert_eq!(
+        r3.len(),
+        2,
+        "expected 2 loose-file errors (adapters + ports), got {}: {r3:#?}",
+        r3.len()
+    );
+    assert!(
+        r3.iter().any(|e| e.title.contains("adapters")),
+        "expected adapters loose"
+    );
+    assert!(
+        r3.iter().any(|e| e.title.contains("ports")),
+        "expected ports loose"
+    );
     assert_standard(&r3, &errors);
 }
 
@@ -349,10 +476,24 @@ fn multiple_loose_files_single_error() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
-    assert_eq!(r3.len(), 1, "expected 1 loose-file error listing all files, got {}: {r3:#?}", r3.len());
-    assert!(r3[0].message.contains("index.ts"), "expected index.ts in message");
-    assert!(r3[0].message.contains("types.ts"), "expected types.ts in message");
-    assert!(r3[0].message.contains("config.json"), "expected config.json in message");
+    assert_eq!(
+        r3.len(),
+        1,
+        "expected 1 loose-file error listing all files, got {}: {r3:#?}",
+        r3.len()
+    );
+    assert!(
+        r3[0].message.contains("index.ts"),
+        "expected index.ts in message"
+    );
+    assert!(
+        r3[0].message.contains("types.ts"),
+        "expected types.ts in message"
+    );
+    assert!(
+        r3[0].message.contains("config.json"),
+        "expected config.json in message"
+    );
     assert_standard(&r3, &errors);
 }
 
@@ -368,7 +509,12 @@ fn gitkeep_allowed() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
-    assert_eq!(r3.len(), 0, "expected 0 errors when .gitkeep in structural dirs, got {}: {r3:#?}", r3.len());
+    assert_eq!(
+        r3.len(),
+        0,
+        "expected 0 errors when .gitkeep in structural dirs, got {}: {r3:#?}",
+        r3.len()
+    );
 }
 
 #[test]
@@ -379,8 +525,16 @@ fn gitkeep_alongside_loose_file() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
-    assert_eq!(r3.len(), 1, "expected 1 loose-file error, got {}: {r3:#?}", r3.len());
-    assert!(r3[0].message.contains("stray.ts"), "expected stray.ts in message");
+    assert_eq!(
+        r3.len(),
+        1,
+        "expected 1 loose-file error, got {}: {r3:#?}",
+        r3.len()
+    );
+    assert!(
+        r3[0].message.contains("stray.ts"),
+        "expected stray.ts in message"
+    );
     let bad_files_section = r3[0]
         .message
         .split("that don't belong: ")
@@ -406,9 +560,22 @@ fn missing_plus_unexpected() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
-    assert_eq!(r3.len(), 2, "expected 2 errors (1 missing + 1 unexpected), got {}: {r3:#?}", r3.len());
-    assert!(r3.iter().any(|e| e.title.contains("missing") && e.title.contains("inbound")), "expected missing inbound");
-    assert!(r3.iter().any(|e| e.title.contains("unexpected") && e.title.contains("middleware")), "expected unexpected middleware");
+    assert_eq!(
+        r3.len(),
+        2,
+        "expected 2 errors (1 missing + 1 unexpected), got {}: {r3:#?}",
+        r3.len()
+    );
+    assert!(
+        r3.iter()
+            .any(|e| e.title.contains("missing") && e.title.contains("inbound")),
+        "expected missing inbound"
+    );
+    assert!(
+        r3.iter()
+            .any(|e| e.title.contains("unexpected") && e.title.contains("middleware")),
+        "expected unexpected middleware"
+    );
     assert_standard(&r3, &errors);
 }
 
@@ -420,9 +587,21 @@ fn missing_plus_loose() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
-    assert_eq!(r3.len(), 2, "expected 2 errors (1 missing + 1 loose), got {}: {r3:#?}", r3.len());
-    assert!(r3.iter().any(|e| e.title.contains("missing") && e.title.contains("outbound")), "expected missing outbound");
-    assert!(r3.iter().any(|e| e.title.contains("loose files")), "expected loose files");
+    assert_eq!(
+        r3.len(),
+        2,
+        "expected 2 errors (1 missing + 1 loose), got {}: {r3:#?}",
+        r3.len()
+    );
+    assert!(
+        r3.iter()
+            .any(|e| e.title.contains("missing") && e.title.contains("outbound")),
+        "expected missing outbound"
+    );
+    assert!(
+        r3.iter().any(|e| e.title.contains("loose files")),
+        "expected loose files"
+    );
     assert_standard(&r3, &errors);
 }
 
@@ -435,16 +614,38 @@ fn all_three_violations() {
     write_file(tmp.path(), &format!("{ADAPTERS}/stray.ts"), "// stray");
     // portal: all 3 violation types in ports/ (avoid adapters/ to not destroy inner hexes)
     remove_dir(tmp.path(), "apps/portal/src/modules/ports/inbound");
-    write_file(tmp.path(), "apps/portal/src/modules/ports/shared/types.ts", "");
-    write_file(tmp.path(), "apps/portal/src/modules/ports/stray.ts", "// stray");
+    write_file(
+        tmp.path(),
+        "apps/portal/src/modules/ports/shared/types.ts",
+        "",
+    );
+    write_file(
+        tmp.path(),
+        "apps/portal/src/modules/ports/stray.ts",
+        "// stray",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
     // 3 violations * 2 apps = 6 errors
-    assert_eq!(r3.len(), 6, "expected 6 errors (3 per app * 2 apps), got {}: {r3:#?}", r3.len());
-    assert!(r3.iter().any(|e| e.title.contains("missing")), "expected missing");
-    assert!(r3.iter().any(|e| e.title.contains("unexpected")), "expected unexpected");
-    assert!(r3.iter().any(|e| e.title.contains("loose files")), "expected loose");
+    assert_eq!(
+        r3.len(),
+        6,
+        "expected 6 errors (3 per app * 2 apps), got {}: {r3:#?}",
+        r3.len()
+    );
+    assert!(
+        r3.iter().any(|e| e.title.contains("missing")),
+        "expected missing"
+    );
+    assert!(
+        r3.iter().any(|e| e.title.contains("unexpected")),
+        "expected unexpected"
+    );
+    assert!(
+        r3.iter().any(|e| e.title.contains("loose files")),
+        "expected loose"
+    );
     for app in TS_SERVICE_APPS {
         assert!(
             r3.iter().any(|e| e.title.contains(app)),
@@ -471,9 +672,22 @@ fn violations_in_both_adapters_and_ports() {
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
     // 2 violations * 2 apps = 4 errors
-    assert_eq!(r3.len(), 4, "expected 4 errors (2 per app * 2 apps), got {}: {r3:#?}", r3.len());
-    assert!(r3.iter().any(|e| e.title.contains("adapters") && e.title.contains("inbound")), "expected adapters/inbound");
-    assert!(r3.iter().any(|e| e.title.contains("ports") && e.title.contains("outbound")), "expected ports/outbound");
+    assert_eq!(
+        r3.len(),
+        4,
+        "expected 4 errors (2 per app * 2 apps), got {}: {r3:#?}",
+        r3.len()
+    );
+    assert!(
+        r3.iter()
+            .any(|e| e.title.contains("adapters") && e.title.contains("inbound")),
+        "expected adapters/inbound"
+    );
+    assert!(
+        r3.iter()
+            .any(|e| e.title.contains("ports") && e.title.contains("outbound")),
+        "expected ports/outbound"
+    );
     for app in TS_SERVICE_APPS {
         assert!(
             r3.iter().any(|e| e.title.contains(app)),
@@ -494,14 +708,30 @@ fn violations_in_both_adapters_and_ports() {
 fn inbound_replaced_with_file() {
     let tmp = copy_fixture();
     remove_dir(tmp.path(), "apps/admin/src/modules/adapters/inbound");
-    write_file(tmp.path(), &format!("{ADAPTERS}/inbound"), "not a directory");
+    write_file(
+        tmp.path(),
+        &format!("{ADAPTERS}/inbound"),
+        "not a directory",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
     // "inbound" as a file: not is_dir → missing + loose
-    assert_eq!(r3.len(), 2, "expected 2 errors (missing + loose), got {}: {r3:#?}", r3.len());
-    assert!(r3.iter().any(|e| e.title.contains("missing") && e.title.contains("inbound")), "expected missing inbound");
-    assert!(r3.iter().any(|e| e.title.contains("loose files")), "expected loose files");
+    assert_eq!(
+        r3.len(),
+        2,
+        "expected 2 errors (missing + loose), got {}: {r3:#?}",
+        r3.len()
+    );
+    assert!(
+        r3.iter()
+            .any(|e| e.title.contains("missing") && e.title.contains("inbound")),
+        "expected missing inbound"
+    );
+    assert!(
+        r3.iter().any(|e| e.title.contains("loose files")),
+        "expected loose files"
+    );
     assert_standard(&r3, &errors);
 }
 
@@ -523,7 +753,12 @@ fn inbound_replaced_with_symlink() {
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
     // DirEntry::file_type() doesn't follow symlinks → missing + loose
-    assert_eq!(r3.len(), 2, "expected 2 errors (missing + loose) for symlink, got {}: {r3:#?}", r3.len());
+    assert_eq!(
+        r3.len(),
+        2,
+        "expected 2 errors (missing + loose) for symlink, got {}: {r3:#?}",
+        r3.len()
+    );
     assert_standard(&r3, &errors);
 }
 
@@ -540,7 +775,12 @@ fn inbound_is_broken_symlink() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
-    assert_eq!(r3.len(), 2, "expected 2 errors (missing + loose) for broken symlink, got {}: {r3:#?}", r3.len());
+    assert_eq!(
+        r3.len(),
+        2,
+        "expected 2 errors (missing + loose) for broken symlink, got {}: {r3:#?}",
+        r3.len()
+    );
     assert_standard(&r3, &errors);
 }
 
@@ -552,12 +792,18 @@ fn inbound_is_broken_symlink() {
 fn empty_inbound_passes_rule3() {
     let tmp = copy_fixture();
     remove_dir(tmp.path(), "apps/admin/src/modules/adapters/inbound");
-    std::fs::create_dir_all(tmp.path().join("apps/admin/src/modules/adapters/inbound")).expect("mkdir");
+    std::fs::create_dir_all(tmp.path().join("apps/admin/src/modules/adapters/inbound"))
+        .expect("mkdir");
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
     // Empty dir is still a dir → passes rule 03
-    assert_eq!(r3.len(), 0, "empty inbound/ should pass rule 03, got {}: {r3:#?}", r3.len());
+    assert_eq!(
+        r3.len(),
+        0,
+        "empty inbound/ should pass rule 03, got {}: {r3:#?}",
+        r3.len()
+    );
 }
 
 // ============================================================================
@@ -575,9 +821,22 @@ fn near_miss_names() {
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
     // 2 missing (inbound, outbound) + 2 unexpected (in, out) = 4
-    assert_eq!(r3.len(), 4, "expected 4 errors (2 missing + 2 unexpected), got {}: {r3:#?}", r3.len());
-    assert!(r3.iter().any(|e| e.title.contains("missing") && e.title.contains("inbound")), "expected missing inbound");
-    assert!(r3.iter().any(|e| e.title.contains("missing") && e.title.contains("outbound")), "expected missing outbound");
+    assert_eq!(
+        r3.len(),
+        4,
+        "expected 4 errors (2 missing + 2 unexpected), got {}: {r3:#?}",
+        r3.len()
+    );
+    assert!(
+        r3.iter()
+            .any(|e| e.title.contains("missing") && e.title.contains("inbound")),
+        "expected missing inbound"
+    );
+    assert!(
+        r3.iter()
+            .any(|e| e.title.contains("missing") && e.title.contains("outbound")),
+        "expected missing outbound"
+    );
     assert_standard(&r3, &errors);
 }
 
@@ -627,7 +886,13 @@ fn idempotent_results() {
     let results_2 = run_check(tmp.path());
     let errors_2 = arch_errors(&results_2);
     let r3_2 = rule3_errors(&errors_2);
-    assert_eq!(r3_1.len(), r3_2.len(), "idempotent: run 1 = {}, run 2 = {}", r3_1.len(), r3_2.len());
+    assert_eq!(
+        r3_1.len(),
+        r3_2.len(),
+        "idempotent: run 1 = {}, run 2 = {}",
+        r3_1.len(),
+        r3_2.len()
+    );
     for e1 in &r3_1 {
         assert!(
             r3_2.iter().any(|e2| e2.title == e1.title),
@@ -654,9 +919,22 @@ fn adapters_no_read_permission() {
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
     // Unreadable adapters/: list_dir_names returns empty → inbound + outbound "missing"
-    assert_eq!(r3.len(), 2, "expected 2 missing errors for unreadable adapters/, got {}: {r3:#?}", r3.len());
-    assert!(r3.iter().any(|e| e.title.contains("missing") && e.title.contains("inbound")), "expected missing inbound");
-    assert!(r3.iter().any(|e| e.title.contains("missing") && e.title.contains("outbound")), "expected missing outbound");
+    assert_eq!(
+        r3.len(),
+        2,
+        "expected 2 missing errors for unreadable adapters/, got {}: {r3:#?}",
+        r3.len()
+    );
+    assert!(
+        r3.iter()
+            .any(|e| e.title.contains("missing") && e.title.contains("inbound")),
+        "expected missing inbound"
+    );
+    assert!(
+        r3.iter()
+            .any(|e| e.title.contains("missing") && e.title.contains("outbound")),
+        "expected missing outbound"
+    );
     assert_standard(&r3, &errors);
 }
 
@@ -736,12 +1014,24 @@ fn wrong_case_dir_name() {
 #[test]
 fn gitignore_is_loose_file() {
     let tmp = copy_fixture();
-    write_file(tmp.path(), &format!("{ADAPTERS}/.gitignore"), "node_modules/");
+    write_file(
+        tmp.path(),
+        &format!("{ADAPTERS}/.gitignore"),
+        "node_modules/",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
-    assert_eq!(r3.len(), 1, "expected 1 loose-file error for .gitignore, got {}: {r3:#?}", r3.len());
-    assert!(r3[0].message.contains(".gitignore"), "expected .gitignore in message");
+    assert_eq!(
+        r3.len(),
+        1,
+        "expected 1 loose-file error for .gitignore, got {}: {r3:#?}",
+        r3.len()
+    );
+    assert!(
+        r3[0].message.contains(".gitignore"),
+        "expected .gitignore in message"
+    );
     assert_standard(&r3, &errors);
 }
 
@@ -752,8 +1042,16 @@ fn ds_store_is_loose_file() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
-    assert_eq!(r3.len(), 1, "expected 1 loose-file error for .DS_Store, got {}: {r3:#?}", r3.len());
-    assert!(r3[0].message.contains(".DS_Store"), "expected .DS_Store in message");
+    assert_eq!(
+        r3.len(),
+        1,
+        "expected 1 loose-file error for .DS_Store, got {}: {r3:#?}",
+        r3.len()
+    );
+    assert!(
+        r3[0].message.contains(".DS_Store"),
+        "expected .DS_Store in message"
+    );
     assert_standard(&r3, &errors);
 }
 
@@ -764,7 +1062,12 @@ fn hidden_dir_unexpected() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
-    assert_eq!(r3.len(), 1, "expected 1 unexpected-dir error for .hidden, got {}: {r3:#?}", r3.len());
+    assert_eq!(
+        r3.len(),
+        1,
+        "expected 1 unexpected-dir error for .hidden, got {}: {r3:#?}",
+        r3.len()
+    );
     assert!(r3[0].title.contains(".hidden"), "expected .hidden in title");
     assert_standard(&r3, &errors);
 }
@@ -778,9 +1081,20 @@ fn file_coexists_with_same_named_dir() {
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
     // Only loose-file error (inbound.bak is a file, inbound/ dir is still present)
-    assert_eq!(r3.len(), 1, "expected 1 loose-file error, got {}: {r3:#?}", r3.len());
-    assert!(r3[0].title.contains("loose files"), "expected loose files error");
-    assert!(r3[0].message.contains("inbound.bak"), "expected inbound.bak in message");
+    assert_eq!(
+        r3.len(),
+        1,
+        "expected 1 loose-file error, got {}: {r3:#?}",
+        r3.len()
+    );
+    assert!(
+        r3[0].title.contains("loose files"),
+        "expected loose files error"
+    );
+    assert!(
+        r3[0].message.contains("inbound.bak"),
+        "expected inbound.bak in message"
+    );
     assert_standard(&r3, &errors);
 }
 
@@ -791,7 +1105,12 @@ fn gitkeep_as_directory() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
-    assert_eq!(r3.len(), 1, "expected 1 unexpected-dir error for .gitkeep/, got {}: {r3:#?}", r3.len());
+    assert_eq!(
+        r3.len(),
+        1,
+        "expected 1 unexpected-dir error for .gitkeep/, got {}: {r3:#?}",
+        r3.len()
+    );
     assert!(
         r3[0].title.contains("unexpected") && r3[0].title.contains(".gitkeep"),
         "expected unexpected .gitkeep/ dir error, got: '{}'",
@@ -803,14 +1122,27 @@ fn gitkeep_as_directory() {
 #[test]
 fn nested_unexpected_only_top_flagged() {
     let tmp = copy_fixture();
-    write_file(tmp.path(), &format!("{ADAPTERS}/middleware/internal/deep/handler.ts"), "");
+    write_file(
+        tmp.path(),
+        &format!("{ADAPTERS}/middleware/internal/deep/handler.ts"),
+        "",
+    );
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
-    assert_eq!(r3.len(), 1, "expected 1 error (top-level middleware/ only), got {}: {r3:#?}", r3.len());
-    assert!(r3[0].title.contains("middleware"), "expected middleware in title");
+    assert_eq!(
+        r3.len(),
+        1,
+        "expected 1 error (top-level middleware/ only), got {}: {r3:#?}",
+        r3.len()
+    );
     assert!(
-        !r3.iter().any(|e| e.title.contains("internal") || e.title.contains("deep")),
+        r3[0].title.contains("middleware"),
+        "expected middleware in title"
+    );
+    assert!(
+        !r3.iter()
+            .any(|e| e.title.contains("internal") || e.title.contains("deep")),
         "should not flag nested dirs inside unexpected dir"
     );
     assert_standard(&r3, &errors);
@@ -821,13 +1153,26 @@ fn unicode_lookalike_dir_name() {
     let tmp = copy_fixture();
     remove_dir(tmp.path(), "apps/admin/src/modules/adapters/inbound");
     // Zero-width space: "i\u{200B}nbound" looks like "inbound" but isn't
-    std::fs::create_dir_all(tmp.path().join(&format!("{ADAPTERS}/i\u{200B}nbound"))).expect("mkdir");
+    std::fs::create_dir_all(tmp.path().join(&format!("{ADAPTERS}/i\u{200B}nbound")))
+        .expect("mkdir");
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r3 = rule3_errors(&errors);
     // Missing real inbound + unexpected lookalike
-    assert_eq!(r3.len(), 2, "expected 2 errors (missing + unexpected lookalike), got {}: {r3:#?}", r3.len());
-    assert!(r3.iter().any(|e| e.title.contains("missing") && e.title.contains("inbound")), "expected missing inbound");
-    assert!(r3.iter().any(|e| e.title.contains("unexpected")), "expected unexpected dir");
+    assert_eq!(
+        r3.len(),
+        2,
+        "expected 2 errors (missing + unexpected lookalike), got {}: {r3:#?}",
+        r3.len()
+    );
+    assert!(
+        r3.iter()
+            .any(|e| e.title.contains("missing") && e.title.contains("inbound")),
+        "expected missing inbound"
+    );
+    assert!(
+        r3.iter().any(|e| e.title.contains("unexpected")),
+        "expected unexpected dir"
+    );
     assert_standard(&r3, &errors);
 }

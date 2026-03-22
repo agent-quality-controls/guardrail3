@@ -6,12 +6,7 @@ use crate::ports::outbound::FileSystem;
 /// Rule 12: `apps/{name}/src/` is banned — code must be in `crates/`.
 /// Uses metadata() to detect src/ existence (catches empty dirs too).
 /// Only fires for directories, not files named `src`.
-pub fn check(
-    fs: &dyn FileSystem,
-    name: &str,
-    app_dir: &Path,
-    results: &mut Vec<CheckResult>,
-) {
+pub fn check(fs: &dyn FileSystem, name: &str, app_dir: &Path, results: &mut Vec<CheckResult>) {
     let src_dir = app_dir.join("src");
     // metadata() detects existence of both empty and non-empty dirs.
     // list_dir() on the result distinguishes dir from file — if it's a file,

@@ -68,7 +68,8 @@ impl ProjectTree {
     #[must_use]
     pub fn file_exists(&self, rel: &str) -> bool {
         let (parent, name) = split_rel(rel);
-        self.dir_contents(parent).is_some_and(|entry| entry.has_file(name))
+        self.dir_contents(parent)
+            .is_some_and(|entry| entry.has_file(name))
     }
 
     /// Return all known directory relative paths except the root.

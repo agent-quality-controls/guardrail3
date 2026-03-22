@@ -90,7 +90,10 @@ fn dirs_with_file_returns_only_matching_dirs() {
         tree.dirs_with_file("Cargo.toml"),
         vec!["apps/cli".to_owned(), "crates/api".to_owned()]
     );
-    assert_eq!(tree.dirs_with_file(".rustfmt.toml"), vec!["crates/api".to_owned()]);
+    assert_eq!(
+        tree.dirs_with_file(".rustfmt.toml"),
+        vec!["crates/api".to_owned()]
+    );
 }
 
 #[test]
@@ -101,7 +104,10 @@ fn matching_dir_rels_matches_actual_dirs_only() {
         tree.matching_dir_rels("crates/*"),
         vec!["crates/api".to_owned(), "crates/missing".to_owned()]
     );
-    assert_eq!(tree.matching_dir_rels("apps/*"), vec!["apps/cli".to_owned()]);
+    assert_eq!(
+        tree.matching_dir_rels("apps/*"),
+        vec!["apps/cli".to_owned()]
+    );
     assert!(tree.matching_dir_rels("does/not/exist/*").is_empty());
     assert!(tree.matching_dir_rels("[invalid").is_empty());
 }

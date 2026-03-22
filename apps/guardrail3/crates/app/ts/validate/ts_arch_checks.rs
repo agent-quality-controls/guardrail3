@@ -167,18 +167,18 @@ fn check_ts_modules_dir(
         &adapters_label,
         results,
     );
-    check_ts_inbound_outbound(
-        fs,
-        name,
-        &modules_dir.join("ports"),
-        &ports_label,
-        results,
-    );
+    check_ts_inbound_outbound(fs, name, &modules_dir.join("ports"), &ports_label, results);
 
     // Validate container folders: domain, application, adapters/{in,out}, ports/{in,out}
     let domain_label = format!("{label_prefix}/domain");
     let application_label = format!("{label_prefix}/application");
-    validate_ts_container(fs, name, &modules_dir.join("domain"), &domain_label, results);
+    validate_ts_container(
+        fs,
+        name,
+        &modules_dir.join("domain"),
+        &domain_label,
+        results,
+    );
     validate_ts_container(
         fs,
         name,

@@ -289,8 +289,10 @@ fn split_parent_child(rel: &str) -> Option<(String, String)> {
         return None;
     }
     match rel.rfind('/') {
-        Some(idx) => Some((rel[..idx].to_owned(), rel[idx.saturating_add(1)..].to_owned())),
+        Some(idx) => Some((
+            rel[..idx].to_owned(),
+            rel[idx.saturating_add(1)..].to_owned(),
+        )),
         None => Some((String::new(), rel.to_owned())),
     }
 }
-

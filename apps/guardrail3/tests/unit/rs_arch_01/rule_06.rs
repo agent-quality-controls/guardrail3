@@ -1,6 +1,6 @@
 use super::helpers::{
-    arch_errors, assert_file_field, assert_inner_hex, assert_no_packages, assert_no_ts_apps,
-    assert_per_app, copy_fixture, remove_dir, run_check, write_file, INNER_HEX, RUST_APPS,
+    INNER_HEX, RUST_APPS, arch_errors, assert_file_field, assert_inner_hex, assert_no_packages,
+    assert_no_ts_apps, assert_per_app, copy_fixture, remove_dir, run_check, write_file,
 };
 use guardrail3::domain::report::CheckResult;
 use std::os::unix::fs::PermissionsExt;
@@ -21,11 +21,7 @@ const OUTER_CONTAINERS: &[&str] = &[
 ];
 
 /// Inner hex containers that have leaf subdirs in the golden fixture.
-const INNER_HEX_CONTAINERS: &[&str] = &[
-    "app",
-    "domain",
-    "adapters/inbound",
-];
+const INNER_HEX_CONTAINERS: &[&str] = &["app", "domain", "adapters/inbound"];
 
 /// Filter to only rule-6 errors (missing Cargo.toml or both Cargo.toml and crates/).
 fn rule6_errors<'a>(errors: &'a [&'a CheckResult]) -> Vec<&'a CheckResult> {
@@ -43,19 +39,11 @@ fn rule6_errors<'a>(errors: &'a [&'a CheckResult]) -> Vec<&'a CheckResult> {
 fn add_orphan_everywhere(root: &std::path::Path, name: &str) {
     for app in RUST_APPS {
         for c in OUTER_CONTAINERS {
-            write_file(
-                root,
-                &format!("apps/{app}/{c}/{name}/src/lib.rs"),
-                "",
-            );
+            write_file(root, &format!("apps/{app}/{c}/{name}/src/lib.rs"), "");
         }
     }
     for c in INNER_HEX_CONTAINERS {
-        write_file(
-            root,
-            &format!("{INNER_HEX}/{c}/{name}/src/lib.rs"),
-            "",
-        );
+        write_file(root, &format!("{INNER_HEX}/{c}/{name}/src/lib.rs"), "");
     }
 }
 
@@ -115,17 +103,13 @@ fn subdir_completely_empty() {
     // Create empty subdirs (no files at all) in all containers across all apps + inner hex.
     for app in RUST_APPS {
         for c in OUTER_CONTAINERS {
-            std::fs::create_dir_all(
-                tmp.path().join(format!("apps/{app}/{c}/empty_sub")),
-            )
-            .expect("mkdir");
+            std::fs::create_dir_all(tmp.path().join(format!("apps/{app}/{c}/empty_sub")))
+                .expect("mkdir");
         }
     }
     for c in INNER_HEX_CONTAINERS {
-        std::fs::create_dir_all(
-            tmp.path().join(format!("{INNER_HEX}/{c}/empty_sub")),
-        )
-        .expect("mkdir");
+        std::fs::create_dir_all(tmp.path().join(format!("{INNER_HEX}/{c}/empty_sub")))
+            .expect("mkdir");
     }
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
@@ -144,7 +128,8 @@ fn subdir_completely_empty() {
             err.title
         );
         assert!(
-            err.message.contains("no `Cargo.toml`") || err.message.contains("no `crates/` directory"),
+            err.message.contains("no `Cargo.toml`")
+                || err.message.contains("no `crates/` directory"),
             "expected message about missing Cargo.toml or crates/, got: '{}'",
             err.message
         );
@@ -190,7 +175,8 @@ fn multiple_invalid_subdirs() {
     );
     for err in &r6 {
         assert!(
-            err.message.contains("no `Cargo.toml`") || err.message.contains("no `crates/` directory"),
+            err.message.contains("no `Cargo.toml`")
+                || err.message.contains("no `crates/` directory"),
             "expected message about missing Cargo.toml or crates/, got: '{}'",
             err.message
         );
@@ -220,11 +206,7 @@ fn subdir_has_both_cargo_and_crates() {
             );
             // Create crates/ with enough inner structure to make has_crates = true
             for inner in &["domain", "app", "ports", "adapters"] {
-                write_file(
-                    tmp.path(),
-                    &format!("{base}/crates/{inner}/.gitkeep"),
-                    "",
-                );
+                write_file(tmp.path(), &format!("{base}/crates/{inner}/.gitkeep"), "");
             }
         }
     }
@@ -236,11 +218,7 @@ fn subdir_has_both_cargo_and_crates() {
             "[package]\nname = \"hybrid\"\nversion = \"0.1.0\"\n",
         );
         for inner in &["domain", "app", "ports", "adapters"] {
-            write_file(
-                tmp.path(),
-                &format!("{base}/crates/{inner}/.gitkeep"),
-                "",
-            );
+            write_file(tmp.path(), &format!("{base}/crates/{inner}/.gitkeep"), "");
         }
     }
     let results = run_check(tmp.path());
@@ -306,21 +284,9 @@ fn golden_baseline() {
 fn gitkeep_alongside_cargo_toml() {
     let tmp = copy_fixture();
     // domain/types already has Cargo.toml — adding .gitkeep should be harmless.
-    write_file(
-        tmp.path(),
-        "apps/devctl/crates/domain/types/.gitkeep",
-        "",
-    );
-    write_file(
-        tmp.path(),
-        "apps/backend/crates/app/commands/.gitkeep",
-        "",
-    );
-    write_file(
-        tmp.path(),
-        "apps/worker/crates/app/processor/.gitkeep",
-        "",
-    );
+    write_file(tmp.path(), "apps/devctl/crates/domain/types/.gitkeep", "");
+    write_file(tmp.path(), "apps/backend/crates/app/commands/.gitkeep", "");
+    write_file(tmp.path(), "apps/worker/crates/app/processor/.gitkeep", "");
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r6 = rule6_errors(&errors);
@@ -402,9 +368,8 @@ fn hex_in_hex_inner_broken() {
     );
     // But there should be arch errors from other rules (rule 02) about missing domain/.
     assert!(
-        errors
-            .iter()
-            .any(|e| e.title.contains("domain") && e.file.as_deref().unwrap_or("").contains("mcp/crates")),
+        errors.iter().any(|e| e.title.contains("domain")
+            && e.file.as_deref().unwrap_or("").contains("mcp/crates")),
         "expected error about missing domain in inner hex from other rules, got: {errors:#?}"
     );
     assert_no_ts_apps(&r6);
@@ -458,7 +423,14 @@ fn hex_in_hex_at_various_containers() {
     // Replace devctl/domain/types crate with a hex-in-hex structure.
     remove_dir(tmp.path(), "apps/devctl/crates/domain/types");
     // types/ now becomes a hex-in-hex with its own crates/ directory.
-    for container in &["app", "domain", "adapters/inbound", "adapters/outbound", "ports/inbound", "ports/outbound"] {
+    for container in &[
+        "app",
+        "domain",
+        "adapters/inbound",
+        "adapters/outbound",
+        "ports/inbound",
+        "ports/outbound",
+    ] {
         write_file(
             tmp.path(),
             &format!("apps/devctl/crates/domain/types/crates/{container}/.gitkeep"),
@@ -489,7 +461,14 @@ fn triple_nested_hex_valid() {
         "apps/backend/crates/adapters/inbound/mcp/crates/adapters/inbound/transport",
     );
     let deep_base = "apps/backend/crates/adapters/inbound/mcp/crates/adapters/inbound/transport";
-    for container in &["app", "domain", "adapters/inbound", "adapters/outbound", "ports/inbound", "ports/outbound"] {
+    for container in &[
+        "app",
+        "domain",
+        "adapters/inbound",
+        "adapters/outbound",
+        "ports/inbound",
+        "ports/outbound",
+    ] {
         write_file(
             tmp.path(),
             &format!("{deep_base}/crates/{container}/.gitkeep"),
@@ -627,7 +606,8 @@ fn permission_denied_subdir() {
         core_errors.len()
     );
     assert!(
-        core_errors[0].message.contains("no `Cargo.toml`") || core_errors[0].message.contains("no `crates/` directory"),
+        core_errors[0].message.contains("no `Cargo.toml`")
+            || core_errors[0].message.contains("no `crates/` directory"),
         "expected message about missing Cargo.toml or crates/, got: '{}'",
         core_errors[0].message
     );
@@ -641,11 +621,7 @@ fn cargo_toml_exists_but_empty() {
     let tmp = copy_fixture();
     // Replace a valid Cargo.toml with empty content. read_file returns Some("").
     // has_cargo = true. Rule 06 passes (content validity is not its concern).
-    write_file(
-        tmp.path(),
-        "apps/devctl/crates/app/core/Cargo.toml",
-        "",
-    );
+    write_file(tmp.path(), "apps/devctl/crates/app/core/Cargo.toml", "");
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r6 = rule6_errors(&errors);
@@ -655,10 +631,7 @@ fn cargo_toml_exists_but_empty() {
         "expected 0 total rule6 errors for empty Cargo.toml (content not checked), got {}: {r6:#?}",
         r6.len()
     );
-    let core_errors: Vec<_> = r6
-        .iter()
-        .filter(|e| e.title.contains("core"))
-        .collect();
+    let core_errors: Vec<_> = r6.iter().filter(|e| e.title.contains("core")).collect();
     assert!(
         core_errors.is_empty(),
         "empty Cargo.toml should still satisfy rule 06 (content not checked), got: {core_errors:#?}"
@@ -676,10 +649,8 @@ fn crates_dir_exists_but_empty() {
     // (missing domain, app, ports, adapters = 4 errors from check_02).
     // Rule 06 itself produces 0 errors — it correctly identifies this as
     // hex-in-hex and delegates to inner structural checks.
-    std::fs::create_dir_all(
-        tmp.path().join("apps/devctl/crates/app/hollow/crates"),
-    )
-    .expect("mkdir");
+    std::fs::create_dir_all(tmp.path().join("apps/devctl/crates/app/hollow/crates"))
+        .expect("mkdir");
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r6 = rule6_errors(&errors);
@@ -692,7 +663,9 @@ fn crates_dir_exists_but_empty() {
     // But inner structural checks should fire (missing required dirs in the empty hex)
     let inner_errors: Vec<_> = errors
         .iter()
-        .filter(|e| e.title.contains("hollow") || e.file.as_deref().unwrap_or("").contains("hollow"))
+        .filter(|e| {
+            e.title.contains("hollow") || e.file.as_deref().unwrap_or("").contains("hollow")
+        })
         .collect();
     assert!(
         !inner_errors.is_empty(),
@@ -711,11 +684,7 @@ fn ts_apps_not_checked() {
     let tmp = copy_fixture();
     // Add invalid subdirs inside TS app modules (admin, landing).
     // These have no Cargo.toml at app root -> not detected as Rust apps.
-    write_file(
-        tmp.path(),
-        "apps/admin/crates/app/orphan_ts/src/lib.rs",
-        "",
-    );
+    write_file(tmp.path(), "apps/admin/crates/app/orphan_ts/src/lib.rs", "");
     write_file(
         tmp.path(),
         "apps/landing/crates/domain/orphan_ts/src/lib.rs",
@@ -788,7 +757,14 @@ fn new_app_gets_checked() {
     );
     write_file(tmp.path(), "apps/scheduler/src/main.rs", "fn main() {}");
     // Create crates structure with containers.
-    for container in &["app", "domain", "adapters/inbound", "adapters/outbound", "ports/inbound", "ports/outbound"] {
+    for container in &[
+        "app",
+        "domain",
+        "adapters/inbound",
+        "adapters/outbound",
+        "ports/inbound",
+        "ports/outbound",
+    ] {
         write_file(
             tmp.path(),
             &format!("apps/scheduler/crates/{container}/.gitkeep"),
@@ -826,7 +802,10 @@ fn new_app_gets_checked() {
         scheduler_errors[0].title
     );
     assert!(
-        scheduler_errors[0].message.contains("no `Cargo.toml`") || scheduler_errors[0].message.contains("no `crates/` directory"),
+        scheduler_errors[0].message.contains("no `Cargo.toml`")
+            || scheduler_errors[0]
+                .message
+                .contains("no `crates/` directory"),
         "expected message about missing Cargo.toml or crates/, got: '{}'",
         scheduler_errors[0].message
     );
@@ -860,7 +839,8 @@ fn inner_hex_leaf_invalid_outer_clean() {
         r6[0].title
     );
     assert!(
-        r6[0].message.contains("no `Cargo.toml`") || r6[0].message.contains("no `crates/` directory"),
+        r6[0].message.contains("no `Cargo.toml`")
+            || r6[0].message.contains("no `crates/` directory"),
         "expected message about missing Cargo.toml or crates/, got: '{}'",
         r6[0].message
     );
@@ -904,16 +884,24 @@ fn inner_hex_label_prefix_correct() {
         .iter()
         .filter(|e| e.title.contains("nested_orphan"))
         .collect();
-    assert_eq!(nested.len(), 1, "expected 1 error, got {}: {nested:#?}", nested.len());
+    assert_eq!(
+        nested.len(),
+        1,
+        "expected 1 error, got {}: {nested:#?}",
+        nested.len()
+    );
     // The label should contain the full nested path from check_crates_dir recursion.
     // Format: crates/adapters/inbound/mcp/crates/app/nested_orphan/
     assert!(
-        nested[0].title.contains("crates/adapters/inbound/mcp/crates/app/nested_orphan"),
+        nested[0]
+            .title
+            .contains("crates/adapters/inbound/mcp/crates/app/nested_orphan"),
         "expected nested label path in title, got: '{}'",
         nested[0].title
     );
     assert!(
-        nested[0].message.contains("no `Cargo.toml`") || nested[0].message.contains("no `crates/` directory"),
+        nested[0].message.contains("no `Cargo.toml`")
+            || nested[0].message.contains("no `crates/` directory"),
         "expected message about missing Cargo.toml or crates/, got: '{}'",
         nested[0].message
     );
@@ -959,7 +947,8 @@ fn idempotent_results() {
         assert_eq!(a.file, b.file, "idempotent: file mismatch");
     }
     assert!(
-        r6_1[0].message.contains("no `Cargo.toml`") || r6_1[0].message.contains("no `crates/` directory"),
+        r6_1[0].message.contains("no `Cargo.toml`")
+            || r6_1[0].message.contains("no `crates/` directory"),
         "expected message about missing Cargo.toml or crates/, got: '{}'",
         r6_1[0].message
     );
@@ -1028,7 +1017,8 @@ fn different_breakage_per_app() {
         devctl_errs[0].title
     );
     assert!(
-        devctl_errs[0].message.contains("no `Cargo.toml`") || devctl_errs[0].message.contains("no `crates/` directory"),
+        devctl_errs[0].message.contains("no `Cargo.toml`")
+            || devctl_errs[0].message.contains("no `crates/` directory"),
         "devctl error message should mention missing Cargo.toml or crates/, got: '{}'",
         devctl_errs[0].message
     );
@@ -1050,7 +1040,9 @@ fn different_breakage_per_app() {
         worker_errs[0].title
     );
     assert!(
-        worker_errs[0].message.contains("not both") || worker_errs[0].message.contains("either a crate") || worker_errs[0].message.contains("Cargo.toml` and `crates/`"),
+        worker_errs[0].message.contains("not both")
+            || worker_errs[0].message.contains("either a crate")
+            || worker_errs[0].message.contains("Cargo.toml` and `crates/`"),
         "worker error message should mention conflict, got: '{}'",
         worker_errs[0].message
     );
@@ -1067,12 +1059,17 @@ fn different_breakage_per_app() {
         inner_errs.len()
     );
     assert!(
-        inner_errs[0].file.as_deref().unwrap_or("").contains("mcp/crates"),
+        inner_errs[0]
+            .file
+            .as_deref()
+            .unwrap_or("")
+            .contains("mcp/crates"),
         "inner hex error should reference mcp/crates in file, got: {:?}",
         inner_errs[0].file
     );
     assert!(
-        inner_errs[0].message.contains("no `Cargo.toml`") || inner_errs[0].message.contains("no `crates/` directory"),
+        inner_errs[0].message.contains("no `Cargo.toml`")
+            || inner_errs[0].message.contains("no `crates/` directory"),
         "inner hex error message should mention missing Cargo.toml or crates/, got: '{}'",
         inner_errs[0].message
     );
@@ -1103,7 +1100,9 @@ fn missing_container_early_return() {
     );
     // Other rules should catch the missing app/ container.
     assert!(
-        errors.iter().any(|e| e.title.contains("app") && e.file.as_deref().unwrap_or("").contains("devctl")),
+        errors
+            .iter()
+            .any(|e| e.title.contains("app") && e.file.as_deref().unwrap_or("").contains("devctl")),
         "expected other rules to flag missing app/ in devctl, got: {errors:#?}"
     );
     assert_no_ts_apps(&r6);
@@ -1148,11 +1147,7 @@ fn hidden_dir_as_leaf() {
     // Documents that hidden dirs ARE checked by rule 06 (list_dir includes them).
     let tmp = copy_fixture();
     // Add .hidden/ in a few containers across apps
-    write_file(
-        tmp.path(),
-        "apps/devctl/crates/app/.hidden/src/lib.rs",
-        "",
-    );
+    write_file(tmp.path(), "apps/devctl/crates/app/.hidden/src/lib.rs", "");
     write_file(
         tmp.path(),
         "apps/backend/crates/domain/.hidden/src/lib.rs",
@@ -1171,10 +1166,7 @@ fn hidden_dir_as_leaf() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r6 = rule6_errors(&errors);
-    let hidden_errors: Vec<_> = r6
-        .iter()
-        .filter(|e| e.title.contains(".hidden"))
-        .collect();
+    let hidden_errors: Vec<_> = r6.iter().filter(|e| e.title.contains(".hidden")).collect();
     // Hidden dirs should fire "missing Cargo.toml" because they have no Cargo.toml or crates/
     assert_eq!(
         hidden_errors.len(),
@@ -1195,7 +1187,8 @@ fn hidden_dir_as_leaf() {
             err.title
         );
         assert!(
-            err.message.contains("no `Cargo.toml`") || err.message.contains("no `crates/` directory"),
+            err.message.contains("no `Cargo.toml`")
+                || err.message.contains("no `crates/` directory"),
             "expected message about missing Cargo.toml or crates/, got: '{}'",
             err.message
         );
@@ -1232,7 +1225,10 @@ fn cargo_toml_wrong_case() {
     );
     if !wrong_case_errors.is_empty() {
         assert!(
-            wrong_case_errors[0].message.contains("no `Cargo.toml`") || wrong_case_errors[0].message.contains("no `crates/` directory"),
+            wrong_case_errors[0].message.contains("no `Cargo.toml`")
+                || wrong_case_errors[0]
+                    .message
+                    .contains("no `crates/` directory"),
             "expected message about missing Cargo.toml or crates/, got: '{}'",
             wrong_case_errors[0].message
         );
@@ -1279,19 +1275,24 @@ fn nested_garbage_no_recursion() {
         r6[0].title
     );
     assert!(
-        r6[0].message.contains("no `Cargo.toml`") || r6[0].message.contains("no `crates/` directory"),
+        r6[0].message.contains("no `Cargo.toml`")
+            || r6[0].message.contains("no `crates/` directory"),
         "expected message about missing Cargo.toml or crates/, got: '{}'",
         r6[0].message
     );
     // Verify no error mentions the nested garbage paths
     for err in &r6 {
         assert!(
-            !err.title.contains("level2") && !err.title.contains("level3") && !err.title.contains("level4"),
+            !err.title.contains("level2")
+                && !err.title.contains("level3")
+                && !err.title.contains("level4"),
             "rule 06 should not recurse into non-hex garbage, but found level2/3/4 in error: '{}'",
             err.title
         );
         assert!(
-            !err.message.contains("level2") && !err.message.contains("level3") && !err.message.contains("level4"),
+            !err.message.contains("level2")
+                && !err.message.contains("level3")
+                && !err.message.contains("level4"),
             "rule 06 should not recurse into non-hex garbage, but found level2/3/4 in message: '{}'",
             err.message
         );
@@ -1368,7 +1369,14 @@ fn maximally_complex_single_container() {
     }
 
     // hex_sub: valid hex-in-hex
-    for container in &["app", "domain", "adapters/inbound", "adapters/outbound", "ports/inbound", "ports/outbound"] {
+    for container in &[
+        "app",
+        "domain",
+        "adapters/inbound",
+        "adapters/outbound",
+        "ports/inbound",
+        "ports/outbound",
+    ] {
         write_file(
             tmp.path(),
             &format!("apps/devctl/crates/app/hex_sub/crates/{container}/.gitkeep"),
@@ -1403,33 +1411,81 @@ fn maximally_complex_single_container() {
     // 1. orphan_no_cargo: missing Cargo.toml
     // 2. conflict_both: both Cargo.toml and crates/
     // gitkeep_only_sub: .gitkeep placeholder — should NOT fire (valid)
-    let orphan_errs: Vec<_> = r6.iter().filter(|e| e.title.contains("orphan_no_cargo")).collect();
-    let conflict_errs: Vec<_> = r6.iter().filter(|e| e.title.contains("conflict_both")).collect();
-    let gitkeep_errs: Vec<_> = r6.iter().filter(|e| e.title.contains("gitkeep_only_sub")).collect();
-    let valid_errs: Vec<_> = r6.iter().filter(|e| e.title.contains("valid_crate")).collect();
+    let orphan_errs: Vec<_> = r6
+        .iter()
+        .filter(|e| e.title.contains("orphan_no_cargo"))
+        .collect();
+    let conflict_errs: Vec<_> = r6
+        .iter()
+        .filter(|e| e.title.contains("conflict_both"))
+        .collect();
+    let gitkeep_errs: Vec<_> = r6
+        .iter()
+        .filter(|e| e.title.contains("gitkeep_only_sub"))
+        .collect();
+    let valid_errs: Vec<_> = r6
+        .iter()
+        .filter(|e| e.title.contains("valid_crate"))
+        .collect();
     let hex_errs: Vec<_> = r6.iter().filter(|e| e.title.contains("hex_sub")).collect();
-    let loose_errs: Vec<_> = r6.iter().filter(|e| e.title.contains("loose_file")).collect();
-    let link_errs: Vec<_> = r6.iter().filter(|e| e.title.contains("link_valid")).collect();
+    let loose_errs: Vec<_> = r6
+        .iter()
+        .filter(|e| e.title.contains("loose_file"))
+        .collect();
+    let link_errs: Vec<_> = r6
+        .iter()
+        .filter(|e| e.title.contains("link_valid"))
+        .collect();
 
-    assert_eq!(orphan_errs.len(), 1, "orphan_no_cargo should fire: {orphan_errs:#?}");
+    assert_eq!(
+        orphan_errs.len(),
+        1,
+        "orphan_no_cargo should fire: {orphan_errs:#?}"
+    );
     assert!(orphan_errs[0].title.contains("missing Cargo.toml"));
     assert!(
-        orphan_errs[0].message.contains("no `Cargo.toml`") || orphan_errs[0].message.contains("no `crates/` directory"),
+        orphan_errs[0].message.contains("no `Cargo.toml`")
+            || orphan_errs[0].message.contains("no `crates/` directory"),
         "orphan message should mention missing Cargo.toml or crates/, got: '{}'",
         orphan_errs[0].message
     );
-    assert_eq!(conflict_errs.len(), 1, "conflict_both should fire: {conflict_errs:#?}");
-    assert!(conflict_errs[0].title.contains("both Cargo.toml and crates/"));
+    assert_eq!(
+        conflict_errs.len(),
+        1,
+        "conflict_both should fire: {conflict_errs:#?}"
+    );
     assert!(
-        conflict_errs[0].message.contains("not both") || conflict_errs[0].message.contains("either a crate") || conflict_errs[0].message.contains("Cargo.toml` and `crates/`"),
+        conflict_errs[0]
+            .title
+            .contains("both Cargo.toml and crates/")
+    );
+    assert!(
+        conflict_errs[0].message.contains("not both")
+            || conflict_errs[0].message.contains("either a crate")
+            || conflict_errs[0]
+                .message
+                .contains("Cargo.toml` and `crates/`"),
         "conflict message should mention conflict, got: '{}'",
         conflict_errs[0].message
     );
-    assert_eq!(gitkeep_errs.len(), 0, "gitkeep_only_sub should be accepted as placeholder: {gitkeep_errs:#?}");
-    assert!(valid_errs.is_empty(), "valid_crate should pass: {valid_errs:#?}");
+    assert_eq!(
+        gitkeep_errs.len(),
+        0,
+        "gitkeep_only_sub should be accepted as placeholder: {gitkeep_errs:#?}"
+    );
+    assert!(
+        valid_errs.is_empty(),
+        "valid_crate should pass: {valid_errs:#?}"
+    );
     assert!(hex_errs.is_empty(), "hex_sub should pass: {hex_errs:#?}");
-    assert!(loose_errs.is_empty(), "loose_file should be ignored: {loose_errs:#?}");
-    assert!(link_errs.is_empty(), "link_valid should be ignored: {link_errs:#?}");
+    assert!(
+        loose_errs.is_empty(),
+        "loose_file should be ignored: {loose_errs:#?}"
+    );
+    assert!(
+        link_errs.is_empty(),
+        "link_valid should be ignored: {link_errs:#?}"
+    );
 
     assert_eq!(
         r6.len(),
@@ -1469,7 +1525,8 @@ fn unicode_lookalike_subdir() {
         r6[0].title
     );
     assert!(
-        r6[0].message.contains("no `Cargo.toml`") || r6[0].message.contains("no `crates/` directory"),
+        r6[0].message.contains("no `Cargo.toml`")
+            || r6[0].message.contains("no `crates/` directory"),
         "expected message about missing Cargo.toml or crates/, got: '{}'",
         r6[0].message
     );
@@ -1486,7 +1543,8 @@ fn cargo_toml_is_directory() {
     let tmp = copy_fixture();
     // Create Cargo.toml as a directory (not a file)
     std::fs::create_dir_all(
-        tmp.path().join("apps/devctl/crates/app/dir_cargo/Cargo.toml"),
+        tmp.path()
+            .join("apps/devctl/crates/app/dir_cargo/Cargo.toml"),
     )
     .expect("mkdir");
     let results = run_check(tmp.path());
@@ -1508,7 +1566,10 @@ fn cargo_toml_is_directory() {
         dir_cargo_errors[0].title
     );
     assert!(
-        dir_cargo_errors[0].message.contains("no `Cargo.toml`") || dir_cargo_errors[0].message.contains("no `crates/` directory"),
+        dir_cargo_errors[0].message.contains("no `Cargo.toml`")
+            || dir_cargo_errors[0]
+                .message
+                .contains("no `crates/` directory"),
         "expected message about missing Cargo.toml or crates/, got: '{}'",
         dir_cargo_errors[0].message
     );
@@ -1545,8 +1606,14 @@ fn subdirs_plus_loose_alongside_valid() {
     let r6 = rule6_errors(&errors);
 
     // Only the orphan should fire
-    let orphan_errs: Vec<_> = r6.iter().filter(|e| e.title.contains("loose_orphan")).collect();
-    let valid_errs: Vec<_> = r6.iter().filter(|e| e.title.contains("another_valid")).collect();
+    let orphan_errs: Vec<_> = r6
+        .iter()
+        .filter(|e| e.title.contains("loose_orphan"))
+        .collect();
+    let valid_errs: Vec<_> = r6
+        .iter()
+        .filter(|e| e.title.contains("another_valid"))
+        .collect();
     let core_errs: Vec<_> = r6.iter().filter(|e| e.title.contains("core")).collect();
 
     assert_eq!(
@@ -1561,7 +1628,8 @@ fn subdirs_plus_loose_alongside_valid() {
         orphan_errs[0].title
     );
     assert!(
-        orphan_errs[0].message.contains("no `Cargo.toml`") || orphan_errs[0].message.contains("no `crates/` directory"),
+        orphan_errs[0].message.contains("no `Cargo.toml`")
+            || orphan_errs[0].message.contains("no `crates/` directory"),
         "orphan message should mention missing Cargo.toml or crates/, got: '{}'",
         orphan_errs[0].message
     );
@@ -1642,7 +1710,8 @@ fn gitkeep_plus_source_files_fires_everywhere() {
             err.title
         );
         assert!(
-            err.message.contains("no `Cargo.toml`") || err.message.contains("no `crates/` directory"),
+            err.message.contains("no `Cargo.toml`")
+                || err.message.contains("no `crates/` directory"),
             "message should mention missing Cargo.toml, got: '{}'",
             err.message
         );
@@ -1663,10 +1732,8 @@ fn gitkeep_plus_subdir_fires() {
         "apps/devctl/crates/app/mixed_gitkeep/.gitkeep",
         "",
     );
-    std::fs::create_dir_all(
-        tmp.path().join("apps/devctl/crates/app/mixed_gitkeep/src"),
-    )
-    .expect("mkdir");
+    std::fs::create_dir_all(tmp.path().join("apps/devctl/crates/app/mixed_gitkeep/src"))
+        .expect("mkdir");
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r6 = rule6_errors(&errors);
@@ -1737,17 +1804,13 @@ fn crates_dir_exists_but_empty_everywhere() {
     let tmp = copy_fixture();
     for app in RUST_APPS {
         for c in OUTER_CONTAINERS {
-            std::fs::create_dir_all(
-                tmp.path().join(format!("apps/{app}/{c}/hollow/crates")),
-            )
-            .expect("mkdir");
+            std::fs::create_dir_all(tmp.path().join(format!("apps/{app}/{c}/hollow/crates")))
+                .expect("mkdir");
         }
     }
     for c in INNER_HEX_CONTAINERS {
-        std::fs::create_dir_all(
-            tmp.path().join(format!("{INNER_HEX}/{c}/hollow/crates")),
-        )
-        .expect("mkdir");
+        std::fs::create_dir_all(tmp.path().join(format!("{INNER_HEX}/{c}/hollow/crates")))
+            .expect("mkdir");
     }
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
@@ -1785,18 +1848,11 @@ fn crates_is_file_not_dir_in_leaf() {
         "apps/devctl/crates/app/fake_hex/crates",
         "I am a file named crates",
     );
-    write_file(
-        tmp.path(),
-        "apps/devctl/crates/app/fake_hex/src/lib.rs",
-        "",
-    );
+    write_file(tmp.path(), "apps/devctl/crates/app/fake_hex/src/lib.rs", "");
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     let r6 = rule6_errors(&errors);
-    let fake_errs: Vec<_> = r6
-        .iter()
-        .filter(|e| e.title.contains("fake_hex"))
-        .collect();
+    let fake_errs: Vec<_> = r6.iter().filter(|e| e.title.contains("fake_hex")).collect();
     assert_eq!(
         fake_errs.len(),
         1,
@@ -1809,7 +1865,8 @@ fn crates_is_file_not_dir_in_leaf() {
         fake_errs[0].title
     );
     assert!(
-        fake_errs[0].message.contains("no `Cargo.toml`") || fake_errs[0].message.contains("no `crates/` directory"),
+        fake_errs[0].message.contains("no `Cargo.toml`")
+            || fake_errs[0].message.contains("no `crates/` directory"),
         "message should explain the issue, got: '{}'",
         fake_errs[0].message
     );
@@ -1835,7 +1892,8 @@ fn gitkeep_as_directory_fires() {
     // Analogous to cargo_toml_is_directory.
     let tmp = copy_fixture();
     std::fs::create_dir_all(
-        tmp.path().join("apps/devctl/crates/app/fake_placeholder/.gitkeep"),
+        tmp.path()
+            .join("apps/devctl/crates/app/fake_placeholder/.gitkeep"),
     )
     .expect("mkdir");
     let results = run_check(tmp.path());
@@ -1923,20 +1981,26 @@ fn orphan_inside_triple_nested_hex() {
     // Verifies recursion detects violations at depth 3.
     let tmp = copy_fixture();
     let base = "apps/devctl/crates/app/outer/crates";
-    for container in &["app", "domain", "adapters/inbound", "adapters/outbound", "ports/inbound", "ports/outbound"] {
-        write_file(
-            tmp.path(),
-            &format!("{base}/{container}/.gitkeep"),
-            "",
-        );
+    for container in &[
+        "app",
+        "domain",
+        "adapters/inbound",
+        "adapters/outbound",
+        "ports/inbound",
+        "ports/outbound",
+    ] {
+        write_file(tmp.path(), &format!("{base}/{container}/.gitkeep"), "");
     }
     let base2 = format!("{base}/app/inner/crates");
-    for container in &["app", "domain", "adapters/inbound", "adapters/outbound", "ports/inbound", "ports/outbound"] {
-        write_file(
-            tmp.path(),
-            &format!("{base2}/{container}/.gitkeep"),
-            "",
-        );
+    for container in &[
+        "app",
+        "domain",
+        "adapters/inbound",
+        "adapters/outbound",
+        "ports/inbound",
+        "ports/outbound",
+    ] {
+        write_file(tmp.path(), &format!("{base2}/{container}/.gitkeep"), "");
     }
     // Add an orphan at the deepest level
     write_file(
@@ -1963,7 +2027,11 @@ fn orphan_inside_triple_nested_hex() {
         deep_errs[0].title
     );
     assert!(
-        deep_errs[0].file.as_deref().unwrap_or("").contains("deep_orphan"),
+        deep_errs[0]
+            .file
+            .as_deref()
+            .unwrap_or("")
+            .contains("deep_orphan"),
         "expected file field to reference deep_orphan, got: '{}'",
         deep_errs[0].file.as_deref().unwrap_or("")
     );

@@ -11,7 +11,9 @@ fn workspace_member_outside_app() {
     let results = run_check(tmp.path());
     let errors = arch_errors(&results);
     assert!(
-        errors.iter().any(|e| e.title.contains("outside") || e.title.contains("shared-types")),
+        errors
+            .iter()
+            .any(|e| e.title.contains("outside") || e.title.contains("shared-types")),
         "expected error about workspace member pointing outside app dir, got: {errors:#?}"
     );
 }

@@ -40,8 +40,12 @@ fn assert_lossless_structure(root: &Path, tree: &ProjectTree) {
     let mut expected_dirs: BTreeSet<String> = BTreeSet::new();
     let mut expected_files: BTreeSet<String> = BTreeSet::new();
     for entry in walkdir::WalkDir::new(root).into_iter().flatten() {
-        let rel = entry.path().strip_prefix(root).expect("strip")
-            .to_string_lossy().into_owned();
+        let rel = entry
+            .path()
+            .strip_prefix(root)
+            .expect("strip")
+            .to_string_lossy()
+            .into_owned();
         if entry.file_type().is_dir() {
             let _ = expected_dirs.insert(rel);
         } else if entry.file_type().is_file() {
@@ -52,8 +56,14 @@ fn assert_lossless_structure(root: &Path, tree: &ProjectTree) {
     let actual_dirs: BTreeSet<String> = tree.structure.keys().cloned().collect();
     let missing_dirs: Vec<_> = expected_dirs.difference(&actual_dirs).collect();
     let extra_dirs: Vec<_> = actual_dirs.difference(&expected_dirs).collect();
-    assert!(missing_dirs.is_empty(), "Walker missed dirs:\n{missing_dirs:#?}");
-    assert!(extra_dirs.is_empty(), "Walker has phantom dirs:\n{extra_dirs:#?}");
+    assert!(
+        missing_dirs.is_empty(),
+        "Walker missed dirs:\n{missing_dirs:#?}"
+    );
+    assert!(
+        extra_dirs.is_empty(),
+        "Walker has phantom dirs:\n{extra_dirs:#?}"
+    );
 
     // Files
     let mut actual_files: BTreeSet<String> = BTreeSet::new();
@@ -64,8 +74,14 @@ fn assert_lossless_structure(root: &Path, tree: &ProjectTree) {
     }
     let missing_files: Vec<_> = expected_files.difference(&actual_files).collect();
     let extra_files: Vec<_> = actual_files.difference(&expected_files).collect();
-    assert!(missing_files.is_empty(), "Walker missed files:\n{missing_files:#?}");
-    assert!(extra_files.is_empty(), "Walker has phantom files:\n{extra_files:#?}");
+    assert!(
+        missing_files.is_empty(),
+        "Walker missed files:\n{missing_files:#?}"
+    );
+    assert!(
+        extra_files.is_empty(),
+        "Walker has phantom files:\n{extra_files:#?}"
+    );
 
     // Per-dir children match reality
     for (dir_rel, entry) in &tree.structure {
@@ -105,8 +121,12 @@ fn lossless_golden_fixture_dirs() {
     let mut expected: BTreeSet<String> = BTreeSet::new();
     for entry in walkdir::WalkDir::new(&root).into_iter().flatten() {
         if entry.file_type().is_dir() {
-            let rel = entry.path().strip_prefix(&root).expect("strip")
-                .to_string_lossy().into_owned();
+            let rel = entry
+                .path()
+                .strip_prefix(&root)
+                .expect("strip")
+                .to_string_lossy()
+                .into_owned();
             let _ = expected.insert(rel);
         }
     }
@@ -126,8 +146,12 @@ fn lossless_golden_fixture_files() {
     let mut expected: BTreeSet<String> = BTreeSet::new();
     for entry in walkdir::WalkDir::new(&root).into_iter().flatten() {
         if entry.file_type().is_file() {
-            let rel = entry.path().strip_prefix(&root).expect("strip")
-                .to_string_lossy().into_owned();
+            let rel = entry
+                .path()
+                .strip_prefix(&root)
+                .expect("strip")
+                .to_string_lossy()
+                .into_owned();
             let _ = expected.insert(rel);
         }
     }
@@ -169,7 +193,10 @@ fn lossless_golden_fixture_per_dir_children() {
         expected_files.sort();
 
         assert_eq!(entry.dirs, expected_dirs, "dirs mismatch for '{dir_rel}'");
-        assert_eq!(entry.files, expected_files, "files mismatch for '{dir_rel}'");
+        assert_eq!(
+            entry.files, expected_files,
+            "files mismatch for '{dir_rel}'"
+        );
     }
 }
 
@@ -179,8 +206,8 @@ fn lossless_golden_fixture_content_matches_disk() {
     let tree = walk_project(&RealFileSystem, &root);
 
     for (rel, cached) in &tree.content {
-        let disk = std::fs::read_to_string(root.join(rel))
-            .unwrap_or_else(|e| panic!("read '{rel}': {e}"));
+        let disk =
+            std::fs::read_to_string(root.join(rel)).unwrap_or_else(|e| panic!("read '{rel}': {e}"));
         assert_eq!(cached, &disk, "content mismatch for '{rel}'");
     }
 }
@@ -212,7 +239,10 @@ fn gitignore_skips_ignored_dirs() {
     // visible/ should be in the tree
     assert!(tree.dir_exists("visible"), "visible/ should exist");
     // ignored_dir/ should NOT be in the tree
-    assert!(!tree.dir_exists("ignored_dir"), "ignored_dir/ should be skipped");
+    assert!(
+        !tree.dir_exists("ignored_dir"),
+        "ignored_dir/ should be skipped"
+    );
     assert!(
         !tree.content.contains_key("ignored_dir/secret.toml"),
         "ignored file content should not be cached"
@@ -232,7 +262,11 @@ fn gitignore_in_subdirectory() {
 
     // Subdirectory has its own .gitignore
     write(root, "apps/myapp/.gitignore", "build/\n");
-    write(root, "apps/myapp/Cargo.toml", "[package]\nname = \"myapp\"\n");
+    write(
+        root,
+        "apps/myapp/Cargo.toml",
+        "[package]\nname = \"myapp\"\n",
+    );
     write(root, "apps/myapp/src/lib.rs", "");
     write(root, "apps/myapp/build/output.bin", "binary");
 
@@ -282,9 +316,17 @@ fn tracked_config_in_gitignored_dir_is_visible() {
 
     // Set up git repo and commit a config file
     git(root, &["init", "--quiet"]);
-    write(root, "hidden_crate/Cargo.toml", "[package]\nname = \"hidden\"\nversion = \"0.1.0\"\n");
+    write(
+        root,
+        "hidden_crate/Cargo.toml",
+        "[package]\nname = \"hidden\"\nversion = \"0.1.0\"\n",
+    );
     write(root, "hidden_crate/src/lib.rs", "pub fn hidden() {}\n");
-    write(root, "visible/Cargo.toml", "[package]\nname = \"visible\"\n");
+    write(
+        root,
+        "visible/Cargo.toml",
+        "[package]\nname = \"visible\"\n",
+    );
     git(root, &["add", "-A"]);
     git(root, &["commit", "-m", "initial"]);
 
@@ -311,7 +353,9 @@ fn tracked_config_in_gitignored_dir_is_visible() {
     );
 
     // Source file in tracked-but-ignored dir: in structure, NOT cached
-    let src = tree.dir_contents("hidden_crate/src").expect("src/ should exist");
+    let src = tree
+        .dir_contents("hidden_crate/src")
+        .expect("src/ should exist");
     assert!(src.has_file("lib.rs"), "lib.rs should be in structure");
     assert!(
         tree.file_content("hidden_crate/src/lib.rs").is_none(),
@@ -341,7 +385,11 @@ fn tracked_vs_untracked_in_same_ignored_dir() {
     git(root, &["commit", "-m", "ignore plans"]);
 
     // Create new files AFTER gitignore — these are untracked + ignored
-    write(root, "plans/new_plan.md", "# new plan (untracked, ignored)\n");
+    write(
+        root,
+        "plans/new_plan.md",
+        "# new plan (untracked, ignored)\n",
+    );
     write(root, "plans/new_config.toml", "key = \"new\"\n");
 
     let tree = walk_project(&RealFileSystem, root);
@@ -411,7 +459,10 @@ fn non_git_project_works_without_patch() {
 
     let tree = walk_project(&RealFileSystem, root);
 
-    assert!(tree.file_content("Cargo.toml").is_some(), "Cargo.toml cached");
+    assert!(
+        tree.file_content("Cargo.toml").is_some(),
+        "Cargo.toml cached"
+    );
     assert!(tree.dir_exists("src"), "src/ exists");
     // target/ may or may not be skipped (ignore crate reads .gitignore even
     // without git). What matters: no crash, tree is built.
@@ -483,16 +534,34 @@ fn caches_all_cargo_tomls_at_every_depth() {
 
     write(root, "Cargo.toml", "[workspace]\nmembers = []\n");
     write(root, "apps/api/Cargo.toml", "[workspace]\nmembers = []\n");
-    write(root, "apps/api/crates/domain/types/Cargo.toml", "[package]\nname = \"types\"\n");
-    write(root, "apps/api/crates/adapters/inbound/rest/Cargo.toml", "[package]\nname = \"rest\"\n");
-    write(root, "packages/shared/Cargo.toml", "[package]\nname = \"shared\"\n");
+    write(
+        root,
+        "apps/api/crates/domain/types/Cargo.toml",
+        "[package]\nname = \"types\"\n",
+    );
+    write(
+        root,
+        "apps/api/crates/adapters/inbound/rest/Cargo.toml",
+        "[package]\nname = \"rest\"\n",
+    );
+    write(
+        root,
+        "packages/shared/Cargo.toml",
+        "[package]\nname = \"shared\"\n",
+    );
 
     let tree = walk_project(&RealFileSystem, root);
 
     assert!(tree.file_content("Cargo.toml").is_some());
     assert!(tree.file_content("apps/api/Cargo.toml").is_some());
-    assert!(tree.file_content("apps/api/crates/domain/types/Cargo.toml").is_some());
-    assert!(tree.file_content("apps/api/crates/adapters/inbound/rest/Cargo.toml").is_some());
+    assert!(
+        tree.file_content("apps/api/crates/domain/types/Cargo.toml")
+            .is_some()
+    );
+    assert!(
+        tree.file_content("apps/api/crates/adapters/inbound/rest/Cargo.toml")
+            .is_some()
+    );
     assert!(tree.file_content("packages/shared/Cargo.toml").is_some());
 }
 
@@ -505,10 +574,14 @@ fn caches_gitkeep_files() {
 
     let tree = walk_project(&RealFileSystem, root);
 
-    let entry = tree.dir_contents("apps/api/crates/ports/inbound")
+    let entry = tree
+        .dir_contents("apps/api/crates/ports/inbound")
         .expect("ports/inbound should exist");
     assert!(entry.has_file(".gitkeep"));
-    assert!(tree.file_content("apps/api/crates/ports/inbound/.gitkeep").is_some());
+    assert!(
+        tree.file_content("apps/api/crates/ports/inbound/.gitkeep")
+            .is_some()
+    );
 }
 
 #[test]
@@ -538,7 +611,10 @@ fn caches_workflow_yamls() {
     let tree = walk_project(&RealFileSystem, root);
 
     assert!(tree.file_content(".github/workflows/ci.yml").is_some());
-    assert!(tree.file_content(".github/workflows/release.yaml").is_some());
+    assert!(
+        tree.file_content(".github/workflows/release.yaml")
+            .is_some()
+    );
     assert!(
         tree.file_content("config/settings.yml").is_none(),
         "non-workflow yaml should not be cached"
@@ -570,8 +646,13 @@ fn empty_directory_captured() {
 
     let tree = walk_project(&RealFileSystem, root);
 
-    assert!(tree.dir_exists("apps/api/crates/domain"), "empty dir should exist");
-    let entry = tree.dir_contents("apps/api/crates/domain").expect("should exist");
+    assert!(
+        tree.dir_exists("apps/api/crates/domain"),
+        "empty dir should exist"
+    );
+    let entry = tree
+        .dir_contents("apps/api/crates/domain")
+        .expect("should exist");
     assert!(entry.dirs.is_empty(), "no subdirs");
     assert!(entry.files.is_empty(), "no files");
 }
@@ -587,7 +668,9 @@ fn deeply_nested_structure() {
     let tree = walk_project(&RealFileSystem, root);
 
     assert!(tree.dir_exists("a/b/c/d/e/f/g/h/i/j"));
-    let j = tree.dir_contents("a/b/c/d/e/f/g/h/i/j").expect("j/ should exist");
+    let j = tree
+        .dir_contents("a/b/c/d/e/f/g/h/i/j")
+        .expect("j/ should exist");
     assert!(j.has_file("leaf.toml"));
 }
 
@@ -669,12 +752,19 @@ fn json_roundtrip() {
     assert_eq!(tree.structure.len(), roundtrip.structure.len());
     assert_eq!(tree.content.len(), roundtrip.content.len());
     for (key, entry) in &tree.structure {
-        let rt = roundtrip.structure.get(key).expect("key missing in roundtrip");
+        let rt = roundtrip
+            .structure
+            .get(key)
+            .expect("key missing in roundtrip");
         assert_eq!(entry.dirs, rt.dirs, "dirs mismatch for '{key}'");
         assert_eq!(entry.files, rt.files, "files mismatch for '{key}'");
     }
     for (key, val) in &tree.content {
-        assert_eq!(val, roundtrip.content.get(key).expect("missing"), "content mismatch for '{key}'");
+        assert_eq!(
+            val,
+            roundtrip.content.get(key).expect("missing"),
+            "content mismatch for '{key}'"
+        );
     }
 }
 
@@ -693,12 +783,20 @@ fn independent_walk(root: &Path) -> (BTreeSet<String>, BTreeSet<String>) {
     let mut all_dirs: Vec<String> = Vec::new();
     let mut all_files: Vec<String> = Vec::new();
 
-    for entry in walkdir::WalkDir::new(root).into_iter().filter_entry(|e| {
-        // Skip .git/ — both walker and verifier agree to exclude it
-        e.file_name() != ".git"
-    }).flatten() {
-        let rel = entry.path().strip_prefix(root).expect("strip prefix")
-            .to_string_lossy().into_owned();
+    for entry in walkdir::WalkDir::new(root)
+        .into_iter()
+        .filter_entry(|e| {
+            // Skip .git/ — both walker and verifier agree to exclude it
+            e.file_name() != ".git"
+        })
+        .flatten()
+    {
+        let rel = entry
+            .path()
+            .strip_prefix(root)
+            .expect("strip prefix")
+            .to_string_lossy()
+            .into_owned();
         if entry.file_type().is_dir() {
             all_dirs.push(rel);
         } else if entry.file_type().is_file() {
@@ -734,7 +832,9 @@ fn independent_walk(root: &Path) -> (BTreeSet<String>, BTreeSet<String>) {
             .collect();
         eprintln!(
             "git check-ignore: {} paths checked, {} ignored, exit={:?}",
-            all_paths.len(), ignored_set.len(), output.status.code()
+            all_paths.len(),
+            ignored_set.len(),
+            output.status.code()
         );
         ignored_set
     };
@@ -744,7 +844,9 @@ fn independent_walk(root: &Path) -> (BTreeSet<String>, BTreeSet<String>) {
         let mut cur = Path::new(path);
         while let Some(parent) = cur.parent() {
             let p = parent.to_string_lossy();
-            if p.is_empty() { break; }
+            if p.is_empty() {
+                break;
+            }
             if ignored.contains(p.as_ref()) {
                 return true;
             }
@@ -753,11 +855,13 @@ fn independent_walk(root: &Path) -> (BTreeSet<String>, BTreeSet<String>) {
         false
     };
 
-    let expected_dirs: BTreeSet<String> = all_dirs.into_iter()
+    let expected_dirs: BTreeSet<String> = all_dirs
+        .into_iter()
         .filter(|d| !ignored.contains(d) && !is_under_ignored(d))
         .collect();
 
-    let expected_files: BTreeSet<String> = all_files.into_iter()
+    let expected_files: BTreeSet<String> = all_files
+        .into_iter()
         .filter(|f| !ignored.contains(f) && !is_under_ignored(f))
         .collect();
 
@@ -784,7 +888,8 @@ fn assert_sets_match(label: &str, expected: &BTreeSet<String>, actual: &BTreeSet
     if !missing.is_empty() {
         eprintln!(
             "\nMissing {label} (expected but walker doesn't have) — {}/{} shown:",
-            missing.len().min(50), missing.len()
+            missing.len().min(50),
+            missing.len()
         );
         for p in missing.iter().take(50) {
             eprintln!("  - {p}");
@@ -793,7 +898,8 @@ fn assert_sets_match(label: &str, expected: &BTreeSet<String>, actual: &BTreeSet
     if !extra.is_empty() {
         eprintln!(
             "\nExtra {label} (walker has but not expected) — {}/{} shown:",
-            extra.len().min(50), extra.len()
+            extra.len().min(50),
+            extra.len()
         );
         for p in extra.iter().take(50) {
             eprintln!("  + {p}");
@@ -803,7 +909,8 @@ fn assert_sets_match(label: &str, expected: &BTreeSet<String>, actual: &BTreeSet
     assert!(
         missing.is_empty() && extra.is_empty(),
         "{label} mismatch: {} missing, {} extra",
-        missing.len(), extra.len()
+        missing.len(),
+        extra.len()
     );
 }
 
@@ -822,11 +929,19 @@ fn lossless_real_project() {
     }
 
     let (expected_dirs, expected_files) = independent_walk(root);
-    eprintln!("Independent: {} files, {} dirs", expected_files.len(), expected_dirs.len());
+    eprintln!(
+        "Independent: {} files, {} dirs",
+        expected_files.len(),
+        expected_dirs.len()
+    );
 
     let tree = walk_project(&RealFileSystem, root);
     let (walker_dirs, walker_files) = walker_sets(&tree);
-    eprintln!("Walker: {} files, {} dirs", walker_files.len(), walker_dirs.len());
+    eprintln!(
+        "Walker: {} files, {} dirs",
+        walker_files.len(),
+        walker_dirs.len()
+    );
 
     assert_sets_match("files", &expected_files, &walker_files);
     assert_sets_match("dirs", &expected_dirs, &walker_dirs);
@@ -840,7 +955,8 @@ fn lossless_real_project() {
 #[ignore] // reason: runs on the guardrail3 repo, slower than unit tests
 fn lossless_self() {
     let root = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .parent().and_then(|p| p.parent())
+        .parent()
+        .and_then(|p| p.parent())
         .expect("guardrail3 repo root");
     if !root.join(".git").exists() {
         eprintln!("Skipping: not in a git repo");
@@ -848,11 +964,19 @@ fn lossless_self() {
     }
 
     let (expected_dirs, expected_files) = independent_walk(root);
-    eprintln!("Independent: {} files, {} dirs", expected_files.len(), expected_dirs.len());
+    eprintln!(
+        "Independent: {} files, {} dirs",
+        expected_files.len(),
+        expected_dirs.len()
+    );
 
     let tree = walk_project(&RealFileSystem, root);
     let (walker_dirs, walker_files) = walker_sets(&tree);
-    eprintln!("Walker: {} files, {} dirs", walker_files.len(), walker_dirs.len());
+    eprintln!(
+        "Walker: {} files, {} dirs",
+        walker_files.len(),
+        walker_dirs.len()
+    );
 
     assert_sets_match("files", &expected_files, &walker_files);
     assert_sets_match("dirs", &expected_dirs, &walker_dirs);
@@ -897,9 +1021,14 @@ fn lossless_content_real() {
 
     // No source files leaked into content
     let source_exts = ["rs", "ts", "tsx", "js", "jsx", "mjs", "cjs"];
-    let leaked: Vec<_> = tree.content.keys()
+    let leaked: Vec<_> = tree
+        .content
+        .keys()
         .filter(|p| {
-            let ext = Path::new(p).extension().and_then(|e| e.to_str()).unwrap_or("");
+            let ext = Path::new(p)
+                .extension()
+                .and_then(|e| e.to_str())
+                .unwrap_or("");
             source_exts.contains(&ext)
                 // Exception: config files that happen to have source extensions
                 && !p.contains("eslint.config.")
@@ -914,6 +1043,10 @@ fn lossless_content_real() {
     assert!(
         leaked.is_empty(),
         "Source files leaked into content cache:\n{}",
-        leaked.iter().map(|f| format!("  {f}")).collect::<Vec<_>>().join("\n")
+        leaked
+            .iter()
+            .map(|f| format!("  {f}"))
+            .collect::<Vec<_>>()
+            .join("\n")
     );
 }

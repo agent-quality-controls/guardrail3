@@ -119,9 +119,15 @@ fn missing_modules_is_warn_not_error() {
     // Must be Warn, not Error
     let admin_warns: Vec<_> = results
         .iter()
-        .filter(|r| r.id == "T-ARCH-01" && r.severity == Severity::Warn && r.title.contains("admin"))
+        .filter(|r| {
+            r.id == "T-ARCH-01" && r.severity == Severity::Warn && r.title.contains("admin")
+        })
         .collect();
-    assert_eq!(admin_warns.len(), 1, "expected 1 Warn for admin: {admin_warns:#?}");
+    assert_eq!(
+        admin_warns.len(),
+        1,
+        "expected 1 Warn for admin: {admin_warns:#?}"
+    );
     // Must NOT have Error for same condition
     let admin_errors: Vec<_> = results
         .iter()
@@ -172,11 +178,7 @@ fn different_failure_modes_across_apps() {
     write_file(tmp.path(), "apps/admin/src/modules", "not a directory");
     // landing: already missing modules/ (baseline)
     // New app: modules/ empty
-    write_file(
-        tmp.path(),
-        "apps/api/package.json",
-        r#"{"name": "api"}"#,
-    );
+    write_file(tmp.path(), "apps/api/package.json", r#"{"name": "api"}"#);
     std::fs::create_dir_all(tmp.path().join("apps/api/src/modules")).expect("mkdir");
     let results = run_check(tmp.path());
     let warns = t_arch_01_warns(&results);
@@ -233,7 +235,10 @@ fn modules_is_file_not_dir() {
     );
     // Cascades to rule_02: 4 missing required dirs (domain, ports, application, adapters)
     let errors = arch_errors(&results);
-    let admin_errors: Vec<_> = errors.iter().filter(|e| e.title.contains("admin")).collect();
+    let admin_errors: Vec<_> = errors
+        .iter()
+        .filter(|e| e.title.contains("admin"))
+        .collect();
     assert_eq!(
         admin_errors.len(),
         4,
@@ -246,7 +251,8 @@ fn modules_is_file_not_dir() {
 fn modules_dir_empty() {
     let tmp = copy_fixture();
     remove_dir(tmp.path(), "apps/admin/src/modules");
-    std::fs::create_dir_all(tmp.path().join("apps/admin/src/modules")).expect("create empty modules");
+    std::fs::create_dir_all(tmp.path().join("apps/admin/src/modules"))
+        .expect("create empty modules");
     let results = run_check(tmp.path());
     // Empty dir: metadata() succeeds → no rule_01 warn
     let warns = t_arch_01_warns(&results);
@@ -258,7 +264,10 @@ fn modules_dir_empty() {
     );
     // Cascades to rule_02: missing domain, ports, application, adapters
     let errors = arch_errors(&results);
-    let admin_errors: Vec<_> = errors.iter().filter(|e| e.title.contains("admin")).collect();
+    let admin_errors: Vec<_> = errors
+        .iter()
+        .filter(|e| e.title.contains("admin"))
+        .collect();
     assert_eq!(
         admin_errors.len(),
         4,
@@ -284,7 +293,10 @@ fn modules_with_only_gitkeep() {
     // Cascades to rule_02: missing 4 required dirs (domain, ports, application, adapters)
     // .gitkeep is explicitly allowed in structural dirs, so no loose-file error
     let errors = arch_errors(&results);
-    let admin_errors: Vec<_> = errors.iter().filter(|e| e.title.contains("admin")).collect();
+    let admin_errors: Vec<_> = errors
+        .iter()
+        .filter(|e| e.title.contains("admin"))
+        .collect();
     assert_eq!(
         admin_errors.len(),
         4,
@@ -319,8 +331,11 @@ fn no_src_dir_at_all() {
 fn modules_is_broken_symlink() {
     let tmp = copy_fixture();
     remove_dir(tmp.path(), "apps/admin/src/modules");
-    std::os::unix::fs::symlink("/nonexistent/path", tmp.path().join("apps/admin/src/modules"))
-        .expect("create broken symlink");
+    std::os::unix::fs::symlink(
+        "/nonexistent/path",
+        tmp.path().join("apps/admin/src/modules"),
+    )
+    .expect("create broken symlink");
     let results = run_check(tmp.path());
     let warns = t_arch_01_warns(&results);
     // Broken symlink: metadata() follows link → target doesn't exist → returns None → warns
@@ -347,8 +362,16 @@ fn modules_symlink_to_valid_dir() {
     std::fs::create_dir_all(target.join("adapters/outbound")).expect("mkdir adapters/outbound");
     std::fs::create_dir_all(target.join("ports/inbound")).expect("mkdir ports/inbound");
     std::fs::create_dir_all(target.join("ports/outbound")).expect("mkdir ports/outbound");
-    write_file(tmp.path(), "valid_modules/domain/types/index.ts", "export type T = {};");
-    write_file(tmp.path(), "valid_modules/application/commands/run.ts", "export function run() {}");
+    write_file(
+        tmp.path(),
+        "valid_modules/domain/types/index.ts",
+        "export type T = {};",
+    );
+    write_file(
+        tmp.path(),
+        "valid_modules/application/commands/run.ts",
+        "export function run() {}",
+    );
     write_file(tmp.path(), "valid_modules/adapters/inbound/.gitkeep", "");
     write_file(tmp.path(), "valid_modules/adapters/outbound/.gitkeep", "");
     write_file(tmp.path(), "valid_modules/ports/inbound/.gitkeep", "");
@@ -366,7 +389,12 @@ fn modules_symlink_to_valid_dir() {
         "symlink to valid modules/ should not produce warning, got: {admin_warns:#?}"
     );
     // Only landing baseline warning
-    assert_eq!(warns.len(), 1, "expected only landing baseline, got {}: {warns:#?}", warns.len());
+    assert_eq!(
+        warns.len(),
+        1,
+        "expected only landing baseline, got {}: {warns:#?}",
+        warns.len()
+    );
 }
 
 #[cfg(unix)]
@@ -389,7 +417,10 @@ fn modules_symlink_to_dev_null() {
     );
     // Should cascade to rule_02 errors
     let errors = arch_errors(&results);
-    let admin_errors: Vec<_> = errors.iter().filter(|e| e.title.contains("admin")).collect();
+    let admin_errors: Vec<_> = errors
+        .iter()
+        .filter(|e| e.title.contains("admin"))
+        .collect();
     assert_eq!(
         admin_errors.len(),
         4,
@@ -502,7 +533,12 @@ fn node_modules_ts_files_not_discovered() {
         "app with only node_modules .ts files should not be discovered, got: {warns:#?}"
     );
     // Baseline only
-    assert_eq!(warns.len(), 1, "expected only landing baseline, got {}: {warns:#?}", warns.len());
+    assert_eq!(
+        warns.len(),
+        1,
+        "expected only landing baseline, got {}: {warns:#?}",
+        warns.len()
+    );
 }
 
 #[test]
@@ -521,7 +557,12 @@ fn build_artifacts_ts_files_not_discovered() {
         !warns.iter().any(|w| w.title.contains("stale")),
         "app with only .next/ .ts files should not be discovered, got: {warns:#?}"
     );
-    assert_eq!(warns.len(), 1, "expected only landing baseline, got {}: {warns:#?}", warns.len());
+    assert_eq!(
+        warns.len(),
+        1,
+        "expected only landing baseline, got {}: {warns:#?}",
+        warns.len()
+    );
 }
 
 #[test]
@@ -594,14 +635,22 @@ fn package_json_is_directory() {
     let warns = t_arch_01_warns(&results);
     // read_file on a directory returns None → falls through to has_ts_files
     // No .ts files → app not discovered → no warning
-    let dir_warns: Vec<_> = warns.iter().filter(|w| w.title.contains("dir-pkg")).collect();
+    let dir_warns: Vec<_> = warns
+        .iter()
+        .filter(|w| w.title.contains("dir-pkg"))
+        .collect();
     assert_eq!(
         dir_warns.len(),
         0,
         "app with package.json-as-directory and no .ts files should not be discovered, got: {dir_warns:#?}"
     );
     // Baseline only
-    assert_eq!(warns.len(), 1, "expected only landing baseline, got {}: {warns:#?}", warns.len());
+    assert_eq!(
+        warns.len(),
+        1,
+        "expected only landing baseline, got {}: {warns:#?}",
+        warns.len()
+    );
 }
 
 #[cfg(unix)]
@@ -617,13 +666,21 @@ fn package_json_is_broken_symlink() {
     let results = run_check(tmp.path());
     let warns = t_arch_01_warns(&results);
     // read_file on broken symlink → None → falls through to has_ts_files → no .ts → not discovered
-    let link_warns: Vec<_> = warns.iter().filter(|w| w.title.contains("link-pkg")).collect();
+    let link_warns: Vec<_> = warns
+        .iter()
+        .filter(|w| w.title.contains("link-pkg"))
+        .collect();
     assert_eq!(
         link_warns.len(),
         0,
         "app with broken symlink package.json and no .ts files should not be discovered, got: {link_warns:#?}"
     );
-    assert_eq!(warns.len(), 1, "expected only landing baseline, got {}: {warns:#?}", warns.len());
+    assert_eq!(
+        warns.len(),
+        1,
+        "expected only landing baseline, got {}: {warns:#?}",
+        warns.len()
+    );
 }
 
 #[test]
@@ -637,7 +694,12 @@ fn file_in_apps_dir_not_discovered() {
         !warns.iter().any(|w| w.title.contains("README")),
         "file in apps/ should not be discovered as an app, got: {warns:#?}"
     );
-    assert_eq!(warns.len(), 1, "expected only landing baseline, got {}: {warns:#?}", warns.len());
+    assert_eq!(
+        warns.len(),
+        1,
+        "expected only landing baseline, got {}: {warns:#?}",
+        warns.len()
+    );
 }
 
 #[test]
@@ -806,7 +868,10 @@ fn modules_no_read_permission() {
     );
     // Should cascade to rule_02 errors (4 missing dirs)
     let errors = arch_errors(&results);
-    let admin_errors: Vec<_> = errors.iter().filter(|e| e.title.contains("admin")).collect();
+    let admin_errors: Vec<_> = errors
+        .iter()
+        .filter(|e| e.title.contains("admin"))
+        .collect();
     assert_eq!(
         admin_errors.len(),
         4,

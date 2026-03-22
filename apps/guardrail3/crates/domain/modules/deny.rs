@@ -281,7 +281,8 @@ pub fn build_deny_toml_with_entries(
 
     // Skip entries
     out.push_str("skip = [\n");
-    let deduped_skip = crate::adapters::inbound::cli::generate::deduplicated_override(&out, extra_skip);
+    let deduped_skip =
+        crate::adapters::inbound::cli::generate::deduplicated_override(&out, extra_skip);
     if !deduped_skip.trim().is_empty() {
         out.push_str(&deduped_skip);
     }
@@ -293,7 +294,8 @@ pub fn build_deny_toml_with_entries(
         out.push_str(module.content);
         out.push('\n');
     }
-    let deduped_bans = crate::adapters::inbound::cli::generate::deduplicated_override(&out, extra_bans);
+    let deduped_bans =
+        crate::adapters::inbound::cli::generate::deduplicated_override(&out, extra_bans);
     if !deduped_bans.trim().is_empty() {
         out.push_str("    # --- Local overrides ---\n");
         out.push_str(&deduped_bans);

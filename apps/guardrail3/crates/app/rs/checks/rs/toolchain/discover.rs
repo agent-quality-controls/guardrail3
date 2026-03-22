@@ -10,7 +10,10 @@ pub fn collect(tree: &ProjectTree) -> ToolchainFacts {
         .file_exists("rust-toolchain")
         .then(|| "rust-toolchain".to_owned());
 
-    let (parsed, parse_error) = match toolchain_toml_rel.as_deref().and_then(|rel| tree.file_content(rel)) {
+    let (parsed, parse_error) = match toolchain_toml_rel
+        .as_deref()
+        .and_then(|rel| tree.file_content(rel))
+    {
         Some(content) => match toml::from_str::<toml::Value>(content) {
             Ok(parsed) => (Some(parsed), None),
             Err(err) => (None, Some(err.to_string())),

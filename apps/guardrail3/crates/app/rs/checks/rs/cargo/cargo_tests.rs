@@ -1,13 +1,15 @@
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
-use crate::domain::project_tree::{DirEntry, ProjectTree};
 use crate::domain::modules::canonical;
+use crate::domain::project_tree::{DirEntry, ProjectTree};
 
 use super::check;
 use super::discover::collect;
 use super::inputs::WorkspaceMembersSetInput;
-use super::lint_support::{EXPECTED_CLIPPY_ALLOW, EXPECTED_CLIPPY_DENY, EXPECTED_CLIPPY_GROUPS, EXPECTED_RUST_LINTS};
+use super::lint_support::{
+    EXPECTED_CLIPPY_ALLOW, EXPECTED_CLIPPY_DENY, EXPECTED_CLIPPY_GROUPS, EXPECTED_RUST_LINTS,
+};
 
 #[test]
 fn workspace_metadata_and_resolver_are_checked() {
@@ -138,8 +140,15 @@ fn library_profile_requires_extra_rust_lints_and_msrv() {
     };
 
     let results = check(&tree);
-    assert!(results.iter().any(|r| r.id == "RS-CARGO-01" && !r.inventory));
-    assert!(results.iter().any(|r| r.id == "RS-CARGO-05" && matches!(r.severity, crate::domain::report::Severity::Warn)));
+    assert!(
+        results
+            .iter()
+            .any(|r| r.id == "RS-CARGO-01" && !r.inventory)
+    );
+    assert!(
+        results.iter().any(|r| r.id == "RS-CARGO-05"
+            && matches!(r.severity, crate::domain::report::Severity::Warn))
+    );
 }
 
 #[test]
@@ -168,9 +177,8 @@ fn virtual_workspace_missing_resolver_is_reported() {
 
     let results = check(&tree);
     assert!(
-        results
-            .iter()
-            .any(|r| r.id == "RS-CARGO-08" && matches!(r.severity, crate::domain::report::Severity::Error))
+        results.iter().any(|r| r.id == "RS-CARGO-08"
+            && matches!(r.severity, crate::domain::report::Severity::Error))
     );
 }
 
@@ -285,16 +293,12 @@ fn declared_members_are_paired_and_membership_sets_are_bound() {
     assert!(set_input.discovered_members.contains("crates/domain"));
 
     let results = check(&tree);
-    assert!(
-        results
-            .iter()
-            .any(|r| r.id == "RS-CARGO-04" && r.inventory && r.file.as_deref() == Some("crates/api/Cargo.toml"))
-    );
-    assert!(
-        results
-            .iter()
-            .any(|r| r.id == "RS-CARGO-04" && !r.inventory && r.file.as_deref() == Some("crates/domain/Cargo.toml"))
-    );
+    assert!(results.iter().any(|r| r.id == "RS-CARGO-04"
+        && r.inventory
+        && r.file.as_deref() == Some("crates/api/Cargo.toml")));
+    assert!(results.iter().any(|r| r.id == "RS-CARGO-04"
+        && !r.inventory
+        && r.file.as_deref() == Some("crates/domain/Cargo.toml")));
 }
 
 #[test]
@@ -424,9 +428,8 @@ fn older_member_edition_is_warned() {
 
     let results = check(&tree);
     assert!(
-        results
-            .iter()
-            .any(|r| r.id == "RS-CARGO-09" && matches!(r.severity, crate::domain::report::Severity::Warn))
+        results.iter().any(|r| r.id == "RS-CARGO-09"
+            && matches!(r.severity, crate::domain::report::Severity::Warn))
     );
 }
 
@@ -493,9 +496,8 @@ fn weakened_member_override_is_reported() {
 
     let results = check(&tree);
     assert!(
-        results
-            .iter()
-            .any(|r| r.id == "RS-CARGO-06" && matches!(r.severity, crate::domain::report::Severity::Error))
+        results.iter().any(|r| r.id == "RS-CARGO-06"
+            && matches!(r.severity, crate::domain::report::Severity::Error))
     );
 }
 
@@ -559,14 +561,12 @@ fn non_inheriting_member_does_not_also_emit_weakened_override() {
 
     let results = check(&tree);
     assert!(
-        results
-            .iter()
-            .any(|r| r.id == "RS-CARGO-04" && matches!(r.severity, crate::domain::report::Severity::Error))
+        results.iter().any(|r| r.id == "RS-CARGO-04"
+            && matches!(r.severity, crate::domain::report::Severity::Error))
     );
     assert!(
-        !results
-            .iter()
-            .any(|r| r.id == "RS-CARGO-06" && matches!(r.severity, crate::domain::report::Severity::Error))
+        !results.iter().any(|r| r.id == "RS-CARGO-06"
+            && matches!(r.severity, crate::domain::report::Severity::Error))
     );
 }
 
@@ -642,9 +642,8 @@ fn negative_specific_lint_priority_is_warned() {
 
     let results = check(&tree);
     assert!(
-        results
-            .iter()
-            .any(|r| r.id == "RS-CARGO-07" && matches!(r.severity, crate::domain::report::Severity::Warn))
+        results.iter().any(|r| r.id == "RS-CARGO-07"
+            && matches!(r.severity, crate::domain::report::Severity::Warn))
     );
 }
 

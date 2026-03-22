@@ -23,7 +23,13 @@ pub fn check(input: &RustfmtRootInput<'_>, results: &mut Vec<CheckResult>) {
         return;
     };
 
-    check_string(parsed, rel, "edition", input.workspace_edition.unwrap_or("2024"), results);
+    check_string(
+        parsed,
+        rel,
+        "edition",
+        input.workspace_edition.unwrap_or("2024"),
+        results,
+    );
     check_int(parsed, rel, "max_width", 100, results);
     check_int(parsed, rel, "tab_spaces", 4, results);
     check_bool(parsed, rel, "use_field_init_shorthand", true, results);
@@ -92,12 +98,7 @@ fn push_wrong(
     });
 }
 
-fn push_missing(
-    rel: &str,
-    key: &str,
-    expected: impl Display,
-    results: &mut Vec<CheckResult>,
-) {
+fn push_missing(rel: &str, key: &str, expected: impl Display, results: &mut Vec<CheckResult>) {
     results.push(CheckResult {
         id: ID.to_owned(),
         severity: Severity::Warn,

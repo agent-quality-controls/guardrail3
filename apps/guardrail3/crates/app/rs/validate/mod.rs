@@ -1,5 +1,5 @@
-pub mod arch;
 pub mod allow_checks;
+pub mod arch;
 pub mod ast_helpers;
 pub mod ast_visitors;
 pub mod cargo_lints;
@@ -243,11 +243,7 @@ fn run_architecture_checks(
     }
 
     {
-        hex_arch_structure::check_hex_arch_structure(
-            fs,
-            workspace_root,
-            &mut arch_results,
-        );
+        hex_arch_structure::check_hex_arch_structure(fs, workspace_root, &mut arch_results);
         hex_arch_checks::check_dependency_flow(
             fs,
             workspace_root,

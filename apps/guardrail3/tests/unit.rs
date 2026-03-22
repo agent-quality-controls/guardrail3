@@ -33,8 +33,12 @@ mod dependency_allowlist_test;
 mod discover_test;
 #[path = "unit/help_gen_test.rs"]
 mod help_gen_test;
+#[path = "unit/project_walker_test.rs"]
+mod project_walker_test;
 #[path = "unit/report_test.rs"]
 mod report_test;
+#[path = "unit/rs_arch_01/mod.rs"]
+mod rs_arch_01;
 #[path = "unit/rs_structure_checks_test.rs"]
 mod rs_structure_checks_test;
 #[path = "unit/rs_test_checks_test.rs"]
@@ -57,6 +61,10 @@ mod test_release_crate_deps;
 mod test_release_repo_checks;
 #[path = "unit/test_source_scan.rs"]
 mod test_source_scan;
+#[path = "unit/test_support/mod.rs"]
+mod test_support;
+#[path = "unit/ts_arch_01/mod.rs"]
+mod ts_arch_01;
 #[path = "unit/ts_arch_checks_test.rs"]
 mod ts_arch_checks_test;
 #[path = "unit/ts_ast_helpers_test.rs"]
@@ -69,11 +77,3 @@ mod ts_comment_checks_test;
 mod ts_source_scan_test;
 #[path = "unit/ts_test_checks_test.rs"]
 mod ts_test_checks_test;
-#[path = "unit/test_support/mod.rs"]
-mod test_support;
-#[path = "unit/rs_arch_01/mod.rs"]
-mod rs_arch_01;
-#[path = "unit/ts_arch_01/mod.rs"]
-mod ts_arch_01;
-#[path = "unit/project_walker_test.rs"]
-mod project_walker_test;
