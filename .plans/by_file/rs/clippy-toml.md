@@ -27,7 +27,7 @@ Verified: with `cargo clippy --workspace` run from `apps/validator-rust/`, each 
 
 ### Shadowing danger
 
-A `clippy.toml` at ANY intermediate directory (e.g., `crates/adapters/clippy.toml`) would shadow the workspace-level file for all crates below that directory. All guardrail bans silently lost for those crates. guardrail3 must ERROR if it finds clippy.toml files below a workspace root that already has one.
+A `clippy.toml` at ANY intermediate directory (e.g., `crates/adapters/clippy.toml`) would shadow the policy-root file for all crates below that directory. All guardrail bans silently lost for those crates. guardrail3 must ERROR if it finds clippy.toml files outside the allowed policy roots: validation root, workspace roots, or standalone package roots.
 
 ### Intermediate directory shadowing — verified
 
@@ -46,7 +46,23 @@ Clippy results are CACHED. Changing or adding a `clippy.toml` does NOT automatic
 
 ### Recommendation
 
-One `clippy.toml` per workspace/standalone-crate directory. OR one at project root to cover everything. guardrail3 should ERROR on any `clippy.toml` found between a workspace root and its member crates (intermediate shadowing).
+Treat `clippy.toml` as a Rust policy-root file.
+
+Allowed locations:
+- validation root / repo root
+- Rust workspace roots
+- standalone package roots that are NOT members of a workspace
+
+Forbidden locations:
+- any deeper member-crate path below one of those roots
+- intermediate shadow configs that are not themselves workspace roots or standalone package roots
+
+Coverage rule:
+- every Rust workspace root and every standalone package root must be covered by an allowed `clippy.toml`
+- coverage can come from:
+  - its own local `clippy.toml`, or
+  - an allowed ancestor `clippy.toml` (for example the validation root)
+- uncovered Rust units are an ERROR, not a warning
 
 ## Why not per inner crate
 
@@ -62,29 +78,42 @@ Could we generate per-crate files with duplication? Yes, but there's no enforcem
 
 4. **Cargo.toml deps handle real isolation:** Domain literally can't call reqwest because it's not a dependency. R-DEPS/R-ARCH validate that dependency declarations are correct. This is compile-time enforcement, stronger than clippy bans.
 
-So: workspace-level clippy.toml + Cargo.toml dependency isolation + per-function `#[allow]` with reason covers every scenario. Per-crate would add duplication with zero enforcement benefit.
+So: policy-root `clippy.toml` + Cargo.toml dependency isolation + per-function `#[allow]` with reason covers every scenario. Inner member-crate `clippy.toml` adds shadowing risk with no enforcement benefit.
 
 ## Contents
 
-clippy.toml has ~80 possible configuration keys (thresholds, lists, booleans, enums). guardrail3 manages 7 of them. The rest are user-owned and MUST be preserved.
+clippy.toml has many possible configuration keys (thresholds, lists, booleans, enums). guardrail3 should manage the hardening-critical subset that can be applied universally and sanely. Other keys remain user-owned and must be preserved.
 
-**guardrail3-managed keys (7):**
-- 5 thresholds: `too-many-lines-threshold`, `cognitive-complexity-threshold`, `too-many-arguments-threshold`, `type-complexity-threshold`, `max-struct-bools`
-- 2 arrays: `disallowed-methods`, `disallowed-types`
+**guardrail3-managed keys**
+- thresholds:
+  - `too-many-lines-threshold`
+  - `cognitive-complexity-threshold`
+  - `too-many-arguments-threshold`
+  - `type-complexity-threshold`
+  - `max-struct-bools`
+  - `max-fn-params-bools`
+  - `excessive-nesting-threshold`
+- booleans:
+  - `avoid-breaking-exported-api`
+  - `allow-dbg-in-tests`
+  - `allow-print-in-tests`
+- arrays:
+  - `disallowed-methods`
+  - `disallowed-types`
+  - `disallowed-macros`
 
 **User-owned keys we must NOT touch (examples from real projects):**
 - `msrv` — project's minimum Rust version
 - `allowed-duplicate-crates` — crates with unavoidable duplicates (e.g., `windows-sys`)
 - `arithmetic-side-effects-allowed` — custom numeric types exempt from overflow checks
-- `allow-expect-in-tests`, `allow-unwrap-in-tests`, `allow-dbg-in-tests` — test relaxations
+- `allow-expect-in-tests`, `allow-unwrap-in-tests` — user-specific test relaxations not currently managed
 - `doc-valid-idents` — project-specific API terms (e.g., `["OAuth", "MyAPI"]`)
-- `disallowed-macros` — project-specific macro bans
 - `await-holding-invalid-types` — async safety guards
 - Any other key from the ~70 we don't manage
 
-**Rule: guardrail3 ONLY reads/writes its 7 keys. All other keys are passed through untouched.**
+**Rule: guardrail3 manages the keys above. All other recognized user keys are passed through untouched. Truly unknown / typo-looking keys should warn in validate.**
 
-### Thresholds (5 values)
+### Thresholds
 
 | Key | clippy default | guardrail3 value | stricter? |
 |---|---|---|---|
@@ -93,13 +122,15 @@ clippy.toml has ~80 possible configuration keys (thresholds, lists, booleans, en
 | too-many-arguments-threshold | 7 | 7 | same |
 | type-complexity-threshold | 250 | 75 | YES — 70% tighter |
 | max-struct-bools | 3 | 3 | same |
+| max-fn-params-bools | n/a here | 3 | managed by guardrail |
+| excessive-nesting-threshold | n/a here | 4 | managed by guardrail |
 
 Enforcement:
 - NEW file: set guardrail3 values
 - EXISTING file, key missing: ADD with guardrail3 value
-- EXISTING file, value stricter (lower): LEAVE
-- EXISTING file, value looser (higher): LEAVE but validate WARNS ("guardrail relaxed: too-many-lines-threshold is 200, baseline is 75")
-- Same model as `#[allow]` — user can relax, we always report
+- validate should enforce exact-match for guardrail-managed thresholds
+- generate should write the exact guardrail value
+- if users relax later, validate errors or warns according to the checker rule contract
 
 ### disallowed-methods
 
@@ -115,8 +146,8 @@ Steady-parent reality:
 - substack-publisher adds: `std::io::stdout`, `std::io::stderr` (per-app override)
 - Reasons differ on every shared entry (project-specific context)
 
-**What we enforce: the PATH must be present. We do NOT enforce reasons.**
-- If `std::fs::write` is banned with reason "All state lives in R2" — that's fine. The ban exists.
+**What we enforce: the PATH must be present, and every guardrail-managed ban entry must have a real reason.**
+- If `std::fs::write` is banned with reason "All state lives in R2" — that's fine. The ban exists and the reason is meaningful.
 - If a guardrail baseline path is MISSING — add on generate, error on validate.
 - If user has EXTRA paths beyond baseline — preserve them.
 
@@ -150,7 +181,20 @@ Same pattern. 9 types identical in both apps:
 - File (use centralized io)
 - LazyLock, OnceLock, once_cell::OnceCell, once_cell::Lazy (no global state)
 
-Reasons differ. Same rule: enforce PATH presence, don't enforce reasons.
+Reasons differ. Same rule: enforce PATH presence and require a real reason field.
+
+### disallowed-macros
+
+This is guardrail-managed too.
+
+Required baseline macro bans:
+- `println!`
+- `eprintln!`
+- `dbg!`
+- `todo!`
+- `unimplemented!`
+
+Same rule: enforce macro presence and require a real reason field.
 
 ## Algorithm
 
@@ -162,12 +206,12 @@ Reasons differ. Same rule: enforce PATH presence, don't enforce reasons.
 3. For thresholds:
    - For each guardrail threshold:
      - If missing: ADD with guardrail value
-     - If present and value <= guardrail value (stricter): LEAVE
-     - If present and value > guardrail value (looser): LEAVE (validate warns separately)
+     - If present and value differs: REWRITE to the guardrail value
+     - Guardrail-managed thresholds are exact-match, not lower-bound / upper-bound suggestions
 4. For disallowed-methods array:
    - Parse each entry, key by `path` field
    - For each guardrail baseline path:
-     - If path is in removals: SKIP (validate warns "guardrail relaxed: {path} — {reason}")
+     - If path is in removals: SKIP only when that removal is an explicitly allowed override with a real reason
      - If path missing from array: ADD entry with guardrail reason
      - If path present: LEAVE (don't touch reason — user's is more specific)
    - Everything else in the array: LEAVE (user's own bans, not our business)
@@ -178,7 +222,7 @@ Reasons differ. Same rule: enforce PATH presence, don't enforce reasons.
 
 ### On `generate` (for a new file):
 ```
-1. Build from template: thresholds + profile methods + profile types + overrides
+1. Build from template: thresholds + managed booleans + profile methods + profile types + macro bans + overrides
 2. Write complete file (current behavior, correct)
 ```
 
@@ -186,7 +230,7 @@ Reasons differ. Same rule: enforce PATH presence, don't enforce reasons.
 ```
 For existing file:
 - Show which baseline entries are MISSING
-- Show which thresholds are LOOSER than guardrail
+- Show which managed scalar settings are MISSING or wrong
 - Show user's extra entries (informational, not errors)
 - Show "no changes needed" if fully compliant
 
@@ -215,11 +259,15 @@ Global removals (`.guardrail3/overrides/clippy-methods-remove.toml`) also possib
 
 ## Edge cases
 
-1. **Inner crate has clippy.toml (R-CLIP-SHADOW — new check):** ERROR. It shadows the workspace one completely. ALL guardrail bans silently lost for that crate. validate must scan for `clippy.toml` or `.clippy.toml` in every crate directory below the workspace root. Implementation: iterate workspace members, check each member dir for clippy.toml presence (excluding the workspace root itself). The fix: remove the per-crate file and move any custom entries to the workspace-level file (or per-function `#[allow]` with reason).
+1. **Inner crate has clippy.toml (R-CLIP-SHADOW — new check):** ERROR. It shadows the policy-root config completely. ALL guardrail bans silently lost for that subtree. validate must allow `clippy.toml` only at:
+   - validation root
+   - workspace roots
+   - standalone package roots not belonging to a workspace
+   The fix: remove the nested file and move custom entries to the nearest allowed policy root (or use per-function `#[allow]` with reason).
 
 2. **Root packages with no clippy.toml:** Generate one at root with library profile (packages are libraries). If `[rust.packages]` is in guardrail3.toml, generate.
 
-3. **Standalone crate not in guardrail3.toml (substack-publisher):** `rs init` must discover it. Currently doesn't because `discover_nested_workspaces` only finds `[workspace]` Cargo.tomls. Fix: also check for `[package]` Cargo.tomls in `apps/*/`.
+3. **Standalone crate not in guardrail3.toml:** it still counts as a valid package-level policy root if it is a package root not belonging to a workspace. Clippy placement/coverage must be derived from Rust project structure, not hex-arch folder naming.
 
 4. **User's file has no guardrail3 header comment:** First merge adds the entries but does NOT add the "GENERATED by guardrail3" header. The file remains user-owned but guardrail-compliant.
 
