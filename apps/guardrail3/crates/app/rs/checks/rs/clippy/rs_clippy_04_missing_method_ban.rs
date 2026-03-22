@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 
 use crate::domain::report::{CheckResult, Severity};
 
-use super::clippy_support::{EXPECTED_METHOD_BANS, ban_paths};
+use super::clippy_support::ban_paths;
 use super::inputs::ConfigClippyInput;
 
 const ID: &str = "RS-CLIPPY-04";
@@ -15,8 +15,8 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
     let found: BTreeSet<_> = ban_paths(parsed, "disallowed-methods")
         .into_iter()
         .collect();
-    for expected in EXPECTED_METHOD_BANS {
-        if found.contains(*expected) {
+    for expected in super::clippy_support::expected_method_bans(input.garde_enabled()) {
+        if found.contains(expected) {
             results.push(
                 CheckResult {
                     id: ID.to_owned(),

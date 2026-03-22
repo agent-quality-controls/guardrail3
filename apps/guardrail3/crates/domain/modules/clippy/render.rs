@@ -3,10 +3,14 @@ use std::fmt::Write;
 use crate::domain::modules::Module;
 
 use super::macros::MACRO_DEBUGGING;
-use super::methods::{library_profile_methods, service_profile_methods};
+use super::methods::{
+    METHOD_GARDE_DESERIALIZATION, library_profile_methods, service_profile_methods,
+};
 use super::settings::SETTINGS;
 use super::thresholds::THRESHOLDS;
-use super::types::{library_profile_types, pure_layer_extra_types, service_profile_types};
+use super::types::{
+    TYPE_GARDE_EXTRACTORS, library_profile_types, pure_layer_extra_types, service_profile_types,
+};
 
 /// Build the full clippy.toml content for a workspace root or crate.
 ///
@@ -15,15 +19,19 @@ use super::types::{library_profile_types, pure_layer_extra_types, service_profil
 pub fn build_clippy_toml(
     profile: &str,
     is_pure_layer: bool,
+    garde_enabled: bool,
     extra_methods: &str,
     extra_types: &str,
 ) -> String {
-    let methods = match profile {
+    let mut methods = match profile {
         "library" => library_profile_methods(),
         _ => service_profile_methods(),
     };
+    if !garde_enabled {
+        methods.retain(|module| module.name != METHOD_GARDE_DESERIALIZATION.name);
+    }
 
-    let types = match profile {
+    let mut types = match profile {
         "library" => library_profile_types(),
         _ => {
             let mut profile_types = service_profile_types();
@@ -33,6 +41,9 @@ pub fn build_clippy_toml(
             profile_types
         }
     };
+    if !garde_enabled {
+        types.retain(|module| module.name != TYPE_GARDE_EXTRACTORS.name);
+    }
 
     let mut out = String::new();
     out.push_str(

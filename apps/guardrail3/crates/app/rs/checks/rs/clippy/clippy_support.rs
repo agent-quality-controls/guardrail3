@@ -62,16 +62,41 @@ pub const EXPECTED_METHOD_BANS: &[&str] = SERVICE_METHOD_PATHS;
 pub const EXPECTED_TYPE_BANS: &[&str] = BASE_TYPE_PATHS;
 pub const EXPECTED_LIBRARY_GLOBAL_STATE_TYPES: &[&str] = LIBRARY_EXTRA_TYPE_PATHS;
 
-pub fn expected_type_bans(profile_name: Option<&str>) -> Vec<&'static str> {
+const GARDE_METHOD_BANS: &[&str] = &[
+    "serde_json::from_str",
+    "serde_json::from_slice",
+    "serde_json::from_value",
+    "serde_json::from_reader",
+    "reqwest::Response::json",
+    "toml::from_str",
+    "serde_yaml::from_str",
+    "serde_yaml::from_reader",
+];
+
+const GARDE_TYPE_BANS: &[&str] = &[
+    "axum::extract::Json",
+    "axum::Json",
+    "axum::extract::Query",
+    "axum::extract::Form",
+];
+
+pub fn expected_type_bans(profile_name: Option<&str>, garde_enabled: bool) -> Vec<&'static str> {
     let mut bans = EXPECTED_TYPE_BANS.to_vec();
+    if !garde_enabled {
+        bans.retain(|path| !GARDE_TYPE_BANS.contains(path));
+    }
     if profile_name == Some("library") {
         bans.extend(EXPECTED_LIBRARY_GLOBAL_STATE_TYPES);
     }
     bans
 }
 
-pub fn expected_method_bans() -> Vec<&'static str> {
-    EXPECTED_METHOD_BANS.to_vec()
+pub fn expected_method_bans(garde_enabled: bool) -> Vec<&'static str> {
+    let mut bans = EXPECTED_METHOD_BANS.to_vec();
+    if !garde_enabled {
+        bans.retain(|path| !GARDE_METHOD_BANS.contains(path));
+    }
+    bans
 }
 
 pub fn parse_ban_entries(parsed: &toml::Value, key: &str) -> Vec<BanEntry> {
@@ -117,23 +142,25 @@ pub fn threshold_value(parsed: &toml::Value, key: &str) -> Option<i64> {
 }
 
 pub fn known_top_level_keys() -> Vec<&'static str> {
-    let mut keys: Vec<_> = THRESHOLD_VALUES.iter().map(|(key, _)| *key).collect();
-    keys.extend([
+    THRESHOLD_VALUES.iter().map(|(key, _)| *key).collect()
+}
+
+pub fn managed_non_threshold_keys() -> Vec<&'static str> {
+    vec![
         "disallowed-methods",
         "disallowed-types",
         "disallowed-macros",
         "avoid-breaking-exported-api",
         "allow-dbg-in-tests",
         "allow-print-in-tests",
-        "msrv",
-        "allowed-duplicate-crates",
-        "arithmetic-side-effects-allowed",
-        "allow-expect-in-tests",
-        "allow-unwrap-in-tests",
-        "doc-valid-idents",
-        "await-holding-invalid-types",
-    ]);
-    keys
+    ]
+}
+
+pub fn looks_like_managed_typo(key: &str) -> bool {
+    known_top_level_keys()
+        .into_iter()
+        .chain(managed_non_threshold_keys())
+        .any(|managed| normalized_key_distance(key, managed) <= 2)
 }
 
 pub fn is_placeholder_reason(reason: &str) -> bool {
@@ -153,4 +180,33 @@ pub fn expected_bool_value(key: &str) -> Option<bool> {
         "allow-print-in-tests" => Some(ALLOW_PRINT_IN_TESTS),
         _ => None,
     }
+}
+
+fn normalized_key_distance(a: &str, b: &str) -> usize {
+    let a = a.replace(['-', '_'], "");
+    let b = b.replace(['-', '_'], "");
+    levenshtein(a.as_bytes(), b.as_bytes())
+}
+
+fn levenshtein(a: &[u8], b: &[u8]) -> usize {
+    if a.is_empty() {
+        return b.len();
+    }
+    if b.is_empty() {
+        return a.len();
+    }
+
+    let mut prev: Vec<usize> = (0..=b.len()).collect();
+    let mut curr = vec![0usize; b.len() + 1];
+
+    for (i, a_byte) in a.iter().enumerate() {
+        curr[0] = i + 1;
+        for (j, b_byte) in b.iter().enumerate() {
+            let cost = usize::from(a_byte != b_byte);
+            curr[j + 1] = (curr[j] + 1).min(prev[j + 1] + 1).min(prev[j] + cost);
+        }
+        prev.clone_from(&curr);
+    }
+
+    prev[b.len()]
 }

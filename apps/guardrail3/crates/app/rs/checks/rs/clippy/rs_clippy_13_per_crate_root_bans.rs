@@ -33,14 +33,15 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
         return;
     };
 
-    let expected_methods: BTreeSet<_> = expected_method_bans()
+    let expected_methods: BTreeSet<_> = expected_method_bans(input.garde_enabled())
         .into_iter()
         .map(str::to_owned)
         .collect();
-    let expected_types: BTreeSet<_> = expected_type_bans(input.profile_name)
-        .into_iter()
-        .map(str::to_owned)
-        .collect();
+    let expected_types: BTreeSet<_> =
+        expected_type_bans(input.profile_name(), input.garde_enabled())
+            .into_iter()
+            .map(str::to_owned)
+            .collect();
     let expected_macros: BTreeSet<_> = EXPECTED_MACRO_BANS
         .iter()
         .map(|path| (*path).to_owned())

@@ -151,19 +151,20 @@ Steady-parent reality:
 - If a guardrail baseline path is MISSING — add on generate, error on validate.
 - If user has EXTRA paths beyond baseline — preserve them.
 
-**Service profile baseline paths (27 methods):**
+**Service profile baseline paths (34 methods, or 26 when garde is disabled):**
 env-vars: `std::env::var`, `std::env::var_os`, `std::env::vars`
 env-mutation: `std::env::set_var`, `std::env::remove_var`
-process: `std::process::exit`, `std::process::Command::new`
+process: `std::process::exit`, `std::process::abort`, `std::process::Command::new`
 sleep: `std::thread::sleep`
 filesystem (15): `std::fs::read_to_string`, `read`, `read_dir`, `read_link`, `write`, `remove_file`, `remove_dir_all`, `create_dir_all`, `rename`, `copy`, `metadata`, `symlink_metadata`, `canonicalize`, `set_permissions`, `hard_link`
 http-client: `reqwest::Client::new`, `reqwest::Client::builder`
 garde-deserialization (8): `serde_json::from_str`, `from_slice`, `from_value`, `from_reader`, `reqwest::Response::json`, `toml::from_str`, `serde_yaml::from_str`, `serde_yaml::from_reader`
 
-**Service profile baseline paths (7 types, or 11 with pure layer):**
+**Service profile baseline paths (10 types, or 14 with pure layer / library profile):**
 collections: `std::collections::HashMap`, `std::collections::HashSet`
 sync: `std::sync::Mutex`, `std::sync::RwLock`
 filesystem: `std::fs::File`
+dynamic typing: `std::any::Any`
 garde-extractors: `axum::extract::Json`, `axum::Json`, `axum::extract::Query`, `axum::extract::Form`
 pure-layer-only (4): `std::sync::LazyLock`, `std::sync::OnceLock`, `once_cell::sync::Lazy`, `once_cell::sync::OnceCell`
 
@@ -171,7 +172,7 @@ pure-layer-only (4): `std::sync::LazyLock`, `std::sync::OnceLock`, `once_cell::s
 
 **Garde module is conditional:** only included when `[rust.apps.X.checks] garde = true`.
 When `garde = false`: EXCLUDE `METHOD_GARDE_DESERIALIZATION` (8 paths: serde_json::from_str/slice/value/reader, reqwest::Response::json, toml::from_str, serde_yaml::from_str/from_reader) and `TYPE_GARDE_EXTRACTORS` (4 paths: axum::extract::Json, axum::Json, axum::extract::Query, axum::extract::Form) from baseline.
-Implementation: `build_clippy_toml` needs a `garde_enabled: bool` parameter. Thread from config: `crate_cfg.checks.as_ref().and_then(|c| c.garde).unwrap_or(true)`.
+Implementation: `build_clippy_toml` needs a `garde_enabled: bool` parameter. Thread from config: per-root `checks.garde`, falling back to global `[rust.checks].garde`, default `true`.
 
 ### disallowed-types
 
@@ -240,9 +241,11 @@ For new file:
 
 ## Override mechanism
 
-With merge-managed, the file IS the source of truth. User adds extra bans directly to clippy.toml — guardrail3 won't touch them (they're not baseline paths). No need for addition override files.
+With merge-managed, the file IS the source of truth. User adds extra bans directly to clippy.toml — guardrail3 won't touch them (they're not baseline paths).
 
-**The only override needed: removals.**
+Current generator reality still supports additive local override fragments for methods/types, but the long-term direction is to prefer direct edits in the policy-root file and keep explicit override files only for removals.
+
+**The preferred override type is removals.**
 
 `.guardrail3/overrides/apps/{name}/clippy-methods-remove.toml` — baseline paths to SKIP for this app.
 `.guardrail3/overrides/apps/{name}/clippy-types-remove.toml` — baseline types to SKIP for this app.

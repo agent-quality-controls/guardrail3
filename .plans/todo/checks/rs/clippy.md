@@ -1,8 +1,8 @@
 # RS-CLIPPY — clippy.toml checker (22 rules)
 
-**Input:** clippy.toml at allowed Rust policy roots
+**Input:** `clippy.toml` / `.clippy.toml` at allowed Rust policy roots
 **Parser:** TOML (`toml::Value`)
-**Current code:** `crates/app/rs/validate/clippy_coverage.rs` + `config_files.rs`
+**Current code:** `crates/app/rs/checks/rs/clippy/**` + `crates/domain/modules/clippy/**`
 
 ## Decisions frozen from architecture/policy review
 
@@ -68,7 +68,7 @@ guardrail3 manages these clippy keys:
   - `disallowed-types`
   - `disallowed-macros`
 
-Other clippy keys may exist, but `RS-CLIPPY-19` should only warn for keys that are truly unknown / likely typos, not merely “not guardrail-managed”.
+Other clippy keys may exist, but `RS-CLIPPY-19` should only warn for keys that look like typos of guardrail-managed keys, not merely “not guardrail-managed”.
 
 ### Frozen threshold values
 
@@ -274,7 +274,7 @@ The generator and checker must match exactly.
 ### RS-CLIPPY-19: unrecognized top-level keys
 - **Old ID:** NEW (from audit)
 - **Severity:** Warn
-- **What:** Flag any top-level key not in the known set (disallowed-methods, disallowed-types, disallowed-macros, thresholds, etc.). Catches typos like `disalowed-methods` that silently have no effect.
+- **What:** Flag top-level keys that look like typos of guardrail-managed keys (for example `disalowed-methods`). Do NOT warn on arbitrary user-owned clippy keys just because guardrail3 does not manage them.
 - **Status:** Implemented
 
 ### RS-CLIPPY-20: disallowed-macros validation

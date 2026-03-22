@@ -13,7 +13,7 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
     };
 
     let found: BTreeSet<_> = ban_paths(parsed, "disallowed-types").into_iter().collect();
-    for expected in expected_type_bans(input.profile_name) {
+    for expected in expected_type_bans(input.profile_name(), input.garde_enabled()) {
         if found.contains(expected) {
             results.push(
                 CheckResult {

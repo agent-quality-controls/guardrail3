@@ -273,6 +273,17 @@ pub(super) fn generate_rust_files(
             .as_deref()
             .or(crate_cfg.profile.as_deref())
             .unwrap_or(profile);
+        let effective_garde = crate_cfg
+            .checks
+            .as_ref()
+            .and_then(|checks| checks.garde)
+            .or_else(|| {
+                cfg.rust
+                    .as_ref()
+                    .and_then(|rust| rust.checks.as_ref())
+                    .and_then(|checks| checks.garde)
+            })
+            .unwrap_or(true);
 
         let is_pure = effective_profile == "library"
             || crate_cfg.layer.as_deref().is_some_and(|l| l == "pure");
@@ -282,6 +293,7 @@ pub(super) fn generate_rust_files(
         let crate_clippy = clippy::build_clippy_toml(
             effective_profile,
             is_pure,
+            effective_garde,
             &local.clippy_methods,
             &local.clippy_types,
         );
@@ -320,6 +332,16 @@ pub(super) fn generate_rust_files(
         let pkg_profile = pkg_cfg
             .and_then(|c| c.type_.as_deref().or(c.profile.as_deref()))
             .unwrap_or("library");
+        let pkg_garde = pkg_cfg
+            .and_then(|c| c.checks.as_ref())
+            .and_then(|checks| checks.garde)
+            .or_else(|| {
+                cfg.rust
+                    .as_ref()
+                    .and_then(|rust| rust.checks.as_ref())
+                    .and_then(|checks| checks.garde)
+            })
+            .unwrap_or(true);
         let pkg_is_pure = pkg_profile == "library";
 
         files.push(GeneratedFile {
@@ -327,6 +349,7 @@ pub(super) fn generate_rust_files(
             content: clippy::build_clippy_toml(
                 pkg_profile,
                 pkg_is_pure,
+                pkg_garde,
                 &local.clippy_methods,
                 &local.clippy_types,
             ),
@@ -358,6 +381,11 @@ pub(super) fn generate_rust_files(
             content: clippy::build_clippy_toml(
                 profile,
                 root_is_pure,
+                cfg.rust
+                    .as_ref()
+                    .and_then(|rust| rust.checks.as_ref())
+                    .and_then(|checks| checks.garde)
+                    .unwrap_or(true),
                 &local.clippy_methods,
                 &local.clippy_types,
             ),

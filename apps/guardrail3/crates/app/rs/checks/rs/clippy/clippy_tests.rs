@@ -171,6 +171,68 @@ fn nested_member_clippy_is_forbidden() {
 }
 
 #[test]
+fn nested_dot_clippy_is_forbidden() {
+    let tree = ProjectTree {
+        root: PathBuf::from("/tmp/project"),
+        structure: BTreeMap::from([
+            (
+                "".to_owned(),
+                DirEntry {
+                    dirs: vec!["workspace".to_owned()],
+                    files: vec![],
+                },
+            ),
+            (
+                "workspace".to_owned(),
+                DirEntry {
+                    dirs: vec!["crates".to_owned()],
+                    files: vec!["Cargo.toml".to_owned(), "clippy.toml".to_owned()],
+                },
+            ),
+            (
+                "workspace/crates".to_owned(),
+                DirEntry {
+                    dirs: vec!["core".to_owned()],
+                    files: vec![],
+                },
+            ),
+            (
+                "workspace/crates/core".to_owned(),
+                DirEntry {
+                    dirs: vec![],
+                    files: vec!["Cargo.toml".to_owned(), ".clippy.toml".to_owned()],
+                },
+            ),
+        ]),
+        content: BTreeMap::from([
+            (
+                "workspace/Cargo.toml".to_owned(),
+                "[workspace]\nmembers = [\"crates/*\"]".to_owned(),
+            ),
+            (
+                "workspace/crates/core/Cargo.toml".to_owned(),
+                "[package]\nname = \"core\"".to_owned(),
+            ),
+            (
+                "workspace/clippy.toml".to_owned(),
+                canonical_clippy_toml().to_owned(),
+            ),
+            (
+                "workspace/crates/core/.clippy.toml".to_owned(),
+                canonical_clippy_toml().to_owned(),
+            ),
+        ]),
+    };
+
+    let results = check(&tree);
+    assert!(results.iter().any(|r| {
+        r.id == "RS-CLIPPY-12"
+            && !r.inventory
+            && r.file.as_deref() == Some("workspace/crates/core/.clippy.toml")
+    }));
+}
+
+#[test]
 fn allowed_workspace_root_must_be_self_contained() {
     let tree = ProjectTree {
         root: PathBuf::from("/tmp/project"),
@@ -235,6 +297,126 @@ disallowed-macros = []
             && r.message.contains("thresholds")
             && r.message.contains("avoid-breaking-exported-api")
     }));
+}
+
+#[test]
+fn local_library_root_uses_library_profile_rules() {
+    let tree = ProjectTree {
+        root: PathBuf::from("/tmp/project"),
+        structure: BTreeMap::from([
+            (
+                "".to_owned(),
+                DirEntry {
+                    dirs: vec!["apps".to_owned()],
+                    files: vec!["guardrail3.toml".to_owned(), "clippy.toml".to_owned()],
+                },
+            ),
+            (
+                "apps".to_owned(),
+                DirEntry {
+                    dirs: vec!["libsite".to_owned()],
+                    files: vec![],
+                },
+            ),
+            (
+                "apps/libsite".to_owned(),
+                DirEntry {
+                    dirs: vec!["crates".to_owned()],
+                    files: vec!["Cargo.toml".to_owned(), "clippy.toml".to_owned()],
+                },
+            ),
+            (
+                "apps/libsite/crates".to_owned(),
+                DirEntry {
+                    dirs: vec!["core".to_owned()],
+                    files: vec![],
+                },
+            ),
+            (
+                "apps/libsite/crates/core".to_owned(),
+                DirEntry {
+                    dirs: vec![],
+                    files: vec!["Cargo.toml".to_owned()],
+                },
+            ),
+        ]),
+        content: BTreeMap::from([
+            (
+                "guardrail3.toml".to_owned(),
+                "[profile]\nname = \"service\"\n[rust.apps.libsite]\ntype = \"library\"".to_owned(),
+            ),
+            (
+                "apps/libsite/Cargo.toml".to_owned(),
+                "[workspace]\nmembers = [\"crates/*\"]".to_owned(),
+            ),
+            (
+                "apps/libsite/crates/core/Cargo.toml".to_owned(),
+                "[package]\nname = \"core\"".to_owned(),
+            ),
+            ("clippy.toml".to_owned(), canonical_clippy_toml().to_owned()),
+            (
+                "apps/libsite/clippy.toml".to_owned(),
+                canonical_clippy_toml().to_owned(),
+            ),
+        ]),
+    };
+
+    let results = check(&tree);
+    assert!(results.iter().any(|r| {
+        r.id == "RS-CLIPPY-14"
+            && !r.inventory
+            && r.file.as_deref() == Some("apps/libsite/clippy.toml")
+            && r.message.contains("LazyLock")
+    }));
+}
+
+#[test]
+fn garde_disabled_does_not_require_garde_bans() {
+    let tree = ProjectTree {
+        root: PathBuf::from("/tmp/project"),
+        structure: BTreeMap::from([(
+            "".to_owned(),
+            DirEntry {
+                dirs: vec![],
+                files: vec!["Cargo.toml".to_owned(), "guardrail3.toml".to_owned(), "clippy.toml".to_owned()],
+            },
+        )]),
+        content: BTreeMap::from([
+            ("Cargo.toml".to_owned(), "[workspace]\nmembers = []".to_owned()),
+            (
+                "guardrail3.toml".to_owned(),
+                "[profile]\nname = \"service\"\n[rust.checks]\ngarde = false".to_owned(),
+            ),
+            (
+                "clippy.toml".to_owned(),
+                canonical_clippy_toml()
+                    .replace("{ path = \"serde_json::from_str\", reason = \"good enough reason text\" },\n", "")
+                    .replace("{ path = \"serde_json::from_slice\", reason = \"good enough reason text\" },\n", "")
+                    .replace("{ path = \"serde_json::from_value\", reason = \"good enough reason text\" },\n", "")
+                    .replace("{ path = \"serde_json::from_reader\", reason = \"good enough reason text\" },\n", "")
+                    .replace("{ path = \"reqwest::Response::json\", reason = \"good enough reason text\" },\n", "")
+                    .replace("{ path = \"toml::from_str\", reason = \"good enough reason text\" },\n", "")
+                    .replace("{ path = \"serde_yaml::from_str\", reason = \"good enough reason text\" },\n", "")
+                    .replace("{ path = \"serde_yaml::from_reader\", reason = \"good enough reason text\" },\n", "")
+                    .replace("{ path = \"axum::extract::Json\", reason = \"good enough reason text\" },\n", "")
+                    .replace("{ path = \"axum::Json\", reason = \"good enough reason text\" },\n", "")
+                    .replace("{ path = \"axum::extract::Query\", reason = \"good enough reason text\" },\n", "")
+                    .replace("{ path = \"axum::extract::Form\", reason = \"good enough reason text\" },\n", ""),
+            ),
+        ]),
+    };
+
+    let results = check(&tree);
+    assert!(
+        !results
+            .iter()
+            .any(|r| r.id == "RS-CLIPPY-04" && r.message.contains("serde_json::from_str"))
+    );
+    assert!(
+        !results
+            .iter()
+            .any(|r| r.id == "RS-CLIPPY-05" && r.message.contains("axum::extract::Json"))
+    );
 }
 
 #[test]
