@@ -32,3 +32,7 @@ pub fn check(input: &RustfmtRootInput<'_>, results: &mut Vec<CheckResult>) {
         });
     }
 }
+
+#[cfg(test)]
+#[path = "rs_fmt_06_edition_mismatch_tests.rs"]
+mod tests;

@@ -4,14 +4,16 @@
 
 ## Principles
 
-1. **One rule, one file.** Every check is a single `.rs` file, independently testable, greppable by ID.
-2. **One rule group, one folder.** Rules that check the same file type live in one directory with a `mod.rs` orchestrator.
-3. **`ProjectTree` is the repository snapshot.** The walker builds it once. It is the only shared project-wide discovery object. (Replaces the old `CrawlResult` + `fs: &dyn FileSystem` pattern.)
-4. **There is an explicit middle layer between `ProjectTree` and rules.** Family orchestrators do two jobs:
+1. **One rule, one production file.** Every check is a single `.rs` file, independently testable, greppable by ID.
+2. **One rule, one test file.** Every rule has its own sidecar `*_tests.rs` file. Family-wide grouped test files are forbidden.
+3. **One rule group, one folder.** Rules that check the same file type live in one directory with a `mod.rs` orchestrator.
+4. **`ProjectTree` is the repository snapshot.** The walker builds it once. It is the only shared project-wide discovery object. (Replaces the old `CrawlResult` + `fs: &dyn FileSystem` pattern.)
+5. **There is an explicit middle layer between `ProjectTree` and rules.** Family orchestrators do two jobs:
    - read the `ProjectTree` / streamed source files
    - construct minimal typed inputs for each rule
-5. **Rules are pure functions over typed inputs.** Input → errors. No I/O, no tree-walking, no path discovery, no hidden state.
-6. **Source files are the exception.** Source scan rules (`.rs`, `.ts`) get file content streamed by the orchestrator via `fs` — not cached in the tree. The tree gives discovery (which files exist), the orchestrator reads content on demand.
+6. **Rules are pure functions over typed inputs.** Input → errors. No I/O, no tree-walking, no path discovery, no hidden state.
+7. **Grouped rule modules are forbidden.** Files like `rs_deny_bans.rs` or `rs_clippy_thresholds.rs` that hide multiple rule IDs behind one module boundary are architecturally wrong.
+8. **Source files are the exception.** Source scan rules (`.rs`, `.ts`) get file content streamed by the orchestrator via `fs` — not cached in the tree. The tree gives discovery (which files exist), the orchestrator reads content on demand.
 
 ## Pipeline
 
@@ -92,6 +94,26 @@ This keeps rules small and prevents every rule from re-implementing its own disc
 **File names:** `rs_clippy_04_method_bans.rs` — prefix matches the ID, 1-2 word suffix describes the rule.
 
 **Folder names:** `checks/rs/clippy/`, `checks/ts/eslint/`, `checks/hooks/shared/`
+
+## Mapping contract
+
+This is a hard structural contract, not style guidance.
+
+- exactly one rule ID per production file
+- exactly one rule-specific test file per production file
+- `mod.rs` orchestrates only
+- `facts.rs` contains normalized shared family facts only
+- `inputs.rs` contains minimal typed rule inputs only
+- support/helper files may contain only shared baseline data and normalization helpers
+
+Forbidden:
+
+- grouped concern files that emit multiple rule IDs
+- grouped threshold files
+- family-wide `*_tests.rs` files
+- temporary “we will split it later” layouts
+
+If one file emits more than one rule ID, the structure is wrong and must be split.
 
 ## Folder structure (example, not exhaustive)
 
@@ -264,6 +286,17 @@ This is where shared parsing and normalization lives. If two rules need the same
 ## Testing
 
 **Rule tests:** construct the minimal typed input struct and call the rule function. No tree, no filesystem, microseconds.
+
+Every rule test lives in its own sidecar file:
+
+```rust
+// rs_fmt_01_exists.rs
+#[cfg(test)]
+#[path = "rs_fmt_01_exists_tests.rs"]
+mod tests;
+```
+
+Family-wide grouped test files such as `fmt_tests.rs`, `cargo_tests.rs`, or `deny_tests.rs` are forbidden.
 
 **Orchestrator tests:** construct a `ProjectTree` in code, call the orchestrator, verify extraction + wiring. No filesystem unless the family is a streamed-source family.
 

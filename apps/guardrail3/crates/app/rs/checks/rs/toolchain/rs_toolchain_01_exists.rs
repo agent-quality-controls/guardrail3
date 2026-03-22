@@ -29,3 +29,7 @@ pub fn check(input: &ToolchainRootInput<'_>, results: &mut Vec<CheckResult>) {
         }),
     }
 }
+
+#[cfg(test)]
+#[path = "rs_toolchain_01_exists_tests.rs"]
+mod tests;

@@ -45,3 +45,7 @@ pub fn check(input: &WorkspaceCargoInput<'_>, results: &mut Vec<CheckResult>) {
         );
     }
 }
+
+#[cfg(test)]
+#[path = "rs_cargo_07_priority_order_tests.rs"]
+mod tests;

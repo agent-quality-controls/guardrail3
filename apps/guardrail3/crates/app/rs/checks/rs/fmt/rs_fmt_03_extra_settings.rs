@@ -50,3 +50,7 @@ fn expected_keys() -> BTreeSet<&'static str> {
     .into_iter()
     .collect()
 }
+
+#[cfg(test)]
+#[path = "rs_fmt_03_extra_settings_tests.rs"]
+mod tests;

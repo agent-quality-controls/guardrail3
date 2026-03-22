@@ -113,8 +113,8 @@ Pattern per family:
 - `mod.rs` — orchestrator
 - `facts.rs` — normalized family facts
 - `inputs.rs` — minimal typed rule inputs
-- one file per rule
-- sidecar test file next to the family module
+- exactly one production file per rule
+- exactly one sidecar test file per rule
 
 Example family:
 - [`apps/guardrail3/crates/app/rs/checks/rs/fmt`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/checks/rs/fmt)
@@ -131,24 +131,26 @@ Do not treat it as fully migrated production wiring yet. It is the reference sha
 
 Do not default to external integration tests for these family modules.
 
-The preferred pattern for new family code is:
-- sidecar test file next to the module
+The required pattern for new family code is:
+- each rule file has its own sidecar test file
 - wired with:
 
 ```rust
 #[cfg(test)]
-#[path = "fmt_tests.rs"]
+#[path = "rs_fmt_01_exists_tests.rs"]
 mod tests;
 ```
 
 Reason:
 - keeps tests close to the family
 - avoids widening visibility just for tests
-- matches the repo’s existing sidecar pattern
+- preserves exact one-rule/one-test traceability
 
 Avoid:
 - inline `mod tests { ... }` bodies in production files
 - exposing internals only for integration-test access
+- family-wide grouped sidecar files such as `fmt_tests.rs`, `cargo_tests.rs`, `clippy_tests.rs`, `deny_tests.rs`
+- grouped production files such as `rs_clippy_thresholds.rs` or `rs_deny_bans.rs`
 
 ## Implementation Order
 
@@ -208,7 +210,7 @@ Do:
 - keep rules pure and tiny
 - keep extraction/parsing in orchestrators
 - build one family at a time
-- prefer sidecar test files
+- require one rule file and one rule-specific sidecar test file
 - use structured parsers, never regex/grep/`contains()` on config/source semantics
 
 Don’t:
@@ -216,6 +218,8 @@ Don’t:
 - give rules oversized inputs “for convenience”
 - let rules crawl the tree or filesystem
 - use inline production-file test modules as the default
+- bundle multiple rule IDs into one production file
+- bundle multiple rules into one family-wide test file
 - update docs as if old `CLAUDE.md` architecture were still current
 
 ## Cold Start Reading List
@@ -234,7 +238,7 @@ If starting fresh, read in this order:
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **guardrail3** (475 symbols, 1155 relationships, 34 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **guardrail3** (4093 symbols, 14939 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 

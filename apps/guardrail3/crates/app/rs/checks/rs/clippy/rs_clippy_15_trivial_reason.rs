@@ -35,3 +35,7 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "rs_clippy_15_trivial_reason_tests.rs"]
+mod tests;

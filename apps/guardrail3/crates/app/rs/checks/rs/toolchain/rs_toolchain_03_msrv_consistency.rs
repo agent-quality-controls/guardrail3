@@ -88,3 +88,7 @@ fn parse_version(raw: &str) -> Option<(u64, u64, u64)> {
     let patch = parts.next().unwrap_or("0").parse().ok()?;
     Some((major, minor, patch))
 }
+
+#[cfg(test)]
+#[path = "rs_toolchain_03_msrv_consistency_tests.rs"]
+mod tests;

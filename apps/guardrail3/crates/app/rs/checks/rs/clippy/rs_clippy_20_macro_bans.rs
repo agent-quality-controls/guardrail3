@@ -40,3 +40,7 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "rs_clippy_20_macro_bans_tests.rs"]
+mod tests;

@@ -80,3 +80,7 @@ pub fn check(input: &WorkspaceCargoInput<'_>, results: &mut Vec<CheckResult>) {
         });
     }
 }
+
+#[cfg(test)]
+#[path = "rs_cargo_05_workspace_metadata_tests.rs"]
+mod tests;

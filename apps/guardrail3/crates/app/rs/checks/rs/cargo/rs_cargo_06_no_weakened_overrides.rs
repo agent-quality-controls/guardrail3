@@ -71,3 +71,7 @@ fn check_family(
         }
     }
 }
+
+#[cfg(test)]
+#[path = "rs_cargo_06_no_weakened_overrides_tests.rs"]
+mod tests;

@@ -4,6 +4,19 @@
 **Parser:** TOML (`toml::Value`)
 **Current code:** `crates/app/rs/checks/rs/clippy/**` + `crates/domain/modules/clippy/**`
 
+## Implementation mapping contract
+
+- exactly one `RS-CLIPPY-*` rule ID per production file
+- exactly one sidecar `*_tests.rs` file per production rule file
+- `mod.rs` orchestrates only
+- `facts.rs`, `inputs.rs`, and `clippy_support.rs` may contain shared facts, typed inputs, canonical baseline data, and normalization helpers only
+
+Forbidden:
+
+- grouped threshold files such as `rs_clippy_thresholds.rs`
+- grouped family test files such as `clippy_tests.rs`
+- helper files that hide multiple rule predicates behind one API
+
 ## Decisions frozen from architecture/policy review
 
 These are the current contract decisions for the clippy family. They override older drift across `config_files.rs`, `clippy_coverage.rs`, `domain/modules/clippy/mod.rs`, and the by-file design docs.

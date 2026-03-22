@@ -143,3 +143,7 @@ pub fn check(input: &WorkspaceCargoInput<'_>, results: &mut Vec<CheckResult>) {
         );
     }
 }
+
+#[cfg(test)]
+#[path = "rs_cargo_01_workspace_lints_tests.rs"]
+mod tests;

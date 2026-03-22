@@ -29,3 +29,7 @@ pub fn check(input: &RustfmtRootInput<'_>, results: &mut Vec<CheckResult>) {
         }),
     }
 }
+
+#[cfg(test)]
+#[path = "rs_fmt_01_exists_tests.rs"]
+mod tests;

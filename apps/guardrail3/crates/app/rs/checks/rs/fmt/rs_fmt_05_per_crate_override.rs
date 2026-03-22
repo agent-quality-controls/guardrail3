@@ -21,3 +21,7 @@ pub fn check(input: &RustfmtExtraConfigInput<'_>, results: &mut Vec<CheckResult>
         inventory: false,
     });
 }
+
+#[cfg(test)]
+#[path = "rs_fmt_05_per_crate_override_tests.rs"]
+mod tests;

@@ -109,3 +109,7 @@ fn push_missing(rel: &str, key: &str, expected: impl Display, results: &mut Vec<
         inventory: false,
     });
 }
+
+#[cfg(test)]
+#[path = "rs_fmt_02_settings_tests.rs"]
+mod tests;

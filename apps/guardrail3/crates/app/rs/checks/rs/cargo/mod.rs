@@ -11,6 +11,7 @@ mod rs_cargo_06_no_weakened_overrides;
 mod rs_cargo_07_priority_order;
 mod rs_cargo_08_resolver;
 mod rs_cargo_09_member_edition_drift;
+mod rs_cargo_10_missing_member_cargo;
 
 use crate::domain::project_tree::ProjectTree;
 use crate::domain::report::CheckResult;
@@ -33,10 +34,7 @@ pub fn check(tree: &ProjectTree) -> Vec<CheckResult> {
     rs_cargo_05_workspace_metadata::check(&workspace, &mut results);
     rs_cargo_07_priority_order::check(&workspace, &mut results);
     rs_cargo_08_resolver::check(&workspace, &mut results);
-    rs_cargo_04_lint_inheritance::check_missing_member_cargos(
-        &declared_vs_discovered,
-        &mut results,
-    );
+    rs_cargo_10_missing_member_cargo::check(&declared_vs_discovered, &mut results);
 
     for member in &facts.members {
         let input = WorkspaceMemberInput::new(&facts.workspace, member);
@@ -49,5 +47,4 @@ pub fn check(tree: &ProjectTree) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-#[path = "cargo_tests.rs"]
-mod tests;
+mod test_support;

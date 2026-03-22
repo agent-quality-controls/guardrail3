@@ -37,7 +37,10 @@ Config resolution is identical (walk-up, nearest wins, crosses workspace boundar
 - `apps/substack-publisher/deny.toml` (68 lines)
 - NO root deny.toml — root workspace packages have no deny checking
 
-**Rule: one deny.toml per Rust workspace/standalone crate. Same as clippy.toml.**
+**Checker rule:** deny placement follows the same root/coverage model as clippy:
+- allowed only at validation root, workspace roots, and standalone package roots not inside a workspace
+- every Rust root must be covered by an effective deny config
+- nested deny configs below an allowed root are forbidden unless the deeper directory is itself another allowed root
 
 ## Contents — what cargo-deny supports
 
@@ -49,10 +52,10 @@ deny.toml has 5 top-level sections: `[graph]`, `[bans]`, `[licenses]`, `[advisor
 - `all-features = true`
 - `no-default-features = false`
 
-**`[bans]` settings** — guardrail defaults, user can relax with EXCEPTION:
+**`[bans]` settings** — split by invariant:
 - `multiple-versions` — guardrail3 says `"deny"`. validator-rust has `"warn"`. substack-publisher has `"warn"` with EXCEPTION comment about AWS SDK. This is like a threshold — user can relax, we warn.
 - `wildcards` — guardrail3 says `"allow"`. substack-publisher has `"warn"`. This one is interesting — the user is STRICTER. Leave it.
-- `allow-wildcard-paths = true` — guardrail default
+- `allow-wildcard-paths = true` — hard guardrail requirement
 - `highlight = "all"` — guardrail default
 
 **`[bans] deny` array** — guardrail baseline ban list (23 crates):
@@ -66,9 +69,10 @@ Each entry has `name` and `wrappers`. The `wrappers` field is the key per-app cu
 
 **`[licenses]`** — guardrail baseline:
 - `allow` array: 12 licenses (MIT, Apache-2.0, BSD-3-Clause, ISC, Unicode-3.0, BSD-2-Clause, BSL-1.0, MPL-2.0, CDLA-Permissive-2.0, OpenSSL, Zlib, CC0-1.0)
-- `confidence-threshold = 0.8`
+- `confidence-threshold = 0.8` minimum; stricter is fine
 - `[licenses.private] ignore = true`
 - User may need ADDITIONAL licenses (e.g., `"Unicode-DFS-2016"` for ICU deps)
+- `[licenses].exceptions` is user-owned for generate but should be inventoried by validate
 
 **`[advisories]`** — 100% user-owned:
 - `ignore` array: completely different per app. These are transitive dep security advisories that the user has reviewed and accepted. Changes with every dep update. guardrail3 has NO baseline here.
@@ -78,11 +82,13 @@ Each entry has `name` and `wrappers`. The `wrappers` field is the key per-app cu
 **`[sources]`** — guardrail baseline:
 - `unknown-registry = "deny"`
 - `unknown-git = "deny"`
-- `allow-registry = ["https://github.com/rust-lang/crates.io-index"]`
+- `allow-registry` must contain crates.io, accepting either:
+  - `https://github.com/rust-lang/crates.io-index`
+  - `sparse+https://index.crates.io/`
 - `allow-git = []`
 - User may need to add git sources for private crates
 
-### User-owned keys guardrail3 must NOT touch:
+### User-owned keys guardrail3 must NOT touch during generate:
 - `[advisories] ignore` — entirely project-specific, changes frequently
 - `[bans] skip` — project-specific duplicate exceptions
 - `[bans] deny` entries with `wrappers` — the wrapper list is per-app (anyhow allowed via texting_robots)
@@ -90,6 +96,8 @@ Each entry has `name` and `wrappers`. The `wrappers` field is the key per-app cu
 - Comments throughout — "NOTE: chrono is intentionally allowed", "EXCEPTION: 18 AWS SDK transitive duplicates"
 - `[licenses] exceptions` — per-crate license exceptions (not present in steady-parent but common)
 - `[sources] allow-git` entries — private crate repos
+
+The checker may still warn or inventory these because they weaken policy or create audit surface.
 
 ## Algorithm
 
@@ -99,7 +107,7 @@ Each entry has `name` and `wrappers`. The `wrappers` field is the key per-app cu
 1. Parse existing deny.toml with toml_edit
 2. [graph]: ensure all-features and no-default-features present with guardrail values
 3. [bans] settings:
-   - multiple-versions: if missing, add "deny". If present, LEAVE (validate warns if not "deny")
+   - multiple-versions: if missing, add "deny". If present, LEAVE (validate warns if weaker)
    - wildcards: if missing, add "allow". If present, LEAVE
    - allow-wildcard-paths: ensure true
    - highlight: ensure "all"
@@ -118,13 +126,13 @@ Each entry has `name` and `wrappers`. The `wrappers` field is the key per-app cu
    - allow array: ensure all 12 baseline licenses present. User extras: LEAVE
    - confidence-threshold: ensure 0.8 or stricter
    - [licenses.private]: ensure ignore = true
-   - [licenses] exceptions: LEAVE (user-owned)
+   - [licenses] exceptions: LEAVE (user-owned, checker inventories)
 8. [advisories]: LEAVE ENTIRELY. 100% user-owned.
 9. [sources]:
    - ensure unknown-registry = "deny"
    - ensure unknown-git = "deny"
    - ensure allow-registry contains crates.io
-   - allow-git: LEAVE (user may have private repos)
+   - allow-git: LEAVE (user may have private repos; checker warns/inventories)
 10. Write back with toml_edit
 ```
 
@@ -173,7 +181,7 @@ Same as clippy.toml — with merge-managed, the file IS the source of truth. Use
 
 3. **User adds licenses to the allow list.** If user adds "Unicode-DFS-2016" to licenses.allow, guardrail3 LEAVES it. The license allow list is additive — more allowed licenses is fine.
 
-4. **User REMOVES a baseline license.** Like removing "MPL-2.0" from the allow list. Next generate adds it back. To legitimately remove: use a deny-licenses-remove.toml override (but this is very unlikely — removing a license from allow makes the project MORE restrictive, which is the user's choice). Actually — removing a license from allow means some deps might fail the check. That's a user choice. Should we re-add it? No — license policy is the user's call. If they remove MPL-2.0, they decided they don't want MPL-2.0 deps. We should only WARN if a baseline license is missing, not force it.
+4. **User REMOVES a baseline license.** This is a real policy decision, not necessarily a bug. Generate should avoid silently broadening license policy by re-adding removed licenses. Validate can still warn or error according to the current `RS-DENY` contract.
 
 5. **Commented-out sections.** validator-rust has commented-out `[[bans.features]]` with a 4-line NOTE. toml_edit preserves comments. The merge algorithm must not re-add a section that exists as a comment — treat commented-out sections as "user deliberately disabled."
 
@@ -189,3 +197,13 @@ Key operations:
 - Parse `[advisories] ignore` as array — but NEVER modify
 - Detect table-array syntax (`[[bans.features]]`) vs inline
 - Preserve ALL comments (especially EXCEPTION and NOTE comments)
+
+## Checker-specific notes
+
+The checker should be stricter than generate in a few places:
+- validate effective coverage, not just file existence
+- detect nested shadow deny configs
+- warn on unknown keys in critical sections
+- warn on duplicate entries in `deny`, `skip`, `ignore`, and `[[bans.features]]`
+- monitor `[bans].allow`, `[licenses].exceptions`, and `allow-git` as escape hatches
+- derive the canonical deny baseline from the generator modules instead of duplicating a prose count

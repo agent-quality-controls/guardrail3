@@ -24,3 +24,7 @@ pub fn check(input: &RustfmtRootInput<'_>, results: &mut Vec<CheckResult>) {
         });
     }
 }
+
+#[cfg(test)]
+#[path = "rs_fmt_07_ignore_escape_hatch_tests.rs"]
+mod tests;

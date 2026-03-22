@@ -36,3 +36,7 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "rs_clippy_18_duplicate_bans_tests.rs"]
+mod tests;

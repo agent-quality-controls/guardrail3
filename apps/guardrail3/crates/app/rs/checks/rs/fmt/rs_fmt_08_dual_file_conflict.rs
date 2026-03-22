@@ -22,3 +22,7 @@ pub fn check(input: &RustfmtDualConflictInput<'_>, results: &mut Vec<CheckResult
         inventory: false,
     });
 }
+
+#[cfg(test)]
+#[path = "rs_fmt_08_dual_file_conflict_tests.rs"]
+mod tests;
