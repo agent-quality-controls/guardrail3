@@ -56,7 +56,7 @@
 | RS-ARCH-05 (R55) | Workspace edition + rust-version metadata | RS-CARGO-05 | Workspace metadata, not hex arch |
 | RS-ARCH-06 (R56) | Publish status inventory | RS-RELEASE-09 | Release concern, not hex arch |
 | RS-ARCH-07 (R57) | Release profile settings inventory | RS-RELEASE-10 | Release concern, not hex arch |
-| RS-ARCH-08 (R58) | Direct std::fs usage | RS-SOURCE-15 | Source scan, not hex arch |
+| RS-ARCH-08 (R58) | Direct std::fs usage | RS-CODE-15 | Code scan, not hex arch |
 
 ## Explicitly rejected
 
@@ -68,5 +68,5 @@
 | Proc-macro crate placement | No proc-macro crates in any current project. Put in `packages/` or configure exception if needed. |
 | Re-export boundary violations | Rust crate boundaries are opaque at compile time. Re-exports don't create transitive Cargo deps. |
 | test/ directory skip abuse | Deliberate behavior. Moving production crate to tests/ breaks all production imports. |
-| Facade-only lib.rs | Belongs in RS-SOURCE-27 (library profile check). Code quality, not architecture. |
+| Facade-only lib.rs | Belongs in RS-CODE-27 (library profile check). Code quality, not architecture. |
 | Adapter-implements-port full verification | Requires cross-crate name resolution syn can't do. RS-HEXARCH-23 (pub trait in adapter = Error) is the cheap heuristic. |
