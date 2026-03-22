@@ -33,7 +33,7 @@ It exists to ensure:
 
 The Rust work currently includes:
 - config families: clippy, deny, fmt, toolchain, cargo
-- source families: source, hexarch, garde, test, deps, release
+- code families: code, hexarch, garde, test, deps, release
 - shared hook architecture and Rust hook checks
 
 The Rust rule inventory lives under:
@@ -160,7 +160,7 @@ Rust families should be built in this order:
 3. `rs/clippy`
 4. `rs/deny`
 5. `rs/cargo`
-6. `rs/source`
+6. `rs/code`
 7. `rs/hexarch`
 8. `rs/deps`
 9. `rs/garde`
@@ -238,7 +238,7 @@ If starting fresh, read in this order:
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **guardrail3** (4140 symbols, 15076 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **guardrail3** (4148 symbols, 15075 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 

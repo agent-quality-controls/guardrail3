@@ -144,7 +144,7 @@ crates/app/checks/
 │   ├── cargo/                              # 9 rules — reads Cargo.toml files
 │   │   ├── mod.rs
 │   │   └── ...
-│   ├── source/                             # 29 rules — reads *.rs (syn AST, streamed)
+│   ├── code/                               # 29 rules — reads *.rs (syn AST, streamed)
 │   │   ├── mod.rs
 │   │   └── ...
 │   ├── hexarch/                            # 18 rules — reads ProjectTree structure
@@ -229,10 +229,10 @@ pub fn check(input: &ClippyTomlInput<'_>, results: &mut Vec<CheckResult>) {
 }
 ```
 
-For source scan (exception — streams file content):
+For Rust code scan (exception — streams file content):
 
 ```rust
-// checks/rs/source/mod.rs — orchestrator
+// checks/rs/code/mod.rs — orchestrator
 
 pub fn check(tree: &ProjectTree, fs: &dyn FileSystem, results: &mut Vec<CheckResult>) {
     // Discover .rs files from tree structure
@@ -267,7 +267,7 @@ Examples:
 - `checks/rs/clippy/mod.rs`
   - reads + parses `clippy.toml`
   - builds `ClippyTomlInput`
-- `checks/rs/source/mod.rs`
+- `checks/rs/code/mod.rs`
   - discovers `.rs` files from the tree
   - streams file content
   - parses `syn::File`
@@ -321,7 +321,7 @@ Build families in ascending complexity:
 3. `rs/clippy`
 4. `rs/deny`
 5. `rs/cargo`
-6. `rs/source`
+6. `rs/code`
 7. `rs/hexarch`
 8. `rs/deps`
 9. `rs/garde`

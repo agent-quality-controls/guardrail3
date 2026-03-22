@@ -33,7 +33,7 @@
 | RS-TEST-13 | Warn | `#[should_panic]` without `expected` string. Matches ANY panic — fragile test. Same philosophy as RS-TEST-07. No tool covers this. AST-based. | Planned |
 | RS-TEST-14 | Warn | Tautological `assert_eq!(lit, lit)` / `assert_ne!(lit, lit)`. Both arguments are `syn::Expr::Lit` — assertion proves nothing. Clippy covers `assert!(true)` but not literal-vs-literal in assert_eq/ne. | Planned |
 | RS-TEST-15 | Warn | Test function with zero assertion macros (assert!, assert_eq!, assert_ne!, assert_matches!, debug_assert*). Tests that never assert are dead weight. Root cause of 2:1 happy-path ratio (audit 14). Exception: functions returning Result (? is the assertion) or calling fns containing "assert"/"verify"/"expect" in name. | Planned |
-| RS-TEST-16 | Warn | Test file >500 effective lines. Same threshold as production code (RS-SOURCE-09). Currently test files are completely exempt from R38 (`if is_test { return; }`). Tests aren't special — split into modules. | Planned |
+| RS-TEST-16 | Warn | Test file >500 effective lines. Same threshold as production code (RS-CODE-09). Currently test files are completely exempt from R38 (`if is_test { return; }`). Tests aren't special — split into modules. | Planned |
 | RS-TEST-17 | Warn | `assert!(matches!(...))` with `_` wildcards in data positions. Proves the variant but not the payload. A mutation changing the payload survives. Always possible to match something specific instead. | Planned |
 | RS-TEST-18 | Warn | Mutation config content validation. `.cargo/mutants.toml` with `exclude_re = [".*"]` makes mutation testing useless (everything excluded). Also flag `timeout_multiplier < 1.0` (fake 100% score via timeouts). RS-TEST-02 checks existence but not content. | Planned |
 
