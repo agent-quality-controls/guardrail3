@@ -4,10 +4,6 @@ use crate::domain::modules::clippy::{
     MAX_FN_PARAMS_BOOLS, MAX_STRUCT_BOOLS, SERVICE_METHOD_PATHS, THRESHOLD_VALUES,
     TOO_MANY_ARGUMENTS_THRESHOLD, TOO_MANY_LINES_THRESHOLD, TYPE_COMPLEXITY_THRESHOLD,
 };
-use crate::domain::report::{CheckResult, Severity};
-
-use super::inputs::ConfigClippyInput;
-
 pub struct ThresholdExpectation {
     pub key: &'static str,
     pub expected: i64,
@@ -136,62 +132,6 @@ pub fn threshold_value(parsed: &toml::Value, key: &str) -> Option<i64> {
     parsed.get(key).and_then(toml::Value::as_integer)
 }
 
-pub fn check_threshold_rule(
-    input: &ConfigClippyInput<'_>,
-    results: &mut Vec<CheckResult>,
-    id: &str,
-    key: &str,
-    expected: i64,
-) {
-    let Some(parsed) = input.config.parsed.as_ref() else {
-        if let Some(parse_error) = &input.config.parse_error {
-            results.push(CheckResult {
-                id: id.to_owned(),
-                severity: Severity::Error,
-                title: "clippy.toml parse error".to_owned(),
-                message: format!("Failed to parse clippy.toml: {parse_error}"),
-                file: Some(input.config.rel_path.clone()),
-                line: None,
-                inventory: false,
-            });
-        }
-        return;
-    };
-
-    match threshold_value(parsed, key) {
-        Some(actual) if actual == expected => results.push(
-            CheckResult {
-                id: id.to_owned(),
-                severity: Severity::Info,
-                title: format!("{key} correct"),
-                message: format!("{key} = {expected}"),
-                file: Some(input.config.rel_path.clone()),
-                line: None,
-                inventory: false,
-            }
-            .as_inventory(),
-        ),
-        Some(actual) => results.push(CheckResult {
-            id: id.to_owned(),
-            severity: Severity::Error,
-            title: format!("{key} wrong value"),
-            message: format!("Expected {expected}, got {actual}."),
-            file: Some(input.config.rel_path.clone()),
-            line: None,
-            inventory: false,
-        }),
-        None => results.push(CheckResult {
-            id: id.to_owned(),
-            severity: Severity::Error,
-            title: format!("{key} missing"),
-            message: format!("Expected {key} = {expected}."),
-            file: Some(input.config.rel_path.clone()),
-            line: None,
-            inventory: false,
-        }),
-    }
-}
-
 pub fn known_top_level_keys() -> Vec<&'static str> {
     THRESHOLD_VALUES.iter().map(|(key, _)| *key).collect()
 }
@@ -205,13 +145,6 @@ pub fn managed_non_threshold_keys() -> Vec<&'static str> {
         "allow-dbg-in-tests",
         "allow-print-in-tests",
     ]
-}
-
-pub fn looks_like_managed_typo(key: &str) -> bool {
-    known_top_level_keys()
-        .into_iter()
-        .chain(managed_non_threshold_keys())
-        .any(|managed| normalized_key_distance(key, managed) <= 2)
 }
 
 pub fn is_placeholder_reason(reason: &str) -> bool {
@@ -233,13 +166,13 @@ pub fn expected_bool_value(key: &str) -> Option<bool> {
     }
 }
 
-fn normalized_key_distance(a: &str, b: &str) -> usize {
+pub fn normalized_key_distance(a: &str, b: &str) -> usize {
     let a = a.replace(['-', '_'], "");
     let b = b.replace(['-', '_'], "");
     levenshtein(a.as_bytes(), b.as_bytes())
 }
 
-fn levenshtein(a: &[u8], b: &[u8]) -> usize {
+pub fn levenshtein(a: &[u8], b: &[u8]) -> usize {
     if a.is_empty() {
         return b.len();
     }

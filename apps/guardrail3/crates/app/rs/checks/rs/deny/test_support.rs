@@ -28,7 +28,70 @@ pub fn project_tree(
 }
 
 pub fn canonical_deny_toml_service() -> String {
-    crate::domain::modules::deny::build_deny_toml("service", "", "", "")
+    r#"
+[graph]
+all-features = true
+no-default-features = false
+
+[bans]
+multiple-versions = "deny"
+wildcards = "allow"
+allow-wildcard-paths = true
+highlight = "all"
+deny = [
+    { name = "simd-json", wrappers = [] },
+    { name = "json5", wrappers = [] },
+    { name = "sonic-rs", wrappers = [] },
+    { name = "ureq", wrappers = [] },
+    { name = "surf", wrappers = [] },
+    { name = "isahc", wrappers = [] },
+    { name = "log4rs", wrappers = [] },
+    { name = "env_logger", wrappers = [] },
+    { name = "simple_logger", wrappers = [] },
+    { name = "fern", wrappers = [] },
+    { name = "async-std", wrappers = [] },
+    { name = "smol", wrappers = [] },
+    { name = "anyhow", wrappers = [] },
+    { name = "bincode", wrappers = [] },
+    { name = "rmp-serde", wrappers = [] },
+    { name = "actix-web", wrappers = [] },
+    { name = "rocket", wrappers = [] },
+    { name = "warp", wrappers = [] },
+    { name = "poem", wrappers = [] },
+    { name = "diesel", wrappers = [] },
+    { name = "sea-orm", wrappers = [] },
+    { name = "prost", wrappers = [] },
+    { name = "flatbuffers", wrappers = [] },
+    { name = "openssl", wrappers = [] },
+    { name = "lazy_static", wrappers = [] },
+]
+skip = []
+
+[[bans.features]]
+name = "tokio"
+deny = ["full"]
+allow = ["fs", "io-util", "macros", "net", "process", "rt-multi-thread", "signal", "sync", "time"]
+reason = "good enough reason text"
+
+[licenses]
+allow = ["MIT", "Apache-2.0", "BSD-3-Clause", "ISC", "Unicode-3.0", "BSD-2-Clause", "BSL-1.0", "MPL-2.0", "CDLA-Permissive-2.0", "OpenSSL", "Zlib", "CC0-1.0"]
+confidence-threshold = 0.8
+
+[licenses.private]
+ignore = true
+
+[advisories]
+unmaintained = "workspace"
+yanked = "warn"
+ignore = []
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = []
+"#
+    .to_owned()
 }
 
 pub fn root_tree_with_deny(deny: &str) -> ProjectTree {

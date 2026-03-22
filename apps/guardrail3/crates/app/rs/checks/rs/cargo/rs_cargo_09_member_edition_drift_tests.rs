@@ -1,7 +1,7 @@
 use crate::domain::report::Severity;
 
-use super::super::check;
-use super::super::test_support::{entry, has_result, tree};
+use super::super::test_support::{collected_facts, entry, member_input, tree};
+use super::check;
 
 #[test]
 fn older_member_edition_is_warned() {
@@ -37,8 +37,14 @@ fn older_member_edition_is_warned() {
         ],
     );
 
-    let results = check(&tree);
-    assert!(has_result(&results, "RS-CARGO-09", |result| {
-        matches!(result.severity, Severity::Warn)
+    let facts = collected_facts(&tree);
+    let input = member_input(&facts, "crates/legacy");
+    let mut results = Vec::new();
+    check(&input, &mut results);
+    assert!(results.iter().any(|result| {
+        result.id == "RS-CARGO-09"
+            && matches!(result.severity, Severity::Warn)
+            && result.title == "member edition older than workspace"
+            && result.message == "crates/legacy sets edition `2021` while workspace uses `2024`."
     }));
 }

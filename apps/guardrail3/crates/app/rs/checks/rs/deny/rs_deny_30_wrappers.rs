@@ -16,10 +16,28 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         let Some(name) = ban_name(entry) else {
             continue;
         };
+        let actual_wrappers = string_array(entry.get("wrappers"));
         let Some(expected_ban) = expected.get(&name) else {
+            if !actual_wrappers.is_empty() {
+                results.push(
+                    CheckResult {
+                        id: "RS-DENY-30".to_owned(),
+                        severity: Severity::Info,
+                        title: "project-specific ban wrappers".to_owned(),
+                        message: format!(
+                            "`{}` ban `{name}` adds project-specific wrappers `{}`.",
+                            config.rel_path,
+                            join_set(&actual_wrappers)
+                        ),
+                        file: Some(config.rel_path.clone()),
+                        line: None,
+                        inventory: false,
+                    }
+                    .as_inventory(),
+                );
+            }
             continue;
         };
-        let actual_wrappers = string_array(entry.get("wrappers"));
         if !expected_ban.wrappers.is_empty() && actual_wrappers != expected_ban.wrappers {
             results.push(CheckResult {
                 id: "RS-DENY-30".to_owned(),
@@ -35,19 +53,22 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                 inventory: false,
             });
         } else if expected_ban.wrappers.is_empty() && !actual_wrappers.is_empty() {
-            results.push(CheckResult {
-                id: "RS-DENY-30".to_owned(),
-                severity: Severity::Warn,
-                title: "ban wrappers weaken canonical ban".to_owned(),
-                message: format!(
-                    "`{}` ban `{name}` adds wrappers `{}`.",
-                    config.rel_path,
-                    join_set(&actual_wrappers)
-                ),
-                file: Some(config.rel_path.clone()),
-                line: None,
-                inventory: false,
-            });
+            results.push(
+                CheckResult {
+                    id: "RS-DENY-30".to_owned(),
+                    severity: Severity::Info,
+                    title: "project-specific ban wrappers".to_owned(),
+                    message: format!(
+                        "`{}` ban `{name}` adds project-specific wrappers `{}`.",
+                        config.rel_path,
+                        join_set(&actual_wrappers)
+                    ),
+                    file: Some(config.rel_path.clone()),
+                    line: None,
+                    inventory: false,
+                }
+                .as_inventory(),
+            );
         }
     }
 }

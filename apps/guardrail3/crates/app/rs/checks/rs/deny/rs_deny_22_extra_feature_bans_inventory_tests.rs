@@ -8,5 +8,10 @@ fn inventories_extra_feature_bans() {
         canonical_deny_toml_service()
     );
     let results = check(&root_tree_with_deny(&deny));
-    assert!(results.iter().any(|r| r.id == "RS-DENY-22" && r.inventory));
+    assert!(results.iter().any(|result| {
+        result.id == "RS-DENY-22"
+            && result.inventory
+            && result.title == "extra feature ban"
+            && result.message.contains("serde")
+    }));
 }

@@ -38,6 +38,11 @@ A `clippy.toml` is allowed only at:
 
 Anything else is forbidden shadowing.
 
+If both `clippy.toml` and `.clippy.toml` exist at the same allowed policy root:
+
+- `clippy.toml` wins by precedence
+- the lower-precedence sibling file is an `RS-CLIPPY-12` error
+
 This is intentionally NOT coupled to hex-arch or folder naming like `apps/` / `packages/`.
 
 ### Coverage rule

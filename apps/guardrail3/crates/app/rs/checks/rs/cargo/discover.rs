@@ -180,3 +180,7 @@ fn read_profile_name(tree: &ProjectTree) -> Option<String> {
         .and_then(toml::Value::as_str)
         .map(str::to_owned)
 }
+
+#[cfg(test)]
+#[path = "discover_tests.rs"]
+mod tests;

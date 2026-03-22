@@ -2,6 +2,7 @@ use std::collections::BTreeMap;
 use std::path::PathBuf;
 
 use crate::domain::project_tree::{DirEntry, ProjectTree};
+use crate::domain::report::Severity;
 
 use super::super::check;
 
@@ -20,7 +21,12 @@ fn warns_when_only_legacy_toolchain_file_exists() {
     };
 
     let results = check(&tree);
-    assert!(results.iter().any(|r| r.id == "RS-TOOLCHAIN-04"));
+    assert!(results.iter().any(|result| {
+        result.id == "RS-TOOLCHAIN-04"
+            && result.severity == Severity::Warn
+            && result.title == "legacy rust-toolchain file present"
+            && result.file.as_deref() == Some("rust-toolchain")
+    }));
 }
 
 #[test]
@@ -45,5 +51,10 @@ fn warns_when_both_legacy_and_modern_toolchain_files_exist() {
     };
 
     let results = check(&tree);
-    assert!(results.iter().any(|r| r.id == "RS-TOOLCHAIN-04"));
+    assert!(results.iter().any(|result| {
+        result.id == "RS-TOOLCHAIN-04"
+            && result.severity == Severity::Warn
+            && result.title == "both rust-toolchain files present"
+            && result.file.as_deref() == Some("rust-toolchain")
+    }));
 }

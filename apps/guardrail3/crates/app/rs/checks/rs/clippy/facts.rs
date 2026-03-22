@@ -29,6 +29,18 @@ pub struct ClippyConfigFacts {
 }
 
 #[derive(Debug, Clone)]
+pub enum ForbiddenConfigReason {
+    NotAllowedRoot,
+    ShadowedSameRoot { preferred_rel_path: String },
+}
+
+#[derive(Debug, Clone)]
+pub struct ForbiddenConfigFacts {
+    pub config: ClippyConfigFacts,
+    pub reason: ForbiddenConfigReason,
+}
+
+#[derive(Debug, Clone)]
 pub struct CoveredRustUnitFacts {
     pub rel_dir: String,
     pub kind: PolicyRootKind,
@@ -44,7 +56,7 @@ pub struct UncoveredRustUnitFacts {
 #[derive(Debug, Clone)]
 pub struct ClippyFacts {
     pub allowed_configs: Vec<ClippyConfigFacts>,
-    pub forbidden_configs: Vec<ClippyConfigFacts>,
+    pub forbidden_configs: Vec<ForbiddenConfigFacts>,
     pub covered_units: Vec<CoveredRustUnitFacts>,
     pub uncovered_units: Vec<UncoveredRustUnitFacts>,
 }
@@ -92,9 +104,39 @@ pub fn collect(tree: &ProjectTree) -> ClippyFacts {
         if allowed_policy_roots.contains(&config.rel_dir) {
             allowed_configs.push(config);
         } else {
-            forbidden_configs.push(config);
+            forbidden_configs.push(ForbiddenConfigFacts {
+                config,
+                reason: ForbiddenConfigReason::NotAllowedRoot,
+            });
         }
     }
+
+    let mut deduped_allowed = Vec::new();
+    let mut configs_by_dir = BTreeMap::<String, Vec<ClippyConfigFacts>>::new();
+    for config in allowed_configs {
+        configs_by_dir
+            .entry(config.rel_dir.clone())
+            .or_default()
+            .push(config);
+    }
+
+    for (_rel_dir, mut same_root_configs) in configs_by_dir {
+        same_root_configs.sort_by_key(|config| config_precedence(&config.rel_path));
+        let mut same_root_iter = same_root_configs.into_iter();
+        if let Some(preferred) = same_root_iter.next() {
+            let preferred_rel_path = preferred.rel_path.clone();
+            deduped_allowed.push(preferred);
+            for config in same_root_iter {
+                forbidden_configs.push(ForbiddenConfigFacts {
+                    config,
+                    reason: ForbiddenConfigReason::ShadowedSameRoot {
+                        preferred_rel_path: preferred_rel_path.clone(),
+                    },
+                });
+            }
+        }
+    }
+    let mut allowed_configs = deduped_allowed;
 
     let mut covered_units = Vec::new();
     let mut uncovered_units = Vec::new();
@@ -120,7 +162,7 @@ pub fn collect(tree: &ProjectTree) -> ClippyFacts {
     covered_units.sort_by(|a, b| a.rel_dir.cmp(&b.rel_dir));
     uncovered_units.sort_by(|a, b| a.rel_dir.cmp(&b.rel_dir));
     allowed_configs.sort_by(|a, b| a.rel_path.cmp(&b.rel_path));
-    forbidden_configs.sort_by(|a, b| a.rel_path.cmp(&b.rel_path));
+    forbidden_configs.sort_by(|a, b| a.config.rel_path.cmp(&b.config.rel_path));
 
     ClippyFacts {
         allowed_configs,
@@ -128,6 +170,16 @@ pub fn collect(tree: &ProjectTree) -> ClippyFacts {
         covered_units,
         uncovered_units,
     }
+}
+
+fn config_precedence(rel_path: &str) -> usize {
+    if rel_path.ends_with("clippy.toml") && !rel_path.ends_with(".clippy.toml") {
+        return 0;
+    }
+    if rel_path.ends_with(".clippy.toml") {
+        return 1;
+    }
+    2
 }
 
 fn collect_cargo_roots(tree: &ProjectTree) -> BTreeMap<String, CargoRootFacts> {

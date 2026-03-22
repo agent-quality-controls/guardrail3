@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
+use super::facts::{collect, ClippyFacts};
 use crate::domain::project_tree::{DirEntry, ProjectTree};
 
 pub fn dir_entry(dirs: &[&str], files: &[&str]) -> DirEntry {
@@ -25,6 +26,10 @@ pub fn project_tree(
             .map(|(rel, content)| (rel.to_owned(), content))
             .collect::<BTreeMap<_, _>>(),
     }
+}
+
+pub fn collected_facts(tree: &ProjectTree) -> ClippyFacts {
+    collect(tree)
 }
 
 pub fn root_workspace_tree(clippy_toml: impl Into<String>) -> ProjectTree {
@@ -105,6 +110,20 @@ pub fn nested_workspace_member_shadow_tree(file_name: &str) -> ProjectTree {
     )
 }
 
+pub fn same_root_dual_config_tree() -> ProjectTree {
+    project_tree(
+        vec![(
+            "",
+            dir_entry(&[], &["Cargo.toml", "clippy.toml", ".clippy.toml"]),
+        )],
+        vec![
+            ("Cargo.toml", "[workspace]\nmembers = []".to_owned()),
+            ("clippy.toml", "max-struct-bools = 3".to_owned()),
+            (".clippy.toml", "max-struct-bools = 4".to_owned()),
+        ],
+    )
+}
+
 pub fn incomplete_workspace_policy_root_tree() -> ProjectTree {
     project_tree(
         vec![
@@ -156,41 +175,30 @@ pub fn library_workspace_root_tree(local_clippy_toml: impl Into<String>) -> Proj
     )
 }
 
+pub fn published_library_package_root_tree(local_clippy_toml: impl Into<String>) -> ProjectTree {
+    project_tree(
+        vec![(
+            "",
+            dir_entry(&[], &["Cargo.toml", "guardrail3.toml", "clippy.toml"]),
+        )],
+        vec![
+            (
+                "Cargo.toml",
+                "[package]\nname = \"libcrate\"\npublish = true\n".to_owned(),
+            ),
+            (
+                "guardrail3.toml",
+                "[profile]\nname = \"library\"\n".to_owned(),
+            ),
+            ("clippy.toml", local_clippy_toml.into()),
+        ],
+    )
+}
+
 pub fn garde_disabled_root_tree(clippy_toml: impl Into<String>) -> ProjectTree {
     root_workspace_tree_with_guardrail(
         clippy_toml,
         "[profile]\nname = \"service\"\n[rust.checks]\ngarde = false",
-    )
-}
-
-pub fn config_hygiene_tree() -> ProjectTree {
-    root_workspace_tree(
-        r#"
-too-many-lines-threshold = 75
-cognitive-complexity-threshold = 15
-too-many-arguments-threshold = 7
-type-complexity-threshold = 75
-max-struct-bools = 3
-max-fn-params-bools = 3
-excessive-nesting-threshold = 4
-avoid-breaking-exported-api = true
-allow-dbg-in-tests = true
-disalowed-methods = []
-
-disallowed-methods = [
-    { path = "std::env::var", reason = "todo" },
-    { path = "std::env::var", reason = "good enough reason text" },
-]
-
-disallowed-types = [
-    { path = "std::collections::HashMap", reason = "placeholder" },
-]
-
-disallowed-macros = [
-    { path = "println", reason = "todo" },
-    { path = "println", reason = "duplicate macro reason" },
-]
-"#,
     )
 }
 

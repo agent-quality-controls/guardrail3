@@ -1,6 +1,8 @@
 use crate::domain::report::{CheckResult, Severity};
 
-use super::deny_support::parse_feature_entries_in_config;
+use super::deny_support::{
+    expected_tokio_allowed_features, join_set, parse_feature_entries_in_config,
+};
 use super::inputs::ConfigDenyInput;
 
 pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
@@ -9,10 +11,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         return;
     };
     let feature_entries = parse_feature_entries_in_config(parsed);
-    let tokio_full_banned = feature_entries
-        .iter()
-        .any(|entry| entry.name == "tokio" && entry.deny.contains("full"));
-    if !tokio_full_banned {
+    let Some(tokio_entry) = feature_entries.iter().find(|entry| entry.name == "tokio") else {
         results.push(CheckResult {
             id: "RS-DENY-21".to_owned(),
             severity: Severity::Warn,
@@ -20,6 +19,39 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
             message: format!(
                 "`{}` must ban `tokio` feature `full` under `[[bans.features]]`.",
                 config.rel_path
+            ),
+            file: Some(config.rel_path.clone()),
+            line: None,
+            inventory: false,
+        });
+        return;
+    };
+
+    if !tokio_entry.deny.contains("full") {
+        results.push(CheckResult {
+            id: "RS-DENY-21".to_owned(),
+            severity: Severity::Warn,
+            title: "tokio full feature not banned".to_owned(),
+            message: format!(
+                "`{}` must ban `tokio` feature `full` under `[[bans.features]]`.",
+                config.rel_path
+            ),
+            file: Some(config.rel_path.clone()),
+            line: None,
+            inventory: false,
+        });
+    }
+
+    let expected_allow = expected_tokio_allowed_features();
+    if tokio_entry.allow != expected_allow {
+        results.push(CheckResult {
+            id: "RS-DENY-21".to_owned(),
+            severity: Severity::Warn,
+            title: "tokio allowed features changed".to_owned(),
+            message: format!(
+                "`{}` must keep `tokio` allowed features `{}`.",
+                config.rel_path,
+                join_set(&expected_allow)
             ),
             file: Some(config.rel_path.clone()),
             line: None,

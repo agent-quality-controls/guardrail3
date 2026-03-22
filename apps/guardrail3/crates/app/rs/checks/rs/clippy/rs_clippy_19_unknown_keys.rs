@@ -3,7 +3,7 @@ use std::collections::BTreeSet;
 use crate::domain::report::{CheckResult, Severity};
 
 use super::clippy_support::{
-    known_top_level_keys, looks_like_managed_typo, managed_non_threshold_keys,
+    known_top_level_keys, managed_non_threshold_keys, normalized_key_distance,
 };
 use super::inputs::ConfigClippyInput;
 
@@ -22,7 +22,12 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
         .chain(managed_non_threshold_keys())
         .collect();
     for key in table.keys() {
-        if !known.contains(key.as_str()) && looks_like_managed_typo(key) {
+        let looks_like_managed_typo = !known.contains(key.as_str())
+            && known
+                .iter()
+                .copied()
+                .any(|managed| normalized_key_distance(key, managed) <= 2);
+        if looks_like_managed_typo {
             results.push(CheckResult {
                 id: ID.to_owned(),
                 severity: Severity::Warn,

@@ -1,19 +1,33 @@
 use crate::domain::report::{CheckResult, Severity};
 
-use super::facts::ClippyConfigFacts;
+use super::facts::{ForbiddenConfigFacts, ForbiddenConfigReason};
 
 const ID: &str = "RS-CLIPPY-12";
 
-pub fn check(config: &ClippyConfigFacts, results: &mut Vec<CheckResult>) {
+pub fn check(forbidden: &ForbiddenConfigFacts, results: &mut Vec<CheckResult>) {
+    let (title, message) = match &forbidden.reason {
+        ForbiddenConfigReason::NotAllowedRoot => (
+            "clippy.toml in forbidden location".to_owned(),
+            format!(
+                "`{}` is not an allowed clippy policy root. clippy.toml is allowed only at the validation root, workspace roots, and standalone package roots that are not workspace members.",
+                forbidden.config.rel_path
+            ),
+        ),
+        ForbiddenConfigReason::ShadowedSameRoot { preferred_rel_path } => (
+            "same-root clippy config conflict".to_owned(),
+            format!(
+                "`{}` conflicts with `{preferred_rel_path}` at the same policy root. Keep only the highest-precedence clippy config file.",
+                forbidden.config.rel_path
+            ),
+        ),
+    };
+
     results.push(CheckResult {
         id: ID.to_owned(),
         severity: Severity::Error,
-        title: "clippy.toml in forbidden location".to_owned(),
-        message: format!(
-            "`{}` is not an allowed clippy policy root. clippy.toml is allowed only at the validation root, workspace roots, and standalone package roots that are not workspace members.",
-            config.rel_path
-        ),
-        file: Some(config.rel_path.clone()),
+        title,
+        message,
+        file: Some(forbidden.config.rel_path.clone()),
         line: None,
         inventory: false,
     });
