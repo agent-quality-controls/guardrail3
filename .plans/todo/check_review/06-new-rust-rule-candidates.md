@@ -74,7 +74,7 @@ These are the candidates that are universal enough to define without project-str
 - Narrow typed error discipline for public APIs
   - **Family:** `rs/code`
   - **Shape:** source/API rule
-  - **Likely severity:** `Warn` first
+  - **Severity:** `Error`
   - **Universal contract:** public error-returning APIs should not expose obviously untyped error forms
   - **Start with explicit banned public error forms only:**
     - `String`
@@ -83,6 +83,42 @@ These are the candidates that are universal enough to define without project-str
     - `Box<dyn Error>`
   - **Notes:** extend `RS-CODE-25` rather than inventing a disconnected rule family
   - **Why this qualifies:** this narrow banned set is universal enough; broader “typed error discipline” is not
+
+- Generic parameter count cap
+  - **Family:** `rs/code`
+  - **Shape:** source structural rule
+  - **Severity:** `Error`
+  - **Universal contract:** more than 6 type/const generic parameters is bad code
+  - **Count:**
+    - type params
+    - const params
+  - **Do not count:**
+    - lifetimes
+  - **Apply to:**
+    - `struct`
+    - `enum`
+    - `trait`
+    - `fn`
+  - **Do not apply to:**
+    - `impl` blocks directly
+  - **Why this qualifies:** threshold is intentionally high enough to catch abstraction sludge rather than normal variation
+
+- Direct dependency count cap
+  - **Family:** `rs/deps`
+  - **Shape:** dependency-count rule
+  - **Severity:** `Error`
+  - **Universal contract:** more than 25 unique direct dependencies on one crate is bad code
+  - **Count:**
+    - unique crate names across:
+      - `[dependencies]`
+      - `[build-dependencies]`
+      - `[dev-dependencies]`
+      - `target.*` dependency tables
+    - `workspace = true` entries
+    - path dependencies
+  - **Do not count:**
+    - the same crate name more than once across sections/tables
+  - **Why this qualifies:** threshold is intentionally high enough to catch sprawl rather than ordinary Rust variation
 
 ### Defer until architecture decisions are made
 
@@ -112,12 +148,6 @@ These are plausible, but need more product framing before implementation.
   - **Likely severity:** `Warn`
   - **Why deferred:** high false-positive risk without type/context sophistication
 
-- Generic parameter count cap
-  - **Family:** `rs/code`
-  - **Shape:** source structural rule
-  - **Likely severity:** `Warn`
-  - **Why deferred:** probably useful, but needs a sane threshold and careful exceptions for legit generic abstractions
-
 - String-based dispatch warning
   - **Family:** `rs/code`
   - **Shape:** source heuristic rule
@@ -128,7 +158,7 @@ These are plausible, but need more product framing before implementation.
   - **Family:** `rs/deps`
   - **Shape:** dependency graph / inventory + threshold rules
   - **Likely severity:** `Warn`
-  - **Why deferred:** needs policy on thresholds and what counts as legitimate foundation crates
+  - **Why deferred:** broader pressure ideas beyond the hard direct-count cap still need policy (transitive depth, feature spread, etc.)
 
 - Structural organization rules
   - **Family:** `rs/code` or `rs/hexarch`
@@ -155,17 +185,19 @@ These are either too policy-heavy, too heuristic for current value, or already b
 ## Recommended order
 
 1. add no-public-fields-on-public-structs
-2. add `#[must_use]` on public `Result` / `Option` functions
-3. extend `RS-CODE-25` into narrow banned public error forms
-4. discuss the deferred policy-heavy candidates separately
+2. extend `RS-CODE-25` into narrow banned public error forms
+3. add generic parameter count cap
+4. add direct dependency count cap
+5. discuss the deferred policy-heavy candidates separately
 
 ## Concrete next planning targets
 
 These are the ones we should turn into real rule specs first:
 
 - `RS-CODE-next`: no public fields on public structs
-- `RS-CODE-next`: `#[must_use]` on public `Result` / `Option` functions
 - `RS-CODE-25` extension or sibling rule: narrow banned public error forms
+- `RS-CODE-next`: generic parameter count cap (`> 6`, type/const only)
+- `RS-DEPS-next`: direct dependency count cap (`> 25`, unique direct dependency names)
 
 ## Already substantially covered
 

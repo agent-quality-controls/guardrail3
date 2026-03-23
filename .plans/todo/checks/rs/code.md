@@ -1,4 +1,4 @@
-# RS-CODE — Rust code file checker (30 implemented rules + next-wave planned rules)
+# RS-CODE — Rust code file checker (30 implemented rules + 3 next-wave planned rules)
 
 **Input:** *.rs files (syn AST parsed)
 **Parser:** syn crate (Rust AST)
@@ -10,7 +10,7 @@
 |--------|--------|----------|------|--------|
 | RS-CODE-01 | R30 | Error (Info for test files) | Crate-level `#![allow(...)]` — suppresses lint for entire crate. Also flags inline module `#![allow]`. | Implemented |
 | RS-CODE-02 | R31 | Info | Justified `#![allow(unused_crate_dependencies)]` — universally exempted | Implemented |
-| RS-CODE-03 | R32 | Error | Item-level `#[allow(...)]` without `// reason:` comment. Also catches always-true `cfg_attr(all(), allow(...))` | Implemented |
+| RS-CODE-03 | R32 | Error | Item-level `#[allow(...)]` without `// reason:` comment. | Implemented |
 | RS-CODE-04 | R33 | Info | Item-level `#[allow(...)]` WITH documented reason (audit trail inventory) | Implemented |
 | RS-CODE-05 | R34 | Error | `#[garde(skip)]` on non-primitive WITHOUT comment | Implemented |
 | RS-CODE-06 | R35 | Error | `#[garde(skip)]` on non-primitive WITH comment but no `// reason:` | Implemented |
@@ -65,9 +65,9 @@ These are not implemented yet. They are the next `rs/code` candidates that are u
 
 | New ID | Severity | What | Status |
 |--------|----------|------|--------|
-| RS-CODE-31 | Warn | `pub struct` with named `pub` fields. Public structs should not expose mutable data bags as their default API shape. | Planned |
-| RS-CODE-32 | Warn | Public function returning `Result<_, _>` or `Option<_>` without `#[must_use]`. | Planned |
-| RS-CODE-33 | Warn | Public function returning obviously untyped public error forms: `Result<_, String>`, `Result<_, &str>`, `Result<_, anyhow::Error>`, or `Result<_, Box<dyn Error>>`. | Planned |
+| RS-CODE-31 | Error | `pub struct` with named `pub` fields. Public structs should not expose field bags as their default API shape. | Planned |
+| RS-CODE-33 | Error | Public function returning obviously untyped public error forms: `Result<_, String>`, `Result<_, &str>`, `Result<_, anyhow::Error>`, or `Result<_, Box<dyn Error>>`. | Planned |
+| RS-CODE-34 | Error | More than 6 type/const generic parameters on a `struct`, `enum`, `trait`, or `fn`. Lifetimes do not count. | Planned |
 
 ### RS-CODE-31 — Public fields on public structs
 
@@ -84,12 +84,15 @@ These are not implemented yet. They are the next `rs/code` candidates that are u
 - private structs
 - named fields without `pub`
 
+**Severity**
+- `Error`
+
 **Open policy point**
-- whether `#[non_exhaustive]` or an explicit exception comment should suppress the warning
+- whether tuple structs / newtypes remain the only built-in exemption in v1
 
 **Examples**
 
-Should warn:
+Should error:
 
 ```rust
 pub struct User {
@@ -98,7 +101,7 @@ pub struct User {
 }
 ```
 
-Should not warn:
+Should not error:
 
 ```rust
 pub struct User {
@@ -109,47 +112,6 @@ pub struct User {
 
 ```rust
 pub struct UserId(pub String);
-```
-
-### RS-CODE-32 — `#[must_use]` on public `Result` / `Option` functions
-
-**Intent**
-- make ignored fallible/optional return values explicit
-
-**Trigger surface**
-- public functions whose declared return type is syntactically:
-  - `Result<...>`
-  - `Option<...>`
-- missing `#[must_use]`
-
-**Initial exclusions**
-- non-public functions
-- functions returning other types
-- trait method declarations should be decided explicitly when implementing; default start should be inherent/public free functions only
-
-**Examples**
-
-Should warn:
-
-```rust
-pub fn parse(input: &str) -> Result<Value, ParseError> {
-    // ...
-}
-```
-
-```rust
-pub fn find(id: Id) -> Option<User> {
-    // ...
-}
-```
-
-Should not warn:
-
-```rust
-#[must_use]
-pub fn parse(input: &str) -> Result<Value, ParseError> {
-    // ...
-}
 ```
 
 ### RS-CODE-33 — Narrow banned public error forms
@@ -169,9 +131,8 @@ pub fn parse(input: &str) -> Result<Value, ParseError> {
 - non-`Result` returns
 - internal/private helpers
 
-**Initial severity**
-- `Warn`
-- this should start broader than the current library-only `RS-CODE-25` gating, because the banned forms themselves are universal smells
+**Severity**
+- `Error`
 
 **Relationship to existing rule**
 - likely replaces or broadens `RS-CODE-25`
@@ -179,7 +140,7 @@ pub fn parse(input: &str) -> Result<Value, ParseError> {
 
 **Examples**
 
-Should warn:
+Should error:
 
 ```rust
 pub fn parse(input: &str) -> Result<Value, String> {
@@ -193,10 +154,59 @@ pub fn parse(input: &str) -> Result<Value, anyhow::Error> {
 }
 ```
 
-Should not warn:
+Should not error:
 
 ```rust
 pub fn parse(input: &str) -> Result<Value, ParseError> {
+    // ...
+}
+```
+
+### RS-CODE-34 — Generic parameter count cap
+
+**Intent**
+- catch abstraction sludge and agentic over-generalization
+
+**Trigger surface**
+- more than 6 generic parameters on:
+  - `struct`
+  - `enum`
+  - `trait`
+  - `fn`
+
+**Count**
+- type parameters
+- const parameters
+
+**Do not count**
+- lifetimes
+
+**Initial exclusions**
+- `impl` blocks directly
+
+**Severity**
+- `Error`
+
+**Examples**
+
+Should error:
+
+```rust
+pub fn build<A, B, C, D, E, F, G>(...) -> Output {
+    // ...
+}
+```
+
+```rust
+pub struct Cache<A, B, C, D, E, F, const N: usize> {
+    // ...
+}
+```
+
+Should not error:
+
+```rust
+pub fn build<A, B, C, D, E, F>(...) -> Output {
     // ...
 }
 ```
