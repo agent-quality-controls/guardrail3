@@ -6,5 +6,6 @@ pub mod deny;
 pub mod fmt;
 pub mod garde;
 pub mod hexarch;
+pub mod release;
 pub mod test;
 pub mod toolchain;

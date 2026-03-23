@@ -25,11 +25,23 @@ pub trait FileSystem: Send + Sync {
 }
 
 /// Tool/command runner abstraction.
+#[derive(Debug, Clone)]
+pub struct CommandRunResult {
+    pub success: bool,
+    pub stderr: String,
+}
+
 pub trait ToolChecker: Send + Sync {
     /// Check if a tool is installed and available on PATH.
     fn is_installed(&self, tool: &str) -> bool;
 
-    /// Run `cargo publish --dry-run` and return stderr output.
+    /// Run `cargo publish --dry-run` and return command outcome.
     /// Returns `None` if the command fails to execute.
-    fn run_cargo_publish_dry_run(&self, path: &Path) -> Option<String>;
+    fn run_cargo_publish_dry_run_outcome(&self, path: &Path) -> Option<CommandRunResult>;
+
+    /// Legacy stderr-only view for existing callers.
+    fn run_cargo_publish_dry_run(&self, path: &Path) -> Option<String> {
+        self.run_cargo_publish_dry_run_outcome(path)
+            .map(|result| result.stderr)
+    }
 }

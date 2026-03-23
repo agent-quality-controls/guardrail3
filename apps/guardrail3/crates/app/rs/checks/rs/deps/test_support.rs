@@ -11,7 +11,7 @@ use super::inputs::{
 };
 use crate::domain::project_tree::{DirEntry, ProjectTree};
 use crate::domain::report::CheckResult;
-use crate::ports::outbound::ToolChecker;
+use crate::ports::outbound::{CommandRunResult, ToolChecker};
 
 pub fn dir_entry(dirs: &[&str], files: &[&str]) -> DirEntry {
     DirEntry {
@@ -51,7 +51,7 @@ impl ToolChecker for StubToolChecker {
         self.installed.contains(tool)
     }
 
-    fn run_cargo_publish_dry_run(&self, _path: &Path) -> Option<String> {
+    fn run_cargo_publish_dry_run_outcome(&self, _path: &Path) -> Option<CommandRunResult> {
         None
     }
 }
