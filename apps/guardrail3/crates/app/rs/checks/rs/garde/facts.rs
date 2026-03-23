@@ -149,12 +149,15 @@ pub fn collect(tree: &ProjectTree) -> GardeFacts {
     let mut enum_targets = Vec::new();
     let mut manual_deserialize_impls = Vec::new();
     let mut query_as_macros = Vec::new();
+    let mut global_type_validation_map = BTreeMap::<String, (bool, bool)>::new();
+    let mut simple_type_validation_map = BTreeMap::<String, Vec<(bool, bool)>>::new();
+    let mut parsed_files = Vec::new();
 
     for rel_path in rust_file_rels(tree) {
         if is_test_path(&rel_path) {
             continue;
         }
-        let Some(root_rel_dir) = owning_root_dir(&rel_path, &active_root_dirs) else {
+        let Some(_root_rel_dir) = owning_root_dir(&rel_path, &active_root_dirs) else {
             continue;
         };
         let abs_path = tree.abs_path(&rel_path);
@@ -179,7 +182,22 @@ pub fn collect(tree: &ProjectTree) -> GardeFacts {
             }
         };
         let parsed = analyze(&ast);
+        for (type_name, state) in &parsed.type_validation_map {
+            let _ = global_type_validation_map.insert(type_name.clone(), *state);
+            let simple_name = type_name
+                .rsplit("::")
+                .next()
+                .unwrap_or(type_name.as_str())
+                .to_owned();
+            simple_type_validation_map
+                .entry(simple_name)
+                .or_default()
+                .push(*state);
+        }
+        parsed_files.push((rel_path, parsed));
+    }
 
+    for (rel_path, parsed) in parsed_files {
         for target in parsed.derived_types {
             let fact = DerivedBoundaryTypeFacts {
                 rel_path: rel_path.clone(),
@@ -200,7 +218,21 @@ pub fn collect(tree: &ProjectTree) -> GardeFacts {
             let resolved = parsed
                 .type_validation_map
                 .get(&manual_impl.type_name)
-                .copied();
+                .copied()
+                .or_else(|| global_type_validation_map.get(&manual_impl.type_name).copied())
+                .or_else(|| {
+                    let simple_name = manual_impl
+                        .type_name
+                        .rsplit("::")
+                        .next()
+                        .unwrap_or(manual_impl.type_name.as_str());
+                    let states = simple_type_validation_map.get(simple_name)?;
+                    if states.len() == 1 {
+                        states.first().copied()
+                    } else {
+                        None
+                    }
+                });
             let has_manual_validate = parsed.manual_validate_impls.contains(&manual_impl.type_name);
             let needs_validate = resolved.map_or(true, |(has_non_primitive, _)| has_non_primitive);
             let has_validate = resolved.is_some_and(|(_, has_validate)| has_validate) || has_manual_validate;
@@ -212,7 +244,6 @@ pub fn collect(tree: &ProjectTree) -> GardeFacts {
                 has_validate,
             });
         }
-
         for macro_use in parsed.query_as_macros {
             query_as_macros.push(QueryAsMacroFacts {
                 rel_path: rel_path.clone(),
@@ -220,8 +251,6 @@ pub fn collect(tree: &ProjectTree) -> GardeFacts {
                 macro_name: macro_use.macro_name,
             });
         }
-
-        let _ = root_rel_dir;
     }
 
     roots.sort_by(|a, b| a.rel_dir.cmp(&b.rel_dir));

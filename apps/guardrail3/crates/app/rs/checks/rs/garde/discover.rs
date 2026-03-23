@@ -23,12 +23,12 @@ pub fn rust_file_rels(tree: &ProjectTree) -> Vec<String> {
 }
 
 pub fn is_test_path(rel_path: &str) -> bool {
-    rel_path.contains("/tests/")
-        || rel_path.contains("/test/")
+    rel_path == "tests.rs"
+        || rel_path.starts_with("tests/")
+        || rel_path.contains("/tests/")
         || rel_path.contains("__tests__")
         || rel_path.ends_with("_test.rs")
         || rel_path.ends_with("_tests.rs")
-        || rel_path.ends_with("/tests.rs")
 }
 
 fn is_fixture_path(rel_path: &str) -> bool {

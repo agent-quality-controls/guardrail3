@@ -58,6 +58,10 @@ struct GardeVisitor {
     manual_validate_impls: BTreeSet<String>,
     type_validation_map: BTreeMap<String, (bool, bool)>,
     query_as_macros: Vec<QueryAsMacro>,
+    module_stack: Vec<String>,
+    deserialize_aliases: BTreeSet<String>,
+    validate_aliases: BTreeSet<String>,
+    query_as_aliases: BTreeSet<String>,
 }
 
 impl GardeVisitor {
@@ -73,12 +77,34 @@ impl GardeVisitor {
 }
 
 impl<'ast> Visit<'ast> for GardeVisitor {
+    fn visit_item_use(&mut self, item: &'ast syn::ItemUse) {
+        collect_use_aliases(
+            &item.tree,
+            &mut self.deserialize_aliases,
+            &mut self.validate_aliases,
+            &mut self.query_as_aliases,
+        );
+        syn::visit::visit_item_use(self, item);
+    }
+
+    fn visit_item_mod(&mut self, item: &'ast syn::ItemMod) {
+        if let Some((_, items)) = &item.content {
+            self.module_stack.push(item.ident.to_string());
+            for inner in items {
+                self.visit_item(inner);
+            }
+            let _ = self.module_stack.pop();
+            return;
+        }
+        syn::visit::visit_item_mod(self, item);
+    }
+
     fn visit_item_struct(&mut self, item: &'ast syn::ItemStruct) {
         let macros = derive_macros(&item.attrs);
         let has_boundary = macros.iter().any(|name| is_input_boundary_derive(name));
         let has_validate = macros.iter().any(|name| is_validate_derive(name));
         let has_non_primitive_fields = struct_has_non_primitive_fields(item);
-        let name = item.ident.to_string();
+        let name = self.qualified_name(&item.ident.to_string());
 
         if has_boundary {
             let boundary_macros = macros
@@ -107,7 +133,7 @@ impl<'ast> Visit<'ast> for GardeVisitor {
         let has_boundary = macros.iter().any(|name| is_input_boundary_derive(name));
         let has_validate = macros.iter().any(|name| is_validate_derive(name));
         let has_non_primitive_fields = enum_has_non_primitive_fields(item);
-        let name = item.ident.to_string();
+        let name = self.qualified_name(&item.ident.to_string());
 
         if has_boundary {
             let boundary_macros = macros
@@ -140,14 +166,24 @@ impl<'ast> Visit<'ast> for GardeVisitor {
             syn::visit::visit_item_impl(self, item);
             return;
         };
-        let trait_name = path_to_string(trait_path);
-        if trait_name == "Deserialize" || trait_name.ends_with("::Deserialize") {
+        let type_name = self.qualify_type_name(&type_name);
+        let trait_name = trait_path
+            .segments
+            .last()
+            .map(|segment| segment.ident.to_string());
+        if trait_name
+            .as_deref()
+            .is_some_and(|name| name == "Deserialize" || self.deserialize_aliases.contains(name))
+        {
             self.manual_deserialize_impls.push(ManualImpl {
                 line: span_line(item.span()),
                 type_name: type_name.clone(),
             });
         }
-        if trait_name == "Validate" || trait_name.ends_with("::Validate") {
+        if trait_name
+            .as_deref()
+            .is_some_and(|name| name == "Validate" || self.validate_aliases.contains(name))
+        {
             let _ = self.manual_validate_impls.insert(type_name);
         }
         syn::visit::visit_item_impl(self, item);
@@ -155,13 +191,36 @@ impl<'ast> Visit<'ast> for GardeVisitor {
 
     fn visit_macro(&mut self, mac: &'ast syn::Macro) {
         let macro_name = path_to_string(&mac.path);
-        if macro_name == "query_as" || macro_name.ends_with("::query_as") {
+        let tail = mac.path.segments.last().map(|segment| segment.ident.to_string());
+        if tail.as_deref().is_some_and(|name| {
+            name == "query_as"
+                || name == "query_as_unchecked"
+                || self.query_as_aliases.contains(name)
+        }) {
             self.query_as_macros.push(QueryAsMacro {
                 line: span_line(mac.span()),
                 macro_name,
             });
         }
         syn::visit::visit_macro(self, mac);
+    }
+}
+
+impl GardeVisitor {
+    fn qualified_name(&self, name: &str) -> String {
+        if self.module_stack.is_empty() {
+            name.to_owned()
+        } else {
+            format!("{}::{name}", self.module_stack.join("::"))
+        }
+    }
+
+    fn qualify_type_name(&self, name: &str) -> String {
+        if name.contains("::") || self.module_stack.is_empty() {
+            name.to_owned()
+        } else {
+            self.qualified_name(name)
+        }
     }
 }
 
@@ -264,8 +323,69 @@ fn type_is_primitive_safe(ty: &syn::Type) -> bool {
 
 fn self_ty_name(ty: &syn::Type) -> Option<String> {
     match ty {
-        syn::Type::Path(type_path) => type_path.path.segments.last().map(|segment| segment.ident.to_string()),
+        syn::Type::Path(type_path) => Some(
+            type_path
+                .path
+                .segments
+                .iter()
+                .map(|segment| segment.ident.to_string())
+                .collect::<Vec<_>>()
+                .join("::"),
+        ),
         _ => None,
+    }
+}
+
+fn collect_use_aliases(
+    tree: &syn::UseTree,
+    deserialize_aliases: &mut BTreeSet<String>,
+    validate_aliases: &mut BTreeSet<String>,
+    query_as_aliases: &mut BTreeSet<String>,
+) {
+    match tree {
+        syn::UseTree::Path(path) => collect_use_aliases(
+            &path.tree,
+            deserialize_aliases,
+            validate_aliases,
+            query_as_aliases,
+        ),
+        syn::UseTree::Name(name) => {
+            let ident = name.ident.to_string();
+            match ident.as_str() {
+                "Deserialize" => {
+                    let _ = deserialize_aliases.insert("Deserialize".to_owned());
+                }
+                "Validate" => {
+                    let _ = validate_aliases.insert("Validate".to_owned());
+                }
+                "query_as" | "query_as_unchecked" => {
+                    let _ = query_as_aliases.insert(ident);
+                }
+                _ => {}
+            }
+        }
+        syn::UseTree::Rename(rename) => {
+            let target = rename.ident.to_string();
+            let alias = rename.rename.to_string();
+            match target.as_str() {
+                "Deserialize" => {
+                    let _ = deserialize_aliases.insert(alias);
+                }
+                "Validate" => {
+                    let _ = validate_aliases.insert(alias);
+                }
+                "query_as" | "query_as_unchecked" => {
+                    let _ = query_as_aliases.insert(alias);
+                }
+                _ => {}
+            }
+        }
+        syn::UseTree::Group(group) => {
+            for item in &group.items {
+                collect_use_aliases(item, deserialize_aliases, validate_aliases, query_as_aliases);
+            }
+        }
+        _ => {}
     }
 }
 
