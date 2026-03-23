@@ -45,7 +45,10 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                 id: "RS-DENY-25".to_owned(),
                 severity: Severity::Error,
                 title: "allow-list overrides deny-list".to_owned(),
-                message: format!("`{}` allows `{name}` even though it is banned.", config.rel_path),
+                message: format!(
+                    "`{}` allows `{name}` even though it is banned.",
+                    config.rel_path
+                ),
                 file: Some(config.rel_path.clone()),
                 line: None,
                 inventory: false,

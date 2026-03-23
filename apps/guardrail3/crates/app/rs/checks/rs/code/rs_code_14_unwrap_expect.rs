@@ -11,10 +11,7 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
             id: ID.to_owned(),
             severity: Severity::Warn,
             title: format!(".{method}() usage"),
-            message: format!(
-                "`.{method}()` found: {}.",
-                line_text(input.content, line)
-            ),
+            message: format!("`.{method}()` found: {}.", line_text(input.content, line)),
             file: Some(input.rel_path.to_owned()),
             line: Some(line),
             inventory: false,
@@ -23,5 +20,5 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_code_14_unwrap_expect_tests.rs"]
+#[path = "rs_code_14_unwrap_expect_tests/mod.rs"]
 mod tests;

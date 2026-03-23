@@ -83,17 +83,16 @@ No additional Rust release requirements remain stranded in that legacy doc. What
 Residual hardening items from archived legacy notes remain relevant here:
 
 - workflow rules (`RS-RELEASE-05..07`, `RS-BIN-01..02`) now parse YAML structurally, but still classify semantics by matching parsed `uses` values, env keys, and step run strings rather than a richer Actions-specific execution model. Good enough for breadth-first completion, but still a later hardening target.
-- the archived `semver_releases.md` template is stricter than the current checker in one important way: it defines canonical semantic baseline for generated `release-plz.toml` and `cliff.toml`, while the current checker mostly validates existence, coverage, and workflow wiring.
-- later hardening should add explicit semantic checks for:
-  - `release-plz.toml`:
+- the archived `semver_releases.md` template now informs active checker semantics for:
+  - `RS-RELEASE-03`:
     - `[workspace].changelog_config = "cliff.toml"`
     - `[workspace].git_release_enable = true`
     - `[workspace].release_always = false`
-  - `cliff.toml`:
+  - `RS-RELEASE-04`:
     - `[git].conventional_commits = true`
     - `[git].filter_unconventional = true`
     - canonical `commit_parsers` coverage for `feat/fix/doc/perf/refactor/style/test/chore`
-- those requirements now belong here, not in a separate top-level plan.
+- the remaining later-hardening item is richer workflow execution semantics, not release-plz/cliff baseline ownership.
 
 ## Explicitly rejected
 

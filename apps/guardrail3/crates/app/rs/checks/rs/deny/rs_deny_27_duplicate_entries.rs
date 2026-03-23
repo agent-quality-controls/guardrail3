@@ -37,15 +37,20 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         let mut skip_counts = BTreeMap::<String, usize>::new();
         if let Some(entries) = bans.get("skip").and_then(toml::Value::as_array) {
             for entry in entries {
-                let name = if let Some(crate_field) = entry.get("crate").and_then(toml::Value::as_str) {
-                    crate_field.split('@').next().unwrap_or(crate_field).to_owned()
-                } else if let Some(name) = entry.as_str() {
-                    name.to_owned()
-                } else if let Some(name) = entry.get("name").and_then(toml::Value::as_str) {
-                    name.to_owned()
-                } else {
-                    "unknown".to_owned()
-                };
+                let name =
+                    if let Some(crate_field) = entry.get("crate").and_then(toml::Value::as_str) {
+                        crate_field
+                            .split('@')
+                            .next()
+                            .unwrap_or(crate_field)
+                            .to_owned()
+                    } else if let Some(name) = entry.as_str() {
+                        name.to_owned()
+                    } else if let Some(name) = entry.get("name").and_then(toml::Value::as_str) {
+                        name.to_owned()
+                    } else {
+                        "unknown".to_owned()
+                    };
                 *skip_counts.entry(name).or_default() += 1;
             }
         }
@@ -85,7 +90,10 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                 id: "RS-DENY-27".to_owned(),
                 severity: Severity::Warn,
                 title: "duplicate advisory ignore entry".to_owned(),
-                message: format!("`{}` has duplicate advisory ignore `{id}`.", config.rel_path),
+                message: format!(
+                    "`{}` has duplicate advisory ignore `{id}`.",
+                    config.rel_path
+                ),
                 file: Some(config.rel_path.clone()),
                 line: None,
                 inventory: false,
@@ -103,7 +111,10 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                 id: "RS-DENY-27".to_owned(),
                 severity: Severity::Warn,
                 title: "duplicate feature-ban entry".to_owned(),
-                message: format!("`{}` has duplicate `[[bans.features]]` for `{name}`.", config.rel_path),
+                message: format!(
+                    "`{}` has duplicate `[[bans.features]]` for `{name}`.",
+                    config.rel_path
+                ),
                 file: Some(config.rel_path.clone()),
                 line: None,
                 inventory: false,

@@ -57,5 +57,5 @@ fn push_result(
 }
 
 #[cfg(test)]
-#[path = "rs_code_01_crate_level_allow_tests.rs"]
+#[path = "rs_code_01_crate_level_allow_tests/mod.rs"]
 mod tests;

@@ -117,7 +117,9 @@ fn maybe_push_test_function(
     if !attrs.iter().any(is_test_attr) {
         return;
     }
-    let should_panic_attr = attrs.iter().find(|attr| attr.path().is_ident("should_panic"));
+    let should_panic_attr = attrs
+        .iter()
+        .find(|attr| attr.path().is_ident("should_panic"));
     let mut body_visitor = TestBodyVisitor::default();
     body_visitor.visit_block(block);
     out.push(TestFunctionInfo {
@@ -144,13 +146,16 @@ struct TestBodyVisitor {
 
 impl<'ast> Visit<'ast> for TestBodyVisitor {
     fn visit_macro(&mut self, mac: &'ast syn::Macro) {
-        if let Some(name) = mac.path.segments.last().map(|segment| segment.ident.to_string()) {
+        if let Some(name) = mac
+            .path
+            .segments
+            .last()
+            .map(|segment| segment.ident.to_string())
+        {
             if is_assertion_macro_name(&name) {
                 self.has_assertion_macro = true;
             }
-            if (name == "assert_eq" || name == "assert_ne")
-                && macro_has_literal_comparison(mac)
-            {
+            if (name == "assert_eq" || name == "assert_ne") && macro_has_literal_comparison(mac) {
                 self.tautological_assert_lines.push(span_line(mac.span()));
             }
             if name == "assert" && macro_has_weak_matches(mac) {
@@ -235,7 +240,11 @@ fn is_assert_like_name(name: &str) -> bool {
 
 fn call_ident(expr: &syn::Expr) -> Option<String> {
     match expr {
-        syn::Expr::Path(path) => path.path.segments.last().map(|segment| segment.ident.to_string()),
+        syn::Expr::Path(path) => path
+            .path
+            .segments
+            .last()
+            .map(|segment| segment.ident.to_string()),
         _ => None,
     }
 }
@@ -248,7 +257,9 @@ fn macro_has_literal_comparison(mac: &syn::Macro) -> bool {
     if args.len() < 2 {
         return false;
     }
-    args.iter().take(2).all(|expr| matches!(expr, syn::Expr::Lit(_)))
+    args.iter()
+        .take(2)
+        .all(|expr| matches!(expr, syn::Expr::Lit(_)))
 }
 
 fn macro_has_weak_matches(mac: &syn::Macro) -> bool {
@@ -281,7 +292,10 @@ fn pattern_contains_wild(pattern: &syn::Pat) -> bool {
         syn::Pat::Wild(_) => true,
         syn::Pat::Tuple(tuple) => tuple.elems.iter().any(pattern_contains_wild),
         syn::Pat::TupleStruct(tuple) => tuple.elems.iter().any(pattern_contains_wild),
-        syn::Pat::Struct(strct) => strct.fields.iter().any(|field| pattern_contains_wild(&field.pat)),
+        syn::Pat::Struct(strct) => strct
+            .fields
+            .iter()
+            .any(|field| pattern_contains_wild(&field.pat)),
         syn::Pat::Slice(slice) => slice.elems.iter().any(pattern_contains_wild),
         syn::Pat::Reference(reference) => pattern_contains_wild(&reference.pat),
         syn::Pat::Or(or) => or.cases.iter().any(pattern_contains_wild),

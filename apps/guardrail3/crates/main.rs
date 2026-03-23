@@ -6,8 +6,10 @@ use glob as _;
 use ignore as _;
 use proc_macro2 as _;
 use quote as _;
+use semver as _;
 use serde as _;
 use serde_json as _;
+use serde_yaml as _;
 use syn as _;
 use toml as _;
 use toml_edit as _;
@@ -234,18 +236,7 @@ fn handle_rs(command: RsCommands) {
             let path = resolve_path(&args.path);
             let fs = RealFileSystem;
             let tc = RealToolChecker;
-            let domains = domains_from_args(&args);
-            let project = discover::detect_project(&fs, &path);
-            let crawl = guardrail3::app::core::crawl::crawl(&path);
-            let report = hooks::validate::run(
-                &fs,
-                &path,
-                project.has_rust,
-                project.has_typescript,
-                &domains,
-                &tc,
-                &crawl,
-            );
+            let report = rs::validate::run_hook_report(&fs, &path, &tc);
             print_report(&args, &report);
         }
         RsCommands::ListModules => {
@@ -309,7 +300,7 @@ fn handle_ts(command: TsCommands) {
             let report = hooks::validate::run(
                 &fs,
                 &path,
-                project.has_rust,
+                false,
                 project.has_typescript,
                 &domains,
                 &tc,
@@ -410,6 +401,7 @@ fn build_rs_categories(
         .and_then(|c| c.architecture)
         .unwrap_or(rs_defaults.architecture);
     let cfg_garde = checks.and_then(|c| c.garde).unwrap_or(rs_defaults.garde);
+    let cfg_hooks = checks.and_then(|c| c.hooks).unwrap_or(rs_defaults.hooks);
     let cfg_tests = checks.and_then(|c| c.tests).unwrap_or(rs_defaults.tests);
     let cfg_release = checks
         .and_then(|c| c.release)
@@ -421,6 +413,7 @@ fn build_rs_categories(
         RustCheckCategories {
             architecture: args.architecture,
             garde: args.garde,
+            hooks: args.code,
             tests: args.tests,
             release: args.release,
         }
@@ -428,6 +421,7 @@ fn build_rs_categories(
         RustCheckCategories {
             architecture: cfg_arch,
             garde: cfg_garde,
+            hooks: cfg_hooks,
             tests: cfg_tests,
             release: cfg_release,
         }

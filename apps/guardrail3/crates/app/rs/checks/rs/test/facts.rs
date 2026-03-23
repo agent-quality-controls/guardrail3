@@ -1,10 +1,13 @@
 use std::collections::{BTreeMap, BTreeSet};
 
+use crate::app::rs::checks::hooks::shell::parse_script;
 use crate::domain::config::types::GuardrailConfig;
 use crate::domain::project_tree::ProjectTree;
 use crate::ports::outbound::ToolChecker;
 
-use super::discover::{is_integration_test_path, is_src_path, is_test_sidecar_path, rust_file_rels};
+use super::discover::{
+    is_integration_test_path, is_src_path, is_test_sidecar_path, rust_file_rels,
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TestRootKind {
@@ -111,7 +114,10 @@ struct CargoRootFacts {
 pub fn collect(tree: &ProjectTree, tc: &dyn ToolChecker) -> TestFacts {
     let mut input_failures = Vec::new();
     let guardrail = parse_guardrail(tree);
-    if let Some(parse_error) = guardrail.as_ref().and_then(|value| value.parse_error.as_ref()) {
+    if let Some(parse_error) = guardrail
+        .as_ref()
+        .and_then(|value| value.parse_error.as_ref())
+    {
         input_failures.push(InputFailureFacts {
             rel_path: "guardrail3.toml".to_owned(),
             message: parse_error.clone(),
@@ -391,7 +397,9 @@ fn cargo_toml_has_tokio(
                 .get(*section)
                 .and_then(toml::Value::as_table)
                 .is_some_and(|table| {
-                    table.iter().any(|(dep_name, spec)| dependency_is_tokio(dep_name, spec, workspace_deps))
+                    table
+                        .iter()
+                        .any(|(dep_name, spec)| dependency_is_tokio(dep_name, spec, workspace_deps))
                 })
         })
 }
@@ -454,7 +462,11 @@ fn collect_mutation_hook_files(tree: &ProjectTree) -> Vec<String> {
             let Some(content) = tree.file_content(rel_path) else {
                 continue;
             };
-            if content.lines().any(line_has_mutation_hook) {
+            if parse_script(content)
+                .executable_lines
+                .iter()
+                .any(executable_line_has_mutation_hook)
+            {
                 files.push(rel_path.clone());
             }
         }
@@ -463,10 +475,8 @@ fn collect_mutation_hook_files(tree: &ProjectTree) -> Vec<String> {
     files
 }
 
-fn line_has_mutation_hook(line: &str) -> bool {
-    let trimmed = line.trim();
-    if trimmed.is_empty() || trimmed.starts_with('#') {
-        return false;
-    }
-    trimmed.contains("cargo mutants") || trimmed.contains("cargo-mutants")
+fn executable_line_has_mutation_hook(
+    line: &crate::app::rs::checks::hooks::shell::ExecutableLine<'_>,
+) -> bool {
+    line.command_text.contains("cargo mutants") || line.command_text.contains("cargo-mutants")
 }

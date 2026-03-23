@@ -25,7 +25,8 @@ pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckRe
             id: ID.to_owned(),
             severity: Severity::Info,
             title: format!("{}: include/exclude missing", krate.name),
-            message: "Publishable crates should consider `include` or `exclude` patterns.".to_owned(),
+            message: "Publishable crates should consider `include` or `exclude` patterns."
+                .to_owned(),
             file: Some(krate.cargo_rel_path.clone()),
             line: None,
             inventory: false,
@@ -34,5 +35,5 @@ pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckRe
 }
 
 #[cfg(test)]
-#[path = "rs_pub_14_include_exclude_inventory_tests.rs"]
+#[path = "rs_pub_14_include_exclude_inventory_tests/mod.rs"]
 mod tests;

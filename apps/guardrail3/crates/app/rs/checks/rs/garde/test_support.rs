@@ -23,7 +23,11 @@ pub fn temp_root(slug: &str) -> PathBuf {
     std::env::temp_dir().join(unique)
 }
 
-pub fn project_tree(structure: Vec<(&str, DirEntry)>, content: Vec<(&str, &str)>, root: PathBuf) -> ProjectTree {
+pub fn project_tree(
+    structure: Vec<(&str, DirEntry)>,
+    content: Vec<(&str, &str)>,
+    root: PathBuf,
+) -> ProjectTree {
     ProjectTree {
         root,
         structure: structure

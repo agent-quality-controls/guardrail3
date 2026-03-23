@@ -25,5 +25,5 @@ pub fn check(input: &PatchHexarchInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_hexarch_16_patch_replace_bypass_tests.rs"]
+#[path = "rs_hexarch_16_patch_replace_bypass_tests/mod.rs"]
 mod tests;

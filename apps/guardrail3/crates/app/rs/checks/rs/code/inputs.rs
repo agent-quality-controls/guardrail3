@@ -1,4 +1,6 @@
-use super::facts::{CodeInputFailureFacts, ExceptionCommentFacts, RustCodeFileFacts, UnsafeCodeLintFacts};
+use super::facts::{
+    CodeInputFailureFacts, ExceptionCommentFacts, RustCodeFileFacts, UnsafeCodeLintFacts,
+};
 
 pub struct RustCodeFileInput<'a> {
     pub rel_path: &'a str,

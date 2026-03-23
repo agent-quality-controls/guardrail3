@@ -32,5 +32,5 @@ pub fn check(input: &WorkspaceCoverageHexarchInput<'_>, results: &mut Vec<CheckR
 }
 
 #[cfg(test)]
-#[path = "rs_hexarch_10_members_within_app_boundary_tests.rs"]
+#[path = "rs_hexarch_10_members_within_app_boundary_tests/mod.rs"]
 mod tests;

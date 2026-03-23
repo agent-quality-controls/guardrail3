@@ -1,6 +1,6 @@
 use crate::domain::report::{CheckResult, Severity};
 
-use super::garde_support::{extract_ban_paths, missing_bans, ADDITIONAL_METHOD_BANS};
+use super::garde_support::{ADDITIONAL_METHOD_BANS, extract_ban_paths, missing_bans};
 use super::inputs::GardeRootInput;
 
 const ID: &str = "RS-GARDE-06";

@@ -39,7 +39,10 @@ fn check_value(
                 id: "RS-DENY-06".to_owned(),
                 severity: Severity::Info,
                 title: format!("advisories `{key}` stricter than baseline"),
-                message: format!("`{}` sets `[advisories].{key} = \"deny\"`.", config.rel_path),
+                message: format!(
+                    "`{}` sets `[advisories].{key} = \"deny\"`.",
+                    config.rel_path
+                ),
                 file: Some(config.rel_path.clone()),
                 line: None,
                 inventory: false,
@@ -50,5 +53,5 @@ fn check_value(
 }
 
 #[cfg(test)]
-#[path = "rs_deny_06_stricter_advisories_inventory_tests.rs"]
+#[path = "rs_deny_06_stricter_advisories_inventory_tests/mod.rs"]
 mod tests;

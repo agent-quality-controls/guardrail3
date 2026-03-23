@@ -34,5 +34,5 @@ pub fn check(forbidden: &ForbiddenConfigFacts, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_clippy_12_allowed_placement_tests.rs"]
+#[path = "rs_clippy_12_allowed_placement_tests/mod.rs"]
 mod tests;

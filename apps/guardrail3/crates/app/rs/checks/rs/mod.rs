@@ -1,8 +1,8 @@
-pub mod code;
 pub mod cargo;
 pub mod clippy;
-pub mod deps;
+pub mod code;
 pub mod deny;
+pub mod deps;
 pub mod fmt;
 pub mod garde;
 pub mod hexarch;

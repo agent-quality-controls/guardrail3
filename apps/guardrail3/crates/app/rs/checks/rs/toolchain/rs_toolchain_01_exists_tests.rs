@@ -22,7 +22,10 @@ fn inventories_when_toolchain_toml_exists() {
     assert!(result.inventory);
     assert_eq!(result.severity, Severity::Info);
     assert_eq!(result.title, "rust-toolchain.toml exists");
-    assert_eq!(result.message, "Found rust-toolchain.toml at workspace root.");
+    assert_eq!(
+        result.message,
+        "Found rust-toolchain.toml at workspace root."
+    );
     assert_eq!(result.file.as_deref(), Some("rust-toolchain.toml"));
 }
 
@@ -45,6 +48,9 @@ fn errors_when_no_supported_toolchain_file_exists() {
     assert!(!result.inventory);
     assert_eq!(result.severity, Severity::Error);
     assert_eq!(result.title, "rust-toolchain.toml missing");
-    assert_eq!(result.message, "Expected rust-toolchain.toml at workspace root.");
+    assert_eq!(
+        result.message,
+        "Expected rust-toolchain.toml at workspace root."
+    );
     assert_eq!(result.file.as_deref(), Some(""));
 }

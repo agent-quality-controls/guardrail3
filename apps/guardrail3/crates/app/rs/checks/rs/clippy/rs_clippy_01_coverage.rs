@@ -44,5 +44,5 @@ pub fn check_uncovered(input: &UncoveredRustUnitInput<'_>, results: &mut Vec<Che
 }
 
 #[cfg(test)]
-#[path = "rs_clippy_01_coverage_tests.rs"]
+#[path = "rs_clippy_01_coverage_tests/mod.rs"]
 mod tests;

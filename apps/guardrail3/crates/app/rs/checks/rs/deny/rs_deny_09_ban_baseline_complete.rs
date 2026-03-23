@@ -32,10 +32,8 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     };
 
     let expected = expected_bans(config.profile_name.as_deref());
-    let actual_names: std::collections::BTreeSet<String> = deny_entries
-        .iter()
-        .filter_map(ban_name)
-        .collect();
+    let actual_names: std::collections::BTreeSet<String> =
+        deny_entries.iter().filter_map(ban_name).collect();
 
     for name in expected.keys() {
         if !actual_names.contains(name) {
@@ -77,5 +75,5 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_deny_09_ban_baseline_complete_tests.rs"]
+#[path = "rs_deny_09_ban_baseline_complete_tests/mod.rs"]
 mod tests;

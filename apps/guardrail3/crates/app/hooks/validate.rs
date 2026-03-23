@@ -17,6 +17,10 @@ pub fn run(
     tc: &dyn ToolChecker,
     crawl: &CrawlResult,
 ) -> Report {
+    if has_rust {
+        return crate::app::rs::validate::run_hook_report(fs, path, tc);
+    }
+
     let mut report = Report::new(path.display().to_string(), vec!["Hooks".to_owned()]);
 
     if domains.code {

@@ -13,7 +13,10 @@ pub fn check(input: &DependencyEdgeHexarchInput<'_>, results: &mut Vec<CheckResu
     results.push(CheckResult {
         id: ID.to_owned(),
         severity: Severity::Info,
-        title: format!("hexarch path dependency `{}` -> `{}`", edge.source_name, edge.dep_alias),
+        title: format!(
+            "hexarch path dependency `{}` -> `{}`",
+            edge.source_name, edge.dep_alias
+        ),
         message: format!(
             "`{}` depends on `{}` via `{}` resolved to `{}`.",
             edge.source_rel_dir, edge.dep_package_name, edge.section_label, target
@@ -25,5 +28,5 @@ pub fn check(input: &DependencyEdgeHexarchInput<'_>, results: &mut Vec<CheckResu
 }
 
 #[cfg(test)]
-#[path = "rs_hexarch_14_dependency_inventory_tests.rs"]
+#[path = "rs_hexarch_14_dependency_inventory_tests/mod.rs"]
 mod tests;

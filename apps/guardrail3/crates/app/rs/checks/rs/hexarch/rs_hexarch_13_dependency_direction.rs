@@ -39,5 +39,5 @@ pub fn check(input: &DependencyEdgeHexarchInput<'_>, results: &mut Vec<CheckResu
 }
 
 #[cfg(test)]
-#[path = "rs_hexarch_13_dependency_direction_tests.rs"]
+#[path = "rs_hexarch_13_dependency_direction_tests/mod.rs"]
 mod tests;

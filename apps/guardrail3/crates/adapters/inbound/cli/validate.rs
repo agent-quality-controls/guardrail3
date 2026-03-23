@@ -5,11 +5,10 @@ use crate::adapters::outbound::fs::RealFileSystem;
 use crate::adapters::outbound::report;
 use crate::adapters::outbound::tool_runner::RealToolChecker;
 use crate::app::core::discover;
-use crate::app::hooks;
 use crate::app::rs;
 use crate::app::ts;
 use crate::domain::config::types::GuardrailConfig;
-use crate::domain::report::{Report, RustCheckCategories, TsCheckCategories, ValidateDomains};
+use crate::domain::report::{Report, RustCheckCategories, TsCheckCategories};
 use crate::ports::outbound::FileSystem;
 
 /// Convert a repo-relative path to an absolute path string.
@@ -25,14 +24,6 @@ pub fn run(args: &ValidateArgs) {
     let Some(abs_path) = path.canonicalize().ok() else {
         eprintln!("Error: cannot resolve path '{}'", args.path);
         std::process::exit(1);
-    };
-
-    let run_all = !args.code && !args.architecture && !args.release && !args.tests && !args.garde;
-    let domains = ValidateDomains {
-        code: run_all || args.code,
-        architecture: run_all || args.architecture,
-        release: run_all || args.release,
-        tests: run_all || args.tests,
     };
 
     let fs = RealFileSystem;
@@ -93,18 +84,25 @@ pub fn run(args: &ValidateArgs) {
         }
     }
 
-    // Hook and deployment checks (hooks still use ValidateDomains)
-    let hooks_report = hooks::validate::run(
-        &fs,
-        &abs_path,
-        project.has_rust,
-        project.has_typescript,
-        &domains,
-        &tc,
-        &crawl,
-    );
-    for section in hooks_report.sections {
-        combined_report.add_section(section);
+    // Keep the legacy hook/deploy path only for non-Rust projects.
+    if !project.has_rust && project.has_typescript {
+        let hooks_report = crate::app::hooks::validate::run(
+            &fs,
+            &abs_path,
+            false,
+            project.has_typescript,
+            &crate::domain::report::ValidateDomains {
+                code: true,
+                architecture: true,
+                release: true,
+                tests: true,
+            },
+            &tc,
+            &crawl,
+        );
+        for section in hooks_report.sections {
+            combined_report.add_section(section);
+        }
     }
 
     match args.format.as_str() {
@@ -259,6 +257,7 @@ fn build_rs_categories(args: &ValidateArgs, cfg: Option<&GuardrailConfig>) -> Ru
         .and_then(|c| c.architecture)
         .unwrap_or(rs_defaults.architecture);
     let cfg_garde = checks.and_then(|c| c.garde).unwrap_or(rs_defaults.garde);
+    let cfg_hooks = checks.and_then(|c| c.hooks).unwrap_or(rs_defaults.hooks);
     let cfg_tests = checks.and_then(|c| c.tests).unwrap_or(rs_defaults.tests);
     let cfg_release = checks
         .and_then(|c| c.release)
@@ -269,6 +268,7 @@ fn build_rs_categories(args: &ValidateArgs, cfg: Option<&GuardrailConfig>) -> Ru
         RustCheckCategories {
             architecture: args.architecture,
             garde: args.garde,
+            hooks: args.code,
             tests: args.tests,
             release: args.release,
         }
@@ -276,6 +276,7 @@ fn build_rs_categories(args: &ValidateArgs, cfg: Option<&GuardrailConfig>) -> Ru
         RustCheckCategories {
             architecture: cfg_arch,
             garde: cfg_garde,
+            hooks: cfg_hooks,
             tests: cfg_tests,
             release: cfg_release,
         }

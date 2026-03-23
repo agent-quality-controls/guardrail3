@@ -10,7 +10,10 @@ pub fn check(input: &TestFunctionInput<'_>, results: &mut Vec<CheckResult>) {
             id: ID.to_owned(),
             severity: Severity::Warn,
             title: "tautological assertion".to_owned(),
-            message: format!("Test `{}` compares only literals in an assertion.", input.function.name),
+            message: format!(
+                "Test `{}` compares only literals in an assertion.",
+                input.function.name
+            ),
             file: Some(input.file.rel_path.clone()),
             line: Some(*line),
             inventory: false,

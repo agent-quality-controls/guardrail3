@@ -50,7 +50,11 @@ pub struct TestFileInput<'a> {
 }
 
 impl<'a> TestFileInput<'a> {
-    pub const fn new(file: &'a TestFileFacts, content: &'a str, parsed: &'a ParsedTestFile) -> Self {
+    pub const fn new(
+        file: &'a TestFileFacts,
+        content: &'a str,
+        parsed: &'a ParsedTestFile,
+    ) -> Self {
         Self {
             file,
             content,

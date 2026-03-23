@@ -10,7 +10,8 @@ pub fn check(input: &TestFileInput<'_>, results: &mut Vec<CheckResult>) {
             id: ID.to_owned(),
             severity: Severity::Warn,
             title: "ignored test lacks reason".to_owned(),
-            message: "`#[ignore]` requires an inline or previous-line `reason:` comment.".to_owned(),
+            message: "`#[ignore]` requires an inline or previous-line `reason:` comment."
+                .to_owned(),
             file: Some(input.file.rel_path.clone()),
             line: Some(*line),
             inventory: false,

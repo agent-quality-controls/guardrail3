@@ -1,6 +1,18 @@
 mod dependency_facts;
 mod facts;
 mod inputs;
+mod rs_hexarch_01_crates_exists;
+mod rs_hexarch_02_exact_contents;
+mod rs_hexarch_03_inbound_outbound;
+mod rs_hexarch_04_loose_files;
+mod rs_hexarch_05_container_not_empty;
+mod rs_hexarch_06_leaf_valid;
+mod rs_hexarch_07_workspace_members_match_crate_dirs;
+mod rs_hexarch_08_app_cargo_is_workspace;
+mod rs_hexarch_09_no_extra_workspace_members;
+mod rs_hexarch_10_members_within_app_boundary;
+mod rs_hexarch_11_root_workspace_doesnt_include_apps;
+mod rs_hexarch_12_src_banned;
 mod rs_hexarch_13_dependency_direction;
 mod rs_hexarch_14_dependency_inventory;
 mod rs_hexarch_15_boundary_config;
@@ -14,18 +26,6 @@ mod rs_hexarch_22_ports_trait_dominance;
 mod rs_hexarch_23_adapter_pub_trait;
 mod rs_hexarch_24_cross_app_boundary;
 mod rs_hexarch_25_target_dependency_direction;
-mod rs_hexarch_01_crates_exists;
-mod rs_hexarch_02_exact_contents;
-mod rs_hexarch_03_inbound_outbound;
-mod rs_hexarch_04_loose_files;
-mod rs_hexarch_05_container_not_empty;
-mod rs_hexarch_06_leaf_valid;
-mod rs_hexarch_07_workspace_members_match_crate_dirs;
-mod rs_hexarch_08_app_cargo_is_workspace;
-mod rs_hexarch_09_no_extra_workspace_members;
-mod rs_hexarch_10_members_within_app_boundary;
-mod rs_hexarch_11_root_workspace_doesnt_include_apps;
-mod rs_hexarch_12_src_banned;
 mod source_facts;
 #[cfg(test)]
 mod test_support;
@@ -35,10 +35,10 @@ use crate::domain::report::CheckResult;
 
 use self::facts::collect;
 use self::inputs::{
-    AppHexarchInput, ContainerHexarchInput, CycleHexarchInput,
-    DependencyEdgeHexarchInput, DirectionalContainerHexarchInput, HexRootInput, LeafHexarchInput,
-    MemberConfigHexarchInput, MemberDependencyHexarchInput, PatchHexarchInput,
-    RootWorkspaceHexarchInput, SourceCrateHexarchInput, WorkspaceCoverageHexarchInput,
+    AppHexarchInput, ContainerHexarchInput, CycleHexarchInput, DependencyEdgeHexarchInput,
+    DirectionalContainerHexarchInput, HexRootInput, LeafHexarchInput, MemberConfigHexarchInput,
+    MemberDependencyHexarchInput, PatchHexarchInput, RootWorkspaceHexarchInput,
+    SourceCrateHexarchInput, WorkspaceCoverageHexarchInput,
 };
 
 pub fn check(tree: &ProjectTree) -> Vec<CheckResult> {

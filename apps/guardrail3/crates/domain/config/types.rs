@@ -66,6 +66,8 @@ pub struct RustChecksConfig {
     #[garde(skip)] // reason: Option<bool> — inherently valid
     pub garde: Option<bool>,
     #[garde(skip)] // reason: Option<bool> — inherently valid
+    pub hooks: Option<bool>,
+    #[garde(skip)] // reason: Option<bool> — inherently valid
     pub tests: Option<bool>,
     #[garde(skip)] // reason: Option<bool> — inherently valid
     pub release: Option<bool>,

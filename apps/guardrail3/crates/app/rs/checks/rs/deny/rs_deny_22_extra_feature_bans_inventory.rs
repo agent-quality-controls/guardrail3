@@ -15,7 +15,10 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                     id: "RS-DENY-22".to_owned(),
                     severity: Severity::Info,
                     title: "extra feature ban".to_owned(),
-                    message: format!("`{}` has extra feature-ban entry for `{}`.", config.rel_path, entry.name),
+                    message: format!(
+                        "`{}` has extra feature-ban entry for `{}`.",
+                        config.rel_path, entry.name
+                    ),
                     file: Some(config.rel_path.clone()),
                     line: None,
                     inventory: false,

@@ -7,7 +7,29 @@ const ID: &str = "RS-HEXARCH-22";
 
 pub fn check(input: &SourceCrateHexarchInput<'_>, results: &mut Vec<CheckResult>) {
     let source = input.source;
-    if source.layer != Some(Layer::Ports) || source.impl_count <= source.pub_trait_count {
+    if source.layer != Some(Layer::Ports) {
+        return;
+    }
+
+    if let Some(source_error_message) = &source.source_error_message {
+        results.push(CheckResult {
+            id: ID.to_owned(),
+            severity: Severity::Warn,
+            title: format!("ports crate `{}` source analysis failed", source.crate_name),
+            message: source_error_message.clone(),
+            file: Some(
+                source
+                    .source_error_rel_path
+                    .clone()
+                    .unwrap_or_else(|| source.rel_dir.clone()),
+            ),
+            line: None,
+            inventory: false,
+        });
+        return;
+    }
+
+    if source.impl_count <= source.pub_trait_count {
         return;
     }
 
@@ -26,5 +48,5 @@ pub fn check(input: &SourceCrateHexarchInput<'_>, results: &mut Vec<CheckResult>
 }
 
 #[cfg(test)]
-#[path = "rs_hexarch_22_ports_trait_dominance_tests.rs"]
+#[path = "rs_hexarch_22_ports_trait_dominance_tests/mod.rs"]
 mod tests;

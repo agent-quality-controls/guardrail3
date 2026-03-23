@@ -37,5 +37,5 @@ pub fn check(input: &ReleaseEdgeInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_pub_11_interdependent_version_consistency_tests.rs"]
+#[path = "rs_pub_11_interdependent_version_consistency_tests/mod.rs"]
 mod tests;

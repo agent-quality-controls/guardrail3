@@ -104,10 +104,8 @@ pub fn collect(tree: &ProjectTree) -> DenyFacts {
         if allowed_policy_roots.contains(&config.policy_root_rel) {
             allowed_configs.push(config);
         } else {
-            let shadowed_root_rel = nearest_allowed_ancestor(
-                &config.policy_root_rel,
-                &allowed_policy_roots,
-            );
+            let shadowed_root_rel =
+                nearest_allowed_ancestor(&config.policy_root_rel, &allowed_policy_roots);
             forbidden_configs.push(ForbiddenDenyConfigFacts {
                 policy_root_rel: config.policy_root_rel,
                 rel_path: config.rel_path,
@@ -231,7 +229,10 @@ fn expand_member_pattern(tree: &ProjectTree, workspace_rel: &str, member: &str) 
     }
 }
 
-fn collect_configs(tree: &ProjectTree, profile_map: &BTreeMap<String, Option<String>>) -> Vec<DenyConfigFacts> {
+fn collect_configs(
+    tree: &ProjectTree,
+    profile_map: &BTreeMap<String, Option<String>>,
+) -> Vec<DenyConfigFacts> {
     let mut configs = Vec::new();
     let mut seen_paths = BTreeSet::new();
     push_config_if_present(
@@ -366,7 +367,12 @@ fn nearest_covering_config(rel_dir: &str, allowed_configs: &[DenyConfigFacts]) -
     allowed_configs
         .iter()
         .filter(|config| is_ancestor_dir(&config.policy_root_rel, rel_dir))
-        .max_by_key(|config| (config.policy_root_rel.len(), config_precedence(&config.file_kind)))
+        .max_by_key(|config| {
+            (
+                config.policy_root_rel.len(),
+                config_precedence(&config.file_kind),
+            )
+        })
         .map(|config| config.rel_path.clone())
 }
 

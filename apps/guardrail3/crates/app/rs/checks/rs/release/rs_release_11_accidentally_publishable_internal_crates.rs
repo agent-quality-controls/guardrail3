@@ -27,5 +27,5 @@ pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckRe
 }
 
 #[cfg(test)]
-#[path = "rs_release_11_accidentally_publishable_internal_crates_tests.rs"]
+#[path = "rs_release_11_accidentally_publishable_internal_crates_tests/mod.rs"]
 mod tests;

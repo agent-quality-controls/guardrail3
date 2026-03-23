@@ -1,7 +1,7 @@
 use crate::domain::report::Severity;
 
-use super::check;
 use super::super::test_support::module_input;
+use super::check;
 
 #[test]
 fn warns_on_non_tests_module_name() {

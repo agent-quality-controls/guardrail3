@@ -57,6 +57,29 @@ pub fn check(input: &HexRootInput<'_>, results: &mut Vec<CheckResult>) {
             inventory: false,
         });
     }
+
+    let bad_files: Vec<_> = input
+        .files
+        .iter()
+        .filter(|file| file.as_str() != ".gitkeep")
+        .cloned()
+        .collect();
+    if !bad_files.is_empty() {
+        results.push(CheckResult {
+            id: ID.to_owned(),
+            severity: Severity::Error,
+            title: format!("Service `{}` has loose files in {}/", input.app_name, label(input)),
+            message: format!(
+                "Service `{}` has files in `{}/` that don't belong: {}. Only `.gitkeep` is allowed alongside the top-level hex directories.",
+                input.app_name,
+                label(input),
+                bad_files.join(", ")
+            ),
+            file: Some(input.crates_rel_dir.to_owned()),
+            line: None,
+            inventory: false,
+        });
+    }
 }
 
 fn label<'a>(input: &'a HexRootInput<'a>) -> &'a str {
@@ -68,5 +91,5 @@ fn label<'a>(input: &'a HexRootInput<'a>) -> &'a str {
 }
 
 #[cfg(test)]
-#[path = "rs_hexarch_02_exact_contents_tests.rs"]
+#[path = "rs_hexarch_02_exact_contents_tests/mod.rs"]
 mod tests;

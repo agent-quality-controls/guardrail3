@@ -1,8 +1,8 @@
 use crate::domain::report::Severity;
 
-use super::check;
 use super::super::parse::ParsedTestFile;
 use super::super::test_support::file_input;
+use super::check;
 
 #[test]
 fn warns_when_test_file_exceeds_threshold() {

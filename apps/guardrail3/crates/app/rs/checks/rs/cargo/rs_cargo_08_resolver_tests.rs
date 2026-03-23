@@ -53,7 +53,8 @@ fn virtual_workspace_missing_resolver_is_reported() {
     assert!(has_result(&results, "RS-CARGO-08", |result| {
         matches!(result.severity, Severity::Error)
             && result.title == "virtual workspace missing resolver"
-            && result.message == "Virtual workspaces must set `resolver = \"2\"` or `resolver = \"3\"`."
+            && result.message
+                == "Virtual workspaces must set `resolver = \"2\"` or `resolver = \"3\"`."
     }));
 }
 

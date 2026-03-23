@@ -20,7 +20,10 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                         id: "RS-DENY-17".to_owned(),
                         severity: Severity::Info,
                         title: "license exception entry".to_owned(),
-                        message: format!("`{}` has license exception for `{name}`.", config.rel_path),
+                        message: format!(
+                            "`{}` has license exception for `{name}`.",
+                            config.rel_path
+                        ),
                         file: Some(config.rel_path.clone()),
                         line: None,
                         inventory: false,
@@ -33,5 +36,5 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_deny_17_license_exceptions_inventory_tests.rs"]
+#[path = "rs_deny_17_license_exceptions_inventory_tests/mod.rs"]
 mod tests;

@@ -1,4 +1,5 @@
 use std::collections::{BTreeMap, BTreeSet};
+use std::path::Path;
 
 use serde_yaml::Value as YamlValue;
 
@@ -24,6 +25,7 @@ pub struct RepoReleaseFacts {
     pub release_plz_package_names: BTreeSet<String>,
     pub cliff_rel_path: String,
     pub cliff_exists: bool,
+    pub cliff_parsed: Option<toml::Value>,
     pub workflows: Vec<WorkflowFacts>,
     pub publishable_crate_names: BTreeSet<String>,
     pub publishable_count: usize,
@@ -53,6 +55,7 @@ pub struct PublishableCrateFacts {
     pub description_present: bool,
     pub license_present: bool,
     pub repository_present: bool,
+    pub readme_declared_false: bool,
     pub readme_rel_path: String,
     pub readme_exists: bool,
     pub readme_content: Option<String>,
@@ -119,7 +122,8 @@ pub fn collect(tree: &ProjectTree, tc: &dyn ToolChecker, thorough: bool) -> Rele
 
     for root in cargo_roots.values().filter(|root| root.has_package) {
         let package = package_table(&root.parsed);
-        let publishable = is_publishable(package);
+        let workspace_package = workspace_package_table(&root.rel_dir, &cargo_roots);
+        let publishable = inherited_publishable(package, workspace_package);
         let is_binary = is_binary_crate(tree, &root.rel_dir, &root.parsed);
         let is_library = is_library_crate(tree, &root.rel_dir, &root.parsed);
         let name = package
@@ -127,11 +131,11 @@ pub fn collect(tree: &ProjectTree, tc: &dyn ToolChecker, thorough: bool) -> Rele
             .and_then(toml::Value::as_str)
             .unwrap_or("unknown")
             .to_owned();
-        let readme_field = package
-            .and_then(|package| package.get("readme"))
-            .and_then(toml::Value::as_str);
-        let (readme_rel_path, readme_abs_path) = readme_target_path(tree, &root.rel_dir, readme_field);
-        let readme_exists = path_file_exists(&readme_abs_path);
+        let readme_declared_false = inherited_readme_declared_false(package, workspace_package);
+        let readme_path_field = inherited_readme_path(package, workspace_package);
+        let (readme_rel_path, readme_abs_path) =
+            readme_target_path(tree, &root.rel_dir, readme_path_field);
+        let readme_exists = !readme_declared_false && path_file_exists(&readme_abs_path);
         let readme_content = if readme_exists {
             match crate::fs::read_file_err(&readme_abs_path) {
                 Ok(content) => Some(content),
@@ -155,31 +159,31 @@ pub fn collect(tree: &ProjectTree, tc: &dyn ToolChecker, thorough: bool) -> Rele
         let version_string = version_value
             .and_then(toml::Value::as_str)
             .map(str::to_owned);
-        let version_valid = workspace_version
-            || version_string
-                .as_deref()
-                .is_some_and(valid_semver);
+        let version_valid =
+            workspace_version || version_string.as_deref().is_some_and(valid_semver);
         let facts = PublishableCrateFacts {
             name: name.clone(),
             cargo_rel_path: root.cargo_rel_path.clone(),
             publishable,
             is_binary,
             is_library,
-            description_present: string_field_present(package, "description"),
-            license_present: string_field_present(package, "license")
-                || string_field_present(package, "license-file"),
-            repository_present: string_field_present(package, "repository"),
+            description_present: inherited_string_field_present(
+                package,
+                workspace_package,
+                "description",
+            ),
+            license_present: inherited_license_present(package, workspace_package),
+            repository_present: inherited_string_field_present(
+                package,
+                workspace_package,
+                "repository",
+            ),
+            readme_declared_false,
             readme_rel_path,
             readme_exists,
             readme_content,
-            keywords_count: package
-                .and_then(|package| package.get("keywords"))
-                .and_then(toml::Value::as_array)
-                .map(Vec::len),
-            categories_count: package
-                .and_then(|package| package.get("categories"))
-                .and_then(toml::Value::as_array)
-                .map(Vec::len),
+            keywords_count: inherited_array_count(package, workspace_package, "keywords"),
+            categories_count: inherited_array_count(package, workspace_package, "categories"),
             version_string: version_string.clone(),
             workspace_version,
             version_valid,
@@ -187,8 +191,9 @@ pub fn collect(tree: &ProjectTree, tc: &dyn ToolChecker, thorough: bool) -> Rele
                 .and_then(|package| package.get("metadata"))
                 .and_then(|metadata| metadata.get("docs.rs"))
                 .is_some(),
-            include_exclude_present: package
-                .is_some_and(|package| package.get("include").is_some() || package.get("exclude").is_some()),
+            include_exclude_present: package.is_some_and(|package| {
+                package.get("include").is_some() || package.get("exclude").is_some()
+            }),
             has_binstall_metadata: package
                 .and_then(|package| package.get("metadata"))
                 .and_then(|metadata| metadata.get("binstall"))
@@ -213,39 +218,57 @@ pub fn collect(tree: &ProjectTree, tc: &dyn ToolChecker, thorough: bool) -> Rele
     let mut release_plz_has_workspace = false;
     let mut release_plz_package_names = BTreeSet::new();
     let release_plz_rel_path = "release-plz.toml".to_owned();
-    if let Some(content) = tree.file_content(&release_plz_rel_path) {
+    if tree.file_exists(&release_plz_rel_path) {
         release_plz_exists = true;
-        match toml::from_str::<toml::Value>(content) {
-            Ok(parsed) => {
-                release_plz_has_workspace = parsed.get("workspace").is_some();
-                release_plz_package_names = parsed
-                    .get("package")
-                    .and_then(toml::Value::as_array)
-                    .map(|entries| {
-                        entries
-                            .iter()
-                            .filter_map(|entry| entry.get("name"))
-                            .filter_map(toml::Value::as_str)
-                            .map(str::to_owned)
-                            .collect::<BTreeSet<_>>()
-                    })
-                    .unwrap_or_default();
-                release_plz_parsed = Some(parsed);
+        if let Some(content) = tree.file_content(&release_plz_rel_path) {
+            match toml::from_str::<toml::Value>(content) {
+                Ok(parsed) => {
+                    release_plz_has_workspace = parsed.get("workspace").is_some();
+                    release_plz_package_names = parsed
+                        .get("package")
+                        .and_then(toml::Value::as_array)
+                        .map(|entries| {
+                            entries
+                                .iter()
+                                .filter_map(|entry| entry.get("name"))
+                                .filter_map(toml::Value::as_str)
+                                .map(str::to_owned)
+                                .collect::<BTreeSet<_>>()
+                        })
+                        .unwrap_or_default();
+                    release_plz_parsed = Some(parsed);
+                }
+                Err(parse_error) => input_failures.push(ReleaseInputFailureFacts {
+                    rel_path: release_plz_rel_path.clone(),
+                    message: format!("Failed to parse release-plz.toml: {parse_error}"),
+                }),
             }
-            Err(parse_error) => input_failures.push(ReleaseInputFailureFacts {
+        } else {
+            input_failures.push(ReleaseInputFailureFacts {
                 rel_path: release_plz_rel_path.clone(),
-                message: format!("Failed to parse release-plz.toml: {parse_error}"),
-            }),
+                message: "Failed to read release-plz.toml.".to_owned(),
+            });
         }
     }
 
     let cliff_rel_path = "cliff.toml".to_owned();
-    let cliff_exists = tree.file_content(&cliff_rel_path).is_some();
-    if let Some(content) = tree.file_content(&cliff_rel_path) {
-        if let Err(parse_error) = toml::from_str::<toml::Value>(content) {
+    let cliff_exists = tree.file_exists(&cliff_rel_path);
+    let mut cliff_parsed = None;
+    if cliff_exists {
+        if let Some(content) = tree.file_content(&cliff_rel_path) {
+            match toml::from_str::<toml::Value>(content) {
+                Ok(parsed) => cliff_parsed = Some(parsed),
+                Err(parse_error) => {
+                    input_failures.push(ReleaseInputFailureFacts {
+                        rel_path: cliff_rel_path.clone(),
+                        message: format!("Failed to parse cliff.toml: {parse_error}"),
+                    });
+                }
+            }
+        } else {
             input_failures.push(ReleaseInputFailureFacts {
                 rel_path: cliff_rel_path.clone(),
-                message: format!("Failed to parse cliff.toml: {parse_error}"),
+                message: "Failed to read cliff.toml.".to_owned(),
             });
         }
     }
@@ -291,6 +314,7 @@ pub fn collect(tree: &ProjectTree, tc: &dyn ToolChecker, thorough: bool) -> Rele
         release_plz_package_names,
         cliff_rel_path,
         cliff_exists,
+        cliff_parsed,
         workflows,
         publishable_crate_names: publishable_names.clone(),
         publishable_count: crates.iter().filter(|krate| krate.publishable).count(),
@@ -308,12 +332,15 @@ pub fn collect(tree: &ProjectTree, tc: &dyn ToolChecker, thorough: bool) -> Rele
             .and_then(toml::Value::as_str)
             .unwrap_or("unknown")
             .to_owned();
-        if !is_publishable(package) {
+        let workspace_package = workspace_package_table(&root.rel_dir, &cargo_roots);
+        if !inherited_publishable(package, workspace_package) {
             continue;
         }
         let workspace_root = workspace_roots
             .iter()
-            .filter(|workspace| root.rel_dir == **workspace || root.rel_dir.starts_with(&format!("{workspace}/")))
+            .filter(|workspace| {
+                root.rel_dir == **workspace || root.rel_dir.starts_with(&format!("{workspace}/"))
+            })
             .max_by_key(|workspace| workspace.len())
             .and_then(|workspace| cargo_roots.get(workspace));
         let workspace_dependencies = workspace_root
@@ -377,7 +404,13 @@ fn collect_cargo_roots(
             } else {
                 join_under_root(&rel_dir, "Cargo.toml")
             };
-            let content = tree.file_content(&cargo_rel_path)?;
+            let Some(content) = tree.file_content(&cargo_rel_path) else {
+                input_failures.push(ReleaseInputFailureFacts {
+                    rel_path: cargo_rel_path.clone(),
+                    message: "Failed to read Cargo.toml for release-family discovery.".to_owned(),
+                });
+                return None;
+            };
             let parsed = match toml::from_str::<toml::Value>(content) {
                 Ok(parsed) => parsed,
                 Err(parse_error) => {
@@ -415,11 +448,35 @@ fn collect_workflows(
     tree: &ProjectTree,
     input_failures: &mut Vec<ReleaseInputFailureFacts>,
 ) -> Vec<WorkflowFacts> {
-    let mut workflows = tree
-        .content
+    let mut workflow_paths = tree
+        .structure
         .iter()
-        .filter(|(rel_path, _)| rel_path.contains(".github/workflows/"))
-        .filter_map(|(rel_path, content)| {
+        .flat_map(|(dir_rel, entry)| {
+            entry.files.iter().filter_map(move |file_name| {
+                let rel_path = ProjectTree::join_rel(dir_rel, file_name);
+                let is_workflow = rel_path.contains(".github/workflows/")
+                    && Path::new(file_name)
+                        .extension()
+                        .and_then(|ext| ext.to_str())
+                        .is_some_and(|ext| {
+                            ext.eq_ignore_ascii_case("yml") || ext.eq_ignore_ascii_case("yaml")
+                        });
+                is_workflow.then_some(rel_path)
+            })
+        })
+        .collect::<Vec<_>>();
+    workflow_paths.sort();
+
+    let mut workflows = workflow_paths
+        .into_iter()
+        .filter_map(|rel_path| {
+            let Some(content) = tree.file_content(&rel_path) else {
+                input_failures.push(ReleaseInputFailureFacts {
+                    rel_path: rel_path.clone(),
+                    message: "Failed to read workflow YAML.".to_owned(),
+                });
+                return None;
+            };
             let parsed = match serde_yaml::from_str::<YamlValue>(content) {
                 Ok(parsed) => parsed,
                 Err(parse_error) => {
@@ -443,4 +500,137 @@ fn collect_workflows(
         .collect::<Vec<_>>();
     workflows.sort_by(|a, b| a.rel_path.cmp(&b.rel_path));
     workflows
+}
+
+fn workspace_package_table<'a>(
+    rel_dir: &str,
+    cargo_roots: &'a BTreeMap<String, CargoRootFacts>,
+) -> Option<&'a toml::Value> {
+    cargo_roots
+        .values()
+        .filter(|candidate| {
+            candidate.has_workspace && is_under_workspace(rel_dir, &candidate.rel_dir)
+        })
+        .max_by_key(|candidate| candidate.rel_dir.len())
+        .and_then(|candidate| candidate.parsed.get("workspace"))
+        .and_then(|workspace| workspace.get("package"))
+}
+
+fn is_under_workspace(rel_dir: &str, workspace_rel_dir: &str) -> bool {
+    workspace_rel_dir.is_empty()
+        || rel_dir == workspace_rel_dir
+        || rel_dir
+            .strip_prefix(workspace_rel_dir)
+            .is_some_and(|suffix| suffix.starts_with('/'))
+}
+
+fn inherited_string_field_present(
+    package: Option<&toml::Value>,
+    workspace_package: Option<&toml::Value>,
+    field: &str,
+) -> bool {
+    string_field_present(package, field)
+        || package
+            .and_then(|package| package.get(field))
+            .and_then(toml::Value::as_table)
+            .and_then(|table| table.get("workspace"))
+            .and_then(toml::Value::as_bool)
+            .is_some_and(|workspace| workspace)
+            && string_field_present(workspace_package, field)
+}
+
+fn inherited_license_present(
+    package: Option<&toml::Value>,
+    workspace_package: Option<&toml::Value>,
+) -> bool {
+    inherited_string_field_present(package, workspace_package, "license")
+        || inherited_string_field_present(package, workspace_package, "license-file")
+}
+
+fn inherited_array_count(
+    package: Option<&toml::Value>,
+    workspace_package: Option<&toml::Value>,
+    field: &str,
+) -> Option<usize> {
+    package
+        .and_then(|package| package.get(field))
+        .and_then(toml::Value::as_array)
+        .map(Vec::len)
+        .or_else(|| {
+            package
+                .and_then(|package| package.get(field))
+                .and_then(toml::Value::as_table)
+                .and_then(|table| table.get("workspace"))
+                .and_then(toml::Value::as_bool)
+                .is_some_and(|workspace| workspace)
+                .then(|| {
+                    workspace_package
+                        .and_then(|workspace_package| workspace_package.get(field))
+                        .and_then(toml::Value::as_array)
+                        .map(Vec::len)
+                })
+                .flatten()
+        })
+}
+
+fn inherited_publishable(
+    package: Option<&toml::Value>,
+    workspace_package: Option<&toml::Value>,
+) -> bool {
+    if !is_publishable(package) {
+        return false;
+    }
+    let inherits = package
+        .and_then(|package| package.get("publish"))
+        .and_then(toml::Value::as_table)
+        .and_then(|table| table.get("workspace"))
+        .and_then(toml::Value::as_bool)
+        .unwrap_or(false);
+    if !inherits {
+        return true;
+    }
+    is_publishable(workspace_package)
+}
+
+fn inherited_readme_declared_false(
+    package: Option<&toml::Value>,
+    workspace_package: Option<&toml::Value>,
+) -> bool {
+    package
+        .and_then(|package| package.get("readme"))
+        .and_then(toml::Value::as_bool)
+        .is_some_and(|value| !value)
+        || package
+            .and_then(|package| package.get("readme"))
+            .and_then(toml::Value::as_table)
+            .and_then(|table| table.get("workspace"))
+            .and_then(toml::Value::as_bool)
+            .is_some_and(|workspace| workspace)
+            && workspace_package
+                .and_then(|workspace_package| workspace_package.get("readme"))
+                .and_then(toml::Value::as_bool)
+                .is_some_and(|value| !value)
+}
+
+fn inherited_readme_path<'a>(
+    package: Option<&'a toml::Value>,
+    workspace_package: Option<&'a toml::Value>,
+) -> Option<&'a str> {
+    package
+        .and_then(|package| package.get("readme"))
+        .and_then(toml::Value::as_str)
+        .or_else(|| {
+            package
+                .and_then(|package| package.get("readme"))
+                .and_then(toml::Value::as_table)
+                .and_then(|table| table.get("workspace"))
+                .and_then(toml::Value::as_bool)
+                .is_some_and(|workspace| workspace)
+                .then(|| {
+                    workspace_package
+                        .and_then(|workspace_package| workspace_package.get("readme"))
+                        .and_then(toml::Value::as_str)
+                })
+                .flatten()
+        })
 }

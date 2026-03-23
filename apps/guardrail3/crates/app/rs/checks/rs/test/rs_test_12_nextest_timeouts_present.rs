@@ -44,7 +44,10 @@ pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
                 id: ID.to_owned(),
                 severity: Severity::Info,
                 title: "nextest timeouts configured".to_owned(),
-                message: format!("`{}` defines both `slow-timeout` and `leak-timeout`.", input.root.nextest_rel_path),
+                message: format!(
+                    "`{}` defines both `slow-timeout` and `leak-timeout`.",
+                    input.root.nextest_rel_path
+                ),
                 file: Some(input.root.nextest_rel_path.clone()),
                 line: None,
                 inventory: false,

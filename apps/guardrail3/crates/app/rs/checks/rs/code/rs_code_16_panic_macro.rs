@@ -20,7 +20,10 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
             id: ID.to_owned(),
             severity: Severity::Warn,
             title: "panic! macro".to_owned(),
-            message: format!("`panic!()` macro found: {}.", line_text(input.content, line)),
+            message: format!(
+                "`panic!()` macro found: {}.",
+                line_text(input.content, line)
+            ),
             file: Some(input.rel_path.to_owned()),
             line: Some(line),
             inventory: false,
@@ -29,5 +32,5 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_code_16_panic_macro_tests.rs"]
+#[path = "rs_code_16_panic_macro_tests/mod.rs"]
 mod tests;

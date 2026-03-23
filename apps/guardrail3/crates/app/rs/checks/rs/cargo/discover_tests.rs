@@ -1,6 +1,6 @@
-use super::collect;
 use super::super::inputs::WorkspaceMembersSetInput;
 use super::super::test_support::{entry, tree};
+use super::collect;
 
 #[test]
 fn workspace_member_set_input_is_bound_from_facts() {

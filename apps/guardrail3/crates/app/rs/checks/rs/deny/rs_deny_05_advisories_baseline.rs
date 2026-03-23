@@ -72,5 +72,5 @@ fn check_value(
 }
 
 #[cfg(test)]
-#[path = "rs_deny_05_advisories_baseline_tests.rs"]
+#[path = "rs_deny_05_advisories_baseline_tests/mod.rs"]
 mod tests;

@@ -53,7 +53,10 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
             id: "RS-DENY-14".to_owned(),
             severity: Severity::Error,
             title: "licenses.private.ignore must be true".to_owned(),
-            message: format!("`{}` must set `[licenses.private].ignore = true`.", config.rel_path),
+            message: format!(
+                "`{}` must set `[licenses.private].ignore = true`.",
+                config.rel_path
+            ),
             file: Some(config.rel_path.clone()),
             line: None,
             inventory: false,
@@ -62,5 +65,5 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_deny_14_license_allow_baseline_tests.rs"]
+#[path = "rs_deny_14_license_allow_baseline_tests/mod.rs"]
 mod tests;

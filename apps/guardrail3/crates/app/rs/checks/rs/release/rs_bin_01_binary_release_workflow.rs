@@ -24,7 +24,10 @@ pub fn check(
                 id: ID.to_owned(),
                 severity: Severity::Info,
                 title: format!("{}: binary release workflow present", krate.name),
-                message: format!("Workflow `{}` builds release binaries and uses a GitHub release action.", workflow.rel_path),
+                message: format!(
+                    "Workflow `{}` builds release binaries and uses a GitHub release action.",
+                    workflow.rel_path
+                ),
                 file: Some(workflow.rel_path.clone()),
                 line: None,
                 inventory: false,
@@ -36,7 +39,9 @@ pub fn check(
                 id: ID.to_owned(),
                 severity: Severity::Info,
                 title: format!("{}: no binary release workflow", krate.name),
-                message: "No workflow builds a release binary and publishes it via GitHub Releases.".to_owned(),
+                message:
+                    "No workflow builds a release binary and publishes it via GitHub Releases."
+                        .to_owned(),
                 file: Some(krate.cargo_rel_path.clone()),
                 line: None,
                 inventory: false,
@@ -47,5 +52,5 @@ pub fn check(
 }
 
 #[cfg(test)]
-#[path = "rs_bin_01_binary_release_workflow_tests.rs"]
+#[path = "rs_bin_01_binary_release_workflow_tests/mod.rs"]
 mod tests;

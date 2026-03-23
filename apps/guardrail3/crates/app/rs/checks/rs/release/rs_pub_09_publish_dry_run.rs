@@ -40,5 +40,5 @@ pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckRe
 }
 
 #[cfg(test)]
-#[path = "rs_pub_09_publish_dry_run_tests.rs"]
+#[path = "rs_pub_09_publish_dry_run_tests/mod.rs"]
 mod tests;

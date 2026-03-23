@@ -19,6 +19,7 @@ pub struct HexRootFacts {
     pub app_rel_dir: String,
     pub crates_rel_dir: String,
     pub dirs: Vec<String>,
+    pub files: Vec<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -238,6 +239,7 @@ fn collect_hex_roots(
         app_rel_dir: app_rel_dir.to_owned(),
         crates_rel_dir: crates_rel_dir.to_owned(),
         dirs: crates_entry.dirs.clone(),
+        files: crates_entry.files.clone(),
     });
 
     for group in ["adapters", "ports"] {

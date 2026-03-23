@@ -1,7 +1,7 @@
 use crate::domain::report::{CheckResult, Severity};
 
 use super::inputs::RustCodeFileInput;
-use super::parse::{find_public_result_error_types, PublicResultErrorKind};
+use super::parse::{PublicResultErrorKind, find_public_result_error_types};
 
 const ID: &str = "RS-CODE-25";
 
@@ -31,5 +31,5 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_code_25_public_result_error_type_tests.rs"]
+#[path = "rs_code_25_public_result_error_type_tests/mod.rs"]
 mod tests;

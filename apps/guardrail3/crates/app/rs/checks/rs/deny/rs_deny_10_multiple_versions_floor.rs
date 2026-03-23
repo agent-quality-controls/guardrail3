@@ -24,7 +24,10 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
             id: "RS-DENY-10".to_owned(),
             severity: Severity::Warn,
             title: "multiple-versions weaker than baseline".to_owned(),
-            message: format!("`{}` sets `[bans].multiple-versions = \"{other}\"`.", config.rel_path),
+            message: format!(
+                "`{}` sets `[bans].multiple-versions = \"{other}\"`.",
+                config.rel_path
+            ),
             file: Some(config.rel_path.clone()),
             line: None,
             inventory: false,
@@ -33,7 +36,10 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
             id: "RS-DENY-10".to_owned(),
             severity: Severity::Warn,
             title: "multiple-versions missing".to_owned(),
-            message: format!("`{}` does not set `[bans].multiple-versions`.", config.rel_path),
+            message: format!(
+                "`{}` does not set `[bans].multiple-versions`.",
+                config.rel_path
+            ),
             file: Some(config.rel_path.clone()),
             line: None,
             inventory: false,
@@ -42,5 +48,5 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_deny_10_multiple_versions_floor_tests.rs"]
+#[path = "rs_deny_10_multiple_versions_floor_tests/mod.rs"]
 mod tests;

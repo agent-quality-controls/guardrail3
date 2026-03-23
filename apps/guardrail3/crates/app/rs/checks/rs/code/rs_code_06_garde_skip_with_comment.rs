@@ -34,5 +34,5 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_code_06_garde_skip_with_comment_tests.rs"]
+#[path = "rs_code_06_garde_skip_with_comment_tests/mod.rs"]
 mod tests;

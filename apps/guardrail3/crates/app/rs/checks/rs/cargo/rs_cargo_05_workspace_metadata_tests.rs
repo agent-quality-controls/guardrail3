@@ -58,7 +58,8 @@ fn library_profile_missing_rust_version_warns() {
     assert!(has_result(&results, "RS-CARGO-05", |result| {
         matches!(result.severity, Severity::Warn)
             && result.title == "library workspace rust-version missing"
-            && result.message == "Library profile should declare `rust-version` as an MSRV contract."
+            && result.message
+                == "Library profile should declare `rust-version` as an MSRV contract."
     }));
 }
 
@@ -85,6 +86,7 @@ fn outdated_workspace_edition_warns_explicitly() {
     assert!(has_result(&results, "RS-CARGO-05", |result| {
         matches!(result.severity, Severity::Warn)
             && result.title == "outdated workspace edition"
-            && result.message == "Workspace edition is `2018`. Use edition `2024` or `2021` minimum."
+            && result.message
+                == "Workspace edition is `2018`. Use edition `2024` or `2021` minimum."
     }));
 }

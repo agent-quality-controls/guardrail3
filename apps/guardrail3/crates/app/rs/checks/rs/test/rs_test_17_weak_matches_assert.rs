@@ -10,7 +10,10 @@ pub fn check(input: &TestFunctionInput<'_>, results: &mut Vec<CheckResult>) {
             id: ID.to_owned(),
             severity: Severity::Warn,
             title: "weak matches assertion".to_owned(),
-            message: format!("Test `{}` uses `assert!(matches!(...))` with `_` wildcards.", input.function.name),
+            message: format!(
+                "Test `{}` uses `assert!(matches!(...))` with `_` wildcards.",
+                input.function.name
+            ),
             file: Some(input.file.rel_path.clone()),
             line: Some(*line),
             inventory: false,

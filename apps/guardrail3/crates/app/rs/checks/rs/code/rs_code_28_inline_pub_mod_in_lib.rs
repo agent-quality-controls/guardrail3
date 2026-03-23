@@ -24,9 +24,12 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 fn is_lib_rs(rel_path: &str) -> bool {
-    rel_path.rsplit('/').next().is_some_and(|name| name == "lib.rs")
+    rel_path
+        .rsplit('/')
+        .next()
+        .is_some_and(|name| name == "lib.rs")
 }
 
 #[cfg(test)]
-#[path = "rs_code_28_inline_pub_mod_in_lib_tests.rs"]
+#[path = "rs_code_28_inline_pub_mod_in_lib_tests/mod.rs"]
 mod tests;

@@ -58,5 +58,5 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_clippy_09_too_many_lines_threshold_tests.rs"]
+#[path = "rs_clippy_09_too_many_lines_threshold_tests/mod.rs"]
 mod tests;

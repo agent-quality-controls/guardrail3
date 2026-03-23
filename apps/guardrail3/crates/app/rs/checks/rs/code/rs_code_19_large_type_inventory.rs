@@ -8,7 +8,11 @@ const ID: &str = "RS-CODE-19";
 pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
     for item in find_large_type_items(input.ast) {
         let (line, kind, count, threshold) = match item {
-            super::parse::LargeTypeItem::Struct { line, name, field_count } => {
+            super::parse::LargeTypeItem::Struct {
+                line,
+                name,
+                field_count,
+            } => {
                 push_struct_result(input, results, line, &name, field_count);
                 continue;
             }
@@ -56,5 +60,5 @@ fn push_struct_result(
 }
 
 #[cfg(test)]
-#[path = "rs_code_19_large_type_inventory_tests.rs"]
+#[path = "rs_code_19_large_type_inventory_tests/mod.rs"]
 mod tests;

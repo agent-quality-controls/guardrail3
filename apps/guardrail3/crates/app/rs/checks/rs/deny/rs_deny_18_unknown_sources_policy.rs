@@ -28,7 +28,10 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                 id: "RS-DENY-18".to_owned(),
                 severity: Severity::Error,
                 title: format!("sources `{key}` has wrong value"),
-                message: format!("`{}` must set `[sources].{key} = \"{expected}\"`.", config.rel_path),
+                message: format!(
+                    "`{}` must set `[sources].{key} = \"{expected}\"`.",
+                    config.rel_path
+                ),
                 file: Some(config.rel_path.clone()),
                 line: None,
                 inventory: false,
@@ -38,5 +41,5 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_deny_18_unknown_sources_policy_tests.rs"]
+#[path = "rs_deny_18_unknown_sources_policy_tests/mod.rs"]
 mod tests;

@@ -46,5 +46,5 @@ pub fn check(input: &LeafHexarchInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_hexarch_06_leaf_valid_tests.rs"]
+#[path = "rs_hexarch_06_leaf_valid_tests/mod.rs"]
 mod tests;

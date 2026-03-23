@@ -59,15 +59,29 @@ members = []
 serde = { version = "1", features = ["derive"] }
 "#,
             ),
-            ("clippy.toml", "disallowed-methods = []\ndisallowed-types = []\n"),
+            (
+                "clippy.toml",
+                "disallowed-methods = []\ndisallowed-types = []\n",
+            ),
             ("guardrail3.toml", "[profile]\nname = \"service\"\n"),
         ],
         root.clone(),
     );
 
     let results = crate::app::rs::checks::rs::garde::check(&tree);
-    assert!(has_result(&results, "RS-GARDE-01", |result| result.severity == Severity::Error));
-    for rule_id in ["RS-GARDE-02", "RS-GARDE-03", "RS-GARDE-04", "RS-GARDE-05", "RS-GARDE-06", "RS-GARDE-07", "RS-GARDE-08", "RS-GARDE-09"] {
+    assert!(has_result(&results, "RS-GARDE-01", |result| result
+        .severity
+        == Severity::Error));
+    for rule_id in [
+        "RS-GARDE-02",
+        "RS-GARDE-03",
+        "RS-GARDE-04",
+        "RS-GARDE-05",
+        "RS-GARDE-06",
+        "RS-GARDE-07",
+        "RS-GARDE-08",
+        "RS-GARDE-09",
+    ] {
         assert!(
             !has_result(&results, rule_id, |_| true),
             "unexpected deeper garde result {rule_id}"

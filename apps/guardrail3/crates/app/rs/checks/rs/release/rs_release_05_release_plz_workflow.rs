@@ -16,7 +16,10 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
                 id: ID.to_owned(),
                 severity: Severity::Info,
                 title: "Release-plz workflow present".to_owned(),
-                message: format!("Workflow `{}` contains an actual release-plz step.", workflow.rel_path),
+                message: format!(
+                    "Workflow `{}` contains an actual release-plz step.",
+                    workflow.rel_path
+                ),
                 file: Some(workflow.rel_path.clone()),
                 line: None,
                 inventory: false,
@@ -36,5 +39,5 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_release_05_release_plz_workflow_tests.rs"]
+#[path = "rs_release_05_release_plz_workflow_tests/mod.rs"]
 mod tests;

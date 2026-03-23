@@ -22,5 +22,5 @@ pub fn check(input: &CycleHexarchInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_hexarch_19_same_layer_cycles_tests.rs"]
+#[path = "rs_hexarch_19_same_layer_cycles_tests/mod.rs"]
 mod tests;

@@ -49,7 +49,9 @@ pub fn collect(tree: &ProjectTree) -> CodeFacts {
             Err(parse_error) => {
                 input_failures.push(CodeInputFailureFacts {
                     rel_path: cargo_rel_path.clone(),
-                    message: format!("Failed to parse Cargo.toml for code-family context: {parse_error}"),
+                    message: format!(
+                        "Failed to parse Cargo.toml for code-family context: {parse_error}"
+                    ),
                 });
                 continue;
             }
@@ -340,7 +342,10 @@ fn policy_settings_for(
     policy_map: &BTreeMap<String, PolicySettings>,
 ) -> PolicySettings {
     if rel_dir.is_empty() {
-        return policy_map.get("").cloned().unwrap_or(PolicySettings { profile_name: None });
+        return policy_map
+            .get("")
+            .cloned()
+            .unwrap_or(PolicySettings { profile_name: None });
     }
 
     let mut current = rel_dir;
@@ -354,7 +359,10 @@ fn policy_settings_for(
         current = parent;
     }
 
-    policy_map.get("").cloned().unwrap_or(PolicySettings { profile_name: None })
+    policy_map
+        .get("")
+        .cloned()
+        .unwrap_or(PolicySettings { profile_name: None })
 }
 
 fn file_parent_rel(rel_path: &str) -> &str {

@@ -1,8 +1,10 @@
-use crate::domain::report::Severity;
 use crate::domain::modules::canonical;
+use crate::domain::report::Severity;
 
 use super::super::inputs::WorkspaceCargoInput;
-use super::super::lint_support::{EXPECTED_CLIPPY_DENY, EXPECTED_CLIPPY_GROUPS, EXPECTED_RUST_LINTS};
+use super::super::lint_support::{
+    EXPECTED_CLIPPY_DENY, EXPECTED_CLIPPY_GROUPS, EXPECTED_RUST_LINTS,
+};
 use super::super::test_support::{collected_facts, entry, has_result, tree};
 use super::check;
 

@@ -1,9 +1,9 @@
+use super::dependency_facts::{
+    BoundaryConfigFacts, CycleFacts, DependencyEdgeFacts, MemberDependencyFacts, PatchEntryFacts,
+};
 use super::facts::{
     ContainerFacts, DirectionalContainerFacts, HexAppFacts, HexRootFacts, LeafFacts,
     RootWorkspaceFacts, WorkspaceCoverageFacts,
-};
-use super::dependency_facts::{
-    BoundaryConfigFacts, CycleFacts, DependencyEdgeFacts, MemberDependencyFacts, PatchEntryFacts,
 };
 use super::source_facts::SourceCrateFacts;
 
@@ -36,6 +36,7 @@ pub struct HexRootInput<'a> {
     pub app_rel_dir: &'a str,
     pub crates_rel_dir: &'a str,
     pub dirs: &'a [String],
+    pub files: &'a [String],
 }
 
 impl<'a> HexRootInput<'a> {
@@ -45,6 +46,7 @@ impl<'a> HexRootInput<'a> {
             app_rel_dir: &facts.app_rel_dir,
             crates_rel_dir: &facts.crates_rel_dir,
             dirs: &facts.dirs,
+            files: &facts.files,
         }
     }
 }

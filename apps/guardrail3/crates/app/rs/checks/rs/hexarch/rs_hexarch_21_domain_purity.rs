@@ -30,7 +30,8 @@ pub fn check(input: &MemberDependencyHexarchInput<'_>, results: &mut Vec<CheckRe
 
     for edge in input.edges.iter().filter(|edge| !edge.kind.is_dev()) {
         if let Some(target_layer) = edge.target_layer {
-            if edge.resolved_target_rel_dir.is_some() && !matches!(target_layer, Layer::Domain | Layer::Ports)
+            if edge.resolved_target_rel_dir.is_some()
+                && !matches!(target_layer, Layer::Domain | Layer::Ports)
             {
                 results.push(CheckResult {
                     id: ID.to_owned(),
@@ -72,5 +73,5 @@ pub fn check(input: &MemberDependencyHexarchInput<'_>, results: &mut Vec<CheckRe
 }
 
 #[cfg(test)]
-#[path = "rs_hexarch_21_domain_purity_tests.rs"]
+#[path = "rs_hexarch_21_domain_purity_tests/mod.rs"]
 mod tests;

@@ -1,7 +1,9 @@
 use crate::domain::report::Severity;
 
+use super::super::test_support::{
+    StubToolChecker, dir_entry, failure_input, project_tree, temp_root, write_file,
+};
 use super::check;
-use super::super::test_support::{dir_entry, failure_input, project_tree, temp_root, write_file, StubToolChecker};
 
 #[test]
 fn errors_on_direct_failure() {

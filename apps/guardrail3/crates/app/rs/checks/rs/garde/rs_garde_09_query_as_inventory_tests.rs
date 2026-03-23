@@ -47,7 +47,10 @@ members = []
 garde = { version = "0.22", features = ["derive"] }
 "#,
             ),
-            ("clippy.toml", "disallowed-methods = []\ndisallowed-types = []\n"),
+            (
+                "clippy.toml",
+                "disallowed-methods = []\ndisallowed-types = []\n",
+            ),
             ("guardrail3.toml", "[profile]\nname = \"service\"\n"),
         ],
         root.clone(),
@@ -98,7 +101,10 @@ members = []
 garde = { version = "0.22", features = ["derive"] }
 "#,
             ),
-            ("clippy.toml", "disallowed-methods = []\ndisallowed-types = []\n"),
+            (
+                "clippy.toml",
+                "disallowed-methods = []\ndisallowed-types = []\n",
+            ),
             ("guardrail3.toml", "[profile]\nname = \"service\"\n"),
         ],
         root.clone(),

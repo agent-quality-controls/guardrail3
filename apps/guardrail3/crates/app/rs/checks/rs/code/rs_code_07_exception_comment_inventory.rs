@@ -20,5 +20,5 @@ pub fn check(input: &ExceptionCommentInput<'_>, results: &mut Vec<CheckResult>) 
 }
 
 #[cfg(test)]
-#[path = "rs_code_07_exception_comment_inventory_tests.rs"]
+#[path = "rs_code_07_exception_comment_inventory_tests/mod.rs"]
 mod tests;

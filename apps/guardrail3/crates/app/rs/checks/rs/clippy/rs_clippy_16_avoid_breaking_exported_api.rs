@@ -56,5 +56,5 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_clippy_16_avoid_breaking_exported_api_tests.rs"]
+#[path = "rs_clippy_16_avoid_breaking_exported_api_tests/mod.rs"]
 mod tests;

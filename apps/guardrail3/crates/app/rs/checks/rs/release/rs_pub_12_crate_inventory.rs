@@ -23,5 +23,5 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_pub_12_crate_inventory_tests.rs"]
+#[path = "rs_pub_12_crate_inventory_tests/mod.rs"]
 mod tests;
