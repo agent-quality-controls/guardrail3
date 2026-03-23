@@ -120,6 +120,17 @@ These are the candidates that are universal enough to define without project-str
     - the same crate name more than once across sections/tables
   - **Why this qualifies:** threshold is intentionally high enough to catch sprawl rather than ordinary Rust variation
 
+- Structural organization caps
+  - **Family:** `rs/code`
+  - **Shape:** per-crate source tree structural rules
+  - **Severity:** `Error`
+  - **Universal contract:** a crate source tree should not exceed any of:
+    - module depth `> 6`
+    - sibling subdirectories in one Rust source directory `> 12`
+    - sibling `.rs` files in one Rust source directory `> 20`
+  - **Measured from:** the crate root (`Cargo.toml`) downward, within Rust source/module directories
+  - **Why this qualifies:** thresholds are intentionally high enough to catch real sprawl rather than normal organization
+
 ### Defer until architecture decisions are made
 
 These are plausible, but need more product framing before implementation.
@@ -160,12 +171,6 @@ These are plausible, but need more product framing before implementation.
   - **Likely severity:** `Warn`
   - **Why deferred:** broader pressure ideas beyond the hard direct-count cap still need policy (transitive depth, feature spread, etc.)
 
-- Structural organization rules
-  - **Family:** `rs/code` or `rs/hexarch`
-  - **Shape:** structural metrics rules
-  - **Likely severity:** `Warn`
-  - **Why deferred:** needs a decision on whether these are universal Rust rules or project-style preferences
-
 ### Reject for now
 
 These are either too policy-heavy, too heuristic for current value, or already better handled elsewhere.
@@ -188,7 +193,8 @@ These are either too policy-heavy, too heuristic for current value, or already b
 2. extend `RS-CODE-25` into narrow banned public error forms
 3. add generic parameter count cap
 4. add direct dependency count cap
-5. discuss the deferred policy-heavy candidates separately
+5. add structural organization caps
+6. discuss the deferred policy-heavy candidates separately
 
 ## Concrete next planning targets
 
@@ -198,6 +204,7 @@ These are the ones we should turn into real rule specs first:
 - `RS-CODE-25` extension or sibling rule: narrow banned public error forms
 - `RS-CODE-next`: generic parameter count cap (`> 6`, type/const only)
 - `RS-DEPS-next`: direct dependency count cap (`> 25`, unique direct dependency names)
+- `RS-CODE-next`: structural organization caps (depth `> 6`, dirs `> 12`, files `> 20`)
 
 ## Already substantially covered
 
