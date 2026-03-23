@@ -8,18 +8,23 @@
 
 | New ID | Severity | What | Status |
 |--------|----------|------|--------|
-| RS-HEXARCH-01 | Error | crates/ exists at app level | Implemented + 41 tests |
-| RS-HEXARCH-02 | Error | Exact contents {adapters, app, domain, ports} in crates/ | Implemented + 42 tests |
-| RS-HEXARCH-03 | Error | {inbound, outbound} in adapters/ and ports/ | Implemented + 48 tests |
-| RS-HEXARCH-04 | Error | Loose files in structural/container dirs (only .gitkeep allowed) | Implemented + 39 tests |
-| RS-HEXARCH-05 | Error | Container dirs not empty (must have subdirs or .gitkeep) | Implemented + 39 tests |
-| RS-HEXARCH-06 | Error | Leaf valid (Cargo.toml or crates/ hex-in-hex or .gitkeep) | Implemented + 40 tests |
-| RS-HEXARCH-07 | Error | Workspace members match crate dirs | 1 test (failing) |
-| RS-HEXARCH-08 | Error | App Cargo.toml is workspace | 1 test (failing) |
-| RS-HEXARCH-09 | Error | No extra workspace members | 1 test (failing) |
-| RS-HEXARCH-10 | Error | Members within app boundary | 1 test (failing) |
-| RS-HEXARCH-11 | Error | Root workspace doesn't include apps | 1 test (failing) |
-| RS-HEXARCH-12 | Error | src/ banned at app level | Implemented + 9 tests |
+| RS-HEXARCH-01 | Error | crates/ exists at app level | Implemented |
+| RS-HEXARCH-02 | Error | Exact contents {adapters, app, domain, ports} in crates/ | Implemented |
+| RS-HEXARCH-03 | Error | {inbound, outbound} in adapters/ and ports/ | Implemented |
+| RS-HEXARCH-04 | Error | Loose files in structural/container dirs (only .gitkeep allowed) | Implemented |
+| RS-HEXARCH-05 | Error | Container dirs not empty (must have subdirs or .gitkeep) | Implemented |
+| RS-HEXARCH-06 | Error | Leaf valid (Cargo.toml or crates/ hex-in-hex or .gitkeep) | Implemented |
+| RS-HEXARCH-07 | Error | Workspace members match crate dirs | Implemented |
+| RS-HEXARCH-08 | Error | App Cargo.toml is workspace | Implemented |
+| RS-HEXARCH-09 | Error | No extra workspace members | Implemented |
+| RS-HEXARCH-10 | Error | Members within app boundary | Implemented |
+| RS-HEXARCH-11 | Error | Root workspace doesn't include apps | Implemented |
+| RS-HEXARCH-12 | Error | src/ banned at app level | Implemented |
+
+Current migrated structural coverage:
+- the old `rs_arch_01` golden fixture is now exercised by the new family
+- rule-specific sidecar tests preserve the old sharp edge cases for `01..12`
+- total current family coverage is 47 `hexarch` tests in the new architecture
 
 ## Dependency direction rules
 
@@ -27,27 +32,27 @@
 |--------|--------|----------|------|--------|
 | RS-HEXARCH-13 | R51 | Error | Dependency direction violation (adapters→domain OK, domain→adapters ERROR) | Implemented |
 | RS-HEXARCH-14 | R52 | Info | Dependency graph inventory | Implemented |
-| RS-HEXARCH-15 | R53 | Error | Unconfigured workspace members + service placement | Implemented |
+| RS-HEXARCH-15 | R53 | Warn | Missing per-app `rust.apps.*` boundary configuration | Implemented |
 
 ## Direction check hardening (audit round 1)
 
 | New ID | Severity | What | Status |
 |--------|----------|------|--------|
-| RS-HEXARCH-16 | Error | `[patch.*]` and `[replace]` sections bypass direction check. Scan workspace root Cargo.toml — if a patch replacement path resolves to a layer-violating location, Error. | Planned |
-| RS-HEXARCH-17 | Error | `workspace = true` dependencies invisible to direction check. Resolve to actual `[workspace.dependencies]` entry. If resolved entry has a `path`, apply layer direction check. | Planned |
-| RS-HEXARCH-18 | Error | Crate renaming via `package` field evades name-based layer lookup. Resolve using both alias AND `package` value AND `path`. | Planned |
-| RS-HEXARCH-19 | Error | Cycle detection in workspace path dependency graph. Same-layer logical cycles (A→B→C→A all in crates/app/) compile fine but indicate confused architecture. | Planned |
-| RS-HEXARCH-20 | Warn | dev-dependency direction violations as separate rule. Test fixtures legitimately need cross-layer deps. Warn not Error. Separate ID allows configuration. | Planned |
+| RS-HEXARCH-16 | Error | `[patch.*]` and `[replace]` sections bypass direction check. Scan workspace root Cargo.toml — if a patch replacement path resolves to a layer-violating location, Error. | Implemented |
+| RS-HEXARCH-17 | Error | `workspace = true` dependencies invisible to direction check. Resolve to actual `[workspace.dependencies]` entry. If resolved entry has a `path`, apply layer direction check. | Implemented |
+| RS-HEXARCH-18 | Error | Crate renaming via `package` field evades name-based layer lookup. Resolve using both alias AND `package` value AND `path`. | Implemented |
+| RS-HEXARCH-19 | Error | Cycle detection in workspace path dependency graph. Same-layer logical cycles (A→B→C→A all in crates/app/) compile fine but indicate confused architecture. | Implemented |
+| RS-HEXARCH-20 | Warn | dev-dependency direction violations as separate rule. Test fixtures legitimately need cross-layer deps. Warn not Error. Separate ID allows configuration. | Implemented |
 
 ## Layer content enforcement (audit round 2)
 
 | New ID | Severity | What | Status |
 |--------|----------|------|--------|
-| RS-HEXARCH-21 | Error | Domain crate purity: domain-layer crates may only depend on workspace path deps (domain/ports), a built-in pure-crate allowlist (serde, thiserror, chrono, uuid, etc.), and user-configured `allowed_deps`. ANY other dependency is Error. Must NOT skip `optional = true` entries. | Planned |
-| RS-HEXARCH-22 | Warn | Ports trait-dominance: crates in `crates/ports/` should be trait-dominant. If more `impl Struct {}` blocks than `pub trait` definitions, Warn. DTOs and error types are OK. | Planned |
-| RS-HEXARCH-23 | Error | Adapter defines `pub trait`: crates in `crates/adapters/` should IMPLEMENT traits from ports, not define their own. `pub trait` in adapter = Error. `pub(crate) trait` is fine. | Planned |
-| RS-HEXARCH-24 | Error | Cross-app boundary violation: no workspace path dep may cross app boundaries. Source in `apps/X/`, target in `apps/Y/` (X≠Y) = Error. Cross-app goes through `packages/` or APIs. | Planned |
-| RS-HEXARCH-25 | Error | `target.'cfg(...)'.dependencies` direction check: platform-conditional deps invisible to current checker. Iterate all TOML keys matching `target.*`, check dep sub-tables with same logic as RS-HEXARCH-13. | Planned |
+| RS-HEXARCH-21 | Error | Domain crate purity: domain-layer crates may only depend on workspace path deps (domain/ports), a built-in pure-crate allowlist (serde, thiserror, chrono, uuid, etc.), and user-configured `allowed_deps`. ANY other dependency is Error. Must NOT skip `optional = true` entries. | Implemented |
+| RS-HEXARCH-22 | Warn | Ports trait-dominance: crates in `crates/ports/` should be trait-dominant. If more `impl Struct {}` blocks than `pub trait` definitions, Warn. DTOs and error types are OK. | Implemented |
+| RS-HEXARCH-23 | Error | Adapter defines `pub trait`: crates in `crates/adapters/` should IMPLEMENT traits from ports, not define their own. `pub trait` in adapter = Error. `pub(crate) trait` is fine. | Implemented |
+| RS-HEXARCH-24 | Error | Cross-app boundary violation: no workspace path dep may cross app boundaries. Source in `apps/X/`, target in `apps/Y/` (X≠Y) = Error. Cross-app goes through `packages/` or APIs. | Implemented |
+| RS-HEXARCH-25 | Error | `target.'cfg(...)'.dependencies` direction check: platform-conditional deps invisible to current checker. Iterate all TOML keys matching `target.*`, check dep sub-tables with same logic as RS-HEXARCH-13. | Implemented |
 
 ## Relocated rules (no longer in hexarch)
 
