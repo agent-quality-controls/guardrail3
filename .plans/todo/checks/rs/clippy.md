@@ -207,6 +207,7 @@ The generator and checker must match exactly.
 - **Severity:** Error
 - **What:** `disallowed-types` must contain all expected type bans (10 base types: HashMap, HashSet, Mutex, RwLock, File, axum::extract::Json, axum::Json, axum::extract::Query, axum::extract::Form, std::any::Any)
 - **Note:** `std::any::Any` added from source audit — `Box<dyn Any>` erases type safety, bypassing strongly-typed boundaries.
+- **Remaining hardening debt from archived GARDE_GUARDRAILS.md:** the canonical extractor/type baseline still needs to expand to cover additional raw boundary extractors such as `axum::extract::Path`, `Multipart`, `ConnectInfo`, and selected `axum_extra` extractor types.
 - **Status:** Implemented
 
 ### RS-CLIPPY-06: extra method ban (inventory)

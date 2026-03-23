@@ -64,3 +64,11 @@
   - `RS-TEST-08` only checks `.claude/` and `.git/hooks/pre-commit`, not the new hook architecture files
   - `RS-TEST-09` has no new-family typed-input coverage yet
 - New family should include an explicit input-failure rule (`RS-TEST-19`) if `.cargo/mutants.toml`, `Cargo.toml`, `.config/nextest.toml`, `guardrail3.toml`, or relevant Rust source files are unreadable/unparsable for rule execution.
+
+## Legacy carry-forward from archived parsing migration
+
+The old top-level AST migration note is being archived, but these Rust-only hardening items remain live for `rs/test`:
+
+- `RS-TEST-13` still depends partly on token-string inspection for `#[should_panic(expected = ...)]` shape detection
+- `RS-TEST-15` still uses heuristic name matching (`assert` / `verify` / `expect`) as one escape hatch for “test without assertions”
+- any remaining parser logic that infers semantics from token text rather than AST node shape should be treated as future hardening work, even though the family is breadth-first complete now

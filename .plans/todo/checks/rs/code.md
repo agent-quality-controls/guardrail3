@@ -96,6 +96,20 @@
 | RS-CARGO | `unreachable_pub` to expected Rust lints | Flags unreachable `pub` items. Library visibility discipline. |
 | RS-DENY | `lazy_static` to EXPECTED_BANS | Legacy macro, `LazyLock` is the replacement. |
 
+## Legacy carry-forward from archived parsing migration
+
+The old top-level `migrate_to_ast_parsing.md` is being archived, but a few Rust-only hardening items remain live here:
+
+- keep TypeScript parsing migration out of scope; only Rust residuals matter now
+- `RS-CODE-03..06` still rely partly on source-line / comment heuristics to associate `// reason:` comments with attributes and `#[garde(skip)]`
+- `RS-CODE-07` exception inventory is intentionally raw-line/config-text driven, but should stay isolated to explicit exception-comment auditing rather than spread back into semantic rule logic
+- any remaining source rules that still depend on raw token strings instead of AST shape should be treated as hardening debt, not “done forever”
+
+The active target is:
+
+- semantic Rust source rules should prefer `syn` structure
+- raw-line/text matching should be confined to comment/reason surfaces where ASTs do not preserve the needed information
+
 ## Target family shape
 
 This family should be implemented as `rs/code`, not `rs/source`.

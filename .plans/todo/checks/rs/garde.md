@@ -26,6 +26,36 @@
 | RS-GARDE-09 | Info | `sqlx::query_as!` macro bypasses derive check. Scan for `query_as!` macro invocations and flag as inventory item requiring manual review for validation. | Planned |
 | RS-GARDE-10 | Error | Garde-family input failures: unreadable/parsing-broken Rust sources or broken garde-family policy inputs must surface explicitly instead of being skipped. | Planned |
 
+## Legacy carry-forward from archived GARDE_GUARDRAILS.md
+
+The older top-level garde design note is being archived, but it still contains live Rust requirements that are not fully implemented yet. They remain active here:
+
+- wrapper-based boundary enforcement is still missing as a first-class library surface:
+  - inbound wrappers such as `ValidatedJson<T>`, `ValidatedQuery<T>`, `ValidatedForm<T>`
+  - outbound validated wrapper such as `Validated<T>`
+- current enforcement is mostly:
+  - clippy ban pressure on raw extractors / raw deserialization
+  - source-level `Validate` inventory
+  - manual bypass detection
+- field-level garde quality is still not enforced:
+  - no rule yet that checks boundary fields carry meaningful garde constraints
+  - no rule yet that checks nested validated fields use `#[garde(dive)]`
+  - no rule yet that checks context-driven validation surfaces where required
+- expanded extractor ban coverage is still missing from the canonical clippy baseline:
+  - `axum::extract::Path`
+  - `axum::extract::Multipart`
+  - `axum::extract::ConnectInfo`
+  - `axum_extra::extract::CookieJar`
+  - `axum_extra::extract::cookie::Cookie`
+  - `axum_extra::extract::TypedHeader`
+  - `axum_extra::extract::JsonDeserializer`
+  - `axum_extra::extract::JsonLines`
+  - `axum_extra::extract::Protobuf`
+  - `axum_extra::extract::Cbor`
+  - `axum_extra::extract::MsgPack`
+
+So the garde family is implemented, but the full architectural enforcement chain described by the legacy doc is not complete yet.
+
 ## Full expected ban lists
 
 ### RS-GARDE-02: Serde deserialization method bans (disallowed-methods)
