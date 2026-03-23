@@ -3,7 +3,7 @@
 use std::path::Path;
 use std::process::Command;
 
-use crate::ports::outbound::ToolChecker;
+use crate::ports::outbound::{CommandRunResult, ToolChecker};
 
 /// Production tool checker that runs actual shell commands.
 pub struct RealToolChecker;
@@ -19,12 +19,15 @@ impl ToolChecker for RealToolChecker {
     }
 
     #[allow(clippy::disallowed_methods)] // reason: adapter layer — runs cargo publish dry-run for release checks
-    fn run_cargo_publish_dry_run(&self, path: &Path) -> Option<String> {
+    fn run_cargo_publish_dry_run_outcome(&self, path: &Path) -> Option<CommandRunResult> {
         let output = Command::new("cargo")
             .args(["publish", "--dry-run"])
             .current_dir(path)
             .output()
             .ok()?;
-        Some(String::from_utf8_lossy(&output.stderr).to_string())
+        Some(CommandRunResult {
+            success: output.status.success(),
+            stderr: String::from_utf8_lossy(&output.stderr).to_string(),
+        })
     }
 }

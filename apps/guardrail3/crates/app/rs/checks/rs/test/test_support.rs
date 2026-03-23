@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 use crate::domain::project_tree::{DirEntry, ProjectTree};
-use crate::ports::outbound::ToolChecker;
+use crate::ports::outbound::{CommandRunResult, ToolChecker};
 
 use super::facts::{
     HookFacts, InputFailureFacts, TestCoverageFacts, TestFileFacts, TestRootFacts, TestRootKind,
@@ -71,7 +71,7 @@ impl ToolChecker for StubToolChecker {
         tool == "cargo-mutants" && self.installed
     }
 
-    fn run_cargo_publish_dry_run(&self, _path: &Path) -> Option<String> {
+    fn run_cargo_publish_dry_run_outcome(&self, _path: &Path) -> Option<CommandRunResult> {
         None
     }
 }
