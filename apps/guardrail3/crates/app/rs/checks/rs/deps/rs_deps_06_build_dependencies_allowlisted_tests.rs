@@ -1,7 +1,9 @@
 use crate::domain::report::Severity;
 
 use super::super::facts::DependencySectionKind;
-use super::super::test_support::{dependency_facts, dependency_input};
+use super::super::test_support::{
+    collected_facts, dependency_facts, dependency_input, dir_entry, has_result, project_tree,
+};
 use super::check;
 
 #[test]
@@ -67,4 +69,64 @@ fn no_allowlist_means_build_dependency_rule_stays_silent() {
     check(&input, &mut results);
 
     assert!(results.is_empty());
+}
+
+#[test]
+fn workspace_true_external_build_dependency_is_checked() {
+    let tree = project_tree(
+        vec![
+            (
+                "",
+                dir_entry(&["packages"], &["Cargo.toml", "guardrail3.toml"]),
+            ),
+            ("packages", dir_entry(&["core"], &[])),
+            ("packages/core", dir_entry(&[], &["Cargo.toml"])),
+        ],
+        vec![
+            (
+                "Cargo.toml",
+                r#"
+                    [workspace]
+                    members = ["packages/*"]
+
+                    [workspace.dependencies]
+                    bindgen = "0.70"
+                "#,
+            ),
+            (
+                "guardrail3.toml",
+                r#"
+                    [rust.packages]
+                    profile = "library"
+                    allowed_deps = ["serde"]
+                "#,
+            ),
+            (
+                "packages/core/Cargo.toml",
+                r#"
+                    [package]
+                    name = "core"
+
+                    [build-dependencies]
+                    bindgen = { workspace = true }
+                "#,
+            ),
+        ],
+    );
+    let facts = collected_facts(&tree, &[]);
+    let input = dependency_input(
+        &facts,
+        "packages/core/Cargo.toml",
+        DependencySectionKind::BuildDependencies,
+        "bindgen",
+    );
+    let mut results = Vec::new();
+
+    check(&input, &mut results);
+
+    assert!(has_result(&results, "RS-DEPS-06", |result| {
+        result.severity == Severity::Error
+            && result.message.contains("`bindgen`")
+            && result.file.as_deref() == Some("packages/core/Cargo.toml")
+    }));
 }

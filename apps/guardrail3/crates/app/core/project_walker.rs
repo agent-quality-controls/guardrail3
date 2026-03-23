@@ -22,6 +22,7 @@ use crate::ports::outbound::FileSystem;
 const CACHED_EXACT: &[&str] = &[
     "Cargo.toml",
     "Cargo.lock",
+    ".gitignore",
     "clippy.toml",
     ".clippy.toml",
     "deny.toml",
