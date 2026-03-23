@@ -1,4 +1,11 @@
 [package]
 name = "devctl-adapters-inbound-cli"
-version = "0.1.0"
-edition = "2024"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+devctl-adapters-outbound-fs = { path = "../../outbound/fs" }
+devctl-app-core = { path = "../../../app/core" }
+
+[lints]
+workspace = true

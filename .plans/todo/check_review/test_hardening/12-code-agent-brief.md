@@ -39,11 +39,12 @@ That vector should be applied across all relevant source files in the golden tre
 
 ## Known gaps already identified
 
-- tests are still `*_tests.rs` instead of rule-specific `*_tests/` directories
+- a first migration batch has started, but many rules are still `*_tests.rs` instead of rule-specific `*_tests/` directories
 - `rs/code` still depends on legacy `ast_helpers` in parts of the family
 - whole-type `#[garde(skip)]` ownership is still missing explicitly
 - grouped/aliased attribute edge cases still need deeper attacks
 - `RS-CODE-30` added fail-closed input handling, but the adversarial depth is still shallow
+- the existing reusable golden tree under `apps/guardrail3/tests/fixtures/r_arch_01/golden/` is now populated enough to act as the shared mutation target; the remaining gap is converting rule tests to use it broadly
 
 ## Required attack classes
 
@@ -69,6 +70,7 @@ Do not leave `*_tests.rs` rule files in place.
 - every rule has at least one real attack-vector test
 - exact file hit sets are asserted where practical
 - legacy helper dependence is reduced or explicitly documented
+- the shared golden tree is populated enough that source-rule mutations happen against realistic Rust and TypeScript code rather than comment-only placeholders
 
 ## Do not
 

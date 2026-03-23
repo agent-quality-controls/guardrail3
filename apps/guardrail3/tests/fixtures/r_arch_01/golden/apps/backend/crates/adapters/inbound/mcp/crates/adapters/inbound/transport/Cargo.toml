@@ -2,3 +2,7 @@
 name = "backend-mcp-adapters-inbound-transport"
 version = "0.1.0"
 edition = "2024"
+
+[dependencies]
+backend-mcp-app-handlers = { path = "../../../app/handlers" }
+backend-mcp-domain-protocol = { path = "../../../domain/protocol" }

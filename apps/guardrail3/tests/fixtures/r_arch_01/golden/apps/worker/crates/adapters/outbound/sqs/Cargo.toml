@@ -1,4 +1,11 @@
 [package]
 name = "worker-adapters-outbound-sqs"
-version = "0.1.0"
-edition = "2024"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+worker-domain-jobs = { path = "../../../domain/jobs" }
+worker-ports-outbound-queue = { path = "../../../ports/outbound/queue" }
+
+[lints]
+workspace = true
