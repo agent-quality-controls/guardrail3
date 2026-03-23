@@ -1,4 +1,4 @@
-# RS-CODE — Rust code file checker (30 implemented rules + 3 next-wave planned rules)
+# RS-CODE — Rust code file checker (30 implemented rules + 4 next-wave planned rules)
 
 **Input:** *.rs files (syn AST parsed)
 **Parser:** syn crate (Rust AST)
@@ -68,6 +68,7 @@ These are not implemented yet. They are the next `rs/code` candidates that are u
 | RS-CODE-31 | Error | `pub struct` with named `pub` fields. Public structs should not expose field bags as their default API shape. | Planned |
 | RS-CODE-33 | Error | Public function returning obviously untyped public error forms: `Result<_, String>`, `Result<_, &str>`, `Result<_, anyhow::Error>`, or `Result<_, Box<dyn Error>>`. | Planned |
 | RS-CODE-34 | Error | More than 6 type/const generic parameters on a `struct`, `enum`, `trait`, or `fn`. Lifetimes do not count. | Planned |
+| RS-CODE-35 | Error | Per-crate source tree exceeds structural caps: module depth >6, sibling subdirectories >12, or sibling `.rs` files >20 in one Rust source directory. | Planned |
 
 ### RS-CODE-31 — Public fields on public structs
 
@@ -210,6 +211,30 @@ pub fn build<A, B, C, D, E, F>(...) -> Output {
     // ...
 }
 ```
+
+### RS-CODE-35 — Per-crate structural organization caps
+
+**Intent**
+- catch source-tree sprawl and uncontrolled agentic expansion
+
+**Measured from**
+- the crate root (`Cargo.toml`) downward
+- within Rust source/module directories only
+
+**Caps**
+- module depth `> 6`
+- sibling subdirectories in one Rust source directory `> 12`
+- sibling `.rs` files in one Rust source directory `> 20`
+
+**Severity**
+- `Error`
+
+**Examples**
+
+Should error:
+- a crate source path deeper than 6 nested module segments from the crate root
+- a module directory with 13 sibling subdirectories
+- a module directory with 21 sibling `.rs` files
 
 ## Relocated checks
 
