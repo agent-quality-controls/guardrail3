@@ -76,3 +76,16 @@ fn unexpected_top_level_dir_is_error() {
     assert!(errors[0].title.contains("unexpected directory crates/misc/"));
     assert_eq!(errors[0].file.as_deref(), Some("apps/devctl/crates/misc"));
 }
+
+#[test]
+fn optional_macros_dir_is_allowed() {
+    let tmp = copy_fixture();
+    write_file(tmp.path(), "apps/devctl/crates/macros/.gitkeep", "");
+
+    let results = run_family(tmp.path());
+    let errors = errors_by_id(&results, "RS-HEXARCH-02");
+    assert!(
+        errors.is_empty(),
+        "optional crates/macros/ should not trigger rule 02: {errors:#?}"
+    );
+}

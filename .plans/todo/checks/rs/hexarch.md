@@ -9,7 +9,7 @@
 | New ID | Severity | What | Status |
 |--------|----------|------|--------|
 | RS-HEXARCH-01 | Error | crates/ exists at app level | Implemented |
-| RS-HEXARCH-02 | Error | Exact contents {adapters, app, domain, ports} in crates/ | Implemented |
+| RS-HEXARCH-02 | Error | Required contents {adapters, app, domain, ports} in crates/; optional macros/ allowed | Implemented |
 | RS-HEXARCH-03 | Error | {inbound, outbound} in adapters/ and ports/ | Implemented |
 | RS-HEXARCH-04 | Error | Loose files in structural/container dirs (only .gitkeep allowed) | Implemented |
 | RS-HEXARCH-05 | Error | Container dirs not empty (must have subdirs or .gitkeep) | Implemented |
