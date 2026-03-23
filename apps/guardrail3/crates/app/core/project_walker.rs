@@ -18,6 +18,13 @@ use crate::domain::project_tree::{DirEntry, ProjectTree};
 #[allow(clippy::disallowed_methods)] // reason: git ls-files requires Command::new
 use crate::ports::outbound::FileSystem;
 
+type ChildSets = (
+    BTreeSet<String>,
+    BTreeSet<String>,
+    BTreeSet<String>,
+    BTreeSet<String>,
+);
+
 /// Config file names that get their content cached (exact match).
 const CACHED_EXACT: &[&str] = &[
     "Cargo.toml",
@@ -104,12 +111,13 @@ fn should_cache(name: &str, rel_path: &str) -> bool {
 ///    and add them back — tracked files are part of the project regardless of
 ///    `.gitignore` patterns.
 pub fn walk_project(fs: &dyn FileSystem, root: &Path) -> ProjectTree {
-    let mut dir_children: BTreeMap<String, (BTreeSet<String>, BTreeSet<String>)> = BTreeMap::new();
+    let mut dir_children: BTreeMap<String, ChildSets> = BTreeMap::new();
     let mut content: BTreeMap<String, String> = BTreeMap::new();
 
     // Phase 1: Walk with ignore crate
     let walker = ignore::WalkBuilder::new(root)
         .hidden(false)
+        .follow_links(true)
         .git_ignore(true)
         .git_global(true)
         .git_exclude(true)
@@ -131,32 +139,49 @@ pub fn walk_project(fs: &dyn FileSystem, root: &Path) -> ProjectTree {
             Ok(r) => r.to_string_lossy().into_owned(),
             Err(_) => continue,
         };
-        let Some(ft) = entry.file_type() else {
-            continue;
-        };
+        let file_type = entry.file_type();
+        let is_symlink = entry.path_is_symlink();
 
-        if ft.is_dir() {
+        if file_type.is_some_and(|ft| ft.is_dir()) {
             let _ = dir_children
                 .entry(rel.clone())
-                .or_insert_with(|| (BTreeSet::new(), BTreeSet::new()));
+                .or_insert_with(empty_child_sets);
             if let Some((parent_rel, dir_name)) = split_parent_child(&rel) {
                 let parent = dir_children
                     .entry(parent_rel)
-                    .or_insert_with(|| (BTreeSet::new(), BTreeSet::new()));
+                    .or_insert_with(empty_child_sets);
                 let _ = parent.0.insert(dir_name);
+                if is_symlink {
+                    let _ = parent
+                        .2
+                        .insert(path.file_name().unwrap().to_string_lossy().into_owned());
+                }
             }
-        } else if ft.is_file() {
+        } else if file_type.is_some_and(|ft| ft.is_file()) {
             if let Some((parent_rel, file_name)) = split_parent_child(&rel) {
                 let parent = dir_children
                     .entry(parent_rel)
-                    .or_insert_with(|| (BTreeSet::new(), BTreeSet::new()));
+                    .or_insert_with(empty_child_sets);
                 let _ = parent.1.insert(file_name);
+                if is_symlink {
+                    let _ = parent
+                        .3
+                        .insert(path.file_name().unwrap().to_string_lossy().into_owned());
+                }
             }
             let file_name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
             if should_cache(file_name, &rel) {
                 if let Some(file_content) = fs.read_file(path) {
                     let _ = content.insert(rel, file_content);
                 }
+            }
+        } else if is_symlink {
+            if let Some((parent_rel, file_name)) = split_parent_child(&rel) {
+                let parent = dir_children
+                    .entry(parent_rel)
+                    .or_insert_with(empty_child_sets);
+                let _ = parent.1.insert(file_name.clone());
+                let _ = parent.3.insert(file_name);
             }
         }
     }
@@ -166,16 +191,24 @@ pub fn walk_project(fs: &dyn FileSystem, root: &Path) -> ProjectTree {
         patch_tracked_files(fs, root, &mut dir_children, &mut content);
     }
 
+    // Phase 3: Preserve immediate symlink children, including broken symlinks
+    // that the ignore walker may omit entirely when follow_links(true) is enabled.
+    patch_immediate_symlink_children(fs, root, &mut dir_children);
+
     // Convert to DirEntry structs
     let structure = dir_children
         .into_iter()
-        .map(|(dir_rel, (child_dirs, child_files))| {
-            let entry = DirEntry {
-                dirs: child_dirs.into_iter().collect(),
-                files: child_files.into_iter().collect(),
-            };
-            (dir_rel, entry)
-        })
+        .map(
+            |(dir_rel, (child_dirs, child_files, symlink_dirs, symlink_files))| {
+                let entry = DirEntry {
+                    dirs: child_dirs.into_iter().collect(),
+                    files: child_files.into_iter().collect(),
+                    symlink_dirs: symlink_dirs.into_iter().collect(),
+                    symlink_files: symlink_files.into_iter().collect(),
+                };
+                (dir_rel, entry)
+            },
+        )
         .collect();
 
     ProjectTree {
@@ -194,7 +227,7 @@ pub fn walk_project(fs: &dyn FileSystem, root: &Path) -> ProjectTree {
 fn patch_tracked_files(
     fs: &dyn FileSystem,
     root: &Path,
-    dir_children: &mut BTreeMap<String, (BTreeSet<String>, BTreeSet<String>)>,
+    dir_children: &mut BTreeMap<String, ChildSets>,
     content: &mut BTreeMap<String, String>,
 ) {
     let output = std::process::Command::new("git")
@@ -215,7 +248,7 @@ fn patch_tracked_files(
 
     // Collect all files already in the tree for fast lookup
     let mut existing_files: BTreeSet<String> = BTreeSet::new();
-    for (dir_rel, (_, files)) in dir_children.iter() {
+    for (dir_rel, (_, files, _, _)) in dir_children.iter() {
         for f in files {
             let _ = existing_files.insert(ProjectTree::join_rel(dir_rel, f));
         }
@@ -243,7 +276,7 @@ fn patch_tracked_files(
             // Add file to parent's children
             let parent = dir_children
                 .entry(parent_rel)
-                .or_insert_with(|| (BTreeSet::new(), BTreeSet::new()));
+                .or_insert_with(empty_child_sets);
             let _ = parent.1.insert(file_name);
 
             // Cache content if it's a config file
@@ -257,28 +290,73 @@ fn patch_tracked_files(
     }
 }
 
-/// Ensure a directory and all its parents exist in the tree.
-fn ensure_parents(
-    dir_children: &mut BTreeMap<String, (BTreeSet<String>, BTreeSet<String>)>,
-    rel: &str,
+fn patch_immediate_symlink_children(
+    fs: &dyn FileSystem,
+    root: &Path,
+    dir_children: &mut BTreeMap<String, ChildSets>,
 ) {
+    let dir_rels = dir_children.keys().cloned().collect::<Vec<_>>();
+    for dir_rel in dir_rels {
+        let abs_dir = if dir_rel.is_empty() {
+            root.to_path_buf()
+        } else {
+            root.join(&dir_rel)
+        };
+        let parent = dir_children
+            .entry(dir_rel.clone())
+            .or_insert_with(empty_child_sets);
+
+        for entry in fs.list_dir(&abs_dir) {
+            let Ok(file_type) = entry.file_type() else {
+                continue;
+            };
+            if !file_type.is_symlink() {
+                continue;
+            }
+
+            let name = entry.file_name().to_string_lossy().into_owned();
+            match entry.metadata() {
+                Ok(metadata) if metadata.is_dir() => {
+                    let _ = parent.0.insert(name.clone());
+                    let _ = parent.2.insert(name);
+                }
+                _ => {
+                    let _ = parent.1.insert(name.clone());
+                    let _ = parent.3.insert(name);
+                }
+            }
+        }
+    }
+}
+
+/// Ensure a directory and all its parents exist in the tree.
+fn ensure_parents(dir_children: &mut BTreeMap<String, ChildSets>, rel: &str) {
     // Walk from the target dir up to root, creating entries as needed
     let mut current = rel.to_owned();
     loop {
         let _ = dir_children
             .entry(current.clone())
-            .or_insert_with(|| (BTreeSet::new(), BTreeSet::new()));
+            .or_insert_with(empty_child_sets);
 
         if let Some((parent, child_name)) = split_parent_child(&current) {
             let p = dir_children
                 .entry(parent.clone())
-                .or_insert_with(|| (BTreeSet::new(), BTreeSet::new()));
+                .or_insert_with(empty_child_sets);
             let _ = p.0.insert(child_name);
             current = parent;
         } else {
             break;
         }
     }
+}
+
+fn empty_child_sets() -> ChildSets {
+    (
+        BTreeSet::new(),
+        BTreeSet::new(),
+        BTreeSet::new(),
+        BTreeSet::new(),
+    )
 }
 
 /// Split a relative path into (parent_rel, child_name).

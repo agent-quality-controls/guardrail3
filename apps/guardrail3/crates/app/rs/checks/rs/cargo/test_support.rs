@@ -11,6 +11,8 @@ pub fn entry(dirs: &[&str], files: &[&str]) -> DirEntry {
     DirEntry {
         dirs: dirs.iter().map(|value| (*value).to_owned()).collect(),
         files: files.iter().map(|value| (*value).to_owned()).collect(),
+        symlink_dirs: Vec::new(),
+        symlink_files: Vec::new(),
     }
 }
 

@@ -12,6 +12,8 @@ fn sample_tree() -> ProjectTree {
                 DirEntry {
                     dirs: vec!["crates".to_owned(), "apps".to_owned()],
                     files: vec!["Cargo.toml".to_owned(), "rust-toolchain.toml".to_owned()],
+                    symlink_dirs: vec![],
+                    symlink_files: vec![],
                 },
             ),
             (
@@ -19,6 +21,8 @@ fn sample_tree() -> ProjectTree {
                 DirEntry {
                     dirs: vec!["api".to_owned(), "missing".to_owned()],
                     files: vec![],
+                    symlink_dirs: vec![],
+                    symlink_files: vec![],
                 },
             ),
             (
@@ -26,6 +30,8 @@ fn sample_tree() -> ProjectTree {
                 DirEntry {
                     dirs: vec![],
                     files: vec!["Cargo.toml".to_owned(), ".rustfmt.toml".to_owned()],
+                    symlink_dirs: vec![],
+                    symlink_files: vec![],
                 },
             ),
             (
@@ -33,6 +39,8 @@ fn sample_tree() -> ProjectTree {
                 DirEntry {
                     dirs: vec![],
                     files: vec![],
+                    symlink_dirs: vec![],
+                    symlink_files: vec![],
                 },
             ),
             (
@@ -40,6 +48,8 @@ fn sample_tree() -> ProjectTree {
                 DirEntry {
                     dirs: vec!["cli".to_owned()],
                     files: vec![],
+                    symlink_dirs: vec![],
+                    symlink_files: vec![],
                 },
             ),
             (
@@ -47,6 +57,8 @@ fn sample_tree() -> ProjectTree {
                 DirEntry {
                     dirs: vec![],
                     files: vec!["Cargo.toml".to_owned()],
+                    symlink_dirs: vec![],
+                    symlink_files: vec![],
                 },
             ),
         ]),

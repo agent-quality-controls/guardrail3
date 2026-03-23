@@ -8,7 +8,9 @@ const OPTIONAL: [&str; 1] = ["macros"];
 
 pub fn check(input: &HexRootInput<'_>, results: &mut Vec<CheckResult>) {
     for expected in EXPECTED {
-        if input.dirs.iter().any(|dir| dir == expected) {
+        if input.dirs.iter().any(|dir| dir == expected)
+            && !input.symlink_dirs.iter().any(|dir| dir == expected)
+        {
             continue;
         }
         results.push(CheckResult {
@@ -32,7 +34,11 @@ pub fn check(input: &HexRootInput<'_>, results: &mut Vec<CheckResult>) {
         });
     }
 
-    for dir in input.dirs {
+    for dir in input
+        .dirs
+        .iter()
+        .filter(|dir| !input.symlink_dirs.iter().any(|symlink| symlink == *dir))
+    {
         if EXPECTED.contains(&dir.as_str()) || OPTIONAL.contains(&dir.as_str()) {
             continue;
         }
@@ -63,6 +69,8 @@ pub fn check(input: &HexRootInput<'_>, results: &mut Vec<CheckResult>) {
         .iter()
         .filter(|file| file.as_str() != ".gitkeep")
         .cloned()
+        .chain(input.symlink_dirs.iter().cloned())
+        .chain(input.symlink_files.iter().cloned())
         .collect();
     if !bad_files.is_empty() {
         results.push(CheckResult {

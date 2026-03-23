@@ -20,6 +20,8 @@ pub struct HexRootFacts {
     pub crates_rel_dir: String,
     pub dirs: Vec<String>,
     pub files: Vec<String>,
+    pub symlink_dirs: Vec<String>,
+    pub symlink_files: Vec<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -240,6 +242,8 @@ fn collect_hex_roots(
         crates_rel_dir: crates_rel_dir.to_owned(),
         dirs: crates_entry.dirs.clone(),
         files: crates_entry.files.clone(),
+        symlink_dirs: crates_entry.symlink_dirs.clone(),
+        symlink_files: crates_entry.symlink_files.clone(),
     });
 
     for group in ["adapters", "ports"] {
@@ -311,6 +315,8 @@ fn dir_snapshot(tree: &ProjectTree, rel_path: &str) -> DirEntry {
     tree.dir_contents(rel_path).cloned().unwrap_or(DirEntry {
         dirs: Vec::new(),
         files: Vec::new(),
+        symlink_dirs: Vec::new(),
+        symlink_files: Vec::new(),
     })
 }
 

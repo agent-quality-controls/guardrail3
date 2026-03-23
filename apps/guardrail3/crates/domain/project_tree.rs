@@ -43,6 +43,12 @@ pub struct DirEntry {
     pub dirs: Vec<String>,
     /// Child file names (just the name, not the full path).
     pub files: Vec<String>,
+    /// Child directory names that are symlinks.
+    #[serde(default)]
+    pub symlink_dirs: Vec<String>,
+    /// Child file names that are symlinks or unusable symlink-like entries.
+    #[serde(default)]
+    pub symlink_files: Vec<String>,
 }
 
 impl ProjectTree {

@@ -62,3 +62,124 @@ fn root_gitkeep_is_still_allowed() {
         "top-level .gitkeep should remain allowed for rule 02: {errors:#?}"
     );
 }
+
+#[test]
+fn nested_root_gitkeep_is_still_allowed() {
+    let tmp = copy_fixture();
+    write_file(
+        tmp.path(),
+        &format!("{}/.gitkeep", super::super::super::test_support::INNER_HEX),
+        "",
+    );
+
+    let results = run_family(tmp.path());
+    let nested_rule_02: Vec<_> = errors_by_id(&results, "RS-HEXARCH-02")
+        .into_iter()
+        .filter(|error| error.file.as_deref() == Some(super::super::super::test_support::INNER_HEX))
+        .collect();
+
+    assert!(
+        nested_rule_02.is_empty(),
+        "nested top-level .gitkeep should remain allowed for rule 02: {nested_rule_02:#?}"
+    );
+}
+
+#[test]
+fn root_gitignore_is_a_loose_file_not_an_allowed_dotfile() {
+    let tmp = copy_fixture();
+    write_file(tmp.path(), "apps/devctl/crates/.gitignore", "*\n");
+
+    let results = run_family(tmp.path());
+    let devctl_rule_02: Vec<_> = errors_by_id(&results, "RS-HEXARCH-02")
+        .into_iter()
+        .filter(|error| error.file.as_deref() == Some("apps/devctl/crates"))
+        .collect();
+
+    assert_eq!(devctl_rule_02.len(), 1, "{devctl_rule_02:#?}");
+    assert!(
+        devctl_rule_02[0].title.contains("loose files"),
+        "{devctl_rule_02:#?}"
+    );
+    assert!(
+        devctl_rule_02[0].message.contains(".gitignore"),
+        "{devctl_rule_02:#?}"
+    );
+}
+
+#[test]
+fn loose_cargo_toml_at_crates_root_is_still_reported_as_a_bad_file() {
+    let tmp = copy_fixture();
+    write_file(
+        tmp.path(),
+        "apps/devctl/crates/Cargo.toml",
+        "[package]\nname = \"wrong-place\"\nversion = \"0.1.0\"\n",
+    );
+
+    let results = run_family(tmp.path());
+    let devctl_rule_02: Vec<_> = errors_by_id(&results, "RS-HEXARCH-02")
+        .into_iter()
+        .filter(|error| error.file.as_deref() == Some("apps/devctl/crates"))
+        .collect();
+
+    assert_eq!(devctl_rule_02.len(), 1, "{devctl_rule_02:#?}");
+    assert!(
+        devctl_rule_02[0].title.contains("loose files"),
+        "{devctl_rule_02:#?}"
+    );
+    assert!(
+        devctl_rule_02[0].message.contains("Cargo.toml"),
+        "{devctl_rule_02:#?}"
+    );
+}
+
+#[test]
+fn symlinked_gitkeep_to_file_is_not_treated_as_the_allowed_real_gitkeep() {
+    let tmp = copy_fixture();
+    std::os::unix::fs::symlink(
+        tmp.path().join("apps/devctl/Cargo.toml"),
+        tmp.path().join("apps/devctl/crates/.gitkeep"),
+    )
+    .expect("symlink");
+
+    let results = run_family(tmp.path());
+    let devctl_rule_02: Vec<_> = errors_by_id(&results, "RS-HEXARCH-02")
+        .into_iter()
+        .filter(|error| error.file.as_deref() == Some("apps/devctl/crates"))
+        .collect();
+
+    assert_eq!(devctl_rule_02.len(), 1, "{devctl_rule_02:#?}");
+    assert!(
+        devctl_rule_02[0].title.contains("loose files"),
+        "{devctl_rule_02:#?}"
+    );
+    assert!(
+        devctl_rule_02[0].message.contains(".gitkeep"),
+        "{devctl_rule_02:#?}"
+    );
+}
+
+#[test]
+fn symlinked_gitkeep_to_directory_is_not_treated_as_the_allowed_real_gitkeep() {
+    let tmp = copy_fixture();
+    std::os::unix::fs::symlink(
+        tmp.path().join("apps/devctl/crates/app"),
+        tmp.path().join("apps/devctl/crates/.gitkeep"),
+    )
+    .expect("symlink");
+
+    let results = run_family(tmp.path());
+    let devctl_rule_02: Vec<_> = errors_by_id(&results, "RS-HEXARCH-02")
+        .into_iter()
+        .filter(|error| error.file.as_deref() == Some("apps/devctl/crates"))
+        .collect();
+
+    assert_eq!(devctl_rule_02.len(), 1, "{devctl_rule_02:#?}");
+    assert!(
+        devctl_rule_02[0].title.contains("loose files"),
+        "{devctl_rule_02:#?}"
+    );
+    assert!(
+        devctl_rule_02[0].message.contains(".gitkeep"),
+        "{devctl_rule_02:#?}"
+    );
+}

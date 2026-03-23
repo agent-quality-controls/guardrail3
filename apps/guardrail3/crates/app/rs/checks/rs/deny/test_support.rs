@@ -15,6 +15,8 @@ pub fn dir_entry(dirs: &[&str], files: &[&str]) -> DirEntry {
     DirEntry {
         dirs: dirs.iter().map(|dir| (*dir).to_owned()).collect(),
         files: files.iter().map(|file| (*file).to_owned()).collect(),
+        symlink_dirs: Vec::new(),
+        symlink_files: Vec::new(),
     }
 }
 
@@ -202,6 +204,58 @@ pub fn set_license_exceptions(deny_toml: &str, entries: Vec<toml::Value>) -> Str
     toml::to_string(&parsed).expect("serialize deny TOML")
 }
 
+pub fn set_bans_allow_entries(deny_toml: &str, entries: Vec<toml::Value>) -> String {
+    let mut parsed = toml::from_str::<toml::Value>(deny_toml).expect("valid deny TOML");
+    let bans = parsed
+        .get_mut("bans")
+        .and_then(toml::Value::as_table_mut)
+        .expect("expected [bans] table");
+    let _ = bans.insert("allow".to_owned(), toml::Value::Array(entries));
+    toml::to_string(&parsed).expect("serialize deny TOML")
+}
+
+pub fn set_advisory_ignores(deny_toml: &str, entries: Vec<toml::Value>) -> String {
+    let mut parsed = toml::from_str::<toml::Value>(deny_toml).expect("valid deny TOML");
+    let advisories = parsed
+        .get_mut("advisories")
+        .and_then(toml::Value::as_table_mut)
+        .expect("expected [advisories] table");
+    let _ = advisories.insert("ignore".to_owned(), toml::Value::Array(entries));
+    toml::to_string(&parsed).expect("serialize deny TOML")
+}
+
+pub fn add_deny_ban_entry(deny_toml: &str, entry: toml::Value) -> String {
+    let mut parsed = toml::from_str::<toml::Value>(deny_toml).expect("valid deny TOML");
+    let entries = parsed
+        .get_mut("bans")
+        .and_then(|bans| bans.get_mut("deny"))
+        .and_then(toml::Value::as_array_mut)
+        .expect("expected [bans].deny array");
+    entries.push(entry);
+    toml::to_string(&parsed).expect("serialize deny TOML")
+}
+
+pub fn add_skip_entry(deny_toml: &str, entry: toml::Value) -> String {
+    let mut parsed = toml::from_str::<toml::Value>(deny_toml).expect("valid deny TOML");
+    let entries = parsed
+        .get_mut("bans")
+        .and_then(|bans| bans.get_mut("skip"))
+        .and_then(toml::Value::as_array_mut)
+        .expect("expected [bans].skip array");
+    entries.push(entry);
+    toml::to_string(&parsed).expect("serialize deny TOML")
+}
+
+pub fn set_feature_entries(deny_toml: &str, entries: Vec<toml::Value>) -> String {
+    let mut parsed = toml::from_str::<toml::Value>(deny_toml).expect("valid deny TOML");
+    let bans = parsed
+        .get_mut("bans")
+        .and_then(toml::Value::as_table_mut)
+        .expect("expected [bans] table");
+    let _ = bans.insert("features".to_owned(), toml::Value::Array(entries));
+    toml::to_string(&parsed).expect("serialize deny TOML")
+}
+
 pub fn set_private_ignore(deny_toml: &str, ignore: bool) -> String {
     let mut parsed = toml::from_str::<toml::Value>(deny_toml).expect("valid deny TOML");
     let licenses = parsed
@@ -272,6 +326,24 @@ pub fn set_allow_git_sources(deny_toml: &str, entries: &[&str]) -> String {
         .expect("expected [sources] table");
     let _ = sources.insert(
         "allow-git".to_owned(),
+        toml::Value::Array(
+            entries
+                .iter()
+                .map(|entry| toml::Value::String((*entry).to_owned()))
+                .collect(),
+        ),
+    );
+    toml::to_string(&parsed).expect("serialize deny TOML")
+}
+
+pub fn set_allow_registries(deny_toml: &str, entries: &[&str]) -> String {
+    let mut parsed = toml::from_str::<toml::Value>(deny_toml).expect("valid deny TOML");
+    let sources = parsed
+        .get_mut("sources")
+        .and_then(toml::Value::as_table_mut)
+        .expect("expected [sources] table");
+    let _ = sources.insert(
+        "allow-registry".to_owned(),
         toml::Value::Array(
             entries
                 .iter()
