@@ -15,3 +15,25 @@ members = [
     "crates/adapters/outbound/queue",
 ]
 resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+thiserror = "2"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+unused_results = "deny"
+unused_crate_dependencies = "deny"
+dead_code = "deny"
+
+[workspace.lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+todo = "deny"
+unimplemented = "deny"

@@ -2,3 +2,7 @@
 name = "backend-adapters-outbound-queue"
 version = "0.1.0"
 edition = "2024"
+
+[dependencies]
+backend-domain-types = { path = "../../../domain/types" }
+backend-ports-outbound-events = { path = "../../../ports/outbound/events" }

@@ -1,0 +1,43 @@
+version = "0.1"
+
+[profile]
+name = "service"
+
+[rust]
+workspace_root = "."
+
+[rust.apps.backend]
+type = "service"
+
+[rust.apps.backend.checks]
+architecture = true
+garde = false
+tests = true
+release = false
+
+[rust.apps.worker]
+type = "service"
+
+[rust.apps.worker.checks]
+architecture = true
+garde = false
+tests = true
+release = false
+
+[rust.apps.devctl]
+type = "service"
+
+[rust.apps.devctl.checks]
+architecture = true
+garde = false
+tests = true
+release = false
+
+[rust.packages]
+type = "library"
+
+[rust.packages.checks]
+architecture = false
+garde = false
+tests = true
+release = false
