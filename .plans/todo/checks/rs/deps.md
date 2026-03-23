@@ -1,4 +1,4 @@
-# RS-DEPS — Tool + dependency policy checker (11 rules)
+# RS-DEPS — Tool + dependency policy checker (11 rules + 1 planned hard cap)
 
 **Input:** Tool PATH checks + Cargo.lock + .gitignore + guardrail3.toml allowlists + Cargo.toml dependency tables
 **Current code:** `dependency_scan.rs`, `dependency_allowlist.rs`
@@ -52,6 +52,37 @@ Allowlist semantics:
 | New ID | Severity | What | Status |
 |--------|----------|------|--------|
 | RS-DEPS-11 | Error | Required dependency-policy inputs unreadable or unparseable: member Cargo.toml, workspace Cargo.toml for `workspace = true` resolution, or `guardrail3.toml` when needed for profile/allowlist policy. | Planned |
+
+## Next-wave planned universal rule
+
+| New ID | Severity | What | Status |
+|--------|----------|------|--------|
+| RS-DEPS-12 | Error | More than 25 unique direct dependency names on one crate across direct dependency sections/tables. | Planned |
+
+### RS-DEPS-12 — Direct dependency count cap
+
+**Intent**
+- catch dependency sprawl and agentic crate accretion
+
+**Trigger surface**
+- one crate/package has more than 25 unique direct dependency names across:
+  - `[dependencies]`
+  - `[build-dependencies]`
+  - `[dev-dependencies]`
+  - `target.*.dependencies`
+  - `target.*.build-dependencies`
+  - `target.*.dev-dependencies`
+
+**Count**
+- unique crate names only
+- `workspace = true` entries count
+- path dependencies count
+
+**Do not count**
+- repeated occurrences of the same crate name across multiple sections/tables more than once
+
+**Severity**
+- `Error`
 
 ## Explicitly rejected
 
