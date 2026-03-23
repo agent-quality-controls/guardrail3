@@ -119,6 +119,7 @@ pub struct BoundaryConfigFacts {
     pub rel_dir: String,
     pub has_config_entry: bool,
     pub is_app_boundary: bool,
+    pub parse_error: Option<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -137,17 +138,22 @@ pub struct DependencyFamilyFacts {
 }
 
 pub fn collect(tree: &ProjectTree) -> DependencyFamilyFacts {
-    let parsed_guardrail = parse_guardrail_config(tree);
+    let guardrail_config = parse_guardrail_config(tree);
     let workspaces = discover_workspaces(tree);
     let workspace_for_member = best_workspace_for_member(&workspaces);
-    let members = collect_members(tree, &workspaces, &workspace_for_member, parsed_guardrail.as_ref());
+    let members = collect_members(
+        tree,
+        &workspaces,
+        &workspace_for_member,
+        guardrail_config.parsed.as_ref(),
+    );
     let member_by_dir = members
         .iter()
         .map(|member| (member.rel_dir.clone(), member))
         .collect::<BTreeMap<_, _>>();
     let edges = collect_edges(tree, &workspaces, &members, &member_by_dir);
     let cycles = collect_same_layer_cycles(&edges, &member_by_dir);
-    let boundary_configs = collect_boundary_configs(&members, parsed_guardrail.as_ref());
+    let boundary_configs = collect_boundary_configs(&members, &guardrail_config);
 
     DependencyFamilyFacts {
         workspaces,
@@ -160,19 +166,31 @@ pub fn collect(tree: &ProjectTree) -> DependencyFamilyFacts {
 
 fn collect_boundary_configs(
     members: &[MemberDependencyFacts],
-    guardrail: Option<&ParsedGuardrailConfig>,
+    guardrail: &GuardrailConfigSnapshot,
 ) -> Vec<BoundaryConfigFacts> {
+    if let Some(parse_error) = &guardrail.parse_error {
+        return vec![BoundaryConfigFacts {
+            rel_dir: "guardrail3.toml".to_owned(),
+            has_config_entry: false,
+            is_app_boundary: false,
+            parse_error: Some(parse_error.clone()),
+        }];
+    }
+
     let mut boundaries = BTreeMap::<String, BoundaryConfigFacts>::new();
     for member in members {
         if let Some(app_root) = &member.app_root_rel_dir {
             let _ = boundaries.entry(app_root.clone()).or_insert_with(|| {
                 let app_name = app_root.rsplit('/').next().unwrap_or(app_root);
                 let has_config_entry = guardrail
+                    .parsed
+                    .as_ref()
                     .is_some_and(|guardrail| guardrail.app_configs.contains_key(app_name));
                 BoundaryConfigFacts {
                     rel_dir: app_root.clone(),
                     has_config_entry,
                     is_app_boundary: true,
+                    parse_error: None,
                 }
             });
         }
@@ -187,26 +205,33 @@ struct ParsedGuardrailConfig {
     packages_config: Option<CrateConfig>,
 }
 
-fn parse_guardrail_config(tree: &ProjectTree) -> Option<ParsedGuardrailConfig> {
-    let content = tree.file_content("guardrail3.toml")?;
+#[derive(Debug, Clone, Default)]
+struct GuardrailConfigSnapshot {
+    parsed: Option<ParsedGuardrailConfig>,
+    parse_error: Option<String>,
+}
+
+fn parse_guardrail_config(tree: &ProjectTree) -> GuardrailConfigSnapshot {
+    let Some(content) = tree.file_content("guardrail3.toml") else {
+        return GuardrailConfigSnapshot::default();
+    };
     match toml::from_str::<GuardrailConfig>(content) {
-        Ok(config) => Some(ParsedGuardrailConfig {
-            root_profile_name: config.profile.map(|profile| profile.name),
-            app_configs: config
-                .rust
-                .as_ref()
-                .and_then(|rust| rust.apps.clone())
-                .unwrap_or_default(),
-            packages_config: config.rust.and_then(|rust| rust.packages),
-        }),
-        Err(parse_error) => {
-            let _ = parse_error;
-            Some(ParsedGuardrailConfig {
-                root_profile_name: None,
-                app_configs: BTreeMap::new(),
-                packages_config: None,
-            })
-        }
+        Ok(config) => GuardrailConfigSnapshot {
+            parsed: Some(ParsedGuardrailConfig {
+                root_profile_name: config.profile.map(|profile| profile.name),
+                app_configs: config
+                    .rust
+                    .as_ref()
+                    .and_then(|rust| rust.apps.clone())
+                    .unwrap_or_default(),
+                packages_config: config.rust.and_then(|rust| rust.packages),
+            }),
+            parse_error: None,
+        },
+        Err(parse_error) => GuardrailConfigSnapshot {
+            parsed: None,
+            parse_error: Some(parse_error.to_string()),
+        },
     }
 }
 
@@ -270,7 +295,11 @@ fn discover_workspaces(tree: &ProjectTree) -> Vec<WorkspaceFacts> {
     workspaces
 }
 
-fn resolve_member_pattern(tree: &ProjectTree, workspace_root_rel_dir: &str, member: &str) -> Vec<String> {
+fn resolve_member_pattern(
+    tree: &ProjectTree,
+    workspace_root_rel_dir: &str,
+    member: &str,
+) -> Vec<String> {
     let pattern = if workspace_root_rel_dir.is_empty() {
         member.to_owned()
     } else {
@@ -359,23 +388,28 @@ fn collect_members(
         let cargo_content = tree.file_content(&cargo_rel_path);
         let name = match cargo_content {
             Some(content) => match toml::from_str::<toml::Value>(content) {
-                Ok(parsed) => (
-                    parsed
-                        .get("package")
-                        .and_then(|value| value.get("name"))
-                        .and_then(toml::Value::as_str)
-                        .map(str::to_owned)
-                        .unwrap_or_else(|| rel_dir.rsplit('/').next().unwrap_or(&rel_dir).to_owned()),
-                    None::<String>,
-                )
-                    .0,
+                Ok(parsed) => {
+                    (
+                        parsed
+                            .get("package")
+                            .and_then(|value| value.get("name"))
+                            .and_then(toml::Value::as_str)
+                            .map(str::to_owned)
+                            .unwrap_or_else(|| {
+                                rel_dir.rsplit('/').next().unwrap_or(&rel_dir).to_owned()
+                            }),
+                        None::<String>,
+                    )
+                        .0
+                }
                 Err(_) => rel_dir.rsplit('/').next().unwrap_or(&rel_dir).to_owned(),
             },
             None => rel_dir.rsplit('/').next().unwrap_or(&rel_dir).to_owned(),
         };
 
         let app_root_rel_dir = app_root_for_dir(&rel_dir);
-        let (_profile_name, allowed_deps) = profile_and_allowed_deps_for_member(&rel_dir, guardrail);
+        let (_profile_name, allowed_deps) =
+            profile_and_allowed_deps_for_member(&rel_dir, guardrail);
 
         members.push(MemberDependencyFacts {
             name,
@@ -517,7 +551,10 @@ fn collect_edge_section(
             None
         };
         let resolved_path_rel = extract_path(value, workspace_deps)
-            .or_else(|| workspace_value.and_then(|workspace_value| extract_path(workspace_value, workspace_deps)))
+            .or_else(|| {
+                workspace_value
+                    .and_then(|workspace_value| extract_path(workspace_value, workspace_deps))
+            })
             .map(|path| normalize_path(&member.rel_dir, &path));
 
         let resolved_member = resolved_path_rel
@@ -542,12 +579,18 @@ fn collect_edge_section(
             resolved_target_rel_dir: target_member
                 .map(|target| target.rel_dir.clone())
                 .or(resolved_path_rel.clone()),
-            target_layer: target_member
-                .and_then(|target| target.layer)
-                .or_else(|| resolved_path_rel.as_ref().and_then(|resolved| layer_from_path(resolved))),
+            target_layer: target_member.and_then(|target| target.layer).or_else(|| {
+                resolved_path_rel
+                    .as_ref()
+                    .and_then(|resolved| layer_from_path(resolved))
+            }),
             target_app_root_rel_dir: target_member
                 .and_then(|target| target.app_root_rel_dir.clone())
-                .or_else(|| resolved_path_rel.as_ref().and_then(|resolved| app_root_for_dir(resolved))),
+                .or_else(|| {
+                    resolved_path_rel
+                        .as_ref()
+                        .and_then(|resolved| app_root_for_dir(resolved))
+                }),
             is_workspace_inherited: uses_workspace,
         });
     }
@@ -575,7 +618,15 @@ fn collect_same_layer_cycles(
     let mut seen = BTreeSet::new();
     for start in graph.keys() {
         let mut stack = Vec::<String>::new();
-        dfs_cycle(start, start, &graph, &mut stack, &mut seen, &mut cycles, member_by_dir);
+        dfs_cycle(
+            start,
+            start,
+            &graph,
+            &mut stack,
+            &mut seen,
+            &mut cycles,
+            member_by_dir,
+        );
     }
     cycles
 }
@@ -596,13 +647,17 @@ fn dfs_cycle(
                 let cycle = canonical_cycle(stack);
                 let cycle_key = cycle.join(" -> ");
                 if seen.insert(cycle_key) {
-                    let layers = cycle
+                    let member_layers = cycle
                         .iter()
-                        .filter_map(|member| member_by_dir.get(member).and_then(|facts| facts.layer))
-                        .collect::<BTreeSet<_>>();
-                    if layers.len() == 1 {
+                        .map(|member| member_by_dir.get(member).and_then(|facts| facts.layer))
+                        .collect::<Vec<_>>();
+                    if let Some(layer) = member_layers.first().copied().flatten().filter(|layer| {
+                        member_layers
+                            .iter()
+                            .all(|candidate| *candidate == Some(*layer))
+                    }) {
                         cycles.push(CycleFacts {
-                            layer: *layers.first().expect("single layer"),
+                            layer,
                             members: cycle,
                         });
                     }
@@ -759,3 +814,7 @@ pub fn normalize_path(base: &str, rel: &str) -> String {
     }
     parts.join("/")
 }
+
+#[cfg(test)]
+#[path = "dependency_facts_tests/mod.rs"]
+mod tests;

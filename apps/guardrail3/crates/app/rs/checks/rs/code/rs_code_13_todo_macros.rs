@@ -13,7 +13,10 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
                 id: ID.to_owned(),
                 severity: Severity::Warn,
                 title: format!("{macro_name}! macro"),
-                message: format!("`{macro_name}!()` macro found: {}.", line_text(input.content, line)),
+                message: format!(
+                    "`{macro_name}!()` macro found: {}.",
+                    line_text(input.content, line)
+                ),
                 file: Some(input.rel_path.to_owned()),
                 line: Some(line),
                 inventory: false,
@@ -22,7 +25,10 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
                 id: ID.to_owned(),
                 severity: Severity::Info,
                 title: "unreachable! macro".to_owned(),
-                message: format!("`unreachable!()` macro found: {}.", line_text(input.content, line)),
+                message: format!(
+                    "`unreachable!()` macro found: {}.",
+                    line_text(input.content, line)
+                ),
                 file: Some(input.rel_path.to_owned()),
                 line: Some(line),
                 inventory: false,
@@ -33,5 +39,5 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_code_13_todo_macros_tests.rs"]
+#[path = "rs_code_13_todo_macros_tests/mod.rs"]
 mod tests;

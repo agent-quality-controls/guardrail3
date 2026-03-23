@@ -1,12 +1,13 @@
 use crate::domain::report::{CheckResult, Severity};
 
+use super::dependency_facts::EdgeKind;
 use super::inputs::DependencyEdgeHexarchInput;
 
 const ID: &str = "RS-HEXARCH-20";
 
 pub fn check(input: &DependencyEdgeHexarchInput<'_>, results: &mut Vec<CheckResult>) {
     let edge = input.edge;
-    if !edge.kind.is_dev() {
+    if edge.kind != EdgeKind::DevDependency {
         return;
     }
     let (Some(source_layer), Some(target_layer)) = (edge.source_layer, edge.target_layer) else {
@@ -35,5 +36,5 @@ pub fn check(input: &DependencyEdgeHexarchInput<'_>, results: &mut Vec<CheckResu
 }
 
 #[cfg(test)]
-#[path = "rs_hexarch_20_dev_dependency_direction_tests.rs"]
+#[path = "rs_hexarch_20_dev_dependency_direction_tests/mod.rs"]
 mod tests;

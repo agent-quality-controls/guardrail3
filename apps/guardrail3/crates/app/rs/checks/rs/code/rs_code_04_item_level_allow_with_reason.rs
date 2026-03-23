@@ -23,5 +23,5 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_code_04_item_level_allow_with_reason_tests.rs"]
+#[path = "rs_code_04_item_level_allow_with_reason_tests/mod.rs"]
 mod tests;

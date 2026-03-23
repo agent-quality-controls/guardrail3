@@ -6,7 +6,7 @@ use crate::app::core::project_walker::walk_project;
 use crate::domain::project_tree::{DirEntry, ProjectTree};
 use crate::domain::report::{CheckResult, Severity};
 
-use super::dependency_facts::{self, DependencyFamilyFacts, EdgeKind};
+use super::dependency_facts::{self, DependencyFamilyFacts};
 
 const GOLDEN_REL: &str = "tests/fixtures/r_arch_01/golden";
 pub const RUST_APPS: &[&str] = &["devctl", "backend", "worker"];
@@ -66,10 +66,7 @@ pub fn dir_entry(dirs: &[&str], files: &[&str]) -> DirEntry {
     }
 }
 
-pub fn project_tree(
-    structure: Vec<(&str, DirEntry)>,
-    content: Vec<(&str, &str)>,
-) -> ProjectTree {
+pub fn project_tree(structure: Vec<(&str, DirEntry)>, content: Vec<(&str, &str)>) -> ProjectTree {
     ProjectTree {
         root: PathBuf::from("/tmp/hexarch"),
         structure: structure
@@ -87,18 +84,6 @@ pub fn dependency_facts(tree: &ProjectTree) -> DependencyFamilyFacts {
     dependency_facts::collect(tree)
 }
 
-pub fn find_edge<'a>(
-    facts: &'a DependencyFamilyFacts,
-    source_rel_dir: &str,
-    alias: &str,
-    kind: EdgeKind,
-) -> &'a super::dependency_facts::DependencyEdgeFacts {
-    facts.edges
-        .iter()
-        .find(|edge| edge.source_rel_dir == source_rel_dir && edge.dep_alias == alias && edge.kind == kind)
-        .expect("expected dependency edge")
-}
-
 pub fn errors_by_id<'a>(results: &'a [CheckResult], id: &str) -> Vec<&'a CheckResult> {
     results
         .iter()
@@ -108,7 +93,10 @@ pub fn errors_by_id<'a>(results: &'a [CheckResult], id: &str) -> Vec<&'a CheckRe
 
 pub fn assert_no_error(results: &[CheckResult], id: &str) {
     let errors = errors_by_id(results, id);
-    assert!(errors.is_empty(), "expected no {id} errors, got: {errors:#?}");
+    assert!(
+        errors.is_empty(),
+        "expected no {id} errors, got: {errors:#?}"
+    );
 }
 
 fn copy_dir_recursive(src: &Path, dst: &Path) {

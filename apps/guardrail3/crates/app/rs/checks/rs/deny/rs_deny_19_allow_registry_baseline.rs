@@ -10,7 +10,10 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
             id: "RS-DENY-19".to_owned(),
             severity: Severity::Error,
             title: "[sources] allow-registry missing".to_owned(),
-            message: format!("`{}` has no valid crates.io registry allow-list.", config.rel_path),
+            message: format!(
+                "`{}` has no valid crates.io registry allow-list.",
+                config.rel_path
+            ),
             file: Some(config.rel_path.clone()),
             line: None,
             inventory: false,
@@ -20,7 +23,12 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     let allow_registry = sources
         .get("allow-registry")
         .and_then(toml::Value::as_array)
-        .map(|entries| entries.iter().filter_map(toml::Value::as_str).collect::<Vec<_>>())
+        .map(|entries| {
+            entries
+                .iter()
+                .filter_map(toml::Value::as_str)
+                .collect::<Vec<_>>()
+        })
         .unwrap_or_default();
     let has_crates_io = allow_registry.iter().any(|registry| {
         *registry == "https://github.com/rust-lang/crates.io-index"
@@ -31,7 +39,10 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
             id: "RS-DENY-19".to_owned(),
             severity: Severity::Error,
             title: "crates.io registry not allowed".to_owned(),
-            message: format!("`{}` must include crates.io in `[sources].allow-registry`.", config.rel_path),
+            message: format!(
+                "`{}` must include crates.io in `[sources].allow-registry`.",
+                config.rel_path
+            ),
             file: Some(config.rel_path.clone()),
             line: None,
             inventory: false,
@@ -63,5 +74,5 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_deny_19_allow_registry_baseline_tests.rs"]
+#[path = "rs_deny_19_allow_registry_baseline_tests/mod.rs"]
 mod tests;

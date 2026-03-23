@@ -49,5 +49,5 @@ pub fn check(input: &DirectionalContainerHexarchInput<'_>, results: &mut Vec<Che
 }
 
 #[cfg(test)]
-#[path = "rs_hexarch_03_inbound_outbound_tests.rs"]
+#[path = "rs_hexarch_03_inbound_outbound_tests/mod.rs"]
 mod tests;

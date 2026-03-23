@@ -31,7 +31,7 @@ use crate::domain::project_tree::ProjectTree;
 use crate::domain::report::CheckResult;
 use crate::ports::outbound::ToolChecker;
 
-use self::facts::{collect, TestCoverageFacts, TestFileFacts};
+use self::facts::{TestCoverageFacts, TestFileFacts, collect};
 use self::inputs::{
     HookTestInput, InputFailureTestInput, RootTestInput, TestCoverageInput, TestFileInput,
     TestFunctionInput, TestModuleInput, ToolTestInput,
@@ -82,7 +82,8 @@ fn analyze_roots(
         let content = match crate::fs::read_file_err(&tree.abs_path(&file.rel_path)) {
             Ok(content) => content,
             Err(read_error) => {
-                let message = format!("Failed to read Rust source file for test analysis: {read_error}");
+                let message =
+                    format!("Failed to read Rust source file for test analysis: {read_error}");
                 rs_test_19_input_failures::check(
                     &InputFailureTestInput::inline(&file.rel_path, &message),
                     results,
@@ -93,7 +94,8 @@ fn analyze_roots(
         let ast = match parse::parse_rust_file(&content) {
             Ok(ast) => ast,
             Err(parse_error) => {
-                let message = format!("Failed to parse Rust source file for test analysis: {parse_error}");
+                let message =
+                    format!("Failed to parse Rust source file for test analysis: {parse_error}");
                 rs_test_19_input_failures::check(
                     &InputFailureTestInput::inline(&file.rel_path, &message),
                     results,
@@ -111,11 +113,11 @@ fn analyze_roots(
             coverage.integration_test_exists = true;
         }
         if file.is_src_file && !file.is_test_sidecar_file {
-            coverage.public_fn_count = coverage
-                .public_fn_count
-                .saturating_add(parsed.pub_fn_count);
+            coverage.public_fn_count = coverage.public_fn_count.saturating_add(parsed.pub_fn_count);
         }
-        coverage.test_fn_count = coverage.test_fn_count.saturating_add(parsed.test_functions.len());
+        coverage.test_fn_count = coverage
+            .test_fn_count
+            .saturating_add(parsed.test_functions.len());
         if !parsed.test_functions.is_empty() {
             coverage.has_any_tests = true;
         }
@@ -126,10 +128,7 @@ fn analyze_roots(
         rs_test_16_test_file_length::check(&file_input, results);
 
         for module in &parsed.cfg_test_modules {
-            rs_test_11_cfg_test_module_naming::check(
-                &TestModuleInput::new(file, module),
-                results,
-            );
+            rs_test_11_cfg_test_module_naming::check(&TestModuleInput::new(file, module), results);
         }
 
         for function in &parsed.test_functions {

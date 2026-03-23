@@ -1,8 +1,8 @@
 use crate::domain::report::Severity;
 
-use super::check;
 use super::super::parse::TestFunctionInfo;
 use super::super::test_support::function_input;
+use super::check;
 
 #[test]
 fn warns_on_matches_assert_with_wildcards() {

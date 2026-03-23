@@ -44,5 +44,5 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_clippy_19_unknown_keys_tests.rs"]
+#[path = "rs_clippy_19_unknown_keys_tests/mod.rs"]
 mod tests;

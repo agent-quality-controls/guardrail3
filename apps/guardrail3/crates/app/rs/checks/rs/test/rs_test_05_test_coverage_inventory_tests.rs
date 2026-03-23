@@ -1,7 +1,7 @@
 use crate::domain::report::Severity;
 
-use super::check;
 use super::super::test_support::coverage_input;
+use super::check;
 
 #[test]
 fn inventories_ratio() {

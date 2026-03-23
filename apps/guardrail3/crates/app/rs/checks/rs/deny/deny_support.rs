@@ -27,7 +27,13 @@ pub fn ban_name(entry: &toml::Value) -> Option<String> {
         return Some(name.to_owned());
     }
     if let Some(crate_name) = entry.get("crate").and_then(toml::Value::as_str) {
-        return Some(crate_name.split('@').next().unwrap_or(crate_name).to_owned());
+        return Some(
+            crate_name
+                .split('@')
+                .next()
+                .unwrap_or(crate_name)
+                .to_owned(),
+        );
     }
     entry.as_str().map(str::to_owned)
 }
@@ -51,7 +57,9 @@ pub fn expected_bans(profile: Option<&str>) -> BTreeMap<String, BanExpectation> 
     }
     let _ = map
         .entry("lazy_static".to_owned())
-        .or_insert(BanExpectation { wrappers: BTreeSet::new() });
+        .or_insert(BanExpectation {
+            wrappers: BTreeSet::new(),
+        });
     map
 }
 
@@ -112,7 +120,11 @@ pub fn expected_sources() -> (BTreeSet<String>, String, String) {
         .and_then(|value| value.get("unknown-git"))
         .and_then(toml::Value::as_str)
         .unwrap_or("deny");
-    (registries, unknown_registry.to_owned(), unknown_git.to_owned())
+    (
+        registries,
+        unknown_registry.to_owned(),
+        unknown_git.to_owned(),
+    )
 }
 
 pub fn expected_graph() -> (bool, bool) {
@@ -240,7 +252,12 @@ pub fn known_section_keys(section: &str) -> BTreeSet<&'static str> {
             "notice",
             "unsound",
         ]),
-        "sources" => BTreeSet::from(["unknown-registry", "unknown-git", "allow-registry", "allow-git"]),
+        "sources" => BTreeSet::from([
+            "unknown-registry",
+            "unknown-git",
+            "allow-registry",
+            "allow-git",
+        ]),
         "private" => BTreeSet::from(["ignore"]),
         "exception" => BTreeSet::from(["allow", "name", "crate", "version", "reason"]),
         "skip" => BTreeSet::from(["name", "crate", "version", "reason"]),

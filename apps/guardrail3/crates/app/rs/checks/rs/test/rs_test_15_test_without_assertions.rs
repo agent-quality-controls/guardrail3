@@ -16,7 +16,10 @@ pub fn check(input: &TestFunctionInput<'_>, results: &mut Vec<CheckResult>) {
         id: ID.to_owned(),
         severity: Severity::Warn,
         title: "test has no assertions".to_owned(),
-        message: format!("Test `{}` has no assertion macro or assertion-like call.", input.function.name),
+        message: format!(
+            "Test `{}` has no assertion macro or assertion-like call.",
+            input.function.name
+        ),
         file: Some(input.file.rel_path.clone()),
         line: Some(input.function.line),
         inventory: false,

@@ -31,7 +31,8 @@ pub fn check(input: &TestFileInput<'_>, results: &mut Vec<CheckResult>) {
             id: ID.to_owned(),
             severity: Severity::Error,
             title: "test function in production source file".to_owned(),
-            message: "Production `src/` files must not define direct `#[test]` functions.".to_owned(),
+            message: "Production `src/` files must not define direct `#[test]` functions."
+                .to_owned(),
             file: Some(input.file.rel_path.clone()),
             line: Some(function.line),
             inventory: false,

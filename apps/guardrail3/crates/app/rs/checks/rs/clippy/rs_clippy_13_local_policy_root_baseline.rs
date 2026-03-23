@@ -59,13 +59,22 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
     {
         missing_sections.push("thresholds");
     }
-    if expected_methods.iter().any(|path| !found_methods.contains(path)) {
+    if expected_methods
+        .iter()
+        .any(|path| !found_methods.contains(path))
+    {
         missing_sections.push("disallowed-methods");
     }
-    if expected_types.iter().any(|path| !found_types.contains(path)) {
+    if expected_types
+        .iter()
+        .any(|path| !found_types.contains(path))
+    {
         missing_sections.push("disallowed-types");
     }
-    if expected_macros.iter().any(|path| !found_macros.contains(path)) {
+    if expected_macros
+        .iter()
+        .any(|path| !found_macros.contains(path))
+    {
         missing_sections.push("disallowed-macros");
     }
     for key in [
@@ -116,5 +125,5 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_clippy_13_local_policy_root_baseline_tests.rs"]
+#[path = "rs_clippy_13_local_policy_root_baseline_tests/mod.rs"]
 mod tests;

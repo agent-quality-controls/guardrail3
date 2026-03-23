@@ -25,5 +25,5 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_clippy_17_test_relaxations_tests.rs"]
+#[path = "rs_clippy_17_test_relaxations_tests/mod.rs"]
 mod tests;

@@ -18,7 +18,10 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         return;
     };
     let (_, expected, _) = expected_bans_settings();
-    match bans.get("allow-wildcard-paths").and_then(toml::Value::as_bool) {
+    match bans
+        .get("allow-wildcard-paths")
+        .and_then(toml::Value::as_bool)
+    {
         Some(value) if value == expected => {}
         _ => results.push(CheckResult {
             id: "RS-DENY-12".to_owned(),
@@ -36,5 +39,5 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_deny_12_allow_wildcard_paths_tests.rs"]
+#[path = "rs_deny_12_allow_wildcard_paths_tests/mod.rs"]
 mod tests;

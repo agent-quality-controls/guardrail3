@@ -24,5 +24,5 @@ pub fn check(input: &AppHexarchInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_hexarch_12_src_banned_tests.rs"]
+#[path = "rs_hexarch_12_src_banned_tests/mod.rs"]
 mod tests;

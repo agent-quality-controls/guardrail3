@@ -12,7 +12,10 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
                 id: ID.to_owned(),
                 severity: Severity::Error,
                 title: "#[path] escapes parent directory".to_owned(),
-                message: format!("`#[path = \"{}\"]` escapes the standard module boundary.", info.path),
+                message: format!(
+                    "`#[path = \"{}\"]` escapes the standard module boundary.",
+                    info.path
+                ),
                 file: Some(input.rel_path.to_owned()),
                 line: Some(info.line),
                 inventory: false,
@@ -49,5 +52,5 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_code_24_path_attr_tests.rs"]
+#[path = "rs_code_24_path_attr_tests/mod.rs"]
 mod tests;

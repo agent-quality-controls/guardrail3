@@ -3,6 +3,7 @@ mod generate_helpers;
 pub(crate) use generate_helpers::deduplicated_override;
 use generate_helpers::{
     GeneratedFile, detect_ts_app_types, generate_rust_files, load_local_overrides,
+    resolve_rust_root,
 };
 
 use std::path::Path;
@@ -166,8 +167,8 @@ pub fn run_ts(args: &GenerateArgs) {
 /// Generate and install pre-commit hooks for the detected stacks.
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI output
 fn generate_and_install_hooks(project_path: &Path, has_rust: bool, has_typescript: bool) {
-    let hook_content =
-        crate::domain::modules::pre_commit::build_pre_commit_script(has_rust, has_typescript);
+    let cfg = load_config(project_path);
+    let hook_content = build_hook_content(cfg.as_ref(), has_rust, has_typescript);
 
     let hooks_dir = project_path.join(".githooks");
     let _ = crate::fs::create_dir_all(&hooks_dir);
@@ -202,8 +203,7 @@ pub fn run_hooks(args: &GenerateArgs) {
 
     let has_rust = cfg.as_ref().and_then(|c| c.rust.as_ref()).is_some();
     let has_typescript = cfg.as_ref().and_then(|c| c.typescript.as_ref()).is_some();
-    let hook_content =
-        crate::domain::modules::pre_commit::build_pre_commit_script(has_rust, has_typescript);
+    let hook_content = build_hook_content(cfg.as_ref(), has_rust, has_typescript);
 
     let hooks_dir = project_path.join(".githooks");
     if let Err(e) = crate::fs::create_dir_all(&hooks_dir) {
@@ -269,17 +269,7 @@ fn generate_all_files(
     // Hooks — build script with appropriate duplication sections and workspace root
     let has_rust = cfg.rust.is_some();
     let has_typescript = cfg.typescript.is_some();
-    let rust_workspace_root = cfg
-        .rust
-        .as_ref()
-        .and_then(|r| r.workspace_root.as_deref())
-        .unwrap_or(".");
-    let hook_content =
-        crate::domain::modules::pre_commit::build_pre_commit_script(has_rust, has_typescript)
-            .replace(
-                "GUARDRAIL3_RUST_WORKSPACE:-.}",
-                &format!("GUARDRAIL3_RUST_WORKSPACE:-{rust_workspace_root}}}"),
-            );
+    let hook_content = build_hook_content(Some(cfg), has_rust, has_typescript);
     files.push(GeneratedFile {
         path: ".githooks/pre-commit".to_owned(),
         content: hook_content,
@@ -363,7 +353,7 @@ pub fn generate_expected_ts(project_path: &Path) -> Option<Vec<GeneratedPair>> {
 
     // Include pre-commit hook (same as run_ts)
     let has_rust = cfg.rust.is_some();
-    let hook_content = crate::domain::modules::pre_commit::build_pre_commit_script(has_rust, true);
+    let hook_content = build_hook_content(Some(&cfg), has_rust, true);
     pairs.push((".githooks/pre-commit".to_owned(), hook_content));
 
     Some(pairs)
@@ -380,4 +370,16 @@ pub fn generate_expected(project_path: &Path) -> Option<Vec<GeneratedPair>> {
 
     let files = generate_all_files(project_path, &cfg, &profile);
     Some(files.into_iter().map(|gf| (gf.path, gf.content)).collect())
+}
+
+fn build_hook_content(
+    cfg: Option<&config::types::GuardrailConfig>,
+    has_rust: bool,
+    has_typescript: bool,
+) -> String {
+    let rust_workspace_root = cfg.map_or_else(|| ".".to_owned(), resolve_rust_root);
+    crate::domain::modules::pre_commit::build_pre_commit_script(has_rust, has_typescript).replace(
+        "GUARDRAIL3_RUST_WORKSPACE:-.}",
+        &format!("GUARDRAIL3_RUST_WORKSPACE:-{rust_workspace_root}}}"),
+    )
 }

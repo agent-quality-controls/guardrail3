@@ -16,28 +16,40 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
 
     let mut skip_counts = BTreeMap::<String, usize>::new();
     for entry in skip_entries {
-        let (name, malformed, non_string_reason, reason) = if let Some(crate_field) =
-            entry.get("crate").and_then(toml::Value::as_str)
-        {
-            let reason_value = entry.get("reason");
-            let reason = reason_value.and_then(toml::Value::as_str).map(str::to_owned);
-            let name = crate_field.split('@').next().unwrap_or(crate_field).to_owned();
-            (name, false, reason_value.is_some() && reason.is_none(), reason)
-        } else if let Some(name) = entry.as_str() {
-            (name.to_owned(), false, false, None)
-        } else if let Some(table) = entry.as_table() {
-            let name = table.get("name").and_then(toml::Value::as_str);
-            let reason_value = table.get("reason");
-            let reason = reason_value.and_then(toml::Value::as_str).map(str::to_owned);
-            (
-                name.unwrap_or("unknown").to_owned(),
-                name.is_none(),
-                reason_value.is_some() && reason.is_none(),
-                reason,
-            )
-        } else {
-            ("unknown".to_owned(), true, false, None)
-        };
+        let (name, malformed, non_string_reason, reason) =
+            if let Some(crate_field) = entry.get("crate").and_then(toml::Value::as_str) {
+                let reason_value = entry.get("reason");
+                let reason = reason_value
+                    .and_then(toml::Value::as_str)
+                    .map(str::to_owned);
+                let name = crate_field
+                    .split('@')
+                    .next()
+                    .unwrap_or(crate_field)
+                    .to_owned();
+                (
+                    name,
+                    false,
+                    reason_value.is_some() && reason.is_none(),
+                    reason,
+                )
+            } else if let Some(name) = entry.as_str() {
+                (name.to_owned(), false, false, None)
+            } else if let Some(table) = entry.as_table() {
+                let name = table.get("name").and_then(toml::Value::as_str);
+                let reason_value = table.get("reason");
+                let reason = reason_value
+                    .and_then(toml::Value::as_str)
+                    .map(str::to_owned);
+                (
+                    name.unwrap_or("unknown").to_owned(),
+                    name.is_none(),
+                    reason_value.is_some() && reason.is_none(),
+                    reason,
+                )
+            } else {
+                ("unknown".to_owned(), true, false, None)
+            };
 
         *skip_counts.entry(name.clone()).or_default() += 1;
 
@@ -98,5 +110,5 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_deny_23_skip_hygiene_tests.rs"]
+#[path = "rs_deny_23_skip_hygiene_tests/mod.rs"]
 mod tests;

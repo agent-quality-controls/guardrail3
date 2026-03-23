@@ -6,7 +6,7 @@ const ID: &str = "RS-PUB-04";
 
 pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckResult>) {
     let krate = input.krate;
-    if !krate.publishable {
+    if !krate.publishable || krate.readme_declared_false {
         return;
     }
     results.push(if krate.readme_exists {
@@ -25,7 +25,10 @@ pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckRe
             id: ID.to_owned(),
             severity: Severity::Warn,
             title: format!("{}: README missing", krate.name),
-            message: format!("Publishable crate `{}` is missing README content at `{}`.", krate.name, krate.readme_rel_path),
+            message: format!(
+                "Publishable crate `{}` is missing README content at `{}`.",
+                krate.name, krate.readme_rel_path
+            ),
             file: Some(krate.cargo_rel_path.clone()),
             line: None,
             inventory: false,
@@ -34,5 +37,5 @@ pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckRe
 }
 
 #[cfg(test)]
-#[path = "rs_pub_04_readme_exists_tests.rs"]
+#[path = "rs_pub_04_readme_exists_tests/mod.rs"]
 mod tests;

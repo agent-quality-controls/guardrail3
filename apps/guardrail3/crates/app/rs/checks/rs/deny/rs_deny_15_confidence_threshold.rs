@@ -14,26 +14,37 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
             id: "RS-DENY-15".to_owned(),
             severity: Severity::Warn,
             title: "confidence-threshold weaker than baseline".to_owned(),
-            message: format!("`{}` sets `confidence-threshold = {value}`.", config.rel_path),
+            message: format!(
+                "`{}` sets `confidence-threshold = {value}`.",
+                config.rel_path
+            ),
             file: Some(config.rel_path.clone()),
             line: None,
             inventory: false,
         }),
-        Some(toml::Value::Integer(value)) if (*value as f64) < expected => results.push(CheckResult {
-            id: "RS-DENY-15".to_owned(),
-            severity: Severity::Warn,
-            title: "confidence-threshold weaker than baseline".to_owned(),
-            message: format!("`{}` sets `confidence-threshold = {value}`.", config.rel_path),
-            file: Some(config.rel_path.clone()),
-            line: None,
-            inventory: false,
-        }),
+        Some(toml::Value::Integer(value)) if (*value as f64) < expected => {
+            results.push(CheckResult {
+                id: "RS-DENY-15".to_owned(),
+                severity: Severity::Warn,
+                title: "confidence-threshold weaker than baseline".to_owned(),
+                message: format!(
+                    "`{}` sets `confidence-threshold = {value}`.",
+                    config.rel_path
+                ),
+                file: Some(config.rel_path.clone()),
+                line: None,
+                inventory: false,
+            })
+        }
         Some(toml::Value::Float(value)) if *value > expected => results.push(
             CheckResult {
                 id: "RS-DENY-15".to_owned(),
                 severity: Severity::Info,
                 title: "confidence-threshold stricter than baseline".to_owned(),
-                message: format!("`{}` sets `confidence-threshold = {value}`.", config.rel_path),
+                message: format!(
+                    "`{}` sets `confidence-threshold = {value}`.",
+                    config.rel_path
+                ),
                 file: Some(config.rel_path.clone()),
                 line: None,
                 inventory: false,
@@ -45,7 +56,10 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                 id: "RS-DENY-15".to_owned(),
                 severity: Severity::Info,
                 title: "confidence-threshold stricter than baseline".to_owned(),
-                message: format!("`{}` sets `confidence-threshold = {value}`.", config.rel_path),
+                message: format!(
+                    "`{}` sets `confidence-threshold = {value}`.",
+                    config.rel_path
+                ),
                 file: Some(config.rel_path.clone()),
                 line: None,
                 inventory: false,
@@ -57,7 +71,10 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
             id: "RS-DENY-15".to_owned(),
             severity: Severity::Warn,
             title: "confidence-threshold missing or invalid".to_owned(),
-            message: format!("`{}` must set `confidence-threshold >= 0.8`.", config.rel_path),
+            message: format!(
+                "`{}` must set `confidence-threshold >= 0.8`.",
+                config.rel_path
+            ),
             file: Some(config.rel_path.clone()),
             line: None,
             inventory: false,
@@ -66,5 +83,5 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_deny_15_confidence_threshold_tests.rs"]
+#[path = "rs_deny_15_confidence_threshold_tests/mod.rs"]
 mod tests;

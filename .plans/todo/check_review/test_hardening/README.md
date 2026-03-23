@@ -20,6 +20,12 @@ The purpose is not to “add more tests”. The purpose is to make every rule ha
 - `14-clippy-deny-agent-brief.md`
 - `15-hooks-agent-brief.md`
   - droppable per-family agent packets
+- `16-hexarch-execution-plan.md`
+  - exhaustive step-by-step implementation order for the full `rs/hexarch` hardening pass
+- `17-hooks-execution-plan.md`
+  - exhaustive step-by-step implementation order for the full hook migration and hardening pass
+- `18-hooks-coverage-matrix.md`
+  - old-to-new hook rule mapping, routing impacts, and canonical migrated module location
 - `01-hexarch.md`
   - highest-risk structural family
 - `02-code.md`

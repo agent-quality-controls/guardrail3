@@ -1,7 +1,7 @@
 use crate::domain::report::Severity;
 
-use super::check;
 use super::super::test_support::tool_input;
+use super::check;
 
 #[test]
 fn inventories_installed_tool() {

@@ -31,5 +31,5 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_release_01_license_file_tests.rs"]
+#[path = "rs_release_01_license_file_tests/mod.rs"]
 mod tests;

@@ -33,5 +33,5 @@ pub fn check(input: &ContainerHexarchInput<'_>, results: &mut Vec<CheckResult>) 
 }
 
 #[cfg(test)]
-#[path = "rs_hexarch_04_loose_files_tests.rs"]
+#[path = "rs_hexarch_04_loose_files_tests/mod.rs"]
 mod tests;

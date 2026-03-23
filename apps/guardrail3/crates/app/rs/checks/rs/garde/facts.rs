@@ -5,7 +5,7 @@ use crate::domain::config::types::GuardrailConfig;
 use crate::domain::project_tree::ProjectTree;
 
 use super::discover::{is_test_path, rust_file_rels};
-use super::parse::{analyze, parse_rust_file, BoundaryKind};
+use super::parse::{BoundaryKind, analyze, parse_rust_file};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PolicyRootKind {
@@ -114,8 +114,18 @@ pub fn collect(tree: &ProjectTree) -> GardeFacts {
         .map(|facts| facts.rel_dir.clone())
         .collect();
 
-    let policy_map = read_policy_map(tree, &cargo_roots, &standalone_package_roots, &mut input_failures);
-    let clippy_configs = collect_clippy_configs(tree, &workspace_roots, &standalone_package_roots, &mut input_failures);
+    let policy_map = read_policy_map(
+        tree,
+        &cargo_roots,
+        &standalone_package_roots,
+        &mut input_failures,
+    );
+    let clippy_configs = collect_clippy_configs(
+        tree,
+        &workspace_roots,
+        &standalone_package_roots,
+        &mut input_failures,
+    );
 
     let mut roots = Vec::new();
     for rel_dir in workspace_roots {
@@ -166,7 +176,9 @@ pub fn collect(tree: &ProjectTree) -> GardeFacts {
             Err(read_error) => {
                 input_failures.push(GardeInputFailureFacts {
                     rel_path: rel_path.clone(),
-                    message: format!("Failed to read Rust source file for garde checks: {read_error}"),
+                    message: format!(
+                        "Failed to read Rust source file for garde checks: {read_error}"
+                    ),
                 });
                 continue;
             }
@@ -176,7 +188,9 @@ pub fn collect(tree: &ProjectTree) -> GardeFacts {
             Err(parse_error) => {
                 input_failures.push(GardeInputFailureFacts {
                     rel_path: rel_path.clone(),
-                    message: format!("Failed to parse Rust source file for garde checks: {parse_error}"),
+                    message: format!(
+                        "Failed to parse Rust source file for garde checks: {parse_error}"
+                    ),
                 });
                 continue;
             }
@@ -208,7 +222,9 @@ pub fn collect(tree: &ProjectTree) -> GardeFacts {
                 has_validate: target.has_validate_derive,
             };
             match target.boundary_kind {
-                BoundaryKind::Struct if target.has_non_primitive_fields => struct_targets.push(fact),
+                BoundaryKind::Struct if target.has_non_primitive_fields => {
+                    struct_targets.push(fact)
+                }
                 BoundaryKind::Enum if target.has_non_primitive_fields => enum_targets.push(fact),
                 _ => {}
             }
@@ -219,7 +235,11 @@ pub fn collect(tree: &ProjectTree) -> GardeFacts {
                 .type_validation_map
                 .get(&manual_impl.type_name)
                 .copied()
-                .or_else(|| global_type_validation_map.get(&manual_impl.type_name).copied())
+                .or_else(|| {
+                    global_type_validation_map
+                        .get(&manual_impl.type_name)
+                        .copied()
+                })
                 .or_else(|| {
                     let simple_name = manual_impl
                         .type_name
@@ -233,9 +253,12 @@ pub fn collect(tree: &ProjectTree) -> GardeFacts {
                         None
                     }
                 });
-            let has_manual_validate = parsed.manual_validate_impls.contains(&manual_impl.type_name);
+            let has_manual_validate = parsed
+                .manual_validate_impls
+                .contains(&manual_impl.type_name);
             let needs_validate = resolved.map_or(true, |(has_non_primitive, _)| has_non_primitive);
-            let has_validate = resolved.is_some_and(|(_, has_validate)| has_validate) || has_manual_validate;
+            let has_validate =
+                resolved.is_some_and(|(_, has_validate)| has_validate) || has_manual_validate;
             manual_deserialize_impls.push(ManualDeserializeImplFacts {
                 rel_path: rel_path.clone(),
                 line: manual_impl.line,
@@ -287,7 +310,9 @@ fn collect_cargo_roots(
             } else {
                 ProjectTree::join_rel(&rel_dir, "Cargo.toml")
             };
-            let parsed = tree.file_content(&rel_path).map(|content| toml::from_str::<toml::Value>(content));
+            let parsed = tree
+                .file_content(&rel_path)
+                .map(|content| toml::from_str::<toml::Value>(content));
             let facts = match parsed {
                 Some(Ok(parsed)) => CargoRootFacts {
                     rel_dir: rel_dir.clone(),
@@ -298,7 +323,9 @@ fn collect_cargo_roots(
                 Some(Err(parse_error)) => {
                     input_failures.push(GardeInputFailureFacts {
                         rel_path: rel_path.clone(),
-                        message: format!("Failed to parse Cargo.toml for garde root discovery: {parse_error}"),
+                        message: format!(
+                            "Failed to parse Cargo.toml for garde root discovery: {parse_error}"
+                        ),
                     });
                     CargoRootFacts {
                         rel_dir: rel_dir.clone(),
@@ -360,16 +387,18 @@ fn read_policy_map(
     input_failures: &mut Vec<GardeInputFailureFacts>,
 ) -> BTreeMap<String, PolicySettings> {
     let parsed = match tree.file_content("guardrail3.toml") {
-        Some(content) => match toml::from_str::<GuardrailConfig>(content) {
-            Ok(parsed) => Some(parsed),
-            Err(parse_error) => {
-                input_failures.push(GardeInputFailureFacts {
+        Some(content) => {
+            match toml::from_str::<GuardrailConfig>(content) {
+                Ok(parsed) => Some(parsed),
+                Err(parse_error) => {
+                    input_failures.push(GardeInputFailureFacts {
                     rel_path: "guardrail3.toml".to_owned(),
                     message: format!("Failed to parse guardrail3.toml for garde policy resolution: {parse_error}"),
                 });
-                None
+                    None
+                }
             }
-        },
+        }
         None => None,
     };
 
@@ -403,12 +432,7 @@ fn read_policy_map(
             .and_then(crate_checks)
             .and_then(|checks| checks.garde)
             .unwrap_or(default_garde);
-        let _ = map.insert(
-            app_dir,
-            PolicySettings {
-                garde_enabled,
-            },
-        );
+        let _ = map.insert(app_dir, PolicySettings { garde_enabled });
     }
 
     if let Some(packages_cfg) = parsed
@@ -420,12 +444,7 @@ fn read_policy_map(
             .and_then(|checks| checks.garde)
             .unwrap_or(default_garde);
         for package_dir in standalone_package_roots {
-            let _ = map.insert(
-                package_dir.clone(),
-                PolicySettings {
-                    garde_enabled,
-                },
-            );
+            let _ = map.insert(package_dir.clone(), PolicySettings { garde_enabled });
         }
     }
 
@@ -455,14 +474,22 @@ fn collect_clippy_configs(
         }
         for rel_dir in tree.dirs_with_file(file_name) {
             if allowed_policy_roots.contains(&rel_dir) {
-                candidates.push(parse_clippy_candidate(tree, &rel_dir, file_name, input_failures));
+                candidates.push(parse_clippy_candidate(
+                    tree,
+                    &rel_dir,
+                    file_name,
+                    input_failures,
+                ));
             }
         }
     }
 
     let mut by_dir = BTreeMap::<String, Vec<ClippyConfigCandidate>>::new();
     for candidate in candidates {
-        by_dir.entry(candidate.rel_dir.clone()).or_default().push(candidate);
+        by_dir
+            .entry(candidate.rel_dir.clone())
+            .or_default()
+            .push(candidate);
     }
 
     let mut deduped = Vec::new();
@@ -486,7 +513,9 @@ fn parse_clippy_candidate(
         Some(content) => match toml::from_str::<toml::Value>(content) {
             Ok(parsed) => (Some(parsed), None),
             Err(parse_error) => {
-                let message = format!("Failed to parse `{rel_path}` for garde clippy-ban validation: {parse_error}");
+                let message = format!(
+                    "Failed to parse `{rel_path}` for garde clippy-ban validation: {parse_error}"
+                );
                 input_failures.push(GardeInputFailureFacts {
                     rel_path: rel_path.clone(),
                     message: message.clone(),

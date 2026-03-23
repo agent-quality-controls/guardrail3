@@ -23,7 +23,9 @@ pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckRe
             id: ID.to_owned(),
             severity: Severity::Warn,
             title: format!("{}: too many keywords", krate.name),
-            message: format!("`[package].keywords` has {count} entries; crates.io allows at most 5."),
+            message: format!(
+                "`[package].keywords` has {count} entries; crates.io allows at most 5."
+            ),
             file: Some(krate.cargo_rel_path.clone()),
             line: None,
             inventory: false,
@@ -44,5 +46,5 @@ pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckRe
 }
 
 #[cfg(test)]
-#[path = "rs_pub_06_keywords_present_tests.rs"]
+#[path = "rs_pub_06_keywords_present_tests/mod.rs"]
 mod tests;

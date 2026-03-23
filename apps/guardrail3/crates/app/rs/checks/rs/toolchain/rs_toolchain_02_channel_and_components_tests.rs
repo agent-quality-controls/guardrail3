@@ -69,9 +69,10 @@ fn errors_on_parse_failure() {
 
 #[test]
 fn warns_when_required_component_is_missing() {
-    let parsed =
-        toml::from_str::<toml::Value>("[toolchain]\nchannel = \"stable\"\ncomponents = [\"clippy\"]")
-            .expect("valid TOML");
+    let parsed = toml::from_str::<toml::Value>(
+        "[toolchain]\nchannel = \"stable\"\ncomponents = [\"clippy\"]",
+    )
+    .expect("valid TOML");
     let input = ToolchainRootInput {
         toolchain_toml_rel: Some("rust-toolchain.toml"),
         legacy_toolchain_rel: None,
@@ -176,8 +177,8 @@ fn warns_when_channel_is_missing() {
 
 #[test]
 fn warns_when_components_array_is_missing() {
-    let parsed = toml::from_str::<toml::Value>("[toolchain]\nchannel = \"stable\"")
-        .expect("valid TOML");
+    let parsed =
+        toml::from_str::<toml::Value>("[toolchain]\nchannel = \"stable\"").expect("valid TOML");
     let input = ToolchainRootInput {
         toolchain_toml_rel: Some("rust-toolchain.toml"),
         legacy_toolchain_rel: None,

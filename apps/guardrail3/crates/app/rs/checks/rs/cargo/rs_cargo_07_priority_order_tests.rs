@@ -73,7 +73,10 @@ fn negative_specific_lint_priority_is_warned() {
     assert_eq!(result.id, "RS-CARGO-07");
     assert!(!result.inventory);
     assert_eq!(result.severity, Severity::Warn);
-    assert_eq!(result.title, "specific lint `unwrap_used` has negative priority");
+    assert_eq!(
+        result.title,
+        "specific lint `unwrap_used` has negative priority"
+    );
     assert_eq!(
         result.message,
         "Specific clippy denies should keep default priority so groups do not override them."

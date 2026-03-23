@@ -52,10 +52,7 @@ pub fn check(tree: &ProjectTree) -> Vec<CheckResult> {
         rs_deny_01_coverage::check_covered(&CoveredRustUnitInput::new(covered), &mut results);
     }
     for uncovered in &facts.uncovered_units {
-        rs_deny_01_coverage::check_uncovered(
-            &UncoveredRustUnitInput::new(uncovered),
-            &mut results,
-        );
+        rs_deny_01_coverage::check_uncovered(&UncoveredRustUnitInput::new(uncovered), &mut results);
     }
     for forbidden in &facts.forbidden_configs {
         rs_deny_02_allowed_locations::check(

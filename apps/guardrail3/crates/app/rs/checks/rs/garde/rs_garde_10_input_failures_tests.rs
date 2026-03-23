@@ -44,7 +44,10 @@ members = []
 garde = { version = "0.22", features = ["derive"] }
 "#,
             ),
-            ("clippy.toml", "disallowed-methods = []\ndisallowed-types = []\n"),
+            (
+                "clippy.toml",
+                "disallowed-methods = []\ndisallowed-types = []\n",
+            ),
             ("guardrail3.toml", "[profile]\nname = \"service\"\n"),
         ],
         root.clone(),
@@ -54,7 +57,9 @@ garde = { version = "0.22", features = ["derive"] }
     assert!(has_result(&results, "RS-GARDE-10", |result| {
         result.severity == Severity::Error
             && result.file.as_deref() == Some(source_rel)
-            && result.message.contains("Failed to parse Rust source file for garde checks")
+            && result
+                .message
+                .contains("Failed to parse Rust source file for garde checks")
     }));
 
     std::fs::remove_dir_all(root).expect("cleanup");

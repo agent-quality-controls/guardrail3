@@ -25,7 +25,8 @@ pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckRe
             id: ID.to_owned(),
             severity: Severity::Warn,
             title: format!("{}: missing binstall metadata", krate.name),
-            message: "Publishable binary crates should set `[package.metadata.binstall]`.".to_owned(),
+            message: "Publishable binary crates should set `[package.metadata.binstall]`."
+                .to_owned(),
             file: Some(krate.cargo_rel_path.clone()),
             line: None,
             inventory: false,
@@ -34,5 +35,5 @@ pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckRe
 }
 
 #[cfg(test)]
-#[path = "rs_bin_03_binstall_metadata_tests.rs"]
+#[path = "rs_bin_03_binstall_metadata_tests/mod.rs"]
 mod tests;

@@ -4,7 +4,12 @@ use super::deny_support::{
     known_section_keys, known_top_level_keys, parse_feature_entries_in_config, section,
 };
 
-fn warn_unknown_key(results: &mut Vec<CheckResult>, rel_path: &str, title: String, message: String) {
+fn warn_unknown_key(
+    results: &mut Vec<CheckResult>,
+    rel_path: &str,
+    title: String,
+    message: String,
+) {
     results.push(CheckResult {
         id: "RS-DENY-28".to_owned(),
         severity: Severity::Warn,
@@ -46,7 +51,10 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                             results,
                             &config.rel_path,
                             format!("unknown {section_name} key"),
-                            format!("`{}` uses unknown `[{section_name}].{key}`.", config.rel_path),
+                            format!(
+                                "`{}` uses unknown `[{section_name}].{key}`.",
+                                config.rel_path
+                            ),
                         );
                     }
                 }
@@ -64,7 +72,10 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                     results,
                     &config.rel_path,
                     "unknown licenses.private key".to_owned(),
-                    format!("`{}` uses unknown `[licenses.private].{key}`.", config.rel_path),
+                    format!(
+                        "`{}` uses unknown `[licenses.private].{key}`.",
+                        config.rel_path
+                    ),
                 );
             }
         }
@@ -145,12 +156,15 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                 results,
                 &config.rel_path,
                 "unknown feature-ban key".to_owned(),
-                format!("`{}` uses unknown `[[bans.features]].{key}`.", config.rel_path),
+                format!(
+                    "`{}` uses unknown `[[bans.features]].{key}`.",
+                    config.rel_path
+                ),
             );
         }
     }
 }
 
 #[cfg(test)]
-#[path = "rs_deny_28_unknown_keys_tests.rs"]
+#[path = "rs_deny_28_unknown_keys_tests/mod.rs"]
 mod tests;

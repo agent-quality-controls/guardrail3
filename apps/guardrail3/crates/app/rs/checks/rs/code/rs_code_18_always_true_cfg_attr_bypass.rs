@@ -23,5 +23,5 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_code_18_always_true_cfg_attr_bypass_tests.rs"]
+#[path = "rs_code_18_always_true_cfg_attr_bypass_tests/mod.rs"]
 mod tests;

@@ -1,7 +1,7 @@
 use crate::domain::report::Severity;
 
-use super::check;
 use super::super::test_support::hook_input;
+use super::check;
 
 #[test]
 fn warns_when_no_hook_matches() {

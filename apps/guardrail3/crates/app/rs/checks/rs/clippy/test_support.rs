@@ -1,9 +1,15 @@
 use std::collections::BTreeMap;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
-use super::facts::{collect, ClippyFacts};
-use super::inputs::{ConfigClippyInput, CoveredRustUnitInput, UncoveredRustUnitInput};
+use super::facts::{ClippyFacts, collect};
+use super::inputs::ConfigClippyInput;
+use crate::adapters::outbound::fs::RealFileSystem;
+use crate::app::core::project_walker::walk_project;
+use crate::domain::modules::clippy::build_clippy_toml;
 use crate::domain::project_tree::{DirEntry, ProjectTree};
+use crate::domain::report::CheckResult;
+
+const GOLDEN_REL: &str = "tests/fixtures/r_arch_01/golden";
 
 pub fn dir_entry(dirs: &[&str], files: &[&str]) -> DirEntry {
     DirEntry {
@@ -12,10 +18,7 @@ pub fn dir_entry(dirs: &[&str], files: &[&str]) -> DirEntry {
     }
 }
 
-pub fn project_tree(
-    structure: Vec<(&str, DirEntry)>,
-    content: Vec<(&str, String)>,
-) -> ProjectTree {
+pub fn project_tree(structure: Vec<(&str, DirEntry)>, content: Vec<(&str, String)>) -> ProjectTree {
     ProjectTree {
         root: PathBuf::from("/tmp/project"),
         structure: structure
@@ -33,6 +36,29 @@ pub fn collected_facts(tree: &ProjectTree) -> ClippyFacts {
     collect(tree)
 }
 
+pub fn fixture_root() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(GOLDEN_REL)
+}
+
+pub fn copy_fixture() -> tempfile::TempDir {
+    let tmp = tempfile::tempdir().expect("create tempdir");
+    copy_dir_recursive(&fixture_root(), tmp.path());
+    tmp
+}
+
+pub fn write_file(root: &Path, rel: &str, content: &str) {
+    let path = root.join(rel);
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent).expect("create parent");
+    }
+    std::fs::write(path, content).expect("write file");
+}
+
+pub fn run_family(root: &Path) -> Vec<CheckResult> {
+    let tree = walk_project(&RealFileSystem, root);
+    super::check(&tree)
+}
+
 pub fn config_input<'a>(facts: &'a ClippyFacts, rel_path: &str) -> ConfigClippyInput<'a> {
     let config = facts
         .allowed_configs
@@ -40,24 +66,6 @@ pub fn config_input<'a>(facts: &'a ClippyFacts, rel_path: &str) -> ConfigClippyI
         .find(|config| config.rel_path == rel_path)
         .expect("expected clippy config facts");
     ConfigClippyInput::new(config)
-}
-
-pub fn covered_input<'a>(facts: &'a ClippyFacts, rel_dir: &str) -> CoveredRustUnitInput<'a> {
-    let covered = facts
-        .covered_units
-        .iter()
-        .find(|covered| covered.rel_dir == rel_dir)
-        .expect("expected covered clippy unit facts");
-    CoveredRustUnitInput::new(covered)
-}
-
-pub fn uncovered_input<'a>(facts: &'a ClippyFacts, rel_dir: &str) -> UncoveredRustUnitInput<'a> {
-    let uncovered = facts
-        .uncovered_units
-        .iter()
-        .find(|unit| unit.rel_dir == rel_dir)
-        .expect("expected uncovered clippy unit facts");
-    UncoveredRustUnitInput::new(uncovered)
 }
 
 pub fn root_workspace_tree(clippy_toml: impl Into<String>) -> ProjectTree {
@@ -87,39 +95,14 @@ pub fn root_workspace_tree_with_guardrail(
     )
 }
 
-pub fn root_coverage_tree() -> ProjectTree {
-    project_tree(
-        vec![
-            ("", dir_entry(&["workspace", "standalone"], &["clippy.toml"])),
-            ("workspace", dir_entry(&["crates"], &["Cargo.toml"])),
-            ("workspace/crates", dir_entry(&["api"], &[])),
-            ("workspace/crates/api", dir_entry(&[], &["Cargo.toml"])),
-            ("standalone", dir_entry(&[], &["Cargo.toml"])),
-        ],
-        vec![
-            ("workspace/Cargo.toml", "[workspace]\nmembers = [\"crates/*\"]".to_owned()),
-            ("workspace/crates/api/Cargo.toml", "[package]\nname = \"api\"".to_owned()),
-            ("standalone/Cargo.toml", "[package]\nname = \"standalone\"".to_owned()),
-            ("clippy.toml", canonical_clippy_toml().to_owned()),
-        ],
-    )
-}
-
-pub fn uncovered_standalone_tree() -> ProjectTree {
-    project_tree(
-        vec![
-            ("", dir_entry(&["standalone"], &[])),
-            ("standalone", dir_entry(&[], &["Cargo.toml"])),
-        ],
-        vec![("standalone/Cargo.toml", "[package]\nname = \"standalone\"".to_owned())],
-    )
-}
-
 pub fn nested_workspace_member_shadow_tree(file_name: &str) -> ProjectTree {
     project_tree(
         vec![
             ("", dir_entry(&["workspace"], &[])),
-            ("workspace", dir_entry(&["crates"], &["Cargo.toml", "clippy.toml"])),
+            (
+                "workspace",
+                dir_entry(&["crates"], &["Cargo.toml", "clippy.toml"]),
+            ),
             ("workspace/crates", dir_entry(&["core"], &[])),
             (
                 "workspace/crates/core",
@@ -127,8 +110,14 @@ pub fn nested_workspace_member_shadow_tree(file_name: &str) -> ProjectTree {
             ),
         ],
         vec![
-            ("workspace/Cargo.toml", "[workspace]\nmembers = [\"crates/*\"]".to_owned()),
-            ("workspace/crates/core/Cargo.toml", "[package]\nname = \"core\"".to_owned()),
+            (
+                "workspace/Cargo.toml",
+                "[workspace]\nmembers = [\"crates/*\"]".to_owned(),
+            ),
+            (
+                "workspace/crates/core/Cargo.toml",
+                "[package]\nname = \"core\"".to_owned(),
+            ),
             ("workspace/clippy.toml", canonical_clippy_toml().to_owned()),
             (
                 &format!("workspace/crates/core/{file_name}"),
@@ -156,13 +145,22 @@ pub fn incomplete_workspace_policy_root_tree() -> ProjectTree {
     project_tree(
         vec![
             ("", dir_entry(&["workspace"], &["clippy.toml"])),
-            ("workspace", dir_entry(&["crates"], &["Cargo.toml", "clippy.toml"])),
+            (
+                "workspace",
+                dir_entry(&["crates"], &["Cargo.toml", "clippy.toml"]),
+            ),
             ("workspace/crates", dir_entry(&["core"], &[])),
             ("workspace/crates/core", dir_entry(&[], &["Cargo.toml"])),
         ],
         vec![
-            ("workspace/Cargo.toml", "[workspace]\nmembers = [\"crates/*\"]".to_owned()),
-            ("workspace/crates/core/Cargo.toml", "[package]\nname = \"core\"".to_owned()),
+            (
+                "workspace/Cargo.toml",
+                "[workspace]\nmembers = [\"crates/*\"]".to_owned(),
+            ),
+            (
+                "workspace/crates/core/Cargo.toml",
+                "[package]\nname = \"core\"".to_owned(),
+            ),
             ("clippy.toml", canonical_clippy_toml().to_owned()),
             (
                 "workspace/clippy.toml",
@@ -181,7 +179,10 @@ disallowed-macros = []
 pub fn library_workspace_root_tree(local_clippy_toml: impl Into<String>) -> ProjectTree {
     project_tree(
         vec![
-            ("", dir_entry(&["apps"], &["guardrail3.toml", "clippy.toml"])),
+            (
+                "",
+                dir_entry(&["apps"], &["guardrail3.toml", "clippy.toml"]),
+            ),
             ("apps", dir_entry(&["libsite"], &[])),
             (
                 "apps/libsite",
@@ -195,8 +196,14 @@ pub fn library_workspace_root_tree(local_clippy_toml: impl Into<String>) -> Proj
                 "guardrail3.toml",
                 "[profile]\nname = \"service\"\n[rust.apps.libsite]\ntype = \"library\"".to_owned(),
             ),
-            ("apps/libsite/Cargo.toml", "[workspace]\nmembers = [\"crates/*\"]".to_owned()),
-            ("apps/libsite/crates/core/Cargo.toml", "[package]\nname = \"core\"".to_owned()),
+            (
+                "apps/libsite/Cargo.toml",
+                "[workspace]\nmembers = [\"crates/*\"]".to_owned(),
+            ),
+            (
+                "apps/libsite/crates/core/Cargo.toml",
+                "[package]\nname = \"core\"".to_owned(),
+            ),
             ("clippy.toml", canonical_clippy_toml().to_owned()),
             ("apps/libsite/clippy.toml", local_clippy_toml.into()),
         ],
@@ -230,75 +237,53 @@ pub fn garde_disabled_root_tree(clippy_toml: impl Into<String>) -> ProjectTree {
     )
 }
 
-pub fn canonical_clippy_toml() -> &'static str {
-    r#"
-too-many-lines-threshold = 75
-cognitive-complexity-threshold = 15
-too-many-arguments-threshold = 7
-type-complexity-threshold = 75
-max-struct-bools = 3
-max-fn-params-bools = 3
-excessive-nesting-threshold = 4
-avoid-breaking-exported-api = false
-allow-dbg-in-tests = false
-allow-print-in-tests = false
-
-disallowed-methods = [
-    { path = "std::env::var", reason = "good enough reason text" },
-    { path = "std::env::var_os", reason = "good enough reason text" },
-    { path = "std::env::vars", reason = "good enough reason text" },
-    { path = "std::env::set_var", reason = "good enough reason text" },
-    { path = "std::env::remove_var", reason = "good enough reason text" },
-    { path = "std::process::exit", reason = "good enough reason text" },
-    { path = "std::process::abort", reason = "good enough reason text" },
-    { path = "std::process::Command::new", reason = "good enough reason text" },
-    { path = "std::thread::sleep", reason = "good enough reason text" },
-    { path = "std::fs::read_to_string", reason = "good enough reason text" },
-    { path = "std::fs::read", reason = "good enough reason text" },
-    { path = "std::fs::read_dir", reason = "good enough reason text" },
-    { path = "std::fs::read_link", reason = "good enough reason text" },
-    { path = "std::fs::write", reason = "good enough reason text" },
-    { path = "std::fs::remove_file", reason = "good enough reason text" },
-    { path = "std::fs::remove_dir_all", reason = "good enough reason text" },
-    { path = "std::fs::create_dir_all", reason = "good enough reason text" },
-    { path = "std::fs::rename", reason = "good enough reason text" },
-    { path = "std::fs::copy", reason = "good enough reason text" },
-    { path = "std::fs::metadata", reason = "good enough reason text" },
-    { path = "std::fs::symlink_metadata", reason = "good enough reason text" },
-    { path = "std::fs::canonicalize", reason = "good enough reason text" },
-    { path = "std::fs::set_permissions", reason = "good enough reason text" },
-    { path = "std::fs::hard_link", reason = "good enough reason text" },
-    { path = "reqwest::Client::new", reason = "good enough reason text" },
-    { path = "reqwest::Client::builder", reason = "good enough reason text" },
-    { path = "serde_json::from_str", reason = "good enough reason text" },
-    { path = "serde_json::from_slice", reason = "good enough reason text" },
-    { path = "serde_json::from_value", reason = "good enough reason text" },
-    { path = "serde_json::from_reader", reason = "good enough reason text" },
-    { path = "reqwest::Response::json", reason = "good enough reason text" },
-    { path = "toml::from_str", reason = "good enough reason text" },
-    { path = "serde_yaml::from_str", reason = "good enough reason text" },
-    { path = "serde_yaml::from_reader", reason = "good enough reason text" },
-]
-
-disallowed-types = [
-    { path = "std::collections::HashMap", reason = "good enough reason text" },
-    { path = "std::collections::HashSet", reason = "good enough reason text" },
-    { path = "std::sync::Mutex", reason = "good enough reason text" },
-    { path = "std::sync::RwLock", reason = "good enough reason text" },
-    { path = "std::fs::File", reason = "good enough reason text" },
-    { path = "axum::extract::Json", reason = "good enough reason text" },
-    { path = "axum::Json", reason = "good enough reason text" },
-    { path = "axum::extract::Query", reason = "good enough reason text" },
-    { path = "axum::extract::Form", reason = "good enough reason text" },
-    { path = "std::any::Any", reason = "good enough reason text" },
-]
-
-disallowed-macros = [
-    { path = "println", reason = "good enough reason text" },
-    { path = "eprintln", reason = "good enough reason text" },
-    { path = "dbg", reason = "good enough reason text" },
-    { path = "todo", reason = "good enough reason text" },
-    { path = "unimplemented", reason = "good enough reason text" },
-]
-"#
+pub fn canonical_clippy_toml() -> String {
+    build_clippy_toml("service", false, true, "", "")
 }
+
+pub fn remove_ban_path(clippy_toml: &str, key: &str, path: &str) -> String {
+    let mut parsed = toml::from_str::<toml::Value>(clippy_toml).expect("valid clippy TOML");
+    let entries = parsed
+        .get_mut(key)
+        .and_then(toml::Value::as_array_mut)
+        .expect("expected ban array");
+    entries.retain(|entry| {
+        entry
+            .get("path")
+            .and_then(toml::Value::as_str)
+            .or_else(|| entry.as_str())
+            != Some(path)
+    });
+    toml::to_string(&parsed).expect("serialize clippy TOML")
+}
+
+pub fn prepend_ban_path(clippy_toml: &str, key: &str, path: &str, reason: &str) -> String {
+    let mut parsed = toml::from_str::<toml::Value>(clippy_toml).expect("valid clippy TOML");
+    let entries = parsed
+        .get_mut(key)
+        .and_then(toml::Value::as_array_mut)
+        .expect("expected ban array");
+    let mut entry = toml::map::Map::new();
+    let _ = entry.insert("path".to_owned(), toml::Value::String(path.to_owned()));
+    let _ = entry.insert("reason".to_owned(), toml::Value::String(reason.to_owned()));
+    entries.insert(0, toml::Value::Table(entry));
+    toml::to_string(&parsed).expect("serialize clippy TOML")
+}
+
+fn copy_dir_recursive(src: &Path, dst: &Path) {
+    for entry in std::fs::read_dir(src).expect("read fixture dir") {
+        let entry = entry.expect("read entry");
+        let src_path = entry.path();
+        let dst_path = dst.join(entry.file_name());
+        if src_path.is_dir() {
+            std::fs::create_dir_all(&dst_path).expect("create dst dir");
+            copy_dir_recursive(&src_path, &dst_path);
+        } else {
+            let _ = std::fs::copy(&src_path, &dst_path).expect("copy fixture file");
+        }
+    }
+}
+
+#[cfg(test)]
+#[path = "clippy_test_support_tests.rs"]
+mod tests;

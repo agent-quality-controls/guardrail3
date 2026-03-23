@@ -122,7 +122,8 @@ impl<'ast> Visit<'ast> for GardeVisitor {
             });
         }
 
-        let _ = self.type_validation_map
+        let _ = self
+            .type_validation_map
             .insert(name, (has_non_primitive_fields, has_validate));
 
         syn::visit::visit_item_struct(self, item);
@@ -151,7 +152,8 @@ impl<'ast> Visit<'ast> for GardeVisitor {
             });
         }
 
-        let _ = self.type_validation_map
+        let _ = self
+            .type_validation_map
             .insert(name, (has_non_primitive_fields, has_validate));
 
         syn::visit::visit_item_enum(self, item);
@@ -191,7 +193,11 @@ impl<'ast> Visit<'ast> for GardeVisitor {
 
     fn visit_macro(&mut self, mac: &'ast syn::Macro) {
         let macro_name = path_to_string(&mac.path);
-        let tail = mac.path.segments.last().map(|segment| segment.ident.to_string());
+        let tail = mac
+            .path
+            .segments
+            .last()
+            .map(|segment| segment.ident.to_string());
         if tail.as_deref().is_some_and(|name| {
             name == "query_as"
                 || name == "query_as_unchecked"
@@ -253,7 +259,10 @@ fn is_validate_derive(macro_name: &str) -> bool {
 
 fn struct_has_non_primitive_fields(item: &syn::ItemStruct) -> bool {
     match &item.fields {
-        syn::Fields::Named(fields) => fields.named.iter().any(|field| type_needs_validation(&field.ty)),
+        syn::Fields::Named(fields) => fields
+            .named
+            .iter()
+            .any(|field| type_needs_validation(&field.ty)),
         syn::Fields::Unnamed(fields) => fields
             .unnamed
             .iter()
@@ -264,7 +273,10 @@ fn struct_has_non_primitive_fields(item: &syn::ItemStruct) -> bool {
 
 fn enum_has_non_primitive_fields(item: &syn::ItemEnum) -> bool {
     item.variants.iter().any(|variant| match &variant.fields {
-        syn::Fields::Named(fields) => fields.named.iter().any(|field| type_needs_validation(&field.ty)),
+        syn::Fields::Named(fields) => fields
+            .named
+            .iter()
+            .any(|field| type_needs_validation(&field.ty)),
         syn::Fields::Unnamed(fields) => fields
             .unnamed
             .iter()
@@ -382,7 +394,12 @@ fn collect_use_aliases(
         }
         syn::UseTree::Group(group) => {
             for item in &group.items {
-                collect_use_aliases(item, deserialize_aliases, validate_aliases, query_as_aliases);
+                collect_use_aliases(
+                    item,
+                    deserialize_aliases,
+                    validate_aliases,
+                    query_as_aliases,
+                );
             }
         }
         _ => {}

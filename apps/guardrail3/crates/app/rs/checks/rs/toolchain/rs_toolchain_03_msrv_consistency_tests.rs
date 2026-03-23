@@ -5,9 +5,10 @@ use super::check;
 
 #[test]
 fn warns_when_pinned_toolchain_is_older_than_msrv() {
-    let parsed =
-        toml::from_str::<toml::Value>("[toolchain]\nchannel = \"1.84.0\"\ncomponents = [\"clippy\", \"rustfmt\"]")
-            .expect("valid TOML");
+    let parsed = toml::from_str::<toml::Value>(
+        "[toolchain]\nchannel = \"1.84.0\"\ncomponents = [\"clippy\", \"rustfmt\"]",
+    )
+    .expect("valid TOML");
     let input = ToolchainRootInput {
         toolchain_toml_rel: Some("rust-toolchain.toml"),
         legacy_toolchain_rel: None,
@@ -33,9 +34,10 @@ fn warns_when_pinned_toolchain_is_older_than_msrv() {
 
 #[test]
 fn inventories_when_pinned_toolchain_satisfies_msrv() {
-    let parsed =
-        toml::from_str::<toml::Value>("[toolchain]\nchannel = \"1.85.1\"\ncomponents = [\"clippy\", \"rustfmt\"]")
-            .expect("valid TOML");
+    let parsed = toml::from_str::<toml::Value>(
+        "[toolchain]\nchannel = \"1.85.1\"\ncomponents = [\"clippy\", \"rustfmt\"]",
+    )
+    .expect("valid TOML");
     let input = ToolchainRootInput {
         toolchain_toml_rel: Some("rust-toolchain.toml"),
         legacy_toolchain_rel: None,
@@ -62,9 +64,10 @@ fn inventories_when_pinned_toolchain_satisfies_msrv() {
 
 #[test]
 fn inventories_when_msrv_is_missing() {
-    let parsed =
-        toml::from_str::<toml::Value>("[toolchain]\nchannel = \"1.85.1\"\ncomponents = [\"clippy\", \"rustfmt\"]")
-            .expect("valid TOML");
+    let parsed = toml::from_str::<toml::Value>(
+        "[toolchain]\nchannel = \"1.85.1\"\ncomponents = [\"clippy\", \"rustfmt\"]",
+    )
+    .expect("valid TOML");
     let input = ToolchainRootInput {
         toolchain_toml_rel: Some("rust-toolchain.toml"),
         legacy_toolchain_rel: None,
@@ -91,9 +94,10 @@ fn inventories_when_msrv_is_missing() {
 
 #[test]
 fn emits_no_result_for_stable_channel() {
-    let parsed =
-        toml::from_str::<toml::Value>("[toolchain]\nchannel = \"stable\"\ncomponents = [\"clippy\", \"rustfmt\"]")
-            .expect("valid TOML");
+    let parsed = toml::from_str::<toml::Value>(
+        "[toolchain]\nchannel = \"stable\"\ncomponents = [\"clippy\", \"rustfmt\"]",
+    )
+    .expect("valid TOML");
     let input = ToolchainRootInput {
         toolchain_toml_rel: Some("rust-toolchain.toml"),
         legacy_toolchain_rel: None,

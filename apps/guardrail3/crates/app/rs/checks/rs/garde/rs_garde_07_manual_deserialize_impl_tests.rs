@@ -7,7 +7,10 @@ use super::check;
 #[test]
 fn errors_when_manual_deserialize_impl_needs_validate() {
     let mut results = Vec::new();
-    check(&ManualDeserializeImplInput::new(&manual_impl(true, false)), &mut results);
+    check(
+        &ManualDeserializeImplInput::new(&manual_impl(true, false)),
+        &mut results,
+    );
     assert_eq!(results.len(), 1);
     assert_eq!(results[0].id, "RS-GARDE-07");
     assert_eq!(results[0].severity, Severity::Error);
@@ -16,7 +19,10 @@ fn errors_when_manual_deserialize_impl_needs_validate() {
 #[test]
 fn skips_manual_deserialize_impl_when_validate_present() {
     let mut results = Vec::new();
-    check(&ManualDeserializeImplInput::new(&manual_impl(true, true)), &mut results);
+    check(
+        &ManualDeserializeImplInput::new(&manual_impl(true, true)),
+        &mut results,
+    );
     assert!(results.is_empty());
 }
 
@@ -64,7 +70,10 @@ members = []
 garde = { version = "0.22", features = ["derive"] }
 "#,
             ),
-            ("clippy.toml", "disallowed-methods = []\ndisallowed-types = []\n"),
+            (
+                "clippy.toml",
+                "disallowed-methods = []\ndisallowed-types = []\n",
+            ),
             ("guardrail3.toml", "[profile]\nname = \"service\"\n"),
         ],
         root.clone(),
@@ -122,7 +131,10 @@ members = []
 garde = { version = "0.22", features = ["derive"] }
 "#,
             ),
-            ("clippy.toml", "disallowed-methods = []\ndisallowed-types = []\n"),
+            (
+                "clippy.toml",
+                "disallowed-methods = []\ndisallowed-types = []\n",
+            ),
             ("guardrail3.toml", "[profile]\nname = \"service\"\n"),
         ],
         root.clone(),

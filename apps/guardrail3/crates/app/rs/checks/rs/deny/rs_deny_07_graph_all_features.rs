@@ -16,7 +16,10 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
             id: "RS-DENY-07".to_owned(),
             severity: Severity::Error,
             title: "graph all-features must be true".to_owned(),
-            message: format!("`{}` must set `[graph].all-features = true`.", config.rel_path),
+            message: format!(
+                "`{}` must set `[graph].all-features = true`.",
+                config.rel_path
+            ),
             file: Some(config.rel_path.clone()),
             line: None,
             inventory: false,
@@ -29,7 +32,10 @@ fn push_missing(config: &super::facts::DenyConfigFacts, results: &mut Vec<CheckR
         id: "RS-DENY-07".to_owned(),
         severity: Severity::Error,
         title: "[graph] section missing".to_owned(),
-        message: format!("`{}` must contain `[graph]` coverage settings.", config.rel_path),
+        message: format!(
+            "`{}` must contain `[graph]` coverage settings.",
+            config.rel_path
+        ),
         file: Some(config.rel_path.clone()),
         line: None,
         inventory: false,
@@ -37,5 +43,5 @@ fn push_missing(config: &super::facts::DenyConfigFacts, results: &mut Vec<CheckR
 }
 
 #[cfg(test)]
-#[path = "rs_deny_07_graph_all_features_tests.rs"]
+#[path = "rs_deny_07_graph_all_features_tests/mod.rs"]
 mod tests;

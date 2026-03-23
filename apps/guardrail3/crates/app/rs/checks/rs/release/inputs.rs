@@ -1,4 +1,6 @@
-use super::facts::{PublishableCrateFacts, ReleaseEdgeFacts, ReleaseInputFailureFacts, RepoReleaseFacts};
+use super::facts::{
+    PublishableCrateFacts, ReleaseEdgeFacts, ReleaseInputFailureFacts, RepoReleaseFacts,
+};
 
 pub struct RepoReleaseInput<'a> {
     pub repo: &'a RepoReleaseFacts,

@@ -26,5 +26,5 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_release_10_release_profile_inventory_tests.rs"]
+#[path = "rs_release_10_release_profile_inventory_tests/mod.rs"]
 mod tests;

@@ -33,5 +33,5 @@ pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckRe
 }
 
 #[cfg(test)]
-#[path = "rs_pub_03_repository_present_tests.rs"]
+#[path = "rs_pub_03_repository_present_tests/mod.rs"]
 mod tests;

@@ -1,0 +1,57 @@
+use crate::domain::report::{CheckResult, Severity};
+
+use super::inputs::DispatcherSyntaxInput;
+
+const ID: &str = "HOOK-SHARED-04";
+
+pub fn check(input: &DispatcherSyntaxInput<'_>, results: &mut Vec<CheckResult>) {
+    if !input.has_modular_dir {
+        results.push(
+            CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Error,
+                title: "monolithic hook mode".to_owned(),
+                message:
+                    "No modular `pre-commit.d` directory exists, so no dispatcher is required."
+                        .to_owned(),
+                file: Some(input.rel_path.to_owned()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
+        return;
+    }
+
+    let has_dispatcher = input
+        .parsed
+        .executable_lines
+        .iter()
+        .any(|line| line.is_dispatcher_syntax && line.raw.contains("pre-commit.d"));
+
+    if has_dispatcher {
+        results.push(
+            CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Error,
+                title: "dispatcher pattern present".to_owned(),
+                message: "Modular hook layout is backed by a real dispatcher command.".to_owned(),
+                file: Some(input.rel_path.to_owned()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
+    } else {
+        results.push(CheckResult {
+            id: ID.to_owned(),
+            severity: Severity::Error,
+            title: "dispatcher pattern missing".to_owned(),
+            message: "Modular hook layout exists but the dispatcher does not execute pre-commit.d."
+                .to_owned(),
+            file: Some(input.rel_path.to_owned()),
+            line: None,
+            inventory: false,
+        });
+    }
+}

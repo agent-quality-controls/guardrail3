@@ -41,5 +41,5 @@ pub fn check(input: &RootWorkspaceHexarchInput<'_>, results: &mut Vec<CheckResul
 }
 
 #[cfg(test)]
-#[path = "rs_hexarch_11_root_workspace_doesnt_include_apps_tests.rs"]
+#[path = "rs_hexarch_11_root_workspace_doesnt_include_apps_tests/mod.rs"]
 mod tests;

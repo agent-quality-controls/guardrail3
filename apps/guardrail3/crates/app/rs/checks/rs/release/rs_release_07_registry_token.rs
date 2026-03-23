@@ -30,7 +30,8 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
             id: ID.to_owned(),
             severity: Severity::Warn,
             title: "CARGO_REGISTRY_TOKEN missing from workflows".to_owned(),
-            message: "No workflow structurally wires `CARGO_REGISTRY_TOKEN` into release steps.".to_owned(),
+            message: "No workflow structurally wires `CARGO_REGISTRY_TOKEN` into release steps."
+                .to_owned(),
             file: None,
             line: None,
             inventory: false,
@@ -39,5 +40,5 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_release_07_registry_token_tests.rs"]
+#[path = "rs_release_07_registry_token_tests/mod.rs"]
 mod tests;

@@ -17,5 +17,5 @@ pub fn check(input: &CodeInputFailureInput<'_>, results: &mut Vec<CheckResult>) 
 }
 
 #[cfg(test)]
-#[path = "rs_code_30_input_failures_tests.rs"]
+#[path = "rs_code_30_input_failures_tests/mod.rs"]
 mod tests;

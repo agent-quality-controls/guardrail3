@@ -21,7 +21,11 @@ pub fn dir_entry(dirs: &[&str], files: &[&str]) -> DirEntry {
     }
 }
 
-pub fn project_tree(structure: Vec<(&str, DirEntry)>, content: Vec<(&str, &str)>, root: PathBuf) -> ProjectTree {
+pub fn project_tree(
+    structure: Vec<(&str, DirEntry)>,
+    content: Vec<(&str, &str)>,
+    root: PathBuf,
+) -> ProjectTree {
     ProjectTree {
         root,
         structure: structure
@@ -82,7 +86,10 @@ pub fn tool_input(installed: bool) -> ToolTestInput<'static> {
 
 pub fn hook_input(matching_files: &[&str]) -> HookTestInput<'static> {
     HookTestInput::new(Box::leak(Box::new(HookFacts {
-        matching_files: matching_files.iter().map(|value| (*value).to_owned()).collect(),
+        matching_files: matching_files
+            .iter()
+            .map(|value| (*value).to_owned())
+            .collect(),
     })))
 }
 
@@ -148,10 +155,7 @@ pub fn file_input(
     TestFileInput::new(file, content, parsed)
 }
 
-pub fn function_input(
-    rel_path: &str,
-    function: TestFunctionInfo,
-) -> TestFunctionInput<'static> {
+pub fn function_input(rel_path: &str, function: TestFunctionInfo) -> TestFunctionInput<'static> {
     let file = Box::leak(Box::new(TestFileFacts {
         rel_path: rel_path.to_owned(),
         root_rel_dir: String::new(),

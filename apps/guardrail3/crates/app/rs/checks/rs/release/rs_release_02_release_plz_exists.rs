@@ -33,5 +33,5 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_release_02_release_plz_exists_tests.rs"]
+#[path = "rs_release_02_release_plz_exists_tests/mod.rs"]
 mod tests;

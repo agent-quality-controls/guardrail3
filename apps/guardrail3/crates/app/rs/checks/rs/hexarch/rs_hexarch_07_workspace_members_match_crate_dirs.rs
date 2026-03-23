@@ -10,7 +10,11 @@ pub fn check(input: &WorkspaceCoverageHexarchInput<'_>, results: &mut Vec<CheckR
     }
 
     for crate_dir in input.discovered_crate_dirs {
-        if input.workspace_members.iter().any(|member| member == crate_dir) {
+        if input
+            .workspace_members
+            .iter()
+            .any(|member| member == crate_dir)
+        {
             continue;
         }
         results.push(CheckResult {
@@ -32,5 +36,5 @@ pub fn check(input: &WorkspaceCoverageHexarchInput<'_>, results: &mut Vec<CheckR
 }
 
 #[cfg(test)]
-#[path = "rs_hexarch_07_workspace_members_match_crate_dirs_tests.rs"]
+#[path = "rs_hexarch_07_workspace_members_match_crate_dirs_tests/mod.rs"]
 mod tests;

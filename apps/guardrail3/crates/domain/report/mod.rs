@@ -56,6 +56,7 @@ pub struct ValidateDomains {
 pub struct RustCheckCategories {
     pub architecture: bool,
     pub garde: bool,
+    pub hooks: bool,
     pub tests: bool,
     pub release: bool,
 }
@@ -65,6 +66,7 @@ impl Default for RustCheckCategories {
         Self {
             architecture: true,
             garde: true,
+            hooks: true,
             tests: true,
             release: true,
         }

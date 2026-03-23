@@ -12,7 +12,10 @@ pub fn check(input: &ContainerHexarchInput<'_>, results: &mut Vec<CheckResult>) 
     let detail = if input.files.is_empty() {
         "is empty".to_owned()
     } else {
-        format!("contains files ({}) but no subdirectories", input.files.join(", "))
+        format!(
+            "contains files ({}) but no subdirectories",
+            input.files.join(", ")
+        )
     };
 
     results.push(CheckResult {
@@ -30,5 +33,5 @@ pub fn check(input: &ContainerHexarchInput<'_>, results: &mut Vec<CheckResult>) 
 }
 
 #[cfg(test)]
-#[path = "rs_hexarch_05_container_not_empty_tests.rs"]
+#[path = "rs_hexarch_05_container_not_empty_tests/mod.rs"]
 mod tests;

@@ -77,7 +77,10 @@ fn members_inheriting_workspace_lints_inventory_pass() {
         domain_result.message,
         "domain: `[lints] workspace = true` inherits workspace lint policy"
     );
-    assert_eq!(domain_result.file.as_deref(), Some("crates/domain/Cargo.toml"));
+    assert_eq!(
+        domain_result.file.as_deref(),
+        Some("crates/domain/Cargo.toml")
+    );
 }
 
 #[test]

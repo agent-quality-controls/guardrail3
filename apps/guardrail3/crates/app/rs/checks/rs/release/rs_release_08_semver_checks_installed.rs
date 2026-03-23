@@ -30,5 +30,5 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_release_08_semver_checks_installed_tests.rs"]
+#[path = "rs_release_08_semver_checks_installed_tests/mod.rs"]
 mod tests;

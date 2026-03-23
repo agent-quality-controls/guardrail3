@@ -1,8 +1,8 @@
 use crate::domain::report::Severity;
 
-use super::check;
 use super::super::parse::{analyze, parse_rust_file};
 use super::super::test_support::file_input;
+use super::check;
 
 #[test]
 fn warns_on_bare_ignore() {

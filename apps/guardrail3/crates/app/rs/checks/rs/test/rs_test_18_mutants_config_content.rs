@@ -19,7 +19,10 @@ pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
                 id: ID.to_owned(),
                 severity: Severity::Warn,
                 title: "mutants config excludes everything".to_owned(),
-                message: format!("`{}` contains an `exclude_re` pattern that matches everything.", input.root.mutants_rel_path),
+                message: format!(
+                    "`{}` contains an `exclude_re` pattern that matches everything.",
+                    input.root.mutants_rel_path
+                ),
                 file: Some(input.root.mutants_rel_path.clone()),
                 line: None,
                 inventory: false,
@@ -27,14 +30,19 @@ pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
         }
     }
 
-    if let Some(timeout_multiplier) = parsed.get("timeout_multiplier").and_then(toml::Value::as_float)
+    if let Some(timeout_multiplier) = parsed
+        .get("timeout_multiplier")
+        .and_then(toml::Value::as_float)
     {
         if timeout_multiplier < 1.0 {
             results.push(CheckResult {
                 id: ID.to_owned(),
                 severity: Severity::Warn,
                 title: "mutants timeout multiplier too low".to_owned(),
-                message: format!("`{}` sets `timeout_multiplier = {timeout_multiplier}`.", input.root.mutants_rel_path),
+                message: format!(
+                    "`{}` sets `timeout_multiplier = {timeout_multiplier}`.",
+                    input.root.mutants_rel_path
+                ),
                 file: Some(input.root.mutants_rel_path.clone()),
                 line: None,
                 inventory: false,

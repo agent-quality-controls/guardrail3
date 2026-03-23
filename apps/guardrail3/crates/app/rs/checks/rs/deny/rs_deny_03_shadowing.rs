@@ -47,5 +47,5 @@ fn rel_label(rel: &str) -> String {
 }
 
 #[cfg(test)]
-#[path = "rs_deny_03_shadowing_tests.rs"]
+#[path = "rs_deny_03_shadowing_tests/mod.rs"]
 mod tests;

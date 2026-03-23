@@ -17,8 +17,12 @@ fn warns_when_reqwest_json_ban_missing() {
 #[test]
 fn inventories_when_reqwest_json_ban_present() {
     let mut facts = root_facts(true);
-    facts.clippy_parsed =
-        Some(toml::from_str("disallowed-methods = [{ path = \"reqwest::Response::json\", reason = \"x\" }]").expect("parse"));
+    facts.clippy_parsed = Some(
+        toml::from_str(
+            "disallowed-methods = [{ path = \"reqwest::Response::json\", reason = \"x\" }]",
+        )
+        .expect("parse"),
+    );
     let mut results = Vec::new();
     check(&GardeRootInput::new(&facts), &mut results);
     assert_eq!(results[0].severity, Severity::Info);

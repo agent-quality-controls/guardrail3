@@ -11,7 +11,10 @@ pub fn check(input: &TestCoverageInput<'_>, results: &mut Vec<CheckResult>) {
                 id: ID.to_owned(),
                 severity: Severity::Info,
                 title: "integration tests exist".to_owned(),
-                message: format!("{} has at least one `tests/*.rs` file.", display_root(&input.coverage.root_rel_dir)),
+                message: format!(
+                    "{} has at least one `tests/*.rs` file.",
+                    display_root(&input.coverage.root_rel_dir)
+                ),
                 file: None,
                 line: None,
                 inventory: false,
@@ -23,7 +26,10 @@ pub fn check(input: &TestCoverageInput<'_>, results: &mut Vec<CheckResult>) {
             id: ID.to_owned(),
             severity: Severity::Info,
             title: "no integration tests".to_owned(),
-            message: format!("{} does not have a `tests/` Rust file.", display_root(&input.coverage.root_rel_dir)),
+            message: format!(
+                "{} does not have a `tests/` Rust file.",
+                display_root(&input.coverage.root_rel_dir)
+            ),
             file: None,
             line: None,
             inventory: false,

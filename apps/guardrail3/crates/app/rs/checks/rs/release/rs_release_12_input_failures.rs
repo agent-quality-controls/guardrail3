@@ -17,5 +17,5 @@ pub fn check(input: &ReleaseInputFailureInput<'_>, results: &mut Vec<CheckResult
 }
 
 #[cfg(test)]
-#[path = "rs_release_12_input_failures_tests.rs"]
+#[path = "rs_release_12_input_failures_tests/mod.rs"]
 mod tests;

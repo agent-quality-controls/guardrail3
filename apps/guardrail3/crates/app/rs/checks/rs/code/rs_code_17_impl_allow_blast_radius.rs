@@ -23,5 +23,5 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_code_17_impl_allow_blast_radius_tests.rs"]
+#[path = "rs_code_17_impl_allow_blast_radius_tests/mod.rs"]
 mod tests;

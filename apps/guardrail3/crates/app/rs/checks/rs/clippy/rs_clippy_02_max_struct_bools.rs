@@ -58,5 +58,5 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_clippy_02_max_struct_bools_tests.rs"]
+#[path = "rs_clippy_02_max_struct_bools_tests/mod.rs"]
 mod tests;

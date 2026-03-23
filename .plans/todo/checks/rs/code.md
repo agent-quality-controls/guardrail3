@@ -1,4 +1,4 @@
-# RS-CODE — Rust code file checker (30 rules)
+# RS-CODE — Rust code file checker (30 implemented rules + next-wave planned rules)
 
 **Input:** *.rs files (syn AST parsed)
 **Parser:** syn crate (Rust AST)
@@ -58,6 +58,148 @@
 | RS-CODE-28 | Warn | `pub mod foo { ... }` with inline body in lib.rs. Public modules should be separate files for organization. | Implemented |
 | RS-CODE-29 | Warn/Error | Trait with >8 methods (Warn) or >12 methods (Error). Nearly unimplementable traits. **Library profile only.** | Implemented |
 | RS-CODE-30 | Error | Source/config input failures that would otherwise fail the family open: unreadable Rust source, unparsable Rust source, or unparsable code-family policy inputs (`Cargo.toml`, `guardrail3.toml`). | Implemented |
+
+## Next-wave planned universal rules
+
+These are not implemented yet. They are the next `rs/code` candidates that are universal enough to define without project-specific architecture knowledge.
+
+| New ID | Severity | What | Status |
+|--------|----------|------|--------|
+| RS-CODE-31 | Warn | `pub struct` with named `pub` fields. Public structs should not expose mutable data bags as their default API shape. | Planned |
+| RS-CODE-32 | Warn | Public function returning `Result<_, _>` or `Option<_>` without `#[must_use]`. | Planned |
+| RS-CODE-33 | Warn | Public function returning obviously untyped public error forms: `Result<_, String>`, `Result<_, &str>`, `Result<_, anyhow::Error>`, or `Result<_, Box<dyn Error>>`. | Planned |
+
+### RS-CODE-31 — Public fields on public structs
+
+**Intent**
+- preserve encapsulation in universally understandable Rust terms
+- avoid turning public types into uncontrolled field bags
+
+**Trigger surface**
+- `pub struct Name { ... }`
+- one or more named fields with `pub`
+
+**Initial exclusions**
+- tuple structs / newtypes
+- private structs
+- named fields without `pub`
+
+**Open policy point**
+- whether `#[non_exhaustive]` or an explicit exception comment should suppress the warning
+
+**Examples**
+
+Should warn:
+
+```rust
+pub struct User {
+    pub id: String,
+    pub email: String,
+}
+```
+
+Should not warn:
+
+```rust
+pub struct User {
+    id: String,
+    email: String,
+}
+```
+
+```rust
+pub struct UserId(pub String);
+```
+
+### RS-CODE-32 — `#[must_use]` on public `Result` / `Option` functions
+
+**Intent**
+- make ignored fallible/optional return values explicit
+
+**Trigger surface**
+- public functions whose declared return type is syntactically:
+  - `Result<...>`
+  - `Option<...>`
+- missing `#[must_use]`
+
+**Initial exclusions**
+- non-public functions
+- functions returning other types
+- trait method declarations should be decided explicitly when implementing; default start should be inherent/public free functions only
+
+**Examples**
+
+Should warn:
+
+```rust
+pub fn parse(input: &str) -> Result<Value, ParseError> {
+    // ...
+}
+```
+
+```rust
+pub fn find(id: Id) -> Option<User> {
+    // ...
+}
+```
+
+Should not warn:
+
+```rust
+#[must_use]
+pub fn parse(input: &str) -> Result<Value, ParseError> {
+    // ...
+}
+```
+
+### RS-CODE-33 — Narrow banned public error forms
+
+**Intent**
+- prevent obviously bad public error contracts without requiring project-specific “ideal” error design
+
+**Trigger surface**
+- public functions returning:
+  - `Result<_, String>`
+  - `Result<_, &str>`
+  - `Result<_, anyhow::Error>`
+  - `Result<_, Box<dyn Error>>`
+
+**Initial exclusions**
+- non-public functions
+- non-`Result` returns
+- internal/private helpers
+
+**Initial severity**
+- `Warn`
+- this should start broader than the current library-only `RS-CODE-25` gating, because the banned forms themselves are universal smells
+
+**Relationship to existing rule**
+- likely replaces or broadens `RS-CODE-25`
+- implementation should avoid leaving overlapping partially-duplicated public-error rules
+
+**Examples**
+
+Should warn:
+
+```rust
+pub fn parse(input: &str) -> Result<Value, String> {
+    // ...
+}
+```
+
+```rust
+pub fn parse(input: &str) -> Result<Value, anyhow::Error> {
+    // ...
+}
+```
+
+Should not warn:
+
+```rust
+pub fn parse(input: &str) -> Result<Value, ParseError> {
+    // ...
+}
+```
 
 ## Relocated checks
 

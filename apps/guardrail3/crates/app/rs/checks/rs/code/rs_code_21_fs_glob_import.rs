@@ -24,5 +24,5 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_code_21_fs_glob_import_tests.rs"]
+#[path = "rs_code_21_fs_glob_import_tests/mod.rs"]
 mod tests;

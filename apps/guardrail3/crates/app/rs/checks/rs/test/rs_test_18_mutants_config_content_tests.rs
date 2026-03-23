@@ -1,8 +1,8 @@
 use crate::domain::report::Severity;
 
-use super::check;
 use super::super::facts::TestRootKind;
 use super::super::test_support::root_input;
+use super::check;
 
 #[test]
 fn warns_on_exclude_all_pattern() {

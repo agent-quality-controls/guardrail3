@@ -40,7 +40,11 @@ fn approved_allow_deviations_are_inventoried() {
         .collect();
     assert!(rule_results.len() >= 2);
     assert!(rule_results.iter().all(|result| result.inventory));
-    assert!(rule_results.iter().all(|result| result.severity == Severity::Info));
+    assert!(
+        rule_results
+            .iter()
+            .all(|result| result.severity == Severity::Info)
+    );
     assert!(has_result(&results, "RS-CARGO-03", |result| {
         result.inventory
             && result.severity == Severity::Info

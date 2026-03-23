@@ -47,5 +47,5 @@ pub fn check(
 }
 
 #[cfg(test)]
-#[path = "rs_bin_02_linux_target_tests.rs"]
+#[path = "rs_bin_02_linux_target_tests/mod.rs"]
 mod tests;

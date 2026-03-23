@@ -15,7 +15,10 @@ pub fn check(input: &TestFunctionInput<'_>, results: &mut Vec<CheckResult>) {
         id: ID.to_owned(),
         severity: Severity::Warn,
         title: "should_panic missing expected message".to_owned(),
-        message: format!("Test `{}` uses `#[should_panic]` without `expected = ...`.", input.function.name),
+        message: format!(
+            "Test `{}` uses `#[should_panic]` without `expected = ...`.",
+            input.function.name
+        ),
         file: Some(input.file.rel_path.clone()),
         line: Some(line),
         inventory: false,

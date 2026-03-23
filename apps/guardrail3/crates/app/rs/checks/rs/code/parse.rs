@@ -340,7 +340,8 @@ fn filter_non_comment_lines(content: &str) -> Vec<NumberedLine> {
     let mut result = Vec::new();
     let mut in_block_comment = false;
 
-    #[allow(clippy::string_slice)] // reason: block comment parsing operates on known ASCII delimiters
+    #[allow(clippy::string_slice)]
+    // reason: block comment parsing operates on known ASCII delimiters
     for (line_num, line) in content.lines().enumerate() {
         let trimmed = line.trim().to_owned();
         let for_comment_check = strip_string_literals(&trimmed);
@@ -446,7 +447,10 @@ fn strip_string_literals(line: &str) -> String {
                     continue;
                 }
                 let terminator = format!("\"{}", "#".repeat(hashes));
-                let rest = &line[line.char_indices().nth(j).map_or(line.len(), |(idx, _)| idx)..];
+                let rest = &line[line
+                    .char_indices()
+                    .nth(j)
+                    .map_or(line.len(), |(idx, _)| idx)..];
                 if let Some(end) = rest.find(&terminator) {
                     i = j.saturating_add(rest[..end].chars().count() + terminator.chars().count());
                 } else {
@@ -606,7 +610,8 @@ fn collect_deny_forbid_attrs(
                 line,
                 lint: path_to_string(&path),
                 level: level.to_owned(),
-                crate_level_inner: crate_level_inner && matches!(attr.style, syn::AttrStyle::Inner(_)),
+                crate_level_inner: crate_level_inner
+                    && matches!(attr.style, syn::AttrStyle::Inner(_)),
             });
         }
     }
@@ -700,7 +705,10 @@ fn use_tree_is_std_fs_glob(tree: &syn::UseTree) -> bool {
             syn::UseTree::Path(fs_path) if fs_path.ident == "fs" => {
                 matches!(&*fs_path.tree, syn::UseTree::Glob(_))
             }
-            syn::UseTree::Group(group) => group.items.iter().any(use_tree_is_std_fs_glob_with_std_prefix),
+            syn::UseTree::Group(group) => group
+                .items
+                .iter()
+                .any(use_tree_is_std_fs_glob_with_std_prefix),
             _ => false,
         },
         syn::UseTree::Group(group) => group.items.iter().any(use_tree_is_std_fs_glob),
@@ -719,8 +727,9 @@ fn use_tree_is_std_fs_glob_with_std_prefix(tree: &syn::UseTree) -> bool {
 
 fn glob_reexport_target(tree: &syn::UseTree) -> Option<String> {
     match tree {
-        syn::UseTree::Path(path) => glob_reexport_target(&path.tree)
-            .map(|target| format!("{}::{target}", path.ident)),
+        syn::UseTree::Path(path) => {
+            glob_reexport_target(&path.tree).map(|target| format!("{}::{target}", path.ident))
+        }
         syn::UseTree::Glob(_) => Some("*".to_owned()),
         _ => None,
     }
@@ -1034,7 +1043,11 @@ impl<'ast> Visit<'ast> for IncludeMacroVisitor {
 
 fn path_to_string_from_use_tree(tree: &syn::UseTree) -> String {
     match tree {
-        syn::UseTree::Path(path) => format!("{}::{}", path.ident, path_to_string_from_use_tree(&path.tree)),
+        syn::UseTree::Path(path) => format!(
+            "{}::{}",
+            path.ident,
+            path_to_string_from_use_tree(&path.tree)
+        ),
         syn::UseTree::Name(name) => name.ident.to_string(),
         syn::UseTree::Rename(rename) => rename.ident.to_string(),
         syn::UseTree::Glob(_) => "*".to_owned(),
@@ -1154,7 +1167,8 @@ impl<'ast> Visit<'ast> for UnwrapExpectVisitor {
             _ => true,
         };
         if !skip {
-            self.out.push((span_line(method_call.method.span()), method));
+            self.out
+                .push((span_line(method_call.method.span()), method));
         }
         syn::visit::visit_expr_method_call(self, method_call);
     }
@@ -1225,7 +1239,11 @@ impl<'ast> Visit<'ast> for LargeTraitVisitor {
 impl InlineStdFsVisitor {
     #[allow(clippy::indexing_slicing)] // reason: guarded by len >= 3
     fn path_is_std_fs_call(path: &syn::Path) -> bool {
-        let segments: Vec<_> = path.segments.iter().map(|segment| segment.ident.to_string()).collect();
+        let segments: Vec<_> = path
+            .segments
+            .iter()
+            .map(|segment| segment.ident.to_string())
+            .collect();
         segments.len() >= 3 && segments[0] == "std" && segments[1] == "fs"
     }
 }
@@ -1266,7 +1284,8 @@ impl<'ast> Visit<'ast> for InlineStdFsVisitor {
     }
 
     fn visit_expr_path(&mut self, expr_path: &'ast syn::ExprPath) {
-        if !self.in_cfg_test && !self.in_allowed_scope && Self::path_is_std_fs_call(&expr_path.path) {
+        if !self.in_cfg_test && !self.in_allowed_scope && Self::path_is_std_fs_call(&expr_path.path)
+        {
             let line = span_line(expr_path.path.span());
             if !self.out.contains(&line) {
                 self.out.push(line);

@@ -27,5 +27,5 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_code_10_use_count_error_tests.rs"]
+#[path = "rs_code_10_use_count_error_tests/mod.rs"]
 mod tests;

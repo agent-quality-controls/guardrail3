@@ -29,5 +29,5 @@ pub fn check(input: &ReleaseEdgeInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_pub_10_no_path_deps_to_unpublishable_tests.rs"]
+#[path = "rs_pub_10_no_path_deps_to_unpublishable_tests/mod.rs"]
 mod tests;

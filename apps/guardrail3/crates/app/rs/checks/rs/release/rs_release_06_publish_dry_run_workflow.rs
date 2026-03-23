@@ -39,5 +39,5 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_release_06_publish_dry_run_workflow_tests.rs"]
+#[path = "rs_release_06_publish_dry_run_workflow_tests/mod.rs"]
 mod tests;

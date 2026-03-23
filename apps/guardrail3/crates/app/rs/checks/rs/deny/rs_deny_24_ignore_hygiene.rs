@@ -15,7 +15,9 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
             } else if let Some(table) = entry.as_table() {
                 let id = table.get("id").and_then(toml::Value::as_str);
                 let reason_value = table.get("reason");
-                let reason = reason_value.and_then(toml::Value::as_str).map(str::to_owned);
+                let reason = reason_value
+                    .and_then(toml::Value::as_str)
+                    .map(str::to_owned);
                 let non_string_reason = reason_value.is_some() && reason.is_none();
                 (
                     id.unwrap_or("unknown").to_owned(),
@@ -68,7 +70,10 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                     inventory: false,
                 });
             }
-            if !malformed && !non_string_reason && !reason.as_deref().unwrap_or("").trim().is_empty() {
+            if !malformed
+                && !non_string_reason
+                && !reason.as_deref().unwrap_or("").trim().is_empty()
+            {
                 results.push(
                     CheckResult {
                         id: "RS-DENY-24".to_owned(),
@@ -87,5 +92,5 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_deny_24_ignore_hygiene_tests.rs"]
+#[path = "rs_deny_24_ignore_hygiene_tests/mod.rs"]
 mod tests;

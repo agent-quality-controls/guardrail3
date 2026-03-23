@@ -110,6 +110,15 @@ pub fn run(
         });
     }
 
+    if categories.hooks {
+        let tree = crate::app::core::project_walker::walk_project(fs, path);
+        let hook_results = crate::app::rs::checks::hooks::check(fs, path, &tree, tc);
+        report.add_section(Section {
+            name: "Hook checks".to_owned(),
+            results: hook_results,
+        });
+    }
+
     if categories.tests {
         let test_results = test_checks::check(fs, tc, workspace_root);
         report.add_section(Section {
@@ -126,6 +135,17 @@ pub fn run(
         });
     }
 
+    report
+}
+
+pub fn run_hook_report(fs: &dyn FileSystem, path: &Path, tc: &dyn ToolChecker) -> Report {
+    let tree = crate::app::core::project_walker::walk_project(fs, path);
+    let hook_results = crate::app::rs::checks::hooks::check(fs, path, &tree, tc);
+    let mut report = Report::new(path.display().to_string(), vec!["Rust".to_owned()]);
+    report.add_section(Section {
+        name: "Hook checks".to_owned(),
+        results: hook_results,
+    });
     report
 }
 

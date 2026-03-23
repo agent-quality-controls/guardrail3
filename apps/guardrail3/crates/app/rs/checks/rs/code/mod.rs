@@ -32,12 +32,16 @@ mod rs_code_27_facade_only_lib;
 mod rs_code_28_inline_pub_mod_in_lib;
 mod rs_code_29_large_trait_inventory;
 mod rs_code_30_input_failures;
+#[cfg(test)]
+mod test_support;
 
 use crate::domain::project_tree::ProjectTree;
 use crate::domain::report::CheckResult;
 
 use self::facts::collect;
-use self::inputs::{CodeInputFailureInput, ExceptionCommentInput, RustCodeFileInput, UnsafeCodeLintInput};
+use self::inputs::{
+    CodeInputFailureInput, ExceptionCommentInput, RustCodeFileInput, UnsafeCodeLintInput,
+};
 
 pub fn check(tree: &ProjectTree) -> Vec<CheckResult> {
     let facts = collect(tree);

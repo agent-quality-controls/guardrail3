@@ -1,6 +1,6 @@
 use crate::domain::report::{CheckResult, Severity};
 
-use super::garde_support::{extract_ban_paths, missing_bans, EXTRACTOR_TYPE_BANS};
+use super::garde_support::{EXTRACTOR_TYPE_BANS, extract_ban_paths, missing_bans};
 use super::inputs::GardeRootInput;
 
 const ID: &str = "RS-GARDE-03";
@@ -12,7 +12,8 @@ pub fn check(input: &GardeRootInput<'_>, results: &mut Vec<CheckResult>) {
             severity: Severity::Warn,
             title: "cannot verify garde extractor bans".to_owned(),
             message: input.root.clippy_parse_error.clone().unwrap_or_else(|| {
-                "No covering clippy configuration found for garde extractor-ban validation.".to_owned()
+                "No covering clippy configuration found for garde extractor-ban validation."
+                    .to_owned()
             }),
             file: input.root.clippy_rel_path.clone(),
             line: None,
