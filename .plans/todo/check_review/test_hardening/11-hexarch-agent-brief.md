@@ -47,7 +47,7 @@ Already done in this lane:
 - `cargo test --manifest-path apps/guardrail3/Cargo.toml rs_hexarch_ -- --nocapture` is currently green (`115 passed`) after the recent dependency-ownership and stale-test fixes
 
 Current active tranche:
-- explicit adversarial protocol across `RS-HEXARCH-01..25`: 4 agents per rule, 2 rounds per rule
+- explicit adversarial protocol across `RS-HEXARCH-01..25`: 4 adversarial passes per rule, repeated until a fresh round stops finding meaningful hardening work
 
 Next tranche after that:
 - severity-exactness and remaining false-positive/fail-closed backfill where still missing
@@ -55,7 +55,7 @@ Next tranche after that:
 ## Attack protocol
 
 This lane is now using the literal exhaustive protocol requested by the user:
-- every `RS-HEXARCH-*` rule must get 2 attack rounds
+- every `RS-HEXARCH-*` rule must get repeated fresh attack rounds until it converges
 - each round must use 4 adversarial agents
 - agents must understand rule intent first, not just literal code behavior
 - the purpose is to find edge cases and rule bugs, not to confirm that the rule passes
@@ -67,7 +67,7 @@ Per rule:
    - false positives / ownership boundaries
    - fixture and mutation realism
 2. patch the real bugs or test gaps found
-3. round 2: repeat 4 fresh attacks against the updated rule
+3. repeat fresh 4-agent rounds against the updated rule until the newest round stops producing meaningful hardening improvements
 4. only then mark the rule done and move to the next one
 
 Current status:
@@ -76,7 +76,18 @@ Current status:
   - post-`follow_links(true)` required child symlinks were silently accepted by name until `ProjectTree` started preserving immediate symlink-child identity for facts/rules
   - a symlink named `.gitkeep` was incorrectly exempted until rule 02 started allowing only a real `.gitkeep` file, not symlinked `.gitkeep`
   The suite is now at 43 tests and covers broad child-symlink parity, outer `adapters/` special-case ownership, nested compound exactness, loose `Cargo.toml` and `.gitignore` root files, `.gitkeep/` directory behavior, mixed outer and nested attacks, all-four-missing with `.gitkeep`, and non-owned nested-lookalike `packages/*` shapes. Fresh agents now say the rule looks converged.
-- `RS-HEXARCH-03..25`: pending this explicit protocol
+- `RS-HEXARCH-03`: complete under repeated fresh 4-agent attack rounds. Two real rule/facts bugs were fixed during convergence:
+  - directional facts were materializing absent parent `adapters/` / `ports/` containers, causing rule 03 to over-own cases that belong to rule 02
+  - directional child symlink identity was being dropped, so symlinked `inbound/` / `outbound/` could pass by name, and an unexpected symlinked child could be silently skipped
+  The suite is now at 19 tests and covers broad adapters/ports parity, both-missing directional cases, broad unexpected-dir sweeps, deep unexpected-dir exactness, ownership boundaries, nested reachability, and directional child symlink cases. Fresh agents now say the rule looks converged.
+- `RS-HEXARCH-04`: complete under repeated fresh 4-agent attack rounds. One real shared-snapshot bug was fixed during convergence:
+  - immediate ignored loose files inside already-discovered dirs could disappear before structural rules saw them, until `ProjectTree` started patching immediate raw file children instead of only symlinks
+  The sidecar is now at 26 tests and covers broad owned loose-file attacks, multiple-file aggregation, near-miss placeholder files, replacement semantics, real-`.gitkeep` boundaries, symlinked `.gitkeep` non-exemption, mixed cross-rule ownership with `RS-HEXARCH-02/03/05`, missing-parent and destroyed-nested non-ownership, and TS/packages non-ownership. Fresh agents now say the only remaining concern is the broader shared-walker ignored-whole-directory tradeoff, not a rule-04-specific bug.
+- `RS-HEXARCH-05`: complete under repeated fresh 4-agent attack rounds. Two real rule/facts bugs were fixed during convergence:
+  - symlink-only containers could be misdescribed as `is empty` until rule 05 started building its `contains files (...)` detail from both real files and symlink files
+  - child directory symlinks were still counting as real subdirectories until container facts/inputs preserved `symlink_dirs`, rule 05 excluded them from the “has real dirs” check, and leaf collection stopped materializing fake rule-06 leaves for symlinked child dirs
+  The sidecar is now at 17 tests and covers broad empty-container sweeps, broad files-only sweeps, broad safe-container replacement parity, nested-only isolation, `.gitkeep` suppression, symlink-only and symlink-dir edges, symlinked `.gitkeep` non-exemption, missing-container non-ownership, and TS/packages non-ownership. Fresh agents now say the only remaining concern is the same shared-walker ignored-whole-directory tradeoff, not a rule-05-specific bug.
+- `RS-HEXARCH-06..25`: pending this explicit protocol
 
 ## Old adversarial sources to mine
 
@@ -155,7 +166,7 @@ Do not leave `*_tests.rs` rule files in place.
 If starting fresh in a new session:
 1. read `01-hexarch.md` for the current coverage matrix
 2. read `16-hexarch-execution-plan.md` for execution order
-3. resume the explicit per-rule adversarial protocol from the first incomplete rule in `01-hexarch.md`; right now that is `RS-HEXARCH-03`
+3. resume the explicit per-rule adversarial protocol from the first incomplete rule in `01-hexarch.md`; right now that is `RS-HEXARCH-06`
 4. update both `01-hexarch.md` and this brief after each completed rule group
 
 ## Do not

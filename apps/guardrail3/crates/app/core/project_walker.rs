@@ -191,9 +191,10 @@ pub fn walk_project(fs: &dyn FileSystem, root: &Path) -> ProjectTree {
         patch_tracked_files(fs, root, &mut dir_children, &mut content);
     }
 
-    // Phase 3: Preserve immediate symlink children, including broken symlinks
-    // that the ignore walker may omit entirely when follow_links(true) is enabled.
-    patch_immediate_symlink_children(fs, root, &mut dir_children);
+    // Phase 3: Preserve immediate filesystem children that the ignore walk may omit.
+    // This keeps structural rules fail-closed for ignored loose files and broken
+    // symlinks without abandoning the main ignore-based traversal.
+    patch_immediate_children(fs, root, &mut dir_children, &mut content);
 
     // Convert to DirEntry structs
     let structure = dir_children
@@ -290,10 +291,11 @@ fn patch_tracked_files(
     }
 }
 
-fn patch_immediate_symlink_children(
+fn patch_immediate_children(
     fs: &dyn FileSystem,
     root: &Path,
     dir_children: &mut BTreeMap<String, ChildSets>,
+    content: &mut BTreeMap<String, String>,
 ) {
     let dir_rels = dir_children.keys().cloned().collect::<Vec<_>>();
     for dir_rel in dir_rels {
@@ -310,19 +312,28 @@ fn patch_immediate_symlink_children(
             let Ok(file_type) = entry.file_type() else {
                 continue;
             };
-            if !file_type.is_symlink() {
+            let name = entry.file_name().to_string_lossy().into_owned();
+            if file_type.is_symlink() {
+                match entry.metadata() {
+                    Ok(metadata) if metadata.is_dir() => {
+                        let _ = parent.0.insert(name.clone());
+                        let _ = parent.2.insert(name);
+                    }
+                    _ => {
+                        let _ = parent.1.insert(name.clone());
+                        let _ = parent.3.insert(name);
+                    }
+                }
                 continue;
             }
 
-            let name = entry.file_name().to_string_lossy().into_owned();
-            match entry.metadata() {
-                Ok(metadata) if metadata.is_dir() => {
-                    let _ = parent.0.insert(name.clone());
-                    let _ = parent.2.insert(name);
-                }
-                _ => {
-                    let _ = parent.1.insert(name.clone());
-                    let _ = parent.3.insert(name);
+            if file_type.is_file() {
+                let rel_path = ProjectTree::join_rel(&dir_rel, &name);
+                let _ = parent.1.insert(name.clone());
+                if !content.contains_key(&rel_path) && should_cache(&name, &rel_path) {
+                    if let Some(file_content) = fs.read_file(&root.join(&rel_path)) {
+                        let _ = content.insert(rel_path, file_content);
+                    }
                 }
             }
         }
@@ -375,3 +386,7 @@ fn split_parent_child(rel: &str) -> Option<(String, String)> {
         None => Some((String::new(), rel.to_owned())),
     }
 }
+
+#[cfg(test)]
+#[path = "project_walker_tests.rs"]
+mod tests;

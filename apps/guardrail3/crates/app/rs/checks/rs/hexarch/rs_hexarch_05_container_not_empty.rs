@@ -5,16 +5,28 @@ use super::inputs::ContainerHexarchInput;
 const ID: &str = "RS-HEXARCH-05";
 
 pub fn check(input: &ContainerHexarchInput<'_>, results: &mut Vec<CheckResult>) {
-    if !input.dirs.is_empty() || input.has_gitkeep {
+    let has_real_dirs = input
+        .dirs
+        .iter()
+        .any(|dir| !input.symlink_dirs.iter().any(|symlink| symlink == dir));
+    if has_real_dirs || input.has_gitkeep {
         return;
     }
 
-    let detail = if input.files.is_empty() {
+    let listed_files: Vec<_> = input
+        .symlink_dirs
+        .iter()
+        .cloned()
+        .chain(input.files.iter().cloned())
+        .chain(input.symlink_files.iter().cloned())
+        .collect();
+
+    let detail = if listed_files.is_empty() {
         "is empty".to_owned()
     } else {
         format!(
             "contains files ({}) but no subdirectories",
-            input.files.join(", ")
+            listed_files.join(", ")
         )
     };
 
