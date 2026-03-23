@@ -1,29 +1,30 @@
-# RS-GARDE — Garde boundary validation checker (9 rules)
+# RS-GARDE — Garde boundary validation checker (10 rules)
 
 **Input:** Cargo.toml + clippy.toml + *.rs files
 **Parser:** TOML + syn AST
-**Current code:** `garde_checks.rs`
+**Current code:** `garde_checks.rs` (old partial baseline only; new family lives under `app/rs/checks/rs/garde`)
 
-**Why separate from RS-CLIPPY:** RS-CLIPPY checks baseline bans (always required). RS-GARDE checks additional bans that only make sense when the project uses garde for input validation boundaries. RS-GARDE-01 checks garde exists first — if it doesn't, the other rules are skipped.
+**Why separate from RS-CLIPPY:** RS-CLIPPY checks baseline bans (always required). RS-GARDE checks additional bans and source-level boundary enforcement that only make sense when the project uses garde for input validation boundaries. RS-GARDE-01 checks garde exists first — if it doesn't, the other rules are skipped.
 
 ## Rules
 
 | New ID | Old ID | Severity | What | Status |
 |--------|--------|----------|------|--------|
-| RS-GARDE-01 | R-GARDE-01 | Error/Info | garde crate in [workspace.dependencies] or [dependencies] | Implemented |
-| RS-GARDE-02 | R-GARDE-02 | Warn/Info | Serde deserialization method bans in clippy.toml disallowed-methods (see full list below) | Implemented (7 methods, needs expansion) |
-| RS-GARDE-03 | R-GARDE-03 | Warn/Info | Axum extractor type bans in clippy.toml disallowed-types (see full list below) | Implemented (4 types, needs expansion) |
-| RS-GARDE-04 | R-GARDE-04 | Warn/Info | reqwest::Response::json method ban in clippy.toml | Implemented |
-| RS-GARDE-05 | R-GARDE-05 | Error/Info | Derive inventory: structs with Deserialize/Parser/Args/FromRow + non-primitive fields must also derive Validate. Skips test files. | Implemented |
+| RS-GARDE-01 | R-GARDE-01 | Error/Info | garde crate in `[workspace.dependencies]` or `[dependencies]` of each enabled Rust root | Planned in new architecture |
+| RS-GARDE-02 | R-GARDE-02 | Warn/Info | Core serde/toml/yaml deserialization method bans in covering clippy config `disallowed-methods` (see list below) | Planned in new architecture |
+| RS-GARDE-03 | R-GARDE-03 | Warn/Info | Axum extractor type bans in covering clippy config `disallowed-types` (see list below) | Planned in new architecture |
+| RS-GARDE-04 | R-GARDE-04 | Warn/Info | `reqwest::Response::json` method ban in covering clippy config | Planned in new architecture |
+| RS-GARDE-05 | R-GARDE-05 | Error/Info | Struct derive inventory: structs with Deserialize/Parser/Args/FromRow + non-primitive fields must also derive Validate. Skips test files. | Planned in new architecture |
 
 ## New rules from audit
 
 | New ID | Severity | What | Status |
 |--------|----------|------|--------|
-| RS-GARDE-06 | Warn/Info | Additional deserialization method bans beyond serde_json/toml/yaml (see full list below). All deserialization entry points must go through Validated<T> wrapper. | Planned |
+| RS-GARDE-06 | Warn/Info | Additional deserialization method bans beyond serde_json/toml/yaml (see full list below). All deserialization entry points must go through `Validated<T>` wrapper. | Planned |
 | RS-GARDE-07 | Error/Info | Manual `impl<'de> Deserialize<'de> for T` bypasses derive check. Scan for impl blocks implementing Deserialize trait — flag target type if it has non-primitive fields and doesn't also implement Validate. | Planned |
-| RS-GARDE-08 | Error/Info | Enums with Deserialize/Parser/Args/FromRow not checked. Extend derive inventory to include enums with tuple or struct variants containing non-primitive fields. `enum Command { Create(Payload) }` with `#[derive(Deserialize)]` needs validation too. Note: DeriveVisitor already handles enums but defaults `has_non_primitive_fields = true` — need `enum_has_non_primitive_fields()` to avoid false positives on C-like enums (`enum Color { Red, Green }`). | Planned (fix false positives) |
-| RS-GARDE-09 | Info | `sqlx::query_as!` macro bypasses derive check. The macro generates FromRow-like code without any derive attribute, so RS-GARDE-05 can't see it. Scan for `query_as!` macro invocations and flag as inventory item requiring manual review for validation. | Planned |
+| RS-GARDE-08 | Error/Info | Enum derive inventory: enums with Deserialize/Parser/Args/FromRow and tuple/struct variants containing non-primitive fields must also derive Validate. Avoid false positives on C-like enums. | Planned |
+| RS-GARDE-09 | Info | `sqlx::query_as!` macro bypasses derive check. Scan for `query_as!` macro invocations and flag as inventory item requiring manual review for validation. | Planned |
+| RS-GARDE-10 | Error | Garde-family input failures: unreadable/parsing-broken Rust sources or broken garde-family policy inputs must surface explicitly instead of being skipped. | Planned |
 
 ## Full expected ban lists
 
@@ -121,9 +122,10 @@ Missing — must add:
 
 | Location | Bug | Fix |
 |----------|-----|-----|
-| `garde_checks.rs` lines 148-171 | `content_has_garde_dependency()` uses line-by-line parsing instead of TOML parser. Confused by comments, multi-line values. | Use `toml::Value` parsing. |
-| `ast_visitors.rs` SKIP_OK_TYPES | `char` missing from primitive skip list | Add `"char"` to SKIP_OK_TYPES |
-| `ast_visitors.rs` DeriveVisitor | Enum handling defaults `has_non_primitive_fields = true` for all enums, causing C-like enum false positives | Add `enum_has_non_primitive_fields()` — check each variant: unit variants are safe, tuple/struct variants with non-primitive fields need validation |
+| `garde_checks.rs` lines 148-171 | `content_has_garde_dependency()` uses line-by-line parsing instead of TOML parser. Confused by comments, multi-line values. | Use `toml::Value` parsing in the new family. |
+| `ast_visitors.rs` SKIP_OK_TYPES | `char` missing from primitive skip list | New family must treat `char` as primitive-safe for garde derive exemption. |
+| `ast_visitors.rs` DeriveVisitor | Enum handling defaults `has_non_primitive_fields = true` for all enums, causing C-like enum false positives | New family must use explicit `enum_has_non_primitive_fields()` logic. |
+| `garde_checks.rs` / `ast_helpers.rs` | unreadable or unparsable source files are skipped silently | New family must surface these as `RS-GARDE-10` errors. |
 
 ## Explicitly rejected
 
@@ -139,3 +141,17 @@ Missing — must add:
 | `sqlx::query_scalar!` | Returns single values. Minimal validation concern. |
 | `serde::Deserialize::deserialize` trait method | Transitively covered by Deserializer constructor bans. Nobody calls this directly. |
 | Per-crate clippy.toml drops garde bans | Already covered by RS-CLIPPY-13 (per-crate must contain workspace bans). |
+
+## Notes for new implementation
+
+- The old `garde_checks.rs` code is only a seed, not the target architecture.
+- Old `R-GARDE-01..05` tests are useful as adversarial seeds, especially for:
+  - garde dependency present/missing
+  - ban completeness shape
+  - derive inventory for `Deserialize` / `Parser` / `Args` / `FromRow`
+  - primitive-only exemption
+- Old implementation must NOT be copied as-is:
+  - no line-based Cargo parsing
+  - no silent source parse/read skips
+  - no enum false positives
+  - no gating later checks on heuristically found prior `CheckResult`s
