@@ -14,6 +14,10 @@ fn inventories_clean_gitignore() {
     assert_eq!(results.len(), 1);
     assert_eq!(results[0].severity, Severity::Info);
     assert!(results[0].inventory);
+    assert_eq!(
+        results[0].message,
+        "No relevant `.gitignore` masks `Cargo.lock` for Rust root `.`."
+    );
 }
 
 #[test]
@@ -49,4 +53,55 @@ fn collect_treats_wildcard_gitignore_as_ignoring_cargo_lock() {
 
     assert_eq!(results.len(), 1);
     assert_eq!(results[0].severity, Severity::Error);
+}
+
+#[test]
+fn collect_treats_nested_gitignore_as_masking_nested_lockfile() {
+    let tree = super::super::test_support::project_tree(
+        vec![
+            (
+                "",
+                super::super::test_support::dir_entry(&["apps"], &["guardrail3.toml"]),
+            ),
+            ("apps", super::super::test_support::dir_entry(&["api"], &[])),
+            (
+                "apps/api",
+                super::super::test_support::dir_entry(
+                    &[],
+                    &["Cargo.toml", "Cargo.lock", ".gitignore"],
+                ),
+            ),
+        ],
+        vec![
+            (
+                "guardrail3.toml",
+                r#"
+                    [rust.apps.api]
+                    profile = "service"
+                "#,
+            ),
+            (
+                "apps/api/Cargo.toml",
+                r#"
+                    [workspace]
+                    members = []
+                "#,
+            ),
+            ("apps/api/.gitignore", "Cargo.lock"),
+        ],
+    );
+    let facts = super::super::test_support::collected_facts(&tree, &[]);
+    let lockfile = facts
+        .lockfiles
+        .iter()
+        .find(|lockfile| lockfile.root_rel_dir == "apps/api")
+        .expect("expected nested workspace lockfile facts");
+    let input = super::super::inputs::LockfileDepsInput::new(lockfile);
+    let mut results = Vec::new();
+
+    check(&input, &mut results);
+
+    assert_eq!(results.len(), 1);
+    assert_eq!(results[0].severity, Severity::Error);
+    assert_eq!(results[0].file.as_deref(), Some("apps/api/.gitignore"));
 }

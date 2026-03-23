@@ -11,8 +11,12 @@ pub fn check(input: &LockfileDepsInput<'_>, results: &mut Vec<CheckResult>) {
                 id: ID.to_owned(),
                 severity: Severity::Info,
                 title: "Cargo.lock committed".to_owned(),
-                message: "`Cargo.lock` is committed.".to_owned(),
-                file: Some("Cargo.lock".to_owned()),
+                message: format!(
+                    "Rust root `{}` has `{}` committed.",
+                    rel_label(&input.lockfile.root_rel_dir),
+                    input.lockfile.cargo_lock_rel_path
+                ),
+                file: Some(input.lockfile.cargo_lock_rel_path.clone()),
                 line: None,
                 inventory: false,
             }
@@ -21,7 +25,7 @@ pub fn check(input: &LockfileDepsInput<'_>, results: &mut Vec<CheckResult>) {
         return;
     }
 
-    let library_profile = input.lockfile.root_profile_name.as_deref() == Some("library");
+    let library_profile = input.lockfile.profile_name.as_deref() == Some("library");
     results.push(CheckResult {
         id: ID.to_owned(),
         severity: if library_profile {
@@ -31,14 +35,30 @@ pub fn check(input: &LockfileDepsInput<'_>, results: &mut Vec<CheckResult>) {
         },
         title: "Cargo.lock missing".to_owned(),
         message: if library_profile {
-            "Library profile project is missing `Cargo.lock`.".to_owned()
+            format!(
+                "Library-profile Rust root `{}` is missing `{}`.",
+                rel_label(&input.lockfile.root_rel_dir),
+                input.lockfile.cargo_lock_rel_path
+            )
         } else {
-            "Non-library Rust project is missing `Cargo.lock`.".to_owned()
+            format!(
+                "Non-library Rust root `{}` is missing `{}`.",
+                rel_label(&input.lockfile.root_rel_dir),
+                input.lockfile.cargo_lock_rel_path
+            )
         },
-        file: Some("Cargo.lock".to_owned()),
+        file: Some(input.lockfile.cargo_lock_rel_path.clone()),
         line: None,
         inventory: false,
     });
+}
+
+fn rel_label(rel: &str) -> String {
+    if rel.is_empty() {
+        ".".to_owned()
+    } else {
+        rel.to_owned()
+    }
 }
 
 #[cfg(test)]

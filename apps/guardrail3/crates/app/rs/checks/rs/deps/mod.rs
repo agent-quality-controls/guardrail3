@@ -52,9 +52,11 @@ pub fn run_with_facts(facts: &DepsFacts) -> Vec<CheckResult> {
         rs_deps_08_library_allowlist_present::check(&input, &mut results);
     }
 
-    let input = LockfileDepsInput::new(&facts.lockfile);
-    rs_deps_09_cargo_lock_present::check(&input, &mut results);
-    rs_deps_10_gitignore_not_ignoring_cargo_lock::check(&input, &mut results);
+    for lockfile in &facts.lockfiles {
+        let input = LockfileDepsInput::new(lockfile);
+        rs_deps_09_cargo_lock_present::check(&input, &mut results);
+        rs_deps_10_gitignore_not_ignoring_cargo_lock::check(&input, &mut results);
+    }
 
     for failure in &facts.input_failures {
         let input = InputFailureDepsInput::new(failure);

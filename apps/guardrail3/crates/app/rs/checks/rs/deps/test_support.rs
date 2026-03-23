@@ -100,7 +100,7 @@ pub fn coverage_input<'a>(
 }
 
 pub fn lockfile_input<'a>(facts: &'a DepsFacts) -> LockfileDepsInput<'a> {
-    LockfileDepsInput::new(&facts.lockfile)
+    LockfileDepsInput::new(facts.lockfiles.first().expect("expected lockfile facts"))
 }
 
 pub fn failure_input<'a>(facts: &'a DepsFacts, rel_path: &str) -> InputFailureDepsInput<'a> {
@@ -127,11 +127,14 @@ pub fn tool_facts(tool_name: &str, installed: bool) -> DepsFacts {
             tool_name: tool_name.to_owned(),
             installed,
         }],
-        lockfile: LockfileFacts {
+        lockfiles: vec![LockfileFacts {
+            root_rel_dir: String::new(),
+            cargo_lock_rel_path: "Cargo.lock".to_owned(),
             cargo_lock_exists: true,
             cargo_lock_ignored: false,
-            root_profile_name: Some("service".to_owned()),
-        },
+            gitignore_rel_path: Some(".gitignore".to_owned()),
+            profile_name: Some("service".to_owned()),
+        }],
         dependency_entries: Vec::new(),
         allowlist_coverage: Vec::new(),
         input_failures: Vec::new(),
@@ -146,11 +149,14 @@ pub fn dependency_facts(
 ) -> DepsFacts {
     DepsFacts {
         tools: Vec::new(),
-        lockfile: LockfileFacts {
+        lockfiles: vec![LockfileFacts {
+            root_rel_dir: String::new(),
+            cargo_lock_rel_path: "Cargo.lock".to_owned(),
             cargo_lock_exists: true,
             cargo_lock_ignored: false,
-            root_profile_name: Some("service".to_owned()),
-        },
+            gitignore_rel_path: Some(".gitignore".to_owned()),
+            profile_name: Some("service".to_owned()),
+        }],
         dependency_entries: vec![DependencyEntryFacts {
             crate_name: "api".to_owned(),
             cargo_rel_path: "crates/api/Cargo.toml".to_owned(),
@@ -168,11 +174,14 @@ pub fn dependency_facts(
 pub fn coverage_facts(profile_name: Option<&str>, has_allowlist: bool) -> DepsFacts {
     DepsFacts {
         tools: Vec::new(),
-        lockfile: LockfileFacts {
+        lockfiles: vec![LockfileFacts {
+            root_rel_dir: String::new(),
+            cargo_lock_rel_path: "Cargo.lock".to_owned(),
             cargo_lock_exists: true,
             cargo_lock_ignored: false,
-            root_profile_name: Some("service".to_owned()),
-        },
+            gitignore_rel_path: Some(".gitignore".to_owned()),
+            profile_name: Some("service".to_owned()),
+        }],
         dependency_entries: Vec::new(),
         allowlist_coverage: vec![AllowlistCoverageFacts {
             crate_name: "core".to_owned(),
@@ -191,11 +200,14 @@ pub fn lockfile_facts(
 ) -> DepsFacts {
     DepsFacts {
         tools: Vec::new(),
-        lockfile: LockfileFacts {
+        lockfiles: vec![LockfileFacts {
+            root_rel_dir: String::new(),
+            cargo_lock_rel_path: "Cargo.lock".to_owned(),
             cargo_lock_exists,
             cargo_lock_ignored,
-            root_profile_name: root_profile_name.map(str::to_owned),
-        },
+            gitignore_rel_path: Some(".gitignore".to_owned()),
+            profile_name: root_profile_name.map(str::to_owned),
+        }],
         dependency_entries: Vec::new(),
         allowlist_coverage: Vec::new(),
         input_failures: Vec::new(),
@@ -205,11 +217,14 @@ pub fn lockfile_facts(
 pub fn failure_facts(rel_path: &str, message: &str) -> DepsFacts {
     DepsFacts {
         tools: Vec::new(),
-        lockfile: LockfileFacts {
+        lockfiles: vec![LockfileFacts {
+            root_rel_dir: String::new(),
+            cargo_lock_rel_path: "Cargo.lock".to_owned(),
             cargo_lock_exists: true,
             cargo_lock_ignored: false,
-            root_profile_name: Some("service".to_owned()),
-        },
+            gitignore_rel_path: Some(".gitignore".to_owned()),
+            profile_name: Some("service".to_owned()),
+        }],
         dependency_entries: Vec::new(),
         allowlist_coverage: Vec::new(),
         input_failures: vec![InputFailureFacts {

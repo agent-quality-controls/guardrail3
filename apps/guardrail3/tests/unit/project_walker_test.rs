@@ -599,6 +599,20 @@ fn caches_package_json() {
 }
 
 #[test]
+fn caches_gitignore_files() {
+    let tmp = tempfile::tempdir().expect("tempdir");
+    let root = tmp.path();
+
+    write(root, ".gitignore", "Cargo.lock\n");
+    write(root, "apps/api/.gitignore", "Cargo.lock\n");
+
+    let tree = walk_project(&RealFileSystem, root);
+
+    assert!(tree.file_content(".gitignore").is_some());
+    assert!(tree.file_content("apps/api/.gitignore").is_some());
+}
+
+#[test]
 fn caches_workflow_yamls() {
     let tmp = tempfile::tempdir().expect("tempdir");
     let root = tmp.path();

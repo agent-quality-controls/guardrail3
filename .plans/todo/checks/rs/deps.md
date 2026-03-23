@@ -44,8 +44,8 @@ Allowlist semantics:
 
 | New ID | Severity | What | Status |
 |--------|----------|------|--------|
-| RS-DEPS-09 | Error/Info | `Cargo.lock` committed. Services/binaries: Error if missing. Libraries: Info if missing. | Planned |
-| RS-DEPS-10 | Error | `.gitignore` must not ignore `Cargo.lock` | Planned |
+| RS-DEPS-09 | Error/Info | `Cargo.lock` committed for each Rust root. Services/binaries: Error if missing. Libraries: Info if missing. | Planned |
+| RS-DEPS-10 | Error | No relevant `.gitignore` may ignore a Rust root's `Cargo.lock` | Planned |
 
 ## Input / parse integrity rules
 

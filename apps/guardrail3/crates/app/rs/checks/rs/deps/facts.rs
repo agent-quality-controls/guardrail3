@@ -12,9 +12,12 @@ pub struct ToolFacts {
 
 #[derive(Debug, Clone, Default)]
 pub struct LockfileFacts {
+    pub root_rel_dir: String,
+    pub cargo_lock_rel_path: String,
     pub cargo_lock_exists: bool,
     pub cargo_lock_ignored: bool,
-    pub root_profile_name: Option<String>,
+    pub gitignore_rel_path: Option<String>,
+    pub profile_name: Option<String>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -63,7 +66,7 @@ pub struct InputFailureFacts {
 #[derive(Debug, Clone, Default)]
 pub struct DepsFacts {
     pub tools: Vec<ToolFacts>,
-    pub lockfile: LockfileFacts,
+    pub lockfiles: Vec<LockfileFacts>,
     pub dependency_entries: Vec<DependencyEntryFacts>,
     pub allowlist_coverage: Vec<AllowlistCoverageFacts>,
     pub input_failures: Vec<InputFailureFacts>,
@@ -93,6 +96,7 @@ pub fn collect(tree: &ProjectTree, tc: &dyn ToolChecker) -> DepsFacts {
 
     let dependency_entries =
         collect_dependency_entries(tree, &members, &workspaces, &mut input_failures);
+    let lockfiles = collect_lockfiles(tree, &workspaces, &members, parsed_guardrail.as_ref());
     let allowlist_coverage = members
         .into_iter()
         .map(|member| AllowlistCoverageFacts {
@@ -122,11 +126,7 @@ pub fn collect(tree: &ProjectTree, tc: &dyn ToolChecker) -> DepsFacts {
                 installed: tc.is_installed("gitleaks"),
             },
         ],
-        lockfile: LockfileFacts {
-            cargo_lock_exists: tree.file_exists("Cargo.lock"),
-            cargo_lock_ignored: cargo_lock_is_ignored(tree.file_content(".gitignore")),
-            root_profile_name: parsed_guardrail.and_then(|guardrail| guardrail.root_profile_name),
-        },
+        lockfiles,
         dependency_entries,
         allowlist_coverage,
         input_failures,
@@ -481,6 +481,54 @@ fn collect_dependency_entries(
     entries
 }
 
+fn collect_lockfiles(
+    tree: &ProjectTree,
+    workspaces: &[WorkspaceFacts],
+    members: &[MemberFacts],
+    parsed_guardrail: Option<&ParsedGuardrail>,
+) -> Vec<LockfileFacts> {
+    let mut root_profiles = BTreeMap::new();
+    for member in members {
+        let _ = root_profiles
+            .entry(member.rel_dir.clone())
+            .or_insert_with(|| member.profile_name.clone());
+    }
+
+    let mut root_rels = BTreeSet::new();
+    for workspace in workspaces {
+        let _ = root_rels.insert(workspace.root_rel_dir.clone());
+        let _ = root_profiles
+            .entry(workspace.root_rel_dir.clone())
+            .or_insert_with(|| policy_for_member(&workspace.root_rel_dir, parsed_guardrail).0);
+    }
+    for member in members {
+        if member.workspace_root_rel_dir.is_none() {
+            let _ = root_rels.insert(member.rel_dir.clone());
+        }
+    }
+
+    root_rels
+        .into_iter()
+        .map(|root_rel_dir| {
+            let cargo_lock_rel_path = if root_rel_dir.is_empty() {
+                "Cargo.lock".to_owned()
+            } else {
+                format!("{root_rel_dir}/Cargo.lock")
+            };
+            let (cargo_lock_ignored, gitignore_rel_path) =
+                lockfile_ignore_status(tree, &root_rel_dir, &cargo_lock_rel_path);
+            LockfileFacts {
+                root_rel_dir: root_rel_dir.clone(),
+                cargo_lock_rel_path: cargo_lock_rel_path.clone(),
+                cargo_lock_exists: tree.file_exists(&cargo_lock_rel_path),
+                cargo_lock_ignored,
+                gitignore_rel_path,
+                profile_name: root_profiles.get(&root_rel_dir).cloned().flatten(),
+            }
+        })
+        .collect()
+}
+
 fn external_dep_name(
     member: &MemberFacts,
     alias: &str,
@@ -537,24 +585,77 @@ fn external_dep_name(
     Ok(Some(package_name))
 }
 
-fn cargo_lock_is_ignored(gitignore: Option<&str>) -> bool {
-    gitignore
-        .map(|gitignore| {
-            gitignore.lines().any(|line| {
-                let trimmed = line.trim();
-                if trimmed.is_empty() || trimmed.starts_with('#') || trimmed.starts_with('!') {
-                    return false;
-                }
+fn lockfile_ignore_status(
+    tree: &ProjectTree,
+    root_rel_dir: &str,
+    cargo_lock_rel_path: &str,
+) -> (bool, Option<String>) {
+    for gitignore_rel_path in ancestor_gitignore_rels(root_rel_dir) {
+        let Some(content) = tree.file_content(&gitignore_rel_path) else {
+            continue;
+        };
+        if cargo_lock_is_ignored(content, &gitignore_rel_path, cargo_lock_rel_path) {
+            return (true, Some(gitignore_rel_path));
+        }
+    }
+    (false, None)
+}
 
-                let normalized = trimmed.trim_start_matches('/');
-                if normalized == "Cargo.lock" {
-                    return true;
-                }
+fn ancestor_gitignore_rels(root_rel_dir: &str) -> Vec<String> {
+    let mut rels = vec![".gitignore".to_owned()];
+    if root_rel_dir.is_empty() {
+        return rels;
+    }
 
-                glob::Pattern::new(normalized)
-                    .ok()
-                    .is_some_and(|pattern| pattern.matches("Cargo.lock"))
-            })
-        })
-        .unwrap_or(false)
+    let mut current = String::new();
+    for segment in root_rel_dir.split('/') {
+        current = if current.is_empty() {
+            segment.to_owned()
+        } else {
+            format!("{current}/{segment}")
+        };
+        rels.push(format!("{current}/.gitignore"));
+    }
+    rels
+}
+
+fn cargo_lock_is_ignored(
+    gitignore: &str,
+    gitignore_rel_path: &str,
+    cargo_lock_rel_path: &str,
+) -> bool {
+    let gitignore_dir_rel = gitignore_rel_path
+        .strip_suffix("/.gitignore")
+        .unwrap_or_default();
+    let candidate_rel = if gitignore_dir_rel.is_empty() {
+        cargo_lock_rel_path.to_owned()
+    } else if let Some(rest) = cargo_lock_rel_path.strip_prefix(&format!("{gitignore_dir_rel}/")) {
+        rest.to_owned()
+    } else {
+        return false;
+    };
+
+    let basename = "Cargo.lock";
+
+    gitignore.lines().any(|line| {
+        let trimmed = line.trim();
+        if trimmed.is_empty() || trimmed.starts_with('#') || trimmed.starts_with('!') {
+            return false;
+        }
+
+        let normalized = trimmed.trim_start_matches('/');
+        if normalized == "Cargo.lock" {
+            return true;
+        }
+
+        if !normalized.contains('/') {
+            return glob::Pattern::new(normalized)
+                .ok()
+                .is_some_and(|pattern| pattern.matches(basename));
+        }
+
+        glob::Pattern::new(normalized)
+            .ok()
+            .is_some_and(|pattern| pattern.matches(&candidate_rel))
+    })
 }
