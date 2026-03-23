@@ -5,7 +5,7 @@
 ## Principles
 
 1. **One rule, one production file.** Every check is a single `.rs` file, independently testable, greppable by ID.
-2. **One rule, one test file.** Every rule has its own sidecar `*_tests.rs` file. Family-wide grouped test files are forbidden.
+2. **One rule, one test module.** Every rule has its own sidecar test module, implemented as a same-named `*_tests/` folder with `mod.rs` plus files split by attack class. Family-wide grouped test files are forbidden.
 3. **One rule group, one folder.** Rules that check the same file type live in one directory with a `mod.rs` orchestrator.
 4. **`ProjectTree` is the repository snapshot.** The walker builds it once. It is the only shared project-wide discovery object. (Replaces the old `CrawlResult` + `fs: &dyn FileSystem` pattern.)
 5. **There is an explicit middle layer between `ProjectTree` and rules.** Family orchestrators do two jobs:
@@ -100,7 +100,7 @@ This keeps rules small and prevents every rule from re-implementing its own disc
 This is a hard structural contract, not style guidance.
 
 - exactly one rule ID per production file
-- exactly one rule-specific test file per production file
+- exactly one rule-specific test module directory per production file
 - `mod.rs` orchestrates only
 - `facts.rs` contains normalized shared family facts only
 - `inputs.rs` contains minimal typed rule inputs only
@@ -111,9 +111,36 @@ Forbidden:
 - grouped concern files that emit multiple rule IDs
 - grouped threshold files
 - family-wide `*_tests.rs` files
+- one-off sidecar test files used instead of the standard rule-specific test module directory
 - temporary “we will split it later” layouts
 
 If one file emits more than one rule ID, the structure is wrong and must be split.
+
+## Test hardening contract
+
+The test goal is not “prove the rule fires once.” The goal is to **try to break the rule**.
+
+For each rule:
+- start from a known-good golden fixture and prove the golden case passes
+- define one attack vector per test
+- apply that attack vector **everywhere in the golden fixture where the rule should care**
+- assert the exact owned hit set:
+  - every Rust target that should fire does fire
+  - every non-owned / out-of-scope target does not fire
+  - exact rule ID
+  - exact severity
+  - exact file/path target set where practical
+
+Every rule test module should split by attack class rather than collapsing into one blob:
+- `golden.rs`
+- `multi_root.rs`
+- `nested_root.rs`
+- `bypasses.rs`
+- `false_positives.rs`
+- `fail_closed.rs`
+- `severity_exactness.rs`
+
+Do not write tiny “one mutation in one place” tests when the attack should apply across the whole template. One test should represent one attack vector, mutated across all relevant roots simultaneously.
 
 ## Folder structure (example, not exhaustive)
 
