@@ -36,10 +36,13 @@ These files are kept for history and backstory, not as primary implementation ta
   - large adversarial audit backlog from the old mixed-stack validator era
   - surviving Rust/shared carry-forward items were consolidated into `.plans/todo/checks/2026-03-23-rust-hardening-followups.md`
 - `checks/deploy/ts.md`
-  - archived because deploy checks are not in the active Rust-only direction
+  - was archived during the Rust-only phase
+  - later moved back into active planning under `.plans/todo/typescript/`
 - `checks/hooks/ts.md`
-  - archived because TS hook planning no longer carries active Rust/shared requirements
+  - was archived during the Rust-only phase
+  - later moved back into active planning under `.plans/todo/typescript/`
 - `checks/hooks_deploy_audit.md`
-  - archived because its live shared/Rust hook items were already carried into active hook plans and the Rust hardening follow-up backlog
+  - was archived during the Rust-only phase
+  - later moved back into active planning under `.plans/todo/typescript/`
 
 If a future session needs active Rust requirements, read the `checks/rs/*.md` files first, not the archived copies here.
