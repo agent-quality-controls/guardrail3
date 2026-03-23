@@ -4,6 +4,7 @@ use super::inputs::HexRootInput;
 
 const ID: &str = "RS-HEXARCH-02";
 const EXPECTED: [&str; 4] = ["adapters", "app", "domain", "ports"];
+const OPTIONAL: [&str; 1] = ["macros"];
 
 pub fn check(input: &HexRootInput<'_>, results: &mut Vec<CheckResult>) {
     for expected in EXPECTED {
@@ -32,7 +33,7 @@ pub fn check(input: &HexRootInput<'_>, results: &mut Vec<CheckResult>) {
     }
 
     for dir in input.dirs {
-        if EXPECTED.contains(&dir.as_str()) {
+        if EXPECTED.contains(&dir.as_str()) || OPTIONAL.contains(&dir.as_str()) {
             continue;
         }
         results.push(CheckResult {
@@ -45,7 +46,7 @@ pub fn check(input: &HexRootInput<'_>, results: &mut Vec<CheckResult>) {
                 dir
             ),
             message: format!(
-                "Service `{}` has `{}/{}/` which is not part of the hex arch template. Only `{{adapters, app, domain, ports}}` directories are allowed in `{}/`.",
+                "Service `{}` has `{}/{}/` which is not part of the hex arch template. Required directories are `{{adapters, app, domain, ports}}`; optional `macros` is also allowed in `{}/`.",
                 input.app_name,
                 label(input),
                 dir,
