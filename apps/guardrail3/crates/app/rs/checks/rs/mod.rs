@@ -4,5 +4,6 @@ pub mod clippy;
 pub mod deps;
 pub mod deny;
 pub mod fmt;
+pub mod garde;
 pub mod hexarch;
 pub mod toolchain;

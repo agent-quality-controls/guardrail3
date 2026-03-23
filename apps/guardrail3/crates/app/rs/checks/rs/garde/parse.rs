@@ -1,0 +1,278 @@
+use std::collections::{BTreeMap, BTreeSet};
+
+use quote::ToTokens;
+use syn::spanned::Spanned;
+use syn::visit::Visit;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum BoundaryKind {
+    Struct,
+    Enum,
+}
+
+#[derive(Debug, Clone)]
+pub struct DerivedBoundaryType {
+    pub line: usize,
+    pub name: String,
+    pub boundary_kind: BoundaryKind,
+    pub boundary_macros: Vec<String>,
+    pub has_validate_derive: bool,
+    pub has_non_primitive_fields: bool,
+}
+
+#[derive(Debug, Clone)]
+pub struct ManualImpl {
+    pub line: usize,
+    pub type_name: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct QueryAsMacro {
+    pub line: usize,
+    pub macro_name: String,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct ParsedGardeFile {
+    pub derived_types: Vec<DerivedBoundaryType>,
+    pub manual_deserialize_impls: Vec<ManualImpl>,
+    pub manual_validate_impls: BTreeSet<String>,
+    pub type_validation_map: BTreeMap<String, (bool, bool)>,
+    pub query_as_macros: Vec<QueryAsMacro>,
+}
+
+pub fn parse_rust_file(content: &str) -> Result<syn::File, syn::Error> {
+    syn::parse_file(content.strip_prefix('\u{feff}').unwrap_or(content))
+}
+
+pub fn analyze(ast: &syn::File) -> ParsedGardeFile {
+    let mut visitor = GardeVisitor::default();
+    visitor.visit_file(ast);
+    visitor.finish()
+}
+
+#[derive(Default)]
+struct GardeVisitor {
+    derived_types: Vec<DerivedBoundaryType>,
+    manual_deserialize_impls: Vec<ManualImpl>,
+    manual_validate_impls: BTreeSet<String>,
+    type_validation_map: BTreeMap<String, (bool, bool)>,
+    query_as_macros: Vec<QueryAsMacro>,
+}
+
+impl GardeVisitor {
+    fn finish(self) -> ParsedGardeFile {
+        ParsedGardeFile {
+            derived_types: self.derived_types,
+            manual_deserialize_impls: self.manual_deserialize_impls,
+            manual_validate_impls: self.manual_validate_impls,
+            type_validation_map: self.type_validation_map,
+            query_as_macros: self.query_as_macros,
+        }
+    }
+}
+
+impl<'ast> Visit<'ast> for GardeVisitor {
+    fn visit_item_struct(&mut self, item: &'ast syn::ItemStruct) {
+        let macros = derive_macros(&item.attrs);
+        let has_boundary = macros.iter().any(|name| is_input_boundary_derive(name));
+        let has_validate = macros.iter().any(|name| is_validate_derive(name));
+        let has_non_primitive_fields = struct_has_non_primitive_fields(item);
+        let name = item.ident.to_string();
+
+        if has_boundary {
+            let boundary_macros = macros
+                .iter()
+                .filter(|name| is_input_boundary_derive(name))
+                .cloned()
+                .collect();
+            self.derived_types.push(DerivedBoundaryType {
+                line: span_line(item.span()),
+                name: name.clone(),
+                boundary_kind: BoundaryKind::Struct,
+                boundary_macros,
+                has_validate_derive: has_validate,
+                has_non_primitive_fields,
+            });
+        }
+
+        let _ = self.type_validation_map
+            .insert(name, (has_non_primitive_fields, has_validate));
+
+        syn::visit::visit_item_struct(self, item);
+    }
+
+    fn visit_item_enum(&mut self, item: &'ast syn::ItemEnum) {
+        let macros = derive_macros(&item.attrs);
+        let has_boundary = macros.iter().any(|name| is_input_boundary_derive(name));
+        let has_validate = macros.iter().any(|name| is_validate_derive(name));
+        let has_non_primitive_fields = enum_has_non_primitive_fields(item);
+        let name = item.ident.to_string();
+
+        if has_boundary {
+            let boundary_macros = macros
+                .iter()
+                .filter(|name| is_input_boundary_derive(name))
+                .cloned()
+                .collect();
+            self.derived_types.push(DerivedBoundaryType {
+                line: span_line(item.span()),
+                name: name.clone(),
+                boundary_kind: BoundaryKind::Enum,
+                boundary_macros,
+                has_validate_derive: has_validate,
+                has_non_primitive_fields,
+            });
+        }
+
+        let _ = self.type_validation_map
+            .insert(name, (has_non_primitive_fields, has_validate));
+
+        syn::visit::visit_item_enum(self, item);
+    }
+
+    fn visit_item_impl(&mut self, item: &'ast syn::ItemImpl) {
+        let Some(trait_path) = item.trait_.as_ref().map(|(_, path, _)| path) else {
+            syn::visit::visit_item_impl(self, item);
+            return;
+        };
+        let Some(type_name) = self_ty_name(&item.self_ty) else {
+            syn::visit::visit_item_impl(self, item);
+            return;
+        };
+        let trait_name = path_to_string(trait_path);
+        if trait_name == "Deserialize" || trait_name.ends_with("::Deserialize") {
+            self.manual_deserialize_impls.push(ManualImpl {
+                line: span_line(item.span()),
+                type_name: type_name.clone(),
+            });
+        }
+        if trait_name == "Validate" || trait_name.ends_with("::Validate") {
+            let _ = self.manual_validate_impls.insert(type_name);
+        }
+        syn::visit::visit_item_impl(self, item);
+    }
+
+    fn visit_macro(&mut self, mac: &'ast syn::Macro) {
+        let macro_name = path_to_string(&mac.path);
+        if macro_name == "query_as" || macro_name.ends_with("::query_as") {
+            self.query_as_macros.push(QueryAsMacro {
+                line: span_line(mac.span()),
+                macro_name,
+            });
+        }
+        syn::visit::visit_macro(self, mac);
+    }
+}
+
+fn derive_macros(attrs: &[syn::Attribute]) -> Vec<String> {
+    let mut macros = Vec::new();
+    for attr in attrs {
+        if !attr.path().is_ident("derive") {
+            continue;
+        }
+        if let syn::Meta::List(list) = &attr.meta {
+            if let Ok(paths) = list.parse_args_with(
+                syn::punctuated::Punctuated::<syn::Path, syn::Token![,]>::parse_terminated,
+            ) {
+                macros.extend(paths.iter().map(path_to_string));
+            }
+        }
+    }
+    macros
+}
+
+fn is_input_boundary_derive(macro_name: &str) -> bool {
+    ["Deserialize", "Parser", "Args", "FromRow"]
+        .iter()
+        .any(|name| macro_name == *name || macro_name.ends_with(&format!("::{name}")))
+}
+
+fn is_validate_derive(macro_name: &str) -> bool {
+    macro_name == "Validate" || macro_name.ends_with("::Validate")
+}
+
+fn struct_has_non_primitive_fields(item: &syn::ItemStruct) -> bool {
+    match &item.fields {
+        syn::Fields::Named(fields) => fields.named.iter().any(|field| type_needs_validation(&field.ty)),
+        syn::Fields::Unnamed(fields) => fields
+            .unnamed
+            .iter()
+            .any(|field| type_needs_validation(&field.ty)),
+        syn::Fields::Unit => false,
+    }
+}
+
+fn enum_has_non_primitive_fields(item: &syn::ItemEnum) -> bool {
+    item.variants.iter().any(|variant| match &variant.fields {
+        syn::Fields::Named(fields) => fields.named.iter().any(|field| type_needs_validation(&field.ty)),
+        syn::Fields::Unnamed(fields) => fields
+            .unnamed
+            .iter()
+            .any(|field| type_needs_validation(&field.ty)),
+        syn::Fields::Unit => false,
+    })
+}
+
+fn type_needs_validation(ty: &syn::Type) -> bool {
+    !type_is_primitive_safe(ty)
+}
+
+fn type_is_primitive_safe(ty: &syn::Type) -> bool {
+    match ty {
+        syn::Type::Path(type_path) => {
+            let Some(last) = type_path.path.segments.last() else {
+                return false;
+            };
+            let ident = last.ident.to_string();
+            if matches!(
+                ident.as_str(),
+                "bool"
+                    | "char"
+                    | "u8"
+                    | "u16"
+                    | "u32"
+                    | "u64"
+                    | "u128"
+                    | "usize"
+                    | "i8"
+                    | "i16"
+                    | "i32"
+                    | "i64"
+                    | "i128"
+                    | "isize"
+                    | "f32"
+                    | "f64"
+            ) {
+                return true;
+            }
+            if ident == "Option" {
+                if let syn::PathArguments::AngleBracketed(args) = &last.arguments {
+                    if args.args.len() == 1 {
+                        if let Some(syn::GenericArgument::Type(inner)) = args.args.first() {
+                            return type_is_primitive_safe(inner);
+                        }
+                    }
+                }
+            }
+            false
+        }
+        syn::Type::Tuple(tuple) => tuple.elems.iter().all(type_is_primitive_safe),
+        _ => false,
+    }
+}
+
+fn self_ty_name(ty: &syn::Type) -> Option<String> {
+    match ty {
+        syn::Type::Path(type_path) => type_path.path.segments.last().map(|segment| segment.ident.to_string()),
+        _ => None,
+    }
+}
+
+fn path_to_string(path: &syn::Path) -> String {
+    path.to_token_stream().to_string().replace(' ', "")
+}
+
+fn span_line(span: proc_macro2::Span) -> usize {
+    span.start().line
+}
