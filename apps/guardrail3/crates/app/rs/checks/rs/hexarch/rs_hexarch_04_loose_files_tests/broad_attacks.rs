@@ -38,6 +38,11 @@ fn loose_files_in_all_owned_container_dirs_hit_every_owned_container() {
 
     let results = run_family(tmp.path());
     let errors = errors_by_id(&results, "RS-HEXARCH-04");
+    assert_eq!(
+        errors.len(),
+        expected_files.len(),
+        "expected exactly one loose-file hit per owned container: {errors:#?}"
+    );
     let actual_files = errors
         .iter()
         .filter_map(|error| error.file.clone())
@@ -50,5 +55,54 @@ fn loose_files_in_all_owned_container_dirs_hit_every_owned_container() {
     for error in &errors {
         assert!(error.title.contains("loose files"));
         assert!(error.message.contains("mod.rs"));
+    }
+}
+
+#[test]
+fn multiple_loose_files_in_all_owned_container_dirs_emit_one_error_per_container() {
+    let tmp = copy_fixture();
+    let expected_files = all_owned_container_paths()
+        .into_iter()
+        .collect::<BTreeSet<_>>();
+    for path in &expected_files {
+        write_file(tmp.path(), &format!("{path}/mod.rs"), "// stray");
+        write_file(tmp.path(), &format!("{path}/README.md"), "# stray");
+    }
+
+    let results = run_family(tmp.path());
+    let errors = errors_by_id(&results, "RS-HEXARCH-04");
+    let actual_files = errors
+        .iter()
+        .filter_map(|error| error.file.clone())
+        .collect::<BTreeSet<_>>();
+
+    assert_eq!(actual_files, expected_files, "{errors:#?}");
+    assert_eq!(errors.len(), expected_files.len(), "{errors:#?}");
+    for error in &errors {
+        assert!(error.message.contains("mod.rs"), "{error:#?}");
+        assert!(error.message.contains("README.md"), "{error:#?}");
+    }
+}
+
+#[test]
+fn near_miss_placeholder_files_hit_every_owned_container() {
+    let tmp = copy_fixture();
+    let expected_files = all_owned_container_paths()
+        .into_iter()
+        .collect::<BTreeSet<_>>();
+    for path in &expected_files {
+        write_file(tmp.path(), &format!("{path}/.gitignore"), "target/");
+    }
+
+    let results = run_family(tmp.path());
+    let errors = errors_by_id(&results, "RS-HEXARCH-04");
+    let actual_files = errors
+        .iter()
+        .filter_map(|error| error.file.clone())
+        .collect::<BTreeSet<_>>();
+
+    assert_eq!(actual_files, expected_files, "{errors:#?}");
+    for error in &errors {
+        assert!(error.message.contains(".gitignore"), "{error:#?}");
     }
 }

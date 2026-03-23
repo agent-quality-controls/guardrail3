@@ -10,6 +10,7 @@ pub fn check(input: &ContainerHexarchInput<'_>, results: &mut Vec<CheckResult>) 
         .iter()
         .filter(|file| file.as_str() != ".gitkeep")
         .cloned()
+        .chain(input.symlink_files.iter().cloned())
         .collect();
 
     if bad_files.is_empty() || (input.dirs.is_empty() && !input.has_gitkeep) {

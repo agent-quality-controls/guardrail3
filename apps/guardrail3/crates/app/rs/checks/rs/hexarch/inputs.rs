@@ -60,6 +60,7 @@ pub struct DirectionalContainerHexarchInput<'a> {
     pub rel_path: &'a str,
     pub label: &'a str,
     pub dirs: &'a [String],
+    pub symlink_dirs: &'a [String],
 }
 
 impl<'a> DirectionalContainerHexarchInput<'a> {
@@ -69,6 +70,7 @@ impl<'a> DirectionalContainerHexarchInput<'a> {
             rel_path: &facts.rel_path,
             label: &facts.label,
             dirs: &facts.dirs,
+            symlink_dirs: &facts.symlink_dirs,
         }
     }
 }
@@ -78,7 +80,9 @@ pub struct ContainerHexarchInput<'a> {
     pub rel_path: &'a str,
     pub label: &'a str,
     pub dirs: &'a [String],
+    pub symlink_dirs: &'a [String],
     pub files: &'a [String],
+    pub symlink_files: &'a [String],
     pub has_gitkeep: bool,
 }
 
@@ -89,7 +93,9 @@ impl<'a> ContainerHexarchInput<'a> {
             rel_path: &facts.rel_path,
             label: &facts.label,
             dirs: &facts.dirs,
+            symlink_dirs: &facts.symlink_dirs,
             files: &facts.files,
+            symlink_files: &facts.symlink_files,
             has_gitkeep: facts.has_gitkeep,
         }
     }

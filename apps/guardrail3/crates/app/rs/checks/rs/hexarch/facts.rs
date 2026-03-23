@@ -30,6 +30,7 @@ pub struct DirectionalContainerFacts {
     pub rel_path: String,
     pub label: String,
     pub dirs: Vec<String>,
+    pub symlink_dirs: Vec<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -38,7 +39,9 @@ pub struct ContainerFacts {
     pub rel_path: String,
     pub label: String,
     pub dirs: Vec<String>,
+    pub symlink_dirs: Vec<String>,
     pub files: Vec<String>,
+    pub symlink_files: Vec<String>,
     pub has_gitkeep: bool,
 }
 
@@ -248,12 +251,16 @@ fn collect_hex_roots(
 
     for group in ["adapters", "ports"] {
         let rel_path = ProjectTree::join_rel(crates_rel_dir, group);
+        if !tree.dir_exists(&rel_path) {
+            continue;
+        }
         let snapshot = dir_snapshot(tree, &rel_path);
         directional_containers.push(DirectionalContainerFacts {
             app_name: app_name.to_owned(),
             rel_path: rel_path.clone(),
             label: relative_hex_label(app_rel_dir, &rel_path),
             dirs: snapshot.dirs,
+            symlink_dirs: snapshot.symlink_dirs,
         });
     }
 
@@ -271,12 +278,18 @@ fn collect_hex_roots(
             app_name: app_name.to_owned(),
             rel_path: rel_path.clone(),
             label: relative_hex_label(app_rel_dir, &rel_path),
-            has_gitkeep: snapshot.files.iter().any(|file| file == ".gitkeep"),
+            has_gitkeep: snapshot.files.iter().any(|file| file == ".gitkeep")
+                && !snapshot.symlink_files.iter().any(|file| file == ".gitkeep"),
             dirs: snapshot.dirs.clone(),
+            symlink_dirs: snapshot.symlink_dirs.clone(),
             files: snapshot.files.clone(),
+            symlink_files: snapshot.symlink_files.clone(),
         });
 
         for subdir in &snapshot.dirs {
+            if snapshot.symlink_dirs.iter().any(|dir| dir == subdir) {
+                continue;
+            }
             let leaf_rel = ProjectTree::join_rel(&rel_path, subdir);
             let leaf_snapshot = dir_snapshot(tree, &leaf_rel);
             let has_cargo = leaf_snapshot.files.iter().any(|file| file == "Cargo.toml");

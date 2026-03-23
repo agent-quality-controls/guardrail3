@@ -1,5 +1,10 @@
 mod broad_attacks;
+mod file_type_parity;
 mod gitkeep_edges;
 mod golden;
+mod ignored_files;
+mod inventory;
+mod non_owned_boundaries;
 mod ownership;
 mod replacement_edges;
+mod symlink_edges;
