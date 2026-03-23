@@ -5,10 +5,7 @@ use serde_yaml::Value as YamlValue;
 
 use super::facts::{PublishableCrateFacts, ReleaseEdgeFacts, RepoReleaseFacts, WorkflowFacts};
 use super::inputs::{PublishableCrateReleaseInput, ReleaseEdgeInput, RepoReleaseInput};
-use super::release_support::{
-    binary_release_present, extract_workflow_analysis, linux_target_present,
-    publish_dry_run_step_present, registry_token_present, release_plz_step_present,
-};
+use super::release_support::extract_workflow_analysis;
 use crate::adapters::outbound::fs::RealFileSystem;
 use crate::adapters::outbound::tool_runner::RealToolChecker;
 use crate::app::core::project_walker::walk_project;
@@ -52,6 +49,8 @@ pub fn dir_entry(dirs: &[&str], files: &[&str]) -> DirEntry {
     DirEntry {
         dirs: dirs.iter().map(|value| (*value).to_owned()).collect(),
         files: files.iter().map(|value| (*value).to_owned()).collect(),
+        symlink_dirs: Vec::new(),
+        symlink_files: Vec::new(),
     }
 }
 
@@ -115,7 +114,6 @@ pub fn repo_facts() -> RepoReleaseFacts {
         release_plz_rel_path: "release-plz.toml".to_owned(),
         release_plz_exists: false,
         release_plz_parsed: None,
-        release_plz_has_workspace: false,
         release_plz_package_names: BTreeSet::new(),
         cliff_rel_path: "cliff.toml".to_owned(),
         cliff_exists: false,
@@ -136,11 +134,7 @@ pub fn workflow_from_yaml(rel_path: &str, yaml: &str) -> WorkflowFacts {
     let analysis = extract_workflow_analysis(&parsed);
     WorkflowFacts {
         rel_path: rel_path.to_owned(),
-        has_release_plz_step: release_plz_step_present(&analysis),
-        has_publish_dry_run_step: publish_dry_run_step_present(&analysis),
-        has_registry_token: registry_token_present(&analysis),
-        has_binary_release: binary_release_present(&analysis),
-        has_linux_target: linux_target_present(&analysis),
+        analysis,
     }
 }
 
@@ -175,6 +169,7 @@ pub fn edge_facts() -> ReleaseEdgeFacts {
         crate_name: "example".to_owned(),
         cargo_rel_path: "crates/example/Cargo.toml".to_owned(),
         dep_name: "dep".to_owned(),
+        dep_package_name: "dep".to_owned(),
         section_label: "dependencies".to_owned(),
         target_label: None,
         has_path: true,

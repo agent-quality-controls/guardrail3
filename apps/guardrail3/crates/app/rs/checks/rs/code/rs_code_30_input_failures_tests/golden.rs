@@ -24,6 +24,8 @@ fn golden_tree_has_no_code_input_failures() {
                 DirEntry {
                     dirs: vec!["src".to_owned()],
                     files: vec!["Cargo.toml".to_owned(), "guardrail3.toml".to_owned()],
+                    symlink_dirs: vec![],
+                    symlink_files: vec![],
                 },
             ),
             (
@@ -31,6 +33,8 @@ fn golden_tree_has_no_code_input_failures() {
                 DirEntry {
                     dirs: Vec::new(),
                     files: vec!["lib.rs".to_owned()],
+                    symlink_dirs: vec![],
+                    symlink_files: vec![],
                 },
             ),
         ]),

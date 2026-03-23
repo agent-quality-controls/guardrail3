@@ -37,6 +37,8 @@ pub struct HexRootInput<'a> {
     pub crates_rel_dir: &'a str,
     pub dirs: &'a [String],
     pub files: &'a [String],
+    pub symlink_dirs: &'a [String],
+    pub symlink_files: &'a [String],
 }
 
 impl<'a> HexRootInput<'a> {
@@ -47,6 +49,8 @@ impl<'a> HexRootInput<'a> {
             crates_rel_dir: &facts.crates_rel_dir,
             dirs: &facts.dirs,
             files: &facts.files,
+            symlink_dirs: &facts.symlink_dirs,
+            symlink_files: &facts.symlink_files,
         }
     }
 }

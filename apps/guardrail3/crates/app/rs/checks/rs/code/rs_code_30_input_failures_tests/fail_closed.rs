@@ -21,6 +21,8 @@ fn family_surfaces_source_parse_failures_with_exact_owned_hit_set() {
                 DirEntry {
                     dirs: vec!["src".to_owned()],
                     files: vec!["Cargo.toml".to_owned()],
+                    symlink_dirs: vec![],
+                    symlink_files: vec![],
                 },
             ),
             (
@@ -28,6 +30,8 @@ fn family_surfaces_source_parse_failures_with_exact_owned_hit_set() {
                 DirEntry {
                     dirs: Vec::new(),
                     files: vec!["lib.rs".to_owned()],
+                    symlink_dirs: vec![],
+                    symlink_files: vec![],
                 },
             ),
         ]),
@@ -73,6 +77,8 @@ fn family_surfaces_guardrail_policy_parse_failures_with_exact_owned_hit_set() {
                 DirEntry {
                     dirs: vec!["src".to_owned()],
                     files: vec!["Cargo.toml".to_owned(), "guardrail3.toml".to_owned()],
+                    symlink_dirs: vec![],
+                    symlink_files: vec![],
                 },
             ),
             (
@@ -80,6 +86,8 @@ fn family_surfaces_guardrail_policy_parse_failures_with_exact_owned_hit_set() {
                 DirEntry {
                     dirs: Vec::new(),
                     files: vec!["lib.rs".to_owned()],
+                    symlink_dirs: vec![],
+                    symlink_files: vec![],
                 },
             ),
         ]),

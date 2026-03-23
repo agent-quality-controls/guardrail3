@@ -51,8 +51,7 @@
 - unreadable/unparsable source fail-open for the rest of the family beyond `RS-HEXARCH-22/23`
 - malformed `guardrail3.toml` fail-open for the rest of the boundary-driven path beyond `RS-HEXARCH-15`
 - direct proof that nested hex roots and top-level roots are attacked together
-- `dependency_facts` still infers internal layers from raw path segments, which leaves a false-positive risk for out-of-tree path deps whose directory names happen to contain `domain`, `ports`, `app`, or `adapters`
-- targeted Cargo verification is still blocked by crate-wide `-D dead-code` noise, including existing unused helpers in hexarch/release test support
+- targeted Cargo verification is currently blocked by unrelated release-family compile drift already present in the tree, not by the hexarch lane itself
 
 ## Coverage matrix
 
@@ -65,8 +64,8 @@ Status key:
 
 | Rule | Current tests | Old corpus signal | Golden | Broad attack | Multi-root | Nested-root | False-positive | Fail-closed | Severity exact | Notes |
 |------|---------------|-------------------|--------|--------------|------------|-------------|----------------|-------------|----------------|-------|
-| `RS-HEXARCH-01` | 6 | `rule_01.rs` has 45 tests | yes | partial | yes | partial | partial | partial | no | moved to `*_tests/`; now proves owned outer hit set, nested no-cascade behavior, and file-vs-dir replacement at both outer and nested `crates/` roots |
-| `RS-HEXARCH-02` | 7 | `rule_02.rs` has 42 tests | yes | partial | yes | partial | partial | partial | no | moved to `*_tests/`; now proves required-dir replacement, outer-adapters replacement, nested/outer `macros`, and root loose-file visibility; top-level files under `crates/` no longer evade the rule |
+| `RS-HEXARCH-01` | 33 | `rule_01.rs` has 45 tests | yes | yes | yes | yes | yes | partial | partial | converged under repeated 4-agent attack rounds; now proves owned outer hit set, broad missing/empty/file and symlink attacks, single-app isolation, discovery-scope ownership for newly discovered Rust apps, `packages/*` non-ownership, coexistence with `RS-HEXARCH-12`, Unicode/spaced app discovery, and that nested missing/file/empty/broken-symlink/symlink-loop `crates/` cases are not owned because rule 01 is app-root-only |
+| `RS-HEXARCH-02` | 43 | `rule_02.rs` has 42 tests | yes | yes | yes | yes | yes | partial | partial | converged under repeated fresh 4-agent attack rounds; walker now preserves immediate symlink-child identity while still following links for discovery, so rule 02 again treats required child symlinks as invalid exact-contents entries instead of silently accepting them by name. The suite now covers valid/broken/non-dir child symlinks, outer `adapters/` symlink reachability, nested `.gitkeep` parity, `.gitignore` and loose `Cargo.toml` at the root, `.gitkeep/` as an unexpected directory, a maximally mixed single-root attack, a nested mixed attack with nested path exactness, all-four-missing-with-`.gitkeep`, non-owned nested-lookalike shapes under `packages/*`, and the final `.gitkeep`-symlink loophole where only a real `.gitkeep` file is exempt. |
 | `RS-HEXARCH-03` | 5 | `rule_03.rs` has 48 tests | yes | partial | yes | partial | partial | partial | no | moved to `*_tests/`; now proves directional file-vs-dir replacement across owned roots and nested no-cascade behavior, but broader ports/adapters parity still needs expansion |
 | `RS-HEXARCH-04` | 5 | `rule_04.rs` has 39 tests | yes | partial | yes | partial | partial | partial | no | moved to `*_tests/`; now proves loose-file replacement semantics, `.gitkeep`-only non-hits, and nested-root `.gitkeep` boundaries, while keeping files-only containers owned by rule 05 |
 | `RS-HEXARCH-05` | 6 | `rule_05.rs` has 39 tests | yes | partial | yes | partial | partial | partial | no | moved to `*_tests/`; now proves empty-container replacement semantics, nested ownership, `.gitkeep` suppression, and exact 20-hit broad emptying across owned safe containers |
@@ -87,19 +86,19 @@ Status key:
 
 | Rule | Current tests | Old corpus signal | Golden | Broad attack | Multi-root | Nested-root | False-positive | Fail-closed | Severity exact | Notes |
 |------|---------------|-------------------|--------|--------------|------------|-------------|----------------|-------------|----------------|-------|
-| `RS-HEXARCH-13` | 1 | legacy `test_hex_arch_checks.rs` only | no | partial | yes | n/a | partial | no | no | moved to `*_tests/`; now proves forbidden direct dependency edges across a broader graph |
+| `RS-HEXARCH-13` | 2 | legacy `test_hex_arch_checks.rs` only | no | partial | yes | n/a | yes | no | no | moved to `*_tests/`; now proves forbidden direct dependency edges across a broader graph and out-of-tree path deps with layer-like names staying out of scope |
 | `RS-HEXARCH-14` | 1 | legacy `test_hex_arch_checks.rs` only | no | partial | yes | n/a | partial | no | no | moved to `*_tests/`; now proves exact inventory messages for multiple resolved path deps |
 | `RS-HEXARCH-15` | 6 | legacy `test_hex_arch_checks.rs` only | yes | partial | yes | n/a | yes | yes | no | parse-error fail-closed added; now proves golden non-hit, single-app and all-app omission, and non-app non-hit |
 | `RS-HEXARCH-16` | 1 | new rule, no old big suite | no | partial | yes | n/a | partial | no | no | moved to `*_tests/`; now proves layered patch/replace targets error while non-layered targets do not |
-| `RS-HEXARCH-17` | 1 | new rule, no old big suite | no | partial | yes | n/a | partial | no | no | moved to `*_tests/`; now proves forbidden inherited workspace edges across a broader graph |
-| `RS-HEXARCH-18` | 1 | new rule, no old big suite | no | partial | yes | n/a | partial | no | no | moved to `*_tests/`; now proves forbidden renamed edges across a broader graph |
+| `RS-HEXARCH-17` | 3 | new rule, no old big suite | no | partial | yes | n/a | yes | no | partial | moved to `*_tests/`; now proves forbidden inherited workspace edges across a broader graph, version-only inherited deps staying external, and inherited renamed path deps being owned once by rule 17 |
+| `RS-HEXARCH-18` | 2 | new rule, no old big suite | no | partial | yes | n/a | yes | no | partial | moved to `*_tests/`; now proves forbidden renamed edges across a broader graph, external renamed deps without internal path resolution staying clean, and workspace-inherited renamed deps staying with rule 17 |
 | `RS-HEXARCH-19` | 3 | new rule, no old big suite | no | partial | partial | n/a | partial | no | partial | moved to `*_tests/`; now proves one-hit same-layer cycle exactness, mixed-layer non-hit, and exact result shape; collector hardened so cycles with unlayered members no longer count as same-layer |
-| `RS-HEXARCH-20` | 1 | new rule, no old big suite | no | partial | yes | n/a | partial | no | partial | moved to `*_tests/`; now proves forbidden dev edges warn while allowed dev edges do not |
-| `RS-HEXARCH-21` | 5 | legacy `test_hex_arch_checks.rs` + newer policy | no | partial | yes | n/a | partial | partial | no | moved to `*_tests/`; now proves dev-deps stay out, build-deps stay in, inherited workspace externals still error, and pure domain/ports path deps stay clean; still needs broader allowlist/config breadth and out-of-tree path classification hardening |
-| `RS-HEXARCH-22` | 4 | new rule, no old big suite | yes | partial | no | n/a | partial | yes | no | collector fail-closed added; source analysis now descends into inline modules; now proves balanced-count, DTO-only, private-trait, non-ports, and multi-file aggregation cases, but still needs broader fixture-backed ownership breadth |
-| `RS-HEXARCH-23` | 6 | new rule, no old big suite | yes | partial | no | n/a | yes | yes | no | collector fail-closed added; source analysis now descends into inline modules; now proves golden non-hit, non-adapter non-hit, `pub(crate)` non-hit, nested-file hit, and inline-module hit |
-| `RS-HEXARCH-24` | 4 | new rule, no old big suite | yes | partial | yes | n/a | yes | no | no | moved to `*_tests/`; now proves cross-app leaks across dependency/dev/build/target sections, plus golden and `packages/` non-hits |
-| `RS-HEXARCH-25` | 2 | new rule, no old big suite | yes | partial | yes | n/a | partial | no | no | moved to `*_tests/`; now proves forbidden target edges across all three target table kinds and golden non-hit |
+| `RS-HEXARCH-20` | 3 | new rule, no old big suite | no | partial | yes | n/a | yes | no | partial | moved to `*_tests/`; now proves forbidden dev edges warn while allowed dev edges do not, target dev edges stay with rule 25, and out-of-tree paths with layer-like names do not false-positive |
+| `RS-HEXARCH-21` | 7 | legacy `test_hex_arch_checks.rs` + newer policy | no | partial | yes | n/a | yes | partial | no | moved to `*_tests/`; now proves dev-deps stay out, build-deps stay in, inherited workspace externals still error, workspace-inherited aliases resolve to real package names, and out-of-tree `domain` / `ports` path deps no longer fail open as fake pure internals; still needs broader allowlist/config breadth |
+| `RS-HEXARCH-22` | 4 | new rule, no old big suite | yes | partial | no | n/a | partial | yes | no | collector fail-closed added; source analysis now descends into inline modules and follows only reachable module files from `lib.rs` / `main.rs`, so orphan files and `#[cfg(test)]` impls no longer perturb the rule; now proves balanced-count, DTO-only, private-trait, non-ports, multi-file aggregation, and unreachable/test-only non-hits |
+| `RS-HEXARCH-23` | 6 | new rule, no old big suite | yes | partial | no | n/a | yes | yes | no | collector fail-closed added; source analysis now descends into inline modules and follows only reachable module files from `lib.rs` / `main.rs`, so orphan files and `#[cfg(test)]` public traits no longer perturb the rule; now proves golden non-hit, non-adapter non-hit, `pub(crate)` non-hit, nested-file hit, inline-module hit, and unreachable/test-only non-hits |
+| `RS-HEXARCH-24` | 5 | new rule, no old big suite | yes | partial | yes | n/a | yes | no | no | moved to `*_tests/`; now proves cross-app leaks across dependency/dev/build/target sections, plus golden, `packages/` non-hits, and external same-name collisions staying out of scope |
+| `RS-HEXARCH-25` | 3 | new rule, no old big suite | yes | partial | yes | n/a | yes | no | no | moved to `*_tests/`; now proves forbidden target edges across all three target table kinds, golden non-hit, and target-specific external same-name collisions staying out of scope |
 
 ## Old-to-new mapping starting point
 
@@ -119,9 +118,9 @@ Status key:
 
 ## First implementation slice
 
-1. Backfill old-corpus edge cases for `RS-HEXARCH-01..12` where breadth is still below the original suites.
-2. Continue source-rule breadth for `RS-HEXARCH-22/23`, then policy/dependency breadth for `RS-HEXARCH-20/21`.
-3. Add missing severity-exactness assertions across the family.
+1. Resume repeated fresh attack rounds at `RS-HEXARCH-03`, carrying forward the same “4 agents until convergence” protocol used for `RS-HEXARCH-01/02`.
+2. Continue graph/dependency breadth for `RS-HEXARCH-14/16/19/24/25`, especially severity-exactness and any remaining workspace/target ownership edges.
+3. Then return to structural mixed-combination attacks where `RS-HEXARCH-01..06` still lag the old corpus.
 
 ## Success condition
 
