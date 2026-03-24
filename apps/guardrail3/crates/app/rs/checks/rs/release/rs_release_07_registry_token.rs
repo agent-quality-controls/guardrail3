@@ -1,6 +1,7 @@
 use crate::domain::report::{CheckResult, Severity};
 
 use super::inputs::RepoReleaseInput;
+use super::release_support::registry_token_present;
 
 const ID: &str = "RS-RELEASE-07";
 
@@ -9,7 +10,7 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
         .repo
         .workflows
         .iter()
-        .find(|workflow| workflow.has_registry_token);
+        .find(|workflow| registry_token_present(&workflow.analysis));
     match workflow {
         Some(workflow) => results.push(
             CheckResult {

@@ -120,6 +120,7 @@ pub fn repo_facts() -> RepoReleaseFacts {
         cliff_parsed: None,
         workflows: Vec::new(),
         publishable_crate_names: BTreeSet::new(),
+        publishable_binary_crate_names: BTreeSet::new(),
         publishable_count: 0,
         non_publishable_count: 0,
         semver_checks_installed: false,
@@ -139,9 +140,12 @@ pub fn workflow_from_yaml(rel_path: &str, yaml: &str) -> WorkflowFacts {
 }
 
 pub fn crate_facts(name: &str) -> PublishableCrateFacts {
+    let mut binary_target_names = BTreeSet::new();
+    let _ = binary_target_names.insert(name.to_owned());
     PublishableCrateFacts {
         name: name.to_owned(),
         cargo_rel_path: "crates/example/Cargo.toml".to_owned(),
+        binary_target_names,
         publishable: true,
         is_binary: false,
         is_library: true,

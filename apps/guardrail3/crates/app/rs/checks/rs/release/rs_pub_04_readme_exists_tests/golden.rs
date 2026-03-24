@@ -16,4 +16,6 @@ fn inventories_existing_readme_for_publishable_crate() {
     assert_eq!(results[0].severity, Severity::Info);
     assert!(results[0].inventory);
     assert_eq!(results[0].file.as_deref(), Some("crates/example/README.md"));
+    assert!(results[0].message.contains("README exists"));
+    assert!(results[0].message.contains("crates/example/README.md"));
 }

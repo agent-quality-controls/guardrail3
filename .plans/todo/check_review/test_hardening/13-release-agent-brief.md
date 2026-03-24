@@ -64,6 +64,17 @@ Closed in the current pass:
 - `RS-RELEASE-12` now also fail-closes unreadable cached Cargo/release/workflow files instead of silently skipping them
 - `RS-RELEASE-03` now enforces the canonical `release-plz.toml` workspace baseline
 - `RS-RELEASE-04` now enforces the canonical `cliff.toml` git baseline and parser coverage
+- `RS-RELEASE-01` now only inventories canonical root license filenames
+- `RS-BIN-01` now rejects unrelated build/release jobs but accepts split build/publish jobs linked by `needs:`
+- `RS-BIN-02` now follows the linked release path for Linux detection and also accepts Linux from matrix-driven `runs-on`
+- `RS-PUB-13` now correctly recognizes nested `[package.metadata.docs.rs]` TOML
+- `RS-PUB-02`, `RS-PUB-13`, `RS-PUB-14`, `RS-BIN-03`, and `RS-RELEASE-12` now have stronger family-level manifest/fixture coverage for the fixed semantics
+- the binary helper layer has now been pushed further through strict rule-by-rule agent attack rounds:
+  - `RS-BIN-01` respects crate targeting through `-p`, `--package=`, `--bin`, `--bin=`, and `--manifest-path`
+  - `RS-BIN-01` no longer credits generic release builds to every binary crate in multi-binary repos
+  - `RS-BIN-01` exact-matches real release actions instead of raw substrings, and accepts both `action-gh-release` and `release-action`
+  - `RS-BIN-02` ignores echo/prose/`--target-dir` Linux noise, supports matrix `include`, and ties Linux-attribution to the current crate’s actual build step
+  - `RS-BIN-03` now has collector-backed warn/no-emit coverage for autodiscovered and explicit-bin manifests, not just stubbed fact tests
 
 Rules already migrated to rule-specific `*_tests/` directories:
 
@@ -125,11 +136,8 @@ Already completed with the richer fixture:
 
 Remaining open design limitation:
 
-- workflow facts still collapse parsed Actions structure into booleans before rule evaluation
-
-Likely active check bugs now covered by adversarial tests:
-
-- `RS-BIN-01` / `RS-BIN-02` probably still join unrelated build and release jobs into false passes
+- workflow rules now consume preserved parsed workflow structure, but semantic matching still relies on release-family helpers rather than a fuller Actions execution model
+- the strict four-agent adversarial loop has now converged across all `RS-RELEASE-*`, `RS-PUB-*`, and `RS-BIN-*` rules; new findings have stopped surfacing concrete checker bugs and are now mostly combinatorial test variants
 
 Closed from the adversarial pass:
 
@@ -138,13 +146,16 @@ Closed from the adversarial pass:
 - `RS-RELEASE-07` no longer treats `CARGO_REGISTRY_TOKEN` on `release-pr`-only steps as sufficient
 - workspace metadata inheritance from `[workspace.package]` is now honored for `RS-PUB-01/02/03/06/07` and `RS-RELEASE-11`
 - `publish = []` now suppresses publishable-crate scope correctly, both directly and through `publish.workspace = true`
+- `WorkflowFacts` now preserves parsed workflow structure, and `RS-RELEASE-05/06/07` plus `RS-BIN-01/02` now evaluate that structure directly instead of consuming pre-collapsed booleans
 
 If a new session reaches one of those boundaries, it should stop and call that out explicitly instead of faking realism.
 
 ## Verification note
 
 - `cargo check -p guardrail3 --lib` passes after the current release-family changes
-- targeted `cargo test -p guardrail3 --lib rs_pub_09_publish_dry_run -- --nocapture` gets past release-family compilation and is blocked by unrelated `deny` test compile errors outside the release family
+- `cargo check -p guardrail3 --tests` now passes again
+- `cargo test -p guardrail3 --lib --no-run` passes
+- targeted release-family tests are green for `RS-RELEASE-01`, `RS-RELEASE-03`, `RS-RELEASE-04`, `RS-RELEASE-05`, `RS-RELEASE-06`, `RS-RELEASE-07`, `RS-PUB-02`, `RS-PUB-13`, `RS-PUB-14`, `RS-RELEASE-12`, `RS-BIN-01`, `RS-BIN-02`, and `RS-BIN-03`
 
 ## Required attack classes
 

@@ -14,4 +14,10 @@ fn inventories_publishable_and_non_publishable_counts() {
     assert_eq!(results[0].id, "RS-PUB-12");
     assert_eq!(results[0].severity, Severity::Info);
     assert!(results[0].inventory);
+    assert_eq!(results[0].file.as_deref(), Some("Cargo.toml"));
+    assert_eq!(results[0].title, "Crate inventory");
+    assert_eq!(
+        results[0].message,
+        "Repo has 2 publishable crate(s) and 1 non-publishable crate(s)."
+    );
 }

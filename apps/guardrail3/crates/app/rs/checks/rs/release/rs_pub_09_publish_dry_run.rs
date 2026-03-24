@@ -10,6 +10,15 @@ pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckRe
         return;
     }
     let Some(run) = &krate.dry_run else {
+        results.push(CheckResult {
+            id: ID.to_owned(),
+            severity: Severity::Error,
+            title: format!("{}: publish dry-run missing", krate.name),
+            message: "Expected `cargo publish --dry-run` result in thorough mode, but no result was collected.".to_owned(),
+            file: Some(krate.cargo_rel_path.clone()),
+            line: None,
+            inventory: false,
+        });
         return;
     };
     results.push(if run.success {

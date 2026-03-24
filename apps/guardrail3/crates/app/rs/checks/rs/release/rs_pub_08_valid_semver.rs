@@ -9,7 +9,7 @@ pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckRe
     if !krate.publishable {
         return;
     }
-    if krate.workspace_version {
+    if krate.workspace_version && krate.version_valid {
         results.push(
             CheckResult {
                 id: ID.to_owned(),

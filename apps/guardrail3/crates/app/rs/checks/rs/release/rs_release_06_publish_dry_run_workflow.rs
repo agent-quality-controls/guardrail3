@@ -1,6 +1,7 @@
 use crate::domain::report::{CheckResult, Severity};
 
 use super::inputs::RepoReleaseInput;
+use super::release_support::publish_dry_run_step_present;
 
 const ID: &str = "RS-RELEASE-06";
 
@@ -9,7 +10,7 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
         .repo
         .workflows
         .iter()
-        .find(|workflow| workflow.has_publish_dry_run_step);
+        .find(|workflow| publish_dry_run_step_present(&workflow.analysis));
     match workflow {
         Some(workflow) => results.push(
             CheckResult {

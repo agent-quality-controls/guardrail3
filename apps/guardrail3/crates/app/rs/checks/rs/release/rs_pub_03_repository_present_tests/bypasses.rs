@@ -13,6 +13,12 @@ fn errors_without_repository_and_skips_non_publishable_crates() {
     assert_eq!(missing_results[0].id, "RS-PUB-03");
     assert_eq!(missing_results[0].severity, Severity::Error);
     assert!(!missing_results[0].inventory);
+    assert_eq!(
+        missing_results[0].file.as_deref(),
+        Some("crates/example/Cargo.toml")
+    );
+    assert!(missing_results[0].title.contains("repository"));
+    assert!(missing_results[0].message.contains("repository"));
 
     let mut non_publishable = crate_facts("x");
     non_publishable.publishable = false;
