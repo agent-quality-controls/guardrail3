@@ -112,7 +112,7 @@ Pattern per family:
 - `facts.rs` — normalized family facts
 - `inputs.rs` — minimal typed rule inputs
 - exactly one production file per rule
-- exactly one sidecar test file per rule
+- exactly one rule-specific sidecar test module directory per rule
 
 Example family:
 - [`apps/guardrail3/crates/app/rs/checks/rs/fmt`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/checks/rs/fmt)
@@ -130,12 +130,12 @@ Do not treat it as fully migrated production wiring yet. It is the reference sha
 Do not default to external integration tests for these family modules.
 
 The required pattern for new family code is:
-- each rule file has its own sidecar test file
+- each rule file has its own rule-specific sidecar test module directory
 - wired with:
 
 ```rust
 #[cfg(test)]
-#[path = "rs_fmt_01_exists_tests.rs"]
+#[path = "rs_fmt_01_exists_tests/mod.rs"]
 mod tests;
 ```
 
@@ -143,11 +143,13 @@ Reason:
 - keeps tests close to the family
 - avoids widening visibility just for tests
 - preserves exact one-rule/one-test traceability
+- allows test files to split by attack vector instead of collapsing into one file
 
 Avoid:
 - inline `mod tests { ... }` bodies in production files
 - exposing internals only for integration-test access
 - family-wide grouped sidecar files such as `fmt_tests.rs`, `cargo_tests.rs`, `clippy_tests.rs`, `deny_tests.rs`
+- one-off `*_tests.rs` sidecars as the long-term target
 - grouped production files such as `rs_clippy_thresholds.rs` or `rs_deny_bans.rs`
 
 ## Implementation Order
@@ -208,7 +210,7 @@ Do:
 - keep rules pure and tiny
 - keep extraction/parsing in orchestrators
 - build one family at a time
-- require one rule file and one rule-specific sidecar test file
+- require one rule file and one rule-specific sidecar test module directory
 - use structured parsers, never regex/grep/`contains()` on config/source semantics
 
 Don’t:

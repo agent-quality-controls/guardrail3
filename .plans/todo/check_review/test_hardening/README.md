@@ -19,7 +19,17 @@ The purpose is not to “add more tests”. The purpose is to make every rule ha
 - `13-release-agent-brief.md`
 - `14-clippy-deny-agent-brief.md`
 - `15-hooks-agent-brief.md`
-  - droppable per-family agent packets
+  - combined migration lane for shared + Rust hooks plus remaining routing/parity debt
+- `19-garde-agent-brief.md`
+- `20-cargo-agent-brief.md`
+- `21-deps-agent-brief.md`
+- `22-hooks-shared-agent-brief.md`
+- `23-hooks-rs-agent-brief.md`
+- `24-fmt-agent-brief.md`
+- `25-toolchain-agent-brief.md`
+- `26-test-agent-brief.md`
+- `27-libarch-agent-brief.md`
+  - droppable family/combined-lane agent packets
 - `16-hexarch-execution-plan.md`
   - exhaustive step-by-step implementation order for the full `rs/hexarch` hardening pass
 - `17-hooks-execution-plan.md`
