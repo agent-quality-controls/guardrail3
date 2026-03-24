@@ -10,7 +10,7 @@ The generator does not own:
 
 ## Ownership mode
 
-- exact-owned
+- semantic-patch
 
 ## Root selection
 
@@ -36,10 +36,13 @@ This contract must hold in mixed repositories containing:
 ## Required generator contract
 
 - every owned Rust policy root gets exactly one generator-owned `deny.toml`
-- each generated file encodes the exact local deny baseline for that root
+- each generated file contains the canonical guardrail-managed deny baseline for that root
 - service and library roots receive the correct local ban/license/source surface
 - generated content includes all required top-level sections owned by `RS-DENY`
-- root-local deny override data is validated, deduplicated, and merged into the correct section exactly once
+- root-local additive deny policy survives reruns only on additive ban surfaces:
+  - package bans
+  - feature bans
+- generator-owned skip, allow, license, source, and other relaxing surfaces are normalized back to the canonical contract on every run
 - generator never creates forbidden nested shadow configs or lower-precedence sibling configs
 
 ## Checker target
@@ -63,7 +66,9 @@ The generated result must satisfy the config-side `RS-DENY` contract for:
 - `RS-DENY` passes for the full repository shape
 
 2. `generate twice`
-- second generation is byte-identical for unchanged inputs
+- a second patch run is semantically stable
+- additive user ban entries survive
+- generator-owned baseline sections normalize to the same result
 
 3. negative mutation
 - mutating one generated deny/license/source surface produces the exact `RS-DENY-*` finding for that surface
