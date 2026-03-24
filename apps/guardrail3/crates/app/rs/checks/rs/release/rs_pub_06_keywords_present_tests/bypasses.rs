@@ -3,26 +3,58 @@ use super::super::check;
 use crate::domain::report::Severity;
 
 #[test]
-fn warns_on_missing_or_too_many_keywords_and_skips_non_publishable_crates() {
-    let mut missing = crate_facts("x");
-    missing.keywords_count = None;
-    let missing_input = crate_input(&missing);
-    let mut missing_results = Vec::new();
-    check(&missing_input, &mut missing_results);
-    assert_eq!(missing_results[0].severity, Severity::Warn);
+fn warns_when_keywords_are_missing_or_zero() {
+    for keywords_count in [None, Some(0)] {
+        let mut facts = crate_facts("x");
+        facts.keywords_count = keywords_count;
+        let input = crate_input(&facts);
+        let mut results = Vec::new();
 
-    let mut too_many = crate_facts("x");
-    too_many.keywords_count = Some(6);
-    let too_many_input = crate_input(&too_many);
-    let mut too_many_results = Vec::new();
-    check(&too_many_input, &mut too_many_results);
-    assert_eq!(too_many_results[0].severity, Severity::Warn);
+        check(&input, &mut results);
 
-    let mut non_publishable = crate_facts("x");
-    non_publishable.publishable = false;
-    non_publishable.keywords_count = None;
-    let non_publishable_input = crate_input(&non_publishable);
-    let mut non_publishable_results = Vec::new();
-    check(&non_publishable_input, &mut non_publishable_results);
-    assert!(non_publishable_results.is_empty());
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].id, "RS-PUB-06");
+        assert_eq!(results[0].severity, Severity::Warn);
+        assert!(!results[0].inventory);
+        assert_eq!(
+            results[0].file.as_deref(),
+            Some("crates/example/Cargo.toml")
+        );
+        assert!(results[0].title.contains("keywords missing"));
+        assert!(results[0].message.contains("1-5 `[package].keywords`"));
+    }
+}
+
+#[test]
+fn warns_when_too_many_keywords_are_present() {
+    let mut facts = crate_facts("x");
+    facts.keywords_count = Some(6);
+    let input = crate_input(&facts);
+    let mut results = Vec::new();
+
+    check(&input, &mut results);
+
+    assert_eq!(results.len(), 1);
+    assert_eq!(results[0].id, "RS-PUB-06");
+    assert_eq!(results[0].severity, Severity::Warn);
+    assert!(!results[0].inventory);
+    assert_eq!(
+        results[0].file.as_deref(),
+        Some("crates/example/Cargo.toml")
+    );
+    assert!(results[0].title.contains("too many keywords"));
+    assert!(results[0].message.contains("at most 5"));
+}
+
+#[test]
+fn skips_non_publishable_crates() {
+    let mut facts = crate_facts("x");
+    facts.publishable = false;
+    facts.keywords_count = None;
+    let input = crate_input(&facts);
+    let mut results = Vec::new();
+
+    check(&input, &mut results);
+
+    assert!(results.is_empty());
 }

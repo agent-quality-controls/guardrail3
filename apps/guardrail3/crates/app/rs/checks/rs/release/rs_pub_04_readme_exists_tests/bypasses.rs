@@ -21,6 +21,9 @@ fn warns_when_publishable_crate_has_no_readme_file() {
         results[0].file.as_deref(),
         Some("crates/example/Cargo.toml")
     );
+    assert!(results[0].title.contains("README missing"));
+    assert!(results[0].message.contains("example"));
+    assert!(results[0].message.contains("crates/example/README.md"));
 }
 
 #[test]

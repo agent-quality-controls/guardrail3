@@ -22,4 +22,9 @@ fn warns_on_publishable_crate_with_no_release_metadata() {
         results[0].file.as_deref(),
         Some("crates/example/Cargo.toml")
     );
+    assert!(results[0].title.contains("internal"));
+    assert!(results[0].message.contains("internal"));
+    assert!(results[0].message.contains("description"));
+    assert!(results[0].message.contains("license"));
+    assert!(results[0].message.contains("repository"));
 }

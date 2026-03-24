@@ -12,4 +12,10 @@ fn inventories_license_metadata_for_publishable_crate() {
     assert_eq!(results[0].id, "RS-PUB-02");
     assert_eq!(results[0].severity, Severity::Info);
     assert!(results[0].inventory);
+    assert_eq!(
+        results[0].file.as_deref(),
+        Some("crates/example/Cargo.toml")
+    );
+    assert!(results[0].title.contains("license"));
+    assert!(results[0].message.contains("license"));
 }

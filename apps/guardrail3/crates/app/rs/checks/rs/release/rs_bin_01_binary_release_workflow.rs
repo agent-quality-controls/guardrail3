@@ -2,6 +2,7 @@ use crate::domain::report::{CheckResult, Severity};
 
 use super::facts::RepoReleaseFacts;
 use super::inputs::PublishableCrateReleaseInput;
+use super::release_support::binary_release_present;
 
 const ID: &str = "RS-BIN-01";
 
@@ -14,10 +15,17 @@ pub fn check(
     if !krate.publishable || !krate.is_binary {
         return;
     }
-    let workflow = repos
-        .iter()
-        .flat_map(|repo| repo.workflows.iter())
-        .find(|workflow| workflow.has_binary_release);
+    let workflow = repos.iter().find_map(|repo| {
+        repo.workflows.iter().find(|workflow| {
+            binary_release_present(
+                &workflow.analysis,
+                &krate.name,
+                &krate.cargo_rel_path,
+                &krate.binary_target_names,
+                repo.publishable_binary_crate_names.len(),
+            )
+        })
+    });
     match workflow {
         Some(workflow) => results.push(
             CheckResult {

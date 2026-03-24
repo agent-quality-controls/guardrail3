@@ -28,10 +28,7 @@ pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckRe
         });
         return;
     }
-    if !content
-        .lines()
-        .any(|line| line.trim_start().starts_with('#'))
-    {
+    if !has_markdown_heading(content) {
         results.push(CheckResult {
             id: ID.to_owned(),
             severity: Severity::Warn,
@@ -66,3 +63,46 @@ pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckRe
 #[cfg(test)]
 #[path = "rs_pub_05_readme_quality_tests/mod.rs"]
 mod tests;
+
+fn has_markdown_heading(content: &str) -> bool {
+    let mut in_fenced_code = false;
+    let mut last_text_line_can_be_setext_heading = false;
+    for line in content.lines() {
+        let trimmed = line.trim_start();
+        if trimmed.starts_with("```") || trimmed.starts_with("~~~") {
+            in_fenced_code = !in_fenced_code;
+            last_text_line_can_be_setext_heading = false;
+            continue;
+        }
+        if in_fenced_code || line.starts_with("    ") || line.starts_with('\t') {
+            last_text_line_can_be_setext_heading = false;
+            continue;
+        }
+        if let Some(after_hashes) = trimmed.strip_prefix('#') {
+            if after_hashes.starts_with('#') {
+                let heading_text = trimmed.trim_start_matches('#');
+                if heading_text.starts_with(char::is_whitespace) {
+                    return true;
+                }
+                last_text_line_can_be_setext_heading = false;
+                continue;
+            }
+            if after_hashes.starts_with(char::is_whitespace) {
+                return true;
+            }
+            last_text_line_can_be_setext_heading = false;
+        }
+        if trimmed == "#" {
+            return true;
+        }
+        if !trimmed.is_empty() && trimmed.chars().all(|ch| ch == '=' || ch == '-') {
+            if last_text_line_can_be_setext_heading {
+                return true;
+            }
+            last_text_line_can_be_setext_heading = false;
+            continue;
+        }
+        last_text_line_can_be_setext_heading = !trimmed.is_empty();
+    }
+    false
+}

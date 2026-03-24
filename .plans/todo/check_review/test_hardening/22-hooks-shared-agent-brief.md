@@ -59,6 +59,8 @@ Use these as seed material only:
 - `apps/guardrail3/crates/app/hooks/validate.rs`
 - `apps/guardrail3/crates/app/hooks/hook_script_checks.rs`
 - `apps/guardrail3/crates/adapters/inbound/cli/generate_helpers.rs`
+- `apps/guardrail3/crates/adapters/inbound/cli/generate.rs`
+- `apps/guardrail3/crates/domain/modules/pre_commit.rs`
 
 Do not port legacy tests or old string-matching behavior mechanically.
 
@@ -71,6 +73,12 @@ Even though this is the split shared-family brief, the hook lane still has live 
 - `RS-TEST-08` parser-sharing continuation
 
 Do not treat this brief as if the only remaining work is local shared-family test migration.
+
+Current migrated routing/generation state you must assume:
+- Rust validate/report routing already uses migrated hook checks
+- legacy `app/hooks/validate.rs` delegates to migrated Rust hook reporting when Rust is present
+- `ts hooks-validate` is pinned to the legacy TS/non-Rust path
+- generation already shares one workspace-root-aware builder across generate/install/diff paths
 
 ## Family Contract
 

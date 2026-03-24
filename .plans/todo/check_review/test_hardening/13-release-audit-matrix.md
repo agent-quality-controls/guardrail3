@@ -100,7 +100,7 @@ Status:
 
 - partially closed in the current pass
 - comments, prose/display text, and `echo ...` fake commands are no longer counted as real execution for the hardened workflow rules
-- workflow facts are still semantically lossy because rule evaluation still consumes booleans instead of richer step/job facts
+- workflow facts now preserve richer step/job facts, but semantic matching is still release-family specific rather than a fuller Actions execution model
 
 ### release-family input failures were only partly fail-closed
 
@@ -118,7 +118,7 @@ Status:
 - unreadable README permission failure is now exercised through a real on-disk fixture mutation
 - unreadable Cargo/workflow/release config files now fail closed when structure shows the file but cached content is missing
 
-### aggregate shape is mostly acceptable, but repo workflow facts are semantically lossy
+### aggregate shape is mostly acceptable, but workflow semantic matching is still family-specific
 
 - Rule inputs themselves are small:
   - `RepoReleaseInput`
@@ -126,17 +126,19 @@ Status:
   - `ReleaseEdgeInput`
   - `ReleaseInputFailureInput`
 - The main problem is not input size.
-- The problem is that `WorkflowFacts` collapses rich workflow structure into booleans too early, which makes exact attack coverage harder and hides why a workflow counted as a hit.
+- The remaining problem is not data loss anymore.
+- `WorkflowFacts` now preserves parsed workflow structure, but release semantics are still recognized through family-specific helper matching rather than a fuller Actions execution model.
 
 Status:
 
-- still open
-- not currently blocking rule-local hardening, but still a real limitation
+- partially closed in the current pass
+- workflow rules no longer consume pre-collapsed booleans
+- deeper Actions execution semantics are still a later-hardening target
 
 ### new adversarial pressure from the current test-attack pass
 
-- binary workflow detection likely still overcounts unrelated build and release jobs
-- shell-wrapper execution, workspace-package inheritance, and `publish = []` publishability attacks have now been added and implementation has been tightened for those cases
+- shell-wrapper execution, workspace-package inheritance, `publish = []`, canonical root license-name validation, split-job binary workflow linkage, and nested `[package.metadata.docs.rs]` handling have now been added and implementation has been tightened for those cases
+- remaining architectural limitation: workflow semantics are still recognized by release-family helper matching, even though parsed jobs/steps are now preserved and consumed directly by the rules
 
 ## Legacy corpus seed map
 
@@ -498,43 +500,39 @@ Legend:
 ### `RS-BIN-01` — `rs_bin_01_binary_release_workflow.rs`
 
 - Current:
-  - flat `rs_bin_01_binary_release_workflow_tests.rs`
-  - one inventory-positive case
-- Missing:
-  - `*_tests/` directory migration
-  - golden coverage
-  - absence case
+  - directory-based `rs_bin_01_binary_release_workflow_tests/`
+  - same-job binary release positive
+  - split build/publish `needs:` positive
   - non-binary false-positive protection
-  - non-publishable false-positive protection
-  - comment/prose fake-hit attacks in workflow YAML
-  - exact owned-hit and owned-non-hit assertions
+  - comment/prose and unrelated-job negatives
+- Missing:
+  - no known rule-local bug remains
+  - broader workflow-fact richness still remains outside this rule
 
 ### `RS-BIN-02` — `rs_bin_02_linux_target.rs`
 
 - Current:
-  - flat `rs_bin_02_linux_target_tests.rs`
-  - one inventory-positive case
-- Missing:
-  - `*_tests/` directory migration
-  - golden coverage
-  - absence case
+  - directory-based `rs_bin_02_linux_target_tests/`
+  - same-job Linux positive
+  - split `needs:` Linux positive
+  - matrix-driven `runs-on` Linux positive
   - non-binary false-positive protection
-  - non-publishable false-positive protection
-  - comment/prose fake-hit attacks in workflow YAML
-  - exact owned-hit and owned-non-hit assertions
+  - comment/prose and unrelated-job negatives
+- Missing:
+  - no known rule-local bug remains
+  - broader workflow-fact richness still remains outside this rule
 
 ### `RS-BIN-03` — `rs_bin_03_binstall_metadata.rs`
 
 - Current:
-  - flat `rs_bin_03_binstall_metadata_tests.rs`
+  - directory-based `rs_bin_03_binstall_metadata_tests/`
   - missing-metadata warning
-  - present-metadata inventory positive
+  - hand-built inventory positive
+  - manifest-backed inventory positive
+  - wrong-shape metadata negative
+  - non-binary and non-publishable false-positive protection
 - Missing:
-  - `*_tests/` directory migration
-  - golden coverage
-  - non-binary false-positive protection
-  - non-publishable false-positive protection
-  - exact owned-hit and owned-non-hit assertions
+  - no known rule-local bug remains
 
 ## Migration order implied by the audit
 

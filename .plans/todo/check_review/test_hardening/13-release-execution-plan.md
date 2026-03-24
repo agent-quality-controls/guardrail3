@@ -90,8 +90,8 @@ Completed:
 
 Still open:
 
-- workflow-fact semantic richness beyond the current boolean model
-- binary-workflow job-linkage hardening remains the only release-family attack that still looks plausible after repeated adversarial passes
+- no concrete release-family rule bug is currently queued
+- remaining work, if any, is deeper workflow semantic modeling rather than another known false-positive or false-negative
 
 ### Phase 1: Reconstruct the exact contract
 
@@ -353,8 +353,9 @@ Status:
 Current verification state:
 
 - `cargo check -p guardrail3 --lib` passes
-- targeted release-family execution now gets past `rs/release` compilation
-- broader test execution is currently blocked by unrelated `deny` test compile errors outside `rs/release`
+- `cargo check -p guardrail3 --tests` passes
+- `cargo test -p guardrail3 --lib --no-run` passes
+- targeted release-family suites are green for `RS-RELEASE-01`, `RS-RELEASE-03`, `RS-RELEASE-04`, `RS-RELEASE-05`, `RS-RELEASE-06`, `RS-RELEASE-07`, `RS-PUB-02`, `RS-PUB-13`, `RS-PUB-14`, `RS-RELEASE-12`, `RS-BIN-01`, `RS-BIN-02`, and `RS-BIN-03`
 
 ### Phase 13: Update planning docs as part of the work, not afterward
 

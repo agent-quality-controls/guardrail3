@@ -20,8 +20,9 @@ pub fn check(input: &ReleaseEdgeInput<'_>, results: &mut Vec<CheckResult>) {
         severity: Severity::Error,
         title: format!("{}: version mismatch with {}", edge.crate_name, edge.dep_name),
         message: format!(
-            "Dependency `{}` in `[{}]`{} requires `{}` but actual local publishable version is `{}`.",
+            "Dependency `{}`{} in `[{}]`{} requires `{}` but actual local publishable version is `{}`.",
             edge.dep_name,
+            dependency_package_suffix(edge),
             edge.section_label,
             edge.target_label
                 .as_ref()
@@ -39,3 +40,9 @@ pub fn check(input: &ReleaseEdgeInput<'_>, results: &mut Vec<CheckResult>) {
 #[cfg(test)]
 #[path = "rs_pub_11_interdependent_version_consistency_tests/mod.rs"]
 mod tests;
+
+fn dependency_package_suffix(edge: &super::facts::ReleaseEdgeFacts) -> String {
+    (edge.dep_name != edge.dep_package_name)
+        .then(|| format!(" (package `{}`)", edge.dep_package_name))
+        .unwrap_or_default()
+}

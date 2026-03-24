@@ -55,7 +55,10 @@ Use these as seed material only:
 
 - `apps/guardrail3/crates/app/hooks/validate.rs`
 - `apps/guardrail3/crates/app/hooks/hook_script_checks.rs`
+- `apps/guardrail3/crates/app/hooks/tool_checks.rs`
 - `apps/guardrail3/crates/adapters/inbound/cli/generate_helpers.rs`
+- `apps/guardrail3/crates/adapters/inbound/cli/generate.rs`
+- `apps/guardrail3/crates/domain/modules/pre_commit.rs`
 
 Do not port legacy string matching or broad substring semantics.
 
@@ -68,6 +71,12 @@ Even though this is the split Rust-family brief, the hook lane still has live cr
 - `RS-TEST-08` parser-sharing continuation
 
 Do not treat this brief as if the only remaining work is local Rust-family test migration.
+
+Current migrated routing/generation state you must assume:
+- Rust validate/report routing already uses migrated hook checks
+- legacy `app/hooks/validate.rs` delegates to migrated Rust hook reporting when Rust is present
+- `ts hooks-validate` is pinned to the legacy TS/non-Rust path
+- generation already shares one workspace-root-aware builder across generate/install/diff paths
 
 ## Family Contract
 
@@ -120,6 +129,7 @@ The family implementation exists, but it still needs hardening.
 
 Highest-signal remaining gaps:
 - the family still uses only `*_tests.rs`, not rule-specific `*_tests/` directories
+- there is also a grouped family test artifact in `mod_tests.rs`
 - step-presence semantics must stay command-level, not text-level
 - `HOOK-RS-06` / `14` / `15` tool-availability semantics need exact owned hit sets
 - `HOOK-RS-07` must stay distinct from plain duplication-step presence:
@@ -136,6 +146,7 @@ The family still uses single sidecar files:
 This pass should move it to the standard:
 - one rule-specific `*_tests/` directory per rule
 - one test file per attack vector
+- no grouped family test artifact left behind
 
 ## Required Attack Classes
 

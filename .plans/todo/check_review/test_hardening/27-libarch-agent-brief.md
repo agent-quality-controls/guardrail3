@@ -55,9 +55,8 @@ Layered mode is required once any threshold is crossed.
 
 Layered shape:
 - package root `Cargo.toml` is workspace root
-- root may be either:
-  - a facade package with `src/lib.rs`
-  - or a pure workspace root
+- package root is also the root facade package
+- root `src/lib.rs` exists and owns the package-level public surface
 - `crates/api`
 - `crates/core`
 - optional `crates/infra`
@@ -79,8 +78,7 @@ Thresholds:
 Important split:
 - `rs/code` and `rs/deps` still own the underlying quality/sprawl rules
 - `rs/libarch` owns when that complexity forces architecture
-- if the root is a facade package, public surface must export from `api`
-- if the root is a pure workspace root, do not invent a facade package just to satisfy the brief
+- the root package facade must export from `api`, not directly from `core` or `infra`
 
 ## Fail-Closed Contract
 

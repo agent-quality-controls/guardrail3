@@ -338,5 +338,5 @@ Forbidden:
   - Current answer in this plan: no.
 - Whether `infra` should be allowed to be absent even after escalation.
   - Current answer: yes, optional.
-- Whether the root package itself is a published facade crate or a pure workspace root.
-  - Current answer: either is acceptable, as long as public surface exports from `api`.
+- Whether the layered root should be anything other than the workspace root + root facade package.
+  - Current answer: no. Layered mode requires the root package to remain the facade package so `RS-LIBARCH-11` owns a concrete root export surface.

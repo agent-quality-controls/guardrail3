@@ -12,7 +12,13 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
     if repo.release_plz_parsed.is_none() {
         return;
     }
-    if !repo.release_plz_has_workspace {
+    let workspace = repo
+        .release_plz_parsed
+        .as_ref()
+        .and_then(|parsed| parsed.get("workspace"))
+        .and_then(toml::Value::as_table);
+
+    if workspace.is_none() {
         results.push(CheckResult {
             id: ID.to_owned(),
             severity: Severity::Warn,
@@ -22,65 +28,58 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
             line: None,
             inventory: false,
         });
-        return;
     }
 
-    let Some(workspace) = repo
-        .release_plz_parsed
-        .as_ref()
-        .and_then(|parsed| parsed.get("workspace"))
-    else {
-        return;
-    };
-
-    if workspace
-        .get("changelog_config")
-        .and_then(toml::Value::as_str)
-        != Some("cliff.toml")
-    {
-        results.push(CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Warn,
-            title: "release-plz.toml missing canonical changelog_config".to_owned(),
-            message:
-                "`release-plz.toml` should set `[workspace].changelog_config = \"cliff.toml\"`."
+    if let Some(workspace) = workspace {
+        if workspace
+            .get("changelog_config")
+            .and_then(toml::Value::as_str)
+            != Some("cliff.toml")
+        {
+            results.push(CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Warn,
+                title: "release-plz.toml missing canonical changelog_config".to_owned(),
+                message:
+                    "`release-plz.toml` should set `[workspace].changelog_config = \"cliff.toml\"`."
+                        .to_owned(),
+                file: Some(repo.release_plz_rel_path.clone()),
+                line: None,
+                inventory: false,
+            });
+        }
+        if workspace
+            .get("git_release_enable")
+            .and_then(toml::Value::as_bool)
+            != Some(true)
+        {
+            results.push(CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Warn,
+                title: "release-plz.toml missing git_release_enable = true".to_owned(),
+                message: "`release-plz.toml` should set `[workspace].git_release_enable = true`."
                     .to_owned(),
-            file: Some(repo.release_plz_rel_path.clone()),
-            line: None,
-            inventory: false,
-        });
-    }
-    if workspace
-        .get("git_release_enable")
-        .and_then(toml::Value::as_bool)
-        != Some(true)
-    {
-        results.push(CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Warn,
-            title: "release-plz.toml missing git_release_enable = true".to_owned(),
-            message: "`release-plz.toml` should set `[workspace].git_release_enable = true`."
-                .to_owned(),
-            file: Some(repo.release_plz_rel_path.clone()),
-            line: None,
-            inventory: false,
-        });
-    }
-    if workspace
-        .get("release_always")
-        .and_then(toml::Value::as_bool)
-        != Some(false)
-    {
-        results.push(CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Warn,
-            title: "release-plz.toml missing release_always = false".to_owned(),
-            message: "`release-plz.toml` should set `[workspace].release_always = false`."
-                .to_owned(),
-            file: Some(repo.release_plz_rel_path.clone()),
-            line: None,
-            inventory: false,
-        });
+                file: Some(repo.release_plz_rel_path.clone()),
+                line: None,
+                inventory: false,
+            });
+        }
+        if workspace
+            .get("release_always")
+            .and_then(toml::Value::as_bool)
+            != Some(false)
+        {
+            results.push(CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Warn,
+                title: "release-plz.toml missing release_always = false".to_owned(),
+                message: "`release-plz.toml` should set `[workspace].release_always = false`."
+                    .to_owned(),
+                file: Some(repo.release_plz_rel_path.clone()),
+                line: None,
+                inventory: false,
+            });
+        }
     }
 
     let missing = repo

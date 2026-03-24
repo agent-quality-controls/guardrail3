@@ -49,15 +49,39 @@ Tighten `release` from “broad strings found” toward actual semantic release 
 - `RS-RELEASE-03` now enforces the canonical `release-plz.toml` workspace baseline in addition to package coverage
 - `RS-RELEASE-04` now enforces the canonical `cliff.toml` git baseline, including commit-parser coverage
 - `publish = []` is now treated as non-publishable, both directly and through `publish.workspace = true`
+- `RS-RELEASE-01` now only inventories allowed root license filenames instead of any arbitrary `license-file` path
+- `RS-BIN-01` now requires a coherent binary release path:
+  - same-job `cargo build --release` plus GitHub release action, or
+  - split build/publish jobs linked by `needs:`
+- `RS-BIN-02` now accepts Linux presence from the actual linked release path, including:
+  - split `needs:` build jobs
+  - matrix-driven `runs-on: ${{ matrix.os }}` with Linux values
+- the binary helper layer has now been hardened further under the strict four-agent rule loop:
+  - crate-targeted build matching now respects `-p`, `--package=`, `--bin`, `--bin=`, and `--manifest-path`
+  - `src/bin/*.rs` and `src/bin/*/main.rs` autodiscovery now count as binary scope unless `autobins = false`
+  - explicit `[[bin]]` still stays in scope when `autobins = false`
+  - generic `cargo build --release` no longer credits every binary crate in multi-binary repos
+  - GitHub release action matching now uses exact action identity instead of substring hits, and accepts both `action-gh-release` and `release-action`
+  - Linux detection now ignores echo/prose/`--target-dir ...linux...` noise, supports matrix `include`, and ties Linux-attribution to the current crate’s build step rather than any other step in the same job
+- `RS-PUB-13` now correctly recognizes nested TOML shape from `[package.metadata.docs.rs]`, not just a flat `metadata["docs.rs"]` lookup
+- manifest-backed positive coverage was added for:
+  - inherited `license-file.workspace = true` under `RS-PUB-02`
+  - non-empty `[package.metadata.docs.rs]` under `RS-PUB-13`
+  - explicit `include = [...]` under `RS-PUB-14`
+  - real `[package.metadata.binstall]` under `RS-BIN-03`
+  - workspace-inherited unreadable README fail-closed under `RS-RELEASE-12`
 
 ## Remaining gaps
 
 - release-family rule migration to rule-specific `*_tests/` directories is complete
-- workflow facts are less bypassable now, but they still collapse rich Actions structure into booleans before rule evaluation
+- workflow rules now evaluate preserved parsed workflow structure, but the semantic matching still relies on release-family helpers rather than a fuller Actions execution model
+- the strict four-agent adversarial loop has now been run through every `RS-RELEASE-*`, `RS-PUB-*`, and `RS-BIN-*` rule; remaining suggestions have converged to lower-value combinatorial variants rather than new concrete checker bugs
 
 ## Adversarial findings queued
 
-- `RS-BIN-01` and `RS-BIN-02` likely still overcount unrelated build/release jobs as a valid binary-release path
+- the remaining workflow limitation is semantic depth, not data loss:
+  - parsed jobs/steps are preserved now
+  - helper matching is still specific to current release-family semantics rather than a fuller Actions execution model
 
 ## Fixture note
 
@@ -78,6 +102,26 @@ That is enough for:
 It is not enough for:
 
 - richer Actions execution semantics beyond the current parsed-step model
+
+## Verification boundary
+
+- `cargo check -p guardrail3 --lib` passes after the current release-family changes
+- `cargo check -p guardrail3 --tests` now passes again
+- `cargo test -p guardrail3 --lib --no-run` passes
+- targeted release-family tests are green for:
+  - `RS-RELEASE-01`
+  - `RS-RELEASE-03`
+  - `RS-RELEASE-04`
+  - `RS-RELEASE-05`
+  - `RS-RELEASE-06`
+  - `RS-RELEASE-07`
+  - `RS-PUB-02`
+  - `RS-PUB-13`
+  - `RS-PUB-14`
+  - `RS-RELEASE-12`
+  - `RS-BIN-01`
+  - `RS-BIN-02`
+  - `RS-BIN-03`
 
 ## Success condition
 

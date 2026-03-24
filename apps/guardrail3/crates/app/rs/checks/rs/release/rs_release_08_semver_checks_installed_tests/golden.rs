@@ -13,4 +13,5 @@ fn inventories_when_semver_checks_tool_is_installed() {
     assert_eq!(results[0].id, "RS-RELEASE-08");
     assert_eq!(results[0].severity, Severity::Info);
     assert!(results[0].inventory);
+    assert_eq!(results[0].file.as_deref(), Some("Cargo.toml"));
 }

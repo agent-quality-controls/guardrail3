@@ -1,6 +1,7 @@
 use crate::domain::report::{CheckResult, Severity};
 
 use super::inputs::RepoReleaseInput;
+use super::release_support::release_plz_step_present;
 
 const ID: &str = "RS-RELEASE-05";
 
@@ -9,7 +10,7 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
         .repo
         .workflows
         .iter()
-        .find(|workflow| workflow.has_release_plz_step);
+        .find(|workflow| release_plz_step_present(&workflow.analysis));
     match workflow {
         Some(workflow) => results.push(
             CheckResult {

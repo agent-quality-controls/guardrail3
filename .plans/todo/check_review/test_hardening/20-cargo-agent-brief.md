@@ -82,7 +82,6 @@ Rules:
 - `RS-CARGO-03`
 - `RS-CARGO-05`
 - `RS-CARGO-07`
-- `RS-CARGO-14`
 - `RS-CARGO-15`
 
 ### Workspace-only rules
@@ -90,10 +89,20 @@ Rules:
 Apply only to owned workspace roots:
 - `RS-CARGO-04`
 - `RS-CARGO-06`
+- `RS-CARGO-08`
 - `RS-CARGO-09`
 - `RS-CARGO-10`
 
 Standalone packages must not be forced through workspace-member semantics they do not have.
+
+### Input-failure rule
+
+`RS-CARGO-14` is not a root-kind applicability rule.
+
+It owns malformed required inputs for whichever rule/root combination is being evaluated:
+- malformed owned policy-root `Cargo.toml`
+- malformed member `Cargo.toml` for workspace-member checks
+- malformed root-local `guardrail3.toml` when profile-sensitive expectations are needed
 
 ## Fail-Closed Contract
 

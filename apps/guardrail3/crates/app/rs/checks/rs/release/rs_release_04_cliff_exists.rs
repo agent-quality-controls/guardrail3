@@ -31,7 +31,7 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
     let Some(parsed) = repo.cliff_parsed.as_ref() else {
         return;
     };
-    let Some(git) = parsed.get("git") else {
+    let Some(git) = parsed.get("git").and_then(toml::Value::as_table) else {
         results.push(CheckResult {
             id: ID.to_owned(),
             severity: Severity::Warn,
@@ -83,7 +83,7 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
             entry
                 .get("message")
                 .and_then(toml::Value::as_str)
-                .is_some_and(|message| message == *prefix)
+                .is_some_and(|message| message_covers_prefix(message, prefix))
         });
         if !covered {
             results.push(CheckResult {
@@ -122,3 +122,29 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
 #[cfg(test)]
 #[path = "rs_release_04_cliff_exists_tests/mod.rs"]
 mod tests;
+
+fn message_covers_prefix(message: &str, prefix: &str) -> bool {
+    if message == prefix {
+        return true;
+    }
+    let bare = prefix.trim_start_matches('^');
+    let exact_head = format!("^{bare}");
+    if message.starts_with(&format!("{exact_head}("))
+        || message.starts_with(&format!("{exact_head}:"))
+        || message.starts_with(&format!("{exact_head}\\"))
+    {
+        return true;
+    }
+    let Some(grouped) = message.strip_prefix("^(") else {
+        return false;
+    };
+    let Some(close_paren) = grouped.find(')') else {
+        return false;
+    };
+    let suffix = &grouped[close_paren + 1..];
+    let valid_continuation = suffix.is_empty()
+        || suffix.starts_with('(')
+        || suffix.starts_with(':')
+        || suffix.starts_with('\\');
+    valid_continuation && grouped[..close_paren].split('|').any(|entry| entry == bare)
+}

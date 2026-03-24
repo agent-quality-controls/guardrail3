@@ -50,6 +50,12 @@ Use it as seed material only. Do not port it mechanically.
 - allowlist coverage policy for library crates
 - lockfile policy
 
+Ownership split matters:
+- `RS-DEPS-01..04` are validation-root tool-availability checks
+- `RS-DEPS-05..08` are crate/package-owned allowlist checks
+- `RS-DEPS-09..10` are Rust-root-owned lockfile checks
+- `RS-DEPS-11` owns fail-closed behavior across those scopes
+
 It does not own:
 - banned crates in the lockfile
 - dependency direction
@@ -67,6 +73,7 @@ Important scope points already frozen in the plan and implementation:
 - `workspace = true` dependencies are not auto-skipped
 - path dependencies are skipped only when they are workspace path dependencies
 - renamed dependencies must be checked against real package name when present
+- target-specific dependency tables are still an explicit live gap and are not yet part of `RS-DEPS-05..07`
 
 ## Fail-Closed Contract
 
@@ -109,6 +116,7 @@ Required outcomes:
 
 2. allowlist enforcement
 - same attack vector should mutate all relevant dependency sections
+- do not invent target-specific table semantics unless you are explicitly expanding the plan
 - external crate vs workspace path dep separation
 - `workspace = true` resolution
 - renamed dependency handling

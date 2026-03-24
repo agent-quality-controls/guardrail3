@@ -3,19 +3,39 @@ use super::super::check;
 use crate::domain::report::Severity;
 
 #[test]
-fn warns_without_categories_and_skips_non_publishable_crates() {
-    let mut missing = crate_facts("x");
-    missing.categories_count = None;
-    let missing_input = crate_input(&missing);
-    let mut missing_results = Vec::new();
-    check(&missing_input, &mut missing_results);
-    assert_eq!(missing_results[0].severity, Severity::Warn);
+fn warns_when_categories_are_missing_or_zero() {
+    for categories_count in [None, Some(0)] {
+        let mut facts = crate_facts("x");
+        facts.categories_count = categories_count;
+        let input = crate_input(&facts);
+        let mut results = Vec::new();
+        check(&input, &mut results);
 
-    let mut non_publishable = crate_facts("x");
-    non_publishable.publishable = false;
-    non_publishable.categories_count = None;
-    let non_publishable_input = crate_input(&non_publishable);
-    let mut non_publishable_results = Vec::new();
-    check(&non_publishable_input, &mut non_publishable_results);
-    assert!(non_publishable_results.is_empty());
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].id, "RS-PUB-07");
+        assert_eq!(results[0].severity, Severity::Warn);
+        assert!(!results[0].inventory);
+        assert_eq!(
+            results[0].file.as_deref(),
+            Some("crates/example/Cargo.toml")
+        );
+        assert!(results[0].title.contains("categories missing"));
+        assert!(
+            results[0]
+                .message
+                .contains("non-empty `[package].categories`")
+        );
+    }
+}
+
+#[test]
+fn skips_non_publishable_crates() {
+    let mut facts = crate_facts("x");
+    facts.publishable = false;
+    facts.categories_count = None;
+    let input = crate_input(&facts);
+    let mut results = Vec::new();
+    check(&input, &mut results);
+
+    assert!(results.is_empty());
 }

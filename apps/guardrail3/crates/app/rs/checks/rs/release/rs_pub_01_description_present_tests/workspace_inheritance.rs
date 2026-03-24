@@ -134,3 +134,59 @@ publish = []
         "publish=[] should suppress RS-PUB-01 scope: {results:#?}"
     );
 }
+
+#[test]
+fn should_error_when_non_member_crate_tries_to_inherit_workspace_description() {
+    let root = temp_root("release-workspace-description-non-member");
+    let tree = project_tree(
+        vec![
+            ("", dir_entry(&["crates"], &["Cargo.toml"])),
+            ("crates", dir_entry(&["member", "orphan"], &[])),
+            ("crates/member", dir_entry(&[], &["Cargo.toml"])),
+            ("crates/orphan", dir_entry(&[], &["Cargo.toml"])),
+        ],
+        vec![
+            (
+                "Cargo.toml",
+                r#"
+[workspace]
+members = ["crates/member"]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+description = "shared workspace description"
+"#,
+            ),
+            (
+                "crates/member/Cargo.toml",
+                r#"
+[package]
+name = "member"
+version.workspace = true
+edition = "2024"
+publish = false
+"#,
+            ),
+            (
+                "crates/orphan/Cargo.toml",
+                r#"
+[package]
+name = "orphan"
+version = "0.1.0"
+edition = "2024"
+description.workspace = true
+"#,
+            ),
+        ],
+        root,
+    );
+    let results = check(&tree, &StubToolChecker::new(true), false);
+
+    assert!(results.iter().any(|result| {
+        result.id == "RS-PUB-01"
+            && result.severity == crate::domain::report::Severity::Error
+            && !result.inventory
+            && result.file.as_deref() == Some("crates/orphan/Cargo.toml")
+    }));
+}
