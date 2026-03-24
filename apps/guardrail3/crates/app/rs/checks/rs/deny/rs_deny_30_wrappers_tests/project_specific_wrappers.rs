@@ -3,14 +3,17 @@ use std::collections::BTreeSet;
 use crate::domain::report::Severity;
 
 use super::super::super::inputs::ConfigDenyInput;
-use super::super::super::test_support::{canonical_deny_toml_service, config_facts};
+use super::super::super::test_support::{
+    add_deny_ban_entry, canonical_deny_toml_service, config_facts, set_deny_ban_wrappers,
+};
 use super::super::check;
 
 #[test]
 fn inventories_added_wrappers_for_bans_without_managed_wrapper_policy() {
-    let config = config_facts(&canonical_deny_toml_service().replace(
-        "{ name = \"anyhow\", wrappers = [] },",
-        "{ name = \"anyhow\", wrappers = [\"texting_robots\"] },",
+    let config = config_facts(&set_deny_ban_wrappers(
+        &canonical_deny_toml_service(),
+        "anyhow",
+        &["texting_robots"],
     ));
     let input = ConfigDenyInput { config: &config };
     let mut results = Vec::new();
@@ -32,9 +35,22 @@ fn inventories_added_wrappers_for_bans_without_managed_wrapper_policy() {
 
 #[test]
 fn inventories_project_specific_wrappers_for_non_canonical_bans() {
-    let config = config_facts(&canonical_deny_toml_service().replace(
-        "deny = [\n",
-        "deny = [\n    { name = \"custom-crate\", wrappers = [\"adapter\"] },\n",
+    let config = config_facts(&add_deny_ban_entry(
+        &canonical_deny_toml_service(),
+        toml::Value::Table(toml::map::Map::from_iter([
+            (
+                "name".to_owned(),
+                toml::Value::String("custom-crate".to_owned()),
+            ),
+            (
+                "wrappers".to_owned(),
+                toml::Value::Array(vec![toml::Value::String("adapter".to_owned())]),
+            ),
+            (
+                "reason".to_owned(),
+                toml::Value::String("good enough reason text".to_owned()),
+            ),
+        ])),
     ));
     let input = ConfigDenyInput { config: &config };
     let mut results = Vec::new();

@@ -30,8 +30,6 @@ fn errors_only_for_effective_roots_without_a_covering_deny_config() {
         .map(|result| result.message.clone())
         .collect::<BTreeSet<_>>();
     let expected_messages = BTreeSet::from([
-        "standalone package root `packages/shared-types` is covered by `packages/shared-types/deny.toml`."
-            .to_owned(),
         "validation root `.` is not covered by any allowed deny config.".to_owned(),
         "workspace root `.` is not covered by any allowed deny config.".to_owned(),
         "workspace root `apps/backend` is not covered by any allowed deny config.".to_owned(),

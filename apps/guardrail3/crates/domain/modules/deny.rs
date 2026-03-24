@@ -70,6 +70,13 @@ pub const DENY_BANS_ASYNC: Module = Module {
     { name = "smol", wrappers = [] },"#,
 };
 
+pub const DENY_BANS_GLOBAL_STATE: Module = Module {
+    name: "deny/bans/global-state",
+    description: "Ban lazy_static (standardize on std lazy primitives)",
+    content: r#"    # --- Global state: use std lazy primitives instead of lazy_static ---
+    { name = "lazy_static", wrappers = [] },"#,
+};
+
 pub const DENY_BANS_ERROR: Module = Module {
     name: "deny/bans/error",
     description: "Ban anyhow (standardize on thiserror)",
@@ -190,6 +197,7 @@ pub fn service_profile_ban_entries() -> Vec<&'static Module> {
         &DENY_BANS_HTTP,
         &DENY_BANS_LOGGING,
         &DENY_BANS_ASYNC,
+        &DENY_BANS_GLOBAL_STATE,
         &DENY_BANS_ERROR,
         &DENY_BANS_WEB,
         &DENY_BANS_DATETIME,
@@ -235,9 +243,14 @@ pub fn build_deny_toml(
     extra_skip: &str,
     extra_feature_bans: &str,
 ) -> String {
+    let ban_entries = if profile == "library" {
+        library_profile_ban_entries()
+    } else {
+        service_profile_ban_entries()
+    };
     build_deny_toml_with_entries(
         profile,
-        &service_profile_ban_entries(),
+        &ban_entries,
         Some(DENY_FEATURE_BANS_TOKIO.content),
         extra_bans,
         extra_skip,
@@ -291,7 +304,7 @@ pub fn build_deny_toml_with_entries(
     // Deny entries
     out.push_str("deny = [\n");
     for module in ban_entries {
-        out.push_str(module.content);
+        out.push_str(&ban_module_content_with_reasons(module));
         out.push('\n');
     }
     let deduped_bans =
@@ -340,4 +353,29 @@ pub fn build_deny_toml_with_entries(
     out.push('\n');
 
     out
+}
+
+fn ban_module_content_with_reasons(module: &Module) -> String {
+    let reason = module.description.replace('\"', "\\\"");
+    module
+        .content
+        .lines()
+        .map(|line| {
+            let trimmed = line.trim_start();
+            if !trimmed.starts_with('{') {
+                return line.to_owned();
+            }
+            let Some(insert_at) = line.find("},") else {
+                return line.to_owned();
+            };
+            let mut out = String::with_capacity(line.len() + reason.len() + 20);
+            out.push_str(&line[..insert_at]);
+            out.push_str(", reason = \"");
+            out.push_str(&reason);
+            out.push('"');
+            out.push_str(&line[insert_at..]);
+            out
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
 }

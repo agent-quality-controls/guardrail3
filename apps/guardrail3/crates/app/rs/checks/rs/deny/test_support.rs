@@ -43,6 +43,21 @@ pub fn canonical_deny_toml_library() -> String {
 }
 
 pub fn nested_member_shadow_tree(file_name: &str) -> ProjectTree {
+    let (core_dirs, core_files, nested_rel_path) =
+        if let Some((dir, nested_file)) = file_name.split_once('/') {
+            (
+                vec![dir],
+                vec!["Cargo.toml"],
+                format!("workspace/crates/core/{dir}/{nested_file}"),
+            )
+        } else {
+            (
+                Vec::new(),
+                vec!["Cargo.toml", file_name],
+                format!("workspace/crates/core/{file_name}"),
+            )
+        };
+
     project_tree(
         vec![
             ("", dir_entry(&["workspace"], &[])),
@@ -51,9 +66,10 @@ pub fn nested_member_shadow_tree(file_name: &str) -> ProjectTree {
                 dir_entry(&["crates"], &["Cargo.toml", "deny.toml"]),
             ),
             ("workspace/crates", dir_entry(&["core"], &[])),
+            ("workspace/crates/core", dir_entry(&core_dirs, &core_files)),
             (
-                "workspace/crates/core",
-                dir_entry(&[], &["Cargo.toml", file_name]),
+                "workspace/crates/core/.cargo",
+                dir_entry(&[], &["deny.toml"]),
             ),
         ],
         vec![
@@ -66,10 +82,7 @@ pub fn nested_member_shadow_tree(file_name: &str) -> ProjectTree {
                 "[package]\nname=\"core\"".to_owned(),
             ),
             ("workspace/deny.toml", canonical_deny_toml_service()),
-            (
-                &format!("workspace/crates/core/{file_name}"),
-                canonical_deny_toml_service(),
-            ),
+            (&nested_rel_path, canonical_deny_toml_service()),
         ],
     )
 }
@@ -159,6 +172,29 @@ pub fn set_deny_ban_wrappers(deny_toml: &str, name: &str, wrappers: &[&str]) -> 
                 .collect(),
         ),
     );
+    toml::to_string(&parsed).expect("serialize deny TOML")
+}
+
+pub fn remove_deny_ban_reason(deny_toml: &str, name: &str) -> String {
+    let mut parsed = toml::from_str::<toml::Value>(deny_toml).expect("valid deny TOML");
+    let entries = parsed
+        .get_mut("bans")
+        .and_then(|bans| bans.get_mut("deny"))
+        .and_then(toml::Value::as_array_mut)
+        .expect("expected [bans].deny array");
+    let entry = entries
+        .iter_mut()
+        .find(|entry| {
+            entry
+                .get("name")
+                .or_else(|| entry.get("crate"))
+                .and_then(toml::Value::as_str)
+                .map(|value| value.split('@').next().unwrap_or(value) == name)
+                .unwrap_or(false)
+        })
+        .expect("expected deny ban entry");
+    let table = entry.as_table_mut().expect("expected table ban entry");
+    let _ = table.remove("reason");
     toml::to_string(&parsed).expect("serialize deny TOML")
 }
 

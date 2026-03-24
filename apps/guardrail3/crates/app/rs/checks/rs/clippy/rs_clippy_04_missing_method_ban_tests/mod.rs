@@ -4,3 +4,5 @@ mod garde_disabled;
 mod golden;
 #[path = "missing_bans.rs"]
 mod missing_bans;
+#[path = "parity.rs"]
+mod parity;

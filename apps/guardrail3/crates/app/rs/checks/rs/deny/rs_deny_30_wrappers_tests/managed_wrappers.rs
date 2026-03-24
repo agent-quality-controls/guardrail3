@@ -1,14 +1,17 @@
 use crate::domain::report::Severity;
 
 use super::super::super::inputs::ConfigDenyInput;
-use super::super::super::test_support::{canonical_deny_toml_service, config_facts};
+use super::super::super::test_support::{
+    canonical_deny_toml_service, config_facts, set_deny_ban_wrappers,
+};
 use super::super::check;
 
 #[test]
 fn errors_when_canonical_non_empty_wrapper_policy_changes() {
-    let config = config_facts(&canonical_deny_toml_service().replace(
-        "{ name = \"regex\", wrappers = [\"tree-sitter\", \"globset\", \"ignore\"] }",
-        "{ name = \"regex\", wrappers = [\"tree-sitter\"] }",
+    let config = config_facts(&set_deny_ban_wrappers(
+        &canonical_deny_toml_service(),
+        "regex",
+        &["tree-sitter"],
     ));
     let input = ConfigDenyInput { config: &config };
     let mut results = Vec::new();

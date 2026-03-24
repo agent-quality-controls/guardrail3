@@ -30,5 +30,5 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_deny_22_extra_feature_bans_inventory_tests.rs"]
+#[path = "rs_deny_22_extra_feature_bans_inventory_tests/mod.rs"]
 mod tests;

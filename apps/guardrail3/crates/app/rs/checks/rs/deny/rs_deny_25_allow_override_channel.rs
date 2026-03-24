@@ -58,5 +58,5 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_deny_25_allow_override_channel_tests.rs"]
+#[path = "rs_deny_25_allow_override_channel_tests/mod.rs"]
 mod tests;

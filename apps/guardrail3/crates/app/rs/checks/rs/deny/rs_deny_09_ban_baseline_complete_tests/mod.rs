@@ -8,3 +8,5 @@ mod library_profile;
 mod managed_wrappers;
 #[path = "missing_bans.rs"]
 mod missing_bans;
+#[path = "parity.rs"]
+mod parity;

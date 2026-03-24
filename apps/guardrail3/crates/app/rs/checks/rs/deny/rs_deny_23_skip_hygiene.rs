@@ -10,13 +10,28 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     let Some(bans) = section(config, "bans") else {
         return;
     };
-    let Some(skip_entries) = bans.get("skip").and_then(toml::Value::as_array) else {
+    let Some(skip_value) = bans.get("skip") else {
+        return;
+    };
+    let Some(skip_entries) = skip_value.as_array() else {
+        results.push(CheckResult {
+            id: "RS-DENY-23".to_owned(),
+            severity: Severity::Warn,
+            title: "malformed skip container".to_owned(),
+            message: format!(
+                "`{}` must use an array for `[bans].skip` entries.",
+                config.rel_path
+            ),
+            file: Some(config.rel_path.clone()),
+            line: None,
+            inventory: false,
+        });
         return;
     };
 
     let mut skip_counts = BTreeMap::<String, usize>::new();
     for entry in skip_entries {
-        let (name, malformed, non_string_reason, reason) =
+        let (name, malformed, non_string_reason, reason, plain_string_entry) =
             if let Some(crate_field) = entry.get("crate").and_then(toml::Value::as_str) {
                 let reason_value = entry.get("reason");
                 let reason = reason_value
@@ -32,9 +47,10 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                     false,
                     reason_value.is_some() && reason.is_none(),
                     reason,
+                    false,
                 )
             } else if let Some(name) = entry.as_str() {
-                (name.to_owned(), false, false, None)
+                (name.to_owned(), false, false, None, true)
             } else if let Some(table) = entry.as_table() {
                 let name = table.get("name").and_then(toml::Value::as_str);
                 let reason_value = table.get("reason");
@@ -46,9 +62,10 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                     name.is_none(),
                     reason_value.is_some() && reason.is_none(),
                     reason,
+                    false,
                 )
             } else {
-                ("unknown".to_owned(), true, false, None)
+                ("unknown".to_owned(), true, false, None, false)
             };
 
         *skip_counts.entry(name.clone()).or_default() += 1;
@@ -80,7 +97,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                 line: None,
                 inventory: false,
             });
-        } else if reason.as_deref().unwrap_or("").trim().is_empty() {
+        } else if !plain_string_entry && reason.as_deref().unwrap_or("").trim().is_empty() {
             results.push(CheckResult {
                 id: "RS-DENY-23".to_owned(),
                 severity: Severity::Warn,
@@ -92,7 +109,10 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
             });
         }
 
-        if !malformed && !non_string_reason && !reason.as_deref().unwrap_or("").trim().is_empty() {
+        if !malformed
+            && !non_string_reason
+            && (plain_string_entry || !reason.as_deref().unwrap_or("").trim().is_empty())
+        {
             results.push(
                 CheckResult {
                     id: "RS-DENY-23".to_owned(),
