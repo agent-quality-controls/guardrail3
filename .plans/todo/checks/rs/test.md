@@ -2,41 +2,53 @@
 
 **Input:** Cargo.toml + .cargo/mutants.toml + *.rs files + cached pre-commit hook files + .config/nextest.toml
 **Parser:** TOML + syn AST + executable-line matching (hooks)
-**Current code:** `test_checks.rs`, `test_quality_checks.rs` (old baseline only; new family should live under `app/rs/checks/rs/test`)
+**Current code:** `crates/app/rs/checks/rs/test/**` (old `test_checks.rs` / `test_quality_checks.rs` are legacy seed material only)
+
+## Implementation mapping contract
+
+- exactly one `RS-TEST-*` rule ID per production file
+- exactly one rule-specific `*_tests/` module directory per production rule file
+- `mod.rs` orchestrates only
+- `discover.rs`, `facts.rs`, `inputs.rs`, `parse.rs`, and `test_support.rs` may contain shared discovery, typed inputs, parsing, and fixture helpers only
+
+Forbidden:
+
+- grouped family test files such as `test_tests.rs`
+- helper files that hide multiple rule predicates behind one API
 
 ## Rules
 
 | New ID | Old ID | Severity | What | Status |
 |--------|--------|----------|------|--------|
-| RS-TEST-01 | R-TEST-01 | Warn | cargo-mutants installed on PATH | Implemented in old validator only |
-| RS-TEST-02 | R-TEST-02 | Warn | .cargo/mutants.toml config exists | Implemented in old validator only |
-| RS-TEST-03 | R-TEST-03 | Warn | [profile.mutants] in Cargo.toml (optimized mutation build) | Implemented in old validator only |
-| RS-TEST-04 | R-TEST-04 | Error/Info | At least one `#[test]` or `#[tokio::test]` exists. AST-based. | Implemented in old validator only |
-| RS-TEST-05 | R-TEST-05 | Info | Test coverage inventory: public fn count vs test fn count, ratio | Implemented in old validator only |
-| RS-TEST-06 | R-TEST-06 | Info | Integration tests/ dir exists with .rs files | Implemented in old validator only |
-| RS-TEST-07 | R-TEST-07 | Warn | `#[ignore]` without documented reason. Accept inline `#[ignore = "..."]`, same-line `// reason: ...`, or previous-line `// reason: ...`. AST-based. | Implemented in old validator only |
-| RS-TEST-08 | R-TEST-08 | Warn | Mutation testing hook in `.claude/` or git hooks/pre-commit | Implemented in old validator only |
-| RS-TEST-09 | R-TEST-09 | Error | Inline test code in `src/` files (`#[cfg(test)] mod tests { ... }` with body) | Implemented in old validator only |
+| RS-TEST-01 | R-TEST-01 | Warn | cargo-mutants installed on PATH | Implemented |
+| RS-TEST-02 | R-TEST-02 | Warn | .cargo/mutants.toml config exists | Implemented |
+| RS-TEST-03 | R-TEST-03 | Warn | [profile.mutants] in Cargo.toml (optimized mutation build) | Implemented |
+| RS-TEST-04 | R-TEST-04 | Error/Info | At least one `#[test]` or `#[tokio::test]` exists. AST-based. | Implemented |
+| RS-TEST-05 | R-TEST-05 | Info | Test coverage inventory: public fn count vs test fn count, ratio | Implemented |
+| RS-TEST-06 | R-TEST-06 | Info | Integration tests/ dir exists with .rs files | Implemented |
+| RS-TEST-07 | R-TEST-07 | Warn | `#[ignore]` without documented reason. Accept inline `#[ignore = "..."]`, same-line `// reason: ...`, or previous-line `// reason: ...`. AST-based. | Implemented |
+| RS-TEST-08 | R-TEST-08 | Warn | Mutation testing hook in the active shared/Rust hook surfaces | Implemented |
+| RS-TEST-09 | R-TEST-09 | Error | Inline test code in `src/` files (`#[cfg(test)] mod tests { ... }` with body) | Implemented |
 
 ## New rules from audit round 1
 
 | New ID | Severity | What | Status |
 |--------|----------|------|--------|
-| RS-TEST-10 | Warn | Test function naming: warn on test fns with names <10 chars or purely numeric suffixes (`test_1`, `test_2`). Lazy names make test suites unnavigable. AST-based. | Planned |
-| RS-TEST-11 | Warn | `#[cfg(test)]` module naming: warn on modules not named `tests`. Modules named `test`, `testing`, `test_utils` etc. break convention. AST-based. | Planned |
-| RS-TEST-12 | Warn | Test timeout configuration: if tokio is a dependency, check that `.config/nextest.toml` exists with `slow-timeout` and `leak-timeout` set. Tests without timeouts hang CI forever. | Planned |
+| RS-TEST-10 | Warn | Test function naming: warn on test fns with names <10 chars or purely numeric suffixes (`test_1`, `test_2`). Lazy names make test suites unnavigable. AST-based. | Implemented |
+| RS-TEST-11 | Warn | `#[cfg(test)]` module naming: warn on modules not named `tests`. Modules named `test`, `testing`, `test_utils` etc. break convention. AST-based. | Implemented |
+| RS-TEST-12 | Warn | Test timeout configuration: if tokio is a dependency, check that `.config/nextest.toml` exists with `slow-timeout` and `leak-timeout` set. Tests without timeouts hang CI forever. | Implemented |
 
 ## New rules from audit round 2
 
 | New ID | Severity | What | Status |
 |--------|----------|------|--------|
-| RS-TEST-13 | Warn | `#[should_panic]` without `expected` string. Matches ANY panic — fragile test. Same philosophy as RS-TEST-07. No tool covers this. AST-based. | Planned |
-| RS-TEST-14 | Warn | Tautological `assert_eq!(lit, lit)` / `assert_ne!(lit, lit)`. Both arguments are `syn::Expr::Lit` — assertion proves nothing. Clippy covers `assert!(true)` but not literal-vs-literal in assert_eq/ne. | Planned |
-| RS-TEST-15 | Warn | Test function with zero assertion macros (assert!, assert_eq!, assert_ne!, assert_matches!, debug_assert*). Tests that never assert are dead weight. Root cause of 2:1 happy-path ratio (audit 14). Exception: functions returning Result (? is the assertion) or calling fns containing "assert"/"verify"/"expect" in name. | Planned |
-| RS-TEST-16 | Warn | Test file >500 effective lines. Same threshold as production code (RS-CODE-09). Currently test files are completely exempt from R38 (`if is_test { return; }`). Tests aren't special — split into modules. | Planned |
-| RS-TEST-17 | Warn | `assert!(matches!(...))` with `_` wildcards in data positions. Proves the variant but not the payload. A mutation changing the payload survives. Always possible to match something specific instead. | Planned |
-| RS-TEST-18 | Warn | Mutation config content validation. `.cargo/mutants.toml` with `exclude_re = [".*"]` makes mutation testing useless (everything excluded). Also flag `timeout_multiplier < 1.0` (fake 100% score via timeouts). RS-TEST-02 checks existence but not content. | Planned |
-| RS-TEST-19 | Error | Input failures for the test family: unreadable/unparsable Rust source, Cargo.toml, `.cargo/mutants.toml`, `.config/nextest.toml`, or `guardrail3.toml` required to evaluate test rules. Fail closed instead of silently skipping. | Planned |
+| RS-TEST-13 | Warn | `#[should_panic]` without `expected` string. Matches ANY panic — fragile test. Same philosophy as RS-TEST-07. No tool covers this. AST-based. | Implemented |
+| RS-TEST-14 | Warn | Tautological `assert_eq!(lit, lit)` / `assert_ne!(lit, lit)`. Both arguments are `syn::Expr::Lit` — assertion proves nothing. Clippy covers `assert!(true)` but not literal-vs-literal in assert_eq/ne. | Implemented |
+| RS-TEST-15 | Warn | Test function with zero assertion macros (assert!, assert_eq!, assert_ne!, assert_matches!, debug_assert*). Tests that never assert are dead weight. Root cause of 2:1 happy-path ratio (audit 14). Exception: functions returning Result (? is the assertion) or calling fns containing "assert"/"verify"/"expect" in name. | Implemented |
+| RS-TEST-16 | Warn | Test file >500 effective lines. Same threshold as production code (RS-CODE-09). Tests are not exempt from structural pressure. | Implemented |
+| RS-TEST-17 | Warn | `assert!(matches!(...))` with `_` wildcards in data positions. Proves the variant but not the payload. A mutation changing the payload survives. Always possible to match something specific instead. | Implemented |
+| RS-TEST-18 | Warn | Mutation config content validation. `.cargo/mutants.toml` with `exclude_re = [".*"]` makes mutation testing useless (everything excluded). Also flag `timeout_multiplier < 1.0` (fake 100% score via timeouts). RS-TEST-02 checks existence but not content. | Implemented |
+| RS-TEST-19 | Error | Input failures for the test family: unreadable/unparsable Rust source, Cargo.toml, `.cargo/mutants.toml`, `.config/nextest.toml`, or `guardrail3.toml` required to evaluate test rules. Fail closed instead of silently skipping. | Implemented |
 
 ## Explicitly rejected
 

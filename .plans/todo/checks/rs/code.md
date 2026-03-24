@@ -1,4 +1,4 @@
-# RS-CODE — Rust code file checker (30 implemented rules + 4 next-wave planned rules)
+# RS-CODE — Rust code file checker (30 implemented rules + 5 next-wave planned rules)
 
 **Input:** *.rs files (syn AST parsed)
 **Parser:** syn crate (Rust AST)
@@ -69,6 +69,7 @@ These are not implemented yet. They are the next `rs/code` candidates that are u
 | RS-CODE-33 | Error | Public function returning obviously untyped public error forms: `Result<_, String>`, `Result<_, &str>`, `Result<_, anyhow::Error>`, or `Result<_, Box<dyn Error>>`. | Planned |
 | RS-CODE-34 | Error | More than 6 type/const generic parameters on a `struct`, `enum`, `trait`, or `fn`. Lifetimes do not count. | Planned |
 | RS-CODE-35 | Error | Per-crate source tree exceeds structural caps: module depth >6, sibling subdirectories >12, or sibling `.rs` files >20 in one Rust source directory. | Planned |
+| RS-CODE-36 | Error | One string-dispatch site has more than 10 string-literal branches. Applies to `match` and `if/else if` chains on the same expression. Test files exempt. | Planned |
 
 ### RS-CODE-31 — Public fields on public structs
 
@@ -236,6 +237,32 @@ Should error:
 - a module directory with 13 sibling subdirectories
 - a module directory with 21 sibling `.rs` files
 
+### RS-CODE-36 — String dispatch cap
+
+**Intent**
+- catch large stringly typed switch blobs that should become typed models
+
+**Trigger surface**
+- more than 10 string-literal branches at one dispatch site:
+  - a `match` on one string-like expression
+  - an `if` / `else if` chain comparing the same expression to string literals
+
+**Do not count**
+- wildcard/default arms
+- non-string-literal guards
+
+**Initial exclusion**
+- test code
+
+**Severity**
+- `Error`
+
+**Examples**
+
+Should error:
+- one `match kind { ... }` with 11 string literal arms
+- one `if action == "..." { } else if action == "..." { } ...` chain with 11 string literal comparisons on the same expression
+
 ## Relocated checks
 
 | Old ID | What | New location |
@@ -390,7 +417,7 @@ Recommended execution buckets:
 ### Test strategy
 
 Tests should follow the same strict pattern as the finished config families:
-- one sidecar test file per rule
+- one rule-specific `*_tests/` module directory per rule
 - rule-local assertions, not family smoke tests
 - direct typed inputs where possible
 - orchestrator tests only for:

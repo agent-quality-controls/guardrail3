@@ -28,7 +28,7 @@ So the checker must validate:
 ## Implementation mapping contract
 
 - exactly one `RS-DENY-*` rule ID per production file
-- exactly one sidecar `*_tests.rs` file per production rule file
+- exactly one rule-specific `*_tests/` module directory per production rule file
 - `mod.rs` orchestrates only
 - `facts.rs`, `inputs.rs`, and `deny_support.rs` may contain shared facts, typed inputs, and canonical baseline helpers only
 
@@ -36,7 +36,10 @@ Forbidden:
 
 - grouped concern files such as `rs_deny_bans.rs`
 - grouped family test files such as `deny_tests.rs`
+- single-file sidecars as the long-term target; each rule should move to a rule-specific test module directory split by attack vector
 - helper files that hide multiple rule predicates behind one API
+
+**Current code:** `crates/app/rs/checks/rs/deny/**` + `crates/domain/modules/deny.rs`
 
 **Canonical sources:**
 - generator baseline: `apps/guardrail3/crates/domain/modules/deny.rs`
@@ -46,36 +49,36 @@ Forbidden:
 
 | New ID | Old ID | Severity | What | Status |
 |--------|--------|----------|------|--------|
-| RS-DENY-01 | R8 | Error | Every Rust root is covered by an effective deny config | Todo |
-| RS-DENY-02 | — | Error | deny config files may exist only at allowed roots | Todo |
-| RS-DENY-03 | — | Error | Nested deny configs that shadow a parent root are forbidden | Todo |
-| RS-DENY-04 | R9 | Warn | Deprecated `[advisories]` fields (`vulnerability`, `notice`, `unsound`) | Todo |
-| RS-DENY-05 | R10 | Error | `[advisories]` must set `unmaintained = "workspace"` and `yanked = "warn"` | Todo |
-| RS-DENY-06 | R11 | Info | Advisory settings stricter than baseline are inventoried | Todo |
-| RS-DENY-07 | — | Error | `[graph].all-features = true` must be set | Todo |
-| RS-DENY-08 | — | Error | `[graph].no-default-features = false` must be set | Todo |
-| RS-DENY-09 | R12 | Error | `[bans].deny` must contain the full canonical baseline ban set for the active profile | Todo |
-| RS-DENY-10 | R12 | Warn | `[bans].multiple-versions` weaker than `"deny"` | Todo |
-| RS-DENY-11 | R13 | Info | `[bans].highlight` setting inventoried when it differs from `"all"` | Todo |
-| RS-DENY-12 | — | Error | `[bans].allow-wildcard-paths = true` must be set | Todo |
-| RS-DENY-13 | — | Warn | `[bans].wildcards` missing / default-reliant / weaker-than-expected is inventoried | Todo |
-| RS-DENY-14 | R14 | Error | `[licenses]` must contain the baseline allow list and `[licenses.private].ignore = true` | Todo |
-| RS-DENY-15 | R15 | Warn/Info | `confidence-threshold` must be `0.8` or stricter; stricter values are inventoried | Todo |
-| RS-DENY-16 | — | Warn | `[licenses].allow` must not include copyleft licenses | Todo |
-| RS-DENY-17 | — | Info | `[licenses].exceptions` entries are inventoried | Todo |
-| RS-DENY-18 | R16 | Error | `[sources].unknown-registry = "deny"` and `unknown-git = "deny"` | Todo |
-| RS-DENY-19 | R16 | Error | `[sources].allow-registry` must contain crates.io (git or sparse URL) | Todo |
-| RS-DENY-20 | — | Warn/Info | `[sources].allow-git` entries are warned and inventoried | Todo |
-| RS-DENY-21 | R17 | Warn | `[[bans.features]]` must ban `tokio` feature `full` and keep the canonical tokio allow list | Todo |
-| RS-DENY-22 | R18 | Info | Extra feature bans beyond tokio are inventoried | Todo |
-| RS-DENY-23 | R19 | Warn/Info | `[bans.skip]` entries: malformed entry or missing/non-string reason warns; valid entries inventory | Todo |
-| RS-DENY-24 | R20 | Warn/Info | `[advisories].ignore` entries: malformed entry or missing/non-string reason warns; valid entries inventory | Todo |
-| RS-DENY-25 | — | Error/Warn | `[bans].allow` is forbidden; overlap with deny baseline is an explicit error | Todo |
-| RS-DENY-26 | — | Info | `[bans].deny` entries without `reason` are inventoried | Todo |
-| RS-DENY-27 | — | Warn | Duplicate entries in `deny`, `skip`, `ignore`, or `[[bans.features]]` are warned | Todo |
-| RS-DENY-28 | — | Warn | Unknown keys / unsupported schema in critical deny sections are warned | Todo |
-| RS-DENY-29 | — | Warn | Advisory ignore accumulation over threshold `5` is warned | Todo |
-| RS-DENY-30 | — | Error/Info | Ban-entry `wrappers` must match canonical policy where managed; project-specific wrappers inventory otherwise | Todo |
+| RS-DENY-01 | R8 | Error | Every Rust root is covered by an effective deny config | Implemented |
+| RS-DENY-02 | — | Error | deny config files may exist only at allowed roots | Implemented |
+| RS-DENY-03 | — | Error | Nested deny configs that shadow a parent root are forbidden | Implemented |
+| RS-DENY-04 | R9 | Warn | Deprecated `[advisories]` fields (`vulnerability`, `notice`, `unsound`) | Implemented |
+| RS-DENY-05 | R10 | Error | `[advisories]` must set `unmaintained = "workspace"` and `yanked = "warn"` | Implemented |
+| RS-DENY-06 | R11 | Info | Advisory settings stricter than baseline are inventoried | Implemented |
+| RS-DENY-07 | — | Error | `[graph].all-features = true` must be set | Implemented |
+| RS-DENY-08 | — | Error | `[graph].no-default-features = false` must be set | Implemented |
+| RS-DENY-09 | R12 | Error | `[bans].deny` must contain the full canonical baseline ban set for the active profile | Implemented |
+| RS-DENY-10 | R12 | Warn | `[bans].multiple-versions` weaker than `"deny"` | Implemented |
+| RS-DENY-11 | R13 | Info | `[bans].highlight` setting inventoried when it differs from `"all"` | Implemented |
+| RS-DENY-12 | — | Error | `[bans].allow-wildcard-paths = true` must be set | Implemented |
+| RS-DENY-13 | — | Warn | `[bans].wildcards` missing / default-reliant / weaker-than-expected is inventoried | Implemented |
+| RS-DENY-14 | R14 | Error | `[licenses]` must contain the baseline allow list and `[licenses.private].ignore = true` | Implemented |
+| RS-DENY-15 | R15 | Warn/Info | `confidence-threshold` must be `0.8` or stricter; stricter values are inventoried | Implemented |
+| RS-DENY-16 | — | Warn | `[licenses].allow` must not include copyleft licenses | Implemented |
+| RS-DENY-17 | — | Info | `[licenses].exceptions` entries are inventoried | Implemented |
+| RS-DENY-18 | R16 | Error | `[sources].unknown-registry = "deny"` and `unknown-git = "deny"` | Implemented |
+| RS-DENY-19 | R16 | Error | `[sources].allow-registry` must contain crates.io (git or sparse URL) | Implemented |
+| RS-DENY-20 | — | Warn/Info | `[sources].allow-git` entries are warned and inventoried | Implemented |
+| RS-DENY-21 | R17 | Warn | `[[bans.features]]` must ban `tokio` feature `full` and keep the canonical tokio allow list | Implemented |
+| RS-DENY-22 | R18 | Info | Extra feature bans beyond tokio are inventoried | Implemented |
+| RS-DENY-23 | R19 | Warn/Info | `[bans.skip]` entries: malformed entry or missing/non-string reason warns; valid entries inventory | Implemented |
+| RS-DENY-24 | R20 | Warn/Info | `[advisories].ignore` entries: malformed entry or missing/non-string reason warns; valid entries inventory | Implemented |
+| RS-DENY-25 | — | Error/Warn | `[bans].allow` is forbidden; overlap with deny baseline is an explicit error | Implemented |
+| RS-DENY-26 | — | Info | `[bans].deny` entries without `reason` are inventoried | Implemented |
+| RS-DENY-27 | — | Warn | Duplicate entries in `deny`, `skip`, `ignore`, or `[[bans.features]]` are warned | Implemented |
+| RS-DENY-28 | — | Warn | Unknown keys / unsupported schema in critical deny sections are warned | Implemented |
+| RS-DENY-29 | — | Warn | Advisory ignore accumulation over threshold `5` is warned | Implemented |
+| RS-DENY-30 | — | Error/Info | Ban-entry `wrappers` must match canonical policy where managed; project-specific wrappers inventory otherwise | Implemented |
 
 ## Canonical baseline
 

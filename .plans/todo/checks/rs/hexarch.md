@@ -23,7 +23,7 @@
 
 Current migrated structural coverage:
 - the old `rs_arch_01` golden fixture is now exercised by the new family
-- rule-specific sidecar tests preserve the old sharp edge cases for `01..12`
+- rule-specific test modules preserve the old sharp edge cases for `01..12`
 - total current family coverage is 47 `hexarch` tests in the new architecture
 
 ## Dependency direction rules
