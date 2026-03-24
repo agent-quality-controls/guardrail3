@@ -1,40 +1,74 @@
-use std::collections::BTreeSet;
+use super::facts::{
+    CargoFamilyFacts, InputFailureFacts, MissingMemberCargoFacts, PolicyRootCargoFacts,
+    WorkspaceMemberCargoFacts,
+};
 
-use super::facts::{CargoFamilyFacts, MemberCargoFacts, WorkspaceCargoFacts};
-
-pub struct WorkspaceCargoInput<'a> {
-    pub workspace: &'a WorkspaceCargoFacts,
+pub struct PolicyRootCargoInput<'a> {
+    pub root: &'a PolicyRootCargoFacts,
 }
 
-pub struct WorkspaceMemberInput<'a> {
-    pub workspace: &'a WorkspaceCargoFacts,
-    pub member: &'a MemberCargoFacts,
+pub struct WorkspaceMemberCargoInput<'a> {
+    pub workspace: &'a PolicyRootCargoFacts,
+    pub member: &'a WorkspaceMemberCargoFacts,
 }
 
-pub struct WorkspaceMembersSetInput<'a> {
-    pub workspace: &'a WorkspaceCargoFacts,
-    pub declared_members: &'a BTreeSet<String>,
-    pub discovered_members: &'a BTreeSet<String>,
+pub struct MissingMemberCargoInput<'a> {
+    pub missing: &'a MissingMemberCargoFacts,
 }
 
-impl<'a> WorkspaceCargoInput<'a> {
-    pub const fn new(workspace: &'a WorkspaceCargoFacts) -> Self {
-        Self { workspace }
+pub struct InputFailureCargoInput<'a> {
+    pub failure: &'a InputFailureFacts,
+}
+
+impl<'a> PolicyRootCargoInput<'a> {
+    pub const fn new(root: &'a PolicyRootCargoFacts) -> Self {
+        Self { root }
+    }
+
+    pub fn from_facts(facts: &'a CargoFamilyFacts) -> Vec<Self> {
+        facts.policy_roots.iter().map(Self::new).collect()
     }
 }
 
-impl<'a> WorkspaceMemberInput<'a> {
-    pub const fn new(workspace: &'a WorkspaceCargoFacts, member: &'a MemberCargoFacts) -> Self {
+impl<'a> WorkspaceMemberCargoInput<'a> {
+    pub const fn new(
+        workspace: &'a PolicyRootCargoFacts,
+        member: &'a WorkspaceMemberCargoFacts,
+    ) -> Self {
         Self { workspace, member }
     }
+
+    pub fn from_facts(facts: &'a CargoFamilyFacts) -> Vec<Self> {
+        facts
+            .workspace_members
+            .iter()
+            .filter_map(|member| {
+                facts
+                    .policy_roots
+                    .iter()
+                    .find(|root| root.rel_dir == member.workspace_root_rel)
+                    .map(|workspace| Self::new(workspace, member))
+            })
+            .collect()
+    }
 }
 
-impl<'a> WorkspaceMembersSetInput<'a> {
-    pub const fn from_facts(facts: &'a CargoFamilyFacts) -> Self {
-        Self {
-            workspace: &facts.workspace,
-            declared_members: &facts.workspace.declared_members,
-            discovered_members: &facts.discovered_member_rels,
-        }
+impl<'a> MissingMemberCargoInput<'a> {
+    pub const fn new(missing: &'a MissingMemberCargoFacts) -> Self {
+        Self { missing }
+    }
+
+    pub fn from_facts(facts: &'a CargoFamilyFacts) -> Vec<Self> {
+        facts.missing_members.iter().map(Self::new).collect()
+    }
+}
+
+impl<'a> InputFailureCargoInput<'a> {
+    pub const fn new(failure: &'a InputFailureFacts) -> Self {
+        Self { failure }
+    }
+
+    pub fn from_facts(facts: &'a CargoFamilyFacts) -> Vec<Self> {
+        facts.input_failures.iter().map(Self::new).collect()
     }
 }

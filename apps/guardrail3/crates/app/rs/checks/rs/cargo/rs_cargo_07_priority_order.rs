@@ -1,15 +1,16 @@
 use crate::domain::report::{CheckResult, Severity};
 
-use super::inputs::WorkspaceCargoInput;
-use super::lint_support::{EXPECTED_CLIPPY_DENY, lint_priority, workspace_lints};
+use super::inputs::PolicyRootCargoInput;
+use super::lint_support::{EXPECTED_CLIPPY_DENY, lint_priority, policy_lints};
 
 const ID: &str = "RS-CARGO-07";
 
-pub fn check(input: &WorkspaceCargoInput<'_>, results: &mut Vec<CheckResult>) {
-    let Some(parsed) = input.workspace.parsed.as_ref() else {
+pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
+    let root = input.root;
+    let Some(_parsed) = root.parsed.as_ref() else {
         return;
     };
-    let Some(clippy_lints) = workspace_lints(parsed, "clippy") else {
+    let Some(clippy_lints) = policy_lints(root, "clippy") else {
         return;
     };
 
@@ -23,7 +24,7 @@ pub fn check(input: &WorkspaceCargoInput<'_>, results: &mut Vec<CheckResult>) {
                 title: format!("specific lint `{lint_name}` has negative priority"),
                 message: "Specific clippy denies should keep default priority so groups do not override them."
                     .to_owned(),
-                file: Some(input.workspace.rel_path.clone()),
+                file: Some(root.cargo_rel_path.clone()),
                 line: None,
                 inventory: false,
             });
@@ -37,7 +38,7 @@ pub fn check(input: &WorkspaceCargoInput<'_>, results: &mut Vec<CheckResult>) {
                 severity: Severity::Info,
                 title: "specific lint priorities are safe".to_owned(),
                 message: "Specific clippy deny lints do not use negative priority.".to_owned(),
-                file: Some(input.workspace.rel_path.clone()),
+                file: Some(root.cargo_rel_path.clone()),
                 line: None,
                 inventory: false,
             }
@@ -47,5 +48,5 @@ pub fn check(input: &WorkspaceCargoInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_cargo_07_priority_order_tests.rs"]
+#[path = "rs_cargo_07_priority_order_tests/mod.rs"]
 mod tests;

@@ -1,35 +1,25 @@
 use crate::domain::report::{CheckResult, Severity};
 
-use super::inputs::WorkspaceCargoInput;
+use super::inputs::PolicyRootCargoInput;
 use super::lint_support::{
     EXPECTED_CLIPPY_DENY, EXPECTED_CLIPPY_GROUPS, EXPECTED_LIBRARY_RUST_LINTS, EXPECTED_RUST_LINTS,
-    is_weaker, lint_level, lint_priority, workspace_lints,
+    is_weaker, lint_level, lint_priority, policy_lints,
 };
 
 const ID: &str = "RS-CARGO-02";
 
-pub fn check(input: &WorkspaceCargoInput<'_>, results: &mut Vec<CheckResult>) {
-    let Some(parsed) = input.workspace.parsed.as_ref() else {
-        if let Some(parse_error) = &input.workspace.parse_error {
-            results.push(CheckResult {
-                id: ID.to_owned(),
-                severity: Severity::Error,
-                title: "workspace Cargo.toml parse error".to_owned(),
-                message: format!("Failed to parse workspace Cargo.toml: {parse_error}"),
-                file: Some(input.workspace.rel_path.clone()),
-                line: None,
-                inventory: false,
-            });
-        }
+pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
+    let root = input.root;
+    let Some(_parsed) = root.parsed.as_ref() else {
         return;
     };
 
     let mut violations = 0usize;
 
-    if let Some(rust_lints) = workspace_lints(parsed, "rust") {
+    if let Some(rust_lints) = policy_lints(root, "rust") {
         for expected in EXPECTED_RUST_LINTS {
             violations += check_expected_level(
-                input.workspace.rel_path.as_str(),
+                &root.cargo_rel_path,
                 rust_lints,
                 expected.name,
                 expected.expected_level,
@@ -38,10 +28,10 @@ pub fn check(input: &WorkspaceCargoInput<'_>, results: &mut Vec<CheckResult>) {
             );
         }
 
-        if input.workspace.profile_name.as_deref() == Some("library") {
+        if root.profile_name.as_deref() == Some("library") {
             for expected in EXPECTED_LIBRARY_RUST_LINTS {
                 violations += check_expected_level(
-                    input.workspace.rel_path.as_str(),
+                    &root.cargo_rel_path,
                     rust_lints,
                     expected.name,
                     expected.expected_level,
@@ -52,10 +42,10 @@ pub fn check(input: &WorkspaceCargoInput<'_>, results: &mut Vec<CheckResult>) {
         }
     }
 
-    if let Some(clippy_lints) = workspace_lints(parsed, "clippy") {
+    if let Some(clippy_lints) = policy_lints(root, "clippy") {
         for expected in EXPECTED_CLIPPY_GROUPS {
             violations += check_expected_level(
-                input.workspace.rel_path.as_str(),
+                &root.cargo_rel_path,
                 clippy_lints,
                 expected.name,
                 expected.expected_level,
@@ -66,7 +56,7 @@ pub fn check(input: &WorkspaceCargoInput<'_>, results: &mut Vec<CheckResult>) {
 
         for lint_name in EXPECTED_CLIPPY_DENY {
             violations += check_expected_level(
-                input.workspace.rel_path.as_str(),
+                &root.cargo_rel_path,
                 clippy_lints,
                 lint_name,
                 "deny",
@@ -81,10 +71,12 @@ pub fn check(input: &WorkspaceCargoInput<'_>, results: &mut Vec<CheckResult>) {
             CheckResult {
                 id: ID.to_owned(),
                 severity: Severity::Info,
-                title: "workspace lint levels match policy".to_owned(),
-                message: "Workspace lint levels and group priorities match the expected policy."
-                    .to_owned(),
-                file: Some(input.workspace.rel_path.clone()),
+                title: "lint levels match policy".to_owned(),
+                message: format!(
+                    "`{}` uses the expected lint levels for this policy root.",
+                    root.cargo_rel_path
+                ),
+                file: Some(root.cargo_rel_path.clone()),
                 line: None,
                 inventory: false,
             }
@@ -104,17 +96,13 @@ fn check_expected_level(
     let mut violations = 0usize;
 
     if let Some(actual_level) = lint_level(lints, name) {
-        if actual_level != expected_level {
+        if actual_level != expected_level && is_weaker(expected_level, actual_level.as_str()) {
             violations += 1;
             results.push(CheckResult {
                 id: ID.to_owned(),
-                severity: if is_weaker(expected_level, actual_level.as_str()) {
-                    Severity::Error
-                } else {
-                    Severity::Warn
-                },
-                title: format!("lint `{name}` has wrong level"),
-                message: format!("Expected `{expected_level}`, got `{actual_level}`."),
+                severity: Severity::Error,
+                title: format!("lint `{name}` weakens policy"),
+                message: format!("Expected `{expected_level}`, got weaker level `{actual_level}`."),
                 file: Some(file.to_owned()),
                 line: None,
                 inventory: false,
@@ -128,7 +116,7 @@ fn check_expected_level(
             violations += 1;
             results.push(CheckResult {
                 id: ID.to_owned(),
-                severity: Severity::Warn,
+                severity: Severity::Error,
                 title: format!("lint `{name}` has wrong priority"),
                 message: format!(
                     "Expected priority `{expected_priority}`, got `{}`.",
@@ -147,5 +135,5 @@ fn check_expected_level(
 }
 
 #[cfg(test)]
-#[path = "rs_cargo_02_lint_levels_tests.rs"]
+#[path = "rs_cargo_02_lint_levels_tests/mod.rs"]
 mod tests;

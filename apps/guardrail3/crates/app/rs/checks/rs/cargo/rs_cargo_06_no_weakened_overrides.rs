@@ -1,36 +1,52 @@
 use crate::domain::report::{CheckResult, Severity};
 
-use super::inputs::WorkspaceMemberInput;
-use super::lint_support::{is_weaker, lint_level, member_lints, workspace_lints};
+use super::inputs::WorkspaceMemberCargoInput;
+use super::lint_support::{is_weaker, lint_level, member_lints, policy_lints};
 
 const ID: &str = "RS-CARGO-06";
 
-pub fn check(input: &WorkspaceMemberInput<'_>, results: &mut Vec<CheckResult>) {
-    if !input.member.lint_workspace_true {
+pub fn check(input: &WorkspaceMemberCargoInput<'_>, results: &mut Vec<CheckResult>) {
+    if !input.member.lint_workspace_true || input.member.parse_error.is_some() {
         return;
     }
 
-    let Some(workspace_parsed) = input.workspace.parsed.as_ref() else {
-        return;
-    };
     let Some(member_parsed) = input.member.parsed.as_ref() else {
         return;
     };
 
-    check_family(
-        &input.member.rel_path,
+    let mut violations = 0usize;
+    violations += check_family(
+        &input.member.cargo_rel_path,
         "rust",
-        workspace_lints(workspace_parsed, "rust"),
+        policy_lints(input.workspace, "rust"),
         member_lints(member_parsed, "rust"),
         results,
     );
-    check_family(
-        &input.member.rel_path,
+    violations += check_family(
+        &input.member.cargo_rel_path,
         "clippy",
-        workspace_lints(workspace_parsed, "clippy"),
+        policy_lints(input.workspace, "clippy"),
         member_lints(member_parsed, "clippy"),
         results,
     );
+
+    if violations == 0 {
+        results.push(
+            CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Info,
+                title: "no weakened overrides".to_owned(),
+                message: format!(
+                    "`{}` does not weaken inherited workspace lint policy.",
+                    input.member.cargo_rel_path
+                ),
+                file: Some(input.member.cargo_rel_path.clone()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
+    }
 }
 
 fn check_family(
@@ -39,15 +55,15 @@ fn check_family(
     workspace_lints: Option<&toml::Value>,
     member_lints: Option<&toml::Value>,
     results: &mut Vec<CheckResult>,
-) {
+) -> usize {
     let (Some(workspace_lints), Some(member_lints)) = (workspace_lints, member_lints) else {
-        return;
+        return 0;
     };
-
     let Some(member_table) = member_lints.as_table() else {
-        return;
+        return 0;
     };
 
+    let mut violations = 0usize;
     for lint_name in member_table.keys() {
         let Some(workspace_level) = lint_level(workspace_lints, lint_name) else {
             continue;
@@ -57,6 +73,7 @@ fn check_family(
         };
 
         if is_weaker(workspace_level.as_str(), member_level.as_str()) {
+            violations += 1;
             results.push(CheckResult {
                 id: ID.to_owned(),
                 severity: Severity::Error,
@@ -70,8 +87,9 @@ fn check_family(
             });
         }
     }
+    violations
 }
 
 #[cfg(test)]
-#[path = "rs_cargo_06_no_weakened_overrides_tests.rs"]
+#[path = "rs_cargo_06_no_weakened_overrides_tests/mod.rs"]
 mod tests;
