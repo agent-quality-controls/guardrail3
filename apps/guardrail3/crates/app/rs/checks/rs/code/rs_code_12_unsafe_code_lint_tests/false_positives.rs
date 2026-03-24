@@ -18,5 +18,12 @@ fn ignores_missing_or_non_workspace_unsafe_code_lints() {
 
     let results = run_family(root);
 
-    assert_eq!(files_for_rule(&results, "RS-CODE-12"), BTreeSet::new());
+    assert_eq!(
+        files_for_rule(&results, "RS-CODE-12"),
+        BTreeSet::from([
+            "apps/backend/Cargo.toml".to_owned(),
+            "apps/devctl/Cargo.toml".to_owned(),
+            "apps/worker/Cargo.toml".to_owned(),
+        ])
+    );
 }

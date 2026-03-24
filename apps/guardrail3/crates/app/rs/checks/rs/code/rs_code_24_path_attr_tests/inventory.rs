@@ -33,27 +33,51 @@ fn attacks_path_attr_boundary_changes_across_multiple_owned_files() {
     );
 
     let results = run_family(root);
-    let rs_code_24_results = results
+    let mut rs_code_24_results = results
         .iter()
         .filter(|result| result.id == "RS-CODE-24")
+        .map(|result| {
+            (
+                result.file.clone(),
+                result.line,
+                result.severity,
+                result.title.clone(),
+                result.message.clone(),
+                result.inventory,
+            )
+        })
         .collect::<Vec<_>>();
+    rs_code_24_results.sort_by_key(|(file, line, severity, _, _, _)| {
+        (
+            file.clone().unwrap_or_default(),
+            *line,
+            format!("{severity:?}"),
+        )
+    });
 
     assert_eq!(
         files_for_rule(&results, "RS-CODE-24"),
         BTreeSet::from([rest_rel.to_owned(), handlers_rel.to_owned()])
     );
-    assert_eq!(rs_code_24_results.len(), 2);
     assert_eq!(
-        rs_code_24_results
-            .iter()
-            .map(|result| (result.file.as_deref(), result.line, result.severity))
-            .collect::<Vec<_>>(),
+        rs_code_24_results,
         vec![
-            (Some(rest_rel), Some(rest_warn_line), Severity::Warn),
             (
-                Some(handlers_rel),
+                Some(handlers_rel.to_owned()),
                 Some(handlers_error_line),
-                Severity::Error
+                Severity::Error,
+                "#[path] escapes parent directory".to_owned(),
+                "`#[path = \"../shared_handlers.rs\"]` escapes the standard module boundary."
+                    .to_owned(),
+                false,
+            ),
+            (
+                Some(rest_rel.to_owned()),
+                Some(rest_warn_line),
+                Severity::Warn,
+                "#[path] usage".to_owned(),
+                "#[path = \"generated_rest.rs\"] reason: generated transport shim".to_owned(),
+                false,
             ),
         ]
     );

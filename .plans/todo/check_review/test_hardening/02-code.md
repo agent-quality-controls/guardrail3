@@ -4,6 +4,8 @@
 
 Attack source-level rules as bypass surfaces, not stylistic hints.
 
+The lane is now in repeated adversarial convergence mode, not structural migration mode.
+
 ## Main attack classes
 
 - suppression tricks
@@ -38,6 +40,7 @@ Each rule has:
 - one attack vector applied across all relevant source files in the golden tree
 - exact file hit sets
 - false-positive controls for similar legal syntax
+- repeated attack passes no longer finding material rule-local bugs
 
 ## Audit Snapshot
 
@@ -77,6 +80,7 @@ Replace structurally:
 - whole-type `#[garde(skip)]` ownership is still an explicit open gap from the brief
 - grouped and aliased attribute/import handling is a likely parser/helper debt surface
 - the current gap is no longer placeholder content; it is the remaining work to rewrite rule tests so they mutate the populated golden tree broadly instead of relying on direct snippets
+- targeted `cargo test` execution can still be blocked by unrelated dirty-tree compile failures outside `rs/code`; when that happens, use `cargo check -p guardrail3 --lib` to keep verifying the `rs/code` slice and document the external blocker explicitly
 
 ## Coverage Matrix
 
@@ -109,8 +113,8 @@ Legend:
 | `RS-CODE-17` | `direct`, `exact` | golden, threshold boundary, multi-file impl attacks, owned hit/non-hit sets | migrate with suppression lane |
 | `RS-CODE-18` | `direct`, `fp`, `exact` | golden, broader always-true predicate matrix, owned hit/non-hit sets, nested placements | high-risk helper/parser surface |
 | `RS-CODE-19` | `direct`, `exact` | golden, threshold-boundary controls, broad inventory mutation, owned hit/non-hit sets | current struct/enum branches are reusable seeds |
-| `RS-CODE-20` | `direct`, `exact` | golden, broader extern placement coverage, false-positive controls, owned hit/non-hit sets | keep foreign-mod ownership under scrutiny |
-| `RS-CODE-21` | `direct`, `exact` | golden, aliasing/glob breadth, exemptions, exact owned hit/non-hit sets | grouped import branch already exists and should be preserved |
+| `RS-CODE-20` | `direct`, `golden`, `fp`, `exact` | optional cfg_attr combinatorics only | foreign-mod ownership is now intentionally centralized here; `RS-CODE-03/04` do not own `ForeignMod` attrs and `RS-CODE-18` no longer claims always-true foreign-mod cfg_attr |
+| `RS-CODE-21` | `direct`, `golden`, `fp`, `exact` | final targeted cargo verification, then optional convergence pass for any real misses it exposes | parser now covers nested/grouped glob imports and cfg(test) suppression; fixture-level metadata assertions were tightened to the family standard |
 | `RS-CODE-22` | `direct`, `exact` | golden, grouped lint-list attacks, broader crate/item placement attacks, owned hit/non-hit sets | high-risk because of `same_line_reason()` |
 | `RS-CODE-23` | `direct`, `exact` | golden, broad include/path-traversal attacks across owned files, exact owned hit/non-hit sets | existing severity split branches are reusable |
 | `RS-CODE-24` | `direct`, `exact` | golden, path traversal vs reason coverage across placements, owned hit/non-hit sets | high-risk because of `same_line_reason()` |
@@ -186,3 +190,44 @@ Start the first migration batch by:
 - cargo-based verification of the new modules is currently blocked by unrelated existing repo failures:
   - `unused-crate-dependencies` failures in non-`rs/code` targets
   - `dead-code` failures in hook-family placeholder structs during `--lib` test builds
+- structural migration is complete across `RS-CODE-01..30`
+- `RS-CODE-01..19` have already been pushed through repeated adversarial hardening loops in this lane
+- `RS-CODE-20` has now also been converged:
+  - prior compile bugs in its sidecar tests were fixed
+  - `RS-CODE-03/04` overlap on `ForeignMod` attrs was removed
+  - `#[cfg_attr(..., allow(...))]` on foreign mods is now owned by `RS-CODE-20`
+  - always-true foreign-mod cfg_attr no longer double-reports with `RS-CODE-18`
+  - direct, golden, false-positive, and inventory coverage are all materially stronger now
+- current verification state for the lane:
+  - `cargo check -p guardrail3 --lib` passes
+  - `cargo check -p guardrail3 --tests` is blocked by unrelated code in `apps/guardrail3/crates/app/rs/checks/rs/release/rs_bin_01_binary_release_workflow_tests/bypasses.rs`
+
+## Adversarial Loop Protocol
+
+Use this per rule now:
+
+1. reconstruct rule intent from:
+   - `code.md`
+   - the family hardening docs
+   - the production error message / semantics
+2. run one targeted verification pass if unrelated repo blockers permit
+3. attack the rule from four angles:
+   - completeness
+   - missing scenarios
+   - pattern parity
+   - false positives / exactness
+4. fix real rule bugs before widening tests
+5. rerun until the remaining findings are just combinatorial expansion with no new bug class
+
+Use the `test-attack` skill as the default analysis frame for this loop.
+
+## Resume Point
+
+Current in-flight batch: `RS-CODE-21..30`.
+
+Latest batch status:
+- `RS-CODE-21` now has stronger direct, golden, false-positive, and inventory exactness
+- `RS-CODE-22..30` have been tightened in the same pass toward exact metadata assertions and true zero-hit baselines
+- the next gate is focused compile/test verification on `target/code`, not more speculative rewrites
+
+Do not reopen `RS-CODE-20` unless a new plan/code contradiction appears.

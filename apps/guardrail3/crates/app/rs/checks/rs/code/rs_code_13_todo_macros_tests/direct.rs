@@ -20,5 +20,13 @@ fn warns_on_todo_macro() {
     check(&input, &mut results);
 
     assert_eq!(results.len(), 1);
+    assert_eq!(results[0].id, "RS-CODE-13");
     assert_eq!(results[0].severity, Severity::Warn);
+    assert_eq!(results[0].file.as_deref(), Some("src/foo.rs"));
+    assert_eq!(results[0].line, Some(1));
+    assert_eq!(results[0].title, "todo! macro");
+    assert_eq!(
+        results[0].message,
+        "`todo!()` macro found: fn foo() { todo!(); }."
+    );
 }

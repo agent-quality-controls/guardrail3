@@ -51,8 +51,13 @@ fn golden_tree_has_no_code_input_failures() {
     };
 
     let results = crate::app::rs::checks::rs::code::check(&tree);
+    let rs_code_30_results = results
+        .iter()
+        .filter(|result| result.id == "RS-CODE-30")
+        .collect::<Vec<_>>();
 
     assert_eq!(files_for_rule(&results, "RS-CODE-30"), BTreeSet::new());
+    assert!(rs_code_30_results.is_empty());
 
     std::fs::remove_dir_all(&root).expect("remove temp tree");
 }

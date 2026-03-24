@@ -1,3 +1,4 @@
+#![recursion_limit = "2048"]
 //! guardrail3 — composable code guardrails for Rust and TypeScript projects.
 
 use proc_macro2 as _;

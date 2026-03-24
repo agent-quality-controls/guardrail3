@@ -8,7 +8,10 @@ fn main() {
     };
 
     let before = handle_dashboard(&request);
-    let after = handle_plan_week(&request).expect("plan week");
+    let Ok(after) = handle_plan_week(&request) else {
+        eprintln!("plan week request failed for {}", request.household_slug);
+        return;
+    };
 
     println!(
         "dashboard for {} ({}): {} inbox tasks before planning, {} scheduled after planning",

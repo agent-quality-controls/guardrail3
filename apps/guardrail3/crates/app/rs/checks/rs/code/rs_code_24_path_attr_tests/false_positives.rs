@@ -19,13 +19,35 @@ fn skips_same_line_reasoned_non_escaping_path_attrs() {
     );
 
     let results = run_family(root);
-    let rule_files = files_for_rule(&results, "RS-CODE-24");
-    assert_eq!(rule_files, BTreeSet::from([rest_rel.to_owned()]));
+    let rs_code_24_results = results
+        .iter()
+        .filter(|result| result.id == "RS-CODE-24")
+        .map(|result| {
+            (
+                result.file.clone(),
+                result.line,
+                result.severity,
+                result.title.clone(),
+                result.message.clone(),
+                result.inventory,
+            )
+        })
+        .collect::<Vec<_>>();
+    let warn_line = rest_content.lines().count() + 2;
+
     assert_eq!(
-        results
-            .iter()
-            .filter(|result| result.id == "RS-CODE-24")
-            .count(),
-        1
+        files_for_rule(&results, "RS-CODE-24"),
+        BTreeSet::from([rest_rel.to_owned()])
+    );
+    assert_eq!(
+        rs_code_24_results,
+        vec![(
+            Some(rest_rel.to_owned()),
+            Some(warn_line),
+            crate::domain::report::Severity::Warn,
+            "#[path] usage".to_owned(),
+            "#[path = \"generated_inline.rs\"] reason: generated request DTO shim".to_owned(),
+            false,
+        )]
     );
 }

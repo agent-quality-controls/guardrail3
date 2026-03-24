@@ -1,21 +1,17 @@
-use super::super::super::inputs::RustCodeFileInput;
-use super::super::super::parse::parse_rust_file;
-use super::super::check;
+use std::collections::BTreeSet;
+
+use super::super::super::test_support::{copy_fixture, files_for_rule, run_family};
 
 #[test]
-fn golden_file_without_conditional_cfg_attr_allow_has_no_hits() {
-    let content = "fn foo() {}";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/foo.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: None,
-    };
-    let mut results = Vec::new();
+fn populated_golden_fixture_has_no_conditional_cfg_attr_allow_hits() {
+    let fixture = copy_fixture();
 
-    check(&input, &mut results);
+    let results = run_family(fixture.path());
+    let rs_code_08_results = results
+        .iter()
+        .filter(|result| result.id == "RS-CODE-08")
+        .collect::<Vec<_>>();
 
-    assert!(results.is_empty());
+    assert_eq!(files_for_rule(&results, "RS-CODE-08"), BTreeSet::new());
+    assert!(rs_code_08_results.is_empty());
 }

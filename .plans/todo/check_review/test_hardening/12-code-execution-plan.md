@@ -6,6 +6,23 @@ It is intentionally exhaustive.
 
 The goal is not to choose a subset. The goal is to close the entire lane, step by step, without skipping structural migration, coverage rebuilding, semantic bug fixing, or plan reconciliation.
 
+## Current checkpoint
+
+The early structural phases below are largely complete.
+
+The lane is now in the repeated adversarial convergence phase:
+- one rule at a time
+- verify when repo blockers permit
+- attack from four angles
+- fix rule-local bugs
+- rerun until convergence
+
+Use the `test-attack` skill for this phase.
+
+Current resume point:
+- `RS-CODE-20` converged
+- `RS-CODE-21..30` exactness batch in progress
+
 ## Phase 0 — Lock Context
 
 1. Re-read the active inputs before making code changes:
@@ -129,6 +146,9 @@ The target is:
 3. Remove the old `*_tests.rs` files only after the new rule-specific module directory is wired and compiling.
 4. Do not leave any mixed old/new structure behind when the pass is complete.
 
+Status:
+- complete for `RS-CODE-01..30`
+
 ## Phase 6 — Harden Suppression Rules (`RS-CODE-01..08`)
 
 ### `RS-CODE-01` crate-level `#![allow(...)]`
@@ -204,6 +224,10 @@ The target is:
 3. Add controls separating this inventory rule from `RS-CODE-18` always-true bypasses.
 4. Assert exact info severity and hit set.
 
+Status:
+- the suppression tranche has already been through structural hardening
+- continue reopening individual rules only if a later adversarial pass exposes a real boundary bug
+
 ## Phase 7 — Harden Structure Rules (`RS-CODE-09..12`)
 
 ### `RS-CODE-09` file length
@@ -236,6 +260,10 @@ The target is:
    - missing lint
    - malformed Cargo input triggering `RS-CODE-30` instead
 3. Assert exact severity split and exact file ownership.
+
+Status:
+- structurally hardened
+- only reopen when attack loops surface a concrete miss
 
 ## Phase 8 — Harden Quality Rules (`RS-CODE-13..16`)
 

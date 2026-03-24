@@ -1,5 +1,7 @@
 use std::collections::BTreeSet;
 
+use crate::domain::report::Severity;
+
 use super::super::super::test_support::{copy_fixture, files_for_rule, run_family, write_file};
 
 #[test]
@@ -18,7 +20,9 @@ fn inventories_todo_unimplemented_and_unreachable_macros_in_real_files() {
     write_file(
         root,
         backend_rel,
-        &format!("{backend_content}\nfn todo_probe() {{ todo!() }}\n"),
+        &format!(
+            "{backend_content}\nmod nested_probe {{\n    pub fn todo_probe() {{ todo!() }}\n}}\n"
+        ),
     );
     write_file(
         root,
@@ -27,9 +31,67 @@ fn inventories_todo_unimplemented_and_unreachable_macros_in_real_files() {
     );
 
     let results = run_family(root);
+    let mut rs_code_13_results = results
+        .iter()
+        .filter(|result| result.id == "RS-CODE-13")
+        .map(|result| {
+            (
+                result.file.clone().expect("file"),
+                result.line,
+                format!("{:?}", result.severity),
+                result.title.clone(),
+                result.message.clone(),
+            )
+        })
+        .collect::<Vec<_>>();
+    rs_code_13_results.sort();
+
+    let backend_new = format!(
+        "{backend_content}\nmod nested_probe {{\n    pub fn todo_probe() {{ todo!() }}\n}}\n"
+    );
+    let worker_new =
+        format!("{worker_content}\nfn worker_probe() {{ unimplemented!(); unreachable!(); }}\n");
+    let backend_line = backend_new
+        .lines()
+        .position(|line| line.contains("pub fn todo_probe()"))
+        .expect("backend macro line")
+        + 1;
+    let worker_line = worker_new
+        .lines()
+        .position(|line| line.contains("fn worker_probe()"))
+        .expect("worker macro line")
+        + 1;
 
     assert_eq!(
         files_for_rule(&results, "RS-CODE-13"),
         BTreeSet::from([backend_rel.to_owned(), worker_rel.to_owned()])
+    );
+    assert_eq!(
+        rs_code_13_results,
+        vec![
+            (
+                backend_rel.to_owned(),
+                Some(backend_line),
+                format!("{:?}", Severity::Warn),
+                "todo! macro".to_owned(),
+                "`todo!()` macro found: pub fn todo_probe() { todo!() }.".to_owned(),
+            ),
+            (
+                worker_rel.to_owned(),
+                Some(worker_line),
+                format!("{:?}", Severity::Info),
+                "unreachable! macro".to_owned(),
+                "`unreachable!()` macro found: fn worker_probe() { unimplemented!(); unreachable!(); }."
+                    .to_owned(),
+            ),
+            (
+                worker_rel.to_owned(),
+                Some(worker_line),
+                format!("{:?}", Severity::Warn),
+                "unimplemented! macro".to_owned(),
+                "`unimplemented!()` macro found: fn worker_probe() { unimplemented!(); unreachable!(); }."
+                    .to_owned(),
+            ),
+        ]
     );
 }
