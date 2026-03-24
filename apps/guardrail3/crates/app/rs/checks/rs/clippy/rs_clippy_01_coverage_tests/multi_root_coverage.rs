@@ -44,16 +44,6 @@ fn inventories_exact_covering_config_for_each_rust_root_in_multi_root_fixture() 
         .collect::<BTreeMap<_, _>>();
     let expected = BTreeMap::from([
         (
-            "standalone package root `packages/shared-types` is covered by `packages/shared-types/clippy.toml`."
-                .to_owned(),
-            (
-                Severity::Info,
-                true,
-                Some("packages/shared-types/clippy.toml".to_owned()),
-                "Rust unit covered by clippy.toml".to_owned(),
-            ),
-        ),
-        (
             "workspace root `apps/backend` is covered by `clippy.toml`.".to_owned(),
             (
                 Severity::Info,

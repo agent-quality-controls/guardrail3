@@ -436,6 +436,7 @@ fn read_profile_map(
     let mut map = BTreeMap::new();
     let default_profile = read_default_profile(tree);
     let _ = map.insert(String::new(), default_profile.clone());
+    let resolved_app_paths = resolve_app_paths(cargo_roots);
 
     let Some(content) = tree.file_content("guardrail3.toml") else {
         return map;
@@ -449,7 +450,6 @@ fn read_profile_map(
         .and_then(|value| value.get("apps"))
         .and_then(toml::Value::as_table)
     {
-        let resolved_app_paths = resolve_app_paths(cargo_roots);
         for (app_name, app_cfg) in apps {
             let profile_name = app_cfg
                 .get("type")
@@ -471,6 +471,12 @@ fn read_profile_map(
             .map(str::to_owned)
             .or_else(|| Some("library".to_owned()))
             .or_else(|| default_profile.clone());
+        if !resolved_app_paths
+            .values()
+            .any(|rel_dir| rel_dir.is_empty())
+        {
+            let _ = map.insert(String::new(), profile_name.clone());
+        }
         for rel_dir in standalone_package_roots {
             let _ = map.insert(rel_dir.clone(), profile_name.clone());
         }
@@ -505,3 +511,7 @@ fn profile_for(rel_dir: &str, profile_map: &BTreeMap<String, Option<String>>) ->
     }
     profile_map.get("").cloned().flatten()
 }
+
+#[cfg(test)]
+#[path = "deny_facts_tests.rs"]
+mod tests;

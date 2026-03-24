@@ -30,8 +30,6 @@ fn errors_only_for_roots_without_an_allowed_covering_config() {
         .map(|result| result.message.clone())
         .collect::<BTreeSet<_>>();
     let expected_messages = BTreeSet::from([
-        "standalone package root `packages/shared-types` is covered by `packages/shared-types/clippy.toml`."
-            .to_owned(),
         "workspace root `apps/backend` is not covered by any allowed clippy.toml at the validation root, a workspace root, or a standalone package root."
             .to_owned(),
         "workspace root `apps/devctl` is covered by `apps/devctl/clippy.toml`.".to_owned(),

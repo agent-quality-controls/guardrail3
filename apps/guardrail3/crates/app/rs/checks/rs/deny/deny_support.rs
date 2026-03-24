@@ -55,11 +55,6 @@ pub fn expected_bans(profile: Option<&str>) -> BTreeMap<String, BanExpectation> 
             let _ = map.insert(name, BanExpectation { wrappers });
         }
     }
-    let _ = map
-        .entry("lazy_static".to_owned())
-        .or_insert(BanExpectation {
-            wrappers: BTreeSet::new(),
-        });
     map
 }
 

@@ -99,7 +99,7 @@ fn generated_service_fixture_matches_checker_baseline_sections() {
 }
 
 #[test]
-fn generator_delta_is_explicit_for_audited_lazy_static_addition() {
+fn generated_service_ban_baseline_matches_expected_bans_exactly() {
     let parsed =
         toml::from_str::<toml::Value>(&canonical_deny_toml_service()).expect("valid deny TOML");
     let generated = deny_entry_names(&parsed);
@@ -114,6 +114,6 @@ fn generator_delta_is_explicit_for_audited_lazy_static_addition() {
         .cloned()
         .collect::<BTreeSet<_>>();
 
-    assert_eq!(only_in_expected, BTreeSet::from(["lazy_static".to_owned()]));
+    assert!(only_in_expected.is_empty());
     assert!(only_in_generated.is_empty());
 }

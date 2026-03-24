@@ -4,3 +4,5 @@ mod fail_closed;
 mod golden;
 #[path = "incomplete_baseline.rs"]
 mod incomplete_baseline;
+#[path = "root_config_is_not_local_policy.rs"]
+mod root_config_is_not_local_policy;

@@ -40,15 +40,6 @@ fn inventories_exact_covering_deny_config_for_each_effective_rust_root() {
         .collect::<BTreeMap<_, _>>();
     let expected = BTreeMap::from([
         (
-            "standalone package root `packages/shared-types` is covered by `packages/shared-types/deny.toml`."
-                .to_owned(),
-            (
-                true,
-                Some("packages/shared-types/deny.toml".to_owned()),
-                "Rust root covered by deny config".to_owned(),
-            ),
-        ),
-        (
             "validation root `.` is covered by `deny.toml`.".to_owned(),
             (
                 true,

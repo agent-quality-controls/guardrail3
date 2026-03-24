@@ -4,5 +4,7 @@ mod garde_disabled;
 mod golden;
 #[path = "library_profile.rs"]
 mod library_profile;
+#[path = "parity.rs"]
+mod parity;
 #[path = "project_specific.rs"]
 mod project_specific;

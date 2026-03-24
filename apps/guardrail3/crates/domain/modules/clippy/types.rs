@@ -10,6 +10,17 @@ pub const BASE_TYPE_PATHS: &[&str] = &[
     "axum::Json",
     "axum::extract::Query",
     "axum::extract::Form",
+    "axum::extract::Path",
+    "axum::extract::Multipart",
+    "axum::extract::ConnectInfo",
+    "axum_extra::extract::CookieJar",
+    "axum_extra::extract::cookie::Cookie",
+    "axum_extra::extract::TypedHeader",
+    "axum_extra::extract::JsonDeserializer",
+    "axum_extra::extract::JsonLines",
+    "axum_extra::extract::Protobuf",
+    "axum_extra::extract::Cbor",
+    "axum_extra::extract::MsgPack",
     "std::any::Any",
 ];
 
@@ -61,7 +72,18 @@ pub const TYPE_GARDE_EXTRACTORS: Module = Module {
     content: r#"    { path = "axum::extract::Json", reason = "BANNED: Use ValidatedJson<T>/ValidatedQuery<T>/ValidatedForm<T> instead. Requires #[derive(garde::Validate)] on the request type." },
     { path = "axum::Json", reason = "BANNED: Use ValidatedJson<T>/ValidatedQuery<T>/ValidatedForm<T> instead. Requires #[derive(garde::Validate)] on the request type." },
     { path = "axum::extract::Query", reason = "BANNED: Use ValidatedJson<T>/ValidatedQuery<T>/ValidatedForm<T> instead. Requires #[derive(garde::Validate)] on the request type." },
-    { path = "axum::extract::Form", reason = "BANNED: Use ValidatedJson<T>/ValidatedQuery<T>/ValidatedForm<T> instead. Requires #[derive(garde::Validate)] on the request type." },"#,
+    { path = "axum::extract::Form", reason = "BANNED: Use ValidatedJson<T>/ValidatedQuery<T>/ValidatedForm<T> instead. Requires #[derive(garde::Validate)] on the request type." },
+    { path = "axum::extract::Path", reason = "BANNED: Use validated wrapper-based boundary extraction instead of raw path extractor usage." },
+    { path = "axum::extract::Multipart", reason = "BANNED: Validate multipart metadata through an explicit validated boundary surface before use." },
+    { path = "axum::extract::ConnectInfo", reason = "BANNED: Treat connection metadata as an explicit validated boundary instead of a raw extractor dependency." },
+    { path = "axum_extra::extract::CookieJar", reason = "BANNED: Validate cookie-derived boundary input through explicit wrapper surfaces before use." },
+    { path = "axum_extra::extract::cookie::Cookie", reason = "BANNED: Validate cookie-derived boundary input through explicit wrapper surfaces before use." },
+    { path = "axum_extra::extract::TypedHeader", reason = "BANNED: Validate header-derived boundary input through explicit wrapper surfaces before use." },
+    { path = "axum_extra::extract::JsonDeserializer", reason = "BANNED: Use validated request wrappers instead of raw JSON deserializer extractors." },
+    { path = "axum_extra::extract::JsonLines", reason = "BANNED: Validate line-oriented JSON payloads through explicit wrapper boundaries before use." },
+    { path = "axum_extra::extract::Protobuf", reason = "BANNED: Validate protobuf-derived boundary input through explicit wrapper surfaces before use." },
+    { path = "axum_extra::extract::Cbor", reason = "BANNED: Validate CBOR-derived boundary input through explicit wrapper surfaces before use." },
+    { path = "axum_extra::extract::MsgPack", reason = "BANNED: Validate MsgPack-derived boundary input through explicit wrapper surfaces before use." },"#,
 };
 
 pub fn service_profile_types() -> Vec<&'static Module> {

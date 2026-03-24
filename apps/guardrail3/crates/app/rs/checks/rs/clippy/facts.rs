@@ -378,6 +378,7 @@ fn read_policy_map(
     let mut map = BTreeMap::new();
     let default_profile = read_profile_name(tree);
     let default_garde = read_global_garde(tree);
+    let resolved_app_paths = resolve_app_paths(cargo_roots);
     let _ = map.insert(
         String::new(),
         PolicySettings {
@@ -398,7 +399,6 @@ fn read_policy_map(
         .and_then(|value| value.get("apps"))
         .and_then(toml::Value::as_table)
     {
-        let resolved_app_paths = resolve_app_paths(cargo_roots);
         for (app_name, app_cfg) in apps {
             let profile_name = app_cfg
                 .get("type")
@@ -436,6 +436,18 @@ fn read_policy_map(
             .and_then(|value| value.get("garde"))
             .and_then(toml::Value::as_bool)
             .unwrap_or(default_garde);
+        if !resolved_app_paths
+            .values()
+            .any(|rel_dir| rel_dir.is_empty())
+        {
+            let _ = map.insert(
+                String::new(),
+                PolicySettings {
+                    profile_name: profile_name.clone(),
+                    garde_enabled,
+                },
+            );
+        }
         for rel_dir in standalone_package_roots {
             let _ = map.insert(
                 rel_dir.clone(),
@@ -519,3 +531,7 @@ fn package_publishable(tree: &ProjectTree, rel_dir: &str) -> bool {
         _ => true,
     }
 }
+
+#[cfg(test)]
+#[path = "clippy_facts_tests.rs"]
+mod tests;

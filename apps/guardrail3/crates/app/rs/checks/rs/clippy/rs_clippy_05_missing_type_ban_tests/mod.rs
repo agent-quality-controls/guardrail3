@@ -6,3 +6,5 @@ mod golden;
 mod library_profile;
 #[path = "missing_bans.rs"]
 mod missing_bans;
+#[path = "parity.rs"]
+mod parity;

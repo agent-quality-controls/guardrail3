@@ -3,28 +3,65 @@ use std::collections::BTreeSet;
 use crate::domain::report::Severity;
 
 use super::super::super::inputs::ConfigDenyInput;
-use super::super::super::test_support::{canonical_deny_toml_service, config_facts};
+use super::super::super::test_support::{
+    add_skip_entry, canonical_deny_toml_service, config_facts, set_advisory_ignores,
+    set_feature_entries, set_license_exceptions,
+};
 use super::super::check;
 
 #[test]
 fn warns_on_unknown_nested_skip_ignore_exception_and_feature_keys() {
-    let deny = canonical_deny_toml_service()
-        .replace(
-            "skip = []",
-            "skip = [{ crate = \"serde@1.0.0\", reason = \"good enough reason text\", extra = true }]",
-        )
-        .replace(
-            "ignore = []",
-            "ignore = [{ id = \"RUSTSEC-2026-0001\", reason = \"good enough reason text\", extra = true }]",
-        )
-        .replace(
-            "[licenses.private]\nignore = true",
-            "[licenses.private]\nignore = true\n\n[[licenses.exceptions]]\nname = \"ring\"\nallow = [\"ISC\"]\nextra = true",
-        )
-        .replace(
-            "[[bans.features]]\nname = \"tokio\"",
-            "[[bans.features]]\nname = \"tokio\"\nextra = true",
-        );
+    let deny = set_feature_entries(
+        &set_license_exceptions(
+            &set_advisory_ignores(
+                &add_skip_entry(
+                    &canonical_deny_toml_service(),
+                    toml::Value::Table(toml::map::Map::from_iter([
+                        (
+                            "crate".to_owned(),
+                            toml::Value::String("serde@1.0.0".to_owned()),
+                        ),
+                        (
+                            "reason".to_owned(),
+                            toml::Value::String("good enough reason text".to_owned()),
+                        ),
+                        ("extra".to_owned(), toml::Value::Boolean(true)),
+                    ])),
+                ),
+                vec![toml::Value::Table(toml::map::Map::from_iter([
+                    (
+                        "id".to_owned(),
+                        toml::Value::String("RUSTSEC-2026-0001".to_owned()),
+                    ),
+                    (
+                        "reason".to_owned(),
+                        toml::Value::String("good enough reason text".to_owned()),
+                    ),
+                    ("extra".to_owned(), toml::Value::Boolean(true)),
+                ]))],
+            ),
+            vec![toml::Value::Table(toml::map::Map::from_iter([
+                ("name".to_owned(), toml::Value::String("ring".to_owned())),
+                (
+                    "allow".to_owned(),
+                    toml::Value::Array(vec![toml::Value::String("ISC".to_owned())]),
+                ),
+                ("extra".to_owned(), toml::Value::Boolean(true)),
+            ]))],
+        ),
+        vec![toml::Value::Table(toml::map::Map::from_iter([
+            ("name".to_owned(), toml::Value::String("tokio".to_owned())),
+            (
+                "deny".to_owned(),
+                toml::Value::Array(vec![toml::Value::String("full".to_owned())]),
+            ),
+            (
+                "allow".to_owned(),
+                toml::Value::Array(vec![toml::Value::String("rt-multi-thread".to_owned())]),
+            ),
+            ("extra".to_owned(), toml::Value::Boolean(true)),
+        ]))],
+    );
     let config = config_facts(&deny);
     let input = ConfigDenyInput { config: &config };
     let mut results = Vec::new();

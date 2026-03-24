@@ -278,7 +278,7 @@ pub(super) fn generate_rust_files(
         });
 
         let deny_content = build_deny_for_profile(
-            profile,
+            effective_profile,
             &local.deny_bans,
             &local.deny_skip,
             &local.deny_feature_bans,
@@ -399,3 +399,7 @@ pub(super) fn generate_rust_files(
 
     files
 }
+
+#[cfg(test)]
+#[path = "generate_helpers_tests.rs"]
+mod tests;
