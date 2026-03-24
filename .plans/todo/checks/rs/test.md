@@ -16,6 +16,39 @@ Forbidden:
 - grouped family test files such as `test_tests.rs`
 - helper files that hide multiple rule predicates behind one API
 
+## Discovery / ownership model
+
+`RS-TEST` is a multi-root family.
+
+Its owned Rust roots are:
+- workspace roots
+- standalone package roots that are not members of a workspace
+
+Per owned root, the family determines:
+- root Cargo test-related config facts
+- root-local `.cargo/mutants.toml`
+- root-local `.config/nextest.toml`
+- Rust source/test files belonging to that root
+
+The family must not collapse to repo-root-only behavior for test roots.
+
+## Shared validation-root inputs
+
+`RS-TEST` also depends on validation-root artifacts that are not root-local:
+- validation-root `guardrail3.toml`
+- active shared/Rust hook surfaces for mutation-hook presence
+
+That split is intentional:
+- root-owned rules evaluate package/workspace-local test facts
+- hook-presence and root policy resolution depend on validation-root artifacts
+
+## Hook resolution contract
+
+`RS-TEST-08` does not own generic hook structure.
+
+It only owns whether the active shared/Rust hook surfaces contain the expected mutation-testing step.
+Missing hook files themselves are owned by the hook families.
+
 ## Rules
 
 | New ID | Old ID | Severity | What | Status |
@@ -50,6 +83,17 @@ Forbidden:
 | RS-TEST-18 | Warn | Mutation config content validation. `.cargo/mutants.toml` with `exclude_re = [".*"]` makes mutation testing useless (everything excluded). Also flag `timeout_multiplier < 1.0` (fake 100% score via timeouts). RS-TEST-02 checks existence but not content. | Implemented |
 | RS-TEST-19 | Error | Input failures for the test family: unreadable/unparsable Rust source, Cargo.toml, `.cargo/mutants.toml`, `.config/nextest.toml`, or `guardrail3.toml` required to evaluate test rules. Fail closed instead of silently skipping. | Implemented |
 
+## Input integrity / fail-closed expectations
+
+The family depends on:
+- readable/parsible owned-root `Cargo.toml`
+- readable/parsible owned-root `.cargo/mutants.toml` when present
+- readable/parsible owned-root `.config/nextest.toml` when present
+- readable Rust source files for analyzed tests/source modules
+- readable validation-root `guardrail3.toml` when policy resolution needs it
+
+Malformed required inputs must surface through `RS-TEST-19`.
+
 ## Explicitly rejected
 
 | Finding | Why rejected |
@@ -73,7 +117,7 @@ Forbidden:
 - Old validator gaps to avoid copying:
   - `has_mutants_profile()` is line-based instead of TOML-based
   - `RS-TEST-04` treats parse failures as “no tests” instead of explicit input failures
-  - `RS-TEST-08` only checks `.claude/` and `.git/hooks/pre-commit`, not the new hook architecture files
+  - older implementations of `RS-TEST-08` only checked legacy hook paths instead of the active shared/Rust hook surfaces
   - `RS-TEST-09` has no new-family typed-input coverage yet
 - New family should include an explicit input-failure rule (`RS-TEST-19`) if `.cargo/mutants.toml`, `Cargo.toml`, `.config/nextest.toml`, `guardrail3.toml`, or relevant Rust source files are unreadable/unparsable for rule execution.
 

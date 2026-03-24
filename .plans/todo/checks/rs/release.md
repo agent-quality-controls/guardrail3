@@ -1,7 +1,70 @@
 # RS-RELEASE — Release readiness checker (29 rules)
 
 **Input:** Cargo.toml + release-plz.toml + cliff.toml + .github/workflows/*.yml + README files
-**Current code:** `release_checks.rs`, `release_repo_checks.rs`, `release_crate_checks.rs`, `release_crate_deps.rs`, `release_bin_checks.rs`, `workspace_metadata.rs`
+**Current code:** `crates/app/rs/checks/rs/release/**` (old `release_checks.rs`, `release_repo_checks.rs`, `release_crate_checks.rs`, `release_crate_deps.rs`, `release_bin_checks.rs`, and `workspace_metadata.rs` are legacy seed material only)
+
+## Implementation mapping contract
+
+- exactly one `RS-RELEASE-*`, `RS-PUB-*`, or `RS-BIN-*` rule ID per production file
+- exactly one rule-specific `*_tests/` module directory per production rule file
+- `mod.rs` orchestrates only
+- `facts.rs`, `inputs.rs`, and `release_support.rs` may contain shared facts, typed inputs, and release-specific normalization helpers only
+
+Forbidden:
+
+- grouped family test files such as `release_tests.rs`
+- helper files that hide multiple unrelated rule predicates behind one API
+
+## Discovery / ownership model
+
+`RS-RELEASE` is a mixed-scope family.
+
+It owns:
+- validation-root / repo-level release artifacts:
+  - root `Cargo.toml`
+  - `release-plz.toml`
+  - `cliff.toml`
+  - `.github/workflows/*.yml`
+  - root license file presence
+- per-package publishability facts for local Rust packages
+- local release-edge facts between publishable crates
+
+The family must not collapse all release checks into repo-root-only Cargo behavior.
+
+It needs all local package roots because:
+- publishable-crate metadata is package-local
+- README ownership is package-local
+- local path/version release edges are package-local
+
+## Input integrity / fail-closed expectations
+
+The family depends on:
+- readable and parseable local `Cargo.toml` files used for repo, package, or edge facts
+- readable and parseable `release-plz.toml`
+- readable and parseable `cliff.toml`
+- readable and parseable workflow YAML files
+- readable README content when a README rule needs the file content
+- actual command outcomes for `cargo publish --dry-run` in thorough mode
+
+Malformed required inputs must surface explicitly through `RS-RELEASE-12`.
+
+That includes:
+- unreadable or unparsable package manifests
+- unreadable or unparsable workflow YAML
+- unreadable README content required for README quality checks
+- parse failures in root release policy files
+
+The family must not silently skip release findings because one required artifact was unreadable.
+
+## Family fact split
+
+The current family is intentionally split into:
+- repo-level facts
+- publishable-crate facts
+- release-edge facts
+- input-failure facts
+
+That split should stay explicit in the plan because the rules are not all evaluating the same scope.
 
 ## Relocated from RS-ARCH
 
@@ -82,7 +145,7 @@ No additional Rust release requirements remain stranded in that legacy doc. What
 
 Residual hardening items from archived legacy notes remain relevant here:
 
-- workflow rules (`RS-RELEASE-05..07`, `RS-BIN-01..02`) now parse YAML structurally, but still classify semantics by matching parsed `uses` values, env keys, and step run strings rather than a richer Actions-specific execution model. Good enough for breadth-first completion, but still a later hardening target.
+- workflow rules (`RS-RELEASE-05..07`, `RS-BIN-01..02`) now preserve parsed workflow structure through family facts and evaluate that structure directly, but they still classify semantics through release-family helper matching rather than a fuller Actions-specific execution model. Good enough for breadth-first completion, but still a later hardening target.
 - the archived `semver_releases.md` template now informs active checker semantics for:
   - `RS-RELEASE-03`:
     - `[workspace].changelog_config = "cliff.toml"`

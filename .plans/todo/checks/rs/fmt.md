@@ -22,7 +22,7 @@ Forbidden:
 | New ID | Old ID | Severity | What | Status |
 |--------|--------|----------|------|--------|
 | RS-FMT-01 | R21 | Error | rustfmt.toml exists at repository root | Implemented |
-| RS-FMT-02 | R22 | Warn | Settings correctness: edition, max_width, tab_spaces, use_field_init_shorthand, use_try_shorthand, reorder_imports, reorder_modules | Implemented |
+| RS-FMT-02 | R22 | Warn/Error | Baseline settings correctness. Owned keys are exactly: `edition`, `max_width`, `tab_spaces`, `use_field_init_shorthand`, `use_try_shorthand`, `reorder_imports`, `reorder_modules`. Wrong or missing value is Warn; unreadable/unparseable root config for this rule is Error. | Implemented |
 | RS-FMT-03 | R23 | Info | Extra settings beyond expected baseline (inventory) | Implemented |
 
 ## New rules from audit
@@ -69,6 +69,11 @@ Malformed inputs that are required to evaluate a rule should not silently degrad
 In particular:
 - malformed root rustfmt config must surface explicitly through the rule that needs it
 - malformed root `Cargo.toml` or `rust-toolchain.toml` must not silently disable `RS-FMT-04` or `RS-FMT-06`
+
+For the current family shape:
+- `RS-FMT-02` owns parse failures of the root rustfmt config
+- `RS-FMT-04` and `RS-FMT-06` own parse/input failures of the secondary files they need
+- there is no separate family-wide input-failure rule at the moment
 
 ## Cross-family dependencies
 

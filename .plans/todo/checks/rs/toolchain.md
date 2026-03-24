@@ -40,13 +40,13 @@ The family is about one repository toolchain contract, not many local toolchain 
 | New ID | Old ID | Severity | What | Status |
 |--------|--------|----------|------|--------|
 | RS-TOOLCHAIN-01 | R24 | Error | rust-toolchain.toml exists at repository root | Implemented |
-| RS-TOOLCHAIN-02 | R25 | Error/Warn | Channel = "stable" (error for nightly, info for pinned stable version), components include clippy + rustfmt | Implemented |
+| RS-TOOLCHAIN-02 | R25 | Error/Warn/Info | Channel + components policy. `stable` is clean inventory; pinned stable versions are tolerated inventory; nightly, pinned-nightly, and beta are errors; missing channel/components are warnings. Components must include `clippy` + `rustfmt`. | Implemented |
 
 ## New rules from audit
 
 | New ID | Severity | What | Status |
 |--------|----------|------|--------|
-| RS-TOOLCHAIN-03 | Warn/Info | MSRV consistency. If `rust-version` in Cargo.toml AND toolchain pins specific version, warn if pinned < MSRV. Library without `rust-version`: Info. | Implemented |
+| RS-TOOLCHAIN-03 | Warn/Info | MSRV consistency. If `rust-version` in Cargo.toml AND toolchain pins specific stable version, warn if pinned < MSRV. If `rust-version` is missing, inventory that MSRV consistency cannot be checked. | Implemented |
 | RS-TOOLCHAIN-04 | Warn | Legacy `rust-toolchain` file (no .toml extension) cannot specify components. Warn to migrate. Also warn if both `rust-toolchain` and `rust-toolchain.toml` coexist (ambiguous). | Implemented |
 
 ## Input integrity / fail-closed expectations
@@ -64,16 +64,14 @@ Malformed inputs required for the rule should not silently weaken enforcement:
 The stable contract is:
 - plain `stable` is accepted
 - pinned stable versions are informationally tolerated
-- nightly is an error
-
-Open hardening carried forward into this plan:
-- `beta` handling must stay explicit rather than being accepted accidentally
-- pinned-nightly forms must be treated as nightly, not as generic pinned versions
+- `beta` is an error
+- `nightly` is an error
+- pinned-nightly forms are treated as nightly and are errors
 
 ## Cross-family dependency
 
-`RS-TOOLCHAIN-03` and `RS-CARGO-05` deliberately touch the same MSRV space from different sides:
-- `RS-CARGO-05` checks whether the manifest declares the metadata
+`RS-TOOLCHAIN-03` and `RS-CARGO-15` deliberately touch the same MSRV space from different sides:
+- `RS-CARGO-15` checks whether the manifest declares the metadata
 - `RS-TOOLCHAIN-03` checks whether the chosen toolchain is compatible with that metadata
 
 That overlap is intentional and should stay explicit in the plan.

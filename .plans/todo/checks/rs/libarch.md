@@ -4,6 +4,18 @@
 **Parser:** TOML + directory structure
 **Current code:** none yet
 
+## Implementation mapping contract
+
+- exactly one `RS-LIBARCH-*` rule ID per production file
+- exactly one rule-specific `*_tests/` module directory per production rule file
+- `mod.rs` orchestrates only
+- `facts.rs` and `inputs.rs` may contain shared discovery, typed inputs, and normalization helpers only
+
+Forbidden:
+
+- grouped family test files such as `libarch_tests.rs`
+- helper files that hide multiple unrelated rule predicates behind one API
+
 ## Why this family exists
 
 `RS-CODE` and `RS-DEPS` can force library code quality, but they do not force library architecture.
@@ -45,7 +57,9 @@ Shape:
 
 ```text
 package/
-  Cargo.toml              # workspace root
+  Cargo.toml              # workspace root + root facade package
+  src/
+    lib.rs
   crates/
     api/
     core/
@@ -58,6 +72,46 @@ Intent:
 - `infra` = external integration / IO / glue
 
 This is deliberately smaller and more boring than hexarch.
+
+## Discovery / ownership model
+
+Owned package roots are local `Cargo.toml` package roots that define a library target.
+
+Library classification is:
+- root has `[package]`
+- and either:
+  - `src/lib.rs` exists
+  - or `[lib]` is declared
+
+The family does not apply to:
+- binary-only packages
+- workspaces with no root/package library target
+
+Once a flat library crosses a threshold, the owned package root is still the package root at the top of that library package. In layered mode, that same package root becomes:
+- the workspace root
+- and the root facade package
+
+## Exact measurement inputs
+
+Escalation measurements are per crate, from that crate’s own `Cargo.toml`.
+
+They mean:
+- direct dependencies: unique direct dependency names on that crate
+- module depth: nested Rust module/source path depth from that crate root
+- sibling subdirectories: subdirectories in one Rust source/module directory
+- sibling `.rs` files: `.rs` files in one Rust source/module directory
+
+Future verification must not reinterpret these as repo-wide totals.
+
+## Input integrity / fail-closed expectations
+
+The family depends on:
+- readable package/workspace `Cargo.toml` files
+- readable crate directory structure
+- readable dependency-edge facts
+- readable root facade source when facade/export rules apply
+
+Malformed required inputs must not silently downgrade a too-large library into a “flat library allowed” clean pass.
 
 ## Escalation thresholds
 
@@ -99,43 +153,61 @@ If a library package crosses any escalation threshold and is still a flat single
 
 This is the core rule that forces architectural split.
 
-### RS-LIBARCH-02..06 — Workspace shape
+### RS-LIBARCH-02 — Layered root is a workspace + facade package
 
-Once layered mode is required:
-- package root must be a workspace
-- `crates/` must exist
-- only `api` and `core` are required
-- only `infra` is optional
-- workspace membership must match actual layered crates
+Once layered mode is required, the package root `Cargo.toml` must be:
+- a workspace root
+- and the root facade package
 
-This mirrors the shape-enforcement style from `RS-HEXARCH`, but for libraries.
+This is what allows `RS-LIBARCH-11` to own a real root facade.
 
-### RS-LIBARCH-07..09 — Dependency direction
+### RS-LIBARCH-03 — `crates/` exists
 
-Layer rules:
-- `core` is the bottom layer
-- `api` is the public surface layer
-- `infra` is the integration layer
+Once layered mode is required, the package root must contain `crates/`.
+
+### RS-LIBARCH-04 — Exact layered crate set
+
+Inside `crates/`:
+- `api` is required
+- `core` is required
+- `infra` is optional
+- no other layer crate dirs are allowed
+
+### RS-LIBARCH-05 — Workspace members match layered crate dirs
+
+Workspace members must exactly include the layered crate dirs that actually exist under `crates/`.
+
+### RS-LIBARCH-06 — No extra workspace members outside the layered boundary
+
+The layered library workspace must not include unrelated member crates outside the library boundary.
+
+### RS-LIBARCH-07 — `core` must not depend on `api`
+
+`core` is the bottom layer and must not depend upward on the public-surface layer.
+
+### RS-LIBARCH-08 — `core` must not depend on `infra`
+
+`core` must stay free of integration/external glue.
+
+### RS-LIBARCH-09 — `api` must not depend on `infra`
 
 Allowed:
 - `api -> core`
 - `infra -> core`
 
 Forbidden:
-- `core -> api`
-- `core -> infra`
 - `api -> infra`
 
 Rationale:
-- public surface should not depend on integration glue
-- core should stay pure of upper/external layers
+- the public surface should not be built on top of integration glue
 
-### RS-LIBARCH-10..11 — Public surface discipline
+### RS-LIBARCH-10 — `infra` must not become the public package surface
 
-- `infra` must not become the public package surface directly
-- root package facade should export from `api`
+`infra` may depend on `core`, but it must not be re-exported directly as the public package surface.
 
-This keeps `api` as the stable public contract.
+### RS-LIBARCH-11 — Root facade exports from `api`
+
+The root facade package must export public surface from `api`, not directly from `core` or `infra`.
 
 ## Relationship to other families
 

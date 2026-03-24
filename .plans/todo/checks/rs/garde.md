@@ -33,7 +33,17 @@ For each owned root, the family determines:
 - which covering `clippy.toml` applies to that root
 - which Rust source files belong to that root
 
+Verified root-policy note:
+- if the effective root config is package-driven by `[rust.packages]`, root garde gating must inherit `[rust.packages.checks]`
+- the root must not always fall back to the global default garde setting
+- otherwise `RS-GARDE-02..09` can fail open or overfire at the root
+
 Rules about clippy ban presence are evaluated against the covering clippy config for the owned root, not against an arbitrary repo-global file.
+
+Important root-policy detail:
+- if the root config surface is package-driven via `[rust.packages]`, the root policy must inherit that package policy
+- the family must not assume the root always uses only the global default `[rust.checks]` / `[profile]` settings
+- otherwise the checker can fail open by scanning or skipping the root under the wrong garde-enabled state
 
 ## Gating model
 
@@ -73,6 +83,10 @@ That dependency should stay explicit in the plan.
 
 ## Rules
 
+Severity note:
+- `Error/Info` means the violation path is `Error` and the clean / inventory path is `Info`
+- `Warn/Info` means the violation path is `Warn` and the clean / inventory path is `Info`
+
 | New ID | Old ID | Severity | What | Status |
 |--------|--------|----------|------|--------|
 | RS-GARDE-01 | R-GARDE-01 | Error/Info | garde crate in `[workspace.dependencies]` or `[dependencies]` of each enabled Rust root | Implemented |
@@ -106,20 +120,33 @@ The older top-level garde design note is being archived, but it still contains l
   - no rule yet that checks boundary fields carry meaningful garde constraints
   - no rule yet that checks nested validated fields use `#[garde(dive)]`
   - no rule yet that checks context-driven validation surfaces where required
-- expanded extractor ban coverage is still missing from the canonical clippy baseline:
-  - `axum::extract::Path`
-  - `axum::extract::Multipart`
-  - `axum::extract::ConnectInfo`
-  - `axum_extra::extract::CookieJar`
-  - `axum_extra::extract::cookie::Cookie`
-  - `axum_extra::extract::TypedHeader`
-  - `axum_extra::extract::JsonDeserializer`
-  - `axum_extra::extract::JsonLines`
-  - `axum_extra::extract::Protobuf`
-  - `axum_extra::extract::Cbor`
-  - `axum_extra::extract::MsgPack`
+- expanded deserialization method coverage is now part of the canonical clippy baseline:
+  - `RS-GARDE-06` and `RS-CLIPPY-04` parity tests now pin the expanded method set
+  - service and library generated `clippy.toml` baselines now both include:
+    - query-string / urlencoded constructors
+    - streaming JSON deserializer constructors
+    - binary / CSV / XML / CBOR / RON / postcard / flexbuffers entry points
+    - config-crate extraction entry points
+- expanded extractor ban coverage is now part of the canonical clippy baseline:
+  - `RS-GARDE-03` and `RS-CLIPPY-05` parity tests now pin the expanded extractor set
+  - service and library generated `clippy.toml` baselines now both include:
+    - `axum::extract::Path`
+    - `axum::extract::Multipart`
+    - `axum::extract::ConnectInfo`
+    - `axum_extra::extract::CookieJar`
+    - `axum_extra::extract::cookie::Cookie`
+    - `axum_extra::extract::TypedHeader`
+    - `axum_extra::extract::JsonDeserializer`
+    - `axum_extra::extract::JsonLines`
+    - `axum_extra::extract::Protobuf`
+    - `axum_extra::extract::Cbor`
+    - `axum_extra::extract::MsgPack`
 
 So the garde family is implemented, but the full architectural enforcement chain described by the legacy doc is not complete yet.
+
+Recent hardening note:
+- source-level multi-root attacks for `RS-GARDE-05/07/08/09` should use workspace roots or standalone package roots only
+- workspace members are not owned garde roots and should not be used as the multi-root ownership model in tests
 
 ## Full expected ban lists
 
@@ -194,13 +221,13 @@ Config crates (from audit round 2):
 
 ### RS-GARDE-03: Axum extractor type bans (disallowed-types)
 
-Core extractors (currently implemented):
+Core extractors:
 - `axum::extract::Json`
 - `axum::Json`
 - `axum::extract::Query`
 - `axum::extract::Form`
 
-Missing — must add:
+Expanded extractor coverage:
 - `axum::extract::Path`
 - `axum::extract::Multipart`
 - `axum::extract::ConnectInfo`

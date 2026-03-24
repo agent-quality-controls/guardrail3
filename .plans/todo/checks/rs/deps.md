@@ -1,7 +1,7 @@
 # RS-DEPS — Tool + dependency policy checker (11 rules + 1 planned hard cap)
 
 **Input:** Tool PATH checks + Cargo.lock + .gitignore + guardrail3.toml allowlists + Cargo.toml dependency tables
-**Current code:** `dependency_scan.rs`, `dependency_allowlist.rs`
+**Current code:** `apps/guardrail3/crates/app/rs/checks/rs/deps/`
 
 This family owns:
 - required external Rust/tooling presence
@@ -15,43 +15,83 @@ This family does **not** own:
 - release-specific dependency policy (`RS-RELEASE`)
 - hook execution of tools (`HOOK-RS`)
 
+## Discovery / ownership model
+
+`RS-DEPS` is a mixed-scope family:
+- tool-install rules are validation-root checks
+- allowlist rules are per local crate/package
+- lockfile rules are per Rust root
+
+Owned local crates/packages are all discovered local `Cargo.toml` package roots.
+
+Owned Rust roots for lockfile policy are:
+- workspace roots
+- standalone package roots that are not members of a workspace
+
+The family must not collapse lockfile policy to repo-root-only behavior, and it must not confuse crate-local dependency policy with workspace-root lockfile ownership.
+
+## Policy ownership
+
+Dependency allowlist/profile policy comes from validation-root `guardrail3.toml`.
+
+That means:
+- the family resolves crate-local allowlist/profile policy from the one root policy surface
+- per-app / per-package entries inside that root policy file are still crate-local policy once resolved
+- future verification must not invent nearest-local `guardrail3.toml` semantics unless the plan changes explicitly
+
 ## Tool installation rules
 
 | New ID | Old ID | Severity | What | Status |
 |--------|--------|----------|------|--------|
-| RS-DEPS-01 | R45 | Error | `cargo-deny` installed on PATH | Planned |
-| RS-DEPS-02 | R46 | Error | `cargo-machete` installed on PATH | Planned |
-| RS-DEPS-03 | R47 | Warn | `cargo-dupes` installed on PATH (recommended) | Planned |
-| RS-DEPS-04 | R48 | Error | `gitleaks` installed on PATH | Planned |
+| RS-DEPS-01 | R45 | Error | `cargo-deny` installed on PATH | Implemented |
+| RS-DEPS-02 | R46 | Error | `cargo-machete` installed on PATH | Implemented |
+| RS-DEPS-03 | R47 | Warn | `cargo-dupes` installed on PATH (recommended) | Implemented |
+| RS-DEPS-04 | R48 | Error | `gitleaks` installed on PATH | Implemented |
 
 ## Allowlist rules
 
 | New ID | Old ID | Severity | What | Status |
 |--------|--------|----------|------|--------|
-| RS-DEPS-05 | R-DEPS-01 | Error | Unauthorized external dependency in `[dependencies]` not in crate's `allowed_deps` list | Planned |
-| RS-DEPS-06 | — | Error | Unauthorized external dependency in `[build-dependencies]` not in crate's `allowed_deps` list | Planned |
-| RS-DEPS-07 | — | Warn | Unauthorized external dependency in `[dev-dependencies]` not in crate's `allowed_deps` list | Planned |
-| RS-DEPS-08 | R-DEPS-02 | Warn | Library crate has no dependency allowlist configured | Planned |
+| RS-DEPS-05 | R-DEPS-01 | Error | Unauthorized external dependency in `[dependencies]` not in crate's `allowed_deps` list | Implemented |
+| RS-DEPS-06 | — | Error | Unauthorized external dependency in `[build-dependencies]` not in crate's `allowed_deps` list | Implemented |
+| RS-DEPS-07 | — | Warn | Unauthorized external dependency in `[dev-dependencies]` not in crate's `allowed_deps` list | Implemented |
+| RS-DEPS-08 | R-DEPS-02 | Warn | Library crate has no dependency allowlist configured | Implemented |
 
 Allowlist semantics:
 - no `allowed_deps` configured means `RS-DEPS-05..07` stay silent; only `RS-DEPS-08` warns for library-profile crates
-- workspace path dependencies are skipped
+- path dependencies are skipped only when they resolve to workspace package paths
 - `workspace = true` is **not** automatically skipped
 - if `workspace = true` resolves to an external workspace dependency, it must still be allowlisted
 - renamed dependencies must be checked against the real `package` name when present
+
+Section ownership:
+- `RS-DEPS-05` owns `[dependencies]`
+- `RS-DEPS-06` owns `[build-dependencies]`
+- `RS-DEPS-07` owns `[dev-dependencies]`
+- target-specific dependency tables are not yet part of the implemented contract and remain an explicit remaining gap
 
 ## Lockfile rules
 
 | New ID | Severity | What | Status |
 |--------|----------|------|--------|
-| RS-DEPS-09 | Error/Info | `Cargo.lock` committed for each Rust root. Services/binaries: Error if missing. Libraries: Info if missing. | Planned |
-| RS-DEPS-10 | Error | No relevant `.gitignore` may ignore a Rust root's `Cargo.lock` | Planned |
+| RS-DEPS-09 | Error/Info | `Cargo.lock` committed for each Rust root. Services/binaries: Error if missing. Libraries: Info if missing. | Implemented |
+| RS-DEPS-10 | Error | No relevant `.gitignore` may ignore a Rust root's `Cargo.lock` | Implemented |
 
 ## Input / parse integrity rules
 
 | New ID | Severity | What | Status |
 |--------|----------|------|--------|
-| RS-DEPS-11 | Error | Required dependency-policy inputs unreadable or unparseable: member Cargo.toml, workspace Cargo.toml for `workspace = true` resolution, or `guardrail3.toml` when needed for profile/allowlist policy. | Planned |
+| RS-DEPS-11 | Error | Required dependency-policy inputs unreadable or unparseable: member Cargo.toml, workspace Cargo.toml for `workspace = true` resolution, or `guardrail3.toml` when needed for profile/allowlist policy. | Implemented |
+
+## Input integrity / fail-closed expectations
+
+The family depends on:
+- readable local package manifests
+- readable workspace manifests when `workspace = true` resolution needs them
+- readable validation-root `guardrail3.toml` when crate policy/profile needs it
+- readable `.gitignore` inputs used for lockfile masking checks
+
+Malformed required inputs must surface through `RS-DEPS-11` rather than silently suppressing allowlist or lockfile findings.
 
 ## Next-wave planned universal rule
 
@@ -91,3 +131,25 @@ Allowlist semantics:
 | Tool minimum version checks | Real problem, but version policy/upgrade cadence is not frozen yet. |
 | Independent banned-crate lockfile scanning | `cargo-deny` already owns the actual policy surface; duplicating it in guardrail3 would be the wrong layer. |
 | Duplicate dependency versions | Tool installation check (`cargo-dupes`) plus hook enforcement is the right layer. |
+
+## Hardening status
+
+### Closed gaps
+
+- rule tests for `RS-DEPS-01..11` now use rule-specific `*_tests/` module directories instead of flat `*_tests.rs` sidecars
+- tool-presence rules now have exact owned-hit coverage proving one missing tool only trips its own rule and preserves exact severities
+- `RS-DEPS-05..07` now have exact section-ownership coverage, renamed-dependency coverage, and explicit `workspace = true` attack coverage
+- non-workspace path dependencies are now checked instead of being skipped wholesale
+- hybrid workspace roots are now associated with their own workspace facts, which keeps root-package `workspace = true` and workspace-path semantics from failing open
+- `RS-DEPS-09` now has explicit multi-root severity coverage across service and library roots
+- `RS-DEPS-10` now evaluates ancestor `.gitignore` files with last-match precedence and nested unignore handling instead of returning on the first positive match
+- `RS-DEPS-11` now has explicit fail-closed coverage for malformed `guardrail3.toml`, malformed member manifests, and malformed workspace manifests needed for `workspace = true` resolution
+
+### Remaining gaps
+
+- `target.*.{dependencies,build-dependencies,dev-dependencies}` tables are still not part of `RS-DEPS-05..07` discovery
+- `RS-DEPS-12` is still planned only
+
+### Policy questions
+
+- none at the moment
