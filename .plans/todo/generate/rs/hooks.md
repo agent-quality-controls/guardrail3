@@ -38,6 +38,8 @@ Checker-side compatibility for legacy `hooks/pre-commit` does not make that lega
 - `.githooks/pre-commit` is a dispatcher over `.githooks/pre-commit.d/*.sh`
 - generated hook files satisfy the shared hook structure contract and the Rust hook semantic contract
 - `core.hooksPath` points at `.githooks`
+- `10-merge-conflict-markers.sh`, `20-gitleaks.sh`, and `30-file-size.sh` are always generated
+- `40-lockfile-integrity.sh` is generated only when the validation root owns a lockfile-integrity surface enforced by `HOOK-SHARED`
 - the generated Rust hook step covers:
   - `cargo fmt --check`
   - `cargo clippy` with deny-warnings behavior

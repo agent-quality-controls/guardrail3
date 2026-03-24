@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 use std::path::Path;
 
-use crate::app::rs::checks::hooks::shell::{parse_script, ParsedShellScript};
+use crate::app::rs::checks::hooks::shell::{ParsedShellScript, parse_script};
 use crate::ports::outbound::{CommandRunResult, ToolChecker};
 
 pub fn parsed_hook(content: &str) -> ParsedShellScript<'_> {

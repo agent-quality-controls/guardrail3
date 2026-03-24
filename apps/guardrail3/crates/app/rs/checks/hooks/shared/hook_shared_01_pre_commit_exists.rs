@@ -30,3 +30,7 @@ pub fn check(pre_commit: Option<&HookScriptFacts>, results: &mut Vec<CheckResult
         }),
     }
 }
+
+#[cfg(test)]
+#[path = "hook_shared_01_pre_commit_exists_tests.rs"]
+mod tests;

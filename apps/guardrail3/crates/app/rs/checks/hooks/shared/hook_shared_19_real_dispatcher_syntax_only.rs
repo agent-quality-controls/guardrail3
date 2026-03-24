@@ -13,7 +13,7 @@ pub fn check(input: &DispatcherSyntaxInput<'_>, results: &mut Vec<CheckResult>) 
         .parsed
         .executable_lines
         .iter()
-        .any(|line| line.is_dispatcher_syntax && line.raw.contains("pre-commit.d"));
+        .any(|line| line.is_dispatcher_syntax && targets_pre_commit_dir(line.raw));
 
     if has_dispatcher {
         results.push(
@@ -42,6 +42,11 @@ pub fn check(input: &DispatcherSyntaxInput<'_>, results: &mut Vec<CheckResult>) 
             inventory: false,
         });
     }
+}
+
+fn targets_pre_commit_dir(raw: &str) -> bool {
+    let normalized = raw.replace(['"', '\''], "");
+    normalized.contains("pre-commit.d/") || normalized.ends_with("pre-commit.d")
 }
 
 #[cfg(test)]

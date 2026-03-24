@@ -3,8 +3,18 @@ use crate::ports::outbound::ToolChecker;
 
 const ID: &str = "HOOK-RS-14";
 
-pub fn check(rel_path: &str, tc: &dyn ToolChecker, results: &mut Vec<CheckResult>) {
-    if tc.is_installed("guardrail3") {
+pub fn check(
+    rel_path: &str,
+    guardrail_validation_expected: bool,
+    guardrail_validation_path_qualified: bool,
+    tc: &dyn ToolChecker,
+    results: &mut Vec<CheckResult>,
+) {
+    if !guardrail_validation_expected {
+        return;
+    }
+
+    if guardrail_validation_path_qualified || tc.is_installed("guardrail3") {
         results.push(
             CheckResult {
                 id: ID.to_owned(),

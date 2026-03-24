@@ -34,3 +34,7 @@ pub fn check(local_override_scripts: &[String], results: &mut Vec<CheckResult>) 
         .as_inventory(),
     );
 }
+
+#[cfg(test)]
+#[path = "hook_shared_09_local_override_inventory_tests.rs"]
+mod tests;

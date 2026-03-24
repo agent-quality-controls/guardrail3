@@ -39,3 +39,7 @@ pub fn check(scripts: &[HookScriptFacts], results: &mut Vec<CheckResult>) {
         .as_inventory(),
     );
 }
+
+#[cfg(test)]
+#[path = "hook_shared_07_modular_scripts_inventory_tests.rs"]
+mod tests;

@@ -2,12 +2,12 @@ use crate::app::rs::checks::hooks::shell::parse_script;
 use crate::domain::report::Severity;
 
 use super::super::facts::HookScriptKind;
-use super::super::hook_shared_18_executable_command_context_only::check;
 use super::super::inputs::ExecutableCommandContextInput;
+use super::check;
 
 #[test]
-fn reports_guardrail_command_mentioned_only_in_comment() {
-    let content = "# guardrail3 rs validate --staged .\n";
+fn warns_when_set_e_only_appears_in_comment() {
+    let content = "# set -euo pipefail\n";
     let parsed = parse_script(content);
     let input = ExecutableCommandContextInput {
         rel_path: ".githooks/pre-commit",
@@ -20,16 +20,13 @@ fn reports_guardrail_command_mentioned_only_in_comment() {
     check(&input, &mut results);
 
     assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "HOOK-SHARED-18");
-    assert_eq!(results[0].severity, Severity::Error);
-    assert_eq!(results[0].line, Some(1));
+    assert_eq!(results[0].severity, Severity::Warn);
+    assert!(!results[0].inventory);
 }
 
 #[test]
-fn ignores_echo_or_comment_when_real_command_exists() {
-    let content = r#"echo "guardrail3 rs validate --staged ."
-guardrail3 rs validate --staged .
-"#;
+fn warns_when_set_e_only_appears_in_echo() {
+    let content = "echo \"set -euo pipefail\"\n";
     let parsed = parse_script(content);
     let input = ExecutableCommandContextInput {
         rel_path: ".githooks/pre-commit",
@@ -41,14 +38,14 @@ guardrail3 rs validate --staged .
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    assert!(results.is_empty());
+    assert_eq!(results.len(), 1);
+    assert_eq!(results[0].severity, Severity::Warn);
+    assert!(!results[0].inventory);
 }
 
 #[test]
-fn still_reports_inert_guardrail_text_when_only_echo_exists() {
-    let content = r#"# guardrail3 rs validate --staged .
-echo "guardrail3 rs validate --staged ."
-"#;
+fn passes_when_real_shell_error_handling_line_exists() {
+    let content = "#!/usr/bin/env bash\nset -euo pipefail\n";
     let parsed = parse_script(content);
     let input = ExecutableCommandContextInput {
         rel_path: ".githooks/pre-commit",
@@ -60,6 +57,7 @@ echo "guardrail3 rs validate --staged ."
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 2);
-    assert!(results.iter().all(|result| result.id == "HOOK-SHARED-18"));
+    assert_eq!(results.len(), 1);
+    assert_eq!(results[0].severity, Severity::Warn);
+    assert!(results[0].inventory);
 }

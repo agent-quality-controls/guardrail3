@@ -3,8 +3,18 @@ use crate::ports::outbound::ToolChecker;
 
 const ID: &str = "HOOK-RS-15";
 
-pub fn check(rel_path: &str, tc: &dyn ToolChecker, results: &mut Vec<CheckResult>) {
-    if tc.is_installed("cargo-dupes") {
+pub fn check(
+    rel_path: &str,
+    cargo_dupes_required: bool,
+    cargo_dupes_path_qualified: bool,
+    tc: &dyn ToolChecker,
+    results: &mut Vec<CheckResult>,
+) {
+    if !cargo_dupes_required {
+        return;
+    }
+
+    if cargo_dupes_path_qualified || tc.is_installed("cargo-dupes") {
         results.push(
             CheckResult {
                 id: ID.to_owned(),

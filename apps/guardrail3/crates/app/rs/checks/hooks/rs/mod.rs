@@ -57,9 +57,33 @@ pub fn check(tree: &ProjectTree, tc: &dyn ToolChecker) -> Vec<CheckResult> {
     hook_rs_11_gitleaks_step_present::check(&input, &mut results);
     hook_rs_12_cargo_dupes_step_present::check(&input, &mut results);
     hook_rs_13_cargo_dupes_excludes_tests::check(&input, &mut results);
-    hook_rs_14_guardrail_binary_available::check(rel_path, tc, &mut results);
-    hook_rs_15_cargo_dupes_installed::check(rel_path, tc, &mut results);
+    let guardrail_validation_expected =
+        hook_rs_08_guardrail_validate_staged_present::script_contains_guardrail_step(input.parsed);
+    let guardrail_validation_path_qualified =
+        hook_rs_08_guardrail_validate_staged_present::script_contains_path_qualified_guardrail_step(
+            input.parsed,
+        );
+    hook_rs_14_guardrail_binary_available::check(
+        rel_path,
+        guardrail_validation_expected,
+        guardrail_validation_path_qualified,
+        tc,
+        &mut results,
+    );
+    hook_rs_15_cargo_dupes_installed::check(
+        rel_path,
+        hook_rs_12_cargo_dupes_step_present::script_contains_cargo_dupes(input.parsed),
+        hook_rs_12_cargo_dupes_step_present::script_contains_path_qualified_cargo_dupes(
+            input.parsed,
+        ),
+        tc,
+        &mut results,
+    );
     hook_rs_16_config_changes_trigger_validation::check(content, &input, &mut results);
 
     results
 }
+
+#[cfg(test)]
+#[path = "mod_tests.rs"]
+mod tests;
