@@ -21,6 +21,10 @@ When the validation root contains publishable binary crates:
 The generator owns release artifacts only at the validation root.
 That release domain remains validation-root-owned even when the repository also contains nested app workspaces or standalone package roots.
 
+Release-domain profile is resolved from the validation root's Rust config contract:
+- the validation root `guardrail3.toml`
+- specifically the root Rust profile / release-enablement settings that drive `RS-RELEASE`
+
 It must never generate release artifacts at:
 - nested app workspaces
 - standalone package roots
@@ -31,6 +35,7 @@ It must never generate release artifacts at:
 
 - service-profile validation roots receive the full release artifact set
 - non-service validation roots receive no release artifacts
+- validation roots with Rust release checks disabled receive no release artifacts
 - `cliff.toml` is the canonical changelog config for the validation root
 - `release-plz.toml` is derived from actual publishable package facts governed by the validation root:
   - real package names
