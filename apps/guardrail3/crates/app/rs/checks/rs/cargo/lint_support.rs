@@ -1,3 +1,5 @@
+use super::facts::{PolicyRootCargoFacts, PolicyRootKind};
+
 pub struct LintExpectation {
     pub name: &'static str,
     pub expected_level: &'static str,
@@ -112,11 +114,28 @@ pub const EXPECTED_CLIPPY_ALLOW: &[&str] = &[
     "multiple_crate_versions",
 ];
 
-pub fn workspace_lints<'a>(parsed: &'a toml::Value, family: &str) -> Option<&'a toml::Value> {
-    parsed
-        .get("workspace")
-        .and_then(|value| value.get("lints"))
-        .and_then(|value| value.get(family))
+pub fn policy_lints<'a>(root: &'a PolicyRootCargoFacts, family: &str) -> Option<&'a toml::Value> {
+    let parsed = root.parsed.as_ref()?;
+    match root.kind {
+        PolicyRootKind::WorkspaceRoot => parsed
+            .get("workspace")
+            .and_then(|value| value.get("lints"))
+            .and_then(|value| value.get(family)),
+        PolicyRootKind::StandalonePackageRoot => {
+            parsed.get("lints").and_then(|value| value.get(family))
+        }
+    }
+}
+
+pub fn policy_lints_table_label(kind: PolicyRootKind, family: &str) -> &'static str {
+    match (kind, family) {
+        (PolicyRootKind::WorkspaceRoot, "rust") => "[workspace.lints.rust]",
+        (PolicyRootKind::WorkspaceRoot, "clippy") => "[workspace.lints.clippy]",
+        (PolicyRootKind::StandalonePackageRoot, "rust") => "[lints.rust]",
+        (PolicyRootKind::StandalonePackageRoot, "clippy") => "[lints.clippy]",
+        (PolicyRootKind::WorkspaceRoot, _) => "[workspace.lints]",
+        (PolicyRootKind::StandalonePackageRoot, _) => "[lints]",
+    }
 }
 
 pub fn member_lints<'a>(parsed: &'a toml::Value, family: &str) -> Option<&'a toml::Value> {
@@ -124,14 +143,10 @@ pub fn member_lints<'a>(parsed: &'a toml::Value, family: &str) -> Option<&'a tom
 }
 
 pub fn lint_level(lints: &toml::Value, name: &str) -> Option<String> {
-    match lints.get(name) {
-        Some(toml::Value::String(level)) => Some(level.clone()),
-        Some(toml::Value::Table(table)) => table
-            .get("level")
-            .and_then(toml::Value::as_str)
-            .map(str::to_owned),
-        _ => None,
-    }
+    lints
+        .get(name)
+        .and_then(lint_level_from_value)
+        .map(str::to_owned)
 }
 
 pub fn lint_priority(lints: &toml::Value, name: &str) -> Option<i64> {
@@ -139,6 +154,24 @@ pub fn lint_priority(lints: &toml::Value, name: &str) -> Option<i64> {
         Some(toml::Value::Table(table)) => table.get("priority").and_then(toml::Value::as_integer),
         _ => None,
     }
+}
+
+pub fn explicit_allow_entries(lints: Option<&toml::Value>) -> Vec<String> {
+    let Some(table) = lints.and_then(toml::Value::as_table) else {
+        return Vec::new();
+    };
+    let mut entries: Vec<_> = table
+        .iter()
+        .filter_map(|(name, value)| {
+            (lint_level_from_value(value) == Some("allow")).then(|| name.clone())
+        })
+        .collect();
+    entries.sort();
+    entries
+}
+
+pub fn is_approved_allow(name: &str) -> bool {
+    EXPECTED_CLIPPY_ALLOW.contains(&name)
 }
 
 pub fn level_rank(level: &str) -> usize {
@@ -153,4 +186,12 @@ pub fn level_rank(level: &str) -> usize {
 
 pub fn is_weaker(expected_level: &str, actual_level: &str) -> bool {
     level_rank(actual_level) < level_rank(expected_level)
+}
+
+fn lint_level_from_value(value: &toml::Value) -> Option<&str> {
+    match value {
+        toml::Value::String(level) => Some(level.as_str()),
+        toml::Value::Table(table) => table.get("level").and_then(toml::Value::as_str),
+        _ => None,
+    }
 }

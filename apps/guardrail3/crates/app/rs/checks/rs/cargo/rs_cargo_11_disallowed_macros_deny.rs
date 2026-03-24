@@ -1,25 +1,28 @@
 use crate::domain::report::{CheckResult, Severity};
 
 use super::inputs::PolicyRootCargoInput;
+use super::lint_support::{lint_level, policy_lints, policy_lints_table_label};
 
-const ID: &str = "RS-CARGO-05";
+const ID: &str = "RS-CARGO-11";
 
 pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
     let root = input.root;
-    if root.parse_error.is_some() {
+    let Some(_parsed) = root.parsed.as_ref() else {
         return;
-    }
+    };
+    let Some(clippy_lints) = policy_lints(root, "clippy") else {
+        return;
+    };
 
-    match root.edition.as_deref() {
-        Some("2024" | "2021") => results.push(
+    match lint_level(clippy_lints, "disallowed_macros").as_deref() {
+        Some("deny") => results.push(
             CheckResult {
                 id: ID.to_owned(),
                 severity: Severity::Info,
-                title: "edition policy satisfied".to_owned(),
+                title: "disallowed macros lint enforced".to_owned(),
                 message: format!(
-                    "`{}` declares edition `{}`.",
-                    root.cargo_rel_path,
-                    root.edition.as_deref().unwrap_or_default()
+                    "`{}` enforces `clippy::disallowed_macros = \"deny\"`.",
+                    policy_lints_table_label(root.kind, "clippy")
                 ),
                 file: Some(root.cargo_rel_path.clone()),
                 line: None,
@@ -30,10 +33,10 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
         Some(other) => results.push(CheckResult {
             id: ID.to_owned(),
             severity: Severity::Error,
-            title: "edition below minimum".to_owned(),
+            title: "disallowed macros lint weakened".to_owned(),
             message: format!(
-                "`{}` declares edition `{other}`. Cargo policy requires edition `2021` or newer.",
-                root.cargo_rel_path
+                "`{}` sets `disallowed_macros` to `{other}` instead of `deny`.",
+                policy_lints_table_label(root.kind, "clippy")
             ),
             file: Some(root.cargo_rel_path.clone()),
             line: None,
@@ -42,11 +45,10 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
         None => results.push(CheckResult {
             id: ID.to_owned(),
             severity: Severity::Error,
-            title: "edition missing".to_owned(),
+            title: "disallowed macros lint missing".to_owned(),
             message: format!(
-                "`{}` must declare an edition for this {}.",
-                root.cargo_rel_path,
-                root.kind.label()
+                "`{}` must define `disallowed_macros = \"deny\"` so macro bans are enforceable.",
+                policy_lints_table_label(root.kind, "clippy")
             ),
             file: Some(root.cargo_rel_path.clone()),
             line: None,
@@ -56,5 +58,5 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_cargo_05_workspace_metadata_tests/mod.rs"]
+#[path = "rs_cargo_11_disallowed_macros_deny_tests/mod.rs"]
 mod tests;

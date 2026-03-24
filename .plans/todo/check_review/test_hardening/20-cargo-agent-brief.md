@@ -2,6 +2,14 @@
 
 This is the droppable handoff file for the `rs/cargo` reconciliation and hardening pass.
 
+## Status
+
+This pass has since been implemented in code.
+
+Use `.plans/todo/checks/rs/cargo.md` as the live contract and current-status source of truth.
+
+Treat the rest of this brief as historical implementation guidance for what this pass was meant to close.
+
 ## Read First
 
 Read these in order:

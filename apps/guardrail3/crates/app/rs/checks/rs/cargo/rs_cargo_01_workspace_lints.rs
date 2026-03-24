@@ -1,31 +1,21 @@
 use crate::domain::report::{CheckResult, Severity};
 
-use super::inputs::WorkspaceCargoInput;
+use super::inputs::PolicyRootCargoInput;
 use super::lint_support::{
     EXPECTED_CLIPPY_DENY, EXPECTED_CLIPPY_GROUPS, EXPECTED_LIBRARY_RUST_LINTS, EXPECTED_RUST_LINTS,
-    lint_level, workspace_lints,
+    lint_level, policy_lints, policy_lints_table_label,
 };
 
 const ID: &str = "RS-CARGO-01";
 
-pub fn check(input: &WorkspaceCargoInput<'_>, results: &mut Vec<CheckResult>) {
-    let Some(parsed) = input.workspace.parsed.as_ref() else {
-        if let Some(parse_error) = &input.workspace.parse_error {
-            results.push(CheckResult {
-                id: ID.to_owned(),
-                severity: Severity::Error,
-                title: "workspace Cargo.toml parse error".to_owned(),
-                message: format!("Failed to parse workspace Cargo.toml: {parse_error}"),
-                file: Some(input.workspace.rel_path.clone()),
-                line: None,
-                inventory: false,
-            });
-        }
+pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
+    let root = input.root;
+    let Some(_parsed) = root.parsed.as_ref() else {
         return;
     };
 
-    let rust_lints = workspace_lints(parsed, "rust");
-    let clippy_lints = workspace_lints(parsed, "clippy");
+    let rust_lints = policy_lints(root, "rust");
+    let clippy_lints = policy_lints(root, "clippy");
     let mut missing = 0usize;
 
     if rust_lints.is_none() {
@@ -33,9 +23,13 @@ pub fn check(input: &WorkspaceCargoInput<'_>, results: &mut Vec<CheckResult>) {
         results.push(CheckResult {
             id: ID.to_owned(),
             severity: Severity::Error,
-            title: "workspace rust lints missing".to_owned(),
-            message: "Missing `[workspace.lints.rust]`.".to_owned(),
-            file: Some(input.workspace.rel_path.clone()),
+            title: "rust lint table missing".to_owned(),
+            message: format!(
+                "`{}` must define `{}`.",
+                root.cargo_rel_path,
+                policy_lints_table_label(root.kind, "rust")
+            ),
+            file: Some(root.cargo_rel_path.clone()),
             line: None,
             inventory: false,
         });
@@ -46,9 +40,13 @@ pub fn check(input: &WorkspaceCargoInput<'_>, results: &mut Vec<CheckResult>) {
         results.push(CheckResult {
             id: ID.to_owned(),
             severity: Severity::Error,
-            title: "workspace clippy lints missing".to_owned(),
-            message: "Missing `[workspace.lints.clippy]`.".to_owned(),
-            file: Some(input.workspace.rel_path.clone()),
+            title: "clippy lint table missing".to_owned(),
+            message: format!(
+                "`{}` must define `{}`.",
+                root.cargo_rel_path,
+                policy_lints_table_label(root.kind, "clippy")
+            ),
+            file: Some(root.cargo_rel_path.clone()),
             line: None,
             inventory: false,
         });
@@ -61,16 +59,21 @@ pub fn check(input: &WorkspaceCargoInput<'_>, results: &mut Vec<CheckResult>) {
                 results.push(CheckResult {
                     id: ID.to_owned(),
                     severity: Severity::Error,
-                    title: format!("missing workspace rust lint `{}`", expected.name),
-                    message: format!("Expected `{}` in `[workspace.lints.rust]`.", expected.name),
-                    file: Some(input.workspace.rel_path.clone()),
+                    title: format!("missing rust lint `{}`", expected.name),
+                    message: format!(
+                        "`{}` must define `{}` in `{}`.",
+                        root.cargo_rel_path,
+                        expected.name,
+                        policy_lints_table_label(root.kind, "rust")
+                    ),
+                    file: Some(root.cargo_rel_path.clone()),
                     line: None,
                     inventory: false,
                 });
             }
         }
 
-        if input.workspace.profile_name.as_deref() == Some("library") {
+        if root.profile_name.as_deref() == Some("library") {
             for expected in EXPECTED_LIBRARY_RUST_LINTS {
                 if lint_level(rust_lints, expected.name).is_none() {
                     missing += 1;
@@ -79,10 +82,11 @@ pub fn check(input: &WorkspaceCargoInput<'_>, results: &mut Vec<CheckResult>) {
                         severity: Severity::Error,
                         title: format!("missing library rust lint `{}`", expected.name),
                         message: format!(
-                            "Library profile expects `{}` in `[workspace.lints.rust]`.",
-                            expected.name
+                            "Library profile requires `{}` in `{}`.",
+                            expected.name,
+                            policy_lints_table_label(root.kind, "rust")
                         ),
-                        file: Some(input.workspace.rel_path.clone()),
+                        file: Some(root.cargo_rel_path.clone()),
                         line: None,
                         inventory: false,
                     });
@@ -100,10 +104,12 @@ pub fn check(input: &WorkspaceCargoInput<'_>, results: &mut Vec<CheckResult>) {
                     severity: Severity::Error,
                     title: format!("missing clippy lint group `{}`", expected.name),
                     message: format!(
-                        "Expected `{}` in `[workspace.lints.clippy]`.",
-                        expected.name
+                        "`{}` must define `{}` in `{}`.",
+                        root.cargo_rel_path,
+                        expected.name,
+                        policy_lints_table_label(root.kind, "clippy")
                     ),
-                    file: Some(input.workspace.rel_path.clone()),
+                    file: Some(root.cargo_rel_path.clone()),
                     line: None,
                     inventory: false,
                 });
@@ -118,9 +124,11 @@ pub fn check(input: &WorkspaceCargoInput<'_>, results: &mut Vec<CheckResult>) {
                     severity: Severity::Error,
                     title: format!("missing clippy deny lint `{lint_name}`"),
                     message: format!(
-                        "Expected `{lint_name} = \"deny\"` in `[workspace.lints.clippy]`."
+                        "`{}` must define `{lint_name}` in `{}`.",
+                        root.cargo_rel_path,
+                        policy_lints_table_label(root.kind, "clippy")
                     ),
-                    file: Some(input.workspace.rel_path.clone()),
+                    file: Some(root.cargo_rel_path.clone()),
                     line: None,
                     inventory: false,
                 });
@@ -133,9 +141,13 @@ pub fn check(input: &WorkspaceCargoInput<'_>, results: &mut Vec<CheckResult>) {
             CheckResult {
                 id: ID.to_owned(),
                 severity: Severity::Info,
-                title: "workspace lint completeness satisfied".to_owned(),
-                message: "Workspace rust and clippy lint inventories are complete.".to_owned(),
-                file: Some(input.workspace.rel_path.clone()),
+                title: "lint completeness satisfied".to_owned(),
+                message: format!(
+                    "`{}` defines the required rust and clippy lint baseline for this {}.",
+                    root.cargo_rel_path,
+                    root.kind.label()
+                ),
+                file: Some(root.cargo_rel_path.clone()),
                 line: None,
                 inventory: false,
             }
@@ -145,5 +157,5 @@ pub fn check(input: &WorkspaceCargoInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_cargo_01_workspace_lints_tests.rs"]
+#[path = "rs_cargo_01_workspace_lints_tests/mod.rs"]
 mod tests;
