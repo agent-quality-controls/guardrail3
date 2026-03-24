@@ -42,5 +42,5 @@ pub fn check(input: &AllowlistCoverageDepsInput<'_>, results: &mut Vec<CheckResu
 }
 
 #[cfg(test)]
-#[path = "rs_deps_08_library_allowlist_present_tests.rs"]
+#[path = "rs_deps_08_library_allowlist_present_tests/mod.rs"]
 mod tests;

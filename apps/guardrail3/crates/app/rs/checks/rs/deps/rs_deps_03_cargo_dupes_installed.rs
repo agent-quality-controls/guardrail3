@@ -38,5 +38,5 @@ pub fn check(input: &ToolDepsInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_deps_03_cargo_dupes_installed_tests.rs"]
+#[path = "rs_deps_03_cargo_dupes_installed_tests/mod.rs"]
 mod tests;

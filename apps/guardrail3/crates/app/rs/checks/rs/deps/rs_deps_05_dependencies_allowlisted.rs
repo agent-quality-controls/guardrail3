@@ -49,5 +49,5 @@ pub fn check(input: &DependencyEntryDepsInput<'_>, results: &mut Vec<CheckResult
 }
 
 #[cfg(test)]
-#[path = "rs_deps_05_dependencies_allowlisted_tests.rs"]
+#[path = "rs_deps_05_dependencies_allowlisted_tests/mod.rs"]
 mod tests;

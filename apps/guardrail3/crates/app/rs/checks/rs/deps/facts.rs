@@ -1,4 +1,5 @@
 use std::collections::{BTreeMap, BTreeSet};
+use std::path::{Component, Path};
 
 use crate::domain::config::types::{CrateConfig, GuardrailConfig};
 use crate::domain::project_tree::ProjectTree;
@@ -146,6 +147,7 @@ struct WorkspaceFacts {
     root_rel_dir: String,
     cargo_rel_path: String,
     workspace_dependencies: toml::map::Map<String, toml::Value>,
+    workspace_package_dirs: BTreeSet<String>,
     member_dirs: Vec<String>,
 }
 
@@ -249,10 +251,15 @@ fn discover_workspaces(
             .and_then(toml::Value::as_table)
             .cloned()
             .unwrap_or_default();
+        let mut workspace_package_dirs = member_dirs.clone();
+        if parsed.get("package").is_some() {
+            let _ = workspace_package_dirs.insert(root_rel_dir.clone());
+        }
         workspaces.push(WorkspaceFacts {
             root_rel_dir,
             cargo_rel_path,
             workspace_dependencies,
+            workspace_package_dirs,
             member_dirs: member_dirs.into_iter().collect(),
         });
     }
@@ -364,7 +371,18 @@ fn discover_members(
             crate_name,
             rel_dir: rel_dir.clone(),
             cargo_rel_path,
-            workspace_root_rel_dir: workspace_by_member.get(&rel_dir).cloned(),
+            workspace_root_rel_dir: {
+                if let Some(workspace_root) = workspace_by_member.get(&rel_dir) {
+                    Some(workspace_root.clone())
+                } else if workspaces
+                    .iter()
+                    .any(|workspace| workspace.root_rel_dir == rel_dir)
+                {
+                    Some(rel_dir.clone())
+                } else {
+                    None
+                }
+            },
             profile_name,
             allowed_deps,
         });
@@ -536,21 +554,18 @@ fn external_dep_name(
     workspaces_by_root: &BTreeMap<String, &WorkspaceFacts>,
 ) -> Result<Option<String>, String> {
     let dep_table = value.as_table();
-    if dep_table.is_some_and(|table| table.contains_key("path")) {
-        return Ok(None);
-    }
-
     let package_name = dep_table
         .and_then(|table| table.get("package"))
         .and_then(toml::Value::as_str)
         .unwrap_or(alias)
         .to_owned();
 
-    if dep_table
+    let uses_workspace = dep_table
         .and_then(|table| table.get("workspace"))
         .and_then(toml::Value::as_bool)
-        == Some(true)
-    {
+        == Some(true);
+
+    if uses_workspace {
         let workspace_root = member
             .workspace_root_rel_dir
             .as_ref()
@@ -579,10 +594,67 @@ fn external_dep_name(
             .and_then(toml::Value::as_str)
             .unwrap_or(alias)
             .to_owned();
+        if let Some(dep_path) = workspace_value
+            .as_table()
+            .and_then(|table| table.get("path"))
+            .and_then(toml::Value::as_str)
+        {
+            if is_workspace_package_path(&workspace.root_rel_dir, dep_path, workspace) {
+                return Ok(None);
+            }
+        }
         return Ok(Some(workspace_package));
     }
 
+    if let Some(dep_path) = dep_table
+        .and_then(|table| table.get("path"))
+        .and_then(toml::Value::as_str)
+    {
+        if let Some(workspace_root) = &member.workspace_root_rel_dir {
+            if let Some(workspace) = workspaces_by_root.get(workspace_root) {
+                if is_workspace_package_path(&member.rel_dir, dep_path, workspace) {
+                    return Ok(None);
+                }
+            }
+        }
+    }
+
     Ok(Some(package_name))
+}
+
+fn is_workspace_package_path(
+    base_rel_dir: &str,
+    dep_path: &str,
+    workspace: &WorkspaceFacts,
+) -> bool {
+    let resolved = normalize_rel_path(base_rel_dir, dep_path);
+    workspace.workspace_package_dirs.contains(&resolved)
+}
+
+fn normalize_rel_path(base_rel_dir: &str, dep_path: &str) -> String {
+    let joined = if base_rel_dir.is_empty() {
+        Path::new(dep_path).to_path_buf()
+    } else {
+        Path::new(base_rel_dir).join(dep_path)
+    };
+    let mut parts = Vec::new();
+
+    for component in joined.components() {
+        match component {
+            Component::CurDir => {}
+            Component::Normal(part) => parts.push(part.to_string_lossy().into_owned()),
+            Component::ParentDir => {
+                if parts.last().is_some_and(|last| last != "..") {
+                    let _ = parts.pop();
+                } else {
+                    parts.push("..".to_owned());
+                }
+            }
+            Component::RootDir | Component::Prefix(_) => {}
+        }
+    }
+
+    parts.join("/")
 }
 
 fn lockfile_ignore_status(
@@ -590,15 +662,28 @@ fn lockfile_ignore_status(
     root_rel_dir: &str,
     cargo_lock_rel_path: &str,
 ) -> (bool, Option<String>) {
+    let mut ignored = false;
+    let mut source = None;
+
     for gitignore_rel_path in ancestor_gitignore_rels(root_rel_dir) {
         let Some(content) = tree.file_content(&gitignore_rel_path) else {
             continue;
         };
-        if cargo_lock_is_ignored(content, &gitignore_rel_path, cargo_lock_rel_path) {
-            return (true, Some(gitignore_rel_path));
+        for line in content.lines() {
+            if let Some(next_ignored) =
+                cargo_lock_ignore_match(line, &gitignore_rel_path, cargo_lock_rel_path)
+            {
+                ignored = next_ignored;
+                source = if ignored {
+                    Some(gitignore_rel_path.clone())
+                } else {
+                    None
+                };
+            }
         }
     }
-    (false, None)
+
+    (ignored, source)
 }
 
 fn ancestor_gitignore_rels(root_rel_dir: &str) -> Vec<String> {
@@ -619,11 +704,11 @@ fn ancestor_gitignore_rels(root_rel_dir: &str) -> Vec<String> {
     rels
 }
 
-fn cargo_lock_is_ignored(
-    gitignore: &str,
+fn cargo_lock_ignore_match(
+    line: &str,
     gitignore_rel_path: &str,
     cargo_lock_rel_path: &str,
-) -> bool {
+) -> Option<bool> {
     let gitignore_dir_rel = gitignore_rel_path
         .strip_suffix("/.gitignore")
         .unwrap_or_default();
@@ -632,30 +717,36 @@ fn cargo_lock_is_ignored(
     } else if let Some(rest) = cargo_lock_rel_path.strip_prefix(&format!("{gitignore_dir_rel}/")) {
         rest.to_owned()
     } else {
-        return false;
+        return None;
     };
 
     let basename = "Cargo.lock";
+    let trimmed = line.trim();
+    if trimmed.is_empty() || trimmed.starts_with('#') {
+        return None;
+    }
 
-    gitignore.lines().any(|line| {
-        let trimmed = line.trim();
-        if trimmed.is_empty() || trimmed.starts_with('#') || trimmed.starts_with('!') {
-            return false;
-        }
+    let (ignored, pattern_text) = if let Some(pattern) = trimmed.strip_prefix('!') {
+        (false, pattern)
+    } else {
+        (true, trimmed)
+    };
+    let normalized = pattern_text.trim_start_matches('/');
+    if normalized.is_empty() {
+        return None;
+    }
 
-        let normalized = trimmed.trim_start_matches('/');
-        if normalized == "Cargo.lock" {
-            return true;
-        }
-
-        if !normalized.contains('/') {
-            return glob::Pattern::new(normalized)
-                .ok()
-                .is_some_and(|pattern| pattern.matches(basename));
-        }
-
+    let matched = if normalized == "Cargo.lock" {
+        true
+    } else if !normalized.contains('/') {
+        glob::Pattern::new(normalized)
+            .ok()
+            .is_some_and(|pattern| pattern.matches(basename))
+    } else {
         glob::Pattern::new(normalized)
             .ok()
             .is_some_and(|pattern| pattern.matches(&candidate_rel))
-    })
+    };
+
+    matched.then_some(ignored)
 }

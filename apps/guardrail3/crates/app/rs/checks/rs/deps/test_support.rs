@@ -10,7 +10,6 @@ use super::inputs::{
     ToolDepsInput,
 };
 use crate::domain::project_tree::{DirEntry, ProjectTree};
-use crate::domain::report::CheckResult;
 use crate::ports::outbound::{CommandRunResult, ToolChecker};
 
 pub fn dir_entry(dirs: &[&str], files: &[&str]) -> DirEntry {
@@ -112,15 +111,6 @@ pub fn failure_input<'a>(facts: &'a DepsFacts, rel_path: &str) -> InputFailureDe
         .find(|failure| failure.rel_path == rel_path)
         .expect("expected input failure facts");
     InputFailureDepsInput::new(failure)
-}
-
-pub fn has_result<F>(results: &[CheckResult], id: &str, predicate: F) -> bool
-where
-    F: Fn(&CheckResult) -> bool,
-{
-    results
-        .iter()
-        .any(|result| result.id == id && predicate(result))
 }
 
 pub fn tool_facts(tool_name: &str, installed: bool) -> DepsFacts {
