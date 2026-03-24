@@ -2,29 +2,94 @@
 
 **Input:** Cargo.toml + clippy.toml + *.rs files
 **Parser:** TOML + syn AST
-**Current code:** `garde_checks.rs` (old partial baseline only; new family lives under `app/rs/checks/rs/garde`)
+**Current code:** `crates/app/rs/checks/rs/garde/**` (old `garde_checks.rs` is legacy seed material only)
 
 **Why separate from RS-CLIPPY:** RS-CLIPPY checks baseline bans (always required). RS-GARDE checks additional bans and source-level boundary enforcement that only make sense when the project uses garde for input validation boundaries. RS-GARDE-01 checks garde exists first — if it doesn't, the other rules are skipped.
+
+## Implementation mapping contract
+
+- exactly one `RS-GARDE-*` rule ID per production file
+- exactly one rule-specific `*_tests/` module directory per production rule file
+- `mod.rs` orchestrates only
+- `discover.rs`, `facts.rs`, `inputs.rs`, `parse.rs`, and `garde_support.rs` may contain shared discovery, facts, parsing, and canonical ban helpers only
+
+Forbidden:
+
+- grouped family test files such as `garde_tests.rs`
+- helper files that hide multiple rule predicates behind one API
+
+## Root discovery / ownership model
+
+`RS-GARDE` is a multi-root family.
+
+Its owned Rust policy roots are:
+- workspace roots
+- standalone package roots that are not members of a workspace
+
+It must not collapse to repo-root-only behavior.
+
+For each owned root, the family determines:
+- whether garde is actually in play for that root
+- which covering `clippy.toml` applies to that root
+- which Rust source files belong to that root
+
+Rules about clippy ban presence are evaluated against the covering clippy config for the owned root, not against an arbitrary repo-global file.
+
+## Gating model
+
+The family is intentionally conditional:
+- `RS-GARDE-01` checks whether garde is present for the owned root
+- if garde is absent, the ban and source-enforcement rules for that root do not fire
+
+This is not a fail-open exception. It is the actual product contract: the garde family only governs Rust roots that are using garde as an input-boundary strategy.
+
+## Input integrity / fail-closed expectations
+
+The family depends on:
+- owned-root `Cargo.toml`
+- the covering `clippy.toml`
+- relevant Rust source files under the owned root
+- root/policy inputs needed to decide whether garde is enabled for that root
+
+Unreadable or unparsable required inputs must surface explicitly through `RS-GARDE-10`.
+That includes:
+- Cargo root discovery failures
+- clippy config parse failures for owned roots
+- Rust source read/parse failures for analyzed files
+
+Malformed inputs must not silently suppress source-level boundary findings.
+
+## Cross-family dependency
+
+`RS-GARDE` deliberately depends on the `RS-CLIPPY` contract:
+- clippy owns the canonical ban configuration surface
+- garde owns the additional boundary-specific ban requirements and source-level derive/bypass checks
+
+So this family is valid only if:
+- clippy coverage/root resolution is correct
+- garde resolves the covering clippy config per owned root correctly
+
+That dependency should stay explicit in the plan.
 
 ## Rules
 
 | New ID | Old ID | Severity | What | Status |
 |--------|--------|----------|------|--------|
-| RS-GARDE-01 | R-GARDE-01 | Error/Info | garde crate in `[workspace.dependencies]` or `[dependencies]` of each enabled Rust root | Planned in new architecture |
-| RS-GARDE-02 | R-GARDE-02 | Warn/Info | Core serde/toml/yaml deserialization method bans in covering clippy config `disallowed-methods` (see list below) | Planned in new architecture |
-| RS-GARDE-03 | R-GARDE-03 | Warn/Info | Axum extractor type bans in covering clippy config `disallowed-types` (see list below) | Planned in new architecture |
-| RS-GARDE-04 | R-GARDE-04 | Warn/Info | `reqwest::Response::json` method ban in covering clippy config | Planned in new architecture |
-| RS-GARDE-05 | R-GARDE-05 | Error/Info | Struct derive inventory: structs with Deserialize/Parser/Args/FromRow + non-primitive fields must also derive Validate. Skips test files. | Planned in new architecture |
+| RS-GARDE-01 | R-GARDE-01 | Error/Info | garde crate in `[workspace.dependencies]` or `[dependencies]` of each enabled Rust root | Implemented |
+| RS-GARDE-02 | R-GARDE-02 | Warn/Info | Core serde/toml/yaml deserialization method bans in covering clippy config `disallowed-methods` (see list below) | Implemented |
+| RS-GARDE-03 | R-GARDE-03 | Warn/Info | Axum extractor type bans in covering clippy config `disallowed-types` (see list below) | Implemented |
+| RS-GARDE-04 | R-GARDE-04 | Warn/Info | `reqwest::Response::json` method ban in covering clippy config | Implemented |
+| RS-GARDE-05 | R-GARDE-05 | Error/Info | Struct derive inventory: structs with Deserialize/Parser/Args/FromRow + non-primitive fields must also derive Validate. Skips test files. | Implemented |
 
 ## New rules from audit
 
 | New ID | Severity | What | Status |
 |--------|----------|------|--------|
-| RS-GARDE-06 | Warn/Info | Additional deserialization method bans beyond serde_json/toml/yaml (see full list below). All deserialization entry points must go through `Validated<T>` wrapper. | Planned |
-| RS-GARDE-07 | Error/Info | Manual `impl<'de> Deserialize<'de> for T` bypasses derive check. Scan for impl blocks implementing Deserialize trait — flag target type if it has non-primitive fields and doesn't also implement Validate. | Planned |
-| RS-GARDE-08 | Error/Info | Enum derive inventory: enums with Deserialize/Parser/Args/FromRow and tuple/struct variants containing non-primitive fields must also derive Validate. Avoid false positives on C-like enums. | Planned |
-| RS-GARDE-09 | Info | `sqlx::query_as!` macro bypasses derive check. Scan for `query_as!` macro invocations and flag as inventory item requiring manual review for validation. | Planned |
-| RS-GARDE-10 | Error | Garde-family input failures: unreadable/parsing-broken Rust sources or broken garde-family policy inputs must surface explicitly instead of being skipped. | Planned |
+| RS-GARDE-06 | Warn/Info | Additional deserialization method bans beyond serde_json/toml/yaml (see full list below). All deserialization entry points must go through `Validated<T>` wrapper. | Implemented |
+| RS-GARDE-07 | Error/Info | Manual `impl<'de> Deserialize<'de> for T` bypasses derive check. Scan for impl blocks implementing Deserialize trait — flag target type if it has non-primitive fields and doesn't also implement Validate. | Implemented |
+| RS-GARDE-08 | Error/Info | Enum derive inventory: enums with Deserialize/Parser/Args/FromRow and tuple/struct variants containing non-primitive fields must also derive Validate. Avoid false positives on C-like enums. | Implemented |
+| RS-GARDE-09 | Info | `sqlx::query_as!` macro bypasses derive check. Scan for `query_as!` macro invocations and flag as inventory item requiring manual review for validation. | Implemented |
+| RS-GARDE-10 | Error | Garde-family input failures: unreadable/parsing-broken Rust sources or broken garde-family policy inputs must surface explicitly instead of being skipped. | Implemented |
 
 ## Legacy carry-forward from archived GARDE_GUARDRAILS.md
 

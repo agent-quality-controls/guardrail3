@@ -7,7 +7,7 @@
 ## Implementation mapping contract
 
 - exactly one `RS-CLIPPY-*` rule ID per production file
-- exactly one sidecar `*_tests.rs` file per production rule file
+- exactly one rule-specific `*_tests/` module directory per production rule file
 - `mod.rs` orchestrates only
 - `facts.rs`, `inputs.rs`, and `clippy_support.rs` may contain shared facts, typed inputs, canonical baseline data, and normalization helpers only
 
@@ -15,6 +15,7 @@ Forbidden:
 
 - grouped threshold files such as `rs_clippy_thresholds.rs`
 - grouped family test files such as `clippy_tests.rs`
+- single-file sidecars as the long-term target; each rule should move to a rule-specific test module directory split by attack vector
 - helper files that hide multiple rule predicates behind one API
 
 ## Decisions frozen from architecture/policy review
