@@ -27,5 +27,5 @@ pub fn check(input: &ManualDeserializeImplInput<'_>, results: &mut Vec<CheckResu
 }
 
 #[cfg(test)]
-#[path = "rs_garde_07_manual_deserialize_impl_tests.rs"]
+#[path = "rs_garde_07_manual_deserialize_impl_tests/mod.rs"]
 mod tests;

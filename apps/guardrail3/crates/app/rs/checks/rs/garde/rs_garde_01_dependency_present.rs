@@ -40,5 +40,5 @@ pub fn check(input: &GardeRootInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_garde_01_dependency_present_tests.rs"]
+#[path = "rs_garde_01_dependency_present_tests/mod.rs"]
 mod tests;

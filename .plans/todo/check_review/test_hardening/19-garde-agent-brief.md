@@ -36,6 +36,9 @@ Rules:
 - `rs_garde_08_enum_derive_validate.rs`
 - `rs_garde_09_query_as_inventory.rs`
 - `rs_garde_10_input_failures.rs`
+- `rs_garde_11_field_level_constraints.rs`
+- `rs_garde_12_nested_validation_dive.rs`
+- `rs_garde_13_context_validation_surface.rs`
 
 ## Legacy Seed Material
 
@@ -55,6 +58,11 @@ Per owned root, the family must determine:
 - whether garde is actually enabled for that root
 - which covering `clippy.toml` applies to that root
 - which Rust source files belong to that root
+
+Important verified semantics:
+- if the root config is package-driven by `[rust.packages]`, root garde gating must inherit `[rust.packages.checks]`
+- the root must not always fall back to the global default garde setting
+- otherwise `RS-GARDE-02..09` can fail open or overfire at the root
 
 Rules `RS-GARDE-02..09` are conditional:
 - if garde is absent for an owned root, those rules do not fire for that root
@@ -92,39 +100,58 @@ Specifically:
 
 These remain active even though the family is implemented:
 
-- expanded extractor bans are still missing from the canonical clippy baseline:
-  - `axum::extract::Path`
-  - `axum::extract::Multipart`
-  - `axum::extract::ConnectInfo`
-  - `axum_extra::extract::CookieJar`
-  - `axum_extra::extract::cookie::Cookie`
-  - `axum_extra::extract::TypedHeader`
-  - `axum_extra::extract::JsonDeserializer`
-  - `axum_extra::extract::JsonLines`
-  - `axum_extra::extract::Protobuf`
-  - `axum_extra::extract::Cbor`
-  - `axum_extra::extract::MsgPack`
-- wrapper-based validation boundary surface is still not implemented:
-  - `ValidatedJson<T>`
-  - `ValidatedQuery<T>`
-  - `ValidatedForm<T>`
-  - `Validated<T>`
-- field-level garde quality is still not enforced:
-  - meaningful garde constraints
-  - `#[garde(dive)]` for nested validated fields
-  - context-driven validation surfaces
+- the facts layer just closed one real mixed-profile/root bug:
+  - `facts.rs` was treating the root as default-garde-driven even when `[rust.packages]` owned the root config shape
+  - that root package-policy inheritance is now fixed
+  - a direct regression exists in `garde_facts_tests.rs`
+  - focused verification should keep using a stable family `CARGO_TARGET_DIR` such as `target/garde` to avoid lock fights with other agents
 
-## Main Structural Problem To Fix
+- expanded extractor bans are no longer a live gap:
+  - the canonical clippy generator now emits the full RS-GARDE-03 extractor set
+  - rule-local parity exists in `rs_garde_03_extractor_type_bans_tests/parity.rs`
+  - generator/checker parity is also pinned by the clippy type-ban parity tests
+- expanded deserialization method bans are no longer a live gap:
+  - the canonical clippy generator now emits the RS-GARDE-06 method set as part of the managed garde method baseline
+  - `RS-GARDE-02/04/06` golden tests now read the canonical generated clippy baseline instead of hand-written method lists
+  - clippy-side parity is pinned through `rs_clippy_04_missing_method_ban_tests/parity.rs`
+- source-level multi-root tests were corrected to the actual root model:
+  - `RS-GARDE-05/07/08/09` multi-root tests now use standalone package roots not enrolled in a workspace
+  - do not model workspace members as owned garde roots; that contradicts both the plan and `facts.rs`
+- derive coverage is broader now:
+  - `RS-GARDE-05` covers `Parser`, `Args`, and `FromRow`, plus the primitive-only `char` exemption
+  - `RS-GARDE-08` covers `Parser`, `Args`, and `FromRow`
+  - `RS-GARDE-09` now has the explicit `query_scalar!` non-hit the plan calls out
+- field-level garde quality is no longer just prose:
+  - `RS-GARDE-11` now enforces meaningful field-level garde constraints
+  - `RS-GARDE-12` now enforces `#[garde(dive)]` on nested validated fields
+  - `RS-GARDE-13` now enforces `#[garde(context(...))]` when field validators reference `ctx`
+- wrapper-based validation boundary surface remains checker-adjacent guidance, not a distinct garde AST rule:
+  - the active enforceable contract here is still the clippy ban surface on raw extractors and raw deserialization
+  - do not reopen this as a garde rule unless the project introduces an actual wrapper API surface that guardrail3 can statically detect
 
-The family still uses old rule sidecars like:
-- `rs_garde_01_dependency_present_tests.rs`
+## Current Test Shape
 
-The current standard is:
+The family already uses the required structure:
 - one rule-specific `*_tests/` directory per rule
-- one test = one attack vector
-- each attack mutates every owned target it should matter for
+- one test file per attack vector
 
-The agent should convert the family to that structure.
+The remaining job is semantic hardening:
+- exact owned hit / non-hit assertions
+- canonical generator parity
+- multi-root ownership coverage
+- fail-closed coverage on policy and source inputs
+
+Current verification status:
+- `CARGO_TARGET_DIR=target/garde-check cargo check --manifest-path apps/guardrail3/Cargo.toml --tests` passed
+- `CARGO_TARGET_DIR=target/clippy-check cargo check --manifest-path apps/guardrail3/Cargo.toml --tests` passed
+- the new `RS-GARDE-11/12/13` packet compile-checks cleanly under the garde target too:
+  - `CARGO_TARGET_DIR=target/garde-check cargo check --manifest-path apps/guardrail3/Cargo.toml --tests`
+- the new `RS-GARDE-11/12/13` packet runtime verification command set is:
+  - `CARGO_TARGET_DIR=target/garde cargo test --manifest-path apps/guardrail3/Cargo.toml --lib rs_garde_11_`
+  - `CARGO_TARGET_DIR=target/garde cargo test --manifest-path apps/guardrail3/Cargo.toml --lib rs_garde_12_`
+  - `CARGO_TARGET_DIR=target/garde cargo test --manifest-path apps/guardrail3/Cargo.toml --lib rs_garde_13_`
+- those runtime commands currently spend a long time in the monolithic `guardrail3` lib-test link step rather than failing fast on the garde packet itself
+- full `cargo test` on the monolithic `guardrail3` test binary is still expensive enough that repeated family-scoped links are not a good tight-loop verifier; use compile-check first, then run full tests when the lane is ready
 
 ## Required Attack Classes
 
@@ -147,6 +174,9 @@ For this family, the highest-signal attack classes are:
 - manual `Deserialize` impl bypasses
 - enum false-positive control for C-like enums
 - fail-closed Rust source and policy-input failures
+- field-level garde validator adequacy
+- nested `#[garde(dive)]` ownership
+- explicit `ctx` surface wiring
 
 ## Mission
 
@@ -154,7 +184,6 @@ Harden `rs/garde` only.
 
 Required outcomes:
 - verify structure against the current checker architecture
-- convert every rule from `*_tests.rs` to a rule-specific `*_tests/` directory
 - add golden coverage for every rule
 - add at least one real attack-vector test for every rule
 - assert exact owned hits, exact owned non-hits, exact rule ID, and exact severity
@@ -181,18 +210,19 @@ The pass is not done until:
 - every rule has a rule-specific `*_tests/` directory
 - every rule has golden coverage
 - every rule has at least one real attack-vector test
+- generator/checker parity is pinned where the rule depends on canonical clippy policy
 - exact-result assertions replace loose presence checks
 - semantic bugs are either fixed or written down explicitly
 
 ## Suggested Start Order
 
-1. read `garde.md` and map all 10 rules to current files
+1. read `garde.md` and map all 13 rules to current files
 2. audit `mod.rs` / `facts.rs` / `discover.rs` for owned-root and covering-config behavior
 3. map old `test_garde_checks.rs` tests to current rule IDs and attack vectors
-4. convert rule sidecars from `*_tests.rs` to `*_tests/`
-5. harden the highest-risk rules first:
+4. harden the highest-risk rules first:
    - `RS-GARDE-05`
    - `RS-GARDE-07`
    - `RS-GARDE-08`
    - `RS-GARDE-10`
+5. close generator/checker drift in the canonical clippy baseline before trusting golden cases
 6. update `garde.md` with closed and remaining gaps before stopping

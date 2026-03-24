@@ -52,5 +52,5 @@ pub fn check(input: &GardeRootInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_garde_04_reqwest_json_ban_tests.rs"]
+#[path = "rs_garde_04_reqwest_json_ban_tests/mod.rs"]
 mod tests;

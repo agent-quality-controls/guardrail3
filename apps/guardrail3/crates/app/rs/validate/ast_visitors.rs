@@ -162,6 +162,7 @@ pub struct GardeSkipInfo {
     pub line: usize,
     pub field_name: String,
     pub field_type: String,
+    pub is_type_level: bool,
     pub is_primitive: bool,
     pub has_subcommand_attr: bool,
 }
@@ -231,11 +232,27 @@ impl<'ast> Visit<'ast> for GardeSkipTypedVisitor {
                 line,
                 field_name,
                 field_type,
+                is_type_level: false,
                 is_primitive: is_primitive || has_subcommand_attr,
                 has_subcommand_attr,
             });
         }
         syn::visit::visit_field(self, f);
+    }
+
+    fn visit_item_struct(&mut self, item_struct: &'ast syn::ItemStruct) {
+        if let Some(line) = has_garde_skip(&item_struct.attrs) {
+            let type_name = item_struct.ident.to_string();
+            self.out.push(GardeSkipInfo {
+                line,
+                field_name: type_name.clone(),
+                field_type: type_name,
+                is_type_level: true,
+                is_primitive: !struct_has_non_primitive_fields(item_struct),
+                has_subcommand_attr: false,
+            });
+        }
+        syn::visit::visit_item_struct(self, item_struct);
     }
 }
 

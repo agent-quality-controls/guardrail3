@@ -1,6 +1,9 @@
+#![allow(dead_code)]
+
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
+use crate::domain::modules::clippy::build_clippy_toml;
 use crate::domain::project_tree::{DirEntry, ProjectTree};
 use crate::domain::report::CheckResult;
 
@@ -98,6 +101,22 @@ pub fn input_failure(rel_path: &str, message: &str) -> GardeInputFailureFacts {
     }
 }
 
+pub fn remove_clippy_ban_path(clippy_toml: &str, key: &str, path: &str) -> String {
+    let mut parsed = toml::from_str::<toml::Value>(clippy_toml).expect("valid clippy TOML");
+    let entries = parsed
+        .get_mut(key)
+        .and_then(toml::Value::as_array_mut)
+        .expect("expected ban array");
+    entries.retain(|entry| {
+        entry
+            .get("path")
+            .and_then(toml::Value::as_str)
+            .or_else(|| entry.as_str())
+            != Some(path)
+    });
+    toml::to_string(&parsed).expect("serialize clippy TOML")
+}
+
 pub fn has_result<F>(results: &[CheckResult], id: &str, predicate: F) -> bool
 where
     F: Fn(&CheckResult) -> bool,
@@ -105,4 +124,8 @@ where
     results
         .iter()
         .any(|result| result.id == id && predicate(result))
+}
+
+pub fn canonical_clippy_toml() -> String {
+    build_clippy_toml("service", false, true, "", "")
 }

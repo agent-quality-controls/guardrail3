@@ -26,5 +26,5 @@ pub fn check(input: &DerivedBoundaryTypeInput<'_>, results: &mut Vec<CheckResult
 }
 
 #[cfg(test)]
-#[path = "rs_garde_05_struct_derive_validate_tests.rs"]
+#[path = "rs_garde_05_struct_derive_validate_tests/mod.rs"]
 mod tests;
