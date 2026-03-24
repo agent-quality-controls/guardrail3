@@ -31,11 +31,13 @@ Current canonical/builders:
 ### clippy
 - current code writes local `clippy.toml` files derived from profile and overrides
 - target contract keeps this family local to Rust policy roots
+- target contract now treats `clippy.toml` as semantic-patch, not exact-owned
 - current helper/root-selection logic is still CLI/config-driven rather than root-taxonomy-driven
 
 ### deny
 - current code writes local `deny.toml` files derived from profile and overrides
 - target contract keeps this family local to Rust policy roots
+- target contract now treats `deny.toml` as semantic-patch, not exact-owned
 - current helper/root-selection logic is still CLI/config-driven rather than root-taxonomy-driven
 
 ### cargo

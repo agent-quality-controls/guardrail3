@@ -8,7 +8,7 @@ No `.clippy.toml` files are generator-owned.
 
 ## Ownership mode
 
-- exact-owned
+- semantic-patch
 
 ## Root selection
 
@@ -34,14 +34,18 @@ This contract must hold in mixed repositories containing:
 ## Required generator contract
 
 - every owned Rust policy root gets exactly one generator-owned `clippy.toml`
-- each generated file encodes the exact local clippy policy for that root
+- each generated file contains the canonical guardrail-managed clippy baseline for that root
 - profile-sensitive generation is exact per root:
   - service profile
   - library profile
   - pure-layer service roots where local policy requires pure-layer additions
 - garde-sensitive generation is exact per root
-- generated content includes the full guardrail-managed clippy baseline for that root
-- root-local clippy override data is validated, deduplicated, and merged exactly once
+- root-local additive clippy bans are preserved across reruns
+- preserved user entries may extend only the additive ban surfaces:
+  - `disallowed-methods`
+  - `disallowed-types`
+  - `disallowed-macros`
+- generator-owned thresholds, booleans, and required baseline bans are normalized back to the canonical contract on every run
 - generator never creates lower-precedence sibling files or forbidden nested local shadow configs
 
 ## Checker target
@@ -64,7 +68,9 @@ The generated result must satisfy the config-side `RS-CLIPPY` contract for:
 - `RS-CLIPPY` passes for the full repository shape
 
 2. `generate twice`
-- second generation is byte-identical for unchanged inputs
+- a second patch run is semantically stable
+- additive user bans survive
+- generator-owned baseline sections normalize to the same result
 
 3. negative mutation
 - mutating one generated threshold, setting, or ban entry produces the exact `RS-CLIPPY-*` finding for that surface
