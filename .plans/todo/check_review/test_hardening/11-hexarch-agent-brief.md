@@ -87,7 +87,83 @@ Current status:
   - symlink-only containers could be misdescribed as `is empty` until rule 05 started building its `contains files (...)` detail from both real files and symlink files
   - child directory symlinks were still counting as real subdirectories until container facts/inputs preserved `symlink_dirs`, rule 05 excluded them from the “has real dirs” check, and leaf collection stopped materializing fake rule-06 leaves for symlinked child dirs
   The sidecar is now at 17 tests and covers broad empty-container sweeps, broad files-only sweeps, broad safe-container replacement parity, nested-only isolation, `.gitkeep` suppression, symlink-only and symlink-dir edges, symlinked `.gitkeep` non-exemption, missing-container non-ownership, and TS/packages non-ownership. Fresh agents now say the only remaining concern is the same shared-walker ignored-whole-directory tradeoff, not a rule-05-specific bug.
-- `RS-HEXARCH-06..25`: pending this explicit protocol
+- `RS-HEXARCH-06`: complete under repeated fresh 4-agent attack rounds. One final shared-snapshot bug was fixed during convergence:
+  - newly recovered ignored directories were visible as dirs but were not recursively scanned in the same patch pass, so ignored valid leaves could still misclassify until `ProjectTree` started recursively patching newly recovered ignored dirs
+  The sidecar is now at 23 tests and covers broad invalid-leaf and hybrid sweeps with exact counts, valid nested hex and placeholder variants, files-only invalid leaves, symlink-leaf non-ownership, inner-only ownership, ignored-leaf branch parity across invalid/valid/hybrid states, permission-denied parity, destroyed-parent nested non-ownership, and TS/packages non-ownership. Fresh agents now say the rule is effectively converged.
+- `RS-HEXARCH-07`: complete under repeated fresh 4-agent attack rounds. Round 1 found two real implementation bugs and several depth gaps:
+  - rule 07 was comparing raw member strings to discovered crate dirs, so valid workspace semantics like `./...`, `../` normalization, trailing slashes, and globs would false-positive as missing members
+  - discovered workspace crates were being found by a raw `Cargo.toml under crates/` scan, so nested Cargo projects inside a real crate leaf could be misclassified as required workspace members
+  The fix derives discovered crate dirs from actual hex leaf facts instead of raw tree scan, adds semantic member resolution for normalized/glob member entries, and makes rule 07 skip non-workspace app Cargo so ownership stays with `RS-HEXARCH-08`.
+  Round 2 found a remaining family mismatch: `RS-HEXARCH-07` had become semantically stricter than `RS-HEXARCH-09/10`, so valid normalized/glob internal members could still false-positive under the neighboring rules. The fix upgrades workspace member facts to keep raw + normalized + resolved semantics and aligns `RS-HEXARCH-07/09/10` on that shared interpretation.
+  Round 3 found two more fail-open gaps in that shared member interpretation:
+  - workspace members `.` and `./` were normalizing away before `RS-HEXARCH-10` could own them, so invalid app-root members disappeared entirely
+  - absolute workspace members like `/crates/domain/types` were being normalized as if they were internal relative members, so they could silently pass as valid coverage
+  Those cases are now fixed in the shared workspace-member facts layer and covered by rule-10 ownership/path-resolution tests. The sidecar now covers golden, one-app multiplicity with per-crate attribution, nested-inner missing-member ownership, normalized/glob semantics for both outer and nested-inner paths, nested Cargo projects inside real leaves staying out of scope, `packages/*` and non-Rust app non-ownership, and mixed ownership-boundary splits across `RS-HEXARCH-07/09/10`. Fresh agents stopped finding meaningful further gaps.
+- `RS-HEXARCH-08`: complete under repeated fresh 4-agent attack rounds. The rule now owns semantic-invalid-workspace config as well as package-style app manifests, with wording updated to “invalid workspace config” instead of implying TOML syntax failure only. The sidecar now includes a realistic package-style manifest rewrite built from the golden fixture’s real workspace manifest, a one-app package-style ownership case, and non-string `[workspace].members[...]` fail-closed ownership.
+- `RS-HEXARCH-09`: complete under repeated fresh 4-agent attack rounds. The main depth work was ownership realism rather than a checker bug: tests now use the real `packages/shared-types` escape target instead of synthetic paths, and rule 09 explicitly stays out of ownership for absolute root-escaped members that belong to `RS-HEXARCH-10`.
+- `RS-HEXARCH-10`: complete under repeated fresh 4-agent attack rounds. The shared workspace-member facts layer now preserves app-root members (`.`, `./`, and `""`) and rejects absolute members as out-of-boundary instead of normalizing them away. The sidecar now also pins the sibling-app seam (`../backend/crates/domain/engine`) plus realistic absolute-path mutations against the copied fixture’s real temp path, so rule 10 owns cross-app, package-escape, app-root, glob, and absolute-member boundary violations while `RS-HEXARCH-07/09` stay clean.
+- `RS-HEXARCH-11`: materially hardened, pending final family-wide rerun. Real semantic bug fixed: the rule no longer compares raw root workspace member strings only, so normalized, glob, app-subpath, and absolute app-root members can no longer evade ownership. The sidecar now covers normalized app-member, absolute app-member, app-subpath, `apps/*` glob, and normalized `packages/*` non-hit coverage.
+- `RS-HEXARCH-12`: materially hardened. The sidecar now covers the golden non-hit, all-app and one-app `src/` ownership, TS-app non-ownership, file-named `src` non-hit, inner-hex non-hit using a real nested path, and non-Rust-file positives under `src/`.
+- `RS-HEXARCH-13`: materially hardened. Cross-app path deps now stay with `RS-HEXARCH-24`, omitted same-app internal targets no longer fail open when omitted from workspace membership, and the sidecar now covers golden, out-of-tree path lookalikes, broad exact attribution, and ownership seams against `RS-HEXARCH-18/24`.
+- `RS-HEXARCH-14`: materially hardened. Inventory no longer fabricates resolved entries for nonexistent paths, and the sidecar now proves exact multi-section inventory messages plus broken-path non-inventory non-hits.
+- `RS-HEXARCH-16`: materially hardened. Layered-looking patch/replace targets now count only when they resolve to a real crate target, so nonexistent patch paths no longer false-positive.
+- `RS-HEXARCH-17`: materially hardened. Inherited same-app path deps now resolve relative to workspace root, inherited cross-app deps stay with `RS-HEXARCH-24`, and the sidecar covers version-only non-hits, renamed ownership against `RS-HEXARCH-18`, and allowed renamed inherited paths.
+- `RS-HEXARCH-18`: materially hardened. Only real target-backed renamed edges now count, cross-app renamed target deps stay with `RS-HEXARCH-24`, and the sidecar covers realistic fixture-backed same-app renamed violations, allowed renamed same-app non-hits, workspace-inherited renamed ownership, renamed dev/target ownership splits with `RS-HEXARCH-20/25`, broken same-app targets, omitted-member seams, and exact alias/package message semantics.
+- `RS-HEXARCH-19`: materially hardened. Same-layer cycle detection no longer includes target-specific edges, and the sidecar now covers golden non-hit, fixture-backed same-layer cycle reporting, omitted-member non-cycles, target-specific non-cycles, mixed-layer filtering, and exact result-count/title semantics.
+- `RS-HEXARCH-20`: materially hardened. Dev-direction warnings now require a real target and stay out of cross-app ownership, leaving `RS-HEXARCH-24` to own cross-app dev deps. The sidecar now covers golden, exact warning messages, renamed dev ownership against `RS-HEXARCH-18`, inherited workspace-dev ownership against `RS-HEXARCH-17`, broken same-app target non-hits, and cross-app dev ownership.
+- `RS-HEXARCH-21`: materially hardened. Same-app `domain/` and `ports/` paths are now treated as allowed only when they resolve to discovered workspace members; omitted pure-layer crates error as non-workspace pure-layer targets instead of failing open. The rule also now stays out of cross-app ownership for `RS-HEXARCH-24`. The sidecar now covers golden, build and target deps in scope, dev deps out of scope, inherited external/alias behavior, cross-app non-ownership, a real backend `domain -> ports/outbound/repo` allow-case, omitted pure-layer members, and out-of-tree pure-looking paths.
+- `RS-HEXARCH-22`: materially hardened. Shared source discovery now fails closed when `src/lib.rs` / `src/main.rs` is missing instead of scanning orphan root files as fake entrypoints. The sidecar now covers golden, fail-closed parse and missing-entrypoint precedence, balanced counts, DTO-only and private-trait non-hits, multi-file aggregation, reachable-module filtering, non-ports scope, inline modules, and nested file layouts.
+- `RS-HEXARCH-23`: materially hardened. Shared source discovery hardening now also applies here, so missing entrypoints fail closed instead of scanning orphan root files. The sidecar now covers golden, fail-closed parse and missing-entrypoint precedence, non-adapter scope, `pub(crate)` / `pub(super)` non-hits, inline-module and nested-file hits, and unreachable/test-only public-trait non-hits.
+- `RS-HEXARCH-24`: materially hardened. Cross-app boundary errors now require a real resolved target, so broken cross-app paths no longer false-positive. The sidecar covers golden, broad cross-app leaks across normal/dev/build/target sections, `packages/` non-hits, external same-name collisions, and broken-target non-hits.
+- `RS-HEXARCH-25`: materially hardened. Target-direction errors now require a real resolved target and stay out of cross-app ownership, leaving `RS-HEXARCH-24` to own cross-app target deps. The sidecar covers golden, forbidden target edges across all target table kinds, external same-name non-hits, broken same-app target-path non-hits, and cross-app ownership boundaries.
+
+## Current uncommitted file set
+
+The current live work is not committed yet. The key files are:
+
+- `apps/guardrail3/crates/app/rs/checks/rs/hexarch/facts.rs`
+  - `WorkspaceCoverageFacts` is being upgraded from raw member strings to semantic workspace-member facts
+  - discovered workspace crates now come from owned hex leaves, not any arbitrary nested `Cargo.toml`
+  - member normalization / resolution logic is being centralized here
+- `apps/guardrail3/crates/app/rs/checks/rs/hexarch/inputs.rs`
+  - workspace coverage input is being updated to carry semantic member facts into rules
+- `apps/guardrail3/crates/app/rs/checks/rs/hexarch/rs_hexarch_07_workspace_members_match_crate_dirs.rs`
+  - now skips non-workspace apps
+  - now matches discovered crate dirs against resolved member semantics instead of raw strings
+- `apps/guardrail3/crates/app/rs/checks/rs/hexarch/rs_hexarch_09_no_extra_workspace_members.rs`
+  - in-flight alignment to semantic workspace-member facts so valid normalized/glob internal members do not false-positive as phantom members
+- `apps/guardrail3/crates/app/rs/checks/rs/hexarch/rs_hexarch_10_members_within_app_boundary.rs`
+  - in-flight alignment to semantic workspace-member facts so valid normalized internal members do not false-positive as out-of-boundary
+- `apps/guardrail3/crates/app/rs/checks/rs/hexarch/rs_hexarch_07_workspace_members_match_crate_dirs_tests/`
+  - widened rule-07 sidecar with golden, path-resolution, discovery-boundary, multiplicity, nested-inner, and ownership-split coverage
+- `.plans/todo/check_review/test_hardening/01-hexarch.md`
+- `.plans/todo/check_review/test_hardening/11-hexarch-agent-brief.md`
+
+## External blockers right now
+
+Targeted Cargo reruns are not giving a clean signal yet because the dirty tree has unrelated compile blockers outside hexarch:
+
+- missing hooks modules from `apps/guardrail3/crates/app/rs/checks/hooks/rs/mod.rs`
+  - latest seen names:
+    - `hook_rs_11_gitleaks_step_present`
+    - `hook_rs_12_cargo_dupes_step_present`
+- unrelated release test move errors:
+  - `apps/guardrail3/crates/app/rs/checks/rs/release/rs_bin_01_binary_release_workflow_tests/bypasses.rs`
+  - `apps/guardrail3/crates/app/rs/checks/rs/release/rs_bin_02_linux_target_tests/bypasses.rs`
+
+Because of that, use:
+- `rustfmt` on touched hexarch files for immediate hygiene
+- the rule intent + diff review + fresh adversarial rounds to continue hardening
+- full `cargo test ... rs_hexarch_07 ...` only after those unrelated blockers are cleared again
+
+## Immediate next steps
+
+When resuming, do this in order:
+
+1. Finish the broad `cargo test --manifest-path apps/guardrail3/Cargo.toml rs_hexarch_ -- --nocapture` rerun on `CARGO_TARGET_DIR=target/hexarch`
+2. Use any failing rule from that rerun as the next active rule and resume fresh 4-agent rounds on that rule immediately
+3. If the family rerun is green, update `01-hexarch.md` to mark `RS-HEXARCH-11..25` converged at the lane level instead of merely materially hardened
+4. Then decide whether any remaining work is only doc/worklog/commit hygiene or whether another family-wide adversarial pass is still justified
 
 ## Old adversarial sources to mine
 
@@ -166,7 +242,7 @@ Do not leave `*_tests.rs` rule files in place.
 If starting fresh in a new session:
 1. read `01-hexarch.md` for the current coverage matrix
 2. read `16-hexarch-execution-plan.md` for execution order
-3. resume the explicit per-rule adversarial protocol from the first incomplete rule in `01-hexarch.md`; right now that is `RS-HEXARCH-06`
+3. resume from the family-wide `rs_hexarch_` rerun result first; if green, update the docs to mark the lane converged, and if not, take the first failing rule as the next active one
 4. update both `01-hexarch.md` and this brief after each completed rule group
 
 ## Do not

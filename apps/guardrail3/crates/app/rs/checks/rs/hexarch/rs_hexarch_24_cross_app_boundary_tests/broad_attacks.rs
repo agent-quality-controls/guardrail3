@@ -19,7 +19,10 @@ fn cross_app_edges_error_and_same_app_edges_do_not() {
                 dir_entry(&[], &["Cargo.toml"]),
             ),
             ("apps/worker", dir_entry(&["crates"], &["Cargo.toml"])),
-            ("apps/worker/crates", dir_entry(&["domain"], &[])),
+            (
+                "apps/worker/crates",
+                dir_entry(&["domain", "app", "ports"], &[]),
+            ),
             ("apps/worker/crates/domain", dir_entry(&["jobs"], &[])),
             (
                 "apps/worker/crates/domain/jobs",
@@ -30,6 +33,15 @@ fn cross_app_edges_error_and_same_app_edges_do_not() {
                 "apps/worker/crates/app/processor",
                 dir_entry(&[], &["Cargo.toml"]),
             ),
+            ("apps/worker/crates/ports", dir_entry(&["outbound"], &[])),
+            (
+                "apps/worker/crates/ports/outbound",
+                dir_entry(&["queue"], &[]),
+            ),
+            (
+                "apps/worker/crates/ports/outbound/queue",
+                dir_entry(&[], &["Cargo.toml"]),
+            ),
         ],
         vec![
             (
@@ -38,7 +50,7 @@ fn cross_app_edges_error_and_same_app_edges_do_not() {
             ),
             (
                 "apps/worker/Cargo.toml",
-                "[workspace]\nmembers = [\"crates/*\", \"crates/*/*\"]\n",
+                "[workspace]\nmembers = [\"crates/*\", \"crates/*/*\", \"crates/*/*/*\"]\n",
             ),
             (
                 "apps/api/crates/app/core/Cargo.toml",

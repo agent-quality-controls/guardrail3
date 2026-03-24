@@ -6,7 +6,9 @@ const ID: &str = "RS-HEXARCH-03";
 
 pub fn check(input: &DirectionalContainerHexarchInput<'_>, results: &mut Vec<CheckResult>) {
     for expected in ["inbound", "outbound"] {
-        if input.dirs.iter().any(|dir| dir == expected) {
+        if input.dirs.iter().any(|dir| dir == expected)
+            && !input.symlink_dirs.iter().any(|dir| dir == expected)
+        {
             continue;
         }
         results.push(CheckResult {

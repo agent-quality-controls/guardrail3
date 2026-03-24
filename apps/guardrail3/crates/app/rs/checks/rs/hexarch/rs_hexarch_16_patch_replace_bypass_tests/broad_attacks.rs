@@ -1,50 +1,32 @@
 use std::collections::BTreeSet;
 
-use super::super::super::dependency_facts::{Layer, PatchEntryFacts};
-use super::super::super::inputs::PatchHexarchInput;
-use super::super::check;
+use super::super::super::test_support::{copy_fixture, errors_by_id, run_family, write_file};
 
 #[test]
-fn only_layered_patch_and_replace_targets_error() {
-    let patches = [
-        PatchEntryFacts {
-            cargo_rel_path: "apps/api/Cargo.toml".to_owned(),
-            key: "api-domain".to_owned(),
-            resolved_rel_dir: "apps/api/crates/domain".to_owned(),
-            target_layer: Some(Layer::Domain),
-        },
-        PatchEntryFacts {
-            cargo_rel_path: "apps/api/Cargo.toml".to_owned(),
-            key: "api-ports".to_owned(),
-            resolved_rel_dir: "apps/api/crates/ports".to_owned(),
-            target_layer: Some(Layer::Ports),
-        },
-        PatchEntryFacts {
-            cargo_rel_path: "apps/api/Cargo.toml".to_owned(),
-            key: "shared-types".to_owned(),
-            resolved_rel_dir: "packages/shared-types".to_owned(),
-            target_layer: None,
-        },
-    ];
+fn fixture_backed_patch_and_replace_only_error_for_layered_targets() {
+    let tmp = copy_fixture();
+    write_file(
+        tmp.path(),
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"packages/shared-types\"]\nresolver = \"2\"\n\n[patch.crates-io]\nbackend-domain-types = { path = \"apps/backend/crates/domain/types\" }\nmissing-layered = { path = \"apps/backend/crates/domain/missing\" }\n\n[replace]\n\"backend-domain-engine:0.1.0\" = { path = \"apps/backend/crates/domain/engine\" }\n\"shared-types:0.1.0\" = { path = \"packages/shared-types\" }\n",
+    );
 
-    let mut results = Vec::new();
-    for patch in &patches {
-        check(&PatchHexarchInput::new(patch), &mut results);
-    }
-
-    let actual_titles = results
+    let results = run_family(tmp.path());
+    let errors = errors_by_id(&results, "RS-HEXARCH-16");
+    let actual_titles = errors
         .iter()
         .map(|result| result.title.clone())
         .collect::<BTreeSet<_>>();
     let expected_titles = [
-        "patch/replace entry `api-domain` bypasses hexarch dependency checks".to_owned(),
-        "patch/replace entry `api-ports` bypasses hexarch dependency checks".to_owned(),
+        "patch/replace entry `backend-domain-types` bypasses hexarch dependency checks".to_owned(),
+        "patch/replace entry `backend-domain-engine:0.1.0` bypasses hexarch dependency checks"
+            .to_owned(),
     ]
     .into_iter()
     .collect::<BTreeSet<_>>();
 
     assert_eq!(
         actual_titles, expected_titles,
-        "unexpected patch hit set: {results:#?}"
+        "unexpected patch/replace hit set: {errors:#?}"
     );
 }

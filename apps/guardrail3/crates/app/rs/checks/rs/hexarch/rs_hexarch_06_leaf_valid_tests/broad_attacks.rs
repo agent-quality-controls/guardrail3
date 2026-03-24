@@ -12,6 +12,7 @@ fn orphan_leaf_without_cargo_or_crates_errors_everywhere_it_is_owned() {
 
     let results = run_family(tmp.path());
     let errors = errors_by_id(&results, "RS-HEXARCH-06");
+    assert_eq!(errors.len(), expected_files.len(), "{errors:#?}");
     let actual_files = errors
         .iter()
         .filter_map(|error| error.file.clone())
@@ -37,11 +38,26 @@ fn leaf_with_both_cargo_and_crates_errors_everywhere_it_is_owned() {
             &format!("{rel}/Cargo.toml"),
             "[package]\nname = \"hybrid\"\nversion = \"0.1.0\"\n",
         );
-        write_file(tmp.path(), &format!("{rel}/crates/domain/.gitkeep"), "");
+        for container in [
+            "app",
+            "domain",
+            "adapters/inbound",
+            "adapters/outbound",
+            "ports/inbound",
+            "ports/outbound",
+        ] {
+            write_file(
+                tmp.path(),
+                &format!("{rel}/crates/{container}/.gitkeep"),
+                "",
+            );
+        }
+        write_file(tmp.path(), &format!("{rel}/.gitkeep"), "");
     }
 
     let results = run_family(tmp.path());
     let errors = errors_by_id(&results, "RS-HEXARCH-06");
+    assert_eq!(errors.len(), expected_files.len(), "{errors:#?}");
     let actual_files = errors
         .iter()
         .filter_map(|error| error.file.clone())
@@ -72,6 +88,7 @@ fn gitkeep_plus_source_files_fires_everywhere() {
 
     let results = run_family(tmp.path());
     let errors = errors_by_id(&results, "RS-HEXARCH-06");
+    assert_eq!(errors.len(), expected_files.len(), "{errors:#?}");
     let actual_files = errors
         .iter()
         .filter_map(|error| error.file.clone())
@@ -98,6 +115,7 @@ fn gitkeep_plus_subdir_fires_everywhere() {
 
     let results = run_family(tmp.path());
     let errors = errors_by_id(&results, "RS-HEXARCH-06");
+    assert_eq!(errors.len(), expected_files.len(), "{errors:#?}");
     let actual_files = errors
         .iter()
         .filter_map(|error| error.file.clone())
@@ -123,6 +141,7 @@ fn gitkeep_as_directory_fires_everywhere() {
 
     let results = run_family(tmp.path());
     let errors = errors_by_id(&results, "RS-HEXARCH-06");
+    assert_eq!(errors.len(), expected_files.len(), "{errors:#?}");
     let actual_files = errors
         .iter()
         .filter_map(|error| error.file.clone())
@@ -135,6 +154,29 @@ fn gitkeep_as_directory_fires_everywhere() {
     for error in &errors {
         assert!(error.title.contains("missing Cargo.toml"));
         assert!(error.title.contains("fake_placeholder"));
+    }
+}
+
+#[test]
+fn flat_files_only_leaf_fires_everywhere() {
+    let tmp = copy_fixture();
+    let expected_files = owned_leaf_dirs(tmp.path(), "flat_files");
+    for rel in &expected_files {
+        write_file(tmp.path(), &format!("{rel}/README.md"), "# stray");
+    }
+
+    let results = run_family(tmp.path());
+    let errors = errors_by_id(&results, "RS-HEXARCH-06");
+    assert_eq!(errors.len(), expected_files.len(), "{errors:#?}");
+    let actual_files = errors
+        .iter()
+        .filter_map(|error| error.file.clone())
+        .collect::<BTreeSet<_>>();
+
+    assert_eq!(actual_files, expected_files, "{errors:#?}");
+    for error in &errors {
+        assert!(error.title.contains("missing Cargo.toml"));
+        assert!(error.title.contains("flat_files"));
     }
 }
 
@@ -157,5 +199,32 @@ fn packages_noise_is_ignored_by_rule_06() {
     assert!(
         errors.is_empty(),
         "packages/ noise should not be owned by rule 06: {errors:#?}"
+    );
+}
+
+#[test]
+fn non_rust_apps_noise_is_ignored_by_rule_06() {
+    let tmp = copy_fixture();
+    write_file(
+        tmp.path(),
+        "apps/admin/crates/app/admin_orphan/src/lib.rs",
+        "",
+    );
+    write_file(
+        tmp.path(),
+        "apps/landing/crates/domain/admin_hybrid/Cargo.toml",
+        "[package]\nname = \"admin-hybrid\"\nversion = \"0.1.0\"\n",
+    );
+    write_file(
+        tmp.path(),
+        "apps/landing/crates/domain/admin_hybrid/crates/app/.gitkeep",
+        "",
+    );
+
+    let results = run_family(tmp.path());
+    let errors = errors_by_id(&results, "RS-HEXARCH-06");
+    assert!(
+        errors.is_empty(),
+        "non-Rust apps should stay out of scope for rule 06: {errors:#?}"
     );
 }

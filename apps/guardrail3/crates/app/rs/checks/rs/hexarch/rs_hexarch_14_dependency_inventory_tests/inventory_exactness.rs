@@ -1,71 +1,29 @@
 use std::collections::BTreeSet;
 
-use super::super::super::dependency_facts::EdgeKind;
-use super::super::super::inputs::DependencyEdgeHexarchInput;
-use super::super::super::test_support::{dependency_facts, dir_entry, project_tree};
-use super::super::check;
+use super::super::super::test_support::{copy_fixture, run_family, write_file};
 
 #[test]
-fn path_dependencies_are_inventoried_with_exact_source_set() {
-    let tree = project_tree(
-        vec![
-            ("", dir_entry(&["apps"], &[])),
-            ("apps", dir_entry(&["api"], &[])),
-            ("apps/api", dir_entry(&["crates"], &["Cargo.toml"])),
-            (
-                "apps/api/crates",
-                dir_entry(&["app", "domain", "ports"], &[]),
-            ),
-            ("apps/api/crates/app", dir_entry(&["core"], &[])),
-            ("apps/api/crates/app/core", dir_entry(&[], &["Cargo.toml"])),
-            ("apps/api/crates/domain", dir_entry(&["types"], &[])),
-            (
-                "apps/api/crates/domain/types",
-                dir_entry(&[], &["Cargo.toml"]),
-            ),
-            ("apps/api/crates/ports", dir_entry(&["repo"], &[])),
-            (
-                "apps/api/crates/ports/repo",
-                dir_entry(&[], &["Cargo.toml"]),
-            ),
-        ],
-        vec![
-            (
-                "apps/api/Cargo.toml",
-                "[workspace]\nmembers = [\"crates/app/*\", \"crates/domain/*\", \"crates/ports/*\"]\n",
-            ),
-            (
-                "apps/api/crates/app/core/Cargo.toml",
-                "[package]\nname = \"api-app-core\"\n[dependencies]\napi-domain-types = { path = \"../../domain/types\" }\napi-ports-repo = { path = \"../../ports/repo\" }\n",
-            ),
-            (
-                "apps/api/crates/domain/types/Cargo.toml",
-                "[package]\nname = \"api-domain-types\"\n",
-            ),
-            (
-                "apps/api/crates/ports/repo/Cargo.toml",
-                "[package]\nname = \"api-ports-repo\"\n",
-            ),
-        ],
+fn fixture_backed_path_dependencies_are_inventoried_with_exact_messages() {
+    let tmp = copy_fixture();
+    write_file(
+        tmp.path(),
+        "apps/backend/crates/app/queries/Cargo.toml",
+        "[package]\nname = \"backend-app-queries\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\nbackend-domain-types = { path = \"../../domain/types\" }\n\n[dev-dependencies]\nshared-types = { path = \"../../../../packages/shared-types\" }\n\n[build-dependencies]\nbackend-ports-outbound-repo = { path = \"../../ports/outbound/repo\" }\n\n[target.'cfg(unix)'.dependencies]\nbackend-domain-engine-target = { package = \"backend-domain-engine\", path = \"../../domain/engine\" }\n\n[target.'cfg(unix)'.dev-dependencies]\nshared-types-target = { package = \"shared-types\", path = \"../../../../packages/shared-types\" }\n\n[target.'cfg(unix)'.build-dependencies]\nbackend-ports-outbound-events-target = { package = \"backend-ports-outbound-events\", path = \"../../ports/outbound/events\" }\n",
     );
 
-    let facts = dependency_facts(&tree);
-    let mut results = Vec::new();
-    for edge in facts
-        .edges
-        .iter()
-        .filter(|edge| edge.kind == EdgeKind::Dependency)
-    {
-        check(&DependencyEdgeHexarchInput::new(edge), &mut results);
-    }
-
+    let results = run_family(tmp.path());
     let actual_messages = results
         .iter()
+        .filter(|result| result.id == "RS-HEXARCH-14")
         .map(|result| result.message.clone())
         .collect::<BTreeSet<_>>();
     let expected_messages = [
-        "`apps/api/crates/app/core` depends on `api-domain-types` via `dependencies` resolved to `apps/api/crates/domain/types`.".to_owned(),
-        "`apps/api/crates/app/core` depends on `api-ports-repo` via `dependencies` resolved to `apps/api/crates/ports/repo`.".to_owned(),
+        "`apps/backend/crates/app/queries` depends on `backend-domain-types` via `dependencies` resolved to `apps/backend/crates/domain/types`.".to_owned(),
+        "`apps/backend/crates/app/queries` depends on `shared-types` via `dev-dependencies` resolved to `packages/shared-types`.".to_owned(),
+        "`apps/backend/crates/app/queries` depends on `backend-ports-outbound-repo` via `build-dependencies` resolved to `apps/backend/crates/ports/outbound/repo`.".to_owned(),
+        "`apps/backend/crates/app/queries` depends on `backend-domain-engine` via `target.*.dependencies` resolved to `apps/backend/crates/domain/engine`.".to_owned(),
+        "`apps/backend/crates/app/queries` depends on `shared-types` via `target.*.dev-dependencies` resolved to `packages/shared-types`.".to_owned(),
+        "`apps/backend/crates/app/queries` depends on `backend-ports-outbound-events` via `target.*.build-dependencies` resolved to `apps/backend/crates/ports/outbound/events`.".to_owned(),
     ]
     .into_iter()
     .collect::<BTreeSet<_>>();
@@ -74,5 +32,36 @@ fn path_dependencies_are_inventoried_with_exact_source_set() {
         actual_messages, expected_messages,
         "unexpected inventory results: {results:#?}"
     );
-    assert!(results.iter().all(|result| result.inventory));
+    assert!(
+        results
+            .iter()
+            .filter(|result| result.id == "RS-HEXARCH-14")
+            .all(|result| result.inventory),
+        "inventory results should be marked as inventory: {results:#?}"
+    );
+}
+
+#[test]
+fn broken_path_dependencies_are_not_inventoried() {
+    let tmp = copy_fixture();
+    write_file(
+        tmp.path(),
+        "apps/backend/crates/app/queries/Cargo.toml",
+        "[package]\nname = \"backend-app-queries\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\nbackend-domain-types = { path = \"../../domain/types\" }\nmissing-same-app = { path = \"../../app/missing\" }\nmissing-package = { path = \"../../../../packages/missing\" }\n",
+    );
+
+    let results = run_family(tmp.path());
+    let inventory_messages = results
+        .iter()
+        .filter(|result| result.id == "RS-HEXARCH-14")
+        .map(|result| result.message.clone())
+        .collect::<BTreeSet<_>>();
+    let expected_messages = ["`apps/backend/crates/app/queries` depends on `backend-domain-types` via `dependencies` resolved to `apps/backend/crates/domain/types`.".to_owned()]
+        .into_iter()
+        .collect::<BTreeSet<_>>();
+
+    assert_eq!(
+        inventory_messages, expected_messages,
+        "broken paths should not fabricate inventory entries: {results:#?}"
+    );
 }

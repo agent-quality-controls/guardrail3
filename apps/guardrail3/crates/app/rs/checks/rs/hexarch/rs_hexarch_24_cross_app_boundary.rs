@@ -12,7 +12,10 @@ pub fn check(input: &DependencyEdgeHexarchInput<'_>, results: &mut Vec<CheckResu
     ) else {
         return;
     };
-    if source_app == target_app || edge.resolved_target_rel_dir.is_none() {
+    if source_app == target_app
+        || edge.resolved_target_rel_dir.is_none()
+        || !edge.resolved_target_exists
+    {
         return;
     }
 

@@ -1,6 +1,9 @@
 use super::super::super::dependency_facts::EdgeKind;
 use super::super::super::inputs::MemberDependencyHexarchInput;
-use super::super::super::test_support::{dependency_facts, dir_entry, project_tree};
+use super::super::super::test_support::{
+    assert_no_error, copy_fixture, dependency_facts, dir_entry, project_tree, run_family,
+    write_file,
+};
 use super::super::check;
 
 #[test]
@@ -70,4 +73,17 @@ fn domain_and_ports_path_deps_do_not_trigger_domain_purity() {
         results.is_empty(),
         "pure domain and ports path dependencies should not trigger domain purity: {results:#?}"
     );
+}
+
+#[test]
+fn real_backend_ports_member_stays_allowed() {
+    let tmp = copy_fixture();
+    write_file(
+        tmp.path(),
+        "apps/backend/crates/domain/engine/Cargo.toml",
+        "[package]\nname = \"backend-domain-engine\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\nbackend-domain-types = { path = \"../types\" }\nbackend-ports-outbound-repo = { path = \"../../ports/outbound/repo\" }\n",
+    );
+
+    let results = run_family(tmp.path());
+    assert_no_error(&results, "RS-HEXARCH-21");
 }

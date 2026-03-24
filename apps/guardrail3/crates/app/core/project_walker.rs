@@ -297,22 +297,28 @@ fn patch_immediate_children(
     dir_children: &mut BTreeMap<String, ChildSets>,
     content: &mut BTreeMap<String, String>,
 ) {
-    let dir_rels = dir_children.keys().cloned().collect::<Vec<_>>();
-    for dir_rel in dir_rels {
+    let mut pending = dir_children.keys().cloned().collect::<Vec<_>>();
+    let mut scanned = BTreeSet::new();
+
+    while let Some(dir_rel) = pending.pop() {
+        if !scanned.insert(dir_rel.clone()) {
+            continue;
+        }
         let abs_dir = if dir_rel.is_empty() {
             root.to_path_buf()
         } else {
             root.join(&dir_rel)
         };
-        let parent = dir_children
-            .entry(dir_rel.clone())
-            .or_insert_with(empty_child_sets);
+        let mut child_dirs_to_add = Vec::new();
 
         for entry in fs.list_dir(&abs_dir) {
             let Ok(file_type) = entry.file_type() else {
                 continue;
             };
             let name = entry.file_name().to_string_lossy().into_owned();
+            let parent = dir_children
+                .entry(dir_rel.clone())
+                .or_insert_with(empty_child_sets);
             if file_type.is_symlink() {
                 match entry.metadata() {
                     Ok(metadata) if metadata.is_dir() => {
@@ -335,6 +341,22 @@ fn patch_immediate_children(
                         let _ = content.insert(rel_path, file_content);
                     }
                 }
+                continue;
+            }
+
+            if file_type.is_dir() {
+                let child_rel = ProjectTree::join_rel(&dir_rel, &name);
+                let _ = parent.0.insert(name);
+                child_dirs_to_add.push(child_rel);
+            }
+        }
+
+        for child_rel in child_dirs_to_add {
+            if !dir_children.contains_key(&child_rel) {
+                let _ = dir_children
+                    .entry(child_rel.clone())
+                    .or_insert_with(empty_child_sets);
+                pending.push(child_rel);
             }
         }
     }

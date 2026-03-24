@@ -68,6 +68,11 @@ fn same_layer_cycle_is_reported_once_even_with_mixed_layer_cycle_present() {
         "expected only the same-layer domain cycle to survive collector filtering: {facts:#?}"
     );
     assert_eq!(facts.cycles[0].layer, Layer::Domain);
+    assert_eq!(
+        results.len(),
+        1,
+        "expected exactly one rule-19 result after collector filtering: {results:#?}"
+    );
 
     let actual_titles = results
         .iter()

@@ -5,7 +5,7 @@ use super::inputs::WorkspaceCoverageHexarchInput;
 const ID: &str = "RS-HEXARCH-07";
 
 pub fn check(input: &WorkspaceCoverageHexarchInput<'_>, results: &mut Vec<CheckResult>) {
-    if input.cargo_parse_error.is_some() {
+    if input.cargo_parse_error.is_some() || !input.is_workspace {
         return;
     }
 
@@ -13,7 +13,7 @@ pub fn check(input: &WorkspaceCoverageHexarchInput<'_>, results: &mut Vec<CheckR
         if input
             .workspace_members
             .iter()
-            .any(|member| member == crate_dir)
+            .any(|member| member.covers_dir(crate_dir))
         {
             continue;
         }

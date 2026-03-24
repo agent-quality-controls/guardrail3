@@ -7,7 +7,13 @@ const ID: &str = "RS-HEXARCH-20";
 
 pub fn check(input: &DependencyEdgeHexarchInput<'_>, results: &mut Vec<CheckResult>) {
     let edge = input.edge;
-    if edge.kind != EdgeKind::DevDependency {
+    if edge.kind != EdgeKind::DevDependency || !edge.resolved_target_exists {
+        return;
+    }
+    if edge.source_app_root_rel_dir.is_some()
+        && edge.target_app_root_rel_dir.is_some()
+        && edge.source_app_root_rel_dir != edge.target_app_root_rel_dir
+    {
         return;
     }
     let (Some(source_layer), Some(target_layer)) = (edge.source_layer, edge.target_layer) else {

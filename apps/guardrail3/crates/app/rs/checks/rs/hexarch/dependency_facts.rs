@@ -109,6 +109,8 @@ pub struct DependencyEdgeFacts {
     pub kind: EdgeKind,
     pub section_label: String,
     pub resolved_target_rel_dir: Option<String>,
+    pub resolved_target_exists: bool,
+    pub resolved_target_is_member: bool,
     pub target_layer: Option<Layer>,
     pub target_app_root_rel_dir: Option<String>,
     pub is_workspace_inherited: bool,
@@ -281,7 +283,7 @@ fn discover_workspaces(tree: &ProjectTree) -> Vec<WorkspaceFacts> {
             .and_then(toml::Value::as_table)
             .cloned()
             .unwrap_or_default();
-        let patch_entries = parse_patch_entries(&parsed, &dir, &cargo_rel_path);
+        let patch_entries = parse_patch_entries(tree, &parsed, &dir, &cargo_rel_path);
 
         workspaces.push(WorkspaceFacts {
             root_rel_dir: dir,
@@ -319,6 +321,7 @@ fn resolve_member_pattern(
 }
 
 fn parse_patch_entries(
+    tree: &ProjectTree,
     parsed: &toml::Value,
     workspace_root_rel_dir: &str,
     cargo_rel_path: &str,
@@ -329,10 +332,14 @@ fn parse_patch_entries(
             for (key, value) in registry_table {
                 if let Some(path_value) = extract_path(value, &toml::map::Map::new()) {
                     let resolved = normalize_path(workspace_root_rel_dir, &path_value);
+                    let target_layer = tree
+                        .file_exists(&ProjectTree::join_rel(&resolved, "Cargo.toml"))
+                        .then(|| layer_from_path(&resolved))
+                        .flatten();
                     patches.push(PatchEntryFacts {
                         cargo_rel_path: cargo_rel_path.to_owned(),
                         key: key.clone(),
-                        target_layer: layer_from_path(&resolved),
+                        target_layer,
                         resolved_rel_dir: resolved,
                     });
                 }
@@ -344,10 +351,14 @@ fn parse_patch_entries(
         for (key, value) in replace_table {
             if let Some(path_value) = extract_path(value, &toml::map::Map::new()) {
                 let resolved = normalize_path(workspace_root_rel_dir, &path_value);
+                let target_layer = tree
+                    .file_exists(&ProjectTree::join_rel(&resolved, "Cargo.toml"))
+                    .then(|| layer_from_path(&resolved))
+                    .flatten();
                 patches.push(PatchEntryFacts {
                     cargo_rel_path: cargo_rel_path.to_owned(),
                     key: key.clone(),
-                    target_layer: layer_from_path(&resolved),
+                    target_layer,
                     resolved_rel_dir: resolved,
                 });
             }
@@ -436,11 +447,6 @@ fn collect_edges(
         .iter()
         .map(|workspace| (workspace.root_rel_dir.clone(), workspace))
         .collect::<BTreeMap<_, _>>();
-    let members_by_name = members
-        .iter()
-        .map(|member| (member.name.clone(), member))
-        .collect::<BTreeMap<_, _>>();
-
     let mut edges = Vec::new();
     for member in members {
         let Some(content) = tree.file_content(&member.cargo_rel_path) else {
@@ -458,28 +464,31 @@ fn collect_edges(
             .unwrap_or_default();
 
         collect_edge_section(
+            tree,
             &mut edges,
             member,
-            &members_by_name,
             member_by_dir,
+            member.workspace_root_rel_dir.as_deref(),
             &workspace_deps,
             parsed.get("dependencies"),
             EdgeKind::Dependency,
         );
         collect_edge_section(
+            tree,
             &mut edges,
             member,
-            &members_by_name,
             member_by_dir,
+            member.workspace_root_rel_dir.as_deref(),
             &workspace_deps,
             parsed.get("dev-dependencies"),
             EdgeKind::DevDependency,
         );
         collect_edge_section(
+            tree,
             &mut edges,
             member,
-            &members_by_name,
             member_by_dir,
+            member.workspace_root_rel_dir.as_deref(),
             &workspace_deps,
             parsed.get("build-dependencies"),
             EdgeKind::BuildDependency,
@@ -488,28 +497,31 @@ fn collect_edges(
         if let Some(target_table) = parsed.get("target").and_then(toml::Value::as_table) {
             for table in target_table.values().filter_map(toml::Value::as_table) {
                 collect_edge_section(
+                    tree,
                     &mut edges,
                     member,
-                    &members_by_name,
                     member_by_dir,
+                    member.workspace_root_rel_dir.as_deref(),
                     &workspace_deps,
                     table.get("dependencies"),
                     EdgeKind::TargetDependency,
                 );
                 collect_edge_section(
+                    tree,
                     &mut edges,
                     member,
-                    &members_by_name,
                     member_by_dir,
+                    member.workspace_root_rel_dir.as_deref(),
                     &workspace_deps,
                     table.get("dev-dependencies"),
                     EdgeKind::TargetDevDependency,
                 );
                 collect_edge_section(
+                    tree,
                     &mut edges,
                     member,
-                    &members_by_name,
                     member_by_dir,
+                    member.workspace_root_rel_dir.as_deref(),
                     &workspace_deps,
                     table.get("build-dependencies"),
                     EdgeKind::TargetBuildDependency,
@@ -522,10 +534,11 @@ fn collect_edges(
 }
 
 fn collect_edge_section(
+    tree: &ProjectTree,
     edges: &mut Vec<DependencyEdgeFacts>,
     member: &MemberDependencyFacts,
-    members_by_name: &BTreeMap<String, &MemberDependencyFacts>,
     member_by_dir: &BTreeMap<String, &MemberDependencyFacts>,
+    workspace_root_rel_dir: Option<&str>,
     workspace_deps: &toml::map::Map<String, toml::Value>,
     section: Option<&toml::Value>,
     kind: EdgeKind,
@@ -536,11 +549,6 @@ fn collect_edge_section(
 
     for (alias, value) in table {
         let dep_table = value.as_table();
-        let package_name = dep_table
-            .and_then(|table| table.get("package"))
-            .and_then(toml::Value::as_str)
-            .unwrap_or(alias)
-            .to_owned();
         let uses_workspace = dep_table
             .and_then(|table| table.get("workspace"))
             .and_then(toml::Value::as_bool)
@@ -550,21 +558,33 @@ fn collect_edge_section(
         } else {
             None
         };
-        let resolved_path_rel = extract_path(value, workspace_deps)
-            .or_else(|| {
-                workspace_value
-                    .and_then(|workspace_value| extract_path(workspace_value, workspace_deps))
-            })
-            .map(|path| normalize_path(&member.rel_dir, &path));
+        let package_name = dependency_package_name(alias, dep_table, workspace_value);
+        let direct_resolved_path_rel =
+            extract_path(value, workspace_deps).map(|path| normalize_path(&member.rel_dir, &path));
+        let inherited_resolved_path_rel = workspace_value
+            .and_then(|workspace_value| extract_path(workspace_value, workspace_deps))
+            .map(|path| normalize_path(workspace_root_rel_dir.unwrap_or(""), &path));
+        let resolved_path_rel = direct_resolved_path_rel.or(inherited_resolved_path_rel);
 
         let resolved_member = resolved_path_rel
             .as_ref()
             .and_then(|resolved| member_by_dir.get(resolved).copied());
-        let fallback_member = members_by_name
-            .get(&package_name)
-            .copied()
-            .or_else(|| members_by_name.get(alias).copied());
-        let target_member = resolved_member.or(fallback_member);
+        let resolved_target_is_member = resolved_member.is_some();
+        let resolved_target_exists = resolved_member.is_some()
+            || resolved_path_rel.as_ref().is_some_and(|resolved| {
+                tree.file_exists(&ProjectTree::join_rel(resolved, "Cargo.toml"))
+            });
+        let inferred_target_app_root = resolved_path_rel
+            .as_ref()
+            .and_then(|resolved| app_root_for_dir(resolved));
+        let inferred_target_layer = resolved_path_rel.as_ref().and_then(|resolved| {
+            let target_app_root = app_root_for_dir(resolved)?;
+            if member.app_root_rel_dir.as_deref() == Some(target_app_root.as_str()) {
+                layer_from_path(resolved)
+            } else {
+                None
+            }
+        });
 
         edges.push(DependencyEdgeFacts {
             source_name: member.name.clone(),
@@ -576,24 +596,38 @@ fn collect_edge_section(
             dep_package_name: package_name,
             kind,
             section_label: kind.label().to_owned(),
-            resolved_target_rel_dir: target_member
+            resolved_target_rel_dir: resolved_member
                 .map(|target| target.rel_dir.clone())
                 .or(resolved_path_rel.clone()),
-            target_layer: target_member.and_then(|target| target.layer).or_else(|| {
-                resolved_path_rel
-                    .as_ref()
-                    .and_then(|resolved| layer_from_path(resolved))
-            }),
-            target_app_root_rel_dir: target_member
+            resolved_target_exists,
+            resolved_target_is_member,
+            target_layer: resolved_member
+                .and_then(|target| target.layer)
+                .or(inferred_target_layer),
+            target_app_root_rel_dir: resolved_member
                 .and_then(|target| target.app_root_rel_dir.clone())
-                .or_else(|| {
-                    resolved_path_rel
-                        .as_ref()
-                        .and_then(|resolved| app_root_for_dir(resolved))
-                }),
+                .or(inferred_target_app_root),
             is_workspace_inherited: uses_workspace,
         });
     }
+}
+
+fn dependency_package_name(
+    alias: &str,
+    dep_table: Option<&toml::map::Map<String, toml::Value>>,
+    workspace_value: Option<&toml::Value>,
+) -> String {
+    dep_table
+        .and_then(|table| table.get("package"))
+        .and_then(toml::Value::as_str)
+        .or_else(|| {
+            workspace_value
+                .and_then(toml::Value::as_table)
+                .and_then(|table| table.get("package"))
+                .and_then(toml::Value::as_str)
+        })
+        .unwrap_or(alias)
+        .to_owned()
 }
 
 fn collect_same_layer_cycles(
@@ -601,7 +635,10 @@ fn collect_same_layer_cycles(
     member_by_dir: &BTreeMap<String, &MemberDependencyFacts>,
 ) -> Vec<CycleFacts> {
     let mut graph: BTreeMap<String, Vec<String>> = BTreeMap::new();
-    for edge in edges.iter().filter(|edge| !edge.kind.is_dev()) {
+    for edge in edges
+        .iter()
+        .filter(|edge| !edge.kind.is_dev() && !edge.kind.is_target())
+    {
         let Some(target_rel) = &edge.resolved_target_rel_dir else {
             continue;
         };
