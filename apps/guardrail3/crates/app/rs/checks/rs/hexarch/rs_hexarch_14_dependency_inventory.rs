@@ -6,6 +6,9 @@ const ID: &str = "RS-HEXARCH-14";
 
 pub fn check(input: &DependencyEdgeHexarchInput<'_>, results: &mut Vec<CheckResult>) {
     let edge = input.edge;
+    if !edge.resolved_target_exists {
+        return;
+    }
     let Some(target) = &edge.resolved_target_rel_dir else {
         return;
     };

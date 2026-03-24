@@ -5,15 +5,23 @@ use super::inputs::WorkspaceCoverageHexarchInput;
 const ID: &str = "RS-HEXARCH-09";
 
 pub fn check(input: &WorkspaceCoverageHexarchInput<'_>, results: &mut Vec<CheckResult>) {
-    if input.cargo_parse_error.is_some() {
+    if input.cargo_parse_error.is_some() || !input.is_workspace {
         return;
     }
 
-    for member in input.workspace_members {
-        if !member.starts_with("crates/") {
+    for member in &input.workspace_members {
+        if !member.is_within_app_boundary() {
             continue;
         }
-        if input.discovered_crate_dirs.iter().any(|dir| dir == member) {
+
+        let all_matches_are_real_crates = !member.resolved_dirs.is_empty()
+            && member.resolved_dirs.iter().all(|resolved| {
+                input
+                    .discovered_crate_dirs
+                    .iter()
+                    .any(|dir| dir == resolved)
+            });
+        if all_matches_are_real_crates {
             continue;
         }
         results.push(CheckResult {
@@ -21,11 +29,11 @@ pub fn check(input: &WorkspaceCoverageHexarchInput<'_>, results: &mut Vec<CheckR
             severity: Severity::Error,
             title: format!(
                 "Service `{}` has extra workspace member `{}`",
-                input.app_name, member
+                input.app_name, member.raw
             ),
             message: format!(
                 "Service `{}` lists workspace member `{}` but no matching crate directory exists under the app boundary.",
-                input.app_name, member
+                input.app_name, member.raw
             ),
             file: Some(input.app_rel_dir.to_owned()),
             line: None,

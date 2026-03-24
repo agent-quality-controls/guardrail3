@@ -127,7 +127,8 @@ pub struct WorkspaceCoverageHexarchInput<'a> {
     pub app_name: &'a str,
     pub app_rel_dir: &'a str,
     pub cargo_parse_error: Option<&'a str>,
-    pub workspace_members: &'a [String],
+    pub is_workspace: bool,
+    pub workspace_members: Vec<WorkspaceMemberHexarchInput<'a>>,
     pub discovered_crate_dirs: &'a [String],
 }
 
@@ -137,15 +138,46 @@ impl<'a> WorkspaceCoverageHexarchInput<'a> {
             app_name: &facts.app_name,
             app_rel_dir: &facts.app_rel_dir,
             cargo_parse_error: facts.cargo_parse_error.as_deref(),
-            workspace_members: &facts.workspace_members,
+            is_workspace: facts.is_workspace,
+            workspace_members: facts
+                .workspace_members
+                .iter()
+                .map(WorkspaceMemberHexarchInput::new)
+                .collect(),
             discovered_crate_dirs: &facts.discovered_crate_dirs,
         }
     }
 }
 
+pub struct WorkspaceMemberHexarchInput<'a> {
+    pub raw: &'a str,
+    pub resolved_dirs: &'a [String],
+    pub within_app_boundary: bool,
+}
+
+impl<'a> WorkspaceMemberHexarchInput<'a> {
+    pub fn new(facts: &'a super::facts::WorkspaceMemberFact) -> Self {
+        Self {
+            raw: &facts.raw,
+            resolved_dirs: &facts.resolved_dirs,
+            within_app_boundary: facts.within_app_boundary,
+        }
+    }
+
+    pub fn covers_dir(&self, rel_dir: &str) -> bool {
+        self.resolved_dirs
+            .iter()
+            .any(|resolved| resolved == rel_dir)
+    }
+
+    pub const fn is_within_app_boundary(&self) -> bool {
+        self.within_app_boundary
+    }
+}
+
 pub struct RootWorkspaceHexarchInput<'a> {
     pub cargo_parse_error: Option<&'a str>,
-    pub workspace_members: &'a [String],
+    pub workspace_members: Vec<RootWorkspaceMemberHexarchInput<'a>>,
     pub rust_app_roots: &'a [String],
 }
 
@@ -153,9 +185,33 @@ impl<'a> RootWorkspaceHexarchInput<'a> {
     pub fn new(facts: &'a RootWorkspaceFacts) -> Self {
         Self {
             cargo_parse_error: facts.cargo_parse_error.as_deref(),
-            workspace_members: &facts.workspace_members,
+            workspace_members: facts
+                .workspace_members
+                .iter()
+                .map(RootWorkspaceMemberHexarchInput::new)
+                .collect(),
             rust_app_roots: &facts.rust_app_roots,
         }
+    }
+}
+
+pub struct RootWorkspaceMemberHexarchInput<'a> {
+    pub raw: &'a str,
+    pub resolved_dirs: &'a [String],
+}
+
+impl<'a> RootWorkspaceMemberHexarchInput<'a> {
+    pub fn new(facts: &'a super::facts::RootWorkspaceMemberFact) -> Self {
+        Self {
+            raw: &facts.raw,
+            resolved_dirs: &facts.resolved_dirs,
+        }
+    }
+
+    pub fn covers_dir(&self, rel_dir: &str) -> bool {
+        self.resolved_dirs
+            .iter()
+            .any(|resolved| resolved == rel_dir || resolved.starts_with(&format!("{rel_dir}/")))
     }
 }
 

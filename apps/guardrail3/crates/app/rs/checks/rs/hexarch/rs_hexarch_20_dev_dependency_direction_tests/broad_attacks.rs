@@ -117,6 +117,10 @@ fn direct_dev_edges_are_warned_while_target_dev_edges_are_left_to_rule_25() {
         .iter()
         .filter_map(|result| result.file.clone())
         .collect::<BTreeSet<_>>();
+    let actual_rule20_messages = rule20
+        .iter()
+        .map(|result| result.message.clone())
+        .collect::<BTreeSet<_>>();
     let expected_rule20_files = [
         "apps/api/crates/domain/types/Cargo.toml".to_owned(),
         "apps/api/crates/ports/repo/Cargo.toml".to_owned(),
@@ -125,10 +129,22 @@ fn direct_dev_edges_are_warned_while_target_dev_edges_are_left_to_rule_25() {
     ]
     .into_iter()
     .collect::<BTreeSet<_>>();
+    let expected_rule20_messages = [
+        "domain crate `api-domain-types` dev-depends on adapters crate `api-adapters-http` via `dev-dependencies`.".to_owned(),
+        "ports crate `api-ports-repo` dev-depends on adapters crate `api-adapters-http` via `dev-dependencies`.".to_owned(),
+        "domain crate `worker-domain-types` dev-depends on adapters crate `worker-adapters-http` via `dev-dependencies`.".to_owned(),
+        "ports crate `worker-ports-repo` dev-depends on app crate `worker-app-core` via `dev-dependencies`.".to_owned(),
+    ]
+    .into_iter()
+    .collect::<BTreeSet<_>>();
 
     assert_eq!(
         actual_rule20_files, expected_rule20_files,
         "unexpected RS-HEXARCH-20 hit set: {rule20:#?}"
+    );
+    assert_eq!(
+        actual_rule20_messages, expected_rule20_messages,
+        "unexpected RS-HEXARCH-20 messages: {rule20:#?}"
     );
     assert_eq!(
         rule20.len(),
@@ -140,18 +156,6 @@ fn direct_dev_edges_are_warned_while_target_dev_edges_are_left_to_rule_25() {
             .iter()
             .all(|result| result.severity == Severity::Warn),
         "RS-HEXARCH-20 should warn, not error: {rule20:#?}"
-    );
-    assert!(
-        rule20
-            .iter()
-            .all(|result| !result.message.contains("target.*.dev-dependencies")),
-        "RS-HEXARCH-20 must not own target dev-dependencies: {rule20:#?}"
-    );
-    assert!(
-        rule20
-            .iter()
-            .any(|result| result.message.contains("dev-dependencies")),
-        "RS-HEXARCH-20 should still report ordinary dev-dependencies: {rule20:#?}"
     );
 
     let rule25 = results

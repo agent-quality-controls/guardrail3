@@ -18,6 +18,22 @@ Reason:
 
 ## Ordered execution plan
 
+### Exhaustive agent protocol
+
+For the final hardening phase, every rule must go through this explicit sequence:
+1. Round 1 with 4 attack agents
+2. Local fixes/tests/docs update
+3. Round 2 with 4 fresh attack agents
+4. Local fixes/tests/docs update
+5. If round 2 still finds meaningful hardness improvements, keep running more attack rounds for that same rule until the last fresh round does not produce a worthwhile strengthening change
+6. Only then move to the next rule
+
+The 4 agent roles per round are:
+- intent vs implementation
+- missing scenarios / old-corpus parity
+- false positives / ownership boundaries
+- fixture and mutation realism
+
 1. Build a rule inventory for `RS-HEXARCH-01..25`.
    For each rule, record:
    - production file

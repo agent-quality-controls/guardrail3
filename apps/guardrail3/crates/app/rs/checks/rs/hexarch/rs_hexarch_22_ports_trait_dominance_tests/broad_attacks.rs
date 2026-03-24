@@ -52,6 +52,11 @@ fn impls_in_multiple_source_files_are_aggregated() {
     let tmp = copy_fixture();
     write_file(
         tmp.path(),
+        "apps/backend/crates/ports/outbound/repo/src/lib.rs",
+        "mod extra;\n\nuse backend_domain_types::Task;\n\npub trait TaskRepo {\n    fn list_inbox_tasks(&self) -> Vec<Task>;\n    fn replace_schedule(&mut self, tasks: Vec<Task>);\n}\n",
+    );
+    write_file(
+        tmp.path(),
         "apps/backend/crates/ports/outbound/repo/src/extra.rs",
         "pub struct ExtraA;\n\nimpl ExtraA {\n    pub fn new() -> Self {\n        Self\n    }\n}\n\npub struct ExtraB;\n\nimpl ExtraB {\n    pub fn new() -> Self {\n        Self\n    }\n}\n",
     );

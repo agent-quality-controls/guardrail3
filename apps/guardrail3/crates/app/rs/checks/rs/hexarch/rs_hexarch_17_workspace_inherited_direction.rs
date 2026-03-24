@@ -9,6 +9,12 @@ pub fn check(input: &DependencyEdgeHexarchInput<'_>, results: &mut Vec<CheckResu
     if !edge.is_workspace_inherited || edge.kind.is_dev() || edge.kind.is_target() {
         return;
     }
+    if edge.source_app_root_rel_dir != edge.target_app_root_rel_dir
+        && edge.source_app_root_rel_dir.is_some()
+        && edge.target_app_root_rel_dir.is_some()
+    {
+        return;
+    }
     let (Some(source_layer), Some(target_layer)) = (edge.source_layer, edge.target_layer) else {
         return;
     };

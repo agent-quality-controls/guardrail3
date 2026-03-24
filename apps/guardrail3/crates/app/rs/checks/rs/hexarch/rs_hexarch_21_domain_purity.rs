@@ -29,7 +29,18 @@ pub fn check(input: &MemberDependencyHexarchInput<'_>, results: &mut Vec<CheckRe
         .collect::<BTreeSet<_>>();
 
     for edge in input.edges.iter().filter(|edge| !edge.kind.is_dev()) {
+        if edge.source_app_root_rel_dir.is_some()
+            && edge.target_app_root_rel_dir.is_some()
+            && edge.source_app_root_rel_dir != edge.target_app_root_rel_dir
+        {
+            continue;
+        }
         if let Some(target_layer) = edge.target_layer {
+            if edge.resolved_target_is_member
+                && matches!(target_layer, Layer::Domain | Layer::Ports)
+            {
+                continue;
+            }
             if edge.resolved_target_rel_dir.is_some()
                 && !matches!(target_layer, Layer::Domain | Layer::Ports)
             {
@@ -39,6 +50,29 @@ pub fn check(input: &MemberDependencyHexarchInput<'_>, results: &mut Vec<CheckRe
                     title: format!("domain crate `{}` depends on non-pure layer", member.name),
                     message: format!(
                         "Domain crate `{}` depends on {} layer `{}` via `{}`.",
+                        member.name,
+                        target_layer.label(),
+                        edge.dep_package_name,
+                        edge.section_label
+                    ),
+                    file: Some(member.cargo_rel_path.clone()),
+                    line: None,
+                    inventory: false,
+                });
+                continue;
+            }
+            if edge.resolved_target_rel_dir.is_some()
+                && matches!(target_layer, Layer::Domain | Layer::Ports)
+            {
+                results.push(CheckResult {
+                    id: ID.to_owned(),
+                    severity: Severity::Error,
+                    title: format!(
+                        "domain crate `{}` depends on non-workspace pure-layer crate",
+                        member.name
+                    ),
+                    message: format!(
+                        "Domain crate `{}` depends on {}-layer path `{}` via `{}`, but that target is not a discovered workspace member.",
                         member.name,
                         target_layer.label(),
                         edge.dep_package_name,
