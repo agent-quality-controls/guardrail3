@@ -53,5 +53,5 @@ fn rel_label(rel: &str) -> String {
 }
 
 #[cfg(test)]
-#[path = "rs_deps_10_gitignore_not_ignoring_cargo_lock_tests.rs"]
+#[path = "rs_deps_10_gitignore_not_ignoring_cargo_lock_tests/mod.rs"]
 mod tests;

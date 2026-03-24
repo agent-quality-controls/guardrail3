@@ -62,5 +62,5 @@ fn rel_label(rel: &str) -> String {
 }
 
 #[cfg(test)]
-#[path = "rs_deps_09_cargo_lock_present_tests.rs"]
+#[path = "rs_deps_09_cargo_lock_present_tests/mod.rs"]
 mod tests;
