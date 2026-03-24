@@ -331,13 +331,19 @@ Family-wide grouped test files such as `fmt_tests.rs`, `cargo_tests.rs`, or `den
 
 **Walker tests:** already implemented — lossless verification against `git ls-files` + `walkdir` + `git check-ignore` on real projects.
 
-## Migration
+## Runtime cutover
 
-1. Create `checks/` skeleton alongside existing `rs/validate/`
-2. Migrate one checker at a time (smallest first: fmt, toolchain)
-3. Old orchestrator delegates to new checker, verifies same output
-4. Once all checkers migrated, remove old `rs/validate/` files
-5. Parallelize: once all checkers are pure, swap `iter` for `par_iter`
+The structural checker architecture in this document is the runtime architecture.
+
+There is no legacy validator compatibility layer in the product contract.
+
+The runtime cutover spec lives in:
+- `.plans/todo/checks/2026-03-24-rust-validation-cutover.md`
+
+That cutover requires:
+- `rs validate` to call only the new family orchestrators under `app/rs/checks/**`
+- family-based selection instead of coarse grouped Rust domains
+- removal of old `app/rs/validate/**` from the runtime path
 
 ## Family-by-family implementation order
 
