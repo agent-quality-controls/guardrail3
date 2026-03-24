@@ -6,7 +6,7 @@ const ID: &str = "HOOK-SHARED-16";
 
 pub fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec<CheckResult>) {
     let found = input.parsed.executable_lines.iter().any(|line| {
-        line.command_text.contains("git cat-file -s")
+        (line.command_name == "git" && line.command_text.contains("git cat-file -s"))
             || (matches!(line.command_name, "stat" | "wc" | "du")
                 && (line.command_text.contains(" -c%s")
                     || line.command_text.contains(" --bytes")

@@ -124,3 +124,202 @@ fn extracts_command_substitution_inside_assignment() {
     assert_eq!(parsed.executable_lines[0].command_name, "echo");
     assert!(parsed.executable_lines[0].raw.contains("Cargo\\.toml"));
 }
+
+#[test]
+fn extracts_command_substitution_inside_export_assignment() {
+    let parsed = parse_script("export DUPES_OUTPUT=$(cargo dupes --exclude-tests)\n");
+
+    assert_eq!(parsed.executable_lines.len(), 1);
+    assert_eq!(parsed.executable_lines[0].command_name, "cargo");
+    assert_eq!(
+        parsed.executable_lines[0].command_text,
+        "cargo dupes --exclude-tests"
+    );
+}
+
+#[test]
+fn extracts_command_substitution_inside_local_assignment() {
+    let parsed = parse_script("local JSCPD_OUTPUT=$(jscpd .)\n");
+
+    assert_eq!(parsed.executable_lines.len(), 1);
+    assert_eq!(parsed.executable_lines[0].command_name, "jscpd");
+    assert_eq!(parsed.executable_lines[0].command_text, "jscpd .");
+}
+
+#[test]
+fn extracts_quoted_command_substitution_inside_assignment() {
+    let parsed = parse_script("OUT=\"$(cargo dupes --exclude-tests)\"\n");
+
+    assert_eq!(parsed.executable_lines.len(), 1);
+    assert_eq!(parsed.executable_lines[0].command_name, "cargo");
+    assert_eq!(
+        parsed.executable_lines[0].command_text,
+        "cargo dupes --exclude-tests"
+    );
+}
+
+#[test]
+fn ignores_single_quoted_command_substitution_literal() {
+    let parsed = parse_script("OUT='$(cargo dupes --exclude-tests)'\n");
+
+    assert!(parsed.executable_lines.is_empty());
+}
+
+#[test]
+fn strips_inline_comments_from_executable_commands() {
+    let parsed = parse_script("guardrail3 rs validate --staged . # trailing note\n");
+
+    assert_eq!(parsed.executable_lines.len(), 1);
+    assert_eq!(
+        parsed.executable_lines[0].command_text,
+        "guardrail3 rs validate --staged ."
+    );
+}
+
+#[test]
+fn ignores_heredoc_body_command_text() {
+    let parsed = parse_script("cat <<'EOF'\nguardrail3 rs validate --staged .\nEOF\n");
+
+    assert_eq!(parsed.executable_lines.len(), 1);
+    assert_eq!(parsed.executable_lines[0].command_name, "cat");
+}
+
+#[test]
+fn extracts_command_substitution_inside_declare_assignment() {
+    let parsed = parse_script("declare DUPES_OUTPUT=\"$(cargo dupes --exclude-tests)\"\n");
+
+    assert_eq!(parsed.executable_lines.len(), 1);
+    assert_eq!(parsed.executable_lines[0].command_name, "cargo");
+    assert_eq!(
+        parsed.executable_lines[0].command_text,
+        "cargo dupes --exclude-tests"
+    );
+}
+
+#[test]
+fn extracts_command_substitution_inside_readonly_assignment() {
+    let parsed = parse_script("readonly JSCPD_OUTPUT=\"$(jscpd .)\"\n");
+
+    assert_eq!(parsed.executable_lines.len(), 1);
+    assert_eq!(parsed.executable_lines[0].command_name, "jscpd");
+    assert_eq!(parsed.executable_lines[0].command_text, "jscpd .");
+}
+
+#[test]
+fn ignores_uncalled_function_body_commands() {
+    let parsed = parse_script(
+        "guardrail_validate() {\n    guardrail3 rs validate --staged .\n}\necho noop\n",
+    );
+
+    assert_eq!(parsed.executable_lines.len(), 1);
+    assert_eq!(parsed.executable_lines[0].command_name, "echo");
+    assert_eq!(parsed.functions.len(), 1);
+    assert_eq!(parsed.functions[0].name, "guardrail_validate");
+}
+
+#[test]
+fn records_called_function_body_for_later_resolution() {
+    let parsed = parse_script(
+        "guardrail_validate() {\n    guardrail3 rs validate --staged .\n}\nguardrail_validate\n",
+    );
+
+    assert_eq!(parsed.executable_lines.len(), 1);
+    assert_eq!(
+        parsed.executable_lines[0].command_name,
+        "guardrail_validate"
+    );
+    assert_eq!(parsed.functions.len(), 1);
+    assert!(
+        parsed.functions[0]
+            .body
+            .contains("guardrail3 rs validate --staged .")
+    );
+}
+
+#[test]
+fn keeps_inline_command_after_single_line_function_definition() {
+    let parsed =
+        parse_script("guardrail_validate() { guardrail3 rs validate --staged .; }; echo done\n");
+
+    assert_eq!(parsed.functions.len(), 1);
+    assert_eq!(parsed.functions[0].name, "guardrail_validate");
+    assert_eq!(parsed.executable_lines.len(), 1);
+    assert_eq!(parsed.executable_lines[0].command_name, "echo");
+}
+
+#[test]
+fn ignores_dead_if_body_commands() {
+    let parsed =
+        parse_script("if false; then\n    guardrail3 rs validate --staged .\nfi\necho noop\n");
+
+    assert_eq!(parsed.executable_lines.len(), 1);
+    assert_eq!(parsed.executable_lines[0].command_name, "echo");
+}
+
+#[test]
+fn keeps_else_body_after_dead_if_condition() {
+    let parsed = parse_script(
+        "if false; then\n    echo skip\nelse\n    guardrail3 rs validate --staged .\nfi\n",
+    );
+
+    assert_eq!(parsed.executable_lines.len(), 1);
+    assert_eq!(parsed.executable_lines[0].command_name, "guardrail3");
+}
+
+#[test]
+fn keeps_elif_body_after_dead_if_condition() {
+    let parsed = parse_script(
+        "if false; then\n    echo skip\nelif true; then\n    guardrail3 rs validate --staged .\nfi\n",
+    );
+
+    assert_eq!(parsed.executable_lines.len(), 1);
+    assert_eq!(parsed.executable_lines[0].command_name, "guardrail3");
+}
+
+#[test]
+fn ignores_dead_elif_body_after_live_if_condition() {
+    let parsed = parse_script(
+        "if true; then\n    echo ok\nelif true; then\n    guardrail3 rs validate --staged .\nfi\n",
+    );
+
+    assert_eq!(parsed.executable_lines.len(), 1);
+    assert_eq!(parsed.executable_lines[0].command_name, "echo");
+}
+
+#[test]
+fn keeps_taken_else_body_from_single_line_dead_if() {
+    let parsed =
+        parse_script("if false; then echo skip; else guardrail3 rs validate --staged .; fi\n");
+
+    assert_eq!(parsed.executable_lines.len(), 1);
+    assert_eq!(parsed.executable_lines[0].command_name, "guardrail3");
+}
+
+#[test]
+fn keeps_taken_elif_body_from_single_line_dead_if() {
+    let parsed = parse_script(
+        "if false; then echo skip; elif true; then guardrail3 rs validate --staged .; fi\n",
+    );
+
+    assert_eq!(parsed.executable_lines.len(), 1);
+    assert_eq!(parsed.executable_lines[0].command_name, "guardrail3");
+}
+
+#[test]
+fn keeps_taken_elif_body_from_single_line_dead_if_with_else_fallback() {
+    let parsed = parse_script(
+        "if false; then echo skip; elif true; then guardrail3 rs validate --staged .; else echo no; fi\n",
+    );
+
+    assert_eq!(parsed.executable_lines.len(), 1);
+    assert_eq!(parsed.executable_lines[0].command_name, "guardrail3");
+}
+
+#[test]
+fn ignores_dead_while_body_commands() {
+    let parsed =
+        parse_script("while false; do\n    guardrail3 rs validate --staged .\ndone\necho noop\n");
+
+    assert_eq!(parsed.executable_lines.len(), 1);
+    assert_eq!(parsed.executable_lines[0].command_name, "echo");
+}

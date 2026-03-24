@@ -30,3 +30,7 @@ pub fn check(has_modular_dir: bool, results: &mut Vec<CheckResult>) {
         .as_inventory(),
     );
 }
+
+#[cfg(test)]
+#[path = "hook_shared_03_modular_directory_inventory_tests.rs"]
+mod tests;

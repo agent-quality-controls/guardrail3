@@ -16,3 +16,7 @@ pub fn check(rel_path: &str, content: &str, results: &mut Vec<CheckResult>) {
         .as_inventory(),
     );
 }
+
+#[cfg(test)]
+#[path = "hook_shared_08_pre_commit_file_size_inventory_tests.rs"]
+mod tests;

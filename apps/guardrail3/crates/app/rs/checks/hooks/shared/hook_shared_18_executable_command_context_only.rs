@@ -21,7 +21,7 @@ pub fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec<CheckR
             .parsed
             .executable_lines
             .iter()
-            .any(|line| matches_step_family(line.command_text, step));
+            .any(|line| matches_step_family(line, step));
         if !is_executable_match {
             suspicious_lines.push((line_no, step));
         }
@@ -77,21 +77,36 @@ fn step_family_from_text(line: &str) -> Option<&'static str> {
         .find_map(|(needle, family)| line.contains(needle).then_some(family))
 }
 
-fn matches_step_family(command_text: &str, family: &str) -> bool {
+fn matches_step_family(
+    line: &crate::app::rs::checks::hooks::shell::ExecutableLine<'_>,
+    family: &str,
+) -> bool {
+    let command_text = line.command_text;
     match family {
-        "guardrail3 rs validate" => command_text.contains("guardrail3 rs validate"),
-        "guardrail3 validate" => command_text.contains("guardrail3 validate"),
-        "cargo clippy" => command_text.contains("cargo clippy"),
-        "cargo deny" => command_text.contains("cargo deny") || command_text.contains("cargo-deny"),
-        "cargo test" => command_text.contains("cargo test"),
+        "guardrail3 rs validate" => {
+            line.command_name == "guardrail3" && command_text.contains("guardrail3 rs validate")
+        }
+        "guardrail3 validate" => {
+            line.command_name == "guardrail3" && command_text.contains("guardrail3 validate")
+        }
+        "cargo clippy" => line.command_name == "cargo" && command_text.contains("cargo clippy"),
+        "cargo deny" => {
+            (line.command_name == "cargo" && command_text.contains("cargo deny"))
+                || line.command_name == "cargo-deny"
+        }
+        "cargo test" => line.command_name == "cargo" && command_text.contains("cargo test"),
         "cargo machete" => {
-            command_text.contains("cargo machete") || command_text.contains("cargo-machete")
+            (line.command_name == "cargo" && command_text.contains("cargo machete"))
+                || line.command_name == "cargo-machete"
         }
         "cargo dupes" => {
-            command_text.contains("cargo dupes") || command_text.contains("cargo-dupes")
+            (line.command_name == "cargo" && command_text.contains("cargo dupes"))
+                || line.command_name == "cargo-dupes"
         }
-        "gitleaks" => command_text.contains("gitleaks"),
-        "pnpm install --frozen-lockfile" => command_text.contains("--frozen-lockfile"),
+        "gitleaks" => line.command_name == "gitleaks",
+        "pnpm install --frozen-lockfile" => {
+            line.command_name == "pnpm" && command_text.contains("--frozen-lockfile")
+        }
         _ => false,
     }
 }

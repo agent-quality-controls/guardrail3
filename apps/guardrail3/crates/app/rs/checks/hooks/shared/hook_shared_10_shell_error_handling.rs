@@ -5,14 +5,7 @@ use super::inputs::ExecutableCommandContextInput;
 const ID: &str = "HOOK-SHARED-10";
 
 pub fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec<CheckResult>) {
-    let has_shell_error_handling = input.content.lines().any(|line| {
-        let trimmed = line.trim();
-        trimmed == "set -e"
-            || trimmed == "set -eu"
-            || trimmed == "set -eo pipefail"
-            || trimmed == "set -euo pipefail"
-            || trimmed.contains("set -e")
-    });
+    let has_shell_error_handling = input.content.lines().any(has_shell_error_handling_line);
 
     if has_shell_error_handling {
         results.push(
@@ -40,3 +33,15 @@ pub fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec<CheckR
         });
     }
 }
+
+fn has_shell_error_handling_line(line: &str) -> bool {
+    let trimmed = line.trim();
+    matches!(
+        trimmed,
+        "set -e" | "set -eu" | "set -eo pipefail" | "set -euo pipefail"
+    )
+}
+
+#[cfg(test)]
+#[path = "hook_shared_10_shell_error_handling_tests.rs"]
+mod tests;

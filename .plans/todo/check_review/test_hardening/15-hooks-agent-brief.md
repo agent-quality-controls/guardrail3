@@ -89,7 +89,6 @@ Still missing:
 - remaining TS/non-Rust routing cleanup
 - generator parity migration
 - any additional `RS-TEST-08` hardening beyond parser reuse
-- shared inventory/metadata sidecar coverage for the remaining uncovered `HOOK-SHARED-*` rules
 
 ## Old adversarial sources to mine
 
@@ -124,6 +123,22 @@ That vector should be applied across all relevant hook surfaces:
   - comment-only config filename mentions no longer satisfy `HOOK-RS-16`
   - echoed tool strings no longer satisfy Rust/shared step-presence checks such as clippy, gitleaks, workspace test, lockfile, and fail-open detection
 - second hardening pass added missing sidecar tests for `HOOK-RS-01..07`, `HOOK-RS-14`, and `HOOK-RS-15`
+- later focused `test-attack` rounds also fixed:
+  - echoed `guardrail3 ... validate --staged` false pass in `HOOK-RS-08`
+  - echoed `git cat-file -s ...` false pass in `HOOK-SHARED-16`
+  - semantic executable-line matching gap in `HOOK-SHARED-18`
+  - echoed config-banner false pass plus escaped-regex false negative in `HOOK-RS-16`
+  - dispatcher lookalike-path false passes in `HOOK-SHARED-04` and `HOOK-SHARED-19`
+- the later strict per-rule 4-agent attack loop drove `HOOK-RS-01..16` rule by rule until findings dropped into low-signal territory
+- `HOOK-RS-16` received the deepest hardening pass and now explicitly handles:
+  - disconnected config-trigger blocks
+  - same-block different-branch false passes
+  - `if`, `elif`, and `case` trigger branches
+  - path-qualified guardrail validation in the trigger path
+  - escaped regex config literals without dotted/undotted collapse
+  - single-line and compact shell forms such as `;then`, `;fi`, and compact `case ... ;; esac`
+  - multiline continued `if` conditions before `then`
+  - nested conditional partitioning so inner config arms and validation arms are not flattened together
 - compile verification still passes with `cargo check --lib`, but full `cargo test` remains blocked by unrelated existing lib-test failures elsewhere on the branch
 
 ## Important constraint for the next agent
@@ -171,13 +186,11 @@ Build the new families in the same architecture as the Rust check families:
 ## Next concrete continuation point
 
 Resume with:
-1. expand adversarial sidecar coverage across the remaining uncovered shared inventory/metadata rules:
-   - `HOOK-SHARED-01`, `02`, `03`, `04`, `05`, `06`, `07`, `08`, `09`, `10`, `12`, `17`
-   - keep adding explicit false-pass cases, not only happy-path tests
-2. move to routing/generator parity:
+1. move to routing/generator parity:
    - legacy/modern hook semantic split
    - remaining TS/non-Rust hook path cleanup
-3. `RS-TEST-08` is already aligned to the parser; deepen its hardening only if needed
+2. `RS-TEST-08` is already aligned to the parser; deepen its hardening only if needed
+3. if more hook hardening is requested after that, run the same strict per-rule 4-agent adversarial loop across selected `HOOK-SHARED-*` rules rather than doing broad family sweeps
 
 ## Do not
 

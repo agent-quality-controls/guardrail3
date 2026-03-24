@@ -93,24 +93,27 @@ Implemented so far:
   - `HOOK-RS-07`
   - `HOOK-RS-14`
   - `HOOK-RS-15`
+- later focused `test-attack` rounds closed additional semantic false passes:
+  - `HOOK-RS-08` no longer counts echoed `guardrail3 ... validate --staged`
+  - `HOOK-SHARED-16` no longer counts echoed `git cat-file -s ...`
+  - `HOOK-SHARED-18` now requires a real semantic command match, not just any executable line with the same words
+  - `HOOK-RS-16` no longer counts echoed config-name banners and now accepts escaped regex trigger patterns
+  - dispatcher rules (`HOOK-SHARED-04`, `HOOK-SHARED-19`) no longer pass on lookalike paths such as `pre-commit.dummy`
+  - `HOOK-RS-16` was pushed through repeated 4-agent per-rule attack rounds and now handles:
+    - disconnected trigger blocks
+    - same-block different-branch false passes
+    - `if` / `elif` / `case` trigger branches
+    - path-qualified validation
+    - escaped regex literals without dotted/undotted collapse
+    - single-line and compact shell forms such as `;then`, `;fi`, compact `case ... ;; esac`
+    - multiline continued `if` conditions before `then`
+    - nested conditional partitioning so inner config arms and inner validation arms are not flattened together
+  - `HOOK-RS-01..16` have now been pushed through the per-rule adversarial loop instead of only broad family sweeps
 
 Not implemented yet:
 - remaining TS/non-Rust legacy hook cleanup
 - remaining generator/checker parity fixes beyond `workspace_root`
 - any deeper `RS-TEST-08` test hardening beyond parser reuse
-- shared inventory/metadata rule sidecar coverage for:
-  - `HOOK-SHARED-01`
-  - `HOOK-SHARED-02`
-  - `HOOK-SHARED-03`
-  - `HOOK-SHARED-04`
-  - `HOOK-SHARED-05`
-  - `HOOK-SHARED-06`
-  - `HOOK-SHARED-07`
-  - `HOOK-SHARED-08`
-  - `HOOK-SHARED-09`
-  - `HOOK-SHARED-10`
-  - `HOOK-SHARED-12`
-  - `HOOK-SHARED-17`
 
 ## Fixture constraint
 
@@ -131,8 +134,8 @@ Call this out explicitly before doing work that needs more than folder structure
 ## Next concrete step
 
 Next code step:
-- add shared inventory/metadata sidecar tests for the remaining uncovered `HOOK-SHARED-*` rules
-- then continue into generator/checker parity work and remaining TS/non-Rust cleanup
+- continue into generator/checker parity work and remaining TS/non-Rust cleanup
+- optionally run the same strict per-rule 4-agent loop across selected `HOOK-SHARED-*` rules if more hook hardening is wanted after Rust convergence
 - note:
   - migrated Rust hook checks are already on the Rust validate path
   - legacy hook entrypoints no longer own Rust hook validation

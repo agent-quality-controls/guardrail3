@@ -55,3 +55,19 @@ fi
     assert_eq!(results[0].severity, Severity::Warn);
     assert!(!results[0].inventory);
 }
+
+#[test]
+fn warns_when_git_cat_file_size_is_only_echoed() {
+    let content = r#"echo "git cat-file -s :$file""#;
+    let parsed = parse_script(content);
+    let input = ExecutableCommandContextInput {
+        rel_path: ".githooks/pre-commit",
+        kind: HookScriptKind::PreCommit,
+        content,
+        parsed: &parsed,
+    };
+    let mut results = Vec::new();
+    check(&input, &mut results);
+    assert_eq!(results[0].severity, Severity::Warn);
+    assert!(!results[0].inventory);
+}
