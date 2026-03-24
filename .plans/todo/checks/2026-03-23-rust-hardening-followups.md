@@ -68,7 +68,9 @@ This file keeps only the still-live Rust/shared follow-up work that did **not** 
 - Hook routing is especially stale:
   - `ValidateDomains` has no hook-/garde-specific dimension
   - hook validation is still gated only on `domains.code`
-- Needs an explicit reconciliation pass so CLI/reporting contract matches the Rust-only architecture.
+- The planning contract for the replacement now lives in:
+  - `.plans/todo/checks/2026-03-24-rust-validation-cutover.md`
+- Remaining work is implementation against that cutover spec, not further planning.
 
 ### 10. Shared hook prerequisite-tool diagnostics are still incomplete
 
@@ -151,11 +153,12 @@ Those notes should remain available only as historical/adversarial reference aft
 - `garde.md` still marks implemented rules as planned.
 - `garde.md` still overstates missing extractor-ban work that is already implemented.
 - `RS-GARDE-06` rule text overclaims wrapper enforcement; current implementation only validates clippy method-ban completeness.
-- `garde.md` still carries live prose requirements with no explicit rule IDs:
-  - wrapper-based boundary enforcement
-  - field-level garde quality checks
-  - `#[garde(dive)]`
-  - context-driven validation
+- `garde.md` used to carry live prose requirements with no explicit rule IDs.
+  Current state after the garde hardening pass:
+  - `RS-GARDE-11` now owns field-level garde quality checks
+  - `RS-GARDE-12` now owns `#[garde(dive)]`
+  - `RS-GARDE-13` now owns explicit `ctx` surface wiring
+  - wrapper-based boundary guidance remains intentionally checker-adjacent and is enforced through clippy ban surfaces rather than a garde-local AST rule
 - `RS-GARDE-09` plan text should explicitly mention both `query_as!` and `query_as_unchecked!`.
 
 #### hexarch/test still have real fail-open and semantic-scope issues
