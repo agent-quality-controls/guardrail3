@@ -19,6 +19,11 @@ fn ignores_non_traversing_include_str_without_rust_include_bypass() {
     );
 
     let results = run_family(root);
+    let rs_code_23_results = results
+        .iter()
+        .filter(|result| result.id == "RS-CODE-23")
+        .collect::<Vec<_>>();
 
     assert_eq!(files_for_rule(&results, "RS-CODE-23"), BTreeSet::new());
+    assert!(rs_code_23_results.is_empty());
 }

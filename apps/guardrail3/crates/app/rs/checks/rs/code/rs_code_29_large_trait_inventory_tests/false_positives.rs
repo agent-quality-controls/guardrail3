@@ -23,6 +23,11 @@ fn skips_non_library_traits_and_threshold_boundary() {
     );
 
     let results = run_family(root);
+    let rs_code_29_results = results
+        .iter()
+        .filter(|result| result.id == "RS-CODE-29")
+        .collect::<Vec<_>>();
 
     assert_eq!(files_for_rule(&results, "RS-CODE-29"), BTreeSet::new());
+    assert!(rs_code_29_results.is_empty());
 }

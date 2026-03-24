@@ -22,4 +22,12 @@ fn warns_on_inline_public_module_in_lib_rs() {
     assert_eq!(results.len(), 1);
     assert_eq!(results[0].id, "RS-CODE-28");
     assert_eq!(results[0].severity, Severity::Warn);
+    assert_eq!(results[0].title, "inline public module in lib.rs");
+    assert_eq!(
+        results[0].message,
+        "`pub mod api { ... }` should live in its own file."
+    );
+    assert_eq!(results[0].line, Some(1));
+    assert_eq!(results[0].file.as_deref(), Some("src/lib.rs"));
+    assert!(!results[0].inventory);
 }

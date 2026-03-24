@@ -1,7 +1,7 @@
 use crate::domain::report::{CheckResult, Severity};
 
 use super::inputs::RustCodeFileInput;
-use super::parse::find_garde_skips_with_types;
+use super::parse::{GardeSkipInfo, find_garde_skips_with_types};
 
 const ID: &str = "RS-CODE-05";
 
@@ -23,13 +23,21 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
             severity: Severity::Error,
             title: "garde(skip) without comment".to_owned(),
             message: format!(
-                "`#[garde(skip)]` on non-primitive field `{}: {}` requires documentation.",
-                info.field_name, info.field_type
+                "`#[garde(skip)]` on non-primitive {} requires documentation.",
+                target_label(&info)
             ),
             file: Some(input.rel_path.to_owned()),
             line: Some(info.line),
             inventory: false,
         });
+    }
+}
+
+fn target_label(info: &GardeSkipInfo) -> String {
+    if info.is_type_level {
+        format!("type `{}`", info.field_name)
+    } else {
+        format!("field `{}: {}`", info.field_name, info.field_type)
     }
 }
 

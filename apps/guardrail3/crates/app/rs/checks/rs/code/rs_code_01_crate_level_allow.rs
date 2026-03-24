@@ -14,6 +14,9 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
     }
 
     for info in find_inline_mod_allows(input.ast) {
+        if info.lint == "unused_crate_dependencies" {
+            continue;
+        }
         push_result(
             input,
             results,

@@ -28,7 +28,14 @@ pub fn recommended_fixups(report: &DoctorReport) -> Vec<String> {
 }
 
 pub fn default_config(workspace_root: &str) -> WorkspaceConfig {
-    WorkspaceConfig::new(workspace_root, HookMode::ValidateAndFix).expect("fixture config")
+    match WorkspaceConfig::new(workspace_root, HookMode::ValidateAndFix) {
+        Ok(config) => config,
+        Err(_) => WorkspaceConfig {
+            root: workspace_root.to_owned(),
+            rust_checks_enabled: true,
+            hook_mode: HookMode::ValidateAndFix,
+        },
+    }
 }
 
 #[cfg(test)]

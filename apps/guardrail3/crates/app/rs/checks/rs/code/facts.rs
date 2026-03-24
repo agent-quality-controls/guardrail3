@@ -116,12 +116,13 @@ fn collect_exception_comments(tree: &ProjectTree) -> Vec<ExceptionCommentFacts> 
             continue;
         };
         for (index, line) in content.lines().enumerate() {
-            let upper = line.to_ascii_uppercase();
-            if upper.contains("// EXCEPTION:") || upper.contains("# EXCEPTION:") {
+            let trimmed = line.trim_start();
+            let upper = trimmed.to_ascii_uppercase();
+            if upper.starts_with("// EXCEPTION:") || upper.starts_with("# EXCEPTION:") {
                 comments.push(ExceptionCommentFacts {
                     rel_path: rel_path.clone(),
                     line: index.saturating_add(1),
-                    line_text: line.trim().to_owned(),
+                    line_text: trimmed.to_owned(),
                 });
             }
         }
@@ -302,7 +303,12 @@ fn read_policy_map(
 
     let package_roots: BTreeSet<_> = cargo_roots
         .values()
-        .filter(|facts| facts.has_package && !configured_app_roots.contains(&facts.rel_dir))
+        .filter(|facts| {
+            facts.has_package
+                && !configured_app_roots
+                    .iter()
+                    .any(|app_root| rel_is_same_or_descendant(&facts.rel_dir, app_root))
+        })
         .map(|facts| facts.rel_dir.clone())
         .collect();
 
@@ -367,4 +373,12 @@ fn policy_settings_for(
 
 fn file_parent_rel(rel_path: &str) -> &str {
     rel_path.rsplit_once('/').map_or("", |(parent, _)| parent)
+}
+
+fn rel_is_same_or_descendant(rel: &str, ancestor: &str) -> bool {
+    rel == ancestor
+        || (!ancestor.is_empty()
+            && rel
+                .strip_prefix(ancestor)
+                .is_some_and(|suffix| suffix.starts_with('/')))
 }

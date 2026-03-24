@@ -7,15 +7,41 @@ fn skips_below_threshold_and_test_files() {
     let fixture = copy_fixture();
     let root = fixture.path();
 
-    let rel = "apps/backend/crates/app/commands/tests/use_band_tests.rs";
-    let imports = (0..20)
+    let test_rel = "apps/backend/crates/app/commands/tests/use_band_tests.rs";
+    let lower_rel = "apps/backend/crates/app/commands/src/use_band_probe.rs";
+    let nested_rel = "apps/backend/crates/app/commands/src/nested_use_band_probe.rs";
+
+    let test_imports = (0..20)
         .map(|index| format!("use crate::test_{index};"))
         .collect::<Vec<_>>()
         .join("\n");
+    let lower_imports = (0..15)
+        .map(|index| format!("use crate::prod_{index};"))
+        .collect::<Vec<_>>()
+        .join("\n");
+    let nested_uses = (0..20)
+        .map(|index| format!("    use crate::nested_{index};"))
+        .collect::<Vec<_>>()
+        .join("\n");
 
-    write_file(root, rel, &imports);
+    write_file(root, test_rel, &test_imports);
+    write_file(
+        root,
+        lower_rel,
+        &format!("{lower_imports}\nfn probe() {{}}\n"),
+    );
+    write_file(
+        root,
+        nested_rel,
+        &format!("mod nested {{\n{nested_uses}\n    pub fn probe() {{}}\n}}\n"),
+    );
 
     let results = run_family(root);
+    let rs_code_11_results = results
+        .iter()
+        .filter(|result| result.id == "RS-CODE-11")
+        .collect::<Vec<_>>();
 
     assert_eq!(files_for_rule(&results, "RS-CODE-11"), BTreeSet::new());
+    assert!(rs_code_11_results.is_empty());
 }

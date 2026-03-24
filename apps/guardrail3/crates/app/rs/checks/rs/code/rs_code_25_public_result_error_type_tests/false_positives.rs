@@ -20,6 +20,11 @@ fn skips_non_library_files_and_typed_public_errors() {
     );
 
     let results = run_family(root);
+    let rs_code_25_results = results
+        .iter()
+        .filter(|result| result.id == "RS-CODE-25")
+        .collect::<Vec<_>>();
 
     assert_eq!(files_for_rule(&results, "RS-CODE-25"), BTreeSet::new());
+    assert!(rs_code_25_results.is_empty());
 }

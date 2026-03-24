@@ -34,25 +34,59 @@ fn attacks_include_bypass_variants_across_multiple_owned_files() {
     );
 
     let results = run_family(root);
-    let rs_code_23_results = results
+    let mut rs_code_23_results = results
         .iter()
         .filter(|result| result.id == "RS-CODE-23")
+        .map(|result| {
+            (
+                result.file.clone(),
+                result.line,
+                result.severity,
+                result.title.clone(),
+                result.message.clone(),
+                result.inventory,
+            )
+        })
         .collect::<Vec<_>>();
+    rs_code_23_results.sort_by_key(|(file, line, severity, _, _, _)| {
+        (
+            file.clone().unwrap_or_default(),
+            *line,
+            format!("{severity:?}"),
+        )
+    });
 
     assert_eq!(
         files_for_rule(&results, "RS-CODE-23"),
         BTreeSet::from([rest_rel.to_owned(), handlers_rel.to_owned()])
     );
-    assert_eq!(rs_code_23_results.len(), 3);
     assert_eq!(
-        rs_code_23_results
-            .iter()
-            .map(|result| (result.file.as_deref(), result.line, result.severity))
-            .collect::<Vec<_>>(),
+        rs_code_23_results,
         vec![
-            (Some(rest_rel), Some(rest_line), Severity::Error),
-            (Some(handlers_rel), Some(handlers_info_line), Severity::Info),
-            (Some(handlers_rel), Some(handlers_warn_line), Severity::Warn),
+            (
+                Some(handlers_rel.to_owned()),
+                Some(handlers_info_line),
+                Severity::Info,
+                "build-script include! inventory".to_owned(),
+                "`include!(concat!(env!(\"OUT_DIR\"), ...))` detected. Review generated-code boundary.".to_owned(),
+                true,
+            ),
+            (
+                Some(handlers_rel.to_owned()),
+                Some(handlers_warn_line),
+                Severity::Warn,
+                "include path traversal".to_owned(),
+                "`include_str!()` uses a path containing `..`.".to_owned(),
+                false,
+            ),
+            (
+                Some(rest_rel.to_owned()),
+                Some(rest_line),
+                Severity::Error,
+                "include! bypass".to_owned(),
+                "`include!()` pulls in Rust code outside the scanned file boundary.".to_owned(),
+                false,
+            ),
         ]
     );
 }

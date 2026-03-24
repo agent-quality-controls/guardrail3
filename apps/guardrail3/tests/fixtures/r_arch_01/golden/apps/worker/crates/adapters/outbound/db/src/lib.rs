@@ -8,31 +8,40 @@ pub struct InMemoryJobStore {
 
 impl InMemoryJobStore {
     pub fn seeded() -> Self {
-        let jobs = vec![
-            Job::new(
-                worker_domain_jobs::JobId::new("job_a").expect("seed id"),
+        let mut jobs = Vec::new();
+
+        if let Ok(job_id) = worker_domain_jobs::JobId::new("job_a") {
+            if let Ok(job) = Job::new(
+                job_id,
                 "acme",
                 worker_domain_jobs::JobKind::BillingDigest,
                 "billing:digest",
-            )
-            .expect("seed job")
-            .lock_to("worker-a"),
-            Job::new(
-                worker_domain_jobs::JobId::new("job_b").expect("seed id"),
+            ) {
+                jobs.push(job.lock_to("worker-a"));
+            }
+        }
+
+        if let Ok(job_id) = worker_domain_jobs::JobId::new("job_b") {
+            if let Ok(job) = Job::new(
+                job_id,
                 "acme",
                 worker_domain_jobs::JobKind::NotificationFanout,
                 "notify:weekly",
-            )
-            .expect("seed job"),
-            Job::new(
-                worker_domain_jobs::JobId::new("job_c").expect("seed id"),
+            ) {
+                jobs.push(job);
+            }
+        }
+
+        if let Ok(job_id) = worker_domain_jobs::JobId::new("job_c") {
+            if let Ok(job) = Job::new(
+                job_id,
                 "beta",
                 worker_domain_jobs::JobKind::ContentReindex,
                 "search:backfill",
-            )
-            .expect("seed job")
-            .with_attempts(2, 3),
-        ];
+            ) {
+                jobs.push(job.with_attempts(2, 3));
+            }
+        }
 
         Self { jobs }
     }

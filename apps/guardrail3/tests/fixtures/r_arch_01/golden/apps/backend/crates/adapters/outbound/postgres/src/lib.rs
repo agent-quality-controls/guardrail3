@@ -10,29 +10,21 @@ pub struct PostgresTaskRepo {
 
 impl PostgresTaskRepo {
     pub fn seeded(household_slug: impl Into<String>) -> Self {
+        let mut inbox = Vec::new();
+        if let Ok(task) = Task::try_new("dishwasher", "Empty the dishwasher", TaskKind::Chore, 1) {
+            inbox.push(task);
+        }
+        if let Ok(task) = Task::try_new("groceries", "Order next week's groceries", TaskKind::Errand, 3)
+        {
+            inbox.push(task.with_notes("Prefer curbside pickup before Wednesday soccer."));
+        }
+        if let Ok(task) = Task::try_new("forms", "Finish school trip forms", TaskKind::School, 5) {
+            inbox.push(task.carryover(2).pinned());
+        }
+
         Self {
             household_slug: household_slug.into(),
-            inbox: vec![
-                Task::try_new("dishwasher", "Empty the dishwasher", TaskKind::Chore, 1)
-                    .expect("seed task"),
-                Task::try_new(
-                    "groceries",
-                    "Order next week's groceries",
-                    TaskKind::Errand,
-                    3,
-                )
-                .expect("seed task")
-                .with_notes("Prefer curbside pickup before Wednesday soccer."),
-                Task::try_new(
-                    "forms",
-                    "Finish school trip forms",
-                    TaskKind::School,
-                    5,
-                )
-                .expect("seed task")
-                .carryover(2)
-                .pinned(),
-            ],
+            inbox,
             scheduled: Vec::new(),
         }
     }

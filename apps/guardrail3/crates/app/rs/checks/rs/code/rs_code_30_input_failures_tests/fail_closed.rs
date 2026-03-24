@@ -52,6 +52,9 @@ fn family_surfaces_source_parse_failures_with_exact_owned_hit_set() {
         .find(|result| result.id == "RS-CODE-30" && result.file.as_deref() == Some(source_rel))
         .expect("source parse failure result");
     assert_eq!(result.severity, Severity::Error);
+    assert_eq!(result.title, "code-family input failure");
+    assert_eq!(result.line, None);
+    assert!(!result.inventory);
     assert!(result.message.contains("Failed to parse Rust source file"));
 
     std::fs::remove_dir_all(&root).expect("remove temp tree");
@@ -116,6 +119,9 @@ fn family_surfaces_guardrail_policy_parse_failures_with_exact_owned_hit_set() {
         })
         .expect("guardrail parse failure result");
     assert_eq!(result.severity, Severity::Error);
+    assert_eq!(result.title, "code-family input failure");
+    assert_eq!(result.line, None);
+    assert!(!result.inventory);
     assert!(result.message.contains("Failed to parse guardrail3.toml"));
 
     std::fs::remove_dir_all(&root).expect("remove temp tree");

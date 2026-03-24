@@ -1,27 +1,12 @@
-use super::super::super::inputs::RustCodeFileInput;
-use super::super::super::parse::parse_rust_file;
-use super::super::check;
+use std::collections::BTreeSet;
+
+use super::super::super::test_support::{copy_fixture, files_for_rule, run_family};
 
 #[test]
-fn golden_file_without_crate_or_module_allow_has_no_hits() {
-    let content = r#"
-fn top_level() {}
+fn populated_golden_fixture_has_no_crate_or_module_allow_hits() {
+    let fixture = copy_fixture();
 
-mod nested {
-    pub fn helper() {}
-}
-"#;
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/lib.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: Some("library"),
-    };
-    let mut results = Vec::new();
+    let results = run_family(fixture.path());
 
-    check(&input, &mut results);
-
-    assert!(results.is_empty());
+    assert_eq!(files_for_rule(&results, "RS-CODE-01"), BTreeSet::new());
 }

@@ -131,6 +131,21 @@ These are the candidates that are universal enough to define without project-str
   - **Measured from:** the crate root (`Cargo.toml`) downward, within Rust source/module directories
   - **Why this qualifies:** thresholds are intentionally high enough to catch real sprawl rather than normal organization
 
+- String dispatch cap
+  - **Family:** `rs/code`
+  - **Shape:** source structural/quality rule
+  - **Severity:** `Error`
+  - **Universal contract:** one dispatch site should not have more than 10 string-literal branches
+  - **Apply to:**
+    - `match` expressions on one string-like expression
+    - `if` / `else if` chains comparing the same expression to string literals
+  - **Do not count:**
+    - wildcard/default arms
+    - non-string-literal guards
+  - **Initial exclusion:**
+    - test code
+  - **Why this qualifies:** the threshold is high enough that it catches stringly typed switch blobs rather than ordinary small routing
+
 ### Defer until architecture decisions are made
 
 These are plausible, but need more product framing before implementation.
@@ -158,12 +173,6 @@ These are plausible, but need more product framing before implementation.
   - **Shape:** source/API heuristic rule
   - **Likely severity:** `Warn`
   - **Why deferred:** high false-positive risk without type/context sophistication
-
-- String-based dispatch warning
-  - **Family:** `rs/code`
-  - **Shape:** source heuristic rule
-  - **Likely severity:** `Info` or `Warn`
-  - **Why deferred:** useful smell detector, but highly heuristic and easy to annoy with
 
 - Dependency pressure rules for libraries
   - **Family:** `rs/deps`
@@ -194,7 +203,8 @@ These are either too policy-heavy, too heuristic for current value, or already b
 3. add generic parameter count cap
 4. add direct dependency count cap
 5. add structural organization caps
-6. discuss the deferred policy-heavy candidates separately
+6. add string dispatch cap
+7. discuss the deferred policy-heavy candidates separately
 
 ## Concrete next planning targets
 
@@ -205,6 +215,7 @@ These are the ones we should turn into real rule specs first:
 - `RS-CODE-next`: generic parameter count cap (`> 6`, type/const only)
 - `RS-DEPS-next`: direct dependency count cap (`> 25`, unique direct dependency names)
 - `RS-CODE-next`: structural organization caps (depth `> 6`, dirs `> 12`, files `> 20`)
+- `RS-CODE-next`: string dispatch cap (`> 10` string-literal branches at one dispatch site)
 
 ## Already substantially covered
 
