@@ -1,4 +1,4 @@
-# RS-GARDE — Garde boundary validation checker (10 rules)
+# RS-GARDE — Garde boundary validation checker (13 rules)
 
 **Input:** Cargo.toml + clippy.toml + *.rs files
 **Parser:** TOML + syn AST
@@ -102,24 +102,34 @@ Severity note:
 | RS-GARDE-06 | Warn/Info | Additional deserialization method bans beyond serde_json/toml/yaml (see full list below). All deserialization entry points must go through `Validated<T>` wrapper. | Implemented |
 | RS-GARDE-07 | Error/Info | Manual `impl<'de> Deserialize<'de> for T` bypasses derive check. Scan for impl blocks implementing Deserialize trait — flag target type if it has non-primitive fields and doesn't also implement Validate. | Implemented |
 | RS-GARDE-08 | Error/Info | Enum derive inventory: enums with Deserialize/Parser/Args/FromRow and tuple/struct variants containing non-primitive fields must also derive Validate. Avoid false positives on C-like enums. | Implemented |
-| RS-GARDE-09 | Info | `sqlx::query_as!` macro bypasses derive check. Scan for `query_as!` macro invocations and flag as inventory item requiring manual review for validation. | Implemented |
+| RS-GARDE-09 | Info | `sqlx::query_as!` and `sqlx::query_as_unchecked!` bypass derive check. Scan macro invocations and flag them as inventory items requiring manual review for validation. | Implemented |
 | RS-GARDE-10 | Error | Garde-family input failures: unreadable/parsing-broken Rust sources or broken garde-family policy inputs must surface explicitly instead of being skipped. | Implemented |
+| RS-GARDE-11 | Error/Info | Validated boundary fields that require runtime validation must carry a meaningful field-level garde validator. Primitive-only fields, unvalidatable map/set/reference surfaces, and nested validated fields handled by `dive` are excluded. | Implemented |
+| RS-GARDE-12 | Error/Info | Nested validated fields must use `#[garde(dive)]` so recursive validation actually runs. Applies to validated nested types, not arbitrary custom types. | Implemented |
+| RS-GARDE-13 | Error/Info | If a field-level garde validator references `ctx`, the boundary type must declare `#[garde(context(...))]`. This makes context-driven validation explicit and prevents half-wired ctx usage. | Implemented |
 
 ## Legacy carry-forward from archived GARDE_GUARDRAILS.md
 
-The older top-level garde design note is being archived, but it still contains live Rust requirements that are not fully implemented yet. They remain active here:
+The older top-level garde design note is being archived, but it still contains live Rust design guidance that needs to be reconciled against the current checker contract. The remaining active interpretations are:
 
-- wrapper-based boundary enforcement is still missing as a first-class library surface:
-  - inbound wrappers such as `ValidatedJson<T>`, `ValidatedQuery<T>`, `ValidatedForm<T>`
-  - outbound validated wrapper such as `Validated<T>`
-- current enforcement is mostly:
+- wrapper-based boundary enforcement does not need a new garde-local source rule right now:
+  - the enforceable checker contract in this repo is still the clippy ban surface on raw extractors and raw deserialization
+  - wrapper types such as `ValidatedJson<T>`, `ValidatedQuery<T>`, `ValidatedForm<T>`, and `Validated<T>` remain application/library design guidance rather than a separate garde AST rule in guardrail3
+- current enforcement chain is:
   - clippy ban pressure on raw extractors / raw deserialization
   - source-level `Validate` inventory
   - manual bypass detection
-- field-level garde quality is still not enforced:
-  - no rule yet that checks boundary fields carry meaningful garde constraints
-  - no rule yet that checks nested validated fields use `#[garde(dive)]`
-  - no rule yet that checks context-driven validation surfaces where required
+  - field-level garde validator coverage
+  - nested `#[garde(dive)]` enforcement
+  - explicit `#[garde(context(...))]` enforcement when `ctx` is used
+- canonical clippy parity is now in better shape:
+  - the full `RS-GARDE-03` extractor set is generator-backed
+  - the full `RS-GARDE-06` deserialization method set is generator-backed
+  - the remaining active gaps are no longer about missing canonical ban entries
+- field-level garde quality is now explicitly enforced:
+  - `RS-GARDE-11` checks meaningful field-level garde constraints
+  - `RS-GARDE-12` checks nested validated fields use `#[garde(dive)]`
+  - `RS-GARDE-13` checks explicit `#[garde(context(...))]` when field validators reference `ctx`
 - expanded deserialization method coverage is now part of the canonical clippy baseline:
   - `RS-GARDE-06` and `RS-CLIPPY-04` parity tests now pin the expanded method set
   - service and library generated `clippy.toml` baselines now both include:
@@ -142,7 +152,7 @@ The older top-level garde design note is being archived, but it still contains l
     - `axum_extra::extract::Cbor`
     - `axum_extra::extract::MsgPack`
 
-So the garde family is implemented, but the full architectural enforcement chain described by the legacy doc is not complete yet.
+So the garde family now implements the enforceable AST-side contract from the legacy doc. The remaining wrapper material in that doc is product-pattern guidance carried by the clippy ban surface rather than a separate garde rule in this checker.
 
 Recent hardening note:
 - source-level multi-root attacks for `RS-GARDE-05/07/08/09` should use workspace roots or standalone package roots only

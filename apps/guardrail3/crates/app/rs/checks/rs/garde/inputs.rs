@@ -1,6 +1,6 @@
 use super::facts::{
-    DerivedBoundaryTypeFacts, GardeInputFailureFacts, GardeRootFacts, ManualDeserializeImplFacts,
-    QueryAsMacroFacts,
+    BoundaryFieldFacts, DerivedBoundaryTypeFacts, GardeInputFailureFacts, GardeRootFacts,
+    ManualDeserializeImplFacts, QueryAsMacroFacts,
 };
 
 pub struct GardeRootInput<'a> {
@@ -17,6 +17,10 @@ pub struct ManualDeserializeImplInput<'a> {
 
 pub struct QueryAsMacroInput<'a> {
     pub macro_use: &'a QueryAsMacroFacts,
+}
+
+pub struct BoundaryFieldInput<'a> {
+    pub field: &'a BoundaryFieldFacts,
 }
 
 pub struct GardeInputFailureInput<'a> {
@@ -44,6 +48,12 @@ impl<'a> ManualDeserializeImplInput<'a> {
 impl<'a> QueryAsMacroInput<'a> {
     pub const fn new(macro_use: &'a QueryAsMacroFacts) -> Self {
         Self { macro_use }
+    }
+}
+
+impl<'a> BoundaryFieldInput<'a> {
+    pub const fn new(field: &'a BoundaryFieldFacts) -> Self {
+        Self { field }
     }
 }
 

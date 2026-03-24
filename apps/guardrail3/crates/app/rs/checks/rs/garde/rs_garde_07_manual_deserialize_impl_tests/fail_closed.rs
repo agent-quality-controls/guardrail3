@@ -1,36 +1,14 @@
+use crate::app::rs::checks::rs::garde::test_support::{
+    canonical_clippy_toml, dir_entry, project_tree, temp_root,
+};
 use crate::domain::report::Severity;
-
-use super::super::inputs::ManualDeserializeImplInput;
-use super::super::test_support::{dir_entry, has_result, manual_impl, project_tree, temp_root};
-use super::check;
 
 #[test]
 fn errors_when_manual_deserialize_impl_needs_validate() {
-    let mut results = Vec::new();
-    check(
-        &ManualDeserializeImplInput::new(&manual_impl(true, false)),
-        &mut results,
-    );
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-GARDE-07");
-    assert_eq!(results[0].severity, Severity::Error);
-}
-
-#[test]
-fn skips_manual_deserialize_impl_when_validate_present() {
-    let mut results = Vec::new();
-    check(
-        &ManualDeserializeImplInput::new(&manual_impl(true, true)),
-        &mut results,
-    );
-    assert!(results.is_empty());
-}
-
-#[test]
-fn family_flags_manual_deserialize_impl_without_validate() {
-    let root = temp_root("rs-garde-07-family");
+    let root = temp_root("rs-garde-07-fail-closed");
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
+    let clippy_toml = canonical_clippy_toml();
     std::fs::create_dir_all(source_abs.parent().expect("parent")).expect("mkdir");
     std::fs::write(
         &source_abs,
@@ -70,28 +48,34 @@ members = []
 garde = { version = "0.22", features = ["derive"] }
 "#,
             ),
-            (
-                "clippy.toml",
-                "disallowed-methods = []\ndisallowed-types = []\n",
-            ),
+            ("clippy.toml", clippy_toml.as_str()),
             ("guardrail3.toml", "[profile]\nname = \"service\"\n"),
         ],
         root.clone(),
     );
 
-    let results = crate::app::rs::checks::rs::garde::check(&tree);
-    assert!(has_result(&results, "RS-GARDE-07", |result| {
-        result.severity == Severity::Error && result.file.as_deref() == Some(source_rel)
-    }));
+    let results: Vec<_> = crate::app::rs::checks::rs::garde::check(&tree)
+        .into_iter()
+        .filter(|result| result.id == "RS-GARDE-07")
+        .collect();
+    assert_eq!(results.len(), 1);
+    assert_eq!(results[0].severity, Severity::Error);
+    assert_eq!(results[0].file.as_deref(), Some(source_rel));
+    assert_eq!(results[0].line, Some(7));
+    assert_eq!(
+        results[0].title,
+        "manual Deserialize impl for `Input` without Validate"
+    );
 
     std::fs::remove_dir_all(root).expect("cleanup");
 }
 
 #[test]
-fn family_flags_aliased_deserialize_impl_without_validate() {
-    let root = temp_root("rs-garde-07-aliased-family");
+fn aliased_deserialize_impl() {
+    let root = temp_root("rs-garde-07-aliased");
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
+    let clippy_toml = canonical_clippy_toml();
     std::fs::create_dir_all(source_abs.parent().expect("parent")).expect("mkdir");
     std::fs::write(
         &source_abs,
@@ -131,19 +115,20 @@ members = []
 garde = { version = "0.22", features = ["derive"] }
 "#,
             ),
-            (
-                "clippy.toml",
-                "disallowed-methods = []\ndisallowed-types = []\n",
-            ),
+            ("clippy.toml", clippy_toml.as_str()),
             ("guardrail3.toml", "[profile]\nname = \"service\"\n"),
         ],
         root.clone(),
     );
 
-    let results = crate::app::rs::checks::rs::garde::check(&tree);
-    assert!(has_result(&results, "RS-GARDE-07", |result| {
-        result.severity == Severity::Error && result.file.as_deref() == Some(source_rel)
-    }));
+    let results: Vec<_> = crate::app::rs::checks::rs::garde::check(&tree)
+        .into_iter()
+        .filter(|result| result.id == "RS-GARDE-07")
+        .collect();
+    assert_eq!(results.len(), 1);
+    assert_eq!(results[0].severity, Severity::Error);
+    assert_eq!(results[0].file.as_deref(), Some(source_rel));
+    assert_eq!(results[0].line, Some(7));
 
     std::fs::remove_dir_all(root).expect("cleanup");
 }

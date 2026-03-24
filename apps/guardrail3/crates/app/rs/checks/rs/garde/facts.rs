@@ -60,6 +60,21 @@ pub struct QueryAsMacroFacts {
 }
 
 #[derive(Debug, Clone)]
+pub struct BoundaryFieldFacts {
+    pub rel_path: String,
+    pub line: usize,
+    pub boundary_name: String,
+    pub field_name: String,
+    pub field_type: String,
+    pub requires_field_validation: bool,
+    pub nested_validated: bool,
+    pub has_garde_dive: bool,
+    pub has_meaningful_garde_rule: bool,
+    pub uses_context: bool,
+    pub boundary_has_context: bool,
+}
+
+#[derive(Debug, Clone)]
 pub struct GardeInputFailureFacts {
     pub rel_path: String,
     pub message: String,
@@ -71,6 +86,7 @@ pub struct GardeFacts {
     pub struct_targets: Vec<DerivedBoundaryTypeFacts>,
     pub enum_targets: Vec<DerivedBoundaryTypeFacts>,
     pub manual_deserialize_impls: Vec<ManualDeserializeImplFacts>,
+    pub boundary_fields: Vec<BoundaryFieldFacts>,
     pub query_as_macros: Vec<QueryAsMacroFacts>,
     pub input_failures: Vec<GardeInputFailureFacts>,
 }
@@ -158,6 +174,7 @@ pub fn collect(tree: &ProjectTree) -> GardeFacts {
     let mut struct_targets = Vec::new();
     let mut enum_targets = Vec::new();
     let mut manual_deserialize_impls = Vec::new();
+    let mut boundary_fields = Vec::new();
     let mut query_as_macros = Vec::new();
     let mut global_type_validation_map = BTreeMap::<String, (bool, bool)>::new();
     let mut simple_type_validation_map = BTreeMap::<String, Vec<(bool, bool)>>::new();
@@ -211,6 +228,22 @@ pub fn collect(tree: &ProjectTree) -> GardeFacts {
         parsed_files.push((rel_path, parsed));
     }
 
+    let global_manual_validate_types: BTreeSet<_> = parsed_files
+        .iter()
+        .flat_map(|(_, parsed)| parsed.manual_validate_impls.iter().cloned())
+        .collect();
+    let mut simple_manual_validate_counts = BTreeMap::<String, usize>::new();
+    for type_name in &global_manual_validate_types {
+        let simple_name = type_name
+            .rsplit("::")
+            .next()
+            .unwrap_or(type_name.as_str())
+            .to_owned();
+        *simple_manual_validate_counts
+            .entry(simple_name)
+            .or_insert(0) += 1;
+    }
+
     for (rel_path, parsed) in parsed_files {
         for target in parsed.derived_types {
             let fact = DerivedBoundaryTypeFacts {
@@ -231,28 +264,13 @@ pub fn collect(tree: &ProjectTree) -> GardeFacts {
         }
 
         for manual_impl in parsed.manual_deserialize_impls {
-            let resolved = parsed
-                .type_validation_map
-                .get(&manual_impl.type_name)
-                .copied()
-                .or_else(|| {
-                    global_type_validation_map
-                        .get(&manual_impl.type_name)
-                        .copied()
-                })
-                .or_else(|| {
-                    let simple_name = manual_impl
-                        .type_name
-                        .rsplit("::")
-                        .next()
-                        .unwrap_or(manual_impl.type_name.as_str());
-                    let states = simple_type_validation_map.get(simple_name)?;
-                    if states.len() == 1 {
-                        states.first().copied()
-                    } else {
-                        None
-                    }
-                });
+            let resolved = resolve_validation_state(
+                std::slice::from_ref(&manual_impl.type_name),
+                &global_type_validation_map,
+                &simple_type_validation_map,
+                &global_manual_validate_types,
+                &simple_manual_validate_counts,
+            );
             let has_manual_validate = parsed
                 .manual_validate_impls
                 .contains(&manual_impl.type_name);
@@ -267,6 +285,45 @@ pub fn collect(tree: &ProjectTree) -> GardeFacts {
                 has_validate,
             });
         }
+
+        for field in parsed.boundary_fields {
+            let boundary_has_validate = field.boundary_has_validate_derive
+                || resolve_validation_state(
+                    std::slice::from_ref(&field.boundary_name),
+                    &global_type_validation_map,
+                    &simple_type_validation_map,
+                    &global_manual_validate_types,
+                    &simple_manual_validate_counts,
+                )
+                .is_some_and(|(_, has_validate)| has_validate);
+            if !boundary_has_validate {
+                continue;
+            }
+
+            let nested_validated = resolve_validation_state(
+                &field.candidate_type_names,
+                &global_type_validation_map,
+                &simple_type_validation_map,
+                &global_manual_validate_types,
+                &simple_manual_validate_counts,
+            )
+            .is_some_and(|(needs_validate, has_validate)| needs_validate && has_validate);
+
+            boundary_fields.push(BoundaryFieldFacts {
+                rel_path: rel_path.clone(),
+                line: field.line,
+                boundary_name: field.boundary_name,
+                field_name: field.field_name,
+                field_type: field.field_type,
+                requires_field_validation: field.requires_field_validation,
+                nested_validated,
+                has_garde_dive: field.has_garde_dive,
+                has_meaningful_garde_rule: field.has_meaningful_garde_rule,
+                uses_context: field.uses_context,
+                boundary_has_context: field.boundary_has_context,
+            });
+        }
+
         for macro_use in parsed.query_as_macros {
             query_as_macros.push(QueryAsMacroFacts {
                 rel_path: rel_path.clone(),
@@ -280,6 +337,7 @@ pub fn collect(tree: &ProjectTree) -> GardeFacts {
     struct_targets.sort_by(|a, b| a.rel_path.cmp(&b.rel_path).then(a.line.cmp(&b.line)));
     enum_targets.sort_by(|a, b| a.rel_path.cmp(&b.rel_path).then(a.line.cmp(&b.line)));
     manual_deserialize_impls.sort_by(|a, b| a.rel_path.cmp(&b.rel_path).then(a.line.cmp(&b.line)));
+    boundary_fields.sort_by(|a, b| a.rel_path.cmp(&b.rel_path).then(a.line.cmp(&b.line)));
     query_as_macros.sort_by(|a, b| a.rel_path.cmp(&b.rel_path).then(a.line.cmp(&b.line)));
     input_failures.sort_by(|a, b| a.rel_path.cmp(&b.rel_path).then(a.message.cmp(&b.message)));
 
@@ -288,9 +346,44 @@ pub fn collect(tree: &ProjectTree) -> GardeFacts {
         struct_targets,
         enum_targets,
         manual_deserialize_impls,
+        boundary_fields,
         query_as_macros,
         input_failures,
     }
+}
+
+fn resolve_validation_state(
+    candidate_names: &[String],
+    global_type_validation_map: &BTreeMap<String, (bool, bool)>,
+    simple_type_validation_map: &BTreeMap<String, Vec<(bool, bool)>>,
+    global_manual_validate_types: &BTreeSet<String>,
+    simple_manual_validate_counts: &BTreeMap<String, usize>,
+) -> Option<(bool, bool)> {
+    for candidate_name in candidate_names {
+        if let Some((has_non_primitive, has_validate_derive)) =
+            global_type_validation_map.get(candidate_name)
+        {
+            return Some((
+                *has_non_primitive,
+                *has_validate_derive || global_manual_validate_types.contains(candidate_name),
+            ));
+        }
+
+        let simple_name = candidate_name
+            .rsplit("::")
+            .next()
+            .unwrap_or(candidate_name.as_str());
+        if let Some(states) = simple_type_validation_map.get(simple_name) {
+            if states.len() == 1 {
+                return Some((
+                    states[0].0,
+                    states[0].1
+                        || simple_manual_validate_counts.get(simple_name).copied() == Some(1),
+                ));
+            }
+        }
+    }
+    None
 }
 
 fn collect_cargo_roots(
@@ -414,6 +507,7 @@ fn read_policy_map(
             .values()
             .flat_map(|root| root.workspace_members.iter().cloned()),
     );
+    let app_paths_include_root = app_paths.values().any(|rel_dir| rel_dir.is_empty());
 
     let mut map = BTreeMap::from([(
         String::new(),
@@ -422,17 +516,17 @@ fn read_policy_map(
         },
     )]);
 
-    for (app_name, app_dir) in app_paths {
+    for (app_name, app_dir) in &app_paths {
         let app_cfg = parsed
             .as_ref()
             .and_then(|config| config.rust.as_ref())
             .and_then(|rust| rust.apps.as_ref())
-            .and_then(|apps| apps.get(&app_name));
+            .and_then(|apps| apps.get(app_name));
         let garde_enabled = app_cfg
             .and_then(crate_checks)
             .and_then(|checks| checks.garde)
             .unwrap_or(default_garde);
-        let _ = map.insert(app_dir, PolicySettings { garde_enabled });
+        let _ = map.insert(app_dir.clone(), PolicySettings { garde_enabled });
     }
 
     if let Some(packages_cfg) = parsed
@@ -443,6 +537,9 @@ fn read_policy_map(
         let garde_enabled = crate_checks(packages_cfg)
             .and_then(|checks| checks.garde)
             .unwrap_or(default_garde);
+        if !app_paths_include_root {
+            let _ = map.insert(String::new(), PolicySettings { garde_enabled });
+        }
         for package_dir in standalone_package_roots {
             let _ = map.insert(package_dir.clone(), PolicySettings { garde_enabled });
         }
@@ -655,3 +752,7 @@ fn content_has_garde_dependency(parsed: &toml::Value) -> bool {
             .and_then(toml::Value::as_table)
             .is_some_and(|deps| deps.contains_key("garde"))
 }
+
+#[cfg(test)]
+#[path = "garde_facts_tests.rs"]
+mod tests;

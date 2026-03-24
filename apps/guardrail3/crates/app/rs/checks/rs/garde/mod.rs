@@ -13,6 +13,9 @@ mod rs_garde_07_manual_deserialize_impl;
 mod rs_garde_08_enum_derive_validate;
 mod rs_garde_09_query_as_inventory;
 mod rs_garde_10_input_failures;
+mod rs_garde_11_field_level_constraints;
+mod rs_garde_12_nested_validation_dive;
+mod rs_garde_13_context_validation_surface;
 
 #[cfg(test)]
 mod test_support;
@@ -22,8 +25,8 @@ use crate::domain::report::CheckResult;
 
 use self::facts::collect;
 use self::inputs::{
-    DerivedBoundaryTypeInput, GardeInputFailureInput, GardeRootInput, ManualDeserializeImplInput,
-    QueryAsMacroInput,
+    BoundaryFieldInput, DerivedBoundaryTypeInput, GardeInputFailureInput, GardeRootInput,
+    ManualDeserializeImplInput, QueryAsMacroInput,
 };
 
 pub fn check(tree: &ProjectTree) -> Vec<CheckResult> {
@@ -71,6 +74,13 @@ pub fn check(tree: &ProjectTree) -> Vec<CheckResult> {
 
     for macro_use in &facts.query_as_macros {
         rs_garde_09_query_as_inventory::check(&QueryAsMacroInput::new(macro_use), &mut results);
+    }
+
+    for field in &facts.boundary_fields {
+        let input = BoundaryFieldInput::new(field);
+        rs_garde_11_field_level_constraints::check(&input, &mut results);
+        rs_garde_12_nested_validation_dive::check(&input, &mut results);
+        rs_garde_13_context_validation_surface::check(&input, &mut results);
     }
 
     results

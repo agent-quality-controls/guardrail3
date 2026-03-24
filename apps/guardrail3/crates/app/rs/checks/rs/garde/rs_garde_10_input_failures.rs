@@ -17,5 +17,5 @@ pub fn check(input: &GardeInputFailureInput<'_>, results: &mut Vec<CheckResult>)
 }
 
 #[cfg(test)]
-#[path = "rs_garde_10_input_failures_tests.rs"]
+#[path = "rs_garde_10_input_failures_tests/mod.rs"]
 mod tests;

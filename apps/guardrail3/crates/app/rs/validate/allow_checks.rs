@@ -201,8 +201,8 @@ fn check_garde_skip_ast(
             results.push(CheckResult {
                 id: "R35".to_owned(),
                 severity: Severity::Error,
-                title: format!("`#[garde(skip)]` on non-primitive field `{}: {}`", info.field_name, info.field_type),
-                message: format!("`#[garde(skip)]` on non-primitive field `{}: {}`. Non-primitive fields must have a real garde validator (e.g., `#[garde(length(min=1))]` for strings). Only primitive types (bool, numeric) can use skip.", info.field_name, info.field_type),
+                title: format!("`#[garde(skip)]` on non-primitive {}", garde_skip_target_label(&info)),
+                message: format!("`#[garde(skip)]` on non-primitive {}. Non-primitive fields must have a real garde validator (e.g., `#[garde(length(min=1))]` for strings). Only primitive types (bool, numeric) can use skip.", garde_skip_target_label(&info)),
                 file: Some(path.display().to_string()),
                 line: Some(line_1based),
                 inventory: false,
@@ -212,12 +212,20 @@ fn check_garde_skip_ast(
                 id: "R34".to_owned(),
                 severity: Severity::Error,
                 title: "garde(skip) without reason".to_owned(),
-                message: format!("`#[garde(skip)]` on non-primitive field `{}: {}` bypasses runtime input validation without documenting why. Non-primitive fields must have a real garde validator (e.g., `#[garde(length(min=1))]` for strings). Only primitive types (bool, numeric) can use skip.", info.field_name, info.field_type),
+                message: format!("`#[garde(skip)]` on non-primitive {} bypasses runtime input validation without documenting why. Non-primitive fields must have a real garde validator (e.g., `#[garde(length(min=1))]` for strings). Only primitive types (bool, numeric) can use skip.", garde_skip_target_label(&info)),
                 file: Some(path.display().to_string()),
                 line: Some(line_1based),
                 inventory: false,
             });
         }
+    }
+}
+
+fn garde_skip_target_label(info: &ast_helpers::GardeSkipInfo) -> String {
+    if info.is_type_level {
+        format!("type `{}`", info.field_name)
+    } else {
+        format!("field `{}: {}`", info.field_name, info.field_type)
     }
 }
 

@@ -23,5 +23,5 @@ pub fn check(input: &QueryAsMacroInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_garde_09_query_as_inventory_tests.rs"]
+#[path = "rs_garde_09_query_as_inventory_tests/mod.rs"]
 mod tests;
