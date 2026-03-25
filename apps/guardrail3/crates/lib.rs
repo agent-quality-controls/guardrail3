@@ -5,8 +5,11 @@ use clap as _;
 use colored as _;
 use garde as _;
 use glob as _;
+use guardrail3_app_arch_helpers as _;
 use guardrail3_app_commands as _;
+use guardrail3_app_rs_ast as _;
 use guardrail3_app_rs_generate as _;
+use guardrail3_app_rs_legacy_validate as _;
 use guardrail3_shared_fs as _;
 use guardrail3_validation_model as _;
 use ignore as _;
@@ -16,10 +19,13 @@ use semver as _;
 use serde as _;
 use serde_json as _;
 use serde_yaml as _;
+use syn as _;
+use toml as _;
 use toml_edit as _;
 use tree_sitter as _;
 use tree_sitter_javascript as _;
 use tree_sitter_typescript as _;
+use walkdir as _;
 
 #[cfg(test)]
 use proptest as _;
@@ -37,7 +43,7 @@ pub mod domain {
 }
 
 pub mod app {
-    pub mod arch_helpers;
+    pub use guardrail3_app_arch_helpers as arch_helpers;
     pub use guardrail3_app_core as core;
     pub use guardrail3_app_hooks as hooks;
     pub mod rs;
