@@ -1,28 +1,3 @@
-// These crates are used by the lib, not directly by the binary.
-// Suppress false positives from unused_crate_dependencies.
-use colored as _;
-use garde as _;
-use glob as _;
-use ignore as _;
-use proc_macro2 as _;
-use quote as _;
-use semver as _;
-use serde as _;
-use serde_json as _;
-use serde_yaml as _;
-use syn as _;
-use toml as _;
-use toml_edit as _;
-use tree_sitter as _;
-use tree_sitter_javascript as _;
-use tree_sitter_typescript as _;
-use walkdir as _;
-
-#[cfg(test)]
-use proptest as _;
-#[cfg(test)]
-use tempfile as _;
-
 use clap::{CommandFactory, FromArgMatches};
 use garde::Validate;
 use guardrail3_adapters_inbound_cli::{
@@ -310,7 +285,7 @@ fn run_rs_validate(args: &RsValidateArgs) -> Report {
     let scoped_files = commands::validate::resolve_scoped_files_pub(args, &path);
     let normalized_scope =
         commands::validate::normalize_scoped_files(&path, scoped_files.as_deref());
-    match rs::runtime::run(
+    match rs::run(
         &fs,
         &path,
         normalized_scope.as_ref(),
