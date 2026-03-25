@@ -45,7 +45,6 @@ pub mod domain {
 }
 
 pub mod app {
-    pub use guardrail3_app_arch_helpers as arch_helpers;
     pub use guardrail3_app_core as core;
     pub use guardrail3_app_hooks as hooks;
     pub mod rs;
