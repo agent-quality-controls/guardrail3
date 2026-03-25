@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 use std::path::Path;
 
 use crate::domain::report::{CheckResult, Severity};
-use crate::ports::outbound::{FileSystem, ToolChecker};
+use guardrail3_outbound_traits::{FileSystem, ToolChecker};
 
 /// Run all repo-level release checks (R-REL-01 through R-REL-08).
 pub fn check_repo_level(

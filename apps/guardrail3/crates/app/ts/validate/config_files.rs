@@ -8,7 +8,7 @@ use super::jscpd_check;
 use super::npmrc_check;
 use super::package_check;
 use super::tsconfig_check;
-use crate::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::FileSystem;
 pub fn check(fs: &dyn FileSystem, path: &Path, crawl: &CrawlResult) -> Vec<CheckResult> {
     let mut results = Vec::new();
 

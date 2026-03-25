@@ -159,7 +159,7 @@ pub fn check_direct_fs_usage(
             severity: Severity::Error,
             title: "Direct std::fs import".to_owned(),
             message: format!(
-                "Direct `use std::fs` import found: `{trimmed}`. All filesystem operations must go through the centralized fs module (src/fs.rs) to ensure consistent error handling, testability, and auditability. Replace with `use crate::fs::*` functions."
+                "Direct `use std::fs` import found: `{trimmed}`. All filesystem operations must go through the centralized fs module (src/fs.rs) to ensure consistent error handling, testability, and auditability. Replace with `use guardrail3_shared_fs::*` functions."
             ),
             file: Some(path.display().to_string()),
             line: Some(line_num),
@@ -185,7 +185,7 @@ pub fn check_direct_fs_usage(
             id: "R58".to_owned(),
             severity: Severity::Error,
             title: "Direct std::fs call".to_owned(),
-            message: format!("Direct `std::fs::*` call found: `{trimmed}`. All filesystem operations must go through the centralized fs module (src/fs.rs) to ensure consistent error handling, testability, and auditability. Replace with the equivalent `crate::fs::*` function."),
+            message: format!("Direct `std::fs::*` call found: `{trimmed}`. All filesystem operations must go through the centralized fs module (src/fs.rs) to ensure consistent error handling, testability, and auditability. Replace with the equivalent `guardrail3_shared_fs::*` function."),
             file: Some(path.display().to_string()),
             line: Some(line_num),
             inventory: false,

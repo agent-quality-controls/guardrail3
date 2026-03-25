@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use crate::domain::report::{CheckResult, Severity};
-use crate::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::FileSystem;
 
 use super::eslint_parser::{self, EslintConfig};
 use super::eslint_rule_infra::{RuleDef, check_eslint_rule, check_eslint_rule_presence};

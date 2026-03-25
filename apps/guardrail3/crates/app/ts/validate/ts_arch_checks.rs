@@ -5,7 +5,7 @@ use walkdir::WalkDir;
 use super::source_scan::is_excluded_ts_dir;
 use crate::app::arch_helpers;
 use crate::domain::report::{CheckResult, Severity, TsAppContext};
-use crate::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::FileSystem;
 
 const ID: &str = "T-ARCH-01";
 const ENTITY: &str = "TS app";

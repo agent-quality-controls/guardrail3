@@ -3,7 +3,7 @@ use std::path::Path;
 use crate::domain::report::{CheckResult, Severity};
 
 use super::ast_helpers;
-use crate::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::FileSystem;
 
 /// Prefix constant used in R30-R31 messages.
 const CRATE_ALLOW_PREFIX: &str = "#![allow(";

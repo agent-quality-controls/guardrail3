@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use crate::domain::report::{CheckResult, Severity};
-use crate::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::FileSystem;
 
 /// Rule 12: `apps/{name}/src/` is banned — code must be in `crates/`.
 /// Uses metadata() to detect src/ existence (catches empty dirs too).

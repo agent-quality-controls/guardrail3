@@ -14,7 +14,7 @@ pub mod helpers;
 use std::path::Path;
 
 use crate::domain::report::CheckResult;
-use crate::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::FileSystem;
 
 /// Run all RS-ARCH-01 structural checks.
 ///

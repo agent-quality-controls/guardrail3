@@ -24,7 +24,7 @@ use std::path::Path;
 use crate::app::core::crawl::CrawlResult;
 use crate::domain::config::types::GuardrailConfig;
 use crate::domain::report::{Report, Section, TsAppContext, TsAppType, TsCheckCategories};
-use crate::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::FileSystem;
 
 #[allow(clippy::too_many_lines)] // reason: TS validation orchestrator wires all check modules
 pub fn run(

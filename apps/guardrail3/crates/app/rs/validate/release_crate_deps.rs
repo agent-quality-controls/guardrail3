@@ -1,7 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use crate::domain::report::{CheckResult, Severity};
-use crate::ports::outbound::ToolChecker;
+use guardrail3_outbound_traits::ToolChecker;
 
 use super::release_checks::CrateInfo;
 

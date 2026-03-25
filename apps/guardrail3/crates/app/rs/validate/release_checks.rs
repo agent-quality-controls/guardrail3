@@ -3,7 +3,7 @@ use std::path::Path;
 
 use crate::app::core::discover::ProjectInfo;
 use crate::domain::report::{CheckResult, Severity};
-use crate::ports::outbound::{FileSystem, ToolChecker};
+use guardrail3_outbound_traits::{FileSystem, ToolChecker};
 
 /// Information about a single discovered crate.
 #[derive(Debug, Clone)]

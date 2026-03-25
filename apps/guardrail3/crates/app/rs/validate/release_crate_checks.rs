@@ -5,7 +5,7 @@ use crate::domain::report::{CheckResult, Severity};
 
 use super::release_checks::CrateInfo;
 use super::release_crate_deps;
-use crate::ports::outbound::{FileSystem, ToolChecker};
+use guardrail3_outbound_traits::{FileSystem, ToolChecker};
 
 /// Run all per-crate checks on a single publishable crate.
 pub fn check_per_crate(

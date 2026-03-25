@@ -5,7 +5,7 @@ use walkdir::WalkDir;
 use super::ast_helpers;
 use super::source_scan::is_excluded_ts_dir;
 use crate::domain::report::{CheckResult, Severity};
-use crate::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::FileSystem;
 
 /// Run all TypeScript test quality checks.
 pub fn check(fs: &dyn FileSystem, path: &Path) -> Vec<CheckResult> {

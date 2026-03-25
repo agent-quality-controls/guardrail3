@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 use std::path::Path;
 
 use crate::domain::report::{CheckResult, Severity};
-use crate::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::FileSystem;
 
 /// Result of scanning for unvalidated input structs: (count with validate, missing struct names).
 pub type UnvalidatedInputResult = (usize, Vec<String>);

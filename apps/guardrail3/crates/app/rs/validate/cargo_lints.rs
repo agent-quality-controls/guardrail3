@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use crate::domain::report::{CheckResult, Severity};
-use crate::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::FileSystem;
 
 struct LintExpectation {
     name: &'static str,

@@ -4,7 +4,7 @@ use crate::domain::report::{CheckResult, Severity};
 
 use super::release_checks::CrateInfo;
 use super::release_repo_checks::read_workflow_files;
-use crate::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::FileSystem;
 /// Run binary-specific checks (R-BIN-01 through R-BIN-03).
 pub fn check_binary(
     fs: &dyn FileSystem,

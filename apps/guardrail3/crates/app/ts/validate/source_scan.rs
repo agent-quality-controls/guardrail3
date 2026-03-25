@@ -5,7 +5,7 @@ use walkdir::WalkDir;
 use super::ast_helpers;
 use super::ts_comment_checks;
 use crate::domain::report::{CheckResult, Severity};
-use crate::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::FileSystem;
 
 pub fn check(
     fs: &dyn FileSystem,

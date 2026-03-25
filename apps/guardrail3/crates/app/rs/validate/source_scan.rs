@@ -7,7 +7,7 @@ use crate::domain::report::CheckResult;
 use super::allow_checks;
 use super::code_quality_checks;
 use super::structure_checks;
-use crate::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::FileSystem;
 
 /// A line number (0-based) paired with its trimmed content.
 pub type NumberedLine = (usize, String);

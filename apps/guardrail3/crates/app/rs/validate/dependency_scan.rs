@@ -1,5 +1,5 @@
 use crate::domain::report::{CheckResult, Severity};
-use crate::ports::outbound::ToolChecker;
+use guardrail3_outbound_traits::ToolChecker;
 
 pub fn check(tc: &dyn ToolChecker) -> Vec<CheckResult> {
     let mut results = Vec::new();

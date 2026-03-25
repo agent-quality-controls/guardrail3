@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use crate::domain::report::{CheckResult, Severity};
-use crate::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::FileSystem;
 
 /// i18n libraries to detect in package.json dependencies.
 const I18N_LIBRARIES: &[&str] = &["next-intl", "react-intl", "i18next", "react-i18next"];

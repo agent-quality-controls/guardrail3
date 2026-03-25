@@ -3,7 +3,7 @@
 use std::path::{Path, PathBuf};
 
 use crate::domain::report::{CheckResult, Severity};
-use crate::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::FileSystem;
 
 type JsonMap = serde_json::Map<String, serde_json::Value>;
 

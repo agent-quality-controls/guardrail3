@@ -4,7 +4,7 @@ use std::path::Path;
 
 use crate::app::arch_helpers;
 use crate::domain::report::CheckResult;
-use crate::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::FileSystem;
 
 const ID: &str = "R-ARCH-01";
 const ENTITY: &str = "Service";
