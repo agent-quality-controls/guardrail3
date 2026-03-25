@@ -259,6 +259,10 @@ pub(super) fn span_line(span: proc_macro2::Span) -> usize {
     span.start().line
 }
 
+#[cfg(test)]
+#[path = "ast_helpers_tests.rs"]
+mod tests;
+
 /// Check if an attribute is `#[allow(clippy::X)]` where X matches the given lint name.
 fn has_allow_lint(attr: &syn::Attribute, lint_name: &str) -> bool {
     if !attr.path().is_ident("allow") {

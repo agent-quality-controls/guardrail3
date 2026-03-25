@@ -21,18 +21,12 @@ use tree_sitter_typescript as _;
 use walkdir as _;
 #[path = "unit/allow_checks_test.rs"]
 mod allow_checks_test;
-#[path = "unit/ast_helpers_test.rs"]
-mod ast_helpers_test;
-#[path = "unit/ast_visitors_test.rs"]
-mod ast_visitors_test;
 #[path = "unit/code_quality_checks_test.rs"]
 mod code_quality_checks_test;
 #[path = "unit/deny_inventory_test.rs"]
 mod deny_inventory_test;
 #[path = "unit/dependency_allowlist_test.rs"]
 mod dependency_allowlist_test;
-#[path = "unit/report_test.rs"]
-mod report_test;
 #[path = "unit/rs_arch_01/mod.rs"]
 mod rs_arch_01;
 #[path = "unit/rs_structure_checks_test.rs"]
