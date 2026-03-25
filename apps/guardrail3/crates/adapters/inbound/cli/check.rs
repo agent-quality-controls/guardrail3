@@ -1,6 +1,7 @@
 use std::path::Path;
 
 use crate::adapters::inbound::cli::generate;
+use guardrail3_app_commands::command_ids::RS_GENERATE;
 
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
 pub fn run(path: &str) {
@@ -33,7 +34,7 @@ pub fn run(path: &str) {
         println!("All generated files are current.");
     } else {
         println!();
-        println!("{stale_count} file(s) need regeneration. Run: guardrail3 generate");
+        println!("{stale_count} file(s) need regeneration. Run: {RS_GENERATE}");
         std::process::exit(1);
     }
 }

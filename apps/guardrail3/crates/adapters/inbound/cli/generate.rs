@@ -10,6 +10,7 @@ use std::path::Path;
 use crate::adapters::inbound::cli::cli::GenerateArgs;
 use crate::domain::config;
 use crate::domain::modules::{canonical, cspell, eslint, stylelint};
+use guardrail3_app_commands::command_ids::{RS_INIT, RS_SHOW_MODULE};
 
 /// A (`relative_path`, `content`) pair for a generated file.
 type GeneratedPair = (String, String);
@@ -37,7 +38,7 @@ pub fn run(args: &GenerateArgs) {
             "Error: guardrail3.toml not found or invalid at {}",
             project_path.display()
         );
-        eprintln!("Run 'guardrail3 init' to create one.");
+        eprintln!("Run '{RS_INIT}' to create one.");
         std::process::exit(1);
     };
 
@@ -75,7 +76,7 @@ pub fn run(args: &GenerateArgs) {
         println!();
         println!("NOTE: Add these workspace lints to your Cargo.toml manually");
         println!("(guardrail3 does not modify Cargo.toml):");
-        println!("  guardrail3 show-module canonical/cargo-lints");
+        println!("  {RS_SHOW_MODULE} canonical/cargo-lints");
     }
 }
 
