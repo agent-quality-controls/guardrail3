@@ -21,3 +21,8 @@ semver = "1"
 serde_yaml = "0.9"
 syn = { version = "2", features = ["full", "parsing", "visit"] }
 toml = "0.8"
+
+[dev-dependencies]
+guardrail3_adapters_outbound_fs = { package = "guardrail3-adapters-outbound-fs", path = "../../../../adapters/outbound/fs" }
+guardrail3_adapters_outbound_tool_runner = { package = "guardrail3-adapters-outbound-tool-runner", path = "../../../../adapters/outbound/tool-runner" }
+tempfile = "3"

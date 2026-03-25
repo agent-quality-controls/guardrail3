@@ -1,0 +1,89 @@
+use std::collections::BTreeSet;
+
+use super::super::super::dependency_facts::Layer;
+use super::super::super::inputs::CycleHexarchInput;
+use super::super::super::test_support::{dependency_facts, dir_entry, project_tree};
+use super::super::check;
+
+#[test]
+fn same_layer_cycle_is_reported_once_even_with_mixed_layer_cycle_present() {
+    let tree = project_tree(
+        vec![
+            ("", dir_entry(&["apps"], &[])),
+            ("apps", dir_entry(&["api"], &[])),
+            ("apps/api", dir_entry(&["crates"], &["Cargo.toml"])),
+            (
+                "apps/api/crates",
+                dir_entry(&["domain", "app", "ports"], &[]),
+            ),
+            ("apps/api/crates/domain", dir_entry(&["a", "b", "c"], &[])),
+            ("apps/api/crates/domain/a", dir_entry(&[], &["Cargo.toml"])),
+            ("apps/api/crates/domain/b", dir_entry(&[], &["Cargo.toml"])),
+            ("apps/api/crates/domain/c", dir_entry(&[], &["Cargo.toml"])),
+            ("apps/api/crates/app", dir_entry(&["core"], &[])),
+            ("apps/api/crates/app/core", dir_entry(&[], &["Cargo.toml"])),
+            ("apps/api/crates/ports", dir_entry(&["repo"], &[])),
+            (
+                "apps/api/crates/ports/repo",
+                dir_entry(&[], &["Cargo.toml"]),
+            ),
+        ],
+        vec![
+            (
+                "apps/api/Cargo.toml",
+                "[workspace]\nmembers = [\"crates/domain/a\", \"crates/domain/b\", \"crates/domain/c\", \"crates/app/core\", \"crates/ports/repo\"]\n",
+            ),
+            (
+                "apps/api/crates/domain/a/Cargo.toml",
+                "[package]\nname = \"api-domain-a\"\n[dependencies]\napi-domain-b = { path = \"../b\" }\n",
+            ),
+            (
+                "apps/api/crates/domain/b/Cargo.toml",
+                "[package]\nname = \"api-domain-b\"\n[dependencies]\napi-domain-c = { path = \"../c\" }\n",
+            ),
+            (
+                "apps/api/crates/domain/c/Cargo.toml",
+                "[package]\nname = \"api-domain-c\"\n[dependencies]\napi-domain-a = { path = \"../a\" }\n",
+            ),
+            (
+                "apps/api/crates/app/core/Cargo.toml",
+                "[package]\nname = \"api-app-core\"\n[dependencies]\napi-ports-repo = { path = \"../../ports/repo\" }\n",
+            ),
+            (
+                "apps/api/crates/ports/repo/Cargo.toml",
+                "[package]\nname = \"api-ports-repo\"\n[dependencies]\napi-app-core = { path = \"../../app/core\" }\n",
+            ),
+        ],
+    );
+
+    let facts = dependency_facts(&tree);
+    let mut results = Vec::new();
+    for cycle in &facts.cycles {
+        check(&CycleHexarchInput::new(cycle), &mut results);
+    }
+
+    assert_eq!(
+        facts.cycles.len(),
+        1,
+        "expected only the same-layer domain cycle to survive collector filtering: {facts:#?}"
+    );
+    assert_eq!(facts.cycles[0].layer, Layer::Domain);
+    assert_eq!(
+        results.len(),
+        1,
+        "expected exactly one rule-19 result after collector filtering: {results:#?}"
+    );
+
+    let actual_titles = results
+        .iter()
+        .map(|result| result.title.clone())
+        .collect::<BTreeSet<_>>();
+    let expected_titles = ["same-layer domain dependency cycle".to_owned()]
+        .into_iter()
+        .collect::<BTreeSet<_>>();
+
+    assert_eq!(
+        actual_titles, expected_titles,
+        "unexpected cycle hit set: {results:#?}"
+    );
+}
