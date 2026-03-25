@@ -1,4 +1,4 @@
-use crate::ports::outbound::ToolChecker;
+use guardrail3_outbound_traits::ToolChecker;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -9,8 +9,8 @@ use super::hook_script_checks::{
     inventory_scripts,
 };
 use super::tool_checks::{check_duplication_tools, check_required_tools};
-use crate::domain::report::{CheckResult, Severity};
-use crate::ports::outbound::FileSystem;
+use guardrail3_domain_report::{CheckResult, Severity};
+use guardrail3_outbound_traits::FileSystem;
 
 pub fn check_hooks(
     fs: &dyn FileSystem,
@@ -283,7 +283,6 @@ fn check_hooks_path(path: &Path, results: &mut Vec<CheckResult>) {
 fn check_permissions(fs: &dyn FileSystem, file_path: &Path, results: &mut Vec<CheckResult>) {
     #[cfg(unix)]
     {
-        use std::os::unix::fs::PermissionsExt;
         match fs.metadata(file_path) {
             Some(meta) => {
                 let mode = meta.permissions().mode();

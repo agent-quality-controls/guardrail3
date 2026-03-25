@@ -1,9 +1,11 @@
 use std::path::Path;
 
-use crate::app::core::crawl::CrawlResult;
-use crate::domain::report::ValidateDomains;
-use crate::domain::report::{Report, Section};
+use guardrail3_app_core::crawl::CrawlResult;
+use guardrail3_app_core::project_walker::walk_project;
+use guardrail3_domain_report::ValidateDomains;
+use guardrail3_domain_report::{Report, Section};
 
+use super::check;
 use super::deploy_checks;
 use super::hook_checks;
 use guardrail3_outbound_traits::{FileSystem, ToolChecker};
@@ -18,8 +20,8 @@ pub fn run(
     crawl: &CrawlResult,
 ) -> Report {
     if has_rust {
-        let tree = crate::app::core::project_walker::walk_project(fs, path);
-        let hook_results = crate::app::rs::checks::hooks::check(fs, path, &tree, tc);
+        let tree = walk_project(fs, path);
+        let hook_results = check(fs, path, &tree, tc);
         let mut report = Report::new(path.display().to_string(), vec!["Rust".to_owned()]);
         report.add_section(Section {
             name: "Hook checks".to_owned(),
