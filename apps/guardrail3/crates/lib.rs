@@ -35,6 +35,8 @@ use tempfile as _;
 use guardrail3_adapters_outbound_fs as _;
 use guardrail3_adapters_outbound_report as _;
 use guardrail3_adapters_outbound_tool_runner as _;
+use guardrail3_domain_project_tree as _;
+use guardrail3_outbound_traits as _;
 
 pub mod domain {
     pub use guardrail3_domain_config as config;
