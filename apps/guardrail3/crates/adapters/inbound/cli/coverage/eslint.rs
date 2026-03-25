@@ -10,7 +10,7 @@
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
-use crate::app::core::crawl::CrawlResult;
+use guardrail3_app_core::crawl::CrawlResult;
 
 use super::engine::{self, CoverageTool};
 
@@ -34,7 +34,7 @@ impl CoverageTool for EslintCoverage {
     }
 
     fn parse_details(&self, config_path: &Path) -> serde_json::Value {
-        let lines = crate::fs::read_file(config_path).map_or(0, |c| c.lines().count());
+        let lines = guardrail3_shared_fs::read_file(config_path).map_or(0, |c| c.lines().count());
         serde_json::json!({"lines": lines})
     }
 

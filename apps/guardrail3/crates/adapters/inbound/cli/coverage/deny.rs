@@ -8,7 +8,7 @@
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
-use crate::app::core::crawl::CrawlResult;
+use guardrail3_app_core::crawl::CrawlResult;
 use guardrail3_app_rs_family_deny::expected_ban_names;
 
 use super::engine::{self, CoverageTool};

@@ -1,12 +1,20 @@
 #![recursion_limit = "2048"]
 //! guardrail3 — composable code guardrails for Rust and TypeScript projects.
 
+use clap as _;
 use colored as _;
+use garde as _;
 use glob as _;
+use guardrail3_app_commands as _;
+use guardrail3_app_rs_generate as _;
+use guardrail3_shared_fs as _;
+use guardrail3_validation_model as _;
 use ignore as _;
 use proc_macro2 as _;
 use quote as _;
 use semver as _;
+use serde as _;
+use serde_json as _;
 use serde_yaml as _;
 use toml_edit as _;
 use tree_sitter as _;
@@ -38,7 +46,7 @@ pub mod app {
 
 pub mod adapters {
     pub mod inbound {
-        pub mod cli;
+        pub use guardrail3_adapters_inbound_cli as cli;
     }
     pub mod outbound {
         pub use guardrail3_adapters_outbound_fs as fs;

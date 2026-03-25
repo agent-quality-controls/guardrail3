@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 use std::path::Path;
 
-use crate::adapters::inbound::cli::generate;
+use crate::generate;
 use guardrail3_app_rs_generate::generate_rust_expected;
 
 /// A (`relative_path`, `content`) pair for a generated file.
