@@ -6,8 +6,8 @@
 
 use std::path::Path;
 
-use crate::domain::report::{CheckResult, Severity};
-use crate::ports::outbound::FileSystem;
+use guardrail3_domain_report::{CheckResult, Severity};
+use guardrail3_outbound_traits::FileSystem;
 
 /// List subdirectory names in a directory.
 pub fn list_dir_names(fs: &dyn FileSystem, dir: &Path) -> Vec<String> {
@@ -170,7 +170,7 @@ pub fn check_container_not_empty(
     results: &mut Vec<CheckResult>,
 ) {
     if fs.metadata(dir).is_none() {
-        return; // missing dir already reported
+        return;
     }
 
     let dir_names = list_dir_names(fs, dir);
@@ -198,11 +198,8 @@ pub fn check_container_not_empty(
             line: None,
             inventory: false,
         });
-        // Do NOT call check_loose_files here — the empty-container error
-        // already lists the offending files. Double-fire avoided.
         return;
     }
 
-    // Container has subdirs — check for loose files alongside them
     check_loose_files(fs, name, dir, label, id, entity, results);
 }

@@ -1,3 +1,3 @@
 pub mod checks;
 pub use guardrail3_app_rs_runtime as runtime;
-pub mod validate;
+pub use guardrail3_app_rs_legacy_validate as validate;

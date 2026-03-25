@@ -12,9 +12,11 @@ members = [
     "crates/adapters/outbound/report",
     "crates/adapters/outbound/tool-runner",
     "crates/shared/fs",
+    "crates/app/arch-helpers",
     "crates/app/commands",
     "crates/app/core",
     "crates/app/rs",
+    "crates/app/rs/validate",
     "crates/app/rs/ast",
     "crates/app/rs/generate",
     "crates/app/hooks",
@@ -128,11 +130,13 @@ guardrail3_adapters_inbound_cli = { package = "guardrail3-adapters-inbound-cli",
 guardrail3_adapters_outbound_fs = { package = "guardrail3-adapters-outbound-fs", path = "crates/adapters/outbound/fs" }
 guardrail3_adapters_outbound_report = { package = "guardrail3-adapters-outbound-report", path = "crates/adapters/outbound/report" }
 guardrail3_shared_fs = { package = "guardrail3-shared-fs", path = "crates/shared/fs" }
+guardrail3_app_arch_helpers = { package = "guardrail3-app-arch-helpers", path = "crates/app/arch-helpers" }
 guardrail3_app_commands = { package = "guardrail3-app-commands", path = "crates/app/commands" }
 guardrail3_adapters_outbound_tool_runner = { package = "guardrail3-adapters-outbound-tool-runner", path = "crates/adapters/outbound/tool-runner" }
 guardrail3_app_core = { package = "guardrail3-app-core", path = "crates/app/core" }
 guardrail3_app_hooks = { package = "guardrail3-app-hooks", path = "crates/app/hooks" }
 guardrail3_app_rs_runtime = { package = "guardrail3-app-rs-runtime", path = "crates/app/rs" }
+guardrail3_app_rs_legacy_validate = { package = "guardrail3-app-rs-legacy-validate", path = "crates/app/rs/validate" }
 guardrail3_app_rs_ast = { package = "guardrail3-app-rs-ast", path = "crates/app/rs/ast" }
 guardrail3_app_rs_generate = { package = "guardrail3-app-rs-generate", path = "crates/app/rs/generate" }
 guardrail3_app_ts = { package = "guardrail3-app-ts", path = "crates/app/ts" }
