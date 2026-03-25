@@ -1,36 +1,65 @@
-use glob as _;
-use guardrail3_domain_project_tree as _;
-use guardrail3_outbound_traits as _;
-use proc_macro2 as _;
-use quote as _;
-use semver as _;
-use serde_yaml as _;
-use syn as _;
-use toml as _;
+mod discover;
+mod facts;
+mod inputs;
+mod lint_support;
+mod rs_cargo_01_workspace_lints;
+mod rs_cargo_02_lint_levels;
+mod rs_cargo_03_allow_inventory;
+mod rs_cargo_04_lint_inheritance;
+mod rs_cargo_05_workspace_metadata;
+mod rs_cargo_06_no_weakened_overrides;
+mod rs_cargo_07_priority_order;
+mod rs_cargo_08_resolver;
+mod rs_cargo_09_member_edition_drift;
+mod rs_cargo_10_missing_member_cargo;
+mod rs_cargo_11_disallowed_macros_deny;
+mod rs_cargo_12_unapproved_allow_entries;
+mod rs_cargo_13_member_local_allows_forbidden;
+mod rs_cargo_14_input_failures;
+mod rs_cargo_15_rust_version_policy;
 
-pub mod domain {
-    pub use guardrail3_domain_config as config;
-    pub use guardrail3_domain_modules as modules;
-    pub use guardrail3_domain_report as report;
-}
+#[cfg(test)]
+mod test_support;
 
-#[doc(hidden)]
-#[path = "../../../checks/hooks/shell.rs"]
-pub mod hook_shell;
+use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_domain_report::CheckResult;
 
-pub mod app {
-    pub use guardrail3_app_core as core;
+use self::discover::collect;
+use self::inputs::{
+    InputFailureCargoInput, MissingMemberCargoInput, PolicyRootCargoInput,
+    WorkspaceMemberCargoInput,
+};
 
-    pub mod rs {
-        pub mod checks {
-            pub mod hooks {
-                pub use crate::hook_shell as shell;
-            }
-        }
+pub fn check(tree: &ProjectTree) -> Vec<CheckResult> {
+    let facts = collect(tree);
+    let mut results = Vec::new();
+
+    for input in InputFailureCargoInput::from_facts(&facts) {
+        rs_cargo_14_input_failures::check(&input, &mut results);
     }
+
+    for input in PolicyRootCargoInput::from_facts(&facts) {
+        rs_cargo_01_workspace_lints::check(&input, &mut results);
+        rs_cargo_02_lint_levels::check(&input, &mut results);
+        rs_cargo_03_allow_inventory::check(&input, &mut results);
+        rs_cargo_05_workspace_metadata::check(&input, &mut results);
+        rs_cargo_07_priority_order::check(&input, &mut results);
+        rs_cargo_08_resolver::check(&input, &mut results);
+        rs_cargo_11_disallowed_macros_deny::check(&input, &mut results);
+        rs_cargo_12_unapproved_allow_entries::check(&input, &mut results);
+        rs_cargo_15_rust_version_policy::check(&input, &mut results);
+    }
+
+    for input in WorkspaceMemberCargoInput::from_facts(&facts) {
+        rs_cargo_04_lint_inheritance::check(&input, &mut results);
+        rs_cargo_06_no_weakened_overrides::check(&input, &mut results);
+        rs_cargo_09_member_edition_drift::check(&input, &mut results);
+        rs_cargo_13_member_local_allows_forbidden::check(&input, &mut results);
+    }
+
+    for input in MissingMemberCargoInput::from_facts(&facts) {
+        rs_cargo_10_missing_member_cargo::check(&input, &mut results);
+    }
+
+    results
 }
-
-#[path = "../../../checks/rs/cargo/mod.rs"]
-mod inner;
-
-pub use inner::*;

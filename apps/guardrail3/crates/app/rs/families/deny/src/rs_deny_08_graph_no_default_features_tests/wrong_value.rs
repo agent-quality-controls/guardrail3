@@ -1,0 +1,41 @@
+use guardrail3_domain_report::Severity;
+
+use super::super::super::inputs::ConfigDenyInput;
+use super::super::super::test_support::{
+    canonical_deny_toml_service, config_facts, remove_section_key, set_section_bool,
+};
+use super::super::check;
+
+#[test]
+fn errors_when_no_default_features_is_missing_or_true() {
+    let missing = config_facts(&remove_section_key(
+        &canonical_deny_toml_service(),
+        "graph",
+        "no-default-features",
+    ));
+    let wrong = config_facts(&set_section_bool(
+        &canonical_deny_toml_service(),
+        "graph",
+        "no-default-features",
+        true,
+    ));
+
+    for config in [&missing, &wrong] {
+        let input = ConfigDenyInput { config };
+        let mut results = Vec::new();
+
+        check(&input, &mut results);
+
+        assert_eq!(results.len(), 1);
+        let result = &results[0];
+        assert_eq!(result.id, "RS-DENY-08");
+        assert_eq!(result.severity, Severity::Error);
+        assert_eq!(result.title, "graph no-default-features must be false");
+        assert_eq!(
+            result.message,
+            "`deny.toml` must set `[graph].no-default-features = false`."
+        );
+        assert_eq!(result.file.as_deref(), Some("deny.toml"));
+        assert!(!result.inventory);
+    }
+}
