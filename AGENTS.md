@@ -97,10 +97,11 @@ The repo is no longer a single `src/...` tree. The real layout is under:
 - [`apps/guardrail3/crates`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates)
 
 Important roots:
-- [`apps/guardrail3/crates/lib.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/lib.rs)
+- [`apps/guardrail3/Cargo.toml`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/Cargo.toml)
+- [`apps/guardrail3/crates/bin/guardrail3/src/main.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/bin/guardrail3/src/main.rs)
 - [`apps/guardrail3/crates/app/core`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/core)
 - [`apps/guardrail3/crates/app/rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs)
-- [`apps/guardrail3/crates/domain/project_tree.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/domain/project_tree.rs)
+- [`apps/guardrail3/crates/domain/project-tree/src/lib.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/domain/project-tree/src/lib.rs)
 
 ## New Checks Layout
 
@@ -230,7 +231,7 @@ If starting fresh, read in this order:
 3. [`.plans/todo/checks/rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/todo/checks/rs)
 4. [`.plans/todo/checks/hooks/shared.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/todo/checks/hooks/shared.md)
 5. [`.plans/todo/checks/hooks/rs.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/todo/checks/hooks/rs.md)
-6. [`apps/guardrail3/crates/domain/project_tree.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/domain/project_tree.rs)
+6. [`apps/guardrail3/crates/domain/project-tree/src/lib.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/domain/project-tree/src/lib.rs)
 7. [`apps/guardrail3/crates/app/core/project_walker.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/core/project_walker.rs)
 8. [`apps/guardrail3/crates/app/rs/checks/rs/fmt`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/checks/rs/fmt)
 9. recent files in [`.worklogs`](/Users/tartakovsky/Projects/websmasher/guardrail3/.worklogs)

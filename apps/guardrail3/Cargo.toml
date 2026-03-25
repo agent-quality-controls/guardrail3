@@ -1,6 +1,6 @@
 [workspace]
 members = [
-    ".",
+    "crates/bin/guardrail3",
     "crates/domain/config",
     "crates/domain/modules",
     "crates/domain/report",
@@ -95,89 +95,3 @@ single_match_else = "allow"
 ref_option_ref = "allow"
 trivially_copy_pass_by_ref = "allow"
 multiple_crate_versions = "allow"
-
-[package]
-name = "guardrail3"
-version = "0.2.0"
-edition = "2024"
-rust-version = "1.85"
-description = "Composable code guardrails for Rust and TypeScript projects"
-license = "MIT"
-repository = "https://github.com/websmasher/guardrail3"
-readme = "README.md"
-keywords = ["guardrails", "linting", "clippy", "rust", "typescript"]
-categories = ["development-tools", "command-line-utilities"]
-
-[lib]
-name = "guardrail3"
-path = "crates/lib.rs"
-
-[[bin]]
-name = "guardrail3"
-path = "crates/main.rs"
-
-[lints]
-workspace = true
-
-[dependencies]
-guardrail3_validation_model = { package = "guardrail3-domain-validation-model", path = "crates/domain/validation-model" }
-guardrail3_domain_config = { package = "guardrail3-domain-config", path = "crates/domain/config" }
-guardrail3_domain_modules = { package = "guardrail3-domain-modules", path = "crates/domain/modules" }
-guardrail3_domain_report = { package = "guardrail3-domain-report", path = "crates/domain/report" }
-guardrail3_domain_project_tree = { package = "guardrail3-domain-project-tree", path = "crates/domain/project-tree" }
-guardrail3_outbound_traits = { package = "guardrail3-ports-outbound-traits", path = "crates/ports/outbound/traits" }
-guardrail3_adapters_inbound_cli = { package = "guardrail3-adapters-inbound-cli", path = "crates/adapters/inbound/cli" }
-guardrail3_adapters_outbound_fs = { package = "guardrail3-adapters-outbound-fs", path = "crates/adapters/outbound/fs" }
-guardrail3_adapters_outbound_report = { package = "guardrail3-adapters-outbound-report", path = "crates/adapters/outbound/report" }
-guardrail3_shared_fs = { package = "guardrail3-shared-fs", path = "crates/shared/fs" }
-guardrail3_app_arch_helpers = { package = "guardrail3-app-arch-helpers", path = "crates/app/arch-helpers" }
-guardrail3_app_commands = { package = "guardrail3-app-commands", path = "crates/app/commands" }
-guardrail3_adapters_outbound_tool_runner = { package = "guardrail3-adapters-outbound-tool-runner", path = "crates/adapters/outbound/tool-runner" }
-guardrail3_app_core = { package = "guardrail3-app-core", path = "crates/app/core" }
-guardrail3_app_hooks = { package = "guardrail3-app-hooks", path = "crates/app/hooks" }
-guardrail3_app_rs_runtime = { package = "guardrail3-app-rs-runtime", path = "crates/app/rs" }
-guardrail3_app_rs_legacy_validate = { package = "guardrail3-app-rs-legacy-validate", path = "crates/app/rs/validate" }
-guardrail3_app_rs_ast = { package = "guardrail3-app-rs-ast", path = "crates/app/rs/ast" }
-guardrail3_app_rs_generate = { package = "guardrail3-app-rs-generate", path = "crates/app/rs/generate" }
-guardrail3_app_ts = { package = "guardrail3-app-ts", path = "crates/app/ts" }
-guardrail3_app_rs_family_arch = { package = "guardrail3-app-rs-family-arch", path = "crates/app/rs/families/arch" }
-guardrail3_app_rs_family_cargo = { package = "guardrail3-app-rs-family-cargo", path = "crates/app/rs/families/cargo" }
-guardrail3_app_rs_family_clippy = { package = "guardrail3-app-rs-family-clippy", path = "crates/app/rs/families/clippy" }
-guardrail3_app_rs_family_code = { package = "guardrail3-app-rs-family-code", path = "crates/app/rs/families/code" }
-guardrail3_app_rs_family_deps = { package = "guardrail3-app-rs-family-deps", path = "crates/app/rs/families/deps" }
-guardrail3_app_rs_family_deny = { package = "guardrail3-app-rs-family-deny", path = "crates/app/rs/families/deny" }
-guardrail3_app_rs_family_fmt = { package = "guardrail3-app-rs-family-fmt", path = "crates/app/rs/families/fmt" }
-guardrail3_app_rs_family_garde = { package = "guardrail3-app-rs-family-garde", path = "crates/app/rs/families/garde" }
-guardrail3_app_rs_family_hexarch = { package = "guardrail3-app-rs-family-hexarch", path = "crates/app/rs/families/hexarch" }
-guardrail3_app_rs_family_hooks_rs = { package = "guardrail3-app-rs-family-hooks-rs", path = "crates/app/rs/families/hooks-rs" }
-guardrail3_app_rs_family_hooks_shared = { package = "guardrail3-app-rs-family-hooks-shared", path = "crates/app/rs/families/hooks-shared" }
-guardrail3_app_rs_family_release = { package = "guardrail3-app-rs-family-release", path = "crates/app/rs/families/release" }
-guardrail3_app_rs_family_test = { package = "guardrail3-app-rs-family-test", path = "crates/app/rs/families/test" }
-guardrail3_app_rs_family_toolchain = { package = "guardrail3-app-rs-family-toolchain", path = "crates/app/rs/families/toolchain" }
-clap = { version = "4", features = ["derive"] }
-toml = "0.8"
-toml_edit = "0.22"
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-serde_yaml = "0.9"
-glob = "0.3"
-colored = "2"
-walkdir = "2"
-ignore = "0.4"
-semver = "1"
-syn = { version = "2", features = ["full", "parsing", "visit"] }
-proc-macro2 = { version = "1", features = ["span-locations"] }
-tree-sitter = "0.26"
-tree-sitter-javascript = "0.25"
-tree-sitter-typescript = "0.23"
-garde = { workspace = true }
-quote = "1.0.45"
-
-[dev-dependencies]
-proptest = "1"
-tempfile = "3"
-
-[package.metadata.binstall]
-pkg-url = "{ repo }/releases/download/v{ version }/{ name }-{ target }{ archive-suffix }"
-bin-dir = "{ bin }{ binary-ext }"
-pkg-fmt = "tgz"
