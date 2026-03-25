@@ -11,6 +11,7 @@ members = [
     "crates/adapters/outbound/report",
     "crates/adapters/outbound/tool-runner",
     "crates/shared/fs",
+    "crates/app/commands",
     "crates/app/core",
     "crates/app/rs",
     "crates/app/rs/ast",
@@ -124,6 +125,7 @@ guardrail3_outbound_traits = { package = "guardrail3-ports-outbound-traits", pat
 guardrail3_adapters_outbound_fs = { package = "guardrail3-adapters-outbound-fs", path = "crates/adapters/outbound/fs" }
 guardrail3_adapters_outbound_report = { package = "guardrail3-adapters-outbound-report", path = "crates/adapters/outbound/report" }
 guardrail3_shared_fs = { package = "guardrail3-shared-fs", path = "crates/shared/fs" }
+guardrail3_app_commands = { package = "guardrail3-app-commands", path = "crates/app/commands" }
 guardrail3_adapters_outbound_tool_runner = { package = "guardrail3-adapters-outbound-tool-runner", path = "crates/adapters/outbound/tool-runner" }
 guardrail3_app_core = { package = "guardrail3-app-core", path = "crates/app/core" }
 guardrail3_app_hooks = { package = "guardrail3-app-hooks", path = "crates/app/hooks" }

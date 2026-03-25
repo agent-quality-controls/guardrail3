@@ -40,6 +40,7 @@ use guardrail3::{
 use guardrail3_adapters_outbound_fs::RealFileSystem;
 use guardrail3_adapters_outbound_report as report;
 use guardrail3_adapters_outbound_tool_runner::RealToolChecker;
+use guardrail3_app_commands::messages::GUIDE_CONTENT;
 use guardrail3_outbound_traits::FileSystem;
 
 #[allow(clippy::print_stderr)] // reason: CLI entry point — stderr for error output
@@ -190,8 +191,7 @@ fn handle_dump_tree(path_str: &str) {
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI — writes file and prints path
 fn handle_guide() {
     let path = std::path::Path::new("GUARDRAIL3_GUIDE.md");
-    let content = guardrail3::domain::modules::guide::GUIDE_CONTENT;
-    if let Err(e) = guardrail3_shared_fs::write_file(path, content) {
+    if let Err(e) = guardrail3_shared_fs::write_file(path, GUIDE_CONTENT) {
         eprintln!("Error writing GUARDRAIL3_GUIDE.md: {e}");
         std::process::exit(1);
     }

@@ -1,4 +1,5 @@
 use crate::domain::modules;
+use guardrail3_app_commands::command_ids::RS_LIST_MODULES;
 
 #[allow(clippy::print_stdout)] // reason: CLI command — module listing output to stdout
 pub fn list_modules() {
@@ -33,7 +34,7 @@ pub fn show_module(name: &str) {
         }
         None => {
             eprintln!("Error: module '{name}' not found.");
-            eprintln!("Run 'guardrail3 list-modules' to see available modules.");
+            eprintln!("Run '{RS_LIST_MODULES}' to see available modules.");
             std::process::exit(1);
         }
     }

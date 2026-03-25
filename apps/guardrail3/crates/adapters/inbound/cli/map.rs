@@ -4,6 +4,7 @@ use std::path::Path;
 
 use crate::app::core::crawl::crawl;
 use crate::app::core::project_map::{self, ProjectMap, RustScopeKind, TsScopeKind};
+use guardrail3_app_commands::command_ids::RS_INIT;
 
 /// Run the map command — crawl, build structure, display.
 #[allow(clippy::print_stdout)] // reason: CLI command — user-facing output
@@ -278,7 +279,7 @@ fn print_shared(map: &ProjectMap) {
     // guardrail3
     println!();
     if rc.guardrail3_tomls.is_empty() {
-        println!("  guardrail3.toml                  MISSING (run guardrail3 init)");
+        println!("  guardrail3.toml                  MISSING (run {RS_INIT})");
     } else {
         println!("  guardrail3.toml");
     }
@@ -308,11 +309,11 @@ fn print_shadows(map: &ProjectMap) {
 // ---------------------------------------------------------------------------
 
 fn count_lines(path: &Path) -> usize {
-    crate::fs::read_file(path).map_or(0, |c| c.lines().count())
+    guardrail3_shared_fs::read_file(path).map_or(0, |c| c.lines().count())
 }
 
 fn parse_clippy_info(path: &Path) -> String {
-    let Some(content) = crate::fs::read_file(path) else {
+    let Some(content) = guardrail3_shared_fs::read_file(path) else {
         return String::new();
     };
     let Ok(table) = content.parse::<toml::Value>() else {
@@ -330,7 +331,7 @@ fn parse_clippy_info(path: &Path) -> String {
 }
 
 fn parse_deny_info(path: &Path) -> String {
-    let Some(content) = crate::fs::read_file(path) else {
+    let Some(content) = guardrail3_shared_fs::read_file(path) else {
         return String::new();
     };
     let Ok(table) = content.parse::<toml::Value>() else {
