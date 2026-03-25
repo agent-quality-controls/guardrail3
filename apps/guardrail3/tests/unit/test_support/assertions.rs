@@ -1,4 +1,4 @@
-use guardrail3::domain::report::{CheckResult, Severity};
+use guardrail3_domain_report::{CheckResult, Severity};
 
 /// Filter results to errors matching a specific check ID.
 pub fn errors_by_id<'a>(results: &'a [CheckResult], id: &str) -> Vec<&'a CheckResult> {

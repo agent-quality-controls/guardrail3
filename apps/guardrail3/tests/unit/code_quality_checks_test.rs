@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use guardrail3::app::rs::validate::code_quality_checks::*;
-use guardrail3::domain::report::Severity;
+use guardrail3_domain_report::Severity;
 
 // ---- Bug 5: R58 direct std::fs detection ----
 
