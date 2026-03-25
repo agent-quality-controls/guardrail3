@@ -1,9 +1,10 @@
+use guardrail3_app_rs_ast::ast_helpers;
 use proc_macro2::Span;
 use syn::parse::Parser;
 use syn::spanned::Spanned;
 use syn::visit::Visit;
 
-pub use crate::app::rs::validate::ast_helpers::{CfgAttrAllowInfo, GardeSkipInfo, InlineModAllow};
+pub use ast_helpers::{CfgAttrAllowInfo, GardeSkipInfo, InlineModAllow};
 
 pub fn parse_rust_file(content: &str) -> Result<syn::File, syn::Error> {
     syn::parse_file(content.strip_prefix('\u{feff}').unwrap_or(content))
@@ -77,11 +78,11 @@ pub fn find_large_type_items(ast: &syn::File) -> Vec<LargeTypeItem> {
 }
 
 pub fn find_crate_level_allows(ast: &syn::File) -> Vec<(usize, String)> {
-    crate::app::rs::validate::ast_helpers::find_crate_level_allows(ast)
+    ast_helpers::find_crate_level_allows(ast)
 }
 
 pub fn find_inline_mod_allows(ast: &syn::File) -> Vec<InlineModAllow> {
-    crate::app::rs::validate::ast_helpers::find_inline_mod_allows(ast)
+    ast_helpers::find_inline_mod_allows(ast)
 }
 
 pub fn find_item_allows(ast: &syn::File) -> Vec<(usize, String)> {
@@ -95,7 +96,7 @@ pub fn find_cfg_attr_allows(ast: &syn::File) -> Vec<CfgAttrAllowInfo> {
         .into_iter()
         .map(|info| (info.line, info.lint))
         .collect::<std::collections::BTreeSet<_>>();
-    crate::app::rs::validate::ast_helpers::find_cfg_attr_allows(ast)
+    ast_helpers::find_cfg_attr_allows(ast)
         .into_iter()
         .map(|mut info| {
             if always_true.contains(&(info.line, info.lint.clone())) {
@@ -107,7 +108,7 @@ pub fn find_cfg_attr_allows(ast: &syn::File) -> Vec<CfgAttrAllowInfo> {
 }
 
 pub fn find_garde_skips_with_types(ast: &syn::File) -> Vec<GardeSkipInfo> {
-    crate::app::rs::validate::ast_helpers::find_garde_skips_with_types(ast)
+    ast_helpers::find_garde_skips_with_types(ast)
 }
 
 pub fn same_line_reason(content: &str, line: usize) -> Option<String> {

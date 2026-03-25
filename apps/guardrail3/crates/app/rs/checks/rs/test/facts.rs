@@ -2,8 +2,8 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use crate::app::rs::checks::hooks::shell::parse_script;
 use crate::domain::config::types::GuardrailConfig;
-use crate::domain::project_tree::ProjectTree;
-use crate::ports::outbound::ToolChecker;
+use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_outbound_traits::ToolChecker;
 
 use super::discover::{
     is_integration_test_path, is_src_path, is_test_sidecar_path, rust_file_rels,

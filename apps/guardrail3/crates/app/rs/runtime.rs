@@ -31,7 +31,7 @@ pub mod app {
     }
 }
 
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 
 use crate::domain::config::types::{GuardrailConfig, RustChecksConfig};
@@ -39,6 +39,20 @@ use crate::domain::report::{Report, Section, rust_validate_family_section_name};
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_outbound_traits::{FileSystem, ToolChecker};
 use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
+
+#[derive(Debug, Clone)]
+struct RustFamilyApplicability {
+    global_enabled: bool,
+    app_enabled: BTreeMap<String, bool>,
+    packages_enabled: Option<bool>,
+    global_only: bool,
+}
+
+enum RustResultScope {
+    App(String),
+    Packages,
+    Other,
+}
 
 pub fn run(
     fs: &dyn FileSystem,
@@ -51,6 +65,7 @@ pub fn run(
     let tree = crate::app::core::project_walker::walk_project(fs, path);
     let config = load_config(&tree)?;
     let selected = resolve_selected_families(&tree, config.as_ref(), requested_families);
+    let applicability = collect_family_applicability(config.as_ref());
 
     let mut report = Report::new(path.display().to_string(), vec!["Rust".to_owned()]);
 
@@ -81,6 +96,10 @@ pub fn run(
             }
             RustValidateFamily::HooksRs => crate::app::rs::checks::hooks::rs::check(&tree, tc),
         };
+        let results = match applicability.get(&family) {
+            Some(value) => filter_results_for_applicability(path, value, results),
+            None => results,
+        };
         report.add_section(Section {
             name: rust_validate_family_section_name(family).to_owned(),
             results,
@@ -88,6 +107,117 @@ pub fn run(
     }
 
     Ok(report)
+}
+
+fn collect_family_applicability(
+    config: Option<&GuardrailConfig>,
+) -> BTreeMap<RustValidateFamily, RustFamilyApplicability> {
+    RustValidateFamily::all()
+        .iter()
+        .copied()
+        .map(|family| {
+            (
+                family,
+                family_applicability(family, config.and_then(|value| value.rust.as_ref())),
+            )
+        })
+        .collect()
+}
+
+fn family_applicability(
+    family: RustValidateFamily,
+    rust: Option<&crate::domain::config::types::RustConfig>,
+) -> RustFamilyApplicability {
+    let global_enabled = rust
+        .and_then(|value| value.checks.as_ref())
+        .and_then(|checks| checks.family_enabled(family))
+        .unwrap_or(true);
+
+    let app_enabled = rust
+        .and_then(|value| value.apps.as_ref())
+        .map(|apps| {
+            apps.iter()
+                .map(|(name, cfg)| {
+                    (
+                        format!("apps/{name}"),
+                        effective_family_flag(cfg.checks.as_ref(), family, global_enabled),
+                    )
+                })
+                .collect()
+        })
+        .unwrap_or_default();
+
+    let packages_enabled = rust
+        .and_then(|value| value.packages.as_ref())
+        .map(|cfg| effective_family_flag(cfg.checks.as_ref(), family, global_enabled));
+
+    RustFamilyApplicability {
+        global_enabled,
+        app_enabled,
+        packages_enabled,
+        global_only: family_uses_global_only(family),
+    }
+}
+
+fn filter_results_for_applicability(
+    project_root: &Path,
+    applicability: &RustFamilyApplicability,
+    results: Vec<crate::domain::report::CheckResult>,
+) -> Vec<crate::domain::report::CheckResult> {
+    if applicability.global_only {
+        return results;
+    }
+
+    results
+        .into_iter()
+        .filter(|result| applicability_allows_result(project_root, applicability, result))
+        .collect()
+}
+
+fn applicability_allows_result(
+    project_root: &Path,
+    applicability: &RustFamilyApplicability,
+    result: &crate::domain::report::CheckResult,
+) -> bool {
+    let Some(file) = result.file.as_deref() else {
+        return true;
+    };
+    let Some(rel_path) = normalize_result_path(project_root, file) else {
+        return applicability.global_enabled;
+    };
+
+    match scope_for_result_path(&rel_path) {
+        RustResultScope::App(app_path) => applicability
+            .app_enabled
+            .get(&app_path)
+            .copied()
+            .unwrap_or(applicability.global_enabled),
+        RustResultScope::Packages => applicability
+            .packages_enabled
+            .unwrap_or(applicability.global_enabled),
+        RustResultScope::Other => applicability.global_enabled,
+    }
+}
+
+fn normalize_result_path(project_root: &Path, file: &str) -> Option<String> {
+    let candidate = Path::new(file);
+    if candidate.is_absolute() {
+        candidate
+            .strip_prefix(project_root)
+            .ok()
+            .map(|value| value.to_string_lossy().replace('\\', "/"))
+    } else {
+        Some(file.trim_start_matches("./").replace('\\', "/"))
+    }
+}
+
+fn scope_for_result_path(rel_path: &str) -> RustResultScope {
+    let mut segments = rel_path.split('/').filter(|segment| !segment.is_empty());
+    match (segments.next(), segments.next()) {
+        (Some("apps"), Some(app_name)) => RustResultScope::App(format!("apps/{app_name}")),
+        (Some("packages"), _) => RustResultScope::Packages,
+        _ => RustResultScope::Other,
+    }
 }
 
 fn load_config(tree: &ProjectTree) -> Result<Option<GuardrailConfig>, String> {
@@ -209,3 +339,7 @@ fn has_unscoped_rust_root(
 
     rust.packages.is_none() && tree.dir_exists("packages")
 }
+
+#[cfg(test)]
+#[path = "runtime_tests.rs"]
+mod tests;

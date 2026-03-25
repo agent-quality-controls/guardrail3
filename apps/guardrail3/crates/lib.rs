@@ -5,9 +5,13 @@ use colored as _;
 use glob as _;
 use ignore as _;
 use proc_macro2 as _;
+use quote as _;
 use semver as _;
 use serde_yaml as _;
 use toml_edit as _;
+use tree_sitter as _;
+use tree_sitter_javascript as _;
+use tree_sitter_typescript as _;
 
 #[cfg(test)]
 use proptest as _;
@@ -29,7 +33,7 @@ pub mod app {
     pub use guardrail3_app_core as core;
     pub use guardrail3_app_hooks as hooks;
     pub mod rs;
-    pub mod ts;
+    pub use guardrail3_app_ts as ts;
 }
 
 pub mod adapters {

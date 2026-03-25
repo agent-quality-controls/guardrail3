@@ -13,7 +13,9 @@ members = [
     "crates/shared/fs",
     "crates/app/core",
     "crates/app/rs",
+    "crates/app/rs/ast",
     "crates/app/hooks",
+    "crates/app/ts",
     "crates/app/rs/families/arch",
     "crates/app/rs/families/cargo",
     "crates/app/rs/families/clippy",
@@ -126,6 +128,8 @@ guardrail3_adapters_outbound_tool_runner = { package = "guardrail3-adapters-outb
 guardrail3_app_core = { package = "guardrail3-app-core", path = "crates/app/core" }
 guardrail3_app_hooks = { package = "guardrail3-app-hooks", path = "crates/app/hooks" }
 guardrail3_app_rs_runtime = { package = "guardrail3-app-rs-runtime", path = "crates/app/rs" }
+guardrail3_app_rs_ast = { package = "guardrail3-app-rs-ast", path = "crates/app/rs/ast" }
+guardrail3_app_ts = { package = "guardrail3-app-ts", path = "crates/app/ts" }
 guardrail3_app_rs_family_arch = { package = "guardrail3-app-rs-family-arch", path = "crates/app/rs/families/arch" }
 guardrail3_app_rs_family_cargo = { package = "guardrail3-app-rs-family-cargo", path = "crates/app/rs/families/cargo" }
 guardrail3_app_rs_family_clippy = { package = "guardrail3-app-rs-family-clippy", path = "crates/app/rs/families/clippy" }

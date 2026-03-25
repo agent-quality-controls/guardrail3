@@ -15,7 +15,7 @@ pub fn check(input: &TestCoverageInput<'_>, results: &mut Vec<CheckResult>) {
                     "{} has at least one `tests/*.rs` file.",
                     display_root(&input.coverage.root_rel_dir)
                 ),
-                file: None,
+                file: Some(anchor_path(&input.coverage.root_rel_dir)),
                 line: None,
                 inventory: false,
             }
@@ -30,7 +30,7 @@ pub fn check(input: &TestCoverageInput<'_>, results: &mut Vec<CheckResult>) {
                 "{} does not have a `tests/` Rust file.",
                 display_root(&input.coverage.root_rel_dir)
             ),
-            file: None,
+            file: Some(anchor_path(&input.coverage.root_rel_dir)),
             line: None,
             inventory: false,
         });
@@ -42,6 +42,14 @@ fn display_root(rel_dir: &str) -> String {
         "project root".to_owned()
     } else {
         format!("`{rel_dir}`")
+    }
+}
+
+fn anchor_path(rel_dir: &str) -> String {
+    if rel_dir.is_empty() {
+        "Cargo.toml".to_owned()
+    } else {
+        rel_dir.to_owned()
     }
 }
 
