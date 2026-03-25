@@ -1,9 +1,8 @@
 use std::fs as stdfs;
 
-use guardrail3::adapters::outbound::fs::RealFileSystem;
-use guardrail3::app::core::discover::*;
+use guardrail3_adapters_outbound_fs::RealFileSystem;
 
-// ---- Bug 8: Monorepo workspace detection ----
+use super::detect_project;
 
 #[test]
 #[allow(clippy::expect_used)] // reason: test setup uses expect for clarity
@@ -11,22 +10,15 @@ use guardrail3::app::core::discover::*;
 #[allow(clippy::uninlined_format_args)] // reason: assert! macros with format args
 fn detects_workspace_in_apps_backend() {
     let fs = RealFileSystem;
-    // Create a temp directory mimicking a monorepo with marker Cargo.toml at root
-    // and real workspace at apps/backend/
     let tmp = std::env::temp_dir().join("guardrail3_test_monorepo");
     let _ = stdfs::remove_dir_all(&tmp);
     let _ = stdfs::create_dir_all(tmp.join("apps/backend/crates/api/src"));
 
-    // Marker Cargo.toml at root (no workspace members)
     let _ = stdfs::write(tmp.join("Cargo.toml"), "[workspace]\nmembers = []\n");
-
-    // Real workspace at apps/backend/
     let _ = stdfs::write(
         tmp.join("apps/backend/Cargo.toml"),
         "[workspace]\nmembers = [\"crates/api\"]\n",
     );
-
-    // Crate Cargo.toml
     let _ = stdfs::write(
         tmp.join("apps/backend/crates/api/Cargo.toml"),
         "[package]\nname = \"api\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
@@ -35,8 +27,6 @@ fn detects_workspace_in_apps_backend() {
         tmp.join("apps/backend/crates/api/src/main.rs"),
         "fn main() {}\n",
     );
-
-    // Also add a package.json + tsconfig.json so TypeScript is detected
     let _ = stdfs::write(tmp.join("package.json"), "{}");
     let _ = stdfs::write(tmp.join("tsconfig.json"), "{}");
 
@@ -64,7 +54,6 @@ fn detects_workspace_in_apps_backend() {
         member_names
     );
 
-    // Cleanup
     let _ = stdfs::remove_dir_all(&tmp);
 }
 
@@ -93,7 +82,6 @@ fn direct_workspace_detected_at_root() {
     let workspace_root = project
         .primary_workspace_root()
         .expect("Should have workspace root");
-    // Should be the root itself, not apps/backend
     assert_eq!(
         workspace_root,
         tmp.as_path(),

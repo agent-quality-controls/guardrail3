@@ -1,4 +1,4 @@
-use crate::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::FileSystem;
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
@@ -426,3 +426,7 @@ fn has_typescript_signals(fs: &dyn FileSystem, dir: &Path, pkg_json_path: &Path)
 
     false
 }
+
+#[cfg(test)]
+#[path = "discover_tests.rs"]
+mod tests;
