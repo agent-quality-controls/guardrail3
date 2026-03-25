@@ -14,9 +14,9 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 
-use crate::domain::project_tree::{DirEntry, ProjectTree};
+use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
 #[allow(clippy::disallowed_methods)] // reason: git ls-files requires Command::new
-use crate::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::FileSystem;
 
 type ChildSets = (
     BTreeSet<String>,
@@ -412,3 +412,7 @@ fn split_parent_child(rel: &str) -> Option<(String, String)> {
 #[cfg(test)]
 #[path = "project_walker_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "project_walker_lossless_tests.rs"]
+mod lossless_tests;

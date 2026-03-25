@@ -31,10 +31,6 @@ mod code_quality_checks_test;
 mod deny_inventory_test;
 #[path = "unit/dependency_allowlist_test.rs"]
 mod dependency_allowlist_test;
-#[path = "unit/discover_test.rs"]
-mod discover_test;
-#[path = "unit/project_walker_test.rs"]
-mod project_walker_test;
 #[path = "unit/report_test.rs"]
 mod report_test;
 #[path = "unit/rs_arch_01/mod.rs"]

@@ -2,8 +2,9 @@ use std::fs;
 
 use tempfile::tempdir;
 
+use guardrail3_adapters_outbound_fs::RealFileSystem;
+
 use super::walk_project;
-use crate::adapters::outbound::fs::RealFileSystem;
 
 #[test]
 fn preserves_immediate_ignored_file_children_in_discovered_dirs() {

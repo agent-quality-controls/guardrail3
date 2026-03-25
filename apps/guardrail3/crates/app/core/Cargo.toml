@@ -18,3 +18,7 @@ ignore = "0.4"
 serde_json = "1"
 toml = "0.8"
 walkdir = "2"
+
+[dev-dependencies]
+guardrail3_adapters_outbound_fs = { package = "guardrail3-adapters-outbound-fs", path = "../../adapters/outbound/fs" }
+tempfile = "3"
