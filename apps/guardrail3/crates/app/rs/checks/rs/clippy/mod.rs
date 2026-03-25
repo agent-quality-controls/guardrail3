@@ -27,11 +27,13 @@ mod rs_clippy_22_type_complexity_threshold;
 #[cfg(test)]
 mod test_support;
 
-use crate::domain::project_tree::ProjectTree;
 use crate::domain::report::CheckResult;
+use guardrail3_domain_project_tree::ProjectTree;
 
 use self::facts::collect;
 use self::inputs::{ConfigClippyInput, CoveredRustUnitInput, UncoveredRustUnitInput};
+
+pub use self::clippy_support::{EXPECTED_METHOD_BANS, EXPECTED_TYPE_BANS};
 
 pub fn check(tree: &ProjectTree) -> Vec<CheckResult> {
     let facts = collect(tree);

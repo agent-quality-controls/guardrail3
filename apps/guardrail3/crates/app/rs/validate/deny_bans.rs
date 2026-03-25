@@ -6,7 +6,7 @@ use crate::domain::report::{CheckResult, Severity};
 pub fn check_ban_list(
     table: &toml::Value,
     file_path: &Path,
-    _profile: Option<&str>,
+    profile: Option<&str>,
     results: &mut Vec<CheckResult>,
 ) {
     let Some(bans) = table.get("bans") else {
@@ -23,7 +23,7 @@ pub fn check_ban_list(
     };
 
     check_bans_settings(bans, file_path, results);
-    check_deny_list_coverage(bans, file_path, results);
+    check_deny_list_coverage(bans, file_path, profile, results);
 }
 
 fn check_bans_settings(bans: &toml::Value, file_path: &Path, results: &mut Vec<CheckResult>) {
@@ -86,7 +86,12 @@ fn check_bans_settings(bans: &toml::Value, file_path: &Path, results: &mut Vec<C
     }
 }
 
-fn check_deny_list_coverage(bans: &toml::Value, file_path: &Path, results: &mut Vec<CheckResult>) {
+fn check_deny_list_coverage(
+    bans: &toml::Value,
+    file_path: &Path,
+    profile: Option<&str>,
+    results: &mut Vec<CheckResult>,
+) {
     let Some(deny_list) = bans.get("deny").and_then(|d| d.as_array()) else {
         results.push(CheckResult {
             id: "R12".to_owned(),
@@ -121,9 +126,7 @@ fn check_deny_list_coverage(bans: &toml::Value, file_path: &Path, results: &mut 
         }
     }
 
-    // All profiles use the same expected bans. Unknown/missing defaults to service.
-    let expected_bans: &[&str] = super::deny_audit::EXPECTED_BANS;
-    let expected_set: BTreeSet<String> = expected_bans.iter().map(|s| (*s).to_owned()).collect();
+    let expected_set = guardrail3_app_rs_family_deny::expected_ban_names(profile);
 
     for exp in &expected_set {
         if !found_bans.contains(exp) {

@@ -9,7 +9,7 @@ use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
 use crate::app::core::crawl::CrawlResult;
-use crate::app::rs::validate::clippy_coverage::{EXPECTED_METHOD_BANS, EXPECTED_TYPE_BANS};
+use guardrail3_app_rs_family_clippy::{EXPECTED_METHOD_BANS, EXPECTED_TYPE_BANS};
 
 use super::engine::{self, CoverageTool};
 
@@ -33,7 +33,7 @@ impl CoverageTool for ClippyCoverage {
     }
 
     fn parse_details(&self, config_path: &Path) -> serde_json::Value {
-        let Some(content) = crate::fs::read_file(config_path) else {
+        let Some(content) = guardrail3_shared_fs::read_file(config_path) else {
             return serde_json::json!({"error": "unreadable"});
         };
         let Ok(table) = content.parse::<toml::Value>() else {

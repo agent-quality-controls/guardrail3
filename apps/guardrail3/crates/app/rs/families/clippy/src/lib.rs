@@ -34,3 +34,6 @@ pub mod app {
 mod inner;
 
 pub use inner::*;
+
+pub const EXPECTED_METHOD_BANS: &[&str] = inner::EXPECTED_METHOD_BANS;
+pub const EXPECTED_TYPE_BANS: &[&str] = inner::EXPECTED_TYPE_BANS;

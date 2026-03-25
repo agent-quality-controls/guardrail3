@@ -35,14 +35,16 @@ mod rs_deny_30_wrappers;
 #[cfg(test)]
 mod test_support;
 
-use crate::domain::project_tree::ProjectTree;
 use crate::domain::report::CheckResult;
+use guardrail3_domain_project_tree::ProjectTree;
 
 use self::facts::collect;
 use self::inputs::{
     ConfigDenyInput, CoveredRustUnitInput, ForbiddenDenyConfigInput, SameRootConflictInput,
     UncoveredRustUnitInput,
 };
+
+pub use self::deny_support::expected_ban_names;
 
 pub fn check(tree: &ProjectTree) -> Vec<CheckResult> {
     let facts = collect(tree);
