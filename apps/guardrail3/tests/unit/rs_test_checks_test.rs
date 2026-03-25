@@ -9,12 +9,12 @@
 
 use std::fs as stdfs;
 
+use guardrail3_adapters_outbound_tool_runner::RealToolChecker;
 use guardrail3_app_rs_legacy_validate::test_checks::{
     check_cargo_mutants_installed, check_mutants_toml, content_has_test, file_has_cfg_test_module,
     has_mutants_profile,
 };
-use guardrail3::domain::report::Severity;
-use guardrail3_adapters_outbound_tool_runner::RealToolChecker;
+use guardrail3_domain_report::Severity;
 
 fn make_temp_dir() -> tempfile::TempDir {
     tempfile::tempdir().expect("failed to create temp dir")

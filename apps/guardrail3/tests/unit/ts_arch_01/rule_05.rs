@@ -2,7 +2,7 @@ use super::helpers::{
     arch_errors, assert_no_landing, assert_no_packages, assert_no_rust_apps, copy_fixture,
     remove_dir, run_check, write_file,
 };
-use guardrail3::domain::report::CheckResult;
+use guardrail3_domain_report::CheckResult;
 
 // ============================================================================
 // Rule 05: Container dirs must not be empty (need subdirs or .gitkeep)

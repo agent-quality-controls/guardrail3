@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use crate::domain::report::{CheckResult, Severity};
+use guardrail3_domain_report::{CheckResult, Severity};
 use guardrail3_outbound_traits::FileSystem;
 
 // R55-R57: workspace metadata & release profile

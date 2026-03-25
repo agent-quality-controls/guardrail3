@@ -7,8 +7,8 @@
     clippy::manual_assert
 )] // reason: test crate
 
-use guardrail3::app::ts::validate::ast_helpers::parse_typescript;
-use guardrail3::app::ts::validate::ts_code_analysis::{
+use guardrail3_app_ts::validate::ast_helpers::parse_typescript;
+use guardrail3_app_ts::validate::ts_code_analysis::{
     find_any_types, find_process_env, find_test_method_calls,
 };
 use tree_sitter::Tree;

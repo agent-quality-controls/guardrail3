@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
-use crate::domain::report::{CheckResult, Severity};
+use guardrail3_domain_report::{CheckResult, Severity};
 use guardrail3_outbound_traits::FileSystem;
 
 pub use guardrail3_app_rs_family_clippy::{EXPECTED_METHOD_BANS, EXPECTED_TYPE_BANS};

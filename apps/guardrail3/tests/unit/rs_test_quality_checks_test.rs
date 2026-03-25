@@ -9,11 +9,11 @@
 
 use std::fs as stdfs;
 
+use guardrail3_adapters_outbound_fs::RealFileSystem;
 use guardrail3_app_rs_legacy_validate::test_quality_checks::{
     check_integration_tests, check_mutation_hook, check_test_coverage_inventory, count_pub_fns,
     count_test_fns, find_ignore_without_reason,
 };
-use guardrail3_adapters_outbound_fs::RealFileSystem;
 use guardrail3_domain_report::Severity;
 
 fn make_temp_dir() -> tempfile::TempDir {

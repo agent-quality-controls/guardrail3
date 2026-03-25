@@ -1,5 +1,5 @@
 use super::helpers::{copy_fixture, import_errors, run_import_check, write_file};
-use guardrail3::domain::report::Severity;
+use guardrail3_domain_report::Severity;
 
 // ============================================================================
 // Rule 07: T-ARCH-02 import boundary violations

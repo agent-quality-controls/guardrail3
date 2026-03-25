@@ -14,7 +14,7 @@ use guardrail3_app_ts::validate::ts_arch_checks::{
     TsLayer, check_file_imports, check_single_app_structure, extract_import_path, layer_from_path,
     resolve_relative,
 };
-use guardrail3::domain::report::Severity;
+use guardrail3_domain_report::Severity;
 use guardrail3_outbound_traits::{FileSystem, FsDirEntry, FsMetadata};
 
 struct StubFs {

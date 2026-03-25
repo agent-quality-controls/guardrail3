@@ -9,10 +9,10 @@
 
 use std::path::Path;
 
-use guardrail3::app::ts::validate::source_scan::{
+use guardrail3_app_ts::validate::source_scan::{
     check_any_types, check_comment_pattern, check_file_length, check_process_env,
 };
-use guardrail3::domain::report::Severity;
+use guardrail3_domain_report::Severity;
 
 // T30: process.env direct access
 #[test]

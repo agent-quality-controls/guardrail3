@@ -3,8 +3,8 @@ use std::path::Path;
 use walkdir::WalkDir;
 
 use super::source_scan::is_excluded_ts_dir;
-use crate::domain::report::{CheckResult, Severity, TsAppContext};
 use guardrail3_app_arch_helpers as arch_helpers;
+use guardrail3_domain_report::{CheckResult, Severity, TsAppContext};
 use guardrail3_outbound_traits::FileSystem;
 
 const ID: &str = "T-ARCH-01";

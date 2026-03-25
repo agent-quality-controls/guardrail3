@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use crate::domain::report::{CheckResult, Severity};
+use guardrail3_domain_report::{CheckResult, Severity};
 use guardrail3_outbound_traits::FileSystem;
 
 /// A tsconfig boolean check: (`setting_name`, `check_id`).

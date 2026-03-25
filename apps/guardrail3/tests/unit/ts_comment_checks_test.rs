@@ -1,7 +1,7 @@
 use std::path::Path;
 
-use guardrail3::app::ts::validate::ts_comment_checks::{check_eslint_disable, check_ts_ignore};
-use guardrail3::domain::report::Severity;
+use guardrail3_app_ts::validate::ts_comment_checks::{check_eslint_disable, check_ts_ignore};
+use guardrail3_domain_report::Severity;
 
 #[test]
 #[allow(clippy::indexing_slicing)] // reason: test assertion indexes into results

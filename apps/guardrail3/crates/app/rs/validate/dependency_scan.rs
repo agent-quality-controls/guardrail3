@@ -1,4 +1,4 @@
-use crate::domain::report::{CheckResult, Severity};
+use guardrail3_domain_report::{CheckResult, Severity};
 use guardrail3_outbound_traits::ToolChecker;
 
 pub fn check(tc: &dyn ToolChecker) -> Vec<CheckResult> {

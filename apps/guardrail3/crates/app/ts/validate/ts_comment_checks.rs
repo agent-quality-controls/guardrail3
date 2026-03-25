@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use super::ast_helpers::{self, CommentInfo};
-use crate::domain::report::{CheckResult, Severity};
+use guardrail3_domain_report::{CheckResult, Severity};
 
 /// Determine whether a file path refers to a TSX file.
 pub(super) fn is_tsx_path(path: &Path) -> bool {

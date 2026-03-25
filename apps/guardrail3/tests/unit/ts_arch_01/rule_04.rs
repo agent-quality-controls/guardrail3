@@ -2,7 +2,7 @@ use super::helpers::{
     arch_errors, assert_no_landing, assert_no_packages, assert_no_rust_apps, copy_fixture,
     run_check, write_file,
 };
-use guardrail3::domain::report::CheckResult;
+use guardrail3_domain_report::CheckResult;
 
 // ============================================================================
 // Rule 04: Loose files in structural/container dirs (only .gitkeep allowed)

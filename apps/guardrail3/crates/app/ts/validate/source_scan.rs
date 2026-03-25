@@ -4,7 +4,7 @@ use walkdir::WalkDir;
 
 use super::ast_helpers;
 use super::ts_comment_checks;
-use crate::domain::report::{CheckResult, Severity};
+use guardrail3_domain_report::{CheckResult, Severity};
 use guardrail3_outbound_traits::FileSystem;
 
 pub fn check(
@@ -105,7 +105,7 @@ pub fn is_excluded_ts_dir_with_gitignore(
 
 fn collect_ts_files(fs: &dyn FileSystem, root: &Path) -> Vec<String> {
     let mut files = Vec::new();
-    let gitignored = crate::app::core::gitignore::load_gitignore_dirs(fs, root);
+    let gitignored = guardrail3_app_core::gitignore::load_gitignore_dirs(fs, root);
     for entry in WalkDir::new(root)
         .into_iter()
         .filter_entry(|e| !is_excluded_ts_dir_with_gitignore(e, &gitignored))

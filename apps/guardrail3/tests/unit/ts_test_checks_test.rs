@@ -9,11 +9,11 @@
 
 use std::fs as stdfs;
 
-use guardrail3::app::ts::validate::test_checks::{
+use guardrail3_app_ts::validate::test_checks::{
     check_only_in_source_content, check_skip_without_reason_content, check_stryker_config,
     check_test_files_exist, check_test_runner_config,
 };
-use guardrail3::domain::report::Severity;
+use guardrail3_domain_report::Severity;
 
 fn make_temp_dir() -> tempfile::TempDir {
     tempfile::tempdir().expect("failed to create temp dir")

@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use crate::domain::report::{CheckResult, Severity};
+use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::deny_bans;
 use super::deny_inventory;
