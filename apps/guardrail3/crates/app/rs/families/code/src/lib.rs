@@ -1,4 +1,5 @@
 use glob as _;
+use guardrail3_app_rs_ast as _;
 use guardrail3_domain_project_tree as _;
 use guardrail3_outbound_traits as _;
 use guardrail3_shared_fs as _;
@@ -19,21 +20,10 @@ pub mod domain {
 #[path = "../../../checks/hooks/shell.rs"]
 pub mod hook_shell;
 
-pub mod rs_validate {
-    #[path = "../../../../validate/ast_helpers.rs"]
-    pub mod ast_helpers;
-    #[path = "../../../../validate/ast_visitors.rs"]
-    pub mod ast_visitors;
-    #[path = "../../../../validate/extra_visitors.rs"]
-    pub mod extra_visitors;
-}
-
 pub mod app {
     pub use guardrail3_app_core as core;
 
     pub mod rs {
-        pub use crate::rs_validate as validate;
-
         pub mod checks {
             pub mod hooks {
                 pub use crate::hook_shell as shell;

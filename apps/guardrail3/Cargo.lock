@@ -343,6 +343,7 @@ dependencies = [
  "guardrail3-adapters-outbound-tool-runner",
  "guardrail3-app-core",
  "guardrail3-app-hooks",
+ "guardrail3-app-rs-ast",
  "guardrail3-app-rs-family-arch",
  "guardrail3-app-rs-family-cargo",
  "guardrail3-app-rs-family-clippy",
@@ -358,6 +359,7 @@ dependencies = [
  "guardrail3-app-rs-family-test",
  "guardrail3-app-rs-family-toolchain",
  "guardrail3-app-rs-runtime",
+ "guardrail3-app-ts",
  "guardrail3-domain-config",
  "guardrail3-domain-modules",
  "guardrail3-domain-project-tree",
@@ -435,6 +437,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "guardrail3-app-rs-ast"
+version = "0.0.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "guardrail3-app-rs-family-arch"
 version = "0.0.0"
 dependencies = [
@@ -488,6 +499,7 @@ version = "0.0.0"
 dependencies = [
  "glob",
  "guardrail3-app-core",
+ "guardrail3-app-rs-ast",
  "guardrail3-domain-config",
  "guardrail3-domain-modules",
  "guardrail3-domain-project-tree",
@@ -654,6 +666,7 @@ version = "0.0.0"
 dependencies = [
  "glob",
  "guardrail3-app-core",
+ "guardrail3-app-rs-ast",
  "guardrail3-domain-config",
  "guardrail3-domain-modules",
  "guardrail3-domain-project-tree",
@@ -702,6 +715,21 @@ dependencies = [
  "guardrail3-domain-validation-model",
  "guardrail3-ports-outbound-traits",
  "toml",
+]
+
+[[package]]
+name = "guardrail3-app-ts"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-app-core",
+ "guardrail3-domain-config",
+ "guardrail3-domain-report",
+ "guardrail3-ports-outbound-traits",
+ "serde_json",
+ "tree-sitter",
+ "tree-sitter-javascript",
+ "tree-sitter-typescript",
+ "walkdir",
 ]
 
 [[package]]

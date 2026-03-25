@@ -26,10 +26,11 @@ mod rs_test_19_input_failures;
 mod test_support;
 
 use std::collections::BTreeMap;
+use std::collections::BTreeSet;
 
-use crate::domain::project_tree::ProjectTree;
 use crate::domain::report::CheckResult;
-use crate::ports::outbound::ToolChecker;
+use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_outbound_traits::ToolChecker;
 
 use self::facts::{TestCoverageFacts, TestFileFacts, collect};
 use self::inputs::{
@@ -37,7 +38,11 @@ use self::inputs::{
     TestFunctionInput, TestModuleInput, ToolTestInput,
 };
 
-pub fn check(tree: &ProjectTree, tc: &dyn ToolChecker) -> Vec<CheckResult> {
+pub fn check(
+    tree: &ProjectTree,
+    tc: &dyn ToolChecker,
+    scoped_files: Option<&BTreeSet<String>>,
+) -> Vec<CheckResult> {
     let facts = collect(tree, tc);
     let mut results = Vec::new();
 
@@ -51,7 +56,7 @@ pub fn check(tree: &ProjectTree, tc: &dyn ToolChecker) -> Vec<CheckResult> {
     let hook_input = HookTestInput::new(&facts.hook);
     rs_test_08_mutation_hook_present::check(&hook_input, &mut results);
 
-    let coverage_by_root = analyze_roots(tree, &facts.files, &mut results);
+    let coverage_by_root = analyze_roots(tree, &facts.files, scoped_files, &mut results);
 
     for root in &facts.roots {
         let root_input = RootTestInput::new(root);
@@ -74,12 +79,16 @@ pub fn check(tree: &ProjectTree, tc: &dyn ToolChecker) -> Vec<CheckResult> {
 fn analyze_roots(
     tree: &ProjectTree,
     files: &[TestFileFacts],
+    scoped_files: Option<&BTreeSet<String>>,
     results: &mut Vec<CheckResult>,
 ) -> BTreeMap<String, TestCoverageFacts> {
     let mut coverage_by_root = BTreeMap::<String, TestCoverageFacts>::new();
 
     for file in files {
-        let content = match crate::fs::read_file_err(&tree.abs_path(&file.rel_path)) {
+        if scoped_files.is_some_and(|paths| !paths.contains(&file.rel_path)) {
+            continue;
+        }
+        let content = match guardrail3_shared_fs::read_file_err(&tree.abs_path(&file.rel_path)) {
             Ok(content) => content,
             Err(read_error) => {
                 let message =

@@ -1,3 +1,5 @@
+#![recursion_limit = "1024"]
+
 use glob as _;
 use guardrail3_domain_project_tree as _;
 use guardrail3_outbound_traits as _;

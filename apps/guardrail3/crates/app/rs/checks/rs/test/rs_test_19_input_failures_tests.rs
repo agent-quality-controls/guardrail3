@@ -30,7 +30,7 @@ fn family_surfaces_source_parse_failures() {
         root.clone(),
     );
 
-    let results = crate::app::rs::checks::rs::test::check(&tree, &StubToolChecker::new(true));
+    let results = crate::check(&tree, &StubToolChecker::new(true), None);
     assert!(results.iter().any(|result| {
         result.id == "RS-TEST-19"
             && result.file.as_deref() == Some("src/lib.rs")

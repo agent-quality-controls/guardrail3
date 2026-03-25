@@ -1,3 +1,4 @@
+use guardrail3_app_rs_ast::ast_helpers;
 use syn::parse::{Parse, Parser};
 use syn::spanned::Spanned;
 use syn::visit::Visit;
@@ -48,9 +49,8 @@ pub fn effective_non_comment_line_count(content: &str) -> usize {
 pub fn analyze(ast: &syn::File, content: &str) -> ParsedTestFile {
     let mut visitor = TestVisitor {
         out: ParsedTestFile {
-            pub_fn_count: crate::app::rs::validate::ast_helpers::count_pub_fn_decls(ast),
-            ignore_without_reason_lines:
-                crate::app::rs::validate::ast_helpers::find_ignore_without_reason(ast, content),
+            pub_fn_count: ast_helpers::count_pub_fn_decls(ast),
+            ignore_without_reason_lines: ast_helpers::find_ignore_without_reason(ast, content),
             cfg_test_modules: Vec::new(),
             test_functions: Vec::new(),
         },

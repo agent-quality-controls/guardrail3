@@ -1,0 +1,12 @@
+[package]
+name = "guardrail3-app-rs-ast"
+version = "0.0.0"
+edition = "2024"
+
+[lints]
+workspace = true
+
+[dependencies]
+proc-macro2 = { version = "1", features = ["span-locations"] }
+quote = "1.0.45"
+syn = { version = "2", features = ["full", "parsing", "visit"] }

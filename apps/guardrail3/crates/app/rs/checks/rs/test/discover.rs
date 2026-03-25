@@ -1,4 +1,4 @@
-use crate::domain::project_tree::ProjectTree;
+use guardrail3_domain_project_tree::ProjectTree;
 
 pub fn rust_file_rels(tree: &ProjectTree) -> Vec<String> {
     let mut rels: Vec<String> = tree

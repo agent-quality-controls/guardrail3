@@ -1,8 +1,8 @@
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
-use crate::domain::project_tree::{DirEntry, ProjectTree};
-use crate::ports::outbound::{CommandRunResult, ToolChecker};
+use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
+use guardrail3_outbound_traits::{CommandRunResult, ToolChecker};
 
 use super::facts::{
     HookFacts, InputFailureFacts, TestCoverageFacts, TestFileFacts, TestRootFacts, TestRootKind,
@@ -128,8 +128,24 @@ pub fn coverage_input(
     test_fn_count: usize,
     integration_test_exists: bool,
 ) -> TestCoverageInput<'static> {
+    coverage_input_for_root(
+        "",
+        has_any_tests,
+        public_fn_count,
+        test_fn_count,
+        integration_test_exists,
+    )
+}
+
+pub fn coverage_input_for_root(
+    root_rel_dir: &str,
+    has_any_tests: bool,
+    public_fn_count: usize,
+    test_fn_count: usize,
+    integration_test_exists: bool,
+) -> TestCoverageInput<'static> {
     TestCoverageInput::new(Box::leak(Box::new(TestCoverageFacts {
-        root_rel_dir: String::new(),
+        root_rel_dir: root_rel_dir.to_owned(),
         has_any_tests,
         public_fn_count,
         test_fn_count,
