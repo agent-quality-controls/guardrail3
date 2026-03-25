@@ -1,7 +1,7 @@
 use std::path::Path;
 
-use crate::domain::report::{CheckResult, Severity};
-use crate::ports::outbound::FileSystem;
+use guardrail3_domain_report::{CheckResult, Severity};
+use guardrail3_outbound_traits::FileSystem;
 
 /// H4: Check dispatcher pattern in pre-commit script
 pub(super) fn check_dispatcher_pattern(

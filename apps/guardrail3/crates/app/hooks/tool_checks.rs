@@ -1,7 +1,7 @@
 use std::path::Path;
 
-use crate::domain::report::{CheckResult, Severity};
-use crate::ports::outbound::ToolChecker;
+use guardrail3_domain_report::{CheckResult, Severity};
+use guardrail3_outbound_traits::ToolChecker;
 
 #[allow(clippy::too_many_lines)] // reason: check function validates multiple tools sequentially, splitting would fragment the logic
 pub fn check_duplication_tools(
