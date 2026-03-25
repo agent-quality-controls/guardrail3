@@ -7,18 +7,13 @@ edition = "2024"
 workspace = true
 
 [dependencies]
-guardrail3_app_core = { package = "guardrail3-app-core", path = "../../../core" }
 guardrail3_app_rs_ast = { package = "guardrail3-app-rs-ast", path = "../../ast" }
+guardrail3_app_rs_family_hooks_shared = { package = "guardrail3-app-rs-family-hooks-shared", path = "../hooks-shared" }
 guardrail3_domain_config = { package = "guardrail3-domain-config", path = "../../../../domain/config" }
-guardrail3_domain_modules = { package = "guardrail3-domain-modules", path = "../../../../domain/modules" }
 guardrail3_domain_project_tree = { package = "guardrail3-domain-project-tree", path = "../../../../domain/project-tree" }
 guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../../../domain/report" }
 guardrail3_outbound_traits = { package = "guardrail3-ports-outbound-traits", path = "../../../../ports/outbound/traits" }
 guardrail3_shared_fs = { package = "guardrail3-shared-fs", path = "../../../../shared/fs" }
-glob = { workspace = true }
 proc-macro2 = { version = "1", features = ["span-locations"] }
-quote = "1.0.45"
-semver = "1"
-serde_yaml = "0.9"
 syn = { version = "2", features = ["full", "parsing", "visit"] }
 toml = "0.8"
