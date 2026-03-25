@@ -42,10 +42,10 @@ mod workspace_metadata;
 
 use std::path::{Path, PathBuf};
 
-use crate::app::core::crawl::CrawlResult;
-use crate::app::core::discover::ProjectInfo;
-use crate::domain::config::types::GuardrailConfig;
-use crate::domain::report::{Report, RustCheckCategories, Section};
+use guardrail3_app_core::crawl::CrawlResult;
+use guardrail3_app_core::discover::ProjectInfo;
+use guardrail3_domain_config::types::GuardrailConfig;
+use guardrail3_domain_report::{Report, RustCheckCategories, Section};
 use guardrail3_outbound_traits::{FileSystem, ToolChecker};
 
 /// Try to load guardrail3.toml as a typed config.
@@ -122,8 +122,8 @@ pub fn run(
     }
 
     if categories.hooks {
-        let tree = crate::app::core::project_walker::walk_project(fs, path);
-        let hook_results = crate::app::hooks::check(fs, path, &tree, tc);
+        let tree = guardrail3_app_core::project_walker::walk_project(fs, path);
+        let hook_results = guardrail3_app_hooks::check(fs, path, &tree, tc);
         report.add_section(Section {
             name: "Hook checks".to_owned(),
             results: hook_results,
@@ -150,8 +150,8 @@ pub fn run(
 }
 
 pub fn run_hook_report(fs: &dyn FileSystem, path: &Path, tc: &dyn ToolChecker) -> Report {
-    let tree = crate::app::core::project_walker::walk_project(fs, path);
-    let hook_results = crate::app::hooks::check(fs, path, &tree, tc);
+    let tree = guardrail3_app_core::project_walker::walk_project(fs, path);
+    let hook_results = guardrail3_app_hooks::check(fs, path, &tree, tc);
     let mut report = Report::new(path.display().to_string(), vec!["Rust".to_owned()]);
     report.add_section(Section {
         name: "Hook checks".to_owned(),
