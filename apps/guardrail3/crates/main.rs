@@ -25,22 +25,21 @@ use tempfile as _;
 
 use clap::{CommandFactory, FromArgMatches};
 use garde::Validate;
-use guardrail3::{
-    adapters::inbound::cli::{
-        self as commands,
-        cli::{Cli, Commands, RsCommands, RsValidateArgs, TsCommands, TsValidateArgs},
-        help_gen,
-    },
-    app::{core::discover, hooks, rs, ts},
-    domain::{
-        config::types::GuardrailConfig,
-        report::{TsCheckCategories, ValidateDomains},
-    },
+use guardrail3_adapters_inbound_cli::{
+    self as commands,
+    cli::{Cli, Commands, RsCommands, RsValidateArgs, TsCommands, TsValidateArgs},
+    help_gen,
 };
 use guardrail3_adapters_outbound_fs::RealFileSystem;
 use guardrail3_adapters_outbound_report as report;
 use guardrail3_adapters_outbound_tool_runner::RealToolChecker;
 use guardrail3_app_commands::messages::GUIDE_CONTENT;
+use guardrail3_app_core::{crawl, discover, project_walker};
+use guardrail3_app_hooks as hooks;
+use guardrail3_app_rs_runtime as rs;
+use guardrail3_app_ts as ts;
+use guardrail3_domain_config::types::GuardrailConfig;
+use guardrail3_domain_report::{Report, TsCheckCategories, ValidateDomains};
 use guardrail3_outbound_traits::FileSystem;
 
 #[allow(clippy::print_stderr)] // reason: CLI entry point — stderr for error output
@@ -92,7 +91,7 @@ fn main() {
                 || npmrc;
             if has_coverage {
                 let project_path = std::path::Path::new(&path);
-                let crawl_result = guardrail3::app::core::crawl::crawl(project_path);
+                let crawl_result = crawl::crawl(project_path);
                 run_coverage_maps(
                     project_path,
                     &crawl_result,
@@ -118,7 +117,7 @@ fn main() {
 #[allow(clippy::too_many_arguments, clippy::fn_params_excessive_bools)] // reason: one bool per coverage tool — flat dispatch from CLI flags
 fn run_coverage_maps(
     project_path: &std::path::Path,
-    crawl_result: &guardrail3::app::core::crawl::CrawlResult,
+    crawl_result: &crawl::CrawlResult,
     clippy: bool,
     deny: bool,
     rustfmt: bool,
@@ -178,7 +177,7 @@ fn handle_dump_tree(path_str: &str) {
         }
     };
     let fs = RealFileSystem;
-    let tree = guardrail3::app::core::project_walker::walk_project(&fs, &resolved);
+    let tree = project_walker::walk_project(&fs, &resolved);
     match serde_json::to_string_pretty(&tree) {
         Ok(json) => println!("{json}"),
         Err(e) => {
@@ -265,7 +264,7 @@ fn handle_ts(command: TsCommands) {
             let fs = RealFileSystem;
             let cfg = load_config(&fs, &path);
             let categories = build_ts_categories(&args, &fs, &path);
-            let crawl = guardrail3::app::core::crawl::crawl(&path);
+            let crawl = crawl::crawl(&path);
             let scoped_files = commands::validate::resolve_scoped_files_pub(&args, &path);
             let report = ts::validate::run(
                 &fs,
@@ -288,7 +287,7 @@ fn handle_ts(command: TsCommands) {
             let tc = RealToolChecker;
             let domains = domains_from_args(&args);
             let project = discover::detect_project(&fs, &path);
-            let crawl = guardrail3::app::core::crawl::crawl(&path);
+            let crawl = crawl::crawl(&path);
             let report = hooks::validate::run(
                 &fs,
                 &path,
@@ -303,7 +302,7 @@ fn handle_ts(command: TsCommands) {
     }
 }
 
-fn run_rs_validate(args: &RsValidateArgs) -> guardrail3::domain::report::Report {
+fn run_rs_validate(args: &RsValidateArgs) -> Report {
     let path = resolve_path(&args.path);
     let fs = RealFileSystem;
     let tc = RealToolChecker;
@@ -328,12 +327,7 @@ fn run_rs_validate(args: &RsValidateArgs) -> guardrail3::domain::report::Report 
 }
 
 #[allow(clippy::disallowed_methods)] // reason: CLI — process::exit
-fn print_report(
-    format: &str,
-    inventory: bool,
-    verbose: bool,
-    report: &guardrail3::domain::report::Report,
-) {
+fn print_report(format: &str, inventory: bool, verbose: bool, report: &Report) {
     match format {
         "json" => report::json::print_report(report, inventory),
         "md" | "markdown" => report::markdown::print_report(report, inventory, verbose),
