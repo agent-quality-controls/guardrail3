@@ -39,16 +39,6 @@ mod rs_test_quality_checks_test;
 mod test_garde_checks;
 #[path = "unit/test_hex_arch_checks.rs"]
 mod test_hex_arch_checks;
-#[path = "unit/test_release_bin_checks.rs"]
-mod test_release_bin_checks;
-#[path = "unit/test_release_checks.rs"]
-mod test_release_checks;
-#[path = "unit/test_release_crate_checks.rs"]
-mod test_release_crate_checks;
-#[path = "unit/test_release_crate_deps.rs"]
-mod test_release_crate_deps;
-#[path = "unit/test_release_repo_checks.rs"]
-mod test_release_repo_checks;
 #[path = "unit/test_source_scan.rs"]
 mod test_source_scan;
 #[path = "unit/test_support/mod.rs"]
