@@ -56,16 +56,20 @@ fn malformed_member_manifest_surfaces_explicit_failure() {
             (
                 result.file.as_deref(),
                 result.severity,
+                result.message.contains("Failed to parse workspace Cargo.toml"),
                 result
                     .message
-                    .contains("Failed to parse Cargo.toml for dependency policy check"),
+                    .contains("Failed to parse Cargo.toml for dependency root discovery"),
             )
         })
         .collect::<Vec<_>>();
 
     assert_eq!(
         summary,
-        vec![(Some("apps/api/Cargo.toml"), Severity::Error, true)]
+        vec![
+            (Some("apps/api/Cargo.toml"), Severity::Error, true, false),
+            (Some("apps/api/Cargo.toml"), Severity::Error, false, true),
+        ]
     );
 }
 
@@ -108,10 +112,11 @@ fn malformed_workspace_manifest_does_not_fail_open_workspace_true_resolution() {
             (
                 result.file.as_deref(),
                 result.severity,
+                result.message.contains("Failed to parse workspace Cargo.toml"),
                 result
                     .message
-                    .contains("Failed to parse workspace Cargo.toml")
-                    || result.message.contains("workspace = true"),
+                    .contains("Failed to parse Cargo.toml for dependency root discovery"),
+                result.message.contains("workspace = true"),
             )
         })
         .collect::<Vec<_>>();
@@ -119,8 +124,9 @@ fn malformed_workspace_manifest_does_not_fail_open_workspace_true_resolution() {
     assert_eq!(
         summary,
         vec![
-            (Some("Cargo.toml"), Severity::Error, true),
-            (Some("apps/api/Cargo.toml"), Severity::Error, true),
+            (Some("Cargo.toml"), Severity::Error, true, false, false),
+            (Some("Cargo.toml"), Severity::Error, false, true, false),
+            (Some("apps/api/Cargo.toml"), Severity::Error, false, false, true),
         ]
     );
 }
