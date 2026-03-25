@@ -4,7 +4,7 @@ use walkdir::WalkDir;
 
 use super::source_scan::is_excluded_dir;
 use crate::domain::report::{CheckResult, Severity};
-use crate::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::FileSystem;
 
 /// Run test quality checks (R-TEST-05 through R-TEST-08).
 pub fn check(fs: &dyn FileSystem, workspace_root: &Path, results: &mut Vec<CheckResult>) {

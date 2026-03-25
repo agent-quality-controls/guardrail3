@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 use crate::domain::report::{CheckResult, Severity};
-use crate::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::FileSystem;
 
 type NpmrcExpectation<'a> = (&'a str, &'a str);
 type NpmrcSettings = Vec<(String, String)>;

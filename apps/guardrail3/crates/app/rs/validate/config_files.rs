@@ -5,7 +5,7 @@ use crate::domain::report::{CheckResult, Severity};
 use super::rustfmt_check;
 use super::toolchain_check;
 use super::workspace_metadata;
-use crate::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::FileSystem;
 
 /// Find the config file whose parent is exactly `workspace_root`.
 fn find_root_config<'a>(configs: &'a [PathBuf], workspace_root: &Path) -> Option<&'a PathBuf> {

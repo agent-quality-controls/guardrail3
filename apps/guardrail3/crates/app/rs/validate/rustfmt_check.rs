@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 use std::path::Path;
 
 use crate::domain::report::{CheckResult, Severity};
-use crate::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::FileSystem;
 
 type ExpectedStr<'a> = (&'a str, &'a str);
 type ExpectedInt<'a> = (&'a str, i64);

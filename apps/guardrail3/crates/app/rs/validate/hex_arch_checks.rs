@@ -4,7 +4,7 @@ use std::path::Path;
 use crate::app::core::discover::ProjectInfo;
 use crate::domain::config::types::CrateConfig;
 use crate::domain::report::{CheckResult, Severity};
-use crate::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::FileSystem;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Layer {

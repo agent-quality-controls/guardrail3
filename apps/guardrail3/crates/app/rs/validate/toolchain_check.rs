@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use crate::domain::report::{CheckResult, Severity};
-use crate::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::FileSystem;
 
 pub fn check_toolchain_settings(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResult>) {
     let content = match fs.read_file_err(path) {

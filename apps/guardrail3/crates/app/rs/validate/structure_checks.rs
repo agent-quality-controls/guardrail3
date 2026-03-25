@@ -4,7 +4,7 @@ use crate::domain::report::{CheckResult, Severity};
 
 use super::ast_helpers;
 use super::source_scan::filter_non_comment_lines;
-use crate::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::FileSystem;
 
 // R38: File line count (>500 effective lines = error)
 pub fn check_file_length(

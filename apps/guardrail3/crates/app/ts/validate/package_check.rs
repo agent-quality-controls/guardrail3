@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
 use crate::domain::report::{CheckResult, Severity};
-use crate::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::FileSystem;
 
 #[allow(clippy::too_many_lines, clippy::disallowed_methods)] // reason: comprehensive package.json validation; guardrail3 JSON config inspection
 pub fn check_package_json(

@@ -2,7 +2,7 @@ use std::path::Path;
 
 use crate::domain::config::types::CrateConfig;
 use crate::domain::report::{CheckResult, Severity};
-use crate::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::FileSystem;
 
 /// R-DEPS-01: Check that all dependencies are in the allowlist.
 ///

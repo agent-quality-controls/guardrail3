@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use crate::domain::report::{CheckResult, Severity};
-use crate::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::FileSystem;
 
 /// Rule 1: `crates/` must exist.
 /// Returns the crates dir path if it exists, None otherwise.

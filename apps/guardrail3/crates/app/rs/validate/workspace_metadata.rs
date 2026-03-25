@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use crate::domain::report::{CheckResult, Severity};
-use crate::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::FileSystem;
 
 // R55-R57: workspace metadata & release profile
 pub fn check_workspace_metadata(
