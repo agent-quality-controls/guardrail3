@@ -43,6 +43,11 @@ garde = { version = "0.22", features = ["derive"] }
 glob = "0.3"
 serde = { version = "1", features = ["derive"] }
 
+[profile.mutants]
+inherits = "dev"
+opt-level = 0
+debug = false
+
 [workspace.lints.rust]
 warnings = "deny"
 unsafe_code = "forbid"
