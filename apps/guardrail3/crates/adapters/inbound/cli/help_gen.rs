@@ -41,3 +41,7 @@ fn inject_ts_help(cmd: Command) -> Command {
             })
     })
 }
+
+#[cfg(test)]
+#[path = "help_gen_tests.rs"]
+mod tests;
