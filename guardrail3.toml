@@ -7,10 +7,19 @@ name = "service"
 workspace_root = "apps/guardrail3"
 
 [rust.checks]
-architecture = true
+fmt = true
+toolchain = true
+clippy = true
+deny = true
+cargo = true
+code = true
+hexarch = true
+deps = true
 garde = true
-tests = true
+test = true
 release = true
+hooks_shared = true
+hooks_rs = true
 
 [rust.apps.guardrail3]
 type = "service"

@@ -342,6 +342,7 @@ dependencies = [
  "guardrail3-adapters-outbound-fs",
  "guardrail3-adapters-outbound-report",
  "guardrail3-adapters-outbound-tool-runner",
+ "guardrail3-app-arch-helpers",
  "guardrail3-app-commands",
  "guardrail3-app-core",
  "guardrail3-app-hooks",
@@ -361,6 +362,7 @@ dependencies = [
  "guardrail3-app-rs-family-test",
  "guardrail3-app-rs-family-toolchain",
  "guardrail3-app-rs-generate",
+ "guardrail3-app-rs-legacy-validate",
  "guardrail3-app-rs-runtime",
  "guardrail3-app-ts",
  "guardrail3-domain-config",
@@ -437,6 +439,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "guardrail3-app-arch-helpers"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-domain-report",
+ "guardrail3-ports-outbound-traits",
+]
+
+[[package]]
 name = "guardrail3-app-commands"
 version = "0.0.0"
 
@@ -445,11 +455,13 @@ name = "guardrail3-app-core"
 version = "0.0.0"
 dependencies = [
  "glob",
+ "guardrail3-adapters-outbound-fs",
  "guardrail3-domain-project-tree",
  "guardrail3-ports-outbound-traits",
  "guardrail3-shared-fs",
  "ignore",
  "serde_json",
+ "tempfile",
  "toml",
  "walkdir",
 ]
@@ -690,6 +702,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "guardrail3-app-rs-legacy-validate"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-app-arch-helpers",
+ "guardrail3-app-core",
+ "guardrail3-app-hooks",
+ "guardrail3-app-rs-ast",
+ "guardrail3-app-rs-family-clippy",
+ "guardrail3-app-rs-family-deny",
+ "guardrail3-domain-config",
+ "guardrail3-domain-report",
+ "guardrail3-ports-outbound-traits",
+ "syn",
+ "toml",
+ "walkdir",
+]
+
+[[package]]
 name = "guardrail3-app-rs-runtime"
 version = "0.0.0"
 dependencies = [
@@ -720,6 +750,7 @@ dependencies = [
 name = "guardrail3-app-ts"
 version = "0.0.0"
 dependencies = [
+ "guardrail3-app-arch-helpers",
  "guardrail3-app-core",
  "guardrail3-domain-config",
  "guardrail3-domain-report",

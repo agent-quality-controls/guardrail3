@@ -14,6 +14,8 @@ The purpose is not to “add more tests”. The purpose is to make every rule ha
   - universal attack model
   - exact assertion standard
   - golden-fixture mutation philosophy
+- `../../checks/2026-03-25-rust-layered-test-architecture.md`
+  - layer split between rule, facts/discovery, family integration, and runtime/product tests
 - `11-hexarch-agent-brief.md`
 - `12-code-agent-brief.md`
 - `13-release-agent-brief.md`
@@ -29,7 +31,15 @@ The purpose is not to “add more tests”. The purpose is to make every rule ha
 - `25-toolchain-agent-brief.md`
 - `26-test-agent-brief.md`
 - `27-libarch-agent-brief.md`
+- `28-rust-validation-cutover-agent-brief.md`
+- `29-arch-agent-brief.md`
   - droppable family/combined-lane agent packets
+- `31-hexarch-layered-test-map.md`
+  - concrete rule/facts/integration split for `rs/hexarch`
+- `32-hexarch-01-06-layered-migration-checklist.md`
+  - concrete execution checklist for migrating `RS-HEXARCH-01..06` to the corrected layered model
+- `33-hexarch-layered-test-architecture-note.md`
+  - lightweight future-architecture note for any later agent touching `rs/hexarch` tests or family crate split
 - `16-hexarch-execution-plan.md`
   - exhaustive step-by-step implementation order for the full `rs/hexarch` hardening pass
 - `17-hooks-execution-plan.md`
