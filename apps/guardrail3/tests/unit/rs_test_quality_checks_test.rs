@@ -9,7 +9,7 @@
 
 use std::fs as stdfs;
 
-use guardrail3::app::rs::validate::test_quality_checks::{
+use guardrail3_app_rs_legacy_validate::test_quality_checks::{
     check_integration_tests, check_mutation_hook, check_test_coverage_inventory, count_pub_fns,
     count_test_fns, find_ignore_without_reason,
 };

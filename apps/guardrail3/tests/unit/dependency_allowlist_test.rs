@@ -1,9 +1,9 @@
 use std::path::{Path, PathBuf};
 
-use guardrail3::app::rs::validate::dependency_allowlist::*;
+use guardrail3_app_rs_legacy_validate::dependency_allowlist::*;
 use guardrail3::domain::config::types::CrateConfig;
 use guardrail3::domain::report::Severity;
-use guardrail3::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::{FileSystem, FsDirEntry, FsMetadata};
 
 /// Stub filesystem that returns a predefined Cargo.toml content.
 struct StubFs {
@@ -20,11 +20,11 @@ impl FileSystem for StubFs {
         Ok(self.content.clone())
     }
 
-    fn list_dir(&self, _path: &Path) -> Vec<std::fs::DirEntry> {
+    fn list_dir(&self, _path: &Path) -> Vec<FsDirEntry> {
         Vec::new()
     }
 
-    fn metadata(&self, _path: &Path) -> Option<std::fs::Metadata> {
+    fn metadata(&self, _path: &Path) -> Option<FsMetadata> {
         None
     }
 }

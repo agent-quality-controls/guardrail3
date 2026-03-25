@@ -179,41 +179,57 @@ fn cli_rs_validate_md_format() {
     );
 }
 
-// ---- hooks validate with json/md (main.rs lines 114,115) ----
+// ---- hooks families through rs validate with json/md ----
 
 #[test]
 #[allow(clippy::expect_used)] // reason: test — panics indicate broken test infrastructure
 #[allow(clippy::disallowed_methods)] // reason: test uses Command
-fn cli_hooks_validate_json_format() {
+fn cli_hooks_family_validate_json_format() {
     let out = guardrail3()
-        .args(["rs", "hooks-validate", "--format", "json", project_root()])
+        .args([
+            "rs",
+            "validate",
+            "--format",
+            "json",
+            "--family",
+            "hooks-rs",
+            project_root(),
+        ])
         .output()
         .expect("failed to run");
 
     let stdout = String::from_utf8_lossy(&out.stdout);
     assert!(
         stdout.contains('{'),
-        "hooks validate --format json should produce JSON"
+        "hooks family validate --format json should produce JSON"
     );
 }
 
 #[test]
 #[allow(clippy::expect_used)] // reason: test — panics indicate broken test infrastructure
 #[allow(clippy::disallowed_methods)] // reason: test uses Command
-fn cli_hooks_validate_md_format() {
+fn cli_hooks_family_validate_md_format() {
     let out = guardrail3()
-        .args(["rs", "hooks-validate", "--format", "md", project_root()])
+        .args([
+            "rs",
+            "validate",
+            "--format",
+            "md",
+            "--family",
+            "hooks-rs",
+            project_root(),
+        ])
         .output()
         .expect("failed to run");
 
     let stdout = String::from_utf8_lossy(&out.stdout);
     assert!(
         stdout.contains("# Guardrail3"),
-        "hooks validate --format md should produce markdown"
+        "hooks family validate --format md should produce markdown"
     );
 }
 
-// ---- Domain filtering (main.rs lines 130-135: domains_from_args) ----
+// ---- Family filtering ----
 
 #[test]
 #[allow(clippy::expect_used)] // reason: test — panics indicate broken test infrastructure
@@ -225,7 +241,8 @@ fn cli_validate_code_domain_only() {
             "validate",
             "--format",
             "json",
-            "--code",
+            "--family",
+            "code",
             project_root(),
         ])
         .output()
@@ -234,21 +251,22 @@ fn cli_validate_code_domain_only() {
     let stdout = String::from_utf8_lossy(&out.stdout);
     assert!(
         stdout.contains("\"project\""),
-        "--code flag should still produce report"
+        "--family code should still produce report"
     );
 }
 
 #[test]
 #[allow(clippy::expect_used)] // reason: test — panics indicate broken test infrastructure
 #[allow(clippy::disallowed_methods)] // reason: test uses Command
-fn cli_validate_architecture_domain_only() {
+fn cli_validate_hexarch_family_only() {
     let out = guardrail3()
         .args([
             "rs",
             "validate",
             "--format",
             "json",
-            "--architecture",
+            "--family",
+            "hexarch",
             project_root(),
         ])
         .output()
@@ -257,7 +275,7 @@ fn cli_validate_architecture_domain_only() {
     let stdout = String::from_utf8_lossy(&out.stdout);
     assert!(
         stdout.contains("\"project\""),
-        "--architecture flag should produce report"
+        "--family hexarch should produce report"
     );
 }
 

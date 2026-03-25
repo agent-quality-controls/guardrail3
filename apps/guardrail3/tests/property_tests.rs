@@ -46,7 +46,7 @@ fn binary_path() -> PathBuf {
 fn run_rs_validate(dir: &std::path::Path) -> (i32, String, String) {
     let dir_str = dir.display().to_string();
     let output = Command::new(binary_path())
-        .args(["rs", "validate", "--format", "json", "--code"])
+        .args(["rs", "validate", "--format", "json", "--family", "code"])
         .arg(&dir_str)
         .output()
         .expect("Failed to run guardrail3");

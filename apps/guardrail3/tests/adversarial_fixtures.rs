@@ -47,7 +47,7 @@ fn validate_fixture(fixture_name: &str) -> String {
     validate_fixture_with_args(fixture_name, &[])
 }
 
-/// Like `validate_fixture` but with extra CLI args (e.g., `--garde` to enable garde checks).
+/// Like `validate_fixture` but with extra CLI args (e.g., `--family garde`).
 #[allow(clippy::disallowed_methods)] // reason: Command::new needed to invoke binary under test
 #[allow(clippy::expect_used)] // reason: test helper — panics indicate broken test infrastructure
 fn validate_fixture_with_args(fixture_name: &str, extra_args: &[&str]) -> String {
@@ -186,7 +186,7 @@ fn adversarial_r32_allow_in_macro_invisible_to_ast() {
 
 #[test]
 fn adversarial_r34_garde_skip_no_reason_detected() {
-    let result = validate_fixture_with_args("garde_skip_no_reason.rs", &["--garde"]);
+    let result = validate_fixture_with_args("garde_skip_no_reason.rs", &["--family", "garde"]);
     assert_contains_check(&result, "R34", "error");
 }
 
