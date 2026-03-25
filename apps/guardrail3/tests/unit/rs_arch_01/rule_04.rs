@@ -2,7 +2,7 @@ use super::helpers::{
     INNER_HEX, RUST_APPS, arch_errors, assert_file_field, assert_inner_hex, assert_no_packages,
     assert_no_ts_apps, assert_per_app, copy_fixture, remove_dir, run_check, write_file,
 };
-use guardrail3::domain::report::CheckResult;
+use guardrail3_domain_report::CheckResult;
 
 const CONTAINER_SUFFIXES: &[&str] = &[
     "app",

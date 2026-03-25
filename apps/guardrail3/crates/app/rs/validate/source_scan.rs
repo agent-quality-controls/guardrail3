@@ -2,7 +2,7 @@ use std::path::Path;
 
 use walkdir::WalkDir;
 
-use crate::domain::report::CheckResult;
+use guardrail3_domain_report::CheckResult;
 
 use super::allow_checks;
 use super::code_quality_checks;
@@ -93,7 +93,7 @@ pub fn is_excluded_dir_with_gitignore(
 
 pub fn collect_rs_files(fs: &dyn FileSystem, root: &Path) -> Vec<String> {
     let mut files = Vec::new();
-    let gitignored = crate::app::core::gitignore::load_gitignore_dirs(fs, root);
+    let gitignored = guardrail3_app_core::gitignore::load_gitignore_dirs(fs, root);
     for entry in WalkDir::new(root)
         .into_iter()
         .filter_entry(|e| !is_excluded_dir_with_gitignore(e, &gitignored))

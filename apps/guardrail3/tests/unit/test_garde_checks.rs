@@ -1,8 +1,8 @@
+use guardrail3_app_rs_ast::ast_helpers::find_derive_attributes;
 use guardrail3_app_rs_legacy_validate::garde_checks::{
     EXPECTED_AXUM_TYPE_BANS, EXPECTED_SERDE_METHOD_BANS, check_ban_presence,
     check_garde_dependency, check_reqwest_json_ban_from_table, count_unvalidated_input_structs,
 };
-use guardrail3_app_rs_ast::ast_helpers::find_derive_attributes;
 use guardrail3_domain_report::{CheckResult, Severity};
 
 // Test-only helpers that parse clippy.toml content strings

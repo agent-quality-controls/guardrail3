@@ -1,5 +1,5 @@
+use super::eslint_parser;
 use super::*;
-use crate::app::ts::validate::eslint_parser;
 use std::path::PathBuf;
 
 fn path() -> PathBuf {

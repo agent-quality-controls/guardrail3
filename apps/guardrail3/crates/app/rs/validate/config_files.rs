@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use crate::domain::report::{CheckResult, Severity};
+use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::rustfmt_check;
 use super::toolchain_check;

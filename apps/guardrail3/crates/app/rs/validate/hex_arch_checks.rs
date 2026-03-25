@@ -1,9 +1,9 @@
 use std::collections::BTreeMap;
 use std::path::Path;
 
-use crate::app::core::discover::ProjectInfo;
-use crate::domain::config::types::CrateConfig;
-use crate::domain::report::{CheckResult, Severity};
+use guardrail3_app_core::discover::ProjectInfo;
+use guardrail3_domain_config::types::CrateConfig;
+use guardrail3_domain_report::{CheckResult, Severity};
 use guardrail3_outbound_traits::FileSystem;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

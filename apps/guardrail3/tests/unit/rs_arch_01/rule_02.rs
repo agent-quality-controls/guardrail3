@@ -2,7 +2,7 @@ use super::helpers::{
     INNER_HEX, RUST_APPS, arch_errors, assert_inner_hex, assert_no_packages, assert_no_ts_apps,
     assert_per_app, copy_fixture, remove_dir, remove_file, run_check, write_file,
 };
-use guardrail3::domain::report::CheckResult;
+use guardrail3_domain_report::CheckResult;
 
 /// All 4 crates/ locations in the golden fixture.
 const ALL_CRATES_DIRS: &[&str] = &[

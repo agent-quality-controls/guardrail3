@@ -7,7 +7,7 @@
     clippy::manual_assert
 )] // reason: test crate
 
-use guardrail3::app::ts::validate::ast_helpers::{
+use guardrail3_app_ts::validate::ast_helpers::{
     find_comments, find_eslint_disables, find_ts_directives, parse_tsx, parse_typescript,
 };
 use tree_sitter::Tree;

@@ -9,7 +9,7 @@ use guardrail3_app_rs_legacy_validate::hex_arch_checks::{
     is_service_internal, layer_from_config, normalize_path,
 };
 use guardrail3_app_rs_legacy_validate::hex_arch_structure::check_hex_arch_structure;
-use guardrail3::domain::report::Severity;
+use guardrail3_domain_report::Severity;
 use guardrail3_outbound_traits::{FileSystem, FsDirEntry, FsMetadata};
 
 /// A stub filesystem that supports both file reads and directory listing.

@@ -2,7 +2,7 @@ use super::helpers::{
     arch_errors, assert_no_packages, assert_no_rust_apps, copy_fixture, remove_dir, run_check,
     write_file,
 };
-use guardrail3::domain::report::{CheckResult, Severity};
+use guardrail3_domain_report::{CheckResult, Severity};
 
 // ============================================================================
 // Rule 01: src/modules/ must exist for TS apps

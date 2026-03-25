@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use crate::domain::report::{CheckResult, Severity};
+use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::release_checks::CrateInfo;
 use super::release_repo_checks::read_workflow_files;

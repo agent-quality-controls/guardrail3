@@ -1,7 +1,7 @@
 use std::path::Path;
 
-use crate::app::core::crawl::CrawlResult;
-use crate::domain::report::CheckResult;
+use guardrail3_app_core::crawl::CrawlResult;
+use guardrail3_domain_report::CheckResult;
 
 use super::eslint_check;
 use super::jscpd_check;

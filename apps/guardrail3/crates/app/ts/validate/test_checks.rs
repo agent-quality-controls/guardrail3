@@ -4,7 +4,7 @@ use walkdir::WalkDir;
 
 use super::ast_helpers;
 use super::source_scan::is_excluded_ts_dir;
-use crate::domain::report::{CheckResult, Severity};
+use guardrail3_domain_report::{CheckResult, Severity};
 use guardrail3_outbound_traits::FileSystem;
 
 /// Run all TypeScript test quality checks.

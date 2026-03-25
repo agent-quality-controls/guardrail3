@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use crate::domain::report::{CheckResult, Severity};
+use guardrail3_domain_report::{CheckResult, Severity};
 use guardrail3_outbound_traits::FileSystem;
 
 /// Rule 12: `apps/{name}/src/` is banned — code must be in `crates/`.

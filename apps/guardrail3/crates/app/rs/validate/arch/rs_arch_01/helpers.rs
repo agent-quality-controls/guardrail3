@@ -2,8 +2,8 @@
 
 use std::path::Path;
 
-use crate::domain::report::CheckResult;
 use guardrail3_app_arch_helpers as arch_helpers;
+use guardrail3_domain_report::CheckResult;
 use guardrail3_outbound_traits::FileSystem;
 
 const ID: &str = "R-ARCH-01";

@@ -1,8 +1,8 @@
 use std::path::{Path, PathBuf};
 
 use guardrail3_app_rs_legacy_validate::dependency_allowlist::*;
-use guardrail3::domain::config::types::CrateConfig;
-use guardrail3::domain::report::Severity;
+use guardrail3_domain_config::types::CrateConfig;
+use guardrail3_domain_report::Severity;
 use guardrail3_outbound_traits::{FileSystem, FsDirEntry, FsMetadata};
 
 /// Stub filesystem that returns a predefined Cargo.toml content.

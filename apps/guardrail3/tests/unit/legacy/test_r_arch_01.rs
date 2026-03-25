@@ -30,7 +30,7 @@ use std::path::Path;
 
 use guardrail3_adapters_outbound_fs::RealFileSystem;
 use guardrail3_app_rs_legacy_validate::hex_arch_structure::check_hex_arch_structure;
-use guardrail3::domain::report::{CheckResult, Severity};
+use guardrail3_domain_report::{CheckResult, Severity};
 
 const GOLDEN: &str = "tests/fixtures/r_arch_01/golden";
 

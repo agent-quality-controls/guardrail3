@@ -3,7 +3,7 @@ use super::helpers::{
     assert_no_ts_apps, assert_per_app, assert_single_error, copy_fixture, remove_dir, remove_file,
     run_check, write_file,
 };
-use guardrail3::domain::report::CheckResult;
+use guardrail3_domain_report::CheckResult;
 use std::os::unix::fs::PermissionsExt;
 #[allow(unused_imports)] // reason: symlink tests use this
 use std::os::unix::fs::symlink;
