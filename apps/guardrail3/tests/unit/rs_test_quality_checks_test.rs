@@ -13,7 +13,8 @@ use guardrail3::app::rs::validate::test_quality_checks::{
     check_integration_tests, check_mutation_hook, check_test_coverage_inventory, count_pub_fns,
     count_test_fns, find_ignore_without_reason,
 };
-use guardrail3::domain::report::Severity;
+use guardrail3_adapters_outbound_fs::RealFileSystem;
+use guardrail3_domain_report::Severity;
 
 fn make_temp_dir() -> tempfile::TempDir {
     tempfile::tempdir().expect("failed to create temp dir")
@@ -35,7 +36,7 @@ fn r_test_05_counts_test_fns() {
 
 #[test]
 fn r_test_05_emits_inventory() {
-    let fs = guardrail3::adapters::outbound::fs::RealFileSystem;
+    let fs = RealFileSystem;
     let tmp = make_temp_dir();
     let src_dir = tmp.path().join("src");
     stdfs::create_dir_all(&src_dir).expect("mkdir");
@@ -58,7 +59,7 @@ fn r_test_05_emits_inventory() {
 
 #[test]
 fn r_test_06_neg_no_tests_dir() {
-    let fs = guardrail3::adapters::outbound::fs::RealFileSystem;
+    let fs = RealFileSystem;
     let tmp = make_temp_dir();
     let mut results = Vec::new();
     check_integration_tests(&fs, tmp.path(), &mut results);
@@ -70,7 +71,7 @@ fn r_test_06_neg_no_tests_dir() {
 
 #[test]
 fn r_test_06_pos_tests_dir_with_rs() {
-    let fs = guardrail3::adapters::outbound::fs::RealFileSystem;
+    let fs = RealFileSystem;
     let tmp = make_temp_dir();
     let tests_dir = tmp.path().join("tests");
     stdfs::create_dir_all(&tests_dir).expect("mkdir");
@@ -124,7 +125,7 @@ fn r_test_07_pos_ignore_with_name_value_reason() {
 
 #[test]
 fn r_test_08_neg_no_hook() {
-    let fs = guardrail3::adapters::outbound::fs::RealFileSystem;
+    let fs = RealFileSystem;
     let tmp = make_temp_dir();
     let mut results = Vec::new();
     check_mutation_hook(&fs, tmp.path(), &mut results);
@@ -136,7 +137,7 @@ fn r_test_08_neg_no_hook() {
 
 #[test]
 fn r_test_08_pos_claude_hook() {
-    let fs = guardrail3::adapters::outbound::fs::RealFileSystem;
+    let fs = RealFileSystem;
     let tmp = make_temp_dir();
     let claude_dir = tmp.path().join(".claude");
     stdfs::create_dir_all(&claude_dir).expect("mkdir");
@@ -155,7 +156,7 @@ fn r_test_08_pos_claude_hook() {
 
 #[test]
 fn r_test_08_pos_pre_commit_hook() {
-    let fs = guardrail3::adapters::outbound::fs::RealFileSystem;
+    let fs = RealFileSystem;
     let tmp = make_temp_dir();
     let hooks_dir = tmp.path().join(".git").join("hooks");
     stdfs::create_dir_all(&hooks_dir).expect("mkdir");

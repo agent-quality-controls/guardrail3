@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use guardrail3::app::rs::validate::allow_checks::*;
-use guardrail3::domain::report::Severity;
+use guardrail3_domain_report::Severity;
 
 // ---- Bug 2: Check ID mappings R30-R35 ----
 
