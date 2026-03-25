@@ -211,6 +211,17 @@ The root facade package must export public surface from `api`, not directly from
 
 ## Relationship to other families
 
+### RS-ARCH
+
+`RS-ARCH` owns:
+- repo-global Rust root placement
+- zone classification (`apps/*`, `packages/*`, `other`)
+- misplaced-root reporting
+- overlap/ownership legality between app/package zones
+
+`RS-LIBARCH` does not emit repo-global misplaced-root findings.
+It assumes `RS-ARCH` has already answered whether a Rust root belongs in the package zone at all.
+
 ### RS-CODE
 
 `RS-CODE` still owns:

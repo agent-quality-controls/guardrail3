@@ -75,3 +75,16 @@ Current migrated structural coverage:
 | test/ directory skip abuse | Deliberate behavior. Moving production crate to tests/ breaks all production imports. |
 | Facade-only lib.rs | Belongs in RS-CODE-27 (library profile check). Code quality, not architecture. |
 | Adapter-implements-port full verification | Requires cross-crate name resolution syn can't do. RS-HEXARCH-23 (pub trait in adapter = Error) is the cheap heuristic. |
+
+## Relationship to other families
+
+### RS-ARCH
+
+`RS-ARCH` owns:
+- repo-global Rust root placement
+- zone classification (`apps/*`, `packages/*`, `other`)
+- misplaced-root reporting
+- overlap/ownership legality between app/package zones
+
+`RS-HEXARCH` does not emit repo-global misplaced-root findings.
+It assumes `RS-ARCH` has already answered whether a Rust root belongs in the app zone at all.

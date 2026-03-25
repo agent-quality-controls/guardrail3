@@ -171,6 +171,9 @@ crates/app/checks/
 │   ├── cargo/                              # 9 rules — reads Cargo.toml files
 │   │   ├── mod.rs
 │   │   └── ...
+│   ├── arch/                               # repo-global Rust root placement / ownership
+│   │   ├── mod.rs
+│   │   └── ...
 │   ├── code/                               # 29 rules — reads *.rs (syn AST, streamed)
 │   │   ├── mod.rs
 │   │   └── ...

@@ -1,6 +1,6 @@
 # TypeScript / Frontend Planning
 
-This folder is active again.
+This folder is active again, but it is no longer the canonical place to define TS family contracts.
 
 Reason:
 - the Rust-for-frontend direction is not mature enough yet
@@ -11,10 +11,13 @@ What lives here:
 - TS/frontend audit notes worth reusing
 - the Rust frontend/content attempt docs, kept as reference for possible future migration back
 
+Canonical TS family contracts now live under:
+- `.plans/todo/checks/ts/`
+
 ## Structure
 
 - `checks/`
-  - active TS/deploy/hook plan docs
+  - legacy/revived TS/deploy/hook plan docs and audit-era notes
 - `audit/`
   - TS/frontend audit notes reactivated for planning use
 - `ts/`
@@ -30,3 +33,5 @@ What lives here:
 - Rust frontend/content family ideas are paused, not deleted
 
 If planning frontend/content work, start here before reading `legacy/`.
+If defining the actual family architecture, start at:
+- `.plans/todo/checks/ts/README.md`

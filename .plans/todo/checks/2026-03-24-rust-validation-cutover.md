@@ -11,6 +11,9 @@ The legacy validator under `crates/app/rs/validate/**` is not a compatibility la
 The cutover is complete only when:
 - `rs validate` emits only `RS-*` and `HOOK-*` findings
 - CLI help and generated guide text describe only the new family model
+- remediation/module text points only at real commands
+- Rust-only dry-run/check/diff surfaces operate on the Rust write set, not all-stack generation
+- Rust-scoped module surfaces have coherent ownership and naming
 - old `R*` / `R-ARCH-*` / `R-REL-*` rule inventory is gone from the user-facing validate path
 
 ## Runtime entrypoint
@@ -27,16 +30,41 @@ The runtime must not call:
 - `crate::app::rs::validate::run(...)`
 - any old `app/rs/validate/*` family module
 
-The old validator tree becomes dead code after cutover and should be deleted once the new runner is wired and tested.
+The old validator tree must not remain part of the Rust validation runtime contract.
+But it is not deleted by decree.
+It is deleted only after every remaining consumer has been migrated off it.
+
+That includes non-validate product surfaces that still import it today, such as:
+- coverage/map helpers
+- hook validation paths that still route through it
+- parser helpers still imported by new-family code
+
+So the correct sequence is:
+1. move remaining consumers off `app/rs/validate/**`
+2. make the new runtime the only Rust validation path
+3. then delete `app/rs/validate/**`
+
+Deletion is allowed only when:
+- no non-legacy file imports `crate::app::rs::validate::*`
+- the live Rust app surface no longer exports `pub mod validate`
 
 The old Rust-specific hook validation path under:
 - `crates/app/hooks/validate.rs`
 
 is also removed from the Rust validation runtime contract.
 
+The cutover is not complete while adjacent product surfaces still contradict the Rust-only model:
+
+- help text advertising nonexistent commands
+- guide/remediation text advertising nonexistent commands
+- `rs` dry-run / check / diff paths expanding into TS-wide generation
+- module/help surfaces still coupled to removed grouped categories
+- generated headers or runtime hints advertising nonexistent or wrong-scope commands
+
 ## Family set
 
 The Rust validation family set is:
+- `arch`
 - `fmt`
 - `toolchain`
 - `clippy`
@@ -51,7 +79,9 @@ The Rust validation family set is:
 - `hooks-shared`
 - `hooks-rs`
 
-`libarch` is not part of the runtime family set until there is a live checker module under `crates/app/rs/checks/rs/libarch/`.
+`arch` and `libarch` are part of the target Rust family model, but neither is part of the live runtime until there is a checker module under:
+- `crates/app/rs/checks/rs/arch/`
+- `crates/app/rs/checks/rs/libarch/`
 
 ## CLI contract
 
@@ -68,6 +98,7 @@ guardrail3 rs validate . --family fmt --family clippy
 If no `--family` flags are provided, all implemented Rust families are selected.
 
 The family names are:
+- `arch`
 - `fmt`
 - `toolchain`
 - `clippy`
@@ -114,6 +145,7 @@ Concretely:
 - `code`, `garde`, and `test` apply scope only to their source-file analysis surfaces
 - their root-owned / tool-owned / config-owned rules still run in full
 - non-source families ignore file scope and still run in full when selected:
+  - `arch`
   - `fmt`
   - `toolchain`
   - `clippy`
@@ -151,6 +183,37 @@ Hook validation lives under:
 
 There is one Rust validation entrypoint, not a separate hook-validator stack.
 
+## Adjacent product surfaces
+
+The runtime cutover includes the surrounding Rust-facing product surfaces, not only the internal validator call graph.
+
+The following must move in the same cutover window:
+
+- `help_gen.rs`
+- guide/remediation text
+- module/help listing surfaces
+- `check` / `diff` / dry-run generation surfaces
+- coverage/map surfaces that still import legacy validator code
+- generated headers and runtime hints embedded in canonical files
+
+Rust-facing commands must stop depending on TypeScript drift for success when the command is documented as Rust-only.
+The cutover must also choose one explicit owner for:
+- the Rust write set used by Rust-facing generation commands
+- the Rust module namespace and command text that refers to it
+
+Those owners are:
+- Rust write set:
+  - crate: `crates/app/rs/generate`
+  - file: `src/owned_artifacts.rs`
+- Rust namespace / command text:
+  - crate: `crates/app/commands`
+  - files:
+    - `src/command_ids.rs`
+    - `src/messages.rs`
+
+`rs hooks-install` is part of the Rust write set.
+It must not depend on TypeScript configuration or emit TypeScript-owned hook content.
+
 ## Config contract
 
 `guardrail3.toml` Rust check toggles become family-based.
@@ -161,6 +224,7 @@ Use:
 
 ```toml
 [rust.checks]
+arch = true
 fmt = true
 toolchain = true
 clippy = true
@@ -223,6 +287,12 @@ Current dependency closure:
 
 CLI narrows. Config enables/disables. There is no grouped-domain expansion step.
 
+The runner must not collapse per-root applicability into one repo-wide boolean.
+It needs typed applicability data that represents:
+- which owned roots are enabled for a family
+- which selected roots are applicable for a family
+- which scoped source files survive narrowing
+
 ## Ownership model
 
 The runtime contract follows the family plans.
@@ -236,6 +306,9 @@ The runtime contract follows the family plans.
 - `clippy`
 - `deny`
 - `cargo`
+
+### Repo-global architecture family
+- `arch`
 
 ### Mixed source + root families
 - `code`
@@ -257,6 +330,9 @@ The runtime contract follows the family plans.
 
 Each family owns its own applicability rules. The top-level runner selects families; it does not re-implement family semantics.
 
+But the runner still owns the shared applicability substrate.
+Families must not be forced to reconstruct enabled-root/applicability state from raw CLI strings.
+
 ## Orchestration pipeline
 
 The new Rust runner must:
@@ -265,8 +341,9 @@ The new Rust runner must:
 2. construct one `FileSystem`
 3. construct one `ToolChecker`
 4. resolve the selected family set
-5. call each family orchestrator directly with the inputs its public contract requires
-6. collect family-local results into one `Report`
+5. resolve typed applicability for the selected set
+6. call each family orchestrator directly with the inputs its public contract requires
+7. collect family-local results into one `Report`
 
 The runner must not:
 - synthesize old grouped sections such as “Config files” or “Source code scan”
@@ -310,6 +387,14 @@ Remove:
 Replace it with a family-selection type, for example:
 - `RustValidationFamily`
 - `RustValidationSelection`
+- `RustValidationApplicability`
+
+The pure Rust family identity must live in the shared validation-model surface.
+Its owner is:
+- crate: `crates/domain/validation-model`
+- file: `src/families.rs`
+
+CLI parsing adapters such as `clap::ValueEnum` and presentation/name helpers must live outside that shared domain type.
 
 `ValidateDomains` remains only if still needed outside Rust validate. It must not drive Rust family routing.
 
@@ -343,12 +428,16 @@ The following user-facing surfaces must switch to the new family inventory:
 - `apps/guardrail3/tests/**` Rust validate UX/config snapshots and CLI tests
 - CLI help text for `rs validate`
 - generated guide/help output that currently lists old `R*` inventories
+- generated headers and remediation text embedded in canonical files
 
 They must describe:
 - the family list
 - `--family`
 - family-level config keys
 - the absence of grouped Rust validation flags
+
+They must also use commands that actually exist in the shipped CLI.
+They must all consume one canonical namespace/text owner rather than duplicating command strings independently.
 
 ## Acceptance criteria
 
@@ -363,14 +452,24 @@ The cutover is correct only when all of the following are true:
 7. `rs hooks-validate` is gone as a separate validation path.
 8. Rust validate tests and golden snapshots no longer lock in old grouped flags, grouped config keys, or old rule IDs.
 9. The public `guardrail3 rs validate` path in `main.rs` no longer routes Rust validation through the old CLI validate helper / legacy Rust validator stack.
+10. Rust-only `check` / `diff` / dry-run generation no longer depends on TS-wide generation.
+11. One runtime path owns Rust report assembly, including hook-family report sections.
+12. The runtime uses typed applicability data, not only raw file-path sets.
+13. One canonical owner defines the Rust write set for Rust-facing generation commands.
+14. One canonical owner defines Rust module-command namespace and user-visible command text.
 
 ## Implementation order inside the cutover
 
 1. Add the new Rust family-selection type and `--family` CLI contract.
-2. Add a new Rust validation runner over `app/rs/checks/**`.
-3. Switch CLI Rust validate to that runner.
-4. Switch report sections to family-based names.
-5. Update config parsing and docs to family-level keys.
-6. Remove old grouped Rust validate flags.
-7. Remove `rs hooks-validate`.
-8. Delete the legacy runtime path under `app/rs/validate/**`.
+2. Add typed applicability data for ownership-scope and file-scope resolution.
+3. Add a new Rust validation runner over `app/rs/checks/**`.
+4. Make that runner the single Rust report-assembly owner.
+5. Switch CLI Rust validate to that runner.
+6. Switch report sections to family-based names.
+7. Split Rust-only `check` / `diff` / dry-run generation away from all-stack generation.
+8. Choose and implement the single Rust write-set owner for Rust-facing generation commands.
+9. Choose and implement the single namespace/text owner for Rust-facing module/help/guide/remediation surfaces.
+10. Update config parsing and docs to family-level keys.
+11. Remove old grouped Rust validate flags.
+12. Remove `rs hooks-validate`.
+13. Delete the legacy runtime path under `app/rs/validate/**` only after the zero-consumer gate is satisfied.
