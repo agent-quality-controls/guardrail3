@@ -29,12 +29,14 @@ mod rs_hexarch_25_target_dependency_direction;
 mod source_facts;
 #[cfg(test)]
 mod test_support;
+#[cfg(test)]
+mod tests;
 
 use glob as _;
 use guardrail3_app_core as _;
 use guardrail3_domain_modules as _;
-use guardrail3_domain_report::CheckResult;
 use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_domain_report::CheckResult;
 use guardrail3_outbound_traits as _;
 use proc_macro2 as _;
 use quote as _;
