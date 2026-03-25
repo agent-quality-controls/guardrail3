@@ -2,6 +2,7 @@ use std::collections::BTreeSet;
 use std::path::Path;
 
 use crate::adapters::inbound::cli::generate;
+use guardrail3_app_rs_generate::generate_rust_expected;
 
 /// A (`relative_path`, `content`) pair for a generated file.
 type FilePair = (String, String);
@@ -26,7 +27,7 @@ enum FileStatus {
 pub fn run(path: &str, dump_dir: Option<&str>) {
     let project_path = Path::new(path);
 
-    let Some(expected) = generate::generate_expected(project_path) else {
+    let Some(expected) = generate_rust_expected(project_path) else {
         eprintln!("Error: guardrail3.toml not found or invalid at {path}");
         std::process::exit(1);
     };
@@ -59,7 +60,7 @@ pub fn run_ts(path: &str, dump_dir: Option<&str>) {
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — writes files for user inspection
 fn dump_files(expected: &[FilePair], dump_dir: &str) {
     let dump_path = Path::new(dump_dir);
-    if let Err(e) = crate::fs::create_dir_all(dump_path) {
+    if let Err(e) = guardrail3_shared_fs::create_dir_all(dump_path) {
         eprintln!("Error creating dump directory: {e}");
         std::process::exit(1);
     }
@@ -67,12 +68,12 @@ fn dump_files(expected: &[FilePair], dump_dir: &str) {
     for (rel_path, content) in expected {
         let full_path = dump_path.join(rel_path);
         if let Some(parent) = full_path.parent() {
-            if let Err(e) = crate::fs::create_dir_all(parent) {
+            if let Err(e) = guardrail3_shared_fs::create_dir_all(parent) {
                 eprintln!("Error creating {}: {e}", parent.display());
                 continue;
             }
         }
-        match crate::fs::write_file(&full_path, content) {
+        match guardrail3_shared_fs::write_file(&full_path, content) {
             Ok(()) => println!("  wrote {rel_path}"),
             Err(e) => eprintln!("  ERROR writing {rel_path}: {e}"),
         }
@@ -145,7 +146,7 @@ fn show_smart_diff(expected: &[FilePair], project_path: &Path) {
 /// Classify a single file: create, update, update-with-custom, or no-change.
 fn classify_file(project_path: &Path, rel_path: &str, gen_content: &str) -> FileStatus {
     let full_path = project_path.join(rel_path);
-    let Ok(actual) = crate::fs::read_file_err(&full_path) else {
+    let Ok(actual) = guardrail3_shared_fs::read_file_err(&full_path) else {
         return FileStatus::WouldCreate;
     };
 

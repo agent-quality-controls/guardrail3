@@ -1,19 +1,18 @@
-#[path = "generate_helpers.rs"]
-mod generate_helpers;
-use generate_helpers::{
-    GeneratedFile, detect_ts_app_types, generate_rust_files, load_local_overrides,
-    resolve_rust_root,
-};
-
 use std::path::Path;
 
 use crate::adapters::inbound::cli::cli::GenerateArgs;
 use crate::domain::config;
 use crate::domain::modules::{canonical, cspell, eslint, stylelint};
 use guardrail3_app_commands::command_ids::{RS_INIT, RS_SHOW_MODULE};
+use guardrail3_app_rs_generate as rs_generate;
 
 /// A (`relative_path`, `content`) pair for a generated file.
 type GeneratedPair = (String, String);
+
+struct GeneratedFile {
+    path: String,
+    content: String,
+}
 
 /// Load guardrail3.toml configuration from a project path.
 #[allow(clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI tool — config parse errors reported to stderr; guardrail3 config parsing — no garde validation needed for own config
@@ -92,15 +91,7 @@ pub fn run_rs(args: &GenerateArgs) {
         std::process::exit(1);
     };
 
-    let profile = cfg
-        .profile
-        .as_ref()
-        .map_or("service", |p| p.name.as_str())
-        .to_owned();
-
-    let local = load_local_overrides(project_path);
-
-    let files = generate_rust_files(project_path, &cfg, &profile, &local);
+    let files = rs_generate::generate_rust_owned_artifacts(project_path, &cfg);
 
     for gf in &files {
         let target = project_path.join(&gf.path);
@@ -114,10 +105,6 @@ pub fn run_rs(args: &GenerateArgs) {
         }
         println!("  wrote: {}", gf.path);
     }
-
-    // Also generate pre-commit hook
-    let has_typescript = cfg.typescript.is_some();
-    generate_and_install_hooks(project_path, true, has_typescript);
 }
 
 /// Generate only TypeScript config files.
@@ -161,19 +148,17 @@ pub fn run_ts(args: &GenerateArgs) {
 
     // Also generate pre-commit hook
     let has_rust = cfg.rust.is_some();
-    generate_and_install_hooks(project_path, has_rust, true);
+    let hook_content = build_hook_content(Some(&cfg), has_rust, true);
+    generate_and_install_hooks(project_path, &hook_content);
 }
 
-/// Generate and install pre-commit hooks for the detected stacks.
+/// Generate and install a pre-commit hook.
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI output
-fn generate_and_install_hooks(project_path: &Path, has_rust: bool, has_typescript: bool) {
-    let cfg = load_config(project_path);
-    let hook_content = build_hook_content(cfg.as_ref(), has_rust, has_typescript);
-
+fn generate_and_install_hooks(project_path: &Path, hook_content: &str) {
     let hooks_dir = project_path.join(".githooks");
     let _ = guardrail3_shared_fs::create_dir_all(&hooks_dir);
     let hook_path = hooks_dir.join("pre-commit");
-    if let Err(e) = guardrail3_shared_fs::write_file(&hook_path, &hook_content) {
+    if let Err(e) = guardrail3_shared_fs::write_file(&hook_path, hook_content) {
         eprintln!("Error writing pre-commit hook: {e}");
         return;
     }
@@ -197,12 +182,54 @@ fn generate_and_install_hooks(project_path: &Path, has_rust: bool, has_typescrip
 
 /// Install pre-commit hooks (standalone command).
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
+pub fn run_rs_hooks(args: &GenerateArgs) {
+    let project_path = Path::new(&args.path);
+    let cfg = load_config(project_path);
+    let hook = rs_generate::generate_rust_hook_artifact(cfg.as_ref());
+
+    let hooks_dir = project_path.join(".githooks");
+    if let Err(e) = guardrail3_shared_fs::create_dir_all(&hooks_dir) {
+        eprintln!("Error creating .githooks/ directory: {e}");
+        std::process::exit(1);
+    }
+
+    let hook_path = hooks_dir.join("pre-commit");
+    if let Err(e) = guardrail3_shared_fs::write_file(&hook_path, &hook.content) {
+        eprintln!("Error writing pre-commit hook: {e}");
+        std::process::exit(1);
+    }
+
+    // Make executable
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        if let Some(meta) = guardrail3_shared_fs::metadata(&hook_path) {
+            let mut perms = meta.permissions();
+            perms.set_mode(0o755);
+            if let Err(e) = guardrail3_shared_fs::set_permissions(&hook_path, perms) {
+                eprintln!("Warning: could not set executable permission: {e}");
+            }
+        }
+    }
+
+    println!("  wrote: .githooks/pre-commit");
+    println!();
+    println!("Configure git to use hooks: git config core.hooksPath .githooks");
+}
+
+/// Install mixed-stack pre-commit hooks for the current project config.
+#[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
 pub fn run_hooks(args: &GenerateArgs) {
     let project_path = Path::new(&args.path);
     let cfg = load_config(project_path);
-
-    let has_rust = cfg.as_ref().and_then(|c| c.rust.as_ref()).is_some();
-    let has_typescript = cfg.as_ref().and_then(|c| c.typescript.as_ref()).is_some();
+    let has_rust = cfg
+        .as_ref()
+        .and_then(|config| config.rust.as_ref())
+        .is_some();
+    let has_typescript = cfg
+        .as_ref()
+        .and_then(|config| config.typescript.as_ref())
+        .is_some();
     let hook_content = build_hook_content(cfg.as_ref(), has_rust, has_typescript);
 
     let hooks_dir = project_path.join(".githooks");
@@ -217,7 +244,6 @@ pub fn run_hooks(args: &GenerateArgs) {
         std::process::exit(1);
     }
 
-    // Make executable
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
@@ -250,30 +276,25 @@ fn warn_if_overwriting(target: &Path, relative_path: &str, new_content: &str) {
 fn generate_all_files(
     project_path: &Path,
     cfg: &config::types::GuardrailConfig,
-    profile: &str,
+    _profile: &str,
 ) -> Vec<GeneratedFile> {
     let mut files = Vec::new();
 
-    let local = load_local_overrides(project_path);
-
     if cfg.rust.is_some() {
-        let rust_files = generate_rust_files(project_path, cfg, profile, &local);
-        files.extend(rust_files);
+        files.extend(
+            rs_generate::generate_rust_owned_artifacts(project_path, cfg)
+                .into_iter()
+                .map(|file| GeneratedFile {
+                    path: file.path,
+                    content: file.content,
+                }),
+        );
     }
 
     if cfg.typescript.is_some() {
         let ts_files = generate_ts_files(cfg);
         files.extend(ts_files);
     }
-
-    // Hooks — build script with appropriate duplication sections and workspace root
-    let has_rust = cfg.rust.is_some();
-    let has_typescript = cfg.typescript.is_some();
-    let hook_content = build_hook_content(Some(cfg), has_rust, has_typescript);
-    files.push(GeneratedFile {
-        path: ".githooks/pre-commit".to_owned(),
-        content: hook_content,
-    });
 
     files
 }
@@ -372,12 +393,51 @@ pub fn generate_expected(project_path: &Path) -> Option<Vec<GeneratedPair>> {
     Some(files.into_iter().map(|gf| (gf.path, gf.content)).collect())
 }
 
+/// Determine which app types exist in the TypeScript config.
+fn detect_ts_app_types(ts_cfg: &config::types::TypeScriptConfig) -> (bool, bool) {
+    let Some(apps) = ts_cfg.apps.as_ref() else {
+        return (false, true);
+    };
+
+    if apps.is_empty() {
+        return (false, true);
+    }
+
+    let mut has_content = false;
+    let mut has_service = false;
+
+    for app_cfg in apps.values() {
+        match app_cfg.type_.as_deref() {
+            Some(t) if t.eq_ignore_ascii_case("content") => has_content = true,
+            Some(t) if t.eq_ignore_ascii_case("service") => has_service = true,
+            Some(t) if t.eq_ignore_ascii_case("library") => {}
+            _ => has_service = true,
+        }
+    }
+
+    if !has_content && !has_service {
+        has_service = true;
+    }
+
+    (has_content, has_service)
+}
+
 fn build_hook_content(
     cfg: Option<&config::types::GuardrailConfig>,
     has_rust: bool,
     has_typescript: bool,
 ) -> String {
-    let rust_workspace_root = cfg.map_or_else(|| ".".to_owned(), resolve_rust_root);
+    let rust_workspace_root = cfg.map_or_else(
+        || ".".to_owned(),
+        |config| {
+            config
+                .rust
+                .as_ref()
+                .and_then(|rust| rust.workspace_root.as_deref())
+                .unwrap_or(".")
+                .to_owned()
+        },
+    );
     crate::domain::modules::pre_commit::build_pre_commit_script(has_rust, has_typescript).replace(
         "GUARDRAIL3_RUST_WORKSPACE:-.}",
         &format!("GUARDRAIL3_RUST_WORKSPACE:-{rust_workspace_root}}}"),

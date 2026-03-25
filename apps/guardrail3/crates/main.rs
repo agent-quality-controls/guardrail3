@@ -229,7 +229,7 @@ fn handle_rs(command: RsCommands) {
         }
         RsCommands::HooksInstall(args) => {
             validate_or_exit(&args);
-            commands::generate::run_hooks(&args);
+            commands::generate::run_rs_hooks(&args);
         }
         RsCommands::ListModules => {
             commands::modules_cmd::list_modules();

@@ -1,13 +1,13 @@
 use std::path::Path;
 
-use crate::adapters::inbound::cli::generate;
 use guardrail3_app_commands::command_ids::RS_GENERATE;
+use guardrail3_app_rs_generate::generate_rust_expected;
 
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
 pub fn run(path: &str) {
     let project_path = Path::new(path);
 
-    let Some(expected) = generate::generate_expected(project_path) else {
+    let Some(expected) = generate_rust_expected(project_path) else {
         eprintln!("Error: guardrail3.toml not found or invalid at {path}");
         std::process::exit(1);
     };

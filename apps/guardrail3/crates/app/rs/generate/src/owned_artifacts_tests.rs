@@ -1,18 +1,9 @@
 use std::fs;
 
-use super::{LocalOverrides, generate_rust_files};
-
-fn empty_overrides() -> LocalOverrides {
-    LocalOverrides {
-        clippy_methods: String::new(),
-        clippy_types: String::new(),
-        deny_bans: String::new(),
-        deny_skip: String::new(),
-        deny_feature_bans: String::new(),
-    }
-}
+use super::{generate_rust_hook_artifact, generate_rust_owned_artifacts};
 
 #[test]
+#[allow(clippy::expect_used)] // reason: test setup assertions
 fn per_app_deny_uses_app_effective_profile() {
     let tmp = tempfile::tempdir().expect("create tempdir");
     fs::create_dir_all(tmp.path().join("apps/backend")).expect("create app dir");
@@ -27,7 +18,7 @@ fn per_app_deny_uses_app_effective_profile() {
     )
     .expect("write backend Cargo.toml");
 
-    let cfg = toml::from_str::<crate::domain::config::types::GuardrailConfig>(
+    let cfg = toml::from_str::<guardrail3_domain_config::types::GuardrailConfig>(
         r#"
 version = "0.1"
 
@@ -40,7 +31,7 @@ type = "library"
     )
     .expect("parse guardrail config");
 
-    let files = generate_rust_files(tmp.path(), &cfg, "service", &empty_overrides());
+    let files = generate_rust_owned_artifacts(tmp.path(), &cfg);
     let backend_deny = files
         .iter()
         .find(|file| file.path == "apps/backend/deny.toml")
@@ -56,5 +47,34 @@ type = "library"
         !backend_deny.content.contains("[[bans.features]]"),
         "library deny config should not emit tokio feature-ban section: {}",
         backend_deny.content
+    );
+}
+
+#[test]
+#[allow(clippy::expect_used)] // reason: test assertions
+fn rust_hook_artifact_stays_rust_only_even_in_mixed_config() {
+    let cfg = toml::from_str::<guardrail3_domain_config::types::GuardrailConfig>(
+        r#"
+version = "0.1"
+
+[profile]
+name = "service"
+
+[rust]
+
+[typescript]
+"#,
+    )
+    .expect("parse guardrail config");
+
+    let hook = generate_rust_hook_artifact(Some(&cfg));
+
+    assert!(
+        hook.content.contains("guardrail3 rs validate --staged ."),
+        "rust hook should validate Rust changes"
+    );
+    assert!(
+        !hook.content.contains("guardrail3 ts validate --staged ."),
+        "rust hook should not emit TypeScript validation steps"
     );
 }
