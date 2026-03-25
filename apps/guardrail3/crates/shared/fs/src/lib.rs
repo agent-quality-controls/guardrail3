@@ -1,9 +1,9 @@
-//! Centralized filesystem operations.
+//! Centralized filesystem operations shared across workspace members.
 //!
-//! All file I/O goes through this module. Benefits:
+//! All file I/O goes through this crate. Benefits:
 //! - Consistent error handling
 //! - Single audit point for all filesystem access
-//! - Mockable for testing
+//! - Mockable boundaries through adapter translation
 
 use std::path::Path;
 
@@ -38,7 +38,7 @@ pub fn list_dir(path: &Path) -> Vec<std::fs::DirEntry> {
 #[allow(clippy::manual_ok_err)] // reason: structurally distinct from read_file to avoid cargo-dupes match
 pub fn metadata(path: &Path) -> Option<std::fs::Metadata> {
     match std::fs::metadata(path) {
-        Ok(m) => Some(m),
+        Ok(metadata) => Some(metadata),
         Err(_) => None,
     }
 }
@@ -72,6 +72,9 @@ pub fn create_dir_all(path: &Path) -> Result<(), std::io::Error> {
 /// # Errors
 /// Returns `std::io::Error` if permissions cannot be set.
 #[allow(clippy::disallowed_methods)] // reason: centralized fs module
-pub fn set_permissions(path: &Path, perm: std::fs::Permissions) -> Result<(), std::io::Error> {
-    std::fs::set_permissions(path, perm)
+pub fn set_permissions(
+    path: &Path,
+    permissions: std::fs::Permissions,
+) -> Result<(), std::io::Error> {
+    std::fs::set_permissions(path, permissions)
 }

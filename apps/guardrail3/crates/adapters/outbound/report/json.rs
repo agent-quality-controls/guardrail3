@@ -1,6 +1,6 @@
 use serde_json::{Map, Number, Value, json};
 
-use crate::domain::report::{Report, Severity};
+use guardrail3_domain_report::{Report, Severity};
 
 /// Strip the project root prefix from a file path to produce a relative path.
 fn relative_path<'a>(file: &'a str, project_root: &str) -> &'a str {

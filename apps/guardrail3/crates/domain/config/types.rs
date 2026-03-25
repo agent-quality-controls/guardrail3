@@ -1,5 +1,6 @@
 use std::collections::BTreeMap;
 
+use guardrail3_validation_model::RustValidateFamily;
 use serde::Deserialize;
 
 /// Type alias for crate configuration map.
@@ -60,17 +61,60 @@ pub struct CrateConfig {
 }
 
 #[derive(Debug, Clone, Deserialize, garde::Validate)]
+#[serde(deny_unknown_fields)]
 pub struct RustChecksConfig {
     #[garde(skip)] // reason: Option<bool> — inherently valid
-    pub architecture: Option<bool>,
+    pub arch: Option<bool>,
+    #[garde(skip)] // reason: Option<bool> — inherently valid
+    pub fmt: Option<bool>,
+    #[garde(skip)] // reason: Option<bool> — inherently valid
+    pub toolchain: Option<bool>,
+    #[garde(skip)] // reason: Option<bool> — inherently valid
+    pub clippy: Option<bool>,
+    #[garde(skip)] // reason: Option<bool> — inherently valid
+    pub deny: Option<bool>,
+    #[garde(skip)] // reason: Option<bool> — inherently valid
+    pub cargo: Option<bool>,
+    #[garde(skip)] // reason: Option<bool> — inherently valid
+    pub code: Option<bool>,
+    #[garde(skip)] // reason: Option<bool> — inherently valid
+    pub hexarch: Option<bool>,
+    #[garde(skip)] // reason: Option<bool> — inherently valid
+    pub libarch: Option<bool>,
+    #[garde(skip)] // reason: Option<bool> — inherently valid
+    pub deps: Option<bool>,
     #[garde(skip)] // reason: Option<bool> — inherently valid
     pub garde: Option<bool>,
     #[garde(skip)] // reason: Option<bool> — inherently valid
-    pub hooks: Option<bool>,
-    #[garde(skip)] // reason: Option<bool> — inherently valid
-    pub tests: Option<bool>,
+    pub test: Option<bool>,
     #[garde(skip)] // reason: Option<bool> — inherently valid
     pub release: Option<bool>,
+    #[garde(skip)] // reason: Option<bool> — inherently valid
+    pub hooks_shared: Option<bool>,
+    #[garde(skip)] // reason: Option<bool> — inherently valid
+    pub hooks_rs: Option<bool>,
+}
+
+impl RustChecksConfig {
+    #[must_use]
+    pub const fn family_enabled(&self, family: RustValidateFamily) -> Option<bool> {
+        match family {
+            RustValidateFamily::Arch => self.arch,
+            RustValidateFamily::Fmt => self.fmt,
+            RustValidateFamily::Toolchain => self.toolchain,
+            RustValidateFamily::Clippy => self.clippy,
+            RustValidateFamily::Deny => self.deny,
+            RustValidateFamily::Cargo => self.cargo,
+            RustValidateFamily::Code => self.code,
+            RustValidateFamily::Hexarch => self.hexarch,
+            RustValidateFamily::Deps => self.deps,
+            RustValidateFamily::Garde => self.garde,
+            RustValidateFamily::Test => self.test,
+            RustValidateFamily::Release => self.release,
+            RustValidateFamily::HooksShared => self.hooks_shared,
+            RustValidateFamily::HooksRs => self.hooks_rs,
+        }
+    }
 }
 
 #[derive(Debug, Deserialize, garde::Validate)]

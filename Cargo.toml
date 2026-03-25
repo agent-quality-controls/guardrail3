@@ -1,5 +1,6 @@
 [workspace]
-members = ["apps/guardrail3"]
+members = []
+exclude = ["apps/guardrail3"]
 resolver = "2"
 
 [workspace.dependencies]

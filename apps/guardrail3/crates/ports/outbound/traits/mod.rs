@@ -3,7 +3,11 @@
 //! These traits define the boundaries between business logic and infrastructure.
 //! The `app` layer depends on these traits; the `adapters` layer implements them.
 
+mod fs_types;
+
 use std::path::Path;
+
+pub use fs_types::{FsDirEntry, FsFileType, FsIoError, FsMetadata, FsPermissions};
 
 /// Filesystem operations abstraction.
 pub trait FileSystem: Send + Sync {
@@ -17,11 +21,11 @@ pub trait FileSystem: Send + Sync {
     fn read_file_err(&self, path: &Path) -> Result<String, std::io::Error>;
 
     /// List directory entries. Returns empty vec on failure.
-    fn list_dir(&self, path: &Path) -> Vec<std::fs::DirEntry>;
+    fn list_dir(&self, path: &Path) -> Vec<FsDirEntry>;
 
     /// Get file metadata (size, modified time, permissions).
     /// Returns `None` if the file doesn't exist or metadata can't be read.
-    fn metadata(&self, path: &Path) -> Option<std::fs::Metadata>;
+    fn metadata(&self, path: &Path) -> Option<FsMetadata>;
 }
 
 /// Tool/command runner abstraction.

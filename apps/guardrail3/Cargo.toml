@@ -1,3 +1,94 @@
+[workspace]
+members = [
+    ".",
+    "crates/domain/config",
+    "crates/domain/modules",
+    "crates/domain/report",
+    "crates/domain/validation-model",
+    "crates/domain/project-tree",
+    "crates/ports/outbound/traits",
+    "crates/adapters/outbound/fs",
+    "crates/adapters/outbound/report",
+    "crates/adapters/outbound/tool-runner",
+    "crates/shared/fs",
+    "crates/app/core",
+    "crates/app/rs",
+    "crates/app/hooks",
+    "crates/app/rs/families/arch",
+    "crates/app/rs/families/cargo",
+    "crates/app/rs/families/clippy",
+    "crates/app/rs/families/code",
+    "crates/app/rs/families/deps",
+    "crates/app/rs/families/deny",
+    "crates/app/rs/families/fmt",
+    "crates/app/rs/families/garde",
+    "crates/app/rs/families/hexarch",
+    "crates/app/rs/families/hooks-rs",
+    "crates/app/rs/families/hooks-shared",
+    "crates/app/rs/families/release",
+    "crates/app/rs/families/test",
+    "crates/app/rs/families/toolchain",
+]
+resolver = "2"
+
+[workspace.dependencies]
+garde = { version = "0.22", features = ["derive"] }
+glob = "0.3"
+serde = { version = "1", features = ["derive"] }
+
+[workspace.lints.rust]
+warnings = "deny"
+unsafe_code = "forbid"
+dead_code = "deny"
+unused_results = "deny"
+unused_crate_dependencies = "deny"
+
+[workspace.lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "deny", priority = -1 }
+cargo = { level = "deny", priority = -1 }
+nursery = { level = "deny", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+unimplemented = "deny"
+todo = "deny"
+dbg_macro = "deny"
+print_stdout = "deny"
+print_stderr = "deny"
+disallowed_methods = "deny"
+disallowed_types = "deny"
+indexing_slicing = "deny"
+string_slice = "deny"
+arithmetic_side_effects = "deny"
+shadow_unrelated = "deny"
+missing_assert_message = "deny"
+partial_pub_fields = "deny"
+str_to_string = "deny"
+implicit_clone = "deny"
+as_conversions = "deny"
+float_cmp = "deny"
+lossy_float_literal = "deny"
+wildcard_enum_match_arm = "deny"
+rest_pat_in_fully_bound_structs = "deny"
+large_stack_arrays = "deny"
+needless_pass_by_value = "deny"
+redundant_else = "deny"
+large_futures = "deny"
+semicolon_if_nothing_returned = "deny"
+redundant_closure_for_method_calls = "deny"
+map_unwrap_or = "deny"
+verbose_file_reads = "deny"
+missing_docs_in_private_items = "allow"
+module_name_repetitions = "allow"
+must_use_candidate = "allow"
+option_if_let_else = "allow"
+empty_line_after_doc_comments = "allow"
+single_match_else = "allow"
+ref_option_ref = "allow"
+trivially_copy_pass_by_ref = "allow"
+multiple_crate_versions = "allow"
+
 [package]
 name = "guardrail3"
 version = "0.2.0"
@@ -22,6 +113,33 @@ path = "crates/main.rs"
 workspace = true
 
 [dependencies]
+guardrail3_validation_model = { package = "guardrail3-domain-validation-model", path = "crates/domain/validation-model" }
+guardrail3_domain_config = { package = "guardrail3-domain-config", path = "crates/domain/config" }
+guardrail3_domain_modules = { package = "guardrail3-domain-modules", path = "crates/domain/modules" }
+guardrail3_domain_report = { package = "guardrail3-domain-report", path = "crates/domain/report" }
+guardrail3_domain_project_tree = { package = "guardrail3-domain-project-tree", path = "crates/domain/project-tree" }
+guardrail3_outbound_traits = { package = "guardrail3-ports-outbound-traits", path = "crates/ports/outbound/traits" }
+guardrail3_adapters_outbound_fs = { package = "guardrail3-adapters-outbound-fs", path = "crates/adapters/outbound/fs" }
+guardrail3_adapters_outbound_report = { package = "guardrail3-adapters-outbound-report", path = "crates/adapters/outbound/report" }
+guardrail3_shared_fs = { package = "guardrail3-shared-fs", path = "crates/shared/fs" }
+guardrail3_adapters_outbound_tool_runner = { package = "guardrail3-adapters-outbound-tool-runner", path = "crates/adapters/outbound/tool-runner" }
+guardrail3_app_core = { package = "guardrail3-app-core", path = "crates/app/core" }
+guardrail3_app_hooks = { package = "guardrail3-app-hooks", path = "crates/app/hooks" }
+guardrail3_app_rs_runtime = { package = "guardrail3-app-rs-runtime", path = "crates/app/rs" }
+guardrail3_app_rs_family_arch = { package = "guardrail3-app-rs-family-arch", path = "crates/app/rs/families/arch" }
+guardrail3_app_rs_family_cargo = { package = "guardrail3-app-rs-family-cargo", path = "crates/app/rs/families/cargo" }
+guardrail3_app_rs_family_clippy = { package = "guardrail3-app-rs-family-clippy", path = "crates/app/rs/families/clippy" }
+guardrail3_app_rs_family_code = { package = "guardrail3-app-rs-family-code", path = "crates/app/rs/families/code" }
+guardrail3_app_rs_family_deps = { package = "guardrail3-app-rs-family-deps", path = "crates/app/rs/families/deps" }
+guardrail3_app_rs_family_deny = { package = "guardrail3-app-rs-family-deny", path = "crates/app/rs/families/deny" }
+guardrail3_app_rs_family_fmt = { package = "guardrail3-app-rs-family-fmt", path = "crates/app/rs/families/fmt" }
+guardrail3_app_rs_family_garde = { package = "guardrail3-app-rs-family-garde", path = "crates/app/rs/families/garde" }
+guardrail3_app_rs_family_hexarch = { package = "guardrail3-app-rs-family-hexarch", path = "crates/app/rs/families/hexarch" }
+guardrail3_app_rs_family_hooks_rs = { package = "guardrail3-app-rs-family-hooks-rs", path = "crates/app/rs/families/hooks-rs" }
+guardrail3_app_rs_family_hooks_shared = { package = "guardrail3-app-rs-family-hooks-shared", path = "crates/app/rs/families/hooks-shared" }
+guardrail3_app_rs_family_release = { package = "guardrail3-app-rs-family-release", path = "crates/app/rs/families/release" }
+guardrail3_app_rs_family_test = { package = "guardrail3-app-rs-family-test", path = "crates/app/rs/families/test" }
+guardrail3_app_rs_family_toolchain = { package = "guardrail3-app-rs-family-toolchain", path = "crates/app/rs/families/toolchain" }
 clap = { version = "4", features = ["derive"] }
 toml = "0.8"
 toml_edit = "0.22"

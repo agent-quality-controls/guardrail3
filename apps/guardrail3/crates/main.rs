@@ -26,21 +26,21 @@ use tempfile as _;
 use clap::{CommandFactory, FromArgMatches};
 use garde::Validate;
 use guardrail3::{
-    adapters::{
-        inbound::cli::{
-            self as commands,
-            cli::{Cli, Commands, RsCommands, TsCommands, ValidateArgs},
-            help_gen,
-        },
-        outbound::{fs::RealFileSystem, report, tool_runner::RealToolChecker},
+    adapters::inbound::cli::{
+        self as commands,
+        cli::{Cli, Commands, RsCommands, RsValidateArgs, TsCommands, TsValidateArgs},
+        help_gen,
     },
     app::{core::discover, hooks, rs, ts},
     domain::{
         config::types::GuardrailConfig,
-        report::{RustCheckCategories, TsCheckCategories, ValidateDomains},
+        report::{TsCheckCategories, ValidateDomains},
     },
-    ports::outbound::FileSystem,
 };
+use guardrail3_adapters_outbound_fs::RealFileSystem;
+use guardrail3_adapters_outbound_report as report;
+use guardrail3_adapters_outbound_tool_runner::RealToolChecker;
+use guardrail3_outbound_traits::FileSystem;
 
 #[allow(clippy::print_stderr)] // reason: CLI entry point — stderr for error output
 #[allow(clippy::disallowed_methods)] // reason: CLI entry point — process::exit for error codes
@@ -191,7 +191,7 @@ fn handle_dump_tree(path_str: &str) {
 fn handle_guide() {
     let path = std::path::Path::new("GUARDRAIL3_GUIDE.md");
     let content = guardrail3::domain::modules::guide::GUIDE_CONTENT;
-    if let Err(e) = guardrail3::fs::write_file(path, content) {
+    if let Err(e) = guardrail3_shared_fs::write_file(path, content) {
         eprintln!("Error writing GUARDRAIL3_GUIDE.md: {e}");
         std::process::exit(1);
     }
@@ -220,8 +220,8 @@ fn handle_rs(command: RsCommands) {
         }
         RsCommands::Validate(args) => {
             validate_or_exit(&args);
-            let (report, _) = run_rs_validate(&args);
-            print_report(&args, &report);
+            let report = run_rs_validate(&args);
+            print_report(&args.format, args.inventory, args.verbose, &report);
         }
         RsCommands::Check(args) => {
             validate_or_exit(&args);
@@ -230,14 +230,6 @@ fn handle_rs(command: RsCommands) {
         RsCommands::HooksInstall(args) => {
             validate_or_exit(&args);
             commands::generate::run_hooks(&args);
-        }
-        RsCommands::HooksValidate(args) => {
-            validate_or_exit(&args);
-            let path = resolve_path(&args.path);
-            let fs = RealFileSystem;
-            let tc = RealToolChecker;
-            let report = rs::validate::run_hook_report(&fs, &path, &tc);
-            print_report(&args, &report);
         }
         RsCommands::ListModules => {
             commands::modules_cmd::list_modules();
@@ -283,7 +275,7 @@ fn handle_ts(command: TsCommands) {
                 cfg.as_ref(),
                 &crawl,
             );
-            print_report(&args, &report);
+            print_report(&args.format, args.inventory, args.verbose, &report);
         }
         TsCommands::HooksInstall(args) => {
             validate_or_exit(&args);
@@ -306,40 +298,46 @@ fn handle_ts(command: TsCommands) {
                 &tc,
                 &crawl,
             );
-            print_report(&args, &report);
+            print_report(&args.format, args.inventory, args.verbose, &report);
         }
     }
 }
 
-fn run_rs_validate(
-    args: &ValidateArgs,
-) -> (guardrail3::domain::report::Report, std::path::PathBuf) {
+fn run_rs_validate(args: &RsValidateArgs) -> guardrail3::domain::report::Report {
     let path = resolve_path(&args.path);
     let fs = RealFileSystem;
     let tc = RealToolChecker;
-    let categories = build_rs_categories(args, &fs, &path);
-    let project = discover::detect_project(&fs, &path);
-    let crawl = guardrail3::app::core::crawl::crawl(&path);
+    let families: Vec<_> = args.families.iter().copied().map(Into::into).collect();
     let scoped_files = commands::validate::resolve_scoped_files_pub(args, &path);
-    let report = rs::validate::run(
+    let normalized_scope =
+        commands::validate::normalize_scoped_files(&path, scoped_files.as_deref());
+    match rs::runtime::run(
         &fs,
         &path,
-        &project,
-        scoped_files.as_deref(),
-        &categories,
+        normalized_scope.as_ref(),
+        &families,
         args.thorough,
         &tc,
-        &crawl,
-    );
-    (report, path)
+    ) {
+        Ok(report) => report,
+        Err(error) => {
+            eprintln!("{error}");
+            std::process::exit(1);
+        }
+    }
 }
 
 #[allow(clippy::disallowed_methods)] // reason: CLI — process::exit
-fn print_report(args: &ValidateArgs, report: &guardrail3::domain::report::Report) {
-    match args.format.as_str() {
-        "json" => report::json::print_report(report, args.inventory),
-        "md" | "markdown" => report::markdown::print_report(report, args.inventory, args.verbose),
-        _ => report::text::print_report(report, args.inventory, args.verbose),
+fn print_report(
+    format: &str,
+    inventory: bool,
+    verbose: bool,
+    report: &guardrail3::domain::report::Report,
+) {
+    match format {
+        "json" => report::json::print_report(report, inventory),
+        "md" | "markdown" => report::markdown::print_report(report, inventory, verbose),
+        _ => report::text::print_report(report, inventory, verbose),
     }
     if report.error_count() > 0 {
         std::process::exit(1);
@@ -366,13 +364,12 @@ fn resolve_path(path_str: &str) -> std::path::PathBuf {
     }
 }
 
-const fn domains_from_args(args: &ValidateArgs) -> ValidateDomains {
-    let run_all = !args.code && !args.architecture && !args.release && !args.tests && !args.garde;
+const fn domains_from_args(_args: &TsValidateArgs) -> ValidateDomains {
     ValidateDomains {
-        code: run_all || args.code,
-        architecture: run_all || args.architecture,
-        release: run_all || args.release,
-        tests: run_all || args.tests,
+        code: true,
+        architecture: true,
+        release: true,
+        tests: true,
     }
 }
 
@@ -384,53 +381,9 @@ fn load_config(fs: &RealFileSystem, path: &std::path::Path) -> Option<GuardrailC
     toml::from_str(&content).ok()
 }
 
-/// Build `RustCheckCategories` by merging config defaults with CLI flags.
-fn build_rs_categories(
-    args: &ValidateArgs,
-    fs: &RealFileSystem,
-    path: &std::path::Path,
-) -> RustCheckCategories {
-    let cfg = load_config(fs, path);
-    let checks = cfg
-        .as_ref()
-        .and_then(|c| c.rust.as_ref())
-        .and_then(|r| r.checks.as_ref());
-
-    let rs_defaults = RustCheckCategories::default();
-    let cfg_arch = checks
-        .and_then(|c| c.architecture)
-        .unwrap_or(rs_defaults.architecture);
-    let cfg_garde = checks.and_then(|c| c.garde).unwrap_or(rs_defaults.garde);
-    let cfg_hooks = checks.and_then(|c| c.hooks).unwrap_or(rs_defaults.hooks);
-    let cfg_tests = checks.and_then(|c| c.tests).unwrap_or(rs_defaults.tests);
-    let cfg_release = checks
-        .and_then(|c| c.release)
-        .unwrap_or(rs_defaults.release);
-
-    // If any CLI domain flag is set, it acts as a filter (only run those)
-    let any_cli = args.code || args.architecture || args.tests || args.release || args.garde;
-    if any_cli {
-        RustCheckCategories {
-            architecture: args.architecture,
-            garde: args.garde,
-            hooks: args.code,
-            tests: args.tests,
-            release: args.release,
-        }
-    } else {
-        RustCheckCategories {
-            architecture: cfg_arch,
-            garde: cfg_garde,
-            hooks: cfg_hooks,
-            tests: cfg_tests,
-            release: cfg_release,
-        }
-    }
-}
-
 /// Build `TsCheckCategories` by merging config defaults with CLI flags.
 fn build_ts_categories(
-    args: &ValidateArgs,
+    _args: &TsValidateArgs,
     fs: &RealFileSystem,
     path: &std::path::Path,
 ) -> TsCheckCategories {
@@ -449,18 +402,9 @@ fn build_ts_categories(
         .unwrap_or(ts_defaults.content);
     let cfg_tests = checks.and_then(|c| c.tests).unwrap_or(ts_defaults.tests);
 
-    let any_cli = args.code || args.architecture || args.tests || args.release || args.garde;
-    if any_cli {
-        TsCheckCategories {
-            architecture: args.architecture,
-            content: false,
-            tests: args.tests,
-        }
-    } else {
-        TsCheckCategories {
-            architecture: cfg_arch,
-            content: cfg_content,
-            tests: cfg_tests,
-        }
+    TsCheckCategories {
+        architecture: cfg_arch,
+        content: cfg_content,
+        tests: cfg_tests,
     }
 }

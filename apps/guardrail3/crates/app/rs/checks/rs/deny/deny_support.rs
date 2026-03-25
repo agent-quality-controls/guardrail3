@@ -10,13 +10,13 @@ pub struct BanExpectation {
 }
 
 pub fn parsed_table(
-    config: &crate::app::rs::checks::rs::deny::facts::DenyConfigFacts,
+    config: &super::facts::DenyConfigFacts,
 ) -> Option<&toml::map::Map<String, toml::Value>> {
     config.parsed.as_ref()?.as_table()
 }
 
 pub fn section<'a>(
-    config: &'a crate::app::rs::checks::rs::deny::facts::DenyConfigFacts,
+    config: &'a super::facts::DenyConfigFacts,
     name: &str,
 ) -> Option<&'a toml::Value> {
     config.parsed.as_ref()?.get(name)

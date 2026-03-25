@@ -2,3 +2,9 @@
 name = "guardrail3-domain-modules"
 version = "0.0.0"
 edition = "2024"
+
+[lib]
+path = "mod.rs"
+
+[lints]
+workspace = true

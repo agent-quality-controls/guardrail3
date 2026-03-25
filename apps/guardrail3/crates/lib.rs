@@ -1,33 +1,33 @@
 #![recursion_limit = "2048"]
 //! guardrail3 — composable code guardrails for Rust and TypeScript projects.
 
+use colored as _;
+use glob as _;
+use ignore as _;
 use proc_macro2 as _;
+use semver as _;
+use serde_yaml as _;
 use toml_edit as _;
 
 #[cfg(test)]
 use proptest as _;
 #[cfg(test)]
 use tempfile as _;
+// Package-level dependency used by the bin target and integration tests.
+use guardrail3_adapters_outbound_fs as _;
+use guardrail3_adapters_outbound_report as _;
+use guardrail3_adapters_outbound_tool_runner as _;
 
 pub mod domain {
-    pub mod config;
-    pub mod modules;
-    pub mod project_tree;
-    pub mod report;
-}
-
-pub mod ports {
-    pub mod outbound {
-        #[path = "traits/mod.rs"]
-        pub mod traits;
-        pub use traits::*;
-    }
+    pub use guardrail3_domain_config as config;
+    pub use guardrail3_domain_modules as modules;
+    pub use guardrail3_domain_report as report;
 }
 
 pub mod app {
     pub mod arch_helpers;
-    pub mod core;
-    pub mod hooks;
+    pub use guardrail3_app_core as core;
+    pub use guardrail3_app_hooks as hooks;
     pub mod rs;
     pub mod ts;
 }
@@ -37,11 +37,7 @@ pub mod adapters {
         pub mod cli;
     }
     pub mod outbound {
-        pub mod fs;
-        pub mod report;
-        #[path = "tool-runner/mod.rs"]
-        pub mod tool_runner;
+        pub use guardrail3_adapters_outbound_fs as fs;
+        pub use guardrail3_adapters_outbound_report as report;
     }
 }
-
-pub mod fs;

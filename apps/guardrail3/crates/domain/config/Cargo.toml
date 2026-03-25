@@ -2,3 +2,14 @@
 name = "guardrail3-domain-config"
 version = "0.0.0"
 edition = "2024"
+
+[lib]
+path = "mod.rs"
+
+[lints]
+workspace = true
+
+[dependencies]
+garde = { workspace = true }
+guardrail3_validation_model = { package = "guardrail3-domain-validation-model", path = "../validation-model" }
+serde = { workspace = true }

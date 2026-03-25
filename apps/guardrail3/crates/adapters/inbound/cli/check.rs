@@ -15,7 +15,7 @@ pub fn run(path: &str) {
 
     for (rel_path, expected_content) in &expected {
         let full_path = project_path.join(rel_path);
-        match crate::fs::read_file_err(&full_path) {
+        match guardrail3_shared_fs::read_file_err(&full_path) {
             Ok(actual) => {
                 if actual != *expected_content {
                     println!("STALE: {rel_path}");

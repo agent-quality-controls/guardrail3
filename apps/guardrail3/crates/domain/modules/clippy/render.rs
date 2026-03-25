@@ -1,6 +1,6 @@
 use std::fmt::Write;
 
-use crate::domain::modules::Module;
+use crate::Module;
 
 use super::macros::MACRO_DEBUGGING;
 use super::methods::{
@@ -109,8 +109,7 @@ fn render_module_array(
         out.push_str(module.content);
         out.push('\n');
     }
-    let deduped =
-        crate::adapters::inbound::cli::generate::deduplicated_override(out, extra_entries);
+    let deduped = crate::deduplicated_override(out, extra_entries);
     if !deduped.trim().is_empty() {
         out.push_str("    # --- Local overrides ---\n");
         out.push_str(&deduped);

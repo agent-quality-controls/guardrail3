@@ -1,5 +1,7 @@
 use clap::{Parser, Subcommand};
 
+use guardrail3_validation_model::RustValidateFamily;
+
 fn validate_format(value: &str, _ctx: &()) -> garde::Result {
     match value {
         "text" | "json" | "md" | "markdown" => Ok(()),
@@ -104,13 +106,11 @@ pub enum RsCommands {
     /// Generate Rust config files (clippy.toml, deny.toml, etc.) from guardrail3.toml
     Generate(GenerateArgs),
     /// Validate Rust project guardrails
-    Validate(ValidateArgs),
+    Validate(RsValidateArgs),
     /// Verify generated Rust configs are current (for CI)
     Check(PathArg),
     /// Install Rust pre-commit hook
     HooksInstall(GenerateArgs),
-    /// Validate Rust pre-commit hook configuration
-    HooksValidate(ValidateArgs),
     /// List embedded Rust config modules
     ListModules,
     /// Show contents of an embedded Rust module
@@ -134,16 +134,16 @@ pub enum TsCommands {
     /// Generate TypeScript config files (eslint, tsconfig, etc.) from guardrail3.toml
     Generate(GenerateArgs),
     /// Validate TypeScript project guardrails
-    Validate(ValidateArgs),
+    Validate(TsValidateArgs),
     /// Install TypeScript pre-commit hook
     HooksInstall(GenerateArgs),
     /// Validate TypeScript pre-commit hook configuration
-    HooksValidate(ValidateArgs),
+    HooksValidate(TsValidateArgs),
 }
 
 #[derive(Parser, Debug, Clone, garde::Validate)]
 #[allow(clippy::struct_excessive_bools)] // reason: CLI argument struct — each bool is an independent flag
-pub struct ValidateArgs {
+pub struct RsValidateArgs {
     /// Output format
     #[arg(long, default_value = "text")]
     #[garde(custom(validate_format))]
@@ -174,30 +174,10 @@ pub struct ValidateArgs {
     #[garde(length(min = 1))] // reason: path must be non-empty
     pub path: String,
 
-    /// Only run code quality checks
-    #[arg(long)]
-    #[garde(skip)] // reason: boolean flag, inherently valid
-    pub code: bool,
-
-    /// Only run architecture checks
-    #[arg(long)]
-    #[garde(skip)] // reason: boolean flag, inherently valid
-    pub architecture: bool,
-
-    /// Only run release readiness checks
-    #[arg(long)]
-    #[garde(skip)] // reason: boolean flag, inherently valid
-    pub release: bool,
-
-    /// Only run test quality checks
-    #[arg(long)]
-    #[garde(skip)] // reason: boolean flag, inherently valid
-    pub tests: bool,
-
-    /// Only run garde boundary validation checks
-    #[arg(long)]
-    #[garde(skip)] // reason: boolean flag, inherently valid
-    pub garde: bool,
+    /// Restrict Rust validation to the selected family. Repeatable.
+    #[arg(long = "family", value_enum)]
+    #[garde(skip)] // reason: clap validates enum values
+    pub families: Vec<RustValidateFamilyArg>,
 
     /// Run slow checks (cargo publish --dry-run, etc.)
     #[arg(long)]
@@ -210,6 +190,89 @@ pub struct ValidateArgs {
     pub inventory: bool,
 
     /// Show all individual items for summarized checks (e.g., list each #[allow] instead of showing count). Without this, checks with more than 5 items are summarized to a single line.
+    #[arg(long)]
+    #[garde(skip)] // reason: boolean flag, inherently valid
+    pub verbose: bool,
+}
+
+#[derive(clap::ValueEnum, Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RustValidateFamilyArg {
+    Arch,
+    Fmt,
+    Toolchain,
+    Clippy,
+    Deny,
+    Cargo,
+    Code,
+    Hexarch,
+    Deps,
+    Garde,
+    Test,
+    Release,
+    HooksShared,
+    HooksRs,
+}
+
+impl From<RustValidateFamilyArg> for RustValidateFamily {
+    fn from(value: RustValidateFamilyArg) -> Self {
+        match value {
+            RustValidateFamilyArg::Arch => Self::Arch,
+            RustValidateFamilyArg::Fmt => Self::Fmt,
+            RustValidateFamilyArg::Toolchain => Self::Toolchain,
+            RustValidateFamilyArg::Clippy => Self::Clippy,
+            RustValidateFamilyArg::Deny => Self::Deny,
+            RustValidateFamilyArg::Cargo => Self::Cargo,
+            RustValidateFamilyArg::Code => Self::Code,
+            RustValidateFamilyArg::Hexarch => Self::Hexarch,
+            RustValidateFamilyArg::Deps => Self::Deps,
+            RustValidateFamilyArg::Garde => Self::Garde,
+            RustValidateFamilyArg::Test => Self::Test,
+            RustValidateFamilyArg::Release => Self::Release,
+            RustValidateFamilyArg::HooksShared => Self::HooksShared,
+            RustValidateFamilyArg::HooksRs => Self::HooksRs,
+        }
+    }
+}
+
+#[derive(Parser, Debug, Clone, garde::Validate)]
+#[allow(clippy::struct_excessive_bools)] // reason: CLI argument struct — each bool is an independent flag
+pub struct TsValidateArgs {
+    /// Output format
+    #[arg(long, default_value = "text")]
+    #[garde(custom(validate_format))]
+    pub format: String,
+
+    /// Only check staged files (git diff --cached)
+    #[arg(long, group = "scope")]
+    #[garde(skip)] // reason: boolean flag, inherently valid
+    pub staged: bool,
+
+    /// Only check dirty files (staged + unstaged)
+    #[arg(long, group = "scope")]
+    #[garde(skip)] // reason: boolean flag, inherently valid
+    pub dirty: bool,
+
+    /// Only check files changed in last N commits
+    #[arg(long, group = "scope")]
+    #[garde(skip)] // reason: type-validated by clap
+    pub commits: Option<usize>,
+
+    /// Specific files to check
+    #[arg(long, group = "scope")]
+    #[garde(inner(length(min = 1)))] // reason: each file path must be non-empty
+    pub files: Vec<String>,
+
+    /// Project path (defaults to current directory)
+    #[arg(default_value = ".")]
+    #[garde(length(min = 1))] // reason: path must be non-empty
+    pub path: String,
+
+    /// Show passing confirmation checks (e.g., 'config exists'). These are hidden by default because they require no action.
+    #[arg(long)]
+    #[garde(skip)] // reason: boolean flag, inherently valid
+    pub inventory: bool,
+
+    /// Show all individual items for summarized checks instead of a single summary line.
     #[arg(long)]
     #[garde(skip)] // reason: boolean flag, inherently valid
     pub verbose: bool,

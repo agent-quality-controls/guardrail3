@@ -1,13 +1,13 @@
-pub mod rs;
-pub mod shared;
+pub use guardrail3_app_rs_family_hooks_rs as rs;
+pub use guardrail3_app_rs_family_hooks_shared as shared;
 pub(crate) mod shell;
 
 use std::path::Path;
 
-use crate::domain::project_tree::ProjectTree;
 use crate::domain::report::CheckResult;
-use crate::ports::outbound::FileSystem;
-use crate::ports::outbound::ToolChecker;
+use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_outbound_traits::FileSystem;
+use guardrail3_outbound_traits::ToolChecker;
 
 pub fn check(
     fs: &dyn FileSystem,

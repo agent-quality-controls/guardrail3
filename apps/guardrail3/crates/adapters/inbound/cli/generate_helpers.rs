@@ -30,7 +30,7 @@ pub fn load_local_overrides(project_path: &Path) -> LocalOverrides {
 
     let read_and_validate = |name: &str| -> String {
         let path = overrides_dir.join(name);
-        let raw = crate::fs::read_file(&path).unwrap_or_default();
+        let raw = guardrail3_shared_fs::read_file(&path).unwrap_or_default();
         // Strip UTF-8 BOM if present
         let clean = raw.strip_prefix('\u{FEFF}').unwrap_or(&raw);
         if clean.trim().is_empty() {
@@ -72,31 +72,6 @@ fn validate_override_content(content: &str, file_name: &str) -> String {
         }
     }
     valid
-}
-
-/// Remove override entries that already exist in the base content.
-/// For TOML array entries, compares by the trimmed line (minus trailing comma).
-pub fn deduplicated_override(base: &str, override_content: &str) -> String {
-    if override_content.trim().is_empty() {
-        return String::new();
-    }
-
-    let mut result = String::new();
-    for line in override_content.lines() {
-        let trimmed = line.trim();
-        // Skip empty lines and comments (already stripped by validation, but be defensive)
-        if trimmed.is_empty() || trimmed.starts_with('#') {
-            continue;
-        }
-        // Check if this exact entry already exists in base (ignore trailing comma differences)
-        let key = trimmed.trim_end_matches(',');
-        if base.contains(key) {
-            continue;
-        }
-        result.push_str(line);
-        result.push('\n');
-    }
-    result
 }
 
 // ---------------------------------------------------------------------------
@@ -221,7 +196,7 @@ pub(super) fn generate_rust_files(
     let mut files = Vec::new();
 
     // Discover actual workspace structure to resolve app names → real paths
-    let fs = crate::adapters::outbound::fs::RealFileSystem;
+    let fs = guardrail3_adapters_outbound_fs::RealFileSystem;
     let project = crate::app::core::discover::detect_project(&fs, project_path);
     let app_path_map = resolve_app_paths(&project, cfg);
 
