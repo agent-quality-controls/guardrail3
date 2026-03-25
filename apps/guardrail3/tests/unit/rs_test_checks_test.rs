@@ -9,11 +9,12 @@
 
 use std::fs as stdfs;
 
-use guardrail3::app::rs::validate::test_checks::{
+use guardrail3_app_rs_legacy_validate::test_checks::{
     check_cargo_mutants_installed, check_mutants_toml, content_has_test, file_has_cfg_test_module,
     has_mutants_profile,
 };
 use guardrail3::domain::report::Severity;
+use guardrail3_adapters_outbound_tool_runner::RealToolChecker;
 
 fn make_temp_dir() -> tempfile::TempDir {
     tempfile::tempdir().expect("failed to create temp dir")
@@ -24,7 +25,7 @@ fn make_temp_dir() -> tempfile::TempDir {
 #[test]
 fn r_test_01_detects_installed_tool() {
     let mut results = Vec::new();
-    let tc = guardrail3::adapters::outbound::tool_runner::RealToolChecker;
+    let tc = RealToolChecker;
     check_cargo_mutants_installed(&tc, &mut results);
     assert_eq!(results.len(), 1);
     assert_eq!(results.first().map(|r| r.id.as_str()), Some("R-TEST-01"));
@@ -33,7 +34,7 @@ fn r_test_01_detects_installed_tool() {
 #[test]
 fn r_test_01_severity_matches_installation() {
     let mut results = Vec::new();
-    let tc = guardrail3::adapters::outbound::tool_runner::RealToolChecker;
+    let tc = RealToolChecker;
     check_cargo_mutants_installed(&tc, &mut results);
     let result = results.first().expect("should have one result");
     assert!(
@@ -109,7 +110,7 @@ fn r_test_04_pos_has_tokio_test() {
 fn r_test_09_detects_cfg_test_module() {
     let content =
         "fn production() {}\n\n#[cfg(test)]\nmod tests {\n    #[test]\n    fn it_works() {}\n}";
-    let parsed = guardrail3::app::rs::validate::ast_helpers::parse_file(content);
+    let parsed = guardrail3_app_rs_legacy_validate::ast_helpers::parse_file(content);
     assert!(parsed.is_some());
     assert!(file_has_cfg_test_module(&parsed.expect("should parse")));
 }
@@ -117,7 +118,7 @@ fn r_test_09_detects_cfg_test_module() {
 #[test]
 fn r_test_09_no_cfg_test_is_clean() {
     let content = "fn production() {}";
-    let parsed = guardrail3::app::rs::validate::ast_helpers::parse_file(content);
+    let parsed = guardrail3_app_rs_legacy_validate::ast_helpers::parse_file(content);
     assert!(parsed.is_some());
     assert!(!file_has_cfg_test_module(&parsed.expect("should parse")));
 }

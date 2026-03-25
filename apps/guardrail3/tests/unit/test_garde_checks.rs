@@ -1,4 +1,4 @@
-use guardrail3::app::rs::validate::garde_checks::{
+use guardrail3_app_rs_legacy_validate::garde_checks::{
     EXPECTED_AXUM_TYPE_BANS, EXPECTED_SERDE_METHOD_BANS, check_ban_presence,
     check_garde_dependency, check_reqwest_json_ban_from_table, count_unvalidated_input_structs,
 };

@@ -3,14 +3,14 @@
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
-use guardrail3::app::core::discover::{ProjectInfo, RustWorkspace, WorkspaceMember};
-use guardrail3::app::rs::validate::hex_arch_checks::{
+use guardrail3_app_core::discover::{ProjectInfo, RustWorkspace, WorkspaceMember};
+use guardrail3_app_rs_legacy_validate::hex_arch_checks::{
     Layer, check_dependency_flow, check_library_service_boundary, contains_segment,
     is_service_internal, layer_from_config, normalize_path,
 };
-use guardrail3::app::rs::validate::hex_arch_structure::check_hex_arch_structure;
+use guardrail3_app_rs_legacy_validate::hex_arch_structure::check_hex_arch_structure;
 use guardrail3::domain::report::Severity;
-use guardrail3::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::{FileSystem, FsDirEntry, FsMetadata};
 
 /// A stub filesystem that supports both file reads and directory listing.
 /// Directories are inferred from file paths: any path prefix that contains
@@ -60,9 +60,8 @@ impl StubFs {
     }
 }
 
-/// A fake DirEntry that can be constructed in tests.
-/// We use a temporary directory to create real `std::fs::DirEntry` instances.
-fn make_dir_entries(parent: &Path, fs: &StubFs) -> Vec<std::fs::DirEntry> {
+/// Create portable directory entries by materializing real temp entries first.
+fn make_dir_entries(parent: &Path, fs: &StubFs) -> Vec<FsDirEntry> {
     // Collect immediate children of `parent`
     let mut children: BTreeMap<String, bool> = BTreeMap::new(); // name -> is_dir
 
@@ -133,10 +132,11 @@ fn make_dir_entries(parent: &Path, fs: &StubFs) -> Vec<std::fs::DirEntry> {
         }
     }
 
-    let mut entries: Vec<std::fs::DirEntry> = std::fs::read_dir(&stub_dir)
+    let mut entries: Vec<FsDirEntry> = std::fs::read_dir(&stub_dir)
         .into_iter()
         .flatten()
         .flatten()
+        .map(FsDirEntry::from_std)
         .collect();
     entries.sort_by_key(|e| e.file_name());
     entries
@@ -153,10 +153,10 @@ impl FileSystem for StubFs {
             .cloned()
             .ok_or_else(|| std::io::Error::new(std::io::ErrorKind::NotFound, "stub"))
     }
-    fn list_dir(&self, path: &Path) -> Vec<std::fs::DirEntry> {
+    fn list_dir(&self, path: &Path) -> Vec<FsDirEntry> {
         make_dir_entries(path, self)
     }
-    fn metadata(&self, _: &Path) -> Option<std::fs::Metadata> {
+    fn metadata(&self, _: &Path) -> Option<FsMetadata> {
         None
     }
 }

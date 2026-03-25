@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use guardrail3::app::rs::validate::deny_inventory::*;
+use guardrail3_app_rs_legacy_validate::deny_inventory::*;
 
 // ---- Bug 6: deny.toml skip entry parsing ----
 

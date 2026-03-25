@@ -9,7 +9,7 @@
 
 use std::path::Path;
 
-use guardrail3::app::rs::validate::structure_checks::{check_file_length, check_use_count};
+use guardrail3_app_rs_legacy_validate::structure_checks::{check_file_length, check_use_count};
 use guardrail3_domain_report::Severity;
 
 // ---- Bug 4: Test file exemptions for R38 ----

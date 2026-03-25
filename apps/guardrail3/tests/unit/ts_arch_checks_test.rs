@@ -10,12 +10,12 @@
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
-use guardrail3::app::ts::validate::ts_arch_checks::{
+use guardrail3_app_ts::validate::ts_arch_checks::{
     TsLayer, check_file_imports, check_single_app_structure, extract_import_path, layer_from_path,
     resolve_relative,
 };
 use guardrail3::domain::report::Severity;
-use guardrail3::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::{FileSystem, FsDirEntry, FsMetadata};
 
 struct StubFs {
     files: BTreeMap<PathBuf, String>,
@@ -45,10 +45,10 @@ impl FileSystem for StubFs {
             .cloned()
             .ok_or_else(|| std::io::Error::new(std::io::ErrorKind::NotFound, "stub"))
     }
-    fn list_dir(&self, _: &Path) -> Vec<std::fs::DirEntry> {
+    fn list_dir(&self, _: &Path) -> Vec<FsDirEntry> {
         Vec::new()
     }
-    fn metadata(&self, _: &Path) -> Option<std::fs::Metadata> {
+    fn metadata(&self, _: &Path) -> Option<FsMetadata> {
         None
     }
 }
@@ -94,7 +94,7 @@ fn t_arch_01_app_with_full_structure() {
         std::fs::write(d.join("index.ts"), "export const x = 1;").expect("write ts file");
     }
 
-    let fs = guardrail3::adapters::outbound::fs::RealFileSystem;
+    let fs = guardrail3_adapters_outbound_fs::RealFileSystem;
     let mut results = Vec::new();
     check_single_app_structure(&fs, &app_dir, &mut results);
     assert!(results.is_empty(), "expected no warnings, got: {results:?}");

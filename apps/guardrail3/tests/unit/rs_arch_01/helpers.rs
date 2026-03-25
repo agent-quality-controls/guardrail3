@@ -1,7 +1,7 @@
 use std::path::Path;
 
-use guardrail3::adapters::outbound::fs::RealFileSystem;
-use guardrail3::app::rs::validate::arch::rs_arch_01::check_hex_arch_structure;
+use guardrail3_adapters_outbound_fs::RealFileSystem;
+use guardrail3_app_rs_legacy_validate::arch::rs_arch_01::check_hex_arch_structure;
 use guardrail3::domain::report::CheckResult;
 
 // Re-export shared utilities so rule files import from super::helpers

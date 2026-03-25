@@ -1,8 +1,8 @@
-//! Adversarial integration tests for guardrail3 check categories feature.
+//! Adversarial integration tests for guardrail3 validation family selection.
 //!
 //! Each test creates a minimal Rust project in a temp directory (with or without
 //! guardrail3.toml), runs `guardrail3 rs validate --format json`, and asserts
-//! that the correct check categories are present or absent based on config/CLI flags.
+//! that the correct Rust families are present or absent based on config/CLI flags.
 use garde as _;
 
 // Suppress unused crate dependency warnings for crates used only by the main binary
@@ -17,7 +17,7 @@ use quote as _;
 use semver as _;
 use serde as _;
 use serde_yaml as _;
-use std::process::Command;
+use std::process::{Command, Output};
 use syn as _;
 use toml as _;
 use toml_edit as _;
@@ -66,16 +66,21 @@ fn setup_project(guardrail3_toml: Option<&str>) -> tempfile::TempDir {
 /// Returns the JSON stdout as a string.
 #[allow(clippy::disallowed_methods)] // reason: Command::new needed to invoke binary under test
 #[allow(clippy::expect_used)] // reason: test helper — panics indicate broken test infrastructure
-fn run_validate(path: &std::path::Path, extra_args: &[&str]) -> String {
+fn run_validate_command(path: &std::path::Path, extra_args: &[&str]) -> Output {
     let mut args = vec!["rs", "validate", "--format", "json"];
     args.extend_from_slice(extra_args);
     args.push(path.to_str().expect("path"));
 
-    let out = Command::new(env!("CARGO_BIN_EXE_guardrail3"))
+    Command::new(env!("CARGO_BIN_EXE_guardrail3"))
         .args(&args)
         .output()
-        .expect("failed to run guardrail3");
+        .expect("failed to run guardrail3")
+}
 
+#[allow(clippy::disallowed_methods)] // reason: Command::new needed to invoke binary under test
+#[allow(clippy::expect_used)] // reason: test helper — panics indicate broken test infrastructure
+fn run_validate(path: &std::path::Path, extra_args: &[&str]) -> String {
+    let out = run_validate_command(path, extra_args);
     String::from_utf8_lossy(&out.stdout).to_string()
 }
 
@@ -102,7 +107,28 @@ fn collect_check_ids(json_output: &str) -> Vec<String> {
     ids
 }
 
+/// Collect all section names from the JSON output into a Vec.
+#[allow(clippy::expect_used, clippy::indexing_slicing)] // reason: test helper — JSON parsing for assertion
+fn collect_section_names(json_output: &str) -> Vec<String> {
+    #[allow(clippy::disallowed_methods)] // reason: test helper — JSON parsing of guardrail3 output
+    let parsed: serde_json::Value =
+        serde_json::from_str(json_output).expect("guardrail3 output should be valid JSON");
+
+    parsed["sections"]
+        .as_array()
+        .expect("sections should be array")
+        .iter()
+        .map(|section| {
+            section["name"]
+                .as_str()
+                .expect("section name should be string")
+                .to_owned()
+        })
+        .collect()
+}
+
 /// Assert that at least one check ID matching the prefix exists in the output.
+#[allow(dead_code)] // reason: helper retained for TypeScript-side category assertions in this file
 #[allow(clippy::expect_used)] // reason: test assertion helper
 fn assert_has_check_prefix(ids: &[String], prefix: &str, json_output: &str) {
     let found = ids.iter().any(|id| id.starts_with(prefix));
@@ -118,6 +144,22 @@ fn assert_no_check_prefix(ids: &[String], prefix: &str, json_output: &str) {
     assert!(
         matching.is_empty(),
         "Did NOT expect any check starting with '{prefix}', but found: {matching:?}\nFull output:\n{json_output}"
+    );
+}
+
+/// Assert that a section exists in the output.
+fn assert_has_section(section_names: &[String], name: &str, json_output: &str) {
+    assert!(
+        section_names.iter().any(|section| section == name),
+        "Expected section '{name}' in output.\nSections found: {section_names:?}\nFull output:\n{json_output}"
+    );
+}
+
+/// Assert that a section does not exist in the output.
+fn assert_no_section(section_names: &[String], name: &str, json_output: &str) {
+    assert!(
+        !section_names.iter().any(|section| section == name),
+        "Did NOT expect section '{name}', but it was present.\nSections found: {section_names:?}\nFull output:\n{json_output}"
     );
 }
 
@@ -141,12 +183,11 @@ fn assert_no_check(ids: &[String], check_id: &str, json_output: &str) {
 }
 
 // ============================================================
-// Test 1: Default behavior — no config, no CLI flags
-// Core checks present, architecture and garde absent
+// Rust family selection
 // ============================================================
 
 #[test]
-fn categories_default_no_config_has_core_checks() {
+fn rust_families_default_no_config_has_core_checks() {
     let tmp = setup_project(None);
     let output = run_validate(tmp.path(), &[]);
     let ids = collect_check_ids(&output);
@@ -157,27 +198,34 @@ fn categories_default_no_config_has_core_checks() {
 }
 
 #[test]
-fn categories_default_no_config_has_architecture_checks() {
+fn rust_families_default_no_config_has_hexarch_checks() {
     let tmp = setup_project(None);
     let output = run_validate(tmp.path(), &[]);
-    let ids = collect_check_ids(&output);
+    let section_names = collect_section_names(&output);
 
-    // Architecture checks SHOULD appear by default (all categories on)
-    assert_has_check_prefix(&ids, "R-ARCH-", &output);
+    assert_has_section(&section_names, "hexarch", &output);
 }
 
 #[test]
-fn categories_default_no_config_has_garde_checks() {
+fn rust_families_default_no_config_has_garde_checks() {
     let tmp = setup_project(None);
     let output = run_validate(tmp.path(), &[]);
-    let ids = collect_check_ids(&output);
+    let section_names = collect_section_names(&output);
 
-    // Garde checks SHOULD appear by default (all categories on)
-    assert_has_check_prefix(&ids, "R-GARDE-", &output);
+    assert_has_section(&section_names, "garde", &output);
 }
 
 #[test]
-fn categories_config_disables_architecture() {
+fn rust_families_default_no_config_has_test_checks() {
+    let tmp = setup_project(None);
+    let output = run_validate(tmp.path(), &[]);
+    let section_names = collect_section_names(&output);
+
+    assert_has_section(&section_names, "test", &output);
+}
+
+#[test]
+fn rust_families_config_disables_hexarch() {
     let config = r#"
 version = "0.1"
 
@@ -188,18 +236,17 @@ name = "service"
 workspace_root = "."
 
 [rust.checks]
-architecture = false
+hexarch = false
 "#;
     let tmp = setup_project(Some(config));
     let output = run_validate(tmp.path(), &[]);
-    let ids = collect_check_ids(&output);
+    let section_names = collect_section_names(&output);
 
-    // Architecture checks should NOT appear when config disables them
-    assert_no_check_prefix(&ids, "R-ARCH-", &output);
+    assert_no_section(&section_names, "hexarch", &output);
 }
 
 #[test]
-fn categories_config_disables_garde() {
+fn rust_families_config_disables_garde() {
     let config = r#"
 version = "0.1"
 
@@ -214,18 +261,13 @@ garde = false
 "#;
     let tmp = setup_project(Some(config));
     let output = run_validate(tmp.path(), &[]);
-    let ids = collect_check_ids(&output);
+    let section_names = collect_section_names(&output);
 
-    // Garde checks should NOT appear when config disables them
-    assert_no_check_prefix(&ids, "R-GARDE-", &output);
+    assert_no_section(&section_names, "garde", &output);
 }
 
-// ============================================================
-// Test 2: Config enables architecture category
-// ============================================================
-
 #[test]
-fn categories_config_enables_architecture() {
+fn rust_families_config_disables_test() {
     let config = r#"
 version = "0.1"
 
@@ -236,22 +278,17 @@ name = "service"
 workspace_root = "."
 
 [rust.checks]
-architecture = true
+test = false
 "#;
     let tmp = setup_project(Some(config));
     let output = run_validate(tmp.path(), &[]);
-    let ids = collect_check_ids(&output);
+    let section_names = collect_section_names(&output);
 
-    // Architecture checks SHOULD appear when config enables them
-    assert_has_check_prefix(&ids, "R-ARCH-", &output);
+    assert_no_section(&section_names, "test", &output);
 }
 
-// ============================================================
-// Test 3: Config enables garde category
-// ============================================================
-
 #[test]
-fn categories_config_enables_garde() {
+fn rust_families_config_enables_optional_families() {
     let config = r#"
 version = "0.1"
 
@@ -262,176 +299,98 @@ name = "service"
 workspace_root = "."
 
 [rust.checks]
+hexarch = true
 garde = true
+test = true
 "#;
     let tmp = setup_project(Some(config));
     let output = run_validate(tmp.path(), &[]);
     let ids = collect_check_ids(&output);
+    let section_names = collect_section_names(&output);
 
-    // Garde checks SHOULD appear when config enables them
-    assert_has_check_prefix(&ids, "R-GARDE-", &output);
-}
-
-// ============================================================
-// Test 4: CLI --garde flag enables garde without config
-// ============================================================
-
-#[test]
-fn categories_cli_garde_flag_enables_garde() {
-    let tmp = setup_project(None);
-    let output = run_validate(tmp.path(), &["--garde"]);
-    let ids = collect_check_ids(&output);
-
-    // Garde checks SHOULD appear when --garde flag is used
-    assert_has_check_prefix(&ids, "R-GARDE-", &output);
-}
-
-// ============================================================
-// Test 5: CLI --architecture flag enables architecture, excludes tests
-// ============================================================
-
-#[test]
-fn categories_cli_architecture_flag_enables_architecture() {
-    let tmp = setup_project(None);
-    let output = run_validate(tmp.path(), &["--architecture"]);
-    let ids = collect_check_ids(&output);
-
-    // Architecture checks SHOULD appear when --architecture flag is used
-    assert_has_check_prefix(&ids, "R-ARCH-", &output);
-}
-
-#[test]
-fn categories_cli_architecture_flag_excludes_tests() {
-    let tmp = setup_project(None);
-    let output = run_validate(tmp.path(), &["--architecture"]);
-    let ids = collect_check_ids(&output);
-
-    // Test checks should NOT appear when only --architecture is specified
-    // (CLI flags act as a filter — only the requested category runs)
-    assert_no_check_prefix(&ids, "R-TEST-", &output);
-}
-
-// ============================================================
-// Test 6: Tests category defaults to on
-// ============================================================
-
-#[test]
-fn categories_tests_default_on_without_config() {
-    let tmp = setup_project(None);
-    let output = run_validate(tmp.path(), &[]);
-    let ids = collect_check_ids(&output);
-
-    // Test checks SHOULD appear by default (tests category defaults to true)
-    assert_has_check_prefix(&ids, "R-TEST-", &output);
-}
-
-// ============================================================
-// Test 7: Config disables tests category
-// ============================================================
-
-#[test]
-fn categories_config_disables_tests() {
-    let config = r#"
-version = "0.1"
-
-[profile]
-name = "service"
-
-[rust]
-workspace_root = "."
-
-[rust.checks]
-tests = false
-"#;
-    let tmp = setup_project(Some(config));
-    let output = run_validate(tmp.path(), &[]);
-    let ids = collect_check_ids(&output);
-
-    // Test checks should NOT appear when config disables them
-    assert_no_check_prefix(&ids, "R-TEST-", &output);
-}
-
-// ============================================================
-// Additional adversarial tests: edge cases and interactions
-// ============================================================
-
-#[test]
-fn categories_cli_flag_overrides_config_disabled() {
-    // Config disables tests, but CLI --tests flag should re-enable them
-    let config = r#"
-version = "0.1"
-
-[profile]
-name = "service"
-
-[rust]
-workspace_root = "."
-
-[rust.checks]
-tests = false
-"#;
-    let tmp = setup_project(Some(config));
-    let output = run_validate(tmp.path(), &["--tests"]);
-    let ids = collect_check_ids(&output);
-
-    // CLI --tests flag should enable test checks regardless of config
-    assert_has_check_prefix(&ids, "R-TEST-", &output);
-}
-
-#[test]
-fn categories_cli_garde_does_not_include_architecture() {
-    // --garde flag should only enable garde, not architecture
-    let tmp = setup_project(None);
-    let output = run_validate(tmp.path(), &["--garde"]);
-    let ids = collect_check_ids(&output);
-
-    assert_has_check_prefix(&ids, "R-GARDE-", &output);
-    assert_no_check_prefix(&ids, "R-ARCH-", &output);
-}
-
-#[test]
-fn categories_cli_architecture_does_not_include_garde() {
-    // --architecture flag should only enable architecture, not garde
-    let tmp = setup_project(None);
-    let output = run_validate(tmp.path(), &["--architecture"]);
-    let ids = collect_check_ids(&output);
-
-    assert_has_check_prefix(&ids, "R-ARCH-", &output);
-    assert_no_check_prefix(&ids, "R-GARDE-", &output);
-}
-
-#[test]
-fn categories_config_enables_all_optional() {
-    // Config enables all optional categories at once
-    let config = r#"
-version = "0.1"
-
-[profile]
-name = "service"
-
-[rust]
-workspace_root = "."
-
-[rust.checks]
-architecture = true
-garde = true
-tests = true
-"#;
-    let tmp = setup_project(Some(config));
-    let output = run_validate(tmp.path(), &[]);
-    let ids = collect_check_ids(&output);
-
-    // All categories should be present
-    assert_has_check_prefix(&ids, "R-ARCH-", &output);
-    assert_has_check_prefix(&ids, "R-GARDE-", &output);
-    assert_has_check_prefix(&ids, "R-TEST-", &output);
-    // Core checks should still be present
+    assert_has_section(&section_names, "hexarch", &output);
+    assert_has_section(&section_names, "garde", &output);
+    assert_has_section(&section_names, "test", &output);
     assert_has_check(&ids, "R1", &output);
 }
 
 #[test]
-fn categories_empty_checks_section_uses_defaults() {
-    // Config has [rust.checks] but no fields — should use defaults (all on)
+fn rust_families_cli_family_garde_enables_garde() {
+    let tmp = setup_project(None);
+    let output = run_validate(tmp.path(), &["--family", "garde"]);
+    let section_names = collect_section_names(&output);
+
+    assert_has_section(&section_names, "garde", &output);
+}
+
+#[test]
+fn rust_families_cli_family_hexarch_enables_hexarch() {
+    let tmp = setup_project(None);
+    let output = run_validate(tmp.path(), &["--family", "hexarch"]);
+    let section_names = collect_section_names(&output);
+
+    assert_has_section(&section_names, "hexarch", &output);
+}
+
+#[test]
+fn rust_families_cli_family_hexarch_excludes_test() {
+    let tmp = setup_project(None);
+    let output = run_validate(tmp.path(), &["--family", "hexarch"]);
+    let section_names = collect_section_names(&output);
+
+    assert_no_section(&section_names, "test", &output);
+}
+
+#[test]
+fn rust_families_cli_family_overrides_default_selection() {
+    let tmp = setup_project(None);
+    let output = run_validate(tmp.path(), &["--family", "garde"]);
+    let section_names = collect_section_names(&output);
+
+    assert_has_section(&section_names, "garde", &output);
+    assert_no_section(&section_names, "hexarch", &output);
+    assert_no_section(&section_names, "test", &output);
+}
+
+#[test]
+fn rust_families_cli_family_respects_disabled_config() {
+    let config = r#"
+version = "0.1"
+
+[profile]
+name = "service"
+
+[rust]
+workspace_root = "."
+
+[rust.checks]
+test = false
+"#;
+    let tmp = setup_project(Some(config));
+    let output = run_validate(tmp.path(), &["--family", "test"]);
+    let section_names = collect_section_names(&output);
+
+    assert_no_section(&section_names, "test", &output);
+}
+
+#[test]
+fn rust_families_multiple_cli_families_union_results() {
+    let tmp = setup_project(None);
+    let output = run_validate(
+        tmp.path(),
+        &[
+            "--family", "hexarch", "--family", "garde", "--family", "test",
+        ],
+    );
+    let section_names = collect_section_names(&output);
+
+    assert_has_section(&section_names, "hexarch", &output);
+    assert_has_section(&section_names, "garde", &output);
+    assert_has_section(&section_names, "test", &output);
+}
+
+#[test]
+fn rust_families_empty_checks_section_uses_defaults() {
     let config = r#"
 version = "0.1"
 
@@ -445,17 +404,15 @@ workspace_root = "."
 "#;
     let tmp = setup_project(Some(config));
     let output = run_validate(tmp.path(), &[]);
-    let ids = collect_check_ids(&output);
+    let section_names = collect_section_names(&output);
 
-    // All categories on by default
-    assert_has_check_prefix(&ids, "R-TEST-", &output);
-    assert_has_check_prefix(&ids, "R-ARCH-", &output);
-    assert_has_check_prefix(&ids, "R-GARDE-", &output);
+    assert_has_section(&section_names, "hexarch", &output);
+    assert_has_section(&section_names, "garde", &output);
+    assert_has_section(&section_names, "test", &output);
 }
 
 #[test]
-fn categories_config_without_checks_section_uses_defaults() {
-    // Config has [rust] but no [rust.checks] — should use defaults (all on)
+fn rust_families_config_without_checks_section_uses_defaults() {
     let config = r#"
 version = "0.1"
 
@@ -467,12 +424,41 @@ workspace_root = "."
 "#;
     let tmp = setup_project(Some(config));
     let output = run_validate(tmp.path(), &[]);
-    let ids = collect_check_ids(&output);
+    let section_names = collect_section_names(&output);
 
-    // All categories on by default
-    assert_has_check_prefix(&ids, "R-TEST-", &output);
-    assert_has_check_prefix(&ids, "R-ARCH-", &output);
-    assert_has_check_prefix(&ids, "R-GARDE-", &output);
+    assert_has_section(&section_names, "hexarch", &output);
+    assert_has_section(&section_names, "garde", &output);
+    assert_has_section(&section_names, "test", &output);
+}
+
+#[test]
+fn rust_families_removed_grouped_keys_fail_closed() {
+    let config = r#"
+version = "0.1"
+
+[profile]
+name = "service"
+
+[rust]
+workspace_root = "."
+
+[rust.checks]
+architecture = true
+"#;
+    let tmp = setup_project(None);
+    std::fs::write(tmp.path().join("guardrail3.toml"), config).expect("write guardrail3.toml");
+
+    let out = run_validate_command(tmp.path(), &[]);
+    let stderr = String::from_utf8_lossy(&out.stderr);
+
+    assert!(
+        !out.status.success(),
+        "removed grouped rust keys should fail closed"
+    );
+    assert!(
+        stderr.contains("Error parsing guardrail3.toml"),
+        "expected parse error, got:\n{stderr}"
+    );
 }
 
 // ============================================================

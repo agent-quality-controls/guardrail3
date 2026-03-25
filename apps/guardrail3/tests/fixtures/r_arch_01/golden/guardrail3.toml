@@ -10,34 +10,34 @@ workspace_root = "."
 type = "service"
 
 [rust.apps.backend.checks]
-architecture = true
+hexarch = true
 garde = false
-tests = true
+test = true
 release = false
 
 [rust.apps.worker]
 type = "service"
 
 [rust.apps.worker.checks]
-architecture = true
+hexarch = true
 garde = false
-tests = true
+test = true
 release = false
 
 [rust.apps.devctl]
 type = "service"
 
 [rust.apps.devctl.checks]
-architecture = true
+hexarch = true
 garde = false
-tests = true
+test = true
 release = false
 
 [rust.packages]
 type = "library"
 
 [rust.packages.checks]
-architecture = false
+hexarch = false
 garde = false
-tests = true
+test = true
 release = false
