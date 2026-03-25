@@ -1,42 +1,24 @@
-pub mod domain {
-    pub use guardrail3_domain_config as config;
-    pub use guardrail3_domain_report as report;
-}
-
-pub mod app {
-    pub use guardrail3_app_core as core;
-
-    pub mod rs {
-        pub mod checks {
-            pub mod hooks {
-                pub use guardrail3_app_rs_family_hooks_rs as rs;
-                pub use guardrail3_app_rs_family_hooks_shared as shared;
-            }
-
-            pub mod rs {
-                pub use guardrail3_app_rs_family_arch as arch;
-                pub use guardrail3_app_rs_family_cargo as cargo;
-                pub use guardrail3_app_rs_family_clippy as clippy;
-                pub use guardrail3_app_rs_family_code as code;
-                pub use guardrail3_app_rs_family_deny as deny;
-                pub use guardrail3_app_rs_family_deps as deps;
-                pub use guardrail3_app_rs_family_fmt as fmt;
-                pub use guardrail3_app_rs_family_garde as garde;
-                pub use guardrail3_app_rs_family_hexarch as hexarch;
-                pub use guardrail3_app_rs_family_release as release;
-                pub use guardrail3_app_rs_family_test as test;
-                pub use guardrail3_app_rs_family_toolchain as toolchain;
-            }
-        }
-    }
-}
-
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 
-use crate::domain::config::types::{GuardrailConfig, RustChecksConfig};
-use crate::domain::report::{Report, Section, rust_validate_family_section_name};
+use guardrail3_app_core::project_walker;
+use guardrail3_app_rs_family_arch as arch;
+use guardrail3_app_rs_family_cargo as cargo;
+use guardrail3_app_rs_family_clippy as clippy;
+use guardrail3_app_rs_family_code as code;
+use guardrail3_app_rs_family_deny as deny;
+use guardrail3_app_rs_family_deps as deps;
+use guardrail3_app_rs_family_fmt as fmt;
+use guardrail3_app_rs_family_garde as garde;
+use guardrail3_app_rs_family_hexarch as hexarch;
+use guardrail3_app_rs_family_hooks_rs as hooks_rs;
+use guardrail3_app_rs_family_hooks_shared as hooks_shared;
+use guardrail3_app_rs_family_release as release;
+use guardrail3_app_rs_family_test as test;
+use guardrail3_app_rs_family_toolchain as toolchain;
+use guardrail3_domain_config::types::{GuardrailConfig, RustChecksConfig, RustConfig};
 use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_domain_report::{CheckResult, Report, Section, rust_validate_family_section_name};
 use guardrail3_outbound_traits::{FileSystem, ToolChecker};
 use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
@@ -62,7 +44,7 @@ pub fn run(
     thorough: bool,
     tc: &dyn ToolChecker,
 ) -> Result<Report, String> {
-    let tree = crate::app::core::project_walker::walk_project(fs, path);
+    let tree = project_walker::walk_project(fs, path);
     let config = load_config(&tree)?;
     let selected = resolve_selected_families(&tree, config.as_ref(), requested_families);
     let applicability = collect_family_applicability(config.as_ref());
@@ -71,30 +53,20 @@ pub fn run(
 
     for family in selected.iter() {
         let results = match family {
-            RustValidateFamily::Arch => crate::app::rs::checks::rs::arch::check(&tree),
-            RustValidateFamily::Fmt => crate::app::rs::checks::rs::fmt::check(&tree),
-            RustValidateFamily::Toolchain => crate::app::rs::checks::rs::toolchain::check(&tree),
-            RustValidateFamily::Clippy => crate::app::rs::checks::rs::clippy::check(&tree),
-            RustValidateFamily::Deny => crate::app::rs::checks::rs::deny::check(&tree),
-            RustValidateFamily::Cargo => crate::app::rs::checks::rs::cargo::check(&tree),
-            RustValidateFamily::Code => {
-                crate::app::rs::checks::rs::code::check(&tree, scoped_files)
-            }
-            RustValidateFamily::Hexarch => crate::app::rs::checks::rs::hexarch::check(&tree),
-            RustValidateFamily::Deps => crate::app::rs::checks::rs::deps::check(&tree, tc),
-            RustValidateFamily::Garde => {
-                crate::app::rs::checks::rs::garde::check(&tree, scoped_files)
-            }
-            RustValidateFamily::Test => {
-                crate::app::rs::checks::rs::test::check(&tree, tc, scoped_files)
-            }
-            RustValidateFamily::Release => {
-                crate::app::rs::checks::rs::release::check(&tree, tc, thorough)
-            }
-            RustValidateFamily::HooksShared => {
-                crate::app::rs::checks::hooks::shared::check(fs, path, &tree, tc)
-            }
-            RustValidateFamily::HooksRs => crate::app::rs::checks::hooks::rs::check(&tree, tc),
+            RustValidateFamily::Arch => arch::check(&tree),
+            RustValidateFamily::Fmt => fmt::check(&tree),
+            RustValidateFamily::Toolchain => toolchain::check(&tree),
+            RustValidateFamily::Clippy => clippy::check(&tree),
+            RustValidateFamily::Deny => deny::check(&tree),
+            RustValidateFamily::Cargo => cargo::check(&tree),
+            RustValidateFamily::Code => code::check(&tree, scoped_files),
+            RustValidateFamily::Hexarch => hexarch::check(&tree),
+            RustValidateFamily::Deps => deps::check(&tree, tc),
+            RustValidateFamily::Garde => garde::check(&tree, scoped_files),
+            RustValidateFamily::Test => test::check(&tree, tc, scoped_files),
+            RustValidateFamily::Release => release::check(&tree, tc, thorough),
+            RustValidateFamily::HooksShared => hooks_shared::check(fs, path, &tree, tc),
+            RustValidateFamily::HooksRs => hooks_rs::check(&tree, tc),
         };
         let results = match applicability.get(&family) {
             Some(value) => filter_results_for_applicability(path, value, results),
@@ -126,7 +98,7 @@ fn collect_family_applicability(
 
 fn family_applicability(
     family: RustValidateFamily,
-    rust: Option<&crate::domain::config::types::RustConfig>,
+    rust: Option<&RustConfig>,
 ) -> RustFamilyApplicability {
     let global_enabled = rust
         .and_then(|value| value.checks.as_ref())
@@ -162,8 +134,8 @@ fn family_applicability(
 fn filter_results_for_applicability(
     project_root: &Path,
     applicability: &RustFamilyApplicability,
-    results: Vec<crate::domain::report::CheckResult>,
-) -> Vec<crate::domain::report::CheckResult> {
+    results: Vec<CheckResult>,
+) -> Vec<CheckResult> {
     if applicability.global_only {
         return results;
     }
@@ -177,7 +149,7 @@ fn filter_results_for_applicability(
 fn applicability_allows_result(
     project_root: &Path,
     applicability: &RustFamilyApplicability,
-    result: &crate::domain::report::CheckResult,
+    result: &CheckResult,
 ) -> bool {
     let Some(file) = result.file.as_deref() else {
         return true;
@@ -329,10 +301,7 @@ fn effective_family_flag(
         .unwrap_or(global)
 }
 
-fn has_unscoped_rust_root(
-    tree: &ProjectTree,
-    rust: &crate::domain::config::types::RustConfig,
-) -> bool {
+fn has_unscoped_rust_root(tree: &ProjectTree, rust: &RustConfig) -> bool {
     if tree.file_exists("Cargo.toml") && rust.apps.as_ref().is_none_or(|apps| apps.is_empty()) {
         return true;
     }
