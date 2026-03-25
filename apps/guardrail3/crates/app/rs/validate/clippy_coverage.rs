@@ -2,58 +2,9 @@ use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
 use crate::domain::report::{CheckResult, Severity};
-use crate::ports::outbound::FileSystem;
+use guardrail3_outbound_traits::FileSystem;
 
-/// Required method bans for the service profile.
-/// Used by both validate (`clippy_coverage`) and coverage map details.
-pub const EXPECTED_METHOD_BANS: &[&str] = &[
-    "std::env::var",
-    "std::env::var_os",
-    "std::env::vars",
-    "std::env::set_var",
-    "std::env::remove_var",
-    "std::process::exit",
-    "std::process::Command::new",
-    "std::thread::sleep",
-    "std::fs::read_to_string",
-    "std::fs::read",
-    "std::fs::read_dir",
-    "std::fs::read_link",
-    "std::fs::write",
-    "std::fs::remove_file",
-    "std::fs::remove_dir_all",
-    "std::fs::create_dir_all",
-    "std::fs::rename",
-    "std::fs::copy",
-    "std::fs::metadata",
-    "std::fs::symlink_metadata",
-    "std::fs::canonicalize",
-    "std::fs::set_permissions",
-    "std::fs::hard_link",
-    "reqwest::Client::new",
-    "reqwest::Client::builder",
-    "serde_json::from_str",
-    "serde_json::from_slice",
-    "serde_json::from_value",
-    "serde_json::from_reader",
-    "reqwest::Response::json",
-    "toml::from_str",
-    "serde_yaml::from_str",
-    "serde_yaml::from_reader",
-];
-
-/// Required type bans for the service profile.
-pub const EXPECTED_TYPE_BANS: &[&str] = &[
-    "std::collections::HashMap",
-    "std::collections::HashSet",
-    "std::sync::Mutex",
-    "std::sync::RwLock",
-    "std::fs::File",
-    "axum::extract::Json",
-    "axum::Json",
-    "axum::extract::Query",
-    "axum::extract::Form",
-];
+pub use guardrail3_app_rs_family_clippy::{EXPECTED_METHOD_BANS, EXPECTED_TYPE_BANS};
 
 pub fn check(
     fs: &dyn FileSystem,

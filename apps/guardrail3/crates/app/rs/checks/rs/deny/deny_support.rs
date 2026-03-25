@@ -58,6 +58,10 @@ pub fn expected_bans(profile: Option<&str>) -> BTreeMap<String, BanExpectation> 
     map
 }
 
+pub fn expected_ban_names(profile: Option<&str>) -> BTreeSet<String> {
+    expected_bans(profile).into_keys().collect()
+}
+
 pub fn expected_licenses() -> BTreeSet<String> {
     let parsed = toml::from_str::<toml::Value>(DENY_LICENSES.content).ok();
     parsed

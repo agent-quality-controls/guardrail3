@@ -5,44 +5,7 @@ use crate::domain::report::{CheckResult, Severity};
 use super::deny_bans;
 use super::deny_inventory;
 use super::deny_licenses;
-use crate::ports::outbound::FileSystem;
-
-pub const EXPECTED_BANS: &[&str] = &[
-    "simd-json",
-    "json5",
-    "sonic-rs",
-    "openssl",
-    "openssl-sys",
-    "ureq",
-    "surf",
-    "isahc",
-    "log4rs",
-    "env_logger",
-    "simple_logger",
-    "fern",
-    "async-std",
-    "smol",
-    "anyhow",
-    "actix-web",
-    "rocket",
-    "warp",
-    "poem",
-    "chrono",
-    "diesel",
-    "sea-orm",
-    "bincode",
-    "rmp-serde",
-    "prost",
-    "flatbuffers",
-    // Parsing: use structured parsers (syn, tree-sitter, serde_json, toml), never regex
-    "regex",
-    "fancy-regex",
-    "onig",
-    "pcre2",
-    "grep-cli",
-    "grep-regex",
-    "grep-matcher",
-];
+use guardrail3_outbound_traits::FileSystem;
 
 pub fn check(
     fs: &dyn FileSystem,

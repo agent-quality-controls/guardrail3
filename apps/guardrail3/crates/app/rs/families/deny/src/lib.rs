@@ -34,3 +34,7 @@ pub mod app {
 mod inner;
 
 pub use inner::*;
+
+pub fn expected_ban_names(profile: Option<&str>) -> std::collections::BTreeSet<String> {
+    inner::expected_ban_names(profile)
+}

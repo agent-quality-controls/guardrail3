@@ -9,7 +9,7 @@ use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
 use crate::app::core::crawl::CrawlResult;
-use crate::app::rs::validate::deny_audit::EXPECTED_BANS;
+use guardrail3_app_rs_family_deny::expected_ban_names;
 
 use super::engine::{self, CoverageTool};
 
@@ -33,7 +33,7 @@ impl CoverageTool for DenyCoverage {
     }
 
     fn parse_details(&self, config_path: &Path) -> serde_json::Value {
-        let Some(content) = crate::fs::read_file(config_path) else {
+        let Some(content) = guardrail3_shared_fs::read_file(config_path) else {
             return serde_json::json!({"error": "unreadable"});
         };
         let Ok(table) = content.parse::<toml::Value>() else {
@@ -54,6 +54,7 @@ impl CoverageTool for DenyCoverage {
 
 /// Diff actual ban entries against required baseline.
 fn diff_bans(table: &toml::Value) -> serde_json::Value {
+    let expected_bans = expected_ban_names(Some("service"));
     let entries: Vec<String> = table
         .get("bans")
         .and_then(|b| b.get("deny"))
@@ -71,19 +72,19 @@ fn diff_bans(table: &toml::Value) -> serde_json::Value {
         .unwrap_or_default();
 
     let total = entries.len();
-    let required_present = EXPECTED_BANS
+    let required_present = expected_bans
         .iter()
-        .filter(|r| entries.iter().any(|e| e == **r))
+        .filter(|r| entries.iter().any(|e| e == *r))
         .count();
-    let required_missing = EXPECTED_BANS.len().saturating_sub(required_present);
+    let required_missing = expected_bans.len().saturating_sub(required_present);
     let user_extra = entries
         .iter()
-        .filter(|e| !EXPECTED_BANS.contains(&e.as_str()))
+        .filter(|e| !expected_bans.contains(*e))
         .count();
 
     serde_json::json!({
         "total": total,
-        "required_total": EXPECTED_BANS.len(),
+        "required_total": expected_bans.len(),
         "required_present": required_present,
         "required_missing": required_missing,
         "user_extra": user_extra
