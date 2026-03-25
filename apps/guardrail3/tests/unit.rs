@@ -33,8 +33,6 @@ mod deny_inventory_test;
 mod dependency_allowlist_test;
 #[path = "unit/discover_test.rs"]
 mod discover_test;
-#[path = "unit/help_gen_test.rs"]
-mod help_gen_test;
 #[path = "unit/project_walker_test.rs"]
 mod project_walker_test;
 #[path = "unit/report_test.rs"]

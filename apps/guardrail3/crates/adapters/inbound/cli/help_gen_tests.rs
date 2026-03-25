@@ -1,7 +1,8 @@
 use clap::CommandFactory;
 
-use guardrail3::adapters::inbound::cli::cli::Cli;
-use guardrail3::adapters::inbound::cli::help_gen::inject_help;
+use crate::cli::Cli;
+
+use super::inject_help;
 
 #[test]
 #[allow(clippy::expect_used)] // reason: test assertions
@@ -14,7 +15,6 @@ fn inject_help_does_not_panic() {
         "missing COMMAND REFERENCE"
     );
     assert!(after.contains("SETUP GUIDE"), "missing SETUP GUIDE in help");
-    assert!(after.contains("PROFILES"), "missing PROFILES in help");
 }
 
 #[test]
@@ -33,10 +33,10 @@ fn rs_validate_help_contains_check_ids() {
         .get_after_help()
         .expect("after_help set")
         .to_string();
-    assert!(after.contains("R1"));
-    assert!(after.contains("R58"));
-    assert!(after.contains("R-DEPS-01"));
-    assert!(after.contains("R-TEST-"));
+    assert!(after.contains("RUST VALIDATION FAMILIES"));
+    assert!(after.contains("hooks-rs"));
+    assert!(after.contains("RS-*"));
+    assert!(after.contains("HOOK-*"));
 }
 
 #[test]
@@ -55,6 +55,23 @@ fn ts_validate_help_contains_check_ids() {
         .get_after_help()
         .expect("after_help set")
         .to_string();
-    assert!(after.contains("T1"));
-    assert!(after.contains("T-TEST-"));
+    assert!(after.contains("TYPESCRIPT VALIDATION"));
+    assert!(after.contains("--staged"));
+}
+
+#[test]
+#[allow(clippy::expect_used)] // reason: test assertions
+fn rs_init_help_contains_profiles() {
+    let cmd = inject_help(Cli::command());
+    let rs = cmd
+        .get_subcommands()
+        .find(|c| c.get_name() == "rs")
+        .expect("rs subcommand");
+    let init = rs
+        .get_subcommands()
+        .find(|c| c.get_name() == "init")
+        .expect("init subcommand");
+    let after = init.get_after_help().expect("after_help set").to_string();
+    assert!(after.contains("PROFILES"));
+    assert!(after.contains("guardrail3 rs generate"));
 }
