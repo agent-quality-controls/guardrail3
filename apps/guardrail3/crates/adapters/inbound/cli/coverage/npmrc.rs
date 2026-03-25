@@ -11,7 +11,7 @@
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
-use crate::app::core::crawl::CrawlResult;
+use guardrail3_app_core::crawl::CrawlResult;
 
 use super::engine::{self, CoverageTool};
 
@@ -35,7 +35,7 @@ impl CoverageTool for NpmrcCoverage {
     }
 
     fn parse_details(&self, config_path: &Path) -> serde_json::Value {
-        let settings = crate::fs::read_file(config_path).map_or(0, |c| {
+        let settings = guardrail3_shared_fs::read_file(config_path).map_or(0, |c| {
             c.lines()
                 .filter(|l| {
                     let t = l.trim();

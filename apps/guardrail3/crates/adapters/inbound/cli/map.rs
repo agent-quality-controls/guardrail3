@@ -2,9 +2,9 @@
 
 use std::path::Path;
 
-use crate::app::core::crawl::crawl;
-use crate::app::core::project_map::{self, ProjectMap, RustScopeKind, TsScopeKind};
 use guardrail3_app_commands::command_ids::RS_INIT;
+use guardrail3_app_core::crawl::crawl;
+use guardrail3_app_core::project_map::{self, ProjectMap, RustScopeKind, TsScope, TsScopeKind};
 
 /// Run the map command — crawl, build structure, display.
 #[allow(clippy::print_stdout)] // reason: CLI command — user-facing output
@@ -197,7 +197,7 @@ fn print_ts(map: &ProjectMap) {
 }
 
 #[allow(clippy::print_stdout)] // reason: CLI output
-fn print_ts_scope(scope: &crate::app::core::project_map::TsScope) {
+fn print_ts_scope(scope: &TsScope) {
     let mut signals = Vec::new();
     if scope.configs.next_config.is_some() {
         signals.push("Next.js");

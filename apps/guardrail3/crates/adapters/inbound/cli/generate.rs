@@ -1,10 +1,10 @@
 use std::path::Path;
 
-use crate::adapters::inbound::cli::cli::GenerateArgs;
-use crate::domain::config;
-use crate::domain::modules::{canonical, cspell, eslint, stylelint};
+use crate::cli::GenerateArgs;
 use guardrail3_app_commands::command_ids::{RS_INIT, RS_SHOW_MODULE};
 use guardrail3_app_rs_generate as rs_generate;
+use guardrail3_domain_config as config;
+use guardrail3_domain_modules::{canonical, cspell, eslint, stylelint};
 
 /// A (`relative_path`, `content`) pair for a generated file.
 type GeneratedPair = (String, String);
@@ -438,8 +438,9 @@ fn build_hook_content(
                 .to_owned()
         },
     );
-    crate::domain::modules::pre_commit::build_pre_commit_script(has_rust, has_typescript).replace(
-        "GUARDRAIL3_RUST_WORKSPACE:-.}",
-        &format!("GUARDRAIL3_RUST_WORKSPACE:-{rust_workspace_root}}}"),
-    )
+    guardrail3_domain_modules::pre_commit::build_pre_commit_script(has_rust, has_typescript)
+        .replace(
+            "GUARDRAIL3_RUST_WORKSPACE:-.}",
+            &format!("GUARDRAIL3_RUST_WORKSPACE:-{rust_workspace_root}}}"),
+        )
 }

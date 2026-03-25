@@ -13,7 +13,7 @@
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
-use crate::app::core::crawl::CrawlResult;
+use guardrail3_app_core::crawl::CrawlResult;
 
 use super::engine::{self, CoverageTool};
 
@@ -37,7 +37,7 @@ impl CoverageTool for TsconfigCoverage {
     }
 
     fn parse_details(&self, config_path: &Path) -> serde_json::Value {
-        let Some(content) = crate::fs::read_file(config_path) else {
+        let Some(content) = guardrail3_shared_fs::read_file(config_path) else {
             return serde_json::json!({});
         };
         let has_extends = content.contains("\"extends\"");

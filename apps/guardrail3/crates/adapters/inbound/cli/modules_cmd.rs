@@ -1,5 +1,5 @@
-use crate::domain::modules;
 use guardrail3_app_commands::command_ids::RS_LIST_MODULES;
+use guardrail3_domain_modules as modules;
 
 #[allow(clippy::print_stdout)] // reason: CLI command — module listing output to stdout
 pub fn list_modules() {

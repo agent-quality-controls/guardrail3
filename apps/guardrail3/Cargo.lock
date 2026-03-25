@@ -338,6 +338,7 @@ dependencies = [
  "colored",
  "garde",
  "glob",
+ "guardrail3-adapters-inbound-cli",
  "guardrail3-adapters-outbound-fs",
  "guardrail3-adapters-outbound-report",
  "guardrail3-adapters-outbound-tool-runner",
@@ -385,6 +386,30 @@ dependencies = [
  "tree-sitter-javascript",
  "tree-sitter-typescript",
  "walkdir",
+]
+
+[[package]]
+name = "guardrail3-adapters-inbound-cli"
+version = "0.0.0"
+dependencies = [
+ "clap",
+ "garde",
+ "guardrail3-adapters-outbound-fs",
+ "guardrail3-app-commands",
+ "guardrail3-app-core",
+ "guardrail3-app-rs-family-clippy",
+ "guardrail3-app-rs-family-deny",
+ "guardrail3-app-rs-generate",
+ "guardrail3-app-ts",
+ "guardrail3-domain-config",
+ "guardrail3-domain-modules",
+ "guardrail3-domain-report",
+ "guardrail3-domain-validation-model",
+ "guardrail3-ports-outbound-traits",
+ "guardrail3-shared-fs",
+ "serde",
+ "serde_json",
+ "toml",
 ]
 
 [[package]]

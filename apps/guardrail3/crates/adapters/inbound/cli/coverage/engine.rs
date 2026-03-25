@@ -11,7 +11,7 @@ use std::path::{Path, PathBuf};
 
 use serde::Serialize;
 
-use crate::app::core::crawl::CrawlResult;
+use guardrail3_app_core::crawl::CrawlResult;
 
 // ---------------------------------------------------------------------------
 // Tool trait

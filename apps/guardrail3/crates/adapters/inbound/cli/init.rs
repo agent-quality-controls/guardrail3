@@ -1,10 +1,11 @@
 use std::fmt::Write;
 use std::path::Path;
 
-use crate::app::ts::validate::auto_detect_app_type;
-use crate::app::ts::validate::ts_arch_checks::discover_ts_apps;
-use crate::domain::report::TsAppType;
 use guardrail3_adapters_outbound_fs::RealFileSystem;
+use guardrail3_app_core::discover::detect_project;
+use guardrail3_app_ts::validate::auto_detect_app_type;
+use guardrail3_app_ts::validate::ts_arch_checks::discover_ts_apps;
+use guardrail3_domain_report::TsAppType;
 use guardrail3_outbound_traits::FileSystem;
 
 /// Initialize Rust guardrail3 configuration: creates guardrail3.toml with discovered workspace
@@ -222,7 +223,7 @@ fn show_file_diff(path: &Path, new_content: &str) {
 #[allow(clippy::too_many_lines)] // reason: generates per-app config sections sequentially
 fn generate_rs_config_content(profile: &str, project_path: &Path) -> String {
     let fs = RealFileSystem;
-    let project = crate::app::core::discover::detect_project(&fs, project_path);
+    let project = detect_project(&fs, project_path);
 
     let mut config = format!(
         r#"version = "0.1"
