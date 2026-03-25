@@ -120,3 +120,7 @@ impl IgnoreVisitor<'_> {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "extra_visitors_tests.rs"]
+mod tests;

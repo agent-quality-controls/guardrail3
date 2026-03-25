@@ -1,7 +1,7 @@
 use syn::visit::Visit;
 
-use guardrail3::app::rs::validate::ast_helpers::parse_file;
-use guardrail3::app::rs::validate::extra_visitors::IgnoreVisitor;
+use crate::ast_helpers::parse_file;
+use crate::extra_visitors::IgnoreVisitor;
 
 #[allow(clippy::expect_used)] // reason: test helper
 fn must_parse(source: &str) -> syn::File {

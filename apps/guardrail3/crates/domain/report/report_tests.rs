@@ -1,6 +1,4 @@
-use guardrail3::domain::report::{CheckResult, Report, Section, Severity};
-
-// ---- Bug 3: Score formula / severity counting ----
+use crate::{CheckResult, Report, Section, Severity};
 
 #[test]
 fn error_count_only_counts_errors() {

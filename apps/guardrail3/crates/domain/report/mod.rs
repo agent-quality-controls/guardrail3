@@ -236,3 +236,7 @@ macro_rules! severity_counter {
 severity_counter!(error_count, Error);
 severity_counter!(warn_count, Warn);
 severity_counter!(info_count, Info);
+
+#[cfg(test)]
+#[path = "report_tests.rs"]
+mod tests;
