@@ -2,3 +2,9 @@
 name = "guardrail3-adapters-outbound-tool-runner"
 version = "0.0.0"
 edition = "2024"
+
+[lib]
+path = "mod.rs"
+
+[dependencies]
+guardrail3_outbound_traits = { package = "guardrail3-ports-outbound-traits", path = "../../../ports/outbound/traits" }

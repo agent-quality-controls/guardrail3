@@ -1,11 +1,11 @@
 use std::fmt::Write;
 use std::path::Path;
 
-use crate::adapters::outbound::fs::RealFileSystem;
 use crate::app::ts::validate::auto_detect_app_type;
 use crate::app::ts::validate::ts_arch_checks::discover_ts_apps;
 use crate::domain::report::TsAppType;
-use crate::ports::outbound::FileSystem;
+use guardrail3_adapters_outbound_fs::RealFileSystem;
+use guardrail3_outbound_traits::FileSystem;
 
 /// Initialize Rust guardrail3 configuration: creates guardrail3.toml with discovered workspace
 /// members and per-crate config. Config files (clippy.toml, deny.toml, etc.) are created by `generate`.
@@ -54,7 +54,7 @@ fn scaffold_config(project_path: &Path, profile: &str, force: bool, created: &mu
         eprintln!("Use --force to overwrite.");
         std::process::exit(1);
     }
-    if let Err(e) = crate::fs::write_file(
+    if let Err(e) = guardrail3_shared_fs::write_file(
         &config_path,
         &generate_rs_config_content(profile, project_path),
     ) {
@@ -79,7 +79,7 @@ pub fn run_ts(path: &str, force: bool, dry_run: bool) {
 
     if dry_run {
         if config_path.exists() {
-            let existing = crate::fs::read_file(&config_path).unwrap_or_default();
+            let existing = guardrail3_shared_fs::read_file(&config_path).unwrap_or_default();
             let new_content = if existing.contains("[typescript]") {
                 replace_typescript_section(&existing, &ts_section)
             } else {
@@ -97,7 +97,7 @@ pub fn run_ts(path: &str, force: bool, dry_run: bool) {
 
     if config_path.exists() {
         // Read existing content and check if [typescript] section already exists
-        let existing = crate::fs::read_file(&config_path).unwrap_or_default();
+        let existing = guardrail3_shared_fs::read_file(&config_path).unwrap_or_default();
         if existing.contains("[typescript]") && !force {
             eprintln!("Error: [typescript] section already exists in guardrail3.toml");
             eprintln!("Use --force to overwrite.");
@@ -108,14 +108,14 @@ pub fn run_ts(path: &str, force: bool, dry_run: bool) {
             // Force mode: replace existing [typescript] section
             // Find [typescript] and replace everything from there to next section or EOF
             let new_content = replace_typescript_section(&existing, &ts_section);
-            if let Err(e) = crate::fs::write_file(&config_path, &new_content) {
+            if let Err(e) = guardrail3_shared_fs::write_file(&config_path, &new_content) {
                 eprintln!("Error writing guardrail3.toml: {e}");
                 std::process::exit(1);
             }
         } else {
             // Append [typescript] section
             let new_content = format!("{existing}{ts_section}");
-            if let Err(e) = crate::fs::write_file(&config_path, &new_content) {
+            if let Err(e) = guardrail3_shared_fs::write_file(&config_path, &new_content) {
                 eprintln!("Error writing guardrail3.toml: {e}");
                 std::process::exit(1);
             }
@@ -125,7 +125,7 @@ pub fn run_ts(path: &str, force: bool, dry_run: bool) {
     } else {
         // Create minimal guardrail3.toml with only [typescript]
         let config_content = format!("version = \"0.1\"\n{ts_section}");
-        if let Err(e) = crate::fs::write_file(&config_path, &config_content) {
+        if let Err(e) = guardrail3_shared_fs::write_file(&config_path, &config_content) {
             eprintln!("Error writing guardrail3.toml: {e}");
             std::process::exit(1);
         }
@@ -195,7 +195,7 @@ fn show_file_diff(path: &Path, new_content: &str) {
         .unwrap_or("unknown");
 
     if path.exists() {
-        let existing = crate::fs::read_file(path).unwrap_or_default();
+        let existing = guardrail3_shared_fs::read_file(path).unwrap_or_default();
         if existing == new_content {
             println!("  No changes to {name}");
         } else {
@@ -236,17 +236,23 @@ workspace_root = "."
     );
 
     let members = project.all_member_dirs();
+    writeln!(config, "\n[rust.checks]").unwrap_or_default();
+    writeln!(config, "arch = true").unwrap_or_default();
     if members.is_empty() {
         // Single-crate — workspace-level checks
-        writeln!(config, "\n[rust.checks]").unwrap_or_default();
-        writeln!(config, "architecture = true      # R-ARCH-*, R-DEPS-*").unwrap_or_default();
-        writeln!(config, "garde = true             # R-GARDE-*").unwrap_or_default();
-        writeln!(config, "tests = true             # R-TEST-*").unwrap_or_default();
-        writeln!(
-            config,
-            "release = true           # R-REL-*, R-PUB-*, R-BIN-*"
-        )
-        .unwrap_or_default();
+        writeln!(config, "fmt = true").unwrap_or_default();
+        writeln!(config, "toolchain = true").unwrap_or_default();
+        writeln!(config, "clippy = true").unwrap_or_default();
+        writeln!(config, "deny = true").unwrap_or_default();
+        writeln!(config, "cargo = true").unwrap_or_default();
+        writeln!(config, "code = true").unwrap_or_default();
+        writeln!(config, "hexarch = true").unwrap_or_default();
+        writeln!(config, "deps = true").unwrap_or_default();
+        writeln!(config, "garde = true").unwrap_or_default();
+        writeln!(config, "test = true").unwrap_or_default();
+        writeln!(config, "release = true").unwrap_or_default();
+        writeln!(config, "hooks_shared = true").unwrap_or_default();
+        writeln!(config, "hooks_rs = true").unwrap_or_default();
     } else {
         // Multi-crate workspace — per-app + packages
         let mut seen_apps: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
@@ -271,15 +277,15 @@ workspace_root = "."
                     writeln!(config, "\n[rust.apps.{app_name}]").unwrap_or_default();
                     writeln!(config, "type = \"service\"").unwrap_or_default();
                     writeln!(config, "\n[rust.apps.{app_name}.checks]").unwrap_or_default();
-                    writeln!(config, "architecture = true      # R-ARCH-*, R-DEPS-*")
-                        .unwrap_or_default();
-                    writeln!(config, "garde = true             # R-GARDE-*").unwrap_or_default();
-                    writeln!(config, "tests = true             # R-TEST-*").unwrap_or_default();
-                    writeln!(
-                        config,
-                        "release = true           # R-REL-*, R-PUB-*, R-BIN-*"
-                    )
-                    .unwrap_or_default();
+                    writeln!(config, "clippy = true").unwrap_or_default();
+                    writeln!(config, "deny = true").unwrap_or_default();
+                    writeln!(config, "cargo = true").unwrap_or_default();
+                    writeln!(config, "code = true").unwrap_or_default();
+                    writeln!(config, "hexarch = true").unwrap_or_default();
+                    writeln!(config, "deps = true").unwrap_or_default();
+                    writeln!(config, "garde = true").unwrap_or_default();
+                    writeln!(config, "test = true").unwrap_or_default();
+                    writeln!(config, "release = true").unwrap_or_default();
                 }
             }
         }
@@ -287,22 +293,15 @@ workspace_root = "."
             writeln!(config, "\n[rust.packages]").unwrap_or_default();
             writeln!(config, "type = \"library\"").unwrap_or_default();
             writeln!(config, "\n[rust.packages.checks]").unwrap_or_default();
-            writeln!(
-                config,
-                "architecture = false     # libraries don't use hex arch"
-            )
-            .unwrap_or_default();
-            writeln!(
-                config,
-                "garde = false            # no input boundary validation for shared packages"
-            )
-            .unwrap_or_default();
-            writeln!(config, "tests = true             # R-TEST-*").unwrap_or_default();
-            writeln!(
-                config,
-                "release = false          # packages published with the app"
-            )
-            .unwrap_or_default();
+            writeln!(config, "clippy = true").unwrap_or_default();
+            writeln!(config, "deny = true").unwrap_or_default();
+            writeln!(config, "cargo = true").unwrap_or_default();
+            writeln!(config, "code = true").unwrap_or_default();
+            writeln!(config, "hexarch = false").unwrap_or_default();
+            writeln!(config, "deps = true").unwrap_or_default();
+            writeln!(config, "garde = false").unwrap_or_default();
+            writeln!(config, "test = true").unwrap_or_default();
+            writeln!(config, "release = false").unwrap_or_default();
         }
     }
 

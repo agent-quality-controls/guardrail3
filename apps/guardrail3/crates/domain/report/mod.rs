@@ -1,3 +1,5 @@
+use guardrail3_validation_model::RustValidateFamily;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Severity {
     Error,
@@ -71,6 +73,51 @@ impl Default for RustCheckCategories {
             release: true,
         }
     }
+}
+
+#[must_use]
+pub const fn rust_validate_family_cli_name(family: RustValidateFamily) -> &'static str {
+    match family {
+        RustValidateFamily::Arch => "arch",
+        RustValidateFamily::Fmt => "fmt",
+        RustValidateFamily::Toolchain => "toolchain",
+        RustValidateFamily::Clippy => "clippy",
+        RustValidateFamily::Deny => "deny",
+        RustValidateFamily::Cargo => "cargo",
+        RustValidateFamily::Code => "code",
+        RustValidateFamily::Hexarch => "hexarch",
+        RustValidateFamily::Deps => "deps",
+        RustValidateFamily::Garde => "garde",
+        RustValidateFamily::Test => "test",
+        RustValidateFamily::Release => "release",
+        RustValidateFamily::HooksShared => "hooks-shared",
+        RustValidateFamily::HooksRs => "hooks-rs",
+    }
+}
+
+#[must_use]
+pub const fn rust_validate_family_config_key(family: RustValidateFamily) -> &'static str {
+    match family {
+        RustValidateFamily::Arch => "arch",
+        RustValidateFamily::Fmt => "fmt",
+        RustValidateFamily::Toolchain => "toolchain",
+        RustValidateFamily::Clippy => "clippy",
+        RustValidateFamily::Deny => "deny",
+        RustValidateFamily::Cargo => "cargo",
+        RustValidateFamily::Code => "code",
+        RustValidateFamily::Hexarch => "hexarch",
+        RustValidateFamily::Deps => "deps",
+        RustValidateFamily::Garde => "garde",
+        RustValidateFamily::Test => "test",
+        RustValidateFamily::Release => "release",
+        RustValidateFamily::HooksShared => "hooks_shared",
+        RustValidateFamily::HooksRs => "hooks_rs",
+    }
+}
+
+#[must_use]
+pub const fn rust_validate_family_section_name(family: RustValidateFamily) -> &'static str {
+    rust_validate_family_cli_name(family)
 }
 
 /// Resolved check categories for TypeScript validation.

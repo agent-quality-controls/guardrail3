@@ -1,4 +1,4 @@
-use crate::domain::modules::Module;
+use crate::Module;
 
 pub const BASE_TYPE_PATHS: &[&str] = &[
     "std::collections::HashMap",

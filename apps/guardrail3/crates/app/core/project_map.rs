@@ -6,7 +6,7 @@
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
-use crate::app::core::crawl::CrawlResult;
+use crate::crawl::CrawlResult;
 
 // ---------------------------------------------------------------------------
 // Project map types
@@ -144,7 +144,7 @@ fn build_rust_scopes(root: &Path, crawl: &CrawlResult) -> Vec<RustScope> {
 
     // Pass 1: find all workspaces and resolve their members
     for cargo_path in &crawl.cargo_tomls {
-        let Some(content) = crate::fs::read_file(cargo_path) else {
+        let Some(content) = guardrail3_shared_fs::read_file(cargo_path) else {
             continue;
         };
         let Ok(table) = content.parse::<toml::Value>() else {
@@ -174,7 +174,7 @@ fn build_rust_scopes(root: &Path, crawl: &CrawlResult) -> Vec<RustScope> {
 
     // Pass 2: find standalone crates (package without workspace, not a member of any workspace)
     for cargo_path in &crawl.cargo_tomls {
-        let Some(content) = crate::fs::read_file(cargo_path) else {
+        let Some(content) = guardrail3_shared_fs::read_file(cargo_path) else {
             continue;
         };
         let Ok(table) = content.parse::<toml::Value>() else {
@@ -276,7 +276,7 @@ fn resolve_workspace_members(
 
 fn read_crate_name(path: &Path) -> String {
     let cargo_path = path.join("Cargo.toml");
-    let Some(content) = crate::fs::read_file(&cargo_path) else {
+    let Some(content) = guardrail3_shared_fs::read_file(&cargo_path) else {
         return path
             .file_name()
             .and_then(|n| n.to_str())
@@ -396,7 +396,7 @@ fn build_ts_scopes(root: &Path, crawl: &CrawlResult) -> Vec<TsScope> {
 
 #[allow(clippy::disallowed_methods)] // reason: serde_json::from_str for package.json inspection — internal tool, not user input
 fn read_package_name(path: &Path) -> String {
-    let Some(content) = crate::fs::read_file(path) else {
+    let Some(content) = guardrail3_shared_fs::read_file(path) else {
         return "unknown".to_owned();
     };
     let Ok(json) = serde_json::from_str::<serde_json::Value>(&content) else {
@@ -412,7 +412,7 @@ fn read_pnpm_patterns(crawl: &CrawlResult) -> Vec<String> {
     let Some(path) = crawl.pnpm_workspaces.first() else {
         return Vec::new();
     };
-    let Some(content) = crate::fs::read_file(path) else {
+    let Some(content) = guardrail3_shared_fs::read_file(path) else {
         return Vec::new();
     };
     // Simple YAML parsing — extract lines that look like: - "apps/*"

@@ -2,3 +2,19 @@
 name = "guardrail3-app-core"
 version = "0.0.0"
 edition = "2024"
+
+[lib]
+path = "mod.rs"
+
+[lints]
+workspace = true
+
+[dependencies]
+glob = { workspace = true }
+guardrail3_domain_project_tree = { package = "guardrail3-domain-project-tree", path = "../../domain/project-tree" }
+guardrail3_outbound_traits = { package = "guardrail3-ports-outbound-traits", path = "../../ports/outbound/traits" }
+guardrail3_shared_fs = { package = "guardrail3-shared-fs", path = "../../shared/fs" }
+ignore = "0.4"
+serde_json = "1"
+toml = "0.8"
+walkdir = "2"

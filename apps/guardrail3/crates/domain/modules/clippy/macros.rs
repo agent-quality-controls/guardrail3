@@ -1,4 +1,4 @@
-use crate::domain::modules::Module;
+use crate::Module;
 
 pub const EXPECTED_MACRO_BANS: &[&str] = &["println", "eprintln", "dbg", "todo", "unimplemented"];
 

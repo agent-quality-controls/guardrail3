@@ -6,7 +6,7 @@ use crate::domain::report::{Report, Section};
 
 use super::deploy_checks;
 use super::hook_checks;
-use crate::ports::outbound::{FileSystem, ToolChecker};
+use guardrail3_outbound_traits::{FileSystem, ToolChecker};
 
 pub fn run(
     fs: &dyn FileSystem,
@@ -18,7 +18,14 @@ pub fn run(
     crawl: &CrawlResult,
 ) -> Report {
     if has_rust {
-        return crate::app::rs::validate::run_hook_report(fs, path, tc);
+        let tree = crate::app::core::project_walker::walk_project(fs, path);
+        let hook_results = crate::app::rs::checks::hooks::check(fs, path, &tree, tc);
+        let mut report = Report::new(path.display().to_string(), vec!["Rust".to_owned()]);
+        report.add_section(Section {
+            name: "Hook checks".to_owned(),
+            results: hook_results,
+        });
+        return report;
     }
 
     let mut report = Report::new(path.display().to_string(), vec!["Hooks".to_owned()]);

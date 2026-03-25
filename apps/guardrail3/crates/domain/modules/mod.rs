@@ -84,3 +84,25 @@ pub fn all_modules() -> Vec<&'static Module> {
 pub fn find_module(name: &str) -> Option<&'static Module> {
     all_modules().into_iter().find(|m| m.name == name)
 }
+
+/// Remove override entries that already exist in the base content.
+pub fn deduplicated_override(base: &str, override_content: &str) -> String {
+    if override_content.trim().is_empty() {
+        return String::new();
+    }
+
+    let mut result = String::new();
+    for line in override_content.lines() {
+        let trimmed = line.trim();
+        if trimmed.is_empty() || trimmed.starts_with('#') {
+            continue;
+        }
+        let key = trimmed.trim_end_matches(',');
+        if base.contains(key) {
+            continue;
+        }
+        result.push_str(line);
+        result.push('\n');
+    }
+    result
+}

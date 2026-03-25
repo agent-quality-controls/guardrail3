@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use colored::Colorize;
 
-use crate::domain::report::{CheckResult, Report, Severity};
+use guardrail3_domain_report::{CheckResult, Report, Severity};
 
 // Clippy wants a type alias for `BTreeMap<&str, Vec<&&CheckResult>>` but the double-reference
 // lifetimes make a clean alias impossible without GATs. Suppress at usage site instead.

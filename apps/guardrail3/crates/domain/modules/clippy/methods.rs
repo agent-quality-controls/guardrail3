@@ -1,4 +1,4 @@
-use crate::domain::modules::Module;
+use crate::Module;
 
 pub const SERVICE_METHOD_PATHS: &[&str] = &[
     "std::env::var",

@@ -4,7 +4,7 @@
 //! the filesystem directly for config files — everything is in the tree.
 //!
 //! Two maps:
-//! - `structure`: every directory visited → its children (dirs + file names)
+//! - `structure`: every directory visited -> its children (dirs + file names)
 //! - `content`: cached raw content of config files we check (keyed by relative path)
 //!
 //! Source files (.rs, .ts, .tsx) appear in the structure (we know they exist)
@@ -17,15 +17,12 @@ use glob::Pattern;
 use serde::{Deserialize, Serialize};
 
 /// The full project tree.
-///
-/// Built once by [`crate::app::core::project_walker::walk_project`],
-/// then passed to checkers as `&ProjectTree`.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProjectTree {
     /// Absolute path to the project root.
     pub root: PathBuf,
 
-    /// Directory structure: every dir visited → its immediate children.
+    /// Directory structure: every dir visited -> its immediate children.
     /// Keys are relative paths from root. `""` = the root directory itself.
     /// Sorted by path (BTreeMap).
     pub structure: BTreeMap<String, DirEntry>,
@@ -128,7 +125,7 @@ impl ProjectTree {
     }
 
     /// Join a directory relative path with a child name.
-    /// Handles the root case (`""` + `"foo"` → `"foo"`).
+    /// Handles the root case (`""` + `"foo"` -> `"foo"`).
     #[must_use]
     pub fn join_rel(parent: &str, child: &str) -> String {
         if parent.is_empty() {
@@ -161,5 +158,4 @@ fn split_rel(rel: &str) -> (&str, &str) {
 }
 
 #[cfg(test)]
-#[path = "project_tree_tests.rs"]
 mod tests;

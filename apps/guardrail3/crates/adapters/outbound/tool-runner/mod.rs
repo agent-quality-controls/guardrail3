@@ -3,7 +3,7 @@
 use std::path::Path;
 use std::process::Command;
 
-use crate::ports::outbound::{CommandRunResult, ToolChecker};
+use guardrail3_outbound_traits::{CommandRunResult, ToolChecker};
 
 /// Production tool checker that runs actual shell commands.
 pub struct RealToolChecker;

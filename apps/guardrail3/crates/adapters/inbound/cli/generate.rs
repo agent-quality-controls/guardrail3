@@ -1,6 +1,5 @@
 #[path = "generate_helpers.rs"]
 mod generate_helpers;
-pub(crate) use generate_helpers::deduplicated_override;
 use generate_helpers::{
     GeneratedFile, detect_ts_app_types, generate_rust_files, load_local_overrides,
     resolve_rust_root,
@@ -19,7 +18,7 @@ type GeneratedPair = (String, String);
 #[allow(clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI tool — config parse errors reported to stderr; guardrail3 config parsing — no garde validation needed for own config
 fn load_config(path: &Path) -> Option<config::types::GuardrailConfig> {
     let config_path = path.join("guardrail3.toml");
-    let content = crate::fs::read_file(&config_path)?;
+    let content = guardrail3_shared_fs::read_file(&config_path)?;
     match toml::from_str(&content) {
         Ok(cfg) => Some(cfg),
         Err(e) => {
@@ -54,13 +53,13 @@ pub fn run(args: &GenerateArgs) {
     for gf in &files {
         let target = project_path.join(&gf.path);
         if let Some(parent) = target.parent() {
-            if let Err(e) = crate::fs::create_dir_all(parent) {
+            if let Err(e) = guardrail3_shared_fs::create_dir_all(parent) {
                 eprintln!("Error creating directory {}: {e}", parent.display());
                 continue;
             }
         }
         warn_if_overwriting(&target, &gf.path, &gf.content);
-        if let Err(e) = crate::fs::write_file(&target, &gf.content) {
+        if let Err(e) = guardrail3_shared_fs::write_file(&target, &gf.content) {
             eprintln!("Error writing {}: {e}", gf.path);
             continue;
         }
@@ -105,10 +104,10 @@ pub fn run_rs(args: &GenerateArgs) {
     for gf in &files {
         let target = project_path.join(&gf.path);
         if let Some(parent) = target.parent() {
-            let _ = crate::fs::create_dir_all(parent);
+            let _ = guardrail3_shared_fs::create_dir_all(parent);
         }
         warn_if_overwriting(&target, &gf.path, &gf.content);
-        if let Err(e) = crate::fs::write_file(&target, &gf.content) {
+        if let Err(e) = guardrail3_shared_fs::write_file(&target, &gf.content) {
             eprintln!("Error writing {}: {e}", gf.path);
             continue;
         }
@@ -145,10 +144,10 @@ pub fn run_ts(args: &GenerateArgs) {
     for gf in &files {
         let target = project_path.join(&gf.path);
         if let Some(parent) = target.parent() {
-            let _ = crate::fs::create_dir_all(parent);
+            let _ = guardrail3_shared_fs::create_dir_all(parent);
         }
         warn_if_overwriting(&target, &gf.path, &gf.content);
-        if let Err(e) = crate::fs::write_file(&target, &gf.content) {
+        if let Err(e) = guardrail3_shared_fs::write_file(&target, &gf.content) {
             eprintln!("Error writing {}: {e}", gf.path);
             continue;
         }
@@ -171,19 +170,19 @@ fn generate_and_install_hooks(project_path: &Path, has_rust: bool, has_typescrip
     let hook_content = build_hook_content(cfg.as_ref(), has_rust, has_typescript);
 
     let hooks_dir = project_path.join(".githooks");
-    let _ = crate::fs::create_dir_all(&hooks_dir);
+    let _ = guardrail3_shared_fs::create_dir_all(&hooks_dir);
     let hook_path = hooks_dir.join("pre-commit");
-    if let Err(e) = crate::fs::write_file(&hook_path, &hook_content) {
+    if let Err(e) = guardrail3_shared_fs::write_file(&hook_path, &hook_content) {
         eprintln!("Error writing pre-commit hook: {e}");
         return;
     }
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
-        if let Some(meta) = crate::fs::metadata(&hook_path) {
+        if let Some(meta) = guardrail3_shared_fs::metadata(&hook_path) {
             let mut perms = meta.permissions();
             perms.set_mode(0o755);
-            let _ = crate::fs::set_permissions(&hook_path, perms);
+            let _ = guardrail3_shared_fs::set_permissions(&hook_path, perms);
         }
     }
     println!("  wrote: .githooks/pre-commit");
@@ -206,13 +205,13 @@ pub fn run_hooks(args: &GenerateArgs) {
     let hook_content = build_hook_content(cfg.as_ref(), has_rust, has_typescript);
 
     let hooks_dir = project_path.join(".githooks");
-    if let Err(e) = crate::fs::create_dir_all(&hooks_dir) {
+    if let Err(e) = guardrail3_shared_fs::create_dir_all(&hooks_dir) {
         eprintln!("Error creating .githooks/ directory: {e}");
         std::process::exit(1);
     }
 
     let hook_path = hooks_dir.join("pre-commit");
-    if let Err(e) = crate::fs::write_file(&hook_path, &hook_content) {
+    if let Err(e) = guardrail3_shared_fs::write_file(&hook_path, &hook_content) {
         eprintln!("Error writing pre-commit hook: {e}");
         std::process::exit(1);
     }
@@ -221,10 +220,10 @@ pub fn run_hooks(args: &GenerateArgs) {
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
-        if let Some(meta) = crate::fs::metadata(&hook_path) {
+        if let Some(meta) = guardrail3_shared_fs::metadata(&hook_path) {
             let mut perms = meta.permissions();
             perms.set_mode(0o755);
-            if let Err(e) = crate::fs::set_permissions(&hook_path, perms) {
+            if let Err(e) = guardrail3_shared_fs::set_permissions(&hook_path, perms) {
                 eprintln!("Warning: could not set executable permission: {e}");
             }
         }
@@ -238,7 +237,7 @@ pub fn run_hooks(args: &GenerateArgs) {
 /// Warn if an existing file has content that differs from what we'd generate.
 #[allow(clippy::print_stderr)] // reason: CLI tool — overwrite warnings reported to stderr
 fn warn_if_overwriting(target: &Path, relative_path: &str, new_content: &str) {
-    if let Some(existing) = crate::fs::read_file(target) {
+    if let Some(existing) = guardrail3_shared_fs::read_file(target) {
         if existing != new_content {
             eprintln!(
                 "  warning: Overwriting {relative_path} — manual edits will be lost. Use .guardrail3/overrides/ for project-specific customization."
