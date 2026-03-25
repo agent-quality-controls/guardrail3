@@ -341,6 +341,7 @@ dependencies = [
  "guardrail3-adapters-outbound-fs",
  "guardrail3-adapters-outbound-report",
  "guardrail3-adapters-outbound-tool-runner",
+ "guardrail3-app-commands",
  "guardrail3-app-core",
  "guardrail3-app-hooks",
  "guardrail3-app-rs-ast",
@@ -358,6 +359,7 @@ dependencies = [
  "guardrail3-app-rs-family-release",
  "guardrail3-app-rs-family-test",
  "guardrail3-app-rs-family-toolchain",
+ "guardrail3-app-rs-generate",
  "guardrail3-app-rs-runtime",
  "guardrail3-app-ts",
  "guardrail3-domain-config",
@@ -410,6 +412,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "guardrail3-app-commands"
+version = "0.0.0"
+
+[[package]]
 name = "guardrail3-app-core"
 version = "0.0.0"
 dependencies = [
@@ -459,18 +465,9 @@ dependencies = [
 name = "guardrail3-app-rs-family-cargo"
 version = "0.0.0"
 dependencies = [
- "glob",
- "guardrail3-app-core",
  "guardrail3-domain-config",
- "guardrail3-domain-modules",
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
- "guardrail3-ports-outbound-traits",
- "proc-macro2",
- "quote",
- "semver",
- "serde_yaml",
- "syn",
  "toml",
 ]
 
@@ -478,18 +475,12 @@ dependencies = [
 name = "guardrail3-app-rs-family-clippy"
 version = "0.0.0"
 dependencies = [
- "glob",
+ "guardrail3-adapters-outbound-fs",
  "guardrail3-app-core",
- "guardrail3-domain-config",
  "guardrail3-domain-modules",
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
- "guardrail3-ports-outbound-traits",
- "proc-macro2",
- "quote",
- "semver",
- "serde_yaml",
- "syn",
+ "tempfile",
  "toml",
 ]
 
@@ -498,6 +489,7 @@ name = "guardrail3-app-rs-family-code"
 version = "0.0.0"
 dependencies = [
  "glob",
+ "guardrail3-adapters-outbound-fs",
  "guardrail3-app-core",
  "guardrail3-app-rs-ast",
  "guardrail3-domain-config",
@@ -511,6 +503,7 @@ dependencies = [
  "semver",
  "serde_yaml",
  "syn",
+ "tempfile",
  "toml",
 ]
 
@@ -518,18 +511,12 @@ dependencies = [
 name = "guardrail3-app-rs-family-deny"
 version = "0.0.0"
 dependencies = [
- "glob",
+ "guardrail3-adapters-outbound-fs",
  "guardrail3-app-core",
- "guardrail3-domain-config",
  "guardrail3-domain-modules",
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
- "guardrail3-ports-outbound-traits",
- "proc-macro2",
- "quote",
- "semver",
- "serde_yaml",
- "syn",
+ "tempfile",
  "toml",
 ]
 
@@ -538,17 +525,10 @@ name = "guardrail3-app-rs-family-deps"
 version = "0.0.0"
 dependencies = [
  "glob",
- "guardrail3-app-core",
  "guardrail3-domain-config",
- "guardrail3-domain-modules",
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
  "guardrail3-ports-outbound-traits",
- "proc-macro2",
- "quote",
- "semver",
- "serde_yaml",
- "syn",
  "toml",
 ]
 
@@ -586,6 +566,7 @@ name = "guardrail3-app-rs-family-hexarch"
 version = "0.0.0"
 dependencies = [
  "glob",
+ "guardrail3-adapters-outbound-fs",
  "guardrail3-app-core",
  "guardrail3-domain-config",
  "guardrail3-domain-modules",
@@ -598,6 +579,7 @@ dependencies = [
  "semver",
  "serde_yaml",
  "syn",
+ "tempfile",
  "toml",
 ]
 
@@ -605,39 +587,20 @@ dependencies = [
 name = "guardrail3-app-rs-family-hooks-rs"
 version = "0.0.0"
 dependencies = [
- "glob",
- "guardrail3-app-core",
- "guardrail3-domain-config",
- "guardrail3-domain-modules",
+ "guardrail3-app-rs-family-hooks-shared",
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
  "guardrail3-ports-outbound-traits",
- "proc-macro2",
- "quote",
- "semver",
- "serde_yaml",
- "syn",
- "toml",
 ]
 
 [[package]]
 name = "guardrail3-app-rs-family-hooks-shared"
 version = "0.0.0"
 dependencies = [
- "glob",
- "guardrail3-app-core",
- "guardrail3-domain-config",
- "guardrail3-domain-modules",
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
  "guardrail3-ports-outbound-traits",
  "guardrail3-shared-fs",
- "proc-macro2",
- "quote",
- "semver",
- "serde_yaml",
- "syn",
- "toml",
 ]
 
 [[package]]
@@ -645,6 +608,8 @@ name = "guardrail3-app-rs-family-release"
 version = "0.0.0"
 dependencies = [
  "glob",
+ "guardrail3-adapters-outbound-fs",
+ "guardrail3-adapters-outbound-tool-runner",
  "guardrail3-app-core",
  "guardrail3-domain-config",
  "guardrail3-domain-modules",
@@ -657,6 +622,7 @@ dependencies = [
  "semver",
  "serde_yaml",
  "syn",
+ "tempfile",
  "toml",
 ]
 
@@ -664,19 +630,14 @@ dependencies = [
 name = "guardrail3-app-rs-family-test"
 version = "0.0.0"
 dependencies = [
- "glob",
- "guardrail3-app-core",
  "guardrail3-app-rs-ast",
+ "guardrail3-app-rs-family-hooks-shared",
  "guardrail3-domain-config",
- "guardrail3-domain-modules",
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
  "guardrail3-ports-outbound-traits",
  "guardrail3-shared-fs",
  "proc-macro2",
- "quote",
- "semver",
- "serde_yaml",
  "syn",
  "toml",
 ]
@@ -687,6 +648,19 @@ version = "0.0.0"
 dependencies = [
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
+ "toml",
+]
+
+[[package]]
+name = "guardrail3-app-rs-generate"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-adapters-outbound-fs",
+ "guardrail3-app-core",
+ "guardrail3-domain-config",
+ "guardrail3-domain-modules",
+ "guardrail3-shared-fs",
+ "tempfile",
  "toml",
 ]
 

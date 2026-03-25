@@ -1,0 +1,18 @@
+[package]
+name = "guardrail3-app-rs-generate"
+version = "0.0.0"
+edition = "2024"
+
+[lints]
+workspace = true
+
+[dependencies]
+guardrail3_adapters_outbound_fs = { package = "guardrail3-adapters-outbound-fs", path = "../../../adapters/outbound/fs" }
+guardrail3_app_core = { package = "guardrail3-app-core", path = "../../core" }
+guardrail3_domain_config = { package = "guardrail3-domain-config", path = "../../../domain/config" }
+guardrail3_domain_modules = { package = "guardrail3-domain-modules", path = "../../../domain/modules" }
+guardrail3_shared_fs = { package = "guardrail3-shared-fs", path = "../../../shared/fs" }
+toml = "0.8"
+
+[dev-dependencies]
+tempfile = "3"
