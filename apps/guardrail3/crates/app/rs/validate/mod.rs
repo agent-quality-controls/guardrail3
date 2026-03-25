@@ -35,7 +35,7 @@ use crate::app::core::crawl::CrawlResult;
 use crate::app::core::discover::ProjectInfo;
 use crate::domain::config::types::GuardrailConfig;
 use crate::domain::report::{Report, RustCheckCategories, Section};
-use crate::ports::outbound::{FileSystem, ToolChecker};
+use guardrail3_outbound_traits::{FileSystem, ToolChecker};
 
 /// Try to load guardrail3.toml as a typed config.
 #[allow(clippy::disallowed_methods)] // reason: guardrail3 config parsing — no garde validation needed for own config
@@ -112,7 +112,7 @@ pub fn run(
 
     if categories.hooks {
         let tree = crate::app::core::project_walker::walk_project(fs, path);
-        let hook_results = crate::app::rs::checks::hooks::check(fs, path, &tree, tc);
+        let hook_results = crate::app::hooks::check(fs, path, &tree, tc);
         report.add_section(Section {
             name: "Hook checks".to_owned(),
             results: hook_results,
@@ -140,7 +140,7 @@ pub fn run(
 
 pub fn run_hook_report(fs: &dyn FileSystem, path: &Path, tc: &dyn ToolChecker) -> Report {
     let tree = crate::app::core::project_walker::walk_project(fs, path);
-    let hook_results = crate::app::rs::checks::hooks::check(fs, path, &tree, tc);
+    let hook_results = crate::app::hooks::check(fs, path, &tree, tc);
     let mut report = Report::new(path.display().to_string(), vec!["Rust".to_owned()]);
     report.add_section(Section {
         name: "Hook checks".to_owned(),
