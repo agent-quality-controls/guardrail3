@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use guardrail3_app_rs_placement::RustArchRole;
+use guardrail3_app_rs_placement::{RustArchRole, RustRootClassification};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RsRootView {
@@ -25,6 +25,7 @@ pub struct RsRootInputFailureView {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RsArchRootView {
     pub root: RsRootView,
+    pub classification: RustRootClassification,
     pub arch_role: Option<RustArchRole>,
     pub app_zone_candidates: Vec<String>,
     pub package_zone_candidates: Vec<String>,

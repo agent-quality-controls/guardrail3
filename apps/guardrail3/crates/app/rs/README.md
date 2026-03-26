@@ -156,13 +156,25 @@ It should not decide root routing.
 
 ```rust
 pub struct RsRootView {
-    pub root_id: RootId,
     pub rel_dir: String,
     pub cargo_rel_path: String,
 }
 
+pub struct RsArchOverlapView {
+    pub app_root_rel: String,
+    pub app_cargo_rel_path: String,
+    pub package_root_rel: String,
+    pub package_cargo_rel_path: String,
+}
+
+pub struct RsRootInputFailureView {
+    pub rel_path: String,
+    pub message: String,
+}
+
 pub struct RsArchRootView {
     pub root: RsRootView,
+    pub classification: RustRootClassification,
     pub arch_role: Option<RustArchRole>,
     pub app_zone_candidates: Vec<String>,
     pub package_zone_candidates: Vec<String>,
@@ -170,15 +182,13 @@ pub struct RsArchRootView {
 
 pub struct RsArchRoute {
     pub roots: Vec<RsArchRootView>,
-    pub overlaps: Vec<OverlapId>,
-    pub input_failures: Vec<RootInputFailureId>,
+    pub overlaps: Vec<RsArchOverlapView>,
+    pub input_failures: Vec<RsRootInputFailureView>,
     pub reporting_enabled: bool,
-    pub scoped_files: Option<BTreeSet<String>>,
 }
 
 pub struct RsHexarchRoute {
     pub roots: Vec<RsRootView>,
-    pub scoped_files: Option<BTreeSet<String>>,
 }
 
 pub struct RsTestRoute {
@@ -193,9 +203,17 @@ Prefer explicit namespaced mapping methods:
 pub struct FamilyMapper<'a> { ... }
 
 impl<'a> FamilyMapper<'a> {
-    pub fn map_rs_arch(&self, scope: &RustRootScope) -> RsArchRoute;
-    pub fn map_rs_hexarch(&self, scope: &RustRootScope) -> RsHexarchRoute;
-    pub fn map_rs_test(&self, scope: &RustRootScope) -> RsTestRoute;
+    pub fn new(
+        tree: &'a ProjectTree,
+        scope: &'a RustRootScope,
+        config: Option<&'a GuardrailConfig>,
+        selected_families: &'a RustFamilySelection,
+        scoped_files: Option<&'a BTreeSet<String>>,
+    ) -> Self;
+
+    pub fn map_rs_arch(&self) -> RsArchRoute;
+    pub fn map_rs_hexarch(&self) -> RsHexarchRoute;
+    pub fn map_rs_test(&self) -> RsTestRoute;
 }
 ```
 
@@ -245,8 +263,8 @@ Families may:
 Allowed family input contents:
 
 - routed narrow root views
-- routed overlap ids or narrow overlap views
-- routed input-failure ids or narrow failure views
+- routed narrow overlap views
+- routed narrow input-failure views
 - mapper-resolved file subsets
 - selection-decided family mode flags already decided outside the family
 
@@ -273,8 +291,8 @@ Concrete flow:
 walk_project()
   -> placement::collect(&tree)
   -> family_selection::resolve(...)
-  -> FamilyMapper::new(&tree, scoped_files)
-  -> family_mapper.map_rs_*(...)
+  -> FamilyMapper::new(&tree, &scope, config, &selected_families, scoped_files)
+  -> family_mapper.map_rs_*()
   -> family::check(&tree, route, ...)
 ```
 
@@ -287,7 +305,7 @@ The shared root-scope seed already exists in:
 - [placement/classification.rs](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/placement/src/classification.rs)
 - [placement/overlap.rs](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/placement/src/overlap.rs)
 
-But `arch` and `test` are not fully migrated to that model yet, and family mapping still leaks into family-local logic.
+`arch` and `test` now consume routed roots from shared placement scope. Other Rust families are still on older direct `ProjectTree` entrypoints, and runtime-level applicability filtering has not been fully collapsed yet.
 
 ## Migration Plan
 

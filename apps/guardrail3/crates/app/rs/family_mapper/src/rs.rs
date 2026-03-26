@@ -55,6 +55,7 @@ impl<'a> FamilyMapper<'a> {
                 .iter()
                 .map(|root| RsArchRootView {
                     root: root_view(root),
+                    classification: root.classification,
                     arch_role: root.arch_role,
                     app_zone_candidates: root.app_zone_candidates.clone(),
                     package_zone_candidates: root.package_zone_candidates.clone(),

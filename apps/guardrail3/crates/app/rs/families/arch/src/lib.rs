@@ -9,6 +9,7 @@ mod rs_arch_06_owner_family_enablement_coherence;
 mod rs_arch_07_required_inputs_fail_closed;
 mod rs_arch_08_auxiliary_roots_declared;
 
+use guardrail3_app_rs_family_mapper::RsArchRoute;
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::CheckResult;
 
@@ -18,8 +19,8 @@ use self::inputs::{
     RequiredInputFailureInput, RootClassificationInput, ScopedArchConfigInput, ZoneOverlapInput,
 };
 
-pub fn check(tree: &ProjectTree) -> Vec<CheckResult> {
-    let facts = collect(tree);
+pub fn check(tree: &ProjectTree, route: &RsArchRoute) -> Vec<CheckResult> {
+    let facts = collect(tree, route);
     let mut results = Vec::new();
 
     for input in RootClassificationInput::from_facts(&facts) {

@@ -57,7 +57,7 @@ pub fn run(
 
     for family in selected.iter() {
         let results = match family {
-            RustValidateFamily::Arch => arch::check(&tree),
+            RustValidateFamily::Arch => arch::check(&tree, &mapper.map_rs_arch()),
             RustValidateFamily::Fmt => fmt::check(&tree),
             RustValidateFamily::Toolchain => toolchain::check(&tree),
             RustValidateFamily::Clippy => clippy::check(&tree),
