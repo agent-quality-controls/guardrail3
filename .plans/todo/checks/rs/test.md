@@ -38,8 +38,7 @@ Forbidden:
 
 Judgment is per owned Rust root:
 
-- workspace roots
-- standalone package roots that are not workspace members
+- every directory containing `Cargo.toml`
 
 ### Non-mutation activation
 

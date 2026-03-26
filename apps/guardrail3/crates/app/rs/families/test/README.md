@@ -31,8 +31,7 @@ This family is conditional:
 
 It evaluates:
 
-- workspace roots
-- standalone package roots that are not workspace members
+- every directory containing `Cargo.toml`
 
 Per owned root it may inspect:
 
@@ -46,7 +45,7 @@ It also reads active validation-root hook surfaces for mutation-hook presence.
 
 ## Activation Model
 
-Judgment is per owned Rust crate/root.
+Judgment is per owned Rust crate/root with its own `Cargo.toml`.
 
 ### Test activation
 
@@ -231,6 +230,7 @@ Must not own:
 
 For a tested component:
 
+- the owning component root may be nested under another Rust root, but it must still have its own `Cargo.toml`
 - `crates/runtime` is the production crate
 - `crates/assertions` is required once any test harness exists
 - every tested production module `foo.rs` has exactly one sidecar harness directory:
