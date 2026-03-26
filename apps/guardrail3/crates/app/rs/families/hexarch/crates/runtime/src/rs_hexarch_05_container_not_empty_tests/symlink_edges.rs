@@ -17,6 +17,7 @@ fn symlink_only_container_reports_contains_files_instead_of_empty() {
     let results = super::run_family(tmp.path());
     assertions::assert_expected_rule_results(
         &results,
+        "",
         &[assertions::ExpectedRuleResult {
             file: Some(container),
             file_contains: None,
@@ -41,6 +42,7 @@ fn dangling_symlink_only_container_reports_contains_files_instead_of_empty() {
     let results = super::run_family(tmp.path());
     assertions::assert_expected_rule_results(
         &results,
+        "",
         &[assertions::ExpectedRuleResult {
             file: Some(container),
             file_contains: None,
@@ -65,6 +67,7 @@ fn symlinked_child_directory_does_not_count_as_a_real_subdirectory() {
     let results = super::run_family(tmp.path());
     assertions::assert_expected_rule_results(
         &results,
+        "",
         &[assertions::ExpectedRuleResult {
             file: Some(container),
             file_contains: None,
@@ -91,6 +94,7 @@ fn symlinked_gitkeep_does_not_suppress_rule_05() {
     let results = super::run_family(tmp.path());
     assertions::assert_expected_rule_results(
         &results,
+        "",
         &[assertions::ExpectedRuleResult {
             file: Some(container),
             file_contains: None,

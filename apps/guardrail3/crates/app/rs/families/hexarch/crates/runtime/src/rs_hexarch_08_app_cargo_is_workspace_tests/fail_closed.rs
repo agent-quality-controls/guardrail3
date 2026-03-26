@@ -1,5 +1,3 @@
-use std::collections::BTreeSet;
-
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_08_app_cargo_is_workspace as assertions;
 use super::{copy_fixture, write_file};
 
@@ -11,27 +9,29 @@ fn parse_error_hits_every_mutated_app() {
     }
 
     let results = super::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "");
-    let actual_files = errors
-        .iter()
-        .filter_map(|error| error.file.clone())
-        .collect::<BTreeSet<_>>();
-    let expected_files = [
-        "apps/devctl/Cargo.toml",
-        "apps/backend/Cargo.toml",
-        "apps/worker/Cargo.toml",
-    ]
-    .into_iter()
-    .map(str::to_owned)
-    .collect::<BTreeSet<_>>();
-
-    assert_eq!(
-        actual_files, expected_files,
-        "unexpected hit set: {errors:#?}"
+    assertions::assert_expected_rule_results(
+        &results,
+        &[
+            assertions::ExpectedRuleResult {
+                file: Some("apps/devctl/Cargo.toml"),
+                file_contains: None,
+                title_contains: Some(&["invalid workspace config"]),
+                message_contains: None,
+            },
+            assertions::ExpectedRuleResult {
+                file: Some("apps/backend/Cargo.toml"),
+                file_contains: None,
+                title_contains: Some(&["invalid workspace config"]),
+                message_contains: None,
+            },
+            assertions::ExpectedRuleResult {
+                file: Some("apps/worker/Cargo.toml"),
+                file_contains: None,
+                title_contains: Some(&["invalid workspace config"]),
+                message_contains: None,
+            },
+        ],
     );
-    for error in &errors {
-        assert!(error.title.contains("invalid workspace config"));
-    }
 }
 
 #[test]
@@ -50,22 +50,13 @@ resolver = "2"
     );
 
     let results = super::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "");
-
-    assert_eq!(
-        errors.len(),
-        1,
-        "expected one invalid workspace members error: {errors:#?}"
-    );
-    assert_eq!(errors[0].file.as_deref(), Some("apps/devctl/Cargo.toml"));
-    assert!(
-        errors[0].title.contains("invalid workspace config"),
-        "expected invalid workspace ownership: {errors:#?}"
-    );
-    assert!(
-        errors[0]
-            .message
-            .contains("[workspace].members[1] must be a string"),
-        "expected exact semantic parse message: {errors:#?}"
+    assertions::assert_expected_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            file: Some("apps/devctl/Cargo.toml"),
+            file_contains: None,
+            title_contains: Some(&["invalid workspace config"]),
+            message_contains: Some(&["[workspace].members[1] must be a string"]),
+        }],
     );
 }

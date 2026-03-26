@@ -149,11 +149,6 @@ resolver = "2"
     );
 
     let results = super::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "");
-    assert_eq!(
-        errors.len(),
-        1,
-        "expected one missing internal crate error: {errors:#?}"
-    );
-    assert!(errors[0].title.contains("crates/domain/types"));
+    assertions::assert_error_count(&results, "", 1);
+    assertions::assert_any_result_contains_title(&results, &["crates/domain/types"]);
 }

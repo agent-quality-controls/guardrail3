@@ -11,18 +11,8 @@ fn package_style_app_cargo_is_owned_by_rule_08_not_rule_10() {
     );
 
     let results = super::run_family(tmp.path());
-    let rule_08 = assertions::errors_by_id(&results, "RS-HEXARCH-08");
-    let rule_10 = assertions::errors_by_id(&results, "");
-
-    assert!(
-        rule_10.is_empty(),
-        "rule 10 should not double-fire on non-workspace app cargo: {rule_10:#?}"
-    );
-    assert_eq!(
-        rule_08.len(),
-        1,
-        "rule 08 should own non-workspace app cargo: {rule_08:#?}"
-    );
+    assertions::assert_no_error(&results, "");
+    assertions::assert_error_count(&results, "RS-HEXARCH-08", 1);
 }
 
 #[test]
@@ -45,17 +35,15 @@ resolver = "2"
     );
 
     let results = super::run_family(tmp.path());
-    let rule_09 = assertions::errors_by_id(&results, "RS-HEXARCH-09");
-    let rule_10 = assertions::errors_by_id(&results, "");
-
-    assert_eq!(
-        rule_09.len(),
-        1,
-        "rule 09 should own phantom members: {rule_09:#?}"
-    );
-    assert!(
-        rule_10.is_empty(),
-        "rule 10 should not misclassify in-boundary phantom members: {rule_10:#?}"
+    assertions::assert_no_error(&results, "");
+    assertions::assert_expected_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            file: Some("apps/devctl"),
+            file_contains: None,
+            title_contains: Some(&["crates/domain/phantom"]),
+            message_contains: None,
+        }],
     );
 }
 
@@ -79,17 +67,15 @@ resolver = "2"
     );
 
     let results = super::run_family(tmp.path());
-    let rule_09 = assertions::errors_by_id(&results, "RS-HEXARCH-09");
-    let rule_10 = assertions::errors_by_id(&results, "");
-
-    assert_eq!(
-        rule_09.len(),
-        1,
-        "rule 09 should own invalid in-boundary roots: {rule_09:#?}"
-    );
-    assert!(
-        rule_10.is_empty(),
-        "rule 10 should not misclassify in-boundary `crates` members: {rule_10:#?}"
+    assertions::assert_no_error(&results, "");
+    assertions::assert_expected_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            file: Some("apps/devctl"),
+            file_contains: None,
+            title_contains: Some(&["./crates/"]),
+            message_contains: None,
+        }],
     );
 }
 
@@ -116,26 +102,24 @@ resolver = "2"
         );
 
         let results = super::run_family(tmp.path());
-        let rule_07 = assertions::errors_by_id(&results, "RS-HEXARCH-07");
-        let rule_09 = assertions::errors_by_id(&results, "RS-HEXARCH-09");
-        let rule_10 = assertions::errors_by_id(&results, "");
-
-        assert!(
-            rule_07.is_empty(),
-            "rule 07 should not own app-root members `{member}`: {rule_07:#?}"
-        );
-        assert!(
-            rule_09.is_empty(),
-            "rule 09 should not own app-root members `{member}`: {rule_09:#?}"
-        );
-        assert_eq!(
-            rule_10.len(),
-            1,
-            "rule 10 should own app-root members `{member}`: {rule_10:#?}"
-        );
-        if !member.is_empty() {
-            assert!(rule_10[0].title.contains(member));
-        }
+        assertions::assert_no_error(&results, "RS-HEXARCH-07");
+        assertions::assert_no_error(&results, "RS-HEXARCH-09");
+        let expected = if member.is_empty() {
+            assertions::ExpectedRuleResult {
+                file: Some("apps/devctl"),
+                file_contains: None,
+                title_contains: None,
+                message_contains: None,
+            }
+        } else {
+            assertions::ExpectedRuleResult {
+                file: Some("apps/devctl"),
+                file_contains: None,
+                title_contains: Some(&[member]),
+                message_contains: None,
+            }
+        };
+        assertions::assert_expected_rule_results(&results, &[expected]);
     }
 }
 
@@ -166,19 +150,16 @@ resolver = "2"
     );
 
     let results = super::run_family(tmp.path());
-    let rule_08 = assertions::errors_by_id(&results, "RS-HEXARCH-08");
-    let rule_10 = assertions::errors_by_id(&results, "");
-
-    assert!(
-        rule_08.is_empty(),
-        "rule 08 should not own absolute workspace members: {rule_08:#?}"
+    assertions::assert_no_error(&results, "RS-HEXARCH-08");
+    assertions::assert_expected_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            file: Some("apps/devctl"),
+            file_contains: None,
+            title_contains: Some(&[&absolute_member]),
+            message_contains: None,
+        }],
     );
-    assert_eq!(
-        rule_10.len(),
-        1,
-        "rule 10 should own absolute workspace members: {rule_10:#?}"
-    );
-    assert!(rule_10[0].title.contains(&absolute_member));
 }
 
 #[test]
@@ -201,22 +182,15 @@ resolver = "2"
     );
 
     let results = super::run_family(tmp.path());
-    let rule_07 = assertions::errors_by_id(&results, "RS-HEXARCH-07");
-    let rule_09 = assertions::errors_by_id(&results, "RS-HEXARCH-09");
-    let rule_10 = assertions::errors_by_id(&results, "");
-
-    assert!(
-        rule_07.is_empty(),
-        "rule 07 should not own sibling-app members: {rule_07:#?}"
+    assertions::assert_no_error(&results, "RS-HEXARCH-07");
+    assertions::assert_no_error(&results, "RS-HEXARCH-09");
+    assertions::assert_expected_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            file: Some("apps/devctl"),
+            file_contains: None,
+            title_contains: Some(&["../backend/crates/domain/engine"]),
+            message_contains: None,
+        }],
     );
-    assert!(
-        rule_09.is_empty(),
-        "rule 09 should not own sibling-app members: {rule_09:#?}"
-    );
-    assert_eq!(
-        rule_10.len(),
-        1,
-        "rule 10 should own sibling-app members: {rule_10:#?}"
-    );
-    assert!(rule_10[0].title.contains("../backend/crates/domain/engine"));
 }

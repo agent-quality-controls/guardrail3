@@ -11,18 +11,8 @@ fn package_style_app_cargo_is_owned_by_rule_08_not_rule_09() {
     );
 
     let results = super::run_family(tmp.path());
-    let rule_08 = assertions::errors_by_id(&results, "RS-HEXARCH-08");
-    let rule_09 = assertions::errors_by_id(&results, "");
-
-    assert!(
-        rule_09.is_empty(),
-        "rule 09 should not double-fire on non-workspace app cargo: {rule_09:#?}"
-    );
-    assert_eq!(
-        rule_08.len(),
-        1,
-        "rule 08 should own non-workspace app cargo: {rule_08:#?}"
-    );
+    assertions::assert_no_error(&results, "");
+    assertions::assert_error_count(&results, "RS-HEXARCH-08", 1);
 }
 
 #[test]
@@ -45,18 +35,8 @@ resolver = "2"
     );
 
     let results = super::run_family(tmp.path());
-    let rule_09 = assertions::errors_by_id(&results, "");
-    let rule_10 = assertions::errors_by_id(&results, "RS-HEXARCH-10");
-
-    assert!(
-        rule_09.is_empty(),
-        "rule 09 should not own outside-boundary members: {rule_09:#?}"
-    );
-    assert_eq!(
-        rule_10.len(),
-        1,
-        "rule 10 should own outside-boundary members: {rule_10:#?}"
-    );
+    assertions::assert_no_error(&results, "");
+    assertions::assert_error_count(&results, "RS-HEXARCH-10", 1);
 }
 
 #[test]
@@ -79,18 +59,8 @@ resolver = "2"
     );
 
     let results = super::run_family(tmp.path());
-    let rule_09 = assertions::errors_by_id(&results, "");
-    let rule_10 = assertions::errors_by_id(&results, "RS-HEXARCH-10");
-
-    assert!(
-        rule_09.is_empty(),
-        "rule 09 should not own parent-escape members: {rule_09:#?}"
-    );
-    assert_eq!(
-        rule_10.len(),
-        1,
-        "rule 10 should own parent-escape members: {rule_10:#?}"
-    );
+    assertions::assert_no_error(&results, "");
+    assertions::assert_error_count(&results, "RS-HEXARCH-10", 1);
 }
 
 #[test]
@@ -113,16 +83,6 @@ resolver = "2"
     );
 
     let results = super::run_family(tmp.path());
-    let rule_09 = assertions::errors_by_id(&results, "");
-    let rule_10 = assertions::errors_by_id(&results, "RS-HEXARCH-10");
-
-    assert!(
-        rule_09.is_empty(),
-        "rule 09 should not own absolute members: {rule_09:#?}"
-    );
-    assert_eq!(
-        rule_10.len(),
-        1,
-        "rule 10 should own absolute members: {rule_10:#?}"
-    );
+    assertions::assert_no_error(&results, "");
+    assertions::assert_error_count(&results, "RS-HEXARCH-10", 1);
 }

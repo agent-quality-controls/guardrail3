@@ -54,7 +54,7 @@ fn replacing_container_dirs_with_files_hits_all_owned_app_roots() {
         })
         .collect::<Vec<_>>();
 
-    assertions::assert_expected_rule_results(&results, &expected);
+    assertions::assert_expected_rule_results(&results, "", &expected);
 }
 
 #[test]
@@ -70,6 +70,7 @@ fn replacing_nested_adapters_inbound_with_a_file_hits_nested_root_only() {
     let results = super::run_family(tmp.path());
     assertions::assert_expected_rule_results(
         &results,
+        "",
         &[assertions::ExpectedRuleResult {
             file: Some("apps/backend/crates/adapters/inbound/mcp/crates/adapters/inbound"),
             file_contains: None,
@@ -93,6 +94,7 @@ fn replacing_all_owned_safe_containers_with_files_hits_every_owned_container() {
     let results = super::run_family(tmp.path());
     assertions::assert_expected_rule_results(
         &results,
+        "",
         &expected_files
             .iter()
             .map(|file| assertions::ExpectedRuleResult {

@@ -10,6 +10,7 @@ fn files_only_container_is_owned_by_rule_05() {
     let results = super::run_family(tmp.path());
     assertions::assert_expected_rule_results(
         &results,
+        "",
         &[assertions::ExpectedRuleResult {
             file: Some("apps/devctl/crates/domain"),
             file_contains: None,
@@ -27,6 +28,7 @@ fn missing_container_dir_is_not_owned_by_rule_05() {
     let results = super::run_family(tmp.path());
     assertions::assert_expected_rule_results(
         &results,
+        "",
         &[assertions::ExpectedRuleResult {
             file: Some("apps/devctl/crates/domain"),
             file_contains: None,
