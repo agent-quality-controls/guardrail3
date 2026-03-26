@@ -2,9 +2,7 @@ use std::path::Path;
 
 use guardrail3_app_rs_family_test as runtime;
 use guardrail3_domain_report::{CheckResult, Severity};
-use test_support::{
-    StubToolChecker, finding as finding_for_rule, rule_files as rule_files_for_rule, walk,
-};
+use test_support::{StubToolChecker, walk};
 
 const RULE_ID: &str = "RS-TEST-14";
 
@@ -24,16 +22,25 @@ pub fn run_family_with_tool(root: &Path, cargo_mutants_installed: bool) -> Vec<C
 }
 
 pub fn rule_files(results: &[CheckResult], _rule_id: &str) -> Vec<String> {
-    rule_files_for_rule(results, RULE_ID)
+    let mut files = results
+        .iter()
+        .filter(|result| result.id == RULE_ID)
+        .filter_map(|result| result.file.clone())
+        .collect::<Vec<_>>();
+    files.sort();
+    files
 }
 
 pub fn finding<'a>(results: &'a [CheckResult], _rule_id: &str) -> &'a CheckResult {
-    finding_for_rule(results, RULE_ID)
+    results
+        .iter()
+        .find(|result| result.id == RULE_ID)
+        .unwrap_or_else(|| panic!("expected {RULE_ID} finding"))
 }
 
 pub fn assert_rule_quiet(results: &[CheckResult]) {
     assert!(
-        rule_files_for_rule(results, RULE_ID).is_empty(),
+        rule_files(results, RULE_ID).is_empty(),
         "expected no {RULE_ID} findings"
     );
 }
@@ -45,7 +52,7 @@ pub fn assert_finding_matches(
     severity: Severity,
     title: &str,
 ) {
-    let finding = finding_for_rule(results, RULE_ID);
+    let finding = finding(results, RULE_ID);
     assert_eq!(finding.severity, severity);
     assert_eq!(finding.title, title);
     assert_eq!(finding.file.as_deref(), Some(file));
