@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_08_app_cargo_is_workspace as assertions;
-use crate::test_support::{copy_fixture, write_file};
+use super::{copy_fixture, write_file};
 
 #[test]
 fn parse_error_hits_every_mutated_app() {
@@ -10,8 +10,8 @@ fn parse_error_hits_every_mutated_app() {
         write_file(tmp.path(), &format!("apps/{app}/Cargo.toml"), "[workspace");
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-08");
+    let results = super::run_family(tmp.path());
+    let errors = assertions::errors_by_id(&results, "");
     let actual_files = errors
         .iter()
         .filter_map(|error| error.file.clone())
@@ -49,8 +49,8 @@ resolver = "2"
 "#,
     );
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-08");
+    let results = super::run_family(tmp.path());
+    let errors = assertions::errors_by_id(&results, "");
 
     assert_eq!(
         errors.len(),

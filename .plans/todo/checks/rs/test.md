@@ -112,7 +112,11 @@ Structural pressure such as file length and `use` count belongs to `RS-CODE`, in
 - `RS-TEST-16` must ignore pure aggregator files with no exported helper functions.
 - `RS-TEST-17` and `RS-TEST-18` must stay scoped to owned component/runtime/assertions packages, not every local crate in the repo.
 - `RS-TEST-18` must reject route-construction logic in `test_support`; mapper/placement wiring is not generic support.
+- `RS-TEST-18` must reject public semantic constants/statics, selector-backed canned path/string helpers, and zero-argument public fixture wrappers in `test_support`.
+- `RS-TEST-18` must also reject public `CheckResult`-style finding selectors in `test_support`; result/rule-id inspection is semantic, not generic setup.
 - `RS-TEST-03` must also reject route-construction infrastructure imports or `FamilyMapper`-built routed inputs from `assertions`; reusable proof helpers are not allowed to own mapper/placement orchestration either.
+- `RS-TEST-03` must reject assertions-side calls into runtime `check_test_tree(...)`; assertions do not own family orchestration.
+- `RS-TEST-16` must reject internal sidecars that still assert directly on result-shape semantics (`RS-*`, finding fields, `CheckResult`/`Severity`) when owned assertions exist.
 
 ## Current migration state
 
@@ -120,6 +124,6 @@ The live family crate has been rewritten onto the accepted 18-rule inventory and
 
 Still in progress:
 
-- refactor the family’s own assertions crate away from thin wrapper helpers so it can satisfy `RS-TEST-16`
-- decide whether the current runtime-sidecar self-tests should keep their direct local assertions or migrate more proof into owned assertions helpers
-- expand attack-vector coverage around proof-bearing assertion detection and `test_support` boundary attacks
+- refactor `rs/test`, `rs/arch`, `rs/cargo`, and `rs/hexarch` sidecars/assertions so they satisfy the stronger semantic-ownership interpretation of `RS-TEST-16`
+- remove assertions-owned family orchestration helpers that still route through runtime `check_test_tree(...)`
+- expand attack-vector coverage around proof-bearing assertion detection, semantic sidecar proof leaks, and `test_support` result-helper attacks

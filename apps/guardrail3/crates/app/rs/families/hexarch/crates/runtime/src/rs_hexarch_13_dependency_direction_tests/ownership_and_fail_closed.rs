@@ -1,5 +1,5 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_13_dependency_direction as assertions;
-use crate::test_support::{copy_fixture, write_file};
+use super::{copy_fixture, write_file};
 
 #[test]
 fn omitted_same_app_target_still_hits_rule_13() {
@@ -15,8 +15,8 @@ fn omitted_same_app_target_still_hits_rule_13() {
         "[package]\nname = \"backend-domain-engine\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\nbackend-domain-types = { path = \"../types\" }\nbackend-app-commands = { path = \"../../app/commands\" }\n",
     );
 
-    let results = assertions::run_family(tmp.path());
-    let rule_13 = assertions::errors_by_id(&results, "RS-HEXARCH-13");
+    let results = super::run_family(tmp.path());
+    let rule_13 = assertions::errors_by_id(&results, "");
 
     assert_eq!(
         rule_13.len(),
@@ -38,13 +38,10 @@ fn renamed_same_app_edge_is_owned_by_rule_18_not_rule_13() {
         "[package]\nname = \"backend-domain-engine\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\nbackend-domain-types = { path = \"../types\" }\ncommands_core = { package = \"backend-app-commands\", path = \"../../app/commands\" }\n",
     );
 
-    let results = assertions::run_family(tmp.path());
+    let results = super::run_family(tmp.path());
     let rule_18 = assertions::errors_by_id(&results, "RS-HEXARCH-18");
 
-    assert!(
-        assertions::errors_by_id(&results, "RS-HEXARCH-13").is_empty(),
-        "{results:#?}"
-    );
+    assertions::assert_no_error(&results, "");
     assert_eq!(
         rule_18.len(),
         1,

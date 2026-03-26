@@ -1,11 +1,14 @@
 #[allow(unused_imports)]
-use guardrail3_app_rs_family_test_assertions::rs_test_10_input_failures::{assert_reported, assert_rule_files, assert_rule_quiet};
+use guardrail3_app_rs_family_test_assertions::rs_test_10_input_failures::{
+    assert_reported, assert_rule_files, assert_rule_quiet,
+};
 
 #[allow(unused_imports)]
 use super::{run_family, tempdir, write_file};
 
 #[test]
-fn clean_root_surfaces_no_input_failures() {let fixture = tempdir();
+fn clean_root_surfaces_no_input_failures() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -18,4 +21,5 @@ fn clean_root_surfaces_no_input_failures() {let fixture = tempdir();
     let results = run_family(root);
 
     assert_rule_quiet(&results);
-    assert!(results.iter().all(|result| result.id != "RS-TEST-10"));}
+    assert!(results.iter().all(|result| result.id != "RS-TEST-10"));
+}

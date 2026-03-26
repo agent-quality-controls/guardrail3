@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use super::super::{run_domain_purity_case, DomainPurityEdgeKindForTest};
-use crate::test_support::{dir_entry, project_tree};
+use super::{dir_entry, project_tree};
 
 #[test]
 fn inherited_workspace_externals_still_trigger_domain_purity() {

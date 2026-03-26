@@ -1,13 +1,8 @@
 #[allow(unused_imports)]
-use guardrail3_app_rs_family_cargo_assertions::rs_cargo_11_disallowed_macros_deny::{
-    check_results,
-    rule_results,
-    assert_rule_results,
-    ExpectedRuleResult,
-};
+use super::{entry, tree};
 #[allow(unused_imports)]
-use super::{
-    entry, tree,
+use guardrail3_app_rs_family_cargo_assertions::rs_cargo_11_disallowed_macros_deny::{
+    ExpectedRuleResult, assert_rule_results, check_results, rule_results,
 };
 
 #[allow(dead_code, non_upper_case_globals)]

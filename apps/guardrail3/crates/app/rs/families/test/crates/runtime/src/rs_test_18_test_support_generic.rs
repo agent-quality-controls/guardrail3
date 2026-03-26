@@ -96,12 +96,11 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
         }
     }
 
-    if input
-        .parsed
-        .file_call_paths
-        .iter()
-        .any(|call_path| call_path.first().is_some_and(|first| first == "FamilyMapper"))
-    {
+    if input.parsed.file_call_paths.iter().any(|call_path| {
+        call_path
+            .first()
+            .is_some_and(|first| first == "FamilyMapper")
+    }) {
         results.push(CheckResult {
             id: ID.to_owned(),
             severity: Severity::Error,
@@ -148,9 +147,12 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
         .map(|function| function.name.as_str())
         .collect::<BTreeSet<_>>();
 
-    for function in input.parsed.functions.iter().filter(|function| {
-        function.is_public && !function.is_test
-    }) {
+    for function in input
+        .parsed
+        .functions
+        .iter()
+        .filter(|function| function.is_public && !function.is_test)
+    {
         let references_file_value = function.path_uses.iter().any(|path| {
             path.first()
                 .is_some_and(|first| input.parsed.file_value_names.contains(first))

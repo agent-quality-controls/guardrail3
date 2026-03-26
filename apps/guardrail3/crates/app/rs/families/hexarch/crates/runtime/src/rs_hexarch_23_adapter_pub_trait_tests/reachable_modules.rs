@@ -1,5 +1,5 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_23_adapter_pub_trait as assertions;
-use crate::test_support::{copy_fixture, write_file};
+use super::{copy_fixture, write_file};
 
 #[test]
 fn orphan_adapter_source_file_does_not_count_as_public_trait_surface() {
@@ -10,11 +10,8 @@ fn orphan_adapter_source_file_does_not_count_as_public_trait_surface() {
         "pub trait OrphanBoundary {}\n",
     );
 
-    let results = assertions::run_family(tmp.path());
-    assert!(
-        assertions::errors_by_id(&results, "RS-HEXARCH-23").is_empty(),
-        "{results:#?}"
-    );
+    let results = super::run_family(tmp.path());
+    assertions::assert_no_error(&results, "");
 }
 
 #[test]
@@ -85,11 +82,8 @@ mod tests {
 "#,
     );
 
-    let results = assertions::run_family(tmp.path());
-    assert!(
-        assertions::errors_by_id(&results, "RS-HEXARCH-23").is_empty(),
-        "{results:#?}"
-    );
+    let results = super::run_family(tmp.path());
+    assertions::assert_no_error(&results, "");
 }
 
 #[test]
@@ -106,11 +100,8 @@ fn missing_entrypoint_errors_instead_of_scanning_root_rs_files_as_entrypoints() 
         "pub trait OrphanBoundary {}\n",
     );
 
-    let results = assertions::run_family(tmp.path());
-    let errors: Vec<_> = results
-        .iter()
-        .filter(|result| result.id == "RS-HEXARCH-23")
-        .collect();
+    let results = super::run_family(tmp.path());
+    let errors = assertions::error_results(&results, "");
 
     assert_eq!(
         errors.len(),

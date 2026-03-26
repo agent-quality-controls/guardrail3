@@ -1,5 +1,5 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_18_renamed_dependency_direction as assertions;
-use crate::test_support::{copy_fixture, write_file};
+use super::{copy_fixture, write_file};
 
 #[test]
 fn cross_app_renamed_edge_is_owned_by_rule_24_not_rule_18() {
@@ -10,14 +10,11 @@ fn cross_app_renamed_edge_is_owned_by_rule_24_not_rule_18() {
         "[package]\nname = \"backend-domain-engine\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\nbackend-domain-types = { path = \"../types\" }\nprocessor_alias = { package = \"worker-app-processor\", path = \"../../../../worker/crates/app/processor\" }\n",
     );
 
-    let results = assertions::run_family(tmp.path());
-    let rule_18 = assertions::errors_by_id(&results, "RS-HEXARCH-18");
+    let results = super::run_family(tmp.path());
+    let rule_18 = assertions::errors_by_id(&results, "");
     let rule_24 = assertions::errors_by_id(&results, "RS-HEXARCH-24");
 
-    assert!(
-        assertions::errors_by_id(&results, "RS-HEXARCH-18").is_empty(),
-        "{results:#?}"
-    );
+    assertions::assert_no_error(&results, "");
     assert_eq!(
         rule_24.len(),
         1,
@@ -43,9 +40,9 @@ fn inherited_renamed_path_dep_is_owned_by_rule_17_not_rule_18() {
         "[package]\nname = \"backend-domain-engine\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\nbackend-domain-types = { path = \"../types\" }\nqueue_alias = { workspace = true }\n",
     );
 
-    let results = assertions::run_family(tmp.path());
+    let results = super::run_family(tmp.path());
     let rule_17 = assertions::errors_by_id(&results, "RS-HEXARCH-17");
-    let rule_18 = assertions::errors_by_id(&results, "RS-HEXARCH-18");
+    let rule_18 = assertions::errors_by_id(&results, "");
 
     assert_eq!(
         rule_17.len(),
@@ -67,17 +64,14 @@ fn renamed_dev_dependency_is_owned_by_rule_20_not_rule_18() {
         "[package]\nname = \"backend-domain-engine\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\nbackend-domain-types = { path = \"../types\" }\n[dev-dependencies]\nqueue_alias = { package = \"backend-adapters-outbound-queue\", path = \"../../adapters/outbound/queue\" }\n",
     );
 
-    let results = assertions::run_family(tmp.path());
-    let rule_18 = assertions::errors_by_id(&results, "RS-HEXARCH-18");
+    let results = super::run_family(tmp.path());
+    let rule_18 = assertions::errors_by_id(&results, "");
     let rule_20 = results
         .iter()
         .filter(|result| result.id == "RS-HEXARCH-20")
         .collect::<Vec<_>>();
 
-    assert!(
-        assertions::errors_by_id(&results, "RS-HEXARCH-18").is_empty(),
-        "{results:#?}"
-    );
+    assertions::assert_no_error(&results, "");
     assert_eq!(
         rule_20.len(),
         1,
@@ -98,14 +92,11 @@ fn renamed_target_dependency_is_owned_by_rule_25_not_rule_18() {
         "[package]\nname = \"backend-domain-engine\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\nbackend-domain-types = { path = \"../types\" }\n[target.'cfg(unix)'.dependencies]\nqueue_alias = { package = \"backend-adapters-outbound-queue\", path = \"../../adapters/outbound/queue\" }\n",
     );
 
-    let results = assertions::run_family(tmp.path());
-    let rule_18 = assertions::errors_by_id(&results, "RS-HEXARCH-18");
+    let results = super::run_family(tmp.path());
+    let rule_18 = assertions::errors_by_id(&results, "");
     let rule_25 = assertions::errors_by_id(&results, "RS-HEXARCH-25");
 
-    assert!(
-        assertions::errors_by_id(&results, "RS-HEXARCH-18").is_empty(),
-        "{results:#?}"
-    );
+    assertions::assert_no_error(&results, "");
     assert_eq!(
         rule_25.len(),
         1,

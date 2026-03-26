@@ -1,7 +1,7 @@
 use std::os::unix::fs::PermissionsExt;
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_06_leaf_valid as assertions;
-use crate::test_support::copy_fixture;
+use super::copy_fixture;
 
 #[test]
 #[cfg(unix)]
@@ -13,18 +13,19 @@ fn unreadable_valid_leaf_currently_degrades_into_missing_cargo_toml() {
     perms.set_mode(0o000);
     std::fs::set_permissions(&leaf, perms).expect("chmod 000");
 
-    let results = assertions::run_family(tmp.path());
+    let results = super::run_family(tmp.path());
 
     let mut restore = std::fs::metadata(&leaf).expect("metadata").permissions();
     restore.set_mode(0o755);
     std::fs::set_permissions(&leaf, restore).expect("restore perms");
 
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-06");
-    let owned: Vec<_> = errors
-        .into_iter()
-        .filter(|error| error.file.as_deref() == Some("apps/devctl/crates/domain/types"))
-        .collect();
-
-    assert_eq!(owned.len(), 1, "{owned:#?}");
-    assert!(owned[0].title.contains("missing Cargo.toml"), "{owned:#?}");
+    assertions::assert_expected_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            file: Some("apps/devctl/crates/domain/types"),
+            file_contains: None,
+            title_contains: Some(&["missing Cargo.toml"]),
+            message_contains: None,
+        }],
+    );
 }

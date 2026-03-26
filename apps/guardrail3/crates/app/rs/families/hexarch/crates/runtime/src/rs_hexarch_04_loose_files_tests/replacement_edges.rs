@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_04_loose_files as assertions;
-use crate::test_support::{copy_fixture, remove_dir, write_file};
+use super::{copy_fixture, remove_dir, write_file};
 
 fn replace_child_dir_with_file(root: &std::path::Path, child_rel: &str) {
     remove_dir(root, child_rel);
@@ -24,32 +24,20 @@ fn replacing_real_child_dirs_with_files_hits_only_the_still_nonempty_containers(
         replace_child_dir_with_file(tmp.path(), &format!("{container}/{child}"));
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-04");
-    assert_eq!(
-        errors.len(),
-        replacements.len(),
-        "expected one loose-file hit per replaced multi-child container: {errors:#?}"
-    );
-
-    let actual_files = errors
-        .iter()
-        .filter_map(|error| error.file.clone())
-        .collect::<BTreeSet<_>>();
-    let expected_files = replacements
+    let results = super::run_family(tmp.path());
+    let actual_files = replacements
         .iter()
         .map(|(container, _)| (*container).to_owned())
         .collect::<BTreeSet<_>>();
-
-    assert_eq!(
-        actual_files, expected_files,
-        "replacement hits should stay on the owning container path: {errors:#?}"
+    assertions::assert_error_summary(
+        &results,
+        "",
+        replacements.len(),
+        &actual_files,
+        None,
+        None,
+        None,
+        Some(&["that don't belong"]),
+        Some(&[".gitkeep"]),
     );
-    for error in &errors {
-        assert!(
-            error.message.contains("that don't belong"),
-            "expected loose-file message, got: '{}'",
-            error.message
-        );
-    }
 }

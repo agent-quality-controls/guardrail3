@@ -6,6 +6,6 @@ fn non_app_boundaries_do_not_warn() {
 
     assert!(
         results.is_empty(),
-        "non-app boundaries should stay out of scope for RS-HEXARCH-15: {results:#?}"
+        "non-app boundaries should stay out of scope for rule 15: {results:#?}"
     );
 }

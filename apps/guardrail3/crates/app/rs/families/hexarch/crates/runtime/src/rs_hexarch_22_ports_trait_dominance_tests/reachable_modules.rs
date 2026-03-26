@@ -1,5 +1,5 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_22_ports_trait_dominance as assertions;
-use crate::test_support::{copy_fixture, write_file};
+use super::{copy_fixture, write_file};
 
 #[test]
 fn orphan_ports_source_file_does_not_count_toward_trait_dominance() {
@@ -22,15 +22,12 @@ impl OrphanRepo {
 "#,
     );
 
-    let results = assertions::run_family(tmp.path());
-    let warnings: Vec<_> = results
-        .iter()
-        .filter(|result| result.id == "RS-HEXARCH-22")
-        .collect();
+    let results = super::run_family(tmp.path());
+    let warnings = assertions::warning_results(&results, "");
 
     assert!(
         warnings.is_empty(),
-        "unreachable orphan files should not affect RS-HEXARCH-22: {warnings:#?}"
+        "unreachable orphan files should not affect rule 22: {warnings:#?}"
     );
 }
 
@@ -65,15 +62,12 @@ mod tests {
 "#,
     );
 
-    let results = assertions::run_family(tmp.path());
-    let warnings: Vec<_> = results
-        .iter()
-        .filter(|result| result.id == "RS-HEXARCH-22")
-        .collect();
+    let results = super::run_family(tmp.path());
+    let warnings = assertions::warning_results(&results, "");
 
     assert!(
         warnings.is_empty(),
-        "test-only impls should not affect RS-HEXARCH-22: {warnings:#?}"
+        "test-only impls should not affect rule 22: {warnings:#?}"
     );
 }
 
@@ -107,25 +101,14 @@ impl OrphanRepo {
 "#,
     );
 
-    let results = assertions::run_family(tmp.path());
-    let warnings: Vec<_> = results
-        .iter()
-        .filter(|result| result.id == "RS-HEXARCH-22")
-        .collect();
-
-    assert_eq!(
-        warnings.len(),
+    let results = super::run_family(tmp.path());
+    let warnings = assertions::warning_results(&results, "");
+    assertions::assert_result_summary(
+        &warnings,
         1,
-        "missing entrypoints should fail closed once instead of scanning orphan root files: {warnings:#?}"
-    );
-    assert_eq!(
-        warnings[0].file.as_deref(),
-        Some("apps/backend/crates/ports/outbound/repo/src")
-    );
-    assert!(
-        warnings[0]
-            .message
-            .contains("expected src/lib.rs or src/main.rs"),
-        "expected explicit missing-entrypoint source warning: {warnings:#?}"
+        ["apps/backend/crates/ports/outbound/repo/src"],
+        Some(Some("apps/backend/crates/ports/outbound/repo/src")),
+        None,
+        Some("expected src/lib.rs or src/main.rs"),
     );
 }

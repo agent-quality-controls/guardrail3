@@ -1,10 +1,10 @@
-use guardrail3_app_rs_family_arch_assertions::rs_arch_08_auxiliary_roots_declared as assertions;
 #[allow(unused_imports)]
-use super::{entry, tree};
+use super::{check_results, entry, tree};
+use guardrail3_app_rs_family_arch_assertions::rs_arch_08_auxiliary_roots_declared as assertions;
 
 #[test]
 fn no_auxiliary_info_results_when_no_auxiliary_roots_exist() {
-    let results = assertions::check_results(&tree(
+    let results = check_results(&tree(
         &[
             ("", entry(&["apps"], &[])),
             ("apps", entry(&["backend"], &[])),

@@ -23,7 +23,10 @@ const EXPECTED_ALLOW_TITLES: &[&str] = &[
 ];
 
 pub fn rule_results<'a>(results: &'a [CheckResult], _rule_id: &str) -> Vec<&'a CheckResult> {
-    results.iter().filter(|result| result.id == RULE_ID).collect()
+    results
+        .iter()
+        .filter(|result| result.id == RULE_ID)
+        .collect()
 }
 
 pub fn assert_rule_results(results: &[CheckResult], expected: &[ExpectedRuleResult<'_>]) -> () {
@@ -51,7 +54,6 @@ pub fn assert_rule_results(results: &[CheckResult], expected: &[ExpectedRuleResu
             "missing expected {RULE_ID} result: {expected_result:#?}\nactual: {actual:#?}"
         );
     }
-
 }
 
 pub fn assert_expected_inventory(results: &[CheckResult]) -> () {

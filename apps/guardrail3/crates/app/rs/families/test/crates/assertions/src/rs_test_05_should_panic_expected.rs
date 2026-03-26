@@ -48,7 +48,6 @@ pub fn assert_reported(
     assert_eq!(finding.line, line);
 }
 
-
 pub fn assert_inventory(results: &[CheckResult], expected: bool) {
     let finding = finding(results, RULE_ID);
     assert_eq!(finding.inventory, expected);

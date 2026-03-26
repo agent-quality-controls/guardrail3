@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_15_boundary_config as assertions;
-use crate::test_support::copy_fixture;
+use super::copy_fixture;
 
 #[test]
 fn missing_one_app_boundary_only_hits_that_app() {
@@ -14,10 +14,10 @@ fn missing_one_app_boundary_only_hits_that_app() {
     );
     std::fs::write(&guardrail_path, updated).expect("remove worker boundary config");
 
-    let results = assertions::run_family(tmp.path());
+    let results = super::run_family(tmp.path());
     let titles = results
         .iter()
-        .filter(|result| result.id == "RS-HEXARCH-15")
+        .filter(|result| result.id == "")
         .map(|result| result.title.clone())
         .collect::<BTreeSet<_>>();
     let expected = ["app boundary `apps/worker` missing rust.apps config".to_owned()]

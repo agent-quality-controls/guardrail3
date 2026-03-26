@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_23_adapter_pub_trait as assertions;
 use guardrail3_domain_report::Severity;
-use crate::test_support::copy_fixture;
+use super::copy_fixture;
 
 #[test]
 fn unparsable_adapter_source_errors_in_family_run() {
@@ -12,11 +12,8 @@ fn unparsable_adapter_source_errors_in_family_run() {
     )
     .expect("write broken adapter source");
 
-    let results = assertions::run_family(tmp.path());
-    let errors: Vec<_> = results
-        .iter()
-        .filter(|result| result.id == "RS-HEXARCH-23")
-        .collect();
+    let results = super::run_family(tmp.path());
+    let errors = assertions::error_results(&results, "");
     assert_eq!(
         errors.len(),
         1,
@@ -50,10 +47,10 @@ fn parse_failure_takes_precedence_over_public_trait_violation() {
     )
     .expect("write public-trait extra module");
 
-    let results = assertions::run_family(tmp.path());
+    let results = super::run_family(tmp.path());
     let errors: Vec<_> = results
         .iter()
-        .filter(|result| result.id == "RS-HEXARCH-23")
+        .filter(|result| result.id == "")
         .collect();
     assert_eq!(
         errors.len(),

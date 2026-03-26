@@ -1,12 +1,15 @@
 #[allow(unused_imports)]
-use guardrail3_app_rs_family_test_assertions::rs_test_15_mutants_config_sane::{assert_inventory, assert_reported, assert_rule_files, assert_rule_quiet};
+use guardrail3_app_rs_family_test_assertions::rs_test_15_mutants_config_sane::{
+    assert_inventory, assert_reported, assert_rule_files, assert_rule_quiet,
+};
 
 #[allow(unused_imports)]
 use super::{run_family, tempdir, write_file};
 use guardrail3_domain_report::Severity;
 
 #[test]
-fn low_timeout_multiplier_is_reported() {let fixture = tempdir();
+fn low_timeout_multiplier_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -18,6 +21,13 @@ fn low_timeout_multiplier_is_reported() {let fixture = tempdir();
 
     let results = run_family(root);
 
-    assert_rule_files(&results, vec![".cargo/mutants.toml".to_owned()]
-    );    assert_reported(&results, ".cargo/mutants.toml", None, Severity::Warn, "mutants timeout multiplier too low");
-    assert_inventory(&results, false);}
+    assert_rule_files(&results, vec![".cargo/mutants.toml".to_owned()]);
+    assert_reported(
+        &results,
+        ".cargo/mutants.toml",
+        None,
+        Severity::Warn,
+        "mutants timeout multiplier too low",
+    );
+    assert_inventory(&results, false);
+}

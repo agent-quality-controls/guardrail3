@@ -281,12 +281,9 @@ fn collect_violations(
                     ),
                 });
             }
-            if let Some(target_module) = file
-                .parsed
-                .file_call_paths
-                .iter()
-                .find_map(|path| sibling_module_target(path, owner_module_name, &local_module_names))
-            {
+            if let Some(target_module) = file.parsed.file_call_paths.iter().find_map(|path| {
+                sibling_module_target(path, owner_module_name, &local_module_names)
+            }) {
                 violations.push(RuntimeAssertionsViolation {
                     rel_path: file.facts.rel_path.clone(),
                     line: None,
@@ -342,7 +339,8 @@ fn collect_violations(
                         ),
                     });
                 }
-                if let Some(route_package) = first_disallowed_route_infra_package(&binding.path_segments)
+                if let Some(route_package) =
+                    first_disallowed_route_infra_package(&binding.path_segments)
                 {
                     violations.push(RuntimeAssertionsViolation {
                         rel_path: file.facts.rel_path.clone(),
@@ -373,12 +371,11 @@ fn collect_violations(
                     ),
                 });
             }
-            if file
-                .parsed
-                .file_call_paths
-                .iter()
-                .any(|call_path| call_path.first().is_some_and(|first| first == "FamilyMapper"))
-            {
+            if file.parsed.file_call_paths.iter().any(|call_path| {
+                call_path
+                    .first()
+                    .is_some_and(|first| first == "FamilyMapper")
+            }) {
                 violations.push(RuntimeAssertionsViolation {
                     rel_path: file.facts.rel_path.clone(),
                     line: None,
@@ -492,7 +489,12 @@ fn import_hits_sibling_module(
     owner_module_name: &str,
     local_module_names: &BTreeSet<String>,
 ) -> bool {
-    sibling_module_target(&binding.path_segments, owner_module_name, local_module_names).is_some()
+    sibling_module_target(
+        &binding.path_segments,
+        owner_module_name,
+        local_module_names,
+    )
+    .is_some()
 }
 
 fn sibling_module_target<'a>(

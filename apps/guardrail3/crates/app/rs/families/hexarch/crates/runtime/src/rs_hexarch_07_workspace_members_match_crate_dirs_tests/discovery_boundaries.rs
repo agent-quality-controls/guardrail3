@@ -1,5 +1,5 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_07_workspace_members_match_crate_dirs as assertions;
-use crate::test_support::{copy_fixture, write_file};
+use super::{copy_fixture, write_file};
 
 #[test]
 fn nested_cargo_project_inside_real_leaf_is_not_treated_as_required_workspace_member() {
@@ -15,11 +15,8 @@ fn nested_cargo_project_inside_real_leaf_is_not_treated_as_required_workspace_me
         "// demo",
     );
 
-    let results = assertions::run_family(tmp.path());
-    assert!(
-        assertions::errors_by_id(&results, "RS-HEXARCH-07").is_empty(),
-        "{results:#?}"
-    );
+    let results = super::run_family(tmp.path());
+    assertions::assert_no_error(&results, "");
 }
 
 #[test]
@@ -36,11 +33,8 @@ fn packages_crates_do_not_enter_rule_07_discovery() {
         "// shared types event model",
     );
 
-    let results = assertions::run_family(tmp.path());
-    assert!(
-        assertions::errors_by_id(&results, "RS-HEXARCH-07").is_empty(),
-        "{results:#?}"
-    );
+    let results = super::run_family(tmp.path());
+    assertions::assert_no_error(&results, "");
 }
 
 #[test]
@@ -57,9 +51,6 @@ fn non_rust_app_lookalikes_do_not_enter_rule_07_discovery() {
         "// admin events",
     );
 
-    let results = assertions::run_family(tmp.path());
-    assert!(
-        assertions::errors_by_id(&results, "RS-HEXARCH-07").is_empty(),
-        "{results:#?}"
-    );
+    let results = super::run_family(tmp.path());
+    assertions::assert_no_error(&results, "");
 }

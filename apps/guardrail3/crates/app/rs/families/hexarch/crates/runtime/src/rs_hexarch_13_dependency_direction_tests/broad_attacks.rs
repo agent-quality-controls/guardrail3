@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_13_dependency_direction as assertions;
-use crate::test_support::{copy_fixture, write_file};
+use super::{copy_fixture, write_file};
 
 #[test]
 fn forbidden_same_app_normal_edges_error_and_allowed_edges_do_not() {
@@ -17,8 +17,8 @@ fn forbidden_same_app_normal_edges_error_and_allowed_edges_do_not() {
         "[package]\nname = \"backend-ports-outbound-repo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\nbackend-domain-types = { path = \"../../../domain/types\" }\nbackend-adapters-outbound-postgres = { path = \"../../../adapters/outbound/postgres\" }\n",
     );
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-13");
+    let results = super::run_family(tmp.path());
+    let errors = assertions::errors_by_id(&results, "");
     let actual_files = errors
         .iter()
         .filter_map(|error| error.file.clone())

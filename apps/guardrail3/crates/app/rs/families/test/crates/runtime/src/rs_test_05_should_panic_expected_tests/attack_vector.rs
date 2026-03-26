@@ -1,13 +1,16 @@
 use guardrail3_domain_report::Severity;
 
 #[allow(unused_imports)]
-use guardrail3_app_rs_family_test_assertions::rs_test_05_should_panic_expected::{assert_reported, assert_rule_files, assert_rule_quiet};
+use guardrail3_app_rs_family_test_assertions::rs_test_05_should_panic_expected::{
+    assert_reported, assert_rule_files, assert_rule_quiet,
+};
 
 #[allow(unused_imports)]
 use super::{run_family, tempdir, write_file};
 
 #[test]
-fn bare_should_panic_is_reported_on_the_test_file() {let fixture = tempdir();
+fn bare_should_panic_is_reported_on_the_test_file() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -22,11 +25,19 @@ fn bare_should_panic_is_reported_on_the_test_file() {let fixture = tempdir();
     );
 
     let results = run_family(root);
-    assert_rule_files(&results, vec!["tests/panic.rs".to_owned()]
-    );    assert_reported(&results, "tests/panic.rs", Some(2), Severity::Warn, "should_panic missing expected string");}
+    assert_rule_files(&results, vec!["tests/panic.rs".to_owned()]);
+    assert_reported(
+        &results,
+        "tests/panic.rs",
+        Some(2),
+        Severity::Warn,
+        "should_panic missing expected string",
+    );
+}
 
 #[test]
-fn empty_expected_string_is_reported() {let fixture = tempdir();
+fn empty_expected_string_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -41,10 +52,18 @@ fn empty_expected_string_is_reported() {let fixture = tempdir();
     );
 
     let results = run_family(root);
-    assert_reported(&results, "tests/panic.rs", Some(2), Severity::Warn, "should_panic missing expected string");}
+    assert_reported(
+        &results,
+        "tests/panic.rs",
+        Some(2),
+        Severity::Warn,
+        "should_panic missing expected string",
+    );
+}
 
 #[test]
-fn non_string_expected_is_reported() {let fixture = tempdir();
+fn non_string_expected_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -59,4 +78,11 @@ fn non_string_expected_is_reported() {let fixture = tempdir();
     );
 
     let results = run_family(root);
-    assert_reported(&results, "tests/panic.rs", Some(2), Severity::Warn, "should_panic missing expected string");}
+    assert_reported(
+        &results,
+        "tests/panic.rs",
+        Some(2),
+        Severity::Warn,
+        "should_panic missing expected string",
+    );
+}

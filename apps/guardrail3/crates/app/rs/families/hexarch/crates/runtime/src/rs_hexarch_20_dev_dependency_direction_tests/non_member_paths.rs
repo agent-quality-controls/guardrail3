@@ -1,5 +1,5 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_20_dev_dependency_direction as assertions;
-use crate::test_support::{copy_fixture, write_file};
+use super::{copy_fixture, write_file};
 
 #[test]
 fn out_of_tree_paths_with_layer_like_names_do_not_trigger_dev_direction() {
@@ -15,11 +15,8 @@ fn out_of_tree_paths_with_layer_like_names_do_not_trigger_dev_direction() {
         "[package]\nname = \"adapter-fixture\"\nversion = \"0.1.0\"\n",
     );
 
-    let results = assertions::run_family(tmp.path());
-    assert!(
-        assertions::errors_by_id(&results, "RS-HEXARCH-20").is_empty(),
-        "{results:#?}"
-    );
+    let results = super::run_family(tmp.path());
+    assertions::assert_no_error(&results, "");
 }
 
 #[test]
@@ -31,11 +28,8 @@ fn missing_same_app_layer_like_dev_path_does_not_trigger_dev_direction() {
         "[package]\nname = \"backend-domain-engine\"\nversion = \"0.1.0\"\n[dev-dependencies]\nqueue_alias = { package = \"backend-adapters-outbound-queue\", path = \"../../adapters/outbound/missing\" }\n",
     );
 
-    let results = assertions::run_family(tmp.path());
-    assert!(
-        assertions::errors_by_id(&results, "RS-HEXARCH-20").is_empty(),
-        "{results:#?}"
-    );
+    let results = super::run_family(tmp.path());
+    assertions::assert_no_error(&results, "");
 }
 
 #[test]
@@ -47,17 +41,14 @@ fn cross_app_dev_edge_is_owned_by_rule_24_not_rule_20() {
         "[package]\nname = \"backend-domain-engine\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\nbackend-domain-types = { path = \"../types\" }\n[dev-dependencies]\nprocessor_alias = { package = \"worker-app-processor\", path = \"../../../../worker/crates/app/processor\" }\n",
     );
 
-    let results = assertions::run_family(tmp.path());
+    let results = super::run_family(tmp.path());
     let rule_20 = results
         .iter()
-        .filter(|result| result.id == "RS-HEXARCH-20")
+        .filter(|result| result.id == "")
         .collect::<Vec<_>>();
     let rule_24 = assertions::errors_by_id(&results, "RS-HEXARCH-24");
 
-    assert!(
-        assertions::errors_by_id(&results, "RS-HEXARCH-20").is_empty(),
-        "{results:#?}"
-    );
+    assertions::assert_no_error(&results, "");
     assert_eq!(
         rule_24.len(),
         1,

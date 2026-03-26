@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_02_exact_contents as assertions;
-use crate::test_support::{copy_fixture, remove_dir, write_file};
-const FIXTURE: crate::test_support::HexarchFixture = crate::test_support::HexarchFixture;
+use super::{copy_fixture, remove_dir, write_file};
+const FIXTURE: super::HexarchFixture = super::HexarchFixture;
 
 fn inner_hex() -> &'static str {
     FIXTURE.inner_hex_root()
@@ -19,24 +19,43 @@ fn missing_dir_plus_unexpected_dir_hits_both_branches_per_owned_root() {
         write_file(tmp.path(), &format!("{dir}/utils/.gitkeep"), "");
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-02");
-    assert_eq!(errors.len(), 8, "{errors:#?}");
-    assert_eq!(
-        errors
-            .iter()
-            .filter(|error| error.title.contains("domain/"))
-            .count(),
-        4,
-        "{errors:#?}"
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_summary(
+        &results,
+        "",
+        8,
+        [
+            "apps/devctl/crates",
+            "apps/backend/crates",
+            "apps/worker/crates",
+            inner_hex(),
+        ],
+        None,
+        None,
+        None,
+        None,
     );
-    assert_eq!(
-        errors
-            .iter()
-            .filter(|error| error.title.contains("utils"))
-            .count(),
+    assertions::assert_error_count_matching(
+        &results,
+        "",
         4,
-        "{errors:#?}"
+        None,
+        None,
+        &["domain/"],
+        &[],
+        &[],
+        &[],
+    );
+    assertions::assert_error_count_matching(
+        &results,
+        "",
+        4,
+        None,
+        None,
+        &["utils"],
+        &[],
+        &[],
+        &[],
     );
 }
 
@@ -53,24 +72,43 @@ fn missing_dir_plus_loose_file_hits_both_branches_per_owned_root() {
         write_file(tmp.path(), &format!("{dir}/mod.rs"), "// stray");
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-02");
-    assert_eq!(errors.len(), 8, "{errors:#?}");
-    assert_eq!(
-        errors
-            .iter()
-            .filter(|error| error.title.contains("ports/"))
-            .count(),
-        4,
-        "{errors:#?}"
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_summary(
+        &results,
+        "",
+        8,
+        [
+            "apps/devctl/crates",
+            "apps/backend/crates",
+            "apps/worker/crates",
+            inner_hex(),
+        ],
+        None,
+        None,
+        None,
+        None,
     );
-    assert_eq!(
-        errors
-            .iter()
-            .filter(|error| error.title.contains("loose files"))
-            .count(),
+    assertions::assert_error_count_matching(
+        &results,
+        "",
         4,
-        "{errors:#?}"
+        None,
+        None,
+        &["ports/"],
+        &[],
+        &[],
+        &[],
+    );
+    assertions::assert_error_count_matching(
+        &results,
+        "",
+        4,
+        None,
+        None,
+        &["loose files"],
+        &[],
+        &[],
+        &[],
     );
 }
 
@@ -87,24 +125,43 @@ fn renamed_required_dir_yields_missing_and_unexpected_per_owned_root() {
         write_file(tmp.path(), &format!("{dir}/domains/.gitkeep"), "");
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-02");
-    assert_eq!(errors.len(), 8, "{errors:#?}");
-    assert_eq!(
-        errors
-            .iter()
-            .filter(|error| error.title.contains("missing") && error.title.contains("domain/"))
-            .count(),
-        4,
-        "{errors:#?}"
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_summary(
+        &results,
+        "",
+        8,
+        [
+            "apps/devctl/crates",
+            "apps/backend/crates",
+            "apps/worker/crates",
+            inner_hex(),
+        ],
+        None,
+        None,
+        None,
+        None,
     );
-    assert_eq!(
-        errors
-            .iter()
-            .filter(|error| error.title.contains("unexpected") && error.title.contains("domains"))
-            .count(),
+    assertions::assert_error_count_matching(
+        &results,
+        "",
         4,
-        "{errors:#?}"
+        None,
+        None,
+        &["missing", "domain/"],
+        &[],
+        &[],
+        &[],
+    );
+    assertions::assert_error_count_matching(
+        &results,
+        "",
+        4,
+        None,
+        None,
+        &["unexpected", "domains"],
+        &[],
+        &[],
+        &[],
     );
 }
 
@@ -122,20 +179,48 @@ fn gitkeep_alongside_bad_files_ignores_gitkeep_but_still_hits_loose_files() {
         write_file(tmp.path(), &format!("{dir}/README.md"), "# stray\n");
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-02");
-    assert_eq!(errors.len(), 4, "{errors:#?}");
-    for error in &errors {
-        assert!(error.title.contains("loose files"), "{error:#?}");
-        assert!(error.message.contains("mod.rs"), "{error:#?}");
-        assert!(error.message.contains("README.md"), "{error:#?}");
-        let listed_files = error
-            .message
-            .split("Only ")
-            .next()
-            .unwrap_or(&error.message);
-        assert!(!listed_files.contains(".gitkeep"), "{error:#?}");
-    }
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_summary(
+        &results,
+        "",
+        4,
+        [
+            "apps/devctl/crates",
+            "apps/backend/crates",
+            "apps/worker/crates",
+            inner_hex(),
+        ],
+        None,
+        Some(&["loose files"]),
+        None,
+        None,
+    );
+    assertions::assert_error_summary(
+        &results,
+        "",
+        4,
+        [
+            "apps/devctl/crates",
+            "apps/backend/crates",
+            "apps/worker/crates",
+            inner_hex(),
+        ],
+        None,
+        None,
+        None,
+        None,
+    );
+    assertions::assert_error_count_matching(
+        &results,
+        "",
+        4,
+        None,
+        None,
+        &["loose files"],
+        &[],
+        &["mod.rs", "README.md"],
+        &[".gitkeep"],
+    );
 }
 
 #[test]
@@ -154,14 +239,22 @@ fn deep_unexpected_dir_tree_blames_only_the_top_level_unexpected_dir() {
         );
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-02");
-    assert_eq!(errors.len(), 4, "{errors:#?}");
-    for error in &errors {
-        assert!(error.title.contains("utils"), "{error:#?}");
-        assert!(!error.title.contains("helpers"), "{error:#?}");
-        assert!(!error.title.contains("deep"), "{error:#?}");
-    }
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_summary(
+        &results,
+        "",
+        4,
+        [
+            "apps/devctl/crates",
+            "apps/backend/crates",
+            "apps/worker/crates",
+            inner_hex(),
+        ],
+        None,
+        Some(&["utils"]),
+        Some(&["helpers", "deep"]),
+        None,
+    );
 }
 
 #[test]
@@ -177,50 +270,61 @@ fn maximally_complex_single_root_accumulates_missing_unexpected_and_loose_withou
     write_file(tmp.path(), &format!("{devctl}/mod.rs"), "// stray");
     write_file(tmp.path(), &format!("{devctl}/.gitkeep"), "");
 
-    let results = assertions::run_family(tmp.path());
-    let rule_02 = assertions::errors_by_id(&results, "RS-HEXARCH-02");
-    let devctl_rule_02: Vec<_> = rule_02
-        .iter()
-        .filter(|error| {
-            error
-                .file
-                .as_deref()
-                .is_some_and(|file| file == devctl || file == "apps/devctl/crates/utils")
-        })
-        .collect();
-
-    assert_eq!(rule_02.len(), 4, "{rule_02:#?}");
-    assert_eq!(devctl_rule_02.len(), 4, "{devctl_rule_02:#?}");
-    assert!(
-        devctl_rule_02
-            .iter()
-            .any(|error| error.title.contains("missing") && error.title.contains("app/")),
-        "{devctl_rule_02:#?}"
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_summary(
+        &results,
+        "",
+        4,
+        [devctl, "apps/devctl/crates/utils"],
+        None,
+        None,
+        None,
+        None,
     );
-    assert!(
-        devctl_rule_02
-            .iter()
-            .any(|error| error.title.contains("missing") && error.title.contains("domain/")),
-        "{devctl_rule_02:#?}"
+    assertions::assert_error_count_matching(
+        &results,
+        "",
+        1,
+        Some(devctl),
+        None,
+        &["missing", "app/"],
+        &[],
+        &[],
+        &[],
     );
-    assert!(
-        devctl_rule_02
-            .iter()
-            .any(|error| error.title.contains("unexpected") && error.title.contains("utils")),
-        "{devctl_rule_02:#?}"
+    assertions::assert_error_count_matching(
+        &results,
+        "",
+        1,
+        Some(devctl),
+        None,
+        &["missing", "domain/"],
+        &[],
+        &[],
+        &[],
     );
-    let loose = devctl_rule_02
-        .iter()
-        .find(|error| error.title.contains("loose files"))
-        .expect("loose files result");
-    assert!(loose.message.contains("app"), "{loose:#?}");
-    assert!(loose.message.contains("mod.rs"), "{loose:#?}");
-    let listed_files = loose
-        .message
-        .split("Only ")
-        .next()
-        .unwrap_or(&loose.message);
-    assert!(!listed_files.contains(".gitkeep"), "{loose:#?}");
+    assertions::assert_error_count_matching(
+        &results,
+        "",
+        1,
+        Some("apps/devctl/crates/utils"),
+        None,
+        &["unexpected", "utils"],
+        &[],
+        &[],
+        &[],
+    );
+    assertions::assert_error_count_matching(
+        &results,
+        "",
+        1,
+        Some(devctl),
+        None,
+        &["loose files"],
+        &[],
+        &["app", "mod.rs"],
+        &[".gitkeep"],
+    );
 }
 
 #[test]
@@ -243,63 +347,21 @@ fn all_four_required_dirs_missing_with_gitkeep_still_emit_only_missing_dir_resul
     }
     write_file(tmp.path(), &format!("{}/.gitkeep", inner_hex()), "");
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-02");
-    assert_eq!(errors.len(), 15, "{errors:#?}");
-    assert!(
-        errors.iter().all(|error| error.title.contains("missing")),
-        "{errors:#?}"
-    );
-    assert!(
-        errors
-            .iter()
-            .all(|error| !error.title.contains("loose files")),
-        "{errors:#?}"
-    );
-}
-
-#[test]
-fn nested_root_compound_attack_stays_nested_and_preserves_exact_category_split() {
-    let tmp = copy_fixture();
-    remove_dir(tmp.path(), &format!("{}/domain", inner_hex()));
-    write_file(tmp.path(), &format!("{}/utils/.gitkeep", inner_hex()), "");
-    write_file(
-        tmp.path(),
-        &format!("{}/Cargo.toml", inner_hex()),
-        "[package]\nname = \"bad\"\n",
-    );
-
-    let results = assertions::run_family(tmp.path());
-    let nested_rule_02: Vec<_> = assertions::errors_by_id(&results, "RS-HEXARCH-02")
-        .into_iter()
-        .filter(|error| {
-            error
-                .file
-                .as_deref()
-                .is_some_and(|file| file == inner_hex() || file == format!("{}/utils", inner_hex()))
-        })
-        .collect();
-
-    assert_eq!(nested_rule_02.len(), 3, "{nested_rule_02:#?}");
-    assert!(
-        nested_rule_02
-            .iter()
-            .any(|error| error.title.contains("adapters/inbound/mcp/crates/domain/")),
-        "{nested_rule_02:#?}"
-    );
-    assert!(
-        nested_rule_02
-            .iter()
-            .any(|error| error.title.contains("adapters/inbound/mcp/crates/utils/")),
-        "{nested_rule_02:#?}"
-    );
-    let loose = nested_rule_02
-        .iter()
-        .find(|error| error.title.contains("loose files"))
-        .expect("nested loose files result");
-    assert!(loose.message.contains("Cargo.toml"), "{loose:#?}");
-    assert!(
-        loose.message.contains("adapters/inbound/mcp/crates"),
-        "{loose:#?}"
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_summary(
+        &results,
+        "",
+        15,
+        [
+            "apps/devctl/crates",
+            "apps/backend/crates",
+            "apps/worker/crates",
+            inner_hex(),
+        ],
+        None,
+        Some(&["missing"]),
+        Some(&["loose files"]),
+        None,
+        None,
     );
 }

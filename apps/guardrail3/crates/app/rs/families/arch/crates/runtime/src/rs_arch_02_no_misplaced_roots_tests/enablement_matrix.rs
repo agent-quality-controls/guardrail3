@@ -1,11 +1,11 @@
-use guardrail3_app_rs_family_arch_assertions::rs_arch_02_no_misplaced_roots as assertions;
 #[allow(unused_imports)]
-use super::{cargo_fixture, CargoFixture, entry, tree, tree_at};
+use super::{CargoFixture, cargo_fixture, check_results, entry, tree, tree_at};
+use guardrail3_app_rs_family_arch_assertions::rs_arch_02_no_misplaced_roots as assertions;
 
 #[test]
 fn misplaced_roots_fire_when_hexarch_is_enabled() {
     let config = "[rust.checks]\nhexarch = true\nlibarch = false\n";
-    let results = assertions::check_results(&tree(
+    let results = check_results(&tree(
         &[
             ("", entry(&["tools"], &["guardrail3.toml"])),
             ("tools", entry(&["worker"], &[])),
@@ -23,7 +23,7 @@ fn misplaced_roots_fire_when_hexarch_is_enabled() {
 #[test]
 fn misplaced_roots_fire_when_libarch_is_enabled() {
     let config = "[rust.checks]\nhexarch = false\nlibarch = true\n";
-    let results = assertions::check_results(&tree(
+    let results = check_results(&tree(
         &[
             ("", entry(&["tools"], &["guardrail3.toml"])),
             ("tools", entry(&["worker"], &[])),
@@ -41,7 +41,7 @@ fn misplaced_roots_fire_when_libarch_is_enabled() {
 #[test]
 fn misplaced_roots_do_not_fire_when_both_architecture_families_are_disabled() {
     let config = "[rust.checks]\nhexarch = false\nlibarch = false\n";
-    let results = assertions::check_results(&tree(
+    let results = check_results(&tree(
         &[
             ("", entry(&["tools"], &["guardrail3.toml"])),
             ("tools", entry(&["worker"], &[])),
@@ -62,7 +62,7 @@ fn misplaced_roots_do_not_fire_when_both_architecture_families_are_disabled() {
 #[test]
 fn misplaced_roots_do_not_fire_when_arch_is_globally_disabled() {
     let config = "[rust.checks]\narch = false\nhexarch = true\nlibarch = true\n";
-    let results = assertions::check_results(&tree(
+    let results = check_results(&tree(
         &[
             ("", entry(&["tools"], &["guardrail3.toml"])),
             ("tools", entry(&["worker"], &[])),

@@ -1,12 +1,12 @@
 use std::collections::BTreeSet;
-const FIXTURE: crate::test_support::HexarchFixture = crate::test_support::HexarchFixture;
+const FIXTURE: super::HexarchFixture = super::HexarchFixture;
 
 fn inner_hex() -> &'static str {
     FIXTURE.inner_hex_root()
 }
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_04_loose_files as assertions;
-use crate::test_support::{copy_fixture, remove_dir, write_file};
+use super::{copy_fixture, remove_dir, write_file};
 
 const CONTAINER_SUFFIXES: &[&str] = &[
     "app",
@@ -47,12 +47,8 @@ fn gitkeep_only_in_all_owned_container_dirs_is_clean() {
         write_file(tmp.path(), &format!("{path}/.gitkeep"), "");
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-04");
-    assert!(
-        errors.is_empty(),
-        "expected .gitkeep-only containers to stay clean for rule 04, got: {errors:#?}"
-    );
+    let results = super::run_family(tmp.path());
+    assertions::assert_no_error(&results, "");
 }
 
 #[test]
@@ -87,37 +83,30 @@ fn gitkeep_plus_replaced_single_child_containers_still_hit_rule_04() {
         replace_single_child_with_gitkeep(tmp.path(), container, child);
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-04");
-    assert_eq!(
-        errors.len(),
-        replacements.len(),
-        "expected one loose-file hit per gitkeep-protected replacement: {errors:#?}"
-    );
-
-    let actual_files = errors
-        .iter()
-        .filter_map(|error| error.file.clone())
-        .collect::<BTreeSet<_>>();
+    let results = super::run_family(tmp.path());
     let expected_files = replacements
         .iter()
         .map(|(container, _)| (*container).to_owned())
         .collect::<BTreeSet<_>>();
 
-    assert_eq!(
-        actual_files, expected_files,
-        "gitkeep-protected replacements should still be owned by rule 04: {errors:#?}"
+    assertions::assert_error_summary(
+        &results,
+        "",
+        replacements.len(),
+        &expected_files,
+        None,
+        Some(&["that don't belong"]),
+        None,
+        None,
     );
-    for error in &errors {
-        let bad_files_section = error
-            .message
-            .split("that don't belong: ")
-            .nth(1)
-            .and_then(|s| s.split(". Only").next())
-            .unwrap_or("");
-        assert!(
-            !bad_files_section.contains(".gitkeep"),
-            ".gitkeep must not be reported as a loose file: '{bad_files_section}'"
-        );
-    }
+    assertions::assert_error_summary(
+        &results,
+        "",
+        replacements.len(),
+        &expected_files,
+        None,
+        None,
+        None,
+        Some(&[".gitkeep"]),
+    );
 }

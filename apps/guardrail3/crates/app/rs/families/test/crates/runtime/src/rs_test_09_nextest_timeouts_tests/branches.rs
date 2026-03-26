@@ -1,12 +1,15 @@
 #[allow(unused_imports)]
-use guardrail3_app_rs_family_test_assertions::rs_test_09_nextest_timeouts::{assert_reported, assert_rule_files, assert_rule_quiet};
+use guardrail3_app_rs_family_test_assertions::rs_test_09_nextest_timeouts::{
+    assert_reported, assert_rule_files, assert_rule_quiet,
+};
 
 #[allow(unused_imports)]
 use super::{run_family, tempdir, write_file};
 use guardrail3_domain_report::Severity;
 
 #[test]
-fn tokio_dependency_only_root_without_nextest_is_reported() {let fixture = tempdir();
+fn tokio_dependency_only_root_without_nextest_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -22,11 +25,19 @@ fn tokio_dependency_only_root_without_nextest_is_reported() {let fixture = tempd
 
     let results = run_family(root);
 
-    assert_rule_files(&results, vec![".config/nextest.toml".to_owned()]
-    );    assert_reported(&results, ".config/nextest.toml", None, Severity::Warn, "nextest config missing");}
+    assert_rule_files(&results, vec![".config/nextest.toml".to_owned()]);
+    assert_reported(
+        &results,
+        ".config/nextest.toml",
+        None,
+        Severity::Warn,
+        "nextest config missing",
+    );
+}
 
 #[test]
-fn tokio_attr_only_root_without_nextest_is_reported() {let fixture = tempdir();
+fn tokio_attr_only_root_without_nextest_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -42,11 +53,19 @@ fn tokio_attr_only_root_without_nextest_is_reported() {let fixture = tempdir();
 
     let results = run_family(root);
 
-    assert_rule_files(&results, vec![".config/nextest.toml".to_owned()]
-    );    assert_reported(&results, ".config/nextest.toml", None, Severity::Warn, "nextest config missing");}
+    assert_rule_files(&results, vec![".config/nextest.toml".to_owned()]);
+    assert_reported(
+        &results,
+        ".config/nextest.toml",
+        None,
+        Severity::Warn,
+        "nextest config missing",
+    );
+}
 
 #[test]
-fn plain_tests_without_tokio_are_inactive_without_nextest() {let fixture = tempdir();
+fn plain_tests_without_tokio_are_inactive_without_nextest() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -62,10 +81,12 @@ fn plain_tests_without_tokio_are_inactive_without_nextest() {let fixture = tempd
 
     let results = run_family(root);
 
-    assert_rule_quiet(&results);}
+    assert_rule_quiet(&results);
+}
 
 #[test]
-fn missing_slow_timeout_is_reported() {let fixture = tempdir();
+fn missing_slow_timeout_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -86,11 +107,19 @@ fn missing_slow_timeout_is_reported() {let fixture = tempdir();
 
     let results = run_family(root);
 
-    assert_rule_files(&results, vec![".config/nextest.toml".to_owned()]
-    );    assert_reported(&results, ".config/nextest.toml", None, Severity::Warn, "nextest timeouts incomplete");}
+    assert_rule_files(&results, vec![".config/nextest.toml".to_owned()]);
+    assert_reported(
+        &results,
+        ".config/nextest.toml",
+        None,
+        Severity::Warn,
+        "nextest timeouts incomplete",
+    );
+}
 
 #[test]
-fn missing_leak_timeout_is_reported() {let fixture = tempdir();
+fn missing_leak_timeout_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -111,5 +140,12 @@ fn missing_leak_timeout_is_reported() {let fixture = tempdir();
 
     let results = run_family(root);
 
-    assert_rule_files(&results, vec![".config/nextest.toml".to_owned()]
-    );    assert_reported(&results, ".config/nextest.toml", None, Severity::Warn, "nextest timeouts incomplete");}
+    assert_rule_files(&results, vec![".config/nextest.toml".to_owned()]);
+    assert_reported(
+        &results,
+        ".config/nextest.toml",
+        None,
+        Severity::Warn,
+        "nextest timeouts incomplete",
+    );
+}

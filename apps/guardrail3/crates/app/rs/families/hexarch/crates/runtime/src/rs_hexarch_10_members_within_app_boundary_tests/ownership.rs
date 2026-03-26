@@ -1,5 +1,5 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_10_members_within_app_boundary as assertions;
-use crate::test_support::{copy_fixture, write_file};
+use super::{copy_fixture, write_file};
 
 #[test]
 fn package_style_app_cargo_is_owned_by_rule_08_not_rule_10() {
@@ -10,9 +10,9 @@ fn package_style_app_cargo_is_owned_by_rule_08_not_rule_10() {
         "[package]\nname = \"devctl\"\nversion = \"0.1.0\"\n",
     );
 
-    let results = assertions::run_family(tmp.path());
+    let results = super::run_family(tmp.path());
     let rule_08 = assertions::errors_by_id(&results, "RS-HEXARCH-08");
-    let rule_10 = assertions::errors_by_id(&results, "RS-HEXARCH-10");
+    let rule_10 = assertions::errors_by_id(&results, "");
 
     assert!(
         rule_10.is_empty(),
@@ -44,9 +44,9 @@ resolver = "2"
 "#,
     );
 
-    let results = assertions::run_family(tmp.path());
+    let results = super::run_family(tmp.path());
     let rule_09 = assertions::errors_by_id(&results, "RS-HEXARCH-09");
-    let rule_10 = assertions::errors_by_id(&results, "RS-HEXARCH-10");
+    let rule_10 = assertions::errors_by_id(&results, "");
 
     assert_eq!(
         rule_09.len(),
@@ -78,9 +78,9 @@ resolver = "2"
 "#,
     );
 
-    let results = assertions::run_family(tmp.path());
+    let results = super::run_family(tmp.path());
     let rule_09 = assertions::errors_by_id(&results, "RS-HEXARCH-09");
-    let rule_10 = assertions::errors_by_id(&results, "RS-HEXARCH-10");
+    let rule_10 = assertions::errors_by_id(&results, "");
 
     assert_eq!(
         rule_09.len(),
@@ -115,10 +115,10 @@ resolver = "2"
             ),
         );
 
-        let results = assertions::run_family(tmp.path());
+        let results = super::run_family(tmp.path());
         let rule_07 = assertions::errors_by_id(&results, "RS-HEXARCH-07");
         let rule_09 = assertions::errors_by_id(&results, "RS-HEXARCH-09");
-        let rule_10 = assertions::errors_by_id(&results, "RS-HEXARCH-10");
+        let rule_10 = assertions::errors_by_id(&results, "");
 
         assert!(
             rule_07.is_empty(),
@@ -165,9 +165,9 @@ resolver = "2"
         ),
     );
 
-    let results = assertions::run_family(tmp.path());
+    let results = super::run_family(tmp.path());
     let rule_08 = assertions::errors_by_id(&results, "RS-HEXARCH-08");
-    let rule_10 = assertions::errors_by_id(&results, "RS-HEXARCH-10");
+    let rule_10 = assertions::errors_by_id(&results, "");
 
     assert!(
         rule_08.is_empty(),
@@ -200,10 +200,10 @@ resolver = "2"
 "#,
     );
 
-    let results = assertions::run_family(tmp.path());
+    let results = super::run_family(tmp.path());
     let rule_07 = assertions::errors_by_id(&results, "RS-HEXARCH-07");
     let rule_09 = assertions::errors_by_id(&results, "RS-HEXARCH-09");
-    let rule_10 = assertions::errors_by_id(&results, "RS-HEXARCH-10");
+    let rule_10 = assertions::errors_by_id(&results, "");
 
     assert!(
         rule_07.is_empty(),

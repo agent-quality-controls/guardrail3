@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_08_app_cargo_is_workspace as assertions;
-use crate::test_support::{copy_fixture, write_file};
+use super::{copy_fixture, write_file};
 
 fn rewrite_as_package_manifest(app_name: &str, original: &str) -> String {
     let parsed = toml::from_str::<toml::Value>(original).expect("parse original workspace cargo");
@@ -54,8 +54,8 @@ fn package_style_app_cargo_hits_every_mutated_app() {
         );
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-08");
+    let results = super::run_family(tmp.path());
+    let errors = assertions::errors_by_id(&results, "");
     let actual_files = errors
         .iter()
         .filter_map(|error| error.file.clone())
@@ -89,8 +89,8 @@ fn single_package_style_app_cargo_hits_only_that_app() {
         &rewrite_as_package_manifest("devctl", &original),
     );
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-08");
+    let results = super::run_family(tmp.path());
+    let errors = assertions::errors_by_id(&results, "");
 
     assert_eq!(
         errors.len(),

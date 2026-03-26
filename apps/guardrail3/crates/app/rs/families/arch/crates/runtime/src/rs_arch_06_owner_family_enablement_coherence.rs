@@ -38,5 +38,12 @@ fn display_dir(rel_dir: &str) -> &str {
 }
 
 #[cfg(test)]
+pub(crate) fn check_results(
+    tree: &guardrail3_domain_project_tree::ProjectTree,
+) -> Vec<guardrail3_domain_report::CheckResult> {
+    crate::check_test_tree(tree)
+}
+
+#[cfg(test)]
 #[path = "rs_arch_06_owner_family_enablement_coherence_tests/mod.rs"]
 mod rs_arch_06_owner_family_enablement_coherence_tests;

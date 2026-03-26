@@ -6,7 +6,8 @@ use guardrail3_app_rs_family_test_assertions::rs_test_11_cargo_mutants_installed
 #[allow(unused_imports)]
 use super::{run_family_with_tool, tempdir, write_file};
 #[test]
-fn missing_tool_is_ignored_without_mutation_adoption_and_reported_when_adopted() {let dormant = tempdir();
+fn missing_tool_is_ignored_without_mutation_adoption_and_reported_when_adopted() {
+    let dormant = tempdir();
     write_file(
         dormant.path(),
         "Cargo.toml",
@@ -36,4 +37,5 @@ fn missing_tool_is_ignored_without_mutation_adoption_and_reported_when_adopted()
     let adopted_results = run_family_with_tool(adopted.path(), false);
     assert_rule_files(&adopted_results, vec!["Cargo.toml".to_owned()]);
     assert_missing_cargo_mutants(&adopted_results);
-    assert_inventory(&adopted_results, false);}
+    assert_inventory(&adopted_results, false);
+}

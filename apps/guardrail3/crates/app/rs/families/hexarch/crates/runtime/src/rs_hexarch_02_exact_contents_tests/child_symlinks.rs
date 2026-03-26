@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_02_exact_contents as assertions;
-use crate::test_support::{copy_fixture, remove_dir};
-const FIXTURE: crate::test_support::HexarchFixture = crate::test_support::HexarchFixture;
+use super::{copy_fixture, remove_dir};
+const FIXTURE: super::HexarchFixture = super::HexarchFixture;
 
 fn inner_hex() -> &'static str {
     FIXTURE.inner_hex_root()
@@ -16,26 +16,36 @@ fn required_child_symlink_to_valid_directory_hits_missing_and_loose_for_that_roo
     )
     .expect("symlink");
 
-    let results = assertions::run_family(tmp.path());
-    let devctl_rule_02: Vec<_> = assertions::errors_by_id(&results, "RS-HEXARCH-02")
-        .into_iter()
-        .filter(|error| {
-            error
-                .file
-                .as_deref()
-                .is_some_and(|file| file.starts_with("apps/devctl/crates"))
-        })
-        .collect();
-    assert_eq!(devctl_rule_02.len(), 2, "{devctl_rule_02:#?}");
-    assert!(
-        devctl_rule_02
-            .iter()
-            .any(|error| error.title.contains("missing") && error.title.contains("domain/"))
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_count_matching_file(
+        &results,
+        "",
+        "apps/devctl/crates",
+        2,
+        &[],
+        &[],
+        &[],
+        &[],
     );
-    assert!(
-        devctl_rule_02
-            .iter()
-            .any(|error| error.title.contains("loose files"))
+    assertions::assert_error_count_matching_file(
+        &results,
+        "",
+        "apps/devctl/crates",
+        1,
+        &["missing", "domain/"],
+        &[],
+        &[],
+        &[],
+    );
+    assertions::assert_error_count_matching_file(
+        &results,
+        "",
+        "apps/devctl/crates",
+        1,
+        &["loose files"],
+        &[],
+        &[],
+        &[],
     );
 }
 
@@ -49,26 +59,16 @@ fn required_child_broken_symlink_hits_missing_and_loose_for_that_root() {
     )
     .expect("symlink");
 
-    let results = assertions::run_family(tmp.path());
-    let devctl_rule_02: Vec<_> = assertions::errors_by_id(&results, "RS-HEXARCH-02")
-        .into_iter()
-        .filter(|error| {
-            error
-                .file
-                .as_deref()
-                .is_some_and(|file| file.starts_with("apps/devctl/crates"))
-        })
-        .collect();
-    assert_eq!(devctl_rule_02.len(), 2, "{devctl_rule_02:#?}");
-    assert!(
-        devctl_rule_02
-            .iter()
-            .any(|error| error.title.contains("missing") && error.title.contains("domain/"))
-    );
-    assert!(
-        devctl_rule_02
-            .iter()
-            .any(|error| error.title.contains("loose files"))
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_count_matching_file(
+        &results,
+        "",
+        "apps/devctl/crates",
+        2,
+        &[],
+        &[],
+        &[],
+        &[],
     );
 }
 
@@ -79,17 +79,17 @@ fn required_child_dev_null_symlink_hits_missing_and_loose_for_that_root() {
     std::os::unix::fs::symlink("/dev/null", tmp.path().join("apps/devctl/crates/domain"))
         .expect("symlink");
 
-    let results = assertions::run_family(tmp.path());
-    let devctl_rule_02: Vec<_> = assertions::errors_by_id(&results, "RS-HEXARCH-02")
-        .into_iter()
-        .filter(|error| {
-            error
-                .file
-                .as_deref()
-                .is_some_and(|file| file.starts_with("apps/devctl/crates"))
-        })
-        .collect();
-    assert_eq!(devctl_rule_02.len(), 2, "{devctl_rule_02:#?}");
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_count_matching_file(
+        &results,
+        "",
+        "apps/devctl/crates",
+        2,
+        &[],
+        &[],
+        &[],
+        &[],
+    );
 }
 
 #[test]
@@ -102,26 +102,36 @@ fn nested_required_child_valid_symlink_hits_missing_and_loose_for_that_root() {
     )
     .expect("symlink");
 
-    let results = assertions::run_family(tmp.path());
-    let nested_rule_02: Vec<_> = assertions::errors_by_id(&results, "RS-HEXARCH-02")
-        .into_iter()
-        .filter(|error| {
-            error
-                .file
-                .as_deref()
-                .is_some_and(|file| file.starts_with(inner_hex()))
-        })
-        .collect();
-    assert_eq!(nested_rule_02.len(), 2, "{nested_rule_02:#?}");
-    assert!(
-        nested_rule_02
-            .iter()
-            .any(|error| error.title.contains("missing") && error.title.contains("domain/"))
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_count_matching_file(
+        &results,
+        "",
+        inner_hex(),
+        2,
+        &[],
+        &[],
+        &[],
+        &[],
     );
-    assert!(
-        nested_rule_02
-            .iter()
-            .any(|error| error.title.contains("loose files"))
+    assertions::assert_error_count_matching_file(
+        &results,
+        "",
+        inner_hex(),
+        1,
+        &["missing", "domain/"],
+        &[],
+        &[],
+        &[],
+    );
+    assertions::assert_error_count_matching_file(
+        &results,
+        "",
+        inner_hex(),
+        1,
+        &["loose files"],
+        &[],
+        &[],
+        &[],
     );
 }
 
@@ -142,24 +152,43 @@ fn required_child_symlink_hits_every_owned_root_for_non_special_required_name() 
         .expect("symlink");
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-02");
-    assert_eq!(errors.len(), 8, "{errors:#?}");
-    assert_eq!(
-        errors
-            .iter()
-            .filter(|error| error.title.contains("missing") && error.title.contains("domain/"))
-            .count(),
-        4,
-        "{errors:#?}"
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_summary(
+        &results,
+        "",
+        8,
+        [
+            "apps/devctl/crates",
+            "apps/backend/crates",
+            "apps/worker/crates",
+            inner_hex(),
+        ],
+        None,
+        None,
+        None,
+        None,
     );
-    assert_eq!(
-        errors
-            .iter()
-            .filter(|error| error.title.contains("loose files"))
-            .count(),
+    assertions::assert_error_count_matching(
+        &results,
+        "",
         4,
-        "{errors:#?}"
+        None,
+        None,
+        &["missing", "domain/"],
+        &[],
+        &[],
+        &[],
+    );
+    assertions::assert_error_count_matching(
+        &results,
+        "",
+        4,
+        None,
+        None,
+        &["loose files"],
+        &[],
+        &[],
+        &[],
     );
 }
 
@@ -179,30 +208,52 @@ fn outer_adapters_symlink_hits_only_outer_roots_because_nested_hex_becomes_unrea
         .expect("symlink");
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-02");
-    assert_eq!(errors.len(), 6, "{errors:#?}");
-    assert_eq!(
-        errors
-            .iter()
-            .filter(|error| error.title.contains("missing") && error.title.contains("adapters/"))
-            .count(),
-        3,
-        "{errors:#?}"
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_summary(
+        &results,
+        "",
+        6,
+        [
+            "apps/devctl/crates",
+            "apps/backend/crates",
+            "apps/worker/crates",
+        ],
+        None,
+        None,
+        None,
+        None,
     );
-    assert_eq!(
-        errors
-            .iter()
-            .filter(|error| error.title.contains("loose files"))
-            .count(),
+    assertions::assert_error_count_matching(
+        &results,
+        "",
         3,
-        "{errors:#?}"
+        None,
+        None,
+        &["missing", "adapters/"],
+        &[],
+        &[],
+        &[],
     );
-    assert!(
-        errors.iter().all(|error| !error
-            .file
-            .as_deref()
-            .is_some_and(|file| file.starts_with(inner_hex()))),
-        "{errors:#?}"
+    assertions::assert_error_count_matching(
+        &results,
+        "",
+        3,
+        None,
+        None,
+        &["loose files"],
+        &[],
+        &[],
+        &[],
+    );
+    assertions::assert_error_count_matching(
+        &results,
+        "",
+        0,
+        Some(inner_hex()),
+        None,
+        &[],
+        &[],
+        &[],
+        &[],
     );
 }

@@ -63,7 +63,8 @@ pub fn check_sidecar_semantic_proof(input: &TestFunctionInput<'_>, results: &mut
 }
 
 fn owns_direct_result_shape_assertion(input: &TestFunctionInput<'_>) -> bool {
-    input.function
+    input
+        .function
         .string_literals
         .iter()
         .any(|value| value.starts_with("RS-"))
@@ -73,7 +74,8 @@ fn owns_direct_result_shape_assertion(input: &TestFunctionInput<'_>) -> bool {
             .iter()
             .any(|field| REPORT_FIELDS.contains(&field.name.as_str()))
         || input.function.path_uses.iter().any(|path| {
-            path.last().is_some_and(|segment| matches!(segment.as_str(), "CheckResult" | "Severity"))
+            path.last()
+                .is_some_and(|segment| matches!(segment.as_str(), "CheckResult" | "Severity"))
         })
 }
 

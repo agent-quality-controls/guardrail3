@@ -1,5 +1,5 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_15_boundary_config as assertions;
-use crate::test_support::copy_fixture;
+use super::copy_fixture;
 
 #[test]
 fn malformed_guardrail_config_warns_in_family_run() {
@@ -10,11 +10,8 @@ fn malformed_guardrail_config_warns_in_family_run() {
     )
     .expect("write malformed guardrail config");
 
-    let results = assertions::run_family(tmp.path());
-    let warnings: Vec<_> = results
-        .iter()
-        .filter(|result| result.id == "RS-HEXARCH-15")
-        .collect();
+    let results = super::run_family(tmp.path());
+    let warnings = assertions::error_results(&results, "");
     assert_eq!(
         warnings.len(),
         1,

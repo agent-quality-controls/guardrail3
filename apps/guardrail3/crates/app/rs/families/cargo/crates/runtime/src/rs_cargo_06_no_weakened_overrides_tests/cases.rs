@@ -1,13 +1,8 @@
 #[allow(unused_imports)]
-use guardrail3_app_rs_family_cargo_assertions::rs_cargo_06_no_weakened_overrides::{
-    assert_rule_results,
-    check_results,
-    ExpectedRuleResult,
-    rule_results,
-};
+use super::{entry, tree};
 #[allow(unused_imports)]
-use super::{
-    entry, tree,
+use guardrail3_app_rs_family_cargo_assertions::rs_cargo_06_no_weakened_overrides::{
+    ExpectedRuleResult, assert_rule_results, check_results, rule_results,
 };
 
 #[allow(dead_code, non_upper_case_globals)]

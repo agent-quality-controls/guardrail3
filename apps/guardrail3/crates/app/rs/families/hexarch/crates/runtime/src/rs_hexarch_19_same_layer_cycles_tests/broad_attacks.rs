@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use super::super::results_for_cycles_for_test as results_for_cycles;
-use crate::test_support::{dir_entry, project_tree};
+use super::{dir_entry, project_tree};
 
 #[test]
 fn same_layer_cycle_is_reported_once_even_with_mixed_layer_cycle_present() {

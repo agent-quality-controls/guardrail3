@@ -12,7 +12,10 @@ pub struct ExpectedRuleResult<'a> {
 const RULE_ID: &str = "RS-CARGO-02";
 
 pub fn rule_results<'a>(results: &'a [CheckResult], _rule_id: &str) -> Vec<&'a CheckResult> {
-    results.iter().filter(|result| result.id == RULE_ID).collect()
+    results
+        .iter()
+        .filter(|result| result.id == RULE_ID)
+        .collect()
 }
 
 pub fn assert_rule_results(results: &[CheckResult], expected: &[ExpectedRuleResult<'_>]) -> () {
@@ -46,7 +49,9 @@ pub fn has_result<F>(results: &[CheckResult], _rule_id: &str, predicate: F) -> b
 where
     F: Fn(&CheckResult) -> bool,
 {
-    results.iter().any(|result| result.id == RULE_ID && predicate(result))
+    results
+        .iter()
+        .any(|result| result.id == RULE_ID && predicate(result))
 }
 
 pub fn assert_result_count(results: &[CheckResult], expected: usize) -> bool {

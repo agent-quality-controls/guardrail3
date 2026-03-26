@@ -1,12 +1,11 @@
-use std::collections::BTreeSet;
-const FIXTURE: crate::test_support::HexarchFixture = crate::test_support::HexarchFixture;
+const FIXTURE: super::HexarchFixture = super::HexarchFixture;
 
 fn inner_hex() -> &'static str {
     FIXTURE.inner_hex_root()
 }
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_02_exact_contents as assertions;
-use crate::test_support::{copy_fixture, remove_dir, write_file};
+use super::{copy_fixture, remove_dir, write_file};
 
 #[test]
 fn missing_domain_hits_all_owned_outer_and_nested_hex_roots() {
@@ -20,34 +19,21 @@ fn missing_domain_hits_all_owned_outer_and_nested_hex_roots() {
         remove_dir(tmp.path(), &format!("{dir}/domain"));
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-02");
-    assert_eq!(
-        errors.len(),
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_summary(
+        &results,
+        "",
         4,
-        "expected one missing-domain hit per owned root: {errors:#?}"
-    );
-    let actual_files = errors
-        .iter()
-        .filter_map(|error| error.file.clone())
-        .collect::<BTreeSet<_>>();
-    let expected_files = [
-        "apps/devctl/crates".to_owned(),
-        "apps/backend/crates".to_owned(),
-        "apps/worker/crates".to_owned(),
-        inner_hex().to_owned(),
-    ]
-    .into_iter()
-    .collect::<BTreeSet<_>>();
-
-    assert_eq!(
-        actual_files, expected_files,
-        "unexpected hit set: {errors:#?}"
-    );
-    assert!(
-        errors
-            .iter()
-            .all(|error| error.title.contains("missing") && error.title.contains("domain/"))
+        [
+            "apps/devctl/crates",
+            "apps/backend/crates",
+            "apps/worker/crates",
+            inner_hex(),
+        ],
+        None,
+        Some(&["missing", "domain/"]),
+        None,
+        None,
     );
 }
 
@@ -63,17 +49,21 @@ fn missing_app_hits_all_owned_outer_and_nested_hex_roots() {
         remove_dir(tmp.path(), &format!("{dir}/app"));
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-02");
-    assert_eq!(
-        errors.len(),
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_summary(
+        &results,
+        "",
         4,
-        "expected one missing-app hit per owned root: {errors:#?}"
-    );
-    assert!(
-        errors
-            .iter()
-            .all(|error| error.title.contains("missing") && error.title.contains("app/"))
+        [
+            "apps/devctl/crates",
+            "apps/backend/crates",
+            "apps/worker/crates",
+            inner_hex(),
+        ],
+        None,
+        Some(&["missing", "app/"]),
+        None,
+        None,
     );
 }
 
@@ -89,17 +79,21 @@ fn missing_ports_hits_all_owned_outer_and_nested_hex_roots() {
         remove_dir(tmp.path(), &format!("{dir}/ports"));
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-02");
-    assert_eq!(
-        errors.len(),
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_summary(
+        &results,
+        "",
         4,
-        "expected one missing-ports hit per owned root: {errors:#?}"
-    );
-    assert!(
-        errors
-            .iter()
-            .all(|error| error.title.contains("missing") && error.title.contains("ports/"))
+        [
+            "apps/devctl/crates",
+            "apps/backend/crates",
+            "apps/worker/crates",
+            inner_hex(),
+        ],
+        None,
+        Some(&["missing", "ports/"]),
+        None,
+        None,
     );
 }
 
@@ -116,45 +110,43 @@ fn replacing_domain_with_file_hits_missing_and_loose_per_owned_root() {
         write_file(tmp.path(), &format!("{dir}/domain"), "not a directory");
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-02");
-    assert_eq!(
-        errors.len(),
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_summary(
+        &results,
+        "",
         8,
-        "expected one missing-dir and one loose-file hit per owned root: {errors:#?}"
+        [
+            "apps/devctl/crates",
+            "apps/backend/crates",
+            "apps/worker/crates",
+            inner_hex(),
+        ],
+        None,
+        None,
+        None,
+        None,
     );
-    let actual_files = errors
-        .iter()
-        .filter_map(|error| error.file.clone())
-        .collect::<BTreeSet<_>>();
-    let expected_files = [
-        "apps/devctl/crates".to_owned(),
-        "apps/backend/crates".to_owned(),
-        "apps/worker/crates".to_owned(),
-        inner_hex().to_owned(),
-    ]
-    .into_iter()
-    .collect::<BTreeSet<_>>();
-
-    assert_eq!(
-        actual_files, expected_files,
-        "unexpected hit set: {errors:#?}"
-    );
-    assert_eq!(
-        errors
-            .iter()
-            .filter(|error| error.title.contains("missing") && error.title.contains("domain/"))
-            .count(),
+    assertions::assert_error_count_matching(
+        &results,
+        "",
         4,
-        "expected one missing-domain hit per owned root: {errors:#?}"
+        None,
+        None,
+        &["missing", "domain/"],
+        &[],
+        &[],
+        &[],
     );
-    assert_eq!(
-        errors
-            .iter()
-            .filter(|error| error.title.contains("loose files"))
-            .count(),
+    assertions::assert_error_count_matching(
+        &results,
+        "",
         4,
-        "expected one loose-file hit per owned root after dir-to-file replacement: {errors:#?}"
+        None,
+        None,
+        &["loose files"],
+        &[],
+        &[],
+        &[],
     );
 }
 
@@ -169,33 +161,20 @@ fn missing_outer_adapters_hits_only_outer_roots_because_nested_hex_becomes_unrea
         remove_dir(tmp.path(), &format!("{dir}/adapters"));
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-02");
-    assert_eq!(
-        errors.len(),
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_summary(
+        &results,
+        "",
         3,
-        "expected one missing-adapters hit per owned outer app: {errors:#?}"
-    );
-    let actual_files = errors
-        .iter()
-        .filter_map(|error| error.file.clone())
-        .collect::<BTreeSet<_>>();
-    let expected_files = [
-        "apps/devctl/crates".to_owned(),
-        "apps/backend/crates".to_owned(),
-        "apps/worker/crates".to_owned(),
-    ]
-    .into_iter()
-    .collect::<BTreeSet<_>>();
-
-    assert_eq!(
-        actual_files, expected_files,
-        "unexpected hit set: {errors:#?}"
-    );
-    assert!(
-        errors
-            .iter()
-            .all(|error| error.title.contains("missing") && error.title.contains("adapters/"))
+        [
+            "apps/devctl/crates",
+            "apps/backend/crates",
+            "apps/worker/crates",
+        ],
+        None,
+        Some(&["missing", "adapters/"]),
+        None,
+        None,
     );
 }
 
@@ -212,61 +191,61 @@ fn replacing_outer_adapters_with_files_hits_only_outer_roots_because_nested_hex_
         write_file(tmp.path(), &format!("{dir}/adapters"), "not a directory");
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-02");
-    assert_eq!(
-        errors.len(),
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_summary(
+        &results,
+        "",
         6,
-        "expected one missing-dir and one loose-file hit per owned outer app: {errors:#?}"
+        [
+            "apps/devctl/crates",
+            "apps/backend/crates",
+            "apps/worker/crates",
+        ],
+        None,
+        None,
+        None,
+        None,
     );
-    let actual_files = errors
-        .iter()
-        .filter_map(|error| error.file.clone())
-        .collect::<BTreeSet<_>>();
-    let expected_files = [
-        "apps/devctl/crates".to_owned(),
-        "apps/backend/crates".to_owned(),
-        "apps/worker/crates".to_owned(),
-    ]
-    .into_iter()
-    .collect::<BTreeSet<_>>();
-
-    assert_eq!(
-        actual_files, expected_files,
-        "unexpected hit set: {errors:#?}"
-    );
-    assert_eq!(
-        errors
-            .iter()
-            .filter(|error| error.title.contains("missing") && error.title.contains("adapters/"))
-            .count(),
+    assertions::assert_error_count_matching(
+        &results,
+        "",
         3,
-        "expected one missing-adapters hit per owned outer app: {errors:#?}"
+        None,
+        None,
+        &["missing", "adapters/"],
+        &[],
+        &[],
+        &[],
     );
-    assert_eq!(
-        errors
-            .iter()
-            .filter(|error| error.title.contains("loose files"))
-            .count(),
+    assertions::assert_error_count_matching(
+        &results,
+        "",
         3,
-        "expected one loose-file hit per owned outer app after dir-to-file replacement: {errors:#?}"
+        None,
+        None,
+        &["loose files"],
+        &[],
+        &[],
+        &[],
     );
 }
 
 #[test]
 fn missing_inner_adapters_hits_only_the_nested_hex_root() {
     let tmp = copy_fixture();
-        remove_dir(tmp.path(), &format!("{}/adapters", inner_hex()));
+    remove_dir(tmp.path(), &format!("{}/adapters", inner_hex()));
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-02");
-    assert_eq!(
-        errors.len(),
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_count_matching_file(
+        &results,
+        "",
+        inner_hex(),
         1,
-        "expected one nested missing-adapters hit: {errors:#?}"
+        &["missing", "adapters/"],
+        &[],
+        &[],
+        &[],
     );
-    assert_eq!(errors[0].file.as_deref(), Some(inner_hex()), "{errors:#?}");
-    assert!(errors[0].title.contains("missing") && errors[0].title.contains("adapters/"));
 }
 
 #[test]
@@ -282,28 +261,43 @@ fn missing_two_required_dirs_hits_each_owned_root_once_per_dir() {
         remove_dir(tmp.path(), &format!("{dir}/ports"));
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-02");
-    assert_eq!(
-        errors.len(),
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_summary(
+        &results,
+        "",
         8,
-        "expected one missing-domain and one missing-ports hit per owned root: {errors:#?}"
+        [
+            "apps/devctl/crates",
+            "apps/backend/crates",
+            "apps/worker/crates",
+            inner_hex(),
+        ],
+        None,
+        None,
+        None,
+        None,
     );
-    assert_eq!(
-        errors
-            .iter()
-            .filter(|error| error.title.contains("domain/"))
-            .count(),
+    assertions::assert_error_count_matching(
+        &results,
+        "",
         4,
-        "{errors:#?}"
+        None,
+        None,
+        &["domain/"],
+        &[],
+        &[],
+        &[],
     );
-    assert_eq!(
-        errors
-            .iter()
-            .filter(|error| error.title.contains("ports/"))
-            .count(),
+    assertions::assert_error_count_matching(
+        &results,
+        "",
         4,
-        "{errors:#?}"
+        None,
+        None,
+        &["ports/"],
+        &[],
+        &[],
+        &[],
     );
 }
 
@@ -319,17 +313,8 @@ fn nested_optional_macros_dir_is_allowed_alongside_outer_macros() {
         write_file(tmp.path(), &format!("{dir}/macros/.gitkeep"), "");
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-02");
-    assert_eq!(
-        errors.len(),
-        0,
-        "optional macros should not trigger rule 02 anywhere: {errors:#?}"
-    );
-    assert!(
-        errors.is_empty(),
-        "optional macros should not trigger rule 02 anywhere: {errors:#?}"
-    );
+    let results = super::run_family(tmp.path());
+    assertions::assert_no_error(&results, "");
 }
 
 #[test]
@@ -337,28 +322,15 @@ fn unexpected_top_level_dir_hits_only_the_mutated_owned_root() {
     let tmp = copy_fixture();
     write_file(tmp.path(), "apps/devctl/crates/misc/.gitkeep", "");
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-02");
-    assert_eq!(
-        errors.len(),
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_summary(
+        &results,
+        "",
         1,
-        "unexpected top-level sibling should only hit one owned root: {errors:#?}"
-    );
-    let actual_files = errors
-        .iter()
-        .filter_map(|error| error.file.clone())
-        .collect::<BTreeSet<_>>();
-    let expected_files = ["apps/devctl/crates/misc".to_owned()]
-        .into_iter()
-        .collect::<BTreeSet<_>>();
-
-    assert_eq!(
-        actual_files, expected_files,
-        "unexpected hit set: {errors:#?}"
-    );
-    assert!(
-        errors[0]
-            .title
-            .contains("unexpected directory crates/misc/")
+        ["apps/devctl/crates/misc"],
+        None,
+        Some(&["unexpected directory crates/misc/"]),
+        None,
+        None,
     );
 }

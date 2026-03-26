@@ -1,10 +1,10 @@
-use guardrail3_app_rs_family_arch_assertions::rs_arch_04_no_zone_overlap as assertions;
 #[allow(unused_imports)]
-use super::{cargo_fixture, CargoFixture, entry, tree, tree_at};
+use super::{CargoFixture, cargo_fixture, check_results, entry, tree, tree_at};
+use guardrail3_app_rs_family_arch_assertions::rs_arch_04_no_zone_overlap as assertions;
 
 #[test]
 fn sibling_app_and_package_roots_do_not_overlap() {
-    let results = assertions::check_results(&tree(
+    let results = check_results(&tree(
         &[
             ("", entry(&["apps", "packages"], &[])),
             ("apps", entry(&["backend"], &[])),
@@ -13,8 +13,14 @@ fn sibling_app_and_package_roots_do_not_overlap() {
             ("packages/shared", entry(&[], &["Cargo.toml"])),
         ],
         &[
-            ("apps/backend/Cargo.toml", cargo_fixture(CargoFixture::AppWorkspace)),
-            ("packages/shared/Cargo.toml", cargo_fixture(CargoFixture::Package)),
+            (
+                "apps/backend/Cargo.toml",
+                cargo_fixture(CargoFixture::AppWorkspace),
+            ),
+            (
+                "packages/shared/Cargo.toml",
+                cargo_fixture(CargoFixture::Package),
+            ),
         ],
     ));
 
@@ -26,7 +32,7 @@ fn sibling_app_and_package_roots_do_not_overlap() {
 
 #[test]
 fn ambiguous_roots_do_not_also_emit_zone_overlap_findings() {
-    let results = assertions::check_results(&tree(
+    let results = check_results(&tree(
         &[
             ("", entry(&["apps"], &[])),
             ("apps", entry(&["backend"], &[])),
@@ -35,8 +41,14 @@ fn ambiguous_roots_do_not_also_emit_zone_overlap_findings() {
             ("apps/backend/packages/shared", entry(&[], &["Cargo.toml"])),
         ],
         &[
-            ("apps/backend/Cargo.toml", cargo_fixture(CargoFixture::AppWorkspace)),
-            ("apps/backend/packages/shared/Cargo.toml", cargo_fixture(CargoFixture::Package)),
+            (
+                "apps/backend/Cargo.toml",
+                cargo_fixture(CargoFixture::AppWorkspace),
+            ),
+            (
+                "apps/backend/packages/shared/Cargo.toml",
+                cargo_fixture(CargoFixture::Package),
+            ),
         ],
     ));
 

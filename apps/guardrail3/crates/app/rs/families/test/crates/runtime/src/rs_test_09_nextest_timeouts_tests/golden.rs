@@ -1,12 +1,15 @@
 #[allow(unused_imports)]
-use guardrail3_app_rs_family_test_assertions::rs_test_09_nextest_timeouts::{assert_reported, assert_rule_files, assert_rule_quiet};
+use guardrail3_app_rs_family_test_assertions::rs_test_09_nextest_timeouts::{
+    assert_reported, assert_rule_files, assert_rule_quiet,
+};
 
 #[allow(unused_imports)]
 use super::{run_family, tempdir, write_file};
 use guardrail3_domain_report::Severity;
 
 #[test]
-fn complete_nextest_timeouts_inventory_clean_async_root() {let fixture = tempdir();
+fn complete_nextest_timeouts_inventory_clean_async_root() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -27,5 +30,12 @@ fn complete_nextest_timeouts_inventory_clean_async_root() {let fixture = tempdir
 
     let results = run_family(root);
 
-    assert_rule_files(&results, vec![".config/nextest.toml".to_owned()]
-    );    assert_reported(&results, ".config/nextest.toml", None, Severity::Info, "nextest timeouts configured");}
+    assert_rule_files(&results, vec![".config/nextest.toml".to_owned()]);
+    assert_reported(
+        &results,
+        ".config/nextest.toml",
+        None,
+        Severity::Info,
+        "nextest timeouts configured",
+    );
+}

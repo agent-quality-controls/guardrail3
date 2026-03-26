@@ -7,7 +7,8 @@ use guardrail3_app_rs_family_test_assertions::rs_test_17_external_harnesses_use_
 use super::{run_family, tempdir, write_file};
 
 #[test]
-fn external_harness_reusing_owned_assertions_passes() {let fixture = tempdir();
+fn external_harness_reusing_owned_assertions_passes() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -43,10 +44,12 @@ fn external_harness_reusing_owned_assertions_passes() {let fixture = tempdir();
 
     let results = run_family(root);
 
-    assert_rule_quiet(&results);}
+    assert_rule_quiet(&results);
+}
 
 #[test]
-fn external_harness_direct_assertion_is_reported() {let fixture = tempdir();
+fn external_harness_direct_assertion_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -82,4 +85,5 @@ fn external_harness_direct_assertion_is_reported() {let fixture = tempdir();
 
     let results = run_family(root);
     assert!(!results.is_empty());
-    assert_external_harness_direct_assertion(&results);}
+    assert_external_harness_direct_assertion(&results);
+}

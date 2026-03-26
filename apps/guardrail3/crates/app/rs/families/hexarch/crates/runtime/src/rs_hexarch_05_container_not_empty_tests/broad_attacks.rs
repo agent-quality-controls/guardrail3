@@ -1,12 +1,12 @@
 use std::collections::BTreeSet;
-const FIXTURE: crate::test_support::HexarchFixture = crate::test_support::HexarchFixture;
+const FIXTURE: super::HexarchFixture = super::HexarchFixture;
 
 fn inner_hex() -> &'static str {
     FIXTURE.inner_hex_root()
 }
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_05_container_not_empty as assertions;
-use crate::test_support::{copy_fixture, empty_dir, write_file};
+use super::{copy_fixture, empty_dir, write_file};
 
 const CONTAINER_SUFFIXES: &[&str] = &[
     "app",
@@ -39,26 +39,19 @@ fn emptying_all_owned_safe_container_dirs_hits_every_owned_container() {
         empty_dir(tmp.path(), path);
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-05");
-    assert_eq!(
-        errors.len(),
-        20,
-        "expected one empty-container hit per owned safe container: {errors:#?}"
+    let results = super::run_family(tmp.path());
+    assertions::assert_expected_rule_results(
+        &results,
+        &expected_files
+            .iter()
+            .map(|file| assertions::ExpectedRuleResult {
+                file: Some(file.as_str()),
+                file_contains: None,
+                title_contains: Some(&["empty container"]),
+                message_contains: Some(&["is empty"]),
+            })
+            .collect::<Vec<_>>(),
     );
-    let actual_files = errors
-        .iter()
-        .filter_map(|error| error.file.clone())
-        .collect::<BTreeSet<_>>();
-
-    assert_eq!(
-        actual_files, expected_files,
-        "unexpected hit set: {errors:#?}"
-    );
-    for error in &errors {
-        assert!(error.title.contains("empty container"));
-        assert!(error.message.contains("is empty"));
-    }
 }
 
 #[test]
@@ -68,28 +61,29 @@ fn emptying_outer_adapters_inbound_destroys_the_nested_hex_path_and_does_not_dou
         empty_dir(tmp.path(), &format!("apps/{app}/crates/adapters/inbound"));
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-05");
-    assert_eq!(
-        errors.len(),
-        3,
-        "expected one outer adapters/inbound hit per owned app: {errors:#?}"
-    );
-    let actual_files = errors
-        .iter()
-        .filter_map(|error| error.file.clone())
-        .collect::<BTreeSet<_>>();
-    let expected_files = [
-        "apps/devctl/crates/adapters/inbound".to_owned(),
-        "apps/backend/crates/adapters/inbound".to_owned(),
-        "apps/worker/crates/adapters/inbound".to_owned(),
-    ]
-    .into_iter()
-    .collect::<BTreeSet<_>>();
-
-    assert_eq!(
-        actual_files, expected_files,
-        "unexpected hit set: {errors:#?}"
+    let results = super::run_family(tmp.path());
+    assertions::assert_expected_rule_results(
+        &results,
+        &[
+            assertions::ExpectedRuleResult {
+                file: Some("apps/devctl/crates/adapters/inbound"),
+                file_contains: None,
+                title_contains: Some(&["empty container"]),
+                message_contains: Some(&["is empty"]),
+            },
+            assertions::ExpectedRuleResult {
+                file: Some("apps/backend/crates/adapters/inbound"),
+                file_contains: None,
+                title_contains: Some(&["empty container"]),
+                message_contains: Some(&["is empty"]),
+            },
+            assertions::ExpectedRuleResult {
+                file: Some("apps/worker/crates/adapters/inbound"),
+                file_contains: None,
+                title_contains: Some(&["empty container"]),
+                message_contains: Some(&["is empty"]),
+            },
+        ],
     );
 }
 
@@ -111,15 +105,19 @@ fn emptying_only_inner_hex_containers_hits_inner_hex_and_leaves_outer_apps_clean
         empty_dir(tmp.path(), path);
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-05");
-    assert_eq!(errors.len(), expected_files.len(), "{errors:#?}");
-    let actual_files = errors
-        .iter()
-        .filter_map(|error| error.file.clone())
-        .collect::<BTreeSet<_>>();
-
-    assert_eq!(actual_files, expected_files, "{errors:#?}");
+    let results = super::run_family(tmp.path());
+    assertions::assert_expected_rule_results(
+        &results,
+        &expected_files
+            .iter()
+            .map(|file| assertions::ExpectedRuleResult {
+                file: Some(file.as_str()),
+                file_contains: None,
+                title_contains: None,
+                message_contains: None,
+            })
+            .collect::<Vec<_>>(),
+    );
 }
 
 #[test]
@@ -133,17 +131,17 @@ fn files_only_all_owned_safe_containers_hit_every_owned_container() {
         write_file(tmp.path(), &format!("{path}/README.md"), "# stray");
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-05");
-    assert_eq!(errors.len(), expected_files.len(), "{errors:#?}");
-    let actual_files = errors
-        .iter()
-        .filter_map(|error| error.file.clone())
-        .collect::<BTreeSet<_>>();
-
-    assert_eq!(actual_files, expected_files, "{errors:#?}");
-    for error in &errors {
-        assert!(error.message.contains("contains files"), "{error:#?}");
-        assert!(error.message.contains("README.md"), "{error:#?}");
-    }
+    let results = super::run_family(tmp.path());
+    assertions::assert_expected_rule_results(
+        &results,
+        &expected_files
+            .iter()
+            .map(|file| assertions::ExpectedRuleResult {
+                file: Some(file.as_str()),
+                file_contains: None,
+                title_contains: None,
+                message_contains: Some(&["contains files", "README.md"]),
+            })
+            .collect::<Vec<_>>(),
+    );
 }

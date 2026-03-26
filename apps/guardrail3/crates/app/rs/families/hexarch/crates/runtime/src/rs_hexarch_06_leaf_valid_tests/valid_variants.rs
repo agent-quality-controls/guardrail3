@@ -1,6 +1,6 @@
 use super::cases::{nested_hex_everywhere, owned_leaf_dirs};
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_06_leaf_valid as assertions;
-use crate::test_support::{copy_fixture, write_file};
+use super::{copy_fixture, write_file};
 
 #[test]
 fn gitkeep_only_leaf_is_valid_placeholder() {
@@ -11,12 +11,8 @@ fn gitkeep_only_leaf_is_valid_placeholder() {
         "",
     );
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-06");
-    assert!(
-        errors.is_empty(),
-        "gitkeep-only leaf should be valid: {errors:#?}"
-    );
+    let results = super::run_family(tmp.path());
+    assertions::assert_no_error(&results, "");
 }
 
 #[test]
@@ -28,22 +24,15 @@ fn inner_hex_owner_without_crates_becomes_leaf_error() {
     )
     .expect("remove inner crates");
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-06");
-    assert_eq!(
-        errors.len(),
-        1,
-        "expected one inner-hex leaf error: {errors:#?}"
-    );
-    assert!(errors[0].title.contains("missing Cargo.toml"));
-    assert!(
-        errors[0]
-            .file
-            .as_deref()
-            .unwrap_or("")
-            .contains("apps/backend/crates/adapters/inbound/mcp"),
-        "expected mcp path in file field: {:?}",
-        errors[0]
+    let results = super::run_family(tmp.path());
+    assertions::assert_expected_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            file: Some("apps/backend/crates/adapters/inbound/mcp"),
+            file_contains: Some("crates/adapters/inbound/mcp/crates"),
+            title_contains: Some(&["missing Cargo.toml"]),
+            message_contains: None,
+        }],
     );
 }
 
@@ -60,12 +49,8 @@ fn crate_leaf_with_gitkeep_is_valid_everywhere() {
         );
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-06");
-    assert!(
-        errors.is_empty(),
-        "crate leaves with .gitkeep should stay valid: {errors:#?}"
-    );
+    let results = super::run_family(tmp.path());
+    assertions::assert_no_error(&results, "");
 }
 
 #[test]
@@ -73,10 +58,6 @@ fn nested_hex_with_gitkeep_placeholders_is_valid_everywhere() {
     let tmp = copy_fixture();
     let _leaf_dirs = nested_hex_everywhere(tmp.path(), "hex_keep");
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-06");
-    assert!(
-        errors.is_empty(),
-        "nested hex leaves with .gitkeep placeholders should stay valid: {errors:#?}"
-    );
+    let results = super::run_family(tmp.path());
+    assertions::assert_no_error(&results, "");
 }

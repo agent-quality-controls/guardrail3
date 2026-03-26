@@ -1,14 +1,8 @@
 #[allow(unused_imports)]
-use guardrail3_app_rs_family_cargo_assertions::rs_cargo_02_lint_levels::{
-    check_results,
-    has_result,
-    rule_results,
-    assert_rule_results,
-    ExpectedRuleResult,
-};
+use super::{entry, tree};
 #[allow(unused_imports)]
-use super::{
-    entry, tree,
+use guardrail3_app_rs_family_cargo_assertions::rs_cargo_02_lint_levels::{
+    ExpectedRuleResult, assert_rule_results, check_results, has_result, rule_results,
 };
 
 #[allow(dead_code, non_upper_case_globals)]

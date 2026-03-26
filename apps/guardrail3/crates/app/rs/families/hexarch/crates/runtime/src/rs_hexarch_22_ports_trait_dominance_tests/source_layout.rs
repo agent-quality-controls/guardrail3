@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_22_ports_trait_dominance as assertions;
 use guardrail3_domain_report::Severity;
-use crate::test_support::{copy_fixture, write_file};
+use super::{copy_fixture, write_file};
 
 #[test]
 fn nested_file_and_inline_modules_still_count_toward_impl_heaviness() {
@@ -72,11 +72,8 @@ impl InternalWorker {
 "#,
     );
 
-    let results = assertions::run_family(tmp.path());
-    let warnings: Vec<_> = results
-        .iter()
-        .filter(|result| result.id == "RS-HEXARCH-22")
-        .collect();
+    let results = super::run_family(tmp.path());
+    let warnings = assertions::warning_results(&results, "");
 
     assert_eq!(
         warnings.len(),
@@ -143,10 +140,10 @@ pub struct InternalDto {
 "#,
     );
 
-    let results = assertions::run_family(tmp.path());
+    let results = super::run_family(tmp.path());
     let warnings: Vec<_> = results
         .iter()
-        .filter(|result| result.id == "RS-HEXARCH-22")
+        .filter(|result| result.id == "")
         .collect();
 
     assert!(

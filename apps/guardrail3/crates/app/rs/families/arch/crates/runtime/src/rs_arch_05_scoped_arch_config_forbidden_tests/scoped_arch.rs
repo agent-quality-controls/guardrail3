@@ -1,11 +1,11 @@
-use guardrail3_app_rs_family_arch_assertions::rs_arch_05_scoped_arch_config_forbidden as assertions;
 #[allow(unused_imports)]
-use super::{cargo_fixture, CargoFixture, entry, tree, tree_at};
+use super::{CargoFixture, cargo_fixture, check_results, entry, tree, tree_at};
+use guardrail3_app_rs_family_arch_assertions::rs_arch_05_scoped_arch_config_forbidden as assertions;
 
 #[test]
 fn app_scoped_arch_config_is_forbidden() {
     let config = "[rust.checks]\narch = true\nhexarch = true\nlibarch = true\n\n[rust.apps.backend.checks]\narch = false\n";
-    let results = assertions::check_results(&tree(
+    let results = check_results(&tree(
         &[
             ("", entry(&["apps"], &["guardrail3.toml"])),
             ("apps", entry(&["backend"], &[])),
@@ -26,7 +26,7 @@ fn app_scoped_arch_config_is_forbidden() {
 #[test]
 fn package_scoped_arch_config_is_forbidden() {
     let config = "[rust.checks]\narch = true\nhexarch = true\nlibarch = true\n\n[rust.packages.checks]\narch = false\n";
-    let results = assertions::check_results(&tree(
+    let results = check_results(&tree(
         &[
             ("", entry(&["packages"], &["guardrail3.toml"])),
             ("packages", entry(&["shared"], &[])),

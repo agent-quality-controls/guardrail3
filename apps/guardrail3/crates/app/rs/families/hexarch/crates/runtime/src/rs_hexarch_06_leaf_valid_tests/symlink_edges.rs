@@ -1,5 +1,5 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_06_leaf_valid as assertions;
-use crate::test_support::copy_fixture;
+use super::copy_fixture;
 
 #[test]
 #[cfg(unix)]
@@ -11,14 +11,8 @@ fn symlink_leaf_is_not_owned_by_rule_06() {
     )
     .expect("symlink");
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-06");
-    assert!(
-        errors
-            .iter()
-            .all(|error| error.file.as_deref() != Some("apps/devctl/crates/app/link_leaf")),
-        "symlink leaves should not materialize rule-06 errors: {errors:#?}"
-    );
+    let results = super::run_family(tmp.path());
+    assertions::assert_no_error_file_contains(&results, "apps/devctl/crates/app/link_leaf");
 }
 
 #[test]
@@ -31,12 +25,6 @@ fn dangling_symlink_leaf_is_not_owned_by_rule_06() {
     )
     .expect("symlink");
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-06");
-    assert!(
-        errors
-            .iter()
-            .all(|error| error.file.as_deref() != Some("apps/devctl/crates/app/dangling_leaf")),
-        "dangling symlink leaves should not materialize rule-06 errors: {errors:#?}"
-    );
+    let results = super::run_family(tmp.path());
+    assertions::assert_no_error_file_contains(&results, "apps/devctl/crates/app/dangling_leaf");
 }

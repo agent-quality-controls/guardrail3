@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_18_renamed_dependency_direction as assertions;
-use crate::test_support::{copy_fixture, write_file};
+use super::{copy_fixture, write_file};
 
 #[test]
 fn forbidden_renamed_edges_error_and_unrenamed_edges_do_not() {
@@ -17,8 +17,8 @@ fn forbidden_renamed_edges_error_and_unrenamed_edges_do_not() {
         "[package]\nname = \"backend-ports-outbound-repo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\nrepo_types = { package = \"backend-domain-types\", path = \"../../../domain/types\" }\nqueue_alias = { package = \"backend-adapters-outbound-queue\", path = \"../../../adapters/outbound/queue\" }\n",
     );
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-18");
+    let results = super::run_family(tmp.path());
+    let errors = assertions::errors_by_id(&results, "");
 
     let actual_files = errors
         .iter()
@@ -51,8 +51,8 @@ fn messages_name_both_alias_and_package_for_each_forbidden_edge() {
         "[package]\nname = \"backend-domain-engine\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\nbackend-domain-types = { path = \"../types\" }\ncommands_alias = { package = \"backend-app-commands\", path = \"../../app/commands\" }\nqueue_alias = { package = \"backend-adapters-outbound-queue\", path = \"../../adapters/outbound/queue\" }\n",
     );
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-18");
+    let results = super::run_family(tmp.path());
+    let errors = assertions::errors_by_id(&results, "");
     assert_eq!(
         errors.len(),
         2,

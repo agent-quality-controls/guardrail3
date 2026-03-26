@@ -1,13 +1,16 @@
 use guardrail3_domain_report::Severity;
 
 #[allow(unused_imports)]
-use guardrail3_app_rs_family_test_assertions::rs_test_16_assertions_modules_prove::{assert_reported_file, assert_rule_files, assert_rule_quiet};
+use guardrail3_app_rs_family_test_assertions::rs_test_16_assertions_modules_prove::{
+    assert_reported_file, assert_rule_files, assert_rule_quiet,
+};
 
 #[allow(unused_imports)]
 use super::{run_family, tempdir, write_file};
 
 #[test]
-fn same_named_proof_in_other_module_does_not_make_wrapper_pass() {let fixture = tempdir();
+fn same_named_proof_in_other_module_does_not_make_wrapper_pass() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -20,7 +23,11 @@ fn same_named_proof_in_other_module_does_not_make_wrapper_pass() {let fixture = 
         "crates/runtime/Cargo.toml",
         "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = {path = \"../assertions\"}\n",
     );
-    write_file(root, "crates/runtime/src/lib.rs", "pub fn value() -> u8 {1}\n");
+    write_file(
+        root,
+        "crates/runtime/src/lib.rs",
+        "pub fn value() -> u8 {1}\n",
+    );
     write_file(
         root,
         "crates/runtime/tests/public_surface.rs",
@@ -31,7 +38,11 @@ fn same_named_proof_in_other_module_does_not_make_wrapper_pass() {let fixture = 
         "crates/assertions/Cargo.toml",
         "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = {path = \"../runtime\"}\n",
     );
-    write_file(root, "crates/assertions/src/lib.rs", "pub mod foo;\npub mod bar;\n");
+    write_file(
+        root,
+        "crates/assertions/src/lib.rs",
+        "pub mod foo;\npub mod bar;\n",
+    );
     write_file(
         root,
         "crates/assertions/src/foo.rs",
@@ -44,6 +55,6 @@ fn same_named_proof_in_other_module_does_not_make_wrapper_pass() {let fixture = 
     );
 
     let results = run_family(root);
-    assert_rule_files(&results, vec!["crates/assertions/src/foo.rs".to_owned()]
-    );
-    assert_reported_file(&results, Severity::Error, "crates/assertions/src/foo.rs");}
+    assert_rule_files(&results, vec!["crates/assertions/src/foo.rs".to_owned()]);
+    assert_reported_file(&results, Severity::Error, "crates/assertions/src/foo.rs");
+}

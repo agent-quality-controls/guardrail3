@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_04_loose_files as assertions;
-use crate::test_support::copy_fixture;
-const FIXTURE: crate::test_support::HexarchFixture = crate::test_support::HexarchFixture;
+use super::copy_fixture;
+const FIXTURE: super::HexarchFixture = super::HexarchFixture;
 
 fn inner_hex() -> &'static str {
     FIXTURE.inner_hex_root()
@@ -15,20 +15,16 @@ fn symlinked_gitkeep_is_not_treated_as_the_allowed_real_gitkeep_in_outer_contain
     )
     .expect("symlink");
 
-    let results = assertions::run_family(tmp.path());
-    let devctl_rule_04: Vec<_> = assertions::errors_by_id(&results, "RS-HEXARCH-04")
-        .into_iter()
-        .filter(|error| error.file.as_deref() == Some("apps/devctl/crates/app"))
-        .collect();
-
-    assert_eq!(devctl_rule_04.len(), 1, "{devctl_rule_04:#?}");
-    assert!(
-        devctl_rule_04[0].title.contains("loose files"),
-        "{devctl_rule_04:#?}"
-    );
-    assert!(
-        devctl_rule_04[0].message.contains(".gitkeep"),
-        "{devctl_rule_04:#?}"
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_count_matching_file(
+        &results,
+        "",
+        "apps/devctl/crates/app",
+        1,
+        &["loose files"],
+        &[],
+        &[".gitkeep"],
+        &[],
     );
 }
 
@@ -41,20 +37,16 @@ fn symlinked_gitkeep_is_not_treated_as_the_allowed_real_gitkeep_in_nested_contai
     )
     .expect("symlink");
 
-    let results = assertions::run_family(tmp.path());
-    let nested_rule_04: Vec<_> = assertions::errors_by_id(&results, "RS-HEXARCH-04")
-        .into_iter()
-        .filter(|error| error.file.as_deref() == Some(&format!("{}/app", inner_hex())))
-        .collect();
-
-    assert_eq!(nested_rule_04.len(), 1, "{nested_rule_04:#?}");
-    assert!(
-        nested_rule_04[0].title.contains("loose files"),
-        "{nested_rule_04:#?}"
-    );
-    assert!(
-        nested_rule_04[0].message.contains(".gitkeep"),
-        "{nested_rule_04:#?}"
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_count_matching_file(
+        &results,
+        "",
+        &format!("{}/app", inner_hex()),
+        1,
+        &["loose files"],
+        &[],
+        &[".gitkeep"],
+        &[],
     );
 }
 
@@ -67,15 +59,15 @@ fn loose_non_gitkeep_symlink_is_reported_as_a_bad_file() {
     )
     .expect("symlink");
 
-    let results = assertions::run_family(tmp.path());
-    let devctl_rule_04: Vec<_> = assertions::errors_by_id(&results, "RS-HEXARCH-04")
-        .into_iter()
-        .filter(|error| error.file.as_deref() == Some("apps/devctl/crates/app"))
-        .collect();
-
-    assert_eq!(devctl_rule_04.len(), 1, "{devctl_rule_04:#?}");
-    assert!(
-        devctl_rule_04[0].message.contains("mod.rs"),
-        "{devctl_rule_04:#?}"
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_count_matching_file(
+        &results,
+        "",
+        "apps/devctl/crates/app",
+        1,
+        &["loose files"],
+        &[],
+        &["mod.rs"],
+        &[],
     );
 }

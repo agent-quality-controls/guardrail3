@@ -1,13 +1,16 @@
 use guardrail3_domain_report::Severity;
 
 #[allow(unused_imports)]
-use guardrail3_app_rs_family_test_assertions::rs_test_02_owned_sidecar_shape::{assert_reported, assert_rule_files, assert_rule_quiet};
+use guardrail3_app_rs_family_test_assertions::rs_test_02_owned_sidecar_shape::{
+    assert_reported, assert_rule_files, assert_rule_quiet,
+};
 
 #[allow(unused_imports)]
 use super::{run_family, tempdir, write_file};
 
 #[test]
-fn path_included_source_file_without_backing_sidecar_is_reported() {let fixture = tempdir();
+fn path_included_source_file_without_backing_sidecar_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -27,4 +30,11 @@ fn path_included_source_file_without_backing_sidecar_is_reported() {let fixture 
     );
 
     let results = run_family(root);
-    assert_reported(&results, "src/lib.rs", Some(1), Severity::Error, "ad hoc cfg(test) module declaration");}
+    assert_reported(
+        &results,
+        "src/lib.rs",
+        Some(1),
+        Severity::Error,
+        "ad hoc cfg(test) module declaration",
+    );
+}
