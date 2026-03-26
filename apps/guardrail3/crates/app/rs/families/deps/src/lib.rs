@@ -14,6 +14,7 @@ mod rs_deps_11_input_failures;
 #[cfg(test)]
 mod test_support;
 
+use guardrail3_app_rs_family_mapper::RsDepsRoute;
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::CheckResult;
 use guardrail3_outbound_traits::ToolChecker;
@@ -24,8 +25,8 @@ use self::inputs::{
     ToolDepsInput,
 };
 
-pub fn check(tree: &ProjectTree, tc: &dyn ToolChecker) -> Vec<CheckResult> {
-    let facts = collect(tree, tc);
+pub fn check(tree: &ProjectTree, route: &RsDepsRoute, tc: &dyn ToolChecker) -> Vec<CheckResult> {
+    let facts = collect(tree, route, tc);
     run_with_facts(&facts)
 }
 

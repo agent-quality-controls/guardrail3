@@ -9,9 +9,11 @@ use super::release_support::extract_workflow_analysis;
 use guardrail3_adapters_outbound_fs::RealFileSystem;
 use guardrail3_adapters_outbound_tool_runner::RealToolChecker;
 use guardrail3_app_core::project_walker::walk_project;
+use guardrail3_app_rs_family_mapper::{FamilyMapper, RsReleaseRoute};
 use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
 use guardrail3_domain_report::{CheckResult, Severity};
 use guardrail3_outbound_traits::{CommandRunResult, ToolChecker};
+use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
 const GOLDEN_REL: &str = "../../../../../tests/fixtures/r_arch_01/golden";
 
@@ -35,7 +37,11 @@ pub fn write_file(root: &Path, rel: &str, content: &str) {
 
 pub fn run_family(root: &Path, thorough: bool) -> Vec<CheckResult> {
     let tree = walk_project(&RealFileSystem, root);
-    super::check(&tree, &RealToolChecker, thorough)
+    run_tree(&tree, &RealToolChecker, thorough)
+}
+
+pub fn run_tree(tree: &ProjectTree, tc: &dyn ToolChecker, thorough: bool) -> Vec<CheckResult> {
+    super::check(tree, &family_route(tree), tc, thorough)
 }
 
 pub fn errors_by_id<'a>(results: &'a [CheckResult], id: &str) -> Vec<&'a CheckResult> {
@@ -215,6 +221,12 @@ pub fn crate_input<'a>(krate: &'a PublishableCrateFacts) -> PublishableCrateRele
 
 pub fn edge_input<'a>(edge: &'a ReleaseEdgeFacts) -> ReleaseEdgeInput<'a> {
     ReleaseEdgeInput::new(edge)
+}
+
+fn family_route(tree: &ProjectTree) -> RsReleaseRoute {
+    let scope = guardrail3_app_rs_placement::collect(tree);
+    let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Release]));
+    FamilyMapper::new(tree, &scope, None, &selected, None).map_rs_release()
 }
 
 fn copy_dir_recursive(src: &Path, dst: &Path) {

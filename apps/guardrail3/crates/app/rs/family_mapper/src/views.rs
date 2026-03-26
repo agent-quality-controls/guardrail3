@@ -59,6 +59,15 @@ pub struct RsCargoRoute {
     pub roots: Vec<RsRootView>,
 }
 
+pub type RsClippyRoute = RsCargoRoute;
+pub type RsDepsRoute = RsCargoRoute;
+pub type RsDenyRoute = RsCargoRoute;
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RsReleaseRoute {
+    pub roots: Vec<RsRootView>,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RsHexarchRoute {
     pub roots: Vec<RsRootView>,

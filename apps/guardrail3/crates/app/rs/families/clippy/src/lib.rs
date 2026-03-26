@@ -27,6 +27,7 @@ mod rs_clippy_22_type_complexity_threshold;
 #[cfg(test)]
 mod test_support;
 
+use guardrail3_app_rs_family_mapper::RsClippyRoute;
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::CheckResult;
 
@@ -35,8 +36,8 @@ use self::inputs::{ConfigClippyInput, CoveredRustUnitInput, UncoveredRustUnitInp
 
 pub use self::clippy_support::{EXPECTED_METHOD_BANS, EXPECTED_TYPE_BANS};
 
-pub fn check(tree: &ProjectTree) -> Vec<CheckResult> {
-    let facts = collect(tree);
+pub fn check(tree: &ProjectTree, route: &RsClippyRoute) -> Vec<CheckResult> {
+    let facts = collect(tree, route);
     let mut results = Vec::new();
 
     for covered in &facts.covered_units {

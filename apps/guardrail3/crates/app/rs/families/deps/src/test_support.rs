@@ -9,8 +9,10 @@ use super::inputs::{
     AllowlistCoverageDepsInput, DependencyEntryDepsInput, InputFailureDepsInput, LockfileDepsInput,
     ToolDepsInput,
 };
+use guardrail3_app_rs_family_mapper::{FamilyMapper, RsDepsRoute};
 use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
 use guardrail3_outbound_traits::{CommandRunResult, ToolChecker};
+use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
 pub fn dir_entry(dirs: &[&str], files: &[&str]) -> DirEntry {
     DirEntry {
@@ -58,7 +60,7 @@ impl ToolChecker for StubToolChecker {
 }
 
 pub fn collected_facts(tree: &ProjectTree, installed: &[&str]) -> DepsFacts {
-    collect(tree, &StubToolChecker::new(installed))
+    collect(tree, &family_route(tree), &StubToolChecker::new(installed))
 }
 
 pub fn tool_input<'a>(facts: &'a DepsFacts, tool_name: &str) -> ToolDepsInput<'a> {
@@ -224,4 +226,11 @@ pub fn failure_facts(rel_path: &str, message: &str) -> DepsFacts {
             message: message.to_owned(),
         }],
     }
+}
+
+fn family_route(tree: &ProjectTree) -> RsDepsRoute {
+    let scope = guardrail3_app_rs_placement::collect(tree);
+    let selected =
+        RustFamilySelection::new(std::collections::BTreeSet::from([RustValidateFamily::Deps]));
+    FamilyMapper::new(tree, &scope, None, &selected, None).map_rs_deps()
 }

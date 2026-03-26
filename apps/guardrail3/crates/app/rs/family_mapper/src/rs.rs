@@ -7,8 +7,9 @@ use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
 use crate::scoped_files::filter_for_roots;
 use crate::views::{
-    RsArchOverlapView, RsArchRootView, RsArchRoute, RsCargoRoute, RsCodeRoute, RsGardeRoute,
-    RsHexarchRoute, RsRootInputFailureView, RsRootView, RsScopedRootView, RsTestRoute,
+    RsArchOverlapView, RsArchRootView, RsArchRoute, RsCargoRoute, RsClippyRoute, RsCodeRoute,
+    RsDenyRoute, RsDepsRoute, RsGardeRoute, RsHexarchRoute, RsReleaseRoute, RsRootInputFailureView,
+    RsRootView, RsScopedRootView, RsTestRoute,
 };
 
 pub struct FamilyMapper<'a> {
@@ -88,7 +89,8 @@ impl<'a> FamilyMapper<'a> {
     #[must_use]
     pub fn map_rs_hexarch(&self) -> RsHexarchRoute {
         let roots = self.map_roots_for_family(RustValidateFamily::Hexarch, |root| {
-            root.classification == RustRootClassification::App && self.root_is_live_for_hexarch(root)
+            root.classification == RustRootClassification::App
+                && self.root_is_live_for_hexarch(root)
         });
         let root_rels = roots
             .iter()
@@ -107,9 +109,37 @@ impl<'a> FamilyMapper<'a> {
     }
 
     #[must_use]
+    pub fn map_rs_clippy(&self) -> RsClippyRoute {
+        RsClippyRoute {
+            roots: self.map_roots_for_family(RustValidateFamily::Clippy, |_| true),
+        }
+    }
+
+    #[must_use]
     pub fn map_rs_cargo(&self) -> RsCargoRoute {
         RsCargoRoute {
             roots: self.map_roots_for_family(RustValidateFamily::Cargo, |_| true),
+        }
+    }
+
+    #[must_use]
+    pub fn map_rs_deny(&self) -> RsDenyRoute {
+        RsDenyRoute {
+            roots: self.map_roots_for_family(RustValidateFamily::Deny, |_| true),
+        }
+    }
+
+    #[must_use]
+    pub fn map_rs_deps(&self) -> RsDepsRoute {
+        RsDepsRoute {
+            roots: self.map_roots_for_family(RustValidateFamily::Deps, |_| true),
+        }
+    }
+
+    #[must_use]
+    pub fn map_rs_release(&self) -> RsReleaseRoute {
+        RsReleaseRoute {
+            roots: self.map_roots_for_family(RustValidateFamily::Release, |_| true),
         }
     }
 

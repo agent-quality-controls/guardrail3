@@ -1,6 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Component, Path};
 
+use guardrail3_app_rs_family_mapper::RsDepsRoute;
 use guardrail3_domain_config::types::{CrateConfig, GuardrailConfig};
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_outbound_traits::ToolChecker;
@@ -73,7 +74,7 @@ pub struct DepsFacts {
     pub input_failures: Vec<InputFailureFacts>,
 }
 
-pub fn collect(tree: &ProjectTree, tc: &dyn ToolChecker) -> DepsFacts {
+pub fn collect(tree: &ProjectTree, route: &RsDepsRoute, tc: &dyn ToolChecker) -> DepsFacts {
     let parsed_guardrail = parse_guardrail(tree);
     let mut input_failures = parsed_guardrail
         .as_ref()
@@ -85,10 +86,16 @@ pub fn collect(tree: &ProjectTree, tc: &dyn ToolChecker) -> DepsFacts {
             }]
         })
         .unwrap_or_default();
-    let workspaces = discover_workspaces(tree, &mut input_failures);
+    let routed_root_rels = route
+        .roots
+        .iter()
+        .map(|root| root.rel_dir.clone())
+        .collect::<BTreeSet<_>>();
+    let workspaces = discover_workspaces(tree, route, &mut input_failures);
     let workspace_by_member = workspace_by_member(&workspaces);
     let members = discover_members(
         tree,
+        &routed_root_rels,
         &workspaces,
         &workspace_by_member,
         &parsed_guardrail,
@@ -187,13 +194,14 @@ fn parse_guardrail(tree: &ProjectTree) -> Option<ParsedGuardrail> {
 
 fn discover_workspaces(
     tree: &ProjectTree,
+    route: &RsDepsRoute,
     input_failures: &mut Vec<InputFailureFacts>,
 ) -> Vec<WorkspaceFacts> {
-    let mut roots = Vec::new();
-    if tree.file_exists("Cargo.toml") {
-        roots.push(String::new());
-    }
-    roots.extend(tree.dirs_with_file("Cargo.toml"));
+    let mut roots = route
+        .roots
+        .iter()
+        .map(|root| root.rel_dir.clone())
+        .collect::<Vec<_>>();
     roots.sort();
     roots.dedup();
 
@@ -302,6 +310,7 @@ fn workspace_by_member(workspaces: &[WorkspaceFacts]) -> BTreeMap<String, String
 
 fn discover_members(
     tree: &ProjectTree,
+    routed_root_rels: &BTreeSet<String>,
     workspaces: &[WorkspaceFacts],
     workspace_by_member: &BTreeMap<String, String>,
     parsed_guardrail: &Option<ParsedGuardrail>,
@@ -312,7 +321,7 @@ fn discover_members(
         .flat_map(|workspace| workspace.member_dirs.iter().cloned())
         .collect::<BTreeSet<_>>();
 
-    for root_rel_dir in std::iter::once(String::new()).chain(tree.dirs_with_file("Cargo.toml")) {
+    for root_rel_dir in routed_root_rels.iter().cloned() {
         if workspace_by_member.contains_key(&root_rel_dir) {
             continue;
         }

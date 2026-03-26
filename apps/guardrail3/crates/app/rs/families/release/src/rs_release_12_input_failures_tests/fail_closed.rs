@@ -1,6 +1,6 @@
 use guardrail3_domain_report::Severity;
 
-use super::super::super::check;
+use super::super::super::test_support::run_tree as check;
 use super::super::super::test_support::{StubToolChecker, dir_entry, project_tree, temp_root};
 
 #[test]

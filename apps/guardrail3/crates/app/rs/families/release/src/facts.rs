@@ -4,6 +4,7 @@ use std::path::{Component, Path, PathBuf};
 use glob::Pattern;
 use serde_yaml::Value as YamlValue;
 
+use guardrail3_app_rs_family_mapper::RsReleaseRoute;
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_outbound_traits::{CommandRunResult, ToolChecker};
 
@@ -110,9 +111,14 @@ struct CargoRootFacts {
     package_workspace: Option<String>,
 }
 
-pub fn collect(tree: &ProjectTree, tc: &dyn ToolChecker, thorough: bool) -> ReleaseFacts {
+pub fn collect(
+    tree: &ProjectTree,
+    route: &RsReleaseRoute,
+    tc: &dyn ToolChecker,
+    thorough: bool,
+) -> ReleaseFacts {
     let mut input_failures = Vec::new();
-    let cargo_roots = collect_cargo_roots(tree, &mut input_failures);
+    let cargo_roots = collect_cargo_roots(tree, route, &mut input_failures);
     let mut crates = Vec::new();
     let mut version_map = BTreeMap::new();
     let mut publishable_names = BTreeSet::new();
@@ -394,15 +400,13 @@ pub fn collect(tree: &ProjectTree, tc: &dyn ToolChecker, thorough: bool) -> Rele
 
 fn collect_cargo_roots(
     tree: &ProjectTree,
+    route: &RsReleaseRoute,
     input_failures: &mut Vec<ReleaseInputFailureFacts>,
 ) -> BTreeMap<String, CargoRootFacts> {
-    let mut dirs = BTreeSet::new();
-    if tree.file_exists("Cargo.toml") {
-        let _ = dirs.insert(String::new());
-    }
-    dirs.extend(tree.dirs_with_file("Cargo.toml"));
-
-    dirs.into_iter()
+    route
+        .roots
+        .iter()
+        .map(|root| root.rel_dir.clone())
         .filter_map(|rel_dir| {
             let cargo_rel_path = if rel_dir.is_empty() {
                 "Cargo.toml".to_owned()

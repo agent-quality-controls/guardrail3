@@ -5,9 +5,11 @@ use super::facts::{ClippyFacts, collect};
 use super::inputs::ConfigClippyInput;
 use guardrail3_adapters_outbound_fs::RealFileSystem;
 use guardrail3_app_core::project_walker::walk_project;
+use guardrail3_app_rs_family_mapper::{FamilyMapper, RsClippyRoute};
 use guardrail3_domain_modules::clippy::build_clippy_toml;
 use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
 use guardrail3_domain_report::CheckResult;
+use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
 const GOLDEN_REL: &str = "../../../../../tests/fixtures/r_arch_01/golden";
 
@@ -35,7 +37,7 @@ pub fn project_tree(structure: Vec<(&str, DirEntry)>, content: Vec<(&str, String
 }
 
 pub fn collected_facts(tree: &ProjectTree) -> ClippyFacts {
-    collect(tree)
+    collect(tree, &family_route(tree))
 }
 
 pub fn fixture_root() -> PathBuf {
@@ -58,7 +60,15 @@ pub fn write_file(root: &Path, rel: &str, content: &str) {
 
 pub fn run_family(root: &Path) -> Vec<CheckResult> {
     let tree = walk_project(&RealFileSystem, root);
-    super::check(&tree)
+    super::check(&tree, &family_route(&tree))
+}
+
+fn family_route(tree: &ProjectTree) -> RsClippyRoute {
+    let scope = guardrail3_app_rs_placement::collect(tree);
+    let selected = RustFamilySelection::new(std::collections::BTreeSet::from([
+        RustValidateFamily::Clippy,
+    ]));
+    FamilyMapper::new(tree, &scope, None, &selected, None).map_rs_clippy()
 }
 
 pub fn config_input<'a>(facts: &'a ClippyFacts, rel_path: &str) -> ConfigClippyInput<'a> {
