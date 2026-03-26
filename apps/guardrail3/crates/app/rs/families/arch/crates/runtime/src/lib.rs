@@ -9,9 +9,13 @@ mod rs_arch_06_owner_family_enablement_coherence;
 mod rs_arch_07_required_inputs_fail_closed;
 mod rs_arch_08_auxiliary_roots_declared;
 
-use guardrail3_app_rs_family_mapper::RsArchRoute;
+use std::collections::BTreeSet;
+
+use guardrail3_app_rs_family_mapper::{FamilyMapper, RsArchRoute};
+use guardrail3_domain_config::types::GuardrailConfig;
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::CheckResult;
+use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
 use self::facts::collect;
 use self::inputs::{
@@ -56,4 +60,14 @@ pub fn check(tree: &ProjectTree, route: &RsArchRoute) -> Vec<CheckResult> {
     }
 
     results
+}
+
+pub fn check_test_tree(tree: &ProjectTree) -> Vec<CheckResult> {
+    let scope = guardrail3_app_rs_placement::collect(tree);
+    let config = tree
+        .file_content("guardrail3.toml")
+        .and_then(|content| toml::from_str::<GuardrailConfig>(content).ok());
+    let selection = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Arch]));
+    let route = FamilyMapper::new(tree, &scope, config.as_ref(), &selection, None).map_rs_arch();
+    check(tree, &route)
 }

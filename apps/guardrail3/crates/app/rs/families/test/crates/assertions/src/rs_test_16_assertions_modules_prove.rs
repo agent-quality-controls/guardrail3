@@ -10,11 +10,7 @@ const RULE_ID: &str = "RS-TEST-16";
 
 pub fn run_family(root: &Path) -> Vec<CheckResult> {
     let tree = walk(root);
-    runtime::check(
-        &tree,
-        &crate::test_route(&tree),
-        &StubToolChecker::default(),
-    )
+    runtime::check_test_tree(&tree, &StubToolChecker::default())
 }
 
 pub fn rule_files(results: &[CheckResult], _rule_id: &str) -> Vec<String> {

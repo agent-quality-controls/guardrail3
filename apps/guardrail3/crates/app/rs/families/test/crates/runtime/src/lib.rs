@@ -1,6 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use guardrail3_app_rs_family_mapper::RsTestRoute;
+use guardrail3_app_rs_family_mapper::{FamilyMapper, RsTestRoute};
 
 mod discover;
 mod facts;
@@ -28,6 +28,7 @@ mod rs_test_18_test_support_generic;
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::CheckResult;
 use guardrail3_outbound_traits::ToolChecker;
+use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
 use self::discover::collect;
 use self::facts::{DiscoveredTestFile, InputFailureFacts, TestFacts, TestFileKind, TestRootFacts};
@@ -185,6 +186,13 @@ pub fn check(tree: &ProjectTree, route: &RsTestRoute, tc: &dyn ToolChecker) -> V
     }
 
     results
+}
+
+pub fn check_test_tree(tree: &ProjectTree, tc: &dyn ToolChecker) -> Vec<CheckResult> {
+    let scope = guardrail3_app_rs_placement::collect(tree);
+    let selection = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Test]));
+    let route = FamilyMapper::new(tree, &scope, None, &selection, None).map_rs_test();
+    check(tree, &route, tc)
 }
 
 fn analyze_root(

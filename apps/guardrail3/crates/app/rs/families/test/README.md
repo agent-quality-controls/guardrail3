@@ -179,6 +179,7 @@ Must not import:
 
 - runtime private internals
 - parser, crawler, CLI, or fixture setup
+- route construction or mapper/placement wiring
 - scenario generation
 - production logic
 
@@ -327,6 +328,7 @@ Detection:
   - `runtime/tests/*.rs` must not import `super::` or `crate::`
   - `runtime/src/<module>_tests/**` must not import sibling production modules
   - `assertions/src/<module>.rs` must import only runtime public API, `test_support`, std, or third-party crates
+  - `assertions/src/<module>.rs` must not import route-construction infrastructure such as mapper/placement crates or build routed family inputs through `FamilyMapper`
 
 ### Test quality and clarity
 

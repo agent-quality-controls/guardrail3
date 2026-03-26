@@ -112,6 +112,7 @@ Structural pressure such as file length and `use` count belongs to `RS-CODE`, in
 - `RS-TEST-16` must ignore pure aggregator files with no exported helper functions.
 - `RS-TEST-17` and `RS-TEST-18` must stay scoped to owned component/runtime/assertions packages, not every local crate in the repo.
 - `RS-TEST-18` must reject route-construction logic in `test_support`; mapper/placement wiring is not generic support.
+- `RS-TEST-03` must also reject route-construction infrastructure imports or `FamilyMapper`-built routed inputs from `assertions`; reusable proof helpers are not allowed to own mapper/placement orchestration either.
 
 ## Current migration state
 

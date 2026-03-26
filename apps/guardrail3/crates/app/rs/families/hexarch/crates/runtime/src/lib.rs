@@ -28,13 +28,17 @@ mod rs_hexarch_24_cross_app_boundary;
 mod rs_hexarch_25_target_dependency_direction;
 mod source_facts;
 
+use std::collections::BTreeSet;
+
 use glob as _;
 use guardrail3_app_core as _;
 use guardrail3_app_rs_family_mapper::RsHexarchRoute;
+use guardrail3_domain_config::types::GuardrailConfig;
 use guardrail3_domain_modules as _;
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::CheckResult;
 use guardrail3_outbound_traits as _;
+use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 use proc_macro2 as _;
 use quote as _;
 use semver as _;
@@ -59,13 +63,7 @@ pub fn collect_dependency_facts_for_tests(
     dependency_facts::collect(tree, route)
 }
 
-#[cfg(test)]
 pub fn family_route_for_tests(tree: &ProjectTree) -> RsHexarchRoute {
-    use std::collections::BTreeSet;
-
-    use guardrail3_domain_config::types::GuardrailConfig;
-    use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
-
     let scope = guardrail3_app_rs_placement::collect(tree);
     let config = tree
         .file_content("guardrail3.toml")
@@ -81,7 +79,11 @@ pub fn family_route_for_tests(tree: &ProjectTree) -> RsHexarchRoute {
     .map_rs_hexarch()
 }
 
-#[cfg(test)]
+pub fn check_test_tree(tree: &ProjectTree) -> Vec<CheckResult> {
+    let route = family_route_for_tests(tree);
+    check(tree, &route)
+}
+
 pub fn collect_dependency_facts_from_tree_for_tests(tree: &ProjectTree) -> DependencyFamilyFacts {
     let route = family_route_for_tests(tree);
     collect_dependency_facts_for_tests(tree, &route)
