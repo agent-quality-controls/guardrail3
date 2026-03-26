@@ -26,22 +26,7 @@ pub fn is_fixture_path(rel_path: &str) -> bool {
     rel_path.contains("/tests/fixtures/") || rel_path.starts_with("tests/fixtures/")
 }
 
-pub fn is_integration_test_path(rel_path: &str, root_rel_dir: &str) -> bool {
-    let rel = root_relative(rel_path, root_rel_dir);
-    rel.starts_with("tests/")
-}
-
-pub fn is_src_path(rel_path: &str, root_rel_dir: &str) -> bool {
-    let rel = root_relative(rel_path, root_rel_dir);
-    rel.starts_with("src/")
-}
-
-pub fn is_test_sidecar_path(rel_path: &str, root_rel_dir: &str) -> bool {
-    let rel = root_relative(rel_path, root_rel_dir);
-    rel.ends_with("_tests.rs") || rel.ends_with("_test.rs") || rel.ends_with("/tests.rs")
-}
-
-fn root_relative<'a>(rel_path: &'a str, root_rel_dir: &str) -> &'a str {
+pub fn root_relative<'a>(rel_path: &'a str, root_rel_dir: &str) -> &'a str {
     if root_rel_dir.is_empty() {
         rel_path
     } else {
@@ -49,5 +34,31 @@ fn root_relative<'a>(rel_path: &'a str, root_rel_dir: &str) -> &'a str {
             .strip_prefix(root_rel_dir)
             .and_then(|rest| rest.strip_prefix('/'))
             .unwrap_or(rel_path)
+    }
+}
+
+pub fn path_is_under(rel_path: &str, prefix: &str) -> bool {
+    rel_path == prefix
+        || rel_path
+            .strip_prefix(prefix)
+            .is_some_and(|rest| rest.starts_with('/'))
+}
+
+pub fn file_stem(rel_path: &str) -> Option<&str> {
+    rel_path
+        .rsplit('/')
+        .next()
+        .and_then(|name| name.strip_suffix(".rs"))
+}
+
+pub fn parent_dir(rel_path: &str) -> &str {
+    rel_path.rsplit_once('/').map_or("", |(parent, _)| parent)
+}
+
+pub fn join_under_root(root_rel_dir: &str, child_rel: &str) -> String {
+    if root_rel_dir.is_empty() {
+        child_rel.to_owned()
+    } else {
+        ProjectTree::join_rel(root_rel_dir, child_rel)
     }
 }

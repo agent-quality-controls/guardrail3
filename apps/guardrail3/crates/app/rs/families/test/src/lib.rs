@@ -2,41 +2,49 @@ mod discover;
 mod facts;
 mod inputs;
 mod parse;
-mod rs_test_01_cargo_mutants_installed;
-mod rs_test_02_mutants_toml_exists;
-mod rs_test_03_mutants_profile_present;
-mod rs_test_04_tests_exist;
-mod rs_test_05_test_coverage_inventory;
-mod rs_test_06_integration_tests_exist;
-mod rs_test_07_ignore_without_reason;
-mod rs_test_08_mutation_hook_present;
-mod rs_test_09_no_inline_tests_in_src;
-mod rs_test_10_test_function_naming;
-mod rs_test_11_cfg_test_module_naming;
-mod rs_test_12_nextest_timeouts_present;
-mod rs_test_13_should_panic_expected;
-mod rs_test_14_tautological_assertions;
-mod rs_test_15_test_without_assertions;
-mod rs_test_16_test_file_length;
-mod rs_test_17_weak_matches_assert;
-mod rs_test_18_mutants_config_content;
-mod rs_test_19_input_failures;
+mod rs_test_01_inline_test_bodies;
+mod rs_test_02_owned_sidecar_shape;
+mod rs_test_03_runtime_assertions_split;
+mod rs_test_04_ignore_reason;
+mod rs_test_05_should_panic_expected;
+mod rs_test_06_tautological_assertions;
+mod rs_test_07_real_proof_site;
+mod rs_test_08_weak_matches_assert;
+mod rs_test_09_nextest_timeouts;
+mod rs_test_10_input_failures;
+mod rs_test_11_cargo_mutants_installed;
+mod rs_test_12_mutants_toml_exists;
+mod rs_test_13_mutants_profile_present;
+mod rs_test_14_mutation_hook_present;
+mod rs_test_15_mutants_config_sane;
 
 #[cfg(test)]
 mod test_support;
 
-use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 
-use guardrail3_domain_report::CheckResult;
 use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_domain_report::CheckResult;
 use guardrail3_outbound_traits::ToolChecker;
 
-use self::facts::{TestCoverageFacts, TestFileFacts, collect};
+use self::facts::{DiscoveredTestFile, InputFailureFacts, TestFacts, TestFileKind, TestRootFacts, collect};
 use self::inputs::{
-    HookTestInput, InputFailureTestInput, RootTestInput, TestCoverageInput, TestFileInput,
-    TestFunctionInput, TestModuleInput, ToolTestInput,
+    CfgTestModuleInput, InputFailureTestInput, RootTestInput, TestFileInput, TestFunctionInput,
 };
+use self::parse::{ParsedTestFile, parse_rust_file};
+
+pub(crate) struct AnalyzedFile {
+    pub(crate) facts: DiscoveredTestFile,
+    pub(crate) parsed: ParsedTestFile,
+}
+
+#[derive(Default)]
+struct RootAnalysis {
+    files: Vec<AnalyzedFile>,
+    has_tests: bool,
+    has_tokio_tests: bool,
+    input_failures: Vec<InputFailureFacts>,
+}
 
 pub fn check(
     tree: &ProjectTree,
@@ -46,109 +54,169 @@ pub fn check(
     let facts = collect(tree, tc);
     let mut results = Vec::new();
 
-    for failure in &facts.input_failures {
-        rs_test_19_input_failures::check(&InputFailureTestInput::new(failure), &mut results);
+    for failure in facts
+        .input_failures
+        .iter()
+        .filter(|failure| failure.rel_path.ends_with("Cargo.toml"))
+    {
+        rs_test_10_input_failures::check(&InputFailureTestInput::new(failure), &mut results);
     }
 
-    let tool_input = ToolTestInput::new(&facts.tool);
-    rs_test_01_cargo_mutants_installed::check(&tool_input, &mut results);
-
-    let hook_input = HookTestInput::new(&facts.hook);
-    rs_test_08_mutation_hook_present::check(&hook_input, &mut results);
-
-    let coverage_by_root = analyze_roots(tree, &facts.files, scoped_files, &mut results);
-
     for root in &facts.roots {
-        let root_input = RootTestInput::new(root);
-        rs_test_02_mutants_toml_exists::check(&root_input, &mut results);
-        rs_test_03_mutants_profile_present::check(&root_input, &mut results);
-        rs_test_12_nextest_timeouts_present::check(&root_input, &mut results);
-        rs_test_18_mutants_config_content::check(&root_input, &mut results);
+        let analysis = analyze_root(tree, root, &facts, scoped_files);
+        let mutation_active =
+            root.mutants_exists || root.has_mutants_profile || !root.mutation_hook_files.is_empty();
+        let root_input = RootTestInput::new(
+            root,
+            analysis.has_tests,
+            analysis.has_tokio_tests,
+            facts.cargo_mutants_installed,
+            &root.mutation_hook_files,
+        );
 
-        if let Some(coverage) = coverage_by_root.get(&root.rel_dir) {
-            let coverage_input = TestCoverageInput::new(coverage);
-            rs_test_04_tests_exist::check(&coverage_input, &mut results);
-            rs_test_05_test_coverage_inventory::check(&coverage_input, &mut results);
-            rs_test_06_integration_tests_exist::check(&coverage_input, &mut results);
+        for failure in active_failures_for_root(&facts, root, &analysis, mutation_active) {
+            rs_test_10_input_failures::check(&InputFailureTestInput::new(failure), &mut results);
+        }
+
+        if analysis.has_tests {
+            rs_test_02_owned_sidecar_shape::collect(
+                tree,
+                root,
+                &analysis.files,
+                scoped_files,
+                &mut results,
+            );
+
+            rs_test_03_runtime_assertions_split::collect(
+                root,
+                &analysis.files,
+                scoped_files,
+                &facts.local_package_names,
+                &mut results,
+            );
+
+            for file in &analysis.files {
+                let file_input = TestFileInput::new(&file.facts, &file.parsed);
+
+                if matches!(file.facts.kind, TestFileKind::Source) {
+                    for module in &file.parsed.cfg_test_modules {
+                        rs_test_01_inline_test_bodies::check(
+                            &CfgTestModuleInput::new(&file.facts, module),
+                            &mut results,
+                        );
+                    }
+                }
+
+                rs_test_04_ignore_reason::check(&file_input, &mut results);
+
+                for function in &file.parsed.test_functions {
+                    let function_input = TestFunctionInput::new(&file.facts, &file.parsed, function);
+                    rs_test_05_should_panic_expected::check(&function_input, &mut results);
+                    rs_test_06_tautological_assertions::check(&function_input, &mut results);
+                    rs_test_07_real_proof_site::check(&function_input, &mut results);
+                    rs_test_08_weak_matches_assert::check(&function_input, &mut results);
+                }
+            }
+
+            rs_test_09_nextest_timeouts::check(&root_input, &mut results);
+        }
+
+        if mutation_active {
+            rs_test_11_cargo_mutants_installed::check(&root_input, &mut results);
+            rs_test_12_mutants_toml_exists::check(&root_input, &mut results);
+            rs_test_13_mutants_profile_present::check(&root_input, &mut results);
+            rs_test_14_mutation_hook_present::check(&root_input, &mut results);
+            rs_test_15_mutants_config_sane::check(&root_input, &mut results);
         }
     }
 
     results
 }
 
-fn analyze_roots(
+fn analyze_root(
     tree: &ProjectTree,
-    files: &[TestFileFacts],
+    root: &TestRootFacts,
+    facts: &TestFacts,
     scoped_files: Option<&BTreeSet<String>>,
-    results: &mut Vec<CheckResult>,
-) -> BTreeMap<String, TestCoverageFacts> {
-    let mut coverage_by_root = BTreeMap::<String, TestCoverageFacts>::new();
+) -> RootAnalysis {
+    let mut analysis = RootAnalysis::default();
 
-    for file in files {
-        if scoped_files.is_some_and(|paths| !paths.contains(&file.rel_path)) {
-            continue;
+    for file in facts.files.iter().filter(|file| file.root_rel_dir == root.rel_dir) {
+        if matches!(
+            file.kind,
+            TestFileKind::InternalSidecarMod
+                | TestFileKind::InternalSidecarSupport
+                | TestFileKind::ExternalHarness
+        ) {
+            analysis.has_tests = true;
         }
+
         let content = match guardrail3_shared_fs::read_file_err(&tree.abs_path(&file.rel_path)) {
             Ok(content) => content,
             Err(read_error) => {
-                let message =
-                    format!("Failed to read Rust source file for test analysis: {read_error}");
-                rs_test_19_input_failures::check(
-                    &InputFailureTestInput::inline(&file.rel_path, &message),
-                    results,
-                );
+                analysis.input_failures.push(InputFailureFacts {
+                    root_rel_dir: root.rel_dir.clone(),
+                    rel_path: file.rel_path.clone(),
+                    message: format!(
+                        "Failed to read Rust source file for test-family analysis: {read_error}"
+                    ),
+                });
                 continue;
             }
         };
-        let ast = match parse::parse_rust_file(&content) {
+
+        let ast = match parse_rust_file(&content) {
             Ok(ast) => ast,
             Err(parse_error) => {
-                let message =
-                    format!("Failed to parse Rust source file for test analysis: {parse_error}");
-                rs_test_19_input_failures::check(
-                    &InputFailureTestInput::inline(&file.rel_path, &message),
-                    results,
-                );
+                analysis.input_failures.push(InputFailureFacts {
+                    root_rel_dir: root.rel_dir.clone(),
+                    rel_path: file.rel_path.clone(),
+                    message: format!(
+                        "Failed to parse Rust source file for test-family analysis: {parse_error}"
+                    ),
+                });
                 continue;
             }
         };
 
         let parsed = parse::analyze(&ast, &content);
-
-        let coverage = coverage_by_root
-            .entry(file.root_rel_dir.clone())
-            .or_insert_with(|| TestCoverageFacts::new(file.root_rel_dir.clone()));
-        if file.is_integration_test_file {
-            coverage.integration_test_exists = true;
+        analysis.has_tests |= !parsed.test_functions.is_empty();
+        analysis.has_tokio_tests |= parsed
+            .test_functions
+            .iter()
+            .any(|function| function.uses_tokio_test_attr);
+        if scoped_files.is_some_and(|paths| !paths.contains(&file.rel_path)) {
+            continue;
         }
-        if file.is_src_file && !file.is_test_sidecar_file {
-            coverage.public_fn_count = coverage.public_fn_count.saturating_add(parsed.pub_fn_count);
-        }
-        coverage.test_fn_count = coverage
-            .test_fn_count
-            .saturating_add(parsed.test_functions.len());
-        if !parsed.test_functions.is_empty() {
-            coverage.has_any_tests = true;
-        }
-
-        let file_input = TestFileInput::new(file, &content, &parsed);
-        rs_test_07_ignore_without_reason::check(&file_input, results);
-        rs_test_09_no_inline_tests_in_src::check(&file_input, results);
-        rs_test_16_test_file_length::check(&file_input, results);
-
-        for module in &parsed.cfg_test_modules {
-            rs_test_11_cfg_test_module_naming::check(&TestModuleInput::new(file, module), results);
-        }
-
-        for function in &parsed.test_functions {
-            let input = TestFunctionInput::new(file, function);
-            rs_test_10_test_function_naming::check(&input, results);
-            rs_test_13_should_panic_expected::check(&input, results);
-            rs_test_14_tautological_assertions::check(&input, results);
-            rs_test_15_test_without_assertions::check(&input, results);
-            rs_test_17_weak_matches_assert::check(&input, results);
-        }
+        analysis.files.push(AnalyzedFile {
+            facts: file.clone(),
+            parsed,
+        });
     }
 
-    coverage_by_root
+    analysis
+}
+
+fn active_failures_for_root<'a>(
+    facts: &'a TestFacts,
+    root: &'a TestRootFacts,
+    analysis: &'a RootAnalysis,
+    mutation_active: bool,
+) -> Vec<&'a InputFailureFacts> {
+    let async_active = analysis.has_tests && (root.tokio_dependency_present || analysis.has_tokio_tests);
+
+    facts.input_failures
+        .iter()
+        .filter(|failure| failure.root_rel_dir == root.rel_dir)
+        .chain(analysis.input_failures.iter())
+        .filter(|failure| {
+            if failure.rel_path.ends_with("nextest.toml") {
+                return async_active;
+            }
+            if failure.rel_path.ends_with("mutants.toml") {
+                return mutation_active;
+            }
+            true
+        })
+        .collect::<Vec<_>>()
 }
