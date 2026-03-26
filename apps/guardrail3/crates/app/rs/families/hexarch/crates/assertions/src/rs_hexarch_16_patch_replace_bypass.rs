@@ -1,18 +1,13 @@
-use std::collections::BTreeSet;
 use std::path::Path;
 
 use guardrail3_app_rs_family_hexarch as runtime;
-use guardrail3_app_rs_family_mapper::{FamilyMapper, RsHexarchRoute};
-use guardrail3_domain_config::types::GuardrailConfig;
-use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::{CheckResult, Severity};
-use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
 const RULE_ID: &str = "RS-HEXARCH-16";
 
 pub fn run_family(root: &Path) -> Vec<CheckResult> {
     let tree = test_support::walk(root);
-    runtime::check(&tree, &route(&tree))
+    runtime::check_test_tree(&tree)
 }
 
 pub fn check_results(root: &Path) -> Vec<CheckResult> {
@@ -40,11 +35,3 @@ pub fn assert_no_error(results: &[CheckResult], rule_id: &str) {
     );
 }
 
-fn route(tree: &ProjectTree) -> RsHexarchRoute {
-    let scope = guardrail3_app_rs_placement::collect(tree);
-    let config = tree
-        .file_content("guardrail3.toml")
-        .and_then(|content| toml::from_str::<GuardrailConfig>(content).ok());
-    let selection = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Hexarch]));
-    FamilyMapper::new(tree, &scope, config.as_ref(), &selection, None).map_rs_hexarch()
-}

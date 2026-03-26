@@ -10,11 +10,7 @@ const RULE_ID: &str = "RS-TEST-03";
 
 pub fn run_family(root: &Path) -> Vec<CheckResult> {
     let tree = walk(root);
-    runtime::check(
-        &tree,
-        &crate::test_route(&tree),
-        &StubToolChecker::default(),
-    )
+    runtime::check_test_tree(&tree, &StubToolChecker::default())
 }
 
 pub fn run_family_with_tool(root: &Path, cargo_mutants_installed: bool) -> Vec<CheckResult> {
@@ -24,7 +20,7 @@ pub fn run_family_with_tool(root: &Path, cargo_mutants_installed: bool) -> Vec<C
     } else {
         StubToolChecker::default()
     };
-    runtime::check(&tree, &crate::test_route(&tree), &checker)
+    runtime::check_test_tree(&tree, &checker)
 }
 
 pub fn rule_files(results: &[CheckResult], _rule_id: &str) -> Vec<String> {

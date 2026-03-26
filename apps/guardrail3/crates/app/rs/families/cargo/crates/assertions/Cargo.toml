@@ -1,0 +1,12 @@
+[package]
+name = "guardrail3-app-rs-family-cargo-assertions"
+version = "0.0.0"
+edition = "2024"
+
+[lints]
+workspace = true
+
+[dependencies]
+"guardrail3-app-rs-family-cargo" = { path = "../runtime" }
+guardrail3_domain_project_tree = { package = "guardrail3-domain-project-tree", path = "../../../../../../domain/project-tree" }
+guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../../../../../domain/report" }

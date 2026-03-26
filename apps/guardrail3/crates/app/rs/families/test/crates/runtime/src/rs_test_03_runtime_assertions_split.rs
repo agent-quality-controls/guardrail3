@@ -9,6 +9,10 @@ use super::inputs::RuntimeAssertionsViolationInput;
 use super::parse::{ModuleInfo, UseBinding};
 
 const ID: &str = "RS-TEST-03";
+const DISALLOWED_ROUTE_INFRA_PACKAGES: &[&str] = &[
+    "guardrail3_app_rs_family_mapper",
+    "guardrail3_app_rs_placement",
+];
 
 pub(crate) fn collect(
     root: &TestRootFacts,
@@ -306,6 +310,18 @@ fn collect_violations(
                         ),
                     });
                 }
+                if let Some(route_package) = first_disallowed_route_infra_package(&binding.path_segments)
+                {
+                    violations.push(RuntimeAssertionsViolation {
+                        rel_path: file.facts.rel_path.clone(),
+                        line: Some(binding.line),
+                        title: "assertions module imports route construction infrastructure"
+                            .to_owned(),
+                        message: format!(
+                            "Assertions modules must stay reusable semantic proof helpers and must not import route-construction infrastructure crate `{route_package}`."
+                        ),
+                    });
+                }
             }
             if let Some(local_root) = file.parsed.file_call_paths.iter().find_map(|path| {
                 first_disallowed_local_package(
@@ -323,6 +339,19 @@ fn collect_violations(
                         "Assertions modules must not call local crate `{}` directly.",
                         local_root
                     ),
+                });
+            }
+            if file
+                .parsed
+                .file_call_paths
+                .iter()
+                .any(|call_path| call_path.first().is_some_and(|first| first == "FamilyMapper"))
+            {
+                violations.push(RuntimeAssertionsViolation {
+                    rel_path: file.facts.rel_path.clone(),
+                    line: None,
+                    title: "assertions module builds routed family input".to_owned(),
+                    message: "Assertions modules must stay reusable semantic proof helpers and must not construct routed family inputs through `FamilyMapper`.".to_owned(),
                 });
             }
         }
@@ -448,6 +477,13 @@ fn first_disallowed_local_package<'a>(
         return None;
     }
     Some(root.as_str())
+}
+
+fn first_disallowed_route_infra_package(path: &[String]) -> Option<&str> {
+    let root = path.first()?;
+    DISALLOWED_ROUTE_INFRA_PACKAGES
+        .contains(&root.as_str())
+        .then_some(root.as_str())
 }
 
 fn module_path_includes_runtime_src(

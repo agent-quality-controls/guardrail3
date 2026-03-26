@@ -421,6 +421,7 @@ dependencies = [
  "guardrail3-domain-config",
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
+ "guardrail3-domain-validation-model",
  "guardrail3_app_rs_family_arch_assertions",
  "toml",
 ]
@@ -439,9 +440,11 @@ dependencies = [
  "guardrail3-app-rs-family-cargo-assertions",
  "guardrail3-app-rs-family-cargo-test-support",
  "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-placement",
  "guardrail3-domain-config",
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
+ "guardrail3-domain-validation-model",
  "toml",
 ]
 
@@ -450,7 +453,6 @@ name = "guardrail3-app-rs-family-cargo-assertions"
 version = "0.0.0"
 dependencies = [
  "guardrail3-app-rs-family-cargo",
- "guardrail3-app-rs-family-cargo-test-support",
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
 ]
@@ -459,12 +461,7 @@ dependencies = [
 name = "guardrail3-app-rs-family-cargo-test-support"
 version = "0.0.0"
 dependencies = [
- "guardrail3-app-rs-family-mapper",
- "guardrail3-app-rs-placement",
- "guardrail3-domain-config",
  "guardrail3-domain-project-tree",
- "guardrail3-domain-validation-model",
- "toml",
 ]
 
 [[package]]
@@ -603,13 +600,8 @@ version = "0.0.0"
 dependencies = [
  "guardrail3-app-rs-family-hexarch",
  "guardrail3-app-rs-family-hexarch-test-support",
- "guardrail3-app-rs-family-mapper",
- "guardrail3-app-rs-placement",
- "guardrail3-domain-config",
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
- "guardrail3-domain-validation-model",
- "toml",
 ]
 
 [[package]]
@@ -695,8 +687,10 @@ dependencies = [
  "guardrail3-app-rs-family-hooks-shared",
  "guardrail3-app-rs-family-mapper",
  "guardrail3-app-rs-family-test-assertions",
+ "guardrail3-app-rs-placement",
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
+ "guardrail3-domain-validation-model",
  "guardrail3-ports-outbound-traits",
  "guardrail3-shared-fs",
  "proc-macro2",
@@ -709,12 +703,8 @@ dependencies = [
 name = "guardrail3-app-rs-family-test-assertions"
 version = "0.0.0"
 dependencies = [
- "guardrail3-app-rs-family-mapper",
  "guardrail3-app-rs-family-test",
- "guardrail3-app-rs-placement",
- "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
- "guardrail3-domain-validation-model",
  "test_support",
 ]
 
@@ -857,13 +847,8 @@ version = "0.0.0"
 dependencies = [
  "guardrail3-app-rs-family-arch",
  "guardrail3-app-rs-family-arch-test-support",
- "guardrail3-app-rs-family-mapper",
- "guardrail3-app-rs-placement",
- "guardrail3-domain-config",
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
- "guardrail3-domain-validation-model",
- "toml",
 ]
 
 [[package]]

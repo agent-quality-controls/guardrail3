@@ -441,6 +441,57 @@ fn assertions_module_reaches_local_private_code_is_reported() {
 }
 
 #[test]
+fn assertions_module_importing_route_infra_is_reported() {
+    let fixture = tempdir();
+    let root = fixture.path();
+
+    write_file(
+        root,
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"crates/runtime\", \"crates/assertions\"]\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/Cargo.toml",
+        "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = { path = \"../assertions\" }\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/src/lib.rs",
+        "pub fn value() -> u8 { 1 }\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/tests/public_surface.rs",
+        "use demo_assertions::assert_runtime;\n#[test]\nfn public_surface() { assert_runtime(); }\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/Cargo.toml",
+        "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = { path = \"../runtime\" }\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/src/lib.rs",
+        "use guardrail3_app_rs_family_mapper::FamilyMapper;\npub fn assert_runtime() { let _ = FamilyMapper::new; assert_eq!(demo_runtime::value(), 1); }\n",
+    );
+
+    let results = run_family(root);
+    let finding = finding(&results, "RS-TEST-03");
+
+    assert_eq!(finding.severity, Severity::Error);
+    assert_eq!(
+        finding.title,
+        "assertions module imports route construction infrastructure"
+    );
+    assert_eq!(
+        finding.file.as_deref(),
+        Some("crates/assertions/src/lib.rs")
+    );
+    assert_eq!(finding.line, Some(1));
+}
+
+#[test]
 fn external_harness_crate_boundary_is_reported() {
     let fixture = tempdir();
     let root = fixture.path();
