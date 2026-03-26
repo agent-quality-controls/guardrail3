@@ -83,7 +83,7 @@ apps/guardrail3/crates/app/rs/families/hexarch/
         rs_hexarch_01_*.rs
         ...
         rs_hexarch_25_*.rs
-    assertions_common/         # shared assertions-only result matchers
+    assertions_common/         # current shared assertions-only result matchers
       Cargo.toml
       src/
         lib.rs
@@ -132,11 +132,13 @@ Must not own:
 
 ### `crates/assertions_common`
 
-Owns only:
+Current intended role:
 
 - shared assertions-only result matchers used by multiple `hexarch` rules
 
-It exists because `hexarch` has a large repeated result-shape surface, and keeping those matchers in `test_support` would violate `RS-TEST` genericity.
+This crate exists because `hexarch` currently has a large repeated result-shape surface, and keeping those matchers in `test_support` would violate `RS-TEST` genericity.
+
+This is a current implementation shape, not a permanently blessed architectural primitive. The next `hexarch` audit should still verify that this crate is justified and stays narrower than `test_support`.
 
 It must stay:
 

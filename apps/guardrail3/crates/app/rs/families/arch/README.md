@@ -73,22 +73,15 @@ Runtime, config validation, help text, and generated config must agree on that.
 
 Rust root placement must not live privately inside this family crate.
 
-Target shared shape:
+The shared Rust scope and typed family-mapper contract are documented in:
 
-```text
-crates/
-  app/
-    rs/
-      placement/                         # shared Rust root-placement substrate
-        Cargo.toml                       # shared by arch, hexarch, and later libarch
-        src/
-          lib.rs                         # exports live-root discovery and placement facts
-          roots.rs                       # eligible live Cargo roots only
-          classification.rs              # app/package/other/ambiguous classification
-          overlap.rs                     # app/package overlap and dual-ownership facts
-```
+- [apps/guardrail3/crates/app/rs/README.md](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/README.md)
 
-`RS-ARCH` uses that substrate and emits repo-global placement findings.
+For `RS-ARCH`, the important contract is:
+
+- live Rust root scope comes from shared `placement`
+- family routing comes from shared `FamilyMapper`
+- `RS-ARCH` is the family that emits repo-global placement findings over that shared scope
 
 `RS-HEXARCH` and `RS-LIBARCH` may consume the same placement facts, but must not emit misplaced-root findings.
 
