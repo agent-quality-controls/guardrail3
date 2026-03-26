@@ -6,7 +6,7 @@ use guardrail3_domain_project_tree::ProjectTree;
 use super::discover::{join_under_root, parent_dir, path_is_under};
 use super::facts::{SidecarViolation, TestFileKind, TestRootFacts};
 use super::inputs::SidecarViolationInput;
-use super::{AnalyzedFile, parse};
+use super::{AnalyzedFile, is_guardrail_family_implementation_root, parse};
 
 const ID: &str = "RS-TEST-02";
 
@@ -42,6 +42,7 @@ fn collect_violations(
 ) -> Vec<SidecarViolation> {
     let mut violations = Vec::new();
     let src_roots = src_roots_for_root(root);
+    let family_impl_root = is_guardrail_family_implementation_root(files);
 
     for dir_rel in tree.all_dir_rels() {
         let Some(src_root) = src_roots
@@ -112,7 +113,27 @@ fn collect_violations(
 
         if matches!(file.facts.kind, TestFileKind::Source) {
             for module in &file.parsed.cfg_test_modules {
-                if module.has_body || cfg_test_decl_is_owned_sidecar(tree, &file.facts.rel_path, file.facts.owner_module_name.as_deref(), module) {
+                if module.has_body
+                    || cfg_test_decl_is_owned_sidecar(
+                        tree,
+                        &file.facts.rel_path,
+                        file.facts.owner_module_name.as_deref(),
+                        module,
+                    )
+                    || (family_impl_root
+                        && cfg_test_decl_is_family_rule_sidecar(
+                            tree,
+                            &file.facts.rel_path,
+                            file.facts.owner_module_name.as_deref(),
+                            module,
+                        ))
+                    || (family_impl_root
+                        && cfg_test_decl_is_family_test_support(
+                            tree,
+                            &file.facts.rel_path,
+                            module,
+                        ))
+                {
                     continue;
                 }
                 violations.push(SidecarViolation {
@@ -127,6 +148,43 @@ fn collect_violations(
 
     violations.sort_by(|left, right| left.rel_path.cmp(&right.rel_path));
     violations
+}
+
+fn cfg_test_decl_is_family_rule_sidecar(
+    tree: &ProjectTree,
+    file_rel_path: &str,
+    owner_module_name: Option<&str>,
+    module: &parse::CfgTestModuleInfo,
+) -> bool {
+    let Some(owner_module_name) = owner_module_name else {
+        return false;
+    };
+    if !owner_module_name.starts_with("rs_") || module.name != "tests" {
+        return false;
+    }
+    let parent = parent_dir(file_rel_path);
+    let expected_path = format!("{owner_module_name}_tests/mod.rs");
+    module.path_attr.as_deref() == Some(expected_path.as_str())
+        && tree.file_exists(&format!("{parent}/{expected_path}"))
+}
+
+fn cfg_test_decl_is_family_test_support(
+    tree: &ProjectTree,
+    file_rel_path: &str,
+    module: &parse::CfgTestModuleInfo,
+) -> bool {
+    if !(file_rel_path.ends_with("/lib.rs") || file_rel_path == "lib.rs") {
+        return false;
+    }
+    if module.name != "test_support" {
+        return false;
+    }
+    let parent = parent_dir(file_rel_path);
+    match module.path_attr.as_deref() {
+        None => tree.file_exists(&format!("{parent}/test_support.rs")),
+        Some("test_support.rs") => tree.file_exists(&format!("{parent}/test_support.rs")),
+        _ => false,
+    }
 }
 
 fn src_roots_for_root(root: &TestRootFacts) -> Vec<String> {

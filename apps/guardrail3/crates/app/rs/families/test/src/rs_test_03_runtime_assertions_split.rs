@@ -6,7 +6,7 @@ use super::discover::{parent_dir, path_is_under};
 use super::facts::{RuntimeAssertionsViolation, TestFileKind, TestRootFacts};
 use super::inputs::RuntimeAssertionsViolationInput;
 use super::parse::{ModuleInfo, UseBinding};
-use super::AnalyzedFile;
+use super::{AnalyzedFile, is_guardrail_family_implementation_root};
 
 const ID: &str = "RS-TEST-03";
 
@@ -46,7 +46,9 @@ fn collect_violations(
         .map(|file| (file.facts.rel_path.clone(), file))
         .collect::<BTreeMap<_, _>>();
 
-    violations.extend(non_component_harness_violations(files, scoped_files));
+    if !is_guardrail_family_implementation_root(files) {
+        violations.extend(non_component_harness_violations(files, scoped_files));
+    }
 
     for component in &root.components {
         let harnesses_exist = !component.sidecars.is_empty() || !component.external_harnesses.is_empty();

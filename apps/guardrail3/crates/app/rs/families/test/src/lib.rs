@@ -38,6 +38,55 @@ pub(crate) struct AnalyzedFile {
     pub(crate) parsed: ParsedTestFile,
 }
 
+pub(crate) fn is_guardrail_family_implementation_root(files: &[AnalyzedFile]) -> bool {
+    let mut has_lib = false;
+    let mut has_test_support = false;
+    let mut has_rule_source = false;
+    let mut has_rule_sidecar = false;
+
+    for file in files {
+        if file.facts.component_rel_dir.is_some() {
+            return false;
+        }
+        match file.facts.kind {
+            TestFileKind::ExternalHarness => return false,
+            TestFileKind::Source => {
+                if file.facts.rel_path.ends_with("/lib.rs") || file.facts.rel_path == "lib.rs" {
+                    has_lib = true;
+                }
+                if file.facts.rel_path.ends_with("/test_support.rs")
+                    || file.facts.rel_path == "test_support.rs"
+                {
+                    has_test_support = true;
+                }
+                if file
+                    .facts
+                    .owner_module_name
+                    .as_deref()
+                    .is_some_and(|name| name.starts_with("rs_"))
+                {
+                    has_rule_source = true;
+                }
+            }
+            TestFileKind::InternalSidecarMod => {
+                if file
+                    .facts
+                    .owner_module_name
+                    .as_deref()
+                    .is_some_and(|name| name.starts_with("rs_"))
+                {
+                    has_rule_sidecar = true;
+                } else {
+                    return false;
+                }
+            }
+            _ => {}
+        }
+    }
+
+    has_lib && has_test_support && has_rule_source && has_rule_sidecar
+}
+
 #[derive(Default)]
 struct RootAnalysis {
     files: Vec<AnalyzedFile>,
