@@ -23,8 +23,7 @@ There should be exactly one shared answer to:
 There should also be exactly one external answer to:
 
 - which in-scope roots are routed to which family
-- which families validate all roots vs app roots vs package roots vs auxiliary roots
-- which root-level scope/applicability filters are applied before a family runs
+- which root-level scope filters are applied before a family runs
 
 That answer should come from a shared layer under:
 
@@ -45,7 +44,7 @@ Shared Rust scope must own:
 External typed family mapping must own:
 
 - per-family root routing from the shared scope
-- applicability filtering at the root level
+- mapper-resolved file scoping for any family that needs it
 - mapping shared root scope into typed family orchestrator inputs
 
 Families must not own:
@@ -85,14 +84,19 @@ apps/guardrail3/crates/app/rs/
       classification.rs               # app/package/auxiliary/other/ambiguous
       overlap.rs                      # overlap / dual-ownership support facts
 
+  family_selection/                   # shared family-set selection only
+    Cargo.toml
+    src/
+      lib.rs
+      selection.rs                    # requested-family resolution + enabled-family/implied-family filtering
+
   family_mapper/                      # shared typed family mapping only
     Cargo.toml
     src/
       lib.rs
-      selection.rs                    # selected-family resolution before family mapping
-      applicability.rs                # config-driven applicability used during mapping
       rs.rs                           # map_rs_* typed Rust family inputs
-      scoped_files.rs                 # resolves raw staged/path scope into typed mapped subsets
+      views.rs                        # narrow family-facing route view types
+      scoped_files.rs                 # resolves raw staged/path scope into mapped family subsets
 
   runtime.rs                          # thin product entrypoint only
 ```
@@ -136,24 +140,49 @@ pub struct RustRootFact {
 - family-local parsing
 - rule semantics
 
+### Family Selection
+
+`family_selection` should answer only:
+
+- which families were requested
+- which families are enabled
+- which implied families are added
+
+It should not decide root routing.
+
 ### Family Mapping
 
-`family_mapper` should expose typed family inputs rather than one generic route bag.
+`family_mapper` should expose typed family routes rather than one generic route bag.
 
 ```rust
-pub struct RsArchFamilyInput {
-    pub root_ids: Vec<RootId>,
-    pub overlap_ids: Vec<OverlapId>,
-    pub root_input_failure_ids: Vec<RootInputFailureId>,
+pub struct RsRootView {
+    pub root_id: RootId,
+    pub rel_dir: String,
+    pub cargo_rel_path: String,
+}
+
+pub struct RsArchRootView {
+    pub root: RsRootView,
+    pub arch_role: Option<RustArchRole>,
+    pub app_zone_candidates: Vec<String>,
+    pub package_zone_candidates: Vec<String>,
+}
+
+pub struct RsArchRoute {
+    pub roots: Vec<RsArchRootView>,
+    pub overlaps: Vec<OverlapId>,
+    pub input_failures: Vec<RootInputFailureId>,
     pub reporting_enabled: bool,
+    pub scoped_files: Option<BTreeSet<String>>,
 }
 
-pub struct RsHexarchFamilyInput {
-    pub root_ids: Vec<RootId>,
+pub struct RsHexarchRoute {
+    pub roots: Vec<RsRootView>,
+    pub scoped_files: Option<BTreeSet<String>>,
 }
 
-pub struct RsTestFamilyInput {
-    pub root_ids: Vec<RootId>,
+pub struct RsTestRoute {
+    pub roots: Vec<RsRootView>,
     pub scoped_files: Option<BTreeSet<String>>,
 }
 ```
@@ -164,47 +193,44 @@ Prefer explicit namespaced mapping methods:
 pub struct FamilyMapper<'a> { ... }
 
 impl<'a> FamilyMapper<'a> {
-    pub fn map_rs_arch(&self, scope: &RustRootScope) -> RsArchFamilyInput;
-    pub fn map_rs_hexarch(&self, scope: &RustRootScope) -> RsHexarchFamilyInput;
-    pub fn map_rs_test(&self, scope: &RustRootScope) -> RsTestFamilyInput;
+    pub fn map_rs_arch(&self, scope: &RustRootScope) -> RsArchRoute;
+    pub fn map_rs_hexarch(&self, scope: &RustRootScope) -> RsHexarchRoute;
+    pub fn map_rs_test(&self, scope: &RustRootScope) -> RsTestRoute;
 }
 ```
 
 `family_mapper` owns:
 
-- config-driven family applicability
 - per-family root routing
-- root-level scoping/applicability policy
+- per-family route projection into narrow owned views
+- mapper-resolved file scoping for any family that needs it
 
 `family_mapper` must not own:
 
-- global family selection policy
 - root discovery
 - root classification
+- family enable/disable policy
 - family-local parsing
 - rule semantics
 
 ## Family Check Signatures
 
-Families should consume injected scope and injected typed family input.
+Families should consume injected typed family route.
 
 Target shape:
 
 ```rust
 pub fn check(
     tree: &ProjectTree,
-    scope: &RustRootScope,
-    input: &RsArchFamilyInput,
+    route: &RsArchRoute,
 ) -> Vec<CheckResult>
 pub fn check(
     tree: &ProjectTree,
-    scope: &RustRootScope,
-    input: &RsHexarchFamilyInput,
+    route: &RsHexarchRoute,
 ) -> Vec<CheckResult>
 pub fn check(
     tree: &ProjectTree,
-    scope: &RustRootScope,
-    input: &RsTestFamilyInput,
+    route: &RsTestRoute,
     tc: &dyn ToolChecker,
 ) -> Vec<CheckResult>
 ```
@@ -218,11 +244,11 @@ Families may:
 
 Allowed family input contents:
 
-- root ids or typed root references from shared scope
-- overlap ids or typed overlap references from shared scope
-- root input failure ids or typed failure references from shared scope
+- routed narrow root views
+- routed overlap ids or narrow overlap views
+- routed input-failure ids or narrow failure views
 - mapper-resolved file subsets
-- config/applicability flags already decided outside the family
+- selection-decided family mode flags already decided outside the family
 
 Families must not:
 
@@ -230,25 +256,26 @@ Families must not:
 - exclude roots
 - decide which routed roots they validate
 - rerun root routing locally
+- receive the whole shared scope just because it is convenient
 
 In concrete terms:
 
 1. `runtime.rs` should build shared Rust scope once.
-2. `runtime.rs` should resolve selected families once.
+2. `runtime.rs` should resolve selected families once via `family_selection`.
 3. `runtime.rs` should build one external typed `FamilyMapper` once.
-4. Families should receive injected scope plus injected typed family inputs.
-5. `arch` should consume typed mapped input instead of collecting roots itself.
-6. `test` should consume typed mapped input instead of collecting roots itself.
+4. Families should receive injected typed family routes.
+5. `arch` should consume typed mapped route instead of collecting roots itself.
+6. `test` should consume typed mapped route instead of collecting roots itself.
 
 Concrete flow:
 
 ```text
 walk_project()
   -> placement::collect(&tree)
-  -> selection::resolve(...)
-  -> FamilyMapper::new(&tree, config, selected_families, scoped_files)
+  -> family_selection::resolve(...)
+  -> FamilyMapper::new(&tree, scoped_files)
   -> family_mapper.map_rs_*(...)
-  -> family::check(&tree, &scope, input, ...)
+  -> family::check(&tree, route, ...)
 ```
 
 ## Current Direction
@@ -268,18 +295,21 @@ But `arch` and `test` are not fully migrated to that model yet, and family mappi
    Keep it family-agnostic.
    It should describe live roots, overlaps, exclusions, and root-discovery failures.
 
-2. Define an external typed family-mapper layer under `family_mapper/`.
+2. Define a shared family-selection layer under `family_selection/`.
+   It owns requested-family resolution, enabled-family filtering, and implied-family expansion.
+
+3. Define an external typed family-mapper layer under `family_mapper/`.
    [runtime.rs](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/runtime.rs) should call it, not implement it inline.
-   It should map shared scoped roots to typed family orchestrator inputs.
+   It should map shared scoped roots to typed family orchestrator inputs using narrow owned route views.
    Families must not invent their own routed universe.
 
-3. Refactor `arch` to consume injected typed mapped input instead of calling `placement::collect(...)` internally.
+4. Refactor `arch` to consume injected typed mapped route instead of calling `placement::collect(...)` internally.
 
-4. Refactor `test` to consume injected typed mapped input instead of doing family-local `Cargo.toml` discovery.
+5. Refactor `test` to consume injected typed mapped route instead of doing family-local `Cargo.toml` discovery.
 
-5. Delete duplicate root collectors and duplicate root-routing logic from families after the shared path is live.
+6. Delete duplicate root collectors and duplicate root-routing logic from families after the shared path is live.
 
-6. Add regressions proving `arch` and `test` agree on:
+7. Add regressions proving `arch` and `test` agree on:
    - which roots are in scope
    - which roots are routed to them
    - which roots are excluded
@@ -293,8 +323,9 @@ But `arch` and `test` are not fully migrated to that model yet, and family mappi
 - Rules must not decide root scope or root routing at all.
 - The external orchestrator may route different root sets to different families, but that routing policy must live outside the family crates.
 - `runtime.rs` should stay thin; if family mapping becomes nontrivial, it belongs in `family_mapper/`, not inline in runtime.
+- `family_selection/` and `family_mapper/` are separate because selecting a family set is not the same problem as routing roots into typed family routes.
 - Shared scope must not encode family semantics.
-- External family mapping may encode family ownership/applicability policy, but not family-internal parsing semantics.
+- External family mapping may encode family ownership/routing policy, but not family-internal parsing semantics.
 - Shared scope must be stable enough that families cannot silently diverge.
 
 ## Acceptance Criteria
@@ -306,6 +337,7 @@ This plan is complete when:
 - `test` no longer performs family-local live-root discovery
 - `test` no longer performs family-local root routing
 - one shared exclusion policy governs Rust root scope
+- one external typed family-selection layer chooses families once
 - one external typed family-mapper layer feeds all Rust families that need root ownership
-- family `check(...)` entrypoints consume injected scope and injected typed family input instead of rediscovering roots
+- family `check(...)` entrypoints consume injected typed family routes instead of rediscovering roots
 - disagreements between families are about semantics, not scope
