@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_04_loose_files as assertions;
 use guardrail3_domain_report::CheckResult;
-use test_support::{copy_fixture, write_file};
+use crate::test_support::{copy_fixture, write_file};
 
 fn single_container_results(file_name: &str) -> Vec<CheckResult> {
     let tmp = copy_fixture();

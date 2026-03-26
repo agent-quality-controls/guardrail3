@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_04_loose_files as assertions;
-use test_support::{copy_fixture, create_dir, empty_dir, remove_dir, write_file};
-const FIXTURE: test_support::HexarchFixture = test_support::HexarchFixture;
+use crate::test_support::{copy_fixture, create_dir, empty_dir, remove_dir, write_file};
+const FIXTURE: crate::test_support::HexarchFixture = crate::test_support::HexarchFixture;
 
 fn inner_hex() -> &'static str {
     FIXTURE.inner_hex_root()

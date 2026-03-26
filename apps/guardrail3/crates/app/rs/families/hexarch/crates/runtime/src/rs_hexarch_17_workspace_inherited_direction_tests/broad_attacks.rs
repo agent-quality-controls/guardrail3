@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use super::super::results_for_dependency_edges_for_test as results_for_dependency_edges;
-use test_support::{dir_entry, project_tree};
+use crate::test_support::{dir_entry, project_tree};
 
 #[test]
 fn forbidden_workspace_inherited_edges_error_and_allowed_ones_do_not() {

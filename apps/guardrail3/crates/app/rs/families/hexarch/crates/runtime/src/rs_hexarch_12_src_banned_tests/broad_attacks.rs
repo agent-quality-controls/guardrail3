@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_12_src_banned as assertions;
-use test_support::{copy_fixture, create_dir, write_file};
+use crate::test_support::{copy_fixture, create_dir, write_file};
 
 #[test]
 fn app_level_src_dirs_hit_every_mutated_rust_app() {

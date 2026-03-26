@@ -1,5 +1,5 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_05_container_not_empty as assertions;
-use test_support::{copy_fixture, empty_dir, write_file};
+use crate::test_support::{copy_fixture, empty_dir, write_file};
 
 #[test]
 fn gitkeep_plus_files_does_not_trigger_rule_05() {

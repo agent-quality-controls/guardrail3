@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use super::super::discovered_app_rel_dirs_for_tests;
-use test_support::{copy_fixture, create_dir, walk, write_file};
+use crate::test_support::{copy_fixture, create_dir, walk, write_file};
 
 fn discovered_apps(root: &std::path::Path) -> BTreeSet<String> {
     let _ = walk(root);

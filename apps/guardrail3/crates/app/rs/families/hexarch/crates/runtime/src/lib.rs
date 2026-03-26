@@ -1,6 +1,8 @@
 mod dependency_facts;
 mod facts;
 mod inputs;
+#[cfg(test)]
+mod test_support;
 mod rs_hexarch_01_crates_exists;
 mod rs_hexarch_02_exact_contents;
 mod rs_hexarch_03_inbound_outbound;
@@ -32,6 +34,8 @@ use std::collections::BTreeSet;
 
 use glob as _;
 use guardrail3_app_core as _;
+#[cfg(test)]
+use guardrail3_adapters_outbound_fs as _;
 use guardrail3_app_rs_family_mapper::RsHexarchRoute;
 use guardrail3_domain_config::types::GuardrailConfig;
 use guardrail3_domain_modules as _;
@@ -43,6 +47,8 @@ use proc_macro2 as _;
 use quote as _;
 use semver as _;
 use serde_yaml as _;
+#[cfg(test)]
+use tempfile as _;
 
 use self::facts::collect;
 use self::inputs::{

@@ -4,7 +4,7 @@ use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::Severity;
 
 use super::super::check_for_test_tree as family_check;
-use test_support::{dir_entry, project_tree};
+use crate::test_support::{dir_entry, project_tree};
 
 fn dev_graph_tree() -> ProjectTree {
     project_tree(

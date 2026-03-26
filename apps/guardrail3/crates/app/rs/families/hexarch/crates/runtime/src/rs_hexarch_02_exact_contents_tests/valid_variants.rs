@@ -1,5 +1,5 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_02_exact_contents as assertions;
-use test_support::{copy_fixture, remove_dir, write_file};
+use crate::test_support::{copy_fixture, remove_dir, write_file};
 
 #[test]
 fn crates_with_only_gitkeep_still_defer_to_missing_required_dirs_not_rule_01() {

@@ -1,5 +1,5 @@
 use super::super::{run_domain_purity_case, DomainPurityEdgeKindForTest};
-use test_support::{dir_entry, project_tree};
+use crate::test_support::{dir_entry, project_tree};
 
 #[test]
 fn inherited_workspace_alias_to_builtin_pure_crate_stays_allowed() {

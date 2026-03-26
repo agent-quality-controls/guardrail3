@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_22_ports_trait_dominance as assertions;
 use guardrail3_domain_report::Severity;
-use test_support::{copy_fixture, write_file};
+use crate::test_support::{copy_fixture, write_file};
 
 #[test]
 fn nested_file_and_inline_modules_still_count_toward_impl_heaviness() {

@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_04_loose_files as assertions;
-use test_support::{copy_fixture, remove_dir, write_file};
+use crate::test_support::{copy_fixture, remove_dir, write_file};
 
 fn replace_child_dir_with_file(root: &std::path::Path, child_rel: &str) {
     remove_dir(root, child_rel);
