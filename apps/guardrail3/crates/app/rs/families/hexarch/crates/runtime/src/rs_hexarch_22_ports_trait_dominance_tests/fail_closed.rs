@@ -1,5 +1,4 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_22_ports_trait_dominance as assertions;
-use guardrail3_domain_report::Severity;
 use super::copy_fixture;
 
 #[test]
@@ -13,21 +12,15 @@ fn unparsable_ports_source_warns_in_family_run() {
     .expect("write broken ports source");
 
     let results = super::run_family(tmp.path());
-    let warnings = assertions::warning_results(&results, "");
-    assert_eq!(
-        warnings.len(),
+    assertions::assert_warning_summary(
+        &results,
+        "",
         1,
-        "expected one source-analysis warning: {warnings:#?}"
-    );
-    assert_eq!(warnings[0].severity, Severity::Warn);
-    assert_eq!(
-        warnings[0].file.as_deref(),
-        Some("apps/backend/crates/ports/outbound/repo/src/lib.rs")
-    );
-    assert!(
-        warnings[0]
-            .message
-            .contains("Failed to parse Rust source file")
+        &["apps/backend/crates/ports/outbound/repo/src/lib.rs"],
+        Some(Some("apps/backend/crates/ports/outbound/repo/src/lib.rs")),
+        Some("Failed to parse Rust source file"),
+        None,
+        &[],
     );
 }
 
@@ -48,21 +41,14 @@ fn parse_failure_takes_precedence_over_impl_heavy_warning() {
     .expect("write impl-heavy extra module");
 
     let results = super::run_family(tmp.path());
-    let warnings: Vec<_> = results
-        .iter()
-        .filter(|result| result.id == "")
-        .collect();
-    assert_eq!(
-        warnings.len(),
+    assertions::assert_warning_summary(
+        &results,
+        "",
         1,
-        "parse failure should short-circuit to one source-analysis warning: {warnings:#?}"
-    );
-    assert!(
-        warnings[0].title.contains("source analysis failed"),
-        "parse failure should not also emit impl-heavy warning: {warnings:#?}"
-    );
-    assert!(
-        !warnings[0].title.contains("impl-heavy"),
-        "parse failure should suppress the generic impl-heavy warning: {warnings:#?}"
+        &["apps/backend/crates/ports/outbound/repo/src/lib.rs"],
+        Some(Some("apps/backend/crates/ports/outbound/repo/src/lib.rs")),
+        Some("Failed to parse Rust source file"),
+        None,
+        &["impl-heavy"],
     );
 }

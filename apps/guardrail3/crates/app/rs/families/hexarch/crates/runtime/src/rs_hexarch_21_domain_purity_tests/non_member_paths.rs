@@ -1,6 +1,5 @@
-use std::collections::BTreeSet;
-
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_21_domain_purity as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_24_cross_app_boundary as rule24_assertions;
 use super::{copy_fixture, write_file};
 
 #[test]
@@ -23,23 +22,14 @@ fn out_of_tree_paths_with_pure_layer_names_still_error() {
     );
 
     let results = super::run_family(tmp.path());
-    let actual_titles = results
-        .iter()
-        .filter(|result| result.id == "")
-        .map(|result| result.title.clone())
-        .collect::<BTreeSet<_>>();
-    let expected_titles = [
-        "domain crate `backend-domain-engine` depends on disallowed external crate `vendor-domain-kit`"
-            .to_owned(),
-        "domain crate `backend-domain-engine` depends on disallowed external crate `vendor-ports-kit`"
-            .to_owned(),
-    ]
-    .into_iter()
-    .collect::<BTreeSet<_>>();
-
-    assert_eq!(
-        actual_titles, expected_titles,
-        "out-of-tree path deps must not be treated as pure internal domain/ports deps: {results:#?}"
+    assertions::assert_error_results(
+        &results,
+        "",
+        2,
+        &[
+            "domain crate `backend-domain-engine` depends on disallowed external crate `vendor-domain-kit`",
+            "domain crate `backend-domain-engine` depends on disallowed external crate `vendor-ports-kit`",
+        ],
     );
 }
 
@@ -53,17 +43,12 @@ fn cross_app_path_dep_is_owned_by_rule_24_not_rule_21() {
     );
 
     let results = super::run_family(tmp.path());
-    let rule_21 = assertions::errors_by_id(&results, "");
-    let rule_24 = assertions::errors_by_id(&results, "RS-HEXARCH-24");
-
-    assertions::assert_no_error(&results, "");
-    assert_eq!(
-        rule_24.len(),
+    rule24_assertions::assert_error_results(
+        &results,
+        "",
         1,
-        "rule 24 should own cross-app domain path deps: {rule_24:#?}"
+        &["apps/backend/crates/domain/engine/Cargo.toml"],
+        &["cross-app boundary dependency"],
     );
-    assert!(
-        rule_21.is_empty(),
-        "rule 21 should stay out of cross-app ownership: {rule_21:#?}"
-    );
+    assertions::assert_no_error(&results, "");
 }

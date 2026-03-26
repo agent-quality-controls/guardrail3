@@ -1,5 +1,6 @@
 use super::super::{run_domain_purity_case, DomainPurityEdgeKindForTest};
 use super::{dir_entry, project_tree};
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_21_domain_purity as assertions;
 
 #[test]
 fn inherited_workspace_alias_to_builtin_pure_crate_stays_allowed() {
@@ -32,11 +33,7 @@ fn inherited_workspace_alias_to_builtin_pure_crate_stays_allowed() {
         "apps/api/crates/domain/core",
         DomainPurityEdgeKindForTest::Dependency,
     );
-
-    assert!(
-        results.is_empty(),
-        "workspace alias to built-in pure crate should stay allowed: {results:#?}"
-    );
+    assertions::assert_no_error(&results, "");
 }
 
 #[test]
@@ -74,9 +71,5 @@ fn inherited_workspace_alias_uses_real_package_name_for_allowed_deps() {
         "apps/api/crates/domain/core",
         DomainPurityEdgeKindForTest::Dependency,
     );
-
-    assert!(
-        results.is_empty(),
-        "allowed_deps should match the real inherited package name, not the workspace alias: {results:#?}"
-    );
+    assertions::assert_no_error(&results, "");
 }

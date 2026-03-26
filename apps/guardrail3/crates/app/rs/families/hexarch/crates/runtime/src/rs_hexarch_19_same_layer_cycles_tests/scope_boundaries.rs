@@ -1,5 +1,6 @@
 use super::super::results_for_cycles_for_test as results_for_cycles;
 use super::{dir_entry, project_tree};
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_19_same_layer_cycles as assertions;
 
 #[test]
 fn target_specific_same_layer_cycle_is_filtered_out() {
@@ -30,10 +31,7 @@ fn target_specific_same_layer_cycle_is_filtered_out() {
     );
 
     let (cycle_layers, _results) = results_for_cycles(&tree);
-    assert!(
-        cycle_layers.is_empty(),
-        "target-specific edges should not fabricate same-layer cycles: {cycle_layers:#?}"
-    );
+    assertions::assert_cycle_layers(&cycle_layers, 0, &[]);
 }
 
 #[test]
@@ -65,8 +63,5 @@ fn omitted_same_layer_member_stays_out_of_cycle_detection() {
     );
 
     let (cycle_layers, _results) = results_for_cycles(&tree);
-    assert!(
-        cycle_layers.is_empty(),
-        "omitted same-layer members should stay out of cycle detection: {cycle_layers:#?}"
-    );
+    assertions::assert_cycle_layers(&cycle_layers, 0, &[]);
 }

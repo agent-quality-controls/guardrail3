@@ -58,9 +58,15 @@ pub fn assert_inventory_results(
     expected_count: usize,
     expected_messages: &[&str],
 ) {
+    let rule_id = RULE_ID;
     let inventory = results
         .iter()
-        .filter(|result| result.id.is_empty() && result.file.as_deref() == Some(file))
+        .filter(|result| {
+            result.id == rule_id
+                && result.severity == Severity::Info
+                && result.inventory
+                && result.file.as_deref() == Some(file)
+        })
         .collect::<Vec<_>>();
     let expected_files = [file];
     assert_result_summary(

@@ -1,11 +1,9 @@
 use super::super::check_boundary_config_for_test as check_boundary_config;
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_15_boundary_config as assertions;
 
 #[test]
 fn non_app_boundaries_do_not_warn() {
     let results = check_boundary_config("packages/shared", false, false, None);
 
-    assert!(
-        results.is_empty(),
-        "non-app boundaries should stay out of scope for rule 15: {results:#?}"
-    );
+    assertions::assert_no_warning(&results, "");
 }

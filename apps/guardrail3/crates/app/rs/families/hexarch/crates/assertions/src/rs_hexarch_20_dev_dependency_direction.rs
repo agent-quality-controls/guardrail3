@@ -70,3 +70,30 @@ pub fn assert_warning_count(results: &[CheckResult], rule_id: &str, expected_cou
     let warnings = warning_results(results, rule_id);
     assert_eq!(warnings.len(), expected_count, "{warnings:#?}");
 }
+
+pub fn assert_error_count(results: &[CheckResult], rule_id: &str, expected_count: usize) {
+    let errors = error_results(results, rule_id);
+    assert_eq!(errors.len(), expected_count, "{errors:#?}");
+}
+
+pub fn assert_warning_file_set(
+    results: &[CheckResult],
+    rule_id: &str,
+    expected_count: usize,
+    expected_files: &[&str],
+) {
+    let warnings = warning_results(results, rule_id);
+    assert_result_summary(&warnings, expected_count, expected_files, None, None, None);
+}
+
+pub fn assert_warning_messages(
+    results: &[CheckResult],
+    rule_id: &str,
+    expected_count: usize,
+    expected_files: &[&str],
+    expected_messages: &[&str],
+) {
+    let warnings = warning_results(results, rule_id);
+    assert_result_summary(&warnings, expected_count, expected_files, None, None, None);
+    assert_result_messages(&warnings, expected_messages);
+}

@@ -52,6 +52,11 @@ pub fn assert_no_error(results: &[CheckResult], rule_id: &str) {
     );
 }
 
+pub fn assert_error_count(results: &[CheckResult], rule_id: &str, expected_count: usize) {
+    let errors = error_results(results, rule_id);
+    assert_eq!(errors.len(), expected_count, "{errors:#?}");
+}
+
 pub fn assert_error_results(
     results: &[CheckResult],
     rule_id: &str,
@@ -62,4 +67,14 @@ pub fn assert_error_results(
     let errors = error_results(results, rule_id);
     assert_result_summary(&errors, expected_count, expected_files, None, None, None);
     assert_result_titles(&errors, expected_titles);
+}
+
+pub fn assert_error_file_set(
+    results: &[CheckResult],
+    rule_id: &str,
+    expected_count: usize,
+    expected_files: &[&str],
+) {
+    let errors = error_results(results, rule_id);
+    assert_result_summary(&errors, expected_count, expected_files, None, None, None);
 }

@@ -1,5 +1,4 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_23_adapter_pub_trait as assertions;
-use guardrail3_domain_report::Severity;
 use super::{copy_fixture, write_file};
 
 #[test]
@@ -12,15 +11,5 @@ fn inline_adapter_module_with_public_trait_errors() {
     );
 
     let results = super::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "");
-    assert_eq!(
-        errors.len(),
-        1,
-        "expected one adapter public-trait error from inline module: {errors:#?}"
-    );
-    assert_eq!(errors[0].severity, Severity::Error);
-    assert_eq!(
-        errors[0].file.as_deref(),
-        Some("apps/backend/crates/adapters/outbound/postgres")
-    );
+    assertions::assert_error_file_single(&results, "", "apps/backend/crates/adapters/outbound/postgres");
 }

@@ -7,11 +7,5 @@ fn malformed_root_cargo_is_error() {
     write_file(tmp.path(), "Cargo.toml", "[workspace");
 
     let results = super::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "");
-    assert_eq!(
-        errors.len(),
-        1,
-        "expected one root parse error: {errors:#?}"
-    );
-    assert!(errors[0].title.contains("parse error"));
+    assertions::assert_error_title_contains(&results, "", 1, &["Cargo.toml"], &["parse error"]);
 }

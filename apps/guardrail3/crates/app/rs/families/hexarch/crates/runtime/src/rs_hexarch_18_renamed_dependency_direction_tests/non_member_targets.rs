@@ -55,11 +55,5 @@ fn renamed_existing_same_app_target_omitted_from_workspace_still_fires() {
     );
 
     let results = super::run_family(tmp.path());
-    let rule_18 = assertions::errors_by_id(&results, "");
-
-    assert_eq!(
-        rule_18.len(),
-        1,
-        "existing same-app omitted targets should still count as renamed internal edges: {rule_18:#?}"
-    );
+    assertions::assert_error_count(&results, "", 1);
 }

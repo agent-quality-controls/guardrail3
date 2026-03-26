@@ -66,6 +66,85 @@ pub fn assert_warning_results(
     assert_result_messages(&warnings, expected_messages);
 }
 
+pub fn assert_no_warning(results: &[CheckResult], rule_id: &str) {
+    let warnings = warning_results(results, rule_id);
+    assert!(
+        warnings.is_empty(),
+        "expected no {RULE_ID} warnings, got: {warnings:#?}"
+    );
+}
+
+pub fn assert_warning_count(results: &[CheckResult], rule_id: &str, expected_count: usize) {
+    let warnings = warning_results(results, rule_id);
+    assert_eq!(warnings.len(), expected_count, "{warnings:#?}");
+}
+
+pub fn assert_warning_summary(
+    results: &[CheckResult],
+    rule_id: &str,
+    expected_count: usize,
+    expected_files: &[&str],
+    expected_file: Option<Option<&str>>,
+    message_contains: Option<&str>,
+    title_contains: Option<&str>,
+    title_forbidden: &[&str],
+) {
+    let warnings = warning_results(results, rule_id);
+    assert_result_summary(
+        &warnings,
+        expected_count,
+        expected_files,
+        expected_file,
+        title_contains,
+        message_contains,
+    );
+    assert!(
+        warnings.iter().all(|warning| warning.severity == Severity::Warn),
+        "{warnings:#?}"
+    );
+    for forbidden in title_forbidden {
+        assert!(
+            warnings.iter().all(|warning| !warning.title.contains(forbidden)),
+            "{warnings:#?}"
+        );
+    }
+}
+
+pub fn assert_warning_file_set(
+    results: &[CheckResult],
+    rule_id: &str,
+    expected_count: usize,
+    expected_files: &[&str],
+) {
+    let warnings = warning_results(results, rule_id);
+    assert_result_summary(&warnings, expected_count, expected_files, None, None, None);
+}
+
+pub fn assert_warning_file_single(
+    results: &[CheckResult],
+    rule_id: &str,
+    expected_file: &str,
+) {
+    let warnings = warning_results(results, rule_id);
+    assert_eq!(warnings.len(), 1, "{warnings:#?}");
+    assert_result_summary(&warnings, 1, [expected_file], Some(Some(expected_file)), None, None);
+}
+
+pub fn assert_warning_title_contains(
+    results: &[CheckResult],
+    rule_id: &str,
+    required_substrings: &[&str],
+) {
+    let warnings = warning_results(results, rule_id);
+    assert_eq!(warnings.len(), 1, "{warnings:#?}");
+    for substring in required_substrings {
+        assert!(
+            warnings.iter().all(|warning| warning.title.contains(substring)),
+            "expected title to contain {substring}: {warnings:#?}"
+        );
+    }
+}
+
 pub fn assert_warning_message_contains(
     results: &[CheckResult],
     rule_id: &str,

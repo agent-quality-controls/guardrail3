@@ -52,6 +52,19 @@ pub fn assert_no_error(results: &[CheckResult], rule_id: &str) {
     );
 }
 
+pub fn assert_no_warning(results: &[CheckResult], rule_id: &str) {
+    let rule_id = if rule_id.is_empty() {
+        RULE_ID
+    } else {
+        rule_id
+    };
+    let warnings = warning_results(results, rule_id);
+    assert!(
+        warnings.is_empty(),
+        "expected no {rule_id} warnings, got: {warnings:#?}"
+    );
+}
+
 pub fn assert_titles(results: &[CheckResult], expected_titles: &[&str]) {
     let findings = results
         .iter()
@@ -59,4 +72,43 @@ pub fn assert_titles(results: &[CheckResult], expected_titles: &[&str]) {
         .collect::<Vec<_>>();
     assert_eq!(findings.len(), expected_titles.len(), "{findings:#?}");
     assert_result_titles(&findings, expected_titles);
+}
+
+pub fn assert_title_set(
+    results: &[CheckResult],
+    rule_id: &str,
+    expected_count: usize,
+    expected_titles: &[&str],
+) {
+    let warnings = warning_results(results, rule_id);
+    assert_eq!(warnings.len(), expected_count, "{warnings:#?}");
+    assert_result_titles(&warnings, expected_titles);
+}
+
+pub fn assert_result_title_contains(
+    results: &[CheckResult],
+    rule_id: &str,
+    expected_count: usize,
+    expected_files: &[&str],
+    required_title: &str,
+) {
+    let warnings = warning_results(results, rule_id);
+    assert_result_summary(
+        &warnings,
+        expected_count,
+        expected_files,
+        None,
+        Some(required_title),
+        None,
+    );
+}
+
+pub fn assert_error_title_forbidden(results: &[CheckResult], rule_id: &str, forbidden: &[&str]) {
+    let warnings = warning_results(results, rule_id);
+    assert!(
+        warnings
+            .iter()
+            .all(|result| forbidden.iter().all(|needle| !result.title.contains(needle))),
+        "expected forbidden title text to be absent in {warnings:#?}"
+    );
 }

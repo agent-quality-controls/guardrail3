@@ -1,4 +1,5 @@
 use guardrail3_domain_report::{CheckResult, Severity};
+use std::collections::BTreeSet;
 
 const RULE_ID: &str = "RS-HEXARCH-19";
 
@@ -61,4 +62,79 @@ pub fn assert_error_results(
     let errors = error_results(results, rule_id);
     assert_eq!(errors.len(), expected_count, "{errors:#?}");
     assert_result_titles(&errors, expected_titles);
+}
+
+pub fn assert_error_count(results: &[CheckResult], rule_id: &str, expected_count: usize) {
+    let errors = error_results(results, rule_id);
+    assert_eq!(errors.len(), expected_count, "{errors:#?}");
+}
+
+pub fn assert_error_file_set(
+    results: &[CheckResult],
+    rule_id: &str,
+    expected_count: usize,
+    expected_files: &[&str],
+) {
+    let errors = error_results(results, rule_id);
+    assert_result_summary(&errors, expected_count, expected_files, None, None, None);
+}
+
+pub fn assert_cycle_layers(cycle_layers: &[String], expected_count: usize, expected_layers: &[&str]) {
+    assert_eq!(cycle_layers.len(), expected_count, "{cycle_layers:#?}");
+    let expected_layers = expected_layers
+        .iter()
+        .map(|layer| layer.to_string())
+        .collect::<BTreeSet<_>>();
+    let actual_layers = cycle_layers.iter().cloned().collect::<BTreeSet<_>>();
+    assert_eq!(actual_layers, expected_layers, "{cycle_layers:#?}");
+}
+
+pub fn assert_error_result_summary(
+    results: &[CheckResult],
+    rule_id: &str,
+    expected_count: usize,
+    expected_files: &[&str],
+    expected_file: Option<Option<&str>>,
+    severity: Option<Severity>,
+    title_contains: Option<&str>,
+    message_contains: Option<&str>,
+) {
+    let errors = error_results(results, rule_id);
+    assert_result_summary(&errors, expected_count, expected_files, expected_file, title_contains, message_contains);
+    if let Some(expected_severity) = severity {
+        assert!(
+            errors.iter().all(|error| error.severity == expected_severity),
+            "{errors:#?}"
+        );
+    }
+}
+
+pub fn assert_error_title_contains(
+    results: &[CheckResult],
+    rule_id: &str,
+    required_substrings: &[&str],
+) {
+    let errors = error_results(results, rule_id);
+    assert_eq!(errors.len(), 1, "{errors:#?}");
+    for substring in required_substrings {
+        assert!(
+            errors.iter().all(|result| result.title.contains(substring)),
+            "expected title to contain {substring}: {errors:#?}"
+        );
+    }
+}
+
+pub fn assert_error_message_contains(
+    results: &[CheckResult],
+    rule_id: &str,
+    required_substrings: &[&str],
+) {
+    let errors = error_results(results, rule_id);
+    assert_eq!(errors.len(), 1, "{errors:#?}");
+    for substring in required_substrings {
+        assert!(
+            errors.iter().all(|result| result.message.contains(substring)),
+            "expected message to contain {substring}: {errors:#?}"
+        );
+    }
 }

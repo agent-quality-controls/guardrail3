@@ -1,4 +1,8 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_18_renamed_dependency_direction as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_17_workspace_inherited_direction as rule17_assertions;
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_20_dev_dependency_direction as rule20_assertions;
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_24_cross_app_boundary as rule24_assertions;
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_25_target_dependency_direction as rule25_assertions;
 use super::{copy_fixture, write_file};
 
 #[test]
@@ -11,19 +15,14 @@ fn cross_app_renamed_edge_is_owned_by_rule_24_not_rule_18() {
     );
 
     let results = super::run_family(tmp.path());
-    let rule_18 = assertions::errors_by_id(&results, "");
-    let rule_24 = assertions::errors_by_id(&results, "RS-HEXARCH-24");
-
-    assertions::assert_no_error(&results, "");
-    assert_eq!(
-        rule_24.len(),
+    rule24_assertions::assert_error_results(
+        &results,
+        "",
         1,
-        "rule 24 should own cross-app renamed edges: {rule_24:#?}"
+        &["apps/backend/crates/domain/engine/Cargo.toml"],
+        &["cross-app boundary dependency"],
     );
-    assert!(
-        rule_18.is_empty(),
-        "rule 18 should stay out of cross-app renamed ownership: {rule_18:#?}"
-    );
+    assertions::assert_error_count(&results, "", 0);
 }
 
 #[test]
@@ -41,18 +40,8 @@ fn inherited_renamed_path_dep_is_owned_by_rule_17_not_rule_18() {
     );
 
     let results = super::run_family(tmp.path());
-    let rule_17 = assertions::errors_by_id(&results, "RS-HEXARCH-17");
-    let rule_18 = assertions::errors_by_id(&results, "");
-
-    assert_eq!(
-        rule_17.len(),
-        1,
-        "rule 17 should own inherited renamed path deps: {rule_17:#?}"
-    );
-    assert!(
-        rule_18.is_empty(),
-        "rule 18 should not double-report inherited renamed path deps: {rule_18:#?}"
-    );
+    rule17_assertions::assert_error_count(&results, "", 1);
+    assertions::assert_error_count(&results, "", 0);
 }
 
 #[test]
@@ -65,22 +54,8 @@ fn renamed_dev_dependency_is_owned_by_rule_20_not_rule_18() {
     );
 
     let results = super::run_family(tmp.path());
-    let rule_18 = assertions::errors_by_id(&results, "");
-    let rule_20 = results
-        .iter()
-        .filter(|result| result.id == "RS-HEXARCH-20")
-        .collect::<Vec<_>>();
-
-    assertions::assert_no_error(&results, "");
-    assert_eq!(
-        rule_20.len(),
-        1,
-        "rule 20 should own renamed dev-dependency direction violations: {rule_20:#?}"
-    );
-    assert!(
-        rule_18.is_empty(),
-        "rule 18 should stay out of renamed dev-dependency ownership: {rule_18:#?}"
-    );
+    rule20_assertions::assert_warning_count(&results, "", 1);
+    assertions::assert_error_count(&results, "", 0);
 }
 
 #[test]
@@ -93,17 +68,12 @@ fn renamed_target_dependency_is_owned_by_rule_25_not_rule_18() {
     );
 
     let results = super::run_family(tmp.path());
-    let rule_18 = assertions::errors_by_id(&results, "");
-    let rule_25 = assertions::errors_by_id(&results, "RS-HEXARCH-25");
-
-    assertions::assert_no_error(&results, "");
-    assert_eq!(
-        rule_25.len(),
+    rule25_assertions::assert_error_results(
+        &results,
+        "",
         1,
-        "rule 25 should own renamed target-specific dependency violations: {rule_25:#?}"
+        &["apps/backend/crates/domain/engine/Cargo.toml"],
+        &["target dependency direction violation"],
     );
-    assert!(
-        rule_18.is_empty(),
-        "rule 18 should stay out of renamed target-dependency ownership: {rule_18:#?}"
-    );
+    assertions::assert_error_count(&results, "", 0);
 }

@@ -1,4 +1,7 @@
 use super::super::audit_edge_for_test as audit_edge;
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_17_workspace_inherited_direction as rule17_assertions;
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_18_renamed_dependency_direction as rule18_assertions;
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_24_cross_app_boundary as rule24_assertions;
 use super::{dir_entry, project_tree};
 
 #[test]
@@ -38,10 +41,7 @@ fn version_only_inherited_dep_with_same_name_local_member_stays_out_of_scope() {
 
     let audit = audit_edge(&tree, "apps/api/crates/domain/core");
 
-    assert!(
-        audit.rule17.is_empty(),
-        "version-only inherited deps must not be treated as internal member edges: {audit:#?}"
-    );
+    rule17_assertions::assert_no_error(&audit.rule17, "");
 }
 
 #[test]
@@ -81,15 +81,8 @@ fn renamed_inherited_path_dep_is_owned_by_rule_17_only() {
 
     let audit = audit_edge(&tree, "apps/api/crates/domain/core");
 
-    assert_eq!(
-        audit.rule17.len(),
-        1,
-        "rule 17 should own inherited renamed path deps: {audit:#?}"
-    );
-    assert!(
-        audit.rule18.is_empty(),
-        "rule 18 should not double-report inherited renamed path deps: {audit:#?}"
-    );
+    rule17_assertions::assert_error_count(&audit.rule17, "", 1);
+    rule18_assertions::assert_no_error(&audit.rule18, "");
 }
 
 #[test]
@@ -135,15 +128,8 @@ fn cross_app_inherited_path_dep_is_owned_by_rule_24_not_rule_17() {
 
     let audit = audit_edge(&tree, "apps/backend/crates/domain/engine");
 
-    assert!(
-        audit.rule17.is_empty(),
-        "rule 17 should stay out of cross-app inherited ownership: {audit:#?}"
-    );
-    assert_eq!(
-        audit.rule24.len(),
-        1,
-        "rule 24 should own cross-app inherited path deps: {audit:#?}"
-    );
+    rule17_assertions::assert_no_error(&audit.rule17, "");
+    rule24_assertions::assert_error_count(&audit.rule24, "", 1);
 }
 
 #[test]
@@ -180,8 +166,5 @@ fn allowed_renamed_inherited_path_dep_stays_clean() {
 
     let audit = audit_edge(&tree, "apps/api/crates/app/core");
 
-    assert!(
-        audit.rule17.is_empty(),
-        "allowed renamed inherited path deps should stay clean: {audit:#?}"
-    );
+    rule17_assertions::assert_no_error(&audit.rule17, "");
 }

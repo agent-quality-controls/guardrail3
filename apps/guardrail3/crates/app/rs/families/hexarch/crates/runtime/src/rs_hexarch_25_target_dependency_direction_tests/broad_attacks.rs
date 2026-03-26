@@ -1,5 +1,3 @@
-use std::collections::BTreeSet;
-
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_25_target_dependency_direction as assertions;
 use super::{dir_entry, project_tree, run_tree};
 
@@ -59,23 +57,10 @@ fn forbidden_target_sections_error_and_allowed_target_sections_do_not() {
     );
 
     let results = super::run_tree(&tree);
-    let results = assertions::errors_by_id(&results, "");
-
-    let actual_files = results
-        .iter()
-        .filter_map(|result| result.file.clone())
-        .collect::<BTreeSet<_>>();
-    let expected_files = ["apps/api/crates/app/core/Cargo.toml".to_owned()]
-        .into_iter()
-        .collect::<BTreeSet<_>>();
-
-    assert_eq!(
-        results.len(),
+    assertions::assert_error_file_set(
+        &results,
+        "",
         3,
-        "expected one target-direction error per forbidden target section: {results:#?}"
-    );
-    assert_eq!(
-        actual_files, expected_files,
-        "unexpected target-direction hit set: {results:#?}"
+        &["apps/api/crates/app/core/Cargo.toml"],
     );
 }

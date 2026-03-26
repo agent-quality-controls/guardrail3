@@ -1,5 +1,4 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_22_ports_trait_dominance as assertions;
-use guardrail3_domain_report::Severity;
 use super::{copy_fixture, write_file};
 
 #[test]
@@ -73,21 +72,18 @@ impl InternalWorker {
     );
 
     let results = super::run_family(tmp.path());
-    let warnings = assertions::warning_results(&results, "");
+    let _warnings = assertions::warning_results(&results, "");
 
-    assert_eq!(
-        warnings.len(),
+    assertions::assert_warning_summary(
+        &results,
+        "",
         1,
-        "expected one impl-heavy warning for the split ports crate: {warnings:#?}"
+        &["apps/backend/crates/ports/outbound/repo"],
+        Some(Some("apps/backend/crates/ports/outbound/repo")),
+        Some("Ports crate `backend-ports-outbound-repo` has 4 impl blocks and 3 public traits"),
+        None,
+        &[],
     );
-    assert_eq!(warnings[0].severity, Severity::Warn);
-    assert_eq!(
-        warnings[0].file.as_deref(),
-        Some("apps/backend/crates/ports/outbound/repo")
-    );
-    assert!(warnings[0].message.contains(
-        "Ports crate `backend-ports-outbound-repo` has 4 impl blocks and 3 public traits"
-    ));
 }
 
 #[test]
@@ -141,13 +137,5 @@ pub struct InternalDto {
     );
 
     let results = super::run_family(tmp.path());
-    let warnings: Vec<_> = results
-        .iter()
-        .filter(|result| result.id == "")
-        .collect();
-
-    assert!(
-        warnings.is_empty(),
-        "expected multi-module DTO-only ports layout to stay clean, got: {warnings:#?}"
-    );
+    assertions::assert_no_error(&results, "");
 }

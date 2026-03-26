@@ -1,5 +1,3 @@
-use std::collections::BTreeSet;
-
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_18_renamed_dependency_direction as assertions;
 use super::{copy_fixture, write_file};
 
@@ -18,27 +16,14 @@ fn forbidden_renamed_edges_error_and_unrenamed_edges_do_not() {
     );
 
     let results = super::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "");
-
-    let actual_files = errors
-        .iter()
-        .filter_map(|result| result.file.clone())
-        .collect::<BTreeSet<_>>();
-    let expected_files = [
-        "apps/backend/crates/domain/engine/Cargo.toml".to_owned(),
-        "apps/backend/crates/ports/outbound/repo/Cargo.toml".to_owned(),
-    ]
-    .into_iter()
-    .collect::<BTreeSet<_>>();
-
-    assert_eq!(
-        actual_files, expected_files,
-        "unexpected renamed-direction hit set: {errors:#?}"
-    );
-    assert_eq!(
-        errors.len(),
+    assertions::assert_error_file_set(
+        &results,
+        "",
         2,
-        "expected exactly two renamed-direction errors: {errors:#?}"
+        &[
+            "apps/backend/crates/domain/engine/Cargo.toml",
+            "apps/backend/crates/ports/outbound/repo/Cargo.toml",
+        ],
     );
 }
 
@@ -52,29 +37,13 @@ fn messages_name_both_alias_and_package_for_each_forbidden_edge() {
     );
 
     let results = super::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "");
-    assert_eq!(
-        errors.len(),
-        2,
-        "expected both forbidden renamed edges from one manifest to be reported: {errors:#?}"
-    );
-
-    let messages = errors
-        .iter()
-        .map(|result| result.message.as_str())
-        .collect::<Vec<_>>();
-    assert!(
-        messages.iter().any(|message| {
-            message.contains("alias `commands_alias`")
-                && message.contains("package `backend-app-commands`")
-        }),
-        "expected one message to name the app alias and package: {messages:#?}"
-    );
-    assert!(
-        messages.iter().any(|message| {
-            message.contains("alias `queue_alias`")
-                && message.contains("package `backend-adapters-outbound-queue`")
-        }),
-        "expected one message to name the adapter alias and package: {messages:#?}"
+    assertions::assert_error_count(&results, "", 2);
+    assertions::assert_error_messages_contain(
+        &results,
+        "",
+        &[
+            &["alias `commands_alias`", "package `backend-app-commands`"],
+            &["alias `queue_alias`", "package `backend-adapters-outbound-queue`"],
+        ],
     );
 }

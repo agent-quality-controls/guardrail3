@@ -1,5 +1,3 @@
-use std::collections::BTreeSet;
-
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_13_dependency_direction as assertions;
 use super::{copy_fixture, write_file};
 
@@ -18,25 +16,13 @@ fn forbidden_same_app_normal_edges_error_and_allowed_edges_do_not() {
     );
 
     let results = super::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "");
-    let actual_files = errors
-        .iter()
-        .filter_map(|error| error.file.clone())
-        .collect::<BTreeSet<_>>();
-    let expected_files = [
-        "apps/backend/crates/domain/engine/Cargo.toml".to_owned(),
-        "apps/backend/crates/ports/outbound/repo/Cargo.toml".to_owned(),
-    ]
-    .into_iter()
-    .collect::<BTreeSet<_>>();
-
-    assert_eq!(
-        actual_files, expected_files,
-        "unexpected direction-violation hit set: {errors:#?}"
-    );
-    assert_eq!(
-        errors.len(),
+    assertions::assert_error_file_set(
+        &results,
+        "",
         3,
-        "expected one result per forbidden edge, not just per file: {errors:#?}"
+        &[
+            "apps/backend/crates/domain/engine/Cargo.toml",
+            "apps/backend/crates/ports/outbound/repo/Cargo.toml",
+        ],
     );
 }

@@ -101,21 +101,10 @@ fn missing_entrypoint_errors_instead_of_scanning_root_rs_files_as_entrypoints() 
     );
 
     let results = super::run_family(tmp.path());
-    let errors = assertions::error_results(&results, "");
-
-    assert_eq!(
-        errors.len(),
-        1,
-        "missing entrypoints should fail closed once instead of scanning orphan root files: {errors:#?}"
+    assertions::assert_error_file_single(
+        &results,
+        "",
+        "apps/backend/crates/adapters/outbound/postgres/src",
     );
-    assert_eq!(
-        errors[0].file.as_deref(),
-        Some("apps/backend/crates/adapters/outbound/postgres/src")
-    );
-    assert!(
-        errors[0]
-            .message
-            .contains("expected src/lib.rs or src/main.rs"),
-        "expected explicit missing-entrypoint source error: {errors:#?}"
-    );
+    assertions::assert_error_message_contains(&results, "", &["expected src/lib.rs or src/main.rs"]);
 }

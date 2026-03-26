@@ -1,5 +1,3 @@
-use std::collections::BTreeSet;
-
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_15_boundary_config as assertions;
 use super::copy_fixture;
 
@@ -24,21 +22,14 @@ fn missing_all_app_boundaries_hits_each_app_boundary() {
     std::fs::write(&guardrail_path, updated).expect("remove all app boundary configs");
 
     let results = super::run_family(tmp.path());
-    let titles = results
-        .iter()
-        .filter(|result| result.id == "")
-        .map(|result| result.title.clone())
-        .collect::<BTreeSet<_>>();
-    let expected = [
-        "app boundary `apps/backend` missing rust.apps config".to_owned(),
-        "app boundary `apps/devctl` missing rust.apps config".to_owned(),
-        "app boundary `apps/worker` missing rust.apps config".to_owned(),
-    ]
-    .into_iter()
-    .collect::<BTreeSet<_>>();
-
-    assert_eq!(
-        titles, expected,
-        "missing app config should be reported for every app boundary: {results:#?}"
+    assertions::assert_title_set(
+        &results,
+        "",
+        3,
+        &[
+            "app boundary `apps/backend` missing rust.apps config",
+            "app boundary `apps/devctl` missing rust.apps config",
+            "app boundary `apps/worker` missing rust.apps config",
+        ],
     );
 }

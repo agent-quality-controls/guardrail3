@@ -1,5 +1,3 @@
-use std::collections::BTreeSet;
-
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_16_patch_replace_bypass as assertions;
 use super::{copy_fixture, write_file};
 
@@ -13,21 +11,12 @@ fn fixture_backed_patch_and_replace_only_error_for_layered_targets() {
     );
 
     let results = super::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "");
-    let actual_titles = errors
-        .iter()
-        .map(|result| result.title.clone())
-        .collect::<BTreeSet<_>>();
-    let expected_titles = [
-        "patch/replace entry `backend-domain-types` bypasses hexarch dependency checks".to_owned(),
-        "patch/replace entry `backend-domain-engine:0.1.0` bypasses hexarch dependency checks"
-            .to_owned(),
-    ]
-    .into_iter()
-    .collect::<BTreeSet<_>>();
-
-    assert_eq!(
-        actual_titles, expected_titles,
-        "unexpected patch/replace hit set: {errors:#?}"
+    assertions::assert_error_title_set(
+        &results,
+        "",
+        &[
+            "patch/replace entry `backend-domain-types` bypasses hexarch dependency checks",
+            "patch/replace entry `backend-domain-engine:0.1.0` bypasses hexarch dependency checks",
+        ],
     );
 }

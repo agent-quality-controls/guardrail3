@@ -54,10 +54,7 @@ fn domain_and_ports_path_deps_do_not_trigger_domain_purity() {
         DomainPurityEdgeKindForTest::Dependency,
     );
 
-    assert!(
-        results.is_empty(),
-        "pure domain and ports path dependencies should not trigger domain purity: {results:#?}"
-    );
+    assertions::assert_no_error(&results, "");
 }
 
 #[test]

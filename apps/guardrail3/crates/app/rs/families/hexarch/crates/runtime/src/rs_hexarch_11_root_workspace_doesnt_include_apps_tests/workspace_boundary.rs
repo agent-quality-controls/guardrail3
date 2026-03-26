@@ -1,5 +1,3 @@
-use std::collections::BTreeSet;
-
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_11_root_workspace_doesnt_include_apps as assertions;
 use super::{copy_fixture, write_file};
 
@@ -13,26 +11,16 @@ fn root_workspace_including_all_rust_apps_hits_every_owned_app_member() {
     );
 
     let results = super::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "");
-    let actual_titles = errors
-        .iter()
-        .map(|error| error.title.clone())
-        .collect::<BTreeSet<_>>();
-    let expected_titles = [
-        "root workspace includes app member `apps/devctl`".to_owned(),
-        "root workspace includes app member `apps/backend`".to_owned(),
-        "root workspace includes app member `apps/worker`".to_owned(),
-    ]
-    .into_iter()
-    .collect::<BTreeSet<_>>();
-
-    assert_eq!(
-        actual_titles, expected_titles,
-        "unexpected hit set: {errors:#?}"
+    assertions::assert_error_title_set(
+        &results,
+        "",
+        &[
+            "root workspace includes app member `apps/devctl`",
+            "root workspace includes app member `apps/backend`",
+            "root workspace includes app member `apps/worker`",
+        ],
     );
-    for error in &errors {
-        assert_eq!(error.file.as_deref(), Some("Cargo.toml"));
-    }
+    assertions::assert_error_file_set(&results, "", 3, &["Cargo.toml"]);
 }
 
 #[test]
@@ -45,14 +33,13 @@ fn normalized_root_workspace_app_member_still_hits_rule_11() {
     );
 
     let results = super::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "");
-
-    assert_eq!(
-        errors.len(),
+    assertions::assert_error_title_contains(
+        &results,
+        "",
         1,
-        "expected one normalized app-member hit: {errors:#?}"
+        &["Cargo.toml"],
+        &["./apps/devctl/"],
     );
-    assert!(errors[0].title.contains("./apps/devctl/"));
 }
 
 #[test]
@@ -68,14 +55,13 @@ fn absolute_root_workspace_app_member_still_hits_rule_11() {
     );
 
     let results = super::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "");
-
-    assert_eq!(
-        errors.len(),
+    assertions::assert_error_title_contains(
+        &results,
+        "",
         1,
-        "expected one absolute app-member hit: {errors:#?}"
+        &["Cargo.toml"],
+        &[&absolute_member],
     );
-    assert!(errors[0].title.contains(&absolute_member));
 }
 
 #[test]
@@ -88,10 +74,13 @@ fn app_subpath_member_still_hits_rule_11() {
     );
 
     let results = super::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "");
-
-    assert_eq!(errors.len(), 1, "expected one app-subpath hit: {errors:#?}");
-    assert!(errors[0].title.contains("apps/devctl/crates/domain/types"));
+    assertions::assert_error_title_contains(
+        &results,
+        "",
+        1,
+        &["Cargo.toml"],
+        &["apps/devctl/crates/domain/types"],
+    );
 }
 
 #[test]
@@ -104,14 +93,12 @@ fn root_workspace_glob_covering_apps_hits_every_owned_app_member() {
     );
 
     let results = super::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "");
-
-    assert_eq!(errors.len(), 1, "expected one glob-member hit: {errors:#?}");
-    assert!(
-        errors
-            .iter()
-            .all(|error| error.title == "root workspace includes app member `apps/*`")
+    assertions::assert_error_title_set(
+        &results,
+        "",
+        &["root workspace includes app member `apps/*`"],
     );
+    assertions::assert_error_file_set(&results, "", 1, &["Cargo.toml"]);
 }
 
 #[test]
@@ -124,10 +111,5 @@ fn normalized_package_member_does_not_false_positive_under_rule_11() {
     );
 
     let results = super::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "");
-
-    assert!(
-        errors.is_empty(),
-        "packages members should stay out of rule 11: {errors:#?}"
-    );
+    assertions::assert_no_error(&results, "");
 }

@@ -1,4 +1,5 @@
 use super::super::{run_source_case, SourceCrateLayerForTest};
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_22_ports_trait_dominance as assertions;
 
 #[test]
 fn impl_heavy_ports_warns() {
@@ -12,11 +13,7 @@ fn impl_heavy_ports_warns() {
         None,
     );
 
-    assert_eq!(
-        results.len(),
-        1,
-        "expected one trait-dominance warning: {results:#?}"
-    );
+    assertions::assert_warning_count(&results, "", 1);
 }
 
 #[test]
@@ -31,10 +28,7 @@ fn equal_impl_and_public_trait_counts_do_not_warn() {
         None,
     );
 
-    assert!(
-        results.is_empty(),
-        "expected no warning when impls and public traits are balanced: {results:#?}"
-    );
+    assertions::assert_no_warning(&results, "");
 }
 
 #[test]
@@ -49,10 +43,7 @@ fn dto_only_ports_crate_stays_clean() {
         None,
     );
 
-    assert!(
-        results.is_empty(),
-        "expected DTO-only ports crates to stay clean: {results:#?}"
-    );
+    assertions::assert_no_warning(&results, "");
 }
 
 #[test]
@@ -67,8 +58,5 @@ fn non_ports_crates_are_ignored() {
         None,
     );
 
-    assert!(
-        results.is_empty(),
-        "expected non-ports crates to be ignored by rule 22: {results:#?}"
-    );
+    assertions::assert_no_warning(&results, "");
 }

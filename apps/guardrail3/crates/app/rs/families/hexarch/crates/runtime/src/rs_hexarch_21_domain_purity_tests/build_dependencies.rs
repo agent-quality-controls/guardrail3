@@ -1,5 +1,4 @@
-use std::collections::BTreeSet;
-
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_21_domain_purity as assertions;
 use super::super::{run_domain_purity_case, DomainPurityEdgeKindForTest};
 use super::{dir_entry, project_tree};
 
@@ -44,18 +43,12 @@ fn build_dependencies_are_in_scope_for_domain_purity() {
         DomainPurityEdgeKindForTest::BuildDependency,
     );
 
-    let actual_titles = results
-        .iter()
-        .map(|result| result.title.clone())
-        .collect::<BTreeSet<_>>();
-    let expected_titles = [
-        "domain crate `api-domain-core` depends on disallowed external crate `tokio`".to_owned(),
-        "domain crate `api-domain-core` depends on non-pure layer".to_owned(),
-    ]
-    .into_iter()
-    .collect::<BTreeSet<_>>();
-    assert_eq!(
-        actual_titles, expected_titles,
-        "build dependencies should be treated as real domain dependencies: {results:#?}"
+    assertions::assert_error_title_set(
+        &results,
+        "",
+        &[
+            "domain crate `api-domain-core` depends on disallowed external crate `tokio`",
+            "domain crate `api-domain-core` depends on non-pure layer",
+        ],
     );
 }
