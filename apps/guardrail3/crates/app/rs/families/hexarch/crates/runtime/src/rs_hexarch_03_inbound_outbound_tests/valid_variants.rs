@@ -28,11 +28,12 @@ fn unexpected_directional_dir_hits_only_the_mutated_owned_container() {
 #[test]
 fn unexpected_dir_in_adapters_hits_all_owned_outer_and_nested_containers() {
     let tmp = copy_fixture();
+    let inner_adapters = format!("{}/adapters", inner_hex());
     for dir in [
         "apps/devctl/crates/adapters",
         "apps/backend/crates/adapters",
         "apps/worker/crates/adapters",
-        &format!("{}/adapters", inner_hex()),
+        inner_adapters.as_str(),
     ] {
         write_file(tmp.path(), &format!("{dir}/shared/.gitkeep"), "");
     }
@@ -46,7 +47,7 @@ fn unexpected_dir_in_adapters_hits_all_owned_outer_and_nested_containers() {
             "apps/devctl/crates/adapters",
             "apps/backend/crates/adapters",
             "apps/worker/crates/adapters",
-            format!("{}/adapters", inner_hex()),
+            inner_adapters.as_str(),
         ],
         None,
         Some(&["unexpected", "shared"]),
@@ -58,11 +59,12 @@ fn unexpected_dir_in_adapters_hits_all_owned_outer_and_nested_containers() {
 #[test]
 fn unexpected_dir_in_ports_hits_all_owned_outer_and_nested_containers() {
     let tmp = copy_fixture();
+    let inner_ports = format!("{}/ports", inner_hex());
     for dir in [
         "apps/devctl/crates/ports",
         "apps/backend/crates/ports",
         "apps/worker/crates/ports",
-        &format!("{}/ports", inner_hex()),
+        inner_ports.as_str(),
     ] {
         write_file(tmp.path(), &format!("{dir}/common/.gitkeep"), "");
     }
@@ -76,7 +78,7 @@ fn unexpected_dir_in_ports_hits_all_owned_outer_and_nested_containers() {
             "apps/devctl/crates/ports",
             "apps/backend/crates/ports",
             "apps/worker/crates/ports",
-            format!("{}/ports", inner_hex()),
+            inner_ports.as_str(),
         ],
         None,
         Some(&["unexpected", "common"]),
@@ -88,6 +90,8 @@ fn unexpected_dir_in_ports_hits_all_owned_outer_and_nested_containers() {
 #[test]
 fn deep_unexpected_dir_tree_blames_only_the_top_level_unexpected_dir() {
     let tmp = copy_fixture();
+    let inner_adapters = format!("{}/adapters", inner_hex());
+    let inner_ports = format!("{}/ports", inner_hex());
     for dir in [
         "apps/devctl/crates/adapters",
         "apps/backend/crates/adapters",
@@ -95,8 +99,8 @@ fn deep_unexpected_dir_tree_blames_only_the_top_level_unexpected_dir() {
         "apps/devctl/crates/ports",
         "apps/backend/crates/ports",
         "apps/worker/crates/ports",
-        &format!("{}/adapters", inner_hex()),
-        &format!("{}/ports", inner_hex()),
+        inner_adapters.as_str(),
+        inner_ports.as_str(),
     ] {
         write_file(
             tmp.path(),
@@ -117,8 +121,8 @@ fn deep_unexpected_dir_tree_blames_only_the_top_level_unexpected_dir() {
             "apps/devctl/crates/ports",
             "apps/backend/crates/ports",
             "apps/worker/crates/ports",
-            format!("{}/adapters", inner_hex()),
-            format!("{}/ports", inner_hex()),
+            inner_adapters.as_str(),
+            inner_ports.as_str(),
         ],
         None,
         Some(&["utils"]),

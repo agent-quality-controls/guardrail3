@@ -38,6 +38,5 @@ fn replacing_real_child_dirs_with_files_hits_only_the_still_nonempty_containers(
         None,
         None,
         Some(&["that don't belong"]),
-        Some(&[".gitkeep"]),
     );
 }

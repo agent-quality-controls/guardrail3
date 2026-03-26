@@ -362,6 +362,5 @@ fn all_four_required_dirs_missing_with_gitkeep_still_emit_only_missing_dir_resul
         Some(&["missing"]),
         Some(&["loose files"]),
         None,
-        None,
     );
 }
