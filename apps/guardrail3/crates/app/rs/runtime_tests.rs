@@ -242,3 +242,42 @@ fn arch_runtime_still_reports_scoped_arch_config_when_global_arch_is_disabled() 
 
     fs::remove_dir_all(&root).expect("cleanup temp root");
 }
+
+#[test]
+fn arch_runtime_reports_fail_closed_results_for_malformed_guardrail_config() {
+    let root = temp_root("arch-runtime-malformed-config");
+    write_file(&root, "guardrail3.toml", "[rust.checks]\nhexarch = \"nope\"\n");
+    write_file(
+        &root,
+        "tools/worker/Cargo.toml",
+        "[package]\nname = \"worker\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+
+    let report = run(
+        &LocalFs,
+        &root,
+        None,
+        &[RustValidateFamily::Arch],
+        false,
+        &StubToolChecker,
+    )
+    .expect("arch runtime report");
+
+    assert_eq!(report.sections.len(), 1, "unexpected sections: {report:#?}");
+    assert_eq!(report.sections[0].name, "arch");
+    let ids = report.sections[0]
+        .results
+        .iter()
+        .map(|result| result.id.as_str())
+        .collect::<Vec<_>>();
+    assert!(
+        ids.contains(&"RS-ARCH-02"),
+        "expected misplaced-root reporting after malformed config parse failure: {report:#?}"
+    );
+    assert!(
+        ids.contains(&"RS-ARCH-07"),
+        "expected required-input fail-closed reporting for malformed config: {report:#?}"
+    );
+
+    fs::remove_dir_all(&root).expect("cleanup temp root");
+}

@@ -45,7 +45,6 @@ impl<'a> FamilyMapper<'a> {
                 roots: Vec::new(),
                 overlaps: Vec::new(),
                 input_failures: Vec::new(),
-                reporting_enabled: false,
             };
         }
 
@@ -82,7 +81,6 @@ impl<'a> FamilyMapper<'a> {
                     message: failure.message.clone(),
                 })
                 .collect(),
-            reporting_enabled: misplaced_root_reporting_enabled(self.config),
         }
     }
 
@@ -284,46 +282,4 @@ fn effective_family_flag(
     checks
         .and_then(|value| value.family_enabled(family))
         .unwrap_or(global)
-}
-
-fn misplaced_root_reporting_enabled(config: Option<&GuardrailConfig>) -> bool {
-    let Some(rust) = config.and_then(|value| value.rust.as_ref()) else {
-        return true;
-    };
-
-    let arch_enabled = rust
-        .checks
-        .as_ref()
-        .and_then(|checks| checks.arch)
-        .unwrap_or(true);
-    let global_hexarch_enabled = rust
-        .checks
-        .as_ref()
-        .and_then(|checks| checks.hexarch)
-        .unwrap_or(true);
-    let global_libarch_enabled = rust
-        .checks
-        .as_ref()
-        .and_then(|checks| checks.libarch)
-        .unwrap_or(true);
-    let app_hexarch_enabled = rust.apps.as_ref().is_some_and(|apps| {
-        apps.values().any(|app| {
-            app.checks
-                .as_ref()
-                .and_then(|checks| checks.hexarch)
-                .unwrap_or(global_hexarch_enabled)
-        })
-    });
-    let packages_libarch_enabled = rust
-        .packages
-        .as_ref()
-        .and_then(|packages| packages.checks.as_ref())
-        .and_then(|checks| checks.libarch)
-        .unwrap_or(global_libarch_enabled);
-
-    arch_enabled
-        && (global_hexarch_enabled
-            || global_libarch_enabled
-            || app_hexarch_enabled
-            || packages_libarch_enabled)
 }

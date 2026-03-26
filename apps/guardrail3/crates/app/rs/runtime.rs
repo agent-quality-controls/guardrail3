@@ -47,7 +47,11 @@ pub fn run(
     tc: &dyn ToolChecker,
 ) -> Result<Report, String> {
     let tree = project_walker::walk_project(fs, path);
-    let config = load_config(&tree)?;
+    let config = match load_config(&tree) {
+        Ok(config) => config,
+        Err(_error) if requested_families == [RustValidateFamily::Arch] => None,
+        Err(error) => return Err(error),
+    };
     let scope = placement::collect(&tree);
     let selected = family_selection::resolve(&tree, config.as_ref(), requested_families);
     let applicability = collect_family_applicability(config.as_ref());

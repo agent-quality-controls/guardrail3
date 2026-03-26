@@ -56,6 +56,7 @@ pub struct ArchFacts {
 
 #[derive(Debug, Clone)]
 struct ConfigResolution {
+    arch_enabled: bool,
     global_hexarch_enabled: bool,
     packages_libarch_enabled: bool,
     app_hexarch_enabled: BTreeMap<String, bool>,
@@ -98,7 +99,7 @@ pub fn collect(tree: &ProjectTree, route: &RsArchRoute) -> ArchFacts {
         overlaps,
         governed_roots,
         input_failures,
-        misplaced_root_reporting_enabled: route.reporting_enabled,
+        misplaced_root_reporting_enabled: misplaced_root_reporting_enabled(&config),
     }
 }
 
@@ -106,6 +107,7 @@ fn resolve_config(tree: &ProjectTree) -> ConfigResolution {
     let Some(content) = tree.file_content("guardrail3.toml") else {
         if tree.file_exists("guardrail3.toml") {
             return ConfigResolution {
+                arch_enabled: true,
                 global_hexarch_enabled: true,
                 packages_libarch_enabled: true,
                 app_hexarch_enabled: BTreeMap::new(),
@@ -120,6 +122,7 @@ fn resolve_config(tree: &ProjectTree) -> ConfigResolution {
         }
 
         return ConfigResolution {
+            arch_enabled: true,
             global_hexarch_enabled: true,
             packages_libarch_enabled: true,
             app_hexarch_enabled: BTreeMap::new(),
@@ -130,6 +133,10 @@ fn resolve_config(tree: &ProjectTree) -> ConfigResolution {
     match toml::from_str::<GuardrailConfig>(content) {
         Ok(config) => {
             let rust = config.rust.as_ref();
+            let arch_enabled = rust
+                .and_then(|value| value.checks.as_ref())
+                .and_then(|checks| checks.arch)
+                .unwrap_or(true);
             let global_hexarch_enabled = rust
                 .and_then(|value| value.checks.as_ref())
                 .and_then(|checks| checks.hexarch)
@@ -164,6 +171,7 @@ fn resolve_config(tree: &ProjectTree) -> ConfigResolution {
             failures.sort_by(|left, right| left.message.cmp(&right.message));
 
             ConfigResolution {
+                arch_enabled,
                 global_hexarch_enabled,
                 packages_libarch_enabled,
                 app_hexarch_enabled,
@@ -171,6 +179,7 @@ fn resolve_config(tree: &ProjectTree) -> ConfigResolution {
             }
         }
         Err(parse_error) => ConfigResolution {
+            arch_enabled: true,
             global_hexarch_enabled: true,
             packages_libarch_enabled: true,
             app_hexarch_enabled: BTreeMap::new(),
@@ -183,6 +192,17 @@ fn resolve_config(tree: &ProjectTree) -> ConfigResolution {
             }],
         },
     }
+}
+
+fn misplaced_root_reporting_enabled(config: &ConfigResolution) -> bool {
+    config.arch_enabled
+        && (config.global_hexarch_enabled
+            || config
+                .app_hexarch_enabled
+                .values()
+                .copied()
+                .any(std::convert::identity)
+            || config.packages_libarch_enabled)
 }
 
 fn scoped_arch_failures(config: &GuardrailConfig) -> Vec<ArchInputFailureFacts> {
