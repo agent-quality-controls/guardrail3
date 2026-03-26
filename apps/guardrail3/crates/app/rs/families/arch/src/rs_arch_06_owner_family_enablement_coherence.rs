@@ -1,0 +1,42 @@
+use guardrail3_app_rs_placement::RustArchitectureOwner;
+use guardrail3_domain_report::{CheckResult, Severity};
+
+use super::inputs::OwnerFamilyCoherenceInput;
+
+const ID: &str = "RS-ARCH-06";
+
+pub fn check(input: &OwnerFamilyCoherenceInput<'_>, results: &mut Vec<CheckResult>) {
+    if input.root.effective_enabled {
+        return;
+    }
+
+    let family_label = match input.root.owner {
+        RustArchitectureOwner::Hexarch => "hexarch",
+        RustArchitectureOwner::Libarch => "libarch",
+    };
+    results.push(CheckResult {
+        id: ID.to_owned(),
+        severity: Severity::Error,
+        title: format!(
+            "Rust {} root `{}` is not governed by {}",
+            input.root.owner.label(),
+            display_dir(&input.root.rel_dir),
+            family_label
+        ),
+        message: format!(
+            "`{}` classifies under `{}`, but effective `{}` enablement resolves to false. Governed Rust roots must stay coherent with their owning architecture family.",
+            input.root.cargo_rel_path, input.root.owner_root_rel, family_label
+        ),
+        file: Some(input.root.cargo_rel_path.clone()),
+        line: None,
+        inventory: false,
+    });
+}
+
+fn display_dir(rel_dir: &str) -> &str {
+    if rel_dir.is_empty() { "." } else { rel_dir }
+}
+
+#[cfg(test)]
+#[path = "rs_arch_06_owner_family_enablement_coherence_tests/mod.rs"]
+mod tests;

@@ -11,7 +11,6 @@ use guardrail3_app_rs_family_deps as deps;
 use guardrail3_app_rs_family_fmt as fmt;
 use guardrail3_app_rs_family_garde as garde;
 use guardrail3_app_rs_family_hexarch as hexarch;
-use guardrail3_app_rs_family_hooks_rs as hooks_rs;
 use guardrail3_app_rs_family_hooks_shared as hooks_shared;
 use guardrail3_app_rs_family_release as release;
 use guardrail3_app_rs_family_test as test;
@@ -66,7 +65,7 @@ pub fn run(
             RustValidateFamily::Test => test::check(&tree, tc, scoped_files),
             RustValidateFamily::Release => release::check(&tree, tc, thorough),
             RustValidateFamily::HooksShared => hooks_shared::check(fs, path, &tree, tc),
-            RustValidateFamily::HooksRs => hooks_rs::check(&tree, tc),
+            RustValidateFamily::HooksRs => Vec::new(),
         };
         let results = match applicability.get(&family) {
             Some(value) => filter_results_for_applicability(path, value, results),
@@ -100,10 +99,20 @@ fn family_applicability(
     family: RustValidateFamily,
     rust: Option<&RustConfig>,
 ) -> RustFamilyApplicability {
+    let global_only = family_uses_global_only(family);
     let global_enabled = rust
         .and_then(|value| value.checks.as_ref())
         .and_then(|checks| checks.family_enabled(family))
         .unwrap_or(true);
+
+    if global_only {
+        return RustFamilyApplicability {
+            global_enabled,
+            app_enabled: BTreeMap::new(),
+            packages_enabled: None,
+            global_only: true,
+        };
+    }
 
     let app_enabled = rust
         .and_then(|value| value.apps.as_ref())
@@ -127,7 +136,7 @@ fn family_applicability(
         global_enabled,
         app_enabled,
         packages_enabled,
-        global_only: family_uses_global_only(family),
+        global_only: false,
     }
 }
 

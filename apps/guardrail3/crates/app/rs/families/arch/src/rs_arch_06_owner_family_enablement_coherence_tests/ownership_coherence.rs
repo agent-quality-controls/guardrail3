@@ -4,7 +4,7 @@ use super::super::super::test_support::{
 
 #[test]
 fn app_roots_error_when_effective_hexarch_enablement_is_false() {
-    let config = "[rust.checks]\nhexarch = true\nlibarch = true\n\n[rust.apps.backend.checks]\nhexarch = false\n";
+    let config = "[rust.checks]\narch = true\nhexarch = false\nlibarch = true\n";
     let results = check_results(&tree(
         &[
             ("", entry(&["apps"], &["guardrail3.toml"])),
@@ -17,11 +17,11 @@ fn app_roots_error_when_effective_hexarch_enablement_is_false() {
         ],
     ));
 
-    assert_error_files(&results, "RS-ARCH-05", &["apps/backend/Cargo.toml"]);
+    assert_error_files(&results, "RS-ARCH-06", &["apps/backend/Cargo.toml"]);
     assert!(
-        error_results(&results, "RS-ARCH-05")
+        error_results(&results, "RS-ARCH-06")
             .iter()
             .all(|result| result.severity == guardrail3_domain_report::Severity::Error),
-        "RS-ARCH-05 severity drifted: {results:#?}"
+        "RS-ARCH-06 severity drifted: {results:#?}"
     );
 }

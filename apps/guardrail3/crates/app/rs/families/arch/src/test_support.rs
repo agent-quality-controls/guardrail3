@@ -2,8 +2,8 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::path::PathBuf;
 
 use super::check;
-use guardrail3_domain_report::{CheckResult, Severity};
 use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
+use guardrail3_domain_report::{CheckResult, Severity};
 
 pub const APP_WORKSPACE_CARGO: &str = "[workspace]\nmembers = []\nresolver = \"2\"\n";
 pub const PACKAGE_CARGO: &str = "[package]\nname = \"shared\"\nedition = \"2024\"\n";
@@ -42,6 +42,13 @@ pub fn error_results<'a>(results: &'a [CheckResult], id: &str) -> Vec<&'a CheckR
         .collect()
 }
 
+pub fn info_results<'a>(results: &'a [CheckResult], id: &str) -> Vec<&'a CheckResult> {
+    results
+        .iter()
+        .filter(|result| result.id == id && result.severity == Severity::Info)
+        .collect()
+}
+
 pub fn error_files(results: &[CheckResult], id: &str) -> BTreeSet<String> {
     error_results(results, id)
         .into_iter()
@@ -49,8 +56,24 @@ pub fn error_files(results: &[CheckResult], id: &str) -> BTreeSet<String> {
         .collect()
 }
 
+pub fn info_files(results: &[CheckResult], id: &str) -> BTreeSet<String> {
+    info_results(results, id)
+        .into_iter()
+        .filter_map(|result| result.file.clone())
+        .collect()
+}
+
 pub fn assert_error_files(results: &[CheckResult], id: &str, expected: &[&str]) {
     let actual = error_files(results, id);
+    let expected = expected
+        .iter()
+        .map(|path| (*path).to_owned())
+        .collect::<BTreeSet<_>>();
+    assert_eq!(actual, expected, "unexpected {id} hit set: {results:#?}");
+}
+
+pub fn assert_info_files(results: &[CheckResult], id: &str, expected: &[&str]) {
+    let actual = info_files(results, id);
     let expected = expected
         .iter()
         .map(|path| (*path).to_owned())

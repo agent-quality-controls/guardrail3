@@ -4,7 +4,7 @@ use super::super::super::test_support::{
 
 #[test]
 fn package_roots_error_when_effective_libarch_enablement_is_false() {
-    let config = "[rust.checks]\nhexarch = true\nlibarch = true\n\n[rust.packages.checks]\nlibarch = false\n";
+    let config = "[rust.checks]\narch = true\nhexarch = true\nlibarch = false\n";
     let results = check_results(&tree(
         &[
             ("", entry(&["packages"], &["guardrail3.toml"])),
@@ -17,5 +17,5 @@ fn package_roots_error_when_effective_libarch_enablement_is_false() {
         ],
     ));
 
-    assert_error_files(&results, "RS-ARCH-05", &["packages/shared/Cargo.toml"]);
+    assert_error_files(&results, "RS-ARCH-06", &["packages/shared/Cargo.toml"]);
 }
