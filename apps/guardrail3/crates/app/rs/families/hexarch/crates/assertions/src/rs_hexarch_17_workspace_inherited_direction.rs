@@ -1,3 +1,5 @@
+use std::collections::BTreeSet;
+
 use guardrail3_domain_report::{CheckResult, Severity};
 
 const RULE_ID: &str = "RS-HEXARCH-17";
@@ -60,4 +62,44 @@ pub fn assert_error_results(
 ) {
     let errors = error_results(results, rule_id);
     assert_result_summary(&errors, expected_count, expected_files, None, None, None);
+}
+
+pub fn assert_error_count(results: &[CheckResult], rule_id: &str, expected_count: usize) {
+    let errors = error_results(results, rule_id);
+    assert_eq!(errors.len(), expected_count, "{errors:#?}");
+}
+
+pub fn assert_error_file_set(
+    results: &[CheckResult],
+    rule_id: &str,
+    expected_count: usize,
+    expected_files: &[&str],
+) {
+    let errors = error_results(results, rule_id);
+    assert_result_summary(&errors, expected_count, expected_files, None, None, None);
+}
+
+pub fn assert_error_file_set_eq(results: &[CheckResult], rule_id: &str, expected_files: &[&str]) {
+    let errors = error_results(results, rule_id);
+    let expected_files = expected_files
+        .iter()
+        .map(|file| file.to_string())
+        .collect::<BTreeSet<_>>();
+    let actual_files = errors
+        .iter()
+        .filter_map(|result| result.file.as_deref())
+        .map(ToOwned::to_owned)
+        .collect::<BTreeSet<_>>();
+    assert_eq!(actual_files, expected_files, "{errors:#?}");
+}
+
+pub fn assert_error_title_contains(
+    results: &[CheckResult],
+    rule_id: &str,
+    expected_count: usize,
+    required_title_substrings: &[&str],
+) {
+    let errors = error_results(results, rule_id);
+    assert_eq!(errors.len(), expected_count, "{errors:#?}");
+    assert_all_titles_contain(&errors, required_title_substrings);
 }

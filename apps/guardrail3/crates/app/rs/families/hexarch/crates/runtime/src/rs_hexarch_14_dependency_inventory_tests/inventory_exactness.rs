@@ -13,14 +13,6 @@ fn fixture_backed_path_dependencies_are_inventoried_with_exact_messages() {
     );
 
     let results = super::run_family(tmp.path());
-    let actual_messages = results
-        .iter()
-        .filter(|result| {
-            result.id == ""
-                && result.file.as_deref() == Some("apps/backend/crates/app/queries/Cargo.toml")
-        })
-        .map(|result| result.message.clone())
-        .collect::<BTreeSet<_>>();
     let expected_messages = [
         "`apps/backend/crates/app/queries` depends on `backend-domain-types` via `dependencies` resolved to `apps/backend/crates/domain/types`.".to_owned(),
         "`apps/backend/crates/app/queries` depends on `shared-types` via `dev-dependencies` resolved to `packages/shared-types`.".to_owned(),
@@ -32,19 +24,11 @@ fn fixture_backed_path_dependencies_are_inventoried_with_exact_messages() {
     .into_iter()
     .collect::<BTreeSet<_>>();
 
-    assert_eq!(
-        actual_messages, expected_messages,
-        "unexpected inventory results: {results:#?}"
-    );
-    assert!(
-        results
-            .iter()
-            .filter(|result| {
-                result.id == ""
-                    && result.file.as_deref() == Some("apps/backend/crates/app/queries/Cargo.toml")
-            })
-            .all(|result| result.inventory),
-        "inventory results should be marked as inventory: {results:#?}"
+    assertions::assert_inventory_results(
+        &results,
+        "apps/backend/crates/app/queries/Cargo.toml",
+        6,
+        &expected_messages.iter().map(String::as_str).collect::<Vec<_>>(),
     );
 }
 
@@ -58,20 +42,17 @@ fn broken_path_dependencies_are_not_inventoried() {
     );
 
     let results = super::run_family(tmp.path());
-    let inventory_messages = results
-        .iter()
-        .filter(|result| {
-            result.id == ""
-                && result.file.as_deref() == Some("apps/backend/crates/app/queries/Cargo.toml")
-        })
-        .map(|result| result.message.clone())
-        .collect::<BTreeSet<_>>();
     let expected_messages = ["`apps/backend/crates/app/queries` depends on `backend-domain-types` via `dependencies` resolved to `apps/backend/crates/domain/types`.".to_owned()]
         .into_iter()
         .collect::<BTreeSet<_>>();
 
-    assert_eq!(
-        inventory_messages, expected_messages,
-        "broken paths should not fabricate inventory entries: {results:#?}"
+    assertions::assert_inventory_results(
+        &results,
+        "apps/backend/crates/app/queries/Cargo.toml",
+        1,
+        &expected_messages
+            .iter()
+            .map(String::as_str)
+            .collect::<Vec<_>>(),
     );
 }

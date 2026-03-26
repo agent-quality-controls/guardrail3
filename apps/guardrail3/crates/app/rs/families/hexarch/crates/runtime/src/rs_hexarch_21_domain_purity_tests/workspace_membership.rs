@@ -1,5 +1,4 @@
-use std::collections::BTreeSet;
-
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_21_domain_purity as assertions;
 use super::super::{run_domain_purity_case, DomainPurityEdgeKindForTest};
 use super::{dir_entry, project_tree};
 
@@ -55,21 +54,10 @@ fn omitted_same_app_pure_layer_targets_do_not_count_as_allowed_internal_deps() {
         DomainPurityEdgeKindForTest::Dependency,
     );
 
-    let actual_titles = results
-        .iter()
-        .map(|result| result.title.clone())
-        .collect::<BTreeSet<_>>();
-    let expected_titles =
-        ["domain crate `api-domain-core` depends on non-workspace pure-layer crate".to_owned()]
-            .into_iter()
-            .collect::<BTreeSet<_>>();
-    assert_eq!(
-        actual_titles, expected_titles,
-        "omitted same-app pure-layer targets must not fail open as allowed internal deps: {results:#?}"
+    assertions::assert_error_title_set(
+        &results,
+        "",
+        &["domain crate `api-domain-core` depends on non-workspace pure-layer crate"],
     );
-    assert_eq!(
-        results.len(),
-        2,
-        "both omitted pure-layer edges should be reported: {results:#?}"
-    );
+    assertions::assert_error_count(&results, "", 2);
 }

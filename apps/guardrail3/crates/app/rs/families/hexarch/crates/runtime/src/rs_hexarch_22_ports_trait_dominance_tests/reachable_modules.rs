@@ -23,12 +23,7 @@ impl OrphanRepo {
     );
 
     let results = super::run_family(tmp.path());
-    let warnings = assertions::warning_results(&results, "");
-
-    assert!(
-        warnings.is_empty(),
-        "unreachable orphan files should not affect rule 22: {warnings:#?}"
-    );
+    assertions::assert_no_warning(&results, "");
 }
 
 #[test]
@@ -63,12 +58,7 @@ mod tests {
     );
 
     let results = super::run_family(tmp.path());
-    let warnings = assertions::warning_results(&results, "");
-
-    assert!(
-        warnings.is_empty(),
-        "test-only impls should not affect rule 22: {warnings:#?}"
-    );
+    assertions::assert_no_warning(&results, "");
 }
 
 #[test]
@@ -102,13 +92,14 @@ impl OrphanRepo {
     );
 
     let results = super::run_family(tmp.path());
-    let warnings = assertions::warning_results(&results, "");
-    assertions::assert_result_summary(
-        &warnings,
+    assertions::assert_warning_summary(
+        &results,
+        "",
         1,
-        ["apps/backend/crates/ports/outbound/repo/src"],
+        &["apps/backend/crates/ports/outbound/repo/src"],
         Some(Some("apps/backend/crates/ports/outbound/repo/src")),
-        None,
         Some("expected src/lib.rs or src/main.rs"),
+        None,
+        &[],
     );
 }

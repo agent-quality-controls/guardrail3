@@ -1,6 +1,7 @@
 use std::collections::BTreeSet;
 
 use super::super::results_for_cycles_for_test as results_for_cycles;
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_19_same_layer_cycles as assertions;
 use super::{dir_entry, project_tree};
 
 #[test]
@@ -56,28 +57,12 @@ fn same_layer_cycle_is_reported_once_even_with_mixed_layer_cycle_present() {
 
     let (cycle_layers, results) = results_for_cycles(&tree);
 
-    assert_eq!(
-        cycle_layers.len(),
-        1,
-        "expected only the same-layer domain cycle to survive collector filtering: {cycle_layers:#?}"
-    );
-    assert_eq!(cycle_layers[0], "domain");
-    assert_eq!(
-        results.len(),
-        1,
-        "expected exactly one rule-19 result after collector filtering: {results:#?}"
-    );
+    assertions::assert_cycle_layers(&cycle_layers, 1, &["domain"]);
+    assertions::assert_error_count(&results, "", 1);
 
-    let actual_titles = results
-        .iter()
-        .map(|result| result.title.clone())
-        .collect::<BTreeSet<_>>();
-    let expected_titles = ["same-layer domain dependency cycle".to_owned()]
-        .into_iter()
-        .collect::<BTreeSet<_>>();
-
-    assert_eq!(
-        actual_titles, expected_titles,
-        "unexpected cycle hit set: {results:#?}"
+    assertions::assert_error_file_set(&results, "", 1, &[]);
+    assertions::assert_result_titles(
+        &assertions::error_results(&results, ""),
+        &["same-layer domain dependency cycle"],
     );
 }

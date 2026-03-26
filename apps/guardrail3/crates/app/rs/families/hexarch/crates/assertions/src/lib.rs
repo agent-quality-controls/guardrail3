@@ -1,3 +1,5 @@
+use guardrail3_app_rs_family_hexarch as _;
+
 pub mod dependency_facts;
 pub mod rs_hexarch_01_crates_exists;
 pub mod rs_hexarch_02_exact_contents;

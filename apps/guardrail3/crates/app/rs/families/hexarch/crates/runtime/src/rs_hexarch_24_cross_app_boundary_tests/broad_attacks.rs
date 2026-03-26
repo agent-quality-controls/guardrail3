@@ -1,5 +1,3 @@
-use std::collections::BTreeSet;
-
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_24_cross_app_boundary as assertions;
 use super::{dir_entry, project_tree, run_tree};
 
@@ -76,22 +74,10 @@ fn cross_app_edges_error_and_same_app_edges_do_not() {
     );
 
     let results = super::run_tree(&tree);
-    let results = assertions::errors_by_id(&results, "");
-
-    assert_eq!(
-        results.len(),
+    assertions::assert_error_file_set(
+        &results,
+        "",
         4,
-        "expected one hit per cross-app dependency section: {results:#?}"
-    );
-    let actual_files = results
-        .iter()
-        .filter_map(|result| result.file.clone())
-        .collect::<BTreeSet<_>>();
-    let expected_files = ["apps/api/crates/app/core/Cargo.toml".to_owned()]
-        .into_iter()
-        .collect::<BTreeSet<_>>();
-    assert_eq!(
-        actual_files, expected_files,
-        "unexpected cross-app hit set: {results:#?}"
+        &["apps/api/crates/app/core/Cargo.toml"],
     );
 }

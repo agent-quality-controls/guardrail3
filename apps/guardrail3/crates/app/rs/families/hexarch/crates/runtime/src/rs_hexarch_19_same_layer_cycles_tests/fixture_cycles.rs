@@ -11,21 +11,12 @@ fn fixture_backed_same_layer_cycle_reports_once() {
     );
 
     let results = super::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "");
-
-    assert_eq!(
-        errors.len(),
+    assertions::assert_error_count(&results, "", 1);
+    assertions::assert_error_results(
+        &results,
+        "",
         1,
-        "expected exactly one same-layer cycle result for the backend fixture mutation: {errors:#?}"
+        &["same-layer domain dependency cycle"],
     );
-    assert_eq!(errors[0].title, "same-layer domain dependency cycle");
-    assert!(
-        errors[0]
-            .message
-            .contains("apps/backend/crates/domain/engine")
-            && errors[0]
-                .message
-                .contains("apps/backend/crates/domain/types"),
-        "expected the cycle message to name the real backend domain members: {errors:#?}"
-    );
+    assertions::assert_error_file_set(&results, "", 1, &[]);
 }

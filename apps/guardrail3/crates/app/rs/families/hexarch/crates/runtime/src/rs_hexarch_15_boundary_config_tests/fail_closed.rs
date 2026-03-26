@@ -11,18 +11,6 @@ fn malformed_guardrail_config_warns_in_family_run() {
     .expect("write malformed guardrail config");
 
     let results = super::run_family(tmp.path());
-    let warnings = assertions::error_results(&results, "");
-    assert_eq!(
-        warnings.len(),
-        1,
-        "expected one parse warning: {warnings:#?}"
-    );
-    assert!(warnings[0].title.contains("parse error"));
-    assert_eq!(warnings[0].file.as_deref(), Some("guardrail3.toml"));
-    assert!(
-        warnings
-            .iter()
-            .all(|result| !result.title.contains("missing rust.apps config")),
-        "parse failures should block boundary-missing warnings: {warnings:#?}"
-    );
+    assertions::assert_result_title_contains(&results, "", 1, &["guardrail3.toml"], "parse error");
+    assertions::assert_error_title_forbidden(&results, "", &["missing rust.apps config"]);
 }

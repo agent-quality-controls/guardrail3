@@ -1,4 +1,5 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_25_target_dependency_direction as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_24_cross_app_boundary as rule24_assertions;
 use super::{copy_fixture, write_file};
 
 #[test]
@@ -37,17 +38,6 @@ fn cross_app_target_edge_is_owned_by_rule_24_not_rule_25() {
     );
 
     let results = super::run_family(tmp.path());
-    let rule_24 = assertions::errors_by_id(&results, "RS-HEXARCH-24");
-    let rule_25 = assertions::errors_by_id(&results, "");
-
     assertions::assert_no_error(&results, "");
-    assert_eq!(
-        rule_24.len(),
-        1,
-        "rule 24 should own cross-app target path deps: {rule_24:#?}"
-    );
-    assert!(
-        rule_25.is_empty(),
-        "rule 25 should stay out of cross-app target ownership: {rule_25:#?}"
-    );
+    rule24_assertions::assert_error_count(&results, "", 1);
 }

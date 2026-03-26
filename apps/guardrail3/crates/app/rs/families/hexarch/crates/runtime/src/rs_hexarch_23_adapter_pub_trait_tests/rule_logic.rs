@@ -1,5 +1,5 @@
 use super::super::run_source_case;
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_23_adapter_pub_trait as assertions;
 
 #[test]
 fn adapter_public_trait_errors() {
@@ -12,14 +12,5 @@ fn adapter_public_trait_errors() {
         None,
     );
 
-    assert_eq!(
-        results.len(),
-        1,
-        "expected one adapter pub-trait error: {results:#?}"
-    );
-    assert_eq!(results[0].severity, Severity::Error);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some("apps/api/crates/adapters/http")
-    );
+    assertions::assert_error_file_single(&results, "", "apps/api/crates/adapters/http");
 }

@@ -1,7 +1,6 @@
-use std::collections::BTreeSet;
-
 use super::super::results_for_dependency_edges_for_test as results_for_dependency_edges;
 use super::{dir_entry, project_tree};
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_17_workspace_inherited_direction as assertions;
 
 #[test]
 fn forbidden_workspace_inherited_edges_error_and_allowed_ones_do_not() {
@@ -57,20 +56,12 @@ fn forbidden_workspace_inherited_edges_error_and_allowed_ones_do_not() {
     );
 
     let results = results_for_dependency_edges(&tree);
-
-    let actual_files = results
-        .iter()
-        .filter_map(|result| result.file.clone())
-        .collect::<BTreeSet<_>>();
-    let expected_files = [
-        "apps/api/crates/domain/types/Cargo.toml".to_owned(),
-        "apps/api/crates/ports/repo/Cargo.toml".to_owned(),
-    ]
-    .into_iter()
-    .collect::<BTreeSet<_>>();
-
-    assert_eq!(
-        actual_files, expected_files,
-        "unexpected inherited-direction hit set: {results:#?}"
+    assertions::assert_error_file_set_eq(
+        &results,
+        "",
+        &[
+            "apps/api/crates/domain/types/Cargo.toml",
+            "apps/api/crates/ports/repo/Cargo.toml",
+        ],
     );
 }

@@ -66,6 +66,41 @@ pub fn assert_error_results(
     assert_result_messages(&errors, expected_messages);
 }
 
+pub fn assert_error_file_set(
+    results: &[CheckResult],
+    rule_id: &str,
+    expected_count: usize,
+    expected_files: &[&str],
+) {
+    let errors = error_results(results, rule_id);
+    assert_result_summary(&errors, expected_count, expected_files, None, None, None);
+}
+
+pub fn assert_error_file_single(
+    results: &[CheckResult],
+    rule_id: &str,
+    expected_file: &str,
+) {
+    let errors = error_results(results, rule_id);
+    assert_eq!(errors.len(), 1, "{errors:#?}");
+    assert_result_summary(&errors, 1, [expected_file], Some(Some(expected_file)), None, None);
+}
+
+pub fn assert_error_title_contains(
+    results: &[CheckResult],
+    rule_id: &str,
+    required_substrings: &[&str],
+) {
+    let errors = error_results(results, rule_id);
+    assert_eq!(errors.len(), 1, "{errors:#?}");
+    for substring in required_substrings {
+        assert!(
+            errors.iter().all(|error| error.title.contains(substring)),
+            "expected title to contain {substring}: {errors:#?}"
+        );
+    }
+}
+
 pub fn assert_error_message_contains(
     results: &[CheckResult],
     rule_id: &str,
@@ -77,6 +112,21 @@ pub fn assert_error_message_contains(
         required_substrings
             .iter()
             .all(|needle| errors[0].message.contains(needle)),
-        "expected message to contain all substrings {required_substrings:#?}: {errors:#?}"
+            "expected message to contain all substrings {required_substrings:#?}: {errors:#?}"
+    );
+}
+
+pub fn assert_error_title_forbidden(
+    results: &[CheckResult],
+    rule_id: &str,
+    forbidden_substrings: &[&str],
+) {
+    let errors = error_results(results, rule_id);
+    assert_eq!(errors.len(), 1, "{errors:#?}");
+    assert!(
+        errors
+            .iter()
+            .all(|error| forbidden_substrings.iter().all(|f| !error.title.contains(f))),
+        "expected no forbidden title substring in {errors:#?}"
     );
 }

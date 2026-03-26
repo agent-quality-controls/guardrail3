@@ -6,12 +6,7 @@ fn clean_golden_fixture_stays_clear_for_ports_trait_dominance() {
     let tmp = copy_fixture();
 
     let results = super::run_family(tmp.path());
-    let warnings = assertions::warning_results(&results, "");
-
-    assert!(
-        warnings.is_empty(),
-        "expected the golden fixture to stay clear for rule 22: {warnings:#?}"
-    );
+    assertions::assert_no_warning(&results, "");
 }
 
 #[test]
@@ -24,14 +19,15 @@ fn private_trait_in_ports_crate_still_counts_as_impl_heavy() {
     );
 
     let results = super::run_family(tmp.path());
-    let warnings = assertions::warning_results(&results, "");
-    assertions::assert_result_summary(
-        &warnings,
+    assertions::assert_warning_summary(
+        &results,
+        "",
         1,
-        ["apps/backend/crates/ports/outbound/repo"],
+        &["apps/backend/crates/ports/outbound/repo"],
         Some(Some("apps/backend/crates/ports/outbound/repo")),
-        None,
         Some("Ports crate `backend-ports-outbound-repo` has 2 impl blocks and 0 public traits"),
+        None,
+        &[],
     );
 }
 
@@ -50,13 +46,14 @@ fn impls_in_multiple_source_files_are_aggregated() {
     );
 
     let results = super::run_family(tmp.path());
-    let warnings = assertions::warning_results(&results, "");
-    assertions::assert_result_summary(
-        &warnings,
+    assertions::assert_warning_summary(
+        &results,
+        "",
         1,
-        ["apps/backend/crates/ports/outbound/repo"],
+        &["apps/backend/crates/ports/outbound/repo"],
         Some(Some("apps/backend/crates/ports/outbound/repo")),
-        None,
         Some("Ports crate `backend-ports-outbound-repo` has 2 impl blocks and 1 public traits"),
+        None,
+        &[],
     );
 }

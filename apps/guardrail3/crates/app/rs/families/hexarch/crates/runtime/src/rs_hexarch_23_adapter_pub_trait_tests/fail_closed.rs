@@ -1,5 +1,4 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_23_adapter_pub_trait as assertions;
-use guardrail3_domain_report::Severity;
 use super::copy_fixture;
 
 #[test]
@@ -13,21 +12,15 @@ fn unparsable_adapter_source_errors_in_family_run() {
     .expect("write broken adapter source");
 
     let results = super::run_family(tmp.path());
-    let errors = assertions::error_results(&results, "");
-    assert_eq!(
-        errors.len(),
-        1,
-        "expected one source-analysis error: {errors:#?}"
+    assertions::assert_error_file_single(
+        &results,
+        "",
+        "apps/backend/crates/adapters/outbound/postgres/src/lib.rs",
     );
-    assert_eq!(errors[0].severity, Severity::Error);
-    assert_eq!(
-        errors[0].file.as_deref(),
-        Some("apps/backend/crates/adapters/outbound/postgres/src/lib.rs")
-    );
-    assert!(
-        errors[0]
-            .message
-            .contains("Failed to parse Rust source file")
+    assertions::assert_error_message_contains(
+        &results,
+        "",
+        &["Failed to parse Rust source file"],
     );
 }
 
@@ -48,21 +41,15 @@ fn parse_failure_takes_precedence_over_public_trait_violation() {
     .expect("write public-trait extra module");
 
     let results = super::run_family(tmp.path());
-    let errors: Vec<_> = results
-        .iter()
-        .filter(|result| result.id == "")
-        .collect();
-    assert_eq!(
-        errors.len(),
-        1,
-        "parse failure should short-circuit to one source-analysis error: {errors:#?}"
+    assertions::assert_error_file_single(
+        &results,
+        "",
+        "apps/backend/crates/adapters/outbound/postgres/src/lib.rs",
     );
-    assert!(
-        errors[0].title.contains("source analysis failed"),
-        "parse failure should not also emit public-trait violation: {errors:#?}"
+    assertions::assert_error_message_contains(
+        &results,
+        "",
+        &["Failed to parse Rust source file"],
     );
-    assert!(
-        !errors[0].title.contains("defines public traits"),
-        "parse failure should suppress the public-trait rule body: {errors:#?}"
-    );
+    assertions::assert_error_title_forbidden(&results, "", &["defines public traits"]);
 }
