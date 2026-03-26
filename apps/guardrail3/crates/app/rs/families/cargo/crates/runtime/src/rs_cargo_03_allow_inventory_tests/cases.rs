@@ -148,5 +148,5 @@ fn inventories_every_approved_allow_entry() {
         &[("pkg/Cargo.toml", &manifest)],
     ));
 
-    assert_expected_inventory(&results);
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_03_allow_inventory::assert_expected_inventory(&results);
 }

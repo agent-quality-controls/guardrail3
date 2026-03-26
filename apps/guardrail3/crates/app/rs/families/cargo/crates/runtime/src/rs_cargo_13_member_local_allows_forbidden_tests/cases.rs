@@ -170,7 +170,7 @@ fn inherited_member_without_local_allows_is_inventory() {
         ],
     ));
 
-    assert_rule_results(
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_13_member_local_allows_forbidden::assert_rule_results(
         &results,
         &[ExpectedRuleResult {
             file: None,
@@ -221,7 +221,7 @@ fn member_local_allow_is_error_even_without_matching_workspace_entry() {
         ],
     ));
 
-    assert_rule_results(
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_13_member_local_allows_forbidden::assert_rule_results(
         &results,
         &[ExpectedRuleResult {
             file: None,

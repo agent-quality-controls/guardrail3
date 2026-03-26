@@ -170,7 +170,7 @@ fn older_member_edition_warns() {
         ],
     ));
 
-    assert_rule_results(
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_09_member_edition_drift::assert_rule_results(
         &results,
         &[ExpectedRuleResult {
             file: None,
@@ -218,7 +218,7 @@ fn matching_member_edition_inventories() {
         ],
     ));
 
-    assert_rule_results(
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_09_member_edition_drift::assert_rule_results(
         &results,
         &[ExpectedRuleResult {
             file: None,

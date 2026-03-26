@@ -150,7 +150,7 @@ fn disallowed_macros_deny_is_inventory() {
         &[("pkg/Cargo.toml", &manifest)],
     ));
 
-    assert_rule_results(
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_11_disallowed_macros_deny::assert_rule_results(
         &results,
         &[ExpectedRuleResult {
             file: None,
@@ -179,7 +179,7 @@ fn missing_disallowed_macros_is_error() {
         &[("pkg/Cargo.toml", &manifest)],
     ));
 
-    assert_rule_results(
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_11_disallowed_macros_deny::assert_rule_results(
         &results,
         &[ExpectedRuleResult {
             file: None,

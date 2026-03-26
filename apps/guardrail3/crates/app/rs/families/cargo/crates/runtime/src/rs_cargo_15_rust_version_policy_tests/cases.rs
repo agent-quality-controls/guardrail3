@@ -152,7 +152,7 @@ fn library_profile_missing_rust_version_is_error() {
         ],
     ));
 
-    assert_rule_results(
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_15_rust_version_policy::assert_rule_results(
         &results,
         &[ExpectedRuleResult {
             file: None,
@@ -179,7 +179,7 @@ fn non_library_missing_rust_version_is_inventory_only() {
         &[("pkg/Cargo.toml", &manifest)],
     ));
 
-    assert_rule_results(
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_15_rust_version_policy::assert_rule_results(
         &results,
         &[ExpectedRuleResult {
             file: None,
@@ -210,7 +210,7 @@ fn library_profile_with_rust_version_is_inventory() {
         ],
     ));
 
-    assert_rule_results(
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_15_rust_version_policy::assert_rule_results(
         &results,
         &[ExpectedRuleResult {
             file: None,

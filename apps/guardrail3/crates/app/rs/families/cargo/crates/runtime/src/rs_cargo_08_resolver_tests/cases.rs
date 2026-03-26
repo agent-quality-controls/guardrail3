@@ -153,7 +153,7 @@ fn explicit_workspace_resolver_is_inventory() {
         &[("Cargo.toml", &workspace_manifest)],
     ));
 
-    assert_rule_results(
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_08_resolver::assert_rule_results(
         &results,
         &[ExpectedRuleResult {
             file: None,
@@ -183,7 +183,7 @@ fn missing_workspace_resolver_is_error() {
         &[("Cargo.toml", &workspace_manifest)],
     ));
 
-    assert_rule_results(
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_08_resolver::assert_rule_results(
         &results,
         &[ExpectedRuleResult {
             file: None,
@@ -232,7 +232,7 @@ fn standalone_root_does_not_emit_workspace_only_rule() {
         ],
     ));
 
-    assert_rule_results(
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_08_resolver::assert_rule_results(
         &results,
         &[ExpectedRuleResult {
             file: Some("Cargo.toml"),

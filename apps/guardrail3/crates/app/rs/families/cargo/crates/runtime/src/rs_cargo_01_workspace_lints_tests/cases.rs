@@ -185,7 +185,7 @@ fn supports_workspace_and_standalone_policy_roots_in_one_repo() {
         ],
     ));
 
-    assert_rule_results(
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_01_workspace_lints::assert_rule_results(
         &results,
         &[
             ExpectedRuleResult {
@@ -224,7 +224,7 @@ fn local_library_profile_requires_unreachable_pub() {
         ],
     ));
 
-    assert_rule_results(
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_01_workspace_lints::assert_rule_results(
         &results,
         &[ExpectedRuleResult {
             file: Some("pkg/Cargo.toml"),
