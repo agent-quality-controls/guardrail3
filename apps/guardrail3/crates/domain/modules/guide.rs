@@ -83,7 +83,7 @@ hooks_shared = true
 hooks_rs = true
 ```
 
-Per-app and package overrides use the same family names:
+Per-app and package overrides use the scoped family names only. `arch` stays global-only under `[rust.checks]`:
 
 ```toml
 [rust.apps.my_api.checks]

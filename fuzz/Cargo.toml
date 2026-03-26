@@ -7,6 +7,9 @@ edition = "2024"
 [package.metadata]
 cargo-fuzz = true
 
+[package.metadata.guardrail3]
+arch_role = "auxiliary"
+
 [dependencies]
 libfuzzer-sys = "0.4"
 tempfile = "3"

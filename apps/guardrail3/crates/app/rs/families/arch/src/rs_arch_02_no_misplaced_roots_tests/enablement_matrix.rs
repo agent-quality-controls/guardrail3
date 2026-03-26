@@ -58,3 +58,24 @@ fn misplaced_roots_do_not_fire_when_both_architecture_families_are_disabled() {
         "misplaced-root reporting should shut off only when both owners are disabled: {results:#?}"
     );
 }
+
+#[test]
+fn misplaced_roots_do_not_fire_when_arch_is_globally_disabled() {
+    let config = "[rust.checks]\narch = false\nhexarch = true\nlibarch = true\n";
+    let results = check_results(&tree(
+        &[
+            ("", entry(&["tools"], &["guardrail3.toml"])),
+            ("tools", entry(&["worker"], &[])),
+            ("tools/worker", entry(&[], &["Cargo.toml"])),
+        ],
+        &[
+            ("guardrail3.toml", config),
+            ("tools/worker/Cargo.toml", "[package]\nname = \"worker\"\n"),
+        ],
+    ));
+
+    assert!(
+        error_results(&results, "RS-ARCH-02").is_empty(),
+        "global arch disablement must suppress misplaced-root reporting even if owner families are enabled: {results:#?}"
+    );
+}

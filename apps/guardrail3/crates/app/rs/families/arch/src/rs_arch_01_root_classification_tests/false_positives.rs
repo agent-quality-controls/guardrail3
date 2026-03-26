@@ -16,3 +16,38 @@ fn misplaced_other_roots_do_not_count_as_ambiguous_classification() {
         "other roots should stay owned by RS-ARCH-02, not RS-ARCH-01: {results:#?}"
     );
 }
+
+#[test]
+fn fixture_and_snapshot_manifests_are_not_classified_as_live_architecture() {
+    let results = check_results(&tree(
+        &[
+            ("", entry(&["apps", "tests"], &[])),
+            ("apps", entry(&["backend"], &[])),
+            ("apps/backend", entry(&[], &["Cargo.toml"])),
+            ("tests", entry(&["fixtures", "snapshots"], &[])),
+            ("tests/fixtures", entry(&["rust-app"], &[])),
+            ("tests/fixtures/rust-app", entry(&[], &["Cargo.toml"])),
+            ("tests/snapshots", entry(&["rust-app"], &[])),
+            ("tests/snapshots/rust-app", entry(&[], &["Cargo.toml"])),
+        ],
+        &[
+            (
+                "apps/backend/Cargo.toml",
+                "[workspace]\nmembers = []\nresolver = \"2\"\n",
+            ),
+            (
+                "tests/fixtures/rust-app/Cargo.toml",
+                "[package]\nname = \"fixture\"\n",
+            ),
+            (
+                "tests/snapshots/rust-app/Cargo.toml",
+                "[package]\nname = \"snapshot\"\n",
+            ),
+        ],
+    ));
+
+    assert!(
+        error_results(&results, "RS-ARCH-01").is_empty(),
+        "excluded fixture/snapshot manifests must not participate in live root classification: {results:#?}"
+    );
+}

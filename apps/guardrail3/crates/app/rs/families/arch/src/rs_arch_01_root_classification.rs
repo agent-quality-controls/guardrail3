@@ -1,6 +1,6 @@
+use guardrail3_app_rs_placement::RustRootClassification;
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use crate::rust_root_placement::RustRootClassification;
 use super::inputs::RootClassificationInput;
 
 const ID: &str = "RS-ARCH-01";

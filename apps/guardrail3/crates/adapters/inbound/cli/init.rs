@@ -368,6 +368,66 @@ fn generate_ts_section(fs: &dyn FileSystem, project_path: &Path) -> String {
     section
 }
 
+#[cfg(test)]
+mod tests {
+    use std::fs;
+    use std::path::Path;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    use super::generate_rs_config_content;
+
+    fn temp_root(label: &str) -> std::path::PathBuf {
+        let nonce = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("system time before UNIX_EPOCH")
+            .as_nanos();
+        let root =
+            std::env::temp_dir().join(format!("guardrail3-{label}-{}-{nonce}", std::process::id()));
+        fs::create_dir_all(&root).expect("create temp root");
+        root
+    }
+
+    fn write_file(root: &Path, rel: &str, body: &str) {
+        let path = root.join(rel);
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent).expect("create parent dirs");
+        }
+        fs::write(path, body).expect("write file");
+    }
+
+    #[test]
+    fn rs_init_keeps_arch_global_even_with_scoped_sections() {
+        let root = temp_root("rs-init-arch-global");
+        write_file(
+            &root,
+            "apps/backend/Cargo.toml",
+            "[workspace]\nmembers = []\nresolver = \"2\"\n",
+        );
+        write_file(
+            &root,
+            "packages/shared/Cargo.toml",
+            "[package]\nname = \"shared\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+        );
+
+        let config = generate_rs_config_content("service", &root);
+
+        assert!(
+            config.contains("[rust.checks]\narch = true"),
+            "global arch toggle missing from generated config:\n{config}"
+        );
+        assert!(
+            !config.contains("[rust.apps.backend.checks]\narch ="),
+            "arch must not be generated under app-scoped checks:\n{config}"
+        );
+        assert!(
+            !config.contains("[rust.packages.checks]\narch ="),
+            "arch must not be generated under package-scoped checks:\n{config}"
+        );
+
+        fs::remove_dir_all(&root).expect("cleanup temp root");
+    }
+}
+
 /// Return a human-readable reason for the detected app type, used as a TOML comment.
 fn detect_reason(app_path: &Path, detected: Option<TsAppType>) -> &'static str {
     match detected {

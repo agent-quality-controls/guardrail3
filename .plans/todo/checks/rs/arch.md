@@ -45,8 +45,10 @@ Every discovered Rust `Cargo.toml` root is classified as exactly one of:
   - under `apps/*`
 - `package`
   - under `packages/*`
+- `auxiliary`
+  - outside governed zones but explicitly marked in Cargo metadata
 - `other`
-  - anywhere else
+  - anywhere else that is neither governed nor declared auxiliary
 
 Architecture families then apply by zone:
 
@@ -116,7 +118,10 @@ Malformed required placement/config inputs must not silently suppress misplaced-
 | RS-ARCH-02 | Error | When Rust architecture enforcement is active, no discovered Rust root may live in `other` | Implemented |
 | RS-ARCH-03 | Error | No Rust root may be simultaneously owned by both app and package zones | Implemented |
 | RS-ARCH-04 | Error | Illegal nesting/overlap between app roots and package roots is forbidden | Implemented |
-| RS-ARCH-05 | Error | Architecture-family enablement and root-zone ownership must be coherent for each governed root | Implemented |
+| RS-ARCH-05 | Error | Scoped `arch` config is forbidden; `arch` is global-only | Implemented |
+| RS-ARCH-06 | Error | Governed roots must stay coherent with owner-family enablement | Implemented |
+| RS-ARCH-07 | Error | Required `arch` inputs fail closed when unreadable or malformed | Implemented |
+| RS-ARCH-08 | Info | Declared auxiliary roots are surfaced explicitly in reports | Implemented |
 
 ## Rule intent
 
@@ -131,7 +136,7 @@ This catches:
 
 ### RS-ARCH-02 — No misplaced Rust roots
 
-When either `hexarch` or `libarch` is enabled, a Rust root in `other` is an error.
+When either `hexarch` or `libarch` is enabled, an unexpected Rust root in `other` is an error.
 
 This is the missing global-placement rule.
 
@@ -145,13 +150,21 @@ App and package architecture boundaries must not overlap or nest in a way that m
 
 This is about root-zone legality, not member legality inside a single workspace.
 
-### RS-ARCH-05 — Family enablement and ownership are coherent
+### RS-ARCH-05 — Scoped `arch` config is forbidden
+
+`arch` is repo-global and must be configured only under `[rust.checks]`.
+
+### RS-ARCH-06 — Owner-family enablement is coherent
 
 For a governed root:
 - app-zone ownership maps to `hexarch`
 - package-zone ownership maps to `libarch`
 
 The family should surface impossible or contradictory ownership states explicitly.
+
+### RS-ARCH-07 — Required inputs fail closed
+
+Unreadable-present or malformed required `arch` inputs must surface explicit errors instead of silently degrading into absence.
 
 ## Relationship to other families
 
@@ -239,9 +252,11 @@ apps/guardrail3/crates/app/rs/checks/rs/rust_root_placement.rs
 - Shared Rust root discovery/classification moved into `rs/rust_root_placement.rs` so future `hexarch` and `libarch` work can reuse the same root inventory instead of rediscovering `Cargo.toml` roots independently.
 - Classification is segment-based rather than top-level-only. This intentionally makes illegal nested shapes such as `apps/<app>/packages/<pkg>` and `packages/<pkg>/apps/<app>` visible as real ambiguity/overlap cases instead of silently treating them as ordinary `other` roots.
 - `RS-ARCH-02` resolves reporting from `hexarch` / `libarch` enablement only. Discovery always runs even when both owner families are disabled.
-- `RS-ARCH-05` owns fail-closed input integrity for this family:
+- `RS-ARCH-07` owns fail-closed input integrity for this family:
   - malformed `guardrail3.toml`
-  - unreadable discovered `Cargo.toml` content in the cached tree
+  - unreadable-present `guardrail3.toml`
+  - unreadable discovered eligible live `Cargo.toml` content in the cached tree
+  - malformed eligible live `Cargo.toml` when auxiliary-role metadata must be resolved
 
 ## Gaps closed
 

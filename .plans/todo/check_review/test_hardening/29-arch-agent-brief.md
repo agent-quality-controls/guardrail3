@@ -101,7 +101,9 @@ Required inputs include:
 - `RS-ARCH-02` no misplaced Rust roots
 - `RS-ARCH-03` no dual ownership
 - `RS-ARCH-04` no illegal zone overlap
-- `RS-ARCH-05` family enablement and ownership are coherent
+- `RS-ARCH-05` scoped `arch` config is forbidden
+- `RS-ARCH-06` owner-family enablement is coherent
+- `RS-ARCH-07` required inputs fail closed
 
 ## Required Attack Classes
 

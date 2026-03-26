@@ -15,5 +15,5 @@ fn malformed_guardrail_config_does_not_suppress_misplaced_root_reporting() {
     ));
 
     assert_error_files(&results, "RS-ARCH-02", &["tools/worker/Cargo.toml"]);
-    assert_error_files(&results, "RS-ARCH-05", &["guardrail3.toml"]);
+    assert_error_files(&results, "RS-ARCH-07", &["guardrail3.toml"]);
 }
