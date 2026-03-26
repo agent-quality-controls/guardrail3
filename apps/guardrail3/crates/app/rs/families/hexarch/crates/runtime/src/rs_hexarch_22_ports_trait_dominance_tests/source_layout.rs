@@ -2,7 +2,7 @@ use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_22_ports_trait_domin
 use super::{copy_fixture, write_file};
 
 #[test]
-fn nested_file_and_inline_modules_still_count_toward_impl_heaviness() {
+fn helper_only_modules_do_not_count_toward_impl_heaviness() {
     let tmp = copy_fixture();
     write_file(
         tmp.path(),
@@ -72,18 +72,7 @@ impl InternalWorker {
     );
 
     let results = super::run_family(tmp.path());
-    let _warnings = assertions::warning_results(&results, "");
-
-    assertions::assert_warning_summary(
-        &results,
-        "",
-        1,
-        &["apps/backend/crates/ports/outbound/repo"],
-        Some(Some("apps/backend/crates/ports/outbound/repo")),
-        Some("Ports crate `backend-ports-outbound-repo` has 4 impl blocks and 3 public traits"),
-        None,
-        &[],
-    );
+    assertions::assert_no_warning(&results, "");
 }
 
 #[test]

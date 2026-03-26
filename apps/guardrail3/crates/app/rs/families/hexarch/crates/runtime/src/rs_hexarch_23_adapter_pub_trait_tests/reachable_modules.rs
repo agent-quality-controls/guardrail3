@@ -108,3 +108,37 @@ fn missing_entrypoint_errors_instead_of_scanning_root_rs_files_as_entrypoints() 
     );
     assertions::assert_error_message_contains(&results, "", &["expected src/lib.rs or src/main.rs"]);
 }
+
+#[test]
+fn lib_path_override_is_used_as_adapter_entrypoint() {
+    let tmp = copy_fixture();
+    std::fs::write(
+        tmp.path()
+            .join("apps/backend/crates/adapters/outbound/postgres/Cargo.toml"),
+        "[package]\nname = \"backend-adapters-outbound-postgres\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[lib]\npath = \"mod.rs\"\n",
+    )
+    .expect("rewrite adapter cargo");
+    std::fs::remove_file(
+        tmp.path()
+            .join("apps/backend/crates/adapters/outbound/postgres/src/lib.rs"),
+    )
+    .expect("remove lib.rs");
+    write_file(
+        tmp.path(),
+        "apps/backend/crates/adapters/outbound/postgres/mod.rs",
+        "pub mod validate;\n",
+    );
+    write_file(
+        tmp.path(),
+        "apps/backend/crates/adapters/outbound/postgres/validate.rs",
+        "pub trait AdapterBoundary {}\n",
+    );
+
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_file_single(
+        &results,
+        "",
+        "apps/backend/crates/adapters/outbound/postgres",
+    );
+    assertions::assert_error_title_contains(&results, "", &["defines public traits"]);
+}

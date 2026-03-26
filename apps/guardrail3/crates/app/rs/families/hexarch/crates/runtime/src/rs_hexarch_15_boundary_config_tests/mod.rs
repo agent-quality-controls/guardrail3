@@ -1,5 +1,7 @@
 #![allow(dead_code, unused_imports)]
 mod fail_closed;
+mod schema_invalid_partial_recovery;
+mod zero_member_workspace;
 mod fixture_missing_all_apps;
 mod fixture_missing_single_app;
 mod golden;
