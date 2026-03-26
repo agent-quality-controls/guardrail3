@@ -10,11 +10,12 @@ use super::{copy_fixture, remove_dir};
 #[test]
 fn missing_outbound_in_adapters_hits_all_owned_outer_and_nested_containers() {
     let tmp = copy_fixture();
+    let inner_adapters = format!("{}/adapters", inner_hex());
     for dir in [
         "apps/devctl/crates/adapters",
         "apps/backend/crates/adapters",
         "apps/worker/crates/adapters",
-        &format!("{}/adapters", inner_hex()),
+        inner_adapters.as_str(),
     ] {
         remove_dir(tmp.path(), &format!("{dir}/outbound"));
     }
@@ -28,7 +29,7 @@ fn missing_outbound_in_adapters_hits_all_owned_outer_and_nested_containers() {
             "apps/devctl/crates/adapters",
             "apps/backend/crates/adapters",
             "apps/worker/crates/adapters",
-            format!("{}/adapters", inner_hex()),
+            inner_adapters.as_str(),
         ],
         None,
         Some(&["outbound", "adapters"]),
@@ -68,11 +69,12 @@ fn missing_inbound_in_adapters_hits_only_outer_containers_because_nested_hex_bec
 #[test]
 fn missing_inbound_in_ports_hits_all_owned_outer_and_nested_containers() {
     let tmp = copy_fixture();
+    let inner_ports = format!("{}/ports", inner_hex());
     for dir in [
         "apps/devctl/crates/ports",
         "apps/backend/crates/ports",
         "apps/worker/crates/ports",
-        &format!("{}/ports", inner_hex()),
+        inner_ports.as_str(),
     ] {
         remove_dir(tmp.path(), &format!("{dir}/inbound"));
     }
@@ -86,7 +88,7 @@ fn missing_inbound_in_ports_hits_all_owned_outer_and_nested_containers() {
             "apps/devctl/crates/ports",
             "apps/backend/crates/ports",
             "apps/worker/crates/ports",
-            format!("{}/ports", inner_hex()),
+            inner_ports.as_str(),
         ],
         None,
         Some(&["inbound", "ports"]),
@@ -98,11 +100,12 @@ fn missing_inbound_in_ports_hits_all_owned_outer_and_nested_containers() {
 #[test]
 fn missing_outbound_in_ports_hits_all_owned_outer_and_nested_containers() {
     let tmp = copy_fixture();
+    let inner_ports = format!("{}/ports", inner_hex());
     for dir in [
         "apps/devctl/crates/ports",
         "apps/backend/crates/ports",
         "apps/worker/crates/ports",
-        &format!("{}/ports", inner_hex()),
+        inner_ports.as_str(),
     ] {
         remove_dir(tmp.path(), &format!("{dir}/outbound"));
     }
@@ -116,7 +119,7 @@ fn missing_outbound_in_ports_hits_all_owned_outer_and_nested_containers() {
             "apps/devctl/crates/ports",
             "apps/backend/crates/ports",
             "apps/worker/crates/ports",
-            format!("{}/ports", inner_hex()),
+            inner_ports.as_str(),
         ],
         None,
         Some(&["outbound", "ports"]),
@@ -128,11 +131,12 @@ fn missing_outbound_in_ports_hits_all_owned_outer_and_nested_containers() {
 #[test]
 fn both_direction_dirs_missing_in_ports_emit_two_missing_results_per_owned_container() {
     let tmp = copy_fixture();
+    let inner_ports = format!("{}/ports", inner_hex());
     for dir in [
         "apps/devctl/crates/ports",
         "apps/backend/crates/ports",
         "apps/worker/crates/ports",
-        &format!("{}/ports", inner_hex()),
+        inner_ports.as_str(),
     ] {
         remove_dir(tmp.path(), &format!("{dir}/inbound"));
         remove_dir(tmp.path(), &format!("{dir}/outbound"));
@@ -147,7 +151,7 @@ fn both_direction_dirs_missing_in_ports_emit_two_missing_results_per_owned_conta
             "apps/devctl/crates/ports",
             "apps/backend/crates/ports",
             "apps/worker/crates/ports",
-            format!("{}/ports", inner_hex()),
+            inner_ports.as_str(),
         ],
         None,
         None,

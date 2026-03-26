@@ -10,15 +10,17 @@ use super::{copy_fixture, remove_dir, write_file};
 #[test]
 fn replacing_outbound_dirs_with_files_hits_every_owned_directional_container() {
     let tmp = copy_fixture();
+    let inner_adapters = format!("{}/adapters", inner_hex());
+    let inner_ports = format!("{}/ports", inner_hex());
     for dir in [
         "apps/devctl/crates/adapters",
         "apps/backend/crates/adapters",
         "apps/worker/crates/adapters",
-        &format!("{}/adapters", inner_hex()),
+        inner_adapters.as_str(),
         "apps/devctl/crates/ports",
         "apps/backend/crates/ports",
         "apps/worker/crates/ports",
-        &format!("{}/ports", inner_hex()),
+        inner_ports.as_str(),
     ] {
         remove_dir(tmp.path(), &format!("{dir}/outbound"));
         write_file(tmp.path(), &format!("{dir}/outbound"), "not a directory");
@@ -33,11 +35,11 @@ fn replacing_outbound_dirs_with_files_hits_every_owned_directional_container() {
             "apps/devctl/crates/adapters",
             "apps/backend/crates/adapters",
             "apps/worker/crates/adapters",
-            format!("{}/adapters", inner_hex()),
+            inner_adapters.as_str(),
             "apps/devctl/crates/ports",
             "apps/backend/crates/ports",
             "apps/worker/crates/ports",
-            format!("{}/ports", inner_hex()),
+            inner_ports.as_str(),
         ],
         None,
         Some(&["outbound"]),

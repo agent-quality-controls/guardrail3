@@ -1,4 +1,5 @@
 const FIXTURE: super::HexarchFixture = super::HexarchFixture;
+use std::collections::BTreeSet;
 
 fn inner_hex() -> &'static str {
     FIXTURE.inner_hex_root()
@@ -40,12 +41,6 @@ fn loose_files_in_all_owned_container_dirs_hit_every_owned_container() {
     }
 
     let results = super::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "");
-    assert_eq!(
-        errors.len(),
-        expected_files.len(),
-        "expected exactly one loose-file hit per owned container: {errors:#?}"
-    );
     assertions::assert_error_summary(
         &results,
         "",
@@ -70,7 +65,6 @@ fn multiple_loose_files_in_all_owned_container_dirs_emit_one_error_per_container
     }
 
     let results = super::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "");
     assertions::assert_error_summary(
         &results,
         "",
@@ -94,7 +88,6 @@ fn near_miss_placeholder_files_hit_every_owned_container() {
     }
 
     let results = super::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "");
     assertions::assert_error_summary(
         &results,
         "",

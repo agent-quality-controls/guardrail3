@@ -8,11 +8,7 @@ fn crates_with_only_gitkeep_still_defer_to_missing_required_dirs_not_rule_01() {
     write_file(tmp.path(), "apps/devctl/crates/.gitkeep", "");
 
     let results = super::run_family(tmp.path());
-    let rule_01 = assertions::errors_by_id(&results, "RS-HEXARCH-01");
-    assert!(
-        rule_01.is_empty(),
-        "rule 01 should treat .gitkeep as present: {rule_01:#?}"
-    );
+    assertions::assert_no_error(&results, "RS-HEXARCH-01");
 
     assertions::assert_error_count_matching_file(
         &results,
@@ -32,9 +28,5 @@ fn optional_macros_dir_is_allowed() {
     write_file(tmp.path(), "apps/devctl/crates/macros/.gitkeep", "");
 
     let results = super::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "");
-    assert!(
-        errors.is_empty(),
-        "optional crates/macros/ should not trigger rule 02: {errors:#?}"
-    );
+    assertions::assert_no_error(&results, "");
 }
