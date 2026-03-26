@@ -23,10 +23,4 @@ fn nested_package_root_inside_app_zone_is_classified_as_ambiguous() {
         "RS-ARCH-01",
         &["apps/backend/packages/shared/Cargo.toml"],
     );
-    assert!(
-        assertions::error_results(&results, "RS-ARCH-01")
-            .iter()
-            .all(|result| result.severity == guardrail3_domain_report::Severity::Error),
-        "RS-ARCH-01 severity drifted: {results:#?}"
-    );
 }

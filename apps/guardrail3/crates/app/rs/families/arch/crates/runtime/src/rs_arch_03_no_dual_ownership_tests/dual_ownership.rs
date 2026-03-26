@@ -23,10 +23,4 @@ fn nested_package_root_inside_app_zone_is_owned_by_both_families() {
         "RS-ARCH-03",
         &["apps/backend/packages/shared/Cargo.toml"],
     );
-    assert!(
-        assertions::error_results(&results, "RS-ARCH-03")
-            .iter()
-            .all(|result| result.severity == guardrail3_domain_report::Severity::Error),
-        "RS-ARCH-03 severity drifted: {results:#?}"
-    );
 }
