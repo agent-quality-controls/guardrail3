@@ -1,7 +1,16 @@
 use std::collections::BTreeSet;
 use std::path::Path;
+const FIXTURE: test_support::HexarchFixture = test_support::HexarchFixture;
 
-use test_support::{INNER_HEX, RUST_APPS, create_dir, write_file};
+fn rust_apps() -> &'static [&'static str] {
+    FIXTURE.apps()
+}
+
+fn inner_hex() -> &'static str {
+    FIXTURE.inner_hex_root()
+}
+
+use test_support::{create_dir, write_file};
 
 pub const OUTER_CONTAINERS: &[&str] = &[
     "crates/app",
@@ -25,7 +34,7 @@ pub const NESTED_CONTAINERS: &[&str] = &[
 
 pub fn owned_leaf_dirs(root: &Path, name: &str) -> BTreeSet<String> {
     let mut expected = BTreeSet::new();
-    for app in RUST_APPS {
+    for app in rust_apps() {
         for container in OUTER_CONTAINERS {
             let rel = format!("apps/{app}/{container}/{name}");
             create_dir(root, &rel);
@@ -33,7 +42,7 @@ pub fn owned_leaf_dirs(root: &Path, name: &str) -> BTreeSet<String> {
         }
     }
     for container in INNER_CONTAINERS {
-        let rel = format!("{INNER_HEX}/{container}/{name}");
+        let rel = format!("{}/{container}/{name}", inner_hex());
         create_dir(root, &rel);
         let _ = expected.insert(rel);
     }

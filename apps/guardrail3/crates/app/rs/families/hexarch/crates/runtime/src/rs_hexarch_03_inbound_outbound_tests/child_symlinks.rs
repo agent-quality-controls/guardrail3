@@ -1,5 +1,10 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_03_inbound_outbound as assertions;
-use test_support::{INNER_HEX, copy_fixture, remove_dir};
+use test_support::{copy_fixture, remove_dir};
+const FIXTURE: test_support::HexarchFixture = test_support::HexarchFixture;
+
+fn inner_hex() -> &'static str {
+    FIXTURE.inner_hex_root()
+}
 
 #[test]
 fn directional_child_symlink_to_valid_directory_hits_missing_for_that_container() {
@@ -28,17 +33,17 @@ fn directional_child_symlink_to_valid_directory_hits_missing_for_that_container(
 #[test]
 fn nested_directional_child_symlink_to_valid_directory_hits_only_the_nested_container() {
     let tmp = copy_fixture();
-    remove_dir(tmp.path(), &format!("{INNER_HEX}/ports/outbound"));
+    remove_dir(tmp.path(), &format!("{}/ports/outbound", inner_hex()));
     std::os::unix::fs::symlink(
-        tmp.path().join(format!("{INNER_HEX}/ports/inbound")),
-        tmp.path().join(format!("{INNER_HEX}/ports/outbound")),
+        tmp.path().join(format!("{}/ports/inbound", inner_hex())),
+        tmp.path().join(format!("{}/ports/outbound", inner_hex())),
     )
     .expect("symlink");
 
     let results = assertions::run_family(tmp.path());
     let nested_rule_03: Vec<_> = assertions::errors_by_id(&results, "RS-HEXARCH-03")
         .into_iter()
-        .filter(|error| error.file.as_deref() == Some(&format!("{INNER_HEX}/ports")))
+        .filter(|error| error.file.as_deref() == Some(&format!("{}/ports", inner_hex())))
         .collect();
 
     assert_eq!(nested_rule_03.len(), 1, "{nested_rule_03:#?}");

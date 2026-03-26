@@ -1,7 +1,12 @@
 use std::collections::BTreeSet;
+const FIXTURE: test_support::HexarchFixture = test_support::HexarchFixture;
+
+fn inner_hex() -> &'static str {
+    FIXTURE.inner_hex_root()
+}
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_02_exact_contents as assertions;
-use test_support::{INNER_HEX, copy_fixture, remove_dir, write_file};
+use test_support::{copy_fixture, remove_dir, write_file};
 
 #[test]
 fn missing_domain_hits_all_owned_outer_and_nested_hex_roots() {
@@ -10,7 +15,7 @@ fn missing_domain_hits_all_owned_outer_and_nested_hex_roots() {
         "apps/devctl/crates",
         "apps/backend/crates",
         "apps/worker/crates",
-        INNER_HEX,
+        inner_hex(),
     ] {
         remove_dir(tmp.path(), &format!("{dir}/domain"));
     }
@@ -30,7 +35,7 @@ fn missing_domain_hits_all_owned_outer_and_nested_hex_roots() {
         "apps/devctl/crates".to_owned(),
         "apps/backend/crates".to_owned(),
         "apps/worker/crates".to_owned(),
-        INNER_HEX.to_owned(),
+        inner_hex().to_owned(),
     ]
     .into_iter()
     .collect::<BTreeSet<_>>();
@@ -53,7 +58,7 @@ fn missing_app_hits_all_owned_outer_and_nested_hex_roots() {
         "apps/devctl/crates",
         "apps/backend/crates",
         "apps/worker/crates",
-        INNER_HEX,
+        inner_hex(),
     ] {
         remove_dir(tmp.path(), &format!("{dir}/app"));
     }
@@ -79,7 +84,7 @@ fn missing_ports_hits_all_owned_outer_and_nested_hex_roots() {
         "apps/devctl/crates",
         "apps/backend/crates",
         "apps/worker/crates",
-        INNER_HEX,
+        inner_hex(),
     ] {
         remove_dir(tmp.path(), &format!("{dir}/ports"));
     }
@@ -105,7 +110,7 @@ fn replacing_domain_with_file_hits_missing_and_loose_per_owned_root() {
         "apps/devctl/crates",
         "apps/backend/crates",
         "apps/worker/crates",
-        INNER_HEX,
+        inner_hex(),
     ] {
         remove_dir(tmp.path(), &format!("{dir}/domain"));
         write_file(tmp.path(), &format!("{dir}/domain"), "not a directory");
@@ -126,7 +131,7 @@ fn replacing_domain_with_file_hits_missing_and_loose_per_owned_root() {
         "apps/devctl/crates".to_owned(),
         "apps/backend/crates".to_owned(),
         "apps/worker/crates".to_owned(),
-        format!("{INNER_HEX}"),
+        inner_hex().to_owned(),
     ]
     .into_iter()
     .collect::<BTreeSet<_>>();
@@ -251,7 +256,7 @@ fn replacing_outer_adapters_with_files_hits_only_outer_roots_because_nested_hex_
 #[test]
 fn missing_inner_adapters_hits_only_the_nested_hex_root() {
     let tmp = copy_fixture();
-    remove_dir(tmp.path(), &format!("{INNER_HEX}/adapters"));
+        remove_dir(tmp.path(), &format!("{}/adapters", inner_hex()));
 
     let results = assertions::run_family(tmp.path());
     let errors = assertions::errors_by_id(&results, "RS-HEXARCH-02");
@@ -260,7 +265,7 @@ fn missing_inner_adapters_hits_only_the_nested_hex_root() {
         1,
         "expected one nested missing-adapters hit: {errors:#?}"
     );
-    assert_eq!(errors[0].file.as_deref(), Some(INNER_HEX), "{errors:#?}");
+    assert_eq!(errors[0].file.as_deref(), Some(inner_hex()), "{errors:#?}");
     assert!(errors[0].title.contains("missing") && errors[0].title.contains("adapters/"));
 }
 
@@ -271,7 +276,7 @@ fn missing_two_required_dirs_hits_each_owned_root_once_per_dir() {
         "apps/devctl/crates",
         "apps/backend/crates",
         "apps/worker/crates",
-        INNER_HEX,
+        inner_hex(),
     ] {
         remove_dir(tmp.path(), &format!("{dir}/domain"));
         remove_dir(tmp.path(), &format!("{dir}/ports"));
@@ -309,7 +314,7 @@ fn nested_optional_macros_dir_is_allowed_alongside_outer_macros() {
         "apps/devctl/crates",
         "apps/backend/crates",
         "apps/worker/crates",
-        INNER_HEX,
+        inner_hex(),
     ] {
         write_file(tmp.path(), &format!("{dir}/macros/.gitkeep"), "");
     }

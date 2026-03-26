@@ -1,7 +1,12 @@
 use std::collections::BTreeSet;
+const FIXTURE: test_support::HexarchFixture = test_support::HexarchFixture;
+
+fn inner_hex() -> &'static str {
+    FIXTURE.inner_hex_root()
+}
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_03_inbound_outbound as assertions;
-use test_support::{INNER_HEX, copy_fixture, remove_dir};
+use test_support::{copy_fixture, remove_dir};
 
 #[test]
 fn missing_outbound_in_adapters_hits_all_owned_outer_and_nested_containers() {
@@ -10,7 +15,7 @@ fn missing_outbound_in_adapters_hits_all_owned_outer_and_nested_containers() {
         "apps/devctl/crates/adapters",
         "apps/backend/crates/adapters",
         "apps/worker/crates/adapters",
-        &format!("{INNER_HEX}/adapters"),
+        &format!("{}/adapters", inner_hex()),
     ] {
         remove_dir(tmp.path(), &format!("{dir}/outbound"));
     }
@@ -25,7 +30,7 @@ fn missing_outbound_in_adapters_hits_all_owned_outer_and_nested_containers() {
         "apps/devctl/crates/adapters".to_owned(),
         "apps/backend/crates/adapters".to_owned(),
         "apps/worker/crates/adapters".to_owned(),
-        format!("{INNER_HEX}/adapters"),
+        format!("{}/adapters", inner_hex()),
     ]
     .into_iter()
     .collect::<BTreeSet<_>>();
@@ -76,7 +81,7 @@ fn missing_inbound_in_adapters_hits_only_outer_containers_because_nested_hex_bec
         !errors.iter().any(|error| error
             .file
             .as_deref()
-            .is_some_and(|file| file.starts_with(INNER_HEX))),
+            .is_some_and(|file| file.starts_with(inner_hex()))),
         "{errors:#?}"
     );
 }
@@ -88,7 +93,7 @@ fn missing_inbound_in_ports_hits_all_owned_outer_and_nested_containers() {
         "apps/devctl/crates/ports",
         "apps/backend/crates/ports",
         "apps/worker/crates/ports",
-        &format!("{INNER_HEX}/ports"),
+        &format!("{}/ports", inner_hex()),
     ] {
         remove_dir(tmp.path(), &format!("{dir}/inbound"));
     }
@@ -103,7 +108,7 @@ fn missing_inbound_in_ports_hits_all_owned_outer_and_nested_containers() {
         "apps/devctl/crates/ports".to_owned(),
         "apps/backend/crates/ports".to_owned(),
         "apps/worker/crates/ports".to_owned(),
-        format!("{INNER_HEX}/ports"),
+        format!("{}/ports", inner_hex()),
     ]
     .into_iter()
     .collect::<BTreeSet<_>>();
@@ -124,7 +129,7 @@ fn missing_outbound_in_ports_hits_all_owned_outer_and_nested_containers() {
         "apps/devctl/crates/ports",
         "apps/backend/crates/ports",
         "apps/worker/crates/ports",
-        &format!("{INNER_HEX}/ports"),
+        &format!("{}/ports", inner_hex()),
     ] {
         remove_dir(tmp.path(), &format!("{dir}/outbound"));
     }
@@ -139,7 +144,7 @@ fn missing_outbound_in_ports_hits_all_owned_outer_and_nested_containers() {
         "apps/devctl/crates/ports".to_owned(),
         "apps/backend/crates/ports".to_owned(),
         "apps/worker/crates/ports".to_owned(),
-        format!("{INNER_HEX}/ports"),
+        format!("{}/ports", inner_hex()),
     ]
     .into_iter()
     .collect::<BTreeSet<_>>();
@@ -160,7 +165,7 @@ fn both_direction_dirs_missing_in_ports_emit_two_missing_results_per_owned_conta
         "apps/devctl/crates/ports",
         "apps/backend/crates/ports",
         "apps/worker/crates/ports",
-        &format!("{INNER_HEX}/ports"),
+        &format!("{}/ports", inner_hex()),
     ] {
         remove_dir(tmp.path(), &format!("{dir}/inbound"));
         remove_dir(tmp.path(), &format!("{dir}/outbound"));
@@ -223,7 +228,7 @@ fn both_direction_dirs_missing_in_adapters_emit_two_missing_results_per_survivin
         !errors.iter().any(|error| error
             .file
             .as_deref()
-            .is_some_and(|file| file.starts_with(INNER_HEX))),
+            .is_some_and(|file| file.starts_with(inner_hex()))),
         "{errors:#?}"
     );
 }

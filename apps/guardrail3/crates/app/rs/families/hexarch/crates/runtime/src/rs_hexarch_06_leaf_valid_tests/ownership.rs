@@ -1,12 +1,17 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_06_leaf_valid as assertions;
-use test_support::{INNER_HEX, copy_fixture, remove_dir, write_file};
+use test_support::{copy_fixture, remove_dir, write_file};
+const FIXTURE: test_support::HexarchFixture = test_support::HexarchFixture;
+
+fn inner_hex() -> &'static str {
+    FIXTURE.inner_hex_root()
+}
 
 #[test]
 fn inner_hex_invalid_leaf_hits_only_inner_hex_and_leaves_outer_apps_clean() {
     let tmp = copy_fixture();
     write_file(
         tmp.path(),
-        &format!("{INNER_HEX}/app/orphan_inner/src/lib.rs"),
+        &format!("{}/app/orphan_inner/src/lib.rs", inner_hex()),
         "pub fn orphan_inner() {}\n",
     );
 
@@ -35,7 +40,7 @@ fn destroying_outer_parent_does_not_create_nested_rule_06_hits() {
     assert!(
         errors
             .iter()
-            .all(|error| !error.file.as_deref().unwrap_or("").contains(INNER_HEX)),
+            .all(|error| !error.file.as_deref().unwrap_or("").contains(inner_hex())),
         "rule 06 should not materialize nested leaves under a destroyed outer parent: {errors:#?}"
     );
 }

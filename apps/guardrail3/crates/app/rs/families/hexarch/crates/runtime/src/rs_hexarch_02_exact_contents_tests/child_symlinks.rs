@@ -1,5 +1,10 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_02_exact_contents as assertions;
-use test_support::{INNER_HEX, copy_fixture, remove_dir};
+use test_support::{copy_fixture, remove_dir};
+const FIXTURE: test_support::HexarchFixture = test_support::HexarchFixture;
+
+fn inner_hex() -> &'static str {
+    FIXTURE.inner_hex_root()
+}
 
 #[test]
 fn required_child_symlink_to_valid_directory_hits_missing_and_loose_for_that_root() {
@@ -90,10 +95,10 @@ fn required_child_dev_null_symlink_hits_missing_and_loose_for_that_root() {
 #[test]
 fn nested_required_child_valid_symlink_hits_missing_and_loose_for_that_root() {
     let tmp = copy_fixture();
-    remove_dir(tmp.path(), &format!("{INNER_HEX}/domain"));
+    remove_dir(tmp.path(), &format!("{}/domain", inner_hex()));
     std::os::unix::fs::symlink(
-        tmp.path().join(format!("{INNER_HEX}/app")),
-        tmp.path().join(format!("{INNER_HEX}/domain")),
+        tmp.path().join(format!("{}/app", inner_hex())),
+        tmp.path().join(format!("{}/domain", inner_hex())),
     )
     .expect("symlink");
 
@@ -104,7 +109,7 @@ fn nested_required_child_valid_symlink_hits_missing_and_loose_for_that_root() {
             error
                 .file
                 .as_deref()
-                .is_some_and(|file| file.starts_with(INNER_HEX))
+                .is_some_and(|file| file.starts_with(inner_hex()))
         })
         .collect();
     assert_eq!(nested_rule_02.len(), 2, "{nested_rule_02:#?}");
@@ -127,7 +132,7 @@ fn required_child_symlink_hits_every_owned_root_for_non_special_required_name() 
         "apps/devctl/crates",
         "apps/backend/crates",
         "apps/worker/crates",
-        INNER_HEX,
+        inner_hex(),
     ] {
         remove_dir(tmp.path(), &format!("{dir}/domain"));
         std::os::unix::fs::symlink(
@@ -197,7 +202,7 @@ fn outer_adapters_symlink_hits_only_outer_roots_because_nested_hex_becomes_unrea
         errors.iter().all(|error| !error
             .file
             .as_deref()
-            .is_some_and(|file| file.starts_with(INNER_HEX))),
+            .is_some_and(|file| file.starts_with(inner_hex()))),
         "{errors:#?}"
     );
 }

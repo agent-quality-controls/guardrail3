@@ -6,11 +6,35 @@ use guardrail3_app_core::project_walker::walk_project;
 use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
 
 const GOLDEN_REL: &str = "../../../../../../tests/fixtures/r_arch_01/golden";
-pub const RUST_APPS: &[&str] = &["devctl", "backend", "worker"];
-pub const INNER_HEX: &str = "apps/backend/crates/adapters/inbound/mcp/crates";
+const RUST_APPS: &[&str] = &["devctl", "backend", "worker"];
+const INNER_HEX_ROOT: &str = "apps/backend/crates/adapters/inbound/mcp/crates";
 
-pub fn fixture_root() -> PathBuf {
+fn fixture_root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(GOLDEN_REL)
+}
+
+pub struct HexarchFixture;
+
+pub fn hexarch_fixture() -> HexarchFixture {
+    HexarchFixture
+}
+
+impl HexarchFixture {
+    pub fn apps(&self) -> &'static [&'static str] {
+        RUST_APPS
+    }
+
+    pub fn inner_hex_root(&self) -> &'static str {
+        INNER_HEX_ROOT
+    }
+
+    pub fn inner_hex(&self, suffix: &str) -> String {
+        if suffix.is_empty() {
+            INNER_HEX_ROOT.to_owned()
+        } else {
+            format!("{INNER_HEX_ROOT}/{suffix}")
+        }
+    }
 }
 
 pub fn copy_fixture() -> tempfile::TempDir {

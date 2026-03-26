@@ -1,7 +1,8 @@
 use std::collections::BTreeSet;
+const FIXTURE: test_support::HexarchFixture = test_support::HexarchFixture;
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_01_crates_exists as assertions;
-use test_support::{INNER_HEX, RUST_APPS, copy_fixture, remove_dir, write_file};
+use test_support::{copy_fixture, remove_dir, write_file};
 
 #[test]
 fn golden_has_no_rule_01_errors() {
@@ -14,7 +15,7 @@ fn golden_has_no_rule_01_errors() {
 #[test]
 fn missing_outer_crates_dir_hits_every_owned_rust_app_and_only_them() {
     let tmp = copy_fixture();
-    for app in RUST_APPS {
+    for app in FIXTURE.apps() {
         remove_dir(tmp.path(), &format!("apps/{app}/crates"));
     }
 
@@ -24,7 +25,8 @@ fn missing_outer_crates_dir_hits_every_owned_rust_app_and_only_them() {
         .iter()
         .filter_map(|error| error.file.clone())
         .collect::<BTreeSet<_>>();
-    let expected_files = RUST_APPS
+    let expected_files = FIXTURE
+        .apps()
         .iter()
         .map(|app| format!("apps/{app}"))
         .collect::<BTreeSet<_>>();
@@ -39,7 +41,7 @@ fn missing_outer_crates_dir_hits_every_owned_rust_app_and_only_them() {
 fn file_outer_crates_dirs_still_count_as_missing_for_the_owned_apps() {
     let tmp = copy_fixture();
 
-    for app in RUST_APPS {
+    for app in FIXTURE.apps() {
         remove_dir(tmp.path(), &format!("apps/{app}/crates"));
         write_file(tmp.path(), &format!("apps/{app}/crates"), "not a dir");
     }
@@ -50,7 +52,8 @@ fn file_outer_crates_dirs_still_count_as_missing_for_the_owned_apps() {
         .iter()
         .filter_map(|error| error.file.clone())
         .collect::<BTreeSet<_>>();
-    let expected_files = RUST_APPS
+    let expected_files = FIXTURE
+        .apps()
         .iter()
         .map(|app| format!("apps/{app}"))
         .collect::<BTreeSet<_>>();
@@ -105,8 +108,8 @@ fn replacing_outer_crates_with_a_file_only_hits_the_owned_app_roots() {
 #[test]
 fn replacing_nested_crates_with_a_file_is_not_owned_by_app_level_rule_01() {
     let tmp = copy_fixture();
-    remove_dir(tmp.path(), INNER_HEX);
-    write_file(tmp.path(), INNER_HEX, "not a directory");
+    remove_dir(tmp.path(), FIXTURE.inner_hex_root());
+    write_file(tmp.path(), FIXTURE.inner_hex_root(), "not a directory");
 
     let results = assertions::run_family(tmp.path());
     let errors = assertions::errors_by_id(&results, "RS-HEXARCH-01");

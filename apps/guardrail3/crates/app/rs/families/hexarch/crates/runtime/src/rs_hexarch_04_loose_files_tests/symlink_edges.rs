@@ -1,5 +1,10 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_04_loose_files as assertions;
-use test_support::{INNER_HEX, copy_fixture};
+use test_support::copy_fixture;
+const FIXTURE: test_support::HexarchFixture = test_support::HexarchFixture;
+
+fn inner_hex() -> &'static str {
+    FIXTURE.inner_hex_root()
+}
 
 #[test]
 fn symlinked_gitkeep_is_not_treated_as_the_allowed_real_gitkeep_in_outer_container() {
@@ -31,15 +36,15 @@ fn symlinked_gitkeep_is_not_treated_as_the_allowed_real_gitkeep_in_outer_contain
 fn symlinked_gitkeep_is_not_treated_as_the_allowed_real_gitkeep_in_nested_container() {
     let tmp = copy_fixture();
     std::os::unix::fs::symlink(
-        tmp.path().join(format!("{INNER_HEX}/app/handlers")),
-        tmp.path().join(format!("{INNER_HEX}/app/.gitkeep")),
+        tmp.path().join(format!("{}/app/handlers", inner_hex())),
+        tmp.path().join(format!("{}/app/.gitkeep", inner_hex())),
     )
     .expect("symlink");
 
     let results = assertions::run_family(tmp.path());
     let nested_rule_04: Vec<_> = assertions::errors_by_id(&results, "RS-HEXARCH-04")
         .into_iter()
-        .filter(|error| error.file.as_deref() == Some(&format!("{INNER_HEX}/app")))
+        .filter(|error| error.file.as_deref() == Some(&format!("{}/app", inner_hex())))
         .collect();
 
     assert_eq!(nested_rule_04.len(), 1, "{nested_rule_04:#?}");
