@@ -20,9 +20,10 @@ mod rs_garde_13_context_validation_surface;
 #[cfg(test)]
 mod test_support;
 
-use std::collections::BTreeSet;
-
 use glob as _;
+use guardrail3_app_core as _;
+use guardrail3_app_rs_family_mapper::RsGardeRoute;
+use guardrail3_domain_config as _;
 use guardrail3_domain_modules as _;
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::CheckResult;
@@ -36,8 +37,8 @@ use self::inputs::{
     ManualDeserializeImplInput, QueryAsMacroInput,
 };
 
-pub fn check(tree: &ProjectTree, scoped_files: Option<&BTreeSet<String>>) -> Vec<CheckResult> {
-    let facts = collect(tree);
+pub fn check(tree: &ProjectTree, route: &RsGardeRoute) -> Vec<CheckResult> {
+    let facts = collect(tree, route);
     let mut results = Vec::new();
 
     for failure in &facts.input_failures {
@@ -59,7 +60,11 @@ pub fn check(tree: &ProjectTree, scoped_files: Option<&BTreeSet<String>>) -> Vec
     }
 
     for target in &facts.struct_targets {
-        if scoped_files.is_some_and(|files| !files.contains(&target.rel_path)) {
+        if route
+            .scoped_files
+            .as_ref()
+            .is_some_and(|files| !files.contains(&target.rel_path))
+        {
             continue;
         }
         rs_garde_05_struct_derive_validate::check(
@@ -69,7 +74,11 @@ pub fn check(tree: &ProjectTree, scoped_files: Option<&BTreeSet<String>>) -> Vec
     }
 
     for target in &facts.manual_deserialize_impls {
-        if scoped_files.is_some_and(|files| !files.contains(&target.rel_path)) {
+        if route
+            .scoped_files
+            .as_ref()
+            .is_some_and(|files| !files.contains(&target.rel_path))
+        {
             continue;
         }
         rs_garde_07_manual_deserialize_impl::check(
@@ -79,7 +88,11 @@ pub fn check(tree: &ProjectTree, scoped_files: Option<&BTreeSet<String>>) -> Vec
     }
 
     for target in &facts.enum_targets {
-        if scoped_files.is_some_and(|files| !files.contains(&target.rel_path)) {
+        if route
+            .scoped_files
+            .as_ref()
+            .is_some_and(|files| !files.contains(&target.rel_path))
+        {
             continue;
         }
         rs_garde_08_enum_derive_validate::check(
@@ -89,14 +102,22 @@ pub fn check(tree: &ProjectTree, scoped_files: Option<&BTreeSet<String>>) -> Vec
     }
 
     for macro_use in &facts.query_as_macros {
-        if scoped_files.is_some_and(|files| !files.contains(&macro_use.rel_path)) {
+        if route
+            .scoped_files
+            .as_ref()
+            .is_some_and(|files| !files.contains(&macro_use.rel_path))
+        {
             continue;
         }
         rs_garde_09_query_as_inventory::check(&QueryAsMacroInput::new(macro_use), &mut results);
     }
 
     for field in &facts.boundary_fields {
-        if scoped_files.is_some_and(|files| !files.contains(&field.rel_path)) {
+        if route
+            .scoped_files
+            .as_ref()
+            .is_some_and(|files| !files.contains(&field.rel_path))
+        {
             continue;
         }
         let input = BoundaryFieldInput::new(field);

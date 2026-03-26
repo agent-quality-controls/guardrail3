@@ -35,9 +35,8 @@ mod rs_code_30_input_failures;
 #[cfg(test)]
 mod test_support;
 
-use std::collections::BTreeSet;
-
 use glob as _;
+use guardrail3_app_rs_family_mapper::RsCodeRoute;
 use guardrail3_domain_config as _;
 use guardrail3_domain_modules as _;
 use guardrail3_domain_project_tree::ProjectTree;
@@ -52,8 +51,8 @@ use self::inputs::{
     CodeInputFailureInput, ExceptionCommentInput, RustCodeFileInput, UnsafeCodeLintInput,
 };
 
-pub fn check(tree: &ProjectTree, scoped_files: Option<&BTreeSet<String>>) -> Vec<CheckResult> {
-    let facts = collect(tree);
+pub fn check(tree: &ProjectTree, route: &RsCodeRoute) -> Vec<CheckResult> {
+    let facts = collect(tree, route);
     let mut results = Vec::new();
 
     for failure in &facts.input_failures {
@@ -72,7 +71,11 @@ pub fn check(tree: &ProjectTree, scoped_files: Option<&BTreeSet<String>>) -> Vec
     }
 
     for file in &facts.files {
-        if scoped_files.is_some_and(|files| !files.contains(&file.rel_path)) {
+        if route
+            .scoped_files
+            .as_ref()
+            .is_some_and(|files| !files.contains(&file.rel_path))
+        {
             continue;
         }
         let content = match guardrail3_shared_fs::read_file_err(&tree.abs_path(&file.rel_path)) {

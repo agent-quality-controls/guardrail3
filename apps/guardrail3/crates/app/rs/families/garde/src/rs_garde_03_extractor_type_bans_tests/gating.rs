@@ -1,4 +1,3 @@
-use crate::check;
 use crate::test_support::{dir_entry, project_tree, temp_root};
 
 #[test]
@@ -15,7 +14,7 @@ fn ignores_workspace_when_garde_missing() {
         ],
         root.clone(),
     );
-    let results = check(&tree, None);
+    let results = crate::test_support::run_family(&tree);
     let filtered: Vec<_> = results
         .into_iter()
         .filter(|r| r.id == "RS-GARDE-03")

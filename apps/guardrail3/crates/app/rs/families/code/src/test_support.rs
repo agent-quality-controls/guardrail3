@@ -3,7 +3,11 @@ use std::path::{Path, PathBuf};
 
 use guardrail3_adapters_outbound_fs::RealFileSystem;
 use guardrail3_app_core::project_walker::walk_project;
+use guardrail3_app_rs_family_mapper::{FamilyMapper, RsCodeRoute};
+use guardrail3_domain_config::types::GuardrailConfig;
+use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::CheckResult;
+use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
 const GOLDEN_REL: &str = "../../../../../tests/fixtures/r_arch_01/golden";
 
@@ -48,7 +52,18 @@ pub fn write_file(root: &Path, rel: &str, content: &str) {
 
 pub fn run_family(root: &Path) -> Vec<CheckResult> {
     let tree = walk_project(&RealFileSystem, root);
-    super::check(&tree, None)
+    super::check(&tree, &family_route(&tree, None))
+}
+
+pub fn run_tree(tree: &ProjectTree) -> Vec<CheckResult> {
+    super::check(tree, &family_route(tree, None))
+}
+
+pub fn family_route(tree: &ProjectTree, scoped_files: Option<&BTreeSet<String>>) -> RsCodeRoute {
+    let scope = guardrail3_app_rs_placement::collect(tree);
+    let config = parse_guardrail_config(tree);
+    let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Code]));
+    FamilyMapper::new(tree, &scope, config.as_ref(), &selected, scoped_files).map_rs_code()
 }
 
 fn copy_dir_recursive(src: &Path, dst: &Path) {
@@ -63,4 +78,9 @@ fn copy_dir_recursive(src: &Path, dst: &Path) {
             let _ = std::fs::copy(&src_path, &dst_path).expect("copy fixture file");
         }
     }
+}
+
+fn parse_guardrail_config(tree: &ProjectTree) -> Option<GuardrailConfig> {
+    tree.file_content("guardrail3.toml")
+        .and_then(|content| toml::from_str::<GuardrailConfig>(content).ok())
 }

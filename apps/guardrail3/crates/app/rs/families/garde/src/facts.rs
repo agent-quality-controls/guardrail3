@@ -1,6 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use guardrail3_app_core::discover::resolve_app_paths_from_member_dirs;
+use guardrail3_app_rs_family_mapper::RsGardeRoute;
 use guardrail3_domain_config::types::GuardrailConfig;
 use guardrail3_domain_project_tree::ProjectTree;
 
@@ -112,9 +113,9 @@ struct ClippyConfigCandidate {
     parse_error: Option<String>,
 }
 
-pub fn collect(tree: &ProjectTree) -> GardeFacts {
+pub fn collect(tree: &ProjectTree, route: &RsGardeRoute) -> GardeFacts {
     let mut input_failures = Vec::new();
-    let cargo_roots = collect_cargo_roots(tree, &mut input_failures);
+    let cargo_roots = collect_cargo_roots(tree, route, &mut input_failures);
     let workspace_roots: BTreeSet<_> = cargo_roots
         .values()
         .filter(|facts| facts.has_workspace)
@@ -388,21 +389,15 @@ fn resolve_validation_state(
 
 fn collect_cargo_roots(
     tree: &ProjectTree,
+    route: &RsGardeRoute,
     input_failures: &mut Vec<GardeInputFailureFacts>,
 ) -> BTreeMap<String, CargoRootFacts> {
-    let mut dirs = BTreeSet::new();
-    if tree.file_exists("Cargo.toml") {
-        let _ = dirs.insert(String::new());
-    }
-    dirs.extend(tree.dirs_with_file("Cargo.toml"));
-
-    dirs.into_iter()
-        .map(|rel_dir| {
-            let rel_path = if rel_dir.is_empty() {
-                "Cargo.toml".to_owned()
-            } else {
-                ProjectTree::join_rel(&rel_dir, "Cargo.toml")
-            };
+    route
+        .roots
+        .iter()
+        .map(|root| {
+            let rel_dir = root.root.rel_dir.clone();
+            let rel_path = root.root.cargo_rel_path.clone();
             let parsed = tree
                 .file_content(&rel_path)
                 .map(|content| toml::from_str::<toml::Value>(content));
@@ -480,18 +475,18 @@ fn read_policy_map(
     input_failures: &mut Vec<GardeInputFailureFacts>,
 ) -> BTreeMap<String, PolicySettings> {
     let parsed = match tree.file_content("guardrail3.toml") {
-        Some(content) => {
-            match toml::from_str::<GuardrailConfig>(content) {
-                Ok(parsed) => Some(parsed),
-                Err(parse_error) => {
-                    input_failures.push(GardeInputFailureFacts {
+        Some(content) => match toml::from_str::<GuardrailConfig>(content) {
+            Ok(parsed) => Some(parsed),
+            Err(parse_error) => {
+                input_failures.push(GardeInputFailureFacts {
                     rel_path: "guardrail3.toml".to_owned(),
-                    message: format!("Failed to parse guardrail3.toml for garde policy resolution: {parse_error}"),
+                    message: format!(
+                        "Failed to parse guardrail3.toml for garde policy resolution: {parse_error}"
+                    ),
                 });
-                    None
-                }
+                None
             }
-        }
+        },
         None => None,
     };
 

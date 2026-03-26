@@ -23,20 +23,6 @@ pub fn rust_file_rels(tree: &ProjectTree) -> Vec<String> {
     rels
 }
 
-pub fn cargo_toml_rels(tree: &ProjectTree) -> Vec<String> {
-    let mut rels = Vec::new();
-    if tree.file_exists("Cargo.toml") {
-        rels.push("Cargo.toml".to_owned());
-    }
-    rels.extend(
-        tree.dirs_with_file("Cargo.toml")
-            .into_iter()
-            .map(|dir_rel| ProjectTree::join_rel(&dir_rel, "Cargo.toml")),
-    );
-    rels.sort();
-    rels
-}
-
 pub fn is_test_path(rel_path: &str) -> bool {
     rel_path.contains("/tests/")
         || rel_path.contains("/test/")

@@ -1,11 +1,14 @@
 #![allow(dead_code)]
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::PathBuf;
 
+use guardrail3_app_rs_family_mapper::{FamilyMapper, RsGardeRoute};
+use guardrail3_domain_config::types::GuardrailConfig;
 use guardrail3_domain_modules::clippy::build_clippy_toml;
 use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
 use guardrail3_domain_report::CheckResult;
+use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
 use super::facts::{
     DerivedBoundaryTypeFacts, GardeInputFailureFacts, GardeRootFacts, ManualDeserializeImplFacts,
@@ -149,4 +152,20 @@ where
 
 pub fn canonical_clippy_toml() -> String {
     build_clippy_toml("service", false, true, "", "")
+}
+
+pub fn family_route(tree: &ProjectTree, scoped_files: Option<&BTreeSet<String>>) -> RsGardeRoute {
+    let scope = guardrail3_app_rs_placement::collect(tree);
+    let config = parse_guardrail_config(tree);
+    let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Garde]));
+    FamilyMapper::new(tree, &scope, config.as_ref(), &selected, scoped_files).map_rs_garde()
+}
+
+pub fn run_family(tree: &ProjectTree) -> Vec<CheckResult> {
+    super::check(tree, &family_route(tree, None))
+}
+
+fn parse_guardrail_config(tree: &ProjectTree) -> Option<GuardrailConfig> {
+    tree.file_content("guardrail3.toml")
+        .and_then(|content| toml::from_str::<GuardrailConfig>(content).ok())
 }

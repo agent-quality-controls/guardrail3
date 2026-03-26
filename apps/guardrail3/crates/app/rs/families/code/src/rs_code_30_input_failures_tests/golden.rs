@@ -50,7 +50,7 @@ fn golden_tree_has_no_code_input_failures() {
         ]),
     };
 
-    let results = crate::check(&tree, None);
+    let results = crate::test_support::run_tree(&tree);
     let rs_code_30_results = results
         .iter()
         .filter(|result| result.id == "RS-CODE-30")

@@ -4,6 +4,6 @@ mod views;
 
 pub use rs::FamilyMapper;
 pub use views::{
-    RsArchOverlapView, RsArchRootView, RsArchRoute, RsHexarchRoute, RsRootInputFailureView,
-    RsRootView, RsTestRoute,
+    RsArchOverlapView, RsArchRootView, RsArchRoute, RsCodeRoute, RsGardeRoute, RsHexarchRoute,
+    RsRootInputFailureView, RsRootView, RsScopedRootView, RsScopedSourceRoute, RsTestRoute,
 };

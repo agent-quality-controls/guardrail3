@@ -33,7 +33,7 @@ serde = { version = "1", features = ["derive"] }
         root.clone(),
     );
 
-    let results = crate::check(&tree, None);
+    let results = crate::test_support::run_family(&tree);
 
     let rs_garde_01_results: Vec<_> = results
         .into_iter()

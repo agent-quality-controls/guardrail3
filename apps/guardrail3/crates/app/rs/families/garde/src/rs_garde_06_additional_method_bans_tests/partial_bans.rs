@@ -1,4 +1,3 @@
-use crate::check;
 use crate::test_support::{
     canonical_clippy_toml, dir_entry, project_tree, remove_clippy_ban_path, temp_root,
 };
@@ -22,7 +21,7 @@ fn warns_when_bans_missing() {
         ],
         root.clone(),
     );
-    let results = check(&tree, None);
+    let results = crate::test_support::run_family(&tree);
     let filtered: Vec<_> = results
         .into_iter()
         .filter(|r| r.id == "RS-GARDE-06")

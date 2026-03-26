@@ -41,7 +41,7 @@ fn family_surfaces_source_parse_failures_with_exact_owned_hit_set() {
         )]),
     };
 
-    let results = crate::check(&tree, None);
+    let results = crate::test_support::run_tree(&tree);
 
     assert_eq!(
         files_for_rule(&results, "RS-CODE-30"),
@@ -106,7 +106,7 @@ fn family_surfaces_guardrail_policy_parse_failures_with_exact_owned_hit_set() {
         ]),
     };
 
-    let results = crate::check(&tree, None);
+    let results = crate::test_support::run_tree(&tree);
 
     assert_eq!(
         files_for_rule(&results, "RS-CODE-30"),
