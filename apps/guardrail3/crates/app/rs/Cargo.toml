@@ -25,9 +25,8 @@ guardrail3_app_rs_family_deps = { package = "guardrail3-app-rs-family-deps", pat
 guardrail3_app_rs_family_fmt = { package = "guardrail3-app-rs-family-fmt", path = "families/fmt" }
 guardrail3_app_rs_family_garde = { package = "guardrail3-app-rs-family-garde", path = "families/garde" }
 guardrail3_app_rs_family_hexarch = { package = "guardrail3-app-rs-family-hexarch", path = "families/hexarch" }
-guardrail3_app_rs_family_hooks_rs = { package = "guardrail3-app-rs-family-hooks-rs", path = "families/hooks-rs" }
 guardrail3_app_rs_family_hooks_shared = { package = "guardrail3-app-rs-family-hooks-shared", path = "families/hooks-shared" }
 guardrail3_app_rs_family_release = { package = "guardrail3-app-rs-family-release", path = "families/release" }
-guardrail3_app_rs_family_test = { package = "guardrail3-app-rs-family-test", path = "families/test" }
+guardrail3_app_rs_family_test = { package = "guardrail3-app-rs-family-test", path = "families/test/crates/family/runtime" }
 guardrail3_app_rs_family_toolchain = { package = "guardrail3-app-rs-family-toolchain", path = "families/toolchain" }
 toml = "0.8"
