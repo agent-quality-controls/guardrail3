@@ -10,31 +10,31 @@ fn generic_test_support_passes() {
     write_file(
         root,
         "Cargo.toml",
-        "[workspace]\nmembers = [\"crates/demo/runtime\", \"crates/demo/assertions\", \"test_support\"]\n",
+        "[workspace]\nmembers = [\"crates/runtime\", \"crates/assertions\", \"test_support\"]\n",
     );
     write_file(
         root,
-        "crates/demo/runtime/Cargo.toml",
-        "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = { path = \"../assertions\" }\ntest_support = { path = \"../../../test_support\" }\n",
+        "crates/runtime/Cargo.toml",
+        "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = { path = \"../assertions\" }\ntest_support = { path = \"../../test_support\" }\n",
     );
     write_file(
         root,
-        "crates/demo/runtime/src/lib.rs",
+        "crates/runtime/src/lib.rs",
         "pub fn value() -> u8 { 1 }\n",
     );
     write_file(
         root,
-        "crates/demo/runtime/tests/public_surface.rs",
+        "crates/runtime/tests/public_surface.rs",
         "use demo_assertions::prove_runtime;\n#[test]\nfn public_surface() { prove_runtime(); }\n",
     );
     write_file(
         root,
-        "crates/demo/assertions/Cargo.toml",
-        "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = { path = \"../runtime\" }\ntest_support = { path = \"../../../test_support\" }\n",
+        "crates/assertions/Cargo.toml",
+        "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = { path = \"../runtime\" }\ntest_support = { path = \"../../test_support\" }\n",
     );
     write_file(
         root,
-        "crates/demo/assertions/src/lib.rs",
+        "crates/assertions/src/lib.rs",
         "pub fn prove_runtime() { assert_eq!(demo_runtime::value(), 1); }\n",
     );
     write_file(
@@ -61,31 +61,31 @@ fn test_support_importing_runtime_is_reported() {
     write_file(
         root,
         "Cargo.toml",
-        "[workspace]\nmembers = [\"crates/demo/runtime\", \"crates/demo/assertions\", \"test_support\"]\n",
+        "[workspace]\nmembers = [\"crates/runtime\", \"crates/assertions\", \"test_support\"]\n",
     );
     write_file(
         root,
-        "crates/demo/runtime/Cargo.toml",
-        "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = { path = \"../assertions\" }\ntest_support = { path = \"../../../test_support\" }\n",
+        "crates/runtime/Cargo.toml",
+        "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = { path = \"../assertions\" }\ntest_support = { path = \"../../test_support\" }\n",
     );
     write_file(
         root,
-        "crates/demo/runtime/src/lib.rs",
+        "crates/runtime/src/lib.rs",
         "pub fn value() -> u8 { 1 }\n",
     );
     write_file(
         root,
-        "crates/demo/runtime/tests/public_surface.rs",
+        "crates/runtime/tests/public_surface.rs",
         "use demo_assertions::prove_runtime;\n#[test]\nfn public_surface() { prove_runtime(); }\n",
     );
     write_file(
         root,
-        "crates/demo/assertions/Cargo.toml",
-        "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = { path = \"../runtime\" }\ntest_support = { path = \"../../../test_support\" }\n",
+        "crates/assertions/Cargo.toml",
+        "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = { path = \"../runtime\" }\ntest_support = { path = \"../../test_support\" }\n",
     );
     write_file(
         root,
-        "crates/demo/assertions/src/lib.rs",
+        "crates/assertions/src/lib.rs",
         "pub fn prove_runtime() { assert_eq!(demo_runtime::value(), 1); }\n",
     );
     write_file(
@@ -120,31 +120,31 @@ fn test_support_direct_runtime_call_is_reported() {
     write_file(
         root,
         "Cargo.toml",
-        "[workspace]\nmembers = [\"crates/demo/runtime\", \"crates/demo/assertions\", \"test_support\"]\n",
+        "[workspace]\nmembers = [\"crates/runtime\", \"crates/assertions\", \"test_support\"]\n",
     );
     write_file(
         root,
-        "crates/demo/runtime/Cargo.toml",
-        "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = { path = \"../assertions\" }\ntest_support = { path = \"../../../test_support\" }\n",
+        "crates/runtime/Cargo.toml",
+        "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = { path = \"../assertions\" }\ntest_support = { path = \"../../test_support\" }\n",
     );
     write_file(
         root,
-        "crates/demo/runtime/src/lib.rs",
+        "crates/runtime/src/lib.rs",
         "pub fn value() -> u8 { 1 }\n",
     );
     write_file(
         root,
-        "crates/demo/runtime/tests/public_surface.rs",
+        "crates/runtime/tests/public_surface.rs",
         "use demo_assertions::prove_runtime;\n#[test]\nfn public_surface() { prove_runtime(); }\n",
     );
     write_file(
         root,
-        "crates/demo/assertions/Cargo.toml",
-        "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = { path = \"../runtime\" }\ntest_support = { path = \"../../../test_support\" }\n",
+        "crates/assertions/Cargo.toml",
+        "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = { path = \"../runtime\" }\ntest_support = { path = \"../../test_support\" }\n",
     );
     write_file(
         root,
-        "crates/demo/assertions/src/lib.rs",
+        "crates/assertions/src/lib.rs",
         "pub fn prove_runtime() { assert_eq!(demo_runtime::value(), 1); }\n",
     );
     write_file(

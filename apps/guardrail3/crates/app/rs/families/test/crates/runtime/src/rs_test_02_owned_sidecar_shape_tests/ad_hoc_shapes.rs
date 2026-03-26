@@ -161,21 +161,21 @@ fn orphaned_sidecar_harness_is_reported() {
     write_file(
         root,
         "Cargo.toml",
-        "[workspace]\nmembers = [\"crates/demo/runtime\", \"crates/demo/assertions\"]\n",
+        "[workspace]\nmembers = [\"crates/runtime\", \"crates/assertions\"]\n",
     );
     write_file(
         root,
-        "crates/demo/runtime/Cargo.toml",
+        "crates/runtime/Cargo.toml",
         "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
     write_file(
         root,
-        "crates/demo/runtime/src/lib_tests/mod.rs",
+        "crates/runtime/src/lib_tests/mod.rs",
         "#[test]\nfn stray() { assert!(true); }\n",
     );
     write_file(
         root,
-        "crates/demo/assertions/Cargo.toml",
+        "crates/assertions/Cargo.toml",
         "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
 
@@ -186,7 +186,7 @@ fn orphaned_sidecar_harness_is_reported() {
     assert_eq!(finding.title, "orphaned sidecar harness");
     assert_eq!(
         finding.file.as_deref(),
-        Some("crates/demo/runtime/src/lib_tests/mod.rs")
+        Some("crates/runtime/src/lib_tests/mod.rs")
     );
     assert_eq!(finding.line, None);
 }
