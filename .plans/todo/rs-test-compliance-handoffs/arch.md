@@ -20,7 +20,12 @@ Current state:
   - generic tree/fixture helpers moved into `test_support`
   - local proof passes:
     - `cargo test --manifest-path apps/guardrail3/crates/app/rs/families/arch/Cargo.toml --workspace --quiet`
-  - product-level `guardrail3 rs validate ... --family {arch,test}` proof is still blocked by unrelated broken manifests in other families under the main `apps/guardrail3` workspace
+  - product-level validation proof now passes:
+    - `cargo run --quiet --manifest-path apps/guardrail3/Cargo.toml -p guardrail3 -- rs validate apps/guardrail3/crates/app/rs/families/arch --family arch --inventory --format json`
+    - `cargo run --quiet --manifest-path apps/guardrail3/Cargo.toml -p guardrail3 -- rs validate apps/guardrail3/crates/app/rs/families/arch --family test --inventory --format json`
+  - current end state:
+    - `RS-ARCH`: `0 errors, 0 warnings, 0 info`
+    - `RS-TEST`: `0 errors, 0 warnings, 0 info`
 
 Read first:
 - `/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/arch/crates/runtime/src/lib.rs`

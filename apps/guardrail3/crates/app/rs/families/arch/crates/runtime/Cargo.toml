@@ -12,5 +12,5 @@ guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../..
 toml = "0.8"
 
 [dev-dependencies]
-"guardrail3-app-rs-family-arch-assertions" = { path = "../assertions" }
+guardrail3_app_rs_family_arch_assertions = { path = "../assertions" }
 test_support = { package = "guardrail3-app-rs-family-arch-test-support", path = "../../test_support" }

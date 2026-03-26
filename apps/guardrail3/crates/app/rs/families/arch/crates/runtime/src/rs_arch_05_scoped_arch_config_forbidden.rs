@@ -18,4 +18,4 @@ pub fn check(input: &ScopedArchConfigInput<'_>, results: &mut Vec<CheckResult>) 
 
 #[cfg(test)]
 #[path = "rs_arch_05_scoped_arch_config_forbidden_tests/mod.rs"]
-mod tests;
+mod rs_arch_05_scoped_arch_config_forbidden_tests;

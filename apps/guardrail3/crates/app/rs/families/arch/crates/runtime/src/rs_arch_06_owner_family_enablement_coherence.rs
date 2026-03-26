@@ -39,4 +39,4 @@ fn display_dir(rel_dir: &str) -> &str {
 
 #[cfg(test)]
 #[path = "rs_arch_06_owner_family_enablement_coherence_tests/mod.rs"]
-mod tests;
+mod rs_arch_06_owner_family_enablement_coherence_tests;
