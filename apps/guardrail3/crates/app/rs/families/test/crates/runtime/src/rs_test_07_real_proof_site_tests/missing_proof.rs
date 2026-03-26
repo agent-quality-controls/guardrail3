@@ -1,10 +1,13 @@
-use guardrail3_domain_report::Severity;
+#[allow(unused_imports)]
+use guardrail3_app_rs_family_test_assertions::rs_test_07_real_proof_site::{
+    assert_rule_files, assert_warning_reported,
+};
 
-use super::{finding, rule_files, run_family, tempdir, write_file};
+#[allow(unused_imports)]
+use super::{run_family, tempdir, write_file};
 
 #[test]
-fn test_without_assertion_macro_or_owned_assertions_call_is_reported() {
-    let fixture = tempdir();
+fn test_without_assertion_macro_or_owned_assertions_call_is_reported() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -15,25 +18,18 @@ fn test_without_assertion_macro_or_owned_assertions_call_is_reported() {
     write_file(
         root,
         "tests/proof.rs",
-        "fn helper() {}\n#[test]\nfn touches_code_only() { helper(); }\n",
+        "fn helper() {}\n#[test]\nfn touches_code_only() {helper();}\n",
     );
 
     let results = run_family(root);
 
-    assert_eq!(
-        rule_files(&results, "RS-TEST-07"),
-        vec!["tests/proof.rs".to_owned()]
+    assert_rule_files(&results, vec!["tests/proof.rs".to_owned()]
     );
-    let finding = finding(&results, "RS-TEST-07");
-    assert_eq!(finding.severity, Severity::Warn);
-    assert_eq!(finding.title, "test lacks real proof site");
-    assert_eq!(finding.file.as_deref(), Some("tests/proof.rs"));
-    assert_eq!(finding.line, Some(3));
+    assert_warning_reported(&results, "tests/proof.rs", Some(3), "test lacks real proof site");
 }
 
 #[test]
-fn result_return_without_proof_is_reported() {
-    let fixture = tempdir();
+fn result_return_without_proof_is_reported() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -44,44 +40,41 @@ fn result_return_without_proof_is_reported() {
     write_file(
         root,
         "crates/runtime/Cargo.toml",
-        "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = { path = \"../assertions\" }\n",
+        "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = {path = \"../assertions\"}\n",
     );
     write_file(
         root,
         "crates/runtime/tests/public_surface.rs",
-        "#[test]\nfn returns_result_without_assertions() -> Result<(), ()> { Ok(()) }\n",
+        "#[test]\nfn returns_result_without_assertions() -> Result<(), ()> {Ok(())}\n",
     );
     write_file(
         root,
         "crates/runtime/src/lib.rs",
-        "pub fn value() -> u8 { 1 }\n",
+        "pub fn value() -> u8 {1}\n",
     );
     write_file(
         root,
         "crates/assertions/Cargo.toml",
-        "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = { path = \"../runtime\" }\n",
+        "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = {path = \"../runtime\"}\n",
     );
     write_file(
         root,
         "crates/assertions/src/lib.rs",
-        "pub fn prove_runtime() { assert_eq!(demo_runtime::value(), 1); }\n",
+        "pub fn prove_runtime() {assert_eq!(demo_runtime::value(), 1);}\n",
     );
 
     let results = run_family(root);
-    let finding = finding(&results, "RS-TEST-07");
-
-    assert_eq!(finding.severity, Severity::Warn);
-    assert_eq!(finding.title, "test lacks real proof site");
-    assert_eq!(
-        finding.file.as_deref(),
-        Some("crates/runtime/tests/public_surface.rs")
+    assert!(!results.is_empty());
+    assert_warning_reported(
+        &results,
+        "crates/runtime/tests/public_surface.rs",
+        Some(2),
+        "test lacks real proof site",
     );
-    assert_eq!(finding.line, Some(2));
 }
 
 #[test]
-fn shadowed_owned_assertions_call_is_reported() {
-    let fixture = tempdir();
+fn shadowed_owned_assertions_call_is_reported() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -92,7 +85,7 @@ fn shadowed_owned_assertions_call_is_reported() {
     write_file(
         root,
         "crates/runtime/Cargo.toml",
-        "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = { path = \"../assertions\" }\n",
+        "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = {path = \"../assertions\"}\n",
     );
     write_file(
         root,
@@ -102,34 +95,31 @@ fn shadowed_owned_assertions_call_is_reported() {
     write_file(
         root,
         "crates/runtime/src/lib.rs",
-        "pub fn value() -> u8 { 1 }\n",
+        "pub fn value() -> u8 {1}\n",
     );
     write_file(
         root,
         "crates/assertions/Cargo.toml",
-        "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = { path = \"../runtime\" }\n",
+        "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = {path = \"../runtime\"}\n",
     );
     write_file(
         root,
         "crates/assertions/src/lib.rs",
-        "pub fn prove_runtime() { assert_eq!(demo_runtime::value(), 1); }\n",
+        "pub fn prove_runtime() {assert_eq!(demo_runtime::value(), 1);}\n",
     );
 
     let results = run_family(root);
-    let finding = finding(&results, "RS-TEST-07");
-
-    assert_eq!(finding.severity, Severity::Warn);
-    assert_eq!(finding.title, "test lacks real proof site");
-    assert_eq!(
-        finding.file.as_deref(),
-        Some("crates/runtime/tests/public_surface.rs")
+    assert!(!results.is_empty());
+    assert_warning_reported(
+        &results,
+        "crates/runtime/tests/public_surface.rs",
+        Some(3),
+        "test lacks real proof site",
     );
-    assert_eq!(finding.line, Some(3));
 }
 
 #[test]
-fn name_heuristic_does_not_count_as_proof() {
-    let fixture = tempdir();
+fn name_heuristic_does_not_count_as_proof() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -140,7 +130,7 @@ fn name_heuristic_does_not_count_as_proof() {
     write_file(
         root,
         "crates/runtime/Cargo.toml",
-        "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = { path = \"../assertions\" }\n",
+        "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = {path = \"../assertions\"}\n",
     );
     write_file(
         root,
@@ -150,27 +140,25 @@ fn name_heuristic_does_not_count_as_proof() {
     write_file(
         root,
         "crates/runtime/src/lib.rs",
-        "pub fn value() -> u8 { 1 }\n",
+        "pub fn value() -> u8 {1}\n",
     );
     write_file(
         root,
         "crates/assertions/Cargo.toml",
-        "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = { path = \"../runtime\" }\n",
+        "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = {path = \"../runtime\"}\n",
     );
     write_file(
         root,
         "crates/assertions/src/lib.rs",
-        "pub fn prove_runtime() { assert_eq!(demo_runtime::value(), 1); }\n",
+        "pub fn prove_runtime() {assert_eq!(demo_runtime::value(), 1);}\n",
     );
 
     let results = run_family(root);
-    let finding = finding(&results, "RS-TEST-07");
-
-    assert_eq!(finding.severity, Severity::Warn);
-    assert_eq!(finding.title, "test lacks real proof site");
-    assert_eq!(
-        finding.file.as_deref(),
-        Some("crates/runtime/tests/public_surface.rs")
+    assert!(!results.is_empty());
+    assert_warning_reported(
+        &results,
+        "crates/runtime/tests/public_surface.rs",
+        Some(2),
+        "test lacks real proof site",
     );
-    assert_eq!(finding.line, Some(2));
 }

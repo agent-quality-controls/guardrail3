@@ -1,8 +1,11 @@
-use super::{rule_files, run_family, tempdir, write_file};
+#[allow(unused_imports)]
+use guardrail3_app_rs_family_test_assertions::rs_test_10_input_failures::{assert_reported, assert_rule_files, assert_rule_quiet};
+
+#[allow(unused_imports)]
+use super::{run_family, tempdir, write_file};
 
 #[test]
-fn clean_root_surfaces_no_input_failures() {
-    let fixture = tempdir();
+fn clean_root_surfaces_no_input_failures() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -10,10 +13,9 @@ fn clean_root_surfaces_no_input_failures() {
         "Cargo.toml",
         "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
-    write_file(root, "src/lib.rs", "pub fn value() -> u8 { 1 }\n");
+    write_file(root, "src/lib.rs", "pub fn value() -> u8 {1}\n");
 
     let results = run_family(root);
 
-    assert!(rule_files(&results, "RS-TEST-10").is_empty());
-    assert!(results.iter().all(|result| result.id != "RS-TEST-10"));
-}
+    assert_rule_quiet(&results);
+    assert!(results.iter().all(|result| result.id != "RS-TEST-10"));}

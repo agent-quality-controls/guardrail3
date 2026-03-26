@@ -1,10 +1,13 @@
 use guardrail3_domain_report::Severity;
 
-use super::{finding, run_family, tempdir, write_file};
+#[allow(unused_imports)]
+use guardrail3_app_rs_family_test_assertions::rs_test_02_owned_sidecar_shape::{assert_reported, assert_rule_files, assert_rule_quiet};
+
+#[allow(unused_imports)]
+use super::{run_family, tempdir, write_file};
 
 #[test]
-fn ad_hoc_cfg_test_module_declaration_is_reported() {
-    let fixture = tempdir();
+fn ad_hoc_cfg_test_module_declaration_is_reported() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -16,21 +19,14 @@ fn ad_hoc_cfg_test_module_declaration_is_reported() {
     write_file(
         root,
         "src/lib_tests/mod.rs",
-        "#[test]\nfn helper() { assert!(true); }\n",
+        "#[test]\nfn helper() {assert!(true);}\n",
     );
 
     let results = run_family(root);
-    let finding = finding(&results, "RS-TEST-02");
-
-    assert_eq!(finding.severity, Severity::Error);
-    assert_eq!(finding.title, "ad hoc cfg(test) module declaration");
-    assert_eq!(finding.file.as_deref(), Some("src/lib.rs"));
-    assert_eq!(finding.line, Some(1));
-}
+    assert_reported(&results, "src/lib.rs", Some(1), Severity::Error, "ad hoc cfg(test) module declaration");}
 
 #[test]
-fn ad_hoc_src_tests_tree_is_reported() {
-    let fixture = tempdir();
+fn ad_hoc_src_tests_tree_is_reported() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -41,21 +37,14 @@ fn ad_hoc_src_tests_tree_is_reported() {
     write_file(
         root,
         "src/tests/helper.rs",
-        "#[test]\nfn stray() { assert!(true); }\n",
+        "#[test]\nfn stray() {assert!(true);}\n",
     );
 
     let results = run_family(root);
-    let finding = finding(&results, "RS-TEST-02");
-
-    assert_eq!(finding.severity, Severity::Error);
-    assert_eq!(finding.title, "ad hoc src/tests tree");
-    assert_eq!(finding.file.as_deref(), Some("src/tests"));
-    assert_eq!(finding.line, None);
-}
+    assert_reported(&results, "src/tests", None, Severity::Error, "ad hoc src/tests tree");}
 
 #[test]
-fn missing_sidecar_mod_rs_is_reported() {
-    let fixture = tempdir();
+fn missing_sidecar_mod_rs_is_reported() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -66,21 +55,14 @@ fn missing_sidecar_mod_rs_is_reported() {
     write_file(
         root,
         "src/lib_tests/helper.rs",
-        "#[test]\nfn stray() { assert!(true); }\n",
+        "#[test]\nfn stray() {assert!(true);}\n",
     );
 
     let results = run_family(root);
-    let finding = finding(&results, "RS-TEST-02");
-
-    assert_eq!(finding.severity, Severity::Error);
-    assert_eq!(finding.title, "sidecar directory missing mod.rs");
-    assert_eq!(finding.file.as_deref(), Some("src/lib_tests"));
-    assert_eq!(finding.line, None);
-}
+    assert_reported(&results, "src/lib_tests", None, Severity::Error, "sidecar directory missing mod.rs");}
 
 #[test]
-fn flat_tests_file_is_reported() {
-    let fixture = tempdir();
+fn flat_tests_file_is_reported() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -91,21 +73,14 @@ fn flat_tests_file_is_reported() {
     write_file(
         root,
         "src/lib_tests.rs",
-        "#[test]\nfn stray() { assert!(true); }\n",
+        "#[test]\nfn stray() {assert!(true);}\n",
     );
 
     let results = run_family(root);
-    let finding = finding(&results, "RS-TEST-02");
-
-    assert_eq!(finding.severity, Severity::Error);
-    assert_eq!(finding.title, "flat sidecar test file");
-    assert_eq!(finding.file.as_deref(), Some("src/lib_tests.rs"));
-    assert_eq!(finding.line, None);
-}
+    assert_reported(&results, "src/lib_tests.rs", None, Severity::Error, "flat sidecar test file");}
 
 #[test]
-fn flat_test_file_is_reported() {
-    let fixture = tempdir();
+fn flat_test_file_is_reported() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -116,21 +91,14 @@ fn flat_test_file_is_reported() {
     write_file(
         root,
         "src/lib_test.rs",
-        "#[test]\nfn stray() { assert!(true); }\n",
+        "#[test]\nfn stray() {assert!(true);}\n",
     );
 
     let results = run_family(root);
-    let finding = finding(&results, "RS-TEST-02");
-
-    assert_eq!(finding.severity, Severity::Error);
-    assert_eq!(finding.title, "flat sidecar test file");
-    assert_eq!(finding.file.as_deref(), Some("src/lib_test.rs"));
-    assert_eq!(finding.line, None);
-}
+    assert_reported(&results, "src/lib_test.rs", None, Severity::Error, "flat sidecar test file");}
 
 #[test]
-fn flat_tests_rs_file_is_reported() {
-    let fixture = tempdir();
+fn flat_tests_rs_file_is_reported() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -141,21 +109,14 @@ fn flat_tests_rs_file_is_reported() {
     write_file(
         root,
         "src/tests.rs",
-        "#[test]\nfn stray() { assert!(true); }\n",
+        "#[test]\nfn stray() {assert!(true);}\n",
     );
 
     let results = run_family(root);
-    let finding = finding(&results, "RS-TEST-02");
-
-    assert_eq!(finding.severity, Severity::Error);
-    assert_eq!(finding.title, "flat sidecar test file");
-    assert_eq!(finding.file.as_deref(), Some("src/tests.rs"));
-    assert_eq!(finding.line, None);
-}
+    assert_reported(&results, "src/tests.rs", None, Severity::Error, "flat sidecar test file");}
 
 #[test]
-fn orphaned_sidecar_harness_is_reported() {
-    let fixture = tempdir();
+fn orphaned_sidecar_harness_is_reported() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -171,7 +132,7 @@ fn orphaned_sidecar_harness_is_reported() {
     write_file(
         root,
         "crates/runtime/src/lib_tests/mod.rs",
-        "#[test]\nfn stray() { assert!(true); }\n",
+        "#[test]\nfn stray() {assert!(true);}\n",
     );
     write_file(
         root,
@@ -180,13 +141,10 @@ fn orphaned_sidecar_harness_is_reported() {
     );
 
     let results = run_family(root);
-    let finding = finding(&results, "RS-TEST-02");
-
-    assert_eq!(finding.severity, Severity::Error);
-    assert_eq!(finding.title, "orphaned sidecar harness");
-    assert_eq!(
-        finding.file.as_deref(),
-        Some("crates/runtime/src/lib_tests/mod.rs")
-    );
-    assert_eq!(finding.line, None);
-}
+    assert_reported(
+        &results,
+        "crates/runtime/src/lib_tests/mod.rs",
+        None,
+        Severity::Error,
+        "orphaned sidecar harness",
+    );}

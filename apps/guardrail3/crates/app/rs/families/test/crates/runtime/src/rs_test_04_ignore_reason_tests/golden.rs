@@ -1,8 +1,11 @@
-use super::{rule_files, run_family, tempdir, write_file};
+#[allow(unused_imports)]
+use guardrail3_app_rs_family_test_assertions::rs_test_04_ignore_reason::{assert_reported, assert_rule_files, assert_rule_quiet};
+
+#[allow(unused_imports)]
+use super::{run_family, tempdir, write_file};
 
 #[test]
-fn reason_comment_keeps_ignore_quiet() {
-    let fixture = tempdir();
+fn reason_comment_keeps_ignore_quiet() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -18,12 +21,10 @@ fn reason_comment_keeps_ignore_quiet() {
 
     let results = run_family(root);
 
-    assert!(rule_files(&results, "RS-TEST-04").is_empty());
-}
+    assert_rule_quiet(&results);}
 
 #[test]
-fn same_line_reason_keeps_ignore_quiet() {
-    let fixture = tempdir();
+fn same_line_reason_keeps_ignore_quiet() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -39,12 +40,10 @@ fn same_line_reason_keeps_ignore_quiet() {
 
     let results = run_family(root);
 
-    assert!(rule_files(&results, "RS-TEST-04").is_empty());
-}
+    assert_rule_quiet(&results);}
 
 #[test]
-fn ignore_attribute_reason_keeps_ignore_quiet() {
-    let fixture = tempdir();
+fn ignore_attribute_reason_keeps_ignore_quiet() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -60,5 +59,4 @@ fn ignore_attribute_reason_keeps_ignore_quiet() {
 
     let results = run_family(root);
 
-    assert!(rule_files(&results, "RS-TEST-04").is_empty());
-}
+    assert_rule_quiet(&results);}

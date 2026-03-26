@@ -1,8 +1,11 @@
-use super::{rule_files, run_family, tempdir, write_file};
+#[allow(unused_imports)]
+use guardrail3_app_rs_family_test_assertions::rs_test_08_weak_matches_assert::{assert_reported, assert_rule_files, assert_rule_quiet};
+
+#[allow(unused_imports)]
+use super::{run_family, tempdir, write_file};
 
 #[test]
-fn concrete_payload_match_is_allowed() {
-    let fixture = tempdir();
+fn concrete_payload_match_is_allowed() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -18,5 +21,4 @@ fn concrete_payload_match_is_allowed() {
 
     let results = run_family(root);
 
-    assert!(rule_files(&results, "RS-TEST-08").is_empty());
-}
+    assert_rule_quiet(&results);}

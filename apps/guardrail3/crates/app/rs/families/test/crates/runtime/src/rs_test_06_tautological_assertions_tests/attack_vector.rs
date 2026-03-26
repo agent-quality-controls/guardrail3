@@ -1,10 +1,13 @@
 use guardrail3_domain_report::Severity;
 
-use super::{finding, rule_files, run_family, tempdir, write_file};
+#[allow(unused_imports)]
+use guardrail3_app_rs_family_test_assertions::rs_test_06_tautological_assertions::{assert_reported, assert_rule_files, assert_rule_quiet};
+
+#[allow(unused_imports)]
+use super::{run_family, tempdir, write_file};
 
 #[test]
-fn literal_vs_literal_assertion_is_reported() {
-    let fixture = tempdir();
+fn literal_vs_literal_assertion_is_reported() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -19,20 +22,11 @@ fn literal_vs_literal_assertion_is_reported() {
     );
 
     let results = run_family(root);
-    assert_eq!(
-        rule_files(&results, "RS-TEST-06"),
-        vec!["tests/asserts.rs".to_owned()]
-    );
-    let finding = finding(&results, "RS-TEST-06");
-    assert_eq!(finding.severity, Severity::Warn);
-    assert_eq!(finding.title, "tautological assertion");
-    assert_eq!(finding.file.as_deref(), Some("tests/asserts.rs"));
-    assert_eq!(finding.line, Some(3));
-}
+    assert_rule_files(&results, vec!["tests/asserts.rs".to_owned()]
+    );    assert_reported(&results, "tests/asserts.rs", Some(3), Severity::Warn, "tautological assertion");}
 
 #[test]
-fn assert_ne_literal_vs_literal_is_reported() {
-    let fixture = tempdir();
+fn assert_ne_literal_vs_literal_is_reported() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -47,17 +41,10 @@ fn assert_ne_literal_vs_literal_is_reported() {
     );
 
     let results = run_family(root);
-    let finding = finding(&results, "RS-TEST-06");
-
-    assert_eq!(finding.severity, Severity::Warn);
-    assert_eq!(finding.title, "tautological assertion");
-    assert_eq!(finding.file.as_deref(), Some("tests/asserts.rs"));
-    assert_eq!(finding.line, Some(3));
-}
+    assert_reported(&results, "tests/asserts.rs", Some(3), Severity::Warn, "tautological assertion");}
 
 #[test]
-fn debug_assert_eq_parenthesized_literals_are_reported() {
-    let fixture = tempdir();
+fn debug_assert_eq_parenthesized_literals_are_reported() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -72,17 +59,10 @@ fn debug_assert_eq_parenthesized_literals_are_reported() {
     );
 
     let results = run_family(root);
-    let finding = finding(&results, "RS-TEST-06");
-
-    assert_eq!(finding.severity, Severity::Warn);
-    assert_eq!(finding.title, "tautological assertion");
-    assert_eq!(finding.file.as_deref(), Some("tests/asserts.rs"));
-    assert_eq!(finding.line, Some(3));
-}
+    assert_reported(&results, "tests/asserts.rs", Some(3), Severity::Warn, "tautological assertion");}
 
 #[test]
-fn debug_assert_ne_parenthesized_literals_are_reported() {
-    let fixture = tempdir();
+fn debug_assert_ne_parenthesized_literals_are_reported() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -97,10 +77,4 @@ fn debug_assert_ne_parenthesized_literals_are_reported() {
     );
 
     let results = run_family(root);
-    let finding = finding(&results, "RS-TEST-06");
-
-    assert_eq!(finding.severity, Severity::Warn);
-    assert_eq!(finding.title, "tautological assertion");
-    assert_eq!(finding.file.as_deref(), Some("tests/asserts.rs"));
-    assert_eq!(finding.line, Some(3));
-}
+    assert_reported(&results, "tests/asserts.rs", Some(3), Severity::Warn, "tautological assertion");}

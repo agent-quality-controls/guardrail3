@@ -162,6 +162,10 @@ pub fn check(tree: &ProjectTree, route: &RsTestRoute, tc: &dyn ToolChecker) -> V
                         function,
                         proof_bearing_assertion_functions,
                     );
+                    rs_test_16_assertions_modules_prove::check_sidecar_semantic_proof(
+                        &function_input,
+                        &mut results,
+                    );
                     rs_test_05_should_panic_expected::check(&function_input, &mut results);
                     rs_test_06_tautological_assertions::check(&function_input, &mut results);
                     rs_test_07_real_proof_site::check(&function_input, &mut results);

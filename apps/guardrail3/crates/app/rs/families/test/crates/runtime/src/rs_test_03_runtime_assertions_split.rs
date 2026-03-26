@@ -386,6 +386,18 @@ fn collect_violations(
                     message: "Assertions modules must stay reusable semantic proof helpers and must not construct routed family inputs through `FamilyMapper`.".to_owned(),
                 });
             }
+            if assertions_call_runtime_check_test_tree(
+                &file.parsed.imports,
+                &file.parsed.file_call_paths,
+                component.runtime_package_name.as_deref(),
+            ) {
+                violations.push(RuntimeAssertionsViolation {
+                    rel_path: file.facts.rel_path.clone(),
+                    line: None,
+                    title: "assertions module orchestrates family execution".to_owned(),
+                    message: "Assertions modules must not call runtime `check_test_tree(...)`; sidecars own family execution and assertions own reusable semantic proof only.".to_owned(),
+                });
+            }
         }
     }
 
@@ -431,6 +443,48 @@ fn import_uses_local_boundary(binding: &UseBinding) -> bool {
         .path_segments
         .first()
         .is_some_and(|segment| matches!(segment.as_str(), "crate" | "self" | "super"))
+}
+
+fn assertions_call_runtime_check_test_tree(
+    imports: &[UseBinding],
+    call_paths: &[Vec<String>],
+    runtime_package_name: Option<&str>,
+) -> bool {
+    let Some(runtime_package_name) = runtime_package_name else {
+        return false;
+    };
+    let mut runtime_roots = BTreeSet::from([
+        runtime_package_name.to_owned(),
+        runtime_package_name.replace('-', "_"),
+    ]);
+    let mut imported_check_test_tree = BTreeSet::new();
+
+    for binding in imports {
+        if binding
+            .path_segments
+            .first()
+            .is_none_or(|first| !runtime_roots.contains(first))
+        {
+            continue;
+        }
+        if let Some(local_name) = binding.local_name.as_ref() {
+            if binding.path_segments.len() == 1 {
+                let _ = runtime_roots.insert(local_name.clone());
+            } else if binding
+                .path_segments
+                .last()
+                .is_some_and(|segment| segment == "check_test_tree")
+            {
+                let _ = imported_check_test_tree.insert(local_name.clone());
+            }
+        }
+    }
+
+    call_paths.iter().any(|path| match path.as_slice() {
+        [single] => imported_check_test_tree.contains(single),
+        [first, second, ..] => runtime_roots.contains(first) && second == "check_test_tree",
+        _ => false,
+    })
 }
 
 fn import_hits_sibling_module(
@@ -539,6 +593,9 @@ fn allowed_assertions_packages(component: &super::facts::TestComponentFacts) -> 
     if let Some(runtime_package_name) = component.runtime_package_name.as_ref() {
         let _ = allowed.insert(runtime_package_name.clone());
     }
+    if let Some(assertions_package_name) = component.assertions_package_name.as_ref() {
+        let _ = allowed.insert(format!("{assertions_package_name}_common"));
+    }
     allowed
 }
 
@@ -592,6 +649,29 @@ fn resolve_relative_path(base_dir: &str, rel_path: &str) -> Option<String> {
         }
     }
     Some(parts.join("/"))
+}
+
+#[cfg(test)]
+#[allow(dead_code)]
+pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
+    let tree = test_support::walk(root);
+    super::check_test_tree(&tree, &test_support::StubToolChecker::default())
+}
+
+#[cfg(test)]
+#[allow(dead_code)]
+#[allow(dead_code)]
+pub(crate) fn run_family_with_tool(
+    root: &std::path::Path,
+    cargo_mutants_installed: bool,
+) -> Vec<CheckResult> {
+    let tree = test_support::walk(root);
+    let checker = if cargo_mutants_installed {
+        test_support::StubToolChecker::with_tools(["cargo-mutants"])
+    } else {
+        test_support::StubToolChecker::default()
+    };
+    super::check_test_tree(&tree, &checker)
 }
 
 #[cfg(test)]

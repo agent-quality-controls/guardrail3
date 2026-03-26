@@ -1,9 +1,12 @@
-use super::{finding, rule_files, run_family, tempdir, write_file};
+#[allow(unused_imports)]
+use guardrail3_app_rs_family_test_assertions::rs_test_14_mutation_hook_present::{assert_reported, assert_rule_files, assert_rule_quiet};
+
+#[allow(unused_imports)]
+use super::{run_family, tempdir, write_file};
 use guardrail3_domain_report::Severity;
 
 #[test]
-fn workspace_root_hook_does_not_duplicate_on_idle_standalone_root() {
-    let fixture = tempdir();
+fn workspace_root_hook_does_not_duplicate_on_idle_standalone_root() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -25,13 +28,5 @@ fn workspace_root_hook_does_not_duplicate_on_idle_standalone_root() {
 
     let results = run_family(root);
 
-    assert_eq!(
-        rule_files(&results, "RS-TEST-14"),
-        vec![".githooks/pre-commit".to_owned()]
-    );
-    let finding = finding(&results, "RS-TEST-14");
-    assert_eq!(finding.severity, Severity::Info);
-    assert_eq!(finding.title, "mutation hook step present");
-    assert_eq!(finding.file.as_deref(), Some(".githooks/pre-commit"));
-    assert_eq!(finding.line, None);
-}
+    assert_rule_files(&results, vec![".githooks/pre-commit".to_owned()]
+    );    assert_reported(&results, ".githooks/pre-commit", None, Severity::Info, "mutation hook step present");}

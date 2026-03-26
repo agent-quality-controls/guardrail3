@@ -1,25 +1,6 @@
-use std::path::Path;
-
-use guardrail3_app_rs_family_test as runtime;
 use guardrail3_domain_report::{CheckResult, Severity};
-use test_support::{StubToolChecker, walk};
 
 const RULE_ID: &str = "RS-TEST-02";
-
-pub fn run_family(root: &Path) -> Vec<CheckResult> {
-    let tree = walk(root);
-    runtime::check_test_tree(&tree, &StubToolChecker::default())
-}
-
-pub fn run_family_with_tool(root: &Path, cargo_mutants_installed: bool) -> Vec<CheckResult> {
-    let tree = walk(root);
-    let checker = if cargo_mutants_installed {
-        StubToolChecker::with_tools(["cargo-mutants"])
-    } else {
-        StubToolChecker::default()
-    };
-    runtime::check_test_tree(&tree, &checker)
-}
 
 pub fn rule_files(results: &[CheckResult], _rule_id: &str) -> Vec<String> {
     let mut files = results
@@ -38,6 +19,14 @@ pub fn finding<'a>(results: &'a [CheckResult], _rule_id: &str) -> &'a CheckResul
         .unwrap_or_else(|| panic!("expected {RULE_ID} finding"))
 }
 
+pub fn assert_rule_files(results: &[CheckResult], expected: Vec<String>) {
+    assert_eq!(
+        rule_files(results, RULE_ID),
+        expected,
+        "unexpected {RULE_ID} files"
+    );
+}
+
 pub fn assert_rule_quiet(results: &[CheckResult]) {
     assert!(
         rule_files(results, RULE_ID).is_empty(),
@@ -45,7 +34,7 @@ pub fn assert_rule_quiet(results: &[CheckResult]) {
     );
 }
 
-pub fn assert_finding_matches(
+pub fn assert_reported(
     results: &[CheckResult],
     file: &str,
     line: Option<usize>,
@@ -57,4 +46,10 @@ pub fn assert_finding_matches(
     assert_eq!(finding.title, title);
     assert_eq!(finding.file.as_deref(), Some(file));
     assert_eq!(finding.line, line);
+}
+
+
+pub fn assert_inventory(results: &[CheckResult], expected: bool) {
+    let finding = finding(results, RULE_ID);
+    assert_eq!(finding.inventory, expected);
 }
