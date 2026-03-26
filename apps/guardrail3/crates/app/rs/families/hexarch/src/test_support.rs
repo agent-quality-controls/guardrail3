@@ -1,10 +1,13 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 
 use guardrail3_adapters_outbound_fs::RealFileSystem;
 use guardrail3_app_core::project_walker::walk_project;
+use guardrail3_app_rs_family_mapper::{FamilyMapper, RsHexarchRoute};
+use guardrail3_domain_config::types::GuardrailConfig;
 use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
 use guardrail3_domain_report::{CheckResult, Severity};
+use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
 use super::dependency_facts::{self, DependencyFamilyFacts};
 
@@ -56,7 +59,8 @@ pub fn empty_dir(root: &Path, rel: &str) {
 
 pub fn run_family(root: &Path) -> Vec<CheckResult> {
     let tree = walk_project(&RealFileSystem, root);
-    super::check(&tree)
+    let route = family_route(&tree);
+    super::check(&tree, &route)
 }
 
 pub fn dir_entry(dirs: &[&str], files: &[&str]) -> DirEntry {
@@ -83,7 +87,8 @@ pub fn project_tree(structure: Vec<(&str, DirEntry)>, content: Vec<(&str, &str)>
 }
 
 pub fn dependency_facts(tree: &ProjectTree) -> DependencyFamilyFacts {
-    dependency_facts::collect(tree)
+    let route = family_route(tree);
+    dependency_facts::collect(tree, &route)
 }
 
 pub fn errors_by_id<'a>(results: &'a [CheckResult], id: &str) -> Vec<&'a CheckResult> {
@@ -113,4 +118,16 @@ fn copy_dir_recursive(src: &Path, dst: &Path) {
             let _ = std::fs::copy(&src_path, &dst_path).expect("copy fixture file");
         }
     }
+}
+
+pub fn family_route(tree: &ProjectTree) -> RsHexarchRoute {
+    let scope = guardrail3_app_rs_placement::collect(tree);
+    let config = parse_guardrail_config(tree);
+    let selection = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Hexarch]));
+    FamilyMapper::new(tree, &scope, config.as_ref(), &selection, None).map_rs_hexarch()
+}
+
+fn parse_guardrail_config(tree: &ProjectTree) -> Option<GuardrailConfig> {
+    tree.file_content("guardrail3.toml")
+        .and_then(|content| toml::from_str::<GuardrailConfig>(content).ok())
 }

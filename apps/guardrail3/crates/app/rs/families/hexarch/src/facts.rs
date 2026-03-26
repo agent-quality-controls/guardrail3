@@ -1,5 +1,6 @@
 use std::collections::BTreeSet;
 
+use guardrail3_app_rs_family_mapper::RsHexarchRoute;
 use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
 
 #[derive(Debug, Clone)]
@@ -96,9 +97,9 @@ pub struct HexarchFacts {
     pub root_workspace: RootWorkspaceFacts,
 }
 
-pub fn collect(tree: &ProjectTree) -> HexarchFacts {
+pub fn collect(tree: &ProjectTree, route: &RsHexarchRoute) -> HexarchFacts {
     let mut facts = HexarchFacts::default();
-    let app_roots = rust_app_roots(tree);
+    let app_roots = routed_app_roots(route);
 
     for (app_name, app_rel_dir) in &app_roots {
         let cargo_rel_path = ProjectTree::join_rel(app_rel_dir, "Cargo.toml");
@@ -208,19 +209,18 @@ fn parse_cargo_value(tree: &ProjectTree, rel_path: &str) -> CargoSnapshot {
     }
 }
 
-fn rust_app_roots(tree: &ProjectTree) -> Vec<(String, String)> {
-    let Some(apps_entry) = tree.dir_contents("apps") else {
-        return Vec::new();
-    };
-
-    let mut roots = Vec::new();
-    for app_name in &apps_entry.dirs {
-        let app_rel_dir = ProjectTree::join_rel("apps", app_name);
-        let cargo_rel = ProjectTree::join_rel(&app_rel_dir, "Cargo.toml");
-        if tree.file_content(&cargo_rel).is_some() {
-            roots.push((app_name.clone(), app_rel_dir));
-        }
-    }
+fn routed_app_roots(route: &RsHexarchRoute) -> Vec<(String, String)> {
+    let mut roots = route
+        .roots
+        .iter()
+        .filter_map(|root| {
+            let app_name = root.rel_dir.strip_prefix("apps/")?;
+            if app_name.contains('/') {
+                return None;
+            }
+            Some((app_name.to_owned(), root.rel_dir.clone()))
+        })
+        .collect::<Vec<_>>();
     roots.sort();
     roots
 }

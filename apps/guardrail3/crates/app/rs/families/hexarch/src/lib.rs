@@ -34,6 +34,7 @@ mod tests;
 
 use glob as _;
 use guardrail3_app_core as _;
+use guardrail3_app_rs_family_mapper::RsHexarchRoute;
 use guardrail3_domain_modules as _;
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::CheckResult;
@@ -51,9 +52,9 @@ use self::inputs::{
     SourceCrateHexarchInput, WorkspaceCoverageHexarchInput,
 };
 
-pub fn check(tree: &ProjectTree) -> Vec<CheckResult> {
-    let facts = collect(tree);
-    let dependency_facts = dependency_facts::collect(tree);
+pub fn check(tree: &ProjectTree, route: &RsHexarchRoute) -> Vec<CheckResult> {
+    let facts = collect(tree, route);
+    let dependency_facts = dependency_facts::collect(tree, route);
     let source_facts = source_facts::collect(tree, &dependency_facts.members);
     let mut results = Vec::new();
 

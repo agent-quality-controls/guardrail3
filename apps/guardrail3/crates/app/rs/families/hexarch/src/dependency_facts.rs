@@ -1,5 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet};
 
+use guardrail3_app_rs_family_mapper::RsHexarchRoute;
 use guardrail3_domain_config::types::{CrateConfig, GuardrailConfig};
 use guardrail3_domain_project_tree::ProjectTree;
 
@@ -139,14 +140,16 @@ pub struct DependencyFamilyFacts {
     pub cycles: Vec<CycleFacts>,
 }
 
-pub fn collect(tree: &ProjectTree) -> DependencyFamilyFacts {
+pub fn collect(tree: &ProjectTree, route: &RsHexarchRoute) -> DependencyFamilyFacts {
+    let owned_app_roots = owned_app_roots(route);
     let guardrail_config = parse_guardrail_config(tree);
-    let workspaces = discover_workspaces(tree);
+    let workspaces = discover_workspaces(tree, &owned_app_roots);
     let workspace_for_member = best_workspace_for_member(&workspaces);
     let members = collect_members(
         tree,
         &workspaces,
         &workspace_for_member,
+        &owned_app_roots,
         guardrail_config.parsed.as_ref(),
     );
     let member_by_dir = members
@@ -164,6 +167,20 @@ pub fn collect(tree: &ProjectTree) -> DependencyFamilyFacts {
         boundary_configs,
         cycles,
     }
+}
+
+fn owned_app_roots(route: &RsHexarchRoute) -> BTreeSet<String> {
+    route
+        .roots
+        .iter()
+        .filter_map(|root| {
+            let app_name = root.rel_dir.strip_prefix("apps/")?;
+            if app_name.contains('/') {
+                return None;
+            }
+            Some(root.rel_dir.clone())
+        })
+        .collect()
 }
 
 fn collect_boundary_configs(
@@ -237,12 +254,15 @@ fn parse_guardrail_config(tree: &ProjectTree) -> GuardrailConfigSnapshot {
     }
 }
 
-fn discover_workspaces(tree: &ProjectTree) -> Vec<WorkspaceFacts> {
+fn discover_workspaces(tree: &ProjectTree, owned_app_roots: &BTreeSet<String>) -> Vec<WorkspaceFacts> {
     let mut workspaces = Vec::new();
     let mut seen = BTreeSet::new();
 
     for dir in std::iter::once(String::new()).chain(tree.dirs_with_file("Cargo.toml")) {
         if !seen.insert(dir.clone()) {
+            continue;
+        }
+        if !dir.is_empty() && !dir_is_within_owned_app(&dir, owned_app_roots) {
             continue;
         }
         let cargo_rel_path = if dir.is_empty() {
@@ -386,11 +406,18 @@ fn collect_members(
     tree: &ProjectTree,
     workspaces: &[WorkspaceFacts],
     workspace_for_member: &BTreeMap<String, String>,
+    owned_app_roots: &BTreeSet<String>,
     guardrail: Option<&ParsedGuardrailConfig>,
 ) -> Vec<MemberDependencyFacts> {
     let mut member_dirs = BTreeSet::new();
     for workspace in workspaces {
-        member_dirs.extend(workspace.member_dirs.iter().cloned());
+        member_dirs.extend(
+            workspace
+                .member_dirs
+                .iter()
+                .filter(|rel_dir| dir_is_within_owned_app(rel_dir, owned_app_roots))
+                .cloned(),
+        );
     }
 
     let mut members = Vec::new();
@@ -435,6 +462,15 @@ fn collect_members(
 
     members.sort_by(|left, right| left.rel_dir.cmp(&right.rel_dir));
     members
+}
+
+fn dir_is_within_owned_app(rel_dir: &str, owned_app_roots: &BTreeSet<String>) -> bool {
+    owned_app_roots.iter().any(|app_root| {
+        rel_dir == app_root
+            || rel_dir
+                .strip_prefix(app_root.as_str())
+                .is_some_and(|rest| rest.starts_with('/'))
+    })
 }
 
 fn collect_edges(
