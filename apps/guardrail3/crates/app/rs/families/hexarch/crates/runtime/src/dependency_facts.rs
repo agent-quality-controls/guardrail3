@@ -169,6 +169,26 @@ pub fn collect(tree: &ProjectTree, route: &RsHexarchRoute) -> DependencyFamilyFa
     }
 }
 
+#[cfg(test)]
+pub(crate) fn collect_for_test_tree(tree: &ProjectTree) -> DependencyFamilyFacts {
+    let scope = guardrail3_app_rs_placement::collect(tree);
+    let config = tree
+        .file_content("guardrail3.toml")
+        .and_then(|content| toml::from_str::<GuardrailConfig>(content).ok());
+    let selection = guardrail3_validation_model::RustFamilySelection::new(BTreeSet::from([
+        guardrail3_validation_model::RustValidateFamily::Hexarch,
+    ]));
+    let route = guardrail3_app_rs_family_mapper::FamilyMapper::new(
+        tree,
+        &scope,
+        config.as_ref(),
+        &selection,
+        None,
+    )
+    .map_rs_hexarch();
+    collect(tree, &route)
+}
+
 fn owned_app_roots(route: &RsHexarchRoute) -> BTreeSet<String> {
     route
         .roots

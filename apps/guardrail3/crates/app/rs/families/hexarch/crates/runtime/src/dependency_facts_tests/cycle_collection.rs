@@ -1,4 +1,4 @@
-use super::super::super::collect_dependency_facts_from_tree_for_tests as dependency_facts;
+use super::super::collect_for_test_tree as dependency_facts;
 use test_support::{dir_entry, project_tree};
 
 #[test]
