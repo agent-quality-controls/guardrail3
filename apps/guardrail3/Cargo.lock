@@ -415,24 +415,54 @@ dependencies = [
 name = "guardrail3-app-rs-family-arch"
 version = "0.0.0"
 dependencies = [
+ "guardrail3-app-rs-family-arch-test-support",
  "guardrail3-app-rs-family-mapper",
  "guardrail3-app-rs-placement",
  "guardrail3-domain-config",
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
- "guardrail3-domain-validation-model",
+ "guardrail3_app_rs_family_arch_assertions",
  "toml",
+]
+
+[[package]]
+name = "guardrail3-app-rs-family-arch-test-support"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-domain-project-tree",
 ]
 
 [[package]]
 name = "guardrail3-app-rs-family-cargo"
 version = "0.0.0"
 dependencies = [
+ "guardrail3-app-rs-family-cargo-assertions",
+ "guardrail3-app-rs-family-cargo-test-support",
+ "guardrail3-app-rs-family-mapper",
+ "guardrail3-domain-config",
+ "guardrail3-domain-project-tree",
+ "guardrail3-domain-report",
+ "toml",
+]
+
+[[package]]
+name = "guardrail3-app-rs-family-cargo-assertions"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-app-rs-family-cargo",
+ "guardrail3-app-rs-family-cargo-test-support",
+ "guardrail3-domain-project-tree",
+ "guardrail3-domain-report",
+]
+
+[[package]]
+name = "guardrail3-app-rs-family-cargo-test-support"
+version = "0.0.0"
+dependencies = [
  "guardrail3-app-rs-family-mapper",
  "guardrail3-app-rs-placement",
  "guardrail3-domain-config",
  "guardrail3-domain-project-tree",
- "guardrail3-domain-report",
  "guardrail3-domain-validation-model",
  "toml",
 ]
@@ -547,8 +577,9 @@ name = "guardrail3-app-rs-family-hexarch"
 version = "0.0.0"
 dependencies = [
  "glob",
- "guardrail3-adapters-outbound-fs",
  "guardrail3-app-core",
+ "guardrail3-app-rs-family-hexarch-assertions",
+ "guardrail3-app-rs-family-hexarch-test-support",
  "guardrail3-app-rs-family-mapper",
  "guardrail3-app-rs-placement",
  "guardrail3-domain-config",
@@ -563,8 +594,32 @@ dependencies = [
  "semver",
  "serde_yaml",
  "syn",
- "tempfile",
  "toml",
+]
+
+[[package]]
+name = "guardrail3-app-rs-family-hexarch-assertions"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-app-rs-family-hexarch",
+ "guardrail3-app-rs-family-hexarch-test-support",
+ "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-placement",
+ "guardrail3-domain-config",
+ "guardrail3-domain-project-tree",
+ "guardrail3-domain-report",
+ "guardrail3-domain-validation-model",
+ "toml",
+]
+
+[[package]]
+name = "guardrail3-app-rs-family-hexarch-test-support"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-adapters-outbound-fs",
+ "guardrail3-app-core",
+ "guardrail3-domain-project-tree",
+ "tempfile",
 ]
 
 [[package]]
@@ -795,6 +850,21 @@ version = "0.0.0"
 [[package]]
 name = "guardrail3-shared-fs"
 version = "0.0.0"
+
+[[package]]
+name = "guardrail3_app_rs_family_arch_assertions"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-app-rs-family-arch",
+ "guardrail3-app-rs-family-arch-test-support",
+ "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-placement",
+ "guardrail3-domain-config",
+ "guardrail3-domain-project-tree",
+ "guardrail3-domain-report",
+ "guardrail3-domain-validation-model",
+ "toml",
+]
 
 [[package]]
 name = "hashbrown"
