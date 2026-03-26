@@ -1,5 +1,14 @@
 #[allow(unused_imports)]
-use super::{check_results, entry, rule_results, tree};
+use guardrail3_app_rs_family_cargo_assertions::rs_cargo_04_lint_inheritance::{
+    assert_rule_results,
+    check_results,
+    ExpectedRuleResult,
+    rule_results,
+};
+#[allow(unused_imports)]
+use super::{
+    entry, tree,
+};
 
 #[allow(dead_code, non_upper_case_globals)]
 const workspace_rust_lints: &str = r#"
@@ -162,9 +171,14 @@ fn member_inheriting_workspace_lints_is_inventory() {
         ],
     ));
 
-    let rule = rule_results(&results, "RS-CARGO-04");
-    assert_eq!(rule.len(), 1, "unexpected results: {rule:#?}");
-    assert!(rule[0].inventory);
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: None,
+            title: None,
+            inventory: Some(true),
+        }],
+    );
 }
 
 #[test]
@@ -203,7 +217,12 @@ fn member_missing_workspace_true_is_error() {
         ],
     ));
 
-    let rule = rule_results(&results, "RS-CARGO-04");
-    assert_eq!(rule.len(), 1, "unexpected results: {rule:#?}");
-    assert_eq!(rule[0].title, "workspace lints not inherited");
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: None,
+            title: Some("workspace lints not inherited"),
+            inventory: None,
+        }],
+    );
 }

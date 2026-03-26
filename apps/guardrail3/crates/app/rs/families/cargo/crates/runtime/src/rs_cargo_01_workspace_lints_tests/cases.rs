@@ -1,6 +1,13 @@
 #[allow(unused_imports)]
+use guardrail3_app_rs_family_cargo_assertions::rs_cargo_01_workspace_lints::{
+    assert_rule_results,
+    check_results,
+    ExpectedRuleResult,
+    rule_results,
+};
+#[allow(unused_imports)]
 use super::{
-    check_results, entry, rule_results, tree,
+    entry, tree,
 };
 
 #[allow(dead_code, non_upper_case_globals)]
@@ -178,16 +185,20 @@ fn supports_workspace_and_standalone_policy_roots_in_one_repo() {
         ],
     ));
 
-    let rule = rule_results(&results, "RS-CARGO-01");
-    assert_eq!(rule.len(), 2, "unexpected results: {rule:#?}");
-    assert!(rule.iter().all(|result| result.inventory));
-    assert!(
-        rule.iter()
-            .any(|result| result.file.as_deref() == Some("Cargo.toml"))
-    );
-    assert!(
-        rule.iter()
-            .any(|result| result.file.as_deref() == Some("tools/helper/Cargo.toml"))
+    assert_rule_results(
+        &results,
+        &[
+            ExpectedRuleResult {
+                file: Some("Cargo.toml"),
+                title: None,
+                inventory: Some(true),
+            },
+            ExpectedRuleResult {
+                file: Some("tools/helper/Cargo.toml"),
+                title: None,
+                inventory: Some(true),
+            },
+        ],
     );
 }
 
@@ -213,9 +224,12 @@ fn local_library_profile_requires_unreachable_pub() {
         ],
     ));
 
-    let rule = rule_results(&results, "RS-CARGO-01");
-    assert_eq!(rule.len(), 1, "unexpected results: {rule:#?}");
-    let result = rule[0];
-    assert_eq!(result.file.as_deref(), Some("pkg/Cargo.toml"));
-    assert_eq!(result.title, "missing library rust lint `unreachable_pub`");
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: Some("pkg/Cargo.toml"),
+            title: Some("missing library rust lint `unreachable_pub`"),
+            inventory: Some(false),
+        }],
+    );
 }

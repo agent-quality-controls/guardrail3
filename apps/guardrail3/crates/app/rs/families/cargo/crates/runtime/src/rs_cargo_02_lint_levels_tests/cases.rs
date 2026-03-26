@@ -1,7 +1,14 @@
 #[allow(unused_imports)]
+use guardrail3_app_rs_family_cargo_assertions::rs_cargo_02_lint_levels::{
+    check_results,
+    has_result,
+    rule_results,
+    assert_rule_results,
+    ExpectedRuleResult,
+};
+#[allow(unused_imports)]
 use super::{
-    check_results, entry, has_result,
-    rule_results, tree,
+    entry, tree,
 };
 
 #[allow(dead_code, non_upper_case_globals)]
@@ -148,9 +155,14 @@ fn stricter_than_baseline_is_accepted_silently() {
         &[("pkg/Cargo.toml", &manifest)],
     ));
 
-    let rule = rule_results(&results, "RS-CARGO-02");
-    assert_eq!(rule.len(), 1, "unexpected results: {rule:#?}");
-    assert!(rule[0].inventory);
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: None,
+            title: None,
+            inventory: Some(true),
+        }],
+    );
 }
 
 #[test]
@@ -172,7 +184,12 @@ fn weaker_levels_are_errors() {
         &[("pkg/Cargo.toml", &manifest)],
     ));
 
-    assert!(has_result(&results, "RS-CARGO-02", |result| {
-        result.title == "lint `warnings` weakens policy"
-    }));
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: None,
+            title: Some("lint `warnings` weakens policy"),
+            inventory: None,
+        }],
+    );
 }

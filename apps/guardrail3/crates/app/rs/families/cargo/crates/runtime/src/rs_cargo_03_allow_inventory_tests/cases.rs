@@ -1,7 +1,11 @@
 #[allow(unused_imports)]
-use super::{
+use guardrail3_app_rs_family_cargo_assertions::rs_cargo_03_allow_inventory::{
     assert_expected_inventory,
-    assert_result_count, check_results, entry, rule_results, tree,
+    check_results,
+};
+#[allow(unused_imports)]
+use super::{
+    entry, tree,
 };
 
 #[allow(dead_code, non_upper_case_globals)]
@@ -144,12 +148,5 @@ fn inventories_every_approved_allow_entry() {
         &[("pkg/Cargo.toml", &manifest)],
     ));
 
-    let rule = rule_results(&results, "RS-CARGO-03");
-    assert_result_count(&results, 9);
     assert_expected_inventory(&results);
-    assert!(rule.iter().all(|result| result.inventory));
-    assert!(
-        rule.iter()
-            .any(|result| result.title == "allow inventory: `multiple_crate_versions`")
-    );
 }

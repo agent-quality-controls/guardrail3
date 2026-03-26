@@ -1,6 +1,13 @@
 #[allow(unused_imports)]
+use guardrail3_app_rs_family_cargo_assertions::rs_cargo_08_resolver::{
+    check_results,
+    rule_results,
+    assert_rule_results,
+    ExpectedRuleResult,
+};
+#[allow(unused_imports)]
 use super::{
-    check_results, entry, rule_results, tree,
+    entry, tree,
 };
 
 #[allow(dead_code, non_upper_case_globals)]
@@ -146,9 +153,14 @@ fn explicit_workspace_resolver_is_inventory() {
         &[("Cargo.toml", &workspace_manifest)],
     ));
 
-    let rule = rule_results(&results, "RS-CARGO-08");
-    assert_eq!(rule.len(), 1, "unexpected results: {rule:#?}");
-    assert!(rule[0].inventory);
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: None,
+            title: None,
+            inventory: Some(true),
+        }],
+    );
 }
 
 #[test]
@@ -171,9 +183,14 @@ fn missing_workspace_resolver_is_error() {
         &[("Cargo.toml", &workspace_manifest)],
     ));
 
-    let rule = rule_results(&results, "RS-CARGO-08");
-    assert_eq!(rule.len(), 1, "unexpected results: {rule:#?}");
-    assert_eq!(rule[0].title, "workspace resolver missing");
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: None,
+            title: Some("workspace resolver missing"),
+            inventory: None,
+        }],
+    );
 }
 
 #[test]
@@ -215,7 +232,12 @@ fn standalone_root_does_not_emit_workspace_only_rule() {
         ],
     ));
 
-    let rule = rule_results(&results, "RS-CARGO-08");
-    assert_eq!(rule.len(), 1, "unexpected results: {rule:#?}");
-    assert_eq!(rule[0].file.as_deref(), Some("Cargo.toml"));
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: Some("Cargo.toml"),
+            title: None,
+            inventory: None,
+        }],
+    );
 }
