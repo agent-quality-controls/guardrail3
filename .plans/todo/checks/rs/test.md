@@ -111,6 +111,7 @@ Structural pressure such as file length and `use` count belongs to `RS-CODE`, in
   - no mutation activation means mutation config is not required
 - `RS-TEST-16` must ignore pure aggregator files with no exported helper functions.
 - `RS-TEST-17` and `RS-TEST-18` must stay scoped to owned component/runtime/assertions packages, not every local crate in the repo.
+- `RS-TEST-18` must reject route-construction logic in `test_support`; mapper/placement wiring is not generic support.
 
 ## Current migration state
 

@@ -223,6 +223,7 @@ Must not own:
 
 - module-specific semantics
 - component-specific output contracts
+- route construction or mapper/placement wiring
 - production logic
 - imports or direct calls into sibling `runtime` / `assertions` component crates
 
