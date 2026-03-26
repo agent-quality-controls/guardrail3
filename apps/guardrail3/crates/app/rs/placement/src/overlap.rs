@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use crate::classification::RustRootPlacementRootFacts;
+use crate::classification::{RustRootClassification, RustRootPlacementRootFacts};
 
 #[derive(Debug, Clone)]
 pub struct RustZoneOverlapFacts {
@@ -17,11 +17,11 @@ pub fn collect_overlaps(roots: &[RustRootPlacementRootFacts]) -> Vec<RustZoneOve
 
     for app_root in roots
         .iter()
-        .filter(|root| !root.app_zone_candidates.is_empty())
+        .filter(|root| root.classification == RustRootClassification::App)
     {
         for package_root in roots
             .iter()
-            .filter(|root| !root.package_zone_candidates.is_empty())
+            .filter(|root| root.classification == RustRootClassification::Package)
         {
             if app_root.rel_dir == package_root.rel_dir {
                 continue;

@@ -255,6 +255,10 @@ fn family_enabled_for_runtime(
         .and_then(|checks| checks.family_enabled(family))
         .unwrap_or(true);
 
+    if family == RustValidateFamily::Arch {
+        return global || scoped_arch_config_present(rust);
+    }
+
     if family_uses_global_only(family) {
         return global;
     }
@@ -298,6 +302,18 @@ fn family_uses_global_only(family: RustValidateFamily) -> bool {
             | RustValidateFamily::HooksShared
             | RustValidateFamily::HooksRs
     )
+}
+
+fn scoped_arch_config_present(rust: &RustConfig) -> bool {
+    rust.apps.as_ref().is_some_and(|apps| {
+        apps.values()
+            .any(|cfg| cfg.checks.as_ref().and_then(|checks| checks.arch).is_some())
+    }) || rust
+        .packages
+        .as_ref()
+        .and_then(|packages| packages.checks.as_ref())
+        .and_then(|checks| checks.arch)
+        .is_some()
 }
 
 fn effective_family_flag(

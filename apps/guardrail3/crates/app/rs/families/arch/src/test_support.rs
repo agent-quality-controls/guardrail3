@@ -18,8 +18,12 @@ pub fn entry(dirs: &[&str], files: &[&str]) -> DirEntry {
 }
 
 pub fn tree(structure: &[(&str, DirEntry)], content: &[(&str, &str)]) -> ProjectTree {
+    tree_at("/tmp/arch", structure, content)
+}
+
+pub fn tree_at(root: &str, structure: &[(&str, DirEntry)], content: &[(&str, &str)]) -> ProjectTree {
     ProjectTree {
-        root: PathBuf::from("/tmp/arch"),
+        root: PathBuf::from(root),
         structure: structure
             .iter()
             .map(|(path, dir_entry)| ((*path).to_owned(), dir_entry.clone()))

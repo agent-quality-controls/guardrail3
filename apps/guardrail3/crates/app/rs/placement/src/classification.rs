@@ -40,6 +40,11 @@ pub enum RustArchRole {
 }
 
 #[must_use]
+pub fn has_governed_zone_candidate(rel_dir: &str) -> bool {
+    !zone_candidates(rel_dir, "apps").is_empty() || !zone_candidates(rel_dir, "packages").is_empty()
+}
+
+#[must_use]
 pub fn classify_root(
     rel_dir: String,
     cargo_rel_path: String,

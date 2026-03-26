@@ -206,3 +206,39 @@ fn arch_runtime_reports_scoped_arch_config_violation() {
 
     fs::remove_dir_all(&root).expect("cleanup temp root");
 }
+
+#[test]
+fn arch_runtime_still_reports_scoped_arch_config_when_global_arch_is_disabled() {
+    let root = temp_root("arch-runtime-scoped-config-global-off");
+    write_file(
+        &root,
+        "guardrail3.toml",
+        "[rust.checks]\narch = false\nhexarch = true\nlibarch = true\n\n[rust.apps.backend.checks]\narch = false\n",
+    );
+    write_file(
+        &root,
+        "apps/backend/Cargo.toml",
+        "[workspace]\nmembers = []\nresolver = \"2\"\n",
+    );
+
+    let report = run(
+        &LocalFs,
+        &root,
+        None,
+        &[RustValidateFamily::Arch],
+        false,
+        &StubToolChecker,
+    )
+    .expect("arch runtime report");
+
+    assert_eq!(report.sections.len(), 1, "unexpected sections: {report:#?}");
+    assert_eq!(report.sections[0].name, "arch");
+    assert_eq!(report.sections[0].results.len(), 1, "{report:#?}");
+    assert_eq!(report.sections[0].results[0].id, "RS-ARCH-05");
+    assert_eq!(
+        report.sections[0].results[0].file.as_deref(),
+        Some("guardrail3.toml")
+    );
+
+    fs::remove_dir_all(&root).expect("cleanup temp root");
+}
