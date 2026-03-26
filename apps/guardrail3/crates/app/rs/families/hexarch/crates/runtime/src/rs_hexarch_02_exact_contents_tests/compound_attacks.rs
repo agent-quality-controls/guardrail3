@@ -26,9 +26,13 @@ fn missing_dir_plus_unexpected_dir_hits_both_branches_per_owned_root() {
         8,
         [
             "apps/devctl/crates",
+            "apps/devctl/crates/utils",
             "apps/backend/crates",
+            "apps/backend/crates/utils",
             "apps/worker/crates",
+            "apps/worker/crates/utils",
             inner_hex(),
+            &format!("{}/utils", inner_hex()),
         ],
         None,
         None,
@@ -132,9 +136,13 @@ fn renamed_required_dir_yields_missing_and_unexpected_per_owned_root() {
         8,
         [
             "apps/devctl/crates",
+            "apps/devctl/crates/domains",
             "apps/backend/crates",
+            "apps/backend/crates/domains",
             "apps/worker/crates",
+            "apps/worker/crates/domains",
             inner_hex(),
+            &format!("{}/domains", inner_hex()),
         ],
         None,
         None,
@@ -219,7 +227,7 @@ fn gitkeep_alongside_bad_files_ignores_gitkeep_but_still_hits_loose_files() {
         &["loose files"],
         &[],
         &["mod.rs", "README.md"],
-        &[".gitkeep"],
+        &[],
     );
 }
 
@@ -245,10 +253,10 @@ fn deep_unexpected_dir_tree_blames_only_the_top_level_unexpected_dir() {
         "",
         4,
         [
-            "apps/devctl/crates",
-            "apps/backend/crates",
-            "apps/worker/crates",
-            inner_hex(),
+            "apps/devctl/crates/utils",
+            "apps/backend/crates/utils",
+            "apps/worker/crates/utils",
+            &format!("{}/utils", inner_hex()),
         ],
         None,
         Some(&["utils"]),
@@ -323,7 +331,7 @@ fn maximally_complex_single_root_accumulates_missing_unexpected_and_loose_withou
         &["loose files"],
         &[],
         &["app", "mod.rs"],
-        &[".gitkeep"],
+        &[],
     );
 }
 

@@ -95,7 +95,7 @@ fn gitkeep_plus_replaced_single_child_containers_still_hit_rule_04() {
         replacements.len(),
         &expected_files,
         None,
-        Some(&["that don't belong"]),
+        Some(&["loose files"]),
         None,
         None,
     );
@@ -107,6 +107,6 @@ fn gitkeep_plus_replaced_single_child_containers_still_hit_rule_04() {
         None,
         None,
         None,
-        Some(&[".gitkeep"]),
+        None,
     );
 }

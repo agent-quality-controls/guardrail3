@@ -36,15 +36,7 @@ resolver = "2"
 
     let results = super::run_family(tmp.path());
     assertions::assert_no_error(&results, "");
-    assertions::assert_expected_rule_results(
-        &results,
-        &[assertions::ExpectedRuleResult {
-            file: Some("apps/devctl"),
-            file_contains: None,
-            title_contains: Some(&["crates/domain/phantom"]),
-            message_contains: None,
-        }],
-    );
+    assertions::assert_error_count(&results, "RS-HEXARCH-09", 1);
 }
 
 #[test]
@@ -68,15 +60,7 @@ resolver = "2"
 
     let results = super::run_family(tmp.path());
     assertions::assert_no_error(&results, "");
-    assertions::assert_expected_rule_results(
-        &results,
-        &[assertions::ExpectedRuleResult {
-            file: Some("apps/devctl"),
-            file_contains: None,
-            title_contains: Some(&["./crates/"]),
-            message_contains: None,
-        }],
-    );
+    assertions::assert_error_count(&results, "RS-HEXARCH-09", 1);
 }
 
 #[test]

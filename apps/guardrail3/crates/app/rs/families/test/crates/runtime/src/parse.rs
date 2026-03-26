@@ -106,6 +106,7 @@ pub struct UseBinding {
     pub line: usize,
     pub path_segments: Vec<String>,
     pub local_name: Option<String>,
+    pub is_public: bool,
 }
 
 pub fn parse_rust_file(content: &str) -> Result<syn::File, syn::Error> {
@@ -192,6 +193,7 @@ impl<'ast> Visit<'ast> for TestVisitor {
             &item.tree,
             &mut Vec::new(),
             span_line(item.span()),
+            matches!(item.vis, syn::Visibility::Public(_)),
             &mut self.out.imports,
         );
         syn::visit::visit_item_use(self, item);
@@ -573,12 +575,13 @@ fn collect_use_bindings(
     tree: &syn::UseTree,
     prefix: &mut Vec<String>,
     line: usize,
+    is_public: bool,
     out: &mut Vec<UseBinding>,
 ) {
     match tree {
         syn::UseTree::Path(path) => {
             prefix.push(path.ident.to_string());
-            collect_use_bindings(&path.tree, prefix, line, out);
+            collect_use_bindings(&path.tree, prefix, line, is_public, out);
             let _ = prefix.pop();
         }
         syn::UseTree::Name(name) => {
@@ -588,6 +591,7 @@ fn collect_use_bindings(
                 line,
                 path_segments,
                 local_name: Some(name.ident.to_string()),
+                is_public,
             });
         }
         syn::UseTree::Rename(rename) => {
@@ -597,6 +601,7 @@ fn collect_use_bindings(
                 line,
                 path_segments,
                 local_name: Some(rename.rename.to_string()),
+                is_public,
             });
         }
         syn::UseTree::Glob(_) => {
@@ -604,11 +609,12 @@ fn collect_use_bindings(
                 line,
                 path_segments: prefix.clone(),
                 local_name: None,
+                is_public,
             });
         }
         syn::UseTree::Group(group) => {
             for item in &group.items {
-                collect_use_bindings(item, prefix, line, out);
+                collect_use_bindings(item, prefix, line, is_public, out);
             }
         }
     }
