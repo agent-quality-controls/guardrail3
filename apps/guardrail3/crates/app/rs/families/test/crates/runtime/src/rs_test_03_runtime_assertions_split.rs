@@ -213,8 +213,16 @@ fn collect_violations(
             let Some(owner_module_name) = file.facts.owner_module_name.as_deref() else {
                 continue;
             };
+            let local_module_names = files
+                .iter()
+                .filter(|candidate| {
+                    candidate.facts.component_rel_dir.as_deref() == Some(component.rel_dir.as_str())
+                        && matches!(candidate.facts.kind, TestFileKind::Source)
+                })
+                .filter_map(|candidate| candidate.facts.owner_module_name.clone())
+                .collect::<BTreeSet<_>>();
             for binding in &file.parsed.imports {
-                if import_hits_sibling_module(binding, owner_module_name) {
+                if import_hits_sibling_module(binding, owner_module_name, &local_module_names) {
                     violations.push(RuntimeAssertionsViolation {
                         rel_path: file.facts.rel_path.clone(),
                         line: Some(binding.line),
@@ -236,6 +244,21 @@ fn collect_violations(
                         ),
                     });
                 }
+            }
+            if let Some(target_module) = file
+                .parsed
+                .file_call_paths
+                .iter()
+                .find_map(|path| sibling_module_target(path, owner_module_name, &local_module_names))
+            {
+                violations.push(RuntimeAssertionsViolation {
+                    rel_path: file.facts.rel_path.clone(),
+                    line: None,
+                    title: "sidecar calls sibling production module".to_owned(),
+                    message: format!(
+                        "Internal sidecar harnesses must not call sibling production module `{target_module}` directly."
+                    ),
+                });
             }
             if let Some(local_root) = file.parsed.file_call_paths.iter().find_map(|path| {
                 first_disallowed_local_package(path, local_package_names, &allowed_sidecar_packages)
@@ -349,17 +372,41 @@ fn import_uses_local_boundary(binding: &UseBinding) -> bool {
         .is_some_and(|segment| matches!(segment.as_str(), "crate" | "self" | "super"))
 }
 
-fn import_hits_sibling_module(binding: &UseBinding, owner_module_name: &str) -> bool {
-    let Some(first) = binding.path_segments.first() else {
-        return false;
-    };
-    if first != "crate" {
-        return false;
+fn import_hits_sibling_module(
+    binding: &UseBinding,
+    owner_module_name: &str,
+    local_module_names: &BTreeSet<String>,
+) -> bool {
+    sibling_module_target(&binding.path_segments, owner_module_name, local_module_names).is_some()
+}
+
+fn sibling_module_target<'a>(
+    path_segments: &'a [String],
+    owner_module_name: &str,
+    local_module_names: &BTreeSet<String>,
+) -> Option<&'a str> {
+    let imported = first_local_module_target(path_segments)?;
+    if !local_module_names.contains(imported) {
+        return None;
     }
-    let Some(imported) = binding.path_segments.get(1) else {
-        return true;
-    };
-    imported != owner_module_name && imported != &format!("{owner_module_name}_tests")
+    let owner_tests_module_name = format!("{owner_module_name}_tests");
+    if imported == owner_module_name || imported == owner_tests_module_name {
+        return None;
+    }
+    Some(imported)
+}
+
+fn first_local_module_target(path_segments: &[String]) -> Option<&str> {
+    let first = path_segments.first()?;
+    match first.as_str() {
+        "crate" => path_segments.get(1).map(String::as_str),
+        "self" | "super" => path_segments
+            .iter()
+            .skip(1)
+            .find(|segment| !matches!(segment.as_str(), "self" | "super"))
+            .map(String::as_str),
+        _ => None,
+    }
 }
 
 fn allowed_external_harness_packages(
