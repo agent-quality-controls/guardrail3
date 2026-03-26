@@ -44,7 +44,7 @@ pub fn check_sidecar_semantic_proof(input: &TestFunctionInput<'_>, results: &mut
     {
         return;
     }
-    if input.file.assertions_package_name.is_none() || !input.function.has_assertion_macro {
+    if input.file.assertions_package_name.is_none() || !input.function.has_failure_enforcement {
         return;
     }
     if !owns_direct_result_shape_assertion(input) {

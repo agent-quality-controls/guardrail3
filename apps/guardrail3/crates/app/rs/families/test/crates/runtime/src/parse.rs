@@ -39,6 +39,7 @@ pub struct TestFunctionInfo {
     pub name: String,
     pub uses_tokio_test_attr: bool,
     pub has_assertion_macro: bool,
+    pub has_failure_enforcement: bool,
     pub call_paths: Vec<Vec<String>>,
     pub path_uses: Vec<Vec<String>>,
     pub method_receiver_paths: Vec<Vec<String>>,
@@ -62,6 +63,7 @@ pub struct FunctionInfo {
     pub has_check_result_arg: bool,
     pub return_kind: ReturnKind,
     pub has_assertion_macro: bool,
+    pub has_failure_enforcement: bool,
     pub call_paths: Vec<Vec<String>>,
     pub path_uses: Vec<Vec<String>>,
     pub field_accesses: Vec<FieldAccessInfo>,
@@ -106,7 +108,6 @@ pub struct UseBinding {
     pub line: usize,
     pub path_segments: Vec<String>,
     pub local_name: Option<String>,
-    pub is_public: bool,
 }
 
 pub fn parse_rust_file(content: &str) -> Result<syn::File, syn::Error> {
@@ -193,10 +194,18 @@ impl<'ast> Visit<'ast> for TestVisitor {
             &item.tree,
             &mut Vec::new(),
             span_line(item.span()),
-            matches!(item.vis, syn::Visibility::Public(_)),
             &mut self.out.imports,
         );
         syn::visit::visit_item_use(self, item);
+    }
+
+    fn visit_item_extern_crate(&mut self, item: &'ast syn::ItemExternCrate) {
+        self.out.imports.push(UseBinding {
+            line: span_line(item.span()),
+            path_segments: vec![item.ident.to_string()],
+            local_name: item.rename.as_ref().map(|(_, ident)| ident.to_string()),
+        });
+        syn::visit::visit_item_extern_crate(self, item);
     }
 
     fn visit_item_const(&mut self, item: &'ast syn::ItemConst) {
@@ -253,6 +262,7 @@ fn maybe_push_test_function(
         name: sig.ident.to_string(),
         uses_tokio_test_attr,
         has_assertion_macro: function.has_assertion_macro,
+        has_failure_enforcement: function.has_failure_enforcement,
         call_paths: function.call_paths.clone(),
         path_uses: function.path_uses.clone(),
         method_receiver_paths: body_visitor.method_receiver_paths,
@@ -293,6 +303,7 @@ fn analyze_function(
         has_check_result_arg,
         return_kind: classify_return_kind(&sig.output),
         has_assertion_macro: body_visitor.has_assertion_macro,
+        has_failure_enforcement: body_visitor.has_failure_enforcement,
         call_paths: body_visitor.call_paths,
         path_uses: body_visitor.path_uses,
         field_accesses: body_visitor.field_accesses,
@@ -352,6 +363,7 @@ fn type_mentions_check_result(ty: &syn::Type) -> bool {
 #[derive(Default)]
 struct TestBodyVisitor {
     has_assertion_macro: bool,
+    has_failure_enforcement: bool,
     call_paths: Vec<Vec<String>>,
     path_uses: Vec<Vec<String>>,
     method_receiver_paths: Vec<Vec<String>>,
@@ -372,6 +384,10 @@ impl<'ast> Visit<'ast> for TestBodyVisitor {
         {
             if is_assertion_macro_name(&name) {
                 self.has_assertion_macro = true;
+                self.has_failure_enforcement = true;
+            }
+            if name == "panic" {
+                self.has_failure_enforcement = true;
             }
             if matches!(
                 name.as_str(),
@@ -417,6 +433,12 @@ impl<'ast> Visit<'ast> for TestBodyVisitor {
     fn visit_expr_method_call(&mut self, expr: &'ast syn::ExprMethodCall) {
         if let Some(path) = call_path(&expr.receiver) {
             self.method_receiver_paths.push(path);
+        }
+        if matches!(
+            expr.method.to_string().as_str(),
+            "unwrap" | "expect" | "unwrap_err" | "expect_err"
+        ) {
+            self.has_failure_enforcement = true;
         }
         syn::visit::visit_expr_method_call(self, expr);
     }
@@ -575,13 +597,12 @@ fn collect_use_bindings(
     tree: &syn::UseTree,
     prefix: &mut Vec<String>,
     line: usize,
-    is_public: bool,
     out: &mut Vec<UseBinding>,
 ) {
     match tree {
         syn::UseTree::Path(path) => {
             prefix.push(path.ident.to_string());
-            collect_use_bindings(&path.tree, prefix, line, is_public, out);
+            collect_use_bindings(&path.tree, prefix, line, out);
             let _ = prefix.pop();
         }
         syn::UseTree::Name(name) => {
@@ -591,7 +612,6 @@ fn collect_use_bindings(
                 line,
                 path_segments,
                 local_name: Some(name.ident.to_string()),
-                is_public,
             });
         }
         syn::UseTree::Rename(rename) => {
@@ -601,7 +621,6 @@ fn collect_use_bindings(
                 line,
                 path_segments,
                 local_name: Some(rename.rename.to_string()),
-                is_public,
             });
         }
         syn::UseTree::Glob(_) => {
@@ -609,12 +628,11 @@ fn collect_use_bindings(
                 line,
                 path_segments: prefix.clone(),
                 local_name: None,
-                is_public,
             });
         }
         syn::UseTree::Group(group) => {
             for item in &group.items {
-                collect_use_bindings(item, prefix, line, is_public, out);
+                collect_use_bindings(item, prefix, line, out);
             }
         }
     }

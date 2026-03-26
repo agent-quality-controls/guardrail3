@@ -347,16 +347,9 @@ fn collect_assertions_proof_catalog(
                     .map(move |function| {
                         qualified_assertion_name(&direct_module_prefix, &function.name)
                     });
-                let re_exported_assertions = file
-                    .parsed
-                    .imports
-                    .iter()
-                    .filter(|binding| binding.is_public)
-                    .filter_map(|binding| binding.local_name.as_ref())
-                    .filter(|name| name.starts_with("assert_"))
-                    .map(move |name| qualified_assertion_name(&module_prefix, name));
+                let _ = module_prefix;
 
-                direct_functions.chain(re_exported_assertions)
+                direct_functions
             })
             .collect::<BTreeSet<_>>();
 
@@ -429,7 +422,6 @@ fn exported_assertion_function_calls_proof(
         (package_name.to_owned(), Vec::new()),
     ]);
     let mut bare_imported_proofs = BTreeMap::new();
-    let mut bare_external_assert_helpers = BTreeSet::new();
     let mut glob_prefixes = Vec::new();
 
     for binding in imports {
@@ -438,11 +430,6 @@ fn exported_assertion_function_calls_proof(
             .first()
             .is_some_and(|segment| root_prefixes.contains_key(segment))
         {
-            if let Some(local_name) = binding.local_name.as_ref() {
-                if local_name.starts_with("assert_") {
-                    let _ = bare_external_assert_helpers.insert(local_name.clone());
-                }
-            }
             continue;
         }
         let Some(first) = binding.path_segments.first() else {
@@ -475,7 +462,6 @@ fn exported_assertion_function_calls_proof(
                             && (bare_imported_proofs
                                 .get(name)
                                 .is_some_and(|qualified| proof_bearing_names.contains(qualified))
-                                || bare_external_assert_helpers.contains(name)
                                 || glob_prefixes.iter().any(|prefix| {
                                     proof_bearing_names
                                         .contains(&qualified_assertion_name(prefix, name))
@@ -553,6 +539,12 @@ fn normalize_relative_assertion_path(
 }
 
 fn is_test_support_file(root: &TestRootFacts, rel_path: &str) -> bool {
-    let test_support_src = discover::join_under_root(&root.rel_dir, "test_support/src");
-    rel_path == test_support_src || discover::path_is_under(rel_path, &test_support_src)
+    [
+        discover::join_under_root(&root.rel_dir, "test_support/src"),
+        discover::join_under_root(&root.rel_dir, "crates/test_support/src"),
+    ]
+    .into_iter()
+    .any(|test_support_src| {
+        rel_path == test_support_src || discover::path_is_under(rel_path, &test_support_src)
+    })
 }

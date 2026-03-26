@@ -461,6 +461,51 @@ fn assertions_module_importing_route_infra_is_reported() {
 }
 
 #[test]
+fn assertions_module_fully_qualified_family_mapper_call_is_reported() {
+    let fixture = tempdir();
+    let root = fixture.path();
+
+    write_file(
+        root,
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"crates/runtime\", \"crates/assertions\"]\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/Cargo.toml",
+        "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = {path = \"../assertions\"}\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/src/lib.rs",
+        "pub fn value() -> u8 {1}\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/tests/public_surface.rs",
+        "use demo_assertions::prove_runtime;\n#[test]\nfn public_surface() {prove_runtime();}\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/Cargo.toml",
+        "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = {path = \"../runtime\"}\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/src/lib.rs",
+        "pub fn prove_runtime() { let _ = guardrail3_app_rs_family_mapper::FamilyMapper::new(tree, scope, None, selected, None); assert_eq!(demo_runtime::value(), 1); }\n",
+    );
+
+    let results = run_family(root);
+    assert_error_reported(
+        &results,
+        "crates/assertions/src/lib.rs",
+        None,
+        "assertions module builds routed family input",
+    );
+}
+
+#[test]
 fn sidecar_calling_crate_root_helper_is_reported() {
     let fixture = tempdir();
     let root = fixture.path();
