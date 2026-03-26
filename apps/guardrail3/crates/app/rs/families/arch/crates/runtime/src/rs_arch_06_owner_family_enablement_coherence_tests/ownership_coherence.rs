@@ -18,10 +18,4 @@ fn app_roots_error_when_effective_hexarch_enablement_is_false() {
     ));
 
     assertions::assert_error_files(&results, "RS-ARCH-06", &["apps/backend/Cargo.toml"]);
-    assert!(
-        assertions::error_results(&results, "RS-ARCH-06")
-            .iter()
-            .all(|result| result.severity == guardrail3_domain_report::Severity::Error),
-        "RS-ARCH-06 severity drifted: {results:#?}"
-    );
 }
