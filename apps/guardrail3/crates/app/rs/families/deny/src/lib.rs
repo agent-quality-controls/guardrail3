@@ -35,6 +35,7 @@ mod rs_deny_30_wrappers;
 #[cfg(test)]
 mod test_support;
 
+use guardrail3_app_rs_family_mapper::RsDenyRoute;
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::CheckResult;
 
@@ -46,8 +47,8 @@ use self::inputs::{
 
 pub use self::deny_support::expected_ban_names;
 
-pub fn check(tree: &ProjectTree) -> Vec<CheckResult> {
-    let facts = collect(tree);
+pub fn check(tree: &ProjectTree, route: &RsDenyRoute) -> Vec<CheckResult> {
+    let facts = collect(tree, route);
     let mut results = Vec::new();
 
     for covered in &facts.covered_units {

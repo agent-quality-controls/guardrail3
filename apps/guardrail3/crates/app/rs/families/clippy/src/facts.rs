@@ -1,5 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet};
 
+use guardrail3_app_rs_family_mapper::RsClippyRoute;
 use guardrail3_domain_project_tree::ProjectTree;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -75,8 +76,13 @@ struct PolicySettings {
     garde_enabled: bool,
 }
 
-pub fn collect(tree: &ProjectTree) -> ClippyFacts {
-    let cargo_roots = collect_cargo_roots(tree);
+pub fn collect(tree: &ProjectTree, route: &RsClippyRoute) -> ClippyFacts {
+    let cargo_roots = collect_cargo_roots(tree, route);
+    let routed_root_rels = route
+        .roots
+        .iter()
+        .map(|root| root.rel_dir.clone())
+        .collect::<BTreeSet<_>>();
     let workspace_roots: BTreeSet<_> = cargo_roots
         .values()
         .filter(|facts| facts.has_workspace)
@@ -93,11 +99,11 @@ pub fn collect(tree: &ProjectTree) -> ClippyFacts {
         .collect();
     let policy_map = read_policy_map(tree, &cargo_roots, &standalone_package_roots);
 
-    let mut allowed_policy_roots = BTreeSet::from([String::new()]);
+    let mut allowed_policy_roots = BTreeSet::new();
     allowed_policy_roots.extend(workspace_roots.iter().cloned());
     allowed_policy_roots.extend(standalone_package_roots.iter().cloned());
 
-    let configs = collect_configs(tree, &policy_map);
+    let configs = collect_configs(tree, &policy_map, &routed_root_rels);
     let mut allowed_configs = Vec::new();
     let mut forbidden_configs = Vec::new();
     for config in configs {
@@ -182,14 +188,14 @@ fn config_precedence(rel_path: &str) -> usize {
     2
 }
 
-fn collect_cargo_roots(tree: &ProjectTree) -> BTreeMap<String, CargoRootFacts> {
-    let mut dirs = BTreeSet::new();
-    if tree.file_exists("Cargo.toml") {
-        let _ = dirs.insert(String::new());
-    }
-    dirs.extend(tree.dirs_with_file("Cargo.toml"));
-
-    dirs.into_iter()
+fn collect_cargo_roots(
+    tree: &ProjectTree,
+    route: &RsClippyRoute,
+) -> BTreeMap<String, CargoRootFacts> {
+    route
+        .roots
+        .iter()
+        .map(|root| root.rel_dir.clone())
         .map(|rel_dir| {
             let rel_path = if rel_dir.is_empty() {
                 "Cargo.toml".to_owned()
@@ -255,16 +261,22 @@ fn expand_member_pattern(tree: &ProjectTree, workspace_rel: &str, member: &str) 
 fn collect_configs(
     tree: &ProjectTree,
     policy_map: &BTreeMap<String, PolicySettings>,
+    routed_root_rels: &BTreeSet<String>,
 ) -> Vec<ClippyConfigFacts> {
     let mut paths = Vec::new();
     for file_name in ["clippy.toml", ".clippy.toml"] {
-        if tree.file_exists(file_name) {
+        if routed_root_rels.contains("") && tree.file_exists(file_name) {
             paths.push(("".to_owned(), file_name.to_owned()));
         }
-        paths.extend(tree.dirs_with_file(file_name).into_iter().map(|rel_dir| {
-            let rel_path = ProjectTree::join_rel(&rel_dir, file_name);
-            (rel_dir, rel_path)
-        }));
+        paths.extend(
+            tree.dirs_with_file(file_name)
+                .into_iter()
+                .filter(|rel_dir| is_under_routed_root(rel_dir, routed_root_rels))
+                .map(|rel_dir| {
+                    let rel_path = ProjectTree::join_rel(&rel_dir, file_name);
+                    (rel_dir, rel_path)
+                }),
+        );
     }
 
     paths
@@ -282,6 +294,12 @@ fn collect_configs(
             )
         })
         .collect()
+}
+
+fn is_under_routed_root(rel_dir: &str, routed_root_rels: &BTreeSet<String>) -> bool {
+    routed_root_rels.iter().any(|root_rel| {
+        root_rel.is_empty() || rel_dir == root_rel || rel_dir.starts_with(&format!("{root_rel}/"))
+    })
 }
 
 fn parse_config(

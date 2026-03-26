@@ -1,4 +1,4 @@
-use super::super::super::check as run_family;
+use super::super::super::test_support::run_tree as run_family;
 use super::super::super::test_support::{StubToolChecker, dir_entry, project_tree, temp_root};
 use super::super::super::test_support::{crate_facts, crate_input};
 use super::super::check;

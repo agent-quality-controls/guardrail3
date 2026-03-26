@@ -35,6 +35,7 @@ mod rs_release_12_input_failures;
 mod test_support;
 
 use guardrail3_app_core as _;
+use guardrail3_app_rs_family_mapper::RsReleaseRoute;
 use guardrail3_domain_config as _;
 use guardrail3_domain_modules as _;
 use guardrail3_domain_project_tree::ProjectTree;
@@ -49,8 +50,13 @@ use self::inputs::{
     PublishableCrateReleaseInput, ReleaseEdgeInput, ReleaseInputFailureInput, RepoReleaseInput,
 };
 
-pub fn check(tree: &ProjectTree, tc: &dyn ToolChecker, thorough: bool) -> Vec<CheckResult> {
-    let facts = collect(tree, tc, thorough);
+pub fn check(
+    tree: &ProjectTree,
+    route: &RsReleaseRoute,
+    tc: &dyn ToolChecker,
+    thorough: bool,
+) -> Vec<CheckResult> {
+    let facts = collect(tree, route, tc, thorough);
     let mut results = Vec::new();
 
     for failure in &facts.input_failures {

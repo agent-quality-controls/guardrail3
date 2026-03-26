@@ -60,15 +60,17 @@ pub fn run(
             RustValidateFamily::Arch => arch::check(&tree, &mapper.map_rs_arch()),
             RustValidateFamily::Fmt => fmt::check(&tree),
             RustValidateFamily::Toolchain => toolchain::check(&tree),
-            RustValidateFamily::Clippy => clippy::check(&tree),
-            RustValidateFamily::Deny => deny::check(&tree),
+            RustValidateFamily::Clippy => clippy::check(&tree, &mapper.map_rs_clippy()),
+            RustValidateFamily::Deny => deny::check(&tree, &mapper.map_rs_deny()),
             RustValidateFamily::Cargo => cargo::check(&tree, &mapper.map_rs_cargo()),
             RustValidateFamily::Code => code::check(&tree, &mapper.map_rs_code()),
             RustValidateFamily::Hexarch => hexarch::check(&tree, &mapper.map_rs_hexarch()),
-            RustValidateFamily::Deps => deps::check(&tree, tc),
+            RustValidateFamily::Deps => deps::check(&tree, &mapper.map_rs_deps(), tc),
             RustValidateFamily::Garde => garde::check(&tree, &mapper.map_rs_garde()),
             RustValidateFamily::Test => test::check(&tree, &mapper.map_rs_test(), tc),
-            RustValidateFamily::Release => release::check(&tree, tc, thorough),
+            RustValidateFamily::Release => {
+                release::check(&tree, &mapper.map_rs_release(), tc, thorough)
+            }
             RustValidateFamily::HooksShared => hooks_shared::check(fs, path, &tree, tc),
             RustValidateFamily::HooksRs => Vec::new(),
         };

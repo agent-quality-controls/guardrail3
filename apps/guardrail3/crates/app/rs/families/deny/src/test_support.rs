@@ -5,9 +5,11 @@ use super::facts::{DenyConfigFacts, DenyFacts, collect};
 use super::inputs::{ForbiddenDenyConfigInput, SameRootConflictInput};
 use guardrail3_adapters_outbound_fs::RealFileSystem;
 use guardrail3_app_core::project_walker::walk_project;
+use guardrail3_app_rs_family_mapper::{FamilyMapper, RsDenyRoute};
 use guardrail3_domain_modules::deny::build_deny_toml;
 use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
 use guardrail3_domain_report::CheckResult;
+use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
 const GOLDEN_REL: &str = "../../../../../tests/fixtures/r_arch_01/golden";
 
@@ -391,7 +393,7 @@ pub fn set_allow_registries(deny_toml: &str, entries: &[&str]) -> String {
 }
 
 pub fn collected_facts(tree: &ProjectTree) -> DenyFacts {
-    collect(tree)
+    collect(tree, &family_route(tree))
 }
 
 pub fn fixture_root() -> PathBuf {
@@ -414,7 +416,7 @@ pub fn write_file(root: &Path, rel: &str, content: &str) {
 
 pub fn run_family(root: &Path) -> Vec<CheckResult> {
     let tree = walk_project(&RealFileSystem, root);
-    super::check(&tree)
+    super::check(&tree, &family_route(&tree))
 }
 
 pub fn forbidden_input<'a>(facts: &'a DenyFacts, rel_path: &str) -> ForbiddenDenyConfigInput<'a> {
@@ -450,6 +452,13 @@ fn copy_dir_recursive(src: &Path, dst: &Path) {
             let _ = std::fs::copy(&src_path, &dst_path).expect("copy fixture file");
         }
     }
+}
+
+fn family_route(tree: &ProjectTree) -> RsDenyRoute {
+    let scope = guardrail3_app_rs_placement::collect(tree);
+    let selected =
+        RustFamilySelection::new(std::collections::BTreeSet::from([RustValidateFamily::Deny]));
+    FamilyMapper::new(tree, &scope, None, &selected, None).map_rs_deny()
 }
 
 #[cfg(test)]
