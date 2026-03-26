@@ -1,7 +1,7 @@
 [workspace]
 members = [
-    "crates/family/runtime",
-    "crates/family/assertions",
+    "crates/runtime",
+    "crates/assertions",
     "test_support",
 ]
 resolver = "2"
