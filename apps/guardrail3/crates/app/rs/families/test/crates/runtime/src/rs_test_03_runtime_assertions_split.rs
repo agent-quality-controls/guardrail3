@@ -9,11 +9,6 @@ use super::inputs::RuntimeAssertionsViolationInput;
 use super::parse::{ModuleInfo, UseBinding};
 
 const ID: &str = "RS-TEST-03";
-const DISALLOWED_ROUTE_INFRA_PACKAGES: &[&str] = &[
-    "guardrail3_app_rs_family_mapper",
-    "guardrail3_app_rs_placement",
-];
-
 pub(crate) fn collect(
     root: &TestRootFacts,
     files: &[AnalyzedFile],
@@ -61,6 +56,7 @@ fn collect_violations(
         let allowed_external_packages = allowed_external_harness_packages(component);
         let allowed_sidecar_packages = allowed_sidecar_packages(component);
         let allowed_assertions_packages = allowed_assertions_packages(component);
+        let assertions_package_name = component.assertions_package_name.as_deref();
 
         if !component.assertions_exists {
             violations.push(RuntimeAssertionsViolation {
@@ -263,6 +259,20 @@ fn collect_violations(
                         ),
                     });
                 }
+                if let Some(target_module) = foreign_assertions_module_target(
+                    &binding.path_segments,
+                    assertions_package_name,
+                    owner_module_name,
+                ) {
+                    violations.push(RuntimeAssertionsViolation {
+                        rel_path: file.facts.rel_path.clone(),
+                        line: Some(binding.line),
+                        title: "sidecar imports sibling assertions module".to_owned(),
+                        message: format!(
+                            "Internal sidecar harnesses may only import owned assertions module `{owner_module_name}` and must not import sibling assertions module `{target_module}`."
+                        ),
+                    });
+                }
             }
             if let Some(target) = file.parsed.file_call_paths.iter().find_map(|path| {
                 disallowed_sidecar_local_boundary_target(
@@ -307,6 +317,18 @@ fn collect_violations(
                     ),
                 });
             }
+            if let Some(target_module) = file.parsed.file_call_paths.iter().find_map(|path| {
+                foreign_assertions_module_target(path, assertions_package_name, owner_module_name)
+            }) {
+                violations.push(RuntimeAssertionsViolation {
+                    rel_path: file.facts.rel_path.clone(),
+                    line: None,
+                    title: "sidecar calls sibling assertions module".to_owned(),
+                    message: format!(
+                        "Internal sidecar harnesses may only call owned assertions module `{owner_module_name}` and must not call sibling assertions module `{target_module}`."
+                    ),
+                });
+            }
         }
 
         for file in files.iter().filter(|file| {
@@ -339,17 +361,19 @@ fn collect_violations(
                         ),
                     });
                 }
-                if let Some(route_package) =
-                    first_disallowed_route_infra_package(&binding.path_segments)
+                if binding
+                    .path_segments
+                    .iter()
+                    .any(|segment| segment == "FamilyMapper")
                 {
                     violations.push(RuntimeAssertionsViolation {
                         rel_path: file.facts.rel_path.clone(),
                         line: Some(binding.line),
                         title: "assertions module imports route construction infrastructure"
                             .to_owned(),
-                        message: format!(
-                            "Assertions modules must stay reusable semantic proof helpers and must not import route-construction infrastructure crate `{route_package}`."
-                        ),
+                        message:
+                            "Assertions modules must stay reusable semantic proof helpers and must not import route-construction infrastructure."
+                                .to_owned(),
                     });
                 }
             }
@@ -371,11 +395,12 @@ fn collect_violations(
                     ),
                 });
             }
-            if file.parsed.file_call_paths.iter().any(|call_path| {
-                call_path
-                    .first()
-                    .is_some_and(|first| first == "FamilyMapper")
-            }) {
+            if file
+                .parsed
+                .file_call_paths
+                .iter()
+                .any(|call_path| call_path.iter().any(|segment| segment == "FamilyMapper"))
+            {
                 violations.push(RuntimeAssertionsViolation {
                     rel_path: file.facts.rel_path.clone(),
                     line: None,
@@ -613,11 +638,19 @@ fn first_disallowed_local_package<'a>(
     Some(root.as_str())
 }
 
-fn first_disallowed_route_infra_package(path: &[String]) -> Option<&str> {
-    let root = path.first()?;
-    DISALLOWED_ROUTE_INFRA_PACKAGES
-        .contains(&root.as_str())
-        .then_some(root.as_str())
+fn foreign_assertions_module_target<'a>(
+    path_segments: &'a [String],
+    assertions_package_name: Option<&str>,
+    owner_module_name: &str,
+) -> Option<&'a str> {
+    let assertions_package_name = assertions_package_name?;
+    let [first, second, ..] = path_segments else {
+        return None;
+    };
+    if first != assertions_package_name || second == owner_module_name {
+        return None;
+    }
+    Some(second.as_str())
 }
 
 fn module_path_includes_runtime_src(

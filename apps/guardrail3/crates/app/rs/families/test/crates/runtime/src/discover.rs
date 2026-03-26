@@ -415,8 +415,12 @@ fn root_component_owns_file(root: &TestRootFacts, rel_path: &str) -> bool {
 }
 
 fn root_has_test_support_file(root: &TestRootFacts, rel_path: &str) -> bool {
-    let test_support_src = join_under_root(&root.rel_dir, "test_support/src");
-    rel_path == test_support_src || path_is_under(rel_path, &test_support_src)
+    [
+        join_under_root(&root.rel_dir, "test_support/src"),
+        join_under_root(&root.rel_dir, "crates/test_support/src"),
+    ]
+    .into_iter()
+    .any(|test_support_src| rel_path == test_support_src || path_is_under(rel_path, &test_support_src))
 }
 
 fn collect_mutation_hook_files(tree: &ProjectTree, root_rel_dir: &str) -> Vec<String> {

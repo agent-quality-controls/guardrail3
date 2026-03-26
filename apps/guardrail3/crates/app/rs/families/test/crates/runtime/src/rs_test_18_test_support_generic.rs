@@ -6,10 +6,6 @@ use super::inputs::TestSupportFileInput;
 use super::parse::{PublicValueKind, ReturnKind};
 
 const ID: &str = "RS-TEST-18";
-const DISALLOWED_ROUTE_INFRA_PACKAGES: &[&str] = &[
-    "guardrail3_app_rs_family_mapper",
-    "guardrail3_app_rs_placement",
-];
 const REPORT_FIELDS: &[&str] = &[
     "file",
     "id",
@@ -52,11 +48,11 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
 
     let mut reported_route_infra_imports = BTreeSet::new();
     for binding in &input.parsed.imports {
-        let Some(first) = binding.path_segments.first() else {
-            continue;
-        };
-        if !DISALLOWED_ROUTE_INFRA_PACKAGES.contains(&first.as_str())
-            || !reported_route_infra_imports.insert((binding.line, first.clone()))
+        if !binding
+            .path_segments
+            .iter()
+            .any(|segment| segment == "FamilyMapper")
+            || !reported_route_infra_imports.insert(binding.line)
         {
             continue;
         }
@@ -64,9 +60,9 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
             id: ID.to_owned(),
             severity: Severity::Error,
             title: "test_support imports route construction infrastructure".to_owned(),
-            message: format!(
-                "Shared `test_support` must stay generic and must not import route-construction infrastructure crate `{first}`."
-            ),
+            message:
+                "Shared `test_support` must stay generic and must not import route-construction infrastructure."
+                    .to_owned(),
             file: Some(input.file.rel_path.clone()),
             line: Some(binding.line),
             inventory: false,
@@ -96,11 +92,12 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
         }
     }
 
-    if input.parsed.file_call_paths.iter().any(|call_path| {
-        call_path
-            .first()
-            .is_some_and(|first| first == "FamilyMapper")
-    }) {
+    if input
+        .parsed
+        .file_call_paths
+        .iter()
+        .any(|call_path| call_path.iter().any(|segment| segment == "FamilyMapper"))
+    {
         results.push(CheckResult {
             id: ID.to_owned(),
             severity: Severity::Error,
@@ -146,6 +143,7 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
         })
         .map(|function| function.name.as_str())
         .collect::<BTreeSet<_>>();
+    let local_semantic_helpers = semantic_helper_names(&input.parsed.functions);
 
     for function in input
         .parsed
@@ -216,7 +214,12 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
                     .string_literals
                     .iter()
                     .any(|value| value.starts_with("RS-")));
-        if selects_report_semantics {
+        let calls_local_semantic_helper = function.call_paths.iter().any(|path| {
+            path.len() == 1
+                && local_semantic_helpers.contains(path[0].as_str())
+                && !function.shadowed_idents.contains(&path[0])
+        });
+        if selects_report_semantics || calls_local_semantic_helper {
             results.push(CheckResult {
                 id: ID.to_owned(),
                 severity: Severity::Error,
@@ -231,6 +234,54 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
             });
         }
     }
+}
+
+fn semantic_helper_names<'a>(
+    functions: &'a [super::parse::FunctionInfo],
+) -> BTreeSet<&'a str> {
+    let mut semantic_helpers = functions
+        .iter()
+        .filter(|function| !function.is_public && !function.is_test)
+        .filter(|function| {
+            function.has_check_result_arg
+                && (function.arg_names.contains("rule_id")
+                    || function.arg_names.contains("id")
+                    || function
+                        .field_accesses
+                        .iter()
+                        .any(|field| REPORT_FIELDS.contains(&field.name.as_str()))
+                    || function
+                        .path_uses
+                        .iter()
+                        .any(|path| path.last().is_some_and(|segment| segment == "CheckResult"))
+                    || function
+                        .string_literals
+                        .iter()
+                        .any(|value| value.starts_with("RS-")))
+        })
+        .map(|function| function.name.as_str())
+        .collect::<BTreeSet<_>>();
+
+    loop {
+        let mut changed = false;
+        for function in functions.iter().filter(|function| !function.is_public && !function.is_test) {
+            if semantic_helpers.contains(function.name.as_str()) {
+                continue;
+            }
+            if function.call_paths.iter().any(|path| {
+                path.len() == 1
+                    && semantic_helpers.contains(path[0].as_str())
+                    && !function.shadowed_idents.contains(&path[0])
+            }) {
+                changed |= semantic_helpers.insert(function.name.as_str());
+            }
+        }
+        if !changed {
+            break;
+        }
+    }
+
+    semantic_helpers
 }
 
 #[cfg(test)]
