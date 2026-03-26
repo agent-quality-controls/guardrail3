@@ -4,11 +4,12 @@ use guardrail3_adapters_outbound_fs::RealFileSystem;
 use guardrail3_app_core::project_walker::walk_project;
 
 use crate::facts::collect;
-use crate::test_support::{copy_fixture, create_dir, write_file};
+use crate::test_support::{copy_fixture, create_dir, family_route, write_file};
 
 fn discovered_apps(root: &std::path::Path) -> BTreeSet<String> {
     let tree = walk_project(&RealFileSystem, root);
-    collect(&tree)
+    let route = family_route(&tree);
+    collect(&tree, &route)
         .apps
         .into_iter()
         .map(|app| app.app_rel_dir)

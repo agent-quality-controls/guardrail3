@@ -64,7 +64,7 @@ pub fn run(
             RustValidateFamily::Deny => deny::check(&tree),
             RustValidateFamily::Cargo => cargo::check(&tree),
             RustValidateFamily::Code => code::check(&tree, scoped_files),
-            RustValidateFamily::Hexarch => hexarch::check(&tree),
+            RustValidateFamily::Hexarch => hexarch::check(&tree, &mapper.map_rs_hexarch()),
             RustValidateFamily::Deps => deps::check(&tree, tc),
             RustValidateFamily::Garde => garde::check(&tree, scoped_files),
             RustValidateFamily::Test => test::check(&tree, &mapper.map_rs_test(), tc),

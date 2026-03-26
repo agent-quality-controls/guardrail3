@@ -4,7 +4,7 @@ use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::Severity;
 
 use super::super::super::check as family_check;
-use super::super::super::test_support::{dir_entry, project_tree};
+use super::super::super::test_support::{dir_entry, family_route, project_tree};
 
 fn dev_graph_tree() -> ProjectTree {
     project_tree(
@@ -107,7 +107,8 @@ fn dev_graph_tree() -> ProjectTree {
 #[test]
 fn direct_dev_edges_are_warned_while_target_dev_edges_are_left_to_rule_25() {
     let tree = dev_graph_tree();
-    let results = family_check(&tree);
+    let route = family_route(&tree);
+    let results = family_check(&tree, &route);
 
     let rule20 = results
         .iter()

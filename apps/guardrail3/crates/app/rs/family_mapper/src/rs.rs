@@ -88,7 +88,7 @@ impl<'a> FamilyMapper<'a> {
     #[must_use]
     pub fn map_rs_hexarch(&self) -> RsHexarchRoute {
         let roots = self.map_roots_for_family(RustValidateFamily::Hexarch, |root| {
-            root.classification == RustRootClassification::App
+            root.classification == RustRootClassification::App && self.root_is_live_for_hexarch(root)
         });
         let root_rels = roots
             .iter()
@@ -130,6 +130,10 @@ impl<'a> FamilyMapper<'a> {
             .filter(|root| root_enabled_for_family(root, family, self.config))
             .map(root_view)
             .collect()
+    }
+
+    fn root_is_live_for_hexarch(&self, root: &RustRootPlacementRootFacts) -> bool {
+        self.tree.file_content(&root.cargo_rel_path).is_some()
     }
 }
 
