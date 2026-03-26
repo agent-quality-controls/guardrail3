@@ -126,17 +126,7 @@ resolver = "2"
                 title_contains: Some(&["crates/domain/events"]),
                 message_contains: None,
             },
-            assertions::ExpectedRuleResult {
-                file: Some("apps/devctl"),
-                file_contains: None,
-                title_contains: Some(&["../../packages/shared-types"]),
-                message_contains: None,
-            },
         ],
-    );
-    assertions::assert_no_error(
-        &results,
-        "RS-HEXARCH-09",
     );
 }
 

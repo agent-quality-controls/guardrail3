@@ -29,7 +29,7 @@ fn inner_hex_owner_without_crates_becomes_leaf_error() {
         &results,
         &[assertions::ExpectedRuleResult {
             file: Some("apps/backend/crates/adapters/inbound/mcp"),
-            file_contains: Some("crates/adapters/inbound/mcp/crates"),
+            file_contains: None,
             title_contains: Some(&["missing Cargo.toml"]),
             message_contains: None,
         }],

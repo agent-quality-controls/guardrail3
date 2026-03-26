@@ -336,13 +336,27 @@ fn collect_assertions_proof_catalog(
             .iter()
             .flat_map(|file| {
                 let module_prefix = assertions_module_prefix(&file.facts.rel_path);
-                file.parsed
+                let direct_module_prefix = module_prefix.clone();
+                let direct_functions = file
+                    .parsed
                     .functions
                     .iter()
                     .filter(|function| {
                         function.is_public && !function.is_test && function.has_assertion_macro
                     })
-                    .map(move |function| qualified_assertion_name(&module_prefix, &function.name))
+                    .map(move |function| {
+                        qualified_assertion_name(&direct_module_prefix, &function.name)
+                    });
+                let re_exported_assertions = file
+                    .parsed
+                    .imports
+                    .iter()
+                    .filter(|binding| binding.is_public)
+                    .filter_map(|binding| binding.local_name.as_ref())
+                    .filter(|name| name.starts_with("assert_"))
+                    .map(move |name| qualified_assertion_name(&module_prefix, name));
+
+                direct_functions.chain(re_exported_assertions)
             })
             .collect::<BTreeSet<_>>();
 
@@ -415,6 +429,7 @@ fn exported_assertion_function_calls_proof(
         (package_name.to_owned(), Vec::new()),
     ]);
     let mut bare_imported_proofs = BTreeMap::new();
+    let mut bare_external_assert_helpers = BTreeSet::new();
     let mut glob_prefixes = Vec::new();
 
     for binding in imports {
@@ -423,6 +438,11 @@ fn exported_assertion_function_calls_proof(
             .first()
             .is_some_and(|segment| root_prefixes.contains_key(segment))
         {
+            if let Some(local_name) = binding.local_name.as_ref() {
+                if local_name.starts_with("assert_") {
+                    let _ = bare_external_assert_helpers.insert(local_name.clone());
+                }
+            }
             continue;
         }
         let Some(first) = binding.path_segments.first() else {
@@ -448,13 +468,18 @@ fn exported_assertion_function_calls_proof(
         .any(|path| match path.as_slice() {
             [name] => {
                 !function.shadowed_idents.contains(name)
-                    && !file_function_names.contains(name)
-                    && (bare_imported_proofs
-                        .get(name)
-                        .is_some_and(|qualified| proof_bearing_names.contains(qualified))
-                        || glob_prefixes.iter().any(|prefix| {
-                            proof_bearing_names.contains(&qualified_assertion_name(prefix, name))
-                        }))
+                    && ((file_function_names.contains(name)
+                        && proof_bearing_names
+                            .contains(&qualified_assertion_name(module_prefix, name)))
+                        || (!file_function_names.contains(name)
+                            && (bare_imported_proofs
+                                .get(name)
+                                .is_some_and(|qualified| proof_bearing_names.contains(qualified))
+                                || bare_external_assert_helpers.contains(name)
+                                || glob_prefixes.iter().any(|prefix| {
+                                    proof_bearing_names
+                                        .contains(&qualified_assertion_name(prefix, name))
+                                }))))
             }
             [first, rest @ ..] => root_prefixes.get(first).is_some_and(|prefix| {
                 proof_bearing_names.contains(&qualified_assertion_name(prefix, &rest.join("::")))
