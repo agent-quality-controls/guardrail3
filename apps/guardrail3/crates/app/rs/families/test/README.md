@@ -95,24 +95,23 @@ The decision is:
 
 ```text
 crates/
-  x/                                  # one tested component
-    runtime/                          # production crate
-      Cargo.toml                      # production manifest; may dev-depend on sibling assertions/test_support
-      src/
-        lib.rs                        # narrow public API; external harnesses must enter here
-        foo.rs                        # production module under test
-        foo_tests/                    # sidecar harnesses owned by foo.rs only
-          mod.rs                      # sidecar entrypoint
-          synthetic.rs                # synthetic and local edge-case inputs for foo
-          private_access.rs           # cases that genuinely need runtime internals
-      tests/
-        public_surface.rs             # black-box harness through runtime public API only
-        parser_backed.rs              # black-box harness that crosses parser/fixture boundary
-    assertions/                       # reusable semantic assertions over runtime public behavior
-      Cargo.toml                      # dev-only crate; depends on sibling runtime and optional test_support
-      src/
-        lib.rs                        # exports assertion modules only
-        foo.rs                        # reusable semantic assertions for foo behavior/output
+  runtime/                            # production crate
+    Cargo.toml                        # production manifest; may dev-depend on sibling assertions/test_support
+    src/
+      lib.rs                          # narrow public API; external harnesses must enter here
+      foo.rs                          # production module under test
+      foo_tests/                      # sidecar harnesses owned by foo.rs only
+        mod.rs                        # sidecar entrypoint
+        synthetic.rs                  # synthetic and local edge-case inputs for foo
+        private_access.rs             # cases that genuinely need runtime internals
+    tests/
+      public_surface.rs               # black-box harness through runtime public API only
+      parser_backed.rs                # black-box harness that crosses parser/fixture boundary
+  assertions/                         # reusable semantic assertions over runtime public behavior
+    Cargo.toml                        # dev-only crate; depends on sibling runtime and optional test_support
+    src/
+      lib.rs                          # exports assertion modules only
+      foo.rs                          # reusable semantic assertions for foo behavior/output
 
   test_support/                       # optional shared dev-only helper crate
     Cargo.toml                        # generic helpers only
@@ -125,7 +124,7 @@ crates/
 
 ## Exact Architecture Enforced
 
-### `x/runtime`
+### `runtime`
 
 Owns:
 
@@ -140,7 +139,7 @@ Must not own:
 - reusable semantic assertion logic
 - shared generic test support
 
-### `x/runtime/src/foo_tests/`
+### `runtime/src/foo_tests/`
 
 Owns:
 
@@ -163,7 +162,7 @@ Must not import:
 - duplicated semantic assertions defined locally
 - other test modules as helpers
 
-### `x/assertions/src/foo.rs`
+### `assertions/src/foo.rs`
 
 Owns:
 
@@ -188,7 +187,7 @@ Must expose:
 
 - at least one proof-bearing exported assertion function once the module exposes helper APIs
 
-### `x/runtime/tests/*.rs`
+### `runtime/tests/*.rs`
 
 Own:
 
@@ -199,8 +198,8 @@ Own:
 
 May import:
 
-- `x/runtime` public API
-- sibling `x/assertions`
+- `runtime` public API
+- sibling `assertions`
 - shared `test_support`
 - std and third-party crates
 
@@ -210,7 +209,7 @@ Must not import:
 - `crate::`
 - runtime `#[cfg(test)]` helpers
 - path-included source files
-- duplicated semantic assertions that belong in `x/assertions`
+- duplicated semantic assertions that belong in `assertions`
 - direct assertion macros as the proof site
 
 ### `test_support/`
@@ -230,16 +229,16 @@ Must not own:
 
 ## Structural Rules
 
-For a tested component `x`:
+For a tested component:
 
-- `x/runtime` is the production crate
-- `x/assertions` is required once any test harness exists
+- `crates/runtime` is the production crate
+- `crates/assertions` is required once any test harness exists
 - every tested production module `foo.rs` has exactly one sidecar harness directory:
-  - `runtime/src/foo_tests/`
+  - `crates/runtime/src/foo_tests/`
 - every tested production module `foo.rs` has exactly one reusable assertions module:
-  - `assertions/src/foo.rs`
+  - `crates/assertions/src/foo.rs`
 - external black-box harnesses live only under:
-  - `runtime/tests/*.rs`
+  - `crates/runtime/tests/*.rs`
 
 Forbidden:
 
@@ -610,11 +609,11 @@ This family relies on structure that already exists on disk.
 
 Mechanically checkable triggers:
 
-- `crates/<name>/runtime/Cargo.toml` exists
-- `crates/<name>/runtime/src/*_tests/mod.rs` exists
-- `crates/<name>/runtime/tests/*.rs` exists
-- `crates/<name>/assertions/Cargo.toml` exists
-- `crates/<name>/assertions/src/<module>.rs` exists
+- `crates/runtime/Cargo.toml` exists
+- `crates/runtime/src/*_tests/mod.rs` exists
+- `crates/runtime/tests/*.rs` exists
+- `crates/assertions/Cargo.toml` exists
+- `crates/assertions/src/<module>.rs` exists
 - exported proof-bearing assertion functions inside `assertions/src/**/*.rs`
 - dependency direction between `runtime`, `assertions`, and `test_support`
 - import boundaries inside sidecars, assertions modules, and external harnesses

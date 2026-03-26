@@ -39,31 +39,31 @@ fn result_return_without_proof_is_reported() {
     write_file(
         root,
         "Cargo.toml",
-        "[workspace]\nmembers = [\"crates/demo/runtime\", \"crates/demo/assertions\"]\n",
+        "[workspace]\nmembers = [\"crates/runtime\", \"crates/assertions\"]\n",
     );
     write_file(
         root,
-        "crates/demo/runtime/Cargo.toml",
+        "crates/runtime/Cargo.toml",
         "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = { path = \"../assertions\" }\n",
     );
     write_file(
         root,
-        "crates/demo/runtime/tests/public_surface.rs",
+        "crates/runtime/tests/public_surface.rs",
         "#[test]\nfn returns_result_without_assertions() -> Result<(), ()> { Ok(()) }\n",
     );
     write_file(
         root,
-        "crates/demo/runtime/src/lib.rs",
+        "crates/runtime/src/lib.rs",
         "pub fn value() -> u8 { 1 }\n",
     );
     write_file(
         root,
-        "crates/demo/assertions/Cargo.toml",
+        "crates/assertions/Cargo.toml",
         "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = { path = \"../runtime\" }\n",
     );
     write_file(
         root,
-        "crates/demo/assertions/src/lib.rs",
+        "crates/assertions/src/lib.rs",
         "pub fn prove_runtime() { assert_eq!(demo_runtime::value(), 1); }\n",
     );
 
@@ -74,7 +74,7 @@ fn result_return_without_proof_is_reported() {
     assert_eq!(finding.title, "test lacks real proof site");
     assert_eq!(
         finding.file.as_deref(),
-        Some("crates/demo/runtime/tests/public_surface.rs")
+        Some("crates/runtime/tests/public_surface.rs")
     );
     assert_eq!(finding.line, Some(2));
 }
@@ -87,31 +87,31 @@ fn shadowed_owned_assertions_call_is_reported() {
     write_file(
         root,
         "Cargo.toml",
-        "[workspace]\nmembers = [\"crates/demo/runtime\", \"crates/demo/assertions\"]\n",
+        "[workspace]\nmembers = [\"crates/runtime\", \"crates/assertions\"]\n",
     );
     write_file(
         root,
-        "crates/demo/runtime/Cargo.toml",
+        "crates/runtime/Cargo.toml",
         "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = { path = \"../assertions\" }\n",
     );
     write_file(
         root,
-        "crates/demo/runtime/tests/public_surface.rs",
+        "crates/runtime/tests/public_surface.rs",
         "use demo_assertions::prove_runtime;\n#[test]\nfn shadowed_call_does_not_count() {\n    let prove_runtime = || {};\n    prove_runtime();\n}\n",
     );
     write_file(
         root,
-        "crates/demo/runtime/src/lib.rs",
+        "crates/runtime/src/lib.rs",
         "pub fn value() -> u8 { 1 }\n",
     );
     write_file(
         root,
-        "crates/demo/assertions/Cargo.toml",
+        "crates/assertions/Cargo.toml",
         "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = { path = \"../runtime\" }\n",
     );
     write_file(
         root,
-        "crates/demo/assertions/src/lib.rs",
+        "crates/assertions/src/lib.rs",
         "pub fn prove_runtime() { assert_eq!(demo_runtime::value(), 1); }\n",
     );
 
@@ -122,7 +122,7 @@ fn shadowed_owned_assertions_call_is_reported() {
     assert_eq!(finding.title, "test lacks real proof site");
     assert_eq!(
         finding.file.as_deref(),
-        Some("crates/demo/runtime/tests/public_surface.rs")
+        Some("crates/runtime/tests/public_surface.rs")
     );
     assert_eq!(finding.line, Some(3));
 }
@@ -135,31 +135,31 @@ fn name_heuristic_does_not_count_as_proof() {
     write_file(
         root,
         "Cargo.toml",
-        "[workspace]\nmembers = [\"crates/demo/runtime\", \"crates/demo/assertions\"]\n",
+        "[workspace]\nmembers = [\"crates/runtime\", \"crates/assertions\"]\n",
     );
     write_file(
         root,
-        "crates/demo/runtime/Cargo.toml",
+        "crates/runtime/Cargo.toml",
         "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = { path = \"../assertions\" }\n",
     );
     write_file(
         root,
-        "crates/demo/runtime/tests/public_surface.rs",
+        "crates/runtime/tests/public_surface.rs",
         "#[test]\nfn verify_runtime() {}\n",
     );
     write_file(
         root,
-        "crates/demo/runtime/src/lib.rs",
+        "crates/runtime/src/lib.rs",
         "pub fn value() -> u8 { 1 }\n",
     );
     write_file(
         root,
-        "crates/demo/assertions/Cargo.toml",
+        "crates/assertions/Cargo.toml",
         "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = { path = \"../runtime\" }\n",
     );
     write_file(
         root,
-        "crates/demo/assertions/src/lib.rs",
+        "crates/assertions/src/lib.rs",
         "pub fn prove_runtime() { assert_eq!(demo_runtime::value(), 1); }\n",
     );
 
@@ -170,7 +170,7 @@ fn name_heuristic_does_not_count_as_proof() {
     assert_eq!(finding.title, "test lacks real proof site");
     assert_eq!(
         finding.file.as_deref(),
-        Some("crates/demo/runtime/tests/public_surface.rs")
+        Some("crates/runtime/tests/public_surface.rs")
     );
     assert_eq!(finding.line, Some(2));
 }

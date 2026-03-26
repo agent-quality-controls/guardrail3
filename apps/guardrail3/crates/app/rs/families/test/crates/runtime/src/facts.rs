@@ -626,45 +626,20 @@ fn collect_components(
     input_failures: &mut Vec<InputFailureFacts>,
 ) -> Vec<TestComponentFacts> {
     let crates_rel_dir = join_under_root(root_rel_dir, "crates");
-    let Some(crates_dir) = tree.dir_contents(&crates_rel_dir) else {
-        return Vec::new();
-    };
-
-    let mut components = Vec::new();
     let direct_runtime_rel_dir = ProjectTree::join_rel(&crates_rel_dir, "runtime");
-    let direct_runtime_cargo_rel_path = ProjectTree::join_rel(&direct_runtime_rel_dir, "Cargo.toml");
-    if tree.file_exists(&direct_runtime_cargo_rel_path) {
-        components.push(build_component_facts(
-            tree,
-            root_rel_dir,
-            root_rel_dir,
-            &direct_runtime_rel_dir,
-            input_failures,
-        ));
+    let direct_runtime_cargo_rel_path =
+        ProjectTree::join_rel(&direct_runtime_rel_dir, "Cargo.toml");
+    if !tree.file_exists(&direct_runtime_cargo_rel_path) {
+        return Vec::new();
     }
 
-    for component_name in &crates_dir.dirs {
-        if matches!(component_name.as_str(), "runtime" | "assertions") {
-            continue;
-        }
-        let component_rel_dir = ProjectTree::join_rel(&crates_rel_dir, component_name);
-        let nested_runtime_rel_dir = ProjectTree::join_rel(&component_rel_dir, "runtime");
-        let nested_runtime_cargo_rel_path =
-            ProjectTree::join_rel(&nested_runtime_rel_dir, "Cargo.toml");
-        if !tree.file_exists(&nested_runtime_cargo_rel_path) {
-            continue;
-        }
-        components.push(build_component_facts(
-            tree,
-            root_rel_dir,
-            &component_rel_dir,
-            &nested_runtime_rel_dir,
-            input_failures,
-        ));
-    }
-
-    components.sort_by(|left, right| left.rel_dir.cmp(&right.rel_dir));
-    components
+    vec![build_component_facts(
+        tree,
+        root_rel_dir,
+        root_rel_dir,
+        &direct_runtime_rel_dir,
+        input_failures,
+    )]
 }
 
 fn build_component_facts(
@@ -675,7 +650,8 @@ fn build_component_facts(
     input_failures: &mut Vec<InputFailureFacts>,
 ) -> TestComponentFacts {
     let runtime_cargo_rel_path = ProjectTree::join_rel(runtime_rel_dir, "Cargo.toml");
-    let runtime_parsed = parse_manifest(tree, root_rel_dir, &runtime_cargo_rel_path, input_failures);
+    let runtime_parsed =
+        parse_manifest(tree, root_rel_dir, &runtime_cargo_rel_path, input_failures);
     let component_parent = parent_dir(runtime_rel_dir).to_owned();
     let assertions_rel_dir = ProjectTree::join_rel(&component_parent, "assertions");
     let assertions_cargo_rel_path = ProjectTree::join_rel(&assertions_rel_dir, "Cargo.toml");
