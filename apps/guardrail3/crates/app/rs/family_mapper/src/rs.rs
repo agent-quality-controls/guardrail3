@@ -86,6 +86,15 @@ impl<'a> FamilyMapper<'a> {
 
     #[must_use]
     pub fn map_rs_hexarch(&self) -> RsHexarchRoute {
+        if !self.selected_families.contains(RustValidateFamily::Hexarch) {
+            return RsHexarchRoute {
+                roots: Vec::new(),
+                scoped_files: None,
+                repo_root_cargo_rel_path: None,
+                guardrail_config_rel_path: None,
+            };
+        }
+
         let roots = self.map_roots_for_family(RustValidateFamily::Hexarch, |root| {
             root.classification == RustRootClassification::App
                 && self.root_is_live_for_hexarch(root)
@@ -98,6 +107,14 @@ impl<'a> FamilyMapper<'a> {
         RsHexarchRoute {
             scoped_files: filter_for_roots(self.tree, self.scoped_files, &root_rels),
             roots,
+            repo_root_cargo_rel_path: self
+                .tree
+                .file_exists("Cargo.toml")
+                .then(|| "Cargo.toml".to_owned()),
+            guardrail_config_rel_path: self
+                .tree
+                .file_exists("guardrail3.toml")
+                .then(|| "guardrail3.toml".to_owned()),
         }
     }
 

@@ -281,3 +281,48 @@ fn arch_runtime_reports_fail_closed_results_for_malformed_guardrail_config() {
 
     fs::remove_dir_all(&root).expect("cleanup temp root");
 }
+
+#[test]
+fn hexarch_runtime_reports_fail_closed_results_for_malformed_guardrail_config() {
+    let root = temp_root("hexarch-runtime-malformed-config");
+    write_file(&root, "guardrail3.toml", "[rust.checks]\nhexarch = \"nope\"\n");
+    write_file(
+        &root,
+        "apps/backend/Cargo.toml",
+        "[workspace]\nmembers = [\"crates/domain/types\"]\nresolver = \"2\"\n",
+    );
+    write_file(
+        &root,
+        "apps/backend/crates/domain/types/Cargo.toml",
+        "[package]\nname = \"backend-domain-types\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write_file(
+        &root,
+        "apps/backend/crates/domain/types/src/lib.rs",
+        "pub struct Marker;\n",
+    );
+
+    let report = run(
+        &LocalFs,
+        &root,
+        None,
+        &[RustValidateFamily::Hexarch],
+        false,
+        &StubToolChecker,
+    )
+    .expect("hexarch runtime report");
+
+    assert_eq!(report.sections.len(), 1, "unexpected sections: {report:#?}");
+    assert_eq!(report.sections[0].name, "hexarch");
+    let ids = report.sections[0]
+        .results
+        .iter()
+        .map(|result| result.id.as_str())
+        .collect::<Vec<_>>();
+    assert!(
+        ids.contains(&"RS-HEXARCH-15"),
+        "expected boundary-config fail-closed reporting for malformed config: {report:#?}"
+    );
+
+    fs::remove_dir_all(&root).expect("cleanup temp root");
+}

@@ -38,6 +38,9 @@ It consumes:
 
 - shared root scope from `placement`
 - routed roots from `FamilyMapper::map_rs_hexarch()`
+- explicit repo-level config surfaces from `FamilyMapper::map_rs_hexarch()` for the rules that truly own them:
+  - root `Cargo.toml` for `RS-HEXARCH-11`
+  - root `guardrail3.toml` for `RS-HEXARCH-15`
 
 Inside a routed root, the family may then do family-local discovery:
 
@@ -49,8 +52,8 @@ Inside a routed root, the family may then do family-local discovery:
 That split is intentional:
 
 - `placement` decides what Rust roots exist
-- `FamilyMapper` decides which roots reach `hexarch`
-- `hexarch` decides only app-local hex facts inside those routed roots
+- `FamilyMapper` decides which app roots and repo-level support files reach `hexarch`
+- `hexarch` decides app-local hex facts inside those routed roots, plus the explicit repo-level checks it owns
 
 ## Current Workspace Shape
 

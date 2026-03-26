@@ -49,7 +49,7 @@ pub fn run(
     let tree = project_walker::walk_project(fs, path);
     let config = match load_config(&tree) {
         Ok(config) => config,
-        Err(_error) if requested_families == [RustValidateFamily::Arch] => None,
+        Err(_error) if requested_families_allow_config_parse_failure(requested_families) => None,
         Err(error) => return Err(error),
     };
     let scope = placement::collect(&tree);
@@ -89,6 +89,15 @@ pub fn run(
     }
 
     Ok(report)
+}
+
+fn requested_families_allow_config_parse_failure(
+    requested_families: &[RustValidateFamily],
+) -> bool {
+    !requested_families.is_empty()
+        && requested_families
+            .iter()
+            .all(|family| matches!(family, RustValidateFamily::Arch | RustValidateFamily::Hexarch))
 }
 
 fn collect_family_applicability(
