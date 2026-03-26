@@ -37,4 +37,4 @@ pub fn check(input: &ZoneOverlapInput<'_>, results: &mut Vec<CheckResult>) {
 
 #[cfg(test)]
 #[path = "rs_arch_04_no_zone_overlap_tests/mod.rs"]
-mod tests;
+mod rs_arch_04_no_zone_overlap_tests;

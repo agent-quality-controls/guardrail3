@@ -1,5 +1,3 @@
-mod common;
-
 pub mod rs_arch_01_root_classification;
 pub mod rs_arch_02_no_misplaced_roots;
 pub mod rs_arch_03_no_dual_ownership;

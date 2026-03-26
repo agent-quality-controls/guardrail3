@@ -34,4 +34,4 @@ fn display_dir(rel_dir: &str) -> &str {
 
 #[cfg(test)]
 #[path = "rs_arch_03_no_dual_ownership_tests/mod.rs"]
-mod tests;
+mod rs_arch_03_no_dual_ownership_tests;

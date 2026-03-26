@@ -28,4 +28,4 @@ fn display_dir(rel_dir: &str) -> &str {
 
 #[cfg(test)]
 #[path = "rs_arch_08_auxiliary_roots_declared_tests/mod.rs"]
-mod tests;
+mod rs_arch_08_auxiliary_roots_declared_tests;

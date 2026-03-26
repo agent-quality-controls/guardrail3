@@ -1,5 +1,5 @@
 [package]
-name = "guardrail3-app-rs-family-arch-assertions"
+name = "guardrail3_app_rs_family_arch_assertions"
 version = "0.0.0"
 edition = "2024"
 

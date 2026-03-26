@@ -18,4 +18,4 @@ pub fn check(input: &RequiredInputFailureInput<'_>, results: &mut Vec<CheckResul
 
 #[cfg(test)]
 #[path = "rs_arch_07_required_inputs_fail_closed_tests/mod.rs"]
-mod tests;
+mod rs_arch_07_required_inputs_fail_closed_tests;
