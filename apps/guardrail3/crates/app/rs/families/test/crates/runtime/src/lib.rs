@@ -1,5 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
+use guardrail3_app_rs_family_mapper::RsTestRoute;
+
 mod discover;
 mod facts;
 mod inputs;
@@ -52,12 +54,8 @@ struct RootAnalysis {
     local_assertions_packages: BTreeSet<String>,
 }
 
-pub fn check(
-    tree: &ProjectTree,
-    tc: &dyn ToolChecker,
-    scoped_files: Option<&BTreeSet<String>>,
-) -> Vec<CheckResult> {
-    let facts = collect(tree, tc);
+pub fn check(tree: &ProjectTree, route: &RsTestRoute, tc: &dyn ToolChecker) -> Vec<CheckResult> {
+    let facts = collect(tree, &route.roots, tc);
     let mut results = Vec::new();
     let discovered_root_dirs = facts
         .roots
@@ -75,7 +73,7 @@ pub fn check(
     }
 
     for root in &facts.roots {
-        let analysis = analyze_root(tree, root, &facts, scoped_files);
+        let analysis = analyze_root(tree, root, &facts, route.scoped_files.as_ref());
         let mutation_active =
             root.mutants_exists || root.has_mutants_profile || !root.mutation_hook_files.is_empty();
         let root_input = RootTestInput::new(
@@ -95,14 +93,14 @@ pub fn check(
                 tree,
                 root,
                 &analysis.files,
-                scoped_files,
+                route.scoped_files.as_ref(),
                 &mut results,
             );
 
             rs_test_03_runtime_assertions_split::collect(
                 root,
                 &analysis.files,
-                scoped_files,
+                route.scoped_files.as_ref(),
                 &facts.local_package_names,
                 &mut results,
             );
