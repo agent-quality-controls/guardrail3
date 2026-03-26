@@ -1,5 +1,10 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_02_exact_contents as assertions;
-use test_support::{INNER_HEX, copy_fixture, remove_dir, write_file};
+use test_support::{copy_fixture, remove_dir, write_file};
+const FIXTURE: test_support::HexarchFixture = test_support::HexarchFixture;
+
+fn inner_hex() -> &'static str {
+    FIXTURE.inner_hex_root()
+}
 
 #[test]
 fn missing_dir_plus_unexpected_dir_hits_both_branches_per_owned_root() {
@@ -8,7 +13,7 @@ fn missing_dir_plus_unexpected_dir_hits_both_branches_per_owned_root() {
         "apps/devctl/crates",
         "apps/backend/crates",
         "apps/worker/crates",
-        INNER_HEX,
+        inner_hex(),
     ] {
         remove_dir(tmp.path(), &format!("{dir}/domain"));
         write_file(tmp.path(), &format!("{dir}/utils/.gitkeep"), "");
@@ -42,7 +47,7 @@ fn missing_dir_plus_loose_file_hits_both_branches_per_owned_root() {
         "apps/devctl/crates",
         "apps/backend/crates",
         "apps/worker/crates",
-        INNER_HEX,
+        inner_hex(),
     ] {
         remove_dir(tmp.path(), &format!("{dir}/ports"));
         write_file(tmp.path(), &format!("{dir}/mod.rs"), "// stray");
@@ -76,7 +81,7 @@ fn renamed_required_dir_yields_missing_and_unexpected_per_owned_root() {
         "apps/devctl/crates",
         "apps/backend/crates",
         "apps/worker/crates",
-        INNER_HEX,
+        inner_hex(),
     ] {
         remove_dir(tmp.path(), &format!("{dir}/domain"));
         write_file(tmp.path(), &format!("{dir}/domains/.gitkeep"), "");
@@ -110,7 +115,7 @@ fn gitkeep_alongside_bad_files_ignores_gitkeep_but_still_hits_loose_files() {
         "apps/devctl/crates",
         "apps/backend/crates",
         "apps/worker/crates",
-        INNER_HEX,
+        inner_hex(),
     ] {
         write_file(tmp.path(), &format!("{dir}/.gitkeep"), "");
         write_file(tmp.path(), &format!("{dir}/mod.rs"), "// stray");
@@ -140,7 +145,7 @@ fn deep_unexpected_dir_tree_blames_only_the_top_level_unexpected_dir() {
         "apps/devctl/crates",
         "apps/backend/crates",
         "apps/worker/crates",
-        INNER_HEX,
+        inner_hex(),
     ] {
         write_file(
             tmp.path(),
@@ -234,9 +239,9 @@ fn all_four_required_dirs_missing_with_gitkeep_still_emit_only_missing_dir_resul
     write_file(tmp.path(), "apps/backend/crates/.gitkeep", "");
 
     for name in ["adapters", "app", "domain", "ports"] {
-        remove_dir(tmp.path(), &format!("{INNER_HEX}/{name}"));
+        remove_dir(tmp.path(), &format!("{}/{}", inner_hex(), name));
     }
-    write_file(tmp.path(), &format!("{INNER_HEX}/.gitkeep"), "");
+    write_file(tmp.path(), &format!("{}/.gitkeep", inner_hex()), "");
 
     let results = assertions::run_family(tmp.path());
     let errors = assertions::errors_by_id(&results, "RS-HEXARCH-02");
@@ -256,11 +261,11 @@ fn all_four_required_dirs_missing_with_gitkeep_still_emit_only_missing_dir_resul
 #[test]
 fn nested_root_compound_attack_stays_nested_and_preserves_exact_category_split() {
     let tmp = copy_fixture();
-    remove_dir(tmp.path(), &format!("{INNER_HEX}/domain"));
-    write_file(tmp.path(), &format!("{INNER_HEX}/utils/.gitkeep"), "");
+    remove_dir(tmp.path(), &format!("{}/domain", inner_hex()));
+    write_file(tmp.path(), &format!("{}/utils/.gitkeep", inner_hex()), "");
     write_file(
         tmp.path(),
-        &format!("{INNER_HEX}/Cargo.toml"),
+        &format!("{}/Cargo.toml", inner_hex()),
         "[package]\nname = \"bad\"\n",
     );
 
@@ -271,7 +276,7 @@ fn nested_root_compound_attack_stays_nested_and_preserves_exact_category_split()
             error
                 .file
                 .as_deref()
-                .is_some_and(|file| file == INNER_HEX || file == format!("{INNER_HEX}/utils"))
+                .is_some_and(|file| file == inner_hex() || file == format!("{}/utils", inner_hex()))
         })
         .collect();
 

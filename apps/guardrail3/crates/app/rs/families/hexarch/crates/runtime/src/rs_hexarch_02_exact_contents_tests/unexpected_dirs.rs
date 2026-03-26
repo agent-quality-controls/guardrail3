@@ -1,7 +1,12 @@
 use std::collections::BTreeSet;
+const FIXTURE: test_support::HexarchFixture = test_support::HexarchFixture;
+
+fn inner_hex() -> &'static str {
+    FIXTURE.inner_hex_root()
+}
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_02_exact_contents as assertions;
-use test_support::{INNER_HEX, copy_fixture, write_file};
+use test_support::{copy_fixture, write_file};
 
 #[test]
 fn unexpected_utils_hits_all_owned_outer_and_nested_hex_roots() {
@@ -10,7 +15,7 @@ fn unexpected_utils_hits_all_owned_outer_and_nested_hex_roots() {
         "apps/devctl/crates",
         "apps/backend/crates",
         "apps/worker/crates",
-        INNER_HEX,
+        inner_hex(),
     ] {
         write_file(tmp.path(), &format!("{dir}/utils/.gitkeep"), "");
     }
@@ -30,7 +35,7 @@ fn unexpected_utils_hits_all_owned_outer_and_nested_hex_roots() {
         "apps/devctl/crates/utils".to_owned(),
         "apps/backend/crates/utils".to_owned(),
         "apps/worker/crates/utils".to_owned(),
-        format!("{INNER_HEX}/utils"),
+        format!("{}/utils", inner_hex()),
     ]
     .into_iter()
     .collect::<BTreeSet<_>>();
@@ -43,7 +48,7 @@ fn unexpected_utils_hits_all_owned_outer_and_nested_hex_roots() {
 #[test]
 fn unexpected_dir_inner_hex_only_hits_only_the_nested_hex_root() {
     let tmp = copy_fixture();
-    write_file(tmp.path(), &format!("{INNER_HEX}/utils/.gitkeep"), "");
+    write_file(tmp.path(), &format!("{}/utils/.gitkeep", inner_hex()), "");
 
     let results = assertions::run_family(tmp.path());
     let errors = assertions::errors_by_id(&results, "RS-HEXARCH-02");
@@ -52,7 +57,7 @@ fn unexpected_dir_inner_hex_only_hits_only_the_nested_hex_root() {
         1,
         "expected one nested unexpected-dir hit: {errors:#?}"
     );
-    let expected = format!("{INNER_HEX}/utils");
+    let expected = format!("{}/utils", inner_hex());
     assert_eq!(
         errors[0].file.as_deref(),
         Some(expected.as_str()),
@@ -67,7 +72,7 @@ fn multiple_unexpected_dirs_hit_each_owned_root_once_per_dir() {
         "apps/devctl/crates",
         "apps/backend/crates",
         "apps/worker/crates",
-        INNER_HEX,
+        inner_hex(),
     ] {
         write_file(tmp.path(), &format!("{dir}/utils/.gitkeep"), "");
         write_file(tmp.path(), &format!("{dir}/helpers/.gitkeep"), "");
@@ -90,7 +95,7 @@ fn near_miss_required_dir_names_are_unexpected_everywhere() {
         "apps/devctl/crates",
         "apps/backend/crates",
         "apps/worker/crates",
-        INNER_HEX,
+        inner_hex(),
     ] {
         for name in ["domains", "adapter", "port", "application"] {
             write_file(tmp.path(), &format!("{dir}/{name}/.gitkeep"), "");

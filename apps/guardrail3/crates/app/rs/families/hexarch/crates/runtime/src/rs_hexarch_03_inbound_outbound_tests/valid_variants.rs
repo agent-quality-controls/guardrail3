@@ -1,4 +1,9 @@
 use std::collections::BTreeSet;
+const FIXTURE: test_support::HexarchFixture = test_support::HexarchFixture;
+
+fn inner_hex() -> &'static str {
+    FIXTURE.inner_hex_root()
+}
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_03_inbound_outbound as assertions;
 use test_support::{copy_fixture, write_file};
@@ -36,7 +41,7 @@ fn unexpected_dir_in_adapters_hits_all_owned_outer_and_nested_containers() {
         "apps/devctl/crates/adapters",
         "apps/backend/crates/adapters",
         "apps/worker/crates/adapters",
-        &format!("{}/adapters", test_support::INNER_HEX),
+        &format!("{}/adapters", inner_hex()),
     ] {
         write_file(tmp.path(), &format!("{dir}/shared/.gitkeep"), "");
     }
@@ -59,7 +64,7 @@ fn unexpected_dir_in_ports_hits_all_owned_outer_and_nested_containers() {
         "apps/devctl/crates/ports",
         "apps/backend/crates/ports",
         "apps/worker/crates/ports",
-        &format!("{}/ports", test_support::INNER_HEX),
+        &format!("{}/ports", inner_hex()),
     ] {
         write_file(tmp.path(), &format!("{dir}/common/.gitkeep"), "");
     }
@@ -85,8 +90,8 @@ fn deep_unexpected_dir_tree_blames_only_the_top_level_unexpected_dir() {
         "apps/devctl/crates/ports",
         "apps/backend/crates/ports",
         "apps/worker/crates/ports",
-        &format!("{}/adapters", test_support::INNER_HEX),
-        &format!("{}/ports", test_support::INNER_HEX),
+        &format!("{}/adapters", inner_hex()),
+        &format!("{}/ports", inner_hex()),
     ] {
         write_file(
             tmp.path(),

@@ -1,7 +1,12 @@
 use std::collections::BTreeSet;
+const FIXTURE: test_support::HexarchFixture = test_support::HexarchFixture;
+
+fn inner_hex() -> &'static str {
+    FIXTURE.inner_hex_root()
+}
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_02_exact_contents as assertions;
-use test_support::{INNER_HEX, copy_fixture, write_file};
+use test_support::{copy_fixture, write_file};
 
 #[test]
 fn root_loose_files_hit_each_owned_hex_root_once() {
@@ -10,7 +15,7 @@ fn root_loose_files_hit_each_owned_hex_root_once() {
         "apps/devctl/crates",
         "apps/backend/crates",
         "apps/worker/crates",
-        INNER_HEX,
+        inner_hex(),
     ] {
         write_file(tmp.path(), &format!("{dir}/mod.rs"), "// stray");
     }
@@ -32,7 +37,7 @@ fn root_loose_files_hit_each_owned_hex_root_once() {
         "apps/devctl/crates".to_owned(),
         "apps/backend/crates".to_owned(),
         "apps/worker/crates".to_owned(),
-        INNER_HEX.to_owned(),
+        inner_hex().to_owned(),
     ]
     .into_iter()
     .collect::<BTreeSet<_>>();
@@ -67,14 +72,14 @@ fn nested_root_gitkeep_is_still_allowed() {
     let tmp = copy_fixture();
     write_file(
         tmp.path(),
-        &format!("{}/.gitkeep", test_support::INNER_HEX),
+        &format!("{}/.gitkeep", inner_hex()),
         "",
     );
 
     let results = assertions::run_family(tmp.path());
     let nested_rule_02: Vec<_> = assertions::errors_by_id(&results, "RS-HEXARCH-02")
         .into_iter()
-        .filter(|error| error.file.as_deref() == Some(test_support::INNER_HEX))
+        .filter(|error| error.file.as_deref() == Some(inner_hex()))
         .collect();
 
     assert!(

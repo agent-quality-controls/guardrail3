@@ -1,7 +1,12 @@
 use std::collections::BTreeSet;
+const FIXTURE: test_support::HexarchFixture = test_support::HexarchFixture;
+
+fn inner_hex() -> &'static str {
+    FIXTURE.inner_hex_root()
+}
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_03_inbound_outbound as assertions;
-use test_support::{INNER_HEX, copy_fixture, remove_dir, write_file};
+use test_support::{copy_fixture, remove_dir, write_file};
 
 #[test]
 fn replacing_outbound_dirs_with_files_hits_every_owned_directional_container() {
@@ -10,11 +15,11 @@ fn replacing_outbound_dirs_with_files_hits_every_owned_directional_container() {
         "apps/devctl/crates/adapters",
         "apps/backend/crates/adapters",
         "apps/worker/crates/adapters",
-        &format!("{INNER_HEX}/adapters"),
+        &format!("{}/adapters", inner_hex()),
         "apps/devctl/crates/ports",
         "apps/backend/crates/ports",
         "apps/worker/crates/ports",
-        &format!("{INNER_HEX}/ports"),
+        &format!("{}/ports", inner_hex()),
     ] {
         remove_dir(tmp.path(), &format!("{dir}/outbound"));
         write_file(tmp.path(), &format!("{dir}/outbound"), "not a directory");
@@ -30,11 +35,11 @@ fn replacing_outbound_dirs_with_files_hits_every_owned_directional_container() {
         "apps/devctl/crates/adapters".to_owned(),
         "apps/backend/crates/adapters".to_owned(),
         "apps/worker/crates/adapters".to_owned(),
-        format!("{INNER_HEX}/adapters"),
+        format!("{}/adapters", inner_hex()),
         "apps/devctl/crates/ports".to_owned(),
         "apps/backend/crates/ports".to_owned(),
         "apps/worker/crates/ports".to_owned(),
-        format!("{INNER_HEX}/ports"),
+        format!("{}/ports", inner_hex()),
     ]
     .into_iter()
     .collect::<BTreeSet<_>>();

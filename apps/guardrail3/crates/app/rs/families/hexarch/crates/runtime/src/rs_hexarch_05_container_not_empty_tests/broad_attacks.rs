@@ -1,7 +1,12 @@
 use std::collections::BTreeSet;
+const FIXTURE: test_support::HexarchFixture = test_support::HexarchFixture;
+
+fn inner_hex() -> &'static str {
+    FIXTURE.inner_hex_root()
+}
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_05_container_not_empty as assertions;
-use test_support::{INNER_HEX, copy_fixture, empty_dir, write_file};
+use test_support::{copy_fixture, empty_dir, write_file};
 
 const CONTAINER_SUFFIXES: &[&str] = &[
     "app",
@@ -19,7 +24,7 @@ fn all_safe_owned_container_paths() -> Vec<String> {
         }
     }
     for suffix in CONTAINER_SUFFIXES {
-        paths.push(format!("{INNER_HEX}/{suffix}"));
+        paths.push(format!("{}/{}", inner_hex(), suffix));
     }
     paths
 }
@@ -92,12 +97,12 @@ fn emptying_outer_adapters_inbound_destroys_the_nested_hex_path_and_does_not_dou
 fn emptying_only_inner_hex_containers_hits_inner_hex_and_leaves_outer_apps_clean() {
     let tmp = copy_fixture();
     let expected_files = [
-        format!("{INNER_HEX}/app"),
-        format!("{INNER_HEX}/domain"),
-        format!("{INNER_HEX}/adapters/inbound"),
-        format!("{INNER_HEX}/adapters/outbound"),
-        format!("{INNER_HEX}/ports/inbound"),
-        format!("{INNER_HEX}/ports/outbound"),
+        format!("{}/app", inner_hex()),
+        format!("{}/domain", inner_hex()),
+        format!("{}/adapters/inbound", inner_hex()),
+        format!("{}/adapters/outbound", inner_hex()),
+        format!("{}/ports/inbound", inner_hex()),
+        format!("{}/ports/outbound", inner_hex()),
     ]
     .into_iter()
     .collect::<BTreeSet<_>>();

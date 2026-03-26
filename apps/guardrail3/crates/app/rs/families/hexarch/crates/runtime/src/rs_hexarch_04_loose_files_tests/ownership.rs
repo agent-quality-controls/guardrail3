@@ -1,5 +1,10 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_04_loose_files as assertions;
-use test_support::{INNER_HEX, copy_fixture, create_dir, empty_dir, remove_dir, write_file};
+use test_support::{copy_fixture, create_dir, empty_dir, remove_dir, write_file};
+const FIXTURE: test_support::HexarchFixture = test_support::HexarchFixture;
+
+fn inner_hex() -> &'static str {
+    FIXTURE.inner_hex_root()
+}
 
 #[test]
 fn files_only_container_is_owned_by_rule_05_not_rule_04() {
@@ -66,7 +71,7 @@ fn removing_outer_adapters_parent_does_not_create_nested_rule_04_hits() {
     assert!(
         rule_04
             .iter()
-            .all(|error| !error.file.as_deref().unwrap_or("").starts_with(INNER_HEX)),
+            .all(|error| !error.file.as_deref().unwrap_or("").starts_with(inner_hex())),
         "rule 04 should not double-fire on nested containers destroyed with the outer adapters parent: {rule_04:#?}"
     );
 }

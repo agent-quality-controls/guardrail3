@@ -1,7 +1,12 @@
 use std::collections::BTreeSet;
+const FIXTURE: test_support::HexarchFixture = test_support::HexarchFixture;
+
+fn inner_hex() -> &'static str {
+    FIXTURE.inner_hex_root()
+}
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_04_loose_files as assertions;
-use test_support::{INNER_HEX, copy_fixture, write_file};
+use test_support::{copy_fixture, write_file};
 
 const CONTAINER_SUFFIXES: &[&str] = &[
     "app",
@@ -20,7 +25,7 @@ fn all_owned_container_paths() -> Vec<String> {
         }
     }
     for suffix in CONTAINER_SUFFIXES {
-        paths.push(format!("{INNER_HEX}/{suffix}"));
+        paths.push(format!("{}/{}", inner_hex(), suffix));
     }
     paths
 }
