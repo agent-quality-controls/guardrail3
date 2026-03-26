@@ -155,7 +155,7 @@ fn stricter_than_baseline_is_accepted_silently() {
         &[("pkg/Cargo.toml", &manifest)],
     ));
 
-    assert_rule_results(
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_02_lint_levels::assert_rule_results(
         &results,
         &[ExpectedRuleResult {
             file: None,
@@ -184,7 +184,7 @@ fn weaker_levels_are_errors() {
         &[("pkg/Cargo.toml", &manifest)],
     ));
 
-    assert_rule_results(
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_02_lint_levels::assert_rule_results(
         &results,
         &[ExpectedRuleResult {
             file: None,

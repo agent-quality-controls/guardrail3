@@ -151,7 +151,7 @@ fn compliant_edition_is_inventory() {
         &[("pkg/Cargo.toml", &manifest)],
     ));
 
-    assert_rule_results(
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_05_workspace_metadata::assert_rule_results(
         &results,
         &[ExpectedRuleResult {
             file: None,
@@ -179,7 +179,7 @@ fn missing_edition_is_error() {
         &[("pkg/Cargo.toml", &manifest)],
     ));
 
-    assert_rule_results(
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_05_workspace_metadata::assert_rule_results(
         &results,
         &[ExpectedRuleResult {
             file: None,

@@ -139,7 +139,7 @@ fn malformed_owned_policy_root_manifest_surfaces_explicit_failure() {
         &[("Cargo.toml", "[workspace")],
     ));
 
-    assert_rule_results(
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_14_input_failures::assert_rule_results(
         &results,
         &[ExpectedRuleResult {
             file: Some("Cargo.toml"),
@@ -177,7 +177,7 @@ fn malformed_workspace_member_manifest_surfaces_explicit_failure() {
         ],
     ));
 
-    assert_rule_results(
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_14_input_failures::assert_rule_results(
         &results,
         &[ExpectedRuleResult {
             file: Some("crates/api/Cargo.toml"),
@@ -211,7 +211,7 @@ fn malformed_root_local_guardrail_surfaces_explicit_failure() {
         ],
     ));
 
-    assert_rule_results(
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_14_input_failures::assert_rule_results(
         &results,
         &[ExpectedRuleResult {
             file: Some("guardrail3.toml"),

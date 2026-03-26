@@ -151,7 +151,7 @@ fn clean_specific_priorities_are_inventory() {
         &[("pkg/Cargo.toml", &manifest)],
     ));
 
-    assert_rule_results(
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_07_priority_order::assert_rule_results(
         &results,
         &[ExpectedRuleResult {
             file: None,
@@ -184,7 +184,7 @@ fn negative_specific_priority_warns() {
         &[("pkg/Cargo.toml", &manifest)],
     ));
 
-    assert_rule_results(
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_07_priority_order::assert_rule_results(
         &results,
         &[ExpectedRuleResult {
             file: None,

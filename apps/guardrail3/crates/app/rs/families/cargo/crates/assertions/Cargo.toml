@@ -7,7 +7,6 @@ edition = "2024"
 workspace = true
 
 [dependencies]
-guardrail3_app_rs_family_cargo_assertions_common = { package = "guardrail3-app-rs-family-cargo-assertions-common", path = "../assertions_common" }
 "guardrail3-app-rs-family-cargo" = { path = "../runtime" }
-guardrail3_domain_project_tree = { package = "guardrail3-domain-project-tree", path = "../../../../../../domain/project-tree" }
+"guardrail3-app-rs-family-cargo-assertions-common" = { path = "../assertions_common" }
 guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../../../../../domain/report" }

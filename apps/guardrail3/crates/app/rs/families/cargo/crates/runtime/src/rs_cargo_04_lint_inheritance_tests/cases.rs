@@ -171,7 +171,7 @@ fn member_inheriting_workspace_lints_is_inventory() {
         ],
     ));
 
-    assert_rule_results(
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_04_lint_inheritance::assert_rule_results(
         &results,
         &[ExpectedRuleResult {
             file: None,
@@ -217,7 +217,7 @@ fn member_missing_workspace_true_is_error() {
         ],
     ));
 
-    assert_rule_results(
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_04_lint_inheritance::assert_rule_results(
         &results,
         &[ExpectedRuleResult {
             file: None,

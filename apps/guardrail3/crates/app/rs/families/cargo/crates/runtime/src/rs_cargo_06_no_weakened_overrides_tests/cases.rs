@@ -174,7 +174,7 @@ fn weakened_member_override_is_error() {
         ],
     ));
 
-    assert_rule_results(
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_06_no_weakened_overrides::assert_rule_results(
         &results,
         &[ExpectedRuleResult {
             file: None,
@@ -223,7 +223,7 @@ fn matching_member_policy_inventories_cleanly() {
         ],
     ));
 
-    assert_rule_results(
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_06_no_weakened_overrides::assert_rule_results(
         &results,
         &[ExpectedRuleResult {
             file: None,

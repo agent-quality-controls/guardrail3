@@ -150,7 +150,7 @@ fn approved_allow_inventory_stays_clean() {
         &[("pkg/Cargo.toml", &manifest)],
     ));
 
-    assert_rule_results(
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_12_unapproved_allow_entries::assert_rule_results(
         &results,
         &[ExpectedRuleResult {
             file: None,
@@ -179,7 +179,7 @@ fn unapproved_allow_entry_is_error() {
         &[("pkg/Cargo.toml", &manifest)],
     ));
 
-    assert_rule_results(
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_12_unapproved_allow_entries::assert_rule_results(
         &results,
         &[ExpectedRuleResult {
             file: None,
