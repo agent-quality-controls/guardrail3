@@ -73,7 +73,7 @@ serde = "1"
         root.clone(),
     );
 
-    let mut rs_garde_01_results: Vec<_> = crate::check(&tree, None)
+    let mut rs_garde_01_results: Vec<_> = crate::test_support::run_family(&tree)
         .into_iter()
         .filter(|r| r.id == "RS-GARDE-01")
         .collect();

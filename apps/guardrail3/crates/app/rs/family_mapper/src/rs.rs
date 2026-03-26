@@ -7,8 +7,8 @@ use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
 use crate::scoped_files::filter_for_roots;
 use crate::views::{
-    RsArchOverlapView, RsArchRootView, RsArchRoute, RsHexarchRoute, RsRootInputFailureView,
-    RsRootView, RsTestRoute,
+    RsArchOverlapView, RsArchRootView, RsArchRoute, RsCodeRoute, RsGardeRoute, RsHexarchRoute,
+    RsRootInputFailureView, RsRootView, RsScopedRootView, RsTestRoute,
 };
 
 pub struct FamilyMapper<'a> {
@@ -102,6 +102,16 @@ impl<'a> FamilyMapper<'a> {
     }
 
     #[must_use]
+    pub fn map_rs_code(&self) -> RsCodeRoute {
+        self.map_scoped_source_route(RustValidateFamily::Code)
+    }
+
+    #[must_use]
+    pub fn map_rs_garde(&self) -> RsGardeRoute {
+        self.map_scoped_source_route(RustValidateFamily::Garde)
+    }
+
+    #[must_use]
     pub fn map_rs_test(&self) -> RsTestRoute {
         let roots = self.map_roots_for_family(RustValidateFamily::Test, |_| true);
         let root_rels = roots
@@ -110,6 +120,19 @@ impl<'a> FamilyMapper<'a> {
             .collect::<Vec<_>>();
 
         RsTestRoute {
+            scoped_files: filter_for_roots(self.tree, self.scoped_files, &root_rels),
+            roots,
+        }
+    }
+
+    fn map_scoped_source_route(&self, family: RustValidateFamily) -> RsCodeRoute {
+        let roots = self.map_scoped_roots_for_family(family, |_| true);
+        let root_rels = roots
+            .iter()
+            .map(|root| root.root.rel_dir.clone())
+            .collect::<Vec<_>>();
+
+        RsCodeRoute {
             scoped_files: filter_for_roots(self.tree, self.scoped_files, &root_rels),
             roots,
         }
@@ -129,6 +152,30 @@ impl<'a> FamilyMapper<'a> {
             .filter(|root| predicate(root))
             .filter(|root| root_enabled_for_family(root, family, self.config))
             .map(root_view)
+            .collect()
+    }
+
+    fn map_scoped_roots_for_family<F>(
+        &self,
+        family: RustValidateFamily,
+        predicate: F,
+    ) -> Vec<RsScopedRootView>
+    where
+        F: Fn(&RustRootPlacementRootFacts) -> bool,
+    {
+        if !self.selected_families.contains(family) {
+            return Vec::new();
+        }
+
+        self.scope
+            .roots
+            .iter()
+            .filter(|root| predicate(root))
+            .filter(|root| root_enabled_for_family(root, family, self.config))
+            .map(|root| RsScopedRootView {
+                root: root_view(root),
+                classification: root.classification,
+            })
             .collect()
     }
 

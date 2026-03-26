@@ -1,8 +1,9 @@
 use std::collections::{BTreeMap, BTreeSet};
 
+use guardrail3_app_rs_family_mapper::RsCodeRoute;
 use guardrail3_domain_project_tree::ProjectTree;
 
-use super::discover::{cargo_toml_rels, is_test_path, rust_file_rels};
+use super::discover::{is_test_path, rust_file_rels};
 
 #[derive(Debug, Clone)]
 pub struct RustCodeFileFacts {
@@ -25,13 +26,15 @@ pub struct CodeFacts {
     pub input_failures: Vec<CodeInputFailureFacts>,
 }
 
-pub fn collect(tree: &ProjectTree) -> CodeFacts {
+pub fn collect(tree: &ProjectTree, route: &RsCodeRoute) -> CodeFacts {
     let mut input_failures = Vec::new();
-    let cargo_roots = collect_cargo_roots(tree, &mut input_failures);
+    let cargo_roots = collect_cargo_roots(tree, route, &mut input_failures);
     let policy_map = read_policy_map(tree, &cargo_roots, &mut input_failures);
+    let root_dirs = cargo_roots.keys().cloned().collect::<Vec<_>>();
 
     let files = rust_file_rels(tree)
         .into_iter()
+        .filter(|rel_path| owning_root_dir(rel_path, &root_dirs).is_some())
         .map(|rel_path| RustCodeFileFacts {
             profile_name: policy_settings_for(file_parent_rel(&rel_path), &policy_map).profile_name,
             is_test: is_test_path(&rel_path),
@@ -40,15 +43,15 @@ pub fn collect(tree: &ProjectTree) -> CodeFacts {
         .collect();
 
     let mut unsafe_code_lints = Vec::new();
-    for cargo_rel_path in cargo_toml_rels(tree) {
-        let Some(content) = tree.file_content(&cargo_rel_path) else {
+    for root in cargo_roots.values().filter(|root| root.has_workspace) {
+        let Some(content) = tree.file_content(&root.cargo_rel_path) else {
             continue;
         };
         let parsed = match toml::from_str::<toml::Value>(content) {
             Ok(parsed) => parsed,
             Err(parse_error) => {
                 input_failures.push(CodeInputFailureFacts {
-                    rel_path: cargo_rel_path.clone(),
+                    rel_path: root.cargo_rel_path.clone(),
                     message: format!(
                         "Failed to parse Cargo.toml for code-family context: {parse_error}"
                     ),
@@ -67,12 +70,12 @@ pub fn collect(tree: &ProjectTree) -> CodeFacts {
             .and_then(toml::Value::as_str)
             .map(str::to_owned);
         unsafe_code_lints.push(UnsafeCodeLintFacts {
-            cargo_rel_path,
+            cargo_rel_path: root.cargo_rel_path.clone(),
             lint_level,
         });
     }
 
-    let exception_comments = collect_exception_comments(tree);
+    let exception_comments = collect_exception_comments(tree, &root_dirs);
 
     CodeFacts {
         files,
@@ -85,6 +88,7 @@ pub fn collect(tree: &ProjectTree) -> CodeFacts {
 #[derive(Debug, Clone)]
 struct CargoRootFacts {
     rel_dir: String,
+    cargo_rel_path: String,
     has_workspace: bool,
     has_package: bool,
     workspace_members: Vec<String>,
@@ -108,10 +112,16 @@ pub struct CodeInputFailureFacts {
     pub message: String,
 }
 
-fn collect_exception_comments(tree: &ProjectTree) -> Vec<ExceptionCommentFacts> {
+fn collect_exception_comments(
+    tree: &ProjectTree,
+    root_dirs: &[String],
+) -> Vec<ExceptionCommentFacts> {
     let mut comments = Vec::new();
 
     for rel_path in config_comment_rels(tree) {
+        if owning_root_dir(&rel_path, root_dirs).is_none() {
+            continue;
+        }
         let Some(content) = tree.file_content(&rel_path) else {
             continue;
         };
@@ -158,25 +168,22 @@ fn config_comment_rels(tree: &ProjectTree) -> Vec<String> {
 
 fn collect_cargo_roots(
     tree: &ProjectTree,
+    route: &RsCodeRoute,
     input_failures: &mut Vec<CodeInputFailureFacts>,
 ) -> BTreeMap<String, CargoRootFacts> {
-    let mut dirs = BTreeSet::new();
-    if tree.file_exists("Cargo.toml") {
-        let _ = dirs.insert(String::new());
-    }
-    dirs.extend(tree.dirs_with_file("Cargo.toml"));
-
-    dirs.into_iter()
-        .map(|rel_dir| {
-            let rel_path = if rel_dir.is_empty() {
-                "Cargo.toml".to_owned()
-            } else {
-                ProjectTree::join_rel(&rel_dir, "Cargo.toml")
-            };
-            let parsed = tree.file_content(&rel_path).map(|content| toml::from_str::<toml::Value>(content));
+    route
+        .roots
+        .iter()
+        .map(|root| {
+            let rel_dir = root.root.rel_dir.clone();
+            let rel_path = root.root.cargo_rel_path.clone();
+            let parsed = tree
+                .file_content(&rel_path)
+                .map(|content| toml::from_str::<toml::Value>(content));
             let facts = match parsed {
                 Some(Ok(parsed)) => CargoRootFacts {
                     rel_dir: rel_dir.clone(),
+                    cargo_rel_path: rel_path.clone(),
                     has_workspace: parsed.get("workspace").is_some(),
                     has_package: parsed.get("package").is_some(),
                     workspace_members: parse_workspace_members(tree, &rel_dir, &parsed),
@@ -188,6 +195,7 @@ fn collect_cargo_roots(
                     });
                     CargoRootFacts {
                         rel_dir: rel_dir.clone(),
+                        cargo_rel_path: rel_path.clone(),
                         has_workspace: false,
                         has_package: false,
                         workspace_members: Vec::new(),
@@ -195,6 +203,7 @@ fn collect_cargo_roots(
                 }
                 None => CargoRootFacts {
                     rel_dir: rel_dir.clone(),
+                    cargo_rel_path: rel_path.clone(),
                     has_workspace: false,
                     has_package: false,
                     workspace_members: Vec::new(),
@@ -381,4 +390,19 @@ fn rel_is_same_or_descendant(rel: &str, ancestor: &str) -> bool {
             && rel
                 .strip_prefix(ancestor)
                 .is_some_and(|suffix| suffix.starts_with('/')))
+}
+
+fn owning_root_dir<'a>(rel_path: &str, root_dirs: &'a [String]) -> Option<&'a str> {
+    let parent = file_parent_rel(rel_path);
+    root_dirs
+        .iter()
+        .filter(|root| {
+            root.is_empty()
+                || parent == root.as_str()
+                || parent
+                    .strip_prefix(root.as_str())
+                    .is_some_and(|rest| rest.starts_with('/'))
+        })
+        .max_by_key(|root| root.len())
+        .map(String::as_str)
 }

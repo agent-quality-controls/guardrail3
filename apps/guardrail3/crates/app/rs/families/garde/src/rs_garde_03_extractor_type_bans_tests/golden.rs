@@ -1,4 +1,3 @@
-use crate::check;
 use crate::test_support::{dir_entry, project_tree, temp_root};
 use guardrail3_domain_modules::clippy::build_clippy_toml;
 use guardrail3_domain_report::Severity;
@@ -18,7 +17,7 @@ fn inventories_when_all_bans_present() {
         ],
         root.clone(),
     );
-    let results = check(&tree, None);
+    let results = crate::test_support::run_family(&tree);
     let filtered: Vec<_> = results
         .into_iter()
         .filter(|r| r.id == "RS-GARDE-03")

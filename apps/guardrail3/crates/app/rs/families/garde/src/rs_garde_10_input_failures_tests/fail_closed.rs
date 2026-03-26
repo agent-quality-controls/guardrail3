@@ -33,7 +33,7 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results: Vec<_> = crate::check(&tree, None)
+    let results: Vec<_> = crate::test_support::run_family(&tree)
         .into_iter()
         .filter(|result| result.id == "RS-GARDE-10")
         .collect();
@@ -74,7 +74,7 @@ fn errors_on_cargo_toml_parse_failure() {
         root.clone(),
     );
 
-    let results: Vec<_> = crate::check(&tree, None)
+    let results: Vec<_> = crate::test_support::run_family(&tree)
         .into_iter()
         .filter(|result| result.id == "RS-GARDE-10")
         .collect();
@@ -116,7 +116,7 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results: Vec<_> = crate::check(&tree, None)
+    let results: Vec<_> = crate::test_support::run_family(&tree)
         .into_iter()
         .filter(|result| result.id == "RS-GARDE-10")
         .collect();

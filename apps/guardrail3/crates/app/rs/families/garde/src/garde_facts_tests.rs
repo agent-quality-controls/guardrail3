@@ -1,4 +1,4 @@
-use super::super::test_support::{dir_entry, project_tree, temp_root};
+use super::super::test_support::{dir_entry, family_route, project_tree, temp_root};
 use super::collect;
 
 #[test]
@@ -42,7 +42,7 @@ fn root_workspace_uses_packages_garde_policy_when_packages_config_owns_root() {
         root.clone(),
     );
 
-    let facts = collect(&tree);
+    let facts = collect(&tree, &family_route(&tree, None));
 
     assert!(
         facts.roots.iter().all(|root| root.rel_dir != ""),

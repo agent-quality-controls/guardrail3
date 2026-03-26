@@ -40,6 +40,21 @@ pub struct RsArchRoute {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RsScopedRootView {
+    pub root: RsRootView,
+    pub classification: RustRootClassification,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RsScopedSourceRoute {
+    pub roots: Vec<RsScopedRootView>,
+    pub scoped_files: Option<BTreeSet<String>>,
+}
+
+pub type RsCodeRoute = RsScopedSourceRoute;
+pub type RsGardeRoute = RsScopedSourceRoute;
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RsHexarchRoute {
     pub roots: Vec<RsRootView>,
     pub scoped_files: Option<BTreeSet<String>>,
