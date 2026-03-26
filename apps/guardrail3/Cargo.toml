@@ -17,6 +17,8 @@ members = [
     "crates/app/core",
     "crates/app/rs",
     "crates/app/rs/placement",
+    "crates/app/rs/family_selection",
+    "crates/app/rs/family_mapper",
     "crates/app/rs/validate",
     "crates/app/rs/ast",
     "crates/app/rs/generate",

@@ -1,6 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use guardrail3_app_rs_family_hooks_shared::hook_shell::parse_script;
+use guardrail3_app_rs_family_mapper::RsRootView;
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_outbound_traits::ToolChecker;
 
@@ -18,9 +19,9 @@ struct CargoRootFacts {
     workspace_members: Vec<String>,
 }
 
-pub fn collect(tree: &ProjectTree, tc: &dyn ToolChecker) -> TestFacts {
+pub fn collect(tree: &ProjectTree, routed_roots: &[RsRootView], tc: &dyn ToolChecker) -> TestFacts {
     let mut input_failures = Vec::new();
-    let cargo_roots = collect_cargo_roots(tree, &mut input_failures);
+    let cargo_roots = collect_cargo_roots(tree, routed_roots, &mut input_failures);
     let mut roots = cargo_roots
         .keys()
         .map(|rel_dir| build_root_facts(tree, rel_dir, &cargo_roots, &mut input_failures))
@@ -117,21 +118,14 @@ pub fn join_under_root(root_rel_dir: &str, child_rel: &str) -> String {
 
 fn collect_cargo_roots(
     tree: &ProjectTree,
+    routed_roots: &[RsRootView],
     input_failures: &mut Vec<InputFailureFacts>,
 ) -> BTreeMap<String, CargoRootFacts> {
-    let mut dirs = BTreeSet::new();
-    if tree.file_exists("Cargo.toml") {
-        let _ = dirs.insert(String::new());
-    }
-    dirs.extend(tree.dirs_with_file("Cargo.toml"));
-
-    dirs.into_iter()
-        .map(|rel_dir| {
-            let cargo_rel_path = if rel_dir.is_empty() {
-                "Cargo.toml".to_owned()
-            } else {
-                ProjectTree::join_rel(&rel_dir, "Cargo.toml")
-            };
+    routed_roots
+        .iter()
+        .map(|root| {
+            let rel_dir = root.rel_dir.clone();
+            let cargo_rel_path = root.cargo_rel_path.clone();
             let parsed = match read_cached_or_fs(tree, &cargo_rel_path) {
                 Ok(Some(content)) => match toml::from_str::<toml::Value>(&content) {
                     Ok(parsed) => Some(parsed),

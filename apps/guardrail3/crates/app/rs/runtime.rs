@@ -12,14 +12,17 @@ use guardrail3_app_rs_family_fmt as fmt;
 use guardrail3_app_rs_family_garde as garde;
 use guardrail3_app_rs_family_hexarch as hexarch;
 use guardrail3_app_rs_family_hooks_shared as hooks_shared;
+use guardrail3_app_rs_family_mapper::FamilyMapper;
 use guardrail3_app_rs_family_release as release;
+use guardrail3_app_rs_family_selection as family_selection;
 use guardrail3_app_rs_family_test as test;
 use guardrail3_app_rs_family_toolchain as toolchain;
+use guardrail3_app_rs_placement as placement;
 use guardrail3_domain_config::types::{GuardrailConfig, RustChecksConfig, RustConfig};
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::{CheckResult, Report, Section, rust_validate_family_section_name};
 use guardrail3_outbound_traits::{FileSystem, ToolChecker};
-use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
+use guardrail3_validation_model::RustValidateFamily;
 
 #[derive(Debug, Clone)]
 struct RustFamilyApplicability {
@@ -45,8 +48,10 @@ pub fn run(
 ) -> Result<Report, String> {
     let tree = project_walker::walk_project(fs, path);
     let config = load_config(&tree)?;
-    let selected = resolve_selected_families(&tree, config.as_ref(), requested_families);
+    let scope = placement::collect(&tree);
+    let selected = family_selection::resolve(&tree, config.as_ref(), requested_families);
     let applicability = collect_family_applicability(config.as_ref());
+    let mapper = FamilyMapper::new(&tree, &scope, config.as_ref(), &selected, scoped_files);
 
     let mut report = Report::new(path.display().to_string(), vec!["Rust".to_owned()]);
 
@@ -62,7 +67,7 @@ pub fn run(
             RustValidateFamily::Hexarch => hexarch::check(&tree),
             RustValidateFamily::Deps => deps::check(&tree, tc),
             RustValidateFamily::Garde => garde::check(&tree, scoped_files),
-            RustValidateFamily::Test => test::check(&tree, tc, scoped_files),
+            RustValidateFamily::Test => test::check(&tree, &mapper.map_rs_test(), tc),
             RustValidateFamily::Release => release::check(&tree, tc, thorough),
             RustValidateFamily::HooksShared => hooks_shared::check(fs, path, &tree, tc),
             RustValidateFamily::HooksRs => Vec::new(),
@@ -210,89 +215,6 @@ fn load_config(tree: &ProjectTree) -> Result<Option<GuardrailConfig>, String> {
         .map_err(|error| format!("Error parsing guardrail3.toml: {error}"))
 }
 
-fn resolve_selected_families(
-    tree: &ProjectTree,
-    config: Option<&GuardrailConfig>,
-    requested_families: &[RustValidateFamily],
-) -> RustFamilySelection {
-    let config_enabled: BTreeSet<_> = RustValidateFamily::all()
-        .iter()
-        .copied()
-        .filter(|family| family_enabled_for_runtime(*family, tree, config))
-        .collect();
-
-    let mut selection = if requested_families.is_empty() {
-        RustFamilySelection::new(config_enabled)
-    } else {
-        RustFamilySelection::new(
-            requested_families
-                .iter()
-                .copied()
-                .filter(|family| config_enabled.contains(family))
-                .collect(),
-        )
-    };
-
-    if selection.contains(RustValidateFamily::HooksRs) {
-        selection.insert(RustValidateFamily::HooksShared);
-    }
-
-    selection
-}
-
-fn family_enabled_for_runtime(
-    family: RustValidateFamily,
-    tree: &ProjectTree,
-    config: Option<&GuardrailConfig>,
-) -> bool {
-    let Some(rust) = config.and_then(|cfg| cfg.rust.as_ref()) else {
-        return true;
-    };
-
-    let global = rust
-        .checks
-        .as_ref()
-        .and_then(|checks| checks.family_enabled(family))
-        .unwrap_or(true);
-
-    if family == RustValidateFamily::Arch {
-        return global || scoped_arch_config_present(rust);
-    }
-
-    if family_uses_global_only(family) {
-        return global;
-    }
-
-    let app_count = rust
-        .apps
-        .as_ref()
-        .map_or(0, std::collections::BTreeMap::len);
-    let has_packages_scope = rust.packages.is_some();
-
-    if app_count == 0 && !has_packages_scope {
-        return global;
-    }
-
-    let app_enabled = rust.apps.as_ref().is_some_and(|apps| {
-        apps.values()
-            .any(|cfg| effective_family_flag(cfg.checks.as_ref(), family, global))
-    });
-    let packages_enabled = rust
-        .packages
-        .as_ref()
-        .is_some_and(|cfg| effective_family_flag(cfg.checks.as_ref(), family, global));
-
-    if family == RustValidateFamily::Hexarch {
-        let discovered_apps = tree.dir_exists("apps");
-        if app_count > 0 || discovered_apps {
-            return app_enabled || (global && app_count == 0);
-        }
-        return global;
-    }
-
-    app_enabled || packages_enabled || (global && has_unscoped_rust_root(tree, rust))
-}
-
 fn family_uses_global_only(family: RustValidateFamily) -> bool {
     matches!(
         family,
@@ -304,18 +226,6 @@ fn family_uses_global_only(family: RustValidateFamily) -> bool {
     )
 }
 
-fn scoped_arch_config_present(rust: &RustConfig) -> bool {
-    rust.apps.as_ref().is_some_and(|apps| {
-        apps.values()
-            .any(|cfg| cfg.checks.as_ref().and_then(|checks| checks.arch).is_some())
-    }) || rust
-        .packages
-        .as_ref()
-        .and_then(|packages| packages.checks.as_ref())
-        .and_then(|checks| checks.arch)
-        .is_some()
-}
-
 fn effective_family_flag(
     checks: Option<&RustChecksConfig>,
     family: RustValidateFamily,
@@ -324,14 +234,6 @@ fn effective_family_flag(
     checks
         .and_then(|value| value.family_enabled(family))
         .unwrap_or(global)
-}
-
-fn has_unscoped_rust_root(tree: &ProjectTree, rust: &RustConfig) -> bool {
-    if tree.file_exists("Cargo.toml") && rust.apps.as_ref().is_none_or(|apps| apps.is_empty()) {
-        return true;
-    }
-
-    rust.packages.is_none() && tree.dir_exists("packages")
 }
 
 #[cfg(test)]

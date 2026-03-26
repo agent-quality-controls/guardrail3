@@ -1,3 +1,9 @@
+use std::collections::BTreeSet;
+
+use guardrail3_app_rs_family_mapper::{FamilyMapper, RsTestRoute};
+use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
+
 pub mod rs_test_01_inline_test_bodies;
 pub mod rs_test_02_owned_sidecar_shape;
 pub mod rs_test_03_runtime_assertions_split;
@@ -16,3 +22,9 @@ pub mod rs_test_15_mutants_config_sane;
 pub mod rs_test_16_assertions_modules_prove;
 pub mod rs_test_17_external_harnesses_use_assertions;
 pub mod rs_test_18_test_support_generic;
+
+fn test_route(tree: &ProjectTree) -> RsTestRoute {
+    let scope = guardrail3_app_rs_placement::collect(tree);
+    let selection = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Test]));
+    FamilyMapper::new(tree, &scope, None, &selection, None).map_rs_test()
+}
