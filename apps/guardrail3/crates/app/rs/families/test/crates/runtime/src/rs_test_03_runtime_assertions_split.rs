@@ -226,6 +226,21 @@ fn collect_violations(
                 .filter_map(|candidate| candidate.facts.owner_module_name.clone())
                 .collect::<BTreeSet<_>>();
             for binding in &file.parsed.imports {
+                if let Some(target) = disallowed_sidecar_local_boundary_target(
+                    &binding.path_segments,
+                    &file.facts.kind,
+                    owner_module_name,
+                    &local_module_names,
+                ) {
+                    violations.push(RuntimeAssertionsViolation {
+                        rel_path: file.facts.rel_path.clone(),
+                        line: Some(binding.line),
+                        title: "sidecar escapes owned module boundary".to_owned(),
+                        message: format!(
+                            "Internal sidecar harnesses must not escape their owned module boundary through local path `{target}`."
+                        ),
+                    });
+                }
                 if import_hits_sibling_module(binding, owner_module_name, &local_module_names) {
                     violations.push(RuntimeAssertionsViolation {
                         rel_path: file.facts.rel_path.clone(),
@@ -248,6 +263,23 @@ fn collect_violations(
                         ),
                     });
                 }
+            }
+            if let Some(target) = file.parsed.file_call_paths.iter().find_map(|path| {
+                disallowed_sidecar_local_boundary_target(
+                    path,
+                    &file.facts.kind,
+                    owner_module_name,
+                    &local_module_names,
+                )
+            }) {
+                violations.push(RuntimeAssertionsViolation {
+                    rel_path: file.facts.rel_path.clone(),
+                    line: None,
+                    title: "sidecar escapes owned module boundary".to_owned(),
+                    message: format!(
+                        "Internal sidecar harnesses must not escape their owned module boundary through local call path `{target}`."
+                    ),
+                });
             }
             if let Some(target_module) = file
                 .parsed
@@ -423,6 +455,49 @@ fn sibling_module_target<'a>(
         return None;
     }
     Some(imported)
+}
+
+fn disallowed_sidecar_local_boundary_target(
+    path_segments: &[String],
+    file_kind: &TestFileKind,
+    owner_module_name: &str,
+    local_module_names: &BTreeSet<String>,
+) -> Option<String> {
+    let Some(first) = path_segments.first() else {
+        return None;
+    };
+    let owner_tests_module_name = format!("{owner_module_name}_tests");
+    match first.as_str() {
+        "crate" => {
+            let target = path_segments.get(1)?;
+            if target == owner_module_name
+                || target == &owner_tests_module_name
+                || local_module_names.contains(target)
+            {
+                None
+            } else {
+                Some(target.clone())
+            }
+        }
+        "self" | "super" => {
+            let boundary_depth = path_segments
+                .iter()
+                .take_while(|segment| matches!(segment.as_str(), "self" | "super"))
+                .count();
+            let max_depth = match file_kind {
+                TestFileKind::InternalSidecarMod => 1,
+                TestFileKind::InternalSidecarSupport => 2,
+                _ => 0,
+            };
+            (boundary_depth > max_depth).then(|| {
+                path_segments
+                    .get(boundary_depth)
+                    .cloned()
+                    .unwrap_or_else(|| "<crate-root>".to_owned())
+            })
+        }
+        _ => None,
+    }
 }
 
 fn first_local_module_target(path_segments: &[String]) -> Option<&str> {

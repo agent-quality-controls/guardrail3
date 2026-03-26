@@ -18,7 +18,7 @@ fn owned_assertions_crate_call_counts_as_real_proof_site() {
     write_file(
         root,
         "crates/runtime/tests/public_surface.rs",
-        "use demo_assertions::lib::prove_runtime;\n#[test]\nfn reuses_owned_assertions() { prove_runtime(); }\n",
+        "use demo_assertions::prove_runtime;\n#[test]\nfn reuses_owned_assertions() { prove_runtime(); }\n",
     );
     write_file(
         root,

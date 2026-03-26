@@ -1,4 +1,4 @@
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 
 use guardrail3_domain_report::{CheckResult, Severity};
 
@@ -47,9 +47,9 @@ fn function_has_owned_assertion_proof(
     let Some(proof_bearing_assertion_functions) = proof_bearing_assertion_functions else {
         return false;
     };
-    let mut call_roots = BTreeSet::from([assertions_package_name.to_owned()]);
-    let mut bare_call_idents = BTreeSet::new();
-    let mut has_assertions_glob = false;
+    let mut root_prefixes = BTreeMap::from([(assertions_package_name.to_owned(), Vec::new())]);
+    let mut bare_imports = BTreeMap::new();
+    let mut glob_prefixes = Vec::new();
 
     for binding in imports {
         if binding
@@ -57,11 +57,12 @@ fn function_has_owned_assertion_proof(
             .first()
             .is_some_and(|segment| segment == assertions_package_name)
         {
+            let relative_segments = binding.path_segments[1..].to_vec();
             if let Some(local_name) = binding.local_name.as_ref() {
-                let _ = call_roots.insert(local_name.clone());
-                let _ = bare_call_idents.insert(local_name.clone());
+                let _ = root_prefixes.insert(local_name.clone(), relative_segments.clone());
+                let _ = bare_imports.insert(local_name.clone(), relative_segments.join("::"));
             } else {
-                has_assertions_glob = true;
+                glob_prefixes.push(relative_segments);
             }
         }
     }
@@ -69,32 +70,43 @@ fn function_has_owned_assertion_proof(
     let bare_call_is_owned = |name: &str| {
         !function.shadowed_idents.contains(name)
             && !file_function_names.contains(name)
-            && proof_bearing_assertion_functions.contains(name)
-            && (bare_call_idents.contains(name) || has_assertions_glob)
+            && (bare_imports
+                .get(name)
+                .is_some_and(|qualified| proof_bearing_assertion_functions.contains(qualified))
+                || glob_prefixes.iter().any(|prefix| {
+                    proof_bearing_assertion_functions
+                        .contains(&qualified_assertion_name(prefix, name))
+                }))
     };
 
     function.call_paths.iter().any(|path| match path.first() {
         Some(first) if path.len() == 1 => bare_call_is_owned(first),
-        Some(first) => {
-            call_roots.contains(first)
-                && path
-                    .last()
-                    .is_some_and(|name| proof_bearing_assertion_functions.contains(name))
-        }
+        Some(first) => root_prefixes.get(first).is_some_and(|prefix| {
+            proof_bearing_assertion_functions
+                .contains(&qualified_assertion_name(prefix, &path[1..].join("::")))
+        }),
         None => false,
     }) || function
         .method_receiver_paths
         .iter()
         .any(|path| match path.first() {
             Some(first) if path.len() == 1 => bare_call_is_owned(first),
-            Some(first) => {
-                call_roots.contains(first)
-                    && path
-                        .last()
-                        .is_some_and(|name| proof_bearing_assertion_functions.contains(name))
-            }
+            Some(first) => root_prefixes.get(first).is_some_and(|prefix| {
+                proof_bearing_assertion_functions
+                    .contains(&qualified_assertion_name(prefix, &path[1..].join("::")))
+            }),
             None => false,
         })
+}
+
+fn qualified_assertion_name(module_prefix: &[String], tail: &str) -> String {
+    if module_prefix.is_empty() {
+        tail.to_owned()
+    } else if tail.is_empty() {
+        module_prefix.join("::")
+    } else {
+        format!("{}::{tail}", module_prefix.join("::"))
+    }
 }
 
 #[cfg(test)]
