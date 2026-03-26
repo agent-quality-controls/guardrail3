@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_25_target_dependency_direction as assertions;
-use test_support::{dir_entry, project_tree};
+use crate::test_support::{dir_entry, project_tree};
 
 #[test]
 fn forbidden_target_sections_error_and_allowed_target_sections_do_not() {

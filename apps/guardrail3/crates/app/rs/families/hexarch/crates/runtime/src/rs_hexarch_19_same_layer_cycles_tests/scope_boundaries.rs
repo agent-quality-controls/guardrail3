@@ -1,5 +1,5 @@
 use super::super::results_for_cycles_for_test as results_for_cycles;
-use test_support::{dir_entry, project_tree};
+use crate::test_support::{dir_entry, project_tree};
 
 #[test]
 fn target_specific_same_layer_cycle_is_filtered_out() {

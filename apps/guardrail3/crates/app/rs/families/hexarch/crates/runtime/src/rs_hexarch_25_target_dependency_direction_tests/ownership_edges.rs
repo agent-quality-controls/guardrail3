@@ -1,5 +1,5 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_25_target_dependency_direction as assertions;
-use test_support::{copy_fixture, write_file};
+use crate::test_support::{copy_fixture, write_file};
 
 #[test]
 fn target_specific_external_same_name_collision_does_not_trigger_direction_rule() {

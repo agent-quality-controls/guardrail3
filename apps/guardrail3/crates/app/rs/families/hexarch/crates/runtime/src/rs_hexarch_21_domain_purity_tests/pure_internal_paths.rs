@@ -1,6 +1,6 @@
 use super::super::{run_domain_purity_case, DomainPurityEdgeKindForTest};
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_21_domain_purity as assertions;
-use test_support::{copy_fixture, dir_entry, project_tree, write_file};
+use crate::test_support::{copy_fixture, dir_entry, project_tree, write_file};
 
 #[test]
 fn domain_and_ports_path_deps_do_not_trigger_domain_purity() {

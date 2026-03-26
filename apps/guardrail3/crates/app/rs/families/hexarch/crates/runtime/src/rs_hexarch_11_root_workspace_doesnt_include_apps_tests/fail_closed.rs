@@ -1,5 +1,5 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_11_root_workspace_doesnt_include_apps as assertions;
-use test_support::{copy_fixture, write_file};
+use crate::test_support::{copy_fixture, write_file};
 
 #[test]
 fn malformed_root_cargo_is_error() {

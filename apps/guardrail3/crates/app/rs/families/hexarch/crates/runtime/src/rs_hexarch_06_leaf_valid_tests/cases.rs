@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 use std::path::Path;
-const FIXTURE: test_support::HexarchFixture = test_support::HexarchFixture;
+const FIXTURE: crate::test_support::HexarchFixture = crate::test_support::HexarchFixture;
 
 fn rust_apps() -> &'static [&'static str] {
     FIXTURE.apps()
@@ -10,7 +10,7 @@ fn inner_hex() -> &'static str {
     FIXTURE.inner_hex_root()
 }
 
-use test_support::{create_dir, write_file};
+use crate::test_support::{create_dir, write_file};
 
 pub const OUTER_CONTAINERS: &[&str] = &[
     "crates/app",

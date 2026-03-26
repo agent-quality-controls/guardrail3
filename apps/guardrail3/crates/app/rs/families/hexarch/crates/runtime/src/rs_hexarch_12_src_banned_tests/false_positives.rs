@@ -1,5 +1,5 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_12_src_banned as assertions;
-use test_support::{copy_fixture, write_file};
+use crate::test_support::{copy_fixture, write_file};
 
 #[test]
 fn golden_fixture_has_no_rule_12_errors() {

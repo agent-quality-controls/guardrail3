@@ -1,12 +1,12 @@
 use std::collections::BTreeSet;
-const FIXTURE: test_support::HexarchFixture = test_support::HexarchFixture;
+const FIXTURE: crate::test_support::HexarchFixture = crate::test_support::HexarchFixture;
 
 fn inner_hex() -> &'static str {
     FIXTURE.inner_hex_root()
 }
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_04_loose_files as assertions;
-use test_support::{copy_fixture, write_file};
+use crate::test_support::{copy_fixture, write_file};
 
 const CONTAINER_SUFFIXES: &[&str] = &[
     "app",

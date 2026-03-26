@@ -1,5 +1,5 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_23_adapter_pub_trait as assertions;
-use test_support::{copy_fixture, write_file};
+use crate::test_support::{copy_fixture, write_file};
 
 #[test]
 fn orphan_adapter_source_file_does_not_count_as_public_trait_surface() {

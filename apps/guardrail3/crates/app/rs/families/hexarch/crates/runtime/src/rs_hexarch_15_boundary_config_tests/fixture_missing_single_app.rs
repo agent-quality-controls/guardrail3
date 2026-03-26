@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_15_boundary_config as assertions;
-use test_support::copy_fixture;
+use crate::test_support::copy_fixture;
 
 #[test]
 fn missing_one_app_boundary_only_hits_that_app() {

@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_08_app_cargo_is_workspace as assertions;
-use test_support::{copy_fixture, write_file};
+use crate::test_support::{copy_fixture, write_file};
 
 #[test]
 fn parse_error_hits_every_mutated_app() {

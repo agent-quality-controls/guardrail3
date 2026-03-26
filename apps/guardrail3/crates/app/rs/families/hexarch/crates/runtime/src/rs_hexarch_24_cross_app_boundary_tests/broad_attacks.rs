@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_24_cross_app_boundary as assertions;
-use test_support::{dir_entry, project_tree};
+use crate::test_support::{dir_entry, project_tree};
 
 #[test]
 fn cross_app_edges_error_and_same_app_edges_do_not() {

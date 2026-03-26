@@ -1,5 +1,5 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_25_target_dependency_direction as assertions;
-use test_support::copy_fixture;
+use crate::test_support::copy_fixture;
 
 #[test]
 fn golden_fixture_has_no_target_dependency_direction_errors() {

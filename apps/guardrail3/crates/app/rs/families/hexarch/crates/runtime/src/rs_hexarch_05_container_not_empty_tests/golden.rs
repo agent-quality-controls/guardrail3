@@ -1,5 +1,5 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_05_container_not_empty as assertions;
-use test_support::copy_fixture;
+use crate::test_support::copy_fixture;
 
 #[test]
 fn golden_has_no_rule_05_errors() {

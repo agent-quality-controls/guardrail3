@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 
 use super::cases::owned_leaf_dirs;
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_06_leaf_valid as assertions;
-use test_support::{copy_fixture, create_dir, write_file};
+use crate::test_support::{copy_fixture, create_dir, write_file};
 
 #[test]
 fn orphan_leaf_without_cargo_or_crates_errors_everywhere_it_is_owned() {

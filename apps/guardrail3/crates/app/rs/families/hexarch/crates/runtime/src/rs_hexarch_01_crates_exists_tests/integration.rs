@@ -1,8 +1,8 @@
 use std::collections::BTreeSet;
-const FIXTURE: test_support::HexarchFixture = test_support::HexarchFixture;
+const FIXTURE: crate::test_support::HexarchFixture = crate::test_support::HexarchFixture;
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_01_crates_exists as assertions;
-use test_support::{copy_fixture, remove_dir, write_file};
+use crate::test_support::{copy_fixture, remove_dir, write_file};
 
 #[test]
 fn golden_has_no_rule_01_errors() {

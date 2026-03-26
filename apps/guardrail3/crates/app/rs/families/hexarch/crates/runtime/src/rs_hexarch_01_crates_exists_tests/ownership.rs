@@ -1,5 +1,5 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_01_crates_exists as assertions;
-use test_support::{copy_fixture, create_dir, remove_dir, write_file};
+use crate::test_support::{copy_fixture, create_dir, remove_dir, write_file};
 
 #[test]
 fn missing_inner_hex_crates_is_not_owned_by_app_level_rule_01() {

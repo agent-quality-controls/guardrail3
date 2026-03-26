@@ -27,4 +27,5 @@ toml = "0.8"
 
 [dev-dependencies]
 "guardrail3-app-rs-family-hexarch-assertions" = { path = "../assertions" }
-test_support = { package = "guardrail3-app-rs-family-hexarch-test-support", path = "../../test_support" }
+guardrail3_adapters_outbound_fs = { package = "guardrail3-adapters-outbound-fs", path = "../../../../../../adapters/outbound/fs" }
+tempfile = "3"

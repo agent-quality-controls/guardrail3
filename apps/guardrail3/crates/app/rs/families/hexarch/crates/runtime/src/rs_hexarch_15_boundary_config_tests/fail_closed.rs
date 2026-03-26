@@ -1,5 +1,5 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_15_boundary_config as assertions;
-use test_support::copy_fixture;
+use crate::test_support::copy_fixture;
 
 #[test]
 fn malformed_guardrail_config_warns_in_family_run() {
