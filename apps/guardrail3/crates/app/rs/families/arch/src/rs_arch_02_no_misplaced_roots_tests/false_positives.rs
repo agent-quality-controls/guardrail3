@@ -1,5 +1,5 @@
 use super::super::super::test_support::{
-    APP_WORKSPACE_CARGO, PACKAGE_CARGO, check_results, entry, error_results, tree,
+    APP_WORKSPACE_CARGO, PACKAGE_CARGO, check_results, entry, error_results, tree, tree_at,
 };
 
 #[test]
@@ -78,5 +78,46 @@ fn declared_auxiliary_roots_do_not_trigger_misplaced_reporting() {
     assert!(
         error_results(&results, "RS-ARCH-02").is_empty(),
         "declared auxiliary roots must not be reported as misplaced: {results:#?}"
+    );
+}
+
+#[test]
+fn excluded_validation_root_does_not_treat_its_own_cargo_manifest_as_live_architecture() {
+    let config = "[rust.checks]\narch = true\nhexarch = true\nlibarch = true\n";
+    let results = check_results(&tree_at(
+        "/tmp/repo/tests/fixtures/rust-app",
+        &[("", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
+        &[
+            ("guardrail3.toml", config),
+            ("Cargo.toml", "[package]\nname = \"fixture\"\n"),
+        ],
+    ));
+
+    assert!(
+        results.is_empty(),
+        "an excluded validation root must not emit live arch findings for its own Cargo root: {results:#?}"
+    );
+}
+
+#[test]
+fn app_scoped_validation_root_still_classifies_nested_crates_as_app_owned() {
+    let config = "[rust.checks]\narch = true\nhexarch = true\nlibarch = true\n";
+    let results = check_results(&tree_at(
+        "/tmp/repo/apps/backend",
+        &[
+            ("", entry(&["crates"], &["Cargo.toml", "guardrail3.toml"])),
+            ("crates", entry(&["domain"], &[])),
+            ("crates/domain", entry(&[], &["Cargo.toml"])),
+        ],
+        &[
+            ("guardrail3.toml", config),
+            ("Cargo.toml", APP_WORKSPACE_CARGO),
+            ("crates/domain/Cargo.toml", "[package]\nname = \"domain\"\n"),
+        ],
+    ));
+
+    assert!(
+        error_results(&results, "RS-ARCH-02").is_empty(),
+        "nested crates under an apps/<name> validation root must still classify as app-owned: {results:#?}"
     );
 }

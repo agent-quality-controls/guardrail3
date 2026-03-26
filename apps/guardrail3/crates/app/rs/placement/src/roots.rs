@@ -3,7 +3,9 @@ use std::collections::BTreeSet;
 use guardrail3_domain_project_tree::ProjectTree;
 use toml::Value;
 
-use crate::classification::{RustArchRole, RustRootPlacementRootFacts, classify_root};
+use crate::classification::{
+    RustArchRole, RustRootPlacementRootFacts, classify_root, has_governed_zone_candidate,
+};
 use crate::overlap::{RustZoneOverlapFacts, collect_overlaps};
 
 #[derive(Debug, Clone)]
@@ -21,6 +23,10 @@ pub struct RustRootPlacementFacts {
 
 #[must_use]
 pub fn collect(tree: &ProjectTree) -> RustRootPlacementFacts {
+    if is_excluded_validation_root(tree) {
+        return RustRootPlacementFacts::default();
+    }
+
     let mut root_dirs = BTreeSet::new();
     if tree.file_exists("Cargo.toml") && !is_excluded_live_root_dir("") {
         let _ = root_dirs.insert(String::new());
@@ -50,8 +56,12 @@ pub fn collect(tree: &ProjectTree) -> RustRootPlacementFacts {
             });
         }
 
-        let arch_role = resolve_arch_role(tree, &cargo_rel_path, &mut input_failures);
         let placement_rel_dir = contextual_rel_dir(zone_context_prefix.as_deref(), &rel_dir);
+        let arch_role = if has_governed_zone_candidate(&placement_rel_dir) {
+            None
+        } else {
+            resolve_arch_role(tree, &cargo_rel_path, &mut input_failures)
+        };
         roots.push(classify_root(
             rel_dir,
             cargo_rel_path,
@@ -72,7 +82,15 @@ pub fn collect(tree: &ProjectTree) -> RustRootPlacementFacts {
 
 #[must_use]
 pub fn is_excluded_live_root_dir(rel_dir: &str) -> bool {
-    let segments: Vec<_> = rel_dir
+    is_excluded_path(rel_dir)
+}
+
+fn is_excluded_validation_root(tree: &ProjectTree) -> bool {
+    is_excluded_path(&tree.root.to_string_lossy().replace('\\', "/"))
+}
+
+fn is_excluded_path(path: &str) -> bool {
+    let segments: Vec<_> = path
         .split('/')
         .filter(|segment| !segment.is_empty())
         .collect();
@@ -81,11 +99,14 @@ pub fn is_excluded_live_root_dir(rel_dir: &str) -> bool {
         return false;
     }
 
-    if segments.first() == Some(&"target") {
+    if segments.contains(&"target") {
         return true;
     }
 
-    if segments.len() >= 3 && segments[0] == ".claude" && segments[1] == "worktrees" {
+    if segments
+        .windows(2)
+        .any(|window| matches!(window, [".claude", "worktrees"]))
+    {
         return true;
     }
 
@@ -116,11 +137,20 @@ fn resolve_arch_role(
         }
     };
 
-    arch_role_from_toml(&parsed)
+    match arch_role_from_toml(&parsed) {
+        Ok(role) => role,
+        Err(message) => {
+            input_failures.push(RustRootPlacementInputFailureFacts {
+                rel_path: cargo_rel_path.to_owned(),
+                message,
+            });
+            None
+        }
+    }
 }
 
-fn arch_role_from_toml(parsed: &Value) -> Option<RustArchRole> {
-    let value = parsed
+fn arch_role_from_toml(parsed: &Value) -> Result<Option<RustArchRole>, String> {
+    let Some(value) = parsed
         .get("package")
         .and_then(|value| value.get("metadata"))
         .and_then(|value| value.get("guardrail3"))
@@ -132,11 +162,22 @@ fn arch_role_from_toml(parsed: &Value) -> Option<RustArchRole> {
                 .and_then(|value| value.get("guardrail3"))
                 .and_then(|value| value.get("arch_role"))
         })
-        .and_then(Value::as_str)?;
+    else {
+        return Ok(None);
+    };
+
+    let Some(value) = value.as_str() else {
+        return Err(
+            "Invalid `arch_role` in Cargo metadata for Rust root placement discovery: expected a string value like `\"auxiliary\"`."
+                .to_owned(),
+        );
+    };
 
     match value {
-        "auxiliary" => Some(RustArchRole::Auxiliary),
-        _ => None,
+        "auxiliary" => Ok(Some(RustArchRole::Auxiliary)),
+        other => Err(format!(
+            "Invalid `arch_role = \"{other}\"` in Cargo metadata for Rust root placement discovery. Expected `\"auxiliary\"`."
+        )),
     }
 }
 

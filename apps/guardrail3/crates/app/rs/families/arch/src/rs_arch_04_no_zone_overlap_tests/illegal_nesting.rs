@@ -1,10 +1,9 @@
 use super::super::super::test_support::{
-    APP_WORKSPACE_CARGO, PACKAGE_CARGO, assert_error_files, check_results, entry, error_results,
-    tree,
+    APP_WORKSPACE_CARGO, PACKAGE_CARGO, check_results, entry, error_results, tree,
 };
 
 #[test]
-fn nested_app_and_package_zone_roots_hit_exact_overlap_set() {
+fn nested_cross_zone_roots_do_not_emit_overlap_on_top_of_ambiguity_and_dual_ownership() {
     let results = check_results(&tree(
         &[
             ("", entry(&["apps", "packages"], &[])),
@@ -25,18 +24,8 @@ fn nested_app_and_package_zone_roots_hit_exact_overlap_set() {
         ],
     ));
 
-    assert_error_files(
-        &results,
-        "RS-ARCH-04",
-        &[
-            "apps/backend/packages/shared/Cargo.toml",
-            "packages/core/Cargo.toml",
-        ],
-    );
     assert!(
-        error_results(&results, "RS-ARCH-04")
-            .iter()
-            .all(|result| result.severity == guardrail3_domain_report::Severity::Error),
-        "RS-ARCH-04 severity drifted: {results:#?}"
+        error_results(&results, "RS-ARCH-04").is_empty(),
+        "cross-zone nested roots should be owned by RS-ARCH-01 and RS-ARCH-03, not also RS-ARCH-04: {results:#?}"
     );
 }

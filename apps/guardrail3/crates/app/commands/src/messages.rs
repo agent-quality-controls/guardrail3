@@ -141,7 +141,7 @@ RUST CHECK TOGGLES
 
   `rs init` writes family-based Rust check toggles:
     arch, fmt, toolchain, clippy, deny, cargo, code, hexarch, deps,
-    garde, test, release, hooks_shared, hooks_rs
+    libarch, garde, test, release, hooks_shared, hooks_rs
 
 AFTER INIT
 
@@ -230,6 +230,7 @@ deny = true
 cargo = true
 code = true
 hexarch = true
+libarch = true
 deps = true
 garde = true
 test = true
@@ -246,6 +247,7 @@ hexarch = true
 garde = false
 
 [rust.packages.checks]
+libarch = true
 code = true
 test = true
 release = false

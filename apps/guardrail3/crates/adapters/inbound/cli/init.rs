@@ -248,6 +248,7 @@ workspace_root = "."
         writeln!(config, "cargo = true").unwrap_or_default();
         writeln!(config, "code = true").unwrap_or_default();
         writeln!(config, "hexarch = true").unwrap_or_default();
+        writeln!(config, "libarch = true").unwrap_or_default();
         writeln!(config, "deps = true").unwrap_or_default();
         writeln!(config, "garde = true").unwrap_or_default();
         writeln!(config, "test = true").unwrap_or_default();
@@ -298,7 +299,7 @@ workspace_root = "."
             writeln!(config, "deny = true").unwrap_or_default();
             writeln!(config, "cargo = true").unwrap_or_default();
             writeln!(config, "code = true").unwrap_or_default();
-            writeln!(config, "hexarch = false").unwrap_or_default();
+            writeln!(config, "libarch = true").unwrap_or_default();
             writeln!(config, "deps = true").unwrap_or_default();
             writeln!(config, "garde = false").unwrap_or_default();
             writeln!(config, "test = true").unwrap_or_default();
@@ -400,6 +401,11 @@ mod tests {
         let root = temp_root("rs-init-arch-global");
         write_file(
             &root,
+            "Cargo.toml",
+            "[workspace]\nmembers = [\"apps/backend\", \"packages/shared\"]\nresolver = \"2\"\n",
+        );
+        write_file(
+            &root,
             "apps/backend/Cargo.toml",
             "[workspace]\nmembers = []\nresolver = \"2\"\n",
         );
@@ -422,6 +428,10 @@ mod tests {
         assert!(
             !config.contains("[rust.packages.checks]\narch ="),
             "arch must not be generated under package-scoped checks:\n{config}"
+        );
+        assert!(
+            config.contains("[rust.packages.checks]\nclippy = true\ndeny = true\ncargo = true\ncode = true\nlibarch = true"),
+            "package section must make libarch explicit:\n{config}"
         );
 
         fs::remove_dir_all(&root).expect("cleanup temp root");
