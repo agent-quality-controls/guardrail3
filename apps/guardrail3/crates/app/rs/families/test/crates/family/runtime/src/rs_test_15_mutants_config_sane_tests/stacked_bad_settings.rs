@@ -24,14 +24,26 @@ fn exclude_all_and_low_timeout_each_emit_a_warning() {
         .collect::<Vec<_>>();
 
     assert_eq!(findings.len(), 2);
-    assert!(findings.iter().all(|finding| finding.severity == Severity::Warn));
+    assert!(
+        findings
+            .iter()
+            .all(|finding| finding.severity == Severity::Warn)
+    );
     assert!(findings.iter().all(|finding| !finding.inventory));
-    assert!(findings
-        .iter()
-        .any(|finding| finding.title == "mutants config excludes everything"));
-    assert!(findings
-        .iter()
-        .any(|finding| finding.title == "mutants timeout multiplier too low"));
-    assert!(findings.iter().all(|finding| finding.file.as_deref() == Some(".cargo/mutants.toml")));
+    assert!(
+        findings
+            .iter()
+            .any(|finding| finding.title == "mutants config excludes everything")
+    );
+    assert!(
+        findings
+            .iter()
+            .any(|finding| finding.title == "mutants timeout multiplier too low")
+    );
+    assert!(
+        findings
+            .iter()
+            .all(|finding| finding.file.as_deref() == Some(".cargo/mutants.toml"))
+    );
     assert!(findings.iter().all(|finding| finding.line.is_none()));
 }

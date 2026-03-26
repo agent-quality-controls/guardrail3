@@ -1,4 +1,4 @@
-use super::{finding, run_family, rule_files, tempdir, write_file};
+use super::{finding, rule_files, run_family, tempdir, write_file};
 use guardrail3_domain_report::Severity;
 
 #[test]
@@ -16,7 +16,10 @@ fn hook_only_mutation_adoption_requires_the_mutants_profile() {
 
     let results = run_family(root);
 
-    assert_eq!(rule_files(&results, "RS-TEST-13"), vec!["Cargo.toml".to_owned()]);
+    assert_eq!(
+        rule_files(&results, "RS-TEST-13"),
+        vec!["Cargo.toml".to_owned()]
+    );
     let finding = finding(&results, "RS-TEST-13");
     assert_eq!(finding.severity, Severity::Warn);
     assert_eq!(finding.title, "profile.mutants missing");

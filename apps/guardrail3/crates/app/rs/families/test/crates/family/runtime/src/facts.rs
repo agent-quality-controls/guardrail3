@@ -288,14 +288,13 @@ fn build_root_facts(
         "mutants config",
         input_failures,
     );
-    let (nextest_exists, nextest_parsed, _nextest_parse_error) =
-        parse_optional_toml(
-            tree,
-            rel_dir,
-            &nextest_rel_path,
-            "nextest config",
-            input_failures,
-        );
+    let (nextest_exists, nextest_parsed, _nextest_parse_error) = parse_optional_toml(
+        tree,
+        rel_dir,
+        &nextest_rel_path,
+        "nextest config",
+        input_failures,
+    );
 
     TestRootFacts {
         rel_dir: rel_dir.to_owned(),
@@ -640,12 +639,8 @@ fn collect_components(
             continue;
         }
 
-        let runtime_parsed = parse_manifest(
-            tree,
-            root_rel_dir,
-            &runtime_cargo_rel_path,
-            input_failures,
-        );
+        let runtime_parsed =
+            parse_manifest(tree, root_rel_dir, &runtime_cargo_rel_path, input_failures);
         let assertions_rel_dir = ProjectTree::join_rel(&component_rel_dir, "assertions");
         let assertions_cargo_rel_path = ProjectTree::join_rel(&assertions_rel_dir, "Cargo.toml");
         let assertions_exists = tree.file_exists(&assertions_cargo_rel_path);
@@ -667,9 +662,7 @@ fn collect_components(
             rel_dir: component_rel_dir,
             runtime_rel_dir,
             runtime_cargo_rel_path,
-            runtime_package_name: runtime_parsed
-                .as_ref()
-                .and_then(manifest_package_name),
+            runtime_package_name: runtime_parsed.as_ref().and_then(manifest_package_name),
             runtime_normal_dependencies: runtime_parsed
                 .as_ref()
                 .map(manifest_normal_dependencies)
@@ -681,9 +674,7 @@ fn collect_components(
             assertions_rel_dir,
             assertions_cargo_rel_path,
             assertions_exists,
-            assertions_package_name: assertions_parsed
-                .as_ref()
-                .and_then(manifest_package_name),
+            assertions_package_name: assertions_parsed.as_ref().and_then(manifest_package_name),
             assertions_dependencies: assertions_parsed
                 .as_ref()
                 .map(manifest_normal_dependencies)
@@ -710,7 +701,9 @@ fn parse_manifest(
             input_failures.push(InputFailureFacts {
                 root_rel_dir: root_rel_dir.to_owned(),
                 rel_path: rel_path.to_owned(),
-                message: format!("Failed to read Cargo.toml for test-family boundaries: {read_error}"),
+                message: format!(
+                    "Failed to read Cargo.toml for test-family boundaries: {read_error}"
+                ),
             });
             return None;
         }
@@ -721,7 +714,9 @@ fn parse_manifest(
             input_failures.push(InputFailureFacts {
                 root_rel_dir: root_rel_dir.to_owned(),
                 rel_path: rel_path.to_owned(),
-                message: format!("Failed to parse Cargo.toml for test-family boundaries: {parse_error}"),
+                message: format!(
+                    "Failed to parse Cargo.toml for test-family boundaries: {parse_error}"
+                ),
             });
             None
         }
@@ -744,10 +739,7 @@ fn manifest_dev_dependencies(parsed: &toml::Value) -> BTreeSet<String> {
     dependency_names(parsed, ["dev-dependencies"])
 }
 
-fn dependency_names<const N: usize>(
-    parsed: &toml::Value,
-    sections: [&str; N],
-) -> BTreeSet<String> {
+fn dependency_names<const N: usize>(parsed: &toml::Value, sections: [&str; N]) -> BTreeSet<String> {
     sections
         .into_iter()
         .filter_map(|section| parsed.get(section).and_then(toml::Value::as_table))

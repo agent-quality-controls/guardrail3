@@ -10,7 +10,8 @@ pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
             id: ID.to_owned(),
             severity: Severity::Warn,
             title: "mutation hook step missing".to_owned(),
-            message: "Active hook surfaces do not contain an executable `cargo mutants` step.".to_owned(),
+            message: "Active hook surfaces do not contain an executable `cargo mutants` step."
+                .to_owned(),
             file: Some(input.root.cargo_rel_path.clone()),
             line: None,
             inventory: false,
@@ -22,7 +23,9 @@ pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
                     id: ID.to_owned(),
                     severity: Severity::Info,
                     title: "mutation hook step present".to_owned(),
-                    message: format!("`{rel_path}` contains an executable mutation-testing command."),
+                    message: format!(
+                        "`{rel_path}` contains an executable mutation-testing command."
+                    ),
                     file: Some(rel_path.clone()),
                     line: None,
                     inventory: false,

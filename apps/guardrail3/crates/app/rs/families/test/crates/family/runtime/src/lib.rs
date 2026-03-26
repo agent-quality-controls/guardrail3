@@ -1,3 +1,5 @@
+use std::collections::{BTreeMap, BTreeSet};
+
 mod discover;
 mod facts;
 mod inputs;
@@ -17,18 +19,22 @@ mod rs_test_12_mutants_toml_exists;
 mod rs_test_13_mutants_profile_present;
 mod rs_test_14_mutation_hook_present;
 mod rs_test_15_mutants_config_sane;
-
-use std::collections::BTreeSet;
+mod rs_test_16_assertions_modules_prove;
+mod rs_test_17_external_harnesses_use_assertions;
+mod rs_test_18_test_support_generic;
 
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::CheckResult;
 use guardrail3_outbound_traits::ToolChecker;
 
-use self::facts::{DiscoveredTestFile, InputFailureFacts, TestFacts, TestFileKind, TestRootFacts, collect};
-use self::inputs::{
-    CfgTestModuleInput, InputFailureTestInput, RootTestInput, TestFileInput, TestFunctionInput,
+use self::facts::{
+    DiscoveredTestFile, InputFailureFacts, TestFacts, TestFileKind, TestRootFacts, collect,
 };
-use self::parse::{ParsedTestFile, parse_rust_file};
+use self::inputs::{
+    AssertionsModuleInput, CfgTestModuleInput, InputFailureTestInput, RootTestInput, TestFileInput,
+    TestFunctionInput, TestSupportFileInput,
+};
+use self::parse::{FunctionInfo, ParsedTestFile, UseBinding, parse_rust_file};
 
 pub(crate) struct AnalyzedFile {
     pub(crate) facts: DiscoveredTestFile,
@@ -41,6 +47,10 @@ struct RootAnalysis {
     has_tests: bool,
     has_tokio_tests: bool,
     input_failures: Vec<InputFailureFacts>,
+    proof_bearing_assertions_by_file: BTreeMap<String, BTreeSet<String>>,
+    proof_bearing_assertions_by_package: BTreeMap<String, BTreeSet<String>>,
+    local_runtime_packages: BTreeSet<String>,
+    local_assertions_packages: BTreeSet<String>,
 }
 
 pub fn check(
@@ -95,6 +105,34 @@ pub fn check(
             for file in &analysis.files {
                 let file_input = TestFileInput::new(&file.facts, &file.parsed);
 
+                if matches!(file.facts.kind, TestFileKind::AssertionsModule) {
+                    let empty = BTreeSet::new();
+                    let proof_bearing_exported_functions = analysis
+                        .proof_bearing_assertions_by_file
+                        .get(&file.facts.rel_path)
+                        .unwrap_or(&empty);
+                    rs_test_16_assertions_modules_prove::check(
+                        &AssertionsModuleInput::new(
+                            &file.facts,
+                            &file.parsed,
+                            proof_bearing_exported_functions,
+                        ),
+                        &mut results,
+                    );
+                }
+
+                if is_test_support_file(root, &file.facts.rel_path) {
+                    rs_test_18_test_support_generic::check(
+                        &TestSupportFileInput::new(
+                            &file.facts,
+                            &file.parsed,
+                            &analysis.local_runtime_packages,
+                            &analysis.local_assertions_packages,
+                        ),
+                        &mut results,
+                    );
+                }
+
                 if matches!(file.facts.kind, TestFileKind::Source) {
                     for module in &file.parsed.cfg_test_modules {
                         rs_test_01_inline_test_bodies::check(
@@ -107,11 +145,27 @@ pub fn check(
                 rs_test_04_ignore_reason::check(&file_input, &mut results);
 
                 for function in &file.parsed.test_functions {
-                    let function_input = TestFunctionInput::new(&file.facts, &file.parsed, function);
+                    let proof_bearing_assertion_functions = file
+                        .facts
+                        .assertions_package_name
+                        .as_deref()
+                        .and_then(|package| {
+                            analysis.proof_bearing_assertions_by_package.get(package)
+                        });
+                    let function_input = TestFunctionInput::new(
+                        &file.facts,
+                        &file.parsed,
+                        function,
+                        proof_bearing_assertion_functions,
+                    );
                     rs_test_05_should_panic_expected::check(&function_input, &mut results);
                     rs_test_06_tautological_assertions::check(&function_input, &mut results);
                     rs_test_07_real_proof_site::check(&function_input, &mut results);
                     rs_test_08_weak_matches_assert::check(&function_input, &mut results);
+                    rs_test_17_external_harnesses_use_assertions::check(
+                        &function_input,
+                        &mut results,
+                    );
                 }
             }
 
@@ -138,7 +192,11 @@ fn analyze_root(
 ) -> RootAnalysis {
     let mut analysis = RootAnalysis::default();
 
-    for file in facts.files.iter().filter(|file| file.root_rel_dir == root.rel_dir) {
+    for file in facts
+        .files
+        .iter()
+        .filter(|file| file.root_rel_dir == root.rel_dir)
+    {
         if matches!(
             file.kind,
             TestFileKind::InternalSidecarMod
@@ -191,6 +249,21 @@ fn analyze_root(
         });
     }
 
+    analysis.local_runtime_packages = root
+        .components
+        .iter()
+        .filter_map(|component| component.runtime_package_name.clone())
+        .collect();
+    analysis.local_assertions_packages = root
+        .components
+        .iter()
+        .filter_map(|component| component.assertions_package_name.clone())
+        .collect();
+    (
+        analysis.proof_bearing_assertions_by_file,
+        analysis.proof_bearing_assertions_by_package,
+    ) = collect_assertions_proof_catalog(&analysis.files);
+
     analysis
 }
 
@@ -200,9 +273,11 @@ fn active_failures_for_root<'a>(
     analysis: &'a RootAnalysis,
     mutation_active: bool,
 ) -> Vec<&'a InputFailureFacts> {
-    let async_active = analysis.has_tests && (root.tokio_dependency_present || analysis.has_tokio_tests);
+    let async_active =
+        analysis.has_tests && (root.tokio_dependency_present || analysis.has_tokio_tests);
 
-    facts.input_failures
+    facts
+        .input_failures
         .iter()
         .filter(|failure| failure.root_rel_dir == root.rel_dir)
         .chain(analysis.input_failures.iter())
@@ -216,4 +291,150 @@ fn active_failures_for_root<'a>(
             true
         })
         .collect::<Vec<_>>()
+}
+
+fn collect_assertions_proof_catalog(
+    files: &[AnalyzedFile],
+) -> (
+    BTreeMap<String, BTreeSet<String>>,
+    BTreeMap<String, BTreeSet<String>>,
+) {
+    let mut proof_bearing_by_file = BTreeMap::new();
+    let mut proof_bearing_by_package = BTreeMap::new();
+    let mut files_by_package: BTreeMap<String, Vec<&AnalyzedFile>> = BTreeMap::new();
+
+    for file in files
+        .iter()
+        .filter(|file| matches!(file.facts.kind, TestFileKind::AssertionsModule))
+    {
+        let Some(package_name) = file.facts.assertions_package_name.as_ref() else {
+            continue;
+        };
+        files_by_package
+            .entry(package_name.clone())
+            .or_default()
+            .push(file);
+    }
+
+    for (package_name, package_files) in files_by_package {
+        let mut proof_bearing_names = package_files
+            .iter()
+            .flat_map(|file| {
+                file.parsed
+                    .functions
+                    .iter()
+                    .filter(|function| {
+                        function.is_public && !function.is_test && function.has_assertion_macro
+                    })
+                    .map(|function| function.name.clone())
+            })
+            .collect::<BTreeSet<_>>();
+
+        loop {
+            let mut changed = false;
+            for file in &package_files {
+                let candidates = file
+                    .parsed
+                    .functions
+                    .iter()
+                    .filter(|function| function.is_public && !function.is_test)
+                    .collect::<Vec<_>>();
+                for function in candidates {
+                    if proof_bearing_names.contains(&function.name) {
+                        continue;
+                    }
+                    if exported_assertion_function_calls_proof(
+                        function,
+                        &file.parsed.imports,
+                        &file.parsed.file_function_names,
+                        &package_name,
+                        &proof_bearing_names,
+                    ) {
+                        changed |= proof_bearing_names.insert(function.name.clone());
+                    }
+                }
+            }
+            if !changed {
+                break;
+            }
+        }
+
+        let _ = proof_bearing_by_package.insert(package_name, proof_bearing_names.clone());
+        for file in package_files {
+            let file_proofs = file
+                .parsed
+                .functions
+                .iter()
+                .filter(|function| {
+                    function.is_public
+                        && !function.is_test
+                        && proof_bearing_names.contains(&function.name)
+                })
+                .map(|function| function.name.clone())
+                .collect();
+            let _ = proof_bearing_by_file.insert(file.facts.rel_path.clone(), file_proofs);
+        }
+    }
+
+    (proof_bearing_by_file, proof_bearing_by_package)
+}
+
+fn exported_assertion_function_calls_proof(
+    function: &FunctionInfo,
+    imports: &[UseBinding],
+    file_function_names: &BTreeSet<String>,
+    package_name: &str,
+    proof_bearing_names: &BTreeSet<String>,
+) -> bool {
+    let mut owned_roots = BTreeSet::from([
+        "crate".to_owned(),
+        "self".to_owned(),
+        "super".to_owned(),
+        package_name.to_owned(),
+    ]);
+    let mut bare_imported_proofs = BTreeSet::new();
+    let mut has_owned_glob = false;
+
+    for binding in imports {
+        if !binding
+            .path_segments
+            .first()
+            .is_some_and(|segment| owned_roots.contains(segment))
+        {
+            continue;
+        }
+
+        if let Some(local_name) = binding.local_name.as_ref() {
+            let _ = owned_roots.insert(local_name.clone());
+            if binding
+                .path_segments
+                .last()
+                .is_some_and(|name| proof_bearing_names.contains(name))
+            {
+                let _ = bare_imported_proofs.insert(local_name.clone());
+            }
+        } else {
+            has_owned_glob = true;
+        }
+    }
+
+    function
+        .call_paths
+        .iter()
+        .any(|path| match path.as_slice() {
+            [name] => {
+                !function.shadowed_idents.contains(name)
+                    && proof_bearing_names.contains(name)
+                    && (file_function_names.contains(name)
+                        || bare_imported_proofs.contains(name)
+                        || has_owned_glob)
+            }
+            [first, .., last] => owned_roots.contains(first) && proof_bearing_names.contains(last),
+            _ => false,
+        })
+}
+
+fn is_test_support_file(root: &TestRootFacts, rel_path: &str) -> bool {
+    let test_support_src = discover::join_under_root(&root.rel_dir, "test_support/src");
+    rel_path == test_support_src || discover::path_is_under(rel_path, &test_support_src)
 }

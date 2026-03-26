@@ -1,4 +1,4 @@
-use super::{run_family, rule_files, tempdir, write_file};
+use super::{rule_files, run_family, tempdir, write_file};
 
 #[test]
 fn owned_sidecar_directory_shape_passes_cleanly() {
@@ -15,7 +15,11 @@ fn owned_sidecar_directory_shape_passes_cleanly() {
         "src/lib.rs",
         "#[cfg(test)]\n#[path = \"lib_tests/mod.rs\"]\nmod lib_tests;\n",
     );
-    write_file(root, "src/lib_tests/mod.rs", "#[test]\nfn owned_sidecar() { assert!(true); }\n");
+    write_file(
+        root,
+        "src/lib_tests/mod.rs",
+        "#[test]\nfn owned_sidecar() { assert!(true); }\n",
+    );
 
     let results = run_family(root);
 

@@ -2,11 +2,11 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use guardrail3_domain_report::{CheckResult, Severity};
 
+use super::AnalyzedFile;
 use super::discover::{parent_dir, path_is_under};
 use super::facts::{RuntimeAssertionsViolation, TestFileKind, TestRootFacts};
 use super::inputs::RuntimeAssertionsViolationInput;
 use super::parse::{ModuleInfo, UseBinding};
-use super::AnalyzedFile;
 
 const ID: &str = "RS-TEST-03";
 
@@ -49,7 +49,8 @@ fn collect_violations(
     violations.extend(non_component_harness_violations(files, scoped_files));
 
     for component in &root.components {
-        let harnesses_exist = !component.sidecars.is_empty() || !component.external_harnesses.is_empty();
+        let harnesses_exist =
+            !component.sidecars.is_empty() || !component.external_harnesses.is_empty();
         if !harnesses_exist {
             continue;
         }
@@ -70,7 +71,10 @@ fn collect_violations(
         }
 
         if let Some(assertions_package_name) = component.assertions_package_name.as_ref() {
-            if component.runtime_normal_dependencies.contains(assertions_package_name) {
+            if component
+                .runtime_normal_dependencies
+                .contains(assertions_package_name)
+            {
                 violations.push(RuntimeAssertionsViolation {
                     rel_path: component.runtime_cargo_rel_path.clone(),
                     line: None,
@@ -78,7 +82,10 @@ fn collect_violations(
                     message: "Runtime crates must not take sibling assertions crates as normal dependencies.".to_owned(),
                 });
             }
-            if !component.runtime_dev_dependencies.contains(assertions_package_name) {
+            if !component
+                .runtime_dev_dependencies
+                .contains(assertions_package_name)
+            {
                 violations.push(RuntimeAssertionsViolation {
                     rel_path: component.runtime_cargo_rel_path.clone(),
                     line: None,
@@ -93,14 +100,18 @@ fn collect_violations(
                 .runtime_package_name
                 .as_ref()
                 .is_some_and(|runtime_package_name| {
-                    !component.assertions_dependencies.contains(runtime_package_name)
+                    !component
+                        .assertions_dependencies
+                        .contains(runtime_package_name)
                 })
         {
             violations.push(RuntimeAssertionsViolation {
                 rel_path: component.assertions_cargo_rel_path.clone(),
                 line: None,
                 title: "assertions missing runtime dependency".to_owned(),
-                message: "Assertions crates must depend on the sibling runtime crate they validate.".to_owned(),
+                message:
+                    "Assertions crates must depend on the sibling runtime crate they validate."
+                        .to_owned(),
             });
         }
 
@@ -155,7 +166,11 @@ fn collect_violations(
             }
 
             for module in &file.parsed.modules {
-                if module_path_includes_runtime_src(module, external_harness, &component.runtime_rel_dir) {
+                if module_path_includes_runtime_src(
+                    module,
+                    external_harness,
+                    &component.runtime_rel_dir,
+                ) {
                     violations.push(RuntimeAssertionsViolation {
                         rel_path: external_harness.clone(),
                         line: Some(module.line),
@@ -165,19 +180,14 @@ fn collect_violations(
                 }
             }
 
-            if let Some(local_root) = file
-                .parsed
-                .file_call_paths
-                .iter()
-                .find_map(|path| {
-                    first_disallowed_local_package(
-                        path,
-                        local_package_names,
-                        &allowed_external_packages,
-                    )
-                    .map(str::to_owned)
-                })
-            {
+            if let Some(local_root) = file.parsed.file_call_paths.iter().find_map(|path| {
+                first_disallowed_local_package(
+                    path,
+                    local_package_names,
+                    &allowed_external_packages,
+                )
+                .map(str::to_owned)
+            }) {
                 violations.push(RuntimeAssertionsViolation {
                     rel_path: external_harness.clone(),
                     line: None,
@@ -227,19 +237,10 @@ fn collect_violations(
                     });
                 }
             }
-            if let Some(local_root) = file
-                .parsed
-                .file_call_paths
-                .iter()
-                .find_map(|path| {
-                    first_disallowed_local_package(
-                        path,
-                        local_package_names,
-                        &allowed_sidecar_packages,
-                    )
+            if let Some(local_root) = file.parsed.file_call_paths.iter().find_map(|path| {
+                first_disallowed_local_package(path, local_package_names, &allowed_sidecar_packages)
                     .map(str::to_owned)
-                })
-            {
+            }) {
                 violations.push(RuntimeAssertionsViolation {
                     rel_path: file.facts.rel_path.clone(),
                     line: None,
@@ -283,19 +284,14 @@ fn collect_violations(
                     });
                 }
             }
-            if let Some(local_root) = file
-                .parsed
-                .file_call_paths
-                .iter()
-                .find_map(|path| {
-                    first_disallowed_local_package(
-                        path,
-                        local_package_names,
-                        &allowed_assertions_packages,
-                    )
-                    .map(str::to_owned)
-                })
-            {
+            if let Some(local_root) = file.parsed.file_call_paths.iter().find_map(|path| {
+                first_disallowed_local_package(
+                    path,
+                    local_package_names,
+                    &allowed_assertions_packages,
+                )
+                .map(str::to_owned)
+            }) {
                 violations.push(RuntimeAssertionsViolation {
                     rel_path: file.facts.rel_path.clone(),
                     line: None,
@@ -366,7 +362,9 @@ fn import_hits_sibling_module(binding: &UseBinding, owner_module_name: &str) -> 
     imported != owner_module_name && imported != &format!("{owner_module_name}_tests")
 }
 
-fn allowed_external_harness_packages(component: &super::facts::TestComponentFacts) -> BTreeSet<String> {
+fn allowed_external_harness_packages(
+    component: &super::facts::TestComponentFacts,
+) -> BTreeSet<String> {
     let mut allowed = BTreeSet::from(["test_support".to_owned()]);
     if let Some(runtime_package_name) = component.runtime_package_name.as_ref() {
         let _ = allowed.insert(runtime_package_name.clone());

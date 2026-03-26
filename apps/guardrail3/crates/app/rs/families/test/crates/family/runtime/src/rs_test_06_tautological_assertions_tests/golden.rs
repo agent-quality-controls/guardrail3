@@ -1,4 +1,4 @@
-use super::{run_family, rule_files, tempdir, write_file};
+use super::{rule_files, run_family, tempdir, write_file};
 
 #[test]
 fn variable_vs_literal_assertion_is_not_tautological() {

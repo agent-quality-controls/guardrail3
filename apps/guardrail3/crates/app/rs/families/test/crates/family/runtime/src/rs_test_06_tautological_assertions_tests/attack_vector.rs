@@ -1,6 +1,6 @@
 use guardrail3_domain_report::Severity;
 
-use super::{finding, run_family, rule_files, tempdir, write_file};
+use super::{finding, rule_files, run_family, tempdir, write_file};
 
 #[test]
 fn literal_vs_literal_assertion_is_reported() {
@@ -19,7 +19,10 @@ fn literal_vs_literal_assertion_is_reported() {
     );
 
     let results = run_family(root);
-    assert_eq!(rule_files(&results, "RS-TEST-06"), vec!["tests/asserts.rs".to_owned()]);
+    assert_eq!(
+        rule_files(&results, "RS-TEST-06"),
+        vec!["tests/asserts.rs".to_owned()]
+    );
     let finding = finding(&results, "RS-TEST-06");
     assert_eq!(finding.severity, Severity::Warn);
     assert_eq!(finding.title, "tautological assertion");

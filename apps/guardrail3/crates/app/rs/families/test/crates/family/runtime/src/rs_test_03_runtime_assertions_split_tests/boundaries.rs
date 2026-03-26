@@ -23,7 +23,10 @@ fn root_local_sidecar_harness_is_reported_instead_of_being_silently_skipped() {
     let finding = finding(&results, "RS-TEST-03");
 
     assert_eq!(finding.severity, Severity::Error);
-    assert_eq!(finding.title, "test harness outside runtime/assertions split");
+    assert_eq!(
+        finding.title,
+        "test harness outside runtime/assertions split"
+    );
     assert_eq!(finding.file.as_deref(), Some("src/lib_tests/mod.rs"));
     assert_eq!(finding.line, None);
 }
@@ -49,7 +52,10 @@ fn root_local_external_harness_is_reported_instead_of_being_silently_skipped() {
     let finding = finding(&results, "RS-TEST-03");
 
     assert_eq!(finding.severity, Severity::Error);
-    assert_eq!(finding.title, "test harness outside runtime/assertions split");
+    assert_eq!(
+        finding.title,
+        "test harness outside runtime/assertions split"
+    );
     assert_eq!(finding.file.as_deref(), Some("tests/public_surface.rs"));
     assert_eq!(finding.line, None);
 }
@@ -69,7 +75,11 @@ fn missing_assertions_crate_for_external_harness_is_reported() {
         "crates/demo/runtime/Cargo.toml",
         "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
-    write_file(root, "crates/demo/runtime/src/lib.rs", "pub fn value() -> u8 { 1 }\n");
+    write_file(
+        root,
+        "crates/demo/runtime/src/lib.rs",
+        "pub fn value() -> u8 { 1 }\n",
+    );
     write_file(
         root,
         "crates/demo/runtime/tests/public_surface.rs",
@@ -81,7 +91,10 @@ fn missing_assertions_crate_for_external_harness_is_reported() {
 
     assert_eq!(finding.severity, Severity::Error);
     assert_eq!(finding.title, "assertions crate missing");
-    assert_eq!(finding.file.as_deref(), Some("crates/demo/assertions/Cargo.toml"));
+    assert_eq!(
+        finding.file.as_deref(),
+        Some("crates/demo/assertions/Cargo.toml")
+    );
     assert_eq!(finding.line, None);
 }
 
@@ -100,7 +113,11 @@ fn runtime_depends_on_assertions_at_normal_scope_is_reported() {
         "crates/demo/runtime/Cargo.toml",
         "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_assertions = { path = \"../assertions\" }\n[dev-dependencies]\ndemo_assertions = { path = \"../assertions\" }\n",
     );
-    write_file(root, "crates/demo/runtime/src/lib.rs", "pub fn value() -> u8 { 1 }\n");
+    write_file(
+        root,
+        "crates/demo/runtime/src/lib.rs",
+        "pub fn value() -> u8 { 1 }\n",
+    );
     write_file(
         root,
         "crates/demo/runtime/tests/public_surface.rs",
@@ -121,8 +138,14 @@ fn runtime_depends_on_assertions_at_normal_scope_is_reported() {
     let finding = finding(&results, "RS-TEST-03");
 
     assert_eq!(finding.severity, Severity::Error);
-    assert_eq!(finding.title, "runtime depends on assertions at normal scope");
-    assert_eq!(finding.file.as_deref(), Some("crates/demo/runtime/Cargo.toml"));
+    assert_eq!(
+        finding.title,
+        "runtime depends on assertions at normal scope"
+    );
+    assert_eq!(
+        finding.file.as_deref(),
+        Some("crates/demo/runtime/Cargo.toml")
+    );
     assert_eq!(finding.line, None);
 }
 
@@ -141,7 +164,11 @@ fn runtime_missing_assertions_dev_dependency_is_reported() {
         "crates/demo/runtime/Cargo.toml",
         "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
-    write_file(root, "crates/demo/runtime/src/lib.rs", "pub fn value() -> u8 { 1 }\n");
+    write_file(
+        root,
+        "crates/demo/runtime/src/lib.rs",
+        "pub fn value() -> u8 { 1 }\n",
+    );
     write_file(
         root,
         "crates/demo/runtime/tests/public_surface.rs",
@@ -163,7 +190,10 @@ fn runtime_missing_assertions_dev_dependency_is_reported() {
 
     assert_eq!(finding.severity, Severity::Error);
     assert_eq!(finding.title, "runtime missing assertions dev-dependency");
-    assert_eq!(finding.file.as_deref(), Some("crates/demo/runtime/Cargo.toml"));
+    assert_eq!(
+        finding.file.as_deref(),
+        Some("crates/demo/runtime/Cargo.toml")
+    );
     assert_eq!(finding.line, None);
 }
 
@@ -182,7 +212,11 @@ fn assertions_missing_runtime_dependency_is_reported() {
         "crates/demo/runtime/Cargo.toml",
         "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = { path = \"../assertions\" }\n",
     );
-    write_file(root, "crates/demo/runtime/src/lib.rs", "pub fn value() -> u8 { 1 }\n");
+    write_file(
+        root,
+        "crates/demo/runtime/src/lib.rs",
+        "pub fn value() -> u8 { 1 }\n",
+    );
     write_file(
         root,
         "crates/demo/runtime/tests/public_surface.rs",
@@ -193,14 +227,21 @@ fn assertions_missing_runtime_dependency_is_reported() {
         "crates/demo/assertions/Cargo.toml",
         "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
-    write_file(root, "crates/demo/assertions/src/lib.rs", "pub fn assert_runtime() {}\n");
+    write_file(
+        root,
+        "crates/demo/assertions/src/lib.rs",
+        "pub fn assert_runtime() {}\n",
+    );
 
     let results = run_family(root);
     let finding = finding(&results, "RS-TEST-03");
 
     assert_eq!(finding.severity, Severity::Error);
     assert_eq!(finding.title, "assertions missing runtime dependency");
-    assert_eq!(finding.file.as_deref(), Some("crates/demo/assertions/Cargo.toml"));
+    assert_eq!(
+        finding.file.as_deref(),
+        Some("crates/demo/assertions/Cargo.toml")
+    );
     assert_eq!(finding.line, None);
 }
 
@@ -219,7 +260,11 @@ fn sidecar_missing_owned_assertions_module_is_reported() {
         "crates/demo/runtime/Cargo.toml",
         "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = { path = \"../assertions\" }\n",
     );
-    write_file(root, "crates/demo/runtime/src/lib.rs", "pub fn value() -> u8 { 1 }\n");
+    write_file(
+        root,
+        "crates/demo/runtime/src/lib.rs",
+        "pub fn value() -> u8 { 1 }\n",
+    );
     write_file(
         root,
         "crates/demo/runtime/src/lib_tests/mod.rs",
@@ -236,7 +281,10 @@ fn sidecar_missing_owned_assertions_module_is_reported() {
 
     assert_eq!(finding.severity, Severity::Error);
     assert_eq!(finding.title, "sidecar missing owned assertions module");
-    assert_eq!(finding.file.as_deref(), Some("crates/demo/runtime/src/lib_tests/mod.rs"));
+    assert_eq!(
+        finding.file.as_deref(),
+        Some("crates/demo/runtime/src/lib_tests/mod.rs")
+    );
     assert_eq!(finding.line, None);
 }
 
@@ -255,8 +303,16 @@ fn sidecar_imports_sibling_production_module_is_reported() {
         "crates/demo/runtime/Cargo.toml",
         "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = { path = \"../assertions\" }\n",
     );
-    write_file(root, "crates/demo/runtime/src/lib.rs", "pub fn value() -> u8 { 1 }\n");
-    write_file(root, "crates/demo/runtime/src/other.rs", "pub fn helper() {}\n");
+    write_file(
+        root,
+        "crates/demo/runtime/src/lib.rs",
+        "pub fn value() -> u8 { 1 }\n",
+    );
+    write_file(
+        root,
+        "crates/demo/runtime/src/other.rs",
+        "pub fn helper() {}\n",
+    );
     write_file(
         root,
         "crates/demo/runtime/src/lib_tests/mod.rs",
@@ -278,7 +334,10 @@ fn sidecar_imports_sibling_production_module_is_reported() {
 
     assert_eq!(finding.severity, Severity::Error);
     assert_eq!(finding.title, "sidecar imports sibling production module");
-    assert_eq!(finding.file.as_deref(), Some("crates/demo/runtime/src/lib_tests/mod.rs"));
+    assert_eq!(
+        finding.file.as_deref(),
+        Some("crates/demo/runtime/src/lib_tests/mod.rs")
+    );
     assert_eq!(finding.line, Some(1));
 }
 
@@ -297,7 +356,11 @@ fn assertions_module_reaches_local_private_code_is_reported() {
         "crates/demo/runtime/Cargo.toml",
         "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = { path = \"../assertions\" }\n",
     );
-    write_file(root, "crates/demo/runtime/src/lib.rs", "pub fn value() -> u8 { 1 }\n");
+    write_file(
+        root,
+        "crates/demo/runtime/src/lib.rs",
+        "pub fn value() -> u8 { 1 }\n",
+    );
     write_file(
         root,
         "crates/demo/runtime/tests/public_surface.rs",
@@ -318,8 +381,14 @@ fn assertions_module_reaches_local_private_code_is_reported() {
     let finding = finding(&results, "RS-TEST-03");
 
     assert_eq!(finding.severity, Severity::Error);
-    assert_eq!(finding.title, "assertions module reaches local private code");
-    assert_eq!(finding.file.as_deref(), Some("crates/demo/assertions/src/lib.rs"));
+    assert_eq!(
+        finding.title,
+        "assertions module reaches local private code"
+    );
+    assert_eq!(
+        finding.file.as_deref(),
+        Some("crates/demo/assertions/src/lib.rs")
+    );
     assert_eq!(finding.line, Some(1));
 }
 
@@ -338,7 +407,11 @@ fn external_harness_crate_boundary_is_reported() {
         "crates/demo/runtime/Cargo.toml",
         "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = { path = \"../assertions\" }\n",
     );
-    write_file(root, "crates/demo/runtime/src/lib.rs", "pub fn value() -> u8 { 1 }\n");
+    write_file(
+        root,
+        "crates/demo/runtime/src/lib.rs",
+        "pub fn value() -> u8 { 1 }\n",
+    );
     write_file(
         root,
         "crates/demo/runtime/tests/public_surface.rs",
@@ -349,14 +422,24 @@ fn external_harness_crate_boundary_is_reported() {
         "crates/demo/assertions/Cargo.toml",
         "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = { path = \"../runtime\" }\n",
     );
-    write_file(root, "crates/demo/assertions/src/lib.rs", "pub fn assert_runtime() {}\n");
+    write_file(
+        root,
+        "crates/demo/assertions/src/lib.rs",
+        "pub fn assert_runtime() {}\n",
+    );
 
     let results = run_family(root);
     let finding = finding(&results, "RS-TEST-03");
 
     assert_eq!(finding.severity, Severity::Error);
-    assert_eq!(finding.title, "external harness reaches private runtime glue");
-    assert_eq!(finding.file.as_deref(), Some("crates/demo/runtime/tests/public_surface.rs"));
+    assert_eq!(
+        finding.title,
+        "external harness reaches private runtime glue"
+    );
+    assert_eq!(
+        finding.file.as_deref(),
+        Some("crates/demo/runtime/tests/public_surface.rs")
+    );
     assert_eq!(finding.line, Some(1));
 }
 
@@ -375,7 +458,11 @@ fn external_harness_self_boundary_stays_quiet() {
         "crates/demo/runtime/Cargo.toml",
         "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = { path = \"../assertions\" }\n",
     );
-    write_file(root, "crates/demo/runtime/src/lib.rs", "pub fn value() -> u8 { 1 }\n");
+    write_file(
+        root,
+        "crates/demo/runtime/src/lib.rs",
+        "pub fn value() -> u8 { 1 }\n",
+    );
     write_file(
         root,
         "crates/demo/runtime/tests/public_surface.rs",
@@ -386,7 +473,11 @@ fn external_harness_self_boundary_stays_quiet() {
         "crates/demo/assertions/Cargo.toml",
         "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = { path = \"../runtime\" }\n",
     );
-    write_file(root, "crates/demo/assertions/src/lib.rs", "pub fn assert_runtime() {}\n");
+    write_file(
+        root,
+        "crates/demo/assertions/src/lib.rs",
+        "pub fn assert_runtime() {}\n",
+    );
 
     let results = run_family(root);
 
@@ -411,7 +502,11 @@ fn external_harness_super_boundary_is_reported() {
         "crates/demo/runtime/Cargo.toml",
         "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = { path = \"../assertions\" }\n",
     );
-    write_file(root, "crates/demo/runtime/src/lib.rs", "pub fn value() -> u8 { 1 }\n");
+    write_file(
+        root,
+        "crates/demo/runtime/src/lib.rs",
+        "pub fn value() -> u8 { 1 }\n",
+    );
     write_file(
         root,
         "crates/demo/runtime/tests/public_surface.rs",
@@ -422,13 +517,23 @@ fn external_harness_super_boundary_is_reported() {
         "crates/demo/assertions/Cargo.toml",
         "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = { path = \"../runtime\" }\n",
     );
-    write_file(root, "crates/demo/assertions/src/lib.rs", "pub fn assert_runtime() {}\n");
+    write_file(
+        root,
+        "crates/demo/assertions/src/lib.rs",
+        "pub fn assert_runtime() {}\n",
+    );
 
     let results = run_family(root);
     let finding = finding(&results, "RS-TEST-03");
 
     assert_eq!(finding.severity, Severity::Error);
-    assert_eq!(finding.title, "external harness reaches private runtime glue");
-    assert_eq!(finding.file.as_deref(), Some("crates/demo/runtime/tests/public_surface.rs"));
+    assert_eq!(
+        finding.title,
+        "external harness reaches private runtime glue"
+    );
+    assert_eq!(
+        finding.file.as_deref(),
+        Some("crates/demo/runtime/tests/public_surface.rs")
+    );
     assert_eq!(finding.line, Some(1));
 }

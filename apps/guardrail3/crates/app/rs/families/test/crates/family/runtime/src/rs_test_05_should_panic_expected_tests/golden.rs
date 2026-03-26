@@ -1,4 +1,4 @@
-use super::{run_family, rule_files, tempdir, write_file};
+use super::{rule_files, run_family, tempdir, write_file};
 
 #[test]
 fn expected_message_keeps_should_panic_quiet() {

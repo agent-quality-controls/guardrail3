@@ -1,4 +1,4 @@
-use super::{run_family, rule_files, tempdir, write_file};
+use super::{rule_files, run_family, tempdir, write_file};
 
 #[test]
 fn malformed_nextest_config_is_ignored_without_async_activation() {
@@ -15,7 +15,11 @@ fn malformed_nextest_config_is_ignored_without_async_activation() {
         "tests/basic.rs",
         "#[test]\nfn runs() { assert_eq!(1, 1); }\n",
     );
-    write_file(root, ".config/nextest.toml", "[profile.default]\nslow-timeout = ");
+    write_file(
+        root,
+        ".config/nextest.toml",
+        "[profile.default]\nslow-timeout = ",
+    );
 
     let results = run_family(root);
 

@@ -65,7 +65,10 @@ impl StubToolChecker {
         S: AsRef<str>,
     {
         Self {
-            installed_tools: tools.into_iter().map(|tool| tool.as_ref().to_owned()).collect(),
+            installed_tools: tools
+                .into_iter()
+                .map(|tool| tool.as_ref().to_owned())
+                .collect(),
         }
     }
 }

@@ -13,7 +13,11 @@ fn ad_hoc_cfg_test_module_declaration_is_reported() {
         "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
     write_file(root, "src/lib.rs", "#[cfg(test)]\nmod helper_tests;\n");
-    write_file(root, "src/lib_tests/mod.rs", "#[test]\nfn helper() { assert!(true); }\n");
+    write_file(
+        root,
+        "src/lib_tests/mod.rs",
+        "#[test]\nfn helper() { assert!(true); }\n",
+    );
 
     let results = run_family(root);
     let finding = finding(&results, "RS-TEST-02");
@@ -34,7 +38,11 @@ fn ad_hoc_src_tests_tree_is_reported() {
         "Cargo.toml",
         "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
-    write_file(root, "src/tests/helper.rs", "#[test]\nfn stray() { assert!(true); }\n");
+    write_file(
+        root,
+        "src/tests/helper.rs",
+        "#[test]\nfn stray() { assert!(true); }\n",
+    );
 
     let results = run_family(root);
     let finding = finding(&results, "RS-TEST-02");
@@ -55,7 +63,11 @@ fn missing_sidecar_mod_rs_is_reported() {
         "Cargo.toml",
         "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
-    write_file(root, "src/lib_tests/helper.rs", "#[test]\nfn stray() { assert!(true); }\n");
+    write_file(
+        root,
+        "src/lib_tests/helper.rs",
+        "#[test]\nfn stray() { assert!(true); }\n",
+    );
 
     let results = run_family(root);
     let finding = finding(&results, "RS-TEST-02");
@@ -76,7 +88,11 @@ fn flat_tests_file_is_reported() {
         "Cargo.toml",
         "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
-    write_file(root, "src/lib_tests.rs", "#[test]\nfn stray() { assert!(true); }\n");
+    write_file(
+        root,
+        "src/lib_tests.rs",
+        "#[test]\nfn stray() { assert!(true); }\n",
+    );
 
     let results = run_family(root);
     let finding = finding(&results, "RS-TEST-02");
@@ -97,7 +113,11 @@ fn flat_test_file_is_reported() {
         "Cargo.toml",
         "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
-    write_file(root, "src/lib_test.rs", "#[test]\nfn stray() { assert!(true); }\n");
+    write_file(
+        root,
+        "src/lib_test.rs",
+        "#[test]\nfn stray() { assert!(true); }\n",
+    );
 
     let results = run_family(root);
     let finding = finding(&results, "RS-TEST-02");
@@ -118,7 +138,11 @@ fn flat_tests_rs_file_is_reported() {
         "Cargo.toml",
         "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
-    write_file(root, "src/tests.rs", "#[test]\nfn stray() { assert!(true); }\n");
+    write_file(
+        root,
+        "src/tests.rs",
+        "#[test]\nfn stray() { assert!(true); }\n",
+    );
 
     let results = run_family(root);
     let finding = finding(&results, "RS-TEST-02");
@@ -144,7 +168,11 @@ fn orphaned_sidecar_harness_is_reported() {
         "crates/demo/runtime/Cargo.toml",
         "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
-    write_file(root, "crates/demo/runtime/src/lib_tests/mod.rs", "#[test]\nfn stray() { assert!(true); }\n");
+    write_file(
+        root,
+        "crates/demo/runtime/src/lib_tests/mod.rs",
+        "#[test]\nfn stray() { assert!(true); }\n",
+    );
     write_file(
         root,
         "crates/demo/assertions/Cargo.toml",

@@ -1,4 +1,4 @@
-use super::{finding, run_family, run_family_with_tool, rule_files, tempdir, write_file};
+use super::{finding, rule_files, run_family, run_family_with_tool, tempdir, write_file};
 use guardrail3_domain_report::Severity;
 
 #[test]
@@ -71,7 +71,11 @@ fn malformed_nextest_config_is_reported_when_async_active() {
         "tests/async.rs",
         "#[tokio::test]\nasync fn runs() { assert!(true); }\n",
     );
-    write_file(root, ".config/nextest.toml", "[profile.default]\nslow-timeout = ");
+    write_file(
+        root,
+        ".config/nextest.toml",
+        "[profile.default]\nslow-timeout = ",
+    );
 
     let results = run_family(root);
 

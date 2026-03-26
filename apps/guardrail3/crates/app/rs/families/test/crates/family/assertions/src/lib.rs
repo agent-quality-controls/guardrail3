@@ -13,3 +13,6 @@ pub mod rs_test_12_mutants_toml_exists;
 pub mod rs_test_13_mutants_profile_present;
 pub mod rs_test_14_mutation_hook_present;
 pub mod rs_test_15_mutants_config_sane;
+pub mod rs_test_16_assertions_modules_prove;
+pub mod rs_test_17_external_harnesses_use_assertions;
+pub mod rs_test_18_test_support_generic;
