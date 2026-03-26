@@ -1,7 +1,5 @@
 use super::super::audit_edge_for_test as audit_edge;
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_17_workspace_inherited_direction as rule17_assertions;
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_18_renamed_dependency_direction as rule18_assertions;
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_24_cross_app_boundary as rule24_assertions;
 use super::{dir_entry, project_tree};
 
 #[test]
@@ -82,7 +80,7 @@ fn renamed_inherited_path_dep_is_owned_by_rule_17_only() {
     let audit = audit_edge(&tree, "apps/api/crates/domain/core");
 
     rule17_assertions::assert_error_count(&audit.rule17, "", 1);
-    rule18_assertions::assert_no_error(&audit.rule18, "");
+    rule17_assertions::assert_no_error(&audit.rule18, "RS-HEXARCH-18");
 }
 
 #[test]
@@ -129,7 +127,7 @@ fn cross_app_inherited_path_dep_is_owned_by_rule_24_not_rule_17() {
     let audit = audit_edge(&tree, "apps/backend/crates/domain/engine");
 
     rule17_assertions::assert_no_error(&audit.rule17, "");
-    rule24_assertions::assert_error_count(&audit.rule24, "", 1);
+    rule17_assertions::assert_error_count(&audit.rule24, "RS-HEXARCH-24", 1);
 }
 
 #[test]

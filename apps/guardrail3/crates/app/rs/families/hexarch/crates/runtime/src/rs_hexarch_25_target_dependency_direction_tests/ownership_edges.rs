@@ -1,5 +1,4 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_25_target_dependency_direction as assertions;
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_24_cross_app_boundary as rule24_assertions;
 use super::{copy_fixture, write_file};
 
 #[test]
@@ -39,5 +38,5 @@ fn cross_app_target_edge_is_owned_by_rule_24_not_rule_25() {
 
     let results = super::run_family(tmp.path());
     assertions::assert_no_error(&results, "");
-    rule24_assertions::assert_error_count(&results, "", 1);
+    assertions::assert_error_count(&results, "RS-HEXARCH-24", 1);
 }

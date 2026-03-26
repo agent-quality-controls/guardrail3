@@ -1,4 +1,5 @@
 use guardrail3_domain_report::{CheckResult, Severity};
+use std::collections::BTreeSet;
 
 const RULE_ID: &str = "RS-HEXARCH-20";
 
@@ -61,9 +62,48 @@ pub fn assert_warning_results(
     expected_messages: &[&str],
 ) {
     let warnings = warning_results(results, rule_id);
-    assert_result_summary(&warnings, expected_count, expected_files, None, None, None);
-    assert_result_titles(&warnings, expected_titles);
-    assert_result_messages(&warnings, expected_messages);
+    assert_eq!(warnings.len(), expected_count, "{warnings:#?}");
+    let actual_files = warnings
+        .iter()
+        .filter_map(|result| result.file.as_deref())
+        .collect::<BTreeSet<_>>();
+    let expected_files = expected_files.iter().copied().collect::<BTreeSet<_>>();
+    assert_eq!(actual_files, expected_files, "{warnings:#?}");
+    let actual_titles = warnings
+        .iter()
+        .map(|result| result.title.as_str())
+        .collect::<BTreeSet<_>>();
+    let expected_titles = expected_titles.iter().copied().collect::<BTreeSet<_>>();
+    assert_eq!(actual_titles, expected_titles, "{warnings:#?}");
+    let actual_messages = warnings
+        .iter()
+        .map(|result| result.message.as_str())
+        .collect::<BTreeSet<_>>();
+    let expected_messages = expected_messages.iter().copied().collect::<BTreeSet<_>>();
+    assert_eq!(actual_messages, expected_messages, "{warnings:#?}");
+}
+
+pub fn assert_error_results(
+    results: &[CheckResult],
+    rule_id: &str,
+    expected_count: usize,
+    expected_files: &[&str],
+    expected_titles: &[&str],
+) {
+    let errors = error_results(results, rule_id);
+    assert_eq!(errors.len(), expected_count, "{errors:#?}");
+    let actual_files = errors
+        .iter()
+        .filter_map(|result| result.file.as_deref())
+        .collect::<BTreeSet<_>>();
+    let expected_files = expected_files.iter().copied().collect::<BTreeSet<_>>();
+    assert_eq!(actual_files, expected_files, "{errors:#?}");
+    let actual_titles = errors
+        .iter()
+        .map(|result| result.title.as_str())
+        .collect::<BTreeSet<_>>();
+    let expected_titles = expected_titles.iter().copied().collect::<BTreeSet<_>>();
+    assert_eq!(actual_titles, expected_titles, "{errors:#?}");
 }
 
 pub fn assert_warning_count(results: &[CheckResult], rule_id: &str, expected_count: usize) {

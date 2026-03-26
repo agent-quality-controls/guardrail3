@@ -1,5 +1,4 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_20_dev_dependency_direction as assertions;
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_24_cross_app_boundary as rule24_assertions;
 use super::{copy_fixture, write_file};
 
 #[test]
@@ -43,9 +42,9 @@ fn cross_app_dev_edge_is_owned_by_rule_24_not_rule_20() {
     );
 
     let results = super::run_family(tmp.path());
-    rule24_assertions::assert_error_results(
+    assertions::assert_error_results(
         &results,
-        "",
+        "RS-HEXARCH-24",
         1,
         &["apps/backend/crates/domain/engine/Cargo.toml"],
         &["cross-app boundary dependency"],

@@ -1,5 +1,4 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_05_container_not_empty as assertions;
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_06_leaf_valid as leaf_assertions;
 use super::{copy_fixture, empty_dir};
 
 #[test]
@@ -76,7 +75,7 @@ fn symlinked_child_directory_does_not_count_as_a_real_subdirectory() {
         }],
     );
 
-    leaf_assertions::assert_no_error_file_contains(&results, "apps/devctl/crates/app/types");
+    assertions::assert_no_error_file_contains(&results, "", "apps/devctl/crates/app/types");
 }
 
 #[test]

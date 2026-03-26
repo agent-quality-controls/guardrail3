@@ -8,8 +8,7 @@ use super::{copy_fixture, remove_dir, write_file};
 fn golden_has_no_rule_01_errors() {
     let tmp = copy_fixture();
     let results = super::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "");
-    assert!(errors.is_empty(), "golden should pass rule 01: {errors:#?}");
+    assertions::assert_no_error(&results, "");
 }
 
 #[test]
@@ -20,13 +19,21 @@ fn missing_outer_crates_dir_hits_every_owned_rust_app_and_only_them() {
     }
 
     let results = super::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "");
     let expected_files = FIXTURE
         .apps()
         .iter()
         .map(|app| format!("apps/{app}"))
         .collect::<BTreeSet<_>>();
-    assertions::assert_result_summary(&errors, expected_files.len(), &expected_files, None, None, None);
+    assertions::assert_error_summary(
+        &results,
+        "",
+        expected_files.len(),
+        &expected_files.iter().map(String::as_str).collect::<Vec<_>>(),
+        None,
+        None,
+        None,
+        None,
+    );
 }
 
 #[test]
@@ -39,13 +46,21 @@ fn file_outer_crates_dirs_still_count_as_missing_for_the_owned_apps() {
     }
 
     let results = super::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "");
     let expected_files = FIXTURE
         .apps()
         .iter()
         .map(|app| format!("apps/{app}"))
         .collect::<BTreeSet<_>>();
-    assertions::assert_result_summary(&errors, expected_files.len(), &expected_files, None, None, None);
+    assertions::assert_error_summary(
+        &results,
+        "",
+        expected_files.len(),
+        &expected_files.iter().map(String::as_str).collect::<Vec<_>>(),
+        None,
+        None,
+        None,
+        None,
+    );
 }
 
 #[test]
@@ -54,11 +69,19 @@ fn single_app_missing_crates_hits_only_that_app() {
     remove_dir(tmp.path(), "apps/devctl/crates");
 
     let results = super::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "");
     let expected_files = ["apps/devctl".to_owned()]
         .into_iter()
         .collect::<BTreeSet<_>>();
-    assertions::assert_result_summary(&errors, expected_files.len(), &expected_files, None, None, None);
+    assertions::assert_error_summary(
+        &results,
+        "",
+        expected_files.len(),
+        &expected_files.iter().map(String::as_str).collect::<Vec<_>>(),
+        None,
+        None,
+        None,
+        None,
+    );
 }
 
 #[test]
@@ -68,12 +91,20 @@ fn replacing_outer_crates_with_a_file_only_hits_the_owned_app_roots() {
     write_file(tmp.path(), "apps/backend/crates", "not a directory");
 
     let results = super::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "");
     let expected_files = ["apps/backend"]
         .into_iter()
         .map(str::to_owned)
         .collect::<BTreeSet<_>>();
-    assertions::assert_result_summary(&errors, expected_files.len(), &expected_files, None, None, None);
+    assertions::assert_error_summary(
+        &results,
+        "",
+        expected_files.len(),
+        &expected_files.iter().map(String::as_str).collect::<Vec<_>>(),
+        None,
+        None,
+        None,
+        None,
+    );
 }
 
 #[test]
@@ -83,9 +114,5 @@ fn replacing_nested_crates_with_a_file_is_not_owned_by_app_level_rule_01() {
     write_file(tmp.path(), FIXTURE.inner_hex_root(), "not a directory");
 
     let results = super::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "");
-    assert!(
-        errors.is_empty(),
-        "rule 01 is app-level only and should not own nested file-vs-dir cases: {errors:#?}"
-    );
+    assertions::assert_no_error(&results, "");
 }

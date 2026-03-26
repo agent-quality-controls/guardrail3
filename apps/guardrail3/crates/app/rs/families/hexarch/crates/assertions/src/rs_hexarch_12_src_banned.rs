@@ -1,4 +1,5 @@
 use guardrail3_domain_report::{CheckResult, Severity};
+use std::collections::BTreeSet;
 
 const RULE_ID: &str = "RS-HEXARCH-12";
 
@@ -60,8 +61,19 @@ pub fn assert_error_results(
     expected_titles: &[&str],
 ) {
     let errors = error_results(results, rule_id);
-    assert_result_summary(&errors, expected_count, expected_files, None, None, None);
-    assert_result_titles(&errors, expected_titles);
+    assert_eq!(errors.len(), expected_count, "{errors:#?}");
+    let actual_files = errors
+        .iter()
+        .filter_map(|result| result.file.as_deref())
+        .collect::<BTreeSet<_>>();
+    let expected_files = expected_files.iter().copied().collect::<BTreeSet<_>>();
+    assert_eq!(actual_files, expected_files, "{errors:#?}");
+    let actual_titles = errors
+        .iter()
+        .map(|result| result.title.as_str())
+        .collect::<BTreeSet<_>>();
+    let expected_titles = expected_titles.iter().copied().collect::<BTreeSet<_>>();
+    assert_eq!(actual_titles, expected_titles, "{errors:#?}");
 }
 
 pub fn assert_error_file_set(
@@ -71,7 +83,13 @@ pub fn assert_error_file_set(
     expected_files: &[&str],
 ) {
     let errors = error_results(results, rule_id);
-    assert_result_summary(&errors, expected_count, expected_files, None, None, None);
+    assert_eq!(errors.len(), expected_count, "{errors:#?}");
+    let actual_files = errors
+        .iter()
+        .filter_map(|result| result.file.as_deref())
+        .collect::<BTreeSet<_>>();
+    let expected_files = expected_files.iter().copied().collect::<BTreeSet<_>>();
+    assert_eq!(actual_files, expected_files, "{errors:#?}");
 }
 
 pub fn assert_error_count(results: &[CheckResult], rule_id: &str, expected_count: usize) {

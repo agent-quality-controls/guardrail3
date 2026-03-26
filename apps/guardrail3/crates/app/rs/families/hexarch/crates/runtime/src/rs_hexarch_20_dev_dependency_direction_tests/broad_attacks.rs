@@ -1,7 +1,6 @@
 use std::collections::BTreeSet;
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_20_dev_dependency_direction as rule20_assertions;
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_25_target_dependency_direction as rule25_assertions;
 use guardrail3_domain_project_tree::ProjectTree;
 
 use super::super::check_for_test_tree as family_check;
@@ -110,7 +109,6 @@ fn direct_dev_edges_are_warned_while_target_dev_edges_are_left_to_rule_25() {
     let tree = dev_graph_tree();
     let results = family_check(&tree);
 
-    let rule20 = rule20_assertions::warning_results(&results, "");
     let expected_rule20_files = [
         "apps/api/crates/domain/types/Cargo.toml".to_owned(),
         "apps/api/crates/ports/repo/Cargo.toml".to_owned(),
@@ -128,13 +126,13 @@ fn direct_dev_edges_are_warned_while_target_dev_edges_are_left_to_rule_25() {
     .into_iter()
     .collect::<BTreeSet<_>>();
 
-    rule20_assertions::assert_result_summary(&rule20, expected_rule20_files.len(), &expected_rule20_files, None, None, None);
-    rule20_assertions::assert_result_messages(&rule20, &expected_rule20_messages);
+    rule20_assertions::assert_warning_messages(
+        &results,
+        "",
+        expected_rule20_files.len(),
+        &expected_rule20_files.iter().map(String::as_str).collect::<Vec<_>>(),
+        &expected_rule20_messages.iter().map(String::as_str).collect::<Vec<_>>(),
+    );
 
-    let rule25 = rule25_assertions::error_results(&results, "");
-    let expected_rule25_files = ["apps/api/crates/domain/types/Cargo.toml".to_owned()]
-        .into_iter()
-        .collect::<BTreeSet<_>>();
-
-    rule25_assertions::assert_result_summary(&rule25, expected_rule25_files.len(), &expected_rule25_files, None, None, None);
+    rule20_assertions::assert_error_count(&results, "RS-HEXARCH-25", 1);
 }
