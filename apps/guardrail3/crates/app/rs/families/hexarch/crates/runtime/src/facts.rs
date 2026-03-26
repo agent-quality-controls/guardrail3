@@ -165,11 +165,18 @@ pub fn collect(tree: &ProjectTree, route: &RsHexarchRoute) -> HexarchFacts {
         });
     }
 
-    let root_snapshot = parse_cargo_value(tree, "Cargo.toml");
-    let root_workspace_members = root_snapshot
-        .value
-        .as_ref()
-        .map_or_else(|| Ok(Vec::new()), parse_workspace_members);
+    let (root_snapshot, root_workspace_members) =
+        match route.repo_root_cargo_rel_path.as_deref() {
+            Some(root_cargo_rel_path) => {
+                let snapshot = parse_cargo_value(tree, root_cargo_rel_path);
+                let members = snapshot
+                    .value
+                    .as_ref()
+                    .map_or_else(|| Ok(Vec::new()), parse_workspace_members);
+                (snapshot, members)
+            }
+            None => (CargoSnapshot::default(), Ok(Vec::new())),
+        };
     facts.root_workspace = RootWorkspaceFacts {
         cargo_parse_error: root_snapshot.parse_error.clone().or_else(|| {
             root_workspace_members

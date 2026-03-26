@@ -142,8 +142,12 @@ pub struct DependencyFamilyFacts {
 
 pub fn collect(tree: &ProjectTree, route: &RsHexarchRoute) -> DependencyFamilyFacts {
     let owned_app_roots = owned_app_roots(route);
-    let guardrail_config = parse_guardrail_config(tree);
-    let workspaces = discover_workspaces(tree, &owned_app_roots);
+    let guardrail_config = parse_guardrail_config(tree, route.guardrail_config_rel_path.as_deref());
+    let workspaces = discover_workspaces(
+        tree,
+        &owned_app_roots,
+        route.repo_root_cargo_rel_path.is_some(),
+    );
     let workspace_for_member = best_workspace_for_member(&workspaces);
     let members = collect_members(
         tree,
@@ -171,21 +175,7 @@ pub fn collect(tree: &ProjectTree, route: &RsHexarchRoute) -> DependencyFamilyFa
 
 #[cfg(test)]
 pub(crate) fn collect_for_test_tree(tree: &ProjectTree) -> DependencyFamilyFacts {
-    let scope = guardrail3_app_rs_placement::collect(tree);
-    let config = tree
-        .file_content("guardrail3.toml")
-        .and_then(|content| toml::from_str::<GuardrailConfig>(content).ok());
-    let selection = guardrail3_validation_model::RustFamilySelection::new(BTreeSet::from([
-        guardrail3_validation_model::RustValidateFamily::Hexarch,
-    ]));
-    let route = guardrail3_app_rs_family_mapper::FamilyMapper::new(
-        tree,
-        &scope,
-        config.as_ref(),
-        &selection,
-        None,
-    )
-    .map_rs_hexarch();
+    let route = crate::family_route_for_tests(tree);
     collect(tree, &route)
 }
 
@@ -250,8 +240,11 @@ struct GuardrailConfigSnapshot {
     parse_error: Option<String>,
 }
 
-fn parse_guardrail_config(tree: &ProjectTree) -> GuardrailConfigSnapshot {
-    let Some(content) = tree.file_content("guardrail3.toml") else {
+fn parse_guardrail_config(tree: &ProjectTree, rel_path: Option<&str>) -> GuardrailConfigSnapshot {
+    let Some(rel_path) = rel_path else {
+        return GuardrailConfigSnapshot::default();
+    };
+    let Some(content) = tree.file_content(rel_path) else {
         return GuardrailConfigSnapshot::default();
     };
     match toml::from_str::<GuardrailConfig>(content) {
@@ -277,11 +270,15 @@ fn parse_guardrail_config(tree: &ProjectTree) -> GuardrailConfigSnapshot {
 fn discover_workspaces(
     tree: &ProjectTree,
     owned_app_roots: &BTreeSet<String>,
+    include_repo_root_workspace: bool,
 ) -> Vec<WorkspaceFacts> {
     let mut workspaces = Vec::new();
     let mut seen = BTreeSet::new();
 
-    for dir in std::iter::once(String::new()).chain(tree.dirs_with_file("Cargo.toml")) {
+    let root_dirs = include_repo_root_workspace
+        .then_some(String::new())
+        .into_iter();
+    for dir in root_dirs.chain(tree.dirs_with_file("Cargo.toml")) {
         if !seen.insert(dir.clone()) {
             continue;
         }

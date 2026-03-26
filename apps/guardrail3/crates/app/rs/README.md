@@ -188,6 +188,9 @@ pub struct RsArchRoute {
 
 pub struct RsHexarchRoute {
     pub roots: Vec<RsRootView>,
+    pub scoped_files: Option<BTreeSet<String>>,
+    pub repo_root_cargo_rel_path: Option<String>,
+    pub guardrail_config_rel_path: Option<String>,
 }
 
 pub struct RsTestRoute {

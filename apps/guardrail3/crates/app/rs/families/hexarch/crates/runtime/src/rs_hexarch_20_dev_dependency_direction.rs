@@ -45,21 +45,7 @@ pub fn check(input: &DependencyEdgeHexarchInput<'_>, results: &mut Vec<CheckResu
 pub(crate) fn check_for_test_tree(
     tree: &guardrail3_domain_project_tree::ProjectTree,
 ) -> Vec<CheckResult> {
-    let scope = guardrail3_app_rs_placement::collect(tree);
-    let config = tree
-        .file_content("guardrail3.toml")
-        .and_then(|content| toml::from_str::<guardrail3_domain_config::types::GuardrailConfig>(content).ok());
-    let selection = guardrail3_validation_model::RustFamilySelection::new(std::collections::BTreeSet::from([
-        guardrail3_validation_model::RustValidateFamily::Hexarch,
-    ]));
-    let route = guardrail3_app_rs_family_mapper::FamilyMapper::new(
-        tree,
-        &scope,
-        config.as_ref(),
-        &selection,
-        None,
-    )
-    .map_rs_hexarch();
+    let route = super::family_route_for_tests(tree);
     super::check(tree, &route)
 }
 
