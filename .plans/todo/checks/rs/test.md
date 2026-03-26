@@ -101,6 +101,7 @@ Structural pressure such as file length and `use` count belongs to `RS-CODE`, in
 - `RS-TEST-07` must not treat `Result` returns as proof.
 - `RS-TEST-07` must not use name-based heuristics like `assert` / `verify` / `expect`.
 - `RS-TEST-02` and `RS-TEST-03` must use filesystem, manifest, and import-boundary checks.
+- Gotcha: if discovery sees sidecar or external harness files but cannot map them to a discovered `runtime/assertions` component, `RS-TEST-03` must report that as an error instead of silently skipping the root.
 - `RS-TEST-14` must use executable-line matching on active hook surfaces, not raw substring scans.
 - `RS-TEST-10` must ignore inactive surfaces:
   - no async activation means nextest config is not required

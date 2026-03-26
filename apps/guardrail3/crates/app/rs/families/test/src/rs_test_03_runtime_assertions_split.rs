@@ -46,6 +46,8 @@ fn collect_violations(
         .map(|file| (file.facts.rel_path.clone(), file))
         .collect::<BTreeMap<_, _>>();
 
+    violations.extend(non_component_harness_violations(files, scoped_files));
+
     for component in &root.components {
         let harnesses_exist = !component.sidecars.is_empty() || !component.external_harnesses.is_empty();
         if !harnesses_exist {
@@ -309,6 +311,28 @@ fn collect_violations(
 
     violations.sort_by(|left, right| left.rel_path.cmp(&right.rel_path));
     violations
+}
+
+fn non_component_harness_violations(
+    files: &[AnalyzedFile],
+    scoped_files: Option<&BTreeSet<String>>,
+) -> Vec<RuntimeAssertionsViolation> {
+    files.iter()
+        .filter(|file| file.facts.component_rel_dir.is_none())
+        .filter(|file| {
+            matches!(
+                file.facts.kind,
+                TestFileKind::InternalSidecarMod | TestFileKind::ExternalHarness
+            )
+        })
+        .filter(|file| scoped_files.is_none_or(|paths| paths.contains(&file.facts.rel_path)))
+        .map(|file| RuntimeAssertionsViolation {
+            rel_path: file.facts.rel_path.clone(),
+            line: None,
+            title: "test harness outside runtime/assertions split".to_owned(),
+            message: "Test harnesses must live under a discovered `runtime` crate with a sibling `assertions` crate; plain root-local sidecars and external harnesses are not allowed.".to_owned(),
+        })
+        .collect()
 }
 
 fn root_has_file(files: &[AnalyzedFile], rel_path: &str) -> bool {

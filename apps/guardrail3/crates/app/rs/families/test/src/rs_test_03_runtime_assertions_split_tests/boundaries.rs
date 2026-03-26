@@ -3,6 +3,58 @@ use guardrail3_domain_report::Severity;
 use crate::test_support::{finding, run_family, tempdir, write_file};
 
 #[test]
+fn root_local_sidecar_harness_is_reported_instead_of_being_silently_skipped() {
+    let fixture = tempdir();
+    let root = fixture.path();
+
+    write_file(
+        root,
+        "Cargo.toml",
+        "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write_file(root, "src/lib.rs", "pub fn value() -> u8 { 1 }\n");
+    write_file(
+        root,
+        "src/lib_tests/mod.rs",
+        "#[test]\nfn owned_sidecar() { assert_eq!(crate::value(), 1); }\n",
+    );
+
+    let results = run_family(root);
+    let finding = finding(&results, "RS-TEST-03");
+
+    assert_eq!(finding.severity, Severity::Error);
+    assert_eq!(finding.title, "test harness outside runtime/assertions split");
+    assert_eq!(finding.file.as_deref(), Some("src/lib_tests/mod.rs"));
+    assert_eq!(finding.line, None);
+}
+
+#[test]
+fn root_local_external_harness_is_reported_instead_of_being_silently_skipped() {
+    let fixture = tempdir();
+    let root = fixture.path();
+
+    write_file(
+        root,
+        "Cargo.toml",
+        "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write_file(root, "src/lib.rs", "pub fn value() -> u8 { 1 }\n");
+    write_file(
+        root,
+        "tests/public_surface.rs",
+        "#[test]\nfn public_surface() { assert_eq!(demo::value(), 1); }\n",
+    );
+
+    let results = run_family(root);
+    let finding = finding(&results, "RS-TEST-03");
+
+    assert_eq!(finding.severity, Severity::Error);
+    assert_eq!(finding.title, "test harness outside runtime/assertions split");
+    assert_eq!(finding.file.as_deref(), Some("tests/public_surface.rs"));
+    assert_eq!(finding.line, None);
+}
+
+#[test]
 fn missing_assertions_crate_for_external_harness_is_reported() {
     let fixture = tempdir();
     let root = fixture.path();
