@@ -42,6 +42,7 @@ fn emptying_all_owned_safe_container_dirs_hits_every_owned_container() {
     let results = super::run_family(tmp.path());
     assertions::assert_expected_rule_results(
         &results,
+        "",
         &expected_files
             .iter()
             .map(|file| assertions::ExpectedRuleResult {
@@ -64,6 +65,7 @@ fn emptying_outer_adapters_inbound_destroys_the_nested_hex_path_and_does_not_dou
     let results = super::run_family(tmp.path());
     assertions::assert_expected_rule_results(
         &results,
+        "",
         &[
             assertions::ExpectedRuleResult {
                 file: Some("apps/devctl/crates/adapters/inbound"),
@@ -108,6 +110,7 @@ fn emptying_only_inner_hex_containers_hits_inner_hex_and_leaves_outer_apps_clean
     let results = super::run_family(tmp.path());
     assertions::assert_expected_rule_results(
         &results,
+        "",
         &expected_files
             .iter()
             .map(|file| assertions::ExpectedRuleResult {
@@ -134,6 +137,7 @@ fn files_only_all_owned_safe_containers_hit_every_owned_container() {
     let results = super::run_family(tmp.path());
     assertions::assert_expected_rule_results(
         &results,
+        "",
         &expected_files
             .iter()
             .map(|file| assertions::ExpectedRuleResult {

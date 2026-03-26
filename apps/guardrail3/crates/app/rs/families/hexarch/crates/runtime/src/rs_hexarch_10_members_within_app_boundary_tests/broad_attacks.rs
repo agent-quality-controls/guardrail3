@@ -1,5 +1,3 @@
-use std::collections::BTreeSet;
-
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_10_members_within_app_boundary as assertions;
 use super::{copy_fixture, write_file};
 
@@ -24,21 +22,27 @@ fn outside_boundary_workspace_members_hit_every_mutated_app() {
     }
 
     let results = super::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "");
-    let actual_files = errors
-        .iter()
-        .filter_map(|error| error.file.clone())
-        .collect::<BTreeSet<_>>();
-    let expected_files = ["apps/devctl", "apps/backend", "apps/worker"]
-        .into_iter()
-        .map(str::to_owned)
-        .collect::<BTreeSet<_>>();
-
-    assert_eq!(
-        actual_files, expected_files,
-        "unexpected hit set: {errors:#?}"
+    assertions::assert_expected_rule_results(
+        &results,
+        &[
+            assertions::ExpectedRuleResult {
+                file: Some("apps/devctl"),
+                file_contains: None,
+                title_contains: Some(&["../../packages/shared-types"]),
+                message_contains: None,
+            },
+            assertions::ExpectedRuleResult {
+                file: Some("apps/backend"),
+                file_contains: None,
+                title_contains: Some(&["../../packages/shared-types"]),
+                message_contains: None,
+            },
+            assertions::ExpectedRuleResult {
+                file: Some("apps/worker"),
+                file_contains: None,
+                title_contains: Some(&["../../packages/shared-types"]),
+                message_contains: None,
+            },
+        ],
     );
-    for error in &errors {
-        assert!(error.title.contains("../../packages/shared-types"));
-    }
 }

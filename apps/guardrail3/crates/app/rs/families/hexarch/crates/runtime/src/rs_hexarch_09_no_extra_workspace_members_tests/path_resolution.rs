@@ -43,19 +43,16 @@ resolver = "2"
     );
 
     let results = super::run_family(tmp.path());
-    let rule_09 = assertions::errors_by_id(&results, "");
-    let rule_10 = assertions::errors_by_id(&results, "RS-HEXARCH-10");
-
-    assert_eq!(
-        rule_09.len(),
-        1,
-        "rule 09 should own invalid in-boundary roots: {rule_09:#?}"
+    assertions::assert_no_error(&results, "RS-HEXARCH-10");
+    assertions::assert_expected_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            file: Some("apps/devctl"),
+            file_contains: None,
+            title_contains: Some(&["./crates/"]),
+            message_contains: None,
+        }],
     );
-    assert!(
-        rule_10.is_empty(),
-        "rule 10 should not misclassify in-boundary `crates` members: {rule_10:#?}"
-    );
-    assert!(rule_09[0].title.contains("./crates/"));
 }
 
 #[test]
@@ -98,17 +95,14 @@ resolver = "2"
     );
 
     let results = super::run_family(tmp.path());
-    let rule_09 = assertions::errors_by_id(&results, "");
-    let rule_10 = assertions::errors_by_id(&results, "RS-HEXARCH-10");
-
-    assert_eq!(
-        rule_09.len(),
-        1,
-        "expected broad container-matching glob to stay owned by rule 09: {rule_09:#?}"
+    assertions::assert_no_error(&results, "RS-HEXARCH-10");
+    assertions::assert_expected_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            file: Some("apps/devctl"),
+            file_contains: None,
+            title_contains: Some(&["crates/*/*"]),
+            message_contains: None,
+        }],
     );
-    assert!(
-        rule_10.is_empty(),
-        "rule 10 should not own in-boundary broad globs: {rule_10:#?}"
-    );
-    assert!(rule_09[0].title.contains("crates/*/*"));
 }

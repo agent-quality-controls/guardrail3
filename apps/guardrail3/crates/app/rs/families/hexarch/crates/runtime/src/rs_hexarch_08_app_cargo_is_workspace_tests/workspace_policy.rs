@@ -1,5 +1,3 @@
-use std::collections::BTreeSet;
-
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_08_app_cargo_is_workspace as assertions;
 use super::{copy_fixture, write_file};
 
@@ -55,27 +53,29 @@ fn package_style_app_cargo_hits_every_mutated_app() {
     }
 
     let results = super::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "");
-    let actual_files = errors
-        .iter()
-        .filter_map(|error| error.file.clone())
-        .collect::<BTreeSet<_>>();
-    let expected_files = [
-        "apps/devctl/Cargo.toml",
-        "apps/backend/Cargo.toml",
-        "apps/worker/Cargo.toml",
-    ]
-    .into_iter()
-    .map(str::to_owned)
-    .collect::<BTreeSet<_>>();
-
-    assert_eq!(
-        actual_files, expected_files,
-        "unexpected hit set: {errors:#?}"
+    assertions::assert_expected_rule_results(
+        &results,
+        &[
+            assertions::ExpectedRuleResult {
+                file: Some("apps/devctl/Cargo.toml"),
+                file_contains: None,
+                title_contains: Some(&["must be a workspace"]),
+                message_contains: None,
+            },
+            assertions::ExpectedRuleResult {
+                file: Some("apps/backend/Cargo.toml"),
+                file_contains: None,
+                title_contains: Some(&["must be a workspace"]),
+                message_contains: None,
+            },
+            assertions::ExpectedRuleResult {
+                file: Some("apps/worker/Cargo.toml"),
+                file_contains: None,
+                title_contains: Some(&["must be a workspace"]),
+                message_contains: None,
+            },
+        ],
     );
-    for error in &errors {
-        assert!(error.title.contains("must be a workspace"));
-    }
 }
 
 #[test]
@@ -90,13 +90,13 @@ fn single_package_style_app_cargo_hits_only_that_app() {
     );
 
     let results = super::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "");
-
-    assert_eq!(
-        errors.len(),
-        1,
-        "expected exactly one package-style app hit: {errors:#?}"
+    assertions::assert_expected_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            file: Some("apps/devctl/Cargo.toml"),
+            file_contains: None,
+            title_contains: Some(&["must be a workspace"]),
+            message_contains: None,
+        }],
     );
-    assert_eq!(errors[0].file.as_deref(), Some("apps/devctl/Cargo.toml"));
-    assert!(errors[0].title.contains("must be a workspace"));
 }
