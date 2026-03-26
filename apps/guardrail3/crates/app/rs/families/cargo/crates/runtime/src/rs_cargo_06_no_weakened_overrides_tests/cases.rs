@@ -1,5 +1,14 @@
 #[allow(unused_imports)]
-use super::{check_results, entry, rule_results, tree};
+use guardrail3_app_rs_family_cargo_assertions::rs_cargo_06_no_weakened_overrides::{
+    assert_rule_results,
+    check_results,
+    ExpectedRuleResult,
+    rule_results,
+};
+#[allow(unused_imports)]
+use super::{
+    entry, tree,
+};
 
 #[allow(dead_code, non_upper_case_globals)]
 const workspace_rust_lints: &str = r#"
@@ -165,9 +174,14 @@ fn weakened_member_override_is_error() {
         ],
     ));
 
-    let rule = rule_results(&results, "RS-CARGO-06");
-    assert_eq!(rule.len(), 1, "unexpected results: {rule:#?}");
-    assert_eq!(rule[0].title, "weakened member rust override");
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: None,
+            title: Some("weakened member rust override"),
+            inventory: None,
+        }],
+    );
 }
 
 #[test]
@@ -209,7 +223,12 @@ fn matching_member_policy_inventories_cleanly() {
         ],
     ));
 
-    let rule = rule_results(&results, "RS-CARGO-06");
-    assert_eq!(rule.len(), 1, "unexpected results: {rule:#?}");
-    assert!(rule[0].inventory);
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: None,
+            title: None,
+            inventory: Some(true),
+        }],
+    );
 }

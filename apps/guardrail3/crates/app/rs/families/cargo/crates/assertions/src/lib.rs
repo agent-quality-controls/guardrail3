@@ -1,4 +1,4 @@
-mod common;
+use guardrail3_app_rs_family_cargo as _;
 
 pub mod rs_cargo_01_workspace_lints;
 pub mod rs_cargo_02_lint_levels;

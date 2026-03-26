@@ -1,5 +1,14 @@
 #[allow(unused_imports)]
-use super::{check_results, entry, rule_results, tree};
+use guardrail3_app_rs_family_cargo_assertions::rs_cargo_09_member_edition_drift::{
+    assert_rule_results,
+    check_results,
+    ExpectedRuleResult,
+    rule_results,
+};
+#[allow(unused_imports)]
+use super::{
+    entry, tree,
+};
 
 #[allow(dead_code, non_upper_case_globals)]
 const workspace_rust_lints: &str = r#"
@@ -161,9 +170,14 @@ fn older_member_edition_warns() {
         ],
     ));
 
-    let rule = rule_results(&results, "RS-CARGO-09");
-    assert_eq!(rule.len(), 1, "unexpected results: {rule:#?}");
-    assert_eq!(rule[0].title, "member edition older than workspace");
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: None,
+            title: Some("member edition older than workspace"),
+            inventory: None,
+        }],
+    );
 }
 
 #[test]
@@ -204,7 +218,12 @@ fn matching_member_edition_inventories() {
         ],
     ));
 
-    let rule = rule_results(&results, "RS-CARGO-09");
-    assert_eq!(rule.len(), 1, "unexpected results: {rule:#?}");
-    assert!(rule[0].inventory);
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: None,
+            title: None,
+            inventory: Some(true),
+        }],
+    );
 }

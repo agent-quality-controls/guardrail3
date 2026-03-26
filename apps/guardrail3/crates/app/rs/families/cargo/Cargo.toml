@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "crates/assertions_common",
     "crates/runtime",
     "crates/assertions",
     "test_support",

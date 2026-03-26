@@ -1,6 +1,8 @@
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::CheckResult;
 
+pub use guardrail3_app_rs_family_cargo_assertions_common::ExpectedRuleResult;
+
 const RULE_ID: &str = "RS-CARGO-03";
 const EXPECTED_ALLOW_TITLES: &[&str] = &[
     "allow inventory: `missing_docs_in_private_items`",
@@ -15,29 +17,50 @@ const EXPECTED_ALLOW_TITLES: &[&str] = &[
 ];
 
 pub fn check_results(tree: &ProjectTree) -> Vec<CheckResult> {
-    crate::common::check_results(tree)
+    guardrail3_app_rs_family_cargo_assertions_common::check_results(tree)
 }
 
 pub fn rule_results<'a>(results: &'a [CheckResult], _rule_id: &str) -> Vec<&'a CheckResult> {
-    crate::common::rule_results(results, RULE_ID)
+    guardrail3_app_rs_family_cargo_assertions_common::rule_results(results, RULE_ID)
 }
 
-pub fn assert_result_count(results: &[CheckResult], expected: usize) {
+pub fn assert_rule_results(results: &[CheckResult], expected: &[ExpectedRuleResult<'_>]) {
+    let actual = rule_results(results, RULE_ID);
     assert_eq!(
-        rule_results(results, RULE_ID).len(),
-        expected,
+        actual.len(),
+        expected.len(),
         "unexpected {RULE_ID} results: {results:#?}"
     );
+
+    for expected_result in expected {
+        let matched = actual.iter().any(|result| {
+            expected_result
+                .file
+                .is_none_or(|file| result.file.as_deref() == Some(file))
+                && expected_result
+                    .title
+                    .is_none_or(|title| result.title == title)
+                && expected_result
+                    .inventory
+                    .is_none_or(|inventory| result.inventory == inventory)
+        });
+        assert!(
+            matched,
+            "missing expected {RULE_ID} result: {expected_result:#?}
+actual: {actual:#?}"
+        );
+    }
 }
 
 pub fn assert_expected_inventory(results: &[CheckResult]) {
-    let actual_titles = rule_results(results, RULE_ID)
+    let expected = EXPECTED_ALLOW_TITLES
         .iter()
-        .map(|result| result.title.as_str())
+        .map(|title| ExpectedRuleResult {
+            file: None,
+            title: Some(title),
+            inventory: Some(true),
+        })
         .collect::<Vec<_>>();
-    assert_eq!(
-        actual_titles,
-        EXPECTED_ALLOW_TITLES,
-        "unexpected {RULE_ID} inventory titles: {actual_titles:#?}"
-    );
+
+    assert_rule_results(results, &expected);
 }

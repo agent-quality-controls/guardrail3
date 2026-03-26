@@ -1,5 +1,14 @@
 #[allow(unused_imports)]
-use super::{check_results, entry, rule_results, tree};
+use guardrail3_app_rs_family_cargo_assertions::rs_cargo_14_input_failures::{
+    assert_rule_results,
+    check_results,
+    ExpectedRuleResult,
+    rule_results,
+};
+#[allow(unused_imports)]
+use super::{
+    entry, tree,
+};
 
 #[allow(dead_code, non_upper_case_globals)]
 const workspace_rust_lints: &str = r#"
@@ -130,9 +139,14 @@ fn malformed_owned_policy_root_manifest_surfaces_explicit_failure() {
         &[("Cargo.toml", "[workspace")],
     ));
 
-    let rule = rule_results(&results, "RS-CARGO-14");
-    assert_eq!(rule.len(), 1, "unexpected results: {rule:#?}");
-    assert_eq!(rule[0].file.as_deref(), Some("Cargo.toml"));
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: Some("Cargo.toml"),
+            title: None,
+            inventory: None,
+        }],
+    );
 }
 
 #[test]
@@ -163,9 +177,14 @@ fn malformed_workspace_member_manifest_surfaces_explicit_failure() {
         ],
     ));
 
-    let rule = rule_results(&results, "RS-CARGO-14");
-    assert_eq!(rule.len(), 1, "unexpected results: {rule:#?}");
-    assert_eq!(rule[0].file.as_deref(), Some("crates/api/Cargo.toml"));
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: Some("crates/api/Cargo.toml"),
+            title: None,
+            inventory: None,
+        }],
+    );
 }
 
 #[test]
@@ -192,7 +211,12 @@ fn malformed_root_local_guardrail_surfaces_explicit_failure() {
         ],
     ));
 
-    let rule = rule_results(&results, "RS-CARGO-14");
-    assert_eq!(rule.len(), 1, "unexpected results: {rule:#?}");
-    assert_eq!(rule[0].file.as_deref(), Some("guardrail3.toml"));
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: Some("guardrail3.toml"),
+            title: None,
+            inventory: None,
+        }],
+    );
 }

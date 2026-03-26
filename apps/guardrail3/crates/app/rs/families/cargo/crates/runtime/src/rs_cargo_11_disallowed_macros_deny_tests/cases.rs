@@ -1,7 +1,13 @@
 #[allow(unused_imports)]
+use guardrail3_app_rs_family_cargo_assertions::rs_cargo_11_disallowed_macros_deny::{
+    check_results,
+    rule_results,
+    assert_rule_results,
+    ExpectedRuleResult,
+};
+#[allow(unused_imports)]
 use super::{
-    check_results, entry, rule_results,
-    tree,
+    entry, tree,
 };
 
 #[allow(dead_code, non_upper_case_globals)]
@@ -144,9 +150,14 @@ fn disallowed_macros_deny_is_inventory() {
         &[("pkg/Cargo.toml", &manifest)],
     ));
 
-    let rule = rule_results(&results, "RS-CARGO-11");
-    assert_eq!(rule.len(), 1, "unexpected results: {rule:#?}");
-    assert!(rule[0].inventory);
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: None,
+            title: None,
+            inventory: Some(true),
+        }],
+    );
 }
 
 #[test]
@@ -168,7 +179,12 @@ fn missing_disallowed_macros_is_error() {
         &[("pkg/Cargo.toml", &manifest)],
     ));
 
-    let rule = rule_results(&results, "RS-CARGO-11");
-    assert_eq!(rule.len(), 1, "unexpected results: {rule:#?}");
-    assert_eq!(rule[0].title, "disallowed macros lint missing");
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: None,
+            title: Some("disallowed macros lint missing"),
+            inventory: None,
+        }],
+    );
 }
