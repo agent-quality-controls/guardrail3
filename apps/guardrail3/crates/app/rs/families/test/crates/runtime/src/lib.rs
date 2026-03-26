@@ -59,11 +59,17 @@ pub fn check(
 ) -> Vec<CheckResult> {
     let facts = collect(tree, tc);
     let mut results = Vec::new();
+    let discovered_root_dirs = facts
+        .roots
+        .iter()
+        .map(|root| root.rel_dir.as_str())
+        .collect::<BTreeSet<_>>();
 
     for failure in facts
         .input_failures
         .iter()
         .filter(|failure| failure.rel_path.ends_with("Cargo.toml"))
+        .filter(|failure| !discovered_root_dirs.contains(failure.root_rel_dir.as_str()))
     {
         rs_test_10_input_failures::check(&InputFailureTestInput::new(failure), &mut results);
     }

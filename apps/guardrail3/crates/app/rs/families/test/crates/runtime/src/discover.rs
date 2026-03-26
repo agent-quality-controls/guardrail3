@@ -11,7 +11,6 @@ use super::facts::{
 
 #[derive(Debug, Clone)]
 struct CargoRootFacts {
-    rel_dir: String,
     cargo_rel_path: String,
     parsed: Option<toml::Value>,
     has_workspace: bool,
@@ -22,38 +21,10 @@ struct CargoRootFacts {
 pub fn collect(tree: &ProjectTree, tc: &dyn ToolChecker) -> TestFacts {
     let mut input_failures = Vec::new();
     let cargo_roots = collect_cargo_roots(tree, &mut input_failures);
-    let workspace_roots: BTreeSet<_> = cargo_roots
-        .values()
-        .filter(|root| root.has_workspace)
-        .map(|root| root.rel_dir.clone())
-        .collect();
-    let workspace_members: BTreeSet<_> = cargo_roots
-        .values()
-        .flat_map(|root| root.workspace_members.iter().cloned())
-        .collect();
-    let standalone_package_roots: BTreeSet<_> = cargo_roots
-        .values()
-        .filter(|root| root.has_package && !workspace_members.contains(&root.rel_dir))
-        .map(|root| root.rel_dir.clone())
-        .collect();
-
-    let mut roots = Vec::new();
-    for rel_dir in &workspace_roots {
-        roots.push(build_root_facts(
-            tree,
-            rel_dir,
-            &cargo_roots,
-            &mut input_failures,
-        ));
-    }
-    for rel_dir in &standalone_package_roots {
-        roots.push(build_root_facts(
-            tree,
-            rel_dir,
-            &cargo_roots,
-            &mut input_failures,
-        ));
-    }
+    let mut roots = cargo_roots
+        .keys()
+        .map(|rel_dir| build_root_facts(tree, rel_dir, &cargo_roots, &mut input_failures))
+        .collect::<Vec<_>>();
     roots.sort_by(|a, b| a.rel_dir.cmp(&b.rel_dir));
 
     let root_dirs: Vec<String> = roots.iter().map(|root| root.rel_dir.clone()).collect();
@@ -64,7 +35,7 @@ pub fn collect(tree: &ProjectTree, tc: &dyn ToolChecker) -> TestFacts {
     let files = rust_file_rels(tree)
         .into_iter()
         .filter_map(|rel_path| {
-            let root_rel_dir = nearest_root_dir(&rel_path, &root_dirs)?;
+            let root_rel_dir = owning_root_dir(&rel_path, &roots, &root_dirs)?;
             let root = roots
                 .iter()
                 .find(|candidate| candidate.rel_dir == root_rel_dir)?;
@@ -188,7 +159,6 @@ fn collect_cargo_roots(
                 }
             };
             let facts = CargoRootFacts {
-                rel_dir: rel_dir.clone(),
                 cargo_rel_path,
                 has_workspace: parsed.as_ref().is_some_and(|parsed| parsed.get("workspace").is_some()),
                 has_package: parsed.as_ref().is_some_and(|parsed| parsed.get("package").is_some()),
@@ -417,6 +387,42 @@ fn nearest_root_dir(rel_path: &str, root_dirs: &[String]) -> Option<String> {
         })
         .max_by_key(|root_rel| root_rel.len())
         .cloned()
+}
+
+fn owning_root_dir(
+    rel_path: &str,
+    roots: &[TestRootFacts],
+    root_dirs: &[String],
+) -> Option<String> {
+    roots
+        .iter()
+        .filter(|root| root_component_owns_file(root, rel_path))
+        .map(|root| root.rel_dir.clone())
+        .max_by_key(|root_rel| root_rel.len())
+        .or_else(|| nearest_root_dir(rel_path, root_dirs))
+}
+
+fn root_component_owns_file(root: &TestRootFacts, rel_path: &str) -> bool {
+    if root_has_test_support_file(root, rel_path) {
+        return true;
+    }
+
+    root.components.iter().any(|component| {
+        let runtime_src = ProjectTree::join_rel(&component.runtime_rel_dir, "src");
+        let assertions_src = ProjectTree::join_rel(&component.assertions_rel_dir, "src");
+
+        path_is_under(rel_path, &runtime_src)
+            || component
+                .external_harnesses
+                .iter()
+                .any(|harness| harness == rel_path)
+            || path_is_under(rel_path, &assertions_src)
+    })
+}
+
+fn root_has_test_support_file(root: &TestRootFacts, rel_path: &str) -> bool {
+    let test_support_src = join_under_root(&root.rel_dir, "test_support/src");
+    rel_path == test_support_src || path_is_under(rel_path, &test_support_src)
 }
 
 fn collect_mutation_hook_files(tree: &ProjectTree, root_rel_dir: &str) -> Vec<String> {
