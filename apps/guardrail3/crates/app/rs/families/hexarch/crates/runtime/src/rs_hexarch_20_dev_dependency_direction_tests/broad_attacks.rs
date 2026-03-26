@@ -3,8 +3,7 @@ use std::collections::BTreeSet;
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::Severity;
 
-use super::super::super::check as family_check;
-use super::super::super::family_route_for_tests as family_route;
+use super::super::check_for_test_tree as family_check;
 use test_support::{dir_entry, project_tree};
 
 fn dev_graph_tree() -> ProjectTree {
@@ -108,8 +107,7 @@ fn dev_graph_tree() -> ProjectTree {
 #[test]
 fn direct_dev_edges_are_warned_while_target_dev_edges_are_left_to_rule_25() {
     let tree = dev_graph_tree();
-    let route = family_route(&tree);
-    let results = family_check(&tree, &route);
+    let results = family_check(&tree);
 
     let rule20 = results
         .iter()
