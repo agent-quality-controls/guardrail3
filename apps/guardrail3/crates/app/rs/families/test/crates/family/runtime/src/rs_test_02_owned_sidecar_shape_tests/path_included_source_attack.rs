@@ -17,7 +17,11 @@ fn path_included_source_file_without_backing_sidecar_is_reported() {
         "src/lib.rs",
         "#[cfg(test)]\n#[path = \"lib_tests/mod.rs\"]\nmod lib_tests;\n",
     );
-    write_file(root, "tests/public_surface.rs", "#[test]\nfn public_surface() { assert!(true); }\n");
+    write_file(
+        root,
+        "tests/public_surface.rs",
+        "#[test]\nfn public_surface() { assert!(true); }\n",
+    );
 
     let results = run_family(root);
     let finding = finding(&results, "RS-TEST-02");

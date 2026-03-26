@@ -1,4 +1,4 @@
-use super::{finding, run_family_with_tool, rule_files, tempdir, write_file};
+use super::{finding, rule_files, run_family_with_tool, tempdir, write_file};
 use guardrail3_domain_report::Severity;
 
 #[test]

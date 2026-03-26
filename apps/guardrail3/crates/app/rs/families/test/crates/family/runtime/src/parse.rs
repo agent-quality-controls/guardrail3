@@ -11,6 +11,7 @@ pub struct ParsedTestFile {
     pub modules: Vec<ModuleInfo>,
     pub cfg_test_modules: Vec<CfgTestModuleInfo>,
     pub test_functions: Vec<TestFunctionInfo>,
+    pub functions: Vec<FunctionInfo>,
     pub file_function_names: BTreeSet<String>,
     pub file_call_paths: Vec<Vec<String>>,
     pub imports: Vec<UseBinding>,
@@ -45,6 +46,17 @@ pub struct TestFunctionInfo {
     pub weak_matches_lines: Vec<usize>,
 }
 
+#[derive(Debug, Clone, Default)]
+pub struct FunctionInfo {
+    pub line: usize,
+    pub name: String,
+    pub is_public: bool,
+    pub is_test: bool,
+    pub has_assertion_macro: bool,
+    pub call_paths: Vec<Vec<String>>,
+    pub shadowed_idents: BTreeSet<String>,
+}
+
 #[derive(Debug, Clone)]
 pub struct UseBinding {
     pub line: usize,
@@ -63,6 +75,7 @@ pub fn analyze(ast: &syn::File, content: &str) -> ParsedTestFile {
             modules: Vec::new(),
             cfg_test_modules: Vec::new(),
             test_functions: Vec::new(),
+            functions: Vec::new(),
             file_function_names: BTreeSet::new(),
             file_call_paths: Vec::new(),
             imports: Vec::new(),
@@ -95,13 +108,36 @@ impl<'ast> Visit<'ast> for TestVisitor {
     }
 
     fn visit_item_fn(&mut self, item: &'ast syn::ItemFn) {
-        let _ = self.out.file_function_names.insert(item.sig.ident.to_string());
-        maybe_push_test_function(&item.attrs, &item.sig, &item.block, &mut self.out.test_functions);
+        let _ = self
+            .out
+            .file_function_names
+            .insert(item.sig.ident.to_string());
+        let function = analyze_function(&item.attrs, &item.vis, &item.sig, &item.block);
+        maybe_push_test_function(
+            &item.attrs,
+            &item.sig,
+            &item.block,
+            &function,
+            &mut self.out.test_functions,
+        );
+        self.out.functions.push(function);
         syn::visit::visit_item_fn(self, item);
     }
 
     fn visit_impl_item_fn(&mut self, item: &'ast syn::ImplItemFn) {
-        maybe_push_test_function(&item.attrs, &item.sig, &item.block, &mut self.out.test_functions);
+        let _ = self
+            .out
+            .file_function_names
+            .insert(item.sig.ident.to_string());
+        let function = analyze_function(&item.attrs, &item.vis, &item.sig, &item.block);
+        maybe_push_test_function(
+            &item.attrs,
+            &item.sig,
+            &item.block,
+            &function,
+            &mut self.out.test_functions,
+        );
+        self.out.functions.push(function);
         syn::visit::visit_impl_item_fn(self, item);
     }
 
@@ -127,6 +163,7 @@ fn maybe_push_test_function(
     attrs: &[syn::Attribute],
     sig: &syn::Signature,
     block: &syn::Block,
+    function: &FunctionInfo,
     out: &mut Vec<TestFunctionInfo>,
 ) {
     let uses_test_attr = attrs.iter().any(is_test_attr);
@@ -143,15 +180,34 @@ fn maybe_push_test_function(
         line: span_line(sig.span()),
         name: sig.ident.to_string(),
         uses_tokio_test_attr,
-        has_assertion_macro: body_visitor.has_assertion_macro,
-        call_paths: body_visitor.call_paths,
+        has_assertion_macro: function.has_assertion_macro,
+        call_paths: function.call_paths.clone(),
         method_receiver_paths: body_visitor.method_receiver_paths,
-        shadowed_idents: body_visitor.shadowed_idents,
+        shadowed_idents: function.shadowed_idents.clone(),
         should_panic_line: should_panic_attr.map(|attr| span_line(attr.span())),
         should_panic_has_expected: should_panic_attr.is_some_and(should_panic_has_expected),
         tautological_assert_lines: body_visitor.tautological_assert_lines,
         weak_matches_lines: body_visitor.weak_matches_lines,
     });
+}
+
+fn analyze_function(
+    attrs: &[syn::Attribute],
+    vis: &syn::Visibility,
+    sig: &syn::Signature,
+    block: &syn::Block,
+) -> FunctionInfo {
+    let mut body_visitor = TestBodyVisitor::default();
+    body_visitor.visit_block(block);
+    FunctionInfo {
+        line: span_line(sig.span()),
+        name: sig.ident.to_string(),
+        is_public: matches!(vis, syn::Visibility::Public(_)),
+        is_test: attrs.iter().any(is_test_attr),
+        has_assertion_macro: body_visitor.has_assertion_macro,
+        call_paths: body_visitor.call_paths,
+        shadowed_idents: body_visitor.shadowed_idents,
+    }
 }
 
 #[derive(Default)]
@@ -269,9 +325,7 @@ fn macro_has_literal_comparison(mac: &syn::Macro) -> bool {
     if args.len() < 2 {
         return false;
     }
-    args.iter()
-        .take(2)
-        .all(expr_is_literal_like)
+    args.iter().take(2).all(expr_is_literal_like)
 }
 
 fn macro_has_weak_matches(mac: &syn::Macro) -> bool {

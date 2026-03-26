@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
-use guardrail3_domain_report::{CheckResult, Severity};
 use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::discover::{join_under_root, parent_dir, path_is_under};
 use super::facts::{SidecarViolation, TestFileKind, TestRootFacts};
@@ -63,7 +63,8 @@ fn collect_violations(
             continue;
         }
 
-        let Some(owner_module_rel_path) = owned_sidecar_owner_rel_path(src_root, rel_after_src) else {
+        let Some(owner_module_rel_path) = owned_sidecar_owner_rel_path(src_root, rel_after_src)
+        else {
             continue;
         };
         let mod_rel_path = format!("{dir_rel}/mod.rs");
@@ -72,7 +73,9 @@ fn collect_violations(
                 rel_path: dir_rel.clone(),
                 line: None,
                 title: "sidecar directory missing mod.rs".to_owned(),
-                message: "Internal sidecar harness directories must expose `mod.rs` as their entrypoint.".to_owned(),
+                message:
+                    "Internal sidecar harness directories must expose `mod.rs` as their entrypoint."
+                        .to_owned(),
             });
             continue;
         }
@@ -95,7 +98,9 @@ fn collect_violations(
         }
         if !matches!(
             file.facts.kind,
-            TestFileKind::Source | TestFileKind::InternalSidecarMod | TestFileKind::InternalSidecarSupport
+            TestFileKind::Source
+                | TestFileKind::InternalSidecarMod
+                | TestFileKind::InternalSidecarSupport
         ) {
             continue;
         }
@@ -180,7 +185,8 @@ fn cfg_test_decl_is_owned_sidecar(
     let parent = parent_dir(file_rel_path);
     let expected_path = format!("{expected_module_name}/mod.rs");
     if let Some(path_attr) = module.path_attr.as_deref() {
-        return path_attr == expected_path && tree.file_exists(&format!("{parent}/{expected_path}"));
+        return path_attr == expected_path
+            && tree.file_exists(&format!("{parent}/{expected_path}"));
     }
 
     let sidecar_dir = format!("{parent}/{expected_module_name}");

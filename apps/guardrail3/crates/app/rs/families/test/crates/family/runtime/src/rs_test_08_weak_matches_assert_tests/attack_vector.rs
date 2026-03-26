@@ -1,6 +1,6 @@
 use guardrail3_domain_report::Severity;
 
-use super::{finding, run_family, rule_files, tempdir, write_file};
+use super::{finding, rule_files, run_family, tempdir, write_file};
 
 #[test]
 fn wildcard_payload_match_is_reported() {
@@ -19,7 +19,10 @@ fn wildcard_payload_match_is_reported() {
     );
 
     let results = run_family(root);
-    assert_eq!(rule_files(&results, "RS-TEST-08"), vec!["tests/matches.rs".to_owned()]);
+    assert_eq!(
+        rule_files(&results, "RS-TEST-08"),
+        vec!["tests/matches.rs".to_owned()]
+    );
     let finding = finding(&results, "RS-TEST-08");
     assert_eq!(finding.severity, Severity::Warn);
     assert_eq!(finding.title, "weak matches assertion");

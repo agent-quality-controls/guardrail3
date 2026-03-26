@@ -1,4 +1,4 @@
-# RS-TEST — Rust test quality checker (15 rules)
+# RS-TEST — Rust test quality checker (18 rules)
 
 **Input:** owned-root `Cargo.toml` + optional `.cargo/mutants.toml` + optional `.config/nextest.toml` + Rust source/test files + active hook surfaces
 **Parser:** TOML + `syn` AST + executable-line shell parsing
@@ -12,7 +12,7 @@ The accepted family contract is:
 
 That README owns:
 
-- the 15-rule inventory
+- the 18-rule inventory
 - rule numbering
 - the per-root activation model
 - exact detection logic
@@ -82,6 +82,9 @@ If any marker exists, the full mutation setup must be present and sane.
 | RS-TEST-13 | Warn/Info | Mutation adoption requires `[profile.mutants]`. | Implemented |
 | RS-TEST-14 | Warn/Info | Mutation adoption requires an executable `cargo mutants` step in active hooks. | Implemented |
 | RS-TEST-15 | Warn/Info | Mutation config must avoid fake/useless settings. | Implemented |
+| RS-TEST-16 | Error | Assertions modules must contain proof-bearing exported functions once they expose helpers. | Implemented |
+| RS-TEST-17 | Error | External harnesses must prove through owned assertions instead of direct assertion macros. | Implemented |
+| RS-TEST-18 | Error | `test_support` must stay generic and must not import/call sibling runtime/assertions crates. | Implemented |
 
 ## Explicitly removed from this family
 
@@ -100,19 +103,22 @@ Structural pressure such as file length and `use` count belongs to `RS-CODE`, in
 
 - `RS-TEST-07` must not treat `Result` returns as proof.
 - `RS-TEST-07` must not use name-based heuristics like `assert` / `verify` / `expect`.
+- `RS-TEST-07` must only count owned assertions calls when the target function is proof-bearing.
 - `RS-TEST-02` and `RS-TEST-03` must use filesystem, manifest, and import-boundary checks.
 - Gotcha: if discovery sees sidecar or external harness files but cannot map them to a discovered `runtime/assertions` component, `RS-TEST-03` must report that as an error instead of silently skipping the root.
 - `RS-TEST-14` must use executable-line matching on active hook surfaces, not raw substring scans.
 - `RS-TEST-10` must ignore inactive surfaces:
   - no async activation means nextest config is not required
   - no mutation activation means mutation config is not required
+- `RS-TEST-16` must ignore pure aggregator files with no exported helper functions.
+- `RS-TEST-17` and `RS-TEST-18` must stay scoped to owned component/runtime/assertions packages, not every local crate in the repo.
 
 ## Current migration state
 
-The live family crate has been rewritten onto the accepted 15-rule inventory and activation model.
+The live family crate has been rewritten onto the accepted 18-rule inventory and activation model.
 
 Still in progress:
 
-- convert the remaining rule tests from flat `*_tests.rs` files to rule-specific `*_tests/` directories
-- expand attack-vector coverage across every rule, especially `RS-TEST-02`, `RS-TEST-03`, `RS-TEST-10`, and the mutation rules
-- remove the now-dead legacy rule/test files left over from the old 19-rule implementation
+- refactor the family’s own assertions crate away from thin wrapper helpers so it can satisfy `RS-TEST-16`
+- decide whether the current runtime-sidecar self-tests should keep their direct local assertions or migrate more proof into owned assertions helpers
+- expand attack-vector coverage around proof-bearing assertion detection and `test_support` boundary attacks

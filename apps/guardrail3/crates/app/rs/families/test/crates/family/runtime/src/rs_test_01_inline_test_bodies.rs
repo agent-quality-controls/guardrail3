@@ -13,7 +13,9 @@ pub fn check(input: &CfgTestModuleInput<'_>, results: &mut Vec<CheckResult>) {
         id: ID.to_owned(),
         severity: Severity::Error,
         title: "inline cfg(test) body in src".to_owned(),
-        message: "Production `src/` files must not contain inline `#[cfg(test)] mod ... { ... }` bodies.".to_owned(),
+        message:
+            "Production `src/` files must not contain inline `#[cfg(test)] mod ... { ... }` bodies."
+                .to_owned(),
         file: Some(input.file.rel_path.clone()),
         line: Some(input.module.line),
         inventory: false,

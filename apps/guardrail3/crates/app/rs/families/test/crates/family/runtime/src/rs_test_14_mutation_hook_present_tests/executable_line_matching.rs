@@ -1,4 +1,4 @@
-use super::{finding, run_family, rule_files, tempdir, write_file};
+use super::{finding, rule_files, run_family, tempdir, write_file};
 use guardrail3_domain_report::Severity;
 
 #[test]
@@ -18,7 +18,10 @@ fn comment_echo_and_version_only_mentions_do_not_count() {
         write_file(fixture.path(), ".githooks/pre-commit", hook_body);
 
         let results = run_family(fixture.path());
-        assert_eq!(rule_files(&results, "RS-TEST-14"), vec!["Cargo.toml".to_owned()]);
+        assert_eq!(
+            rule_files(&results, "RS-TEST-14"),
+            vec!["Cargo.toml".to_owned()]
+        );
         let issue = finding(&results, "RS-TEST-14");
         assert_eq!(issue.severity, Severity::Warn);
         assert_eq!(issue.title, "mutation hook step missing");

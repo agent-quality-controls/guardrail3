@@ -1,4 +1,4 @@
-use super::{finding, run_family_with_tool, rule_files, tempdir, write_file};
+use super::{finding, rule_files, run_family_with_tool, tempdir, write_file};
 use guardrail3_domain_report::Severity;
 
 #[test]
@@ -14,7 +14,10 @@ fn installed_tool_reports_info_for_an_adopted_root() {
 
     let results = run_family_with_tool(root, true);
 
-    assert_eq!(rule_files(&results, "RS-TEST-11"), vec!["Cargo.toml".to_owned()]);
+    assert_eq!(
+        rule_files(&results, "RS-TEST-11"),
+        vec!["Cargo.toml".to_owned()]
+    );
     let finding = finding(&results, "RS-TEST-11");
     assert_eq!(finding.severity, Severity::Info);
     assert_eq!(finding.title, "cargo-mutants installed");

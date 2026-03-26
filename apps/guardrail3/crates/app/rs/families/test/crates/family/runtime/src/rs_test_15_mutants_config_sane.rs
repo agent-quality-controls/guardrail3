@@ -33,7 +33,10 @@ pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
         }
     }
 
-    if let Some(timeout_multiplier) = parsed.get("timeout_multiplier").and_then(timeout_multiplier) {
+    if let Some(timeout_multiplier) = parsed
+        .get("timeout_multiplier")
+        .and_then(timeout_multiplier)
+    {
         if timeout_multiplier < 1.0 {
             pushed = true;
             results.push(CheckResult {

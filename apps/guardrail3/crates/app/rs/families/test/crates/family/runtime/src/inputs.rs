@@ -1,3 +1,5 @@
+use std::collections::BTreeSet;
+
 use super::facts::{
     DiscoveredTestFile, InputFailureFacts, RuntimeAssertionsViolation, SidecarViolation,
     TestRootFacts,
@@ -45,6 +47,7 @@ pub struct TestFunctionInput<'a> {
     pub file: &'a DiscoveredTestFile,
     pub parsed: &'a ParsedTestFile,
     pub function: &'a TestFunctionInfo,
+    pub proof_bearing_assertion_functions: Option<&'a BTreeSet<String>>,
 }
 
 impl<'a> TestFunctionInput<'a> {
@@ -52,11 +55,13 @@ impl<'a> TestFunctionInput<'a> {
         file: &'a DiscoveredTestFile,
         parsed: &'a ParsedTestFile,
         function: &'a TestFunctionInfo,
+        proof_bearing_assertion_functions: Option<&'a BTreeSet<String>>,
     ) -> Self {
         Self {
             file,
             parsed,
             function,
+            proof_bearing_assertion_functions,
         }
     }
 }
@@ -99,5 +104,48 @@ pub struct RuntimeAssertionsViolationInput<'a> {
 impl<'a> RuntimeAssertionsViolationInput<'a> {
     pub const fn new(violation: &'a RuntimeAssertionsViolation) -> Self {
         Self { violation }
+    }
+}
+
+pub struct AssertionsModuleInput<'a> {
+    pub file: &'a DiscoveredTestFile,
+    pub parsed: &'a ParsedTestFile,
+    pub proof_bearing_exported_functions: &'a BTreeSet<String>,
+}
+
+impl<'a> AssertionsModuleInput<'a> {
+    pub const fn new(
+        file: &'a DiscoveredTestFile,
+        parsed: &'a ParsedTestFile,
+        proof_bearing_exported_functions: &'a BTreeSet<String>,
+    ) -> Self {
+        Self {
+            file,
+            parsed,
+            proof_bearing_exported_functions,
+        }
+    }
+}
+
+pub struct TestSupportFileInput<'a> {
+    pub file: &'a DiscoveredTestFile,
+    pub parsed: &'a ParsedTestFile,
+    pub local_runtime_packages: &'a BTreeSet<String>,
+    pub local_assertions_packages: &'a BTreeSet<String>,
+}
+
+impl<'a> TestSupportFileInput<'a> {
+    pub const fn new(
+        file: &'a DiscoveredTestFile,
+        parsed: &'a ParsedTestFile,
+        local_runtime_packages: &'a BTreeSet<String>,
+        local_assertions_packages: &'a BTreeSet<String>,
+    ) -> Self {
+        Self {
+            file,
+            parsed,
+            local_runtime_packages,
+            local_assertions_packages,
+        }
     }
 }

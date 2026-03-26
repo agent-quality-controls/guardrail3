@@ -1,6 +1,6 @@
 use guardrail3_domain_report::Severity;
 
-use super::{finding, run_family, rule_files, tempdir, write_file};
+use super::{finding, rule_files, run_family, tempdir, write_file};
 
 #[test]
 fn bare_should_panic_is_reported_on_the_test_file() {
@@ -19,7 +19,10 @@ fn bare_should_panic_is_reported_on_the_test_file() {
     );
 
     let results = run_family(root);
-    assert_eq!(rule_files(&results, "RS-TEST-05"), vec!["tests/panic.rs".to_owned()]);
+    assert_eq!(
+        rule_files(&results, "RS-TEST-05"),
+        vec!["tests/panic.rs".to_owned()]
+    );
     let finding = finding(&results, "RS-TEST-05");
     assert_eq!(finding.severity, Severity::Warn);
     assert_eq!(finding.title, "should_panic missing expected string");

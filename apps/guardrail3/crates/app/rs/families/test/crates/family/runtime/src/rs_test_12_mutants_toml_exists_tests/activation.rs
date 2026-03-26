@@ -1,4 +1,4 @@
-use super::{finding, run_family, rule_files, tempdir, write_file};
+use super::{finding, rule_files, run_family, tempdir, write_file};
 use guardrail3_domain_report::Severity;
 
 #[test]
@@ -19,7 +19,11 @@ fn missing_config_is_ignored_without_adoption_and_required_for_hook_only_adoptio
         "Cargo.toml",
         "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
-    write_file(adopted.path(), ".githooks/pre-commit", "#!/bin/sh\ncargo mutants --list\n");
+    write_file(
+        adopted.path(),
+        ".githooks/pre-commit",
+        "#!/bin/sh\ncargo mutants --list\n",
+    );
 
     let adopted_results = run_family(adopted.path());
     assert_eq!(

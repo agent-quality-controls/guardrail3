@@ -14,6 +14,7 @@ pub fn check(input: &TestFunctionInput<'_>, results: &mut Vec<CheckResult>) {
             &input.parsed.imports,
             &input.parsed.file_function_names,
             input.file.assertions_package_name.as_deref(),
+            input.proof_bearing_assertion_functions,
         )
     {
         return;
@@ -38,8 +39,12 @@ fn function_has_owned_assertion_proof(
     imports: &[UseBinding],
     file_function_names: &BTreeSet<String>,
     assertions_package_name: Option<&str>,
+    proof_bearing_assertion_functions: Option<&BTreeSet<String>>,
 ) -> bool {
     let Some(assertions_package_name) = assertions_package_name else {
+        return false;
+    };
+    let Some(proof_bearing_assertion_functions) = proof_bearing_assertion_functions else {
         return false;
     };
     let mut call_roots = BTreeSet::from([assertions_package_name.to_owned()]);
@@ -64,21 +69,32 @@ fn function_has_owned_assertion_proof(
     let bare_call_is_owned = |name: &str| {
         !function.shadowed_idents.contains(name)
             && !file_function_names.contains(name)
+            && proof_bearing_assertion_functions.contains(name)
             && (bare_call_idents.contains(name) || has_assertions_glob)
     };
 
     function.call_paths.iter().any(|path| match path.first() {
         Some(first) if path.len() == 1 => bare_call_is_owned(first),
-        Some(first) => call_roots.contains(first),
+        Some(first) => {
+            call_roots.contains(first)
+                && path
+                    .last()
+                    .is_some_and(|name| proof_bearing_assertion_functions.contains(name))
+        }
         None => false,
     }) || function
         .method_receiver_paths
         .iter()
         .any(|path| match path.first() {
             Some(first) if path.len() == 1 => bare_call_is_owned(first),
-            Some(first) => call_roots.contains(first),
+            Some(first) => {
+                call_roots.contains(first)
+                    && path
+                        .last()
+                        .is_some_and(|name| proof_bearing_assertion_functions.contains(name))
+            }
             None => false,
-    })
+        })
 }
 
 #[cfg(test)]

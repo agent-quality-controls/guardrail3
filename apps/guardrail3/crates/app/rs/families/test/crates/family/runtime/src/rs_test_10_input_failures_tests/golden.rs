@@ -1,4 +1,4 @@
-use super::{run_family, rule_files, tempdir, write_file};
+use super::{rule_files, run_family, tempdir, write_file};
 
 #[test]
 fn clean_root_surfaces_no_input_failures() {

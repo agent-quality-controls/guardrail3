@@ -5,7 +5,8 @@ use super::inputs::RootTestInput;
 const ID: &str = "RS-TEST-09";
 
 pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
-    let async_active = input.has_tests && (input.root.tokio_dependency_present || input.has_tokio_tests);
+    let async_active =
+        input.has_tests && (input.root.tokio_dependency_present || input.has_tokio_tests);
     if !async_active {
         return;
     }
@@ -30,7 +31,9 @@ pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
     let Some(parsed) = input.root.nextest_parsed.as_ref() else {
         return;
     };
-    let default_profile = parsed.get("profile").and_then(|profile| profile.get("default"));
+    let default_profile = parsed
+        .get("profile")
+        .and_then(|profile| profile.get("default"));
     let has_slow_timeout = default_profile
         .and_then(|profile| profile.get("slow-timeout"))
         .is_some();
