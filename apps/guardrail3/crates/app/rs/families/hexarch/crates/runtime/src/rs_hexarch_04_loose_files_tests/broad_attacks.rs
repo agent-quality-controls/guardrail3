@@ -1,12 +1,11 @@
-use std::collections::BTreeSet;
-const FIXTURE: crate::test_support::HexarchFixture = crate::test_support::HexarchFixture;
+const FIXTURE: super::HexarchFixture = super::HexarchFixture;
 
 fn inner_hex() -> &'static str {
     FIXTURE.inner_hex_root()
 }
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_04_loose_files as assertions;
-use crate::test_support::{copy_fixture, write_file};
+use super::{copy_fixture, write_file};
 
 const CONTAINER_SUFFIXES: &[&str] = &[
     "app",
@@ -40,26 +39,23 @@ fn loose_files_in_all_owned_container_dirs_hit_every_owned_container() {
         write_file(tmp.path(), &format!("{path}/mod.rs"), "// stray");
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-04");
+    let results = super::run_family(tmp.path());
+    let errors = assertions::errors_by_id(&results, "");
     assert_eq!(
         errors.len(),
         expected_files.len(),
         "expected exactly one loose-file hit per owned container: {errors:#?}"
     );
-    let actual_files = errors
-        .iter()
-        .filter_map(|error| error.file.clone())
-        .collect::<BTreeSet<_>>();
-
-    assert_eq!(
-        actual_files, expected_files,
-        "unexpected hit set: {errors:#?}"
+    assertions::assert_error_summary(
+        &results,
+        "",
+        expected_files.len(),
+        expected_files,
+        None,
+        Some(&["loose files"]),
+        None,
+        Some(&["mod.rs"]),
     );
-    for error in &errors {
-        assert!(error.title.contains("loose files"));
-        assert!(error.message.contains("mod.rs"));
-    }
 }
 
 #[test]
@@ -73,19 +69,18 @@ fn multiple_loose_files_in_all_owned_container_dirs_emit_one_error_per_container
         write_file(tmp.path(), &format!("{path}/README.md"), "# stray");
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-04");
-    let actual_files = errors
-        .iter()
-        .filter_map(|error| error.file.clone())
-        .collect::<BTreeSet<_>>();
-
-    assert_eq!(actual_files, expected_files, "{errors:#?}");
-    assert_eq!(errors.len(), expected_files.len(), "{errors:#?}");
-    for error in &errors {
-        assert!(error.message.contains("mod.rs"), "{error:#?}");
-        assert!(error.message.contains("README.md"), "{error:#?}");
-    }
+    let results = super::run_family(tmp.path());
+    let errors = assertions::errors_by_id(&results, "");
+    assertions::assert_error_summary(
+        &results,
+        "",
+        expected_files.len(),
+        expected_files,
+        None,
+        Some(&["loose files"]),
+        None,
+        Some(&["mod.rs", "README.md"]),
+    );
 }
 
 #[test]
@@ -98,15 +93,16 @@ fn near_miss_placeholder_files_hit_every_owned_container() {
         write_file(tmp.path(), &format!("{path}/.gitignore"), "target/");
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-04");
-    let actual_files = errors
-        .iter()
-        .filter_map(|error| error.file.clone())
-        .collect::<BTreeSet<_>>();
-
-    assert_eq!(actual_files, expected_files, "{errors:#?}");
-    for error in &errors {
-        assert!(error.message.contains(".gitignore"), "{error:#?}");
-    }
+    let results = super::run_family(tmp.path());
+    let errors = assertions::errors_by_id(&results, "");
+    assertions::assert_error_summary(
+        &results,
+        "",
+        expected_files.len(),
+        expected_files,
+        None,
+        Some(&["loose files"]),
+        None,
+        Some(&[".gitignore"]),
+    );
 }

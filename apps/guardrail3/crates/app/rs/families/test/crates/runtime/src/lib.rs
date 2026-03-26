@@ -357,8 +357,7 @@ fn collect_assertions_proof_catalog(
                     .collect::<Vec<_>>();
                 for function in candidates {
                     let module_prefix = assertions_module_prefix(&file.facts.rel_path);
-                    let qualified_name =
-                        qualified_assertion_name(&module_prefix, &function.name);
+                    let qualified_name = qualified_assertion_name(&module_prefix, &function.name);
                     if proof_bearing_names.contains(&qualified_name) {
                         continue;
                     }
@@ -389,10 +388,8 @@ fn collect_assertions_proof_catalog(
                 .filter(|function| {
                     function.is_public
                         && !function.is_test
-                        && proof_bearing_names.contains(&qualified_assertion_name(
-                            &module_prefix,
-                            &function.name,
-                        ))
+                        && proof_bearing_names
+                            .contains(&qualified_assertion_name(&module_prefix, &function.name))
                 })
                 .map(|function| function.name.clone())
                 .collect();
@@ -434,12 +431,12 @@ fn exported_assertion_function_calls_proof(
         let Some(base_prefix) = root_prefixes.get(first).cloned() else {
             continue;
         };
-        let relative_segments = normalize_relative_assertion_path(&binding.path_segments, &base_prefix);
+        let relative_segments =
+            normalize_relative_assertion_path(&binding.path_segments, &base_prefix);
 
         if let Some(local_name) = binding.local_name.as_ref() {
             let _ = root_prefixes.insert(local_name.clone(), relative_segments.clone());
-            let _ = bare_imported_proofs
-                .insert(local_name.clone(), relative_segments.join("::"));
+            let _ = bare_imported_proofs.insert(local_name.clone(), relative_segments.join("::"));
         } else {
             glob_prefixes.push(relative_segments);
         }
@@ -456,8 +453,7 @@ fn exported_assertion_function_calls_proof(
                         .get(name)
                         .is_some_and(|qualified| proof_bearing_names.contains(qualified))
                         || glob_prefixes.iter().any(|prefix| {
-                            proof_bearing_names
-                                .contains(&qualified_assertion_name(prefix, name))
+                            proof_bearing_names.contains(&qualified_assertion_name(prefix, name))
                         }))
             }
             [first, rest @ ..] => root_prefixes.get(first).is_some_and(|prefix| {
@@ -500,7 +496,10 @@ fn parent_module_prefix(module_prefix: &[String]) -> Vec<String> {
     }
 }
 
-fn normalize_relative_assertion_path(path_segments: &[String], base_prefix: &[String]) -> Vec<String> {
+fn normalize_relative_assertion_path(
+    path_segments: &[String],
+    base_prefix: &[String],
+) -> Vec<String> {
     let mut normalized = base_prefix.to_vec();
     let mut iter = path_segments.iter();
     match iter.next().map(String::as_str) {

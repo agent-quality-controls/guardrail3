@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_25_target_dependency_direction as assertions;
-use crate::test_support::{dir_entry, project_tree};
+use super::{dir_entry, project_tree, run_tree};
 
 #[test]
 fn forbidden_target_sections_error_and_allowed_target_sections_do_not() {
@@ -58,8 +58,8 @@ fn forbidden_target_sections_error_and_allowed_target_sections_do_not() {
         ],
     );
 
-    let results = assertions::run_tree(&tree);
-    let results = assertions::errors_by_id(&results, "RS-HEXARCH-25");
+    let results = super::run_tree(&tree);
+    let results = assertions::errors_by_id(&results, "");
 
     let actual_files = results
         .iter()

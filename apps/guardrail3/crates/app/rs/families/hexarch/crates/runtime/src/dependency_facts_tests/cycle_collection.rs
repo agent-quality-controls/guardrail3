@@ -1,5 +1,5 @@
 use super::super::collect_for_test_tree as dependency_facts;
-use crate::test_support::{dir_entry, project_tree};
+use super::{dir_entry, project_tree};
 
 #[test]
 fn cycle_with_unlayered_member_is_not_reported_as_same_layer() {

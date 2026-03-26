@@ -1,12 +1,11 @@
-use std::collections::BTreeSet;
-const FIXTURE: crate::test_support::HexarchFixture = crate::test_support::HexarchFixture;
+const FIXTURE: super::HexarchFixture = super::HexarchFixture;
 
 fn inner_hex() -> &'static str {
     FIXTURE.inner_hex_root()
 }
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_03_inbound_outbound as assertions;
-use crate::test_support::{copy_fixture, remove_dir};
+use super::{copy_fixture, remove_dir};
 
 #[test]
 fn missing_outbound_in_adapters_hits_all_owned_outer_and_nested_containers() {
@@ -20,29 +19,22 @@ fn missing_outbound_in_adapters_hits_all_owned_outer_and_nested_containers() {
         remove_dir(tmp.path(), &format!("{dir}/outbound"));
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-03");
-    let actual_files = errors
-        .iter()
-        .filter_map(|error| error.file.clone())
-        .collect::<BTreeSet<_>>();
-    let expected_files = [
-        "apps/devctl/crates/adapters".to_owned(),
-        "apps/backend/crates/adapters".to_owned(),
-        "apps/worker/crates/adapters".to_owned(),
-        format!("{}/adapters", inner_hex()),
-    ]
-    .into_iter()
-    .collect::<BTreeSet<_>>();
-
-    assert_eq!(
-        actual_files, expected_files,
-        "unexpected hit set: {errors:#?}"
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_summary(
+        &results,
+        "",
+        4,
+        [
+            "apps/devctl/crates/adapters",
+            "apps/backend/crates/adapters",
+            "apps/worker/crates/adapters",
+            format!("{}/adapters", inner_hex()),
+        ],
+        None,
+        Some(&["outbound", "adapters"]),
+        None,
+        None,
     );
-    for error in &errors {
-        assert!(error.title.contains("outbound"));
-        assert!(error.title.contains("adapters"));
-    }
 }
 
 #[test]
@@ -56,33 +48,20 @@ fn missing_inbound_in_adapters_hits_only_outer_containers_because_nested_hex_bec
         remove_dir(tmp.path(), &format!("{dir}/inbound"));
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-03");
-    let actual_files = errors
-        .iter()
-        .filter_map(|error| error.file.clone())
-        .collect::<BTreeSet<_>>();
-    let expected_files = [
-        "apps/devctl/crates/adapters".to_owned(),
-        "apps/backend/crates/adapters".to_owned(),
-        "apps/worker/crates/adapters".to_owned(),
-    ]
-    .into_iter()
-    .collect::<BTreeSet<_>>();
-
-    assert_eq!(actual_files, expected_files, "{errors:#?}");
-    assert!(
-        errors
-            .iter()
-            .all(|error| error.title.contains("inbound") && error.title.contains("adapters")),
-        "{errors:#?}"
-    );
-    assert!(
-        !errors.iter().any(|error| error
-            .file
-            .as_deref()
-            .is_some_and(|file| file.starts_with(inner_hex()))),
-        "{errors:#?}"
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_summary(
+        &results,
+        "",
+        3,
+        [
+            "apps/devctl/crates/adapters",
+            "apps/backend/crates/adapters",
+            "apps/worker/crates/adapters",
+        ],
+        None,
+        Some(&["inbound", "adapters"]),
+        None,
+        None,
     );
 }
 
@@ -98,27 +77,21 @@ fn missing_inbound_in_ports_hits_all_owned_outer_and_nested_containers() {
         remove_dir(tmp.path(), &format!("{dir}/inbound"));
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-03");
-    let actual_files = errors
-        .iter()
-        .filter_map(|error| error.file.clone())
-        .collect::<BTreeSet<_>>();
-    let expected_files = [
-        "apps/devctl/crates/ports".to_owned(),
-        "apps/backend/crates/ports".to_owned(),
-        "apps/worker/crates/ports".to_owned(),
-        format!("{}/ports", inner_hex()),
-    ]
-    .into_iter()
-    .collect::<BTreeSet<_>>();
-
-    assert_eq!(actual_files, expected_files, "{errors:#?}");
-    assert!(
-        errors
-            .iter()
-            .all(|error| error.title.contains("inbound") && error.title.contains("ports")),
-        "{errors:#?}"
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_summary(
+        &results,
+        "",
+        4,
+        [
+            "apps/devctl/crates/ports",
+            "apps/backend/crates/ports",
+            "apps/worker/crates/ports",
+            format!("{}/ports", inner_hex()),
+        ],
+        None,
+        Some(&["inbound", "ports"]),
+        None,
+        None,
     );
 }
 
@@ -134,27 +107,21 @@ fn missing_outbound_in_ports_hits_all_owned_outer_and_nested_containers() {
         remove_dir(tmp.path(), &format!("{dir}/outbound"));
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-03");
-    let actual_files = errors
-        .iter()
-        .filter_map(|error| error.file.clone())
-        .collect::<BTreeSet<_>>();
-    let expected_files = [
-        "apps/devctl/crates/ports".to_owned(),
-        "apps/backend/crates/ports".to_owned(),
-        "apps/worker/crates/ports".to_owned(),
-        format!("{}/ports", inner_hex()),
-    ]
-    .into_iter()
-    .collect::<BTreeSet<_>>();
-
-    assert_eq!(actual_files, expected_files, "{errors:#?}");
-    assert!(
-        errors
-            .iter()
-            .all(|error| error.title.contains("outbound") && error.title.contains("ports")),
-        "{errors:#?}"
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_summary(
+        &results,
+        "",
+        4,
+        [
+            "apps/devctl/crates/ports",
+            "apps/backend/crates/ports",
+            "apps/worker/crates/ports",
+            format!("{}/ports", inner_hex()),
+        ],
+        None,
+        Some(&["outbound", "ports"]),
+        None,
+        None,
     );
 }
 
@@ -171,24 +138,43 @@ fn both_direction_dirs_missing_in_ports_emit_two_missing_results_per_owned_conta
         remove_dir(tmp.path(), &format!("{dir}/outbound"));
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-03");
-    assert_eq!(errors.len(), 8, "{errors:#?}");
-    assert_eq!(
-        errors
-            .iter()
-            .filter(|error| error.title.contains("/inbound/ directory"))
-            .count(),
-        4,
-        "{errors:#?}"
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_summary(
+        &results,
+        "",
+        8,
+        [
+            "apps/devctl/crates/ports",
+            "apps/backend/crates/ports",
+            "apps/worker/crates/ports",
+            format!("{}/ports", inner_hex()),
+        ],
+        None,
+        None,
+        None,
+        None,
     );
-    assert_eq!(
-        errors
-            .iter()
-            .filter(|error| error.title.contains("/outbound/ directory"))
-            .count(),
+    assertions::assert_error_count_matching(
+        &results,
+        "",
         4,
-        "{errors:#?}"
+        None,
+        None,
+        &["/inbound/ directory"],
+        &[],
+        &[],
+        &[],
+    );
+    assertions::assert_error_count_matching(
+        &results,
+        "",
+        4,
+        None,
+        None,
+        &["/outbound/ directory"],
+        &[],
+        &[],
+        &[],
     );
 }
 
@@ -205,31 +191,42 @@ fn both_direction_dirs_missing_in_adapters_emit_two_missing_results_per_survivin
         remove_dir(tmp.path(), &format!("{dir}/outbound"));
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-03");
-    assert_eq!(errors.len(), 6, "{errors:#?}");
-    assert_eq!(
-        errors
-            .iter()
-            .filter(|error| error.title.contains("inbound"))
-            .count(),
-        3,
-        "{errors:#?}"
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_summary(
+        &results,
+        "",
+        6,
+        [
+            "apps/devctl/crates/adapters",
+            "apps/backend/crates/adapters",
+            "apps/worker/crates/adapters",
+        ],
+        None,
+        None,
+        None,
+        None,
     );
-    assert_eq!(
-        errors
-            .iter()
-            .filter(|error| error.title.contains("outbound"))
-            .count(),
+    assertions::assert_error_count_matching(
+        &results,
+        "",
         3,
-        "{errors:#?}"
+        None,
+        None,
+        &["inbound"],
+        &[],
+        &[],
+        &[],
     );
-    assert!(
-        !errors.iter().any(|error| error
-            .file
-            .as_deref()
-            .is_some_and(|file| file.starts_with(inner_hex()))),
-        "{errors:#?}"
+    assertions::assert_error_count_matching(
+        &results,
+        "",
+        3,
+        None,
+        None,
+        &["outbound"],
+        &[],
+        &[],
+        &[],
     );
 }
 
@@ -240,28 +237,19 @@ fn removing_outer_backend_inbound_destroys_the_nested_hex_path_and_does_not_doub
         remove_dir(tmp.path(), &format!("apps/{app}/crates/adapters/inbound"));
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-03");
-    let actual_files = errors
-        .iter()
-        .filter_map(|error| error.file.clone())
-        .collect::<BTreeSet<_>>();
-    let expected_files = [
-        "apps/devctl/crates/adapters".to_owned(),
-        "apps/backend/crates/adapters".to_owned(),
-        "apps/worker/crates/adapters".to_owned(),
-    ]
-    .into_iter()
-    .collect::<BTreeSet<_>>();
-
-    assert_eq!(
-        actual_files, expected_files,
-        "unexpected hit set: {errors:#?}"
-    );
-    assert!(
-        !errors
-            .iter()
-            .any(|error| error.file.as_deref().unwrap_or("").contains("mcp/crates")),
-        "inner hex should be unreachable after removing backend adapters/inbound: {errors:#?}"
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_summary(
+        &results,
+        "",
+        3,
+        [
+            "apps/devctl/crates/adapters",
+            "apps/backend/crates/adapters",
+            "apps/worker/crates/adapters",
+        ],
+        None,
+        None,
+        None,
+        None,
     );
 }

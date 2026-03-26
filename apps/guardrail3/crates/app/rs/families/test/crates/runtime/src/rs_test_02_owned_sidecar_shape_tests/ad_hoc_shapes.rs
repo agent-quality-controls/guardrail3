@@ -1,13 +1,16 @@
 use guardrail3_domain_report::Severity;
 
 #[allow(unused_imports)]
-use guardrail3_app_rs_family_test_assertions::rs_test_02_owned_sidecar_shape::{assert_reported, assert_rule_files, assert_rule_quiet};
+use guardrail3_app_rs_family_test_assertions::rs_test_02_owned_sidecar_shape::{
+    assert_reported, assert_rule_files, assert_rule_quiet,
+};
 
 #[allow(unused_imports)]
 use super::{run_family, tempdir, write_file};
 
 #[test]
-fn ad_hoc_cfg_test_module_declaration_is_reported() {let fixture = tempdir();
+fn ad_hoc_cfg_test_module_declaration_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -23,10 +26,18 @@ fn ad_hoc_cfg_test_module_declaration_is_reported() {let fixture = tempdir();
     );
 
     let results = run_family(root);
-    assert_reported(&results, "src/lib.rs", Some(1), Severity::Error, "ad hoc cfg(test) module declaration");}
+    assert_reported(
+        &results,
+        "src/lib.rs",
+        Some(1),
+        Severity::Error,
+        "ad hoc cfg(test) module declaration",
+    );
+}
 
 #[test]
-fn ad_hoc_src_tests_tree_is_reported() {let fixture = tempdir();
+fn ad_hoc_src_tests_tree_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -41,10 +52,18 @@ fn ad_hoc_src_tests_tree_is_reported() {let fixture = tempdir();
     );
 
     let results = run_family(root);
-    assert_reported(&results, "src/tests", None, Severity::Error, "ad hoc src/tests tree");}
+    assert_reported(
+        &results,
+        "src/tests",
+        None,
+        Severity::Error,
+        "ad hoc src/tests tree",
+    );
+}
 
 #[test]
-fn missing_sidecar_mod_rs_is_reported() {let fixture = tempdir();
+fn missing_sidecar_mod_rs_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -59,10 +78,18 @@ fn missing_sidecar_mod_rs_is_reported() {let fixture = tempdir();
     );
 
     let results = run_family(root);
-    assert_reported(&results, "src/lib_tests", None, Severity::Error, "sidecar directory missing mod.rs");}
+    assert_reported(
+        &results,
+        "src/lib_tests",
+        None,
+        Severity::Error,
+        "sidecar directory missing mod.rs",
+    );
+}
 
 #[test]
-fn flat_tests_file_is_reported() {let fixture = tempdir();
+fn flat_tests_file_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -77,10 +104,18 @@ fn flat_tests_file_is_reported() {let fixture = tempdir();
     );
 
     let results = run_family(root);
-    assert_reported(&results, "src/lib_tests.rs", None, Severity::Error, "flat sidecar test file");}
+    assert_reported(
+        &results,
+        "src/lib_tests.rs",
+        None,
+        Severity::Error,
+        "flat sidecar test file",
+    );
+}
 
 #[test]
-fn flat_test_file_is_reported() {let fixture = tempdir();
+fn flat_test_file_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -95,10 +130,18 @@ fn flat_test_file_is_reported() {let fixture = tempdir();
     );
 
     let results = run_family(root);
-    assert_reported(&results, "src/lib_test.rs", None, Severity::Error, "flat sidecar test file");}
+    assert_reported(
+        &results,
+        "src/lib_test.rs",
+        None,
+        Severity::Error,
+        "flat sidecar test file",
+    );
+}
 
 #[test]
-fn flat_tests_rs_file_is_reported() {let fixture = tempdir();
+fn flat_tests_rs_file_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -113,10 +156,18 @@ fn flat_tests_rs_file_is_reported() {let fixture = tempdir();
     );
 
     let results = run_family(root);
-    assert_reported(&results, "src/tests.rs", None, Severity::Error, "flat sidecar test file");}
+    assert_reported(
+        &results,
+        "src/tests.rs",
+        None,
+        Severity::Error,
+        "flat sidecar test file",
+    );
+}
 
 #[test]
-fn orphaned_sidecar_harness_is_reported() {let fixture = tempdir();
+fn orphaned_sidecar_harness_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -147,4 +198,5 @@ fn orphaned_sidecar_harness_is_reported() {let fixture = tempdir();
         None,
         Severity::Error,
         "orphaned sidecar harness",
-    );}
+    );
+}

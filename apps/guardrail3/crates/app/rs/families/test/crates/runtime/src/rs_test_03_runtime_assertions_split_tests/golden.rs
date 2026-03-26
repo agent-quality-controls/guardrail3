@@ -1,11 +1,14 @@
 #[allow(unused_imports)]
-use guardrail3_app_rs_family_test_assertions::rs_test_03_runtime_assertions_split::{assert_reported, assert_rule_files, assert_rule_quiet};
+use guardrail3_app_rs_family_test_assertions::rs_test_03_runtime_assertions_split::{
+    assert_reported, assert_rule_files, assert_rule_quiet,
+};
 
 #[allow(unused_imports)]
 use super::{run_family, tempdir, write_file};
 
 #[test]
-fn runtime_assertions_split_with_black_box_harness_stays_clean() {let fixture = tempdir();
+fn runtime_assertions_split_with_black_box_harness_stays_clean() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -46,10 +49,12 @@ fn runtime_assertions_split_with_black_box_harness_stays_clean() {let fixture = 
 
     let results = run_family(root);
 
-    assert_rule_quiet(&results);}
+    assert_rule_quiet(&results);
+}
 
 #[test]
-fn nested_package_root_with_runtime_assertions_split_stays_clean() {let fixture = tempdir();
+fn nested_package_root_with_runtime_assertions_split_stays_clean() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -95,4 +100,5 @@ fn nested_package_root_with_runtime_assertions_split_stays_clean() {let fixture 
 
     let results = run_family(root);
 
-    assert_rule_quiet(&results);}
+    assert_rule_quiet(&results);
+}

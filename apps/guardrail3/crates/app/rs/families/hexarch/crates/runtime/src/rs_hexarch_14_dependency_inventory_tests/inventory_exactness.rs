@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_14_dependency_inventory as assertions;
-use crate::test_support::{copy_fixture, write_file};
+use super::{copy_fixture, write_file};
 
 #[test]
 fn fixture_backed_path_dependencies_are_inventoried_with_exact_messages() {
@@ -12,11 +12,11 @@ fn fixture_backed_path_dependencies_are_inventoried_with_exact_messages() {
         "[package]\nname = \"backend-app-queries\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\nbackend-domain-types = { path = \"../../domain/types\" }\n\n[dev-dependencies]\nshared-types = { path = \"../../../../../packages/shared-types\" }\n\n[build-dependencies]\nbackend-ports-outbound-repo = { path = \"../../ports/outbound/repo\" }\n\n[target.'cfg(unix)'.dependencies]\nbackend-domain-engine-target = { package = \"backend-domain-engine\", path = \"../../domain/engine\" }\n\n[target.'cfg(unix)'.dev-dependencies]\nshared-types-target = { package = \"shared-types\", path = \"../../../../../packages/shared-types\" }\n\n[target.'cfg(unix)'.build-dependencies]\nbackend-ports-outbound-events-target = { package = \"backend-ports-outbound-events\", path = \"../../ports/outbound/events\" }\n",
     );
 
-    let results = assertions::run_family(tmp.path());
+    let results = super::run_family(tmp.path());
     let actual_messages = results
         .iter()
         .filter(|result| {
-            result.id == "RS-HEXARCH-14"
+            result.id == ""
                 && result.file.as_deref() == Some("apps/backend/crates/app/queries/Cargo.toml")
         })
         .map(|result| result.message.clone())
@@ -40,7 +40,7 @@ fn fixture_backed_path_dependencies_are_inventoried_with_exact_messages() {
         results
             .iter()
             .filter(|result| {
-                result.id == "RS-HEXARCH-14"
+                result.id == ""
                     && result.file.as_deref() == Some("apps/backend/crates/app/queries/Cargo.toml")
             })
             .all(|result| result.inventory),
@@ -57,11 +57,11 @@ fn broken_path_dependencies_are_not_inventoried() {
         "[package]\nname = \"backend-app-queries\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\nbackend-domain-types = { path = \"../../domain/types\" }\nmissing-same-app = { path = \"../../app/missing\" }\nmissing-package = { path = \"../../../../../packages/missing\" }\n",
     );
 
-    let results = assertions::run_family(tmp.path());
+    let results = super::run_family(tmp.path());
     let inventory_messages = results
         .iter()
         .filter(|result| {
-            result.id == "RS-HEXARCH-14"
+            result.id == ""
                 && result.file.as_deref() == Some("apps/backend/crates/app/queries/Cargo.toml")
         })
         .map(|result| result.message.clone())

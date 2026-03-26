@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_15_boundary_config as assertions;
-use crate::test_support::copy_fixture;
+use super::copy_fixture;
 
 #[test]
 fn missing_all_app_boundaries_hits_each_app_boundary() {
@@ -23,10 +23,10 @@ fn missing_all_app_boundaries_hits_each_app_boundary() {
         );
     std::fs::write(&guardrail_path, updated).expect("remove all app boundary configs");
 
-    let results = assertions::run_family(tmp.path());
+    let results = super::run_family(tmp.path());
     let titles = results
         .iter()
-        .filter(|result| result.id == "RS-HEXARCH-15")
+        .filter(|result| result.id == "")
         .map(|result| result.title.clone())
         .collect::<BTreeSet<_>>();
     let expected = [

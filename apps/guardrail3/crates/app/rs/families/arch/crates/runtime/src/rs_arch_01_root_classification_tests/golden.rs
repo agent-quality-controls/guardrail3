@@ -1,10 +1,10 @@
-use guardrail3_app_rs_family_arch_assertions::rs_arch_01_root_classification as assertions;
 #[allow(unused_imports)]
-use super::{cargo_fixture, CargoFixture, entry, tree, tree_at};
+use super::{CargoFixture, cargo_fixture, check_results, entry, tree, tree_at};
+use guardrail3_app_rs_family_arch_assertions::rs_arch_01_root_classification as assertions;
 
 #[test]
 fn golden_layout_has_no_classification_errors() {
-    let results = assertions::check_results(&tree(
+    let results = check_results(&tree(
         &[
             ("", entry(&["apps", "packages"], &[])),
             ("apps", entry(&["backend"], &[])),
@@ -13,8 +13,14 @@ fn golden_layout_has_no_classification_errors() {
             ("packages/shared", entry(&[], &["Cargo.toml"])),
         ],
         &[
-            ("apps/backend/Cargo.toml", cargo_fixture(CargoFixture::AppWorkspace)),
-            ("packages/shared/Cargo.toml", cargo_fixture(CargoFixture::Package)),
+            (
+                "apps/backend/Cargo.toml",
+                cargo_fixture(CargoFixture::AppWorkspace),
+            ),
+            (
+                "packages/shared/Cargo.toml",
+                cargo_fixture(CargoFixture::Package),
+            ),
         ],
     ));
 

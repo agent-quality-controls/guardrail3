@@ -1,0 +1,10 @@
+[package]
+name = "guardrail3-app-rs-family-hexarch-assertions-common"
+version = "0.0.0"
+edition = "2024"
+
+[lints]
+workspace = true
+
+[dependencies]
+guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../../../../../domain/report" }

@@ -51,5 +51,17 @@ pub fn check_tree_for_tests(tree: &guardrail3_domain_project_tree::ProjectTree) 
 }
 
 #[cfg(test)]
+#[allow(dead_code)]
+pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
+    crate::check_test_tree(&test_support::walk(root))
+}
+
+#[cfg(test)]
+#[allow(dead_code)]
+pub(super) fn results_for_test_tree(tree: &guardrail3_domain_project_tree::ProjectTree) -> Vec<CheckResult> {
+    crate::check_test_tree(tree)
+}
+
+#[cfg(test)]
 #[path = "rs_hexarch_25_target_dependency_direction_tests/mod.rs"]
 mod rs_hexarch_25_target_dependency_direction_tests;

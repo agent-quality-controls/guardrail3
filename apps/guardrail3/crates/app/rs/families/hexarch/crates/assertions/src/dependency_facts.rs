@@ -1,10 +1,9 @@
-use guardrail3_app_rs_family_hexarch::{self as runtime, DependencyFamilyFacts};
-use guardrail3_domain_project_tree::ProjectTree;
-
-pub fn dependency_facts(tree: &ProjectTree) -> DependencyFamilyFacts {
-    runtime::collect_dependency_facts_from_tree_for_tests(tree)
-}
+use guardrail3_app_rs_family_hexarch::DependencyFamilyFacts;
 
 pub fn assert_member_count(facts: &DependencyFamilyFacts, expected: usize) {
-    assert_eq!(facts.members.len(), expected);
+    assert_eq!(facts.members.len(), expected, "{facts:#?}");
+}
+
+pub fn assert_no_cycles(facts: &DependencyFamilyFacts) {
+    assert!(facts.cycles.is_empty(), "{facts:#?}");
 }

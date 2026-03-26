@@ -1,11 +1,14 @@
 #[allow(unused_imports)]
-use guardrail3_app_rs_family_test_assertions::rs_test_02_owned_sidecar_shape::{assert_reported, assert_rule_files, assert_rule_quiet};
+use guardrail3_app_rs_family_test_assertions::rs_test_02_owned_sidecar_shape::{
+    assert_reported, assert_rule_files, assert_rule_quiet,
+};
 
 #[allow(unused_imports)]
 use super::{run_family, tempdir, write_file};
 
 #[test]
-fn root_local_ruleish_shape_does_not_get_a_sidecar_exception() {let fixture = tempdir();
+fn root_local_ruleish_shape_does_not_get_a_sidecar_exception() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -33,4 +36,5 @@ fn root_local_ruleish_shape_does_not_get_a_sidecar_exception() {let fixture = te
     assert_rule_files(
         &run_family(root),
         vec!["src/lib.rs".to_owned(), "src/rs_demo_01.rs".to_owned()],
-    );}
+    );
+}

@@ -68,7 +68,6 @@ pub fn assert_present_mutation_hook(results: &[CheckResult]) {
     );
 }
 
-
 pub fn assert_inventory(results: &[CheckResult], expected: bool) {
     let finding = finding(results, RULE_ID);
     assert_eq!(finding.inventory, expected);

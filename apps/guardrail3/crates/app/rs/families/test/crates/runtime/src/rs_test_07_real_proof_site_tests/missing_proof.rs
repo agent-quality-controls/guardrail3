@@ -7,7 +7,8 @@ use guardrail3_app_rs_family_test_assertions::rs_test_07_real_proof_site::{
 use super::{run_family, tempdir, write_file};
 
 #[test]
-fn test_without_assertion_macro_or_owned_assertions_call_is_reported() {let fixture = tempdir();
+fn test_without_assertion_macro_or_owned_assertions_call_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -23,13 +24,18 @@ fn test_without_assertion_macro_or_owned_assertions_call_is_reported() {let fixt
 
     let results = run_family(root);
 
-    assert_rule_files(&results, vec!["tests/proof.rs".to_owned()]
+    assert_rule_files(&results, vec!["tests/proof.rs".to_owned()]);
+    assert_warning_reported(
+        &results,
+        "tests/proof.rs",
+        Some(3),
+        "test lacks real proof site",
     );
-    assert_warning_reported(&results, "tests/proof.rs", Some(3), "test lacks real proof site");
 }
 
 #[test]
-fn result_return_without_proof_is_reported() {let fixture = tempdir();
+fn result_return_without_proof_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -74,7 +80,8 @@ fn result_return_without_proof_is_reported() {let fixture = tempdir();
 }
 
 #[test]
-fn shadowed_owned_assertions_call_is_reported() {let fixture = tempdir();
+fn shadowed_owned_assertions_call_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -119,7 +126,8 @@ fn shadowed_owned_assertions_call_is_reported() {let fixture = tempdir();
 }
 
 #[test]
-fn name_heuristic_does_not_count_as_proof() {let fixture = tempdir();
+fn name_heuristic_does_not_count_as_proof() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(

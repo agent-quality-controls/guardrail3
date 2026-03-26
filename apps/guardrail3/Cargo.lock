@@ -453,6 +453,15 @@ name = "guardrail3-app-rs-family-cargo-assertions"
 version = "0.0.0"
 dependencies = [
  "guardrail3-app-rs-family-cargo",
+ "guardrail3-app-rs-family-cargo-assertions-common",
+ "guardrail3-domain-report",
+]
+
+[[package]]
+name = "guardrail3-app-rs-family-cargo-assertions-common"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-app-rs-family-cargo",
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
 ]
@@ -591,6 +600,7 @@ dependencies = [
  "semver",
  "serde_yaml",
  "syn",
+ "tempfile",
  "toml",
 ]
 
@@ -599,8 +609,14 @@ name = "guardrail3-app-rs-family-hexarch-assertions"
 version = "0.0.0"
 dependencies = [
  "guardrail3-app-rs-family-hexarch",
- "guardrail3-app-rs-family-hexarch-test-support",
- "guardrail3-domain-project-tree",
+ "guardrail3-app-rs-family-hexarch-assertions-common",
+ "guardrail3-domain-report",
+]
+
+[[package]]
+name = "guardrail3-app-rs-family-hexarch-assertions-common"
+version = "0.0.0"
+dependencies = [
  "guardrail3-domain-report",
 ]
 
@@ -611,7 +627,6 @@ dependencies = [
  "guardrail3-adapters-outbound-fs",
  "guardrail3-app-core",
  "guardrail3-domain-project-tree",
- "tempfile",
 ]
 
 [[package]]
@@ -686,26 +701,17 @@ dependencies = [
  "guardrail3-app-rs-ast",
  "guardrail3-app-rs-family-hooks-shared",
  "guardrail3-app-rs-family-mapper",
- "guardrail3-app-rs-family-test-assertions",
  "guardrail3-app-rs-placement",
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
  "guardrail3-domain-validation-model",
  "guardrail3-ports-outbound-traits",
  "guardrail3-shared-fs",
+ "guardrail3_app_rs_family_test_assertions",
  "proc-macro2",
  "syn",
  "test_support",
  "toml",
-]
-
-[[package]]
-name = "guardrail3-app-rs-family-test-assertions"
-version = "0.0.0"
-dependencies = [
- "guardrail3-app-rs-family-test",
- "guardrail3-domain-report",
- "test_support",
 ]
 
 [[package]]
@@ -848,6 +854,14 @@ dependencies = [
  "guardrail3-app-rs-family-arch",
  "guardrail3-app-rs-family-arch-test-support",
  "guardrail3-domain-project-tree",
+ "guardrail3-domain-report",
+]
+
+[[package]]
+name = "guardrail3_app_rs_family_test_assertions"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-app-rs-family-test",
  "guardrail3-domain-report",
 ]
 
@@ -1196,7 +1210,6 @@ dependencies = [
  "guardrail3-adapters-outbound-fs",
  "guardrail3-app-core",
  "guardrail3-domain-project-tree",
- "guardrail3-domain-report",
  "guardrail3-ports-outbound-traits",
  "tempfile",
 ]

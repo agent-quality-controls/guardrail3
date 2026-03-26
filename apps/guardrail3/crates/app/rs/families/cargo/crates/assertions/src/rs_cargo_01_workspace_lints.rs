@@ -12,7 +12,10 @@ pub struct ExpectedRuleResult<'a> {
 const RULE_ID: &str = "RS-CARGO-01";
 
 pub fn rule_results<'a>(results: &'a [CheckResult], _rule_id: &str) -> Vec<&'a CheckResult> {
-    results.iter().filter(|result| result.id == RULE_ID).collect()
+    results
+        .iter()
+        .filter(|result| result.id == RULE_ID)
+        .collect()
 }
 
 pub fn assert_rule_results(results: &[CheckResult], expected: &[ExpectedRuleResult<'_>]) -> () {

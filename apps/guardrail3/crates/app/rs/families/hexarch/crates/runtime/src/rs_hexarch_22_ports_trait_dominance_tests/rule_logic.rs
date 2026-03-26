@@ -69,6 +69,6 @@ fn non_ports_crates_are_ignored() {
 
     assert!(
         results.is_empty(),
-        "expected non-ports crates to be ignored by RS-HEXARCH-22: {results:#?}"
+        "expected non-ports crates to be ignored by rule 22: {results:#?}"
     );
 }

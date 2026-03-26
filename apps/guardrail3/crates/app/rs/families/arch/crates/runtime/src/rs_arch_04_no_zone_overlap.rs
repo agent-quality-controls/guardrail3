@@ -36,5 +36,12 @@ pub fn check(input: &ZoneOverlapInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
+pub(crate) fn check_results(
+    tree: &guardrail3_domain_project_tree::ProjectTree,
+) -> Vec<guardrail3_domain_report::CheckResult> {
+    crate::check_test_tree(tree)
+}
+
+#[cfg(test)]
 #[path = "rs_arch_04_no_zone_overlap_tests/mod.rs"]
 mod rs_arch_04_no_zone_overlap_tests;

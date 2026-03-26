@@ -2,6 +2,7 @@
 members = [
     "crates/runtime",
     "crates/assertions",
+    "crates/assertions_common",
     "test_support",
 ]
 resolver = "2"

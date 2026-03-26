@@ -58,7 +58,6 @@ pub fn assert_external_harness_direct_assertion(results: &[CheckResult]) {
     );
 }
 
-
 pub fn assert_inventory(results: &[CheckResult], expected: bool) {
     let finding = finding(results, RULE_ID);
     assert_eq!(finding.inventory, expected);

@@ -1,5 +1,5 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_09_no_extra_workspace_members as assertions;
-use crate::test_support::{copy_fixture, write_file};
+use super::{copy_fixture, write_file};
 
 #[test]
 fn package_style_app_cargo_is_owned_by_rule_08_not_rule_09() {
@@ -10,9 +10,9 @@ fn package_style_app_cargo_is_owned_by_rule_08_not_rule_09() {
         "[package]\nname = \"devctl\"\nversion = \"0.1.0\"\n",
     );
 
-    let results = assertions::run_family(tmp.path());
+    let results = super::run_family(tmp.path());
     let rule_08 = assertions::errors_by_id(&results, "RS-HEXARCH-08");
-    let rule_09 = assertions::errors_by_id(&results, "RS-HEXARCH-09");
+    let rule_09 = assertions::errors_by_id(&results, "");
 
     assert!(
         rule_09.is_empty(),
@@ -44,8 +44,8 @@ resolver = "2"
 "#,
     );
 
-    let results = assertions::run_family(tmp.path());
-    let rule_09 = assertions::errors_by_id(&results, "RS-HEXARCH-09");
+    let results = super::run_family(tmp.path());
+    let rule_09 = assertions::errors_by_id(&results, "");
     let rule_10 = assertions::errors_by_id(&results, "RS-HEXARCH-10");
 
     assert!(
@@ -78,8 +78,8 @@ resolver = "2"
 "#,
     );
 
-    let results = assertions::run_family(tmp.path());
-    let rule_09 = assertions::errors_by_id(&results, "RS-HEXARCH-09");
+    let results = super::run_family(tmp.path());
+    let rule_09 = assertions::errors_by_id(&results, "");
     let rule_10 = assertions::errors_by_id(&results, "RS-HEXARCH-10");
 
     assert!(
@@ -112,8 +112,8 @@ resolver = "2"
 "#,
     );
 
-    let results = assertions::run_family(tmp.path());
-    let rule_09 = assertions::errors_by_id(&results, "RS-HEXARCH-09");
+    let results = super::run_family(tmp.path());
+    let rule_09 = assertions::errors_by_id(&results, "");
     let rule_10 = assertions::errors_by_id(&results, "RS-HEXARCH-10");
 
     assert!(

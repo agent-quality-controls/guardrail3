@@ -1,5 +1,5 @@
 use super::super::{run_domain_purity_case, DomainPurityEdgeKindForTest};
-use crate::test_support::{dir_entry, project_tree};
+use super::{dir_entry, project_tree};
 
 #[test]
 fn dev_dependencies_do_not_trigger_domain_purity() {

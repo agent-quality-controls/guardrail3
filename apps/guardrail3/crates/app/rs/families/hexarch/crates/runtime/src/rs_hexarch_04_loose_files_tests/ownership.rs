@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_04_loose_files as assertions;
-use crate::test_support::{copy_fixture, create_dir, empty_dir, remove_dir, write_file};
-const FIXTURE: crate::test_support::HexarchFixture = crate::test_support::HexarchFixture;
+use super::{copy_fixture, create_dir, empty_dir, remove_dir, write_file};
+const FIXTURE: super::HexarchFixture = super::HexarchFixture;
 
 fn inner_hex() -> &'static str {
     FIXTURE.inner_hex_root()
@@ -12,19 +12,27 @@ fn files_only_container_is_owned_by_rule_05_not_rule_04() {
     empty_dir(tmp.path(), "apps/devctl/crates/domain");
     write_file(tmp.path(), "apps/devctl/crates/domain/README.md", "# stray");
 
-    let results = assertions::run_family(tmp.path());
-    let rule_04 = assertions::errors_by_id(&results, "RS-HEXARCH-04");
-    let rule_05 = assertions::errors_by_id(&results, "RS-HEXARCH-05");
-    assert!(
-        rule_04.is_empty(),
-        "rule 04 should not double-fire on files-only container: {rule_04:#?}"
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_count_matching_file(
+        &results,
+        "",
+        "apps/devctl/crates/domain",
+        0,
+        &[],
+        &[],
+        &[],
+        &[],
     );
-    assert_eq!(
-        rule_05.len(),
+    assertions::assert_error_count_matching_file(
+        &results,
+        "RS-HEXARCH-05",
+        "apps/devctl/crates/domain",
         1,
-        "expected rule 05 to own files-only container: {rule_05:#?}"
+        &[],
+        &[],
+        &["README.md"],
+        &[],
     );
-    assert!(rule_05[0].message.contains("README.md"));
 }
 
 #[test]
@@ -32,17 +40,17 @@ fn empty_container_is_owned_by_rule_05_not_rule_04() {
     let tmp = copy_fixture();
     empty_dir(tmp.path(), "apps/devctl/crates/domain");
 
-    let results = assertions::run_family(tmp.path());
-    let rule_04 = assertions::errors_by_id(&results, "RS-HEXARCH-04");
-    let rule_05 = assertions::errors_by_id(&results, "RS-HEXARCH-05");
-    assert!(
-        rule_04.is_empty(),
-        "rule 04 should stay silent for truly empty containers: {rule_04:#?}"
-    );
-    assert_eq!(rule_05.len(), 1, "{rule_05:#?}");
-    assert_eq!(
-        rule_05[0].file.as_deref(),
-        Some("apps/devctl/crates/domain")
+    let results = super::run_family(tmp.path());
+    assertions::assert_no_error(&results, "");
+    assertions::assert_error_count_matching_file(
+        &results,
+        "RS-HEXARCH-05",
+        "apps/devctl/crates/domain",
+        1,
+        &[],
+        &[],
+        &[],
+        &[],
     );
 }
 
@@ -51,13 +59,16 @@ fn missing_container_dir_does_not_emit_rule_04_for_that_path() {
     let tmp = copy_fixture();
     remove_dir(tmp.path(), "apps/devctl/crates/domain");
 
-    let results = assertions::run_family(tmp.path());
-    let rule_04 = assertions::errors_by_id(&results, "RS-HEXARCH-04");
-    assert!(
-        rule_04
-            .iter()
-            .all(|error| error.file.as_deref() != Some("apps/devctl/crates/domain")),
-        "rule 04 should stay silent for an absent container owned by another rule: {rule_04:#?}"
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_count_matching_file(
+        &results,
+        "",
+        "apps/devctl/crates/domain",
+        0,
+        &[],
+        &[],
+        &[],
+        &[],
     );
 }
 
@@ -66,13 +77,17 @@ fn removing_outer_adapters_parent_does_not_create_nested_rule_04_hits() {
     let tmp = copy_fixture();
     remove_dir(tmp.path(), "apps/backend/crates/adapters");
 
-    let results = assertions::run_family(tmp.path());
-    let rule_04 = assertions::errors_by_id(&results, "RS-HEXARCH-04");
-    assert!(
-        rule_04
-            .iter()
-            .all(|error| !error.file.as_deref().unwrap_or("").starts_with(inner_hex())),
-        "rule 04 should not double-fire on nested containers destroyed with the outer adapters parent: {rule_04:#?}"
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_count_matching(
+        &results,
+        "",
+        0,
+        None,
+        Some(inner_hex()),
+        &[],
+        &[],
+        &[],
+        &[],
     );
 }
 
@@ -86,12 +101,8 @@ fn ts_apps_and_packages_stay_out_of_scope() {
     );
     write_file(tmp.path(), "packages/shared-types/README.md", "# stray");
 
-    let results = assertions::run_family(tmp.path());
-    let rule_04 = assertions::errors_by_id(&results, "RS-HEXARCH-04");
-    assert!(
-        rule_04.is_empty(),
-        "rule 04 should ignore TS apps and packages entirely: {rule_04:#?}"
-    );
+    let results = super::run_family(tmp.path());
+    assertions::assert_no_error(&results, "");
 }
 
 #[test]
@@ -105,14 +116,27 @@ fn symlink_only_container_is_owned_by_rule_05_not_rule_04() {
     )
     .expect("symlink");
 
-    let results = assertions::run_family(tmp.path());
-    let rule_04 = assertions::errors_by_id(&results, "RS-HEXARCH-04");
-    let rule_05 = assertions::errors_by_id(&results, "RS-HEXARCH-05");
-    assert!(
-        rule_04.is_empty(),
-        "rule 04 should stay silent for symlink-only containers owned by rule 05: {rule_04:#?}"
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_count_matching_file(
+        &results,
+        "",
+        "apps/devctl/crates/domain",
+        0,
+        &[],
+        &[],
+        &[],
+        &[],
     );
-    assert_eq!(rule_05.len(), 1, "{rule_05:#?}");
+    assertions::assert_error_count_matching_file(
+        &results,
+        "RS-HEXARCH-05",
+        "apps/devctl/crates/domain",
+        1,
+        &[],
+        &[],
+        &[],
+        &[],
+    );
 }
 
 #[test]
@@ -129,16 +153,26 @@ fn mixed_rule_04_and_rule_05_states_split_ownership_exactly() {
     empty_dir(tmp.path(), "apps/devctl/crates/domain");
     write_file(tmp.path(), "apps/devctl/crates/domain/README.md", "# stray");
 
-    let results = assertions::run_family(tmp.path());
-    let rule_04 = assertions::errors_by_id(&results, "RS-HEXARCH-04");
-    let rule_05 = assertions::errors_by_id(&results, "RS-HEXARCH-05");
-
-    assert_eq!(rule_04.len(), 1, "{rule_04:#?}");
-    assert_eq!(rule_05.len(), 1, "{rule_05:#?}");
-    assert_eq!(rule_04[0].file.as_deref(), Some("apps/backend/crates/app"));
-    assert_eq!(
-        rule_05[0].file.as_deref(),
-        Some("apps/devctl/crates/domain")
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_count_matching_file(
+        &results,
+        "",
+        "apps/backend/crates/app",
+        1,
+        &["loose files"],
+        &[],
+        &[],
+        &[],
+    );
+    assertions::assert_error_count_matching_file(
+        &results,
+        "RS-HEXARCH-05",
+        "apps/devctl/crates/domain",
+        1,
+        &[],
+        &[],
+        &[],
+        &[],
     );
 }
 
@@ -153,23 +187,46 @@ fn mixed_root_structural_and_container_loose_files_split_across_neighbor_rules()
         "// container stray",
     );
 
-    let results = assertions::run_family(tmp.path());
-    let rule_02 = assertions::errors_by_id(&results, "RS-HEXARCH-02");
-    let rule_03 = assertions::errors_by_id(&results, "RS-HEXARCH-03");
-    let rule_04 = assertions::errors_by_id(&results, "RS-HEXARCH-04");
-    let rule_05 = assertions::errors_by_id(&results, "RS-HEXARCH-05");
-
-    assert_eq!(rule_02.len(), 1, "{rule_02:#?}");
-    assert_eq!(rule_03.len(), 1, "{rule_03:#?}");
-    assert_eq!(rule_04.len(), 1, "{rule_04:#?}");
-    assert!(rule_05.is_empty(), "{rule_05:#?}");
-    assert_eq!(rule_02[0].file.as_deref(), Some("apps/devctl/crates"));
-    assert_eq!(
-        rule_03[0].file.as_deref(),
-        Some("apps/devctl/crates/adapters/diagonal")
+    let results = super::run_family(tmp.path());
+    assertions::assert_error_count_matching_file(
+        &results,
+        "RS-HEXARCH-02",
+        "apps/devctl/crates",
+        1,
+        &[],
+        &[],
+        &[],
+        &[],
     );
-    assert_eq!(
-        rule_04[0].file.as_deref(),
-        Some("apps/devctl/crates/domain")
+    assertions::assert_error_count_matching_file(
+        &results,
+        "RS-HEXARCH-03",
+        "apps/devctl/crates/adapters/diagonal",
+        1,
+        &[],
+        &[],
+        &[],
+        &[],
+    );
+    assertions::assert_error_count_matching_file(
+        &results,
+        "",
+        "apps/devctl/crates/domain",
+        1,
+        &[],
+        &[],
+        &[],
+        &[],
+    );
+    assertions::assert_error_count_matching(
+        &results,
+        "RS-HEXARCH-05",
+        0,
+        None,
+        None,
+        &[],
+        &[],
+        &[],
+        &[],
     );
 }

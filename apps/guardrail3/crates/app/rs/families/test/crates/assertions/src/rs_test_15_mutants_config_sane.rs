@@ -48,7 +48,6 @@ pub fn assert_reported(
     assert_eq!(finding.line, line);
 }
 
-
 pub fn assert_inventory(results: &[CheckResult], expected: bool) {
     let finding = finding(results, RULE_ID);
     assert_eq!(finding.inventory, expected);
@@ -68,7 +67,11 @@ pub fn assert_rule_findings(results: &[CheckResult], expected: &[ExpectedRuleFin
         .iter()
         .filter(|result| result.id == RULE_ID)
         .collect::<Vec<_>>();
-    assert_eq!(actual.len(), expected.len(), "unexpected {RULE_ID} findings");
+    assert_eq!(
+        actual.len(),
+        expected.len(),
+        "unexpected {RULE_ID} findings"
+    );
 
     for expected_result in expected {
         let matched = actual.iter().any(|result| {

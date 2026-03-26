@@ -1,10 +1,10 @@
-use guardrail3_app_rs_family_arch_assertions::rs_arch_04_no_zone_overlap as assertions;
 #[allow(unused_imports)]
-use super::{cargo_fixture, CargoFixture, entry, tree, tree_at};
+use super::{CargoFixture, cargo_fixture, check_results, entry, tree, tree_at};
+use guardrail3_app_rs_family_arch_assertions::rs_arch_04_no_zone_overlap as assertions;
 
 #[test]
 fn nested_cross_zone_roots_do_not_emit_overlap_on_top_of_ambiguity_and_dual_ownership() {
-    let results = assertions::check_results(&tree(
+    let results = check_results(&tree(
         &[
             ("", entry(&["apps", "packages"], &[])),
             ("apps", entry(&["backend"], &[])),
@@ -17,10 +17,22 @@ fn nested_cross_zone_roots_do_not_emit_overlap_on_top_of_ambiguity_and_dual_owne
             ("packages/core/apps/web", entry(&[], &["Cargo.toml"])),
         ],
         &[
-            ("apps/backend/Cargo.toml", cargo_fixture(CargoFixture::AppWorkspace)),
-            ("apps/backend/packages/shared/Cargo.toml", cargo_fixture(CargoFixture::Package)),
-            ("packages/core/Cargo.toml", cargo_fixture(CargoFixture::Package)),
-            ("packages/core/apps/web/Cargo.toml", cargo_fixture(CargoFixture::AppWorkspace)),
+            (
+                "apps/backend/Cargo.toml",
+                cargo_fixture(CargoFixture::AppWorkspace),
+            ),
+            (
+                "apps/backend/packages/shared/Cargo.toml",
+                cargo_fixture(CargoFixture::Package),
+            ),
+            (
+                "packages/core/Cargo.toml",
+                cargo_fixture(CargoFixture::Package),
+            ),
+            (
+                "packages/core/apps/web/Cargo.toml",
+                cargo_fixture(CargoFixture::AppWorkspace),
+            ),
         ],
     ));
 

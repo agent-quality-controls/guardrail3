@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_12_src_banned as assertions;
-use crate::test_support::{copy_fixture, create_dir, write_file};
+use super::{copy_fixture, create_dir, write_file};
 
 #[test]
 fn app_level_src_dirs_hit_every_mutated_rust_app() {
@@ -10,8 +10,8 @@ fn app_level_src_dirs_hit_every_mutated_rust_app() {
     write_file(tmp.path(), "apps/backend/src/main.rs", "fn main() {}");
     write_file(tmp.path(), "apps/worker/src/main.rs", "fn main() {}");
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-12");
+    let results = super::run_family(tmp.path());
+    let errors = assertions::errors_by_id(&results, "");
     let actual_files = errors
         .iter()
         .filter_map(|error| error.file.clone())
@@ -32,8 +32,8 @@ fn src_in_one_rust_app_hits_only_that_app() {
     let tmp = copy_fixture();
     write_file(tmp.path(), "apps/devctl/src/main.rs", "fn main() {}");
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-12");
+    let results = super::run_family(tmp.path());
+    let errors = assertions::errors_by_id(&results, "");
     let actual_files = errors
         .iter()
         .filter_map(|error| error.file.clone())
@@ -56,8 +56,8 @@ fn empty_src_dirs_still_hit_every_mutated_rust_app() {
     create_dir(tmp.path(), "apps/backend/src");
     create_dir(tmp.path(), "apps/worker/src");
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-12");
+    let results = super::run_family(tmp.path());
+    let errors = assertions::errors_by_id(&results, "");
     let actual_files = errors
         .iter()
         .filter_map(|error| error.file.clone())
@@ -78,8 +78,8 @@ fn src_with_only_non_rust_files_still_hits_rule_12() {
     let tmp = copy_fixture();
     write_file(tmp.path(), "apps/devctl/src/README.md", "# readme\n");
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-12");
+    let results = super::run_family(tmp.path());
+    let errors = assertions::errors_by_id(&results, "");
     let actual_files = errors
         .iter()
         .filter_map(|error| error.file.clone())

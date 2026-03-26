@@ -49,9 +49,14 @@ pub fn assert_reported(
 }
 
 pub fn assert_missing_cargo_mutants(results: &[CheckResult]) {
-    assert_reported(results, "Cargo.toml", None, Severity::Warn, "cargo-mutants missing");
+    assert_reported(
+        results,
+        "Cargo.toml",
+        None,
+        Severity::Warn,
+        "cargo-mutants missing",
+    );
 }
-
 
 pub fn assert_inventory(results: &[CheckResult], expected: bool) {
     let finding = finding(results, RULE_ID);

@@ -2,29 +2,26 @@ use std::collections::BTreeSet;
 
 use super::cases::owned_leaf_dirs;
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_06_leaf_valid as assertions;
-use crate::test_support::{copy_fixture, create_dir, write_file};
+use super::{copy_fixture, create_dir, write_file};
 
 #[test]
 fn orphan_leaf_without_cargo_or_crates_errors_everywhere_it_is_owned() {
     let tmp = copy_fixture();
     let expected_files = owned_leaf_dirs(tmp.path(), "orphan");
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-06");
-    assert_eq!(errors.len(), expected_files.len(), "{errors:#?}");
-    let actual_files = errors
-        .iter()
-        .filter_map(|error| error.file.clone())
-        .collect::<BTreeSet<_>>();
-
-    assert_eq!(
-        actual_files, expected_files,
-        "unexpected hit set: {errors:#?}"
+    let results = super::run_family(tmp.path());
+    assertions::assert_expected_rule_results(
+        &results,
+        &expected_files
+            .iter()
+            .map(|file| assertions::ExpectedRuleResult {
+                file: Some(file.as_str()),
+                file_contains: None,
+                title_contains: Some(&["missing Cargo.toml", "orphan"]),
+                message_contains: None,
+            })
+            .collect::<Vec<_>>(),
     );
-    for error in &errors {
-        assert!(error.title.contains("missing Cargo.toml"));
-        assert!(error.title.contains("orphan"));
-    }
 }
 
 #[test]
@@ -54,22 +51,19 @@ fn leaf_with_both_cargo_and_crates_errors_everywhere_it_is_owned() {
         write_file(tmp.path(), &format!("{rel}/.gitkeep"), "");
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-06");
-    assert_eq!(errors.len(), expected_files.len(), "{errors:#?}");
-    let actual_files = errors
-        .iter()
-        .filter_map(|error| error.file.clone())
-        .collect::<BTreeSet<_>>();
-
-    assert_eq!(
-        actual_files, expected_files,
-        "unexpected hit set: {errors:#?}"
+    let results = super::run_family(tmp.path());
+    assertions::assert_expected_rule_results(
+        &results,
+        &expected_files
+            .iter()
+            .map(|file| assertions::ExpectedRuleResult {
+                file: Some(file.as_str()),
+                file_contains: None,
+                title_contains: Some(&["both Cargo.toml and crates/", "hybrid"]),
+                message_contains: None,
+            })
+            .collect::<Vec<_>>(),
     );
-    for error in &errors {
-        assert!(error.title.contains("both Cargo.toml and crates/"));
-        assert!(error.title.contains("hybrid"));
-    }
 }
 
 #[test]
@@ -85,22 +79,19 @@ fn gitkeep_plus_source_files_fires_everywhere() {
         );
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-06");
-    assert_eq!(errors.len(), expected_files.len(), "{errors:#?}");
-    let actual_files = errors
-        .iter()
-        .filter_map(|error| error.file.clone())
-        .collect::<BTreeSet<_>>();
-
-    assert_eq!(
-        actual_files, expected_files,
-        "unexpected hit set for .gitkeep+source placeholder: {errors:#?}"
+    let results = super::run_family(tmp.path());
+    assertions::assert_expected_rule_results(
+        &results,
+        &expected_files
+            .iter()
+            .map(|file| assertions::ExpectedRuleResult {
+                file: Some(file.as_str()),
+                file_contains: None,
+                title_contains: Some(&["missing Cargo.toml", "broken_placeholder"]),
+                message_contains: None,
+            })
+            .collect::<Vec<_>>(),
     );
-    for error in &errors {
-        assert!(error.title.contains("missing Cargo.toml"));
-        assert!(error.title.contains("broken_placeholder"));
-    }
 }
 
 #[test]
@@ -112,22 +103,19 @@ fn gitkeep_plus_subdir_fires_everywhere() {
         create_dir(tmp.path(), &format!("{rel}/src"));
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-06");
-    assert_eq!(errors.len(), expected_files.len(), "{errors:#?}");
-    let actual_files = errors
-        .iter()
-        .filter_map(|error| error.file.clone())
-        .collect::<BTreeSet<_>>();
-
-    assert_eq!(
-        actual_files, expected_files,
-        "unexpected hit set for .gitkeep+subdir placeholder: {errors:#?}"
+    let results = super::run_family(tmp.path());
+    assertions::assert_expected_rule_results(
+        &results,
+        &expected_files
+            .iter()
+            .map(|file| assertions::ExpectedRuleResult {
+                file: Some(file.as_str()),
+                file_contains: None,
+                title_contains: Some(&["missing Cargo.toml", "broken_subdir"]),
+                message_contains: None,
+            })
+            .collect::<Vec<_>>(),
     );
-    for error in &errors {
-        assert!(error.title.contains("missing Cargo.toml"));
-        assert!(error.title.contains("broken_subdir"));
-    }
 }
 
 #[test]
@@ -138,22 +126,19 @@ fn gitkeep_as_directory_fires_everywhere() {
         create_dir(tmp.path(), &format!("{rel}/.gitkeep"));
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-06");
-    assert_eq!(errors.len(), expected_files.len(), "{errors:#?}");
-    let actual_files = errors
-        .iter()
-        .filter_map(|error| error.file.clone())
-        .collect::<BTreeSet<_>>();
-
-    assert_eq!(
-        actual_files, expected_files,
-        "unexpected hit set for .gitkeep-as-directory placeholder: {errors:#?}"
+    let results = super::run_family(tmp.path());
+    assertions::assert_expected_rule_results(
+        &results,
+        &expected_files
+            .iter()
+            .map(|file| assertions::ExpectedRuleResult {
+                file: Some(file.as_str()),
+                file_contains: None,
+                title_contains: Some(&["missing Cargo.toml", "fake_placeholder"]),
+                message_contains: None,
+            })
+            .collect::<Vec<_>>(),
     );
-    for error in &errors {
-        assert!(error.title.contains("missing Cargo.toml"));
-        assert!(error.title.contains("fake_placeholder"));
-    }
 }
 
 #[test]
@@ -164,19 +149,19 @@ fn flat_files_only_leaf_fires_everywhere() {
         write_file(tmp.path(), &format!("{rel}/README.md"), "# stray");
     }
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-06");
-    assert_eq!(errors.len(), expected_files.len(), "{errors:#?}");
-    let actual_files = errors
-        .iter()
-        .filter_map(|error| error.file.clone())
-        .collect::<BTreeSet<_>>();
-
-    assert_eq!(actual_files, expected_files, "{errors:#?}");
-    for error in &errors {
-        assert!(error.title.contains("missing Cargo.toml"));
-        assert!(error.title.contains("flat_files"));
-    }
+    let results = super::run_family(tmp.path());
+    assertions::assert_expected_rule_results(
+        &results,
+        &expected_files
+            .iter()
+            .map(|file| assertions::ExpectedRuleResult {
+                file: Some(file.as_str()),
+                file_contains: None,
+                title_contains: Some(&["missing Cargo.toml", "flat_files"]),
+                message_contains: None,
+            })
+            .collect::<Vec<_>>(),
+    );
 }
 
 #[test]
@@ -193,12 +178,8 @@ fn packages_noise_is_ignored_by_rule_06() {
         "",
     );
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-06");
-    assert!(
-        errors.is_empty(),
-        "packages/ noise should not be owned by rule 06: {errors:#?}"
-    );
+    let results = super::run_family(tmp.path());
+    assertions::assert_no_error(&results, "");
 }
 
 #[test]
@@ -220,10 +201,6 @@ fn non_rust_apps_noise_is_ignored_by_rule_06() {
         "",
     );
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-06");
-    assert!(
-        errors.is_empty(),
-        "non-Rust apps should stay out of scope for rule 06: {errors:#?}"
-    );
+    let results = super::run_family(tmp.path());
+    assertions::assert_no_error(&results, "");
 }

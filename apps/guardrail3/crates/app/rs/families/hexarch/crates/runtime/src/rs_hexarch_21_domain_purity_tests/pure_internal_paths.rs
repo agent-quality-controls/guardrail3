@@ -1,6 +1,6 @@
 use super::super::{run_domain_purity_case, DomainPurityEdgeKindForTest};
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_21_domain_purity as assertions;
-use crate::test_support::{copy_fixture, dir_entry, project_tree, write_file};
+use super::{copy_fixture, dir_entry, project_tree, write_file};
 
 #[test]
 fn domain_and_ports_path_deps_do_not_trigger_domain_purity() {
@@ -69,9 +69,6 @@ fn real_backend_ports_member_stays_allowed() {
         "[package]\nname = \"backend-domain-engine\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\nbackend-domain-types = { path = \"../types\" }\nbackend-ports-outbound-repo = { path = \"../../ports/outbound/repo\" }\n",
     );
 
-    let results = assertions::run_family(tmp.path());
-    assert!(
-        assertions::errors_by_id(&results, "RS-HEXARCH-21").is_empty(),
-        "{results:#?}"
-    );
+    let results = super::run_family(tmp.path());
+    assertions::assert_no_error(&results, "");
 }

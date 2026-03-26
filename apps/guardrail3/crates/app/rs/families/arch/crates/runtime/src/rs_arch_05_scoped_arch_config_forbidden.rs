@@ -17,5 +17,12 @@ pub fn check(input: &ScopedArchConfigInput<'_>, results: &mut Vec<CheckResult>) 
 }
 
 #[cfg(test)]
+pub(crate) fn check_results(
+    tree: &guardrail3_domain_project_tree::ProjectTree,
+) -> Vec<guardrail3_domain_report::CheckResult> {
+    crate::check_test_tree(tree)
+}
+
+#[cfg(test)]
 #[path = "rs_arch_05_scoped_arch_config_forbidden_tests/mod.rs"]
 mod rs_arch_05_scoped_arch_config_forbidden_tests;

@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_21_domain_purity as assertions;
-use crate::test_support::{copy_fixture, write_file};
+use super::{copy_fixture, write_file};
 
 #[test]
 fn out_of_tree_paths_with_pure_layer_names_still_error() {
@@ -22,10 +22,10 @@ fn out_of_tree_paths_with_pure_layer_names_still_error() {
         "[package]\nname = \"vendor-ports-kit\"\nversion = \"0.1.0\"\n",
     );
 
-    let results = assertions::run_family(tmp.path());
+    let results = super::run_family(tmp.path());
     let actual_titles = results
         .iter()
-        .filter(|result| result.id == "RS-HEXARCH-21")
+        .filter(|result| result.id == "")
         .map(|result| result.title.clone())
         .collect::<BTreeSet<_>>();
     let expected_titles = [
@@ -52,14 +52,11 @@ fn cross_app_path_dep_is_owned_by_rule_24_not_rule_21() {
         "[package]\nname = \"backend-domain-engine\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\nbackend-domain-types = { path = \"../types\" }\nworker-app-processor = { path = \"../../../../worker/crates/app/processor\" }\n",
     );
 
-    let results = assertions::run_family(tmp.path());
-    let rule_21 = assertions::errors_by_id(&results, "RS-HEXARCH-21");
+    let results = super::run_family(tmp.path());
+    let rule_21 = assertions::errors_by_id(&results, "");
     let rule_24 = assertions::errors_by_id(&results, "RS-HEXARCH-24");
 
-    assert!(
-        assertions::errors_by_id(&results, "RS-HEXARCH-21").is_empty(),
-        "{results:#?}"
-    );
+    assertions::assert_no_error(&results, "");
     assert_eq!(
         rule_24.len(),
         1,

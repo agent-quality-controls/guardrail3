@@ -1,12 +1,15 @@
 #[allow(unused_imports)]
-use guardrail3_app_rs_family_test_assertions::rs_test_12_mutants_toml_exists::{assert_inventory, assert_reported, assert_rule_files, assert_rule_quiet};
+use guardrail3_app_rs_family_test_assertions::rs_test_12_mutants_toml_exists::{
+    assert_inventory, assert_reported, assert_rule_files, assert_rule_quiet,
+};
 
 #[allow(unused_imports)]
 use super::{run_family, tempdir, write_file};
 use guardrail3_domain_report::Severity;
 
 #[test]
-fn missing_config_is_ignored_without_adoption_and_required_for_hook_only_adoption() {let dormant = tempdir();
+fn missing_config_is_ignored_without_adoption_and_required_for_hook_only_adoption() {
+    let dormant = tempdir();
     write_file(
         dormant.path(),
         "Cargo.toml",
@@ -30,5 +33,12 @@ fn missing_config_is_ignored_without_adoption_and_required_for_hook_only_adoptio
 
     let adopted_results = run_family(adopted.path());
     assert_rule_files(&adopted_results, vec![".cargo/mutants.toml".to_owned()]);
-    assert_reported(&adopted_results, ".cargo/mutants.toml", None, Severity::Warn, "mutants config missing");
-    assert_inventory(&adopted_results, false);}
+    assert_reported(
+        &adopted_results,
+        ".cargo/mutants.toml",
+        None,
+        Severity::Warn,
+        "mutants config missing",
+    );
+    assert_inventory(&adopted_results, false);
+}

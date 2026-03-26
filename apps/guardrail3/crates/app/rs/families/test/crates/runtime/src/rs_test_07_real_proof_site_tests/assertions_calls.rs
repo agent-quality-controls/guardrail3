@@ -1,11 +1,14 @@
 #[allow(unused_imports)]
-use guardrail3_app_rs_family_test_assertions::rs_test_07_real_proof_site::{assert_reported, assert_rule_files, assert_rule_quiet};
+use guardrail3_app_rs_family_test_assertions::rs_test_07_real_proof_site::{
+    assert_reported, assert_rule_files, assert_rule_quiet,
+};
 
 #[allow(unused_imports)]
 use super::{run_family, tempdir, write_file};
 
 #[test]
-fn owned_assertions_crate_call_counts_as_real_proof_site() {let fixture = tempdir();
+fn owned_assertions_crate_call_counts_as_real_proof_site() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -41,10 +44,12 @@ fn owned_assertions_crate_call_counts_as_real_proof_site() {let fixture = tempdi
 
     let results = run_family(root);
 
-    assert_rule_quiet(&results);}
+    assert_rule_quiet(&results);
+}
 
 #[test]
-fn owned_assertions_alias_call_counts_as_real_proof_site() {let fixture = tempdir();
+fn owned_assertions_alias_call_counts_as_real_proof_site() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -80,10 +85,12 @@ fn owned_assertions_alias_call_counts_as_real_proof_site() {let fixture = tempdi
 
     let results = run_family(root);
 
-    assert_rule_quiet(&results);}
+    assert_rule_quiet(&results);
+}
 
 #[test]
-fn owned_assertions_glob_call_counts_as_real_proof_site() {let fixture = tempdir();
+fn owned_assertions_glob_call_counts_as_real_proof_site() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -119,10 +126,12 @@ fn owned_assertions_glob_call_counts_as_real_proof_site() {let fixture = tempdir
 
     let results = run_family(root);
 
-    assert_rule_quiet(&results);}
+    assert_rule_quiet(&results);
+}
 
 #[test]
-fn owned_assertions_grouped_import_call_counts_as_real_proof_site() {let fixture = tempdir();
+fn owned_assertions_grouped_import_call_counts_as_real_proof_site() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -159,4 +168,5 @@ fn owned_assertions_grouped_import_call_counts_as_real_proof_site() {let fixture
 
     let results = run_family(root);
 
-    assert_rule_quiet(&results);}
+    assert_rule_quiet(&results);
+}

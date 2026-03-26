@@ -45,13 +45,25 @@ pub(super) fn check_with_top_level_entries_for_tests(
 pub(super) fn discovered_app_rel_dirs_for_tests(
     root: &std::path::Path,
 ) -> std::collections::BTreeSet<String> {
-    let tree = crate::test_support::walk(root);
+    let tree = test_support::walk(root);
     let route = super::family_route_for_tests(&tree);
     super::facts::collect(&tree, &route)
         .apps
         .into_iter()
         .map(|app| app.app_rel_dir)
         .collect()
+}
+
+#[cfg(test)]
+#[allow(dead_code)]
+pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
+    crate::check_test_tree(&test_support::walk(root))
+}
+
+#[cfg(test)]
+#[allow(dead_code)]
+pub(super) fn results_for_test_tree(tree: &guardrail3_domain_project_tree::ProjectTree) -> Vec<CheckResult> {
+    crate::check_test_tree(tree)
 }
 
 #[cfg(test)]

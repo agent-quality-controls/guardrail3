@@ -1,12 +1,15 @@
 #[allow(unused_imports)]
-use guardrail3_app_rs_family_test_assertions::rs_test_13_mutants_profile_present::{assert_inventory, assert_reported, assert_rule_files, assert_rule_quiet};
+use guardrail3_app_rs_family_test_assertions::rs_test_13_mutants_profile_present::{
+    assert_inventory, assert_reported, assert_rule_files, assert_rule_quiet,
+};
 
 #[allow(unused_imports)]
 use super::{run_family, tempdir, write_file};
 use guardrail3_domain_report::Severity;
 
 #[test]
-fn present_mutants_profile_is_reported() {let fixture = tempdir();
+fn present_mutants_profile_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -18,6 +21,13 @@ fn present_mutants_profile_is_reported() {let fixture = tempdir();
 
     let results = run_family(root);
 
-    assert_rule_files(&results, vec!["Cargo.toml".to_owned()]
-    );    assert_reported(&results, "Cargo.toml", None, Severity::Info, "profile.mutants configured");
-    assert_inventory(&results, true);}
+    assert_rule_files(&results, vec!["Cargo.toml".to_owned()]);
+    assert_reported(
+        &results,
+        "Cargo.toml",
+        None,
+        Severity::Info,
+        "profile.mutants configured",
+    );
+    assert_inventory(&results, true);
+}

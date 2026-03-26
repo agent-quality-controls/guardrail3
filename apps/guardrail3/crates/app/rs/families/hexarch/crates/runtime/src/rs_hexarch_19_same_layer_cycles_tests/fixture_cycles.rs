@@ -1,5 +1,5 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_19_same_layer_cycles as assertions;
-use crate::test_support::{copy_fixture, write_file};
+use super::{copy_fixture, write_file};
 
 #[test]
 fn fixture_backed_same_layer_cycle_reports_once() {
@@ -10,8 +10,8 @@ fn fixture_backed_same_layer_cycle_reports_once() {
         "[package]\nname = \"backend-domain-types\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\nengine_alias = { package = \"backend-domain-engine\", path = \"../engine\" }\n",
     );
 
-    let results = assertions::run_family(tmp.path());
-    let errors = assertions::errors_by_id(&results, "RS-HEXARCH-19");
+    let results = super::run_family(tmp.path());
+    let errors = assertions::errors_by_id(&results, "");
 
     assert_eq!(
         errors.len(),

@@ -48,7 +48,6 @@ pub fn assert_reported(
     assert_eq!(finding.line, line);
 }
 
-
 pub fn assert_inventory(results: &[CheckResult], expected: bool) {
     let finding = finding(results, RULE_ID);
     assert_eq!(finding.inventory, expected);
@@ -65,5 +64,9 @@ pub fn assert_error_results_are_error(results: &[CheckResult], rule_id: &str) {
         .iter()
         .filter(|result| result.id == rule_id)
         .collect::<Vec<_>>();
-    assert!(errors.iter().all(|result| result.severity == Severity::Error));
+    assert!(
+        errors
+            .iter()
+            .all(|result| result.severity == Severity::Error)
+    );
 }

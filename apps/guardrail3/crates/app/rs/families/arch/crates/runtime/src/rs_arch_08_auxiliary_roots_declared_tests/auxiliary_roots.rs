@@ -1,10 +1,10 @@
-use guardrail3_app_rs_family_arch_assertions::rs_arch_08_auxiliary_roots_declared as assertions;
 #[allow(unused_imports)]
-use super::{entry, tree};
+use super::{check_results, entry, tree};
+use guardrail3_app_rs_family_arch_assertions::rs_arch_08_auxiliary_roots_declared as assertions;
 
 #[test]
 fn declared_auxiliary_roots_are_reported_as_info() {
-    let results = assertions::check_results(&tree(
+    let results = check_results(&tree(
         &[
             ("", entry(&["fuzz"], &[])),
             ("fuzz", entry(&[], &["Cargo.toml"])),
@@ -20,7 +20,7 @@ fn declared_auxiliary_roots_are_reported_as_info() {
 
 #[test]
 fn workspace_level_auxiliary_metadata_is_reported_as_info() {
-    let results = assertions::check_results(&tree(
+    let results = check_results(&tree(
         &[
             ("", entry(&["tools"], &[])),
             ("tools", entry(&["xtask"], &[])),

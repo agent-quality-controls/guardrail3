@@ -1,11 +1,14 @@
 #[allow(unused_imports)]
-use guardrail3_app_rs_family_test_assertions::rs_test_01_inline_test_bodies::{assert_reported, assert_rule_files, assert_rule_quiet};
+use guardrail3_app_rs_family_test_assertions::rs_test_01_inline_test_bodies::{
+    assert_reported, assert_rule_files, assert_rule_quiet,
+};
 
 #[allow(unused_imports)]
 use super::{run_family, tempdir, write_file};
 
 #[test]
-fn owned_sidecar_declaration_stays_quiet() {let fixture = tempdir();
+fn owned_sidecar_declaration_stays_quiet() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -26,4 +29,5 @@ fn owned_sidecar_declaration_stays_quiet() {let fixture = tempdir();
 
     let results = run_family(root);
 
-    assert_rule_quiet(&results);}
+    assert_rule_quiet(&results);
+}

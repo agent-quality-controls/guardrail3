@@ -1,10 +1,11 @@
 use std::collections::BTreeSet;
 
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_20_dev_dependency_direction as rule20_assertions;
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_25_target_dependency_direction as rule25_assertions;
 use guardrail3_domain_project_tree::ProjectTree;
-use guardrail3_domain_report::Severity;
 
 use super::super::check_for_test_tree as family_check;
-use crate::test_support::{dir_entry, project_tree};
+use super::{dir_entry, project_tree};
 
 fn dev_graph_tree() -> ProjectTree {
     project_tree(
@@ -109,18 +110,7 @@ fn direct_dev_edges_are_warned_while_target_dev_edges_are_left_to_rule_25() {
     let tree = dev_graph_tree();
     let results = family_check(&tree);
 
-    let rule20 = results
-        .iter()
-        .filter(|result| result.id == "RS-HEXARCH-20")
-        .collect::<Vec<_>>();
-    let actual_rule20_files = rule20
-        .iter()
-        .filter_map(|result| result.file.clone())
-        .collect::<BTreeSet<_>>();
-    let actual_rule20_messages = rule20
-        .iter()
-        .map(|result| result.message.clone())
-        .collect::<BTreeSet<_>>();
+    let rule20 = rule20_assertions::warning_results(&results, "");
     let expected_rule20_files = [
         "apps/api/crates/domain/types/Cargo.toml".to_owned(),
         "apps/api/crates/ports/repo/Cargo.toml".to_owned(),
@@ -138,51 +128,23 @@ fn direct_dev_edges_are_warned_while_target_dev_edges_are_left_to_rule_25() {
     .into_iter()
     .collect::<BTreeSet<_>>();
 
-    assert_eq!(
-        actual_rule20_files, expected_rule20_files,
-        "unexpected RS-HEXARCH-20 hit set: {rule20:#?}"
-    );
-    assert_eq!(
-        actual_rule20_messages, expected_rule20_messages,
-        "unexpected RS-HEXARCH-20 messages: {rule20:#?}"
-    );
+    rule20_assertions::assert_result_summary(&rule20, expected_rule20_files.len(), &expected_rule20_files, None, None, None);
+    rule20_assertions::assert_result_messages(&rule20, &expected_rule20_messages);
     assert_eq!(
         rule20.len(),
         4,
-        "RS-HEXARCH-20 should only own the four direct dev violations: {rule20:#?}"
-    );
-    assert!(
-        rule20
-            .iter()
-            .all(|result| result.severity == Severity::Warn),
-        "RS-HEXARCH-20 should warn, not error: {rule20:#?}"
+        "rule 20 should only own the four direct dev violations: {rule20:#?}"
     );
 
-    let rule25 = results
-        .iter()
-        .filter(|result| result.id == "RS-HEXARCH-25")
-        .collect::<Vec<_>>();
-    let actual_rule25_files = rule25
-        .iter()
-        .filter_map(|result| result.file.clone())
-        .collect::<BTreeSet<_>>();
+    let rule25 = rule25_assertions::error_results(&results, "RS-HEXARCH-25");
     let expected_rule25_files = ["apps/api/crates/domain/types/Cargo.toml".to_owned()]
         .into_iter()
         .collect::<BTreeSet<_>>();
 
-    assert_eq!(
-        actual_rule25_files, expected_rule25_files,
-        "target dev-dependencies should be owned by RS-HEXARCH-25: {rule25:#?}"
-    );
+    rule25_assertions::assert_result_summary(&rule25, expected_rule25_files.len(), &expected_rule25_files, None, None, None);
     assert_eq!(
         rule25.len(),
         1,
         "expected one target-dev hit for RS-HEXARCH-25: {rule25:#?}"
-    );
-    assert!(
-        rule25
-            .iter()
-            .all(|result| result.severity == Severity::Error),
-        "RS-HEXARCH-25 should error on the target-dev edge: {rule25:#?}"
     );
 }

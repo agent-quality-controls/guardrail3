@@ -1,11 +1,14 @@
 #[allow(unused_imports)]
-use guardrail3_app_rs_family_test_assertions::rs_test_06_tautological_assertions::{assert_reported, assert_rule_files, assert_rule_quiet};
+use guardrail3_app_rs_family_test_assertions::rs_test_06_tautological_assertions::{
+    assert_reported, assert_rule_files, assert_rule_quiet,
+};
 
 #[allow(unused_imports)]
 use super::{run_family, tempdir, write_file};
 
 #[test]
-fn variable_vs_literal_assertion_is_not_tautological() {let fixture = tempdir();
+fn variable_vs_literal_assertion_is_not_tautological() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -21,4 +24,5 @@ fn variable_vs_literal_assertion_is_not_tautological() {let fixture = tempdir();
 
     let results = run_family(root);
 
-    assert_rule_quiet(&results);}
+    assert_rule_quiet(&results);
+}

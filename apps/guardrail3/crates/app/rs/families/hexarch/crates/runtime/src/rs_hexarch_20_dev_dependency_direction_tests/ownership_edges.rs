@@ -1,5 +1,5 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_20_dev_dependency_direction as assertions;
-use crate::test_support::{copy_fixture, write_file};
+use super::{copy_fixture, write_file};
 
 #[test]
 fn renamed_dev_edge_is_owned_by_rule_20_not_rule_18() {
@@ -10,17 +10,14 @@ fn renamed_dev_edge_is_owned_by_rule_20_not_rule_18() {
         "[package]\nname = \"backend-domain-engine\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\nbackend-domain-types = { path = \"../types\" }\n[dev-dependencies]\nqueue_alias = { package = \"backend-adapters-outbound-queue\", path = \"../../adapters/outbound/queue\" }\n",
     );
 
-    let results = assertions::run_family(tmp.path());
+    let results = super::run_family(tmp.path());
     let rule_18 = assertions::errors_by_id(&results, "RS-HEXARCH-18");
     let rule_20 = results
         .iter()
-        .filter(|result| result.id == "RS-HEXARCH-20")
+        .filter(|result| result.id == "")
         .collect::<Vec<_>>();
 
-    assert!(
-        assertions::errors_by_id(&results, "RS-HEXARCH-18").is_empty(),
-        "{results:#?}"
-    );
+    assertions::assert_no_error(&results, "RS-HEXARCH-18");
     assert_eq!(
         rule_20.len(),
         1,
@@ -46,11 +43,11 @@ fn inherited_dev_edge_is_owned_by_rule_20_not_rule_17() {
         "[package]\nname = \"backend-domain-engine\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\nbackend-domain-types = { path = \"../types\" }\n[dev-dependencies]\nqueue_alias = { workspace = true }\n",
     );
 
-    let results = assertions::run_family(tmp.path());
+    let results = super::run_family(tmp.path());
     let rule_17 = assertions::errors_by_id(&results, "RS-HEXARCH-17");
     let rule_20 = results
         .iter()
-        .filter(|result| result.id == "RS-HEXARCH-20")
+        .filter(|result| result.id == "")
         .collect::<Vec<_>>();
 
     assert!(

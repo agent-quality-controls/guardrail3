@@ -7,7 +7,8 @@ use guardrail3_app_rs_family_test_assertions::rs_test_03_runtime_assertions_spli
 use super::{run_family, tempdir, write_file};
 
 #[test]
-fn root_local_sidecar_harness_is_reported_instead_of_being_silently_skipped() {let fixture = tempdir();
+fn root_local_sidecar_harness_is_reported_instead_of_being_silently_skipped() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -24,10 +25,17 @@ fn root_local_sidecar_harness_is_reported_instead_of_being_silently_skipped() {l
 
     let results = run_family(root);
     assert!(!results.is_empty());
-    assert_error_reported(&results, "src/lib_tests/mod.rs", None, "test harness outside runtime/assertions split");}
+    assert_error_reported(
+        &results,
+        "src/lib_tests/mod.rs",
+        None,
+        "test harness outside runtime/assertions split",
+    );
+}
 
 #[test]
-fn root_local_external_harness_is_reported_instead_of_being_silently_skipped() {let fixture = tempdir();
+fn root_local_external_harness_is_reported_instead_of_being_silently_skipped() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -44,10 +52,17 @@ fn root_local_external_harness_is_reported_instead_of_being_silently_skipped() {
 
     let results = run_family(root);
     assert!(!results.is_empty());
-    assert_error_reported(&results, "tests/public_surface.rs", None, "test harness outside runtime/assertions split");}
+    assert_error_reported(
+        &results,
+        "tests/public_surface.rs",
+        None,
+        "test harness outside runtime/assertions split",
+    );
+}
 
 #[test]
-fn missing_assertions_crate_for_external_harness_is_reported() {let fixture = tempdir();
+fn missing_assertions_crate_for_external_harness_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -73,11 +88,17 @@ fn missing_assertions_crate_for_external_harness_is_reported() {let fixture = te
 
     let results = run_family(root);
     assert!(!results.is_empty());
-    assert_error_reported(&results, "crates/assertions/Cargo.toml", None, "assertions crate missing");
+    assert_error_reported(
+        &results,
+        "crates/assertions/Cargo.toml",
+        None,
+        "assertions crate missing",
+    );
 }
 
 #[test]
-fn runtime_depends_on_assertions_at_normal_scope_is_reported() {let fixture = tempdir();
+fn runtime_depends_on_assertions_at_normal_scope_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -113,10 +134,17 @@ fn runtime_depends_on_assertions_at_normal_scope_is_reported() {let fixture = te
 
     let results = run_family(root);
     assert!(!results.is_empty());
-    assert_error_reported(&results, "crates/runtime/Cargo.toml", None, "runtime depends on assertions at normal scope");}
+    assert_error_reported(
+        &results,
+        "crates/runtime/Cargo.toml",
+        None,
+        "runtime depends on assertions at normal scope",
+    );
+}
 
 #[test]
-fn runtime_missing_assertions_dev_dependency_is_reported() {let fixture = tempdir();
+fn runtime_missing_assertions_dev_dependency_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -152,10 +180,17 @@ fn runtime_missing_assertions_dev_dependency_is_reported() {let fixture = tempdi
 
     let results = run_family(root);
     assert!(!results.is_empty());
-    assert_error_reported(&results, "crates/runtime/Cargo.toml", None, "runtime missing assertions dev-dependency");}
+    assert_error_reported(
+        &results,
+        "crates/runtime/Cargo.toml",
+        None,
+        "runtime missing assertions dev-dependency",
+    );
+}
 
 #[test]
-fn assertions_missing_runtime_dependency_is_reported() {let fixture = tempdir();
+fn assertions_missing_runtime_dependency_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -191,11 +226,17 @@ fn assertions_missing_runtime_dependency_is_reported() {let fixture = tempdir();
 
     let results = run_family(root);
     assert!(!results.is_empty());
-    assert_error_reported(&results, "crates/assertions/Cargo.toml", None, "assertions missing runtime dependency");
+    assert_error_reported(
+        &results,
+        "crates/assertions/Cargo.toml",
+        None,
+        "assertions missing runtime dependency",
+    );
 }
 
 #[test]
-fn sidecar_missing_owned_assertions_module_is_reported() {let fixture = tempdir();
+fn sidecar_missing_owned_assertions_module_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -226,11 +267,17 @@ fn sidecar_missing_owned_assertions_module_is_reported() {let fixture = tempdir(
 
     let results = run_family(root);
     assert!(!results.is_empty());
-    assert_error_reported(&results, "crates/runtime/src/lib_tests/mod.rs", None, "sidecar missing owned assertions module");
+    assert_error_reported(
+        &results,
+        "crates/runtime/src/lib_tests/mod.rs",
+        None,
+        "sidecar missing owned assertions module",
+    );
 }
 
 #[test]
-fn sidecar_imports_sibling_production_module_is_reported() {let fixture = tempdir();
+fn sidecar_imports_sibling_production_module_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -267,10 +314,17 @@ fn sidecar_imports_sibling_production_module_is_reported() {let fixture = tempdi
 
     let results = run_family(root);
     assert!(!results.is_empty());
-    assert_error_reported(&results, "crates/runtime/src/lib_tests/mod.rs", Some(1), "sidecar imports sibling production module");}
+    assert_error_reported(
+        &results,
+        "crates/runtime/src/lib_tests/mod.rs",
+        Some(1),
+        "sidecar imports sibling production module",
+    );
+}
 
 #[test]
-fn assertions_module_calling_runtime_check_test_tree_is_reported() {let fixture = tempdir();
+fn assertions_module_calling_runtime_check_test_tree_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -283,7 +337,11 @@ fn assertions_module_calling_runtime_check_test_tree_is_reported() {let fixture 
         "crates/runtime/Cargo.toml",
         "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = {path = \"../assertions\"}\n",
     );
-    write_file(root, "crates/runtime/src/lib.rs", "pub fn value() -> u8 {1}\n");
+    write_file(
+        root,
+        "crates/runtime/src/lib.rs",
+        "pub fn value() -> u8 {1}\n",
+    );
     write_file(
         root,
         "crates/runtime/tests/public_surface.rs",
@@ -302,10 +360,17 @@ fn assertions_module_calling_runtime_check_test_tree_is_reported() {let fixture 
 
     let results = run_family(root);
     assert!(!results.is_empty());
-    assert_error_reported(&results, "crates/assertions/src/lib.rs", None, "assertions module orchestrates family execution");}
+    assert_error_reported(
+        &results,
+        "crates/assertions/src/lib.rs",
+        None,
+        "assertions module orchestrates family execution",
+    );
+}
 
 #[test]
-fn assertions_module_reaches_local_private_code_is_reported() {let fixture = tempdir();
+fn assertions_module_reaches_local_private_code_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -341,10 +406,17 @@ fn assertions_module_reaches_local_private_code_is_reported() {let fixture = tem
 
     let results = run_family(root);
     assert!(!results.is_empty());
-    assert_error_reported(&results, "crates/assertions/src/lib.rs", Some(1), "assertions module reaches local private code");}
+    assert_error_reported(
+        &results,
+        "crates/assertions/src/lib.rs",
+        Some(1),
+        "assertions module reaches local private code",
+    );
+}
 
 #[test]
-fn assertions_module_importing_route_infra_is_reported() {let fixture = tempdir();
+fn assertions_module_importing_route_infra_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -380,10 +452,17 @@ fn assertions_module_importing_route_infra_is_reported() {let fixture = tempdir(
 
     let results = run_family(root);
     assert!(!results.is_empty());
-    assert_error_reported(&results, "crates/assertions/src/lib.rs", Some(1), "assertions module imports route construction infrastructure");}
+    assert_error_reported(
+        &results,
+        "crates/assertions/src/lib.rs",
+        Some(1),
+        "assertions module imports route construction infrastructure",
+    );
+}
 
 #[test]
-fn sidecar_calling_crate_root_helper_is_reported() {let fixture = tempdir();
+fn sidecar_calling_crate_root_helper_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -406,7 +485,11 @@ fn sidecar_calling_crate_root_helper_is_reported() {let fixture = tempdir();
         "crates/runtime/src/foo.rs",
         "#[cfg(test)]\n#[path = \"foo_tests/mod.rs\"]\nmod foo_tests;\n",
     );
-    write_file(root, "crates/runtime/src/foo_tests/mod.rs", "mod support;\n");
+    write_file(
+        root,
+        "crates/runtime/src/foo_tests/mod.rs",
+        "mod support;\n",
+    );
     write_file(
         root,
         "crates/runtime/src/foo_tests/support.rs",
@@ -426,10 +509,17 @@ fn sidecar_calling_crate_root_helper_is_reported() {let fixture = tempdir();
 
     let results = run_family(root);
     assert!(!results.is_empty());
-    assert_error_reported(&results, "crates/runtime/src/foo_tests/support.rs", Some(1), "sidecar escapes owned module boundary");}
+    assert_error_reported(
+        &results,
+        "crates/runtime/src/foo_tests/support.rs",
+        Some(1),
+        "sidecar escapes owned module boundary",
+    );
+}
 
 #[test]
-fn external_harness_self_boundary_stays_quiet() {let fixture = tempdir();
+fn external_harness_self_boundary_stays_quiet() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -468,10 +558,12 @@ fn external_harness_self_boundary_stays_quiet() {let fixture = tempdir();
     assert!(
         results.iter().all(|result| result.id != "RS-TEST-03"),
         "external harness-local `self::` helpers should stay quiet"
-    );}
+    );
+}
 
 #[test]
-fn external_harness_super_boundary_is_reported() {let fixture = tempdir();
+fn external_harness_super_boundary_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -507,4 +599,10 @@ fn external_harness_super_boundary_is_reported() {let fixture = tempdir();
 
     let results = run_family(root);
     assert!(!results.is_empty());
-    assert_error_reported(&results, "crates/runtime/tests/public_surface.rs", Some(1), "external harness reaches private runtime glue");}
+    assert_error_reported(
+        &results,
+        "crates/runtime/tests/public_surface.rs",
+        Some(1),
+        "external harness reaches private runtime glue",
+    );
+}

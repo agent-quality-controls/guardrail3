@@ -1,13 +1,17 @@
 use guardrail3_domain_report::Severity;
 
 #[allow(unused_imports)]
-use guardrail3_app_rs_family_test_assertions::rs_test_16_assertions_modules_prove::{assert_error_results_are_error, assert_reported_file, assert_reported, assert_rule_files, assert_rule_quiet};
+use guardrail3_app_rs_family_test_assertions::rs_test_16_assertions_modules_prove::{
+    assert_error_results_are_error, assert_reported, assert_reported_file, assert_rule_files,
+    assert_rule_quiet,
+};
 
 #[allow(unused_imports)]
 use super::{run_family, tempdir, write_file};
 
 #[test]
-fn proof_bearing_export_in_assertions_module_passes() {let fixture = tempdir();
+fn proof_bearing_export_in_assertions_module_passes() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -44,10 +48,12 @@ fn proof_bearing_export_in_assertions_module_passes() {let fixture = tempdir();
 
     let results = run_family(root);
 
-    assert_rule_quiet(&results);}
+    assert_rule_quiet(&results);
+}
 
 #[test]
-fn thin_wrapper_assertions_module_is_reported() {let fixture = tempdir();
+fn thin_wrapper_assertions_module_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -83,18 +89,19 @@ fn thin_wrapper_assertions_module_is_reported() {let fixture = tempdir();
     );
 
     let results = run_family(root);
-    assert_rule_files(&results, vec!["crates/assertions/src/foo.rs".to_owned()]
-    );
+    assert_rule_files(&results, vec!["crates/assertions/src/foo.rs".to_owned()]);
     assert_reported(
         &results,
         "crates/assertions/src/foo.rs",
         Some(1),
         Severity::Error,
         "assertions module lacks proof-bearing export",
-    );}
+    );
+}
 
 #[test]
-fn sidecar_result_shape_assertion_is_reported() {let fixture = tempdir();
+fn sidecar_result_shape_assertion_is_reported() {
+    let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -112,11 +119,7 @@ fn sidecar_result_shape_assertion_is_reported() {let fixture = tempdir();
         "crates/runtime/src/lib.rs",
         "#[cfg(test)]\n#[path = \"lib_tests/mod.rs\"]\nmod tests;\npub fn value() -> u8 {1}\n",
     );
-    write_file(
-        root,
-        "crates/runtime/src/lib_tests/mod.rs",
-        "mod cases;\n",
-    );
+    write_file(root, "crates/runtime/src/lib_tests/mod.rs", "mod cases;\n");
     write_file(
         root,
         "crates/runtime/src/lib_tests/cases.rs",
@@ -134,4 +137,5 @@ fn sidecar_result_shape_assertion_is_reported() {let fixture = tempdir();
     );
 
     let results = run_family(root);
-    assert_error_results_are_error(&results, "RS-DEMO-01");}
+    assert_error_results_are_error(&results, "RS-DEMO-01");
+}
