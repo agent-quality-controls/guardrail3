@@ -1,8 +1,4 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_18_renamed_dependency_direction as assertions;
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_17_workspace_inherited_direction as rule17_assertions;
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_20_dev_dependency_direction as rule20_assertions;
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_24_cross_app_boundary as rule24_assertions;
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_25_target_dependency_direction as rule25_assertions;
 use super::{copy_fixture, write_file};
 
 #[test]
@@ -15,9 +11,9 @@ fn cross_app_renamed_edge_is_owned_by_rule_24_not_rule_18() {
     );
 
     let results = super::run_family(tmp.path());
-    rule24_assertions::assert_error_results(
+    assertions::assert_error_results(
         &results,
-        "",
+        "RS-HEXARCH-24",
         1,
         &["apps/backend/crates/domain/engine/Cargo.toml"],
         &["cross-app boundary dependency"],
@@ -40,7 +36,7 @@ fn inherited_renamed_path_dep_is_owned_by_rule_17_not_rule_18() {
     );
 
     let results = super::run_family(tmp.path());
-    rule17_assertions::assert_error_count(&results, "", 1);
+    assertions::assert_error_count(&results, "RS-HEXARCH-17", 1);
     assertions::assert_error_count(&results, "", 0);
 }
 
@@ -54,7 +50,7 @@ fn renamed_dev_dependency_is_owned_by_rule_20_not_rule_18() {
     );
 
     let results = super::run_family(tmp.path());
-    rule20_assertions::assert_warning_count(&results, "", 1);
+    assertions::assert_warning_count(&results, "RS-HEXARCH-20", 1);
     assertions::assert_error_count(&results, "", 0);
 }
 
@@ -68,9 +64,9 @@ fn renamed_target_dependency_is_owned_by_rule_25_not_rule_18() {
     );
 
     let results = super::run_family(tmp.path());
-    rule25_assertions::assert_error_results(
+    assertions::assert_error_results(
         &results,
-        "",
+        "RS-HEXARCH-25",
         1,
         &["apps/backend/crates/domain/engine/Cargo.toml"],
         &["target dependency direction violation"],

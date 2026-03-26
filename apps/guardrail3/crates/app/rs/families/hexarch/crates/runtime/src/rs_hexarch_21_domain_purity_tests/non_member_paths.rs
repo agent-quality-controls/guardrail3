@@ -1,5 +1,4 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_21_domain_purity as assertions;
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_24_cross_app_boundary as rule24_assertions;
 use super::{copy_fixture, write_file};
 
 #[test]
@@ -26,6 +25,7 @@ fn out_of_tree_paths_with_pure_layer_names_still_error() {
         &results,
         "",
         2,
+        &["apps/backend/crates/domain/engine/Cargo.toml"],
         &[
             "domain crate `backend-domain-engine` depends on disallowed external crate `vendor-domain-kit`",
             "domain crate `backend-domain-engine` depends on disallowed external crate `vendor-ports-kit`",
@@ -43,9 +43,9 @@ fn cross_app_path_dep_is_owned_by_rule_24_not_rule_21() {
     );
 
     let results = super::run_family(tmp.path());
-    rule24_assertions::assert_error_results(
+    assertions::assert_error_results(
         &results,
-        "",
+        "RS-HEXARCH-24",
         1,
         &["apps/backend/crates/domain/engine/Cargo.toml"],
         &["cross-app boundary dependency"],

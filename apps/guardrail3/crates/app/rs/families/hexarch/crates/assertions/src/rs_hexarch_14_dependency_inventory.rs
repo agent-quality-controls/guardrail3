@@ -1,4 +1,5 @@
 use guardrail3_domain_report::{CheckResult, Severity};
+use std::collections::BTreeSet;
 
 const RULE_ID: &str = "RS-HEXARCH-14";
 
@@ -68,15 +69,12 @@ pub fn assert_inventory_results(
                 && result.file.as_deref() == Some(file)
         })
         .collect::<Vec<_>>();
-    let expected_files = [file];
-    assert_result_summary(
-        &inventory,
-        expected_count,
-        &expected_files,
-        None,
-        None,
-        None,
-    );
-    assert_all_inventory(&inventory);
-    assert_result_messages(&inventory, expected_messages);
+    assert_eq!(inventory.len(), expected_count, "{inventory:#?}");
+    assert!(inventory.iter().all(|result| result.inventory), "{inventory:#?}");
+    let actual_messages = inventory
+        .iter()
+        .map(|result| result.message.as_str())
+        .collect::<BTreeSet<_>>();
+    let expected_messages = expected_messages.iter().copied().collect::<BTreeSet<_>>();
+    assert_eq!(actual_messages, expected_messages, "{inventory:#?}");
 }

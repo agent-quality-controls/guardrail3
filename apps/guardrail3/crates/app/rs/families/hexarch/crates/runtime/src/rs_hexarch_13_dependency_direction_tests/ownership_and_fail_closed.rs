@@ -1,5 +1,4 @@
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_13_dependency_direction as assertions;
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_18_renamed_dependency_direction as rule18_assertions;
 use super::{copy_fixture, write_file};
 
 #[test]
@@ -32,5 +31,5 @@ fn renamed_same_app_edge_is_owned_by_rule_18_not_rule_13() {
 
     let results = super::run_family(tmp.path());
     assertions::assert_no_error(&results, "");
-    rule18_assertions::assert_error_count(&results, "", 1);
+    assertions::assert_error_count(&results, "RS-HEXARCH-18", 1);
 }

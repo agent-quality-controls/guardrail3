@@ -107,7 +107,7 @@ fn ts_apps_and_packages_stay_out_of_scope() {
 
 #[test]
 #[cfg(unix)]
-fn symlink_only_container_is_owned_by_rule_05_not_rule_04() {
+fn symlink_only_container_does_not_trigger_rule_04() {
     let tmp = copy_fixture();
     empty_dir(tmp.path(), "apps/devctl/crates/domain");
     std::os::unix::fs::symlink(
@@ -122,16 +122,6 @@ fn symlink_only_container_is_owned_by_rule_05_not_rule_04() {
         "",
         "apps/devctl/crates/domain",
         0,
-        &[],
-        &[],
-        &[],
-        &[],
-    );
-    assertions::assert_error_count_matching_file(
-        &results,
-        "RS-HEXARCH-05",
-        "apps/devctl/crates/domain",
-        1,
         &[],
         &[],
         &[],

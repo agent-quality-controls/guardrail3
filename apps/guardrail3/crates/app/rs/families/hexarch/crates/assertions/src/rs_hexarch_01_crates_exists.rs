@@ -1,4 +1,5 @@
 use guardrail3_domain_report::{CheckResult, Severity};
+use std::collections::BTreeSet;
 
 const RULE_ID: &str = "RS-HEXARCH-01";
 
@@ -60,6 +61,23 @@ pub fn assert_error_count(results: &[CheckResult], rule_id: &str, expected_count
         expected_count,
         "unexpected {rule_id} error count: {errors:#?}"
     );
+}
+
+pub fn assert_error_file_set(
+    results: &[CheckResult],
+    rule_id: &str,
+    expected_count: usize,
+    expected_files: &[&str],
+) {
+    let rule_id = if rule_id.is_empty() { RULE_ID } else { rule_id };
+    let errors = error_results(results, rule_id);
+    assert_eq!(errors.len(), expected_count, "unexpected {rule_id} errors: {errors:#?}");
+    let actual_files = errors
+        .iter()
+        .filter_map(|result| result.file.as_deref())
+        .collect::<BTreeSet<_>>();
+    let expected_files = expected_files.iter().copied().collect::<BTreeSet<_>>();
+    assert_eq!(actual_files, expected_files, "unexpected {rule_id} errors: {errors:#?}");
 }
 
 pub fn assert_error_summary<I>(

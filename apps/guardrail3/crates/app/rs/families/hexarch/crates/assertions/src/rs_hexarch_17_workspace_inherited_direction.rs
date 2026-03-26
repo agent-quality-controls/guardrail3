@@ -61,6 +61,7 @@ pub fn assert_error_results(
     expected_files: &[&str],
 ) {
     let errors = error_results(results, rule_id);
+    assert_eq!(errors.len(), expected_count, "{errors:#?}");
     assert_result_summary(&errors, expected_count, expected_files, None, None, None);
 }
 
@@ -76,6 +77,7 @@ pub fn assert_error_file_set(
     expected_files: &[&str],
 ) {
     let errors = error_results(results, rule_id);
+    assert_eq!(errors.len(), expected_count, "{errors:#?}");
     assert_result_summary(&errors, expected_count, expected_files, None, None, None);
 }
 
