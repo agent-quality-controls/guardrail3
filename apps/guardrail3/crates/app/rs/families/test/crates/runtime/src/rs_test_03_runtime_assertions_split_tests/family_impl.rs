@@ -1,8 +1,11 @@
-use super::{rule_files, run_family, tempdir, write_file};
+#[allow(unused_imports)]
+use guardrail3_app_rs_family_test_assertions::rs_test_03_runtime_assertions_split::{assert_reported, assert_rule_files, assert_rule_quiet};
+
+#[allow(unused_imports)]
+use super::{run_family, tempdir, write_file};
 
 #[test]
-fn root_local_ruleish_shape_still_requires_runtime_assertions_split() {
-    let fixture = tempdir();
+fn root_local_ruleish_shape_still_requires_runtime_assertions_split() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -19,16 +22,15 @@ fn root_local_ruleish_shape_still_requires_runtime_assertions_split() {
     write_file(
         root,
         "src/rs_demo_01.rs",
-        "#[cfg(test)]\n#[path = \"rs_demo_01_tests/mod.rs\"]\nmod tests;\npub fn check() -> bool { true }\n",
+        "#[cfg(test)]\n#[path = \"rs_demo_01_tests/mod.rs\"]\nmod tests;\npub fn check() -> bool {true}\n",
     );
     write_file(
         root,
         "src/rs_demo_01_tests/mod.rs",
-        "#[test]\nfn sidecar() { assert!(crate::rs_demo_01::check()); }\n",
+        "#[test]\nfn sidecar() {assert!(crate::rs_demo_01::check());}\n",
     );
 
-    assert_eq!(
-        rule_files(&run_family(root), "RS-TEST-03"),
-        vec!["src/rs_demo_01_tests/mod.rs".to_owned()]
-    );
-}
+    assert_rule_files(
+        &run_family(root),
+        vec!["src/rs_demo_01_tests/mod.rs".to_owned()],
+    );}

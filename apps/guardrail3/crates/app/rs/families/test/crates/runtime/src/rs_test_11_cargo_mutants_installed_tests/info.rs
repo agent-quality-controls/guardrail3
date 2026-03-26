@@ -1,9 +1,12 @@
-use super::{finding, rule_files, run_family_with_tool, tempdir, write_file};
+#[allow(unused_imports)]
+use guardrail3_app_rs_family_test_assertions::rs_test_11_cargo_mutants_installed::{assert_inventory, assert_reported, assert_rule_files, assert_rule_quiet};
+
+#[allow(unused_imports)]
+use super::{run_family_with_tool, tempdir, write_file};
 use guardrail3_domain_report::Severity;
 
 #[test]
-fn installed_tool_reports_info_for_an_adopted_root() {
-    let fixture = tempdir();
+fn installed_tool_reports_info_for_an_adopted_root() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -14,14 +17,6 @@ fn installed_tool_reports_info_for_an_adopted_root() {
 
     let results = run_family_with_tool(root, true);
 
-    assert_eq!(
-        rule_files(&results, "RS-TEST-11"),
-        vec!["Cargo.toml".to_owned()]
-    );
-    let finding = finding(&results, "RS-TEST-11");
-    assert_eq!(finding.severity, Severity::Info);
-    assert_eq!(finding.title, "cargo-mutants installed");
-    assert_eq!(finding.file.as_deref(), Some("Cargo.toml"));
-    assert_eq!(finding.line, None);
-    assert!(finding.inventory);
-}
+    assert_rule_files(&results, vec!["Cargo.toml".to_owned()]
+    );    assert_reported(&results, "Cargo.toml", None, Severity::Info, "cargo-mutants installed");
+    assert_inventory(&results, true);}

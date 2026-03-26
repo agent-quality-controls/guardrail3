@@ -1,10 +1,13 @@
 use guardrail3_domain_report::Severity;
 
-use super::{finding, run_family, tempdir, write_file};
+#[allow(unused_imports)]
+use guardrail3_app_rs_family_test_assertions::rs_test_02_owned_sidecar_shape::{assert_reported, assert_rule_files, assert_rule_quiet};
+
+#[allow(unused_imports)]
+use super::{run_family, tempdir, write_file};
 
 #[test]
-fn path_included_source_file_without_backing_sidecar_is_reported() {
-    let fixture = tempdir();
+fn path_included_source_file_without_backing_sidecar_is_reported() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -20,14 +23,8 @@ fn path_included_source_file_without_backing_sidecar_is_reported() {
     write_file(
         root,
         "tests/public_surface.rs",
-        "#[test]\nfn public_surface() { assert!(true); }\n",
+        "#[test]\nfn public_surface() {assert!(true);}\n",
     );
 
     let results = run_family(root);
-    let finding = finding(&results, "RS-TEST-02");
-
-    assert_eq!(finding.severity, Severity::Error);
-    assert_eq!(finding.title, "ad hoc cfg(test) module declaration");
-    assert_eq!(finding.file.as_deref(), Some("src/lib.rs"));
-    assert_eq!(finding.line, Some(1));
-}
+    assert_reported(&results, "src/lib.rs", Some(1), Severity::Error, "ad hoc cfg(test) module declaration");}

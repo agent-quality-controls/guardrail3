@@ -1,9 +1,12 @@
-use super::{finding, rule_files, run_family, tempdir, write_file};
+#[allow(unused_imports)]
+use guardrail3_app_rs_family_test_assertions::rs_test_15_mutants_config_sane::{assert_inventory, assert_reported, assert_rule_files, assert_rule_quiet};
+
+#[allow(unused_imports)]
+use super::{run_family, tempdir, write_file};
 use guardrail3_domain_report::Severity;
 
 #[test]
-fn low_timeout_multiplier_is_reported() {
-    let fixture = tempdir();
+fn low_timeout_multiplier_is_reported() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -15,14 +18,6 @@ fn low_timeout_multiplier_is_reported() {
 
     let results = run_family(root);
 
-    assert_eq!(
-        rule_files(&results, "RS-TEST-15"),
-        vec![".cargo/mutants.toml".to_owned()]
-    );
-    let finding = finding(&results, "RS-TEST-15");
-    assert_eq!(finding.severity, Severity::Warn);
-    assert_eq!(finding.title, "mutants timeout multiplier too low");
-    assert_eq!(finding.file.as_deref(), Some(".cargo/mutants.toml"));
-    assert_eq!(finding.line, None);
-    assert!(!finding.inventory);
-}
+    assert_rule_files(&results, vec![".cargo/mutants.toml".to_owned()]
+    );    assert_reported(&results, ".cargo/mutants.toml", None, Severity::Warn, "mutants timeout multiplier too low");
+    assert_inventory(&results, false);}

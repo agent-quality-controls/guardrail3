@@ -1,9 +1,12 @@
-use super::{finding, rule_files, run_family_with_tool, tempdir, write_file};
-use guardrail3_domain_report::Severity;
+#[allow(unused_imports)]
+use guardrail3_app_rs_family_test_assertions::rs_test_11_cargo_mutants_installed::{
+    assert_inventory, assert_missing_cargo_mutants, assert_rule_files, assert_rule_quiet,
+};
 
+#[allow(unused_imports)]
+use super::{run_family_with_tool, tempdir, write_file};
 #[test]
-fn missing_tool_is_ignored_without_mutation_adoption_and_reported_when_adopted() {
-    let dormant = tempdir();
+fn missing_tool_is_ignored_without_mutation_adoption_and_reported_when_adopted() {let dormant = tempdir();
     write_file(
         dormant.path(),
         "Cargo.toml",
@@ -12,11 +15,11 @@ fn missing_tool_is_ignored_without_mutation_adoption_and_reported_when_adopted()
     write_file(
         dormant.path(),
         "tests/basic.rs",
-        "#[test]\nfn runs() { assert!(true); }\n",
+        "#[test]\nfn runs() {assert!(true);}\n",
     );
 
     let dormant_results = run_family_with_tool(dormant.path(), false);
-    assert!(rule_files(&dormant_results, "RS-TEST-11").is_empty());
+    assert_rule_quiet(&dormant_results);
 
     let adopted = tempdir();
     write_file(
@@ -27,17 +30,10 @@ fn missing_tool_is_ignored_without_mutation_adoption_and_reported_when_adopted()
     write_file(
         adopted.path(),
         "tests/basic.rs",
-        "#[test]\nfn runs() { assert!(true); }\n",
+        "#[test]\nfn runs() {assert!(true);}\n",
     );
 
     let adopted_results = run_family_with_tool(adopted.path(), false);
-    assert_eq!(
-        rule_files(&adopted_results, "RS-TEST-11"),
-        vec!["Cargo.toml".to_owned()]
-    );
-    let finding = finding(&adopted_results, "RS-TEST-11");
-    assert_eq!(finding.severity, Severity::Warn);
-    assert_eq!(finding.title, "cargo-mutants missing");
-    assert_eq!(finding.file.as_deref(), Some("Cargo.toml"));
-    assert_eq!(finding.line, None);
-}
+    assert_rule_files(&adopted_results, vec!["Cargo.toml".to_owned()]);
+    assert_missing_cargo_mutants(&adopted_results);
+    assert_inventory(&adopted_results, false);}

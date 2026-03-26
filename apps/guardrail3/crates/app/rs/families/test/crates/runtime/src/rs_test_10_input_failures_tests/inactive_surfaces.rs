@@ -1,8 +1,11 @@
-use super::{rule_files, run_family, tempdir, write_file};
+#[allow(unused_imports)]
+use guardrail3_app_rs_family_test_assertions::rs_test_10_input_failures::{assert_reported, assert_rule_files, assert_rule_quiet};
+
+#[allow(unused_imports)]
+use super::{run_family, tempdir, write_file};
 
 #[test]
-fn malformed_nextest_config_is_ignored_without_async_activation() {
-    let fixture = tempdir();
+fn malformed_nextest_config_is_ignored_without_async_activation() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -13,7 +16,7 @@ fn malformed_nextest_config_is_ignored_without_async_activation() {
     write_file(
         root,
         "tests/basic.rs",
-        "#[test]\nfn runs() { assert_eq!(1, 1); }\n",
+        "#[test]\nfn runs() {assert_eq!(1, 1);}\n",
     );
     write_file(
         root,
@@ -23,5 +26,4 @@ fn malformed_nextest_config_is_ignored_without_async_activation() {
 
     let results = run_family(root);
 
-    assert!(rule_files(&results, "RS-TEST-10").is_empty());
-}
+    assert_rule_quiet(&results);}

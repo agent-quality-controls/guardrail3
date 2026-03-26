@@ -1,8 +1,11 @@
-use super::{rule_files, run_family, tempdir, write_file};
+#[allow(unused_imports)]
+use guardrail3_app_rs_family_test_assertions::rs_test_01_inline_test_bodies::{assert_reported, assert_rule_files, assert_rule_quiet};
+
+#[allow(unused_imports)]
+use super::{run_family, tempdir, write_file};
 
 #[test]
-fn owned_sidecar_declaration_stays_quiet() {
-    let fixture = tempdir();
+fn owned_sidecar_declaration_stays_quiet() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -18,10 +21,9 @@ fn owned_sidecar_declaration_stays_quiet() {
     write_file(
         root,
         "src/lib_tests/mod.rs",
-        "#[test]\nfn uses_owned_sidecar() { assert!(true); }\n",
+        "#[test]\nfn uses_owned_sidecar() {assert!(true);}\n",
     );
 
     let results = run_family(root);
 
-    assert!(rule_files(&results, "RS-TEST-01").is_empty());
-}
+    assert_rule_quiet(&results);}

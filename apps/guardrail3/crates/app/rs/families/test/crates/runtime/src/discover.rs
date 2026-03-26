@@ -699,7 +699,7 @@ fn manifest_package_name(parsed: &toml::Value) -> Option<String> {
         .get("package")
         .and_then(|package| package.get("name"))
         .and_then(toml::Value::as_str)
-        .map(str::to_owned)
+        .map(rust_crate_name)
 }
 
 fn manifest_normal_dependencies(parsed: &toml::Value) -> BTreeSet<String> {
@@ -714,8 +714,12 @@ fn dependency_names<const N: usize>(parsed: &toml::Value, sections: [&str; N]) -
     sections
         .into_iter()
         .filter_map(|section| parsed.get(section).and_then(toml::Value::as_table))
-        .flat_map(|table| table.keys().cloned())
+        .flat_map(|table| table.keys().map(|name| rust_crate_name(name)))
         .collect()
+}
+
+fn rust_crate_name(package_name: &str) -> String {
+    package_name.replace('-', "_")
 }
 
 fn collect_sidecars(

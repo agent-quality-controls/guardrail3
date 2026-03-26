@@ -3,11 +3,21 @@ use std::collections::BTreeSet;
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::inputs::TestSupportFileInput;
+use super::parse::{PublicValueKind, ReturnKind};
 
 const ID: &str = "RS-TEST-18";
 const DISALLOWED_ROUTE_INFRA_PACKAGES: &[&str] = &[
     "guardrail3_app_rs_family_mapper",
     "guardrail3_app_rs_placement",
+];
+const REPORT_FIELDS: &[&str] = &[
+    "file",
+    "id",
+    "inventory",
+    "line",
+    "message",
+    "severity",
+    "title",
 ];
 
 pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
@@ -17,28 +27,27 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
         .chain(input.local_assertions_packages.iter())
         .cloned()
         .collect::<BTreeSet<_>>();
-    if disallowed_packages.is_empty() {
-        return;
-    }
 
-    for binding in &input.parsed.imports {
-        let Some(first) = binding.path_segments.first() else {
-            continue;
-        };
-        if !disallowed_packages.contains(first) {
-            continue;
+    if !disallowed_packages.is_empty() {
+        for binding in &input.parsed.imports {
+            let Some(first) = binding.path_segments.first() else {
+                continue;
+            };
+            if !disallowed_packages.contains(first) {
+                continue;
+            }
+            results.push(CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Error,
+                title: "test_support imports local component crate".to_owned(),
+                message: format!(
+                    "Shared `test_support` must stay generic and must not import local runtime/assertions crate `{first}`."
+                ),
+                file: Some(input.file.rel_path.clone()),
+                line: Some(binding.line),
+                inventory: false,
+            });
         }
-        results.push(CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Error,
-            title: "test_support imports local component crate".to_owned(),
-            message: format!(
-                "Shared `test_support` must stay generic and must not import local runtime/assertions crate `{first}`."
-            ),
-            file: Some(input.file.rel_path.clone()),
-            line: Some(binding.line),
-            inventory: false,
-        });
     }
 
     let mut reported_route_infra_imports = BTreeSet::new();
@@ -64,25 +73,27 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
         });
     }
 
-    let mut called_packages = BTreeSet::new();
-    for call_path in &input.parsed.file_call_paths {
-        let Some(first) = call_path.first() else {
-            continue;
-        };
-        if !disallowed_packages.contains(first) || !called_packages.insert(first.clone()) {
-            continue;
+    if !disallowed_packages.is_empty() {
+        let mut called_packages = BTreeSet::new();
+        for call_path in &input.parsed.file_call_paths {
+            let Some(first) = call_path.first() else {
+                continue;
+            };
+            if !disallowed_packages.contains(first) || !called_packages.insert(first.clone()) {
+                continue;
+            }
+            results.push(CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Error,
+                title: "test_support calls local component crate".to_owned(),
+                message: format!(
+                    "Shared `test_support` must stay generic and must not call local runtime/assertions crate `{first}` directly."
+                ),
+                file: Some(input.file.rel_path.clone()),
+                line: None,
+                inventory: false,
+            });
         }
-        results.push(CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Error,
-            title: "test_support calls local component crate".to_owned(),
-            message: format!(
-                "Shared `test_support` must stay generic and must not call local runtime/assertions crate `{first}` directly."
-            ),
-            file: Some(input.file.rel_path.clone()),
-            line: None,
-            inventory: false,
-        });
     }
 
     if input
@@ -101,6 +112,146 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
             inventory: false,
         });
     }
+
+    for value in &input.parsed.public_values {
+        results.push(CheckResult {
+            id: ID.to_owned(),
+            severity: Severity::Error,
+            title: "test_support exports public semantic constant".to_owned(),
+            message: format!(
+                "Shared `test_support` must stay generic and must not expose public {} `{}`.",
+                match value.kind {
+                    PublicValueKind::Const => "const",
+                    PublicValueKind::Static => "static",
+                },
+                value.name
+            ),
+            file: Some(input.file.rel_path.clone()),
+            line: Some(value.line),
+            inventory: false,
+        });
+    }
+
+    let local_canned_helpers = input
+        .parsed
+        .functions
+        .iter()
+        .filter(|function| {
+            !function.is_public
+                && !function.is_test
+                && function.arg_count == 0
+                && matches!(
+                    function.return_kind,
+                    ReturnKind::StringLike | ReturnKind::PathLike
+                )
+        })
+        .map(|function| function.name.as_str())
+        .collect::<BTreeSet<_>>();
+
+    for function in input.parsed.functions.iter().filter(|function| {
+        function.is_public && !function.is_test
+    }) {
+        let references_file_value = function.path_uses.iter().any(|path| {
+            path.first()
+                .is_some_and(|first| input.parsed.file_value_names.contains(first))
+        });
+        let calls_local_canned_helper = function.call_paths.iter().any(|path| {
+            path.len() == 1
+                && local_canned_helpers.contains(path[0].as_str())
+                && !function.shadowed_idents.contains(&path[0])
+        });
+
+        if matches!(
+            function.return_kind,
+            ReturnKind::StringLike | ReturnKind::PathLike
+        ) && (function.arg_count == 0 || references_file_value || calls_local_canned_helper)
+        {
+            results.push(CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Error,
+                title: "test_support exports canned path or string helper".to_owned(),
+                message: format!(
+                    "Shared `test_support` must stay generic and must not expose public helper `{}` returning canned path/string data.",
+                    function.name
+                ),
+                file: Some(input.file.rel_path.clone()),
+                line: Some(function.line),
+                inventory: false,
+            });
+            continue;
+        }
+
+        if function.arg_count == 0
+            && matches!(function.return_kind, ReturnKind::Other)
+            && calls_local_canned_helper
+        {
+            results.push(CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Error,
+                title: "test_support exports canned fixture helper".to_owned(),
+                message: format!(
+                    "Shared `test_support` must stay generic and must not expose zero-argument public helper `{}` that wraps canned fixture path/string data.",
+                    function.name
+                ),
+                file: Some(input.file.rel_path.clone()),
+                line: Some(function.line),
+                inventory: false,
+            });
+        }
+
+        let selects_report_semantics = function.has_check_result_arg
+            && (function.arg_names.contains("rule_id")
+                || function.arg_names.contains("id")
+                || function
+                    .field_accesses
+                    .iter()
+                    .any(|field| REPORT_FIELDS.contains(&field.name.as_str()))
+                || function
+                    .path_uses
+                    .iter()
+                    .any(|path| path.last().is_some_and(|segment| segment == "CheckResult"))
+                || function
+                    .string_literals
+                    .iter()
+                    .any(|value| value.starts_with("RS-")));
+        if selects_report_semantics {
+            results.push(CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Error,
+                title: "test_support exports semantic finding helper".to_owned(),
+                message: format!(
+                    "Shared `test_support` must stay generic and must not expose public helper `{}` that selects or inspects guardrail findings/results by rule semantics.",
+                    function.name
+                ),
+                file: Some(input.file.rel_path.clone()),
+                line: Some(function.line),
+                inventory: false,
+            });
+        }
+    }
+}
+
+#[cfg(test)]
+#[allow(dead_code)]
+pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
+    let tree = test_support::walk(root);
+    super::check_test_tree(&tree, &test_support::StubToolChecker::default())
+}
+
+#[cfg(test)]
+#[allow(dead_code)]
+#[allow(dead_code)]
+pub(crate) fn run_family_with_tool(
+    root: &std::path::Path,
+    cargo_mutants_installed: bool,
+) -> Vec<CheckResult> {
+    let tree = test_support::walk(root);
+    let checker = if cargo_mutants_installed {
+        test_support::StubToolChecker::with_tools(["cargo-mutants"])
+    } else {
+        test_support::StubToolChecker::default()
+    };
+    super::check_test_tree(&tree, &checker)
 }
 
 #[cfg(test)]

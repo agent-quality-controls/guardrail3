@@ -1,10 +1,13 @@
 use guardrail3_domain_report::Severity;
 
-use super::{finding, rule_files, run_family, tempdir, write_file};
+#[allow(unused_imports)]
+use guardrail3_app_rs_family_test_assertions::rs_test_05_should_panic_expected::{assert_reported, assert_rule_files, assert_rule_quiet};
+
+#[allow(unused_imports)]
+use super::{run_family, tempdir, write_file};
 
 #[test]
-fn bare_should_panic_is_reported_on_the_test_file() {
-    let fixture = tempdir();
+fn bare_should_panic_is_reported_on_the_test_file() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -15,24 +18,15 @@ fn bare_should_panic_is_reported_on_the_test_file() {
     write_file(
         root,
         "tests/panic.rs",
-        "#[test]\n#[should_panic]\nfn panics_without_expected_message() { panic!(\"boom\"); }\n",
+        "#[test]\n#[should_panic]\nfn panics_without_expected_message() {panic!(\"boom\");}\n",
     );
 
     let results = run_family(root);
-    assert_eq!(
-        rule_files(&results, "RS-TEST-05"),
-        vec!["tests/panic.rs".to_owned()]
-    );
-    let finding = finding(&results, "RS-TEST-05");
-    assert_eq!(finding.severity, Severity::Warn);
-    assert_eq!(finding.title, "should_panic missing expected string");
-    assert_eq!(finding.file.as_deref(), Some("tests/panic.rs"));
-    assert_eq!(finding.line, Some(2));
-}
+    assert_rule_files(&results, vec!["tests/panic.rs".to_owned()]
+    );    assert_reported(&results, "tests/panic.rs", Some(2), Severity::Warn, "should_panic missing expected string");}
 
 #[test]
-fn empty_expected_string_is_reported() {
-    let fixture = tempdir();
+fn empty_expected_string_is_reported() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -43,21 +37,14 @@ fn empty_expected_string_is_reported() {
     write_file(
         root,
         "tests/panic.rs",
-        "#[test]\n#[should_panic(expected = \"\")]\nfn panics_with_empty_expected_message() { panic!(\"boom\"); }\n",
+        "#[test]\n#[should_panic(expected = \"\")]\nfn panics_with_empty_expected_message() {panic!(\"boom\");}\n",
     );
 
     let results = run_family(root);
-    let finding = finding(&results, "RS-TEST-05");
-
-    assert_eq!(finding.severity, Severity::Warn);
-    assert_eq!(finding.title, "should_panic missing expected string");
-    assert_eq!(finding.file.as_deref(), Some("tests/panic.rs"));
-    assert_eq!(finding.line, Some(2));
-}
+    assert_reported(&results, "tests/panic.rs", Some(2), Severity::Warn, "should_panic missing expected string");}
 
 #[test]
-fn non_string_expected_is_reported() {
-    let fixture = tempdir();
+fn non_string_expected_is_reported() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -68,14 +55,8 @@ fn non_string_expected_is_reported() {
     write_file(
         root,
         "tests/panic.rs",
-        "#[test]\n#[should_panic(expected = 1)]\nfn panics_with_non_string_expected() { panic!(\"boom\"); }\n",
+        "#[test]\n#[should_panic(expected = 1)]\nfn panics_with_non_string_expected() {panic!(\"boom\");}\n",
     );
 
     let results = run_family(root);
-    let finding = finding(&results, "RS-TEST-05");
-
-    assert_eq!(finding.severity, Severity::Warn);
-    assert_eq!(finding.title, "should_panic missing expected string");
-    assert_eq!(finding.file.as_deref(), Some("tests/panic.rs"));
-    assert_eq!(finding.line, Some(2));
-}
+    assert_reported(&results, "tests/panic.rs", Some(2), Severity::Warn, "should_panic missing expected string");}

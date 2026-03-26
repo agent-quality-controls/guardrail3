@@ -555,10 +555,16 @@ Detection:
 
 - inspect exported functions in `assertions/src/**/*.rs`
 - if a file exposes helper functions, require at least one proof-bearing exported function
+- inspect internal runtime sidecars that have owned sibling assertions modules
+- report when the sidecar still performs direct guardrail result-shape assertions itself
 - proof-bearing means exactly one of:
   - the function body contains an allowlisted assertion macro
   - the function calls another owned assertions function already known to be proof-bearing
 - aggregator files with no exported functions are ignored
+- sidecars must not keep semantic assertions over:
+  - rule-id literals like `RS-*`
+  - finding fields like `id`, `title`, `message`, `file`, `line`, `inventory`, `severity`
+  - report types like `CheckResult` / `Severity`
 
 #### `RS-TEST-17`
 
@@ -585,6 +591,10 @@ Prevents:
 Detection:
 
 - inspect `test_support/src/**/*.rs`
+- report public `const` / `static` exports
+- report public helpers returning canned path/string-like values when they expose file-local fixture constants or private canned path/string helpers
+- report zero-argument public helpers that wrap canned fixture path/string helpers into container-style fixture APIs
+- report public helpers that accept `CheckResult`-shaped inputs and select or inspect findings by rule semantics
 - report imports of sibling local `runtime` crates
 - report imports of sibling local `assertions` crates
 - report direct calls into those sibling local component crates

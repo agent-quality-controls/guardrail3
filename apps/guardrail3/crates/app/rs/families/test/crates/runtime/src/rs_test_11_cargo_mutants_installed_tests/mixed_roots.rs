@@ -1,9 +1,12 @@
-use super::{finding, rule_files, run_family_with_tool, tempdir, write_file};
+#[allow(unused_imports)]
+use guardrail3_app_rs_family_test_assertions::rs_test_11_cargo_mutants_installed::{assert_reported, assert_rule_files, assert_rule_quiet};
+
+#[allow(unused_imports)]
+use super::{run_family_with_tool, tempdir, write_file};
 use guardrail3_domain_report::Severity;
 
 #[test]
-fn workspace_root_adoption_does_not_activate_idle_standalone_root() {
-    let fixture = tempdir();
+fn workspace_root_adoption_does_not_activate_idle_standalone_root() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -25,13 +28,5 @@ fn workspace_root_adoption_does_not_activate_idle_standalone_root() {
 
     let results = run_family_with_tool(root, false);
 
-    assert_eq!(
-        rule_files(&results, "RS-TEST-11"),
-        vec!["Cargo.toml".to_owned()]
-    );
-    let finding = finding(&results, "RS-TEST-11");
-    assert_eq!(finding.severity, Severity::Warn);
-    assert_eq!(finding.title, "cargo-mutants missing");
-    assert_eq!(finding.file.as_deref(), Some("Cargo.toml"));
-    assert_eq!(finding.line, None);
-}
+    assert_rule_files(&results, vec!["Cargo.toml".to_owned()]
+    );    assert_reported(&results, "Cargo.toml", None, Severity::Warn, "cargo-mutants missing");}

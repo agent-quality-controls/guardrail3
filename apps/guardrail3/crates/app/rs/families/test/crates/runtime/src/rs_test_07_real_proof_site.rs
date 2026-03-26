@@ -61,6 +61,9 @@ fn function_has_owned_assertion_proof(
             if let Some(local_name) = binding.local_name.as_ref() {
                 let _ = root_prefixes.insert(local_name.clone(), relative_segments.clone());
                 let _ = bare_imports.insert(local_name.clone(), relative_segments.join("::"));
+            } else if let Some(last) = relative_segments.last().cloned() {
+                let _ = root_prefixes.insert(last.clone(), relative_segments.clone());
+                let _ = bare_imports.insert(last, relative_segments.join("::"));
             } else {
                 glob_prefixes.push(relative_segments);
             }
@@ -107,6 +110,29 @@ fn qualified_assertion_name(module_prefix: &[String], tail: &str) -> String {
     } else {
         format!("{}::{tail}", module_prefix.join("::"))
     }
+}
+
+#[cfg(test)]
+#[allow(dead_code)]
+pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
+    let tree = test_support::walk(root);
+    super::check_test_tree(&tree, &test_support::StubToolChecker::default())
+}
+
+#[cfg(test)]
+#[allow(dead_code)]
+#[allow(dead_code)]
+pub(crate) fn run_family_with_tool(
+    root: &std::path::Path,
+    cargo_mutants_installed: bool,
+) -> Vec<CheckResult> {
+    let tree = test_support::walk(root);
+    let checker = if cargo_mutants_installed {
+        test_support::StubToolChecker::with_tools(["cargo-mutants"])
+    } else {
+        test_support::StubToolChecker::default()
+    };
+    super::check_test_tree(&tree, &checker)
 }
 
 #[cfg(test)]

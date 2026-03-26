@@ -1,9 +1,12 @@
-use super::{finding, rule_files, run_family, tempdir, write_file};
+#[allow(unused_imports)]
+use guardrail3_app_rs_family_test_assertions::rs_test_13_mutants_profile_present::{assert_reported, assert_rule_files, assert_rule_quiet};
+
+#[allow(unused_imports)]
+use super::{run_family, tempdir, write_file};
 use guardrail3_domain_report::Severity;
 
 #[test]
-fn adopted_workspace_root_does_not_require_profile_for_idle_standalone_root() {
-    let fixture = tempdir();
+fn adopted_workspace_root_does_not_require_profile_for_idle_standalone_root() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -25,13 +28,5 @@ fn adopted_workspace_root_does_not_require_profile_for_idle_standalone_root() {
 
     let results = run_family(root);
 
-    assert_eq!(
-        rule_files(&results, "RS-TEST-13"),
-        vec!["Cargo.toml".to_owned()]
-    );
-    let finding = finding(&results, "RS-TEST-13");
-    assert_eq!(finding.severity, Severity::Warn);
-    assert_eq!(finding.title, "profile.mutants missing");
-    assert_eq!(finding.file.as_deref(), Some("Cargo.toml"));
-    assert_eq!(finding.line, None);
-}
+    assert_rule_files(&results, vec!["Cargo.toml".to_owned()]
+    );    assert_reported(&results, "Cargo.toml", None, Severity::Warn, "profile.mutants missing");}

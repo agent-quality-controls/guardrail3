@@ -1,10 +1,13 @@
 use guardrail3_domain_report::Severity;
 
-use super::{finding, rule_files, run_family, tempdir, write_file};
+#[allow(unused_imports)]
+use guardrail3_app_rs_family_test_assertions::rs_test_08_weak_matches_assert::{assert_reported, assert_rule_files, assert_rule_quiet};
+
+#[allow(unused_imports)]
+use super::{run_family, tempdir, write_file};
 
 #[test]
-fn wildcard_payload_match_is_reported() {
-    let fixture = tempdir();
+fn wildcard_payload_match_is_reported() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -19,20 +22,11 @@ fn wildcard_payload_match_is_reported() {
     );
 
     let results = run_family(root);
-    assert_eq!(
-        rule_files(&results, "RS-TEST-08"),
-        vec!["tests/matches.rs".to_owned()]
-    );
-    let finding = finding(&results, "RS-TEST-08");
-    assert_eq!(finding.severity, Severity::Warn);
-    assert_eq!(finding.title, "weak matches assertion");
-    assert_eq!(finding.file.as_deref(), Some("tests/matches.rs"));
-    assert_eq!(finding.line, Some(4));
-}
+    assert_rule_files(&results, vec!["tests/matches.rs".to_owned()]
+    );    assert_reported(&results, "tests/matches.rs", Some(4), Severity::Warn, "weak matches assertion");}
 
 #[test]
-fn debug_assert_wildcard_match_is_reported() {
-    let fixture = tempdir();
+fn debug_assert_wildcard_match_is_reported() {let fixture = tempdir();
     let root = fixture.path();
 
     write_file(
@@ -47,10 +41,4 @@ fn debug_assert_wildcard_match_is_reported() {
     );
 
     let results = run_family(root);
-    let finding = finding(&results, "RS-TEST-08");
-
-    assert_eq!(finding.severity, Severity::Warn);
-    assert_eq!(finding.title, "weak matches assertion");
-    assert_eq!(finding.file.as_deref(), Some("tests/matches.rs"));
-    assert_eq!(finding.line, Some(4));
-}
+    assert_reported(&results, "tests/matches.rs", Some(4), Severity::Warn, "weak matches assertion");}

@@ -12,6 +12,8 @@ pub struct ParsedTestFile {
     pub cfg_test_modules: Vec<CfgTestModuleInfo>,
     pub test_functions: Vec<TestFunctionInfo>,
     pub functions: Vec<FunctionInfo>,
+    pub public_values: Vec<PublicValueInfo>,
+    pub file_value_names: BTreeSet<String>,
     pub file_function_names: BTreeSet<String>,
     pub file_call_paths: Vec<Vec<String>>,
     pub imports: Vec<UseBinding>,
@@ -38,7 +40,10 @@ pub struct TestFunctionInfo {
     pub uses_tokio_test_attr: bool,
     pub has_assertion_macro: bool,
     pub call_paths: Vec<Vec<String>>,
+    pub path_uses: Vec<Vec<String>>,
     pub method_receiver_paths: Vec<Vec<String>>,
+    pub field_accesses: Vec<FieldAccessInfo>,
+    pub string_literals: Vec<String>,
     pub shadowed_idents: BTreeSet<String>,
     pub should_panic_line: Option<usize>,
     pub should_panic_has_expected: bool,
@@ -52,9 +57,48 @@ pub struct FunctionInfo {
     pub name: String,
     pub is_public: bool,
     pub is_test: bool,
+    pub arg_count: usize,
+    pub arg_names: BTreeSet<String>,
+    pub has_check_result_arg: bool,
+    pub return_kind: ReturnKind,
     pub has_assertion_macro: bool,
     pub call_paths: Vec<Vec<String>>,
+    pub path_uses: Vec<Vec<String>>,
+    pub field_accesses: Vec<FieldAccessInfo>,
+    pub string_literals: Vec<String>,
     pub shadowed_idents: BTreeSet<String>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ReturnKind {
+    None,
+    Other,
+    StringLike,
+    PathLike,
+}
+
+impl Default for ReturnKind {
+    fn default() -> Self {
+        Self::None
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct PublicValueInfo {
+    pub line: usize,
+    pub name: String,
+    pub kind: PublicValueKind,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PublicValueKind {
+    Const,
+    Static,
+}
+
+#[derive(Debug, Clone)]
+pub struct FieldAccessInfo {
+    pub name: String,
 }
 
 #[derive(Debug, Clone)]
@@ -76,6 +120,8 @@ pub fn analyze(ast: &syn::File, content: &str) -> ParsedTestFile {
             cfg_test_modules: Vec::new(),
             test_functions: Vec::new(),
             functions: Vec::new(),
+            public_values: Vec::new(),
+            file_value_names: BTreeSet::new(),
             file_function_names: BTreeSet::new(),
             file_call_paths: Vec::new(),
             imports: Vec::new(),
@@ -151,6 +197,30 @@ impl<'ast> Visit<'ast> for TestVisitor {
         syn::visit::visit_item_use(self, item);
     }
 
+    fn visit_item_const(&mut self, item: &'ast syn::ItemConst) {
+        let _ = self.out.file_value_names.insert(item.ident.to_string());
+        if matches!(item.vis, syn::Visibility::Public(_)) {
+            self.out.public_values.push(PublicValueInfo {
+                line: span_line(item.span()),
+                name: item.ident.to_string(),
+                kind: PublicValueKind::Const,
+            });
+        }
+        syn::visit::visit_item_const(self, item);
+    }
+
+    fn visit_item_static(&mut self, item: &'ast syn::ItemStatic) {
+        let _ = self.out.file_value_names.insert(item.ident.to_string());
+        if matches!(item.vis, syn::Visibility::Public(_)) {
+            self.out.public_values.push(PublicValueInfo {
+                line: span_line(item.span()),
+                name: item.ident.to_string(),
+                kind: PublicValueKind::Static,
+            });
+        }
+        syn::visit::visit_item_static(self, item);
+    }
+
     fn visit_expr_call(&mut self, expr: &'ast syn::ExprCall) {
         if let Some(path) = call_path(&expr.func) {
             self.out.file_call_paths.push(path);
@@ -182,7 +252,10 @@ fn maybe_push_test_function(
         uses_tokio_test_attr,
         has_assertion_macro: function.has_assertion_macro,
         call_paths: function.call_paths.clone(),
+        path_uses: function.path_uses.clone(),
         method_receiver_paths: body_visitor.method_receiver_paths,
+        field_accesses: function.field_accesses.clone(),
+        string_literals: function.string_literals.clone(),
         shadowed_idents: function.shadowed_idents.clone(),
         should_panic_line: should_panic_attr.map(|attr| span_line(attr.span())),
         should_panic_has_expected: should_panic_attr.is_some_and(should_panic_has_expected),
@@ -199,14 +272,78 @@ fn analyze_function(
 ) -> FunctionInfo {
     let mut body_visitor = TestBodyVisitor::default();
     body_visitor.visit_block(block);
+    let mut arg_names = BTreeSet::new();
+    let has_check_result_arg = sig.inputs.iter().any(|input| {
+        if let syn::FnArg::Typed(typed) = input {
+            collect_pat_idents(&typed.pat, &mut arg_names);
+            type_mentions_check_result(&typed.ty)
+        } else {
+            false
+        }
+    });
     FunctionInfo {
         line: span_line(sig.span()),
         name: sig.ident.to_string(),
         is_public: matches!(vis, syn::Visibility::Public(_)),
         is_test: attrs.iter().any(is_test_attr),
+        arg_count: sig.inputs.len(),
+        arg_names,
+        has_check_result_arg,
+        return_kind: classify_return_kind(&sig.output),
         has_assertion_macro: body_visitor.has_assertion_macro,
         call_paths: body_visitor.call_paths,
+        path_uses: body_visitor.path_uses,
+        field_accesses: body_visitor.field_accesses,
+        string_literals: body_visitor.string_literals,
         shadowed_idents: body_visitor.shadowed_idents,
+    }
+}
+
+fn classify_return_kind(output: &syn::ReturnType) -> ReturnKind {
+    let syn::ReturnType::Type(_, ty) = output else {
+        return ReturnKind::None;
+    };
+    classify_type_kind(ty)
+}
+
+fn classify_type_kind(ty: &syn::Type) -> ReturnKind {
+    match ty {
+        syn::Type::Path(type_path) => {
+            let last = type_path
+                .path
+                .segments
+                .last()
+                .map(|segment| segment.ident.to_string());
+            match last.as_deref() {
+                Some("String") | Some("str") => ReturnKind::StringLike,
+                Some("Path") | Some("PathBuf") => ReturnKind::PathLike,
+                _ => ReturnKind::Other,
+            }
+        }
+        syn::Type::Reference(reference) => classify_type_kind(&reference.elem),
+        syn::Type::Slice(slice) => match classify_type_kind(&slice.elem) {
+            ReturnKind::StringLike => ReturnKind::StringLike,
+            ReturnKind::PathLike => ReturnKind::PathLike,
+            _ => ReturnKind::Other,
+        },
+        _ => ReturnKind::Other,
+    }
+}
+
+fn type_mentions_check_result(ty: &syn::Type) -> bool {
+    match ty {
+        syn::Type::Path(type_path) => type_path
+            .path
+            .segments
+            .iter()
+            .any(|segment| segment.ident == "CheckResult"),
+        syn::Type::Reference(reference) => type_mentions_check_result(&reference.elem),
+        syn::Type::Slice(slice) => type_mentions_check_result(&slice.elem),
+        syn::Type::Array(array) => type_mentions_check_result(&array.elem),
+        syn::Type::Tuple(tuple) => tuple.elems.iter().any(type_mentions_check_result),
+        syn::Type::Group(group) => type_mentions_check_result(&group.elem),
+        syn::Type::Paren(paren) => type_mentions_check_result(&paren.elem),
+        _ => false,
     }
 }
 
@@ -214,7 +351,10 @@ fn analyze_function(
 struct TestBodyVisitor {
     has_assertion_macro: bool,
     call_paths: Vec<Vec<String>>,
+    path_uses: Vec<Vec<String>>,
     method_receiver_paths: Vec<Vec<String>>,
+    field_accesses: Vec<FieldAccessInfo>,
+    string_literals: Vec<String>,
     shadowed_idents: BTreeSet<String>,
     tautological_assert_lines: Vec<usize>,
     weak_matches_lines: Vec<usize>,
@@ -252,11 +392,36 @@ impl<'ast> Visit<'ast> for TestBodyVisitor {
         syn::visit::visit_expr_call(self, expr);
     }
 
+    fn visit_expr_path(&mut self, expr: &'ast syn::ExprPath) {
+        self.path_uses.push(
+            expr.path
+                .segments
+                .iter()
+                .map(|segment| segment.ident.to_string())
+                .collect(),
+        );
+        syn::visit::visit_expr_path(self, expr);
+    }
+
+    fn visit_expr_field(&mut self, expr: &'ast syn::ExprField) {
+        if let syn::Member::Named(name) = &expr.member {
+            self.field_accesses.push(FieldAccessInfo {
+                name: name.to_string(),
+            });
+        }
+        syn::visit::visit_expr_field(self, expr);
+    }
+
     fn visit_expr_method_call(&mut self, expr: &'ast syn::ExprMethodCall) {
         if let Some(path) = call_path(&expr.receiver) {
             self.method_receiver_paths.push(path);
         }
         syn::visit::visit_expr_method_call(self, expr);
+    }
+
+    fn visit_lit_str(&mut self, lit: &'ast syn::LitStr) {
+        self.string_literals.push(lit.value());
+        syn::visit::visit_lit_str(self, lit);
     }
 
     fn visit_local(&mut self, local: &'ast syn::Local) {

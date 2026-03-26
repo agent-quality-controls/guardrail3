@@ -1,3 +1,5 @@
+use guardrail3_app_rs_family_test as _;
+
 pub mod rs_test_01_inline_test_bodies;
 pub mod rs_test_02_owned_sidecar_shape;
 pub mod rs_test_03_runtime_assertions_split;
