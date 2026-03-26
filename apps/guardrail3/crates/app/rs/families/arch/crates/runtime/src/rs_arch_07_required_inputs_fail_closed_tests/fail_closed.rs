@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_arch_assertions::rs_arch_07_required_inputs_fail_closed as assertions;
 #[allow(unused_imports)]
-use test_support::{APP_WORKSPACE_CARGO, PACKAGE_CARGO, entry, tree, tree_at};
+use super::{cargo_fixture, CargoFixture, entry, tree, tree_at};
 
 #[test]
 fn malformed_guardrail_config_emits_required_input_failure() {

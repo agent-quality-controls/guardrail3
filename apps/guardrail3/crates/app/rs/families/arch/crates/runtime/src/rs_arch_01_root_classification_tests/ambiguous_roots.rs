@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_arch_assertions::rs_arch_01_root_classification as assertions;
 #[allow(unused_imports)]
-use test_support::{APP_WORKSPACE_CARGO, PACKAGE_CARGO, entry, tree, tree_at};
+use super::{cargo_fixture, CargoFixture, entry, tree, tree_at};
 
 #[test]
 fn nested_package_root_inside_app_zone_is_classified_as_ambiguous() {
@@ -13,8 +13,8 @@ fn nested_package_root_inside_app_zone_is_classified_as_ambiguous() {
             ("apps/backend/packages/shared", entry(&[], &["Cargo.toml"])),
         ],
         &[
-            ("apps/backend/Cargo.toml", APP_WORKSPACE_CARGO),
-            ("apps/backend/packages/shared/Cargo.toml", PACKAGE_CARGO),
+            ("apps/backend/Cargo.toml", cargo_fixture(CargoFixture::AppWorkspace)),
+            ("apps/backend/packages/shared/Cargo.toml", cargo_fixture(CargoFixture::Package)),
         ],
     ));
 

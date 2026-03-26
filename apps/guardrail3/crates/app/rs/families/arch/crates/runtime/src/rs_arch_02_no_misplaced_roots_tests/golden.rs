@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_arch_assertions::rs_arch_02_no_misplaced_roots as assertions;
 #[allow(unused_imports)]
-use test_support::{APP_WORKSPACE_CARGO, PACKAGE_CARGO, entry, tree, tree_at};
+use super::{cargo_fixture, CargoFixture, entry, tree, tree_at};
 
 #[test]
 fn golden_layout_has_no_misplaced_root_errors() {
@@ -13,8 +13,8 @@ fn golden_layout_has_no_misplaced_root_errors() {
             ("packages/shared", entry(&[], &["Cargo.toml"])),
         ],
         &[
-            ("apps/backend/Cargo.toml", APP_WORKSPACE_CARGO),
-            ("packages/shared/Cargo.toml", PACKAGE_CARGO),
+            ("apps/backend/Cargo.toml", cargo_fixture(CargoFixture::AppWorkspace)),
+            ("packages/shared/Cargo.toml", cargo_fixture(CargoFixture::Package)),
         ],
     ));
 

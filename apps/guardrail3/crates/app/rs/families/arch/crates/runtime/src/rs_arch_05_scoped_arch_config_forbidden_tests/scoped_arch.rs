@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_arch_assertions::rs_arch_05_scoped_arch_config_forbidden as assertions;
 #[allow(unused_imports)]
-use test_support::{APP_WORKSPACE_CARGO, PACKAGE_CARGO, entry, tree, tree_at};
+use super::{cargo_fixture, CargoFixture, entry, tree, tree_at};
 
 #[test]
 fn app_scoped_arch_config_is_forbidden() {

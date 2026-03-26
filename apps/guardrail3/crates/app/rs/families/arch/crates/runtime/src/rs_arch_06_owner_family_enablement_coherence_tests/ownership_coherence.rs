@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_arch_assertions::rs_arch_06_owner_family_enablement_coherence as assertions;
 #[allow(unused_imports)]
-use test_support::{APP_WORKSPACE_CARGO, PACKAGE_CARGO, entry, tree, tree_at};
+use super::{cargo_fixture, CargoFixture, entry, tree, tree_at};
 
 #[test]
 fn app_roots_error_when_effective_hexarch_enablement_is_false() {
@@ -13,7 +13,7 @@ fn app_roots_error_when_effective_hexarch_enablement_is_false() {
         ],
         &[
             ("guardrail3.toml", config),
-            ("apps/backend/Cargo.toml", APP_WORKSPACE_CARGO),
+            ("apps/backend/Cargo.toml", cargo_fixture(CargoFixture::AppWorkspace)),
         ],
     ));
 
