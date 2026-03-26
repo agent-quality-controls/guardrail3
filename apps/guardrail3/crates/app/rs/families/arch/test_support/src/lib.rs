@@ -3,9 +3,6 @@ use std::path::PathBuf;
 
 use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
 
-pub const APP_WORKSPACE_CARGO: &str = "[workspace]\nmembers = []\nresolver = \"2\"\n";
-pub const PACKAGE_CARGO: &str = "[package]\nname = \"shared\"\nedition = \"2024\"\n";
-
 pub fn entry(dirs: &[&str], files: &[&str]) -> DirEntry {
     DirEntry {
         dirs: dirs.iter().map(|value| (*value).to_owned()).collect(),

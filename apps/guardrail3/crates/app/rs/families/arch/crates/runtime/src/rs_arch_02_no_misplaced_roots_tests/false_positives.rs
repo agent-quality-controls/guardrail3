@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_arch_assertions::rs_arch_02_no_misplaced_roots as assertions;
 #[allow(unused_imports)]
-use test_support::{APP_WORKSPACE_CARGO, PACKAGE_CARGO, entry, tree, tree_at};
+use super::{cargo_fixture, CargoFixture, entry, tree, tree_at};
 
 #[test]
 fn app_and_package_roots_do_not_trigger_misplaced_root_reporting() {
@@ -15,8 +15,8 @@ fn app_and_package_roots_do_not_trigger_misplaced_root_reporting() {
         ],
         &[
             ("guardrail3.toml", config),
-            ("apps/backend/Cargo.toml", APP_WORKSPACE_CARGO),
-            ("packages/shared/Cargo.toml", PACKAGE_CARGO),
+            ("apps/backend/Cargo.toml", cargo_fixture(CargoFixture::AppWorkspace)),
+            ("packages/shared/Cargo.toml", cargo_fixture(CargoFixture::Package)),
         ],
     ));
 
@@ -111,7 +111,7 @@ fn app_scoped_validation_root_still_classifies_nested_crates_as_app_owned() {
         ],
         &[
             ("guardrail3.toml", config),
-            ("Cargo.toml", APP_WORKSPACE_CARGO),
+            ("Cargo.toml", cargo_fixture(CargoFixture::AppWorkspace)),
             ("crates/domain/Cargo.toml", "[package]\nname = \"domain\"\n"),
         ],
     ));
