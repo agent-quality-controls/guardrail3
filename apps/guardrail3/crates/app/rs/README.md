@@ -184,7 +184,6 @@ pub struct RsArchRoute {
     pub roots: Vec<RsArchRootView>,
     pub overlaps: Vec<RsArchOverlapView>,
     pub input_failures: Vec<RsRootInputFailureView>,
-    pub reporting_enabled: bool,
 }
 
 pub struct RsHexarchRoute {
