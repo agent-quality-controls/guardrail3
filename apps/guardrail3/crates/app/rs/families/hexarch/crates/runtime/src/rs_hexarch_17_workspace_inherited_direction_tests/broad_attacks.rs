@@ -1,9 +1,6 @@
 use std::collections::BTreeSet;
 
-use super::super::super::collect_dependency_facts_from_tree_for_tests as dependency_facts;
-use super::super::super::dependency_facts::EdgeKind;
-use super::super::super::inputs::DependencyEdgeHexarchInput;
-use super::super::check;
+use super::super::results_for_dependency_edges_for_test as results_for_dependency_edges;
 use test_support::{dir_entry, project_tree};
 
 #[test]
@@ -59,15 +56,7 @@ fn forbidden_workspace_inherited_edges_error_and_allowed_ones_do_not() {
         ],
     );
 
-    let facts = dependency_facts(&tree);
-    let mut results = Vec::new();
-    for edge in facts
-        .edges
-        .iter()
-        .filter(|edge| edge.kind == EdgeKind::Dependency)
-    {
-        check(&DependencyEdgeHexarchInput::new(edge), &mut results);
-    }
+    let results = results_for_dependency_edges(&tree);
 
     let actual_files = results
         .iter()

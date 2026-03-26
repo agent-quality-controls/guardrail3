@@ -2,6 +2,11 @@ use std::collections::BTreeSet;
 
 use guardrail3_domain_report::{CheckResult, Severity};
 
+#[cfg(test)]
+use guardrail3_domain_project_tree::ProjectTree;
+
+#[cfg(test)]
+use super::dependency_facts::EdgeKind;
 use super::dependency_facts::Layer;
 use super::inputs::MemberDependencyHexarchInput;
 
@@ -104,6 +109,61 @@ pub fn check(input: &MemberDependencyHexarchInput<'_>, results: &mut Vec<CheckRe
             });
         }
     }
+}
+
+#[cfg(test)]
+#[allow(dead_code)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum DomainPurityEdgeKindForTest {
+    Dependency,
+    DevDependency,
+    BuildDependency,
+    TargetDependency,
+    TargetBuildDependency,
+}
+
+#[cfg(test)]
+pub(crate) fn run_domain_purity_case(
+    tree: &ProjectTree,
+    member_rel_dir: &str,
+    edge_kind: DomainPurityEdgeKindForTest,
+) -> Vec<CheckResult> {
+    let facts = super::collect_dependency_facts_from_tree_for_tests(tree);
+    let member = facts
+        .members
+        .iter()
+        .find(|member| member.rel_dir == member_rel_dir)
+        .unwrap_or_else(|| panic!("missing domain member `{member_rel_dir}`"));
+    let edges = facts
+        .edges
+        .iter()
+        .filter(|edge| {
+            edge.source_rel_dir == member.rel_dir
+                && matches!(
+                    (edge_kind, edge.kind),
+                    (DomainPurityEdgeKindForTest::Dependency, EdgeKind::Dependency)
+                        | (DomainPurityEdgeKindForTest::DevDependency, EdgeKind::DevDependency)
+                        | (
+                            DomainPurityEdgeKindForTest::BuildDependency,
+                            EdgeKind::BuildDependency
+                        )
+                        | (
+                            DomainPurityEdgeKindForTest::TargetDependency,
+                            EdgeKind::TargetDependency
+                        )
+                        | (
+                            DomainPurityEdgeKindForTest::TargetBuildDependency,
+                            EdgeKind::TargetBuildDependency
+                        )
+                )
+        })
+        .collect();
+    let mut results = Vec::new();
+    check(
+        &MemberDependencyHexarchInput::new(member, edges),
+        &mut results,
+    );
+    results
 }
 
 #[cfg(test)]

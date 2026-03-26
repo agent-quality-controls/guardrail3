@@ -2,6 +2,8 @@ use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::dependency_facts::Layer;
 use super::inputs::SourceCrateHexarchInput;
+#[cfg(test)]
+use super::source_facts::SourceCrateFacts;
 
 const ID: &str = "RS-HEXARCH-23";
 
@@ -48,6 +50,29 @@ pub fn check(input: &SourceCrateHexarchInput<'_>, results: &mut Vec<CheckResult>
         line: None,
         inventory: false,
     });
+}
+
+#[cfg(test)]
+pub(crate) fn run_source_case(
+    crate_name: &str,
+    rel_dir: &str,
+    pub_trait_count: usize,
+    impl_count: usize,
+    source_error_rel_path: Option<&str>,
+    source_error_message: Option<&str>,
+) -> Vec<CheckResult> {
+    let source = SourceCrateFacts {
+        crate_name: crate_name.to_owned(),
+        rel_dir: rel_dir.to_owned(),
+        layer: Some(Layer::Adapters),
+        pub_trait_count,
+        impl_count,
+        source_error_rel_path: source_error_rel_path.map(|value| value.to_owned()),
+        source_error_message: source_error_message.map(|value| value.to_owned()),
+    };
+    let mut results = Vec::new();
+    check(&SourceCrateHexarchInput::new(&source), &mut results);
+    results
 }
 
 #[cfg(test)]

@@ -34,5 +34,16 @@ pub fn check(input: &DependencyEdgeHexarchInput<'_>, results: &mut Vec<CheckResu
 }
 
 #[cfg(test)]
+#[allow(dead_code)]
+pub fn check_tree_for_tests(tree: &guardrail3_domain_project_tree::ProjectTree) -> Vec<CheckResult> {
+    let dependency_facts = super::collect_dependency_facts_from_tree_for_tests(tree);
+    let mut results = Vec::new();
+    for edge in &dependency_facts.edges {
+        check(&DependencyEdgeHexarchInput::new(edge), &mut results);
+    }
+    results
+}
+
+#[cfg(test)]
 #[path = "rs_hexarch_24_cross_app_boundary_tests/mod.rs"]
 mod rs_hexarch_24_cross_app_boundary_tests;

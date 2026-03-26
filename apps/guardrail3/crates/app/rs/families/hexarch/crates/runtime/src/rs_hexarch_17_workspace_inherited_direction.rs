@@ -1,5 +1,8 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
+#[cfg(test)]
+use guardrail3_domain_project_tree::ProjectTree;
+
 use super::inputs::DependencyEdgeHexarchInput;
 
 const ID: &str = "RS-HEXARCH-17";
@@ -38,6 +41,59 @@ pub fn check(input: &DependencyEdgeHexarchInput<'_>, results: &mut Vec<CheckResu
         line: None,
         inventory: false,
     });
+}
+
+#[cfg(test)]
+pub fn results_for_dependency_edges_for_test(tree: &ProjectTree) -> Vec<CheckResult> {
+    let facts = crate::collect_dependency_facts_from_tree_for_tests(tree);
+    let mut results = Vec::new();
+    for edge in facts
+        .edges
+        .iter()
+        .filter(|edge| edge.kind == crate::dependency_facts::EdgeKind::Dependency)
+    {
+        check(&DependencyEdgeHexarchInput::new(edge), &mut results);
+    }
+    results
+}
+
+#[cfg(test)]
+#[derive(Debug)]
+pub struct WorkspaceInheritedDirectionAudit {
+    pub rule17: Vec<CheckResult>,
+    pub rule18: Vec<CheckResult>,
+    pub rule24: Vec<CheckResult>,
+}
+
+#[cfg(test)]
+pub fn audit_edge_for_test(tree: &ProjectTree, source_rel_dir: &str) -> WorkspaceInheritedDirectionAudit {
+    let facts = crate::collect_dependency_facts_from_tree_for_tests(tree);
+    let edge = facts
+        .edges
+        .iter()
+        .find(|edge| edge.source_rel_dir == source_rel_dir)
+        .expect("inherited edge");
+
+    let mut rule17 = Vec::new();
+    check(&DependencyEdgeHexarchInput::new(edge), &mut rule17);
+
+    let mut rule18 = Vec::new();
+    crate::rs_hexarch_18_renamed_dependency_direction::check(
+        &DependencyEdgeHexarchInput::new(edge),
+        &mut rule18,
+    );
+
+    let mut rule24 = Vec::new();
+    crate::rs_hexarch_24_cross_app_boundary::check(
+        &DependencyEdgeHexarchInput::new(edge),
+        &mut rule24,
+    );
+
+    WorkspaceInheritedDirectionAudit {
+        rule17,
+        rule18,
+        rule24,
+    }
 }
 
 #[cfg(test)]
