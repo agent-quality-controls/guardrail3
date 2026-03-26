@@ -631,61 +631,90 @@ fn collect_components(
     };
 
     let mut components = Vec::new();
+    let direct_runtime_rel_dir = ProjectTree::join_rel(&crates_rel_dir, "runtime");
+    let direct_runtime_cargo_rel_path = ProjectTree::join_rel(&direct_runtime_rel_dir, "Cargo.toml");
+    if tree.file_exists(&direct_runtime_cargo_rel_path) {
+        components.push(build_component_facts(
+            tree,
+            root_rel_dir,
+            root_rel_dir,
+            &direct_runtime_rel_dir,
+            input_failures,
+        ));
+    }
+
     for component_name in &crates_dir.dirs {
-        let component_rel_dir = ProjectTree::join_rel(&crates_rel_dir, component_name);
-        let runtime_rel_dir = ProjectTree::join_rel(&component_rel_dir, "runtime");
-        let runtime_cargo_rel_path = ProjectTree::join_rel(&runtime_rel_dir, "Cargo.toml");
-        if !tree.file_exists(&runtime_cargo_rel_path) {
+        if matches!(component_name.as_str(), "runtime" | "assertions") {
             continue;
         }
-
-        let runtime_parsed =
-            parse_manifest(tree, root_rel_dir, &runtime_cargo_rel_path, input_failures);
-        let assertions_rel_dir = ProjectTree::join_rel(&component_rel_dir, "assertions");
-        let assertions_cargo_rel_path = ProjectTree::join_rel(&assertions_rel_dir, "Cargo.toml");
-        let assertions_exists = tree.file_exists(&assertions_cargo_rel_path);
-        let assertions_parsed = if assertions_exists {
-            parse_manifest(
-                tree,
-                root_rel_dir,
-                &assertions_cargo_rel_path,
-                input_failures,
-            )
-        } else {
-            None
-        };
-
-        let sidecars = collect_sidecars(tree, &runtime_rel_dir, &assertions_rel_dir);
-        let external_harnesses = collect_external_harnesses(tree, &runtime_rel_dir);
-
-        components.push(TestComponentFacts {
-            rel_dir: component_rel_dir,
-            runtime_rel_dir,
-            runtime_cargo_rel_path,
-            runtime_package_name: runtime_parsed.as_ref().and_then(manifest_package_name),
-            runtime_normal_dependencies: runtime_parsed
-                .as_ref()
-                .map(manifest_normal_dependencies)
-                .unwrap_or_default(),
-            runtime_dev_dependencies: runtime_parsed
-                .as_ref()
-                .map(manifest_dev_dependencies)
-                .unwrap_or_default(),
-            assertions_rel_dir,
-            assertions_cargo_rel_path,
-            assertions_exists,
-            assertions_package_name: assertions_parsed.as_ref().and_then(manifest_package_name),
-            assertions_dependencies: assertions_parsed
-                .as_ref()
-                .map(manifest_normal_dependencies)
-                .unwrap_or_default(),
-            sidecars,
-            external_harnesses,
-        });
+        let component_rel_dir = ProjectTree::join_rel(&crates_rel_dir, component_name);
+        let nested_runtime_rel_dir = ProjectTree::join_rel(&component_rel_dir, "runtime");
+        let nested_runtime_cargo_rel_path =
+            ProjectTree::join_rel(&nested_runtime_rel_dir, "Cargo.toml");
+        if !tree.file_exists(&nested_runtime_cargo_rel_path) {
+            continue;
+        }
+        components.push(build_component_facts(
+            tree,
+            root_rel_dir,
+            &component_rel_dir,
+            &nested_runtime_rel_dir,
+            input_failures,
+        ));
     }
 
     components.sort_by(|left, right| left.rel_dir.cmp(&right.rel_dir));
     components
+}
+
+fn build_component_facts(
+    tree: &ProjectTree,
+    root_rel_dir: &str,
+    component_rel_dir: &str,
+    runtime_rel_dir: &str,
+    input_failures: &mut Vec<InputFailureFacts>,
+) -> TestComponentFacts {
+    let runtime_cargo_rel_path = ProjectTree::join_rel(runtime_rel_dir, "Cargo.toml");
+    let runtime_parsed = parse_manifest(tree, root_rel_dir, &runtime_cargo_rel_path, input_failures);
+    let component_parent = parent_dir(runtime_rel_dir).to_owned();
+    let assertions_rel_dir = ProjectTree::join_rel(&component_parent, "assertions");
+    let assertions_cargo_rel_path = ProjectTree::join_rel(&assertions_rel_dir, "Cargo.toml");
+    let assertions_exists = tree.file_exists(&assertions_cargo_rel_path);
+    let assertions_parsed = if assertions_exists {
+        parse_manifest(
+            tree,
+            root_rel_dir,
+            &assertions_cargo_rel_path,
+            input_failures,
+        )
+    } else {
+        None
+    };
+
+    TestComponentFacts {
+        rel_dir: component_rel_dir.to_owned(),
+        runtime_rel_dir: runtime_rel_dir.to_owned(),
+        runtime_cargo_rel_path,
+        runtime_package_name: runtime_parsed.as_ref().and_then(manifest_package_name),
+        runtime_normal_dependencies: runtime_parsed
+            .as_ref()
+            .map(manifest_normal_dependencies)
+            .unwrap_or_default(),
+        runtime_dev_dependencies: runtime_parsed
+            .as_ref()
+            .map(manifest_dev_dependencies)
+            .unwrap_or_default(),
+        assertions_rel_dir: assertions_rel_dir.clone(),
+        assertions_cargo_rel_path,
+        assertions_exists,
+        assertions_package_name: assertions_parsed.as_ref().and_then(manifest_package_name),
+        assertions_dependencies: assertions_parsed
+            .as_ref()
+            .map(manifest_normal_dependencies)
+            .unwrap_or_default(),
+        sidecars: collect_sidecars(tree, runtime_rel_dir, &assertions_rel_dir),
+        external_harnesses: collect_external_harnesses(tree, runtime_rel_dir),
+    }
 }
 
 fn parse_manifest(

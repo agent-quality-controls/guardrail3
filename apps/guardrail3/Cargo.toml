@@ -16,6 +16,7 @@ members = [
     "crates/app/commands",
     "crates/app/core",
     "crates/app/rs",
+    "crates/app/rs/placement",
     "crates/app/rs/validate",
     "crates/app/rs/ast",
     "crates/app/rs/generate",
@@ -33,8 +34,8 @@ members = [
     "crates/app/rs/families/hooks-rs",
     "crates/app/rs/families/hooks-shared",
     "crates/app/rs/families/release",
-    "crates/app/rs/families/test/crates/family/runtime",
-    "crates/app/rs/families/test/crates/family/assertions",
+    "crates/app/rs/families/test/crates/runtime",
+    "crates/app/rs/families/test/crates/assertions",
     "crates/app/rs/families/test/test_support",
     "crates/app/rs/families/toolchain",
 ]
