@@ -103,3 +103,31 @@ impl OrphanRepo {
         &[],
     );
 }
+
+#[test]
+fn lib_path_override_is_used_as_ports_entrypoint() {
+    let tmp = copy_fixture();
+    std::fs::write(
+        tmp.path()
+            .join("apps/backend/crates/ports/outbound/repo/Cargo.toml"),
+        "[package]\nname = \"backend-ports-outbound-repo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[lib]\npath = \"repo.rs\"\n",
+    )
+    .expect("rewrite ports cargo");
+    std::fs::remove_file(
+        tmp.path()
+            .join("apps/backend/crates/ports/outbound/repo/src/lib.rs"),
+    )
+    .expect("remove lib.rs");
+    write_file(
+        tmp.path(),
+        "apps/backend/crates/ports/outbound/repo/repo.rs",
+        r#"
+pub trait TaskRepo {
+    fn list(&self);
+}
+"#,
+    );
+
+    let results = super::run_family(tmp.path());
+    assertions::assert_no_warning(&results, "");
+}

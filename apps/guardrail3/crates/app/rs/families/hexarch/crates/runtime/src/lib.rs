@@ -26,6 +26,7 @@ mod rs_hexarch_22_ports_trait_dominance;
 mod rs_hexarch_23_adapter_pub_trait;
 mod rs_hexarch_24_cross_app_boundary;
 mod rs_hexarch_25_target_dependency_direction;
+mod rs_hexarch_26_member_manifest_parse_error;
 mod source_facts;
 
 use std::collections::BTreeSet;
@@ -48,7 +49,7 @@ use self::facts::collect;
 use self::inputs::{
     AppHexarchInput, ContainerHexarchInput, CycleHexarchInput, DependencyEdgeHexarchInput,
     DirectionalContainerHexarchInput, HexRootInput, LeafHexarchInput, MemberConfigHexarchInput,
-    MemberDependencyHexarchInput, PatchHexarchInput, RootWorkspaceHexarchInput,
+    MemberDependencyHexarchInput, MemberManifestFailureHexarchInput, PatchHexarchInput, RootWorkspaceHexarchInput,
     SourceCrateHexarchInput, WorkspaceCoverageHexarchInput,
 };
 
@@ -156,6 +157,11 @@ pub fn check(tree: &ProjectTree, route: &RsHexarchRoute) -> Vec<CheckResult> {
         rs_hexarch_20_dev_dependency_direction::check(&input, &mut results);
         rs_hexarch_24_cross_app_boundary::check(&input, &mut results);
         rs_hexarch_25_target_dependency_direction::check(&input, &mut results);
+    }
+
+    for failure in &dependency_facts.member_manifest_failures {
+        let input = MemberManifestFailureHexarchInput::new(failure);
+        rs_hexarch_26_member_manifest_parse_error::check(&input, &mut results);
     }
 
     for cycle in &dependency_facts.cycles {

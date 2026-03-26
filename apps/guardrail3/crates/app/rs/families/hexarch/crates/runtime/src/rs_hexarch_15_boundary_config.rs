@@ -10,9 +10,10 @@ pub fn check(input: &MemberConfigHexarchInput<'_>, results: &mut Vec<CheckResult
         results.push(CheckResult {
             id: ID.to_owned(),
             severity: Severity::Warn,
-            title: "guardrail3.toml parse error blocks hexarch boundary checks".to_owned(),
+            title: "guardrail3.toml parse or validation error blocks hexarch boundary checks"
+                .to_owned(),
             message: format!(
-                "Failed to parse `guardrail3.toml`, so guardrail3 cannot verify app boundary configuration: {parse_error}"
+                "Failed to parse or validate `guardrail3.toml`, so guardrail3 cannot fully verify app boundary configuration: {parse_error}"
             ),
             file: Some("guardrail3.toml".to_owned()),
             line: None,

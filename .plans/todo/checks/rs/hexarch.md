@@ -1,4 +1,4 @@
-# RS-HEXARCH — Hex arch structure + dependency direction checker (25 rules)
+# RS-HEXARCH — Hex arch structure + dependency direction checker (26 rules)
 
 **Input:** Directory structure + Cargo.toml files (workspace + per-crate) + *.rs files (for ports/adapter content checks)
 **Parser:** TOML + filesystem + syn AST
@@ -49,10 +49,11 @@ Current migrated structural coverage:
 | New ID | Severity | What | Status |
 |--------|----------|------|--------|
 | RS-HEXARCH-21 | Error | Domain crate purity: domain-layer crates may only depend on workspace path deps (domain/ports), a built-in pure-crate allowlist (serde, thiserror, chrono, uuid, etc.), and user-configured `allowed_deps`. ANY other dependency is Error. Must NOT skip `optional = true` entries. | Implemented |
-| RS-HEXARCH-22 | Warn | Ports trait-dominance: crates in `crates/ports/` should be trait-dominant. If more `impl Struct {}` blocks than `pub trait` definitions, Warn. DTOs and error types are OK. | Implemented |
+| RS-HEXARCH-22 | Warn | Ports trait-dominance: crates in `crates/ports/` should be trait-dominant. Count `pub trait` definitions across the reachable module tree. Count impl blocks only inside module subtrees that actually define traits; traitless helper/DTO/error modules do not make the crate impl-heavy by themselves. Warn when the counted impl total exceeds the counted `pub trait` total. | Implemented |
 | RS-HEXARCH-23 | Error | Adapter defines `pub trait`: crates in `crates/adapters/` should IMPLEMENT traits from ports, not define their own. `pub trait` in adapter = Error. `pub(crate) trait` is fine. | Implemented |
 | RS-HEXARCH-24 | Error | Cross-app boundary violation: no workspace path dep may cross app boundaries. Source in `apps/X/`, target in `apps/Y/` (X≠Y) = Error. Cross-app goes through `packages/` or APIs. | Implemented |
 | RS-HEXARCH-25 | Error | `target.'cfg(...)'.dependencies` direction check: platform-conditional deps invisible to current checker. Iterate all TOML keys matching `target.*`, check dep sub-tables with same logic as RS-HEXARCH-13. | Implemented |
+| RS-HEXARCH-26 | Error | Member manifest parse error blocks dependency analysis: if a workspace member `Cargo.toml` cannot be parsed, fail closed instead of silently skipping dependency-direction checks for that member. | Implemented |
 
 ## Relocated rules (no longer in hexarch)
 

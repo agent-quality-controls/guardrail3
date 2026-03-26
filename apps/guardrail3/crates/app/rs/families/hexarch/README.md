@@ -15,6 +15,7 @@ This family enforces app-local Rust structure inside routed app roots. It does n
 - workspace member coverage inside one routed app
 - dependency-direction and cross-app dependency rules
 - source-level ports/adapter surface rules
+- fail-closed dependency blocking when member manifests are malformed
 
 It does not own:
 
@@ -75,8 +76,8 @@ apps/guardrail3/crates/app/rs/families/hexarch/
         rs_hexarch_01_*_tests/
           mod.rs
         ...
-        rs_hexarch_25_*.rs
-        rs_hexarch_25_*_tests/
+        rs_hexarch_26_*.rs
+        rs_hexarch_26_*_tests/
           mod.rs
     assertions/                # rule-owned reusable semantic assertions
       Cargo.toml
@@ -85,7 +86,7 @@ apps/guardrail3/crates/app/rs/families/hexarch/
         dependency_facts.rs
         rs_hexarch_01_*.rs
         ...
-        rs_hexarch_25_*.rs
+        rs_hexarch_26_*.rs
     assertions_common/         # current shared assertions-only result matchers
       Cargo.toml
       src/
@@ -185,3 +186,4 @@ The next work on `hexarch` is no longer basic self-hosting. It is architecture t
 - verify the family does not still own scope it should receive externally
 - verify `assertions_common` stays a legitimate assertions-only helper crate
 - verify runtime test-only helpers do not backdoor route/placement behavior into assertions
+- keep the documented rule inventory aligned with the live runtime rule set

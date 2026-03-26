@@ -1,5 +1,6 @@
 use super::dependency_facts::{
-    BoundaryConfigFacts, CycleFacts, DependencyEdgeFacts, MemberDependencyFacts, PatchEntryFacts,
+    BoundaryConfigFacts, CycleFacts, DependencyEdgeFacts, MemberDependencyFacts,
+    MemberManifestFailureFacts, PatchEntryFacts,
 };
 use super::facts::{
     ContainerFacts, DirectionalContainerFacts, HexAppFacts, HexRootFacts, LeafFacts,
@@ -263,6 +264,16 @@ pub struct CycleHexarchInput<'a> {
 impl<'a> CycleHexarchInput<'a> {
     pub fn new(cycle: &'a CycleFacts) -> Self {
         Self { cycle }
+    }
+}
+
+pub struct MemberManifestFailureHexarchInput<'a> {
+    pub failure: &'a MemberManifestFailureFacts,
+}
+
+impl<'a> MemberManifestFailureHexarchInput<'a> {
+    pub fn new(failure: &'a MemberManifestFailureFacts) -> Self {
+        Self { failure }
     }
 }
 

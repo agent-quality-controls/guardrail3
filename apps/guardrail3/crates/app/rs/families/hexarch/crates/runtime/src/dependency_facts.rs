@@ -92,10 +92,21 @@ pub struct MemberDependencyFacts {
     pub name: String,
     pub rel_dir: String,
     pub cargo_rel_path: String,
+    pub cargo_parse_error: Option<String>,
     pub workspace_root_rel_dir: Option<String>,
     pub app_root_rel_dir: Option<String>,
     pub layer: Option<Layer>,
     pub allowed_deps: BTreeSet<String>,
+}
+
+#[derive(Debug, Clone)]
+pub struct MemberManifestFailureFacts {
+    pub name: String,
+    pub rel_dir: String,
+    pub cargo_rel_path: String,
+    pub app_root_rel_dir: Option<String>,
+    pub layer: Option<Layer>,
+    pub parse_error: String,
 }
 
 #[derive(Debug, Clone)]
@@ -135,6 +146,7 @@ pub struct CycleFacts {
 pub struct DependencyFamilyFacts {
     pub workspaces: Vec<WorkspaceFacts>,
     pub members: Vec<MemberDependencyFacts>,
+    pub member_manifest_failures: Vec<MemberManifestFailureFacts>,
     pub edges: Vec<DependencyEdgeFacts>,
     pub boundary_configs: Vec<BoundaryConfigFacts>,
     pub cycles: Vec<CycleFacts>,
@@ -149,7 +161,7 @@ pub fn collect(tree: &ProjectTree, route: &RsHexarchRoute) -> DependencyFamilyFa
         route.repo_root_cargo_rel_path.is_some(),
     );
     let workspace_for_member = best_workspace_for_member(&workspaces);
-    let members = collect_members(
+    let (members, member_manifest_failures) = collect_members(
         tree,
         &workspaces,
         &workspace_for_member,
@@ -162,11 +174,12 @@ pub fn collect(tree: &ProjectTree, route: &RsHexarchRoute) -> DependencyFamilyFa
         .collect::<BTreeMap<_, _>>();
     let edges = collect_edges(tree, &workspaces, &members, &member_by_dir);
     let cycles = collect_same_layer_cycles(&edges, &member_by_dir);
-    let boundary_configs = collect_boundary_configs(&members, &guardrail_config);
+    let boundary_configs = collect_boundary_configs(&owned_app_roots, &guardrail_config);
 
     DependencyFamilyFacts {
         workspaces,
         members,
+        member_manifest_failures,
         edges,
         boundary_configs,
         cycles,
@@ -194,35 +207,30 @@ fn owned_app_roots(route: &RsHexarchRoute) -> BTreeSet<String> {
 }
 
 fn collect_boundary_configs(
-    members: &[MemberDependencyFacts],
+    owned_app_roots: &BTreeSet<String>,
     guardrail: &GuardrailConfigSnapshot,
 ) -> Vec<BoundaryConfigFacts> {
+    let mut boundaries = BTreeMap::<String, BoundaryConfigFacts>::new();
     if let Some(parse_error) = &guardrail.parse_error {
-        return vec![BoundaryConfigFacts {
+        let _ = boundaries.insert("guardrail3.toml".to_owned(), BoundaryConfigFacts {
             rel_dir: "guardrail3.toml".to_owned(),
             has_config_entry: false,
             is_app_boundary: false,
             parse_error: Some(parse_error.clone()),
-        }];
+        });
+        if !guardrail.raw_parse_succeeded {
+            return boundaries.into_values().collect();
+        }
     }
 
-    let mut boundaries = BTreeMap::<String, BoundaryConfigFacts>::new();
-    for member in members {
-        if let Some(app_root) = &member.app_root_rel_dir {
-            let _ = boundaries.entry(app_root.clone()).or_insert_with(|| {
-                let app_name = app_root.rsplit('/').next().unwrap_or(app_root);
-                let has_config_entry = guardrail
-                    .parsed
-                    .as_ref()
-                    .is_some_and(|guardrail| guardrail.app_configs.contains_key(app_name));
-                BoundaryConfigFacts {
-                    rel_dir: app_root.clone(),
-                    has_config_entry,
-                    is_app_boundary: true,
-                    parse_error: None,
-                }
-            });
-        }
+    for app_root in owned_app_roots {
+        let app_name = app_root.rsplit('/').next().unwrap_or(app_root);
+        let _ = boundaries.insert(app_root.clone(), BoundaryConfigFacts {
+            rel_dir: app_root.clone(),
+            has_config_entry: guardrail.app_config_names.contains(app_name),
+            is_app_boundary: true,
+            parse_error: None,
+        });
     }
     boundaries.into_values().collect()
 }
@@ -238,6 +246,8 @@ struct ParsedGuardrailConfig {
 struct GuardrailConfigSnapshot {
     parsed: Option<ParsedGuardrailConfig>,
     parse_error: Option<String>,
+    app_config_names: BTreeSet<String>,
+    raw_parse_succeeded: bool,
 }
 
 fn parse_guardrail_config(tree: &ProjectTree, rel_path: Option<&str>) -> GuardrailConfigSnapshot {
@@ -247,6 +257,16 @@ fn parse_guardrail_config(tree: &ProjectTree, rel_path: Option<&str>) -> Guardra
     let Some(content) = tree.file_content(rel_path) else {
         return GuardrailConfigSnapshot::default();
     };
+    let raw_value = toml::from_str::<toml::Value>(content).ok();
+    let raw_app_config_names = raw_value
+        .as_ref()
+        .and_then(|value| {
+            value.get("rust")
+                .and_then(|rust| rust.get("apps"))
+                .and_then(toml::Value::as_table)
+                .map(|apps| apps.keys().cloned().collect::<BTreeSet<_>>())
+        })
+        .unwrap_or_default();
     match toml::from_str::<GuardrailConfig>(content) {
         Ok(config) => GuardrailConfigSnapshot {
             parsed: Some(ParsedGuardrailConfig {
@@ -259,10 +279,14 @@ fn parse_guardrail_config(tree: &ProjectTree, rel_path: Option<&str>) -> Guardra
                 packages_config: config.rust.and_then(|rust| rust.packages),
             }),
             parse_error: None,
+            app_config_names: raw_app_config_names,
+            raw_parse_succeeded: true,
         },
         Err(parse_error) => GuardrailConfigSnapshot {
             parsed: None,
             parse_error: Some(parse_error.to_string()),
+            app_config_names: raw_app_config_names,
+            raw_parse_succeeded: raw_value.is_some(),
         },
     }
 }
@@ -282,7 +306,7 @@ fn discover_workspaces(
         if !seen.insert(dir.clone()) {
             continue;
         }
-        if !dir.is_empty() && !dir_is_within_owned_app(&dir, owned_app_roots) {
+        if !dir.is_empty() && !dir_is_within_owned_hex_scope(&dir, owned_app_roots) {
             continue;
         }
         let cargo_rel_path = if dir.is_empty() {
@@ -428,7 +452,7 @@ fn collect_members(
     workspace_for_member: &BTreeMap<String, String>,
     owned_app_roots: &BTreeSet<String>,
     guardrail: Option<&ParsedGuardrailConfig>,
-) -> Vec<MemberDependencyFacts> {
+) -> (Vec<MemberDependencyFacts>, Vec<MemberManifestFailureFacts>) {
     let mut member_dirs = BTreeSet::new();
     for workspace in workspaces {
         member_dirs.extend(
@@ -441,47 +465,58 @@ fn collect_members(
     }
 
     let mut members = Vec::new();
+    let mut failures = Vec::new();
     for rel_dir in member_dirs {
         let cargo_rel_path = format!("{rel_dir}/Cargo.toml");
         let cargo_content = tree.file_content(&cargo_rel_path);
-        let name = match cargo_content {
+        let fallback_name = rel_dir.rsplit('/').next().unwrap_or(&rel_dir).to_owned();
+        let (name, cargo_parse_error) = match cargo_content {
             Some(content) => match toml::from_str::<toml::Value>(content) {
-                Ok(parsed) => {
-                    (
-                        parsed
-                            .get("package")
-                            .and_then(|value| value.get("name"))
-                            .and_then(toml::Value::as_str)
-                            .map(str::to_owned)
-                            .unwrap_or_else(|| {
-                                rel_dir.rsplit('/').next().unwrap_or(&rel_dir).to_owned()
-                            }),
-                        None::<String>,
-                    )
-                        .0
-                }
-                Err(_) => rel_dir.rsplit('/').next().unwrap_or(&rel_dir).to_owned(),
+                Ok(parsed) => (
+                    parsed
+                        .get("package")
+                        .and_then(|value| value.get("name"))
+                        .and_then(toml::Value::as_str)
+                        .map(str::to_owned)
+                        .unwrap_or_else(|| fallback_name.clone()),
+                    None,
+                ),
+                Err(parse_error) => (fallback_name.clone(), Some(parse_error.to_string())),
             },
-            None => rel_dir.rsplit('/').next().unwrap_or(&rel_dir).to_owned(),
+            None => (fallback_name.clone(), None),
         };
 
         let app_root_rel_dir = app_root_for_dir(&rel_dir);
         let (_profile_name, allowed_deps) =
             profile_and_allowed_deps_for_member(&rel_dir, guardrail);
+        let layer = layer_for_member(&rel_dir, guardrail);
+
+        if let Some(parse_error) = &cargo_parse_error {
+            failures.push(MemberManifestFailureFacts {
+                name: name.clone(),
+                rel_dir: rel_dir.clone(),
+                cargo_rel_path: cargo_rel_path.clone(),
+                app_root_rel_dir: app_root_rel_dir.clone(),
+                layer,
+                parse_error: parse_error.clone(),
+            });
+        }
 
         members.push(MemberDependencyFacts {
             name,
             rel_dir: rel_dir.clone(),
             cargo_rel_path,
+            cargo_parse_error,
             workspace_root_rel_dir: workspace_for_member.get(&rel_dir).cloned(),
             app_root_rel_dir,
-            layer: layer_for_member(&rel_dir, guardrail),
+            layer,
             allowed_deps,
         });
     }
 
     members.sort_by(|left, right| left.rel_dir.cmp(&right.rel_dir));
-    members
+    failures.sort_by(|left, right| left.rel_dir.cmp(&right.rel_dir));
+    (members, failures)
 }
 
 fn dir_is_within_owned_app(rel_dir: &str, owned_app_roots: &BTreeSet<String>) -> bool {
@@ -490,6 +525,15 @@ fn dir_is_within_owned_app(rel_dir: &str, owned_app_roots: &BTreeSet<String>) ->
             || rel_dir
                 .strip_prefix(app_root.as_str())
                 .is_some_and(|rest| rest.starts_with('/'))
+    })
+}
+
+fn dir_is_within_owned_hex_scope(rel_dir: &str, owned_app_roots: &BTreeSet<String>) -> bool {
+    owned_app_roots.iter().any(|app_root| {
+        rel_dir == app_root
+            || rel_dir
+                .strip_prefix(&format!("{app_root}/crates"))
+                .is_some_and(|rest| rest.is_empty() || rest.starts_with('/'))
     })
 }
 
@@ -505,6 +549,9 @@ fn collect_edges(
         .collect::<BTreeMap<_, _>>();
     let mut edges = Vec::new();
     for member in members {
+        if member.cargo_parse_error.is_some() {
+            continue;
+        }
         let Some(content) = tree.file_content(&member.cargo_rel_path) else {
             continue;
         };

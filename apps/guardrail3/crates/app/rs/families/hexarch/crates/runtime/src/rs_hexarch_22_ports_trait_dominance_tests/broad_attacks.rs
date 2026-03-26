@@ -32,7 +32,7 @@ fn private_trait_in_ports_crate_still_counts_as_impl_heavy() {
 }
 
 #[test]
-fn impls_in_multiple_source_files_are_aggregated() {
+fn helper_only_impls_in_traitless_modules_do_not_count() {
     let tmp = copy_fixture();
     write_file(
         tmp.path(),
@@ -46,14 +46,5 @@ fn impls_in_multiple_source_files_are_aggregated() {
     );
 
     let results = super::run_family(tmp.path());
-    assertions::assert_warning_summary(
-        &results,
-        "",
-        1,
-        &["apps/backend/crates/ports/outbound/repo"],
-        Some(Some("apps/backend/crates/ports/outbound/repo")),
-        Some("Ports crate `backend-ports-outbound-repo` has 2 impl blocks and 1 public traits"),
-        None,
-        &[],
-    );
+    assertions::assert_no_warning(&results, "");
 }
