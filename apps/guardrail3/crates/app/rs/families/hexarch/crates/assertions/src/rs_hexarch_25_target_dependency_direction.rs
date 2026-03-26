@@ -1,6 +1,7 @@
 use std::path::Path;
 
 use guardrail3_app_rs_family_hexarch as runtime;
+use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::{CheckResult, Severity};
 
 const RULE_ID: &str = "RS-HEXARCH-25";
@@ -12,6 +13,10 @@ pub fn run_family(root: &Path) -> Vec<CheckResult> {
 
 pub fn check_results(root: &Path) -> Vec<CheckResult> {
     run_family(root)
+}
+
+pub fn run_tree(tree: &ProjectTree) -> Vec<CheckResult> {
+    runtime::check_test_tree(tree)
 }
 
 pub fn error_results<'a>(results: &'a [CheckResult], rule_id: &str) -> Vec<&'a CheckResult> {
@@ -34,4 +39,3 @@ pub fn assert_no_error(results: &[CheckResult], rule_id: &str) {
         "expected no {rule_id} errors, got: {errors:#?}"
     );
 }
-

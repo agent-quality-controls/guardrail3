@@ -1,8 +1,6 @@
 use std::collections::BTreeSet;
 
-use super::super::super::collect_dependency_facts_from_tree_for_tests as dependency_facts;
-use super::super::super::inputs::DependencyEdgeHexarchInput;
-use super::super::check;
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_25_target_dependency_direction as assertions;
 use test_support::{dir_entry, project_tree};
 
 #[test]
@@ -60,11 +58,8 @@ fn forbidden_target_sections_error_and_allowed_target_sections_do_not() {
         ],
     );
 
-    let facts = dependency_facts(&tree);
-    let mut results = Vec::new();
-    for edge in facts.edges.iter().filter(|edge| edge.kind.is_target()) {
-        check(&DependencyEdgeHexarchInput::new(edge), &mut results);
-    }
+    let results = assertions::run_tree(&tree);
+    let results = assertions::errors_by_id(&results, "RS-HEXARCH-25");
 
     let actual_files = results
         .iter()

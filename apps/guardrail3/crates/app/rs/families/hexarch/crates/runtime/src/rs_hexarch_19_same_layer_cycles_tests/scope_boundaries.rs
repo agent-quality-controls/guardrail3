@@ -1,4 +1,4 @@
-use super::super::super::collect_dependency_facts_from_tree_for_tests as dependency_facts;
+use super::super::results_for_cycles_for_test as results_for_cycles;
 use test_support::{dir_entry, project_tree};
 
 #[test]
@@ -29,10 +29,10 @@ fn target_specific_same_layer_cycle_is_filtered_out() {
         ],
     );
 
-    let facts = dependency_facts(&tree);
+    let (cycle_layers, _results) = results_for_cycles(&tree);
     assert!(
-        facts.cycles.is_empty(),
-        "target-specific edges should not fabricate same-layer cycles: {facts:#?}"
+        cycle_layers.is_empty(),
+        "target-specific edges should not fabricate same-layer cycles: {cycle_layers:#?}"
     );
 }
 
@@ -64,9 +64,9 @@ fn omitted_same_layer_member_stays_out_of_cycle_detection() {
         ],
     );
 
-    let facts = dependency_facts(&tree);
+    let (cycle_layers, _results) = results_for_cycles(&tree);
     assert!(
-        facts.cycles.is_empty(),
-        "omitted same-layer members should stay out of cycle detection: {facts:#?}"
+        cycle_layers.is_empty(),
+        "omitted same-layer members should stay out of cycle detection: {cycle_layers:#?}"
     );
 }

@@ -1,9 +1,4 @@
-use super::super::super::collect_dependency_facts_from_tree_for_tests as dependency_facts;
-use super::super::super::inputs::DependencyEdgeHexarchInput;
-use super::super::super::{
-    rs_hexarch_17_workspace_inherited_direction, rs_hexarch_18_renamed_dependency_direction,
-    rs_hexarch_24_cross_app_boundary,
-};
+use super::super::audit_edge_for_test as audit_edge;
 use test_support::{dir_entry, project_tree};
 
 #[test]
@@ -41,21 +36,11 @@ fn version_only_inherited_dep_with_same_name_local_member_stays_out_of_scope() {
         ],
     );
 
-    let facts = dependency_facts(&tree);
-    let edge = facts
-        .edges
-        .iter()
-        .find(|edge| edge.source_rel_dir == "apps/api/crates/domain/core")
-        .expect("inherited edge");
-    let mut results = Vec::new();
-    rs_hexarch_17_workspace_inherited_direction::check(
-        &DependencyEdgeHexarchInput::new(edge),
-        &mut results,
-    );
+    let audit = audit_edge(&tree, "apps/api/crates/domain/core");
 
     assert!(
-        results.is_empty(),
-        "version-only inherited deps must not be treated as internal member edges: {results:#?}"
+        audit.rule17.is_empty(),
+        "version-only inherited deps must not be treated as internal member edges: {audit:#?}"
     );
 }
 
@@ -94,32 +79,16 @@ fn renamed_inherited_path_dep_is_owned_by_rule_17_only() {
         ],
     );
 
-    let facts = dependency_facts(&tree);
-    let edge = facts
-        .edges
-        .iter()
-        .find(|edge| edge.source_rel_dir == "apps/api/crates/domain/core")
-        .expect("inherited renamed edge");
-
-    let mut rule17 = Vec::new();
-    rs_hexarch_17_workspace_inherited_direction::check(
-        &DependencyEdgeHexarchInput::new(edge),
-        &mut rule17,
-    );
-    let mut rule18 = Vec::new();
-    rs_hexarch_18_renamed_dependency_direction::check(
-        &DependencyEdgeHexarchInput::new(edge),
-        &mut rule18,
-    );
+    let audit = audit_edge(&tree, "apps/api/crates/domain/core");
 
     assert_eq!(
-        rule17.len(),
+        audit.rule17.len(),
         1,
-        "rule 17 should own inherited renamed path deps: {rule17:#?}"
+        "rule 17 should own inherited renamed path deps: {audit:#?}"
     );
     assert!(
-        rule18.is_empty(),
-        "rule 18 should not double-report inherited renamed path deps: {rule18:#?}"
+        audit.rule18.is_empty(),
+        "rule 18 should not double-report inherited renamed path deps: {audit:#?}"
     );
 }
 
@@ -164,29 +133,16 @@ fn cross_app_inherited_path_dep_is_owned_by_rule_24_not_rule_17() {
         ],
     );
 
-    let facts = dependency_facts(&tree);
-    let edge = facts
-        .edges
-        .iter()
-        .find(|edge| edge.source_rel_dir == "apps/backend/crates/domain/engine")
-        .expect("inherited cross-app edge");
-
-    let mut rule17 = Vec::new();
-    rs_hexarch_17_workspace_inherited_direction::check(
-        &DependencyEdgeHexarchInput::new(edge),
-        &mut rule17,
-    );
-    let mut rule24 = Vec::new();
-    rs_hexarch_24_cross_app_boundary::check(&DependencyEdgeHexarchInput::new(edge), &mut rule24);
+    let audit = audit_edge(&tree, "apps/backend/crates/domain/engine");
 
     assert!(
-        rule17.is_empty(),
-        "rule 17 should stay out of cross-app inherited ownership: {rule17:#?}"
+        audit.rule17.is_empty(),
+        "rule 17 should stay out of cross-app inherited ownership: {audit:#?}"
     );
     assert_eq!(
-        rule24.len(),
+        audit.rule24.len(),
         1,
-        "rule 24 should own cross-app inherited path deps: {rule24:#?}"
+        "rule 24 should own cross-app inherited path deps: {audit:#?}"
     );
 }
 
@@ -222,21 +178,10 @@ fn allowed_renamed_inherited_path_dep_stays_clean() {
         ],
     );
 
-    let facts = dependency_facts(&tree);
-    let edge = facts
-        .edges
-        .iter()
-        .find(|edge| edge.source_rel_dir == "apps/api/crates/app/core")
-        .expect("allowed inherited renamed edge");
-
-    let mut rule17 = Vec::new();
-    rs_hexarch_17_workspace_inherited_direction::check(
-        &DependencyEdgeHexarchInput::new(edge),
-        &mut rule17,
-    );
+    let audit = audit_edge(&tree, "apps/api/crates/app/core");
 
     assert!(
-        rule17.is_empty(),
-        "allowed renamed inherited path deps should stay clean: {rule17:#?}"
+        audit.rule17.is_empty(),
+        "allowed renamed inherited path deps should stay clean: {audit:#?}"
     );
 }

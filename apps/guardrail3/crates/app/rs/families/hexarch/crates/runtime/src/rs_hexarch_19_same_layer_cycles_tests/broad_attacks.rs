@@ -1,9 +1,6 @@
 use std::collections::BTreeSet;
 
-use super::super::super::collect_dependency_facts_from_tree_for_tests as dependency_facts;
-use super::super::super::dependency_facts::Layer;
-use super::super::super::inputs::CycleHexarchInput;
-use super::super::check;
+use super::super::results_for_cycles_for_test as results_for_cycles;
 use test_support::{dir_entry, project_tree};
 
 #[test]
@@ -57,18 +54,14 @@ fn same_layer_cycle_is_reported_once_even_with_mixed_layer_cycle_present() {
         ],
     );
 
-    let facts = dependency_facts(&tree);
-    let mut results = Vec::new();
-    for cycle in &facts.cycles {
-        check(&CycleHexarchInput::new(cycle), &mut results);
-    }
+    let (cycle_layers, results) = results_for_cycles(&tree);
 
     assert_eq!(
-        facts.cycles.len(),
+        cycle_layers.len(),
         1,
-        "expected only the same-layer domain cycle to survive collector filtering: {facts:#?}"
+        "expected only the same-layer domain cycle to survive collector filtering: {cycle_layers:#?}"
     );
-    assert_eq!(facts.cycles[0].layer, Layer::Domain);
+    assert_eq!(cycle_layers[0], "domain");
     assert_eq!(
         results.len(),
         1,

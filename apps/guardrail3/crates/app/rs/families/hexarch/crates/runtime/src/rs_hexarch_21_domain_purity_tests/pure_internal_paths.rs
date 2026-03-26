@@ -1,7 +1,4 @@
-use super::super::super::collect_dependency_facts_from_tree_for_tests as dependency_facts;
-use super::super::super::dependency_facts::EdgeKind;
-use super::super::super::inputs::MemberDependencyHexarchInput;
-use super::super::check;
+use super::super::{run_domain_purity_case, DomainPurityEdgeKindForTest};
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_21_domain_purity as assertions;
 use test_support::{copy_fixture, dir_entry, project_tree, write_file};
 
@@ -51,21 +48,10 @@ fn domain_and_ports_path_deps_do_not_trigger_domain_purity() {
         ],
     );
 
-    let facts = dependency_facts(&tree);
-    let member = facts
-        .members
-        .iter()
-        .find(|member| member.rel_dir == "apps/api/crates/domain/core")
-        .expect("domain member");
-    let edges = facts
-        .edges
-        .iter()
-        .filter(|edge| edge.source_rel_dir == member.rel_dir && edge.kind == EdgeKind::Dependency)
-        .collect();
-    let mut results = Vec::new();
-    check(
-        &MemberDependencyHexarchInput::new(member, edges),
-        &mut results,
+    let results = run_domain_purity_case(
+        &tree,
+        "apps/api/crates/domain/core",
+        DomainPurityEdgeKindForTest::Dependency,
     );
 
     assert!(

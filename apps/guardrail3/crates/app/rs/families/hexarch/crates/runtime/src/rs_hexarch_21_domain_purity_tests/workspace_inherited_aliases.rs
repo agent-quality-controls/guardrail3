@@ -1,7 +1,4 @@
-use super::super::super::collect_dependency_facts_from_tree_for_tests as dependency_facts;
-use super::super::super::dependency_facts::EdgeKind;
-use super::super::super::inputs::MemberDependencyHexarchInput;
-use super::super::check;
+use super::super::{run_domain_purity_case, DomainPurityEdgeKindForTest};
 use test_support::{dir_entry, project_tree};
 
 #[test]
@@ -30,21 +27,10 @@ fn inherited_workspace_alias_to_builtin_pure_crate_stays_allowed() {
         ],
     );
 
-    let facts = dependency_facts(&tree);
-    let member = facts
-        .members
-        .iter()
-        .find(|member| member.rel_dir == "apps/api/crates/domain/core")
-        .expect("domain member");
-    let edges = facts
-        .edges
-        .iter()
-        .filter(|edge| edge.source_rel_dir == member.rel_dir && edge.kind == EdgeKind::Dependency)
-        .collect();
-    let mut results = Vec::new();
-    check(
-        &MemberDependencyHexarchInput::new(member, edges),
-        &mut results,
+    let results = run_domain_purity_case(
+        &tree,
+        "apps/api/crates/domain/core",
+        DomainPurityEdgeKindForTest::Dependency,
     );
 
     assert!(
@@ -83,21 +69,10 @@ fn inherited_workspace_alias_uses_real_package_name_for_allowed_deps() {
         ],
     );
 
-    let facts = dependency_facts(&tree);
-    let member = facts
-        .members
-        .iter()
-        .find(|member| member.rel_dir == "apps/api/crates/domain/core")
-        .expect("domain member");
-    let edges = facts
-        .edges
-        .iter()
-        .filter(|edge| edge.source_rel_dir == member.rel_dir && edge.kind == EdgeKind::Dependency)
-        .collect();
-    let mut results = Vec::new();
-    check(
-        &MemberDependencyHexarchInput::new(member, edges),
-        &mut results,
+    let results = run_domain_purity_case(
+        &tree,
+        "apps/api/crates/domain/core",
+        DomainPurityEdgeKindForTest::Dependency,
     );
 
     assert!(
