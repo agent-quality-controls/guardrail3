@@ -27,9 +27,8 @@ use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::CheckResult;
 use guardrail3_outbound_traits::ToolChecker;
 
-use self::facts::{
-    DiscoveredTestFile, InputFailureFacts, TestFacts, TestFileKind, TestRootFacts, collect,
-};
+use self::discover::collect;
+use self::facts::{DiscoveredTestFile, InputFailureFacts, TestFacts, TestFileKind, TestRootFacts};
 use self::inputs::{
     AssertionsModuleInput, CfgTestModuleInput, InputFailureTestInput, RootTestInput, TestFileInput,
     TestFunctionInput, TestSupportFileInput,
