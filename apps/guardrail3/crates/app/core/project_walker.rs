@@ -87,6 +87,10 @@ fn should_cache(name: &str, rel_path: &str) -> bool {
     if name == "mutants.toml" && rel_path.contains(".cargo/") {
         return true;
     }
+    // .config/nextest.toml — special path-based match
+    if name == "nextest.toml" && rel_path.contains(".config/") {
+        return true;
+    }
     // GitHub workflow YAML files
     if rel_path.contains(".github/workflows/") {
         let ext = Path::new(name)

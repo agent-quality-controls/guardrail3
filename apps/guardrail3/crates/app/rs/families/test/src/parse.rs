@@ -1,3 +1,5 @@
+use std::collections::BTreeSet;
+
 use guardrail3_app_rs_ast::ast_helpers;
 use syn::parse::{Parse, Parser};
 use syn::spanned::Spanned;
@@ -5,10 +7,19 @@ use syn::visit::Visit;
 
 #[derive(Debug, Clone, Default)]
 pub struct ParsedTestFile {
-    pub pub_fn_count: usize,
     pub ignore_without_reason_lines: Vec<usize>,
+    pub modules: Vec<ModuleInfo>,
     pub cfg_test_modules: Vec<CfgTestModuleInfo>,
     pub test_functions: Vec<TestFunctionInfo>,
+    pub file_function_names: BTreeSet<String>,
+    pub file_call_paths: Vec<Vec<String>>,
+    pub imports: Vec<UseBinding>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ModuleInfo {
+    pub line: usize,
+    pub path_attr: Option<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -16,45 +27,46 @@ pub struct CfgTestModuleInfo {
     pub line: usize,
     pub name: String,
     pub has_body: bool,
+    pub path_attr: Option<String>,
 }
 
 #[derive(Debug, Clone, Default)]
 pub struct TestFunctionInfo {
     pub line: usize,
     pub name: String,
-    pub inside_cfg_test_module: bool,
-    pub has_result_return: bool,
+    pub uses_tokio_test_attr: bool,
     pub has_assertion_macro: bool,
-    pub has_assert_like_call: bool,
+    pub call_paths: Vec<Vec<String>>,
+    pub method_receiver_paths: Vec<Vec<String>>,
+    pub shadowed_idents: BTreeSet<String>,
     pub should_panic_line: Option<usize>,
     pub should_panic_has_expected: bool,
     pub tautological_assert_lines: Vec<usize>,
     pub weak_matches_lines: Vec<usize>,
 }
 
-pub fn parse_rust_file(content: &str) -> Result<syn::File, syn::Error> {
-    syn::parse_file(content.strip_prefix('\u{feff}').unwrap_or(content))
+#[derive(Debug, Clone)]
+pub struct UseBinding {
+    pub line: usize,
+    pub path_segments: Vec<String>,
+    pub local_name: Option<String>,
 }
 
-pub fn effective_non_comment_line_count(content: &str) -> usize {
-    content
-        .lines()
-        .filter(|line| {
-            let trimmed = line.trim();
-            !trimmed.is_empty() && !trimmed.starts_with("//")
-        })
-        .count()
+pub fn parse_rust_file(content: &str) -> Result<syn::File, syn::Error> {
+    syn::parse_file(content.strip_prefix('\u{feff}').unwrap_or(content))
 }
 
 pub fn analyze(ast: &syn::File, content: &str) -> ParsedTestFile {
     let mut visitor = TestVisitor {
         out: ParsedTestFile {
-            pub_fn_count: ast_helpers::count_pub_fn_decls(ast),
             ignore_without_reason_lines: ast_helpers::find_ignore_without_reason(ast, content),
+            modules: Vec::new(),
             cfg_test_modules: Vec::new(),
             test_functions: Vec::new(),
+            file_function_names: BTreeSet::new(),
+            file_call_paths: Vec::new(),
+            imports: Vec::new(),
         },
-        cfg_test_depth: 0,
     };
     visitor.visit_file(ast);
     visitor.out
@@ -62,48 +74,52 @@ pub fn analyze(ast: &syn::File, content: &str) -> ParsedTestFile {
 
 struct TestVisitor {
     out: ParsedTestFile,
-    cfg_test_depth: usize,
 }
 
 impl<'ast> Visit<'ast> for TestVisitor {
     fn visit_item_mod(&mut self, item: &'ast syn::ItemMod) {
         let is_cfg_test = item.attrs.iter().any(is_cfg_test_attr);
+        self.out.modules.push(ModuleInfo {
+            line: span_line(item.span()),
+            path_attr: item.attrs.iter().find_map(path_attr_value),
+        });
         if is_cfg_test {
             self.out.cfg_test_modules.push(CfgTestModuleInfo {
                 line: span_line(item.span()),
                 name: item.ident.to_string(),
                 has_body: item.content.is_some(),
+                path_attr: item.attrs.iter().find_map(path_attr_value),
             });
         }
-        if is_cfg_test {
-            self.cfg_test_depth = self.cfg_test_depth.saturating_add(1);
-        }
         syn::visit::visit_item_mod(self, item);
-        if is_cfg_test {
-            self.cfg_test_depth = self.cfg_test_depth.saturating_sub(1);
-        }
     }
 
     fn visit_item_fn(&mut self, item: &'ast syn::ItemFn) {
-        maybe_push_test_function(
-            &item.attrs,
-            &item.sig,
-            &item.block,
-            self.cfg_test_depth > 0,
-            &mut self.out.test_functions,
-        );
+        let _ = self.out.file_function_names.insert(item.sig.ident.to_string());
+        maybe_push_test_function(&item.attrs, &item.sig, &item.block, &mut self.out.test_functions);
         syn::visit::visit_item_fn(self, item);
     }
 
     fn visit_impl_item_fn(&mut self, item: &'ast syn::ImplItemFn) {
-        maybe_push_test_function(
-            &item.attrs,
-            &item.sig,
-            &item.block,
-            self.cfg_test_depth > 0,
-            &mut self.out.test_functions,
-        );
+        maybe_push_test_function(&item.attrs, &item.sig, &item.block, &mut self.out.test_functions);
         syn::visit::visit_impl_item_fn(self, item);
+    }
+
+    fn visit_item_use(&mut self, item: &'ast syn::ItemUse) {
+        collect_use_bindings(
+            &item.tree,
+            &mut Vec::new(),
+            span_line(item.span()),
+            &mut self.out.imports,
+        );
+        syn::visit::visit_item_use(self, item);
+    }
+
+    fn visit_expr_call(&mut self, expr: &'ast syn::ExprCall) {
+        if let Some(path) = call_path(&expr.func) {
+            self.out.file_call_paths.push(path);
+        }
+        syn::visit::visit_expr_call(self, expr);
     }
 }
 
@@ -111,12 +127,13 @@ fn maybe_push_test_function(
     attrs: &[syn::Attribute],
     sig: &syn::Signature,
     block: &syn::Block,
-    inside_cfg_test_module: bool,
     out: &mut Vec<TestFunctionInfo>,
 ) {
-    if !attrs.iter().any(is_test_attr) {
+    let uses_test_attr = attrs.iter().any(is_test_attr);
+    if !uses_test_attr {
         return;
     }
+    let uses_tokio_test_attr = attrs.iter().any(is_tokio_test_attr);
     let should_panic_attr = attrs
         .iter()
         .find(|attr| attr.path().is_ident("should_panic"));
@@ -125,10 +142,11 @@ fn maybe_push_test_function(
     out.push(TestFunctionInfo {
         line: span_line(sig.span()),
         name: sig.ident.to_string(),
-        inside_cfg_test_module,
-        has_result_return: signature_returns_result(sig),
+        uses_tokio_test_attr,
         has_assertion_macro: body_visitor.has_assertion_macro,
-        has_assert_like_call: body_visitor.has_assert_like_call,
+        call_paths: body_visitor.call_paths,
+        method_receiver_paths: body_visitor.method_receiver_paths,
+        shadowed_idents: body_visitor.shadowed_idents,
         should_panic_line: should_panic_attr.map(|attr| span_line(attr.span())),
         should_panic_has_expected: should_panic_attr.is_some_and(should_panic_has_expected),
         tautological_assert_lines: body_visitor.tautological_assert_lines,
@@ -139,7 +157,9 @@ fn maybe_push_test_function(
 #[derive(Default)]
 struct TestBodyVisitor {
     has_assertion_macro: bool,
-    has_assert_like_call: bool,
+    call_paths: Vec<Vec<String>>,
+    method_receiver_paths: Vec<Vec<String>>,
+    shadowed_idents: BTreeSet<String>,
     tautological_assert_lines: Vec<usize>,
     weak_matches_lines: Vec<usize>,
 }
@@ -155,10 +175,14 @@ impl<'ast> Visit<'ast> for TestBodyVisitor {
             if is_assertion_macro_name(&name) {
                 self.has_assertion_macro = true;
             }
-            if (name == "assert_eq" || name == "assert_ne") && macro_has_literal_comparison(mac) {
+            if matches!(
+                name.as_str(),
+                "assert_eq" | "assert_ne" | "debug_assert_eq" | "debug_assert_ne"
+            ) && macro_has_literal_comparison(mac)
+            {
                 self.tautological_assert_lines.push(span_line(mac.span()));
             }
-            if name == "assert" && macro_has_weak_matches(mac) {
+            if matches!(name.as_str(), "assert" | "debug_assert") && macro_has_weak_matches(mac) {
                 self.weak_matches_lines.push(span_line(mac.span()));
             }
         }
@@ -166,20 +190,22 @@ impl<'ast> Visit<'ast> for TestBodyVisitor {
     }
 
     fn visit_expr_call(&mut self, expr: &'ast syn::ExprCall) {
-        if call_ident(&expr.func)
-            .as_deref()
-            .is_some_and(is_assert_like_name)
-        {
-            self.has_assert_like_call = true;
+        if let Some(path) = call_path(&expr.func) {
+            self.call_paths.push(path);
         }
         syn::visit::visit_expr_call(self, expr);
     }
 
     fn visit_expr_method_call(&mut self, expr: &'ast syn::ExprMethodCall) {
-        if is_assert_like_name(&expr.method.to_string()) {
-            self.has_assert_like_call = true;
+        if let Some(path) = call_path(&expr.receiver) {
+            self.method_receiver_paths.push(path);
         }
         syn::visit::visit_expr_method_call(self, expr);
+    }
+
+    fn visit_local(&mut self, local: &'ast syn::Local) {
+        collect_pat_idents(&local.pat, &mut self.shadowed_idents);
+        syn::visit::visit_local(self, local);
     }
 }
 
@@ -192,30 +218,19 @@ fn is_test_attr(attr: &syn::Attribute) -> bool {
             .is_some_and(|segment| segment.ident == "test")
 }
 
+fn is_tokio_test_attr(attr: &syn::Attribute) -> bool {
+    let path = attr.path();
+    path.segments.len() == 2
+        && path.segments[0].ident == "tokio"
+        && path.segments[1].ident == "test"
+}
+
 fn is_cfg_test_attr(attr: &syn::Attribute) -> bool {
     if !attr.path().is_ident("cfg") {
         return false;
     }
     match &attr.meta {
         syn::Meta::List(list) => list.tokens.to_string().replace(' ', "") == "test",
-        _ => false,
-    }
-}
-
-fn signature_returns_result(sig: &syn::Signature) -> bool {
-    match &sig.output {
-        syn::ReturnType::Type(_, ty) => type_is_result(ty),
-        syn::ReturnType::Default => false,
-    }
-}
-
-fn type_is_result(ty: &syn::Type) -> bool {
-    match ty {
-        syn::Type::Path(type_path) => type_path
-            .path
-            .segments
-            .last()
-            .is_some_and(|segment| segment.ident == "Result"),
         _ => false,
     }
 }
@@ -233,18 +248,15 @@ fn is_assertion_macro_name(name: &str) -> bool {
     )
 }
 
-fn is_assert_like_name(name: &str) -> bool {
-    let lower = name.to_ascii_lowercase();
-    lower.contains("assert") || lower.contains("verify") || lower.contains("expect")
-}
-
-fn call_ident(expr: &syn::Expr) -> Option<String> {
+fn call_path(expr: &syn::Expr) -> Option<Vec<String>> {
     match expr {
         syn::Expr::Path(path) => path
             .path
             .segments
-            .last()
-            .map(|segment| segment.ident.to_string()),
+            .iter()
+            .map(|segment| segment.ident.to_string())
+            .collect::<Vec<_>>()
+            .pipe(Some),
         _ => None,
     }
 }
@@ -259,13 +271,14 @@ fn macro_has_literal_comparison(mac: &syn::Macro) -> bool {
     }
     args.iter()
         .take(2)
-        .all(|expr| matches!(expr, syn::Expr::Lit(_)))
+        .all(expr_is_literal_like)
 }
 
 fn macro_has_weak_matches(mac: &syn::Macro) -> bool {
     let Ok(expr) = syn::parse2::<syn::Expr>(mac.tokens.clone()) else {
         return false;
     };
+    let expr = peel_parens(expr);
     let syn::Expr::Macro(expr_macro) = expr else {
         return false;
     };
@@ -306,15 +319,143 @@ fn pattern_contains_wild(pattern: &syn::Pat) -> bool {
 }
 
 fn should_panic_has_expected(attr: &syn::Attribute) -> bool {
-    match &attr.meta {
-        syn::Meta::List(list) => list.tokens.to_string().contains("expected"),
-        _ => false,
-    }
+    let mut has_expected = false;
+    let _ = attr.parse_nested_meta(|meta| {
+        if meta.path.is_ident("expected") {
+            let value: syn::LitStr = meta.value()?.parse()?;
+            has_expected = !value.value().trim().is_empty();
+        }
+        Ok(())
+    });
+    has_expected
 }
 
 fn span_line(span: proc_macro2::Span) -> usize {
     span.start().line
 }
+
+fn path_attr_value(attr: &syn::Attribute) -> Option<String> {
+    if !attr.path().is_ident("path") {
+        return None;
+    }
+    match &attr.meta {
+        syn::Meta::NameValue(name_value) => match &name_value.value {
+            syn::Expr::Lit(expr_lit) => match &expr_lit.lit {
+                syn::Lit::Str(value) => Some(value.value()),
+                _ => None,
+            },
+            _ => None,
+        },
+        _ => None,
+    }
+}
+
+fn collect_use_bindings(
+    tree: &syn::UseTree,
+    prefix: &mut Vec<String>,
+    line: usize,
+    out: &mut Vec<UseBinding>,
+) {
+    match tree {
+        syn::UseTree::Path(path) => {
+            prefix.push(path.ident.to_string());
+            collect_use_bindings(&path.tree, prefix, line, out);
+            let _ = prefix.pop();
+        }
+        syn::UseTree::Name(name) => {
+            let mut path_segments = prefix.clone();
+            path_segments.push(name.ident.to_string());
+            out.push(UseBinding {
+                line,
+                path_segments,
+                local_name: Some(name.ident.to_string()),
+            });
+        }
+        syn::UseTree::Rename(rename) => {
+            let mut path_segments = prefix.clone();
+            path_segments.push(rename.ident.to_string());
+            out.push(UseBinding {
+                line,
+                path_segments,
+                local_name: Some(rename.rename.to_string()),
+            });
+        }
+        syn::UseTree::Glob(_) => {
+            out.push(UseBinding {
+                line,
+                path_segments: prefix.clone(),
+                local_name: None,
+            });
+        }
+        syn::UseTree::Group(group) => {
+            for item in &group.items {
+                collect_use_bindings(item, prefix, line, out);
+            }
+        }
+    }
+}
+
+fn expr_is_literal_like(expr: &syn::Expr) -> bool {
+    match expr {
+        syn::Expr::Lit(_) => true,
+        syn::Expr::Paren(paren) => expr_is_literal_like(&paren.expr),
+        syn::Expr::Group(group) => expr_is_literal_like(&group.expr),
+        _ => false,
+    }
+}
+
+fn peel_parens(expr: syn::Expr) -> syn::Expr {
+    match expr {
+        syn::Expr::Paren(paren) => peel_parens(*paren.expr),
+        syn::Expr::Group(group) => peel_parens(*group.expr),
+        other => other,
+    }
+}
+
+fn collect_pat_idents(pat: &syn::Pat, out: &mut BTreeSet<String>) {
+    match pat {
+        syn::Pat::Ident(ident) => {
+            let _ = out.insert(ident.ident.to_string());
+        }
+        syn::Pat::Tuple(tuple) => {
+            for element in &tuple.elems {
+                collect_pat_idents(element, out);
+            }
+        }
+        syn::Pat::TupleStruct(tuple) => {
+            for element in &tuple.elems {
+                collect_pat_idents(element, out);
+            }
+        }
+        syn::Pat::Struct(strct) => {
+            for field in &strct.fields {
+                collect_pat_idents(&field.pat, out);
+            }
+        }
+        syn::Pat::Slice(slice) => {
+            for element in &slice.elems {
+                collect_pat_idents(element, out);
+            }
+        }
+        syn::Pat::Reference(reference) => collect_pat_idents(&reference.pat, out),
+        syn::Pat::Type(typed) => collect_pat_idents(&typed.pat, out),
+        syn::Pat::Or(or) => {
+            for case in &or.cases {
+                collect_pat_idents(case, out);
+            }
+        }
+        syn::Pat::Paren(paren) => collect_pat_idents(&paren.pat, out),
+        _ => {}
+    }
+}
+
+trait Pipe: Sized {
+    fn pipe<T>(self, f: impl FnOnce(Self) -> T) -> T {
+        f(self)
+    }
+}
+
+impl<T> Pipe for T {}
 
 struct MatchesArgs {
     #[allow(dead_code)] // reason: only the pattern matters for this rule
