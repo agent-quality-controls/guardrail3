@@ -184,42 +184,75 @@ Unreadable-present inputs must not be treated as absent.
 
 Inside this guardrail family itself:
 
-- `src/lib.rs` orchestrates only
-- `src/facts.rs` binds shared placement facts with config resolution
-- `src/inputs.rs` produces minimal per-rule inputs
+- the family root is a Cargo workspace
+- `crates/runtime/src/lib.rs` orchestrates only
+- `crates/runtime/src/facts.rs` binds routed placement facts with config resolution
+- `crates/runtime/src/inputs.rs` produces minimal per-rule inputs
+- `crates/assertions/src/*.rs` owns reusable semantic assertions
+- `test_support/src/lib.rs` owns only generic `ProjectTree` builders/helpers
 - exactly one `RS-ARCH-*` rule ID per production file
 - exactly one rule-specific sidecar test module directory per production rule file
+- live-root scope comes from shared `placement`
+- root routing comes from shared `FamilyMapper`
 
 Target family tree:
 
 ```text
 apps/guardrail3/crates/app/rs/families/arch/
   Cargo.toml
-  src/
-    lib.rs
-    facts.rs
-    inputs.rs
-    test_support.rs
-    rs_arch_01_root_classification.rs
-    rs_arch_01_root_classification_tests/
-      mod.rs
-    rs_arch_02_no_misplaced_roots.rs
-    rs_arch_02_no_misplaced_roots_tests/
-      mod.rs
-    rs_arch_03_no_dual_ownership.rs
-    rs_arch_03_no_dual_ownership_tests/
-      mod.rs
-    rs_arch_04_no_zone_overlap.rs
-    rs_arch_04_no_zone_overlap_tests/
-      mod.rs
-    rs_arch_05_enablement_coherence.rs
-    rs_arch_05_enablement_coherence_tests/
-      mod.rs
+  crates/
+    runtime/
+      Cargo.toml
+      src/
+        lib.rs
+        facts.rs
+        inputs.rs
+        rs_arch_01_root_classification.rs
+        rs_arch_01_root_classification_tests/
+          mod.rs
+        rs_arch_02_no_misplaced_roots.rs
+        rs_arch_02_no_misplaced_roots_tests/
+          mod.rs
+        rs_arch_03_no_dual_ownership.rs
+        rs_arch_03_no_dual_ownership_tests/
+          mod.rs
+        rs_arch_04_no_zone_overlap.rs
+        rs_arch_04_no_zone_overlap_tests/
+          mod.rs
+        rs_arch_05_scoped_arch_config_forbidden.rs
+        rs_arch_05_scoped_arch_config_forbidden_tests/
+          mod.rs
+        rs_arch_06_owner_family_enablement_coherence.rs
+        rs_arch_06_owner_family_enablement_coherence_tests/
+          mod.rs
+        rs_arch_07_required_inputs_fail_closed.rs
+        rs_arch_07_required_inputs_fail_closed_tests/
+          mod.rs
+        rs_arch_08_auxiliary_roots_declared.rs
+        rs_arch_08_auxiliary_roots_declared_tests/
+          mod.rs
+    assertions/
+      Cargo.toml
+      src/
+        lib.rs
+        rs_arch_01_root_classification.rs
+        rs_arch_02_no_misplaced_roots.rs
+        rs_arch_03_no_dual_ownership.rs
+        rs_arch_04_no_zone_overlap.rs
+        rs_arch_05_scoped_arch_config_forbidden.rs
+        rs_arch_06_owner_family_enablement_coherence.rs
+        rs_arch_07_required_inputs_fail_closed.rs
+        rs_arch_08_auxiliary_roots_declared.rs
+  test_support/
+    Cargo.toml
+    src/
+      lib.rs
 ```
 
 Forbidden:
 
 - private family-local root discovery that `hexarch` cannot reuse
+- local reimplementation of root routing that should come from `FamilyMapper`
 - grouped rule files
 - grouped family-wide test files
 - fixture manifests treated as live roots
