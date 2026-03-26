@@ -24,8 +24,8 @@ use std::collections::BTreeSet;
 
 use glob as _;
 use guardrail3_domain_modules as _;
-use guardrail3_domain_report::CheckResult;
 use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_domain_report::CheckResult;
 use guardrail3_outbound_traits as _;
 use semver as _;
 use serde_yaml as _;

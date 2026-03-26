@@ -32,9 +32,7 @@ pub fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec<CheckR
     });
 }
 
-fn has_merge_conflict_check(
-    executable_lines: &[crate::hook_shell::ExecutableLine<'_>],
-) -> bool {
+fn has_merge_conflict_check(executable_lines: &[crate::hook_shell::ExecutableLine<'_>]) -> bool {
     executable_lines.iter().any(|line| {
         let command = line.command_text.trim();
         let command_name = command.split_whitespace().next().unwrap_or_default();

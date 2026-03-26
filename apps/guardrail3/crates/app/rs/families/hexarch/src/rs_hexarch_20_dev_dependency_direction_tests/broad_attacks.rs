@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
-use guardrail3_domain_report::Severity;
 use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_domain_report::Severity;
 
 use super::super::super::check as family_check;
 use super::super::super::test_support::{dir_entry, project_tree};

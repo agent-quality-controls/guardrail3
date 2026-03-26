@@ -1,7 +1,5 @@
 use crate::check;
-use crate::test_support::{
-    canonical_clippy_toml, dir_entry, project_tree, temp_root,
-};
+use crate::test_support::{canonical_clippy_toml, dir_entry, project_tree, temp_root};
 use guardrail3_domain_report::Severity;
 
 #[test]

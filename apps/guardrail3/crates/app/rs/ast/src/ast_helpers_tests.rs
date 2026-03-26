@@ -99,7 +99,10 @@ fn cfg_attr_all_empty_is_always_true() {
     ));
     assert_eq!(allows.len(), 1, "should find cfg_attr allow");
     assert_eq!(allows[0].lint, "dead_code");
-    assert!(allows[0].is_always_true, "all() with no args is always true");
+    assert!(
+        allows[0].is_always_true,
+        "all() with no args is always true"
+    );
 }
 
 #[test]

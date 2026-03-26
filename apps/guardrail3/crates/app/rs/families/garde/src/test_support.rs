@@ -4,8 +4,8 @@ use std::collections::BTreeMap;
 use std::path::PathBuf;
 
 use guardrail3_domain_modules::clippy::build_clippy_toml;
-use guardrail3_domain_report::CheckResult;
 use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
+use guardrail3_domain_report::CheckResult;
 
 use super::facts::{
     DerivedBoundaryTypeFacts, GardeInputFailureFacts, GardeRootFacts, ManualDeserializeImplFacts,

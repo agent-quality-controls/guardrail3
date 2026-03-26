@@ -77,10 +77,7 @@ fn step_family_from_text(line: &str) -> Option<&'static str> {
         .find_map(|(needle, family)| line.contains(needle).then_some(family))
 }
 
-fn matches_step_family(
-    line: &crate::hook_shell::ExecutableLine<'_>,
-    family: &str,
-) -> bool {
+fn matches_step_family(line: &crate::hook_shell::ExecutableLine<'_>, family: &str) -> bool {
     let command_text = line.command_text;
     match family {
         "guardrail3 rs validate" => {

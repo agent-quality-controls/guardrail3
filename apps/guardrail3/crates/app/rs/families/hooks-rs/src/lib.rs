@@ -22,8 +22,8 @@ mod inputs;
 mod test_support;
 
 use guardrail3_app_rs_family_hooks_shared::hook_shell::parse_script;
-use guardrail3_domain_report::CheckResult;
 use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_domain_report::CheckResult;
 use guardrail3_outbound_traits::ToolChecker;
 
 use self::facts::collect;

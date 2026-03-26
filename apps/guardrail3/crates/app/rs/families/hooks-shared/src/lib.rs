@@ -20,12 +20,12 @@ mod hook_shared_18_executable_command_context_only;
 mod hook_shared_19_real_dispatcher_syntax_only;
 mod hook_shared_20_concrete_lockfile_command;
 mod hook_shared_21_no_fail_open_wrappers;
-mod inputs;
 pub mod hook_shell;
+mod inputs;
 
 use crate::hook_shell::parse_script;
-use guardrail3_domain_report::CheckResult;
 use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_domain_report::CheckResult;
 use guardrail3_outbound_traits::FileSystem;
 use guardrail3_outbound_traits::ToolChecker;
 

@@ -140,8 +140,9 @@ readme.workspace = true
             && result.file.as_deref() == Some("README.md")
             && result.message.contains("Failed to read README")
     }));
-    assert!(!results.iter().any(|result| {
-        result.id == "RS-PUB-05"
-            && result.file.as_deref() == Some("README.md")
-    }));
+    assert!(
+        !results.iter().any(|result| {
+            result.id == "RS-PUB-05" && result.file.as_deref() == Some("README.md")
+        })
+    );
 }

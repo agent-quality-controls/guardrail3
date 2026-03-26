@@ -1,6 +1,4 @@
-use crate::test_support::{
-    canonical_clippy_toml, dir_entry, project_tree, temp_root,
-};
+use crate::test_support::{canonical_clippy_toml, dir_entry, project_tree, temp_root};
 
 #[test]
 fn stays_quiet_when_ctx_usage_has_type_level_context() {

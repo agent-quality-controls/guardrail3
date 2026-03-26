@@ -30,6 +30,10 @@ The purpose is not to “add more tests”. The purpose is to make every rule ha
 - `24-fmt-agent-brief.md`
 - `25-toolchain-agent-brief.md`
 - `26-test-agent-brief.md`
+- `34-test-family-rewrite-agent-brief.md`
+  - current droppable packet for rewriting `rs/test` to the accepted family README contract
+- `35-arch-family-rewrite-agent-brief.md`
+  - current droppable packet for rewriting `rs/arch` to the accepted family README contract
 - `27-libarch-agent-brief.md`
 - `28-rust-validation-cutover-agent-brief.md`
 - `29-arch-agent-brief.md`

@@ -67,7 +67,10 @@ fn inventories_forbid_unsafe_code_even_with_reason() {
 
     assert_eq!(results.len(), 1);
     assert_eq!(results[0].id, "RS-CODE-22");
-    assert_eq!(results[0].severity, guardrail3_domain_report::Severity::Info);
+    assert_eq!(
+        results[0].severity,
+        guardrail3_domain_report::Severity::Info
+    );
     assert_eq!(results[0].title, "forbid(unsafe_code)");
     assert!(results[0].inventory);
 }
