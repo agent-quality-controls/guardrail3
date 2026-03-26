@@ -1,9 +1,12 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::PathBuf;
 
 use super::check;
+use guardrail3_app_rs_family_mapper::{FamilyMapper, RsCargoRoute};
+use guardrail3_domain_config::types::GuardrailConfig;
 use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
 use guardrail3_domain_report::CheckResult;
+use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
 pub const FULL_RUST_LINTS: &str = r#"
     [workspace.lints.rust]
@@ -147,7 +150,7 @@ pub fn tree(structure: &[(&str, DirEntry)], content: &[(&str, &str)]) -> Project
 }
 
 pub fn check_results(tree: &ProjectTree) -> Vec<CheckResult> {
-    check(tree)
+    check(tree, &family_route(tree))
 }
 
 pub fn rule_results<'a>(results: &'a [CheckResult], id: &str) -> Vec<&'a CheckResult> {
@@ -161,4 +164,16 @@ where
     results
         .iter()
         .any(|result| result.id == id && predicate(result))
+}
+
+fn family_route(tree: &ProjectTree) -> RsCargoRoute {
+    let scope = guardrail3_app_rs_placement::collect(tree);
+    let config = parse_guardrail_config(tree);
+    let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Cargo]));
+    FamilyMapper::new(tree, &scope, config.as_ref(), &selected, None).map_rs_cargo()
+}
+
+fn parse_guardrail_config(tree: &ProjectTree) -> Option<GuardrailConfig> {
+    tree.file_content("guardrail3.toml")
+        .and_then(|content| toml::from_str::<GuardrailConfig>(content).ok())
 }

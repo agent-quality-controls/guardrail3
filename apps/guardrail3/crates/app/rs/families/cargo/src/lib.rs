@@ -21,6 +21,7 @@ mod rs_cargo_15_rust_version_policy;
 #[cfg(test)]
 mod test_support;
 
+use guardrail3_app_rs_family_mapper::RsCargoRoute;
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::CheckResult;
 
@@ -30,8 +31,8 @@ use self::inputs::{
     WorkspaceMemberCargoInput,
 };
 
-pub fn check(tree: &ProjectTree) -> Vec<CheckResult> {
-    let facts = collect(tree);
+pub fn check(tree: &ProjectTree, route: &RsCargoRoute) -> Vec<CheckResult> {
+    let facts = collect(tree, route);
     let mut results = Vec::new();
 
     for input in InputFailureCargoInput::from_facts(&facts) {

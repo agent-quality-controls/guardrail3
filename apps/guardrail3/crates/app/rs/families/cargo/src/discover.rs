@@ -1,5 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet};
 
+use guardrail3_app_rs_family_mapper::RsCargoRoute;
 use guardrail3_domain_config::types::GuardrailConfig;
 use guardrail3_domain_project_tree::ProjectTree;
 
@@ -28,8 +29,8 @@ struct GuardrailSnapshot {
     parse_error: Option<String>,
 }
 
-pub fn collect(tree: &ProjectTree) -> CargoFamilyFacts {
-    let snapshots = collect_cargo_snapshots(tree);
+pub fn collect(tree: &ProjectTree, route: &RsCargoRoute) -> CargoFamilyFacts {
+    let snapshots = collect_cargo_snapshots(tree, route);
     let workspace_roots: Vec<_> = snapshots
         .values()
         .filter(|snapshot| snapshot.has_workspace)
@@ -119,16 +120,16 @@ pub fn collect(tree: &ProjectTree) -> CargoFamilyFacts {
     }
 }
 
-fn collect_cargo_snapshots(tree: &ProjectTree) -> BTreeMap<String, CargoSnapshot> {
-    let mut dirs = BTreeSet::new();
-    if tree.file_exists("Cargo.toml") {
-        let _ = dirs.insert(String::new());
-    }
-    dirs.extend(tree.dirs_with_file("Cargo.toml"));
-
-    dirs.into_iter()
-        .map(|rel_dir| {
-            let cargo_rel_path = rel_path(&rel_dir, "Cargo.toml");
+fn collect_cargo_snapshots(
+    tree: &ProjectTree,
+    route: &RsCargoRoute,
+) -> BTreeMap<String, CargoSnapshot> {
+    route
+        .roots
+        .iter()
+        .map(|root| {
+            let rel_dir = root.rel_dir.clone();
+            let cargo_rel_path = root.cargo_rel_path.clone();
             let snapshot = snapshot_for(tree, &rel_dir, &cargo_rel_path);
             (rel_dir, snapshot)
         })
