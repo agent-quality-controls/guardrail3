@@ -7,8 +7,8 @@ use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
 use crate::scoped_files::filter_for_roots;
 use crate::views::{
-    RsArchOverlapView, RsArchRootView, RsArchRoute, RsCodeRoute, RsGardeRoute, RsHexarchRoute,
-    RsRootInputFailureView, RsRootView, RsScopedRootView, RsTestRoute,
+    RsArchOverlapView, RsArchRootView, RsArchRoute, RsCargoRoute, RsCodeRoute, RsGardeRoute,
+    RsHexarchRoute, RsRootInputFailureView, RsRootView, RsScopedRootView, RsTestRoute,
 };
 
 pub struct FamilyMapper<'a> {
@@ -104,6 +104,13 @@ impl<'a> FamilyMapper<'a> {
     #[must_use]
     pub fn map_rs_code(&self) -> RsCodeRoute {
         self.map_scoped_source_route(RustValidateFamily::Code)
+    }
+
+    #[must_use]
+    pub fn map_rs_cargo(&self) -> RsCargoRoute {
+        RsCargoRoute {
+            roots: self.map_roots_for_family(RustValidateFamily::Cargo, |_| true),
+        }
     }
 
     #[must_use]

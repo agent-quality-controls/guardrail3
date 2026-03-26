@@ -55,6 +55,11 @@ pub type RsCodeRoute = RsScopedSourceRoute;
 pub type RsGardeRoute = RsScopedSourceRoute;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RsCargoRoute {
+    pub roots: Vec<RsRootView>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RsHexarchRoute {
     pub roots: Vec<RsRootView>,
     pub scoped_files: Option<BTreeSet<String>>,

@@ -62,7 +62,7 @@ pub fn run(
             RustValidateFamily::Toolchain => toolchain::check(&tree),
             RustValidateFamily::Clippy => clippy::check(&tree),
             RustValidateFamily::Deny => deny::check(&tree),
-            RustValidateFamily::Cargo => cargo::check(&tree),
+            RustValidateFamily::Cargo => cargo::check(&tree, &mapper.map_rs_cargo()),
             RustValidateFamily::Code => code::check(&tree, &mapper.map_rs_code()),
             RustValidateFamily::Hexarch => hexarch::check(&tree, &mapper.map_rs_hexarch()),
             RustValidateFamily::Deps => deps::check(&tree, tc),
