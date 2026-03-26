@@ -23,7 +23,11 @@ fn inventories_garde_owned_method_bans_as_project_specific_when_garde_is_disable
         .collect::<BTreeSet<_>>();
     let expected_baseline = expected_method_bans(false);
     let expected_messages = ban_paths(
-        input.config.parsed.as_ref().expect("expected parsed clippy TOML"),
+        input
+            .config
+            .parsed
+            .as_ref()
+            .expect("expected parsed clippy TOML"),
         "disallowed-methods",
     )
     .into_iter()

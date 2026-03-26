@@ -7,10 +7,10 @@ use super::facts::{PublishableCrateFacts, ReleaseEdgeFacts, RepoReleaseFacts, Wo
 use super::inputs::{PublishableCrateReleaseInput, ReleaseEdgeInput, RepoReleaseInput};
 use super::release_support::extract_workflow_analysis;
 use guardrail3_adapters_outbound_fs::RealFileSystem;
-use guardrail3_app_core::project_walker::walk_project;
-use guardrail3_domain_report::{CheckResult, Severity};
 use guardrail3_adapters_outbound_tool_runner::RealToolChecker;
+use guardrail3_app_core::project_walker::walk_project;
 use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
+use guardrail3_domain_report::{CheckResult, Severity};
 use guardrail3_outbound_traits::{CommandRunResult, ToolChecker};
 
 const GOLDEN_REL: &str = "../../../../../tests/fixtures/r_arch_01/golden";

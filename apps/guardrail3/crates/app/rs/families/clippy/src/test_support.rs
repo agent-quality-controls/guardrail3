@@ -6,8 +6,8 @@ use super::inputs::ConfigClippyInput;
 use guardrail3_adapters_outbound_fs::RealFileSystem;
 use guardrail3_app_core::project_walker::walk_project;
 use guardrail3_domain_modules::clippy::build_clippy_toml;
-use guardrail3_domain_report::CheckResult;
 use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
+use guardrail3_domain_report::CheckResult;
 
 const GOLDEN_REL: &str = "../../../../../tests/fixtures/r_arch_01/golden";
 

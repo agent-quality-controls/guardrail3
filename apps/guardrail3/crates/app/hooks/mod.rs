@@ -10,9 +10,7 @@ pub fn check(
     tree: &ProjectTree,
     tc: &dyn ToolChecker,
 ) -> Vec<CheckResult> {
-    let mut results = guardrail3_app_rs_family_hooks_shared::check(fs, root, tree, tc);
-    results.extend(guardrail3_app_rs_family_hooks_rs::check(tree, tc));
-    results
+    guardrail3_app_rs_family_hooks_shared::check(fs, root, tree, tc)
 }
 
 mod deploy_checks;

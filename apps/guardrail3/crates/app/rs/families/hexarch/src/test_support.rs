@@ -3,8 +3,8 @@ use std::path::{Path, PathBuf};
 
 use guardrail3_adapters_outbound_fs::RealFileSystem;
 use guardrail3_app_core::project_walker::walk_project;
-use guardrail3_domain_report::{CheckResult, Severity};
 use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
+use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::dependency_facts::{self, DependencyFamilyFacts};
 

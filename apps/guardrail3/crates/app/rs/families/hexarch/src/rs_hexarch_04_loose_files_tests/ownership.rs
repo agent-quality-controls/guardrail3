@@ -165,5 +165,8 @@ fn mixed_root_structural_and_container_loose_files_split_across_neighbor_rules()
         rule_03[0].file.as_deref(),
         Some("apps/devctl/crates/adapters/diagonal")
     );
-    assert_eq!(rule_04[0].file.as_deref(), Some("apps/devctl/crates/domain"));
+    assert_eq!(
+        rule_04[0].file.as_deref(),
+        Some("apps/devctl/crates/domain")
+    );
 }

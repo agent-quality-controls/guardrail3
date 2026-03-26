@@ -1,6 +1,4 @@
-use crate::test_support::{
-    canonical_clippy_toml, dir_entry, project_tree, temp_root,
-};
+use crate::test_support::{canonical_clippy_toml, dir_entry, project_tree, temp_root};
 
 #[test]
 fn ignores_fixed_rules_and_unused_context_annotations() {

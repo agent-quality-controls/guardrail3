@@ -541,9 +541,9 @@ fn workspace_root_for_package<'a>(
 ) -> Option<&'a CargoRootFacts> {
     if let Some(workspace_ref) = root.package_workspace.as_deref() {
         let workspace_rel_dir = normalize_rel_dir(join_rel_dir(&root.rel_dir, workspace_ref));
-        return cargo_roots
-            .get(&workspace_rel_dir)
-            .filter(|candidate| candidate.has_workspace && workspace_contains_package(candidate, root));
+        return cargo_roots.get(&workspace_rel_dir).filter(|candidate| {
+            candidate.has_workspace && workspace_contains_package(candidate, root)
+        });
     }
 
     cargo_roots
@@ -559,17 +559,14 @@ fn workspace_contains_package(
     if package_root.rel_dir == workspace_root.rel_dir {
         return true;
     }
-    if workspace_root
-        .workspace_exclude
-        .iter()
-        .any(|pattern| workspace_member_pattern_matches(workspace_root, pattern, &package_root.rel_dir))
-    {
+    if workspace_root.workspace_exclude.iter().any(|pattern| {
+        workspace_member_pattern_matches(workspace_root, pattern, &package_root.rel_dir)
+    }) {
         return false;
     }
-    workspace_root
-        .workspace_members
-        .iter()
-        .any(|pattern| workspace_member_pattern_matches(workspace_root, pattern, &package_root.rel_dir))
+    workspace_root.workspace_members.iter().any(|pattern| {
+        workspace_member_pattern_matches(workspace_root, pattern, &package_root.rel_dir)
+    })
 }
 
 fn workspace_member_pattern_matches(

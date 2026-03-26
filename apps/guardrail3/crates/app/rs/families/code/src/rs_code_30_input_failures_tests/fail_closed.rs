@@ -1,7 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use guardrail3_domain_report::Severity;
 use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
+use guardrail3_domain_report::Severity;
 
 use super::super::super::test_support::{files_for_rule, temp_root};
 
