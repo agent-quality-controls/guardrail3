@@ -10,6 +10,7 @@ This family enforces workspace-level and member-level Cargo policy inside routed
 
 - workspace lint table presence and shape
 - lint level policy and allow inventory
+- required Clippy lint baseline in Cargo lint tables, including `clippy::unwrap_used` and `clippy::expect_used`
 - lint inheritance from workspace to members
 - workspace metadata policy
 - resolver policy

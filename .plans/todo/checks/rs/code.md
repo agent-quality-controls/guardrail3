@@ -1,4 +1,4 @@
-# RS-CODE — Rust code file checker (30 implemented rules + 5 next-wave planned rules)
+# RS-CODE — Rust code file checker (29 implemented rules + 5 next-wave planned rules)
 
 **Input:** *.rs files (syn AST parsed)
 **Parser:** syn crate (Rust AST)
@@ -31,7 +31,6 @@
 | New ID | Old ID | Severity | What | Status |
 |--------|--------|----------|------|--------|
 | RS-CODE-13 | R43 | Warn/Info | todo!/unimplemented! macros (Warn). unreachable! in non-test (Info). AST-based. | Implemented |
-| RS-CODE-14 | R44 | Warn | .unwrap()/.expect() usage. AST-based. | Implemented |
 | RS-CODE-15 | R58 | Error | Direct `std::fs` import or inline call. Skips src/fs.rs and test files. AST-based. | Implemented |
 
 ## New rules from audit
@@ -274,6 +273,7 @@ Should error:
 | Finding | Why rejected |
 |---------|-------------|
 | `dbg!` macro source scan | Division of labor — add `clippy::dbg_macro` to RS-CARGO expected lints instead. |
+| `.unwrap()` / `.expect()` source scan | Division of labor — enforce `clippy::unwrap_used` and `clippy::expect_used` in RS-CARGO/RS-CLIPPY instead of duplicating Clippy in AST scanning. |
 | `unsafe` inside `macro_rules!` | R53 `unsafe_code = "forbid"` catches at compile time. Known limitation, documented. |
 | `.unwrap_or_default()` | Context-dependent, too many false positives. Code review territory. |
 | Deep nesting (>4 levels) | Fragile from AST, file length limit covers symptoms. |
@@ -392,7 +392,7 @@ pub struct UnsafeCodeLintInput<'a> {
 }
 ```
 
-Rules 01-11 and 13-29 should run on one `RustCodeFileInput`.
+Rules 01-11 and 13, 15-29 should run on one `RustCodeFileInput`.
 
 Rule 12 should run on one `UnsafeCodeLintInput`.
 
@@ -408,7 +408,8 @@ Recommended execution buckets:
 - structure bucket:
   - `RS-CODE-09` through `RS-CODE-11`
 - quality bucket:
-  - `RS-CODE-13` through `RS-CODE-29`
+  - `RS-CODE-13`
+  - `RS-CODE-15` through `RS-CODE-29`
 
 `RS-CODE-12` should run once from Cargo/workspace lint facts, outside the per-file loop.
 
@@ -443,7 +444,6 @@ Recommended order:
    - `RS-CODE-10`
    - `RS-CODE-11`
    - `RS-CODE-13`
-   - `RS-CODE-14`
 5. add `RS-CODE-12` separately from Cargo lint facts
 6. then migrate the attribute-heavy rules:
    - `RS-CODE-01` through `RS-CODE-08`

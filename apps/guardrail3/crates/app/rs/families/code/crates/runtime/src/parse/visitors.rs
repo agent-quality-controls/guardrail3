@@ -1,16 +1,10 @@
-use super::helpers::{is_cfg_test_attr, path_to_string, path_to_string_from_use_tree, span_line};
+use super::helpers::{path_to_string, path_to_string_from_use_tree, span_line};
 use super::types::{FacadeBodyItemInfo, LargeTypeItem as LargeTypeFact, TraitMethodCountInfo};
 use syn::spanned::Spanned;
 use syn::visit::Visit;
 
 pub fn find_forbidden_macros(ast: &syn::File) -> Vec<(usize, String)> {
     let mut visitor = ForbiddenMacroVisitor { out: Vec::new() };
-    visitor.visit_file(ast);
-    visitor.out
-}
-
-pub fn find_unwrap_expect(ast: &syn::File) -> Vec<(usize, String)> {
-    let mut visitor = UnwrapExpectVisitor::default();
     visitor.visit_file(ast);
     visitor.out
 }
@@ -117,12 +111,6 @@ struct ForbiddenMacroVisitor {
     out: Vec<(usize, String)>,
 }
 
-#[derive(Default)]
-struct UnwrapExpectVisitor {
-    out: Vec<(usize, String)>,
-    in_cfg_test: bool,
-}
-
 struct LargeTypeVisitor {
     out: Vec<LargeTypeFact>,
 }
@@ -141,81 +129,6 @@ impl<'ast> Visit<'ast> for ForbiddenMacroVisitor {
         syn::visit::visit_macro(self, macro_call);
     }
 }
-
-impl UnwrapExpectVisitor {
-    fn save_and_apply(&mut self, attrs: &[syn::Attribute]) -> bool {
-        let was = self.in_cfg_test;
-        self.in_cfg_test |= attrs.iter().any(is_cfg_test_attr);
-        was
-    }
-
-    fn restore(&mut self, was: bool) {
-        self.in_cfg_test = was;
-    }
-}
-
-impl<'ast> Visit<'ast> for UnwrapExpectVisitor {
-    fn visit_item_fn(&mut self, item_fn: &'ast syn::ItemFn) {
-        let was = self.save_and_apply(&item_fn.attrs);
-        syn::visit::visit_item_fn(self, item_fn);
-        self.restore(was);
-    }
-
-    fn visit_impl_item_fn(&mut self, item_fn: &'ast syn::ImplItemFn) {
-        let was = self.save_and_apply(&item_fn.attrs);
-        syn::visit::visit_impl_item_fn(self, item_fn);
-        self.restore(was);
-    }
-
-    fn visit_item_mod(&mut self, item_mod: &'ast syn::ItemMod) {
-        let was = self.save_and_apply(&item_mod.attrs);
-        syn::visit::visit_item_mod(self, item_mod);
-        self.restore(was);
-    }
-
-    fn visit_local(&mut self, local: &'ast syn::Local) {
-        let was = self.save_and_apply(&local.attrs);
-        syn::visit::visit_local(self, local);
-        self.restore(was);
-    }
-
-    fn visit_expr_method_call(&mut self, method_call: &'ast syn::ExprMethodCall) {
-        let method = method_call.method.to_string();
-        let skip = match method.as_str() {
-            "unwrap" | "expect" => self.in_cfg_test,
-            _ => true,
-        };
-        if !skip {
-            self.out
-                .push((span_line(method_call.method.span()), method));
-        }
-        syn::visit::visit_expr_method_call(self, method_call);
-    }
-
-    fn visit_expr_call(&mut self, expr_call: &'ast syn::ExprCall) {
-        if !self.in_cfg_test {
-            if let syn::Expr::Path(expr_path) = &*expr_call.func {
-                let mut segments = expr_path.path.segments.iter();
-                let first = segments.next();
-                let second = segments.next();
-                if first.is_some() && second.is_some() {
-                    let method = expr_path
-                        .path
-                        .segments
-                        .last()
-                        .map(|segment| segment.ident.to_string());
-                    if let Some(method) = method {
-                        if matches!(method.as_str(), "unwrap" | "expect") {
-                            self.out.push((span_line(expr_path.path.span()), method));
-                        }
-                    }
-                }
-            }
-        }
-        syn::visit::visit_expr_call(self, expr_call);
-    }
-}
-
 
 impl<'ast> Visit<'ast> for LargeTypeVisitor {
     fn visit_item_struct(&mut self, item_struct: &'ast syn::ItemStruct) {
