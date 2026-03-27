@@ -1,0 +1,10 @@
+[package]
+name = "guardrail3-app-rs-family-code-assertions"
+version = "0.0.0"
+edition = "2024"
+
+[lints]
+workspace = true
+
+[dependencies]
+"guardrail3-app-rs-family-code" = { path = "../runtime" }

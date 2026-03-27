@@ -9,7 +9,7 @@ use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::CheckResult;
 use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
-const GOLDEN_REL: &str = "../../../../../tests/fixtures/r_arch_01/golden";
+const GOLDEN_REL: &str = "../../../../../../../tests/fixtures/r_arch_01/golden";
 
 pub fn temp_root(slug: &str) -> PathBuf {
     let unique = format!(
