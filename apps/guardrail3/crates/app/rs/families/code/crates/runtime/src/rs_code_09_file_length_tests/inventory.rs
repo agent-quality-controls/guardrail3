@@ -13,7 +13,7 @@ fn attacks_file_length_using_real_owned_file_surface() {
     let root = fixture.path();
 
     let rel = "apps/backend/crates/adapters/inbound/rest/src/lib.rs";
-    let content = std::fs::read_to_string(root.join(rel)).expect("read source");
+    let content = test_support::read_file(root, rel);
     let filler = "fn filler() {}\n".repeat(501);
 
     write_file(root, rel, &format!("{content}\n{filler}"));

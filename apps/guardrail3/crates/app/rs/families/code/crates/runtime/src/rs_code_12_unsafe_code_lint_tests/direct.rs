@@ -1,19 +1,14 @@
 use guardrail3_domain_report::Severity;
 
-use super::super::super::inputs::UnsafeCodeLintInput;
-use super::super::check;
+use guardrail3_app_rs_family_code_assertions::rs_code_12_unsafe_code_lint::{assert_normalized_empty, assert_normalized_len, findings};
+use super::super::check_unsafe_code_lint;
 
 #[test]
 fn errors_on_deny_level() {
-    let input = UnsafeCodeLintInput {
-        cargo_rel_path: "Cargo.toml",
-        lint_level: Some("deny"),
-    };
-    let mut results = Vec::new();
+    let raw_results = check_unsafe_code_lint("Cargo.toml", Some("deny"));
+    let results = findings(&raw_results);
 
-    check(&input, &mut results);
-
-    assert_eq!(results.len(), 1);
+    assert_normalized_len(&results, 1);
     assert_eq!(results[0].id, "RS-CODE-12");
     assert_eq!(results[0].severity, Severity::Error);
     assert_eq!(results[0].file.as_deref(), Some("Cargo.toml"));
@@ -27,13 +22,8 @@ fn errors_on_deny_level() {
 
 #[test]
 fn skips_unexpected_workspace_lint_levels() {
-    let input = UnsafeCodeLintInput {
-        cargo_rel_path: "Cargo.toml",
-        lint_level: Some("warn"),
-    };
-    let mut results = Vec::new();
+    let raw_results = check_unsafe_code_lint("Cargo.toml", Some("warn"));
+    let results = findings(&raw_results);
 
-    check(&input, &mut results);
-
-    assert!(results.is_empty());
+    assert_normalized_empty(&results);
 }

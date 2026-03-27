@@ -1,20 +1,17 @@
-use std::collections::BTreeSet;
-
 use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
 
-use super::super::super::test_support::{files_for_rule, temp_root};
+use guardrail3_app_rs_family_code_assertions::rs_code_30_input_failures::{assert_no_hits};
+use super::super::run_tree;
+use test_support::temp_root;
+use test_support::{create_dir_all, write_path};
 
 #[test]
 fn golden_tree_has_no_code_input_failures() {
     let root = temp_root("rs-code-30-golden");
     let source_rel = "src/lib.rs";
     let source_abs = root.join(source_rel);
-    std::fs::create_dir_all(source_abs.parent().expect("parent")).expect("create source dir");
-    std::fs::write(
-        &source_abs,
-        "pub fn parse() -> Result<(), String> { Ok(()) }",
-    )
-    .expect("write source");
+    create_dir_all(source_abs.parent().unwrap_or(root.as_path()));
+    write_path(&source_abs, "pub fn parse() -> Result<(), String> { Ok(()) }");
 
     let tree = ProjectTree {
         root: root.clone(),
@@ -50,14 +47,7 @@ fn golden_tree_has_no_code_input_failures() {
         ]),
     };
 
-    let results = crate::test_support::run_tree(&tree);
-    let rs_code_30_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-30")
-        .collect::<Vec<_>>();
+    let results = run_tree(&tree);
+    assert_no_hits(&results);
 
-    assert_eq!(files_for_rule(&results, "RS-CODE-30"), BTreeSet::new());
-    assert!(rs_code_30_results.is_empty());
-
-    std::fs::remove_dir_all(&root).expect("remove temp tree");
 }

@@ -498,6 +498,7 @@ dependencies = [
  "guardrail3-app-core",
  "guardrail3-app-rs-ast",
  "guardrail3-app-rs-family-code-assertions",
+ "guardrail3-app-rs-family-code-test-support",
  "guardrail3-app-rs-family-mapper",
  "guardrail3-app-rs-placement",
  "guardrail3-domain-config",
@@ -512,7 +513,6 @@ dependencies = [
  "semver",
  "serde_yaml",
  "syn",
- "tempfile",
  "toml",
 ]
 
@@ -521,11 +521,15 @@ name = "guardrail3-app-rs-family-code-assertions"
 version = "0.0.0"
 dependencies = [
  "guardrail3-app-rs-family-code",
+ "guardrail3-domain-report",
 ]
 
 [[package]]
 name = "guardrail3-app-rs-family-code-test-support"
 version = "0.0.0"
+dependencies = [
+ "guardrail3-shared-fs",
+]
 
 [[package]]
 name = "guardrail3-app-rs-family-deny"

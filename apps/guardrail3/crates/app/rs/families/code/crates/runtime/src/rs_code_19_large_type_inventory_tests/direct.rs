@@ -1,8 +1,7 @@
 use guardrail3_domain_report::Severity;
 
-use super::super::super::inputs::RustCodeFileInput;
-use super::super::super::parse::parse_rust_file;
-use super::super::check;
+use guardrail3_app_rs_family_code_assertions::rs_code_19_large_type_inventory::{assert_normalized_len, findings};
+use super::super::check_source;
 
 #[test]
 fn inventories_large_structs() {
@@ -11,19 +10,10 @@ fn inventories_large_structs() {
         fields.push_str(&format!("field_{index}: i32,\n"));
     }
     let content = format!("struct Big {{\n{fields}}}");
-    let ast = parse_rust_file(&content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/foo.rs",
-        content: &content,
-        ast: &ast,
-        is_test: false,
-        profile_name: None,
-    };
-    let mut results = Vec::new();
+    let raw_results = check_source("src/foo.rs", &content, false);
+    let results = findings(&raw_results);
 
-    check(&input, &mut results);
-
-    assert_eq!(results.len(), 1);
+    assert_normalized_len(&results, 1);
     let result = &results[0];
     assert_eq!(result.id, "RS-CODE-19");
     assert_eq!(result.severity, Severity::Info);
@@ -44,19 +34,10 @@ fn inventories_large_enums() {
         variants.push_str(&format!("Variant{index},\n"));
     }
     let content = format!("enum BigEnum {{\n{variants}}}");
-    let ast = parse_rust_file(&content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/foo.rs",
-        content: &content,
-        ast: &ast,
-        is_test: false,
-        profile_name: None,
-    };
-    let mut results = Vec::new();
+    let raw_results = check_source("src/foo.rs", &content, false);
+    let results = findings(&raw_results);
 
-    check(&input, &mut results);
-
-    assert_eq!(results.len(), 1);
+    assert_normalized_len(&results, 1);
     let result = &results[0];
     assert_eq!(result.id, "RS-CODE-19");
     assert_eq!(result.severity, Severity::Info);
@@ -80,19 +61,10 @@ fn inventories_large_tuple_structs() {
         fields.push_str("i32");
     }
     let content = format!("struct BigTuple({fields});");
-    let ast = parse_rust_file(&content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/foo.rs",
-        content: &content,
-        ast: &ast,
-        is_test: false,
-        profile_name: None,
-    };
-    let mut results = Vec::new();
+    let raw_results = check_source("src/foo.rs", &content, false);
+    let results = findings(&raw_results);
 
-    check(&input, &mut results);
-
-    assert_eq!(results.len(), 1);
+    assert_normalized_len(&results, 1);
     let result = &results[0];
     assert_eq!(result.id, "RS-CODE-19");
     assert_eq!(result.severity, Severity::Info);

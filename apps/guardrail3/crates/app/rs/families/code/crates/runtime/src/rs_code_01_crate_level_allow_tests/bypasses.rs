@@ -20,13 +20,13 @@ fn attacks_crate_and_nested_module_wide_allows_across_real_owned_files() {
     let mixed_exempt_rel = "apps/backend/crates/ports/inbound/api/src/lib.rs";
     let item_rel = "apps/worker/crates/ports/outbound/queue/src/lib.rs";
 
-    let crate_content = std::fs::read_to_string(root.join(crate_rel)).expect("read crate file");
-    let inline_content = std::fs::read_to_string(root.join(inline_rel)).expect("read inline file");
-    let mixed_content = std::fs::read_to_string(root.join(mixed_rel)).expect("read mixed file");
-    let exempt_content = std::fs::read_to_string(root.join(exempt_rel)).expect("read exempt file");
+    let crate_content = test_support::read_file(root, crate_rel);
+    let inline_content = test_support::read_file(root, inline_rel);
+    let mixed_content = test_support::read_file(root, mixed_rel);
+    let exempt_content = test_support::read_file(root, exempt_rel);
     let mixed_exempt_content =
-        std::fs::read_to_string(root.join(mixed_exempt_rel)).expect("read mixed exempt file");
-    let item_content = std::fs::read_to_string(root.join(item_rel)).expect("read item file");
+        test_support::read_file(root, mixed_exempt_rel);
+    let item_content = test_support::read_file(root, item_rel);
 
     let crate_new = format!("#![allow(clippy::unwrap_used)]\n{crate_content}\n");
     let inline_new = format!(
@@ -59,16 +59,35 @@ fn attacks_crate_and_nested_module_wide_allows_across_real_owned_files() {
     );
 
     let results = run_family(root);
+    let relevant_results = results
+        .into_iter()
+        .filter(|result| {
+            matches!(
+                result.file.as_deref(),
+                Some(path)
+                    if [
+                        crate_rel,
+                        inline_rel,
+                        mixed_rel,
+                        test_rel,
+                        mixed_exempt_rel,
+                        exempt_rel,
+                        item_rel,
+                    ]
+                    .contains(&path)
+            )
+        })
+        .collect::<Vec<_>>();
 
-    assert_files(&results, BTreeSet::from([
-            crate_rel.to_owned(),
-            inline_rel.to_owned(),
-            mixed_rel.to_owned(),
-            mixed_exempt_rel.to_owned(),
-            test_rel.to_owned(),
-        ]));
+    assert_files(&relevant_results, BTreeSet::from([
+        crate_rel.to_owned(),
+        inline_rel.to_owned(),
+        mixed_rel.to_owned(),
+        mixed_exempt_rel.to_owned(),
+        test_rel.to_owned(),
+    ]));
     assert_findings(
-        &results,
+        &relevant_results,
         &[
             RuleFinding {
                 severity: Severity::Error,

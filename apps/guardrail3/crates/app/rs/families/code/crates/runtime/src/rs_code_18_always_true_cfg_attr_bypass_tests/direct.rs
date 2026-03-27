@@ -1,8 +1,7 @@
 use guardrail3_domain_report::Severity;
 
-use super::super::super::inputs::RustCodeFileInput;
-use super::super::super::parse::parse_rust_file;
-use super::super::check;
+use guardrail3_app_rs_family_code_assertions::rs_code_18_always_true_cfg_attr_bypass::{assert_normalized_len, findings};
+use super::super::check_source;
 
 #[test]
 fn errors_on_exhaustive_unix_windows_cfg_attr_allow() {
@@ -10,19 +9,10 @@ fn errors_on_exhaustive_unix_windows_cfg_attr_allow() {
 #[cfg_attr(any(unix, windows), allow(clippy::unwrap_used))]
 fn foo() {}
 "#;
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/foo.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: None,
-    };
-    let mut results = Vec::new();
+    let raw_results = check_source("src/foo.rs", content, false);
+    let results = findings(&raw_results);
 
-    check(&input, &mut results);
-
-    assert_eq!(results.len(), 1);
+    assert_normalized_len(&results, 1);
     assert_eq!(results[0].id, "RS-CODE-18");
     assert_eq!(results[0].severity, Severity::Error);
     assert_eq!(results[0].file.as_deref(), Some("src/foo.rs"));
@@ -40,19 +30,10 @@ fn errors_on_empty_all_cfg_attr_allow() {
 #[cfg_attr(all(), allow(clippy::expect_used))]
 fn foo() {}
 "#;
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/foo.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: None,
-    };
-    let mut results = Vec::new();
+    let raw_results = check_source("src/foo.rs", content, false);
+    let results = findings(&raw_results);
 
-    check(&input, &mut results);
-
-    assert_eq!(results.len(), 1);
+    assert_normalized_len(&results, 1);
     assert_eq!(results[0].id, "RS-CODE-18");
     assert_eq!(results[0].severity, Severity::Error);
     assert_eq!(results[0].file.as_deref(), Some("src/foo.rs"));

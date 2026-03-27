@@ -19,13 +19,13 @@ fn skips_documented_and_cross_rule_near_misses() {
     let documented_mod_rel = "apps/backend/crates/ports/outbound/repo/src/lib.rs";
 
     let documented_content =
-        std::fs::read_to_string(root.join(documented_rel)).expect("read documented file");
-    let nested_content = std::fs::read_to_string(root.join(nested_rel)).expect("read nested file");
-    let mixed_content = std::fs::read_to_string(root.join(mixed_rel)).expect("read mixed file");
+        test_support::read_file(root, documented_rel);
+    let nested_content = test_support::read_file(root, nested_rel);
+    let mixed_content = test_support::read_file(root, mixed_rel);
     let cfg_attr_content =
-        std::fs::read_to_string(root.join(cfg_attr_rel)).expect("read cfg_attr file");
+        test_support::read_file(root, cfg_attr_rel);
     let documented_mod_content =
-        std::fs::read_to_string(root.join(documented_mod_rel)).expect("read documented mod file");
+        test_support::read_file(root, documented_mod_rel);
 
     write_file(
         root,
@@ -69,9 +69,7 @@ fn skips_documented_and_cross_rule_near_misses() {
     );
     let undocumented_line = mixed_new
         .lines()
-        .position(|line| line.contains("#[allow(clippy::expect_used)]"))
-        .expect("mixed undocumented allow line")
-        + 1;
+        .position(|line| line.contains("#[allow(clippy::expect_used)]")).map(|index| index + 1).unwrap_or_default();
 
     assert_files(&results, BTreeSet::from([mixed_rel.to_owned()]));
     assert_findings(
@@ -99,13 +97,13 @@ fn skips_broad_documented_item_level_allows_across_real_owned_files() {
     let trait_rel = "apps/backend/crates/ports/outbound/events/src/lib.rs";
 
     let top_level_content =
-        std::fs::read_to_string(root.join(top_level_rel)).expect("read top-level documented file");
+        test_support::read_file(root, top_level_rel);
     let nested_content =
-        std::fs::read_to_string(root.join(nested_rel)).expect("read nested documented file");
+        test_support::read_file(root, nested_rel);
     let grouped_content =
-        std::fs::read_to_string(root.join(grouped_rel)).expect("read grouped documented file");
-    let impl_content = std::fs::read_to_string(root.join(impl_rel)).expect("read impl file");
-    let trait_content = std::fs::read_to_string(root.join(trait_rel)).expect("read trait file");
+        test_support::read_file(root, grouped_rel);
+    let impl_content = test_support::read_file(root, impl_rel);
+    let trait_content = test_support::read_file(root, trait_rel);
 
     write_file(
         root,
@@ -153,7 +151,7 @@ fn skips_non_item_allow_surfaces() {
     let root = fixture.path();
 
     let rel = "apps/backend/crates/adapters/outbound/queue/src/lib.rs";
-    let content = std::fs::read_to_string(root.join(rel)).expect("read non-item surface file");
+    let content = test_support::read_file(root, rel);
     let new_content = format!(
         "{content}\npub fn non_item_probe(input: Option<&str>) -> usize {{\n    #[allow(clippy::unwrap_used)]\n    let value = input.unwrap_or(\"fallback\");\n    match value.len() {{\n        #[allow(clippy::wildcard_enum_match_arm)]\n        _ => value.len(),\n    }}\n}}\n"
     );
@@ -170,7 +168,7 @@ fn skips_documented_supported_non_function_item_kinds() {
     let root = fixture.path();
 
     let rel = "apps/devctl/crates/ports/outbound/traits/src/lib.rs";
-    let content = std::fs::read_to_string(root.join(rel)).expect("read supported item kinds file");
+    let content = test_support::read_file(root, rel);
     let new_content = format!(
         "{content}\n#[allow(clippy::module_name_repetitions)] // reason: exported config constant\npub const DOCUMENTED_CONST_PROBE: usize = 1;\n#[allow(clippy::module_name_repetitions)] // reason: cached process state\npub static DOCUMENTED_STATIC_PROBE: &str = \"ready\";\n#[allow(clippy::module_name_repetitions)] // reason: compatibility alias\npub type DocumentedAliasProbe = usize;\n#[allow(clippy::module_name_repetitions)] // reason: trait alias bridge\npub trait DocumentedTraitAliasProbe = Send + Sync;\n#[allow(unused_imports)] // reason: adapter import seam\nuse std::fmt as _;\n#[allow(clippy::module_name_repetitions)] // reason: ffi compatibility shape\npub union DocumentedUnionProbe {{\n    bytes: [u8; 4],\n    word: u32,\n}}\n#[allow(clippy::module_name_repetitions)] // reason: DTO naming compatibility\npub struct DocumentedStructProbe;\n#[allow(clippy::module_name_repetitions)] // reason: state machine naming compatibility\npub enum DocumentedEnumProbe {{\n    Ready,\n}}\ntrait AssocBoundary {{\n    #[allow(clippy::module_name_repetitions)] // reason: trait-associated constant contract\n    const LIMIT: usize;\n    #[allow(clippy::module_name_repetitions)] // reason: trait-associated type contract\n    type Output;\n}}\nstruct DocumentedAssocProbe;\nimpl AssocBoundary for DocumentedAssocProbe {{\n    #[allow(clippy::module_name_repetitions)] // reason: trait-associated constant bridge\n    const LIMIT: usize = 1;\n    #[allow(clippy::module_name_repetitions)] // reason: trait-associated type bridge\n    type Output = usize;\n}}\n"
     );

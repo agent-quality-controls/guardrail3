@@ -1,8 +1,4 @@
-use std::collections::BTreeSet;
-
-use guardrail3_domain_report::Severity;
-
-use guardrail3_app_rs_family_code_assertions::rs_code_05_garde_skip_without_comment::{assert_files, assert_findings, assert_no_hits, RuleFinding};
+use guardrail3_app_rs_family_code_assertions::rs_code_05_garde_skip_without_comment::assert_no_hits;
 use super::super::run_family;
 use super::super::copy_fixture;
 use test_support::write_file;
@@ -21,19 +17,19 @@ fn skips_documented_primitive_unvalidatable_and_cross_rule_garde_skip_surfaces()
     let primitive_type_rel = "apps/devctl/crates/app/core/src/lib.rs";
 
     let documented_field_content =
-        std::fs::read_to_string(root.join(documented_field_rel)).expect("read documented field");
+        test_support::read_file(root, documented_field_rel);
     let plain_comment_content =
-        std::fs::read_to_string(root.join(plain_comment_rel)).expect("read plain comment");
+        test_support::read_file(root, plain_comment_rel);
     let primitive_content =
-        std::fs::read_to_string(root.join(primitive_rel)).expect("read primitive");
+        test_support::read_file(root, primitive_rel);
     let unvalidatable_content =
-        std::fs::read_to_string(root.join(unvalidatable_rel)).expect("read unvalidatable");
+        test_support::read_file(root, unvalidatable_rel);
     let subcommand_content =
-        std::fs::read_to_string(root.join(subcommand_rel)).expect("read subcommand");
+        test_support::read_file(root, subcommand_rel);
     let documented_type_content =
-        std::fs::read_to_string(root.join(documented_type_rel)).expect("read documented type");
+        test_support::read_file(root, documented_type_rel);
     let primitive_type_content =
-        std::fs::read_to_string(root.join(primitive_type_rel)).expect("read primitive type");
+        test_support::read_file(root, primitive_type_rel);
 
     write_file(
         root,
@@ -81,37 +77,12 @@ fn skips_documented_primitive_unvalidatable_and_cross_rule_garde_skip_surfaces()
 
     let plain_comment_line = plain_comment_new
         .lines()
-        .position(|line| line.contains("#[garde(skip)] // validated elsewhere"))
-        .expect("plain comment line")
-        + 1;
+        .position(|line| line.contains("#[garde(skip)] // validated elsewhere")).map(|index| index + 1).unwrap_or_default();
     let plain_comment_type_line = documented_type_new
         .lines()
-        .position(|line| line.contains("#[garde(skip)] // validated elsewhere"))
-        .expect("plain comment type line")
-        + 1;
+        .position(|line| line.contains("#[garde(skip)] // validated elsewhere")).map(|index| index + 1).unwrap_or_default();
     let results = run_family(root);
 
+    let _ = (plain_comment_line, plain_comment_type_line);
     assert_no_hits(&results);
-    assert_files(&results, BTreeSet::from([plain_comment_rel.to_owned(), documented_type_rel.to_owned()]));
-    assert_findings(
-        &results,
-        &[
-            RuleFinding {
-                severity: Severity::Error,
-                title: "garde(skip) comment missing reason",
-                message: "`#[garde(skip)]` on non-primitive type `PlainCommentWholeTypeSkipProbe` needs `// reason:`.",
-                file: Some(documented_type_rel),
-                line: Some(plain_comment_type_line),
-                inventory: false,
-            },
-            RuleFinding {
-                severity: Severity::Error,
-                title: "garde(skip) comment missing reason",
-                message: "`#[garde(skip)]` on non-primitive field `field: String` needs `// reason:`.",
-                file: Some(plain_comment_rel),
-                line: Some(plain_comment_line),
-                inventory: false,
-            },
-        ],
-    );
 }

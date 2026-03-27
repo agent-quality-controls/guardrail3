@@ -1,6 +1,7 @@
-use std::collections::BTreeSet;
-
-use super::super::super::test_support::{copy_fixture, files_for_rule, run_family, write_file};
+use guardrail3_app_rs_family_code_assertions::rs_code_19_large_type_inventory::{assert_no_hits};
+use super::super::run_family;
+use super::super::copy_fixture;
+use test_support::write_file;
 
 #[test]
 fn skips_types_that_stay_at_or_below_threshold_in_named_tuple_and_unit_forms() {
@@ -11,9 +12,9 @@ fn skips_types_that_stay_at_or_below_threshold_in_named_tuple_and_unit_forms() {
     let worker_rel = "apps/worker/crates/domain/jobs/src/lib.rs";
 
     let backend_content =
-        std::fs::read_to_string(root.join(backend_rel)).expect("read backend source");
+        test_support::read_file(root, backend_rel);
     let worker_content =
-        std::fs::read_to_string(root.join(worker_rel)).expect("read worker source");
+        test_support::read_file(root, worker_rel);
 
     let mut struct_fields = String::new();
     for index in 0..15 {
@@ -48,11 +49,5 @@ fn skips_types_that_stay_at_or_below_threshold_in_named_tuple_and_unit_forms() {
     );
 
     let results = run_family(root);
-    let rs_code_19_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-19")
-        .collect::<Vec<_>>();
-
-    assert_eq!(files_for_rule(&results, "RS-CODE-19"), BTreeSet::new());
-    assert!(rs_code_19_results.is_empty());
+    assert_no_hits(&results);
 }

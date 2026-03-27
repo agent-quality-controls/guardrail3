@@ -1,8 +1,7 @@
-use std::collections::BTreeSet;
-
-use guardrail3_domain_report::Severity;
-
-use super::super::super::test_support::{copy_fixture, files_for_rule, run_family, write_file};
+use guardrail3_app_rs_family_code_assertions::rs_code_19_large_type_inventory::assert_inventories_large_struct_and_enum_shapes_across_owned_files_with_exact_metadata;
+use super::super::run_family;
+use super::super::copy_fixture;
+use test_support::write_file;
 
 #[test]
 fn inventories_large_struct_and_enum_shapes_across_owned_files_with_exact_metadata() {
@@ -13,9 +12,9 @@ fn inventories_large_struct_and_enum_shapes_across_owned_files_with_exact_metada
     let worker_rel = "apps/worker/crates/domain/jobs/src/lib.rs";
 
     let backend_content =
-        std::fs::read_to_string(root.join(backend_rel)).expect("read backend source");
+        test_support::read_file(root, backend_rel);
     let worker_content =
-        std::fs::read_to_string(root.join(worker_rel)).expect("read worker source");
+        test_support::read_file(root, worker_rel);
 
     let mut struct_fields = String::new();
     for index in 0..16 {
@@ -35,55 +34,16 @@ fn inventories_large_struct_and_enum_shapes_across_owned_files_with_exact_metada
 
     let backend_line = backend_new
         .lines()
-        .position(|line| line.contains("struct PlannerAudit"))
-        .expect("backend line")
-        + 1;
+        .position(|line| line.contains("struct PlannerAudit")).map(|index| index + 1).unwrap_or_default();
     let worker_line = worker_new
         .lines()
-        .position(|line| line.contains("enum QueueAudit"))
-        .expect("worker line")
-        + 1;
+        .position(|line| line.contains("enum QueueAudit")).map(|index| index + 1).unwrap_or_default();
 
-    let results = run_family(root);
-    let mut rs_code_19_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-19")
-        .map(|result| {
-            (
-                result.file.clone().expect("file"),
-                result.line,
-                format!("{:?}", result.severity),
-                result.title.clone(),
-                result.message.clone(),
-                result.inventory,
-            )
-        })
-        .collect::<Vec<_>>();
-    rs_code_19_results.sort();
-
-    assert_eq!(
-        files_for_rule(&results, "RS-CODE-19"),
-        BTreeSet::from([backend_rel.to_owned(), worker_rel.to_owned()])
-    );
-    assert_eq!(
-        rs_code_19_results,
-        vec![
-            (
-                backend_rel.to_owned(),
-                Some(backend_line),
-                format!("{:?}", Severity::Info),
-                "large type inventory".to_owned(),
-                "struct `PlannerAudit` has 16 fields (inventory threshold 15).".to_owned(),
-                true,
-            ),
-            (
-                worker_rel.to_owned(),
-                Some(worker_line),
-                format!("{:?}", Severity::Info),
-                "large type inventory".to_owned(),
-                "enum `QueueAudit` has 21 items (inventory threshold 20).".to_owned(),
-                true,
-            ),
-        ]
+    assert_inventories_large_struct_and_enum_shapes_across_owned_files_with_exact_metadata(
+        &run_family(root),
+        backend_rel,
+        worker_rel,
+        backend_line,
+        worker_line,
     );
 }

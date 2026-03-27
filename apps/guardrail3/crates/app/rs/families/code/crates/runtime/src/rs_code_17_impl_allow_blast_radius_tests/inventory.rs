@@ -1,8 +1,7 @@
-use std::collections::BTreeSet;
-
-use guardrail3_domain_report::Severity;
-
-use super::super::super::test_support::{copy_fixture, files_for_rule, run_family, write_file};
+use guardrail3_app_rs_family_code_assertions::rs_code_17_impl_allow_blast_radius::assert_attacks_impl_level_allows_across_multiple_owned_rust_files_with_exact_metadata;
+use super::super::run_family;
+use super::super::copy_fixture;
+use test_support::write_file;
 
 #[test]
 fn attacks_impl_level_allows_across_multiple_owned_rust_files_with_exact_metadata() {
@@ -13,9 +12,9 @@ fn attacks_impl_level_allows_across_multiple_owned_rust_files_with_exact_metadat
     let worker_rel = "apps/worker/crates/app/processor/src/lib.rs";
 
     let backend_content =
-        std::fs::read_to_string(root.join(backend_rel)).expect("read backend source");
+        test_support::read_file(root, backend_rel);
     let worker_content =
-        std::fs::read_to_string(root.join(worker_rel)).expect("read worker source");
+        test_support::read_file(root, worker_rel);
 
     let backend_new = format!(
         "{backend_content}\n\nstruct ImplAudit;\n#[allow(clippy::too_many_lines)]\nimpl ImplAudit {{\n    fn first(&self) {{}}\n    fn second(&self) {{}}\n    fn third(&self) {{}}\n    fn fourth(&self) {{}}\n}}\n"
@@ -29,77 +28,23 @@ fn attacks_impl_level_allows_across_multiple_owned_rust_files_with_exact_metadat
 
     let backend_line = backend_new
         .lines()
-        .position(|line| line.contains("#[allow(clippy::too_many_lines)]"))
-        .expect("backend allow line")
-        + 1;
+        .position(|line| line.contains("#[allow(clippy::too_many_lines)]")).map(|index| index + 1).unwrap_or_default();
     let worker_grouped_line = worker_new
         .lines()
         .position(|line| {
             line.contains("#[allow(clippy::too_many_arguments, clippy::too_many_lines)]")
         })
-        .expect("worker grouped allow line")
-        + 1;
+        .map(|index| index + 1).unwrap_or_default();
     let worker_secondary_line = worker_new
         .lines()
-        .position(|line| line.contains("#[allow(clippy::type_complexity)]"))
-        .expect("worker secondary allow line")
-        + 1;
+        .position(|line| line.contains("#[allow(clippy::type_complexity)]")).map(|index| index + 1).unwrap_or_default();
 
-    let results = run_family(root);
-    let mut rs_code_17_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-17")
-        .map(|result| {
-            (
-                result.file.clone().expect("file"),
-                result.line,
-                format!("{:?}", result.severity),
-                result.title.clone(),
-                result.message.clone(),
-            )
-        })
-        .collect::<Vec<_>>();
-    rs_code_17_results.sort();
-
-    assert_eq!(
-        files_for_rule(&results, "RS-CODE-17"),
-        BTreeSet::from([backend_rel.to_owned(), worker_rel.to_owned()])
-    );
-    assert_eq!(
-        rs_code_17_results,
-        vec![
-            (
-                backend_rel.to_owned(),
-                Some(backend_line),
-                format!("{:?}", Severity::Error),
-                "blanket impl-level allow".to_owned(),
-                "`#[allow(clippy::too_many_lines)]` covers an impl block with 4 methods. Apply lint suppressions to individual methods instead."
-                    .to_owned(),
-            ),
-            (
-                worker_rel.to_owned(),
-                Some(worker_grouped_line),
-                format!("{:?}", Severity::Error),
-                "blanket impl-level allow".to_owned(),
-                "`#[allow(clippy::too_many_arguments)]` covers an impl block with 5 methods. Apply lint suppressions to individual methods instead."
-                    .to_owned(),
-            ),
-            (
-                worker_rel.to_owned(),
-                Some(worker_grouped_line),
-                format!("{:?}", Severity::Error),
-                "blanket impl-level allow".to_owned(),
-                "`#[allow(clippy::too_many_lines)]` covers an impl block with 5 methods. Apply lint suppressions to individual methods instead."
-                    .to_owned(),
-            ),
-            (
-                worker_rel.to_owned(),
-                Some(worker_secondary_line),
-                format!("{:?}", Severity::Error),
-                "blanket impl-level allow".to_owned(),
-                "`#[allow(clippy::type_complexity)]` covers an impl block with 4 methods. Apply lint suppressions to individual methods instead."
-                    .to_owned(),
-            ),
-        ]
+    assert_attacks_impl_level_allows_across_multiple_owned_rust_files_with_exact_metadata(
+        &run_family(root),
+        backend_rel,
+        worker_rel,
+        backend_line,
+        worker_grouped_line,
+        worker_secondary_line,
     );
 }

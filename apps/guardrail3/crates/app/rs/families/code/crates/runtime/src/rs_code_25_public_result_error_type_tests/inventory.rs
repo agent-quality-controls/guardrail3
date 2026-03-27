@@ -2,7 +2,14 @@ use std::collections::BTreeSet;
 
 use guardrail3_domain_report::Severity;
 
-use super::super::super::test_support::{copy_fixture, files_for_rule, run_family, write_file};
+use guardrail3_app_rs_family_code_assertions::rs_code_25_public_result_error_type::{
+    assert_files,
+    assert_findings,
+    RuleFinding,
+};
+use super::super::run_family;
+use super::super::copy_fixture;
+use test_support::write_file;
 
 #[test]
 fn attacks_weak_public_result_error_types_in_library_profile_files() {
@@ -11,7 +18,7 @@ fn attacks_weak_public_result_error_types_in_library_profile_files() {
 
     let package_rel = "packages/shared-types/src/lib.rs";
     let package_content =
-        std::fs::read_to_string(root.join(package_rel)).expect("read package source");
+        test_support::read_file(root, package_rel);
 
     let mutated = format!(
         "{package_content}\n\npub fn parse_shared_slug() -> Result<TenantSlug, String> {{\n    Err(\"missing tenant\".to_owned())\n}}\n"
@@ -21,38 +28,18 @@ fn attacks_weak_public_result_error_types_in_library_profile_files() {
     let results = run_family(root);
     let weak_line = mutated
         .lines()
-        .position(|line| line.contains("pub fn parse_shared_slug()"))
-        .expect("weak public result line")
-        + 1;
-    let rs_code_25_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-25")
-        .map(|result| {
-            (
-                result.file.clone(),
-                result.line,
-                result.severity,
-                result.title.clone(),
-                result.message.clone(),
-                result.inventory,
-            )
-        })
-        .collect::<Vec<_>>();
+        .position(|line| line.contains("pub fn parse_shared_slug()")).map(|index| index + 1).unwrap_or_default();
 
-    assert_eq!(
-        files_for_rule(&results, "RS-CODE-25"),
-        BTreeSet::from([package_rel.to_owned()])
-    );
-    assert_eq!(
-        rs_code_25_results,
-        vec![(
-            Some(package_rel.to_owned()),
-            Some(weak_line),
-            Severity::Warn,
-            "weak public error type".to_owned(),
-            "Public function `parse_shared_slug` returns `Result<_, String>`. Use a typed error instead."
-                .to_owned(),
-            false,
-        )]
+    assert_files(&results, BTreeSet::from([package_rel.to_owned()]));
+    assert_findings(
+        &results,
+        &[RuleFinding {
+            severity: Severity::Warn,
+            title: "weak public error type",
+            message: "Public function `parse_shared_slug` returns `Result<_, String>`. Use a typed error instead.",
+            file: Some(package_rel),
+            line: Some(weak_line),
+            inventory: false,
+        }],
     );
 }

@@ -1,4 +1,32 @@
-#![deny(warnings)]
-#![forbid(unsafe_code)]
-
 use guardrail3_app_rs_family_code as _;
+
+pub mod rs_code_01_crate_level_allow;
+pub mod rs_code_02_unused_crate_dependencies_allow;
+pub mod rs_code_03_item_level_allow_without_reason;
+pub mod rs_code_04_item_level_allow_with_reason;
+pub mod rs_code_05_garde_skip_without_comment;
+pub mod rs_code_06_garde_skip_with_comment;
+pub mod rs_code_07_exception_comment_inventory;
+pub mod rs_code_08_cfg_attr_allow_inventory;
+pub mod rs_code_09_file_length;
+pub mod rs_code_10_use_count_error;
+pub mod rs_code_11_use_count_warn;
+pub mod rs_code_12_unsafe_code_lint;
+pub mod rs_code_13_todo_macros;
+pub mod rs_code_14_unwrap_expect;
+pub mod rs_code_15_direct_fs_usage;
+pub mod rs_code_16_panic_macro;
+pub mod rs_code_17_impl_allow_blast_radius;
+pub mod rs_code_18_always_true_cfg_attr_bypass;
+pub mod rs_code_19_large_type_inventory;
+pub mod rs_code_20_extern_allow;
+pub mod rs_code_21_fs_glob_import;
+pub mod rs_code_22_deny_forbid_without_reason;
+pub mod rs_code_23_include_bypass;
+pub mod rs_code_24_path_attr;
+pub mod rs_code_25_public_result_error_type;
+pub mod rs_code_26_lib_glob_reexport;
+pub mod rs_code_27_facade_only_lib;
+pub mod rs_code_28_inline_pub_mod_in_lib;
+pub mod rs_code_29_large_trait_inventory;
+pub mod rs_code_30_input_failures;

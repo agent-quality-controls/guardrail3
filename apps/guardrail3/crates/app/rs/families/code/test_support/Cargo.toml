@@ -7,3 +7,4 @@ edition = "2024"
 workspace = true
 
 [dependencies]
+guardrail3_shared_fs = { package = "guardrail3-shared-fs", path = "../../../../../shared/fs" }

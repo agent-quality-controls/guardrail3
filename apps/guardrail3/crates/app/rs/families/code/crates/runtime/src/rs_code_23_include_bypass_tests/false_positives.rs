@@ -1,6 +1,7 @@
-use std::collections::BTreeSet;
-
-use super::super::super::test_support::{copy_fixture, files_for_rule, run_family, write_file};
+use guardrail3_app_rs_family_code_assertions::rs_code_23_include_bypass::{assert_no_hits};
+use super::super::run_family;
+use super::super::copy_fixture;
+use test_support::write_file;
 
 #[test]
 fn ignores_non_traversing_include_str_without_rust_include_bypass() {
@@ -8,7 +9,7 @@ fn ignores_non_traversing_include_str_without_rust_include_bypass() {
     let root = fixture.path();
 
     let rest_rel = "apps/backend/crates/adapters/inbound/rest/src/lib.rs";
-    let rest_content = std::fs::read_to_string(root.join(rest_rel)).expect("read rest source");
+    let rest_content = test_support::read_file(root, rest_rel);
 
     write_file(
         root,
@@ -19,11 +20,5 @@ fn ignores_non_traversing_include_str_without_rust_include_bypass() {
     );
 
     let results = run_family(root);
-    let rs_code_23_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-23")
-        .collect::<Vec<_>>();
-
-    assert_eq!(files_for_rule(&results, "RS-CODE-23"), BTreeSet::new());
-    assert!(rs_code_23_results.is_empty());
+    assert_no_hits(&results);
 }

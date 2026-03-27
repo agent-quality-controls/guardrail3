@@ -1,6 +1,7 @@
-use std::collections::BTreeSet;
-
-use super::super::super::test_support::{copy_fixture, files_for_rule, run_family, write_file};
+use guardrail3_app_rs_family_code_assertions::rs_code_14_unwrap_expect::{assert_no_hits};
+use super::super::run_family;
+use super::super::copy_fixture;
+use test_support::write_file;
 
 #[test]
 fn skips_cfg_test_and_allow_scoped_unwrap_expect_usage() {
@@ -13,12 +14,12 @@ fn skips_cfg_test_and_allow_scoped_unwrap_expect_usage() {
     let text_rel = "apps/devctl/crates/app/core/src/lib.rs";
 
     let cfg_test_content =
-        std::fs::read_to_string(root.join(cfg_test_rel)).expect("read cfg test source");
+        test_support::read_file(root, cfg_test_rel);
     let impl_allow_content =
-        std::fs::read_to_string(root.join(impl_allow_rel)).expect("read impl source");
+        test_support::read_file(root, impl_allow_rel);
     let local_allow_content =
-        std::fs::read_to_string(root.join(local_allow_rel)).expect("read local source");
-    let text_content = std::fs::read_to_string(root.join(text_rel)).expect("read text source");
+        test_support::read_file(root, local_allow_rel);
+    let text_content = test_support::read_file(root, text_rel);
 
     write_file(
         root,
@@ -50,11 +51,5 @@ fn skips_cfg_test_and_allow_scoped_unwrap_expect_usage() {
     );
 
     let results = run_family(root);
-    let rs_code_14_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-14")
-        .collect::<Vec<_>>();
-
-    assert_eq!(files_for_rule(&results, "RS-CODE-14"), BTreeSet::new());
-    assert!(rs_code_14_results.is_empty());
+    assert_no_hits(&results);
 }

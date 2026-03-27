@@ -2,7 +2,14 @@ use std::collections::BTreeSet;
 
 use guardrail3_domain_report::Severity;
 
-use super::super::super::test_support::{copy_fixture, files_for_rule, run_family, write_file};
+use guardrail3_app_rs_family_code_assertions::rs_code_26_lib_glob_reexport::{
+    assert_files,
+    assert_findings,
+    RuleFinding,
+};
+use super::super::run_family;
+use super::super::copy_fixture;
+use test_support::write_file;
 
 #[test]
 fn warns_on_glob_reexport_in_real_library_lib_rs() {
@@ -11,7 +18,7 @@ fn warns_on_glob_reexport_in_real_library_lib_rs() {
 
     let package_rel = "packages/shared-types/src/lib.rs";
     let package_content =
-        std::fs::read_to_string(root.join(package_rel)).expect("read package source");
+        test_support::read_file(root, package_rel);
 
     let mutated = format!(
         "{package_content}\n\nmod internal {{ pub struct Hidden; }}\npub use internal::*;\n"
@@ -21,37 +28,18 @@ fn warns_on_glob_reexport_in_real_library_lib_rs() {
     let results = run_family(root);
     let glob_line = mutated
         .lines()
-        .position(|line| line.contains("pub use internal::*;"))
-        .expect("glob re-export line")
-        + 1;
-    let rs_code_26_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-26")
-        .map(|result| {
-            (
-                result.file.clone(),
-                result.line,
-                result.severity,
-                result.title.clone(),
-                result.message.clone(),
-                result.inventory,
-            )
-        })
-        .collect::<Vec<_>>();
+        .position(|line| line.contains("pub use internal::*;")).map(|index| index + 1).unwrap_or_default();
 
-    assert_eq!(
-        files_for_rule(&results, "RS-CODE-26"),
-        BTreeSet::from([package_rel.to_owned()])
-    );
-    assert_eq!(
-        rs_code_26_results,
-        vec![(
-            Some(package_rel.to_owned()),
-            Some(glob_line),
-            Severity::Warn,
-            "glob re-export in lib.rs".to_owned(),
-            "`pub use internal::*` creates an unstable API surface.".to_owned(),
-            false,
-        )]
+    assert_files(&results, BTreeSet::from([package_rel.to_owned()]));
+    assert_findings(
+        &results,
+        &[RuleFinding {
+            severity: Severity::Warn,
+            title: "glob re-export in lib.rs",
+            message: "`pub use internal::*` creates an unstable API surface.",
+            file: Some(package_rel),
+            line: Some(glob_line),
+            inventory: false,
+        }],
     );
 }

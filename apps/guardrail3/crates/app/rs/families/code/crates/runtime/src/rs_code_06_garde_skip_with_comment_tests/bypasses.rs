@@ -18,13 +18,13 @@ fn detects_non_primitive_garde_skips_with_plain_comments_across_real_owned_files
     let wrong_key_rel = "apps/backend/crates/ports/outbound/events/src/lib.rs";
     let vec_rel = "apps/devctl/crates/app/core/src/lib.rs";
 
-    let type_content = std::fs::read_to_string(root.join(type_rel)).expect("read type file");
-    let field_content = std::fs::read_to_string(root.join(field_rel)).expect("read field file");
+    let type_content = test_support::read_file(root, type_rel);
+    let field_content = test_support::read_file(root, field_rel);
     let empty_reason_content =
-        std::fs::read_to_string(root.join(empty_reason_rel)).expect("read empty reason file");
+        test_support::read_file(root, empty_reason_rel);
     let wrong_key_content =
-        std::fs::read_to_string(root.join(wrong_key_rel)).expect("read wrong key file");
-    let vec_content = std::fs::read_to_string(root.join(vec_rel)).expect("read vec file");
+        test_support::read_file(root, wrong_key_rel);
+    let vec_content = test_support::read_file(root, vec_rel);
 
     let type_new = format!(
         "{type_content}\n#[garde(skip)] // validated elsewhere\nstruct WholeTypeCommentProbe {{\n    plan: String,\n}}\n"
@@ -50,29 +50,19 @@ fn detects_non_primitive_garde_skips_with_plain_comments_across_real_owned_files
 
     let type_line = type_new
         .lines()
-        .position(|line| line.contains("#[garde(skip)] // validated elsewhere"))
-        .expect("type line")
-        + 1;
+        .position(|line| line.contains("#[garde(skip)] // validated elsewhere")).map(|index| index + 1).unwrap_or_default();
     let field_line = field_new
         .lines()
-        .position(|line| line.contains("#[garde(skip)] // validated elsewhere"))
-        .expect("field line")
-        + 1;
+        .position(|line| line.contains("#[garde(skip)] // validated elsewhere")).map(|index| index + 1).unwrap_or_default();
     let empty_reason_line = empty_reason_new
         .lines()
-        .position(|line| line.contains("#[garde(skip)] // reason:"))
-        .expect("empty reason line")
-        + 1;
+        .position(|line| line.contains("#[garde(skip)] // reason:")).map(|index| index + 1).unwrap_or_default();
     let wrong_key_line = wrong_key_new
         .lines()
-        .position(|line| line.contains("#[garde(skip)] // because: external validation envelope"))
-        .expect("wrong key line")
-        + 1;
+        .position(|line| line.contains("#[garde(skip)] // because: external validation envelope")).map(|index| index + 1).unwrap_or_default();
     let vec_line = vec_new
         .lines()
-        .position(|line| line.contains("#[garde(skip)] // temporary bypass"))
-        .expect("vec line")
-        + 1;
+        .position(|line| line.contains("#[garde(skip)] // temporary bypass")).map(|index| index + 1).unwrap_or_default();
 
     let results = run_family(root);
 

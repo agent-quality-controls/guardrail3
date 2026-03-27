@@ -1,6 +1,7 @@
-use std::collections::BTreeSet;
-
-use super::super::super::test_support::{copy_fixture, files_for_rule, run_family, write_file};
+use guardrail3_app_rs_family_code_assertions::rs_code_27_facade_only_lib::{assert_no_hits};
+use super::super::run_family;
+use super::super::copy_fixture;
+use test_support::write_file;
 
 #[test]
 fn skips_consts_types_and_explicit_pub_reexports_in_lib_rs() {
@@ -9,7 +10,7 @@ fn skips_consts_types_and_explicit_pub_reexports_in_lib_rs() {
 
     let package_rel = "packages/shared-types/src/lib.rs";
     let package_content =
-        std::fs::read_to_string(root.join(package_rel)).expect("read package source");
+        test_support::read_file(root, package_rel);
 
     write_file(
         root,
@@ -20,11 +21,5 @@ fn skips_consts_types_and_explicit_pub_reexports_in_lib_rs() {
     );
 
     let results = run_family(root);
-    let rs_code_27_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-27")
-        .collect::<Vec<_>>();
-
-    assert_eq!(files_for_rule(&results, "RS-CODE-27"), BTreeSet::new());
-    assert!(rs_code_27_results.is_empty());
+    assert_no_hits(&results);
 }

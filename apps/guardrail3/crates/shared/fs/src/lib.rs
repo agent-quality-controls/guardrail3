@@ -55,6 +55,21 @@ pub fn write_file(path: &Path, content: &str) -> Result<(), std::io::Error> {
     std::fs::write(path, content)
 }
 
+/// Remove a directory tree.
+///
+/// Returns `Ok(())` if the tree does not exist.
+///
+/// # Errors
+/// Returns `std::io::Error` if the directory cannot be removed.
+#[allow(clippy::disallowed_methods)] // reason: centralized fs module
+pub fn remove_dir_all(path: &Path) -> Result<(), std::io::Error> {
+    match std::fs::remove_dir_all(path) {
+        Ok(()) => Ok(()),
+        Err(err) if err.kind() == std::io::ErrorKind::NotFound => Ok(()),
+        Err(err) => Err(err),
+    }
+}
+
 /// Create directory and all parent directories.
 ///
 /// Returns `Ok(())` if the directory already exists.
@@ -65,6 +80,15 @@ pub fn write_file(path: &Path, content: &str) -> Result<(), std::io::Error> {
 pub fn create_dir_all(path: &Path) -> Result<(), std::io::Error> {
     let target = path.to_path_buf();
     std::fs::create_dir_all(&target)
+}
+
+/// Copy a file.
+///
+/// # Errors
+/// Returns `std::io::Error` if the file cannot be copied.
+#[allow(clippy::disallowed_methods)] // reason: centralized fs module
+pub fn copy_file(from: &Path, to: &Path) -> Result<u64, std::io::Error> {
+    std::fs::copy(from, to)
 }
 
 /// Set file permissions.

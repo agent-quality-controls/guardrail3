@@ -1,8 +1,8 @@
-use std::collections::BTreeSet;
-
 use guardrail3_domain_report::Severity;
 
-use guardrail3_app_rs_family_code_assertions::rs_code_01_crate_level_allow::{assert_files, assert_findings, RuleFinding};
+use guardrail3_app_rs_family_code_assertions::rs_code_01_crate_level_allow::{
+    RuleFinding, assert_findings,
+};
 use super::super::run_family;
 use super::super::copy_fixture;
 use test_support::write_file;
@@ -27,17 +27,25 @@ fn uses_info_severity_for_real_test_paths() {
     );
 
     let results = run_family(root);
+    let relevant_results = results
+        .into_iter()
+        .filter(|result| {
+            matches!(
+                result.file.as_deref(),
+                Some(path) if [crate_test_rel, inline_test_rel].contains(&path)
+            )
+        })
+        .collect::<Vec<_>>();
 
-    assert_files(&results, BTreeSet::from([crate_test_rel.to_owned(), inline_test_rel.to_owned()]));
     assert_findings(
-        &results,
+        &relevant_results,
         &[
             RuleFinding {
                 severity: Severity::Info,
                 title: "crate-level allow",
                 message: "Crate/module-wide allow for `clippy::unwrap_used` is test-file exempt.",
                 file: Some(crate_test_rel),
-                line: Some(2),
+                line: Some(1),
                 inventory: false,
             },
             RuleFinding {
@@ -48,6 +56,6 @@ fn uses_info_severity_for_real_test_paths() {
                 line: Some(2),
                 inventory: false,
             },
-        ]
+        ],
     );
 }

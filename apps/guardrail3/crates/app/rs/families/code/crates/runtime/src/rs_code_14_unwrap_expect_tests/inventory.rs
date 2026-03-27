@@ -1,8 +1,7 @@
-use std::collections::BTreeSet;
-
-use guardrail3_domain_report::Severity;
-
-use super::super::super::test_support::{copy_fixture, files_for_rule, run_family, write_file};
+use guardrail3_app_rs_family_code_assertions::rs_code_14_unwrap_expect::assert_attacks_unwrap_and_expect_calls_across_real_owned_files_with_exact_metadata;
+use super::super::run_family;
+use super::super::copy_fixture;
+use test_support::write_file;
 
 #[test]
 fn attacks_unwrap_and_expect_calls_across_real_owned_files_with_exact_metadata() {
@@ -13,9 +12,9 @@ fn attacks_unwrap_and_expect_calls_across_real_owned_files_with_exact_metadata()
     let worker_rel = "apps/worker/crates/adapters/outbound/sqs/src/lib.rs";
 
     let backend_content =
-        std::fs::read_to_string(root.join(backend_rel)).expect("read backend source");
+        test_support::read_file(root, backend_rel);
     let worker_content =
-        std::fs::read_to_string(root.join(worker_rel)).expect("read worker source");
+        test_support::read_file(root, worker_rel);
 
     let backend_new = format!(
         "{backend_content}\nfn unwrap_probe() {{ let _ = Some(1).unwrap(); }}\nfn expect_probe() {{ let _ = Some(1).expect(\"backend\"); }}\n"
@@ -29,77 +28,24 @@ fn attacks_unwrap_and_expect_calls_across_real_owned_files_with_exact_metadata()
 
     let backend_unwrap_line = backend_new
         .lines()
-        .position(|line| line.contains("fn unwrap_probe()"))
-        .expect("backend unwrap line")
-        + 1;
+        .position(|line| line.contains("fn unwrap_probe()")).map(|index| index + 1).unwrap_or_default();
     let backend_expect_line = backend_new
         .lines()
-        .position(|line| line.contains("fn expect_probe()"))
-        .expect("backend expect line")
-        + 1;
+        .position(|line| line.contains("fn expect_probe()")).map(|index| index + 1).unwrap_or_default();
     let worker_expect_line = worker_new
         .lines()
-        .position(|line| line.contains("let _ = Some(1).expect(\"queue\");"))
-        .expect("worker expect line")
-        + 1;
+        .position(|line| line.contains("let _ = Some(1).expect(\"queue\");")).map(|index| index + 1).unwrap_or_default();
     let worker_unwrap_line = worker_new
         .lines()
-        .position(|line| line.contains("let _ = Some(1).unwrap();"))
-        .expect("worker unwrap line")
-        + 1;
+        .position(|line| line.contains("let _ = Some(1).unwrap();")).map(|index| index + 1).unwrap_or_default();
 
-    let results = run_family(root);
-    let mut rs_code_14_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-14")
-        .map(|result| {
-            (
-                result.file.clone().expect("file"),
-                result.line,
-                format!("{:?}", result.severity),
-                result.title.clone(),
-                result.message.clone(),
-            )
-        })
-        .collect::<Vec<_>>();
-    rs_code_14_results.sort();
-
-    assert_eq!(
-        files_for_rule(&results, "RS-CODE-14"),
-        BTreeSet::from([backend_rel.to_owned(), worker_rel.to_owned()])
-    );
-    assert_eq!(
-        rs_code_14_results,
-        vec![
-            (
-                backend_rel.to_owned(),
-                Some(backend_unwrap_line),
-                format!("{:?}", Severity::Warn),
-                ".unwrap() usage".to_owned(),
-                "`.unwrap()` found: fn unwrap_probe() { let _ = Some(1).unwrap(); }.".to_owned(),
-            ),
-            (
-                backend_rel.to_owned(),
-                Some(backend_expect_line),
-                format!("{:?}", Severity::Warn),
-                ".expect() usage".to_owned(),
-                "`.expect()` found: fn expect_probe() { let _ = Some(1).expect(\"backend\"); }."
-                    .to_owned(),
-            ),
-            (
-                worker_rel.to_owned(),
-                Some(worker_expect_line),
-                format!("{:?}", Severity::Warn),
-                ".expect() usage".to_owned(),
-                "`.expect()` found: let _ = Some(1).expect(\"queue\");.".to_owned(),
-            ),
-            (
-                worker_rel.to_owned(),
-                Some(worker_unwrap_line),
-                format!("{:?}", Severity::Warn),
-                ".unwrap() usage".to_owned(),
-                "`.unwrap()` found: let _ = Some(1).unwrap();.".to_owned(),
-            ),
-        ]
+    assert_attacks_unwrap_and_expect_calls_across_real_owned_files_with_exact_metadata(
+        &run_family(root),
+        backend_rel,
+        worker_rel,
+        backend_unwrap_line,
+        backend_expect_line,
+        worker_expect_line,
+        worker_unwrap_line,
     );
 }

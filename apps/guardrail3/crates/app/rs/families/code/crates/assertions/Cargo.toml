@@ -8,3 +8,4 @@ workspace = true
 
 [dependencies]
 "guardrail3-app-rs-family-code" = { path = "../runtime" }
+guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../../../../../domain/report" }

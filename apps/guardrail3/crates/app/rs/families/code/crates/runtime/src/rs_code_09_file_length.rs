@@ -35,14 +35,13 @@ pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-pub(crate) fn copy_fixture() -> tempfile::TempDir {
+pub(crate) fn copy_fixture() -> test_support::TempDir {
     crate::copy_test_fixture()
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(crate) fn check_source(rel_path: &str, content: &str, is_test: bool) -> Vec<CheckResult> {
-    let ast = super::parse::parse_rust_file(content).expect("valid rust");
+    let ast = super::parse::parse_rust_file(content).unwrap_or_else(|error| std::panic::panic_any(format!("valid rust: {error}")));
     let input = super::inputs::RustCodeFileInput {
         rel_path,
         content,
@@ -56,5 +55,5 @@ pub(crate) fn check_source(rel_path: &str, content: &str, is_test: bool) -> Vec<
 }
 
 #[cfg(test)]
-#[path = "rs_code_09_file_length_tests/mod.rs"]
+#[path = "rs_code_09_file_length_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_code_09_file_length_tests;
