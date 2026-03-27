@@ -497,6 +497,7 @@ dependencies = [
  "guardrail3-adapters-outbound-fs",
  "guardrail3-app-core",
  "guardrail3-app-rs-ast",
+ "guardrail3-app-rs-family-code-assertions",
  "guardrail3-app-rs-family-mapper",
  "guardrail3-app-rs-placement",
  "guardrail3-domain-config",
@@ -514,6 +515,17 @@ dependencies = [
  "tempfile",
  "toml",
 ]
+
+[[package]]
+name = "guardrail3-app-rs-family-code-assertions"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-app-rs-family-code",
+]
+
+[[package]]
+name = "guardrail3-app-rs-family-code-test-support"
+version = "0.0.0"
 
 [[package]]
 name = "guardrail3-app-rs-family-deny"
