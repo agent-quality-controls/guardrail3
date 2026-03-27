@@ -1,6 +1,9 @@
 use guardrail3_app_rs_family_deny_assertions::rs_deny_28_unknown_keys as assertions;
 
-use super::super::{add_skip_entry, build_fixture_deny_toml, set_advisory_ignores, set_feature_entries, set_license_exceptions};
+use super::super::{
+    add_skip_entry, build_fixture_deny_toml, set_advisory_ignores, set_feature_entries,
+    set_license_exceptions,
+};
 
 #[test]
 fn warns_on_unknown_nested_skip_ignore_exception_and_feature_keys() {

@@ -6,3 +6,5 @@ mod nested_entries;
 mod sources_and_bans;
 #[path = "top_level_and_sections.rs"]
 mod top_level_and_sections;
+#[path = "unsupported_schema.rs"]
+mod unsupported_schema;

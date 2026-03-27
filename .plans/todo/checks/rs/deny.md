@@ -67,7 +67,7 @@ Forbidden:
 | RS-DENY-16 | — | Warn | `[licenses].allow` must not include copyleft licenses | Implemented |
 | RS-DENY-17 | — | Info | `[licenses].exceptions` entries are inventoried | Implemented |
 | RS-DENY-18 | R16 | Error | `[sources].unknown-registry = "deny"` and `unknown-git = "deny"` | Implemented |
-| RS-DENY-19 | R16 | Error | `[sources].allow-registry` must contain crates.io (git or sparse URL) | Implemented |
+| RS-DENY-19 | R16 | Error | `[sources].allow-registry` must allow only crates.io (git or sparse URL) | Implemented |
 | RS-DENY-20 | — | Warn/Info | `[sources].allow-git` entries are warned and inventoried | Implemented |
 | RS-DENY-21 | R17 | Warn | `[[bans.features]]` must ban `tokio` feature `full` and keep the canonical tokio allow list | Implemented |
 | RS-DENY-22 | R18 | Info | Extra feature bans beyond tokio are inventoried | Implemented |
@@ -117,7 +117,7 @@ They are separate concerns:
 The old plan merged all source checks into one rule.
 That hid an important distinction:
 - `unknown-*` policy is guardrail-owned
-- `allow-registry` must include crates.io
+- `allow-registry` is guardrail-owned and should stay exact
 - `allow-git` is user-owned but risky and should be inventoried / warned, not blanket-error'ed
 
 ### Graph correctness
@@ -208,11 +208,13 @@ Warn / inventory:
 Guardrail-owned:
 - `unknown-registry = "deny"`
 - `unknown-git = "deny"`
-- crates.io must be in `allow-registry`
+- `allow-registry` must allow only crates.io
 
 Accepted crates.io values:
 - `https://github.com/rust-lang/crates.io-index`
 - `sparse+https://index.crates.io/`
+
+Any extra registry is an error.
 
 `allow-git` is not automatically forbidden by the plan, but it is risky enough to warn and inventory.
 
@@ -248,6 +250,7 @@ Policy:
 Warn on:
 - duplicate deny / skip / ignore / feature-ban entries
 - unknown keys in critical sections
+- unsupported schema in critical sections
 
 Validate `wrappers` deliberately:
 - canonical managed wrapper expectations must be enforced where the baseline requires them

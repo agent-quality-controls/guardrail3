@@ -142,7 +142,7 @@ Those notes should remain available only as historical/adversarial reference aft
 #### clippy/deny still have generator-checker drift
 
 - Per-crate `deny.toml` generation still appears to ignore effective per-root profile selection.
-- `RS-DENY-19` implementation is stricter than the plan text because it rejects extra registries, not only missing crates.io baseline.
+- `RS-DENY-19` policy has since been tightened to match the stricter implementation: extra registries are forbidden, not merely inventoried.
 - Clippy generation and validation still disagree on global-state bans for non-library pure/service contexts.
 - The canonical module registry still does not fully expose the deny profile surface needed by the active deny contract.
 
@@ -237,7 +237,7 @@ Those notes should remain available only as historical/adversarial reference aft
 #### newly confirmed family-specific concrete bugs
 
 - `readme = false` is still not honored correctly by `rs/release` README checks and should be a top-level tracked release bug.
-- `RS-DENY-19` needs an explicit policy decision on whether extra registries are allowed or forbidden.
+- `RS-DENY-19` policy decision is now explicit: extra registries are forbidden.
 
 ## Candidate future Rust rules extracted from `NEW_CHECKS.md`
 
@@ -330,9 +330,9 @@ These are Rust-only candidate guardrails that still look materially relevant aft
 #### deny still needs policy and parity cleanup
 
 - `deny.md` still marks the whole family as `Todo`; statuses need to reflect the implemented family.
-- Decide `RS-DENY-19` policy explicitly:
-  - allow extra registries if crates.io is present
-  - or forbid any non-crates.io registry and tighten the plan to match the current rule
+- Keep `RS-DENY-19` plan/code aligned on the stricter policy:
+  - forbid any non-crates.io registry
+  - keep generator, checker, and docs exact about the accepted crates.io forms
 - Add a real generator-vs-checker parity test for deny baseline.
 - Replace stale hardcoded canonical service fixture in deny tests with generator-derived or parity-checked baseline.
 - Update `deny.md` to describe the real generator surface, not an oversimplified single-file canonical source.
