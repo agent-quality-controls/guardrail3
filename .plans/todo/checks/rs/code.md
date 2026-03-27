@@ -31,7 +31,7 @@
 | New ID | Old ID | Severity | What | Status |
 |--------|--------|----------|------|--------|
 | RS-CODE-13 | R43 | Warn/Info | todo!/unimplemented! macros (Warn). unreachable! in non-test (Info). AST-based. | Implemented |
-| RS-CODE-15 | R58 | Error | Direct `std::fs` import or inline call. Skips src/fs.rs and test files. AST-based. | Implemented |
+| RS-CODE-15 | R58 | Error | Direct `std::fs` import or inline call. Skips test files and explicit filesystem-boundary modules (`src/fs.rs`, `src/fs/mod.rs`, or crate-root `fs/src/lib.rs`). AST-based. | Implemented |
 
 ## New rules from audit
 

@@ -57,6 +57,11 @@ fn skips_test_boundaries_cfg_test_src_fs_and_text_only_near_misses() {
     );
     write_file(
         root,
+        "apps/backend/crates/shared/fs/src/lib.rs",
+        "pub fn allowed_probe() { let _ = std::fs::read_to_string(\"fixture\"); }\n",
+    );
+    write_file(
+        root,
         cfg_rel,
         &format!(
             "{cfg_content}\n#[cfg(test)]\nuse std::fs;\n#[cfg(test)]\nmod cfg_probe {{\n    pub fn run() {{ let _ = std::fs::read_to_string(\"fixture\"); }}\n}}\n"
@@ -86,6 +91,7 @@ fn skips_test_boundaries_cfg_test_src_fs_and_text_only_near_misses() {
                         "apps/backend/crates/app/queries/src/tests.rs",
                         "tests/top_level_fs_usage.rs",
                         "apps/backend/crates/app/queries/src/fs.rs",
+                        "apps/backend/crates/shared/fs/src/lib.rs",
                         cfg_rel,
                         test_text_rel,
                     ]

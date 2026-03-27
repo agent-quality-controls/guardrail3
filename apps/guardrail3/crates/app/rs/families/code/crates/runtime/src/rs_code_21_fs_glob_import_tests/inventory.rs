@@ -16,12 +16,11 @@ fn attacks_std_fs_glob_imports_across_multiple_owned_files() {
     let root = fixture.path();
 
     let backend_rel = "apps/backend/crates/adapters/outbound/postgres/src/lib.rs";
-    let devctl_rel = "apps/devctl/crates/adapters/outbound/fs/src/lib.rs";
+    let app_rel = "apps/backend/crates/app/queries/src/lib.rs";
 
     let backend_content =
         test_support::read_file(root, backend_rel);
-    let devctl_content =
-        test_support::read_file(root, devctl_rel);
+    let app_content = test_support::read_file(root, app_rel);
 
     write_file(
         root,
@@ -30,12 +29,12 @@ fn attacks_std_fs_glob_imports_across_multiple_owned_files() {
     );
     write_file(
         root,
-        devctl_rel,
-        &format!("use std::{{fs::*, path::PathBuf}};\n{devctl_content}"),
+        app_rel,
+        &format!("use std::{{fs::*, path::PathBuf}};\n{app_content}"),
     );
 
     let results = run_family(root);
-    assert_files(&results, BTreeSet::from([backend_rel.to_owned(), devctl_rel.to_owned()]));
+    assert_files(&results, BTreeSet::from([backend_rel.to_owned(), app_rel.to_owned()]));
     assert_findings(
         &results,
         &[
@@ -51,7 +50,7 @@ fn attacks_std_fs_glob_imports_across_multiple_owned_files() {
                 severity: Severity::Error,
                 title: "std::fs glob import",
                 message: "Direct `use std::fs::*` glob import bypasses clippy method bans.",
-                file: Some(devctl_rel),
+                file: Some(app_rel),
                 line: Some(1),
                 inventory: false,
             },
@@ -94,7 +93,7 @@ fn attacks_inline_module_glob_across_golden_tree() {
     let fixture = copy_fixture();
     let root = fixture.path();
 
-    let target_rel = "apps/devctl/crates/adapters/outbound/fs/src/lib.rs";
+    let target_rel = "apps/backend/crates/app/queries/src/lib.rs";
     let target_content = test_support::read_file(root, target_rel);
 
     let mutated = format!(

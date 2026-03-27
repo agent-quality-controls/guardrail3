@@ -64,3 +64,17 @@ fn errors_on_std_alias_fs_call() {
     assert_eq!(results[0].title, "direct std::fs call");
     assert_eq!(results[0].line, Some(2));
 }
+
+#[test]
+fn errors_on_extern_crate_std_alias_fs_call() {
+    let content =
+        "extern crate std as s;\nfn main() { let _ = s::fs::read_to_string(\"foo\"); }";
+    let raw_results = check_source("src/foo.rs", content, false);
+    let results = findings(&raw_results);
+
+    assert_normalized_len(&results, 1);
+    assert_eq!(results[0].id, "RS-CODE-15");
+    assert_eq!(results[0].severity, Severity::Error);
+    assert_eq!(results[0].title, "direct std::fs call");
+    assert_eq!(results[0].line, Some(2));
+}
