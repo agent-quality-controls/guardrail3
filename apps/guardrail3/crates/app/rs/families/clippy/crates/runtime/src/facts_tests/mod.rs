@@ -1,4 +1,6 @@
-use super::super::test_support::{collected_facts, dir_entry, project_tree};
+use test_support::{dir_entry, project_tree};
+
+use super::collect_for_tests;
 
 #[test]
 fn root_config_uses_packages_profile_when_packages_policy_exists() {
@@ -32,7 +34,7 @@ fn root_config_uses_packages_profile_when_packages_policy_exists() {
         ],
     );
 
-    let facts = collected_facts(&tree);
+    let facts = collect_for_tests(&tree);
     let root = facts
         .allowed_configs
         .iter()

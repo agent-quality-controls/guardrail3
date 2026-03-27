@@ -4,13 +4,13 @@ use guardrail3_domain_report::Severity;
 
 use super::super::super::clippy_support::{ban_paths, expected_method_bans};
 use super::super::super::test_support::{
-    canonical_clippy_toml, collected_facts, config_input, garde_disabled_root_tree,
+    build_fixture_clippy_toml, collected_facts, config_input, garde_disabled_root_tree,
 };
 use super::super::check;
 
 #[test]
 fn inventories_garde_owned_method_bans_as_project_specific_when_garde_is_disabled() {
-    let tree = garde_disabled_root_tree(canonical_clippy_toml());
+    let tree = garde_disabled_root_tree(build_fixture_clippy_toml("service", false, true, "", ""));
     let facts = collected_facts(&tree);
     let input = config_input(&facts, "clippy.toml");
     let mut results = Vec::new();

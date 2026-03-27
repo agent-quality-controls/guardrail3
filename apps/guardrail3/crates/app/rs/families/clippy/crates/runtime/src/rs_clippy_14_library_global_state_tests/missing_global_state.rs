@@ -3,13 +3,13 @@ use std::collections::BTreeSet;
 use guardrail3_domain_report::Severity;
 
 use super::super::super::test_support::{
-    canonical_clippy_toml, collected_facts, config_input, library_workspace_root_tree,
+    build_fixture_clippy_toml, collected_facts, config_input, library_workspace_root_tree,
 };
 use super::super::check;
 
 #[test]
 fn errors_for_every_missing_library_global_state_type_ban() {
-    let tree = library_workspace_root_tree(canonical_clippy_toml());
+    let tree = library_workspace_root_tree(build_fixture_clippy_toml("service", false, true, "", ""));
     let facts = collected_facts(&tree);
     let mut results = Vec::new();
 

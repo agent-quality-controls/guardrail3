@@ -4,13 +4,13 @@ use guardrail3_domain_modules::clippy::build_clippy_toml;
 use guardrail3_domain_report::Severity;
 
 use super::super::super::test_support::{
-    canonical_clippy_toml, copy_fixture, run_family, write_file,
+    build_fixture_clippy_toml, copy_fixture, run_family, write_file,
 };
 
 #[test]
 fn inventories_exact_covering_config_for_each_rust_root_in_multi_root_fixture() {
     let tmp = copy_fixture();
-    write_file(tmp.path(), "clippy.toml", &canonical_clippy_toml());
+    write_file(tmp.path(), "clippy.toml", &build_fixture_clippy_toml("service", false, true, "", ""));
     write_file(
         tmp.path(),
         "apps/devctl/clippy.toml",

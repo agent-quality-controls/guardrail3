@@ -1,5 +1,5 @@
 use super::super::super::test_support::{
-    canonical_clippy_toml, collected_facts, dir_entry, project_tree,
+    build_fixture_clippy_toml, collected_facts, dir_entry, project_tree,
 };
 
 #[test]
@@ -23,17 +23,17 @@ fn allows_validation_workspace_and_standalone_package_roots() {
         ],
         vec![
             ("Cargo.toml", "[workspace]\nmembers = []".to_owned()),
-            ("clippy.toml", canonical_clippy_toml()),
+            ("clippy.toml", build_fixture_clippy_toml("service", false, true, "", "")),
             (
                 "apps/backend/Cargo.toml",
                 "[workspace]\nmembers = []".to_owned(),
             ),
-            ("apps/backend/clippy.toml", canonical_clippy_toml()),
+            ("apps/backend/clippy.toml", build_fixture_clippy_toml("service", false, true, "", "")),
             (
                 "packages/shared-types/Cargo.toml",
                 "[package]\nname = \"shared-types\"\n".to_owned(),
             ),
-            ("packages/shared-types/clippy.toml", canonical_clippy_toml()),
+            ("packages/shared-types/clippy.toml", build_fixture_clippy_toml("service", false, true, "", "")),
         ],
     );
 

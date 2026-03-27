@@ -5,7 +5,7 @@ use guardrail3_domain_modules::clippy::{
     SERVICE_METHOD_PATHS, THRESHOLD_VALUES, TOO_MANY_ARGUMENTS_THRESHOLD,
     TOO_MANY_LINES_THRESHOLD, TYPE_COMPLEXITY_THRESHOLD,
 };
-use super::canonical_clippy_toml;
+use super::build_fixture_clippy_toml;
 
 fn paths_for_key(parsed: &toml::Value, key: &str) -> BTreeSet<String> {
     parsed
@@ -28,7 +28,7 @@ fn paths_for_key(parsed: &toml::Value, key: &str) -> BTreeSet<String> {
 #[test]
 fn generated_service_fixture_matches_checker_expectations() {
     let parsed =
-        toml::from_str::<toml::Value>(&canonical_clippy_toml()).expect("valid clippy TOML");
+        toml::from_str::<toml::Value>(&build_fixture_clippy_toml("service", false, true, "", "")).expect("valid clippy TOML");
 
     for (key, expected) in THRESHOLD_VALUES {
         assert_eq!(

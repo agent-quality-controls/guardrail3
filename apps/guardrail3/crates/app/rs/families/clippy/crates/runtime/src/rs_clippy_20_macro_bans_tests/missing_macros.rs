@@ -3,14 +3,14 @@ use std::collections::BTreeSet;
 use guardrail3_domain_report::Severity;
 
 use super::super::super::test_support::{
-    canonical_clippy_toml, collected_facts, config_input, remove_ban_path, root_workspace_tree,
+    build_fixture_clippy_toml, collected_facts, config_input, remove_ban_path, root_workspace_tree,
 };
 use super::super::check;
 
 #[test]
 fn errors_for_each_missing_required_macro_ban() {
     let clippy = remove_ban_path(
-        &remove_ban_path(&canonical_clippy_toml(), "disallowed-macros", "eprintln"),
+        &remove_ban_path(&build_fixture_clippy_toml("service", false, true, "", ""), "disallowed-macros", "eprintln"),
         "disallowed-macros",
         "todo",
     );
