@@ -1,0 +1,22 @@
+[package]
+name = "guardrail3-app-rs-family-deps"
+version = "0.0.0"
+edition = "2024"
+
+[lints]
+workspace = true
+
+[dependencies]
+guardrail3_app_rs_family_mapper = { package = "guardrail3-app-rs-family-mapper", path = "../../../../family_mapper" }
+guardrail3_domain_config = { package = "guardrail3-domain-config", path = "../../../../../../domain/config" }
+guardrail3_domain_project_tree = { package = "guardrail3-domain-project-tree", path = "../../../../../../domain/project-tree" }
+guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../../../../../domain/report" }
+guardrail3_outbound_traits = { package = "guardrail3-ports-outbound-traits", path = "../../../../../../ports/outbound/traits" }
+glob = { workspace = true }
+toml = "0.8"
+
+[dev-dependencies]
+guardrail3_app_rs_placement = { package = "guardrail3-app-rs-placement", path = "../../../../placement" }
+guardrail3_validation_model = { package = "guardrail3-domain-validation-model", path = "../../../../../../domain/validation-model" }
+guardrail3_app_rs_family_deps_assertions = { package = "guardrail3-app-rs-family-deps-assertions", path = "../assertions" }
+test_support = { package = "guardrail3-app-rs-family-deps-test-support", path = "../../test_support" }

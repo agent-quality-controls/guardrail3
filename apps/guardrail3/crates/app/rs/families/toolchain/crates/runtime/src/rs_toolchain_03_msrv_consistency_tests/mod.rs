@@ -68,6 +68,36 @@ fn inventories_when_pinned_toolchain_satisfies_msrv() {
 }
 
 #[test]
+fn inventories_when_pinned_toolchain_with_host_suffix_satisfies_msrv() {
+    let parsed = toml::from_str::<toml::Value>(
+        "[toolchain]\nchannel = \"1.85.1-x86_64-unknown-linux-gnu\"\ncomponents = [\"clippy\", \"rustfmt\"]",
+    )
+    .expect("valid TOML");
+    let input = test_input(
+        Some("rust-toolchain.toml"),
+        None,
+        Some(&parsed),
+        None,
+        Some("1.85.0"),
+        None,
+    );
+    let mut results = Vec::new();
+
+    check(&input, &mut results);
+
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            severity: Severity::Info,
+            inventory: true,
+            title: "pinned toolchain satisfies MSRV",
+            message: "Pinned toolchain `1.85.1-x86_64-unknown-linux-gnu` is compatible with Cargo rust-version `1.85.0`.",
+            file: Some("rust-toolchain.toml"),
+        }],
+    );
+}
+
+#[test]
 fn inventories_when_msrv_is_missing() {
     let parsed = toml::from_str::<toml::Value>(
         "[toolchain]\nchannel = \"1.85.1\"\ncomponents = [\"clippy\", \"rustfmt\"]",

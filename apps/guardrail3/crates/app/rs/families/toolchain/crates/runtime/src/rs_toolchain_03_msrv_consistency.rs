@@ -129,7 +129,10 @@ pub fn check(input: &ToolchainRootInput<'_>, results: &mut Vec<CheckResult>) {
 
 fn parse_version(raw: &str) -> Option<(u64, u64, u64)> {
     let normalized = raw.trim().trim_start_matches('v');
-    let mut parts = normalized.split('.');
+    let version_part = normalized
+        .split_once('-')
+        .map_or(normalized, |(version_part, _)| version_part);
+    let mut parts = version_part.split('.');
     let major = parts.next()?.parse().ok()?;
     let minor = parts.next()?.parse().ok()?;
     let patch = parts.next().unwrap_or("0").parse().ok()?;
