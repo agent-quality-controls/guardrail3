@@ -1,10 +1,10 @@
 # Backfill Clippy Hardening Context
 
 **Date:** 2026-03-27 21:39
-**Scope:** `.plans/todo/checks/rs/clippy.md`, `apps/guardrail3/crates/domain/modules/clippy/{mod.rs,settings.rs}`, `.worklogs/2026-03-27-214025-harden-clippy-policy-context.md`
+**Scope:** `apps/guardrail3/crates/domain/modules/clippy/{mod.rs,settings.rs}`, `.worklogs/2026-03-27-213947-harden-rs-clippy-policy-context-and-test-relaxations.md`
 
 ## Summary
-Backfilled the missing detailed worklog for the already-landed `rs/clippy` policy-context hardening and synced the plan plus canonical domain-module exports to the live code. This keeps the clippy attack stream documented and ensures the managed settings inventory names every boolean the runtime now enforces.
+Backfilled the missing follow-up context for the already-landed `rs/clippy` policy-context hardening and synced the canonical domain-module exports to the live code. This keeps the clippy attack stream documented and ensures the top-level clippy module re-exports every managed setting the runtime now enforces.
 
 ## Context & Problem
 While continuing the adversarial `rs/clippy` review, `HEAD` advanced to `01b87ad` (`harden rs clippy policy context`). That commit landed the runtime-side fixes first:
@@ -16,7 +16,7 @@ While continuing the adversarial `rs/clippy` review, `HEAD` advanced to `01b87ad
 But the repo was left with two follow-up problems:
 
 1. the commit had no worklog, which violates the repo’s worklog rule
-2. the plan and canonical `domain/modules/clippy` exports were still slightly behind the live runtime behavior
+2. the canonical `domain/modules/clippy` exports were still slightly behind the live runtime behavior
 
 So this follow-up commit is not “more clippy code.” It is the documentation and source-of-truth sync that makes the already-landed hardening legible and durable.
 
@@ -28,15 +28,6 @@ So this follow-up commit is not “more clippy code.” It is the documentation 
 - **Alternatives considered:**
   - Leave the previous clippy commit undocumented — rejected because it breaks the repo’s stated operating rule and makes future clippy work harder to recover.
   - Rewrite or amend the earlier commit — rejected because the instructions explicitly say not to amend unless requested.
-
-### Sync the clippy plan to the runtime’s actual managed bool set
-- **Chose:** Update `.plans/todo/checks/rs/clippy.md` so the managed-key set and profile-policy notes explicitly include:
-  - `allow-expect-in-tests`
-  - `allow-panic-in-tests`
-  - `allow-unwrap-in-tests`
-- **Why:** The runtime and fixtures already enforce those keys. The plan should match the implementation so future attacks are measured against the real contract.
-- **Alternatives considered:**
-  - Leave the plan terse and rely on code discovery — rejected because this family is in active semantic hardening and the plan is the attack source of truth.
 
 ### Export the new canonical bool from `domain/modules/clippy`
 - **Chose:** Export `ALLOW_PANIC_IN_TESTS` from `apps/guardrail3/crates/domain/modules/clippy/mod.rs`.
@@ -54,8 +45,7 @@ So this follow-up commit is not “more clippy code.” It is the documentation 
 - The plan file remains the human-readable contract, while `domain/modules/clippy` remains the canonical generated-settings source used by family fixtures and parity checks.
 
 ## Information Sources
-- `git show --stat --name-only 01b87ad`
-- `.worklogs/2026-03-27-214025-harden-clippy-policy-context.md`
+- `git show --stat --name-only 3f69dc3`
 - `.plans/todo/checks/rs/clippy.md`
 - `apps/guardrail3/crates/domain/modules/clippy/{mod.rs,settings.rs}`
 - Prior clippy worklogs:
@@ -70,7 +60,6 @@ So this follow-up commit is not “more clippy code.” It is the documentation 
 
 ## Key Files for Context
 - `.worklogs/2026-03-27-214025-harden-clippy-policy-context.md` — detailed record of the runtime-side clippy hardening already landed at `HEAD`
-- `.plans/todo/checks/rs/clippy.md` — family contract after syncing the managed bool set
 - `apps/guardrail3/crates/domain/modules/clippy/settings.rs` — canonical generated bool settings
 - `apps/guardrail3/crates/domain/modules/clippy/mod.rs` — exported canonical surface
 - `.worklogs/2026-03-27-212709-fix-clippy-macro-ban-paths.md` — prior semantic checkpoint before the policy-context hardening
