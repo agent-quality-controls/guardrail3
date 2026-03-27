@@ -93,16 +93,22 @@ fn only_inventories_crate_level_unused_crate_dependencies_in_mixed_same_file_cas
 
     let rel = "apps/backend/crates/ports/outbound/repo/src/lib.rs";
     let content = test_support::read_file(root, rel);
+    let new_content = format!(
+        "#![allow(unused_crate_dependencies)]\n{content}\n#[allow(unused_crate_dependencies)]\npub fn item_level_probe() {{}}\nmod outer {{\n    #![allow(unused_crate_dependencies)]\n    pub fn helper() {{}}\n}}\n"
+    );
 
     write_file(
         root,
         rel,
-        &format!(
-            "#![allow(unused_crate_dependencies)]\n{content}\n#[allow(unused_crate_dependencies)]\npub fn item_level_probe() {{}}\nmod outer {{\n    #![allow(unused_crate_dependencies)]\n    pub fn helper() {{}}\n}}\n"
-        ),
+        &new_content,
     );
 
     let results = run_family(root);
+    let inline_line = new_content
+        .lines()
+        .position(|line| line.contains("#![allow(unused_crate_dependencies)]") && !line.starts_with("#!"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
 
     assert_files(
         &results,
@@ -112,14 +118,24 @@ fn only_inventories_crate_level_unused_crate_dependencies_in_mixed_same_file_cas
     );
     assert_findings(
         &results,
-        &[RuleFinding {
-            severity: Severity::Info,
-            title: "unused_crate_dependencies exemption",
-            message: "unused_crate_dependencies is an approved universal exemption.",
-            file: Some("apps/backend/crates/ports/outbound/repo/src/lib.rs"),
-            line: Some(1),
-            inventory: false,
-        }],
+        &[
+            RuleFinding {
+                severity: Severity::Info,
+                title: "unused_crate_dependencies exemption",
+                message: "unused_crate_dependencies is an approved universal exemption.",
+                file: Some("apps/backend/crates/ports/outbound/repo/src/lib.rs"),
+                line: Some(1),
+                inventory: false,
+            },
+            RuleFinding {
+                severity: Severity::Info,
+                title: "unused_crate_dependencies exemption",
+                message: "unused_crate_dependencies is an approved universal exemption.",
+                file: Some("apps/backend/crates/ports/outbound/repo/src/lib.rs"),
+                line: Some(inline_line),
+                inventory: false,
+            },
+        ],
     );
 }
 
