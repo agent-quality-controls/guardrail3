@@ -185,6 +185,10 @@ pub fn threshold_value(parsed: &toml::Value, key: &str) -> Option<i64> {
     parsed.get(key).and_then(toml::Value::as_integer)
 }
 
+pub fn display_macro_name(path: &str) -> &str {
+    path.rsplit("::").next().unwrap_or(path)
+}
+
 pub fn known_top_level_keys() -> Vec<&'static str> {
     THRESHOLD_VALUES.iter().map(|(key, _)| *key).collect()
 }

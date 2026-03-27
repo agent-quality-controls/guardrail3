@@ -6,9 +6,13 @@ use super::super::run_for_tests;
 #[test]
 fn errors_for_each_missing_required_macro_ban() {
     let clippy = remove_ban_path(
-        &remove_ban_path(&build_fixture_clippy_toml("service", false, true, "", ""), "disallowed-macros", "eprintln"),
+        &remove_ban_path(
+            &build_fixture_clippy_toml("service", false, true, "", ""),
+            "disallowed-macros",
+            "std::eprintln",
+        ),
         "disallowed-macros",
-        "todo",
+        "std::todo",
     );
     let tree = root_workspace_tree(clippy);
     let results = run_for_tests(&tree, "clippy.toml");

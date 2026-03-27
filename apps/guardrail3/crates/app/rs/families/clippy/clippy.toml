@@ -160,9 +160,9 @@ disallowed-types = [
 # DISALLOWED MACROS
 disallowed-macros = [
     # --- Ban debugging and unfinished-code macros ---
-    { path = "println", reason = "Use structured logging or explicit output helpers instead of ad hoc println!" },
-    { path = "eprintln", reason = "Use structured logging or explicit error reporting instead of ad hoc eprintln!" },
-    { path = "dbg", reason = "Remove debugging probes before commit -- dbg! is a temporary local diagnostic only" },
-    { path = "todo", reason = "Ship concrete code or explicit errors -- todo! leaves unfinished control flow in production code" },
-    { path = "unimplemented", reason = "Ship concrete code or explicit errors -- unimplemented! leaves unfinished control flow in production code" },
+    { path = "std::println", reason = "Use structured logging or explicit output helpers instead of ad hoc println!" },
+    { path = "std::eprintln", reason = "Use structured logging or explicit error reporting instead of ad hoc eprintln!" },
+    { path = "std::dbg", reason = "Remove debugging probes before commit -- dbg! is a temporary local diagnostic only" },
+    { path = "std::todo", reason = "Ship concrete code or explicit errors -- todo! leaves unfinished control flow in production code" },
+    { path = "std::unimplemented", reason = "Ship concrete code or explicit errors -- unimplemented! leaves unfinished control flow in production code" },
 ]
