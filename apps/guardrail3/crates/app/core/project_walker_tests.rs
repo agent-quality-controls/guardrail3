@@ -61,6 +61,33 @@ fn preserves_immediate_ignored_directory_children_in_discovered_dirs() {
 }
 
 #[test]
+fn caches_repo_local_cargo_config_files() {
+    let tmp = tempdir().expect("tempdir");
+    fs::create_dir_all(tmp.path().join(".cargo")).expect("create cargo dir");
+    fs::write(
+        tmp.path().join(".cargo/config.toml"),
+        "[env]\nCLIPPY_CONF_DIR = \".\"\n",
+    )
+    .expect("write cargo config toml");
+    fs::write(
+        tmp.path().join(".cargo/config"),
+        "[env]\nRUSTFLAGS = \"-Dwarnings\"\n",
+    )
+    .expect("write cargo config");
+
+    let tree = walk_project(&RealFileSystem, tmp.path());
+
+    assert_eq!(
+        tree.file_content(".cargo/config.toml"),
+        Some("[env]\nCLIPPY_CONF_DIR = \".\"\n"),
+    );
+    assert_eq!(
+        tree.file_content(".cargo/config"),
+        Some("[env]\nRUSTFLAGS = \"-Dwarnings\"\n"),
+    );
+}
+
+#[test]
 fn recursively_scans_newly_recovered_ignored_directories() {
     let tmp = tempdir().expect("tempdir");
     fs::create_dir_all(tmp.path().join("apps/devctl/crates/app/core")).expect("create dirs");

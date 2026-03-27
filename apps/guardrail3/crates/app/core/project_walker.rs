@@ -83,6 +83,10 @@ fn should_cache(name: &str, rel_path: &str) -> bool {
     if CACHED_PREFIX.iter().any(|p| name.starts_with(p)) {
         return true;
     }
+    // .cargo/config.toml and legacy .cargo/config — cargo-local env/tool overrides
+    if rel_path.ends_with(".cargo/config.toml") || rel_path.ends_with(".cargo/config") {
+        return true;
+    }
     // .cargo/mutants.toml — special path-based match
     if name == "mutants.toml" && rel_path.contains(".cargo/") {
         return true;
