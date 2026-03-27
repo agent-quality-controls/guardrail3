@@ -231,10 +231,10 @@ fn family_route_for_tests(tree: &ProjectTree) -> RsClippyRoute {
 }
 
 fn config_precedence(rel_path: &str) -> usize {
-    if rel_path.ends_with("clippy.toml") && !rel_path.ends_with(".clippy.toml") {
+    if rel_path.ends_with(".clippy.toml") {
         return 0;
     }
-    if rel_path.ends_with(".clippy.toml") {
+    if rel_path.ends_with("clippy.toml") && !rel_path.ends_with(".clippy.toml") {
         return 1;
     }
     2
