@@ -1,5 +1,6 @@
 use super::facts::{
-    ClippyConfigFacts, ClippyFacts, CoveredRustUnitFacts, PolicyRootKind, UncoveredRustUnitFacts,
+    CargoConfigOverrideFacts, ClippyConfigFacts, ClippyFacts, CoveredRustUnitFacts,
+    PolicyRootKind, UncoveredRustUnitFacts,
 };
 
 pub struct ConfigClippyInput<'a> {
@@ -19,6 +20,11 @@ pub struct UncoveredRustUnitInput<'a> {
 
 pub struct PolicyContextFailureInput<'a> {
     pub parse_error: &'a str,
+}
+
+pub struct CargoConfigOverrideInput<'a> {
+    pub rel_path: &'a str,
+    pub parse_error: Option<&'a str>,
 }
 
 impl<'a> ConfigClippyInput<'a> {
@@ -50,6 +56,15 @@ impl<'a> ConfigClippyInput<'a> {
 impl<'a> PolicyContextFailureInput<'a> {
     pub const fn new(parse_error: &'a str) -> Self {
         Self { parse_error }
+    }
+}
+
+impl<'a> CargoConfigOverrideInput<'a> {
+    pub fn new(facts: &'a CargoConfigOverrideFacts) -> Self {
+        Self {
+            rel_path: &facts.rel_path,
+            parse_error: facts.parse_error.as_deref(),
+        }
     }
 }
 

@@ -371,6 +371,143 @@ pub fn garde_disabled_root_tree(clippy_toml: impl Into<String>) -> ProjectTree {
     )
 }
 
+pub fn root_workspace_tree_with_cargo_config(
+    cargo_config_rel: &str,
+    cargo_config: impl Into<String>,
+) -> ProjectTree {
+    let cargo_config = cargo_config.into();
+    project_tree(
+        vec![
+            ("", dir_entry(&[".cargo"], &["Cargo.toml", "clippy.toml"])),
+            (".cargo", dir_entry(&[], &[cargo_config_rel])),
+        ],
+        vec![
+            ("Cargo.toml", "[workspace]\nmembers = []".to_owned()),
+            (
+                "clippy.toml",
+                build_fixture_clippy_toml("service", false, true, "", ""),
+            ),
+            (&format!(".cargo/{cargo_config_rel}"), cargo_config),
+        ],
+    )
+}
+
+pub fn nested_workspace_root_with_cargo_config(
+    cargo_config_rel: &str,
+    cargo_config: impl Into<String>,
+) -> ProjectTree {
+    let cargo_config = cargo_config.into();
+    project_tree(
+        vec![
+            ("", dir_entry(&["apps"], &[])),
+            ("apps", dir_entry(&["backend"], &[])),
+            (
+                "apps/backend",
+                dir_entry(&[".cargo", "crates"], &["Cargo.toml", "clippy.toml"]),
+            ),
+            ("apps/backend/.cargo", dir_entry(&[], &[cargo_config_rel])),
+            ("apps/backend/crates", dir_entry(&["core"], &[])),
+            ("apps/backend/crates/core", dir_entry(&[], &["Cargo.toml"])),
+        ],
+        vec![
+            (
+                "apps/backend/Cargo.toml",
+                "[workspace]\nmembers = [\"crates/*\"]".to_owned(),
+            ),
+            (
+                "apps/backend/clippy.toml",
+                build_fixture_clippy_toml("service", false, true, "", ""),
+            ),
+            (
+                "apps/backend/crates/core/Cargo.toml",
+                "[package]\nname = \"core\"\n".to_owned(),
+            ),
+            (&format!("apps/backend/.cargo/{cargo_config_rel}"), cargo_config),
+        ],
+    )
+}
+
+pub fn nested_workspace_member_with_cargo_config(
+    cargo_config_rel: &str,
+    cargo_config: impl Into<String>,
+) -> ProjectTree {
+    let cargo_config = cargo_config.into();
+    project_tree(
+        vec![
+            ("", dir_entry(&["apps"], &[])),
+            ("apps", dir_entry(&["backend"], &[])),
+            (
+                "apps/backend",
+                dir_entry(&["crates"], &["Cargo.toml", "clippy.toml"]),
+            ),
+            ("apps/backend/crates", dir_entry(&["core"], &[])),
+            (
+                "apps/backend/crates/core",
+                dir_entry(&[".cargo"], &["Cargo.toml"]),
+            ),
+            (
+                "apps/backend/crates/core/.cargo",
+                dir_entry(&[], &[cargo_config_rel]),
+            ),
+        ],
+        vec![
+            (
+                "apps/backend/Cargo.toml",
+                "[workspace]\nmembers = [\"crates/*\"]".to_owned(),
+            ),
+            (
+                "apps/backend/clippy.toml",
+                build_fixture_clippy_toml("service", false, true, "", ""),
+            ),
+            (
+                "apps/backend/crates/core/Cargo.toml",
+                "[package]\nname = \"core\"\n".to_owned(),
+            ),
+            (
+                &format!("apps/backend/crates/core/.cargo/{cargo_config_rel}"),
+                cargo_config,
+            ),
+        ],
+    )
+}
+
+pub fn unrelated_nested_cargo_config_tree(
+    cargo_config_rel: &str,
+    cargo_config: impl Into<String>,
+) -> ProjectTree {
+    let cargo_config = cargo_config.into();
+    project_tree(
+        vec![
+            ("", dir_entry(&["apps", "docs"], &[])),
+            ("apps", dir_entry(&["backend"], &[])),
+            (
+                "apps/backend",
+                dir_entry(&["crates"], &["Cargo.toml", "clippy.toml"]),
+            ),
+            ("apps/backend/crates", dir_entry(&["core"], &[])),
+            ("apps/backend/crates/core", dir_entry(&[], &["Cargo.toml"])),
+            ("docs", dir_entry(&["guide"], &[])),
+            ("docs/guide", dir_entry(&[".cargo"], &[])),
+            ("docs/guide/.cargo", dir_entry(&[], &[cargo_config_rel])),
+        ],
+        vec![
+            (
+                "apps/backend/Cargo.toml",
+                "[workspace]\nmembers = [\"crates/*\"]".to_owned(),
+            ),
+            (
+                "apps/backend/clippy.toml",
+                build_fixture_clippy_toml("service", false, true, "", ""),
+            ),
+            (
+                "apps/backend/crates/core/Cargo.toml",
+                "[package]\nname = \"core\"\n".to_owned(),
+            ),
+            (&format!("docs/guide/.cargo/{cargo_config_rel}"), cargo_config),
+        ],
+    )
+}
+
 pub fn remove_ban_path(clippy_toml: &str, key: &str, path: &str) -> String {
     let mut parsed = toml::from_str::<toml::Value>(clippy_toml).expect("valid clippy TOML");
     let entries = parsed

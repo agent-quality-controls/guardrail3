@@ -67,8 +67,15 @@ pub struct ClippyFacts {
     pub policy_context_parse_error: Option<String>,
     pub allowed_configs: Vec<ClippyConfigFacts>,
     pub forbidden_configs: Vec<ForbiddenConfigFacts>,
+    pub cargo_config_overrides: Vec<CargoConfigOverrideFacts>,
     pub covered_units: Vec<CoveredRustUnitFacts>,
     pub uncovered_units: Vec<UncoveredRustUnitFacts>,
+}
+
+#[derive(Debug, Clone)]
+pub struct CargoConfigOverrideFacts {
+    pub rel_path: String,
+    pub parse_error: Option<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -121,6 +128,8 @@ pub fn collect(tree: &ProjectTree, route: &RsClippyRoute) -> ClippyFacts {
         .map(|facts| facts.rel_dir.clone())
         .collect();
     let policy_map = read_policy_map(tree, &cargo_roots, &standalone_package_roots);
+    let mut cargo_config_overrides =
+        collect_cargo_config_overrides(tree, &routed_root_rels, &cargo_roots);
 
     let mut allowed_policy_roots = BTreeSet::new();
     let _ = allowed_policy_roots.insert(String::new());
@@ -193,11 +202,13 @@ pub fn collect(tree: &ProjectTree, route: &RsClippyRoute) -> ClippyFacts {
     uncovered_units.sort_by(|a, b| a.rel_dir.cmp(&b.rel_dir));
     allowed_configs.sort_by(|a, b| a.rel_path.cmp(&b.rel_path));
     forbidden_configs.sort_by(|a, b| a.config.rel_path.cmp(&b.config.rel_path));
+    cargo_config_overrides.sort_by(|a, b| a.rel_path.cmp(&b.rel_path));
 
     ClippyFacts {
         policy_context_parse_error: policy_map.parse_error,
         allowed_configs,
         forbidden_configs,
+        cargo_config_overrides,
         covered_units,
         uncovered_units,
     }
@@ -353,6 +364,80 @@ fn collect_configs(
             )
         })
         .collect()
+}
+
+fn collect_cargo_config_overrides(
+    tree: &ProjectTree,
+    routed_root_rels: &BTreeSet<String>,
+    cargo_roots: &BTreeMap<String, CargoRootFacts>,
+) -> Vec<CargoConfigOverrideFacts> {
+    let mut rel_paths = Vec::new();
+
+    for rel_path in [".cargo/config.toml", ".cargo/config"] {
+        if tree.file_exists(rel_path) {
+            rel_paths.push(rel_path.to_owned());
+        }
+    }
+
+    rel_paths.extend(
+        tree.dirs_with_file("config.toml")
+            .into_iter()
+            .filter(|rel_dir| rel_dir.ends_with("/.cargo"))
+            .filter(|rel_dir| {
+                cargo_config_applies_to_routed_roots(rel_dir, routed_root_rels, cargo_roots)
+            })
+            .map(|rel_dir| ProjectTree::join_rel(&rel_dir, "config.toml")),
+    );
+    rel_paths.extend(
+        tree.dirs_with_file("config")
+            .into_iter()
+            .filter(|rel_dir| rel_dir.ends_with("/.cargo"))
+            .filter(|rel_dir| {
+                cargo_config_applies_to_routed_roots(rel_dir, routed_root_rels, cargo_roots)
+            })
+            .map(|rel_dir| ProjectTree::join_rel(&rel_dir, "config")),
+    );
+
+    rel_paths
+        .into_iter()
+        .filter_map(|rel_path| {
+            let parsed = match tree.file_content(&rel_path) {
+                Some(content) => toml::from_str::<toml::Value>(content)
+                    .map(Some)
+                    .map_err(|err| err.to_string()),
+                None => Err("cargo config content missing from ProjectTree".to_owned()),
+            };
+            match parsed {
+                Ok(Some(parsed)) => parsed
+                    .get("env")
+                    .and_then(toml::Value::as_table)
+                    .and_then(|env| env.get("CLIPPY_CONF_DIR"))
+                    .map(|_| CargoConfigOverrideFacts {
+                        rel_path,
+                        parse_error: None,
+                    }),
+                Ok(None) => None,
+                Err(parse_error) => Some(CargoConfigOverrideFacts {
+                    rel_path,
+                    parse_error: Some(parse_error),
+                }),
+            }
+        })
+        .collect()
+}
+
+fn cargo_config_applies_to_routed_roots(
+    rel_dir: &str,
+    routed_root_rels: &BTreeSet<String>,
+    cargo_roots: &BTreeMap<String, CargoRootFacts>,
+) -> bool {
+    let owner_rel = rel_dir.strip_suffix("/.cargo").unwrap_or(rel_dir);
+    owner_rel.is_empty()
+        || cargo_roots.keys().any(|cargo_root_rel| {
+            is_under_routed_root(cargo_root_rel, routed_root_rels)
+                && (cargo_root_rel == owner_rel
+                    || cargo_root_rel.starts_with(&format!("{owner_rel}/")))
+        })
 }
 
 fn is_under_routed_root(rel_dir: &str, routed_root_rels: &BTreeSet<String>) -> bool {

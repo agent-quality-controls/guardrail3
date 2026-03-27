@@ -10,6 +10,7 @@ This family enforces `clippy.toml` policy inside routed Rust roots. It does not 
 
 - allowed `clippy.toml` coverage for routed Rust units
 - allowed `clippy.toml` placement and shadowing rules
+- applicable cargo-config override surfaces that can redirect Clippy config discovery
 - exact managed threshold values
 - required disallowed method/type/macro baseline
 - ban-entry reason quality
@@ -47,6 +48,7 @@ Inside a routed root, the family may then do family-local discovery:
 
 - allowed Clippy policy root selection
 - `clippy.toml` / `.clippy.toml` parsing
+- applicable `.cargo/config.toml` / `.cargo/config` discovery for forbidden `CLIPPY_CONF_DIR` overrides
 - managed-key normalization
 - per-root coverage and shadowing analysis
 - profile-aware baseline comparison
@@ -78,8 +80,8 @@ apps/guardrail3/crates/app/rs/families/clippy/
         rs_clippy_01_*_tests/
           mod.rs
         ...
-        rs_clippy_22_*.rs
-        rs_clippy_22_*_tests/
+        rs_clippy_24_*.rs
+        rs_clippy_24_*_tests/
           mod.rs
     assertions/
       Cargo.toml
@@ -189,8 +191,9 @@ At the current checkpoint:
 - the family passes `RS-ARCH`
 - the family passes `RS-CLIPPY`
 - the family root now carries a managed `clippy.toml`, so the earlier `RS-CLIPPY-01` self-hit is gone
+- the family now fail-closes on applicable `CLIPPY_CONF_DIR` override surfaces in `.cargo/config.toml` / `.cargo/config`
 - the family no longer has a runtime-local `test_support.rs` shim
-- rule clusters `02..22` now use owner helpers plus sibling assertions modules
+- rule clusters `02..24` now use owner helpers plus sibling assertions modules
 - the remaining self-hosting status under `RS-TEST` needs a fresh top-level validator run after the unrelated outer-workspace break from the in-flight `deny` migration is gone
 
 So the next work on `clippy` is not rule rescue first. It is:

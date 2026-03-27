@@ -1,4 +1,4 @@
-# RS-CLIPPY — clippy.toml checker (23 rules)
+# RS-CLIPPY — clippy.toml checker (24 rules)
 
 **Input:** `clippy.toml` / `.clippy.toml` at allowed Rust policy roots
 **Parser:** TOML (`toml::Value`)
@@ -318,6 +318,14 @@ The generator and checker must match exactly.
 - **Severity:** Error
 - **What:** If active Clippy policy depends on `guardrail3.toml` profile/garde metadata and that file is unreadable or malformed, fail closed instead of silently falling back to default profile/garde behavior.
 - **Why:** Profile-sensitive rules must not guess when the policy context is broken.
+- **Status:** Implemented
+
+### RS-CLIPPY-24: cargo config must not override Clippy config discovery
+- **Old ID:** NEW (from attack)
+- **Severity:** Error
+- **What:** Any applicable `.cargo/config.toml` or legacy `.cargo/config` that sets `CLIPPY_CONF_DIR` is forbidden. If an applicable cargo config surface is unreadable or malformed, fail closed.
+- **Why:** `CLIPPY_CONF_DIR` bypasses the routed clippy policy-root model by forcing Clippy to start config discovery from an arbitrary directory.
+- **Applies to:** validation-root cargo config surfaces, routed workspace/package roots, and member/package-local cargo config surfaces that apply to in-scope Cargo roots.
 - **Status:** Implemented
 
 ## Explicitly rejected audit findings
