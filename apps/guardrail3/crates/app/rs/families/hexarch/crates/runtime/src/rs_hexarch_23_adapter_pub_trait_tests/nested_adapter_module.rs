@@ -7,7 +7,7 @@ fn nested_adapter_module_with_public_trait_errors() {
     write_file(
         tmp.path(),
         "apps/backend/crates/adapters/outbound/postgres/src/lib.rs",
-        "mod nested;\n",
+        "pub mod nested;\n",
     );
     write_file(
         tmp.path(),

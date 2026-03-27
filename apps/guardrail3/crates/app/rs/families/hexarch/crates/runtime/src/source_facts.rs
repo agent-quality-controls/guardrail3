@@ -10,7 +10,8 @@ pub struct SourceCrateFacts {
     pub rel_dir: String,
     pub layer: Option<super::dependency_facts::Layer>,
     pub pub_trait_count: usize,
-    pub impl_count: usize,
+    pub public_free_fn_count: usize,
+    pub public_inherent_method_count: usize,
     pub source_error_rel_path: Option<String>,
     pub source_error_message: Option<String>,
 }
@@ -27,16 +28,18 @@ pub fn collect(tree: &ProjectTree, members: &[MemberDependencyFacts]) -> Vec<Sou
         }
         for entrypoint in entrypoints {
             let module_stats =
-                walk_module_file(tree, &entrypoint, &mut source_error, &mut visited);
+                walk_module_file(tree, &entrypoint, &mut source_error, &mut visited, true);
             stats.pub_trait_count += module_stats.pub_trait_count;
-            stats.impl_count += module_stats.impl_count;
+            stats.public_free_fn_count += module_stats.public_free_fn_count;
+            stats.public_inherent_method_count += module_stats.public_inherent_method_count;
         }
         crates.push(SourceCrateFacts {
             crate_name: member.name.clone(),
             rel_dir: member.rel_dir.clone(),
             layer: member.layer,
             pub_trait_count: stats.pub_trait_count,
-            impl_count: stats.impl_count,
+            public_free_fn_count: stats.public_free_fn_count,
+            public_inherent_method_count: stats.public_inherent_method_count,
             source_error_rel_path: source_error.as_ref().map(|(rel_path, _)| rel_path.clone()),
             source_error_message: source_error.map(|(_, message)| message),
         });
@@ -47,14 +50,15 @@ pub fn collect(tree: &ProjectTree, members: &[MemberDependencyFacts]) -> Vec<Sou
 #[derive(Default)]
 struct SourceStats {
     pub_trait_count: usize,
-    impl_count: usize,
+    public_free_fn_count: usize,
+    public_inherent_method_count: usize,
 }
 
 #[derive(Default)]
 struct ModuleStats {
     pub_trait_count: usize,
-    impl_count: usize,
-    has_any_trait: bool,
+    public_free_fn_count: usize,
+    public_inherent_method_count: usize,
 }
 
 fn determine_entrypoints(
@@ -109,6 +113,7 @@ fn walk_module_file(
     rel_path: &str,
     source_error: &mut Option<(String, String)>,
     visited: &mut BTreeSet<String>,
+    public_module: bool,
 ) -> ModuleStats {
     if source_error.is_some() || !visited.insert(rel_path.to_owned()) {
         return ModuleStats::default();
@@ -136,7 +141,7 @@ fn walk_module_file(
         }
     };
 
-    count_items(tree, rel_path, &parsed.items, source_error, visited)
+    count_items(tree, rel_path, &parsed.items, source_error, visited, public_module)
 }
 
 fn parse_manifest_entrypoints(
@@ -186,6 +191,7 @@ fn count_items(
     items: &[syn::Item],
     source_error: &mut Option<(String, String)>,
     visited: &mut BTreeSet<String>,
+    public_module: bool,
 ) -> ModuleStats {
     let mut stats = ModuleStats::default();
     for item in items {
@@ -194,36 +200,49 @@ fn count_items(
         }
         match item {
             syn::Item::Trait(item_trait) => {
-                stats.has_any_trait = true;
-                if matches!(item_trait.vis, syn::Visibility::Public(_)) {
+                if public_module && matches!(item_trait.vis, syn::Visibility::Public(_)) {
                     stats.pub_trait_count += 1;
                 }
             }
-            syn::Item::Impl(_) => stats.impl_count += 1,
+            syn::Item::Fn(item_fn) => {
+                if public_module && matches!(item_fn.vis, syn::Visibility::Public(_)) {
+                    stats.public_free_fn_count += 1;
+                }
+            }
+            syn::Item::Impl(item_impl) => {
+                if public_module && item_impl.trait_.is_none() {
+                    stats.public_inherent_method_count += item_impl
+                        .items
+                        .iter()
+                        .filter_map(|item| match item {
+                            syn::ImplItem::Fn(item_fn)
+                                if matches!(item_fn.vis, syn::Visibility::Public(_)) =>
+                            {
+                                Some(())
+                            }
+                            _ => None,
+                        })
+                        .count();
+                }
+            }
             syn::Item::Mod(item_mod) => {
+                let child_public = public_module && matches!(item_mod.vis, syn::Visibility::Public(_));
                 if let Some((_, nested_items)) = &item_mod.content {
                     let nested =
-                        count_items(tree, rel_path, nested_items, source_error, visited);
+                        count_items(tree, rel_path, nested_items, source_error, visited, child_public);
                     stats.pub_trait_count += nested.pub_trait_count;
-                    if nested.has_any_trait {
-                        stats.impl_count += nested.impl_count;
-                    }
-                    stats.has_any_trait |= nested.has_any_trait;
+                    stats.public_free_fn_count += nested.public_free_fn_count;
+                    stats.public_inherent_method_count += nested.public_inherent_method_count;
                 } else if let Some(module_path) = resolve_module_path(tree, rel_path, item_mod) {
                     let nested =
-                        walk_module_file(tree, &module_path, source_error, visited);
+                        walk_module_file(tree, &module_path, source_error, visited, child_public);
                     stats.pub_trait_count += nested.pub_trait_count;
-                    if nested.has_any_trait {
-                        stats.impl_count += nested.impl_count;
-                    }
-                    stats.has_any_trait |= nested.has_any_trait;
+                    stats.public_free_fn_count += nested.public_free_fn_count;
+                    stats.public_inherent_method_count += nested.public_inherent_method_count;
                 }
             }
             _ => {}
         }
-    }
-    if !stats.has_any_trait {
-        stats.impl_count = 0;
     }
     stats
 }

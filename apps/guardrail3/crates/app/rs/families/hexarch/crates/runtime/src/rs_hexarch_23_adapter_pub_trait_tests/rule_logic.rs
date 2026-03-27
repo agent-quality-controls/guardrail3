@@ -7,7 +7,6 @@ fn adapter_public_trait_errors() {
         "api-adapter-http",
         "apps/api/crates/adapters/http",
         1,
-        0,
         None,
         None,
     );

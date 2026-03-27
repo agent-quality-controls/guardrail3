@@ -57,7 +57,6 @@ pub(crate) fn run_source_case(
     crate_name: &str,
     rel_dir: &str,
     pub_trait_count: usize,
-    impl_count: usize,
     source_error_rel_path: Option<&str>,
     source_error_message: Option<&str>,
 ) -> Vec<CheckResult> {
@@ -66,7 +65,8 @@ pub(crate) fn run_source_case(
         rel_dir: rel_dir.to_owned(),
         layer: Some(Layer::Adapters),
         pub_trait_count,
-        impl_count,
+        public_free_fn_count: 0,
+        public_inherent_method_count: 0,
         source_error_rel_path: source_error_rel_path.map(|value| value.to_owned()),
         source_error_message: source_error_message.map(|value| value.to_owned()),
     };

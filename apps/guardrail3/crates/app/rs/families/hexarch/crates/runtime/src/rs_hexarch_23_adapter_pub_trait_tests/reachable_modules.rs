@@ -142,3 +142,21 @@ fn lib_path_override_is_used_as_adapter_entrypoint() {
     );
     assertions::assert_error_title_contains(&results, "", &["defines public traits"]);
 }
+
+#[test]
+fn public_traits_inside_private_modules_do_not_count_as_adapter_public_surface() {
+    let tmp = copy_fixture();
+    write_file(
+        tmp.path(),
+        "apps/backend/crates/adapters/outbound/postgres/src/lib.rs",
+        "mod internal;\n",
+    );
+    write_file(
+        tmp.path(),
+        "apps/backend/crates/adapters/outbound/postgres/src/internal.rs",
+        "pub trait InternalBoundary {}\n",
+    );
+
+    let results = super::run_family(tmp.path());
+    assertions::assert_no_error(&results, "");
+}

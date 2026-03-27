@@ -31,22 +31,41 @@ pub fn check(input: &SourceCrateHexarchInput<'_>, results: &mut Vec<CheckResult>
         return;
     }
 
-    if source.impl_count <= source.pub_trait_count {
-        return;
+    if source.public_free_fn_count > 0 {
+        results.push(CheckResult {
+            id: ID.to_owned(),
+            severity: Severity::Warn,
+            title: format!(
+                "ports crate `{}` exposes public free functions",
+                source.crate_name
+            ),
+            message: format!(
+                "Ports crate `{}` exposes {} public free function(s) outside trait definitions. Ports should keep public behavior in traits or passive types, not free functions.",
+                source.crate_name, source.public_free_fn_count
+            ),
+            file: Some(source.rel_dir.clone()),
+            line: None,
+            inventory: false,
+        });
     }
 
-    results.push(CheckResult {
-        id: ID.to_owned(),
-        severity: Severity::Warn,
-        title: format!("ports crate `{}` is impl-heavy", source.crate_name),
-        message: format!(
-            "Ports crate `{}` has {} impl blocks and {} public traits. Ports should stay trait-dominant.",
-            source.crate_name, source.impl_count, source.pub_trait_count
-        ),
-        file: Some(source.rel_dir.clone()),
-        line: None,
-        inventory: false,
-    });
+    if source.public_inherent_method_count > 0 {
+        results.push(CheckResult {
+            id: ID.to_owned(),
+            severity: Severity::Warn,
+            title: format!(
+                "ports crate `{}` exposes public inherent methods",
+                source.crate_name
+            ),
+            message: format!(
+                "Ports crate `{}` exposes {} public inherent method(s) on concrete types. Ports should keep public behavior in traits or passive types, not on concrete types.",
+                source.crate_name, source.public_inherent_method_count
+            ),
+            file: Some(source.rel_dir.clone()),
+            line: None,
+            inventory: false,
+        });
+    }
 }
 
 #[cfg(test)]
@@ -62,7 +81,8 @@ pub(crate) fn run_source_case(
     crate_name: &str,
     rel_dir: &str,
     pub_trait_count: usize,
-    impl_count: usize,
+    public_free_fn_count: usize,
+    public_inherent_method_count: usize,
     source_error_rel_path: Option<&str>,
     source_error_message: Option<&str>,
 ) -> Vec<CheckResult> {
@@ -74,7 +94,8 @@ pub(crate) fn run_source_case(
             SourceCrateLayerForTest::Adapters => Layer::Adapters,
         }),
         pub_trait_count,
-        impl_count,
+        public_free_fn_count,
+        public_inherent_method_count,
         source_error_rel_path: source_error_rel_path.map(|value| value.to_owned()),
         source_error_message: source_error_message.map(|value| value.to_owned()),
     };

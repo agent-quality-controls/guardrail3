@@ -2,7 +2,7 @@ use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_22_ports_trait_domin
 use super::{copy_fixture, write_file};
 
 #[test]
-fn helper_only_modules_do_not_count_toward_impl_heaviness() {
+fn public_inherent_methods_inside_trait_modules_warn() {
     let tmp = copy_fixture();
     write_file(
         tmp.path(),
@@ -72,11 +72,20 @@ impl InternalWorker {
     );
 
     let results = super::run_family(tmp.path());
-    assertions::assert_no_warning(&results, "");
+    assertions::assert_warning_summary(
+        &results,
+        "",
+        1,
+        &["apps/backend/crates/ports/outbound/repo"],
+        Some(Some("apps/backend/crates/ports/outbound/repo")),
+        Some("public inherent method"),
+        None,
+        &[],
+    );
 }
 
 #[test]
-fn trait_only_split_modules_with_pub_crate_traits_stay_clean() {
+fn trait_only_split_modules_with_passive_types_stay_clean() {
     let tmp = copy_fixture();
     write_file(
         tmp.path(),
@@ -110,6 +119,12 @@ pub trait ApiPort {
 
 pub struct ApiDto {
     pub id: String,
+}
+
+impl std::fmt::Display for ApiDto {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.id)
+    }
 }
 "#,
     );
