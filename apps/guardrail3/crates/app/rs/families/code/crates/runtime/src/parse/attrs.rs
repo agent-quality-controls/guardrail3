@@ -1,8 +1,8 @@
 use super::helpers::{
     collect_allow_lints, collect_always_true_cfg_attr_allows, collect_cfg_attr_allow_lints,
-    collect_deny_forbid_attrs, collect_path_attrs, expr_contains_out_dir, expr_has_path_traversal,
-    impl_item_attrs, item_attrs, macro_token_exprs, path_to_string, result_error_kind, span_line,
-    trait_item_attrs,
+    collect_cfg_attr_path_attrs, collect_deny_forbid_attrs, collect_path_attrs,
+    expr_contains_out_dir, expr_has_path_traversal, impl_item_attrs, item_attrs,
+    macro_token_exprs, path_to_string, result_error_kind, span_line, trait_item_attrs,
 };
 use super::types::{
     DenyForbidInfo, ForeignModAllowInfo, ImplAllowInfo, IncludeMacroInfo, PathAttrInfo,
@@ -71,6 +71,7 @@ pub fn find_cfg_attr_allows(ast: &syn::File) -> Vec<ast_helpers::CfgAttrAllowInf
 pub fn find_path_attrs(ast: &syn::File) -> Vec<PathAttrInfo> {
     let mut out = Vec::new();
     collect_path_attrs(&ast.attrs, &mut out);
+    collect_cfg_attr_path_attrs(&ast.attrs, &mut out);
     let mut visitor = PathAttrVisitor { out: &mut out };
     visitor.visit_file(ast);
     out
@@ -226,6 +227,7 @@ impl<'ast> Visit<'ast> for AlwaysTrueCfgAttrVisitor<'ast> {
 impl<'ast> Visit<'ast> for PathAttrVisitor<'ast> {
     fn visit_item(&mut self, item: &'ast syn::Item) {
         collect_path_attrs(item_attrs(item), self.out);
+        collect_cfg_attr_path_attrs(item_attrs(item), self.out);
         syn::visit::visit_item(self, item);
     }
 }

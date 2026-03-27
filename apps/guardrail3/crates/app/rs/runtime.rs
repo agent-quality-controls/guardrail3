@@ -97,7 +97,14 @@ fn requested_families_allow_config_parse_failure(
     !requested_families.is_empty()
         && requested_families
             .iter()
-            .all(|family| matches!(family, RustValidateFamily::Arch | RustValidateFamily::Hexarch))
+            .all(|family| {
+                matches!(
+                    family,
+                    RustValidateFamily::Arch
+                        | RustValidateFamily::Hexarch
+                        | RustValidateFamily::Code
+                )
+            })
 }
 
 fn collect_family_applicability(

@@ -104,30 +104,6 @@ pub(crate) fn cfg_meta_requires_test(meta: &syn::Meta) -> bool {
     }
 }
 
-pub(crate) fn attrs_have_allow_lint(attrs: &[syn::Attribute], lint_name: &str) -> bool {
-    attrs.iter().any(|attr| attr_allows_lint(attr, lint_name))
-}
-
-pub(crate) fn attr_allows_lint(attr: &syn::Attribute, lint_name: &str) -> bool {
-    if !attr.path().is_ident("allow") {
-        return false;
-    }
-    let syn::Meta::List(list) = &attr.meta else {
-        return false;
-    };
-    let Ok(paths) = list.parse_args_with(
-        syn::punctuated::Punctuated::<syn::Path, syn::Token![,]>::parse_terminated,
-    ) else {
-        return false;
-    };
-    paths.iter().any(|path| {
-        path.segments
-            .iter()
-            .next_back()
-            .is_some_and(|segment| segment.ident == lint_name)
-    })
-}
-
 pub(crate) fn collect_allow_lints(attrs: &[syn::Attribute]) -> Vec<(usize, String)> {
     let mut out = Vec::new();
     for attr in attrs {
@@ -243,6 +219,48 @@ pub(crate) fn collect_path_attrs(
             line: span_line(attr.span()),
             path: path_lit.value(),
         });
+    }
+}
+
+pub(crate) fn collect_cfg_attr_path_attrs(
+    attrs: &[syn::Attribute],
+    out: &mut Vec<crate::parse::PathAttrInfo>,
+) {
+    for attr in attrs {
+        if !attr.path().is_ident("cfg_attr") {
+            continue;
+        }
+        let syn::Meta::List(list) = &attr.meta else {
+            continue;
+        };
+        let Ok(args) = list.parse_args_with(
+            syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated,
+        ) else {
+            continue;
+        };
+        let mut args = args.into_iter();
+        let Some(_) = args.next() else {
+            continue;
+        };
+        let line = span_line(attr.span());
+        for meta in args {
+            let syn::Meta::NameValue(name_value) = meta else {
+                continue;
+            };
+            if !name_value.path.is_ident("path") {
+                continue;
+            }
+            let syn::Expr::Lit(expr_lit) = &name_value.value else {
+                continue;
+            };
+            let syn::Lit::Str(path_lit) = &expr_lit.lit else {
+                continue;
+            };
+            out.push(crate::parse::PathAttrInfo {
+                line,
+                path: path_lit.value(),
+            });
+        }
     }
 }
 

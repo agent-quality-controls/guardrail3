@@ -56,7 +56,7 @@ That split is intentional:
 
 ## Current Status
 
-This family is mid-migration and not yet in the same stabilized self-hosted tier as:
+This family is now in the same self-hosted stabilized tier as:
 
 - `RS-TEST`
 - `RS-ARCH`
@@ -65,27 +65,22 @@ This family is mid-migration and not yet in the same stabilized self-hosted tier
 
 Current implementation state:
 
-- the family root is now a workspace
-- production and tests now live under [crates/runtime/src](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/code/crates/runtime/src)
-- placeholder sibling crates now exist for:
+- the family root is a workspace
+- production and tests live under [crates/runtime/src](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/code/crates/runtime/src)
+- sibling crates are live and used:
   - [crates/assertions](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/code/crates/assertions)
   - [test_support](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/code/test_support)
-- the family already consumes `RsCodeRoute` in [lib.rs](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/code/crates/runtime/src/lib.rs)
+- the family consumes `RsCodeRoute` in [lib.rs](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/code/crates/runtime/src/lib.rs)
 - the family passes `RS-ARCH`
-- the family test suite is green from the moved runtime crate
-- the family does not yet pass `RS-TEST`
+- the family passes `RS-TEST`
+- the family passes `RS-CODE`
+- the family unit-test suite is green from the moved runtime crate
 
-At the current checkpoint after the workspace split:
+The next work is no longer migration. It is adversarial auditing:
 
-- `RS-TEST-02`: `31` hits
-- `RS-TEST-03`: `778` hits
-- `RS-TEST-16`: `99` hits
-
-So the next work is:
-
-- stop sidecars from escaping their owned runtime/assertions boundary
-- extract proof-bearing semantic assertions out of runtime sidecars
-- replace runtime-local `test_support.rs` with the sibling `test_support` crate
+- attack the implemented rules for false-greens and false-positives
+- tighten fail-closed behavior on any remaining unreadable active inputs
+- compare live repo findings against the intended rule inventory
 
 ## Target Workspace Shape
 
@@ -139,7 +134,7 @@ Must not own:
 
 - reusable semantic proof helpers
 - repo-global root discovery
-- route construction
+- production route construction
 
 ### `crates/assertions`
 
@@ -183,7 +178,7 @@ The practical migration order is:
 4. replace runtime-local `test_support.rs` with the sibling `test_support` crate
 5. extract proof-bearing rule assertions out of runtime sidecars
 6. make the family pass `RS-TEST`
-7. then attack `RS-CODE` itself the same way `RS-TEST` and `RS-HEXARCH` were attacked
+7. attack `RS-CODE` itself the same way `RS-TEST` and `RS-HEXARCH` were attacked
 
 ## Done Means
 
@@ -193,5 +188,5 @@ The practical migration order is:
 - passes `RS-ARCH`
 - passes `RS-TEST`
 - has family-local docs aligned with the live code
-- no longer hides mapper/placement wiring inside family-local tests
+- keeps mapper/placement wiring out of the production runtime surface
 - is ready for a deeper adversarial rule-family audit

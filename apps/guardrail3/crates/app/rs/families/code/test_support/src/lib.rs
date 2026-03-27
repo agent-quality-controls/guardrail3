@@ -1,4 +1,7 @@
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicU64, Ordering};
+
+static TEMP_ROOT_COUNTER: AtomicU64 = AtomicU64::new(0);
 
 #[derive(Debug)]
 pub struct TempDir {
@@ -12,15 +15,16 @@ impl TempDir {
     }
 }
 
-#[must_use]
-pub fn temp_root(slug: &str) -> PathBuf {
+fn temp_root(slug: &str) -> PathBuf {
+    let unique_counter = TEMP_ROOT_COUNTER.fetch_add(1, Ordering::Relaxed);
     let unique = format!(
-        "{}-{}-{}",
+        "{}-{}-{}-{}",
         slug,
         std::process::id(),
         std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
-            .map_or(0, |duration| duration.as_nanos())
+            .map_or(0, |duration| duration.as_nanos()),
+        unique_counter,
     );
     let path = std::env::temp_dir().join(unique);
     create_dir_all(&path);
@@ -28,10 +32,17 @@ pub fn temp_root(slug: &str) -> PathBuf {
 }
 
 #[must_use]
+pub fn create_temp_dir(slug: &str) -> TempDir {
+    TempDir {
+        path: temp_root(slug),
+    }
+}
+
+#[must_use]
 pub fn copy_tree(src: &Path) -> TempDir {
-    let path = temp_root("copy-tree");
-    copy_dir_recursive(src, &path);
-    TempDir { path }
+    let temp_dir = create_temp_dir("copy-tree");
+    copy_dir_recursive(src, temp_dir.path());
+    temp_dir
 }
 
 #[must_use]

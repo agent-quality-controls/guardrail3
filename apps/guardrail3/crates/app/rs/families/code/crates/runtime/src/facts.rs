@@ -1,6 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use guardrail3_app_rs_family_mapper::RsCodeRoute;
+use guardrail3_domain_config::types::GuardrailConfig;
 use guardrail3_domain_project_tree::ProjectTree;
 
 use super::discover::{is_test_path, rust_file_rels};
@@ -28,9 +29,10 @@ pub struct CodeFacts {
 
 pub fn collect(tree: &ProjectTree, route: &RsCodeRoute) -> CodeFacts {
     let mut input_failures = Vec::new();
-    let cargo_roots = collect_cargo_roots(tree, route, &mut input_failures);
-    let policy_map = read_policy_map(tree, &cargo_roots, &mut input_failures);
+    let active_root_dirs = active_root_dirs(route);
+    let cargo_roots = collect_cargo_roots(tree, route, &active_root_dirs, &mut input_failures);
     let root_dirs = cargo_roots.keys().cloned().collect::<Vec<_>>();
+    let policy_map = read_policy_map(tree, &cargo_roots, &mut input_failures);
 
     let files = rust_file_rels(tree)
         .into_iter()
@@ -169,14 +171,23 @@ fn config_comment_rels(tree: &ProjectTree) -> Vec<String> {
 fn collect_cargo_roots(
     tree: &ProjectTree,
     route: &RsCodeRoute,
+    active_root_dirs: &BTreeSet<String>,
     input_failures: &mut Vec<CodeInputFailureFacts>,
 ) -> BTreeMap<String, CargoRootFacts> {
     route
         .roots
         .iter()
+        .filter(|root| active_root_dirs.contains(&root.root.rel_dir))
         .map(|root| {
             let rel_dir = root.root.rel_dir.clone();
             let rel_path = root.root.cargo_rel_path.clone();
+            if tree.file_exists(&rel_path) && tree.file_content(&rel_path).is_none() {
+                input_failures.push(CodeInputFailureFacts {
+                    rel_path: rel_path.clone(),
+                    message: "Failed to read Cargo.toml for code-family root discovery."
+                        .to_owned(),
+                });
+            }
             let parsed = tree
                 .file_content(&rel_path)
                 .map(|content| toml::from_str::<toml::Value>(content));
@@ -212,6 +223,48 @@ fn collect_cargo_roots(
             (rel_dir, facts)
         })
         .collect()
+}
+
+fn active_root_dirs(route: &RsCodeRoute) -> BTreeSet<String> {
+    let routed_roots = route
+        .roots
+        .iter()
+        .map(|root| root.root.clone())
+        .collect::<Vec<_>>();
+
+    match route.scoped_files.as_ref() {
+        None => routed_roots
+            .into_iter()
+            .map(|root| root.rel_dir)
+            .collect::<BTreeSet<_>>(),
+        Some(scoped_files) => scoped_files
+            .iter()
+            .filter_map(|rel_path| owning_routed_root(rel_path, &routed_roots))
+            .map(|root| root.rel_dir.clone())
+            .collect(),
+    }
+}
+
+fn owning_routed_root<'a>(
+    rel_path: &str,
+    routed_roots: &'a [guardrail3_app_rs_family_mapper::RsRootView],
+) -> Option<&'a guardrail3_app_rs_family_mapper::RsRootView> {
+    routed_roots
+        .iter()
+        .filter(|root| path_belongs_to_root(rel_path, root))
+        .max_by_key(|root| root.rel_dir.len())
+}
+
+fn path_belongs_to_root(
+    rel_path: &str,
+    root: &guardrail3_app_rs_family_mapper::RsRootView,
+) -> bool {
+    rel_path == root.cargo_rel_path
+        || rel_path == root.rel_dir
+        || root.rel_dir.is_empty()
+        || rel_path
+            .strip_prefix(root.rel_dir.as_str())
+            .is_some_and(|suffix| suffix.starts_with('/'))
 }
 
 fn parse_workspace_members(
@@ -255,8 +308,17 @@ fn read_policy_map(
 ) -> BTreeMap<String, PolicySettings> {
     let mut map = BTreeMap::new();
     let parsed = match tree.file_content("guardrail3.toml") {
-        Some(content) => match toml::from_str::<toml::Value>(content) {
-            Ok(parsed) => Some(parsed),
+        Some(content) => match toml::from_str::<GuardrailConfig>(content) {
+            Ok(_) => match toml::from_str::<toml::Value>(content) {
+                Ok(parsed) => Some(parsed),
+                Err(parse_error) => {
+                    input_failures.push(CodeInputFailureFacts {
+                        rel_path: "guardrail3.toml".to_owned(),
+                        message: format!("Failed to parse guardrail3.toml for code-family policy resolution: {parse_error}"),
+                    });
+                    None
+                }
+            },
             Err(parse_error) => {
                 input_failures.push(CodeInputFailureFacts {
                     rel_path: "guardrail3.toml".to_owned(),
@@ -265,6 +327,14 @@ fn read_policy_map(
                 None
             }
         },
+        None if tree.file_exists("guardrail3.toml") => {
+            input_failures.push(CodeInputFailureFacts {
+                rel_path: "guardrail3.toml".to_owned(),
+                message: "Failed to read guardrail3.toml for code-family policy resolution."
+                    .to_owned(),
+            });
+            None
+        }
         None => None,
     };
     let default_profile = parsed

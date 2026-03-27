@@ -51,7 +51,7 @@
 |--------|----------|------|--------|
 | RS-CODE-22 | Error | `#[deny]`/`#[forbid]` attributes without `// reason:`. Undocumented lint level overrides — same class as `#[allow]`. `#![deny(warnings)]` is an anti-pattern. Exception: `#![forbid(unsafe_code)]` is Info (strengthens safety). | Implemented |
 | RS-CODE-23 | Error | `include!()` pulls in unscanned code. Direct bypass of all code scanning. Exception: `include!(concat!(env!("OUT_DIR"), ...))` is Info (build-script pattern). Warn for `include_str!()`/`include_bytes!()` with path traversal (`..`). | Implemented |
-| RS-CODE-24 | Error/Warn | `#[path = "..."]` redirects module paths. Error if path contains `..` (escaping directory). Warn for any `#[path]` usage (breaks standard file layout). Require `// reason:` for Warn case. | Implemented |
+| RS-CODE-24 | Error/Warn | `#[path = "..."]` redirects module paths. Error if path contains `..` (escaping directory). Warn for any `#[path]` usage (breaks standard file layout). Require `// reason:` for Warn case. Canonical `#[cfg(test)]` sidecar wiring to `<rule>_tests/mod.rs` is exempt. | Implemented |
 | RS-CODE-25 | Warn | `Result<T, String>` or `Result<T, Box<dyn Error>>` in `pub fn` return types. Poor error discipline — forces callers to parse strings. **Library profile only.** | Implemented |
 | RS-CODE-26 | Warn | `pub use foo::*` glob re-export in lib.rs. Unpredictable API surface — any change to inner module changes library API. **Library profile only.** | Implemented |
 | RS-CODE-27 | Error | Facade-only lib.rs: should contain only `mod`, `pub use`, doc comments, type/const definitions. No function bodies, no impl blocks. **Library profile only.** | Implemented |

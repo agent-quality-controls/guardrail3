@@ -326,3 +326,101 @@ fn hexarch_runtime_reports_fail_closed_results_for_malformed_guardrail_config() 
 
     fs::remove_dir_all(&root).expect("cleanup temp root");
 }
+
+#[test]
+fn code_runtime_reports_fail_closed_results_for_malformed_guardrail_config() {
+    let root = temp_root("code-runtime-malformed-config");
+    write_file(&root, "guardrail3.toml", "[rust.checks]\ncode = \"nope\"\n");
+    write_file(
+        &root,
+        "apps/backend/Cargo.toml",
+        "[workspace]\nmembers = [\"crates/domain/types\"]\nresolver = \"2\"\n",
+    );
+    write_file(
+        &root,
+        "apps/backend/crates/domain/types/Cargo.toml",
+        "[package]\nname = \"backend-domain-types\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write_file(
+        &root,
+        "apps/backend/crates/domain/types/src/lib.rs",
+        "pub struct Marker;\n",
+    );
+
+    let report = run(
+        &LocalFs,
+        &root,
+        None,
+        &[RustValidateFamily::Code],
+        false,
+        &StubToolChecker,
+    )
+    .expect("code runtime report");
+
+    assert_eq!(report.sections.len(), 1, "unexpected sections: {report:#?}");
+    assert_eq!(report.sections[0].name, "code");
+    let ids = report.sections[0]
+        .results
+        .iter()
+        .map(|result| result.id.as_str())
+        .collect::<Vec<_>>();
+    assert!(
+        ids.contains(&"RS-CODE-30"),
+        "expected code-family fail-closed reporting for malformed config: {report:#?}"
+    );
+
+    fs::remove_dir_all(&root).expect("cleanup temp root");
+}
+
+#[test]
+fn code_runtime_scoped_files_limit_config_results_to_active_root() {
+    let root = temp_root("code-runtime-scoped-config-results");
+    write_file(
+        &root,
+        "guardrail3.toml",
+        "# EXCEPTION: root policy note\n[rust.checks]\ncode = true\n",
+    );
+    write_file(
+        &root,
+        "apps/backend/Cargo.toml",
+        "# EXCEPTION: backend workspace lint inventory\n[workspace]\nmembers = []\nresolver = \"2\"\n[workspace.lints.rust]\nunsafe_code = \"warn\"\n",
+    );
+    write_file(
+        &root,
+        "apps/backend/src/lib.rs",
+        "pub struct BackendMarker;\n",
+    );
+    write_file(
+        &root,
+        "apps/worker/Cargo.toml",
+        "# EXCEPTION: worker workspace lint inventory\n[workspace]\nmembers = []\nresolver = \"2\"\n[workspace.lints.rust]\nunsafe_code = \"warn\"\n",
+    );
+    write_file(
+        &root,
+        "apps/worker/src/lib.rs",
+        "pub struct WorkerMarker;\n",
+    );
+
+    let scoped_files = std::collections::BTreeSet::from(["apps/backend/src/lib.rs".to_owned()]);
+    let report = run(
+        &LocalFs,
+        &root,
+        Some(&scoped_files),
+        &[RustValidateFamily::Code],
+        false,
+        &StubToolChecker,
+    )
+    .expect("code runtime report");
+
+    assert_eq!(report.sections.len(), 1, "unexpected sections: {report:#?}");
+    assert_eq!(report.sections[0].name, "code");
+    assert!(
+        report.sections[0]
+            .results
+            .iter()
+            .all(|result| result.file.as_deref() == Some("apps/backend/Cargo.toml")),
+        "scoped code results should stay on the active root only: {report:#?}"
+    );
+
+    fs::remove_dir_all(&root).expect("cleanup temp root");
+}

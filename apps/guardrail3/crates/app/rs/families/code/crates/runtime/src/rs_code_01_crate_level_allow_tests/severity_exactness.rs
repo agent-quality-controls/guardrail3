@@ -14,6 +14,8 @@ fn uses_info_severity_for_real_test_paths() {
 
     let crate_test_rel = "apps/worker/tests/crate_allow_tests.rs";
     let inline_test_rel = "apps/devctl/tests/module_allow_tests.rs";
+    let sidecar_test_rel =
+        "apps/backend/crates/ports/inbound/api/src/rs_code_01_probe_tests/mod.rs";
 
     write_file(
         root,
@@ -25,6 +27,11 @@ fn uses_info_severity_for_real_test_paths() {
         inline_test_rel,
         "mod nested_test_allow {\n    #![allow(clippy::expect_used)]\n    pub fn helper() {}\n}\n",
     );
+    write_file(
+        root,
+        sidecar_test_rel,
+        "#![allow(clippy::panic)]\npub fn sidecar_fixture() {}\n",
+    );
 
     let results = run_family(root);
     let relevant_results = results
@@ -32,7 +39,7 @@ fn uses_info_severity_for_real_test_paths() {
         .filter(|result| {
             matches!(
                 result.file.as_deref(),
-                Some(path) if [crate_test_rel, inline_test_rel].contains(&path)
+                Some(path) if [crate_test_rel, inline_test_rel, sidecar_test_rel].contains(&path)
             )
         })
         .collect::<Vec<_>>();
@@ -54,6 +61,14 @@ fn uses_info_severity_for_real_test_paths() {
                 message: "Crate/module-wide allow for `clippy::expect_used` is test-file exempt.",
                 file: Some(inline_test_rel),
                 line: Some(2),
+                inventory: false,
+            },
+            RuleFinding {
+                severity: Severity::Info,
+                title: "crate-level allow",
+                message: "Crate/module-wide allow for `clippy::panic` is test-file exempt.",
+                file: Some(sidecar_test_rel),
+                line: Some(1),
                 inventory: false,
             },
         ],
