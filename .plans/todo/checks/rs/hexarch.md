@@ -1,4 +1,4 @@
-# RS-HEXARCH — Hex arch structure + dependency direction checker (26 rules)
+# RS-HEXARCH — Hex arch structure + dependency direction checker (27 rules)
 
 **Input:** Directory structure + Cargo.toml files (workspace + per-crate) + *.rs files (for ports/adapter content checks)
 **Parser:** TOML + filesystem + syn AST
@@ -14,12 +14,13 @@
 | RS-HEXARCH-04 | Error | Loose files in structural/container dirs (only .gitkeep allowed) | Implemented |
 | RS-HEXARCH-05 | Error | Container dirs not empty (must have subdirs or .gitkeep) | Implemented |
 | RS-HEXARCH-06 | Error | Leaf valid (Cargo.toml or crates/ hex-in-hex or .gitkeep) | Implemented |
-| RS-HEXARCH-07 | Error | Workspace members match crate dirs | Implemented |
+| RS-HEXARCH-07 | Error | Workspace members cover all live app-local Cargo roots | Implemented |
 | RS-HEXARCH-08 | Error | App Cargo.toml is workspace | Implemented |
 | RS-HEXARCH-09 | Error | No extra workspace members | Implemented |
 | RS-HEXARCH-10 | Error | Members within app boundary | Implemented |
 | RS-HEXARCH-11 | Error | Root workspace doesn't include apps | Implemented |
 | RS-HEXARCH-12 | Error | src/ banned at app level | Implemented |
+| RS-HEXARCH-27 | Error | Nested workspace forbidden under app root | Implemented |
 
 Current migrated structural coverage:
 - the old `rs_arch_01` golden fixture is now exercised by the new family

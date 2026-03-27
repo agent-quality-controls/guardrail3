@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_07_workspace_members_match_crate_dirs as assertions;
 use super::{copy_fixture, write_file};
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_07_workspace_members_match_crate_dirs as assertions;
 
 #[test]
 fn discovered_crates_missing_from_workspace_members_hit_every_mutated_app() {
@@ -24,19 +24,19 @@ fn discovered_crates_missing_from_workspace_members_hit_every_mutated_app() {
         &results,
         &[
             assertions::ExpectedRuleResult {
-                file: Some("apps/devctl"),
+                file: Some("apps/devctl/crates/domain/events/Cargo.toml"),
                 file_contains: None,
                 title_contains: Some(&["not a workspace member", "crates/domain/events"]),
                 message_contains: None,
             },
             assertions::ExpectedRuleResult {
-                file: Some("apps/backend"),
+                file: Some("apps/backend/crates/domain/events/Cargo.toml"),
                 file_contains: None,
                 title_contains: Some(&["not a workspace member", "crates/domain/events"]),
                 message_contains: None,
             },
             assertions::ExpectedRuleResult {
-                file: Some("apps/worker"),
+                file: Some("apps/worker/crates/domain/events/Cargo.toml"),
                 file_contains: None,
                 title_contains: Some(&["not a workspace member", "crates/domain/events"]),
                 message_contains: None,
@@ -65,13 +65,13 @@ fn one_app_with_two_missing_crates_emits_two_errors() {
         &results,
         &[
             assertions::ExpectedRuleResult {
-                file: Some("apps/devctl"),
+                file: Some("apps/devctl/crates/domain/events/Cargo.toml"),
                 file_contains: None,
                 title_contains: Some(&["crates/domain/events"]),
                 message_contains: None,
             },
             assertions::ExpectedRuleResult {
-                file: Some("apps/devctl"),
+                file: Some("apps/devctl/crates/app/service/Cargo.toml"),
                 file_contains: None,
                 title_contains: Some(&["crates/app/service"]),
                 message_contains: None,
@@ -98,7 +98,7 @@ fn one_app_with_one_missing_top_level_crate_emits_one_owned_error() {
     assertions::assert_expected_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            file: Some("apps/devctl"),
+            file: Some("apps/devctl/crates/domain/events/Cargo.toml"),
             file_contains: None,
             title_contains: Some(&["crates/domain/events"]),
             message_contains: None,
@@ -124,7 +124,9 @@ fn nested_inner_hex_missing_member_is_owned_by_backend_app_workspace() {
     assertions::assert_expected_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            file: Some("apps/backend"),
+            file: Some(
+                "apps/backend/crates/adapters/inbound/mcp/crates/ports/outbound/events/Cargo.toml",
+            ),
             file_contains: None,
             title_contains: Some(&["crates/adapters/inbound/mcp/crates/ports/outbound/events"]),
             message_contains: None,

@@ -12,7 +12,8 @@ This family enforces app-local Rust structure inside routed app roots. It does n
 - exact top-level hex container shape
 - directional inbound/outbound container shape
 - loose-file and empty-container structure checks
-- workspace member coverage inside one routed app
+- workspace member coverage for every live app-local Cargo root
+- nested workspace prohibition inside one routed app
 - dependency-direction and cross-app dependency rules
 - source-level ports/adapter surface rules
 - fail-closed dependency blocking when member manifests are malformed
@@ -54,7 +55,7 @@ It consumes:
 Inside a routed root, the family may then do family-local discovery:
 
 - app hex roots
-- workspace/member coverage
+- workspace/member coverage across all live app-local Cargo roots
 - dependency edges/cycles
 - source facts
 
@@ -84,8 +85,8 @@ apps/guardrail3/crates/app/rs/families/hexarch/
         rs_hexarch_01_*_tests/
           mod.rs
         ...
-        rs_hexarch_26_*.rs
-        rs_hexarch_26_*_tests/
+        rs_hexarch_27_*.rs
+        rs_hexarch_27_*_tests/
           mod.rs
     assertions/                # rule-owned reusable semantic assertions
       Cargo.toml
@@ -94,7 +95,7 @@ apps/guardrail3/crates/app/rs/families/hexarch/
         dependency_facts.rs
         rs_hexarch_01_*.rs
         ...
-        rs_hexarch_26_*.rs
+        rs_hexarch_27_*.rs
     assertions_common/         # current shared assertions-only result matchers
       Cargo.toml
       src/
