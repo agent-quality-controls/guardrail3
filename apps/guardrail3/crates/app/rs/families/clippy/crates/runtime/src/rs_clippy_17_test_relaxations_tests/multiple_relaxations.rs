@@ -10,6 +10,7 @@ fn warns_for_each_enabled_test_relaxation() {
         r#"
 allow-dbg-in-tests = true
 allow-expect-in-tests = false
+allow-panic-in-tests = true
 allow-print-in-tests = true
 allow-unwrap-in-tests = true
 "#,
@@ -27,6 +28,11 @@ allow-unwrap-in-tests = true
                 Severity::Error,
                 "clippy test expect policy misconfigured",
                 "`allow-expect-in-tests` must be `true` so tests may use `expect(...)` while non-test code stays governed by `clippy::expect_used`.",
+            ),
+            (
+                Severity::Error,
+                "clippy test panic relaxation enabled",
+                "`allow-panic-in-tests` must stay `false` so `panic!()` remains banned in tests.",
             ),
             (
                 Severity::Warn,

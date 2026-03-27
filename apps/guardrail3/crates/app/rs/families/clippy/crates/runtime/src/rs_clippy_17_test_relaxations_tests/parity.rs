@@ -1,5 +1,6 @@
 use guardrail3_domain_modules::clippy::{
-    ALLOW_DBG_IN_TESTS, ALLOW_EXPECT_IN_TESTS, ALLOW_PRINT_IN_TESTS, ALLOW_UNWRAP_IN_TESTS,
+    ALLOW_DBG_IN_TESTS, ALLOW_EXPECT_IN_TESTS, ALLOW_PANIC_IN_TESTS, ALLOW_PRINT_IN_TESTS,
+    ALLOW_UNWRAP_IN_TESTS,
 };
 use test_support::build_fixture_clippy_toml;
 
@@ -11,6 +12,7 @@ fn generated_service_baseline_keeps_test_relaxation_policy_exact() {
     for key in [
         "allow-dbg-in-tests",
         "allow-expect-in-tests",
+        "allow-panic-in-tests",
         "allow-print-in-tests",
         "allow-unwrap-in-tests",
     ] {
@@ -26,6 +28,7 @@ fn expected_bool_value(key: &str) -> bool {
     match key {
         "allow-dbg-in-tests" => ALLOW_DBG_IN_TESTS,
         "allow-expect-in-tests" => ALLOW_EXPECT_IN_TESTS,
+        "allow-panic-in-tests" => ALLOW_PANIC_IN_TESTS,
         "allow-print-in-tests" => ALLOW_PRINT_IN_TESTS,
         "allow-unwrap-in-tests" => ALLOW_UNWRAP_IN_TESTS,
         _ => unreachable!("unsupported key"),

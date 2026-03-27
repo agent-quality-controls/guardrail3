@@ -31,9 +31,10 @@ pub struct ClippyConfigFacts {
     pub rel_path: String,
     pub parsed: Option<toml::Value>,
     pub parse_error: Option<String>,
+    pub policy_context_parse_error: Option<String>,
     pub profile_name: Option<String>,
     pub garde_enabled: bool,
-    pub package_publishable: bool,
+    pub published_library_policy: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -63,6 +64,7 @@ pub struct UncoveredRustUnitFacts {
 
 #[derive(Debug, Clone)]
 pub struct ClippyFacts {
+    pub policy_context_parse_error: Option<String>,
     pub allowed_configs: Vec<ClippyConfigFacts>,
     pub forbidden_configs: Vec<ForbiddenConfigFacts>,
     pub covered_units: Vec<CoveredRustUnitFacts>,
@@ -81,6 +83,20 @@ struct CargoRootFacts {
 struct PolicySettings {
     profile_name: Option<String>,
     garde_enabled: bool,
+}
+
+#[derive(Debug, Clone)]
+struct GuardrailPolicyFacts {
+    parsed: Option<toml::Value>,
+    parse_error: Option<String>,
+    default_profile: Option<String>,
+    default_garde: bool,
+}
+
+#[derive(Debug, Clone)]
+struct ResolvedPolicyMap {
+    map: BTreeMap<String, PolicySettings>,
+    parse_error: Option<String>,
 }
 
 pub fn collect(tree: &ProjectTree, route: &RsClippyRoute) -> ClippyFacts {
@@ -111,7 +127,7 @@ pub fn collect(tree: &ProjectTree, route: &RsClippyRoute) -> ClippyFacts {
     allowed_policy_roots.extend(workspace_roots.iter().cloned());
     allowed_policy_roots.extend(standalone_package_roots.iter().cloned());
 
-    let configs = collect_configs(tree, &policy_map, &routed_root_rels);
+    let configs = collect_configs(tree, &cargo_roots, &policy_map, &routed_root_rels);
     let mut allowed_configs = Vec::new();
     let mut forbidden_configs = Vec::new();
     for config in configs {
@@ -179,6 +195,7 @@ pub fn collect(tree: &ProjectTree, route: &RsClippyRoute) -> ClippyFacts {
     forbidden_configs.sort_by(|a, b| a.config.rel_path.cmp(&b.config.rel_path));
 
     ClippyFacts {
+        policy_context_parse_error: policy_map.parse_error,
         allowed_configs,
         forbidden_configs,
         covered_units,
@@ -295,7 +312,8 @@ fn expand_member_pattern(tree: &ProjectTree, workspace_rel: &str, member: &str) 
 
 fn collect_configs(
     tree: &ProjectTree,
-    policy_map: &BTreeMap<String, PolicySettings>,
+    cargo_roots: &BTreeMap<String, CargoRootFacts>,
+    policy_map: &ResolvedPolicyMap,
     routed_root_rels: &BTreeSet<String>,
 ) -> Vec<ClippyConfigFacts> {
     let mut paths = Vec::new();
@@ -317,15 +335,21 @@ fn collect_configs(
     paths
         .into_iter()
         .map(|(rel_dir, rel_path)| {
-            let settings = policy_settings_for(rel_dir.as_str(), policy_map);
-            let package_publishable = package_publishable(tree, rel_dir.as_str());
+            let settings = policy_settings_for(rel_dir.as_str(), &policy_map.map);
+            let published_library_policy = published_library_policy(
+                tree,
+                cargo_roots,
+                rel_dir.as_str(),
+                settings.profile_name.as_deref(),
+            );
             parse_config(
                 tree,
                 &rel_dir,
                 &rel_path,
+                policy_map.parse_error.clone(),
                 settings.profile_name,
                 settings.garde_enabled,
-                package_publishable,
+                published_library_policy,
             )
         })
         .collect()
@@ -341,9 +365,10 @@ fn parse_config(
     tree: &ProjectTree,
     rel_dir: &str,
     rel_path: &str,
+    policy_context_parse_error: Option<String>,
     profile_name: Option<String>,
     garde_enabled: bool,
-    package_publishable: bool,
+    published_library_policy: bool,
 ) -> ClippyConfigFacts {
     match tree
         .file_content(rel_path)
@@ -354,27 +379,30 @@ fn parse_config(
             rel_path: rel_path.to_owned(),
             parsed: Some(parsed),
             parse_error: None,
+            policy_context_parse_error,
             profile_name,
             garde_enabled,
-            package_publishable,
+            published_library_policy,
         },
         Some(Err(err)) => ClippyConfigFacts {
             rel_dir: rel_dir.to_owned(),
             rel_path: rel_path.to_owned(),
             parsed: None,
             parse_error: Some(err.to_string()),
+            policy_context_parse_error,
             profile_name,
             garde_enabled,
-            package_publishable,
+            published_library_policy,
         },
         None => ClippyConfigFacts {
             rel_dir: rel_dir.to_owned(),
             rel_path: rel_path.to_owned(),
             parsed: None,
             parse_error: Some("clippy.toml content missing from ProjectTree".to_owned()),
+            policy_context_parse_error,
             profile_name,
             garde_enabled,
-            package_publishable,
+            published_library_policy,
         },
     }
 }
@@ -412,26 +440,17 @@ fn is_ancestor_dir(ancestor: &str, rel_dir: &str) -> bool {
     ancestor.is_empty() || ancestor == rel_dir || rel_dir.starts_with(&format!("{ancestor}/"))
 }
 
-fn read_profile_name(tree: &ProjectTree) -> Option<String> {
-    let content = tree.file_content("guardrail3.toml")?;
-    let parsed = toml::from_str::<toml::Value>(content).ok()?;
-
-    parsed
-        .get("profile")
-        .and_then(|value| value.get("name"))
-        .and_then(toml::Value::as_str)
-        .map(str::to_owned)
-}
-
 fn read_policy_map(
     tree: &ProjectTree,
     cargo_roots: &BTreeMap<String, CargoRootFacts>,
     standalone_package_roots: &BTreeSet<String>,
-) -> BTreeMap<String, PolicySettings> {
+) -> ResolvedPolicyMap {
     let mut map = BTreeMap::new();
-    let default_profile = read_profile_name(tree);
-    let default_garde = read_global_garde(tree);
+    let guardrail = read_guardrail_policy(tree);
+    let default_profile = guardrail.default_profile.clone();
+    let default_garde = guardrail.default_garde;
     let resolved_app_paths = resolve_app_paths(cargo_roots);
+    let app_root_paths: BTreeSet<_> = resolved_app_paths.values().cloned().collect();
     let _ = map.insert(
         String::new(),
         PolicySettings {
@@ -440,11 +459,11 @@ fn read_policy_map(
         },
     );
 
-    let Some(content) = tree.file_content("guardrail3.toml") else {
-        return map;
-    };
-    let Ok(parsed) = toml::from_str::<toml::Value>(content) else {
-        return map;
+    let Some(parsed) = guardrail.parsed.as_ref() else {
+        return ResolvedPolicyMap {
+            map,
+            parse_error: guardrail.parse_error,
+        };
     };
     let rust = parsed.get("rust");
 
@@ -501,6 +520,21 @@ fn read_policy_map(
                 },
             );
         }
+        for rel_dir in cargo_roots
+            .values()
+            .filter(|facts| facts.has_workspace)
+            .map(|facts| facts.rel_dir.as_str())
+            .filter(|rel_dir| !rel_dir.is_empty())
+            .filter(|rel_dir| !app_root_paths.contains(*rel_dir))
+        {
+            let _ = map.insert(
+                rel_dir.to_owned(),
+                PolicySettings {
+                    profile_name: profile_name.clone(),
+                    garde_enabled,
+                },
+            );
+        }
         for rel_dir in standalone_package_roots {
             let _ = map.insert(
                 rel_dir.clone(),
@@ -512,7 +546,10 @@ fn read_policy_map(
         }
     }
 
-    map
+    ResolvedPolicyMap {
+        map,
+        parse_error: guardrail.parse_error,
+    }
 }
 
 fn resolve_app_paths(cargo_roots: &BTreeMap<String, CargoRootFacts>) -> BTreeMap<String, String> {
@@ -534,20 +571,48 @@ fn resolve_app_paths(cargo_roots: &BTreeMap<String, CargoRootFacts>) -> BTreeMap
     resolved
 }
 
-fn read_global_garde(tree: &ProjectTree) -> bool {
+fn read_guardrail_policy(tree: &ProjectTree) -> GuardrailPolicyFacts {
+    if !tree.file_exists("guardrail3.toml") {
+        return GuardrailPolicyFacts {
+            parsed: None,
+            parse_error: None,
+            default_profile: None,
+            default_garde: true,
+        };
+    }
+
     let Some(content) = tree.file_content("guardrail3.toml") else {
-        return true;
-    };
-    let Ok(parsed) = toml::from_str::<toml::Value>(content) else {
-        return true;
+        return GuardrailPolicyFacts {
+            parsed: None,
+            parse_error: Some("guardrail3.toml content missing from ProjectTree".to_owned()),
+            default_profile: None,
+            default_garde: true,
+        };
     };
 
-    parsed
-        .get("rust")
-        .and_then(|value| value.get("checks"))
-        .and_then(|value| value.get("garde"))
-        .and_then(toml::Value::as_bool)
-        .unwrap_or(true)
+    match toml::from_str::<toml::Value>(content) {
+        Ok(parsed) => GuardrailPolicyFacts {
+            default_profile: parsed
+                .get("profile")
+                .and_then(|value| value.get("name"))
+                .and_then(toml::Value::as_str)
+                .map(str::to_owned),
+            default_garde: parsed
+                .get("rust")
+                .and_then(|value| value.get("checks"))
+                .and_then(|value| value.get("garde"))
+                .and_then(toml::Value::as_bool)
+                .unwrap_or(true),
+            parsed: Some(parsed),
+            parse_error: None,
+        },
+        Err(err) => GuardrailPolicyFacts {
+            parsed: None,
+            parse_error: Some(err.to_string()),
+            default_profile: None,
+            default_garde: true,
+        },
+    }
 }
 
 fn policy_settings_for(
@@ -569,6 +634,29 @@ fn policy_settings_for(
         profile_name: None,
         garde_enabled: true,
     })
+}
+
+fn published_library_policy(
+    tree: &ProjectTree,
+    cargo_roots: &BTreeMap<String, CargoRootFacts>,
+    rel_dir: &str,
+    profile_name: Option<&str>,
+) -> bool {
+    if profile_name != Some("library") {
+        return false;
+    }
+
+    package_publishable(tree, rel_dir)
+        || cargo_roots
+            .get(rel_dir)
+            .filter(|facts| facts.has_workspace)
+            .map(|facts| {
+                facts
+                    .workspace_members
+                    .iter()
+                    .any(|member_rel| package_publishable(tree, member_rel))
+            })
+            .unwrap_or(false)
 }
 
 fn package_publishable(tree: &ProjectTree, rel_dir: &str) -> bool {

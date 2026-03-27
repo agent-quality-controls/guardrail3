@@ -10,6 +10,9 @@ use super::inputs::ConfigClippyInput;
 const ID: &str = "RS-CLIPPY-14";
 
 pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
+    if input.policy_context_parse_error().is_some() {
+        return;
+    }
     if input.profile_name() != Some("library") {
         return;
     }

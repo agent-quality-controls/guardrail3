@@ -34,6 +34,13 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
             "`allow-expect-in-tests` must be `true` so tests may use `expect(...)` while non-test code stays governed by `clippy::expect_used`.",
         ),
         (
+            "allow-panic-in-tests",
+            false,
+            Severity::Error,
+            "clippy test panic relaxation enabled",
+            "`allow-panic-in-tests` must stay `false` so `panic!()` remains banned in tests.",
+        ),
+        (
             "allow-unwrap-in-tests",
             false,
             Severity::Error,

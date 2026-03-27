@@ -17,6 +17,10 @@ pub struct UncoveredRustUnitInput<'a> {
     pub kind: PolicyRootKind,
 }
 
+pub struct PolicyContextFailureInput<'a> {
+    pub parse_error: &'a str,
+}
+
 impl<'a> ConfigClippyInput<'a> {
     pub const fn new(config: &'a ClippyConfigFacts) -> Self {
         Self { config }
@@ -34,8 +38,18 @@ impl<'a> ConfigClippyInput<'a> {
         self.config.garde_enabled
     }
 
-    pub const fn package_publishable(&self) -> bool {
-        self.config.package_publishable
+    pub const fn published_library_policy(&self) -> bool {
+        self.config.published_library_policy
+    }
+
+    pub fn policy_context_parse_error(&self) -> Option<&'a str> {
+        self.config.policy_context_parse_error.as_deref()
+    }
+}
+
+impl<'a> PolicyContextFailureInput<'a> {
+    pub const fn new(parse_error: &'a str) -> Self {
+        Self { parse_error }
     }
 }
 

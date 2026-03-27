@@ -16,6 +16,9 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
     if input.config.rel_dir.is_empty() {
         return;
     }
+    if input.policy_context_parse_error().is_some() {
+        return;
+    }
 
     let Some(parsed) = input.config.parsed.as_ref() else {
         if let Some(parse_error) = &input.config.parse_error {
@@ -83,6 +86,7 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
         "avoid-breaking-exported-api",
         "allow-dbg-in-tests",
         "allow-expect-in-tests",
+        "allow-panic-in-tests",
         "allow-print-in-tests",
         "allow-unwrap-in-tests",
     ] {

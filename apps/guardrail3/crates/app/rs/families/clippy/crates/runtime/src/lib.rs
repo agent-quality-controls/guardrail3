@@ -23,13 +23,16 @@ mod rs_clippy_19_unknown_keys;
 mod rs_clippy_20_macro_bans;
 mod rs_clippy_21_cognitive_complexity_threshold;
 mod rs_clippy_22_type_complexity_threshold;
+mod rs_clippy_23_policy_context_parseable;
 
 use guardrail3_app_rs_family_mapper::RsClippyRoute;
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::CheckResult;
 
 use self::facts::collect;
-use self::inputs::{ConfigClippyInput, CoveredRustUnitInput, UncoveredRustUnitInput};
+use self::inputs::{
+    ConfigClippyInput, CoveredRustUnitInput, PolicyContextFailureInput, UncoveredRustUnitInput,
+};
 
 pub use self::clippy_support::{EXPECTED_METHOD_BANS, EXPECTED_TYPE_BANS};
 
@@ -53,6 +56,13 @@ pub fn check(tree: &ProjectTree, route: &RsClippyRoute) -> Vec<CheckResult> {
 
     for forbidden in &facts.forbidden_configs {
         rs_clippy_12_allowed_placement::check(forbidden, &mut results);
+    }
+
+    if let Some(parse_error) = facts.policy_context_parse_error.as_deref() {
+        rs_clippy_23_policy_context_parseable::check(
+            &PolicyContextFailureInput::new(parse_error),
+            &mut results,
+        );
     }
 
     for input in ConfigClippyInput::from_facts(&facts) {
