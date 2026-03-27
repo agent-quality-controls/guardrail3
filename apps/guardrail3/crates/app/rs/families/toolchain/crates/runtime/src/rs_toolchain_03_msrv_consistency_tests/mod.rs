@@ -3,7 +3,9 @@ use guardrail3_app_rs_family_toolchain_assertions::rs_toolchain_03_msrv_consiste
 };
 use guardrail3_domain_report::Severity;
 
-use super::{check, test_input, test_input_missing_cargo};
+use super::{
+    check, test_input, test_input_invalid_cargo_rust_version_type, test_input_missing_cargo,
+};
 
 #[test]
 fn warns_when_pinned_toolchain_is_older_than_msrv() {
@@ -180,6 +182,35 @@ fn errors_when_cargo_rust_version_is_invalid() {
             inventory: false,
             title: "Cargo rust-version is invalid",
             message: "Cannot compare pinned toolchain against invalid Cargo rust-version `stable`.",
+            file: Some("Cargo.toml"),
+        }],
+    );
+}
+
+#[test]
+fn errors_when_cargo_rust_version_is_not_a_string() {
+    let parsed = toml::from_str::<toml::Value>(
+        "[toolchain]\nchannel = \"1.85.1\"\ncomponents = [\"clippy\", \"rustfmt\"]",
+    )
+    .expect("valid TOML");
+    let input = test_input_invalid_cargo_rust_version_type(
+        Some("rust-toolchain.toml"),
+        None,
+        Some(&parsed),
+        None,
+        None,
+    );
+    let mut results = Vec::new();
+
+    check(&input, &mut results);
+
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            severity: Severity::Error,
+            inventory: false,
+            title: "Cargo rust-version is invalid",
+            message: "`Cargo.toml` `rust-version` must be a string version.",
             file: Some("Cargo.toml"),
         }],
     );

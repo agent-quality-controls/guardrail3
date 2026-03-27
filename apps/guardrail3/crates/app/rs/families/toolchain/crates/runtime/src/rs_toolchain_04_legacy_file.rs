@@ -47,6 +47,7 @@ pub(crate) fn test_input<'a>(
         parse_error,
         cargo_toml_rel: Some("Cargo.toml"),
         cargo_rust_version,
+        cargo_rust_version_invalid: false,
         cargo_parse_error,
     }
 }
