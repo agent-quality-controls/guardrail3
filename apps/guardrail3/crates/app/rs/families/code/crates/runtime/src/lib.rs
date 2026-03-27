@@ -15,7 +15,6 @@ mod rs_code_10_use_count_error;
 mod rs_code_11_use_count_warn;
 mod rs_code_12_unsafe_code_lint;
 mod rs_code_13_todo_macros;
-mod rs_code_14_unwrap_expect;
 mod rs_code_15_direct_fs_usage;
 mod rs_code_16_panic_macro;
 mod rs_code_17_impl_allow_blast_radius;
@@ -122,7 +121,6 @@ pub fn check(tree: &ProjectTree, route: &RsCodeRoute) -> Vec<CheckResult> {
         rs_code_10_use_count_error::check(&input, &mut results);
         rs_code_11_use_count_warn::check(&input, &mut results);
         rs_code_13_todo_macros::check(&input, &mut results);
-        rs_code_14_unwrap_expect::check(&input, &mut results);
         rs_code_15_direct_fs_usage::check(&input, &mut results);
         rs_code_16_panic_macro::check(&input, &mut results);
         rs_code_17_impl_allow_blast_radius::check(&input, &mut results);

@@ -93,10 +93,6 @@ pub fn find_forbidden_macros(ast: &syn::File) -> Vec<(usize, String)> {
     visitors::find_forbidden_macros(ast)
 }
 
-pub fn find_unwrap_expect(ast: &syn::File) -> Vec<(usize, String)> {
-    visitors::find_unwrap_expect(ast)
-}
-
 pub fn find_std_fs_import_lines(ast: &syn::File) -> Vec<usize> {
     fs_visitors::find_std_fs_import_lines(ast)
 }

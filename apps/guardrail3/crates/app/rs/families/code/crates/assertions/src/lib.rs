@@ -13,7 +13,6 @@ pub mod rs_code_10_use_count_error;
 pub mod rs_code_11_use_count_warn;
 pub mod rs_code_12_unsafe_code_lint;
 pub mod rs_code_13_todo_macros;
-pub mod rs_code_14_unwrap_expect;
 pub mod rs_code_15_direct_fs_usage;
 pub mod rs_code_16_panic_macro;
 pub mod rs_code_17_impl_allow_blast_radius;
