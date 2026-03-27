@@ -26,3 +26,11 @@ fn accepts_concat_of_string_literals() {
 
     assert_no_hits(&results);
 }
+
+#[test]
+fn ignores_non_method_helper_named_expect() {
+    let content = "mod helpers { pub fn expect(_message: &str) {} }\nfn probe() { helpers::expect(\"ok\"); }";
+    let results = check_source("tests/probe.rs", content, true);
+
+    assert_no_hits(&results);
+}

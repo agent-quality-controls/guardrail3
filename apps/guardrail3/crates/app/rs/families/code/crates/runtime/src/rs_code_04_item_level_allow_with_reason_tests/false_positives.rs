@@ -110,7 +110,7 @@ fn inventories_accepted_reason_variants_and_other_item_kinds() {
                 message: "#[allow(clippy::unwrap_used)] reason: uppercase accepted",
                 file: Some(upper_rel),
                 line: Some(upper_line),
-                inventory: false,
+                inventory: true,
             },
             RuleFinding {
                 severity: Severity::Info,
@@ -118,7 +118,7 @@ fn inventories_accepted_reason_variants_and_other_item_kinds() {
                 message: "#[allow(clippy::expect_used)] reason: module boundary shim",
                 file: Some(mod_rel),
                 line: Some(mod_line),
-                inventory: false,
+                inventory: true,
             },
             RuleFinding {
                 severity: Severity::Info,
@@ -126,7 +126,7 @@ fn inventories_accepted_reason_variants_and_other_item_kinds() {
                 message: "#[allow(clippy::panic)] reason: tight spacing accepted",
                 file: Some(tight_rel),
                 line: Some(tight_line),
-                inventory: false,
+                inventory: true,
             },
         ]
     );
@@ -160,7 +160,86 @@ fn inventories_only_documented_allows_in_mixed_same_file_case() {
             message: "#[allow(clippy::unwrap_used)] reason: documented surface",
             file: Some(rel),
             line: Some(documented_line),
-            inventory: false,
+            inventory: true,
         }],
+    );
+}
+
+#[test]
+fn preserves_reason_text_with_url_like_content() {
+    let fixture = copy_fixture();
+    let root = fixture.path();
+
+    let rel = "apps/backend/crates/ports/inbound/api/src/lib.rs";
+    let content = test_support::read_file(root, rel);
+
+    let new_content = format!(
+        "{content}\n#[allow(clippy::unwrap_used)] // reason: compatibility note see https://example.com/policy\npub fn documented_probe() {{}}\n"
+    );
+    write_file(root, rel, &new_content);
+
+    let line = new_content
+        .lines()
+        .position(|source| {
+            source.contains(
+                "#[allow(clippy::unwrap_used)] // reason: compatibility note see https://example.com/policy",
+            )
+        })
+        .map(|index| index + 1)
+        .unwrap_or_default();
+
+    assert_findings(
+        &run_family(root),
+        &[RuleFinding {
+            severity: Severity::Info,
+            title: "item-level allow with reason",
+            message:
+                "#[allow(clippy::unwrap_used)] reason: compatibility note see https://example.com/policy",
+            file: Some(rel),
+            line: Some(line),
+            inventory: true,
+        }],
+    );
+}
+
+#[test]
+fn inventories_multiline_allow_with_reason_on_closing_line() {
+    let fixture = copy_fixture();
+    let root = fixture.path();
+
+    let rel = "apps/backend/crates/ports/inbound/api/src/lib.rs";
+    let content = test_support::read_file(root, rel);
+
+    let new_content = format!(
+        "{content}\n#[allow(\n    clippy::unwrap_used,\n    clippy::expect_used\n)] // reason: multiline adapter seam\npub fn documented_probe() {{}}\n"
+    );
+    write_file(root, rel, &new_content);
+
+    let line = new_content
+        .lines()
+        .position(|source| source.contains(")] // reason: multiline adapter seam"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
+
+    assert_findings(
+        &run_family(root),
+        &[
+            RuleFinding {
+                severity: Severity::Info,
+                title: "item-level allow with reason",
+                message: "#[allow(clippy::expect_used)] reason: multiline adapter seam",
+                file: Some(rel),
+                line: Some(line),
+                inventory: true,
+            },
+            RuleFinding {
+                severity: Severity::Info,
+                title: "item-level allow with reason",
+                message: "#[allow(clippy::unwrap_used)] reason: multiline adapter seam",
+                file: Some(rel),
+                line: Some(line),
+                inventory: true,
+            },
+        ],
     );
 }

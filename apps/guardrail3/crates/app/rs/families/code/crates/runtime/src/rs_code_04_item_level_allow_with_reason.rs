@@ -17,7 +17,7 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
             message: format!("#[allow({lint})] reason: {reason}"),
             file: Some(input.rel_path.to_owned()),
             line: Some(line),
-            inventory: false,
+            inventory: true,
         });
     }
 }

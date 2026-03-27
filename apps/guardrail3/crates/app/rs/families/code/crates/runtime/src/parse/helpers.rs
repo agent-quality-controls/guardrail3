@@ -108,7 +108,7 @@ pub(crate) fn collect_allow_lints(attrs: &[syn::Attribute]) -> Vec<(usize, Strin
     let mut out = Vec::new();
     for attr in attrs {
         if attr.path().is_ident("allow") {
-            let line = span_line(attr.span());
+            let line = span_end_line(attr.span());
             let syn::Meta::List(list) = &attr.meta else {
                 continue;
             };
@@ -143,7 +143,7 @@ pub(crate) fn collect_cfg_attr_allow_lints(attrs: &[syn::Attribute]) -> Vec<(usi
         let Some(_) = args.next() else {
             continue;
         };
-        let line = span_line(attr.span());
+        let line = span_end_line(attr.span());
         for meta in args {
             let syn::Meta::List(inner) = meta else {
                 continue;
