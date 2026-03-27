@@ -26,7 +26,6 @@ pub mod rs_code_24_path_attr;
 pub mod rs_code_25_public_result_error_type;
 pub mod rs_code_26_lib_glob_reexport;
 pub mod rs_code_27_facade_only_lib;
-pub mod rs_code_28_inline_pub_mod_in_lib;
 pub mod rs_code_29_large_trait_inventory;
 pub mod rs_code_30_input_failures;
 pub mod rs_code_32_test_expect_message_quality;

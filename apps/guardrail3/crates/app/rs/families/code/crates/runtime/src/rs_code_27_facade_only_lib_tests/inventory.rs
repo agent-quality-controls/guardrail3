@@ -20,8 +20,9 @@ fn errors_on_non_facade_items_in_real_library_lib_rs() {
     let package_content =
         test_support::read_file(root, package_rel);
 
-    let mutated =
-        format!("{package_content}\n\nuse crate::TenantSlug;\npub fn mutate_surface() {{}}\n");
+    let mutated = format!(
+        "{package_content}\n\nuse crate::TenantSlug;\npub fn mutate_surface() {{}}\npub mod api {{ pub fn ping() {{}} }}\n"
+    );
     write_file(root, package_rel, &mutated);
 
     let results = run_family(root);
@@ -31,6 +32,9 @@ fn errors_on_non_facade_items_in_real_library_lib_rs() {
     let fn_line = mutated
         .lines()
         .position(|line| line.contains("pub fn mutate_surface()")).map(|index| index + 1).unwrap_or_default();
+    let inline_line = mutated
+        .lines()
+        .position(|line| line.contains("pub mod api")).map(|index| index + 1).unwrap_or_default();
 
     assert_files(&results, BTreeSet::from([package_rel.to_owned()]));
     assert_findings(
@@ -50,6 +54,14 @@ fn errors_on_non_facade_items_in_real_library_lib_rs() {
                 message: "lib.rs contains function `mutate_surface`. Keep lib.rs limited to facade declarations and type/const definitions.",
                 file: Some(package_rel),
                 line: Some(fn_line),
+                inventory: false,
+            },
+            RuleFinding {
+                severity: Severity::Error,
+                title: "lib.rs should stay facade-only",
+                message: "lib.rs contains inline module `api`. Keep lib.rs limited to facade declarations and type/const definitions.",
+                file: Some(package_rel),
+                line: Some(inline_line),
                 inventory: false,
             },
         ],
