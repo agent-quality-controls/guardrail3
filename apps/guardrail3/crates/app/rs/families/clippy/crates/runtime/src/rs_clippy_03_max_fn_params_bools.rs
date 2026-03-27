@@ -1,4 +1,6 @@
 use guardrail3_domain_modules::clippy::MAX_FN_PARAMS_BOOLS;
+#[cfg(test)]
+use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::clippy_support::threshold_value;
@@ -55,6 +57,14 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
             inventory: false,
         }),
     }
+}
+
+#[cfg(test)]
+pub(crate) fn run_for_tests(tree: &ProjectTree, rel_path: &str) -> Vec<CheckResult> {
+    let facts = super::test_support::collected_facts(tree);
+    let mut results = Vec::new();
+    check(&super::test_support::config_input(&facts, rel_path), &mut results);
+    results
 }
 
 #[cfg(test)]
