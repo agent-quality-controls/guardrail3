@@ -4,3 +4,5 @@ mod golden;
 mod missing_global_state;
 #[path = "parity.rs"]
 mod parity;
+#[path = "standalone_app_profile.rs"]
+mod standalone_app_profile;
