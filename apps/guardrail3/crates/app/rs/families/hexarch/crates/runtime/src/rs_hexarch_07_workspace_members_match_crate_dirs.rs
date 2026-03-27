@@ -9,26 +9,34 @@ pub fn check(input: &WorkspaceCoverageHexarchInput<'_>, results: &mut Vec<CheckR
         return;
     }
 
-    for crate_dir in input.discovered_crate_dirs {
+    for cargo_root in &input.app_local_cargo_roots {
         if input
             .workspace_members
             .iter()
-            .any(|member| member.covers_dir(crate_dir))
+            .any(|member| member.covers_dir(cargo_root.rel_dir))
         {
             continue;
         }
+
+        let parse_suffix = cargo_root
+            .cargo_parse_error
+            .map_or_else(String::new, |message| {
+                format!(" The nested Cargo.toml is malformed: {message}")
+            });
         results.push(CheckResult {
             id: ID.to_owned(),
             severity: Severity::Error,
             title: format!(
-                "Service `{}` crate `{}` is not a workspace member",
-                input.app_name, crate_dir
+                "Service `{}` Cargo root `{}` is not a workspace member",
+                input.app_name, cargo_root.rel_dir
             ),
             message: format!(
-                "Service `{}` has crate directory `{}` but it is not listed in `[workspace].members` of the app Cargo.toml.",
-                input.app_name, crate_dir
+                "Service `{}` has live Cargo root `{}` at `{}` but it is not listed in `[workspace].members` of the app Cargo.toml. Every live app-local Cargo root must be owned by the app workspace.{parse_suffix}",
+                input.app_name,
+                cargo_root.rel_dir,
+                cargo_root.cargo_rel_path
             ),
-            file: Some(input.app_rel_dir.to_owned()),
+            file: Some(cargo_root.cargo_rel_path.to_owned()),
             line: None,
             inventory: false,
         });
@@ -43,7 +51,9 @@ pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> 
 
 #[cfg(test)]
 #[allow(dead_code)]
-pub(super) fn results_for_test_tree(tree: &guardrail3_domain_project_tree::ProjectTree) -> Vec<CheckResult> {
+pub(super) fn results_for_test_tree(
+    tree: &guardrail3_domain_project_tree::ProjectTree,
+) -> Vec<CheckResult> {
     crate::check_test_tree(tree)
 }
 

@@ -27,6 +27,7 @@ mod rs_hexarch_23_adapter_pub_trait;
 mod rs_hexarch_24_cross_app_boundary;
 mod rs_hexarch_25_target_dependency_direction;
 mod rs_hexarch_26_member_manifest_parse_error;
+mod rs_hexarch_27_nested_workspace_forbidden;
 mod source_facts;
 
 use std::collections::BTreeSet;
@@ -49,8 +50,8 @@ use self::facts::collect;
 use self::inputs::{
     AppHexarchInput, ContainerHexarchInput, CycleHexarchInput, DependencyEdgeHexarchInput,
     DirectionalContainerHexarchInput, HexRootInput, LeafHexarchInput, MemberConfigHexarchInput,
-    MemberDependencyHexarchInput, MemberManifestFailureHexarchInput, PatchHexarchInput, RootWorkspaceHexarchInput,
-    SourceCrateHexarchInput, WorkspaceCoverageHexarchInput,
+    MemberDependencyHexarchInput, MemberManifestFailureHexarchInput, PatchHexarchInput,
+    RootWorkspaceHexarchInput, SourceCrateHexarchInput, WorkspaceCoverageHexarchInput,
 };
 
 #[doc(hidden)]
@@ -129,6 +130,7 @@ pub fn check(tree: &ProjectTree, route: &RsHexarchRoute) -> Vec<CheckResult> {
         rs_hexarch_07_workspace_members_match_crate_dirs::check(&input, &mut results);
         rs_hexarch_09_no_extra_workspace_members::check(&input, &mut results);
         rs_hexarch_10_members_within_app_boundary::check(&input, &mut results);
+        rs_hexarch_27_nested_workspace_forbidden::check(&input, &mut results);
     }
 
     let root_workspace = RootWorkspaceHexarchInput::new(&facts.root_workspace);

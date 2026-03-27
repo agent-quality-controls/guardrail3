@@ -63,7 +63,15 @@ pub struct WorkspaceCoverageFacts {
     pub cargo_parse_error: Option<String>,
     pub is_workspace: bool,
     pub workspace_members: Vec<WorkspaceMemberFact>,
-    pub discovered_crate_dirs: Vec<String>,
+    pub app_local_cargo_roots: Vec<AppLocalCargoRootFact>,
+}
+
+#[derive(Debug, Clone)]
+pub struct AppLocalCargoRootFact {
+    pub rel_dir: String,
+    pub cargo_rel_path: String,
+    pub cargo_parse_error: Option<String>,
+    pub is_workspace: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -125,8 +133,6 @@ pub fn collect(tree: &ProjectTree, route: &RsHexarchRoute) -> HexarchFacts {
             .unwrap_or(0);
 
         let src_rel = ProjectTree::join_rel(app_rel_dir, "src");
-        let leaves_start = facts.leaves.len();
-
         collect_hex_roots(
             tree,
             app_name,
@@ -138,9 +144,8 @@ pub fn collect(tree: &ProjectTree, route: &RsHexarchRoute) -> HexarchFacts {
             &mut facts.leaves,
         );
 
-        let discovered_crate_dirs =
-            discovered_workspace_crate_dirs(&facts.leaves[leaves_start..], app_rel_dir);
         let workspace_members = build_workspace_member_facts(tree, app_rel_dir, &workspace_members);
+        let app_local_cargo_roots = collect_app_local_cargo_roots(tree, app_rel_dir);
 
         facts.apps.push(HexAppFacts {
             app_name: app_name.clone(),
@@ -161,22 +166,21 @@ pub fn collect(tree: &ProjectTree, route: &RsHexarchRoute) -> HexarchFacts {
             cargo_parse_error: cargo_snapshot.parse_error.or(workspace_members_error),
             is_workspace,
             workspace_members,
-            discovered_crate_dirs,
+            app_local_cargo_roots,
         });
     }
 
-    let (root_snapshot, root_workspace_members) =
-        match route.repo_root_cargo_rel_path.as_deref() {
-            Some(root_cargo_rel_path) => {
-                let snapshot = parse_cargo_value(tree, root_cargo_rel_path);
-                let members = snapshot
-                    .value
-                    .as_ref()
-                    .map_or_else(|| Ok(Vec::new()), parse_workspace_members);
-                (snapshot, members)
-            }
-            None => (CargoSnapshot::default(), Ok(Vec::new())),
-        };
+    let (root_snapshot, root_workspace_members) = match route.repo_root_cargo_rel_path.as_deref() {
+        Some(root_cargo_rel_path) => {
+            let snapshot = parse_cargo_value(tree, root_cargo_rel_path);
+            let members = snapshot
+                .value
+                .as_ref()
+                .map_or_else(|| Ok(Vec::new()), parse_workspace_members);
+            (snapshot, members)
+        }
+        None => (CargoSnapshot::default(), Ok(Vec::new())),
+    };
     facts.root_workspace = RootWorkspaceFacts {
         cargo_parse_error: root_snapshot.parse_error.clone().or_else(|| {
             root_workspace_members
@@ -269,20 +273,48 @@ fn toml_value_kind(value: &toml::Value) -> &'static str {
     }
 }
 
-fn discovered_workspace_crate_dirs(leaves: &[LeafFacts], app_rel_dir: &str) -> Vec<String> {
-    let mut dirs = BTreeSet::new();
-    for leaf in leaves {
-        if !leaf.has_cargo || leaf.has_crates_dir {
-            continue;
-        }
-        let rel_to_app = leaf
-            .rel_path
-            .strip_prefix(app_rel_dir)
-            .unwrap_or(&leaf.rel_path)
-            .trim_start_matches('/');
-        let _ = dirs.insert(rel_to_app.to_owned());
-    }
-    dirs.into_iter().collect()
+fn collect_app_local_cargo_roots(
+    tree: &ProjectTree,
+    app_rel_dir: &str,
+) -> Vec<AppLocalCargoRootFact> {
+    let mut rel_dirs = tree
+        .dirs_with_file("Cargo.toml")
+        .into_iter()
+        .filter(|rel_dir| {
+            rel_dir.starts_with(&format!("{app_rel_dir}/"))
+                && !guardrail3_app_rs_placement::is_excluded_live_root_dir(rel_dir)
+        })
+        .collect::<Vec<_>>();
+    rel_dirs.sort();
+
+    rel_dirs
+        .into_iter()
+        .map(|repo_rel_dir| {
+            let cargo_rel_path = ProjectTree::join_rel(&repo_rel_dir, "Cargo.toml");
+            let mut cargo_snapshot = parse_cargo_value(tree, &cargo_rel_path);
+            if tree.file_exists(&cargo_rel_path) && tree.file_content(&cargo_rel_path).is_none() {
+                cargo_snapshot.parse_error = Some(
+                    "Failed to read live app-local Cargo.toml for workspace-boundary discovery."
+                        .to_owned(),
+                );
+            }
+            let rel_dir = repo_rel_dir
+                .strip_prefix(app_rel_dir)
+                .unwrap_or(&repo_rel_dir)
+                .trim_start_matches('/')
+                .to_owned();
+
+            AppLocalCargoRootFact {
+                rel_dir,
+                cargo_rel_path,
+                cargo_parse_error: cargo_snapshot.parse_error,
+                is_workspace: cargo_snapshot
+                    .value
+                    .as_ref()
+                    .is_some_and(|value| value.get("workspace").is_some()),
+            }
+        })
+        .collect()
 }
 
 fn build_workspace_member_facts(

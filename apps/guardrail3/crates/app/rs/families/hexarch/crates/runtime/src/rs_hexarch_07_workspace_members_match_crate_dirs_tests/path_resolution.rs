@@ -1,5 +1,5 @@
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_07_workspace_members_match_crate_dirs as assertions;
 use super::{copy_fixture, write_file};
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_07_workspace_members_match_crate_dirs as assertions;
 
 #[test]
 fn normalized_member_path_counts_as_covered() {
@@ -102,6 +102,39 @@ resolver = "2"
         tmp.path(),
         "apps/backend/crates/adapters/inbound/mcp/crates/ports/outbound/events/src/lib.rs",
         "// nested events",
+    );
+
+    let results = super::run_family(tmp.path());
+    assertions::assert_no_error(&results, "");
+}
+
+#[test]
+fn wildcard_member_pattern_covers_non_hex_nested_package_paths() {
+    let tmp = copy_fixture();
+    write_file(
+        tmp.path(),
+        "apps/devctl/Cargo.toml",
+        r#"[workspace]
+members = [
+    "crates/domain/types",
+    "crates/app/core",
+    "crates/ports/outbound/traits",
+    "crates/adapters/inbound/cli",
+    "crates/adapters/outbound/fs",
+    "crates/app/rs/families/*/crates/runtime",
+]
+resolver = "2"
+"#,
+    );
+    write_file(
+        tmp.path(),
+        "apps/devctl/crates/app/rs/families/deny/crates/runtime/Cargo.toml",
+        "[package]\nname = \"devctl-rs-family-deny-runtime\"\nversion = \"0.1.0\"\n",
+    );
+    write_file(
+        tmp.path(),
+        "apps/devctl/crates/app/rs/families/deny/crates/runtime/src/lib.rs",
+        "// nested family runtime",
     );
 
     let results = super::run_family(tmp.path());

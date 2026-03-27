@@ -3,8 +3,8 @@ use super::dependency_facts::{
     MemberManifestFailureFacts, PatchEntryFacts,
 };
 use super::facts::{
-    ContainerFacts, DirectionalContainerFacts, HexAppFacts, HexRootFacts, LeafFacts,
-    RootWorkspaceFacts, WorkspaceCoverageFacts,
+    AppLocalCargoRootFact, ContainerFacts, DirectionalContainerFacts, HexAppFacts, HexRootFacts,
+    LeafFacts, RootWorkspaceFacts, WorkspaceCoverageFacts,
 };
 use super::source_facts::SourceCrateFacts;
 
@@ -130,7 +130,7 @@ pub struct WorkspaceCoverageHexarchInput<'a> {
     pub cargo_parse_error: Option<&'a str>,
     pub is_workspace: bool,
     pub workspace_members: Vec<WorkspaceMemberHexarchInput<'a>>,
-    pub discovered_crate_dirs: &'a [String],
+    pub app_local_cargo_roots: Vec<AppLocalCargoRootHexarchInput<'a>>,
 }
 
 impl<'a> WorkspaceCoverageHexarchInput<'a> {
@@ -145,7 +145,29 @@ impl<'a> WorkspaceCoverageHexarchInput<'a> {
                 .iter()
                 .map(WorkspaceMemberHexarchInput::new)
                 .collect(),
-            discovered_crate_dirs: &facts.discovered_crate_dirs,
+            app_local_cargo_roots: facts
+                .app_local_cargo_roots
+                .iter()
+                .map(AppLocalCargoRootHexarchInput::new)
+                .collect(),
+        }
+    }
+}
+
+pub struct AppLocalCargoRootHexarchInput<'a> {
+    pub rel_dir: &'a str,
+    pub cargo_rel_path: &'a str,
+    pub cargo_parse_error: Option<&'a str>,
+    pub is_workspace: bool,
+}
+
+impl<'a> AppLocalCargoRootHexarchInput<'a> {
+    pub fn new(facts: &'a AppLocalCargoRootFact) -> Self {
+        Self {
+            rel_dir: &facts.rel_dir,
+            cargo_rel_path: &facts.cargo_rel_path,
+            cargo_parse_error: facts.cargo_parse_error.as_deref(),
+            is_workspace: facts.is_workspace,
         }
     }
 }
