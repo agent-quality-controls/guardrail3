@@ -17,6 +17,7 @@ fn generated_top_level_keys_are_all_known_managed_keys() {
             "avoid-breaking-exported-api",
             "allow-dbg-in-tests",
             "allow-expect-in-tests",
+            "allow-panic-in-tests",
             "allow-print-in-tests",
             "allow-unwrap-in-tests",
             "disallowed-methods",

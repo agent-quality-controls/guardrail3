@@ -59,6 +59,12 @@ fn generated_service_fixture_matches_checker_expectations() {
     );
     assert_eq!(
         parsed
+            .get("allow-panic-in-tests")
+            .and_then(toml::Value::as_bool),
+        Some(false)
+    );
+    assert_eq!(
+        parsed
             .get("allow-print-in-tests")
             .and_then(toml::Value::as_bool),
         Some(false)
@@ -71,8 +77,8 @@ fn generated_service_fixture_matches_checker_expectations() {
     );
 
     let expected_methods = SERVICE_METHOD_PATHS
-        .into_iter()
-        .map(str::to_owned)
+        .iter()
+        .map(|path| (*path).to_owned())
         .collect::<BTreeSet<_>>();
     assert_eq!(
         paths_for_key(&parsed, "disallowed-methods"),

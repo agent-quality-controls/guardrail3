@@ -24,3 +24,4 @@ pub mod rs_clippy_10_too_many_arguments_threshold;
 pub mod rs_clippy_11_excessive_nesting_threshold;
 pub mod rs_clippy_21_cognitive_complexity_threshold;
 pub mod rs_clippy_22_type_complexity_threshold;
+pub mod rs_clippy_23_policy_context_parseable;

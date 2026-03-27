@@ -1,4 +1,4 @@
-# RS-CLIPPY — clippy.toml checker (22 rules)
+# RS-CLIPPY — clippy.toml checker (23 rules)
 
 **Input:** `clippy.toml` / `.clippy.toml` at allowed Rust policy roots
 **Parser:** TOML (`toml::Value`)
@@ -124,7 +124,7 @@ Every guardrail-managed ban entry must have a real `reason`.
 - `library` profile adds global-state type bans
 - `avoid-breaking-exported-api` should be explicitly set
 - default hardened value is `false`
-- `true` may be informationally tolerated for published library crates, but is otherwise Warn
+- `true` may be informationally tolerated for published library policy roots, but is otherwise Warn
 - `allow-dbg-in-tests = true` and `allow-print-in-tests = true` are Warn
 
 ### Source of truth after cleanup
@@ -280,7 +280,7 @@ The generator and checker must match exactly.
 ### RS-CLIPPY-16: avoid-breaking-exported-api setting
 - **Old ID:** NEW (from audit)
 - **Severity:** Warn
-- **What:** `avoid-breaking-exported-api` should be explicitly set to `false` (suppresses useful lints when `true`, which is the default). For published library crates, `true` is legitimate — info note instead.
+- **What:** `avoid-breaking-exported-api` should be explicitly set to `false` (suppresses useful lints when `true`, which is the default). For published library policy roots, `true` is legitimate — info note instead.
 - **Status:** Implemented
 
 ## Config hygiene
@@ -292,8 +292,9 @@ The generator and checker must match exactly.
   - `allow-dbg-in-tests = false`
   - `allow-print-in-tests = false`
   - `allow-expect-in-tests = true`
+  - `allow-panic-in-tests = false`
   - `allow-unwrap-in-tests = false`
-- **Why:** `expect(...)` is allowed only in tests, `unwrap()` stays banned everywhere, and debug/print noise stays disabled in tests.
+- **Why:** `expect(...)` is allowed only in tests, while `panic!()`, `unwrap()`, debug, and print relaxations stay disabled there.
 - **Status:** Implemented
 
 ### RS-CLIPPY-19: unrecognized top-level keys
@@ -306,6 +307,13 @@ The generator and checker must match exactly.
 - **Old ID:** NEW (from audit)
 - **Severity:** Error
 - **What:** `disallowed-macros` section must contain expected macro bans (println!, eprintln!, dbg!, todo!, unimplemented!) with reason fields. Defense in depth alongside cargo workspace lint config — provides per-macro ban reasons in compiler errors.
+- **Status:** Implemented
+
+### RS-CLIPPY-23: policy context is parseable
+- **Old ID:** NEW (from attack)
+- **Severity:** Error
+- **What:** If active Clippy policy depends on `guardrail3.toml` profile/garde metadata and that file is unreadable or malformed, fail closed instead of silently falling back to default profile/garde behavior.
+- **Why:** Profile-sensitive rules must not guess when the policy context is broken.
 - **Status:** Implemented
 
 ## Explicitly rejected audit findings

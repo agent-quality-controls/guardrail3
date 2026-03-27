@@ -6,7 +6,7 @@ use super::super::run_for_tests;
 #[test]
 fn warns_for_managed_key_typos_but_not_unrelated_unknown_keys() {
     let tree = root_workspace_tree(
-        "disalowed-methods = []\nallow-print-in-tets = false\ncustom-project-key = true",
+        "disalowed-methods = []\nallow-print-in-tets = false\ncustom-project-key = true\nmsrv = \"1.85\"\n",
     );
     let results = run_for_tests(&tree, "clippy.toml");
     assertions::assert_messages(

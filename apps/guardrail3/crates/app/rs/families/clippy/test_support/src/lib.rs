@@ -270,6 +270,43 @@ pub fn library_workspace_root_tree(local_clippy_toml: impl Into<String>) -> Proj
     )
 }
 
+pub fn published_library_workspace_root_tree(local_clippy_toml: impl Into<String>) -> ProjectTree {
+    project_tree(
+        vec![
+            (
+                "",
+                dir_entry(&["apps"], &["guardrail3.toml", "clippy.toml"]),
+            ),
+            ("apps", dir_entry(&["libsite"], &[])),
+            (
+                "apps/libsite",
+                dir_entry(&["crates"], &["Cargo.toml", "clippy.toml"]),
+            ),
+            ("apps/libsite/crates", dir_entry(&["core"], &[])),
+            ("apps/libsite/crates/core", dir_entry(&[], &["Cargo.toml"])),
+        ],
+        vec![
+            (
+                "guardrail3.toml",
+                "[profile]\nname = \"service\"\n[rust.apps.libsite]\ntype = \"library\"".to_owned(),
+            ),
+            (
+                "apps/libsite/Cargo.toml",
+                "[workspace]\nmembers = [\"crates/*\"]".to_owned(),
+            ),
+            (
+                "apps/libsite/crates/core/Cargo.toml",
+                "[package]\nname = \"core\"\npublish = true\n".to_owned(),
+            ),
+            (
+                "clippy.toml",
+                build_fixture_clippy_toml("service", false, true, "", ""),
+            ),
+            ("apps/libsite/clippy.toml", local_clippy_toml.into()),
+        ],
+    )
+}
+
 pub fn published_library_package_root_tree(local_clippy_toml: impl Into<String>) -> ProjectTree {
     project_tree(
         vec![(
@@ -283,6 +320,46 @@ pub fn published_library_package_root_tree(local_clippy_toml: impl Into<String>)
             ),
             ("guardrail3.toml", "[profile]\nname = \"library\"\n".to_owned()),
             ("clippy.toml", local_clippy_toml.into()),
+        ],
+    )
+}
+
+pub fn package_library_workspace_root_tree(local_clippy_toml: impl Into<String>) -> ProjectTree {
+    project_tree(
+        vec![
+            (
+                "",
+                dir_entry(&["packages"], &["guardrail3.toml", "clippy.toml"]),
+            ),
+            ("packages", dir_entry(&["shared-types"], &[])),
+            (
+                "packages/shared-types",
+                dir_entry(&["crates"], &["Cargo.toml", "clippy.toml"]),
+            ),
+            ("packages/shared-types/crates", dir_entry(&["core"], &[])),
+            (
+                "packages/shared-types/crates/core",
+                dir_entry(&[], &["Cargo.toml"]),
+            ),
+        ],
+        vec![
+            (
+                "guardrail3.toml",
+                "[profile]\nname = \"service\"\n[rust.packages]\ntype = \"library\"\n".to_owned(),
+            ),
+            (
+                "packages/shared-types/Cargo.toml",
+                "[workspace]\nmembers = [\"crates/*\"]\n".to_owned(),
+            ),
+            (
+                "packages/shared-types/crates/core/Cargo.toml",
+                "[package]\nname = \"core\"\n".to_owned(),
+            ),
+            (
+                "clippy.toml",
+                build_fixture_clippy_toml("service", false, true, "", ""),
+            ),
+            ("packages/shared-types/clippy.toml", local_clippy_toml.into()),
         ],
     )
 }

@@ -4,5 +4,7 @@ mod golden;
 mod missing_global_state;
 #[path = "parity.rs"]
 mod parity;
+#[path = "package_workspace_profile.rs"]
+mod package_workspace_profile;
 #[path = "standalone_app_profile.rs"]
 mod standalone_app_profile;

@@ -17,6 +17,7 @@ This family enforces `clippy.toml` policy inside routed Rust roots. It does not 
 - managed-key typo detection
 - profile-specific Clippy policy such as library global-state bans
 - fail-closed handling when active Clippy inputs are unreadable or malformed
+  - including malformed `guardrail3.toml` policy context used to resolve profile/garde behavior
 
 It does not own:
 

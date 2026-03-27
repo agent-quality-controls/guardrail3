@@ -32,6 +32,7 @@ avoid-breaking-exported-api = false
 # Tests should stay quiet and deterministic.
 allow-dbg-in-tests = false
 allow-expect-in-tests = true
+allow-panic-in-tests = false
 allow-print-in-tests = false
 allow-unwrap-in-tests = false
 

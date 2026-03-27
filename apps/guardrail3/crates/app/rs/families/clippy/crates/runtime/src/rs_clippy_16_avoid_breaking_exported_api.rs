@@ -7,6 +7,9 @@ use super::inputs::ConfigClippyInput;
 const ID: &str = "RS-CLIPPY-16";
 
 pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
+    if input.policy_context_parse_error().is_some() {
+        return;
+    }
     let Some(parsed) = input.config.parsed.as_ref() else {
         return;
     };
@@ -24,7 +27,7 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
             }
             .as_inventory(),
         ),
-        Some(true) if input.profile_name() == Some("library") && input.package_publishable() => results.push(
+        Some(true) if input.published_library_policy() => results.push(
             CheckResult {
                 id: ID.to_owned(),
                 severity: Severity::Info,
