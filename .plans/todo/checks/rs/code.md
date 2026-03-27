@@ -1,4 +1,4 @@
-# RS-CODE — Rust code file checker (29 implemented rules + 5 next-wave planned rules)
+# RS-CODE — Rust code file checker (30 implemented rules + 5 next-wave planned rules)
 
 **Input:** *.rs files (syn AST parsed)
 **Parser:** syn crate (Rust AST)
@@ -57,6 +57,7 @@
 | RS-CODE-28 | Warn | `pub mod foo { ... }` with inline body in lib.rs. Public modules should be separate files for organization. | Implemented |
 | RS-CODE-29 | Warn/Error | Trait with >8 methods (Warn) or >12 methods (Error). Nearly unimplementable traits. **Library profile only.** | Implemented |
 | RS-CODE-30 | Error | Source/config input failures that would otherwise fail the family open: unreadable Rust source, unparsable Rust source, or unparsable code-family policy inputs (`Cargo.toml`, `guardrail3.toml`). | Implemented |
+| RS-CODE-32 | Error | Test-only `expect(...)` messages must be useful string literals. Non-literal messages or trivial literals like `"ok"` are forbidden. Production `expect(...)` ownership belongs to Clippy/Cargo policy instead. | Implemented |
 
 ## Next-wave planned universal rules
 

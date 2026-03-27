@@ -74,3 +74,9 @@ pub struct ForeignModAllowInfo {
     pub lint: String,
     pub via_cfg_attr: bool,
 }
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TestExpectCallInfo {
+    pub line: usize,
+    pub message: Option<String>,
+}

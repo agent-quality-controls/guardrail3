@@ -29,3 +29,4 @@ pub mod rs_code_27_facade_only_lib;
 pub mod rs_code_28_inline_pub_mod_in_lib;
 pub mod rs_code_29_large_trait_inventory;
 pub mod rs_code_30_input_failures;
+pub mod rs_code_32_test_expect_message_quality;

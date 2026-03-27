@@ -12,6 +12,7 @@ This family enforces source-level Rust policy inside routed Rust roots. It does 
 - lint-suppression and exception-comment policy
 - source-structure thresholds and public-surface organization checks
 - code-quality and bypass checks such as `include!`, `#[path]`, `panic!`, and direct `std::fs`
+- test-only assertion quality checks such as useful `expect(...)` messages in test contexts
 - fail-closed reporting when active source or code-policy inputs are unreadable or malformed
 
 It does not own:

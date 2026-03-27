@@ -9,13 +9,42 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
         return;
     };
 
-    for key in ["allow-dbg-in-tests", "allow-print-in-tests"] {
-        if parsed.get(key).and_then(toml::Value::as_bool) == Some(true) {
+    for (key, expected, severity, title, message) in [
+        (
+            "allow-dbg-in-tests",
+            false,
+            Severity::Warn,
+            "clippy test relaxation enabled",
+            "`allow-dbg-in-tests = true` relaxes test output discipline.",
+        ),
+        (
+            "allow-print-in-tests",
+            false,
+            Severity::Warn,
+            "clippy test relaxation enabled",
+            "`allow-print-in-tests = true` relaxes test output discipline.",
+        ),
+        (
+            "allow-expect-in-tests",
+            true,
+            Severity::Error,
+            "clippy test expect policy misconfigured",
+            "`allow-expect-in-tests` must be `true` so tests may use `expect(...)` while non-test code stays governed by `clippy::expect_used`.",
+        ),
+        (
+            "allow-unwrap-in-tests",
+            false,
+            Severity::Error,
+            "clippy test unwrap relaxation enabled",
+            "`allow-unwrap-in-tests` must stay `false` so `unwrap()` remains banned in tests.",
+        ),
+    ] {
+        if parsed.get(key).and_then(toml::Value::as_bool) != Some(expected) {
             results.push(CheckResult {
                 id: ID.to_owned(),
-                severity: Severity::Warn,
-                title: "clippy test relaxation enabled".to_owned(),
-                message: format!("`{key} = true` relaxes test output discipline."),
+                severity,
+                title: title.to_owned(),
+                message: message.to_owned(),
                 file: Some(input.config.rel_path.clone()),
                 line: None,
                 inventory: false,
