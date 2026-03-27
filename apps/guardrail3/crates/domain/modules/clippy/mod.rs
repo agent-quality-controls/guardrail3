@@ -13,7 +13,7 @@ pub use methods::{
 };
 pub use render::build_clippy_toml;
 pub use settings::{
-    ALLOW_DBG_IN_TESTS, ALLOW_EXPECT_IN_TESTS, ALLOW_PRINT_IN_TESTS,
+    ALLOW_DBG_IN_TESTS, ALLOW_EXPECT_IN_TESTS, ALLOW_PANIC_IN_TESTS, ALLOW_PRINT_IN_TESTS,
     ALLOW_UNWRAP_IN_TESTS, AVOID_BREAKING_EXPORTED_API, SETTINGS,
 };
 pub use thresholds::{
