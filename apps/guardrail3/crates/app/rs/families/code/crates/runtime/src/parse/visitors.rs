@@ -68,6 +68,11 @@ pub fn find_facade_body_items(ast: &syn::File) -> Vec<FacadeBodyItemInfo> {
     ast.items
         .iter()
         .filter_map(|item| match item {
+            syn::Item::Mod(item_mod) if item_mod.content.is_some() => Some(FacadeBodyItemInfo {
+                line: span_line(item_mod.ident.span()),
+                kind: "inline module",
+                name: item_mod.ident.to_string(),
+            }),
             syn::Item::Fn(item_fn) => Some(FacadeBodyItemInfo {
                 line: span_line(item_fn.sig.ident.span()),
                 kind: "function",
@@ -106,28 +111,6 @@ pub fn find_facade_body_items(ast: &syn::File) -> Vec<FacadeBodyItemInfo> {
                 name: path_to_string(&item.mac.path),
             }),
             _ => None,
-        })
-        .collect()
-}
-
-pub fn find_inline_public_modules(ast: &syn::File) -> Vec<(usize, String)> {
-    ast.items
-        .iter()
-        .filter_map(|item| {
-            let syn::Item::Mod(item_mod) = item else {
-                return None;
-            };
-            if item_mod
-                .attrs
-                .iter()
-                .any(super::helpers::is_cfg_test_attr)
-            {
-                return None;
-            }
-            if item_mod.content.is_none() || !matches!(item_mod.vis, syn::Visibility::Public(_)) {
-                return None;
-            }
-            Some((span_line(item_mod.ident.span()), item_mod.ident.to_string()))
         })
         .collect()
 }

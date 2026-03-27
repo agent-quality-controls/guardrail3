@@ -16,10 +16,18 @@ fn skips_consts_types_and_explicit_pub_reexports_in_lib_rs() {
         root,
         package_rel,
         &format!(
-            "{package_content}\n\npub const API_VERSION: &str = \"v1\";\npub struct FacadeMarker;\npub mod internal {{ pub struct Visible; }}\npub use internal::Visible;\n"
+            "{package_content}\n\npub const API_VERSION: &str = \"v1\";\npub struct FacadeMarker;\nmod internal;\npub use internal::Visible;\n"
         ),
     );
 
     let results = run_family(root);
+    assert_no_hits(&results);
+}
+
+#[test]
+fn skips_cfg_test_inline_module_outside_library_lib_rs() {
+    let content = "#[cfg(test)]\npub mod tests { pub fn run() {} }\n";
+    let results = super::super::check_source("src/main.rs", content, false);
+
     assert_no_hits(&results);
 }

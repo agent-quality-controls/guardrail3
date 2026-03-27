@@ -123,10 +123,6 @@ pub fn find_facade_body_items(ast: &syn::File) -> Vec<FacadeBodyItemInfo> {
     visitors::find_facade_body_items(ast)
 }
 
-pub fn find_inline_public_modules(ast: &syn::File) -> Vec<(usize, String)> {
-    visitors::find_inline_public_modules(ast)
-}
-
 pub fn find_large_type_items(ast: &syn::File) -> Vec<LargeTypeItem> {
     visitors::find_large_type_items(ast)
 }
