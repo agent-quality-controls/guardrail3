@@ -71,3 +71,28 @@ fn fails_closed_when_root_cargo_manifest_has_no_edition() {
         "rustfmt edition checks require `[workspace.package].edition` or `[package].edition` in root Cargo.toml.",
     );
 }
+
+#[test]
+fn fails_closed_when_root_cargo_manifest_is_missing() {
+    let fixture = tempfile::tempdir().expect("create tempdir");
+    let root = fixture.path();
+
+    std::fs::write(
+        root.join("rustfmt.toml"),
+        "edition = \"2024\"\nmax_width = 100\ntab_spaces = 4\nuse_field_init_shorthand = true\nuse_try_shorthand = true\nreorder_imports = true\nreorder_modules = true\n",
+    )
+    .expect("write rustfmt.toml");
+    std::fs::write(
+        root.join("rust-toolchain.toml"),
+        "[toolchain]\nchannel = \"stable\"\n",
+    )
+    .expect("write rust-toolchain.toml");
+
+    let results = run_family(root);
+
+    assertions::assert_error(
+        &results,
+        "Cargo.toml missing",
+        "rustfmt edition checks require a root Cargo.toml with workspace or package edition.",
+    );
+}

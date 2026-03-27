@@ -15,3 +15,17 @@ fn reports_extra_per_crate_rustfmt_configs() {
         "crates/core/.rustfmt.toml",
     );
 }
+
+#[test]
+fn reports_plain_nested_rustfmt_toml_overrides() {
+    let results = run_check(
+        "crates/core/rustfmt.toml",
+        super::super::facts::RustfmtConfigKind::RustfmtToml,
+    );
+
+    assertions::assert_override(
+        &results,
+        "rustfmt.toml below workspace root overrides root formatting policy",
+        "crates/core/rustfmt.toml",
+    );
+}

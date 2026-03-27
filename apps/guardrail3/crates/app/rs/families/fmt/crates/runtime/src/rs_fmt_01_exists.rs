@@ -33,5 +33,10 @@ pub(crate) fn run_check(config_rel: Option<&str>) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
+pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
+    crate::check_test_root(root)
+}
+
+#[cfg(test)]
 #[path = "rs_fmt_01_exists_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_fmt_01_exists_tests;
