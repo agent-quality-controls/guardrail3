@@ -52,6 +52,52 @@ fn inventories_when_channel_and_components_match_policy() {
 }
 
 #[test]
+fn inventories_when_stable_channel_has_host_suffix() {
+    let parsed = toml::from_str::<toml::Value>(
+        "[toolchain]\nchannel = \"stable-x86_64-unknown-linux-gnu\"\ncomponents = [\"clippy\", \"rustfmt\"]",
+    )
+    .expect("valid TOML");
+    let input = test_input(
+        Some("rust-toolchain.toml"),
+        None,
+        Some(&parsed),
+        None,
+        Some("1.85"),
+        None,
+    );
+    let mut results = Vec::new();
+
+    check(&input, &mut results);
+
+    assert_rule_results(
+        &results,
+        &[
+            ExpectedRuleResult {
+                severity: Severity::Info,
+                inventory: true,
+                title: "toolchain channel is stable",
+                message: "channel = \"stable\".",
+                file: Some("rust-toolchain.toml"),
+            },
+            ExpectedRuleResult {
+                severity: Severity::Info,
+                inventory: true,
+                title: "toolchain component `clippy` present",
+                message: "`clippy` is listed in `components`.",
+                file: Some("rust-toolchain.toml"),
+            },
+            ExpectedRuleResult {
+                severity: Severity::Info,
+                inventory: true,
+                title: "toolchain component `rustfmt` present",
+                message: "`rustfmt` is listed in `components`.",
+                file: Some("rust-toolchain.toml"),
+            },
+        ],
+    );
+}
+
+#[test]
 fn errors_when_toolchain_table_is_missing() {
     let parsed = toml::from_str::<toml::Value>(
         "channel = \"stable\"\ncomponents = [\"clippy\", \"rustfmt\"]",
@@ -105,6 +151,52 @@ fn errors_when_toolchain_table_is_not_a_table() {
             message: "`rust-toolchain.toml` must define `[toolchain]` as a table.",
             file: Some("rust-toolchain.toml"),
         }],
+    );
+}
+
+#[test]
+fn inventories_when_pinned_stable_channel_has_host_suffix() {
+    let parsed = toml::from_str::<toml::Value>(
+        "[toolchain]\nchannel = \"1.85.0-x86_64-unknown-linux-gnu\"\ncomponents = [\"clippy\", \"rustfmt\"]",
+    )
+    .expect("valid TOML");
+    let input = test_input(
+        Some("rust-toolchain.toml"),
+        None,
+        Some(&parsed),
+        None,
+        Some("1.85"),
+        None,
+    );
+    let mut results = Vec::new();
+
+    check(&input, &mut results);
+
+    assert_rule_results(
+        &results,
+        &[
+            ExpectedRuleResult {
+                severity: Severity::Info,
+                inventory: true,
+                title: "toolchain channel is pinned",
+                message: "Pinned channel `1.85.0-x86_64-unknown-linux-gnu` is acceptable.",
+                file: Some("rust-toolchain.toml"),
+            },
+            ExpectedRuleResult {
+                severity: Severity::Info,
+                inventory: true,
+                title: "toolchain component `clippy` present",
+                message: "`clippy` is listed in `components`.",
+                file: Some("rust-toolchain.toml"),
+            },
+            ExpectedRuleResult {
+                severity: Severity::Info,
+                inventory: true,
+                title: "toolchain component `rustfmt` present",
+                message: "`rustfmt` is listed in `components`.",
+                file: Some("rust-toolchain.toml"),
+            },
+        ],
     );
 }
 

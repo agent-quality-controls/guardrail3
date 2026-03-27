@@ -155,14 +155,33 @@ fn check_channel(toolchain: &toml::value::Table, rel: &str, results: &mut Vec<Ch
 
 fn classify_channel(raw: &str) -> ChannelKind {
     let normalized = raw.trim().to_ascii_lowercase();
+    let segments = normalized.split('-').collect::<Vec<_>>();
 
-    if normalized == "stable" {
+    if segments.first() == Some(&"stable") {
         return ChannelKind::Stable;
     }
-    if normalized.contains("nightly") {
+    if segments
+        .first()
+        .is_some_and(|segment| segment.starts_with("nightly"))
+    {
         return ChannelKind::Nightly;
     }
-    if normalized.contains("beta") {
+    if segments
+        .first()
+        .is_some_and(|segment| segment.starts_with("beta"))
+    {
+        return ChannelKind::Beta;
+    }
+    if segments
+        .get(1)
+        .is_some_and(|segment| segment.starts_with("nightly"))
+    {
+        return ChannelKind::Nightly;
+    }
+    if segments
+        .get(1)
+        .is_some_and(|segment| segment.starts_with("beta"))
+    {
         return ChannelKind::Beta;
     }
     if parse_pinned_stable(raw).is_some() {
@@ -174,7 +193,10 @@ fn classify_channel(raw: &str) -> ChannelKind {
 
 fn parse_pinned_stable(raw: &str) -> Option<(u64, u64, u64)> {
     let normalized = raw.trim().trim_start_matches('v');
-    let mut parts = normalized.split('.');
+    let version_part = normalized
+        .split_once('-')
+        .map_or(normalized, |(version_part, _)| version_part);
+    let mut parts = version_part.split('.');
 
     let major = parts.next()?.parse().ok()?;
     let minor = parts.next()?.parse().ok()?;

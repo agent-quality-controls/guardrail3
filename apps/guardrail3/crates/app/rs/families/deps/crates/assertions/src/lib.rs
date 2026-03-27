@@ -1,0 +1,15 @@
+use guardrail3_app_rs_family_deps as _;
+
+mod common;
+
+pub mod rs_deps_01_cargo_deny_installed;
+pub mod rs_deps_02_cargo_machete_installed;
+pub mod rs_deps_03_cargo_dupes_installed;
+pub mod rs_deps_04_gitleaks_installed;
+pub mod rs_deps_05_dependencies_allowlisted;
+pub mod rs_deps_06_build_dependencies_allowlisted;
+pub mod rs_deps_07_dev_dependencies_allowlisted;
+pub mod rs_deps_08_library_allowlist_present;
+pub mod rs_deps_09_cargo_lock_present;
+pub mod rs_deps_10_gitignore_not_ignoring_cargo_lock;
+pub mod rs_deps_11_input_failures;
