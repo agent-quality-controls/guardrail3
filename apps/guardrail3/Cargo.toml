@@ -36,7 +36,9 @@ members = [
     "crates/app/rs/families/code/test_support",
     "crates/app/rs/families/deps",
     "crates/app/rs/families/deny",
-    "crates/app/rs/families/fmt",
+    "crates/app/rs/families/fmt/crates/runtime",
+    "crates/app/rs/families/fmt/crates/assertions",
+    "crates/app/rs/families/fmt/test_support",
     "crates/app/rs/families/garde",
     "crates/app/rs/families/hexarch/crates/runtime",
     "crates/app/rs/families/hexarch/crates/assertions",
@@ -47,7 +49,8 @@ members = [
     "crates/app/rs/families/test/crates/runtime",
     "crates/app/rs/families/test/crates/assertions",
     "crates/app/rs/families/test/test_support",
-    "crates/app/rs/families/toolchain",
+    "crates/app/rs/families/toolchain/crates/runtime",
+    "crates/app/rs/families/toolchain/crates/assertions",
 ]
 resolver = "2"
 

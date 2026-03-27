@@ -1,0 +1,17 @@
+[package]
+name = "guardrail3-app-rs-family-fmt"
+version = "0.0.0"
+edition = "2024"
+
+[lints]
+workspace = true
+
+[dependencies]
+guardrail3_domain_project_tree = { package = "guardrail3-domain-project-tree", path = "../../../../../../domain/project-tree" }
+guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../../../../../domain/report" }
+toml = "0.8"
+
+[dev-dependencies]
+guardrail3_app_rs_family_fmt_assertions = { package = "guardrail3-app-rs-family-fmt-assertions", path = "../assertions" }
+test_support = { package = "guardrail3-app-rs-family-fmt-test-support", path = "../../test_support" }
+tempfile = "3"
