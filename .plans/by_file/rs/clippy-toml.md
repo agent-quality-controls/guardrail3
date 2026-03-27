@@ -1,5 +1,11 @@
 # clippy.toml
 
+> Historical design note. Parts of this file are superseded by:
+> - [`.plans/by_file/tools/edge-cases/clippy.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/by_file/tools/edge-cases/clippy.md) for real upstream Clippy config discovery behavior
+> - [`.plans/todo/checks/rs/clippy.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/todo/checks/rs/clippy.md) for the current `RS-CLIPPY` family contract
+>
+> In particular, treat the test-relaxation ownership below as stale: the live family now manages `allow-expect-in-tests`, `allow-panic-in-tests`, and `allow-unwrap-in-tests`.
+
 ## How clippy finds its config (empirically verified 2026-03-19)
 
 When `cargo clippy` runs, cargo compiles each member crate separately. For each crate, cargo sets `CARGO_MANIFEST_DIR` to that crate's own directory (where its `Cargo.toml` is).

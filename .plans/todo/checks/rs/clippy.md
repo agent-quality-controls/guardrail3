@@ -2,7 +2,7 @@
 
 **Input:** `clippy.toml` / `.clippy.toml` at allowed Rust policy roots
 **Parser:** TOML (`toml::Value`)
-**Current code:** `crates/app/rs/checks/rs/clippy/**` + `crates/domain/modules/clippy/**`
+**Current code:** `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/**` + `apps/guardrail3/crates/app/rs/families/clippy/crates/assertions/**` + `apps/guardrail3/crates/app/rs/families/clippy/test_support/**` + `apps/guardrail3/crates/domain/modules/clippy/**`
 
 ## Implementation mapping contract
 
@@ -31,7 +31,7 @@ These are the current contract decisions for the clippy family. They override ol
 
 ### Allowed clippy.toml locations
 
-A `clippy.toml` is allowed only at:
+A Clippy config file (`clippy.toml` or `.clippy.toml`) is allowed only at:
 
 - the validation root (`ProjectTree.root`)
 - Rust workspace roots
@@ -48,16 +48,16 @@ This is intentionally NOT coupled to hex-arch or folder naming like `apps/` / `p
 
 ### Coverage rule
 
-Every Rust workspace root and every standalone package root must be covered by some allowed `clippy.toml`:
+Every Rust workspace root and every standalone package root must be covered by some allowed Clippy config file:
 
-- its own local `clippy.toml`, or
-- an allowed ancestor `clippy.toml` (for example the validation root)
+- its own local Clippy config file, or
+- an allowed ancestor Clippy config file (for example the validation root)
 
 If a Rust unit is uncovered, that is an Error.
 
 ### Shadowing rule
 
-If a `clippy.toml` exists below an allowed policy root, it is an Error unless that deeper directory is itself another allowed policy root.
+If a Clippy config file exists below an allowed policy root, it is an Error unless that deeper directory is itself another allowed policy root.
 
 This means:
 
@@ -137,7 +137,7 @@ After the clippy family is fully reconciled:
 
 1. policy decisions in this plan
 2. canonical generated module in `domain/modules/clippy/`
-3. checker expectations in `app/rs/checks/rs/clippy`
+3. checker expectations in `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime`
 4. old validator/tests only as migration evidence
 
 The generator and checker must match exactly.

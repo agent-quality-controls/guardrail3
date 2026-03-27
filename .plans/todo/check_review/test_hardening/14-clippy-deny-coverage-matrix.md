@@ -1,5 +1,11 @@
 # Clippy And Deny Coverage Matrix
 
+> Historical hardening ledger. Rule counts and file paths in this matrix can drift after family migration.
+> Use:
+> - [`.plans/todo/checks/rs/clippy.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/todo/checks/rs/clippy.md)
+> - [`.plans/todo/checks/rs/deny.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/todo/checks/rs/deny.md)
+> for current live inventory.
+
 This is the first-pass rule inventory and hardening ledger for the `rs/clippy` and `rs/deny` families.
 
 It answers four questions for every rule:

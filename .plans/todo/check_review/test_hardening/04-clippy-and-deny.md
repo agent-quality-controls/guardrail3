@@ -1,5 +1,11 @@
 # Clippy And Deny Hardening Lane
 
+> Historical hardening checkpoint. Current rule inventory and live semantics now live in:
+> - [`.plans/todo/checks/rs/clippy.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/todo/checks/rs/clippy.md)
+> - [`.plans/todo/checks/rs/deny.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/todo/checks/rs/deny.md)
+>
+> Use this file as migration history, not current source of truth.
+
 ## Focus
 
 These families are mostly implemented. The hardening work is parity and policy-edge attack coverage.
