@@ -5,8 +5,14 @@ use super::parse::find_std_fs_glob_import_lines;
 
 const ID: &str = "RS-CODE-21";
 
+fn is_filesystem_boundary_module(rel_path: &str) -> bool {
+    rel_path.ends_with("src/fs.rs")
+        || rel_path.ends_with("src/fs/mod.rs")
+        || rel_path.ends_with("fs/src/lib.rs")
+}
+
 pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
-    if input.is_test || input.rel_path.ends_with("src/fs.rs") {
+    if input.is_test || is_filesystem_boundary_module(input.rel_path) {
         return;
     }
 

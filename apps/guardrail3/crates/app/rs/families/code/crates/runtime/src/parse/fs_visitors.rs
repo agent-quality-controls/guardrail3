@@ -54,9 +54,9 @@ fn use_tree_matches_std_fs_with_std_prefix(tree: &syn::UseTree) -> bool {
     }
 }
 
-fn use_tree_is_std_fs_glob(tree: &syn::UseTree) -> bool {
+fn use_tree_is_std_fs_glob(tree: &syn::UseTree, std_aliases: &BTreeSet<String>) -> bool {
     match tree {
-        syn::UseTree::Path(std_path) if std_path.ident == "std" => match &*std_path.tree {
+        syn::UseTree::Path(std_path) if std_aliases.contains(&std_path.ident.to_string()) => match &*std_path.tree {
             syn::UseTree::Path(fs_path) if fs_path.ident == "fs" => {
                 fs_subtree_contains_glob(&fs_path.tree)
             }
@@ -66,7 +66,10 @@ fn use_tree_is_std_fs_glob(tree: &syn::UseTree) -> bool {
                 .any(use_tree_is_std_fs_glob_with_std_prefix),
             _ => false,
         },
-        syn::UseTree::Group(group) => group.items.iter().any(use_tree_is_std_fs_glob),
+        syn::UseTree::Group(group) => group
+            .items
+            .iter()
+            .any(|item| use_tree_is_std_fs_glob(item, std_aliases)),
         _ => false,
     }
 }
@@ -137,6 +140,17 @@ fn collect_std_aliases(tree: &syn::UseTree, aliases: &mut BTreeSet<String>) {
             }
         }
         _ => {}
+    }
+}
+
+fn collect_std_extern_crate_alias(item: &syn::ItemExternCrate, aliases: &mut BTreeSet<String>) {
+    if item.ident != "std" {
+        return;
+    }
+    if let Some((_, rename)) = &item.rename {
+        let _ = aliases.insert(rename.to_string());
+    } else {
+        let _ = aliases.insert(String::from("std"));
     }
 }
 
@@ -218,6 +232,11 @@ impl<'ast> Visit<'ast> for InlineStdFsVisitor {
         syn::visit::visit_item_use(self, use_item);
     }
 
+    fn visit_item_extern_crate(&mut self, item: &'ast syn::ItemExternCrate) {
+        collect_std_extern_crate_alias(item, &mut self.std_aliases);
+        syn::visit::visit_item_extern_crate(self, item);
+    }
+
     fn visit_expr_call(&mut self, expr_call: &'ast syn::ExprCall) {
         if !self.in_cfg_test {
             if let syn::Expr::Path(expr_path) = &*expr_call.func {
@@ -256,11 +275,16 @@ impl<'ast> Visit<'ast> for StdFsGlobImportVisitor {
         collect_std_aliases(&use_item.tree, &mut self.std_aliases);
         if !self.in_cfg_test
             && !use_item.attrs.iter().any(is_cfg_test_attr)
-            && use_tree_is_std_fs_glob(&use_item.tree)
+            && use_tree_is_std_fs_glob(&use_item.tree, &self.std_aliases)
         {
             self.out.push(span_line(use_item.span()));
         }
         syn::visit::visit_item_use(self, use_item);
+    }
+
+    fn visit_item_extern_crate(&mut self, item: &'ast syn::ItemExternCrate) {
+        collect_std_extern_crate_alias(item, &mut self.std_aliases);
+        syn::visit::visit_item_extern_crate(self, item);
     }
 }
 
@@ -295,5 +319,10 @@ impl<'ast> Visit<'ast> for StdFsImportVisitor {
             self.out.push(span_line(use_item.span()));
         }
         syn::visit::visit_item_use(self, use_item);
+    }
+
+    fn visit_item_extern_crate(&mut self, item: &'ast syn::ItemExternCrate) {
+        collect_std_extern_crate_alias(item, &mut self.std_aliases);
+        syn::visit::visit_item_extern_crate(self, item);
     }
 }

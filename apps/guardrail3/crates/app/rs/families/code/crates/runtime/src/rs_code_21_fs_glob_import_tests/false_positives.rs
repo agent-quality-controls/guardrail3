@@ -44,6 +44,11 @@ fn skips_test_files_and_src_fs_rs_exemption() {
         "apps/backend/crates/app/commands/src/fs.rs",
         "use std::fs::*;\npub fn allowed_probe() {}\n",
     );
+    write_file(
+        root,
+        "apps/backend/crates/shared/fs/src/lib.rs",
+        "use std::fs::*;\npub fn allowed_probe() {}\n",
+    );
 
     let results = run_family(root);
     assert_no_hits(&results);

@@ -220,6 +220,25 @@ fn errors_on_function_local_glob_import() {
 }
 
 #[test]
+fn errors_on_extern_crate_std_alias_glob_import() {
+    let content = "extern crate std as s;\nuse s::fs::*;\nfn main() {}";
+    let binding = check_source("src/foo.rs", content, false);
+    let results = findings(&binding);
+
+    assert_eq!(results.len(), 1, "extern crate alias glob must be caught");
+    assert_eq!(results[0].id, "RS-CODE-21");
+    assert_eq!(results[0].severity, Severity::Error);
+    assert_eq!(results[0].title, "std::fs glob import");
+    assert_eq!(
+        results[0].message,
+        "Direct `use std::fs::*` glob import bypasses clippy method bans."
+    );
+    assert_eq!(results[0].line, Some(2));
+    assert_eq!(results[0].file.as_deref(), Some("src/foo.rs"));
+    assert!(!results[0].inventory);
+}
+
+#[test]
 fn multiple_glob_imports_in_same_file() {
     let content = "use std::fs::*;\nmod helpers {\n    use std::fs::{self, *};\n}\nfn main() {}";
     let binding = check_source("src/foo.rs", content, false);
