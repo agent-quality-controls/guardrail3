@@ -1,20 +1,11 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_clippy_assertions::rs_clippy_03_max_fn_params_bools as assertions;
+use test_support::root_workspace_tree;
 
-use super::super::super::test_support::{collected_facts, config_input, root_workspace_tree};
-use super::super::check;
+use super::super::run_for_tests;
 
 #[test]
 fn errors_when_max_fn_params_bools_is_wrong() {
     let tree = root_workspace_tree("max-fn-params-bools = 4");
-    let facts = collected_facts(&tree);
-    let mut results = Vec::new();
-
-    check(&config_input(&facts, "clippy.toml"), &mut results);
-
-    assert_eq!(results.len(), 1);
-    let result = &results[0];
-    assert_eq!(result.id, "RS-CLIPPY-03");
-    assert_eq!(result.severity, Severity::Error);
-    assert_eq!(result.title, "max-fn-params-bools wrong value");
-    assert_eq!(result.message, "Expected 3, got 4.");
+    let results = run_for_tests(&tree, "clippy.toml");
+    assertions::assert_wrong_value(&results);
 }

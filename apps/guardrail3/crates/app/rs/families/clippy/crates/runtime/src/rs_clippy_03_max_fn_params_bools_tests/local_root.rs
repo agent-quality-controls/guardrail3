@@ -1,26 +1,11 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_clippy_assertions::rs_clippy_03_max_fn_params_bools as assertions;
+use test_support::{canonical_clippy_toml, library_workspace_root_tree};
 
-use super::super::super::test_support::{
-    canonical_clippy_toml, collected_facts, config_input, library_workspace_root_tree,
-};
-use super::super::check;
+use super::super::run_for_tests;
 
 #[test]
 fn inventories_generated_threshold_at_a_local_policy_root_too() {
     let tree = library_workspace_root_tree(canonical_clippy_toml());
-    let facts = collected_facts(&tree);
-    let mut results = Vec::new();
-
-    check(
-        &config_input(&facts, "apps/libsite/clippy.toml"),
-        &mut results,
-    );
-
-    assert_eq!(results.len(), 1);
-    let result = &results[0];
-    assert_eq!(result.id, "RS-CLIPPY-03");
-    assert_eq!(result.severity, Severity::Info);
-    assert!(result.inventory);
-    assert_eq!(result.file.as_deref(), Some("apps/libsite/clippy.toml"));
-    assert_eq!(result.title, "max-fn-params-bools correct");
+    let results = run_for_tests(&tree, "apps/libsite/clippy.toml");
+    assertions::assert_golden(&results, "apps/libsite/clippy.toml");
 }
