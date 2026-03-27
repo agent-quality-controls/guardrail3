@@ -2,7 +2,10 @@ use std::collections::BTreeSet;
 
 use guardrail3_domain_report::Severity;
 
-use super::super::super::test_support::{copy_fixture, run_family, write_file};
+use guardrail3_app_rs_family_code_assertions::rs_code_04_item_level_allow_with_reason::{assert_findings, assert_value_eq, RuleFinding};
+use super::super::run_family;
+use super::super::copy_fixture;
+use test_support::write_file;
 
 #[test]
 fn inventories_documented_item_level_allows_across_real_owned_files() {
@@ -88,87 +91,65 @@ fn inventories_documented_item_level_allows_across_real_owned_files() {
         .expect("trait line")
         + 1;
 
-    let mut rs_code_04_results = run_family(root)
-        .into_iter()
-        .filter(|result| result.id == "RS-CODE-04")
-        .map(|result| {
-            (
-                result.file.expect("file"),
-                result.line,
-                format!("{:?}", result.severity),
-                result.title,
-                result.message,
-            )
-        })
-        .collect::<Vec<_>>();
-    rs_code_04_results.sort();
-
-    assert_eq!(
-        rs_code_04_results
-            .iter()
-            .map(|(file, _, _, _, _)| file.clone())
-            .collect::<BTreeSet<_>>(),
-        BTreeSet::from([
-            top_level_rel.to_owned(),
-            nested_rel.to_owned(),
-            grouped_rel.to_owned(),
-            module_rel.to_owned(),
-            impl_rel.to_owned(),
-            trait_rel.to_owned(),
-        ])
-    );
-    assert_eq!(
-        rs_code_04_results,
-        vec![
-            (
-                impl_rel.to_owned(),
-                Some(impl_line),
-                format!("{:?}", Severity::Info),
-                "item-level allow with reason".to_owned(),
-                "#[allow(clippy::panic)] reason: adapter glue seam".to_owned(),
-            ),
-            (
-                top_level_rel.to_owned(),
-                Some(top_level_line),
-                format!("{:?}", Severity::Info),
-                "item-level allow with reason".to_owned(),
-                "#[allow(clippy::unwrap_used)] reason: compatibility shim".to_owned(),
-            ),
-            (
-                module_rel.to_owned(),
-                Some(module_line),
-                format!("{:?}", Severity::Info),
-                "item-level allow with reason".to_owned(),
-                "#[allow(clippy::expect_used)] reason: documented module seam".to_owned(),
-            ),
-            (
-                trait_rel.to_owned(),
-                Some(trait_line),
-                format!("{:?}", Severity::Info),
-                "item-level allow with reason".to_owned(),
-                "#[allow(clippy::unwrap_used)] reason: trait shim contract".to_owned(),
-            ),
-            (
-                grouped_rel.to_owned(),
-                Some(grouped_line),
-                format!("{:?}", Severity::Info),
-                "item-level allow with reason".to_owned(),
-                "#[allow(clippy::expect_used)] reason: grouped adapter allowance".to_owned(),
-            ),
-            (
-                grouped_rel.to_owned(),
-                Some(grouped_line),
-                format!("{:?}", Severity::Info),
-                "item-level allow with reason".to_owned(),
-                "#[allow(clippy::unwrap_used)] reason: grouped adapter allowance".to_owned(),
-            ),
-            (
-                nested_rel.to_owned(),
-                Some(nested_line),
-                format!("{:?}", Severity::Info),
-                "item-level allow with reason".to_owned(),
-                "#[allow(clippy::panic)] reason: queue adapter probe".to_owned(),
-            ),
+    assert_findings(
+        &run_family(root),
+        &[
+            RuleFinding {
+                severity: Severity::Info,
+                title: "item-level allow with reason",
+                message: "#[allow(clippy::panic)] reason: adapter glue seam",
+                file: Some(impl_rel),
+                line: Some(impl_line),
+                inventory: false,
+            },
+            RuleFinding {
+                severity: Severity::Info,
+                title: "item-level allow with reason",
+                message: "#[allow(clippy::unwrap_used)] reason: compatibility shim",
+                file: Some(top_level_rel),
+                line: Some(top_level_line),
+                inventory: false,
+            },
+            RuleFinding {
+                severity: Severity::Info,
+                title: "item-level allow with reason",
+                message: "#[allow(clippy::expect_used)] reason: documented module seam",
+                file: Some(module_rel),
+                line: Some(module_line),
+                inventory: false,
+            },
+            RuleFinding {
+                severity: Severity::Info,
+                title: "item-level allow with reason",
+                message: "#[allow(clippy::unwrap_used)] reason: trait shim contract",
+                file: Some(trait_rel),
+                line: Some(trait_line),
+                inventory: false,
+            },
+            RuleFinding {
+                severity: Severity::Info,
+                title: "item-level allow with reason",
+                message: "#[allow(clippy::expect_used)] reason: grouped adapter allowance",
+                file: Some(grouped_rel),
+                line: Some(grouped_line),
+                inventory: false,
+            },
+            RuleFinding {
+                severity: Severity::Info,
+                title: "item-level allow with reason",
+                message: "#[allow(clippy::unwrap_used)] reason: grouped adapter allowance",
+                file: Some(grouped_rel),
+                line: Some(grouped_line),
+                inventory: false,
+            },
+            RuleFinding {
+                severity: Severity::Info,
+                title: "item-level allow with reason",
+                message: "#[allow(clippy::panic)] reason: queue adapter probe",
+                file: Some(nested_rel),
+                line: Some(nested_line),
+                inventory: false,
+            },
         ]
     );
 }

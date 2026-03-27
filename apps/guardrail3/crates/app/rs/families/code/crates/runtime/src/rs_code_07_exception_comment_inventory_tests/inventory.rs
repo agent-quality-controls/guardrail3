@@ -2,7 +2,10 @@ use std::collections::BTreeSet;
 
 use guardrail3_domain_report::Severity;
 
-use super::super::super::test_support::{copy_fixture, files_for_rule, run_family, write_file};
+use guardrail3_app_rs_family_code_assertions::rs_code_07_exception_comment_inventory::{assert_files, assert_findings, RuleFinding};
+use super::super::run_family;
+use super::super::copy_fixture;
+use test_support::write_file;
 
 #[test]
 fn inventories_exception_comments_across_real_config_roots_with_exact_owned_hit_set() {
@@ -69,93 +72,74 @@ fn inventories_exception_comments_across_real_config_roots_with_exact_owned_hit_
     );
 
     let results = run_family(root);
-    let mut rs_code_07_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-07")
-        .map(|result| {
-            (
-                result.file.clone().expect("file"),
-                result.line,
-                format!("{:?}", result.severity),
-                result.title.clone(),
-                result.message.clone(),
-                result.inventory,
-            )
-        })
-        .collect::<Vec<_>>();
-    rs_code_07_results.sort();
 
-    assert_eq!(
-        files_for_rule(&results, "RS-CODE-07"),
-        BTreeSet::from([
+    assert_files(&results, BTreeSet::from([
             root_guardrail_rel.to_owned(),
             root_rustfmt_rel.to_owned(),
             root_toolchain_rel.to_owned(),
             backend_cargo_rel.to_owned(),
             worker_cargo_rel.to_owned(),
             nested_cargo_rel.to_owned(),
-        ])
-    );
-    assert_eq!(
-        rs_code_07_results,
-        vec![
-            (
-                backend_cargo_rel.to_owned(),
-                Some(backend_line),
-                format!("{:?}", Severity::Info),
-                "EXCEPTION comment inventory".to_owned(),
-                "Config exception comment: # EXCEPTION: backend workspace lint inventory"
-                    .to_owned(),
-                true,
-            ),
-            (
-                nested_cargo_rel.to_owned(),
-                Some(nested_line),
-                format!("{:?}", Severity::Info),
-                "EXCEPTION comment inventory".to_owned(),
-                "Config exception comment: # EXCEPTION: nested crate lint inventory".to_owned(),
-                true,
-            ),
-            (
-                worker_cargo_rel.to_owned(),
-                Some(worker_line),
-                format!("{:?}", Severity::Info),
-                "EXCEPTION comment inventory".to_owned(),
-                "Config exception comment: # EXCEPTION: worker rollout inventory".to_owned(),
-                true,
-            ),
-            (
-                root_guardrail_rel.to_owned(),
-                Some(root_line),
-                format!("{:?}", Severity::Info),
-                "EXCEPTION comment inventory".to_owned(),
-                "Config exception comment: # EXCEPTION: fixture root policy note".to_owned(),
-                true,
-            ),
-            (
-                root_toolchain_rel.to_owned(),
-                Some(toolchain_line),
-                format!("{:?}", Severity::Info),
-                "EXCEPTION comment inventory".to_owned(),
-                "Config exception comment: // EXCEPTION: toolchain rollout inventory".to_owned(),
-                true,
-            ),
-            (
-                root_rustfmt_rel.to_owned(),
-                Some(rustfmt_first_line),
-                format!("{:?}", Severity::Info),
-                "EXCEPTION comment inventory".to_owned(),
-                "Config exception comment: # EXCEPTION: rustfmt policy inventory".to_owned(),
-                true,
-            ),
-            (
-                root_rustfmt_rel.to_owned(),
-                Some(rustfmt_second_line),
-                format!("{:?}", Severity::Info),
-                "EXCEPTION comment inventory".to_owned(),
-                "Config exception comment: # EXCEPTION: rustfmt repeated inventory".to_owned(),
-                true,
-            ),
-        ]
+        ]));
+    assert_findings(
+        &results,
+        &[
+            RuleFinding {
+                severity: Severity::Info,
+                title: "EXCEPTION comment inventory",
+                message: "Config exception comment: # EXCEPTION: backend workspace lint inventory",
+                file: Some(backend_cargo_rel),
+                line: Some(backend_line),
+                inventory: true,
+            },
+            RuleFinding {
+                severity: Severity::Info,
+                title: "EXCEPTION comment inventory",
+                message: "Config exception comment: # EXCEPTION: nested crate lint inventory",
+                file: Some(nested_cargo_rel),
+                line: Some(nested_line),
+                inventory: true,
+            },
+            RuleFinding {
+                severity: Severity::Info,
+                title: "EXCEPTION comment inventory",
+                message: "Config exception comment: # EXCEPTION: worker rollout inventory",
+                file: Some(worker_cargo_rel),
+                line: Some(worker_line),
+                inventory: true,
+            },
+            RuleFinding {
+                severity: Severity::Info,
+                title: "EXCEPTION comment inventory",
+                message: "Config exception comment: # EXCEPTION: fixture root policy note",
+                file: Some(root_guardrail_rel),
+                line: Some(root_line),
+                inventory: true,
+            },
+            RuleFinding {
+                severity: Severity::Info,
+                title: "EXCEPTION comment inventory",
+                message: "Config exception comment: // EXCEPTION: toolchain rollout inventory",
+                file: Some(root_toolchain_rel),
+                line: Some(toolchain_line),
+                inventory: true,
+            },
+            RuleFinding {
+                severity: Severity::Info,
+                title: "EXCEPTION comment inventory",
+                message: "Config exception comment: # EXCEPTION: rustfmt policy inventory",
+                file: Some(root_rustfmt_rel),
+                line: Some(rustfmt_first_line),
+                inventory: true,
+            },
+            RuleFinding {
+                severity: Severity::Info,
+                title: "EXCEPTION comment inventory",
+                message: "Config exception comment: # EXCEPTION: rustfmt repeated inventory",
+                file: Some(root_rustfmt_rel),
+                line: Some(rustfmt_second_line),
+                inventory: true,
+            },
+        ],
     );
 }

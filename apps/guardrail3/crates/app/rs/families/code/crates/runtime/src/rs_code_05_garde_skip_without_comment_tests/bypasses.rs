@@ -2,7 +2,10 @@ use std::collections::BTreeSet;
 
 use guardrail3_domain_report::Severity;
 
-use super::super::super::test_support::{copy_fixture, files_for_rule, run_family, write_file};
+use guardrail3_app_rs_family_code_assertions::rs_code_05_garde_skip_without_comment::{assert_files, assert_findings, RuleFinding};
+use super::super::run_family;
+use super::super::copy_fixture;
+use test_support::write_file;
 
 #[test]
 fn detects_non_primitive_garde_skips_without_comments_across_real_owned_files() {
@@ -48,56 +51,39 @@ fn detects_non_primitive_garde_skips_without_comments_across_real_owned_files() 
         + 1;
 
     let results = run_family(root);
-    let mut rs_code_05_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-05")
-        .map(|result| {
-            (
-                result.file.clone().expect("file"),
-                result.line,
-                format!("{:?}", result.severity),
-                result.title.clone(),
-                result.message.clone(),
-            )
-        })
-        .collect::<Vec<_>>();
-    rs_code_05_results.sort();
 
-    assert_eq!(
-        files_for_rule(&results, "RS-CODE-05"),
-        BTreeSet::from([
+    assert_files(&results, BTreeSet::from([
             type_rel.to_owned(),
             field_rel.to_owned(),
             vec_rel.to_owned()
-        ])
-    );
-    assert_eq!(
-        rs_code_05_results,
-        vec![
-            (
-                type_rel.to_owned(),
-                Some(type_line),
-                format!("{:?}", Severity::Error),
-                "garde(skip) without comment".to_owned(),
-                "`#[garde(skip)]` on non-primitive type `WholeTypeSkipProbe` requires documentation."
-                    .to_owned(),
-            ),
-            (
-                field_rel.to_owned(),
-                Some(field_line),
-                format!("{:?}", Severity::Error),
-                "garde(skip) without comment".to_owned(),
-                "`#[garde(skip)]` on non-primitive field `field: String` requires documentation."
-                    .to_owned(),
-            ),
-            (
-                vec_rel.to_owned(),
-                Some(vec_line),
-                format!("{:?}", Severity::Error),
-                "garde(skip) without comment".to_owned(),
-                "`#[garde(skip)]` on non-primitive field `items: Vec<String>` requires documentation."
-                    .to_owned(),
-            ),
-        ]
+        ]));
+    assert_findings(
+        &results,
+        &[
+            RuleFinding {
+                severity: Severity::Error,
+                title: "garde(skip) without comment",
+                message: "`#[garde(skip)]` on non-primitive type `WholeTypeSkipProbe` requires documentation.",
+                file: Some(type_rel),
+                line: Some(type_line),
+                inventory: false,
+            },
+            RuleFinding {
+                severity: Severity::Error,
+                title: "garde(skip) without comment",
+                message: "`#[garde(skip)]` on non-primitive field `field: String` requires documentation.",
+                file: Some(field_rel),
+                line: Some(field_line),
+                inventory: false,
+            },
+            RuleFinding {
+                severity: Severity::Error,
+                title: "garde(skip) without comment",
+                message: "`#[garde(skip)]` on non-primitive field `items: Vec<String>` requires documentation.",
+                file: Some(vec_rel),
+                line: Some(vec_line),
+                inventory: false,
+            },
+        ],
     );
 }

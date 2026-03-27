@@ -41,6 +41,33 @@ fn target_label(info: &GardeSkipInfo) -> String {
     }
 }
 
+
+#[cfg(test)]
+pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
+    crate::check_test_root(root)
+}
+
+#[cfg(test)]
+pub(crate) fn copy_fixture() -> tempfile::TempDir {
+    crate::copy_test_fixture()
+}
+
+#[cfg(test)]
+#[allow(dead_code)]
+pub(crate) fn check_source(rel_path: &str, content: &str, is_test: bool) -> Vec<CheckResult> {
+    let ast = super::parse::parse_rust_file(content).expect("valid rust");
+    let input = super::inputs::RustCodeFileInput {
+        rel_path,
+        content,
+        ast: &ast,
+        is_test,
+        profile_name: None,
+    };
+    let mut results = Vec::new();
+    check(&input, &mut results);
+    results
+}
+
 #[cfg(test)]
 #[path = "rs_code_05_garde_skip_without_comment_tests/mod.rs"]
-mod tests;
+mod rs_code_05_garde_skip_without_comment_tests;

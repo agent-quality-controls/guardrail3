@@ -1,6 +1,7 @@
-use std::collections::BTreeSet;
-
-use super::super::super::test_support::{copy_fixture, files_for_rule, run_family, write_file};
+use guardrail3_app_rs_family_code_assertions::rs_code_09_file_length::{assert_no_hits};
+use super::super::run_family;
+use super::super::copy_fixture;
+use test_support::write_file;
 
 #[test]
 fn skips_test_file_even_when_it_exceeds_threshold() {
@@ -20,13 +21,7 @@ fn skips_test_file_even_when_it_exceeds_threshold() {
     }
 
     let results = run_family(root);
-    let rs_code_09_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-09")
-        .collect::<Vec<_>>();
-
-    assert_eq!(files_for_rule(&results, "RS-CODE-09"), BTreeSet::new());
-    assert!(rs_code_09_results.is_empty());
+    assert_no_hits(&results);
 }
 
 #[test]
@@ -40,11 +35,5 @@ fn skips_file_with_many_comment_lines_but_only_500_effective_lines() {
     write_file(root, rel, &format!("{effective}{comments}"));
 
     let results = run_family(root);
-    let rs_code_09_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-09")
-        .collect::<Vec<_>>();
-
-    assert_eq!(files_for_rule(&results, "RS-CODE-09"), BTreeSet::new());
-    assert!(rs_code_09_results.is_empty());
+    assert_no_hits(&results);
 }

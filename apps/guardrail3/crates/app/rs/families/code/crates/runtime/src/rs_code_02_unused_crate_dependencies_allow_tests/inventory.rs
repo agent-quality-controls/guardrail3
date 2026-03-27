@@ -2,7 +2,10 @@ use std::collections::BTreeSet;
 
 use guardrail3_domain_report::Severity;
 
-use super::super::super::test_support::{copy_fixture, files_for_rule, run_family, write_file};
+use guardrail3_app_rs_family_code_assertions::rs_code_02_unused_crate_dependencies_allow::{assert_files, assert_findings, assert_value_eq, RuleFinding};
+use super::super::run_family;
+use super::super::copy_fixture;
+use test_support::write_file;
 
 #[test]
 fn inventories_unused_crate_dependencies_allow_across_real_owned_files() {
@@ -34,54 +37,40 @@ fn inventories_unused_crate_dependencies_allow_across_real_owned_files() {
     );
 
     let results = run_family(root);
-    let mut rs_code_02_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-02")
-        .map(|result| {
-            (
-                result.file.clone().expect("file"),
-                result.line,
-                format!("{:?}", result.severity),
-                result.title.clone(),
-                result.message.clone(),
-            )
-        })
-        .collect::<Vec<_>>();
-    rs_code_02_results.sort();
 
-    assert_eq!(
-        files_for_rule(&results, "RS-CODE-02"),
-        BTreeSet::from([
+    assert_files(&results, BTreeSet::from([
             backend_rel.to_owned(),
             worker_rel.to_owned(),
             test_rel.to_owned(),
-        ])
-    );
-    assert_eq!(
-        rs_code_02_results,
-        vec![
-            (
-                backend_rel.to_owned(),
-                Some(1),
-                format!("{:?}", Severity::Info),
-                "unused_crate_dependencies exemption".to_owned(),
-                "unused_crate_dependencies is an approved universal exemption.".to_owned(),
-            ),
-            (
-                test_rel.to_owned(),
-                Some(1),
-                format!("{:?}", Severity::Info),
-                "unused_crate_dependencies exemption".to_owned(),
-                "unused_crate_dependencies is an approved universal exemption.".to_owned(),
-            ),
-            (
-                worker_rel.to_owned(),
-                Some(1),
-                format!("{:?}", Severity::Info),
-                "unused_crate_dependencies exemption".to_owned(),
-                "unused_crate_dependencies is an approved universal exemption.".to_owned(),
-            ),
-        ]
+        ]));
+    assert_findings(
+        &results,
+        &[
+            RuleFinding {
+                severity: Severity::Info,
+                title: "unused_crate_dependencies exemption",
+                message: "unused_crate_dependencies is an approved universal exemption.",
+                file: Some(backend_rel),
+                line: Some(1),
+                inventory: true,
+            },
+            RuleFinding {
+                severity: Severity::Info,
+                title: "unused_crate_dependencies exemption",
+                message: "unused_crate_dependencies is an approved universal exemption.",
+                file: Some(test_rel),
+                line: Some(1),
+                inventory: true,
+            },
+            RuleFinding {
+                severity: Severity::Info,
+                title: "unused_crate_dependencies exemption",
+                message: "unused_crate_dependencies is an approved universal exemption.",
+                file: Some(worker_rel),
+                line: Some(1),
+                inventory: true,
+            },
+        ],
     );
 }
 
@@ -102,19 +91,19 @@ fn only_inventories_crate_level_unused_crate_dependencies_in_mixed_same_file_cas
     );
 
     let results = run_family(root);
-    let rs_code_02_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-02")
-        .collect::<Vec<_>>();
 
-    assert_eq!(
-        files_for_rule(&results, "RS-CODE-02"),
-        BTreeSet::from([rel.to_owned()])
+    assert_files(&results, BTreeSet::from([rel.to_owned()]));
+    assert_findings(
+        &results,
+        &[RuleFinding {
+            severity: Severity::Info,
+            title: "unused_crate_dependencies exemption",
+            message: "unused_crate_dependencies is an approved universal exemption.",
+            file: Some(rel),
+            line: Some(1),
+            inventory: true,
+        }],
     );
-    assert_eq!(rs_code_02_results.len(), 1);
-    let result = rs_code_02_results[0];
-    assert_eq!(result.file.as_deref(), Some(rel));
-    assert_eq!(result.line, Some(1));
 }
 
 #[test]
@@ -130,15 +119,27 @@ fn inventories_each_repeated_crate_level_unused_crate_dependencies_exemption() {
     );
     write_file(root, rel, &new_content);
 
-    let mut rs_code_02_results = run_family(root)
-        .into_iter()
-        .filter(|result| result.id == "RS-CODE-02")
-        .map(|result| (result.file.expect("file"), result.line))
-        .collect::<Vec<_>>();
-    rs_code_02_results.sort();
+    let results = run_family(root);
 
-    assert_eq!(
-        rs_code_02_results,
-        vec![(rel.to_owned(), Some(1)), (rel.to_owned(), Some(2))]
+    assert_findings(
+        &results,
+        &[
+            RuleFinding {
+                severity: Severity::Info,
+                title: "unused_crate_dependencies exemption",
+                message: "unused_crate_dependencies is an approved universal exemption.",
+                file: Some(rel),
+                line: Some(1),
+                inventory: true,
+            },
+            RuleFinding {
+                severity: Severity::Info,
+                title: "unused_crate_dependencies exemption",
+                message: "unused_crate_dependencies is an approved universal exemption.",
+                file: Some(rel),
+                line: Some(2),
+                inventory: true,
+            },
+        ],
     );
 }

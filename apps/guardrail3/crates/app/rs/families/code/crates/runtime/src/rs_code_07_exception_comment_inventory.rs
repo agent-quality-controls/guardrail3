@@ -19,6 +19,29 @@ pub fn check(input: &ExceptionCommentInput<'_>, results: &mut Vec<CheckResult>) 
     );
 }
 
+
+#[cfg(test)]
+pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
+    crate::check_test_root(root)
+}
+
+#[cfg(test)]
+pub(crate) fn copy_fixture() -> tempfile::TempDir {
+    crate::copy_test_fixture()
+}
+
+#[cfg(test)]
+pub(crate) fn check_comment(rel_path: &str, line: usize, line_text: &str) -> Vec<CheckResult> {
+    let input = super::inputs::ExceptionCommentInput {
+        rel_path,
+        line,
+        line_text,
+    };
+    let mut results = Vec::new();
+    check(&input, &mut results);
+    results
+}
+
 #[cfg(test)]
 #[path = "rs_code_07_exception_comment_inventory_tests/mod.rs"]
-mod tests;
+mod rs_code_07_exception_comment_inventory_tests;

@@ -2,7 +2,10 @@ use std::collections::BTreeSet;
 
 use guardrail3_domain_report::Severity;
 
-use super::super::super::test_support::{copy_fixture, files_for_rule, run_family, write_file};
+use guardrail3_app_rs_family_code_assertions::rs_code_09_file_length::{assert_files, assert_findings, RuleFinding};
+use super::super::run_family;
+use super::super::copy_fixture;
+use test_support::write_file;
 
 #[test]
 fn attacks_file_length_using_real_owned_file_surface() {
@@ -16,32 +19,17 @@ fn attacks_file_length_using_real_owned_file_surface() {
     write_file(root, rel, &format!("{content}\n{filler}"));
 
     let results = run_family(root);
-    let rs_code_09_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-09")
-        .map(|result| {
-            (
-                result.file.clone().expect("file"),
-                result.line,
-                format!("{:?}", result.severity),
-                result.title.clone(),
-                result.message.clone(),
-            )
-        })
-        .collect::<Vec<_>>();
 
-    assert_eq!(
-        files_for_rule(&results, "RS-CODE-09"),
-        BTreeSet::from([rel.to_owned()])
-    );
-    assert_eq!(
-        rs_code_09_results,
-        vec![(
-            rel.to_owned(),
-            None,
-            format!("{:?}", Severity::Error),
-            "file too long".to_owned(),
-            "538 effective lines (max 500). Long files are hard to review and maintain.".to_owned(),
-        )]
+    assert_files(&results, BTreeSet::from([rel.to_owned()]));
+    assert_findings(
+        &results,
+        &[RuleFinding {
+            severity: Severity::Error,
+            title: "file too long",
+            message: "538 effective lines (max 500). Long files are hard to review and maintain.",
+            file: Some(rel),
+            line: None,
+            inventory: false,
+        }],
     );
 }

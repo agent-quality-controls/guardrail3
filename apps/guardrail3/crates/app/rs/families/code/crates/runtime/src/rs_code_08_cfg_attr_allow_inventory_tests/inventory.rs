@@ -2,7 +2,10 @@ use std::collections::BTreeSet;
 
 use guardrail3_domain_report::Severity;
 
-use super::super::super::test_support::{copy_fixture, files_for_rule, run_family, write_file};
+use guardrail3_app_rs_family_code_assertions::rs_code_08_cfg_attr_allow_inventory::{assert_files, assert_findings, RuleFinding};
+use super::super::run_family;
+use super::super::copy_fixture;
+use test_support::write_file;
 
 #[test]
 fn inventories_conditional_cfg_attr_allows_across_real_owned_files_with_exact_metadata() {
@@ -59,65 +62,47 @@ fn inventories_conditional_cfg_attr_allows_across_real_owned_files_with_exact_me
         + 1;
 
     let results = run_family(root);
-    let mut rs_code_08_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-08")
-        .map(|result| {
-            (
-                result.file.clone().expect("file"),
-                result.line,
-                format!("{:?}", result.severity),
-                result.title.clone(),
-                result.message.clone(),
-                result.inventory,
-            )
-        })
-        .collect::<Vec<_>>();
-    rs_code_08_results.sort();
 
-    assert_eq!(
-        files_for_rule(&results, "RS-CODE-08"),
-        BTreeSet::from([
+    assert_files(&results, BTreeSet::from([
             backend_rel.to_owned(),
             worker_rel.to_owned(),
             nested_rel.to_owned(),
-        ])
-    );
-    assert_eq!(
-        rs_code_08_results,
-        vec![
-            (
-                backend_rel.to_owned(),
-                Some(backend_line),
-                format!("{:?}", Severity::Info),
-                "conditional cfg_attr allow".to_owned(),
-                "Conditional cfg_attr allow for `clippy::unwrap_used`.".to_owned(),
-                true,
-            ),
-            (
-                nested_rel.to_owned(),
-                Some(nested_line),
-                format!("{:?}", Severity::Info),
-                "conditional cfg_attr allow".to_owned(),
-                "Conditional cfg_attr allow for `clippy::unwrap_used`.".to_owned(),
-                true,
-            ),
-            (
-                worker_rel.to_owned(),
-                Some(worker_line),
-                format!("{:?}", Severity::Info),
-                "conditional cfg_attr allow".to_owned(),
-                "Conditional cfg_attr allow for `clippy::expect_used`.".to_owned(),
-                true,
-            ),
-            (
-                worker_rel.to_owned(),
-                Some(worker_line),
-                format!("{:?}", Severity::Info),
-                "conditional cfg_attr allow".to_owned(),
-                "Conditional cfg_attr allow for `clippy::panic`.".to_owned(),
-                true,
-            ),
-        ]
+        ]));
+    assert_findings(
+        &results,
+        &[
+            RuleFinding {
+                severity: Severity::Info,
+                title: "conditional cfg_attr allow",
+                message: "Conditional cfg_attr allow for `clippy::unwrap_used`.",
+                file: Some(backend_rel),
+                line: Some(backend_line),
+                inventory: true,
+            },
+            RuleFinding {
+                severity: Severity::Info,
+                title: "conditional cfg_attr allow",
+                message: "Conditional cfg_attr allow for `clippy::unwrap_used`.",
+                file: Some(nested_rel),
+                line: Some(nested_line),
+                inventory: true,
+            },
+            RuleFinding {
+                severity: Severity::Info,
+                title: "conditional cfg_attr allow",
+                message: "Conditional cfg_attr allow for `clippy::expect_used`.",
+                file: Some(worker_rel),
+                line: Some(worker_line),
+                inventory: true,
+            },
+            RuleFinding {
+                severity: Severity::Info,
+                title: "conditional cfg_attr allow",
+                message: "Conditional cfg_attr allow for `clippy::panic`.",
+                file: Some(worker_rel),
+                line: Some(worker_line),
+                inventory: true,
+            },
+        ],
     );
 }

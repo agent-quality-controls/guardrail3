@@ -1,21 +1,15 @@
 use guardrail3_domain_report::Severity;
 
-use super::super::super::inputs::ExceptionCommentInput;
-use super::super::check;
+use guardrail3_app_rs_family_code_assertions::rs_code_07_exception_comment_inventory::{assert_normalized_len, findings};
+use super::super::check_comment;
 
 #[test]
 fn inventories_direct_exception_comment_input() {
     let line_text = "# EXCEPTION: temporary override";
-    let input = ExceptionCommentInput {
-        rel_path: "Cargo.toml",
-        line: 4,
-        line_text,
-    };
-    let mut results = Vec::new();
+    let raw_results = check_comment("Cargo.toml", 4, line_text);
+    let results = findings(&raw_results);
 
-    check(&input, &mut results);
-
-    assert_eq!(results.len(), 1);
+    assert_normalized_len(&results, 1);
     assert_eq!(results[0].id, "RS-CODE-07");
     assert_eq!(results[0].severity, Severity::Info);
     assert!(results[0].inventory);

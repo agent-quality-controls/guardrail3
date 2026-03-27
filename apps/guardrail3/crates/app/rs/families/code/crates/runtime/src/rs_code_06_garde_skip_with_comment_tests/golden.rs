@@ -1,6 +1,6 @@
-use std::collections::BTreeSet;
-
-use super::super::super::test_support::{copy_fixture, files_for_rule, run_family};
+use guardrail3_app_rs_family_code_assertions::rs_code_06_garde_skip_with_comment::{assert_no_hits};
+use super::super::run_family;
+use super::super::copy_fixture;
 
 #[test]
 fn populated_golden_fixture_has_no_plain_comment_garde_skip_hits() {
@@ -9,5 +9,5 @@ fn populated_golden_fixture_has_no_plain_comment_garde_skip_hits() {
 
     let results = run_family(root);
 
-    assert_eq!(files_for_rule(&results, "RS-CODE-06"), BTreeSet::new());
+    assert_no_hits(&results);
 }

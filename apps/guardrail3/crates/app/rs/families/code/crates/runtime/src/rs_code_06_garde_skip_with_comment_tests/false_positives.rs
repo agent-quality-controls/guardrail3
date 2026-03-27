@@ -2,7 +2,10 @@ use std::collections::BTreeSet;
 
 use guardrail3_domain_report::Severity;
 
-use super::super::super::test_support::{copy_fixture, files_for_rule, run_family, write_file};
+use guardrail3_app_rs_family_code_assertions::rs_code_06_garde_skip_with_comment::{assert_files, assert_findings, assert_no_hits, RuleFinding};
+use super::super::run_family;
+use super::super::copy_fixture;
+use test_support::write_file;
 
 #[test]
 fn skips_reasoned_primitive_unvalidatable_and_missing_comment_garde_skip_surfaces() {
@@ -108,49 +111,28 @@ fn skips_reasoned_primitive_unvalidatable_and_missing_comment_garde_skip_surface
         + 1;
 
     let results = run_family(root);
-    let rs_code_06_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-06")
-        .collect::<Vec<_>>();
-    let rs_code_05_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-05")
-        .map(|result| {
-            (
-                result.file.clone().expect("file"),
-                result.line,
-                format!("{:?}", result.severity),
-                result.title.clone(),
-                result.message.clone(),
-            )
-        })
-        .collect::<Vec<_>>();
 
-    assert_eq!(files_for_rule(&results, "RS-CODE-06"), BTreeSet::new());
-    assert!(rs_code_06_results.is_empty());
-    assert_eq!(
-        files_for_rule(&results, "RS-CODE-05"),
-        BTreeSet::from([missing_comment_rel.to_owned(), block_comment_rel.to_owned()])
-    );
-    assert_eq!(
-        rs_code_05_results,
-        vec![
-            (
-                missing_comment_rel.to_owned(),
-                Some(missing_comment_line),
-                format!("{:?}", Severity::Error),
-                "garde(skip) without comment".to_owned(),
-                "`#[garde(skip)]` on non-primitive field `field: String` requires documentation."
-                    .to_owned(),
-            ),
-            (
-                block_comment_rel.to_owned(),
-                Some(block_comment_line),
-                format!("{:?}", Severity::Error),
-                "garde(skip) without comment".to_owned(),
-                "`#[garde(skip)]` on non-primitive field `field: String` requires documentation."
-                    .to_owned(),
-            ),
-        ]
+    assert_no_hits(&results);
+    assert_files(&results, BTreeSet::from([missing_comment_rel.to_owned(), block_comment_rel.to_owned()]));
+    assert_findings(
+        &results,
+        &[
+            RuleFinding {
+                severity: Severity::Error,
+                title: "garde(skip) without comment",
+                message: "`#[garde(skip)]` on non-primitive field `field: String` requires documentation.",
+                file: Some(missing_comment_rel),
+                line: Some(missing_comment_line),
+                inventory: false,
+            },
+            RuleFinding {
+                severity: Severity::Error,
+                title: "garde(skip) without comment",
+                message: "`#[garde(skip)]` on non-primitive field `field: String` requires documentation.",
+                file: Some(block_comment_rel),
+                line: Some(block_comment_line),
+                inventory: false,
+            },
+        ],
     );
 }
