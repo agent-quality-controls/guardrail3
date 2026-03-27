@@ -24,12 +24,14 @@ It does not own:
 - repo-global Rust root placement
 - app/package overlap classification
 - app-internal hex structure
+- tool-specific Cargo config overrides that redirect another tool's own policy discovery
 - generic source-code quality
 
 Those belong to:
 
 - `RS-ARCH`
 - `RS-HEXARCH`
+- the affected tool family itself, for example `RS-CLIPPY` for `CLIPPY_CONF_DIR`
 - `RS-CODE`
 - shared Rust `placement`
 - shared Rust `FamilyMapper`

@@ -60,6 +60,8 @@ That split is intentional:
 - `FamilyMapper` decides which roots reach `clippy`
 - `clippy` decides Clippy-policy facts inside those routed roots
 
+The `CLIPPY_CONF_DIR` override stays here even though it lives in Cargo config files, because the semantic question is still Clippy-specific: whether Clippy config discovery has been redirected away from the routed policy-root model. Generic Cargo lint-table and manifest policy remains owned by `RS-CARGO`.
+
 ## Current Shape
 
 At this checkpoint, `clippy` is in the nested family workspace shape and the sidecar migration now uses sibling assertions plus external `test_support`:
