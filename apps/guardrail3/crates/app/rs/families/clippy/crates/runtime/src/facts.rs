@@ -178,6 +178,11 @@ pub fn collect(tree: &ProjectTree, route: &RsClippyRoute) -> ClippyFacts {
     }
 }
 
+#[cfg(test)]
+pub(crate) fn collect_for_tests(tree: &ProjectTree) -> ClippyFacts {
+    collect(tree, &super::test_support::family_route_for_tests(tree))
+}
+
 fn config_precedence(rel_path: &str) -> usize {
     if rel_path.ends_with("clippy.toml") && !rel_path.ends_with(".clippy.toml") {
         return 0;

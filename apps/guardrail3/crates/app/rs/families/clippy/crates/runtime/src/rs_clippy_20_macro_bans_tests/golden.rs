@@ -3,13 +3,13 @@ use std::collections::BTreeSet;
 use guardrail3_domain_report::Severity;
 
 use super::super::super::test_support::{
-    canonical_clippy_toml, collected_facts, config_input, root_workspace_tree,
+    build_fixture_clippy_toml, collected_facts, config_input, root_workspace_tree,
 };
 use super::super::check;
 
 #[test]
 fn inventories_every_required_macro_ban_from_generated_baseline() {
-    let tree = root_workspace_tree(canonical_clippy_toml());
+    let tree = root_workspace_tree(build_fixture_clippy_toml("service", false, true, "", ""));
     let facts = collected_facts(&tree);
     let mut results = Vec::new();
 

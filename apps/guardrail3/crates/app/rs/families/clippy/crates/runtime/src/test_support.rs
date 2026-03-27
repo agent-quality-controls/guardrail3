@@ -11,18 +11,17 @@ use super::facts::{ClippyFacts, collect};
 use super::inputs::ConfigClippyInput;
 
 pub use test_support::{
-    canonical_clippy_toml, dir_entry, garde_disabled_root_tree,
+    build_fixture_clippy_toml, dir_entry, garde_disabled_root_tree,
     incomplete_workspace_policy_root_tree, library_workspace_root_tree,
     nested_workspace_member_shadow_tree, prepend_ban_path,
     project_tree, published_library_package_root_tree, remove_ban_path,
-    root_workspace_tree, root_workspace_tree_with_guardrail,
-    same_root_dual_config_tree, write_file,
+    root_workspace_tree, same_root_dual_config_tree, write_file,
 };
 
-const GOLDEN_REL: &str = "../../../../../tests/fixtures/r_arch_01/golden";
+const GOLDEN_REL: &str = "../../../../../../../tests/fixtures/r_arch_01/golden";
 
 pub fn collected_facts(tree: &ProjectTree) -> ClippyFacts {
-    collect(tree, &family_route(tree))
+    collect(tree, &family_route_for_tests(tree))
 }
 
 pub fn config_input<'a>(facts: &'a ClippyFacts, rel_path: &str) -> ConfigClippyInput<'a> {
@@ -44,10 +43,10 @@ pub fn copy_fixture() -> test_support::TempDir {
 
 pub fn run_family(root: &Path) -> Vec<CheckResult> {
     let tree = walk_project(&RealFileSystem, root);
-    super::check(&tree, &family_route(&tree))
+    super::check(&tree, &family_route_for_tests(&tree))
 }
 
-fn family_route(tree: &ProjectTree) -> RsClippyRoute {
+pub(crate) fn family_route_for_tests(tree: &ProjectTree) -> RsClippyRoute {
     let scope = guardrail3_app_rs_placement::collect(tree);
     let selected = RustFamilySelection::new(std::collections::BTreeSet::from([
         RustValidateFamily::Clippy,

@@ -1,13 +1,13 @@
 use guardrail3_domain_report::Severity;
 
 use super::super::super::test_support::{
-    canonical_clippy_toml, collected_facts, config_input, garde_disabled_root_tree, remove_ban_path,
+    build_fixture_clippy_toml, collected_facts, config_input, garde_disabled_root_tree, remove_ban_path,
 };
 use super::super::check;
 
 #[test]
 fn drops_garde_owned_type_requirements_when_garde_is_disabled() {
-    let mut clippy = canonical_clippy_toml();
+    let mut clippy = build_fixture_clippy_toml("service", false, true, "", "");
     for path in [
         "axum::extract::Json",
         "axum::Json",

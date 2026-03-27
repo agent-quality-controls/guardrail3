@@ -1,35 +1,41 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use crate::common::{assert_correct, assert_missing, assert_parse_error, single_result};
-
 const ID: &str = "RS-CLIPPY-03";
 
 pub fn assert_golden(results: &[CheckResult], file: &str) {
-    assert_correct(
-        results,
-        ID,
-        "max-fn-params-bools correct",
-        "max-fn-params-bools = 3",
-        file,
-    );
+    let result = single_result(results);
+    assert!(result.inventory);
+    assert_eq!(result.severity, Severity::Info);
+    assert_eq!(result.title, "max-fn-params-bools correct");
+    assert_eq!(result.message, "max-fn-params-bools = 3");
+    assert_eq!(result.file.as_deref(), Some(file));
 }
 
 pub fn assert_missing_value(results: &[CheckResult]) {
-    assert_missing(
-        results,
-        ID,
-        "max-fn-params-bools missing",
-        "Expected max-fn-params-bools = 3.",
-    );
+    let result = single_result(results);
+    assert_eq!(result.severity, Severity::Error);
+    assert_eq!(result.title, "max-fn-params-bools missing");
+    assert_eq!(result.message, "Expected max-fn-params-bools = 3.");
 }
 
 pub fn assert_parse_failure(results: &[CheckResult], file: &str) {
-    assert_parse_error(results, ID, file);
+    let result = single_result(results);
+    assert_eq!(result.severity, Severity::Error);
+    assert_eq!(result.title, "clippy.toml parse error");
+    assert!(result.message.starts_with("Failed to parse clippy.toml: "));
+    assert_eq!(result.file.as_deref(), Some(file));
 }
 
 pub fn assert_wrong_value(results: &[CheckResult]) {
-    let result = single_result(results, ID);
+    let result = single_result(results);
     assert_eq!(result.severity, Severity::Error);
     assert_eq!(result.title, "max-fn-params-bools wrong value");
     assert_eq!(result.message, "Expected 3, got 4.");
+}
+
+fn single_result(results: &[CheckResult]) -> &CheckResult {
+    assert_eq!(results.len(), 1);
+    let result = &results[0];
+    assert_eq!(result.id, ID);
+    result
 }

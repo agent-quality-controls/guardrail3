@@ -103,8 +103,20 @@ pub fn create_dir_all(path: &Path) {
     );
 }
 
-pub fn canonical_clippy_toml() -> String {
-    build_clippy_toml("service", false, true, "", "")
+pub fn build_fixture_clippy_toml(
+    profile_name: &str,
+    is_pure_layer: bool,
+    garde_enabled: bool,
+    extra_methods: &str,
+    extra_types: &str,
+) -> String {
+    build_clippy_toml(
+        profile_name,
+        is_pure_layer,
+        garde_enabled,
+        extra_methods,
+        extra_types,
+    )
 }
 
 pub fn root_workspace_tree(clippy_toml: impl Into<String>) -> ProjectTree {
@@ -157,10 +169,13 @@ pub fn nested_workspace_member_shadow_tree(file_name: &str) -> ProjectTree {
                 "workspace/crates/core/Cargo.toml",
                 "[package]\nname = \"core\"".to_owned(),
             ),
-            ("workspace/clippy.toml", canonical_clippy_toml().to_owned()),
+            (
+                "workspace/clippy.toml",
+                build_fixture_clippy_toml("service", false, true, "", ""),
+            ),
             (
                 &format!("workspace/crates/core/{file_name}"),
-                canonical_clippy_toml().to_owned(),
+                build_fixture_clippy_toml("service", false, true, "", ""),
             ),
         ],
     )
@@ -200,7 +215,10 @@ pub fn incomplete_workspace_policy_root_tree() -> ProjectTree {
                 "workspace/crates/core/Cargo.toml",
                 "[package]\nname = \"core\"".to_owned(),
             ),
-            ("clippy.toml", canonical_clippy_toml().to_owned()),
+            (
+                "clippy.toml",
+                build_fixture_clippy_toml("service", false, true, "", ""),
+            ),
             (
                 "workspace/clippy.toml",
                 r#"
@@ -243,7 +261,10 @@ pub fn library_workspace_root_tree(local_clippy_toml: impl Into<String>) -> Proj
                 "apps/libsite/crates/core/Cargo.toml",
                 "[package]\nname = \"core\"".to_owned(),
             ),
-            ("clippy.toml", canonical_clippy_toml().to_owned()),
+            (
+                "clippy.toml",
+                build_fixture_clippy_toml("service", false, true, "", ""),
+            ),
             ("apps/libsite/clippy.toml", local_clippy_toml.into()),
         ],
     )
@@ -317,5 +338,4 @@ fn copy_dir_recursive(src: &Path, dst: &Path) {
 }
 
 #[cfg(test)]
-#[path = "test_support_tests/mod.rs"] // reason: test-only sidecar module wiring
-mod test_support_tests;
+mod lib_tests;

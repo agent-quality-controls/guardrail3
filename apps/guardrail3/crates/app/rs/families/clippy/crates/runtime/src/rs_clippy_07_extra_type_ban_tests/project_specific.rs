@@ -1,14 +1,14 @@
 use guardrail3_domain_report::Severity;
 
 use super::super::super::test_support::{
-    canonical_clippy_toml, collected_facts, config_input, prepend_ban_path, root_workspace_tree,
+    build_fixture_clippy_toml, collected_facts, config_input, prepend_ban_path, root_workspace_tree,
 };
 use super::super::check;
 
 #[test]
 fn inventories_project_specific_extra_type_bans() {
     let clippy = prepend_ban_path(
-        &canonical_clippy_toml(),
+        &build_fixture_clippy_toml("service", false, true, "", ""),
         "disallowed-types",
         "std::sync::Arc",
         "good enough reason text",

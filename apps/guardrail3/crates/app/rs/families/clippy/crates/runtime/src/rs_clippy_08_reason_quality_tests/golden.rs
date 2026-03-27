@@ -1,11 +1,11 @@
 use super::super::super::test_support::{
-    canonical_clippy_toml, collected_facts, config_input, root_workspace_tree,
+    build_fixture_clippy_toml, collected_facts, config_input, root_workspace_tree,
 };
 use super::super::check;
 
 #[test]
 fn emits_no_result_when_all_ban_entries_use_reasoned_table_format() {
-    let tree = root_workspace_tree(canonical_clippy_toml());
+    let tree = root_workspace_tree(build_fixture_clippy_toml("service", false, true, "", ""));
     let facts = collected_facts(&tree);
     let mut results = Vec::new();
 

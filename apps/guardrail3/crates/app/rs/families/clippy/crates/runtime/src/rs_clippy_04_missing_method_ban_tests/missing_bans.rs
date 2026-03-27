@@ -3,13 +3,13 @@ use std::collections::BTreeSet;
 use guardrail3_domain_report::Severity;
 
 use super::super::super::test_support::{
-    canonical_clippy_toml, collected_facts, config_input, remove_ban_path, root_workspace_tree,
+    build_fixture_clippy_toml, collected_facts, config_input, remove_ban_path, root_workspace_tree,
 };
 use super::super::check;
 
 #[test]
 fn errors_for_each_missing_required_method_ban() {
-    let mut clippy = canonical_clippy_toml();
+    let mut clippy = build_fixture_clippy_toml("service", false, true, "", "");
     for path in ["std::env::var", "std::process::abort"] {
         clippy = remove_ban_path(&clippy, "disallowed-methods", path);
     }
