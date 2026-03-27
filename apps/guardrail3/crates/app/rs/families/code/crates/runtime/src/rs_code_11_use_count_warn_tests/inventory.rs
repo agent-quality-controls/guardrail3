@@ -13,7 +13,7 @@ fn warns_at_threshold_band_in_real_owned_file() {
     let root = fixture.path();
 
     let rel = "apps/backend/crates/app/queries/src/lib.rs";
-    let content = std::fs::read_to_string(root.join(rel)).expect("read source");
+    let content = test_support::read_file(root, rel);
     let imports = (0..16)
         .map(|index| format!("use crate::warn_{index};"))
         .collect::<Vec<_>>()
@@ -27,6 +27,8 @@ fn warns_at_threshold_band_in_real_owned_file() {
     write_file(root, rel, &format!("{imports}\n{content}"));
 
     let results = run_family(root);
+    let expected_message =
+        format!("{total_use_count} top-level use statements (warn at 16, max 20).");
 
     assert_files(&results, BTreeSet::from([rel.to_owned()]));
     assert_findings(
@@ -34,7 +36,7 @@ fn warns_at_threshold_band_in_real_owned_file() {
         &[RuleFinding {
             severity: Severity::Warn,
             title: "many use statements",
-            message: format!("{total_use_count} top-level use statements (warn at 16, max 20)."),
+            message: &expected_message,
             file: Some(rel),
             line: None,
             inventory: false,

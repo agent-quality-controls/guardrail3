@@ -17,11 +17,11 @@ fn inventories_conditional_cfg_attr_allows_across_real_owned_files_with_exact_me
     let nested_rel = "apps/backend/crates/ports/inbound/api/src/lib.rs";
 
     let backend_content =
-        std::fs::read_to_string(root.join(backend_rel)).expect("read backend source");
+        test_support::read_file(root, backend_rel);
     let worker_content =
-        std::fs::read_to_string(root.join(worker_rel)).expect("read worker source");
+        test_support::read_file(root, worker_rel);
     let nested_content =
-        std::fs::read_to_string(root.join(nested_rel)).expect("read nested source");
+        test_support::read_file(root, nested_rel);
 
     let backend_new = format!(
         "{backend_content}\n#[cfg_attr(test, allow(clippy::unwrap_used))]\nfn cfg_attr_backend_probe() {{}}\n"
@@ -39,9 +39,7 @@ fn inventories_conditional_cfg_attr_allows_across_real_owned_files_with_exact_me
 
     let backend_line = backend_new
         .lines()
-        .position(|line| line.contains("#[cfg_attr(test, allow(clippy::unwrap_used))]"))
-        .expect("backend line")
-        + 1;
+        .position(|line| line.contains("#[cfg_attr(test, allow(clippy::unwrap_used))]")).map(|index| index + 1).unwrap_or_default();
     let worker_line = worker_new
         .lines()
         .position(|line| {
@@ -49,8 +47,7 @@ fn inventories_conditional_cfg_attr_allows_across_real_owned_files_with_exact_me
                 "#[cfg_attr(feature = \"serde\", allow(clippy::expect_used, clippy::panic))]",
             )
         })
-        .expect("worker line")
-        + 1;
+        .map(|index| index + 1).unwrap_or_default();
     let nested_line = nested_new
         .lines()
         .position(|line| {
@@ -58,8 +55,7 @@ fn inventories_conditional_cfg_attr_allows_across_real_owned_files_with_exact_me
                 "#[cfg_attr(any(test, feature = \"debug-tools\"), allow(clippy::unwrap_used))]",
             )
         })
-        .expect("nested line")
-        + 1;
+        .map(|index| index + 1).unwrap_or_default();
 
     let results = run_family(root);
 

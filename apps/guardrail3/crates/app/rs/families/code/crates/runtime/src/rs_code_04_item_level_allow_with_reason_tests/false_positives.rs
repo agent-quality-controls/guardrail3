@@ -1,3 +1,5 @@
+use guardrail3_domain_report::Severity;
+
 use guardrail3_app_rs_family_code_assertions::rs_code_04_item_level_allow_with_reason::{assert_findings, assert_no_hits, RuleFinding};
 use super::super::run_family;
 use super::super::copy_fixture;
@@ -14,13 +16,13 @@ fn skips_undocumented_and_malformed_reason_near_misses() {
     let block_comment_rel = "apps/backend/crates/adapters/outbound/queue/src/lib.rs";
 
     let undocumented_content =
-        std::fs::read_to_string(root.join(undocumented_rel)).expect("read undocumented file");
+        test_support::read_file(root, undocumented_rel);
     let empty_reason_content =
-        std::fs::read_to_string(root.join(empty_reason_rel)).expect("read empty reason file");
+        test_support::read_file(root, empty_reason_rel);
     let wrong_key_content =
-        std::fs::read_to_string(root.join(wrong_key_rel)).expect("read wrong key file");
+        test_support::read_file(root, wrong_key_rel);
     let block_comment_content =
-        std::fs::read_to_string(root.join(block_comment_rel)).expect("read block comment file");
+        test_support::read_file(root, block_comment_rel);
 
     write_file(
         root,
@@ -65,9 +67,9 @@ fn inventories_accepted_reason_variants_and_other_item_kinds() {
     let tight_rel = "apps/worker/crates/adapters/outbound/sqs/src/lib.rs";
     let mod_rel = "apps/devctl/crates/app/core/src/lib.rs";
 
-    let upper_content = std::fs::read_to_string(root.join(upper_rel)).expect("read upper file");
-    let tight_content = std::fs::read_to_string(root.join(tight_rel)).expect("read tight file");
-    let mod_content = std::fs::read_to_string(root.join(mod_rel)).expect("read mod file");
+    let upper_content = test_support::read_file(root, upper_rel);
+    let tight_content = test_support::read_file(root, tight_rel);
+    let mod_content = test_support::read_file(root, mod_rel);
 
     let upper_new = format!(
         "{upper_content}\n#[allow(clippy::unwrap_used)] // REASON: uppercase accepted\npub fn uppercase_reason_probe() {{}}\n"
@@ -88,20 +90,16 @@ fn inventories_accepted_reason_variants_and_other_item_kinds() {
         .position(|line| {
             line.contains("#[allow(clippy::unwrap_used)] // REASON: uppercase accepted")
         })
-        .expect("upper line")
-        + 1;
+        .map(|index| index + 1).unwrap_or_default();
     let tight_line = tight_new
         .lines()
-        .position(|line| line.contains("#[allow(clippy::panic)] //reason: tight spacing accepted"))
-        .expect("tight line")
-        + 1;
+        .position(|line| line.contains("#[allow(clippy::panic)] //reason: tight spacing accepted")).map(|index| index + 1).unwrap_or_default();
     let mod_line = mod_new
         .lines()
         .position(|line| {
             line.contains("#[allow(clippy::expect_used)] // reason: module boundary shim")
         })
-        .expect("mod line")
-        + 1;
+        .map(|index| index + 1).unwrap_or_default();
 
     assert_findings(
         &run_family(root),
@@ -140,7 +138,7 @@ fn inventories_only_documented_allows_in_mixed_same_file_case() {
     let root = fixture.path();
 
     let rel = "apps/backend/crates/ports/inbound/api/src/lib.rs";
-    let content = std::fs::read_to_string(root.join(rel)).expect("read mixed file");
+    let content = test_support::read_file(root, rel);
 
     let new_content = format!(
         "{content}\n#[allow(clippy::unwrap_used)] // reason: documented surface\npub fn documented_probe() {{}}\n#[allow(clippy::expect_used)]\npub fn undocumented_probe() {{}}\n"
@@ -152,8 +150,7 @@ fn inventories_only_documented_allows_in_mixed_same_file_case() {
         .position(|line| {
             line.contains("#[allow(clippy::unwrap_used)] // reason: documented surface")
         })
-        .expect("documented line")
-        + 1;
+        .map(|index| index + 1).unwrap_or_default();
 
     assert_findings(
         &run_family(root),

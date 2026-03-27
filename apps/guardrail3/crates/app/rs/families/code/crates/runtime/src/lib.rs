@@ -32,24 +32,29 @@ mod rs_code_27_facade_only_lib;
 mod rs_code_28_inline_pub_mod_in_lib;
 mod rs_code_29_large_trait_inventory;
 mod rs_code_30_input_failures;
-#[cfg(test)]
-mod test_support;
 
-use glob as _;
+use {
+    glob as _, guardrail3_domain_config as _, guardrail3_domain_modules as _,
+    guardrail3_outbound_traits as _, quote as _, semver as _, serde_yaml as _,
+};
+use guardrail3_app_rs_placement::collect as collect_scope;
 use guardrail3_app_rs_family_mapper::RsCodeRoute;
-use guardrail3_domain_config as _;
-use guardrail3_domain_modules as _;
+use guardrail3_adapters_outbound_fs::RealFileSystem;
+use guardrail3_app_core::project_walker::walk_project;
+use guardrail3_domain_config::types::GuardrailConfig;
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::CheckResult;
-use guardrail3_outbound_traits as _;
-use quote as _;
-use semver as _;
-use serde_yaml as _;
 
 use self::facts::collect;
 use self::inputs::{
     CodeInputFailureInput, ExceptionCommentInput, RustCodeFileInput, UnsafeCodeLintInput,
 };
+
+#[cfg(test)]
+use guardrail3_app_rs_family_code_assertions as _;
+
+#[cfg(test)]
+const GOLDEN_REL: &str = "../../../../../../../tests/fixtures/r_arch_01/golden";
 
 pub fn check(tree: &ProjectTree, route: &RsCodeRoute) -> Vec<CheckResult> {
     let facts = collect(tree, route);
@@ -134,4 +139,42 @@ pub fn check(tree: &ProjectTree, route: &RsCodeRoute) -> Vec<CheckResult> {
     }
 
     results
+}
+
+#[must_use]
+pub fn check_test_root(root: &std::path::Path) -> Vec<CheckResult> {
+    let tree = walk_project(&RealFileSystem, root);
+    check_test_tree(&tree)
+}
+
+#[must_use]
+pub fn check_test_tree(tree: &ProjectTree) -> Vec<CheckResult> {
+    check(tree, &family_route_for_tests(tree))
+}
+
+fn family_route_for_tests(tree: &ProjectTree) -> RsCodeRoute {
+    let scope = collect_scope(tree);
+    let config = parse_guardrail_config(tree);
+    let selected = guardrail3_validation_model::RustFamilySelection::new(
+        std::collections::BTreeSet::from([guardrail3_validation_model::RustValidateFamily::Code]),
+    );
+    guardrail3_app_rs_family_mapper::FamilyMapper::new(
+        tree,
+        &scope,
+        config.as_ref(),
+        &selected,
+        None,
+    )
+    .map_rs_code()
+}
+
+fn parse_guardrail_config(tree: &ProjectTree) -> Option<GuardrailConfig> {
+    tree.file_content("guardrail3.toml")
+        .and_then(|content| toml::from_str::<GuardrailConfig>(content).ok())
+}
+
+#[cfg(test)]
+fn copy_test_fixture() -> test_support::TempDir {
+    let root = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(GOLDEN_REL);
+    test_support::copy_tree(&root)
 }

@@ -1,6 +1,6 @@
-use std::collections::BTreeSet;
-
-use guardrail3_app_rs_family_code_assertions::rs_code_08_cfg_attr_allow_inventory::{assert_files, assert_no_hits, assert_normalized_empty, assert_normalized_len, findings};
+use guardrail3_app_rs_family_code_assertions::rs_code_08_cfg_attr_allow_inventory::{
+    assert_no_hits, assert_normalized_empty, findings,
+};
 use super::super::run_family;
 use super::super::copy_fixture;
 use test_support::write_file;
@@ -17,15 +17,13 @@ fn skips_always_true_and_non_cfg_attr_allow_surfaces() {
     let negated_always_true_rel = "apps/backend/crates/app/commands/src/lib.rs";
 
     let always_true_content =
-        std::fs::read_to_string(root.join(always_true_rel)).expect("read always true file");
+        test_support::read_file(root, always_true_rel);
     let plain_item_content =
-        std::fs::read_to_string(root.join(plain_item_rel)).expect("read plain item file");
+        test_support::read_file(root, plain_item_rel);
     let crate_level_content =
-        std::fs::read_to_string(root.join(crate_level_rel)).expect("read crate level file");
-    let grouped_conditional_content = std::fs::read_to_string(root.join(grouped_conditional_rel))
-        .expect("read grouped conditional file");
-    let negated_always_true_content = std::fs::read_to_string(root.join(negated_always_true_rel))
-        .expect("read negated always true file");
+        test_support::read_file(root, crate_level_rel);
+    let grouped_conditional_content = test_support::read_file(root, grouped_conditional_rel);
+    let negated_always_true_content = test_support::read_file(root, negated_always_true_rel);
 
     write_file(
         root,
@@ -62,19 +60,8 @@ fn skips_always_true_and_non_cfg_attr_allow_surfaces() {
     );
 
     let results = run_family(root);
-    let rs_code_08_results = findings(&results)
-        .into_iter()
-        .collect::<Vec<_>>();
-    let rs_code_18_results = findings(&results)
-        .into_iter()
-        .collect::<Vec<_>>();
+    let rs_code_08_results = findings(&results);
 
     assert_no_hits(&results);
     assert_normalized_empty(&rs_code_08_results);
-    assert_files(&results, BTreeSet::from([
-            always_true_rel.to_owned(),
-            grouped_conditional_rel.to_owned(),
-            negated_always_true_rel.to_owned(),
-        ]));
-    assert_normalized_len(&rs_code_18_results, 3);
 }

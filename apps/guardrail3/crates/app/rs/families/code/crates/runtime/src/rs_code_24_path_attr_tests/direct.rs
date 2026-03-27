@@ -1,25 +1,15 @@
 use guardrail3_domain_report::Severity;
 
-use super::super::super::inputs::RustCodeFileInput;
-use super::super::super::parse::parse_rust_file;
-use super::super::check;
+use guardrail3_app_rs_family_code_assertions::rs_code_24_path_attr::{assert_normalized_len, findings};
+use super::super::check_source;
 
 #[test]
 fn errors_on_path_attr_without_reason() {
     let content = "#[path = \"generated.rs\"]\nmod generated;";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/lib.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: Some("library"),
-    };
-    let mut results = Vec::new();
+    let binding = check_source("src/lib.rs", content, false);
+    let results = findings(&binding);
 
-    check(&input, &mut results);
-
-    assert_eq!(results.len(), 1);
+    assert_normalized_len(&results, 1);
     assert_eq!(results[0].id, "RS-CODE-24");
     assert_eq!(results[0].severity, Severity::Error);
     assert_eq!(results[0].title, "#[path] without reason");
@@ -35,19 +25,10 @@ fn errors_on_path_attr_without_reason() {
 #[test]
 fn warns_on_path_attr_with_reason() {
     let content = "#[path = \"generated.rs\"] // reason: generated facade shim\nmod generated;";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/lib.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: Some("library"),
-    };
-    let mut results = Vec::new();
+    let binding = check_source("src/lib.rs", content, false);
+    let results = findings(&binding);
 
-    check(&input, &mut results);
-
-    assert_eq!(results.len(), 1);
+    assert_normalized_len(&results, 1);
     assert_eq!(results[0].id, "RS-CODE-24");
     assert_eq!(results[0].severity, Severity::Warn);
     assert_eq!(results[0].title, "#[path] usage");
@@ -63,19 +44,10 @@ fn warns_on_path_attr_with_reason() {
 #[test]
 fn errors_on_parent_escaping_path_attr() {
     let content = "#[path = \"../generated.rs\"]\nmod generated;";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/lib.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: Some("library"),
-    };
-    let mut results = Vec::new();
+    let binding = check_source("src/lib.rs", content, false);
+    let results = findings(&binding);
 
-    check(&input, &mut results);
-
-    assert_eq!(results.len(), 1);
+    assert_normalized_len(&results, 1);
     assert_eq!(results[0].id, "RS-CODE-24");
     assert_eq!(results[0].severity, Severity::Error);
     assert_eq!(results[0].title, "#[path] escapes parent directory");

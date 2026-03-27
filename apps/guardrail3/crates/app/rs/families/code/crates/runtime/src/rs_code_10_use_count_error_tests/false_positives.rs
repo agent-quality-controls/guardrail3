@@ -9,7 +9,7 @@ fn skips_grouped_imports_that_keep_statement_count_low() {
     let root = fixture.path();
 
     let rel = "apps/backend/crates/adapters/inbound/rest/src/lib.rs";
-    let content = std::fs::read_to_string(root.join(rel)).expect("read source");
+    let content = test_support::read_file(root, rel);
 
     write_file(
         root,

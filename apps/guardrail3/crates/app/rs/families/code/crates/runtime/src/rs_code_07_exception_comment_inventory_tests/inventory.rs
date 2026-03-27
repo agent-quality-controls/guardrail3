@@ -20,15 +20,15 @@ fn inventories_exception_comments_across_real_config_roots_with_exact_owned_hit_
     let nested_cargo_rel = "apps/backend/crates/app/queries/Cargo.toml";
 
     let root_guardrail =
-        std::fs::read_to_string(root.join(root_guardrail_rel)).expect("read guardrail");
-    let root_rustfmt = std::fs::read_to_string(root.join(root_rustfmt_rel)).unwrap_or_default();
-    let root_toolchain = std::fs::read_to_string(root.join(root_toolchain_rel)).unwrap_or_default();
+        test_support::read_file(root, root_guardrail_rel);
+    let root_rustfmt = test_support::read_file(root, root_rustfmt_rel);
+    let root_toolchain = test_support::read_file(root, root_toolchain_rel);
     let backend_cargo =
-        std::fs::read_to_string(root.join(backend_cargo_rel)).expect("read backend cargo");
+        test_support::read_file(root, backend_cargo_rel);
     let worker_cargo =
-        std::fs::read_to_string(root.join(worker_cargo_rel)).expect("read worker cargo");
+        test_support::read_file(root, worker_cargo_rel);
     let nested_cargo =
-        std::fs::read_to_string(root.join(nested_cargo_rel)).expect("read nested cargo");
+        test_support::read_file(root, nested_cargo_rel);
 
     let root_line = root_guardrail.lines().count() + 2;
     let rustfmt_first_line = root_rustfmt.lines().count() + 1;

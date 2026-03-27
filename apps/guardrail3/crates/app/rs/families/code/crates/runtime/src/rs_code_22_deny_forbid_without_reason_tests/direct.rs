@@ -1,25 +1,15 @@
 use guardrail3_domain_report::Severity;
 
-use super::super::super::inputs::RustCodeFileInput;
-use super::super::super::parse::parse_rust_file;
-use super::super::check;
+use guardrail3_app_rs_family_code_assertions::rs_code_22_deny_forbid_without_reason::{assert_normalized_len, findings};
+use super::super::check_source;
 
 #[test]
 fn errors_on_undocumented_deny_attr() {
     let content = "#[deny(clippy::panic)]\nfn foo() {}";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/lib.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: Some("library"),
-    };
-    let mut results = Vec::new();
+    let binding = check_source("src/lib.rs", content, false);
+    let results = findings(&binding);
 
-    check(&input, &mut results);
-
-    assert_eq!(results.len(), 1);
+    assert_normalized_len(&results, 1);
     assert_eq!(results[0].id, "RS-CODE-22");
     assert_eq!(results[0].severity, Severity::Error);
     assert_eq!(results[0].title, "#[deny]/#[forbid] without reason");
@@ -35,19 +25,10 @@ fn errors_on_undocumented_deny_attr() {
 #[test]
 fn inventories_crate_level_forbid_unsafe_code() {
     let content = "#![forbid(unsafe_code)]\nfn foo() {}";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/lib.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: Some("library"),
-    };
-    let mut results = Vec::new();
+    let binding = check_source("src/lib.rs", content, false);
+    let results = findings(&binding);
 
-    check(&input, &mut results);
-
-    assert_eq!(results.len(), 1);
+    assert_normalized_len(&results, 1);
     assert_eq!(results[0].id, "RS-CODE-22");
     assert_eq!(results[0].severity, Severity::Info);
     assert_eq!(results[0].title, "forbid(unsafe_code)");
@@ -63,19 +44,10 @@ fn inventories_crate_level_forbid_unsafe_code() {
 #[test]
 fn errors_on_crate_level_deny_warnings() {
     let content = "#![deny(warnings)]\nfn foo() {}";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/lib.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: Some("library"),
-    };
-    let mut results = Vec::new();
+    let binding = check_source("src/lib.rs", content, false);
+    let results = findings(&binding);
 
-    check(&input, &mut results);
-
-    assert_eq!(results.len(), 1);
+    assert_normalized_len(&results, 1);
     assert_eq!(results[0].id, "RS-CODE-22");
     assert_eq!(results[0].severity, Severity::Error);
     assert_eq!(results[0].title, "#[deny]/#[forbid] without reason");
@@ -91,19 +63,10 @@ fn errors_on_crate_level_deny_warnings() {
 #[test]
 fn errors_on_non_inner_forbid_unsafe_code() {
     let content = "#[forbid(unsafe_code)]\nfn foo() {}";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/lib.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: Some("library"),
-    };
-    let mut results = Vec::new();
+    let binding = check_source("src/lib.rs", content, false);
+    let results = findings(&binding);
 
-    check(&input, &mut results);
-
-    assert_eq!(results.len(), 1);
+    assert_normalized_len(&results, 1);
     assert_eq!(results[0].id, "RS-CODE-22");
     assert_eq!(results[0].severity, Severity::Error);
     assert_eq!(results[0].title, "#[deny]/#[forbid] without reason");
@@ -119,19 +82,10 @@ fn errors_on_non_inner_forbid_unsafe_code() {
 #[test]
 fn errors_on_grouped_deny_lints_without_reason() {
     let content = "#[deny(clippy::panic, clippy::expect_used)]\nfn foo() {}";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/lib.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: Some("library"),
-    };
-    let mut results = Vec::new();
+    let binding = check_source("src/lib.rs", content, false);
+    let results = findings(&binding);
 
-    check(&input, &mut results);
-
-    assert_eq!(results.len(), 2);
+    assert_normalized_len(&results, 2);
     assert!(results.iter().all(|result| result.id == "RS-CODE-22"));
     assert!(
         results
@@ -146,7 +100,7 @@ fn errors_on_grouped_deny_lints_without_reason() {
     assert_eq!(
         results
             .iter()
-            .map(|result| result.message.as_str())
+            .map(|result| result.message)
             .collect::<Vec<_>>(),
         vec![
             "`#[deny(clippy::panic)]` changes local lint policy without documenting why. Add `// reason:` on the same line.",
@@ -168,19 +122,10 @@ fn errors_on_grouped_deny_lints_without_reason() {
 #[test]
 fn errors_on_trait_item_deny_attr() {
     let content = "trait Api {\n    #[deny(clippy::panic)]\n    fn run();\n}";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/lib.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: Some("library"),
-    };
-    let mut results = Vec::new();
+    let binding = check_source("src/lib.rs", content, false);
+    let results = findings(&binding);
 
-    check(&input, &mut results);
-
-    assert_eq!(results.len(), 1);
+    assert_normalized_len(&results, 1);
     assert_eq!(results[0].id, "RS-CODE-22");
     assert_eq!(results[0].severity, Severity::Error);
     assert_eq!(results[0].title, "#[deny]/#[forbid] without reason");

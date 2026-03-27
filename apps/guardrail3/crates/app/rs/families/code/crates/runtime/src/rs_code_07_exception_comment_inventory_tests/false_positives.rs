@@ -12,11 +12,11 @@ fn ignores_exception_like_text_outside_supported_config_comment_forms() {
     let backend_cargo_rel = "apps/backend/Cargo.toml";
     let root_guardrail_rel = "guardrail3.toml";
 
-    let root_package = std::fs::read_to_string(root.join(root_package_rel)).expect("read package");
+    let root_package = test_support::read_file(root, root_package_rel);
     let backend_cargo =
-        std::fs::read_to_string(root.join(backend_cargo_rel)).expect("read backend cargo");
+        test_support::read_file(root, backend_cargo_rel);
     let root_guardrail =
-        std::fs::read_to_string(root.join(root_guardrail_rel)).expect("read root guardrail");
+        test_support::read_file(root, root_guardrail_rel);
 
     write_file(
         root,

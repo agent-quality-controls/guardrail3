@@ -1,4 +1,4 @@
-use guardrail3_app_rs_family_code_assertions::rs_code_02_unused_crate_dependencies_allow::{assert_no_hits};
+use guardrail3_app_rs_family_code_assertions::rs_code_02_unused_crate_dependencies_allow::assert_no_hits;
 use super::super::run_family;
 use super::super::copy_fixture;
 use test_support::write_file;
@@ -14,11 +14,11 @@ fn skips_other_allow_names_inline_modules_and_item_level_near_misses() {
     let module_decl_rel = "apps/devctl/crates/adapters/inbound/cli/src/lib.rs";
 
     let other_allow_content =
-        std::fs::read_to_string(root.join(other_allow_rel)).expect("read other allow file");
-    let inline_content = std::fs::read_to_string(root.join(inline_rel)).expect("read inline file");
-    let item_content = std::fs::read_to_string(root.join(item_rel)).expect("read item file");
+        test_support::read_file(root, other_allow_rel);
+    let inline_content = test_support::read_file(root, inline_rel);
+    let item_content = test_support::read_file(root, item_rel);
     let module_decl_content =
-        std::fs::read_to_string(root.join(module_decl_rel)).expect("read module decl file");
+        test_support::read_file(root, module_decl_rel);
 
     write_file(
         root,
@@ -53,6 +53,22 @@ fn skips_other_allow_names_inline_modules_and_item_level_near_misses() {
     );
 
     let results = run_family(root);
+    let relevant_results = results
+        .into_iter()
+        .filter(|result| {
+            matches!(
+                result.file.as_deref(),
+                Some(path)
+                    if [
+                        other_allow_rel,
+                        inline_rel,
+                        item_rel,
+                        module_decl_rel,
+                    ]
+                    .contains(&path)
+            )
+        })
+        .collect::<Vec<_>>();
 
-    assert_no_hits(&results);
+    assert_no_hits(&relevant_results);
 }

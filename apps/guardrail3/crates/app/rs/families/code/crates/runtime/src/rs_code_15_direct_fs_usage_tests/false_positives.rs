@@ -1,6 +1,7 @@
-use std::collections::BTreeSet;
-
-use super::super::super::test_support::{copy_fixture, files_for_rule, run_family, write_file};
+use guardrail3_app_rs_family_code_assertions::rs_code_15_direct_fs_usage::{assert_no_hits};
+use super::super::run_family;
+use super::super::copy_fixture;
+use test_support::write_file;
 
 #[test]
 fn skips_test_boundaries_cfg_test_and_allowed_std_fs_usage() {
@@ -11,11 +12,11 @@ fn skips_test_boundaries_cfg_test_and_allowed_std_fs_usage() {
     let allowed_rel = "apps/worker/crates/adapters/outbound/db/src/lib.rs";
     let test_text_rel = "apps/devctl/crates/app/core/src/lib.rs";
 
-    let cfg_content = std::fs::read_to_string(root.join(cfg_rel)).expect("read cfg source");
+    let cfg_content = test_support::read_file(root, cfg_rel);
     let allowed_content =
-        std::fs::read_to_string(root.join(allowed_rel)).expect("read allowed source");
+        test_support::read_file(root, allowed_rel);
     let test_text_content =
-        std::fs::read_to_string(root.join(test_text_rel)).expect("read text source");
+        test_support::read_file(root, test_text_rel);
 
     write_file(
         root,
@@ -75,11 +76,5 @@ fn skips_test_boundaries_cfg_test_and_allowed_std_fs_usage() {
     );
 
     let results = run_family(root);
-    let rs_code_15_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-15")
-        .collect::<Vec<_>>();
-
-    assert_eq!(files_for_rule(&results, "RS-CODE-15"), BTreeSet::new());
-    assert!(rs_code_15_results.is_empty());
+    assert_no_hits(&results);
 }

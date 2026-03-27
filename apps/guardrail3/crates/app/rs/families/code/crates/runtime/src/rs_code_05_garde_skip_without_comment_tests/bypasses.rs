@@ -16,9 +16,9 @@ fn detects_non_primitive_garde_skips_without_comments_across_real_owned_files() 
     let field_rel = "apps/backend/crates/app/queries/src/lib.rs";
     let vec_rel = "apps/devctl/crates/app/core/src/lib.rs";
 
-    let type_content = std::fs::read_to_string(root.join(type_rel)).expect("read type file");
-    let field_content = std::fs::read_to_string(root.join(field_rel)).expect("read field file");
-    let vec_content = std::fs::read_to_string(root.join(vec_rel)).expect("read vec file");
+    let type_content = test_support::read_file(root, type_rel);
+    let field_content = test_support::read_file(root, field_rel);
+    let vec_content = test_support::read_file(root, vec_rel);
 
     let type_new = format!(
         "{type_content}\n#[garde(skip)]\nstruct WholeTypeSkipProbe {{\n    plan: String,\n}}\n"
@@ -36,19 +36,13 @@ fn detects_non_primitive_garde_skips_without_comments_across_real_owned_files() 
 
     let type_line = type_new
         .lines()
-        .position(|line| line.contains("#[garde(skip)]"))
-        .expect("type line")
-        + 1;
+        .position(|line| line.contains("#[garde(skip)]")).map(|index| index + 1).unwrap_or_default();
     let field_line = field_new
         .lines()
-        .position(|line| line.contains("#[garde(skip)]"))
-        .expect("field line")
-        + 1;
+        .position(|line| line.contains("#[garde(skip)]")).map(|index| index + 1).unwrap_or_default();
     let vec_line = vec_new
         .lines()
-        .position(|line| line.contains("#[garde(skip)]"))
-        .expect("vec line")
-        + 1;
+        .position(|line| line.contains("#[garde(skip)]")).map(|index| index + 1).unwrap_or_default();
 
     let results = run_family(root);
 

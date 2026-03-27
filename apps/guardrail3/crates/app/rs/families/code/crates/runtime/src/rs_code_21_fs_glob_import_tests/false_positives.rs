@@ -1,9 +1,8 @@
-use std::collections::BTreeSet;
-
-use super::super::super::inputs::RustCodeFileInput;
-use super::super::super::parse::parse_rust_file;
-use super::super::super::test_support::{copy_fixture, files_for_rule, run_family, write_file};
-use super::super::check;
+use super::super::check_source;
+use guardrail3_app_rs_family_code_assertions::rs_code_21_fs_glob_import::{assert_no_hits};
+use super::super::run_family;
+use super::super::copy_fixture;
+use test_support::write_file;
 
 #[test]
 fn skips_test_files_and_src_fs_rs_exemption() {
@@ -47,29 +46,13 @@ fn skips_test_files_and_src_fs_rs_exemption() {
     );
 
     let results = run_family(root);
-    let rs_code_21_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-21")
-        .collect::<Vec<_>>();
-
-    assert_eq!(files_for_rule(&results, "RS-CODE-21"), BTreeSet::new());
-    assert!(rs_code_21_results.is_empty());
+    assert_no_hits(&results);
 }
 
 #[test]
 fn no_hit_on_non_glob_fs_imports() {
     let content = "use std::fs::File;\nuse std::fs::{self};\nuse std::fs::{File, Read};\nuse std::{fs::{self, File as Alias}, io};\nfn main() {}";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/foo.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: None,
-    };
-    let mut results = Vec::new();
-
-    check(&input, &mut results);
+    let results = check_source("src/foo.rs", content, false);
 
     assert_eq!(
         results.len(),
@@ -82,17 +65,7 @@ fn no_hit_on_non_glob_fs_imports() {
 #[test]
 fn no_hit_on_non_std_fs_glob() {
     let content = "use other_guardrail3_shared_fs::*;\nuse mylib::fs::*;\nfn main() {}";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/foo.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: None,
-    };
-    let mut results = Vec::new();
-
-    check(&input, &mut results);
+    let results = check_source("src/foo.rs", content, false);
 
     assert_eq!(
         results.len(),
@@ -105,17 +78,7 @@ fn no_hit_on_non_std_fs_glob() {
 #[test]
 fn no_hit_on_std_non_fs_glob() {
     let content = "use std::io::*;\nuse std::collections::*;\nfn main() {}";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/foo.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: None,
-    };
-    let mut results = Vec::new();
-
-    check(&input, &mut results);
+    let results = check_source("src/foo.rs", content, false);
 
     assert_eq!(
         results.len(),
@@ -128,17 +91,7 @@ fn no_hit_on_std_non_fs_glob() {
 #[test]
 fn no_hit_on_cfg_test_guarded_glob() {
     let content = "#[cfg(test)]\nuse std::fs::*;\nfn main() {}";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/foo.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: None,
-    };
-    let mut results = Vec::new();
-
-    check(&input, &mut results);
+    let results = check_source("src/foo.rs", content, false);
 
     assert_eq!(results.len(), 0, "cfg(test) guarded glob must not trigger");
     assert!(results.iter().all(|result| result.id != "RS-CODE-21"));
@@ -147,17 +100,7 @@ fn no_hit_on_cfg_test_guarded_glob() {
 #[test]
 fn no_hit_on_cfg_all_test_guarded_glob() {
     let content = "#[cfg(all(test, unix))]\nuse std::fs::*;\nfn main() {}";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/foo.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: None,
-    };
-    let mut results = Vec::new();
-
-    check(&input, &mut results);
+    let results = check_source("src/foo.rs", content, false);
 
     assert_eq!(
         results.len(),
@@ -171,17 +114,7 @@ fn no_hit_on_cfg_all_test_guarded_glob() {
 fn no_hit_on_cfg_test_module_containing_glob() {
     let content =
         "#[cfg(test)]\nmod tests {\n    use std::fs::*;\n    fn probe() {}\n}\nfn main() {}";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/foo.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: None,
-    };
-    let mut results = Vec::new();
-
-    check(&input, &mut results);
+    let results = check_source("src/foo.rs", content, false);
 
     assert_eq!(
         results.len(),
@@ -194,17 +127,7 @@ fn no_hit_on_cfg_test_module_containing_glob() {
 #[test]
 fn no_hit_on_cfg_all_test_module_containing_glob() {
     let content = "#[cfg(all(test, unix))]\nmod tests {\n    use std::fs::*;\n    fn probe() {}\n}\nfn main() {}";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/foo.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: None,
-    };
-    let mut results = Vec::new();
-
-    check(&input, &mut results);
+    let results = check_source("src/foo.rs", content, false);
 
     assert_eq!(
         results.len(),
@@ -217,17 +140,7 @@ fn no_hit_on_cfg_all_test_module_containing_glob() {
 #[test]
 fn no_hit_on_cfg_all_test_function_containing_glob() {
     let content = "#[cfg(all(test, unix))]\nfn helper() {\n    use std::fs::*;\n    let _ = read_to_string(\"fixture\");\n}\nfn main() {}";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/foo.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: None,
-    };
-    let mut results = Vec::new();
-
-    check(&input, &mut results);
+    let results = check_source("src/foo.rs", content, false);
 
     assert_eq!(
         results.len(),
@@ -240,17 +153,7 @@ fn no_hit_on_cfg_all_test_function_containing_glob() {
 #[test]
 fn no_hit_on_test_file_with_inline_module_glob() {
     let content = "mod helpers {\n    use std::fs::*;\n}\n#[test]\nfn smoke() {}";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/foo.rs",
-        content,
-        ast: &ast,
-        is_test: true,
-        profile_name: None,
-    };
-    let mut results = Vec::new();
-
-    check(&input, &mut results);
+    let results = check_source("src/foo.rs", content, true);
 
     assert_eq!(results.len(), 0, "test files are fully exempt");
     assert!(results.iter().all(|result| result.id != "RS-CODE-21"));

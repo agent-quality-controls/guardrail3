@@ -15,10 +15,10 @@ fn skips_item_level_and_file_backed_module_near_misses() {
     let item_rel = "apps/worker/crates/ports/outbound/queue/src/lib.rs";
 
     let module_decl_content =
-        std::fs::read_to_string(root.join(module_decl_rel)).expect("read module decl file");
+        test_support::read_file(root, module_decl_rel);
     let file_backed_parent_content =
-        std::fs::read_to_string(root.join(file_backed_parent_rel)).expect("read parent file");
-    let item_content = std::fs::read_to_string(root.join(item_rel)).expect("read item file");
+        test_support::read_file(root, file_backed_parent_rel);
+    let item_content = test_support::read_file(root, item_rel);
 
     write_file(
         root,
@@ -49,7 +49,7 @@ fn skips_item_level_and_file_backed_module_near_misses() {
     let results = run_family(root);
 
     assert_files(&results, BTreeSet::from([
-            "apps/backend/crates/ports/outbound/events/src/file_backed_child.rs".to_owned()
+            "apps/backend/crates/ports/outbound/events/src/file_backed_child.rs".to_owned(),
         ]));
     assert!(!results.iter().any(|result| {
         result.id == "RS-CODE-01" && result.file.as_deref() == Some(file_backed_parent_rel)

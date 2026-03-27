@@ -1,6 +1,7 @@
-use std::collections::BTreeSet;
-
-use super::super::super::test_support::{copy_fixture, files_for_rule, run_family, write_file};
+use guardrail3_app_rs_family_code_assertions::rs_code_26_lib_glob_reexport::{assert_no_hits};
+use super::super::run_family;
+use super::super::copy_fixture;
+use test_support::write_file;
 
 #[test]
 fn skips_non_library_profiles_and_non_glob_reexports() {
@@ -9,7 +10,7 @@ fn skips_non_library_profiles_and_non_glob_reexports() {
 
     let worker_rel = "apps/worker/crates/domain/jobs/src/lib.rs";
     let worker_content =
-        std::fs::read_to_string(root.join(worker_rel)).expect("read worker source");
+        test_support::read_file(root, worker_rel);
 
     write_file(
         root,
@@ -20,11 +21,5 @@ fn skips_non_library_profiles_and_non_glob_reexports() {
     );
 
     let results = run_family(root);
-    let rs_code_26_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-26")
-        .collect::<Vec<_>>();
-
-    assert_eq!(files_for_rule(&results, "RS-CODE-26"), BTreeSet::new());
-    assert!(rs_code_26_results.is_empty());
+    assert_no_hits(&results);
 }

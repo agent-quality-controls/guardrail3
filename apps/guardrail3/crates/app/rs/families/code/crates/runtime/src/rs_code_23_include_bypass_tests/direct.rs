@@ -1,25 +1,15 @@
 use guardrail3_domain_report::Severity;
 
-use super::super::super::inputs::RustCodeFileInput;
-use super::super::super::parse::parse_rust_file;
-use super::super::check;
+use guardrail3_app_rs_family_code_assertions::rs_code_23_include_bypass::{assert_normalized_len, findings};
+use super::super::check_source;
 
 #[test]
 fn errors_on_plain_include_bypass() {
     let content = "include!(\"../generated.rs\");";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/lib.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: Some("library"),
-    };
-    let mut results = Vec::new();
+    let binding = check_source("src/lib.rs", content, false);
+    let results = findings(&binding);
 
-    check(&input, &mut results);
-
-    assert_eq!(results.len(), 1);
+    assert_normalized_len(&results, 1);
     assert_eq!(results[0].id, "RS-CODE-23");
     assert_eq!(results[0].severity, Severity::Error);
     assert_eq!(results[0].title, "include! bypass");
@@ -35,19 +25,10 @@ fn errors_on_plain_include_bypass() {
 #[test]
 fn inventories_build_script_include_pattern() {
     let content = "include!(concat!(env!(\"OUT_DIR\"), \"/generated.rs\"));";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/lib.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: Some("library"),
-    };
-    let mut results = Vec::new();
+    let binding = check_source("src/lib.rs", content, false);
+    let results = findings(&binding);
 
-    check(&input, &mut results);
-
-    assert_eq!(results.len(), 1);
+    assert_normalized_len(&results, 1);
     assert_eq!(results[0].id, "RS-CODE-23");
     assert_eq!(results[0].severity, Severity::Info);
     assert_eq!(results[0].title, "build-script include! inventory");
@@ -63,19 +44,10 @@ fn inventories_build_script_include_pattern() {
 #[test]
 fn warns_on_include_path_traversal() {
     let content = "const BYTES: &[u8] = include_bytes!(\"../fixtures/payload.bin\");";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/lib.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: Some("library"),
-    };
-    let mut results = Vec::new();
+    let binding = check_source("src/lib.rs", content, false);
+    let results = findings(&binding);
 
-    check(&input, &mut results);
-
-    assert_eq!(results.len(), 1);
+    assert_normalized_len(&results, 1);
     assert_eq!(results[0].id, "RS-CODE-23");
     assert_eq!(results[0].severity, Severity::Warn);
     assert_eq!(results[0].title, "include path traversal");

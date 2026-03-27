@@ -1,23 +1,13 @@
 use guardrail3_domain_report::Severity;
 
-use super::super::super::inputs::RustCodeFileInput;
-use super::super::super::parse::parse_rust_file;
-use super::super::check;
+use guardrail3_app_rs_family_code_assertions::rs_code_21_fs_glob_import::{assert_normalized_len, findings};
+use super::super::check_source;
 
 #[test]
 fn errors_on_direct_std_fs_glob() {
     let content = "use std::fs::*;\nfn main() {}";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/foo.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: None,
-    };
-    let mut results = Vec::new();
-
-    check(&input, &mut results);
+    let binding = check_source("src/foo.rs", content, false);
+    let results = findings(&binding);
 
     assert_eq!(
         results.len(),
@@ -39,19 +29,10 @@ fn errors_on_direct_std_fs_glob() {
 #[test]
 fn errors_on_grouped_std_fs_glob_import() {
     let content = "use std::{fs::*, io};\nfn main() {}";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/foo.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: None,
-    };
-    let mut results = Vec::new();
+    let binding = check_source("src/foo.rs", content, false);
+    let results = findings(&binding);
 
-    check(&input, &mut results);
-
-    assert_eq!(results.len(), 1);
+    assert_normalized_len(&results, 1);
     assert_eq!(results[0].id, "RS-CODE-21");
     assert_eq!(results[0].severity, Severity::Error);
     assert_eq!(results[0].title, "std::fs glob import");
@@ -67,19 +48,10 @@ fn errors_on_grouped_std_fs_glob_import() {
 #[test]
 fn errors_on_public_std_fs_glob_import() {
     let content = "pub use std::fs::*;\nfn main() {}";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/lib.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: Some("library"),
-    };
-    let mut results = Vec::new();
+    let binding = check_source("src/lib.rs", content, false);
+    let results = findings(&binding);
 
-    check(&input, &mut results);
-
-    assert_eq!(results.len(), 1);
+    assert_normalized_len(&results, 1);
     assert_eq!(results[0].id, "RS-CODE-21");
     assert_eq!(results[0].severity, Severity::Error);
     assert_eq!(results[0].title, "std::fs glob import");
@@ -95,17 +67,8 @@ fn errors_on_public_std_fs_glob_import() {
 #[test]
 fn errors_on_fs_glob_inside_group_with_self() {
     let content = "use std::fs::{self, *};\nfn main() {}";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/foo.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: None,
-    };
-    let mut results = Vec::new();
-
-    check(&input, &mut results);
+    let binding = check_source("src/foo.rs", content, false);
+    let results = findings(&binding);
 
     assert_eq!(
         results.len(),
@@ -127,17 +90,8 @@ fn errors_on_fs_glob_inside_group_with_self() {
 #[test]
 fn errors_on_fs_glob_inside_group_with_named() {
     let content = "use std::fs::{File, *};\nfn main() {}";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/foo.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: None,
-    };
-    let mut results = Vec::new();
-
-    check(&input, &mut results);
+    let binding = check_source("src/foo.rs", content, false);
+    let results = findings(&binding);
 
     assert_eq!(
         results.len(),
@@ -159,17 +113,8 @@ fn errors_on_fs_glob_inside_group_with_named() {
 #[test]
 fn errors_on_alias_plus_glob_inside_group() {
     let content = "use std::fs::{File as Alias, *};\nfn main() {}";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/foo.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: None,
-    };
-    let mut results = Vec::new();
-
-    check(&input, &mut results);
+    let binding = check_source("src/foo.rs", content, false);
+    let results = findings(&binding);
 
     assert_eq!(results.len(), 1, "alias-plus-glob must still be caught");
     assert_eq!(results[0].id, "RS-CODE-21");
@@ -187,17 +132,8 @@ fn errors_on_alias_plus_glob_inside_group() {
 #[test]
 fn errors_on_nested_grouped_fs_glob_import() {
     let content = "use std::fs::{{*}};\nfn main() {}";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/foo.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: None,
-    };
-    let mut results = Vec::new();
-
-    check(&input, &mut results);
+    let binding = check_source("src/foo.rs", content, false);
+    let results = findings(&binding);
 
     assert_eq!(
         results.len(),
@@ -219,17 +155,8 @@ fn errors_on_nested_grouped_fs_glob_import() {
 #[test]
 fn errors_on_glob_inside_inline_module() {
     let content = "mod internal {\n    use std::fs::*;\n    pub fn read_it() {}\n}\nfn main() {}";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/foo.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: None,
-    };
-    let mut results = Vec::new();
-
-    check(&input, &mut results);
+    let binding = check_source("src/foo.rs", content, false);
+    let results = findings(&binding);
 
     assert_eq!(results.len(), 1, "glob inside inline module must be caught");
     assert_eq!(results[0].id, "RS-CODE-21");
@@ -248,17 +175,8 @@ fn errors_on_glob_inside_inline_module() {
 fn errors_on_grouped_glob_inside_inline_module() {
     let content =
         "mod internal {\n    use std::{fs::*, io};\n    pub fn read_it() {}\n}\nfn main() {}";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/foo.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: None,
-    };
-    let mut results = Vec::new();
-
-    check(&input, &mut results);
+    let binding = check_source("src/foo.rs", content, false);
+    let results = findings(&binding);
 
     assert_eq!(
         results.len(),
@@ -281,17 +199,8 @@ fn errors_on_grouped_glob_inside_inline_module() {
 fn errors_on_function_local_glob_import() {
     let content =
         "fn main() {\n    use std::fs::*;\n    let _ = read_to_string(\"Cargo.toml\");\n}";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/foo.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: None,
-    };
-    let mut results = Vec::new();
-
-    check(&input, &mut results);
+    let binding = check_source("src/foo.rs", content, false);
+    let results = findings(&binding);
 
     assert_eq!(
         results.len(),
@@ -313,17 +222,8 @@ fn errors_on_function_local_glob_import() {
 #[test]
 fn multiple_glob_imports_in_same_file() {
     let content = "use std::fs::*;\nmod helpers {\n    use std::fs::{self, *};\n}\nfn main() {}";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/foo.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: None,
-    };
-    let mut results = Vec::new();
-
-    check(&input, &mut results);
+    let binding = check_source("src/foo.rs", content, false);
+    let results = findings(&binding);
 
     assert_eq!(
         results.len(),

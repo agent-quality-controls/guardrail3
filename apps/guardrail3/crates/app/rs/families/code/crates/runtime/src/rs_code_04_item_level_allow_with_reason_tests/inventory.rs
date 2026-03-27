@@ -1,8 +1,6 @@
-use std::collections::BTreeSet;
-
 use guardrail3_domain_report::Severity;
 
-use guardrail3_app_rs_family_code_assertions::rs_code_04_item_level_allow_with_reason::{assert_findings, assert_value_eq, RuleFinding};
+use guardrail3_app_rs_family_code_assertions::rs_code_04_item_level_allow_with_reason::{assert_findings, RuleFinding};
 use super::super::run_family;
 use super::super::copy_fixture;
 use test_support::write_file;
@@ -20,13 +18,13 @@ fn inventories_documented_item_level_allows_across_real_owned_files() {
     let trait_rel = "apps/backend/crates/ports/outbound/repo/src/lib.rs";
 
     let top_level_content =
-        std::fs::read_to_string(root.join(top_level_rel)).expect("read top-level file");
-    let nested_content = std::fs::read_to_string(root.join(nested_rel)).expect("read nested file");
+        test_support::read_file(root, top_level_rel);
+    let nested_content = test_support::read_file(root, nested_rel);
     let grouped_content =
-        std::fs::read_to_string(root.join(grouped_rel)).expect("read grouped file");
-    let module_content = std::fs::read_to_string(root.join(module_rel)).expect("read module file");
-    let impl_content = std::fs::read_to_string(root.join(impl_rel)).expect("read impl file");
-    let trait_content = std::fs::read_to_string(root.join(trait_rel)).expect("read trait file");
+        test_support::read_file(root, grouped_rel);
+    let module_content = test_support::read_file(root, module_rel);
+    let impl_content = test_support::read_file(root, impl_rel);
+    let trait_content = test_support::read_file(root, trait_rel);
 
     let top_level_new = format!(
         "{top_level_content}\n#[allow(clippy::unwrap_used)] // reason: compatibility shim\npub fn documented_query_probe() {{}}\n"
@@ -59,37 +57,28 @@ fn inventories_documented_item_level_allows_across_real_owned_files() {
         .position(|line| {
             line.contains("#[allow(clippy::unwrap_used)] // reason: compatibility shim")
         })
-        .expect("top level line")
-        + 1;
+        .map(|index| index + 1).unwrap_or_default();
     let nested_line = nested_new
         .lines()
-        .position(|line| line.contains("#[allow(clippy::panic)] // reason: queue adapter probe"))
-        .expect("nested line")
-        + 1;
+        .position(|line| line.contains("#[allow(clippy::panic)] // reason: queue adapter probe")).map(|index| index + 1).unwrap_or_default();
     let grouped_line = grouped_new
         .lines()
-        .position(|line| line.contains("#[allow(clippy::unwrap_used, clippy::expect_used)] // reason: grouped adapter allowance"))
-        .expect("grouped line")
-        + 1;
+        .position(|line| line.contains("#[allow(clippy::unwrap_used, clippy::expect_used)] // reason: grouped adapter allowance")).map(|index| index + 1).unwrap_or_default();
     let module_line = module_new
         .lines()
         .position(|line| {
             line.contains("#[allow(clippy::expect_used)] // reason: documented module seam")
         })
-        .expect("module line")
-        + 1;
+        .map(|index| index + 1).unwrap_or_default();
     let impl_line = impl_new
         .lines()
-        .position(|line| line.contains("#[allow(clippy::panic)] // reason: adapter glue seam"))
-        .expect("impl line")
-        + 1;
+        .position(|line| line.contains("#[allow(clippy::panic)] // reason: adapter glue seam")).map(|index| index + 1).unwrap_or_default();
     let trait_line = trait_new
         .lines()
         .position(|line| {
             line.contains("#[allow(clippy::unwrap_used)] // reason: trait shim contract")
         })
-        .expect("trait line")
-        + 1;
+        .map(|index| index + 1).unwrap_or_default();
 
     assert_findings(
         &run_family(root),

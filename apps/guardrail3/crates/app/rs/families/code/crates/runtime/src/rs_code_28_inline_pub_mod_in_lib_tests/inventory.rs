@@ -2,7 +2,14 @@ use std::collections::BTreeSet;
 
 use guardrail3_domain_report::Severity;
 
-use super::super::super::test_support::{copy_fixture, files_for_rule, run_family, write_file};
+use guardrail3_app_rs_family_code_assertions::rs_code_28_inline_pub_mod_in_lib::{
+    assert_files,
+    assert_findings,
+    RuleFinding,
+};
+use super::super::run_family;
+use super::super::copy_fixture;
+use test_support::write_file;
 
 #[test]
 fn warns_on_inline_public_module_in_real_library_lib_rs() {
@@ -11,7 +18,7 @@ fn warns_on_inline_public_module_in_real_library_lib_rs() {
 
     let package_rel = "packages/shared-types/src/lib.rs";
     let package_content =
-        std::fs::read_to_string(root.join(package_rel)).expect("read package source");
+        test_support::read_file(root, package_rel);
 
     let mutated = format!("{package_content}\n\npub mod api {{ pub fn ping() {{}} }}\n");
     write_file(root, package_rel, &mutated);
@@ -19,37 +26,18 @@ fn warns_on_inline_public_module_in_real_library_lib_rs() {
     let results = run_family(root);
     let inline_line = mutated
         .lines()
-        .position(|line| line.contains("pub mod api"))
-        .expect("inline pub mod line")
-        + 1;
-    let rs_code_28_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-28")
-        .map(|result| {
-            (
-                result.file.clone(),
-                result.line,
-                result.severity,
-                result.title.clone(),
-                result.message.clone(),
-                result.inventory,
-            )
-        })
-        .collect::<Vec<_>>();
+        .position(|line| line.contains("pub mod api")).map(|index| index + 1).unwrap_or_default();
 
-    assert_eq!(
-        files_for_rule(&results, "RS-CODE-28"),
-        BTreeSet::from([package_rel.to_owned()])
-    );
-    assert_eq!(
-        rs_code_28_results,
-        vec![(
-            Some(package_rel.to_owned()),
-            Some(inline_line),
-            Severity::Warn,
-            "inline public module in lib.rs".to_owned(),
-            "`pub mod api { ... }` should live in its own file.".to_owned(),
-            false,
-        )]
+    assert_files(&results, BTreeSet::from([package_rel.to_owned()]));
+    assert_findings(
+        &results,
+        &[RuleFinding {
+            severity: Severity::Warn,
+            title: "inline public module in lib.rs",
+            message: "`pub mod api { ... }` should live in its own file.",
+            file: Some(package_rel),
+            line: Some(inline_line),
+            inventory: false,
+        }],
     );
 }

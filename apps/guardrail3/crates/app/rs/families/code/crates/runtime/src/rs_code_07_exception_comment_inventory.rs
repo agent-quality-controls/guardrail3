@@ -26,7 +26,7 @@ pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-pub(crate) fn copy_fixture() -> tempfile::TempDir {
+pub(crate) fn copy_fixture() -> test_support::TempDir {
     crate::copy_test_fixture()
 }
 
@@ -43,5 +43,5 @@ pub(crate) fn check_comment(rel_path: &str, line: usize, line_text: &str) -> Vec
 }
 
 #[cfg(test)]
-#[path = "rs_code_07_exception_comment_inventory_tests/mod.rs"]
+#[path = "rs_code_07_exception_comment_inventory_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_code_07_exception_comment_inventory_tests;

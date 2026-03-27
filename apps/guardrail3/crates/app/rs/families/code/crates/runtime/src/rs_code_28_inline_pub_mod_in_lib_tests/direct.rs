@@ -1,25 +1,15 @@
 use guardrail3_domain_report::Severity;
 
-use super::super::super::inputs::RustCodeFileInput;
-use super::super::super::parse::parse_rust_file;
-use super::super::check;
+use guardrail3_app_rs_family_code_assertions::rs_code_28_inline_pub_mod_in_lib::{assert_normalized_len, findings};
+use super::super::check_source;
 
 #[test]
 fn warns_on_inline_public_module_in_lib_rs() {
     let content = "pub mod api { pub fn run() {} }";
-    let ast = parse_rust_file(content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/lib.rs",
-        content,
-        ast: &ast,
-        is_test: false,
-        profile_name: Some("library"),
-    };
-    let mut results = Vec::new();
+    let binding = check_source("src/lib.rs", content, false);
+    let results = findings(&binding);
 
-    check(&input, &mut results);
-
-    assert_eq!(results.len(), 1);
+    assert_normalized_len(&results, 1);
     assert_eq!(results[0].id, "RS-CODE-28");
     assert_eq!(results[0].severity, Severity::Warn);
     assert_eq!(results[0].title, "inline public module in lib.rs");

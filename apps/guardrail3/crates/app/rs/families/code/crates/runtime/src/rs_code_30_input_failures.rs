@@ -16,6 +16,20 @@ pub fn check(input: &CodeInputFailureInput<'_>, results: &mut Vec<CheckResult>) 
     });
 }
 
+
 #[cfg(test)]
-#[path = "rs_code_30_input_failures_tests/mod.rs"]
-mod tests;
+pub(crate) fn run_tree(tree: &guardrail3_domain_project_tree::ProjectTree) -> Vec<CheckResult> {
+    crate::check_test_tree(tree)
+}
+
+#[cfg(test)]
+pub(crate) fn check_input_failure(rel_path: &str, message: &str) -> Vec<CheckResult> {
+    let input = super::inputs::CodeInputFailureInput { rel_path, message };
+    let mut results = Vec::new();
+    check(&input, &mut results);
+    results
+}
+
+#[cfg(test)]
+#[path = "rs_code_30_input_failures_tests/mod.rs"] // reason: test-only sidecar module wiring
+mod rs_code_30_input_failures_tests;

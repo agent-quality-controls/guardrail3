@@ -1,8 +1,7 @@
-use std::collections::BTreeSet;
-
-use guardrail3_domain_report::Severity;
-
-use super::super::super::test_support::{copy_fixture, files_for_rule, run_family, write_file};
+use guardrail3_app_rs_family_code_assertions::rs_code_12_unsafe_code_lint::assert_inventories_workspace_forbid_lints;
+use super::super::run_family;
+use super::super::copy_fixture;
+use test_support::write_file;
 
 #[test]
 fn distinguishes_deny_and_forbid_workspace_lint_levels_across_real_manifests() {
@@ -14,8 +13,8 @@ fn distinguishes_deny_and_forbid_workspace_lint_levels_across_real_manifests() {
     let worker_rel = "apps/worker/Cargo.toml";
 
     let backend_content =
-        std::fs::read_to_string(root.join(backend_rel)).expect("read backend cargo");
-    let worker_content = std::fs::read_to_string(root.join(worker_rel)).expect("read worker cargo");
+        test_support::read_file(root, backend_rel);
+    let worker_content = test_support::read_file(root, worker_rel);
 
     write_file(
         root,
@@ -28,36 +27,10 @@ fn distinguishes_deny_and_forbid_workspace_lint_levels_across_real_manifests() {
         &worker_content.replace("unsafe_code = \"forbid\"", "unsafe_code = \"forbid\""),
     );
 
-    let results = run_family(root);
-
-    assert_eq!(
-        files_for_rule(&results, "RS-CODE-12"),
-        BTreeSet::from([
-            backend_rel.to_owned(),
-            devctl_rel.to_owned(),
-            worker_rel.to_owned(),
-        ])
-    );
-    let mut actual = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-12")
-        .map(|result| {
-            (
-                result.file.clone().expect("file"),
-                result.severity,
-                result.inventory,
-            )
-        })
-        .collect::<Vec<_>>();
-    actual.sort_by_key(|(file, severity, inventory)| {
-        (file.clone(), format!("{severity:?}"), *inventory)
-    });
-    assert_eq!(
-        actual,
-        vec![
-            (backend_rel.to_owned(), Severity::Error, false),
-            (devctl_rel.to_owned(), Severity::Info, true),
-            (worker_rel.to_owned(), Severity::Info, true),
-        ]
+    assert_inventories_workspace_forbid_lints(
+        &run_family(root),
+        backend_rel,
+        devctl_rel,
+        worker_rel,
     );
 }
