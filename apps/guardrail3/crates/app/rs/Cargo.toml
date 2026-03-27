@@ -18,7 +18,7 @@ guardrail3_outbound_traits = { package = "guardrail3-ports-outbound-traits", pat
 guardrail3_validation_model = { package = "guardrail3-domain-validation-model", path = "../../domain/validation-model" }
 guardrail3_app_rs_family_arch = { package = "guardrail3-app-rs-family-arch", path = "families/arch/crates/runtime" }
 guardrail3_app_rs_family_cargo = { package = "guardrail3-app-rs-family-cargo", path = "families/cargo/crates/runtime" }
-guardrail3_app_rs_family_clippy = { package = "guardrail3-app-rs-family-clippy", path = "families/clippy" }
+guardrail3_app_rs_family_clippy = { package = "guardrail3-app-rs-family-clippy", path = "families/clippy/crates/runtime" }
 guardrail3_app_rs_family_code = { package = "guardrail3-app-rs-family-code", path = "families/code/crates/runtime" }
 guardrail3_app_rs_family_deny = { package = "guardrail3-app-rs-family-deny", path = "families/deny" }
 guardrail3_app_rs_family_deps = { package = "guardrail3-app-rs-family-deps", path = "families/deps" }
