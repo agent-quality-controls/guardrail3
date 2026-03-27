@@ -6,10 +6,15 @@ use super::parse::{find_path_attrs, same_line_reason};
 const ID: &str = "RS-CODE-24";
 
 fn is_canonical_test_sidecar_path(input: &RustCodeFileInput<'_>, line: usize, path: &str) -> bool {
-    let Some(mod_name) = path.strip_suffix("/mod.rs") else {
+    let Some(current_stem) = std::path::Path::new(input.rel_path)
+        .file_stem()
+        .and_then(std::ffi::OsStr::to_str)
+    else {
         return false;
     };
-    if !mod_name.ends_with("_tests") {
+    let expected_mod_name = format!("{current_stem}_tests");
+    let expected_path = format!("{expected_mod_name}/mod.rs");
+    if path != expected_path {
         return false;
     }
     let lines = input.content.lines().collect::<Vec<_>>();
@@ -20,7 +25,9 @@ fn is_canonical_test_sidecar_path(input: &RustCodeFileInput<'_>, line: usize, pa
     let Some(next_line) = lines.get(attr_index + 1) else {
         return false;
     };
-    prev_line.trim() == "#[cfg(test)]" && next_line.trim() == format!("mod {mod_name};")
+    let expected_mod_line = format!("mod {expected_mod_name};");
+    prev_line.trim() == "#[cfg(test)]"
+        && (next_line.trim() == "mod tests;" || next_line.trim() == expected_mod_line)
 }
 
 pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {

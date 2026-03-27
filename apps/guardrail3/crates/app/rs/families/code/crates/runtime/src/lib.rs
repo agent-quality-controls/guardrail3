@@ -37,11 +37,7 @@ use {
     glob as _, guardrail3_domain_config as _, guardrail3_domain_modules as _,
     guardrail3_outbound_traits as _, quote as _, semver as _, serde_yaml as _,
 };
-use guardrail3_app_rs_placement::collect as collect_scope;
 use guardrail3_app_rs_family_mapper::RsCodeRoute;
-use guardrail3_adapters_outbound_fs::RealFileSystem;
-use guardrail3_app_core::project_walker::walk_project;
-use guardrail3_domain_config::types::GuardrailConfig;
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::CheckResult;
 
@@ -52,6 +48,12 @@ use self::inputs::{
 
 #[cfg(test)]
 use guardrail3_app_rs_family_code_assertions as _;
+#[cfg(test)]
+use guardrail3_adapters_outbound_fs::RealFileSystem;
+#[cfg(test)]
+use guardrail3_app_core::project_walker::walk_project;
+#[cfg(test)]
+use guardrail3_domain_config::types::GuardrailConfig;
 
 #[cfg(test)]
 const GOLDEN_REL: &str = "../../../../../../../tests/fixtures/r_arch_01/golden";
@@ -141,19 +143,22 @@ pub fn check(tree: &ProjectTree, route: &RsCodeRoute) -> Vec<CheckResult> {
     results
 }
 
+#[cfg(test)]
 #[must_use]
-pub fn check_test_root(root: &std::path::Path) -> Vec<CheckResult> {
+pub(crate) fn check_test_root(root: &std::path::Path) -> Vec<CheckResult> {
     let tree = walk_project(&RealFileSystem, root);
     check_test_tree(&tree)
 }
 
+#[cfg(test)]
 #[must_use]
-pub fn check_test_tree(tree: &ProjectTree) -> Vec<CheckResult> {
+pub(crate) fn check_test_tree(tree: &ProjectTree) -> Vec<CheckResult> {
     check(tree, &family_route_for_tests(tree))
 }
 
+#[cfg(test)]
 fn family_route_for_tests(tree: &ProjectTree) -> RsCodeRoute {
-    let scope = collect_scope(tree);
+    let scope = guardrail3_app_rs_placement::collect(tree);
     let config = parse_guardrail_config(tree);
     let selected = guardrail3_validation_model::RustFamilySelection::new(
         std::collections::BTreeSet::from([guardrail3_validation_model::RustValidateFamily::Code]),
@@ -168,13 +173,14 @@ fn family_route_for_tests(tree: &ProjectTree) -> RsCodeRoute {
     .map_rs_code()
 }
 
+#[cfg(test)]
 fn parse_guardrail_config(tree: &ProjectTree) -> Option<GuardrailConfig> {
     tree.file_content("guardrail3.toml")
         .and_then(|content| toml::from_str::<GuardrailConfig>(content).ok())
 }
 
 #[cfg(test)]
-fn copy_test_fixture() -> test_support::TempDir {
+pub(crate) fn copy_test_fixture() -> test_support::TempDir {
     let root = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(GOLDEN_REL);
     test_support::copy_tree(&root)
 }

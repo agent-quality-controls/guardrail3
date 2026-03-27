@@ -1,6 +1,7 @@
 mod attrs;
 mod comments;
 mod core;
+mod fs_visitors;
 mod helpers;
 mod types;
 mod visitors;
@@ -97,15 +98,15 @@ pub fn find_unwrap_expect(ast: &syn::File) -> Vec<(usize, String)> {
 }
 
 pub fn find_std_fs_import_lines(ast: &syn::File) -> Vec<usize> {
-    visitors::find_std_fs_import_lines(ast)
+    fs_visitors::find_std_fs_import_lines(ast)
 }
 
 pub fn find_inline_std_fs_call_lines(ast: &syn::File) -> Vec<usize> {
-    visitors::find_inline_std_fs_call_lines(ast)
+    fs_visitors::find_inline_std_fs_call_lines(ast)
 }
 
 pub fn find_std_fs_glob_import_lines(ast: &syn::File) -> Vec<usize> {
-    visitors::find_std_fs_glob_import_lines(ast)
+    fs_visitors::find_std_fs_glob_import_lines(ast)
 }
 
 pub fn find_pub_use_glob_reexports(ast: &syn::File) -> Vec<(usize, String)> {

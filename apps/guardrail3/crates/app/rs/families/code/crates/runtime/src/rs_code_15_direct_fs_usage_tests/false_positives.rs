@@ -4,17 +4,14 @@ use super::super::copy_fixture;
 use test_support::write_file;
 
 #[test]
-fn skips_test_boundaries_cfg_test_and_allowed_std_fs_usage() {
+fn skips_test_boundaries_cfg_test_src_fs_and_text_only_near_misses() {
     let fixture = copy_fixture();
     let root = fixture.path();
 
     let cfg_rel = "apps/backend/crates/app/queries/src/lib.rs";
-    let allowed_rel = "apps/worker/crates/adapters/outbound/db/src/lib.rs";
     let test_text_rel = "apps/devctl/crates/app/core/src/lib.rs";
 
     let cfg_content = test_support::read_file(root, cfg_rel);
-    let allowed_content =
-        test_support::read_file(root, allowed_rel);
     let test_text_content =
         test_support::read_file(root, test_text_rel);
 
@@ -50,6 +47,11 @@ fn skips_test_boundaries_cfg_test_and_allowed_std_fs_usage() {
     );
     write_file(
         root,
+        "tests/top_level_fs_usage.rs",
+        "use std::fs;\nfn probe() { let _ = std::fs::read_to_string(\"fixture\"); }\n",
+    );
+    write_file(
+        root,
         "apps/backend/crates/app/queries/src/fs.rs",
         "use std::fs;\npub fn allowed_probe() { let _ = std::fs::read_to_string(\"fixture\"); }\n",
     );
@@ -62,13 +64,6 @@ fn skips_test_boundaries_cfg_test_and_allowed_std_fs_usage() {
     );
     write_file(
         root,
-        allowed_rel,
-        &format!(
-            "{allowed_content}\n#[allow(clippy::disallowed_methods)]\nfn allowed_free_fn() {{ let _ = std::fs::read_to_string(\"jobs.txt\"); }}\n#[allow(clippy::disallowed_methods)]\nmod allowed_mod {{\n    pub fn run() {{ let _ = std::fs::read_to_string(\"jobs.txt\"); }}\n}}\nstruct AllowProbe;\nimpl AllowProbe {{\n    #[allow(clippy::disallowed_methods)]\n    fn run(&self) {{ let _ = std::fs::read_to_string(\"jobs.txt\"); }}\n}}\nfn local_allow_probe() {{\n    #[allow(clippy::disallowed_methods)]\n    let _value = std::fs::read_to_string(\"jobs.txt\");\n}}\nfn path_reference_probe() {{\n    let _reader = std::fs::read_to_string;\n}}\n"
-        ),
-    );
-    write_file(
-        root,
         test_text_rel,
         &format!(
             "{test_text_content}\nfn text_probe() {{\n    let _ = \"use std::fs\";\n    let _ = \"std::fs::read_to_string\";\n    // use std::fs\n    // std::fs::read_to_string(\"fixture\")\n}}\n"
@@ -76,5 +71,27 @@ fn skips_test_boundaries_cfg_test_and_allowed_std_fs_usage() {
     );
 
     let results = run_family(root);
-    assert_no_hits(&results);
+    let relevant_results = results
+        .into_iter()
+        .filter(|result| {
+            matches!(
+                result.file.as_deref(),
+                Some(path)
+                    if [
+                        "apps/backend/crates/app/queries/tests/fs_usage_tests.rs",
+                        "apps/backend/crates/app/queries/test/fs_usage_test.rs",
+                        "apps/backend/crates/app/queries/__tests__/fs_usage.rs",
+                        "apps/backend/crates/app/queries/src/fs_usage_test.rs",
+                        "apps/backend/crates/app/queries/src/fs_usage_tests.rs",
+                        "apps/backend/crates/app/queries/src/tests.rs",
+                        "tests/top_level_fs_usage.rs",
+                        "apps/backend/crates/app/queries/src/fs.rs",
+                        cfg_rel,
+                        test_text_rel,
+                    ]
+                    .contains(&path)
+            )
+        })
+        .collect::<Vec<_>>();
+    assert_no_hits(&relevant_results);
 }

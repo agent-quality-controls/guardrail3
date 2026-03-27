@@ -155,3 +155,20 @@ pub fn assert_guardrail_policy_parse_failure(results: &[CheckResult], file: &str
         finding.message
     );
 }
+
+pub fn assert_message_fragment_failure(results: &[CheckResult], file: &str, fragment: &str) {
+    let actual = findings(results);
+    assert_eq!(actual.len(), 1);
+    let finding = &actual[0];
+    assert_eq!(finding.id, ID);
+    assert_eq!(finding.severity, Severity::Error);
+    assert_eq!(finding.title, "code-family input failure");
+    assert_eq!(finding.file, Some(file));
+    assert_eq!(finding.line, None);
+    assert!(!finding.inventory);
+    assert!(
+        finding.message.contains(fragment),
+        "expected fragment `{fragment}` in `{}`",
+        finding.message
+    );
+}
