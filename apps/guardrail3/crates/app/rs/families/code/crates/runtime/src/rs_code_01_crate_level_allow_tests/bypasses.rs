@@ -2,7 +2,10 @@ use std::collections::BTreeSet;
 
 use guardrail3_domain_report::Severity;
 
-use super::super::super::test_support::{copy_fixture, files_for_rule, run_family, write_file};
+use guardrail3_app_rs_family_code_assertions::rs_code_01_crate_level_allow::{assert_files, assert_findings, RuleFinding};
+use super::super::run_family;
+use super::super::copy_fixture;
+use test_support::write_file;
 
 #[test]
 fn attacks_crate_and_nested_module_wide_allows_across_real_owned_files() {
@@ -56,100 +59,80 @@ fn attacks_crate_and_nested_module_wide_allows_across_real_owned_files() {
     );
 
     let results = run_family(root);
-    let rs_code_01_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-01")
-        .collect::<Vec<_>>();
 
-    assert_eq!(
-        files_for_rule(&results, "RS-CODE-01"),
-        BTreeSet::from([
+    assert_files(&results, BTreeSet::from([
             crate_rel.to_owned(),
             inline_rel.to_owned(),
             mixed_rel.to_owned(),
             mixed_exempt_rel.to_owned(),
             test_rel.to_owned(),
-        ])
-    );
-    assert_eq!(rs_code_01_results.len(), 6);
-    let mut actual = rs_code_01_results
-        .iter()
-        .map(|result| {
-            (
-                result.file.clone().expect("file"),
-                result.line,
-                format!("{:?}", result.severity),
-                result.title.clone(),
-                result.message.clone(),
-            )
-        })
-        .collect::<Vec<_>>();
-    actual.sort();
-    assert_eq!(
-        actual,
-        vec![
-            (
-                mixed_rel.to_owned(),
-                mixed_new
+        ]));
+    assert_findings(
+        &results,
+        &[
+            RuleFinding {
+                severity: Severity::Error,
+                title: "crate-level allow",
+                message: "Crate/module-wide `allow(clippy::unwrap_used)` suppresses the lint too broadly.",
+                file: Some(crate_rel),
+                line: crate_new
                     .lines()
                     .position(|line| line.contains("#![allow(clippy::unwrap_used)]"))
                     .map(|index| index + 1),
-                format!("{:?}", Severity::Error),
-                "crate-level allow".to_owned(),
-                "Crate/module-wide `allow(clippy::unwrap_used)` suppresses the lint too broadly."
-                    .to_owned(),
-            ),
-            (
-                mixed_rel.to_owned(),
-                mixed_new
+                inventory: false,
+            },
+            RuleFinding {
+                severity: Severity::Error,
+                title: "module-level allow in outer::inner",
+                message: "Crate/module-wide `allow(clippy::panic)` suppresses the lint too broadly.",
+                file: Some(mixed_rel),
+                line: mixed_new
                     .lines()
                     .position(|line| line.contains("#![allow(clippy::panic)]"))
                     .map(|index| index + 1),
-                format!("{:?}", Severity::Error),
-                "module-level allow in outer::inner".to_owned(),
-                "Crate/module-wide `allow(clippy::panic)` suppresses the lint too broadly."
-                    .to_owned(),
-            ),
-            (
-                crate_rel.to_owned(),
-                crate_new
+                inventory: false,
+            },
+            RuleFinding {
+                severity: Severity::Error,
+                title: "crate-level allow",
+                message: "Crate/module-wide `allow(clippy::unwrap_used)` suppresses the lint too broadly.",
+                file: Some(mixed_rel),
+                line: mixed_new
                     .lines()
                     .position(|line| line.contains("#![allow(clippy::unwrap_used)]"))
                     .map(|index| index + 1),
-                format!("{:?}", Severity::Error),
-                "crate-level allow".to_owned(),
-                "Crate/module-wide `allow(clippy::unwrap_used)` suppresses the lint too broadly."
-                    .to_owned(),
-            ),
-            (
-                mixed_exempt_rel.to_owned(),
-                mixed_exempt_new
+                inventory: false,
+            },
+            RuleFinding {
+                severity: Severity::Error,
+                title: "crate-level allow",
+                message: "Crate/module-wide `allow(clippy::unwrap_used)` suppresses the lint too broadly.",
+                file: Some(mixed_exempt_rel),
+                line: mixed_exempt_new
                     .lines()
                     .position(|line| line.contains("#![allow(clippy::unwrap_used)]"))
                     .map(|index| index + 1),
-                format!("{:?}", Severity::Error),
-                "crate-level allow".to_owned(),
-                "Crate/module-wide `allow(clippy::unwrap_used)` suppresses the lint too broadly."
-                    .to_owned(),
-            ),
-            (
-                test_rel.to_owned(),
-                Some(2),
-                format!("{:?}", Severity::Info),
-                "module-level allow in nested_test_allow".to_owned(),
-                "Crate/module-wide allow for `clippy::expect_used` is test-file exempt.".to_owned(),
-            ),
-            (
-                inline_rel.to_owned(),
-                inline_new
+                inventory: false,
+            },
+            RuleFinding {
+                severity: Severity::Info,
+                title: "module-level allow in nested_test_allow",
+                message: "Crate/module-wide allow for `clippy::expect_used` is test-file exempt.",
+                file: Some(test_rel),
+                line: Some(2),
+                inventory: false,
+            },
+            RuleFinding {
+                severity: Severity::Error,
+                title: "module-level allow in nested_allow",
+                message: "Crate/module-wide `allow(clippy::panic)` suppresses the lint too broadly.",
+                file: Some(inline_rel),
+                line: inline_new
                     .lines()
                     .position(|line| line.contains("#![allow(clippy::panic)]"))
                     .map(|index| index + 1),
-                format!("{:?}", Severity::Error),
-                "module-level allow in nested_allow".to_owned(),
-                "Crate/module-wide `allow(clippy::panic)` suppresses the lint too broadly."
-                    .to_owned(),
-            ),
+                inventory: false,
+            },
         ]
     );
 }

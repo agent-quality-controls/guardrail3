@@ -2,7 +2,10 @@ use std::collections::BTreeSet;
 
 use guardrail3_domain_report::Severity;
 
-use super::super::super::test_support::{copy_fixture, files_for_rule, run_family, write_file};
+use guardrail3_app_rs_family_code_assertions::rs_code_06_garde_skip_with_comment::{assert_files, assert_findings, RuleFinding};
+use super::super::run_family;
+use super::super::copy_fixture;
+use test_support::write_file;
 
 #[test]
 fn detects_non_primitive_garde_skips_with_plain_comments_across_real_owned_files() {
@@ -72,74 +75,57 @@ fn detects_non_primitive_garde_skips_with_plain_comments_across_real_owned_files
         + 1;
 
     let results = run_family(root);
-    let mut rs_code_06_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-06")
-        .map(|result| {
-            (
-                result.file.clone().expect("file"),
-                result.line,
-                format!("{:?}", result.severity),
-                result.title.clone(),
-                result.message.clone(),
-            )
-        })
-        .collect::<Vec<_>>();
-    rs_code_06_results.sort();
 
-    assert_eq!(
-        files_for_rule(&results, "RS-CODE-06"),
-        BTreeSet::from([
+    assert_files(&results, BTreeSet::from([
             type_rel.to_owned(),
             field_rel.to_owned(),
             empty_reason_rel.to_owned(),
             wrong_key_rel.to_owned(),
             vec_rel.to_owned()
-        ])
-    );
-    assert_eq!(
-        rs_code_06_results,
-        vec![
-            (
-                type_rel.to_owned(),
-                Some(type_line),
-                format!("{:?}", Severity::Error),
-                "garde(skip) comment missing reason".to_owned(),
-                "`#[garde(skip)]` on non-primitive type `WholeTypeCommentProbe` needs `// reason:`."
-                    .to_owned(),
-            ),
-            (
-                field_rel.to_owned(),
-                Some(field_line),
-                format!("{:?}", Severity::Error),
-                "garde(skip) comment missing reason".to_owned(),
-                "`#[garde(skip)]` on non-primitive field `field: String` needs `// reason:`."
-                    .to_owned(),
-            ),
-            (
-                wrong_key_rel.to_owned(),
-                Some(wrong_key_line),
-                format!("{:?}", Severity::Error),
-                "garde(skip) comment missing reason".to_owned(),
-                "`#[garde(skip)]` on non-primitive type `WrongKeyWholeTypeCommentProbe` needs `// reason:`."
-                    .to_owned(),
-            ),
-            (
-                empty_reason_rel.to_owned(),
-                Some(empty_reason_line),
-                format!("{:?}", Severity::Error),
-                "garde(skip) comment missing reason".to_owned(),
-                "`#[garde(skip)]` on non-primitive field `field: String` needs `// reason:`."
-                    .to_owned(),
-            ),
-            (
-                vec_rel.to_owned(),
-                Some(vec_line),
-                format!("{:?}", Severity::Error),
-                "garde(skip) comment missing reason".to_owned(),
-                "`#[garde(skip)]` on non-primitive field `items: Vec<String>` needs `// reason:`."
-                    .to_owned(),
-            ),
-        ]
+        ]));
+    assert_findings(
+        &results,
+        &[
+            RuleFinding {
+                severity: Severity::Error,
+                title: "garde(skip) comment missing reason",
+                message: "`#[garde(skip)]` on non-primitive type `WholeTypeCommentProbe` needs `// reason:`.",
+                file: Some(type_rel),
+                line: Some(type_line),
+                inventory: false,
+            },
+            RuleFinding {
+                severity: Severity::Error,
+                title: "garde(skip) comment missing reason",
+                message: "`#[garde(skip)]` on non-primitive field `field: String` needs `// reason:`.",
+                file: Some(field_rel),
+                line: Some(field_line),
+                inventory: false,
+            },
+            RuleFinding {
+                severity: Severity::Error,
+                title: "garde(skip) comment missing reason",
+                message: "`#[garde(skip)]` on non-primitive type `WrongKeyWholeTypeCommentProbe` needs `// reason:`.",
+                file: Some(wrong_key_rel),
+                line: Some(wrong_key_line),
+                inventory: false,
+            },
+            RuleFinding {
+                severity: Severity::Error,
+                title: "garde(skip) comment missing reason",
+                message: "`#[garde(skip)]` on non-primitive field `field: String` needs `// reason:`.",
+                file: Some(empty_reason_rel),
+                line: Some(empty_reason_line),
+                inventory: false,
+            },
+            RuleFinding {
+                severity: Severity::Error,
+                title: "garde(skip) comment missing reason",
+                message: "`#[garde(skip)]` on non-primitive field `items: Vec<String>` needs `// reason:`.",
+                file: Some(vec_rel),
+                line: Some(vec_line),
+                inventory: false,
+            },
+        ],
     );
 }

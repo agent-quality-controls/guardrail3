@@ -1,6 +1,7 @@
-use std::collections::BTreeSet;
-
-use super::super::super::test_support::{copy_fixture, files_for_rule, run_family, write_file};
+use guardrail3_app_rs_family_code_assertions::rs_code_04_item_level_allow_with_reason::{assert_findings, assert_no_hits, RuleFinding};
+use super::super::run_family;
+use super::super::copy_fixture;
+use test_support::write_file;
 
 #[test]
 fn skips_undocumented_and_malformed_reason_near_misses() {
@@ -52,7 +53,7 @@ fn skips_undocumented_and_malformed_reason_near_misses() {
 
     let results = run_family(root);
 
-    assert_eq!(files_for_rule(&results, "RS-CODE-04"), BTreeSet::new());
+    assert_no_hits(&results);
 }
 
 #[test]
@@ -102,31 +103,33 @@ fn inventories_accepted_reason_variants_and_other_item_kinds() {
         .expect("mod line")
         + 1;
 
-    let mut rs_code_04_results = run_family(root)
-        .into_iter()
-        .filter(|result| result.id == "RS-CODE-04")
-        .map(|result| (result.file.expect("file"), result.line, result.message))
-        .collect::<Vec<_>>();
-    rs_code_04_results.sort();
-
-    assert_eq!(
-        rs_code_04_results,
-        vec![
-            (
-                upper_rel.to_owned(),
-                Some(upper_line),
-                "#[allow(clippy::unwrap_used)] reason: uppercase accepted".to_owned(),
-            ),
-            (
-                mod_rel.to_owned(),
-                Some(mod_line),
-                "#[allow(clippy::expect_used)] reason: module boundary shim".to_owned(),
-            ),
-            (
-                tight_rel.to_owned(),
-                Some(tight_line),
-                "#[allow(clippy::panic)] reason: tight spacing accepted".to_owned(),
-            ),
+    assert_findings(
+        &run_family(root),
+        &[
+            RuleFinding {
+                severity: Severity::Info,
+                title: "item-level allow with reason",
+                message: "#[allow(clippy::unwrap_used)] reason: uppercase accepted",
+                file: Some(upper_rel),
+                line: Some(upper_line),
+                inventory: false,
+            },
+            RuleFinding {
+                severity: Severity::Info,
+                title: "item-level allow with reason",
+                message: "#[allow(clippy::expect_used)] reason: module boundary shim",
+                file: Some(mod_rel),
+                line: Some(mod_line),
+                inventory: false,
+            },
+            RuleFinding {
+                severity: Severity::Info,
+                title: "item-level allow with reason",
+                message: "#[allow(clippy::panic)] reason: tight spacing accepted",
+                file: Some(tight_rel),
+                line: Some(tight_line),
+                inventory: false,
+            },
         ]
     );
 }
@@ -152,17 +155,15 @@ fn inventories_only_documented_allows_in_mixed_same_file_case() {
         .expect("documented line")
         + 1;
 
-    let rs_code_04_results = run_family(root)
-        .into_iter()
-        .filter(|result| result.id == "RS-CODE-04")
-        .collect::<Vec<_>>();
-
-    assert_eq!(rs_code_04_results.len(), 1);
-    let result = &rs_code_04_results[0];
-    assert_eq!(result.file.as_deref(), Some(rel));
-    assert_eq!(result.line, Some(documented_line));
-    assert_eq!(
-        result.message,
-        "#[allow(clippy::unwrap_used)] reason: documented surface"
+    assert_findings(
+        &run_family(root),
+        &[RuleFinding {
+            severity: Severity::Info,
+            title: "item-level allow with reason",
+            message: "#[allow(clippy::unwrap_used)] reason: documented surface",
+            file: Some(rel),
+            line: Some(documented_line),
+            inventory: false,
+        }],
     );
 }

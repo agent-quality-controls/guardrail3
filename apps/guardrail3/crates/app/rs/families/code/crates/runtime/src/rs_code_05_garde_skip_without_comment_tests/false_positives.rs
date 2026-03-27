@@ -2,7 +2,10 @@ use std::collections::BTreeSet;
 
 use guardrail3_domain_report::Severity;
 
-use super::super::super::test_support::{copy_fixture, files_for_rule, run_family, write_file};
+use guardrail3_app_rs_family_code_assertions::rs_code_05_garde_skip_without_comment::{assert_files, assert_findings, assert_no_hits, RuleFinding};
+use super::super::run_family;
+use super::super::copy_fixture;
+use test_support::write_file;
 
 #[test]
 fn skips_documented_primitive_unvalidatable_and_cross_rule_garde_skip_surfaces() {
@@ -87,50 +90,28 @@ fn skips_documented_primitive_unvalidatable_and_cross_rule_garde_skip_surfaces()
         .expect("plain comment type line")
         + 1;
     let results = run_family(root);
-    let rs_code_05_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-05")
-        .collect::<Vec<_>>();
-    let mut rs_code_06_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-06")
-        .map(|result| {
-            (
-                result.file.clone().expect("file"),
-                result.line,
-                format!("{:?}", result.severity),
-                result.title.clone(),
-                result.message.clone(),
-            )
-        })
-        .collect::<Vec<_>>();
-    rs_code_06_results.sort();
 
-    assert_eq!(files_for_rule(&results, "RS-CODE-05"), BTreeSet::new());
-    assert!(rs_code_05_results.is_empty());
-    assert_eq!(
-        files_for_rule(&results, "RS-CODE-06"),
-        BTreeSet::from([plain_comment_rel.to_owned(), documented_type_rel.to_owned()])
-    );
-    assert_eq!(
-        rs_code_06_results,
-        vec![
-            (
-                documented_type_rel.to_owned(),
-                Some(plain_comment_type_line),
-                format!("{:?}", Severity::Error),
-                "garde(skip) comment missing reason".to_owned(),
-                "`#[garde(skip)]` on non-primitive type `PlainCommentWholeTypeSkipProbe` needs `// reason:`."
-                    .to_owned(),
-            ),
-            (
-                plain_comment_rel.to_owned(),
-                Some(plain_comment_line),
-                format!("{:?}", Severity::Error),
-                "garde(skip) comment missing reason".to_owned(),
-                "`#[garde(skip)]` on non-primitive field `field: String` needs `// reason:`."
-                    .to_owned(),
-            ),
-        ]
+    assert_no_hits(&results);
+    assert_files(&results, BTreeSet::from([plain_comment_rel.to_owned(), documented_type_rel.to_owned()]));
+    assert_findings(
+        &results,
+        &[
+            RuleFinding {
+                severity: Severity::Error,
+                title: "garde(skip) comment missing reason",
+                message: "`#[garde(skip)]` on non-primitive type `PlainCommentWholeTypeSkipProbe` needs `// reason:`.",
+                file: Some(documented_type_rel),
+                line: Some(plain_comment_type_line),
+                inventory: false,
+            },
+            RuleFinding {
+                severity: Severity::Error,
+                title: "garde(skip) comment missing reason",
+                message: "`#[garde(skip)]` on non-primitive field `field: String` needs `// reason:`.",
+                file: Some(plain_comment_rel),
+                line: Some(plain_comment_line),
+                inventory: false,
+            },
+        ],
     );
 }

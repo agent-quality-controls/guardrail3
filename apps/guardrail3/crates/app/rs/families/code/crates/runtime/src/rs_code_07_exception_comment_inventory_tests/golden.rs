@@ -1,17 +1,11 @@
-use std::collections::BTreeSet;
-
-use super::super::super::test_support::{copy_fixture, files_for_rule, run_family};
+use guardrail3_app_rs_family_code_assertions::rs_code_07_exception_comment_inventory::{assert_no_hits};
+use super::super::run_family;
+use super::super::copy_fixture;
 
 #[test]
 fn populated_golden_fixture_has_no_exception_comment_inventory_hits() {
     let fixture = copy_fixture();
 
     let results = run_family(fixture.path());
-    let rs_code_07_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-07")
-        .collect::<Vec<_>>();
-
-    assert_eq!(files_for_rule(&results, "RS-CODE-07"), BTreeSet::new());
-    assert!(rs_code_07_results.is_empty());
+    assert_no_hits(&results);
 }

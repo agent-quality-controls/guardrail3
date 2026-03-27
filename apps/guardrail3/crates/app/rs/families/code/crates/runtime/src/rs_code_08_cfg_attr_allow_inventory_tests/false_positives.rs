@@ -1,6 +1,9 @@
 use std::collections::BTreeSet;
 
-use super::super::super::test_support::{copy_fixture, files_for_rule, run_family, write_file};
+use guardrail3_app_rs_family_code_assertions::rs_code_08_cfg_attr_allow_inventory::{assert_files, assert_no_hits, assert_normalized_empty, assert_normalized_len, findings};
+use super::super::run_family;
+use super::super::copy_fixture;
+use test_support::write_file;
 
 #[test]
 fn skips_always_true_and_non_cfg_attr_allow_surfaces() {
@@ -59,24 +62,19 @@ fn skips_always_true_and_non_cfg_attr_allow_surfaces() {
     );
 
     let results = run_family(root);
-    let rs_code_08_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-08")
+    let rs_code_08_results = findings(&results)
+        .into_iter()
         .collect::<Vec<_>>();
-    let rs_code_18_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-18")
+    let rs_code_18_results = findings(&results)
+        .into_iter()
         .collect::<Vec<_>>();
 
-    assert_eq!(files_for_rule(&results, "RS-CODE-08"), BTreeSet::new());
-    assert!(rs_code_08_results.is_empty());
-    assert_eq!(
-        files_for_rule(&results, "RS-CODE-18"),
-        BTreeSet::from([
+    assert_no_hits(&results);
+    assert_normalized_empty(&rs_code_08_results);
+    assert_files(&results, BTreeSet::from([
             always_true_rel.to_owned(),
             grouped_conditional_rel.to_owned(),
             negated_always_true_rel.to_owned(),
-        ])
-    );
-    assert_eq!(rs_code_18_results.len(), 3);
+        ]));
+    assert_normalized_len(&rs_code_18_results, 3);
 }

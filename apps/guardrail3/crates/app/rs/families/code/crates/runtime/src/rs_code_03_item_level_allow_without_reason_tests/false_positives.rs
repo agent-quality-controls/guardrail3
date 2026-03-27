@@ -2,7 +2,10 @@ use std::collections::BTreeSet;
 
 use guardrail3_domain_report::Severity;
 
-use super::super::super::test_support::{copy_fixture, files_for_rule, run_family, write_file};
+use guardrail3_app_rs_family_code_assertions::rs_code_03_item_level_allow_without_reason::{assert_files, assert_findings, assert_no_hits, RuleFinding};
+use super::super::run_family;
+use super::super::copy_fixture;
+use test_support::write_file;
 
 #[test]
 fn skips_documented_and_cross_rule_near_misses() {
@@ -69,33 +72,18 @@ fn skips_documented_and_cross_rule_near_misses() {
         .position(|line| line.contains("#[allow(clippy::expect_used)]"))
         .expect("mixed undocumented allow line")
         + 1;
-    let rs_code_03_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-03")
-        .map(|result| {
-            (
-                result.file.clone().expect("file"),
-                result.line,
-                format!("{:?}", result.severity),
-                result.title.clone(),
-                result.message.clone(),
-            )
-        })
-        .collect::<Vec<_>>();
 
-    assert_eq!(
-        files_for_rule(&results, "RS-CODE-03"),
-        BTreeSet::from([mixed_rel.to_owned()])
-    );
-    assert_eq!(
-        rs_code_03_results,
-        vec![(
-            mixed_rel.to_owned(),
-            Some(undocumented_line),
-            format!("{:?}", Severity::Error),
-            "item-level allow without reason".to_owned(),
-            "`#[allow(clippy::expect_used)]` requires `// reason:` on the same line.".to_owned(),
-        )]
+    assert_files(&results, BTreeSet::from([mixed_rel.to_owned()]));
+    assert_findings(
+        &results,
+        &[RuleFinding {
+            severity: Severity::Error,
+            title: "item-level allow without reason",
+            message: "`#[allow(clippy::expect_used)]` requires `// reason:` on the same line.",
+            file: Some(mixed_rel),
+            line: Some(undocumented_line),
+            inventory: false,
+        }],
     );
 }
 
@@ -156,13 +144,7 @@ fn skips_broad_documented_item_level_allows_across_real_owned_files() {
     );
 
     let results = run_family(root);
-    let rs_code_03_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-03")
-        .collect::<Vec<_>>();
-
-    assert_eq!(files_for_rule(&results, "RS-CODE-03"), BTreeSet::new());
-    assert!(rs_code_03_results.is_empty());
+    assert_no_hits(&results);
 }
 
 #[test]
@@ -179,7 +161,7 @@ fn skips_non_item_allow_surfaces() {
 
     let results = run_family(root);
 
-    assert_eq!(files_for_rule(&results, "RS-CODE-03"), BTreeSet::new());
+    assert_no_hits(&results);
 }
 
 #[test]
@@ -195,11 +177,5 @@ fn skips_documented_supported_non_function_item_kinds() {
     write_file(root, rel, &new_content);
 
     let results = run_family(root);
-    let rs_code_03_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-03")
-        .collect::<Vec<_>>();
-
-    assert_eq!(files_for_rule(&results, "RS-CODE-03"), BTreeSet::new());
-    assert!(rs_code_03_results.is_empty());
+    assert_no_hits(&results);
 }

@@ -1,6 +1,7 @@
-use std::collections::BTreeSet;
-
-use super::super::super::test_support::{copy_fixture, files_for_rule, run_family, write_file};
+use guardrail3_app_rs_family_code_assertions::rs_code_02_unused_crate_dependencies_allow::{assert_no_hits};
+use super::super::run_family;
+use super::super::copy_fixture;
+use test_support::write_file;
 
 #[test]
 fn skips_other_allow_names_inline_modules_and_item_level_near_misses() {
@@ -53,5 +54,5 @@ fn skips_other_allow_names_inline_modules_and_item_level_near_misses() {
 
     let results = run_family(root);
 
-    assert_eq!(files_for_rule(&results, "RS-CODE-02"), BTreeSet::new());
+    assert_no_hits(&results);
 }

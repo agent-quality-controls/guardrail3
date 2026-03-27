@@ -1,6 +1,7 @@
-use std::collections::BTreeSet;
-
-use super::super::super::test_support::{copy_fixture, files_for_rule, run_family, write_file};
+use guardrail3_app_rs_family_code_assertions::rs_code_11_use_count_warn::{assert_no_hits};
+use super::super::run_family;
+use super::super::copy_fixture;
+use test_support::write_file;
 
 #[test]
 fn skips_below_threshold_and_test_files() {
@@ -37,11 +38,5 @@ fn skips_below_threshold_and_test_files() {
     );
 
     let results = run_family(root);
-    let rs_code_11_results = results
-        .iter()
-        .filter(|result| result.id == "RS-CODE-11")
-        .collect::<Vec<_>>();
-
-    assert_eq!(files_for_rule(&results, "RS-CODE-11"), BTreeSet::new());
-    assert!(rs_code_11_results.is_empty());
+    assert_no_hits(&results);
 }

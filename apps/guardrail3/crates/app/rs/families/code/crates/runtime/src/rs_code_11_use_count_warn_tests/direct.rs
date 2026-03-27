@@ -1,8 +1,7 @@
 use guardrail3_domain_report::Severity;
 
-use super::super::super::inputs::RustCodeFileInput;
-use super::super::super::parse::parse_rust_file;
-use super::super::check;
+use guardrail3_app_rs_family_code_assertions::rs_code_11_use_count_warn::{assert_findings, RuleFinding};
+use super::super::check_source;
 
 #[test]
 fn warns_between_sixteen_and_twenty_top_level_uses() {
@@ -11,27 +10,16 @@ fn warns_between_sixteen_and_twenty_top_level_uses() {
         .collect();
     lines.push("fn main() {}".to_owned());
     let content = lines.join("\n");
-    let ast = parse_rust_file(&content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/foo.rs",
-        content: &content,
-        ast: &ast,
-        is_test: false,
-        profile_name: None,
-    };
-    let mut results = Vec::new();
-
-    check(&input, &mut results);
-
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-CODE-11");
-    assert_eq!(results[0].severity, Severity::Warn);
-    assert_eq!(results[0].file.as_deref(), Some("src/foo.rs"));
-    assert_eq!(results[0].line, None);
-    assert_eq!(results[0].title, "many use statements");
-    assert_eq!(
-        results[0].message,
-        "16 top-level use statements (warn at 16, max 20)."
+    assert_findings(
+        &check_source("src/foo.rs", &content, false),
+        &[RuleFinding {
+            severity: Severity::Warn,
+            title: "many use statements",
+            message: "16 top-level use statements (warn at 16, max 20).",
+            file: Some("src/foo.rs"),
+            line: None,
+            inventory: false,
+        }],
     );
 }
 
@@ -42,19 +30,7 @@ fn skips_below_warn_band_in_non_test_file() {
         .collect();
     lines.push("fn main() {}".to_owned());
     let content = lines.join("\n");
-    let ast = parse_rust_file(&content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/foo.rs",
-        content: &content,
-        ast: &ast,
-        is_test: false,
-        profile_name: None,
-    };
-    let mut results = Vec::new();
-
-    check(&input, &mut results);
-
-    assert!(results.is_empty());
+    assert_findings(&check_source("src/foo.rs", &content, false), &[]);
 }
 
 #[test]
@@ -64,17 +40,5 @@ fn skips_above_warn_band_in_non_test_file() {
         .collect();
     lines.push("fn main() {}".to_owned());
     let content = lines.join("\n");
-    let ast = parse_rust_file(&content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/foo.rs",
-        content: &content,
-        ast: &ast,
-        is_test: false,
-        profile_name: None,
-    };
-    let mut results = Vec::new();
-
-    check(&input, &mut results);
-
-    assert!(results.is_empty());
+    assert_findings(&check_source("src/foo.rs", &content, false), &[]);
 }

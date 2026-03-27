@@ -1,49 +1,26 @@
 use guardrail3_domain_report::Severity;
 
-use super::super::super::inputs::RustCodeFileInput;
-use super::super::super::parse::parse_rust_file;
-use super::super::check;
+use guardrail3_app_rs_family_code_assertions::rs_code_09_file_length::{assert_findings, RuleFinding};
+use super::super::check_source;
 
 #[test]
 fn errors_when_non_test_file_exceeds_500_effective_lines() {
     let content = "fn x() {}\n".repeat(501);
-    let ast = parse_rust_file(&content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/foo.rs",
-        content: &content,
-        ast: &ast,
-        is_test: false,
-        profile_name: None,
-    };
-    let mut results = Vec::new();
-
-    check(&input, &mut results);
-
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-CODE-09");
-    assert_eq!(results[0].severity, Severity::Error);
-    assert_eq!(results[0].file.as_deref(), Some("src/foo.rs"));
-    assert_eq!(results[0].title, "file too long");
-    assert_eq!(
-        results[0].message,
-        "501 effective lines (max 500). Long files are hard to review and maintain."
+    assert_findings(
+        &check_source("src/foo.rs", &content, false),
+        &[RuleFinding {
+            severity: Severity::Error,
+            title: "file too long",
+            message: "501 effective lines (max 500). Long files are hard to review and maintain.",
+            file: Some("src/foo.rs"),
+            line: None,
+            inventory: false,
+        }],
     );
 }
 
 #[test]
 fn skips_non_test_file_at_exact_500_effective_lines() {
     let content = "fn x() {}\n".repeat(500);
-    let ast = parse_rust_file(&content).expect("valid rust");
-    let input = RustCodeFileInput {
-        rel_path: "src/foo.rs",
-        content: &content,
-        ast: &ast,
-        is_test: false,
-        profile_name: None,
-    };
-    let mut results = Vec::new();
-
-    check(&input, &mut results);
-
-    assert!(results.is_empty());
+    assert_findings(&check_source("src/foo.rs", &content, false), &[]);
 }
