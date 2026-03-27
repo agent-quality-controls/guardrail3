@@ -16,8 +16,8 @@ disallowed-types = [
     { path = "std::collections::HashMap", reason = "another good enough reason text" },
 ]
 disallowed-macros = [
-    { path = "println", reason = "good enough reason text" },
-    { path = "println", reason = "another good enough reason text" },
+    { path = "std::println", reason = "good enough reason text" },
+    { path = "std::println", reason = "another good enough reason text" },
 ]
 "#,
     );
@@ -25,7 +25,7 @@ disallowed-macros = [
     assertions::assert_messages(
         &results,
         &[
-            "`println` appears 2 times in `disallowed-macros`.",
+            "`std::println` appears 2 times in `disallowed-macros`.",
             "`std::collections::HashMap` appears 2 times in `disallowed-types`.",
             "`std::env::var` appears 2 times in `disallowed-methods`.",
         ],

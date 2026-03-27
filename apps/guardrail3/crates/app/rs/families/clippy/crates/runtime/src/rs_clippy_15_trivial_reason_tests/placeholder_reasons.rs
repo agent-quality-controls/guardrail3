@@ -14,7 +14,7 @@ disallowed-types = [
     { path = "std::collections::HashMap", reason = "reason" },
 ]
 disallowed-macros = [
-    { path = "println", reason = "short" },
+    { path = "std::println", reason = "short" },
 ]
 "#,
     );
@@ -22,7 +22,7 @@ disallowed-macros = [
     assertions::assert_placeholder_messages(
         &results,
         &[
-            "`println` in `disallowed-macros` has a trivial or placeholder `reason`.",
+            "`std::println` in `disallowed-macros` has a trivial or placeholder `reason`.",
             "`std::collections::HashMap` in `disallowed-types` has a trivial or placeholder `reason`.",
             "`std::env::var` in `disallowed-methods` has a trivial or placeholder `reason`.",
         ],
