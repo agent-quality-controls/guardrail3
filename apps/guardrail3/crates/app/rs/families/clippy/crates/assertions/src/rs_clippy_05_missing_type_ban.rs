@@ -28,17 +28,13 @@ pub fn assert_garde_disabled(results: &[CheckResult], file: &str) {
     assert!(!results.iter().any(|result| result.message.contains("axum::extract::Form")));
 }
 
-pub fn assert_library_global_state_inventory(results: &[CheckResult]) {
+pub fn assert_excludes_library_global_state(results: &[CheckResult]) {
     assert!(results.iter().all(|result| result.id == ID));
-    assert!(results.iter().any(|result| {
-        result.severity == Severity::Info
-            && result.inventory
-            && result.message == "`std::sync::LazyLock` is banned."
-    }));
-    assert!(results.iter().any(|result| {
-        result.severity == Severity::Info
-            && result.inventory
-            && result.message == "`once_cell::sync::OnceCell` is banned."
+    assert!(!results.iter().any(|result| {
+        result.message.contains("std::sync::LazyLock")
+            || result.message.contains("std::sync::OnceLock")
+            || result.message.contains("once_cell::sync::Lazy")
+            || result.message.contains("once_cell::sync::OnceCell")
     }));
 }
 

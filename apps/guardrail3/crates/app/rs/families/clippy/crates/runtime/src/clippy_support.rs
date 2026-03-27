@@ -120,12 +120,17 @@ const GARDE_TYPE_BANS: &[&str] = &[
 ];
 
 pub fn expected_type_bans(profile_name: Option<&str>, garde_enabled: bool) -> Vec<&'static str> {
+    let mut bans = expected_required_type_bans(garde_enabled);
+    if profile_name == Some("library") {
+        bans.extend(EXPECTED_LIBRARY_GLOBAL_STATE_TYPES);
+    }
+    bans
+}
+
+pub fn expected_required_type_bans(garde_enabled: bool) -> Vec<&'static str> {
     let mut bans = EXPECTED_TYPE_BANS.to_vec();
     if !garde_enabled {
         bans.retain(|path| !GARDE_TYPE_BANS.contains(path));
-    }
-    if profile_name == Some("library") {
-        bans.extend(EXPECTED_LIBRARY_GLOBAL_STATE_TYPES);
     }
     bans
 }

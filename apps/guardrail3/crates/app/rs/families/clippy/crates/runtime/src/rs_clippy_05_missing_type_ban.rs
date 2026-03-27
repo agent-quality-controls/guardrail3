@@ -4,7 +4,7 @@ use guardrail3_domain_report::{CheckResult, Severity};
 #[cfg(test)]
 use guardrail3_domain_project_tree::ProjectTree;
 
-use super::clippy_support::{ban_paths, expected_type_bans};
+use super::clippy_support::{ban_paths, expected_required_type_bans};
 use super::inputs::ConfigClippyInput;
 
 const ID: &str = "RS-CLIPPY-05";
@@ -15,7 +15,7 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
     };
 
     let found: BTreeSet<_> = ban_paths(parsed, "disallowed-types").into_iter().collect();
-    for expected in expected_type_bans(input.profile_name(), input.garde_enabled()) {
+    for expected in expected_required_type_bans(input.garde_enabled()) {
         if found.contains(expected) {
             results.push(
                 CheckResult {
