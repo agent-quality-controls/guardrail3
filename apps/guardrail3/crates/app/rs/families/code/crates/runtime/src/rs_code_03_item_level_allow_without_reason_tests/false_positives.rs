@@ -177,3 +177,19 @@ fn skips_documented_supported_non_function_item_kinds() {
     let results = run_family(root);
     assert_no_hits(&results);
 }
+
+#[test]
+fn skips_multiline_documented_allow_with_reason_on_closing_line() {
+    let fixture = copy_fixture();
+    let root = fixture.path();
+
+    let rel = "apps/backend/crates/ports/inbound/api/src/lib.rs";
+    let content = test_support::read_file(root, rel);
+    let new_content = format!(
+        "{content}\n#[allow(\n    clippy::unwrap_used,\n    clippy::expect_used\n)] // reason: multiline adapter seam\npub fn documented_probe() {{}}\n"
+    );
+    write_file(root, rel, &new_content);
+
+    let results = run_family(root);
+    assert_no_hits(&results);
+}

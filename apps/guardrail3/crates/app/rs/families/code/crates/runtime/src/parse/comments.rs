@@ -16,7 +16,7 @@ pub fn same_line_reason(content: &str, line: usize) -> Option<String> {
     content
         .lines()
         .nth(line.saturating_sub(1))
-        .and_then(|source_line| source_line.split("//").nth(1))
+        .and_then(|source_line| source_line.split_once("//").map(|(_, comment)| comment))
         .and_then(|comment| {
             let trimmed = comment.trim();
             let lower = trimmed.to_ascii_lowercase();

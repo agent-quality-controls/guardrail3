@@ -232,19 +232,6 @@ impl<'ast> Visit<'ast> for TestExpectVisitor {
         syn::visit::visit_expr_method_call(self, method_call);
     }
 
-    fn visit_expr_call(&mut self, expr_call: &'ast syn::ExprCall) {
-        if let syn::Expr::Path(expr_path) = &*expr_call.func {
-            let segments = expr_path.path.segments.iter().collect::<Vec<_>>();
-            if segments.len() >= 2
-                && segments
-                    .last()
-                    .is_some_and(|segment| segment.ident == "expect")
-            {
-                self.push_expect_call(span_line(expr_path.path.span()), &expr_call.args);
-            }
-        }
-        syn::visit::visit_expr_call(self, expr_call);
-    }
 }
 
 impl<'ast> Visit<'ast> for LargeTypeVisitor {

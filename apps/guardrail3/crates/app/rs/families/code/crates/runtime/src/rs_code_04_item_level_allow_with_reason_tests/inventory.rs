@@ -89,7 +89,7 @@ fn inventories_documented_item_level_allows_across_real_owned_files() {
                 message: "#[allow(clippy::panic)] reason: adapter glue seam",
                 file: Some(impl_rel),
                 line: Some(impl_line),
-                inventory: false,
+                inventory: true,
             },
             RuleFinding {
                 severity: Severity::Info,
@@ -97,7 +97,7 @@ fn inventories_documented_item_level_allows_across_real_owned_files() {
                 message: "#[allow(clippy::unwrap_used)] reason: compatibility shim",
                 file: Some(top_level_rel),
                 line: Some(top_level_line),
-                inventory: false,
+                inventory: true,
             },
             RuleFinding {
                 severity: Severity::Info,
@@ -105,7 +105,7 @@ fn inventories_documented_item_level_allows_across_real_owned_files() {
                 message: "#[allow(clippy::expect_used)] reason: documented module seam",
                 file: Some(module_rel),
                 line: Some(module_line),
-                inventory: false,
+                inventory: true,
             },
             RuleFinding {
                 severity: Severity::Info,
@@ -113,7 +113,7 @@ fn inventories_documented_item_level_allows_across_real_owned_files() {
                 message: "#[allow(clippy::unwrap_used)] reason: trait shim contract",
                 file: Some(trait_rel),
                 line: Some(trait_line),
-                inventory: false,
+                inventory: true,
             },
             RuleFinding {
                 severity: Severity::Info,
@@ -121,7 +121,7 @@ fn inventories_documented_item_level_allows_across_real_owned_files() {
                 message: "#[allow(clippy::expect_used)] reason: grouped adapter allowance",
                 file: Some(grouped_rel),
                 line: Some(grouped_line),
-                inventory: false,
+                inventory: true,
             },
             RuleFinding {
                 severity: Severity::Info,
@@ -129,7 +129,7 @@ fn inventories_documented_item_level_allows_across_real_owned_files() {
                 message: "#[allow(clippy::unwrap_used)] reason: grouped adapter allowance",
                 file: Some(grouped_rel),
                 line: Some(grouped_line),
-                inventory: false,
+                inventory: true,
             },
             RuleFinding {
                 severity: Severity::Info,
@@ -137,7 +137,7 @@ fn inventories_documented_item_level_allows_across_real_owned_files() {
                 message: "#[allow(clippy::panic)] reason: queue adapter probe",
                 file: Some(nested_rel),
                 line: Some(nested_line),
-                inventory: false,
+                inventory: true,
             },
         ]
     );
