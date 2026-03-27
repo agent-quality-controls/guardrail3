@@ -59,27 +59,43 @@ That split is intentional:
 
 ## Current Shape
 
-At this checkpoint, `clippy` is still in the old single-crate family shape:
+At this checkpoint, `clippy` has been moved into the nested family workspace shape, but the test boundary migration is only partial:
 
 ```text
 apps/guardrail3/crates/app/rs/families/clippy/
   Cargo.toml
-  src/
-    lib.rs
-    facts.rs
-    inputs.rs
-    clippy_support.rs
-    test_support.rs
-    rs_clippy_01_*.rs
-    rs_clippy_01_*_tests/
-      mod.rs
-    ...
-    rs_clippy_22_*.rs
-    rs_clippy_22_*_tests/
-      mod.rs
+  clippy.toml
+  crates/
+    runtime/
+      Cargo.toml
+      src/
+        lib.rs
+        facts.rs
+        inputs.rs
+        clippy_support.rs
+        test_support.rs
+        rs_clippy_01_*.rs
+        rs_clippy_01_*_tests/
+          mod.rs
+        ...
+        rs_clippy_22_*.rs
+        rs_clippy_22_*_tests/
+          mod.rs
+    assertions/
+      Cargo.toml
+      src/
+        lib.rs
+  test_support/
+    Cargo.toml
+    src/
+      lib.rs
 ```
 
-This means the family logic is alive, but the family is not yet self-hosted under the stricter `RS-TEST` contract.
+This means:
+
+- the family is now a real nested workspace
+- the runtime crate builds and the family is green under `RS-ARCH` and `RS-CLIPPY`
+- but the family is not yet self-hosted under the stricter `RS-TEST` contract because assertions extraction is still largely undone
 
 ## Target Shape
 
@@ -169,13 +185,17 @@ At the current checkpoint:
 
 - the family unit tests pass
 - the family passes `RS-ARCH`
+- the family passes `RS-CLIPPY`
+- the family root now carries a managed `clippy.toml`, so the earlier `RS-CLIPPY-01` self-hit is gone
 - the family still fails `RS-TEST`
-- the family still has a self-hit under `RS-CLIPPY-01`
-- there is no family README-derived self-host migration yet
+  - `RS-TEST-03`: `612`
+  - `RS-TEST-16`: `16`
+  - `RS-TEST-02`: `1`
+  - `RS-TEST-01`: `1`
+  - `RS-TEST-18`: `1`
 
 So the next work on `clippy` is not rule rescue first. It is:
 
-1. document the family contract
-2. migrate to the self-hosted runtime/assertions/test_support shape
-3. make the family pass `RS-TEST`
-4. then attack-review the live `RS-CLIPPY` rules the way `RS-CODE` and `RS-TEST` were hardened
+1. finish the `RS-TEST` migration by removing runtime-local test-support escapes and extracting owned assertions modules
+2. make the family pass `RS-TEST`
+3. then attack-review the live `RS-CLIPPY` rules the way `RS-CODE` and `RS-TEST` were hardened

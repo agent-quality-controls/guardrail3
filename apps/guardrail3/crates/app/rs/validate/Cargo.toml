@@ -14,7 +14,7 @@ guardrail3_app_arch_helpers = { package = "guardrail3-app-arch-helpers", path = 
 guardrail3_app_core = { package = "guardrail3-app-core", path = "../../core" }
 guardrail3_app_hooks = { package = "guardrail3-app-hooks", path = "../../hooks" }
 guardrail3_app_rs_ast = { package = "guardrail3-app-rs-ast", path = "../ast" }
-guardrail3_app_rs_family_clippy = { package = "guardrail3-app-rs-family-clippy", path = "../families/clippy" }
+guardrail3_app_rs_family_clippy = { package = "guardrail3-app-rs-family-clippy", path = "../families/clippy/crates/runtime" }
 guardrail3_app_rs_family_deny = { package = "guardrail3-app-rs-family-deny", path = "../families/deny" }
 guardrail3_domain_config = { package = "guardrail3-domain-config", path = "../../../domain/config" }
 guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../../domain/report" }
