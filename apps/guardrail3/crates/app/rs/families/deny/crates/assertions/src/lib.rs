@@ -1,0 +1,35 @@
+use guardrail3_app_rs_family_deny as _;
+
+mod common;
+
+pub mod facts;
+pub mod rs_deny_01_coverage;
+pub mod rs_deny_02_allowed_locations;
+pub mod rs_deny_03_shadowing;
+pub mod rs_deny_04_deprecated_advisories;
+pub mod rs_deny_05_advisories_baseline;
+pub mod rs_deny_06_stricter_advisories_inventory;
+pub mod rs_deny_07_graph_all_features;
+pub mod rs_deny_08_graph_no_default_features;
+pub mod rs_deny_09_ban_baseline_complete;
+pub mod rs_deny_10_multiple_versions_floor;
+pub mod rs_deny_11_highlight_inventory;
+pub mod rs_deny_12_allow_wildcard_paths;
+pub mod rs_deny_13_wildcards_inventory;
+pub mod rs_deny_14_license_allow_baseline;
+pub mod rs_deny_15_confidence_threshold;
+pub mod rs_deny_16_copyleft_allowlist;
+pub mod rs_deny_17_license_exceptions_inventory;
+pub mod rs_deny_18_unknown_sources_policy;
+pub mod rs_deny_19_allow_registry_baseline;
+pub mod rs_deny_20_allow_git_inventory;
+pub mod rs_deny_21_tokio_full_ban;
+pub mod rs_deny_22_extra_feature_bans_inventory;
+pub mod rs_deny_23_skip_hygiene;
+pub mod rs_deny_24_ignore_hygiene;
+pub mod rs_deny_25_allow_override_channel;
+pub mod rs_deny_26_ban_reason_inventory;
+pub mod rs_deny_27_duplicate_entries;
+pub mod rs_deny_28_unknown_keys;
+pub mod rs_deny_29_ignore_accumulation;
+pub mod rs_deny_30_wrappers;

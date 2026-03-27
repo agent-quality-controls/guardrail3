@@ -20,7 +20,7 @@ guardrail3_app_rs_family_arch = { package = "guardrail3-app-rs-family-arch", pat
 guardrail3_app_rs_family_cargo = { package = "guardrail3-app-rs-family-cargo", path = "families/cargo/crates/runtime" }
 guardrail3_app_rs_family_clippy = { package = "guardrail3-app-rs-family-clippy", path = "families/clippy/crates/runtime" }
 guardrail3_app_rs_family_code = { package = "guardrail3-app-rs-family-code", path = "families/code/crates/runtime" }
-guardrail3_app_rs_family_deny = { package = "guardrail3-app-rs-family-deny", path = "families/deny" }
+guardrail3_app_rs_family_deny = { package = "guardrail3-app-rs-family-deny", path = "families/deny/crates/runtime" }
 guardrail3_app_rs_family_deps = { package = "guardrail3-app-rs-family-deps", path = "families/deps" }
 guardrail3_app_rs_family_fmt = { package = "guardrail3-app-rs-family-fmt", path = "families/fmt/crates/runtime" }
 guardrail3_app_rs_family_garde = { package = "guardrail3-app-rs-family-garde", path = "families/garde" }
