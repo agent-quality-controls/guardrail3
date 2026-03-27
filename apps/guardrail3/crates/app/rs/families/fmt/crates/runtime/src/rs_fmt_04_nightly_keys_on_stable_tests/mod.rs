@@ -67,3 +67,30 @@ fn fails_closed_when_toolchain_file_is_malformed() {
         "Nightly-only rustfmt settings require a parseable root rust-toolchain.toml.",
     );
 }
+
+#[test]
+fn fails_closed_when_toolchain_channel_is_missing() {
+    let fixture = tempfile::tempdir().expect("create tempdir");
+    let root = fixture.path();
+
+    std::fs::write(
+        root.join("Cargo.toml"),
+        "[workspace]\nmembers = []\nresolver = \"2\"\n\n[workspace.package]\nedition = \"2024\"\n",
+    )
+    .expect("write Cargo.toml");
+    std::fs::write(
+        root.join("rustfmt.toml"),
+        "edition = \"2024\"\nmax_width = 100\ntab_spaces = 4\nuse_field_init_shorthand = true\nuse_try_shorthand = true\nreorder_imports = true\nreorder_modules = true\ngroup_imports = \"StdExternalCrate\"\n",
+    )
+    .expect("write rustfmt.toml");
+    std::fs::write(root.join("rust-toolchain.toml"), "[toolchain]\ncomponents = [\"rustfmt\"]\n")
+        .expect("write rust-toolchain.toml");
+
+    let results = run_family(root);
+
+    assertions::assert_error(
+        &results,
+        "rust-toolchain channel missing",
+        "Nightly-only rustfmt settings require `[toolchain].channel` in root rust-toolchain.toml.",
+    );
+}

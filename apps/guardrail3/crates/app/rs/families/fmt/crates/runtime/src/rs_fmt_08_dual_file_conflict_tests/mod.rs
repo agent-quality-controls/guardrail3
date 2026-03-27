@@ -8,3 +8,10 @@ fn reports_dual_root_config_conflicts() {
 
     assertions::assert_conflict(&results, "rustfmt.toml");
 }
+
+#[test]
+fn reports_nested_dual_config_conflicts_at_nested_path() {
+    let results = run_check("nested");
+
+    assertions::assert_conflict(&results, "nested/rustfmt.toml");
+}
