@@ -69,8 +69,7 @@ pub fn collect(tree: &ProjectTree, route: &RsCodeRoute) -> CodeFacts {
             .and_then(|workspace| workspace.get("lints"))
             .and_then(|lints| lints.get("rust"))
             .and_then(|rust| rust.get("unsafe_code"))
-            .and_then(toml::Value::as_str)
-            .map(str::to_owned);
+            .and_then(parse_lint_level);
         unsafe_code_lints.push(UnsafeCodeLintFacts {
             cargo_rel_path: root.cargo_rel_path.clone(),
             lint_level,
@@ -128,19 +127,82 @@ fn collect_exception_comments(
             continue;
         };
         for (index, line) in content.lines().enumerate() {
-            let trimmed = line.trim_start();
-            let upper = trimmed.to_ascii_uppercase();
-            if upper.starts_with("// EXCEPTION:") || upper.starts_with("# EXCEPTION:") {
+            let Some(comment_text) = extract_exception_comment(line) else {
+                continue;
+            };
+            let normalized = comment_text
+                .trim_start_matches('#')
+                .trim_start_matches('/')
+                .trim_start();
+            if normalized.to_ascii_uppercase().starts_with("EXCEPTION:") {
                 comments.push(ExceptionCommentFacts {
                     rel_path: rel_path.clone(),
                     line: index.saturating_add(1),
-                    line_text: trimmed.to_owned(),
+                    line_text: comment_text.to_owned(),
                 });
             }
         }
     }
 
     comments
+}
+
+fn parse_lint_level(value: &toml::Value) -> Option<String> {
+    value.as_str().map(str::to_owned).or_else(|| {
+        value
+            .as_table()
+            .and_then(|table| table.get("level"))
+            .and_then(toml::Value::as_str)
+            .map(str::to_owned)
+    })
+}
+
+fn extract_exception_comment(line: &str) -> Option<&str> {
+    #[derive(Clone, Copy)]
+    enum State {
+        Normal,
+        DoubleQuoted { escaped: bool },
+        SingleQuoted,
+    }
+
+    let bytes = line.as_bytes();
+    let mut index = 0usize;
+    let mut state = State::Normal;
+
+    while index < bytes.len() {
+        match state {
+            State::Normal => {
+                if bytes[index] == b'#' {
+                    return line.get(index..).map(str::trim_start);
+                }
+                if bytes[index] == b'/' && bytes.get(index.saturating_add(1)) == Some(&b'/') {
+                    return line.get(index..).map(str::trim_start);
+                }
+                if bytes[index] == b'"' {
+                    state = State::DoubleQuoted { escaped: false };
+                } else if bytes[index] == b'\'' {
+                    state = State::SingleQuoted;
+                }
+            }
+            State::DoubleQuoted { escaped } => {
+                if escaped {
+                    state = State::DoubleQuoted { escaped: false };
+                } else if bytes[index] == b'\\' {
+                    state = State::DoubleQuoted { escaped: true };
+                } else if bytes[index] == b'"' {
+                    state = State::Normal;
+                }
+            }
+            State::SingleQuoted => {
+                if bytes[index] == b'\'' {
+                    state = State::Normal;
+                }
+            }
+        }
+        index = index.saturating_add(1);
+    }
+
+    None
 }
 
 fn config_comment_rels(tree: &ProjectTree) -> Vec<String> {

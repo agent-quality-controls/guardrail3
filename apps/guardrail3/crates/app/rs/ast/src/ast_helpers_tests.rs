@@ -136,7 +136,23 @@ fn cfg_attr_allow_found_on_trait_item() {
     assert_eq!(allows.len(), 1, "should find cfg_attr allow on trait item");
     assert_eq!(allows[0].line, 2);
     assert_eq!(allows[0].lint, "dead_code");
-    assert!(!allows[0].is_always_true, "test condition is not always true");
+    assert!(
+        !allows[0].is_always_true,
+        "test condition is not always true"
+    );
+}
+
+#[test]
+fn nested_cfg_attr_allow_found() {
+    let allows = find_cfg_attr_allows(&must_parse(
+        "#[cfg_attr(test, cfg_attr(unix, allow(dead_code)))]\nunsafe extern \"C\" { fn puts(s: *const i8); }",
+    ));
+    assert_eq!(allows.len(), 1, "should find nested cfg_attr allow");
+    assert_eq!(allows[0].lint, "dead_code");
+    assert!(
+        !allows[0].is_always_true,
+        "nested conditional allow stays conditional"
+    );
 }
 
 #[test]

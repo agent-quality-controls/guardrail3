@@ -1,7 +1,9 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::inputs::RustCodeFileInput;
-use super::parse::{GardeSkipInfo, find_garde_skips_with_types, same_line_has_comment, same_line_reason};
+use super::parse::{
+    GardeSkipInfo, find_garde_skips_with_types, same_line_has_comment, same_line_reason,
+};
 
 const ID: &str = "RS-CODE-06";
 
@@ -37,7 +39,6 @@ fn target_label(info: &GardeSkipInfo) -> String {
         format!("field `{}: {}`", info.field_name, info.field_type)
     }
 }
-
 
 #[cfg(test)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {

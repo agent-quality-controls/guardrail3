@@ -310,71 +310,71 @@ pub(super) fn extract_cfg_attr_allow_lints(attr: &syn::Attribute, out: &mut Vec<
         return;
     }
     let line = span_line(attr.span());
-    let Ok(meta_list) = attr.meta.require_list() else {
+    let syn::Meta::List(meta_list) = &attr.meta else {
         return;
     };
-    let always_true = is_cfg_attr_always_true(&meta_list.tokens);
-    let mut iter = meta_list.tokens.clone().into_iter().peekable();
-    while let Some(token) = iter.next() {
-        if let proc_macro2::TokenTree::Ident(ref ident) = token {
-            if ident == "allow" {
-                if let Some(proc_macro2::TokenTree::Group(group)) = iter.peek() {
-                    if group.delimiter() == proc_macro2::Delimiter::Parenthesis {
-                        if let Ok(paths) = syn::parse2::<LintList>(group.stream()) {
-                            for path in &paths.0 {
-                                out.push(CfgAttrAllowInfo {
-                                    line,
-                                    lint: path_to_string(path),
-                                    is_always_true: always_true,
-                                });
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    let Ok(args) = meta_list.parse_args_with(
+        syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated,
+    ) else {
+        return;
+    };
+    let mut args = args.into_iter();
+    let Some(condition) = args.next() else {
+        return;
+    };
+    let always_true = is_cfg_meta_always_true(&condition);
+    for meta in args {
+        collect_cfg_attr_allow_lints_from_meta(&meta, line, always_true, out);
     }
 }
 
 /// Detect if a `cfg_attr` condition is always true.
 /// Currently detects `all()` with no arguments.
-fn is_cfg_attr_always_true(tokens: &proc_macro2::TokenStream) -> bool {
-    let mut iter = tokens.clone().into_iter();
-    // First token should be the condition identifier
-    let Some(first) = iter.next() else {
+fn is_cfg_meta_always_true(meta: &syn::Meta) -> bool {
+    let syn::Meta::List(list) = meta else {
         return false;
     };
-    let proc_macro2::TokenTree::Ident(ref ident) = first else {
-        return false;
-    };
-    if ident != "all" {
-        return false;
-    }
-    // Next token should be an empty parenthesized group: `()`
-    let Some(second) = iter.next() else {
-        return false;
-    };
-    let proc_macro2::TokenTree::Group(ref group) = second else {
-        return false;
-    };
-    if group.delimiter() != proc_macro2::Delimiter::Parenthesis {
-        return false;
-    }
-    // `all()` is always true only if the group is empty (no arguments)
-    if !group.stream().is_empty() {
-        return false;
-    }
-    // Next must be a comma (separating condition from the allow)
-    let Some(third) = iter.next() else {
-        return false;
-    };
-    matches!(third, proc_macro2::TokenTree::Punct(ref p) if p.as_char() == ',')
+    list.path.is_ident("all") && list.tokens.is_empty()
 }
 
-struct LintList(syn::punctuated::Punctuated<syn::Path, syn::Token![,]>);
-impl syn::parse::Parse for LintList {
-    fn parse(input: syn::parse::ParseStream<'_>) -> syn::Result<Self> {
-        Ok(Self(syn::punctuated::Punctuated::parse_terminated(input)?))
+fn collect_cfg_attr_allow_lints_from_meta(
+    meta: &syn::Meta,
+    line: usize,
+    always_true: bool,
+    out: &mut Vec<CfgAttrAllowInfo>,
+) {
+    let syn::Meta::List(inner) = meta else {
+        return;
+    };
+    if inner.path.is_ident("allow") {
+        if let Ok(paths) = inner.parse_args_with(
+            syn::punctuated::Punctuated::<syn::Path, syn::Token![,]>::parse_terminated,
+        ) {
+            for path in &paths {
+                out.push(CfgAttrAllowInfo {
+                    line,
+                    lint: path_to_string(path),
+                    is_always_true: always_true,
+                });
+            }
+        }
+        return;
+    }
+    if !inner.path.is_ident("cfg_attr") {
+        return;
+    }
+    let Ok(args) = inner.parse_args_with(
+        syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated,
+    ) else {
+        return;
+    };
+    let mut args = args.into_iter();
+    let Some(condition) = args.next() else {
+        return;
+    };
+    let nested_always_true = always_true && is_cfg_meta_always_true(&condition);
+    for nested in args {
+        collect_cfg_attr_allow_lints_from_meta(&nested, line, nested_always_true, out);
     }
 }
 
