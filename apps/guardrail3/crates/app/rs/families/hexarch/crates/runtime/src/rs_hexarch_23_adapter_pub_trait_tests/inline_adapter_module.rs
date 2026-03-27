@@ -7,7 +7,7 @@ fn inline_adapter_module_with_public_trait_errors() {
     write_file(
         tmp.path(),
         "apps/backend/crates/adapters/outbound/postgres/src/lib.rs",
-        "mod nested {\n    pub trait InlineBoundary {\n    }\n}\n",
+        "pub mod nested {\n    pub trait InlineBoundary {\n    }\n}\n",
     );
 
     let results = super::run_family(tmp.path());

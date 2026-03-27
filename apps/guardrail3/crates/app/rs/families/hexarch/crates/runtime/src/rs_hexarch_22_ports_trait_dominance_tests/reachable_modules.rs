@@ -131,3 +131,65 @@ pub trait TaskRepo {
     let results = super::run_family(tmp.path());
     assertions::assert_no_warning(&results, "");
 }
+
+#[test]
+fn reachable_public_free_function_warns() {
+    let tmp = copy_fixture();
+    write_file(
+        tmp.path(),
+        "apps/backend/crates/ports/outbound/repo/src/lib.rs",
+        r#"
+pub trait TaskRepo {
+    fn list(&self);
+}
+
+pub fn helper() {}
+"#,
+    );
+
+    let results = super::run_family(tmp.path());
+    assertions::assert_warning_summary(
+        &results,
+        "",
+        1,
+        &["apps/backend/crates/ports/outbound/repo"],
+        Some(Some("apps/backend/crates/ports/outbound/repo")),
+        Some("public free function"),
+        None,
+        &[],
+    );
+}
+
+#[test]
+fn public_items_inside_private_module_do_not_count_as_ports_public_surface() {
+    let tmp = copy_fixture();
+    write_file(
+        tmp.path(),
+        "apps/backend/crates/ports/outbound/repo/src/lib.rs",
+        r#"
+mod private_api;
+
+pub trait TaskRepo {
+    fn list(&self);
+}
+"#,
+    );
+    write_file(
+        tmp.path(),
+        "apps/backend/crates/ports/outbound/repo/src/private_api.rs",
+        r#"
+pub fn helper() {}
+
+pub struct InternalRepo;
+
+impl InternalRepo {
+    pub fn new() -> Self {
+        Self
+    }
+}
+"#,
+    );
+
+    let results = super::run_family(tmp.path());
+    assertions::assert_no_warning(&results, "");
+}

@@ -17,6 +17,14 @@ This family enforces app-local Rust structure inside routed app roots. It does n
 - source-level ports/adapter surface rules
 - fail-closed dependency blocking when member manifests are malformed
 
+For ports source surfaces, the contract is direct rather than heuristic:
+
+- ports may define passive public DTO/error/type declarations
+- ports may define `pub trait` contracts
+- ports may define trait impls on passive types
+- ports should not expose public free functions
+- ports should not expose public inherent methods on concrete types
+
 It does not own:
 
 - repo-global misplaced Rust roots

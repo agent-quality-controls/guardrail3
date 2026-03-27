@@ -10,12 +10,30 @@ fn clean_golden_fixture_stays_clear_for_ports_trait_dominance() {
 }
 
 #[test]
-fn private_trait_in_ports_crate_still_counts_as_impl_heavy() {
+fn private_trait_without_public_behavior_stays_clean() {
     let tmp = copy_fixture();
     write_file(
         tmp.path(),
         "apps/backend/crates/ports/outbound/repo/src/lib.rs",
         "trait InternalRepo {}\n\nstruct Repo;\n\nimpl Repo {\n    fn new() -> Self {\n        Self\n    }\n}\n\nimpl InternalRepo for Repo {}\n",
+    );
+
+    let results = super::run_family(tmp.path());
+    assertions::assert_no_warning(&results, "");
+}
+
+#[test]
+fn public_inherent_methods_in_traitless_helper_module_warn() {
+    let tmp = copy_fixture();
+    write_file(
+        tmp.path(),
+        "apps/backend/crates/ports/outbound/repo/src/lib.rs",
+        "pub mod extra;\n\nuse backend_domain_types::Task;\n\npub trait TaskRepo {\n    fn list_inbox_tasks(&self) -> Vec<Task>;\n    fn replace_schedule(&mut self, tasks: Vec<Task>);\n}\n",
+    );
+    write_file(
+        tmp.path(),
+        "apps/backend/crates/ports/outbound/repo/src/extra.rs",
+        "pub struct ExtraA;\n\nimpl ExtraA {\n    pub fn new() -> Self {\n        Self\n    }\n}\n\npub struct ExtraB;\n\nimpl ExtraB {\n    pub fn new() -> Self {\n        Self\n    }\n}\n",
     );
 
     let results = super::run_family(tmp.path());
@@ -25,14 +43,14 @@ fn private_trait_in_ports_crate_still_counts_as_impl_heavy() {
         1,
         &["apps/backend/crates/ports/outbound/repo"],
         Some(Some("apps/backend/crates/ports/outbound/repo")),
-        Some("Ports crate `backend-ports-outbound-repo` has 2 impl blocks and 0 public traits"),
+        Some("public inherent method"),
         None,
         &[],
     );
 }
 
 #[test]
-fn helper_only_impls_in_traitless_modules_do_not_count() {
+fn private_helper_methods_in_traitless_module_stay_clean() {
     let tmp = copy_fixture();
     write_file(
         tmp.path(),
@@ -42,7 +60,7 @@ fn helper_only_impls_in_traitless_modules_do_not_count() {
     write_file(
         tmp.path(),
         "apps/backend/crates/ports/outbound/repo/src/extra.rs",
-        "pub struct ExtraA;\n\nimpl ExtraA {\n    pub fn new() -> Self {\n        Self\n    }\n}\n\npub struct ExtraB;\n\nimpl ExtraB {\n    pub fn new() -> Self {\n        Self\n    }\n}\n",
+        "pub struct ExtraA;\n\nimpl ExtraA {\n    fn new() -> Self {\n        Self\n    }\n}\n\nstruct ExtraB;\n\nimpl ExtraB {\n    fn new() -> Self {\n        Self\n    }\n}\n",
     );
 
     let results = super::run_family(tmp.path());
