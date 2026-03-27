@@ -1,15 +1,13 @@
-use std::collections::BTreeMap;
-
+use guardrail3_app_rs_family_clippy_assertions::rs_clippy_01_coverage as assertions;
 use guardrail3_domain_modules::clippy::build_clippy_toml;
 use guardrail3_domain_report::Severity;
+use test_support::{build_fixture_clippy_toml, write_file};
 
-use super::super::super::test_support::{
-    build_fixture_clippy_toml, copy_fixture, run_family, write_file,
-};
+use super::super::{copy_fixture_for_tests, run_for_tests};
 
 #[test]
 fn inventories_exact_covering_config_for_each_rust_root_in_multi_root_fixture() {
-    let tmp = copy_fixture();
+    let tmp = copy_fixture_for_tests();
     write_file(tmp.path(), "clippy.toml", &build_fixture_clippy_toml("service", false, true, "", ""));
     write_file(
         tmp.path(),
@@ -22,64 +20,38 @@ fn inventories_exact_covering_config_for_each_rust_root_in_multi_root_fixture() 
         &build_clippy_toml("library", false, true, "", ""),
     );
 
-    let results = run_family(tmp.path());
-    let coverage = results
-        .iter()
-        .filter(|result| result.id == "RS-CLIPPY-01")
-        .collect::<Vec<_>>();
-
-    let actual = coverage
-        .iter()
-        .map(|result| {
+    let results = run_for_tests(tmp.path());
+    assertions::assert_multi_root_coverage(
+        &results,
+        &[
             (
-                result.message.clone(),
-                (
-                    result.severity,
-                    result.inventory,
-                    result.file.clone(),
-                    result.title.clone(),
-                ),
-            )
-        })
-        .collect::<BTreeMap<_, _>>();
-    let expected = BTreeMap::from([
-        (
-            "workspace root `apps/backend` is covered by `clippy.toml`.".to_owned(),
-            (
+                "workspace root `apps/backend` is covered by `clippy.toml`.",
                 Severity::Info,
                 true,
-                Some("clippy.toml".to_owned()),
-                "Rust unit covered by clippy.toml".to_owned(),
+                Some("clippy.toml"),
+                "Rust unit covered by clippy.toml",
             ),
-        ),
-        (
-            "workspace root `apps/devctl` is covered by `apps/devctl/clippy.toml`.".to_owned(),
             (
+                "workspace root `apps/devctl` is covered by `apps/devctl/clippy.toml`.",
                 Severity::Info,
                 true,
-                Some("apps/devctl/clippy.toml".to_owned()),
-                "Rust unit covered by clippy.toml".to_owned(),
+                Some("apps/devctl/clippy.toml"),
+                "Rust unit covered by clippy.toml",
             ),
-        ),
-        (
-            "workspace root `apps/worker` is covered by `clippy.toml`.".to_owned(),
             (
+                "workspace root `apps/worker` is covered by `clippy.toml`.",
                 Severity::Info,
                 true,
-                Some("clippy.toml".to_owned()),
-                "Rust unit covered by clippy.toml".to_owned(),
+                Some("clippy.toml"),
+                "Rust unit covered by clippy.toml",
             ),
-        ),
-        (
-            "workspace root is covered by `clippy.toml`.".to_owned(),
             (
+                "workspace root is covered by `clippy.toml`.",
                 Severity::Info,
                 true,
-                Some("clippy.toml".to_owned()),
-                "Rust unit covered by clippy.toml".to_owned(),
+                Some("clippy.toml"),
+                "Rust unit covered by clippy.toml",
             ),
-        ),
-    ]);
-
-    assert_eq!(actual, expected);
+        ],
+    );
 }

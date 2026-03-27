@@ -1,7 +1,14 @@
 use std::collections::{BTreeMap, BTreeSet};
 
+#[cfg(test)]
+use guardrail3_app_rs_family_mapper::FamilyMapper;
 use guardrail3_app_rs_family_mapper::RsClippyRoute;
 use guardrail3_domain_project_tree::ProjectTree;
+#[cfg(test)]
+use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
+
+#[cfg(test)]
+use super::inputs::ConfigClippyInput;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PolicyRootKind {
@@ -180,7 +187,29 @@ pub fn collect(tree: &ProjectTree, route: &RsClippyRoute) -> ClippyFacts {
 
 #[cfg(test)]
 pub(crate) fn collect_for_tests(tree: &ProjectTree) -> ClippyFacts {
-    collect(tree, &super::test_support::family_route_for_tests(tree))
+    collect(tree, &family_route_for_tests(tree))
+}
+
+#[cfg(test)]
+pub(crate) fn config_input_for_tests<'a>(
+    facts: &'a ClippyFacts,
+    rel_path: &str,
+) -> ConfigClippyInput<'a> {
+    let config = facts
+        .allowed_configs
+        .iter()
+        .find(|config| config.rel_path == rel_path)
+        .expect("expected clippy config facts");
+    ConfigClippyInput::new(config)
+}
+
+#[cfg(test)]
+fn family_route_for_tests(tree: &ProjectTree) -> RsClippyRoute {
+    let scope = guardrail3_app_rs_placement::collect(tree);
+    let selected = RustFamilySelection::new(std::collections::BTreeSet::from([
+        RustValidateFamily::Clippy,
+    ]));
+    FamilyMapper::new(tree, &scope, None, &selected, None).map_rs_clippy()
 }
 
 fn config_precedence(rel_path: &str) -> usize {

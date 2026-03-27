@@ -1,7 +1,6 @@
 use std::collections::BTreeSet;
 
-use super::super::super::clippy_support::parse_ban_entries;
-use super::super::super::test_support::build_fixture_clippy_toml;
+use test_support::build_fixture_clippy_toml;
 
 #[test]
 fn generated_ban_baseline_has_no_duplicate_paths_in_any_section() {
@@ -13,9 +12,13 @@ fn generated_ban_baseline_has_no_duplicate_paths_in_any_section() {
         "disallowed-types",
         "disallowed-macros",
     ] {
-        let paths = parse_ban_entries(&parsed, key)
+        let paths = parsed
+            .get(key)
+            .and_then(toml::Value::as_array)
             .into_iter()
-            .map(|entry| entry.path)
+            .flatten()
+            .filter_map(|entry| entry.get("path").and_then(toml::Value::as_str))
+            .map(str::to_owned)
             .collect::<Vec<_>>();
         let unique = paths.iter().cloned().collect::<BTreeSet<_>>();
         assert_eq!(

@@ -80,6 +80,3 @@ pub fn check(tree: &ProjectTree, route: &RsClippyRoute) -> Vec<CheckResult> {
 
     results
 }
-
-#[cfg(test)]
-mod test_support;

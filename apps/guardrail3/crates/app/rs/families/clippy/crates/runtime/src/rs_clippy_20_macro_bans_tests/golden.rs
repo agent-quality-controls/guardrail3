@@ -1,38 +1,21 @@
-use std::collections::BTreeSet;
+use guardrail3_app_rs_family_clippy_assertions::rs_clippy_20_macro_bans as assertions;
+use test_support::{build_fixture_clippy_toml, root_workspace_tree};
 
-use guardrail3_domain_report::Severity;
-
-use super::super::super::test_support::{
-    build_fixture_clippy_toml, collected_facts, config_input, root_workspace_tree,
-};
-use super::super::check;
+use super::super::run_for_tests;
 
 #[test]
 fn inventories_every_required_macro_ban_from_generated_baseline() {
     let tree = root_workspace_tree(build_fixture_clippy_toml("service", false, true, "", ""));
-    let facts = collected_facts(&tree);
-    let mut results = Vec::new();
-
-    check(&config_input(&facts, "clippy.toml"), &mut results);
-
-    let actual_messages = results
-        .iter()
-        .map(|result| result.message.clone())
-        .collect::<BTreeSet<_>>();
-    let expected_messages = BTreeSet::from([
-        "`dbg!` is banned.".to_owned(),
-        "`eprintln!` is banned.".to_owned(),
-        "`println!` is banned.".to_owned(),
-        "`todo!` is banned.".to_owned(),
-        "`unimplemented!` is banned.".to_owned(),
-    ]);
-
-    assert_eq!(actual_messages, expected_messages);
-    assert!(results.iter().all(|result| {
-        result.id == "RS-CLIPPY-20"
-            && result.inventory
-            && result.severity == Severity::Info
-            && result.title == "macro ban present"
-            && result.file.as_deref() == Some("clippy.toml")
-    }));
+    let results = run_for_tests(&tree, "clippy.toml");
+    assertions::assert_golden(
+        &results,
+        &[
+            "`dbg!` is banned.",
+            "`eprintln!` is banned.",
+            "`println!` is banned.",
+            "`todo!` is banned.",
+            "`unimplemented!` is banned.",
+        ],
+        "clippy.toml",
+    );
 }

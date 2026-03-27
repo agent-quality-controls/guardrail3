@@ -1,31 +1,15 @@
 use guardrail3_domain_modules::clippy::build_clippy_toml;
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_clippy_assertions::rs_clippy_05_missing_type_ban as assertions;
+use test_support::{published_library_package_root_tree, remove_ban_path};
 
-use super::super::super::test_support::{
-    collected_facts, config_input, published_library_package_root_tree, remove_ban_path,
-};
-use super::super::check;
+use super::super::run_for_tests;
 
 #[test]
 fn inventories_library_only_global_state_type_bans_when_library_profile_baseline_is_present() {
     let tree =
         published_library_package_root_tree(build_clippy_toml("library", false, true, "", ""));
-    let facts = collected_facts(&tree);
-    let mut results = Vec::new();
-
-    check(&config_input(&facts, "clippy.toml"), &mut results);
-
-    assert!(results.iter().all(|result| result.id == "RS-CLIPPY-05"));
-    assert!(results.iter().any(|result| {
-        result.severity == Severity::Info
-            && result.inventory
-            && result.message == "`std::sync::LazyLock` is banned."
-    }));
-    assert!(results.iter().any(|result| {
-        result.severity == Severity::Info
-            && result.inventory
-            && result.message == "`once_cell::sync::OnceCell` is banned."
-    }));
+    let results = run_for_tests(&tree, "clippy.toml");
+    assertions::assert_library_global_state_inventory(&results);
 }
 
 #[test]
@@ -36,17 +20,12 @@ fn errors_when_library_profile_is_missing_global_state_type_bans() {
     }
 
     let tree = published_library_package_root_tree(clippy);
-    let facts = collected_facts(&tree);
-    let mut results = Vec::new();
-
-    check(&config_input(&facts, "clippy.toml"), &mut results);
-
-    assert!(results.iter().any(|result| {
-        result.severity == Severity::Error
-            && result.message == "`std::sync::LazyLock` is not present in `disallowed-types`."
-    }));
-    assert!(results.iter().any(|result| {
-        result.severity == Severity::Error
-            && result.message == "`once_cell::sync::OnceCell` is not present in `disallowed-types`."
-    }));
+    let results = run_for_tests(&tree, "clippy.toml");
+    assertions::assert_missing_messages(
+        &results,
+        &[
+            "`std::sync::LazyLock` is not present in `disallowed-types`.",
+            "`once_cell::sync::OnceCell` is not present in `disallowed-types`.",
+        ],
+    );
 }
