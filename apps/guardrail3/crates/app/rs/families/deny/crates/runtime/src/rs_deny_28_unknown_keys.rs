@@ -20,6 +20,25 @@ fn warn_unknown_key(
         inventory: false,
     });
 }
+
+fn warn_unsupported_schema(
+    results: &mut Vec<CheckResult>,
+    rel_path: &str,
+    scope: &str,
+    expected: &str,
+) {
+    results.push(CheckResult {
+        id: "RS-DENY-28".to_owned(),
+        severity: Severity::Warn,
+        title: format!("unsupported {scope} schema"),
+        message: format!(
+            "`{rel_path}` uses unsupported schema for `{scope}`; expected {expected}."
+        ),
+        file: Some(rel_path.to_owned()),
+        line: None,
+        inventory: false,
+    });
+}
 use super::inputs::ConfigDenyInput;
 
 pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
@@ -44,109 +63,129 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
 
     for section_name in ["advisories", "bans", "graph", "licenses", "sources"] {
         if let Some(value) = section(config, section_name) {
-            if let Some(section_table) = value.as_table() {
-                for key in section_table.keys() {
-                    if !known_section_keys(section_name).contains(key.as_str()) {
-                        warn_unknown_key(
-                            results,
-                            &config.rel_path,
-                            format!("unknown {section_name} key"),
-                            format!(
-                                "`{}` uses unknown `[{section_name}].{key}`.",
-                                config.rel_path
-                            ),
-                        );
-                    }
-                }
-            }
-        }
-    }
-
-    if let Some(private_table) = section(config, "licenses")
-        .and_then(|value| value.get("private"))
-        .and_then(toml::Value::as_table)
-    {
-        for key in private_table.keys() {
-            if !known_section_keys("private").contains(key.as_str()) {
-                warn_unknown_key(
+            let Some(section_table) = value.as_table() else {
+                warn_unsupported_schema(
                     results,
                     &config.rel_path,
-                    "unknown licenses.private key".to_owned(),
-                    format!(
-                        "`{}` uses unknown `[licenses.private].{key}`.",
-                        config.rel_path
-                    ),
+                    &format!("[{section_name}]"),
+                    "table",
                 );
+                continue;
+            };
+            for key in section_table.keys() {
+                if !known_section_keys(section_name).contains(key.as_str()) {
+                    warn_unknown_key(
+                        results,
+                        &config.rel_path,
+                        format!("unknown {section_name} key"),
+                        format!(
+                            "`{}` uses unknown `[{section_name}].{key}`.",
+                            config.rel_path
+                        ),
+                    );
+                }
             }
         }
     }
 
-    if let Some(exceptions) = section(config, "licenses")
-        .and_then(|value| value.get("exceptions"))
-        .and_then(toml::Value::as_array)
+    if let Some(private) = section(config, "licenses").and_then(|value| value.get("private")) {
+        if !private.is_table() {
+            warn_unsupported_schema(results, &config.rel_path, "[licenses.private]", "table");
+        } else if let Some(private_table) = private.as_table() {
+            for key in private_table.keys() {
+                if !known_section_keys("private").contains(key.as_str()) {
+                    warn_unknown_key(
+                        results,
+                        &config.rel_path,
+                        "unknown licenses.private key".to_owned(),
+                        format!(
+                            "`{}` uses unknown `[licenses.private].{key}`.",
+                            config.rel_path
+                        ),
+                    );
+                }
+            }
+        }
+    }
+
+    if let Some(exceptions) = section(config, "licenses").and_then(|value| value.get("exceptions"))
     {
-        for (index, entry) in exceptions.iter().enumerate() {
-            if let Some(table) = entry.as_table() {
-                for key in table.keys() {
-                    if !known_section_keys("exception").contains(key.as_str()) {
-                        warn_unknown_key(
-                            results,
-                            &config.rel_path,
-                            "unknown licenses.exceptions key".to_owned(),
-                            format!(
-                                "`{}` uses unknown `[[licenses.exceptions]].{key}` at index {index}.",
-                                config.rel_path
-                            ),
-                        );
+        if !exceptions.is_array() {
+            warn_unsupported_schema(results, &config.rel_path, "[licenses].exceptions", "array");
+        } else if let Some(exceptions) = exceptions.as_array() {
+            for (index, entry) in exceptions.iter().enumerate() {
+                if let Some(table) = entry.as_table() {
+                    for key in table.keys() {
+                        if !known_section_keys("exception").contains(key.as_str()) {
+                            warn_unknown_key(
+                                results,
+                                &config.rel_path,
+                                "unknown licenses.exceptions key".to_owned(),
+                                format!(
+                                    "`{}` uses unknown `[[licenses.exceptions]].{key}` at index {index}.",
+                                    config.rel_path
+                                ),
+                            );
+                        }
                     }
                 }
             }
         }
     }
 
-    if let Some(skip_entries) = section(config, "bans")
-        .and_then(|value| value.get("skip"))
-        .and_then(toml::Value::as_array)
-    {
-        for (index, entry) in skip_entries.iter().enumerate() {
-            if let Some(table) = entry.as_table() {
-                for key in table.keys() {
-                    if !known_section_keys("skip").contains(key.as_str()) {
-                        warn_unknown_key(
-                            results,
-                            &config.rel_path,
-                            "unknown bans.skip key".to_owned(),
-                            format!(
-                                "`{}` uses unknown `[[bans.skip]].{key}` at index {index}.",
-                                config.rel_path
-                            ),
-                        );
+    if let Some(skip_entries) = section(config, "bans").and_then(|value| value.get("skip")) {
+        if !skip_entries.is_array() {
+            warn_unsupported_schema(results, &config.rel_path, "[bans].skip", "array");
+        } else if let Some(skip_entries) = skip_entries.as_array() {
+            for (index, entry) in skip_entries.iter().enumerate() {
+                if let Some(table) = entry.as_table() {
+                    for key in table.keys() {
+                        if !known_section_keys("skip").contains(key.as_str()) {
+                            warn_unknown_key(
+                                results,
+                                &config.rel_path,
+                                "unknown bans.skip key".to_owned(),
+                                format!(
+                                    "`{}` uses unknown `[[bans.skip]].{key}` at index {index}.",
+                                    config.rel_path
+                                ),
+                            );
+                        }
                     }
                 }
             }
         }
     }
 
-    if let Some(ignore_entries) = section(config, "advisories")
-        .and_then(|value| value.get("ignore"))
-        .and_then(toml::Value::as_array)
+    if let Some(ignore_entries) =
+        section(config, "advisories").and_then(|value| value.get("ignore"))
     {
-        for (index, entry) in ignore_entries.iter().enumerate() {
-            if let Some(table) = entry.as_table() {
-                for key in table.keys() {
-                    if !known_section_keys("ignore").contains(key.as_str()) {
-                        warn_unknown_key(
-                            results,
-                            &config.rel_path,
-                            "unknown advisories.ignore key".to_owned(),
-                            format!(
-                                "`{}` uses unknown `[[advisories.ignore]].{key}` at index {index}.",
-                                config.rel_path
-                            ),
-                        );
+        if !ignore_entries.is_array() {
+            warn_unsupported_schema(results, &config.rel_path, "[advisories].ignore", "array");
+        } else if let Some(ignore_entries) = ignore_entries.as_array() {
+            for (index, entry) in ignore_entries.iter().enumerate() {
+                if let Some(table) = entry.as_table() {
+                    for key in table.keys() {
+                        if !known_section_keys("ignore").contains(key.as_str()) {
+                            warn_unknown_key(
+                                results,
+                                &config.rel_path,
+                                "unknown advisories.ignore key".to_owned(),
+                                format!(
+                                    "`{}` uses unknown `[[advisories.ignore]].{key}` at index {index}.",
+                                    config.rel_path
+                                ),
+                            );
+                        }
                     }
                 }
             }
+        }
+    }
+
+    if let Some(feature_entries) = section(config, "bans").and_then(|value| value.get("features")) {
+        if !feature_entries.is_array() {
+            warn_unsupported_schema(results, &config.rel_path, "[bans].features", "array");
         }
     }
 
@@ -164,7 +203,6 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         }
     }
 }
-
 
 #[cfg(test)]
 #[allow(dead_code)]
@@ -185,7 +223,10 @@ pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-pub(crate) use ::test_support::{add_skip_entry, build_fixture_deny_toml, copy_fixture, set_advisory_ignores, set_feature_entries, set_license_exceptions, write_file};
+pub(crate) use ::test_support::{
+    add_skip_entry, build_fixture_deny_toml, copy_fixture, set_advisory_ignores,
+    set_feature_entries, set_license_exceptions, write_file,
+};
 #[cfg(test)]
 #[path = "rs_deny_28_unknown_keys_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_deny_28_unknown_keys_tests;
