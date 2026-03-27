@@ -32,5 +32,25 @@ pub fn check(input: &ToolchainRootInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_toolchain_04_legacy_file_tests.rs"]
-mod tests;
+pub(crate) fn test_input<'a>(
+    toolchain_toml_rel: Option<&'a str>,
+    legacy_toolchain_rel: Option<&'a str>,
+    parsed: Option<&'a toml::Value>,
+    parse_error: Option<&'a str>,
+    cargo_rust_version: Option<&'a str>,
+    cargo_parse_error: Option<&'a str>,
+) -> ToolchainRootInput<'a> {
+    ToolchainRootInput {
+        toolchain_toml_rel,
+        legacy_toolchain_rel,
+        parsed,
+        parse_error,
+        cargo_toml_rel: Some("Cargo.toml"),
+        cargo_rust_version,
+        cargo_parse_error,
+    }
+}
+
+#[cfg(test)]
+#[path = "rs_toolchain_04_legacy_file_tests/mod.rs"] // reason: test-only sidecar module wiring
+mod rs_toolchain_04_legacy_file_tests;
