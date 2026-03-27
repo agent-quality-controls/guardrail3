@@ -107,6 +107,7 @@ pub fn collect(tree: &ProjectTree, route: &RsClippyRoute) -> ClippyFacts {
     let policy_map = read_policy_map(tree, &cargo_roots, &standalone_package_roots);
 
     let mut allowed_policy_roots = BTreeSet::new();
+    let _ = allowed_policy_roots.insert(String::new());
     allowed_policy_roots.extend(workspace_roots.iter().cloned());
     allowed_policy_roots.extend(standalone_package_roots.iter().cloned());
 
@@ -299,7 +300,7 @@ fn collect_configs(
 ) -> Vec<ClippyConfigFacts> {
     let mut paths = Vec::new();
     for file_name in ["clippy.toml", ".clippy.toml"] {
-        if routed_root_rels.contains("") && tree.file_exists(file_name) {
+        if tree.file_exists(file_name) {
             paths.push(("".to_owned(), file_name.to_owned()));
         }
         paths.extend(
@@ -515,13 +516,22 @@ fn read_policy_map(
 }
 
 fn resolve_app_paths(cargo_roots: &BTreeMap<String, CargoRootFacts>) -> BTreeMap<String, String> {
-    guardrail3_app_core::discover::resolve_app_paths_from_member_dirs(
+    let mut resolved = guardrail3_app_core::discover::resolve_app_paths_from_member_dirs(
         cargo_roots
             .values()
             .filter(|facts| facts.has_workspace)
             .flat_map(|workspace| workspace.workspace_members.iter().cloned())
             .collect::<Vec<_>>(),
-    )
+    );
+
+    for rel_dir in cargo_roots.keys() {
+        let mut parts = rel_dir.split('/');
+        if let (Some("apps"), Some(app_name), None) = (parts.next(), parts.next(), parts.next()) {
+            let _ = resolved.entry(app_name.to_owned()).or_insert_with(|| rel_dir.clone());
+        }
+    }
+
+    resolved
 }
 
 fn read_global_garde(tree: &ProjectTree) -> bool {
