@@ -1,7 +1,5 @@
 use guardrail3_domain_modules::clippy::{
-    ALLOW_DBG_IN_TESTS, ALLOW_EXPECT_IN_TESTS, ALLOW_PANIC_IN_TESTS, ALLOW_PRINT_IN_TESTS,
-    ALLOW_UNWRAP_IN_TESTS, AVOID_BREAKING_EXPORTED_API, BASE_TYPE_PATHS,
-    COGNITIVE_COMPLEXITY_THRESHOLD,
+    BASE_TYPE_PATHS, COGNITIVE_COMPLEXITY_THRESHOLD,
     EXCESSIVE_NESTING_THRESHOLD, LIBRARY_EXTRA_TYPE_PATHS, MAX_FN_PARAMS_BOOLS, MAX_STRUCT_BOOLS,
     SERVICE_METHOD_PATHS, THRESHOLD_VALUES, TOO_MANY_ARGUMENTS_THRESHOLD, TOO_MANY_LINES_THRESHOLD,
     TYPE_COMPLEXITY_THRESHOLD,
@@ -216,18 +214,6 @@ pub fn is_placeholder_reason(reason: &str) -> bool {
             normalized.as_str(),
             "todo" | "fixme" | "fix later" | "tbd" | "..." | "reason"
         )
-}
-
-pub fn expected_bool_value(key: &str) -> Option<bool> {
-    match key {
-        "avoid-breaking-exported-api" => Some(AVOID_BREAKING_EXPORTED_API),
-        "allow-dbg-in-tests" => Some(ALLOW_DBG_IN_TESTS),
-        "allow-expect-in-tests" => Some(ALLOW_EXPECT_IN_TESTS),
-        "allow-panic-in-tests" => Some(ALLOW_PANIC_IN_TESTS),
-        "allow-print-in-tests" => Some(ALLOW_PRINT_IN_TESTS),
-        "allow-unwrap-in-tests" => Some(ALLOW_UNWRAP_IN_TESTS),
-        _ => None,
-    }
 }
 
 pub fn normalized_key_distance(a: &str, b: &str) -> usize {

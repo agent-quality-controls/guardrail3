@@ -10,6 +10,6 @@ fn errors_when_local_policy_root_drops_managed_sections() {
     assertions::assert_incomplete_baseline(
         &results,
         "workspace/clippy.toml",
-        "`workspace/clippy.toml` replaces inherited clippy policy but is incomplete. Missing or wrong managed sections: allow-dbg-in-tests, allow-expect-in-tests, allow-panic-in-tests, allow-print-in-tests, allow-unwrap-in-tests, avoid-breaking-exported-api, disallowed-macros, disallowed-methods, disallowed-types, thresholds."
+        "`workspace/clippy.toml` replaces inherited clippy policy but is incomplete. Missing or wrong managed sections: disallowed-macros, disallowed-methods, disallowed-types, thresholds."
     );
 }
