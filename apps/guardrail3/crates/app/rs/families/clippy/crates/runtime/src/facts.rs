@@ -591,20 +591,28 @@ fn read_guardrail_policy(tree: &ProjectTree) -> GuardrailPolicyFacts {
     };
 
     match toml::from_str::<toml::Value>(content) {
-        Ok(parsed) => GuardrailPolicyFacts {
-            default_profile: parsed
-                .get("profile")
-                .and_then(|value| value.get("name"))
-                .and_then(toml::Value::as_str)
-                .map(str::to_owned),
-            default_garde: parsed
-                .get("rust")
-                .and_then(|value| value.get("checks"))
-                .and_then(|value| value.get("garde"))
-                .and_then(toml::Value::as_bool)
-                .unwrap_or(true),
-            parsed: Some(parsed),
-            parse_error: None,
+        Ok(parsed) => match validate_guardrail_policy_shape(&parsed) {
+            Ok(()) => GuardrailPolicyFacts {
+                default_profile: parsed
+                    .get("profile")
+                    .and_then(|value| value.get("name"))
+                    .and_then(toml::Value::as_str)
+                    .map(str::to_owned),
+                default_garde: parsed
+                    .get("rust")
+                    .and_then(|value| value.get("checks"))
+                    .and_then(|value| value.get("garde"))
+                    .and_then(toml::Value::as_bool)
+                    .unwrap_or(true),
+                parsed: Some(parsed),
+                parse_error: None,
+            },
+            Err(err) => GuardrailPolicyFacts {
+                parsed: None,
+                parse_error: Some(err),
+                default_profile: None,
+                default_garde: true,
+            },
         },
         Err(err) => GuardrailPolicyFacts {
             parsed: None,
@@ -613,6 +621,78 @@ fn read_guardrail_policy(tree: &ProjectTree) -> GuardrailPolicyFacts {
             default_garde: true,
         },
     }
+}
+
+fn validate_guardrail_policy_shape(parsed: &toml::Value) -> Result<(), String> {
+    if let Some(profile) = parsed.get("profile") {
+        let table = profile
+            .as_table()
+            .ok_or_else(|| "`profile` must be a table in active `guardrail3.toml`.".to_owned())?;
+        if let Some(name) = table.get("name") {
+            if !name.is_str() {
+                return Err("`profile.name` must be a string in active `guardrail3.toml`."
+                    .to_owned());
+            }
+        }
+    }
+
+    let Some(rust) = parsed.get("rust") else {
+        return Ok(());
+    };
+    let rust_table = rust
+        .as_table()
+        .ok_or_else(|| "`rust` must be a table in active `guardrail3.toml`.".to_owned())?;
+
+    if let Some(checks) = rust_table.get("checks") {
+        validate_garde_field(checks, "`rust.checks`")?;
+    }
+
+    if let Some(apps) = rust_table.get("apps") {
+        let apps_table = apps.as_table().ok_or_else(|| {
+            "`rust.apps` must be a table in active `guardrail3.toml`.".to_owned()
+        })?;
+        for (app_name, app_cfg) in apps_table {
+            let ctx = format!("`rust.apps.{app_name}`");
+            validate_profile_block(app_cfg, &ctx)?;
+        }
+    }
+
+    if let Some(packages) = rust_table.get("packages") {
+        validate_profile_block(packages, "`rust.packages`")?;
+    }
+
+    Ok(())
+}
+
+fn validate_profile_block(value: &toml::Value, context: &str) -> Result<(), String> {
+    let table = value
+        .as_table()
+        .ok_or_else(|| format!("{context} must be a table in active `guardrail3.toml`."))?;
+    if let Some(profile_name) = table.get("type").or_else(|| table.get("profile")) {
+        if !profile_name.is_str() {
+            return Err(format!(
+                "{context}.type/profile must be a string in active `guardrail3.toml`."
+            ));
+        }
+    }
+    if let Some(checks) = table.get("checks") {
+        validate_garde_field(checks, &format!("{context}.checks"))?;
+    }
+    Ok(())
+}
+
+fn validate_garde_field(value: &toml::Value, context: &str) -> Result<(), String> {
+    let table = value
+        .as_table()
+        .ok_or_else(|| format!("{context} must be a table in active `guardrail3.toml`."))?;
+    if let Some(garde) = table.get("garde") {
+        if !garde.is_bool() {
+            return Err(format!(
+                "{context}.garde must be a bool in active `guardrail3.toml`."
+            ));
+        }
+    }
+    Ok(())
 }
 
 fn policy_settings_for(
