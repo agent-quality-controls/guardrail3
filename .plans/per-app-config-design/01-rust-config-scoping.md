@@ -3,6 +3,10 @@
 **Date:** 2026-03-18
 **Status:** Design document (no code changes)
 
+> Historical design note. The Clippy lookup discussion in this document is stale.
+> For real upstream Clippy config resolution, use [`.plans/by_file/tools/edge-cases/clippy.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/by_file/tools/edge-cases/clippy.md).
+> For the live guardrail family contract, use [`.plans/todo/checks/rs/clippy.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/todo/checks/rs/clippy.md).
+
 ## Problem Statement
 
 guardrail3 generates config files (clippy.toml, deny.toml, rustfmt.toml, etc.) for Rust projects. Today it works well for single-workspace projects. But real monorepos have **multiple independent Rust applications** that need **different configs** -- different clippy bans, different deny.toml exceptions, different profiles. The current system applies one global set of overrides (`.guardrail3/overrides/`) to all apps uniformly, which is wrong.

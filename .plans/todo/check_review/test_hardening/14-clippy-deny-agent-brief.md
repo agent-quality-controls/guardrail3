@@ -1,5 +1,10 @@
 # Clippy And Deny Agent Brief
 
+> Historical hardening brief. Use:
+> - [`.plans/todo/checks/rs/clippy.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/todo/checks/rs/clippy.md)
+> - [`.plans/todo/checks/rs/deny.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/todo/checks/rs/deny.md)
+> as the current source of truth before acting on details here.
+
 You own the `rs/clippy` and `rs/deny` hardening pass.
 
 ## Read first
