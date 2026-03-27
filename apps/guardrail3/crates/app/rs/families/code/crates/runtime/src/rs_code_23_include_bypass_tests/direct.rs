@@ -42,6 +42,25 @@ fn inventories_build_script_include_pattern() {
 }
 
 #[test]
+fn errors_on_non_concat_include_with_out_dir_reference() {
+    let content = "include!(my_macro!(env!(\"OUT_DIR\"), \"../escape.rs\"));";
+    let binding = check_source("src/lib.rs", content, false);
+    let results = findings(&binding);
+
+    assert_normalized_len(&results, 1);
+    assert_eq!(results[0].id, "RS-CODE-23");
+    assert_eq!(results[0].severity, Severity::Error);
+    assert_eq!(results[0].title, "include! bypass");
+    assert_eq!(
+        results[0].message,
+        "`include!()` pulls in Rust code outside the scanned file boundary."
+    );
+    assert_eq!(results[0].line, Some(1));
+    assert_eq!(results[0].file.as_deref(), Some("src/lib.rs"));
+    assert!(!results[0].inventory);
+}
+
+#[test]
 fn warns_on_include_path_traversal() {
     let content = "const BYTES: &[u8] = include_bytes!(\"../fixtures/payload.bin\");";
     let binding = check_source("src/lib.rs", content, false);

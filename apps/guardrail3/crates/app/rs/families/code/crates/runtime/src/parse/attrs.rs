@@ -5,7 +5,7 @@ use super::helpers::{
     impl_item_attrs, item_attrs, path_to_string, span_line, trait_item_attrs,
 };
 use super::analysis_helpers::{
-    collect_always_true_cfg_attr_allows, expr_contains_out_dir, expr_has_path_traversal,
+    collect_always_true_cfg_attr_allows, expr_has_path_traversal, expr_is_out_dir_concat,
     macro_token_exprs, result_error_kind,
 };
 use super::types::{
@@ -205,7 +205,8 @@ impl<'ast> Visit<'ast> for IncludeMacroVisitor {
         let base = name.rsplit("::").next().unwrap_or(&name);
         if matches!(base, "include" | "include_str" | "include_bytes") {
             let exprs = macro_token_exprs(macro_call);
-            let build_script_pattern = exprs.iter().any(expr_contains_out_dir);
+            let build_script_pattern =
+                base == "include" && exprs.len() == 1 && expr_is_out_dir_concat(&exprs[0]);
             let path_traversal = exprs.iter().any(expr_has_path_traversal);
             self.out.push(IncludeMacroInfo {
                 line: span_line(macro_call.path.span()),
@@ -276,5 +277,27 @@ impl<'ast> Visit<'ast> for PublicResultErrorVisitor {
             }
         }
         syn::visit::visit_impl_item_fn(self, item_fn);
+    }
+
+    fn visit_item_trait(&mut self, item_trait: &'ast syn::ItemTrait) {
+        if !matches!(item_trait.vis, syn::Visibility::Public(_)) {
+            return syn::visit::visit_item_trait(self, item_trait);
+        }
+        for item in &item_trait.items {
+            let syn::TraitItem::Fn(item_fn) = item else {
+                continue;
+            };
+            let syn::ReturnType::Type(_, ty) = &item_fn.sig.output else {
+                continue;
+            };
+            if let Some(kind) = result_error_kind(ty) {
+                self.out.push(PublicResultErrorInfo {
+                    line: span_line(item_fn.sig.ident.span()),
+                    fn_name: format!("{}::{}", item_trait.ident, item_fn.sig.ident),
+                    kind,
+                });
+            }
+        }
+        syn::visit::visit_item_trait(self, item_trait);
     }
 }

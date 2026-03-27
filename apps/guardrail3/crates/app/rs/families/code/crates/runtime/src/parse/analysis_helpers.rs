@@ -148,28 +148,30 @@ pub(crate) fn macro_token_exprs(mac: &syn::Macro) -> Vec<syn::Expr> {
         .unwrap_or_default()
 }
 
-pub(crate) fn expr_contains_out_dir(expr: &syn::Expr) -> bool {
-    match expr {
-        syn::Expr::Macro(expr_macro) => {
-            let name = super::helpers::path_to_string(&expr_macro.mac.path);
-            if name.ends_with("env") {
-                return expr_macro.mac.tokens.to_string().contains("\"OUT_DIR\"");
-            }
-            if name.ends_with("concat") {
-                return macro_token_exprs(&expr_macro.mac)
-                    .iter()
-                    .any(expr_contains_out_dir);
-            }
-            macro_token_exprs(&expr_macro.mac)
-                .iter()
-                .any(expr_contains_out_dir)
-        }
-        syn::Expr::Call(call) => {
-            expr_contains_out_dir(&call.func) || call.args.iter().any(expr_contains_out_dir)
-        }
-        syn::Expr::Path(_) => false,
-        _ => false,
+pub(crate) fn expr_is_out_dir_concat(expr: &syn::Expr) -> bool {
+    let syn::Expr::Macro(expr_macro) = expr else {
+        return false;
+    };
+    let name = super::helpers::path_to_string(&expr_macro.mac.path);
+    if !name.ends_with("concat") {
+        return false;
     }
+    let args = macro_token_exprs(&expr_macro.mac);
+    if args.len() < 2 {
+        return false;
+    }
+    expr_is_env_out_dir(&args[0])
+}
+
+fn expr_is_env_out_dir(expr: &syn::Expr) -> bool {
+    let syn::Expr::Macro(expr_macro) = expr else {
+        return false;
+    };
+    let name = super::helpers::path_to_string(&expr_macro.mac.path);
+    if !name.ends_with("env") {
+        return false;
+    }
+    expr_macro.mac.tokens.to_string().contains("\"OUT_DIR\"")
 }
 
 pub(crate) fn expr_has_path_traversal(expr: &syn::Expr) -> bool {
