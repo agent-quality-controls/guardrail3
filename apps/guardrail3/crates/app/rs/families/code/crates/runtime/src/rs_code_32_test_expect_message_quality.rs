@@ -48,8 +48,7 @@ fn test_expect_message_is_useful(message: &str) -> bool {
     }
     if matches!(
         normalized.as_str(),
-        "ok"
-            | "okay"
+        "ok" | "okay"
             | "present"
             | "works"
             | "valid"

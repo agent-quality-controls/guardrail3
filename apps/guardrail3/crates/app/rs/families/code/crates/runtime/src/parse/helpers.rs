@@ -144,23 +144,46 @@ pub(crate) fn collect_cfg_attr_allow_lints(attrs: &[syn::Attribute]) -> Vec<(usi
         };
         let line = span_end_line(attr.span());
         for meta in args {
-            let syn::Meta::List(inner) = meta else {
-                continue;
-            };
-            if !inner.path.is_ident("allow") {
-                continue;
-            }
-            let Ok(paths) = inner.parse_args_with(
-                syn::punctuated::Punctuated::<syn::Path, syn::Token![,]>::parse_terminated,
-            ) else {
-                continue;
-            };
-            for path in paths {
-                out.push((line, path_to_string(&path)));
-            }
+            collect_cfg_attr_allow_lints_from_meta(&meta, line, &mut out);
         }
     }
     out
+}
+
+fn collect_cfg_attr_allow_lints_from_meta(
+    meta: &syn::Meta,
+    line: usize,
+    out: &mut Vec<(usize, String)>,
+) {
+    let syn::Meta::List(inner) = meta else {
+        return;
+    };
+    if inner.path.is_ident("allow") {
+        let Ok(paths) = inner.parse_args_with(
+            syn::punctuated::Punctuated::<syn::Path, syn::Token![,]>::parse_terminated,
+        ) else {
+            return;
+        };
+        for path in paths {
+            out.push((line, path_to_string(&path)));
+        }
+        return;
+    }
+    if !inner.path.is_ident("cfg_attr") {
+        return;
+    }
+    let Ok(args) = inner.parse_args_with(
+        syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated,
+    ) else {
+        return;
+    };
+    let mut args = args.into_iter();
+    let Some(_) = args.next() else {
+        return;
+    };
+    for nested in args {
+        collect_cfg_attr_allow_lints_from_meta(&nested, line, out);
+    }
 }
 
 pub(crate) fn collect_deny_forbid_attrs(

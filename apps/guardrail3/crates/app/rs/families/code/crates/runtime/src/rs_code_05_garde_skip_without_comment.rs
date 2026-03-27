@@ -37,7 +37,6 @@ fn target_label(info: &GardeSkipInfo) -> String {
     }
 }
 
-
 #[cfg(test)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_root(root)
