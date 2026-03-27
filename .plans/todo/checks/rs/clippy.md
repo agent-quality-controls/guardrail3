@@ -81,7 +81,10 @@ guardrail3 manages these clippy keys:
 - booleans:
   - `avoid-breaking-exported-api`
   - `allow-dbg-in-tests`
+  - `allow-expect-in-tests`
+  - `allow-panic-in-tests`
   - `allow-print-in-tests`
+  - `allow-unwrap-in-tests`
 - ban arrays:
   - `disallowed-methods`
   - `disallowed-types`
@@ -126,6 +129,7 @@ Every guardrail-managed ban entry must have a real `reason`.
 - default hardened value is `false`
 - `true` may be informationally tolerated for published library policy roots, but is otherwise Warn
 - `allow-dbg-in-tests = true` and `allow-print-in-tests = true` are Warn
+- `allow-panic-in-tests = true` and `allow-unwrap-in-tests = true` are Error
 
 ### Source of truth after cleanup
 
