@@ -44,3 +44,21 @@ fn foo() {}
         "`#[cfg_attr(..., allow(clippy::expect_used))]` is effectively unconditional. Use a direct `#[allow]` with an explicit reason instead."
     );
 }
+
+#[test]
+fn errors_on_trait_item_with_always_true_cfg_attr_allow() {
+    let content = "trait Api {\n    #[cfg_attr(all(), allow(dead_code))]\n    fn run();\n}\n";
+    let raw_results = check_source("src/lib.rs", content, false);
+    let results = findings(&raw_results);
+
+    assert_normalized_len(&results, 1);
+    assert_eq!(results[0].id, "RS-CODE-18");
+    assert_eq!(results[0].severity, Severity::Error);
+    assert_eq!(results[0].file.as_deref(), Some("src/lib.rs"));
+    assert_eq!(results[0].line, Some(2));
+    assert_eq!(results[0].title, "always-true cfg_attr bypass");
+    assert_eq!(
+        results[0].message,
+        "`#[cfg_attr(..., allow(dead_code))]` is effectively unconditional. Use a direct `#[allow]` with an explicit reason instead."
+    );
+}

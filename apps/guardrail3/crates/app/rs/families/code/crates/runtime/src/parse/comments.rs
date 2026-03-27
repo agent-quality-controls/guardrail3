@@ -1,4 +1,4 @@
-type NumberedLine = (usize, String);
+type NumberedLine = (usize, ());
 
 pub fn effective_non_comment_line_count(content: &str) -> usize {
     filter_non_comment_lines(content).len()
@@ -32,95 +32,172 @@ pub fn same_line_reason(content: &str, line: usize) -> Option<String> {
         })
 }
 
+pub fn same_line_has_comment(content: &str, line: usize) -> bool {
+    content
+        .lines()
+        .nth(line.saturating_sub(1))
+        .is_some_and(|source_line| {
+            let stripped = strip_string_literals(source_line);
+            stripped.contains("//") || stripped.contains("/*")
+        })
+}
+
 fn filter_non_comment_lines(content: &str) -> Vec<NumberedLine> {
     let mut result = Vec::new();
-    let mut in_block_comment = false;
+    let bytes = content.as_bytes();
+    let mut i = 0usize;
+    let mut line_num = 0usize;
+    let mut line_has_code = false;
 
-    for (line_num, line) in content.lines().enumerate() {
-        let trimmed = line.trim().to_owned();
-        let for_comment_check = strip_string_literals(&trimmed);
+    #[derive(Clone, Copy)]
+    enum ScanState {
+        Normal,
+        LineComment,
+        BlockComment(usize),
+        String { escaped: bool },
+        RawString { hashes: usize },
+    }
 
-        if in_block_comment {
-            if let Some(end_pos) = for_comment_check.find("*/") {
-                let after = trimmed
-                    .get(end_pos.saturating_add(2)..)
-                    .unwrap_or("")
-                    .trim()
-                    .to_owned();
-                let after_for_check = strip_string_literals(&after);
-                if after_for_check.contains("/*") {
-                    in_block_comment = true;
-                    if let Some(new_open) = after_for_check.find("/*") {
-                        let before_new = after.get(..new_open).unwrap_or("").trim().to_owned();
-                        if !before_new.is_empty() && !before_new.starts_with("//") {
-                            result.push((line_num, before_new));
-                        }
-                    }
+    let mut state = ScanState::Normal;
+
+    while i < bytes.len() {
+        let byte = bytes[i];
+        if byte == b'\n' {
+            if line_has_code {
+                result.push((line_num, ()));
+            }
+            line_num = line_num.saturating_add(1);
+            line_has_code = false;
+            if matches!(state, ScanState::LineComment) {
+                state = ScanState::Normal;
+            }
+            i = i.saturating_add(1);
+            continue;
+        }
+
+        state = match state {
+            ScanState::Normal => {
+                if starts_line_comment(bytes, i) {
+                    i = i.saturating_add(2);
+                    ScanState::LineComment
+                } else if starts_block_comment(bytes, i) {
+                    i = i.saturating_add(2);
+                    ScanState::BlockComment(1)
+                } else if let Some((prefix_len, hashes)) = raw_string_prefix(bytes, i) {
+                    line_has_code = true;
+                    i = i.saturating_add(prefix_len);
+                    ScanState::RawString { hashes }
+                } else if starts_byte_or_plain_string(bytes, i) {
+                    line_has_code = true;
+                    i = i.saturating_add(if bytes[i] == b'b' { 2 } else { 1 });
+                    ScanState::String { escaped: false }
                 } else {
-                    in_block_comment = false;
-                    if !after.is_empty() && !after.starts_with("//") {
-                        result.push((line_num, after));
+                    if !bytes[i].is_ascii_whitespace() {
+                        line_has_code = true;
                     }
+                    i = i.saturating_add(1);
+                    ScanState::Normal
                 }
             }
-            continue;
-        }
-
-        let processed = strip_inline_block_comments(&trimmed);
-        let processed_for_check = strip_string_literals(&processed);
-        if let Some(open_pos) = processed_for_check.find("/*") {
-            let before = processed.get(..open_pos).unwrap_or("").trim().to_owned();
-            in_block_comment = true;
-            if !before.is_empty() && !before.starts_with("//") {
-                result.push((line_num, before));
+            ScanState::LineComment => {
+                i = i.saturating_add(1);
+                ScanState::LineComment
             }
-            continue;
-        }
+            ScanState::BlockComment(depth) => {
+                if starts_block_comment(bytes, i) {
+                    i = i.saturating_add(2);
+                    ScanState::BlockComment(depth.saturating_add(1))
+                } else if ends_block_comment(bytes, i) {
+                    i = i.saturating_add(2);
+                    if depth == 1 {
+                        ScanState::Normal
+                    } else {
+                        ScanState::BlockComment(depth.saturating_sub(1))
+                    }
+                } else {
+                    i = i.saturating_add(1);
+                    ScanState::BlockComment(depth)
+                }
+            }
+            ScanState::String { escaped } => {
+                if escaped {
+                    i = i.saturating_add(1);
+                    ScanState::String { escaped: false }
+                } else if byte == b'\\' {
+                    i = i.saturating_add(1);
+                    ScanState::String { escaped: true }
+                } else if byte == b'"' {
+                    i = i.saturating_add(1);
+                    ScanState::Normal
+                } else {
+                    i = i.saturating_add(1);
+                    ScanState::String { escaped: false }
+                }
+            }
+            ScanState::RawString { hashes } => {
+                if raw_string_terminator(bytes, i, hashes) {
+                    i = i.saturating_add(1 + hashes);
+                    ScanState::Normal
+                } else {
+                    i = i.saturating_add(1);
+                    ScanState::RawString { hashes }
+                }
+            }
+        };
+    }
 
-        let final_trimmed = processed.trim().to_owned();
-        if final_trimmed.is_empty()
-            || final_trimmed.starts_with("//")
-            || final_trimmed.starts_with("///")
-        {
-            continue;
-        }
-
-        result.push((line_num, final_trimmed));
+    if line_has_code {
+        result.push((line_num, ()));
     }
 
     result
 }
 
-fn strip_inline_block_comments(line: &str) -> String {
-    let mut result = String::with_capacity(line.len());
-    let mut remaining = line;
+fn starts_line_comment(bytes: &[u8], index: usize) -> bool {
+    bytes.get(index) == Some(&b'/') && bytes.get(index.saturating_add(1)) == Some(&b'/')
+}
 
-    loop {
-        let remaining_for_check = strip_string_literals(remaining);
-        match remaining_for_check.find("/*") {
-            Some(start) => {
-                result.push_str(remaining.get(..start).unwrap_or(""));
-                let check_rest = strip_string_literals(remaining.get(start..).unwrap_or(""));
-                match check_rest.find("*/") {
-                    Some(end) => {
-                        remaining = remaining
-                            .get(start.saturating_add(end).saturating_add(2)..)
-                            .unwrap_or("");
-                    }
-                    None => {
-                        result.push_str(remaining.get(start..).unwrap_or(""));
-                        break;
-                    }
-                }
-            }
-            None => {
-                result.push_str(remaining);
-                break;
-            }
-        }
+fn starts_block_comment(bytes: &[u8], index: usize) -> bool {
+    bytes.get(index) == Some(&b'/') && bytes.get(index.saturating_add(1)) == Some(&b'*')
+}
+
+fn ends_block_comment(bytes: &[u8], index: usize) -> bool {
+    bytes.get(index) == Some(&b'*') && bytes.get(index.saturating_add(1)) == Some(&b'/')
+}
+
+fn starts_byte_or_plain_string(bytes: &[u8], index: usize) -> bool {
+    bytes.get(index) == Some(&b'"')
+        || (bytes.get(index) == Some(&b'b') && bytes.get(index.saturating_add(1)) == Some(&b'"'))
+}
+
+fn raw_string_prefix(bytes: &[u8], index: usize) -> Option<(usize, usize)> {
+    let prefix_offset = if bytes.get(index) == Some(&b'r') {
+        0
+    } else if bytes.get(index) == Some(&b'b') && bytes.get(index.saturating_add(1)) == Some(&b'r') {
+        1
+    } else {
+        return None;
+    };
+
+    let mut hashes = 0usize;
+    let mut cursor = index.saturating_add(prefix_offset).saturating_add(1);
+    while bytes.get(cursor) == Some(&b'#') {
+        hashes = hashes.saturating_add(1);
+        cursor = cursor.saturating_add(1);
+    }
+    if bytes.get(cursor) != Some(&b'"') {
+        return None;
     }
 
-    result
+    let prefix_len = cursor.saturating_sub(index).saturating_add(1);
+    Some((prefix_len, hashes))
+}
+
+fn raw_string_terminator(bytes: &[u8], index: usize, hashes: usize) -> bool {
+    if bytes.get(index) != Some(&b'"') {
+        return false;
+    }
+    (0..hashes).all(|offset| bytes.get(index.saturating_add(1 + offset)) == Some(&b'#'))
 }
 
 fn strip_string_literals(line: &str) -> String {

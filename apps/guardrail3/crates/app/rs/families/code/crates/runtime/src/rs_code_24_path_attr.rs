@@ -32,7 +32,7 @@ fn is_canonical_test_sidecar_path(input: &RustCodeFileInput<'_>, line: usize, pa
 
 pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
     for info in find_path_attrs(input.ast) {
-        if is_canonical_test_sidecar_path(input, info.line, &info.path) {
+        if !info.via_cfg_attr && is_canonical_test_sidecar_path(input, info.line, &info.path) {
             continue;
         }
         if info.path.contains("..") {

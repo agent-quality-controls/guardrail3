@@ -118,3 +118,17 @@ fn errors_on_cfg_attr_parent_escaping_path_attr() {
     assert_eq!(results[0].severity, Severity::Error);
     assert_eq!(results[0].title, "#[path] escapes parent directory");
 }
+
+#[test]
+fn errors_on_cfg_attr_canonical_sidecar_path_wiring_without_reason() {
+    let content =
+        "#[cfg(test)]\n#[cfg_attr(unix, path = \"rs_code_24_path_attr_tests/mod.rs\")]\nmod tests;";
+    let binding = check_source("src/rs_code_24_path_attr.rs", content, false);
+    let results = findings(&binding);
+
+    assert_normalized_len(&results, 1);
+    assert_eq!(results[0].id, "RS-CODE-24");
+    assert_eq!(results[0].severity, Severity::Error);
+    assert_eq!(results[0].title, "#[path] without reason");
+    assert_eq!(results[0].line, Some(2));
+}

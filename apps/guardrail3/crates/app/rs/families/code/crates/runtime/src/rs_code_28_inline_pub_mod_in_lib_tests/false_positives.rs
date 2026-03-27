@@ -21,3 +21,11 @@ fn skips_non_public_or_file_backed_modules() {
     let results = run_family(root);
     assert_no_hits(&results);
 }
+
+#[test]
+fn skips_cfg_test_public_module_in_lib_rs() {
+    let content = "#[cfg(test)]\npub mod tests { pub fn run() {} }\n";
+    let results = super::super::check_source("src/lib.rs", content, false);
+
+    assert_no_hits(&results);
+}

@@ -1,8 +1,12 @@
 use super::helpers::{
-    collect_allow_lints, collect_always_true_cfg_attr_allows, collect_cfg_attr_allow_lints,
-    collect_cfg_attr_path_attrs, collect_deny_forbid_attrs, collect_path_attrs,
-    expr_contains_out_dir, expr_has_path_traversal, impl_item_attrs, item_attrs,
-    macro_token_exprs, path_to_string, result_error_kind, span_line, trait_item_attrs,
+    collect_allow_lints, collect_cfg_attr_allow_lints,
+    collect_cfg_attr_deny_forbid_attrs, collect_cfg_attr_path_attrs, collect_deny_forbid_attrs,
+    collect_path_attrs,
+    impl_item_attrs, item_attrs, path_to_string, span_line, trait_item_attrs,
+};
+use super::analysis_helpers::{
+    collect_always_true_cfg_attr_allows, expr_contains_out_dir, expr_has_path_traversal,
+    macro_token_exprs, result_error_kind,
 };
 use super::types::{
     DenyForbidInfo, ForeignModAllowInfo, ImplAllowInfo, IncludeMacroInfo, PathAttrInfo,
@@ -27,6 +31,7 @@ pub fn find_impl_block_allows(ast: &syn::File) -> Vec<ImplAllowInfo> {
 pub fn find_deny_forbid_attrs(ast: &syn::File) -> Vec<DenyForbidInfo> {
     let mut out = Vec::new();
     collect_deny_forbid_attrs(&ast.attrs, true, &mut out);
+    collect_cfg_attr_deny_forbid_attrs(&ast.attrs, true, &mut out);
     let mut visitor = DenyForbidVisitor { out: &mut out };
     visitor.visit_file(ast);
     out
@@ -157,16 +162,19 @@ impl<'ast> Visit<'ast> for ImplAllowVisitor {
 impl<'ast> Visit<'ast> for DenyForbidVisitor<'ast> {
     fn visit_item(&mut self, item: &'ast syn::Item) {
         collect_deny_forbid_attrs(item_attrs(item), false, self.out);
+        collect_cfg_attr_deny_forbid_attrs(item_attrs(item), false, self.out);
         syn::visit::visit_item(self, item);
     }
 
     fn visit_impl_item(&mut self, item: &'ast syn::ImplItem) {
         collect_deny_forbid_attrs(impl_item_attrs(item), false, self.out);
+        collect_cfg_attr_deny_forbid_attrs(impl_item_attrs(item), false, self.out);
         syn::visit::visit_impl_item(self, item);
     }
 
     fn visit_trait_item(&mut self, item: &'ast syn::TraitItem) {
         collect_deny_forbid_attrs(trait_item_attrs(item), false, self.out);
+        collect_cfg_attr_deny_forbid_attrs(trait_item_attrs(item), false, self.out);
         syn::visit::visit_trait_item(self, item);
     }
 }
@@ -221,6 +229,11 @@ impl<'ast> Visit<'ast> for AlwaysTrueCfgAttrVisitor<'ast> {
     fn visit_impl_item(&mut self, item: &'ast syn::ImplItem) {
         collect_always_true_cfg_attr_allows(impl_item_attrs(item), self.out);
         syn::visit::visit_impl_item(self, item);
+    }
+
+    fn visit_trait_item(&mut self, item: &'ast syn::TraitItem) {
+        collect_always_true_cfg_attr_allows(trait_item_attrs(item), self.out);
+        syn::visit::visit_trait_item(self, item);
     }
 }
 

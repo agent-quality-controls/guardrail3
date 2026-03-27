@@ -119,3 +119,37 @@ fn detects_non_primitive_garde_skips_with_plain_comments_across_real_owned_files
         ],
     );
 }
+
+#[test]
+fn detects_non_primitive_garde_skip_with_block_comment() {
+    let fixture = copy_fixture();
+    let root = fixture.path();
+
+    let rel = "apps/worker/crates/adapters/outbound/sqs/src/lib.rs";
+    let content = test_support::read_file(root, rel);
+    let new_content = format!(
+        "{content}\nstruct BlockCommentSkipProbe {{\n    #[garde(skip)] /* validated elsewhere */\n    field: String,\n}}\n"
+    );
+    write_file(root, rel, &new_content);
+
+    let line = new_content
+        .lines()
+        .position(|entry| entry.contains("#[garde(skip)] /* validated elsewhere */"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
+
+    let results = run_family(root);
+
+    assert_files(&results, BTreeSet::from([rel.to_owned()]));
+    assert_findings(
+        &results,
+        &[RuleFinding {
+            severity: Severity::Error,
+            title: "garde(skip) comment missing reason",
+            message: "`#[garde(skip)]` on non-primitive field `field: String` needs `// reason:`.",
+            file: Some(rel),
+            line: Some(line),
+            inventory: false,
+        }],
+    );
+}

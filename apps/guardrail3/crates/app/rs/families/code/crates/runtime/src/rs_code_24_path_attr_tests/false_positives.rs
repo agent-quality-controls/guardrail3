@@ -41,3 +41,39 @@ fn skips_same_line_reasoned_non_escaping_path_attrs() {
         }],
     );
 }
+
+#[test]
+fn skips_multiline_path_attr_with_reason_on_closing_line() {
+    let content = "#[path =\n    \"generated_inline.rs\"\n] // reason: generated request DTO shim\nmod generated_inline;\n";
+    let results = super::super::check_source("src/lib.rs", content, false);
+
+    assert_findings(
+        &results,
+        &[RuleFinding {
+            severity: guardrail3_domain_report::Severity::Warn,
+            title: "#[path] usage",
+            message: "#[path = \"generated_inline.rs\"] reason: generated request DTO shim",
+            file: Some("src/lib.rs"),
+            line: Some(3),
+            inventory: false,
+        }],
+    );
+}
+
+#[test]
+fn skips_multiline_cfg_attr_path_with_reason_on_closing_line() {
+    let content = "#[cfg_attr(\n    test,\n    path = \"generated_inline.rs\"\n)] // reason: generated request DTO shim\nmod generated_inline;\n";
+    let results = super::super::check_source("src/lib.rs", content, false);
+
+    assert_findings(
+        &results,
+        &[RuleFinding {
+            severity: guardrail3_domain_report::Severity::Warn,
+            title: "#[path] usage",
+            message: "#[path = \"generated_inline.rs\"] reason: generated request DTO shim",
+            file: Some("src/lib.rs"),
+            line: Some(4),
+            inventory: false,
+        }],
+    );
+}

@@ -1,7 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::inputs::RustCodeFileInput;
-use super::parse::{GardeSkipInfo, find_garde_skips_with_types, same_line_reason};
+use super::parse::{GardeSkipInfo, find_garde_skips_with_types, same_line_has_comment, same_line_reason};
 
 const ID: &str = "RS-CODE-06";
 
@@ -10,8 +10,7 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
         if info.is_primitive {
             continue;
         }
-        let same_line = input.content.lines().nth(info.line.saturating_sub(1));
-        let has_comment = same_line.is_some_and(|line| line.contains("//"));
+        let has_comment = same_line_has_comment(input.content, info.line);
         let has_reason = same_line_reason(input.content, info.line).is_some();
         if !has_comment || has_reason {
             continue;
