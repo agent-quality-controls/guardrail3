@@ -1,11 +1,7 @@
-use std::collections::BTreeSet;
+use guardrail3_app_rs_family_clippy_assertions::rs_clippy_20_macro_bans as assertions;
+use test_support::{build_fixture_clippy_toml, remove_ban_path, root_workspace_tree};
 
-use guardrail3_domain_report::Severity;
-
-use super::super::super::test_support::{
-    build_fixture_clippy_toml, collected_facts, config_input, remove_ban_path, root_workspace_tree,
-};
-use super::super::check;
+use super::super::run_for_tests;
 
 #[test]
 fn errors_for_each_missing_required_macro_ban() {
@@ -15,21 +11,12 @@ fn errors_for_each_missing_required_macro_ban() {
         "todo",
     );
     let tree = root_workspace_tree(clippy);
-    let facts = collected_facts(&tree);
-    let mut results = Vec::new();
-
-    check(&config_input(&facts, "clippy.toml"), &mut results);
-
-    let error_messages = results
-        .iter()
-        .filter(|result| result.severity == Severity::Error)
-        .map(|result| result.message.clone())
-        .collect::<BTreeSet<_>>();
-    let expected_error_messages = BTreeSet::from([
-        "`eprintln!` is not present in `disallowed-macros`.".to_owned(),
-        "`todo!` is not present in `disallowed-macros`.".to_owned(),
-    ]);
-
-    assert_eq!(error_messages, expected_error_messages);
-    assert!(results.iter().all(|result| result.id == "RS-CLIPPY-20"));
+    let results = run_for_tests(&tree, "clippy.toml");
+    assertions::assert_missing_messages(
+        &results,
+        &[
+            "`eprintln!` is not present in `disallowed-macros`.",
+            "`todo!` is not present in `disallowed-macros`.",
+        ],
+    );
 }

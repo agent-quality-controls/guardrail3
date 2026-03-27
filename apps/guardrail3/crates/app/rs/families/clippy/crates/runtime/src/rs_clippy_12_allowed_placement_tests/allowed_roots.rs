@@ -1,6 +1,7 @@
-use super::super::super::test_support::{
-    build_fixture_clippy_toml, collected_facts, dir_entry, project_tree,
-};
+use guardrail3_app_rs_family_clippy_assertions::rs_clippy_12_allowed_placement as assertions;
+use test_support::{build_fixture_clippy_toml, dir_entry, project_tree};
+
+use super::super::run_for_tests;
 
 #[test]
 fn allows_validation_workspace_and_standalone_package_roots() {
@@ -37,11 +38,6 @@ fn allows_validation_workspace_and_standalone_package_roots() {
         ],
     );
 
-    let facts = collected_facts(&tree);
-
-    assert!(
-        facts.forbidden_configs.is_empty(),
-        "expected allowed policy roots to stay out of RS-CLIPPY-12: {:#?}",
-        facts.forbidden_configs
-    );
+    let results = run_for_tests(&tree);
+    assertions::assert_no_results(&results);
 }

@@ -1,15 +1,19 @@
 use std::collections::BTreeSet;
 
-use super::super::super::clippy_support::{EXPECTED_MACRO_BANS, parse_ban_entries};
-use super::super::super::test_support::build_fixture_clippy_toml;
+use guardrail3_domain_modules::clippy::EXPECTED_MACRO_BANS;
+use test_support::build_fixture_clippy_toml;
 
 #[test]
 fn generated_macro_ban_set_matches_rule_baseline() {
     let parsed =
         toml::from_str::<toml::Value>(&build_fixture_clippy_toml("service", false, true, "", "")).expect("valid clippy TOML");
-    let actual = parse_ban_entries(&parsed, "disallowed-macros")
+    let actual = parsed
+        .get("disallowed-macros")
+        .and_then(toml::Value::as_array)
         .into_iter()
-        .map(|entry| entry.path)
+        .flatten()
+        .filter_map(|entry| entry.get("path").and_then(toml::Value::as_str))
+        .map(str::to_owned)
         .collect::<BTreeSet<_>>();
     let expected = EXPECTED_MACRO_BANS
         .iter()

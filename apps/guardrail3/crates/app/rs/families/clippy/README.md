@@ -59,7 +59,7 @@ That split is intentional:
 
 ## Current Shape
 
-At this checkpoint, `clippy` has been moved into the nested family workspace shape, but the test boundary migration is only partial:
+At this checkpoint, `clippy` is in the nested family workspace shape and the sidecar migration now uses sibling assertions plus external `test_support`:
 
 ```text
 apps/guardrail3/crates/app/rs/families/clippy/
@@ -73,7 +73,6 @@ apps/guardrail3/crates/app/rs/families/clippy/
         facts.rs
         inputs.rs
         clippy_support.rs
-        test_support.rs
         rs_clippy_01_*.rs
         rs_clippy_01_*_tests/
           mod.rs
@@ -95,7 +94,9 @@ This means:
 
 - the family is now a real nested workspace
 - the runtime crate builds and the family is green under `RS-ARCH` and `RS-CLIPPY`
-- but the family is not yet self-hosted under the stricter `RS-TEST` contract because assertions extraction is still largely undone
+- rule sidecars now prove behavior through sibling assertions modules instead of runtime-local helper plumbing
+- generic fixture setup now lives in the sibling `test_support` crate rather than a private runtime shim
+- fresh top-level `RS-TEST` validation still depends on the outer app workspace being buildable, so when another family temporarily breaks the outer workspace, clippy progress must be verified from its nested workspace first
 
 ## Target Shape
 
@@ -137,7 +138,7 @@ Owns:
 - family orchestration
 - family-local Clippy policy discovery inside routed roots
 - rule execution
-- scenario setup in runtime sidecars
+- narrowly scoped test-only owner helpers such as `run_for_tests(...)`
 
 Must not own:
 
@@ -187,15 +188,12 @@ At the current checkpoint:
 - the family passes `RS-ARCH`
 - the family passes `RS-CLIPPY`
 - the family root now carries a managed `clippy.toml`, so the earlier `RS-CLIPPY-01` self-hit is gone
-- the family still fails `RS-TEST`
-  - `RS-TEST-03`: `612`
-  - `RS-TEST-16`: `16`
-  - `RS-TEST-02`: `1`
-  - `RS-TEST-01`: `1`
-  - `RS-TEST-18`: `1`
+- the family no longer has a runtime-local `test_support.rs` shim
+- rule clusters `02..22` now use owner helpers plus sibling assertions modules
+- the remaining self-hosting status under `RS-TEST` needs a fresh top-level validator run after the unrelated outer-workspace break from the in-flight `deny` migration is gone
 
 So the next work on `clippy` is not rule rescue first. It is:
 
-1. finish the `RS-TEST` migration by removing runtime-local test-support escapes and extracting owned assertions modules
-2. make the family pass `RS-TEST`
+1. rerun `RS-TEST` on the family once the outer workspace is healthy again and confirm the remaining buckets exactly
+2. fix any leftover structural fallout if the validator still finds it
 3. then attack-review the live `RS-CLIPPY` rules the way `RS-CODE` and `RS-TEST` were hardened

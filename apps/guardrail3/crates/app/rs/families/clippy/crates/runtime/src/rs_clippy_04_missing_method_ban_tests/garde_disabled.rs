@@ -1,9 +1,9 @@
-use guardrail3_domain_report::Severity;
-
-use super::super::super::test_support::{
-    build_fixture_clippy_toml, collected_facts, config_input, garde_disabled_root_tree, remove_ban_path,
+use guardrail3_app_rs_family_clippy_assertions::rs_clippy_04_missing_method_ban as assertions;
+use test_support::{
+    build_fixture_clippy_toml, garde_disabled_root_tree, remove_ban_path,
 };
-use super::super::check;
+
+use super::super::run_for_tests;
 
 #[test]
 fn drops_garde_owned_method_requirements_when_garde_is_disabled() {
@@ -22,25 +22,6 @@ fn drops_garde_owned_method_requirements_when_garde_is_disabled() {
     }
 
     let tree = garde_disabled_root_tree(clippy);
-    let facts = collected_facts(&tree);
-    let mut results = Vec::new();
-
-    check(&config_input(&facts, "clippy.toml"), &mut results);
-
-    assert!(results.iter().all(|result| {
-        result.id == "RS-CLIPPY-04"
-            && result.inventory
-            && result.severity == Severity::Info
-            && result.file.as_deref() == Some("clippy.toml")
-    }));
-    assert!(
-        !results
-            .iter()
-            .any(|result| result.message.contains("serde_json::from_str"))
-    );
-    assert!(
-        !results
-            .iter()
-            .any(|result| result.message.contains("reqwest::Response::json"))
-    );
+    let results = run_for_tests(&tree, "clippy.toml");
+    assertions::assert_garde_disabled(&results, "clippy.toml");
 }

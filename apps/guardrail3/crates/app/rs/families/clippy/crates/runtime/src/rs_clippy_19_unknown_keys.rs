@@ -1,6 +1,8 @@
 use std::collections::BTreeSet;
 
 use guardrail3_domain_report::{CheckResult, Severity};
+#[cfg(test)]
+use guardrail3_domain_project_tree::ProjectTree;
 
 use super::clippy_support::{
     known_top_level_keys, managed_non_threshold_keys, normalized_key_distance,
@@ -41,6 +43,14 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
             });
         }
     }
+}
+
+#[cfg(test)]
+pub(crate) fn run_for_tests(tree: &ProjectTree, rel_path: &str) -> Vec<CheckResult> {
+    let facts = super::facts::collect_for_tests(tree);
+    let mut results = Vec::new();
+    check(&super::facts::config_input_for_tests(&facts, rel_path), &mut results);
+    results
 }
 
 #[cfg(test)]

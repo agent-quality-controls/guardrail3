@@ -1,18 +1,11 @@
-use super::super::super::test_support::{
-    build_fixture_clippy_toml, collected_facts, config_input, root_workspace_tree,
-};
-use super::super::check;
+use guardrail3_app_rs_family_clippy_assertions::rs_clippy_15_trivial_reason as assertions;
+use test_support::{build_fixture_clippy_toml, root_workspace_tree};
+
+use super::super::run_for_tests;
 
 #[test]
 fn emits_no_result_when_ban_reasons_are_substantive() {
     let tree = root_workspace_tree(build_fixture_clippy_toml("service", false, true, "", ""));
-    let facts = collected_facts(&tree);
-    let mut results = Vec::new();
-
-    check(&config_input(&facts, "clippy.toml"), &mut results);
-
-    assert!(
-        results.is_empty(),
-        "expected canonical non-placeholder reasons to avoid RS-CLIPPY-15 warnings: {results:#?}"
-    );
+    let results = run_for_tests(&tree, "clippy.toml");
+    assertions::assert_no_results(&results);
 }

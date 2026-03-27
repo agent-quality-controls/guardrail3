@@ -1,4 +1,6 @@
 use guardrail3_domain_report::{CheckResult, Severity};
+#[cfg(test)]
+use guardrail3_domain_project_tree::ProjectTree;
 
 use super::facts::{ForbiddenConfigFacts, ForbiddenConfigReason};
 
@@ -31,6 +33,16 @@ pub fn check(forbidden: &ForbiddenConfigFacts, results: &mut Vec<CheckResult>) {
         line: None,
         inventory: false,
     });
+}
+
+#[cfg(test)]
+pub(crate) fn run_for_tests(tree: &ProjectTree) -> Vec<CheckResult> {
+    let facts = super::facts::collect_for_tests(tree);
+    let mut results = Vec::new();
+    for forbidden in &facts.forbidden_configs {
+        check(forbidden, &mut results);
+    }
+    results
 }
 
 #[cfg(test)]

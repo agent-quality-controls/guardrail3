@@ -1,5 +1,4 @@
-use super::super::super::clippy_support::parse_ban_entries;
-use super::super::super::test_support::build_fixture_clippy_toml;
+use test_support::build_fixture_clippy_toml;
 
 #[test]
 fn generated_ban_entries_use_table_format_with_reasons_across_all_sections() {
@@ -11,12 +10,22 @@ fn generated_ban_entries_use_table_format_with_reasons_across_all_sections() {
         "disallowed-types",
         "disallowed-macros",
     ] {
-        let entries = parse_ban_entries(&parsed, key);
+        let entries = parsed
+            .get(key)
+            .and_then(toml::Value::as_array)
+            .cloned()
+            .unwrap_or_default();
         assert!(!entries.is_empty(), "expected canonical entries in {key}");
         assert!(
             entries
                 .iter()
-                .all(|entry| !entry.is_plain_string && entry.reason.as_deref().is_some()),
+                .all(|entry| {
+                    entry
+                        .as_table()
+                        .and_then(|table| table.get("reason"))
+                        .and_then(toml::Value::as_str)
+                        .is_some()
+                }),
             "expected canonical entries in {key} to use table format with reasons: {entries:#?}"
         );
     }

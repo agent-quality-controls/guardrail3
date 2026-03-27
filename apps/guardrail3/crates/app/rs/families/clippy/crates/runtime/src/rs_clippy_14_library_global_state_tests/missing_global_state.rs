@@ -1,41 +1,20 @@
-use std::collections::BTreeSet;
+use guardrail3_app_rs_family_clippy_assertions::rs_clippy_14_library_global_state as assertions;
+use test_support::{build_fixture_clippy_toml, library_workspace_root_tree};
 
-use guardrail3_domain_report::Severity;
-
-use super::super::super::test_support::{
-    build_fixture_clippy_toml, collected_facts, config_input, library_workspace_root_tree,
-};
-use super::super::check;
+use super::super::run_for_tests;
 
 #[test]
 fn errors_for_every_missing_library_global_state_type_ban() {
     let tree = library_workspace_root_tree(build_fixture_clippy_toml("service", false, true, "", ""));
-    let facts = collected_facts(&tree);
-    let mut results = Vec::new();
-
-    check(
-        &config_input(&facts, "apps/libsite/clippy.toml"),
-        &mut results,
+    let results = run_for_tests(&tree, "apps/libsite/clippy.toml");
+    assertions::assert_missing_messages(
+        &results,
+        &[
+            "Library profile must ban `once_cell::sync::Lazy` in `disallowed-types`.",
+            "Library profile must ban `once_cell::sync::OnceCell` in `disallowed-types`.",
+            "Library profile must ban `std::sync::LazyLock` in `disallowed-types`.",
+            "Library profile must ban `std::sync::OnceLock` in `disallowed-types`.",
+        ],
+        "apps/libsite/clippy.toml",
     );
-
-    let actual_messages = results
-        .iter()
-        .map(|result| result.message.clone())
-        .collect::<BTreeSet<_>>();
-    let expected_messages = BTreeSet::from([
-        "Library profile must ban `once_cell::sync::Lazy` in `disallowed-types`.".to_owned(),
-        "Library profile must ban `once_cell::sync::OnceCell` in `disallowed-types`.".to_owned(),
-        "Library profile must ban `std::sync::LazyLock` in `disallowed-types`.".to_owned(),
-        "Library profile must ban `std::sync::OnceLock` in `disallowed-types`.".to_owned(),
-    ]);
-
-    assert_eq!(actual_messages, expected_messages);
-    assert_eq!(results.len(), expected_messages.len());
-    assert!(results.iter().all(|result| {
-        result.id == "RS-CLIPPY-14"
-            && !result.inventory
-            && result.severity == Severity::Error
-            && result.title == "library clippy.toml missing global-state type ban"
-            && result.file.as_deref() == Some("apps/libsite/clippy.toml")
-    }));
 }

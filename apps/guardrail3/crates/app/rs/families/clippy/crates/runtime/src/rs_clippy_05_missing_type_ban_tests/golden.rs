@@ -1,34 +1,11 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_clippy_assertions::rs_clippy_05_missing_type_ban as assertions;
+use test_support::{build_fixture_clippy_toml, root_workspace_tree};
 
-use super::super::super::test_support::{
-    build_fixture_clippy_toml, collected_facts, config_input, root_workspace_tree,
-};
-use super::super::check;
+use super::super::run_for_tests;
 
 #[test]
 fn inventories_every_expected_service_type_ban_from_generated_baseline() {
     let tree = root_workspace_tree(build_fixture_clippy_toml("service", false, true, "", ""));
-    let facts = collected_facts(&tree);
-    let mut results = Vec::new();
-
-    check(&config_input(&facts, "clippy.toml"), &mut results);
-
-    assert!(!results.is_empty());
-    assert!(results.iter().all(|result| {
-        result.id == "RS-CLIPPY-05"
-            && result.inventory
-            && result.severity == Severity::Info
-            && result.title == "type ban present"
-            && result.file.as_deref() == Some("clippy.toml")
-    }));
-    assert!(
-        results
-            .iter()
-            .any(|result| result.message == "`std::collections::HashMap` is banned.")
-    );
-    assert!(
-        results
-            .iter()
-            .any(|result| result.message == "`std::any::Any` is banned.")
-    );
+    let results = run_for_tests(&tree, "clippy.toml");
+    assertions::assert_golden(&results, "clippy.toml");
 }
