@@ -127,6 +127,10 @@ impl<'ast> Visit<'ast> for CfgAttrAllowVisitor<'_> {
         collect_cfg_attr_allows(impl_item_attrs(i), self.out);
         syn::visit::visit_impl_item(self, i);
     }
+    fn visit_trait_item(&mut self, i: &'ast syn::TraitItem) {
+        collect_cfg_attr_allows(trait_item_attrs(i), self.out);
+        syn::visit::visit_trait_item(self, i);
+    }
 }
 
 pub struct GardeSkipVisitor {

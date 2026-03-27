@@ -37,3 +37,25 @@ fn skips_file_with_many_comment_lines_but_only_500_effective_lines() {
     let results = run_family(root);
     assert_no_hits(&results);
 }
+
+#[test]
+fn skips_nested_block_comment_lines_when_counting_effective_length() {
+    let content = format!(
+        "fn keep() {{}}\n{}\nfn also_keep() {{}}\n",
+        "/* outer\n/* inner */\nstill outer */\n".repeat(400)
+    );
+
+    let results = super::super::check_source("src/lib.rs", &content, false);
+    assert_no_hits(&results);
+}
+
+#[test]
+fn skips_multiline_raw_string_payload_lines_when_counting_effective_length() {
+    let content = format!(
+        "const HELP: &str = r#\"\n{}\n\"#;\nfn keep() {{}}\n",
+        "payload line\n".repeat(600)
+    );
+
+    let results = super::super::check_source("src/lib.rs", &content, false);
+    assert_no_hits(&results);
+}

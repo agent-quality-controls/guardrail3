@@ -86,3 +86,22 @@ fn skips_documented_primitive_unvalidatable_and_cross_rule_garde_skip_surfaces()
     let _ = (plain_comment_line, plain_comment_type_line);
     assert_no_hits(&results);
 }
+
+#[test]
+fn skips_same_line_block_comment_garde_skip_surface() {
+    let fixture = copy_fixture();
+    let root = fixture.path();
+
+    let rel = "apps/worker/crates/adapters/outbound/sqs/src/lib.rs";
+    let content = test_support::read_file(root, rel);
+    write_file(
+        root,
+        rel,
+        &format!(
+            "{content}\nstruct BlockCommentSkipProbe {{\n    #[garde(skip)] /* validated elsewhere */\n    field: String,\n}}\n"
+        ),
+    );
+
+    let results = run_family(root);
+    assert_no_hits(&results);
+}

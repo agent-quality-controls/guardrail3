@@ -137,3 +137,22 @@ fn errors_on_trait_item_deny_attr() {
     assert_eq!(results[0].file.as_deref(), Some("src/lib.rs"));
     assert!(!results[0].inventory);
 }
+
+#[test]
+fn errors_on_cfg_attr_deny_without_reason() {
+    let content = "#[cfg_attr(unix, deny(clippy::panic))]\nfn foo() {}";
+    let binding = check_source("src/lib.rs", content, false);
+    let results = findings(&binding);
+
+    assert_normalized_len(&results, 1);
+    assert_eq!(results[0].id, "RS-CODE-22");
+    assert_eq!(results[0].severity, Severity::Error);
+    assert_eq!(results[0].title, "#[deny]/#[forbid] without reason");
+    assert_eq!(
+        results[0].message,
+        "`#[deny(clippy::panic)]` changes local lint policy without documenting why. Add `// reason:` on the same line."
+    );
+    assert_eq!(results[0].line, Some(1));
+    assert_eq!(results[0].file.as_deref(), Some("src/lib.rs"));
+    assert!(!results[0].inventory);
+}

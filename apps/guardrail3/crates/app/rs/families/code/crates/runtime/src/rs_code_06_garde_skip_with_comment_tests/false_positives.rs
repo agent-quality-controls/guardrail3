@@ -16,7 +16,6 @@ fn skips_reasoned_primitive_unvalidatable_and_missing_comment_garde_skip_surface
     let unvalidatable_rel = "apps/backend/crates/ports/outbound/repo/src/lib.rs";
     let subcommand_rel = "apps/backend/crates/ports/outbound/events/src/lib.rs";
     let reasoned_type_rel = "apps/devctl/crates/app/core/src/lib.rs";
-    let block_comment_rel = "apps/worker/crates/adapters/outbound/sqs/src/lib.rs";
 
     let reasoned_field_content =
         test_support::read_file(root, reasoned_field_rel);
@@ -34,8 +33,6 @@ fn skips_reasoned_primitive_unvalidatable_and_missing_comment_garde_skip_surface
         test_support::read_file(root, subcommand_rel);
     let reasoned_type_content =
         test_support::read_file(root, reasoned_type_rel);
-    let block_comment_content =
-        test_support::read_file(root, block_comment_rel);
 
     write_file(
         root,
@@ -90,20 +87,12 @@ fn skips_reasoned_primitive_unvalidatable_and_missing_comment_garde_skip_surface
             "{reasoned_type_content}\n#[garde(skip)] // reason: external validation envelope\nstruct ReasonedWholeTypeSkipProbe {{\n    payload: String,\n}}\n#[garde(skip)]\nstruct PrimitiveWholeTypeSkipProbe {{\n    count: usize,\n    enabled: bool,\n}}\n#[garde(skip)] // temporary bypass\nstruct PrimitiveWholeTypeCommentProbe {{\n    count: usize,\n    enabled: bool,\n}}\n#[garde(skip)] // temporary bypass\nstruct UnvalidatableWholeTypeCommentProbe {{\n    tags: std::collections::HashMap<String, String>,\n}}\n"
         ),
     );
-    let block_comment_new = format!(
-        "{block_comment_content}\nstruct BlockCommentSkipProbe {{\n    #[garde(skip)] /* validated elsewhere */\n    field: String,\n}}\n"
-    );
-    write_file(root, block_comment_rel, &block_comment_new);
-
     let missing_comment_line = missing_comment_new
         .lines()
         .position(|line| line.contains("#[garde(skip)]")).map(|index| index + 1).unwrap_or_default();
-    let block_comment_line = block_comment_new
-        .lines()
-        .position(|line| line.contains("#[garde(skip)] /* validated elsewhere */")).map(|index| index + 1).unwrap_or_default();
 
     let results = run_family(root);
 
-    let _ = (missing_comment_line, block_comment_line);
+    let _ = missing_comment_line;
     assert_no_hits(&results);
 }

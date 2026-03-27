@@ -1,3 +1,4 @@
+mod analysis_helpers;
 mod attrs;
 mod comments;
 mod core;
@@ -40,6 +41,10 @@ pub fn line_text(content: &str, line: usize) -> &str {
 
 pub fn same_line_reason(content: &str, line: usize) -> Option<String> {
     comments::same_line_reason(content, line)
+}
+
+pub fn same_line_has_comment(content: &str, line: usize) -> bool {
+    comments::same_line_has_comment(content, line)
 }
 
 pub fn find_crate_level_allows(ast: &syn::File) -> Vec<(usize, String)> {

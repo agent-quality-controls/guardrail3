@@ -39,6 +39,7 @@ pub struct IncludeMacroInfo {
 pub struct PathAttrInfo {
     pub line: usize,
     pub path: String,
+    pub via_cfg_attr: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

@@ -102,3 +102,37 @@ fn inventories_conditional_cfg_attr_allows_across_real_owned_files_with_exact_me
         ],
     );
 }
+
+#[test]
+fn inventories_conditional_cfg_attr_allow_on_trait_item() {
+    let fixture = copy_fixture();
+    let root = fixture.path();
+
+    let rel = "apps/backend/crates/app/commands/src/lib.rs";
+    let content = test_support::read_file(root, rel);
+    let new_content = format!(
+        "{content}\ntrait Api {{\n    #[cfg_attr(test, allow(dead_code))]\n    fn run();\n}}\n"
+    );
+    write_file(root, rel, &new_content);
+
+    let line = new_content
+        .lines()
+        .position(|entry| entry.contains("#[cfg_attr(test, allow(dead_code))]"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
+
+    let results = run_family(root);
+
+    assert_files(&results, BTreeSet::from([rel.to_owned()]));
+    assert_findings(
+        &results,
+        &[RuleFinding {
+            severity: Severity::Info,
+            title: "conditional cfg_attr allow",
+            message: "Conditional cfg_attr allow for `dead_code`.",
+            file: Some(rel),
+            line: Some(line),
+            inventory: true,
+        }],
+    );
+}

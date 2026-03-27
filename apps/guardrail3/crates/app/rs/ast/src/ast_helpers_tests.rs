@@ -129,6 +129,17 @@ fn cfg_attr_any_is_not_always_true() {
 }
 
 #[test]
+fn cfg_attr_allow_found_on_trait_item() {
+    let allows = find_cfg_attr_allows(&must_parse(
+        "trait Api {\n    #[cfg_attr(test, allow(dead_code))]\n    fn run();\n}",
+    ));
+    assert_eq!(allows.len(), 1, "should find cfg_attr allow on trait item");
+    assert_eq!(allows[0].line, 2);
+    assert_eq!(allows[0].lint, "dead_code");
+    assert!(!allows[0].is_always_true, "test condition is not always true");
+}
+
+#[test]
 fn garde_skip_found() {
     let src = "use garde::Validate;\n\n\
         #[derive(Validate)]\nstruct Input {\n    #[garde(skip)]\n    name: String,\n}";

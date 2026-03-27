@@ -32,18 +32,35 @@ pub fn find_pub_use_glob_reexports(ast: &syn::File) -> Vec<(usize, String)> {
             if !matches!(use_item.vis, syn::Visibility::Public(_)) {
                 return None;
             }
-            glob_reexport_target(&use_item.tree).map(|target| (span_line(use_item.span()), target))
+            let targets = glob_reexport_targets(&use_item.tree);
+            if targets.is_empty() {
+                None
+            } else {
+                Some(
+                    targets
+                        .into_iter()
+                        .map(|target| (span_line(use_item.span()), target))
+                        .collect::<Vec<_>>(),
+                )
+            }
         })
+        .flatten()
         .collect()
 }
 
-fn glob_reexport_target(tree: &syn::UseTree) -> Option<String> {
+fn glob_reexport_targets(tree: &syn::UseTree) -> Vec<String> {
     match tree {
-        syn::UseTree::Path(path) => {
-            glob_reexport_target(&path.tree).map(|target| format!("{}::{target}", path.ident))
-        }
-        syn::UseTree::Glob(_) => Some("*".to_owned()),
-        _ => None,
+        syn::UseTree::Path(path) => glob_reexport_targets(&path.tree)
+            .into_iter()
+            .map(|target| format!("{}::{target}", path.ident))
+            .collect(),
+        syn::UseTree::Glob(_) => vec!["*".to_owned()],
+        syn::UseTree::Group(group) => group
+            .items
+            .iter()
+            .flat_map(glob_reexport_targets)
+            .collect(),
+        _ => Vec::new(),
     }
 }
 
@@ -100,6 +117,13 @@ pub fn find_inline_public_modules(ast: &syn::File) -> Vec<(usize, String)> {
             let syn::Item::Mod(item_mod) = item else {
                 return None;
             };
+            if item_mod
+                .attrs
+                .iter()
+                .any(super::helpers::is_cfg_test_attr)
+            {
+                return None;
+            }
             if item_mod.content.is_none() || !matches!(item_mod.vis, syn::Visibility::Public(_)) {
                 return None;
             }
