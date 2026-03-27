@@ -31,6 +31,7 @@ mod rs_code_27_facade_only_lib;
 mod rs_code_28_inline_pub_mod_in_lib;
 mod rs_code_29_large_trait_inventory;
 mod rs_code_30_input_failures;
+mod rs_code_32_test_expect_message_quality;
 
 use {
     glob as _, guardrail3_domain_config as _, guardrail3_domain_modules as _,
@@ -136,6 +137,7 @@ pub fn check(tree: &ProjectTree, route: &RsCodeRoute) -> Vec<CheckResult> {
         rs_code_27_facade_only_lib::check(&input, &mut results);
         rs_code_28_inline_pub_mod_in_lib::check(&input, &mut results);
         rs_code_29_large_trait_inventory::check(&input, &mut results);
+        rs_code_32_test_expect_message_quality::check(&input, &mut results);
     }
 
     results

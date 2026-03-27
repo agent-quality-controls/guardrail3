@@ -47,9 +47,11 @@ fn build_clippy_toml_renders_sections_and_overrides() {
     assert!(rendered.contains("# THRESHOLDS"));
     assert!(rendered.contains(&format!("max-fn-params-bools = {MAX_FN_PARAMS_BOOLS}")));
     assert!(rendered.contains("allow-dbg-in-tests = false"));
+    assert!(rendered.contains("allow-expect-in-tests = true"));
     assert!(rendered.contains("disallowed-methods = ["));
     assert!(rendered.contains("disallowed-types = ["));
     assert!(rendered.contains("disallowed-macros = ["));
+    assert!(rendered.contains("allow-unwrap-in-tests = false"));
     assert!(rendered.contains("custom::method"));
     assert!(rendered.contains("custom::Type"));
     assert!(rendered.contains("std::sync::LazyLock"));

@@ -1,5 +1,6 @@
 use guardrail3_domain_modules::clippy::{
-    ALLOW_DBG_IN_TESTS, ALLOW_PRINT_IN_TESTS, AVOID_BREAKING_EXPORTED_API, BASE_TYPE_PATHS,
+    ALLOW_DBG_IN_TESTS, ALLOW_EXPECT_IN_TESTS, ALLOW_PRINT_IN_TESTS,
+    ALLOW_UNWRAP_IN_TESTS, AVOID_BREAKING_EXPORTED_API, BASE_TYPE_PATHS,
     COGNITIVE_COMPLEXITY_THRESHOLD, EXCESSIVE_NESTING_THRESHOLD, LIBRARY_EXTRA_TYPE_PATHS,
     MAX_FN_PARAMS_BOOLS, MAX_STRUCT_BOOLS, SERVICE_METHOD_PATHS, THRESHOLD_VALUES,
     TOO_MANY_ARGUMENTS_THRESHOLD, TOO_MANY_LINES_THRESHOLD, TYPE_COMPLEXITY_THRESHOLD,
@@ -190,7 +191,9 @@ pub fn managed_non_threshold_keys() -> Vec<&'static str> {
         "disallowed-macros",
         "avoid-breaking-exported-api",
         "allow-dbg-in-tests",
+        "allow-expect-in-tests",
         "allow-print-in-tests",
+        "allow-unwrap-in-tests",
     ]
 }
 
@@ -208,7 +211,9 @@ pub fn expected_bool_value(key: &str) -> Option<bool> {
     match key {
         "avoid-breaking-exported-api" => Some(AVOID_BREAKING_EXPORTED_API),
         "allow-dbg-in-tests" => Some(ALLOW_DBG_IN_TESTS),
+        "allow-expect-in-tests" => Some(ALLOW_EXPECT_IN_TESTS),
         "allow-print-in-tests" => Some(ALLOW_PRINT_IN_TESTS),
+        "allow-unwrap-in-tests" => Some(ALLOW_UNWRAP_IN_TESTS),
         _ => None,
     }
 }

@@ -19,6 +19,7 @@ pub type LargeTypeItem = types::LargeTypeItem;
 pub type PathAttrInfo = types::PathAttrInfo;
 pub type PublicResultErrorInfo = types::PublicResultErrorInfo;
 pub type PublicResultErrorKind = types::PublicResultErrorKind;
+pub type TestExpectCallInfo = types::TestExpectCallInfo;
 pub type TraitMethodCountInfo = types::TraitMethodCountInfo;
 
 pub fn parse_rust_file(content: &str) -> Result<syn::File, syn::Error> {
@@ -91,6 +92,10 @@ pub fn find_public_result_error_types(ast: &syn::File) -> Vec<PublicResultErrorI
 
 pub fn find_forbidden_macros(ast: &syn::File) -> Vec<(usize, String)> {
     visitors::find_forbidden_macros(ast)
+}
+
+pub fn find_test_expect_calls(ast: &syn::File, file_is_test: bool) -> Vec<TestExpectCallInfo> {
+    visitors::find_test_expect_calls(ast, file_is_test)
 }
 
 pub fn find_std_fs_import_lines(ast: &syn::File) -> Vec<usize> {

@@ -285,10 +285,15 @@ The generator and checker must match exactly.
 
 ## Config hygiene
 
-### RS-CLIPPY-17: allow-dbg-in-tests / allow-print-in-tests
+### RS-CLIPPY-17: test relaxation policy
 - **Old ID:** NEW (from audit)
-- **Severity:** Warn
-- **What:** `allow-dbg-in-tests` and `allow-print-in-tests` should not be `true`. Keeps test output clean and deterministic.
+- **Severity:** Warn/Error
+- **What:** test-only Clippy relaxations must match the managed policy exactly:
+  - `allow-dbg-in-tests = false`
+  - `allow-print-in-tests = false`
+  - `allow-expect-in-tests = true`
+  - `allow-unwrap-in-tests = false`
+- **Why:** `expect(...)` is allowed only in tests, `unwrap()` stays banned everywhere, and debug/print noise stays disabled in tests.
 - **Status:** Implemented
 
 ### RS-CLIPPY-19: unrecognized top-level keys

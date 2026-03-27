@@ -41,7 +41,19 @@ fn generated_service_fixture_matches_checker_expectations() {
     );
     assert_eq!(
         parsed
+            .get("allow-expect-in-tests")
+            .and_then(toml::Value::as_bool),
+        Some(true)
+    );
+    assert_eq!(
+        parsed
             .get("allow-print-in-tests")
+            .and_then(toml::Value::as_bool),
+        Some(false)
+    );
+    assert_eq!(
+        parsed
+            .get("allow-unwrap-in-tests")
             .and_then(toml::Value::as_bool),
         Some(false)
     );

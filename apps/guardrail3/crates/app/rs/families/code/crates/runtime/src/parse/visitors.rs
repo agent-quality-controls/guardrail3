@@ -1,10 +1,23 @@
 use super::helpers::{path_to_string, path_to_string_from_use_tree, span_line};
-use super::types::{FacadeBodyItemInfo, LargeTypeItem as LargeTypeFact, TraitMethodCountInfo};
+use super::types::{
+    FacadeBodyItemInfo, LargeTypeItem as LargeTypeFact, TestExpectCallInfo,
+    TraitMethodCountInfo,
+};
+use syn::parse::Parser;
 use syn::spanned::Spanned;
 use syn::visit::Visit;
 
 pub fn find_forbidden_macros(ast: &syn::File) -> Vec<(usize, String)> {
     let mut visitor = ForbiddenMacroVisitor { out: Vec::new() };
+    visitor.visit_file(ast);
+    visitor.out
+}
+
+pub fn find_test_expect_calls(ast: &syn::File, file_is_test: bool) -> Vec<TestExpectCallInfo> {
+    let mut visitor = TestExpectVisitor {
+        out: Vec::new(),
+        in_test_context: file_is_test,
+    };
     visitor.visit_file(ast);
     visitor.out
 }
@@ -111,6 +124,11 @@ struct ForbiddenMacroVisitor {
     out: Vec<(usize, String)>,
 }
 
+struct TestExpectVisitor {
+    out: Vec<TestExpectCallInfo>,
+    in_test_context: bool,
+}
+
 struct LargeTypeVisitor {
     out: Vec<LargeTypeFact>,
 }
@@ -127,6 +145,105 @@ impl<'ast> Visit<'ast> for ForbiddenMacroVisitor {
             self.out.push((span_line(macro_call.path.span()), name));
         }
         syn::visit::visit_macro(self, macro_call);
+    }
+}
+
+impl TestExpectVisitor {
+    fn save_and_apply(&mut self, attrs: &[syn::Attribute]) -> bool {
+        let was = self.in_test_context;
+        self.in_test_context |= attrs.iter().any(super::helpers::is_cfg_test_attr);
+        was
+    }
+
+    fn restore(&mut self, was: bool) {
+        self.in_test_context = was;
+    }
+
+    fn push_expect_call(&mut self, line: usize, args: &syn::punctuated::Punctuated<syn::Expr, syn::Token![,]>) {
+        if !self.in_test_context {
+            return;
+        }
+        let message = args.first().and_then(extract_expect_message);
+        self.out.push(TestExpectCallInfo { line, message });
+    }
+}
+
+fn extract_expect_message(expr: &syn::Expr) -> Option<String> {
+    match expr {
+        syn::Expr::Lit(expr_lit) => match &expr_lit.lit {
+            syn::Lit::Str(lit) => Some(lit.value()),
+            _ => None,
+        },
+        syn::Expr::Macro(expr_macro) if expr_macro.mac.path.is_ident("concat") => {
+            let parser =
+                syn::punctuated::Punctuated::<syn::Expr, syn::Token![,]>::parse_terminated;
+            let args = parser.parse2(expr_macro.mac.tokens.clone()).ok()?;
+            let mut out = String::new();
+            for arg in args {
+                let syn::Expr::Lit(expr_lit) = arg else {
+                    return None;
+                };
+                let syn::Lit::Str(lit) = expr_lit.lit else {
+                    return None;
+                };
+                out.push_str(&lit.value());
+            }
+            Some(out)
+        }
+        _ => None,
+    }
+}
+
+impl<'ast> Visit<'ast> for TestExpectVisitor {
+    fn visit_item_fn(&mut self, item_fn: &'ast syn::ItemFn) {
+        let was = self.save_and_apply(&item_fn.attrs);
+        syn::visit::visit_item_fn(self, item_fn);
+        self.restore(was);
+    }
+
+    fn visit_impl_item_fn(&mut self, item_fn: &'ast syn::ImplItemFn) {
+        let was = self.save_and_apply(&item_fn.attrs);
+        syn::visit::visit_impl_item_fn(self, item_fn);
+        self.restore(was);
+    }
+
+    fn visit_trait_item_fn(&mut self, item_fn: &'ast syn::TraitItemFn) {
+        let was = self.save_and_apply(&item_fn.attrs);
+        syn::visit::visit_trait_item_fn(self, item_fn);
+        self.restore(was);
+    }
+
+    fn visit_item_mod(&mut self, item_mod: &'ast syn::ItemMod) {
+        let was = self.save_and_apply(&item_mod.attrs);
+        syn::visit::visit_item_mod(self, item_mod);
+        self.restore(was);
+    }
+
+    fn visit_local(&mut self, local: &'ast syn::Local) {
+        let was = self.save_and_apply(&local.attrs);
+        syn::visit::visit_local(self, local);
+        self.restore(was);
+    }
+
+    fn visit_expr_method_call(&mut self, method_call: &'ast syn::ExprMethodCall) {
+        if method_call.method == "expect" {
+            self.push_expect_call(span_line(method_call.method.span()), &method_call.args);
+        }
+        syn::visit::visit_expr_method_call(self, method_call);
+    }
+
+    fn visit_expr_call(&mut self, expr_call: &'ast syn::ExprCall) {
+        if let syn::Expr::Path(expr_path) = &*expr_call.func {
+            let segments = expr_path.path.segments.iter().collect::<Vec<_>>();
+            if segments.len() >= 2
+                && segments
+                    .last()
+                    .is_some_and(|segment| segment.ident == "expect")
+            {
+                self.push_expect_call(span_line(expr_path.path.span()), &expr_call.args);
+            }
+        }
+        syn::visit::visit_expr_call(self, expr_call);
     }
 }
 

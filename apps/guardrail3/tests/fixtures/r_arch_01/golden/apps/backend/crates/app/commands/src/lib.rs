@@ -42,7 +42,7 @@ mod tests {
             scheduled: Vec::new(),
         };
 
-        let plan = plan_inbox_week(&mut repo).expect("plan");
+        let plan = plan_inbox_week(&mut repo).expect("weekly plan should build");
 
         assert_eq!(plan.focus_points, 6);
         assert_eq!(repo.scheduled.len(), 2);
@@ -62,7 +62,7 @@ mod tests {
             scheduled: Vec::new(),
         };
 
-        let plan = plan_inbox_week(&mut repo).expect("plan");
+        let plan = plan_inbox_week(&mut repo).expect("weekly plan should build");
 
         assert_eq!(plan.focus_points, 8);
         assert_eq!(plan.tasks.len(), 2);

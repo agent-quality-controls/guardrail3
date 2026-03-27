@@ -80,7 +80,9 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
     for key in [
         "avoid-breaking-exported-api",
         "allow-dbg-in-tests",
+        "allow-expect-in-tests",
         "allow-print-in-tests",
+        "allow-unwrap-in-tests",
     ] {
         if parsed.get(key).and_then(toml::Value::as_bool) != expected_bool_value(key) {
             missing_sections.push(key);
