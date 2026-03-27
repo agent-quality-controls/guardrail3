@@ -33,14 +33,50 @@ pub fn check(input: &ToolchainRootInput<'_>, results: &mut Vec<CheckResult>) {
         return;
     };
 
-    check_channel(parsed, rel, results);
-    check_components(parsed, rel, results);
+    let Some(toolchain) = toolchain_table(parsed, rel, results) else {
+        return;
+    };
+
+    check_channel(toolchain, rel, results);
+    check_components(toolchain, rel, results);
 }
 
-fn check_channel(parsed: &toml::Value, rel: &str, results: &mut Vec<CheckResult>) {
-    let channel_value = parsed
-        .get("toolchain")
-        .and_then(|value| value.get("channel"));
+fn toolchain_table<'a>(
+    parsed: &'a toml::Value,
+    rel: &str,
+    results: &mut Vec<CheckResult>,
+) -> Option<&'a toml::value::Table> {
+    match parsed.get("toolchain") {
+        Some(toml::Value::Table(toolchain)) => Some(toolchain),
+        Some(_) => {
+            results.push(CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Error,
+                title: "toolchain table is invalid".to_owned(),
+                message: "`rust-toolchain.toml` must define `[toolchain]` as a table.".to_owned(),
+                file: Some(rel.to_owned()),
+                line: None,
+                inventory: false,
+            });
+            None
+        }
+        None => {
+            results.push(CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Error,
+                title: "toolchain table missing".to_owned(),
+                message: "Add a `[toolchain]` table with `channel` and `components`.".to_owned(),
+                file: Some(rel.to_owned()),
+                line: None,
+                inventory: false,
+            });
+            None
+        }
+    }
+}
+
+fn check_channel(toolchain: &toml::value::Table, rel: &str, results: &mut Vec<CheckResult>) {
+    let channel_value = toolchain.get("channel");
 
     match channel_value {
         Some(toml::Value::String(channel)) => match classify_channel(channel) {
@@ -151,10 +187,8 @@ fn parse_pinned_stable(raw: &str) -> Option<(u64, u64, u64)> {
     Some((major, minor, patch))
 }
 
-fn check_components(parsed: &toml::Value, rel: &str, results: &mut Vec<CheckResult>) {
-    let components_value = parsed
-        .get("toolchain")
-        .and_then(|value| value.get("components"));
+fn check_components(toolchain: &toml::value::Table, rel: &str, results: &mut Vec<CheckResult>) {
+    let components_value = toolchain.get("components");
 
     match components_value {
         Some(toml::Value::Array(components)) => {
@@ -239,6 +273,7 @@ pub(crate) fn test_input<'a>(
         parse_error,
         cargo_toml_rel: Some("Cargo.toml"),
         cargo_rust_version,
+        cargo_rust_version_invalid: false,
         cargo_parse_error,
     }
 }

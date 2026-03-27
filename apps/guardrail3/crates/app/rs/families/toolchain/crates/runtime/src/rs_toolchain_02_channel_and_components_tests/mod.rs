@@ -52,6 +52,63 @@ fn inventories_when_channel_and_components_match_policy() {
 }
 
 #[test]
+fn errors_when_toolchain_table_is_missing() {
+    let parsed = toml::from_str::<toml::Value>(
+        "channel = \"stable\"\ncomponents = [\"clippy\", \"rustfmt\"]",
+    )
+    .expect("valid TOML");
+    let input = test_input(
+        Some("rust-toolchain.toml"),
+        None,
+        Some(&parsed),
+        None,
+        Some("1.85"),
+        None,
+    );
+    let mut results = Vec::new();
+
+    check(&input, &mut results);
+
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            severity: Severity::Error,
+            inventory: false,
+            title: "toolchain table missing",
+            message: "Add a `[toolchain]` table with `channel` and `components`.",
+            file: Some("rust-toolchain.toml"),
+        }],
+    );
+}
+
+#[test]
+fn errors_when_toolchain_table_is_not_a_table() {
+    let parsed = toml::from_str::<toml::Value>("toolchain = \"stable\"").expect("valid TOML");
+    let input = test_input(
+        Some("rust-toolchain.toml"),
+        None,
+        Some(&parsed),
+        None,
+        Some("1.85"),
+        None,
+    );
+    let mut results = Vec::new();
+
+    check(&input, &mut results);
+
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            severity: Severity::Error,
+            inventory: false,
+            title: "toolchain table is invalid",
+            message: "`rust-toolchain.toml` must define `[toolchain]` as a table.",
+            file: Some("rust-toolchain.toml"),
+        }],
+    );
+}
+
+#[test]
 fn errors_on_parse_failure() {
     let input = test_input(
         Some("rust-toolchain.toml"),

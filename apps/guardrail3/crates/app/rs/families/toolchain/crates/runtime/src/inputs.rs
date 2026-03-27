@@ -7,6 +7,7 @@ pub struct ToolchainRootInput<'a> {
     pub parse_error: Option<&'a str>,
     pub cargo_toml_rel: Option<&'a str>,
     pub cargo_rust_version: Option<&'a str>,
+    pub cargo_rust_version_invalid: bool,
     pub cargo_parse_error: Option<&'a str>,
 }
 
@@ -19,6 +20,7 @@ impl<'a> ToolchainRootInput<'a> {
             parse_error: facts.parse_error.as_deref(),
             cargo_toml_rel: facts.cargo_toml_rel.as_deref(),
             cargo_rust_version: facts.cargo_rust_version.as_deref(),
+            cargo_rust_version_invalid: facts.cargo_rust_version_invalid,
             cargo_parse_error: facts.cargo_parse_error.as_deref(),
         }
     }

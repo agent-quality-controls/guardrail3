@@ -51,6 +51,19 @@ pub fn check(input: &ToolchainRootInput<'_>, results: &mut Vec<CheckResult>) {
         return;
     }
 
+    if input.cargo_rust_version_invalid {
+        results.push(CheckResult {
+            id: ID.to_owned(),
+            severity: Severity::Error,
+            title: "Cargo rust-version is invalid".to_owned(),
+            message: "`Cargo.toml` `rust-version` must be a string version.".to_owned(),
+            file: Some("Cargo.toml".to_owned()),
+            line: None,
+            inventory: false,
+        });
+        return;
+    }
+
     let Some(cargo_msrv) = input.cargo_rust_version else {
         results.push(
             CheckResult {
@@ -142,6 +155,7 @@ pub(crate) fn test_input<'a>(
         parse_error,
         cargo_toml_rel: Some("Cargo.toml"),
         cargo_rust_version,
+        cargo_rust_version_invalid: false,
         cargo_parse_error,
     }
 }
@@ -162,6 +176,27 @@ pub(crate) fn test_input_missing_cargo<'a>(
         parse_error,
         cargo_toml_rel: None,
         cargo_rust_version,
+        cargo_rust_version_invalid: false,
+        cargo_parse_error,
+    }
+}
+
+#[cfg(test)]
+pub(crate) fn test_input_invalid_cargo_rust_version_type<'a>(
+    toolchain_toml_rel: Option<&'a str>,
+    legacy_toolchain_rel: Option<&'a str>,
+    parsed: Option<&'a toml::Value>,
+    parse_error: Option<&'a str>,
+    cargo_parse_error: Option<&'a str>,
+) -> ToolchainRootInput<'a> {
+    ToolchainRootInput {
+        toolchain_toml_rel,
+        legacy_toolchain_rel,
+        parsed,
+        parse_error,
+        cargo_toml_rel: Some("Cargo.toml"),
+        cargo_rust_version: None,
+        cargo_rust_version_invalid: true,
         cargo_parse_error,
     }
 }

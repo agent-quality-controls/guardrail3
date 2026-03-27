@@ -46,7 +46,46 @@ pub(crate) fn test_input<'a>(
         parse_error,
         cargo_toml_rel: Some("Cargo.toml"),
         cargo_rust_version,
+        cargo_rust_version_invalid: false,
         cargo_parse_error,
+    }
+}
+
+#[cfg(test)]
+pub(crate) fn run_family_check(
+    tree: &guardrail3_domain_project_tree::ProjectTree,
+) -> Vec<CheckResult> {
+    crate::check(tree)
+}
+
+#[cfg(test)]
+pub(crate) fn test_tree(
+    root_files: &[&str],
+    content: &[(&str, &str)],
+) -> guardrail3_domain_project_tree::ProjectTree {
+    use std::collections::BTreeMap;
+    use std::path::PathBuf;
+
+    use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
+
+    let structure = BTreeMap::from([(
+        String::new(),
+        DirEntry {
+            dirs: Vec::new(),
+            files: root_files.iter().map(|file| (*file).to_owned()).collect(),
+            symlink_dirs: Vec::new(),
+            symlink_files: Vec::new(),
+        },
+    )]);
+    let content = content
+        .iter()
+        .map(|(path, file_content)| ((*path).to_owned(), (*file_content).to_owned()))
+        .collect();
+
+    ProjectTree {
+        root: PathBuf::from("/tmp/toolchain-family-tests"),
+        structure,
+        content,
     }
 }
 

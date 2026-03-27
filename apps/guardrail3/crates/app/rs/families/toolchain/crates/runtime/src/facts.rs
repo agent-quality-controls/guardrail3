@@ -6,5 +6,6 @@ pub struct ToolchainFacts {
     pub parse_error: Option<String>,
     pub cargo_toml_rel: Option<String>,
     pub cargo_rust_version: Option<String>,
+    pub cargo_rust_version_invalid: bool,
     pub cargo_parse_error: Option<String>,
 }
