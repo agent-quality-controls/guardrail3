@@ -5,8 +5,8 @@ use guardrail3_domain_report::{CheckResult, Severity};
 use guardrail3_domain_project_tree::ProjectTree;
 
 use super::clippy_support::{
-    EXPECTED_MACRO_BANS, THRESHOLD_EXPECTATIONS, ban_paths, expected_bool_value,
-    expected_method_bans, expected_type_bans, threshold_value,
+    EXPECTED_MACRO_BANS, THRESHOLD_EXPECTATIONS, ban_paths, expected_method_bans,
+    expected_type_bans, threshold_value,
 };
 use super::inputs::ConfigClippyInput;
 
@@ -82,19 +82,6 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
     {
         missing_sections.push("disallowed-macros");
     }
-    for key in [
-        "avoid-breaking-exported-api",
-        "allow-dbg-in-tests",
-        "allow-expect-in-tests",
-        "allow-panic-in-tests",
-        "allow-print-in-tests",
-        "allow-unwrap-in-tests",
-    ] {
-        if parsed.get(key).and_then(toml::Value::as_bool) != expected_bool_value(key) {
-            missing_sections.push(key);
-        }
-    }
-
     if missing_sections.is_empty() {
         results.push(
             CheckResult {
