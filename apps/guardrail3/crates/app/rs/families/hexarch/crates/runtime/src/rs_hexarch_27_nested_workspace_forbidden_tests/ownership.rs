@@ -1,8 +1,5 @@
 use super::{copy_fixture, write_file};
-use guardrail3_app_rs_family_hexarch_assertions::{
-    rs_hexarch_07_workspace_members_match_crate_dirs as workspace_member_assertions,
-    rs_hexarch_27_nested_workspace_forbidden as assertions,
-};
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_27_nested_workspace_forbidden as assertions;
 use std::path::PathBuf;
 
 #[test]
@@ -16,7 +13,13 @@ fn malformed_nested_cargo_is_owned_by_rule_07_not_rule_27() {
 
     let results = super::run_family(tmp.path());
     assertions::assert_no_error(&results);
-    workspace_member_assertions::assert_error_count(&results, "", 1);
+    assertions::assert_workspace_members_error_summary(
+        &results,
+        1,
+        "apps/devctl/crates/app/rs/families/deny/Cargo.toml",
+        &["crates/app/rs/families/deny"],
+        &["Every live app-local Cargo root must be owned"],
+    );
 }
 
 #[test]
@@ -63,28 +66,26 @@ resolver = "2"
             message_contains: None,
         }],
     );
-    workspace_member_assertions::assert_expected_rule_results(
+    assertions::assert_workspace_members_error_summary(
         &results,
-        &[workspace_member_assertions::ExpectedRuleResult {
-            file: Some("apps/devctl/crates/app/rs/families/deny/Cargo.toml"),
-            file_contains: None,
-            title_contains: Some(&["crates/app/rs/families/deny"]),
-            message_contains: Some(&["Every live app-local Cargo root must be owned"]),
-        }],
+        1,
+        "apps/devctl/crates/app/rs/families/deny/Cargo.toml",
+        &["crates/app/rs/families/deny"],
+        &["Every live app-local Cargo root must be owned"],
     );
 }
 
 #[test]
-fn actual_guardrail3_repo_now_fails_for_nested_family_workspaces() {
+fn actual_guardrail3_repo_no_longer_has_nested_family_workspaces() {
     let repo_root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("../../../../../../../../..")
         .canonicalize()
         .expect("resolve repo root");
 
     let results = super::run_family(&repo_root);
-    assertions::assert_any_result_contains_title(&results, &["crates/app/rs/families/deny"]);
-    workspace_member_assertions::assert_any_result_contains_title(
+    assertions::assert_no_error(&results);
+    assertions::assert_no_workspace_members_error_with_file_prefix(
         &results,
-        &["crates/app/rs/families/deny"],
+        "apps/guardrail3/crates/app/rs/families/",
     );
 }

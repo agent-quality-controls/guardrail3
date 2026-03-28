@@ -132,8 +132,9 @@ Do not limit tests to `crates/{app,domain,ports,adapters}` leafs. The whole poin
 Minimum expected verification:
 
 - targeted `hexarch` unit tests for the touched rules/facts
-- `cargo test --manifest-path apps/guardrail3/crates/app/rs/families/hexarch/Cargo.toml --workspace`
-- a source-level or binary-level `rs validate ... --family hexarch --inventory --format json` run on `apps/guardrail3` that now reports the nested workspace violation
+- `cargo test --manifest-path apps/guardrail3/Cargo.toml -p guardrail3-app-rs-family-hexarch --lib`
+- a binary-level `rs validate ... --family hexarch --inventory --format json` run on `apps/guardrail3` that is clean after the nested workspaces are removed
+- a temp-repo attack that reintroduces a nested family-style workspace under `apps/guardrail3` and proves `RS-HEXARCH-07` plus `RS-HEXARCH-27` fire at the top level
 
 If top-level Cargo remains broken for unrelated reasons, do not “fix” the rest of the repo just to make this task pass.
 
@@ -145,7 +146,7 @@ This handoff is complete when:
 - nested app-local workspaces fail
 - all live app-local Cargo roots must be workspace members
 - tests pin the behavior
-- the current `apps/guardrail3` sprawl now fails for the obvious workspace-boundary reason instead of slipping through silently
+- the current `apps/guardrail3` tree no longer contains nested family workspaces, so top-level Cargo metadata succeeds and `apps/guardrail3` validates clean under `RS-HEXARCH`
 
 ## Notable Open Follow-Up
 
