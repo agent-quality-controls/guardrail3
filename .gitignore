@@ -1,4 +1,5 @@
 /target/
+/apps/*/target/
 .claude/
 .mcp.json
 .gitnexus
