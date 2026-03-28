@@ -12,6 +12,7 @@ use tree_sitter::{Parser, Tree};
 pub use super::ts_code_analysis::{find_any_types, find_process_env, find_test_method_calls};
 
 /// A comment found in the source: 1-based line number + raw text.
+#[derive(Debug)]
 pub struct CommentInfo {
     pub line: usize,
     pub text: String,

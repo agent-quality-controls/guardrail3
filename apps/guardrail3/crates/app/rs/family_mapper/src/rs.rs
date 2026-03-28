@@ -12,6 +12,7 @@ use crate::views::{
     RsRootView, RsScopedRootView, RsTestRoute,
 };
 
+#[derive(Debug)]
 pub struct FamilyMapper<'a> {
     tree: &'a ProjectTree,
     scope: &'a RustRootPlacementFacts,

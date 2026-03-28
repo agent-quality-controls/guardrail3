@@ -10,6 +10,7 @@ use tree_sitter::{Node, Parser, Tree};
 
 /// Parsed `ESLint` flat config (`.mjs` file).
 #[allow(clippy::struct_excessive_bools)] // reason: ESLint config has multiple independent boolean markers
+#[derive(Debug)]
 pub struct EslintConfig {
     /// All rules across all config blocks, keyed by rule name.
     /// Value is the LAST occurrence (later blocks override earlier).
@@ -29,6 +30,7 @@ pub struct EslintConfig {
 }
 
 /// Configuration for a single `ESLint` rule.
+#[derive(Debug)]
 pub struct RuleConfig {
     /// Rule severity: "error", "warn", or "off".
     pub severity: String,

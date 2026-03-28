@@ -64,6 +64,9 @@ members = [
 ]
 resolver = "2"
 
+[workspace.package]
+edition = "2024"
+
 [workspace.dependencies]
 garde = { version = "0.22", features = ["derive"] }
 glob = "0.3"
@@ -80,6 +83,7 @@ unsafe_code = "forbid"
 dead_code = "deny"
 unused_results = "deny"
 unused_crate_dependencies = "deny"
+missing_debug_implementations = "deny"
 
 [workspace.lints.clippy]
 all = { level = "deny", priority = -1 }
@@ -95,6 +99,7 @@ dbg_macro = "deny"
 print_stdout = "deny"
 print_stderr = "deny"
 disallowed_methods = "deny"
+disallowed_macros = "deny"
 disallowed_types = "deny"
 indexing_slicing = "deny"
 string_slice = "deny"

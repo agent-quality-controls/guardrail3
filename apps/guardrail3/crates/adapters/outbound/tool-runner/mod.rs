@@ -6,6 +6,7 @@ use std::process::Command;
 use guardrail3_outbound_traits::{CommandRunResult, ToolChecker};
 
 /// Production tool checker that runs actual shell commands.
+#[derive(Debug)]
 pub struct RealToolChecker;
 
 impl ToolChecker for RealToolChecker {

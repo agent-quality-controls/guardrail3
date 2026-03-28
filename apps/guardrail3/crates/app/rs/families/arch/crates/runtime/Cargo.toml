@@ -15,3 +15,6 @@ toml = "0.8"
 [dev-dependencies]
 guardrail3_app_rs_family_arch_assertions = { path = "../assertions" }
 test_support = { package = "guardrail3-app-rs-family-arch-test-support", path = "../../test_support" }
+
+[lints]
+workspace = true

@@ -5,6 +5,7 @@ use std::path::Path;
 use guardrail3_outbound_traits::{FileSystem, FsDirEntry, FsMetadata};
 
 /// Production filesystem implementation that delegates to `guardrail3_shared_fs`.
+#[derive(Debug)]
 pub struct RealFileSystem;
 
 impl FileSystem for RealFileSystem {
