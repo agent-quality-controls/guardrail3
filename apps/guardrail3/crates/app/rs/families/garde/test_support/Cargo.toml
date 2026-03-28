@@ -1,0 +1,13 @@
+[package]
+name = "guardrail3-app-rs-family-garde-test-support"
+version = "0.0.0"
+edition = "2024"
+
+[lints]
+workspace = true
+
+[lib]
+name = "test_support"
+
+[dependencies]
+guardrail3_domain_project_tree = { package = "guardrail3-domain-project-tree", path = "../../../../../domain/project-tree" }

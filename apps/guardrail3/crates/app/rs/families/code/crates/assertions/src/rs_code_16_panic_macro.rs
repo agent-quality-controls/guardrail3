@@ -143,8 +143,7 @@ pub fn assert_attacks_panic_macros_across_real_owned_files_with_exact_metadata(
                 id: ID,
                 severity: Severity::Warn,
                 title: "panic! macro",
-                message: "`panic!()` macro found: pub fn second_run() { core::panic!(\"still bad\"); }."
-                    ,
+                message: "`panic!()` macro found: pub fn second_run() { core::panic!(\"still bad\"); }.",
                 file: Some(backend_rel),
                 line: Some(backend_second_line),
                 inventory: false,
@@ -153,8 +152,7 @@ pub fn assert_attacks_panic_macros_across_real_owned_files_with_exact_metadata(
                 id: ID,
                 severity: Severity::Warn,
                 title: "panic! macro",
-                message: "`panic!()` macro found: fn queue_panic_probe(&self) { panic!(\"queue\"); }."
-                    ,
+                message: "`panic!()` macro found: fn queue_panic_probe(&self) { panic!(\"queue\"); }.",
                 file: Some(worker_rel),
                 line: Some(worker_impl_line),
                 inventory: false,
@@ -163,8 +161,7 @@ pub fn assert_attacks_panic_macros_across_real_owned_files_with_exact_metadata(
                 id: ID,
                 severity: Severity::Warn,
                 title: "panic! macro",
-                message: "`panic!()` macro found: pub fn still_counted() { panic!(\"prod-file cfg\"); }."
-                    ,
+                message: "`panic!()` macro found: pub fn still_counted() { panic!(\"prod-file cfg\"); }.",
                 file: Some(worker_rel),
                 line: Some(worker_cfg_line),
                 inventory: false,

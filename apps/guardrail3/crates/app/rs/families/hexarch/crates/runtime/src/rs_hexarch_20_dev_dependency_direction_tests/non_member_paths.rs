@@ -1,5 +1,5 @@
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_20_dev_dependency_direction as assertions;
 use super::{copy_fixture, write_file};
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_20_dev_dependency_direction as assertions;
 
 #[test]
 fn out_of_tree_paths_with_layer_like_names_do_not_trigger_dev_direction() {

@@ -1,7 +1,6 @@
 use super::helpers::{path_to_string, path_to_string_from_use_tree, span_line};
 use super::types::{
-    FacadeBodyItemInfo, LargeTypeItem as LargeTypeFact, TestExpectCallInfo,
-    TraitMethodCountInfo,
+    FacadeBodyItemInfo, LargeTypeItem as LargeTypeFact, TestExpectCallInfo, TraitMethodCountInfo,
 };
 use syn::parse::Parser;
 use syn::spanned::Spanned;
@@ -55,11 +54,7 @@ fn glob_reexport_targets(tree: &syn::UseTree) -> Vec<String> {
             .map(|target| format!("{}::{target}", path.ident))
             .collect(),
         syn::UseTree::Glob(_) => vec!["*".to_owned()],
-        syn::UseTree::Group(group) => group
-            .items
-            .iter()
-            .flat_map(glob_reexport_targets)
-            .collect(),
+        syn::UseTree::Group(group) => group.items.iter().flat_map(glob_reexport_targets).collect(),
         _ => Vec::new(),
     }
 }
@@ -166,7 +161,11 @@ impl TestExpectVisitor {
         self.in_test_context = was;
     }
 
-    fn push_expect_call(&mut self, line: usize, args: &syn::punctuated::Punctuated<syn::Expr, syn::Token![,]>) {
+    fn push_expect_call(
+        &mut self,
+        line: usize,
+        args: &syn::punctuated::Punctuated<syn::Expr, syn::Token![,]>,
+    ) {
         if !self.in_test_context {
             return;
         }
@@ -182,8 +181,7 @@ fn extract_expect_message(expr: &syn::Expr) -> Option<String> {
             _ => None,
         },
         syn::Expr::Macro(expr_macro) if expr_macro.mac.path.is_ident("concat") => {
-            let parser =
-                syn::punctuated::Punctuated::<syn::Expr, syn::Token![,]>::parse_terminated;
+            let parser = syn::punctuated::Punctuated::<syn::Expr, syn::Token![,]>::parse_terminated;
             let args = parser.parse2(expr_macro.mac.tokens.clone()).ok()?;
             let mut out = String::new();
             for arg in args {
@@ -238,7 +236,6 @@ impl<'ast> Visit<'ast> for TestExpectVisitor {
         }
         syn::visit::visit_expr_method_call(self, method_call);
     }
-
 }
 
 impl<'ast> Visit<'ast> for LargeTypeVisitor {

@@ -1,8 +1,8 @@
+use super::super::copy_fixture;
+use super::super::run_family;
 use guardrail3_app_rs_family_code_assertions::rs_code_08_cfg_attr_allow_inventory::{
     assert_no_hits, assert_normalized_empty, findings,
 };
-use super::super::run_family;
-use super::super::copy_fixture;
 use test_support::write_file;
 
 #[test]
@@ -16,12 +16,9 @@ fn skips_always_true_and_non_cfg_attr_allow_surfaces() {
     let grouped_conditional_rel = "apps/backend/crates/ports/outbound/repo/src/lib.rs";
     let negated_always_true_rel = "apps/backend/crates/app/commands/src/lib.rs";
 
-    let always_true_content =
-        test_support::read_file(root, always_true_rel);
-    let plain_item_content =
-        test_support::read_file(root, plain_item_rel);
-    let crate_level_content =
-        test_support::read_file(root, crate_level_rel);
+    let always_true_content = test_support::read_file(root, always_true_rel);
+    let plain_item_content = test_support::read_file(root, plain_item_rel);
+    let crate_level_content = test_support::read_file(root, crate_level_rel);
     let grouped_conditional_content = test_support::read_file(root, grouped_conditional_rel);
     let negated_always_true_content = test_support::read_file(root, negated_always_true_rel);
 

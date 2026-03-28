@@ -133,9 +133,7 @@ pub fn assert_attacks_always_true_cfg_attr_bypasses_across_multiple_owned_files_
                 id: ID,
                 severity: Severity::Error,
                 title: "always-true cfg_attr bypass",
-                message:
-                    "`#[cfg_attr(..., allow(clippy::unwrap_used))]` is effectively unconditional. Use a direct `#[allow]` with an explicit reason instead."
-                        ,
+                message: "`#[cfg_attr(..., allow(clippy::unwrap_used))]` is effectively unconditional. Use a direct `#[allow]` with an explicit reason instead.",
                 file: Some(backend_rel),
                 line: Some(backend_top_line),
                 inventory: false,
@@ -144,9 +142,7 @@ pub fn assert_attacks_always_true_cfg_attr_bypasses_across_multiple_owned_files_
                 id: ID,
                 severity: Severity::Error,
                 title: "always-true cfg_attr bypass",
-                message:
-                    "`#[cfg_attr(..., allow(clippy::panic))]` is effectively unconditional. Use a direct `#[allow]` with an explicit reason instead."
-                        ,
+                message: "`#[cfg_attr(..., allow(clippy::panic))]` is effectively unconditional. Use a direct `#[allow]` with an explicit reason instead.",
                 file: Some(backend_rel),
                 line: Some(backend_nested_line),
                 inventory: false,
@@ -155,9 +151,7 @@ pub fn assert_attacks_always_true_cfg_attr_bypasses_across_multiple_owned_files_
                 id: ID,
                 severity: Severity::Error,
                 title: "always-true cfg_attr bypass",
-                message:
-                    "`#[cfg_attr(..., allow(clippy::expect_used))]` is effectively unconditional. Use a direct `#[allow]` with an explicit reason instead."
-                        ,
+                message: "`#[cfg_attr(..., allow(clippy::expect_used))]` is effectively unconditional. Use a direct `#[allow]` with an explicit reason instead.",
                 file: Some(worker_rel),
                 line: Some(worker_line),
                 inventory: false,
@@ -166,9 +160,7 @@ pub fn assert_attacks_always_true_cfg_attr_bypasses_across_multiple_owned_files_
                 id: ID,
                 severity: Severity::Error,
                 title: "always-true cfg_attr bypass",
-                message:
-                    "`#[cfg_attr(..., allow(clippy::panic))]` is effectively unconditional. Use a direct `#[allow]` with an explicit reason instead."
-                        ,
+                message: "`#[cfg_attr(..., allow(clippy::panic))]` is effectively unconditional. Use a direct `#[allow]` with an explicit reason instead.",
                 file: Some(worker_rel),
                 line: Some(worker_line),
                 inventory: false,

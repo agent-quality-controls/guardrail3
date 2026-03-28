@@ -4,8 +4,8 @@ fn inner_hex() -> &'static str {
     FIXTURE.inner_hex_root()
 }
 
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_02_exact_contents as assertions;
 use super::{copy_fixture, write_file};
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_02_exact_contents as assertions;
 
 #[test]
 fn root_loose_files_hit_each_owned_hex_root_once() {
@@ -49,23 +49,10 @@ fn root_gitkeep_is_still_allowed() {
 #[test]
 fn nested_root_gitkeep_is_still_allowed() {
     let tmp = copy_fixture();
-    write_file(
-        tmp.path(),
-        &format!("{}/.gitkeep", inner_hex()),
-        "",
-    );
+    write_file(tmp.path(), &format!("{}/.gitkeep", inner_hex()), "");
 
     let results = super::run_family(tmp.path());
-    assertions::assert_error_count_matching_file(
-        &results,
-        "",
-        inner_hex(),
-        0,
-        &[],
-        &[],
-        &[],
-        &[],
-    );
+    assertions::assert_error_count_matching_file(&results, "", inner_hex(), 0, &[], &[], &[], &[]);
 }
 
 #[test]

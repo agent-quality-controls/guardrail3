@@ -4,8 +4,8 @@ fn inner_hex() -> &'static str {
     FIXTURE.inner_hex_root()
 }
 
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_03_inbound_outbound as assertions;
 use super::{copy_fixture, remove_dir, write_file};
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_03_inbound_outbound as assertions;
 
 #[test]
 fn replacing_outbound_dirs_with_files_hits_every_owned_directional_container() {

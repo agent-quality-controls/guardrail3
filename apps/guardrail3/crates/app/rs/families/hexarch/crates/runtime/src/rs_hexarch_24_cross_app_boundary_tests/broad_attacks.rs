@@ -1,5 +1,5 @@
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_24_cross_app_boundary as assertions;
 use super::{dir_entry, project_tree, run_tree};
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_24_cross_app_boundary as assertions;
 
 #[test]
 fn cross_app_edges_error_and_same_app_edges_do_not() {
@@ -74,10 +74,5 @@ fn cross_app_edges_error_and_same_app_edges_do_not() {
     );
 
     let results = super::run_tree(&tree);
-    assertions::assert_error_file_set(
-        &results,
-        "",
-        4,
-        &["apps/api/crates/app/core/Cargo.toml"],
-    );
+    assertions::assert_error_file_set(&results, "", 4, &["apps/api/crates/app/core/Cargo.toml"]);
 }

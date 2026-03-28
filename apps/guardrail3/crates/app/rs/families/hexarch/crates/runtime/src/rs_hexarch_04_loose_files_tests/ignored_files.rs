@@ -1,5 +1,5 @@
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_04_loose_files as assertions;
 use super::{copy_fixture, write_file};
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_04_loose_files as assertions;
 
 #[test]
 fn ignored_untracked_loose_files_still_hit_rule_04() {

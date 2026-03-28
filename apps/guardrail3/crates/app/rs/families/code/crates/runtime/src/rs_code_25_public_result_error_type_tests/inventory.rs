@@ -2,13 +2,11 @@ use std::collections::BTreeSet;
 
 use guardrail3_domain_report::Severity;
 
-use guardrail3_app_rs_family_code_assertions::rs_code_25_public_result_error_type::{
-    assert_files,
-    assert_findings,
-    RuleFinding,
-};
-use super::super::run_family;
 use super::super::copy_fixture;
+use super::super::run_family;
+use guardrail3_app_rs_family_code_assertions::rs_code_25_public_result_error_type::{
+    RuleFinding, assert_files, assert_findings,
+};
 use test_support::write_file;
 
 #[test]
@@ -17,8 +15,7 @@ fn attacks_weak_public_result_error_types_in_library_profile_files() {
     let root = fixture.path();
 
     let package_rel = "packages/shared-types/src/lib.rs";
-    let package_content =
-        test_support::read_file(root, package_rel);
+    let package_content = test_support::read_file(root, package_rel);
 
     let mutated = format!(
         "{package_content}\n\npub fn parse_shared_slug() -> Result<TenantSlug, String> {{\n    Err(\"missing tenant\".to_owned())\n}}\n"
@@ -28,7 +25,9 @@ fn attacks_weak_public_result_error_types_in_library_profile_files() {
     let results = run_family(root);
     let weak_line = mutated
         .lines()
-        .position(|line| line.contains("pub fn parse_shared_slug()")).map(|index| index + 1).unwrap_or_default();
+        .position(|line| line.contains("pub fn parse_shared_slug()"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
 
     assert_files(&results, BTreeSet::from([package_rel.to_owned()]));
     assert_findings(

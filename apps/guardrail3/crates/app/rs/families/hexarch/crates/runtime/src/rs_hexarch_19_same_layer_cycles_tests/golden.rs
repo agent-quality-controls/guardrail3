@@ -1,5 +1,5 @@
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_19_same_layer_cycles as assertions;
 use super::copy_fixture;
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_19_same_layer_cycles as assertions;
 
 #[test]
 fn golden_fixture_has_no_rule_19_errors() {

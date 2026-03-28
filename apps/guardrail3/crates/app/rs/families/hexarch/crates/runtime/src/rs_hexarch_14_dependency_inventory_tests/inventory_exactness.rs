@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_14_dependency_inventory as assertions;
 use super::{copy_fixture, write_file};
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_14_dependency_inventory as assertions;
 
 #[test]
 fn fixture_backed_path_dependencies_are_inventoried_with_exact_messages() {
@@ -28,7 +28,10 @@ fn fixture_backed_path_dependencies_are_inventoried_with_exact_messages() {
         &results,
         "apps/backend/crates/app/queries/Cargo.toml",
         6,
-        &expected_messages.iter().map(String::as_str).collect::<Vec<_>>(),
+        &expected_messages
+            .iter()
+            .map(String::as_str)
+            .collect::<Vec<_>>(),
     );
 }
 

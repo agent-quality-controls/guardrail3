@@ -1,5 +1,5 @@
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_12_src_banned as assertions;
 use super::{copy_fixture, create_dir, write_file};
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_12_src_banned as assertions;
 
 #[test]
 fn app_level_src_dirs_hit_every_mutated_rust_app() {
@@ -13,11 +13,7 @@ fn app_level_src_dirs_hit_every_mutated_rust_app() {
         &results,
         "",
         3,
-        &[
-            "apps/devctl/src",
-            "apps/backend/src",
-            "apps/worker/src",
-        ],
+        &["apps/devctl/src", "apps/backend/src", "apps/worker/src"],
     );
 }
 
@@ -42,11 +38,7 @@ fn empty_src_dirs_still_hit_every_mutated_rust_app() {
         &results,
         "",
         3,
-        &[
-            "apps/devctl/src",
-            "apps/backend/src",
-            "apps/worker/src",
-        ],
+        &["apps/devctl/src", "apps/backend/src", "apps/worker/src"],
     );
 }
 

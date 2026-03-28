@@ -1,5 +1,5 @@
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_03_inbound_outbound as assertions;
 use super::{copy_fixture, remove_dir, write_file};
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_03_inbound_outbound as assertions;
 
 #[test]
 fn missing_parent_directional_container_is_owned_by_rule_02_not_rule_03() {

@@ -1,5 +1,5 @@
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_02_exact_contents as assertions;
 use super::{copy_fixture, remove_dir, write_file};
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_02_exact_contents as assertions;
 const FIXTURE: super::HexarchFixture = super::HexarchFixture;
 
 fn inner_hex() -> &'static str {
@@ -50,17 +50,7 @@ fn missing_dir_plus_unexpected_dir_hits_both_branches_per_owned_root() {
         &[],
         &[],
     );
-    assertions::assert_error_count_matching(
-        &results,
-        "",
-        4,
-        None,
-        None,
-        &["utils"],
-        &[],
-        &[],
-        &[],
-    );
+    assertions::assert_error_count_matching(&results, "", 4, None, None, &["utils"], &[], &[], &[]);
 }
 
 #[test]

@@ -74,7 +74,11 @@ fn crates_test_support_layout_is_checked_too() {
         "crates/runtime/Cargo.toml",
         "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = {path = \"../assertions\"}\ntest_support = {path = \"../test_support\"}\n",
     );
-    write_file(root, "crates/runtime/src/lib.rs", "pub fn value() -> u8 {1}\n");
+    write_file(
+        root,
+        "crates/runtime/src/lib.rs",
+        "pub fn value() -> u8 {1}\n",
+    );
     write_file(
         root,
         "crates/runtime/tests/public_surface.rs",
@@ -290,7 +294,11 @@ fn test_support_fully_qualified_family_mapper_call_is_reported() {
         "crates/runtime/Cargo.toml",
         "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = {path = \"../assertions\"}\ntest_support = {path = \"../../test_support\"}\n",
     );
-    write_file(root, "crates/runtime/src/lib.rs", "pub fn value() -> u8 {1}\n");
+    write_file(
+        root,
+        "crates/runtime/src/lib.rs",
+        "pub fn value() -> u8 {1}\n",
+    );
     write_file(
         root,
         "crates/runtime/tests/public_surface.rs",
@@ -342,7 +350,11 @@ fn test_support_transitive_semantic_helper_is_reported() {
         "crates/runtime/Cargo.toml",
         "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = {path = \"../assertions\"}\ntest_support = {path = \"../../test_support\"}\n",
     );
-    write_file(root, "crates/runtime/src/lib.rs", "pub fn value() -> u8 {1}\n");
+    write_file(
+        root,
+        "crates/runtime/src/lib.rs",
+        "pub fn value() -> u8 {1}\n",
+    );
     write_file(
         root,
         "crates/runtime/tests/public_surface.rs",

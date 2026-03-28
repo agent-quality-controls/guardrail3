@@ -1,7 +1,9 @@
 use guardrail3_domain_report::Severity;
 
-use guardrail3_app_rs_family_code_assertions::rs_code_24_path_attr::{assert_normalized_len, findings};
 use super::super::check_source;
+use guardrail3_app_rs_family_code_assertions::rs_code_24_path_attr::{
+    assert_normalized_len, findings,
+};
 
 #[test]
 fn errors_on_path_attr_without_reason() {
@@ -62,8 +64,7 @@ fn errors_on_parent_escaping_path_attr() {
 
 #[test]
 fn skips_canonical_test_sidecar_path_wiring() {
-    let content =
-        "#[cfg(test)]\n#[path = \"rs_code_24_path_attr_tests/mod.rs\"]\nmod rs_code_24_path_attr_tests;";
+    let content = "#[cfg(test)]\n#[path = \"rs_code_24_path_attr_tests/mod.rs\"]\nmod rs_code_24_path_attr_tests;";
     let binding = check_source("src/rs_code_24_path_attr.rs", content, false);
     let results = findings(&binding);
 
@@ -72,8 +73,7 @@ fn skips_canonical_test_sidecar_path_wiring() {
 
 #[test]
 fn skips_documented_repo_standard_test_sidecar_path_wiring() {
-    let content =
-        "#[cfg(test)]\n#[path = \"rs_code_24_path_attr_tests/mod.rs\"]\nmod tests;";
+    let content = "#[cfg(test)]\n#[path = \"rs_code_24_path_attr_tests/mod.rs\"]\nmod tests;";
     let binding = check_source("src/rs_code_24_path_attr.rs", content, false);
     let results = findings(&binding);
 
@@ -95,8 +95,7 @@ fn errors_on_near_miss_sidecar_path_wiring_without_cfg_test() {
 
 #[test]
 fn errors_on_cfg_test_sidecar_path_for_another_rule_name() {
-    let content =
-        "#[cfg(test)]\n#[path = \"rs_code_99_other_rule_tests/mod.rs\"]\nmod rs_code_99_other_rule_tests;";
+    let content = "#[cfg(test)]\n#[path = \"rs_code_99_other_rule_tests/mod.rs\"]\nmod rs_code_99_other_rule_tests;";
     let binding = check_source("src/lib.rs", content, false);
     let results = findings(&binding);
 
@@ -108,8 +107,7 @@ fn errors_on_cfg_test_sidecar_path_for_another_rule_name() {
 
 #[test]
 fn errors_on_cfg_attr_parent_escaping_path_attr() {
-    let content =
-        "#[cfg_attr(unix, path = \"../generated.rs\")]\nmod generated;";
+    let content = "#[cfg_attr(unix, path = \"../generated.rs\")]\nmod generated;";
     let binding = check_source("src/lib.rs", content, false);
     let results = findings(&binding);
 

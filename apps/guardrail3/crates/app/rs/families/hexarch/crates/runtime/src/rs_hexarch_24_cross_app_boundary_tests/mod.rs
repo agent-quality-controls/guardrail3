@@ -4,12 +4,14 @@ mod golden;
 mod ownership_edges;
 mod package_non_hit;
 
-use std::path::{Path, PathBuf};
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::CheckResult;
+use std::path::{Path, PathBuf};
 
 #[allow(unused_imports)]
-pub(super) use test_support::{create_dir, dir_entry, empty_dir, project_tree, remove_dir, walk, write_file};
+pub(super) use test_support::{
+    create_dir, dir_entry, empty_dir, project_tree, remove_dir, walk, write_file,
+};
 
 const GOLDEN_REL: &str = "../../../../../../../tests/fixtures/r_arch_01/golden";
 const RUST_APPS: &[&str] = &["devctl", "backend", "worker"];
@@ -19,7 +21,9 @@ pub(super) fn run_family(root: &Path) -> Vec<guardrail3_domain_report::CheckResu
     super::results_for_test_root(root)
 }
 
-pub(super) fn run_tree(tree: &guardrail3_domain_project_tree::ProjectTree) -> Vec<guardrail3_domain_report::CheckResult> {
+pub(super) fn run_tree(
+    tree: &guardrail3_domain_project_tree::ProjectTree,
+) -> Vec<guardrail3_domain_report::CheckResult> {
     super::results_for_test_tree(tree)
 }
 

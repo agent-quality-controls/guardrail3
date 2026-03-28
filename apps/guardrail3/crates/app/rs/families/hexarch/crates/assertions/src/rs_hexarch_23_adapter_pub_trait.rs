@@ -76,14 +76,17 @@ pub fn assert_error_file_set(
     assert_result_summary(&errors, expected_count, expected_files, None, None, None);
 }
 
-pub fn assert_error_file_single(
-    results: &[CheckResult],
-    rule_id: &str,
-    expected_file: &str,
-) {
+pub fn assert_error_file_single(results: &[CheckResult], rule_id: &str, expected_file: &str) {
     let errors = error_results(results, rule_id);
     assert_eq!(errors.len(), 1, "{errors:#?}");
-    assert_result_summary(&errors, 1, [expected_file], Some(Some(expected_file)), None, None);
+    assert_result_summary(
+        &errors,
+        1,
+        [expected_file],
+        Some(Some(expected_file)),
+        None,
+        None,
+    );
 }
 
 pub fn assert_error_title_contains(
@@ -112,7 +115,7 @@ pub fn assert_error_message_contains(
         required_substrings
             .iter()
             .all(|needle| errors[0].message.contains(needle)),
-            "expected message to contain all substrings {required_substrings:#?}: {errors:#?}"
+        "expected message to contain all substrings {required_substrings:#?}: {errors:#?}"
     );
 }
 
@@ -124,9 +127,9 @@ pub fn assert_error_title_forbidden(
     let errors = error_results(results, rule_id);
     assert_eq!(errors.len(), 1, "{errors:#?}");
     assert!(
-        errors
+        errors.iter().all(|error| forbidden_substrings
             .iter()
-            .all(|error| forbidden_substrings.iter().all(|f| !error.title.contains(f))),
+            .all(|f| !error.title.contains(f))),
         "expected no forbidden title substring in {errors:#?}"
     );
 }

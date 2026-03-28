@@ -1,7 +1,9 @@
 use guardrail3_domain_report::Severity;
 
-use guardrail3_app_rs_family_code_assertions::rs_code_07_exception_comment_inventory::{assert_normalized_len, findings};
 use super::super::check_comment;
+use guardrail3_app_rs_family_code_assertions::rs_code_07_exception_comment_inventory::{
+    assert_normalized_len, findings,
+};
 
 #[test]
 fn inventories_direct_exception_comment_input() {

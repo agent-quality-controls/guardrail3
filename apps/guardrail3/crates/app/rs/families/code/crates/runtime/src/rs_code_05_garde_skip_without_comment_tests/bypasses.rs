@@ -2,9 +2,11 @@ use std::collections::BTreeSet;
 
 use guardrail3_domain_report::Severity;
 
-use guardrail3_app_rs_family_code_assertions::rs_code_05_garde_skip_without_comment::{assert_files, assert_findings, RuleFinding};
-use super::super::run_family;
 use super::super::copy_fixture;
+use super::super::run_family;
+use guardrail3_app_rs_family_code_assertions::rs_code_05_garde_skip_without_comment::{
+    RuleFinding, assert_files, assert_findings,
+};
 use test_support::write_file;
 
 #[test]
@@ -36,21 +38,30 @@ fn detects_non_primitive_garde_skips_without_comments_across_real_owned_files() 
 
     let type_line = type_new
         .lines()
-        .position(|line| line.contains("#[garde(skip)]")).map(|index| index + 1).unwrap_or_default();
+        .position(|line| line.contains("#[garde(skip)]"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
     let field_line = field_new
         .lines()
-        .position(|line| line.contains("#[garde(skip)]")).map(|index| index + 1).unwrap_or_default();
+        .position(|line| line.contains("#[garde(skip)]"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
     let vec_line = vec_new
         .lines()
-        .position(|line| line.contains("#[garde(skip)]")).map(|index| index + 1).unwrap_or_default();
+        .position(|line| line.contains("#[garde(skip)]"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
 
     let results = run_family(root);
 
-    assert_files(&results, BTreeSet::from([
+    assert_files(
+        &results,
+        BTreeSet::from([
             type_rel.to_owned(),
             field_rel.to_owned(),
-            vec_rel.to_owned()
-        ]));
+            vec_rel.to_owned(),
+        ]),
+    );
     assert_findings(
         &results,
         &[

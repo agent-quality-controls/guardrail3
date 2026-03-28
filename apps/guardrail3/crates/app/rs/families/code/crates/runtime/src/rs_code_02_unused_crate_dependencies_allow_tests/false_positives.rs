@@ -1,8 +1,8 @@
 use std::collections::BTreeSet;
 
-use guardrail3_app_rs_family_code_assertions::rs_code_02_unused_crate_dependencies_allow::assert_files;
-use super::super::run_family;
 use super::super::copy_fixture;
+use super::super::run_family;
+use guardrail3_app_rs_family_code_assertions::rs_code_02_unused_crate_dependencies_allow::assert_files;
 use test_support::write_file;
 
 #[test]
@@ -16,14 +16,11 @@ fn skips_other_allow_names_inline_modules_and_item_level_near_misses() {
     let module_decl_rel = "apps/devctl/crates/adapters/inbound/cli/src/lib.rs";
     let inline_exempt_rel = "apps/backend/crates/ports/outbound/repo/src/lib.rs";
 
-    let other_allow_content =
-        test_support::read_file(root, other_allow_rel);
+    let other_allow_content = test_support::read_file(root, other_allow_rel);
     let inline_other_content = test_support::read_file(root, inline_other_rel);
     let item_content = test_support::read_file(root, item_rel);
-    let module_decl_content =
-        test_support::read_file(root, module_decl_rel);
-    let inline_exempt_content =
-        test_support::read_file(root, inline_exempt_rel);
+    let module_decl_content = test_support::read_file(root, module_decl_rel);
+    let inline_exempt_content = test_support::read_file(root, inline_exempt_rel);
 
     write_file(
         root,

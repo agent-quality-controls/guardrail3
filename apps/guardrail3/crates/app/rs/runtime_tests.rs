@@ -246,7 +246,11 @@ fn arch_runtime_still_reports_scoped_arch_config_when_global_arch_is_disabled() 
 #[test]
 fn arch_runtime_reports_fail_closed_results_for_malformed_guardrail_config() {
     let root = temp_root("arch-runtime-malformed-config");
-    write_file(&root, "guardrail3.toml", "[rust.checks]\nhexarch = \"nope\"\n");
+    write_file(
+        &root,
+        "guardrail3.toml",
+        "[rust.checks]\nhexarch = \"nope\"\n",
+    );
     write_file(
         &root,
         "tools/worker/Cargo.toml",
@@ -285,7 +289,11 @@ fn arch_runtime_reports_fail_closed_results_for_malformed_guardrail_config() {
 #[test]
 fn hexarch_runtime_reports_fail_closed_results_for_malformed_guardrail_config() {
     let root = temp_root("hexarch-runtime-malformed-config");
-    write_file(&root, "guardrail3.toml", "[rust.checks]\nhexarch = \"nope\"\n");
+    write_file(
+        &root,
+        "guardrail3.toml",
+        "[rust.checks]\nhexarch = \"nope\"\n",
+    );
     write_file(
         &root,
         "apps/backend/Cargo.toml",

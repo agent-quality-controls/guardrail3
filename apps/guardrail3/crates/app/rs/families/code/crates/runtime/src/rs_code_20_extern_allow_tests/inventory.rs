@@ -1,6 +1,6 @@
-use guardrail3_app_rs_family_code_assertions::rs_code_20_extern_allow::assert_inventory_allow_attrs_on_extern_blocks;
-use super::super::run_family;
 use super::super::copy_fixture;
+use super::super::run_family;
+use guardrail3_app_rs_family_code_assertions::rs_code_20_extern_allow::assert_inventory_allow_attrs_on_extern_blocks;
 use test_support::write_file;
 
 #[test]
@@ -14,8 +14,7 @@ fn attacks_allow_attrs_on_extern_blocks_across_multiple_owned_files() {
     let mcp_content = test_support::read_file(root, mcp_rel);
     let api_content = test_support::read_file(root, api_rel);
     let worker_rel = "apps/worker/crates/ports/outbound/queue/src/lib.rs";
-    let worker_content =
-        test_support::read_file(root, worker_rel);
+    let worker_content = test_support::read_file(root, worker_rel);
 
     let mcp_mutated = format!(
         "{mcp_content}\nmod native_protocol {{\n    #[allow(improper_ctypes)]\n    unsafe extern \"C\" {{\n        fn protocol_probe(code: i32);\n    }}\n}}\n"
@@ -33,13 +32,19 @@ fn attacks_allow_attrs_on_extern_blocks_across_multiple_owned_files() {
 
     let mcp_line = mcp_mutated
         .lines()
-        .position(|line| line.contains("#[allow(improper_ctypes)]")).map(|index| index + 1).unwrap_or_default();
+        .position(|line| line.contains("#[allow(improper_ctypes)]"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
     let api_line = api_mutated
         .lines()
-        .position(|line| line.contains("#[allow(improper_ctypes_definitions)]")).map(|index| index + 1).unwrap_or_default();
+        .position(|line| line.contains("#[allow(improper_ctypes_definitions)]"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
     let worker_line = worker_mutated
         .lines()
-        .position(|line| line.contains("#[cfg_attr(feature = \"ffi\", allow(improper_ctypes))]")).map(|index| index + 1).unwrap_or_default();
+        .position(|line| line.contains("#[cfg_attr(feature = \"ffi\", allow(improper_ctypes))]"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
 
     assert_inventory_allow_attrs_on_extern_blocks(
         &run_family(root),

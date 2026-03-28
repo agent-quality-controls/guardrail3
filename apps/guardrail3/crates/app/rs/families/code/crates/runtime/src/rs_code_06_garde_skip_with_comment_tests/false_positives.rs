@@ -1,6 +1,6 @@
-use guardrail3_app_rs_family_code_assertions::rs_code_06_garde_skip_with_comment::assert_no_hits;
-use super::super::run_family;
 use super::super::copy_fixture;
+use super::super::run_family;
+use guardrail3_app_rs_family_code_assertions::rs_code_06_garde_skip_with_comment::assert_no_hits;
 use test_support::write_file;
 
 #[test]
@@ -17,22 +17,14 @@ fn skips_reasoned_primitive_unvalidatable_and_missing_comment_garde_skip_surface
     let subcommand_rel = "apps/backend/crates/ports/outbound/events/src/lib.rs";
     let reasoned_type_rel = "apps/devctl/crates/app/core/src/lib.rs";
 
-    let reasoned_field_content =
-        test_support::read_file(root, reasoned_field_rel);
-    let uppercase_reason_content =
-        test_support::read_file(root, uppercase_reason_rel);
-    let tight_reason_content =
-        test_support::read_file(root, tight_reason_rel);
-    let missing_comment_content =
-        test_support::read_file(root, missing_comment_rel);
-    let primitive_content =
-        test_support::read_file(root, primitive_rel);
-    let unvalidatable_content =
-        test_support::read_file(root, unvalidatable_rel);
-    let subcommand_content =
-        test_support::read_file(root, subcommand_rel);
-    let reasoned_type_content =
-        test_support::read_file(root, reasoned_type_rel);
+    let reasoned_field_content = test_support::read_file(root, reasoned_field_rel);
+    let uppercase_reason_content = test_support::read_file(root, uppercase_reason_rel);
+    let tight_reason_content = test_support::read_file(root, tight_reason_rel);
+    let missing_comment_content = test_support::read_file(root, missing_comment_rel);
+    let primitive_content = test_support::read_file(root, primitive_rel);
+    let unvalidatable_content = test_support::read_file(root, unvalidatable_rel);
+    let subcommand_content = test_support::read_file(root, subcommand_rel);
+    let reasoned_type_content = test_support::read_file(root, reasoned_type_rel);
 
     write_file(
         root,
@@ -89,7 +81,9 @@ fn skips_reasoned_primitive_unvalidatable_and_missing_comment_garde_skip_surface
     );
     let missing_comment_line = missing_comment_new
         .lines()
-        .position(|line| line.contains("#[garde(skip)]")).map(|index| index + 1).unwrap_or_default();
+        .position(|line| line.contains("#[garde(skip)]"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
 
     let results = run_family(root);
 

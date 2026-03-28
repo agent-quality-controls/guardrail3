@@ -142,9 +142,7 @@ pub fn assert_attacks_direct_std_fs_imports_and_calls_in_real_owned_files_with_e
                 id: ID,
                 severity: Severity::Error,
                 title: "direct std::fs call",
-                message:
-                    "Direct `std::fs::*` call found: `let _ = std::fs::read_to_string(\"backend.txt\");`."
-                        ,
+                message: "Direct `std::fs::*` call found: `let _ = std::fs::read_to_string(\"backend.txt\");`.",
                 file: Some(backend_rel),
                 line: Some(backend_call_line),
                 inventory: false,
@@ -153,9 +151,7 @@ pub fn assert_attacks_direct_std_fs_imports_and_calls_in_real_owned_files_with_e
                 id: ID,
                 severity: Severity::Error,
                 title: "direct std::fs import",
-                message:
-                    "Direct `use std::fs` import found: `use std::{fs, io}; fn fs_call_probe() { let _ = std::fs::read_to_string(\"jobs.txt\"); }`."
-                        ,
+                message: "Direct `use std::fs` import found: `use std::{fs, io}; fn fs_call_probe() { let _ = std::fs::read_to_string(\"jobs.txt\"); }`.",
                 file: Some(worker_rel),
                 line: Some(worker_import_line),
                 inventory: false,
@@ -176,9 +172,7 @@ pub fn assert_prefers_import_hit_when_import_and_call_share_one_line(
             id: ID,
             severity: Severity::Error,
             title: "direct std::fs import",
-            message:
-                "Direct `use std::fs` import found: `use std::fs; fn same_line_probe() { let _ = std::fs::read_to_string(\"same-line.txt\"); }`."
-                    ,
+            message: "Direct `use std::fs` import found: `use std::fs; fn same_line_probe() { let _ = std::fs::read_to_string(\"same-line.txt\"); }`.",
             file: Some(rel),
             line: Some(line),
             inventory: false,

@@ -1,6 +1,6 @@
-use guardrail3_app_rs_family_code_assertions::rs_code_15_direct_fs_usage::{assert_no_hits};
-use super::super::run_family;
 use super::super::copy_fixture;
+use super::super::run_family;
+use guardrail3_app_rs_family_code_assertions::rs_code_15_direct_fs_usage::assert_no_hits;
 use test_support::write_file;
 
 #[test]
@@ -12,8 +12,7 @@ fn skips_test_boundaries_cfg_test_src_fs_and_text_only_near_misses() {
     let test_text_rel = "apps/devctl/crates/app/core/src/lib.rs";
 
     let cfg_content = test_support::read_file(root, cfg_rel);
-    let test_text_content =
-        test_support::read_file(root, test_text_rel);
+    let test_text_content = test_support::read_file(root, test_text_rel);
 
     write_file(
         root,

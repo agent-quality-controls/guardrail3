@@ -1,8 +1,10 @@
 use guardrail3_domain_report::Severity;
 
-use guardrail3_app_rs_family_code_assertions::rs_code_04_item_level_allow_with_reason::{assert_findings, assert_no_hits, RuleFinding};
-use super::super::run_family;
 use super::super::copy_fixture;
+use super::super::run_family;
+use guardrail3_app_rs_family_code_assertions::rs_code_04_item_level_allow_with_reason::{
+    RuleFinding, assert_findings, assert_no_hits,
+};
 use test_support::write_file;
 
 #[test]
@@ -15,14 +17,10 @@ fn skips_undocumented_and_malformed_reason_near_misses() {
     let wrong_key_rel = "apps/devctl/crates/ports/outbound/traits/src/lib.rs";
     let block_comment_rel = "apps/backend/crates/adapters/outbound/queue/src/lib.rs";
 
-    let undocumented_content =
-        test_support::read_file(root, undocumented_rel);
-    let empty_reason_content =
-        test_support::read_file(root, empty_reason_rel);
-    let wrong_key_content =
-        test_support::read_file(root, wrong_key_rel);
-    let block_comment_content =
-        test_support::read_file(root, block_comment_rel);
+    let undocumented_content = test_support::read_file(root, undocumented_rel);
+    let empty_reason_content = test_support::read_file(root, empty_reason_rel);
+    let wrong_key_content = test_support::read_file(root, wrong_key_rel);
+    let block_comment_content = test_support::read_file(root, block_comment_rel);
 
     write_file(
         root,
@@ -90,16 +88,20 @@ fn inventories_accepted_reason_variants_and_other_item_kinds() {
         .position(|line| {
             line.contains("#[allow(clippy::unwrap_used)] // REASON: uppercase accepted")
         })
-        .map(|index| index + 1).unwrap_or_default();
+        .map(|index| index + 1)
+        .unwrap_or_default();
     let tight_line = tight_new
         .lines()
-        .position(|line| line.contains("#[allow(clippy::panic)] //reason: tight spacing accepted")).map(|index| index + 1).unwrap_or_default();
+        .position(|line| line.contains("#[allow(clippy::panic)] //reason: tight spacing accepted"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
     let mod_line = mod_new
         .lines()
         .position(|line| {
             line.contains("#[allow(clippy::expect_used)] // reason: module boundary shim")
         })
-        .map(|index| index + 1).unwrap_or_default();
+        .map(|index| index + 1)
+        .unwrap_or_default();
 
     assert_findings(
         &run_family(root),
@@ -128,7 +130,7 @@ fn inventories_accepted_reason_variants_and_other_item_kinds() {
                 line: Some(tight_line),
                 inventory: true,
             },
-        ]
+        ],
     );
 }
 
@@ -150,7 +152,8 @@ fn inventories_only_documented_allows_in_mixed_same_file_case() {
         .position(|line| {
             line.contains("#[allow(clippy::unwrap_used)] // reason: documented surface")
         })
-        .map(|index| index + 1).unwrap_or_default();
+        .map(|index| index + 1)
+        .unwrap_or_default();
 
     assert_findings(
         &run_family(root),
@@ -193,8 +196,7 @@ fn preserves_reason_text_with_url_like_content() {
         &[RuleFinding {
             severity: Severity::Info,
             title: "item-level allow with reason",
-            message:
-                "#[allow(clippy::unwrap_used)] reason: compatibility note see https://example.com/policy",
+            message: "#[allow(clippy::unwrap_used)] reason: compatibility note see https://example.com/policy",
             file: Some(rel),
             line: Some(line),
             inventory: true,

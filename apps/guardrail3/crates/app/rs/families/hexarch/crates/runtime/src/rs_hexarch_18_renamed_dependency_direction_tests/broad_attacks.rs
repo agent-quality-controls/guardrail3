@@ -1,5 +1,5 @@
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_18_renamed_dependency_direction as assertions;
 use super::{copy_fixture, write_file};
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_18_renamed_dependency_direction as assertions;
 
 #[test]
 fn forbidden_renamed_edges_error_and_unrenamed_edges_do_not() {
@@ -43,7 +43,10 @@ fn messages_name_both_alias_and_package_for_each_forbidden_edge() {
         "",
         &[
             &["alias `commands_alias`", "package `backend-app-commands`"],
-            &["alias `queue_alias`", "package `backend-adapters-outbound-queue`"],
+            &[
+                "alias `queue_alias`",
+                "package `backend-adapters-outbound-queue`",
+            ],
         ],
     );
 }

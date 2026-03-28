@@ -1,5 +1,5 @@
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_25_target_dependency_direction as assertions;
 use super::{dir_entry, project_tree, run_tree};
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_25_target_dependency_direction as assertions;
 
 #[test]
 fn forbidden_target_sections_error_and_allowed_target_sections_do_not() {
@@ -57,10 +57,5 @@ fn forbidden_target_sections_error_and_allowed_target_sections_do_not() {
     );
 
     let results = super::run_tree(&tree);
-    assertions::assert_error_file_set(
-        &results,
-        "",
-        3,
-        &["apps/api/crates/app/core/Cargo.toml"],
-    );
+    assertions::assert_error_file_set(&results, "", 3, &["apps/api/crates/app/core/Cargo.toml"]);
 }

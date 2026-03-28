@@ -1,6 +1,6 @@
 use super::super::audit_edge_for_test as audit_edge;
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_17_workspace_inherited_direction as rule17_assertions;
 use super::{dir_entry, project_tree};
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_17_workspace_inherited_direction as rule17_assertions;
 
 #[test]
 fn version_only_inherited_dep_with_same_name_local_member_stays_out_of_scope() {

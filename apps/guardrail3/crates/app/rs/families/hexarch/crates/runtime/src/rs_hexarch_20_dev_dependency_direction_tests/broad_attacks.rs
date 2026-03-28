@@ -130,8 +130,14 @@ fn direct_dev_edges_are_warned_while_target_dev_edges_are_left_to_rule_25() {
         &results,
         "",
         expected_rule20_files.len(),
-        &expected_rule20_files.iter().map(String::as_str).collect::<Vec<_>>(),
-        &expected_rule20_messages.iter().map(String::as_str).collect::<Vec<_>>(),
+        &expected_rule20_files
+            .iter()
+            .map(String::as_str)
+            .collect::<Vec<_>>(),
+        &expected_rule20_messages
+            .iter()
+            .map(String::as_str)
+            .collect::<Vec<_>>(),
     );
 
     rule20_assertions::assert_error_count(&results, "RS-HEXARCH-25", 1);

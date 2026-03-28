@@ -1,5 +1,5 @@
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_23_adapter_pub_trait as assertions;
 use super::{copy_fixture, write_file};
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_23_adapter_pub_trait as assertions;
 
 #[test]
 fn orphan_adapter_source_file_does_not_count_as_public_trait_surface() {
@@ -106,7 +106,11 @@ fn missing_entrypoint_errors_instead_of_scanning_root_rs_files_as_entrypoints() 
         "",
         "apps/backend/crates/adapters/outbound/postgres/src",
     );
-    assertions::assert_error_message_contains(&results, "", &["expected src/lib.rs or src/main.rs"]);
+    assertions::assert_error_message_contains(
+        &results,
+        "",
+        &["expected src/lib.rs or src/main.rs"],
+    );
 }
 
 #[test]

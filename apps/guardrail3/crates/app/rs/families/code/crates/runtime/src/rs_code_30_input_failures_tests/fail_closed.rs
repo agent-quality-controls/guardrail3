@@ -2,13 +2,11 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
 
+use super::super::run_tree;
 use guardrail3_app_rs_family_code_assertions::rs_code_30_input_failures::{
-    assert_guardrail_policy_parse_failure,
-    assert_message_fragment_failure,
-    assert_files,
+    assert_files, assert_guardrail_policy_parse_failure, assert_message_fragment_failure,
     assert_source_parse_failure,
 };
-use super::super::run_tree;
 use test_support::{create_dir_all, create_temp_dir, write_path};
 
 #[test]
@@ -51,7 +49,6 @@ fn family_surfaces_source_parse_failures_with_exact_owned_hit_set() {
 
     assert_files(&results, BTreeSet::from([source_rel.to_owned()]));
     assert_source_parse_failure(&results, source_rel);
-
 }
 
 #[test]
@@ -60,7 +57,10 @@ fn family_surfaces_guardrail_policy_parse_failures_with_exact_owned_hit_set() {
     let source_rel = "src/lib.rs";
     let source_abs = root.path().join(source_rel);
     create_dir_all(source_abs.parent().unwrap_or(root.path()));
-    write_path(&source_abs, "pub fn parse() -> Result<(), String> { Ok(()) }");
+    write_path(
+        &source_abs,
+        "pub fn parse() -> Result<(), String> { Ok(()) }",
+    );
 
     let tree = ProjectTree {
         root: root.path().to_path_buf(),
@@ -100,7 +100,6 @@ fn family_surfaces_guardrail_policy_parse_failures_with_exact_owned_hit_set() {
 
     assert_files(&results, BTreeSet::from(["guardrail3.toml".to_owned()]));
     assert_guardrail_policy_parse_failure(&results, "guardrail3.toml");
-
 }
 
 #[test]

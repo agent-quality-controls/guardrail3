@@ -53,11 +53,7 @@ pub fn assert_no_error(results: &[CheckResult], rule_id: &str) {
 }
 
 pub fn assert_no_warning(results: &[CheckResult], rule_id: &str) {
-    let rule_id = if rule_id.is_empty() {
-        RULE_ID
-    } else {
-        rule_id
-    };
+    let rule_id = if rule_id.is_empty() { RULE_ID } else { rule_id };
     let warnings = warning_results(results, rule_id);
     assert!(
         warnings.is_empty(),
@@ -106,9 +102,9 @@ pub fn assert_result_title_contains(
 pub fn assert_error_title_forbidden(results: &[CheckResult], rule_id: &str, forbidden: &[&str]) {
     let warnings = warning_results(results, rule_id);
     assert!(
-        warnings
+        warnings.iter().all(|result| forbidden
             .iter()
-            .all(|result| forbidden.iter().all(|needle| !result.title.contains(needle))),
+            .all(|needle| !result.title.contains(needle))),
         "expected forbidden title text to be absent in {warnings:#?}"
     );
 }

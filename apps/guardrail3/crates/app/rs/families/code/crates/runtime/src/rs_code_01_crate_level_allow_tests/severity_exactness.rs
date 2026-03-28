@@ -1,10 +1,10 @@
 use guardrail3_domain_report::Severity;
 
+use super::super::copy_fixture;
+use super::super::run_family;
 use guardrail3_app_rs_family_code_assertions::rs_code_01_crate_level_allow::{
     RuleFinding, assert_findings,
 };
-use super::super::run_family;
-use super::super::copy_fixture;
 use test_support::write_file;
 
 #[test]

@@ -141,7 +141,14 @@ fn walk_module_file(
         }
     };
 
-    count_items(tree, rel_path, &parsed.items, source_error, visited, public_module)
+    count_items(
+        tree,
+        rel_path,
+        &parsed.items,
+        source_error,
+        visited,
+        public_module,
+    )
 }
 
 fn parse_manifest_entrypoints(
@@ -226,10 +233,17 @@ fn count_items(
                 }
             }
             syn::Item::Mod(item_mod) => {
-                let child_public = public_module && matches!(item_mod.vis, syn::Visibility::Public(_));
+                let child_public =
+                    public_module && matches!(item_mod.vis, syn::Visibility::Public(_));
                 if let Some((_, nested_items)) = &item_mod.content {
-                    let nested =
-                        count_items(tree, rel_path, nested_items, source_error, visited, child_public);
+                    let nested = count_items(
+                        tree,
+                        rel_path,
+                        nested_items,
+                        source_error,
+                        visited,
+                        child_public,
+                    );
                     stats.pub_trait_count += nested.pub_trait_count;
                     stats.public_free_fn_count += nested.public_free_fn_count;
                     stats.public_inherent_method_count += nested.public_inherent_method_count;

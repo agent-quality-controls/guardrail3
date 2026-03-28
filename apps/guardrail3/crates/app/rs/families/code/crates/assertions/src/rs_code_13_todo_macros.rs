@@ -141,8 +141,7 @@ pub fn assert_inventories_todo_unimplemented_and_unreachable_macros_in_real_file
                 id: ID,
                 severity: Severity::Warn,
                 title: "unimplemented! macro",
-                message: "`unimplemented!()` macro found: fn worker_probe() { unimplemented!(); unreachable!(); }."
-                    ,
+                message: "`unimplemented!()` macro found: fn worker_probe() { unimplemented!(); unreachable!(); }.",
                 file: Some(worker_rel),
                 line: Some(worker_line),
                 inventory: false,
@@ -151,8 +150,7 @@ pub fn assert_inventories_todo_unimplemented_and_unreachable_macros_in_real_file
                 id: ID,
                 severity: Severity::Info,
                 title: "unreachable! macro",
-                message: "`unreachable!()` macro found: fn worker_probe() { unimplemented!(); unreachable!(); }."
-                    ,
+                message: "`unreachable!()` macro found: fn worker_probe() { unimplemented!(); unreachable!(); }.",
                 file: Some(worker_rel),
                 line: Some(worker_line),
                 inventory: false,

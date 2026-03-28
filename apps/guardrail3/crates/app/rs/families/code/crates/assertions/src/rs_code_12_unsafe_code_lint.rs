@@ -129,13 +129,7 @@ pub fn assert_populated_golden_fixture_inventories_workspace_forbid_lints(
         })
         .collect::<Vec<_>>();
     actual.sort_by_key(|(file, severity, title, message, inventory)| {
-        (
-            *file,
-            format!("{severity:?}"),
-            *title,
-            *message,
-            *inventory,
-        )
+        (*file, format!("{severity:?}"), *title, *message, *inventory)
     });
     assert_value_eq(
         actual,
@@ -184,13 +178,7 @@ pub fn assert_inventories_workspace_forbid_lints(
         })
         .collect::<Vec<_>>();
     actual.sort_by_key(|(file, severity, title, message, inventory)| {
-        (
-            *file,
-            format!("{severity:?}"),
-            *title,
-            *message,
-            *inventory,
-        )
+        (*file, format!("{severity:?}"), *title, *message, *inventory)
     });
     assert_value_eq(
         actual,

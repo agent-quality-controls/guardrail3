@@ -1,14 +1,12 @@
 use std::collections::BTreeSet;
 
-use guardrail3_app_rs_family_code_assertions::rs_code_22_deny_forbid_without_reason::{
-    assert_files,
-    assert_findings,
-    RuleFinding,
-};
-use super::super::run_family;
 use super::super::copy_fixture;
-use test_support::write_file;
+use super::super::run_family;
+use guardrail3_app_rs_family_code_assertions::rs_code_22_deny_forbid_without_reason::{
+    RuleFinding, assert_files, assert_findings,
+};
 use guardrail3_domain_report::Severity;
+use test_support::write_file;
 
 #[test]
 fn attacks_undocumented_deny_forbid_attrs_across_multiple_owned_files() {
@@ -18,10 +16,8 @@ fn attacks_undocumented_deny_forbid_attrs_across_multiple_owned_files() {
     let backend_rel = "apps/backend/crates/domain/types/src/lib.rs";
     let worker_rel = "apps/worker/crates/domain/jobs/src/lib.rs";
 
-    let backend_content =
-        test_support::read_file(root, backend_rel);
-    let worker_content =
-        test_support::read_file(root, worker_rel);
+    let backend_content = test_support::read_file(root, backend_rel);
+    let worker_content = test_support::read_file(root, worker_rel);
 
     let backend_line = backend_content.lines().count() + 2;
     let worker_info_line = 1;
@@ -42,7 +38,10 @@ fn attacks_undocumented_deny_forbid_attrs_across_multiple_owned_files() {
 
     let results = run_family(root);
 
-    assert_files(&results, BTreeSet::from([backend_rel.to_owned(), worker_rel.to_owned()]));
+    assert_files(
+        &results,
+        BTreeSet::from([backend_rel.to_owned(), worker_rel.to_owned()]),
+    );
     assert_findings(
         &results,
         &[
@@ -82,8 +81,7 @@ fn attacks_grouped_inner_forbid_and_trait_item_across_owned_files() {
     let backend_rel = "apps/backend/crates/domain/types/src/lib.rs";
     let test_rel = "apps/backend/crates/app/queries/tests/lint_policy.rs";
 
-    let backend_content =
-        test_support::read_file(root, backend_rel);
+    let backend_content = test_support::read_file(root, backend_rel);
     write_file(
         root,
         backend_rel,
@@ -104,7 +102,10 @@ fn attacks_grouped_inner_forbid_and_trait_item_across_owned_files() {
         .map(|index| index + 1)
         .unwrap_or_default();
 
-    assert_files(&results, BTreeSet::from([backend_rel.to_owned(), test_rel.to_owned()]));
+    assert_files(
+        &results,
+        BTreeSet::from([backend_rel.to_owned(), test_rel.to_owned()]),
+    );
     assert_findings(
         &results,
         &[

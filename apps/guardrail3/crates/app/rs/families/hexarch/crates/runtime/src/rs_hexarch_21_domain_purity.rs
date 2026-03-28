@@ -141,20 +141,22 @@ pub(crate) fn run_domain_purity_case(
             edge.source_rel_dir == member.rel_dir
                 && matches!(
                     (edge_kind, edge.kind),
-                    (DomainPurityEdgeKindForTest::Dependency, EdgeKind::Dependency)
-                        | (DomainPurityEdgeKindForTest::DevDependency, EdgeKind::DevDependency)
-                        | (
-                            DomainPurityEdgeKindForTest::BuildDependency,
-                            EdgeKind::BuildDependency
-                        )
-                        | (
-                            DomainPurityEdgeKindForTest::TargetDependency,
-                            EdgeKind::TargetDependency
-                        )
-                        | (
-                            DomainPurityEdgeKindForTest::TargetBuildDependency,
-                            EdgeKind::TargetBuildDependency
-                        )
+                    (
+                        DomainPurityEdgeKindForTest::Dependency,
+                        EdgeKind::Dependency
+                    ) | (
+                        DomainPurityEdgeKindForTest::DevDependency,
+                        EdgeKind::DevDependency
+                    ) | (
+                        DomainPurityEdgeKindForTest::BuildDependency,
+                        EdgeKind::BuildDependency
+                    ) | (
+                        DomainPurityEdgeKindForTest::TargetDependency,
+                        EdgeKind::TargetDependency
+                    ) | (
+                        DomainPurityEdgeKindForTest::TargetBuildDependency,
+                        EdgeKind::TargetBuildDependency
+                    )
                 )
         })
         .collect();
@@ -174,7 +176,9 @@ pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> 
 
 #[cfg(test)]
 #[allow(dead_code)]
-pub(super) fn results_for_test_tree(tree: &guardrail3_domain_project_tree::ProjectTree) -> Vec<CheckResult> {
+pub(super) fn results_for_test_tree(
+    tree: &guardrail3_domain_project_tree::ProjectTree,
+) -> Vec<CheckResult> {
     crate::check_test_tree(tree)
 }
 

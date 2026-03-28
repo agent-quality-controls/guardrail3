@@ -1,5 +1,5 @@
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_21_domain_purity as assertions;
 use super::{copy_fixture, write_file};
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_21_domain_purity as assertions;
 
 #[test]
 fn out_of_tree_paths_with_pure_layer_names_still_error() {

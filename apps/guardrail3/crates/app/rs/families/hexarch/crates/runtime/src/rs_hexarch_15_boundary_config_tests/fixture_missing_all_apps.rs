@@ -1,5 +1,5 @@
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_15_boundary_config as assertions;
 use super::copy_fixture;
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_15_boundary_config as assertions;
 
 #[test]
 fn missing_all_app_boundaries_hits_each_app_boundary() {
