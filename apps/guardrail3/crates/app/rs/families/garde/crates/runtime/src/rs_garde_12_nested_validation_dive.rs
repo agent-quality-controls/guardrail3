@@ -5,7 +5,7 @@ use super::inputs::BoundaryFieldInput;
 const ID: &str = "RS-GARDE-12";
 
 pub fn check(input: &BoundaryFieldInput<'_>, results: &mut Vec<CheckResult>) {
-    if !input.field.nested_validated || input.field.has_garde_dive {
+    if !input.field.nested_validated || input.field.has_garde_skip || input.field.has_garde_dive {
         return;
     }
 
