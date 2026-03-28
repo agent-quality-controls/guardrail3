@@ -20,6 +20,7 @@ pub use super::ast_visitors::{GardeSkipInfo, struct_has_non_primitive_fields};
 pub(super) type Located = (usize, String);
 
 /// Information about a `#[cfg_attr(..., allow(...))]` attribute.
+#[derive(Debug)]
 pub struct CfgAttrAllowInfo {
     /// 1-based line number.
     pub line: usize,
@@ -30,6 +31,7 @@ pub struct CfgAttrAllowInfo {
 }
 
 /// Information about a `#[derive(...)]` attribute on an item.
+#[derive(Debug)]
 pub struct DeriveInfo {
     /// 1-based line number of the derive attribute.
     pub line: usize,
@@ -61,6 +63,7 @@ pub fn find_crate_level_allows(file: &syn::File) -> Vec<Located> {
 }
 
 /// Information about a `#![allow(...)]` inside an inline module.
+#[derive(Debug)]
 pub struct InlineModAllow {
     /// 1-based line number of the inner attribute.
     pub line: usize,

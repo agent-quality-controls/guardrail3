@@ -5,3 +5,6 @@ edition = "2024"
 
 [dependencies]
 guardrail3_domain_project_tree = { package = "guardrail3-domain-project-tree", path = "../../../../../domain/project-tree" }
+
+[lints]
+workspace = true

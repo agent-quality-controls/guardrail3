@@ -8,3 +8,6 @@ path = "mod.rs"
 
 [dependencies]
 guardrail3_outbound_traits = { package = "guardrail3-ports-outbound-traits", path = "../../../ports/outbound/traits" }
+
+[lints]
+workspace = true

@@ -8,6 +8,7 @@ use syn::visit::Visit;
 
 use super::ast_helpers::{attrs_have_allow_lint, is_cfg_test_attr, span_line};
 
+#[derive(Debug)]
 pub struct InlineStdFsVisitor {
     pub out: Vec<usize>,
     pub in_cfg_test: bool,
@@ -74,6 +75,7 @@ impl<'ast> Visit<'ast> for InlineStdFsVisitor {
 // IgnoreVisitor — detects `#[ignore]` without reason comment
 // ---------------------------------------------------------------------------
 
+#[derive(Debug)]
 pub struct IgnoreVisitor<'s> {
     pub lines: Vec<&'s str>,
     pub violations: Vec<usize>,

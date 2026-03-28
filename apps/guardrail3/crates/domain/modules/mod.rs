@@ -8,6 +8,7 @@ pub mod pre_commit;
 pub mod release;
 pub mod stylelint;
 
+#[derive(Debug)]
 pub struct Module {
     pub name: &'static str,
     pub description: &'static str,

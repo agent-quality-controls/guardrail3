@@ -82,6 +82,7 @@ fn has_test_or_tokio_test(attrs: &[syn::Attribute]) -> bool {
 // Visitors
 // ---------------------------------------------------------------------------
 
+#[derive(Debug)]
 pub struct ItemAllowVisitor {
     pub out: Vec<Located>,
 }
@@ -115,6 +116,7 @@ impl<'ast> Visit<'ast> for ItemAllowVisitor {
     }
 }
 
+#[derive(Debug)]
 pub struct CfgAttrAllowVisitor<'a> {
     pub out: &'a mut Vec<CfgAttrAllowInfo>,
 }
@@ -133,6 +135,7 @@ impl<'ast> Visit<'ast> for CfgAttrAllowVisitor<'_> {
     }
 }
 
+#[derive(Debug)]
 pub struct GardeSkipVisitor {
     pub out: Vec<usize>,
 }
@@ -162,6 +165,7 @@ const SKIP_OK_TYPES: &[&str] = &[
 ];
 
 /// Information about a `#[garde(skip)]` field, including its type.
+#[derive(Debug)]
 pub struct GardeSkipInfo {
     pub line: usize,
     pub field_name: String,
@@ -211,6 +215,7 @@ fn type_to_string(ty: &syn::Type) -> String {
     ty.to_token_stream().to_string().replace(' ', "")
 }
 
+#[derive(Debug)]
 pub struct GardeSkipTypedVisitor {
     pub out: Vec<GardeSkipInfo>,
 }
@@ -271,6 +276,7 @@ pub fn struct_has_non_primitive_fields(item: &syn::ItemStruct) -> bool {
     }
 }
 
+#[derive(Debug)]
 pub struct UnsafeVisitor {
     pub out: Vec<usize>,
 }
@@ -305,6 +311,7 @@ impl<'ast> Visit<'ast> for UnsafeVisitor {
     }
 }
 
+#[derive(Debug)]
 pub struct ForbiddenMacroVisitor {
     pub out: Vec<Located>,
 }
@@ -319,7 +326,7 @@ impl<'ast> Visit<'ast> for ForbiddenMacroVisitor {
     }
 }
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct UnwrapExpectVisitor {
     pub out: Vec<Located>,
     /// Scope has `#[allow(clippy::unwrap_used)]`
@@ -376,6 +383,7 @@ impl<'ast> Visit<'ast> for UnwrapExpectVisitor {
     }
 }
 
+#[derive(Debug)]
 pub struct DeriveVisitor {
     pub out: Vec<DeriveInfo>,
 }
@@ -439,6 +447,7 @@ impl<'ast> Visit<'ast> for DeriveVisitor {
     }
 }
 
+#[derive(Debug)]
 pub struct TestAttrVisitor {
     pub found: bool,
 }
@@ -461,6 +470,7 @@ impl<'ast> Visit<'ast> for TestAttrVisitor {
     }
 }
 
+#[derive(Debug)]
 pub struct PubFnVisitor {
     pub count: usize,
 }
@@ -479,6 +489,7 @@ impl<'ast> Visit<'ast> for PubFnVisitor {
     }
 }
 
+#[derive(Debug)]
 pub struct TestCountVisitor {
     pub count: usize,
 }
