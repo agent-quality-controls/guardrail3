@@ -42,5 +42,6 @@ pub(crate) fn check_comment(rel_path: &str, line: usize, line_text: &str) -> Vec
 }
 
 #[cfg(test)]
-#[path = "rs_code_07_exception_comment_inventory_tests/mod.rs"] // reason: test-only sidecar module wiring
+#[path = "rs_code_07_exception_comment_inventory_tests/mod.rs"]
+// reason: test-only sidecar module wiring
 mod rs_code_07_exception_comment_inventory_tests;

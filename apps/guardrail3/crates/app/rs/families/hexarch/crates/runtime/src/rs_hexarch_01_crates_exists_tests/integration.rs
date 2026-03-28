@@ -1,8 +1,8 @@
 use std::collections::BTreeSet;
 const FIXTURE: super::HexarchFixture = super::HexarchFixture;
 
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_01_crates_exists as assertions;
 use super::{copy_fixture, remove_dir, write_file};
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_01_crates_exists as assertions;
 
 #[test]
 fn golden_has_no_rule_01_errors() {
@@ -28,7 +28,10 @@ fn missing_outer_crates_dir_hits_every_owned_rust_app_and_only_them() {
         &results,
         "",
         expected_files.len(),
-        &expected_files.iter().map(String::as_str).collect::<Vec<_>>(),
+        &expected_files
+            .iter()
+            .map(String::as_str)
+            .collect::<Vec<_>>(),
         None,
         None,
         None,
@@ -55,7 +58,10 @@ fn file_outer_crates_dirs_still_count_as_missing_for_the_owned_apps() {
         &results,
         "",
         expected_files.len(),
-        &expected_files.iter().map(String::as_str).collect::<Vec<_>>(),
+        &expected_files
+            .iter()
+            .map(String::as_str)
+            .collect::<Vec<_>>(),
         None,
         None,
         None,
@@ -76,7 +82,10 @@ fn single_app_missing_crates_hits_only_that_app() {
         &results,
         "",
         expected_files.len(),
-        &expected_files.iter().map(String::as_str).collect::<Vec<_>>(),
+        &expected_files
+            .iter()
+            .map(String::as_str)
+            .collect::<Vec<_>>(),
         None,
         None,
         None,
@@ -99,7 +108,10 @@ fn replacing_outer_crates_with_a_file_only_hits_the_owned_app_roots() {
         &results,
         "",
         expected_files.len(),
-        &expected_files.iter().map(String::as_str).collect::<Vec<_>>(),
+        &expected_files
+            .iter()
+            .map(String::as_str)
+            .collect::<Vec<_>>(),
         None,
         None,
         None,

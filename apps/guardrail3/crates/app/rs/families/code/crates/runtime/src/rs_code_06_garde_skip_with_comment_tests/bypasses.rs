@@ -2,9 +2,11 @@ use std::collections::BTreeSet;
 
 use guardrail3_domain_report::Severity;
 
-use guardrail3_app_rs_family_code_assertions::rs_code_06_garde_skip_with_comment::{assert_files, assert_findings, RuleFinding};
-use super::super::run_family;
 use super::super::copy_fixture;
+use super::super::run_family;
+use guardrail3_app_rs_family_code_assertions::rs_code_06_garde_skip_with_comment::{
+    RuleFinding, assert_files, assert_findings,
+};
 use test_support::write_file;
 
 #[test]
@@ -20,10 +22,8 @@ fn detects_non_primitive_garde_skips_with_plain_comments_across_real_owned_files
 
     let type_content = test_support::read_file(root, type_rel);
     let field_content = test_support::read_file(root, field_rel);
-    let empty_reason_content =
-        test_support::read_file(root, empty_reason_rel);
-    let wrong_key_content =
-        test_support::read_file(root, wrong_key_rel);
+    let empty_reason_content = test_support::read_file(root, empty_reason_rel);
+    let wrong_key_content = test_support::read_file(root, wrong_key_rel);
     let vec_content = test_support::read_file(root, vec_rel);
 
     let type_new = format!(
@@ -50,29 +50,42 @@ fn detects_non_primitive_garde_skips_with_plain_comments_across_real_owned_files
 
     let type_line = type_new
         .lines()
-        .position(|line| line.contains("#[garde(skip)] // validated elsewhere")).map(|index| index + 1).unwrap_or_default();
+        .position(|line| line.contains("#[garde(skip)] // validated elsewhere"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
     let field_line = field_new
         .lines()
-        .position(|line| line.contains("#[garde(skip)] // validated elsewhere")).map(|index| index + 1).unwrap_or_default();
+        .position(|line| line.contains("#[garde(skip)] // validated elsewhere"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
     let empty_reason_line = empty_reason_new
         .lines()
-        .position(|line| line.contains("#[garde(skip)] // reason:")).map(|index| index + 1).unwrap_or_default();
+        .position(|line| line.contains("#[garde(skip)] // reason:"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
     let wrong_key_line = wrong_key_new
         .lines()
-        .position(|line| line.contains("#[garde(skip)] // because: external validation envelope")).map(|index| index + 1).unwrap_or_default();
+        .position(|line| line.contains("#[garde(skip)] // because: external validation envelope"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
     let vec_line = vec_new
         .lines()
-        .position(|line| line.contains("#[garde(skip)] // temporary bypass")).map(|index| index + 1).unwrap_or_default();
+        .position(|line| line.contains("#[garde(skip)] // temporary bypass"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
 
     let results = run_family(root);
 
-    assert_files(&results, BTreeSet::from([
+    assert_files(
+        &results,
+        BTreeSet::from([
             type_rel.to_owned(),
             field_rel.to_owned(),
             empty_reason_rel.to_owned(),
             wrong_key_rel.to_owned(),
-            vec_rel.to_owned()
-        ]));
+            vec_rel.to_owned(),
+        ]),
+    );
     assert_findings(
         &results,
         &[

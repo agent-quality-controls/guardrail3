@@ -2,13 +2,11 @@ use std::collections::BTreeSet;
 
 use guardrail3_domain_report::Severity;
 
-use guardrail3_app_rs_family_code_assertions::rs_code_23_include_bypass::{
-    assert_files,
-    assert_findings,
-    RuleFinding,
-};
-use super::super::run_family;
 use super::super::copy_fixture;
+use super::super::run_family;
+use guardrail3_app_rs_family_code_assertions::rs_code_23_include_bypass::{
+    RuleFinding, assert_files, assert_findings,
+};
 use test_support::write_file;
 
 #[test]
@@ -20,8 +18,7 @@ fn attacks_include_bypass_variants_across_multiple_owned_files() {
     let handlers_rel = "apps/backend/crates/adapters/inbound/mcp/crates/app/handlers/src/lib.rs";
 
     let rest_content = test_support::read_file(root, rest_rel);
-    let handlers_content =
-        test_support::read_file(root, handlers_rel);
+    let handlers_content = test_support::read_file(root, handlers_rel);
 
     let rest_line = rest_content.lines().count() + 2;
     let handlers_info_line = handlers_content.lines().count() + 2;
@@ -41,7 +38,10 @@ fn attacks_include_bypass_variants_across_multiple_owned_files() {
     );
 
     let results = run_family(root);
-    assert_files(&results, BTreeSet::from([rest_rel.to_owned(), handlers_rel.to_owned()]));
+    assert_files(
+        &results,
+        BTreeSet::from([rest_rel.to_owned(), handlers_rel.to_owned()]),
+    );
     assert_findings(
         &results,
         &[

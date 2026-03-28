@@ -16,7 +16,6 @@ pub fn check(input: &CodeInputFailureInput<'_>, results: &mut Vec<CheckResult>) 
     });
 }
 
-
 #[cfg(test)]
 pub(crate) fn run_tree(tree: &guardrail3_domain_project_tree::ProjectTree) -> Vec<CheckResult> {
     crate::check_test_tree(tree)

@@ -97,11 +97,7 @@ pub fn assert_error_count(results: &[CheckResult], rule_id: &str, expected_count
     assert_eq!(errors.len(), expected_count, "{errors:#?}");
 }
 
-pub fn assert_error_file_single(
-    results: &[CheckResult],
-    rule_id: &str,
-    expected_file: &str,
-) {
+pub fn assert_error_file_single(results: &[CheckResult], rule_id: &str, expected_file: &str) {
     let errors = error_results(results, rule_id);
     assert_eq!(errors.len(), 1, "{errors:#?}");
     let actual_files = errors

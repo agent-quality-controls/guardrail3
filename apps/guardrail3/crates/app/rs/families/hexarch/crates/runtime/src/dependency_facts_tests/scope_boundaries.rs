@@ -1,6 +1,6 @@
 use super::super::collect_for_test_tree as dependency_facts;
-use guardrail3_app_rs_family_hexarch_assertions::dependency_facts as assertions;
 use super::{dir_entry, project_tree};
+use guardrail3_app_rs_family_hexarch_assertions::dependency_facts as assertions;
 
 #[test]
 fn fixture_workspace_outside_app_crates_tree_is_ignored() {
@@ -8,10 +8,7 @@ fn fixture_workspace_outside_app_crates_tree_is_ignored() {
         vec![
             ("", dir_entry(&["apps"], &[])),
             ("apps", dir_entry(&["api"], &[])),
-            (
-                "apps/api",
-                dir_entry(&["crates", "tests"], &["Cargo.toml"]),
-            ),
+            ("apps/api", dir_entry(&["crates", "tests"], &["Cargo.toml"])),
             ("apps/api/crates", dir_entry(&["domain"], &[])),
             ("apps/api/crates/domain", dir_entry(&["core"], &[])),
             (

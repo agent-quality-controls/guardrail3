@@ -70,7 +70,10 @@ pub fn assert_inventory_results(
         })
         .collect::<Vec<_>>();
     assert_eq!(inventory.len(), expected_count, "{inventory:#?}");
-    assert!(inventory.iter().all(|result| result.inventory), "{inventory:#?}");
+    assert!(
+        inventory.iter().all(|result| result.inventory),
+        "{inventory:#?}"
+    );
     let actual_messages = inventory
         .iter()
         .map(|result| result.message.as_str())

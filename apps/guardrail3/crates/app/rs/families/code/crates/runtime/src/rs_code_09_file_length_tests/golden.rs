@@ -1,6 +1,6 @@
-use guardrail3_app_rs_family_code_assertions::rs_code_09_file_length::{assert_no_hits};
-use super::super::run_family;
 use super::super::copy_fixture;
+use super::super::run_family;
+use guardrail3_app_rs_family_code_assertions::rs_code_09_file_length::assert_no_hits;
 
 #[test]
 fn populated_golden_fixture_has_no_file_length_hits() {

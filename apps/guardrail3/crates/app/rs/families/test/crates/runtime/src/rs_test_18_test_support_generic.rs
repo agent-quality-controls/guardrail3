@@ -236,9 +236,7 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
     }
 }
 
-fn semantic_helper_names<'a>(
-    functions: &'a [super::parse::FunctionInfo],
-) -> BTreeSet<&'a str> {
+fn semantic_helper_names<'a>(functions: &'a [super::parse::FunctionInfo]) -> BTreeSet<&'a str> {
     let mut semantic_helpers = functions
         .iter()
         .filter(|function| !function.is_public && !function.is_test)
@@ -264,7 +262,10 @@ fn semantic_helper_names<'a>(
 
     loop {
         let mut changed = false;
-        for function in functions.iter().filter(|function| !function.is_public && !function.is_test) {
+        for function in functions
+            .iter()
+            .filter(|function| !function.is_public && !function.is_test)
+        {
             if semantic_helpers.contains(function.name.as_str()) {
                 continue;
             }

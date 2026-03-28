@@ -1,9 +1,9 @@
 use guardrail3_domain_report::Severity;
 
+use super::super::check_source;
 use guardrail3_app_rs_family_code_assertions::rs_code_32_test_expect_message_quality::{
     assert_normalized_len, findings,
 };
-use super::super::check_source;
 
 #[test]
 fn errors_on_short_expect_message_in_test_file() {
@@ -21,7 +21,8 @@ fn errors_on_short_expect_message_in_test_file() {
 
 #[test]
 fn errors_on_non_literal_expect_message_in_test_file() {
-    let content = "fn probe() { let msg = \"backend fixture should parse\"; let _ = Some(1).expect(msg); }";
+    let content =
+        "fn probe() { let msg = \"backend fixture should parse\"; let _ = Some(1).expect(msg); }";
     let binding = check_source("tests/probe.rs", content, true);
     let results = findings(&binding);
 

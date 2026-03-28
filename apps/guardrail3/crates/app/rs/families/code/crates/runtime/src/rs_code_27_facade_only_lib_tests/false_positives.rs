@@ -1,6 +1,6 @@
-use guardrail3_app_rs_family_code_assertions::rs_code_27_facade_only_lib::{assert_no_hits};
-use super::super::run_family;
 use super::super::copy_fixture;
+use super::super::run_family;
+use guardrail3_app_rs_family_code_assertions::rs_code_27_facade_only_lib::assert_no_hits;
 use test_support::write_file;
 
 #[test]
@@ -9,8 +9,7 @@ fn skips_consts_types_and_explicit_pub_reexports_in_lib_rs() {
     let root = fixture.path();
 
     let package_rel = "packages/shared-types/src/lib.rs";
-    let package_content =
-        test_support::read_file(root, package_rel);
+    let package_content = test_support::read_file(root, package_rel);
 
     write_file(
         root,

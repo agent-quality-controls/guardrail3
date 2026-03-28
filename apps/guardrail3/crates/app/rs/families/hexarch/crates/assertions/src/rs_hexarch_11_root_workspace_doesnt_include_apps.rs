@@ -110,11 +110,7 @@ pub fn assert_error_title_contains(
     assert_all_titles_contain(&errors, required_title_substrings);
 }
 
-pub fn assert_error_title_set(
-    results: &[CheckResult],
-    rule_id: &str,
-    expected_titles: &[&str],
-) {
+pub fn assert_error_title_set(results: &[CheckResult], rule_id: &str, expected_titles: &[&str]) {
     let errors = error_results(results, rule_id);
     let actual_titles = errors
         .iter()

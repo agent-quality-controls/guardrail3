@@ -1,5 +1,5 @@
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_23_adapter_pub_trait as assertions;
 use super::copy_fixture;
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_23_adapter_pub_trait as assertions;
 
 #[test]
 fn unparsable_adapter_source_errors_in_family_run() {
@@ -17,11 +17,7 @@ fn unparsable_adapter_source_errors_in_family_run() {
         "",
         "apps/backend/crates/adapters/outbound/postgres/src/lib.rs",
     );
-    assertions::assert_error_message_contains(
-        &results,
-        "",
-        &["Failed to parse Rust source file"],
-    );
+    assertions::assert_error_message_contains(&results, "", &["Failed to parse Rust source file"]);
 }
 
 #[test]
@@ -46,10 +42,6 @@ fn parse_failure_takes_precedence_over_public_trait_violation() {
         "",
         "apps/backend/crates/adapters/outbound/postgres/src/lib.rs",
     );
-    assertions::assert_error_message_contains(
-        &results,
-        "",
-        &["Failed to parse Rust source file"],
-    );
+    assertions::assert_error_message_contains(&results, "", &["Failed to parse Rust source file"]);
     assertions::assert_error_title_forbidden(&results, "", &["defines public traits"]);
 }

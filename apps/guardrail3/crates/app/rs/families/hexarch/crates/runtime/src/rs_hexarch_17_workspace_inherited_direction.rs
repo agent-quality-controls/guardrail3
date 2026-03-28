@@ -66,7 +66,10 @@ pub struct WorkspaceInheritedDirectionAudit {
 }
 
 #[cfg(test)]
-pub fn audit_edge_for_test(tree: &ProjectTree, source_rel_dir: &str) -> WorkspaceInheritedDirectionAudit {
+pub fn audit_edge_for_test(
+    tree: &ProjectTree,
+    source_rel_dir: &str,
+) -> WorkspaceInheritedDirectionAudit {
     let facts = crate::collect_dependency_facts_from_tree_for_tests(tree);
     let edge = facts
         .edges
@@ -104,7 +107,9 @@ pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> 
 
 #[cfg(test)]
 #[allow(dead_code)]
-pub(super) fn results_for_test_tree(tree: &guardrail3_domain_project_tree::ProjectTree) -> Vec<CheckResult> {
+pub(super) fn results_for_test_tree(
+    tree: &guardrail3_domain_project_tree::ProjectTree,
+) -> Vec<CheckResult> {
     crate::check_test_tree(tree)
 }
 

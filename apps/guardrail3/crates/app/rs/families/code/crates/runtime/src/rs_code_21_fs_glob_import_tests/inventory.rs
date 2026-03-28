@@ -1,14 +1,12 @@
 use std::collections::BTreeSet;
 
-use guardrail3_app_rs_family_code_assertions::rs_code_21_fs_glob_import::{
-    assert_files,
-    assert_findings,
-    RuleFinding,
-};
-use super::super::run_family;
 use super::super::copy_fixture;
-use test_support::write_file;
+use super::super::run_family;
+use guardrail3_app_rs_family_code_assertions::rs_code_21_fs_glob_import::{
+    RuleFinding, assert_files, assert_findings,
+};
 use guardrail3_domain_report::Severity;
+use test_support::write_file;
 
 #[test]
 fn attacks_std_fs_glob_imports_across_multiple_owned_files() {
@@ -18,8 +16,7 @@ fn attacks_std_fs_glob_imports_across_multiple_owned_files() {
     let backend_rel = "apps/backend/crates/adapters/outbound/postgres/src/lib.rs";
     let app_rel = "apps/backend/crates/app/queries/src/lib.rs";
 
-    let backend_content =
-        test_support::read_file(root, backend_rel);
+    let backend_content = test_support::read_file(root, backend_rel);
     let app_content = test_support::read_file(root, app_rel);
 
     write_file(
@@ -34,7 +31,10 @@ fn attacks_std_fs_glob_imports_across_multiple_owned_files() {
     );
 
     let results = run_family(root);
-    assert_files(&results, BTreeSet::from([backend_rel.to_owned(), app_rel.to_owned()]));
+    assert_files(
+        &results,
+        BTreeSet::from([backend_rel.to_owned(), app_rel.to_owned()]),
+    );
     assert_findings(
         &results,
         &[
@@ -104,7 +104,9 @@ fn attacks_inline_module_glob_across_golden_tree() {
     let results = run_family(root);
     let inline_line = mutated
         .lines()
-        .position(|line| line.contains("use std::fs::*;")).map(|index| index + 1).unwrap_or_default();
+        .position(|line| line.contains("use std::fs::*;"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
 
     assert_files(&results, BTreeSet::from([target_rel.to_owned()]));
     assert_findings(
@@ -135,7 +137,9 @@ fn attacks_function_local_glob_import_in_owned_file() {
     let results = run_family(root);
     let glob_line = mutated
         .lines()
-        .position(|line| line.contains("use std::fs::*;")).map(|index| index + 1).unwrap_or_default();
+        .position(|line| line.contains("use std::fs::*;"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
 
     assert_files(&results, BTreeSet::from([target_rel.to_owned()]));
     assert_findings(

@@ -212,12 +212,15 @@ fn collect_boundary_configs(
 ) -> Vec<BoundaryConfigFacts> {
     let mut boundaries = BTreeMap::<String, BoundaryConfigFacts>::new();
     if let Some(parse_error) = &guardrail.parse_error {
-        let _ = boundaries.insert("guardrail3.toml".to_owned(), BoundaryConfigFacts {
-            rel_dir: "guardrail3.toml".to_owned(),
-            has_config_entry: false,
-            is_app_boundary: false,
-            parse_error: Some(parse_error.clone()),
-        });
+        let _ = boundaries.insert(
+            "guardrail3.toml".to_owned(),
+            BoundaryConfigFacts {
+                rel_dir: "guardrail3.toml".to_owned(),
+                has_config_entry: false,
+                is_app_boundary: false,
+                parse_error: Some(parse_error.clone()),
+            },
+        );
         if !guardrail.raw_parse_succeeded {
             return boundaries.into_values().collect();
         }
@@ -225,12 +228,15 @@ fn collect_boundary_configs(
 
     for app_root in owned_app_roots {
         let app_name = app_root.rsplit('/').next().unwrap_or(app_root);
-        let _ = boundaries.insert(app_root.clone(), BoundaryConfigFacts {
-            rel_dir: app_root.clone(),
-            has_config_entry: guardrail.app_config_names.contains(app_name),
-            is_app_boundary: true,
-            parse_error: None,
-        });
+        let _ = boundaries.insert(
+            app_root.clone(),
+            BoundaryConfigFacts {
+                rel_dir: app_root.clone(),
+                has_config_entry: guardrail.app_config_names.contains(app_name),
+                is_app_boundary: true,
+                parse_error: None,
+            },
+        );
     }
     boundaries.into_values().collect()
 }
@@ -261,7 +267,8 @@ fn parse_guardrail_config(tree: &ProjectTree, rel_path: Option<&str>) -> Guardra
     let raw_app_config_names = raw_value
         .as_ref()
         .and_then(|value| {
-            value.get("rust")
+            value
+                .get("rust")
                 .and_then(|rust| rust.get("apps"))
                 .and_then(toml::Value::as_table)
                 .map(|apps| apps.keys().cloned().collect::<BTreeSet<_>>())

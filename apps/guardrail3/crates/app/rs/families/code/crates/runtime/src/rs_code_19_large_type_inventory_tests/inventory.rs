@@ -1,6 +1,6 @@
-use guardrail3_app_rs_family_code_assertions::rs_code_19_large_type_inventory::assert_inventories_large_struct_and_enum_shapes_across_owned_files_with_exact_metadata;
-use super::super::run_family;
 use super::super::copy_fixture;
+use super::super::run_family;
+use guardrail3_app_rs_family_code_assertions::rs_code_19_large_type_inventory::assert_inventories_large_struct_and_enum_shapes_across_owned_files_with_exact_metadata;
 use test_support::write_file;
 
 #[test]
@@ -11,10 +11,8 @@ fn inventories_large_struct_and_enum_shapes_across_owned_files_with_exact_metada
     let backend_rel = "apps/backend/crates/domain/types/src/lib.rs";
     let worker_rel = "apps/worker/crates/domain/jobs/src/lib.rs";
 
-    let backend_content =
-        test_support::read_file(root, backend_rel);
-    let worker_content =
-        test_support::read_file(root, worker_rel);
+    let backend_content = test_support::read_file(root, backend_rel);
+    let worker_content = test_support::read_file(root, worker_rel);
 
     let mut struct_fields = String::new();
     for index in 0..16 {
@@ -34,10 +32,14 @@ fn inventories_large_struct_and_enum_shapes_across_owned_files_with_exact_metada
 
     let backend_line = backend_new
         .lines()
-        .position(|line| line.contains("struct PlannerAudit")).map(|index| index + 1).unwrap_or_default();
+        .position(|line| line.contains("struct PlannerAudit"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
     let worker_line = worker_new
         .lines()
-        .position(|line| line.contains("enum QueueAudit")).map(|index| index + 1).unwrap_or_default();
+        .position(|line| line.contains("enum QueueAudit"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
 
     assert_inventories_large_struct_and_enum_shapes_across_owned_files_with_exact_metadata(
         &run_family(root),

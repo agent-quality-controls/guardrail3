@@ -12,10 +12,7 @@ fn empty_workspace_app_still_requires_boundary_config() {
             ("apps/api/crates", dir_entry(&[], &[])),
         ],
         vec![
-            (
-                "guardrail3.toml",
-                "[rust.checks]\nhexarch = true\n",
-            ),
+            ("guardrail3.toml", "[rust.checks]\nhexarch = true\n"),
             ("apps/api/Cargo.toml", "[workspace]\nmembers = []\n"),
         ],
     );

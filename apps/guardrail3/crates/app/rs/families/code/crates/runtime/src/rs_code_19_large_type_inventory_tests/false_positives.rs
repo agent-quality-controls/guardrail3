@@ -1,6 +1,6 @@
-use guardrail3_app_rs_family_code_assertions::rs_code_19_large_type_inventory::{assert_no_hits};
-use super::super::run_family;
 use super::super::copy_fixture;
+use super::super::run_family;
+use guardrail3_app_rs_family_code_assertions::rs_code_19_large_type_inventory::assert_no_hits;
 use test_support::write_file;
 
 #[test]
@@ -11,10 +11,8 @@ fn skips_types_that_stay_at_or_below_threshold_in_named_tuple_and_unit_forms() {
     let backend_rel = "apps/backend/crates/domain/types/src/lib.rs";
     let worker_rel = "apps/worker/crates/domain/jobs/src/lib.rs";
 
-    let backend_content =
-        test_support::read_file(root, backend_rel);
-    let worker_content =
-        test_support::read_file(root, worker_rel);
+    let backend_content = test_support::read_file(root, backend_rel);
+    let worker_content = test_support::read_file(root, worker_rel);
 
     let mut struct_fields = String::new();
     for index in 0..15 {

@@ -1,8 +1,8 @@
 use std::collections::BTreeSet;
 
-use guardrail3_app_rs_family_code_assertions::rs_code_02_unused_crate_dependencies_allow::assert_files;
-use super::super::run_family;
 use super::super::copy_fixture;
+use super::super::run_family;
+use guardrail3_app_rs_family_code_assertions::rs_code_02_unused_crate_dependencies_allow::assert_files;
 use test_support::write_file;
 
 #[test]
@@ -43,8 +43,5 @@ fn populated_golden_fixture_has_no_unused_crate_dependencies_allow_hits() {
         })
         .collect::<Vec<_>>();
 
-    assert_files(
-        &relevant_results,
-        BTreeSet::new(),
-    );
+    assert_files(&relevant_results, BTreeSet::new());
 }

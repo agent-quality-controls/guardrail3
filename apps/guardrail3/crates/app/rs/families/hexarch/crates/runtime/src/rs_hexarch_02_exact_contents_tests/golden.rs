@@ -1,5 +1,5 @@
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_02_exact_contents as assertions;
 use super::copy_fixture;
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_02_exact_contents as assertions;
 
 #[test]
 fn golden_has_no_rule_02_errors() {

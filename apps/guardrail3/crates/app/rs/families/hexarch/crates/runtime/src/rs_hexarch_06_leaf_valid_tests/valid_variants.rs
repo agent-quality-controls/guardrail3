@@ -1,6 +1,6 @@
 use super::cases::{nested_hex_everywhere, owned_leaf_dirs};
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_06_leaf_valid as assertions;
 use super::{copy_fixture, write_file};
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_06_leaf_valid as assertions;
 
 #[test]
 fn gitkeep_only_leaf_is_valid_placeholder() {

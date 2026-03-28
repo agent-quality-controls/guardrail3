@@ -1,6 +1,6 @@
-use guardrail3_app_rs_family_code_assertions::rs_code_13_todo_macros::assert_inventories_todo_unimplemented_and_unreachable_macros_in_real_files;
-use super::super::run_family;
 use super::super::copy_fixture;
+use super::super::run_family;
+use guardrail3_app_rs_family_code_assertions::rs_code_13_todo_macros::assert_inventories_todo_unimplemented_and_unreachable_macros_in_real_files;
 use test_support::write_file;
 
 #[test]
@@ -11,10 +11,8 @@ fn inventories_todo_unimplemented_and_unreachable_macros_in_real_files() {
     let backend_rel = "apps/backend/crates/adapters/inbound/rest/src/lib.rs";
     let worker_rel = "apps/worker/crates/adapters/outbound/db/src/lib.rs";
 
-    let backend_content =
-        test_support::read_file(root, backend_rel);
-    let worker_content =
-        test_support::read_file(root, worker_rel);
+    let backend_content = test_support::read_file(root, backend_rel);
+    let worker_content = test_support::read_file(root, worker_rel);
 
     write_file(
         root,
@@ -36,10 +34,14 @@ fn inventories_todo_unimplemented_and_unreachable_macros_in_real_files() {
         format!("{worker_content}\nfn worker_probe() {{ unimplemented!(); unreachable!(); }}\n");
     let backend_line = backend_new
         .lines()
-        .position(|line| line.contains("pub fn todo_probe()")).map(|index| index + 1).unwrap_or_default();
+        .position(|line| line.contains("pub fn todo_probe()"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
     let worker_line = worker_new
         .lines()
-        .position(|line| line.contains("fn worker_probe()")).map(|index| index + 1).unwrap_or_default();
+        .position(|line| line.contains("fn worker_probe()"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
 
     assert_inventories_todo_unimplemented_and_unreachable_macros_in_real_files(
         &run_family(root),

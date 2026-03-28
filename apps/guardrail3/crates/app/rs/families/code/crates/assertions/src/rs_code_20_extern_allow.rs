@@ -122,9 +122,7 @@ pub fn assert_errors_on_allow_attr_on_extern_block(
             id: ID,
             severity: Severity::Error,
             title: "allow on extern block",
-            message:
-                "`#[allow(improper_ctypes)]` on an `extern` block hides FFI risk behind a broad suppression."
-                    ,
+            message: "`#[allow(improper_ctypes)]` on an `extern` block hides FFI risk behind a broad suppression.",
             file: Some(file),
             line: Some(line),
             inventory: false,
@@ -144,9 +142,7 @@ pub fn assert_errors_on_multiple_lints_from_one_extern_block_allow_attribute(
             id: ID,
             severity: Severity::Error,
             title: "allow on extern block",
-            message:
-                "`#[allow(clippy::all)]` on an `extern` block hides FFI risk behind a broad suppression."
-                    ,
+            message: "`#[allow(clippy::all)]` on an `extern` block hides FFI risk behind a broad suppression.",
             file: Some(file),
             line: Some(line),
             inventory: false,
@@ -155,19 +151,14 @@ pub fn assert_errors_on_multiple_lints_from_one_extern_block_allow_attribute(
             id: ID,
             severity: Severity::Error,
             title: "allow on extern block",
-            message:
-                "`#[allow(improper_ctypes)]` on an `extern` block hides FFI risk behind a broad suppression."
-                    ,
+            message: "`#[allow(improper_ctypes)]` on an `extern` block hides FFI risk behind a broad suppression.",
             file: Some(file),
             line: Some(line),
             inventory: false,
         },
     ];
     expected.sort_by(|left, right| left.message.cmp(right.message));
-    assert_value_eq(
-        actual,
-        expected,
-    );
+    assert_value_eq(actual, expected);
 }
 
 pub fn assert_errors_when_stacked_allow_attrs_cover_the_same_extern_block(
@@ -184,9 +175,7 @@ pub fn assert_errors_when_stacked_allow_attrs_cover_the_same_extern_block(
                 id: ID,
                 severity: Severity::Error,
                 title: "allow on extern block",
-                message:
-                    "`#[allow(improper_ctypes)]` on an `extern` block hides FFI risk behind a broad suppression."
-                        ,
+                message: "`#[allow(improper_ctypes)]` on an `extern` block hides FFI risk behind a broad suppression.",
                 file: Some(file),
                 line: Some(line_one),
                 inventory: false,
@@ -195,9 +184,7 @@ pub fn assert_errors_when_stacked_allow_attrs_cover_the_same_extern_block(
                 id: ID,
                 severity: Severity::Error,
                 title: "allow on extern block",
-                message:
-                    "`#[allow(improper_ctypes_definitions)]` on an `extern` block hides FFI risk behind a broad suppression."
-                        ,
+                message: "`#[allow(improper_ctypes_definitions)]` on an `extern` block hides FFI risk behind a broad suppression.",
                 file: Some(file),
                 line: Some(line_two),
                 inventory: false,
@@ -218,9 +205,7 @@ pub fn assert_errors_on_cfg_attr_allow_covers_an_extern_block(
             id: ID,
             severity: Severity::Error,
             title: "allow on extern block",
-            message:
-                "`#[cfg_attr(..., allow(improper_ctypes))]` on an `extern` block hides FFI risk behind a broad suppression."
-                    ,
+            message: "`#[cfg_attr(..., allow(improper_ctypes))]` on an `extern` block hides FFI risk behind a broad suppression.",
             file: Some(file),
             line: Some(line),
             inventory: false,
@@ -240,9 +225,7 @@ pub fn assert_errors_on_multiple_lints_from_one_cfg_attr_allow_on_extern_block(
             id: ID,
             severity: Severity::Error,
             title: "allow on extern block",
-            message:
-                "`#[cfg_attr(..., allow(clippy::all))]` on an `extern` block hides FFI risk behind a broad suppression."
-                    ,
+            message: "`#[cfg_attr(..., allow(clippy::all))]` on an `extern` block hides FFI risk behind a broad suppression.",
             file: Some(file),
             line: Some(line),
             inventory: false,
@@ -251,19 +234,14 @@ pub fn assert_errors_on_multiple_lints_from_one_cfg_attr_allow_on_extern_block(
             id: ID,
             severity: Severity::Error,
             title: "allow on extern block",
-            message:
-                "`#[cfg_attr(..., allow(improper_ctypes))]` on an `extern` block hides FFI risk behind a broad suppression."
-                    ,
+            message: "`#[cfg_attr(..., allow(improper_ctypes))]` on an `extern` block hides FFI risk behind a broad suppression.",
             file: Some(file),
             line: Some(line),
             inventory: false,
         },
     ];
     expected.sort_by(|left, right| left.message.cmp(right.message));
-    assert_value_eq(
-        actual,
-        expected,
-    );
+    assert_value_eq(actual, expected);
 }
 
 pub fn assert_errors_on_mixed_allow_and_cfg_attr_on_the_same_extern_block(
@@ -280,9 +258,7 @@ pub fn assert_errors_on_mixed_allow_and_cfg_attr_on_the_same_extern_block(
                 id: ID,
                 severity: Severity::Error,
                 title: "allow on extern block",
-                message:
-                    "`#[allow(improper_ctypes)]` on an `extern` block hides FFI risk behind a broad suppression."
-                        ,
+                message: "`#[allow(improper_ctypes)]` on an `extern` block hides FFI risk behind a broad suppression.",
                 file: Some(file),
                 line: Some(allow_line),
                 inventory: false,
@@ -291,9 +267,7 @@ pub fn assert_errors_on_mixed_allow_and_cfg_attr_on_the_same_extern_block(
                 id: ID,
                 severity: Severity::Error,
                 title: "allow on extern block",
-                message:
-                    "`#[cfg_attr(..., allow(improper_ctypes_definitions))]` on an `extern` block hides FFI risk behind a broad suppression."
-                        ,
+                message: "`#[cfg_attr(..., allow(improper_ctypes_definitions))]` on an `extern` block hides FFI risk behind a broad suppression.",
                 file: Some(file),
                 line: Some(cfg_attr_line),
                 inventory: false,
@@ -315,9 +289,7 @@ pub fn assert_inventory_allow_attrs_on_extern_blocks(
                 id: ID,
                 severity: Severity::Error,
                 title: "allow on extern block",
-                message:
-                    "`#[allow(improper_ctypes)]` on an `extern` block hides FFI risk behind a broad suppression."
-                        ,
+                message: "`#[allow(improper_ctypes)]` on an `extern` block hides FFI risk behind a broad suppression.",
                 file: Some(files[0]),
                 line: Some(lines[0]),
                 inventory: false,
@@ -326,9 +298,7 @@ pub fn assert_inventory_allow_attrs_on_extern_blocks(
                 id: ID,
                 severity: Severity::Error,
                 title: "allow on extern block",
-                message:
-                    "`#[allow(improper_ctypes_definitions)]` on an `extern` block hides FFI risk behind a broad suppression."
-                        ,
+                message: "`#[allow(improper_ctypes_definitions)]` on an `extern` block hides FFI risk behind a broad suppression.",
                 file: Some(files[1]),
                 line: Some(lines[1]),
                 inventory: false,
@@ -337,9 +307,7 @@ pub fn assert_inventory_allow_attrs_on_extern_blocks(
                 id: ID,
                 severity: Severity::Error,
                 title: "allow on extern block",
-                message:
-                    "`#[cfg_attr(..., allow(improper_ctypes))]` on an `extern` block hides FFI risk behind a broad suppression."
-                        ,
+                message: "`#[cfg_attr(..., allow(improper_ctypes))]` on an `extern` block hides FFI risk behind a broad suppression.",
                 file: Some(files[2]),
                 line: Some(lines[2]),
                 inventory: false,

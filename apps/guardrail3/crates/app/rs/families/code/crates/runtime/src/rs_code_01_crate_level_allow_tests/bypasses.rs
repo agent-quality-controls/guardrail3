@@ -2,9 +2,11 @@ use std::collections::BTreeSet;
 
 use guardrail3_domain_report::Severity;
 
-use guardrail3_app_rs_family_code_assertions::rs_code_01_crate_level_allow::{assert_files, assert_findings, RuleFinding};
-use super::super::run_family;
 use super::super::copy_fixture;
+use super::super::run_family;
+use guardrail3_app_rs_family_code_assertions::rs_code_01_crate_level_allow::{
+    RuleFinding, assert_files, assert_findings,
+};
 use test_support::write_file;
 
 #[test]
@@ -24,8 +26,7 @@ fn attacks_crate_and_nested_module_wide_allows_across_real_owned_files() {
     let inline_content = test_support::read_file(root, inline_rel);
     let mixed_content = test_support::read_file(root, mixed_rel);
     let exempt_content = test_support::read_file(root, exempt_rel);
-    let mixed_exempt_content =
-        test_support::read_file(root, mixed_exempt_rel);
+    let mixed_exempt_content = test_support::read_file(root, mixed_exempt_rel);
     let item_content = test_support::read_file(root, item_rel);
 
     let crate_new = format!("#![allow(clippy::unwrap_used)]\n{crate_content}\n");
@@ -79,13 +80,16 @@ fn attacks_crate_and_nested_module_wide_allows_across_real_owned_files() {
         })
         .collect::<Vec<_>>();
 
-    assert_files(&relevant_results, BTreeSet::from([
-        crate_rel.to_owned(),
-        inline_rel.to_owned(),
-        mixed_rel.to_owned(),
-        mixed_exempt_rel.to_owned(),
-        test_rel.to_owned(),
-    ]));
+    assert_files(
+        &relevant_results,
+        BTreeSet::from([
+            crate_rel.to_owned(),
+            inline_rel.to_owned(),
+            mixed_rel.to_owned(),
+            mixed_exempt_rel.to_owned(),
+            test_rel.to_owned(),
+        ]),
+    );
     assert_findings(
         &relevant_results,
         &[
@@ -152,6 +156,6 @@ fn attacks_crate_and_nested_module_wide_allows_across_real_owned_files() {
                     .map(|index| index + 1),
                 inventory: false,
             },
-        ]
+        ],
     );
 }

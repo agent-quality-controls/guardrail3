@@ -1,7 +1,9 @@
 use guardrail3_domain_report::Severity;
 
-use guardrail3_app_rs_family_code_assertions::rs_code_15_direct_fs_usage::{assert_normalized_len, findings};
 use super::super::check_source;
+use guardrail3_app_rs_family_code_assertions::rs_code_15_direct_fs_usage::{
+    assert_normalized_len, findings,
+};
 
 #[test]
 fn errors_on_std_fs_import() {
@@ -67,8 +69,7 @@ fn errors_on_std_alias_fs_call() {
 
 #[test]
 fn errors_on_extern_crate_std_alias_fs_call() {
-    let content =
-        "extern crate std as s;\nfn main() { let _ = s::fs::read_to_string(\"foo\"); }";
+    let content = "extern crate std as s;\nfn main() { let _ = s::fs::read_to_string(\"foo\"); }";
     let raw_results = check_source("src/foo.rs", content, false);
     let results = findings(&raw_results);
 

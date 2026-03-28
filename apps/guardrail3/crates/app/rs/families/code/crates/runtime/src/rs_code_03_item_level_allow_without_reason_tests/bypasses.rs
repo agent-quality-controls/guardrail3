@@ -2,9 +2,11 @@ use std::collections::BTreeSet;
 
 use guardrail3_domain_report::Severity;
 
-use guardrail3_app_rs_family_code_assertions::rs_code_03_item_level_allow_without_reason::{assert_files, assert_findings, RuleFinding};
-use super::super::run_family;
 use super::super::copy_fixture;
+use super::super::run_family;
+use guardrail3_app_rs_family_code_assertions::rs_code_03_item_level_allow_without_reason::{
+    RuleFinding, assert_files, assert_findings,
+};
 use test_support::write_file;
 
 #[test]
@@ -19,11 +21,9 @@ fn detects_undocumented_item_level_allows_across_real_owned_files() {
     let trait_rel = "apps/backend/crates/ports/outbound/repo/src/lib.rs";
     let impl_rel = "apps/backend/crates/adapters/outbound/queue/src/lib.rs";
 
-    let top_level_content =
-        test_support::read_file(root, top_level_rel);
+    let top_level_content = test_support::read_file(root, top_level_rel);
     let nested_content = test_support::read_file(root, nested_rel);
-    let grouped_content =
-        test_support::read_file(root, grouped_rel);
+    let grouped_content = test_support::read_file(root, grouped_rel);
     let module_content = test_support::read_file(root, module_rel);
     let trait_content = test_support::read_file(root, trait_rel);
     let impl_content = test_support::read_file(root, impl_rel);
@@ -56,22 +56,34 @@ fn detects_undocumented_item_level_allows_across_real_owned_files() {
 
     let top_level_line = top_level_new
         .lines()
-        .position(|line| line.contains("#[allow(clippy::unwrap_used)]")).map(|index| index + 1).unwrap_or_default();
+        .position(|line| line.contains("#[allow(clippy::unwrap_used)]"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
     let nested_line = nested_new
         .lines()
-        .position(|line| line.contains("#[allow(clippy::panic)]")).map(|index| index + 1).unwrap_or_default();
+        .position(|line| line.contains("#[allow(clippy::panic)]"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
     let grouped_line = grouped_new
         .lines()
-        .position(|line| line.contains("#[allow(clippy::unwrap_used, clippy::expect_used)]")).map(|index| index + 1).unwrap_or_default();
+        .position(|line| line.contains("#[allow(clippy::unwrap_used, clippy::expect_used)]"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
     let module_line = module_new
         .lines()
-        .position(|line| line.contains("#[allow(clippy::panic)]")).map(|index| index + 1).unwrap_or_default();
+        .position(|line| line.contains("#[allow(clippy::panic)]"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
     let trait_line = trait_new
         .lines()
-        .position(|line| line.contains("#[allow(clippy::expect_used)]")).map(|index| index + 1).unwrap_or_default();
+        .position(|line| line.contains("#[allow(clippy::expect_used)]"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
     let impl_line = impl_new
         .lines()
-        .position(|line| line.contains("#[allow(clippy::panic)]")).map(|index| index + 1).unwrap_or_default();
+        .position(|line| line.contains("#[allow(clippy::panic)]"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
 
     let results = run_family(root);
     let relevant_results = results
@@ -93,14 +105,17 @@ fn detects_undocumented_item_level_allows_across_real_owned_files() {
         })
         .collect::<Vec<_>>();
 
-    assert_files(&relevant_results, BTreeSet::from([
+    assert_files(
+        &relevant_results,
+        BTreeSet::from([
             top_level_rel.to_owned(),
             nested_rel.to_owned(),
             grouped_rel.to_owned(),
             module_rel.to_owned(),
             trait_rel.to_owned(),
             impl_rel.to_owned(),
-        ]));
+        ]),
+    );
     assert_findings(
         &relevant_results,
         &[
@@ -160,6 +175,6 @@ fn detects_undocumented_item_level_allows_across_real_owned_files() {
                 line: Some(nested_line),
                 inventory: false,
             },
-        ]
+        ],
     );
 }

@@ -1,5 +1,5 @@
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_08_app_cargo_is_workspace as assertions;
 use super::{copy_fixture, write_file};
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_08_app_cargo_is_workspace as assertions;
 
 fn rewrite_as_package_manifest(app_name: &str, original: &str) -> String {
     let parsed = toml::from_str::<toml::Value>(original).expect("parse original workspace cargo");

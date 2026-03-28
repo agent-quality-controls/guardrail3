@@ -1,6 +1,6 @@
 use super::super::collect_for_test_tree as dependency_facts;
-use guardrail3_app_rs_family_hexarch_assertions::dependency_facts as assertions;
 use super::{dir_entry, project_tree};
+use guardrail3_app_rs_family_hexarch_assertions::dependency_facts as assertions;
 
 #[test]
 fn cycle_with_unlayered_member_is_not_reported_as_same_layer() {

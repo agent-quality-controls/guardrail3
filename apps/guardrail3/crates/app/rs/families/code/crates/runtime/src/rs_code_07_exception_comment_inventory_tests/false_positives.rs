@@ -1,6 +1,6 @@
-use guardrail3_app_rs_family_code_assertions::rs_code_07_exception_comment_inventory::{assert_no_hits};
-use super::super::run_family;
 use super::super::copy_fixture;
+use super::super::run_family;
+use guardrail3_app_rs_family_code_assertions::rs_code_07_exception_comment_inventory::assert_no_hits;
 use test_support::write_file;
 
 #[test]
@@ -13,10 +13,8 @@ fn ignores_exception_like_text_outside_supported_config_comment_forms() {
     let root_guardrail_rel = "guardrail3.toml";
 
     let root_package = test_support::read_file(root, root_package_rel);
-    let backend_cargo =
-        test_support::read_file(root, backend_cargo_rel);
-    let root_guardrail =
-        test_support::read_file(root, root_guardrail_rel);
+    let backend_cargo = test_support::read_file(root, backend_cargo_rel);
+    let root_guardrail = test_support::read_file(root, root_guardrail_rel);
 
     write_file(
         root,

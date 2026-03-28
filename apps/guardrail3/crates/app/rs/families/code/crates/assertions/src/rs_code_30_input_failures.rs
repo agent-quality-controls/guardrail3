@@ -129,9 +129,7 @@ pub fn assert_source_parse_failure(results: &[CheckResult], file: &str) {
     assert_eq!(finding.line, None);
     assert!(!finding.inventory);
     assert!(
-        finding
-            .message
-            .contains("Failed to parse Rust source file"),
+        finding.message.contains("Failed to parse Rust source file"),
         "unexpected message: {}",
         finding.message
     );
@@ -148,9 +146,7 @@ pub fn assert_guardrail_policy_parse_failure(results: &[CheckResult], file: &str
     assert_eq!(finding.line, None);
     assert!(!finding.inventory);
     assert!(
-        finding
-            .message
-            .contains("Failed to parse guardrail3.toml"),
+        finding.message.contains("Failed to parse guardrail3.toml"),
         "unexpected message: {}",
         finding.message
     );

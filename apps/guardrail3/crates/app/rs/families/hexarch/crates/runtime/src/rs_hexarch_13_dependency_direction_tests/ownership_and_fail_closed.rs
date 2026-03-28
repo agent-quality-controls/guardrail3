@@ -1,5 +1,5 @@
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_13_dependency_direction as assertions;
 use super::{copy_fixture, write_file};
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_13_dependency_direction as assertions;
 
 #[test]
 fn omitted_same_app_target_still_hits_rule_13() {
@@ -17,7 +17,11 @@ fn omitted_same_app_target_still_hits_rule_13() {
 
     let results = super::run_family(tmp.path());
     assertions::assert_error_count(&results, "", 1);
-    assertions::assert_error_file_single(&results, "", "apps/backend/crates/domain/engine/Cargo.toml");
+    assertions::assert_error_file_single(
+        &results,
+        "",
+        "apps/backend/crates/domain/engine/Cargo.toml",
+    );
 }
 
 #[test]

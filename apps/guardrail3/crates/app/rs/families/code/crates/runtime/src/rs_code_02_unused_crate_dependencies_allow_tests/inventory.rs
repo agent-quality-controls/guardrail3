@@ -2,9 +2,11 @@ use std::collections::BTreeSet;
 
 use guardrail3_domain_report::Severity;
 
-use guardrail3_app_rs_family_code_assertions::rs_code_02_unused_crate_dependencies_allow::{assert_files, assert_findings, RuleFinding};
-use super::super::run_family;
 use super::super::copy_fixture;
+use super::super::run_family;
+use guardrail3_app_rs_family_code_assertions::rs_code_02_unused_crate_dependencies_allow::{
+    RuleFinding, assert_files, assert_findings,
+};
 use test_support::write_file;
 
 #[test]
@@ -16,8 +18,7 @@ fn inventories_unused_crate_dependencies_allow_across_real_owned_files() {
     let worker_rel = "apps/worker/crates/adapters/outbound/sqs/src/lib.rs";
     let test_rel = "apps/backend/tests/unused_deps_inventory_tests.rs";
 
-    let backend_content =
-        test_support::read_file(root, backend_rel);
+    let backend_content = test_support::read_file(root, backend_rel);
     let worker_content = test_support::read_file(root, worker_rel);
 
     write_file(
@@ -97,24 +98,20 @@ fn only_inventories_crate_level_unused_crate_dependencies_in_mixed_same_file_cas
         "#![allow(unused_crate_dependencies)]\n{content}\n#[allow(unused_crate_dependencies)]\npub fn item_level_probe() {{}}\nmod outer {{\n    #![allow(unused_crate_dependencies)]\n    pub fn helper() {{}}\n}}\n"
     );
 
-    write_file(
-        root,
-        rel,
-        &new_content,
-    );
+    write_file(root, rel, &new_content);
 
     let results = run_family(root);
     let inline_line = new_content
         .lines()
-        .position(|line| line.contains("#![allow(unused_crate_dependencies)]") && !line.starts_with("#!"))
+        .position(|line| {
+            line.contains("#![allow(unused_crate_dependencies)]") && !line.starts_with("#!")
+        })
         .map(|index| index + 1)
         .unwrap_or_default();
 
     assert_files(
         &results,
-        BTreeSet::from([
-            "apps/backend/crates/ports/outbound/repo/src/lib.rs".to_owned(),
-        ]),
+        BTreeSet::from(["apps/backend/crates/ports/outbound/repo/src/lib.rs".to_owned()]),
     );
     assert_findings(
         &results,

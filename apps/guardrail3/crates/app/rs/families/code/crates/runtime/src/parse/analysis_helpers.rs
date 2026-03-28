@@ -1,5 +1,5 @@
-use syn::spanned::Spanned;
 use syn::parse::Parser;
+use syn::spanned::Spanned;
 
 pub(crate) fn collect_always_true_cfg_attr_allows(
     attrs: &[syn::Attribute],

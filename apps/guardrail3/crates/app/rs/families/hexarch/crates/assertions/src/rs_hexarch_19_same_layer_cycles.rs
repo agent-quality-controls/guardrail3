@@ -79,7 +79,11 @@ pub fn assert_error_file_set(
     assert_result_summary(&errors, expected_count, expected_files, None, None, None);
 }
 
-pub fn assert_cycle_layers(cycle_layers: &[String], expected_count: usize, expected_layers: &[&str]) {
+pub fn assert_cycle_layers(
+    cycle_layers: &[String],
+    expected_count: usize,
+    expected_layers: &[&str],
+) {
     assert_eq!(cycle_layers.len(), expected_count, "{cycle_layers:#?}");
     let expected_layers = expected_layers
         .iter()
@@ -100,10 +104,19 @@ pub fn assert_error_result_summary(
     message_contains: Option<&str>,
 ) {
     let errors = error_results(results, rule_id);
-    assert_result_summary(&errors, expected_count, expected_files, expected_file, title_contains, message_contains);
+    assert_result_summary(
+        &errors,
+        expected_count,
+        expected_files,
+        expected_file,
+        title_contains,
+        message_contains,
+    );
     if let Some(expected_severity) = severity {
         assert!(
-            errors.iter().all(|error| error.severity == expected_severity),
+            errors
+                .iter()
+                .all(|error| error.severity == expected_severity),
             "{errors:#?}"
         );
     }
@@ -133,7 +146,9 @@ pub fn assert_error_message_contains(
     assert_eq!(errors.len(), 1, "{errors:#?}");
     for substring in required_substrings {
         assert!(
-            errors.iter().all(|result| result.message.contains(substring)),
+            errors
+                .iter()
+                .all(|result| result.message.contains(substring)),
             "expected message to contain {substring}: {errors:#?}"
         );
     }

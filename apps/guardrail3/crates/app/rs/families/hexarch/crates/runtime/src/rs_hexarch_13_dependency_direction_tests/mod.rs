@@ -5,11 +5,13 @@ mod non_member_paths;
 mod ownership_and_fail_closed;
 mod ownership_edges;
 
-use std::path::{Path, PathBuf};
 use guardrail3_domain_report::CheckResult;
+use std::path::{Path, PathBuf};
 
 #[allow(unused_imports)]
-pub(super) use test_support::{create_dir, dir_entry, empty_dir, project_tree, remove_dir, walk, write_file};
+pub(super) use test_support::{
+    create_dir, dir_entry, empty_dir, project_tree, remove_dir, walk, write_file,
+};
 
 const GOLDEN_REL: &str = "../../../../../../../tests/fixtures/r_arch_01/golden";
 const RUST_APPS: &[&str] = &["devctl", "backend", "worker"];

@@ -94,5 +94,6 @@ pub(crate) fn check_source(rel_path: &str, content: &str, is_test: bool) -> Vec<
 }
 
 #[cfg(test)]
-#[path = "rs_code_32_test_expect_message_quality_tests/mod.rs"] // reason: test-only sidecar module wiring
+#[path = "rs_code_32_test_expect_message_quality_tests/mod.rs"]
+// reason: test-only sidecar module wiring
 mod rs_code_32_test_expect_message_quality_tests;

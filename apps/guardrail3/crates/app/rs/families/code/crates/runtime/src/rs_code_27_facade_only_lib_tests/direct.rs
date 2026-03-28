@@ -1,7 +1,9 @@
 use guardrail3_domain_report::Severity;
 
-use guardrail3_app_rs_family_code_assertions::rs_code_27_facade_only_lib::{assert_normalized_len, findings};
 use super::super::check_source;
+use guardrail3_app_rs_family_code_assertions::rs_code_27_facade_only_lib::{
+    assert_normalized_len, findings,
+};
 
 #[test]
 fn errors_on_private_use_in_library_lib_rs() {

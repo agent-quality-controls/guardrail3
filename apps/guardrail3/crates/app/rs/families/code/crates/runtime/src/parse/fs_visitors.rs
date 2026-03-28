@@ -56,16 +56,18 @@ fn use_tree_matches_std_fs_with_std_prefix(tree: &syn::UseTree) -> bool {
 
 fn use_tree_is_std_fs_glob(tree: &syn::UseTree, std_aliases: &BTreeSet<String>) -> bool {
     match tree {
-        syn::UseTree::Path(std_path) if std_aliases.contains(&std_path.ident.to_string()) => match &*std_path.tree {
-            syn::UseTree::Path(fs_path) if fs_path.ident == "fs" => {
-                fs_subtree_contains_glob(&fs_path.tree)
+        syn::UseTree::Path(std_path) if std_aliases.contains(&std_path.ident.to_string()) => {
+            match &*std_path.tree {
+                syn::UseTree::Path(fs_path) if fs_path.ident == "fs" => {
+                    fs_subtree_contains_glob(&fs_path.tree)
+                }
+                syn::UseTree::Group(group) => group
+                    .items
+                    .iter()
+                    .any(use_tree_is_std_fs_glob_with_std_prefix),
+                _ => false,
             }
-            syn::UseTree::Group(group) => group
-                .items
-                .iter()
-                .any(use_tree_is_std_fs_glob_with_std_prefix),
-            _ => false,
-        },
+        }
         syn::UseTree::Group(group) => group
             .items
             .iter()

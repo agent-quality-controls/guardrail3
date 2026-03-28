@@ -1,6 +1,6 @@
-use guardrail3_app_rs_family_code_assertions::rs_code_18_always_true_cfg_attr_bypass::{assert_no_hits};
-use super::super::run_family;
 use super::super::copy_fixture;
+use super::super::run_family;
+use guardrail3_app_rs_family_code_assertions::rs_code_18_always_true_cfg_attr_bypass::assert_no_hits;
 use test_support::write_file;
 
 #[test]
@@ -10,10 +10,8 @@ fn skips_genuinely_conditional_cfg_attr_forms() {
 
     let backend_rel = "apps/backend/crates/app/commands/src/lib.rs";
     let worker_rel = "apps/worker/crates/app/processor/src/lib.rs";
-    let backend_content =
-        test_support::read_file(root, backend_rel);
-    let worker_content =
-        test_support::read_file(root, worker_rel);
+    let backend_content = test_support::read_file(root, backend_rel);
+    let worker_content = test_support::read_file(root, worker_rel);
 
     write_file(
         root,

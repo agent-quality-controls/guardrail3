@@ -1,10 +1,10 @@
 use guardrail3_domain_report::Severity;
 
-use guardrail3_app_rs_family_code_assertions::rs_code_32_test_expect_message_quality::{
-    assert_findings, RuleFinding,
-};
 use super::super::copy_fixture;
 use super::super::run_family;
+use guardrail3_app_rs_family_code_assertions::rs_code_32_test_expect_message_quality::{
+    RuleFinding, assert_findings,
+};
 use test_support::{line_number, read_file, write_file};
 
 #[test]

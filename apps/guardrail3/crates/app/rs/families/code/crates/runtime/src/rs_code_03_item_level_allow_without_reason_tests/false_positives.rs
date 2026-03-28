@@ -2,9 +2,11 @@ use std::collections::BTreeSet;
 
 use guardrail3_domain_report::Severity;
 
-use guardrail3_app_rs_family_code_assertions::rs_code_03_item_level_allow_without_reason::{assert_files, assert_findings, assert_no_hits, RuleFinding};
-use super::super::run_family;
 use super::super::copy_fixture;
+use super::super::run_family;
+use guardrail3_app_rs_family_code_assertions::rs_code_03_item_level_allow_without_reason::{
+    RuleFinding, assert_files, assert_findings, assert_no_hits,
+};
 use test_support::write_file;
 
 #[test]
@@ -18,14 +20,11 @@ fn skips_documented_and_cross_rule_near_misses() {
     let cfg_attr_rel = "apps/backend/crates/adapters/outbound/queue/src/lib.rs";
     let documented_mod_rel = "apps/backend/crates/ports/outbound/repo/src/lib.rs";
 
-    let documented_content =
-        test_support::read_file(root, documented_rel);
+    let documented_content = test_support::read_file(root, documented_rel);
     let nested_content = test_support::read_file(root, nested_rel);
     let mixed_content = test_support::read_file(root, mixed_rel);
-    let cfg_attr_content =
-        test_support::read_file(root, cfg_attr_rel);
-    let documented_mod_content =
-        test_support::read_file(root, documented_mod_rel);
+    let cfg_attr_content = test_support::read_file(root, cfg_attr_rel);
+    let documented_mod_content = test_support::read_file(root, documented_mod_rel);
 
     write_file(
         root,
@@ -69,7 +68,9 @@ fn skips_documented_and_cross_rule_near_misses() {
     );
     let undocumented_line = mixed_new
         .lines()
-        .position(|line| line.contains("#[allow(clippy::expect_used)]")).map(|index| index + 1).unwrap_or_default();
+        .position(|line| line.contains("#[allow(clippy::expect_used)]"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
 
     assert_files(&results, BTreeSet::from([mixed_rel.to_owned()]));
     assert_findings(
@@ -96,12 +97,9 @@ fn skips_broad_documented_item_level_allows_across_real_owned_files() {
     let impl_rel = "apps/backend/crates/adapters/outbound/queue/src/lib.rs";
     let trait_rel = "apps/backend/crates/ports/outbound/events/src/lib.rs";
 
-    let top_level_content =
-        test_support::read_file(root, top_level_rel);
-    let nested_content =
-        test_support::read_file(root, nested_rel);
-    let grouped_content =
-        test_support::read_file(root, grouped_rel);
+    let top_level_content = test_support::read_file(root, top_level_rel);
+    let nested_content = test_support::read_file(root, nested_rel);
+    let grouped_content = test_support::read_file(root, grouped_rel);
     let impl_content = test_support::read_file(root, impl_rel);
     let trait_content = test_support::read_file(root, trait_rel);
 

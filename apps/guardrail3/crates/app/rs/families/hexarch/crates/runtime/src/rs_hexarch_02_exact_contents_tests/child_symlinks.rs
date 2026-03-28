@@ -1,5 +1,5 @@
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_02_exact_contents as assertions;
 use super::{copy_fixture, remove_dir};
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_02_exact_contents as assertions;
 const FIXTURE: super::HexarchFixture = super::HexarchFixture;
 
 fn inner_hex() -> &'static str {
@@ -103,16 +103,7 @@ fn nested_required_child_valid_symlink_hits_missing_and_loose_for_that_root() {
     .expect("symlink");
 
     let results = super::run_family(tmp.path());
-    assertions::assert_error_count_matching_file(
-        &results,
-        "",
-        inner_hex(),
-        2,
-        &[],
-        &[],
-        &[],
-        &[],
-    );
+    assertions::assert_error_count_matching_file(&results, "", inner_hex(), 2, &[], &[], &[], &[]);
     assertions::assert_error_count_matching_file(
         &results,
         "",

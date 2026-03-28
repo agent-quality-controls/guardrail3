@@ -35,7 +35,9 @@ pub fn check(input: &DependencyEdgeHexarchInput<'_>, results: &mut Vec<CheckResu
 
 #[cfg(test)]
 #[allow(dead_code)]
-pub fn check_tree_for_tests(tree: &guardrail3_domain_project_tree::ProjectTree) -> Vec<CheckResult> {
+pub fn check_tree_for_tests(
+    tree: &guardrail3_domain_project_tree::ProjectTree,
+) -> Vec<CheckResult> {
     let dependency_facts = super::collect_dependency_facts_from_tree_for_tests(tree);
     let mut results = Vec::new();
     for edge in &dependency_facts.edges {
@@ -52,7 +54,9 @@ pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> 
 
 #[cfg(test)]
 #[allow(dead_code)]
-pub(super) fn results_for_test_tree(tree: &guardrail3_domain_project_tree::ProjectTree) -> Vec<CheckResult> {
+pub(super) fn results_for_test_tree(
+    tree: &guardrail3_domain_project_tree::ProjectTree,
+) -> Vec<CheckResult> {
     crate::check_test_tree(tree)
 }
 

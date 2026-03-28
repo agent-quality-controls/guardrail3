@@ -1,5 +1,5 @@
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_04_loose_files as assertions;
 use super::{copy_fixture, create_dir, empty_dir, remove_dir, write_file};
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_04_loose_files as assertions;
 const FIXTURE: super::HexarchFixture = super::HexarchFixture;
 
 fn inner_hex() -> &'static str {

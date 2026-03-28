@@ -1,7 +1,9 @@
 use guardrail3_domain_report::Severity;
 
-use guardrail3_app_rs_family_code_assertions::rs_code_12_unsafe_code_lint::{assert_normalized_empty, assert_normalized_len, findings};
 use super::super::check_unsafe_code_lint;
+use guardrail3_app_rs_family_code_assertions::rs_code_12_unsafe_code_lint::{
+    assert_normalized_empty, assert_normalized_len, findings,
+};
 
 #[test]
 fn errors_on_deny_level() {

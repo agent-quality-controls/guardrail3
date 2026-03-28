@@ -1,7 +1,9 @@
 use guardrail3_domain_report::Severity;
 
-use guardrail3_app_rs_family_code_assertions::rs_code_11_use_count_warn::{assert_findings, RuleFinding};
 use super::super::check_source;
+use guardrail3_app_rs_family_code_assertions::rs_code_11_use_count_warn::{
+    RuleFinding, assert_findings,
+};
 
 #[test]
 fn warns_between_sixteen_and_twenty_top_level_uses() {

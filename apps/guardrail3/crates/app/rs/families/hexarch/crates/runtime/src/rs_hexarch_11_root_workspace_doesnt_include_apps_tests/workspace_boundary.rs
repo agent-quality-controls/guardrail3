@@ -1,5 +1,5 @@
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_11_root_workspace_doesnt_include_apps as assertions;
 use super::{copy_fixture, write_file};
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_11_root_workspace_doesnt_include_apps as assertions;
 
 #[test]
 fn root_workspace_including_all_rust_apps_hits_every_owned_app_member() {
@@ -33,13 +33,7 @@ fn normalized_root_workspace_app_member_still_hits_rule_11() {
     );
 
     let results = super::run_family(tmp.path());
-    assertions::assert_error_title_contains(
-        &results,
-        "",
-        1,
-        &["Cargo.toml"],
-        &["./apps/devctl/"],
-    );
+    assertions::assert_error_title_contains(&results, "", 1, &["Cargo.toml"], &["./apps/devctl/"]);
 }
 
 #[test]
@@ -55,13 +49,7 @@ fn absolute_root_workspace_app_member_still_hits_rule_11() {
     );
 
     let results = super::run_family(tmp.path());
-    assertions::assert_error_title_contains(
-        &results,
-        "",
-        1,
-        &["Cargo.toml"],
-        &[&absolute_member],
-    );
+    assertions::assert_error_title_contains(&results, "", 1, &["Cargo.toml"], &[&absolute_member]);
 }
 
 #[test]

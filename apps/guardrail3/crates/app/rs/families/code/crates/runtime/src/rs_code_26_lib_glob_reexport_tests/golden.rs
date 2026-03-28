@@ -1,6 +1,6 @@
-use guardrail3_app_rs_family_code_assertions::rs_code_26_lib_glob_reexport::{assert_no_hits};
-use super::super::run_family;
 use super::super::copy_fixture;
+use super::super::run_family;
+use guardrail3_app_rs_family_code_assertions::rs_code_26_lib_glob_reexport::assert_no_hits;
 
 #[test]
 fn populated_golden_fixture_has_no_lib_glob_reexport_hits() {

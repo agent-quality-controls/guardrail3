@@ -1,6 +1,6 @@
-use guardrail3_app_rs_family_code_assertions::rs_code_16_panic_macro::{assert_no_hits};
-use super::super::run_family;
 use super::super::copy_fixture;
+use super::super::run_family;
+use guardrail3_app_rs_family_code_assertions::rs_code_16_panic_macro::assert_no_hits;
 use test_support::write_file;
 
 #[test]

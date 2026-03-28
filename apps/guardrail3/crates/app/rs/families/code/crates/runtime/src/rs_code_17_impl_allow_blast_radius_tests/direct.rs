@@ -1,7 +1,9 @@
 use guardrail3_domain_report::Severity;
 
-use guardrail3_app_rs_family_code_assertions::rs_code_17_impl_allow_blast_radius::{assert_normalized_len, findings};
 use super::super::check_source;
+use guardrail3_app_rs_family_code_assertions::rs_code_17_impl_allow_blast_radius::{
+    assert_normalized_len, findings,
+};
 
 #[test]
 fn errors_on_impl_allow_covering_more_than_three_methods() {

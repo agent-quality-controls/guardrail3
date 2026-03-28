@@ -4,8 +4,8 @@ fn inner_hex() -> &'static str {
     FIXTURE.inner_hex_root()
 }
 
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_03_inbound_outbound as assertions;
 use super::{copy_fixture, remove_dir};
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_03_inbound_outbound as assertions;
 
 #[test]
 fn missing_outbound_in_adapters_hits_all_owned_outer_and_nested_containers() {

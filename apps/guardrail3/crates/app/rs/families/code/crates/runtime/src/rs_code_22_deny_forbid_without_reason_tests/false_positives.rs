@@ -1,7 +1,9 @@
 use super::super::check_source;
-use guardrail3_app_rs_family_code_assertions::rs_code_22_deny_forbid_without_reason::{assert_no_hits, assert_normalized_len, findings};
-use super::super::run_family;
 use super::super::copy_fixture;
+use super::super::run_family;
+use guardrail3_app_rs_family_code_assertions::rs_code_22_deny_forbid_without_reason::{
+    assert_no_hits, assert_normalized_len, findings,
+};
 use test_support::write_file;
 
 #[test]
@@ -10,8 +12,7 @@ fn skips_same_line_reason_documented_attrs() {
     let root = fixture.path();
 
     let backend_rel = "apps/backend/crates/domain/types/src/lib.rs";
-    let backend_content =
-        test_support::read_file(root, backend_rel);
+    let backend_content = test_support::read_file(root, backend_rel);
 
     write_file(
         root,
@@ -53,9 +54,7 @@ fn does_not_treat_block_comment_as_same_line_reason() {
     let content = "#[deny(clippy::panic)] /* reason: not supported */\nfn one() {}";
     let results = check_source("src/lib.rs", content, false);
 
-    let rs_code_22_results = findings(&results)
-        .into_iter()
-        .collect::<Vec<_>>();
+    let rs_code_22_results = findings(&results).into_iter().collect::<Vec<_>>();
     assert_normalized_len(&rs_code_22_results, 1);
 }
 
@@ -64,9 +63,7 @@ fn empty_or_wrong_key_reason_comments_do_not_suppress() {
     let content = "#[deny(clippy::panic)] // reason:\nfn one() {}\n#[forbid(clippy::expect_used)] // because: not the accepted key\nfn two() {}";
     let results = check_source("src/lib.rs", content, false);
 
-    let rs_code_22_results = findings(&results)
-        .into_iter()
-        .collect::<Vec<_>>();
+    let rs_code_22_results = findings(&results).into_iter().collect::<Vec<_>>();
     assert_normalized_len(&rs_code_22_results, 2);
 }
 

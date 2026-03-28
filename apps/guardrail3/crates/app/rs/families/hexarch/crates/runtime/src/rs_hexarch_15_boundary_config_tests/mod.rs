@@ -1,17 +1,19 @@
 #![allow(dead_code, unused_imports)]
 mod fail_closed;
-mod schema_invalid_partial_recovery;
-mod zero_member_workspace;
 mod fixture_missing_all_apps;
 mod fixture_missing_single_app;
 mod golden;
 mod missing_config;
+mod schema_invalid_partial_recovery;
+mod zero_member_workspace;
 
-use std::path::{Path, PathBuf};
 use guardrail3_domain_report::CheckResult;
+use std::path::{Path, PathBuf};
 
 #[allow(unused_imports)]
-pub(super) use test_support::{create_dir, dir_entry, empty_dir, project_tree, remove_dir, walk, write_file};
+pub(super) use test_support::{
+    create_dir, dir_entry, empty_dir, project_tree, remove_dir, walk, write_file,
+};
 
 const GOLDEN_REL: &str = "../../../../../../../tests/fixtures/r_arch_01/golden";
 const RUST_APPS: &[&str] = &["devctl", "backend", "worker"];

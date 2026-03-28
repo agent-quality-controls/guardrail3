@@ -32,13 +32,13 @@ mod rs_code_29_large_trait_inventory;
 mod rs_code_30_input_failures;
 mod rs_code_32_test_expect_message_quality;
 
+use guardrail3_app_rs_family_mapper::RsCodeRoute;
+use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_domain_report::CheckResult;
 use {
     glob as _, guardrail3_domain_config as _, guardrail3_domain_modules as _,
     guardrail3_outbound_traits as _, quote as _, semver as _, serde_yaml as _,
 };
-use guardrail3_app_rs_family_mapper::RsCodeRoute;
-use guardrail3_domain_project_tree::ProjectTree;
-use guardrail3_domain_report::CheckResult;
 
 use self::facts::collect;
 use self::inputs::{
@@ -46,11 +46,11 @@ use self::inputs::{
 };
 
 #[cfg(test)]
-use guardrail3_app_rs_family_code_assertions as _;
-#[cfg(test)]
 use guardrail3_adapters_outbound_fs::RealFileSystem;
 #[cfg(test)]
 use guardrail3_app_core::project_walker::walk_project;
+#[cfg(test)]
+use guardrail3_app_rs_family_code_assertions as _;
 #[cfg(test)]
 use guardrail3_domain_config::types::GuardrailConfig;
 
@@ -158,9 +158,10 @@ pub(crate) fn check_test_tree(tree: &ProjectTree) -> Vec<CheckResult> {
 fn family_route_for_tests(tree: &ProjectTree) -> RsCodeRoute {
     let scope = guardrail3_app_rs_placement::collect(tree);
     let config = parse_guardrail_config(tree);
-    let selected = guardrail3_validation_model::RustFamilySelection::new(
-        std::collections::BTreeSet::from([guardrail3_validation_model::RustValidateFamily::Code]),
-    );
+    let selected =
+        guardrail3_validation_model::RustFamilySelection::new(std::collections::BTreeSet::from([
+            guardrail3_validation_model::RustValidateFamily::Code,
+        ]));
     guardrail3_app_rs_family_mapper::FamilyMapper::new(
         tree,
         &scope,

@@ -133,9 +133,7 @@ pub fn assert_attacks_impl_level_allows_across_multiple_owned_rust_files_with_ex
                 id: ID,
                 severity: Severity::Error,
                 title: "blanket impl-level allow",
-                message:
-                    "`#[allow(clippy::too_many_lines)]` covers an impl block with 4 methods. Apply lint suppressions to individual methods instead."
-                        ,
+                message: "`#[allow(clippy::too_many_lines)]` covers an impl block with 4 methods. Apply lint suppressions to individual methods instead.",
                 file: Some(backend_rel),
                 line: Some(backend_line),
                 inventory: false,
@@ -144,9 +142,7 @@ pub fn assert_attacks_impl_level_allows_across_multiple_owned_rust_files_with_ex
                 id: ID,
                 severity: Severity::Error,
                 title: "blanket impl-level allow",
-                message:
-                    "`#[allow(clippy::too_many_arguments)]` covers an impl block with 5 methods. Apply lint suppressions to individual methods instead."
-                        ,
+                message: "`#[allow(clippy::too_many_arguments)]` covers an impl block with 5 methods. Apply lint suppressions to individual methods instead.",
                 file: Some(worker_rel),
                 line: Some(worker_grouped_line),
                 inventory: false,
@@ -155,9 +151,7 @@ pub fn assert_attacks_impl_level_allows_across_multiple_owned_rust_files_with_ex
                 id: ID,
                 severity: Severity::Error,
                 title: "blanket impl-level allow",
-                message:
-                    "`#[allow(clippy::too_many_lines)]` covers an impl block with 5 methods. Apply lint suppressions to individual methods instead."
-                        ,
+                message: "`#[allow(clippy::too_many_lines)]` covers an impl block with 5 methods. Apply lint suppressions to individual methods instead.",
                 file: Some(worker_rel),
                 line: Some(worker_grouped_line),
                 inventory: false,
@@ -166,9 +160,7 @@ pub fn assert_attacks_impl_level_allows_across_multiple_owned_rust_files_with_ex
                 id: ID,
                 severity: Severity::Error,
                 title: "blanket impl-level allow",
-                message:
-                    "`#[allow(clippy::type_complexity)]` covers an impl block with 4 methods. Apply lint suppressions to individual methods instead."
-                        ,
+                message: "`#[allow(clippy::type_complexity)]` covers an impl block with 4 methods. Apply lint suppressions to individual methods instead.",
                 file: Some(worker_rel),
                 line: Some(worker_secondary_line),
                 inventory: false,

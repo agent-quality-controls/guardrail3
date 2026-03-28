@@ -1,8 +1,10 @@
 use guardrail3_domain_report::Severity;
 
-use guardrail3_app_rs_family_code_assertions::rs_code_04_item_level_allow_with_reason::{assert_findings, RuleFinding};
-use super::super::run_family;
 use super::super::copy_fixture;
+use super::super::run_family;
+use guardrail3_app_rs_family_code_assertions::rs_code_04_item_level_allow_with_reason::{
+    RuleFinding, assert_findings,
+};
 use test_support::write_file;
 
 #[test]
@@ -17,11 +19,9 @@ fn inventories_documented_item_level_allows_across_real_owned_files() {
     let impl_rel = "apps/backend/crates/adapters/outbound/queue/src/lib.rs";
     let trait_rel = "apps/backend/crates/ports/outbound/repo/src/lib.rs";
 
-    let top_level_content =
-        test_support::read_file(root, top_level_rel);
+    let top_level_content = test_support::read_file(root, top_level_rel);
     let nested_content = test_support::read_file(root, nested_rel);
-    let grouped_content =
-        test_support::read_file(root, grouped_rel);
+    let grouped_content = test_support::read_file(root, grouped_rel);
     let module_content = test_support::read_file(root, module_rel);
     let impl_content = test_support::read_file(root, impl_rel);
     let trait_content = test_support::read_file(root, trait_rel);
@@ -57,10 +57,13 @@ fn inventories_documented_item_level_allows_across_real_owned_files() {
         .position(|line| {
             line.contains("#[allow(clippy::unwrap_used)] // reason: compatibility shim")
         })
-        .map(|index| index + 1).unwrap_or_default();
+        .map(|index| index + 1)
+        .unwrap_or_default();
     let nested_line = nested_new
         .lines()
-        .position(|line| line.contains("#[allow(clippy::panic)] // reason: queue adapter probe")).map(|index| index + 1).unwrap_or_default();
+        .position(|line| line.contains("#[allow(clippy::panic)] // reason: queue adapter probe"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
     let grouped_line = grouped_new
         .lines()
         .position(|line| line.contains("#[allow(clippy::unwrap_used, clippy::expect_used)] // reason: grouped adapter allowance")).map(|index| index + 1).unwrap_or_default();
@@ -69,16 +72,20 @@ fn inventories_documented_item_level_allows_across_real_owned_files() {
         .position(|line| {
             line.contains("#[allow(clippy::expect_used)] // reason: documented module seam")
         })
-        .map(|index| index + 1).unwrap_or_default();
+        .map(|index| index + 1)
+        .unwrap_or_default();
     let impl_line = impl_new
         .lines()
-        .position(|line| line.contains("#[allow(clippy::panic)] // reason: adapter glue seam")).map(|index| index + 1).unwrap_or_default();
+        .position(|line| line.contains("#[allow(clippy::panic)] // reason: adapter glue seam"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
     let trait_line = trait_new
         .lines()
         .position(|line| {
             line.contains("#[allow(clippy::unwrap_used)] // reason: trait shim contract")
         })
-        .map(|index| index + 1).unwrap_or_default();
+        .map(|index| index + 1)
+        .unwrap_or_default();
 
     assert_findings(
         &run_family(root),
@@ -139,6 +146,6 @@ fn inventories_documented_item_level_allows_across_real_owned_files() {
                 line: Some(nested_line),
                 inventory: true,
             },
-        ]
+        ],
     );
 }
