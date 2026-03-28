@@ -71,7 +71,7 @@ This family is self-hosted under the same `RS-TEST` contract it enforces elsewhe
 
 ```text
 apps/guardrail3/crates/app/rs/families/hexarch/
-  Cargo.toml
+  README.md
   crates/
     runtime/                   # family orchestrator + rule implementations
       Cargo.toml
@@ -105,6 +105,9 @@ apps/guardrail3/crates/app/rs/families/hexarch/
     src/
       lib.rs
 ```
+
+These crates are members of the top-level `apps/guardrail3` workspace. The family
+container directory is not itself a nested Cargo workspace root.
 
 ## Ownership Boundaries
 

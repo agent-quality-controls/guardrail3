@@ -97,6 +97,56 @@ fn missing_assertions_crate_for_external_harness_is_reported() {
 }
 
 #[test]
+fn family_container_without_parent_cargo_manifest_is_still_a_valid_runtime_assertions_split() {
+    let fixture = tempdir();
+    let root = fixture.path();
+
+    write_file(
+        root,
+        "crates/runtime/Cargo.toml",
+        "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = {path = \"../assertions\"}\ntest_support = {path = \"../../test_support\"}\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/src/lib.rs",
+        "#[cfg(test)]\n#[path = \"lib_tests/mod.rs\"]\nmod tests;\n\npub fn value() -> u8 { 1 }\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/src/lib_tests/mod.rs",
+        "mod cases;\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/src/lib_tests/cases.rs",
+        "use demo_assertions::lib::assert_runtime;\n\n#[test]\nfn owned_sidecar() { assert_runtime(); }\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/Cargo.toml",
+        "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = {path = \"../runtime\"}\ntest_support = {path = \"../../test_support\"}\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/src/lib.rs",
+        "pub fn assert_runtime() { assert_eq!(demo_runtime::value(), 1); }\n",
+    );
+    write_file(
+        root,
+        "test_support/Cargo.toml",
+        "[package]\nname = \"test_support\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write_file(
+        root,
+        "test_support/src/lib.rs",
+        "pub fn marker() {}\n",
+    );
+
+    let results = run_family(root);
+    assert_rule_quiet(&results);
+}
+
+#[test]
 fn runtime_depends_on_assertions_at_normal_scope_is_reported() {
     let fixture = tempdir();
     let root = fixture.path();

@@ -22,9 +22,9 @@ struct CargoRootFacts {
 pub fn collect(tree: &ProjectTree, routed_roots: &[RsRootView], tc: &dyn ToolChecker) -> TestFacts {
     let mut input_failures = Vec::new();
     let cargo_roots = collect_cargo_roots(tree, routed_roots, &mut input_failures);
-    let mut roots = cargo_roots
-        .keys()
-        .map(|rel_dir| build_root_facts(tree, rel_dir, &cargo_roots, &mut input_failures))
+    let mut roots = collect_test_root_dirs(&cargo_roots)
+        .into_iter()
+        .map(|rel_dir| build_root_facts(tree, &rel_dir, &cargo_roots, &mut input_failures))
         .collect::<Vec<_>>();
     roots.sort_by(|a, b| a.rel_dir.cmp(&b.rel_dir));
 
@@ -167,6 +167,34 @@ fn collect_cargo_roots(
         .collect()
 }
 
+fn collect_test_root_dirs(cargo_roots: &BTreeMap<String, CargoRootFacts>) -> Vec<String> {
+    let mut root_dirs = BTreeSet::new();
+    for rel_dir in cargo_roots.keys() {
+        let _ = root_dirs.insert(component_container_root(rel_dir).unwrap_or_else(|| rel_dir.clone()));
+    }
+    root_dirs.into_iter().collect()
+}
+
+fn component_container_root(rel_dir: &str) -> Option<String> {
+    if matches!(
+        rel_dir,
+        "crates/runtime"
+            | "crates/assertions"
+            | "crates/assertions_common"
+            | "crates/test_support"
+            | "test_support"
+    ) {
+        return Some(String::new());
+    }
+    rel_dir
+        .strip_suffix("/crates/runtime")
+        .or_else(|| rel_dir.strip_suffix("/crates/assertions"))
+        .or_else(|| rel_dir.strip_suffix("/crates/assertions_common"))
+        .or_else(|| rel_dir.strip_suffix("/crates/test_support"))
+        .or_else(|| rel_dir.strip_suffix("/test_support"))
+        .map(ToOwned::to_owned)
+}
+
 fn parse_workspace_members(
     tree: &ProjectTree,
     workspace_rel: &str,
@@ -206,9 +234,7 @@ fn build_root_facts(
     cargo_roots: &BTreeMap<String, CargoRootFacts>,
     input_failures: &mut Vec<InputFailureFacts>,
 ) -> TestRootFacts {
-    let cargo = cargo_roots
-        .get(rel_dir)
-        .expect("expected discovered cargo root");
+    let cargo = root_cargo_facts(rel_dir, cargo_roots);
     let mutants_rel_path = join_under_root(rel_dir, ".cargo/mutants.toml");
     let nextest_rel_path = join_under_root(rel_dir, ".config/nextest.toml");
     let (mutants_exists, mutants_parsed, _) = parse_optional_toml(
@@ -228,23 +254,35 @@ fn build_root_facts(
 
     TestRootFacts {
         rel_dir: rel_dir.to_owned(),
-        cargo_rel_path: cargo.cargo_rel_path.clone(),
+        cargo_rel_path: cargo
+            .map(|facts| facts.cargo_rel_path.clone())
+            .unwrap_or_else(|| join_under_root(rel_dir, "crates/runtime/Cargo.toml")),
         mutants_rel_path,
         mutants_exists,
         mutants_parsed,
         nextest_rel_path,
         nextest_exists,
         nextest_parsed,
-        tokio_dependency_present: root_has_tokio(tree, cargo, cargo_roots),
+        tokio_dependency_present: cargo
+            .is_some_and(|facts| root_has_tokio(tree, facts, cargo_roots)),
         has_mutants_profile: cargo
-            .parsed
-            .as_ref()
+            .and_then(|facts| facts.parsed.as_ref())
             .and_then(|parsed| parsed.get("profile"))
             .and_then(|profile| profile.get("mutants"))
             .is_some(),
         mutation_hook_files: collect_mutation_hook_files(tree, rel_dir),
         components: collect_components(tree, rel_dir, input_failures),
     }
+}
+
+fn root_cargo_facts<'a>(
+    rel_dir: &str,
+    cargo_roots: &'a BTreeMap<String, CargoRootFacts>,
+) -> Option<&'a CargoRootFacts> {
+    cargo_roots.get(rel_dir).or_else(|| {
+        let runtime_rel_dir = join_under_root(rel_dir, "crates/runtime");
+        cargo_roots.get(&runtime_rel_dir)
+    })
 }
 
 fn parse_optional_toml(
@@ -420,7 +458,9 @@ fn root_has_test_support_file(root: &TestRootFacts, rel_path: &str) -> bool {
         join_under_root(&root.rel_dir, "crates/test_support/src"),
     ]
     .into_iter()
-    .any(|test_support_src| rel_path == test_support_src || path_is_under(rel_path, &test_support_src))
+    .any(|test_support_src| {
+        rel_path == test_support_src || path_is_under(rel_path, &test_support_src)
+    })
 }
 
 fn collect_mutation_hook_files(tree: &ProjectTree, root_rel_dir: &str) -> Vec<String> {

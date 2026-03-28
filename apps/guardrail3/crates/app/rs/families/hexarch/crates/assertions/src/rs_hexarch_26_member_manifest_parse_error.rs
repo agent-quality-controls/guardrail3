@@ -23,17 +23,36 @@ pub fn assert_error_summary(
     message_contains: Option<&str>,
 ) {
     let errors = error_results(results, rule_id);
-    assert_result_summary(
-        &errors,
+    assert_eq!(
+        errors.len(),
         expected_count,
-        expected_files,
-        None,
-        None,
-        message_contains,
+        "unexpected {RULE_ID} error count: {errors:#?}"
     );
+
+    let actual_files = errors
+        .iter()
+        .filter_map(|result| result.file.as_deref())
+        .collect::<std::collections::BTreeSet<_>>();
+    let expected_files = expected_files
+        .iter()
+        .copied()
+        .collect::<std::collections::BTreeSet<_>>();
+    assert_eq!(actual_files, expected_files, "{errors:#?}");
+
+    if let Some(message_contains) = message_contains {
+        assert!(
+            errors
+                .iter()
+                .all(|result| result.message.contains(message_contains)),
+            "{errors:#?}"
+        );
+    }
 }
 
 pub fn assert_no_error(results: &[CheckResult], rule_id: &str) {
     let errors = error_results(results, rule_id);
-    assert!(errors.is_empty(), "expected no {RULE_ID} errors, got: {errors:#?}");
+    assert!(
+        errors.is_empty(),
+        "expected no {RULE_ID} errors, got: {errors:#?}"
+    );
 }
