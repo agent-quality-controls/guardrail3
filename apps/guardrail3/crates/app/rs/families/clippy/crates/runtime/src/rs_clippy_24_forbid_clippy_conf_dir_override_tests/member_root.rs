@@ -10,8 +10,5 @@ fn errors_for_workspace_member_cargo_config_override() {
         "[env]\nCLIPPY_CONF_DIR = \"../../..\"\n",
     );
     let results = run_for_tests(&tree);
-    assertions::assert_override_error(
-        &results,
-        "apps/backend/crates/core/.cargo/config.toml",
-    );
+    assertions::assert_override_error(&results, "apps/backend/crates/core/.cargo/config.toml");
 }

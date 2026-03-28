@@ -1,6 +1,8 @@
 use std::collections::BTreeSet;
 
-use guardrail3_domain_modules::clippy::{BASE_TYPE_PATHS, LIBRARY_EXTRA_TYPE_PATHS, build_clippy_toml};
+use guardrail3_domain_modules::clippy::{
+    BASE_TYPE_PATHS, LIBRARY_EXTRA_TYPE_PATHS, build_clippy_toml,
+};
 
 #[test]
 fn generated_library_profile_contains_exact_managed_global_state_type_set() {

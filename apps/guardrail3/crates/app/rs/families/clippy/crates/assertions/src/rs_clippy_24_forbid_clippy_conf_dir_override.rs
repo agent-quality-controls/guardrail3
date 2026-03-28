@@ -18,7 +18,9 @@ pub fn assert_override_error(results: &[CheckResult], rel_path: &str) {
     assert_eq!(result.file.as_deref(), Some(rel_path));
     assert_eq!(
         result.message,
-        format!("`{rel_path}` sets `CLIPPY_CONF_DIR`, which bypasses the routed clippy policy-root model.")
+        format!(
+            "`{rel_path}` sets `CLIPPY_CONF_DIR`, which bypasses the routed clippy policy-root model."
+        )
     );
 }
 
@@ -27,7 +29,10 @@ pub fn assert_parse_error(results: &[CheckResult], rel_path: &str) {
     let result = &results[0];
     assert_eq!(result.id, ID);
     assert_eq!(result.severity, Severity::Error);
-    assert_eq!(result.title, "cargo config override surface is not parseable");
+    assert_eq!(
+        result.title,
+        "cargo config override surface is not parseable"
+    );
     assert_eq!(result.file.as_deref(), Some(rel_path));
     assert!(
         result.message.contains("Failed to parse"),

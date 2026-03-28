@@ -1,6 +1,6 @@
-use guardrail3_domain_report::{CheckResult, Severity};
 #[cfg(test)]
 use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::facts::{ForbiddenConfigFacts, ForbiddenConfigReason};
 

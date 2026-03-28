@@ -63,9 +63,10 @@ pub(crate) fn run_for_tests(root: &Path) -> Vec<CheckResult> {
         root,
     );
     let scope = guardrail3_app_rs_placement::collect(&tree);
-    let selected = guardrail3_validation_model::RustFamilySelection::new(
-        std::collections::BTreeSet::from([guardrail3_validation_model::RustValidateFamily::Clippy]),
-    );
+    let selected =
+        guardrail3_validation_model::RustFamilySelection::new(std::collections::BTreeSet::from([
+            guardrail3_validation_model::RustValidateFamily::Clippy,
+        ]));
     let route =
         guardrail3_app_rs_family_mapper::FamilyMapper::new(&tree, &scope, None, &selected, None)
             .map_rs_clippy();

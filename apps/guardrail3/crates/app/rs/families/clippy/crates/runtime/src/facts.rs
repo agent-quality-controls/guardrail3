@@ -649,7 +649,9 @@ fn resolve_app_paths(cargo_roots: &BTreeMap<String, CargoRootFacts>) -> BTreeMap
     for rel_dir in cargo_roots.keys() {
         let mut parts = rel_dir.split('/');
         if let (Some("apps"), Some(app_name), None) = (parts.next(), parts.next(), parts.next()) {
-            let _ = resolved.entry(app_name.to_owned()).or_insert_with(|| rel_dir.clone());
+            let _ = resolved
+                .entry(app_name.to_owned())
+                .or_insert_with(|| rel_dir.clone());
         }
     }
 
@@ -715,8 +717,9 @@ fn validate_guardrail_policy_shape(parsed: &toml::Value) -> Result<(), String> {
             .ok_or_else(|| "`profile` must be a table in active `guardrail3.toml`.".to_owned())?;
         if let Some(name) = table.get("name") {
             if !name.is_str() {
-                return Err("`profile.name` must be a string in active `guardrail3.toml`."
-                    .to_owned());
+                return Err(
+                    "`profile.name` must be a string in active `guardrail3.toml`.".to_owned(),
+                );
             }
         }
     }
@@ -733,9 +736,9 @@ fn validate_guardrail_policy_shape(parsed: &toml::Value) -> Result<(), String> {
     }
 
     if let Some(apps) = rust_table.get("apps") {
-        let apps_table = apps.as_table().ok_or_else(|| {
-            "`rust.apps` must be a table in active `guardrail3.toml`.".to_owned()
-        })?;
+        let apps_table = apps
+            .as_table()
+            .ok_or_else(|| "`rust.apps` must be a table in active `guardrail3.toml`.".to_owned())?;
         for (app_name, app_cfg) in apps_table {
             let ctx = format!("`rust.apps.{app_name}`");
             validate_profile_block(app_cfg, &ctx)?;

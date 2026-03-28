@@ -318,7 +318,10 @@ pub fn published_library_package_root_tree(local_clippy_toml: impl Into<String>)
                 "Cargo.toml",
                 "[package]\nname = \"libcrate\"\npublish = true\n".to_owned(),
             ),
-            ("guardrail3.toml", "[profile]\nname = \"library\"\n".to_owned()),
+            (
+                "guardrail3.toml",
+                "[profile]\nname = \"library\"\n".to_owned(),
+            ),
             ("clippy.toml", local_clippy_toml.into()),
         ],
     )
@@ -359,7 +362,10 @@ pub fn package_library_workspace_root_tree(local_clippy_toml: impl Into<String>)
                 "clippy.toml",
                 build_fixture_clippy_toml("service", false, true, "", ""),
             ),
-            ("packages/shared-types/clippy.toml", local_clippy_toml.into()),
+            (
+                "packages/shared-types/clippy.toml",
+                local_clippy_toml.into(),
+            ),
         ],
     )
 }
@@ -422,7 +428,10 @@ pub fn nested_workspace_root_with_cargo_config(
                 "apps/backend/crates/core/Cargo.toml",
                 "[package]\nname = \"core\"\n".to_owned(),
             ),
-            (&format!("apps/backend/.cargo/{cargo_config_rel}"), cargo_config),
+            (
+                &format!("apps/backend/.cargo/{cargo_config_rel}"),
+                cargo_config,
+            ),
         ],
     )
 }
@@ -503,7 +512,10 @@ pub fn unrelated_nested_cargo_config_tree(
                 "apps/backend/crates/core/Cargo.toml",
                 "[package]\nname = \"core\"\n".to_owned(),
             ),
-            (&format!("docs/guide/.cargo/{cargo_config_rel}"), cargo_config),
+            (
+                &format!("docs/guide/.cargo/{cargo_config_rel}"),
+                cargo_config,
+            ),
         ],
     )
 }

@@ -8,7 +8,11 @@ use super::super::{copy_fixture_for_tests, run_for_tests};
 #[test]
 fn inventories_exact_covering_config_for_each_rust_root_in_multi_root_fixture() {
     let tmp = copy_fixture_for_tests();
-    write_file(tmp.path(), "clippy.toml", &build_fixture_clippy_toml("service", false, true, "", ""));
+    write_file(
+        tmp.path(),
+        "clippy.toml",
+        &build_fixture_clippy_toml("service", false, true, "", ""),
+    );
     write_file(
         tmp.path(),
         "apps/devctl/clippy.toml",

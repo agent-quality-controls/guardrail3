@@ -1,11 +1,11 @@
 use std::collections::BTreeSet;
 
+use super::build_fixture_clippy_toml;
 use guardrail3_domain_modules::clippy::{
     EXPECTED_MACRO_BANS, LIBRARY_EXTRA_TYPE_PATHS, MAX_FN_PARAMS_BOOLS, MAX_STRUCT_BOOLS,
-    SERVICE_METHOD_PATHS, THRESHOLD_VALUES, TOO_MANY_ARGUMENTS_THRESHOLD,
-    TOO_MANY_LINES_THRESHOLD, TYPE_COMPLEXITY_THRESHOLD,
+    SERVICE_METHOD_PATHS, THRESHOLD_VALUES, TOO_MANY_ARGUMENTS_THRESHOLD, TOO_MANY_LINES_THRESHOLD,
+    TYPE_COMPLEXITY_THRESHOLD,
 };
-use super::build_fixture_clippy_toml;
 
 fn paths_for_key(parsed: &toml::Value, key: &str) -> BTreeSet<String> {
     parsed
@@ -28,7 +28,8 @@ fn paths_for_key(parsed: &toml::Value, key: &str) -> BTreeSet<String> {
 #[test]
 fn generated_service_fixture_matches_checker_expectations() {
     let parsed =
-        toml::from_str::<toml::Value>(&build_fixture_clippy_toml("service", false, true, "", "")).expect("valid clippy TOML");
+        toml::from_str::<toml::Value>(&build_fixture_clippy_toml("service", false, true, "", ""))
+            .expect("valid clippy TOML");
 
     for (key, expected) in THRESHOLD_VALUES {
         assert_eq!(
@@ -108,9 +109,9 @@ fn generated_service_fixture_matches_checker_expectations() {
         "axum_extra::extract::Cbor",
         "axum_extra::extract::MsgPack",
     ]
-        .into_iter()
-        .map(str::to_owned)
-        .collect::<BTreeSet<_>>();
+    .into_iter()
+    .map(str::to_owned)
+    .collect::<BTreeSet<_>>();
     assert_eq!(paths_for_key(&parsed, "disallowed-types"), expected_types);
 
     let expected_macros = EXPECTED_MACRO_BANS
@@ -120,7 +121,9 @@ fn generated_service_fixture_matches_checker_expectations() {
     assert_eq!(paths_for_key(&parsed, "disallowed-macros"), expected_macros);
 
     assert_eq!(
-        parsed.get("max-struct-bools").and_then(toml::Value::as_integer),
+        parsed
+            .get("max-struct-bools")
+            .and_then(toml::Value::as_integer),
         Some(MAX_STRUCT_BOOLS),
     );
     assert_eq!(

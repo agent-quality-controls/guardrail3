@@ -32,8 +32,8 @@ use guardrail3_domain_report::CheckResult;
 
 use self::facts::collect;
 use self::inputs::{
-    CargoConfigOverrideInput, ConfigClippyInput, CoveredRustUnitInput,
-    PolicyContextFailureInput, UncoveredRustUnitInput,
+    CargoConfigOverrideInput, ConfigClippyInput, CoveredRustUnitInput, PolicyContextFailureInput,
+    UncoveredRustUnitInput,
 };
 
 pub use self::clippy_support::{EXPECTED_METHOD_BANS, EXPECTED_TYPE_BANS};

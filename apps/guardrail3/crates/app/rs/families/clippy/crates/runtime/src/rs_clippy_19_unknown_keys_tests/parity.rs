@@ -8,7 +8,8 @@ use test_support::build_fixture_clippy_toml;
 #[test]
 fn generated_top_level_keys_are_all_known_managed_keys() {
     let parsed =
-        toml::from_str::<toml::Value>(&build_fixture_clippy_toml("service", false, true, "", "")).expect("valid clippy TOML");
+        toml::from_str::<toml::Value>(&build_fixture_clippy_toml("service", false, true, "", ""))
+            .expect("valid clippy TOML");
     let table = parsed.as_table().expect("top-level clippy table");
     let known: BTreeSet<_> = THRESHOLD_VALUES
         .iter()

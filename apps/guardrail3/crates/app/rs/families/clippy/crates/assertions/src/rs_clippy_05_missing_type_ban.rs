@@ -13,8 +13,16 @@ pub fn assert_golden(results: &[CheckResult], file: &str) {
             && result.title == "type ban present"
             && result.file.as_deref() == Some(file)
     }));
-    assert!(results.iter().any(|result| result.message == "`std::collections::HashMap` is banned."));
-    assert!(results.iter().any(|result| result.message == "`std::any::Any` is banned."));
+    assert!(
+        results
+            .iter()
+            .any(|result| result.message == "`std::collections::HashMap` is banned.")
+    );
+    assert!(
+        results
+            .iter()
+            .any(|result| result.message == "`std::any::Any` is banned.")
+    );
 }
 
 pub fn assert_garde_disabled(results: &[CheckResult], file: &str) {
@@ -24,8 +32,16 @@ pub fn assert_garde_disabled(results: &[CheckResult], file: &str) {
             && result.severity == Severity::Info
             && result.file.as_deref() == Some(file)
     }));
-    assert!(!results.iter().any(|result| result.message.contains("axum::extract::Json")));
-    assert!(!results.iter().any(|result| result.message.contains("axum::extract::Form")));
+    assert!(
+        !results
+            .iter()
+            .any(|result| result.message.contains("axum::extract::Json"))
+    );
+    assert!(
+        !results
+            .iter()
+            .any(|result| result.message.contains("axum::extract::Form"))
+    );
 }
 
 pub fn assert_excludes_library_global_state(results: &[CheckResult]) {

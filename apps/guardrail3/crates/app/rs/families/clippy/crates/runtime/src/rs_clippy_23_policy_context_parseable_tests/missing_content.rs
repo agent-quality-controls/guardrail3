@@ -14,7 +14,9 @@ fn errors_when_guardrail_policy_file_content_is_missing_from_project_tree() {
             ("Cargo.toml", "[workspace]\nmembers = []".to_owned()),
             (
                 "clippy.toml",
-                guardrail3_domain_modules::clippy::build_clippy_toml("service", false, true, "", ""),
+                guardrail3_domain_modules::clippy::build_clippy_toml(
+                    "service", false, true, "", "",
+                ),
             ),
         ],
     );

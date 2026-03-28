@@ -5,7 +5,8 @@ use super::super::run_for_tests;
 
 #[test]
 fn inventories_generated_threshold_at_a_local_policy_root_too() {
-    let tree = library_workspace_root_tree(build_fixture_clippy_toml("service", false, true, "", ""));
+    let tree =
+        library_workspace_root_tree(build_fixture_clippy_toml("service", false, true, "", ""));
     let results = run_for_tests(&tree, "apps/libsite/clippy.toml");
     assertions::assert_golden(&results, "apps/libsite/clippy.toml");
 }

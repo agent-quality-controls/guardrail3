@@ -29,7 +29,10 @@ pub fn assert_incomplete_baseline(results: &[CheckResult], file: &str, message: 
     assert_eq!(result.id, ID);
     assert!(!result.inventory);
     assert_eq!(result.severity, Severity::Error);
-    assert_eq!(result.title, "local clippy policy root drops managed baseline");
+    assert_eq!(
+        result.title,
+        "local clippy policy root drops managed baseline"
+    );
     assert_eq!(result.file.as_deref(), Some(file));
     assert_eq!(result.message, message);
 }

@@ -4,7 +4,8 @@ use test_support::build_fixture_clippy_toml;
 #[test]
 fn generated_service_baseline_contains_expected_avoid_breaking_exported_api_value() {
     let parsed =
-        toml::from_str::<toml::Value>(&build_fixture_clippy_toml("service", false, true, "", "")).expect("valid clippy TOML");
+        toml::from_str::<toml::Value>(&build_fixture_clippy_toml("service", false, true, "", ""))
+            .expect("valid clippy TOML");
 
     assert_eq!(
         parsed

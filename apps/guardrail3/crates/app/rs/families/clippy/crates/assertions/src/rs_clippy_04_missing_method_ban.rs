@@ -13,8 +13,16 @@ pub fn assert_golden(results: &[CheckResult], file: &str) {
             && result.title == "method ban present"
             && result.file.as_deref() == Some(file)
     }));
-    assert!(results.iter().any(|result| result.message == "`std::env::var` is banned."));
-    assert!(results.iter().any(|result| result.message == "`std::process::abort` is banned."));
+    assert!(
+        results
+            .iter()
+            .any(|result| result.message == "`std::env::var` is banned.")
+    );
+    assert!(
+        results
+            .iter()
+            .any(|result| result.message == "`std::process::abort` is banned.")
+    );
 }
 
 pub fn assert_garde_disabled(results: &[CheckResult], file: &str) {
@@ -24,8 +32,16 @@ pub fn assert_garde_disabled(results: &[CheckResult], file: &str) {
             && result.severity == Severity::Info
             && result.file.as_deref() == Some(file)
     }));
-    assert!(!results.iter().any(|result| result.message.contains("serde_json::from_str")));
-    assert!(!results.iter().any(|result| result.message.contains("reqwest::Response::json")));
+    assert!(
+        !results
+            .iter()
+            .any(|result| result.message.contains("serde_json::from_str"))
+    );
+    assert!(
+        !results
+            .iter()
+            .any(|result| result.message.contains("reqwest::Response::json"))
+    );
 }
 
 pub fn assert_missing_messages(results: &[CheckResult], expected: &[&str]) {

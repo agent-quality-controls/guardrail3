@@ -24,17 +24,26 @@ fn allows_validation_workspace_and_standalone_package_roots() {
         ],
         vec![
             ("Cargo.toml", "[workspace]\nmembers = []".to_owned()),
-            ("clippy.toml", build_fixture_clippy_toml("service", false, true, "", "")),
+            (
+                "clippy.toml",
+                build_fixture_clippy_toml("service", false, true, "", ""),
+            ),
             (
                 "apps/backend/Cargo.toml",
                 "[workspace]\nmembers = []".to_owned(),
             ),
-            ("apps/backend/clippy.toml", build_fixture_clippy_toml("service", false, true, "", "")),
+            (
+                "apps/backend/clippy.toml",
+                build_fixture_clippy_toml("service", false, true, "", ""),
+            ),
             (
                 "packages/shared-types/Cargo.toml",
                 "[package]\nname = \"shared-types\"\n".to_owned(),
             ),
-            ("packages/shared-types/clippy.toml", build_fixture_clippy_toml("service", false, true, "", "")),
+            (
+                "packages/shared-types/clippy.toml",
+                build_fixture_clippy_toml("service", false, true, "", ""),
+            ),
         ],
     );
 
