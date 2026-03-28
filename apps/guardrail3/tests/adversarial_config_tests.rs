@@ -22,6 +22,7 @@ use quote as _;
 use semver as _;
 use serde as _;
 use serde_yaml as _;
+use std::fs;
 use std::path::PathBuf;
 use std::process::Command;
 use syn as _;
@@ -56,6 +57,10 @@ fn validate_project(fixture_name: &str) -> Vec<Check> {
         "fixture not found: {}",
         fixture_path.display()
     );
+    let temp_fixture = tempfile::tempdir().expect("create temp fixture dir");
+    let temp_fixture_path = temp_fixture.path().join(fixture_name);
+    copy_fixture_tree(&fixture_path, &temp_fixture_path);
+    materialize_hidden_policy_files(&temp_fixture_path);
 
     // Find the binary — workspace target dir is at workspace root (two levels up from crate)
     let workspace_root = manifest_dir
@@ -83,7 +88,7 @@ fn validate_project(fixture_name: &str) -> Vec<Check> {
 
     let output = Command::new(&bin)
         .args(["rs", "validate"])
-        .arg(&fixture_path)
+        .arg(&temp_fixture_path)
         .arg("--format")
         .arg("json")
         .arg("--inventory")
@@ -128,6 +133,42 @@ fn validate_project(fixture_name: &str) -> Vec<Check> {
     }
 
     checks
+}
+
+fn copy_fixture_tree(from: &std::path::Path, to: &std::path::Path) {
+    for entry in walkdir::WalkDir::new(from) {
+        let entry = entry.expect("walk adversarial fixture");
+        let rel = entry
+            .path()
+            .strip_prefix(from)
+            .expect("fixture entry relative path");
+        let dest = to.join(rel);
+        if entry.file_type().is_dir() {
+            fs::create_dir_all(&dest).expect("create fixture directory");
+            continue;
+        }
+
+        if let Some(parent) = dest.parent() {
+            fs::create_dir_all(parent).expect("create fixture parent directory");
+        }
+        fs::copy(entry.path(), &dest).expect("copy fixture file");
+    }
+}
+
+fn materialize_hidden_policy_files(root: &std::path::Path) {
+    for (hidden_name, live_name) in [
+        ("clippy.fixture.toml", "clippy.toml"),
+        (".clippy.fixture.toml", ".clippy.toml"),
+    ] {
+        for entry in walkdir::WalkDir::new(root) {
+            let entry = entry.expect("walk hidden policy files");
+            if !entry.file_type().is_file() || entry.file_name() != hidden_name {
+                continue;
+            }
+            let live_path = entry.path().with_file_name(live_name);
+            fs::rename(entry.path(), live_path).expect("materialize hidden policy file");
+        }
+    }
 }
 
 /// Assert that at least one check with the given ID and severity exists.

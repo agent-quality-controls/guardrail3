@@ -3,7 +3,8 @@ use test_support::build_fixture_clippy_toml;
 #[test]
 fn generated_ban_entries_use_non_placeholder_reasons_across_all_sections() {
     let parsed =
-        toml::from_str::<toml::Value>(&build_fixture_clippy_toml("service", false, true, "", "")).expect("valid clippy TOML");
+        toml::from_str::<toml::Value>(&build_fixture_clippy_toml("service", false, true, "", ""))
+            .expect("valid clippy TOML");
 
     for key in [
         "disallowed-methods",

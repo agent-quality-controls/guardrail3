@@ -64,12 +64,10 @@ The `CLIPPY_CONF_DIR` override stays here even though it lives in Cargo config f
 
 ## Current Shape
 
-At this checkpoint, `clippy` is in the nested family workspace shape and the sidecar migration now uses sibling assertions plus external `test_support`:
+At this checkpoint, `clippy` uses the family-container shape under the app-root workspace and the sidecar migration uses sibling assertions plus external `test_support`:
 
 ```text
 apps/guardrail3/crates/app/rs/families/clippy/
-  Cargo.toml
-  clippy.toml
   crates/
     runtime/
       Cargo.toml
@@ -97,11 +95,11 @@ apps/guardrail3/crates/app/rs/families/clippy/
 
 This means:
 
-- the family is now a real nested workspace
+- the family container is not a nested workspace root
 - the runtime crate builds and the family is green under `RS-ARCH` and `RS-CLIPPY`
 - rule sidecars now prove behavior through sibling assertions modules instead of runtime-local helper plumbing
 - generic fixture setup now lives in the sibling `test_support` crate rather than a private runtime shim
-- fresh top-level `RS-TEST` validation still depends on the outer app workspace being buildable, so when another family temporarily breaks the outer workspace, clippy progress must be verified from its nested workspace first
+- fresh top-level `RS-TEST` validation now depends on the app-root workspace only
 
 ## Target Shape
 
@@ -109,7 +107,6 @@ The target is the same self-hosted family pattern now used by `test`, `arch`, `c
 
 ```text
 apps/guardrail3/crates/app/rs/families/clippy/
-  Cargo.toml
   crates/
     runtime/
       Cargo.toml
@@ -192,11 +189,11 @@ At the current checkpoint:
 - the family unit tests pass
 - the family passes `RS-ARCH`
 - the family passes `RS-CLIPPY`
-- the family root now carries a managed `clippy.toml`, so the earlier `RS-CLIPPY-01` self-hit is gone
+- the repo-owned policy root is [`apps/guardrail3/clippy.toml`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/clippy.toml), and the family root no longer carries a local `clippy.toml`
 - the family now fail-closes on applicable `CLIPPY_CONF_DIR` override surfaces in `.cargo/config.toml` / `.cargo/config`
 - the family no longer has a runtime-local `test_support.rs` shim
 - rule clusters `02..24` now use owner helpers plus sibling assertions modules
-- the remaining self-hosting status under `RS-TEST` needs a fresh top-level validator run after the unrelated outer-workspace break from the in-flight `deny` migration is gone
+- adversarial fixture configs that need a literal `clippy.toml` are now materialized in tempdirs during tests instead of living as active repo policy roots
 
 So the next work on `clippy` is not rule rescue first. It is:
 

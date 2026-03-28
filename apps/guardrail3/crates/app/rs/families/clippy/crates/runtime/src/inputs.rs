@@ -1,6 +1,6 @@
 use super::facts::{
-    CargoConfigOverrideFacts, ClippyConfigFacts, ClippyFacts, CoveredRustUnitFacts,
-    PolicyRootKind, UncoveredRustUnitFacts,
+    CargoConfigOverrideFacts, ClippyConfigFacts, ClippyFacts, CoveredRustUnitFacts, PolicyRootKind,
+    UncoveredRustUnitFacts,
 };
 
 pub struct ConfigClippyInput<'a> {

@@ -58,7 +58,9 @@ fn validation_root_clippy_is_collected_without_root_cargo() {
         vec![
             (
                 "clippy.toml",
-                guardrail3_domain_modules::clippy::build_clippy_toml("service", false, true, "", ""),
+                guardrail3_domain_modules::clippy::build_clippy_toml(
+                    "service", false, true, "", "",
+                ),
             ),
             (
                 "apps/backend/Cargo.toml",
@@ -74,7 +76,10 @@ fn validation_root_clippy_is_collected_without_root_cargo() {
     let facts = collect_for_tests(&tree);
 
     assert!(
-        facts.allowed_configs.iter().any(|config| config.rel_path == "clippy.toml"),
+        facts
+            .allowed_configs
+            .iter()
+            .any(|config| config.rel_path == "clippy.toml"),
         "expected validation-root clippy.toml to be collected even when the validation root is not a Rust root: {facts:#?}"
     );
 }
@@ -130,7 +135,9 @@ fn malformed_guardrail_policy_is_recorded_as_policy_context_error() {
             ("guardrail3.toml", "[".to_owned()),
             (
                 "clippy.toml",
-                guardrail3_domain_modules::clippy::build_clippy_toml("service", false, true, "", ""),
+                guardrail3_domain_modules::clippy::build_clippy_toml(
+                    "service", false, true, "", "",
+                ),
             ),
         ],
     );

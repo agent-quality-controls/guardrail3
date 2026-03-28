@@ -6,7 +6,8 @@ use test_support::build_fixture_clippy_toml;
 #[test]
 fn generated_service_method_ban_set_matches_rule_baseline() {
     let parsed =
-        toml::from_str::<toml::Value>(&build_fixture_clippy_toml("service", false, true, "", "")).expect("valid clippy TOML");
+        toml::from_str::<toml::Value>(&build_fixture_clippy_toml("service", false, true, "", ""))
+            .expect("valid clippy TOML");
     let actual = parsed
         .get("disallowed-methods")
         .and_then(toml::Value::as_array)
@@ -15,7 +16,10 @@ fn generated_service_method_ban_set_matches_rule_baseline() {
         .filter_map(|entry| entry.get("path").and_then(toml::Value::as_str))
         .map(str::to_owned)
         .collect::<BTreeSet<_>>();
-    let expected = SERVICE_METHOD_PATHS.iter().map(|path| (*path).to_owned()).collect::<BTreeSet<_>>();
+    let expected = SERVICE_METHOD_PATHS
+        .iter()
+        .map(|path| (*path).to_owned())
+        .collect::<BTreeSet<_>>();
 
     assert_eq!(actual, expected);
 }

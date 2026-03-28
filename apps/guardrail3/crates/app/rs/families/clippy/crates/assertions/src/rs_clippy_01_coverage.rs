@@ -53,9 +53,9 @@ pub fn assert_excludes_non_rust_roots(results: &[CheckResult]) {
         .collect::<Vec<_>>();
 
     assert!(
-        coverage_messages
-            .iter()
-            .all(|message| !message.contains("apps/landing") && !message.contains("packages/ui-kit")),
+        coverage_messages.iter().all(
+            |message| !message.contains("apps/landing") && !message.contains("packages/ui-kit")
+        ),
         "expected non-Rust roots to stay out of clippy coverage results: {coverage_messages:#?}"
     );
 }
@@ -95,6 +95,9 @@ pub fn assert_selective_uncovered(
             .iter()
             .filter_map(|result| result.file.as_deref())
             .collect::<BTreeSet<_>>(),
-        expected_error_files.iter().copied().collect::<BTreeSet<_>>(),
+        expected_error_files
+            .iter()
+            .copied()
+            .collect::<BTreeSet<_>>(),
     );
 }

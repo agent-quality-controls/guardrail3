@@ -1,5 +1,5 @@
-use guardrail3_domain_modules::clippy::build_clippy_toml;
 use guardrail3_app_rs_family_clippy_assertions::rs_clippy_14_library_global_state as assertions;
+use guardrail3_domain_modules::clippy::build_clippy_toml;
 use test_support::{
     build_fixture_clippy_toml, published_library_package_root_tree, root_workspace_tree,
 };

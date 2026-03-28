@@ -1,5 +1,5 @@
-use guardrail3_domain_modules::clippy::build_clippy_toml;
 use guardrail3_app_rs_family_clippy_assertions::rs_clippy_13_local_policy_root_baseline as assertions;
+use guardrail3_domain_modules::clippy::build_clippy_toml;
 use test_support::library_workspace_root_tree;
 
 use super::super::run_for_tests;

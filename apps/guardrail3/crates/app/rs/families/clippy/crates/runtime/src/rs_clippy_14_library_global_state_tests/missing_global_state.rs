@@ -5,7 +5,8 @@ use super::super::run_for_tests;
 
 #[test]
 fn errors_for_every_missing_library_global_state_type_ban() {
-    let tree = library_workspace_root_tree(build_fixture_clippy_toml("service", false, true, "", ""));
+    let tree =
+        library_workspace_root_tree(build_fixture_clippy_toml("service", false, true, "", ""));
     let results = run_for_tests(&tree, "apps/libsite/clippy.toml");
     assertions::assert_missing_messages(
         &results,

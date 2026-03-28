@@ -5,7 +5,8 @@ use test_support::build_fixture_clippy_toml;
 #[test]
 fn generated_ban_baseline_has_no_duplicate_paths_in_any_section() {
     let parsed =
-        toml::from_str::<toml::Value>(&build_fixture_clippy_toml("service", false, true, "", "")).expect("valid clippy TOML");
+        toml::from_str::<toml::Value>(&build_fixture_clippy_toml("service", false, true, "", ""))
+            .expect("valid clippy TOML");
 
     for key in [
         "disallowed-methods",

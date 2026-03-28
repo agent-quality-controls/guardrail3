@@ -33,6 +33,11 @@ fn paths(toml_text: &str, key: &str) -> BTreeSet<String> {
         .and_then(|parsed| parsed.get(key).and_then(toml::Value::as_array).cloned())
         .unwrap_or_default()
         .into_iter()
-        .filter_map(|entry| entry.get("path").and_then(toml::Value::as_str).map(str::to_owned))
+        .filter_map(|entry| {
+            entry
+                .get("path")
+                .and_then(toml::Value::as_str)
+                .map(str::to_owned)
+        })
         .collect()
 }
