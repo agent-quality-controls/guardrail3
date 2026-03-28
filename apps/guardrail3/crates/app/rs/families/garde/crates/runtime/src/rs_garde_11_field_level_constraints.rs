@@ -6,7 +6,9 @@ const ID: &str = "RS-GARDE-11";
 
 pub fn check(input: &BoundaryFieldInput<'_>, results: &mut Vec<CheckResult>) {
     if !input.field.requires_field_validation
+        || input.field.has_garde_skip
         || input.field.nested_validated
+        || input.field.has_garde_dive
         || input.field.has_meaningful_garde_rule
     {
         return;

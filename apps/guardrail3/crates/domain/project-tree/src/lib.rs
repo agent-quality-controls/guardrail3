@@ -14,37 +14,45 @@ use std::collections::BTreeMap;
 use std::path::PathBuf;
 
 use glob::Pattern;
+use garde::Validate;
 use serde::{Deserialize, Serialize};
 
 /// The full project tree.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Validate)]
 pub struct ProjectTree {
     /// Absolute path to the project root.
+    #[garde(skip)] // reason: walker-owned absolute path, not user-provided boundary data
     pub root: PathBuf,
 
     /// Directory structure: every dir visited -> its immediate children.
     /// Keys are relative paths from root. `""` = the root directory itself.
     /// Sorted by path (BTreeMap).
+    #[garde(skip)] // reason: walker-owned structural map, validated by project walker construction
     pub structure: BTreeMap<String, DirEntry>,
 
     /// Cached config file contents, keyed by relative path from root.
     /// Contains every config file we check — NOT source code (.rs/.ts/.tsx).
     /// Sorted by path (BTreeMap).
+    #[garde(skip)] // reason: walker-owned config cache, not direct external boundary input
     pub content: BTreeMap<String, String>,
 }
 
 /// A single directory's immediate children.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Validate)]
 pub struct DirEntry {
     /// Child directory names (just the name, not the full path).
+    #[garde(skip)] // reason: walker-owned structure listing, not direct boundary validation data
     pub dirs: Vec<String>,
     /// Child file names (just the name, not the full path).
+    #[garde(skip)] // reason: walker-owned structure listing, not direct boundary validation data
     pub files: Vec<String>,
     /// Child directory names that are symlinks.
     #[serde(default)]
+    #[garde(skip)] // reason: walker-owned structure listing, not direct boundary validation data
     pub symlink_dirs: Vec<String>,
     /// Child file names that are symlinks or unusable symlink-like entries.
     #[serde(default)]
+    #[garde(skip)] // reason: walker-owned structure listing, not direct boundary validation data
     pub symlink_files: Vec<String>,
 }
 

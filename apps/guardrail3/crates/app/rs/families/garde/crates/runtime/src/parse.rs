@@ -42,6 +42,7 @@ pub struct BoundaryField {
     pub boundary_has_validate_derive: bool,
     pub boundary_has_context: bool,
     pub requires_field_validation: bool,
+    pub has_garde_skip: bool,
     pub has_garde_dive: bool,
     pub has_meaningful_garde_rule: bool,
     pub uses_context: bool,
@@ -285,6 +286,7 @@ fn derive_macros(attrs: &[syn::Attribute]) -> Vec<String> {
 
 #[derive(Default)]
 struct GardeAttrSummary {
+    has_skip: bool,
     has_dive: bool,
     has_meaningful_rule: bool,
     uses_context: bool,
@@ -312,6 +314,9 @@ fn summarize_garde_attrs(attrs: &[syn::Attribute]) -> GardeAttrSummary {
         let _ = attr.parse_nested_meta(|meta| {
             if meta.path.is_ident("dive") {
                 summary.has_dive = true;
+            } else if meta.path.is_ident("skip") {
+                summary.has_skip = true;
+                summary.has_meaningful_rule = true;
             } else if !meta.path.is_ident("skip") && !meta.path.is_ident("context") {
                 summary.has_meaningful_rule = true;
             }
@@ -432,6 +437,7 @@ fn boundary_field(
         boundary_has_validate_derive,
         boundary_has_context,
         requires_field_validation: type_requires_field_validation(&field.ty),
+        has_garde_skip: summary.has_skip,
         has_garde_dive: summary.has_dive,
         has_meaningful_garde_rule: summary.has_meaningful_rule,
         uses_context: summary.uses_context,
