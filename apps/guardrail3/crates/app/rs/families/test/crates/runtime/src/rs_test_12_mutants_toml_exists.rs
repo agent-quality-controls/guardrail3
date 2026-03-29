@@ -5,7 +5,20 @@ use super::inputs::RootTestInput;
 const ID: &str = "RS-TEST-12";
 
 pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
-    if !input.root.mutants_exists {
+    if input.root.mutants_exists {
+        results.push(
+            CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Info,
+                title: "mutants config exists".to_owned(),
+                message: format!("Found `{}`.", input.root.mutants_rel_path),
+                file: Some(input.root.mutants_rel_path.clone()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
+    } else {
         results.push(CheckResult {
             id: ID.to_owned(),
             severity: Severity::Warn,

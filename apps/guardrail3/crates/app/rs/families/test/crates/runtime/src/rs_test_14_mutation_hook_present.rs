@@ -16,6 +16,23 @@ pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
             line: None,
             inventory: false,
         });
+    } else {
+        for rel_path in input.mutation_hook_files {
+            results.push(
+                CheckResult {
+                    id: ID.to_owned(),
+                    severity: Severity::Info,
+                    title: "mutation hook step present".to_owned(),
+                    message: format!(
+                        "`{rel_path}` contains an executable mutation-testing command."
+                    ),
+                    file: Some(rel_path.clone()),
+                    line: None,
+                    inventory: false,
+                }
+                .as_inventory(),
+            );
+        }
     }
 }
 
