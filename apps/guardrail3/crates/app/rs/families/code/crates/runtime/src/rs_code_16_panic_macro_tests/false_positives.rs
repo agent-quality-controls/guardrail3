@@ -15,27 +15,12 @@ fn skips_panic_macro_only_in_test_paths_and_not_for_other_macro_text() {
     );
     write_file(
         root,
-        "apps/backend/crates/app/queries/test/panic_macro_test.rs",
-        "fn probe() { panic!(\"boom\"); }\n",
-    );
-    write_file(
-        root,
-        "apps/backend/crates/app/queries/__tests__/panic_macro.rs",
-        "fn probe() { panic!(\"boom\"); }\n",
-    );
-    write_file(
-        root,
         "apps/backend/crates/app/queries/src/panic_macro_test.rs",
         "fn probe() { panic!(\"boom\"); }\n",
     );
     write_file(
         root,
         "apps/backend/crates/app/queries/src/panic_macro_tests.rs",
-        "fn probe() { panic!(\"boom\"); }\n",
-    );
-    write_file(
-        root,
-        "apps/backend/crates/app/queries/src/tests.rs",
         "fn probe() { panic!(\"boom\"); }\n",
     );
     write_file(

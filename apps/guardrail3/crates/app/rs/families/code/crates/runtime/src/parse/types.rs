@@ -16,6 +16,7 @@ pub enum LargeTypeItem {
 pub struct ImplAllowInfo {
     pub line: usize,
     pub lint: String,
+    pub kind: LintPolicyKind,
     pub method_count: usize,
 }
 
@@ -25,6 +26,7 @@ pub struct DenyForbidInfo {
     pub lint: String,
     pub level: String,
     pub crate_level_inner: bool,
+    pub cfg_truth: CfgPredicateTruth,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -40,6 +42,7 @@ pub struct PathAttrInfo {
     pub line: usize,
     pub path: String,
     pub via_cfg_attr: bool,
+    pub cfg_truth: CfgPredicateTruth,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -73,6 +76,7 @@ pub struct TraitMethodCountInfo {
 pub struct ForeignModAllowInfo {
     pub line: usize,
     pub lint: String,
+    pub kind: LintPolicyKind,
     pub via_cfg_attr: bool,
 }
 
@@ -80,4 +84,48 @@ pub struct ForeignModAllowInfo {
 pub struct TestExpectCallInfo {
     pub line: usize,
     pub message: Option<String>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum LintPolicyKind {
+    Allow,
+    Expect,
+}
+
+impl LintPolicyKind {
+    pub fn attr_name(self) -> &'static str {
+        match self {
+            Self::Allow => "allow",
+            Self::Expect => "expect",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum CfgPredicateTruth {
+    KnownTrue,
+    KnownFalse,
+    Unknown,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct LintPolicyInfo {
+    pub line: usize,
+    pub lint: String,
+    pub kind: LintPolicyKind,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CfgAttrLintInfo {
+    pub line: usize,
+    pub lint: String,
+    pub kind: LintPolicyKind,
+    pub truth: CfgPredicateTruth,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ForbiddenMacroInfo {
+    pub line: usize,
+    pub macro_name: String,
+    pub in_test_context: bool,
 }

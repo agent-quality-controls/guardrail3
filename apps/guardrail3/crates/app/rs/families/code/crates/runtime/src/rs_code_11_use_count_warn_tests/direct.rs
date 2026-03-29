@@ -4,7 +4,7 @@ use guardrail3_app_rs_family_code_assertions::rs_code_11_use_count_warn::{
 };
 
 #[test]
-fn warns_between_sixteen_and_twenty_top_level_uses() {
+fn warns_between_sixteen_and_twenty_top_level_use_imports() {
     let mut lines: Vec<String> = (0..16)
         .map(|index| format!("use crate::mod_{index};"))
         .collect();
@@ -14,8 +14,24 @@ fn warns_between_sixteen_and_twenty_top_level_uses() {
         &check_source("src/foo.rs", &content, false),
         &[RuleFinding {
             severity: Severity::Warn,
-            title: "many use statements",
-            message: "16 top-level use statements (warn at 16, max 20).",
+            title: "many use imports",
+            message: "16 top-level use imports (warn at 16, max 20).",
+            file: Some("src/foo.rs"),
+            line: None,
+            inventory: false,
+        }],
+    );
+}
+
+#[test]
+fn warns_grouped_imports_by_leaf_count() {
+    let content = "use crate::{a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p};\nfn main() {}\n";
+    assert_findings(
+        &check_source("src/foo.rs", content, false),
+        &[RuleFinding {
+            severity: Severity::Warn,
+            title: "many use imports",
+            message: "16 top-level use imports (warn at 16, max 20).",
             file: Some("src/foo.rs"),
             line: None,
             inventory: false,

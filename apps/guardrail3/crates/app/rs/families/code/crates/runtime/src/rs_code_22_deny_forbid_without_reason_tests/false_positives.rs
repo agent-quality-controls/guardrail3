@@ -27,11 +27,31 @@ fn skips_same_line_reason_documented_attrs() {
 }
 
 #[test]
-fn skips_reason_variants_on_same_line() {
+fn rejects_noncanonical_reason_variants_on_same_line() {
     let content = "#![deny(clippy::panic, clippy::expect_used)] // reason: root policy is documented\n#[deny(clippy::panic)] // REASON: keep this API panic free\nfn one() {}\n#[forbid(clippy::expect_used)] //reason: worker retries handle fallibility\nfn two() {}\n";
     let results = check_source("src/lib.rs", content, false);
 
-    assert_no_hits(&results);
+    assert_findings(
+        &results,
+        &[
+            RuleFinding {
+                severity: guardrail3_domain_report::Severity::Error,
+                title: "#[deny]/#[forbid] without reason",
+                message: "`#[deny(clippy::panic)]` changes local lint policy without documenting why. Add `// reason:` on the same line.",
+                file: Some("src/lib.rs"),
+                line: Some(2),
+                inventory: false,
+            },
+            RuleFinding {
+                severity: guardrail3_domain_report::Severity::Error,
+                title: "#[deny]/#[forbid] without reason",
+                message: "`#[forbid(clippy::expect_used)]` changes local lint policy without documenting why. Add `// reason:` on the same line.",
+                file: Some("src/lib.rs"),
+                line: Some(4),
+                inventory: false,
+            },
+        ],
+    );
 }
 
 #[test]

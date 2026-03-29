@@ -55,42 +55,42 @@ fn skips_undocumented_and_malformed_reason_near_misses() {
 }
 
 #[test]
-fn inventories_accepted_reason_variants_and_other_item_kinds() {
+fn inventories_exact_reason_syntax_and_other_item_kinds() {
     let fixture = copy_fixture();
     let root = fixture.path();
 
-    let upper_rel = "apps/backend/crates/ports/outbound/repo/src/lib.rs";
-    let tight_rel = "apps/worker/crates/adapters/outbound/sqs/src/lib.rs";
+    let function_rel = "apps/backend/crates/ports/outbound/repo/src/lib.rs";
+    let adapter_rel = "apps/worker/crates/adapters/outbound/sqs/src/lib.rs";
     let mod_rel = "apps/devctl/crates/app/core/src/lib.rs";
 
-    let upper_content = test_support::read_file(root, upper_rel);
-    let tight_content = test_support::read_file(root, tight_rel);
+    let function_content = test_support::read_file(root, function_rel);
+    let adapter_content = test_support::read_file(root, adapter_rel);
     let mod_content = test_support::read_file(root, mod_rel);
 
-    let upper_new = format!(
-        "{upper_content}\n#[allow(clippy::unwrap_used)] // REASON: uppercase accepted\npub fn uppercase_reason_probe() {{}}\n"
+    let function_new = format!(
+        "{function_content}\n#[allow(clippy::unwrap_used)] // reason: exact syntax accepted\npub fn exact_reason_probe() {{}}\n"
     );
-    let tight_new = format!(
-        "{tight_content}\n#[allow(clippy::panic)] //reason: tight spacing accepted\npub fn tight_reason_probe() {{}}\n"
+    let adapter_new = format!(
+        "{adapter_content}\n#[allow(clippy::panic)] // reason: adapter boundary shim\npub fn adapter_reason_probe() {{}}\n"
     );
     let mod_new = format!(
         "{mod_content}\n#[allow(clippy::expect_used)] // reason: module boundary shim\npub mod documented_module_probe {{\n    pub fn helper() {{}}\n}}\n"
     );
 
-    write_file(root, upper_rel, &upper_new);
-    write_file(root, tight_rel, &tight_new);
+    write_file(root, function_rel, &function_new);
+    write_file(root, adapter_rel, &adapter_new);
     write_file(root, mod_rel, &mod_new);
 
-    let upper_line = upper_new
+    let function_line = function_new
         .lines()
         .position(|line| {
-            line.contains("#[allow(clippy::unwrap_used)] // REASON: uppercase accepted")
+            line.contains("#[allow(clippy::unwrap_used)] // reason: exact syntax accepted")
         })
         .map(|index| index + 1)
         .unwrap_or_default();
-    let tight_line = tight_new
+    let adapter_line = adapter_new
         .lines()
-        .position(|line| line.contains("#[allow(clippy::panic)] //reason: tight spacing accepted"))
+        .position(|line| line.contains("#[allow(clippy::panic)] // reason: adapter boundary shim"))
         .map(|index| index + 1)
         .unwrap_or_default();
     let mod_line = mod_new
@@ -107,9 +107,9 @@ fn inventories_accepted_reason_variants_and_other_item_kinds() {
             RuleFinding {
                 severity: Severity::Info,
                 title: "item-level allow with reason",
-                message: "#[allow(clippy::unwrap_used)] reason: uppercase accepted",
-                file: Some(upper_rel),
-                line: Some(upper_line),
+                message: "#[allow(clippy::unwrap_used)] reason: exact syntax accepted",
+                file: Some(function_rel),
+                line: Some(function_line),
                 inventory: true,
             },
             RuleFinding {
@@ -123,9 +123,9 @@ fn inventories_accepted_reason_variants_and_other_item_kinds() {
             RuleFinding {
                 severity: Severity::Info,
                 title: "item-level allow with reason",
-                message: "#[allow(clippy::panic)] reason: tight spacing accepted",
-                file: Some(tight_rel),
-                line: Some(tight_line),
+                message: "#[allow(clippy::panic)] reason: adapter boundary shim",
+                file: Some(adapter_rel),
+                line: Some(adapter_line),
                 inventory: true,
             },
         ],

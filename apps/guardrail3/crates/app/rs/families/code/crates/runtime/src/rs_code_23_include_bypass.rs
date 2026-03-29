@@ -8,7 +8,19 @@ const ID: &str = "RS-CODE-23";
 pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
     for info in find_include_macros(input.ast) {
         match info.macro_name.as_str() {
-            "include" if info.build_script_pattern => results.push(
+            "include" if info.build_script_pattern && info.path_traversal => {
+                results.push(CheckResult {
+                    id: ID.to_owned(),
+                    severity: Severity::Warn,
+                    title: "include path traversal".to_owned(),
+                    message: "`include!()` build-script pattern appends a path containing `..`."
+                        .to_owned(),
+                    file: Some(input.rel_path.to_owned()),
+                    line: Some(info.line),
+                    inventory: false,
+                });
+            }
+            "include" if info.build_script_pattern && !info.path_traversal => results.push(
                 CheckResult {
                     id: ID.to_owned(),
                     severity: Severity::Info,
@@ -54,14 +66,14 @@ pub(crate) fn copy_fixture() -> test_support::TempDir {
 }
 
 #[cfg(test)]
-pub(crate) fn check_source(rel_path: &str, content: &str, is_test: bool) -> Vec<CheckResult> {
+pub(crate) fn check_source(rel_path: &str, content: &str, is_test_root: bool) -> Vec<CheckResult> {
     let ast = super::parse::parse_rust_file(content)
         .unwrap_or_else(|error| std::panic::panic_any(format!("valid rust: {error}")));
     let input = super::inputs::RustCodeFileInput {
         rel_path,
         content,
         ast: &ast,
-        is_test,
+        is_test_root,
         profile_name: None,
     };
     let mut results = Vec::new();

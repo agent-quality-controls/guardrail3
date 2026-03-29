@@ -4,12 +4,12 @@ use guardrail3_app_rs_family_mapper::RsCodeRoute;
 use guardrail3_domain_config::types::GuardrailConfig;
 use guardrail3_domain_project_tree::ProjectTree;
 
-use super::discover::{is_test_path, rust_file_rels};
+use super::discover::{is_test_root_path, rust_file_rels};
 
 #[derive(Debug, Clone)]
 pub struct RustCodeFileFacts {
     pub rel_path: String,
-    pub is_test: bool,
+    pub is_test_root: bool,
     pub profile_name: Option<String>,
 }
 
@@ -39,7 +39,7 @@ pub fn collect(tree: &ProjectTree, route: &RsCodeRoute) -> CodeFacts {
         .filter(|rel_path| owning_root_dir(rel_path, &root_dirs).is_some())
         .map(|rel_path| RustCodeFileFacts {
             profile_name: policy_settings_for(file_parent_rel(&rel_path), &policy_map).profile_name,
-            is_test: is_test_path(&rel_path),
+            is_test_root: is_test_root_path(&rel_path),
             rel_path,
         })
         .collect();

@@ -1,21 +1,31 @@
-use super::helpers::{path_to_string, path_to_string_from_use_tree, span_line};
+use super::helpers::{attrs_enter_test_context, path_to_string, path_to_string_from_use_tree, span_line};
 use super::types::{
-    FacadeBodyItemInfo, LargeTypeItem as LargeTypeFact, TestExpectCallInfo, TraitMethodCountInfo,
+    FacadeBodyItemInfo, ForbiddenMacroInfo, LargeTypeItem as LargeTypeFact, TestExpectCallInfo,
+    TraitMethodCountInfo,
 };
 use syn::parse::Parser;
 use syn::spanned::Spanned;
 use syn::visit::Visit;
 
-pub fn find_forbidden_macros(ast: &syn::File) -> Vec<(usize, String)> {
-    let mut visitor = ForbiddenMacroVisitor { out: Vec::new() };
+pub fn find_forbidden_macros(
+    ast: &syn::File,
+    file_is_test_root: bool,
+) -> Vec<ForbiddenMacroInfo> {
+    let mut visitor = ForbiddenMacroVisitor {
+        out: Vec::new(),
+        in_test_context: file_is_test_root,
+    };
     visitor.visit_file(ast);
     visitor.out
 }
 
-pub fn find_test_expect_calls(ast: &syn::File, file_is_test: bool) -> Vec<TestExpectCallInfo> {
+pub fn find_test_expect_calls(
+    ast: &syn::File,
+    file_is_test_root: bool,
+) -> Vec<TestExpectCallInfo> {
     let mut visitor = TestExpectVisitor {
         out: Vec::new(),
-        in_test_context: file_is_test,
+        in_test_context: file_is_test_root,
     };
     visitor.visit_file(ast);
     visitor.out
@@ -123,7 +133,8 @@ pub fn find_large_traits(ast: &syn::File) -> Vec<TraitMethodCountInfo> {
 }
 
 struct ForbiddenMacroVisitor {
-    out: Vec<(usize, String)>,
+    out: Vec<ForbiddenMacroInfo>,
+    in_test_context: bool,
 }
 
 struct TestExpectVisitor {
@@ -139,28 +150,78 @@ struct LargeTraitVisitor {
     out: Vec<TraitMethodCountInfo>,
 }
 
+trait TestContextAware {
+    fn in_test_context_mut(&mut self) -> &mut bool;
+
+    fn save_and_apply_test_context(&mut self, attrs: &[syn::Attribute]) -> bool {
+        let was = *self.in_test_context_mut();
+        *self.in_test_context_mut() |= attrs_enter_test_context(attrs);
+        was
+    }
+
+    fn restore_test_context(&mut self, was: bool) {
+        *self.in_test_context_mut() = was;
+    }
+}
+
+impl TestContextAware for ForbiddenMacroVisitor {
+    fn in_test_context_mut(&mut self) -> &mut bool {
+        &mut self.in_test_context
+    }
+}
+
+impl TestContextAware for TestExpectVisitor {
+    fn in_test_context_mut(&mut self) -> &mut bool {
+        &mut self.in_test_context
+    }
+}
+
 impl<'ast> Visit<'ast> for ForbiddenMacroVisitor {
+    fn visit_item_fn(&mut self, item_fn: &'ast syn::ItemFn) {
+        let was = self.save_and_apply_test_context(&item_fn.attrs);
+        syn::visit::visit_item_fn(self, item_fn);
+        self.restore_test_context(was);
+    }
+
+    fn visit_impl_item_fn(&mut self, item_fn: &'ast syn::ImplItemFn) {
+        let was = self.save_and_apply_test_context(&item_fn.attrs);
+        syn::visit::visit_impl_item_fn(self, item_fn);
+        self.restore_test_context(was);
+    }
+
+    fn visit_trait_item_fn(&mut self, item_fn: &'ast syn::TraitItemFn) {
+        let was = self.save_and_apply_test_context(&item_fn.attrs);
+        syn::visit::visit_trait_item_fn(self, item_fn);
+        self.restore_test_context(was);
+    }
+
+    fn visit_item_mod(&mut self, item_mod: &'ast syn::ItemMod) {
+        let was = self.save_and_apply_test_context(&item_mod.attrs);
+        syn::visit::visit_item_mod(self, item_mod);
+        self.restore_test_context(was);
+    }
+
+    fn visit_local(&mut self, local: &'ast syn::Local) {
+        let was = self.save_and_apply_test_context(&local.attrs);
+        syn::visit::visit_local(self, local);
+        self.restore_test_context(was);
+    }
+
     fn visit_macro(&mut self, macro_call: &'ast syn::Macro) {
         let name = path_to_string(&macro_call.path);
         let base = name.rsplit("::").next().unwrap_or(&name);
         if matches!(base, "todo" | "unimplemented" | "unreachable" | "panic") {
-            self.out.push((span_line(macro_call.path.span()), name));
+            self.out.push(ForbiddenMacroInfo {
+                line: span_line(macro_call.path.span()),
+                macro_name: name,
+                in_test_context: self.in_test_context,
+            });
         }
         syn::visit::visit_macro(self, macro_call);
     }
 }
 
 impl TestExpectVisitor {
-    fn save_and_apply(&mut self, attrs: &[syn::Attribute]) -> bool {
-        let was = self.in_test_context;
-        self.in_test_context |= attrs.iter().any(super::helpers::is_cfg_test_attr);
-        was
-    }
-
-    fn restore(&mut self, was: bool) {
-        self.in_test_context = was;
-    }
-
     fn push_expect_call(
         &mut self,
         line: usize,
@@ -201,33 +262,33 @@ fn extract_expect_message(expr: &syn::Expr) -> Option<String> {
 
 impl<'ast> Visit<'ast> for TestExpectVisitor {
     fn visit_item_fn(&mut self, item_fn: &'ast syn::ItemFn) {
-        let was = self.save_and_apply(&item_fn.attrs);
+        let was = self.save_and_apply_test_context(&item_fn.attrs);
         syn::visit::visit_item_fn(self, item_fn);
-        self.restore(was);
+        self.restore_test_context(was);
     }
 
     fn visit_impl_item_fn(&mut self, item_fn: &'ast syn::ImplItemFn) {
-        let was = self.save_and_apply(&item_fn.attrs);
+        let was = self.save_and_apply_test_context(&item_fn.attrs);
         syn::visit::visit_impl_item_fn(self, item_fn);
-        self.restore(was);
+        self.restore_test_context(was);
     }
 
     fn visit_trait_item_fn(&mut self, item_fn: &'ast syn::TraitItemFn) {
-        let was = self.save_and_apply(&item_fn.attrs);
+        let was = self.save_and_apply_test_context(&item_fn.attrs);
         syn::visit::visit_trait_item_fn(self, item_fn);
-        self.restore(was);
+        self.restore_test_context(was);
     }
 
     fn visit_item_mod(&mut self, item_mod: &'ast syn::ItemMod) {
-        let was = self.save_and_apply(&item_mod.attrs);
+        let was = self.save_and_apply_test_context(&item_mod.attrs);
         syn::visit::visit_item_mod(self, item_mod);
-        self.restore(was);
+        self.restore_test_context(was);
     }
 
     fn visit_local(&mut self, local: &'ast syn::Local) {
-        let was = self.save_and_apply(&local.attrs);
+        let was = self.save_and_apply_test_context(&local.attrs);
         syn::visit::visit_local(self, local);
-        self.restore(was);
+        self.restore_test_context(was);
     }
 
     fn visit_expr_method_call(&mut self, method_call: &'ast syn::ExprMethodCall) {

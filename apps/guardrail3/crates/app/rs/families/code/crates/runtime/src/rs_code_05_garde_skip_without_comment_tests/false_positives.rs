@@ -4,14 +4,17 @@ use guardrail3_app_rs_family_code_assertions::rs_code_05_garde_skip_without_comm
 use test_support::write_file;
 
 #[test]
-fn skips_documented_primitive_unvalidatable_and_cross_rule_garde_skip_surfaces() {
+fn skips_documented_explicitly_exempt_and_cross_rule_garde_skip_surfaces() {
     let fixture = copy_fixture();
     let root = fixture.path();
 
     let documented_field_rel = "apps/backend/crates/ports/inbound/api/src/lib.rs";
     let plain_comment_rel = "apps/worker/crates/ports/outbound/queue/src/lib.rs";
     let primitive_rel = "apps/devctl/crates/ports/outbound/traits/src/lib.rs";
-    let unvalidatable_rel = "apps/backend/crates/adapters/outbound/queue/src/lib.rs";
+    let exempt_rel = "apps/backend/crates/adapters/outbound/queue/src/lib.rs";
+    let option_map_rel = "apps/worker/crates/adapters/outbound/sqs/src/lib.rs";
+    let reference_rel = "apps/worker/crates/adapters/outbound/slack/src/lib.rs";
+    let trait_object_rel = "apps/backend/crates/app/commands/src/lib.rs";
     let subcommand_rel = "apps/backend/crates/ports/outbound/repo/src/lib.rs";
     let documented_type_rel = "apps/backend/crates/ports/outbound/events/src/lib.rs";
     let primitive_type_rel = "apps/devctl/crates/app/core/src/lib.rs";
@@ -19,7 +22,10 @@ fn skips_documented_primitive_unvalidatable_and_cross_rule_garde_skip_surfaces()
     let documented_field_content = test_support::read_file(root, documented_field_rel);
     let plain_comment_content = test_support::read_file(root, plain_comment_rel);
     let primitive_content = test_support::read_file(root, primitive_rel);
-    let unvalidatable_content = test_support::read_file(root, unvalidatable_rel);
+    let exempt_content = test_support::read_file(root, exempt_rel);
+    let option_map_content = test_support::read_file(root, option_map_rel);
+    let reference_content = test_support::read_file(root, reference_rel);
+    let trait_object_content = test_support::read_file(root, trait_object_rel);
     let subcommand_content = test_support::read_file(root, subcommand_rel);
     let documented_type_content = test_support::read_file(root, documented_type_rel);
     let primitive_type_content = test_support::read_file(root, primitive_type_rel);
@@ -44,9 +50,30 @@ fn skips_documented_primitive_unvalidatable_and_cross_rule_garde_skip_surfaces()
     );
     write_file(
         root,
-        unvalidatable_rel,
+        exempt_rel,
         &format!(
-            "{unvalidatable_content}\nstruct UnvalidatableSkipProbe {{\n    #[garde(skip)]\n    tags: std::collections::HashMap<String, String>,\n}}\n"
+            "{exempt_content}\nstruct ExplicitMapSkipProbe {{\n    #[garde(skip)]\n    tags: std::collections::HashMap<String, String>,\n}}\n"
+        ),
+    );
+    write_file(
+        root,
+        option_map_rel,
+        &format!(
+            "{option_map_content}\nstruct OptionMapSkipProbe {{\n    #[garde(skip)]\n    tags: Option<std::collections::HashMap<String, String>>,\n}}\n"
+        ),
+    );
+    write_file(
+        root,
+        reference_rel,
+        &format!(
+            "{reference_content}\nstruct ReferenceSkipProbe {{\n    #[garde(skip)]\n    label: &'static str,\n}}\n"
+        ),
+    );
+    write_file(
+        root,
+        trait_object_rel,
+        &format!(
+            "{trait_object_content}\ntrait Handler {{}}\nstruct TraitObjectSkipProbe {{\n    #[garde(skip)]\n    handler: Box<dyn Handler>,\n}}\n"
         ),
     );
     write_file(

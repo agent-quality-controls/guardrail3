@@ -7,7 +7,7 @@ const ID: &str = "RS-CODE-05";
 
 pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
     for info in find_garde_skips_with_types(input.ast) {
-        if info.is_primitive {
+        if info.is_exempt {
             continue;
         }
         let has_comment = same_line_has_comment(input.content, info.line);
@@ -19,7 +19,7 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
             severity: Severity::Error,
             title: "garde(skip) without comment".to_owned(),
             message: format!(
-                "`#[garde(skip)]` on non-primitive {} requires documentation.",
+                "`#[garde(skip)]` on non-exempt {} requires documentation.",
                 target_label(&info)
             ),
             file: Some(input.rel_path.to_owned()),

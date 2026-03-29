@@ -11,18 +11,8 @@ fn skips_test_files_and_src_fs_rs_exemption() {
 
     write_file(
         root,
-        "apps/backend/crates/app/commands/tests/fs_glob.rs",
+        "apps/backend/crates/app/commands/tests/fs_glob_tests.rs",
         "use std::fs::*;\n#[test]\nfn smoke() {}\n",
-    );
-    write_file(
-        root,
-        "apps/backend/crates/app/commands/test/fs_glob_test.rs",
-        "use std::fs::*;\nfn smoke() {}\n",
-    );
-    write_file(
-        root,
-        "apps/backend/crates/app/commands/__tests__/fs_glob.rs",
-        "use std::fs::*;\nfn smoke() {}\n",
     );
     write_file(
         root,
@@ -33,11 +23,6 @@ fn skips_test_files_and_src_fs_rs_exemption() {
         root,
         "apps/backend/crates/app/commands/src/fs_glob_tests.rs",
         "use std::fs::*;\nfn smoke() {}\n",
-    );
-    write_file(
-        root,
-        "apps/backend/crates/app/commands/src/tests.rs",
-        "use std::fs::*;\npub fn smoke() {}\n",
     );
     write_file(
         root,

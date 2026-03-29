@@ -1,7 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::inputs::RustCodeFileInput;
-use super::parse::{find_path_attrs, same_line_reason};
+use super::parse::{CfgPredicateTruth, find_path_attrs, path_string_has_parent_segment, same_line_reason};
 
 const ID: &str = "RS-CODE-24";
 
@@ -32,10 +32,13 @@ fn is_canonical_test_sidecar_path(input: &RustCodeFileInput<'_>, line: usize, pa
 
 pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
     for info in find_path_attrs(input.ast) {
+        if info.cfg_truth == CfgPredicateTruth::KnownFalse {
+            continue;
+        }
         if !info.via_cfg_attr && is_canonical_test_sidecar_path(input, info.line, &info.path) {
             continue;
         }
-        if info.path.contains("..") {
+        if path_string_has_parent_segment(&info.path) {
             results.push(CheckResult {
                 id: ID.to_owned(),
                 severity: Severity::Error,
@@ -90,14 +93,14 @@ pub(crate) fn copy_fixture() -> test_support::TempDir {
 }
 
 #[cfg(test)]
-pub(crate) fn check_source(rel_path: &str, content: &str, is_test: bool) -> Vec<CheckResult> {
+pub(crate) fn check_source(rel_path: &str, content: &str, is_test_root: bool) -> Vec<CheckResult> {
     let ast = super::parse::parse_rust_file(content)
         .unwrap_or_else(|error| std::panic::panic_any(format!("valid rust: {error}")));
     let input = super::inputs::RustCodeFileInput {
         rel_path,
         content,
         ast: &ast,
-        is_test,
+        is_test_root,
         profile_name: None,
     };
     let mut results = Vec::new();

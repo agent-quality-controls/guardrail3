@@ -10,17 +10,23 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
         let lint = info.lint;
         let message = if info.via_cfg_attr {
             format!(
-                "`#[cfg_attr(..., allow({lint}))]` on an `extern` block hides FFI risk behind a broad suppression."
+                "`#[cfg_attr(..., {}({lint}))]` on an `extern` block hides FFI risk behind a broad suppression.",
+                info.kind.attr_name()
             )
         } else {
             format!(
-                "`#[allow({lint})]` on an `extern` block hides FFI risk behind a broad suppression."
+                "`#[{}({lint})]` on an `extern` block hides FFI risk behind a broad suppression.",
+                info.kind.attr_name()
             )
         };
         results.push(CheckResult {
             id: ID.to_owned(),
             severity: Severity::Error,
-            title: "allow on extern block".to_owned(),
+            title: if info.kind.attr_name() == "allow" {
+                "allow on extern block".to_owned()
+            } else {
+                "expect on extern block".to_owned()
+            },
             message,
             file: Some(input.rel_path.to_owned()),
             line: Some(info.line),
@@ -40,14 +46,14 @@ pub(crate) fn copy_fixture() -> test_support::TempDir {
 }
 
 #[cfg(test)]
-pub(crate) fn check_source(rel_path: &str, content: &str, is_test: bool) -> Vec<CheckResult> {
+pub(crate) fn check_source(rel_path: &str, content: &str, is_test_root: bool) -> Vec<CheckResult> {
     let ast = super::parse::parse_rust_file(content)
         .unwrap_or_else(|error| std::panic::panic_any(format!("valid rust: {error}")));
     let input = super::inputs::RustCodeFileInput {
         rel_path,
         content,
         ast: &ast,
-        is_test,
+        is_test_root,
         profile_name: None,
     };
     let mut results = Vec::new();

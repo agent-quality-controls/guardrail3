@@ -1,56 +1,66 @@
 use syn::parse::Parser;
 use syn::spanned::Spanned;
 
-pub(crate) fn collect_always_true_cfg_attr_allows(
-    attrs: &[syn::Attribute],
-    out: &mut Vec<crate::parse::CfgAttrAllowInfo>,
+use super::types::CfgPredicateTruth;
+
+pub(crate) fn walk_cfg_attr_payloads(
+    attr: &syn::Attribute,
+    mut visit: impl FnMut(usize, CfgPredicateTruth, &syn::Meta),
 ) {
-    for attr in attrs {
-        if !attr.path().is_ident("cfg_attr") {
-            continue;
-        }
-        let syn::Meta::List(list) = &attr.meta else {
-            continue;
-        };
-        let Ok(args) = list.parse_args_with(
-            syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated,
-        ) else {
-            continue;
-        };
-        let mut args = args.into_iter();
-        let Some(condition) = args.next() else {
-            continue;
-        };
-        if !meta_is_always_true(&condition) {
-            continue;
-        }
-        let line = super::helpers::span_line(attr.span());
-        for meta in args {
-            let syn::Meta::List(inner) = meta else {
-                continue;
-            };
-            if !inner.path.is_ident("allow") {
-                continue;
-            }
-            let Ok(paths) = inner.parse_args_with(
-                syn::punctuated::Punctuated::<syn::Path, syn::Token![,]>::parse_terminated,
-            ) else {
-                continue;
-            };
-            for path in paths {
-                out.push(crate::parse::CfgAttrAllowInfo {
-                    line,
-                    lint: super::helpers::path_to_string(&path),
-                    is_always_true: true,
-                });
-            }
-        }
+    if !attr.path().is_ident("cfg_attr") {
+        return;
+    }
+    let syn::Meta::List(list) = &attr.meta else {
+        return;
+    };
+    let Ok(args) = list.parse_args_with(
+        syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated,
+    ) else {
+        return;
+    };
+    let mut args = args.into_iter();
+    let Some(condition) = args.next() else {
+        return;
+    };
+    let line = super::helpers::span_end_line(attr.span());
+    let truth = classify_cfg_predicate(&condition);
+    for meta in args {
+        walk_cfg_attr_meta(line, truth, &meta, &mut visit);
     }
 }
 
-pub(crate) fn meta_is_always_true(meta: &syn::Meta) -> bool {
+fn walk_cfg_attr_meta(
+    line: usize,
+    inherited_truth: CfgPredicateTruth,
+    meta: &syn::Meta,
+    visit: &mut impl FnMut(usize, CfgPredicateTruth, &syn::Meta),
+) {
+    let syn::Meta::List(list) = meta else {
+        visit(line, inherited_truth, meta);
+        return;
+    };
+    if !list.path.is_ident("cfg_attr") {
+        visit(line, inherited_truth, meta);
+        return;
+    }
+    let Ok(args) = list.parse_args_with(
+        syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated,
+    ) else {
+        return;
+    };
+    let mut args = args.into_iter();
+    let Some(condition) = args.next() else {
+        return;
+    };
+    let truth = combine_cfg_truth(inherited_truth, classify_cfg_predicate(&condition));
+    for nested in args {
+        walk_cfg_attr_meta(line, truth, &nested, visit);
+    }
+}
+
+pub(crate) fn classify_cfg_predicate(meta: &syn::Meta) -> CfgPredicateTruth {
     match meta {
-        syn::Meta::Path(_) => false,
+        syn::Meta::Path(_) | syn::Meta::NameValue(_) => CfgPredicateTruth::Unknown,
         syn::Meta::List(list) => {
             let name = super::helpers::path_to_string(&list.path);
             let nested: Vec<syn::Meta> = list
@@ -60,77 +70,78 @@ pub(crate) fn meta_is_always_true(meta: &syn::Meta) -> bool {
                 .map(|punctuated| punctuated.into_iter().collect::<Vec<_>>())
                 .unwrap_or_default();
             match name.as_str() {
-                "all" => nested.iter().all(meta_is_always_true),
+                "all" => {
+                    if nested.is_empty() {
+                        CfgPredicateTruth::KnownTrue
+                    } else {
+                        fold_all_truths(nested.iter().map(classify_cfg_predicate))
+                    }
+                }
                 "any" => {
                     if nested.is_empty() {
-                        return false;
+                        CfgPredicateTruth::KnownFalse
+                    } else {
+                        fold_any_truths(nested.iter().map(classify_cfg_predicate))
                     }
-                    if nested.iter().any(meta_is_always_true) {
-                        return true;
-                    }
-                    is_known_exhaustive_any(&nested)
                 }
-                "not" if nested.len() == 1 => meta_is_always_false(&nested[0]),
-                _ => false,
+                "not" if nested.len() == 1 => invert_cfg_truth(classify_cfg_predicate(&nested[0])),
+                _ => CfgPredicateTruth::Unknown,
             }
         }
-        syn::Meta::NameValue(_) => false,
     }
 }
 
-pub(crate) fn meta_is_always_false(meta: &syn::Meta) -> bool {
-    match meta {
-        syn::Meta::Path(path) => path
-            .get_ident()
-            .is_some_and(|ident| is_cfg_ident_always_false(ident.to_string().as_str())),
-        syn::Meta::List(list) => {
-            let name = super::helpers::path_to_string(&list.path);
-            let nested: Vec<syn::Meta> = list
-                .parse_args_with(
-                    syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated,
-                )
-                .map(|punctuated| punctuated.into_iter().collect::<Vec<_>>())
-                .unwrap_or_default();
-            match name.as_str() {
-                "all" => nested.iter().any(meta_is_always_false),
-                "any" => nested.iter().all(meta_is_always_false),
-                "not" if nested.len() == 1 => meta_is_always_true(&nested[0]),
-                _ => false,
-            }
+fn fold_all_truths(truths: impl Iterator<Item = CfgPredicateTruth>) -> CfgPredicateTruth {
+    let mut saw_unknown = false;
+    for truth in truths {
+        match truth {
+            CfgPredicateTruth::KnownFalse => return CfgPredicateTruth::KnownFalse,
+            CfgPredicateTruth::Unknown => saw_unknown = true,
+            CfgPredicateTruth::KnownTrue => {}
         }
-        syn::Meta::NameValue(_) => false,
+    }
+    if saw_unknown {
+        CfgPredicateTruth::Unknown
+    } else {
+        CfgPredicateTruth::KnownTrue
     }
 }
 
-pub(crate) fn is_cfg_ident_always_false(ident: &str) -> bool {
-    !matches!(
-        ident,
-        "unix"
-            | "windows"
-            | "target_os"
-            | "target_family"
-            | "target_arch"
-            | "target_env"
-            | "target_vendor"
-            | "target_pointer_width"
-            | "target_endian"
-            | "debug_assertions"
-            | "test"
-            | "feature"
-            | "proc_macro"
-            | "panic"
-    )
+fn fold_any_truths(truths: impl Iterator<Item = CfgPredicateTruth>) -> CfgPredicateTruth {
+    let mut saw_unknown = false;
+    for truth in truths {
+        match truth {
+            CfgPredicateTruth::KnownTrue => return CfgPredicateTruth::KnownTrue,
+            CfgPredicateTruth::Unknown => saw_unknown = true,
+            CfgPredicateTruth::KnownFalse => {}
+        }
+    }
+    if saw_unknown {
+        CfgPredicateTruth::Unknown
+    } else {
+        CfgPredicateTruth::KnownFalse
+    }
 }
 
-pub(crate) fn is_known_exhaustive_any(nested: &[syn::Meta]) -> bool {
-    let names: Vec<String> = nested
-        .iter()
-        .filter_map(|meta| match meta {
-            syn::Meta::Path(path) => path.get_ident().map(ToString::to_string),
-            _ => None,
-        })
-        .collect();
-    names.iter().any(|name| name == "unix") && names.iter().any(|name| name == "windows")
+fn invert_cfg_truth(truth: CfgPredicateTruth) -> CfgPredicateTruth {
+    match truth {
+        CfgPredicateTruth::KnownTrue => CfgPredicateTruth::KnownFalse,
+        CfgPredicateTruth::KnownFalse => CfgPredicateTruth::KnownTrue,
+        CfgPredicateTruth::Unknown => CfgPredicateTruth::Unknown,
+    }
+}
+
+pub(crate) fn combine_cfg_truth(
+    outer: CfgPredicateTruth,
+    inner: CfgPredicateTruth,
+) -> CfgPredicateTruth {
+    match (outer, inner) {
+        (CfgPredicateTruth::KnownFalse, _) | (_, CfgPredicateTruth::KnownFalse) => {
+            CfgPredicateTruth::KnownFalse
+        }
+        (CfgPredicateTruth::KnownTrue, truth) | (truth, CfgPredicateTruth::KnownTrue) => truth,
+        _ => CfgPredicateTruth::Unknown,
+    }
 }
 
 pub(crate) fn macro_token_exprs(mac: &syn::Macro) -> Vec<syn::Expr> {
@@ -177,7 +188,7 @@ fn expr_is_env_out_dir(expr: &syn::Expr) -> bool {
 pub(crate) fn expr_has_path_traversal(expr: &syn::Expr) -> bool {
     match expr {
         syn::Expr::Lit(expr_lit) => match &expr_lit.lit {
-            syn::Lit::Str(value) => value.value().contains(".."),
+            syn::Lit::Str(value) => path_string_has_parent_segment(&value.value()),
             _ => false,
         },
         syn::Expr::Macro(expr_macro) => macro_token_exprs(&expr_macro.mac)
@@ -189,6 +200,11 @@ pub(crate) fn expr_has_path_traversal(expr: &syn::Expr) -> bool {
         syn::Expr::Array(array) => array.elems.iter().any(expr_has_path_traversal),
         _ => false,
     }
+}
+
+pub(crate) fn path_string_has_parent_segment(path: &str) -> bool {
+    path.split('/').any(|segment| segment == "..")
+        || path.split('\\').any(|segment| segment == "..")
 }
 
 pub(crate) fn result_error_kind(ty: &syn::Type) -> Option<crate::parse::PublicResultErrorKind> {

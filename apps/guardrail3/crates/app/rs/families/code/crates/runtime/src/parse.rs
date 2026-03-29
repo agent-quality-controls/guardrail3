@@ -7,16 +7,19 @@ mod helpers;
 mod types;
 mod visitors;
 
-pub type CfgAttrAllowInfo = guardrail3_app_rs_ast::ast_helpers::CfgAttrAllowInfo;
 pub type GardeSkipInfo = guardrail3_app_rs_ast::ast_helpers::GardeSkipInfo;
 pub type InlineModAllow = guardrail3_app_rs_ast::ast_helpers::InlineModAllow;
 
+pub type CfgAttrLintInfo = types::CfgAttrLintInfo;
+pub type CfgPredicateTruth = types::CfgPredicateTruth;
 pub type DenyForbidInfo = types::DenyForbidInfo;
 pub type FacadeBodyItemInfo = types::FacadeBodyItemInfo;
+pub type ForbiddenMacroInfo = types::ForbiddenMacroInfo;
 pub type ForeignModAllowInfo = types::ForeignModAllowInfo;
 pub type ImplAllowInfo = types::ImplAllowInfo;
 pub type IncludeMacroInfo = types::IncludeMacroInfo;
 pub type LargeTypeItem = types::LargeTypeItem;
+pub type LintPolicyInfo = types::LintPolicyInfo;
 pub type PathAttrInfo = types::PathAttrInfo;
 pub type PublicResultErrorInfo = types::PublicResultErrorInfo;
 pub type PublicResultErrorKind = types::PublicResultErrorKind;
@@ -59,8 +62,8 @@ pub fn find_garde_skips_with_types(ast: &syn::File) -> Vec<GardeSkipInfo> {
     guardrail3_app_rs_ast::ast_helpers::find_garde_skips_with_types(ast)
 }
 
-pub fn find_item_allows(ast: &syn::File) -> Vec<(usize, String)> {
-    attrs::find_item_allows(ast)
+pub fn find_item_lint_policies(ast: &syn::File) -> Vec<LintPolicyInfo> {
+    attrs::find_item_lint_policies(ast)
 }
 
 pub fn find_impl_block_allows(ast: &syn::File) -> Vec<ImplAllowInfo> {
@@ -79,12 +82,12 @@ pub fn find_include_macros(ast: &syn::File) -> Vec<IncludeMacroInfo> {
     attrs::find_include_macros(ast)
 }
 
-pub fn find_always_true_cfg_attr_allows(ast: &syn::File) -> Vec<CfgAttrAllowInfo> {
-    attrs::find_always_true_cfg_attr_allows(ast)
+pub fn find_cfg_attr_lint_policies(ast: &syn::File) -> Vec<CfgAttrLintInfo> {
+    attrs::find_cfg_attr_lint_policies(ast)
 }
 
-pub fn find_cfg_attr_allows(ast: &syn::File) -> Vec<CfgAttrAllowInfo> {
-    attrs::find_cfg_attr_allows(ast)
+pub fn path_string_has_parent_segment(path: &str) -> bool {
+    analysis_helpers::path_string_has_parent_segment(path)
 }
 
 pub fn find_path_attrs(ast: &syn::File) -> Vec<PathAttrInfo> {
@@ -95,12 +98,18 @@ pub fn find_public_result_error_types(ast: &syn::File) -> Vec<PublicResultErrorI
     attrs::find_public_result_error_types(ast)
 }
 
-pub fn find_forbidden_macros(ast: &syn::File) -> Vec<(usize, String)> {
-    visitors::find_forbidden_macros(ast)
+pub fn find_forbidden_macros(
+    ast: &syn::File,
+    file_is_test_root: bool,
+) -> Vec<ForbiddenMacroInfo> {
+    visitors::find_forbidden_macros(ast, file_is_test_root)
 }
 
-pub fn find_test_expect_calls(ast: &syn::File, file_is_test: bool) -> Vec<TestExpectCallInfo> {
-    visitors::find_test_expect_calls(ast, file_is_test)
+pub fn find_test_expect_calls(
+    ast: &syn::File,
+    file_is_test_root: bool,
+) -> Vec<TestExpectCallInfo> {
+    visitors::find_test_expect_calls(ast, file_is_test_root)
 }
 
 pub fn find_std_fs_import_lines(ast: &syn::File) -> Vec<usize> {

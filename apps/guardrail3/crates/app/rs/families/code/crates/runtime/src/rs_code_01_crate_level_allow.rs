@@ -34,7 +34,7 @@ fn push_result(
     lint: &str,
     module_path: Option<&str>,
 ) {
-    let severity = if input.is_test {
+    let severity = if input.is_test_root {
         Severity::Info
     } else {
         Severity::Error
@@ -43,7 +43,7 @@ fn push_result(
         || "crate-level allow".to_owned(),
         |module_path| format!("module-level allow in {module_path}"),
     );
-    let message = if input.is_test {
+    let message = if input.is_test_root {
         format!("Crate/module-wide allow for `{lint}` is test-file exempt.")
     } else {
         format!("Crate/module-wide `allow({lint})` suppresses the lint too broadly.")

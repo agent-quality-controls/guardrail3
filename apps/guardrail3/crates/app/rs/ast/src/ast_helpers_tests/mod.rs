@@ -229,6 +229,85 @@ fn garde_skip_in_string_not_found() {
 }
 
 #[test]
+fn garde_skip_typed_uses_explicit_exemption_set() {
+    let src = r#"
+        use std::collections::{HashMap, HashSet};
+
+        trait Handler {}
+
+        struct UserMap;
+        struct FeatureSet;
+
+        struct Input {
+            #[garde(skip)]
+            primitive: usize,
+            #[garde(skip)]
+            tags: HashMap<String, String>,
+            #[garde(skip)]
+            groups: HashSet<String>,
+            #[garde(skip)]
+            maybe_tags: Option<HashMap<String, String>>,
+            #[garde(skip)]
+            borrowed: &'static str,
+            #[garde(skip)]
+            handler: Box<dyn Handler>,
+            #[garde(skip)]
+            alias_map: UserMap,
+            #[garde(skip)]
+            alias_set: FeatureSet,
+            #[garde(skip)]
+            maybe_alias: Option<UserMap>,
+        }
+    "#;
+
+    let infos = find_garde_skips_with_types(&must_parse(src));
+    let by_name = infos
+        .iter()
+        .map(|info| (info.field_name.as_str(), info.is_exempt))
+        .collect::<std::collections::BTreeMap<_, _>>();
+
+    assert_eq!(by_name.get("primitive"), Some(&true));
+    assert_eq!(by_name.get("tags"), Some(&true));
+    assert_eq!(by_name.get("groups"), Some(&true));
+    assert_eq!(by_name.get("maybe_tags"), Some(&true));
+    assert_eq!(by_name.get("borrowed"), Some(&true));
+    assert_eq!(by_name.get("handler"), Some(&true));
+    assert_eq!(by_name.get("alias_map"), Some(&false));
+    assert_eq!(by_name.get("alias_set"), Some(&false));
+    assert_eq!(by_name.get("maybe_alias"), Some(&false));
+}
+
+#[test]
+fn garde_skip_typed_type_level_requires_all_fields_to_be_exempt() {
+    let src = r#"
+        use std::collections::HashMap;
+
+        struct UserMap;
+
+        #[garde(skip)]
+        struct ExemptWholeType {
+            tags: HashMap<String, String>,
+            count: usize,
+        }
+
+        #[garde(skip)]
+        struct AliasWholeType {
+            alias: UserMap,
+        }
+    "#;
+
+    let infos = find_garde_skips_with_types(&must_parse(src));
+    let by_name = infos
+        .iter()
+        .filter(|info| info.is_type_level)
+        .map(|info| (info.field_name.as_str(), info.is_exempt))
+        .collect::<std::collections::BTreeMap<_, _>>();
+
+    assert_eq!(by_name.get("ExemptWholeType"), Some(&true));
+    assert_eq!(by_name.get("AliasWholeType"), Some(&false));
+}
+
+#[test]
 fn unsafe_block_found() {
     let src = "fn foo() { unsafe { std::ptr::null::<u8>(); } }";
     assert_eq!(

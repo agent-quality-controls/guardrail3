@@ -21,6 +21,7 @@ fn attacks_include_bypass_variants_across_multiple_owned_files() {
     let rest_line = rest_content.lines().count() + 2;
     let handlers_info_line = handlers_content.lines().count() + 2;
     let handlers_warn_line = handlers_content.lines().count() + 3;
+    let handlers_build_warn_line = handlers_content.lines().count() + 4;
 
     write_file(
         root,
@@ -31,7 +32,7 @@ fn attacks_include_bypass_variants_across_multiple_owned_files() {
         root,
         handlers_rel,
         &format!(
-            "{handlers_content}\ninclude!(concat!(env!(\"OUT_DIR\"), \"/generated_handlers.rs\"));\nconst MCP_SCHEMA: &str = include_str!(\"../schema.json\");\n"
+            "{handlers_content}\ninclude!(concat!(env!(\"OUT_DIR\"), \"/generated_handlers.rs\"));\nconst MCP_SCHEMA: &str = include_str!(\"../schema.json\");\ninclude!(concat!(env!(\"OUT_DIR\"), \"/../escape.rs\"));\n"
         ),
     );
 
@@ -57,6 +58,14 @@ fn attacks_include_bypass_variants_across_multiple_owned_files() {
                 message: "`include_str!()` uses a path containing `..`.",
                 file: Some(handlers_rel),
                 line: Some(handlers_warn_line),
+                inventory: false,
+            },
+            RuleFinding {
+                severity: Severity::Warn,
+                title: "include path traversal",
+                message: "`include!()` build-script pattern appends a path containing `..`.",
+                file: Some(handlers_rel),
+                line: Some(handlers_build_warn_line),
                 inventory: false,
             },
             RuleFinding {

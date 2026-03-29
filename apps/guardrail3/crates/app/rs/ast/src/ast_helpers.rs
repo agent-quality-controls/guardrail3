@@ -14,7 +14,9 @@ use super::ast_visitors::{
 };
 use super::extra_visitors::{IgnoreVisitor, InlineStdFsVisitor};
 
-pub use super::ast_visitors::{GardeSkipInfo, struct_has_non_primitive_fields};
+pub use super::ast_visitors::{
+    GardeSkipInfo, struct_has_non_exempt_fields, struct_has_non_primitive_fields,
+};
 
 /// A source location (1-based line number) paired with a descriptive string (lint name, method name, etc.).
 pub(super) type Located = (usize, String);
@@ -142,7 +144,7 @@ pub fn find_garde_skips(file: &syn::File) -> Vec<usize> {
     v.out
 }
 
-/// Find `#[garde(skip)]` fields with type information.
+/// Find `#[garde(skip)]` fields/types with explicit exemption classification.
 pub fn find_garde_skips_with_types(file: &syn::File) -> Vec<GardeSkipInfo> {
     let mut v = GardeSkipTypedVisitor { out: Vec::new() };
     v.visit_file(file);

@@ -6,7 +6,7 @@ use super::parse::count_top_level_use_imports;
 const ID: &str = "RS-CODE-10";
 
 pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
-    if input.is_test {
+    if input.is_test_root {
         return;
     }
 
@@ -37,14 +37,14 @@ pub(crate) fn copy_fixture() -> test_support::TempDir {
 }
 
 #[cfg(test)]
-pub(crate) fn check_source(rel_path: &str, content: &str, is_test: bool) -> Vec<CheckResult> {
+pub(crate) fn check_source(rel_path: &str, content: &str, is_test_root: bool) -> Vec<CheckResult> {
     let ast = super::parse::parse_rust_file(content)
         .unwrap_or_else(|error| std::panic::panic_any(format!("valid rust: {error}")));
     let input = super::inputs::RustCodeFileInput {
         rel_path,
         content,
         ast: &ast,
-        is_test,
+        is_test_root,
         profile_name: None,
     };
     let mut results = Vec::new();

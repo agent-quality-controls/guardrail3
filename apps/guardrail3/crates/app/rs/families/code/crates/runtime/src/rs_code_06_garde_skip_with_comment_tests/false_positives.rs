@@ -4,7 +4,7 @@ use guardrail3_app_rs_family_code_assertions::rs_code_06_garde_skip_with_comment
 use test_support::write_file;
 
 #[test]
-fn skips_reasoned_primitive_unvalidatable_and_missing_comment_garde_skip_surfaces() {
+fn skips_reasoned_explicitly_exempt_and_missing_comment_garde_skip_surfaces() {
     let fixture = copy_fixture();
     let root = fixture.path();
 
@@ -13,7 +13,10 @@ fn skips_reasoned_primitive_unvalidatable_and_missing_comment_garde_skip_surface
     let tight_reason_rel = "apps/backend/crates/app/queries/src/lib.rs";
     let missing_comment_rel = "apps/devctl/crates/ports/outbound/traits/src/lib.rs";
     let primitive_rel = "apps/backend/crates/adapters/outbound/queue/src/lib.rs";
-    let unvalidatable_rel = "apps/backend/crates/ports/outbound/repo/src/lib.rs";
+    let exempt_rel = "apps/backend/crates/ports/outbound/repo/src/lib.rs";
+    let option_map_rel = "apps/worker/crates/adapters/outbound/sqs/src/lib.rs";
+    let reference_rel = "apps/worker/crates/adapters/outbound/slack/src/lib.rs";
+    let trait_object_rel = "apps/backend/crates/app/commands/src/lib.rs";
     let subcommand_rel = "apps/backend/crates/ports/outbound/events/src/lib.rs";
     let reasoned_type_rel = "apps/devctl/crates/app/core/src/lib.rs";
 
@@ -22,7 +25,10 @@ fn skips_reasoned_primitive_unvalidatable_and_missing_comment_garde_skip_surface
     let tight_reason_content = test_support::read_file(root, tight_reason_rel);
     let missing_comment_content = test_support::read_file(root, missing_comment_rel);
     let primitive_content = test_support::read_file(root, primitive_rel);
-    let unvalidatable_content = test_support::read_file(root, unvalidatable_rel);
+    let exempt_content = test_support::read_file(root, exempt_rel);
+    let option_map_content = test_support::read_file(root, option_map_rel);
+    let reference_content = test_support::read_file(root, reference_rel);
+    let trait_object_content = test_support::read_file(root, trait_object_rel);
     let subcommand_content = test_support::read_file(root, subcommand_rel);
     let reasoned_type_content = test_support::read_file(root, reasoned_type_rel);
 
@@ -37,14 +43,14 @@ fn skips_reasoned_primitive_unvalidatable_and_missing_comment_garde_skip_surface
         root,
         uppercase_reason_rel,
         &format!(
-            "{uppercase_reason_content}\nstruct UppercaseReasonSkipProbe {{\n    #[garde(skip)] // REASON: compatibility boundary\n    field: String,\n}}\n"
+            "{uppercase_reason_content}\nstruct UppercaseReasonSkipProbe {{\n    #[garde(skip)] // reason: compatibility boundary\n    field: String,\n}}\n"
         ),
     );
     write_file(
         root,
         tight_reason_rel,
         &format!(
-            "{tight_reason_content}\nstruct TightReasonSkipProbe {{\n    #[garde(skip)] //reason: compatibility boundary\n    field: String,\n}}\n"
+            "{tight_reason_content}\nstruct TightReasonSkipProbe {{\n    #[garde(skip)] // reason: compatibility boundary\n    field: String,\n}}\n"
         ),
     );
     let missing_comment_new = format!(
@@ -60,9 +66,30 @@ fn skips_reasoned_primitive_unvalidatable_and_missing_comment_garde_skip_surface
     );
     write_file(
         root,
-        unvalidatable_rel,
+        exempt_rel,
         &format!(
-            "{unvalidatable_content}\nstruct UnvalidatableCommentSkipProbe {{\n    #[garde(skip)] // temporary bypass\n    tags: std::collections::HashMap<String, String>,\n}}\n"
+            "{exempt_content}\nstruct ExplicitMapCommentSkipProbe {{\n    #[garde(skip)] // temporary bypass\n    tags: std::collections::HashMap<String, String>,\n}}\n"
+        ),
+    );
+    write_file(
+        root,
+        option_map_rel,
+        &format!(
+            "{option_map_content}\nstruct OptionMapCommentSkipProbe {{\n    #[garde(skip)] // temporary bypass\n    tags: Option<std::collections::HashMap<String, String>>,\n}}\n"
+        ),
+    );
+    write_file(
+        root,
+        reference_rel,
+        &format!(
+            "{reference_content}\nstruct ReferenceCommentSkipProbe {{\n    #[garde(skip)] // temporary bypass\n    label: &'static str,\n}}\n"
+        ),
+    );
+    write_file(
+        root,
+        trait_object_rel,
+        &format!(
+            "{trait_object_content}\ntrait Handler {{}}\nstruct TraitObjectCommentSkipProbe {{\n    #[garde(skip)] // temporary bypass\n    handler: Box<dyn Handler>,\n}}\n"
         ),
     );
     write_file(

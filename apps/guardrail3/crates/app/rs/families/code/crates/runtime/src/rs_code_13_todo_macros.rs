@@ -6,7 +6,9 @@ use super::parse::{find_forbidden_macros, line_text};
 const ID: &str = "RS-CODE-13";
 
 pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
-    for (line, macro_name) in find_forbidden_macros(input.ast) {
+    for info in find_forbidden_macros(input.ast, input.is_test_root) {
+        let line = info.line;
+        let macro_name = info.macro_name;
         let base_name = macro_name.rsplit("::").next().unwrap_or(&macro_name);
         match base_name {
             "todo" | "unimplemented" => results.push(CheckResult {
@@ -21,7 +23,7 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
                 line: Some(line),
                 inventory: false,
             }),
-            "unreachable" if !input.is_test => results.push(CheckResult {
+            "unreachable" if !info.in_test_context => results.push(CheckResult {
                 id: ID.to_owned(),
                 severity: Severity::Info,
                 title: "unreachable! macro".to_owned(),
@@ -49,14 +51,14 @@ pub(crate) fn copy_fixture() -> test_support::TempDir {
 }
 
 #[cfg(test)]
-pub(crate) fn check_source(rel_path: &str, content: &str, is_test: bool) -> Vec<CheckResult> {
+pub(crate) fn check_source(rel_path: &str, content: &str, is_test_root: bool) -> Vec<CheckResult> {
     let ast = super::parse::parse_rust_file(content)
         .unwrap_or_else(|error| std::panic::panic_any(format!("valid rust: {error}")));
     let input = super::inputs::RustCodeFileInput {
         rel_path,
         content,
         ast: &ast,
-        is_test,
+        is_test_root,
         profile_name: None,
     };
     let mut results = Vec::new();

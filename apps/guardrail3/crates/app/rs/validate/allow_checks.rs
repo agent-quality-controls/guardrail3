@@ -189,8 +189,8 @@ fn check_garde_skip_ast(
 ) {
     let raw_lines: Vec<&str> = content.lines().collect();
     for info in ast_helpers::find_garde_skips_with_types(file) {
-        // Primitives (bool, numeric, Option<primitive>) are always valid to skip — no result
-        if info.is_primitive {
+        // Explicit garde(skip) exemptions are allowed without extra ownership.
+        if info.is_exempt {
             continue;
         }
         let line_1based = info.line;
@@ -201,8 +201,8 @@ fn check_garde_skip_ast(
             results.push(CheckResult {
                 id: "R35".to_owned(),
                 severity: Severity::Error,
-                title: format!("`#[garde(skip)]` on non-primitive {}", garde_skip_target_label(&info)),
-                message: format!("`#[garde(skip)]` on non-primitive {}. Non-primitive fields must have a real garde validator (e.g., `#[garde(length(min=1))]` for strings). Only primitive types (bool, numeric) can use skip.", garde_skip_target_label(&info)),
+                title: format!("`#[garde(skip)]` on non-exempt {}", garde_skip_target_label(&info)),
+                message: format!("`#[garde(skip)]` on non-exempt {}. Non-exempt fields must have a real garde validator or an owned reason for skipping validation.", garde_skip_target_label(&info)),
                 file: Some(path.display().to_string()),
                 line: Some(line_1based),
                 inventory: false,
@@ -212,7 +212,7 @@ fn check_garde_skip_ast(
                 id: "R34".to_owned(),
                 severity: Severity::Error,
                 title: "garde(skip) without reason".to_owned(),
-                message: format!("`#[garde(skip)]` on non-primitive {} bypasses runtime input validation without documenting why. Non-primitive fields must have a real garde validator (e.g., `#[garde(length(min=1))]` for strings). Only primitive types (bool, numeric) can use skip.", garde_skip_target_label(&info)),
+                message: format!("`#[garde(skip)]` on non-exempt {} bypasses runtime input validation without documenting why. Non-exempt fields must have a real garde validator or an owned reason for skipping validation.", garde_skip_target_label(&info)),
                 file: Some(path.display().to_string()),
                 line: Some(line_1based),
                 inventory: false,

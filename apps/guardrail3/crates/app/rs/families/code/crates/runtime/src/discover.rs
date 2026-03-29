@@ -23,16 +23,18 @@ pub fn rust_file_rels(tree: &ProjectTree) -> Vec<String> {
     rels
 }
 
-pub fn is_test_path(rel_path: &str) -> bool {
-    rel_path.starts_with("tests/")
-        || rel_path.starts_with("test/")
-        || rel_path.contains("/tests/")
-        || rel_path.contains("/test/")
-        || rel_path.contains("_tests/")
-        || rel_path.contains("__tests__")
-        || rel_path.ends_with("_test.rs")
-        || rel_path.ends_with("_tests.rs")
-        || rel_path.ends_with("/tests.rs")
+pub fn is_test_root_path(rel_path: &str) -> bool {
+    let segments = rel_path.split('/').collect::<Vec<_>>();
+    if segments.first().is_some_and(|segment| *segment == "tests") {
+        return true;
+    }
+    if segments.iter().any(|segment| segment.ends_with("_tests")) {
+        return true;
+    }
+    let Some(file_name) = segments.last() else {
+        return false;
+    };
+    file_name.ends_with("_test.rs") || file_name.ends_with("_tests.rs")
 }
 
 fn is_fixture_path(rel_path: &str) -> bool {

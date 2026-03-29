@@ -1,19 +1,24 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::inputs::RustCodeFileInput;
-use super::parse::find_always_true_cfg_attr_allows;
+use super::parse::{CfgPredicateTruth, find_cfg_attr_lint_policies};
 
 const ID: &str = "RS-CODE-18";
 
 pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
-    for info in find_always_true_cfg_attr_allows(input.ast) {
+    for info in find_cfg_attr_lint_policies(input.ast) {
+        if info.truth != CfgPredicateTruth::KnownTrue {
+            continue;
+        }
         results.push(CheckResult {
             id: ID.to_owned(),
             severity: Severity::Error,
             title: "always-true cfg_attr bypass".to_owned(),
             message: format!(
-                "`#[cfg_attr(..., allow({}))]` is effectively unconditional. Use a direct `#[allow]` with an explicit reason instead.",
-                info.lint
+                "`#[cfg_attr(..., {}({}))]` is effectively unconditional. Use a direct `#[{}]` with an explicit reason instead.",
+                info.kind.attr_name(),
+                info.lint,
+                info.kind.attr_name()
             ),
             file: Some(input.rel_path.to_owned()),
             line: Some(info.line),
@@ -33,14 +38,14 @@ pub(crate) fn copy_fixture() -> test_support::TempDir {
 }
 
 #[cfg(test)]
-pub(crate) fn check_source(rel_path: &str, content: &str, is_test: bool) -> Vec<CheckResult> {
+pub(crate) fn check_source(rel_path: &str, content: &str, is_test_root: bool) -> Vec<CheckResult> {
     let ast = super::parse::parse_rust_file(content)
         .unwrap_or_else(|error| std::panic::panic_any(format!("valid rust: {error}")));
     let input = super::inputs::RustCodeFileInput {
         rel_path,
         content,
         ast: &ast,
-        is_test,
+        is_test_root,
         profile_name: None,
     };
     let mut results = Vec::new();
