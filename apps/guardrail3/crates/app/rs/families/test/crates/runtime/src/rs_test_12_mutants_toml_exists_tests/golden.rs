@@ -1,13 +1,13 @@
 #[allow(unused_imports)]
 use guardrail3_app_rs_family_test_assertions::rs_test_12_mutants_toml_exists::{
-    assert_rule_quiet,
+    Severity, assert_inventory, assert_reported, assert_rule_files, assert_rule_quiet,
 };
 
 #[allow(unused_imports)]
 use super::{run_family, tempdir, write_file};
 
 #[test]
-fn present_mutants_config_keeps_the_root_quiet() {
+fn present_mutants_config_is_reported() {
     let fixture = tempdir();
     let root = fixture.path();
 
@@ -20,5 +20,13 @@ fn present_mutants_config_keeps_the_root_quiet() {
 
     let results = run_family(root);
 
-    assert_rule_quiet(&results);
+    assert_rule_files(&results, vec![".cargo/mutants.toml".to_owned()]);
+    assert_reported(
+        &results,
+        ".cargo/mutants.toml",
+        None,
+        Severity::Info,
+        "mutants config exists",
+    );
+    assert_inventory(&results, true);
 }

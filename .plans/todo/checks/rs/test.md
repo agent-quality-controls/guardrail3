@@ -76,11 +76,11 @@ If any marker exists, the full mutation setup must be present and sane.
 | RS-TEST-08 | Warn | Weak wildcard `matches!` assertions are forbidden. | Implemented |
 | RS-TEST-09 | Warn/Info | Async-test roots require nextest slow/leak timeout settings. | Implemented |
 | RS-TEST-10 | Error | Required inputs fail closed when unreadable or unparsable. | Implemented |
-| RS-TEST-11 | Warn | Mutation adoption requires `cargo-mutants` on `PATH`. | Implemented |
-| RS-TEST-12 | Warn | Mutation adoption requires `.cargo/mutants.toml`. | Implemented |
-| RS-TEST-13 | Warn | Mutation adoption requires `[profile.mutants]`. | Implemented |
-| RS-TEST-14 | Warn | Mutation adoption requires an executable `cargo mutants` step in active hooks. | Implemented |
-| RS-TEST-15 | Warn | Mutation config must avoid fake/useless settings. | Implemented |
+| RS-TEST-11 | Warn/Info | Mutation adoption requires `cargo-mutants` on `PATH`. | Implemented |
+| RS-TEST-12 | Warn/Info | Mutation adoption requires `.cargo/mutants.toml`. | Implemented |
+| RS-TEST-13 | Warn/Info | Mutation adoption requires `[profile.mutants]`. | Implemented |
+| RS-TEST-14 | Warn/Info | Mutation adoption requires an executable `cargo mutants` step in active hooks. | Implemented |
+| RS-TEST-15 | Warn/Info | Mutation config must avoid fake/useless settings. | Implemented |
 | RS-TEST-16 | Error | Assertions modules must contain proof-bearing exported functions once they expose helpers. | Implemented |
 | RS-TEST-17 | Error | External harnesses must prove through owned assertions instead of direct assertion macros. | Implemented |
 | RS-TEST-18 | Error | `test_support` must stay generic and must not import/call sibling runtime/assertions crates. | Implemented |

@@ -1,6 +1,6 @@
 #[allow(unused_imports)]
 use guardrail3_app_rs_family_test_assertions::rs_test_14_mutation_hook_present::{
-    assert_rule_quiet,
+    Severity, assert_reported, assert_rule_files, assert_rule_quiet,
 };
 
 #[allow(unused_imports)]
@@ -30,5 +30,12 @@ fn workspace_root_hook_does_not_duplicate_on_idle_standalone_root() {
 
     let results = run_family(root);
 
-    assert_rule_quiet(&results);
+    assert_rule_files(&results, vec![".githooks/pre-commit".to_owned()]);
+    assert_reported(
+        &results,
+        ".githooks/pre-commit",
+        None,
+        Severity::Info,
+        "mutation hook step present",
+    );
 }
