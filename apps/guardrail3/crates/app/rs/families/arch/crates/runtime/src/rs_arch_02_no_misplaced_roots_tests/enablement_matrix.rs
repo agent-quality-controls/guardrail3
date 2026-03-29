@@ -53,10 +53,7 @@ fn misplaced_roots_do_not_fire_when_both_architecture_families_are_disabled() {
         ],
     ));
 
-    assert!(
-        assertions::error_results(&results, "RS-ARCH-02").is_empty(),
-        "misplaced-root reporting should shut off only when both owners are disabled: {results:#?}"
-    );
+    assertions::assert_no_error_files(&results, "RS-ARCH-02");
 }
 
 #[test]
@@ -74,8 +71,5 @@ fn misplaced_roots_do_not_fire_when_arch_is_globally_disabled() {
         ],
     ));
 
-    assert!(
-        assertions::error_results(&results, "RS-ARCH-02").is_empty(),
-        "global arch disablement must suppress misplaced-root reporting even if owner families are enabled: {results:#?}"
-    );
+    assertions::assert_no_error_files(&results, "RS-ARCH-02");
 }

@@ -28,8 +28,5 @@ fn golden_layout_has_no_required_input_failures() {
         ],
     ));
 
-    assert!(
-        assertions::error_results(&results, "RS-ARCH-07").is_empty(),
-        "unexpected required-input failures: {results:#?}"
-    );
+    assertions::assert_no_error_files(&results, "RS-ARCH-07");
 }

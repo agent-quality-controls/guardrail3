@@ -13,10 +13,7 @@ fn misplaced_other_roots_do_not_count_as_ambiguous_classification() {
         &[("tools/worker/Cargo.toml", "[package]\nname = \"worker\"\n")],
     ));
 
-    assert!(
-        assertions::error_results(&results, "RS-ARCH-01").is_empty(),
-        "other roots should stay owned by RS-ARCH-02, not RS-ARCH-01: {results:#?}"
-    );
+    assertions::assert_no_error_files(&results, "RS-ARCH-01");
 }
 
 #[test]
@@ -48,8 +45,5 @@ fn fixture_and_snapshot_manifests_are_not_classified_as_live_architecture() {
         ],
     ));
 
-    assert!(
-        assertions::error_results(&results, "RS-ARCH-01").is_empty(),
-        "excluded fixture/snapshot manifests must not participate in live root classification: {results:#?}"
-    );
+    assertions::assert_no_error_files(&results, "RS-ARCH-01");
 }

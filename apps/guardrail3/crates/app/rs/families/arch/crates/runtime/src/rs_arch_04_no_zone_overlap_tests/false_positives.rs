@@ -24,10 +24,7 @@ fn sibling_app_and_package_roots_do_not_overlap() {
         ],
     ));
 
-    assert!(
-        assertions::error_results(&results, "RS-ARCH-04").is_empty(),
-        "sibling app/package roots should not overlap: {results:#?}"
-    );
+    assertions::assert_no_error_files(&results, "RS-ARCH-04");
 }
 
 #[test]
@@ -52,8 +49,5 @@ fn ambiguous_roots_do_not_also_emit_zone_overlap_findings() {
         ],
     ));
 
-    assert!(
-        assertions::error_results(&results, "RS-ARCH-04").is_empty(),
-        "ambiguous roots belong to RS-ARCH-01/03, not RS-ARCH-04 overlap reporting: {results:#?}"
-    );
+    assertions::assert_no_error_files(&results, "RS-ARCH-04");
 }

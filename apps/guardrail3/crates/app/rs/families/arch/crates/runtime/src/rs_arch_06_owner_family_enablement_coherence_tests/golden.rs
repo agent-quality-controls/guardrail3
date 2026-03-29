@@ -24,8 +24,5 @@ fn golden_layout_has_no_owner_family_coherence_errors() {
         ],
     ));
 
-    assert!(
-        assertions::error_results(&results, "RS-ARCH-06").is_empty(),
-        "unexpected owner-family coherence errors: {results:#?}"
-    );
+    assertions::assert_no_error_files(&results, "RS-ARCH-06");
 }

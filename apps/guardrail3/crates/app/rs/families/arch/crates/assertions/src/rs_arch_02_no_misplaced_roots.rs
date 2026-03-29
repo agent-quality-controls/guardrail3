@@ -30,6 +30,10 @@ pub fn assert_error_files(results: &[CheckResult], rule_id: &str, expected: &[&s
     );
 }
 
+pub fn assert_no_error_files(results: &[CheckResult], rule_id: &str) {
+    assert_error_files(results, rule_id, &[]);
+}
+
 fn resolved_rule_id(rule_id: &str) -> &str {
     if rule_id.is_empty() { RULE_ID } else { rule_id }
 }

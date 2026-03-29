@@ -26,10 +26,7 @@ fn app_and_package_roots_do_not_trigger_misplaced_root_reporting() {
         ],
     ));
 
-    assert!(
-        assertions::error_results(&results, "RS-ARCH-02").is_empty(),
-        "valid zone-owned roots should not be reported as misplaced: {results:#?}"
-    );
+    assertions::assert_no_error_files(&results, "RS-ARCH-02");
 }
 
 #[test]
@@ -58,10 +55,7 @@ fn excluded_fixture_and_target_roots_do_not_trigger_misplaced_reporting() {
         ],
     ));
 
-    assert!(
-        assertions::error_results(&results, "RS-ARCH-02").is_empty(),
-        "excluded fixture/target manifests must not be reported as live misplaced roots: {results:#?}"
-    );
+    assertions::assert_no_error_files(&results, "RS-ARCH-02");
 }
 
 #[test]
@@ -81,10 +75,7 @@ fn declared_auxiliary_roots_do_not_trigger_misplaced_reporting() {
         ],
     ));
 
-    assert!(
-        assertions::error_results(&results, "RS-ARCH-02").is_empty(),
-        "declared auxiliary roots must not be reported as misplaced: {results:#?}"
-    );
+    assertions::assert_no_error_files(&results, "RS-ARCH-02");
 }
 
 #[test]
@@ -99,10 +90,7 @@ fn excluded_validation_root_does_not_treat_its_own_cargo_manifest_as_live_archit
         ],
     ));
 
-    assert!(
-        results.is_empty(),
-        "an excluded validation root must not emit live arch findings for its own Cargo root: {results:#?}"
-    );
+    assertions::assert_no_error_files(&results, "RS-ARCH-02");
 }
 
 #[test]
@@ -122,8 +110,5 @@ fn app_scoped_validation_root_still_classifies_nested_crates_as_app_owned() {
         ],
     ));
 
-    assert!(
-        assertions::error_results(&results, "RS-ARCH-02").is_empty(),
-        "nested crates under an apps/<name> validation root must still classify as app-owned: {results:#?}"
-    );
+    assertions::assert_no_error_files(&results, "RS-ARCH-02");
 }

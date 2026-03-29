@@ -24,8 +24,5 @@ fn golden_layout_has_no_zone_overlap_errors() {
         ],
     ));
 
-    assert!(
-        assertions::error_results(&results, "RS-ARCH-04").is_empty(),
-        "unexpected zone-overlap errors: {results:#?}"
-    );
+    assertions::assert_no_error_files(&results, "RS-ARCH-04");
 }

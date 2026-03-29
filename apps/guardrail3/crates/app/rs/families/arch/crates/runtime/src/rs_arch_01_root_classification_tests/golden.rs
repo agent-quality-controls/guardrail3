@@ -24,8 +24,5 @@ fn golden_layout_has_no_classification_errors() {
         ],
     ));
 
-    assert!(
-        assertions::error_results(&results, "RS-ARCH-01").is_empty(),
-        "unexpected classification errors: {results:#?}"
-    );
+    assertions::assert_no_error_files(&results, "RS-ARCH-01");
 }
