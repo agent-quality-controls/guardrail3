@@ -796,10 +796,7 @@ fn external_harness_self_boundary_stays_quiet() {
 
     let results = run_family(root);
 
-    assert!(
-        results.iter().all(|result| result.id != "RS-TEST-03"),
-        "external harness-local `self::` helpers should stay quiet"
-    );
+    assert_rule_quiet(&results);
 }
 
 #[test]

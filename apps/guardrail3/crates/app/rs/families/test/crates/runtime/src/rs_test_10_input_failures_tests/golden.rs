@@ -21,5 +21,4 @@ fn clean_root_surfaces_no_input_failures() {
     let results = run_family(root);
 
     assert_rule_quiet(&results);
-    assert!(results.iter().all(|result| result.id != "RS-TEST-10"));
 }
