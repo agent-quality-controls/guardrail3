@@ -38,5 +38,5 @@ pub fn check(hooks_path: Option<&str>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "hook_shared_02_hooks_path_configured_tests.rs"]
-mod tests;
+#[path = "hook_shared_02_hooks_path_configured_tests/mod.rs"]
+mod hook_shared_02_hooks_path_configured_tests;

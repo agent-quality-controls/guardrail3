@@ -32,5 +32,18 @@ pub fn check(pre_commit: Option<&HookScriptFacts>, results: &mut Vec<CheckResult
 }
 
 #[cfg(test)]
-#[path = "hook_shared_01_pre_commit_exists_tests.rs"]
-mod tests;
+#[allow(dead_code)]
+pub(crate) fn run_case(pre_commit_content: Option<&str>) -> Vec<CheckResult> {
+    let pre_commit = pre_commit_content.map(|content| HookScriptFacts {
+        rel_path: ".githooks/pre-commit".to_owned(),
+        kind: super::facts::HookScriptKind::PreCommit,
+        content: content.to_owned(),
+    });
+    let mut results = Vec::new();
+    check(pre_commit.as_ref(), &mut results);
+    results
+}
+
+#[cfg(test)]
+#[path = "hook_shared_01_pre_commit_exists_tests/mod.rs"]
+mod hook_shared_01_pre_commit_exists_tests;

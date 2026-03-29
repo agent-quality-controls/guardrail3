@@ -1,0 +1,26 @@
+use guardrail3_app_rs_family_hooks_shared as _;
+
+mod common;
+
+pub mod hook_shared_01_pre_commit_exists;
+pub mod hook_shared_02_hooks_path_configured;
+pub mod hook_shared_03_modular_directory_inventory;
+pub mod hook_shared_04_dispatcher_pattern;
+pub mod hook_shared_05_pre_commit_executable;
+pub mod hook_shared_06_script_stats_inventory;
+pub mod hook_shared_07_modular_scripts_inventory;
+pub mod hook_shared_08_pre_commit_file_size_inventory;
+pub mod hook_shared_09_local_override_inventory;
+pub mod hook_shared_10_shell_error_handling;
+pub mod hook_shared_11_valid_shebang;
+pub mod hook_shared_12_modular_scripts_executable;
+pub mod hook_shared_13_no_unconditional_exit_zero;
+pub mod hook_shared_14_no_bypass_instructions;
+pub mod hook_shared_15_merge_conflict_step_present;
+pub mod hook_shared_16_file_size_step_present;
+pub mod hook_shared_17_execution_trust;
+pub mod hook_shared_18_executable_command_context_only;
+pub mod hook_shared_19_real_dispatcher_syntax_only;
+pub mod hook_shared_20_concrete_lockfile_command;
+pub mod hook_shared_21_no_fail_open_wrappers;
+pub mod hook_shell;

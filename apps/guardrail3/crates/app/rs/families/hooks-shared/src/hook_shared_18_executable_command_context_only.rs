@@ -109,5 +109,20 @@ fn matches_step_family(line: &crate::hook_shell::ExecutableLine<'_>, family: &st
 }
 
 #[cfg(test)]
+#[allow(dead_code)]
+pub(crate) fn run_case(content: &str) -> Vec<CheckResult> {
+    let parsed = crate::hook_shell::parse_script(content);
+    let input = ExecutableCommandContextInput {
+        rel_path: ".githooks/pre-commit",
+        kind: super::facts::HookScriptKind::PreCommit,
+        content,
+        parsed: &parsed,
+    };
+    let mut results = Vec::new();
+    check(&input, &mut results);
+    results
+}
+
+#[cfg(test)]
 #[path = "hook_shared_18_executable_command_context_only_tests/mod.rs"]
-mod tests;
+mod hook_shared_18_executable_command_context_only_tests;

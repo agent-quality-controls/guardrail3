@@ -685,5 +685,5 @@ fn constant_shell_status(segment: &str) -> Option<bool> {
 }
 
 #[cfg(test)]
-#[path = "shell_tests.rs"]
-mod tests;
+#[path = "hook_shell_tests/mod.rs"]
+mod hook_shell_tests;

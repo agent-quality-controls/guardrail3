@@ -38,5 +38,20 @@ pub fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec<CheckR
 }
 
 #[cfg(test)]
-#[path = "hook_shared_14_no_bypass_instructions_tests.rs"]
-mod tests;
+#[allow(dead_code)]
+pub(crate) fn run_case(content: &str) -> Vec<CheckResult> {
+    let parsed = crate::hook_shell::parse_script(content);
+    let input = ExecutableCommandContextInput {
+        rel_path: ".githooks/pre-commit",
+        kind: super::facts::HookScriptKind::PreCommit,
+        content,
+        parsed: &parsed,
+    };
+    let mut results = Vec::new();
+    check(&input, &mut results);
+    results
+}
+
+#[cfg(test)]
+#[path = "hook_shared_14_no_bypass_instructions_tests/mod.rs"]
+mod hook_shared_14_no_bypass_instructions_tests;

@@ -41,5 +41,18 @@ fn is_guardrail_critical(command_text: &str) -> bool {
 }
 
 #[cfg(test)]
+#[allow(dead_code)]
+pub(crate) fn run_case(content: &str) -> Vec<CheckResult> {
+    let parsed = crate::hook_shell::parse_script(content);
+    let input = FailOpenWrapperInput {
+        rel_path: ".githooks/pre-commit",
+        executable_lines: &parsed.executable_lines,
+    };
+    let mut results = Vec::new();
+    check(&input, &mut results);
+    results
+}
+
+#[cfg(test)]
 #[path = "hook_shared_21_no_fail_open_wrappers_tests/mod.rs"]
-mod tests;
+mod hook_shared_21_no_fail_open_wrappers_tests;
