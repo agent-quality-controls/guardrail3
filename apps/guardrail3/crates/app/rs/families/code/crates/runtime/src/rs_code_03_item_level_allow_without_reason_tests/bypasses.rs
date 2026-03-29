@@ -176,3 +176,104 @@ fn detects_undocumented_item_level_allows_across_real_owned_files() {
         ],
     );
 }
+
+#[test]
+fn detects_undocumented_item_level_expects_across_real_owned_files() {
+    let fixture = copy_fixture();
+    let root = fixture.path();
+
+    let top_level_rel = "apps/backend/crates/app/queries/src/lib.rs";
+    let grouped_rel = "apps/devctl/crates/app/core/src/lib.rs";
+    let module_rel = "apps/backend/crates/ports/outbound/events/src/lib.rs";
+
+    let top_level_content = test_support::read_file(root, top_level_rel);
+    let grouped_content = test_support::read_file(root, grouped_rel);
+    let module_content = test_support::read_file(root, module_rel);
+
+    let top_level_new = format!(
+        "{top_level_content}\n#[expect(clippy::unwrap_used)]\npub fn undocumented_expect_probe() {{}}\n"
+    );
+    let grouped_new = format!(
+        "{grouped_content}\n#[expect(clippy::unwrap_used, clippy::expect_used)]\npub fn grouped_expect_probe() {{}}\n"
+    );
+    let module_new = format!(
+        "{module_content}\n#[expect(clippy::panic)]\npub mod undocumented_expect_module_probe {{\n    pub fn helper() {{}}\n}}\n"
+    );
+
+    write_file(root, top_level_rel, &top_level_new);
+    write_file(root, grouped_rel, &grouped_new);
+    write_file(root, module_rel, &module_new);
+
+    let top_level_line = top_level_new
+        .lines()
+        .position(|line| line.contains("#[expect(clippy::unwrap_used)]"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
+    let grouped_line = grouped_new
+        .lines()
+        .position(|line| line.contains("#[expect(clippy::unwrap_used, clippy::expect_used)]"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
+    let module_line = module_new
+        .lines()
+        .position(|line| line.contains("#[expect(clippy::panic)]"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
+
+    let results = run_family(root);
+    let relevant_results = results
+        .into_iter()
+        .filter(|result| {
+            matches!(
+                result.file.as_deref(),
+                Some(path) if [top_level_rel, grouped_rel, module_rel].contains(&path)
+            )
+        })
+        .collect::<Vec<_>>();
+
+    assert_files(
+        &relevant_results,
+        BTreeSet::from([
+            top_level_rel.to_owned(),
+            grouped_rel.to_owned(),
+            module_rel.to_owned(),
+        ]),
+    );
+    assert_findings(
+        &relevant_results,
+        &[
+            RuleFinding {
+                severity: Severity::Error,
+                title: "item-level expect without reason",
+                message: "`#[expect(clippy::unwrap_used)]` requires `// reason:` on the same line.",
+                file: Some(top_level_rel),
+                line: Some(top_level_line),
+                inventory: false,
+            },
+            RuleFinding {
+                severity: Severity::Error,
+                title: "item-level expect without reason",
+                message: "`#[expect(clippy::expect_used)]` requires `// reason:` on the same line.",
+                file: Some(grouped_rel),
+                line: Some(grouped_line),
+                inventory: false,
+            },
+            RuleFinding {
+                severity: Severity::Error,
+                title: "item-level expect without reason",
+                message: "`#[expect(clippy::unwrap_used)]` requires `// reason:` on the same line.",
+                file: Some(grouped_rel),
+                line: Some(grouped_line),
+                inventory: false,
+            },
+            RuleFinding {
+                severity: Severity::Error,
+                title: "item-level expect without reason",
+                message: "`#[expect(clippy::panic)]` requires `// reason:` on the same line.",
+                file: Some(module_rel),
+                line: Some(module_line),
+                inventory: false,
+            },
+        ],
+    );
+}
