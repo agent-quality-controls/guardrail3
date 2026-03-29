@@ -1,6 +1,9 @@
 use std::fs;
 
 use super::{generate_rust_hook_artifact, generate_rust_owned_artifacts};
+use guardrail3_app_rs_generate_assertions::owned_artifacts::{
+    assert_contains, assert_not_contains,
+};
 
 #[test]
 #[allow(clippy::expect_used)] // reason: test setup assertions
@@ -37,16 +40,20 @@ type = "library"
         .find(|file| file.path == "apps/backend/deny.toml")
         .expect("expected backend deny.toml");
 
-    assert!(
-        backend_deny.content.contains("Library IO bans")
-            && backend_deny.content.contains("{ name = \"tokio\""),
-        "library deny config should include the library-only tokio crate ban: {}",
-        backend_deny.content
+    assert_contains(
+        &backend_deny.content,
+        "Library IO bans",
+        "library deny config should include the library-only section",
     );
-    assert!(
-        !backend_deny.content.contains("[[bans.features]]"),
-        "library deny config should not emit tokio feature-ban section: {}",
-        backend_deny.content
+    assert_contains(
+        &backend_deny.content,
+        "{ name = \"tokio\"",
+        "library deny config should include the library-only tokio crate ban",
+    );
+    assert_not_contains(
+        &backend_deny.content,
+        "[[bans.features]]",
+        "library deny config should not emit the tokio feature-ban section",
     );
 }
 
@@ -69,12 +76,14 @@ name = "service"
 
     let hook = generate_rust_hook_artifact(Some(&cfg));
 
-    assert!(
-        hook.content.contains("guardrail3 rs validate --staged ."),
-        "rust hook should validate Rust changes"
+    assert_contains(
+        &hook.content,
+        "guardrail3 rs validate --staged .",
+        "rust hook should validate Rust changes",
     );
-    assert!(
-        !hook.content.contains("guardrail3 ts validate --staged ."),
-        "rust hook should not emit TypeScript validation steps"
+    assert_not_contains(
+        &hook.content,
+        "guardrail3 ts validate --staged .",
+        "rust hook should not emit TypeScript validation steps",
     );
 }

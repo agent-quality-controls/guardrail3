@@ -263,8 +263,8 @@ pub(super) fn span_line(span: proc_macro2::Span) -> usize {
 }
 
 #[cfg(test)]
-#[path = "ast_helpers_tests.rs"]
-mod tests;
+#[path = "ast_helpers_tests/mod.rs"]
+mod ast_helpers_tests;
 
 /// Check if an attribute is `#[allow(clippy::X)]` where X matches the given lint name.
 fn has_allow_lint(attr: &syn::Attribute, lint_name: &str) -> bool {
@@ -448,6 +448,7 @@ pub(super) fn item_attrs(item: &syn::Item) -> &[syn::Attribute] {
         syn::Item::Const(c) => &c.attrs,
         syn::Item::Static(s) => &s.attrs,
         syn::Item::Use(u) => &u.attrs,
+        syn::Item::ForeignMod(f) => &f.attrs,
         _ => &[],
     }
 }

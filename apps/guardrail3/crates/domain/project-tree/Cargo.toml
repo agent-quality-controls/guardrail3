@@ -10,3 +10,6 @@ serde = { workspace = true }
 
 [lints]
 workspace = true
+
+[dev-dependencies]
+guardrail3_domain_project_tree_assertions = { package = "guardrail3-domain-project-tree-assertions", path = "assertions" }

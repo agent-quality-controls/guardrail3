@@ -1,4 +1,5 @@
 use crate::ast_helpers::*;
+use guardrail3_app_rs_ast_assertions::ast_helpers::assert_single_cfg_attr_allow;
 
 fn must_parse(source: &str) -> syn::File {
     #[allow(clippy::expect_used)] // reason: test helper — panic on bad input is correct
@@ -31,7 +32,7 @@ fn crate_level_allow_in_string_not_found() {
 fn crate_level_allow_multiple_lints() {
     let src = "#![allow(dead_code, unused_variables)]\nfn main() {}";
     assert_eq!(
-        find_crate_level_allows(&must_parse(src)).len(),
+        find_crate_level_allows(&must_parse(&src)).len(),
         2,
         "two lints in one allow"
     );
@@ -73,12 +74,7 @@ fn cfg_attr_allow_found() {
     let allows = find_cfg_attr_allows(&must_parse(
         "#[cfg_attr(test, allow(dead_code))]\nfn foo() {}",
     ));
-    assert_eq!(allows.len(), 1, "should find cfg_attr allow");
-    assert_eq!(allows[0].lint, "dead_code");
-    assert!(
-        !allows[0].is_always_true,
-        "test condition is not always true"
-    );
+    assert_single_cfg_attr_allow(allows.len(), allows[0].line, &allows[0].lint, allows[0].is_always_true, 1, "dead_code", false);
 }
 
 #[test]
@@ -97,12 +93,7 @@ fn cfg_attr_all_empty_is_always_true() {
     let allows = find_cfg_attr_allows(&must_parse(
         "#[cfg_attr(all(), allow(dead_code))]\nfn foo() {}",
     ));
-    assert_eq!(allows.len(), 1, "should find cfg_attr allow");
-    assert_eq!(allows[0].lint, "dead_code");
-    assert!(
-        allows[0].is_always_true,
-        "all() with no args is always true"
-    );
+    assert_single_cfg_attr_allow(allows.len(), allows[0].line, &allows[0].lint, allows[0].is_always_true, 1, "dead_code", true);
 }
 
 #[test]
@@ -111,9 +102,7 @@ fn cfg_attr_all_with_args_is_not_always_true() {
     let allows = find_cfg_attr_allows(&must_parse(
         "#[cfg_attr(all(unix), allow(dead_code))]\nfn foo() {}",
     ));
-    assert_eq!(allows.len(), 1, "should find cfg_attr allow");
-    assert_eq!(allows[0].lint, "dead_code");
-    assert!(!allows[0].is_always_true, "all(unix) is not always true");
+    assert_single_cfg_attr_allow(allows.len(), allows[0].line, &allows[0].lint, allows[0].is_always_true, 1, "dead_code", false);
 }
 
 #[test]
@@ -133,13 +122,7 @@ fn cfg_attr_allow_found_on_trait_item() {
     let allows = find_cfg_attr_allows(&must_parse(
         "trait Api {\n    #[cfg_attr(test, allow(dead_code))]\n    fn run();\n}",
     ));
-    assert_eq!(allows.len(), 1, "should find cfg_attr allow on trait item");
-    assert_eq!(allows[0].line, 2);
-    assert_eq!(allows[0].lint, "dead_code");
-    assert!(
-        !allows[0].is_always_true,
-        "test condition is not always true"
-    );
+    assert_single_cfg_attr_allow(allows.len(), allows[0].line, &allows[0].lint, allows[0].is_always_true, 2, "dead_code", false);
 }
 
 #[test]
@@ -147,12 +130,7 @@ fn nested_cfg_attr_allow_found() {
     let allows = find_cfg_attr_allows(&must_parse(
         "#[cfg_attr(test, cfg_attr(unix, allow(dead_code)))]\nunsafe extern \"C\" { fn puts(s: *const i8); }",
     ));
-    assert_eq!(allows.len(), 1, "should find nested cfg_attr allow");
-    assert_eq!(allows[0].lint, "dead_code");
-    assert!(
-        !allows[0].is_always_true,
-        "nested conditional allow stays conditional"
-    );
+    assert_single_cfg_attr_allow(allows.len(), allows[0].line, &allows[0].lint, allows[0].is_always_true, 1, "dead_code", false);
 }
 
 #[test]

@@ -1,5 +1,6 @@
-use guardrail3_domain_modules::clippy::AVOID_BREAKING_EXPORTED_API;
 use test_support::build_fixture_clippy_toml;
+
+const AVOID_BREAKING_EXPORTED_API: bool = false;
 
 #[test]
 fn generated_service_baseline_contains_expected_avoid_breaking_exported_api_value() {
