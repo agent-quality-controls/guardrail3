@@ -27,14 +27,14 @@ fn sibling_app_and_package_roots_do_not_overlap() {
 }
 
 #[test]
-fn ambiguous_roots_do_not_also_emit_zone_overlap_findings() {
+fn same_zone_nesting_does_not_emit_zone_overlap_findings() {
     let results = check_results(&tree(
         &[
             ("", entry(&["apps"], &[])),
             ("apps", entry(&["backend"], &[])),
-            ("apps/backend", entry(&["packages"], &["Cargo.toml"])),
-            ("apps/backend/packages", entry(&["shared"], &[])),
-            ("apps/backend/packages/shared", entry(&[], &["Cargo.toml"])),
+            ("apps/backend", entry(&["crates"], &["Cargo.toml"])),
+            ("apps/backend/crates", entry(&["worker"], &[])),
+            ("apps/backend/crates/worker", entry(&[], &["Cargo.toml"])),
         ],
         &[
             (
@@ -42,8 +42,8 @@ fn ambiguous_roots_do_not_also_emit_zone_overlap_findings() {
                 cargo_fixture(CargoFixture::AppWorkspace),
             ),
             (
-                "apps/backend/packages/shared/Cargo.toml",
-                cargo_fixture(CargoFixture::Package),
+                "apps/backend/crates/worker/Cargo.toml",
+                cargo_fixture(CargoFixture::AppWorkspace),
             ),
         ],
     ));

@@ -337,9 +337,16 @@ Severity:
 Detection:
 
 - start from eligible live roots
-- compare only app-owned roots against package-owned roots
-- emit if one root directory is an ancestor of the other
+- derive actual app-root/package-root pairs from zone candidates on discovered live roots
+- emit if an app-root directory and a package-root directory have a direct ancestor/descendant relationship
 - sort findings deterministically by app root path then package root path
+
+This rule is layout-level, not root-level:
+
+- nested cross-zone shapes such as `apps/<app>/packages/<pkg>` and `packages/<pkg>/apps/<app>` should emit:
+  - `RS-ARCH-01` for ambiguous root classification
+  - `RS-ARCH-03` for dual ownership
+  - `RS-ARCH-04` for the illegal app/package containment pair itself
 
 Do not emit for:
 

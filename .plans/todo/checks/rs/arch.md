@@ -150,6 +150,11 @@ App and package architecture boundaries must not overlap or nest in a way that m
 
 This is about root-zone legality, not member legality inside a single workspace.
 
+Treat this as a layout-level rule, not a duplicate root-level one:
+- `RS-ARCH-01` owns ambiguous per-root classification
+- `RS-ARCH-03` owns per-root dual ownership
+- `RS-ARCH-04` owns the illegal app/package containment pair itself
+
 ### RS-ARCH-05 — Scoped `arch` config is forbidden
 
 `arch` is repo-global and must be configured only under `[rust.checks]`.
@@ -250,7 +255,10 @@ apps/guardrail3/crates/app/rs/checks/rs/rust_root_placement.rs
 
 - `rs/arch` is implemented as a repo-global family with one production file per rule and one rule-specific `*_tests/` directory per rule.
 - Shared Rust root discovery/classification moved into `rs/rust_root_placement.rs` so future `hexarch` and `libarch` work can reuse the same root inventory instead of rediscovering `Cargo.toml` roots independently.
-- Classification is segment-based rather than top-level-only. This intentionally makes illegal nested shapes such as `apps/<app>/packages/<pkg>` and `packages/<pkg>/apps/<app>` visible as real ambiguity/overlap cases instead of silently treating them as ordinary `other` roots.
+- Classification is segment-based rather than top-level-only. This intentionally makes illegal nested shapes such as `apps/<app>/packages/<pkg>` and `packages/<pkg>/apps/<app>` visible as:
+  - `RS-ARCH-01` ambiguous roots
+  - `RS-ARCH-03` dual ownership
+  - `RS-ARCH-04` illegal layout overlap pairs
 - `RS-ARCH-02` resolves reporting from `hexarch` / `libarch` enablement only. Discovery always runs even when both owner families are disabled.
 - `RS-ARCH-07` owns fail-closed input integrity for this family:
   - malformed `guardrail3.toml`

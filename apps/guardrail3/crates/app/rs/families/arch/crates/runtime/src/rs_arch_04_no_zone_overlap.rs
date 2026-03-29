@@ -5,19 +5,25 @@ use super::inputs::ZoneOverlapInput;
 const ID: &str = "RS-ARCH-04";
 
 pub fn check(input: &ZoneOverlapInput<'_>, results: &mut Vec<CheckResult>) {
-    let nesting_message = if input
+    let (nesting_message, file) = if input
         .overlap
         .package_root_rel
         .starts_with(&format!("{}/", input.overlap.app_root_rel))
     {
-        format!(
-            "package root `{}` nests inside app root `{}`",
-            input.overlap.package_root_rel, input.overlap.app_root_rel
+        (
+            format!(
+                "package root `{}` nests inside app root `{}`",
+                input.overlap.package_root_rel, input.overlap.app_root_rel
+            ),
+            input.overlap.package_cargo_rel_path.clone(),
         )
     } else {
-        format!(
-            "app root `{}` nests inside package root `{}`",
-            input.overlap.app_root_rel, input.overlap.package_root_rel
+        (
+            format!(
+                "app root `{}` nests inside package root `{}`",
+                input.overlap.app_root_rel, input.overlap.package_root_rel
+            ),
+            input.overlap.app_cargo_rel_path.clone(),
         )
     };
 
@@ -29,7 +35,7 @@ pub fn check(input: &ZoneOverlapInput<'_>, results: &mut Vec<CheckResult>) {
             "{nesting_message}. app Cargo root: `{}`; package Cargo root: `{}`. App/package architecture zones must not overlap or nest.",
             input.overlap.app_cargo_rel_path, input.overlap.package_cargo_rel_path
         ),
-        file: Some(input.overlap.package_cargo_rel_path.clone()),
+        file: Some(file),
         line: None,
         inventory: false,
     });
