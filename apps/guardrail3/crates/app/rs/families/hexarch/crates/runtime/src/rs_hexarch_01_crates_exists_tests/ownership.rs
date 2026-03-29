@@ -123,14 +123,5 @@ fn missing_crates_and_banned_src_can_coexist_on_the_same_app() {
     write_file(tmp.path(), "apps/devctl/src/main.rs", "fn main() {}\n");
 
     let results = super::run_family(tmp.path());
-    assert_eq!(
-        assertions::errors_by_id(&results, "").len(),
-        1,
-        "{results:#?}"
-    );
-    assert_eq!(
-        assertions::errors_by_id(&results, "RS-HEXARCH-12").len(),
-        1,
-        "{results:#?}"
-    );
+    assertions::assert_rule_01_and_rule_12_coexist(&results);
 }

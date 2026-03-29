@@ -1,4 +1,4 @@
-use guardrail3_domain_report::{CheckResult, Severity};
+pub use guardrail3_domain_report::{CheckResult, Severity};
 use std::collections::BTreeSet;
 
 const RULE_ID: &str = "RS-HEXARCH-01";
@@ -166,4 +166,9 @@ pub fn assert_no_error_with_file_prefix(results: &[CheckResult], rule_id: &str, 
             .is_none_or(|file| !file.starts_with(prefix))),
         "expected no {rule_id} errors with file prefix {prefix}, got: {errors:#?}"
     );
+}
+
+pub fn assert_rule_01_and_rule_12_coexist(results: &[CheckResult]) {
+    assert_error_count(results, "", 1);
+    assert_error_count(results, "RS-HEXARCH-12", 1);
 }

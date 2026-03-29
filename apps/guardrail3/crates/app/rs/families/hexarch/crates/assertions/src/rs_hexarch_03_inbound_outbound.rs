@@ -1,4 +1,4 @@
-use guardrail3_domain_report::{CheckResult, Severity};
+pub use guardrail3_domain_report::{CheckResult, Severity};
 
 const RULE_ID: &str = "RS-HEXARCH-03";
 
