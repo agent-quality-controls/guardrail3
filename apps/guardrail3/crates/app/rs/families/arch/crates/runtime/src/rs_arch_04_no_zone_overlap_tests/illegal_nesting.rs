@@ -2,7 +2,7 @@ use super::{CargoFixture, cargo_fixture, check_results, entry, tree};
 use guardrail3_app_rs_family_arch_assertions::rs_arch_04_no_zone_overlap as assertions;
 
 #[test]
-fn nested_cross_zone_roots_do_not_emit_overlap_on_top_of_ambiguity_and_dual_ownership() {
+fn nested_cross_zone_roots_emit_layout_overlap_on_top_of_ambiguity_and_dual_ownership() {
     let results = check_results(&tree(
         &[
             ("", entry(&["apps", "packages"], &[])),
@@ -35,5 +35,12 @@ fn nested_cross_zone_roots_do_not_emit_overlap_on_top_of_ambiguity_and_dual_owne
         ],
     ));
 
-    assertions::assert_no_error_files(&results, "RS-ARCH-04");
+    assertions::assert_error_files(
+        &results,
+        "RS-ARCH-04",
+        &[
+            "apps/backend/packages/shared/Cargo.toml",
+            "packages/core/apps/web/Cargo.toml",
+        ],
+    );
 }

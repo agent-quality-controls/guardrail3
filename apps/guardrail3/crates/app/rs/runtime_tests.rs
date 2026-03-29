@@ -161,11 +161,17 @@ fn arch_runtime_dispatch_uses_arch_section_name() {
     )
     .expect("arch runtime report");
 
+    let live_results = report.sections[0]
+        .results
+        .iter()
+        .filter(|result| !result.inventory)
+        .collect::<Vec<_>>();
+
     assert_eq!(report.sections.len(), 1, "unexpected sections: {report:#?}");
     assert_eq!(report.sections[0].name, "arch");
     assert!(
-        report.sections[0].results.is_empty(),
-        "clean app root should not emit arch findings: {report:#?}"
+        live_results.is_empty(),
+        "clean app root should not emit live arch findings: {report:#?}"
     );
 
     fs::remove_dir_all(&root).expect("cleanup temp root");
@@ -195,14 +201,17 @@ fn arch_runtime_reports_scoped_arch_config_violation() {
     )
     .expect("arch runtime report");
 
+    let live_results = report.sections[0]
+        .results
+        .iter()
+        .filter(|result| !result.inventory)
+        .collect::<Vec<_>>();
+
     assert_eq!(report.sections.len(), 1, "unexpected sections: {report:#?}");
     assert_eq!(report.sections[0].name, "arch");
-    assert_eq!(report.sections[0].results.len(), 1, "{report:#?}");
-    assert_eq!(report.sections[0].results[0].id, "RS-ARCH-05");
-    assert_eq!(
-        report.sections[0].results[0].file.as_deref(),
-        Some("guardrail3.toml")
-    );
+    assert_eq!(live_results.len(), 1, "{report:#?}");
+    assert_eq!(live_results[0].id, "RS-ARCH-05");
+    assert_eq!(live_results[0].file.as_deref(), Some("guardrail3.toml"));
 
     fs::remove_dir_all(&root).expect("cleanup temp root");
 }
@@ -231,14 +240,17 @@ fn arch_runtime_still_reports_scoped_arch_config_when_global_arch_is_disabled() 
     )
     .expect("arch runtime report");
 
+    let live_results = report.sections[0]
+        .results
+        .iter()
+        .filter(|result| !result.inventory)
+        .collect::<Vec<_>>();
+
     assert_eq!(report.sections.len(), 1, "unexpected sections: {report:#?}");
     assert_eq!(report.sections[0].name, "arch");
-    assert_eq!(report.sections[0].results.len(), 1, "{report:#?}");
-    assert_eq!(report.sections[0].results[0].id, "RS-ARCH-05");
-    assert_eq!(
-        report.sections[0].results[0].file.as_deref(),
-        Some("guardrail3.toml")
-    );
+    assert_eq!(live_results.len(), 1, "{report:#?}");
+    assert_eq!(live_results[0].id, "RS-ARCH-05");
+    assert_eq!(live_results[0].file.as_deref(), Some("guardrail3.toml"));
 
     fs::remove_dir_all(&root).expect("cleanup temp root");
 }
