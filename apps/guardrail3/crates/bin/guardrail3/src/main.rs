@@ -66,8 +66,18 @@ fn main() {
     match cli.command {
         Commands::Rs { command } => handle_rs(command),
         Commands::Ts { command } => handle_ts(command),
-        Commands::DumpGuide => handle_guide(),
-        Commands::DumpTree { path } => handle_dump_tree(&path),
+        Commands::DumpGuide => match handle_guide() {
+            Ok(lines) => {
+                for line in lines {
+                    print_stdout(&line);
+                }
+            }
+            Err(message) => exit_with_error(&message, 1),
+        },
+        Commands::DumpTree { path } => match handle_dump_tree(&path) {
+            Ok(json) => print_stdout(&json),
+            Err(message) => exit_with_error(&message, 1),
+        },
         Commands::Map {
             path,
             clippy,
@@ -151,36 +161,27 @@ fn run_coverage_maps(
     }
 }
 
-#[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI — dumps JSON to stdout
-fn handle_dump_tree(path_str: &str) {
+fn resolve_path_for_dump(path_str: &str) -> Result<std::path::PathBuf, String> {
     let path = std::path::Path::new(path_str);
-    let resolved = match path.canonicalize() {
-        Ok(p) => p,
-        Err(e) => {
-            eprintln!("Error: cannot resolve path '{path_str}': {e}");
-            std::process::exit(1);
-        }
-    };
-    let fs = RealFileSystem;
-    let tree = project_walker::walk_project(&fs, &resolved);
-    match serde_json::to_string_pretty(&tree) {
-        Ok(json) => println!("{json}"),
-        Err(e) => {
-            eprintln!("Error serializing tree: {e}");
-            std::process::exit(1);
-        }
-    }
+    path.canonicalize()
+        .map_err(|error| format!("Error: cannot resolve path '{path_str}': {error}"))
 }
 
-#[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI — writes file and prints path
-fn handle_guide() {
+fn handle_dump_tree(path_str: &str) -> Result<String, String> {
+    let resolved = resolve_path_for_dump(path_str)?;
+    let fs = RealFileSystem;
+    let tree = project_walker::walk_project(&fs, &resolved);
+    serde_json::to_string_pretty(&tree).map_err(|error| format!("Error serializing tree: {error}"))
+}
+
+fn handle_guide() -> Result<Vec<String>, String> {
     let path = std::path::Path::new("GUARDRAIL3_GUIDE.md");
-    if let Err(e) = guardrail3_shared_fs::write_file(path, GUIDE_CONTENT) {
-        eprintln!("Error writing GUARDRAIL3_GUIDE.md: {e}");
-        std::process::exit(1);
-    }
-    println!("Generated: {}", path.display());
-    println!("Commit this file so agents and contributors can find it.");
+    guardrail3_shared_fs::write_file(path, GUIDE_CONTENT)
+        .map_err(|error| format!("Error writing GUARDRAIL3_GUIDE.md: {error}"))?;
+    Ok(vec![
+        format!("Generated: {}", path.display()),
+        "Commit this file so agents and contributors can find it.".to_owned(),
+    ])
 }
 
 #[allow(clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI dispatch
@@ -216,11 +217,14 @@ fn handle_rs(command: RsCommands) {
             commands::generate::run_rs_hooks(&args);
         }
         RsCommands::ListModules => {
-            commands::modules_cmd::list_modules();
+            print_stdout(&commands::modules_cmd::list_modules());
         }
         RsCommands::ShowModule(args) => {
             validate_or_exit(&args);
-            commands::modules_cmd::show_module(&args.name);
+            match commands::modules_cmd::show_module(&args.name) {
+                Ok(output) => print_stdout(&output),
+                Err(message) => exit_with_error(&message, 1),
+            }
         }
     }
 }
@@ -323,12 +327,23 @@ fn print_report(format: &str, inventory: bool, verbose: bool, report: &Report) {
     }
 }
 
+#[allow(clippy::print_stdout)] // reason: CLI boundary output
+fn print_stdout(message: &str) {
+    println!("{message}");
+}
+
 #[allow(clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI — validation error output + exit
 fn validate_or_exit<T: Validate<Context = ()>>(args: &T) {
     if let Err(e) = args.validate() {
         eprintln!("Validation error: {e}");
         std::process::exit(2);
     }
+}
+
+#[allow(clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI boundary error output + exit
+fn exit_with_error(message: &str, code: i32) -> ! {
+    eprintln!("{message}");
+    std::process::exit(code);
 }
 
 #[allow(clippy::disallowed_methods, clippy::print_stderr)] // reason: CLI — process::exit + error output

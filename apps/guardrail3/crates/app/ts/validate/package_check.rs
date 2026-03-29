@@ -3,33 +3,42 @@ use std::path::{Path, PathBuf};
 use guardrail3_domain_report::{CheckResult, Severity};
 use guardrail3_outbound_traits::FileSystem;
 
-#[allow(clippy::too_many_lines, clippy::disallowed_methods)] // reason: comprehensive package.json validation; guardrail3 JSON config inspection
-pub fn check_package_json(
-    fs: &dyn FileSystem,
-    package_jsons: &[PathBuf],
-    root: &Path,
+const BANNED_DEPS: &[&str] = &[
+    "axios",
+    "lodash",
+    "moment",
+    "uuid",
+    "nanoid",
+    "pg",
+    "express",
+    "classnames",
+    "winston",
+    "pino",
+    "request",
+    "got",
+    "superagent",
+    "node-fetch",
+    "isomorphic-fetch",
+    "underscore",
+    "request-promise",
+    "postgres",
+    "cross-fetch",
+    "xregexp",
+    "regexp-tree",
+];
+
+const BANNED_PREFIXES: &[&str] = &["embla-carousel"];
+
+fn load_package_json(fs: &dyn FileSystem, pkg_path: &Path) -> Option<serde_json::Value> {
+    let content = fs.read_file(pkg_path)?;
+    serde_json::from_str(&content).ok()
+}
+
+fn push_private_field_result(
+    json: &serde_json::Value,
+    pkg_path: &Path,
     results: &mut Vec<CheckResult>,
 ) {
-    // Find root package.json by matching parent to project root.
-    // Per-app package.jsons get banned-dep checks only (T17).
-    let root_pkg = package_jsons
-        .iter()
-        .find(|p| p.parent().is_some_and(|parent| parent == root));
-
-    let Some(pkg_path) = root_pkg else {
-        return;
-    };
-
-    let Some(content) = fs.read_file(pkg_path) else {
-        return;
-    };
-
-    let json: serde_json::Value = match serde_json::from_str(&content) {
-        Ok(v) => v,
-        Err(_) => return,
-    };
-
-    // T-PKG-01: private field must be true
     let is_private = json
         .get("private")
         .and_then(serde_json::Value::as_bool)
@@ -61,8 +70,13 @@ pub fn check_package_json(
             inventory: false,
         });
     }
+}
 
-    // T15: pnpm.overrides
+fn push_pnpm_override_results(
+    json: &serde_json::Value,
+    pkg_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     let overrides = json.get("pnpm").and_then(|p| p.get("overrides"));
     match overrides {
         Some(ov) if ov.is_object() => {
@@ -101,25 +115,26 @@ pub fn check_package_json(
                 });
             }
 
-            // T16: Extra overrides
-            let known_overrides = ["zod", "@eslint/js"];
             for key in ov_obj.keys() {
-                if !known_overrides.contains(&key.as_str()) {
-                    results.push(CheckResult {
-                        id: "T16".to_owned(),
-                        severity: Severity::Info,
-                        title: format!("Extra pnpm override: `{key}`"),
-                        message: format!(
-                            "Non-baseline pnpm override `{key}` = {}. Extra overrides pin transitive \
-                             dependency versions. Verify this is intentional and the pinned version is current.",
-                            ov_obj
-                                .get(key)
-                                .map_or_else(|| "?".to_owned(), std::string::ToString::to_string)
-                        ),
-                        file: Some(pkg_path.display().to_string()),
-                        line: None,
-                        inventory: false,
-                    }.as_inventory());
+                if !["zod", "@eslint/js"].contains(&key.as_str()) {
+                    results.push(
+                        CheckResult {
+                            id: "T16".to_owned(),
+                            severity: Severity::Info,
+                            title: format!("Extra pnpm override: `{key}`"),
+                            message: format!(
+                                "Non-baseline pnpm override `{key}` = {}. Extra overrides pin transitive \
+                                 dependency versions. Verify this is intentional and the pinned version is current.",
+                                ov_obj
+                                    .get(key)
+                                    .map_or_else(|| "?".to_owned(), std::string::ToString::to_string)
+                            ),
+                            file: Some(pkg_path.display().to_string()),
+                            line: None,
+                            inventory: false,
+                        }
+                        .as_inventory(),
+                    );
                 }
             }
         }
@@ -138,39 +153,20 @@ pub fn check_package_json(
             });
         }
     }
+}
 
-    // T17: Banned dependencies
-    let banned_deps: &[&str] = &[
-        "axios",
-        "lodash",
-        "moment",
-        "uuid",
-        "nanoid",
-        "pg",
-        "express",
-        "classnames",
-        "winston",
-        "pino",
-        "request",
-        "got",
-        "superagent",
-        "node-fetch",
-        "isomorphic-fetch",
-        "underscore",
-        "request-promise",
-        "postgres",
-        "cross-fetch",
-        // Regex: use structured parsers (tree-sitter, AST) instead
-        "xregexp",
-        "regexp-tree",
-    ];
-    let banned_prefixes: &[&str] = &["embla-carousel"];
-
+fn push_banned_dependency_results(
+    json: &serde_json::Value,
+    pkg_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     for section_name in &["dependencies", "devDependencies"] {
-        if let Some(deps) = json.get(section_name).and_then(|d| d.as_object()) {
+        if let Some(deps) = json.get(section_name).and_then(|deps| deps.as_object()) {
             for dep_name in deps.keys() {
-                let is_banned = banned_deps.contains(&dep_name.as_str())
-                    || banned_prefixes.iter().any(|p| dep_name.starts_with(p));
+                let is_banned = BANNED_DEPS.contains(&dep_name.as_str())
+                    || BANNED_PREFIXES
+                        .iter()
+                        .any(|prefix| dep_name.starts_with(prefix));
 
                 if is_banned {
                     results.push(CheckResult {
@@ -190,8 +186,13 @@ pub fn check_package_json(
             }
         }
     }
+}
 
-    // T18: packageManager field
+fn push_package_manager_results(
+    json: &serde_json::Value,
+    pkg_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
     if json.get("packageManager").is_some() {
         results.push(CheckResult {
             id: "T18".to_owned(),
@@ -221,26 +222,30 @@ pub fn check_package_json(
             inventory: false,
         });
     }
+}
 
-    // T55: preinstall script contains only-allow pnpm
+fn push_script_results(json: &serde_json::Value, pkg_path: &Path, results: &mut Vec<CheckResult>) {
     let preinstall = json
         .get("scripts")
-        .and_then(|s| s.get("preinstall"))
-        .and_then(|v| v.as_str());
+        .and_then(|scripts| scripts.get("preinstall"))
+        .and_then(serde_json::Value::as_str);
 
     match preinstall {
         Some(script) if script.contains("only-allow pnpm") => {
-            results.push(CheckResult {
-                id: "T55".to_owned(),
-                severity: Severity::Info,
-                title: "`preinstall` script enforces pnpm".to_owned(),
-                message: "`preinstall` script contains `only-allow pnpm`. This prevents accidentally running \
-                         `npm install` or `yarn install`, which would create a conflicting lockfile."
-                    .to_owned(),
-                file: Some(pkg_path.display().to_string()),
-                line: None,
-                inventory: false,
-            }.as_inventory());
+            results.push(
+                CheckResult {
+                    id: "T55".to_owned(),
+                    severity: Severity::Info,
+                    title: "`preinstall` script enforces pnpm".to_owned(),
+                    message: "`preinstall` script contains `only-allow pnpm`. This prevents accidentally running \
+                             `npm install` or `yarn install`, which would create a conflicting lockfile."
+                        .to_owned(),
+                    file: Some(pkg_path.display().to_string()),
+                    line: None,
+                    inventory: false,
+                }
+                .as_inventory(),
+            );
         }
         _ => {
             results.push(CheckResult {
@@ -258,52 +263,67 @@ pub fn check_package_json(
         }
     }
 
-    // T56: prepare script exists
-    let prepare = json.get("scripts").and_then(|s| s.get("prepare"));
+    push_script_presence_result(
+        json,
+        pkg_path,
+        "prepare",
+        "T56",
+        Severity::Warn,
+        "`prepare` script exists in `package.json`",
+        "`prepare` script found. This runs after `pnpm install`, typically setting up git hooks (e.g., husky) or building required artifacts.",
+        "`prepare` script missing from `package.json`",
+        "No `prepare` script in `package.json`. The `prepare` script runs after `pnpm install` and is typically used to set up git hooks (e.g., `\"prepare\": \"husky\"`). Without it, new developers won't get pre-commit hooks installed automatically.",
+        results,
+    );
+    push_script_presence_result(
+        json,
+        pkg_path,
+        "lint",
+        "T-PKG-02",
+        Severity::Error,
+        "`lint` script exists in `package.json`",
+        "`lint` script found in package.json scripts.",
+        "`lint` script missing",
+        "package.json must have a `lint` script for CI linting (e.g., `eslint --max-warnings 0 .`).",
+        results,
+    );
+    push_script_presence_result(
+        json,
+        pkg_path,
+        "typecheck",
+        "T-PKG-03",
+        Severity::Error,
+        "`typecheck` script exists in `package.json`",
+        "`typecheck` script found in package.json scripts.",
+        "`typecheck` script missing",
+        "package.json must have a `typecheck` script for CI type checking (e.g., `tsc --noEmit`).",
+        results,
+    );
+}
 
-    if prepare.is_some() {
-        results.push(
-            CheckResult {
-                id: "T56".to_owned(),
-                severity: Severity::Info,
-                title: "`prepare` script exists in `package.json`".to_owned(),
-                message:
-                    "`prepare` script found. This runs after `pnpm install`, typically setting up \
-                     git hooks (e.g., husky) or building required artifacts."
-                        .to_owned(),
-                file: Some(pkg_path.display().to_string()),
-                line: None,
-                inventory: false,
-            }
-            .as_inventory(),
-        );
-    } else {
-        results.push(CheckResult {
-            id: "T56".to_owned(),
-            severity: Severity::Warn,
-            title: "`prepare` script missing from `package.json`".to_owned(),
-            message: "No `prepare` script in `package.json`. The `prepare` script runs after `pnpm install` \
-                     and is typically used to set up git hooks (e.g., `\"prepare\": \"husky\"`). Without it, \
-                     new developers won't get pre-commit hooks installed automatically."
-                .to_owned(),
-            file: Some(pkg_path.display().to_string()),
-            line: None,
-            inventory: false,
-        });
-    }
-
-    // T-PKG-02: lint script exists
-    let has_lint_script = json
+fn push_script_presence_result(
+    json: &serde_json::Value,
+    pkg_path: &Path,
+    script_name: &str,
+    id: &str,
+    missing_severity: Severity,
+    success_title: &str,
+    success_message: &str,
+    missing_title: &str,
+    missing_message: &str,
+    results: &mut Vec<CheckResult>,
+) {
+    let has_script = json
         .get("scripts")
-        .and_then(|s| s.as_object())
-        .is_some_and(|scripts| scripts.contains_key("lint"));
-    if has_lint_script {
+        .and_then(serde_json::Value::as_object)
+        .is_some_and(|scripts| scripts.contains_key(script_name));
+    if has_script {
         results.push(
             CheckResult {
-                id: "T-PKG-02".to_owned(),
+                id: id.to_owned(),
                 severity: Severity::Info,
-                title: "`lint` script exists in `package.json`".to_owned(),
-                message: "`lint` script found in package.json scripts.".to_owned(),
+                title: success_title.to_owned(),
+                message: success_message.to_owned(),
                 file: Some(pkg_path.display().to_string()),
                 line: None,
                 inventory: false,
@@ -312,51 +332,18 @@ pub fn check_package_json(
         );
     } else {
         results.push(CheckResult {
-            id: "T-PKG-02".to_owned(),
-            severity: Severity::Error,
-            title: "`lint` script missing".to_owned(),
-            message: "package.json must have a `lint` script for CI linting \
-                     (e.g., `eslint --max-warnings 0 .`)."
-                .to_owned(),
+            id: id.to_owned(),
+            severity: missing_severity,
+            title: missing_title.to_owned(),
+            message: missing_message.to_owned(),
             file: Some(pkg_path.display().to_string()),
             line: None,
             inventory: false,
         });
     }
+}
 
-    // T-PKG-03: typecheck script exists
-    let has_typecheck_script = json
-        .get("scripts")
-        .and_then(|s| s.as_object())
-        .is_some_and(|scripts| scripts.contains_key("typecheck"));
-    if has_typecheck_script {
-        results.push(
-            CheckResult {
-                id: "T-PKG-03".to_owned(),
-                severity: Severity::Info,
-                title: "`typecheck` script exists in `package.json`".to_owned(),
-                message: "`typecheck` script found in package.json scripts.".to_owned(),
-                file: Some(pkg_path.display().to_string()),
-                line: None,
-                inventory: false,
-            }
-            .as_inventory(),
-        );
-    } else {
-        results.push(CheckResult {
-            id: "T-PKG-03".to_owned(),
-            severity: Severity::Error,
-            title: "`typecheck` script missing".to_owned(),
-            message: "package.json must have a `typecheck` script for CI type checking \
-                     (e.g., `tsc --noEmit`)."
-                .to_owned(),
-            file: Some(pkg_path.display().to_string()),
-            line: None,
-            inventory: false,
-        });
-    }
-
-    // T57: engines field
+fn push_engine_results(json: &serde_json::Value, pkg_path: &Path, results: &mut Vec<CheckResult>) {
     if json.get("engines").is_some() {
         results.push(CheckResult {
             id: "T57".to_owned(),
@@ -387,10 +374,9 @@ pub fn check_package_json(
         });
     }
 
-    // T-PKG-04: engines must include pnpm version constraint
     let has_pnpm_engine = json
         .get("engines")
-        .and_then(|e| e.as_object())
+        .and_then(serde_json::Value::as_object)
         .is_some_and(|engines| engines.contains_key("pnpm"));
     if has_pnpm_engine {
         results.push(
@@ -406,7 +392,6 @@ pub fn check_package_json(
             .as_inventory(),
         );
     } else if json.get("engines").is_some() {
-        // Only check if engines exists but lacks pnpm — T57 handles missing engines
         results.push(CheckResult {
             id: "T-PKG-04".to_owned(),
             severity: Severity::Error,
@@ -419,18 +404,23 @@ pub fn check_package_json(
             inventory: false,
         });
     }
+}
 
-    // T58: onlyBuiltDependencies
-    if let Some(obd) = json
+fn push_only_built_dependencies_result(
+    json: &serde_json::Value,
+    pkg_path: &Path,
+    results: &mut Vec<CheckResult>,
+) {
+    if let Some(only_built_dependencies) = json
         .get("pnpm")
-        .and_then(|p| p.get("onlyBuiltDependencies"))
+        .and_then(|pnpm| pnpm.get("onlyBuiltDependencies"))
     {
         results.push(CheckResult {
             id: "T58".to_owned(),
             severity: Severity::Info,
             title: "`onlyBuiltDependencies` configured in pnpm".to_owned(),
             message: format!(
-                "`onlyBuiltDependencies` = {obd}. This restricts which packages can run post-install scripts, \
+                "`onlyBuiltDependencies` = {only_built_dependencies}. This restricts which packages can run post-install scripts, \
                  reducing supply chain attack surface by blocking arbitrary code execution from dependencies."
             ),
             file: Some(pkg_path.display().to_string()),
@@ -438,6 +428,35 @@ pub fn check_package_json(
             inventory: false,
         }.as_inventory());
     }
+}
+
+pub fn check_package_json(
+    fs: &dyn FileSystem,
+    package_jsons: &[PathBuf],
+    root: &Path,
+    results: &mut Vec<CheckResult>,
+) {
+    // Find root package.json by matching parent to project root.
+    // Per-app package.jsons get banned-dep checks only (T17).
+    let root_pkg = package_jsons
+        .iter()
+        .find(|p| p.parent().is_some_and(|parent| parent == root));
+
+    let Some(pkg_path) = root_pkg else {
+        return;
+    };
+
+    let Some(json) = load_package_json(fs, pkg_path) else {
+        return;
+    };
+
+    push_private_field_result(&json, pkg_path, results);
+    push_pnpm_override_results(&json, pkg_path, results);
+    push_banned_dependency_results(&json, pkg_path, results);
+    push_package_manager_results(&json, pkg_path, results);
+    push_script_results(&json, pkg_path, results);
+    push_engine_results(&json, pkg_path, results);
+    push_only_built_dependencies_result(&json, pkg_path, results);
 
     // Per-app package.jsons: check banned deps (T17) only
     for app_pkg in package_jsons {
@@ -449,68 +468,14 @@ pub fn check_package_json(
 }
 
 /// Check banned dependencies in a single package.json (T17 only).
-#[allow(clippy::disallowed_methods)] // reason: serde_json::from_str for package.json inspection
 fn check_banned_deps_in_package(
     fs: &dyn FileSystem,
     pkg_path: &Path,
     results: &mut Vec<CheckResult>,
 ) {
-    let Some(content) = fs.read_file(pkg_path) else {
+    let Some(json) = load_package_json(fs, pkg_path) else {
         return;
     };
 
-    let json: serde_json::Value = match serde_json::from_str(&content) {
-        Ok(v) => v,
-        Err(_) => return,
-    };
-
-    let banned_deps: &[&str] = &[
-        "axios",
-        "lodash",
-        "moment",
-        "uuid",
-        "nanoid",
-        "pg",
-        "express",
-        "classnames",
-        "winston",
-        "pino",
-        "request",
-        "got",
-        "superagent",
-        "node-fetch",
-        "isomorphic-fetch",
-        "underscore",
-        "request-promise",
-        "postgres",
-        "cross-fetch",
-        "xregexp",
-        "regexp-tree",
-    ];
-    let banned_prefixes: &[&str] = &["embla-carousel"];
-
-    for section_name in &["dependencies", "devDependencies"] {
-        if let Some(deps) = json.get(section_name).and_then(|d| d.as_object()) {
-            for dep_name in deps.keys() {
-                let is_banned = banned_deps.contains(&dep_name.as_str())
-                    || banned_prefixes.iter().any(|p| dep_name.starts_with(p));
-
-                if is_banned {
-                    results.push(CheckResult {
-                        id: "T17".to_owned(),
-                        severity: Severity::Error,
-                        title: format!("Banned dependency `{dep_name}` in `{section_name}`"),
-                        message: format!(
-                            "`{dep_name}` found in `{section_name}`. This package is banned because a preferred \
-                             alternative exists (e.g., native fetch over axios, date-fns over moment, \
-                             crypto.randomUUID over uuid). Remove it and switch to the approved alternative."
-                        ),
-                        file: Some(pkg_path.display().to_string()),
-                        line: None,
-                        inventory: false,
-                    });
-                }
-            }
-        }
-    }
+    push_banned_dependency_results(&json, pkg_path, results);
 }
