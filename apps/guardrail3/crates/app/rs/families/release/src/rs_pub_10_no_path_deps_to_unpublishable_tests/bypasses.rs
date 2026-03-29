@@ -1,6 +1,6 @@
-use super::super::super::release_support::dependency_edges;
-use super::super::super::test_support::run_tree as run_family;
-use super::super::super::test_support::{
+use super::super::dependency_edges;
+use super::super::run_tree as run_family;
+use super::super::{
     StubToolChecker, dir_entry, edge_facts, edge_input, project_tree, temp_root,
 };
 use super::super::check;

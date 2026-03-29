@@ -1,5 +1,5 @@
-use super::super::super::test_support::run_tree as check;
-use super::super::super::test_support::{StubToolChecker, dir_entry, project_tree, temp_root};
+use super::super::run_tree as check;
+use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
 
 #[test]
 fn golden_config_only_tree_has_no_release_input_failures() {

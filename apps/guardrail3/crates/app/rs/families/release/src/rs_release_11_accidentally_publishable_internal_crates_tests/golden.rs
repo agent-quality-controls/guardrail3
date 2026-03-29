@@ -1,6 +1,6 @@
 use guardrail3_domain_report::Severity;
 
-use super::super::super::test_support::{crate_facts, crate_input};
+use super::super::{crate_facts, crate_input};
 use super::super::check;
 
 #[test]

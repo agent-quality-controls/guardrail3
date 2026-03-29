@@ -56,6 +56,8 @@ members = [
     "crates/app/rs/families/hooks-rs",
     "crates/app/rs/families/hooks-shared",
     "crates/app/rs/families/release",
+    "crates/app/rs/families/release/assertions",
+    "crates/app/rs/families/release/test_support",
     "crates/app/rs/families/test/crates/runtime",
     "crates/app/rs/families/test/crates/assertions",
     "crates/app/rs/families/test/test_support",

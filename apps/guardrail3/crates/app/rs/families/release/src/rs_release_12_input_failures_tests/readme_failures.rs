@@ -1,7 +1,7 @@
 #[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
 
-use super::super::super::test_support::{copy_fixture, run_family, write_file};
+use super::super::{copy_fixture, run_family, write_file};
 
 #[cfg(unix)]
 #[test]

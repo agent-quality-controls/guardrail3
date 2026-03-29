@@ -1,0 +1,33 @@
+use guardrail3_app_rs_family_release as _;
+
+mod common;
+
+pub mod rs_bin_01_binary_release_workflow;
+pub mod rs_bin_02_linux_target;
+pub mod rs_bin_03_binstall_metadata;
+pub mod rs_pub_01_description_present;
+pub mod rs_pub_02_license_present;
+pub mod rs_pub_03_repository_present;
+pub mod rs_pub_04_readme_exists;
+pub mod rs_pub_05_readme_quality;
+pub mod rs_pub_06_keywords_present;
+pub mod rs_pub_07_categories_present;
+pub mod rs_pub_08_valid_semver;
+pub mod rs_pub_09_publish_dry_run;
+pub mod rs_pub_10_no_path_deps_to_unpublishable;
+pub mod rs_pub_11_interdependent_version_consistency;
+pub mod rs_pub_12_crate_inventory;
+pub mod rs_pub_13_docs_rs_metadata;
+pub mod rs_pub_14_include_exclude_inventory;
+pub mod rs_release_01_license_file;
+pub mod rs_release_02_release_plz_exists;
+pub mod rs_release_03_release_plz_coverage;
+pub mod rs_release_04_cliff_exists;
+pub mod rs_release_05_release_plz_workflow;
+pub mod rs_release_06_publish_dry_run_workflow;
+pub mod rs_release_07_registry_token;
+pub mod rs_release_08_semver_checks_installed;
+pub mod rs_release_09_publish_status_inventory;
+pub mod rs_release_10_release_profile_inventory;
+pub mod rs_release_11_accidentally_publishable_internal_crates;
+pub mod rs_release_12_input_failures;

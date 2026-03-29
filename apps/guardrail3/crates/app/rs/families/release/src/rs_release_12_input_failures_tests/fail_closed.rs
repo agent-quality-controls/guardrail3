@@ -1,7 +1,7 @@
-use guardrail3_domain_report::Severity;
-
-use super::super::super::test_support::run_tree as check;
-use super::super::super::test_support::{StubToolChecker, dir_entry, project_tree, temp_root};
+use super::super::run_tree as check;
+use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
+use guardrail3_app_rs_family_release_assertions::rs_release_12_input_failures as assertions;
+use guardrail3_app_rs_family_release_assertions::rs_release_12_input_failures::ExpectedRuleResult;
 
 #[test]
 fn emits_exact_fail_closed_hits_for_malformed_release_configs_and_workflow_yaml() {
@@ -38,44 +38,48 @@ repository = "https://example.com/repo"
     );
     let tool_checker = StubToolChecker::new(true);
     let results = check(&tree, &tool_checker, false);
-    let failures = results
-        .iter()
-        .filter(|result| result.id == "RS-RELEASE-12")
-        .collect::<Vec<_>>();
-
-    assert_eq!(
-        failures.len(),
-        3,
-        "expected exact input failures: {results:#?}"
+    assertions::assert_rule_results(
+        &results,
+        &[
+            ExpectedRuleResult {
+                file: Some(".github/workflows/release.yml"),
+                ..ExpectedRuleResult::default()
+            },
+            ExpectedRuleResult {
+                file: Some("cliff.toml"),
+                ..ExpectedRuleResult::default()
+            },
+            ExpectedRuleResult {
+                file: Some("release-plz.toml"),
+                ..ExpectedRuleResult::default()
+            },
+        ],
     );
-    assert!(
-        failures
-            .iter()
-            .all(|result| result.severity == Severity::Error)
+    assertions::assert_related_rule_file_absent(
+        &results,
+        assertions::RELEASE_PLZ_COVERAGE_RULE_ID,
+        "release-plz.toml",
     );
-    assert_eq!(
-        failures
-            .iter()
-            .map(|result| result.file.as_deref())
-            .collect::<Vec<_>>(),
-        vec![
-            Some(".github/workflows/release.yml"),
-            Some("cliff.toml"),
-            Some("release-plz.toml"),
-        ]
+    assertions::assert_related_rule_file_absent(
+        &results,
+        assertions::CLIFF_EXISTS_RULE_ID,
+        "cliff.toml",
     );
-    assert!(!results.iter().any(|result| {
-        result.id == "RS-RELEASE-03" && result.file.as_deref() == Some("release-plz.toml")
-    }));
-    assert!(!results.iter().any(|result| {
-        result.id == "RS-RELEASE-04" && result.file.as_deref() == Some("cliff.toml")
-    }));
-    assert!(!results.iter().any(|result| {
-        matches!(
-            result.id.as_str(),
-            "RS-RELEASE-05" | "RS-RELEASE-06" | "RS-RELEASE-07"
-        ) && result.file.as_deref() == Some(".github/workflows/release.yml")
-    }));
+    assertions::assert_related_rule_file_absent(
+        &results,
+        assertions::RELEASE_WORKFLOW_RULE_ID,
+        ".github/workflows/release.yml",
+    );
+    assertions::assert_related_rule_file_absent(
+        &results,
+        assertions::PUBLISH_DRY_RUN_WORKFLOW_RULE_ID,
+        ".github/workflows/release.yml",
+    );
+    assertions::assert_related_rule_file_absent(
+        &results,
+        assertions::REGISTRY_TOKEN_RULE_ID,
+        ".github/workflows/release.yml",
+    );
 }
 
 #[test]
@@ -115,19 +119,31 @@ jobs:
     let tool_checker = StubToolChecker::new(true);
     let results = check(&tree, &tool_checker, false);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-RELEASE-12" && result.file.as_deref() == Some("Cargo.toml")
-    }));
-    assert!(results.iter().any(|result| {
-        result.id == "RS-RELEASE-02"
-            && result.inventory
-            && result.file.as_deref() == Some("release-plz.toml")
-    }));
-    assert!(results.iter().any(|result| {
-        result.id == "RS-RELEASE-05"
-            && result.inventory
-            && result.file.as_deref() == Some(".github/workflows/release.yml")
-    }));
+    assertions::assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: Some("Cargo.toml"),
+            ..ExpectedRuleResult::default()
+        }],
+    );
+    assertions::assert_related_rule_results(
+        &results,
+        assertions::RELEASE_PLZ_EXISTS_RULE_ID,
+        &[ExpectedRuleResult {
+            file: Some("release-plz.toml"),
+            inventory: Some(true),
+            ..ExpectedRuleResult::default()
+        }],
+    );
+    assertions::assert_related_rule_results(
+        &results,
+        assertions::RELEASE_WORKFLOW_RULE_ID,
+        &[ExpectedRuleResult {
+            file: Some(".github/workflows/release.yml"),
+            inventory: Some(true),
+            ..ExpectedRuleResult::default()
+        }],
+    );
 }
 
 #[test]
@@ -152,28 +168,7 @@ fn unreadable_cached_release_files_fail_closed_when_structure_exists_without_con
     );
     let tool_checker = StubToolChecker::new(true);
     let results = check(&tree, &tool_checker, false);
-    let failures = results
-        .iter()
-        .filter(|result| result.id == "RS-RELEASE-12")
-        .map(|result| (result.file.as_deref(), result.message.as_str()))
-        .collect::<Vec<_>>();
-
-    assert!(failures.iter().any(|(file, message)| {
-        *file == Some("Cargo.toml") && message.contains("Failed to read Cargo.toml")
-    }));
-    assert!(failures.iter().any(|(file, message)| {
-        *file == Some("crates/example/Cargo.toml") && message.contains("Failed to read Cargo.toml")
-    }));
-    assert!(failures.iter().any(|(file, message)| {
-        *file == Some("release-plz.toml") && message.contains("Failed to read release-plz.toml")
-    }));
-    assert!(failures.iter().any(|(file, message)| {
-        *file == Some("cliff.toml") && message.contains("Failed to read cliff.toml")
-    }));
-    assert!(failures.iter().any(|(file, message)| {
-        *file == Some(".github/workflows/release.yml")
-            && message.contains("Failed to read workflow YAML")
-    }));
+    assertions::assert_unreadable_cached_files_fail_closed(&results);
 }
 
 #[test]
@@ -233,21 +228,31 @@ jobs:
     let tool_checker = StubToolChecker::new(true);
     let results = check(&tree, &tool_checker, false);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-RELEASE-12"
-            && result.file.as_deref() == Some("crates/example/Cargo.toml")
-            && result.severity == Severity::Error
-    }));
-    assert!(results.iter().any(|result| {
-        result.id == "RS-RELEASE-02"
-            && result.inventory
-            && result.file.as_deref() == Some("release-plz.toml")
-    }));
-    assert!(results.iter().any(|result| {
-        result.id == "RS-RELEASE-05"
-            && result.inventory
-            && result.file.as_deref() == Some(".github/workflows/release.yml")
-    }));
+    assertions::assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: Some("crates/example/Cargo.toml"),
+            ..ExpectedRuleResult::default()
+        }],
+    );
+    assertions::assert_related_rule_results(
+        &results,
+        assertions::RELEASE_PLZ_EXISTS_RULE_ID,
+        &[ExpectedRuleResult {
+            file: Some("release-plz.toml"),
+            inventory: Some(true),
+            ..ExpectedRuleResult::default()
+        }],
+    );
+    assertions::assert_related_rule_results(
+        &results,
+        assertions::RELEASE_WORKFLOW_RULE_ID,
+        &[ExpectedRuleResult {
+            file: Some(".github/workflows/release.yml"),
+            inventory: Some(true),
+            ..ExpectedRuleResult::default()
+        }],
+    );
 }
 
 #[test]
@@ -286,10 +291,7 @@ repository = "https://example.com/repo"
     let tool_checker = StubToolChecker::new(true);
     let results = check(&tree, &tool_checker, false);
 
-    assert!(!results.iter().any(|result| {
-        result.id == "RS-RELEASE-12"
-            && result.file.as_deref() == Some("examples/demo/.github/workflows/release.yml")
-    }));
+    assertions::assert_rule_file_absent(&results, "examples/demo/.github/workflows/release.yml");
 }
 
 #[test]
@@ -344,11 +346,6 @@ conventional_commits = true
     let tool_checker = StubToolChecker::new(true);
     let results = check(&tree, &tool_checker, false);
 
-    assert!(!results.iter().any(|result| {
-        result.id == "RS-RELEASE-12"
-            && matches!(
-                result.file.as_deref(),
-                Some("examples/demo/release-plz.toml") | Some("examples/demo/cliff.toml")
-            )
-    }));
+    assertions::assert_rule_file_absent(&results, "examples/demo/release-plz.toml");
+    assertions::assert_rule_file_absent(&results, "examples/demo/cliff.toml");
 }
