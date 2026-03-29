@@ -12,11 +12,18 @@ fn severity_rank(severity: Severity) -> u8 {
     }
 }
 
-pub fn assert_no_results(results: &[CheckResult]) {
-    assert!(
-        results.is_empty(),
-        "expected no test-relaxation findings: {results:#?}"
+pub fn assert_inventory(results: &[CheckResult], file: &str) {
+    assert_eq!(results.len(), 1);
+    let result = &results[0];
+    assert_eq!(result.id, ID);
+    assert!(result.inventory);
+    assert_eq!(result.severity, Severity::Info);
+    assert_eq!(result.title, "clippy test relaxation policy exact");
+    assert_eq!(
+        result.message,
+        "Managed test relaxation keys match the expected clippy policy."
     );
+    assert_eq!(result.file.as_deref(), Some(file));
 }
 
 pub fn assert_messages(results: &[CheckResult], expected: &[(Severity, &str, &str)], file: &str) {

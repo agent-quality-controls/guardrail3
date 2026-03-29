@@ -13,10 +13,10 @@ fn emits_no_result_for_non_library_profile() {
 }
 
 #[test]
-fn emits_no_result_when_library_profile_keeps_global_state_bans() {
+fn inventories_when_library_profile_keeps_global_state_bans() {
     let tree = published_library_package_root_tree(build_fixture_clippy_toml(
         "library", false, true, "", "",
     ));
     let results = run_for_tests(&tree, "clippy.toml");
-    assertions::assert_no_results(&results);
+    assertions::assert_inventory(&results, "clippy.toml");
 }

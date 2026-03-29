@@ -16,6 +16,31 @@ pub fn check(input: &InputFailureTestInput<'_>, results: &mut Vec<CheckResult>) 
     });
 }
 
+pub(crate) fn emit_inventory_if_clean(
+    root: &super::facts::TestRootFacts,
+    results: &mut Vec<CheckResult>,
+    has_failures: bool,
+) {
+    if has_failures {
+        return;
+    }
+    results.push(
+        CheckResult {
+            id: ID.to_owned(),
+            severity: Severity::Info,
+            title: "test-family input failures evaluated".to_owned(),
+            message: format!(
+                "Root `{}` was checked for input failures and none were found.",
+                root.rel_dir
+            ),
+            file: Some(root.cargo_rel_path.clone()),
+            line: None,
+            inventory: false,
+        }
+        .as_inventory(),
+    );
+}
+
 #[cfg(test)]
 #[allow(dead_code)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {

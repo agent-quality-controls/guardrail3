@@ -5,27 +5,45 @@ use super::inputs::DualOwnershipInput;
 const ID: &str = "RS-ARCH-03";
 
 pub fn check(input: &DualOwnershipInput<'_>, results: &mut Vec<CheckResult>) {
-    if input.root.owner_families.len() < 2 {
+    if input.root.owner_families.len() >= 2 {
+        results.push(CheckResult {
+            id: ID.to_owned(),
+            severity: Severity::Error,
+            title: format!(
+                "Rust root `{}` has dual architecture ownership",
+                display_dir(&input.root.rel_dir)
+            ),
+            message: format!(
+                "`{}` is simultaneously owned by app zone(s) [{}] and package zone(s) [{}]. A single Rust root must not be governed by both hexarch and libarch.",
+                input.root.cargo_rel_path,
+                input.root.app_zone_candidates.join(", "),
+                input.root.package_zone_candidates.join(", "),
+            ),
+            file: Some(input.root.cargo_rel_path.clone()),
+            line: None,
+            inventory: false,
+        });
         return;
     }
 
-    results.push(CheckResult {
-        id: ID.to_owned(),
-        severity: Severity::Error,
-        title: format!(
-            "Rust root `{}` has dual architecture ownership",
-            display_dir(&input.root.rel_dir)
-        ),
-        message: format!(
-            "`{}` is simultaneously owned by app zone(s) [{}] and package zone(s) [{}]. A single Rust root must not be governed by both hexarch and libarch.",
-            input.root.cargo_rel_path,
-            input.root.app_zone_candidates.join(", "),
-            input.root.package_zone_candidates.join(", "),
-        ),
-        file: Some(input.root.cargo_rel_path.clone()),
-        line: None,
-        inventory: false,
-    });
+    results.push(
+        CheckResult {
+            id: ID.to_owned(),
+            severity: Severity::Info,
+            title: format!(
+                "Rust root `{}` avoids dual architecture ownership",
+                display_dir(&input.root.rel_dir)
+            ),
+            message: format!(
+                "`{}` is governed by at most one architecture family.",
+                input.root.cargo_rel_path
+            ),
+            file: Some(input.root.cargo_rel_path.clone()),
+            line: None,
+            inventory: false,
+        }
+        .as_inventory(),
+    );
 }
 
 fn display_dir(rel_dir: &str) -> &str {

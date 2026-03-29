@@ -1,6 +1,11 @@
 use guardrail3_app_rs_family_hexarch as _;
 
 pub mod dependency_facts;
+pub mod inventory_contract;
+pub use inventory_contract::{
+    HEXARCH_INVENTORY_RULE_IDS, PATCH_REPLACE_BYPASS_RULE_ID, assert_inventory_ids,
+    assert_inventory_result,
+};
 pub mod rs_hexarch_01_crates_exists;
 pub mod rs_hexarch_02_exact_contents;
 pub mod rs_hexarch_03_inbound_outbound;

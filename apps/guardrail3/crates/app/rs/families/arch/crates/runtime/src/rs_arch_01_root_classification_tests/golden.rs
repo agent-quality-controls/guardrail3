@@ -25,4 +25,9 @@ fn golden_layout_has_no_classification_errors() {
     ));
 
     assertions::assert_no_error_files(&results, "RS-ARCH-01");
+    assertions::assert_inventory_files(
+        &results,
+        "RS-ARCH-01",
+        &["apps/backend/Cargo.toml", "packages/shared/Cargo.toml"],
+    );
 }

@@ -1,6 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::inputs::DependencyEdgeHexarchInput;
+use super::inventory::push_success;
 
 const ID: &str = "RS-HEXARCH-24";
 
@@ -16,6 +17,18 @@ pub fn check(input: &DependencyEdgeHexarchInput<'_>, results: &mut Vec<CheckResu
         || edge.resolved_target_rel_dir.is_none()
         || !edge.resolved_target_exists
     {
+        if source_app == target_app && edge.resolved_target_rel_dir.is_some() && edge.resolved_target_exists {
+            push_success(
+                results,
+                ID,
+                "dependency stays within one app boundary".to_owned(),
+                format!(
+                    "`{}` depends on `{}` without crossing app boundaries.",
+                    edge.source_rel_dir, edge.dep_package_name
+                ),
+                Some(edge.source_cargo_rel_path.clone()),
+            );
+        }
         return;
     }
 

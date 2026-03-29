@@ -11,6 +11,8 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
         return;
     };
 
+    let mut mismatch_count = 0usize;
+
     for (key, expected, severity, title, message) in [
         (
             "allow-dbg-in-tests",
@@ -49,6 +51,7 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
         ),
     ] {
         if parsed.get(key).and_then(toml::Value::as_bool) != Some(expected) {
+            mismatch_count += 1;
             results.push(CheckResult {
                 id: ID.to_owned(),
                 severity,
@@ -59,6 +62,22 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
                 inventory: false,
             });
         }
+    }
+
+    if mismatch_count == 0 {
+        results.push(
+            CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Info,
+                title: "clippy test relaxation policy exact".to_owned(),
+                message: "Managed test relaxation keys match the expected clippy policy."
+                    .to_owned(),
+                file: Some(input.config.rel_path.clone()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
     }
 }
 

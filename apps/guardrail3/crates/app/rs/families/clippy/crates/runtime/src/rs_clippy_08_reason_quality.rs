@@ -12,6 +12,8 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
         return;
     };
 
+    let mut missing_reason_count = 0usize;
+
     for key in [
         "disallowed-methods",
         "disallowed-types",
@@ -19,6 +21,7 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
     ] {
         for entry in parse_ban_entries(parsed, key) {
             if entry.is_plain_string || entry.reason.as_deref().is_none() {
+                missing_reason_count += 1;
                 results.push(CheckResult {
                     id: ID.to_owned(),
                     severity: Severity::Warn,
@@ -33,6 +36,22 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
                 });
             }
         }
+    }
+
+    if missing_reason_count == 0 {
+        results.push(
+            CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Info,
+                title: "ban entries use reasoned table format".to_owned(),
+                message: "All managed ban entries use table format with a `reason` field."
+                    .to_owned(),
+                file: Some(input.config.rel_path.clone()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
     }
 }
 

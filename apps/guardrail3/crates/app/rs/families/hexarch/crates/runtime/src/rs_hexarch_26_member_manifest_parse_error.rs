@@ -1,6 +1,8 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
+use super::dependency_facts::{MemberDependencyFacts, MemberManifestFailureFacts};
 use super::inputs::MemberManifestFailureHexarchInput;
+use super::inventory::push_success;
 
 const ID: &str = "RS-HEXARCH-26";
 
@@ -18,6 +20,27 @@ pub fn check(input: &MemberManifestFailureHexarchInput<'_>, results: &mut Vec<Ch
         line: None,
         inventory: false,
     });
+}
+
+pub fn check_inventory(
+    members: &[MemberDependencyFacts],
+    failures: &[MemberManifestFailureFacts],
+    results: &mut Vec<CheckResult>,
+) {
+    if members.is_empty() || !failures.is_empty() {
+        return;
+    }
+
+    push_success(
+        results,
+        ID,
+        "member Cargo.toml files parsed cleanly".to_owned(),
+        format!(
+            "Hexarch parsed all {} discovered member Cargo.toml files cleanly, so dependency checks were not blocked.",
+            members.len()
+        ),
+        None,
+    );
 }
 
 #[cfg(test)]

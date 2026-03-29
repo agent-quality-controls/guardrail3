@@ -26,6 +26,31 @@ pub fn check(input: &MisplacedRootInput<'_>, results: &mut Vec<CheckResult>) {
     });
 }
 
+pub fn check_success(
+    reporting_enabled: bool,
+    has_misplaced_roots: bool,
+    results: &mut Vec<CheckResult>,
+) {
+    if !reporting_enabled || has_misplaced_roots {
+        return;
+    }
+
+    results.push(
+        CheckResult {
+            id: ID.to_owned(),
+            severity: Severity::Info,
+            title: "No misplaced Rust roots found".to_owned(),
+            message:
+                "All discovered live Rust roots stay within governed architecture zones or declared auxiliary roots."
+                    .to_owned(),
+            file: None,
+            line: None,
+            inventory: false,
+        }
+        .as_inventory(),
+    );
+}
+
 fn display_dir(rel_dir: &str) -> &str {
     if rel_dir.is_empty() { "." } else { rel_dir }
 }

@@ -35,6 +35,26 @@ pub fn check(input: &ZoneOverlapInput<'_>, results: &mut Vec<CheckResult>) {
     });
 }
 
+pub fn check_success(has_overlaps: bool, results: &mut Vec<CheckResult>) {
+    if has_overlaps {
+        return;
+    }
+
+    results.push(
+        CheckResult {
+            id: ID.to_owned(),
+            severity: Severity::Info,
+            title: "No illegal app/package zone overlap found".to_owned(),
+            message: "App and package architecture zones do not overlap or nest illegally."
+                .to_owned(),
+            file: None,
+            line: None,
+            inventory: false,
+        }
+        .as_inventory(),
+    );
+}
+
 #[cfg(test)]
 pub(crate) fn check_results(
     tree: &guardrail3_domain_project_tree::ProjectTree,

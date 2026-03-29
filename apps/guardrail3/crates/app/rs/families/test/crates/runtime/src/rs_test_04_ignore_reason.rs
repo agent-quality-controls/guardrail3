@@ -17,6 +17,20 @@ pub fn check(input: &TestFileInput<'_>, results: &mut Vec<CheckResult>) {
             inventory: false,
         });
     }
+    if input.parsed.ignore_without_reason_lines.is_empty() {
+        results.push(
+            CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Info,
+                title: "ignored tests have reasons".to_owned(),
+                message: "Every `#[ignore]` in this file is paired with a reason comment or attribute.".to_owned(),
+                file: Some(input.file.rel_path.clone()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
+    }
 }
 
 #[cfg(test)]

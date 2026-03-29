@@ -21,8 +21,10 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
     };
 
     let found: BTreeSet<_> = ban_paths(parsed, "disallowed-types").into_iter().collect();
+    let mut missing_count = 0usize;
     for expected in EXPECTED_LIBRARY_GLOBAL_STATE_TYPES {
         if !found.contains(*expected) {
+            missing_count += 1;
             results.push(CheckResult {
                 id: ID.to_owned(),
                 severity: Severity::Error,
@@ -33,6 +35,21 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
                 inventory: false,
             });
         }
+    }
+
+    if missing_count == 0 {
+        results.push(
+            CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Info,
+                title: "library global-state bans present".to_owned(),
+                message: "Library profile includes all managed global-state type bans.".to_owned(),
+                file: Some(input.config.rel_path.clone()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
     }
 }
 

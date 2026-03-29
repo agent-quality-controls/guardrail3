@@ -16,7 +16,25 @@ pub(crate) fn collect(
     local_package_names: &BTreeSet<String>,
     results: &mut Vec<CheckResult>,
 ) {
-    for violation in collect_violations(root, files, scoped_files, local_package_names) {
+    let violations = collect_violations(root, files, scoped_files, local_package_names);
+    if violations.is_empty() {
+        results.push(
+            CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Info,
+                title: "runtime/assertions split confirmed".to_owned(),
+                message: format!(
+                    "Root `{}` keeps runtime harnesses separated from sibling assertions crates.",
+                    root.rel_dir
+                ),
+                file: Some(root.cargo_rel_path.clone()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
+    }
+    for violation in violations {
         check(&RuntimeAssertionsViolationInput::new(&violation), results);
     }
 }

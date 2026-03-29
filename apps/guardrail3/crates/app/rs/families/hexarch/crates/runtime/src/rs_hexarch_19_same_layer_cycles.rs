@@ -3,8 +3,10 @@ use guardrail3_domain_report::{CheckResult, Severity};
 #[cfg(test)]
 use guardrail3_domain_project_tree::ProjectTree;
 
+use super::dependency_facts::{CycleFacts, MemberDependencyFacts};
 #[cfg(test)]
-use super::dependency_facts::{CycleFacts, Layer};
+use super::dependency_facts::Layer;
+use super::inventory::push_success;
 
 use super::inputs::CycleHexarchInput;
 
@@ -25,6 +27,27 @@ pub fn check(input: &CycleHexarchInput<'_>, results: &mut Vec<CheckResult>) {
         line: None,
         inventory: false,
     });
+}
+
+pub fn check_inventory(
+    members: &[MemberDependencyFacts],
+    cycles: &[CycleFacts],
+    results: &mut Vec<CheckResult>,
+) {
+    if members.is_empty() || !cycles.is_empty() {
+        return;
+    }
+
+    push_success(
+        results,
+        ID,
+        "no same-layer dependency cycles detected".to_owned(),
+        format!(
+            "Hexarch checked {} workspace member(s) and found no same-layer dependency cycles.",
+            members.len()
+        ),
+        None,
+    );
 }
 
 #[cfg(test)]

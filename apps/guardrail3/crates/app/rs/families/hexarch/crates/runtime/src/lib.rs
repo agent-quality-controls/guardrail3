@@ -1,5 +1,6 @@
 mod dependency_facts;
 mod facts;
+mod inventory;
 mod inputs;
 mod rs_hexarch_01_crates_exists;
 mod rs_hexarch_02_exact_contents;
@@ -170,6 +171,11 @@ pub fn check(tree: &ProjectTree, route: &RsHexarchRoute) -> Vec<CheckResult> {
         let input = CycleHexarchInput::new(cycle);
         rs_hexarch_19_same_layer_cycles::check(&input, &mut results);
     }
+    rs_hexarch_19_same_layer_cycles::check_inventory(
+        &dependency_facts.members,
+        &dependency_facts.cycles,
+        &mut results,
+    );
 
     for member in &dependency_facts.members {
         let input = MemberDependencyHexarchInput::new(
@@ -189,5 +195,15 @@ pub fn check(tree: &ProjectTree, route: &RsHexarchRoute) -> Vec<CheckResult> {
         rs_hexarch_23_adapter_pub_trait::check(&input, &mut results);
     }
 
+    rs_hexarch_26_member_manifest_parse_error::check_inventory(
+        &dependency_facts.members,
+        &dependency_facts.member_manifest_failures,
+        &mut results,
+    );
+
     results
 }
+
+#[cfg(test)]
+#[path = "lib_tests/mod.rs"]
+mod lib_tests;

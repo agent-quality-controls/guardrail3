@@ -1,6 +1,6 @@
 #[allow(unused_imports)]
 use guardrail3_app_rs_family_test_assertions::rs_test_09_nextest_timeouts::{
-    Severity, assert_reported, assert_rule_files, assert_rule_quiet,
+    Severity, assert_inventory, assert_reported, assert_rule_files, assert_rule_quiet,
 };
 
 #[allow(unused_imports)]
@@ -80,7 +80,8 @@ fn plain_tests_without_tokio_are_inactive_without_nextest() {
 
     let results = run_family(root);
 
-    assert_rule_quiet(&results);
+    assert_rule_files(&results, vec!["Cargo.toml".to_owned()]);
+    assert_inventory(&results, true);
 }
 
 #[test]

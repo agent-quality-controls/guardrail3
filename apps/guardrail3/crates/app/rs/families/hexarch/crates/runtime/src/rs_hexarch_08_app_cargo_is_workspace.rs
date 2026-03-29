@@ -1,6 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::inputs::AppHexarchInput;
+use super::inventory::push_success;
 
 const ID: &str = "RS-HEXARCH-08";
 
@@ -22,6 +23,16 @@ pub fn check(input: &AppHexarchInput<'_>, results: &mut Vec<CheckResult>) {
     }
 
     if input.is_workspace {
+        push_success(
+            results,
+            ID,
+            format!("Service `{}` Cargo.toml is a workspace", input.app_name),
+            format!(
+                "Service `{}` uses `{}` as the app workspace root.",
+                input.app_name, input.cargo_rel_path
+            ),
+            Some(input.cargo_rel_path.to_owned()),
+        );
         return;
     }
 

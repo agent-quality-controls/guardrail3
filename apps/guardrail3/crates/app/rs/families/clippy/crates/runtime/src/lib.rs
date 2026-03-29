@@ -49,6 +49,10 @@ pub fn check(tree: &ProjectTree, route: &RsClippyRoute) -> Vec<CheckResult> {
         rs_clippy_01_coverage::check_covered(&CoveredRustUnitInput::new(covered), &mut results);
     }
 
+    for allowed in &facts.allowed_configs {
+        rs_clippy_12_allowed_placement::check_allowed(allowed, &mut results);
+    }
+
     for uncovered in &facts.uncovered_units {
         rs_clippy_01_coverage::check_uncovered(
             &UncoveredRustUnitInput::new(uncovered),
@@ -65,13 +69,19 @@ pub fn check(tree: &ProjectTree, route: &RsClippyRoute) -> Vec<CheckResult> {
             &PolicyContextFailureInput::new(parse_error),
             &mut results,
         );
+    } else if tree.file_exists("guardrail3.toml") {
+        rs_clippy_23_policy_context_parseable::check_parseable(&mut results);
     }
 
-    for override_facts in &facts.cargo_config_overrides {
-        rs_clippy_24_forbid_clippy_conf_dir_override::check(
-            &CargoConfigOverrideInput::new(override_facts),
-            &mut results,
-        );
+    if facts.cargo_config_overrides.is_empty() {
+        rs_clippy_24_forbid_clippy_conf_dir_override::check_clean(&mut results);
+    } else {
+        for override_facts in &facts.cargo_config_overrides {
+            rs_clippy_24_forbid_clippy_conf_dir_override::check(
+                &CargoConfigOverrideInput::new(override_facts),
+                &mut results,
+            );
+        }
     }
 
     for input in ConfigClippyInput::from_facts(&facts) {

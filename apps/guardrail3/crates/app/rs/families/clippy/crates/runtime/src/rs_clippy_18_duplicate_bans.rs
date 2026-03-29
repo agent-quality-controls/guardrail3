@@ -14,6 +14,8 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
         return;
     };
 
+    let mut duplicate_count = 0usize;
+
     for key in [
         "disallowed-methods",
         "disallowed-types",
@@ -25,6 +27,7 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
         }
         for (path, count) in counts {
             if count > 1 {
+                duplicate_count += 1;
                 results.push(CheckResult {
                     id: ID.to_owned(),
                     severity: Severity::Warn,
@@ -36,6 +39,21 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
                 });
             }
         }
+    }
+
+    if duplicate_count == 0 {
+        results.push(
+            CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Info,
+                title: "ban entries are duplicate-free".to_owned(),
+                message: "Managed ban sections contain no duplicate paths.".to_owned(),
+                file: Some(input.config.rel_path.clone()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
     }
 }
 

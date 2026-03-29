@@ -8,6 +8,21 @@ pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
     let async_active =
         input.has_tests && (input.root.tokio_dependency_present || input.has_tokio_tests);
     if !async_active {
+        results.push(
+            CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Info,
+                title: "nextest timeouts inactive".to_owned(),
+                message: format!(
+                    "{} has no async test surface that requires nextest timeouts.",
+                    display_root(&input.root.rel_dir)
+                ),
+                file: Some(input.root.cargo_rel_path.clone()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
         return;
     }
 

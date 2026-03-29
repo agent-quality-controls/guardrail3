@@ -1,6 +1,6 @@
 #[allow(unused_imports)]
 use guardrail3_app_rs_family_test_assertions::rs_test_03_runtime_assertions_split::{
-    assert_error_reported, assert_rule_files, assert_rule_quiet,
+    assert_error_reported, assert_inventory, assert_rule_files, assert_rule_quiet,
 };
 
 #[allow(unused_imports)]
@@ -135,7 +135,8 @@ fn family_container_without_parent_cargo_manifest_is_still_a_valid_runtime_asser
     write_file(root, "test_support/src/lib.rs", "pub fn marker() {}\n");
 
     let results = run_family(root);
-    assert_rule_quiet(&results);
+    assert_rule_files(&results, vec!["crates/runtime/Cargo.toml".to_owned()]);
+    assert_inventory(&results, true);
 }
 
 #[test]
@@ -182,7 +183,8 @@ fn root_runtime_package_with_sibling_assertions_is_a_valid_runtime_assertions_sp
     write_file(root, "test_support/src/lib.rs", "pub fn marker() {}\n");
 
     let results = run_family(root);
-    assert_rule_quiet(&results);
+    assert_rule_files(&results, vec!["Cargo.toml".to_owned()]);
+    assert_inventory(&results, true);
 }
 
 #[test]
@@ -641,7 +643,8 @@ fn assertions_module_importing_shared_report_model_is_allowed() {
     );
 
     let results = run_family(root);
-    assert_rule_quiet(&results);
+    assert_rule_files(&results, vec!["Cargo.toml".to_owned()]);
+    assert_inventory(&results, true);
 }
 
 #[test]
@@ -796,7 +799,8 @@ fn external_harness_self_boundary_stays_quiet() {
 
     let results = run_family(root);
 
-    assert_rule_quiet(&results);
+    assert_rule_files(&results, vec!["Cargo.toml".to_owned()]);
+    assert_inventory(&results, true);
 }
 
 #[test]

@@ -1,6 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::inputs::LeafHexarchInput;
+use super::inventory::push_success;
 
 const ID: &str = "RS-HEXARCH-06";
 
@@ -25,6 +26,16 @@ pub fn check(input: &LeafHexarchInput<'_>, results: &mut Vec<CheckResult>) {
     }
 
     if input.has_cargo || input.has_crates_dir || input.gitkeep_only {
+        push_success(
+            results,
+            ID,
+            format!("Service `{}` leaf {} has valid ownership shape", input.app_name, input.label),
+            format!(
+                "Service `{}` keeps leaf `{}` as a crate, nested hex root, or placeholder.",
+                input.app_name, input.rel_path
+            ),
+            Some(input.rel_path.to_owned()),
+        );
         return;
     }
 

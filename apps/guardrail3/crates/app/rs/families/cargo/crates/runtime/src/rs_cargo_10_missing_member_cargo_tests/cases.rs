@@ -177,7 +177,7 @@ fn declared_member_without_manifest_warns() {
 }
 
 #[test]
-fn complete_member_set_emits_no_missing_member_warning() {
+fn complete_member_set_is_inventory() {
     let workspace_manifest = format!(
         r#"
             [workspace]
@@ -214,5 +214,12 @@ fn complete_member_set_emits_no_missing_member_warning() {
         ],
     ));
 
-    guardrail3_app_rs_family_cargo_assertions::rs_cargo_10_missing_member_cargo::assert_rule_results(&results, &[]);
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_10_missing_member_cargo::assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: None,
+            title: Some("all declared workspace members have Cargo.toml"),
+            inventory: Some(true),
+        }],
+    );
 }

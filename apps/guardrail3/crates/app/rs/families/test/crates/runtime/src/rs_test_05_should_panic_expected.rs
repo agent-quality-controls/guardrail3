@@ -9,6 +9,21 @@ pub fn check(input: &TestFunctionInput<'_>, results: &mut Vec<CheckResult>) {
         return;
     };
     if input.function.should_panic_has_expected {
+        results.push(
+            CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Info,
+                title: "should_panic expected string present".to_owned(),
+                message: format!(
+                    "Test `{}` keeps `#[should_panic]` paired with an explicit expected string.",
+                    input.function.name
+                ),
+                file: Some(input.file.rel_path.clone()),
+                line: Some(line),
+                inventory: false,
+            }
+            .as_inventory(),
+        );
         return;
     }
 

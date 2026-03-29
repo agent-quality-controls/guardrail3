@@ -25,4 +25,9 @@ fn golden_layout_has_no_scoped_arch_errors() {
     ));
 
     assertions::assert_no_error_files(&results, "RS-ARCH-05");
+    assertions::assert_inventory_summary(
+        &results,
+        "RS-ARCH-05",
+        "arch config remains global-only",
+    );
 }

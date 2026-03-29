@@ -2,9 +2,9 @@ use std::collections::BTreeSet;
 
 #[test]
 fn generated_library_profile_contains_exact_managed_global_state_type_set() {
-    let parsed = toml::from_str::<toml::Value>(
-        &test_support::build_fixture_clippy_toml("library", false, true, "", ""),
-    )
+    let parsed = toml::from_str::<toml::Value>(&test_support::build_fixture_clippy_toml(
+        "library", false, true, "", "",
+    ))
     .expect("valid clippy TOML");
     let actual = parsed
         .get("disallowed-types")
@@ -41,9 +41,9 @@ fn generated_library_profile_contains_exact_managed_global_state_type_set() {
         "once_cell::sync::Lazy",
         "once_cell::sync::OnceCell",
     ]
-        .iter()
-        .map(|path| (*path).to_owned())
-        .collect::<BTreeSet<_>>();
+    .iter()
+    .map(|path| (*path).to_owned())
+    .collect::<BTreeSet<_>>();
 
     assert_eq!(actual, expected);
 }

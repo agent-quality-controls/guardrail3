@@ -38,9 +38,9 @@ fn generated_service_types_do_not_contain_project_specific_extras() {
         "axum_extra::extract::MsgPack",
         "std::any::Any",
     ]
-        .iter()
-        .map(|path| (*path).to_owned())
-        .collect::<BTreeSet<_>>();
+    .iter()
+    .map(|path| (*path).to_owned())
+    .collect::<BTreeSet<_>>();
 
     assert_eq!(actual, expected);
 }
@@ -85,9 +85,9 @@ fn generated_library_types_do_not_misclassify_managed_global_state_entries_as_ex
         "once_cell::sync::Lazy",
         "once_cell::sync::OnceCell",
     ]
-        .iter()
-        .map(|path| (*path).to_owned())
-        .collect::<BTreeSet<_>>();
+    .iter()
+    .map(|path| (*path).to_owned())
+    .collect::<BTreeSet<_>>();
 
     assert_eq!(actual, expected);
 }

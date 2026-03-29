@@ -1,6 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::inputs::ContainerHexarchInput;
+use super::inventory::push_success;
 
 const ID: &str = "RS-HEXARCH-05";
 
@@ -10,6 +11,16 @@ pub fn check(input: &ContainerHexarchInput<'_>, results: &mut Vec<CheckResult>) 
         .iter()
         .any(|dir| !input.symlink_dirs.iter().any(|symlink| symlink == dir));
     if has_real_dirs || input.has_gitkeep {
+        push_success(
+            results,
+            ID,
+            format!("Service `{}` container {} is populated", input.app_name, input.label),
+            format!(
+                "Service `{}` keeps container `{}` non-empty with subdirectories or `.gitkeep`.",
+                input.app_name, input.rel_path
+            ),
+            Some(input.rel_path.to_owned()),
+        );
         return;
     }
 

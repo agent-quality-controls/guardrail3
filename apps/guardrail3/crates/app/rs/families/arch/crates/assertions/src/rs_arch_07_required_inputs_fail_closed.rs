@@ -34,6 +34,25 @@ pub fn assert_no_error_files(results: &[CheckResult], rule_id: &str) {
     assert_error_files(results, rule_id, &[]);
 }
 
+pub fn assert_inventory_summary(results: &[CheckResult], rule_id: &str, expected_title: &str) {
+    let inventory = results
+        .iter()
+        .filter(|result| {
+            result.id == resolved_rule_id(rule_id)
+                && result.severity == Severity::Info
+                && result.inventory
+        })
+        .collect::<Vec<_>>();
+    assert_eq!(
+        inventory.len(),
+        1,
+        "unexpected {} inventory results: {results:#?}",
+        resolved_rule_id(rule_id)
+    );
+    assert_eq!(inventory[0].title, expected_title);
+    assert_eq!(inventory[0].file, None);
+}
+
 fn resolved_rule_id(rule_id: &str) -> &str {
     if rule_id.is_empty() { RULE_ID } else { rule_id }
 }

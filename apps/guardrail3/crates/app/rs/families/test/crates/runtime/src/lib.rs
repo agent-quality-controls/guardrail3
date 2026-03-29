@@ -77,6 +77,7 @@ pub fn check(tree: &ProjectTree, route: &RsTestRoute, tc: &dyn ToolChecker) -> V
         let analysis = analyze_root(tree, root, &facts, route.scoped_files.as_ref());
         let mutation_active =
             root.mutants_exists || root.has_mutants_profile || !root.mutation_hook_files.is_empty();
+        let mut had_root_input_failures = false;
         let root_input = RootTestInput::new(
             root,
             analysis.has_tests,
@@ -86,6 +87,7 @@ pub fn check(tree: &ProjectTree, route: &RsTestRoute, tc: &dyn ToolChecker) -> V
         );
 
         for failure in active_failures_for_root(&facts, root, &analysis, mutation_active) {
+            had_root_input_failures = true;
             rs_test_10_input_failures::check(&InputFailureTestInput::new(failure), &mut results);
         }
 
@@ -179,6 +181,12 @@ pub fn check(tree: &ProjectTree, route: &RsTestRoute, tc: &dyn ToolChecker) -> V
 
             rs_test_09_nextest_timeouts::check(&root_input, &mut results);
         }
+
+        rs_test_10_input_failures::emit_inventory_if_clean(
+            root,
+            &mut results,
+            had_root_input_failures,
+        );
 
         if mutation_active {
             rs_test_11_cargo_mutants_installed::check(&root_input, &mut results);

@@ -215,3 +215,58 @@ fn malformed_root_local_guardrail_surfaces_explicit_failure() {
         }],
     );
 }
+
+#[test]
+fn clean_inputs_are_inventory() {
+    let workspace_manifest = format!(
+        r#"
+            [workspace]
+            members = ["crates/api"]
+            resolver = "2"
+
+            [workspace.package]
+            edition = "2024"
+            rust-version = "1.85"
+
+            {workspace_rust_lints}
+            {workspace_clippy_lints}
+        "#
+    );
+    let results = check_results(&tree(
+        &[
+            ("", entry(&["crates"], &["Cargo.toml", "guardrail3.toml"])),
+            ("crates", entry(&["api"], &[])),
+            ("crates/api", entry(&[], &["Cargo.toml"])),
+        ],
+        &[
+            ("Cargo.toml", &workspace_manifest),
+            (
+                "guardrail3.toml",
+                r#"
+                    [rust]
+                    profile = "service"
+                "#,
+            ),
+            (
+                "crates/api/Cargo.toml",
+                r#"
+                    [package]
+                    name = "api"
+                    edition = "2024"
+
+                    [lints]
+                    workspace = true
+                "#,
+            ),
+        ],
+    ));
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_14_input_failures::assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: Some("Cargo.toml"),
+            title: Some("cargo-family inputs parsed cleanly"),
+            inventory: Some(true),
+        }],
+    );
+}

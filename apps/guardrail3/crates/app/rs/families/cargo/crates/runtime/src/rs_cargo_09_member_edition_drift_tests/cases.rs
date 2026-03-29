@@ -222,3 +222,50 @@ fn matching_member_edition_inventories() {
         }],
     );
 }
+
+#[test]
+fn inherited_member_edition_inventories() {
+    let workspace_manifest = format!(
+        r#"
+            [workspace]
+            members = ["crates/api"]
+            resolver = "2"
+
+            [workspace.package]
+            edition = "2024"
+            rust-version = "1.85"
+
+            {workspace_rust_lints}
+            {workspace_clippy_lints}
+        "#
+    );
+    let results = check_results(&tree(
+        &[
+            ("", entry(&["crates"], &["Cargo.toml"])),
+            ("crates", entry(&["api"], &[])),
+            ("crates/api", entry(&[], &["Cargo.toml"])),
+        ],
+        &[
+            ("Cargo.toml", &workspace_manifest),
+            (
+                "crates/api/Cargo.toml",
+                r#"
+                    [package]
+                    name = "api"
+
+                    [lints]
+                    workspace = true
+                "#,
+            ),
+        ],
+    ));
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_09_member_edition_drift::assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: None,
+            title: Some("member inherits workspace edition"),
+            inventory: Some(true),
+        }],
+    );
+}

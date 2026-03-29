@@ -2,6 +2,7 @@ use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::dependency_facts::Layer;
 use super::inputs::SourceCrateHexarchInput;
+use super::inventory::push_success;
 #[cfg(test)]
 use super::source_facts::SourceCrateFacts;
 
@@ -35,6 +36,16 @@ pub fn check(input: &SourceCrateHexarchInput<'_>, results: &mut Vec<CheckResult>
     }
 
     if source.pub_trait_count == 0 {
+        push_success(
+            results,
+            ID,
+            format!("adapter crate `{}` defines no public traits", source.crate_name),
+            format!(
+                "Adapter crate `{}` keeps its public surface free of adapter-owned public traits.",
+                source.crate_name
+            ),
+            Some(source.rel_dir.clone()),
+        );
         return;
     }
 

@@ -1,6 +1,6 @@
 #[allow(unused_imports)]
 use guardrail3_app_rs_family_test_assertions::rs_test_07_real_proof_site::{
-    assert_reported, assert_rule_files, assert_rule_quiet,
+    assert_inventory, assert_reported, assert_rule_files, assert_rule_quiet,
 };
 
 #[allow(unused_imports)]
@@ -44,7 +44,11 @@ fn owned_assertions_crate_call_counts_as_real_proof_site() {
 
     let results = run_family(root);
 
-    assert_rule_quiet(&results);
+    assert_rule_files(
+        &results,
+        vec!["crates/runtime/tests/public_surface.rs".to_owned()],
+    );
+    assert_inventory(&results, true);
 }
 
 #[test]
@@ -85,7 +89,11 @@ fn owned_assertions_alias_call_counts_as_real_proof_site() {
 
     let results = run_family(root);
 
-    assert_rule_quiet(&results);
+    assert_rule_files(
+        &results,
+        vec!["crates/runtime/tests/public_surface.rs".to_owned()],
+    );
+    assert_inventory(&results, true);
 }
 
 #[test]
@@ -126,7 +134,11 @@ fn owned_assertions_glob_call_counts_as_real_proof_site() {
 
     let results = run_family(root);
 
-    assert_rule_quiet(&results);
+    assert_rule_files(
+        &results,
+        vec!["crates/runtime/tests/public_surface.rs".to_owned()],
+    );
+    assert_inventory(&results, true);
 }
 
 #[test]
@@ -168,7 +180,11 @@ fn owned_assertions_grouped_import_call_counts_as_real_proof_site() {
 
     let results = run_family(root);
 
-    assert_rule_quiet(&results);
+    assert_rule_files(
+        &results,
+        vec!["crates/runtime/tests/public_surface.rs".to_owned()],
+    );
+    assert_inventory(&results, true);
 }
 
 #[test]
@@ -225,7 +241,11 @@ pub mod proofs;
 
     let results = run_family(root);
 
-    assert_rule_quiet(&results);
+    assert_rule_files(
+        &results,
+        vec!["crates/runtime/tests/public_surface.rs".to_owned()],
+    );
+    assert_inventory(&results, true);
 }
 
 #[test]
@@ -282,5 +302,9 @@ pub mod proofs;
 
     let results = run_family(root);
 
-    assert_rule_quiet(&results);
+    assert_rule_files(
+        &results,
+        vec!["crates/runtime/tests/public_surface.rs".to_owned()],
+    );
+    assert_inventory(&results, true);
 }

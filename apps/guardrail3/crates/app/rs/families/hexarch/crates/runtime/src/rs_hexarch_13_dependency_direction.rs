@@ -1,6 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::inputs::DependencyEdgeHexarchInput;
+use super::inventory::push_success;
 
 const ID: &str = "RS-HEXARCH-13";
 
@@ -22,6 +23,20 @@ pub fn check(input: &DependencyEdgeHexarchInput<'_>, results: &mut Vec<CheckResu
         return;
     };
     if !source_layer.forbidden().contains(&target_layer) {
+        push_success(
+            results,
+            ID,
+            "dependency direction allowed".to_owned(),
+            format!(
+                "{} crate `{}` depends on {} crate `{}` via `{}` without violating hexarch direction.",
+                source_layer.label(),
+                edge.source_name,
+                target_layer.label(),
+                edge.dep_package_name,
+                edge.section_label
+            ),
+            Some(edge.source_cargo_rel_path.clone()),
+        );
         return;
     }
 

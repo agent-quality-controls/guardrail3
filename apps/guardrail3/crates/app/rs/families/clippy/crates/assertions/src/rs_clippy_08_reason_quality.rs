@@ -4,11 +4,18 @@ use guardrail3_domain_report::{CheckResult, Severity};
 
 const ID: &str = "RS-CLIPPY-08";
 
-pub fn assert_no_results(results: &[CheckResult]) {
-    assert!(
-        results.is_empty(),
-        "expected no missing-reason findings: {results:#?}"
+pub fn assert_inventory(results: &[CheckResult], file: &str) {
+    assert_eq!(results.len(), 1);
+    let result = &results[0];
+    assert_eq!(result.id, ID);
+    assert!(result.inventory);
+    assert_eq!(result.severity, Severity::Info);
+    assert_eq!(result.title, "ban entries use reasoned table format");
+    assert_eq!(
+        result.message,
+        "All managed ban entries use table format with a `reason` field."
     );
+    assert_eq!(result.file.as_deref(), Some(file));
 }
 
 pub fn assert_missing_reasons(results: &[CheckResult], expected: &[&str], file: &str) {

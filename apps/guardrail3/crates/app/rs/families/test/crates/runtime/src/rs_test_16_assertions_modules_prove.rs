@@ -24,6 +24,18 @@ pub fn check(input: &AssertionsModuleInput<'_>, results: &mut Vec<CheckResult>) 
         return;
     };
     if !input.proof_bearing_exported_functions.is_empty() {
+        results.push(
+            CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Info,
+                title: "assertions module proves runtime".to_owned(),
+                message: "Assertions modules expose public helpers that ultimately prove through real assertions.".to_owned(),
+                file: Some(input.file.rel_path.clone()),
+                line: Some(first_exported_function.line),
+                inventory: false,
+            }
+            .as_inventory(),
+        );
         return;
     }
 
@@ -48,6 +60,18 @@ pub fn check_sidecar_semantic_proof(input: &TestFunctionInput<'_>, results: &mut
         return;
     }
     if !owns_direct_result_shape_assertion(input) {
+        results.push(
+            CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Info,
+                title: "sidecar delegates semantic proof".to_owned(),
+                message: "Internal sidecars keep setup local and delegate result-shape assertions to the owned sibling assertions module.".to_owned(),
+                file: Some(input.file.rel_path.clone()),
+                line: Some(input.function.line),
+                inventory: false,
+            }
+            .as_inventory(),
+        );
         return;
     }
 
