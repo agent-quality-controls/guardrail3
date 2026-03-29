@@ -396,6 +396,7 @@ Detection:
 - if required config or placement inputs are unreadable or unparsable, emit fail-closed errors
 - active required inputs include:
   - readable eligible live `Cargo.toml`
+  - parseable governed app/package `Cargo.toml`
   - readable `guardrail3.toml`
   - parseable `guardrail3.toml`
   - parseable auxiliary-role metadata in eligible live `Cargo.toml`
