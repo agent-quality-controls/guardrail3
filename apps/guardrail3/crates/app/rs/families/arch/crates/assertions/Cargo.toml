@@ -5,7 +5,6 @@ edition = "2024"
 
 [dependencies]
 "guardrail3-app-rs-family-arch" = { path = "../runtime" }
-guardrail3_domain_project_tree = { package = "guardrail3-domain-project-tree", path = "../../../../../../domain/project-tree" }
 guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../../../../../domain/report" }
 test_support = { package = "guardrail3-app-rs-family-arch-test-support", path = "../../test_support" }
 

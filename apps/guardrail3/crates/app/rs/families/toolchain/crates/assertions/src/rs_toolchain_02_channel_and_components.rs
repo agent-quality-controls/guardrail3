@@ -1,4 +1,5 @@
-use guardrail3_domain_report::{CheckResult, Severity};
+use guardrail3_domain_report::CheckResult;
+pub use guardrail3_domain_report::Severity;
 
 const RULE_ID: &str = "RS-TOOLCHAIN-02";
 

@@ -1,7 +1,6 @@
 use guardrail3_app_rs_family_toolchain_assertions::rs_toolchain_02_channel_and_components::{
-    ExpectedRuleResult, assert_rule_results,
+    ExpectedRuleResult, Severity, assert_rule_results,
 };
-use guardrail3_domain_report::Severity;
 
 use super::{check, test_input};
 
