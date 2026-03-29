@@ -16,8 +16,5 @@ fn no_auxiliary_info_results_when_no_auxiliary_roots_exist() {
         )],
     ));
 
-    assert!(
-        assertions::info_results(&results, "RS-ARCH-08").is_empty(),
-        "unexpected auxiliary info results: {results:#?}"
-    );
+    assertions::assert_no_info_files(&results, "RS-ARCH-08");
 }

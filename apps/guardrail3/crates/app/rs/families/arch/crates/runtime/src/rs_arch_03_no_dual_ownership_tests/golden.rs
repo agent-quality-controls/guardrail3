@@ -24,8 +24,5 @@ fn golden_layout_has_no_dual_ownership_errors() {
         ],
     ));
 
-    assert!(
-        assertions::error_results(&results, "RS-ARCH-03").is_empty(),
-        "unexpected dual-ownership errors: {results:#?}"
-    );
+    assertions::assert_no_error_files(&results, "RS-ARCH-03");
 }

@@ -24,8 +24,5 @@ fn golden_layout_has_no_scoped_arch_errors() {
         ],
     ));
 
-    assert!(
-        assertions::error_results(&results, "RS-ARCH-05").is_empty(),
-        "unexpected scoped arch errors: {results:#?}"
-    );
+    assertions::assert_no_error_files(&results, "RS-ARCH-05");
 }

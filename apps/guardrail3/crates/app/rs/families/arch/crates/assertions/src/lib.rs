@@ -1,3 +1,7 @@
+use guardrail3_app_rs_family_arch as _;
+use guardrail3_domain_project_tree as _;
+use test_support as _;
+
 pub mod rs_arch_01_root_classification;
 pub mod rs_arch_02_no_misplaced_roots;
 pub mod rs_arch_03_no_dual_ownership;

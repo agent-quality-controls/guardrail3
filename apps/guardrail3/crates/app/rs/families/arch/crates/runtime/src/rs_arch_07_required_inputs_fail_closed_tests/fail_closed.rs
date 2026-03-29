@@ -74,8 +74,5 @@ fn malformed_app_owned_cargo_toml_does_not_emit_required_input_failure() {
         &[("apps/backend/Cargo.toml", "[workspace\nmembers = []\n")],
     ));
 
-    assert!(
-        assertions::error_results(&results, "RS-ARCH-07").is_empty(),
-        "app-owned roots should classify by path without forcing Cargo.toml parse for auxiliary metadata: {results:#?}"
-    );
+    assertions::assert_no_error_files(&results, "RS-ARCH-07");
 }

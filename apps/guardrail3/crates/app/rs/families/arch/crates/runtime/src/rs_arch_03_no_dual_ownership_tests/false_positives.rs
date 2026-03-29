@@ -24,8 +24,5 @@ fn nested_app_inside_app_does_not_count_as_dual_family_ownership() {
         ],
     ));
 
-    assert!(
-        assertions::error_results(&results, "RS-ARCH-03").is_empty(),
-        "multiple app candidates belong to RS-ARCH-01, not RS-ARCH-03: {results:#?}"
-    );
+    assertions::assert_no_error_files(&results, "RS-ARCH-03");
 }

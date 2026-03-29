@@ -24,8 +24,5 @@ fn golden_layout_has_no_misplaced_root_errors() {
         ],
     ));
 
-    assert!(
-        assertions::error_results(&results, "RS-ARCH-02").is_empty(),
-        "unexpected misplaced-root errors: {results:#?}"
-    );
+    assertions::assert_no_error_files(&results, "RS-ARCH-02");
 }
