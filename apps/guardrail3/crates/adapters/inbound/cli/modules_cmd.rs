@@ -1,41 +1,38 @@
 use guardrail3_app_commands::command_ids::RS_LIST_MODULES;
 use guardrail3_domain_modules as modules;
 
-#[allow(clippy::print_stdout)] // reason: CLI command — module listing output to stdout
-pub fn list_modules() {
+pub fn list_modules() -> String {
     let all = modules::all_modules();
 
     // Group by category prefix
     let mut current_category = String::new();
+    let mut output = String::new();
 
     for module in &all {
         let category = module.name.split('/').next().unwrap_or(module.name);
 
         if category != current_category {
             if !current_category.is_empty() {
-                println!();
+                output.push('\n');
             }
-            println!("=== {category} ===");
+            output.push_str(&format!("=== {category} ===\n"));
             category.clone_into(&mut current_category);
         }
 
-        println!("  {:<40} {}", module.name, module.description);
+        output.push_str(&format!("  {:<40} {}\n", module.name, module.description));
     }
+
+    output
 }
 
-#[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
-pub fn show_module(name: &str) {
+pub fn show_module(name: &str) -> Result<String, String> {
     match modules::find_module(name) {
-        Some(module) => {
-            println!("# Module: {}", module.name);
-            println!("# {}", module.description);
-            println!();
-            println!("{}", module.content);
-        }
-        None => {
-            eprintln!("Error: module '{name}' not found.");
-            eprintln!("Run '{RS_LIST_MODULES}' to see available modules.");
-            std::process::exit(1);
-        }
+        Some(module) => Ok(format!(
+            "# Module: {}\n# {}\n\n{}",
+            module.name, module.description, module.content
+        )),
+        None => Err(format!(
+            "Error: module '{name}' not found.\nRun '{RS_LIST_MODULES}' to see available modules."
+        )),
     }
 }

@@ -204,9 +204,6 @@ fn discover_nested_workspaces(fs: &dyn FileSystem, root: &Path, info: &mut Proje
     }
 }
 
-#[allow(clippy::manual_let_else)] // reason: match with early return is clearer here
-#[allow(clippy::string_slice)] // reason: parsing on known ASCII Cargo.toml content
-#[allow(clippy::needless_collect)] // reason: collect needed for ownership
 fn detect_rust(fs: &dyn FileSystem, path: &Path, project_root: &Path, info: &mut ProjectInfo) {
     let cargo_path = path.join("Cargo.toml");
     if !cargo_path.exists() {
@@ -223,15 +220,12 @@ fn detect_rust(fs: &dyn FileSystem, path: &Path, project_root: &Path, info: &mut
         return;
     };
 
-    let table: toml::Value = match content.parse() {
-        Ok(v) => v,
-        Err(_) => {
-            info.workspaces.push(RustWorkspace {
-                root: path.to_path_buf(),
-                members: Vec::new(),
-            });
-            return;
-        }
+    let Ok(table) = content.parse::<toml::Value>() else {
+        info.workspaces.push(RustWorkspace {
+            root: path.to_path_buf(),
+            members: Vec::new(),
+        });
+        return;
     };
 
     let mut ws = RustWorkspace {
