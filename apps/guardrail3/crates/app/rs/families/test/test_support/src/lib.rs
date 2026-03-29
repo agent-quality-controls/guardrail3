@@ -35,7 +35,7 @@ pub fn walk(root: &Path) -> ProjectTree {
     walk_project(&RealFileSystem, root)
 }
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct StubToolChecker {
     installed_tools: BTreeSet<String>,
 }

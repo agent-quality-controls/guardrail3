@@ -27,9 +27,9 @@ fn root_local_sidecar_harness_is_reported_instead_of_being_silently_skipped() {
     assert!(!results.is_empty());
     assert_error_reported(
         &results,
-        "src/lib_tests/mod.rs",
+        "assertions/Cargo.toml",
         None,
-        "test harness outside runtime/assertions split",
+        "assertions crate missing",
     );
 }
 
@@ -54,9 +54,9 @@ fn root_local_external_harness_is_reported_instead_of_being_silently_skipped() {
     assert!(!results.is_empty());
     assert_error_reported(
         &results,
-        "tests/public_surface.rs",
+        "assertions/Cargo.toml",
         None,
-        "test harness outside runtime/assertions split",
+        "assertions crate missing",
     );
 }
 
@@ -111,11 +111,7 @@ fn family_container_without_parent_cargo_manifest_is_still_a_valid_runtime_asser
         "crates/runtime/src/lib.rs",
         "#[cfg(test)]\n#[path = \"lib_tests/mod.rs\"]\nmod tests;\n\npub fn value() -> u8 { 1 }\n",
     );
-    write_file(
-        root,
-        "crates/runtime/src/lib_tests/mod.rs",
-        "mod cases;\n",
-    );
+    write_file(root, "crates/runtime/src/lib_tests/mod.rs", "mod cases;\n");
     write_file(
         root,
         "crates/runtime/src/lib_tests/cases.rs",
@@ -136,11 +132,54 @@ fn family_container_without_parent_cargo_manifest_is_still_a_valid_runtime_asser
         "test_support/Cargo.toml",
         "[package]\nname = \"test_support\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
+    write_file(root, "test_support/src/lib.rs", "pub fn marker() {}\n");
+
+    let results = run_family(root);
+    assert_rule_quiet(&results);
+}
+
+#[test]
+fn root_runtime_package_with_sibling_assertions_is_a_valid_runtime_assertions_split() {
+    let fixture = tempdir();
+    let root = fixture.path();
+
     write_file(
         root,
-        "test_support/src/lib.rs",
-        "pub fn marker() {}\n",
+        "Cargo.toml",
+        "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = {path = \"assertions\"}\ntest_support = {path = \"test_support\"}\n",
     );
+    write_file(
+        root,
+        "src/lib.rs",
+        "#[cfg(test)]\n#[path = \"lib_tests/mod.rs\"]\nmod lib_tests;\n\npub fn value() -> u8 { 1 }\n",
+    );
+    write_file(root, "src/lib_tests/mod.rs", "mod cases;\n");
+    write_file(
+        root,
+        "src/lib_tests/cases.rs",
+        "use demo_assertions::assert_runtime;\n\n#[test]\nfn owned_sidecar() { assert_runtime(); }\n",
+    );
+    write_file(
+        root,
+        "tests/public_surface.rs",
+        "use demo_assertions::assert_runtime;\n\n#[test]\nfn public_surface() { assert_runtime(); }\n",
+    );
+    write_file(
+        root,
+        "assertions/Cargo.toml",
+        "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = {path = \"..\"}\ntest_support = {path = \"../test_support\"}\n",
+    );
+    write_file(
+        root,
+        "assertions/src/lib.rs",
+        "pub fn assert_runtime() { assert_eq!(demo_runtime::value(), 1); }\n",
+    );
+    write_file(
+        root,
+        "test_support/Cargo.toml",
+        "[package]\nname = \"test_support\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write_file(root, "test_support/src/lib.rs", "pub fn marker() {}\n");
 
     let results = run_family(root);
     assert_rule_quiet(&results);
@@ -154,7 +193,7 @@ fn runtime_depends_on_assertions_at_normal_scope_is_reported() {
     write_file(
         root,
         "Cargo.toml",
-        "[workspace]\nmembers = [\"crates/runtime\", \"crates/assertions\"]\n",
+        "[workspace]\nmembers = [\"crates/runtime\", \"crates/assertions\", \"support/report\"]\n",
     );
     write_file(
         root,
@@ -552,6 +591,113 @@ fn assertions_module_fully_qualified_family_mapper_call_is_reported() {
         "crates/assertions/src/lib.rs",
         None,
         "assertions module builds routed family input",
+    );
+}
+
+#[test]
+fn assertions_module_importing_shared_report_model_is_allowed() {
+    let fixture = tempdir();
+    let root = fixture.path();
+
+    write_file(
+        root,
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"crates/runtime\", \"crates/assertions\"]\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/Cargo.toml",
+        "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = {path = \"../assertions\"}\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/src/lib.rs",
+        "pub fn value() -> u8 {1}\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/tests/public_surface.rs",
+        "use demo_assertions::assert_runtime;\n#[test]\nfn public_surface() {assert_runtime();}\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/Cargo.toml",
+        "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = {path = \"../runtime\"}\nguardrail3_domain_report = { package = \"guardrail3-domain-report\", path = \"../../support/report\" }\n",
+    );
+    write_file(
+        root,
+        "support/report/Cargo.toml",
+        "[package]\nname = \"guardrail3-domain-report\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write_file(
+        root,
+        "support/report/src/lib.rs",
+        "#[derive(Clone, Copy, PartialEq, Eq, Debug)]\npub enum Severity { Error }\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/src/lib.rs",
+        "use guardrail3_domain_report::Severity;\npub fn assert_runtime() { assert_eq!(Severity::Error, Severity::Error); assert_eq!(demo_runtime::value(), 1); }\n",
+    );
+
+    let results = run_family(root);
+    assert_rule_quiet(&results);
+}
+
+#[test]
+fn sidecar_importing_shared_report_model_is_still_reported() {
+    let fixture = tempdir();
+    let root = fixture.path();
+
+    write_file(
+        root,
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"crates/runtime\", \"crates/assertions\", \"support/report\"]\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/Cargo.toml",
+        "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = {path = \"../assertions\"}\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/src/lib.rs",
+        "#[cfg(test)]\n#[path = \"lib_tests/mod.rs\"]\nmod lib_tests;\npub fn value() -> u8 {1}\n",
+    );
+    write_file(root, "crates/runtime/src/lib_tests/mod.rs", "mod cases;\n");
+    write_file(
+        root,
+        "crates/runtime/src/lib_tests/cases.rs",
+        "use guardrail3_domain_report::Severity;\n#[test]\nfn owned_sidecar() { assert_eq!(Severity::Error, Severity::Error); }\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/Cargo.toml",
+        "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = {path = \"../runtime\"}\nguardrail3_domain_report = { package = \"guardrail3-domain-report\", path = \"../../support/report\" }\n",
+    );
+    write_file(
+        root,
+        "support/report/Cargo.toml",
+        "[package]\nname = \"guardrail3-domain-report\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write_file(
+        root,
+        "support/report/src/lib.rs",
+        "#[derive(Clone, Copy, PartialEq, Eq, Debug)]\npub enum Severity { Error }\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/src/lib.rs",
+        "pub fn assert_runtime() {}\n",
+    );
+
+    let results = run_family(root);
+    assert!(!results.is_empty());
+    assert_error_reported(
+        &results,
+        "crates/runtime/src/lib_tests/cases.rs",
+        Some(1),
+        "sidecar imports disallowed local crate",
     );
 }
 

@@ -1,11 +1,10 @@
 #[allow(unused_imports)]
 use guardrail3_app_rs_family_test_assertions::rs_test_10_input_failures::{
-    assert_message_starts_with, assert_reported, assert_rule_files, assert_rule_quiet,
+    Severity, assert_message_starts_with, assert_reported, assert_rule_files, assert_rule_quiet,
 };
 
 #[allow(unused_imports)]
 use super::{run_family, run_family_with_tool, tempdir, write_file};
-use guardrail3_domain_report::Severity;
 
 #[test]
 fn malformed_source_fails_closed_as_input_failure() {

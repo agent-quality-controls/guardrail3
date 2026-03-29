@@ -35,6 +35,9 @@ fn root_local_ruleish_shape_still_requires_runtime_assertions_split() {
 
     assert_rule_files(
         &run_family(root),
-        vec!["src/rs_demo_01_tests/mod.rs".to_owned()],
+        vec![
+            "assertions/Cargo.toml".to_owned(),
+            "src/rs_demo_01_tests/mod.rs".to_owned(),
+        ],
     );
 }

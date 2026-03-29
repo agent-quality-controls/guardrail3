@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
+use crate::{CheckResult, Severity};
 use guardrail3_domain_project_tree::ProjectTree;
-use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::discover::{join_under_root, parent_dir, path_is_under};
 use super::facts::{SidecarViolation, TestFileKind, TestRootFacts};

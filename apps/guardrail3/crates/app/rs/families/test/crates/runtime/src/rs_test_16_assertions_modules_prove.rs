@@ -1,4 +1,4 @@
-use guardrail3_domain_report::{CheckResult, Severity};
+use crate::{CheckResult, Severity};
 
 use super::facts::TestFileKind;
 use super::inputs::{AssertionsModuleInput, TestFunctionInput};

@@ -1,4 +1,5 @@
-use guardrail3_domain_report::{CheckResult, Severity};
+use guardrail3_app_rs_family_test::CheckResult;
+pub use guardrail3_app_rs_family_test::Severity;
 
 const RULE_ID: &str = "RS-TEST-08";
 

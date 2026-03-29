@@ -1,11 +1,10 @@
 #[allow(unused_imports)]
 use guardrail3_app_rs_family_test_assertions::rs_test_09_nextest_timeouts::{
-    assert_reported, assert_rule_files, assert_rule_quiet,
+    Severity, assert_reported, assert_rule_files, assert_rule_quiet,
 };
 
 #[allow(unused_imports)]
 use super::{run_family, tempdir, write_file};
-use guardrail3_domain_report::Severity;
 
 #[test]
 fn tokio_dependency_only_root_without_nextest_is_reported() {

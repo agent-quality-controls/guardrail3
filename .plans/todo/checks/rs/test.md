@@ -117,6 +117,7 @@ Structural pressure such as file length and `use` count belongs to `RS-CODE`, in
 - `RS-TEST-03` must also reject route-construction infrastructure imports or `FamilyMapper`-built routed inputs from `assertions`; reusable proof helpers are not allowed to own mapper/placement orchestration either.
 - `RS-TEST-03` must reject assertions-side calls into runtime `check_test_tree(...)`; assertions do not own family orchestration.
 - `RS-TEST-16` must reject internal sidecars that still assert directly on result-shape semantics (`RS-*`, finding fields, `CheckResult`/`Severity`) when owned assertions exist.
+- `RS-TEST-03` may allow assertions crates to import the shared report/result model when that is the runtime public surface they are proving over; that exception must not widen to unrelated local production crates.
 
 ## Current migration state
 

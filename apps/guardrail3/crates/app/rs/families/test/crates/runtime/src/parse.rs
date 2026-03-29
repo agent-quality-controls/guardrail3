@@ -399,6 +399,9 @@ impl<'ast> Visit<'ast> for TestBodyVisitor {
             if matches!(name.as_str(), "assert" | "debug_assert") && macro_has_weak_matches(mac) {
                 self.weak_matches_lines.push(span_line(mac.span()));
             }
+            if is_assertion_macro_name(&name) || name == "panic" {
+                visit_macro_expr_args(self, mac);
+            }
         }
         syn::visit::visit_macro(self, mac);
     }
@@ -541,6 +544,16 @@ fn macro_has_weak_matches(mac: &syn::Macro) -> bool {
         return false;
     };
     pattern_contains_wild(&args.pattern)
+}
+
+fn visit_macro_expr_args(visitor: &mut TestBodyVisitor, mac: &syn::Macro) {
+    let parser = syn::punctuated::Punctuated::<syn::Expr, syn::Token![,]>::parse_terminated;
+    let Ok(args) = parser.parse2(mac.tokens.clone()) else {
+        return;
+    };
+    for expr in args {
+        visitor.visit_expr(&expr);
+    }
 }
 
 fn pattern_contains_wild(pattern: &syn::Pat) -> bool {

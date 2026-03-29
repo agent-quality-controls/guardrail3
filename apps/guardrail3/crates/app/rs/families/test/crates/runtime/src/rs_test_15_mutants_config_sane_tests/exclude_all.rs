@@ -1,11 +1,10 @@
 #[allow(unused_imports)]
 use guardrail3_app_rs_family_test_assertions::rs_test_15_mutants_config_sane::{
-    assert_inventory, assert_reported, assert_rule_files, assert_rule_quiet,
+    Severity, assert_inventory, assert_reported, assert_rule_files, assert_rule_quiet,
 };
 
 #[allow(unused_imports)]
 use super::{run_family, tempdir, write_file};
-use guardrail3_domain_report::Severity;
 
 #[test]
 fn exclude_all_pattern_is_reported() {

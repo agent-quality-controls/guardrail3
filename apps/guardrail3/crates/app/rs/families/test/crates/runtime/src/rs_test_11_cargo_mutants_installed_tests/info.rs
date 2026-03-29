@@ -1,11 +1,10 @@
 #[allow(unused_imports)]
 use guardrail3_app_rs_family_test_assertions::rs_test_11_cargo_mutants_installed::{
-    assert_inventory, assert_reported, assert_rule_files, assert_rule_quiet,
+    Severity, assert_inventory, assert_reported, assert_rule_files, assert_rule_quiet,
 };
 
 #[allow(unused_imports)]
 use super::{run_family_with_tool, tempdir, write_file};
-use guardrail3_domain_report::Severity;
 
 #[test]
 fn installed_tool_reports_info_for_an_adopted_root() {
