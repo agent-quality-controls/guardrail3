@@ -122,6 +122,36 @@ fn attacks_inline_module_glob_across_golden_tree() {
 }
 
 #[test]
+fn attacks_alias_then_glob_across_owned_file() {
+    let fixture = copy_fixture();
+    let root = fixture.path();
+
+    let target_rel = "apps/backend/crates/app/queries/src/lib.rs";
+    let target_content = test_support::read_file(root, target_rel);
+
+    write_file(
+        root,
+        target_rel,
+        &format!("use std::fs::{{File as Alias, *}};\n{target_content}"),
+    );
+
+    let results = run_family(root);
+
+    assert_files(&results, BTreeSet::from([target_rel.to_owned()]));
+    assert_findings(
+        &results,
+        &[RuleFinding {
+            severity: Severity::Error,
+            title: "std::fs glob import",
+            message: "Direct `use std::fs::*` glob import bypasses clippy method bans.",
+            file: Some(target_rel),
+            line: Some(1),
+            inventory: false,
+        }],
+    );
+}
+
+#[test]
 fn attacks_function_local_glob_import_in_owned_file() {
     let fixture = copy_fixture();
     let root = fixture.path();

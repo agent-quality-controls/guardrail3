@@ -1,6 +1,11 @@
 use proc_macro2::Span;
 use syn::spanned::Spanned;
 
+use super::types::{
+    CfgAttrLintInfo, CfgPredicateTruth, DenyForbidInfo, LintPolicyInfo, LintPolicyKind,
+    PathAttrInfo,
+};
+
 pub(crate) fn span_line(span: Span) -> usize {
     span.start().line
 }
@@ -78,7 +83,11 @@ pub(crate) fn path_to_string_from_use_tree(tree: &syn::UseTree) -> String {
     }
 }
 
-pub(crate) fn is_cfg_test_attr(attr: &syn::Attribute) -> bool {
+pub(crate) fn attrs_enter_test_context(attrs: &[syn::Attribute]) -> bool {
+    attrs.iter().any(attr_enters_test_context) || attrs.iter().any(attr_is_direct_test)
+}
+
+pub(crate) fn attr_enters_test_context(attr: &syn::Attribute) -> bool {
     if !attr.path().is_ident("cfg") {
         return false;
     }
@@ -88,108 +97,114 @@ pub(crate) fn is_cfg_test_attr(attr: &syn::Attribute) -> bool {
     let Ok(meta) = list.parse_args::<syn::Meta>() else {
         return false;
     };
-    cfg_meta_requires_test(&meta)
+    cfg_meta_mentions_test(&meta, true)
 }
 
-pub(crate) fn cfg_meta_requires_test(meta: &syn::Meta) -> bool {
+pub(crate) fn attr_is_direct_test(attr: &syn::Attribute) -> bool {
+    if attr.path().is_ident("test") {
+        return true;
+    }
+    let segments = &attr.path().segments;
+    segments.len() == 2 && segments[0].ident == "tokio" && segments[1].ident == "test"
+}
+
+fn cfg_meta_mentions_test(meta: &syn::Meta, positive: bool) -> bool {
     match meta {
-        syn::Meta::Path(path) => path.is_ident("test"),
-        syn::Meta::List(list) if list.path.is_ident("all") => list
+        syn::Meta::Path(path) => positive && path.is_ident("test"),
+        syn::Meta::List(list) if list.path.is_ident("all") || list.path.is_ident("any") => list
             .parse_args_with(
                 syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated,
             )
-            .is_ok_and(|items| items.iter().any(cfg_meta_requires_test)),
+            .is_ok_and(|items| {
+                items
+                    .iter()
+                    .any(|item| cfg_meta_mentions_test(item, positive))
+            }),
+        syn::Meta::List(list) if list.path.is_ident("not") => list
+            .parse_args_with(
+                syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated,
+            )
+            .is_ok_and(|items| {
+                items
+                    .iter()
+                    .any(|item| cfg_meta_mentions_test(item, !positive))
+            }),
         _ => false,
     }
 }
 
-pub(crate) fn collect_allow_lints(attrs: &[syn::Attribute]) -> Vec<(usize, String)> {
+fn lint_policy_kind(path: &syn::Path) -> Option<LintPolicyKind> {
+    if path.is_ident("allow") {
+        Some(LintPolicyKind::Allow)
+    } else if path.is_ident("expect") {
+        Some(LintPolicyKind::Expect)
+    } else {
+        None
+    }
+}
+
+pub(crate) fn collect_item_lint_policies(attrs: &[syn::Attribute]) -> Vec<LintPolicyInfo> {
     let mut out = Vec::new();
     for attr in attrs {
-        if attr.path().is_ident("allow") {
-            let line = span_end_line(attr.span());
-            let syn::Meta::List(list) = &attr.meta else {
-                continue;
-            };
-            let Ok(paths) = list.parse_args_with(
-                syn::punctuated::Punctuated::<syn::Path, syn::Token![,]>::parse_terminated,
-            ) else {
-                continue;
-            };
-            for path in paths {
-                out.push((line, path_to_string(&path)));
-            }
+        let Some(kind) = lint_policy_kind(attr.path()) else {
+            continue;
+        };
+        let line = span_end_line(attr.span());
+        let syn::Meta::List(list) = &attr.meta else {
+            continue;
+        };
+        let Ok(paths) = list.parse_args_with(
+            syn::punctuated::Punctuated::<syn::Path, syn::Token![,]>::parse_terminated,
+        ) else {
+            continue;
+        };
+        for path in paths {
+            out.push(LintPolicyInfo {
+                line,
+                lint: path_to_string(&path),
+                kind,
+            });
         }
     }
     out
 }
 
-pub(crate) fn collect_cfg_attr_allow_lints(attrs: &[syn::Attribute]) -> Vec<(usize, String)> {
-    let mut out = Vec::new();
+pub(crate) fn collect_cfg_attr_lint_policies(
+    attrs: &[syn::Attribute],
+    out: &mut Vec<CfgAttrLintInfo>,
+) {
     for attr in attrs {
         if !attr.path().is_ident("cfg_attr") {
             continue;
         }
-        let syn::Meta::List(list) = &attr.meta else {
-            continue;
-        };
-        let Ok(args) = list.parse_args_with(
-            syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated,
-        ) else {
-            continue;
-        };
-        let mut args = args.into_iter();
-        let Some(_) = args.next() else {
-            continue;
-        };
-        let line = span_end_line(attr.span());
-        for meta in args {
-            collect_cfg_attr_allow_lints_from_meta(&meta, line, &mut out);
-        }
-    }
-    out
-}
-
-fn collect_cfg_attr_allow_lints_from_meta(
-    meta: &syn::Meta,
-    line: usize,
-    out: &mut Vec<(usize, String)>,
-) {
-    let syn::Meta::List(inner) = meta else {
-        return;
-    };
-    if inner.path.is_ident("allow") {
-        let Ok(paths) = inner.parse_args_with(
-            syn::punctuated::Punctuated::<syn::Path, syn::Token![,]>::parse_terminated,
-        ) else {
-            return;
-        };
-        for path in paths {
-            out.push((line, path_to_string(&path)));
-        }
-        return;
-    }
-    if !inner.path.is_ident("cfg_attr") {
-        return;
-    }
-    let Ok(args) = inner.parse_args_with(
-        syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated,
-    ) else {
-        return;
-    };
-    let mut args = args.into_iter();
-    let Some(_) = args.next() else {
-        return;
-    };
-    for nested in args {
-        collect_cfg_attr_allow_lints_from_meta(&nested, line, out);
+        super::analysis_helpers::walk_cfg_attr_payloads(attr, |line, truth, meta| {
+            let syn::Meta::List(inner) = meta else {
+                return;
+            };
+            let Some(kind) = lint_policy_kind(&inner.path) else {
+                return;
+            };
+            let Ok(paths) = inner.parse_args_with(
+                syn::punctuated::Punctuated::<syn::Path, syn::Token![,]>::parse_terminated,
+            ) else {
+                return;
+            };
+            for path in paths {
+                out.push(CfgAttrLintInfo {
+                    line,
+                    lint: path_to_string(&path),
+                    kind,
+                    truth,
+                });
+            }
+        });
     }
 }
 
 pub(crate) fn collect_deny_forbid_attrs(
     attrs: &[syn::Attribute],
     crate_level_inner: bool,
-    out: &mut Vec<crate::parse::DenyForbidInfo>,
+    out: &mut Vec<DenyForbidInfo>,
 ) {
     for attr in attrs {
         let level = if attr.path().is_ident("deny") {
@@ -209,12 +224,13 @@ pub(crate) fn collect_deny_forbid_attrs(
             continue;
         };
         for path in paths {
-            out.push(crate::parse::DenyForbidInfo {
+            out.push(DenyForbidInfo {
                 line,
                 lint: path_to_string(&path),
                 level: level.to_owned(),
                 crate_level_inner: crate_level_inner
                     && matches!(attr.style, syn::AttrStyle::Inner(_)),
+                cfg_truth: CfgPredicateTruth::KnownTrue,
             });
         }
     }
@@ -223,58 +239,43 @@ pub(crate) fn collect_deny_forbid_attrs(
 pub(crate) fn collect_cfg_attr_deny_forbid_attrs(
     attrs: &[syn::Attribute],
     crate_level_inner: bool,
-    out: &mut Vec<crate::parse::DenyForbidInfo>,
+    out: &mut Vec<DenyForbidInfo>,
 ) {
     for attr in attrs {
         if !attr.path().is_ident("cfg_attr") {
             continue;
         }
-        let syn::Meta::List(list) = &attr.meta else {
-            continue;
-        };
-        let Ok(args) = list.parse_args_with(
-            syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated,
-        ) else {
-            continue;
-        };
-        let mut args = args.into_iter();
-        let Some(_) = args.next() else {
-            continue;
-        };
-        let line = span_end_line(attr.span());
-        for meta in args {
+        super::analysis_helpers::walk_cfg_attr_payloads(attr, |line, truth, meta| {
             let syn::Meta::List(inner) = meta else {
-                continue;
+                return;
             };
             let level = if inner.path.is_ident("deny") {
                 "deny"
             } else if inner.path.is_ident("forbid") {
                 "forbid"
             } else {
-                continue;
+                return;
             };
             let Ok(paths) = inner.parse_args_with(
                 syn::punctuated::Punctuated::<syn::Path, syn::Token![,]>::parse_terminated,
             ) else {
-                continue;
+                return;
             };
             for path in paths {
-                out.push(crate::parse::DenyForbidInfo {
+                out.push(DenyForbidInfo {
                     line,
                     lint: path_to_string(&path),
                     level: level.to_owned(),
                     crate_level_inner: crate_level_inner
                         && matches!(attr.style, syn::AttrStyle::Inner(_)),
+                    cfg_truth: truth,
                 });
             }
-        }
+        });
     }
 }
 
-pub(crate) fn collect_path_attrs(
-    attrs: &[syn::Attribute],
-    out: &mut Vec<crate::parse::PathAttrInfo>,
-) {
+pub(crate) fn collect_path_attrs(attrs: &[syn::Attribute], out: &mut Vec<PathAttrInfo>) {
     for attr in attrs {
         if !attr.path().is_ident("path") {
             continue;
@@ -288,53 +289,39 @@ pub(crate) fn collect_path_attrs(
         let syn::Lit::Str(path_lit) = &expr_lit.lit else {
             continue;
         };
-        out.push(crate::parse::PathAttrInfo {
+        out.push(PathAttrInfo {
             line: span_end_line(attr.span()),
             path: path_lit.value(),
             via_cfg_attr: false,
+            cfg_truth: CfgPredicateTruth::KnownTrue,
         });
     }
 }
 
-pub(crate) fn collect_cfg_attr_path_attrs(
-    attrs: &[syn::Attribute],
-    out: &mut Vec<crate::parse::PathAttrInfo>,
-) {
+pub(crate) fn collect_cfg_attr_path_attrs(attrs: &[syn::Attribute], out: &mut Vec<PathAttrInfo>) {
     for attr in attrs {
         if !attr.path().is_ident("cfg_attr") {
             continue;
         }
-        let syn::Meta::List(list) = &attr.meta else {
-            continue;
-        };
-        let Ok(args) = list.parse_args_with(
-            syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated,
-        ) else {
-            continue;
-        };
-        let mut args = args.into_iter();
-        let Some(_) = args.next() else {
-            continue;
-        };
-        let line = span_end_line(attr.span());
-        for meta in args {
+        super::analysis_helpers::walk_cfg_attr_payloads(attr, |line, truth, meta| {
             let syn::Meta::NameValue(name_value) = meta else {
-                continue;
+                return;
             };
             if !name_value.path.is_ident("path") {
-                continue;
+                return;
             }
             let syn::Expr::Lit(expr_lit) = &name_value.value else {
-                continue;
+                return;
             };
             let syn::Lit::Str(path_lit) = &expr_lit.lit else {
-                continue;
+                return;
             };
-            out.push(crate::parse::PathAttrInfo {
+            out.push(PathAttrInfo {
                 line,
                 path: path_lit.value(),
                 via_cfg_attr: true,
+                cfg_truth: truth,
             });
-        }
+        });
     }
 }

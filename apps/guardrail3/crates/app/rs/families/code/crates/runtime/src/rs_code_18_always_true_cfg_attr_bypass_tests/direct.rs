@@ -4,9 +4,9 @@ use guardrail3_app_rs_family_code_assertions::rs_code_18_always_true_cfg_attr_by
 };
 
 #[test]
-fn errors_on_exhaustive_unix_windows_cfg_attr_allow() {
+fn errors_on_not_any_cfg_attr_allow() {
     let content = r#"
-#[cfg_attr(any(unix, windows), allow(clippy::unwrap_used))]
+#[cfg_attr(not(any()), allow(clippy::unwrap_used))]
 fn foo() {}
 "#;
     let results = check_source("src/foo.rs", content, false);

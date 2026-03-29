@@ -3,7 +3,7 @@ use std::collections::BTreeSet;
 use syn::spanned::Spanned;
 use syn::visit::Visit;
 
-use super::helpers::{is_cfg_test_attr, span_line};
+use super::helpers::{attrs_enter_test_context, span_line};
 
 pub fn find_std_fs_import_lines(ast: &syn::File) -> Vec<usize> {
     let mut visitor = StdFsImportVisitor::default();
@@ -95,28 +95,56 @@ fn fs_subtree_contains_glob(tree: &syn::UseTree) -> bool {
 
 struct StdFsImportVisitor {
     out: Vec<usize>,
-    in_cfg_test: bool,
-    std_aliases: BTreeSet<String>,
+    in_test_context: bool,
 }
 
 struct StdFsGlobImportVisitor {
     out: Vec<usize>,
-    in_cfg_test: bool,
+    in_test_context: bool,
     std_aliases: BTreeSet<String>,
 }
 
 struct InlineStdFsVisitor {
     out: Vec<usize>,
-    in_cfg_test: bool,
+    in_test_context: bool,
     std_aliases: BTreeSet<String>,
+}
+
+trait TestContextAware {
+    fn in_test_context_mut(&mut self) -> &mut bool;
+
+    fn save_and_apply_test_context(&mut self, attrs: &[syn::Attribute]) -> bool {
+        let was = *self.in_test_context_mut();
+        *self.in_test_context_mut() |= attrs_enter_test_context(attrs);
+        was
+    }
+
+    fn restore_test_context(&mut self, was: bool) {
+        *self.in_test_context_mut() = was;
+    }
+}
+
+impl TestContextAware for StdFsImportVisitor {
+    fn in_test_context_mut(&mut self) -> &mut bool {
+        &mut self.in_test_context
+    }
+}
+
+impl TestContextAware for StdFsGlobImportVisitor {
+    fn in_test_context_mut(&mut self) -> &mut bool {
+        &mut self.in_test_context
+    }
+}
+
+impl TestContextAware for InlineStdFsVisitor {
+    fn in_test_context_mut(&mut self) -> &mut bool {
+        &mut self.in_test_context
+    }
 }
 
 impl InlineStdFsVisitor {
     fn path_is_std_fs_call(path: &syn::Path, std_aliases: &BTreeSet<String>) -> bool {
-        let mut segments = path
-            .segments
-            .iter()
-            .map(|segment| segment.ident.to_string());
+        let mut segments = path.segments.iter().map(|segment| segment.ident.to_string());
         matches!(
             (
                 segments.next().as_deref(),
@@ -174,7 +202,7 @@ impl Default for InlineStdFsVisitor {
     fn default() -> Self {
         Self {
             out: Vec::new(),
-            in_cfg_test: false,
+            in_test_context: false,
             std_aliases: BTreeSet::from([String::from("std")]),
         }
     }
@@ -184,8 +212,7 @@ impl Default for StdFsImportVisitor {
     fn default() -> Self {
         Self {
             out: Vec::new(),
-            in_cfg_test: false,
-            std_aliases: BTreeSet::from([String::from("std")]),
+            in_test_context: false,
         }
     }
 }
@@ -194,7 +221,7 @@ impl Default for StdFsGlobImportVisitor {
     fn default() -> Self {
         Self {
             out: Vec::new(),
-            in_cfg_test: false,
+            in_test_context: false,
             std_aliases: BTreeSet::from([String::from("std")]),
         }
     }
@@ -202,31 +229,33 @@ impl Default for StdFsGlobImportVisitor {
 
 impl<'ast> Visit<'ast> for InlineStdFsVisitor {
     fn visit_item_mod(&mut self, item_mod: &'ast syn::ItemMod) {
-        let was = self.in_cfg_test;
-        self.in_cfg_test |= item_mod.attrs.iter().any(is_cfg_test_attr);
+        let was = self.save_and_apply_test_context(&item_mod.attrs);
         syn::visit::visit_item_mod(self, item_mod);
-        self.in_cfg_test = was;
+        self.restore_test_context(was);
     }
 
     fn visit_item_fn(&mut self, item_fn: &'ast syn::ItemFn) {
-        let was = self.in_cfg_test;
-        self.in_cfg_test |= item_fn.attrs.iter().any(is_cfg_test_attr);
+        let was = self.save_and_apply_test_context(&item_fn.attrs);
         syn::visit::visit_item_fn(self, item_fn);
-        self.in_cfg_test = was;
+        self.restore_test_context(was);
     }
 
     fn visit_impl_item_fn(&mut self, item_fn: &'ast syn::ImplItemFn) {
-        let was = self.in_cfg_test;
-        self.in_cfg_test |= item_fn.attrs.iter().any(is_cfg_test_attr);
+        let was = self.save_and_apply_test_context(&item_fn.attrs);
         syn::visit::visit_impl_item_fn(self, item_fn);
-        self.in_cfg_test = was;
+        self.restore_test_context(was);
+    }
+
+    fn visit_trait_item_fn(&mut self, item_fn: &'ast syn::TraitItemFn) {
+        let was = self.save_and_apply_test_context(&item_fn.attrs);
+        syn::visit::visit_trait_item_fn(self, item_fn);
+        self.restore_test_context(was);
     }
 
     fn visit_local(&mut self, local: &'ast syn::Local) {
-        let was = self.in_cfg_test;
-        self.in_cfg_test |= local.attrs.iter().any(is_cfg_test_attr);
+        let was = self.save_and_apply_test_context(&local.attrs);
         syn::visit::visit_local(self, local);
-        self.in_cfg_test = was;
+        self.restore_test_context(was);
     }
 
     fn visit_item_use(&mut self, use_item: &'ast syn::ItemUse) {
@@ -240,7 +269,7 @@ impl<'ast> Visit<'ast> for InlineStdFsVisitor {
     }
 
     fn visit_expr_call(&mut self, expr_call: &'ast syn::ExprCall) {
-        if !self.in_cfg_test {
+        if !self.in_test_context {
             if let syn::Expr::Path(expr_path) = &*expr_call.func {
                 if Self::path_is_std_fs_call(&expr_path.path, &self.std_aliases) {
                     self.out.push(span_line(expr_path.path.span()));
@@ -253,35 +282,43 @@ impl<'ast> Visit<'ast> for InlineStdFsVisitor {
 
 impl<'ast> Visit<'ast> for StdFsGlobImportVisitor {
     fn visit_item_mod(&mut self, item_mod: &'ast syn::ItemMod) {
-        let was = self.in_cfg_test;
-        self.in_cfg_test |= item_mod.attrs.iter().any(is_cfg_test_attr);
+        let was = self.save_and_apply_test_context(&item_mod.attrs);
         syn::visit::visit_item_mod(self, item_mod);
-        self.in_cfg_test = was;
+        self.restore_test_context(was);
     }
 
     fn visit_item_fn(&mut self, item_fn: &'ast syn::ItemFn) {
-        let was = self.in_cfg_test;
-        self.in_cfg_test |= item_fn.attrs.iter().any(is_cfg_test_attr);
+        let was = self.save_and_apply_test_context(&item_fn.attrs);
         syn::visit::visit_item_fn(self, item_fn);
-        self.in_cfg_test = was;
+        self.restore_test_context(was);
     }
 
     fn visit_impl_item_fn(&mut self, item_fn: &'ast syn::ImplItemFn) {
-        let was = self.in_cfg_test;
-        self.in_cfg_test |= item_fn.attrs.iter().any(is_cfg_test_attr);
+        let was = self.save_and_apply_test_context(&item_fn.attrs);
         syn::visit::visit_impl_item_fn(self, item_fn);
-        self.in_cfg_test = was;
+        self.restore_test_context(was);
+    }
+
+    fn visit_trait_item_fn(&mut self, item_fn: &'ast syn::TraitItemFn) {
+        let was = self.save_and_apply_test_context(&item_fn.attrs);
+        syn::visit::visit_trait_item_fn(self, item_fn);
+        self.restore_test_context(was);
+    }
+
+    fn visit_local(&mut self, local: &'ast syn::Local) {
+        let was = self.save_and_apply_test_context(&local.attrs);
+        syn::visit::visit_local(self, local);
+        self.restore_test_context(was);
     }
 
     fn visit_item_use(&mut self, use_item: &'ast syn::ItemUse) {
+        let was = self.save_and_apply_test_context(&use_item.attrs);
         collect_std_aliases(&use_item.tree, &mut self.std_aliases);
-        if !self.in_cfg_test
-            && !use_item.attrs.iter().any(is_cfg_test_attr)
-            && use_tree_is_std_fs_glob(&use_item.tree, &self.std_aliases)
-        {
+        if !self.in_test_context && use_tree_is_std_fs_glob(&use_item.tree, &self.std_aliases) {
             self.out.push(span_line(use_item.span()));
         }
         syn::visit::visit_item_use(self, use_item);
+        self.restore_test_context(was);
     }
 
     fn visit_item_extern_crate(&mut self, item: &'ast syn::ItemExternCrate) {
@@ -292,39 +329,41 @@ impl<'ast> Visit<'ast> for StdFsGlobImportVisitor {
 
 impl<'ast> Visit<'ast> for StdFsImportVisitor {
     fn visit_item_mod(&mut self, item_mod: &'ast syn::ItemMod) {
-        let was = self.in_cfg_test;
-        self.in_cfg_test |= item_mod.attrs.iter().any(is_cfg_test_attr);
+        let was = self.save_and_apply_test_context(&item_mod.attrs);
         syn::visit::visit_item_mod(self, item_mod);
-        self.in_cfg_test = was;
+        self.restore_test_context(was);
     }
 
     fn visit_item_fn(&mut self, item_fn: &'ast syn::ItemFn) {
-        let was = self.in_cfg_test;
-        self.in_cfg_test |= item_fn.attrs.iter().any(is_cfg_test_attr);
+        let was = self.save_and_apply_test_context(&item_fn.attrs);
         syn::visit::visit_item_fn(self, item_fn);
-        self.in_cfg_test = was;
+        self.restore_test_context(was);
     }
 
     fn visit_impl_item_fn(&mut self, item_fn: &'ast syn::ImplItemFn) {
-        let was = self.in_cfg_test;
-        self.in_cfg_test |= item_fn.attrs.iter().any(is_cfg_test_attr);
+        let was = self.save_and_apply_test_context(&item_fn.attrs);
         syn::visit::visit_impl_item_fn(self, item_fn);
-        self.in_cfg_test = was;
+        self.restore_test_context(was);
+    }
+
+    fn visit_trait_item_fn(&mut self, item_fn: &'ast syn::TraitItemFn) {
+        let was = self.save_and_apply_test_context(&item_fn.attrs);
+        syn::visit::visit_trait_item_fn(self, item_fn);
+        self.restore_test_context(was);
+    }
+
+    fn visit_local(&mut self, local: &'ast syn::Local) {
+        let was = self.save_and_apply_test_context(&local.attrs);
+        syn::visit::visit_local(self, local);
+        self.restore_test_context(was);
     }
 
     fn visit_item_use(&mut self, use_item: &'ast syn::ItemUse) {
-        collect_std_aliases(&use_item.tree, &mut self.std_aliases);
-        if !self.in_cfg_test
-            && !use_item.attrs.iter().any(is_cfg_test_attr)
-            && use_tree_matches_std_fs(&use_item.tree)
-        {
+        let was = self.save_and_apply_test_context(&use_item.attrs);
+        if !self.in_test_context && use_tree_matches_std_fs(&use_item.tree) {
             self.out.push(span_line(use_item.span()));
         }
         syn::visit::visit_item_use(self, use_item);
-    }
-
-    fn visit_item_extern_crate(&mut self, item: &'ast syn::ItemExternCrate) {
-        collect_std_extern_crate_alias(item, &mut self.std_aliases);
-        syn::visit::visit_item_extern_crate(self, item);
+        self.restore_test_context(was);
     }
 }

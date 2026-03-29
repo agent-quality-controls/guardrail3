@@ -88,12 +88,12 @@ mod tests {
         let queue = FakeQueue {
             jobs: RefCell::new(vec![
                 Job::new(
-                    JobId::new("job_1").expect("valid id"),
+                    JobId::new("job_1").expect("job_1 id should parse"),
                     "acme",
                     JobKind::NotificationFanout,
                     "fanout:daily-brief",
                 )
-                .expect("valid job"),
+                .expect("job_1 payload should validate"),
             ]),
             ..FakeQueue::default()
         };
@@ -107,12 +107,12 @@ mod tests {
     #[test]
     fn skips_jobs_that_already_finished() {
         let mut finished_job = Job::new(
-            JobId::new("job_2").expect("valid id"),
+            JobId::new("job_2").expect("job_2 id should parse"),
             "acme",
             JobKind::BillingDigest,
             "billing:week-12",
         )
-        .expect("valid job");
+        .expect("job_2 payload should validate");
         finished_job.status = JobStatus::Completed;
 
         let queue = FakeQueue {

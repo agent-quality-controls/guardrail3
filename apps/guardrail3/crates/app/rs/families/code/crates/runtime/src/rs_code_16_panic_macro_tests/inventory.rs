@@ -18,7 +18,7 @@ fn attacks_panic_macros_across_real_owned_files_with_exact_metadata() {
         "{backend_content}\nmod nested_panic_probe {{\n    pub fn run() {{ panic!(\"fixups\"); }}\n    pub fn second_run() {{ core::panic!(\"still bad\"); }}\n}}\n"
     );
     let worker_new = format!(
-        "{worker_content}\nimpl QueueProbe {{\n    fn queue_panic_probe(&self) {{ panic!(\"queue\"); }}\n}}\n#[cfg(test)]\nmod cfg_probe {{\n    pub fn still_counted() {{ panic!(\"prod-file cfg\"); }}\n}}\n"
+        "{worker_content}\nimpl QueueProbe {{\n    fn queue_panic_probe(&self) {{ panic!(\"queue\"); }}\n}}\n#[cfg(test)]\nmod cfg_probe {{\n    pub fn test_only_probe() {{ panic!(\"prod-file cfg\"); }}\n}}\n"
     );
 
     write_file(root, backend_rel, &backend_new);
@@ -39,12 +39,6 @@ fn attacks_panic_macros_across_real_owned_files_with_exact_metadata() {
         .position(|line| line.contains("fn queue_panic_probe(&self)"))
         .map(|index| index + 1)
         .unwrap_or_default();
-    let worker_cfg_line = worker_new
-        .lines()
-        .position(|line| line.contains("pub fn still_counted()"))
-        .map(|index| index + 1)
-        .unwrap_or_default();
-
     assert_attacks_panic_macros_across_real_owned_files_with_exact_metadata(
         &run_family(root),
         backend_rel,
@@ -52,6 +46,5 @@ fn attacks_panic_macros_across_real_owned_files_with_exact_metadata() {
         backend_first_line,
         backend_second_line,
         worker_impl_line,
-        worker_cfg_line,
     );
 }

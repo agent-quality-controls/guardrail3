@@ -35,7 +35,7 @@ fn skips_documented_and_cross_rule_near_misses() {
         root,
         nested_rel,
         &format!(
-            "{nested_content}\nmod nested_documented {{\n    #[allow(clippy::panic)] // REASON: temporary test seam\n    pub fn helper() {{}}\n}}\n"
+            "{nested_content}\nmod nested_documented {{\n    #[allow(clippy::panic)] // reason: temporary test seam\n    pub fn helper() {{}}\n}}\n"
         ),
     );
     write_file(
@@ -56,7 +56,7 @@ fn skips_documented_and_cross_rule_near_misses() {
         root,
         documented_mod_rel,
         &format!(
-            "{documented_mod_content}\n#[allow(clippy::unwrap_used, clippy::expect_used)] //reason: adapter boundary shim\npub mod documented_module_probe {{\n    pub fn helper() {{}}\n}}\n"
+            "{documented_mod_content}\n#[allow(clippy::unwrap_used, clippy::expect_used)] // reason: adapter boundary shim\npub mod documented_module_probe {{\n    pub fn helper() {{}}\n}}\n"
         ),
     );
 
@@ -112,14 +112,14 @@ fn skips_broad_documented_item_level_allows_across_real_owned_files() {
         root,
         nested_rel,
         &format!(
-            "{nested_content}\nmod nested_documented {{\n    #[allow(clippy::panic)] //reason: outbound port seam\n    pub fn helper() {{}}\n}}\n"
+            "{nested_content}\nmod nested_documented {{\n    #[allow(clippy::panic)] // reason: outbound port seam\n    pub fn helper() {{}}\n}}\n"
         ),
     );
     write_file(
         root,
         grouped_rel,
         &format!(
-            "{grouped_content}\n#[allow(clippy::unwrap_used, clippy::expect_used)] // REASON: trait adapter compatibility\npub mod documented_grouped_probe {{\n    pub fn helper() {{}}\n}}\n"
+            "{grouped_content}\n#[allow(clippy::unwrap_used, clippy::expect_used)] // reason: trait adapter compatibility\npub mod documented_grouped_probe {{\n    pub fn helper() {{}}\n}}\n"
         ),
     );
     write_file(

@@ -6,7 +6,7 @@ pub struct RustCodeFileInput<'a> {
     pub rel_path: &'a str,
     pub content: &'a str,
     pub ast: &'a syn::File,
-    pub is_test: bool,
+    pub is_test_root: bool,
     pub profile_name: Option<&'a str>,
 }
 
@@ -16,7 +16,7 @@ impl<'a> RustCodeFileInput<'a> {
             rel_path: &facts.rel_path,
             content,
             ast,
-            is_test: facts.is_test,
+            is_test_root: facts.is_test_root,
             profile_name: facts.profile_name.as_deref(),
         }
     }

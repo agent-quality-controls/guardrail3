@@ -16,14 +16,12 @@ pub fn same_line_reason(content: &str, line: usize) -> Option<String> {
     content
         .lines()
         .nth(line.saturating_sub(1))
-        .and_then(|source_line| source_line.split_once("//").map(|(_, comment)| comment))
+        .and_then(trailing_line_comment)
         .and_then(|comment| {
-            let trimmed = comment.trim();
-            let lower = trimmed.to_ascii_lowercase();
-            if !lower.starts_with("reason:") {
+            if !comment.starts_with(" reason:") {
                 return None;
             }
-            let reason = trimmed.get("reason:".len()..)?.trim();
+            let reason = comment.get(" reason:".len()..)?.trim();
             if reason.is_empty() {
                 None
             } else {
@@ -170,6 +168,112 @@ fn starts_byte_or_plain_string(bytes: &[u8], index: usize) -> bool {
         || (bytes.get(index) == Some(&b'b') && bytes.get(index.saturating_add(1)) == Some(&b'"'))
 }
 
+fn starts_byte_or_plain_char(bytes: &[u8], index: usize) -> bool {
+    bytes.get(index) == Some(&b'\'')
+        || (bytes.get(index) == Some(&b'b') && bytes.get(index.saturating_add(1)) == Some(&b'\''))
+}
+
+fn trailing_line_comment(line: &str) -> Option<&str> {
+    let bytes = line.as_bytes();
+    let mut i = 0usize;
+
+    #[derive(Clone, Copy)]
+    enum ScanState {
+        Normal,
+        BlockComment(usize),
+        String { escaped: bool },
+        Char { escaped: bool },
+        RawString { hashes: usize },
+    }
+
+    let mut state = ScanState::Normal;
+
+    while i < bytes.len() {
+        state = match state {
+            ScanState::Normal => {
+                if starts_line_comment(bytes, i) {
+                    return line.get(i.saturating_add(2)..);
+                }
+                if starts_block_comment(bytes, i) {
+                    i = i.saturating_add(2);
+                    ScanState::BlockComment(1)
+                } else if let Some((prefix_len, hashes)) = raw_string_prefix(bytes, i) {
+                    i = i.saturating_add(prefix_len);
+                    ScanState::RawString { hashes }
+                } else if starts_byte_or_plain_string(bytes, i) {
+                    i = i.saturating_add(if bytes[i] == b'b' { 2 } else { 1 });
+                    ScanState::String { escaped: false }
+                } else if starts_byte_or_plain_char(bytes, i) {
+                    i = i.saturating_add(if bytes[i] == b'b' { 2 } else { 1 });
+                    ScanState::Char { escaped: false }
+                } else {
+                    i = i.saturating_add(1);
+                    ScanState::Normal
+                }
+            }
+            ScanState::BlockComment(depth) => {
+                if starts_block_comment(bytes, i) {
+                    i = i.saturating_add(2);
+                    ScanState::BlockComment(depth.saturating_add(1))
+                } else if ends_block_comment(bytes, i) {
+                    i = i.saturating_add(2);
+                    if depth == 1 {
+                        ScanState::Normal
+                    } else {
+                        ScanState::BlockComment(depth.saturating_sub(1))
+                    }
+                } else {
+                    i = i.saturating_add(1);
+                    ScanState::BlockComment(depth)
+                }
+            }
+            ScanState::String { escaped } => {
+                let byte = bytes[i];
+                if escaped {
+                    i = i.saturating_add(1);
+                    ScanState::String { escaped: false }
+                } else if byte == b'\\' {
+                    i = i.saturating_add(1);
+                    ScanState::String { escaped: true }
+                } else if byte == b'"' {
+                    i = i.saturating_add(1);
+                    ScanState::Normal
+                } else {
+                    i = i.saturating_add(1);
+                    ScanState::String { escaped: false }
+                }
+            }
+            ScanState::Char { escaped } => {
+                let byte = bytes[i];
+                if escaped {
+                    i = i.saturating_add(1);
+                    ScanState::Char { escaped: false }
+                } else if byte == b'\\' {
+                    i = i.saturating_add(1);
+                    ScanState::Char { escaped: true }
+                } else if byte == b'\'' {
+                    i = i.saturating_add(1);
+                    ScanState::Normal
+                } else {
+                    i = i.saturating_add(1);
+                    ScanState::Char { escaped: false }
+                }
+            }
+            ScanState::RawString { hashes } => {
+                if raw_string_terminator(bytes, i, hashes) {
+                    i = i.saturating_add(1 + hashes);
+                    ScanState::Normal
+                } else {
+                    i = i.saturating_add(1);
+                    ScanState::RawString { hashes }
+                }
+            }
+        };
+    }
+
+    None
+}
+
 fn raw_string_prefix(bytes: &[u8], index: usize) -> Option<(usize, usize)> {
     let prefix_offset = if bytes.get(index) == Some(&b'r') {
         0
@@ -271,4 +375,38 @@ fn strip_string_literals(line: &str) -> String {
     }
 
     result
+}
+
+#[cfg(test)]
+mod tests {
+    use super::same_line_reason;
+
+    #[test]
+    fn accepts_only_exact_same_line_reason_prefix() {
+        let content = "#[allow(clippy::unwrap_used)] // reason: documented seam\n#[allow(clippy::panic)] // REASON: uppercase\n#[allow(clippy::expect_used)] //reason: tight\n";
+
+        assert_eq!(
+            same_line_reason(content, 1),
+            Some("documented seam".to_owned())
+        );
+        assert_eq!(same_line_reason(content, 2), None);
+        assert_eq!(same_line_reason(content, 3), None);
+    }
+
+    #[test]
+    fn ignores_comment_markers_inside_strings_and_raw_strings() {
+        let content = concat!(
+            "let url = \"https://example.com/policy\"; #[allow(clippy::unwrap_used)] // reason: external policy link https://example.com/policy\n",
+            "let snippet = r#\"// reason: forged\"#; #[allow(clippy::panic)] // reason: raw string stays inert\n",
+        );
+
+        assert_eq!(
+            same_line_reason(content, 1),
+            Some("external policy link https://example.com/policy".to_owned())
+        );
+        assert_eq!(
+            same_line_reason(content, 2),
+            Some("raw string stays inert".to_owned())
+        );
+    }
 }

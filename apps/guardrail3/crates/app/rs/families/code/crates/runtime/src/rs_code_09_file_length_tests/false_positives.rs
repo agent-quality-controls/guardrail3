@@ -11,11 +11,8 @@ fn skips_test_file_even_when_it_exceeds_threshold() {
     let filler = "fn filler() {}\n".repeat(600);
     for rel in [
         "apps/backend/crates/app/commands/tests/long_case_tests.rs",
-        "apps/backend/crates/app/commands/test/long_case.rs",
-        "apps/backend/crates/app/commands/src/__tests__/long_case.rs",
         "apps/backend/crates/app/commands/src/long_case_test.rs",
         "apps/backend/crates/app/commands/src/long_case_tests.rs",
-        "apps/backend/crates/app/commands/src/tests.rs",
     ] {
         write_file(root, rel, &filler);
     }

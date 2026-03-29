@@ -57,6 +57,42 @@ fn errors_on_non_concat_include_with_out_dir_reference() {
 }
 
 #[test]
+fn errors_on_build_script_include_with_parent_traversal() {
+    let content = "include!(concat!(env!(\"OUT_DIR\"), \"/../escape.rs\"));";
+    let results = check_source("src/lib.rs", content, false);
+
+    assert_findings(
+        &results,
+        &[RuleFinding {
+            severity: guardrail3_domain_report::Severity::Warn,
+            title: "include path traversal",
+            message: "`include!()` build-script pattern appends a path containing `..`.",
+            file: Some("src/lib.rs"),
+            line: Some(1),
+            inventory: false,
+        }],
+    );
+}
+
+#[test]
+fn keeps_build_script_include_inventory_for_non_traversing_double_dot_filename() {
+    let content = "include!(concat!(env!(\"OUT_DIR\"), \"/generated..rs\"));";
+    let results = check_source("src/lib.rs", content, false);
+
+    assert_findings(
+        &results,
+        &[RuleFinding {
+            severity: guardrail3_domain_report::Severity::Info,
+            title: "build-script include! inventory",
+            message: "`include!(concat!(env!(\"OUT_DIR\"), ...))` detected. Review generated-code boundary.",
+            file: Some("src/lib.rs"),
+            line: Some(1),
+            inventory: true,
+        }],
+    );
+}
+
+#[test]
 fn warns_on_include_path_traversal() {
     let content = "const BYTES: &[u8] = include_bytes!(\"../fixtures/payload.bin\");";
     let results = check_source("src/lib.rs", content, false);

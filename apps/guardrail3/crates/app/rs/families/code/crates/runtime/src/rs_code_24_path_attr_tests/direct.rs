@@ -43,6 +43,53 @@ fn warns_on_path_attr_with_reason() {
 }
 
 #[test]
+fn errors_on_noncanonical_reason_spellings() {
+    let content = "#[path = \"generated.rs\"] // REASON: generated facade shim\nmod generated;\n#[path = \"generated_inline.rs\"] //reason: generated request DTO shim\nmod generated_inline;";
+    let results = check_source("src/lib.rs", content, false);
+
+    assert_findings(
+        &results,
+        &[
+            RuleFinding {
+                severity: guardrail3_domain_report::Severity::Error,
+                title: "#[path] without reason",
+                message: "`#[path = \"generated.rs\"]` changes module resolution and requires `// reason:` on the same line.",
+                file: Some("src/lib.rs"),
+                line: Some(1),
+                inventory: false,
+            },
+            RuleFinding {
+                severity: guardrail3_domain_report::Severity::Error,
+                title: "#[path] without reason",
+                message: "`#[path = \"generated_inline.rs\"]` changes module resolution and requires `// reason:` on the same line.",
+                file: Some("src/lib.rs"),
+                line: Some(3),
+                inventory: false,
+            },
+        ],
+    );
+}
+
+#[test]
+fn warns_on_path_attr_with_double_slash_inside_string_literal() {
+    let content =
+        "#[path = \"generated//inline.rs\"] // reason: generated facade shim\nmod generated;";
+    let results = check_source("src/lib.rs", content, false);
+
+    assert_findings(
+        &results,
+        &[RuleFinding {
+            severity: guardrail3_domain_report::Severity::Warn,
+            title: "#[path] usage",
+            message: "#[path = \"generated//inline.rs\"] reason: generated facade shim",
+            file: Some("src/lib.rs"),
+            line: Some(1),
+            inventory: false,
+        }],
+    );
+}
+
+#[test]
 fn errors_on_parent_escaping_path_attr() {
     let results = check_source(
         "src/lib.rs",

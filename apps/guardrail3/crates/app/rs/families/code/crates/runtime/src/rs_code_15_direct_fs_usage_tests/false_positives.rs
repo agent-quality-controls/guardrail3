@@ -21,16 +21,6 @@ fn skips_test_boundaries_cfg_test_src_fs_and_text_only_near_misses() {
     );
     write_file(
         root,
-        "apps/backend/crates/app/queries/test/fs_usage_test.rs",
-        "use std::fs;\nfn probe() { let _ = std::fs::read_to_string(\"fixture\"); }\n",
-    );
-    write_file(
-        root,
-        "apps/backend/crates/app/queries/__tests__/fs_usage.rs",
-        "use std::fs;\nfn probe() { let _ = std::fs::read_to_string(\"fixture\"); }\n",
-    );
-    write_file(
-        root,
         "apps/backend/crates/app/queries/src/fs_usage_test.rs",
         "use std::fs;\nfn probe() { let _ = std::fs::read_to_string(\"fixture\"); }\n",
     );
@@ -38,11 +28,6 @@ fn skips_test_boundaries_cfg_test_src_fs_and_text_only_near_misses() {
         root,
         "apps/backend/crates/app/queries/src/fs_usage_tests.rs",
         "use std::fs;\nfn probe() { let _ = std::fs::read_to_string(\"fixture\"); }\n",
-    );
-    write_file(
-        root,
-        "apps/backend/crates/app/queries/src/tests.rs",
-        "use std::fs;\npub fn probe() { let _ = std::fs::read_to_string(\"fixture\"); }\n",
     );
     write_file(
         root,
@@ -83,11 +68,8 @@ fn skips_test_boundaries_cfg_test_src_fs_and_text_only_near_misses() {
                 Some(path)
                     if [
                         "apps/backend/crates/app/queries/tests/fs_usage_tests.rs",
-                        "apps/backend/crates/app/queries/test/fs_usage_test.rs",
-                        "apps/backend/crates/app/queries/__tests__/fs_usage.rs",
                         "apps/backend/crates/app/queries/src/fs_usage_test.rs",
                         "apps/backend/crates/app/queries/src/fs_usage_tests.rs",
-                        "apps/backend/crates/app/queries/src/tests.rs",
                         "tests/top_level_fs_usage.rs",
                         "apps/backend/crates/app/queries/src/fs.rs",
                         "apps/backend/crates/shared/fs/src/lib.rs",

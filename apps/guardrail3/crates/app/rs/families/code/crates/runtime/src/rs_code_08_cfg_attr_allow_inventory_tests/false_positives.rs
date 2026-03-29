@@ -14,19 +14,19 @@ fn skips_always_true_and_non_cfg_attr_allow_surfaces() {
     let plain_item_rel = "apps/devctl/crates/app/core/src/lib.rs";
     let crate_level_rel = "apps/worker/crates/app/processor/src/lib.rs";
     let grouped_conditional_rel = "apps/backend/crates/ports/outbound/repo/src/lib.rs";
-    let negated_always_true_rel = "apps/backend/crates/app/commands/src/lib.rs";
+    let nested_always_true_rel = "apps/backend/crates/app/commands/src/lib.rs";
 
     let always_true_content = test_support::read_file(root, always_true_rel);
     let plain_item_content = test_support::read_file(root, plain_item_rel);
     let crate_level_content = test_support::read_file(root, crate_level_rel);
     let grouped_conditional_content = test_support::read_file(root, grouped_conditional_rel);
-    let negated_always_true_content = test_support::read_file(root, negated_always_true_rel);
+    let nested_always_true_content = test_support::read_file(root, nested_always_true_rel);
 
     write_file(
         root,
         always_true_rel,
         &format!(
-            "{always_true_content}\n#[cfg_attr(any(unix, windows), allow(clippy::unwrap_used))]\nfn always_true_probe() {{}}\n"
+            "{always_true_content}\n#[cfg_attr(all(), allow(clippy::unwrap_used))]\nfn always_true_probe() {{}}\n"
         ),
     );
     write_file(
@@ -50,9 +50,9 @@ fn skips_always_true_and_non_cfg_attr_allow_surfaces() {
     );
     write_file(
         root,
-        negated_always_true_rel,
+        nested_always_true_rel,
         &format!(
-            "{negated_always_true_content}\n#[cfg_attr(not(never_target), allow(clippy::expect_used))]\nfn negated_always_true_probe() {{}}\n"
+            "{nested_always_true_content}\n#[cfg_attr(all(), cfg_attr(all(), allow(clippy::expect_used)))]\nfn nested_always_true_probe() {{}}\n"
         ),
     );
 

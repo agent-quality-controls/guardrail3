@@ -6,7 +6,7 @@ use super::parse::{find_test_expect_calls, line_text};
 const ID: &str = "RS-CODE-32";
 
 pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
-    for issue in find_test_expect_calls(input.ast, input.is_test) {
+    for issue in find_test_expect_calls(input.ast, input.is_test_root) {
         match issue.message {
             Some(message) if test_expect_message_is_useful(&message) => {}
             Some(message) => results.push(CheckResult {
@@ -39,11 +39,11 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
 
 fn test_expect_message_is_useful(message: &str) -> bool {
     let trimmed = message.trim();
-    if trimmed.len() < 7 {
+    if trimmed.len() < 12 {
         return false;
     }
     let normalized = trimmed.to_ascii_lowercase();
-    if normalized.split_whitespace().count() < 2 {
+    if normalized.split_whitespace().count() < 3 {
         return false;
     }
     if matches!(
@@ -78,14 +78,14 @@ pub(crate) fn copy_fixture() -> test_support::TempDir {
 }
 
 #[cfg(test)]
-pub(crate) fn check_source(rel_path: &str, content: &str, is_test: bool) -> Vec<CheckResult> {
+pub(crate) fn check_source(rel_path: &str, content: &str, is_test_root: bool) -> Vec<CheckResult> {
     let ast = super::parse::parse_rust_file(content)
         .unwrap_or_else(|error| std::panic::panic_any(format!("valid rust: {error}")));
     let input = super::inputs::RustCodeFileInput {
         rel_path,
         content,
         ast: &ast,
-        is_test,
+        is_test_root,
         profile_name: None,
     };
     let mut results = Vec::new();

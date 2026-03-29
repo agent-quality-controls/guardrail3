@@ -117,7 +117,6 @@ pub fn assert_attacks_panic_macros_across_real_owned_files_with_exact_metadata(
     backend_first_line: usize,
     backend_second_line: usize,
     worker_impl_line: usize,
-    worker_cfg_line: usize,
 ) {
     let mut actual = findings(results);
     actual.sort_by(|left, right| {
@@ -155,15 +154,6 @@ pub fn assert_attacks_panic_macros_across_real_owned_files_with_exact_metadata(
                 message: "`panic!()` macro found: fn queue_panic_probe(&self) { panic!(\"queue\"); }.",
                 file: Some(worker_rel),
                 line: Some(worker_impl_line),
-                inventory: false,
-            },
-            Finding {
-                id: ID,
-                severity: Severity::Warn,
-                title: "panic! macro",
-                message: "`panic!()` macro found: pub fn still_counted() { panic!(\"prod-file cfg\"); }.",
-                file: Some(worker_rel),
-                line: Some(worker_cfg_line),
                 inventory: false,
             },
         ],

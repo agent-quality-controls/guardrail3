@@ -15,10 +15,10 @@ fn attacks_always_true_cfg_attr_bypasses_across_multiple_owned_files_with_exact_
     let worker_content = test_support::read_file(root, worker_rel);
 
     let backend_new = format!(
-        "{backend_content}\n#[cfg_attr(all(), allow(clippy::unwrap_used))]\nfn cfg_attr_backend_probe() {{}}\nmod nested_cfg_attr_probe {{\n    #[cfg_attr(any(unix, windows), allow(clippy::panic))]\n    pub fn helper() {{}}\n}}\n"
+        "{backend_content}\n#[cfg_attr(all(), allow(clippy::unwrap_used))]\nfn cfg_attr_backend_probe() {{}}\nmod nested_cfg_attr_probe {{\n    #[cfg_attr(not(any()), allow(clippy::panic))]\n    pub fn helper() {{}}\n}}\n"
     );
     let worker_new = format!(
-        "{worker_content}\nstruct WorkerProbe;\nimpl WorkerProbe {{\n    #[cfg_attr(not(never_target), allow(clippy::expect_used, clippy::panic))]\n    fn cfg_attr_worker_probe(&self) {{}}\n}}\n"
+        "{worker_content}\nstruct WorkerProbe;\nimpl WorkerProbe {{\n    #[cfg_attr(all(), allow(clippy::expect_used, clippy::panic))]\n    fn cfg_attr_worker_probe(&self) {{}}\n}}\n"
     );
 
     write_file(root, backend_rel, &backend_new);
@@ -31,16 +31,12 @@ fn attacks_always_true_cfg_attr_bypasses_across_multiple_owned_files_with_exact_
         .unwrap_or_default();
     let backend_nested_line = backend_new
         .lines()
-        .position(|line| line.contains("#[cfg_attr(any(unix, windows), allow(clippy::panic))]"))
+        .position(|line| line.contains("#[cfg_attr(not(any()), allow(clippy::panic))]"))
         .map(|index| index + 1)
         .unwrap_or_default();
     let worker_line = worker_new
         .lines()
-        .position(|line| {
-            line.contains(
-                "#[cfg_attr(not(never_target), allow(clippy::expect_used, clippy::panic))]",
-            )
-        })
+        .position(|line| line.contains("#[cfg_attr(all(), allow(clippy::expect_used, clippy::panic))]"))
         .map(|index| index + 1)
         .unwrap_or_default();
 

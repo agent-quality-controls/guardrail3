@@ -14,7 +14,7 @@ fn skips_grouped_imports_that_keep_leaf_count_low() {
     write_file(
         root,
         rel,
-        &format!("use crate::{{a,b,c,d,e,f,g,h,i,j,k,l,m,o}};\n{content}"),
+        &format!("use crate::{{a,b,c,d,e,f,g,h,i,j}};\n{content}"),
     );
 
     let results = run_family(root);
