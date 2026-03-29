@@ -1,5 +1,4 @@
 use guardrail3_app_rs_family_garde_assertions::rs_garde_12_nested_validation_dive as assertions;
-use guardrail3_domain_report::Severity;
 use test_support::{dir_entry, project_tree, temp_root};
 
 #[test]
@@ -99,7 +98,7 @@ garde = { version = "0.22", features = ["derive"] }
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(Severity::Error),
+            severity: Some(assertions::Severity::Error),
             file: Some(local_rel),
             ..Default::default()
         }],

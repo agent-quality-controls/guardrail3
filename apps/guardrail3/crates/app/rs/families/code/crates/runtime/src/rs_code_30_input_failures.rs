@@ -22,6 +22,9 @@ pub(crate) fn run_tree(tree: &guardrail3_domain_project_tree::ProjectTree) -> Ve
 }
 
 #[cfg(test)]
+pub(crate) use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
+
+#[cfg(test)]
 pub(crate) fn check_input_failure(rel_path: &str, message: &str) -> Vec<CheckResult> {
     let input = super::inputs::CodeInputFailureInput { rel_path, message };
     let mut results = Vec::new();

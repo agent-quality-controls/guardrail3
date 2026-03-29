@@ -1,5 +1,3 @@
-use guardrail3_domain_report::Severity;
-
 use guardrail3_app_rs_family_garde_assertions::rs_garde_09_query_as_inventory as assertions;
 use test_support::{dir_entry, project_tree, temp_root};
 
@@ -78,7 +76,7 @@ garde = { version = "0.22", features = ["derive"] }
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(Severity::Info),
+            severity: Some(assertions::Severity::Info),
             file: Some("vendor/lib/src/db.rs"),
             inventory: Some(true),
             ..Default::default()

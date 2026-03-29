@@ -488,6 +488,7 @@ Activation:
 Detection:
 
 - exact tool probe on `PATH`
+- compliant adopted roots stay quiet
 
 #### `RS-TEST-12`
 
@@ -500,6 +501,7 @@ Prevents:
 Detection:
 
 - exact file existence check at the owned root
+- compliant adopted roots stay quiet
 
 #### `RS-TEST-13`
 
@@ -513,6 +515,7 @@ Detection:
 
 - parse owned-root `Cargo.toml`
 - require `[profile.mutants]`
+- compliant adopted roots stay quiet
 
 #### `RS-TEST-14`
 
@@ -527,6 +530,7 @@ Detection:
 - parse active hook surfaces using executable-line matching
 - require a command step invoking `cargo mutants`
 - raw substring matching is not sufficient
+- compliant adopted roots stay quiet
 
 #### `RS-TEST-15`
 
@@ -543,6 +547,7 @@ Detection:
 - flag exact dangerous states such as:
   - `exclude_re = [\".*\"]`
   - `timeout_multiplier < 1.0`
+- compliant adopted roots stay quiet
 
 #### `RS-TEST-16`
 

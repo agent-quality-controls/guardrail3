@@ -1,10 +1,8 @@
 use std::collections::BTreeSet;
 
-use guardrail3_domain_report::Severity;
-
 use super::super::copy_fixture;
 use super::super::run_family;
-use guardrail3_app_rs_family_code_assertions::rs_code_05_garde_skip_without_comment::{
+use guardrail3_app_rs_family_code_assertions::rs_code_05_garde_skip_without_comment::{Severity, 
     RuleFinding, assert_files, assert_findings,
 };
 use test_support::write_file;

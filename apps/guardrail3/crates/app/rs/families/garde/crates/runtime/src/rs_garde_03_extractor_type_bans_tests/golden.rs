@@ -1,11 +1,10 @@
 use guardrail3_app_rs_family_garde_assertions::rs_garde_03_extractor_type_bans as assertions;
-use guardrail3_domain_modules::clippy::build_clippy_toml;
 use test_support::{dir_entry, project_tree, temp_root};
 
 #[test]
 fn inventories_when_all_bans_present() {
     let root = temp_root("golden-garde-03");
-    let clippy_toml = build_clippy_toml("service", false, true, "", "");
+    let clippy_toml = super::super::canonical_clippy_toml();
     let tree = project_tree(
         vec![("", dir_entry(&[], &["Cargo.toml", "clippy.toml"]))],
         vec![

@@ -1,13 +1,13 @@
 #[allow(unused_imports)]
 use guardrail3_app_rs_family_test_assertions::rs_test_15_mutants_config_sane::{
-    Severity, assert_inventory, assert_reported, assert_rule_files, assert_rule_quiet,
+    assert_rule_quiet,
 };
 
 #[allow(unused_imports)]
 use super::{run_family, tempdir, write_file};
 
 #[test]
-fn sane_mutants_config_is_reported_as_inventory() {
+fn sane_mutants_config_keeps_the_root_quiet() {
     let fixture = tempdir();
     let root = fixture.path();
 
@@ -24,13 +24,5 @@ fn sane_mutants_config_is_reported_as_inventory() {
 
     let results = run_family(root);
 
-    assert_rule_files(&results, vec![".cargo/mutants.toml".to_owned()]);
-    assert_reported(
-        &results,
-        ".cargo/mutants.toml",
-        None,
-        Severity::Info,
-        "mutants config looks sane",
-    );
-    assert_inventory(&results, true);
+    assert_rule_quiet(&results);
 }

@@ -1,9 +1,5 @@
-use std::collections::BTreeSet;
-
-use guardrail3_app_rs_family_mapper::FamilyMapper;
-use guardrail3_domain_config::types::GuardrailConfig;
+use guardrail3_app_rs_family_garde_assertions::facts::assert_root_dirs_exclude;
 use super::collect;
-use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 use test_support::{dir_entry, project_tree, temp_root};
 
 #[test]
@@ -47,18 +43,12 @@ fn root_workspace_uses_packages_garde_policy_when_packages_config_owns_root() {
         root.clone(),
     );
 
-    let scope = guardrail3_app_rs_placement::collect(&tree);
-    let config = tree
-        .file_content("guardrail3.toml")
-        .and_then(|content| toml::from_str::<GuardrailConfig>(content).ok());
-    let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Garde]));
-    let route = FamilyMapper::new(&tree, &scope, config.as_ref(), &selected, None).map_rs_garde();
+    let route = super::family_route(&tree, None);
     let facts = collect(&tree, &route);
 
-    assert!(
-        facts.roots.iter().all(|root| root.rel_dir != ""),
-        "root workspace should be gated off by [rust.packages.checks].garde = false: {:#?}",
-        facts.roots
+    assert_root_dirs_exclude(
+        facts.roots.iter().map(|root| root.rel_dir.as_str()),
+        "",
     );
 
     std::fs::remove_dir_all(root).expect("cleanup");

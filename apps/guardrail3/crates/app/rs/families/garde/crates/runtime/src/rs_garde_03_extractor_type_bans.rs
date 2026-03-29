@@ -61,6 +61,12 @@ pub(super) fn canonical_clippy_toml() -> String {
 
 #[cfg(test)]
 #[allow(dead_code)]
+pub(super) fn canonical_library_clippy_toml() -> String {
+    guardrail3_domain_modules::clippy::build_clippy_toml("library", false, true, "", "")
+}
+
+#[cfg(test)]
+#[allow(dead_code)]
 pub(super) fn remove_clippy_ban_path(clippy_toml: &str, key: &str, path: &str) -> String {
     {
     let mut parsed = toml::from_str::<toml::Value>(clippy_toml).expect("valid clippy TOML");

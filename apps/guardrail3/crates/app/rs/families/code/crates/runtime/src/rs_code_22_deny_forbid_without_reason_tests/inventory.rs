@@ -2,10 +2,9 @@ use std::collections::BTreeSet;
 
 use super::super::copy_fixture;
 use super::super::run_family;
-use guardrail3_app_rs_family_code_assertions::rs_code_22_deny_forbid_without_reason::{
+use guardrail3_app_rs_family_code_assertions::rs_code_22_deny_forbid_without_reason::{Severity, 
     RuleFinding, assert_files, assert_findings,
 };
-use guardrail3_domain_report::Severity;
 use test_support::write_file;
 
 #[test]

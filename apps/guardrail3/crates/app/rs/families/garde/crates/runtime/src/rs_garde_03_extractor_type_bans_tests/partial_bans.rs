@@ -1,11 +1,10 @@
 use guardrail3_app_rs_family_garde_assertions::rs_garde_03_extractor_type_bans as assertions;
-use guardrail3_domain_modules::clippy::build_clippy_toml;
 use test_support::{dir_entry, project_tree, temp_root};
 
 #[test]
 fn warns_when_bans_missing() {
     let root = temp_root("partial-garde-03");
-    let mut clippy_toml = build_clippy_toml("service", false, true, "", "");
+    let mut clippy_toml = super::super::canonical_clippy_toml();
     for path in ["axum::extract::Path", "axum_extra::extract::TypedHeader"] {
         clippy_toml = super::super::remove_clippy_ban_path(&clippy_toml, "disallowed-types", path);
     }

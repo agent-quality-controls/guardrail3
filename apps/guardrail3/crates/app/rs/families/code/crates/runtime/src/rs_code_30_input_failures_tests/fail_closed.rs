@@ -1,8 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
-
-use super::super::run_tree;
+use super::super::{DirEntry, ProjectTree, run_tree};
 use guardrail3_app_rs_family_code_assertions::rs_code_30_input_failures::{
     assert_files, assert_guardrail_policy_parse_failure, assert_message_fragment_failure,
     assert_source_parse_failure,

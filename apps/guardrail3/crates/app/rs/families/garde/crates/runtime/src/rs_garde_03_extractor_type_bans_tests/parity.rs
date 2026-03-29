@@ -1,7 +1,6 @@
 use std::collections::BTreeSet;
 
 use guardrail3_app_rs_family_garde_assertions::rs_garde_03_extractor_type_bans::EXTRACTOR_TYPE_BANS;
-use guardrail3_domain_modules::clippy::build_clippy_toml;
 
 fn disallowed_type_paths(parsed: &toml::Value) -> BTreeSet<String> {
     parsed
@@ -21,7 +20,7 @@ fn disallowed_type_paths(parsed: &toml::Value) -> BTreeSet<String> {
 
 #[test]
 fn generated_service_clippy_baseline_contains_all_garde_extractor_bans() {
-    let parsed = toml::from_str::<toml::Value>(&build_clippy_toml("service", false, true, "", ""))
+    let parsed = toml::from_str::<toml::Value>(&super::super::canonical_clippy_toml())
         .expect("valid clippy TOML");
     let actual = disallowed_type_paths(&parsed);
     let expected = EXTRACTOR_TYPE_BANS
@@ -34,7 +33,7 @@ fn generated_service_clippy_baseline_contains_all_garde_extractor_bans() {
 
 #[test]
 fn generated_library_clippy_baseline_contains_all_garde_extractor_bans() {
-    let parsed = toml::from_str::<toml::Value>(&build_clippy_toml("library", false, true, "", ""))
+    let parsed = toml::from_str::<toml::Value>(&super::super::canonical_library_clippy_toml())
         .expect("valid clippy TOML");
     let actual = disallowed_type_paths(&parsed);
     let expected = EXTRACTOR_TYPE_BANS

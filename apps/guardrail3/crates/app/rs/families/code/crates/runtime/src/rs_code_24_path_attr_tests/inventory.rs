@@ -1,10 +1,8 @@
 use std::collections::BTreeSet;
 
-use guardrail3_domain_report::Severity;
-
 use super::super::copy_fixture;
 use super::super::run_family;
-use guardrail3_app_rs_family_code_assertions::rs_code_24_path_attr::{
+use guardrail3_app_rs_family_code_assertions::rs_code_24_path_attr::{Severity, 
     RuleFinding, assert_files, assert_findings,
 };
 use test_support::write_file;

@@ -54,23 +54,7 @@ pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
         }
     }
 
-    if !pushed {
-        results.push(
-            CheckResult {
-                id: ID.to_owned(),
-                severity: Severity::Info,
-                title: "mutants config looks sane".to_owned(),
-                message: format!(
-                    "`{}` avoids the known fake-mutation configurations this family bans.",
-                    input.root.mutants_rel_path
-                ),
-                file: Some(input.root.mutants_rel_path.clone()),
-                line: None,
-                inventory: false,
-            }
-            .as_inventory(),
-        );
-    }
+    let _ = pushed;
 }
 
 fn is_exclude_all_pattern(pattern: &str) -> bool {

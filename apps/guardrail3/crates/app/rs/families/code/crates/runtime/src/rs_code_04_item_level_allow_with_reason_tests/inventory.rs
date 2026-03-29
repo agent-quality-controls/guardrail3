@@ -1,8 +1,6 @@
-use guardrail3_domain_report::Severity;
-
 use super::super::copy_fixture;
 use super::super::run_family;
-use guardrail3_app_rs_family_code_assertions::rs_code_04_item_level_allow_with_reason::{
+use guardrail3_app_rs_family_code_assertions::rs_code_04_item_level_allow_with_reason::{Severity, 
     RuleFinding, assert_findings,
 };
 use test_support::write_file;

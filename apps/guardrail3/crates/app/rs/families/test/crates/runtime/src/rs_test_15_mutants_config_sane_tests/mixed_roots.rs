@@ -1,6 +1,6 @@
 #[allow(unused_imports)]
 use guardrail3_app_rs_family_test_assertions::rs_test_15_mutants_config_sane::{
-    Severity, assert_inventory, assert_reported, assert_rule_files, assert_rule_quiet,
+    assert_rule_quiet,
 };
 
 #[allow(unused_imports)]
@@ -30,13 +30,5 @@ fn adopted_workspace_root_does_not_emit_inventory_for_idle_standalone_root() {
 
     let results = run_family(root);
 
-    assert_rule_files(&results, vec![".cargo/mutants.toml".to_owned()]);
-    assert_reported(
-        &results,
-        ".cargo/mutants.toml",
-        None,
-        Severity::Info,
-        "mutants config looks sane",
-    );
-    assert_inventory(&results, true);
+    assert_rule_quiet(&results);
 }

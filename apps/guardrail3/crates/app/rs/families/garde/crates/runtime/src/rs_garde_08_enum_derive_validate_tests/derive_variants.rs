@@ -1,8 +1,7 @@
 use guardrail3_app_rs_family_garde_assertions::rs_garde_08_enum_derive_validate as assertions;
-use guardrail3_domain_report::{CheckResult, Severity};
 use test_support::{dir_entry, project_tree, temp_root};
 
-fn run_enum_boundary(source: &str) -> Vec<CheckResult> {
+fn run_enum_boundary(source: &str) -> Vec<assertions::CheckResult> {
     let root = temp_root("rs-garde-08-derive-variants");
     let source_abs = root.join("src/input.rs");
     let clippy_toml = super::super::canonical_clippy_toml();
@@ -56,7 +55,7 @@ enum Input {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(Severity::Error),
+            severity: Some(assertions::Severity::Error),
             message: Some(
                 "Enum `Input` derives Parser and has non-primitive payload fields, but does not derive `Validate`.",
             ),
@@ -83,7 +82,7 @@ enum Input {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(Severity::Error),
+            severity: Some(assertions::Severity::Error),
             message: Some(
                 "Enum `Input` derives Args and has non-primitive payload fields, but does not derive `Validate`.",
             ),
@@ -110,7 +109,7 @@ enum Input {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(Severity::Error),
+            severity: Some(assertions::Severity::Error),
             message: Some(
                 "Enum `Input` derives FromRow and has non-primitive payload fields, but does not derive `Validate`.",
             ),
@@ -137,7 +136,7 @@ enum Input {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(Severity::Error),
+            severity: Some(assertions::Severity::Error),
             message: Some(
                 "Enum `Input` derives De and has non-primitive payload fields, but does not derive `Validate`.",
             ),

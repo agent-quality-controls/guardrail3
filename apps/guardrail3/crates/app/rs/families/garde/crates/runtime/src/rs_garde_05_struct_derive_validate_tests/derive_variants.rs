@@ -1,8 +1,7 @@
 use guardrail3_app_rs_family_garde_assertions::rs_garde_05_struct_derive_validate as assertions;
-use guardrail3_domain_report::CheckResult;
 use test_support::{dir_entry, project_tree, temp_root};
 
-fn run_struct_boundary(source: &str) -> Vec<CheckResult> {
+fn run_struct_boundary(source: &str) -> Vec<assertions::CheckResult> {
     let root = temp_root("rs-garde-05-derive-variants");
     let source_abs = root.join("src/input.rs");
     let clippy_toml = super::super::canonical_clippy_toml();

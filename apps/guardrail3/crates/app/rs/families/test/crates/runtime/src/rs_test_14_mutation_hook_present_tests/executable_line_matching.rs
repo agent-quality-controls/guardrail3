@@ -1,7 +1,6 @@
 #[allow(unused_imports)]
 use guardrail3_app_rs_family_test_assertions::rs_test_14_mutation_hook_present::{
-    assert_missing_mutation_hook, assert_present_mutation_hook, assert_rule_files,
-    assert_rule_quiet,
+    assert_missing_mutation_hook, assert_rule_files, assert_rule_quiet,
 };
 
 #[allow(unused_imports)]
@@ -45,7 +44,6 @@ fn real_mutation_commands_count_in_common_shell_forms() {
         write_file(fixture.path(), ".githooks/pre-commit", hook_body);
 
         let results = run_family(fixture.path());
-        assert_rule_files(&results, vec![".githooks/pre-commit".to_owned()]);
-        assert_present_mutation_hook(&results);
+        assert_rule_quiet(&results);
     }
 }
