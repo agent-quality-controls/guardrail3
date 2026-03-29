@@ -1,5 +1,12 @@
 # Arch Family Rewrite Agent Brief
 
+> Historical note: this file is superseded. For the current `RS-ARCH` contract, use:
+> - `apps/guardrail3/crates/app/rs/families/arch/README.md`
+> - `apps/guardrail3/crates/app/rs/README.md`
+> - `.plans/todo/checks/rs/arch.md`
+>
+> This brief reflects an older rewrite phase and may contain stale rule counts, paths, or family shape.
+
 This is the current droppable handoff file for rewriting and hardening the live `rs/arch` family.
 
 ## Read First

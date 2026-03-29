@@ -1,5 +1,12 @@
 # Arch Agent Brief
 
+> Historical note: this file is superseded. For the current `RS-ARCH` contract, use:
+> - `apps/guardrail3/crates/app/rs/families/arch/README.md`
+> - `apps/guardrail3/crates/app/rs/README.md`
+> - `.plans/todo/checks/rs/arch.md`
+>
+> This brief predates the current family layout and rule inventory.
+
 This is the droppable handoff file for the `rs/arch` implementation and hardening pass.
 
 ## Read First

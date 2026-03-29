@@ -1,5 +1,12 @@
 # RS-ARCH Implementation Handoff
 
+> Historical note: this handoff is superseded by the live `RS-ARCH` family docs and rule plan:
+> - `apps/guardrail3/crates/app/rs/families/arch/README.md`
+> - `apps/guardrail3/crates/app/rs/README.md`
+> - `.plans/todo/checks/rs/arch.md`
+>
+> It documents an older implementation stage and no longer matches the current rule split or file layout.
+
 **Date:** 2026-03-24
 
 ## Summary
