@@ -67,7 +67,6 @@ fn rel_label(rel: &str) -> String {
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_root(root)
 }

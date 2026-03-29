@@ -109,7 +109,6 @@ fn matches_step_family(line: &crate::hook_shell::ExecutableLine<'_>, family: &st
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(crate) fn run_case(content: &str) -> Vec<CheckResult> {
     let parsed = crate::hook_shell::parse_script(content);
     let input = ExecutableCommandContextInput {

@@ -1,6 +1,9 @@
 crate::define_rule_assertions!("HOOK-SHARED-07");
 
-pub fn assert_message_contains_all(results: &[guardrail3_domain_report::CheckResult], needles: &[&str]) {
+pub fn assert_message_contains_all(
+    results: &[guardrail3_domain_report::CheckResult],
+    needles: &[&str],
+) {
     let finding = findings(results)
         .into_iter()
         .next()

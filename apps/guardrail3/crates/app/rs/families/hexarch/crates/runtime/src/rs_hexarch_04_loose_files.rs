@@ -21,7 +21,10 @@ pub fn check(input: &ContainerHexarchInput<'_>, results: &mut Vec<CheckResult>) 
         push_success(
             results,
             ID,
-            format!("Service `{}` has no loose files in {}", input.app_name, input.label),
+            format!(
+                "Service `{}` has no loose files in {}",
+                input.app_name, input.label
+            ),
             format!(
                 "Service `{}` keeps structural/container directory `{}` free of loose files.",
                 input.app_name, input.rel_path
@@ -48,19 +51,9 @@ pub fn check(input: &ContainerHexarchInput<'_>, results: &mut Vec<CheckResult>) 
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_tree(&test_support::walk(root))
 }
-
-#[cfg(test)]
-#[allow(dead_code)]
-pub(super) fn results_for_test_tree(
-    tree: &guardrail3_domain_project_tree::ProjectTree,
-) -> Vec<CheckResult> {
-    crate::check_test_tree(tree)
-}
-
 #[cfg(test)]
 #[path = "rs_hexarch_04_loose_files_tests/mod.rs"]
 mod rs_hexarch_04_loose_files_tests;

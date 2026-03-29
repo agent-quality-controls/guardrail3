@@ -50,7 +50,6 @@ fn targets_pre_commit_dir(raw: &str) -> bool {
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(crate) fn run_case(content: &str, has_modular_dir: bool) -> Vec<CheckResult> {
     let parsed = crate::hook_shell::parse_script(content);
     let input = DispatcherSyntaxInput {

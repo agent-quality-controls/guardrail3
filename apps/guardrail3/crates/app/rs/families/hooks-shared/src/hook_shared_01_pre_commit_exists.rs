@@ -32,7 +32,6 @@ pub fn check(pre_commit: Option<&HookScriptFacts>, results: &mut Vec<CheckResult
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(crate) fn run_case(pre_commit_content: Option<&str>) -> Vec<CheckResult> {
     let pre_commit = pre_commit_content.map(|content| HookScriptFacts {
         rel_path: ".githooks/pre-commit".to_owned(),

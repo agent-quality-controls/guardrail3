@@ -43,7 +43,6 @@ fn has_shell_error_handling_line(line: &str) -> bool {
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(crate) fn run_case(content: &str) -> Vec<CheckResult> {
     let parsed = crate::hook_shell::parse_script(content);
     let input = ExecutableCommandContextInput {

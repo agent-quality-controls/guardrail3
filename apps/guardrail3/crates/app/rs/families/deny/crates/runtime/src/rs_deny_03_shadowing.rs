@@ -47,28 +47,10 @@ fn rel_label(rel: &str) -> String {
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_root(root)
 }
 
-#[cfg(test)]
-#[allow(dead_code)]
-pub(crate) fn run_same_root_conflict(
-    tree: &guardrail3_domain_project_tree::ProjectTree,
-    policy_root_rel: &str,
-) -> Vec<CheckResult> {
-    let facts = crate::collect_facts_for_test(tree);
-    let conflict = facts
-        .same_root_conflicts
-        .iter()
-        .find(|conflict| conflict.policy_root_rel == policy_root_rel)
-        .expect("expected same-root deny conflict facts");
-    let input = SameRootConflictInput::new(conflict);
-    let mut results = Vec::new();
-    check_same_root_conflict(&input, &mut results);
-    results
-}
 
 #[cfg(test)]
 pub(crate) use crate::{collected_facts, forbidden_input, same_root_conflict_input};

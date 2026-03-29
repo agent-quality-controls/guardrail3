@@ -1,5 +1,4 @@
-#[allow(unused_imports)]
-use super::{CargoFixture, cargo_fixture, check_results, entry, tree, tree_at};
+use super::{CargoFixture, cargo_fixture, check_results, entry, tree};
 use guardrail3_app_rs_family_arch_assertions::rs_arch_05_scoped_arch_config_forbidden as assertions;
 
 #[test]
@@ -25,9 +24,5 @@ fn golden_layout_has_no_scoped_arch_errors() {
     ));
 
     assertions::assert_no_error_files(&results, "RS-ARCH-05");
-    assertions::assert_inventory_summary(
-        &results,
-        "RS-ARCH-05",
-        "arch config remains global-only",
-    );
+    assertions::assert_inventory_summary(&results, "RS-ARCH-05", "arch config remains global-only");
 }

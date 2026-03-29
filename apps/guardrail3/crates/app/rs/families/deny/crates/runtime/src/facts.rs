@@ -565,7 +565,6 @@ fn profile_for(rel_dir: &str, profile_map: &BTreeMap<String, Option<String>>) ->
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(crate) fn collect_for_test(tree: &ProjectTree) -> DenyFacts {
     crate::collect_facts_for_test(tree)
 }

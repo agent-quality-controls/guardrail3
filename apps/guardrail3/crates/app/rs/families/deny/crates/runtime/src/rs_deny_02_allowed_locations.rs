@@ -41,28 +41,10 @@ fn rel_label(rel: &str) -> String {
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_root(root)
 }
 
-#[cfg(test)]
-#[allow(dead_code)]
-pub(crate) fn run_forbidden(
-    tree: &guardrail3_domain_project_tree::ProjectTree,
-    rel_path: &str,
-) -> Vec<CheckResult> {
-    let facts = crate::collect_facts_for_test(tree);
-    let forbidden = facts
-        .forbidden_configs
-        .iter()
-        .find(|config| config.rel_path == rel_path)
-        .expect("expected forbidden deny config facts");
-    let input = ForbiddenDenyConfigInput::new(forbidden);
-    let mut results = Vec::new();
-    check(&input, &mut results);
-    results
-}
 
 #[cfg(test)]
 pub(crate) use crate::{collected_facts, forbidden_input};

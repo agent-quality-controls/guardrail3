@@ -11,7 +11,11 @@ pub fn assert_inventory_hit(
         .into_iter()
         .filter(|result| result.file.as_deref() == Some(file) && result.line == Some(line))
         .collect::<Vec<_>>();
-    assert_eq!(matching.len(), 1, "unexpected RS-GARDE-09 findings for {file}:{line}: {matching:#?}");
+    assert_eq!(
+        matching.len(),
+        1,
+        "unexpected RS-GARDE-09 findings for {file}:{line}: {matching:#?}"
+    );
     assert_rule_results(
         &[matching[0].clone()],
         &[ExpectedRuleResult {
@@ -32,6 +36,10 @@ pub fn assert_single_inventory_hit(
     message: &str,
 ) {
     let findings = findings(results);
-    assert_eq!(findings.len(), 1, "unexpected RS-GARDE-09 findings: {findings:#?}");
+    assert_eq!(
+        findings.len(),
+        1,
+        "unexpected RS-GARDE-09 findings: {findings:#?}"
+    );
     assert_inventory_hit(results, file, line, message);
 }

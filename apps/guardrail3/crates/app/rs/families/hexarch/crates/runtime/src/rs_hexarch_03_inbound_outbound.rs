@@ -55,7 +55,10 @@ pub fn check(input: &DirectionalContainerHexarchInput<'_>, results: &mut Vec<Che
         push_success(
             results,
             ID,
-            format!("Service `{}` has inbound/outbound split in {}", input.app_name, input.label),
+            format!(
+                "Service `{}` has inbound/outbound split in {}",
+                input.app_name, input.label
+            ),
             format!(
                 "Service `{}` keeps `{}` limited to `inbound/` and `outbound/`.",
                 input.app_name, input.rel_path
@@ -66,19 +69,9 @@ pub fn check(input: &DirectionalContainerHexarchInput<'_>, results: &mut Vec<Che
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_tree(&test_support::walk(root))
 }
-
-#[cfg(test)]
-#[allow(dead_code)]
-pub(super) fn results_for_test_tree(
-    tree: &guardrail3_domain_project_tree::ProjectTree,
-) -> Vec<CheckResult> {
-    crate::check_test_tree(tree)
-}
-
 #[cfg(test)]
 #[path = "rs_hexarch_03_inbound_outbound_tests/mod.rs"]
 mod rs_hexarch_03_inbound_outbound_tests;

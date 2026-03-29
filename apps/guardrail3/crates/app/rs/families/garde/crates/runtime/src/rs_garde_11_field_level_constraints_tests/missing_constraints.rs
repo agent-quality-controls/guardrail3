@@ -47,7 +47,11 @@ garde = { version = "0.22", features = ["derive"] }
 
     let results = super::super::run_family(&tree);
     let findings = assertions::findings(&results);
-    assert_eq!(findings.len(), 1, "unexpected RS-GARDE-11 findings: {findings:#?}");
+    assert_eq!(
+        findings.len(),
+        1,
+        "unexpected RS-GARDE-11 findings: {findings:#?}"
+    );
     assertions::assert_single_error(
         &results,
         Some(source_rel),
@@ -138,7 +142,11 @@ pub struct Profile {
 
     let results = super::super::run_family(&tree);
     let findings = assertions::findings(&results);
-    assert_eq!(findings.len(), 1, "unexpected RS-GARDE-11 findings: {findings:#?}");
+    assert_eq!(
+        findings.len(),
+        1,
+        "unexpected RS-GARDE-11 findings: {findings:#?}"
+    );
     assertions::assert_single_error(
         &results,
         Some(source_rel),
@@ -201,7 +209,11 @@ garde = { version = "0.22", features = ["derive"] }
 
     let results = super::super::run_family(&tree);
     let findings = assertions::findings(&results);
-    assert_eq!(findings.len(), 1, "unexpected RS-GARDE-11 findings: {findings:#?}");
+    assert_eq!(
+        findings.len(),
+        1,
+        "unexpected RS-GARDE-11 findings: {findings:#?}"
+    );
     assertions::assert_single_error(
         &results,
         Some(source_rel),

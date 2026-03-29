@@ -72,7 +72,10 @@ pub fn check(input: &SourceCrateHexarchInput<'_>, results: &mut Vec<CheckResult>
         push_success(
             results,
             ID,
-            format!("ports crate `{}` keeps public behavior in traits", source.crate_name),
+            format!(
+                "ports crate `{}` keeps public behavior in traits",
+                source.crate_name
+            ),
             format!(
                 "Ports crate `{}` exposes no public free functions or public inherent methods on concrete types.",
                 source.crate_name
@@ -119,19 +122,9 @@ pub(crate) fn run_source_case(
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_tree(&test_support::walk(root))
 }
-
-#[cfg(test)]
-#[allow(dead_code)]
-pub(super) fn results_for_test_tree(
-    tree: &guardrail3_domain_project_tree::ProjectTree,
-) -> Vec<CheckResult> {
-    crate::check_test_tree(tree)
-}
-
 #[cfg(test)]
 #[path = "rs_hexarch_22_ports_trait_dominance_tests/mod.rs"]
 mod rs_hexarch_22_ports_trait_dominance_tests;

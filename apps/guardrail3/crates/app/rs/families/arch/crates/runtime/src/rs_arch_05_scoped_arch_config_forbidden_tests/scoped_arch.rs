@@ -1,5 +1,4 @@
-#[allow(unused_imports)]
-use super::{CargoFixture, cargo_fixture, check_results, entry, tree, tree_at};
+use super::{check_results, entry, tree};
 use guardrail3_app_rs_family_arch_assertions::rs_arch_05_scoped_arch_config_forbidden as assertions;
 
 #[test]

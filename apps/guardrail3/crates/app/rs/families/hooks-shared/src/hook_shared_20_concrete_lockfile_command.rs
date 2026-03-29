@@ -43,7 +43,6 @@ fn has_concrete_lockfile_command(
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(crate) fn run_case(content: &str) -> Vec<CheckResult> {
     let parsed = crate::hook_shell::parse_script(content);
     let input = ExecutableCommandContextInput {

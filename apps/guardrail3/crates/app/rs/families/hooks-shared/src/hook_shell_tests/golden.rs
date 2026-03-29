@@ -68,10 +68,13 @@ gitleaks protect --staged --no-banner || echo "warning"
         parsed.executable_lines[1].softened_by,
         Some(FailOpenWrapper::NoOp)
     );
-    assert!(matches!(
-        parsed.executable_lines[2].softened_by,
-        Some(FailOpenWrapper::Echo(_))
-    ), "expected echo fail-open wrapper on the third executable line");
+    assert!(
+        matches!(
+            parsed.executable_lines[2].softened_by,
+            Some(FailOpenWrapper::Echo(_))
+        ),
+        "expected echo fail-open wrapper on the third executable line"
+    );
 }
 
 #[test]

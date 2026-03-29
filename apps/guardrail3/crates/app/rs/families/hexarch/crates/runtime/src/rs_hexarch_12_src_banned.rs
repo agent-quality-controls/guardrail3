@@ -10,7 +10,10 @@ pub fn check(input: &AppHexarchInput<'_>, results: &mut Vec<CheckResult>) {
         push_success(
             results,
             ID,
-            format!("Service `{}` has no app-level src/ directory", input.app_name),
+            format!(
+                "Service `{}` has no app-level src/ directory",
+                input.app_name
+            ),
             format!(
                 "Service `{}` keeps app code under `crates/` instead of `{}/src`.",
                 input.app_name, input.app_rel_dir
@@ -35,19 +38,9 @@ pub fn check(input: &AppHexarchInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_tree(&test_support::walk(root))
 }
-
-#[cfg(test)]
-#[allow(dead_code)]
-pub(super) fn results_for_test_tree(
-    tree: &guardrail3_domain_project_tree::ProjectTree,
-) -> Vec<CheckResult> {
-    crate::check_test_tree(tree)
-}
-
 #[cfg(test)]
 #[path = "rs_hexarch_12_src_banned_tests/mod.rs"]
 mod rs_hexarch_12_src_banned_tests;

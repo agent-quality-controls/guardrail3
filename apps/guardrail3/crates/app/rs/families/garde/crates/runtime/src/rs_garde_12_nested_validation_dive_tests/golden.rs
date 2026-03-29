@@ -113,7 +113,10 @@ garde = { version = "0.22", features = ["derive"] }
 
     let results = super::super::run_family(&tree);
     let findings = assertions::findings(&results);
-    assert!(findings.is_empty(), "expected no RS-GARDE-12 findings: {findings:#?}");
+    assert!(
+        findings.is_empty(),
+        "expected no RS-GARDE-12 findings: {findings:#?}"
+    );
     assertions::assert_rule_quiet(&results);
     assertions::assert_field_level_constraints_quiet(&results);
 
