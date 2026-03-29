@@ -11,7 +11,7 @@ fn errors_when_non_test_file_exceeds_500_effective_lines() {
         &[RuleFinding {
             severity: Severity::Error,
             title: "file too long",
-            message: "501 effective lines (max 500). Long files are hard to review and maintain.",
+            message: "501 effective code-bearing lines (max 500). Long files are hard to review and maintain.",
             file: Some("src/foo.rs"),
             line: None,
             inventory: false,

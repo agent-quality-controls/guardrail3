@@ -13,8 +13,8 @@
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
-use glob::Pattern;
 use garde::Validate;
+use glob::Pattern;
 use serde::{Deserialize, Serialize};
 
 /// The full project tree.
@@ -27,7 +27,8 @@ pub struct ProjectTree {
     /// Directory structure: every dir visited -> its immediate children.
     /// Keys are relative paths from root. `""` = the root directory itself.
     /// Sorted by path (BTreeMap).
-    #[garde(skip)] // reason: walker-owned structural map, validated by project walker construction
+    #[garde(skip)]
+    // reason: walker-owned structural map, validated by project walker construction
     pub structure: BTreeMap<String, DirEntry>,
 
     /// Cached config file contents, keyed by relative path from root.
@@ -41,18 +42,18 @@ pub struct ProjectTree {
 #[derive(Debug, Clone, Serialize, Deserialize, Validate)]
 pub struct DirEntry {
     /// Child directory names (just the name, not the full path).
-    #[garde(skip)] // reason: walker-owned structure listing, not direct boundary validation data
+    #[garde(skip)] // reason: walker-owned directory listing
     pub dirs: Vec<String>,
     /// Child file names (just the name, not the full path).
-    #[garde(skip)] // reason: walker-owned structure listing, not direct boundary validation data
+    #[garde(skip)] // reason: walker-owned file listing
     pub files: Vec<String>,
     /// Child directory names that are symlinks.
     #[serde(default)]
-    #[garde(skip)] // reason: walker-owned structure listing, not direct boundary validation data
+    #[garde(skip)] // reason: walker-owned symlinked directory listing
     pub symlink_dirs: Vec<String>,
     /// Child file names that are symlinks or unusable symlink-like entries.
     #[serde(default)]
-    #[garde(skip)] // reason: walker-owned structure listing, not direct boundary validation data
+    #[garde(skip)] // reason: walker-owned symlinked file listing
     pub symlink_files: Vec<String>,
 }
 

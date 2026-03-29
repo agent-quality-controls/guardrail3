@@ -6,11 +6,7 @@ use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
 use crate::scoped_files::filter_for_roots;
-use crate::views::{
-    RsArchOverlapView, RsArchRootView, RsArchRoute, RsCargoRoute, RsClippyRoute, RsCodeRoute,
-    RsDenyRoute, RsDepsRoute, RsGardeRoute, RsHexarchRoute, RsReleaseRoute, RsRootInputFailureView,
-    RsRootView, RsScopedRootView, RsTestRoute,
-};
+use crate::views;
 
 #[derive(Debug)]
 pub struct FamilyMapper<'a> {
@@ -40,21 +36,21 @@ impl<'a> FamilyMapper<'a> {
     }
 
     #[must_use]
-    pub fn map_rs_arch(&self) -> RsArchRoute {
+    pub fn map_rs_arch(&self) -> views::RsArchRoute {
         if !self.selected_families.contains(RustValidateFamily::Arch) {
-            return RsArchRoute {
+            return views::RsArchRoute {
                 roots: Vec::new(),
                 overlaps: Vec::new(),
                 input_failures: Vec::new(),
             };
         }
 
-        RsArchRoute {
+        views::RsArchRoute {
             roots: self
                 .scope
                 .roots
                 .iter()
-                .map(|root| RsArchRootView {
+                .map(|root| views::RsArchRootView {
                     root: root_view(root),
                     classification: root.classification,
                     arch_role: root.arch_role,
@@ -66,7 +62,7 @@ impl<'a> FamilyMapper<'a> {
                 .scope
                 .overlaps
                 .iter()
-                .map(|overlap| RsArchOverlapView {
+                .map(|overlap| views::RsArchOverlapView {
                     app_root_rel: overlap.app_root_rel.clone(),
                     app_cargo_rel_path: overlap.app_cargo_rel_path.clone(),
                     package_root_rel: overlap.package_root_rel.clone(),
@@ -77,7 +73,7 @@ impl<'a> FamilyMapper<'a> {
                 .scope
                 .input_failures
                 .iter()
-                .map(|failure| RsRootInputFailureView {
+                .map(|failure| views::RsRootInputFailureView {
                     rel_path: failure.rel_path.clone(),
                     message: failure.message.clone(),
                 })
@@ -86,9 +82,9 @@ impl<'a> FamilyMapper<'a> {
     }
 
     #[must_use]
-    pub fn map_rs_hexarch(&self) -> RsHexarchRoute {
+    pub fn map_rs_hexarch(&self) -> views::RsHexarchRoute {
         if !self.selected_families.contains(RustValidateFamily::Hexarch) {
-            return RsHexarchRoute {
+            return views::RsHexarchRoute {
                 roots: Vec::new(),
                 scoped_files: None,
                 repo_root_cargo_rel_path: None,
@@ -105,7 +101,7 @@ impl<'a> FamilyMapper<'a> {
             .map(|root| root.rel_dir.clone())
             .collect::<Vec<_>>();
 
-        RsHexarchRoute {
+        views::RsHexarchRoute {
             scoped_files: filter_for_roots(self.tree, self.scoped_files, &root_rels),
             roots,
             repo_root_cargo_rel_path: self
@@ -120,78 +116,82 @@ impl<'a> FamilyMapper<'a> {
     }
 
     #[must_use]
-    pub fn map_rs_code(&self) -> RsCodeRoute {
+    pub fn map_rs_code(&self) -> views::RsCodeRoute {
         self.map_scoped_source_route(RustValidateFamily::Code)
     }
 
     #[must_use]
-    pub fn map_rs_clippy(&self) -> RsClippyRoute {
-        RsClippyRoute {
+    pub fn map_rs_clippy(&self) -> views::RsClippyRoute {
+        views::RsClippyRoute {
             roots: self.map_roots_for_family(RustValidateFamily::Clippy, |_| true),
         }
     }
 
     #[must_use]
-    pub fn map_rs_cargo(&self) -> RsCargoRoute {
-        RsCargoRoute {
+    pub fn map_rs_cargo(&self) -> views::RsCargoRoute {
+        views::RsCargoRoute {
             roots: self.map_roots_for_family(RustValidateFamily::Cargo, |_| true),
         }
     }
 
     #[must_use]
-    pub fn map_rs_deny(&self) -> RsDenyRoute {
-        RsDenyRoute {
+    pub fn map_rs_deny(&self) -> views::RsDenyRoute {
+        views::RsDenyRoute {
             roots: self.map_roots_for_family(RustValidateFamily::Deny, |_| true),
         }
     }
 
     #[must_use]
-    pub fn map_rs_deps(&self) -> RsDepsRoute {
-        RsDepsRoute {
+    pub fn map_rs_deps(&self) -> views::RsDepsRoute {
+        views::RsDepsRoute {
             roots: self.map_roots_for_family(RustValidateFamily::Deps, |_| true),
         }
     }
 
     #[must_use]
-    pub fn map_rs_release(&self) -> RsReleaseRoute {
-        RsReleaseRoute {
+    pub fn map_rs_release(&self) -> views::RsReleaseRoute {
+        views::RsReleaseRoute {
             roots: self.map_roots_for_family(RustValidateFamily::Release, |_| true),
         }
     }
 
     #[must_use]
-    pub fn map_rs_garde(&self) -> RsGardeRoute {
+    pub fn map_rs_garde(&self) -> views::RsGardeRoute {
         self.map_scoped_source_route(RustValidateFamily::Garde)
     }
 
     #[must_use]
-    pub fn map_rs_test(&self) -> RsTestRoute {
+    pub fn map_rs_test(&self) -> views::RsTestRoute {
         let roots = self.map_roots_for_family(RustValidateFamily::Test, |_| true);
         let root_rels = roots
             .iter()
             .map(|root| root.rel_dir.clone())
             .collect::<Vec<_>>();
 
-        RsTestRoute {
+        views::RsTestRoute {
             scoped_files: filter_for_roots(self.tree, self.scoped_files, &root_rels),
             roots,
         }
     }
 
-    fn map_scoped_source_route(&self, family: RustValidateFamily) -> RsCodeRoute {
+    fn map_scoped_source_route(&self, family: RustValidateFamily) -> views::RsCodeRoute {
         let roots = self.map_scoped_roots_for_family(family, |_| true);
         let root_rels = roots
             .iter()
             .map(|root| root.root.rel_dir.clone())
             .collect::<Vec<_>>();
 
-        RsCodeRoute {
+        views::RsCodeRoute {
             scoped_files: filter_for_roots(self.tree, self.scoped_files, &root_rels),
             roots,
         }
     }
 
-    fn map_roots_for_family<F>(&self, family: RustValidateFamily, predicate: F) -> Vec<RsRootView>
+    fn map_roots_for_family<F>(
+        &self,
+        family: RustValidateFamily,
+        predicate: F,
+    ) -> Vec<views::RsRootView>
     where
         F: Fn(&RustRootPlacementRootFacts) -> bool,
     {
@@ -212,7 +212,7 @@ impl<'a> FamilyMapper<'a> {
         &self,
         family: RustValidateFamily,
         predicate: F,
-    ) -> Vec<RsScopedRootView>
+    ) -> Vec<views::RsScopedRootView>
     where
         F: Fn(&RustRootPlacementRootFacts) -> bool,
     {
@@ -225,7 +225,7 @@ impl<'a> FamilyMapper<'a> {
             .iter()
             .filter(|root| predicate(root))
             .filter(|root| root_enabled_for_family(root, family, self.config))
-            .map(|root| RsScopedRootView {
+            .map(|root| views::RsScopedRootView {
                 root: root_view(root),
                 classification: root.classification,
             })
@@ -237,8 +237,8 @@ impl<'a> FamilyMapper<'a> {
     }
 }
 
-fn root_view(root: &RustRootPlacementRootFacts) -> RsRootView {
-    RsRootView {
+fn root_view(root: &RustRootPlacementRootFacts) -> views::RsRootView {
+    views::RsRootView {
         rel_dir: root.rel_dir.clone(),
         cargo_rel_path: root.cargo_rel_path.clone(),
     }

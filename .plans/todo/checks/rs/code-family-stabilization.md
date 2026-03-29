@@ -1,5 +1,7 @@
 # RS-CODE Family Stabilization Plan
 
+Historical note: this file still tracks the family-stabilization lane, but earlier wording about a family-root `code/Cargo.toml` workspace is obsolete. The live family shape is the package group described in [code/README.md](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/code/README.md): `crates/runtime`, `crates/assertions`, and `test_support` under a non-package family root.
+
 This plan is about stabilizing the `RS-CODE` family itself as a self-hosted Rust family.
 
 It is not the old rule-hardening lane.
@@ -8,44 +10,25 @@ The rule inventory and prior adversarial rule notes still live in:
 - [code.md](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/todo/checks/rs/code.md)
 - [.plans/todo/check_review/test_hardening/02-code.md](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/todo/check_review/test_hardening/02-code.md)
 
-This document is the current migration plan for getting the family into the same tier as:
-
-- `RS-TEST`
-- `RS-ARCH`
-- `RS-HEXARCH`
-- `RS-CARGO`
+This document is the stabilization plan for the family itself. It should not be read as proof that live repo-root `RS-CODE` debt is gone; that repo cleanup is separate from family-correctness work.
 
 ## Current Snapshot
 
 As of the current checkpoint:
 
-- [code/Cargo.toml](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/code/Cargo.toml) is now a family workspace root
-- the existing runtime source tree has been moved under [crates/runtime/src](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/code/crates/runtime/src)
-- placeholder sibling crates exist at:
+- the production runtime lives under [crates/runtime/src](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/code/crates/runtime/src)
+- sibling packages exist and are populated at:
   - [crates/assertions](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/code/crates/assertions)
   - [test_support](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/code/test_support)
 - the family already consumes `RsCodeRoute` in [lib.rs](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/code/crates/runtime/src/lib.rs)
-- the family passes `RS-ARCH`
-- the family tests pass:
-  - `179 passed`
-- the family does not pass `RS-TEST`
-  - `RS-TEST-02`: `31`
-  - `RS-TEST-03`: `778`
-  - `RS-TEST-16`: `99`
-- there was no family README before this checkpoint
-
-Approximate size:
-
-- `3356` production LOC
-- `8041` test LOC
-- `179` Rust files under [src](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/code/src)
-- `143` of those under rule-specific `*_tests/` directories
-
-So the family is already semantically alive and heavily tested, but its self-hosting split is only partial: the workspace shape exists, while assertion ownership and generic test-support boundaries do not.
+- recent work has been dominated by correctness fixes from [FIXES.md](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/code/FIXES.md), not by creating empty scaffolding
+- older exact pass/fail counts in this plan are historical and should be re-verified before reuse
 
 ## Why `RS-CODE` Next
 
-Compared to the remaining unstabilized Rust families:
+This was the reason `RS-CODE` was the next structural target:
+
+Compared to the remaining unstabilized Rust families at the time:
 
 - `code` has `61` `RS-TEST` errors
 - `release` has `59`
@@ -60,11 +43,11 @@ Compared to the remaining unstabilized Rust families:
 
 ## Target End State
 
-The family should end in the same self-hosted shape as the other stabilized families:
+The family should end in this self-hosted package-group shape:
 
 ```text
 apps/guardrail3/crates/app/rs/families/code/
-  Cargo.toml
+  README.md
   crates/
     runtime/
       Cargo.toml
@@ -107,34 +90,26 @@ Required end-state properties:
 
 ## Main Risks
 
-### 1. Size, not semantics
+### 1. Repo debt can hide family progress
 
-The biggest cost is file movement and boundary cleanup, not discovering brand-new rule semantics.
+The family itself is no longer mostly about file movement. The confusing part now is that repo-root `RS-CODE` still reports on many ordinary source files, so repo debt can look like unfinished family work unless the two are kept separate.
 
-The family already has:
+### 2. Shared parser bugs were the real trust boundary
 
-- routed entrypoint
-- per-rule files
-- per-rule sidecar test directories
-- a large passing local suite
+[FIXES.md](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/code/FIXES.md) showed that the worst defects were shared-model problems, not isolated rule bugs:
 
-So the main danger is migration churn across many files, not missing rule inventory.
-
-### 2. Runtime-local test support still leaks architecture wiring
-
-[test_support.rs](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/code/crates/runtime/src/test_support.rs) currently imports:
-
-- `FamilyMapper`
-- `placement`
-- `CheckResult`
-
-That is exactly the kind of pre-self-hosting debt removed from `test`, `arch`, `cargo`, and `hexarch`.
+- fragmented test-context detection
+- brittle `// reason:` parsing
+- overconfident `cfg_attr` truth
+- ambiguous `garde(skip)` exemptions
+- public-API reachability false positives
+- `OUT_DIR` include carveouts that could still hide traversal
 
 ### 3. Assertions layer exists only as a placeholder
 
-The family now has a sibling assertions crate, but it is only scaffolding. Runtime sidecars still own result-shape proof.
+This is no longer true as written. The sibling assertions crate is populated and in active use, but result-shape proof is still not uniformly extracted across every rule.
 
-That means the migration is no longer about file movement. It is about extracting reusable semantic proof out of runtime sidecars.
+That means the remaining stabilization work is not about creating scaffolding. It is about finishing ownership cleanup where runtime sidecars still carry semantic proof or test-support debt.
 
 ## Migration Phases
 
@@ -152,12 +127,11 @@ Status:
 
 Completed work:
 
-1. Converted [code/Cargo.toml](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/code/Cargo.toml) into a family workspace root.
-2. Created:
+1. Created the split family packages:
    - `crates/runtime/Cargo.toml`
    - `crates/assertions/Cargo.toml`
    - `test_support/Cargo.toml`
-3. Updated the main Rust workspace wiring so the family package points at `crates/runtime`.
+2. Updated the main Rust workspace wiring so the family package points at `crates/runtime`.
 
 ## Phase 3 — Runtime Move
 
@@ -176,17 +150,17 @@ Completed work:
 
 Current state:
 
-- not started
-- runtime-local `test_support.rs` is still active
-- sibling `test_support` crate exists but is still empty scaffolding
+- materially complete
+- sibling `test_support` is populated and used
+- remaining cleanup is about narrowing a few lingering helper boundaries, not first-time extraction
 
 ## Phase 5 — Assertions Split
 
 Current state:
 
-- not started
-- sibling assertions crate exists but is still empty scaffolding
-- runtime sidecars still own semantic result-shape proof
+- materially complete
+- sibling assertions crate exists and is populated
+- remaining work is incremental extraction and consistency, not placeholder scaffolding
 
 Target work:
 
@@ -200,12 +174,11 @@ Target work:
 
 ## Phase 6 — RS-TEST Closure
 
-1. Run:
-   - `rs validate .../families/code --family test`
-   - `rs validate .../families/code --family arch`
-   - `cargo test -p guardrail3-app-rs-family-code --lib`
-2. Close all structural `RS-TEST-02/03` failures.
-3. If stricter `RS-TEST-07/16/18` findings appear after the split, fix those before any rule-family attack pass.
+Status:
+
+- complete
+
+The family has already been migrated through `RS-TEST` closure. Any new `RS-TEST` findings at this point should be treated as regressions, not expected migration debt.
 
 ## Phase 7 — Family Attack Pass
 
@@ -215,28 +188,25 @@ Only after structural stabilization:
 2. compare README, rule inventory, and implementation
 3. look for false greens, false positives, and hidden scope widening
 
-That is separate work from the workspace split.
+That is separate work from the workspace split, and it is already underway. The shared-parser fixes from `FIXES.md` belong to this phase.
 
 ## Immediate Execution Order
 
-The next concrete coding order should be:
+The next concrete coding order is now:
 
-1. workspace split scaffolding
-2. move runtime files without semantic changes
-3. restore green family tests
-4. extract generic test support
-5. add assertions crate and migrate proof helpers
-6. make `RS-CODE` pass `RS-TEST`
-7. only then start attacking rule semantics again
+1. finish the remaining `FIXES.md` tail that is about docs, later-rule coverage, and exact contract wording
+2. keep later-numbered rule coverage converging toward exact owned hit sets
+3. keep family-correctness commits separate from repo-root `RS-CODE` debt cleanup
+4. run repeated adversarial passes after each substantive hardening batch
 
 ## Definition Of Done
 
 `RS-CODE` is stabilized when:
 
 - [code/README.md](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/code/README.md) matches the live implementation
-- the family has the workspace shape above
+- the family has the package-group shape above
 - `guardrail3-app-rs-family-code` points at `crates/runtime`
 - family tests pass
 - `RS-ARCH` on the family root is clean
 - `RS-TEST` on the family root is clean
-- the family is ready for a deeper adversarial rule-family review
+- the family is ready for repeated adversarial rule-family review without reopening shared-parser trust gaps

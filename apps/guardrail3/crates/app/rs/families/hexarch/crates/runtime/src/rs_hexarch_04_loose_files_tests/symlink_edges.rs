@@ -13,7 +13,7 @@ fn symlinked_gitkeep_is_not_treated_as_the_allowed_real_gitkeep_in_outer_contain
         tmp.path().join("apps/devctl/Cargo.toml"),
         tmp.path().join("apps/devctl/crates/app/.gitkeep"),
     )
-    .expect("symlink");
+    .expect("failed to create symlink fixture for hexarch test");
 
     let results = super::run_family(tmp.path());
     assertions::assert_error_count_matching_file(
@@ -35,7 +35,7 @@ fn symlinked_gitkeep_is_not_treated_as_the_allowed_real_gitkeep_in_nested_contai
         tmp.path().join(format!("{}/app/handlers", inner_hex())),
         tmp.path().join(format!("{}/app/.gitkeep", inner_hex())),
     )
-    .expect("symlink");
+    .expect("failed to create symlink fixture for hexarch test");
 
     let results = super::run_family(tmp.path());
     assertions::assert_error_count_matching_file(
@@ -57,7 +57,7 @@ fn loose_non_gitkeep_symlink_is_reported_as_a_bad_file() {
         tmp.path().join("apps/devctl/crates/app/core"),
         tmp.path().join("apps/devctl/crates/app/mod.rs"),
     )
-    .expect("symlink");
+    .expect("failed to create symlink fixture for hexarch test");
 
     let results = super::run_family(tmp.path());
     assertions::assert_error_count_matching_file(

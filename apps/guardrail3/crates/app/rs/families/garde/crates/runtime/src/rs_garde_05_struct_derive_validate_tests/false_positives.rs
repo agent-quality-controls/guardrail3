@@ -7,7 +7,12 @@ fn skips_validated_struct_boundary_types() {
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
     let clippy_toml = super::super::canonical_clippy_toml();
-    std::fs::create_dir_all(source_abs.parent().expect("fixture source path must have a parent directory")).expect("failed to create fixture source directory");
+    std::fs::create_dir_all(
+        source_abs
+            .parent()
+            .expect("fixture source path must have a parent directory"),
+    )
+    .expect("failed to create fixture source directory");
     std::fs::write(
         &source_abs,
         r#"
@@ -58,7 +63,12 @@ fn ignores_non_boundary_derive_with_deserialize_suffix() {
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
     let clippy_toml = super::super::canonical_clippy_toml();
-    std::fs::create_dir_all(source_abs.parent().expect("fixture source path must have a parent directory")).expect("failed to create fixture source directory");
+    std::fs::create_dir_all(
+        source_abs
+            .parent()
+            .expect("fixture source path must have a parent directory"),
+    )
+    .expect("failed to create fixture source directory");
     std::fs::write(
         &source_abs,
         r#"
@@ -106,7 +116,12 @@ fn skips_struct_with_aliased_validate_derive() {
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
     let clippy_toml = super::super::canonical_clippy_toml();
-    std::fs::create_dir_all(source_abs.parent().expect("fixture source path must have a parent directory")).expect("failed to create fixture source directory");
+    std::fs::create_dir_all(
+        source_abs
+            .parent()
+            .expect("fixture source path must have a parent directory"),
+    )
+    .expect("failed to create fixture source directory");
     std::fs::write(
         &source_abs,
         r#"

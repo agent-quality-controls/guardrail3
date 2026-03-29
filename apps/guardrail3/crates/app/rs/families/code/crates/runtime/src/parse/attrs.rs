@@ -1,19 +1,19 @@
 use std::collections::BTreeSet;
 
-use super::analysis_helpers::{
-    expr_has_path_traversal, expr_is_out_dir_concat, macro_token_exprs, result_error_kind,
-};
-use super::helpers::{
-    collect_cfg_attr_deny_forbid_attrs, collect_cfg_attr_lint_policies,
-    collect_cfg_attr_path_attrs, collect_deny_forbid_attrs, collect_item_lint_policies,
-    collect_path_attrs, impl_item_attrs, item_attrs, path_to_string, span_line, trait_item_attrs,
-};
-use super::types::{
-    CfgAttrLintInfo, CfgPredicateTruth, DenyForbidInfo, ForeignModAllowInfo, ImplAllowInfo,
-    IncludeMacroInfo, LintPolicyInfo, PathAttrInfo, PublicResultErrorInfo,
-};
+use super::analysis_helpers;
+use super::helpers;
+use super::types::{self, CfgPredicateTruth};
 use syn::spanned::Spanned;
 use syn::visit::Visit;
+
+type CfgAttrLintInfo = types::CfgAttrLintInfo;
+type DenyForbidInfo = types::DenyForbidInfo;
+type ForeignModAllowInfo = types::ForeignModAllowInfo;
+type ImplAllowInfo = types::ImplAllowInfo;
+type IncludeMacroInfo = types::IncludeMacroInfo;
+type LintPolicyInfo = types::LintPolicyInfo;
+type PathAttrInfo = types::PathAttrInfo;
+type PublicResultErrorInfo = types::PublicResultErrorInfo;
 
 pub fn find_item_lint_policies(ast: &syn::File) -> Vec<LintPolicyInfo> {
     let mut visitor = ItemOnlyPolicyVisitor { out: Vec::new() };
@@ -29,8 +29,8 @@ pub fn find_impl_block_allows(ast: &syn::File) -> Vec<ImplAllowInfo> {
 
 pub fn find_deny_forbid_attrs(ast: &syn::File) -> Vec<DenyForbidInfo> {
     let mut out = Vec::new();
-    collect_deny_forbid_attrs(&ast.attrs, true, &mut out);
-    collect_cfg_attr_deny_forbid_attrs(&ast.attrs, true, &mut out);
+    helpers::collect_deny_forbid_attrs(&ast.attrs, true, &mut out);
+    helpers::collect_cfg_attr_deny_forbid_attrs(&ast.attrs, true, &mut out);
     let mut visitor = DenyForbidVisitor { out: &mut out };
     visitor.visit_file(ast);
     out
@@ -50,7 +50,7 @@ pub fn find_include_macros(ast: &syn::File) -> Vec<IncludeMacroInfo> {
 
 pub fn find_cfg_attr_lint_policies(ast: &syn::File) -> Vec<CfgAttrLintInfo> {
     let mut out = Vec::new();
-    collect_cfg_attr_lint_policies(&ast.attrs, &mut out);
+    helpers::collect_cfg_attr_lint_policies(&ast.attrs, &mut out);
     let mut visitor = CfgAttrPolicyVisitor { out: &mut out };
     visitor.visit_file(ast);
     out
@@ -58,8 +58,8 @@ pub fn find_cfg_attr_lint_policies(ast: &syn::File) -> Vec<CfgAttrLintInfo> {
 
 pub fn find_path_attrs(ast: &syn::File) -> Vec<PathAttrInfo> {
     let mut out = Vec::new();
-    collect_path_attrs(&ast.attrs, &mut out);
-    collect_cfg_attr_path_attrs(&ast.attrs, &mut out);
+    helpers::collect_path_attrs(&ast.attrs, &mut out);
+    helpers::collect_cfg_attr_path_attrs(&ast.attrs, &mut out);
     let mut visitor = PathAttrVisitor { out: &mut out };
     visitor.visit_file(ast);
     out
@@ -116,20 +116,24 @@ impl<'ast> Visit<'ast> for ItemOnlyPolicyVisitor {
     fn visit_item(&mut self, item: &'ast syn::Item) {
         if !matches!(item, syn::Item::ForeignMod(_)) {
             self.out
-                .extend(collect_item_lint_policies(item_attrs(item)));
+                .extend(helpers::collect_item_lint_policies(helpers::item_attrs(
+                    item,
+                )));
         }
         syn::visit::visit_item(self, item);
     }
 
     fn visit_impl_item(&mut self, item: &'ast syn::ImplItem) {
-        self.out
-            .extend(collect_item_lint_policies(impl_item_attrs(item)));
+        self.out.extend(helpers::collect_item_lint_policies(
+            helpers::impl_item_attrs(item),
+        ));
         syn::visit::visit_impl_item(self, item);
     }
 
     fn visit_trait_item(&mut self, item: &'ast syn::TraitItem) {
-        self.out
-            .extend(collect_item_lint_policies(trait_item_attrs(item)));
+        self.out.extend(helpers::collect_item_lint_policies(
+            helpers::trait_item_attrs(item),
+        ));
         syn::visit::visit_trait_item(self, item);
     }
 }
@@ -142,7 +146,7 @@ impl<'ast> Visit<'ast> for ImplAllowVisitor {
             .filter(|item| matches!(item, syn::ImplItem::Fn(_)))
             .count();
         if method_count > 3 {
-            for info in collect_item_lint_policies(&item_impl.attrs) {
+            for info in helpers::collect_item_lint_policies(&item_impl.attrs) {
                 self.out.push(ImplAllowInfo {
                     line: info.line,
                     lint: info.lint,
@@ -157,27 +161,35 @@ impl<'ast> Visit<'ast> for ImplAllowVisitor {
 
 impl<'ast> Visit<'ast> for DenyForbidVisitor<'ast> {
     fn visit_item(&mut self, item: &'ast syn::Item) {
-        collect_deny_forbid_attrs(item_attrs(item), false, self.out);
-        collect_cfg_attr_deny_forbid_attrs(item_attrs(item), false, self.out);
+        helpers::collect_deny_forbid_attrs(helpers::item_attrs(item), false, self.out);
+        helpers::collect_cfg_attr_deny_forbid_attrs(helpers::item_attrs(item), false, self.out);
         syn::visit::visit_item(self, item);
     }
 
     fn visit_impl_item(&mut self, item: &'ast syn::ImplItem) {
-        collect_deny_forbid_attrs(impl_item_attrs(item), false, self.out);
-        collect_cfg_attr_deny_forbid_attrs(impl_item_attrs(item), false, self.out);
+        helpers::collect_deny_forbid_attrs(helpers::impl_item_attrs(item), false, self.out);
+        helpers::collect_cfg_attr_deny_forbid_attrs(
+            helpers::impl_item_attrs(item),
+            false,
+            self.out,
+        );
         syn::visit::visit_impl_item(self, item);
     }
 
     fn visit_trait_item(&mut self, item: &'ast syn::TraitItem) {
-        collect_deny_forbid_attrs(trait_item_attrs(item), false, self.out);
-        collect_cfg_attr_deny_forbid_attrs(trait_item_attrs(item), false, self.out);
+        helpers::collect_deny_forbid_attrs(helpers::trait_item_attrs(item), false, self.out);
+        helpers::collect_cfg_attr_deny_forbid_attrs(
+            helpers::trait_item_attrs(item),
+            false,
+            self.out,
+        );
         syn::visit::visit_trait_item(self, item);
     }
 }
 
 impl<'ast> Visit<'ast> for ForeignModAllowVisitor {
     fn visit_item_foreign_mod(&mut self, item: &'ast syn::ItemForeignMod) {
-        for info in collect_item_lint_policies(&item.attrs) {
+        for info in helpers::collect_item_lint_policies(&item.attrs) {
             self.out.push(ForeignModAllowInfo {
                 line: info.line,
                 lint: info.lint,
@@ -186,7 +198,7 @@ impl<'ast> Visit<'ast> for ForeignModAllowVisitor {
             });
         }
         let mut cfg_infos = Vec::new();
-        collect_cfg_attr_lint_policies(&item.attrs, &mut cfg_infos);
+        helpers::collect_cfg_attr_lint_policies(&item.attrs, &mut cfg_infos);
         for info in cfg_infos {
             if info.truth == CfgPredicateTruth::KnownFalse {
                 continue;
@@ -204,15 +216,16 @@ impl<'ast> Visit<'ast> for ForeignModAllowVisitor {
 
 impl<'ast> Visit<'ast> for IncludeMacroVisitor {
     fn visit_macro(&mut self, macro_call: &'ast syn::Macro) {
-        let name = path_to_string(&macro_call.path);
+        let name = helpers::path_to_string(&macro_call.path);
         let base = name.rsplit("::").next().unwrap_or(&name);
         if matches!(base, "include" | "include_str" | "include_bytes") {
-            let exprs = macro_token_exprs(macro_call);
-            let build_script_pattern =
-                base == "include" && exprs.len() == 1 && expr_is_out_dir_concat(&exprs[0]);
-            let path_traversal = exprs.iter().any(expr_has_path_traversal);
+            let exprs = analysis_helpers::macro_token_exprs(macro_call);
+            let build_script_pattern = base == "include"
+                && exprs.len() == 1
+                && analysis_helpers::expr_is_out_dir_concat(&exprs[0]);
+            let path_traversal = exprs.iter().any(analysis_helpers::expr_has_path_traversal);
             self.out.push(IncludeMacroInfo {
-                line: span_line(macro_call.path.span()),
+                line: helpers::span_line(macro_call.path.span()),
                 macro_name: base.to_owned(),
                 build_script_pattern,
                 path_traversal,
@@ -225,26 +238,26 @@ impl<'ast> Visit<'ast> for IncludeMacroVisitor {
 impl<'ast> Visit<'ast> for CfgAttrPolicyVisitor<'ast> {
     fn visit_item(&mut self, item: &'ast syn::Item) {
         if !matches!(item, syn::Item::ForeignMod(_)) {
-            collect_cfg_attr_lint_policies(item_attrs(item), self.out);
+            helpers::collect_cfg_attr_lint_policies(helpers::item_attrs(item), self.out);
         }
         syn::visit::visit_item(self, item);
     }
 
     fn visit_impl_item(&mut self, item: &'ast syn::ImplItem) {
-        collect_cfg_attr_lint_policies(impl_item_attrs(item), self.out);
+        helpers::collect_cfg_attr_lint_policies(helpers::impl_item_attrs(item), self.out);
         syn::visit::visit_impl_item(self, item);
     }
 
     fn visit_trait_item(&mut self, item: &'ast syn::TraitItem) {
-        collect_cfg_attr_lint_policies(trait_item_attrs(item), self.out);
+        helpers::collect_cfg_attr_lint_policies(helpers::trait_item_attrs(item), self.out);
         syn::visit::visit_trait_item(self, item);
     }
 }
 
 impl<'ast> Visit<'ast> for PathAttrVisitor<'ast> {
     fn visit_item(&mut self, item: &'ast syn::Item) {
-        collect_path_attrs(item_attrs(item), self.out);
-        collect_cfg_attr_path_attrs(item_attrs(item), self.out);
+        helpers::collect_path_attrs(helpers::item_attrs(item), self.out);
+        helpers::collect_cfg_attr_path_attrs(helpers::item_attrs(item), self.out);
         syn::visit::visit_item(self, item);
     }
 }
@@ -275,9 +288,9 @@ impl<'ast> Visit<'ast> for PublicResultErrorVisitor {
     fn visit_item_fn(&mut self, item_fn: &'ast syn::ItemFn) {
         if self.current_module_public() && matches!(item_fn.vis, syn::Visibility::Public(_)) {
             if let syn::ReturnType::Type(_, ty) = &item_fn.sig.output {
-                if let Some(kind) = result_error_kind(ty) {
+                if let Some(kind) = analysis_helpers::result_error_kind(ty) {
                     self.out.push(PublicResultErrorInfo {
-                        line: span_line(item_fn.sig.ident.span()),
+                        line: helpers::span_line(item_fn.sig.ident.span()),
                         fn_name: item_fn.sig.ident.to_string(),
                         kind,
                     });
@@ -305,9 +318,9 @@ impl<'ast> Visit<'ast> for PublicResultErrorVisitor {
                 let syn::ReturnType::Type(_, ty) = &item_fn.sig.output else {
                     continue;
                 };
-                if let Some(kind) = result_error_kind(ty) {
+                if let Some(kind) = analysis_helpers::result_error_kind(ty) {
                     self.out.push(PublicResultErrorInfo {
-                        line: span_line(item_fn.sig.ident.span()),
+                        line: helpers::span_line(item_fn.sig.ident.span()),
                         fn_name: item_fn.sig.ident.to_string(),
                         kind,
                     });
@@ -326,9 +339,9 @@ impl<'ast> Visit<'ast> for PublicResultErrorVisitor {
                 let syn::ReturnType::Type(_, ty) = &item_fn.sig.output else {
                     continue;
                 };
-                if let Some(kind) = result_error_kind(ty) {
+                if let Some(kind) = analysis_helpers::result_error_kind(ty) {
                     self.out.push(PublicResultErrorInfo {
-                        line: span_line(item_fn.sig.ident.span()),
+                        line: helpers::span_line(item_fn.sig.ident.span()),
                         fn_name: format!("{}::{}", item_trait.ident, item_fn.sig.ident),
                         kind,
                     });

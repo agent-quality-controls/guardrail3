@@ -68,7 +68,7 @@ fn missing_entrypoint_warns_instead_of_scanning_root_rs_files_as_entrypoints() {
         tmp.path()
             .join("apps/backend/crates/ports/outbound/repo/src/lib.rs"),
     )
-    .expect("remove lib.rs");
+    .expect("failed to remove lib.rs from hexarch fixture");
     write_file(
         tmp.path(),
         "apps/backend/crates/ports/outbound/repo/src/orphan.rs",
@@ -117,7 +117,7 @@ fn lib_path_override_is_used_as_ports_entrypoint() {
         tmp.path()
             .join("apps/backend/crates/ports/outbound/repo/src/lib.rs"),
     )
-    .expect("remove lib.rs");
+    .expect("failed to remove lib.rs from hexarch fixture");
     write_file(
         tmp.path(),
         "apps/backend/crates/ports/outbound/repo/repo.rs",

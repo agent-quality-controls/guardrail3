@@ -93,7 +93,7 @@ fn missing_entrypoint_errors_instead_of_scanning_root_rs_files_as_entrypoints() 
         tmp.path()
             .join("apps/backend/crates/adapters/outbound/postgres/src/lib.rs"),
     )
-    .expect("remove lib.rs");
+    .expect("failed to remove lib.rs from hexarch fixture");
     write_file(
         tmp.path(),
         "apps/backend/crates/adapters/outbound/postgres/src/orphan.rs",
@@ -126,7 +126,7 @@ fn lib_path_override_is_used_as_adapter_entrypoint() {
         tmp.path()
             .join("apps/backend/crates/adapters/outbound/postgres/src/lib.rs"),
     )
-    .expect("remove lib.rs");
+    .expect("failed to remove lib.rs from hexarch fixture");
     write_file(
         tmp.path(),
         "apps/backend/crates/adapters/outbound/postgres/mod.rs",

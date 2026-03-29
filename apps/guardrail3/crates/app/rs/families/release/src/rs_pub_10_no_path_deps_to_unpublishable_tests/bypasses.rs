@@ -28,24 +28,24 @@ name = "example"
 public = { workspace = true }
 "#,
     )
-    .expect("valid crate manifest");
+    .expect("failed to parse release test crate manifest");
     let workspace_manifest: toml::Value = toml::from_str(
         r#"
 [workspace.dependencies]
 public = "1.2.3"
 "#,
     )
-    .expect("valid workspace manifest");
+    .expect("failed to parse release test workspace manifest");
     let workspace_dependencies = workspace_manifest
         .get("workspace")
         .and_then(|workspace| workspace.get("dependencies"))
         .and_then(toml::Value::as_table)
         .cloned()
-        .expect("workspace dependencies");
+        .expect("failed to extract release workspace dependencies");
     let edge = dependency_edges(&parsed, &workspace_dependencies)
         .into_iter()
         .find(|edge| edge.dep_name == "public")
-        .expect("public edge");
+        .expect("failed to locate release dependency edge named public");
 
     assert!(!edge.has_path);
 }

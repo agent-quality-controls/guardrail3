@@ -9,7 +9,7 @@ fn unparsable_ports_source_warns_in_family_run() {
             .join("apps/backend/crates/ports/outbound/repo/src/lib.rs"),
         "pub trait Repo {\n",
     )
-    .expect("write broken ports source");
+    .expect("failed to write broken ports source into hexarch fixture");
 
     let results = super::run_family(tmp.path());
     assertions::assert_warning_summary(
@@ -32,7 +32,7 @@ fn parse_failure_takes_precedence_over_impl_heavy_warning() {
             .join("apps/backend/crates/ports/outbound/repo/src/lib.rs"),
         "mod extra;\npub trait Repo {\n",
     )
-    .expect("write broken ports source");
+    .expect("failed to write broken ports source into hexarch fixture");
     std::fs::write(
         tmp.path()
             .join("apps/backend/crates/ports/outbound/repo/src/extra.rs"),

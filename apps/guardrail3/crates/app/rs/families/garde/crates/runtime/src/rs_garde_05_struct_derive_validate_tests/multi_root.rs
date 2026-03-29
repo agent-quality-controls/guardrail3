@@ -9,7 +9,12 @@ fn handles_multiple_roots() {
     let clippy_toml = super::super::canonical_clippy_toml();
 
     let source1_abs = root.join(source1_rel);
-    std::fs::create_dir_all(source1_abs.parent().expect("fixture source path must have a parent directory")).expect("failed to create fixture source directory");
+    std::fs::create_dir_all(
+        source1_abs
+            .parent()
+            .expect("fixture source path must have a parent directory"),
+    )
+    .expect("failed to create fixture source directory");
     std::fs::write(
         &source1_abs,
         r#"
@@ -24,7 +29,12 @@ struct InputA {
     .expect("failed to write fixture source");
 
     let source2_abs = root.join(source2_rel);
-    std::fs::create_dir_all(source2_abs.parent().expect("fixture source path must have a parent directory")).expect("failed to create fixture source directory");
+    std::fs::create_dir_all(
+        source2_abs
+            .parent()
+            .expect("fixture source path must have a parent directory"),
+    )
+    .expect("failed to create fixture source directory");
     std::fs::write(
         &source2_abs,
         r#"

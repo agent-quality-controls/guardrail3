@@ -59,7 +59,7 @@ fn warns_when_workspace_key_exists_but_is_not_a_table() {
 workspace = "oops"
 "#,
         )
-        .expect("valid release-plz"),
+        .expect("failed to parse release-plz fixture"),
     );
     let _ = facts.publishable_crate_names.insert("cli".to_owned());
     let _ = facts.release_plz_package_names.insert("cli".to_owned());
@@ -94,7 +94,7 @@ git_release_enable = true
 release_always = false
 "#,
         )
-        .expect("valid release-plz"),
+        .expect("failed to parse release-plz fixture"),
     );
     let _ = facts.publishable_crate_names.insert("api".to_owned());
     let _ = facts.publishable_crate_names.insert("cli".to_owned());
@@ -130,7 +130,7 @@ git_release_enable = true
 release_always = false
 "#,
         )
-        .expect("valid release-plz"),
+        .expect("failed to parse release-plz fixture"),
     );
     let _ = facts.publishable_crate_names.insert("api".to_owned());
     let _ = facts.publishable_crate_names.insert("cli".to_owned());
@@ -191,7 +191,7 @@ git_release_enable = true
 release_always = false
 "#,
         )
-        .expect("valid release-plz"),
+        .expect("failed to parse release-plz fixture"),
     );
     let input = repo_input(&facts);
     let mut results = Vec::new();
@@ -223,7 +223,7 @@ git_release_enable = true
 release_always = false
 "#,
         )
-        .expect("valid release-plz"),
+        .expect("failed to parse release-plz fixture"),
     );
     let input = repo_input(&facts);
     let mut results = Vec::new();
@@ -255,7 +255,7 @@ changelog_config = "cliff.toml"
 release_always = false
 "#,
         )
-        .expect("valid release-plz"),
+        .expect("failed to parse release-plz fixture"),
     );
     let input = repo_input(&facts);
     let mut results = Vec::new();
@@ -288,7 +288,7 @@ git_release_enable = false
 release_always = false
 "#,
         )
-        .expect("valid release-plz"),
+        .expect("failed to parse release-plz fixture"),
     );
     let input = repo_input(&facts);
     let mut results = Vec::new();
@@ -321,7 +321,7 @@ git_release_enable = true
 release_always = true
 "#,
         )
-        .expect("valid release-plz"),
+        .expect("failed to parse release-plz fixture"),
     );
     let input = repo_input(&facts);
     let mut results = Vec::new();
@@ -353,7 +353,7 @@ changelog_config = "cliff.toml"
 git_release_enable = true
 "#,
         )
-        .expect("valid release-plz"),
+        .expect("failed to parse release-plz fixture"),
     );
     let input = repo_input(&facts);
     let mut results = Vec::new();
@@ -386,7 +386,7 @@ git_release_enable = false
 release_always = true
 "#,
         )
-        .expect("valid release-plz"),
+        .expect("failed to parse release-plz fixture"),
     );
     let _ = facts.publishable_crate_names.insert("api".to_owned());
     let input = repo_input(&facts);

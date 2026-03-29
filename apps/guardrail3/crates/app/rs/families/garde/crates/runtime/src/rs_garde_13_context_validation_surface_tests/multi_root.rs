@@ -9,8 +9,18 @@ fn local_ctx_gap_only_errors_for_owned_root() {
     let clippy_toml = super::super::canonical_clippy_toml();
     let local_abs = root.join(local_rel);
     let shared_abs = root.join(shared_rel);
-    std::fs::create_dir_all(local_abs.parent().expect("fixture source path must have a parent directory")).expect("failed to create local fixture source directory");
-    std::fs::create_dir_all(shared_abs.parent().expect("fixture source path must have a parent directory")).expect("failed to create shared fixture source directory");
+    std::fs::create_dir_all(
+        local_abs
+            .parent()
+            .expect("fixture source path must have a parent directory"),
+    )
+    .expect("failed to create local fixture source directory");
+    std::fs::create_dir_all(
+        shared_abs
+            .parent()
+            .expect("fixture source path must have a parent directory"),
+    )
+    .expect("failed to create shared fixture source directory");
     std::fs::write(
         &shared_abs,
         r#"

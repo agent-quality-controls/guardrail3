@@ -52,7 +52,6 @@ pub(crate) fn run_check(deny_toml: &str) -> Vec<CheckResult> {
     crate::run_config_rule_for_test(deny_toml, None, check)
 }
 
-
 #[cfg(test)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_root(root)
@@ -65,5 +64,4 @@ pub(crate) use ::test_support::{
 };
 #[cfg(test)]
 #[path = "rs_deny_10_multiple_versions_floor_tests/mod.rs"] // reason: test-only sidecar module wiring
-// reason: test-only sidecar module wiring
 mod rs_deny_10_multiple_versions_floor_tests;

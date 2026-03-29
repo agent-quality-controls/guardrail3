@@ -45,8 +45,6 @@ pub(crate) fn run_check(deny_toml: &str) -> Vec<CheckResult> {
     crate::run_config_rule_for_test(deny_toml, None, check)
 }
 
-
-
 #[cfg(test)]
 pub(crate) use ::test_support::{build_fixture_deny_toml, remove_section, set_source_policy};
 #[cfg(test)]
@@ -55,5 +53,4 @@ pub(crate) fn expected_sources_for_test() -> (std::collections::BTreeSet<String>
 }
 #[cfg(test)]
 #[path = "rs_deny_18_unknown_sources_policy_tests/mod.rs"] // reason: test-only sidecar module wiring
-// reason: test-only sidecar module wiring
 mod rs_deny_18_unknown_sources_policy_tests;

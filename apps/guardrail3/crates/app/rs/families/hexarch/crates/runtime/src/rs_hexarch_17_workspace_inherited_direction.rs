@@ -90,7 +90,7 @@ pub fn audit_edge_for_test(
         .edges
         .iter()
         .find(|edge| edge.source_rel_dir == source_rel_dir)
-        .expect("inherited edge");
+        .expect("expected inherited dependency edge from workspace member");
 
     let mut rule17 = Vec::new();
     check(&DependencyEdgeHexarchInput::new(edge), &mut rule17);

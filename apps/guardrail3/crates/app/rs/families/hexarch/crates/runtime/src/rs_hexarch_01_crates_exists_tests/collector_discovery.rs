@@ -60,7 +60,7 @@ fn broken_cargo_toml_symlink_is_not_collected_as_an_app_root() {
     let tmp = copy_fixture();
     create_dir(tmp.path(), "apps/broken");
     std::os::unix::fs::symlink("/nonexistent", tmp.path().join("apps/broken/Cargo.toml"))
-        .expect("symlink");
+        .expect("failed to create symlink fixture for hexarch test");
 
     let apps = discovered_apps(tmp.path());
     assert!(!apps.contains("apps/broken"), "{apps:#?}");

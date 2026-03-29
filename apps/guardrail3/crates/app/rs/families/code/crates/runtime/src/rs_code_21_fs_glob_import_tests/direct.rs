@@ -201,6 +201,24 @@ fn errors_on_extern_crate_std_alias_glob_import() {
 }
 
 #[test]
+fn errors_on_use_std_alias_then_glob_import() {
+    let content = "use std as s;\nuse s::fs::*;\nfn main() {}";
+    let results = check_source("src/foo.rs", content, false);
+
+    assert_findings(
+        &results,
+        &[RuleFinding {
+            severity: guardrail3_domain_report::Severity::Error,
+            title: "std::fs glob import",
+            message: "Direct `use std::fs::*` glob import bypasses clippy method bans.",
+            file: Some("src/foo.rs"),
+            line: Some(2),
+            inventory: false,
+        }],
+    );
+}
+
+#[test]
 fn multiple_glob_imports_in_same_file() {
     let content = "use std::fs::*;\nmod helpers {\n    use std::fs::{self, *};\n}\nfn main() {}";
     let results = check_source("src/foo.rs", content, false);

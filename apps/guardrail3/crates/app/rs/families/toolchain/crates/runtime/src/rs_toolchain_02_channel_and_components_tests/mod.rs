@@ -4,12 +4,16 @@ use guardrail3_app_rs_family_toolchain_assertions::rs_toolchain_02_channel_and_c
 
 use super::{check, test_input};
 
+fn parse_toolchain_policy_toml(source: &str) -> toml::Value {
+    toml::from_str::<toml::Value>(source)
+        .expect("toolchain channel/components test fixture TOML should parse")
+}
+
 #[test]
 fn inventories_when_channel_and_components_match_policy() {
-    let parsed = toml::from_str::<toml::Value>(
+    let parsed = parse_toolchain_policy_toml(
         "[toolchain]\nchannel = \"stable\"\ncomponents = [\"clippy\", \"rustfmt\"]",
-    )
-    .expect("valid TOML");
+    );
     let input = test_input(
         Some("rust-toolchain.toml"),
         None,
@@ -52,10 +56,9 @@ fn inventories_when_channel_and_components_match_policy() {
 
 #[test]
 fn inventories_when_stable_channel_has_host_suffix() {
-    let parsed = toml::from_str::<toml::Value>(
+    let parsed = parse_toolchain_policy_toml(
         "[toolchain]\nchannel = \"stable-x86_64-unknown-linux-gnu\"\ncomponents = [\"clippy\", \"rustfmt\"]",
-    )
-    .expect("valid TOML");
+    );
     let input = test_input(
         Some("rust-toolchain.toml"),
         None,
@@ -98,10 +101,8 @@ fn inventories_when_stable_channel_has_host_suffix() {
 
 #[test]
 fn errors_when_toolchain_table_is_missing() {
-    let parsed = toml::from_str::<toml::Value>(
-        "channel = \"stable\"\ncomponents = [\"clippy\", \"rustfmt\"]",
-    )
-    .expect("valid TOML");
+    let parsed =
+        parse_toolchain_policy_toml("channel = \"stable\"\ncomponents = [\"clippy\", \"rustfmt\"]");
     let input = test_input(
         Some("rust-toolchain.toml"),
         None,
@@ -128,7 +129,7 @@ fn errors_when_toolchain_table_is_missing() {
 
 #[test]
 fn errors_when_toolchain_table_is_not_a_table() {
-    let parsed = toml::from_str::<toml::Value>("toolchain = \"stable\"").expect("valid TOML");
+    let parsed = parse_toolchain_policy_toml("toolchain = \"stable\"");
     let input = test_input(
         Some("rust-toolchain.toml"),
         None,
@@ -155,10 +156,9 @@ fn errors_when_toolchain_table_is_not_a_table() {
 
 #[test]
 fn inventories_when_pinned_stable_channel_has_host_suffix() {
-    let parsed = toml::from_str::<toml::Value>(
+    let parsed = parse_toolchain_policy_toml(
         "[toolchain]\nchannel = \"1.85.0-x86_64-unknown-linux-gnu\"\ncomponents = [\"clippy\", \"rustfmt\"]",
-    )
-    .expect("valid TOML");
+    );
     let input = test_input(
         Some("rust-toolchain.toml"),
         None,
@@ -227,10 +227,8 @@ fn errors_on_parse_failure() {
 
 #[test]
 fn warns_when_required_component_is_missing() {
-    let parsed = toml::from_str::<toml::Value>(
-        "[toolchain]\nchannel = \"stable\"\ncomponents = [\"clippy\"]",
-    )
-    .expect("valid TOML");
+    let parsed =
+        parse_toolchain_policy_toml("[toolchain]\nchannel = \"stable\"\ncomponents = [\"clippy\"]");
     let input = test_input(
         Some("rust-toolchain.toml"),
         None,
@@ -273,10 +271,9 @@ fn warns_when_required_component_is_missing() {
 
 #[test]
 fn errors_when_channel_is_nightly() {
-    let parsed = toml::from_str::<toml::Value>(
+    let parsed = parse_toolchain_policy_toml(
         "[toolchain]\nchannel = \"nightly\"\ncomponents = [\"clippy\", \"rustfmt\"]",
-    )
-    .expect("valid TOML");
+    );
     let input = test_input(
         Some("rust-toolchain.toml"),
         None,
@@ -319,10 +316,9 @@ fn errors_when_channel_is_nightly() {
 
 #[test]
 fn errors_when_channel_is_pinned_nightly() {
-    let parsed = toml::from_str::<toml::Value>(
+    let parsed = parse_toolchain_policy_toml(
         "[toolchain]\nchannel = \"nightly-2026-03-01\"\ncomponents = [\"clippy\", \"rustfmt\"]",
-    )
-    .expect("valid TOML");
+    );
     let input = test_input(
         Some("rust-toolchain.toml"),
         None,
@@ -365,10 +361,9 @@ fn errors_when_channel_is_pinned_nightly() {
 
 #[test]
 fn errors_when_version_like_channel_contains_nightly_suffix() {
-    let parsed = toml::from_str::<toml::Value>(
+    let parsed = parse_toolchain_policy_toml(
         "[toolchain]\nchannel = \"1.85.0-nightly\"\ncomponents = [\"clippy\", \"rustfmt\"]",
-    )
-    .expect("valid TOML");
+    );
     let input = test_input(
         Some("rust-toolchain.toml"),
         None,
@@ -411,10 +406,9 @@ fn errors_when_version_like_channel_contains_nightly_suffix() {
 
 #[test]
 fn errors_when_channel_is_beta() {
-    let parsed = toml::from_str::<toml::Value>(
+    let parsed = parse_toolchain_policy_toml(
         "[toolchain]\nchannel = \"beta\"\ncomponents = [\"clippy\", \"rustfmt\"]",
-    )
-    .expect("valid TOML");
+    );
     let input = test_input(
         Some("rust-toolchain.toml"),
         None,
@@ -457,10 +451,9 @@ fn errors_when_channel_is_beta() {
 
 #[test]
 fn errors_when_version_like_channel_contains_beta_suffix() {
-    let parsed = toml::from_str::<toml::Value>(
+    let parsed = parse_toolchain_policy_toml(
         "[toolchain]\nchannel = \"1.85.0-beta\"\ncomponents = [\"clippy\", \"rustfmt\"]",
-    )
-    .expect("valid TOML");
+    );
     let input = test_input(
         Some("rust-toolchain.toml"),
         None,
@@ -503,10 +496,9 @@ fn errors_when_version_like_channel_contains_beta_suffix() {
 
 #[test]
 fn errors_when_channel_is_not_a_string() {
-    let parsed = toml::from_str::<toml::Value>(
+    let parsed = parse_toolchain_policy_toml(
         "[toolchain]\nchannel = 185\ncomponents = [\"clippy\", \"rustfmt\"]",
-    )
-    .expect("valid TOML");
+    );
     let input = test_input(
         Some("rust-toolchain.toml"),
         None,
@@ -549,10 +541,9 @@ fn errors_when_channel_is_not_a_string() {
 
 #[test]
 fn inventories_when_channel_is_pinned_stable_version() {
-    let parsed = toml::from_str::<toml::Value>(
+    let parsed = parse_toolchain_policy_toml(
         "[toolchain]\nchannel = \"1.85.0\"\ncomponents = [\"clippy\", \"rustfmt\"]",
-    )
-    .expect("valid TOML");
+    );
     let input = test_input(
         Some("rust-toolchain.toml"),
         None,
@@ -595,10 +586,9 @@ fn inventories_when_channel_is_pinned_stable_version() {
 
 #[test]
 fn errors_when_components_are_not_a_string_array() {
-    let parsed = toml::from_str::<toml::Value>(
+    let parsed = parse_toolchain_policy_toml(
         "[toolchain]\nchannel = \"stable\"\ncomponents = [\"clippy\", 1]",
-    )
-    .expect("valid TOML");
+    );
     let input = test_input(
         Some("rust-toolchain.toml"),
         None,
@@ -634,9 +624,7 @@ fn errors_when_components_are_not_a_string_array() {
 
 #[test]
 fn warns_when_channel_is_missing() {
-    let parsed =
-        toml::from_str::<toml::Value>("[toolchain]\ncomponents = [\"clippy\", \"rustfmt\"]")
-            .expect("valid TOML");
+    let parsed = parse_toolchain_policy_toml("[toolchain]\ncomponents = [\"clippy\", \"rustfmt\"]");
     let input = test_input(
         Some("rust-toolchain.toml"),
         None,
@@ -679,8 +667,7 @@ fn warns_when_channel_is_missing() {
 
 #[test]
 fn warns_when_components_array_is_missing() {
-    let parsed =
-        toml::from_str::<toml::Value>("[toolchain]\nchannel = \"stable\"").expect("valid TOML");
+    let parsed = parse_toolchain_policy_toml("[toolchain]\nchannel = \"stable\"");
     let input = test_input(
         Some("rust-toolchain.toml"),
         None,

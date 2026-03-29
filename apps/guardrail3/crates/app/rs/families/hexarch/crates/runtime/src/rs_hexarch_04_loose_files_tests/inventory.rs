@@ -11,7 +11,7 @@ fn multiple_loose_entries_in_one_container_produce_one_error_listing_every_entry
         tmp.path().join("apps/devctl/Cargo.toml"),
         tmp.path().join(format!("{container}/notes.txt")),
     )
-    .expect("symlink");
+    .expect("failed to create symlink fixture for hexarch test");
 
     let results = super::run_family(tmp.path());
     assertions::assert_error_count_matching_file(

@@ -11,7 +11,7 @@ fn symlink_only_container_reports_contains_files_instead_of_empty() {
         tmp.path().join("apps/devctl/crates/app"),
         tmp.path().join(format!("{container}/link")),
     )
-    .expect("symlink");
+    .expect("failed to create symlink fixture for hexarch test");
 
     let results = super::run_family(tmp.path());
     assertions::assert_expected_rule_results(
@@ -36,7 +36,7 @@ fn dangling_symlink_only_container_reports_contains_files_instead_of_empty() {
         "/nonexistent/path/that/does/not/exist",
         tmp.path().join(format!("{container}/dangling")),
     )
-    .expect("symlink");
+    .expect("failed to create symlink fixture for hexarch test");
 
     let results = super::run_family(tmp.path());
     assertions::assert_expected_rule_results(
@@ -61,7 +61,7 @@ fn symlinked_child_directory_does_not_count_as_a_real_subdirectory() {
         tmp.path().join("apps/devctl/crates/domain/types"),
         tmp.path().join(format!("{container}/types")),
     )
-    .expect("symlink");
+    .expect("failed to create symlink fixture for hexarch test");
 
     let results = super::run_family(tmp.path());
     assertions::assert_expected_rule_results(
@@ -88,7 +88,7 @@ fn symlinked_gitkeep_does_not_suppress_rule_05() {
         tmp.path().join("apps/devctl/Cargo.toml"),
         tmp.path().join(format!("{container}/.gitkeep")),
     )
-    .expect("symlink");
+    .expect("failed to create symlink fixture for hexarch test");
 
     let results = super::run_family(tmp.path());
     assertions::assert_expected_rule_results(

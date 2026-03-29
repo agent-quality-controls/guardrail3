@@ -14,7 +14,7 @@ fn directional_child_symlink_to_valid_directory_hits_missing_for_that_container(
         tmp.path().join("apps/devctl/crates/adapters/outbound"),
         tmp.path().join("apps/devctl/crates/adapters/inbound"),
     )
-    .expect("symlink");
+    .expect("failed to create symlink fixture for hexarch test");
 
     let results = super::run_family(tmp.path());
     assertions::assert_error_count_matching_file(
@@ -37,7 +37,7 @@ fn nested_directional_child_symlink_to_valid_directory_hits_only_the_nested_cont
         tmp.path().join(format!("{}/ports/inbound", inner_hex())),
         tmp.path().join(format!("{}/ports/outbound", inner_hex())),
     )
-    .expect("symlink");
+    .expect("failed to create symlink fixture for hexarch test");
 
     let results = super::run_family(tmp.path());
     assertions::assert_error_count_matching_file(
@@ -59,7 +59,7 @@ fn unexpected_directional_child_symlink_is_still_reported_as_unexpected() {
         tmp.path().join("apps/devctl/crates/adapters/outbound"),
         tmp.path().join("apps/devctl/crates/adapters/shared"),
     )
-    .expect("symlink");
+    .expect("failed to create symlink fixture for hexarch test");
 
     let results = super::run_family(tmp.path());
     assertions::assert_error_count_matching_file(

@@ -43,5 +43,4 @@ pub(crate) fn copy_fixture() -> test_support::TempDir {
 
 #[cfg(test)]
 #[path = "rs_code_03_item_level_allow_without_reason_tests/mod.rs"] // reason: test-only sidecar module wiring
-// reason: test-only sidecar module wiring
 mod rs_code_03_item_level_allow_without_reason_tests;

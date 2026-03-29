@@ -78,9 +78,8 @@ fn passes_when_env_long_split_string_wraps_cargo_dupes_with_exclude_tests() {
 
 #[test]
 fn passes_when_env_split_string_assignment_only_payload_precedes_cargo_dupes() {
-    let results = run_case(
-        "env --split-string 'RUSTFLAGS=-D warnings' cargo dupes check --exclude-tests\n",
-    );
+    let results =
+        run_case("env --split-string 'RUSTFLAGS=-D warnings' cargo dupes check --exclude-tests\n");
     assertions::assert_present(&results);
 }
 
@@ -170,9 +169,8 @@ fn passes_when_shell_wrapper_runs_multiline_cargo_dupes_script() {
 
 #[test]
 fn passes_when_shell_wrapper_runs_helper_function_inside_payload() {
-    let results = run_case(
-        "bash -lc 'run_dupes() {\n    cargo dupes check --exclude-tests\n}\nrun_dupes'\n",
-    );
+    let results =
+        run_case("bash -lc 'run_dupes() {\n    cargo dupes check --exclude-tests\n}\nrun_dupes'\n");
     assertions::assert_present(&results);
 }
 

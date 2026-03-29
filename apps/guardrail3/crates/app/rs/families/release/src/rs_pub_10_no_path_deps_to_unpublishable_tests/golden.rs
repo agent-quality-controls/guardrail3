@@ -13,24 +13,24 @@ name = "example"
 internal = { workspace = true }
 "#,
     )
-    .expect("valid crate manifest");
+    .expect("failed to parse release test crate manifest");
     let workspace_manifest: toml::Value = toml::from_str(
         r#"
 [workspace.dependencies]
 internal = { path = "../internal", version = "1.2.3" }
 "#,
     )
-    .expect("valid workspace manifest");
+    .expect("failed to parse release test workspace manifest");
     let workspace_dependencies = workspace_manifest
         .get("workspace")
         .and_then(|workspace| workspace.get("dependencies"))
         .and_then(toml::Value::as_table)
         .cloned()
-        .expect("workspace dependencies");
+        .expect("failed to extract release workspace dependencies");
     let edge = dependency_edges(&parsed, &workspace_dependencies)
         .into_iter()
         .find(|edge| edge.dep_name == "internal")
-        .expect("internal edge");
+        .expect("failed to locate release dependency edge named internal");
     assert!(edge.has_path);
 
     let mut facts = edge_facts();
@@ -78,7 +78,7 @@ internal = { path = "../internal", version = "1.2.3" }
     let edge = dependency_edges(&parsed, &toml::map::Map::new())
         .into_iter()
         .find(|edge| edge.dep_name == "internal")
-        .expect("internal edge");
+        .expect("failed to locate release dependency edge named internal");
     assert!(edge.has_path);
     assert_eq!(edge.section_label, "build-dependencies");
     assert_eq!(edge.target_label.as_deref(), Some("cfg(unix)"));

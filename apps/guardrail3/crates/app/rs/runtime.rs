@@ -1,28 +1,31 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 
-use guardrail3_app_core::project_walker;
-use guardrail3_app_rs_family_arch as arch;
-use guardrail3_app_rs_family_cargo as cargo;
-use guardrail3_app_rs_family_clippy as clippy;
-use guardrail3_app_rs_family_code as code;
-use guardrail3_app_rs_family_deny as deny;
-use guardrail3_app_rs_family_deps as deps;
-use guardrail3_app_rs_family_fmt as fmt;
-use guardrail3_app_rs_family_garde as garde;
-use guardrail3_app_rs_family_hexarch as hexarch;
-use guardrail3_app_rs_family_hooks_shared as hooks_shared;
-use guardrail3_app_rs_family_mapper::FamilyMapper;
-use guardrail3_app_rs_family_release as release;
-use guardrail3_app_rs_family_selection as family_selection;
-use guardrail3_app_rs_family_test as test;
-use guardrail3_app_rs_family_toolchain as toolchain;
-use guardrail3_app_rs_placement as placement;
 use guardrail3_domain_config::types::{GuardrailConfig, RustChecksConfig, RustConfig};
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::{CheckResult, Report, Section, rust_validate_family_section_name};
 use guardrail3_outbound_traits::{FileSystem, ToolChecker};
 use guardrail3_validation_model::RustValidateFamily;
+
+mod runtime_deps {
+    pub(super) use guardrail3_app_core::project_walker;
+    pub(super) use guardrail3_app_rs_family_arch as arch;
+    pub(super) use guardrail3_app_rs_family_cargo as cargo;
+    pub(super) use guardrail3_app_rs_family_clippy as clippy;
+    pub(super) use guardrail3_app_rs_family_code as code;
+    pub(super) use guardrail3_app_rs_family_deny as deny;
+    pub(super) use guardrail3_app_rs_family_deps as deps;
+    pub(super) use guardrail3_app_rs_family_fmt as fmt;
+    pub(super) use guardrail3_app_rs_family_garde as garde;
+    pub(super) use guardrail3_app_rs_family_hexarch as hexarch;
+    pub(super) use guardrail3_app_rs_family_hooks_shared as hooks_shared;
+    pub(super) use guardrail3_app_rs_family_mapper::FamilyMapper;
+    pub(super) use guardrail3_app_rs_family_release as release;
+    pub(super) use guardrail3_app_rs_family_selection as family_selection;
+    pub(super) use guardrail3_app_rs_family_test as test;
+    pub(super) use guardrail3_app_rs_family_toolchain as toolchain;
+    pub(super) use guardrail3_app_rs_placement as placement;
+}
 
 #[derive(Debug, Clone)]
 struct RustFamilyApplicability {
@@ -46,36 +49,44 @@ pub fn run(
     thorough: bool,
     tc: &dyn ToolChecker,
 ) -> Result<Report, String> {
-    let tree = project_walker::walk_project(fs, path);
+    let tree = runtime_deps::project_walker::walk_project(fs, path);
     let config = match load_config(&tree) {
         Ok(config) => config,
         Err(_error) if requested_families_allow_config_parse_failure(requested_families) => None,
         Err(error) => return Err(error),
     };
-    let scope = placement::collect(&tree);
-    let selected = family_selection::resolve(&tree, config.as_ref(), requested_families);
+    let scope = runtime_deps::placement::collect(&tree);
+    let selected =
+        runtime_deps::family_selection::resolve(&tree, config.as_ref(), requested_families);
     let applicability = collect_family_applicability(config.as_ref());
-    let mapper = FamilyMapper::new(&tree, &scope, config.as_ref(), &selected, scoped_files);
+    let mapper =
+        runtime_deps::FamilyMapper::new(&tree, &scope, config.as_ref(), &selected, scoped_files);
 
     let mut report = Report::new(path.display().to_string(), vec!["Rust".to_owned()]);
 
     for family in selected.iter() {
         let results = match family {
-            RustValidateFamily::Arch => arch::check(&tree, &mapper.map_rs_arch()),
-            RustValidateFamily::Fmt => fmt::check(&tree),
-            RustValidateFamily::Toolchain => toolchain::check(&tree),
-            RustValidateFamily::Clippy => clippy::check(&tree, &mapper.map_rs_clippy()),
-            RustValidateFamily::Deny => deny::check(&tree, &mapper.map_rs_deny()),
-            RustValidateFamily::Cargo => cargo::check(&tree, &mapper.map_rs_cargo()),
-            RustValidateFamily::Code => code::check(&tree, &mapper.map_rs_code()),
-            RustValidateFamily::Hexarch => hexarch::check(&tree, &mapper.map_rs_hexarch()),
-            RustValidateFamily::Deps => deps::check(&tree, &mapper.map_rs_deps(), tc),
-            RustValidateFamily::Garde => garde::check(&tree, &mapper.map_rs_garde()),
-            RustValidateFamily::Test => test::check(&tree, &mapper.map_rs_test(), tc),
-            RustValidateFamily::Release => {
-                release::check(&tree, &mapper.map_rs_release(), tc, thorough)
+            RustValidateFamily::Arch => runtime_deps::arch::check(&tree, &mapper.map_rs_arch()),
+            RustValidateFamily::Fmt => runtime_deps::fmt::check(&tree),
+            RustValidateFamily::Toolchain => runtime_deps::toolchain::check(&tree),
+            RustValidateFamily::Clippy => {
+                runtime_deps::clippy::check(&tree, &mapper.map_rs_clippy())
             }
-            RustValidateFamily::HooksShared => hooks_shared::check(fs, path, &tree, tc),
+            RustValidateFamily::Deny => runtime_deps::deny::check(&tree, &mapper.map_rs_deny()),
+            RustValidateFamily::Cargo => runtime_deps::cargo::check(&tree, &mapper.map_rs_cargo()),
+            RustValidateFamily::Code => runtime_deps::code::check(&tree, &mapper.map_rs_code()),
+            RustValidateFamily::Hexarch => {
+                runtime_deps::hexarch::check(&tree, &mapper.map_rs_hexarch())
+            }
+            RustValidateFamily::Deps => runtime_deps::deps::check(&tree, &mapper.map_rs_deps(), tc),
+            RustValidateFamily::Garde => runtime_deps::garde::check(&tree, &mapper.map_rs_garde()),
+            RustValidateFamily::Test => runtime_deps::test::check(&tree, &mapper.map_rs_test(), tc),
+            RustValidateFamily::Release => {
+                runtime_deps::release::check(&tree, &mapper.map_rs_release(), tc, thorough)
+            }
+            RustValidateFamily::HooksShared => {
+                runtime_deps::hooks_shared::check(fs, path, &tree, tc)
+            }
             RustValidateFamily::HooksRs => Vec::new(),
         };
         let results = match applicability.get(&family) {

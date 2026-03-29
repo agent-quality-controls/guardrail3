@@ -116,7 +116,8 @@ fn passes_when_long_form_split_string_env_runs_cargo_dupes() {
 
 #[test]
 fn passes_when_long_form_split_string_assignments_precede_cargo_dupes() {
-    let results = run_case("env --split-string 'RUSTFLAGS=-D warnings' cargo dupes --exclude-tests\n");
+    let results =
+        run_case("env --split-string 'RUSTFLAGS=-D warnings' cargo dupes --exclude-tests\n");
     assertions::assert_present(&results);
 }
 
@@ -178,25 +179,25 @@ fn passes_when_short_cargo_global_flag_with_value_precedes_dupes() {
 fn passes_when_dupes_wins_over_jscpd_if_both_exist() {
     let results = run_case("jscpd .\ncargo dupes --exclude-tests\n");
     assertions::assert_present(&results);
-    }
+}
 
 #[test]
 fn passes_when_dupes_binary_wins_over_jscpd_if_both_exist() {
     let results = run_case("jscpd .\ncargo-dupes --exclude-tests\n");
     assertions::assert_present(&results);
-    }
+}
 
 #[test]
 fn passes_when_env_wrapped_dupes_wins_over_jscpd_if_both_exist() {
     let results = run_case("jscpd .\nenv CARGO_TERM_COLOR=always cargo dupes --exclude-tests\n");
     assertions::assert_present(&results);
-    }
+}
 
 #[test]
 fn passes_when_jscpd_precedes_same_line_dupes_chain() {
     let results = run_case("jscpd . && cargo dupes --exclude-tests\n");
     assertions::assert_present(&results);
-    }
+}
 
 #[test]
 fn passes_when_brace_group_runs_cargo_dupes() {
@@ -208,13 +209,13 @@ fn passes_when_brace_group_runs_cargo_dupes() {
 fn passes_when_dupes_runs_on_right_hand_or_chain() {
     let results = run_case("cargo fmt --check || cargo dupes --exclude-tests\n");
     assertions::assert_present(&results);
-    }
+}
 
 #[test]
 fn passes_when_dupes_wins_on_right_hand_or_chain_after_jscpd() {
     let results = run_case("jscpd . || cargo dupes --exclude-tests\n");
     assertions::assert_present(&results);
-    }
+}
 
 #[test]
 fn passes_when_valid_dupes_appears_after_unrelated_commands() {

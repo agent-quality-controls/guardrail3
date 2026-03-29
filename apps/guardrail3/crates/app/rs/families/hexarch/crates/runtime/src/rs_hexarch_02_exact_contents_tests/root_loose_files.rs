@@ -102,7 +102,7 @@ fn symlinked_gitkeep_to_file_is_not_treated_as_the_allowed_real_gitkeep() {
         tmp.path().join("apps/devctl/Cargo.toml"),
         tmp.path().join("apps/devctl/crates/.gitkeep"),
     )
-    .expect("symlink");
+    .expect("failed to create symlink fixture for hexarch test");
 
     let results = super::run_family(tmp.path());
     assertions::assert_error_count_matching_file(
@@ -124,7 +124,7 @@ fn symlinked_gitkeep_to_directory_is_not_treated_as_the_allowed_real_gitkeep() {
         tmp.path().join("apps/devctl/crates/app"),
         tmp.path().join("apps/devctl/crates/.gitkeep"),
     )
-    .expect("symlink");
+    .expect("failed to create symlink fixture for hexarch test");
 
     let results = super::run_family(tmp.path());
     assertions::assert_error_count_matching_file(

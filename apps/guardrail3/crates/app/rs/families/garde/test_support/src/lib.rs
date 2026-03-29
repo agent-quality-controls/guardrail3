@@ -2,6 +2,7 @@ use std::collections::BTreeMap;
 use std::path::PathBuf;
 
 use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
+use guardrail3_shared_fs::{create_dir_all, write_file};
 
 pub fn temp_root(slug: &str) -> PathBuf {
     let unique = format!(
@@ -14,7 +15,7 @@ pub fn temp_root(slug: &str) -> PathBuf {
             .as_nanos()
     );
     let root = std::env::temp_dir().join(unique);
-    std::fs::create_dir_all(&root).expect("create temp root");
+    create_dir_all(&root).expect("create temp root");
     root
 }
 
@@ -29,17 +30,14 @@ pub fn project_tree(
         } else {
             root.join(rel)
         };
-        std::fs::create_dir_all(&abs_dir).expect("create project dir");
+        create_dir_all(&abs_dir).expect("create project dir");
         for dir in &entry.dirs {
-            std::fs::create_dir_all(abs_dir.join(dir)).expect("create child dir");
+            create_dir_all(&abs_dir.join(dir)).expect("create child dir");
         }
     }
     for (rel, body) in &content {
         let abs_path = root.join(rel);
-        if let Some(parent) = abs_path.parent() {
-            std::fs::create_dir_all(parent).expect("create file parent");
-        }
-        std::fs::write(&abs_path, body).expect("write project file");
+        write_file(&abs_path, body).expect("write project file");
     }
 
     ProjectTree {

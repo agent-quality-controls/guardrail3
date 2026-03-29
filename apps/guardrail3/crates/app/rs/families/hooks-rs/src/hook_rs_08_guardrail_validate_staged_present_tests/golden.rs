@@ -38,7 +38,8 @@ fn passes_when_wrapped_guardrail_validation_exists() {
 
 #[test]
 fn passes_when_one_line_if_then_runs_guardrail_validation() {
-    let results = run_case("if test -n \"$RUST_CHANGED\"; then guardrail3 validate --staged .; fi\n");
+    let results =
+        run_case("if test -n \"$RUST_CHANGED\"; then guardrail3 validate --staged .; fi\n");
     assertions::assert_present(&results);
 }
 
@@ -296,7 +297,8 @@ fn warns_when_top_level_guardrail_validate_is_only_help() {
 
 #[test]
 fn passes_when_valid_guardrail_validation_appears_after_invalid_line() {
-    let results = run_case("guardrail3 rs validatex --staged .\nguardrail3 rs validate --staged .\n");
+    let results =
+        run_case("guardrail3 rs validatex --staged .\nguardrail3 rs validate --staged .\n");
     assertions::assert_present(&results);
 }
 
@@ -382,9 +384,8 @@ fn passes_when_guardrail_validation_exists_inside_taken_single_line_else_body() 
 
 #[test]
 fn passes_when_guardrail_validation_exists_inside_taken_single_line_elif_body() {
-    let results = run_case(
-        "if false; then echo skip; elif true; then guardrail3 validate --staged .; fi\n",
-    );
+    let results =
+        run_case("if false; then echo skip; elif true; then guardrail3 validate --staged .; fi\n");
     assertions::assert_present(&results);
 }
 
@@ -398,7 +399,8 @@ fn passes_when_guardrail_validation_exists_inside_taken_single_line_elif_body_wi
 
 #[test]
 fn warns_when_guardrail_validation_only_exists_inside_dead_else_body() {
-    let results = run_case("if true; then\n    echo ok\nelse\n    guardrail3 validate --staged .\nfi\n");
+    let results =
+        run_case("if true; then\n    echo ok\nelse\n    guardrail3 validate --staged .\nfi\n");
     assertions::assert_missing(&results);
 }
 

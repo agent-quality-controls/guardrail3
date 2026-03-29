@@ -5,6 +5,7 @@ use guardrail3_adapters_outbound_fs::RealFileSystem;
 use guardrail3_app_core::project_walker::walk_project;
 use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
 use guardrail3_outbound_traits::{CommandRunResult, ToolChecker};
+use guardrail3_shared_fs::{create_dir_all, write_file as write_file_at};
 
 pub fn walk(root: &Path) -> ProjectTree {
     walk_project(&RealFileSystem, root)
@@ -12,10 +13,7 @@ pub fn walk(root: &Path) -> ProjectTree {
 
 pub fn write_file(root: &Path, rel: &str, content: &str) {
     let path = root.join(rel);
-    if let Some(parent) = path.parent() {
-        std::fs::create_dir_all(parent).expect("create parent");
-    }
-    std::fs::write(path, content).expect("write file");
+    write_file_at(&path, content).expect("failed to write release fixture file");
 }
 
 pub fn dir_entry(dirs: &[&str], files: &[&str]) -> DirEntry {
@@ -38,17 +36,14 @@ pub fn project_tree(
         } else {
             root.join(rel)
         };
-        std::fs::create_dir_all(&abs_dir).expect("create project dir");
+        create_dir_all(&abs_dir).expect("failed to create release project directory");
         for dir in &entry.dirs {
-            std::fs::create_dir_all(abs_dir.join(dir)).expect("create child dir");
+            create_dir_all(&abs_dir.join(dir)).expect("failed to create release child directory");
         }
     }
     for (rel, body) in &content {
         let abs_path = root.join(rel);
-        if let Some(parent) = abs_path.parent() {
-            std::fs::create_dir_all(parent).expect("create file parent");
-        }
-        std::fs::write(&abs_path, body).expect("write project file");
+        write_file_at(&abs_path, body).expect("failed to write release project file");
     }
 
     ProjectTree {
@@ -71,11 +66,11 @@ pub fn temp_root(slug: &str) -> PathBuf {
         std::process::id(),
         std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
-            .expect("clock")
+            .expect("failed to read system clock for release temp root")
             .as_nanos()
     );
     let root = std::env::temp_dir().join(unique);
-    std::fs::create_dir_all(&root).expect("create temp root");
+    create_dir_all(&root).expect("failed to create release temp root");
     root
 }
 

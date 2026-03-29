@@ -45,7 +45,6 @@ pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_root(root)
 }
 
-
 #[cfg(test)]
 pub(crate) use crate::{collected_facts, forbidden_input};
 #[cfg(test)]

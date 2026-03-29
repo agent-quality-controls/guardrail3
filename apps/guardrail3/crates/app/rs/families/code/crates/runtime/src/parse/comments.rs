@@ -378,35 +378,5 @@ fn strip_string_literals(line: &str) -> String {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::same_line_reason;
-
-    #[test]
-    fn accepts_only_exact_same_line_reason_prefix() {
-        let content = "#[allow(clippy::unwrap_used)] // reason: documented seam\n#[allow(clippy::panic)] // REASON: uppercase\n#[allow(clippy::expect_used)] //reason: tight\n";
-
-        assert_eq!(
-            same_line_reason(content, 1),
-            Some("documented seam".to_owned())
-        );
-        assert_eq!(same_line_reason(content, 2), None);
-        assert_eq!(same_line_reason(content, 3), None);
-    }
-
-    #[test]
-    fn ignores_comment_markers_inside_strings_and_raw_strings() {
-        let content = concat!(
-            "let url = \"https://example.com/policy\"; #[allow(clippy::unwrap_used)] // reason: external policy link https://example.com/policy\n",
-            "let snippet = r#\"// reason: forged\"#; #[allow(clippy::panic)] // reason: raw string stays inert\n",
-        );
-
-        assert_eq!(
-            same_line_reason(content, 1),
-            Some("external policy link https://example.com/policy".to_owned())
-        );
-        assert_eq!(
-            same_line_reason(content, 2),
-            Some("raw string stays inert".to_owned())
-        );
-    }
-}
+#[path = "comments_tests/mod.rs"] // reason: parse module sidecar tests
+mod comments_tests;

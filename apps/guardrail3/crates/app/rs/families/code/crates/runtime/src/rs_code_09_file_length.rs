@@ -20,7 +20,7 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
         severity: Severity::Error,
         title: "file too long".to_owned(),
         message: format!(
-            "{effective_lines} effective lines (max 500). Long files are hard to review and maintain."
+            "{effective_lines} effective code-bearing lines (max 500). Long files are hard to review and maintain."
         ),
         file: Some(input.rel_path.to_owned()),
         line: None,

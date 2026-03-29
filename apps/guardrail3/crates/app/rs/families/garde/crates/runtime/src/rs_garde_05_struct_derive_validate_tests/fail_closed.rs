@@ -7,7 +7,12 @@ fn errors_when_struct_boundary_type_lacks_validate() {
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
     let clippy_toml = super::super::canonical_clippy_toml();
-    std::fs::create_dir_all(source_abs.parent().expect("fixture source path must have a parent directory")).expect("failed to create fixture source directory");
+    std::fs::create_dir_all(
+        source_abs
+            .parent()
+            .expect("fixture source path must have a parent directory"),
+    )
+    .expect("failed to create fixture source directory");
     std::fs::write(
         &source_abs,
         r#"
@@ -69,7 +74,12 @@ fn non_garde_validate_derive_does_not_suppress_struct_error() {
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
     let clippy_toml = super::super::canonical_clippy_toml();
-    std::fs::create_dir_all(source_abs.parent().expect("fixture source path must have a parent directory")).expect("failed to create fixture source directory");
+    std::fs::create_dir_all(
+        source_abs
+            .parent()
+            .expect("fixture source path must have a parent directory"),
+    )
+    .expect("failed to create fixture source directory");
     std::fs::write(
         &source_abs,
         r#"

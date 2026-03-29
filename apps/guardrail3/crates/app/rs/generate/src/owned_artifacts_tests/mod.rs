@@ -8,7 +8,7 @@ use guardrail3_app_rs_generate_assertions::owned_artifacts::{
 #[test]
 #[allow(clippy::expect_used)] // reason: test setup assertions
 fn per_app_deny_uses_app_effective_profile() {
-    let tmp = tempfile::tempdir().expect("create tempdir");
+    let tmp = tempfile::tempdir().expect("create temporary owned-artifacts test root");
     fs::create_dir_all(tmp.path().join("apps/backend")).expect("create app dir");
     fs::write(
         tmp.path().join("Cargo.toml"),

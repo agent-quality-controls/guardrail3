@@ -21,7 +21,7 @@ fn local_extra_feature_bans_inventory_stays_owned_by_the_local_root() {
         .and_then(|b| b.get("features"))
         .and_then(toml::Value::as_array)
         .cloned()
-        .expect("feature entries");
+        .expect("expected feature inventory entries in generated deny TOML");
     let mut local_entries = existing;
     local_entries.push(feature_entry("serde"));
 

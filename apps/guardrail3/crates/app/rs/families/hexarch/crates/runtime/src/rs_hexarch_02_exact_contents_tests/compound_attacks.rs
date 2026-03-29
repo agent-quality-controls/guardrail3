@@ -262,7 +262,7 @@ fn maximally_complex_single_root_accumulates_missing_unexpected_and_loose_withou
     let devctl = "apps/devctl/crates";
     remove_dir(tmp.path(), &format!("{devctl}/app"));
     std::os::unix::fs::symlink("/dev/null", tmp.path().join(format!("{devctl}/app")))
-        .expect("symlink");
+        .expect("failed to create symlink fixture for hexarch test");
     remove_dir(tmp.path(), &format!("{devctl}/domain"));
     write_file(tmp.path(), &format!("{devctl}/utils/.gitkeep"), "");
     write_file(tmp.path(), &format!("{devctl}/mod.rs"), "// stray");

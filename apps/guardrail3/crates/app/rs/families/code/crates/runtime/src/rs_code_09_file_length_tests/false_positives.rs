@@ -22,7 +22,7 @@ fn skips_test_file_even_when_it_exceeds_threshold() {
 }
 
 #[test]
-fn skips_file_with_many_comment_lines_but_only_500_effective_lines() {
+fn skips_file_with_many_comment_lines_but_only_500_effective_code_bearing_lines() {
     let fixture = copy_fixture();
     let root = fixture.path();
 
@@ -36,7 +36,7 @@ fn skips_file_with_many_comment_lines_but_only_500_effective_lines() {
 }
 
 #[test]
-fn skips_nested_block_comment_lines_when_counting_effective_length() {
+fn skips_nested_block_comment_lines_when_counting_effective_code_bearing_lines() {
     let content = format!(
         "fn keep() {{}}\n{}\nfn also_keep() {{}}\n",
         "/* outer\n/* inner */\nstill outer */\n".repeat(400)
@@ -47,7 +47,7 @@ fn skips_nested_block_comment_lines_when_counting_effective_length() {
 }
 
 #[test]
-fn skips_multiline_raw_string_payload_lines_when_counting_effective_length() {
+fn skips_multiline_raw_string_payload_lines_when_counting_effective_code_bearing_lines() {
     let content = format!(
         "const HELP: &str = r#\"\n{}\n\"#;\nfn keep() {{}}\n",
         "payload line\n".repeat(600)

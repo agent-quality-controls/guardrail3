@@ -416,7 +416,7 @@ mod tests {
         if let Some(parent) = path.parent() {
             fs::create_dir_all(parent).expect("create parent dirs");
         }
-        fs::write(path, body).expect("write file");
+        fs::write(path, body).expect("write test fixture file");
     }
 
     #[test]

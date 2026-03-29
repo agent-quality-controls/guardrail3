@@ -25,7 +25,7 @@ commit_parsers = [
 ]
 "#,
         )
-        .expect("valid cliff"),
+        .expect("failed to parse cliff fixture"),
     );
     let input = repo_input(&facts);
     let mut results = Vec::new();
@@ -66,7 +66,7 @@ commit_parsers = [
 ]
 "#,
         )
-        .expect("valid cliff"),
+        .expect("failed to parse cliff fixture"),
     );
     let input = repo_input(&facts);
     let mut results = Vec::new();
@@ -105,7 +105,7 @@ commit_parsers = [
 ]
 "#,
         )
-        .expect("valid cliff"),
+        .expect("failed to parse cliff fixture"),
     );
     let input = repo_input(&facts);
     let mut results = Vec::new();
