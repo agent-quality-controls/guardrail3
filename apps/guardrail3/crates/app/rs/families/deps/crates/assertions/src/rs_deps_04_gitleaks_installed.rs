@@ -1,7 +1,11 @@
 crate::define_rule_assertions!("RS-DEPS-04");
 
 pub fn assert_exactness_summary(results: &[guardrail3_domain_report::CheckResult]) {
-    assert_eq!(results.len(), 4, "unexpected deps exactness results: {results:#?}");
+    assert_eq!(
+        results.len(),
+        4,
+        "unexpected deps exactness results: {results:#?}"
+    );
     assert_rule_results(
         results,
         &[ExpectedRuleResult {

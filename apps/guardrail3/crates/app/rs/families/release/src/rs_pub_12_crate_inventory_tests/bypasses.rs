@@ -1,6 +1,6 @@
-use guardrail3_app_rs_family_release_assertions::rs_pub_12_crate_inventory as assertions;
-use super::super::{repo_facts, repo_input};
 use super::super::check;
+use super::super::{repo_facts, repo_input};
+use guardrail3_app_rs_family_release_assertions::rs_pub_12_crate_inventory as assertions;
 
 #[test]
 fn inventories_zero_publishable_and_zero_non_publishable_counts() {

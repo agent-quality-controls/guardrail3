@@ -46,32 +46,37 @@ pub fn check(input: &DependencyEntryDepsInput<'_>, results: &mut Vec<CheckResult
     });
 }
 
-
 #[cfg(test)]
-#[allow(dead_code)]
 fn family_route(
     tree: &guardrail3_domain_project_tree::ProjectTree,
 ) -> guardrail3_app_rs_family_mapper::RsDepsRoute {
     let scope = guardrail3_app_rs_placement::collect(tree);
-    let selected = guardrail3_validation_model::RustFamilySelection::new(
-        std::collections::BTreeSet::from([guardrail3_validation_model::RustValidateFamily::Deps]),
-    );
+    let selected =
+        guardrail3_validation_model::RustFamilySelection::new(std::collections::BTreeSet::from([
+            guardrail3_validation_model::RustValidateFamily::Deps,
+        ]));
     guardrail3_app_rs_family_mapper::FamilyMapper::new(tree, &scope, None, &selected, None)
         .map_rs_deps()
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(super) fn collected_facts(
     tree: &guardrail3_domain_project_tree::ProjectTree,
     installed: &[&str],
 ) -> super::facts::DepsFacts {
-    super::facts::collect(tree, &family_route(tree), &test_support::StubToolChecker::new(installed))
+    super::facts::collect(
+        tree,
+        &family_route(tree),
+        &test_support::StubToolChecker::new(installed),
+    )
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
-pub(super) fn dependency_facts(allowlist_present: bool, allowlisted: bool, dep_package_name: &str) -> super::facts::DepsFacts {
+pub(super) fn dependency_facts(
+    allowlist_present: bool,
+    allowlisted: bool,
+    dep_package_name: &str,
+) -> super::facts::DepsFacts {
     super::facts::DepsFacts {
         tools: Vec::new(),
         lockfiles: vec![super::facts::LockfileFacts {
@@ -97,18 +102,22 @@ pub(super) fn dependency_facts(allowlist_present: bool, allowlisted: bool, dep_p
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
-pub(super) fn dependency_input<'a>(facts: &'a super::facts::DepsFacts, cargo_rel_path: &str, dep_package_name: &str) -> super::inputs::DependencyEntryDepsInput<'a> {
-    let entry = facts.dependency_entries.iter().find(|entry| entry.cargo_rel_path == cargo_rel_path && entry.section_kind == super::facts::DependencySectionKind::DevDependencies && entry.dep_package_name == dep_package_name).expect("expected dependency entry facts");
+pub(super) fn dependency_input<'a>(
+    facts: &'a super::facts::DepsFacts,
+    cargo_rel_path: &str,
+    dep_package_name: &str,
+) -> super::inputs::DependencyEntryDepsInput<'a> {
+    let entry = facts
+        .dependency_entries
+        .iter()
+        .find(|entry| {
+            entry.cargo_rel_path == cargo_rel_path
+                && entry.section_kind == super::facts::DependencySectionKind::DevDependencies
+                && entry.dep_package_name == dep_package_name
+        })
+        .expect("expected dependency entry facts");
     super::inputs::DependencyEntryDepsInput::new(entry)
 }
-
-#[cfg(test)]
-#[allow(dead_code)]
-pub(super) fn run_with_facts(facts: &super::facts::DepsFacts) -> Vec<guardrail3_domain_report::CheckResult> {
-    crate::run_with_facts(facts)
-}
-
 #[cfg(test)]
 #[path = "rs_deps_07_dev_dependencies_allowlisted_tests/mod.rs"]
 mod rs_deps_07_dev_dependencies_allowlisted_tests;

@@ -1,9 +1,7 @@
-#[allow(unused_imports)]
 use guardrail3_app_rs_family_test_assertions::rs_test_02_owned_sidecar_shape::{
-    assert_inventory, assert_reported, assert_rule_files, assert_rule_quiet,
+    assert_inventory, assert_rule_files,
 };
 
-#[allow(unused_imports)]
 use super::{run_family, tempdir, write_file};
 
 #[test]
@@ -76,6 +74,9 @@ fn nested_package_root_sidecar_shape_passes_cleanly() {
 
     let results = run_family(root);
 
-    assert_rule_files(&results, vec!["apps/backend/crates/domain/Cargo.toml".to_owned()]);
+    assert_rule_files(
+        &results,
+        vec!["apps/backend/crates/domain/Cargo.toml".to_owned()],
+    );
     assert_inventory(&results, true);
 }

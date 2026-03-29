@@ -33,7 +33,10 @@ pub fn assert_unreadable_cached_files_fail_closed(results: &[CheckResult]) {
         ("crates/example/Cargo.toml", "Failed to read Cargo.toml"),
         ("release-plz.toml", "Failed to read release-plz.toml"),
         ("cliff.toml", "Failed to read cliff.toml"),
-        (".github/workflows/release.yml", "Failed to read workflow YAML"),
+        (
+            ".github/workflows/release.yml",
+            "Failed to read workflow YAML",
+        ),
     ];
 
     for (file, needle) in expected {

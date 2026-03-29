@@ -1,17 +1,10 @@
-use super::{collected_facts, dependency_facts, dependency_input,
-    dir_entry, project_tree,
-};
+use super::{collected_facts, dependency_facts, dependency_input, dir_entry, project_tree};
 use guardrail3_app_rs_family_deps_assertions::rs_deps_05_dependencies_allowlisted as assertions;
-use guardrail3_domain_report::Severity;
 
 #[test]
 fn inventories_allowlisted_runtime_dependency() {
     let facts = dependency_facts(true, true, "serde");
-    let input = dependency_input(
-        &facts,
-        "crates/api/Cargo.toml",
-        "serde",
-    );
+    let input = dependency_input(&facts, "crates/api/Cargo.toml", "serde");
     let mut results = Vec::new();
 
     super::super::check(&input, &mut results);
@@ -19,7 +12,7 @@ fn inventories_allowlisted_runtime_dependency() {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(Severity::Info),
+            severity: Some(assertions::Severity::Info),
             title: Some("dependency allowlisted"),
             inventory: Some(true),
             ..assertions::ExpectedRuleResult::default()
@@ -57,11 +50,7 @@ fn renamed_dependency_uses_package_name_for_allowlist() {
         ],
     );
     let facts = collected_facts(&tree, &[]);
-    let input = dependency_input(
-        &facts,
-        "apps/api/Cargo.toml",
-        "serde",
-    );
+    let input = dependency_input(&facts, "apps/api/Cargo.toml", "serde");
     let mut results = Vec::new();
 
     super::super::check(&input, &mut results);
@@ -69,7 +58,7 @@ fn renamed_dependency_uses_package_name_for_allowlist() {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(Severity::Info),
+            severity: Some(assertions::Severity::Info),
             inventory: Some(true),
             message_contains: Some("`serde`"),
             ..assertions::ExpectedRuleResult::default()

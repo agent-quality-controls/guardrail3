@@ -1,9 +1,7 @@
-use guardrail3_app_rs_family_release_assertions::rs_pub_13_docs_rs_metadata as assertions;
-use super::super::run_tree as run_family;
-use super::super::{
-    StubToolChecker, crate_facts, crate_input, dir_entry, project_tree, temp_root,
-};
 use super::super::check;
+use super::super::run_tree as run_family;
+use super::super::{StubToolChecker, crate_facts, crate_input, dir_entry, project_tree, temp_root};
+use guardrail3_app_rs_family_release_assertions::rs_pub_13_docs_rs_metadata as assertions;
 
 #[test]
 fn inventories_docs_rs_metadata_for_publishable_library_crate() {

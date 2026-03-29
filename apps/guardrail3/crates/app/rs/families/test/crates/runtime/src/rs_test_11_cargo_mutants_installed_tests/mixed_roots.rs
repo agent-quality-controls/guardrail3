@@ -1,9 +1,7 @@
-#[allow(unused_imports)]
 use guardrail3_app_rs_family_test_assertions::rs_test_11_cargo_mutants_installed::{
-    Severity, assert_reported, assert_rule_files, assert_rule_quiet,
+    Severity, assert_reported, assert_rule_files,
 };
 
-#[allow(unused_imports)]
 use super::{run_family_with_tool, tempdir, write_file};
 
 #[test]

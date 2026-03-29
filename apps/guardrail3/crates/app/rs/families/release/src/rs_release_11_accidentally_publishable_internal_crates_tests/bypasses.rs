@@ -1,5 +1,5 @@
-use super::super::{crate_facts, crate_input};
 use super::super::check;
+use super::super::{crate_facts, crate_input};
 
 #[test]
 fn does_not_warn_for_non_publishable_internal_crates() {

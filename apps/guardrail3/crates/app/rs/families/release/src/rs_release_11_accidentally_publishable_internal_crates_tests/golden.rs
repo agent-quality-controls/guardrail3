@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_release_assertions::rs_release_11_accidentally_publishable_internal_crates as assertions;
 
-use super::super::{crate_facts, crate_input};
 use super::super::check;
+use super::super::{crate_facts, crate_input};
 
 #[test]
 fn warns_on_publishable_crate_with_no_release_metadata() {

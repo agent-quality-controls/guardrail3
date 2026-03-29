@@ -39,7 +39,10 @@ pub fn assert_failed(results: &[CheckResult], file: &str, title: &str, message_c
 
 pub fn assert_quiet(results: &[CheckResult]) {
     let actual = findings(results);
-    assert!(actual.is_empty(), "expected no RS-PUB-09 findings, got {actual:#?}");
+    assert!(
+        actual.is_empty(),
+        "expected no RS-PUB-09 findings, got {actual:#?}"
+    );
 }
 
 pub fn assert_no_message_contains(results: &[CheckResult], needle: &str) {

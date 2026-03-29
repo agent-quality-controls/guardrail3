@@ -1,6 +1,5 @@
 use super::{collected_facts, dir_entry, project_tree};
 use guardrail3_app_rs_family_deps_assertions::rs_deps_10_gitignore_not_ignoring_cargo_lock as assertions;
-use guardrail3_domain_report::Severity;
 
 #[test]
 fn reports_exact_gitignore_sources_across_roots() {
@@ -78,26 +77,29 @@ fn reports_exact_gitignore_sources_across_roots() {
         })
         .collect::<Vec<_>>();
 
-    assertions::assert_summary(summary, vec![
+    assertions::assert_summary(
+        summary,
+        vec![
             (
                 Some("Cargo.lock"),
-                Severity::Info,
+                assertions::Severity::Info,
                 true,
                 "No relevant `.gitignore` masks `Cargo.lock` for Rust root `.`.",
             ),
             (
                 Some("apps/api/.gitignore"),
-                Severity::Error,
+                assertions::Severity::Error,
                 false,
                 "`apps/api/.gitignore` ignores `apps/api/Cargo.lock` for Rust root `apps/api`.",
             ),
             (
                 Some(".gitignore"),
-                Severity::Error,
+                assertions::Severity::Error,
                 false,
                 "`.gitignore` ignores `packages/core/Cargo.lock` for Rust root `packages/core`.",
             ),
-        ]);
+        ],
+    );
 }
 
 #[test]
@@ -145,12 +147,15 @@ fn nested_unignore_overrides_ancestor_ignore() {
         })
         .collect::<Vec<_>>();
 
-    assertions::assert_summary(summary, vec![(
+    assertions::assert_summary(
+        summary,
+        vec![(
             Some("apps/api/Cargo.lock"),
-            Severity::Info,
+            assertions::Severity::Info,
             true,
             "No relevant `.gitignore` masks `apps/api/Cargo.lock` for Rust root `apps/api`.",
-        )]);
+        )],
+    );
 }
 
 #[test]
@@ -210,20 +215,23 @@ fn anchored_root_cargo_lock_pattern_does_not_collapse_to_nested_roots() {
         })
         .collect::<Vec<_>>();
 
-    assertions::assert_summary(summary, vec![
+    assertions::assert_summary(
+        summary,
+        vec![
             (
                 Some(".gitignore"),
-                Severity::Error,
+                assertions::Severity::Error,
                 false,
                 "`.gitignore` ignores `Cargo.lock` for Rust root `.`.",
             ),
             (
                 Some("apps/api/Cargo.lock"),
-                Severity::Info,
+                assertions::Severity::Info,
                 true,
                 "No relevant `.gitignore` masks `apps/api/Cargo.lock` for Rust root `apps/api`.",
             ),
-        ]);
+        ],
+    );
 }
 
 #[test]
@@ -283,18 +291,21 @@ fn anchored_root_cargo_glob_pattern_stays_anchored() {
         })
         .collect::<Vec<_>>();
 
-    assertions::assert_summary(summary, vec![
+    assertions::assert_summary(
+        summary,
+        vec![
             (
                 Some(".gitignore"),
-                Severity::Error,
+                assertions::Severity::Error,
                 false,
                 "`.gitignore` ignores `Cargo.lock` for Rust root `.`.",
             ),
             (
                 Some("apps/api/Cargo.lock"),
-                Severity::Info,
+                assertions::Severity::Info,
                 true,
                 "No relevant `.gitignore` masks `apps/api/Cargo.lock` for Rust root `apps/api`.",
             ),
-        ]);
+        ],
+    );
 }

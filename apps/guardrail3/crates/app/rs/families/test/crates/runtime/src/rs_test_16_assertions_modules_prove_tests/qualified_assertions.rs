@@ -1,9 +1,7 @@
-#[allow(unused_imports)]
 use guardrail3_app_rs_family_test_assertions::rs_test_16_assertions_modules_prove::{
-    Severity, assert_has_finding, assert_rule_files, assert_rule_quiet,
+    Severity, assert_has_finding, assert_rule_files,
 };
 
-#[allow(unused_imports)]
 use super::{run_family, tempdir, write_file};
 
 #[test]
@@ -60,6 +58,16 @@ fn same_named_proof_in_other_module_does_not_make_wrapper_pass() {
             "crates/assertions/src/foo.rs".to_owned(),
         ],
     );
-    assert_has_finding(&results, "crates/assertions/src/bar.rs", Severity::Info, true);
-    assert_has_finding(&results, "crates/assertions/src/foo.rs", Severity::Error, false);
+    assert_has_finding(
+        &results,
+        "crates/assertions/src/bar.rs",
+        Severity::Info,
+        true,
+    );
+    assert_has_finding(
+        &results,
+        "crates/assertions/src/foo.rs",
+        Severity::Error,
+        false,
+    );
 }

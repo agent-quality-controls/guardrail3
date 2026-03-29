@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_release_assertions::rs_pub_07_categories_present as assertions;
 
-use super::super::{crate_facts, crate_input};
 use super::super::check;
+use super::super::{crate_facts, crate_input};
 
 #[test]
 fn warns_when_categories_are_missing_or_zero() {

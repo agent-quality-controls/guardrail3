@@ -1,9 +1,7 @@
-#[allow(unused_imports)]
 use guardrail3_app_rs_family_test_assertions::rs_test_07_real_proof_site::{
-    assert_reported, assert_reported_file, assert_rule_files, assert_rule_quiet,
+    assert_reported_file, assert_rule_files,
 };
 
-#[allow(unused_imports)]
 use super::{run_family, tempdir, write_file};
 
 #[test]

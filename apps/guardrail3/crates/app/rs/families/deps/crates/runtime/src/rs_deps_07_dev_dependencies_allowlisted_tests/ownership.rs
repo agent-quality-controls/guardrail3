@@ -1,6 +1,5 @@
 use super::{collected_facts, dependency_facts, dependency_input, dir_entry, project_tree};
 use guardrail3_app_rs_family_deps_assertions::rs_deps_07_dev_dependencies_allowlisted as assertions;
-use guardrail3_domain_report::Severity;
 
 #[test]
 fn workspace_true_external_dev_dependency_keeps_warn_severity() {
@@ -45,11 +44,7 @@ fn workspace_true_external_dev_dependency_keeps_warn_severity() {
         ],
     );
     let facts = collected_facts(&tree, &[]);
-    let input = dependency_input(
-        &facts,
-        "packages/core/Cargo.toml",
-        "tempfile",
-    );
+    let input = dependency_input(&facts, "packages/core/Cargo.toml", "tempfile");
     let mut results = Vec::new();
 
     super::super::check(&input, &mut results);
@@ -57,7 +52,7 @@ fn workspace_true_external_dev_dependency_keeps_warn_severity() {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(Severity::Warn),
+            severity: Some(assertions::Severity::Warn),
             message: Some(
                 "Dependency `tempfile` in `[dev-dependencies]` is not allowlisted for crate `core`.",
             ),
@@ -69,11 +64,7 @@ fn workspace_true_external_dev_dependency_keeps_warn_severity() {
 #[test]
 fn dev_rule_stays_silent_without_allowlist() {
     let facts = dependency_facts(false, false, "tempfile");
-    let input = dependency_input(
-        &facts,
-        "crates/api/Cargo.toml",
-        "tempfile",
-    );
+    let input = dependency_input(&facts, "crates/api/Cargo.toml", "tempfile");
     let mut results = Vec::new();
 
     super::super::check(&input, &mut results);

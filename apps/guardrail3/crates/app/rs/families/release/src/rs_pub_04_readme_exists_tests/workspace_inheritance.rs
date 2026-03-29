@@ -1,6 +1,6 @@
-use guardrail3_app_rs_family_release_assertions::rs_pub_04_readme_exists as assertions;
 use super::super::run_tree as check;
 use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
+use guardrail3_app_rs_family_release_assertions::rs_pub_04_readme_exists as assertions;
 
 #[test]
 fn should_inventory_when_readme_is_inherited_from_workspace_package() {

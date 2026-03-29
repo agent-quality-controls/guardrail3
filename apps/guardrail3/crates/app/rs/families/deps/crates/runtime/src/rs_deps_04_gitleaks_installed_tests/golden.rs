@@ -1,6 +1,5 @@
 use super::{tool_facts, tool_input};
 use guardrail3_app_rs_family_deps_assertions::rs_deps_04_gitleaks_installed as assertions;
-use guardrail3_domain_report::Severity;
 
 #[test]
 fn inventories_installed_gitleaks() {
@@ -13,7 +12,7 @@ fn inventories_installed_gitleaks() {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(Severity::Info),
+            severity: Some(assertions::Severity::Info),
             title: Some("gitleaks installed"),
             inventory: Some(true),
             ..assertions::ExpectedRuleResult::default()

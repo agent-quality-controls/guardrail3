@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_release_assertions::rs_release_08_semver_checks_installed as assertions;
 
-use super::super::{repo_facts, repo_input};
 use super::super::check;
+use super::super::{repo_facts, repo_input};
 
 #[test]
 fn warns_when_semver_checks_tool_is_missing() {

@@ -16,31 +16,32 @@ pub fn check(input: &InputFailureDepsInput<'_>, results: &mut Vec<CheckResult>) 
     });
 }
 
-
 #[cfg(test)]
-#[allow(dead_code)]
 fn family_route(
     tree: &guardrail3_domain_project_tree::ProjectTree,
 ) -> guardrail3_app_rs_family_mapper::RsDepsRoute {
     let scope = guardrail3_app_rs_placement::collect(tree);
-    let selected = guardrail3_validation_model::RustFamilySelection::new(
-        std::collections::BTreeSet::from([guardrail3_validation_model::RustValidateFamily::Deps]),
-    );
+    let selected =
+        guardrail3_validation_model::RustFamilySelection::new(std::collections::BTreeSet::from([
+            guardrail3_validation_model::RustValidateFamily::Deps,
+        ]));
     guardrail3_app_rs_family_mapper::FamilyMapper::new(tree, &scope, None, &selected, None)
         .map_rs_deps()
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(super) fn collected_facts(
     tree: &guardrail3_domain_project_tree::ProjectTree,
     installed: &[&str],
 ) -> super::facts::DepsFacts {
-    super::facts::collect(tree, &family_route(tree), &test_support::StubToolChecker::new(installed))
+    super::facts::collect(
+        tree,
+        &family_route(tree),
+        &test_support::StubToolChecker::new(installed),
+    )
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(super) fn failure_facts(rel_path: &str, message: &str) -> super::facts::DepsFacts {
     super::facts::DepsFacts {
         tools: Vec::new(),
@@ -62,15 +63,22 @@ pub(super) fn failure_facts(rel_path: &str, message: &str) -> super::facts::Deps
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
-pub(super) fn failure_input<'a>(facts: &'a super::facts::DepsFacts, rel_path: &str) -> super::inputs::InputFailureDepsInput<'a> {
-    let failure = facts.input_failures.iter().find(|failure| failure.rel_path == rel_path).expect("expected input failure facts");
+pub(super) fn failure_input<'a>(
+    facts: &'a super::facts::DepsFacts,
+    rel_path: &str,
+) -> super::inputs::InputFailureDepsInput<'a> {
+    let failure = facts
+        .input_failures
+        .iter()
+        .find(|failure| failure.rel_path == rel_path)
+        .expect("expected input failure facts");
     super::inputs::InputFailureDepsInput::new(failure)
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
-pub(super) fn run_with_facts(facts: &super::facts::DepsFacts) -> Vec<guardrail3_domain_report::CheckResult> {
+pub(super) fn run_with_facts(
+    facts: &super::facts::DepsFacts,
+) -> Vec<guardrail3_domain_report::CheckResult> {
     crate::run_with_facts(facts)
 }
 

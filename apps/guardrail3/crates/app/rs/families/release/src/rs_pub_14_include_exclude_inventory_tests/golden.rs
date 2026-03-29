@@ -1,10 +1,8 @@
 use guardrail3_app_rs_family_release_assertions::rs_pub_14_include_exclude_inventory as assertions;
 
-use super::super::run_tree as run_family;
-use super::super::{
-    StubToolChecker, crate_facts, crate_input, dir_entry, project_tree, temp_root,
-};
 use super::super::check;
+use super::super::run_tree as run_family;
+use super::super::{StubToolChecker, crate_facts, crate_input, dir_entry, project_tree, temp_root};
 
 #[test]
 fn inventories_include_exclude_when_present() {

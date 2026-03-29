@@ -1,5 +1,4 @@
 #![allow(unused_imports)]
-#[allow(unused_imports)]
 pub(crate) use guardrail3_app_rs_family_cargo_assertions::rs_cargo_05_workspace_metadata::{
     ExpectedRuleResult, assert_rule_results, check_results, rule_results,
 };

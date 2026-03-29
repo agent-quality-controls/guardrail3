@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_release_assertions::rs_release_04_cliff_exists as assertions;
 
-use super::super::{repo_facts, repo_input};
 use super::super::check;
+use super::super::{repo_facts, repo_input};
 
 #[test]
 fn inventories_cliff_file_when_present() {
