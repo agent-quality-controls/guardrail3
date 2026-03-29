@@ -5,7 +5,7 @@ fn generated_library_profile_contains_exact_managed_global_state_type_set() {
     let parsed = toml::from_str::<toml::Value>(
         &test_support::build_fixture_clippy_toml("library", false, true, "", ""),
     )
-        .expect("valid clippy TOML");
+    .expect("valid clippy TOML");
     let actual = parsed
         .get("disallowed-types")
         .and_then(toml::Value::as_array)
