@@ -22,6 +22,12 @@ enum FileStatus {
     },
 }
 
+struct PendingUpdate<'a> {
+    rel_path: &'a str,
+    diff_lines: usize,
+    custom_entries: Vec<String>,
+}
+
 /// Dry-run for rs generate — shows what would change per file.
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
 pub fn run(path: &str, dump_dir: Option<&str>) {
@@ -35,7 +41,9 @@ pub fn run(path: &str, dump_dir: Option<&str>) {
     if let Some(dir) = dump_dir {
         dump_files(&expected, dir);
     } else {
-        show_smart_diff(&expected, project_path);
+        if show_smart_diff(&expected, project_path) {
+            std::process::exit(1);
+        }
     }
 }
 
@@ -52,7 +60,9 @@ pub fn run_ts(path: &str, dump_dir: Option<&str>) {
     if let Some(dir) = dump_dir {
         dump_files(&expected, dir);
     } else {
-        show_smart_diff(&expected, project_path);
+        if show_smart_diff(&expected, project_path) {
+            std::process::exit(1);
+        }
     }
 }
 
@@ -86,10 +96,9 @@ fn dump_files(expected: &[FilePair], dump_dir: &str) {
 /// Groups output by status: creates first, then updates (with custom entry
 /// details for TOML files), then unchanged files.
 #[allow(clippy::print_stdout)] // reason: CLI dry-run output
-#[allow(clippy::type_complexity)] // reason: slice of tuples from generate_expected
-fn show_smart_diff(expected: &[FilePair], project_path: &Path) {
+fn show_smart_diff(expected: &[FilePair], project_path: &Path) -> bool {
     let mut creates: Vec<&str> = Vec::new();
-    let mut updates: Vec<(&str, usize, Vec<String>)> = Vec::new();
+    let mut updates: Vec<PendingUpdate<'_>> = Vec::new();
     let mut unchanged: Vec<&str> = Vec::new();
 
     for (rel_path, gen_content) in expected {
@@ -98,31 +107,42 @@ fn show_smart_diff(expected: &[FilePair], project_path: &Path) {
             FileStatus::WouldCreate => creates.push(rel_path),
             FileStatus::NoChanges => unchanged.push(rel_path),
             FileStatus::WouldUpdate { diff_lines } => {
-                updates.push((rel_path, diff_lines, Vec::new()));
+                updates.push(PendingUpdate {
+                    rel_path,
+                    diff_lines,
+                    custom_entries: Vec::new(),
+                });
             }
             FileStatus::WouldUpdateWithCustom {
                 diff_lines,
                 custom_entries,
             } => {
-                updates.push((rel_path, diff_lines, custom_entries));
+                updates.push(PendingUpdate {
+                    rel_path,
+                    diff_lines,
+                    custom_entries,
+                });
             }
         }
     }
 
     if creates.is_empty() && updates.is_empty() {
         println!("No changes needed. All generated files are current.");
-        return;
+        return false;
     }
 
     for rel_path in &creates {
         println!("{rel_path} — would create");
     }
 
-    for (rel_path, diff_lines, customs) in &updates {
-        println!("{rel_path} — would update ({diff_lines} lines differ)");
-        if !customs.is_empty() {
+    for update in &updates {
+        println!(
+            "{} — would update ({} lines differ)",
+            update.rel_path, update.diff_lines
+        );
+        if !update.custom_entries.is_empty() {
             println!("  Custom entries found — would extract to .guardrail3/overrides/:");
-            for entry in customs {
+            for entry in &update.custom_entries {
                 println!("    {entry}");
             }
         }
@@ -138,9 +158,7 @@ fn show_smart_diff(expected: &[FilePair], project_path: &Path) {
         "{total} file(s) would change, {} file(s) up to date.",
         unchanged.len()
     );
-
-    #[allow(clippy::disallowed_methods)] // reason: non-zero exit when changes pending
-    std::process::exit(1);
+    true
 }
 
 /// Classify a single file: create, update, update-with-custom, or no-change.

@@ -15,30 +15,35 @@ struct GeneratedFile {
 }
 
 /// Load guardrail3.toml configuration from a project path.
-#[allow(clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI tool — config parse errors reported to stderr; guardrail3 config parsing — no garde validation needed for own config
-fn load_config(path: &Path) -> Option<config::types::GuardrailConfig> {
+fn load_config(path: &Path) -> Result<Option<config::types::GuardrailConfig>, String> {
     let config_path = path.join("guardrail3.toml");
-    let content = guardrail3_shared_fs::read_file(&config_path)?;
-    match toml::from_str(&content) {
-        Ok(cfg) => Some(cfg),
-        Err(e) => {
-            eprintln!("Error parsing guardrail3.toml: {e}");
-            None
-        }
-    }
+    let Some(content) = guardrail3_shared_fs::read_file(&config_path) else {
+        return Ok(None);
+    };
+    toml::from_str(&content)
+        .map(Some)
+        .map_err(|error| format!("Error parsing guardrail3.toml: {error}"))
 }
 
 /// Main generate command -- generates all config files from guardrail3.toml.
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and process::exit for error codes
 pub fn run(args: &GenerateArgs) {
     let project_path = Path::new(&args.path);
-    let Some(cfg) = load_config(project_path) else {
-        eprintln!(
-            "Error: guardrail3.toml not found or invalid at {}",
-            project_path.display()
-        );
-        eprintln!("Run '{RS_INIT}' to create one.");
-        std::process::exit(1);
+    let cfg = match load_config(project_path) {
+        Ok(Some(cfg)) => cfg,
+        Ok(None) => {
+            eprintln!(
+                "Error: guardrail3.toml not found or invalid at {}",
+                project_path.display()
+            );
+            eprintln!("Run '{RS_INIT}' to create one.");
+            std::process::exit(1);
+        }
+        Err(error) => {
+            eprintln!("{error}");
+            eprintln!("Run '{RS_INIT}' to create one.");
+            std::process::exit(1);
+        }
     };
 
     let profile = cfg
@@ -83,12 +88,19 @@ pub fn run(args: &GenerateArgs) {
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
 pub fn run_rs(args: &GenerateArgs) {
     let project_path = Path::new(&args.path);
-    let Some(cfg) = load_config(project_path) else {
-        eprintln!(
-            "Error: guardrail3.toml not found or invalid at {}",
-            project_path.display()
-        );
-        std::process::exit(1);
+    let cfg = match load_config(project_path) {
+        Ok(Some(cfg)) => cfg,
+        Ok(None) => {
+            eprintln!(
+                "Error: guardrail3.toml not found or invalid at {}",
+                project_path.display()
+            );
+            std::process::exit(1);
+        }
+        Err(error) => {
+            eprintln!("{error}");
+            std::process::exit(1);
+        }
     };
 
     let files = rs_generate::generate_rust_owned_artifacts(project_path, &cfg);
@@ -111,12 +123,19 @@ pub fn run_rs(args: &GenerateArgs) {
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
 pub fn run_ts(args: &GenerateArgs) {
     let project_path = Path::new(&args.path);
-    let Some(cfg) = load_config(project_path) else {
-        eprintln!(
-            "Error: guardrail3.toml not found at {}",
-            project_path.display()
-        );
-        std::process::exit(1);
+    let cfg = match load_config(project_path) {
+        Ok(Some(cfg)) => cfg,
+        Ok(None) => {
+            eprintln!(
+                "Error: guardrail3.toml not found at {}",
+                project_path.display()
+            );
+            std::process::exit(1);
+        }
+        Err(error) => {
+            eprintln!("{error}");
+            std::process::exit(1);
+        }
     };
 
     let files = generate_ts_files(&cfg);
@@ -184,7 +203,13 @@ fn generate_and_install_hooks(project_path: &Path, hook_content: &str) {
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
 pub fn run_rs_hooks(args: &GenerateArgs) {
     let project_path = Path::new(&args.path);
-    let cfg = load_config(project_path);
+    let cfg = match load_config(project_path) {
+        Ok(cfg) => cfg,
+        Err(error) => {
+            eprintln!("{error}");
+            std::process::exit(1);
+        }
+    };
     let hook = rs_generate::generate_rust_hook_artifact(cfg.as_ref());
 
     let hooks_dir = project_path.join(".githooks");
@@ -221,7 +246,13 @@ pub fn run_rs_hooks(args: &GenerateArgs) {
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
 pub fn run_hooks(args: &GenerateArgs) {
     let project_path = Path::new(&args.path);
-    let cfg = load_config(project_path);
+    let cfg = match load_config(project_path) {
+        Ok(cfg) => cfg,
+        Err(error) => {
+            eprintln!("{error}");
+            std::process::exit(1);
+        }
+    };
     let has_rust = cfg
         .as_ref()
         .and_then(|config| config.rust.as_ref())
@@ -363,7 +394,7 @@ fn generate_ts_files(cfg: &config::types::GuardrailConfig) -> Vec<GeneratedFile>
 
 /// Generate expected TS file contents without writing -- used by ts diff.
 pub fn generate_expected_ts(project_path: &Path) -> Option<Vec<GeneratedPair>> {
-    let cfg = load_config(project_path)?;
+    let cfg = load_config(project_path).ok()??;
 
     let files = generate_ts_files(&cfg);
     if files.is_empty() {
@@ -382,7 +413,7 @@ pub fn generate_expected_ts(project_path: &Path) -> Option<Vec<GeneratedPair>> {
 
 /// Generate expected file contents without writing -- used by check and diff.
 pub fn generate_expected(project_path: &Path) -> Option<Vec<GeneratedPair>> {
-    let cfg = load_config(project_path)?;
+    let cfg = load_config(project_path).ok()??;
     let profile = cfg
         .profile
         .as_ref()

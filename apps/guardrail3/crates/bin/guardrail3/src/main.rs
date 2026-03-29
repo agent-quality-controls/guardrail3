@@ -17,9 +17,38 @@ use guardrail3_domain_config::types::GuardrailConfig;
 use guardrail3_domain_report::{Report, TsCheckCategories, ValidateDomains};
 use guardrail3_outbound_traits::FileSystem;
 
+struct CoverageSelection {
+    clippy: bool,
+    deny: bool,
+    rustfmt: bool,
+    eslint: bool,
+    stylelint: bool,
+    prettier: bool,
+    cspell: bool,
+    jscpd: bool,
+    tsconfig: bool,
+    rust_toolchain: bool,
+    npmrc: bool,
+}
+
+impl CoverageSelection {
+    const fn any(&self) -> bool {
+        self.clippy
+            || self.deny
+            || self.rustfmt
+            || self.eslint
+            || self.stylelint
+            || self.prettier
+            || self.cspell
+            || self.jscpd
+            || self.tsconfig
+            || self.rust_toolchain
+            || self.npmrc
+    }
+}
+
 #[allow(clippy::print_stderr)] // reason: CLI entry point — stderr for error output
 #[allow(clippy::disallowed_methods)] // reason: CLI entry point — process::exit for error codes
-#[allow(clippy::too_many_lines)] // reason: CLI entry point — command dispatch
 fn main() {
     let cmd = help_gen::inject_help(Cli::command());
     let matches = match cmd.try_get_matches() {
@@ -53,90 +82,71 @@ fn main() {
             rust_toolchain,
             npmrc,
         } => {
-            let has_coverage = clippy
-                || deny
-                || rustfmt
-                || eslint
-                || stylelint
-                || prettier
-                || cspell
-                || jscpd
-                || tsconfig
-                || rust_toolchain
-                || npmrc;
-            if has_coverage {
-                let project_path = std::path::Path::new(&path);
-                let crawl_result = crawl::crawl(project_path);
-                run_coverage_maps(
-                    project_path,
-                    &crawl_result,
-                    clippy,
-                    deny,
-                    rustfmt,
-                    eslint,
-                    stylelint,
-                    prettier,
-                    cspell,
-                    jscpd,
-                    tsconfig,
-                    rust_toolchain,
-                    npmrc,
-                );
-            } else {
-                commands::map::run(&path);
-            }
+            let selection = CoverageSelection {
+                clippy,
+                deny,
+                rustfmt,
+                eslint,
+                stylelint,
+                prettier,
+                cspell,
+                jscpd,
+                tsconfig,
+                rust_toolchain,
+                npmrc,
+            };
+            handle_map_command(&path, &selection);
         }
     }
 }
 
-#[allow(clippy::too_many_arguments, clippy::fn_params_excessive_bools)] // reason: one bool per coverage tool — flat dispatch from CLI flags
+fn handle_map_command(path: &str, selection: &CoverageSelection) {
+    if selection.any() {
+        let project_path = std::path::Path::new(path);
+        let crawl_result = crawl::crawl(project_path);
+        run_coverage_maps(project_path, &crawl_result, selection);
+    } else {
+        commands::map::run(path);
+    }
+}
+
 fn run_coverage_maps(
     project_path: &std::path::Path,
     crawl_result: &crawl::CrawlResult,
-    clippy: bool,
-    deny: bool,
-    rustfmt: bool,
-    eslint: bool,
-    stylelint: bool,
-    prettier: bool,
-    cspell: bool,
-    jscpd: bool,
-    tsconfig: bool,
-    rust_toolchain: bool,
-    npmrc: bool,
+    selection: &CoverageSelection,
 ) {
     use commands::coverage;
-    if clippy {
+    if selection.clippy {
         coverage::clippy::print(project_path, crawl_result);
     }
-    if deny {
+    if selection.deny {
         coverage::deny::print(project_path, crawl_result);
     }
-    if rustfmt {
+    if selection.rustfmt {
         coverage::rustfmt::print(project_path, crawl_result);
     }
-    if eslint {
+    if selection.eslint {
         coverage::eslint::print(project_path, crawl_result);
     }
-    if stylelint {
+    if selection.stylelint {
         coverage::stylelint::print(project_path, crawl_result);
     }
-    if prettier {
+    if selection.prettier {
         coverage::prettier::print(project_path, crawl_result);
     }
-    if cspell {
+    if selection.cspell {
         coverage::cspell::print(project_path, crawl_result);
     }
-    if jscpd {
+    if selection.jscpd {
         coverage::jscpd::print(project_path, crawl_result);
     }
-    if tsconfig {
+    if selection.tsconfig {
         coverage::tsconfig::print(project_path, crawl_result);
     }
-    if rust_toolchain {
+    if selection.rust_toolchain {
         coverage::rust_toolchain::print(project_path, crawl_result);
     }
-    if npmrc {
+    if selection.npmrc {
         coverage::npmrc::print(project_path, crawl_result);
     }
 }
@@ -343,7 +353,6 @@ const fn domains_from_args(_args: &TsValidateArgs) -> ValidateDomains {
 }
 
 /// Load guardrail3.toml config, if present.
-#[allow(clippy::disallowed_methods)] // reason: guardrail3 config parsing
 fn load_config(fs: &RealFileSystem, path: &std::path::Path) -> Option<GuardrailConfig> {
     let config_path = path.join("guardrail3.toml");
     let content = fs.read_file(&config_path)?;
