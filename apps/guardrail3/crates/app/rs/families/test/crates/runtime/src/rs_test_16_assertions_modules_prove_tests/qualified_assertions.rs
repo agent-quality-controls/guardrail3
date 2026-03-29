@@ -1,6 +1,6 @@
 #[allow(unused_imports)]
 use guardrail3_app_rs_family_test_assertions::rs_test_16_assertions_modules_prove::{
-    Severity, assert_reported_file, assert_rule_files, assert_rule_quiet,
+    Severity, assert_has_finding, assert_rule_files, assert_rule_quiet,
 };
 
 #[allow(unused_imports)]
@@ -53,6 +53,13 @@ fn same_named_proof_in_other_module_does_not_make_wrapper_pass() {
     );
 
     let results = run_family(root);
-    assert_rule_files(&results, vec!["crates/assertions/src/foo.rs".to_owned()]);
-    assert_reported_file(&results, Severity::Error, "crates/assertions/src/foo.rs");
+    assert_rule_files(
+        &results,
+        vec![
+            "crates/assertions/src/bar.rs".to_owned(),
+            "crates/assertions/src/foo.rs".to_owned(),
+        ],
+    );
+    assert_has_finding(&results, "crates/assertions/src/bar.rs", Severity::Info, true);
+    assert_has_finding(&results, "crates/assertions/src/foo.rs", Severity::Error, false);
 }

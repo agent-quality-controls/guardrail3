@@ -1,6 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::inputs::WorkspaceCoverageHexarchInput;
+use super::inventory::push_success;
 
 const ID: &str = "RS-HEXARCH-09";
 
@@ -9,6 +10,7 @@ pub fn check(input: &WorkspaceCoverageHexarchInput<'_>, results: &mut Vec<CheckR
         return;
     }
 
+    let before = results.len();
     for member in &input.workspace_members {
         if !member.is_within_app_boundary() {
             continue;
@@ -39,6 +41,19 @@ pub fn check(input: &WorkspaceCoverageHexarchInput<'_>, results: &mut Vec<CheckR
             line: None,
             inventory: false,
         });
+    }
+
+    if results.len() == before {
+        push_success(
+            results,
+            ID,
+            format!("Service `{}` has no extra workspace members", input.app_name),
+            format!(
+                "Service `{}` app workspace members all map to live app-local Cargo roots.",
+                input.app_name
+            ),
+            Some(format!("{}/Cargo.toml", input.app_rel_dir)),
+        );
     }
 }
 

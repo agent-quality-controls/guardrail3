@@ -1,7 +1,7 @@
 #[allow(unused_imports)]
 use guardrail3_app_rs_family_test_assertions::rs_test_16_assertions_modules_prove::{
-    Severity, assert_error_results_are_error, assert_reported, assert_reported_file,
-    assert_rule_files, assert_rule_quiet,
+    Severity, assert_error_results_are_error, assert_inventory, assert_reported,
+    assert_reported_file, assert_rule_files, assert_rule_quiet,
 };
 
 #[allow(unused_imports)]
@@ -46,7 +46,8 @@ fn proof_bearing_export_in_assertions_module_passes() {
 
     let results = run_family(root);
 
-    assert_rule_quiet(&results);
+    assert_rule_files(&results, vec!["crates/assertions/src/foo.rs".to_owned()]);
+    assert_inventory(&results, true);
 }
 
 #[test]

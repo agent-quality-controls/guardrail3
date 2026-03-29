@@ -6,5 +6,6 @@ use super::super::run_for_tests;
 #[test]
 fn rejects_lower_precedence_same_root_sibling_config() {
     let results = run_for_tests(&same_root_dual_config_tree());
+    assertions::assert_allowed_files(&results, &[".clippy.toml"]);
     assertions::assert_same_root_conflict(&results, "clippy.toml", ".clippy.toml");
 }

@@ -19,6 +19,23 @@ pub fn check(input: &TestFunctionInput<'_>, results: &mut Vec<CheckResult>) {
             inventory: false,
         });
     }
+    if input.function.weak_matches_lines.is_empty() {
+        results.push(
+            CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Info,
+                title: "weak matches assertion absent".to_owned(),
+                message: format!(
+                    "Test `{}` uses specific payload checks rather than weak wildcard matches.",
+                    input.function.name
+                ),
+                file: Some(input.file.rel_path.clone()),
+                line: Some(input.function.line),
+                inventory: false,
+            }
+            .as_inventory(),
+        );
+    }
 }
 
 #[cfg(test)]

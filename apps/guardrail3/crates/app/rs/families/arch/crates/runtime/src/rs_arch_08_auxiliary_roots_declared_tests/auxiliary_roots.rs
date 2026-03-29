@@ -16,6 +16,7 @@ fn declared_auxiliary_roots_are_reported_as_info() {
     ));
 
     assertions::assert_info_files(&results, "RS-ARCH-08", &["fuzz/Cargo.toml"]);
+    assertions::assert_all_info_inventory(&results, "RS-ARCH-08");
 }
 
 #[test]
@@ -33,4 +34,5 @@ fn workspace_level_auxiliary_metadata_is_reported_as_info() {
     ));
 
     assertions::assert_info_files(&results, "RS-ARCH-08", &["tools/xtask/Cargo.toml"]);
+    assertions::assert_all_info_inventory(&results, "RS-ARCH-08");
 }

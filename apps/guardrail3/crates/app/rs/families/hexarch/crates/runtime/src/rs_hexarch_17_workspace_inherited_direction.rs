@@ -4,6 +4,7 @@ use guardrail3_domain_report::{CheckResult, Severity};
 use guardrail3_domain_project_tree::ProjectTree;
 
 use super::inputs::DependencyEdgeHexarchInput;
+use super::inventory::push_success;
 
 const ID: &str = "RS-HEXARCH-17";
 
@@ -22,6 +23,20 @@ pub fn check(input: &DependencyEdgeHexarchInput<'_>, results: &mut Vec<CheckResu
         return;
     };
     if !source_layer.forbidden().contains(&target_layer) {
+        push_success(
+            results,
+            ID,
+            "workspace dependency direction allowed".to_owned(),
+            format!(
+                "{} crate `{}` inherits workspace dependency `{}` to {} crate `{}` without violating hexarch direction.",
+                source_layer.label(),
+                edge.source_name,
+                edge.dep_alias,
+                target_layer.label(),
+                edge.dep_package_name
+            ),
+            Some(edge.source_cargo_rel_path.clone()),
+        );
         return;
     }
 

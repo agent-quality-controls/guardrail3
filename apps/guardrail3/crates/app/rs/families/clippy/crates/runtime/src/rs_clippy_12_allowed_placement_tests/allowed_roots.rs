@@ -4,7 +4,7 @@ use test_support::{build_fixture_clippy_toml, dir_entry, project_tree};
 use super::super::run_for_tests;
 
 #[test]
-fn allows_validation_workspace_and_standalone_package_roots() {
+fn inventories_validation_workspace_and_standalone_package_roots() {
     let tree = project_tree(
         vec![
             (
@@ -48,5 +48,12 @@ fn allows_validation_workspace_and_standalone_package_roots() {
     );
 
     let results = run_for_tests(&tree);
-    assertions::assert_no_results(&results);
+    assertions::assert_allowed_files(
+        &results,
+        &[
+            "clippy.toml",
+            "apps/backend/clippy.toml",
+            "packages/shared-types/clippy.toml",
+        ],
+    );
 }

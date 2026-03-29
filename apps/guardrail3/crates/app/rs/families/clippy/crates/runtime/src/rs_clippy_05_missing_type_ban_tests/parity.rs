@@ -38,9 +38,9 @@ fn generated_service_type_ban_set_matches_rule_baseline() {
         "axum_extra::extract::MsgPack",
         "std::any::Any",
     ]
-        .iter()
-        .map(|path| (*path).to_owned())
-        .collect::<BTreeSet<_>>();
+    .iter()
+    .map(|path| (*path).to_owned())
+    .collect::<BTreeSet<_>>();
 
     assert_eq!(actual, expected);
 }
@@ -85,9 +85,9 @@ fn generated_library_type_ban_set_matches_rule_baseline() {
         "once_cell::sync::Lazy",
         "once_cell::sync::OnceCell",
     ]
-        .iter()
-        .map(|path| (*path).to_owned())
-        .collect::<BTreeSet<_>>();
+    .iter()
+    .map(|path| (*path).to_owned())
+    .collect::<BTreeSet<_>>();
 
     assert_eq!(actual, expected);
 }

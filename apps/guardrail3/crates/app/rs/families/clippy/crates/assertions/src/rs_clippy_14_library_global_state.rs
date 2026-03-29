@@ -7,8 +7,22 @@ const ID: &str = "RS-CLIPPY-14";
 pub fn assert_no_results(results: &[CheckResult]) {
     assert!(
         results.is_empty(),
-        "expected no library global-state findings: {results:#?}"
+        "expected no library-global-state evaluation results: {results:#?}"
     );
+}
+
+pub fn assert_inventory(results: &[CheckResult], file: &str) {
+    assert_eq!(results.len(), 1);
+    let result = &results[0];
+    assert_eq!(result.id, ID);
+    assert!(result.inventory);
+    assert_eq!(result.severity, Severity::Info);
+    assert_eq!(result.title, "library global-state bans present");
+    assert_eq!(
+        result.message,
+        "Library profile includes all managed global-state type bans."
+    );
+    assert_eq!(result.file.as_deref(), Some(file));
 }
 
 pub fn assert_missing_messages(results: &[CheckResult], expected: &[&str], file: &str) {

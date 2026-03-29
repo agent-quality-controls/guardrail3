@@ -1,3 +1,5 @@
+#[path = "golden.rs"]
+mod golden;
 #[path = "missing_content.rs"]
 mod missing_content;
 #[path = "parse_error.rs"]

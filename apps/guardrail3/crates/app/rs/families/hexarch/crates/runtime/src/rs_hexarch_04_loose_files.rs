@@ -1,6 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::inputs::ContainerHexarchInput;
+use super::inventory::push_success;
 
 const ID: &str = "RS-HEXARCH-04";
 
@@ -13,7 +14,20 @@ pub fn check(input: &ContainerHexarchInput<'_>, results: &mut Vec<CheckResult>) 
         .chain(input.symlink_files.iter().cloned())
         .collect();
 
-    if bad_files.is_empty() || (input.dirs.is_empty() && !input.has_gitkeep) {
+    if bad_files.is_empty() {
+        if input.dirs.is_empty() && !input.has_gitkeep {
+            return;
+        }
+        push_success(
+            results,
+            ID,
+            format!("Service `{}` has no loose files in {}", input.app_name, input.label),
+            format!(
+                "Service `{}` keeps structural/container directory `{}` free of loose files.",
+                input.app_name, input.rel_path
+            ),
+            Some(input.rel_path.to_owned()),
+        );
         return;
     }
 

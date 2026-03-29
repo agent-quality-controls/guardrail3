@@ -1,6 +1,6 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::MissingMemberCargoInput;
+use super::inputs::{MissingMemberCargoInput, MissingMemberInventoryCargoInput};
 
 const ID: &str = "RS-CARGO-10";
 
@@ -17,6 +17,31 @@ pub fn check(input: &MissingMemberCargoInput<'_>, results: &mut Vec<CheckResult>
         line: None,
         inventory: false,
     });
+}
+
+pub fn check_inventory(
+    input: &MissingMemberInventoryCargoInput<'_>,
+    results: &mut Vec<CheckResult>,
+) {
+    if input.has_missing_members {
+        return;
+    }
+
+    results.push(
+        CheckResult {
+            id: ID.to_owned(),
+            severity: Severity::Info,
+            title: "all declared workspace members have Cargo.toml".to_owned(),
+            message: format!(
+                "{} declares only member directories that contain Cargo.toml.",
+                input.workspace.kind.label()
+            ),
+            file: Some(input.workspace.cargo_rel_path.clone()),
+            line: None,
+            inventory: false,
+        }
+        .as_inventory(),
+    );
 }
 
 #[cfg(test)]

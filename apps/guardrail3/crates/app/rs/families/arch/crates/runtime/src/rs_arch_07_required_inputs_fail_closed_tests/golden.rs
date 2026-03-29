@@ -29,4 +29,9 @@ fn golden_layout_has_no_required_input_failures() {
     ));
 
     assertions::assert_no_error_files(&results, "RS-ARCH-07");
+    assertions::assert_inventory_summary(
+        &results,
+        "RS-ARCH-07",
+        "Rust architecture required inputs are readable",
+    );
 }

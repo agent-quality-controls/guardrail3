@@ -19,6 +19,7 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
         return;
     };
 
+    let mut typo_count = 0usize;
     let known: BTreeSet<_> = known_top_level_keys()
         .into_iter()
         .chain(managed_non_threshold_keys())
@@ -30,6 +31,7 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
                 .copied()
                 .any(|managed| normalized_key_distance(key, managed) <= 2);
         if looks_like_managed_typo {
+            typo_count += 1;
             results.push(CheckResult {
                 id: ID.to_owned(),
                 severity: Severity::Warn,
@@ -42,6 +44,22 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
                 inventory: false,
             });
         }
+    }
+
+    if typo_count == 0 {
+        results.push(
+            CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Info,
+                title: "no suspicious managed-key typos".to_owned(),
+                message: "No top-level keys look like typos of guardrail-managed clippy keys."
+                    .to_owned(),
+                file: Some(input.config.rel_path.clone()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
     }
 }
 

@@ -60,6 +60,23 @@ pub fn assert_reported_file(results: &[CheckResult], severity: Severity, file: &
     assert_eq!(finding.file.as_deref(), Some(file));
 }
 
+pub fn assert_has_finding(
+    results: &[CheckResult],
+    file: &str,
+    severity: Severity,
+    inventory: bool,
+) {
+    assert!(
+        results.iter().any(|result| {
+            result.id == RULE_ID
+                && result.file.as_deref() == Some(file)
+                && result.severity == severity
+                && result.inventory == inventory
+        }),
+        "expected {RULE_ID} finding for {file} with severity={severity:?} inventory={inventory}, got: {results:#?}"
+    );
+}
+
 pub fn assert_error_results_are_error(results: &[CheckResult], rule_id: &str) {
     let errors = results
         .iter()

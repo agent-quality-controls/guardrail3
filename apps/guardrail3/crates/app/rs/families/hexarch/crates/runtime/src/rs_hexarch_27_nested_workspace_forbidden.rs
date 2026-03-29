@@ -1,6 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::inputs::WorkspaceCoverageHexarchInput;
+use super::inventory::push_success;
 
 const ID: &str = "RS-HEXARCH-27";
 
@@ -9,6 +10,7 @@ pub fn check(input: &WorkspaceCoverageHexarchInput<'_>, results: &mut Vec<CheckR
         return;
     }
 
+    let before = results.len();
     for cargo_root in &input.app_local_cargo_roots {
         if !cargo_root.is_workspace {
             continue;
@@ -31,6 +33,22 @@ pub fn check(input: &WorkspaceCoverageHexarchInput<'_>, results: &mut Vec<CheckR
             line: None,
             inventory: false,
         });
+    }
+
+    if results.len() == before {
+        push_success(
+            results,
+            ID,
+            format!(
+                "Service `{}` has no nested workspaces under the app root",
+                input.app_name
+            ),
+            format!(
+                "Service `{}` keeps `{}` as the only workspace root inside the app boundary.",
+                input.app_name, input.app_rel_dir
+            ),
+            Some(format!("{}/Cargo.toml", input.app_rel_dir)),
+        );
     }
 }
 

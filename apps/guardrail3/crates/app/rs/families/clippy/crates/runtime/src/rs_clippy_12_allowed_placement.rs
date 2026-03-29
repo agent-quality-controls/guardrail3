@@ -2,9 +2,27 @@
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::facts::{ForbiddenConfigFacts, ForbiddenConfigReason};
+use super::facts::{ClippyConfigFacts, ForbiddenConfigFacts, ForbiddenConfigReason};
 
 const ID: &str = "RS-CLIPPY-12";
+
+pub fn check_allowed(config: &ClippyConfigFacts, results: &mut Vec<CheckResult>) {
+    results.push(
+        CheckResult {
+            id: ID.to_owned(),
+            severity: Severity::Info,
+            title: "clippy.toml placement allowed".to_owned(),
+            message: format!(
+                "`{}` is placed at an allowed clippy policy root.",
+                config.rel_path
+            ),
+            file: Some(config.rel_path.clone()),
+            line: None,
+            inventory: false,
+        }
+        .as_inventory(),
+    );
+}
 
 pub fn check(forbidden: &ForbiddenConfigFacts, results: &mut Vec<CheckResult>) {
     let (title, message) = match &forbidden.reason {
@@ -39,6 +57,9 @@ pub fn check(forbidden: &ForbiddenConfigFacts, results: &mut Vec<CheckResult>) {
 pub(crate) fn run_for_tests(tree: &ProjectTree) -> Vec<CheckResult> {
     let facts = super::facts::collect_for_tests(tree);
     let mut results = Vec::new();
+    for allowed in &facts.allowed_configs {
+        check_allowed(allowed, &mut results);
+    }
     for forbidden in &facts.forbidden_configs {
         check(forbidden, &mut results);
     }

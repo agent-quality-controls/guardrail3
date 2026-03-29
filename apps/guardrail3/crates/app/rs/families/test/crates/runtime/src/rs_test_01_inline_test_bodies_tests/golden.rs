@@ -1,6 +1,6 @@
 #[allow(unused_imports)]
 use guardrail3_app_rs_family_test_assertions::rs_test_01_inline_test_bodies::{
-    assert_reported, assert_rule_files, assert_rule_quiet,
+    assert_inventory, assert_reported, assert_rule_files, assert_rule_quiet,
 };
 
 #[allow(unused_imports)]
@@ -29,5 +29,6 @@ fn owned_sidecar_declaration_stays_quiet() {
 
     let results = run_family(root);
 
-    assert_rule_quiet(&results);
+    assert_rule_files(&results, vec!["src/lib.rs".to_owned()]);
+    assert_inventory(&results, true);
 }

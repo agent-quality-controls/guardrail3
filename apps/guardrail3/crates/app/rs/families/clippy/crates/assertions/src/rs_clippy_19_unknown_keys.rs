@@ -4,6 +4,20 @@ use guardrail3_domain_report::{CheckResult, Severity};
 
 const ID: &str = "RS-CLIPPY-19";
 
+pub fn assert_inventory(results: &[CheckResult], file: &str) {
+    assert_eq!(results.len(), 1);
+    let result = &results[0];
+    assert_eq!(result.id, ID);
+    assert!(result.inventory);
+    assert_eq!(result.severity, Severity::Info);
+    assert_eq!(result.title, "no suspicious managed-key typos");
+    assert_eq!(
+        result.message,
+        "No top-level keys look like typos of guardrail-managed clippy keys."
+    );
+    assert_eq!(result.file.as_deref(), Some(file));
+}
+
 pub fn assert_messages(results: &[CheckResult], expected: &[&str], file: &str) {
     let actual_messages = results
         .iter()

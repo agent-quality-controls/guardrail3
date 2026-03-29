@@ -1,10 +1,12 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::inputs::DirectionalContainerHexarchInput;
+use super::inventory::push_success;
 
 const ID: &str = "RS-HEXARCH-03";
 
 pub fn check(input: &DirectionalContainerHexarchInput<'_>, results: &mut Vec<CheckResult>) {
+    let before = results.len();
     for expected in ["inbound", "outbound"] {
         if input.dirs.iter().any(|dir| dir == expected)
             && !input.symlink_dirs.iter().any(|dir| dir == expected)
@@ -47,6 +49,19 @@ pub fn check(input: &DirectionalContainerHexarchInput<'_>, results: &mut Vec<Che
             line: None,
             inventory: false,
         });
+    }
+
+    if results.len() == before {
+        push_success(
+            results,
+            ID,
+            format!("Service `{}` has inbound/outbound split in {}", input.app_name, input.label),
+            format!(
+                "Service `{}` keeps `{}` limited to `inbound/` and `outbound/`.",
+                input.app_name, input.rel_path
+            ),
+            Some(input.rel_path.to_owned()),
+        );
     }
 }
 

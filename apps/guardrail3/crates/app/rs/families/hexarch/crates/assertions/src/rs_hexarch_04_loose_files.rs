@@ -1,6 +1,7 @@
 pub use guardrail3_domain_report::{CheckResult, Severity};
 
 const RULE_ID: &str = "RS-HEXARCH-04";
+pub const RULE_05_ID: &str = "RS-HEXARCH-05";
 
 pub use guardrail3_app_rs_family_hexarch_assertions_common::{
     assert_all_inventory, assert_all_titles_contain, assert_result_messages, assert_result_summary,

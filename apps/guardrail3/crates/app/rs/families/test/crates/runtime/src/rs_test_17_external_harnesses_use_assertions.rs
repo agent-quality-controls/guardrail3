@@ -9,6 +9,20 @@ pub fn check(input: &TestFunctionInput<'_>, results: &mut Vec<CheckResult>) {
     if !matches!(input.file.kind, TestFileKind::ExternalHarness)
         || !input.function.has_assertion_macro
     {
+        if matches!(input.file.kind, TestFileKind::ExternalHarness) {
+            results.push(
+                CheckResult {
+                    id: ID.to_owned(),
+                    severity: Severity::Info,
+                    title: "external harness uses owned assertions".to_owned(),
+                    message: "External harnesses stay black-box and prove through the owned assertions crate rather than direct assertion macros.".to_owned(),
+                    file: Some(input.file.rel_path.clone()),
+                    line: Some(input.function.line),
+                    inventory: false,
+                }
+                .as_inventory(),
+            );
+        }
         return;
     }
 

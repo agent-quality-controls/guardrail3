@@ -1,6 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use crate::MemberConfigHexarchInput;
+use super::inventory::push_success;
 
 const ID: &str = "RS-HEXARCH-15";
 
@@ -22,7 +23,20 @@ pub fn check(input: &MemberConfigHexarchInput<'_>, results: &mut Vec<CheckResult
         return;
     }
 
-    if !boundary.is_app_boundary || boundary.has_config_entry {
+    if !boundary.is_app_boundary {
+        return;
+    }
+    if boundary.has_config_entry {
+        push_success(
+            results,
+            ID,
+            format!("app boundary `{}` has rust.apps config", boundary.rel_dir),
+            format!(
+                "App boundary `{}` is covered by an explicit `[rust.apps.*]` configuration entry.",
+                boundary.rel_dir
+            ),
+            Some("guardrail3.toml".to_owned()),
+        );
         return;
     }
 

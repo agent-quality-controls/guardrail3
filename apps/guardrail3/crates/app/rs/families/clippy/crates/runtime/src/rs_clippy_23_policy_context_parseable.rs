@@ -6,6 +6,22 @@ use super::inputs::PolicyContextFailureInput;
 
 const ID: &str = "RS-CLIPPY-23";
 
+pub fn check_parseable(results: &mut Vec<CheckResult>) {
+    results.push(
+        CheckResult {
+            id: ID.to_owned(),
+            severity: Severity::Info,
+            title: "clippy policy context parseable".to_owned(),
+            message: "Active `guardrail3.toml` parsed successfully for clippy policy context."
+                .to_owned(),
+            file: Some("guardrail3.toml".to_owned()),
+            line: None,
+            inventory: false,
+        }
+        .as_inventory(),
+    );
+}
+
 pub fn check(input: &PolicyContextFailureInput<'_>, results: &mut Vec<CheckResult>) {
     results.push(CheckResult {
         id: ID.to_owned(),
@@ -27,6 +43,8 @@ pub(crate) fn run_for_tests(tree: &ProjectTree) -> Vec<CheckResult> {
     let mut results = Vec::new();
     if let Some(parse_error) = facts.policy_context_parse_error.as_deref() {
         check(&PolicyContextFailureInput::new(parse_error), &mut results);
+    } else if tree.file_exists("guardrail3.toml") {
+        check_parseable(&mut results);
     }
     results
 }

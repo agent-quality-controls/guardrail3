@@ -25,4 +25,9 @@ fn golden_layout_has_no_dual_ownership_errors() {
     ));
 
     assertions::assert_no_error_files(&results, "RS-ARCH-03");
+    assertions::assert_inventory_files(
+        &results,
+        "RS-ARCH-03",
+        &["apps/backend/Cargo.toml", "packages/shared/Cargo.toml"],
+    );
 }

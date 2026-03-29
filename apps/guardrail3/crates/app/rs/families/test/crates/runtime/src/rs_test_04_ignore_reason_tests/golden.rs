@@ -1,6 +1,6 @@
 #[allow(unused_imports)]
 use guardrail3_app_rs_family_test_assertions::rs_test_04_ignore_reason::{
-    assert_reported, assert_rule_files, assert_rule_quiet,
+    assert_inventory, assert_reported, assert_rule_files, assert_rule_quiet,
 };
 
 #[allow(unused_imports)]
@@ -24,7 +24,8 @@ fn reason_comment_keeps_ignore_quiet() {
 
     let results = run_family(root);
 
-    assert_rule_quiet(&results);
+    assert_rule_files(&results, vec!["tests/slow.rs".to_owned()]);
+    assert_inventory(&results, true);
 }
 
 #[test]
@@ -45,7 +46,8 @@ fn same_line_reason_keeps_ignore_quiet() {
 
     let results = run_family(root);
 
-    assert_rule_quiet(&results);
+    assert_rule_files(&results, vec!["tests/slow.rs".to_owned()]);
+    assert_inventory(&results, true);
 }
 
 #[test]
@@ -66,5 +68,6 @@ fn ignore_attribute_reason_keeps_ignore_quiet() {
 
     let results = run_family(root);
 
-    assert_rule_quiet(&results);
+    assert_rule_files(&results, vec!["tests/slow.rs".to_owned()]);
+    assert_inventory(&results, true);
 }

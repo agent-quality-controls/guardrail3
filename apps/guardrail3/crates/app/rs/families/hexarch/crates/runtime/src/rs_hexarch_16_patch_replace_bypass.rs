@@ -1,12 +1,23 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::inputs::PatchHexarchInput;
+use super::inventory::push_success;
 
 const ID: &str = "RS-HEXARCH-16";
 
 pub fn check(input: &PatchHexarchInput<'_>, results: &mut Vec<CheckResult>) {
     let patch = input.patch;
     if patch.target_layer.is_none() {
+        push_success(
+            results,
+            ID,
+            format!("patch/replace entry `{}` stays outside the layered tree", patch.key),
+            format!(
+                "`{}` resolves to `{}` outside the owned layered Rust tree, so it does not bypass hexarch layer enforcement.",
+                patch.key, patch.resolved_rel_dir
+            ),
+            Some(patch.cargo_rel_path.clone()),
+        );
         return;
     }
 

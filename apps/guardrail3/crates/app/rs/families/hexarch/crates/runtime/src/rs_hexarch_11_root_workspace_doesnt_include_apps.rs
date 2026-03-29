@@ -1,6 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::inputs::RootWorkspaceHexarchInput;
+use super::inventory::push_success;
 
 const ID: &str = "RS-HEXARCH-11";
 
@@ -18,6 +19,7 @@ pub fn check(input: &RootWorkspaceHexarchInput<'_>, results: &mut Vec<CheckResul
         return;
     }
 
+    let before = results.len();
     for member in &input.workspace_members {
         if !input
             .rust_app_roots
@@ -38,6 +40,17 @@ pub fn check(input: &RootWorkspaceHexarchInput<'_>, results: &mut Vec<CheckResul
             line: None,
             inventory: false,
         });
+    }
+
+    if results.len() == before {
+        push_success(
+            results,
+            ID,
+            "root workspace excludes app roots".to_owned(),
+            "Root `Cargo.toml` does not claim any routed Rust app root as a workspace member."
+                .to_owned(),
+            Some("Cargo.toml".to_owned()),
+        );
     }
 }
 

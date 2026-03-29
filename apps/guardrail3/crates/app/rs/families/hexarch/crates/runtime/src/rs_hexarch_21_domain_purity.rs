@@ -9,6 +9,7 @@ use guardrail3_domain_project_tree::ProjectTree;
 use super::dependency_facts::EdgeKind;
 use super::dependency_facts::Layer;
 use super::inputs::MemberDependencyHexarchInput;
+use super::inventory::push_success;
 
 const ID: &str = "RS-HEXARCH-21";
 const BUILTIN_ALLOWED: &[&str] = &[
@@ -26,6 +27,7 @@ pub fn check(input: &MemberDependencyHexarchInput<'_>, results: &mut Vec<CheckRe
     if member.layer != Some(Layer::Domain) {
         return;
     }
+    let before = results.len();
 
     let allowed = BUILTIN_ALLOWED
         .iter()
@@ -108,6 +110,19 @@ pub fn check(input: &MemberDependencyHexarchInput<'_>, results: &mut Vec<CheckRe
                 inventory: false,
             });
         }
+    }
+
+    if results.len() == before {
+        push_success(
+            results,
+            ID,
+            format!("domain crate `{}` stays pure", member.name),
+            format!(
+                "Domain crate `{}` uses only allowed pure-layer or allowlisted dependencies.",
+                member.name
+            ),
+            Some(member.cargo_rel_path.clone()),
+        );
     }
 }
 

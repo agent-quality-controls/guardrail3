@@ -1,6 +1,6 @@
 #[allow(unused_imports)]
 use guardrail3_app_rs_family_test_assertions::rs_test_06_tautological_assertions::{
-    assert_reported, assert_rule_files, assert_rule_quiet,
+    assert_inventory, assert_reported, assert_rule_files, assert_rule_quiet,
 };
 
 #[allow(unused_imports)]
@@ -24,5 +24,6 @@ fn variable_vs_literal_assertion_is_not_tautological() {
 
     let results = run_family(root);
 
-    assert_rule_quiet(&results);
+    assert_rule_files(&results, vec!["tests/asserts.rs".to_owned()]);
+    assert_inventory(&results, true);
 }

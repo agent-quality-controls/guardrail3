@@ -12,6 +12,8 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
         return;
     };
 
+    let mut placeholder_count = 0usize;
+
     for key in [
         "disallowed-methods",
         "disallowed-types",
@@ -21,6 +23,7 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
             if let Some(reason) = entry.reason.as_deref()
                 && is_placeholder_reason(reason)
             {
+                placeholder_count += 1;
                 results.push(CheckResult {
                     id: ID.to_owned(),
                     severity: Severity::Warn,
@@ -35,6 +38,22 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
                 });
             }
         }
+    }
+
+    if placeholder_count == 0 {
+        results.push(
+            CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Info,
+                title: "ban reasons are substantive".to_owned(),
+                message: "All managed ban entries use substantive non-placeholder `reason` text."
+                    .to_owned(),
+                file: Some(input.config.rel_path.clone()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
     }
 }
 

@@ -4,9 +4,9 @@ use test_support::unrelated_nested_cargo_config_tree;
 use super::super::run_for_tests;
 
 #[test]
-fn ignores_nested_cargo_config_outside_routed_rust_scope() {
+fn inventories_when_nested_cargo_config_is_outside_routed_rust_scope() {
     let tree =
         unrelated_nested_cargo_config_tree("config.toml", "[env]\nCLIPPY_CONF_DIR = \".\"\n");
     let results = run_for_tests(&tree);
-    assertions::assert_no_results(&results);
+    assertions::assert_inventory(&results);
 }

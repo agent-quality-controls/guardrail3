@@ -17,6 +17,21 @@ pub fn check(input: &TestFunctionInput<'_>, results: &mut Vec<CheckResult>) {
             input.proof_bearing_assertion_functions,
         )
     {
+        results.push(
+            CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Info,
+                title: "real proof site present".to_owned(),
+                message: format!(
+                    "Test `{}` proves behavior through an assertion macro or owned assertions helper.",
+                    input.function.name
+                ),
+                file: Some(input.file.rel_path.clone()),
+                line: Some(input.function.line),
+                inventory: false,
+            }
+            .as_inventory(),
+        );
         return;
     }
 

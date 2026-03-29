@@ -25,4 +25,9 @@ fn golden_layout_has_no_zone_overlap_errors() {
     ));
 
     assertions::assert_no_error_files(&results, "RS-ARCH-04");
+    assertions::assert_inventory_summary(
+        &results,
+        "RS-ARCH-04",
+        "No illegal app/package zone overlap found",
+    );
 }

@@ -5,21 +5,24 @@ use super::inputs::AuxiliaryRootInput;
 const ID: &str = "RS-ARCH-08";
 
 pub fn check(input: &AuxiliaryRootInput<'_>, results: &mut Vec<CheckResult>) {
-    results.push(CheckResult {
-        id: ID.to_owned(),
-        severity: Severity::Info,
-        title: format!(
-            "Rust root `{}` is declared auxiliary",
-            display_dir(&input.root.rel_dir)
-        ),
-        message: format!(
-            "`{}` is outside `apps/*` and `packages/*`, but is explicitly marked with `arch_role = \"auxiliary\"` in Cargo metadata.",
-            input.root.cargo_rel_path
-        ),
-        file: Some(input.root.cargo_rel_path.clone()),
-        line: None,
-        inventory: false,
-    });
+    results.push(
+        CheckResult {
+            id: ID.to_owned(),
+            severity: Severity::Info,
+            title: format!(
+                "Rust root `{}` is declared auxiliary",
+                display_dir(&input.root.rel_dir)
+            ),
+            message: format!(
+                "`{}` is outside `apps/*` and `packages/*`, but is explicitly marked with `arch_role = \"auxiliary\"` in Cargo metadata.",
+                input.root.cargo_rel_path
+            ),
+            file: Some(input.root.cargo_rel_path.clone()),
+            line: None,
+            inventory: false,
+        }
+        .as_inventory(),
+    );
 }
 
 fn display_dir(rel_dir: &str) -> &str {

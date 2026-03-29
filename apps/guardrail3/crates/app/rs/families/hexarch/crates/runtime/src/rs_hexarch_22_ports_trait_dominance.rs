@@ -2,6 +2,7 @@ use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::dependency_facts::Layer;
 use super::inputs::SourceCrateHexarchInput;
+use super::inventory::push_success;
 #[cfg(test)]
 use super::source_facts::SourceCrateFacts;
 
@@ -65,6 +66,19 @@ pub fn check(input: &SourceCrateHexarchInput<'_>, results: &mut Vec<CheckResult>
             line: None,
             inventory: false,
         });
+    }
+
+    if source.public_free_fn_count == 0 && source.public_inherent_method_count == 0 {
+        push_success(
+            results,
+            ID,
+            format!("ports crate `{}` keeps public behavior in traits", source.crate_name),
+            format!(
+                "Ports crate `{}` exposes no public free functions or public inherent methods on concrete types.",
+                source.crate_name
+            ),
+            Some(source.rel_dir.clone()),
+        );
     }
 }
 

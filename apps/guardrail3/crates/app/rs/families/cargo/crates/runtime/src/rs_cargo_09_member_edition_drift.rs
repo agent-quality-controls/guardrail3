@@ -11,39 +11,55 @@ pub fn check(input: &WorkspaceMemberCargoInput<'_>, results: &mut Vec<CheckResul
     let Some(workspace_edition) = input.workspace.edition.as_deref() else {
         return;
     };
-    let Some(member_edition) = input.member.edition.as_deref() else {
-        return;
-    };
-
-    if edition_rank(member_edition) < edition_rank(workspace_edition) {
-        results.push(CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Warn,
-            title: "member edition older than workspace".to_owned(),
-            message: format!(
-                "{} sets edition `{member_edition}` while workspace uses `{workspace_edition}`.",
-                input.member.member_rel
-            ),
-            file: Some(input.member.cargo_rel_path.clone()),
-            line: None,
-            inventory: false,
-        });
-    } else {
-        results.push(
-            CheckResult {
+    match input.member.edition.as_deref() {
+        Some(member_edition) if edition_rank(member_edition) < edition_rank(workspace_edition) => {
+            results.push(CheckResult {
                 id: ID.to_owned(),
-                severity: Severity::Info,
-                title: "member edition aligns with workspace".to_owned(),
+                severity: Severity::Warn,
+                title: "member edition older than workspace".to_owned(),
                 message: format!(
-                    "{} does not downgrade the workspace edition.",
+                    "{} sets edition `{member_edition}` while workspace uses `{workspace_edition}`.",
                     input.member.member_rel
                 ),
                 file: Some(input.member.cargo_rel_path.clone()),
                 line: None,
                 inventory: false,
-            }
-            .as_inventory(),
-        );
+            });
+        }
+        Some(_) => {
+            results.push(
+                CheckResult {
+                    id: ID.to_owned(),
+                    severity: Severity::Info,
+                    title: "member edition aligns with workspace".to_owned(),
+                    message: format!(
+                        "{} does not downgrade the workspace edition.",
+                        input.member.member_rel
+                    ),
+                    file: Some(input.member.cargo_rel_path.clone()),
+                    line: None,
+                    inventory: false,
+                }
+                .as_inventory(),
+            );
+        }
+        None => {
+            results.push(
+                CheckResult {
+                    id: ID.to_owned(),
+                    severity: Severity::Info,
+                    title: "member inherits workspace edition".to_owned(),
+                    message: format!(
+                        "{} inherits workspace edition `{workspace_edition}`.",
+                        input.member.member_rel
+                    ),
+                    file: Some(input.member.cargo_rel_path.clone()),
+                    line: None,
+                    inventory: false,
+                }
+                .as_inventory(),
+            );
+        }
     }
 }
 

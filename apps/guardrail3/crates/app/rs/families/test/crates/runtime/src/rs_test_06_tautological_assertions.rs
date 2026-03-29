@@ -19,6 +19,23 @@ pub fn check(input: &TestFunctionInput<'_>, results: &mut Vec<CheckResult>) {
             inventory: false,
         });
     }
+    if input.function.tautological_assert_lines.is_empty() {
+        results.push(
+            CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Info,
+                title: "tautological assertions absent".to_owned(),
+                message: format!(
+                    "Test `{}` uses real values in its assertions.",
+                    input.function.name
+                ),
+                file: Some(input.file.rel_path.clone()),
+                line: Some(input.function.line),
+                inventory: false,
+            }
+            .as_inventory(),
+        );
+    }
 }
 
 #[cfg(test)]

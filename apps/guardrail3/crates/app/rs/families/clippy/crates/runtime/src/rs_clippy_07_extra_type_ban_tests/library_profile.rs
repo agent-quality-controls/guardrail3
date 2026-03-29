@@ -1,5 +1,7 @@
 use guardrail3_app_rs_family_clippy_assertions::rs_clippy_07_extra_type_ban as assertions;
-use test_support::{build_fixture_clippy_toml, prepend_ban_path, published_library_package_root_tree};
+use test_support::{
+    build_fixture_clippy_toml, prepend_ban_path, published_library_package_root_tree,
+};
 
 use super::super::run_for_tests;
 

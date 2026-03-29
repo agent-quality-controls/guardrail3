@@ -28,8 +28,8 @@ use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
 use self::discover::collect;
 use self::inputs::{
-    InputFailureCargoInput, MissingMemberCargoInput, PolicyRootCargoInput,
-    WorkspaceMemberCargoInput,
+    InputFailureCargoInput, InputFailureInventoryCargoInput, MissingMemberCargoInput,
+    MissingMemberInventoryCargoInput, PolicyRootCargoInput, WorkspaceMemberCargoInput,
 };
 
 pub fn check(tree: &ProjectTree, route: &RsCargoRoute) -> Vec<CheckResult> {
@@ -38,6 +38,9 @@ pub fn check(tree: &ProjectTree, route: &RsCargoRoute) -> Vec<CheckResult> {
 
     for input in InputFailureCargoInput::from_facts(&facts) {
         rs_cargo_14_input_failures::check(&input, &mut results);
+    }
+    for input in InputFailureInventoryCargoInput::from_facts(&facts) {
+        rs_cargo_14_input_failures::check_inventory(&input, &mut results);
     }
 
     for input in PolicyRootCargoInput::from_facts(&facts) {
@@ -61,6 +64,9 @@ pub fn check(tree: &ProjectTree, route: &RsCargoRoute) -> Vec<CheckResult> {
 
     for input in MissingMemberCargoInput::from_facts(&facts) {
         rs_cargo_10_missing_member_cargo::check(&input, &mut results);
+    }
+    for input in MissingMemberInventoryCargoInput::from_facts(&facts) {
+        rs_cargo_10_missing_member_cargo::check_inventory(&input, &mut results);
     }
 
     results

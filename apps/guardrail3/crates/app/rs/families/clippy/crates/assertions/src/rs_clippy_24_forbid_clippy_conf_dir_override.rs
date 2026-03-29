@@ -2,11 +2,18 @@ use guardrail3_domain_report::{CheckResult, Severity};
 
 const ID: &str = "RS-CLIPPY-24";
 
-pub fn assert_no_results(results: &[CheckResult]) {
-    assert!(
-        results.is_empty(),
-        "expected no CLIPPY_CONF_DIR override findings: {results:#?}"
+pub fn assert_inventory(results: &[CheckResult]) {
+    assert_eq!(results.len(), 1);
+    let result = &results[0];
+    assert_eq!(result.id, ID);
+    assert!(result.inventory);
+    assert_eq!(result.severity, Severity::Info);
+    assert_eq!(result.title, "no clippy config dir overrides found");
+    assert_eq!(
+        result.message,
+        "No applicable cargo config surfaces set `CLIPPY_CONF_DIR`."
     );
+    assert_eq!(result.file, None);
 }
 
 pub fn assert_override_error(results: &[CheckResult], rel_path: &str) {
@@ -22,6 +29,7 @@ pub fn assert_override_error(results: &[CheckResult], rel_path: &str) {
             "`{rel_path}` sets `CLIPPY_CONF_DIR`, which bypasses the routed clippy policy-root model."
         )
     );
+    assert!(!result.inventory);
 }
 
 pub fn assert_parse_error(results: &[CheckResult], rel_path: &str) {
@@ -42,4 +50,5 @@ pub fn assert_parse_error(results: &[CheckResult], rel_path: &str) {
         result.message.contains("CLIPPY_CONF_DIR"),
         "expected CLIPPY_CONF_DIR context in parse failure: {result:#?}"
     );
+    assert!(!result.inventory);
 }

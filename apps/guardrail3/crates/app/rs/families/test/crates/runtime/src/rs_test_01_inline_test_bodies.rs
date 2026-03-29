@@ -6,6 +6,18 @@ const ID: &str = "RS-TEST-01";
 
 pub fn check(input: &CfgTestModuleInput<'_>, results: &mut Vec<CheckResult>) {
     if !input.module.has_body {
+        results.push(
+            CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Info,
+                title: "inline cfg(test) body absent".to_owned(),
+                message: "Owned `#[cfg(test)]` declarations stay as sidecar modules instead of inline bodies.".to_owned(),
+                file: Some(input.file.rel_path.clone()),
+                line: Some(input.module.line),
+                inventory: false,
+            }
+            .as_inventory(),
+        );
         return;
     }
 

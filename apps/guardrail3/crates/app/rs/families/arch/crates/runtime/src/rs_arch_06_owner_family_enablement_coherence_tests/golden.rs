@@ -25,4 +25,9 @@ fn golden_layout_has_no_owner_family_coherence_errors() {
     ));
 
     assertions::assert_no_error_files(&results, "RS-ARCH-06");
+    assertions::assert_inventory_files(
+        &results,
+        "RS-ARCH-06",
+        &["apps/backend/Cargo.toml", "packages/shared/Cargo.toml"],
+    );
 }

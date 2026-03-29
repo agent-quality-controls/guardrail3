@@ -1,5 +1,6 @@
 use super::{copy_fixture, create_dir, empty_dir, remove_dir, write_file};
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_04_loose_files as assertions;
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_04_loose_files::RULE_05_ID;
 const FIXTURE: super::HexarchFixture = super::HexarchFixture;
 
 fn inner_hex() -> &'static str {
@@ -7,7 +8,7 @@ fn inner_hex() -> &'static str {
 }
 
 #[test]
-fn files_only_container_is_owned_by_rule_05_not_rule_04() {
+fn files_only_container_hits_rule_04_and_rule_05() {
     let tmp = copy_fixture();
     empty_dir(tmp.path(), "apps/devctl/crates/domain");
     write_file(tmp.path(), "apps/devctl/crates/domain/README.md", "# stray");
@@ -17,15 +18,15 @@ fn files_only_container_is_owned_by_rule_05_not_rule_04() {
         &results,
         "",
         "apps/devctl/crates/domain",
-        0,
+        1,
+        &["loose files"],
         &[],
-        &[],
-        &[],
+        &["README.md"],
         &[],
     );
     assertions::assert_error_count_matching_file(
         &results,
-        "RS-HEXARCH-05",
+        RULE_05_ID,
         "apps/devctl/crates/domain",
         1,
         &[],
@@ -44,7 +45,7 @@ fn empty_container_is_owned_by_rule_05_not_rule_04() {
     assertions::assert_no_error(&results, "");
     assertions::assert_error_count_matching_file(
         &results,
-        "RS-HEXARCH-05",
+        RULE_05_ID,
         "apps/devctl/crates/domain",
         1,
         &[],
@@ -107,7 +108,7 @@ fn ts_apps_and_packages_stay_out_of_scope() {
 
 #[test]
 #[cfg(unix)]
-fn symlink_only_container_does_not_trigger_rule_04() {
+fn symlink_only_container_hits_rule_04_and_rule_05() {
     let tmp = copy_fixture();
     empty_dir(tmp.path(), "apps/devctl/crates/domain");
     std::os::unix::fs::symlink(
@@ -121,10 +122,20 @@ fn symlink_only_container_does_not_trigger_rule_04() {
         &results,
         "",
         "apps/devctl/crates/domain",
-        0,
+        1,
+        &["loose files"],
+        &[],
+        &["README.md"],
+        &[],
+    );
+    assertions::assert_error_count_matching_file(
+        &results,
+        RULE_05_ID,
+        "apps/devctl/crates/domain",
+        1,
         &[],
         &[],
-        &[],
+        &["README.md"],
         &[],
     );
 }
@@ -156,7 +167,7 @@ fn mixed_rule_04_and_rule_05_states_split_ownership_exactly() {
     );
     assertions::assert_error_count_matching_file(
         &results,
-        "RS-HEXARCH-05",
+        RULE_05_ID,
         "apps/devctl/crates/domain",
         1,
         &[],
@@ -210,7 +221,7 @@ fn mixed_root_structural_and_container_loose_files_split_across_neighbor_rules()
     );
     assertions::assert_error_count_matching(
         &results,
-        "RS-HEXARCH-05",
+        RULE_05_ID,
         0,
         None,
         None,

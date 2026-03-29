@@ -1,11 +1,22 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::inputs::AppHexarchInput;
+use super::inventory::push_success;
 
 const ID: &str = "RS-HEXARCH-12";
 
 pub fn check(input: &AppHexarchInput<'_>, results: &mut Vec<CheckResult>) {
     if !input.src_dir_exists {
+        push_success(
+            results,
+            ID,
+            format!("Service `{}` has no app-level src/ directory", input.app_name),
+            format!(
+                "Service `{}` keeps app code under `crates/` instead of `{}/src`.",
+                input.app_name, input.app_rel_dir
+            ),
+            Some(input.app_rel_dir.to_owned()),
+        );
         return;
     }
 

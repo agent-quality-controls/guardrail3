@@ -25,4 +25,5 @@ fn golden_layout_has_no_misplaced_root_errors() {
     ));
 
     assertions::assert_no_error_files(&results, "RS-ARCH-02");
+    assertions::assert_inventory_summary(&results, "RS-ARCH-02", "No misplaced Rust roots found");
 }

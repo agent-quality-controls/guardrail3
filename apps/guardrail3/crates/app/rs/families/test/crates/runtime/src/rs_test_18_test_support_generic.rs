@@ -17,6 +17,7 @@ const REPORT_FIELDS: &[&str] = &[
 ];
 
 pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
+    let mut reported = false;
     let disallowed_packages = input
         .local_runtime_packages
         .iter()
@@ -43,6 +44,7 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
                 line: Some(binding.line),
                 inventory: false,
             });
+            reported = true;
         }
     }
 
@@ -67,6 +69,7 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
             line: Some(binding.line),
             inventory: false,
         });
+        reported = true;
     }
 
     if !disallowed_packages.is_empty() {
@@ -89,6 +92,7 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
                 line: None,
                 inventory: false,
             });
+            reported = true;
         }
     }
 
@@ -107,6 +111,7 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
             line: None,
             inventory: false,
         });
+        reported = true;
     }
 
     for value in &input.parsed.public_values {
@@ -126,6 +131,7 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
             line: Some(value.line),
             inventory: false,
         });
+        reported = true;
     }
 
     let local_canned_helpers = input
@@ -178,6 +184,7 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
                 line: Some(function.line),
                 inventory: false,
             });
+            reported = true;
             continue;
         }
 
@@ -197,6 +204,7 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
                 line: Some(function.line),
                 inventory: false,
             });
+            reported = true;
         }
 
         let selects_report_semantics = function.has_check_result_arg
@@ -232,7 +240,23 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
                 line: Some(function.line),
                 inventory: false,
             });
+            reported = true;
         }
+    }
+
+    if !reported {
+        results.push(
+            CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Info,
+                title: "test_support stays generic".to_owned(),
+                message: "Shared `test_support` contains only generic fixture helpers and no local-component or semantic result-surface coupling.".to_owned(),
+                file: Some(input.file.rel_path.clone()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
     }
 }
 

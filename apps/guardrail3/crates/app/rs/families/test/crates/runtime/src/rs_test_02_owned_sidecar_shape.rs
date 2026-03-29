@@ -17,7 +17,25 @@ pub(crate) fn collect(
     scoped_files: Option<&BTreeSet<String>>,
     results: &mut Vec<CheckResult>,
 ) {
-    for violation in collect_violations(tree, root, files, scoped_files) {
+    let violations = collect_violations(tree, root, files, scoped_files);
+    if violations.is_empty() {
+        results.push(
+            CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Info,
+                title: "owned sidecar shape confirmed".to_owned(),
+                message: format!(
+                    "Root `{}` keeps sidecar harnesses in owned `<module>_tests/` directories.",
+                    root.rel_dir
+                ),
+                file: Some(root.cargo_rel_path.clone()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
+    }
+    for violation in violations {
         check(&SidecarViolationInput::new(&violation), results);
     }
 }

@@ -1,12 +1,14 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::inputs::HexRootInput;
+use super::inventory::push_success;
 
 const ID: &str = "RS-HEXARCH-02";
 const EXPECTED: [&str; 4] = ["adapters", "app", "domain", "ports"];
 const OPTIONAL: [&str; 1] = ["macros"];
 
 pub fn check(input: &HexRootInput<'_>, results: &mut Vec<CheckResult>) {
+    let before = results.len();
     for expected in EXPECTED {
         if input.dirs.iter().any(|dir| dir == expected)
             && !input.symlink_dirs.iter().any(|dir| dir == expected)
@@ -87,6 +89,19 @@ pub fn check(input: &HexRootInput<'_>, results: &mut Vec<CheckResult>) {
             line: None,
             inventory: false,
         });
+    }
+
+    if results.len() == before {
+        push_success(
+            results,
+            ID,
+            format!("Service `{}` has exact top-level hex contents", input.app_name),
+            format!(
+                "Service `{}` keeps `{}` aligned with the required top-level hex template.",
+                input.app_name, input.crates_rel_dir
+            ),
+            Some(input.crates_rel_dir.to_owned()),
+        );
     }
 }
 
