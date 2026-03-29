@@ -8,16 +8,16 @@ use super::walk_project;
 
 #[test]
 fn preserves_immediate_ignored_file_children_in_discovered_dirs() {
-    let tmp = tempdir().expect("tempdir");
-    fs::create_dir_all(tmp.path().join("apps/devctl/crates/app/core")).expect("create dirs");
-    fs::write(tmp.path().join(".gitignore"), "*.env\n").expect("write gitignore");
-    fs::write(tmp.path().join("apps/devctl/Cargo.toml"), "[workspace]\n").expect("write cargo");
-    fs::write(tmp.path().join("apps/devctl/crates/app/.env"), "SECRET=1").expect("write env");
+    let tmp = tempdir().expect("failed to create temporary project root");
+    fs::create_dir_all(tmp.path().join("apps/devctl/crates/app/core")).expect("failed to create project fixture directories");
+    fs::write(tmp.path().join(".gitignore"), "*.env\n").expect("failed to write project fixture .gitignore");
+    fs::write(tmp.path().join("apps/devctl/Cargo.toml"), "[workspace]\n").expect("failed to write project fixture Cargo.toml");
+    fs::write(tmp.path().join("apps/devctl/crates/app/.env"), "SECRET=1").expect("failed to write ignored environment fixture");
     fs::write(
         tmp.path().join("apps/devctl/crates/app/core/lib.rs"),
         "pub fn ready() {}\n",
     )
-    .expect("write lib");
+    .expect("failed to write project fixture Rust source");
 
     let tree = walk_project(&RealFileSystem, tmp.path());
     let entry = tree
@@ -32,21 +32,21 @@ fn preserves_immediate_ignored_file_children_in_discovered_dirs() {
 
 #[test]
 fn preserves_immediate_ignored_directory_children_in_discovered_dirs() {
-    let tmp = tempdir().expect("tempdir");
-    fs::create_dir_all(tmp.path().join("apps/devctl/crates/app/core")).expect("create dirs");
-    fs::write(tmp.path().join(".gitignore"), "orphan/\n").expect("write gitignore");
-    fs::write(tmp.path().join("apps/devctl/Cargo.toml"), "[workspace]\n").expect("write cargo");
-    fs::create_dir_all(tmp.path().join("apps/devctl/crates/app/orphan/src")).expect("mkdir");
+    let tmp = tempdir().expect("failed to create temporary project root");
+    fs::create_dir_all(tmp.path().join("apps/devctl/crates/app/core")).expect("failed to create project fixture directories");
+    fs::write(tmp.path().join(".gitignore"), "orphan/\n").expect("failed to write project fixture .gitignore");
+    fs::write(tmp.path().join("apps/devctl/Cargo.toml"), "[workspace]\n").expect("failed to write project fixture Cargo.toml");
+    fs::create_dir_all(tmp.path().join("apps/devctl/crates/app/orphan/src")).expect("failed to create ignored fixture directory");
     fs::write(
         tmp.path().join("apps/devctl/crates/app/orphan/src/lib.rs"),
         "pub fn ignored_leaf() {}\n",
     )
-    .expect("write lib");
+    .expect("failed to write project fixture Rust source");
     fs::write(
         tmp.path().join("apps/devctl/crates/app/core/lib.rs"),
         "pub fn ready() {}\n",
     )
-    .expect("write lib");
+    .expect("failed to write project fixture Rust source");
 
     let tree = walk_project(&RealFileSystem, tmp.path());
     let entry = tree
@@ -62,7 +62,7 @@ fn preserves_immediate_ignored_directory_children_in_discovered_dirs() {
 
 #[test]
 fn caches_repo_local_cargo_config_files() {
-    let tmp = tempdir().expect("tempdir");
+    let tmp = tempdir().expect("failed to create temporary project root");
     fs::create_dir_all(tmp.path().join(".cargo")).expect("create cargo dir");
     fs::write(
         tmp.path().join(".cargo/config.toml"),
@@ -89,22 +89,22 @@ fn caches_repo_local_cargo_config_files() {
 
 #[test]
 fn recursively_scans_newly_recovered_ignored_directories() {
-    let tmp = tempdir().expect("tempdir");
-    fs::create_dir_all(tmp.path().join("apps/devctl/crates/app/core")).expect("create dirs");
-    fs::write(tmp.path().join(".gitignore"), "valid_crate/\n").expect("write gitignore");
-    fs::write(tmp.path().join("apps/devctl/Cargo.toml"), "[workspace]\n").expect("write cargo");
-    fs::create_dir_all(tmp.path().join("apps/devctl/crates/app/valid_crate")).expect("mkdir");
+    let tmp = tempdir().expect("failed to create temporary project root");
+    fs::create_dir_all(tmp.path().join("apps/devctl/crates/app/core")).expect("failed to create project fixture directories");
+    fs::write(tmp.path().join(".gitignore"), "valid_crate/\n").expect("failed to write project fixture .gitignore");
+    fs::write(tmp.path().join("apps/devctl/Cargo.toml"), "[workspace]\n").expect("failed to write project fixture Cargo.toml");
+    fs::create_dir_all(tmp.path().join("apps/devctl/crates/app/valid_crate")).expect("failed to create ignored fixture directory");
     fs::write(
         tmp.path()
             .join("apps/devctl/crates/app/valid_crate/Cargo.toml"),
         "[package]\nname = \"valid-crate\"\nversion = \"0.1.0\"\n",
     )
-    .expect("write cargo");
+    .expect("failed to write project fixture Cargo.toml");
     fs::write(
         tmp.path().join("apps/devctl/crates/app/core/lib.rs"),
         "pub fn ready() {}\n",
     )
-    .expect("write lib");
+    .expect("failed to write project fixture Rust source");
 
     let tree = walk_project(&RealFileSystem, tmp.path());
     let entry = tree
@@ -120,20 +120,20 @@ fn recursively_scans_newly_recovered_ignored_directories() {
 #[test]
 #[cfg(unix)]
 fn preserves_immediate_ignored_symlink_file_children_in_discovered_dirs() {
-    let tmp = tempdir().expect("tempdir");
-    fs::create_dir_all(tmp.path().join("apps/devctl/crates/app/core")).expect("create dirs");
-    fs::write(tmp.path().join(".gitignore"), "*.env\n").expect("write gitignore");
-    fs::write(tmp.path().join("apps/devctl/Cargo.toml"), "[workspace]\n").expect("write cargo");
+    let tmp = tempdir().expect("failed to create temporary project root");
+    fs::create_dir_all(tmp.path().join("apps/devctl/crates/app/core")).expect("failed to create project fixture directories");
+    fs::write(tmp.path().join(".gitignore"), "*.env\n").expect("failed to write project fixture .gitignore");
+    fs::write(tmp.path().join("apps/devctl/Cargo.toml"), "[workspace]\n").expect("failed to write project fixture Cargo.toml");
     std::os::unix::fs::symlink(
         tmp.path().join("apps/devctl/Cargo.toml"),
         tmp.path().join("apps/devctl/crates/app/.env"),
     )
-    .expect("symlink");
+    .expect("failed to create project fixture symlink");
     fs::write(
         tmp.path().join("apps/devctl/crates/app/core/lib.rs"),
         "pub fn ready() {}\n",
     )
-    .expect("write lib");
+    .expect("failed to write project fixture Rust source");
 
     let tree = walk_project(&RealFileSystem, tmp.path());
     let entry = tree
@@ -150,19 +150,19 @@ fn preserves_immediate_ignored_symlink_file_children_in_discovered_dirs() {
 #[test]
 #[cfg(unix)]
 fn preserves_immediate_broken_symlink_children_in_discovered_dirs() {
-    let tmp = tempdir().expect("tempdir");
-    fs::create_dir_all(tmp.path().join("apps/devctl/crates/app/core")).expect("create dirs");
-    fs::write(tmp.path().join("apps/devctl/Cargo.toml"), "[workspace]\n").expect("write cargo");
+    let tmp = tempdir().expect("failed to create temporary project root");
+    fs::create_dir_all(tmp.path().join("apps/devctl/crates/app/core")).expect("failed to create project fixture directories");
+    fs::write(tmp.path().join("apps/devctl/Cargo.toml"), "[workspace]\n").expect("failed to write project fixture Cargo.toml");
     std::os::unix::fs::symlink(
         tmp.path().join("missing-target"),
         tmp.path().join("apps/devctl/crates/app/.env"),
     )
-    .expect("symlink");
+    .expect("failed to create project fixture symlink");
     fs::write(
         tmp.path().join("apps/devctl/crates/app/core/lib.rs"),
         "pub fn ready() {}\n",
     )
-    .expect("write lib");
+    .expect("failed to write project fixture Rust source");
 
     let tree = walk_project(&RealFileSystem, tmp.path());
     let entry = tree

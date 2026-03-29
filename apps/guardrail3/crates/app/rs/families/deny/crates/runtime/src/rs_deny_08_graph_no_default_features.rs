@@ -65,6 +65,6 @@ pub(crate) use ::test_support::{
 };
 #[cfg(test)]
 #[cfg(test)]
-#[path = "rs_deny_08_graph_no_default_features_tests/mod.rs"]
+#[path = "rs_deny_08_graph_no_default_features_tests/mod.rs"] // reason: test-only sidecar module wiring
 // reason: test-only sidecar module wiring
 mod rs_deny_08_graph_no_default_features_tests;

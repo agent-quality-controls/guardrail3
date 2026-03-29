@@ -40,5 +40,5 @@ pub fn check_inventory(
 }
 
 #[cfg(test)]
-#[path = "rs_cargo_14_input_failures_tests/mod.rs"]
+#[path = "rs_cargo_14_input_failures_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_cargo_14_input_failures_tests;

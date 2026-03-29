@@ -29,7 +29,7 @@ fn assert_lossless_structure(root: &Path, tree: &ProjectTree) {
         let rel = entry
             .path()
             .strip_prefix(root)
-            .expect("strip")
+            .expect("walkdir entry should remain under the golden root")
             .to_string_lossy()
             .into_owned();
         if entry.file_type().is_dir() {
@@ -77,7 +77,7 @@ fn assert_lossless_structure(root: &Path, tree: &ProjectTree) {
             .flatten()
         {
             let name = child.file_name().to_string_lossy().into_owned();
-            if child.file_type().expect("ft").is_dir() {
+            if child.file_type().expect("failed to read child file type while verifying golden fixture").is_dir() {
                 exp_d.push(name);
             } else {
                 exp_f.push(name);
@@ -101,7 +101,7 @@ fn lossless_golden_fixture_dirs() {
             let rel = entry
                 .path()
                 .strip_prefix(&root)
-                .expect("strip")
+                .expect("walkdir entry should remain under the golden root")
                 .to_string_lossy()
                 .into_owned();
             let _ = expected.insert(rel);
@@ -126,7 +126,7 @@ fn lossless_golden_fixture_files() {
             let rel = entry
                 .path()
                 .strip_prefix(&root)
-                .expect("strip")
+                .expect("walkdir entry should remain under the golden root")
                 .to_string_lossy()
                 .into_owned();
             let _ = expected.insert(rel);
@@ -160,7 +160,7 @@ fn lossless_golden_fixture_per_dir_children() {
             .flatten()
         {
             let name = child.file_name().to_string_lossy().into_owned();
-            if child.file_type().expect("ft").is_dir() {
+            if child.file_type().expect("failed to read child file type while verifying golden fixture").is_dir() {
                 expected_dirs.push(name);
             } else {
                 expected_files.push(name);

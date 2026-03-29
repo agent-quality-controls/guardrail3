@@ -51,6 +51,6 @@ pub(crate) fn parse_feature_entries_for_test(
     super::deny_support::parse_feature_entries_in_config(parsed)
 }
 #[cfg(test)]
-#[path = "rs_deny_22_extra_feature_bans_inventory_tests/mod.rs"]
+#[path = "rs_deny_22_extra_feature_bans_inventory_tests/mod.rs"] // reason: test-only sidecar module wiring
 // reason: test-only sidecar module wiring
 mod rs_deny_22_extra_feature_bans_inventory_tests;

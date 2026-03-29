@@ -28,5 +28,5 @@ pub use types::{
 };
 
 #[cfg(test)]
-#[path = "clippy_tests.rs"]
+#[path = "clippy_tests.rs"] // reason: colocated clippy module tests
 mod tests;

@@ -18,8 +18,8 @@ fn load() {
         ("vendor/tool/src/db.rs", "fn load() {}\n"),
     ] {
         let abs = root.join(rel);
-        std::fs::create_dir_all(abs.parent().expect("parent")).expect("mkdir");
-        std::fs::write(abs, source).expect("write");
+        std::fs::create_dir_all(abs.parent().expect("fixture source path must have a parent directory")).expect("failed to create fixture source directory");
+        std::fs::write(abs, source).expect("failed to write fixture source");
     }
 
     let tree = project_tree(
@@ -83,5 +83,5 @@ garde = { version = "0.22", features = ["derive"] }
         }],
     );
 
-    std::fs::remove_dir_all(root).expect("cleanup");
+    std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");
 }

@@ -14,7 +14,7 @@ fn required_child_symlink_to_valid_directory_hits_missing_and_loose_for_that_roo
         tmp.path().join("apps/devctl/crates/app"),
         tmp.path().join("apps/devctl/crates/domain"),
     )
-    .expect("symlink");
+    .expect("failed to create required-child symlink fixture");
 
     let results = super::run_family(tmp.path());
     assertions::assert_error_count_matching_file(
@@ -57,7 +57,7 @@ fn required_child_broken_symlink_hits_missing_and_loose_for_that_root() {
         "/nonexistent/path",
         tmp.path().join("apps/devctl/crates/domain"),
     )
-    .expect("symlink");
+    .expect("failed to create required-child symlink fixture");
 
     let results = super::run_family(tmp.path());
     assertions::assert_error_count_matching_file(
@@ -77,7 +77,7 @@ fn required_child_dev_null_symlink_hits_missing_and_loose_for_that_root() {
     let tmp = copy_fixture();
     remove_dir(tmp.path(), "apps/devctl/crates/domain");
     std::os::unix::fs::symlink("/dev/null", tmp.path().join("apps/devctl/crates/domain"))
-        .expect("symlink");
+        .expect("failed to create required-child symlink fixture");
 
     let results = super::run_family(tmp.path());
     assertions::assert_error_count_matching_file(
@@ -100,7 +100,7 @@ fn nested_required_child_valid_symlink_hits_missing_and_loose_for_that_root() {
         tmp.path().join(format!("{}/app", inner_hex())),
         tmp.path().join(format!("{}/domain", inner_hex())),
     )
-    .expect("symlink");
+    .expect("failed to create required-child symlink fixture");
 
     let results = super::run_family(tmp.path());
     assertions::assert_error_count_matching_file(&results, "", inner_hex(), 2, &[], &[], &[], &[]);
@@ -140,7 +140,7 @@ fn required_child_symlink_hits_every_owned_root_for_non_special_required_name() 
             tmp.path().join(format!("{dir}/app")),
             tmp.path().join(format!("{dir}/domain")),
         )
-        .expect("symlink");
+        .expect("failed to create required-child symlink fixture");
     }
 
     let results = super::run_family(tmp.path());
@@ -196,7 +196,7 @@ fn outer_adapters_symlink_hits_only_outer_roots_because_nested_hex_becomes_unrea
             tmp.path().join(format!("{dir}/app")),
             tmp.path().join(format!("{dir}/adapters")),
         )
-        .expect("symlink");
+        .expect("failed to create required-child symlink fixture");
     }
 
     let results = super::run_family(tmp.path());

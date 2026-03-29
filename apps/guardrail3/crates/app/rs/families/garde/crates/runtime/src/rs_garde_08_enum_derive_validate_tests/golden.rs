@@ -7,7 +7,7 @@ fn stays_quiet_for_validated_enum_boundary() {
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
     let clippy_toml = super::super::canonical_clippy_toml();
-    std::fs::create_dir_all(source_abs.parent().expect("parent")).expect("mkdir");
+    std::fs::create_dir_all(source_abs.parent().expect("fixture source path must have a parent directory")).expect("failed to create fixture source directory");
     std::fs::write(
         &source_abs,
         r#"
@@ -20,7 +20,7 @@ enum Input {
 }
 "#,
     )
-    .expect("write");
+    .expect("failed to write fixture source");
 
     let tree = project_tree(
         vec![
@@ -50,5 +50,5 @@ garde = { version = "0.22", features = ["derive"] }
     assert!(findings.is_empty());
     assertions::assert_rule_quiet(&results);
 
-    std::fs::remove_dir_all(root).expect("cleanup");
+    std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");
 }

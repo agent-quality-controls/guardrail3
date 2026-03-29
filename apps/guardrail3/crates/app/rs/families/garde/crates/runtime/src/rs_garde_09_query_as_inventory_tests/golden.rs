@@ -61,7 +61,7 @@ fn load() {
         "`qa` bypasses derive-based garde boundary checks. Review the target type and ensure validated input handling is explicit.",
     );
 
-    std::fs::remove_dir_all(root).expect("cleanup");
+    std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");
 }
 
 #[test]
@@ -124,5 +124,5 @@ fn load() {
         "`qau` bypasses derive-based garde boundary checks. Review the target type and ensure validated input handling is explicit.",
     );
 
-    std::fs::remove_dir_all(root).expect("cleanup");
+    std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");
 }

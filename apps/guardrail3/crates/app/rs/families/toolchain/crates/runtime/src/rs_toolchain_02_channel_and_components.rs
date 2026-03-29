@@ -301,6 +301,6 @@ pub(crate) fn test_input<'a>(
 }
 
 #[cfg(test)]
-#[path = "rs_toolchain_02_channel_and_components_tests/mod.rs"]
+#[path = "rs_toolchain_02_channel_and_components_tests/mod.rs"] // reason: test-only sidecar module wiring
 // reason: test-only sidecar module wiring
 mod rs_toolchain_02_channel_and_components_tests;

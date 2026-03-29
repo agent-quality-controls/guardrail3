@@ -851,5 +851,5 @@ fn package_publishable(tree: &ProjectTree, rel_dir: &str) -> bool {
 }
 
 #[cfg(test)]
-#[path = "facts_tests/mod.rs"]
+#[path = "facts_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod facts_tests;

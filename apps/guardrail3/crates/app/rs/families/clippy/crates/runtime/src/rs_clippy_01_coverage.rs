@@ -74,5 +74,5 @@ pub(crate) fn run_for_tests(root: &Path) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-#[path = "rs_clippy_01_coverage_tests/mod.rs"]
+#[path = "rs_clippy_01_coverage_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_clippy_01_coverage_tests;

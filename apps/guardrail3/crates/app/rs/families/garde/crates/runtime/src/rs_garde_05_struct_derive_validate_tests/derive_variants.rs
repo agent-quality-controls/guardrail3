@@ -5,8 +5,8 @@ fn run_struct_boundary(source: &str) -> Vec<assertions::CheckResult> {
     let root = temp_root("rs-garde-05-derive-variants");
     let source_abs = root.join("src/input.rs");
     let clippy_toml = super::super::canonical_clippy_toml();
-    std::fs::create_dir_all(source_abs.parent().expect("parent")).expect("mkdir");
-    std::fs::write(&source_abs, source).expect("write");
+    std::fs::create_dir_all(source_abs.parent().expect("fixture source path must have a parent directory")).expect("failed to create fixture source directory");
+    std::fs::write(&source_abs, source).expect("failed to write fixture source");
 
     let tree = project_tree(
         vec![
@@ -33,7 +33,7 @@ garde = { version = "0.22", features = ["derive"] }
 
     let results = super::super::run_family(&tree);
 
-    std::fs::remove_dir_all(root).expect("cleanup");
+    std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");
     results
 }
 

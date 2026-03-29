@@ -9,7 +9,7 @@ fn handles_multiple_roots() {
     let clippy_toml = super::super::canonical_clippy_toml();
 
     let source1_abs = root.join(source1_rel);
-    std::fs::create_dir_all(source1_abs.parent().expect("parent")).expect("mkdir");
+    std::fs::create_dir_all(source1_abs.parent().expect("fixture source path must have a parent directory")).expect("failed to create fixture source directory");
     std::fs::write(
         &source1_abs,
         r#"
@@ -21,10 +21,10 @@ struct InputA {
 }
 "#,
     )
-    .expect("write");
+    .expect("failed to write fixture source");
 
     let source2_abs = root.join(source2_rel);
-    std::fs::create_dir_all(source2_abs.parent().expect("parent")).expect("mkdir");
+    std::fs::create_dir_all(source2_abs.parent().expect("fixture source path must have a parent directory")).expect("failed to create fixture source directory");
     std::fs::write(
         &source2_abs,
         r#"
@@ -37,7 +37,7 @@ struct InputB {
 }
 "#,
     )
-    .expect("write");
+    .expect("failed to write fixture source");
 
     let tree = project_tree(
         vec![
@@ -95,5 +95,5 @@ garde = { version = "0.22", features = ["derive"] }
     );
     assertions::assert_single_error(&results, Some(source1_rel), Some(4), None, None);
 
-    std::fs::remove_dir_all(root).expect("cleanup");
+    std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");
 }

@@ -42,7 +42,7 @@ fn load() {
     assert!(findings.is_empty());
     assertions::assert_rule_quiet(&results);
 
-    std::fs::remove_dir_all(root).expect("cleanup");
+    std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");
 }
 
 #[test]
@@ -92,5 +92,5 @@ fn load() {
     assert!(findings.is_empty());
     assertions::assert_rule_quiet(&results);
 
-    std::fs::remove_dir_all(root).expect("cleanup");
+    std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");
 }

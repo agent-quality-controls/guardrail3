@@ -7,7 +7,7 @@ fn errors_when_validated_boundary_field_has_no_real_garde_rule() {
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
     let clippy_toml = super::super::canonical_clippy_toml();
-    std::fs::create_dir_all(source_abs.parent().expect("parent")).expect("mkdir");
+    std::fs::create_dir_all(source_abs.parent().expect("fixture source path must have a parent directory")).expect("failed to create fixture source directory");
     std::fs::write(
         &source_abs,
         r#"
@@ -20,7 +20,7 @@ struct Input {
 }
 "#,
     )
-    .expect("write");
+    .expect("failed to write fixture source");
 
     let tree = project_tree(
         vec![
@@ -62,7 +62,7 @@ garde = { version = "0.22", features = ["derive"] }
         ),
     );
 
-    std::fs::remove_dir_all(root).expect("cleanup");
+    std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");
 }
 
 #[test]
@@ -71,7 +71,7 @@ fn does_not_treat_foreign_qualified_type_as_local_nested_validated() {
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
     let clippy_toml = super::super::canonical_clippy_toml();
-    std::fs::create_dir_all(source_abs.parent().expect("parent")).expect("mkdir");
+    std::fs::create_dir_all(source_abs.parent().expect("fixture source path must have a parent directory")).expect("failed to create fixture source directory");
     std::fs::write(
         &source_abs,
         r#"
@@ -84,7 +84,7 @@ struct Input {
 }
 "#,
     )
-    .expect("write");
+    .expect("failed to write fixture source");
 
     let tree = project_tree(
         vec![
@@ -156,7 +156,7 @@ pub struct Profile {
     );
     assertions::assert_nested_dive_quiet(&results);
 
-    std::fs::remove_dir_all(root).expect("cleanup");
+    std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");
 }
 
 #[test]
@@ -165,7 +165,7 @@ fn custom_types_with_map_suffix_still_need_field_validators() {
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
     let clippy_toml = super::super::canonical_clippy_toml();
-    std::fs::create_dir_all(source_abs.parent().expect("parent")).expect("mkdir");
+    std::fs::create_dir_all(source_abs.parent().expect("fixture source path must have a parent directory")).expect("failed to create fixture source directory");
     std::fs::write(
         &source_abs,
         r#"
@@ -182,7 +182,7 @@ struct Input {
 }
 "#,
     )
-    .expect("write");
+    .expect("failed to write fixture source");
 
     let tree = project_tree(
         vec![
@@ -222,5 +222,5 @@ garde = { version = "0.22", features = ["derive"] }
         None,
     );
 
-    std::fs::remove_dir_all(root).expect("cleanup");
+    std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");
 }

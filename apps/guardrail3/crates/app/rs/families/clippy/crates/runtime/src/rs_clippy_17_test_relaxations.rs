@@ -93,5 +93,5 @@ pub(crate) fn run_for_tests(tree: &ProjectTree, rel_path: &str) -> Vec<CheckResu
 }
 
 #[cfg(test)]
-#[path = "rs_clippy_17_test_relaxations_tests/mod.rs"]
+#[path = "rs_clippy_17_test_relaxations_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_clippy_17_test_relaxations_tests;

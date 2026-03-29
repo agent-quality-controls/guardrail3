@@ -74,5 +74,5 @@ fn edition_rank(edition: &str) -> usize {
 }
 
 #[cfg(test)]
-#[path = "rs_cargo_09_member_edition_drift_tests/mod.rs"]
+#[path = "rs_cargo_09_member_edition_drift_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_cargo_09_member_edition_drift_tests;
