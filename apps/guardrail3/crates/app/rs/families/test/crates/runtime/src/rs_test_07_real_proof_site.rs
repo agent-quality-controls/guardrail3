@@ -1,6 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use guardrail3_domain_report::{CheckResult, Severity};
+use crate::{CheckResult, Severity};
 
 use super::inputs::TestFunctionInput;
 use super::parse::{TestFunctionInfo, UseBinding};

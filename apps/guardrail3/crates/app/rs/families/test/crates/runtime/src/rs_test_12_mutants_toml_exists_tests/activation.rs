@@ -1,11 +1,10 @@
 #[allow(unused_imports)]
 use guardrail3_app_rs_family_test_assertions::rs_test_12_mutants_toml_exists::{
-    assert_inventory, assert_reported, assert_rule_files, assert_rule_quiet,
+    Severity, assert_inventory, assert_reported, assert_rule_files, assert_rule_quiet,
 };
 
 #[allow(unused_imports)]
 use super::{run_family, tempdir, write_file};
-use guardrail3_domain_report::Severity;
 
 #[test]
 fn missing_config_is_ignored_without_adoption_and_required_for_hook_only_adoption() {

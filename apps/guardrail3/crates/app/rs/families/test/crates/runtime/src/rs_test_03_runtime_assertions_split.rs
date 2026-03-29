@@ -1,6 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use guardrail3_domain_report::{CheckResult, Severity};
+use crate::{CheckResult, Severity};
 
 use super::AnalyzedFile;
 use super::discover::{parent_dir, path_is_under};
@@ -616,7 +616,12 @@ fn allowed_sidecar_packages(component: &super::facts::TestComponentFacts) -> BTr
 }
 
 fn allowed_assertions_packages(component: &super::facts::TestComponentFacts) -> BTreeSet<String> {
-    let mut allowed = BTreeSet::from(["test_support".to_owned()]);
+    let mut allowed = BTreeSet::from([
+        "test_support".to_owned(),
+        // Assertions prove over the runtime's public CheckResult surface, so the shared
+        // report model is part of their allowed semantic dependency set.
+        "guardrail3_domain_report".to_owned(),
+    ]);
     if let Some(runtime_package_name) = component.runtime_package_name.as_ref() {
         let _ = allowed.insert(runtime_package_name.clone());
     }
@@ -647,7 +652,10 @@ fn foreign_assertions_module_target<'a>(
     let [first, second, ..] = path_segments else {
         return None;
     };
-    if first != assertions_package_name || second == owner_module_name {
+    if first != assertions_package_name
+        || second == owner_module_name
+        || (owner_module_name == "lib" && path_segments.len() == 2)
+    {
         return None;
     }
     Some(second.as_str())

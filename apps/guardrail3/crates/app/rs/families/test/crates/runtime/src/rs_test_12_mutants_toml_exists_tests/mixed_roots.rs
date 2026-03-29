@@ -1,11 +1,10 @@
 #[allow(unused_imports)]
 use guardrail3_app_rs_family_test_assertions::rs_test_12_mutants_toml_exists::{
-    assert_inventory, assert_reported, assert_rule_files, assert_rule_quiet,
+    Severity, assert_inventory, assert_reported, assert_rule_files, assert_rule_quiet,
 };
 
 #[allow(unused_imports)]
 use super::{run_family, tempdir, write_file};
-use guardrail3_domain_report::Severity;
 
 #[test]
 fn workspace_root_adoption_does_not_require_mutants_config_for_idle_standalone_root() {

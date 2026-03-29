@@ -1,8 +1,6 @@
-use guardrail3_domain_report::Severity;
-
 #[allow(unused_imports)]
 use guardrail3_app_rs_family_test_assertions::rs_test_01_inline_test_bodies::{
-    assert_reported, assert_rule_files, assert_rule_quiet,
+    Severity, assert_reported, assert_rule_files, assert_rule_quiet,
 };
 
 #[allow(unused_imports)]

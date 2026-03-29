@@ -1,6 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use guardrail3_app_rs_family_mapper::{FamilyMapper, RsTestRoute};
+pub use guardrail3_domain_report::{CheckResult, Severity};
 
 mod discover;
 mod facts;
@@ -26,7 +27,6 @@ mod rs_test_17_external_harnesses_use_assertions;
 mod rs_test_18_test_support_generic;
 
 use guardrail3_domain_project_tree::ProjectTree;
-use guardrail3_domain_report::CheckResult;
 use guardrail3_outbound_traits::ToolChecker;
 use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
@@ -290,6 +290,7 @@ fn active_failures_for_root<'a>(
 ) -> Vec<&'a InputFailureFacts> {
     let async_active =
         analysis.has_tests && (root.tokio_dependency_present || analysis.has_tokio_tests);
+    let mut seen_paths = BTreeSet::new();
 
     facts
         .input_failures
@@ -305,6 +306,7 @@ fn active_failures_for_root<'a>(
             }
             true
         })
+        .filter(|failure| seen_paths.insert(failure.rel_path.clone()))
         .collect::<Vec<_>>()
 }
 

@@ -172,6 +172,7 @@ Owns:
 May import:
 
 - sibling `runtime` public API only
+- shared report-model types exposed through that public API
 - shared `test_support`
 - std and third-party crates
 

@@ -170,7 +170,8 @@ fn collect_cargo_roots(
 fn collect_test_root_dirs(cargo_roots: &BTreeMap<String, CargoRootFacts>) -> Vec<String> {
     let mut root_dirs = BTreeSet::new();
     for rel_dir in cargo_roots.keys() {
-        let _ = root_dirs.insert(component_container_root(rel_dir).unwrap_or_else(|| rel_dir.clone()));
+        let _ =
+            root_dirs.insert(component_container_root(rel_dir).unwrap_or_else(|| rel_dir.clone()));
     }
     root_dirs.into_iter().collect()
 }
@@ -181,6 +182,7 @@ fn component_container_root(rel_dir: &str) -> Option<String> {
         "crates/runtime"
             | "crates/assertions"
             | "crates/assertions_common"
+            | "assertions"
             | "crates/test_support"
             | "test_support"
     ) {
@@ -190,6 +192,7 @@ fn component_container_root(rel_dir: &str) -> Option<String> {
         .strip_suffix("/crates/runtime")
         .or_else(|| rel_dir.strip_suffix("/crates/assertions"))
         .or_else(|| rel_dir.strip_suffix("/crates/assertions_common"))
+        .or_else(|| rel_dir.strip_suffix("/assertions"))
         .or_else(|| rel_dir.strip_suffix("/crates/test_support"))
         .or_else(|| rel_dir.strip_suffix("/test_support"))
         .map(ToOwned::to_owned)
@@ -271,7 +274,7 @@ fn build_root_facts(
             .and_then(|profile| profile.get("mutants"))
             .is_some(),
         mutation_hook_files: collect_mutation_hook_files(tree, rel_dir),
-        components: collect_components(tree, rel_dir, input_failures),
+        components: collect_components(tree, rel_dir, cargo, input_failures),
     }
 }
 
@@ -633,13 +636,24 @@ fn shell_words(command_text: &str) -> Vec<String> {
 fn collect_components(
     tree: &ProjectTree,
     root_rel_dir: &str,
+    root_cargo: Option<&CargoRootFacts>,
     input_failures: &mut Vec<InputFailureFacts>,
 ) -> Vec<TestComponentFacts> {
     let crates_rel_dir = join_under_root(root_rel_dir, "crates");
     let direct_runtime_rel_dir = ProjectTree::join_rel(&crates_rel_dir, "runtime");
     let direct_runtime_cargo_rel_path =
         ProjectTree::join_rel(&direct_runtime_rel_dir, "Cargo.toml");
-    if !tree.file_exists(&direct_runtime_cargo_rel_path) {
+    if tree.file_exists(&direct_runtime_cargo_rel_path) {
+        return vec![build_component_facts(
+            tree,
+            root_rel_dir,
+            root_rel_dir,
+            &direct_runtime_rel_dir,
+            input_failures,
+        )];
+    }
+
+    if !root_cargo.is_some_and(|cargo| cargo.has_package) {
         return Vec::new();
     }
 
@@ -647,7 +661,7 @@ fn collect_components(
         tree,
         root_rel_dir,
         root_rel_dir,
-        &direct_runtime_rel_dir,
+        root_rel_dir,
         input_failures,
     )]
 }
@@ -662,7 +676,11 @@ fn build_component_facts(
     let runtime_cargo_rel_path = ProjectTree::join_rel(runtime_rel_dir, "Cargo.toml");
     let runtime_parsed =
         parse_manifest(tree, root_rel_dir, &runtime_cargo_rel_path, input_failures);
-    let component_parent = parent_dir(runtime_rel_dir).to_owned();
+    let component_parent = if runtime_rel_dir == component_rel_dir {
+        component_rel_dir.to_owned()
+    } else {
+        parent_dir(runtime_rel_dir).to_owned()
+    };
     let assertions_rel_dir = ProjectTree::join_rel(&component_parent, "assertions");
     let assertions_cargo_rel_path = ProjectTree::join_rel(&assertions_rel_dir, "Cargo.toml");
     let assertions_exists = tree.file_exists(&assertions_cargo_rel_path);
