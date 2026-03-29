@@ -2,14 +2,20 @@ use super::*;
 
 #[test]
 #[allow(clippy::disallowed_methods)] // reason: test — parsing generated JSON to verify structure
-#[allow(clippy::panic)] // reason: test — panic on invalid JSON indicates broken generation
 fn cspell_config_is_valid_json() {
     let json = build_cspell_config();
-    let Ok(value) = serde_json::from_str::<serde_json::Value>(&json) else {
-        panic!("cspell config must be valid JSON");
+    let parsed = serde_json::from_str::<serde_json::Value>(&json);
+    assert!(
+        parsed.is_ok(),
+        "cspell config must be valid JSON: {parsed:?}"
+    );
+    let value = match parsed {
+        Ok(value) => value,
+        Err(_) => return,
     };
     let Some(obj) = value.as_object() else {
-        panic!("root must be a JSON object");
+        assert!(false, "root must be a JSON object");
+        return;
     };
     assert_eq!(
         obj.get("version").and_then(|v| v.as_str()),

@@ -2,8 +2,45 @@ use crate::ast_helpers::*;
 use guardrail3_app_rs_ast_assertions::ast_helpers::assert_single_cfg_attr_allow;
 
 fn must_parse(source: &str) -> syn::File {
-    #[allow(clippy::expect_used)] // reason: test helper — panic on bad input is correct
-    parse_file(source).expect("test input should be valid Rust")
+    match parse_file(source) {
+        Some(file) => file,
+        None => panic!("test input should be valid Rust"),
+    }
+}
+
+fn only_item_allow<'a>(allows: &'a [(usize, String)], expected_lint: &str) -> &'a str {
+    assert_eq!(allows.len(), 1, "should find exactly one item-level allow");
+    let Some((_, lint)) = allows.first() else {
+        panic!("expected exactly one item-level allow");
+    };
+    assert_eq!(lint, expected_lint);
+    lint
+}
+
+fn only_cfg_attr_allow<'a>(allows: &'a [CfgAttrAllowInfo]) -> &'a CfgAttrAllowInfo {
+    assert_eq!(allows.len(), 1, "should find exactly one cfg_attr allow");
+    let Some(allow) = allows.first() else {
+        panic!("expected exactly one cfg_attr allow");
+    };
+    allow
+}
+
+fn only_macro_name<'a>(macros: &'a [(usize, String)], expected_name: &str) -> &'a str {
+    assert_eq!(macros.len(), 1, "should find exactly one forbidden macro");
+    let Some((_, name)) = macros.first() else {
+        panic!("expected exactly one forbidden macro");
+    };
+    assert_eq!(name, expected_name);
+    name
+}
+
+fn only_unwrap_expect<'a>(items: &'a [(usize, String)], expected_name: &str) -> &'a str {
+    assert_eq!(items.len(), 1, "should find exactly one unwrap/expect call");
+    let Some((_, name)) = items.first() else {
+        panic!("expected exactly one unwrap/expect call");
+    };
+    assert_eq!(name, expected_name);
+    name
 }
 
 #[test]
@@ -39,13 +76,11 @@ fn crate_level_allow_multiple_lints() {
 }
 
 #[test]
-#[allow(clippy::indexing_slicing)] // reason: test assertion on known-length vector
 fn item_allow_found() {
     let attr = ["#[allow(", "clippy::unwrap_used)]"].concat();
     let src = format!("{attr}\nfn foo() {{}}");
     let allows = find_item_allows(&must_parse(&src));
-    assert_eq!(allows.len(), 1, "should find item-level allow");
-    assert_eq!(allows[0].1, "clippy::unwrap_used");
+    let _ = only_item_allow(&allows, "clippy::unwrap_used");
 }
 
 #[test]
@@ -59,22 +94,28 @@ fn item_allow_in_string_not_found() {
 }
 
 #[test]
-#[allow(clippy::indexing_slicing)] // reason: test assertion on known-length vector
 fn item_allow_on_impl_method() {
     let attr = ["#[allow(", "dead_code)]"].concat();
     let src = format!("struct S;\nimpl S {{\n    {attr}\n    fn method(&self) {{}}\n}}");
     let allows = find_item_allows(&must_parse(&src));
-    assert_eq!(allows.len(), 1, "should find allow on impl method");
-    assert_eq!(allows[0].1, "dead_code");
+    let _ = only_item_allow(&allows, "dead_code");
 }
 
 #[test]
-#[allow(clippy::indexing_slicing)] // reason: test assertion on known-length vector
 fn cfg_attr_allow_found() {
     let allows = find_cfg_attr_allows(&must_parse(
         "#[cfg_attr(test, allow(dead_code))]\nfn foo() {}",
     ));
-    assert_single_cfg_attr_allow(allows.len(), allows[0].line, &allows[0].lint, allows[0].is_always_true, 1, "dead_code", false);
+    let allow = only_cfg_attr_allow(&allows);
+    assert_single_cfg_attr_allow(
+        allows.len(),
+        allow.line,
+        &allow.lint,
+        allow.is_always_true,
+        1,
+        "dead_code",
+        false,
+    );
 }
 
 #[test]
@@ -88,21 +129,37 @@ fn cfg_attr_allow_in_string_not_found() {
 }
 
 #[test]
-#[allow(clippy::indexing_slicing)] // reason: test assertion on known-length vector
 fn cfg_attr_all_empty_is_always_true() {
     let allows = find_cfg_attr_allows(&must_parse(
         "#[cfg_attr(all(), allow(dead_code))]\nfn foo() {}",
     ));
-    assert_single_cfg_attr_allow(allows.len(), allows[0].line, &allows[0].lint, allows[0].is_always_true, 1, "dead_code", true);
+    let allow = only_cfg_attr_allow(&allows);
+    assert_single_cfg_attr_allow(
+        allows.len(),
+        allow.line,
+        &allow.lint,
+        allow.is_always_true,
+        1,
+        "dead_code",
+        true,
+    );
 }
 
 #[test]
-#[allow(clippy::indexing_slicing)] // reason: test assertion on known-length vector
 fn cfg_attr_all_with_args_is_not_always_true() {
     let allows = find_cfg_attr_allows(&must_parse(
         "#[cfg_attr(all(unix), allow(dead_code))]\nfn foo() {}",
     ));
-    assert_single_cfg_attr_allow(allows.len(), allows[0].line, &allows[0].lint, allows[0].is_always_true, 1, "dead_code", false);
+    let allow = only_cfg_attr_allow(&allows);
+    assert_single_cfg_attr_allow(
+        allows.len(),
+        allow.line,
+        &allow.lint,
+        allow.is_always_true,
+        1,
+        "dead_code",
+        false,
+    );
 }
 
 #[test]
@@ -122,7 +179,16 @@ fn cfg_attr_allow_found_on_trait_item() {
     let allows = find_cfg_attr_allows(&must_parse(
         "trait Api {\n    #[cfg_attr(test, allow(dead_code))]\n    fn run();\n}",
     ));
-    assert_single_cfg_attr_allow(allows.len(), allows[0].line, &allows[0].lint, allows[0].is_always_true, 2, "dead_code", false);
+    let allow = only_cfg_attr_allow(&allows);
+    assert_single_cfg_attr_allow(
+        allows.len(),
+        allow.line,
+        &allow.lint,
+        allow.is_always_true,
+        2,
+        "dead_code",
+        false,
+    );
 }
 
 #[test]
@@ -130,7 +196,16 @@ fn nested_cfg_attr_allow_found() {
     let allows = find_cfg_attr_allows(&must_parse(
         "#[cfg_attr(test, cfg_attr(unix, allow(dead_code)))]\nunsafe extern \"C\" { fn puts(s: *const i8); }",
     ));
-    assert_single_cfg_attr_allow(allows.len(), allows[0].line, &allows[0].lint, allows[0].is_always_true, 1, "dead_code", false);
+    let allow = only_cfg_attr_allow(&allows);
+    assert_single_cfg_attr_allow(
+        allows.len(),
+        allow.line,
+        &allow.lint,
+        allow.is_always_true,
+        1,
+        "dead_code",
+        false,
+    );
 }
 
 #[test]
@@ -182,17 +257,13 @@ fn unsafe_in_string_not_found() {
 }
 
 #[test]
-#[allow(clippy::indexing_slicing)] // reason: test assertion on known-length vector
 fn forbidden_macros_found() {
     let m1 = find_forbidden_macros(&must_parse("fn f() { todo!(); }"));
-    assert_eq!(m1.len(), 1, "todo found");
-    assert_eq!(m1[0].1, "todo");
+    let _ = only_macro_name(&m1, "todo");
     let m2 = find_forbidden_macros(&must_parse("fn f() { unimplemented!(); }"));
-    assert_eq!(m2.len(), 1, "unimplemented found");
-    assert_eq!(m2[0].1, "unimplemented");
+    let _ = only_macro_name(&m2, "unimplemented");
     let m3 = find_forbidden_macros(&must_parse("fn f() { panic!(\"oh\"); }"));
-    assert_eq!(m3.len(), 1, "panic found");
-    assert_eq!(m3[0].1, "panic");
+    let _ = only_macro_name(&m3, "panic");
 }
 
 #[test]
@@ -205,14 +276,11 @@ fn todo_in_string_not_found() {
 }
 
 #[test]
-#[allow(clippy::indexing_slicing)] // reason: test assertion on known-length vector
 fn unwrap_expect_found() {
     let u = find_unwrap_expect(&must_parse("fn f() { Some(1).unwrap(); }"));
-    assert_eq!(u.len(), 1, "unwrap found");
-    assert_eq!(u[0].1, "unwrap");
+    let _ = only_unwrap_expect(&u, "unwrap");
     let e = find_unwrap_expect(&must_parse("fn f() { Some(1).expect(\"m\"); }"));
-    assert_eq!(e.len(), 1, "expect found");
-    assert_eq!(e[0].1, "expect");
+    let _ = only_unwrap_expect(&e, "expect");
 }
 
 #[test]
