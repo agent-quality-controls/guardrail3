@@ -220,7 +220,6 @@ fn show_file_diff(path: &Path, new_content: &str) {
     }
 }
 
-#[allow(clippy::too_many_lines)] // reason: generates per-app config sections sequentially
 fn generate_rs_config_content(profile: &str, project_path: &Path) -> String {
     let fs = RealFileSystem;
     let project = detect_project(&fs, project_path);
@@ -237,77 +236,101 @@ workspace_root = "."
     );
 
     let members = project.all_member_dirs();
+    write_global_checks(&mut config);
+    if members.is_empty() {
+        write_single_crate_checks(&mut config);
+    } else {
+        write_workspace_checks(&mut config, &project);
+    }
+
+    config
+}
+
+fn write_global_checks(config: &mut String) {
     writeln!(config, "\n[rust.checks]").unwrap_or_default();
     writeln!(config, "arch = true").unwrap_or_default();
-    if members.is_empty() {
-        // Single-crate — workspace-level checks
-        writeln!(config, "fmt = true").unwrap_or_default();
-        writeln!(config, "toolchain = true").unwrap_or_default();
+}
+
+fn write_single_crate_checks(config: &mut String) {
+    writeln!(config, "fmt = true").unwrap_or_default();
+    writeln!(config, "toolchain = true").unwrap_or_default();
+    writeln!(config, "clippy = true").unwrap_or_default();
+    writeln!(config, "deny = true").unwrap_or_default();
+    writeln!(config, "cargo = true").unwrap_or_default();
+    writeln!(config, "code = true").unwrap_or_default();
+    writeln!(config, "hexarch = true").unwrap_or_default();
+    writeln!(config, "libarch = true").unwrap_or_default();
+    writeln!(config, "deps = true").unwrap_or_default();
+    writeln!(config, "garde = true").unwrap_or_default();
+    writeln!(config, "test = true").unwrap_or_default();
+    writeln!(config, "release = true").unwrap_or_default();
+    writeln!(config, "hooks_shared = true").unwrap_or_default();
+    writeln!(config, "hooks_rs = true").unwrap_or_default();
+}
+
+fn write_workspace_checks(
+    config: &mut String,
+    project: &guardrail3_app_core::discover::ProjectInfo,
+) {
+    let (app_names, has_packages) = discover_rust_app_groups(project);
+
+    for app_name in app_names {
+        writeln!(config, "\n[rust.apps.{app_name}]").unwrap_or_default();
+        writeln!(config, "type = \"service\"").unwrap_or_default();
+        writeln!(config, "\n[rust.apps.{app_name}.checks]").unwrap_or_default();
         writeln!(config, "clippy = true").unwrap_or_default();
         writeln!(config, "deny = true").unwrap_or_default();
         writeln!(config, "cargo = true").unwrap_or_default();
         writeln!(config, "code = true").unwrap_or_default();
         writeln!(config, "hexarch = true").unwrap_or_default();
-        writeln!(config, "libarch = true").unwrap_or_default();
         writeln!(config, "deps = true").unwrap_or_default();
         writeln!(config, "garde = true").unwrap_or_default();
         writeln!(config, "test = true").unwrap_or_default();
         writeln!(config, "release = true").unwrap_or_default();
-        writeln!(config, "hooks_shared = true").unwrap_or_default();
-        writeln!(config, "hooks_rs = true").unwrap_or_default();
-    } else {
-        // Multi-crate workspace — per-app + packages
-        let mut seen_apps: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
-        let mut has_packages = false;
+    }
 
-        for ws in &project.workspaces {
-            for member in &ws.members {
-                let dir = &member.dir;
-                if dir.starts_with("packages/") || dir.contains("/packages/") {
-                    has_packages = true;
-                    continue;
-                }
-                let app_name = if dir.starts_with("apps/") {
-                    dir.strip_prefix("apps/")
-                        .and_then(|rest| rest.split('/').next())
-                        .unwrap_or(&member.name)
-                } else {
-                    &member.name
-                };
-                if !seen_apps.contains(app_name) {
-                    let _ = seen_apps.insert(app_name.to_owned());
-                    writeln!(config, "\n[rust.apps.{app_name}]").unwrap_or_default();
-                    writeln!(config, "type = \"service\"").unwrap_or_default();
-                    writeln!(config, "\n[rust.apps.{app_name}.checks]").unwrap_or_default();
-                    writeln!(config, "clippy = true").unwrap_or_default();
-                    writeln!(config, "deny = true").unwrap_or_default();
-                    writeln!(config, "cargo = true").unwrap_or_default();
-                    writeln!(config, "code = true").unwrap_or_default();
-                    writeln!(config, "hexarch = true").unwrap_or_default();
-                    writeln!(config, "deps = true").unwrap_or_default();
-                    writeln!(config, "garde = true").unwrap_or_default();
-                    writeln!(config, "test = true").unwrap_or_default();
-                    writeln!(config, "release = true").unwrap_or_default();
-                }
+    if has_packages {
+        writeln!(config, "\n[rust.packages]").unwrap_or_default();
+        writeln!(config, "type = \"library\"").unwrap_or_default();
+        writeln!(config, "\n[rust.packages.checks]").unwrap_or_default();
+        writeln!(config, "clippy = true").unwrap_or_default();
+        writeln!(config, "deny = true").unwrap_or_default();
+        writeln!(config, "cargo = true").unwrap_or_default();
+        writeln!(config, "code = true").unwrap_or_default();
+        writeln!(config, "libarch = true").unwrap_or_default();
+        writeln!(config, "deps = true").unwrap_or_default();
+        writeln!(config, "garde = false").unwrap_or_default();
+        writeln!(config, "test = true").unwrap_or_default();
+        writeln!(config, "release = false").unwrap_or_default();
+    }
+}
+
+fn discover_rust_app_groups(
+    project: &guardrail3_app_core::discover::ProjectInfo,
+) -> (std::collections::BTreeSet<String>, bool) {
+    let mut seen_apps = std::collections::BTreeSet::new();
+    let mut has_packages = false;
+
+    for ws in &project.workspaces {
+        for member in &ws.members {
+            let dir = &member.dir;
+            if dir.starts_with("packages/") || dir.contains("/packages/") {
+                has_packages = true;
+                continue;
             }
-        }
-        if has_packages {
-            writeln!(config, "\n[rust.packages]").unwrap_or_default();
-            writeln!(config, "type = \"library\"").unwrap_or_default();
-            writeln!(config, "\n[rust.packages.checks]").unwrap_or_default();
-            writeln!(config, "clippy = true").unwrap_or_default();
-            writeln!(config, "deny = true").unwrap_or_default();
-            writeln!(config, "cargo = true").unwrap_or_default();
-            writeln!(config, "code = true").unwrap_or_default();
-            writeln!(config, "libarch = true").unwrap_or_default();
-            writeln!(config, "deps = true").unwrap_or_default();
-            writeln!(config, "garde = false").unwrap_or_default();
-            writeln!(config, "test = true").unwrap_or_default();
-            writeln!(config, "release = false").unwrap_or_default();
+
+            let app_name = if dir.starts_with("apps/") {
+                dir.strip_prefix("apps/")
+                    .and_then(|rest: &str| rest.split('/').next())
+                    .unwrap_or(&member.name)
+            } else {
+                &member.name
+            };
+            let _ = seen_apps.insert(app_name.to_owned());
         }
     }
 
-    config
+    (seen_apps, has_packages)
 }
 
 /// Generate the `[typescript]` TOML section by discovering apps and auto-detecting their types.

@@ -101,7 +101,6 @@ fn print_rust(map: &ProjectMap) {
 }
 
 #[allow(clippy::print_stdout)] // reason: CLI output
-#[allow(clippy::too_many_lines)] // reason: display formatting for TS section
 fn print_ts(map: &ProjectMap) {
     if map.ts_scopes.is_empty() {
         return;
@@ -129,70 +128,25 @@ fn print_ts(map: &ProjectMap) {
 
     if !apps.is_empty() {
         println!("  Apps:");
-        for scope in &apps {
-            print_ts_scope(scope);
-        }
+        print_ts_group(&apps);
         println!();
     }
 
     if !packages.is_empty() {
         println!("  Packages:");
-        for scope in &packages {
-            print_ts_scope(scope);
-        }
+        print_ts_group(&packages);
         println!();
     }
 
     if !tools.is_empty() {
         println!("  Tools:");
-        for scope in &tools {
-            print_ts_scope(scope);
-        }
+        print_ts_group(&tools);
         println!();
     }
 
     // Root-level TS guardrails
-    let rc = &map.root_configs;
-    let has_root_ts = rc.eslint_config.is_some()
-        || rc.stylelint_config.is_some()
-        || rc.tsconfig_base.is_some()
-        || rc.npmrc.is_some()
-        || rc.jscpd_config.is_some()
-        || rc.cspell_config.is_some()
-        || rc.prettier_config.is_some();
-
-    if has_root_ts {
-        println!("  Root guardrails:");
-        if let Some(p) = &rc.eslint_config {
-            println!(
-                "    eslint.config.mjs              {} lines",
-                count_lines(p)
-            );
-        }
-        if let Some(p) = &rc.stylelint_config {
-            println!(
-                "    .stylelintrc                   {} lines",
-                count_lines(p)
-            );
-        }
-        if rc.tsconfig_base.is_some() {
-            println!("    tsconfig.base.json");
-        }
-        if rc.npmrc.is_some() {
-            println!("    .npmrc");
-        }
-        if rc.jscpd_config.is_some() {
-            println!("    .jscpd.json");
-        }
-        if rc.cspell_config.is_some() {
-            println!("    cspell config");
-        } else {
-            println!("    cspell config                  MISSING");
-        }
-        if rc.prettier_config.is_some() {
-            println!("    prettier config");
-        }
-        println!();
+    if has_root_ts_guardrails(map) {
+        print_root_ts_guardrails(map);
     }
 }
 
@@ -227,6 +181,59 @@ fn print_ts_scope(scope: &TsScope) {
     if c.stylelint_config.is_some() {
         println!("      stylelint config (per-app)");
     }
+}
+
+fn print_ts_group(scopes: &[&TsScope]) {
+    for scope in scopes {
+        print_ts_scope(scope);
+    }
+}
+
+fn has_root_ts_guardrails(map: &ProjectMap) -> bool {
+    let rc = &map.root_configs;
+    rc.eslint_config.is_some()
+        || rc.stylelint_config.is_some()
+        || rc.tsconfig_base.is_some()
+        || rc.npmrc.is_some()
+        || rc.jscpd_config.is_some()
+        || rc.cspell_config.is_some()
+        || rc.prettier_config.is_some()
+}
+
+#[allow(clippy::print_stdout)] // reason: CLI output
+fn print_root_ts_guardrails(map: &ProjectMap) {
+    let rc = &map.root_configs;
+    println!("  Root guardrails:");
+    if let Some(p) = &rc.eslint_config {
+        println!(
+            "    eslint.config.mjs              {} lines",
+            count_lines(p)
+        );
+    }
+    if let Some(p) = &rc.stylelint_config {
+        println!(
+            "    .stylelintrc                   {} lines",
+            count_lines(p)
+        );
+    }
+    if rc.tsconfig_base.is_some() {
+        println!("    tsconfig.base.json");
+    }
+    if rc.npmrc.is_some() {
+        println!("    .npmrc");
+    }
+    if rc.jscpd_config.is_some() {
+        println!("    .jscpd.json");
+    }
+    if rc.cspell_config.is_some() {
+        println!("    cspell config");
+    } else {
+        println!("    cspell config                  MISSING");
+    }
+    if rc.prettier_config.is_some() {
+        println!("    prettier config");
+    }
+    println!();
 }
 
 #[allow(clippy::print_stdout)] // reason: CLI output

@@ -80,7 +80,6 @@ fn normalize_one_scoped_file(project_path: &Path, path: &str) -> Option<String> 
     }
 }
 
-#[allow(clippy::disallowed_methods)] // reason: CLI tool runs git commands for scoped file detection
 fn resolve_scoped_files<T: ScopedValidateArgs>(
     args: &T,
     project_path: &Path,
@@ -104,13 +103,11 @@ fn resolve_scoped_files<T: ScopedValidateArgs>(
     None
 }
 
-#[allow(clippy::disallowed_methods)] // reason: CLI tool runs git commands
 fn git_staged_files(project_path: &Path) -> Option<Vec<String>> {
-    let output = std::process::Command::new("git")
-        .args(["diff", "--cached", "--name-only", "--diff-filter=ACMR"])
-        .current_dir(project_path)
-        .output()
-        .ok()?;
+    let output = run_git_command(
+        project_path,
+        &["diff", "--cached", "--name-only", "--diff-filter=ACMR"],
+    )?;
 
     if !output.status.success() {
         return None;
@@ -124,25 +121,13 @@ fn git_staged_files(project_path: &Path) -> Option<Vec<String>> {
     Some(files)
 }
 
-#[allow(clippy::disallowed_methods)] // reason: CLI tool runs git commands
 fn git_dirty_files(project_path: &Path) -> Option<Vec<String>> {
-    let staged = std::process::Command::new("git")
-        .args(["diff", "--cached", "--name-only"])
-        .current_dir(project_path)
-        .output()
-        .ok()?;
-
-    let unstaged = std::process::Command::new("git")
-        .args(["diff", "--name-only"])
-        .current_dir(project_path)
-        .output()
-        .ok()?;
-
-    let untracked = std::process::Command::new("git")
-        .args(["ls-files", "--others", "--exclude-standard"])
-        .current_dir(project_path)
-        .output()
-        .ok()?;
+    let staged = run_git_command(project_path, &["diff", "--cached", "--name-only"])?;
+    let unstaged = run_git_command(project_path, &["diff", "--name-only"])?;
+    let untracked = run_git_command(
+        project_path,
+        &["ls-files", "--others", "--exclude-standard"],
+    )?;
 
     if !staged.status.success() || !unstaged.status.success() || !untracked.status.success() {
         return None;
@@ -161,19 +146,18 @@ fn git_dirty_files(project_path: &Path) -> Option<Vec<String>> {
     Some(files)
 }
 
-#[allow(clippy::disallowed_methods)] // reason: CLI tool runs git commands
 fn git_commit_files(project_path: &Path, n: usize) -> Option<Vec<String>> {
-    let output = std::process::Command::new("git")
-        .args([
+    let commit_window = format!("-{n}");
+    let output = run_git_command(
+        project_path,
+        &[
             "log",
             "--name-only",
-            &format!("-{n}"),
+            &commit_window,
             "--diff-filter=ACM",
             "--pretty=format:",
-        ])
-        .current_dir(project_path)
-        .output()
-        .ok()?;
+        ],
+    )?;
 
     if !output.status.success() {
         return None;
@@ -186,4 +170,13 @@ fn git_commit_files(project_path: &Path, n: usize) -> Option<Vec<String>> {
         .collect();
 
     Some(files)
+}
+
+#[allow(clippy::disallowed_methods)] // reason: CLI tool runs git commands
+fn run_git_command(project_path: &Path, args: &[&str]) -> Option<std::process::Output> {
+    std::process::Command::new("git")
+        .args(args)
+        .current_dir(project_path)
+        .output()
+        .ok()
 }

@@ -2,9 +2,6 @@ use std::collections::BTreeMap;
 
 use guardrail3_domain_report::{CheckResult, Report, Severity};
 
-// Clippy wants a type alias for `BTreeMap<&str, Vec<&&CheckResult>>` but the double-reference
-// lifetimes make a clean alias impossible without GATs. Suppress at usage site instead.
-
 /// Maximum number of results per check ID before summarizing.
 const VERBOSE_THRESHOLD: usize = 3;
 
@@ -80,10 +77,9 @@ pub fn print_report(report: &Report, show_inventory: bool, verbose: bool) {
 /// Print results, summarizing check IDs that exceed the threshold.
 #[allow(clippy::print_stdout)] // reason: CLI report output to stdout
 fn print_with_summarization(results: &[&CheckResult], project_root: &str) {
-    #[allow(clippy::type_complexity)] // reason: double-reference lifetime prevents clean type alias
-    let mut groups: BTreeMap<&str, Vec<&&CheckResult>> = BTreeMap::new();
+    let mut groups: BTreeMap<&str, Vec<&CheckResult>> = BTreeMap::new();
     let mut order: Vec<&str> = Vec::new();
-    for result in results {
+    for result in results.iter().copied() {
         let id = result.id.as_str();
         let entry = groups.entry(id).or_default();
         if entry.is_empty() {
@@ -107,7 +103,7 @@ fn print_with_summarization(results: &[&CheckResult], project_root: &str) {
 
 /// Print a single summary row for a group of results with the same check ID.
 #[allow(clippy::print_stdout)] // reason: CLI report output to stdout
-fn print_summary_row(group: &[&&CheckResult]) {
+fn print_summary_row(group: &[&CheckResult]) {
     let Some(first) = group.first() else { return };
     let count = group.len();
 
