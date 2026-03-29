@@ -47,5 +47,20 @@ fn has_merge_conflict_check(executable_lines: &[crate::hook_shell::ExecutableLin
 }
 
 #[cfg(test)]
+#[allow(dead_code)]
+pub(crate) fn run_case(content: &str) -> Vec<CheckResult> {
+    let parsed = crate::hook_shell::parse_script(content);
+    let input = ExecutableCommandContextInput {
+        rel_path: ".githooks/pre-commit",
+        kind: super::facts::HookScriptKind::PreCommit,
+        content,
+        parsed: &parsed,
+    };
+    let mut results = Vec::new();
+    check(&input, &mut results);
+    results
+}
+
+#[cfg(test)]
 #[path = "hook_shared_15_merge_conflict_step_present_tests/mod.rs"]
-mod tests;
+mod hook_shared_15_merge_conflict_step_present_tests;

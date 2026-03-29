@@ -11,3 +11,6 @@ guardrail3_domain_project_tree = { package = "guardrail3-domain-project-tree", p
 guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../../../domain/report" }
 guardrail3_outbound_traits = { package = "guardrail3-ports-outbound-traits", path = "../../../../ports/outbound/traits" }
 guardrail3_shared_fs = { package = "guardrail3-shared-fs", path = "../../../../shared/fs" }
+
+[dev-dependencies]
+guardrail3_app_rs_family_hooks_shared_assertions = { package = "guardrail3-app-rs-family-hooks-shared-assertions", path = "assertions" }

@@ -41,5 +41,21 @@ pub fn check(scripts: &[HookScriptFacts], results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "hook_shared_07_modular_scripts_inventory_tests.rs"]
-mod tests;
+#[allow(dead_code)]
+pub(crate) fn run_case(script_names: &[&str]) -> Vec<CheckResult> {
+    let scripts = script_names
+        .iter()
+        .map(|name| HookScriptFacts {
+            rel_path: format!(".githooks/pre-commit.d/{name}"),
+            kind: super::facts::HookScriptKind::Modular,
+            content: String::new(),
+        })
+        .collect::<Vec<_>>();
+    let mut results = Vec::new();
+    check(&scripts, &mut results);
+    results
+}
+
+#[cfg(test)]
+#[path = "hook_shared_07_modular_scripts_inventory_tests/mod.rs"]
+mod hook_shared_07_modular_scripts_inventory_tests;

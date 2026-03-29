@@ -18,5 +18,5 @@ pub fn check(rel_path: &str, content: &str, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "hook_shared_08_pre_commit_file_size_inventory_tests.rs"]
-mod tests;
+#[path = "hook_shared_08_pre_commit_file_size_inventory_tests/mod.rs"]
+mod hook_shared_08_pre_commit_file_size_inventory_tests;

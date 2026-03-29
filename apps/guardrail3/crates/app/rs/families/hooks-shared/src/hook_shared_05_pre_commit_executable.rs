@@ -38,5 +38,5 @@ pub fn check(rel_path: &str, executable: Option<bool>, results: &mut Vec<CheckRe
 }
 
 #[cfg(test)]
-#[path = "hook_shared_05_pre_commit_executable_tests.rs"]
-mod tests;
+#[path = "hook_shared_05_pre_commit_executable_tests/mod.rs"]
+mod hook_shared_05_pre_commit_executable_tests;

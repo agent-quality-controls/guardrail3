@@ -37,5 +37,5 @@ pub fn check(modular_executable: &[(String, bool)], results: &mut Vec<CheckResul
 }
 
 #[cfg(test)]
-#[path = "hook_shared_12_modular_scripts_executable_tests.rs"]
-mod tests;
+#[path = "hook_shared_12_modular_scripts_executable_tests/mod.rs"]
+mod hook_shared_12_modular_scripts_executable_tests;

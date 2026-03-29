@@ -50,5 +50,19 @@ fn targets_pre_commit_dir(raw: &str) -> bool {
 }
 
 #[cfg(test)]
+#[allow(dead_code)]
+pub(crate) fn run_case(content: &str, has_modular_dir: bool) -> Vec<CheckResult> {
+    let parsed = crate::hook_shell::parse_script(content);
+    let input = DispatcherSyntaxInput {
+        rel_path: ".githooks/pre-commit",
+        has_modular_dir,
+        parsed: &parsed,
+    };
+    let mut results = Vec::new();
+    check(&input, &mut results);
+    results
+}
+
+#[cfg(test)]
 #[path = "hook_shared_19_real_dispatcher_syntax_only_tests/mod.rs"]
-mod tests;
+mod hook_shared_19_real_dispatcher_syntax_only_tests;

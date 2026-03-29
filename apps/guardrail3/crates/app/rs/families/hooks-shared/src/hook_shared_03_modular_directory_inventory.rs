@@ -32,5 +32,5 @@ pub fn check(has_modular_dir: bool, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "hook_shared_03_modular_directory_inventory_tests.rs"]
-mod tests;
+#[path = "hook_shared_03_modular_directory_inventory_tests/mod.rs"]
+mod hook_shared_03_modular_directory_inventory_tests;
