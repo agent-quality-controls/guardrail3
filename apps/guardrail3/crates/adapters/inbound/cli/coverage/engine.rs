@@ -42,7 +42,7 @@ pub trait CoverageTool {
 // Output data model
 // ---------------------------------------------------------------------------
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 pub struct CoverageMap {
     pub tool: String,
     pub resolution: String,
@@ -52,7 +52,7 @@ pub struct CoverageMap {
     pub summary: Summary,
 }
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 pub struct ConfigInstance {
     pub path: String,
     pub details: serde_json::Value,
@@ -69,13 +69,13 @@ pub struct ConfigInstance {
     pub shadowed_by: Vec<ShadowedBy>,
 }
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 pub struct ShadowedBy {
     pub path: String,
     pub steals: Vec<String>,
 }
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 pub struct Summary {
     pub total_dirs: u32,
     pub covered_dirs: u32,

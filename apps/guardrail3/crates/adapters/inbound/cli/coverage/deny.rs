@@ -13,6 +13,7 @@ use guardrail3_app_rs_family_deny::expected_ban_names;
 
 use super::engine::{self, CoverageTool};
 
+#[derive(Debug)]
 pub struct DenyCoverage;
 
 impl CoverageTool for DenyCoverage {

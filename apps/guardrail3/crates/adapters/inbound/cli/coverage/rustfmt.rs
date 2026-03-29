@@ -26,6 +26,7 @@ const REQUIRED_SETTINGS: &[SettingDef] = &[
     ("reorder_modules", "true"),
 ];
 
+#[derive(Debug)]
 pub struct RustfmtCoverage;
 
 impl CoverageTool for RustfmtCoverage {
