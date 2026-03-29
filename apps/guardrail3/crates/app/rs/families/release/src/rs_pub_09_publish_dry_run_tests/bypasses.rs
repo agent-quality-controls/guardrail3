@@ -81,7 +81,5 @@ fn family_does_not_emit_publish_dry_run_results_when_not_thorough() {
     let tmp = copy_fixture();
     let results = run_family(tmp.path(), false);
 
-    guardrail3_app_rs_family_release_assertions::rs_pub_09_publish_dry_run::assert_quiet(
-        &results,
-    );
+    guardrail3_app_rs_family_release_assertions::rs_pub_09_publish_dry_run::assert_quiet(&results);
 }

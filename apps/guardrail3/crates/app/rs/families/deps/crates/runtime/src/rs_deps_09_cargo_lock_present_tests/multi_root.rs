@@ -1,6 +1,5 @@
 use super::{collected_facts, dir_entry, project_tree};
 use guardrail3_app_rs_family_deps_assertions::rs_deps_09_cargo_lock_present as assertions;
-use guardrail3_domain_report::Severity;
 
 #[test]
 fn missing_lockfiles_across_multiple_roots_keep_exact_severities() {
@@ -59,22 +58,24 @@ fn missing_lockfiles_across_multiple_roots_keep_exact_severities() {
         &[
             assertions::ExpectedRuleResult {
                 file: Some("Cargo.lock"),
-                severity: Some(Severity::Error),
+                severity: Some(assertions::Severity::Error),
                 message: Some("Non-library Rust root `.` is missing `Cargo.lock`."),
                 inventory: Some(false),
                 ..Default::default()
             },
             assertions::ExpectedRuleResult {
                 file: Some("apps/api/Cargo.lock"),
-                severity: Some(Severity::Error),
+                severity: Some(assertions::Severity::Error),
                 message: Some("Non-library Rust root `apps/api` is missing `apps/api/Cargo.lock`."),
                 inventory: Some(false),
                 ..Default::default()
             },
             assertions::ExpectedRuleResult {
                 file: Some("packages/core/Cargo.lock"),
-                severity: Some(Severity::Info),
-                message: Some("Library-profile Rust root `packages/core` is missing `packages/core/Cargo.lock`."),
+                severity: Some(assertions::Severity::Info),
+                message: Some(
+                    "Library-profile Rust root `packages/core` is missing `packages/core/Cargo.lock`.",
+                ),
                 inventory: Some(false),
                 ..Default::default()
             },

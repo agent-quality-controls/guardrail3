@@ -1,6 +1,5 @@
 use super::{collected_facts, dependency_input, dir_entry, project_tree};
 use guardrail3_app_rs_family_deps_assertions::rs_deps_05_dependencies_allowlisted as assertions;
-use guardrail3_domain_report::Severity;
 
 #[test]
 fn broad_dependency_attack_assigns_each_section_to_its_own_rule() {
@@ -84,11 +83,7 @@ fn non_workspace_path_dependency_is_still_checked() {
         ],
     );
     let facts = collected_facts(&tree, &[]);
-    let input = dependency_input(
-        &facts,
-        "packages/core/Cargo.toml",
-        "reqwest",
-    );
+    let input = dependency_input(&facts, "packages/core/Cargo.toml", "reqwest");
     let mut results = Vec::new();
 
     super::super::check(&input, &mut results);
@@ -96,7 +91,7 @@ fn non_workspace_path_dependency_is_still_checked() {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(Severity::Error),
+            severity: Some(assertions::Severity::Error),
             message: Some(
                 "Dependency `reqwest` in `[dependencies]` is not allowlisted for crate `core`.",
             ),

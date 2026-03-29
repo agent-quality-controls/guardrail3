@@ -1,9 +1,7 @@
-#[allow(unused_imports)]
 use guardrail3_app_rs_family_test_assertions::rs_test_03_runtime_assertions_split::{
-    assert_inventory, assert_reported, assert_rule_files, assert_rule_quiet,
+    assert_inventory, assert_rule_files,
 };
 
-#[allow(unused_imports)]
 use super::{run_family, tempdir, write_file};
 
 #[test]
@@ -101,6 +99,9 @@ fn nested_package_root_with_runtime_assertions_split_stays_clean() {
 
     let results = run_family(root);
 
-    assert_rule_files(&results, vec!["apps/backend/crates/domain/Cargo.toml".to_owned()]);
+    assert_rule_files(
+        &results,
+        vec!["apps/backend/crates/domain/Cargo.toml".to_owned()],
+    );
     assert_inventory(&results, true);
 }

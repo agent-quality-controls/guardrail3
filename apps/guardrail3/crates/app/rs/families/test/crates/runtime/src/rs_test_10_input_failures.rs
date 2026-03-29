@@ -42,14 +42,12 @@ pub(crate) fn emit_inventory_if_clean(
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
     let tree = test_support::walk(root);
     super::check_test_tree(&tree, &test_support::StubToolChecker::default())
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 #[allow(dead_code)]
 pub(crate) fn run_family_with_tool(
     root: &std::path::Path,

@@ -1,5 +1,5 @@
-use super::super::{repo_facts, repo_input};
 use super::super::check;
+use super::super::{repo_facts, repo_input};
 
 #[test]
 fn stays_quiet_when_release_profile_is_absent() {

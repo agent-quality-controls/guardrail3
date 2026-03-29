@@ -1,11 +1,11 @@
 use std::collections::BTreeSet;
 
-use guardrail3_app_rs_family_release_assertions::rs_bin_02_linux_target as assertions;
 use super::super::run_tree as run_family;
 use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
+use guardrail3_app_rs_family_release_assertions::rs_bin_02_linux_target as assertions;
 
-use super::super::{crate_facts, crate_input, repo_facts, workflow_from_yaml};
 use super::super::check;
+use super::super::{crate_facts, crate_input, repo_facts, workflow_from_yaml};
 
 #[test]
 fn reports_absence_when_linux_only_appears_in_display_text() {

@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_release_assertions::rs_release_10_release_profile_inventory as assertions;
 
-use super::super::{repo_facts, repo_input};
 use super::super::check;
+use super::super::{repo_facts, repo_input};
 
 #[test]
 fn inventories_release_profile_settings_when_present() {

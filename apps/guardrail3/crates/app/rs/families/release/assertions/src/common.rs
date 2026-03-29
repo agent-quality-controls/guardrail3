@@ -97,8 +97,8 @@ pub fn assert_rule_results(
 macro_rules! define_rule_assertions {
     ($rule_id:literal) => {
         pub use crate::common::ExpectedRuleResult;
-        pub use guardrail3_domain_report::Severity;
         use guardrail3_domain_report::CheckResult;
+        pub use guardrail3_domain_report::Severity;
 
         const RULE_ID: &str = $rule_id;
 
@@ -118,10 +118,7 @@ macro_rules! define_rule_assertions {
             crate::common::assert_rule_files(results, RULE_ID, expected);
         }
 
-        pub fn assert_rule_results(
-            results: &[CheckResult],
-            expected: &[ExpectedRuleResult<'_>],
-        ) {
+        pub fn assert_rule_results(results: &[CheckResult], expected: &[ExpectedRuleResult<'_>]) {
             crate::common::assert_rule_results(results, RULE_ID, expected);
         }
     };

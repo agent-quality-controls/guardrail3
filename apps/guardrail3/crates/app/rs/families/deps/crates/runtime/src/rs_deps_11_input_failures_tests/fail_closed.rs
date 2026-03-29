@@ -1,6 +1,5 @@
 use super::{collected_facts, dir_entry, project_tree};
 use guardrail3_app_rs_family_deps_assertions::rs_deps_11_input_failures as assertions;
-use guardrail3_domain_report::Severity;
 
 #[test]
 fn collect_surfaces_guardrail_parse_failure() {
@@ -22,7 +21,10 @@ fn collect_surfaces_guardrail_parse_failure() {
         })
         .collect::<Vec<_>>();
 
-    assertions::assert_summary(summary, vec![(Some("guardrail3.toml"), Severity::Error, true)]);
+    assertions::assert_summary(
+        summary,
+        vec![(Some("guardrail3.toml"), assertions::Severity::Error, true)],
+    );
 }
 
 #[test]
@@ -44,7 +46,10 @@ fn unreadable_guardrail_policy_surfaces_explicit_failure() {
         })
         .collect::<Vec<_>>();
 
-    assertions::assert_summary(summary, vec![(Some("guardrail3.toml"), Severity::Error, true)]);
+    assertions::assert_summary(
+        summary,
+        vec![(Some("guardrail3.toml"), assertions::Severity::Error, true)],
+    );
 }
 
 #[test]
@@ -92,7 +97,10 @@ fn guardrail_policy_unknown_crate_key_surfaces_explicit_failure() {
         })
         .collect::<Vec<_>>();
 
-    assertions::assert_summary(summary, vec![(Some("guardrail3.toml"), Severity::Error, true)]);
+    assertions::assert_summary(
+        summary,
+        vec![(Some("guardrail3.toml"), assertions::Severity::Error, true)],
+    );
 }
 
 #[test]
@@ -137,7 +145,10 @@ fn guardrail_policy_empty_allowed_dep_entry_surfaces_explicit_failure() {
         })
         .collect::<Vec<_>>();
 
-    assertions::assert_summary(summary, vec![(Some("guardrail3.toml"), Severity::Error, true)]);
+    assertions::assert_summary(
+        summary,
+        vec![(Some("guardrail3.toml"), assertions::Severity::Error, true)],
+    );
 }
 
 #[test]
@@ -182,7 +193,10 @@ fn guardrail_policy_unknown_rust_key_surfaces_explicit_failure() {
         })
         .collect::<Vec<_>>();
 
-    assertions::assert_summary(summary, vec![(Some("guardrail3.toml"), Severity::Error, true)]);
+    assertions::assert_summary(
+        summary,
+        vec![(Some("guardrail3.toml"), assertions::Severity::Error, true)],
+    );
 }
 
 #[test]
@@ -240,7 +254,10 @@ fn workspace_members_with_non_string_entries_surface_explicit_failure() {
         })
         .collect::<Vec<_>>();
 
-    assertions::assert_summary(summary, vec![(Some("Cargo.toml"), Severity::Error, true)]);
+    assertions::assert_summary(
+        summary,
+        vec![(Some("Cargo.toml"), assertions::Severity::Error, true)],
+    );
 }
 
 #[test]
@@ -302,15 +319,18 @@ fn workspace_dependency_package_with_non_string_name_surfaces_explicit_failure()
         })
         .collect::<Vec<_>>();
 
-    assertions::assert_summary(summary, vec![
-            (Some("Cargo.toml"), Severity::Error, true, false),
+    assertions::assert_summary(
+        summary,
+        vec![
+            (Some("Cargo.toml"), assertions::Severity::Error, true, false),
             (
                 Some("packages/core/Cargo.toml"),
-                Severity::Error,
+                assertions::Severity::Error,
                 false,
-                true
+                true,
             ),
-        ]);
+        ],
+    );
 }
 
 #[test]
@@ -358,7 +378,14 @@ fn dependency_workspace_flag_with_non_boolean_value_surfaces_explicit_failure() 
         })
         .collect::<Vec<_>>();
 
-    assertions::assert_summary(summary, vec![(Some("apps/api/Cargo.toml"), Severity::Error, true)]);
+    assertions::assert_summary(
+        summary,
+        vec![(
+            Some("apps/api/Cargo.toml"),
+            assertions::Severity::Error,
+            true,
+        )],
+    );
 }
 
 #[test]
@@ -393,7 +420,14 @@ fn unreadable_member_manifest_surfaces_explicit_failure() {
         })
         .collect::<Vec<_>>();
 
-    assertions::assert_summary(summary, vec![(Some("apps/api/Cargo.toml"), Severity::Error, true)]);
+    assertions::assert_summary(
+        summary,
+        vec![(
+            Some("apps/api/Cargo.toml"),
+            assertions::Severity::Error,
+            true,
+        )],
+    );
 }
 
 #[test]
@@ -424,7 +458,10 @@ fn unreadable_workspace_manifest_surfaces_explicit_failure() {
         })
         .collect::<Vec<_>>();
 
-    assertions::assert_summary(summary, vec![(Some("Cargo.toml"), Severity::Error, true)]);
+    assertions::assert_summary(
+        summary,
+        vec![(Some("Cargo.toml"), assertions::Severity::Error, true)],
+    );
 }
 
 #[test]
@@ -465,10 +502,23 @@ fn malformed_member_manifest_surfaces_explicit_failure() {
         })
         .collect::<Vec<_>>();
 
-    assertions::assert_summary(summary, vec![
-            (Some("apps/api/Cargo.toml"), Severity::Error, true, false),
-            (Some("apps/api/Cargo.toml"), Severity::Error, false, true),
-        ]);
+    assertions::assert_summary(
+        summary,
+        vec![
+            (
+                Some("apps/api/Cargo.toml"),
+                assertions::Severity::Error,
+                true,
+                false,
+            ),
+            (
+                Some("apps/api/Cargo.toml"),
+                assertions::Severity::Error,
+                false,
+                true,
+            ),
+        ],
+    );
 }
 
 #[test]
@@ -521,17 +571,32 @@ fn malformed_workspace_manifest_does_not_fail_open_workspace_true_resolution() {
         })
         .collect::<Vec<_>>();
 
-    assertions::assert_summary(summary, vec![
-            (Some("Cargo.toml"), Severity::Error, true, false, false),
-            (Some("Cargo.toml"), Severity::Error, false, true, false),
+    assertions::assert_summary(
+        summary,
+        vec![
+            (
+                Some("Cargo.toml"),
+                assertions::Severity::Error,
+                true,
+                false,
+                false,
+            ),
+            (
+                Some("Cargo.toml"),
+                assertions::Severity::Error,
+                false,
+                true,
+                false,
+            ),
             (
                 Some("apps/api/Cargo.toml"),
-                Severity::Error,
+                assertions::Severity::Error,
                 false,
                 false,
-                true
+                true,
             ),
-        ]);
+        ],
+    );
 }
 
 #[test]
@@ -574,5 +639,8 @@ fn unreadable_gitignore_surfaces_explicit_failure() {
         })
         .collect::<Vec<_>>();
 
-    assertions::assert_summary(summary, vec![(Some(".gitignore"), Severity::Error, true)]);
+    assertions::assert_summary(
+        summary,
+        vec![(Some(".gitignore"), assertions::Severity::Error, true)],
+    );
 }

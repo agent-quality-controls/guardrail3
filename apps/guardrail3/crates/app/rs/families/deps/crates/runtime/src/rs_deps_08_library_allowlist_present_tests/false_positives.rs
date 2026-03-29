@@ -1,6 +1,5 @@
 use super::{collected_facts, dir_entry, project_tree};
 use guardrail3_app_rs_family_deps_assertions::rs_deps_08_library_allowlist_present as assertions;
-use guardrail3_domain_report::Severity;
 
 #[test]
 fn warns_only_for_library_crates_without_allowlists() {
@@ -45,7 +44,7 @@ fn warns_only_for_library_crates_without_allowlists() {
         &results,
         &[assertions::ExpectedRuleResult {
             file: Some("packages/core/Cargo.toml"),
-            severity: Some(Severity::Warn),
+            severity: Some(assertions::Severity::Warn),
             message: Some("Library crate `core` has no `allowed_deps` policy."),
             inventory: Some(false),
             ..Default::default()

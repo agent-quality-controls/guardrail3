@@ -1,6 +1,6 @@
-use guardrail3_app_rs_family_release_assertions::rs_pub_07_categories_present as assertions;
 use super::super::run_tree as check;
 use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
+use guardrail3_app_rs_family_release_assertions::rs_pub_07_categories_present as assertions;
 
 #[test]
 fn should_not_warn_when_categories_are_inherited_from_workspace_package() {

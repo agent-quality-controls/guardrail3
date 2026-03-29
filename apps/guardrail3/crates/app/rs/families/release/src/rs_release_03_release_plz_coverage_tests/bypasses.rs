@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_release_assertions::rs_release_03_release_plz_coverage as assertions;
 
-use super::super::{repo_facts, repo_input};
 use super::super::check;
+use super::super::{repo_facts, repo_input};
 
 #[test]
 fn stays_quiet_when_release_plz_is_absent_and_existence_is_owned_elsewhere() {

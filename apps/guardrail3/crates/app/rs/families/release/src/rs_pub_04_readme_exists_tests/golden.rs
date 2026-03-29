@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_release_assertions::rs_pub_04_readme_exists as assertions;
 
-use super::super::{crate_facts, crate_input};
 use super::super::check;
+use super::super::{crate_facts, crate_input};
 
 #[test]
 fn inventories_existing_readme_for_publishable_crate() {

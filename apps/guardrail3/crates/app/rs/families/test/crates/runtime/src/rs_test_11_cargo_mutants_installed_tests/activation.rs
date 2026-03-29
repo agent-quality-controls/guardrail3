@@ -1,9 +1,7 @@
-#[allow(unused_imports)]
 use guardrail3_app_rs_family_test_assertions::rs_test_11_cargo_mutants_installed::{
     assert_inventory, assert_missing_cargo_mutants, assert_rule_files, assert_rule_quiet,
 };
 
-#[allow(unused_imports)]
 use super::{run_family_with_tool, tempdir, write_file};
 #[test]
 fn missing_tool_is_ignored_without_mutation_adoption_and_reported_when_adopted() {

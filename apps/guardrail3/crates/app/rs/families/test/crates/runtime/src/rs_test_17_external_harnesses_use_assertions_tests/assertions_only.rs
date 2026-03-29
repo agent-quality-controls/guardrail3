@@ -1,10 +1,7 @@
-#[allow(unused_imports)]
 use guardrail3_app_rs_family_test_assertions::rs_test_17_external_harnesses_use_assertions::{
     assert_external_harness_direct_assertion, assert_inventory, assert_rule_files,
-    assert_rule_quiet,
 };
 
-#[allow(unused_imports)]
 use super::{run_family, tempdir, write_file};
 
 #[test]
@@ -45,7 +42,10 @@ fn external_harness_reusing_owned_assertions_passes() {
 
     let results = run_family(root);
 
-    assert_rule_files(&results, vec!["crates/runtime/tests/public_surface.rs".to_owned()]);
+    assert_rule_files(
+        &results,
+        vec!["crates/runtime/tests/public_surface.rs".to_owned()],
+    );
     assert_inventory(&results, true);
 }
 

@@ -1,10 +1,7 @@
-#[allow(unused_imports)]
 use guardrail3_app_rs_family_test_assertions::rs_test_14_mutation_hook_present::{
     assert_missing_mutation_hook, assert_present_mutation_hook, assert_rule_files,
-    assert_rule_quiet,
 };
 
-#[allow(unused_imports)]
 use super::{run_family, tempdir, write_file};
 #[test]
 fn comment_echo_and_version_only_mentions_do_not_count() {

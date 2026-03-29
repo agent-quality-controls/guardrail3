@@ -1,11 +1,9 @@
-#[allow(unused_imports)]
 use super::{entry, tree};
-#[allow(unused_imports)]
 use guardrail3_app_rs_family_cargo_assertions::rs_cargo_01_workspace_lints::{
     ExpectedRuleResult, assert_rule_results, check_results, rule_results,
 };
 
-#[allow(dead_code, non_upper_case_globals)]
+#[allow(dead_code, non_upper_case_globals)] // reason: declarative fixture fragments intentionally keep config-shaped lowercase names and are shared unevenly across scenario tables
 const workspace_rust_lints: &str = r#"
     [workspace.lints.rust]
     warnings = "deny"
@@ -16,7 +14,7 @@ const workspace_rust_lints: &str = r#"
     missing_debug_implementations = "warn"
 "#;
 
-#[allow(dead_code, non_upper_case_globals)]
+#[allow(dead_code, non_upper_case_globals)] // reason: declarative fixture fragments intentionally keep config-shaped lowercase names and are shared unevenly across scenario tables
 const workspace_clippy_lints: &str = r#"
     [workspace.lints.clippy]
     all = { level = "deny", priority = -1 }
@@ -66,7 +64,7 @@ const workspace_clippy_lints: &str = r#"
     multiple_crate_versions = "allow"
 "#;
 
-#[allow(dead_code, non_upper_case_globals)]
+#[allow(dead_code, non_upper_case_globals)] // reason: declarative fixture fragments intentionally keep config-shaped lowercase names and are shared unevenly across scenario tables
 const standalone_rust_lints: &str = r#"
     [lints.rust]
     warnings = "deny"
@@ -77,7 +75,7 @@ const standalone_rust_lints: &str = r#"
     missing_debug_implementations = "warn"
 "#;
 
-#[allow(dead_code, non_upper_case_globals)]
+#[allow(dead_code, non_upper_case_globals)] // reason: declarative fixture fragments intentionally keep config-shaped lowercase names and are shared unevenly across scenario tables
 const standalone_clippy_lints: &str = r#"
     [lints.clippy]
     all = { level = "deny", priority = -1 }

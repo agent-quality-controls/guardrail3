@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_release_assertions::rs_release_09_publish_status_inventory as assertions;
 
-use super::super::{repo_facts, repo_input};
 use super::super::check;
+use super::super::{repo_facts, repo_input};
 
 #[test]
 fn inventories_publish_status_when_present() {

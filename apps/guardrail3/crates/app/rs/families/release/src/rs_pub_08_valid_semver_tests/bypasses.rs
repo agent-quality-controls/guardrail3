@@ -1,8 +1,8 @@
-use guardrail3_app_rs_family_release_assertions::rs_pub_08_valid_semver as assertions;
+use super::super::check;
 use super::super::run_tree as run_family;
 use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
 use super::super::{crate_facts, crate_input};
-use super::super::check;
+use guardrail3_app_rs_family_release_assertions::rs_pub_08_valid_semver as assertions;
 
 #[test]
 fn errors_on_invalid_semver_and_skips_non_publishable_crates() {

@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_release_assertions::rs_release_07_registry_token as assertions;
 
-use super::super::{repo_facts, repo_input, workflow_from_yaml};
 use super::super::check;
+use super::super::{repo_facts, repo_input, workflow_from_yaml};
 
 #[test]
 fn inventories_registry_token_when_inherited_into_real_release_step() {

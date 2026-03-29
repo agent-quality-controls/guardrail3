@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_release_assertions::rs_release_05_release_plz_workflow as assertions;
 
-use super::super::{repo_facts, repo_input, workflow_from_yaml};
 use super::super::check;
+use super::super::{repo_facts, repo_input, workflow_from_yaml};
 
 #[test]
 fn warns_when_release_plz_only_appears_in_comments_names_or_echo_lines() {

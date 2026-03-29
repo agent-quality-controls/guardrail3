@@ -1,9 +1,7 @@
-#[allow(unused_imports)]
 use guardrail3_app_rs_family_test_assertions::rs_test_01_inline_test_bodies::{
-    Severity, assert_reported, assert_rule_files, assert_rule_quiet,
+    Severity, assert_reported,
 };
 
-#[allow(unused_imports)]
 use super::{run_family, tempdir, write_file};
 
 #[test]

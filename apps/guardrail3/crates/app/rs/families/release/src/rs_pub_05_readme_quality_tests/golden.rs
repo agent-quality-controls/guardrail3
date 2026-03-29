@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_release_assertions::rs_pub_05_readme_quality as assertions;
 
-use super::super::{crate_facts, crate_input};
 use super::super::check;
+use super::super::{crate_facts, crate_input};
 
 #[test]
 fn inventories_good_readme_quality_for_publishable_crate() {

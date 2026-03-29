@@ -1,6 +1,5 @@
 use super::{tool_facts, tool_input};
 use guardrail3_app_rs_family_deps_assertions::rs_deps_01_cargo_deny_installed as assertions;
-use guardrail3_domain_report::Severity;
 
 #[test]
 fn inventories_installed_cargo_deny() {
@@ -13,7 +12,7 @@ fn inventories_installed_cargo_deny() {
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(Severity::Info),
+            severity: Some(assertions::Severity::Info),
             title: Some("cargo-deny installed"),
             inventory: Some(true),
             ..assertions::ExpectedRuleResult::default()
