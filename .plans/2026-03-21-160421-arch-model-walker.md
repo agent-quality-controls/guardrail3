@@ -1,5 +1,10 @@
 # Plan: ProjectTree — Parse Once, Check Many
 
+> Historical note: this is background architecture context, not the current `RS-ARCH` source of truth. For live `arch` behavior, use:
+> - `apps/guardrail3/crates/app/rs/families/arch/README.md`
+> - `apps/guardrail3/crates/app/rs/README.md`
+> - `.plans/todo/checks/rs/arch.md`
+
 **Date:** 2026-03-21
 **Prerequisite for:** RS-ARCH-01 rules 07-11, checker architecture refactor
 
