@@ -13,6 +13,7 @@ use guardrail3_app_rs_family_clippy::{EXPECTED_METHOD_BANS, EXPECTED_TYPE_BANS};
 
 use super::engine::{self, CoverageTool};
 
+#[derive(Debug)]
 pub struct ClippyCoverage;
 
 impl CoverageTool for ClippyCoverage {

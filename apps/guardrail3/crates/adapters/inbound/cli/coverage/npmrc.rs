@@ -15,6 +15,7 @@ use guardrail3_app_core::crawl::CrawlResult;
 
 use super::engine::{self, CoverageTool};
 
+#[derive(Debug)]
 pub struct NpmrcCoverage;
 
 impl CoverageTool for NpmrcCoverage {

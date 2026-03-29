@@ -20,6 +20,7 @@ const REQUIRED_SETTINGS: &[SettingDef] = &[("channel", "\"stable\"")];
 /// Required components.
 const REQUIRED_COMPONENTS: &[&str] = &["clippy", "rustfmt"];
 
+#[derive(Debug)]
 pub struct RustToolchainCoverage;
 
 impl CoverageTool for RustToolchainCoverage {
