@@ -27,10 +27,7 @@ fn root_config_uses_packages_profile_when_packages_policy_exists() {
                 "packages/shared-types/Cargo.toml",
                 "[package]\nname = \"shared-types\"\n".to_owned(),
             ),
-            (
-                "deny.toml",
-                build_fixture_deny_toml("library"),
-            ),
+            ("deny.toml", build_fixture_deny_toml("library")),
         ],
     );
 

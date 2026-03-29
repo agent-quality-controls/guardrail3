@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_deny_assertions::rs_deny_03_shadowing as assertions;
 
-use super::super::{collected_facts, forbidden_input, nested_member_shadow_tree};
 use super::super::check_forbidden;
+use super::super::{collected_facts, forbidden_input, nested_member_shadow_tree};
 
 #[test]
 fn reports_nested_shadowing_for_every_deny_filename_variant() {

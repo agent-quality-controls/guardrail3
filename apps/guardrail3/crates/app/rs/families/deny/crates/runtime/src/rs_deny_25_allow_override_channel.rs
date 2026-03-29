@@ -57,7 +57,6 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     }
 }
 
-
 #[cfg(test)]
 #[allow(dead_code)]
 pub(crate) fn run_check(deny_toml: &str) -> Vec<CheckResult> {
@@ -77,7 +76,10 @@ pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-pub(crate) use ::test_support::{build_fixture_deny_toml, copy_fixture, set_bans_allow_entries, write_file};
+pub(crate) use ::test_support::{
+    build_fixture_deny_toml, copy_fixture, set_bans_allow_entries, write_file,
+};
 #[cfg(test)]
-#[path = "rs_deny_25_allow_override_channel_tests/mod.rs"] // reason: test-only sidecar module wiring
+#[path = "rs_deny_25_allow_override_channel_tests/mod.rs"]
+// reason: test-only sidecar module wiring
 mod rs_deny_25_allow_override_channel_tests;

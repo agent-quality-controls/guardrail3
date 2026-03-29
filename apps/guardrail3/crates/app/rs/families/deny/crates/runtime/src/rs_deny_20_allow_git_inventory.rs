@@ -37,7 +37,6 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     }
 }
 
-
 #[cfg(test)]
 #[allow(dead_code)]
 pub(crate) fn run_check(deny_toml: &str) -> Vec<CheckResult> {

@@ -1,7 +1,5 @@
 use guardrail3_domain_report::Severity;
 
-
-
 #[test]
 fn warns_when_skip_container_is_not_an_array() {
     let results = super::super::run_check("[bans]\nskip = \"serde\"\n");

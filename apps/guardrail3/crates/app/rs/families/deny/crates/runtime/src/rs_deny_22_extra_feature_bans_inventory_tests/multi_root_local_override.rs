@@ -14,8 +14,8 @@ fn feature_entry(name: &str) -> toml::Value {
 
 #[test]
 fn local_extra_feature_bans_inventory_stays_owned_by_the_local_root() {
-    let parsed =
-        toml::from_str::<toml::Value>(&build_fixture_deny_toml("service")).expect("valid deny TOML");
+    let parsed = toml::from_str::<toml::Value>(&build_fixture_deny_toml("service"))
+        .expect("valid deny TOML");
     let existing = parsed
         .get("bans")
         .and_then(|b| b.get("features"))
@@ -26,11 +26,7 @@ fn local_extra_feature_bans_inventory_stays_owned_by_the_local_root() {
     local_entries.push(feature_entry("serde"));
 
     let tmp = copy_fixture("../../../../../../../tests/fixtures/r_arch_01/golden");
-    write_file(
-        tmp.path(),
-        "deny.toml",
-        &build_fixture_deny_toml("service"),
-    );
+    write_file(tmp.path(), "deny.toml", &build_fixture_deny_toml("service"));
     write_file(
         tmp.path(),
         "apps/devctl/deny.toml",

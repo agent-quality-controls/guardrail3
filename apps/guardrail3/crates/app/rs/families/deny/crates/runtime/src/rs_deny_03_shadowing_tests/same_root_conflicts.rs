@@ -1,7 +1,7 @@
 use guardrail3_domain_report::Severity;
 
-use super::super::{collected_facts, same_root_conflict_input, same_root_conflict_tree};
 use super::super::check_same_root_conflict;
+use super::super::{collected_facts, same_root_conflict_input, same_root_conflict_tree};
 
 #[test]
 fn errors_on_same_root_precedence_conflict() {

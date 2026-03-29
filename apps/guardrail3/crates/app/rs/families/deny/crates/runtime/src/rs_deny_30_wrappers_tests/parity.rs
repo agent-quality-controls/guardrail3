@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
-use super::super::expected_ban_wrappers_for_test;
 use super::super::build_fixture_deny_toml;
+use super::super::expected_ban_wrappers_for_test;
 
 fn generated_wrapper_map(
     parsed: &toml::Value,
@@ -38,8 +38,8 @@ fn generated_wrapper_map(
 
 #[test]
 fn generated_ban_wrappers_match_expected_canonical_wrapper_policy() {
-    let parsed =
-        toml::from_str::<toml::Value>(&build_fixture_deny_toml("service")).expect("valid deny TOML");
+    let parsed = toml::from_str::<toml::Value>(&build_fixture_deny_toml("service"))
+        .expect("valid deny TOML");
     let generated = generated_wrapper_map(&parsed);
     let expected = expected_ban_wrappers_for_test(Some("service"));
 

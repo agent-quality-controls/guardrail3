@@ -1,7 +1,7 @@
 use guardrail3_app_rs_family_deny_assertions::rs_deny_02_allowed_locations as assertions;
 
-use super::super::{collected_facts, forbidden_input, nested_member_shadow_tree};
 use super::super::check;
+use super::super::{collected_facts, forbidden_input, nested_member_shadow_tree};
 
 #[test]
 fn reports_every_forbidden_deny_config_filename_variant() {

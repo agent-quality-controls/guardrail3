@@ -1,4 +1,6 @@
-use super::super::{add_skip_entry, build_fixture_deny_toml, set_advisory_ignores, set_feature_entries};
+use super::super::{
+    add_skip_entry, build_fixture_deny_toml, set_advisory_ignores, set_feature_entries,
+};
 
 fn skip_entry(name: &str, version: &str) -> toml::Value {
     toml::Value::Table(toml::map::Map::from_iter([

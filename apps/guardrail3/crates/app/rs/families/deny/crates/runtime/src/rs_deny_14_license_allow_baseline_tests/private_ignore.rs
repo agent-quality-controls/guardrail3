@@ -4,7 +4,10 @@ use super::super::{build_fixture_deny_toml, set_private_ignore};
 
 #[test]
 fn errors_when_licenses_private_ignore_is_not_true() {
-    let results = super::super::run_check(&set_private_ignore(&build_fixture_deny_toml("service"), false));
+    let results = super::super::run_check(&set_private_ignore(
+        &build_fixture_deny_toml("service"),
+        false,
+    ));
 
     assert_eq!(results.len(), 1);
     let result = &results[0];

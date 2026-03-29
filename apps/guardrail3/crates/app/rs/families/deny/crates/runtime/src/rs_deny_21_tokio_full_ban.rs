@@ -60,7 +60,6 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     }
 }
 
-
 #[cfg(test)]
 #[allow(dead_code)]
 pub(crate) fn run_check(deny_toml: &str) -> Vec<CheckResult> {
@@ -80,7 +79,9 @@ pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-pub(crate) use ::test_support::{build_fixture_deny_toml, copy_fixture, set_feature_entries, write_file};
+pub(crate) use ::test_support::{
+    build_fixture_deny_toml, copy_fixture, set_feature_entries, write_file,
+};
 #[cfg(test)]
 pub(crate) fn expected_tokio_allowed_features_for_test() -> std::collections::BTreeSet<String> {
     super::deny_support::expected_tokio_allowed_features()
