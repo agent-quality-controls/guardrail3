@@ -2,6 +2,14 @@
 
 Rust root placement and architecture ownership family.
 
+Current source of truth for this family:
+
+- this README for family-local behavior and rule boundaries
+- [apps/guardrail3/crates/app/rs/README.md](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/README.md) for shared `placement` / `FamilyMapper` architecture
+- [.plans/todo/checks/rs/arch.md](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/todo/checks/rs/arch.md) for the live rule inventory
+
+Older handoffs and migration briefs are historical only.
+
 This family enforces a target state where Rust architecture ownership is:
 
 - repo-global
@@ -168,7 +176,9 @@ Examples:
 - eligible root `Cargo.toml` exists in the tree but cached content is missing
 - `guardrail3.toml` exists in the tree but cached content is missing
 - `guardrail3.toml` content is malformed TOML
-- `Cargo.toml` is readable but malformed when auxiliary-role metadata must be resolved
+- governed app/package `Cargo.toml` is readable but malformed
+- governed app/package `Cargo.toml` declares `arch_role`, which is invalid there
+- out-of-zone `Cargo.toml` is readable but malformed when auxiliary-role metadata must be resolved
 
 Absence and unreadability are different states.
 Unreadable-present inputs must not be treated as absent.
@@ -177,7 +187,7 @@ Unreadable-present inputs must not be treated as absent.
 
 Inside this guardrail family itself:
 
-- the family root is a Cargo workspace
+- the family container lives under `families/arch/`
 - `crates/runtime/src/lib.rs` orchestrates only
 - `crates/runtime/src/facts.rs` binds routed placement facts with config resolution
 - `crates/runtime/src/inputs.rs` produces minimal per-rule inputs
@@ -192,7 +202,6 @@ Target family tree:
 
 ```text
 apps/guardrail3/crates/app/rs/families/arch/
-  Cargo.toml
   crates/
     runtime/
       Cargo.toml
@@ -297,7 +306,7 @@ Detection:
 - start from eligible live roots
 - reuse `RS-ARCH-01` classification facts
 - for each root classified as `other`:
-  - if both owner families disabled, emit nothing
+  - if reporting is inactive, emit one inventory info result explaining that misplaced-root enforcement is suppressed
   - otherwise emit one misplaced-root finding
 
 Do not emit for:
@@ -397,9 +406,31 @@ Detection:
 - active required inputs include:
   - readable eligible live `Cargo.toml`
   - parseable governed app/package `Cargo.toml`
+  - governed app/package `Cargo.toml` that does not declare `arch_role`
   - readable `guardrail3.toml`
   - parseable `guardrail3.toml`
   - parseable auxiliary-role metadata in eligible live `Cargo.toml`
+
+### RS-ARCH-08
+
+Declared auxiliary roots must be surfaced explicitly.
+
+Severity:
+
+- `Info`
+
+Detection:
+
+- start from eligible live roots
+- emit for roots outside governed zones that explicitly declare:
+  - `[package.metadata.guardrail3] arch_role = "auxiliary"`
+  - or `[workspace.metadata.guardrail3] arch_role = "auxiliary"`
+- inventory-mark these confirmations so the exemption stays visible without masquerading as an error
+
+Do not emit for:
+
+- governed roots under `apps/*` or `packages/*`
+- malformed or invalid auxiliary metadata, which belongs to `RS-ARCH-07`
 
 ## Test Expectations
 

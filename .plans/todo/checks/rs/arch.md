@@ -19,6 +19,13 @@ That is a separate concern. It should not be duplicated in both `hexarch` and `l
 
 `RS-ARCH` exists to own that global placement and ownership contract once.
 
+Current source of truth:
+- `apps/guardrail3/crates/app/rs/families/arch/README.md` for family-local behavior
+- `apps/guardrail3/crates/app/rs/README.md` for shared routed architecture
+- this file for the live rule inventory
+
+Older handoffs are historical only.
+
 ## Scope
 
 This family is deliberately narrow.
@@ -100,6 +107,7 @@ The intended behavior is:
 
 Discovery/classification still happens either way.
 Enablement changes reporting, not root discovery.
+When reporting is inactive, `RS-ARCH-02` should still emit an inventory/info result saying misplaced-root enforcement is suppressed.
 
 ## Input integrity / fail-closed expectations
 
@@ -170,6 +178,16 @@ The family should surface impossible or contradictory ownership states explicitl
 ### RS-ARCH-07 — Required inputs fail closed
 
 Unreadable-present or malformed required `arch` inputs must surface explicit errors instead of silently degrading into absence.
+
+That includes:
+- malformed governed app/package `Cargo.toml`
+- governed roots that declare `arch_role`
+- malformed auxiliary metadata on out-of-zone roots
+
+### RS-ARCH-08 — Declared auxiliary roots are explicit
+
+Roots outside governed zones may opt into `auxiliary` status explicitly.
+That exemption should stay visible as inventory/info output.
 
 ## Relationship to other families
 

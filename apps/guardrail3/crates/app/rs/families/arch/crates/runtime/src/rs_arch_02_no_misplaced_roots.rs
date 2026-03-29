@@ -31,7 +31,29 @@ pub fn check_success(
     has_misplaced_roots: bool,
     results: &mut Vec<CheckResult>,
 ) {
-    if !reporting_enabled || has_misplaced_roots {
+    if !reporting_enabled {
+        results.push(
+            CheckResult {
+                id: ID.to_owned(),
+                severity: Severity::Info,
+                title: "Misplaced-root reporting is inactive".to_owned(),
+                message: if has_misplaced_roots {
+                    "Discovered Rust roots outside governed zones exist, but `RS-ARCH-02` is inactive because `arch` or both owner architecture families are disabled."
+                        .to_owned()
+                } else {
+                    "No misplaced-root errors can fire in this run because `RS-ARCH-02` is inactive while `arch` or both owner architecture families are disabled."
+                        .to_owned()
+                },
+                file: None,
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
+        return;
+    }
+
+    if has_misplaced_roots {
         return;
     }
 

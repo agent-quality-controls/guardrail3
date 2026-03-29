@@ -53,6 +53,11 @@ fn misplaced_roots_do_not_fire_when_both_architecture_families_are_disabled() {
     ));
 
     assertions::assert_no_error_files(&results, "RS-ARCH-02");
+    assertions::assert_inventory_summary(
+        &results,
+        "RS-ARCH-02",
+        "Misplaced-root reporting is inactive",
+    );
 }
 
 #[test]
@@ -71,4 +76,9 @@ fn misplaced_roots_do_not_fire_when_arch_is_globally_disabled() {
     ));
 
     assertions::assert_no_error_files(&results, "RS-ARCH-02");
+    assertions::assert_inventory_summary(
+        &results,
+        "RS-ARCH-02",
+        "Misplaced-root reporting is inactive",
+    );
 }

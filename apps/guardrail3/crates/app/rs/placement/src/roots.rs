@@ -59,6 +59,14 @@ pub fn collect(tree: &ProjectTree) -> RustRootPlacementFacts {
         let placement_rel_dir = contextual_rel_dir(zone_context_prefix.as_deref(), &rel_dir);
         let parsed = parse_live_cargo_toml(tree, &cargo_rel_path, &mut input_failures);
         let arch_role = if has_governed_zone_candidate(&placement_rel_dir) {
+            if let Some(parsed) = parsed.as_ref() {
+                if declares_arch_role(parsed) {
+                    input_failures.push(RustRootPlacementInputFailureFacts {
+                        rel_path: cargo_rel_path.clone(),
+                        message: "Governed Rust roots under `apps/*` or `packages/*` must not declare `arch_role` in Cargo metadata. `arch_role = \"auxiliary\"` is only valid for roots outside governed architecture zones.".to_owned(),
+                    });
+                }
+            }
             None
         } else {
             resolve_arch_role(parsed.as_ref(), &cargo_rel_path, &mut input_failures)
@@ -161,19 +169,7 @@ fn parse_live_cargo_toml(
 }
 
 fn arch_role_from_toml(parsed: &Value) -> Result<Option<RustArchRole>, String> {
-    let Some(value) = parsed
-        .get("package")
-        .and_then(|value| value.get("metadata"))
-        .and_then(|value| value.get("guardrail3"))
-        .and_then(|value| value.get("arch_role"))
-        .or_else(|| {
-            parsed
-                .get("workspace")
-                .and_then(|value| value.get("metadata"))
-                .and_then(|value| value.get("guardrail3"))
-                .and_then(|value| value.get("arch_role"))
-        })
-    else {
+    let Some(value) = arch_role_value(parsed) else {
         return Ok(None);
     };
 
@@ -190,6 +186,25 @@ fn arch_role_from_toml(parsed: &Value) -> Result<Option<RustArchRole>, String> {
             "Invalid `arch_role = \"{other}\"` in Cargo metadata for Rust root placement discovery. Expected `\"auxiliary\"`."
         )),
     }
+}
+
+fn declares_arch_role(parsed: &Value) -> bool {
+    arch_role_value(parsed).is_some()
+}
+
+fn arch_role_value(parsed: &Value) -> Option<&Value> {
+    parsed
+        .get("package")
+        .and_then(|value| value.get("metadata"))
+        .and_then(|value| value.get("guardrail3"))
+        .and_then(|value| value.get("arch_role"))
+        .or_else(|| {
+            parsed
+                .get("workspace")
+                .and_then(|value| value.get("metadata"))
+                .and_then(|value| value.get("guardrail3"))
+                .and_then(|value| value.get("arch_role"))
+        })
 }
 
 fn zone_context_prefix(tree: &ProjectTree) -> Option<String> {
