@@ -1,3 +1,4 @@
+use guardrail3_app_rs_family_release_assertions::rs_release_11_accidentally_publishable_internal_crates as assertions;
 use super::super::run_tree as check;
 use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
 
@@ -47,10 +48,8 @@ readme = false
     );
     let results = check(&tree, &StubToolChecker::new(true), false);
 
-    assert!(
-        results.iter().all(|result| result.id != "RS-RELEASE-11"),
-        "workspace-inherited metadata should prevent RS-RELEASE-11: {results:#?}"
-    );
+    assert!(assertions::findings(&results).is_empty());
+    assertions::assert_rule_quiet(&results);
 }
 
 #[test]
@@ -90,10 +89,8 @@ license.workspace = true
     );
     let results = check(&tree, &StubToolChecker::new(true), false);
 
-    assert!(
-        results.iter().all(|result| result.id != "RS-RELEASE-11"),
-        "single inherited metadata field should prevent RS-RELEASE-11: {results:#?}"
-    );
+    assert!(assertions::findings(&results).is_empty());
+    assertions::assert_rule_quiet(&results);
 }
 
 #[test]
@@ -133,10 +130,8 @@ publish.workspace = true
     );
     let results = check(&tree, &StubToolChecker::new(true), false);
 
-    assert!(
-        results.iter().all(|result| result.id != "RS-RELEASE-11"),
-        "workspace-inherited publish=[] should suppress RS-RELEASE-11: {results:#?}"
-    );
+    assert!(assertions::findings(&results).is_empty());
+    assertions::assert_rule_quiet(&results);
 }
 
 #[test]
@@ -191,9 +186,13 @@ repository.workspace = true
     );
     let results = check(&tree, &StubToolChecker::new(true), false);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-RELEASE-11"
-            && !result.inventory
-            && result.file.as_deref() == Some("crates/orphan/Cargo.toml")
-    }));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            file: Some("crates/orphan/Cargo.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }

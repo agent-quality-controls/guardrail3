@@ -1,8 +1,8 @@
 use std::collections::BTreeSet;
 
+use guardrail3_app_rs_family_release_assertions::rs_bin_02_linux_target as assertions;
 use super::super::run_tree as run_family;
 use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
-use guardrail3_domain_report::Severity;
 
 use super::super::{crate_facts, crate_input, repo_facts, workflow_from_yaml};
 use super::super::check;
@@ -33,18 +33,17 @@ jobs:
 
     check(&input, &[repo.clone()], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-02");
-    assert_eq!(results[0].severity, Severity::Info);
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some("crates/example/Cargo.toml")
-    );
-    assert!(results[0].title.contains("no linux release target"));
-    assert_eq!(
-        results[0].message,
-        "No workflow includes a Linux target for binary release."
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            title_contains: Some("no linux release target"),
+            file: Some("crates/example/Cargo.toml"),
+            inventory: Some(true),
+            message: Some("No workflow includes a Linux target for binary release."),
+            ..Default::default()
+        }],
     );
 }
 
@@ -69,10 +68,15 @@ jobs:
 
     check(&input, &[repo], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-02");
-    assert!(results[0].inventory);
-    assert_eq!(results[0].title, "bin: no linux release target");
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            title: Some("bin: no linux release target"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -98,7 +102,8 @@ jobs:
 
     check(&input, &[repo.clone()], &mut results);
 
-    assert!(results.is_empty());
+    assert!(assertions::findings(&results).is_empty());
+    assertions::assert_rule_quiet(&results);
 
     let mut non_publishable_binary = crate_facts("bin");
     non_publishable_binary.is_binary = true;
@@ -112,7 +117,8 @@ jobs:
         &mut non_publishable_binary_results,
     );
 
-    assert!(non_publishable_binary_results.is_empty());
+    assert!(assertions::findings(&non_publishable_binary_results).is_empty());
+    assertions::assert_rule_quiet(&non_publishable_binary_results);
 }
 
 #[test]
@@ -139,14 +145,16 @@ jobs:
 
     check(&input, &[repo.clone()], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-02");
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some("crates/example/Cargo.toml")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            title_contains: Some("no linux release target"),
+            file: Some("crates/example/Cargo.toml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
-    assert!(results[0].title.contains("no linux release target"));
 }
 
 #[test]
@@ -159,15 +167,17 @@ fn reports_absence_when_repo_has_no_workflows() {
 
     check(&input, &[repo.clone()], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-02");
-    assert_eq!(results[0].severity, Severity::Info);
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some("crates/example/Cargo.toml")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            title: Some("bin: no linux release target"),
+            file: Some("crates/example/Cargo.toml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
-    assert_eq!(results[0].title, "bin: no linux release target");
 }
 
 #[test]
@@ -194,15 +204,17 @@ jobs:
 
     check(&input, &[repo.clone()], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-02");
-    assert_eq!(results[0].severity, Severity::Info);
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some("crates/example/Cargo.toml")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            title: Some("bin: no linux release target"),
+            file: Some("crates/example/Cargo.toml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
-    assert_eq!(results[0].title, "bin: no linux release target");
 }
 
 #[test]
@@ -226,10 +238,15 @@ jobs:
 
     check(&input, &[repo], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-02");
-    assert!(results[0].inventory);
-    assert_eq!(results[0].title, "bin: no linux release target");
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            title: Some("bin: no linux release target"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -277,10 +294,8 @@ jobs:
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(
-        results.iter().all(|result| result.id != "RS-BIN-02"),
-        "autobins=false package should stay out of RS-BIN-02: {results:#?}"
-    );
+    assert!(assertions::findings(&results).is_empty());
+    assertions::assert_rule_quiet(&results);
 }
 
 #[test]
@@ -304,14 +319,16 @@ jobs:
 
     check(&input, &[repo], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-02");
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some("crates/example/Cargo.toml")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            title: Some("worker: no linux release target"),
+            file: Some("crates/example/Cargo.toml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
-    assert_eq!(results[0].title, "worker: no linux release target");
 }
 
 #[test]
@@ -339,10 +356,15 @@ jobs:
 
     check(&input, &[repo], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-02");
-    assert!(results[0].inventory);
-    assert_eq!(results[0].title, "worker: no linux release target");
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            title: Some("worker: no linux release target"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -391,10 +413,8 @@ jobs:
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(
-        results.iter().all(|result| result.id != "RS-BIN-02"),
-        "autobins=false src/bin package should stay out of RS-BIN-02: {results:#?}"
-    );
+    assert!(assertions::findings(&results).is_empty());
+    assertions::assert_rule_quiet(&results);
 }
 
 #[test]
@@ -426,10 +446,15 @@ jobs:
 
     check(&input, &[repo], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-02");
-    assert!(results[0].inventory);
-    assert_eq!(results[0].title, "bin: no linux release target");
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            title: Some("bin: no linux release target"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -454,10 +479,15 @@ jobs:
 
     check(&input, &[repo], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-02");
-    assert!(results[0].inventory);
-    assert_eq!(results[0].title, "worker: no linux release target");
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            title: Some("worker: no linux release target"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -482,8 +512,13 @@ jobs:
 
     check(&input, &[repo], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-02");
-    assert!(results[0].inventory);
-    assert_eq!(results[0].title, "worker: no linux release target");
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            title: Some("worker: no linux release target"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
 }

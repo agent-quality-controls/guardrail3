@@ -1,4 +1,4 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_release_assertions::rs_pub_05_readme_quality as assertions;
 
 use super::super::{crate_facts, crate_input};
 use super::super::check;
@@ -11,12 +11,17 @@ fn inventories_good_readme_quality_for_publishable_crate() {
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-PUB-05");
-    assert_eq!(results[0].severity, Severity::Info);
-    assert!(results[0].inventory);
-    assert_eq!(results[0].file.as_deref(), Some("crates/example/README.md"));
-    assert!(results[0].message.contains("content and headings"));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            file: Some("crates/example/README.md"),
+            inventory: Some(true),
+            message_contains: Some("content and headings"),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -31,11 +36,16 @@ fn inventories_good_readme_quality_with_setext_heading() {
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-PUB-05");
-    assert_eq!(results[0].severity, Severity::Info);
-    assert!(results[0].inventory);
-    assert_eq!(results[0].file.as_deref(), Some("crates/example/README.md"));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            file: Some("crates/example/README.md"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -47,9 +57,14 @@ fn inventories_good_readme_quality_with_multi_hash_heading() {
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-PUB-05");
-    assert_eq!(results[0].severity, Severity::Info);
-    assert!(results[0].inventory);
-    assert_eq!(results[0].file.as_deref(), Some("crates/example/README.md"));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            file: Some("crates/example/README.md"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
 }

@@ -1,3 +1,4 @@
+use guardrail3_app_rs_family_release_assertions::rs_pub_06_keywords_present as assertions;
 use super::super::run_tree as check;
 use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
 
@@ -47,17 +48,14 @@ readme = false
     );
     let results = check(&tree, &StubToolChecker::new(true), false);
 
-    assert!(
-        results.iter().any(|result| {
-            result.id == "RS-PUB-06"
-                && result.inventory
-                && result.file.as_deref() == Some("crates/pub/Cargo.toml")
-        }) && results.iter().all(|result| {
-            !(result.id == "RS-PUB-06"
-                && result.severity == guardrail3_domain_report::Severity::Warn
-                && !result.inventory)
-        }),
-        "workspace-inherited keywords should satisfy RS-PUB-06: {results:#?}"
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            file: Some("crates/pub/Cargo.toml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
 }
 
@@ -97,13 +95,17 @@ keywords.workspace = true
     );
     let results = check(&tree, &StubToolChecker::new(true), false);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-PUB-06"
-            && result.severity == guardrail3_domain_report::Severity::Warn
-            && !result.inventory
-            && result.file.as_deref() == Some("crates/pub/Cargo.toml")
-            && result.title.contains("keywords missing")
-    }));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Warn),
+            title_contains: Some("keywords missing"),
+            file: Some("crates/pub/Cargo.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -154,12 +156,16 @@ keywords.workspace = true
     );
     let results = check(&tree, &StubToolChecker::new(true), false);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-PUB-06"
-            && result.severity == guardrail3_domain_report::Severity::Warn
-            && !result.inventory
-            && result.file.as_deref() == Some("crates/orphan/Cargo.toml")
-    }));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Warn),
+            file: Some("crates/orphan/Cargo.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -201,16 +207,13 @@ keywords.workspace = true
     );
     let results = check(&tree, &StubToolChecker::new(true), false);
 
-    assert!(
-        results.iter().any(|result| {
-            result.id == "RS-PUB-06"
-                && result.inventory
-                && result.file.as_deref() == Some("packages/pub/Cargo.toml")
-        }) && results.iter().all(|result| {
-            !(result.id == "RS-PUB-06"
-                && result.severity == guardrail3_domain_report::Severity::Warn
-                && !result.inventory)
-        }),
-        "package.workspace keyword inheritance should satisfy RS-PUB-06: {results:#?}"
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            file: Some("packages/pub/Cargo.toml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
 }

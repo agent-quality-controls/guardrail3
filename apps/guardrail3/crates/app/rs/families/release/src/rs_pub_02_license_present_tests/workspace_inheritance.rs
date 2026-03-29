@@ -1,3 +1,4 @@
+use guardrail3_app_rs_family_release_assertions::rs_pub_02_license_present as assertions;
 use super::super::run_tree as check;
 use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
 
@@ -47,11 +48,13 @@ readme = false
     );
     let results = check(&tree, &StubToolChecker::new(true), false);
 
-    assert!(
-        results
-            .iter()
-            .any(|result| result.id == "RS-PUB-02" && result.inventory),
-        "workspace-inherited license should inventory under RS-PUB-02: {results:#?}"
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
 }
 
@@ -102,11 +105,13 @@ readme = false
     );
     let results = check(&tree, &StubToolChecker::new(true), false);
 
-    assert!(
-        results
-            .iter()
-            .any(|result| result.id == "RS-PUB-02" && result.inventory),
-        "workspace-inherited license-file should inventory under RS-PUB-02: {results:#?}"
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
 }
 
@@ -159,10 +164,14 @@ license-file.workspace = true
     );
     let results = check(&tree, &StubToolChecker::new(true), false);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-PUB-02"
-            && result.severity == guardrail3_domain_report::Severity::Error
-            && !result.inventory
-            && result.file.as_deref() == Some("crates/orphan/Cargo.toml")
-    }));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Error),
+            file: Some("crates/orphan/Cargo.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }

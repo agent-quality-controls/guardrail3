@@ -1,4 +1,4 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_release_assertions::rs_release_04_cliff_exists as assertions;
 
 use super::super::{repo_facts, repo_input};
 use super::super::check;
@@ -11,11 +11,16 @@ fn warns_when_cliff_file_is_missing() {
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-RELEASE-04");
-    assert_eq!(results[0].severity, Severity::Warn);
-    assert!(!results[0].inventory);
-    assert_eq!(results[0].file.as_deref(), Some("cliff.toml"));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Warn),
+            file: Some("cliff.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -28,7 +33,8 @@ fn stays_quiet_when_cliff_exists_but_parse_failure_is_owned_by_release_12() {
 
     check(&input, &mut results);
 
-    assert!(results.is_empty());
+    assert!(assertions::findings(&results).is_empty());
+    assertions::assert_rule_quiet(&results);
 }
 
 #[test]
@@ -41,12 +47,17 @@ fn warns_when_git_section_is_missing() {
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-RELEASE-04");
-    assert_eq!(results[0].severity, Severity::Warn);
-    assert!(!results[0].inventory);
-    assert_eq!(results[0].file.as_deref(), Some("cliff.toml"));
-    assert!(results[0].title.contains("[git]"));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Warn),
+            title_contains: Some("[git]"),
+            file: Some("cliff.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -66,12 +77,17 @@ git = "oops"
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-RELEASE-04");
-    assert_eq!(results[0].severity, Severity::Warn);
-    assert!(!results[0].inventory);
-    assert_eq!(results[0].file.as_deref(), Some("cliff.toml"));
-    assert!(results[0].title.contains("[git]"));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Warn),
+            title_contains: Some("[git]"),
+            file: Some("cliff.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -102,12 +118,17 @@ commit_parsers = [
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-RELEASE-04");
-    assert_eq!(results[0].severity, Severity::Warn);
-    assert!(!results[0].inventory);
-    assert_eq!(results[0].file.as_deref(), Some("cliff.toml"));
-    assert!(results[0].title.contains("conventional_commits"));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Warn),
+            title_contains: Some("conventional_commits"),
+            file: Some("cliff.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -139,12 +160,17 @@ commit_parsers = [
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-RELEASE-04");
-    assert_eq!(results[0].severity, Severity::Warn);
-    assert!(!results[0].inventory);
-    assert_eq!(results[0].file.as_deref(), Some("cliff.toml"));
-    assert!(results[0].title.contains("conventional_commits"));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Warn),
+            title_contains: Some("conventional_commits"),
+            file: Some("cliff.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -175,12 +201,17 @@ commit_parsers = [
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-RELEASE-04");
-    assert_eq!(results[0].severity, Severity::Warn);
-    assert!(!results[0].inventory);
-    assert_eq!(results[0].file.as_deref(), Some("cliff.toml"));
-    assert!(results[0].title.contains("filter_unconventional"));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Warn),
+            title_contains: Some("filter_unconventional"),
+            file: Some("cliff.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -212,12 +243,17 @@ commit_parsers = [
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-RELEASE-04");
-    assert_eq!(results[0].severity, Severity::Warn);
-    assert!(!results[0].inventory);
-    assert_eq!(results[0].file.as_deref(), Some("cliff.toml"));
-    assert!(results[0].title.contains("filter_unconventional"));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Warn),
+            title_contains: Some("filter_unconventional"),
+            file: Some("cliff.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -243,22 +279,20 @@ commit_parsers = [
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 6);
-    assert!(results.iter().all(|result| result.id == "RS-RELEASE-04"));
-    assert!(
-        results
-            .iter()
-            .all(|result| result.severity == Severity::Warn)
+    assert_eq!(assertions::findings(&results).len(), 6);
+    assertions::assert_rule_count(&results, 6);
+    assertions::assert_rule_results(
+        &results,
+        &["^doc", "^perf", "^refactor", "^style", "^test", "^chore"].map(|prefix| {
+            assertions::ExpectedRuleResult {
+                severity: Some(assertions::Severity::Warn),
+                title_contains: Some(prefix),
+                file: Some("cliff.toml"),
+                inventory: Some(false),
+                ..Default::default()
+            }
+        }),
     );
-    assert!(results.iter().all(|result| !result.inventory));
-    assert!(
-        results
-            .iter()
-            .all(|result| result.file.as_deref() == Some("cliff.toml"))
-    );
-    for prefix in ["^doc", "^perf", "^refactor", "^style", "^test", "^chore"] {
-        assert!(results.iter().any(|result| result.title.contains(prefix)));
-    }
 }
 
 #[test]
@@ -290,12 +324,17 @@ commit_parsers = [
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-RELEASE-04");
-    assert_eq!(results[0].severity, Severity::Warn);
-    assert!(!results[0].inventory);
-    assert_eq!(results[0].file.as_deref(), Some("cliff.toml"));
-    assert!(results[0].title.contains("^feat"));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Warn),
+            title_contains: Some("^feat"),
+            file: Some("cliff.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -327,10 +366,15 @@ commit_parsers = [
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-RELEASE-04");
-    assert_eq!(results[0].severity, Severity::Warn);
-    assert!(!results[0].inventory);
-    assert_eq!(results[0].file.as_deref(), Some("cliff.toml"));
-    assert!(results[0].title.contains("^feat"));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Warn),
+            title_contains: Some("^feat"),
+            file: Some("cliff.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }

@@ -1,8 +1,8 @@
+use guardrail3_app_rs_family_release_assertions::rs_bin_03_binstall_metadata as assertions;
 use super::super::run_tree as run_family;
 use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
 use super::super::{crate_facts, crate_input};
 use super::super::check;
-use guardrail3_domain_report::Severity;
 
 #[test]
 fn warns_without_binstall_metadata_and_skips_out_of_scope_crates() {
@@ -12,29 +12,25 @@ fn warns_without_binstall_metadata_and_skips_out_of_scope_crates() {
     let missing_input = crate_input(&missing);
     let mut missing_results = Vec::new();
     check(&missing_input, &mut missing_results);
-    assert_eq!(missing_results.len(), 1);
-    assert_eq!(missing_results[0].id, "RS-BIN-03");
-    assert_eq!(missing_results[0].severity, Severity::Warn);
-    assert!(!missing_results[0].inventory);
-    assert_eq!(
-        missing_results[0].file.as_deref(),
-        Some("crates/example/Cargo.toml")
-    );
-    assert!(
-        missing_results[0]
-            .title
-            .contains("missing binstall metadata")
-    );
-    assert_eq!(
-        missing_results[0].message,
-        "Publishable binary crates should set `[package.metadata.binstall]`."
+    assert!(!assertions::findings(&missing_results).is_empty());
+    assertions::assert_rule_results(
+        &missing_results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Warn),
+            title_contains: Some("missing binstall metadata"),
+            file: Some("crates/example/Cargo.toml"),
+            inventory: Some(false),
+            message: Some("Publishable binary crates should set `[package.metadata.binstall]`."),
+            ..Default::default()
+        }],
     );
 
     let library = crate_facts("lib");
     let library_input = crate_input(&library);
     let mut library_results = Vec::new();
     check(&library_input, &mut library_results);
-    assert!(library_results.is_empty());
+    assert!(assertions::findings(&library_results).is_empty());
+    assertions::assert_rule_quiet(&library_results);
 
     let mut library_with_metadata = crate_facts("lib");
     library_with_metadata.has_binstall_metadata = true;
@@ -44,7 +40,8 @@ fn warns_without_binstall_metadata_and_skips_out_of_scope_crates() {
         &library_with_metadata_input,
         &mut library_with_metadata_results,
     );
-    assert!(library_with_metadata_results.is_empty());
+    assert!(assertions::findings(&library_with_metadata_results).is_empty());
+    assertions::assert_rule_quiet(&library_with_metadata_results);
 
     let mut non_publishable = crate_facts("bin");
     non_publishable.is_binary = true;
@@ -52,7 +49,8 @@ fn warns_without_binstall_metadata_and_skips_out_of_scope_crates() {
     let non_publishable_input = crate_input(&non_publishable);
     let mut non_publishable_results = Vec::new();
     check(&non_publishable_input, &mut non_publishable_results);
-    assert!(non_publishable_results.is_empty());
+    assert!(assertions::findings(&non_publishable_results).is_empty());
+    assertions::assert_rule_quiet(&non_publishable_results);
 }
 
 #[test]
@@ -86,9 +84,15 @@ binstall = "oops"
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-BIN-03" && result.severity == Severity::Warn && !result.inventory
-    }));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Warn),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -120,12 +124,16 @@ repository = "https://example.com/bin"
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-BIN-03"
-            && result.severity == Severity::Warn
-            && !result.inventory
-            && result.file.as_deref() == Some("Cargo.toml")
-    }));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Warn),
+            file: Some("Cargo.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -158,13 +166,17 @@ repository = "https://example.com/bin"
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-BIN-03"
-            && result.severity == Severity::Info
-            && result.inventory
-            && result.file.as_deref() == Some("Cargo.toml")
-            && result.title.contains("binstall metadata present")
-    }));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            title_contains: Some("binstall metadata present"),
+            file: Some("Cargo.toml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -200,12 +212,16 @@ path = "src/main.rs"
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-BIN-03"
-            && result.severity == Severity::Warn
-            && !result.inventory
-            && result.file.as_deref() == Some("Cargo.toml")
-    }));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Warn),
+            file: Some("Cargo.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -240,10 +256,8 @@ pkg-url = "{ repo }/releases/download/{ version }/{ name }"
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(
-        results.iter().all(|result| result.id != "RS-BIN-03"),
-        "autobins=false package should stay out of RS-BIN-03: {results:#?}"
-    );
+    assert!(assertions::findings(&results).is_empty());
+    assertions::assert_rule_quiet(&results);
 }
 
 #[test]
@@ -277,10 +291,8 @@ pkg-url = "{ repo }/releases/download/{ version }/{ name }"
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(
-        results.iter().all(|result| result.id != "RS-BIN-03"),
-        "non-binary crate should stay out of RS-BIN-03: {results:#?}"
-    );
+    assert!(assertions::findings(&results).is_empty());
+    assertions::assert_rule_quiet(&results);
 }
 
 #[test]
@@ -316,8 +328,6 @@ pkg-url = "{ repo }/releases/download/{ version }/{ name }"
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(
-        results.iter().all(|result| result.id != "RS-BIN-03"),
-        "autobins=false src/bin package should stay out of RS-BIN-03: {results:#?}"
-    );
+    assert!(assertions::findings(&results).is_empty());
+    assertions::assert_rule_quiet(&results);
 }

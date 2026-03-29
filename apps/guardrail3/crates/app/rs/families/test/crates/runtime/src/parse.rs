@@ -17,6 +17,7 @@ pub struct ParsedTestFile {
     pub file_function_names: BTreeSet<String>,
     pub file_call_paths: Vec<Vec<String>>,
     pub imports: Vec<UseBinding>,
+    pub macro_defined_proof_functions: BTreeSet<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -127,6 +128,7 @@ pub fn analyze(ast: &syn::File, content: &str) -> ParsedTestFile {
             file_function_names: BTreeSet::new(),
             file_call_paths: Vec::new(),
             imports: Vec::new(),
+            macro_defined_proof_functions: BTreeSet::new(),
         },
     };
     visitor.visit_file(ast);
@@ -206,6 +208,24 @@ impl<'ast> Visit<'ast> for TestVisitor {
             local_name: item.rename.as_ref().map(|(_, ident)| ident.to_string()),
         });
         syn::visit::visit_item_extern_crate(self, item);
+    }
+
+    fn visit_item_macro(&mut self, item: &'ast syn::ItemMacro) {
+        if item
+            .mac
+            .path
+            .segments
+            .last()
+            .is_some_and(|segment| segment.ident == "define_rule_assertions")
+        {
+            self.out.macro_defined_proof_functions.extend([
+                "assert_rule_quiet".to_owned(),
+                "assert_rule_count".to_owned(),
+                "assert_rule_files".to_owned(),
+                "assert_rule_results".to_owned(),
+            ]);
+        }
+        syn::visit::visit_item_macro(self, item);
     }
 
     fn visit_item_const(&mut self, item: &'ast syn::ItemConst) {

@@ -1,3 +1,4 @@
+use guardrail3_app_rs_family_release_assertions::rs_pub_03_repository_present as assertions;
 use super::super::run_tree as check;
 use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
 
@@ -47,17 +48,14 @@ readme = false
     );
     let results = check(&tree, &StubToolChecker::new(true), false);
 
-    assert!(
-        results.iter().any(|result| {
-            result.id == "RS-PUB-03"
-                && result.inventory
-                && result.file.as_deref() == Some("crates/pub/Cargo.toml")
-        }) && results.iter().all(|result| {
-            !(result.id == "RS-PUB-03"
-                && result.severity == guardrail3_domain_report::Severity::Error
-                && !result.inventory)
-        }),
-        "workspace-inherited repository should satisfy RS-PUB-03: {results:#?}"
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            file: Some("crates/pub/Cargo.toml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
 }
 
@@ -109,11 +107,15 @@ repository.workspace = true
     );
     let results = check(&tree, &StubToolChecker::new(true), false);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-PUB-03"
-            && !result.inventory
-            && result.file.as_deref() == Some("crates/orphan/Cargo.toml")
-    }));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            file: Some("crates/orphan/Cargo.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -155,17 +157,14 @@ repository.workspace = true
     );
     let results = check(&tree, &StubToolChecker::new(true), false);
 
-    assert!(
-        results.iter().any(|result| {
-            result.id == "RS-PUB-03"
-                && result.inventory
-                && result.file.as_deref() == Some("packages/pub/Cargo.toml")
-        }) && results.iter().all(|result| {
-            !(result.id == "RS-PUB-03"
-                && result.severity == guardrail3_domain_report::Severity::Error
-                && !result.inventory)
-        }),
-        "package.workspace inheritance should satisfy RS-PUB-03: {results:#?}"
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            file: Some("packages/pub/Cargo.toml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
 }
 
@@ -219,10 +218,14 @@ repository.workspace = true
     );
     let results = check(&tree, &StubToolChecker::new(true), false);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-PUB-03"
-            && result.severity == guardrail3_domain_report::Severity::Error
-            && !result.inventory
-            && result.file.as_deref() == Some("packages/orphan/Cargo.toml")
-    }));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Error),
+            file: Some("packages/orphan/Cargo.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }
