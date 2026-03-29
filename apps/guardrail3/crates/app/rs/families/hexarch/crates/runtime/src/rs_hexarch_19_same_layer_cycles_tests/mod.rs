@@ -5,7 +5,7 @@ mod fixture_cycles;
 mod golden;
 mod scope_boundaries;
 
-use guardrail3_domain_report::CheckResult;
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_19_same_layer_cycles::CheckResult;
 use std::path::{Path, PathBuf};
 
 #[allow(unused_imports)]
@@ -17,7 +17,7 @@ const GOLDEN_REL: &str = "../../../../../../../tests/fixtures/r_arch_01/golden";
 const RUST_APPS: &[&str] = &["devctl", "backend", "worker"];
 const INNER_HEX_ROOT: &str = "apps/backend/crates/adapters/inbound/mcp/crates";
 
-pub(super) fn run_family(root: &Path) -> Vec<guardrail3_domain_report::CheckResult> {
+pub(super) fn run_family(root: &Path) -> Vec<CheckResult> {
     super::results_for_test_root(root)
 }
 

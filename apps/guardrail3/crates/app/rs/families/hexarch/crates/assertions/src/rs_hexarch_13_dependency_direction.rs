@@ -1,4 +1,4 @@
-use guardrail3_domain_report::{CheckResult, Severity};
+pub use guardrail3_domain_report::{CheckResult, Severity};
 use std::collections::BTreeSet;
 
 const RULE_ID: &str = "RS-HEXARCH-13";
