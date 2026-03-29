@@ -1,8 +1,6 @@
-use guardrail3_domain_report::Severity;
-
 use super::super::check_source;
 use guardrail3_app_rs_family_code_assertions::rs_code_29_large_trait_inventory::{
-    assert_normalized_len, findings,
+    assert_findings, RuleFinding,
 };
 
 #[test]
@@ -12,20 +10,19 @@ fn errors_on_trait_with_thirteen_methods() {
         methods.push_str(&format!("    fn m{index}(&self);\n"));
     }
     let content = format!("pub trait Service {{\n{methods}}}");
-    let binding = check_source("src/lib.rs", &content, false);
-    let results = findings(&binding);
+    let results = check_source("src/lib.rs", &content, false);
 
-    assert_normalized_len(&results, 1);
-    assert_eq!(results[0].id, "RS-CODE-29");
-    assert_eq!(results[0].severity, Severity::Error);
-    assert_eq!(results[0].title, "large trait surface");
-    assert_eq!(
-        results[0].message,
-        "Trait `Service` has 13 methods (warn above 8, error above 12)."
+    assert_findings(
+        &results,
+        &[RuleFinding {
+            severity: guardrail3_domain_report::Severity::Error,
+            title: "large trait surface",
+            message: "Trait `Service` has 13 methods (warn above 8, error above 12).",
+            file: Some("src/lib.rs"),
+            line: Some(1),
+            inventory: false,
+        }],
     );
-    assert_eq!(results[0].line, Some(1));
-    assert_eq!(results[0].file.as_deref(), Some("src/lib.rs"));
-    assert!(!results[0].inventory);
 }
 
 #[test]
@@ -35,18 +32,17 @@ fn warns_on_trait_with_nine_methods() {
         methods.push_str(&format!("    fn m{index}(&self);\n"));
     }
     let content = format!("pub trait Service {{\n{methods}}}");
-    let binding = check_source("src/lib.rs", &content, false);
-    let results = findings(&binding);
+    let results = check_source("src/lib.rs", &content, false);
 
-    assert_normalized_len(&results, 1);
-    assert_eq!(results[0].id, "RS-CODE-29");
-    assert_eq!(results[0].severity, Severity::Warn);
-    assert_eq!(results[0].title, "large trait surface");
-    assert_eq!(
-        results[0].message,
-        "Trait `Service` has 9 methods (warn above 8, error above 12)."
+    assert_findings(
+        &results,
+        &[RuleFinding {
+            severity: guardrail3_domain_report::Severity::Warn,
+            title: "large trait surface",
+            message: "Trait `Service` has 9 methods (warn above 8, error above 12).",
+            file: Some("src/lib.rs"),
+            line: Some(1),
+            inventory: false,
+        }],
     );
-    assert_eq!(results[0].line, Some(1));
-    assert_eq!(results[0].file.as_deref(), Some("src/lib.rs"));
-    assert!(!results[0].inventory);
 }

@@ -2,7 +2,7 @@ use super::super::check_source;
 use super::super::copy_fixture;
 use super::super::run_family;
 use guardrail3_app_rs_family_code_assertions::rs_code_22_deny_forbid_without_reason::{
-    assert_no_hits, assert_normalized_len, findings,
+    assert_findings, assert_no_hits, RuleFinding,
 };
 use test_support::write_file;
 
@@ -31,7 +31,7 @@ fn skips_reason_variants_on_same_line() {
     let content = "#![deny(clippy::panic, clippy::expect_used)] // reason: root policy is documented\n#[deny(clippy::panic)] // REASON: keep this API panic free\nfn one() {}\n#[forbid(clippy::expect_used)] //reason: worker retries handle fallibility\nfn two() {}\n";
     let results = check_source("src/lib.rs", content, false);
 
-    assert!(results.iter().all(|result| result.id != "RS-CODE-22"));
+    assert_no_hits(&results);
 }
 
 #[test]
@@ -39,14 +39,17 @@ fn inventories_forbid_unsafe_code_even_with_reason() {
     let content = "#![forbid(unsafe_code)] // reason: this crate must stay safe\nfn one() {}";
     let results = check_source("src/lib.rs", content, false);
 
-    assert_normalized_len(&results, 1);
-    assert_eq!(results[0].id, "RS-CODE-22");
-    assert_eq!(
-        results[0].severity,
-        guardrail3_domain_report::Severity::Info
+    assert_findings(
+        &results,
+        &[RuleFinding {
+            severity: guardrail3_domain_report::Severity::Info,
+            title: "forbid(unsafe_code)",
+            message: "`forbid(unsafe_code)` strengthens the local safety boundary.",
+            file: Some("src/lib.rs"),
+            line: Some(1),
+            inventory: true,
+        }],
     );
-    assert_eq!(results[0].title, "forbid(unsafe_code)");
-    assert!(results[0].inventory);
 }
 
 #[test]
@@ -54,8 +57,17 @@ fn does_not_treat_block_comment_as_same_line_reason() {
     let content = "#[deny(clippy::panic)] /* reason: not supported */\nfn one() {}";
     let results = check_source("src/lib.rs", content, false);
 
-    let rs_code_22_results = findings(&results).into_iter().collect::<Vec<_>>();
-    assert_normalized_len(&rs_code_22_results, 1);
+    assert_findings(
+        &results,
+        &[RuleFinding {
+            severity: guardrail3_domain_report::Severity::Error,
+            title: "#[deny]/#[forbid] without reason",
+            message: "`#[deny(clippy::panic)]` changes local lint policy without documenting why. Add `// reason:` on the same line.",
+            file: Some("src/lib.rs"),
+            line: Some(1),
+            inventory: false,
+        }],
+    );
 }
 
 #[test]
@@ -63,8 +75,27 @@ fn empty_or_wrong_key_reason_comments_do_not_suppress() {
     let content = "#[deny(clippy::panic)] // reason:\nfn one() {}\n#[forbid(clippy::expect_used)] // because: not the accepted key\nfn two() {}";
     let results = check_source("src/lib.rs", content, false);
 
-    let rs_code_22_results = findings(&results).into_iter().collect::<Vec<_>>();
-    assert_normalized_len(&rs_code_22_results, 2);
+    assert_findings(
+        &results,
+        &[
+            RuleFinding {
+                severity: guardrail3_domain_report::Severity::Error,
+                title: "#[deny]/#[forbid] without reason",
+                message: "`#[deny(clippy::panic)]` changes local lint policy without documenting why. Add `// reason:` on the same line.",
+                file: Some("src/lib.rs"),
+                line: Some(1),
+                inventory: false,
+            },
+            RuleFinding {
+                severity: guardrail3_domain_report::Severity::Error,
+                title: "#[deny]/#[forbid] without reason",
+                message: "`#[forbid(clippy::expect_used)]` changes local lint policy without documenting why. Add `// reason:` on the same line.",
+                file: Some("src/lib.rs"),
+                line: Some(3),
+                inventory: false,
+            },
+        ],
+    );
 }
 
 #[test]
@@ -87,5 +118,5 @@ fn skips_multiline_attr_with_reason_on_closing_line() {
     let content = "#[deny(\n    clippy::panic,\n    clippy::expect_used\n)] // reason: local boundary hardening\nfn one() {}";
     let results = check_source("src/lib.rs", content, false);
 
-    assert!(results.iter().all(|result| result.id != "RS-CODE-22"));
+    assert_no_hits(&results);
 }

@@ -1,82 +1,75 @@
-use guardrail3_domain_report::Severity;
-
 use super::super::check_source;
 use guardrail3_app_rs_family_code_assertions::rs_code_23_include_bypass::{
-    assert_normalized_len, findings,
+    assert_findings, RuleFinding,
 };
 
 #[test]
 fn errors_on_plain_include_bypass() {
-    let content = "include!(\"../generated.rs\");";
-    let binding = check_source("src/lib.rs", content, false);
-    let results = findings(&binding);
+    let results = check_source("src/lib.rs", "include!(\"../generated.rs\");", false);
 
-    assert_normalized_len(&results, 1);
-    assert_eq!(results[0].id, "RS-CODE-23");
-    assert_eq!(results[0].severity, Severity::Error);
-    assert_eq!(results[0].title, "include! bypass");
-    assert_eq!(
-        results[0].message,
-        "`include!()` pulls in Rust code outside the scanned file boundary."
+    assert_findings(
+        &results,
+        &[RuleFinding {
+            severity: guardrail3_domain_report::Severity::Error,
+            title: "include! bypass",
+            message: "`include!()` pulls in Rust code outside the scanned file boundary.",
+            file: Some("src/lib.rs"),
+            line: Some(1),
+            inventory: false,
+        }],
     );
-    assert_eq!(results[0].line, Some(1));
-    assert_eq!(results[0].file.as_deref(), Some("src/lib.rs"));
-    assert!(!results[0].inventory);
 }
 
 #[test]
 fn inventories_build_script_include_pattern() {
     let content = "include!(concat!(env!(\"OUT_DIR\"), \"/generated.rs\"));";
-    let binding = check_source("src/lib.rs", content, false);
-    let results = findings(&binding);
+    let results = check_source("src/lib.rs", content, false);
 
-    assert_normalized_len(&results, 1);
-    assert_eq!(results[0].id, "RS-CODE-23");
-    assert_eq!(results[0].severity, Severity::Info);
-    assert_eq!(results[0].title, "build-script include! inventory");
-    assert_eq!(
-        results[0].message,
-        "`include!(concat!(env!(\"OUT_DIR\"), ...))` detected. Review generated-code boundary."
+    assert_findings(
+        &results,
+        &[RuleFinding {
+            severity: guardrail3_domain_report::Severity::Info,
+            title: "build-script include! inventory",
+            message: "`include!(concat!(env!(\"OUT_DIR\"), ...))` detected. Review generated-code boundary.",
+            file: Some("src/lib.rs"),
+            line: Some(1),
+            inventory: true,
+        }],
     );
-    assert_eq!(results[0].line, Some(1));
-    assert_eq!(results[0].file.as_deref(), Some("src/lib.rs"));
-    assert!(results[0].inventory);
 }
 
 #[test]
 fn errors_on_non_concat_include_with_out_dir_reference() {
     let content = "include!(my_macro!(env!(\"OUT_DIR\"), \"../escape.rs\"));";
-    let binding = check_source("src/lib.rs", content, false);
-    let results = findings(&binding);
+    let results = check_source("src/lib.rs", content, false);
 
-    assert_normalized_len(&results, 1);
-    assert_eq!(results[0].id, "RS-CODE-23");
-    assert_eq!(results[0].severity, Severity::Error);
-    assert_eq!(results[0].title, "include! bypass");
-    assert_eq!(
-        results[0].message,
-        "`include!()` pulls in Rust code outside the scanned file boundary."
+    assert_findings(
+        &results,
+        &[RuleFinding {
+            severity: guardrail3_domain_report::Severity::Error,
+            title: "include! bypass",
+            message: "`include!()` pulls in Rust code outside the scanned file boundary.",
+            file: Some("src/lib.rs"),
+            line: Some(1),
+            inventory: false,
+        }],
     );
-    assert_eq!(results[0].line, Some(1));
-    assert_eq!(results[0].file.as_deref(), Some("src/lib.rs"));
-    assert!(!results[0].inventory);
 }
 
 #[test]
 fn warns_on_include_path_traversal() {
     let content = "const BYTES: &[u8] = include_bytes!(\"../fixtures/payload.bin\");";
-    let binding = check_source("src/lib.rs", content, false);
-    let results = findings(&binding);
+    let results = check_source("src/lib.rs", content, false);
 
-    assert_normalized_len(&results, 1);
-    assert_eq!(results[0].id, "RS-CODE-23");
-    assert_eq!(results[0].severity, Severity::Warn);
-    assert_eq!(results[0].title, "include path traversal");
-    assert_eq!(
-        results[0].message,
-        "`include_bytes!()` uses a path containing `..`."
+    assert_findings(
+        &results,
+        &[RuleFinding {
+            severity: guardrail3_domain_report::Severity::Warn,
+            title: "include path traversal",
+            message: "`include_bytes!()` uses a path containing `..`.",
+            file: Some("src/lib.rs"),
+            line: Some(1),
+            inventory: false,
+        }],
     );
-    assert_eq!(results[0].line, Some(1));
-    assert_eq!(results[0].file.as_deref(), Some("src/lib.rs"));
-    assert!(!results[0].inventory);
 }
