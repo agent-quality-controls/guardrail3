@@ -67,5 +67,5 @@ pub(crate) fn run_for_tests(tree: &ProjectTree) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-#[path = "rs_clippy_12_allowed_placement_tests/mod.rs"]
+#[path = "rs_clippy_12_allowed_placement_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_clippy_12_allowed_placement_tests;

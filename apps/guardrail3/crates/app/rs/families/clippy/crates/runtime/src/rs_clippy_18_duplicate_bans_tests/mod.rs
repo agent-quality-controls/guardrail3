@@ -1,6 +1,6 @@
-#[path = "golden.rs"]
+#[path = "golden.rs"] // reason: test matrix sidecar split by scenario
 mod golden;
-#[path = "multiple_sections.rs"]
+#[path = "multiple_sections.rs"] // reason: test matrix sidecar split by scenario
 mod multiple_sections;
-#[path = "parity.rs"]
+#[path = "parity.rs"] // reason: test matrix sidecar split by scenario
 mod parity;

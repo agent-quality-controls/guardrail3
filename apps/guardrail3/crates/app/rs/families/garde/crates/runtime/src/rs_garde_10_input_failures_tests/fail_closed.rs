@@ -7,8 +7,8 @@ fn errors_on_source_parse_failure() {
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
     let clippy_toml = super::super::canonical_clippy_toml();
-    std::fs::create_dir_all(source_abs.parent().expect("parent")).expect("mkdir");
-    std::fs::write(&source_abs, "fn broken( {").expect("write");
+    std::fs::create_dir_all(source_abs.parent().expect("fixture source path must have a parent directory")).expect("failed to create fixture source directory");
+    std::fs::write(&source_abs, "fn broken( {").expect("failed to write fixture source");
 
     let tree = project_tree(
         vec![
@@ -46,7 +46,7 @@ garde = { version = "0.22", features = ["derive"] }
         }],
     );
 
-    std::fs::remove_dir_all(root).expect("cleanup");
+    std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");
 }
 
 #[test]
@@ -55,8 +55,8 @@ fn errors_on_cargo_toml_parse_failure() {
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
     let clippy_toml = super::super::canonical_clippy_toml();
-    std::fs::create_dir_all(source_abs.parent().expect("parent")).expect("mkdir");
-    std::fs::write(&source_abs, "fn valid() {}").expect("write");
+    std::fs::create_dir_all(source_abs.parent().expect("fixture source path must have a parent directory")).expect("failed to create fixture source directory");
+    std::fs::write(&source_abs, "fn valid() {}").expect("failed to write fixture source");
 
     let tree = project_tree(
         vec![
@@ -86,7 +86,7 @@ fn errors_on_cargo_toml_parse_failure() {
         }],
     );
 
-    std::fs::remove_dir_all(root).expect("cleanup");
+    std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");
 }
 
 #[test]
@@ -94,8 +94,8 @@ fn errors_on_clippy_parse_failure() {
     let root = temp_root("rs-garde-10-clippy-failure");
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
-    std::fs::create_dir_all(source_abs.parent().expect("parent")).expect("mkdir");
-    std::fs::write(&source_abs, "fn valid() {}").expect("write");
+    std::fs::create_dir_all(source_abs.parent().expect("fixture source path must have a parent directory")).expect("failed to create fixture source directory");
+    std::fs::write(&source_abs, "fn valid() {}").expect("failed to write fixture source");
 
     let tree = project_tree(
         vec![
@@ -133,5 +133,5 @@ garde = { version = "0.22", features = ["derive"] }
         }],
     );
 
-    std::fs::remove_dir_all(root).expect("cleanup");
+    std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");
 }

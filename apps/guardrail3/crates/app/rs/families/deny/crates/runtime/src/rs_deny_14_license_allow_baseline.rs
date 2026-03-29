@@ -80,6 +80,6 @@ pub(crate) fn expected_licenses_for_test() -> std::collections::BTreeSet<String>
     super::deny_support::expected_licenses()
 }
 #[cfg(test)]
-#[path = "rs_deny_14_license_allow_baseline_tests/mod.rs"]
+#[path = "rs_deny_14_license_allow_baseline_tests/mod.rs"] // reason: test-only sidecar module wiring
 // reason: test-only sidecar module wiring
 mod rs_deny_14_license_allow_baseline_tests;

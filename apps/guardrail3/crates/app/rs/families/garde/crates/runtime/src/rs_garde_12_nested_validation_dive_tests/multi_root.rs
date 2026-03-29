@@ -9,8 +9,8 @@ fn local_missing_dive_only_errors_for_owned_root() {
     let clippy_toml = super::super::canonical_clippy_toml();
     let local_abs = root.join(local_rel);
     let shared_abs = root.join(shared_rel);
-    std::fs::create_dir_all(local_abs.parent().expect("parent")).expect("mkdir local");
-    std::fs::create_dir_all(shared_abs.parent().expect("parent")).expect("mkdir shared");
+    std::fs::create_dir_all(local_abs.parent().expect("fixture source path must have a parent directory")).expect("failed to create local fixture source directory");
+    std::fs::create_dir_all(shared_abs.parent().expect("fixture source path must have a parent directory")).expect("failed to create shared fixture source directory");
     std::fs::write(
         &shared_abs,
         r#"
@@ -30,7 +30,7 @@ struct SharedInput {
 }
 "#,
     )
-    .expect("write shared");
+    .expect("failed to write shared fixture source");
     std::fs::write(
         &local_abs,
         r#"
@@ -49,7 +49,7 @@ struct LocalInput {
 }
 "#,
     )
-    .expect("write local");
+    .expect("failed to write local fixture source");
 
     let tree = project_tree(
         vec![
@@ -104,5 +104,5 @@ garde = { version = "0.22", features = ["derive"] }
         }],
     );
 
-    std::fs::remove_dir_all(root).expect("cleanup");
+    std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");
 }

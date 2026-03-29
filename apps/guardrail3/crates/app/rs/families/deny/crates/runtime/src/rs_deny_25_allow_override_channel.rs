@@ -73,6 +73,6 @@ pub(crate) use ::test_support::{
     build_fixture_deny_toml, copy_fixture, set_bans_allow_entries, write_file,
 };
 #[cfg(test)]
-#[path = "rs_deny_25_allow_override_channel_tests/mod.rs"]
+#[path = "rs_deny_25_allow_override_channel_tests/mod.rs"] // reason: test-only sidecar module wiring
 // reason: test-only sidecar module wiring
 mod rs_deny_25_allow_override_channel_tests;

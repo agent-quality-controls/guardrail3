@@ -356,5 +356,5 @@ pub fn build_eslint_config(has_content_app: bool, has_service_app: bool) -> Stri
 }
 
 #[cfg(test)]
-#[path = "eslint_tests.rs"]
+#[path = "eslint_tests.rs"] // reason: colocated eslint module tests
 mod eslint_tests;

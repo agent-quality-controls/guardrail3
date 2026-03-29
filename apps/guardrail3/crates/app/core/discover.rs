@@ -422,5 +422,5 @@ fn has_typescript_signals(fs: &dyn FileSystem, dir: &Path, pkg_json_path: &Path)
 }
 
 #[cfg(test)]
-#[path = "discover_tests.rs"]
+#[path = "discover_tests.rs"] // reason: colocated unit tests for discovery internals
 mod tests;

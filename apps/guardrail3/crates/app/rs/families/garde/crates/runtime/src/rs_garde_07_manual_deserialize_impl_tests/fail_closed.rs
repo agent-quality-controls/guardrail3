@@ -7,7 +7,7 @@ fn errors_when_manual_deserialize_impl_needs_validate() {
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
     let clippy_toml = super::super::canonical_clippy_toml();
-    std::fs::create_dir_all(source_abs.parent().expect("parent")).expect("mkdir");
+    std::fs::create_dir_all(source_abs.parent().expect("fixture source path must have a parent directory")).expect("failed to create fixture source directory");
     std::fs::write(
         &source_abs,
         r#"
@@ -27,7 +27,7 @@ impl<'de> Deserialize<'de> for Input {
 }
 "#,
     )
-    .expect("write");
+    .expect("failed to write fixture source");
 
     let tree = project_tree(
         vec![
@@ -66,7 +66,7 @@ garde = { version = "0.22", features = ["derive"] }
         }],
     );
 
-    std::fs::remove_dir_all(root).expect("cleanup");
+    std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");
 }
 
 #[test]
@@ -75,7 +75,7 @@ fn aliased_deserialize_impl() {
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
     let clippy_toml = super::super::canonical_clippy_toml();
-    std::fs::create_dir_all(source_abs.parent().expect("parent")).expect("mkdir");
+    std::fs::create_dir_all(source_abs.parent().expect("fixture source path must have a parent directory")).expect("failed to create fixture source directory");
     std::fs::write(
         &source_abs,
         r#"
@@ -95,7 +95,7 @@ impl<'de> De<'de> for Input {
 }
 "#,
     )
-    .expect("write");
+    .expect("failed to write fixture source");
 
     let tree = project_tree(
         vec![
@@ -133,7 +133,7 @@ garde = { version = "0.22", features = ["derive"] }
         }],
     );
 
-    std::fs::remove_dir_all(root).expect("cleanup");
+    std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");
 }
 
 #[test]
@@ -142,7 +142,7 @@ fn unrelated_validate_trait_does_not_suppress_deserialize_bypass() {
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
     let clippy_toml = super::super::canonical_clippy_toml();
-    std::fs::create_dir_all(source_abs.parent().expect("parent")).expect("mkdir");
+    std::fs::create_dir_all(source_abs.parent().expect("fixture source path must have a parent directory")).expect("failed to create fixture source directory");
     std::fs::write(
         &source_abs,
         r#"
@@ -169,7 +169,7 @@ impl<'de> Deserialize<'de> for Input {
 }
 "#,
     )
-    .expect("write");
+    .expect("failed to write fixture source");
 
     let tree = project_tree(
         vec![
@@ -206,5 +206,5 @@ garde = { version = "0.22", features = ["derive"] }
         }],
     );
 
-    std::fs::remove_dir_all(root).expect("cleanup");
+    std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");
 }

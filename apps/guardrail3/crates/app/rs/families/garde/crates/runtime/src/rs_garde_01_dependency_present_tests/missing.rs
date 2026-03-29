@@ -49,5 +49,5 @@ serde = { version = "1", features = ["derive"] }
         }],
     );
 
-    std::fs::remove_dir_all(root).expect("cleanup");
+    std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");
 }

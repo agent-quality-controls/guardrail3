@@ -418,9 +418,9 @@ fn split_parent_child(rel: &str) -> Option<(String, String)> {
 }
 
 #[cfg(test)]
-#[path = "project_walker_tests.rs"]
+#[path = "project_walker_tests.rs"] // reason: colocated unit tests for walker behavior
 mod tests;
 
 #[cfg(test)]
-#[path = "project_walker_lossless_tests.rs"]
+#[path = "project_walker_lossless_tests.rs"] // reason: colocated lossless golden tests for walker behavior
 mod lossless_tests;

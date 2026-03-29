@@ -55,5 +55,5 @@ pub fn check(input: &WorkspaceMemberCargoInput<'_>, results: &mut Vec<CheckResul
 }
 
 #[cfg(test)]
-#[path = "rs_cargo_13_member_local_allows_forbidden_tests/mod.rs"]
+#[path = "rs_cargo_13_member_local_allows_forbidden_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_cargo_13_member_local_allows_forbidden_tests;
