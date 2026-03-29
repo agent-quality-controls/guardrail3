@@ -30,3 +30,31 @@ impl Foo {
         }],
     );
 }
+
+#[test]
+fn errors_on_impl_expect_covering_more_than_three_methods() {
+    let content = r#"
+struct Foo;
+
+#[expect(clippy::too_many_lines)]
+impl Foo {
+    fn a(&self) {}
+    fn b(&self) {}
+    fn c(&self) {}
+    fn d(&self) {}
+}
+"#;
+    let results = check_source("src/foo.rs", content, false);
+
+    assert_findings(
+        &results,
+        &[RuleFinding {
+            severity: guardrail3_domain_report::Severity::Error,
+            title: "blanket impl-level expect",
+            message: "`#[expect(clippy::too_many_lines)]` covers an impl block with 4 methods. Apply lint suppressions to individual methods instead.",
+            file: Some("src/foo.rs"),
+            line: Some(4),
+            inventory: false,
+        }],
+    );
+}
