@@ -41,6 +41,8 @@ deny = [
     # --- Async runtime: standardize on tokio ---
     { name = "async-std", wrappers = [] },
     { name = "smol", wrappers = [] },
+    # --- Global state: use std lazy primitives instead of lazy_static ---
+    { name = "lazy_static", wrappers = [], reason = "Ban lazy_static (standardize on std lazy primitives)" },
     # --- Error handling: standardize on thiserror ---
     { name = "anyhow", wrappers = [] },
     # --- Web framework: standardize on axum ---

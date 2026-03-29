@@ -35,7 +35,6 @@ Those belong to:
 apps/guardrail3/crates/app/rs/families/deny/
   Cargo.toml
   README.md
-  deny.toml
   rustfmt.toml
   rust-toolchain.toml
   crates/
@@ -73,7 +72,8 @@ This family is now in the same stabilized shape as `RS-FMT`:
 - one rule-specific sidecar directory per rule
 - owned assertions modules for reusable result-shape proofs
 - clean `RS-TEST` validation for the internal sidecar/assertions boundary
-- self-hosted family-root `deny.toml`, `rustfmt.toml`, and `rust-toolchain.toml`
+- family-local `rustfmt.toml` and `rust-toolchain.toml`
+- no live family-root `deny.toml`; app-root deny policy remains the single allowed live config for this repo shape
 
 The family-level test suite is currently green from the nested workspace:
 
