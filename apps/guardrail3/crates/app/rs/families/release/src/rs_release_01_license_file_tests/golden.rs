@@ -1,4 +1,4 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_release_assertions::rs_release_01_license_file as assertions;
 
 use super::super::{repo_facts, repo_input};
 use super::super::check;
@@ -12,11 +12,16 @@ fn inventories_real_license_file_path() {
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-RELEASE-01");
-    assert_eq!(results[0].severity, Severity::Info);
-    assert!(results[0].inventory);
-    assert_eq!(results[0].file.as_deref(), Some("LICENSE-APACHE"));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            file: Some("LICENSE-APACHE"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -29,9 +34,14 @@ fn inventories_each_allowed_root_license_name() {
 
         check(&input, &mut results);
 
-        assert_eq!(results.len(), 1);
-        assert_eq!(results[0].id, "RS-RELEASE-01");
-        assert!(results[0].inventory);
-        assert_eq!(results[0].file.as_deref(), Some(rel_path));
+        assert!(!assertions::findings(&results).is_empty());
+        assertions::assert_rule_results(
+            &results,
+            &[assertions::ExpectedRuleResult {
+                file: Some(rel_path),
+                inventory: Some(true),
+                ..Default::default()
+            }],
+        );
     }
 }

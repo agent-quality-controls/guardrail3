@@ -1,3 +1,5 @@
+use guardrail3_app_rs_family_release_assertions::rs_pub_10_no_path_deps_to_unpublishable as assertions;
+
 use super::super::dependency_edges;
 use super::super::run_tree as run_family;
 use super::super::{
@@ -13,7 +15,8 @@ fn does_not_error_on_path_dep_to_publishable_crate() {
 
     check(&input, &mut results);
 
-    assert!(results.is_empty());
+    assert!(assertions::findings(&results).is_empty());
+    assertions::assert_rule_quiet(&results);
 }
 
 #[test]
@@ -59,7 +62,8 @@ fn direct_non_path_edge_stays_out_of_rule_scope() {
 
     check(&input, &mut results);
 
-    assert!(results.is_empty());
+    assert!(assertions::findings(&results).is_empty());
+    assertions::assert_rule_quiet(&results);
 }
 
 #[test]
@@ -128,16 +132,13 @@ publish = false
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(
-        results.iter().all(|result| {
-            !(result.id == "RS-PUB-10" && result.message.contains("public_alias"))
-        })
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            file: Some("crates/consumer/Cargo.toml"),
+            message_contains: Some("internal_alias"),
+            ..Default::default()
+        }],
     );
-    assert!(results.iter().any(|result| {
-        result.id == "RS-PUB-10"
-            && result.message.contains("internal_alias")
-            && result.message.contains("package `internal`")
-            && result.message.contains("`[dependencies]`")
-            && result.file.as_deref() == Some("crates/consumer/Cargo.toml")
-    }));
 }

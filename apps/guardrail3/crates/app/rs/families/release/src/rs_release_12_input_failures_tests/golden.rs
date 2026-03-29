@@ -1,3 +1,5 @@
+use guardrail3_app_rs_family_release_assertions::rs_release_12_input_failures as assertions;
+
 use super::super::run_tree as check;
 use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
 
@@ -58,8 +60,6 @@ jobs:
     let tool_checker = StubToolChecker::new(true);
     let results = check(&tree, &tool_checker, false);
 
-    assert!(
-        !results.iter().any(|result| result.id == "RS-RELEASE-12"),
-        "unexpected input failures: {results:#?}"
-    );
+    assert!(assertions::findings(&results).is_empty());
+    assertions::assert_rule_quiet(&results);
 }

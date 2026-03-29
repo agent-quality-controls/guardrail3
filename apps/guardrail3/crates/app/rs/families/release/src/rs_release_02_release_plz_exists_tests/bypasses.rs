@@ -1,4 +1,4 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_release_assertions::rs_release_02_release_plz_exists as assertions;
 
 use super::super::run_tree as run_family;
 use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
@@ -13,11 +13,16 @@ fn warns_when_release_plz_file_is_missing() {
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-RELEASE-02");
-    assert_eq!(results[0].severity, Severity::Warn);
-    assert!(!results[0].inventory);
-    assert_eq!(results[0].file.as_deref(), Some("release-plz.toml"));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Warn),
+            file: Some("release-plz.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -47,12 +52,16 @@ repository = "https://example.com/repo"
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-RELEASE-02"
-            && result.severity == Severity::Warn
-            && !result.inventory
-            && result.file.as_deref() == Some("release-plz.toml")
-    }));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Warn),
+            file: Some("release-plz.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -78,20 +87,23 @@ repository = "https://example.com/repo"
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-RELEASE-02"
-            && result.severity == Severity::Info
-            && result.inventory
-            && result.file.as_deref() == Some("release-plz.toml")
-    }));
-    assert!(
-        !results
-            .iter()
-            .any(|result| { result.id == "RS-RELEASE-02" && result.severity == Severity::Warn })
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            file: Some("release-plz.toml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
-    assert!(results.iter().any(|result| {
-        result.id == "RS-RELEASE-12"
-            && result.severity == Severity::Error
-            && result.file.as_deref() == Some("release-plz.toml")
-    }));
+    assertions::assert_related_rule_results(
+        &results,
+        assertions::INPUT_FAILURE_RULE_ID,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Error),
+            file: Some("release-plz.toml"),
+            ..Default::default()
+        }],
+    );
 }

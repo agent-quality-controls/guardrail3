@@ -1,6 +1,8 @@
 #[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
 
+use guardrail3_app_rs_family_release_assertions::rs_release_12_input_failures as assertions;
+
 use super::super::{copy_fixture, run_family, write_file};
 
 #[cfg(unix)]
@@ -36,15 +38,20 @@ readme = "README.md"
 
     std::fs::set_permissions(&readme_path, original_permissions).expect("restore permissions");
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-RELEASE-12"
-            && result.file.as_deref() == Some("packages/shared-types/README.md")
-            && result.message.contains("Failed to read README")
-    }));
-    assert!(!results.iter().any(|result| {
-        result.id == "RS-PUB-05"
-            && result.file.as_deref() == Some("packages/shared-types/README.md")
-    }));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            file: Some("packages/shared-types/README.md"),
+            message_contains: Some("Failed to read README"),
+            ..Default::default()
+        }],
+    );
+    assertions::assert_related_rule_file_absent(
+        &results,
+        assertions::README_QUALITY_RULE_ID,
+        "packages/shared-types/README.md",
+    );
 }
 
 #[cfg(unix)]
@@ -81,10 +88,8 @@ readme = "README.md"
 
     std::fs::set_permissions(&readme_path, original_permissions).expect("restore permissions");
 
-    assert!(!results.iter().any(|result| {
-        result.id == "RS-RELEASE-12"
-            && result.file.as_deref() == Some("packages/shared-types/README.md")
-    }));
+    assert!(assertions::findings(&results).is_empty());
+    assertions::assert_rule_quiet(&results);
 }
 
 #[cfg(unix)]
@@ -135,14 +140,18 @@ readme.workspace = true
 
     std::fs::set_permissions(&readme_path, original_permissions).expect("restore permissions");
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-RELEASE-12"
-            && result.file.as_deref() == Some("README.md")
-            && result.message.contains("Failed to read README")
-    }));
-    assert!(
-        !results.iter().any(|result| {
-            result.id == "RS-PUB-05" && result.file.as_deref() == Some("README.md")
-        })
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            file: Some("README.md"),
+            message_contains: Some("Failed to read README"),
+            ..Default::default()
+        }],
+    );
+    assertions::assert_related_rule_file_absent(
+        &results,
+        assertions::README_QUALITY_RULE_ID,
+        "README.md",
     );
 }

@@ -1,6 +1,7 @@
+use guardrail3_app_rs_family_release_assertions::rs_pub_06_keywords_present as assertions;
+
 use super::super::{crate_facts, crate_input};
 use super::super::check;
-use guardrail3_domain_report::Severity;
 
 #[test]
 fn inventories_valid_keywords_count() {
@@ -8,15 +9,17 @@ fn inventories_valid_keywords_count() {
     let input = crate_input(&facts);
     let mut results = Vec::new();
     check(&input, &mut results);
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-PUB-06");
-    assert_eq!(results[0].severity, Severity::Info);
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some("crates/example/Cargo.toml")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            file: Some("crates/example/Cargo.toml"),
+            inventory: Some(true),
+            message_contains: Some("3 entries"),
+            ..Default::default()
+        }],
     );
-    assert!(results[0].message.contains("3 entries"));
 }
 
 #[test]
@@ -29,14 +32,17 @@ fn inventories_keywords_at_lower_and_upper_allowed_boundaries() {
 
         check(&input, &mut results);
 
-        assert_eq!(results.len(), 1);
-        assert_eq!(results[0].id, "RS-PUB-06");
-        assert_eq!(results[0].severity, Severity::Info);
-        assert!(results[0].inventory);
-        assert_eq!(
-            results[0].file.as_deref(),
-            Some("crates/example/Cargo.toml")
+        let expected_message = format!("{count} entries");
+        assert!(!assertions::findings(&results).is_empty());
+        assertions::assert_rule_results(
+            &results,
+            &[assertions::ExpectedRuleResult {
+                severity: Some(assertions::Severity::Info),
+                file: Some("crates/example/Cargo.toml"),
+                inventory: Some(true),
+                message_contains: Some(expected_message.as_str()),
+                ..Default::default()
+            }],
         );
-        assert!(results[0].message.contains(&format!("{count} entries")));
     }
 }

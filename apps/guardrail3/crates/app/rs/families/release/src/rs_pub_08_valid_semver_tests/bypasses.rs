@@ -1,8 +1,8 @@
+use guardrail3_app_rs_family_release_assertions::rs_pub_08_valid_semver as assertions;
 use super::super::run_tree as run_family;
 use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
 use super::super::{crate_facts, crate_input};
 use super::super::check;
-use guardrail3_domain_report::Severity;
 
 #[test]
 fn errors_on_invalid_semver_and_skips_non_publishable_crates() {
@@ -12,19 +12,17 @@ fn errors_on_invalid_semver_and_skips_non_publishable_crates() {
     let invalid_input = crate_input(&invalid);
     let mut invalid_results = Vec::new();
     check(&invalid_input, &mut invalid_results);
-    assert_eq!(invalid_results.len(), 1);
-    assert_eq!(invalid_results[0].id, "RS-PUB-08");
-    assert_eq!(invalid_results[0].severity, Severity::Error);
-    assert!(!invalid_results[0].inventory);
-    assert_eq!(
-        invalid_results[0].file.as_deref(),
-        Some("crates/example/Cargo.toml")
-    );
-    assert!(invalid_results[0].title.contains("invalid semver"));
-    assert!(
-        invalid_results[0]
-            .message
-            .contains("valid semver version or `version.workspace = true`")
+    assert!(!assertions::findings(&invalid_results).is_empty());
+    assertions::assert_rule_results(
+        &invalid_results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Error),
+            title_contains: Some("invalid semver"),
+            file: Some("crates/example/Cargo.toml"),
+            inventory: Some(false),
+            message_contains: Some("valid semver version or `version.workspace = true`"),
+            ..Default::default()
+        }],
     );
 
     let mut inherited_invalid = crate_facts("x");
@@ -34,18 +32,16 @@ fn errors_on_invalid_semver_and_skips_non_publishable_crates() {
     let inherited_invalid_input = crate_input(&inherited_invalid);
     let mut inherited_invalid_results = Vec::new();
     check(&inherited_invalid_input, &mut inherited_invalid_results);
-    assert_eq!(inherited_invalid_results.len(), 1);
-    assert_eq!(inherited_invalid_results[0].id, "RS-PUB-08");
-    assert_eq!(inherited_invalid_results[0].severity, Severity::Error);
-    assert!(!inherited_invalid_results[0].inventory);
-    assert_eq!(
-        inherited_invalid_results[0].file.as_deref(),
-        Some("crates/example/Cargo.toml")
-    );
-    assert!(
-        inherited_invalid_results[0]
-            .title
-            .contains("invalid semver")
+    assert!(!assertions::findings(&inherited_invalid_results).is_empty());
+    assertions::assert_rule_results(
+        &inherited_invalid_results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Error),
+            title_contains: Some("invalid semver"),
+            file: Some("crates/example/Cargo.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
     );
 
     let mut non_publishable = crate_facts("x");
@@ -54,7 +50,8 @@ fn errors_on_invalid_semver_and_skips_non_publishable_crates() {
     let non_publishable_input = crate_input(&non_publishable);
     let mut non_publishable_results = Vec::new();
     check(&non_publishable_input, &mut non_publishable_results);
-    assert!(non_publishable_results.is_empty());
+    assert!(assertions::findings(&non_publishable_results).is_empty());
+    assertions::assert_rule_quiet(&non_publishable_results);
 }
 
 #[test]
@@ -97,11 +94,15 @@ readme = false
         missing_root,
     );
     let missing_results = run_family(&missing_tree, &StubToolChecker::new(true), false);
-    assert!(missing_results.iter().any(|result| {
-        result.id == "RS-PUB-08"
-            && result.severity == Severity::Error
-            && result.file.as_deref() == Some("crates/pub/Cargo.toml")
-    }));
+    assert!(!assertions::findings(&missing_results).is_empty());
+    assertions::assert_rule_results(
+        &missing_results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Error),
+            file: Some("crates/pub/Cargo.toml"),
+            ..Default::default()
+        }],
+    );
 
     let invalid_root = temp_root("release-workspace-version-invalid");
     let invalid_tree = project_tree(
@@ -142,11 +143,15 @@ readme = false
         invalid_root,
     );
     let invalid_results = run_family(&invalid_tree, &StubToolChecker::new(true), false);
-    assert!(invalid_results.iter().any(|result| {
-        result.id == "RS-PUB-08"
-            && result.severity == Severity::Error
-            && result.file.as_deref() == Some("crates/pub/Cargo.toml")
-    }));
+    assert!(!assertions::findings(&invalid_results).is_empty());
+    assertions::assert_rule_results(
+        &invalid_results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Error),
+            file: Some("crates/pub/Cargo.toml"),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -193,13 +198,17 @@ readme = false
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-PUB-08"
-            && result.severity == Severity::Info
-            && result.inventory
-            && result.file.as_deref() == Some("packages/pub/Cargo.toml")
-            && result.message.contains("`version.workspace = true`")
-    }));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            file: Some("packages/pub/Cargo.toml"),
+            inventory: Some(true),
+            message_contains: Some("`version.workspace = true`"),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -257,10 +266,14 @@ readme = false
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-PUB-08"
-            && result.severity == Severity::Error
-            && !result.inventory
-            && result.file.as_deref() == Some("packages/orphan/Cargo.toml")
-    }));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Error),
+            file: Some("packages/orphan/Cargo.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }

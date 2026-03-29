@@ -1,6 +1,7 @@
+use guardrail3_app_rs_family_release_assertions::rs_pub_07_categories_present as assertions;
+
 use super::super::{crate_facts, crate_input};
 use super::super::check;
-use guardrail3_domain_report::Severity;
 
 #[test]
 fn warns_when_categories_are_missing_or_zero() {
@@ -11,19 +12,17 @@ fn warns_when_categories_are_missing_or_zero() {
         let mut results = Vec::new();
         check(&input, &mut results);
 
-        assert_eq!(results.len(), 1);
-        assert_eq!(results[0].id, "RS-PUB-07");
-        assert_eq!(results[0].severity, Severity::Warn);
-        assert!(!results[0].inventory);
-        assert_eq!(
-            results[0].file.as_deref(),
-            Some("crates/example/Cargo.toml")
-        );
-        assert!(results[0].title.contains("categories missing"));
-        assert!(
-            results[0]
-                .message
-                .contains("non-empty `[package].categories`")
+        assert!(!assertions::findings(&results).is_empty());
+        assertions::assert_rule_results(
+            &results,
+            &[assertions::ExpectedRuleResult {
+                severity: Some(assertions::Severity::Warn),
+                file: Some("crates/example/Cargo.toml"),
+                inventory: Some(false),
+                title_contains: Some("categories missing"),
+                message_contains: Some("non-empty `[package].categories`"),
+                ..Default::default()
+            }],
         );
     }
 }
@@ -37,5 +36,6 @@ fn skips_non_publishable_crates() {
     let mut results = Vec::new();
     check(&input, &mut results);
 
-    assert!(results.is_empty());
+    assert!(assertions::findings(&results).is_empty());
+    assertions::assert_rule_quiet(&results);
 }
