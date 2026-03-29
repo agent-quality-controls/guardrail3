@@ -5,7 +5,11 @@ use super::super::{build_fixture_deny_toml, remove_section_key};
 #[test]
 fn errors_when_baseline_advisory_values_are_missing() {
     let deny = remove_section_key(
-        &remove_section_key(&build_fixture_deny_toml("service"), "advisories", "unmaintained"),
+        &remove_section_key(
+            &build_fixture_deny_toml("service"),
+            "advisories",
+            "unmaintained",
+        ),
         "advisories",
         "yanked",
     );

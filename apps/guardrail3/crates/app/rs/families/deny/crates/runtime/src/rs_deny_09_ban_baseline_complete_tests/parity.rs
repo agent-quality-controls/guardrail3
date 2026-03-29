@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
-use super::super::expected_ban_names_for_test;
 use super::super::build_fixture_deny_toml;
+use super::super::expected_ban_names_for_test;
 
 fn deny_entry_names(parsed: &toml::Value) -> BTreeSet<String> {
     parsed
@@ -25,8 +25,8 @@ fn deny_entry_names(parsed: &toml::Value) -> BTreeSet<String> {
 
 #[test]
 fn generated_service_ban_set_matches_rule_baseline_exactly() {
-    let parsed =
-        toml::from_str::<toml::Value>(&build_fixture_deny_toml("service")).expect("valid deny TOML");
+    let parsed = toml::from_str::<toml::Value>(&build_fixture_deny_toml("service"))
+        .expect("valid deny TOML");
     let generated = deny_entry_names(&parsed);
     let expected = expected_ban_names_for_test(Some("service"));
 
@@ -44,8 +44,8 @@ fn generated_service_ban_set_matches_rule_baseline_exactly() {
 
 #[test]
 fn generated_library_ban_set_matches_rule_baseline_exactly() {
-    let parsed =
-        toml::from_str::<toml::Value>(&build_fixture_deny_toml("library")).expect("valid deny TOML");
+    let parsed = toml::from_str::<toml::Value>(&build_fixture_deny_toml("library"))
+        .expect("valid deny TOML");
     let generated = deny_entry_names(&parsed);
     let expected = expected_ban_names_for_test(Some("library"));
 

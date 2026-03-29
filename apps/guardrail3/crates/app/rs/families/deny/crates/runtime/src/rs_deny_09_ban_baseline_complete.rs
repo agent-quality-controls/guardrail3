@@ -74,7 +74,6 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     }
 }
 
-
 #[cfg(test)]
 #[allow(dead_code)]
 pub(crate) fn run_check(deny_toml: &str) -> Vec<CheckResult> {
@@ -94,7 +93,7 @@ pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-pub(crate) use crate::{config_facts_with_profile};
+pub(crate) use crate::config_facts_with_profile;
 #[cfg(test)]
 pub(crate) use ::test_support::{build_fixture_deny_toml, remove_deny_ban, set_deny_ban_wrappers};
 #[cfg(test)]

@@ -1,8 +1,8 @@
 use guardrail3_domain_report::Severity;
 
 use super::super::ConfigDenyInput;
-use super::super::{build_fixture_deny_toml, config_facts, remove_section_key, set_section_bool};
 use super::super::check;
+use super::super::{build_fixture_deny_toml, config_facts, remove_section_key, set_section_bool};
 
 #[test]
 fn errors_when_allow_wildcard_paths_is_missing_or_false() {

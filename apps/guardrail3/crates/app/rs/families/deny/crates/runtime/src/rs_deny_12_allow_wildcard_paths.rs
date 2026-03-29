@@ -38,7 +38,6 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     }
 }
 
-
 #[cfg(test)]
 #[allow(dead_code)]
 pub(crate) fn run_check(deny_toml: &str) -> Vec<CheckResult> {
@@ -58,9 +57,12 @@ pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-pub(crate) use crate::{config_facts};
+pub(crate) use crate::config_facts;
 #[cfg(test)]
-pub(crate) use ::test_support::{build_fixture_deny_toml, copy_fixture, remove_section, remove_section_key, set_section_bool, write_file};
+pub(crate) use ::test_support::{
+    build_fixture_deny_toml, copy_fixture, remove_section, remove_section_key, set_section_bool,
+    write_file,
+};
 #[cfg(test)]
 #[cfg(test)]
 #[path = "rs_deny_12_allow_wildcard_paths_tests/mod.rs"] // reason: test-only sidecar module wiring

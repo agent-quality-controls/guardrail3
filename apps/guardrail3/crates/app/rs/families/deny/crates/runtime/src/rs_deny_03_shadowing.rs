@@ -73,7 +73,10 @@ pub(crate) fn run_same_root_conflict(
 #[cfg(test)]
 pub(crate) use crate::{collected_facts, forbidden_input, same_root_conflict_input};
 #[cfg(test)]
-pub(crate) use ::test_support::{build_fixture_deny_toml, copy_fixture, nested_member_shadow_tree, same_root_conflict_tree, write_file};
+pub(crate) use ::test_support::{
+    build_fixture_deny_toml, copy_fixture, nested_member_shadow_tree, same_root_conflict_tree,
+    write_file,
+};
 #[cfg(test)]
 #[path = "rs_deny_03_shadowing_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_deny_03_shadowing_tests;

@@ -1,6 +1,9 @@
 use guardrail3_app_rs_family_deny_assertions::rs_deny_27_duplicate_entries as assertions;
 
-use super::super::{add_deny_ban_entry, add_skip_entry, build_fixture_deny_toml, set_advisory_ignores, set_feature_entries};
+use super::super::{
+    add_deny_ban_entry, add_skip_entry, build_fixture_deny_toml, set_advisory_ignores,
+    set_feature_entries,
+};
 
 fn deny_entry(name: &str) -> toml::Value {
     toml::Value::Table(toml::map::Map::from_iter([

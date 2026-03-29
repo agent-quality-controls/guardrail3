@@ -1,7 +1,5 @@
 use guardrail3_domain_report::Severity;
 
-
-
 #[test]
 fn errors_when_bans_section_is_missing() {
     let results = super::super::run_check("[graph]\nall-features = true\n");

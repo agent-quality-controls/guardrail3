@@ -123,7 +123,6 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     }
 }
 
-
 #[cfg(test)]
 #[allow(dead_code)]
 pub(crate) fn run_check(deny_toml: &str) -> Vec<CheckResult> {
@@ -143,7 +142,10 @@ pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-pub(crate) use ::test_support::{add_deny_ban_entry, add_skip_entry, build_fixture_deny_toml, set_advisory_ignores, set_feature_entries};
+pub(crate) use ::test_support::{
+    add_deny_ban_entry, add_skip_entry, build_fixture_deny_toml, set_advisory_ignores,
+    set_feature_entries,
+};
 #[cfg(test)]
 #[path = "rs_deny_27_duplicate_entries_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_deny_27_duplicate_entries_tests;

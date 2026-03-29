@@ -67,7 +67,9 @@ pub(crate) fn run_forbidden(
 #[cfg(test)]
 pub(crate) use crate::{collected_facts, forbidden_input};
 #[cfg(test)]
-pub(crate) use ::test_support::{build_fixture_deny_toml, copy_fixture, nested_member_shadow_tree, write_file};
+pub(crate) use ::test_support::{
+    build_fixture_deny_toml, copy_fixture, nested_member_shadow_tree, write_file,
+};
 #[cfg(test)]
 #[path = "rs_deny_02_allowed_locations_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_deny_02_allowed_locations_tests;

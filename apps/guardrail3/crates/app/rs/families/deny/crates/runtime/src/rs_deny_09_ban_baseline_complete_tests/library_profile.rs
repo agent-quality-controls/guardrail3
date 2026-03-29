@@ -6,7 +6,8 @@ use super::super::{build_fixture_deny_toml, config_facts_with_profile, remove_de
 
 #[test]
 fn emits_no_result_for_generated_library_ban_baseline() {
-    let results = super::super::run_check_with_profile(&build_fixture_deny_toml("library"), "library");
+    let results =
+        super::super::run_check_with_profile(&build_fixture_deny_toml("library"), "library");
 
     assert!(
         results.is_empty(),

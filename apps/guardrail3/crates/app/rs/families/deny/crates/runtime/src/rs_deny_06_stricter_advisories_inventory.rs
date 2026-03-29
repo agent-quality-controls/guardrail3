@@ -52,7 +52,6 @@ fn check_value(
     }
 }
 
-
 #[cfg(test)]
 #[allow(dead_code)]
 pub(crate) fn run_check(deny_toml: &str) -> Vec<CheckResult> {
@@ -72,7 +71,10 @@ pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-pub(crate) use ::test_support::{build_fixture_deny_toml, copy_fixture, set_section_string, write_file};
+pub(crate) use ::test_support::{
+    build_fixture_deny_toml, copy_fixture, set_section_string, write_file,
+};
 #[cfg(test)]
-#[path = "rs_deny_06_stricter_advisories_inventory_tests/mod.rs"] // reason: test-only sidecar module wiring
+#[path = "rs_deny_06_stricter_advisories_inventory_tests/mod.rs"]
+// reason: test-only sidecar module wiring
 mod rs_deny_06_stricter_advisories_inventory_tests;

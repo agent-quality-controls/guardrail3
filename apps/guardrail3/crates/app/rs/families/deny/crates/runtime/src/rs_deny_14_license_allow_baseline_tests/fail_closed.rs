@@ -4,7 +4,10 @@ use super::super::{build_fixture_deny_toml, remove_section};
 
 #[test]
 fn errors_when_licenses_section_is_missing() {
-    let results = super::super::run_check(&remove_section(&build_fixture_deny_toml("service"), "licenses"));
+    let results = super::super::run_check(&remove_section(
+        &build_fixture_deny_toml("service"),
+        "licenses",
+    ));
 
     assert_eq!(results.len(), 1);
     let result = &results[0];

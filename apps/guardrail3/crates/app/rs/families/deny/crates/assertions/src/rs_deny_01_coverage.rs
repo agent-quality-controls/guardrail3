@@ -14,5 +14,9 @@ pub fn assert_parse_error(results: &[guardrail3_domain_report::CheckResult], fil
     assert_eq!(finding.severity, guardrail3_domain_report::Severity::Error);
     assert_eq!(finding.file, Some(file));
     assert!(!finding.inventory);
-    assert!(finding.message.starts_with(&format!("`{file}` could not be parsed: ")));
+    assert!(
+        finding
+            .message
+            .starts_with(&format!("`{file}` could not be parsed: "))
+    );
 }

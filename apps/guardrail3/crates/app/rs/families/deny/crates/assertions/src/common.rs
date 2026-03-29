@@ -93,9 +93,7 @@ macro_rules! define_result_assertions {
         pub use crate::common::Finding;
 
         #[must_use]
-        pub fn findings(
-            results: &[guardrail3_domain_report::CheckResult],
-        ) -> Vec<Finding<'_>> {
+        pub fn findings(results: &[guardrail3_domain_report::CheckResult]) -> Vec<Finding<'_>> {
             crate::common::findings(results, $id)
         }
 
@@ -166,11 +164,7 @@ macro_rules! define_result_assertions {
         }
 
         #[must_use]
-        pub fn error_no_file<'a>(
-            title: &'a str,
-            message: &'a str,
-            inventory: bool,
-        ) -> Finding<'a> {
+        pub fn error_no_file<'a>(title: &'a str, message: &'a str, inventory: bool) -> Finding<'a> {
             crate::common::finding(
                 guardrail3_domain_report::Severity::Error,
                 title,
@@ -181,11 +175,7 @@ macro_rules! define_result_assertions {
         }
 
         #[must_use]
-        pub fn warn_no_file<'a>(
-            title: &'a str,
-            message: &'a str,
-            inventory: bool,
-        ) -> Finding<'a> {
+        pub fn warn_no_file<'a>(title: &'a str, message: &'a str, inventory: bool) -> Finding<'a> {
             crate::common::finding(
                 guardrail3_domain_report::Severity::Warn,
                 title,
@@ -196,11 +186,7 @@ macro_rules! define_result_assertions {
         }
 
         #[must_use]
-        pub fn info_no_file<'a>(
-            title: &'a str,
-            message: &'a str,
-            inventory: bool,
-        ) -> Finding<'a> {
+        pub fn info_no_file<'a>(title: &'a str, message: &'a str, inventory: bool) -> Finding<'a> {
             crate::common::finding(
                 guardrail3_domain_report::Severity::Info,
                 title,

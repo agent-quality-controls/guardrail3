@@ -14,8 +14,8 @@ fn feature_entry(name: &str) -> toml::Value {
 
 #[test]
 fn inventories_each_non_tokio_feature_ban_entry() {
-    let parsed =
-        toml::from_str::<toml::Value>(&build_fixture_deny_toml("service")).expect("valid deny TOML");
+    let parsed = toml::from_str::<toml::Value>(&build_fixture_deny_toml("service"))
+        .expect("valid deny TOML");
     let existing = parsed
         .get("bans")
         .and_then(|b| b.get("features"))

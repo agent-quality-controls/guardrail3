@@ -5,7 +5,11 @@ use super::super::{build_fixture_deny_toml, set_source_policy};
 #[test]
 fn errors_for_each_weakened_unknown_source_policy_key() {
     let deny = set_source_policy(
-        &set_source_policy(&build_fixture_deny_toml("service"), "unknown-registry", "allow"),
+        &set_source_policy(
+            &build_fixture_deny_toml("service"),
+            "unknown-registry",
+            "allow",
+        ),
         "unknown-git",
         "warn",
     );

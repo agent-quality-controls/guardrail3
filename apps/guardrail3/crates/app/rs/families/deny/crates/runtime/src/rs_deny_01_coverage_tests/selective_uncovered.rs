@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_deny_assertions::rs_deny_01_coverage as assertions;
 
-use super::super::{copy_fixture, write_file, build_fixture_deny_toml};
+use super::super::{build_fixture_deny_toml, copy_fixture, write_file};
 
 #[test]
 fn errors_only_for_effective_roots_without_a_covering_deny_config() {

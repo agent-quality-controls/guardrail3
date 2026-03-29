@@ -1,8 +1,10 @@
 use guardrail3_domain_report::Severity;
 
 use super::super::ConfigDenyInput;
-use super::super::{build_fixture_deny_toml, config_facts, remove_section_key, set_license_confidence_threshold};
 use super::super::check;
+use super::super::{
+    build_fixture_deny_toml, config_facts, remove_section_key, set_license_confidence_threshold,
+};
 
 #[test]
 fn warns_when_confidence_threshold_is_missing_or_invalid() {

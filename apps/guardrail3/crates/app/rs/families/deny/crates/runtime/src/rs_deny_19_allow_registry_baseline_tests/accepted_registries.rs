@@ -1,6 +1,6 @@
 use super::super::ConfigDenyInput;
-use super::super::{build_fixture_deny_toml, config_facts};
 use super::super::check;
+use super::super::{build_fixture_deny_toml, config_facts};
 
 #[test]
 fn accepts_github_and_sparse_crates_io_forms() {
