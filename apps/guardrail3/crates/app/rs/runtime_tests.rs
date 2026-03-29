@@ -429,6 +429,44 @@ fn arch_runtime_reports_governed_auxiliary_metadata_as_fail_closed() {
 }
 
 #[test]
+fn arch_runtime_explicit_request_reports_inactive_misplaced_root_rule() {
+    let root = temp_root("arch-runtime-inactive-misplaced");
+    write_file(
+        &root,
+        "guardrail3.toml",
+        "[rust.checks]\narch = false\nhexarch = true\nlibarch = true\n",
+    );
+    write_file(
+        &root,
+        "tools/worker/Cargo.toml",
+        "[package]\nname = \"worker\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+
+    let report = run(
+        &LocalFs,
+        &root,
+        None,
+        &[RustValidateFamily::Arch],
+        false,
+        &StubToolChecker,
+    )
+    .expect("arch runtime report");
+
+    assert_eq!(report.sections.len(), 1, "unexpected sections: {report:#?}");
+    assert_eq!(report.sections[0].name, "arch");
+    assert!(
+        report.sections[0].results.iter().any(|result| {
+            result.id == "RS-ARCH-02"
+                && result.inventory
+                && result.title == "Misplaced-root reporting is inactive"
+        }),
+        "expected explicit arch request to surface inactive RS-ARCH-02 inventory: {report:#?}"
+    );
+
+    fs::remove_dir_all(&root).expect("cleanup temp root");
+}
+
+#[test]
 fn hexarch_runtime_reports_fail_closed_results_for_malformed_guardrail_config() {
     let root = temp_root("hexarch-runtime-malformed-config");
     write_file(

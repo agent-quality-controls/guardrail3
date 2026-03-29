@@ -178,7 +178,7 @@ Examples:
 - `guardrail3.toml` content is malformed TOML
 - governed app/package `Cargo.toml` is readable but malformed
 - governed app/package `Cargo.toml` declares `arch_role`, which is invalid there
-- out-of-zone `Cargo.toml` is readable but malformed when auxiliary-role metadata must be resolved
+- malformed eligible live out-of-zone `Cargo.toml`
 
 Absence and unreadability are different states.
 Unreadable-present inputs must not be treated as absent.
@@ -391,6 +391,7 @@ Detection:
 - for governed roots:
   - app-owned roots require effective `hexarch = true`
   - package-owned roots require effective `libarch = true`
+  - app-scoped `hexarch` overrides win over the global `hexarch` default for every root under that app
 
 ### RS-ARCH-07
 
@@ -446,6 +447,7 @@ Every rule should have:
 The family must also have at least one runtime-surface test proving:
 
 - `--family arch` survives CLI parsing
+- explicit `--family arch` still runs when `[rust.checks] arch = false`
 - runtime dispatch runs `RS-ARCH`
 - report section name is `arch`
 - generated config includes global `arch = true`

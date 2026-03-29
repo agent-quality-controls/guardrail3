@@ -2,7 +2,7 @@
 
 **Input:** all discovered Rust `Cargo.toml` roots + guardrail config + owned workspace/package classification
 **Parser:** TOML + directory structure
-**Current code:** `apps/guardrail3/crates/app/rs/checks/rs/arch/`, `apps/guardrail3/crates/app/rs/checks/rs/rust_root_placement.rs`
+**Current code:** `apps/guardrail3/crates/app/rs/families/arch/`, `apps/guardrail3/crates/app/rs/placement/`
 
 ## Why this family exists
 
@@ -172,6 +172,7 @@ Treat this as a layout-level rule, not a duplicate root-level one:
 For a governed root:
 - app-zone ownership maps to `hexarch`
 - package-zone ownership maps to `libarch`
+- app-scoped `hexarch` overrides win over the global `hexarch` default for every root under that app
 
 The family should surface impossible or contradictory ownership states explicitly.
 
@@ -239,40 +240,41 @@ But `RS-ARCH` remains the only family that emits repo-global placement findings.
 | Duplicating misplaced-root rules in both `hexarch` and `libarch` | Causes double signaling and drift |
 | Letting enable/disable change discovery | Discovery must stay complete; only reporting is conditional |
 
-## Target family shape
+## Current family shape
 
-This family should follow the same new checker architecture as the other Rust families.
-
-Target folder:
+The live family now follows the self-hosted workspace split used by the other stabilized Rust families.
 
 ```text
-apps/guardrail3/crates/app/rs/checks/rs/arch/
-├── mod.rs
-├── facts.rs
-├── inputs.rs
-├── test_support.rs
-├── rs_arch_01_root_classification.rs
-├── rs_arch_02_no_misplaced_roots.rs
-├── rs_arch_03_no_dual_ownership.rs
-├── rs_arch_04_no_zone_overlap.rs
-├── rs_arch_05_enablement_coherence.rs
-├── rs_arch_01_root_classification_tests/
-├── rs_arch_02_no_misplaced_roots_tests/
-├── rs_arch_03_no_dual_ownership_tests/
-├── rs_arch_04_no_zone_overlap_tests/
-└── rs_arch_05_enablement_coherence_tests/
+apps/guardrail3/crates/app/rs/families/arch/
+├── Cargo.toml
+├── README.md
+├── crates/
+│   ├── runtime/
+│   │   ├── Cargo.toml
+│   │   └── src/
+│   │       ├── lib.rs
+│   │       ├── facts.rs
+│   │       ├── inputs.rs
+│   │       ├── rs_arch_01_root_classification.rs
+│   │       └── rs_arch_01_root_classification_tests/
+│   └── assertions/
+│       ├── Cargo.toml
+│       └── src/
+└── test_support/
+    ├── Cargo.toml
+    └── src/
 ```
 
 Shared placement substrate:
 
 ```text
-apps/guardrail3/crates/app/rs/checks/rs/rust_root_placement.rs
+apps/guardrail3/crates/app/rs/placement/
 ```
 
 ## Implementation notes
 
 - `rs/arch` is implemented as a repo-global family with one production file per rule and one rule-specific `*_tests/` directory per rule.
-- Shared Rust root discovery/classification moved into `rs/rust_root_placement.rs` so future `hexarch` and `libarch` work can reuse the same root inventory instead of rediscovering `Cargo.toml` roots independently.
+- Shared Rust root discovery/classification lives under `rs/placement/` so future `hexarch` and `libarch` work can reuse the same root inventory instead of rediscovering `Cargo.toml` roots independently.
 - Classification is segment-based rather than top-level-only. This intentionally makes illegal nested shapes such as `apps/<app>/packages/<pkg>` and `packages/<pkg>/apps/<app>` visible as:
   - `RS-ARCH-01` ambiguous roots
   - `RS-ARCH-03` dual ownership
@@ -283,17 +285,18 @@ apps/guardrail3/crates/app/rs/checks/rs/rust_root_placement.rs
   - unreadable-present `guardrail3.toml`
   - unreadable discovered eligible live `Cargo.toml` content in the cached tree
   - malformed governed app/package `Cargo.toml`
-  - malformed eligible live `Cargo.toml` when auxiliary-role metadata must be resolved
+  - malformed eligible live out-of-zone `Cargo.toml`
+  - governed app/package roots that declare `arch_role`
 
 ## Gaps closed
 
 - Added the new `rs/arch` checker family under the current `ProjectTree` architecture.
 - Added reusable root-placement facts for all discovered Rust `Cargo.toml` roots, owner-family candidates, and illegal app/package overlap pairs.
-- Added golden and attack-vector coverage for all five planned rules using rule-specific test directories.
+- Added golden and attack-vector coverage for all eight live rules using rule-specific test directories.
 - Wired `arch` into Rust runtime family selection and user-facing help/guide family lists.
 
 ## Remaining gaps
 
-- `rust_root_placement.rs` is currently used only by `rs/arch`; `rs/hexarch` and future `rs/libarch` still need to adopt it instead of maintaining separate root-discovery logic.
+- Shared placement facts are still consumed directly by too few families; `rs/hexarch` and future `rs/libarch` still need to finish migrating onto the same routed root substrate.
 - `libarch` is still not an implemented runtime family, even though `rs/arch` now understands `libarch` enablement for ownership coherence and misplaced-root reporting.
 - Full `cargo test -p guardrail3` verification is currently blocked by unrelated existing test-callsite signature drift in other families (`code`, `garde`, and `test`) that predates this family.

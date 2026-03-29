@@ -109,3 +109,37 @@ fn governed_root_declaring_auxiliary_metadata_emits_required_input_failure() {
 
     assertions::assert_error_files(&results, "RS-ARCH-07", &["apps/backend/Cargo.toml"]);
 }
+
+#[test]
+fn governed_package_root_declaring_auxiliary_metadata_emits_required_input_failure() {
+    let results = check_results(&tree(
+        &[
+            ("", entry(&["packages"], &[])),
+            ("packages", entry(&["shared"], &[])),
+            ("packages/shared", entry(&[], &["Cargo.toml"])),
+        ],
+        &[(
+            "packages/shared/Cargo.toml",
+            "[package]\nname = \"shared\"\nedition = \"2024\"\n\n[package.metadata.guardrail3]\narch_role = \"auxiliary\"\n",
+        )],
+    ));
+
+    assertions::assert_error_files(&results, "RS-ARCH-07", &["packages/shared/Cargo.toml"]);
+}
+
+#[test]
+fn governed_package_workspace_metadata_declaring_auxiliary_emits_required_input_failure() {
+    let results = check_results(&tree(
+        &[
+            ("", entry(&["packages"], &[])),
+            ("packages", entry(&["shared"], &[])),
+            ("packages/shared", entry(&[], &["Cargo.toml"])),
+        ],
+        &[(
+            "packages/shared/Cargo.toml",
+            "[workspace]\nmembers = []\nresolver = \"2\"\n\n[workspace.metadata.guardrail3]\narch_role = \"auxiliary\"\n",
+        )],
+    ));
+
+    assertions::assert_error_files(&results, "RS-ARCH-07", &["packages/shared/Cargo.toml"]);
+}

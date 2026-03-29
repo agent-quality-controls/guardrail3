@@ -63,7 +63,7 @@ pub fn collect(tree: &ProjectTree) -> RustRootPlacementFacts {
                 if declares_arch_role(parsed) {
                     input_failures.push(RustRootPlacementInputFailureFacts {
                         rel_path: cargo_rel_path.clone(),
-                        message: "Governed Rust roots under `apps/*` or `packages/*` must not declare `arch_role` in Cargo metadata. `arch_role = \"auxiliary\"` is only valid for roots outside governed architecture zones.".to_owned(),
+                        message: "Governed Rust roots under `apps/*` or `packages/*` must not declare `arch_role` in Cargo metadata. The only supported `arch_role` value is `auxiliary`, and it is valid only for roots outside governed architecture zones.".to_owned(),
                     });
                 }
             }
