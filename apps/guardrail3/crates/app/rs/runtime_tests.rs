@@ -299,6 +299,48 @@ fn arch_runtime_reports_fail_closed_results_for_malformed_guardrail_config() {
 }
 
 #[test]
+fn arch_runtime_reports_fail_closed_results_for_malformed_governed_manifest() {
+    let root = temp_root("arch-runtime-malformed-governed-cargo");
+    write_file(
+        &root,
+        "guardrail3.toml",
+        "[rust.checks]\narch = true\nhexarch = true\nlibarch = true\n",
+    );
+    write_file(&root, "apps/backend/Cargo.toml", "[workspace\nmembers = []\n");
+
+    let report = run(
+        &LocalFs,
+        &root,
+        None,
+        &[RustValidateFamily::Arch],
+        false,
+        &StubToolChecker,
+    )
+    .expect("arch runtime report");
+
+    assert_eq!(report.sections.len(), 1, "unexpected sections: {report:#?}");
+    assert_eq!(report.sections[0].name, "arch");
+    let ids = report.sections[0]
+        .results
+        .iter()
+        .map(|result| result.id.as_str())
+        .collect::<Vec<_>>();
+    assert!(
+        ids.contains(&"RS-ARCH-07"),
+        "expected required-input fail-closed reporting for malformed governed manifest: {report:#?}"
+    );
+    assert!(
+        report.sections[0].results.iter().any(|result| {
+            result.id == "RS-ARCH-07"
+                && result.file.as_deref() == Some("apps/backend/Cargo.toml")
+        }),
+        "expected malformed governed manifest to be attributed to apps/backend/Cargo.toml: {report:#?}"
+    );
+
+    fs::remove_dir_all(&root).expect("cleanup temp root");
+}
+
+#[test]
 fn hexarch_runtime_reports_fail_closed_results_for_malformed_guardrail_config() {
     let root = temp_root("hexarch-runtime-malformed-config");
     write_file(

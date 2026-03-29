@@ -264,6 +264,7 @@ apps/guardrail3/crates/app/rs/checks/rs/rust_root_placement.rs
   - malformed `guardrail3.toml`
   - unreadable-present `guardrail3.toml`
   - unreadable discovered eligible live `Cargo.toml` content in the cached tree
+  - malformed governed app/package `Cargo.toml`
   - malformed eligible live `Cargo.toml` when auxiliary-role metadata must be resolved
 
 ## Gaps closed

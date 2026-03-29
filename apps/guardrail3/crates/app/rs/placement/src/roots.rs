@@ -57,10 +57,11 @@ pub fn collect(tree: &ProjectTree) -> RustRootPlacementFacts {
         }
 
         let placement_rel_dir = contextual_rel_dir(zone_context_prefix.as_deref(), &rel_dir);
+        let parsed = parse_live_cargo_toml(tree, &cargo_rel_path, &mut input_failures);
         let arch_role = if has_governed_zone_candidate(&placement_rel_dir) {
             None
         } else {
-            resolve_arch_role(tree, &cargo_rel_path, &mut input_failures)
+            resolve_arch_role(parsed.as_ref(), &cargo_rel_path, &mut input_failures)
         };
         roots.push(classify_root(
             rel_dir,
@@ -116,33 +117,43 @@ fn is_excluded_path(path: &str) -> bool {
 }
 
 fn resolve_arch_role(
-    tree: &ProjectTree,
+    parsed: Option<&Value>,
     cargo_rel_path: &str,
     input_failures: &mut Vec<RustRootPlacementInputFailureFacts>,
 ) -> Option<RustArchRole> {
+    let Some(parsed) = parsed else {
+        return None;
+    };
+
+    match arch_role_from_toml(parsed) {
+        Ok(role) => role,
+        Err(message) => {
+            input_failures.push(RustRootPlacementInputFailureFacts {
+                rel_path: cargo_rel_path.to_owned(),
+                message,
+            });
+            None
+        }
+    }
+}
+
+fn parse_live_cargo_toml(
+    tree: &ProjectTree,
+    cargo_rel_path: &str,
+    input_failures: &mut Vec<RustRootPlacementInputFailureFacts>,
+) -> Option<Value> {
     let Some(content) = tree.file_content(cargo_rel_path) else {
         return None;
     };
 
-    let parsed = match toml::from_str::<Value>(content) {
-        Ok(parsed) => parsed,
+    match toml::from_str::<Value>(content) {
+        Ok(parsed) => Some(parsed),
         Err(parse_error) => {
             input_failures.push(RustRootPlacementInputFailureFacts {
                 rel_path: cargo_rel_path.to_owned(),
                 message: format!(
                     "Failed to parse eligible live Cargo.toml for Rust root placement discovery: {parse_error}"
                 ),
-            });
-            return None;
-        }
-    };
-
-    match arch_role_from_toml(&parsed) {
-        Ok(role) => role,
-        Err(message) => {
-            input_failures.push(RustRootPlacementInputFailureFacts {
-                rel_path: cargo_rel_path.to_owned(),
-                message,
             });
             None
         }

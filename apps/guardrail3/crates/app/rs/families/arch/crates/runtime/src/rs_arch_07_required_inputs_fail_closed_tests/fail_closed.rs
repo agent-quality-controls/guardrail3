@@ -63,7 +63,7 @@ fn malformed_auxiliary_candidate_cargo_toml_emits_required_input_failure() {
 }
 
 #[test]
-fn malformed_app_owned_cargo_toml_does_not_emit_required_input_failure() {
+fn malformed_app_owned_cargo_toml_emits_required_input_failure() {
     let results = check_results(&tree(
         &[
             ("", entry(&["apps"], &[])),
@@ -73,5 +73,19 @@ fn malformed_app_owned_cargo_toml_does_not_emit_required_input_failure() {
         &[("apps/backend/Cargo.toml", "[workspace\nmembers = []\n")],
     ));
 
-    assertions::assert_no_error_files(&results, "RS-ARCH-07");
+    assertions::assert_error_files(&results, "RS-ARCH-07", &["apps/backend/Cargo.toml"]);
+}
+
+#[test]
+fn malformed_package_owned_cargo_toml_emits_required_input_failure() {
+    let results = check_results(&tree(
+        &[
+            ("", entry(&["packages"], &[])),
+            ("packages", entry(&["shared"], &[])),
+            ("packages/shared", entry(&[], &["Cargo.toml"])),
+        ],
+        &[("packages/shared/Cargo.toml", "[package\nname = \"shared\"\n")],
+    ));
+
+    assertions::assert_error_files(&results, "RS-ARCH-07", &["packages/shared/Cargo.toml"]);
 }
