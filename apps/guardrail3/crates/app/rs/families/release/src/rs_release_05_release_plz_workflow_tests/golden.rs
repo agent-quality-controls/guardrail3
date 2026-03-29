@@ -1,4 +1,4 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_release_assertions::rs_release_05_release_plz_workflow as assertions;
 
 use super::super::{repo_facts, repo_input, workflow_from_yaml};
 use super::super::check;
@@ -27,13 +27,15 @@ jobs:
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-RELEASE-05");
-    assert_eq!(results[0].severity, Severity::Info);
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some(".github/workflows/release.yml")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            file: Some(".github/workflows/release.yml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
 }
 
@@ -57,13 +59,15 @@ jobs:
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-RELEASE-05");
-    assert_eq!(results[0].severity, Severity::Info);
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some(".github/workflows/release-action.yml")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            file: Some(".github/workflows/release-action.yml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
 }
 
@@ -85,13 +89,15 @@ jobs:
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-RELEASE-05");
-    assert_eq!(results[0].severity, Severity::Info);
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some(".github/workflows/release-cli.yml")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            file: Some(".github/workflows/release-cli.yml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
 }
 
@@ -113,12 +119,14 @@ jobs:
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-RELEASE-05");
-    assert_eq!(results[0].severity, Severity::Info);
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some(".github/workflows/release-config.yml")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            file: Some(".github/workflows/release-config.yml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
 }

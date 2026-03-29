@@ -355,6 +355,14 @@ fn collect_assertions_proof_catalog(
             })
             .collect::<BTreeSet<_>>();
 
+        for file in &package_files {
+            let module_prefix = assertions_module_prefix(&file.facts.rel_path);
+            for function_name in &file.parsed.macro_defined_proof_functions {
+                let _ = proof_bearing_names
+                    .insert(qualified_assertion_name(&module_prefix, function_name));
+            }
+        }
+
         loop {
             let mut changed = false;
             for file in &package_files {

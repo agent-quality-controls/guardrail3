@@ -97,6 +97,7 @@ pub fn assert_rule_results(
 macro_rules! define_rule_assertions {
     ($rule_id:literal) => {
         pub use crate::common::ExpectedRuleResult;
+        pub use guardrail3_domain_report::Severity;
         use guardrail3_domain_report::CheckResult;
 
         const RULE_ID: &str = $rule_id;

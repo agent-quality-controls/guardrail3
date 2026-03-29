@@ -1,3 +1,4 @@
+use guardrail3_app_rs_family_release_assertions::rs_pub_01_description_present as assertions;
 use super::super::run_tree as check;
 use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
 
@@ -47,17 +48,14 @@ readme = false
     );
     let results = check(&tree, &StubToolChecker::new(true), false);
 
-    assert!(
-        results.iter().any(|result| {
-            result.id == "RS-PUB-01"
-                && result.inventory
-                && result.file.as_deref() == Some("crates/pub/Cargo.toml")
-        }) && results.iter().all(|result| {
-            !(result.id == "RS-PUB-01"
-                && result.severity == guardrail3_domain_report::Severity::Error
-                && !result.inventory)
-        }),
-        "workspace-inherited description should satisfy RS-PUB-01: {results:#?}"
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            file: Some("crates/pub/Cargo.toml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
 }
 
@@ -98,10 +96,8 @@ publish.workspace = true
     );
     let results = check(&tree, &StubToolChecker::new(true), false);
 
-    assert!(
-        results.iter().all(|result| result.id != "RS-PUB-01"),
-        "workspace-inherited publish=false should suppress RS-PUB-01: {results:#?}"
-    );
+    assert!(assertions::findings(&results).is_empty());
+    assertions::assert_rule_quiet(&results);
 }
 
 #[test]
@@ -137,10 +133,8 @@ publish = []
     );
     let results = check(&tree, &StubToolChecker::new(true), false);
 
-    assert!(
-        results.iter().all(|result| result.id != "RS-PUB-01"),
-        "publish=[] should suppress RS-PUB-01 scope: {results:#?}"
-    );
+    assert!(assertions::findings(&results).is_empty());
+    assertions::assert_rule_quiet(&results);
 }
 
 #[test]
@@ -191,10 +185,14 @@ description.workspace = true
     );
     let results = check(&tree, &StubToolChecker::new(true), false);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-PUB-01"
-            && result.severity == guardrail3_domain_report::Severity::Error
-            && !result.inventory
-            && result.file.as_deref() == Some("crates/orphan/Cargo.toml")
-    }));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Error),
+            file: Some("crates/orphan/Cargo.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }

@@ -170,3 +170,56 @@ fn owned_assertions_grouped_import_call_counts_as_real_proof_site() {
 
     assert_rule_quiet(&results);
 }
+
+#[test]
+fn macro_defined_owned_assertions_call_counts_as_real_proof_site() {
+    let fixture = tempdir();
+    let root = fixture.path();
+
+    write_file(
+        root,
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"crates/runtime\", \"crates/assertions\"]\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/Cargo.toml",
+        "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = {path = \"../assertions\"}\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/tests/public_surface.rs",
+        "use demo_assertions as assertions;\n#[test]\nfn reuses_macro_defined_owned_assertions() {assertions::proofs::assert_rule_quiet::<u8>(&[]);}\n",
+    );
+    write_file(root, "crates/runtime/src/lib.rs", "pub fn value() -> u8 {1}\n");
+    write_file(
+        root,
+        "crates/assertions/Cargo.toml",
+        "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = {path = \"../runtime\"}\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/src/lib.rs",
+        r#"
+#[macro_export]
+macro_rules! define_rule_assertions {
+    ($rule_id:literal) => {
+        pub fn assert_rule_quiet<T>(_results: &[T]) {
+            assert!(true, "{}", $rule_id);
+        }
+    };
+}
+
+pub mod proofs;
+"#,
+    );
+    write_file(
+        root,
+        "crates/assertions/src/proofs.rs",
+        "crate::define_rule_assertions!(\"RS-DEMO-01\");\n",
+    );
+
+    let results = run_family(root);
+
+    assert_rule_quiet(&results);
+}

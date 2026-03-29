@@ -1,8 +1,8 @@
 use std::collections::BTreeSet;
 
+use guardrail3_app_rs_family_release_assertions::rs_bin_01_binary_release_workflow as assertions;
 use super::super::run_tree as run_family;
 use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
-use guardrail3_domain_report::Severity;
 
 use super::super::{crate_facts, crate_input, repo_facts, workflow_from_yaml};
 use super::super::check;
@@ -28,18 +28,19 @@ jobs:
 
     check(&input, &[repo.clone()], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-01");
-    assert_eq!(results[0].severity, Severity::Info);
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some("crates/example/Cargo.toml")
-    );
-    assert!(results[0].title.contains("no binary release workflow"));
-    assert_eq!(
-        results[0].message,
-        "No workflow builds a release binary and publishes it via GitHub Releases."
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            title_contains: Some("no binary release workflow"),
+            file: Some("crates/example/Cargo.toml"),
+            inventory: Some(true),
+            message: Some(
+                "No workflow builds a release binary and publishes it via GitHub Releases.",
+            ),
+            ..Default::default()
+        }],
     );
 }
 
@@ -66,7 +67,8 @@ jobs:
 
     check(&input, &[repo.clone()], &mut results);
 
-    assert!(results.is_empty());
+    assert!(assertions::findings(&results).is_empty());
+    assertions::assert_rule_quiet(&results);
 
     let mut non_publishable_binary = crate_facts("bin");
     non_publishable_binary.is_binary = true;
@@ -80,7 +82,7 @@ jobs:
         &mut non_publishable_binary_results,
     );
 
-    assert!(non_publishable_binary_results.is_empty());
+    assertions::assert_rule_quiet(&non_publishable_binary_results);
 }
 
 #[test]
@@ -104,14 +106,16 @@ jobs:
 
     check(&input, &[repo.clone()], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-01");
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some("crates/example/Cargo.toml")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            title_contains: Some("no binary release workflow"),
+            file: Some("crates/example/Cargo.toml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
-    assert!(results[0].title.contains("no binary release workflow"));
 }
 
 #[test]
@@ -138,14 +142,16 @@ jobs:
 
     check(&input, &[repo.clone()], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-01");
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some("crates/example/Cargo.toml")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            title_contains: Some("no binary release workflow"),
+            file: Some("crates/example/Cargo.toml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
-    assert!(results[0].title.contains("no binary release workflow"));
 }
 
 #[test]
@@ -158,15 +164,17 @@ fn reports_absence_when_repo_has_no_workflows() {
 
     check(&input, &[repo.clone()], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-01");
-    assert_eq!(results[0].severity, Severity::Info);
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some("crates/example/Cargo.toml")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            title: Some("bin: no binary release workflow"),
+            file: Some("crates/example/Cargo.toml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
-    assert_eq!(results[0].title, "bin: no binary release workflow");
 }
 
 #[test]
@@ -189,15 +197,17 @@ jobs:
 
     check(&input, &[repo.clone()], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-01");
-    assert_eq!(results[0].severity, Severity::Info);
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some("crates/example/Cargo.toml")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            title: Some("bin: no binary release workflow"),
+            file: Some("crates/example/Cargo.toml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
-    assert_eq!(results[0].title, "bin: no binary release workflow");
 }
 
 #[test]
@@ -245,10 +255,8 @@ jobs:
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(
-        results.iter().all(|result| result.id != "RS-BIN-01"),
-        "autobins=false package should stay out of RS-BIN-01: {results:#?}"
-    );
+    assert!(assertions::findings(&results).is_empty());
+    assertions::assert_rule_quiet(&results);
 }
 
 #[test]
@@ -272,14 +280,16 @@ jobs:
 
     check(&input, &[repo], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-01");
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some("crates/example/Cargo.toml")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            title: Some("worker: no binary release workflow"),
+            file: Some("crates/example/Cargo.toml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
-    assert_eq!(results[0].title, "worker: no binary release workflow");
 }
 
 #[test]
@@ -304,10 +314,15 @@ jobs:
 
     check(&input, &[repo], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-01");
-    assert!(results[0].inventory);
-    assert_eq!(results[0].title, "worker: no binary release workflow");
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            title: Some("worker: no binary release workflow"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -332,12 +347,14 @@ jobs:
 
     check(&input, &[repo], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-01");
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].title,
-        "worker-package: no binary release workflow"
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            title: Some("worker-package: no binary release workflow"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
 }
 
@@ -387,10 +404,8 @@ jobs:
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(
-        results.iter().all(|result| result.id != "RS-BIN-01"),
-        "autobins=false src/bin package should stay out of RS-BIN-01: {results:#?}"
-    );
+    assert!(assertions::findings(&results).is_empty());
+    assertions::assert_rule_quiet(&results);
 }
 
 #[test]
@@ -442,12 +457,16 @@ jobs:
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-BIN-01"
-            && result.inventory
-            && result.file.as_deref() == Some("Cargo.toml")
-            && result.title.contains("no binary release workflow")
-    }));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            title_contains: Some("no binary release workflow"),
+            file: Some("Cargo.toml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -475,13 +494,15 @@ jobs:
 
     check(&input, &[repo], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-01");
-    assert!(results[0].inventory);
-    assert_eq!(results[0].title, "worker: no binary release workflow");
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some("crates/example/Cargo.toml")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            title: Some("worker: no binary release workflow"),
+            file: Some("crates/example/Cargo.toml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
 }
 
@@ -507,11 +528,16 @@ jobs:
 
     check(&input, &[repo], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-01");
-    assert!(results[0].inventory);
-    assert_eq!(results[0].title, "worker: no binary release workflow");
-    assert_eq!(results[0].file.as_deref(), Some("crates/worker/Cargo.toml"));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            title: Some("worker: no binary release workflow"),
+            file: Some("crates/worker/Cargo.toml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -543,13 +569,15 @@ jobs:
 
     check(&input, &[repo], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-01");
-    assert!(results[0].inventory);
-    assert_eq!(results[0].title, "bin: no binary release workflow");
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some("crates/example/Cargo.toml")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            title: Some("bin: no binary release workflow"),
+            file: Some("crates/example/Cargo.toml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
 }
 
@@ -574,10 +602,15 @@ jobs:
 
     check(&input, &[repo], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-01");
-    assert!(results[0].inventory);
-    assert_eq!(results[0].title, "bin: no binary release workflow");
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            title: Some("bin: no binary release workflow"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -601,8 +634,13 @@ jobs:
 
     check(&input, &[repo], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-01");
-    assert!(results[0].inventory);
-    assert_eq!(results[0].title, "bin: no binary release workflow");
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            title: Some("bin: no binary release workflow"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
 }

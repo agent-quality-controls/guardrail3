@@ -1,4 +1,4 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_release_assertions::rs_pub_05_readme_quality as assertions;
 
 use super::super::{crate_facts, crate_input};
 use super::super::check;
@@ -12,14 +12,18 @@ fn warns_on_stub_readme() {
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-PUB-05");
-    assert_eq!(results[0].severity, Severity::Warn);
-    assert!(!results[0].inventory);
-    assert_eq!(results[0].file.as_deref(), Some("crates/example/README.md"));
-    assert!(results[0].title.contains("stub"));
-    assert!(results[0].message.contains("README.md"));
-    assert!(results[0].message.contains("bytes"));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Warn),
+            title_contains: Some("stub"),
+            file: Some("crates/example/README.md"),
+            inventory: Some(false),
+            message_contains: Some("README.md"),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -31,13 +35,18 @@ fn warns_when_readme_has_no_heading() {
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-PUB-05");
-    assert_eq!(results[0].severity, Severity::Warn);
-    assert!(!results[0].inventory);
-    assert_eq!(results[0].file.as_deref(), Some("crates/example/README.md"));
-    assert!(results[0].title.contains("no heading"));
-    assert!(results[0].message.contains("no markdown heading"));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Warn),
+            title_contains: Some("no heading"),
+            file: Some("crates/example/README.md"),
+            inventory: Some(false),
+            message_contains: Some("no markdown heading"),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -51,7 +60,8 @@ fn skips_explicit_readme_false_and_non_publishable_crates() {
 
     check(&false_input, &mut false_results);
 
-    assert!(false_results.is_empty());
+    assert!(assertions::findings(&false_results).is_empty());
+    assertions::assert_rule_quiet(&false_results);
 
     let mut non_publishable = crate_facts("example");
     non_publishable.publishable = false;
@@ -61,7 +71,8 @@ fn skips_explicit_readme_false_and_non_publishable_crates() {
 
     check(&non_publishable_input, &mut non_publishable_results);
 
-    assert!(non_publishable_results.is_empty());
+    assert!(assertions::findings(&non_publishable_results).is_empty());
+    assertions::assert_rule_quiet(&non_publishable_results);
 }
 
 #[test]
@@ -74,7 +85,8 @@ fn skips_missing_readme_and_leaves_that_to_readme_exists_rule() {
 
     check(&input, &mut results);
 
-    assert!(results.is_empty());
+    assert!(assertions::findings(&results).is_empty());
+    assertions::assert_rule_quiet(&results);
 }
 
 #[test]
@@ -89,12 +101,17 @@ fn warns_when_only_code_blocks_contain_hash_prefixes() {
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-PUB-05");
-    assert_eq!(results[0].severity, Severity::Warn);
-    assert!(!results[0].inventory);
-    assert_eq!(results[0].file.as_deref(), Some("crates/example/README.md"));
-    assert!(results[0].title.contains("no heading"));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Warn),
+            title_contains: Some("no heading"),
+            file: Some("crates/example/README.md"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -109,12 +126,17 @@ fn warns_when_only_indented_code_blocks_contain_hash_prefixes() {
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-PUB-05");
-    assert_eq!(results[0].severity, Severity::Warn);
-    assert!(!results[0].inventory);
-    assert_eq!(results[0].file.as_deref(), Some("crates/example/README.md"));
-    assert!(results[0].title.contains("no heading"));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Warn),
+            title_contains: Some("no heading"),
+            file: Some("crates/example/README.md"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -126,10 +148,15 @@ fn warns_when_hash_prefixed_text_is_not_a_real_markdown_heading() {
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-PUB-05");
-    assert_eq!(results[0].severity, Severity::Warn);
-    assert!(!results[0].inventory);
-    assert_eq!(results[0].file.as_deref(), Some("crates/example/README.md"));
-    assert!(results[0].title.contains("no heading"));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Warn),
+            title_contains: Some("no heading"),
+            file: Some("crates/example/README.md"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }

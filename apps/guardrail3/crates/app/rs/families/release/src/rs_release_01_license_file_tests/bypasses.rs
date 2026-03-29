@@ -1,4 +1,4 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_release_assertions::rs_release_01_license_file as assertions;
 
 use super::super::run_tree as run_family;
 use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
@@ -13,11 +13,16 @@ fn errors_when_no_license_material_exists() {
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-RELEASE-01");
-    assert_eq!(results[0].severity, Severity::Error);
-    assert!(!results[0].inventory);
-    assert_eq!(results[0].file.as_deref(), Some("Cargo.toml"));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Error),
+            file: Some("Cargo.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -30,11 +35,16 @@ fn errors_when_license_path_is_nested_or_not_whitelisted() {
 
         check(&input, &mut results);
 
-        assert_eq!(results.len(), 1);
-        assert_eq!(results[0].id, "RS-RELEASE-01");
-        assert_eq!(results[0].severity, Severity::Error);
-        assert!(!results[0].inventory);
-        assert_eq!(results[0].file.as_deref(), Some("Cargo.toml"));
+        assert!(!assertions::findings(&results).is_empty());
+        assertions::assert_rule_results(
+            &results,
+            &[assertions::ExpectedRuleResult {
+                severity: Some(assertions::Severity::Error),
+                file: Some("Cargo.toml"),
+                inventory: Some(false),
+                ..Default::default()
+            }],
+        );
     }
 }
 
@@ -66,10 +76,14 @@ repository = "https://example.com/repo"
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-RELEASE-01"
-            && result.severity == Severity::Info
-            && result.inventory
-            && result.file.as_deref() == Some("LICENSE")
-    }));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            file: Some("LICENSE"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
 }

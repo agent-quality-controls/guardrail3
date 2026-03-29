@@ -1,8 +1,8 @@
 use std::collections::BTreeSet;
 
+use guardrail3_app_rs_family_release_assertions::rs_bin_01_binary_release_workflow as assertions;
 use super::super::run_tree as run_family;
 use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
-use guardrail3_domain_report::Severity;
 
 use super::super::{crate_facts, crate_input, repo_facts, workflow_from_yaml};
 use super::super::check;
@@ -28,21 +28,18 @@ jobs:
 
     check(&input, &[repo], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-01");
-    assert_eq!(results[0].severity, Severity::Info);
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some(".github/workflows/binary.yml")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            title_contains: Some("binary release workflow present"),
+            file: Some(".github/workflows/binary.yml"),
+            inventory: Some(true),
+            message_contains: Some("builds release binaries and uses a GitHub release action"),
+            ..Default::default()
+        }],
     );
-    assert!(results[0].title.contains("binary release workflow present"));
-    assert!(
-        results[0]
-            .message
-            .contains("builds release binaries and uses a GitHub release action")
-    );
-    assert!(results[0].message.contains(".github/workflows/binary.yml"));
 }
 
 #[test]
@@ -66,15 +63,17 @@ jobs:
 
     check(&input, &[repo], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-01");
-    assert_eq!(results[0].severity, Severity::Info);
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some(".github/workflows/binary-alt-action.yml")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            title_contains: Some("binary release workflow present"),
+            file: Some(".github/workflows/binary-alt-action.yml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
-    assert!(results[0].title.contains("binary release workflow present"));
 }
 
 #[test]
@@ -102,15 +101,17 @@ jobs:
 
     check(&input, &[repo], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-01");
-    assert_eq!(results[0].severity, Severity::Info);
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some(".github/workflows/binary-needs.yml")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            title_contains: Some("binary release workflow present"),
+            file: Some(".github/workflows/binary-needs.yml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
-    assert!(results[0].title.contains("binary release workflow present"));
 }
 
 #[test]
@@ -142,18 +143,19 @@ jobs:
 
     check(&input, &[repo], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-01");
-    assert_eq!(results[0].severity, Severity::Info);
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some(".github/workflows/binary-needs-array.yml")
-    );
-    assert_eq!(results[0].title, "bin: binary release workflow present");
-    assert_eq!(
-        results[0].message,
-        "Workflow `.github/workflows/binary-needs-array.yml` builds release binaries and uses a GitHub release action."
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            title: Some("bin: binary release workflow present"),
+            file: Some(".github/workflows/binary-needs-array.yml"),
+            inventory: Some(true),
+            message: Some(
+                "Workflow `.github/workflows/binary-needs-array.yml` builds release binaries and uses a GitHub release action.",
+            ),
+            ..Default::default()
+        }],
     );
 }
 
@@ -187,13 +189,15 @@ jobs:
 
     check(&input, &[repo], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-01");
-    assert_eq!(results[0].severity, Severity::Info);
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some(".github/workflows/binary-needs-transitive.yml")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            file: Some(".github/workflows/binary-needs-transitive.yml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
 }
 
@@ -218,12 +222,14 @@ jobs:
 
     check(&input, &[repo], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-01");
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some(".github/workflows/binary-targeted.yml")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            file: Some(".github/workflows/binary-targeted.yml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
 }
 
@@ -248,12 +254,14 @@ jobs:
 
     check(&input, &[repo], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-01");
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some(".github/workflows/binary-targeted-equals.yml")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            file: Some(".github/workflows/binary-targeted-equals.yml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
 }
 
@@ -279,12 +287,14 @@ jobs:
 
     check(&input, &[repo], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-01");
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some(".github/workflows/binary-targeted-bin.yml")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            file: Some(".github/workflows/binary-targeted-bin.yml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
 }
 
@@ -310,12 +320,14 @@ jobs:
 
     check(&input, &[repo], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-01");
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some(".github/workflows/binary-targeted-bin-equals.yml")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            file: Some(".github/workflows/binary-targeted-bin-equals.yml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
 }
 
@@ -341,12 +353,14 @@ jobs:
 
     check(&input, &[repo], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-01");
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some(".github/workflows/binary-targeted-manifest.yml")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            file: Some(".github/workflows/binary-targeted-manifest.yml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
 }
 
@@ -371,12 +385,14 @@ jobs:
 
     check(&input, &[repo], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-01");
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some(".github/workflows/binary-shell-wrapper.yml")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            file: Some(".github/workflows/binary-shell-wrapper.yml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
 }
 
@@ -401,12 +417,14 @@ jobs:
 
     check(&input, &[repo], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-01");
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some(".github/workflows/binary-toolchain-wrapper.yml")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            file: Some(".github/workflows/binary-toolchain-wrapper.yml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
 }
 
@@ -431,12 +449,14 @@ jobs:
 
     check(&input, &[repo], &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-01");
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some(".github/workflows/binary-env-wrapper.yml")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            file: Some(".github/workflows/binary-env-wrapper.yml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
 }
 
@@ -485,12 +505,16 @@ jobs:
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-BIN-01"
-            && result.inventory
-            && result.file.as_deref() == Some(".github/workflows/binary-release.yml")
-            && result.title.contains("binary release workflow present")
-    }));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            title_contains: Some("binary release workflow present"),
+            file: Some(".github/workflows/binary-release.yml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -539,12 +563,16 @@ jobs:
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-BIN-01"
-            && result.inventory
-            && result.file.as_deref() == Some(".github/workflows/binary-release.yml")
-            && result.title.contains("binary release workflow present")
-    }));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            title_contains: Some("binary release workflow present"),
+            file: Some(".github/workflows/binary-release.yml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -596,11 +624,15 @@ jobs:
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-BIN-01"
-            && result.inventory
-            && result.file.as_deref() == Some(".github/workflows/binary-release.yml")
-    }));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            file: Some(".github/workflows/binary-release.yml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -652,10 +684,14 @@ jobs:
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-BIN-01"
-            && result.inventory
-            && result.file.as_deref() == Some(".github/workflows/binary-release.yml")
-            && result.title.contains("binary release workflow present")
-    }));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            title_contains: Some("binary release workflow present"),
+            file: Some(".github/workflows/binary-release.yml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
 }

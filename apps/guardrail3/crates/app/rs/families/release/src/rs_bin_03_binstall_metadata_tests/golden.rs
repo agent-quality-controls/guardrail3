@@ -1,9 +1,9 @@
+use guardrail3_app_rs_family_release_assertions::rs_bin_03_binstall_metadata as assertions;
 use super::super::run_tree as run_family;
 use super::super::{
     StubToolChecker, crate_facts, crate_input, dir_entry, project_tree, temp_root,
 };
 use super::super::check;
-use guardrail3_domain_report::Severity;
 
 #[test]
 fn inventories_binstall_metadata_for_publishable_binary_crate() {
@@ -13,18 +13,17 @@ fn inventories_binstall_metadata_for_publishable_binary_crate() {
     let input = crate_input(&facts);
     let mut results = Vec::new();
     check(&input, &mut results);
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-BIN-03");
-    assert_eq!(results[0].severity, Severity::Info);
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some("crates/example/Cargo.toml")
-    );
-    assert!(results[0].title.contains("binstall metadata present"));
-    assert_eq!(
-        results[0].message,
-        "`[package.metadata.binstall]` is present."
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            title_contains: Some("binstall metadata present"),
+            file: Some("crates/example/Cargo.toml"),
+            inventory: Some(true),
+            message: Some("`[package.metadata.binstall]` is present."),
+            ..Default::default()
+        }],
     );
 }
 
@@ -59,13 +58,17 @@ pkg-url = "{ repo }/releases/download/{ version }/{ name }"
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-BIN-03"
-            && result.severity == Severity::Info
-            && result.inventory
-            && result.file.as_deref() == Some("Cargo.toml")
-            && result.title.contains("binstall metadata present")
-    }));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            title_contains: Some("binstall metadata present"),
+            file: Some("Cargo.toml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -100,13 +103,17 @@ pkg-url = "{ repo }/releases/download/{ version }/{ name }"
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-BIN-03"
-            && result.severity == Severity::Info
-            && result.inventory
-            && result.file.as_deref() == Some("Cargo.toml")
-            && result.title.contains("binstall metadata present")
-    }));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            title_contains: Some("binstall metadata present"),
+            file: Some("Cargo.toml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -145,10 +152,14 @@ pkg-url = "{ repo }/releases/download/{ version }/{ name }"
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-BIN-03"
-            && result.severity == Severity::Info
-            && result.inventory
-            && result.file.as_deref() == Some("Cargo.toml")
-    }));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            file: Some("Cargo.toml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
 }

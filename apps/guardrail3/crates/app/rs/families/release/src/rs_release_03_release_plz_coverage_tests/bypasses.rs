@@ -1,4 +1,4 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_release_assertions::rs_release_03_release_plz_coverage as assertions;
 
 use super::super::{repo_facts, repo_input};
 use super::super::check;
@@ -11,7 +11,8 @@ fn stays_quiet_when_release_plz_is_absent_and_existence_is_owned_elsewhere() {
 
     check(&input, &mut results);
 
-    assert!(results.is_empty());
+    assert!(assertions::findings(&results).is_empty());
+    assertions::assert_rule_quiet(&results);
 }
 
 #[test]
@@ -25,25 +26,27 @@ fn warns_when_workspace_section_is_missing() {
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 2);
-    assert!(results.iter().all(|result| result.id == "RS-RELEASE-03"));
-    assert!(
-        results
-            .iter()
-            .all(|result| result.severity == Severity::Warn)
+    assert_eq!(assertions::findings(&results).len(), 2);
+    assertions::assert_rule_count(&results, 2);
+    assertions::assert_rule_results(
+        &results,
+        &[
+            assertions::ExpectedRuleResult {
+                severity: Some(assertions::Severity::Warn),
+                title_contains: Some("[workspace]"),
+                file: Some("release-plz.toml"),
+                inventory: Some(false),
+                ..Default::default()
+            },
+            assertions::ExpectedRuleResult {
+                severity: Some(assertions::Severity::Warn),
+                title_contains: Some("cli"),
+                file: Some("release-plz.toml"),
+                inventory: Some(false),
+                ..Default::default()
+            },
+        ],
     );
-    assert!(results.iter().all(|result| !result.inventory));
-    assert!(
-        results
-            .iter()
-            .all(|result| result.file.as_deref() == Some("release-plz.toml"))
-    );
-    assert!(
-        results
-            .iter()
-            .any(|result| result.title.contains("[workspace]"))
-    );
-    assert!(results.iter().any(|result| result.title.contains("cli")));
 }
 
 #[test]
@@ -65,12 +68,17 @@ workspace = "oops"
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-RELEASE-03");
-    assert_eq!(results[0].severity, Severity::Warn);
-    assert!(!results[0].inventory);
-    assert_eq!(results[0].file.as_deref(), Some("release-plz.toml"));
-    assert!(results[0].title.contains("[workspace]"));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Warn),
+            title_contains: Some("[workspace]"),
+            file: Some("release-plz.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -96,12 +104,17 @@ release_always = false
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-RELEASE-03");
-    assert_eq!(results[0].severity, Severity::Warn);
-    assert!(!results[0].inventory);
-    assert!(results[0].title.contains("cli"));
-    assert_eq!(results[0].file.as_deref(), Some("release-plz.toml"));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Warn),
+            title_contains: Some("cli"),
+            file: Some("release-plz.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -128,21 +141,27 @@ release_always = false
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 2);
-    assert!(results.iter().all(|result| result.id == "RS-RELEASE-03"));
-    assert!(
-        results
-            .iter()
-            .all(|result| result.severity == Severity::Warn)
+    assert_eq!(assertions::findings(&results).len(), 2);
+    assertions::assert_rule_count(&results, 2);
+    assertions::assert_rule_results(
+        &results,
+        &[
+            assertions::ExpectedRuleResult {
+                severity: Some(assertions::Severity::Warn),
+                title_contains: Some("cli"),
+                file: Some("release-plz.toml"),
+                inventory: Some(false),
+                ..Default::default()
+            },
+            assertions::ExpectedRuleResult {
+                severity: Some(assertions::Severity::Warn),
+                title_contains: Some("worker"),
+                file: Some("release-plz.toml"),
+                inventory: Some(false),
+                ..Default::default()
+            },
+        ],
     );
-    assert!(results.iter().all(|result| !result.inventory));
-    assert!(
-        results
-            .iter()
-            .all(|result| result.file.as_deref() == Some("release-plz.toml"))
-    );
-    assert!(results.iter().any(|result| result.title.contains("cli")));
-    assert!(results.iter().any(|result| result.title.contains("worker")));
 }
 
 #[test]
@@ -155,7 +174,8 @@ fn stays_quiet_when_release_plz_is_present_but_unparseable_and_fail_closed_is_ow
 
     check(&input, &mut results);
 
-    assert!(results.is_empty());
+    assert!(assertions::findings(&results).is_empty());
+    assertions::assert_rule_quiet(&results);
 }
 
 #[test]
@@ -178,12 +198,17 @@ release_always = false
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-RELEASE-03");
-    assert_eq!(results[0].severity, Severity::Warn);
-    assert!(!results[0].inventory);
-    assert_eq!(results[0].file.as_deref(), Some("release-plz.toml"));
-    assert!(results[0].title.contains("changelog_config"));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Warn),
+            title_contains: Some("changelog_config"),
+            file: Some("release-plz.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -205,12 +230,17 @@ release_always = false
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-RELEASE-03");
-    assert_eq!(results[0].severity, Severity::Warn);
-    assert!(!results[0].inventory);
-    assert_eq!(results[0].file.as_deref(), Some("release-plz.toml"));
-    assert!(results[0].title.contains("changelog_config"));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Warn),
+            title_contains: Some("changelog_config"),
+            file: Some("release-plz.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -232,12 +262,17 @@ release_always = false
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-RELEASE-03");
-    assert_eq!(results[0].severity, Severity::Warn);
-    assert!(!results[0].inventory);
-    assert_eq!(results[0].file.as_deref(), Some("release-plz.toml"));
-    assert!(results[0].title.contains("git_release_enable"));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Warn),
+            title_contains: Some("git_release_enable"),
+            file: Some("release-plz.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -260,12 +295,17 @@ release_always = false
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-RELEASE-03");
-    assert_eq!(results[0].severity, Severity::Warn);
-    assert!(!results[0].inventory);
-    assert_eq!(results[0].file.as_deref(), Some("release-plz.toml"));
-    assert!(results[0].title.contains("git_release_enable"));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Warn),
+            title_contains: Some("git_release_enable"),
+            file: Some("release-plz.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -288,12 +328,17 @@ release_always = true
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-RELEASE-03");
-    assert_eq!(results[0].severity, Severity::Warn);
-    assert!(!results[0].inventory);
-    assert_eq!(results[0].file.as_deref(), Some("release-plz.toml"));
-    assert!(results[0].title.contains("release_always"));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Warn),
+            title_contains: Some("release_always"),
+            file: Some("release-plz.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -315,12 +360,17 @@ git_release_enable = true
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-RELEASE-03");
-    assert_eq!(results[0].severity, Severity::Warn);
-    assert!(!results[0].inventory);
-    assert_eq!(results[0].file.as_deref(), Some("release-plz.toml"));
-    assert!(results[0].title.contains("release_always"));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Warn),
+            title_contains: Some("release_always"),
+            file: Some("release-plz.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -344,33 +394,39 @@ release_always = true
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 4);
-    assert!(results.iter().all(|result| result.id == "RS-RELEASE-03"));
-    assert!(
-        results
-            .iter()
-            .all(|result| result.severity == Severity::Warn)
+    assert_eq!(assertions::findings(&results).len(), 4);
+    assertions::assert_rule_count(&results, 4);
+    assertions::assert_rule_results(
+        &results,
+        &[
+            assertions::ExpectedRuleResult {
+                severity: Some(assertions::Severity::Warn),
+                title_contains: Some("changelog_config"),
+                file: Some("release-plz.toml"),
+                inventory: Some(false),
+                ..Default::default()
+            },
+            assertions::ExpectedRuleResult {
+                severity: Some(assertions::Severity::Warn),
+                title_contains: Some("git_release_enable"),
+                file: Some("release-plz.toml"),
+                inventory: Some(false),
+                ..Default::default()
+            },
+            assertions::ExpectedRuleResult {
+                severity: Some(assertions::Severity::Warn),
+                title_contains: Some("release_always"),
+                file: Some("release-plz.toml"),
+                inventory: Some(false),
+                ..Default::default()
+            },
+            assertions::ExpectedRuleResult {
+                severity: Some(assertions::Severity::Warn),
+                title_contains: Some("api"),
+                file: Some("release-plz.toml"),
+                inventory: Some(false),
+                ..Default::default()
+            },
+        ],
     );
-    assert!(results.iter().all(|result| !result.inventory));
-    assert!(
-        results
-            .iter()
-            .all(|result| result.file.as_deref() == Some("release-plz.toml"))
-    );
-    assert!(
-        results
-            .iter()
-            .any(|result| result.title.contains("changelog_config"))
-    );
-    assert!(
-        results
-            .iter()
-            .any(|result| result.title.contains("git_release_enable"))
-    );
-    assert!(
-        results
-            .iter()
-            .any(|result| result.title.contains("release_always"))
-    );
-    assert!(results.iter().any(|result| result.title.contains("api")));
 }
