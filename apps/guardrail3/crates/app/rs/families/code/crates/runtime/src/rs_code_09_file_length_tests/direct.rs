@@ -1,7 +1,5 @@
-use guardrail3_domain_report::Severity;
-
 use super::super::check_source;
-use guardrail3_app_rs_family_code_assertions::rs_code_09_file_length::{
+use guardrail3_app_rs_family_code_assertions::rs_code_09_file_length::{Severity, 
     RuleFinding, assert_findings,
 };
 

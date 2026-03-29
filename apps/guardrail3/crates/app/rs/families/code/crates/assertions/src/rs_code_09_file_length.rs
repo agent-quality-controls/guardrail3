@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use guardrail3_domain_report::{CheckResult, Severity};
+pub use guardrail3_domain_report::{CheckResult, Severity};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct RuleFinding<'a> {

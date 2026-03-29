@@ -1,5 +1,4 @@
 use guardrail3_app_rs_family_garde_assertions::rs_garde_08_enum_derive_validate as assertions;
-use guardrail3_domain_report::Severity;
 use test_support::{dir_entry, project_tree, temp_root};
 
 #[test]
@@ -51,7 +50,7 @@ garde = { version = "0.22", features = ["derive"] }
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(Severity::Error),
+            severity: Some(assertions::Severity::Error),
             file: Some(source_rel),
             line: Some(4),
             title: Some("enum `Input` missing Validate derive"),
@@ -111,7 +110,7 @@ garde = { version = "0.22", features = ["derive"] }
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
-            severity: Some(Severity::Error),
+            severity: Some(assertions::Severity::Error),
             file: Some(source_rel),
             ..Default::default()
         }],

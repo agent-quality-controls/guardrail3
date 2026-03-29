@@ -1,13 +1,12 @@
 use guardrail3_app_rs_family_garde_assertions::rs_garde_03_extractor_type_bans as assertions;
-use guardrail3_domain_modules::clippy::build_clippy_toml;
 use test_support::{dir_entry, project_tree, temp_root};
 
 #[test]
 fn local_missing_extractor_ban_only_warns_for_owned_root() {
     let root = temp_root("multi-garde-03");
-    let root_clippy = build_clippy_toml("service", false, true, "", "");
+    let root_clippy = super::super::canonical_clippy_toml();
     let local_clippy = super::super::remove_clippy_ban_path(
-        &build_clippy_toml("service", false, true, "", ""),
+        &super::super::canonical_clippy_toml(),
         "disallowed-types",
         "axum::extract::Multipart",
     );

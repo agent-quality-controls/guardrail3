@@ -208,6 +208,16 @@ if [ "$RUST_CHANGED" -gt 0 ] || [ "$CARGO_CHANGED" -gt 0 ]; then
         echo "Rust tests failed. Fix tests before committing."
         exit 1
     fi
+
+    echo "Running cargo-mutants configuration check..."
+    if ! command -v cargo-mutants &> /dev/null; then
+        echo "ERROR: cargo-mutants not installed. Install: cargo install cargo-mutants"
+        exit 1
+    fi
+    if ! (cd "$RUST_WORKSPACE" && cargo mutants --check); then
+        echo "cargo-mutants check failed. Fix mutation-test setup before committing."
+        exit 1
+    fi
 fi
 
 # === Copy-paste detection (cargo-dupes, AST-aware) ===
