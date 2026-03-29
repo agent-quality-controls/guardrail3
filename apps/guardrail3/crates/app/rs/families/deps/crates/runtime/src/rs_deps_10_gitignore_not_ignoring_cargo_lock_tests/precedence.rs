@@ -1,5 +1,5 @@
 use super::{collected_facts, dir_entry, project_tree};
-use crate::run_with_facts;
+use guardrail3_app_rs_family_deps_assertions::rs_deps_10_gitignore_not_ignoring_cargo_lock as assertions;
 use guardrail3_domain_report::Severity;
 
 #[test]
@@ -64,7 +64,7 @@ fn reports_exact_gitignore_sources_across_roots() {
         ],
     );
     let facts = collected_facts(&tree, &[]);
-    let results = run_with_facts(&facts);
+    let results = super::run_with_facts(&facts);
     let summary = results
         .iter()
         .filter(|result| result.id == "RS-DEPS-10")
@@ -78,9 +78,7 @@ fn reports_exact_gitignore_sources_across_roots() {
         })
         .collect::<Vec<_>>();
 
-    assert_eq!(
-        summary,
-        vec![
+    assertions::assert_summary(summary, vec![
             (
                 Some("Cargo.lock"),
                 Severity::Info,
@@ -99,8 +97,7 @@ fn reports_exact_gitignore_sources_across_roots() {
                 false,
                 "`.gitignore` ignores `packages/core/Cargo.lock` for Rust root `packages/core`.",
             ),
-        ]
-    );
+        ]);
 }
 
 #[test]
@@ -134,7 +131,7 @@ fn nested_unignore_overrides_ancestor_ignore() {
         ],
     );
     let facts = collected_facts(&tree, &[]);
-    let results = run_with_facts(&facts);
+    let results = super::run_with_facts(&facts);
     let summary = results
         .iter()
         .filter(|result| result.id == "RS-DEPS-10")
@@ -148,15 +145,12 @@ fn nested_unignore_overrides_ancestor_ignore() {
         })
         .collect::<Vec<_>>();
 
-    assert_eq!(
-        summary,
-        vec![(
+    assertions::assert_summary(summary, vec![(
             Some("apps/api/Cargo.lock"),
             Severity::Info,
             true,
             "No relevant `.gitignore` masks `apps/api/Cargo.lock` for Rust root `apps/api`.",
-        )]
-    );
+        )]);
 }
 
 #[test]
@@ -202,7 +196,7 @@ fn anchored_root_cargo_lock_pattern_does_not_collapse_to_nested_roots() {
         ],
     );
     let facts = collected_facts(&tree, &[]);
-    let results = run_with_facts(&facts);
+    let results = super::run_with_facts(&facts);
     let summary = results
         .iter()
         .filter(|result| result.id == "RS-DEPS-10")
@@ -216,9 +210,7 @@ fn anchored_root_cargo_lock_pattern_does_not_collapse_to_nested_roots() {
         })
         .collect::<Vec<_>>();
 
-    assert_eq!(
-        summary,
-        vec![
+    assertions::assert_summary(summary, vec![
             (
                 Some(".gitignore"),
                 Severity::Error,
@@ -231,8 +223,7 @@ fn anchored_root_cargo_lock_pattern_does_not_collapse_to_nested_roots() {
                 true,
                 "No relevant `.gitignore` masks `apps/api/Cargo.lock` for Rust root `apps/api`.",
             ),
-        ]
-    );
+        ]);
 }
 
 #[test]
@@ -278,7 +269,7 @@ fn anchored_root_cargo_glob_pattern_stays_anchored() {
         ],
     );
     let facts = collected_facts(&tree, &[]);
-    let results = run_with_facts(&facts);
+    let results = super::run_with_facts(&facts);
     let summary = results
         .iter()
         .filter(|result| result.id == "RS-DEPS-10")
@@ -292,9 +283,7 @@ fn anchored_root_cargo_glob_pattern_stays_anchored() {
         })
         .collect::<Vec<_>>();
 
-    assert_eq!(
-        summary,
-        vec![
+    assertions::assert_summary(summary, vec![
             (
                 Some(".gitignore"),
                 Severity::Error,
@@ -307,6 +296,5 @@ fn anchored_root_cargo_glob_pattern_stays_anchored() {
                 true,
                 "No relevant `.gitignore` masks `apps/api/Cargo.lock` for Rust root `apps/api`.",
             ),
-        ]
-    );
+        ]);
 }

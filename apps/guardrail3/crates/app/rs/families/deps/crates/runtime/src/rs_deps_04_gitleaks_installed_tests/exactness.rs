@@ -1,6 +1,5 @@
 use super::{collected_facts, project_tree};
-use crate::run_with_facts;
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_deps_assertions::rs_deps_04_gitleaks_installed as assertions;
 
 #[test]
 fn missing_gitleaks_only_hits_its_own_rule() {
@@ -8,19 +7,6 @@ fn missing_gitleaks_only_hits_its_own_rule() {
         &project_tree(Vec::new(), Vec::new()),
         &["cargo-deny", "cargo-machete", "cargo-dupes"],
     );
-    let results = run_with_facts(&facts);
-    let summary = results
-        .iter()
-        .map(|result| (result.id.as_str(), result.severity, result.inventory))
-        .collect::<Vec<_>>();
-
-    assert_eq!(
-        summary,
-        vec![
-            ("RS-DEPS-01", Severity::Info, true),
-            ("RS-DEPS-02", Severity::Info, true),
-            ("RS-DEPS-03", Severity::Info, true),
-            ("RS-DEPS-04", Severity::Error, false),
-        ]
-    );
+    let results = super::run_with_facts(&facts);
+    assertions::assert_exactness_summary(&results);
 }

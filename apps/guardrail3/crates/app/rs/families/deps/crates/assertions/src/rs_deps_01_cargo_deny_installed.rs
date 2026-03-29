@@ -1,13 +1,40 @@
-use guardrail3_domain_report::CheckResult;
+crate::define_rule_assertions!("RS-DEPS-01");
 
-pub use super::common::ExpectedRuleResult;
-
-const RULE_ID: &str = "RS-DEPS-01";
-
-pub fn rule_results<'a>(results: &'a [CheckResult]) -> Vec<&'a CheckResult> {
-    super::common::rule_results(results, RULE_ID)
-}
-
-pub fn assert_rule_results(results: &[CheckResult], expected: &[ExpectedRuleResult<'_>]) {
-    super::common::assert_rule_results(results, RULE_ID, expected);
+pub fn assert_exactness_summary(results: &[guardrail3_domain_report::CheckResult]) {
+    assert_eq!(results.len(), 4, "unexpected deps exactness results: {results:#?}");
+    assert_rule_results(
+        results,
+        &[ExpectedRuleResult {
+            severity: Some(Severity::Error),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
+    crate::common::assert_rule_results(
+        results,
+        "RS-DEPS-02",
+        &[ExpectedRuleResult {
+            severity: Some(Severity::Info),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
+    crate::common::assert_rule_results(
+        results,
+        "RS-DEPS-03",
+        &[ExpectedRuleResult {
+            severity: Some(Severity::Info),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
+    crate::common::assert_rule_results(
+        results,
+        "RS-DEPS-04",
+        &[ExpectedRuleResult {
+            severity: Some(Severity::Info),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
 }

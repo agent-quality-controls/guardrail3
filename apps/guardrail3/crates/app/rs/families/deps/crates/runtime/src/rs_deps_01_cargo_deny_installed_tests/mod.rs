@@ -1,8 +1,5 @@
 #![allow(unused_imports)]
-pub(crate) use crate::test_harness::{collected_facts, tool_facts, tool_input};
-pub(crate) use guardrail3_app_rs_family_deps_assertions::rs_deps_01_cargo_deny_installed::{
-    ExpectedRuleResult, assert_rule_results,
-};
+pub(crate) use super::{collected_facts, run_with_facts, tool_facts, tool_input};
 pub(crate) use test_support::project_tree;
 
 mod exactness;

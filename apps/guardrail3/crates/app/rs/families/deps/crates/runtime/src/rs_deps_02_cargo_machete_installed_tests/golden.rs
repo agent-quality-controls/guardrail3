@@ -1,4 +1,5 @@
-use super::{ExpectedRuleResult, assert_rule_results, tool_facts, tool_input};
+use super::{tool_facts, tool_input};
+use guardrail3_app_rs_family_deps_assertions::rs_deps_02_cargo_machete_installed as assertions;
 use guardrail3_domain_report::Severity;
 
 #[test]
@@ -9,13 +10,13 @@ fn inventories_installed_cargo_machete() {
 
     super::super::check(&input, &mut results);
 
-    assert_rule_results(
+    assertions::assert_rule_results(
         &results,
-        &[ExpectedRuleResult {
+        &[assertions::ExpectedRuleResult {
             severity: Some(Severity::Info),
             title: Some("cargo-machete installed"),
             inventory: Some(true),
-            ..ExpectedRuleResult::default()
+            ..assertions::ExpectedRuleResult::default()
         }],
     );
 }

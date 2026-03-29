@@ -56,3 +56,34 @@ pub fn assert_rule_results(
         );
     }
 }
+
+pub fn assert_rule_quiet(results: &[CheckResult], rule_id: &str) {
+    let actual = rule_results(results, rule_id);
+    assert!(
+        actual.is_empty(),
+        "expected no {rule_id} findings, got {actual:#?}"
+    );
+}
+
+#[macro_export]
+macro_rules! define_rule_assertions {
+    ($rule_id:literal) => {
+        pub use crate::common::ExpectedRuleResult;
+        use guardrail3_domain_report::CheckResult;
+        pub use guardrail3_domain_report::Severity;
+
+        const RULE_ID: &str = $rule_id;
+
+        pub fn findings(results: &[CheckResult]) -> Vec<&CheckResult> {
+            crate::common::rule_results(results, RULE_ID)
+        }
+
+        pub fn assert_rule_results(results: &[CheckResult], expected: &[ExpectedRuleResult<'_>]) {
+            crate::common::assert_rule_results(results, RULE_ID, expected);
+        }
+
+        pub fn assert_rule_quiet(results: &[CheckResult]) {
+            crate::common::assert_rule_quiet(results, RULE_ID);
+        }
+    };
+}

@@ -1,5 +1,5 @@
 use super::{collected_facts, dir_entry, project_tree};
-use crate::run_with_facts;
+use guardrail3_app_rs_family_deps_assertions::rs_deps_11_input_failures as assertions;
 use guardrail3_domain_report::Severity;
 
 #[test]
@@ -9,7 +9,7 @@ fn collect_surfaces_guardrail_parse_failure() {
         vec![("guardrail3.toml", "[rust.apps")],
     );
     let facts = collected_facts(&tree, &[]);
-    let results = run_with_facts(&facts);
+    let results = super::run_with_facts(&facts);
     let summary = results
         .iter()
         .filter(|result| result.id == "RS-DEPS-11")
@@ -22,17 +22,14 @@ fn collect_surfaces_guardrail_parse_failure() {
         })
         .collect::<Vec<_>>();
 
-    assert_eq!(
-        summary,
-        vec![(Some("guardrail3.toml"), Severity::Error, true)]
-    );
+    assertions::assert_summary(summary, vec![(Some("guardrail3.toml"), Severity::Error, true)]);
 }
 
 #[test]
 fn unreadable_guardrail_policy_surfaces_explicit_failure() {
     let tree = project_tree(vec![("", dir_entry(&[], &["guardrail3.toml"]))], Vec::new());
     let facts = collected_facts(&tree, &[]);
-    let results = run_with_facts(&facts);
+    let results = super::run_with_facts(&facts);
     let summary = results
         .iter()
         .filter(|result| result.id == "RS-DEPS-11")
@@ -47,10 +44,7 @@ fn unreadable_guardrail_policy_surfaces_explicit_failure() {
         })
         .collect::<Vec<_>>();
 
-    assert_eq!(
-        summary,
-        vec![(Some("guardrail3.toml"), Severity::Error, true)]
-    );
+    assertions::assert_summary(summary, vec![(Some("guardrail3.toml"), Severity::Error, true)]);
 }
 
 #[test]
@@ -83,7 +77,7 @@ fn guardrail_policy_unknown_crate_key_surfaces_explicit_failure() {
         ],
     );
     let facts = collected_facts(&tree, &[]);
-    let results = run_with_facts(&facts);
+    let results = super::run_with_facts(&facts);
     let summary = results
         .iter()
         .filter(|result| result.id == "RS-DEPS-11")
@@ -98,10 +92,7 @@ fn guardrail_policy_unknown_crate_key_surfaces_explicit_failure() {
         })
         .collect::<Vec<_>>();
 
-    assert_eq!(
-        summary,
-        vec![(Some("guardrail3.toml"), Severity::Error, true)]
-    );
+    assertions::assert_summary(summary, vec![(Some("guardrail3.toml"), Severity::Error, true)]);
 }
 
 #[test]
@@ -131,7 +122,7 @@ fn guardrail_policy_empty_allowed_dep_entry_surfaces_explicit_failure() {
         ],
     );
     let facts = collected_facts(&tree, &[]);
-    let results = run_with_facts(&facts);
+    let results = super::run_with_facts(&facts);
     let summary = results
         .iter()
         .filter(|result| result.id == "RS-DEPS-11")
@@ -146,10 +137,7 @@ fn guardrail_policy_empty_allowed_dep_entry_surfaces_explicit_failure() {
         })
         .collect::<Vec<_>>();
 
-    assert_eq!(
-        summary,
-        vec![(Some("guardrail3.toml"), Severity::Error, true)]
-    );
+    assertions::assert_summary(summary, vec![(Some("guardrail3.toml"), Severity::Error, true)]);
 }
 
 #[test]
@@ -179,7 +167,7 @@ fn guardrail_policy_unknown_rust_key_surfaces_explicit_failure() {
         ],
     );
     let facts = collected_facts(&tree, &[]);
-    let results = run_with_facts(&facts);
+    let results = super::run_with_facts(&facts);
     let summary = results
         .iter()
         .filter(|result| result.id == "RS-DEPS-11")
@@ -194,10 +182,7 @@ fn guardrail_policy_unknown_rust_key_surfaces_explicit_failure() {
         })
         .collect::<Vec<_>>();
 
-    assert_eq!(
-        summary,
-        vec![(Some("guardrail3.toml"), Severity::Error, true)]
-    );
+    assertions::assert_summary(summary, vec![(Some("guardrail3.toml"), Severity::Error, true)]);
 }
 
 #[test]
@@ -240,7 +225,7 @@ fn workspace_members_with_non_string_entries_surface_explicit_failure() {
         ],
     );
     let facts = collected_facts(&tree, &[]);
-    let results = run_with_facts(&facts);
+    let results = super::run_with_facts(&facts);
     let summary = results
         .iter()
         .filter(|result| result.id == "RS-DEPS-11")
@@ -255,7 +240,7 @@ fn workspace_members_with_non_string_entries_surface_explicit_failure() {
         })
         .collect::<Vec<_>>();
 
-    assert_eq!(summary, vec![(Some("Cargo.toml"), Severity::Error, true)]);
+    assertions::assert_summary(summary, vec![(Some("Cargo.toml"), Severity::Error, true)]);
 }
 
 #[test]
@@ -301,7 +286,7 @@ fn workspace_dependency_package_with_non_string_name_surfaces_explicit_failure()
         ],
     );
     let facts = collected_facts(&tree, &[]);
-    let results = run_with_facts(&facts);
+    let results = super::run_with_facts(&facts);
     let summary = results
         .iter()
         .filter(|result| result.id == "RS-DEPS-11")
@@ -317,9 +302,7 @@ fn workspace_dependency_package_with_non_string_name_surfaces_explicit_failure()
         })
         .collect::<Vec<_>>();
 
-    assert_eq!(
-        summary,
-        vec![
+    assertions::assert_summary(summary, vec![
             (Some("Cargo.toml"), Severity::Error, true, false),
             (
                 Some("packages/core/Cargo.toml"),
@@ -327,8 +310,7 @@ fn workspace_dependency_package_with_non_string_name_surfaces_explicit_failure()
                 false,
                 true
             ),
-        ]
-    );
+        ]);
 }
 
 #[test]
@@ -361,7 +343,7 @@ fn dependency_workspace_flag_with_non_boolean_value_surfaces_explicit_failure() 
         ],
     );
     let facts = collected_facts(&tree, &[]);
-    let results = run_with_facts(&facts);
+    let results = super::run_with_facts(&facts);
     let summary = results
         .iter()
         .filter(|result| result.id == "RS-DEPS-11")
@@ -376,10 +358,7 @@ fn dependency_workspace_flag_with_non_boolean_value_surfaces_explicit_failure() 
         })
         .collect::<Vec<_>>();
 
-    assert_eq!(
-        summary,
-        vec![(Some("apps/api/Cargo.toml"), Severity::Error, true)]
-    );
+    assertions::assert_summary(summary, vec![(Some("apps/api/Cargo.toml"), Severity::Error, true)]);
 }
 
 #[test]
@@ -399,7 +378,7 @@ fn unreadable_member_manifest_surfaces_explicit_failure() {
         )],
     );
     let facts = collected_facts(&tree, &[]);
-    let results = run_with_facts(&facts);
+    let results = super::run_with_facts(&facts);
     let summary = results
         .iter()
         .filter(|result| result.id == "RS-DEPS-11")
@@ -414,10 +393,7 @@ fn unreadable_member_manifest_surfaces_explicit_failure() {
         })
         .collect::<Vec<_>>();
 
-    assert_eq!(
-        summary,
-        vec![(Some("apps/api/Cargo.toml"), Severity::Error, true)]
-    );
+    assertions::assert_summary(summary, vec![(Some("apps/api/Cargo.toml"), Severity::Error, true)]);
 }
 
 #[test]
@@ -433,7 +409,7 @@ fn unreadable_workspace_manifest_surfaces_explicit_failure() {
         )],
     );
     let facts = collected_facts(&tree, &[]);
-    let results = run_with_facts(&facts);
+    let results = super::run_with_facts(&facts);
     let summary = results
         .iter()
         .filter(|result| result.id == "RS-DEPS-11")
@@ -448,7 +424,7 @@ fn unreadable_workspace_manifest_surfaces_explicit_failure() {
         })
         .collect::<Vec<_>>();
 
-    assert_eq!(summary, vec![(Some("Cargo.toml"), Severity::Error, true)]);
+    assertions::assert_summary(summary, vec![(Some("Cargo.toml"), Severity::Error, true)]);
 }
 
 #[test]
@@ -471,7 +447,7 @@ fn malformed_member_manifest_surfaces_explicit_failure() {
         ],
     );
     let facts = collected_facts(&tree, &[]);
-    let results = run_with_facts(&facts);
+    let results = super::run_with_facts(&facts);
     let summary = results
         .iter()
         .filter(|result| result.id == "RS-DEPS-11")
@@ -489,13 +465,10 @@ fn malformed_member_manifest_surfaces_explicit_failure() {
         })
         .collect::<Vec<_>>();
 
-    assert_eq!(
-        summary,
-        vec![
+    assertions::assert_summary(summary, vec![
             (Some("apps/api/Cargo.toml"), Severity::Error, true, false),
             (Some("apps/api/Cargo.toml"), Severity::Error, false, true),
-        ]
-    );
+        ]);
 }
 
 #[test]
@@ -529,7 +502,7 @@ fn malformed_workspace_manifest_does_not_fail_open_workspace_true_resolution() {
         ],
     );
     let facts = collected_facts(&tree, &[]);
-    let results = run_with_facts(&facts);
+    let results = super::run_with_facts(&facts);
     let summary = results
         .iter()
         .filter(|result| result.id == "RS-DEPS-11")
@@ -548,9 +521,7 @@ fn malformed_workspace_manifest_does_not_fail_open_workspace_true_resolution() {
         })
         .collect::<Vec<_>>();
 
-    assert_eq!(
-        summary,
-        vec![
+    assertions::assert_summary(summary, vec![
             (Some("Cargo.toml"), Severity::Error, true, false, false),
             (Some("Cargo.toml"), Severity::Error, false, true, false),
             (
@@ -560,8 +531,7 @@ fn malformed_workspace_manifest_does_not_fail_open_workspace_true_resolution() {
                 false,
                 true
             ),
-        ]
-    );
+        ]);
 }
 
 #[test]
@@ -589,7 +559,7 @@ fn unreadable_gitignore_surfaces_explicit_failure() {
         ],
     );
     let facts = collected_facts(&tree, &[]);
-    let results = run_with_facts(&facts);
+    let results = super::run_with_facts(&facts);
     let summary = results
         .iter()
         .filter(|result| result.id == "RS-DEPS-11")
@@ -604,5 +574,5 @@ fn unreadable_gitignore_surfaces_explicit_failure() {
         })
         .collect::<Vec<_>>();
 
-    assert_eq!(summary, vec![(Some(".gitignore"), Severity::Error, true)]);
+    assertions::assert_summary(summary, vec![(Some(".gitignore"), Severity::Error, true)]);
 }

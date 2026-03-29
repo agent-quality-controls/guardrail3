@@ -11,8 +11,6 @@ mod rs_deps_08_library_allowlist_present;
 mod rs_deps_09_cargo_lock_present;
 mod rs_deps_10_gitignore_not_ignoring_cargo_lock;
 mod rs_deps_11_input_failures;
-#[cfg(test)]
-mod test_harness;
 
 use guardrail3_app_rs_family_mapper::RsDepsRoute;
 use guardrail3_domain_project_tree::ProjectTree;
