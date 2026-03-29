@@ -1,11 +1,11 @@
-use crate::test_fixtures::canonical_clippy_toml;
+use guardrail3_app_rs_family_garde_assertions::rs_garde_08_enum_derive_validate as assertions;
 use guardrail3_domain_report::{CheckResult, Severity};
 use test_support::{dir_entry, project_tree, temp_root};
 
 fn run_enum_boundary(source: &str) -> Vec<CheckResult> {
     let root = temp_root("rs-garde-08-derive-variants");
     let source_abs = root.join("src/input.rs");
-    let clippy_toml = canonical_clippy_toml();
+    let clippy_toml = super::super::canonical_clippy_toml();
     std::fs::create_dir_all(source_abs.parent().expect("parent")).expect("mkdir");
     std::fs::write(&source_abs, source).expect("write");
 
@@ -32,10 +32,7 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results: Vec<_> = crate::test_fixtures::run_family(&tree)
-        .into_iter()
-        .filter(|result| result.id == "RS-GARDE-08")
-        .collect();
+    let results = super::super::run_family(&tree);
 
     std::fs::remove_dir_all(root).expect("cleanup");
     results
@@ -54,11 +51,17 @@ enum Input {
 "#,
     );
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].severity, Severity::Error);
-    assert_eq!(
-        results[0].message,
-        "Enum `Input` derives Parser and has non-primitive payload fields, but does not derive `Validate`."
+    let findings = assertions::findings(&results);
+    assert_eq!(findings.len(), 1);
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(Severity::Error),
+            message: Some(
+                "Enum `Input` derives Parser and has non-primitive payload fields, but does not derive `Validate`.",
+            ),
+            ..Default::default()
+        }],
     );
 }
 
@@ -75,11 +78,17 @@ enum Input {
 "#,
     );
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].severity, Severity::Error);
-    assert_eq!(
-        results[0].message,
-        "Enum `Input` derives Args and has non-primitive payload fields, but does not derive `Validate`."
+    let findings = assertions::findings(&results);
+    assert_eq!(findings.len(), 1);
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(Severity::Error),
+            message: Some(
+                "Enum `Input` derives Args and has non-primitive payload fields, but does not derive `Validate`.",
+            ),
+            ..Default::default()
+        }],
     );
 }
 
@@ -96,11 +105,17 @@ enum Input {
 "#,
     );
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].severity, Severity::Error);
-    assert_eq!(
-        results[0].message,
-        "Enum `Input` derives FromRow and has non-primitive payload fields, but does not derive `Validate`."
+    let findings = assertions::findings(&results);
+    assert_eq!(findings.len(), 1);
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(Severity::Error),
+            message: Some(
+                "Enum `Input` derives FromRow and has non-primitive payload fields, but does not derive `Validate`.",
+            ),
+            ..Default::default()
+        }],
     );
 }
 
@@ -117,10 +132,16 @@ enum Input {
 "#,
     );
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].severity, Severity::Error);
-    assert_eq!(
-        results[0].message,
-        "Enum `Input` derives De and has non-primitive payload fields, but does not derive `Validate`."
+    let findings = assertions::findings(&results);
+    assert_eq!(findings.len(), 1);
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(Severity::Error),
+            message: Some(
+                "Enum `Input` derives De and has non-primitive payload fields, but does not derive `Validate`.",
+            ),
+            ..Default::default()
+        }],
     );
 }

@@ -1,4 +1,4 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_garde_assertions::rs_garde_01_dependency_present as assertions;
 
 use test_support::{dir_entry, project_tree, temp_root};
 
@@ -73,32 +73,36 @@ serde = "1"
         root.clone(),
     );
 
-    let mut rs_garde_01_results: Vec<_> = crate::test_fixtures::run_family(&tree)
-        .into_iter()
-        .filter(|r| r.id == "RS-GARDE-01")
-        .collect();
-
-    rs_garde_01_results.sort_by_key(|r| r.file.clone());
-
-    assert_eq!(rs_garde_01_results.len(), 3);
-
-    assert_eq!(rs_garde_01_results[0].severity, Severity::Error);
-    assert_eq!(rs_garde_01_results[0].file.as_deref(), Some("Cargo.toml"));
-    assert!(!rs_garde_01_results[0].inventory);
-
-    assert_eq!(rs_garde_01_results[1].severity, Severity::Info);
-    assert_eq!(
-        rs_garde_01_results[1].file.as_deref(),
-        Some("vendor/lib/Cargo.toml")
+    let results = super::super::run_family(&tree);
+    let _ = assertions::findings(&results);
+    assertions::assert_rule_results(
+        &results,
+        &[
+            assertions::ExpectedRuleResult {
+                severity: Some(assertions::Severity::Error),
+                file: Some("Cargo.toml"),
+                inventory: Some(false),
+                title: Some("garde dependency missing"),
+                message_contains: Some("workspace root"),
+                ..Default::default()
+            },
+            assertions::ExpectedRuleResult {
+                severity: Some(assertions::Severity::Info),
+                file: Some("vendor/lib/Cargo.toml"),
+                inventory: Some(true),
+                title: Some("garde dependency found"),
+                ..Default::default()
+            },
+            assertions::ExpectedRuleResult {
+                severity: Some(assertions::Severity::Error),
+                file: Some("vendor/tool/Cargo.toml"),
+                inventory: Some(false),
+                title: Some("garde dependency missing"),
+                message_contains: Some("standalone package root"),
+                ..Default::default()
+            },
+        ],
     );
-    assert!(rs_garde_01_results[1].inventory);
-
-    assert_eq!(rs_garde_01_results[2].severity, Severity::Error);
-    assert_eq!(
-        rs_garde_01_results[2].file.as_deref(),
-        Some("vendor/tool/Cargo.toml")
-    );
-    assert!(!rs_garde_01_results[2].inventory);
 
     std::fs::remove_dir_all(root).expect("cleanup");
 }

@@ -1,4 +1,4 @@
-use crate::test_fixtures::canonical_clippy_toml;
+use guardrail3_app_rs_family_garde_assertions::rs_garde_13_context_validation_surface as assertions;
 use guardrail3_domain_report::Severity;
 use test_support::{dir_entry, project_tree, temp_root};
 
@@ -7,7 +7,7 @@ fn errors_when_ctx_usage_has_no_type_level_context() {
     let root = temp_root("rs-garde-13-missing");
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
-    let clippy_toml = canonical_clippy_toml();
+    let clippy_toml = super::super::canonical_clippy_toml();
     std::fs::create_dir_all(source_abs.parent().expect("parent")).expect("mkdir");
     std::fs::write(
         &source_abs,
@@ -52,20 +52,20 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results: Vec<_> = crate::test_fixtures::run_family(&tree)
-        .into_iter()
-        .filter(|result| result.id == "RS-GARDE-13")
-        .collect();
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].severity, Severity::Error);
-    assert_eq!(results[0].file.as_deref(), Some(source_rel));
-    assert_eq!(
-        results[0].title,
-        "boundary `Input` uses ctx without garde(context)"
-    );
-    assert_eq!(
-        results[0].message,
-        "Field `title` in validated boundary `Input` references `ctx` in a garde validator, but the boundary type is missing `#[garde(context(...))]`."
+    let results = super::super::run_family(&tree);
+    let findings = assertions::findings(&results);
+    assert_eq!(findings.len(), 1);
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(Severity::Error),
+            file: Some(source_rel),
+            title: Some("boundary `Input` uses ctx without garde(context)"),
+            message: Some(
+                "Field `title` in validated boundary `Input` references `ctx` in a garde validator, but the boundary type is missing `#[garde(context(...))]`.",
+            ),
+            ..Default::default()
+        }],
     );
 
     std::fs::remove_dir_all(root).expect("cleanup");

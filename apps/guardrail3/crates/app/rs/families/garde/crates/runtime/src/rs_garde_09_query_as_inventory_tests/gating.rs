@@ -1,3 +1,4 @@
+use guardrail3_app_rs_family_garde_assertions::rs_garde_09_query_as_inventory as assertions;
 use guardrail3_domain_modules::clippy::build_clippy_toml;
 
 use test_support::{dir_entry, project_tree, temp_root};
@@ -31,11 +32,10 @@ fn load() {
         root.clone(),
     );
 
-    let results: Vec<_> = crate::test_fixtures::run_family(&tree)
-        .into_iter()
-        .filter(|result| result.id == "RS-GARDE-09")
-        .collect();
-    assert!(results.is_empty());
+    let results = super::super::run_family(&tree);
+    let findings = assertions::findings(&results);
+    assert!(findings.is_empty());
+    assertions::assert_rule_quiet(&results);
 
     std::fs::remove_dir_all(root).expect("cleanup");
 }

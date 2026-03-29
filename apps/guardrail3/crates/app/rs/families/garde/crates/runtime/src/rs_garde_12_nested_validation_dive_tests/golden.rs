@@ -1,4 +1,4 @@
-use crate::test_fixtures::canonical_clippy_toml;
+use guardrail3_app_rs_family_garde_assertions::rs_garde_12_nested_validation_dive as assertions;
 use test_support::{dir_entry, project_tree, temp_root};
 
 #[test]
@@ -6,7 +6,7 @@ fn stays_quiet_when_nested_validated_fields_use_dive() {
     let root = temp_root("rs-garde-12-golden");
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
-    let clippy_toml = canonical_clippy_toml();
+    let clippy_toml = super::super::canonical_clippy_toml();
     std::fs::create_dir_all(source_abs.parent().expect("parent")).expect("mkdir");
     std::fs::write(
         &source_abs,
@@ -52,11 +52,10 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results: Vec<_> = crate::test_fixtures::run_family(&tree)
-        .into_iter()
-        .filter(|result| result.id == "RS-GARDE-12")
-        .collect();
-    assert!(results.is_empty());
+    let results = super::super::run_family(&tree);
+    let findings = assertions::findings(&results);
+    assert!(findings.is_empty());
+    assertions::assert_rule_quiet(&results);
 
     std::fs::remove_dir_all(root).expect("cleanup");
 }
@@ -66,7 +65,7 @@ fn stays_quiet_when_array_of_nested_validated_fields_use_dive() {
     let root = temp_root("rs-garde-12-array-golden");
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
-    let clippy_toml = canonical_clippy_toml();
+    let clippy_toml = super::super::canonical_clippy_toml();
     std::fs::create_dir_all(source_abs.parent().expect("parent")).expect("mkdir");
     std::fs::write(
         &source_abs,
@@ -112,16 +111,11 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results = crate::test_fixtures::run_family(&tree);
-    let rs_garde_12_results: Vec<_> = results
-        .iter()
-        .filter(|result| result.id == "RS-GARDE-12")
-        .collect();
-    assert!(rs_garde_12_results.is_empty());
-    assert!(
-        results.iter().all(|result| result.id != "RS-GARDE-11"),
-        "array dive should not fall back to RS-GARDE-11: {results:#?}"
-    );
+    let results = super::super::run_family(&tree);
+    let findings = assertions::findings(&results);
+    assert!(findings.is_empty(), "expected no RS-GARDE-12 findings: {findings:#?}");
+    assertions::assert_rule_quiet(&results);
+    assertions::assert_field_level_constraints_quiet(&results);
 
     std::fs::remove_dir_all(root).expect("cleanup");
 }

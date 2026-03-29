@@ -1,5 +1,5 @@
+use guardrail3_app_rs_family_garde_assertions::rs_garde_03_extractor_type_bans as assertions;
 use guardrail3_domain_modules::clippy::build_clippy_toml;
-use guardrail3_domain_report::Severity;
 use test_support::{dir_entry, project_tree, temp_root};
 
 #[test]
@@ -17,19 +17,14 @@ fn inventories_when_all_bans_present() {
         ],
         root.clone(),
     );
-    let results = crate::test_fixtures::run_family(&tree);
-    let filtered: Vec<_> = results
-        .into_iter()
-        .filter(|r| r.id == "RS-GARDE-03")
-        .collect();
-    assert_eq!(filtered.len(), 1);
-    assert_eq!(filtered[0].severity, Severity::Info);
-    assert!(filtered[0].inventory);
-    assert_eq!(
-        filtered[0].message,
-        "All required Axum extractor bans are present in the covering clippy configuration."
+    let results = super::super::run_family(&tree);
+    let findings = assertions::findings(&results);
+    assert_eq!(findings.len(), 1, "unexpected RS-GARDE-03 findings: {findings:#?}");
+    assertions::assert_inventory(
+        &results,
+        "clippy.toml",
+        "All required Axum extractor bans are present in the covering clippy configuration.",
     );
-    assert_eq!(filtered[0].file.as_deref(), Some("clippy.toml"));
 
     std::fs::remove_dir_all(&root).expect("remove temp root");
 }

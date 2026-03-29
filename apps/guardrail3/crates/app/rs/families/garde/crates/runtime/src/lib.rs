@@ -16,8 +16,6 @@ mod rs_garde_10_input_failures;
 mod rs_garde_11_field_level_constraints;
 mod rs_garde_12_nested_validation_dive;
 mod rs_garde_13_context_validation_surface;
-#[cfg(test)]
-mod test_fixtures;
 
 use glob as _;
 use guardrail3_app_core as _;
@@ -29,9 +27,6 @@ use guardrail3_domain_report::CheckResult;
 use guardrail3_outbound_traits as _;
 use semver as _;
 use serde_yaml as _;
-
-#[cfg(test)]
-use guardrail3_app_rs_family_garde_assertions as _;
 
 use self::facts::collect;
 use self::inputs::{

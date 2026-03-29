@@ -1,4 +1,4 @@
-use crate::test_fixtures::canonical_clippy_toml;
+use guardrail3_app_rs_family_garde_assertions::rs_garde_10_input_failures as assertions;
 use guardrail3_domain_report::Severity;
 use test_support::{dir_entry, project_tree, temp_root};
 
@@ -7,7 +7,7 @@ fn errors_on_source_parse_failure() {
     let root = temp_root("rs-garde-10-parse-failure");
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
-    let clippy_toml = canonical_clippy_toml();
+    let clippy_toml = super::super::canonical_clippy_toml();
     std::fs::create_dir_all(source_abs.parent().expect("parent")).expect("mkdir");
     std::fs::write(&source_abs, "fn broken( {").expect("write");
 
@@ -34,17 +34,17 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results: Vec<_> = crate::test_fixtures::run_family(&tree)
-        .into_iter()
-        .filter(|result| result.id == "RS-GARDE-10")
-        .collect();
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].severity, Severity::Error);
-    assert_eq!(results[0].file.as_deref(), Some(source_rel));
-    assert!(
-        results[0]
-            .message
-            .contains("Failed to parse Rust source file for garde checks")
+    let results = super::super::run_family(&tree);
+    let findings = assertions::findings(&results);
+    assert_eq!(findings.len(), 1);
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(Severity::Error),
+            file: Some(source_rel),
+            message_contains: Some("Failed to parse Rust source file for garde checks"),
+            ..Default::default()
+        }],
     );
 
     std::fs::remove_dir_all(root).expect("cleanup");
@@ -55,7 +55,7 @@ fn errors_on_cargo_toml_parse_failure() {
     let root = temp_root("rs-garde-10-cargo-failure");
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
-    let clippy_toml = canonical_clippy_toml();
+    let clippy_toml = super::super::canonical_clippy_toml();
     std::fs::create_dir_all(source_abs.parent().expect("parent")).expect("mkdir");
     std::fs::write(&source_abs, "fn valid() {}").expect("write");
 
@@ -75,13 +75,17 @@ fn errors_on_cargo_toml_parse_failure() {
         root.clone(),
     );
 
-    let results: Vec<_> = crate::test_fixtures::run_family(&tree)
-        .into_iter()
-        .filter(|result| result.id == "RS-GARDE-10")
-        .collect();
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].severity, Severity::Error);
-    assert_eq!(results[0].file.as_deref(), Some("Cargo.toml"));
+    let results = super::super::run_family(&tree);
+    let findings = assertions::findings(&results);
+    assert_eq!(findings.len(), 1);
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(Severity::Error),
+            file: Some("Cargo.toml"),
+            ..Default::default()
+        }],
+    );
 
     std::fs::remove_dir_all(root).expect("cleanup");
 }
@@ -117,17 +121,17 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results: Vec<_> = crate::test_fixtures::run_family(&tree)
-        .into_iter()
-        .filter(|result| result.id == "RS-GARDE-10")
-        .collect();
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].severity, Severity::Error);
-    assert_eq!(results[0].file.as_deref(), Some("clippy.toml"));
-    assert!(
-        results[0]
-            .message
-            .contains("Failed to parse `clippy.toml` for garde clippy-ban validation")
+    let results = super::super::run_family(&tree);
+    let findings = assertions::findings(&results);
+    assert_eq!(findings.len(), 1);
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(Severity::Error),
+            file: Some("clippy.toml"),
+            message_contains: Some("Failed to parse `clippy.toml` for garde clippy-ban validation"),
+            ..Default::default()
+        }],
     );
 
     std::fs::remove_dir_all(root).expect("cleanup");

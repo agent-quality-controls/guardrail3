@@ -1,4 +1,4 @@
-use crate::test_fixtures::canonical_clippy_toml;
+use guardrail3_app_rs_family_garde_assertions::rs_garde_12_nested_validation_dive as assertions;
 use test_support::{dir_entry, project_tree, temp_root};
 
 #[test]
@@ -6,7 +6,7 @@ fn ignores_non_nested_fields_and_non_validated_custom_types() {
     let root = temp_root("rs-garde-12-false-positives");
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
-    let clippy_toml = canonical_clippy_toml();
+    let clippy_toml = super::super::canonical_clippy_toml();
     std::fs::create_dir_all(source_abs.parent().expect("parent")).expect("mkdir");
     std::fs::write(
         &source_abs,
@@ -51,11 +51,10 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results: Vec<_> = crate::test_fixtures::run_family(&tree)
-        .into_iter()
-        .filter(|result| result.id == "RS-GARDE-12")
-        .collect();
-    assert!(results.is_empty());
+    let results = super::super::run_family(&tree);
+    let findings = assertions::findings(&results);
+    assert!(findings.is_empty());
+    assertions::assert_rule_quiet(&results);
 
     std::fs::remove_dir_all(root).expect("cleanup");
 }
@@ -65,7 +64,7 @@ fn ignores_foreign_qualified_type_even_when_other_root_defines_matching_name() {
     let root = temp_root("rs-garde-12-foreign-qualified");
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
-    let clippy_toml = canonical_clippy_toml();
+    let clippy_toml = super::super::canonical_clippy_toml();
     std::fs::create_dir_all(source_abs.parent().expect("parent")).expect("mkdir");
     std::fs::write(
         &source_abs,
@@ -135,12 +134,10 @@ pub struct Profile {
         root.clone(),
     );
 
-    let results = crate::test_fixtures::run_family(&tree);
-    let rs_garde_12_results: Vec<_> = results
-        .into_iter()
-        .filter(|result| result.id == "RS-GARDE-12")
-        .collect();
-    assert!(rs_garde_12_results.is_empty());
+    let results = super::super::run_family(&tree);
+    let findings = assertions::findings(&results);
+    assert!(findings.is_empty(), "expected no RS-GARDE-12 findings: {findings:#?}");
+    assertions::assert_rule_quiet(&results);
 
     std::fs::remove_dir_all(root).expect("cleanup");
 }
@@ -150,7 +147,7 @@ fn ignores_skipped_nested_validated_fields() {
     let root = temp_root("rs-garde-12-skip-nested");
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
-    let clippy_toml = canonical_clippy_toml();
+    let clippy_toml = super::super::canonical_clippy_toml();
     std::fs::create_dir_all(source_abs.parent().expect("parent")).expect("mkdir");
     std::fs::write(
         &source_abs,
@@ -196,14 +193,10 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results: Vec<_> = crate::test_fixtures::run_family(&tree)
-        .into_iter()
-        .filter(|result| result.id == "RS-GARDE-12")
-        .collect();
-    assert!(
-        results.is_empty(),
-        "explicitly skipped nested fields should not require garde(dive)"
-    );
+    let results = super::super::run_family(&tree);
+    let findings = assertions::findings(&results);
+    assert!(findings.is_empty());
+    assertions::assert_rule_quiet(&results);
 
     std::fs::remove_dir_all(root).expect("cleanup");
 }

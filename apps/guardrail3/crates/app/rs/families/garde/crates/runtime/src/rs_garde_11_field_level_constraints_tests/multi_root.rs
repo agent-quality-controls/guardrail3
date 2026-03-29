@@ -1,4 +1,4 @@
-use crate::test_fixtures::canonical_clippy_toml;
+use guardrail3_app_rs_family_garde_assertions::rs_garde_11_field_level_constraints as assertions;
 use guardrail3_domain_report::Severity;
 use test_support::{dir_entry, project_tree, temp_root};
 
@@ -7,7 +7,7 @@ fn local_boundary_gap_only_errors_for_owned_root() {
     let root = temp_root("rs-garde-11-multi-root");
     let local_rel = "vendor/lib/src/input.rs";
     let shared_rel = "src/input.rs";
-    let clippy_toml = canonical_clippy_toml();
+    let clippy_toml = super::super::canonical_clippy_toml();
     let local_abs = root.join(local_rel);
     let shared_abs = root.join(shared_rel);
     std::fs::create_dir_all(local_abs.parent().expect("parent")).expect("mkdir local");
@@ -81,13 +81,17 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results: Vec<_> = crate::test_fixtures::run_family(&tree)
-        .into_iter()
-        .filter(|result| result.id == "RS-GARDE-11")
-        .collect();
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].severity, Severity::Error);
-    assert_eq!(results[0].file.as_deref(), Some(local_rel));
+    let results = super::super::run_family(&tree);
+    let findings = assertions::findings(&results);
+    assert_eq!(findings.len(), 1);
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(Severity::Error),
+            file: Some(local_rel),
+            ..Default::default()
+        }],
+    );
 
     std::fs::remove_dir_all(root).expect("cleanup");
 }

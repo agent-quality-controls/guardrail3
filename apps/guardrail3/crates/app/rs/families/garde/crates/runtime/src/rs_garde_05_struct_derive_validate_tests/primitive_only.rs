@@ -1,11 +1,11 @@
-use crate::test_fixtures::canonical_clippy_toml;
+use guardrail3_app_rs_family_garde_assertions::rs_garde_05_struct_derive_validate as assertions;
 use test_support::{dir_entry, project_tree, temp_root};
 
 #[test]
 fn skips_primitive_only_struct_boundary_without_validate() {
     let root = temp_root("rs-garde-05-primitive-only");
     let source_abs = root.join("src/input.rs");
-    let clippy_toml = canonical_clippy_toml();
+    let clippy_toml = super::super::canonical_clippy_toml();
     std::fs::create_dir_all(source_abs.parent().expect("parent")).expect("mkdir");
     std::fs::write(
         &source_abs,
@@ -45,11 +45,9 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results: Vec<_> = crate::test_fixtures::run_family(&tree)
-        .into_iter()
-        .filter(|result| result.id == "RS-GARDE-05")
-        .collect();
-    assert!(results.is_empty());
+    let results = super::super::run_family(&tree);
+    let _ = assertions::findings(&results);
+    assertions::assert_rule_quiet(&results);
 
     std::fs::remove_dir_all(root).expect("cleanup");
 }
@@ -58,7 +56,7 @@ garde = { version = "0.22", features = ["derive"] }
 fn skips_primitive_array_struct_boundary_without_validate() {
     let root = temp_root("rs-garde-05-primitive-array");
     let source_abs = root.join("src/input.rs");
-    let clippy_toml = canonical_clippy_toml();
+    let clippy_toml = super::super::canonical_clippy_toml();
     std::fs::create_dir_all(source_abs.parent().expect("parent")).expect("mkdir");
     std::fs::write(
         &source_abs,
@@ -97,14 +95,9 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results: Vec<_> = crate::test_fixtures::run_family(&tree)
-        .into_iter()
-        .filter(|result| result.id == "RS-GARDE-05")
-        .collect();
-    assert!(
-        results.is_empty(),
-        "primitive-only arrays should stay exempt"
-    );
+    let results = super::super::run_family(&tree);
+    let _ = assertions::findings(&results);
+    assertions::assert_rule_quiet(&results);
 
     std::fs::remove_dir_all(root).expect("cleanup");
 }

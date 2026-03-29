@@ -1,12 +1,12 @@
 use guardrail3_domain_report::Severity;
 
-use crate::test_fixtures::canonical_clippy_toml;
+use guardrail3_app_rs_family_garde_assertions::rs_garde_09_query_as_inventory as assertions;
 use test_support::{dir_entry, project_tree, temp_root};
 
 #[test]
 fn inventories_query_as_only_for_the_owned_root() {
     let root = temp_root("rs-garde-09-multi-root");
-    let clippy_toml = canonical_clippy_toml();
+    let clippy_toml = super::super::canonical_clippy_toml();
 
     for (rel, source) in [
         (
@@ -71,15 +71,19 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results: Vec<_> = crate::test_fixtures::run_family(&tree)
-        .into_iter()
-        .filter(|result| result.id == "RS-GARDE-09")
-        .collect();
+    let results = super::super::run_family(&tree);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].severity, Severity::Info);
-    assert!(results[0].inventory);
-    assert_eq!(results[0].file.as_deref(), Some("vendor/lib/src/db.rs"));
+    let findings = assertions::findings(&results);
+    assert_eq!(findings.len(), 1);
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(Severity::Info),
+            file: Some("vendor/lib/src/db.rs"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
 
     std::fs::remove_dir_all(root).expect("cleanup");
 }

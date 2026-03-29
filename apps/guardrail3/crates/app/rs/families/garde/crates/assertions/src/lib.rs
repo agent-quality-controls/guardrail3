@@ -1,5 +1,8 @@
 use guardrail3_app_rs_family_garde as _;
 
+mod common;
+pub mod facts;
+
 pub mod rs_garde_01_dependency_present;
 pub mod rs_garde_02_core_method_bans;
 pub mod rs_garde_03_extractor_type_bans;

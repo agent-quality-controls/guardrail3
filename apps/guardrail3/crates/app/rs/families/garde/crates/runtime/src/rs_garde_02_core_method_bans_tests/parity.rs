@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use super::super::super::garde_support::CORE_METHOD_BANS;
+use guardrail3_app_rs_family_garde_assertions::rs_garde_02_core_method_bans::CORE_METHOD_BANS;
 use guardrail3_domain_modules::clippy::build_clippy_toml;
 
 fn disallowed_method_paths(parsed: &toml::Value) -> BTreeSet<String> {

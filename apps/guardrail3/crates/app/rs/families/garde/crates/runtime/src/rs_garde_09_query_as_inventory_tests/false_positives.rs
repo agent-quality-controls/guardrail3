@@ -1,10 +1,10 @@
-use crate::test_fixtures::canonical_clippy_toml;
+use guardrail3_app_rs_family_garde_assertions::rs_garde_09_query_as_inventory as assertions;
 use test_support::{dir_entry, project_tree, temp_root};
 
 #[test]
 fn does_not_flag_query_scalar() {
     let root = temp_root("rs-garde-09-query-scalar");
-    let clippy_toml = canonical_clippy_toml();
+    let clippy_toml = super::super::canonical_clippy_toml();
 
     let tree = project_tree(
         vec![
@@ -37,11 +37,10 @@ fn load() {
         root.clone(),
     );
 
-    let results: Vec<_> = crate::test_fixtures::run_family(&tree)
-        .into_iter()
-        .filter(|result| result.id == "RS-GARDE-09")
-        .collect();
-    assert!(results.is_empty());
+    let results = super::super::run_family(&tree);
+    let findings = assertions::findings(&results);
+    assert!(findings.is_empty());
+    assertions::assert_rule_quiet(&results);
 
     std::fs::remove_dir_all(root).expect("cleanup");
 }
@@ -49,7 +48,7 @@ fn load() {
 #[test]
 fn ignores_non_sqlx_query_as_macro_with_same_name() {
     let root = temp_root("rs-garde-09-non-sqlx-query-as");
-    let clippy_toml = canonical_clippy_toml();
+    let clippy_toml = super::super::canonical_clippy_toml();
 
     let tree = project_tree(
         vec![
@@ -88,14 +87,10 @@ fn load() {
         root.clone(),
     );
 
-    let results: Vec<_> = crate::test_fixtures::run_family(&tree)
-        .into_iter()
-        .filter(|result| result.id == "RS-GARDE-09")
-        .collect();
-    assert!(
-        results.is_empty(),
-        "non-sqlx query_as macros should not be inventoried"
-    );
+    let results = super::super::run_family(&tree);
+    let findings = assertions::findings(&results);
+    assert!(findings.is_empty());
+    assertions::assert_rule_quiet(&results);
 
     std::fs::remove_dir_all(root).expect("cleanup");
 }
