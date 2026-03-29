@@ -306,7 +306,11 @@ fn arch_runtime_reports_fail_closed_results_for_malformed_governed_manifest() {
         "guardrail3.toml",
         "[rust.checks]\narch = true\nhexarch = true\nlibarch = true\n",
     );
-    write_file(&root, "apps/backend/Cargo.toml", "[workspace\nmembers = []\n");
+    write_file(
+        &root,
+        "apps/backend/Cargo.toml",
+        "[workspace\nmembers = []\n",
+    );
 
     let report = run(
         &LocalFs,
@@ -331,8 +335,7 @@ fn arch_runtime_reports_fail_closed_results_for_malformed_governed_manifest() {
     );
     assert!(
         report.sections[0].results.iter().any(|result| {
-            result.id == "RS-ARCH-07"
-                && result.file.as_deref() == Some("apps/backend/Cargo.toml")
+            result.id == "RS-ARCH-07" && result.file.as_deref() == Some("apps/backend/Cargo.toml")
         }),
         "expected malformed governed manifest to be attributed to apps/backend/Cargo.toml: {report:#?}"
     );
@@ -384,6 +387,42 @@ fn arch_runtime_honors_app_scoped_hexarch_override() {
             "apps/backend/crates/worker/Cargo.toml",
         ],
         "{report:#?}"
+    );
+
+    fs::remove_dir_all(&root).expect("cleanup temp root");
+}
+
+#[test]
+fn arch_runtime_reports_governed_auxiliary_metadata_as_fail_closed() {
+    let root = temp_root("arch-runtime-governed-auxiliary-metadata");
+    write_file(
+        &root,
+        "guardrail3.toml",
+        "[rust.checks]\narch = true\nhexarch = true\nlibarch = true\n",
+    );
+    write_file(
+        &root,
+        "apps/backend/Cargo.toml",
+        "[workspace]\nmembers = []\nresolver = \"2\"\n\n[workspace.metadata.guardrail3]\narch_role = \"auxiliary\"\n",
+    );
+
+    let report = run(
+        &LocalFs,
+        &root,
+        None,
+        &[RustValidateFamily::Arch],
+        false,
+        &StubToolChecker,
+    )
+    .expect("arch runtime report");
+
+    assert_eq!(report.sections.len(), 1, "unexpected sections: {report:#?}");
+    assert_eq!(report.sections[0].name, "arch");
+    assert!(
+        report.sections[0].results.iter().any(|result| {
+            result.id == "RS-ARCH-07" && result.file.as_deref() == Some("apps/backend/Cargo.toml")
+        }),
+        "expected governed auxiliary metadata to fail closed: {report:#?}"
     );
 
     fs::remove_dir_all(&root).expect("cleanup temp root");
