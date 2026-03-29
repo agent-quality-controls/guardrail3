@@ -53,19 +53,9 @@ pub fn check(input: &WorkspaceCoverageHexarchInput<'_>, results: &mut Vec<CheckR
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_tree(&test_support::walk(root))
 }
-
-#[cfg(test)]
-#[allow(dead_code)]
-pub(super) fn results_for_test_tree(
-    tree: &guardrail3_domain_project_tree::ProjectTree,
-) -> Vec<CheckResult> {
-    crate::check_test_tree(tree)
-}
-
 #[cfg(test)]
 #[path = "rs_hexarch_27_nested_workspace_forbidden_tests/mod.rs"]
 mod rs_hexarch_27_nested_workspace_forbidden_tests;

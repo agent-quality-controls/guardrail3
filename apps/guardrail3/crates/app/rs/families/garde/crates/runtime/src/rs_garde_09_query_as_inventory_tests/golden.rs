@@ -43,7 +43,11 @@ fn load() {
 
     let results = super::super::run_family(&tree);
     let findings = assertions::findings(&results);
-    assert_eq!(findings.len(), 2, "unexpected RS-GARDE-09 findings: {findings:#?}");
+    assert_eq!(
+        findings.len(),
+        2,
+        "unexpected RS-GARDE-09 findings: {findings:#?}"
+    );
     assertions::assert_inventory_hit(
         &results,
         "src/db.rs",
@@ -102,7 +106,11 @@ fn load() {
 
     let results = super::super::run_family(&tree);
     let findings = assertions::findings(&results);
-    assert_eq!(findings.len(), 2, "unexpected RS-GARDE-09 findings: {findings:#?}");
+    assert_eq!(
+        findings.len(),
+        2,
+        "unexpected RS-GARDE-09 findings: {findings:#?}"
+    );
     assertions::assert_inventory_hit(
         &results,
         "src/db.rs",

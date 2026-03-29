@@ -11,7 +11,6 @@ mod valid_variants;
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_06_leaf_valid::CheckResult;
 use std::path::{Path, PathBuf};
 
-#[allow(unused_imports)]
 pub(super) use test_support::{
     create_dir, dir_entry, empty_dir, project_tree, remove_dir, walk, write_file,
 };

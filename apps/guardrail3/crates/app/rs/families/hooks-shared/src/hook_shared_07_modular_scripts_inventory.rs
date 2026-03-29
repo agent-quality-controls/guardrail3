@@ -41,7 +41,6 @@ pub fn check(scripts: &[HookScriptFacts], results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(crate) fn run_case(script_names: &[&str]) -> Vec<CheckResult> {
     let scripts = script_names
         .iter()

@@ -36,10 +36,9 @@ pub fn check(tree: &ProjectTree, route: &RsArchRoute) -> Vec<CheckResult> {
     }
     rs_arch_02_no_misplaced_roots::check_success(
         facts.misplaced_root_reporting_enabled,
-        facts
-            .roots
-            .iter()
-            .any(|root| root.classification == guardrail3_app_rs_placement::RustRootClassification::Other),
+        facts.roots.iter().any(|root| {
+            root.classification == guardrail3_app_rs_placement::RustRootClassification::Other
+        }),
         &mut results,
     );
 
@@ -67,8 +66,10 @@ pub fn check(tree: &ProjectTree, route: &RsArchRoute) -> Vec<CheckResult> {
             )
         }),
         facts.input_failures.iter().any(|failure| {
-            matches!(failure.kind, self::facts::ArchInputFailureKind::RequiredInput)
-                && failure.rel_path == "guardrail3.toml"
+            matches!(
+                failure.kind,
+                self::facts::ArchInputFailureKind::RequiredInput
+            ) && failure.rel_path == "guardrail3.toml"
         }),
         &mut results,
     );

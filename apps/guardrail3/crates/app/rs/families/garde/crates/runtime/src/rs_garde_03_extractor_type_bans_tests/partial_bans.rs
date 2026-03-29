@@ -21,7 +21,11 @@ fn warns_when_bans_missing() {
     );
     let results = super::super::run_family(&tree);
     let findings = assertions::findings(&results);
-    assert_eq!(findings.len(), 1, "unexpected RS-GARDE-03 findings: {findings:#?}");
+    assert_eq!(
+        findings.len(),
+        1,
+        "unexpected RS-GARDE-03 findings: {findings:#?}"
+    );
     assertions::assert_missing(
         &results,
         "clippy.toml",

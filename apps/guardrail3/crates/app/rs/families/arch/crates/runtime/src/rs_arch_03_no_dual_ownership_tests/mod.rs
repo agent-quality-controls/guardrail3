@@ -14,7 +14,7 @@ pub(super) fn cargo_fixture(kind: CargoFixture) -> &'static str {
     }
 }
 
-pub(crate) use test_support::{entry, tree, tree_at};
+pub(crate) use test_support::{entry, tree};
 
 mod dual_ownership;
 mod false_positives;

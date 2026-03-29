@@ -11,7 +11,10 @@ pub fn check(input: &PatchHexarchInput<'_>, results: &mut Vec<CheckResult>) {
         push_success(
             results,
             ID,
-            format!("patch/replace entry `{}` stays outside the layered tree", patch.key),
+            format!(
+                "patch/replace entry `{}` stays outside the layered tree",
+                patch.key
+            ),
             format!(
                 "`{}` resolves to `{}` outside the owned layered Rust tree, so it does not bypass hexarch layer enforcement.",
                 patch.key, patch.resolved_rel_dir
@@ -36,19 +39,9 @@ pub fn check(input: &PatchHexarchInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_tree(&test_support::walk(root))
 }
-
-#[cfg(test)]
-#[allow(dead_code)]
-pub(super) fn results_for_test_tree(
-    tree: &guardrail3_domain_project_tree::ProjectTree,
-) -> Vec<CheckResult> {
-    crate::check_test_tree(tree)
-}
-
 #[cfg(test)]
 #[path = "rs_hexarch_16_patch_replace_bypass_tests/mod.rs"]
 mod rs_hexarch_16_patch_replace_bypass_tests;

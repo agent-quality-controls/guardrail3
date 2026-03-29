@@ -25,6 +25,10 @@ pub fn assert_single_error(
     title: Option<&str>,
 ) {
     let findings = findings(results);
-    assert_eq!(findings.len(), 1, "unexpected RS-GARDE-07 findings: {findings:#?}");
+    assert_eq!(
+        findings.len(),
+        1,
+        "unexpected RS-GARDE-07 findings: {findings:#?}"
+    );
     assert_error(results, file, line, title);
 }

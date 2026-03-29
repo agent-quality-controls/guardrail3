@@ -47,7 +47,6 @@ fn has_merge_conflict_check(executable_lines: &[crate::hook_shell::ExecutableLin
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(crate) fn run_case(content: &str) -> Vec<CheckResult> {
     let parsed = crate::hook_shell::parse_script(content);
     let input = ExecutableCommandContextInput {

@@ -75,22 +75,15 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(crate) fn run_check(deny_toml: &str) -> Vec<CheckResult> {
     crate::run_config_rule_for_test(deny_toml, None, check)
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(crate) fn run_check_with_profile(deny_toml: &str, profile_name: &str) -> Vec<CheckResult> {
     crate::run_config_rule_for_test(deny_toml, Some(profile_name), check)
 }
 
-#[cfg(test)]
-#[allow(dead_code)]
-pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
-    crate::check_test_root(root)
-}
 
 #[cfg(test)]
 pub(crate) use crate::config_facts_with_profile;
@@ -102,16 +95,6 @@ pub(crate) fn expected_ban_names_for_test(
 ) -> std::collections::BTreeSet<String> {
     super::deny_support::expected_bans(profile_name)
         .into_keys()
-        .collect()
-}
-#[cfg(test)]
-#[allow(dead_code)]
-pub(crate) fn expected_ban_wrappers_for_test(
-    profile_name: Option<&str>,
-) -> std::collections::BTreeMap<String, std::collections::BTreeSet<String>> {
-    super::deny_support::expected_bans(profile_name)
-        .into_iter()
-        .map(|(name, expectation)| (name, expectation.wrappers))
         .collect()
 }
 #[cfg(test)]

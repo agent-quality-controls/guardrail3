@@ -18,7 +18,11 @@ fn inventories_when_all_bans_present() {
     );
     let results = super::super::run_family(&tree);
     let findings = assertions::findings(&results);
-    assert_eq!(findings.len(), 1, "unexpected RS-GARDE-03 findings: {findings:#?}");
+    assert_eq!(
+        findings.len(),
+        1,
+        "unexpected RS-GARDE-03 findings: {findings:#?}"
+    );
     assertions::assert_inventory(
         &results,
         "clippy.toml",

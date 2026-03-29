@@ -28,7 +28,11 @@ pub fn assert_inventory(
         .into_iter()
         .filter(|result| result.file.as_deref() == Some(file))
         .collect::<Vec<_>>();
-    assert_eq!(matching.len(), 1, "unexpected RS-GARDE-03 findings for {file}: {matching:#?}");
+    assert_eq!(
+        matching.len(),
+        1,
+        "unexpected RS-GARDE-03 findings for {file}: {matching:#?}"
+    );
     assert_rule_results(
         &[matching[0].clone()],
         &[ExpectedRuleResult {
@@ -51,7 +55,11 @@ pub fn assert_missing(
         .into_iter()
         .filter(|result| result.file.as_deref() == Some(file))
         .collect::<Vec<_>>();
-    assert_eq!(matching.len(), 1, "unexpected RS-GARDE-03 findings for {file}: {matching:#?}");
+    assert_eq!(
+        matching.len(),
+        1,
+        "unexpected RS-GARDE-03 findings for {file}: {matching:#?}"
+    );
     assert_rule_results(
         &[matching[0].clone()],
         &[ExpectedRuleResult {

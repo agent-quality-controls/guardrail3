@@ -32,7 +32,6 @@ pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
     }
 }
 #[cfg(test)]
-#[allow(dead_code)]
 pub(crate) fn run_family_with_tool(
     root: &std::path::Path,
     cargo_mutants_installed: bool,

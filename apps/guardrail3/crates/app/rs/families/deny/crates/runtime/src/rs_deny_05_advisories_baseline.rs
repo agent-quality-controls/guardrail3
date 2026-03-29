@@ -72,19 +72,12 @@ fn check_value(
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(crate) fn run_check(deny_toml: &str) -> Vec<CheckResult> {
     crate::run_config_rule_for_test(deny_toml, None, check)
 }
 
-#[cfg(test)]
-#[allow(dead_code)]
-pub(crate) fn run_check_with_profile(deny_toml: &str, profile_name: &str) -> Vec<CheckResult> {
-    crate::run_config_rule_for_test(deny_toml, Some(profile_name), check)
-}
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_root(root)
 }

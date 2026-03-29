@@ -17,7 +17,10 @@ fn ignores_workspace_when_garde_missing() {
     );
     let results = super::super::run_family(&tree);
     let findings = assertions::findings(&results);
-    assert!(findings.is_empty(), "expected no RS-GARDE-06 findings: {findings:#?}");
+    assert!(
+        findings.is_empty(),
+        "expected no RS-GARDE-06 findings: {findings:#?}"
+    );
     assertions::assert_rule_quiet(&results);
 
     std::fs::remove_dir_all(&root).expect("remove temp root");

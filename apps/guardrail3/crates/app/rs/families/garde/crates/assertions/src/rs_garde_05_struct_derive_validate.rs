@@ -8,7 +8,11 @@ pub fn assert_single_error(
     message: Option<&str>,
 ) {
     let findings = findings(results);
-    assert_eq!(findings.len(), 1, "unexpected RS-GARDE-05 findings: {findings:#?}");
+    assert_eq!(
+        findings.len(),
+        1,
+        "unexpected RS-GARDE-05 findings: {findings:#?}"
+    );
     assert_rule_results(
         results,
         &[ExpectedRuleResult {

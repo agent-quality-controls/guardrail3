@@ -33,12 +33,20 @@ pub fn assert_single_error_contains(
     message_contains: &str,
 ) {
     let findings = findings(results);
-    assert_eq!(findings.len(), 1, "unexpected RS-GARDE-10 findings: {findings:#?}");
+    assert_eq!(
+        findings.len(),
+        1,
+        "unexpected RS-GARDE-10 findings: {findings:#?}"
+    );
     assert_error_contains(results, file, message_contains);
 }
 
 pub fn assert_single_error_file(results: &[guardrail3_domain_report::CheckResult], file: &str) {
     let findings = findings(results);
-    assert_eq!(findings.len(), 1, "unexpected RS-GARDE-10 findings: {findings:#?}");
+    assert_eq!(
+        findings.len(),
+        1,
+        "unexpected RS-GARDE-10 findings: {findings:#?}"
+    );
     assert_error_file(results, file);
 }

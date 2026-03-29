@@ -4,7 +4,6 @@ mod workspace_policy;
 
 use std::path::{Path, PathBuf};
 
-#[allow(unused_imports)]
 pub(super) use test_support::{walk, write_file};
 
 const GOLDEN_REL: &str = "../../../../../../../tests/fixtures/r_arch_01/golden";

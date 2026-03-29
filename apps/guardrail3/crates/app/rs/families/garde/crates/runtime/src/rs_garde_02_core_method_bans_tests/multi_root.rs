@@ -32,7 +32,11 @@ fn local_missing_core_ban_only_warns_for_owned_root() {
     );
     let results = super::super::run_family(&tree);
     let findings = assertions::findings(&results);
-    assert_eq!(findings.len(), 2, "unexpected RS-GARDE-02 findings: {findings:#?}");
+    assert_eq!(
+        findings.len(),
+        2,
+        "unexpected RS-GARDE-02 findings: {findings:#?}"
+    );
     assertions::assert_inventory(
         &results,
         "clippy.toml",

@@ -95,7 +95,10 @@ pub fn check(input: &HexRootInput<'_>, results: &mut Vec<CheckResult>) {
         push_success(
             results,
             ID,
-            format!("Service `{}` has exact top-level hex contents", input.app_name),
+            format!(
+                "Service `{}` has exact top-level hex contents",
+                input.app_name
+            ),
             format!(
                 "Service `{}` keeps `{}` aligned with the required top-level hex template.",
                 input.app_name, input.crates_rel_dir
@@ -114,19 +117,9 @@ fn label<'a>(input: &'a HexRootInput<'a>) -> &'a str {
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_tree(&test_support::walk(root))
 }
-
-#[cfg(test)]
-#[allow(dead_code)]
-pub(super) fn results_for_test_tree(
-    tree: &guardrail3_domain_project_tree::ProjectTree,
-) -> Vec<CheckResult> {
-    crate::check_test_tree(tree)
-}
-
 #[cfg(test)]
 #[path = "rs_hexarch_02_exact_contents_tests/mod.rs"]
 mod rs_hexarch_02_exact_contents_tests;

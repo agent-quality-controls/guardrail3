@@ -14,7 +14,10 @@ pub fn check(input: &ContainerHexarchInput<'_>, results: &mut Vec<CheckResult>) 
         push_success(
             results,
             ID,
-            format!("Service `{}` container {} is populated", input.app_name, input.label),
+            format!(
+                "Service `{}` container {} is populated",
+                input.app_name, input.label
+            ),
             format!(
                 "Service `{}` keeps container `{}` non-empty with subdirectories or `.gitkeep`.",
                 input.app_name, input.rel_path
@@ -56,19 +59,9 @@ pub fn check(input: &ContainerHexarchInput<'_>, results: &mut Vec<CheckResult>) 
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_tree(&test_support::walk(root))
 }
-
-#[cfg(test)]
-#[allow(dead_code)]
-pub(super) fn results_for_test_tree(
-    tree: &guardrail3_domain_project_tree::ProjectTree,
-) -> Vec<CheckResult> {
-    crate::check_test_tree(tree)
-}
-
 #[cfg(test)]
 #[path = "rs_hexarch_05_container_not_empty_tests/mod.rs"]
 mod rs_hexarch_05_container_not_empty_tests;

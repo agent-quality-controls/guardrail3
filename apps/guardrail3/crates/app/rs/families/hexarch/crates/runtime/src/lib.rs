@@ -1,7 +1,7 @@
 mod dependency_facts;
 mod facts;
-mod inventory;
 mod inputs;
+mod inventory;
 mod rs_hexarch_01_crates_exists;
 mod rs_hexarch_02_exact_contents;
 mod rs_hexarch_03_inbound_outbound;

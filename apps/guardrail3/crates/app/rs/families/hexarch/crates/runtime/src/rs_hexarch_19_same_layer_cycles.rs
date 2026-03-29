@@ -3,9 +3,9 @@ use guardrail3_domain_report::{CheckResult, Severity};
 #[cfg(test)]
 use guardrail3_domain_project_tree::ProjectTree;
 
-use super::dependency_facts::{CycleFacts, MemberDependencyFacts};
 #[cfg(test)]
 use super::dependency_facts::Layer;
+use super::dependency_facts::{CycleFacts, MemberDependencyFacts};
 use super::inventory::push_success;
 
 use super::inputs::CycleHexarchInput;
@@ -84,19 +84,9 @@ pub fn check_cycle_for_test(layer: &str, members: Vec<&str>) -> Vec<CheckResult>
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_tree(&test_support::walk(root))
 }
-
-#[cfg(test)]
-#[allow(dead_code)]
-pub(super) fn results_for_test_tree(
-    tree: &guardrail3_domain_project_tree::ProjectTree,
-) -> Vec<CheckResult> {
-    crate::check_test_tree(tree)
-}
-
 #[cfg(test)]
 #[path = "rs_hexarch_19_same_layer_cycles_tests/mod.rs"]
 mod rs_hexarch_19_same_layer_cycles_tests;

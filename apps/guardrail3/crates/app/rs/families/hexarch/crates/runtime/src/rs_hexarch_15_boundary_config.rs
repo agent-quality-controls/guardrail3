@@ -1,7 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use crate::MemberConfigHexarchInput;
 use super::inventory::push_success;
+use crate::MemberConfigHexarchInput;
 
 const ID: &str = "RS-HEXARCH-15";
 
@@ -77,13 +77,11 @@ pub fn check_boundary_config_for_test(
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_tree(&test_support::walk(root))
 }
 
 #[cfg(test)]
-#[allow(dead_code)]
 pub(super) fn results_for_test_tree(
     tree: &guardrail3_domain_project_tree::ProjectTree,
 ) -> Vec<CheckResult> {

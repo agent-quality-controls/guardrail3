@@ -41,7 +41,9 @@ pub fn assert_rule_results(
                 && expected_result
                     .file
                     .is_none_or(|file| result.file.as_deref() == Some(file))
-                && expected_result.line.is_none_or(|line| result.line == Some(line))
+                && expected_result
+                    .line
+                    .is_none_or(|line| result.line == Some(line))
                 && expected_result
                     .inventory
                     .is_none_or(|inventory| result.inventory == inventory)

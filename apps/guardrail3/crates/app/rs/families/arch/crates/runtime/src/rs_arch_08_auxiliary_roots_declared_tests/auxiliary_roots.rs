@@ -1,4 +1,3 @@
-#[allow(unused_imports)]
 use super::{check_results, entry, tree};
 use guardrail3_app_rs_family_arch_assertions::rs_arch_08_auxiliary_roots_declared as assertions;
 

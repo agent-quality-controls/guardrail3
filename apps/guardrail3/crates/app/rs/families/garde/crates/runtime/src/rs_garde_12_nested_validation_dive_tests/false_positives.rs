@@ -136,7 +136,10 @@ pub struct Profile {
 
     let results = super::super::run_family(&tree);
     let findings = assertions::findings(&results);
-    assert!(findings.is_empty(), "expected no RS-GARDE-12 findings: {findings:#?}");
+    assert!(
+        findings.is_empty(),
+        "expected no RS-GARDE-12 findings: {findings:#?}"
+    );
     assertions::assert_rule_quiet(&results);
 
     std::fs::remove_dir_all(root).expect("cleanup");

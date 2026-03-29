@@ -1,4 +1,3 @@
-#[allow(unused_imports)]
 use super::{CargoFixture, cargo_fixture, check_results, entry, tree, tree_at};
 use guardrail3_app_rs_family_arch_assertions::rs_arch_02_no_misplaced_roots as assertions;
 

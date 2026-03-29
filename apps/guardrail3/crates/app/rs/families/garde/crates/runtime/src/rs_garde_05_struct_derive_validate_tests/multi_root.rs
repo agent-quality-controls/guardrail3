@@ -88,7 +88,11 @@ garde = { version = "0.22", features = ["derive"] }
 
     let results = super::super::run_family(&tree);
     let findings = assertions::findings(&results);
-    assert_eq!(findings.len(), 1, "unexpected RS-GARDE-05 findings: {findings:#?}");
+    assert_eq!(
+        findings.len(),
+        1,
+        "unexpected RS-GARDE-05 findings: {findings:#?}"
+    );
     assertions::assert_single_error(&results, Some(source1_rel), Some(4), None, None);
 
     std::fs::remove_dir_all(root).expect("cleanup");

@@ -4,11 +4,10 @@ mod golden;
 mod ownership_edges;
 mod package_non_hit;
 
-use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_24_cross_app_boundary::ProjectTree;
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_24_cross_app_boundary::CheckResult;
+use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_24_cross_app_boundary::ProjectTree;
 use std::path::{Path, PathBuf};
 
-#[allow(unused_imports)]
 pub(super) use test_support::{
     create_dir, dir_entry, empty_dir, project_tree, remove_dir, walk, write_file,
 };
@@ -21,9 +20,7 @@ pub(super) fn run_family(root: &Path) -> Vec<CheckResult> {
     super::results_for_test_root(root)
 }
 
-pub(super) fn run_tree(
-    tree: &ProjectTree,
-) -> Vec<CheckResult> {
+pub(super) fn run_tree(tree: &ProjectTree) -> Vec<CheckResult> {
     super::results_for_test_tree(tree)
 }
 

@@ -7,7 +7,6 @@ mod path_resolution;
 use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_09_no_extra_workspace_members::CheckResult;
 use std::path::{Path, PathBuf};
 
-#[allow(unused_imports)]
 pub(super) use test_support::{
     create_dir, dir_entry, empty_dir, project_tree, remove_dir, walk, write_file,
 };
