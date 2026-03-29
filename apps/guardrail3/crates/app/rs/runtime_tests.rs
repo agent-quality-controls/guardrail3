@@ -341,6 +341,55 @@ fn arch_runtime_reports_fail_closed_results_for_malformed_governed_manifest() {
 }
 
 #[test]
+fn arch_runtime_honors_app_scoped_hexarch_override() {
+    let root = temp_root("arch-runtime-app-scoped-hexarch");
+    write_file(
+        &root,
+        "guardrail3.toml",
+        "[rust.checks]\narch = true\nhexarch = true\nlibarch = true\n\n[rust.apps.backend.checks]\nhexarch = false\n",
+    );
+    write_file(
+        &root,
+        "apps/backend/Cargo.toml",
+        "[workspace]\nmembers = [\"crates/worker\"]\nresolver = \"2\"\n",
+    );
+    write_file(
+        &root,
+        "apps/backend/crates/worker/Cargo.toml",
+        "[workspace]\nmembers = []\nresolver = \"2\"\n",
+    );
+
+    let report = run(
+        &LocalFs,
+        &root,
+        None,
+        &[RustValidateFamily::Arch],
+        false,
+        &StubToolChecker,
+    )
+    .expect("arch runtime report");
+
+    assert_eq!(report.sections.len(), 1, "unexpected sections: {report:#?}");
+    assert_eq!(report.sections[0].name, "arch");
+    let rs_arch_06_files = report.sections[0]
+        .results
+        .iter()
+        .filter(|result| result.id == "RS-ARCH-06" && !result.inventory)
+        .filter_map(|result| result.file.as_deref())
+        .collect::<Vec<_>>();
+    assert_eq!(
+        rs_arch_06_files,
+        vec![
+            "apps/backend/Cargo.toml",
+            "apps/backend/crates/worker/Cargo.toml",
+        ],
+        "{report:#?}"
+    );
+
+    fs::remove_dir_all(&root).expect("cleanup temp root");
+}
+
+#[test]
 fn hexarch_runtime_reports_fail_closed_results_for_malformed_guardrail_config() {
     let root = temp_root("hexarch-runtime-malformed-config");
     write_file(
