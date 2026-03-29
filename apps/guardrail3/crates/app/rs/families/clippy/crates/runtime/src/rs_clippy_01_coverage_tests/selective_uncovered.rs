@@ -1,6 +1,5 @@
 use guardrail3_app_rs_family_clippy_assertions::rs_clippy_01_coverage as assertions;
-use guardrail3_domain_modules::clippy::build_clippy_toml;
-use test_support::write_file;
+use test_support::{build_fixture_clippy_toml, write_file};
 
 use super::super::{copy_fixture_for_tests, run_for_tests};
 
@@ -10,12 +9,12 @@ fn errors_only_for_roots_without_an_allowed_covering_config() {
     write_file(
         tmp.path(),
         "apps/devctl/clippy.toml",
-        &build_clippy_toml("service", false, true, "", ""),
+        &build_fixture_clippy_toml("service", false, true, "", ""),
     );
     write_file(
         tmp.path(),
         "packages/shared-types/clippy.toml",
-        &build_clippy_toml("library", false, true, "", ""),
+        &build_fixture_clippy_toml("library", false, true, "", ""),
     );
 
     let results = run_for_tests(tmp.path());

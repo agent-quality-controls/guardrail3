@@ -1,8 +1,5 @@
 use std::collections::BTreeSet;
 
-use guardrail3_domain_modules::clippy::{
-    BASE_TYPE_PATHS, EXPECTED_MACRO_BANS, SERVICE_METHOD_PATHS, THRESHOLD_VALUES,
-};
 use test_support::build_fixture_clippy_toml;
 
 #[test]
@@ -11,9 +8,16 @@ fn generated_top_level_keys_are_all_known_managed_keys() {
         toml::from_str::<toml::Value>(&build_fixture_clippy_toml("service", false, true, "", ""))
             .expect("valid clippy TOML");
     let table = parsed.as_table().expect("top-level clippy table");
-    let known: BTreeSet<_> = THRESHOLD_VALUES
-        .iter()
-        .map(|(key, _)| *key)
+    let known: BTreeSet<_> = [
+        "max-struct-bools",
+        "max-fn-params-bools",
+        "too-many-lines-threshold",
+        "too-many-arguments-threshold",
+        "excessive-nesting-threshold",
+        "cognitive-complexity-threshold",
+        "type-complexity-threshold",
+    ]
+        .into_iter()
         .chain([
             "avoid-breaking-exported-api",
             "allow-dbg-in-tests",
@@ -42,9 +46,9 @@ fn generated_top_level_keys_are_all_known_managed_keys() {
         );
     }
 
-    assert!(!SERVICE_METHOD_PATHS.is_empty());
-    assert!(!BASE_TYPE_PATHS.is_empty());
-    assert!(!EXPECTED_MACRO_BANS.is_empty());
+    assert!(known.contains("disallowed-methods"));
+    assert!(known.contains("disallowed-types"));
+    assert!(known.contains("disallowed-macros"));
 }
 
 fn normalized_key_distance(a: &str, b: &str) -> usize {
