@@ -19,13 +19,7 @@ pub fn resolve(
     let mut selection = if requested_families.is_empty() {
         RustFamilySelection::new(config_enabled)
     } else {
-        RustFamilySelection::new(
-            requested_families
-                .iter()
-                .copied()
-                .filter(|family| config_enabled.contains(family))
-                .collect(),
-        )
+        RustFamilySelection::new(requested_families.iter().copied().collect())
     };
 
     if selection.contains(RustValidateFamily::HooksRs) {
@@ -33,6 +27,15 @@ pub fn resolve(
     }
 
     selection
+}
+
+#[cfg(test)]
+pub(crate) fn resolve_for_tests(
+    tree: &ProjectTree,
+    config: Option<&GuardrailConfig>,
+    requested_families: &[RustValidateFamily],
+) -> RustFamilySelection {
+    resolve(tree, config, requested_families)
 }
 
 fn family_enabled_for_runtime(
