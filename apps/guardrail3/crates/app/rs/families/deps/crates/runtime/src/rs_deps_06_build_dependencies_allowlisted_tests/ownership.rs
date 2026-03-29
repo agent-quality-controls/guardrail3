@@ -1,5 +1,5 @@
 use super::{collected_facts, dependency_facts, dependency_input, dir_entry, project_tree};
-use crate::facts::DependencySectionKind;
+use guardrail3_app_rs_family_deps_assertions::rs_deps_06_build_dependencies_allowlisted as assertions;
 use guardrail3_domain_report::Severity;
 
 #[test]
@@ -48,40 +48,35 @@ fn workspace_true_external_build_dependency_is_checked() {
     let input = dependency_input(
         &facts,
         "packages/core/Cargo.toml",
-        DependencySectionKind::BuildDependencies,
         "bindgen",
     );
     let mut results = Vec::new();
 
     super::super::check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    let result = &results[0];
-    assert_eq!(result.id, "RS-DEPS-06");
-    assert_eq!(result.severity, Severity::Error);
-    assert_eq!(
-        result.message,
-        "Dependency `bindgen` in `[build-dependencies]` is not allowlisted for crate `core`."
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(Severity::Error),
+            message: Some(
+                "Dependency `bindgen` in `[build-dependencies]` is not allowlisted for crate `core`.",
+            ),
+            ..Default::default()
+        }],
     );
 }
 
 #[test]
 fn build_rule_stays_silent_without_allowlist() {
-    let facts = dependency_facts(
-        DependencySectionKind::BuildDependencies,
-        false,
-        false,
-        "bindgen",
-    );
+    let facts = dependency_facts(false, false, "bindgen");
     let input = dependency_input(
         &facts,
         "crates/api/Cargo.toml",
-        DependencySectionKind::BuildDependencies,
         "bindgen",
     );
     let mut results = Vec::new();
 
     super::super::check(&input, &mut results);
 
-    assert!(results.is_empty());
+    assertions::assert_rule_quiet(&results);
 }

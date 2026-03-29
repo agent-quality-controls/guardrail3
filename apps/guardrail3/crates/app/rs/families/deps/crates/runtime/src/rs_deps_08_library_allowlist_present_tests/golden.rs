@@ -1,4 +1,5 @@
-use super::{ExpectedRuleResult, assert_rule_results, coverage_facts, coverage_input};
+use super::{coverage_facts, coverage_input};
+use guardrail3_app_rs_family_deps_assertions::rs_deps_08_library_allowlist_present as assertions;
 use guardrail3_domain_report::Severity;
 
 #[test]
@@ -9,13 +10,13 @@ fn inventories_library_allowlist_when_present() {
 
     super::super::check(&input, &mut results);
 
-    assert_rule_results(
+    assertions::assert_rule_results(
         &results,
-        &[ExpectedRuleResult {
+        &[assertions::ExpectedRuleResult {
             severity: Some(Severity::Info),
             title: Some("library allowlist present"),
             inventory: Some(true),
-            ..ExpectedRuleResult::default()
+            ..assertions::ExpectedRuleResult::default()
         }],
     );
 }

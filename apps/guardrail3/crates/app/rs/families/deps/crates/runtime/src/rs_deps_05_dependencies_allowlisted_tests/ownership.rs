@@ -1,6 +1,5 @@
 use super::{collected_facts, dependency_input, dir_entry, project_tree};
-use crate::facts::DependencySectionKind;
-use crate::run_with_facts;
+use guardrail3_app_rs_family_deps_assertions::rs_deps_05_dependencies_allowlisted as assertions;
 use guardrail3_domain_report::Severity;
 
 #[test]
@@ -39,41 +38,8 @@ fn broad_dependency_attack_assigns_each_section_to_its_own_rule() {
         ],
     );
     let facts = collected_facts(&tree, &[]);
-    let results = run_with_facts(&facts);
-    let summary = results
-        .iter()
-        .filter(|result| {
-            matches!(
-                result.id.as_str(),
-                "RS-DEPS-05" | "RS-DEPS-06" | "RS-DEPS-07"
-            )
-        })
-        .map(|result| (result.id.as_str(), result.severity, result.message.clone()))
-        .collect::<Vec<_>>();
-
-    assert_eq!(
-        summary,
-        vec![
-            (
-                "RS-DEPS-05",
-                Severity::Error,
-                "Dependency `tokio` in `[dependencies]` is not allowlisted for crate `api`."
-                    .to_owned(),
-            ),
-            (
-                "RS-DEPS-06",
-                Severity::Error,
-                "Dependency `bindgen` in `[build-dependencies]` is not allowlisted for crate `api`."
-                    .to_owned(),
-            ),
-            (
-                "RS-DEPS-07",
-                Severity::Warn,
-                "Dependency `tempfile` in `[dev-dependencies]` is not allowlisted for crate `api`."
-                    .to_owned(),
-            ),
-        ]
-    );
+    let results = super::run_with_facts(&facts);
+    assertions::assert_broad_dependency_attack_summary(&results);
 }
 
 #[test]
@@ -121,20 +87,21 @@ fn non_workspace_path_dependency_is_still_checked() {
     let input = dependency_input(
         &facts,
         "packages/core/Cargo.toml",
-        DependencySectionKind::Dependencies,
         "reqwest",
     );
     let mut results = Vec::new();
 
     super::super::check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    let result = &results[0];
-    assert_eq!(result.id, "RS-DEPS-05");
-    assert_eq!(result.severity, Severity::Error);
-    assert_eq!(
-        result.message,
-        "Dependency `reqwest` in `[dependencies]` is not allowlisted for crate `core`."
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(Severity::Error),
+            message: Some(
+                "Dependency `reqwest` in `[dependencies]` is not allowlisted for crate `core`.",
+            ),
+            ..Default::default()
+        }],
     );
 }
 
@@ -186,9 +153,7 @@ fn workspace_path_dependency_is_skipped() {
         ],
     );
     let facts = collected_facts(&tree, &[]);
-    let results = run_with_facts(&facts);
+    let results = super::run_with_facts(&facts);
 
-    assert!(results.iter().all(|result| {
-        !(result.id == "RS-DEPS-05" && result.file.as_deref() == Some("packages/core/Cargo.toml"))
-    }));
+    assertions::assert_rule_quiet(&results);
 }

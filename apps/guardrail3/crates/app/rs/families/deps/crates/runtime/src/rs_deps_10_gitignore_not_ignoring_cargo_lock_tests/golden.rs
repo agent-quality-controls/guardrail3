@@ -1,4 +1,5 @@
-use super::{ExpectedRuleResult, assert_rule_results, lockfile_facts, lockfile_input};
+use super::{lockfile_facts, lockfile_input};
+use guardrail3_app_rs_family_deps_assertions::rs_deps_10_gitignore_not_ignoring_cargo_lock as assertions;
 use guardrail3_domain_report::Severity;
 
 #[test]
@@ -9,13 +10,13 @@ fn inventories_clean_gitignore() {
 
     super::super::check(&input, &mut results);
 
-    assert_rule_results(
+    assertions::assert_rule_results(
         &results,
-        &[ExpectedRuleResult {
+        &[assertions::ExpectedRuleResult {
             severity: Some(Severity::Info),
             inventory: Some(true),
             message: Some("No relevant `.gitignore` masks `Cargo.lock` for Rust root `.`."),
-            ..ExpectedRuleResult::default()
+            ..assertions::ExpectedRuleResult::default()
         }],
     );
 }

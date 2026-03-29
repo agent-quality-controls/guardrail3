@@ -1,6 +1,5 @@
 use super::{collected_facts, project_tree};
-use crate::run_with_facts;
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_deps_assertions::rs_deps_03_cargo_dupes_installed as assertions;
 
 #[test]
 fn missing_cargo_dupes_keeps_exact_warn_severity() {
@@ -8,19 +7,6 @@ fn missing_cargo_dupes_keeps_exact_warn_severity() {
         &project_tree(Vec::new(), Vec::new()),
         &["cargo-deny", "cargo-machete", "gitleaks"],
     );
-    let results = run_with_facts(&facts);
-    let summary = results
-        .iter()
-        .map(|result| (result.id.as_str(), result.severity, result.inventory))
-        .collect::<Vec<_>>();
-
-    assert_eq!(
-        summary,
-        vec![
-            ("RS-DEPS-01", Severity::Info, true),
-            ("RS-DEPS-02", Severity::Info, true),
-            ("RS-DEPS-03", Severity::Warn, false),
-            ("RS-DEPS-04", Severity::Info, true),
-        ]
-    );
+    let results = super::run_with_facts(&facts);
+    assertions::assert_exactness_summary(&results);
 }

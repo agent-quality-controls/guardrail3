@@ -1,5 +1,5 @@
 use super::{collected_facts, dir_entry, project_tree};
-use crate::run_with_facts;
+use guardrail3_app_rs_family_deps_assertions::rs_deps_08_library_allowlist_present as assertions;
 use guardrail3_domain_report::Severity;
 
 #[test]
@@ -40,27 +40,15 @@ fn warns_only_for_library_crates_without_allowlists() {
         ],
     );
     let facts = collected_facts(&tree, &[]);
-    let results = run_with_facts(&facts);
-    let summary = results
-        .iter()
-        .filter(|result| result.id == "RS-DEPS-08")
-        .map(|result| {
-            (
-                result.file.as_deref(),
-                result.severity,
-                result.message.as_str(),
-                result.inventory,
-            )
-        })
-        .collect::<Vec<_>>();
-
-    assert_eq!(
-        summary,
-        vec![(
-            Some("packages/core/Cargo.toml"),
-            Severity::Warn,
-            "Library crate `core` has no `allowed_deps` policy.",
-            false,
-        )]
+    let results = super::run_with_facts(&facts);
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            file: Some("packages/core/Cargo.toml"),
+            severity: Some(Severity::Warn),
+            message: Some("Library crate `core` has no `allowed_deps` policy."),
+            inventory: Some(false),
+            ..Default::default()
+        }],
     );
 }

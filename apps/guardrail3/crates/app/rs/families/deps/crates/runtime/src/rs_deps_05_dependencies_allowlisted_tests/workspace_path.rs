@@ -1,5 +1,5 @@
-use crate::facts::DependencySectionKind;
 use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_deps_assertions::rs_deps_05_dependencies_allowlisted as assertions;
 
 use super::{collected_facts, dependency_input, dir_entry, project_tree};
 
@@ -51,19 +51,20 @@ fn workspace_true_external_path_dependency_is_still_checked() {
     let input = dependency_input(
         &facts,
         "packages/core/Cargo.toml",
-        DependencySectionKind::Dependencies,
         "reqwest",
     );
     let mut results = Vec::new();
 
     super::super::check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    let result = &results[0];
-    assert_eq!(result.id, "RS-DEPS-05");
-    assert_eq!(result.severity, Severity::Error);
-    assert_eq!(
-        result.message,
-        "Dependency `reqwest` in `[dependencies]` is not allowlisted for crate `core`."
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(Severity::Error),
+            message: Some(
+                "Dependency `reqwest` in `[dependencies]` is not allowlisted for crate `core`.",
+            ),
+            ..Default::default()
+        }],
     );
 }

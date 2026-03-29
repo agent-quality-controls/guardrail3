@@ -1,27 +1,26 @@
-use super::{ExpectedRuleResult, assert_rule_results, dependency_facts, dependency_input};
-use crate::facts::DependencySectionKind;
+use super::{dependency_facts, dependency_input};
+use guardrail3_app_rs_family_deps_assertions::rs_deps_06_build_dependencies_allowlisted as assertions;
 use guardrail3_domain_report::Severity;
 
 #[test]
 fn inventories_allowlisted_build_dependency() {
-    let facts = dependency_facts(DependencySectionKind::BuildDependencies, true, true, "cc");
+    let facts = dependency_facts(true, true, "cc");
     let input = dependency_input(
         &facts,
         "crates/api/Cargo.toml",
-        DependencySectionKind::BuildDependencies,
         "cc",
     );
     let mut results = Vec::new();
 
     super::super::check(&input, &mut results);
 
-    assert_rule_results(
+    assertions::assert_rule_results(
         &results,
-        &[ExpectedRuleResult {
+        &[assertions::ExpectedRuleResult {
             severity: Some(Severity::Info),
             title: Some("build dependency allowlisted"),
             inventory: Some(true),
-            ..ExpectedRuleResult::default()
+            ..assertions::ExpectedRuleResult::default()
         }],
     );
 }
