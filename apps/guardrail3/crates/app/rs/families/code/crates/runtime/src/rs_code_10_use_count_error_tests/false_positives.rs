@@ -4,7 +4,7 @@ use guardrail3_app_rs_family_code_assertions::rs_code_10_use_count_error::assert
 use test_support::write_file;
 
 #[test]
-fn skips_grouped_imports_that_keep_statement_count_low() {
+fn skips_grouped_imports_that_keep_leaf_count_low() {
     let fixture = copy_fixture();
     let root = fixture.path();
 
@@ -14,7 +14,7 @@ fn skips_grouped_imports_that_keep_statement_count_low() {
     write_file(
         root,
         rel,
-        &format!("use crate::{{a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u}};\n{content}"),
+        &format!("use crate::{{a,b,c,d,e,f,g,h,i,j,k,l,m,o}};\n{content}"),
     );
 
     let results = run_family(root);

@@ -1,6 +1,6 @@
 use super::super::check_input_failure;
 use guardrail3_app_rs_family_code_assertions::rs_code_30_input_failures::{
-    assert_findings, RuleFinding,
+    RuleFinding, assert_findings,
 };
 
 #[test]

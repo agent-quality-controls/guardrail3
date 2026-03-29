@@ -1,6 +1,6 @@
 use super::super::check_source;
 use guardrail3_app_rs_family_code_assertions::rs_code_25_public_result_error_type::{
-    assert_findings, RuleFinding,
+    RuleFinding, assert_findings,
 };
 
 #[test]
@@ -13,8 +13,7 @@ fn warns_on_public_result_string_in_library_profile() {
         &[RuleFinding {
             severity: guardrail3_domain_report::Severity::Warn,
             title: "weak public error type",
-            message:
-                "Public function `parse` returns `Result<_, String>`. Use a typed error instead.",
+            message: "Public function `parse` returns `Result<_, String>`. Use a typed error instead.",
             file: Some("src/lib.rs"),
             line: Some(1),
             inventory: false,

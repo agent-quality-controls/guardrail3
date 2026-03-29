@@ -1,6 +1,6 @@
 use super::super::check_comment;
 use guardrail3_app_rs_family_code_assertions::rs_code_07_exception_comment_inventory::{
-    assert_findings, RuleFinding,
+    RuleFinding, assert_findings,
 };
 
 #[test]

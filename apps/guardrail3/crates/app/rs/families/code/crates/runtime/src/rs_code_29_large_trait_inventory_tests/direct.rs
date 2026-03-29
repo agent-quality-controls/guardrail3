@@ -1,6 +1,6 @@
 use super::super::check_source;
 use guardrail3_app_rs_family_code_assertions::rs_code_29_large_trait_inventory::{
-    assert_findings, RuleFinding,
+    RuleFinding, assert_findings,
 };
 
 #[test]

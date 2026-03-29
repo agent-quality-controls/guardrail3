@@ -2,8 +2,8 @@ use std::collections::BTreeSet;
 
 use super::super::copy_fixture;
 use super::super::run_family;
-use guardrail3_app_rs_family_code_assertions::rs_code_08_cfg_attr_allow_inventory::{Severity, 
-    RuleFinding, assert_files, assert_findings,
+use guardrail3_app_rs_family_code_assertions::rs_code_08_cfg_attr_allow_inventory::{
+    RuleFinding, Severity, assert_files, assert_findings,
 };
 use test_support::write_file;
 

@@ -2,7 +2,7 @@ use super::super::check_source;
 use super::super::copy_fixture;
 use super::super::run_family;
 use guardrail3_app_rs_family_code_assertions::rs_code_22_deny_forbid_without_reason::{
-    assert_findings, assert_no_hits, RuleFinding,
+    RuleFinding, assert_findings, assert_no_hits,
 };
 use test_support::write_file;
 
