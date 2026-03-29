@@ -1,5 +1,9 @@
+use std::collections::BTreeSet;
+
+use guardrail3_app_rs_family_mapper::FamilyMapper;
+use guardrail3_domain_config::types::GuardrailConfig;
 use super::collect;
-use crate::test_fixtures::family_route;
+use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 use test_support::{dir_entry, project_tree, temp_root};
 
 #[test]
@@ -43,7 +47,13 @@ fn root_workspace_uses_packages_garde_policy_when_packages_config_owns_root() {
         root.clone(),
     );
 
-    let facts = collect(&tree, &family_route(&tree, None));
+    let scope = guardrail3_app_rs_placement::collect(&tree);
+    let config = tree
+        .file_content("guardrail3.toml")
+        .and_then(|content| toml::from_str::<GuardrailConfig>(content).ok());
+    let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Garde]));
+    let route = FamilyMapper::new(&tree, &scope, config.as_ref(), &selected, None).map_rs_garde();
+    let facts = collect(&tree, &route);
 
     assert!(
         facts.roots.iter().all(|root| root.rel_dir != ""),

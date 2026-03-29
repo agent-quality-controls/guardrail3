@@ -1,32 +1,52 @@
-use guardrail3_domain_report::CheckResult;
+crate::define_rule_assertions!("RS-GARDE-08");
 
-const RULE_ID: &str = "RS-GARDE-08";
-
-pub fn findings(results: &[CheckResult]) -> Vec<&CheckResult> {
-    results
-        .iter()
-        .filter(|result| result.id == RULE_ID)
-        .collect()
-}
-
-pub fn assert_rule_quiet(results: &[CheckResult]) {
-    assert!(
-        findings(results).is_empty(),
-        "expected no {RULE_ID} findings"
+pub fn assert_error_message(results: &[guardrail3_domain_report::CheckResult], message: &str) {
+    assert_rule_results(
+        results,
+        &[ExpectedRuleResult {
+            severity: Some(Severity::Error),
+            message: Some(message),
+            ..Default::default()
+        }],
     );
 }
 
-pub fn assert_rule_files(results: &[CheckResult], expected: &[&str]) {
-    let mut files = findings(results)
-        .into_iter()
-        .filter_map(|result| result.file.clone())
-        .collect::<Vec<_>>();
-    files.sort();
-    assert_eq!(
-        files,
-        expected
-            .iter()
-            .map(|file| (*file).to_owned())
-            .collect::<Vec<_>>()
+pub fn assert_error(
+    results: &[guardrail3_domain_report::CheckResult],
+    file: Option<&str>,
+    line: Option<usize>,
+    title: Option<&str>,
+) {
+    assert_rule_results(
+        results,
+        &[ExpectedRuleResult {
+            severity: Some(Severity::Error),
+            file,
+            line,
+            title,
+            ..Default::default()
+        }],
+    );
+}
+
+pub fn assert_single_error(
+    results: &[guardrail3_domain_report::CheckResult],
+    file: Option<&str>,
+    line: Option<usize>,
+    title: Option<&str>,
+    message: Option<&str>,
+) {
+    let findings = findings(results);
+    assert_eq!(findings.len(), 1, "unexpected RS-GARDE-08 findings: {findings:#?}");
+    assert_rule_results(
+        results,
+        &[ExpectedRuleResult {
+            severity: Some(Severity::Error),
+            file,
+            line,
+            title,
+            message,
+            ..Default::default()
+        }],
     );
 }

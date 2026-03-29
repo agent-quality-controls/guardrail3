@@ -1,32 +1,44 @@
-use guardrail3_domain_report::CheckResult;
+crate::define_rule_assertions!("RS-GARDE-10");
 
-const RULE_ID: &str = "RS-GARDE-10";
-
-pub fn findings(results: &[CheckResult]) -> Vec<&CheckResult> {
-    results
-        .iter()
-        .filter(|result| result.id == RULE_ID)
-        .collect()
-}
-
-pub fn assert_rule_quiet(results: &[CheckResult]) {
-    assert!(
-        findings(results).is_empty(),
-        "expected no {RULE_ID} findings"
+pub fn assert_error_contains(
+    results: &[guardrail3_domain_report::CheckResult],
+    file: &str,
+    message_contains: &str,
+) {
+    assert_rule_results(
+        results,
+        &[ExpectedRuleResult {
+            severity: Some(Severity::Error),
+            file: Some(file),
+            message_contains: Some(message_contains),
+            ..Default::default()
+        }],
     );
 }
 
-pub fn assert_rule_files(results: &[CheckResult], expected: &[&str]) {
-    let mut files = findings(results)
-        .into_iter()
-        .filter_map(|result| result.file.clone())
-        .collect::<Vec<_>>();
-    files.sort();
-    assert_eq!(
-        files,
-        expected
-            .iter()
-            .map(|file| (*file).to_owned())
-            .collect::<Vec<_>>()
+pub fn assert_error_file(results: &[guardrail3_domain_report::CheckResult], file: &str) {
+    assert_rule_results(
+        results,
+        &[ExpectedRuleResult {
+            severity: Some(Severity::Error),
+            file: Some(file),
+            ..Default::default()
+        }],
     );
+}
+
+pub fn assert_single_error_contains(
+    results: &[guardrail3_domain_report::CheckResult],
+    file: &str,
+    message_contains: &str,
+) {
+    let findings = findings(results);
+    assert_eq!(findings.len(), 1, "unexpected RS-GARDE-10 findings: {findings:#?}");
+    assert_error_contains(results, file, message_contains);
+}
+
+pub fn assert_single_error_file(results: &[guardrail3_domain_report::CheckResult], file: &str) {
+    let findings = findings(results);
+    assert_eq!(findings.len(), 1, "unexpected RS-GARDE-10 findings: {findings:#?}");
+    assert_error_file(results, file);
 }

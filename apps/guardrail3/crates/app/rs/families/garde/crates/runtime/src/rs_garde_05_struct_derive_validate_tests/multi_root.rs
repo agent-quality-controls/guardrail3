@@ -1,5 +1,4 @@
-use crate::test_fixtures::canonical_clippy_toml;
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_garde_assertions::rs_garde_05_struct_derive_validate as assertions;
 use test_support::{dir_entry, project_tree, temp_root};
 
 #[test]
@@ -7,7 +6,7 @@ fn handles_multiple_roots() {
     let root = temp_root("rs-garde-05-multi-root");
     let source1_rel = "vendor/lib/src/input.rs";
     let source2_rel = "vendor/tool/src/input.rs";
-    let clippy_toml = canonical_clippy_toml();
+    let clippy_toml = super::super::canonical_clippy_toml();
 
     let source1_abs = root.join(source1_rel);
     std::fs::create_dir_all(source1_abs.parent().expect("parent")).expect("mkdir");
@@ -87,16 +86,10 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let mut results: Vec<_> = crate::test_fixtures::run_family(&tree)
-        .into_iter()
-        .filter(|result| result.id == "RS-GARDE-05")
-        .collect();
-    results.sort_by(|a, b| a.file.cmp(&b.file));
-
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].severity, Severity::Error);
-    assert_eq!(results[0].file.as_deref(), Some(source1_rel));
-    assert_eq!(results[0].line, Some(4));
+    let results = super::super::run_family(&tree);
+    let findings = assertions::findings(&results);
+    assert_eq!(findings.len(), 1, "unexpected RS-GARDE-05 findings: {findings:#?}");
+    assertions::assert_single_error(&results, Some(source1_rel), Some(4), None, None);
 
     std::fs::remove_dir_all(root).expect("cleanup");
 }

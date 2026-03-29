@@ -1,6 +1,5 @@
-use crate::test_fixtures::remove_clippy_ban_path;
+use guardrail3_app_rs_family_garde_assertions::rs_garde_03_extractor_type_bans as assertions;
 use guardrail3_domain_modules::clippy::build_clippy_toml;
-use guardrail3_domain_report::Severity;
 use test_support::{dir_entry, project_tree, temp_root};
 
 #[test]
@@ -8,7 +7,7 @@ fn warns_when_bans_missing() {
     let root = temp_root("partial-garde-03");
     let mut clippy_toml = build_clippy_toml("service", false, true, "", "");
     for path in ["axum::extract::Path", "axum_extra::extract::TypedHeader"] {
-        clippy_toml = remove_clippy_ban_path(&clippy_toml, "disallowed-types", path);
+        clippy_toml = super::super::remove_clippy_ban_path(&clippy_toml, "disallowed-types", path);
     }
     let tree = project_tree(
         vec![("", dir_entry(&[], &["Cargo.toml", "clippy.toml"]))],
@@ -21,18 +20,14 @@ fn warns_when_bans_missing() {
         ],
         root.clone(),
     );
-    let results = crate::test_fixtures::run_family(&tree);
-    let filtered: Vec<_> = results
-        .into_iter()
-        .filter(|r| r.id == "RS-GARDE-03")
-        .collect();
-    assert_eq!(filtered.len(), 1);
-    assert_eq!(filtered[0].severity, Severity::Warn);
-    assert_eq!(
-        filtered[0].message,
-        "Missing garde extractor bans from `disallowed-types`: axum::extract::Path, axum_extra::extract::TypedHeader."
+    let results = super::super::run_family(&tree);
+    let findings = assertions::findings(&results);
+    assert_eq!(findings.len(), 1, "unexpected RS-GARDE-03 findings: {findings:#?}");
+    assertions::assert_missing(
+        &results,
+        "clippy.toml",
+        "Missing garde extractor bans from `disallowed-types`: axum::extract::Path, axum_extra::extract::TypedHeader.",
     );
-    assert_eq!(filtered[0].file.as_deref(), Some("clippy.toml"));
 
     std::fs::remove_dir_all(&root).expect("remove temp root");
 }

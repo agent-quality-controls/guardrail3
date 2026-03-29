@@ -1,4 +1,4 @@
-use crate::test_fixtures::canonical_clippy_toml;
+use guardrail3_app_rs_family_garde_assertions::rs_garde_13_context_validation_surface as assertions;
 use test_support::{dir_entry, project_tree, temp_root};
 
 #[test]
@@ -6,7 +6,7 @@ fn ignores_fixed_rules_and_unused_context_annotations() {
     let root = temp_root("rs-garde-13-false-positives");
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
-    let clippy_toml = canonical_clippy_toml();
+    let clippy_toml = super::super::canonical_clippy_toml();
     std::fs::create_dir_all(source_abs.parent().expect("parent")).expect("mkdir");
     std::fs::write(
         &source_abs,
@@ -51,11 +51,10 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results: Vec<_> = crate::test_fixtures::run_family(&tree)
-        .into_iter()
-        .filter(|result| result.id == "RS-GARDE-13")
-        .collect();
-    assert!(results.is_empty());
+    let results = super::super::run_family(&tree);
+    let findings = assertions::findings(&results);
+    assert!(findings.is_empty());
+    assertions::assert_rule_quiet(&results);
 
     std::fs::remove_dir_all(root).expect("cleanup");
 }
@@ -65,7 +64,7 @@ fn ignores_qualified_function_paths_named_ctx() {
     let root = temp_root("rs-garde-13-qualified-ctx-path");
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
-    let clippy_toml = canonical_clippy_toml();
+    let clippy_toml = super::super::canonical_clippy_toml();
     std::fs::create_dir_all(source_abs.parent().expect("parent")).expect("mkdir");
     std::fs::write(
         &source_abs,
@@ -105,14 +104,10 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results: Vec<_> = crate::test_fixtures::run_family(&tree)
-        .into_iter()
-        .filter(|result| result.id == "RS-GARDE-13")
-        .collect();
-    assert!(
-        results.is_empty(),
-        "qualified function paths ending in ctx should not require garde(context)"
-    );
+    let results = super::super::run_family(&tree);
+    let findings = assertions::findings(&results);
+    assert!(findings.is_empty());
+    assertions::assert_rule_quiet(&results);
 
     std::fs::remove_dir_all(root).expect("cleanup");
 }

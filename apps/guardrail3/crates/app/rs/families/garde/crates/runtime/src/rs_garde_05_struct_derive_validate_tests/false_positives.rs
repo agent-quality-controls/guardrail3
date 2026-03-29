@@ -1,4 +1,4 @@
-use crate::test_fixtures::canonical_clippy_toml;
+use guardrail3_app_rs_family_garde_assertions::rs_garde_05_struct_derive_validate as assertions;
 use test_support::{dir_entry, project_tree, temp_root};
 
 #[test]
@@ -6,7 +6,7 @@ fn skips_validated_struct_boundary_types() {
     let root = temp_root("rs-garde-05-false-pos");
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
-    let clippy_toml = canonical_clippy_toml();
+    let clippy_toml = super::super::canonical_clippy_toml();
     std::fs::create_dir_all(source_abs.parent().expect("parent")).expect("mkdir");
     std::fs::write(
         &source_abs,
@@ -45,11 +45,9 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results: Vec<_> = crate::test_fixtures::run_family(&tree)
-        .into_iter()
-        .filter(|result| result.id == "RS-GARDE-05")
-        .collect();
-    assert!(results.is_empty());
+    let results = super::super::run_family(&tree);
+    let _ = assertions::findings(&results);
+    assertions::assert_rule_quiet(&results);
 
     std::fs::remove_dir_all(root).expect("cleanup");
 }
@@ -59,7 +57,7 @@ fn ignores_non_boundary_derive_with_deserialize_suffix() {
     let root = temp_root("rs-garde-05-fake-deserialize");
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
-    let clippy_toml = canonical_clippy_toml();
+    let clippy_toml = super::super::canonical_clippy_toml();
     std::fs::create_dir_all(source_abs.parent().expect("parent")).expect("mkdir");
     std::fs::write(
         &source_abs,
@@ -95,14 +93,9 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results: Vec<_> = crate::test_fixtures::run_family(&tree)
-        .into_iter()
-        .filter(|result| result.id == "RS-GARDE-05")
-        .collect();
-    assert!(
-        results.is_empty(),
-        "non-canonical derive macros should not create boundary inventory"
-    );
+    let results = super::super::run_family(&tree);
+    let _ = assertions::findings(&results);
+    assertions::assert_rule_quiet(&results);
 
     std::fs::remove_dir_all(root).expect("cleanup");
 }
@@ -112,7 +105,7 @@ fn skips_struct_with_aliased_validate_derive() {
     let root = temp_root("rs-garde-05-aliased-validate");
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
-    let clippy_toml = canonical_clippy_toml();
+    let clippy_toml = super::super::canonical_clippy_toml();
     std::fs::create_dir_all(source_abs.parent().expect("parent")).expect("mkdir");
     std::fs::write(
         &source_abs,
@@ -151,14 +144,9 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results: Vec<_> = crate::test_fixtures::run_family(&tree)
-        .into_iter()
-        .filter(|result| result.id == "RS-GARDE-05")
-        .collect();
-    assert!(
-        results.is_empty(),
-        "aliased derive macros should still count"
-    );
+    let results = super::super::run_family(&tree);
+    let _ = assertions::findings(&results);
+    assertions::assert_rule_quiet(&results);
 
     std::fs::remove_dir_all(root).expect("cleanup");
 }

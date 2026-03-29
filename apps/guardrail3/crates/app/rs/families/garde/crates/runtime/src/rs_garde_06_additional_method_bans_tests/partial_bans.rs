@@ -1,13 +1,13 @@
-use crate::test_fixtures::{canonical_clippy_toml, remove_clippy_ban_path};
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_garde_assertions::rs_garde_06_additional_method_bans as assertions;
 use test_support::{dir_entry, project_tree, temp_root};
 
 #[test]
 fn warns_when_bans_missing() {
     let root = temp_root("partial-garde-06");
-    let mut clippy_toml = canonical_clippy_toml();
+    let mut clippy_toml = super::super::canonical_clippy_toml();
     for path in ["serde_qs::from_bytes", "figment::Figment::extract"] {
-        clippy_toml = remove_clippy_ban_path(&clippy_toml, "disallowed-methods", path);
+        clippy_toml =
+            super::super::remove_clippy_ban_path(&clippy_toml, "disallowed-methods", path);
     }
     let tree = project_tree(
         vec![("", dir_entry(&[], &["Cargo.toml", "clippy.toml"]))],
@@ -20,18 +20,14 @@ fn warns_when_bans_missing() {
         ],
         root.clone(),
     );
-    let results = crate::test_fixtures::run_family(&tree);
-    let filtered: Vec<_> = results
-        .into_iter()
-        .filter(|r| r.id == "RS-GARDE-06")
-        .collect();
-    assert_eq!(filtered.len(), 1);
-    assert_eq!(filtered[0].severity, Severity::Warn);
-    assert_eq!(
-        filtered[0].message,
-        "Missing additional garde deserialization bans from `disallowed-methods`: serde_qs::from_bytes, figment::Figment::extract."
+    let results = super::super::run_family(&tree);
+    let findings = assertions::findings(&results);
+    assert_eq!(findings.len(), 1, "unexpected RS-GARDE-06 findings: {findings:#?}");
+    assertions::assert_missing(
+        &results,
+        "clippy.toml",
+        "Missing additional garde deserialization bans from `disallowed-methods`: serde_qs::from_bytes, figment::Figment::extract.",
     );
-    assert_eq!(filtered[0].file.as_deref(), Some("clippy.toml"));
 
     std::fs::remove_dir_all(&root).expect("remove temp root");
 }

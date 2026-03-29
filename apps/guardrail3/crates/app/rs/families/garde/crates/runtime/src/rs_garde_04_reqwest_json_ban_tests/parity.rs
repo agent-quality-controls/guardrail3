@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use super::super::super::garde_support::REQWEST_JSON_BAN;
+use guardrail3_app_rs_family_garde_assertions::rs_garde_04_reqwest_json_ban::REQWEST_JSON_BAN;
 use guardrail3_domain_modules::clippy::build_clippy_toml;
 
 fn disallowed_method_paths(parsed: &toml::Value) -> BTreeSet<String> {

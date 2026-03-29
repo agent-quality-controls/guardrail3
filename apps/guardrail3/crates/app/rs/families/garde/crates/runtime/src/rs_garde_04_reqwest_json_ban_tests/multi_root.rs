@@ -1,13 +1,12 @@
-use crate::test_fixtures::{canonical_clippy_toml, remove_clippy_ban_path};
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_garde_assertions::rs_garde_04_reqwest_json_ban as assertions;
 use test_support::{dir_entry, project_tree, temp_root};
 
 #[test]
 fn local_missing_reqwest_ban_only_warns_for_owned_root() {
     let root = temp_root("multi-garde-04");
-    let root_clippy = canonical_clippy_toml();
-    let local_clippy = remove_clippy_ban_path(
-        &canonical_clippy_toml(),
+    let root_clippy = super::super::canonical_clippy_toml();
+    let local_clippy = super::super::remove_clippy_ban_path(
+        &super::super::canonical_clippy_toml(),
         "disallowed-methods",
         "reqwest::Response::json",
     );
@@ -31,23 +30,19 @@ fn local_missing_reqwest_ban_only_warns_for_owned_root() {
         ],
         root.clone(),
     );
-    let results = crate::test_fixtures::run_family(&tree);
-    let filtered: Vec<_> = results
-        .into_iter()
-        .filter(|r| r.id == "RS-GARDE-04")
-        .collect();
-    assert_eq!(filtered.len(), 2);
-    assert!(filtered.iter().any(|result| {
-        result.severity == Severity::Info
-            && result.inventory
-            && result.file.as_deref() == Some("clippy.toml")
-    }));
-    assert!(filtered.iter().any(|result| {
-        result.severity == Severity::Warn
-            && !result.inventory
-            && result.file.as_deref() == Some("vendor/lib/clippy.toml")
-            && result.message == "Missing `reqwest::Response::json` from `disallowed-methods`."
-    }));
+    let results = super::super::run_family(&tree);
+    let findings = assertions::findings(&results);
+    assert_eq!(findings.len(), 2, "unexpected RS-GARDE-04 findings: {findings:#?}");
+    assertions::assert_inventory(
+        &results,
+        "clippy.toml",
+        "`reqwest::Response::json` is banned in the covering clippy configuration.",
+    );
+    assertions::assert_missing(
+        &results,
+        "vendor/lib/clippy.toml",
+        "Missing `reqwest::Response::json` from `disallowed-methods`.",
+    );
 
     std::fs::remove_dir_all(&root).expect("remove temp root");
 }

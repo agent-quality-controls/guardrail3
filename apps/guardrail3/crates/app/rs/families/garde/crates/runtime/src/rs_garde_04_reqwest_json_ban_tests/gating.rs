@@ -1,3 +1,4 @@
+use guardrail3_app_rs_family_garde_assertions::rs_garde_04_reqwest_json_ban as assertions;
 use test_support::{dir_entry, project_tree, temp_root};
 
 #[test]
@@ -14,15 +15,10 @@ fn ignores_workspace_when_garde_missing() {
         ],
         root.clone(),
     );
-    let results = crate::test_fixtures::run_family(&tree);
-    let filtered: Vec<_> = results
-        .into_iter()
-        .filter(|r| r.id == "RS-GARDE-04")
-        .collect();
-    assert!(
-        filtered.is_empty(),
-        "Expected no RS-GARDE-04 results when garde is missing"
-    );
+    let results = super::super::run_family(&tree);
+    let findings = assertions::findings(&results);
+    assert!(findings.is_empty(), "expected no RS-GARDE-04 findings: {findings:#?}");
+    assertions::assert_rule_quiet(&results);
 
     std::fs::remove_dir_all(&root).expect("remove temp root");
 }

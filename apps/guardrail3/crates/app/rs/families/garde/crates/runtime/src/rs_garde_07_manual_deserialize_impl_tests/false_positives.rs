@@ -1,4 +1,4 @@
-use crate::test_fixtures::canonical_clippy_toml;
+use guardrail3_app_rs_family_garde_assertions::rs_garde_07_manual_deserialize_impl as assertions;
 use test_support::{dir_entry, project_tree, temp_root};
 
 #[test]
@@ -6,7 +6,7 @@ fn skips_manual_deserialize_impl_when_validate_present() {
     let root = temp_root("rs-garde-07-false-pos");
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
-    let clippy_toml = canonical_clippy_toml();
+    let clippy_toml = super::super::canonical_clippy_toml();
     std::fs::create_dir_all(source_abs.parent().expect("parent")).expect("mkdir");
     std::fs::write(
         &source_abs,
@@ -54,11 +54,10 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results: Vec<_> = crate::test_fixtures::run_family(&tree)
-        .into_iter()
-        .filter(|result| result.id == "RS-GARDE-07")
-        .collect();
-    assert!(results.is_empty());
+    let results = super::super::run_family(&tree);
+    let findings = assertions::findings(&results);
+    assert!(findings.is_empty());
+    assertions::assert_rule_quiet(&results);
 
     std::fs::remove_dir_all(root).expect("cleanup");
 }
@@ -68,7 +67,7 @@ fn ignores_non_serde_deserialize_trait_with_same_name() {
     let root = temp_root("rs-garde-07-non-serde-deserialize");
     let source_rel = "src/input.rs";
     let source_abs = root.join(source_rel);
-    let clippy_toml = canonical_clippy_toml();
+    let clippy_toml = super::super::canonical_clippy_toml();
     std::fs::create_dir_all(source_abs.parent().expect("parent")).expect("mkdir");
     std::fs::write(
         &source_abs,
@@ -111,14 +110,10 @@ garde = { version = "0.22", features = ["derive"] }
         root.clone(),
     );
 
-    let results: Vec<_> = crate::test_fixtures::run_family(&tree)
-        .into_iter()
-        .filter(|result| result.id == "RS-GARDE-07")
-        .collect();
-    assert!(
-        results.is_empty(),
-        "non-serde Deserialize traits should not count as manual bypasses"
-    );
+    let results = super::super::run_family(&tree);
+    let findings = assertions::findings(&results);
+    assert!(findings.is_empty());
+    assertions::assert_rule_quiet(&results);
 
     std::fs::remove_dir_all(root).expect("cleanup");
 }

@@ -808,5 +808,22 @@ fn content_has_garde_dependency(parsed: &toml::Value) -> bool {
 }
 
 #[cfg(test)]
+#[allow(dead_code)]
+pub(super) fn family_route(
+    tree: &guardrail3_domain_project_tree::ProjectTree,
+    scoped_files: Option<&std::collections::BTreeSet<String>>,
+) -> guardrail3_app_rs_family_mapper::RsGardeRoute {
+    let scope = guardrail3_app_rs_placement::collect(tree);
+    let config = tree
+        .file_content("guardrail3.toml")
+        .and_then(|content| toml::from_str::<guardrail3_domain_config::types::GuardrailConfig>(content).ok());
+    let selected = guardrail3_validation_model::RustFamilySelection::new(
+        std::collections::BTreeSet::from([guardrail3_validation_model::RustValidateFamily::Garde]),
+    );
+    guardrail3_app_rs_family_mapper::FamilyMapper::new(tree, &scope, config.as_ref(), &selected, scoped_files)
+        .map_rs_garde()
+}
+
+#[cfg(test)]
 #[path = "facts_tests/mod.rs"]
-mod tests;
+mod facts_tests;

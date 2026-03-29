@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use super::super::super::garde_support::EXTRACTOR_TYPE_BANS;
+use guardrail3_app_rs_family_garde_assertions::rs_garde_03_extractor_type_bans::EXTRACTOR_TYPE_BANS;
 use guardrail3_domain_modules::clippy::build_clippy_toml;
 
 fn disallowed_type_paths(parsed: &toml::Value) -> BTreeSet<String> {
