@@ -1,12 +1,11 @@
 use guardrail3_app_rs_family_clippy_assertions::rs_clippy_13_local_policy_root_baseline as assertions;
-use guardrail3_domain_modules::clippy::build_clippy_toml;
-use test_support::library_workspace_root_tree;
+use test_support::{build_fixture_clippy_toml, library_workspace_root_tree};
 
 use super::super::run_for_tests;
 
 #[test]
 fn ignores_keys_owned_by_specific_rules() {
-    let clippy = build_clippy_toml("library", false, true, "", "")
+    let clippy = build_fixture_clippy_toml("library", false, true, "", "")
         .replace(
             "avoid-breaking-exported-api = false",
             "avoid-breaking-exported-api = true",

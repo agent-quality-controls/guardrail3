@@ -1,5 +1,4 @@
 use guardrail3_app_rs_family_clippy_assertions::rs_clippy_17_test_relaxations as assertions;
-use guardrail3_domain_report::Severity;
 use test_support::root_workspace_tree;
 
 use super::super::run_for_tests;
@@ -20,27 +19,27 @@ allow-unwrap-in-tests = true
         &results,
         &[
             (
-                Severity::Warn,
+                assertions::Severity::Warn,
                 "clippy test relaxation enabled",
                 "`allow-dbg-in-tests = true` relaxes test output discipline.",
             ),
             (
-                Severity::Error,
+                assertions::Severity::Error,
                 "clippy test expect policy misconfigured",
                 "`allow-expect-in-tests` must be `true` so tests may use `expect(...)` while non-test code stays governed by `clippy::expect_used`.",
             ),
             (
-                Severity::Error,
+                assertions::Severity::Error,
                 "clippy test panic relaxation enabled",
                 "`allow-panic-in-tests` must stay `false` so `panic!()` remains banned in tests.",
             ),
             (
-                Severity::Warn,
+                assertions::Severity::Warn,
                 "clippy test relaxation enabled",
                 "`allow-print-in-tests = true` relaxes test output discipline.",
             ),
             (
-                Severity::Error,
+                assertions::Severity::Error,
                 "clippy test unwrap relaxation enabled",
                 "`allow-unwrap-in-tests` must stay `false` so `unwrap()` remains banned in tests.",
             ),

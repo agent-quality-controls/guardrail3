@@ -1,8 +1,10 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use guardrail3_domain_report::{CheckResult, Severity};
+use guardrail3_domain_report::CheckResult;
 
 const ID: &str = "RS-CLIPPY-01";
+
+pub use guardrail3_domain_report::Severity;
 
 pub fn assert_multi_root_coverage(
     results: &[CheckResult],

@@ -1,7 +1,5 @@
 use guardrail3_app_rs_family_clippy_assertions::rs_clippy_01_coverage as assertions;
-use guardrail3_domain_modules::clippy::build_clippy_toml;
-use guardrail3_domain_report::Severity;
-use test_support::{create_dir_all, create_temp_dir, write_file};
+use test_support::{build_fixture_clippy_toml, create_dir_all, create_temp_dir, write_file};
 
 use super::super::run_for_tests;
 
@@ -12,7 +10,7 @@ fn validation_root_dotfile_covers_descendant_workspace_without_root_cargo() {
     write_file(
         tmp.path(),
         ".clippy.toml",
-        &build_clippy_toml("service", false, true, "", ""),
+        &build_fixture_clippy_toml("service", false, true, "", ""),
     );
     write_file(
         tmp.path(),
@@ -30,7 +28,7 @@ fn validation_root_dotfile_covers_descendant_workspace_without_root_cargo() {
         &results,
         &[(
             "workspace root `apps/backend` is covered by `.clippy.toml`.",
-            Severity::Info,
+            assertions::Severity::Info,
             true,
             Some(".clippy.toml"),
             "Rust unit covered by clippy.toml",

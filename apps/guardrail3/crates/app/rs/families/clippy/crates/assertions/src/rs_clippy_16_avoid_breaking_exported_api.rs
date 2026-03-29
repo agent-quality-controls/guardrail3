@@ -1,3 +1,4 @@
+use guardrail3_domain_modules::clippy::AVOID_BREAKING_EXPORTED_API;
 use guardrail3_domain_report::{CheckResult, Severity};
 
 const ID: &str = "RS-CLIPPY-16";
@@ -59,4 +60,15 @@ pub fn assert_warn_true(results: &[CheckResult], file: &str) {
     );
     assert!(!result.inventory);
     assert_eq!(result.file.as_deref(), Some(file));
+}
+
+pub fn assert_generated_service_baseline_contains_expected_value(clippy_toml: &str) {
+    let parsed = toml::from_str::<toml::Value>(clippy_toml).expect("valid clippy TOML");
+
+    assert_eq!(
+        parsed
+            .get("avoid-breaking-exported-api")
+            .and_then(toml::Value::as_bool),
+        Some(AVOID_BREAKING_EXPORTED_API)
+    );
 }
