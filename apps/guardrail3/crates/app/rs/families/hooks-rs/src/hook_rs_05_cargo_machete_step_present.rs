@@ -163,5 +163,17 @@ fn shell_words(command_text: &str) -> Vec<String> {
 }
 
 #[cfg(test)]
-#[path = "hook_rs_05_cargo_machete_step_present_tests.rs"]
-mod tests;
+pub(super) fn run_case(content: &str) -> Vec<CheckResult> {
+    let parsed = test_support::parsed_hook(content);
+    let input = RustHookCommandInput {
+        rel_path: ".githooks/pre-commit",
+        parsed: &parsed,
+    };
+    let mut results = Vec::new();
+    check(&input, &mut results);
+    results
+}
+
+#[cfg(test)]
+#[path = "hook_rs_05_cargo_machete_step_present_tests/mod.rs"]
+mod hook_rs_05_cargo_machete_step_present_tests;

@@ -41,5 +41,22 @@ pub fn check(
 }
 
 #[cfg(test)]
-#[path = "hook_rs_15_cargo_dupes_installed_tests.rs"]
-mod tests;
+pub(super) fn run_case(
+    cargo_dupes_required: bool,
+    cargo_dupes_path_qualified: bool,
+    installed: &[&'static str],
+) -> Vec<CheckResult> {
+    let mut results = Vec::new();
+    check(
+        ".githooks/pre-commit",
+        cargo_dupes_required,
+        cargo_dupes_path_qualified,
+        &test_support::StubToolChecker::new(installed),
+        &mut results,
+    );
+    results
+}
+
+#[cfg(test)]
+#[path = "hook_rs_15_cargo_dupes_installed_tests/mod.rs"]
+mod hook_rs_15_cargo_dupes_installed_tests;

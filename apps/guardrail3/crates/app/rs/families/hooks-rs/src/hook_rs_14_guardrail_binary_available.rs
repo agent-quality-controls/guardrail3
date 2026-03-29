@@ -41,5 +41,22 @@ pub fn check(
 }
 
 #[cfg(test)]
-#[path = "hook_rs_14_guardrail_binary_available_tests.rs"]
-mod tests;
+pub(super) fn run_case(
+    guardrail_validation_expected: bool,
+    guardrail_validation_path_qualified: bool,
+    installed: &[&'static str],
+) -> Vec<CheckResult> {
+    let mut results = Vec::new();
+    check(
+        ".githooks/pre-commit",
+        guardrail_validation_expected,
+        guardrail_validation_path_qualified,
+        &test_support::StubToolChecker::new(installed),
+        &mut results,
+    );
+    results
+}
+
+#[cfg(test)]
+#[path = "hook_rs_14_guardrail_binary_available_tests/mod.rs"]
+mod hook_rs_14_guardrail_binary_available_tests;

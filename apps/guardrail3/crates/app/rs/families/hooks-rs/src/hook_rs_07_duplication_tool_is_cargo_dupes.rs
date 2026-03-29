@@ -359,5 +359,17 @@ fn shell_words(command_text: &str) -> Vec<String> {
 }
 
 #[cfg(test)]
-#[path = "hook_rs_07_duplication_tool_is_cargo_dupes_tests.rs"]
-mod tests;
+pub(super) fn run_case(content: &str) -> Vec<CheckResult> {
+    let parsed = test_support::parsed_hook(content);
+    let input = RustHookCommandInput {
+        rel_path: ".githooks/pre-commit",
+        parsed: &parsed,
+    };
+    let mut results = Vec::new();
+    check(&input, &mut results);
+    results
+}
+
+#[cfg(test)]
+#[path = "hook_rs_07_duplication_tool_is_cargo_dupes_tests/mod.rs"]
+mod hook_rs_07_duplication_tool_is_cargo_dupes_tests;

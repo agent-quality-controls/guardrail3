@@ -198,5 +198,17 @@ fn looks_like_env_assignment(token: &str) -> bool {
 }
 
 #[cfg(test)]
-#[path = "hook_rs_01_fmt_step_present_tests.rs"]
-mod tests;
+pub(super) fn run_case(content: &str) -> Vec<CheckResult> {
+    let parsed = test_support::parsed_hook(content);
+    let input = RustHookCommandInput {
+        rel_path: ".githooks/pre-commit",
+        parsed: &parsed,
+    };
+    let mut results = Vec::new();
+    check(&input, &mut results);
+    results
+}
+
+#[cfg(test)]
+#[path = "hook_rs_01_fmt_step_present_tests/mod.rs"]
+mod hook_rs_01_fmt_step_present_tests;
