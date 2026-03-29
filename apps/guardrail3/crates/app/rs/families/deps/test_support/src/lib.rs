@@ -27,6 +27,7 @@ pub fn project_tree(structure: Vec<(&str, DirEntry)>, content: Vec<(&str, &str)>
     }
 }
 
+#[derive(Debug)]
 pub struct StubToolChecker {
     installed: BTreeSet<String>,
 }

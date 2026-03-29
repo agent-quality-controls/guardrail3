@@ -309,9 +309,9 @@ fn workspace_dependency_package_with_non_string_name_surfaces_explicit_failure()
             (
                 result.file.as_deref(),
                 result.severity,
-                result.message.contains(
-                    "`[workspace.dependencies].reqwest.package` must be a string",
-                ),
+                result
+                    .message
+                    .contains("`[workspace.dependencies].reqwest.package` must be a string"),
                 result.message.contains("workspace = true"),
             )
         })
@@ -321,7 +321,12 @@ fn workspace_dependency_package_with_non_string_name_surfaces_explicit_failure()
         summary,
         vec![
             (Some("Cargo.toml"), Severity::Error, true, false),
-            (Some("packages/core/Cargo.toml"), Severity::Error, false, true),
+            (
+                Some("packages/core/Cargo.toml"),
+                Severity::Error,
+                false,
+                true
+            ),
         ]
     );
 }
@@ -364,9 +369,9 @@ fn dependency_workspace_flag_with_non_boolean_value_surfaces_explicit_failure() 
             (
                 result.file.as_deref(),
                 result.severity,
-                result.message.contains(
-                    "`[dependencies].reqwest.workspace` must be a boolean",
-                ),
+                result
+                    .message
+                    .contains("`[dependencies].reqwest.workspace` must be a boolean"),
             )
         })
         .collect::<Vec<_>>();

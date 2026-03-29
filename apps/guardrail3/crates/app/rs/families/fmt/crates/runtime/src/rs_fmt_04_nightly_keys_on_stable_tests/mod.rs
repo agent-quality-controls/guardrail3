@@ -83,8 +83,11 @@ fn fails_closed_when_toolchain_channel_is_missing() {
         "edition = \"2024\"\nmax_width = 100\ntab_spaces = 4\nuse_field_init_shorthand = true\nuse_try_shorthand = true\nreorder_imports = true\nreorder_modules = true\ngroup_imports = \"StdExternalCrate\"\n",
     )
     .expect("write rustfmt.toml");
-    std::fs::write(root.join("rust-toolchain.toml"), "[toolchain]\ncomponents = [\"rustfmt\"]\n")
-        .expect("write rust-toolchain.toml");
+    std::fs::write(
+        root.join("rust-toolchain.toml"),
+        "[toolchain]\ncomponents = [\"rustfmt\"]\n",
+    )
+    .expect("write rust-toolchain.toml");
 
     let results = run_family(root);
 

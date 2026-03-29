@@ -86,7 +86,9 @@ pub fn assert_workspace_members_error_summary(
 ) {
     let errors = results
         .iter()
-        .filter(|result| result.id == WORKSPACE_MEMBERS_RULE_ID && result.severity == Severity::Error)
+        .filter(|result| {
+            result.id == WORKSPACE_MEMBERS_RULE_ID && result.severity == Severity::Error
+        })
         .collect::<Vec<_>>();
     assert_eq!(
         errors.len(),
@@ -96,7 +98,9 @@ pub fn assert_workspace_members_error_summary(
     for result in &errors {
         assert_eq!(result.file.as_deref(), Some(expected_file), "{errors:#?}");
         assert!(
-            title_contains.iter().all(|needle| result.title.contains(needle)),
+            title_contains
+                .iter()
+                .all(|needle| result.title.contains(needle)),
             "{errors:#?}"
         );
         assert!(

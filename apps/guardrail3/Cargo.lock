@@ -772,6 +772,8 @@ dependencies = [
  "guardrail3-adapters-outbound-tool-runner",
  "guardrail3-app-core",
  "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-family-release-assertions",
+ "guardrail3-app-rs-family-release-test-support",
  "guardrail3-app-rs-placement",
  "guardrail3-domain-config",
  "guardrail3-domain-modules",
@@ -787,6 +789,24 @@ dependencies = [
  "syn",
  "tempfile",
  "toml",
+]
+
+[[package]]
+name = "guardrail3-app-rs-family-release-assertions"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-app-rs-family-release",
+ "guardrail3-domain-report",
+]
+
+[[package]]
+name = "guardrail3-app-rs-family-release-test-support"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-adapters-outbound-fs",
+ "guardrail3-app-core",
+ "guardrail3-domain-project-tree",
+ "guardrail3-ports-outbound-traits",
 ]
 
 [[package]]
@@ -929,6 +949,7 @@ version = "0.0.0"
 name = "guardrail3-domain-project-tree"
 version = "0.0.0"
 dependencies = [
+ "garde",
  "glob",
  "serde",
 ]
@@ -975,7 +996,6 @@ name = "guardrail3_app_rs_family_test_assertions"
 version = "0.0.0"
 dependencies = [
  "guardrail3-app-rs-family-test",
- "guardrail3-domain-report",
 ]
 
 [[package]]

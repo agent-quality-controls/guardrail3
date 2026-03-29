@@ -448,14 +448,10 @@ fn validate_dependency_spec_shape(
 
     if let Some(path) = table.get("path") {
         let Some(path) = path.as_str() else {
-            return Err(format!(
-                "`[{section_key}].{alias}.path` must be a string."
-            ));
+            return Err(format!("`[{section_key}].{alias}.path` must be a string."));
         };
         if path.is_empty() {
-            return Err(format!(
-                "`[{section_key}].{alias}.path` must be non-empty."
-            ));
+            return Err(format!("`[{section_key}].{alias}.path` must be non-empty."));
         }
     }
 
