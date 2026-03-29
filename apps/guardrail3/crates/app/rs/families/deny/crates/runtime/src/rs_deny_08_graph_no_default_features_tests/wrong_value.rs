@@ -1,4 +1,4 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_deny_assertions::rs_deny_08_graph_no_default_features as assertions;
 
 use super::super::ConfigDenyInput;
 use super::super::check;
@@ -24,16 +24,14 @@ fn errors_when_no_default_features_is_missing_or_true() {
 
         check(&input, &mut results);
 
-        assert_eq!(results.len(), 1);
-        let result = &results[0];
-        assert_eq!(result.id, "RS-DENY-08");
-        assert_eq!(result.severity, Severity::Error);
-        assert_eq!(result.title, "graph no-default-features must be false");
-        assert_eq!(
-            result.message,
-            "`deny.toml` must set `[graph].no-default-features = false`."
+        assertions::assert_findings(
+            &results,
+            &[assertions::error(
+                "graph no-default-features must be false",
+                "`deny.toml` must set `[graph].no-default-features = false`.",
+                "deny.toml",
+                false,
+            )],
         );
-        assert_eq!(result.file.as_deref(), Some("deny.toml"));
-        assert!(!result.inventory);
     }
 }

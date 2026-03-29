@@ -1,17 +1,16 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_deny_assertions::rs_deny_23_skip_hygiene as assertions;
 
 #[test]
 fn warns_when_skip_container_is_not_an_array() {
     let results = super::super::run_check("[bans]\nskip = \"serde\"\n");
 
-    assert_eq!(results.len(), 1);
-    let result = &results[0];
-    assert_eq!(result.id, "RS-DENY-23");
-    assert_eq!(result.severity, Severity::Warn);
-    assert_eq!(result.title, "malformed skip container");
-    assert_eq!(
-        result.message,
-        "`deny.toml` must use an array for `[bans].skip` entries."
+    assertions::assert_findings(
+        &results,
+        &[assertions::warn(
+            "malformed skip container",
+            "`deny.toml` must use an array for `[bans].skip` entries.",
+            "deny.toml",
+            false,
+        )],
     );
-    assert_eq!(result.file.as_deref(), Some("deny.toml"));
 }

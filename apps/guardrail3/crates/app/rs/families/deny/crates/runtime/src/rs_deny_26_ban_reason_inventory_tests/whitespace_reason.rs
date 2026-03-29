@@ -1,4 +1,4 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_deny_assertions::rs_deny_26_ban_reason_inventory as assertions;
 
 use super::super::add_deny_ban_entry;
 
@@ -14,15 +14,13 @@ fn inventories_whitespace_only_reason_as_missing() {
     );
     let results = super::super::run_check(&deny);
 
-    assert_eq!(results.len(), 1);
-    let result = &results[0];
-    assert_eq!(result.id, "RS-DENY-26");
-    assert_eq!(result.severity, Severity::Info);
-    assert_eq!(result.title, "ban entry missing reason");
-    assert_eq!(
-        result.message,
-        "`deny.toml` ban entry `json5` has no `reason`."
+    assertions::assert_findings(
+        &results,
+        &[assertions::info(
+            "ban entry missing reason",
+            "`deny.toml` ban entry `json5` has no `reason`.",
+            "deny.toml",
+            true,
+        )],
     );
-    assert_eq!(result.file.as_deref(), Some("deny.toml"));
-    assert!(result.inventory);
 }

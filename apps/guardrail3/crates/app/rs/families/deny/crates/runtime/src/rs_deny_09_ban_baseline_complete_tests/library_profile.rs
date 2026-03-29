@@ -1,4 +1,4 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_deny_assertions::rs_deny_09_ban_baseline_complete as assertions;
 
 use super::super::ConfigDenyInput;
 use super::super::check;
@@ -29,19 +29,21 @@ fn library_profile_requires_library_io_bans() {
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 2);
-    assert!(results.iter().any(|result| {
-        result.id == "RS-DENY-09"
-            && result.severity == Severity::Error
-            && result.title == "missing canonical ban"
-            && result.message == "`deny.toml` is missing deny ban `axum`."
-            && result.file.as_deref() == Some("deny.toml")
-    }));
-    assert!(results.iter().any(|result| {
-        result.id == "RS-DENY-09"
-            && result.severity == Severity::Error
-            && result.title == "missing canonical ban"
-            && result.message == "`deny.toml` is missing deny ban `tokio`."
-            && result.file.as_deref() == Some("deny.toml")
-    }));
+    assertions::assert_findings(
+        &results,
+        &[
+            assertions::error(
+                "missing canonical ban",
+                "`deny.toml` is missing deny ban `axum`.",
+                "deny.toml",
+                false,
+            ),
+            assertions::error(
+                "missing canonical ban",
+                "`deny.toml` is missing deny ban `tokio`.",
+                "deny.toml",
+                false,
+            ),
+        ],
+    );
 }

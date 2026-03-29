@@ -1,4 +1,4 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_deny_assertions::rs_deny_09_ban_baseline_complete as assertions;
 
 use super::super::{build_fixture_deny_toml, set_deny_ban_wrappers};
 
@@ -10,14 +10,13 @@ fn errors_when_canonical_managed_wrappers_change() {
         &["tree-sitter"],
     ));
 
-    assert_eq!(results.len(), 1);
-    let result = &results[0];
-    assert_eq!(result.id, "RS-DENY-09");
-    assert_eq!(result.severity, Severity::Error);
-    assert_eq!(result.title, "managed ban wrappers changed");
-    assert_eq!(
-        result.message,
-        "`deny.toml` ban `regex` no longer matches the canonical managed entry."
+    assertions::assert_findings(
+        &results,
+        &[assertions::error(
+            "managed ban wrappers changed",
+            "`deny.toml` ban `regex` no longer matches the canonical managed entry.",
+            "deny.toml",
+            false,
+        )],
     );
-    assert_eq!(result.file.as_deref(), Some("deny.toml"));
 }

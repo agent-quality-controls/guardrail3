@@ -1,4 +1,4 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_deny_assertions::rs_deny_13_wildcards_inventory as assertions;
 
 use super::super::ConfigDenyInput;
 use super::super::check;
@@ -27,13 +27,14 @@ fn warns_when_wildcards_is_missing_or_project_specific() {
 
         check(&input, &mut results);
 
-        assert_eq!(results.len(), 1);
-        let result = &results[0];
-        assert_eq!(result.id, "RS-DENY-13");
-        assert_eq!(result.severity, Severity::Warn);
-        assert_eq!(result.title, "wildcards differs from baseline");
-        assert_eq!(result.message, expected);
-        assert_eq!(result.file.as_deref(), Some("deny.toml"));
-        assert!(!result.inventory);
+        assertions::assert_findings(
+            &results,
+            &[assertions::warn(
+                "wildcards differs from baseline",
+                expected,
+                "deny.toml",
+                false,
+            )],
+        );
     }
 }

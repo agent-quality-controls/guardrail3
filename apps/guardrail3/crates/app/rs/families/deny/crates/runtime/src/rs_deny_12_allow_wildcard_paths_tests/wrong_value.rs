@@ -1,4 +1,4 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_deny_assertions::rs_deny_12_allow_wildcard_paths as assertions;
 
 use super::super::ConfigDenyInput;
 use super::super::check;
@@ -24,16 +24,14 @@ fn errors_when_allow_wildcard_paths_is_missing_or_false() {
 
         check(&input, &mut results);
 
-        assert_eq!(results.len(), 1);
-        let result = &results[0];
-        assert_eq!(result.id, "RS-DENY-12");
-        assert_eq!(result.severity, Severity::Error);
-        assert_eq!(result.title, "allow-wildcard-paths must be true");
-        assert_eq!(
-            result.message,
-            "`deny.toml` must set `[bans].allow-wildcard-paths = true`."
+        assertions::assert_findings(
+            &results,
+            &[assertions::error(
+                "allow-wildcard-paths must be true",
+                "`deny.toml` must set `[bans].allow-wildcard-paths = true`.",
+                "deny.toml",
+                false,
+            )],
         );
-        assert_eq!(result.file.as_deref(), Some("deny.toml"));
-        assert!(!result.inventory);
     }
 }

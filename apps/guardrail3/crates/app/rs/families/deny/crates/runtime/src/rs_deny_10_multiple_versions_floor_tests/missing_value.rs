@@ -1,4 +1,4 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_deny_assertions::rs_deny_10_multiple_versions_floor as assertions;
 
 use super::super::{build_fixture_deny_toml, remove_section_key};
 
@@ -10,15 +10,13 @@ fn warns_when_multiple_versions_is_missing() {
         "multiple-versions",
     ));
 
-    assert_eq!(results.len(), 1);
-    let result = &results[0];
-    assert_eq!(result.id, "RS-DENY-10");
-    assert_eq!(result.severity, Severity::Warn);
-    assert_eq!(result.title, "multiple-versions missing");
-    assert_eq!(
-        result.message,
-        "`deny.toml` does not set `[bans].multiple-versions`."
+    assertions::assert_findings(
+        &results,
+        &[assertions::warn(
+            "multiple-versions missing",
+            "`deny.toml` does not set `[bans].multiple-versions`.",
+            "deny.toml",
+            false,
+        )],
     );
-    assert_eq!(result.file.as_deref(), Some("deny.toml"));
-    assert!(!result.inventory);
 }

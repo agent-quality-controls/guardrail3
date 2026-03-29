@@ -1,4 +1,4 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_deny_assertions::rs_deny_30_wrappers as assertions;
 
 use super::super::{build_fixture_deny_toml, set_deny_ban_wrappers};
 
@@ -10,15 +10,13 @@ fn errors_when_canonical_non_empty_wrapper_policy_changes() {
         &["tree-sitter"],
     ));
 
-    assert_eq!(results.len(), 1);
-    let result = &results[0];
-    assert_eq!(result.id, "RS-DENY-30");
-    assert_eq!(result.severity, Severity::Error);
-    assert_eq!(result.title, "managed ban wrappers changed");
-    assert_eq!(
-        result.message,
-        "`deny.toml` ban `regex` must keep wrappers `globset, ignore, tree-sitter`."
+    assertions::assert_findings(
+        &results,
+        &[assertions::error(
+            "managed ban wrappers changed",
+            "`deny.toml` ban `regex` must keep wrappers `globset, ignore, tree-sitter`.",
+            "deny.toml",
+            false,
+        )],
     );
-    assert_eq!(result.file.as_deref(), Some("deny.toml"));
-    assert!(!result.inventory);
 }
