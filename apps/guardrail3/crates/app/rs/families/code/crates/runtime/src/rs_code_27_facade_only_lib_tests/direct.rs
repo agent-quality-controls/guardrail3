@@ -1,6 +1,6 @@
 use super::super::check_source;
 use guardrail3_app_rs_family_code_assertions::rs_code_27_facade_only_lib::{
-    assert_findings, RuleFinding,
+    RuleFinding, assert_findings,
 };
 
 #[test]

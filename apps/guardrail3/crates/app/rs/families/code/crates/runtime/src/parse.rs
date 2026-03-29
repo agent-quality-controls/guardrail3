@@ -31,8 +31,8 @@ pub fn effective_non_comment_line_count(content: &str) -> usize {
     comments::effective_non_comment_line_count(content)
 }
 
-pub fn count_top_level_use_statements(ast: &syn::File) -> usize {
-    core::count_top_level_use_statements(ast)
+pub fn count_top_level_use_imports(ast: &syn::File) -> usize {
+    core::count_top_level_use_imports(ast)
 }
 
 pub fn line_text(content: &str, line: usize) -> &str {

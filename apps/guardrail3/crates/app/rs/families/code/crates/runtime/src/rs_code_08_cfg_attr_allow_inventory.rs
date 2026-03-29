@@ -36,6 +36,6 @@ pub(crate) fn copy_fixture() -> test_support::TempDir {
 }
 
 #[cfg(test)]
-#[path = "rs_code_08_cfg_attr_allow_inventory_tests/mod.rs"]
+#[path = "rs_code_08_cfg_attr_allow_inventory_tests/mod.rs"] // reason: test-only sidecar module wiring
 // reason: test-only sidecar module wiring
 mod rs_code_08_cfg_attr_allow_inventory_tests;

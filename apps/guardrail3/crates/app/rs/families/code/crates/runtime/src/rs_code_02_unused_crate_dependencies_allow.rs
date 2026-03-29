@@ -44,6 +44,6 @@ pub(crate) fn copy_fixture() -> test_support::TempDir {
 }
 
 #[cfg(test)]
-#[path = "rs_code_02_unused_crate_dependencies_allow_tests/mod.rs"]
+#[path = "rs_code_02_unused_crate_dependencies_allow_tests/mod.rs"] // reason: test-only sidecar module wiring
 // reason: test-only sidecar module wiring
 mod rs_code_02_unused_crate_dependencies_allow_tests;

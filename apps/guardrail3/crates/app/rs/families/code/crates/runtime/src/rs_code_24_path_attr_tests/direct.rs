@@ -1,6 +1,6 @@
 use super::super::check_source;
 use guardrail3_app_rs_family_code_assertions::rs_code_24_path_attr::{
-    assert_findings, assert_no_hits, RuleFinding,
+    RuleFinding, assert_findings, assert_no_hits,
 };
 
 #[test]

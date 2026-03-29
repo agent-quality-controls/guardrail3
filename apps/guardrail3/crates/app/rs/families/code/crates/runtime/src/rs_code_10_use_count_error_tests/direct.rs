@@ -1,10 +1,10 @@
 use super::super::check_source;
-use guardrail3_app_rs_family_code_assertions::rs_code_10_use_count_error::{Severity, 
-    RuleFinding, assert_findings,
+use guardrail3_app_rs_family_code_assertions::rs_code_10_use_count_error::{
+    RuleFinding, Severity, assert_findings,
 };
 
 #[test]
-fn errors_above_twenty_top_level_uses() {
+fn errors_above_twenty_top_level_use_imports() {
     let mut lines: Vec<String> = (0..21)
         .map(|index| format!("use crate::mod_{index};"))
         .collect();
@@ -14,8 +14,8 @@ fn errors_above_twenty_top_level_uses() {
         &check_source("src/foo.rs", &content, false),
         &[RuleFinding {
             severity: Severity::Error,
-            title: "too many use statements",
-            message: "21 top-level use statements (max 20).",
+            title: "too many use imports",
+            message: "21 top-level use imports (max 20).",
             file: Some("src/foo.rs"),
             line: None,
             inventory: false,
@@ -24,7 +24,23 @@ fn errors_above_twenty_top_level_uses() {
 }
 
 #[test]
-fn skips_exactly_twenty_top_level_uses() {
+fn errors_grouped_imports_by_leaf_count() {
+    let content = "use crate::{a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u};\nfn main() {}\n";
+    assert_findings(
+        &check_source("src/foo.rs", content, false),
+        &[RuleFinding {
+            severity: Severity::Error,
+            title: "too many use imports",
+            message: "21 top-level use imports (max 20).",
+            file: Some("src/foo.rs"),
+            line: None,
+            inventory: false,
+        }],
+    );
+}
+
+#[test]
+fn skips_exactly_twenty_top_level_use_imports() {
     let mut lines: Vec<String> = (0..20)
         .map(|index| format!("use crate::mod_{index};"))
         .collect();
