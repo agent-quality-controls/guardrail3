@@ -26,6 +26,8 @@ toml = "0.8"
 [dev-dependencies]
 guardrail3_adapters_outbound_fs = { package = "guardrail3-adapters-outbound-fs", path = "../../../../adapters/outbound/fs" }
 guardrail3_adapters_outbound_tool_runner = { package = "guardrail3-adapters-outbound-tool-runner", path = "../../../../adapters/outbound/tool-runner" }
+guardrail3_app_rs_family_release_assertions = { package = "guardrail3-app-rs-family-release-assertions", path = "assertions" }
 guardrail3_app_rs_placement = { package = "guardrail3-app-rs-placement", path = "../../placement" }
 guardrail3_validation_model = { package = "guardrail3-domain-validation-model", path = "../../../../domain/validation-model" }
+test_support = { package = "guardrail3-app-rs-family-release-test-support", path = "test_support" }
 tempfile = "3"

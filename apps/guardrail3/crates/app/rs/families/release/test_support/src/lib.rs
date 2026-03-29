@@ -1,0 +1,103 @@
+use std::collections::BTreeMap;
+use std::path::{Path, PathBuf};
+
+use guardrail3_adapters_outbound_fs::RealFileSystem;
+use guardrail3_app_core::project_walker::walk_project;
+use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
+use guardrail3_outbound_traits::{CommandRunResult, ToolChecker};
+
+pub fn walk(root: &Path) -> ProjectTree {
+    walk_project(&RealFileSystem, root)
+}
+
+pub fn write_file(root: &Path, rel: &str, content: &str) {
+    let path = root.join(rel);
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent).expect("create parent");
+    }
+    std::fs::write(path, content).expect("write file");
+}
+
+pub fn dir_entry(dirs: &[&str], files: &[&str]) -> DirEntry {
+    DirEntry {
+        dirs: dirs.iter().map(|value| (*value).to_owned()).collect(),
+        files: files.iter().map(|value| (*value).to_owned()).collect(),
+        symlink_dirs: Vec::new(),
+        symlink_files: Vec::new(),
+    }
+}
+
+pub fn project_tree(
+    structure: Vec<(&str, DirEntry)>,
+    content: Vec<(&str, &str)>,
+    root: PathBuf,
+) -> ProjectTree {
+    for (rel, entry) in &structure {
+        let abs_dir = if rel.is_empty() {
+            root.clone()
+        } else {
+            root.join(rel)
+        };
+        std::fs::create_dir_all(&abs_dir).expect("create project dir");
+        for dir in &entry.dirs {
+            std::fs::create_dir_all(abs_dir.join(dir)).expect("create child dir");
+        }
+    }
+    for (rel, body) in &content {
+        let abs_path = root.join(rel);
+        if let Some(parent) = abs_path.parent() {
+            std::fs::create_dir_all(parent).expect("create file parent");
+        }
+        std::fs::write(&abs_path, body).expect("write project file");
+    }
+
+    ProjectTree {
+        root,
+        structure: structure
+            .into_iter()
+            .map(|(rel, entry)| (rel.to_owned(), entry))
+            .collect::<BTreeMap<_, _>>(),
+        content: content
+            .into_iter()
+            .map(|(rel, body)| (rel.to_owned(), body.to_owned()))
+            .collect::<BTreeMap<_, _>>(),
+    }
+}
+
+pub fn temp_root(slug: &str) -> PathBuf {
+    let unique = format!(
+        "{}-{}-{}",
+        slug,
+        std::process::id(),
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("clock")
+            .as_nanos()
+    );
+    let root = std::env::temp_dir().join(unique);
+    std::fs::create_dir_all(&root).expect("create temp root");
+    root
+}
+
+#[derive(Debug)]
+pub struct StubToolChecker {
+    semver_checks_installed: bool,
+}
+
+impl StubToolChecker {
+    pub const fn new(semver_checks_installed: bool) -> Self {
+        Self {
+            semver_checks_installed,
+        }
+    }
+}
+
+impl ToolChecker for StubToolChecker {
+    fn is_installed(&self, tool: &str) -> bool {
+        tool == "cargo-semver-checks" && self.semver_checks_installed
+    }
+
+    fn run_cargo_publish_dry_run_outcome(&self, _path: &Path) -> Option<CommandRunResult> {
+        None
+    }
+}

@@ -1,9 +1,6 @@
 use guardrail3_domain_report::Severity;
 
-use super::super::super::facts::ReleaseEdgeFacts;
-use super::super::super::inputs::ReleaseEdgeInput;
-use super::super::super::release_support::dependency_edges;
-use super::super::check;
+use super::super::{check, dependency_edges, edge_facts, edge_input};
 
 #[test]
 fn errors_on_inherited_workspace_path_dep_to_unpublishable_crate() {
@@ -36,20 +33,19 @@ internal = { path = "../internal", version = "1.2.3" }
         .expect("internal edge");
     assert!(edge.has_path);
 
-    let facts = ReleaseEdgeFacts {
-        crate_name: "example".to_owned(),
-        cargo_rel_path: "crates/example/Cargo.toml".to_owned(),
-        dep_name: edge.dep_name,
-        dep_package_name: edge.dep_package_name,
-        section_label: edge.section_label,
-        target_label: edge.target_label,
-        has_path: edge.has_path,
-        dep_publishable: false,
-        version_req: edge.version_req,
-        actual_version: Some("1.2.3".to_owned()),
-        version_satisfied: Some(true),
-    };
-    let input = ReleaseEdgeInput::new(&facts);
+    let mut facts = edge_facts();
+    facts.crate_name = "example".to_owned();
+    facts.cargo_rel_path = "crates/example/Cargo.toml".to_owned();
+    facts.dep_name = edge.dep_name;
+    facts.dep_package_name = edge.dep_package_name;
+    facts.section_label = edge.section_label;
+    facts.target_label = edge.target_label;
+    facts.has_path = edge.has_path;
+    facts.dep_publishable = false;
+    facts.version_req = edge.version_req;
+    facts.actual_version = Some("1.2.3".to_owned());
+    facts.version_satisfied = Some(true);
+    let input = edge_input(&facts);
     let mut results = Vec::new();
 
     check(&input, &mut results);
@@ -86,20 +82,19 @@ internal = { path = "../internal", version = "1.2.3" }
     assert_eq!(edge.section_label, "build-dependencies");
     assert_eq!(edge.target_label.as_deref(), Some("cfg(unix)"));
 
-    let facts = ReleaseEdgeFacts {
-        crate_name: "example".to_owned(),
-        cargo_rel_path: "crates/example/Cargo.toml".to_owned(),
-        dep_name: edge.dep_name,
-        dep_package_name: edge.dep_package_name,
-        section_label: edge.section_label,
-        target_label: edge.target_label,
-        has_path: edge.has_path,
-        dep_publishable: false,
-        version_req: edge.version_req,
-        actual_version: Some("1.2.3".to_owned()),
-        version_satisfied: Some(true),
-    };
-    let input = ReleaseEdgeInput::new(&facts);
+    let mut facts = edge_facts();
+    facts.crate_name = "example".to_owned();
+    facts.cargo_rel_path = "crates/example/Cargo.toml".to_owned();
+    facts.dep_name = edge.dep_name;
+    facts.dep_package_name = edge.dep_package_name;
+    facts.section_label = edge.section_label;
+    facts.target_label = edge.target_label;
+    facts.has_path = edge.has_path;
+    facts.dep_publishable = false;
+    facts.version_req = edge.version_req;
+    facts.actual_version = Some("1.2.3".to_owned());
+    facts.version_satisfied = Some(true);
+    let input = edge_input(&facts);
     let mut results = Vec::new();
 
     check(&input, &mut results);

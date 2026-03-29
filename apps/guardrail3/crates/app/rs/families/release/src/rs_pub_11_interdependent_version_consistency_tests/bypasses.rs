@@ -1,6 +1,6 @@
-use super::super::super::test_support::run_tree as run_family;
-use super::super::super::test_support::{StubToolChecker, dir_entry, project_tree, temp_root};
-use super::super::super::test_support::{edge_facts, edge_input};
+use super::super::run_tree as run_family;
+use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
+use super::super::{edge_facts, edge_input};
 use super::super::check;
 
 #[test]

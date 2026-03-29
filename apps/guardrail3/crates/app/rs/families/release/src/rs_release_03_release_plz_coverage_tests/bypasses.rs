@@ -1,6 +1,6 @@
 use guardrail3_domain_report::Severity;
 
-use super::super::super::test_support::{repo_facts, repo_input};
+use super::super::{repo_facts, repo_input};
 use super::super::check;
 
 #[test]

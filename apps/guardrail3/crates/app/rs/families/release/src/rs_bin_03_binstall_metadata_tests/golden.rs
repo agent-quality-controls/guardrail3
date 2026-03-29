@@ -1,5 +1,5 @@
-use super::super::super::test_support::run_tree as run_family;
-use super::super::super::test_support::{
+use super::super::run_tree as run_family;
+use super::super::{
     StubToolChecker, crate_facts, crate_input, dir_entry, project_tree, temp_root,
 };
 use super::super::check;

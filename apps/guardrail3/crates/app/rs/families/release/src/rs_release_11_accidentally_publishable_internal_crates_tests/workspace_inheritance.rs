@@ -1,5 +1,5 @@
-use super::super::super::test_support::run_tree as check;
-use super::super::super::test_support::{StubToolChecker, dir_entry, project_tree, temp_root};
+use super::super::run_tree as check;
+use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
 
 #[test]
 fn should_not_warn_when_release_metadata_is_inherited_from_workspace_package() {

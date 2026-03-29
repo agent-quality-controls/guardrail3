@@ -1,10 +1,10 @@
 use std::collections::BTreeSet;
 
-use super::super::super::test_support::run_tree as run_family;
-use super::super::super::test_support::{StubToolChecker, dir_entry, project_tree, temp_root};
+use super::super::run_tree as run_family;
+use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
 use guardrail3_domain_report::Severity;
 
-use super::super::super::test_support::{crate_facts, crate_input, repo_facts, workflow_from_yaml};
+use super::super::{crate_facts, crate_input, repo_facts, workflow_from_yaml};
 use super::super::check;
 
 #[test]
