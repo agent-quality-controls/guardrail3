@@ -124,5 +124,5 @@ impl IgnoreVisitor<'_> {
 }
 
 #[cfg(test)]
-#[path = "extra_visitors_tests.rs"]
-mod tests;
+#[path = "extra_visitors_tests/mod.rs"]
+mod extra_visitors_tests;

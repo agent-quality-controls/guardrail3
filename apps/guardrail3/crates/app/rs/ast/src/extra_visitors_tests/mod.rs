@@ -1,11 +1,10 @@
 use syn::visit::Visit;
 
-use crate::ast_helpers::parse_file;
 use crate::extra_visitors::IgnoreVisitor;
 
 #[allow(clippy::expect_used)] // reason: test helper
 fn must_parse(source: &str) -> syn::File {
-    parse_file(source).expect("test input should be valid Rust")
+    syn::parse_file(source).expect("test input should be valid Rust")
 }
 
 #[test]

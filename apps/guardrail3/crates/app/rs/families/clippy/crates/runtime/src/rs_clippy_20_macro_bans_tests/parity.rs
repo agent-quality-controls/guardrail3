@@ -1,7 +1,14 @@
 use std::collections::BTreeSet;
 
-use guardrail3_domain_modules::clippy::EXPECTED_MACRO_BANS;
 use test_support::build_fixture_clippy_toml;
+
+const EXPECTED_MACRO_BANS: &[&str] = &[
+    "std::println",
+    "std::eprintln",
+    "std::dbg",
+    "std::todo",
+    "std::unimplemented",
+];
 
 #[test]
 fn generated_macro_ban_set_matches_rule_baseline() {

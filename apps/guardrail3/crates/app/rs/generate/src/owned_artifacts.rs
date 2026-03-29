@@ -375,5 +375,5 @@ fn strip_section(script: &str, start_marker: &str, end_marker: &str) -> String {
 }
 
 #[cfg(test)]
-#[path = "owned_artifacts_tests.rs"]
-mod tests;
+#[path = "owned_artifacts_tests/mod.rs"]
+mod owned_artifacts_tests;

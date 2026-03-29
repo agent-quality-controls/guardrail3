@@ -2,6 +2,7 @@ use std::collections::BTreeMap;
 use std::path::PathBuf;
 
 use super::{DirEntry, ProjectTree};
+use guardrail3_domain_project_tree_assertions::assert_string_vec_eq;
 
 fn sample_tree() -> ProjectTree {
     ProjectTree {
@@ -82,15 +83,10 @@ fn file_exists_checks_root_and_nested_files() {
 fn all_dir_rels_excludes_root() {
     let tree = sample_tree();
 
-    assert_eq!(
-        tree.all_dir_rels(),
-        vec![
-            "apps".to_owned(),
-            "apps/cli".to_owned(),
-            "crates".to_owned(),
-            "crates/api".to_owned(),
-            "crates/missing".to_owned(),
-        ]
+    assert_string_vec_eq(
+        &tree.all_dir_rels(),
+        &["apps", "apps/cli", "crates", "crates/api", "crates/missing"],
+        "all_dir_rels should return every known non-root directory in sorted order",
     );
 }
 
@@ -98,13 +94,15 @@ fn all_dir_rels_excludes_root() {
 fn dirs_with_file_returns_only_matching_dirs() {
     let tree = sample_tree();
 
-    assert_eq!(
-        tree.dirs_with_file("Cargo.toml"),
-        vec!["apps/cli".to_owned(), "crates/api".to_owned()]
+    assert_string_vec_eq(
+        &tree.dirs_with_file("Cargo.toml"),
+        &["apps/cli", "crates/api"],
+        "dirs_with_file should return only the directories containing Cargo.toml",
     );
-    assert_eq!(
-        tree.dirs_with_file(".rustfmt.toml"),
-        vec!["crates/api".to_owned()]
+    assert_string_vec_eq(
+        &tree.dirs_with_file(".rustfmt.toml"),
+        &["crates/api"],
+        "dirs_with_file should return only the directories containing .rustfmt.toml",
     );
 }
 
@@ -112,13 +110,15 @@ fn dirs_with_file_returns_only_matching_dirs() {
 fn matching_dir_rels_matches_actual_dirs_only() {
     let tree = sample_tree();
 
-    assert_eq!(
-        tree.matching_dir_rels("crates/*"),
-        vec!["crates/api".to_owned(), "crates/missing".to_owned()]
+    assert_string_vec_eq(
+        &tree.matching_dir_rels("crates/*"),
+        &["crates/api", "crates/missing"],
+        "matching_dir_rels should match the crate subtree only",
     );
-    assert_eq!(
-        tree.matching_dir_rels("apps/*"),
-        vec!["apps/cli".to_owned()]
+    assert_string_vec_eq(
+        &tree.matching_dir_rels("apps/*"),
+        &["apps/cli"],
+        "matching_dir_rels should match the app subtree only",
     );
     assert!(tree.matching_dir_rels("does/not/exist/*").is_empty());
     assert!(tree.matching_dir_rels("[invalid").is_empty());

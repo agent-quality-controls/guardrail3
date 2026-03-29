@@ -15,4 +15,5 @@ guardrail3_shared_fs = { package = "guardrail3-shared-fs", path = "../../../shar
 toml = "0.8"
 
 [dev-dependencies]
+guardrail3_app_rs_generate_assertions = { package = "guardrail3-app-rs-generate-assertions", path = "assertions" }
 tempfile = "3"

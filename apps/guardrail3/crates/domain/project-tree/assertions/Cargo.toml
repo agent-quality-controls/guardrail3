@@ -1,0 +1,10 @@
+[package]
+name = "guardrail3-domain-project-tree-assertions"
+version = "0.0.0"
+edition = "2024"
+
+[lints]
+workspace = true
+
+[dependencies]
+guardrail3_domain_project_tree = { package = "guardrail3-domain-project-tree", path = ".." }

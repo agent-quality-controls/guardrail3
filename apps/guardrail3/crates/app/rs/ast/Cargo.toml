@@ -10,3 +10,6 @@ workspace = true
 proc-macro2 = { version = "1", features = ["span-locations"] }
 quote = "1.0.45"
 syn = { version = "2", features = ["full", "parsing", "visit"] }
+
+[dev-dependencies]
+guardrail3_app_rs_ast_assertions = { package = "guardrail3-app-rs-ast-assertions", path = "assertions" }
