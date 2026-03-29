@@ -1,0 +1,20 @@
+use guardrail3_app_rs_family_hooks_rs as _;
+
+mod common;
+
+pub mod hook_rs_01_fmt_step_present;
+pub mod hook_rs_02_clippy_step_present;
+pub mod hook_rs_03_cargo_deny_step_present;
+pub mod hook_rs_04_test_step_present;
+pub mod hook_rs_05_cargo_machete_step_present;
+pub mod hook_rs_06_required_tools_installed;
+pub mod hook_rs_07_duplication_tool_is_cargo_dupes;
+pub mod hook_rs_08_guardrail_validate_staged_present;
+pub mod hook_rs_09_clippy_denies_warnings;
+pub mod hook_rs_10_test_uses_workspace;
+pub mod hook_rs_11_gitleaks_step_present;
+pub mod hook_rs_12_cargo_dupes_step_present;
+pub mod hook_rs_13_cargo_dupes_excludes;
+pub mod hook_rs_14_guardrail_binary_available;
+pub mod hook_rs_15_cargo_dupes_installed;
+pub mod hook_rs_16_config_changes_trigger_validation;

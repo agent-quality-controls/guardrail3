@@ -54,6 +54,8 @@ members = [
     "crates/app/rs/families/hexarch/crates/assertions_common",
     "crates/app/rs/families/hexarch/test_support",
     "crates/app/rs/families/hooks-rs",
+    "crates/app/rs/families/hooks-rs/assertions",
+    "crates/app/rs/families/hooks-rs/test_support",
     "crates/app/rs/families/hooks-shared",
     "crates/app/rs/families/hooks-shared/assertions",
     "crates/app/rs/families/release",

@@ -593,5 +593,17 @@ fn replace_top_level_case_marker_impl(
 }
 
 #[cfg(test)]
-#[path = "hook_rs_16_config_changes_trigger_validation_tests.rs"]
-mod tests;
+pub(super) fn run_case(content: &str) -> Vec<CheckResult> {
+    let parsed = test_support::parsed_hook(content);
+    let input = RustHookCommandInput {
+        rel_path: ".githooks/pre-commit",
+        parsed: &parsed,
+    };
+    let mut results = Vec::new();
+    check(content, &input, &mut results);
+    results
+}
+
+#[cfg(test)]
+#[path = "hook_rs_16_config_changes_trigger_validation_tests/mod.rs"]
+mod hook_rs_16_config_changes_trigger_validation_tests;

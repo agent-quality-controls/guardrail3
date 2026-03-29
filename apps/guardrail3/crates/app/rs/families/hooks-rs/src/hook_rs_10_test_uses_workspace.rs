@@ -670,5 +670,17 @@ fn strip_inline_comment(line: &str) -> &str {
 }
 
 #[cfg(test)]
-#[path = "hook_rs_10_test_uses_workspace_tests.rs"]
-mod tests;
+pub(super) fn run_case(content: &str) -> Vec<CheckResult> {
+    let parsed = test_support::parsed_hook(content);
+    let input = RustHookCommandInput {
+        rel_path: ".githooks/pre-commit",
+        parsed: &parsed,
+    };
+    let mut results = Vec::new();
+    check(&input, &mut results);
+    results
+}
+
+#[cfg(test)]
+#[path = "hook_rs_10_test_uses_workspace_tests/mod.rs"]
+mod hook_rs_10_test_uses_workspace_tests;
