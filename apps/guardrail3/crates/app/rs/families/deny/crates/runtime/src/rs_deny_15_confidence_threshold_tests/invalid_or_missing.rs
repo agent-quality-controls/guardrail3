@@ -1,4 +1,4 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_deny_assertions::rs_deny_15_confidence_threshold as assertions;
 
 use super::super::ConfigDenyInput;
 use super::super::check;
@@ -24,16 +24,14 @@ fn warns_when_confidence_threshold_is_missing_or_invalid() {
 
         check(&input, &mut results);
 
-        assert_eq!(results.len(), 1);
-        let result = &results[0];
-        assert_eq!(result.id, "RS-DENY-15");
-        assert_eq!(result.severity, Severity::Warn);
-        assert_eq!(result.title, "confidence-threshold missing or invalid");
-        assert_eq!(
-            result.message,
-            "`deny.toml` must set `confidence-threshold >= 0.8`."
+        assertions::assert_findings(
+            &results,
+            &[assertions::warn(
+                "confidence-threshold missing or invalid",
+                "`deny.toml` must set `confidence-threshold >= 0.8`.",
+                "deny.toml",
+                false,
+            )],
         );
-        assert_eq!(result.file.as_deref(), Some("deny.toml"));
-        assert!(!result.inventory);
     }
 }

@@ -1,4 +1,4 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_deny_assertions::rs_deny_05_advisories_baseline as assertions;
 
 use super::super::{build_fixture_deny_toml, remove_section};
 
@@ -9,12 +9,13 @@ fn errors_when_advisories_section_is_missing() {
         "advisories",
     ));
 
-    assert_eq!(results.len(), 1);
-    let result = &results[0];
-    assert_eq!(result.id, "RS-DENY-05");
-    assert_eq!(result.severity, Severity::Error);
-    assert_eq!(result.title, "[advisories] section missing");
-    assert_eq!(result.message, "`deny.toml` has no `[advisories]` section.");
-    assert_eq!(result.file.as_deref(), Some("deny.toml"));
-    assert!(!result.inventory);
+    assertions::assert_findings(
+        &results,
+        &[assertions::error(
+            "[advisories] section missing",
+            "`deny.toml` has no `[advisories]` section.",
+            "deny.toml",
+            false,
+        )],
+    );
 }

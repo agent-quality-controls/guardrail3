@@ -1,4 +1,4 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_deny_assertions::rs_deny_14_license_allow_baseline as assertions;
 
 use super::super::{build_fixture_deny_toml, remove_section};
 
@@ -9,11 +9,13 @@ fn errors_when_licenses_section_is_missing() {
         "licenses",
     ));
 
-    assert_eq!(results.len(), 1);
-    let result = &results[0];
-    assert_eq!(result.id, "RS-DENY-14");
-    assert_eq!(result.severity, Severity::Error);
-    assert_eq!(result.title, "[licenses] section missing");
-    assert_eq!(result.message, "`deny.toml` has no `[licenses]` section.");
-    assert_eq!(result.file.as_deref(), Some("deny.toml"));
+    assertions::assert_findings(
+        &results,
+        &[assertions::error(
+            "[licenses] section missing",
+            "`deny.toml` has no `[licenses]` section.",
+            "deny.toml",
+            false,
+        )],
+    );
 }

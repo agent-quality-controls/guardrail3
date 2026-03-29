@@ -1,4 +1,4 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_deny_assertions::rs_deny_08_graph_no_default_features as assertions;
 
 use super::super::{build_fixture_deny_toml, remove_section};
 
@@ -9,15 +9,13 @@ fn errors_when_graph_section_is_missing() {
         "graph",
     ));
 
-    assert_eq!(results.len(), 1);
-    let result = &results[0];
-    assert_eq!(result.id, "RS-DENY-08");
-    assert_eq!(result.severity, Severity::Error);
-    assert_eq!(result.title, "[graph] section missing");
-    assert_eq!(
-        result.message,
-        "`deny.toml` must contain `[graph]` coverage settings."
+    assertions::assert_findings(
+        &results,
+        &[assertions::error(
+            "[graph] section missing",
+            "`deny.toml` must contain `[graph]` coverage settings.",
+            "deny.toml",
+            false,
+        )],
     );
-    assert_eq!(result.file.as_deref(), Some("deny.toml"));
-    assert!(!result.inventory);
 }

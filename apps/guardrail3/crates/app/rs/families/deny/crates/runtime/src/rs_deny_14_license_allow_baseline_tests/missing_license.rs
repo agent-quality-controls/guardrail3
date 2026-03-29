@@ -1,4 +1,4 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_deny_assertions::rs_deny_14_license_allow_baseline as assertions;
 
 use super::super::{build_fixture_deny_toml, remove_allowed_license};
 
@@ -9,14 +9,13 @@ fn errors_when_a_baseline_allowed_license_is_missing() {
         "MIT",
     ));
 
-    assert_eq!(results.len(), 1);
-    let result = &results[0];
-    assert_eq!(result.id, "RS-DENY-14");
-    assert_eq!(result.severity, Severity::Error);
-    assert_eq!(result.title, "baseline license missing");
-    assert_eq!(
-        result.message,
-        "`deny.toml` is missing allowed license `MIT`."
+    assertions::assert_findings(
+        &results,
+        &[assertions::error(
+            "baseline license missing",
+            "`deny.toml` is missing allowed license `MIT`.",
+            "deny.toml",
+            false,
+        )],
     );
-    assert_eq!(result.file.as_deref(), Some("deny.toml"));
 }

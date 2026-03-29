@@ -1,4 +1,4 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_deny_assertions::rs_deny_10_multiple_versions_floor as assertions;
 
 use super::super::{build_fixture_deny_toml, set_section_string};
 
@@ -11,15 +11,13 @@ fn warns_when_multiple_versions_is_weaker_than_baseline() {
         "warn",
     ));
 
-    assert_eq!(results.len(), 1);
-    let result = &results[0];
-    assert_eq!(result.id, "RS-DENY-10");
-    assert_eq!(result.severity, Severity::Warn);
-    assert_eq!(result.title, "multiple-versions weaker than baseline");
-    assert_eq!(
-        result.message,
-        "`deny.toml` sets `[bans].multiple-versions = \"warn\"`."
+    assertions::assert_findings(
+        &results,
+        &[assertions::warn(
+            "multiple-versions weaker than baseline",
+            "`deny.toml` sets `[bans].multiple-versions = \"warn\"`.",
+            "deny.toml",
+            false,
+        )],
     );
-    assert_eq!(result.file.as_deref(), Some("deny.toml"));
-    assert!(!result.inventory);
 }

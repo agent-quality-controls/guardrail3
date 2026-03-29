@@ -1,4 +1,4 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_deny_assertions::rs_deny_15_confidence_threshold as assertions;
 
 use super::super::{build_fixture_deny_toml, set_license_confidence_threshold};
 
@@ -9,15 +9,13 @@ fn warns_when_confidence_threshold_is_weaker() {
         toml::Value::Float(0.7),
     ));
 
-    assert_eq!(results.len(), 1);
-    let result = &results[0];
-    assert_eq!(result.id, "RS-DENY-15");
-    assert_eq!(result.severity, Severity::Warn);
-    assert_eq!(result.title, "confidence-threshold weaker than baseline");
-    assert_eq!(
-        result.message,
-        "`deny.toml` sets `confidence-threshold = 0.7`."
+    assertions::assert_findings(
+        &results,
+        &[assertions::warn(
+            "confidence-threshold weaker than baseline",
+            "`deny.toml` sets `confidence-threshold = 0.7`.",
+            "deny.toml",
+            false,
+        )],
     );
-    assert_eq!(result.file.as_deref(), Some("deny.toml"));
-    assert!(!result.inventory);
 }

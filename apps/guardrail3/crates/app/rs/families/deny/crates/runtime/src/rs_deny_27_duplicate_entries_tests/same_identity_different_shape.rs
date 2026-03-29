@@ -1,4 +1,4 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_deny_assertions::rs_deny_27_duplicate_entries as assertions;
 
 use super::super::{add_skip_entry, build_fixture_deny_toml, set_advisory_ignores};
 
@@ -41,17 +41,21 @@ fn warns_when_same_identity_is_duplicated_across_supported_shapes() {
     );
     let results = super::super::run_check(&deny);
 
-    assert_eq!(results.len(), 2);
-    assert!(results.iter().any(|result| {
-        result.id == "RS-DENY-27"
-            && result.severity == Severity::Warn
-            && result.title == "duplicate skip entry"
-            && result.message == "`deny.toml` has duplicate skip entry `demo`."
-    }));
-    assert!(results.iter().any(|result| {
-        result.id == "RS-DENY-27"
-            && result.severity == Severity::Warn
-            && result.title == "duplicate advisory ignore entry"
-            && result.message == "`deny.toml` has duplicate advisory ignore `RUSTSEC-2020-0001`."
-    }));
+    assertions::assert_findings(
+        &results,
+        &[
+            assertions::warn(
+                "duplicate advisory ignore entry",
+                "`deny.toml` has duplicate advisory ignore `RUSTSEC-2020-0001`.",
+                "deny.toml",
+                false,
+            ),
+            assertions::warn(
+                "duplicate skip entry",
+                "`deny.toml` has duplicate skip entry `demo`.",
+                "deny.toml",
+                false,
+            ),
+        ],
+    );
 }

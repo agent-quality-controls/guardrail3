@@ -224,6 +224,18 @@ impl<'ast> Visit<'ast> for TestVisitor {
                 "assert_rule_files".to_owned(),
                 "assert_rule_results".to_owned(),
             ]);
+        } else if item
+            .mac
+            .path
+            .segments
+            .last()
+            .is_some_and(|segment| segment.ident == "define_result_assertions")
+        {
+            self.out.macro_defined_proof_functions.extend([
+                "assert_findings".to_owned(),
+                "assert_no_findings".to_owned(),
+                "assert_contains".to_owned(),
+            ]);
         }
         syn::visit::visit_item_macro(self, item);
     }

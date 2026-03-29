@@ -1,4 +1,4 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_deny_assertions::rs_deny_18_unknown_sources_policy as assertions;
 
 use super::super::{build_fixture_deny_toml, remove_section};
 
@@ -9,10 +9,13 @@ fn errors_when_sources_section_is_missing() {
         "sources",
     ));
 
-    assert_eq!(results.len(), 1);
-    let result = &results[0];
-    assert_eq!(result.id, "RS-DENY-18");
-    assert_eq!(result.severity, Severity::Error);
-    assert_eq!(result.title, "[sources] section missing");
-    assert_eq!(result.message, "`deny.toml` has no `[sources]` section.");
+    assertions::assert_findings(
+        &results,
+        &[assertions::error(
+            "[sources] section missing",
+            "`deny.toml` has no `[sources]` section.",
+            "deny.toml",
+            false,
+        )],
+    );
 }

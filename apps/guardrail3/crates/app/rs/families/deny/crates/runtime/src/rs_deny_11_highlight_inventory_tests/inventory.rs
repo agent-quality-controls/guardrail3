@@ -1,4 +1,4 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_deny_assertions::rs_deny_11_highlight_inventory as assertions;
 
 use super::super::ConfigDenyInput;
 use super::super::check;
@@ -27,13 +27,14 @@ fn inventories_missing_or_project_specific_highlight() {
 
         check(&input, &mut results);
 
-        assert_eq!(results.len(), 1);
-        let result = &results[0];
-        assert_eq!(result.id, "RS-DENY-11");
-        assert_eq!(result.severity, Severity::Info);
-        assert_eq!(result.title, "highlight differs from baseline");
-        assert_eq!(result.message, expected);
-        assert_eq!(result.file.as_deref(), Some("deny.toml"));
-        assert!(result.inventory);
+        assertions::assert_findings(
+            &results,
+            &[assertions::info(
+                "highlight differs from baseline",
+                expected,
+                "deny.toml",
+                true,
+            )],
+        );
     }
 }
