@@ -1,8 +1,6 @@
-use guardrail3_domain_report::Severity;
-
 use super::super::check_source;
 use guardrail3_app_rs_family_code_assertions::rs_code_17_impl_allow_blast_radius::{
-    assert_normalized_len, findings,
+    assert_findings, RuleFinding,
 };
 
 #[test]
@@ -18,17 +16,17 @@ impl Foo {
     fn d(&self) {}
 }
 "#;
-    let raw_results = check_source("src/foo.rs", content, false);
-    let results = findings(&raw_results);
+    let results = check_source("src/foo.rs", content, false);
 
-    assert_normalized_len(&results, 1);
-    assert_eq!(results[0].id, "RS-CODE-17");
-    assert_eq!(results[0].severity, Severity::Error);
-    assert_eq!(results[0].file.as_deref(), Some("src/foo.rs"));
-    assert_eq!(results[0].line, Some(4));
-    assert_eq!(results[0].title, "blanket impl-level allow");
-    assert_eq!(
-        results[0].message,
-        "`#[allow(clippy::too_many_lines)]` covers an impl block with 4 methods. Apply lint suppressions to individual methods instead."
+    assert_findings(
+        &results,
+        &[RuleFinding {
+            severity: guardrail3_domain_report::Severity::Error,
+            title: "blanket impl-level allow",
+            message: "`#[allow(clippy::too_many_lines)]` covers an impl block with 4 methods. Apply lint suppressions to individual methods instead.",
+            file: Some("src/foo.rs"),
+            line: Some(4),
+            inventory: false,
+        }],
     );
 }

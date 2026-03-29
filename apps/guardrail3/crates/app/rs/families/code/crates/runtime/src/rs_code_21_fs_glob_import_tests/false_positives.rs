@@ -59,12 +59,7 @@ fn no_hit_on_non_glob_fs_imports() {
     let content = "use std::fs::File;\nuse std::fs::{self};\nuse std::fs::{File, Read};\nuse std::{fs::{self, File as Alias}, io};\nfn main() {}";
     let results = check_source("src/foo.rs", content, false);
 
-    assert_eq!(
-        results.len(),
-        0,
-        "non-glob fs imports must not trigger RS-CODE-21"
-    );
-    assert!(results.iter().all(|result| result.id != "RS-CODE-21"));
+    assert_no_hits(&results);
 }
 
 #[test]
@@ -72,12 +67,7 @@ fn no_hit_on_non_std_fs_glob() {
     let content = "use other_guardrail3_shared_fs::*;\nuse mylib::fs::*;\nfn main() {}";
     let results = check_source("src/foo.rs", content, false);
 
-    assert_eq!(
-        results.len(),
-        0,
-        "glob imports from non-std crates must not trigger"
-    );
-    assert!(results.iter().all(|result| result.id != "RS-CODE-21"));
+    assert_no_hits(&results);
 }
 
 #[test]
@@ -85,12 +75,7 @@ fn no_hit_on_std_non_fs_glob() {
     let content = "use std::io::*;\nuse std::collections::*;\nfn main() {}";
     let results = check_source("src/foo.rs", content, false);
 
-    assert_eq!(
-        results.len(),
-        0,
-        "glob imports from std but not fs must not trigger"
-    );
-    assert!(results.iter().all(|result| result.id != "RS-CODE-21"));
+    assert_no_hits(&results);
 }
 
 #[test]
@@ -98,8 +83,7 @@ fn no_hit_on_cfg_test_guarded_glob() {
     let content = "#[cfg(test)]\nuse std::fs::*;\nfn main() {}";
     let results = check_source("src/foo.rs", content, false);
 
-    assert_eq!(results.len(), 0, "cfg(test) guarded glob must not trigger");
-    assert!(results.iter().all(|result| result.id != "RS-CODE-21"));
+    assert_no_hits(&results);
 }
 
 #[test]
@@ -107,12 +91,7 @@ fn no_hit_on_cfg_all_test_guarded_glob() {
     let content = "#[cfg(all(test, unix))]\nuse std::fs::*;\nfn main() {}";
     let results = check_source("src/foo.rs", content, false);
 
-    assert_eq!(
-        results.len(),
-        0,
-        "cfg(all(test, ...)) glob must not trigger"
-    );
-    assert!(results.iter().all(|result| result.id != "RS-CODE-21"));
+    assert_no_hits(&results);
 }
 
 #[test]
@@ -121,12 +100,7 @@ fn no_hit_on_cfg_test_module_containing_glob() {
         "#[cfg(test)]\nmod tests {\n    use std::fs::*;\n    fn probe() {}\n}\nfn main() {}";
     let results = check_source("src/foo.rs", content, false);
 
-    assert_eq!(
-        results.len(),
-        0,
-        "glob inside cfg(test) module must not trigger"
-    );
-    assert!(results.iter().all(|result| result.id != "RS-CODE-21"));
+    assert_no_hits(&results);
 }
 
 #[test]
@@ -134,12 +108,7 @@ fn no_hit_on_cfg_all_test_module_containing_glob() {
     let content = "#[cfg(all(test, unix))]\nmod tests {\n    use std::fs::*;\n    fn probe() {}\n}\nfn main() {}";
     let results = check_source("src/foo.rs", content, false);
 
-    assert_eq!(
-        results.len(),
-        0,
-        "glob inside cfg(all(test, ...)) module must not trigger"
-    );
-    assert!(results.iter().all(|result| result.id != "RS-CODE-21"));
+    assert_no_hits(&results);
 }
 
 #[test]
@@ -147,12 +116,7 @@ fn no_hit_on_cfg_all_test_function_containing_glob() {
     let content = "#[cfg(all(test, unix))]\nfn helper() {\n    use std::fs::*;\n    let _ = read_to_string(\"fixture\");\n}\nfn main() {}";
     let results = check_source("src/foo.rs", content, false);
 
-    assert_eq!(
-        results.len(),
-        0,
-        "glob inside cfg(all(test, ...)) function must not trigger"
-    );
-    assert!(results.iter().all(|result| result.id != "RS-CODE-21"));
+    assert_no_hits(&results);
 }
 
 #[test]
@@ -160,6 +124,5 @@ fn no_hit_on_test_file_with_inline_module_glob() {
     let content = "mod helpers {\n    use std::fs::*;\n}\n#[test]\nfn smoke() {}";
     let results = check_source("src/foo.rs", content, true);
 
-    assert_eq!(results.len(), 0, "test files are fully exempt");
-    assert!(results.iter().all(|result| result.id != "RS-CODE-21"));
+    assert_no_hits(&results);
 }

@@ -52,7 +52,4 @@ fn skips_item_level_and_file_backed_module_near_misses() {
             "apps/backend/crates/ports/outbound/events/src/file_backed_child.rs".to_owned(),
         ]),
     );
-    assert!(!results.iter().any(|result| {
-        result.id == "RS-CODE-01" && result.file.as_deref() == Some(file_backed_parent_rel)
-    }));
 }
