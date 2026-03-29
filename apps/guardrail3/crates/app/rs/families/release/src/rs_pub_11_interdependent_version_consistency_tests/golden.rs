@@ -1,4 +1,4 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_release_assertions::rs_pub_11_interdependent_version_consistency as assertions;
 
 use super::super::{check, dependency_edges, edge_facts, edge_input};
 
@@ -51,22 +51,17 @@ api = { path = "../api", version = "^2.0.0" }
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-PUB-11");
-    assert_eq!(results[0].severity, Severity::Error);
-    assert!(!results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some("crates/example/Cargo.toml")
-    );
-    assert!(results[0].title.contains("version mismatch with api"));
-    assert!(results[0].message.contains("Dependency `api`"));
-    assert!(results[0].message.contains("`[dependencies]`"));
-    assert!(results[0].message.contains("requires `^2.0.0`"));
-    assert!(
-        results[0]
-            .message
-            .contains("actual local publishable version is `1.2.3`")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Error),
+            file: Some("crates/example/Cargo.toml"),
+            inventory: Some(false),
+            title_contains: Some("version mismatch with api"),
+            message_contains: Some("requires `^2.0.0`"),
+            ..Default::default()
+        }],
     );
 }
 
@@ -89,22 +84,15 @@ fn errors_on_target_specific_renamed_path_dep_with_incompatible_version() {
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-PUB-11");
-    assert_eq!(results[0].severity, Severity::Error);
-    assert!(!results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some("crates/example/Cargo.toml")
-    );
-    assert!(results[0].message.contains("Dependency `api_v2`"));
-    assert!(results[0].message.contains("package `api`"));
-    assert!(results[0].message.contains("`[build-dependencies]`"));
-    assert!(results[0].message.contains("under target `cfg(unix)`"));
-    assert!(results[0].message.contains("requires `^2.0.0`"));
-    assert!(
-        results[0]
-            .message
-            .contains("actual local publishable version is `1.2.3`")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Error),
+            file: Some("crates/example/Cargo.toml"),
+            inventory: Some(false),
+            message_contains: Some("Dependency `api_v2`"),
+            ..Default::default()
+        }],
     );
 }

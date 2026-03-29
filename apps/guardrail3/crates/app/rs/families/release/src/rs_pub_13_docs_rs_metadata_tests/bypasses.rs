@@ -1,8 +1,8 @@
+use guardrail3_app_rs_family_release_assertions::rs_pub_13_docs_rs_metadata as assertions;
 use super::super::run_tree as run_family;
 use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
 use super::super::{crate_facts, crate_input};
 use super::super::check;
-use guardrail3_domain_report::Severity;
 
 #[test]
 fn emits_info_when_docs_rs_metadata_is_missing_and_skips_out_of_scope_crates() {
@@ -11,23 +11,17 @@ fn emits_info_when_docs_rs_metadata_is_missing_and_skips_out_of_scope_crates() {
     let missing_input = crate_input(&missing);
     let mut missing_results = Vec::new();
     check(&missing_input, &mut missing_results);
-    assert_eq!(missing_results.len(), 1);
-    assert_eq!(missing_results[0].id, "RS-PUB-13");
-    assert_eq!(missing_results[0].severity, Severity::Info);
-    assert!(!missing_results[0].inventory);
-    assert_eq!(
-        missing_results[0].file.as_deref(),
-        Some("crates/example/Cargo.toml")
-    );
-    assert!(
-        missing_results[0]
-            .title
-            .contains("docs.rs metadata missing")
-    );
-    assert!(
-        missing_results[0]
-            .message
-            .contains("reproducible docs.rs builds")
+    assert!(!assertions::findings(&missing_results).is_empty());
+    assertions::assert_rule_results(
+        &missing_results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            title_contains: Some("docs.rs metadata missing"),
+            file: Some("crates/example/Cargo.toml"),
+            inventory: Some(false),
+            message_contains: Some("reproducible docs.rs builds"),
+            ..Default::default()
+        }],
     );
 
     let mut binary = crate_facts("bin");
@@ -36,7 +30,8 @@ fn emits_info_when_docs_rs_metadata_is_missing_and_skips_out_of_scope_crates() {
     let binary_input = crate_input(&binary);
     let mut binary_results = Vec::new();
     check(&binary_input, &mut binary_results);
-    assert!(binary_results.is_empty());
+    assert!(assertions::findings(&binary_results).is_empty());
+    assertions::assert_rule_quiet(&binary_results);
 
     let mut non_publishable = crate_facts("x");
     non_publishable.publishable = false;
@@ -44,7 +39,8 @@ fn emits_info_when_docs_rs_metadata_is_missing_and_skips_out_of_scope_crates() {
     let non_publishable_input = crate_input(&non_publishable);
     let mut non_publishable_results = Vec::new();
     check(&non_publishable_input, &mut non_publishable_results);
-    assert!(non_publishable_results.is_empty());
+    assert!(assertions::findings(&non_publishable_results).is_empty());
+    assertions::assert_rule_quiet(&non_publishable_results);
 
     let mut binary_with_metadata = crate_facts("bin");
     binary_with_metadata.is_library = false;
@@ -57,7 +53,8 @@ fn emits_info_when_docs_rs_metadata_is_missing_and_skips_out_of_scope_crates() {
         &mut binary_with_metadata_results,
     );
 
-    assert!(binary_with_metadata_results.is_empty());
+    assert!(assertions::findings(&binary_with_metadata_results).is_empty());
+    assertions::assert_rule_quiet(&binary_with_metadata_results);
 }
 
 #[test]
@@ -89,13 +86,17 @@ path = "src/lib.rs"
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-PUB-13"
-            && result.severity == Severity::Info
-            && !result.inventory
-            && result.file.as_deref() == Some("Cargo.toml")
-            && result.title.contains("docs.rs metadata missing")
-    }));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            title_contains: Some("docs.rs metadata missing"),
+            file: Some("Cargo.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -132,11 +133,15 @@ foo = "bar"
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-PUB-13"
-            && result.severity == Severity::Info
-            && !result.inventory
-            && result.file.as_deref() == Some("Cargo.toml")
-            && result.title.contains("docs.rs metadata missing")
-    }));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            title_contains: Some("docs.rs metadata missing"),
+            file: Some("Cargo.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }

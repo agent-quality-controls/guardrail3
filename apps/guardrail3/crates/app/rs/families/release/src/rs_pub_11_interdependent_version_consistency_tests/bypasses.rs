@@ -1,3 +1,5 @@
+use guardrail3_app_rs_family_release_assertions::rs_pub_11_interdependent_version_consistency as assertions;
+
 use super::super::run_tree as run_family;
 use super::super::{StubToolChecker, dir_entry, project_tree, temp_root};
 use super::super::{edge_facts, edge_input};
@@ -11,7 +13,8 @@ fn does_not_error_when_local_publishable_version_is_compatible() {
 
     check(&input, &mut results);
 
-    assert!(results.is_empty());
+    assert!(assertions::findings(&results).is_empty());
+    assertions::assert_rule_quiet(&results);
 }
 
 #[test]
@@ -23,7 +26,8 @@ fn does_not_error_for_non_publishable_or_non_path_edges() {
 
     check(&non_publishable_input, &mut non_publishable_results);
 
-    assert!(non_publishable_results.is_empty());
+    assert!(assertions::findings(&non_publishable_results).is_empty());
+    assertions::assert_rule_quiet(&non_publishable_results);
 
     let mut non_path = edge_facts();
     non_path.has_path = false;
@@ -33,7 +37,8 @@ fn does_not_error_for_non_publishable_or_non_path_edges() {
 
     check(&non_path_input, &mut non_path_results);
 
-    assert!(non_path_results.is_empty());
+    assert!(assertions::findings(&non_path_results).is_empty());
+    assertions::assert_rule_quiet(&non_path_results);
 
     let mut missing_req = edge_facts();
     missing_req.version_req = None;
@@ -43,7 +48,8 @@ fn does_not_error_for_non_publishable_or_non_path_edges() {
 
     check(&missing_req_input, &mut missing_req_results);
 
-    assert!(missing_req_results.is_empty());
+    assert!(assertions::findings(&missing_req_results).is_empty());
+    assertions::assert_rule_quiet(&missing_req_results);
 
     let mut unknown_compat = edge_facts();
     unknown_compat.version_satisfied = None;
@@ -52,7 +58,8 @@ fn does_not_error_for_non_publishable_or_non_path_edges() {
 
     check(&unknown_compat_input, &mut unknown_compat_results);
 
-    assert!(unknown_compat_results.is_empty());
+    assert!(assertions::findings(&unknown_compat_results).is_empty());
+    assertions::assert_rule_quiet(&unknown_compat_results);
 }
 
 #[test]
@@ -109,11 +116,13 @@ repository = "https://example.com/api"
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-PUB-11"
-            && result.message.contains("api_v2")
-            && result.message.contains("package `api`")
-            && result.message.contains("`[dependencies]`")
-            && result.file.as_deref() == Some("crates/consumer/Cargo.toml")
-    }));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            file: Some("crates/consumer/Cargo.toml"),
+            message_contains: Some("api_v2"),
+            ..Default::default()
+        }],
+    );
 }

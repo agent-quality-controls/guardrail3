@@ -1,4 +1,4 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_release_assertions::rs_release_06_publish_dry_run_workflow as assertions;
 
 use super::super::{repo_facts, repo_input, workflow_from_yaml};
 use super::super::check;
@@ -21,13 +21,15 @@ jobs:
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-RELEASE-06");
-    assert_eq!(results[0].severity, Severity::Info);
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some(".github/workflows/publish.yml")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            file: Some(".github/workflows/publish.yml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
 }
 
@@ -49,13 +51,15 @@ jobs:
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-RELEASE-06");
-    assert_eq!(results[0].severity, Severity::Info);
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some(".github/workflows/publish-toolchain.yml")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            file: Some(".github/workflows/publish-toolchain.yml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
 }
 
@@ -77,12 +81,14 @@ jobs:
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-RELEASE-06");
-    assert_eq!(results[0].severity, Severity::Info);
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some(".github/workflows/publish-manifest.yml")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            file: Some(".github/workflows/publish-manifest.yml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
     );
 }

@@ -1,9 +1,10 @@
+use guardrail3_app_rs_family_release_assertions::rs_pub_14_include_exclude_inventory as assertions;
+
 use super::super::run_tree as run_family;
 use super::super::{
     StubToolChecker, crate_facts, crate_input, dir_entry, project_tree, temp_root,
 };
 use super::super::check;
-use guardrail3_domain_report::Severity;
 
 #[test]
 fn inventories_include_exclude_when_present() {
@@ -11,18 +12,17 @@ fn inventories_include_exclude_when_present() {
     let input = crate_input(&facts);
     let mut results = Vec::new();
     check(&input, &mut results);
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-PUB-14");
-    assert_eq!(results[0].severity, Severity::Info);
-    assert!(results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some("crates/example/Cargo.toml")
-    );
-    assert!(results[0].title.contains("include/exclude configured"));
-    assert_eq!(
-        results[0].message,
-        "Cargo.toml sets `include` or `exclude`."
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            file: Some("crates/example/Cargo.toml"),
+            inventory: Some(true),
+            title_contains: Some("include/exclude configured"),
+            message: Some("Cargo.toml sets `include` or `exclude`."),
+            ..Default::default()
+        }],
     );
 }
 
@@ -58,12 +58,16 @@ path = "src/lib.rs"
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-PUB-14"
-            && result.severity == Severity::Info
-            && result.inventory
-            && result.file.as_deref() == Some("Cargo.toml")
-    }));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            file: Some("Cargo.toml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -98,10 +102,14 @@ path = "src/lib.rs"
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(results.iter().any(|result| {
-        result.id == "RS-PUB-14"
-            && result.severity == Severity::Info
-            && result.inventory
-            && result.file.as_deref() == Some("Cargo.toml")
-    }));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            file: Some("Cargo.toml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
 }

@@ -1,6 +1,7 @@
+use guardrail3_app_rs_family_release_assertions::rs_release_09_publish_status_inventory as assertions;
+
 use super::super::{repo_facts, repo_input};
 use super::super::check;
-use guardrail3_domain_report::Severity;
 
 #[test]
 fn inventories_publish_status_when_present() {
@@ -9,12 +10,17 @@ fn inventories_publish_status_when_present() {
     let input = repo_input(&facts);
     let mut results = Vec::new();
     check(&input, &mut results);
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-RELEASE-09");
-    assert_eq!(results[0].severity, Severity::Info);
-    assert!(results[0].inventory);
-    assert_eq!(results[0].file.as_deref(), Some("Cargo.toml"));
-    assert!(results[0].message.contains("publish = false"));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            file: Some("Cargo.toml"),
+            inventory: Some(true),
+            message_contains: Some("publish = false"),
+            ..Default::default()
+        }],
+    );
 }
 
 #[test]
@@ -24,10 +30,15 @@ fn inventories_non_boolean_publish_status_when_present() {
     let input = repo_input(&facts);
     let mut results = Vec::new();
     check(&input, &mut results);
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-RELEASE-09");
-    assert_eq!(results[0].severity, Severity::Info);
-    assert!(results[0].inventory);
-    assert_eq!(results[0].file.as_deref(), Some("Cargo.toml"));
-    assert!(results[0].message.contains("publish = [\"internal\"]"));
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Info),
+            file: Some("Cargo.toml"),
+            inventory: Some(true),
+            message_contains: Some("publish = [\"internal\"]"),
+            ..Default::default()
+        }],
+    );
 }

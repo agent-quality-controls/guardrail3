@@ -1,6 +1,7 @@
+use guardrail3_app_rs_family_release_assertions::rs_pub_01_description_present as assertions;
+
 use super::super::{crate_facts, crate_input};
 use super::super::check;
-use guardrail3_domain_report::Severity;
 
 #[test]
 fn errors_without_description_and_skips_non_publishable_crates() {
@@ -9,13 +10,15 @@ fn errors_without_description_and_skips_non_publishable_crates() {
     let missing_input = crate_input(&missing);
     let mut missing_results = Vec::new();
     check(&missing_input, &mut missing_results);
-    assert_eq!(missing_results.len(), 1);
-    assert_eq!(missing_results[0].id, "RS-PUB-01");
-    assert_eq!(missing_results[0].severity, Severity::Error);
-    assert!(!missing_results[0].inventory);
-    assert_eq!(
-        missing_results[0].file.as_deref(),
-        Some("crates/example/Cargo.toml")
+    assert!(!assertions::findings(&missing_results).is_empty());
+    assertions::assert_rule_results(
+        &missing_results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Error),
+            file: Some("crates/example/Cargo.toml"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
     );
 
     let mut non_publishable = crate_facts("x");
@@ -24,5 +27,6 @@ fn errors_without_description_and_skips_non_publishable_crates() {
     let non_publishable_input = crate_input(&non_publishable);
     let mut non_publishable_results = Vec::new();
     check(&non_publishable_input, &mut non_publishable_results);
-    assert!(non_publishable_results.is_empty());
+    assert!(assertions::findings(&non_publishable_results).is_empty());
+    assertions::assert_rule_quiet(&non_publishable_results);
 }

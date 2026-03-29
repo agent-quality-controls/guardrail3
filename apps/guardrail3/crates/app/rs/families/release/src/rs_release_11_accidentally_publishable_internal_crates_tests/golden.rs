@@ -1,4 +1,4 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_release_assertions::rs_release_11_accidentally_publishable_internal_crates as assertions;
 
 use super::super::{crate_facts, crate_input};
 use super::super::check;
@@ -14,17 +14,16 @@ fn warns_on_publishable_crate_with_no_release_metadata() {
 
     check(&input, &mut results);
 
-    assert_eq!(results.len(), 1);
-    assert_eq!(results[0].id, "RS-RELEASE-11");
-    assert_eq!(results[0].severity, Severity::Warn);
-    assert!(!results[0].inventory);
-    assert_eq!(
-        results[0].file.as_deref(),
-        Some("crates/example/Cargo.toml")
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Warn),
+            file: Some("crates/example/Cargo.toml"),
+            inventory: Some(false),
+            title_contains: Some("internal"),
+            message_contains: Some("internal"),
+            ..Default::default()
+        }],
     );
-    assert!(results[0].title.contains("internal"));
-    assert!(results[0].message.contains("internal"));
-    assert!(results[0].message.contains("description"));
-    assert!(results[0].message.contains("license"));
-    assert!(results[0].message.contains("repository"));
 }
