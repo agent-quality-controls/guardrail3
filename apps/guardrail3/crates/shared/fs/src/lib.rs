@@ -35,12 +35,8 @@ pub fn list_dir(path: &Path) -> Vec<std::fs::DirEntry> {
 ///
 /// Returns `None` if the file doesn't exist or metadata can't be read.
 #[allow(clippy::disallowed_methods)] // reason: centralized fs module
-#[allow(clippy::manual_ok_err)] // reason: structurally distinct from read_file to avoid cargo-dupes match
 pub fn metadata(path: &Path) -> Option<std::fs::Metadata> {
-    match std::fs::metadata(path) {
-        Ok(metadata) => Some(metadata),
-        Err(_) => None,
-    }
+    std::fs::metadata(path).ok()
 }
 
 /// Write content to a file, creating parent directories.

@@ -3,8 +3,7 @@ use guardrail3_app_rs_family_cargo_assertions::rs_cargo_01_workspace_lints::{
     ExpectedRuleResult, assert_rule_results, check_results, rule_results,
 };
 
-#[allow(dead_code, non_upper_case_globals)] // reason: declarative fixture fragments intentionally keep config-shaped lowercase names and are shared unevenly across scenario tables
-const workspace_rust_lints: &str = r#"
+const WORKSPACE_RUST_LINTS: &str = r#"
     [workspace.lints.rust]
     warnings = "deny"
     unsafe_code = "forbid"
@@ -14,8 +13,7 @@ const workspace_rust_lints: &str = r#"
     missing_debug_implementations = "warn"
 "#;
 
-#[allow(dead_code, non_upper_case_globals)] // reason: declarative fixture fragments intentionally keep config-shaped lowercase names and are shared unevenly across scenario tables
-const workspace_clippy_lints: &str = r#"
+const WORKSPACE_CLIPPY_LINTS: &str = r#"
     [workspace.lints.clippy]
     all = { level = "deny", priority = -1 }
     pedantic = { level = "deny", priority = -1 }
@@ -64,8 +62,7 @@ const workspace_clippy_lints: &str = r#"
     multiple_crate_versions = "allow"
 "#;
 
-#[allow(dead_code, non_upper_case_globals)] // reason: declarative fixture fragments intentionally keep config-shaped lowercase names and are shared unevenly across scenario tables
-const standalone_rust_lints: &str = r#"
+const STANDALONE_RUST_LINTS: &str = r#"
     [lints.rust]
     warnings = "deny"
     unsafe_code = "forbid"
@@ -75,8 +72,7 @@ const standalone_rust_lints: &str = r#"
     missing_debug_implementations = "warn"
 "#;
 
-#[allow(dead_code, non_upper_case_globals)] // reason: declarative fixture fragments intentionally keep config-shaped lowercase names and are shared unevenly across scenario tables
-const standalone_clippy_lints: &str = r#"
+const STANDALONE_CLIPPY_LINTS: &str = r#"
     [lints.clippy]
     all = { level = "deny", priority = -1 }
     pedantic = { level = "deny", priority = -1 }
@@ -137,8 +133,8 @@ fn supports_workspace_and_standalone_policy_roots_in_one_repo() {
             edition = "2024"
             rust-version = "1.85"
 
-            {workspace_rust_lints}
-            {workspace_clippy_lints}
+            {WORKSPACE_RUST_LINTS}
+            {WORKSPACE_CLIPPY_LINTS}
         "#
     );
     let standalone_manifest = format!(
@@ -148,8 +144,8 @@ fn supports_workspace_and_standalone_policy_roots_in_one_repo() {
             edition = "2024"
             rust-version = "1.85"
 
-            {standalone_rust_lints}
-            {standalone_clippy_lints}
+            {STANDALONE_RUST_LINTS}
+            {STANDALONE_CLIPPY_LINTS}
         "#
     );
 
@@ -203,8 +199,8 @@ fn local_library_profile_requires_unreachable_pub() {
             name = "helper"
             edition = "2024"
 
-            {standalone_rust_lints}
-            {standalone_clippy_lints}
+            {STANDALONE_RUST_LINTS}
+            {STANDALONE_CLIPPY_LINTS}
         "#
     );
     let standalone_manifest = standalone_manifest.replace(r#"unreachable_pub = "deny""#, "");
