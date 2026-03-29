@@ -562,6 +562,3 @@ fn copy_dir_recursive(src: &Path, dst: &Path) {
         }
     }
 }
-
-#[cfg(test)]
-mod lib_tests;
