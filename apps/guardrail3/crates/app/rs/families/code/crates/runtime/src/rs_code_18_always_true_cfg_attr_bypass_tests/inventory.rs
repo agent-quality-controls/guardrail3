@@ -36,7 +36,9 @@ fn attacks_always_true_cfg_attr_bypasses_across_multiple_owned_files_with_exact_
         .unwrap_or_default();
     let worker_line = worker_new
         .lines()
-        .position(|line| line.contains("#[cfg_attr(all(), allow(clippy::expect_used, clippy::panic))]"))
+        .position(|line| {
+            line.contains("#[cfg_attr(all(), allow(clippy::expect_used, clippy::panic))]")
+        })
         .map(|index| index + 1)
         .unwrap_or_default();
 

@@ -28,7 +28,7 @@ fn empty_inner_hex_crates_is_not_owned_by_app_level_rule_01() {
         tmp.path()
             .join("apps/backend/crates/adapters/inbound/mcp/crates"),
     )
-    .expect("recreate nested crates dir");
+    .expect("failed to recreate nested crates directory for ownership fixture");
 
     let results = super::run_family(tmp.path());
     let errors = assertions::errors_by_id(&results, "");
@@ -50,7 +50,7 @@ fn broken_nested_crates_symlink_is_not_owned_by_app_level_rule_01() {
         tmp.path()
             .join("apps/backend/crates/adapters/inbound/mcp/crates"),
     )
-    .expect("symlink");
+    .expect("failed to create symlink fixture for hexarch test");
 
     let results = super::run_family(tmp.path());
     let errors = assertions::errors_by_id(&results, "");
@@ -71,7 +71,8 @@ fn nested_crates_symlink_loop_does_not_become_a_rule_01_hit() {
         tmp.path(),
         "apps/backend/crates/adapters/inbound/mcp/crates",
     );
-    std::os::unix::fs::symlink(&outer, &inner).expect("symlink");
+    std::os::unix::fs::symlink(&outer, &inner)
+        .expect("failed to create symlink fixture for hexarch test");
 
     let results = super::run_family(tmp.path());
     let errors = assertions::errors_by_id(&results, "");
@@ -85,7 +86,8 @@ fn nested_crates_symlink_loop_does_not_become_a_rule_01_hit() {
 fn gitkeep_only_outer_crates_is_not_owned_by_rule_01() {
     let tmp = copy_fixture();
     for app in ["devctl", "backend", "worker"] {
-        std::fs::remove_dir_all(tmp.path().join(format!("apps/{app}/crates"))).expect("remove");
+        std::fs::remove_dir_all(tmp.path().join(format!("apps/{app}/crates")))
+            .expect("failed to remove hexarch fixture path during test setup");
         create_dir(tmp.path(), &format!("apps/{app}/crates"));
         write_file(tmp.path(), &format!("apps/{app}/crates/.gitkeep"), "");
     }
@@ -119,7 +121,8 @@ fn packages_crate_without_crates_dir_is_not_owned_by_rule_01() {
 #[test]
 fn missing_crates_and_banned_src_can_coexist_on_the_same_app() {
     let tmp = copy_fixture();
-    std::fs::remove_dir_all(tmp.path().join("apps/devctl/crates")).expect("remove");
+    std::fs::remove_dir_all(tmp.path().join("apps/devctl/crates"))
+        .expect("failed to remove hexarch fixture path during test setup");
     write_file(tmp.path(), "apps/devctl/src/main.rs", "fn main() {}\n");
 
     let results = super::run_family(tmp.path());

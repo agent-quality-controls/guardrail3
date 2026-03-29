@@ -134,7 +134,7 @@ fn write_file(root: &Path, rel: &str, body: &str) {
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent).expect("create parent dirs");
     }
-    fs::write(path, body).expect("write file");
+    fs::write(path, body).expect("write runtime test fixture file");
 }
 
 #[test]

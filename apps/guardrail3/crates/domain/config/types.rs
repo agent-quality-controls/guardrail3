@@ -35,8 +35,7 @@ pub struct RustConfig {
     pub workspace_root: Option<String>,
     #[garde(inner(inner(length(min = 1))))] // reason: each workspace path must be non-empty
     pub workspaces: Option<Vec<String>>,
-    #[garde(skip)]
-    // reason: BTreeMap values — garde cannot dive into map values; validated by layer_from_config
+    #[garde(skip)] // reason: map values are validated by layer_from_config
     pub apps: Option<CrateMap>,
     #[garde(dive)] // reason: recursively validate nested CrateConfig for packages
     pub packages: Option<CrateConfig>,
@@ -139,8 +138,7 @@ pub struct TsAppConfig {
 
 #[derive(Debug, Deserialize, garde::Validate)]
 pub struct TypeScriptConfig {
-    #[garde(skip)]
-    // reason: BTreeMap values — garde cannot dive into map values; validated by type resolution
+    #[garde(skip)] // reason: map values are validated by type resolution
     pub apps: Option<TsAppMap>,
     #[garde(inner(length(min = 1)))] // reason: migrations path must be non-empty when present
     pub migrations: Option<String>,

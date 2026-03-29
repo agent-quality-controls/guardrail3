@@ -21,7 +21,7 @@ fn inventories_each_non_tokio_feature_ban_entry() {
         .and_then(|b| b.get("features"))
         .and_then(toml::Value::as_array)
         .cloned()
-        .expect("feature entries");
+        .expect("expected feature inventory entries in generated deny TOML");
     let mut entries = existing;
     entries.push(feature_entry("serde"));
     entries.push(feature_entry("axum"));

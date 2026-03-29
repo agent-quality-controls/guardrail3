@@ -70,7 +70,7 @@ fn warns_when_git_key_exists_but_is_not_a_table() {
 git = "oops"
 "#,
         )
-        .expect("valid cliff"),
+        .expect("failed to parse cliff fixture"),
     );
     let input = repo_input(&facts);
     let mut results = Vec::new();
@@ -111,7 +111,7 @@ commit_parsers = [
 ]
 "#,
         )
-        .expect("valid cliff"),
+        .expect("failed to parse cliff fixture"),
     );
     let input = repo_input(&facts);
     let mut results = Vec::new();
@@ -153,7 +153,7 @@ commit_parsers = [
 ]
 "#,
         )
-        .expect("valid cliff"),
+        .expect("failed to parse cliff fixture"),
     );
     let input = repo_input(&facts);
     let mut results = Vec::new();
@@ -194,7 +194,7 @@ commit_parsers = [
 ]
 "#,
         )
-        .expect("valid cliff"),
+        .expect("failed to parse cliff fixture"),
     );
     let input = repo_input(&facts);
     let mut results = Vec::new();
@@ -236,7 +236,7 @@ commit_parsers = [
 ]
 "#,
         )
-        .expect("valid cliff"),
+        .expect("failed to parse cliff fixture"),
     );
     let input = repo_input(&facts);
     let mut results = Vec::new();
@@ -272,7 +272,7 @@ commit_parsers = [
 ]
 "#,
         )
-        .expect("valid cliff"),
+        .expect("failed to parse cliff fixture"),
     );
     let input = repo_input(&facts);
     let mut results = Vec::new();
@@ -317,7 +317,7 @@ commit_parsers = [
 ]
 "#,
         )
-        .expect("valid cliff"),
+        .expect("failed to parse cliff fixture"),
     );
     let input = repo_input(&facts);
     let mut results = Vec::new();
@@ -359,7 +359,7 @@ commit_parsers = [
 ]
 "#,
         )
-        .expect("valid cliff"),
+        .expect("failed to parse cliff fixture"),
     );
     let input = repo_input(&facts);
     let mut results = Vec::new();

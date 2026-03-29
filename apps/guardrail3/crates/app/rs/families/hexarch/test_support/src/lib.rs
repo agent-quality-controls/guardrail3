@@ -4,37 +4,28 @@ use std::path::{Path, PathBuf};
 use guardrail3_adapters_outbound_fs::RealFileSystem;
 use guardrail3_app_core::project_walker::walk_project;
 use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
+use guardrail3_shared_fs::{create_dir_all, metadata, remove_dir_all, write_file as write_fs_file};
 
 pub fn write_file(root: &Path, rel: &str, content: &str) {
     let path = root.join(rel);
-    if let Some(parent) = path.parent() {
-        std::fs::create_dir_all(parent).expect("create parent");
-    }
-    std::fs::write(path, content).expect("write file");
+    write_fs_file(&path, content).expect("write file");
 }
 
 pub fn remove_dir(root: &Path, rel: &str) {
-    std::fs::remove_dir_all(root.join(rel)).expect("remove dir");
+    remove_dir_all(&root.join(rel)).expect("remove dir");
 }
 
 pub fn create_dir(root: &Path, rel: &str) {
-    std::fs::create_dir_all(root.join(rel)).expect("create dir");
+    create_dir_all(&root.join(rel)).expect("create dir");
 }
 
 pub fn empty_dir(root: &Path, rel: &str) {
     let dir = root.join(rel);
-    if !dir.exists() {
+    if metadata(&dir).is_none() {
         return;
     }
-    for entry in std::fs::read_dir(dir).expect("read dir") {
-        let entry = entry.expect("dir entry");
-        let file_type = entry.file_type().expect("file type");
-        if file_type.is_dir() {
-            std::fs::remove_dir_all(entry.path()).expect("remove nested dir");
-        } else {
-            std::fs::remove_file(entry.path()).expect("remove nested file");
-        }
-    }
+    remove_dir_all(&dir).expect("remove dir contents");
+    create_dir_all(&dir).expect("recreate dir");
 }
 
 pub fn walk(root: &Path) -> ProjectTree {

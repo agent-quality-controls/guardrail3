@@ -16,7 +16,7 @@ git_release_enable = true
 release_always = false
 "#,
         )
-        .expect("valid release-plz"),
+        .expect("failed to parse release-plz fixture"),
     );
     let _ = facts.publishable_crate_names.insert("api".to_owned());
     let _ = facts.publishable_crate_names.insert("cli".to_owned());
@@ -53,7 +53,7 @@ git_release_enable = true
 release_always = false
 "#,
         )
-        .expect("valid release-plz"),
+        .expect("failed to parse release-plz fixture"),
     );
     let _ = facts.publishable_crate_names.insert("api".to_owned());
     let _ = facts.release_plz_package_names.insert("api".to_owned());

@@ -1,5 +1,7 @@
 use guardrail3_app_rs_family_code as _;
 
+pub mod comments;
+pub mod parse;
 pub mod rs_code_01_crate_level_allow;
 pub mod rs_code_02_unused_crate_dependencies_allow;
 pub mod rs_code_03_item_level_allow_without_reason;

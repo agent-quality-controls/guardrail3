@@ -1,7 +1,9 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::inputs::RustCodeFileInput;
-use super::parse::{CfgPredicateTruth, find_path_attrs, path_string_has_parent_segment, same_line_reason};
+use super::parse::{
+    CfgPredicateTruth, find_path_attrs, path_string_has_parent_segment, same_line_reason,
+};
 
 const ID: &str = "RS-CODE-24";
 

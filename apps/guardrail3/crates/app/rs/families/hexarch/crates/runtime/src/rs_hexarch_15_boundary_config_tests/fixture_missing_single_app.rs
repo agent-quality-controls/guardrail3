@@ -5,7 +5,8 @@ use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_15_boundary_config a
 fn missing_one_app_boundary_only_hits_that_app() {
     let tmp = copy_fixture();
     let guardrail_path = tmp.path().join("guardrail3.toml");
-    let guardrail = std::fs::read_to_string(&guardrail_path).expect("read guardrail config");
+    let guardrail = std::fs::read_to_string(&guardrail_path)
+        .expect("failed to read fixture guardrail3.toml for boundary-config test");
     let updated = guardrail.replace(
         "\n[rust.apps.worker]\ntype = \"service\"\n\n[rust.apps.worker.checks]\nhexarch = true\ngarde = false\ntest = true\nrelease = false\n",
         "\n",

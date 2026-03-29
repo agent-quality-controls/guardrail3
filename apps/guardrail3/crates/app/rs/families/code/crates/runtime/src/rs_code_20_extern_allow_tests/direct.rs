@@ -1,6 +1,6 @@
 use super::super::check_source;
 use guardrail3_app_rs_family_code_assertions::rs_code_20_extern_allow::{
-    assert_errors_on_allow_attr_on_extern_block,
+    RuleFinding, assert_errors_on_allow_attr_on_extern_block, assert_findings,
     assert_errors_on_cfg_attr_allow_covers_an_extern_block,
     assert_errors_on_mixed_allow_and_cfg_attr_on_the_same_extern_block,
     assert_errors_on_multiple_lints_from_one_cfg_attr_allow_on_extern_block,
@@ -20,6 +20,29 @@ unsafe extern "C" {
         &check_source("src/ffi.rs", content, false),
         "src/ffi.rs",
         2,
+    );
+}
+
+#[test]
+fn errors_on_expect_attr_on_extern_block() {
+    let content = r#"
+#[expect(improper_ctypes)]
+unsafe extern "C" {
+    fn puts(s: *const i8);
+}
+"#;
+    let results = check_source("src/ffi.rs", content, false);
+
+    assert_findings(
+        &results,
+        &[RuleFinding {
+            severity: guardrail3_domain_report::Severity::Error,
+            title: "expect on extern block",
+            message: "`#[expect(improper_ctypes)]` on an `extern` block hides FFI risk behind a broad suppression.",
+            file: Some("src/ffi.rs"),
+            line: Some(2),
+            inventory: false,
+        }],
     );
 }
 

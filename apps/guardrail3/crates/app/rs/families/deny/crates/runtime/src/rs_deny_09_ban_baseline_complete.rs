@@ -84,7 +84,6 @@ pub(crate) fn run_check_with_profile(deny_toml: &str, profile_name: &str) -> Vec
     crate::run_config_rule_for_test(deny_toml, Some(profile_name), check)
 }
 
-
 #[cfg(test)]
 pub(crate) use crate::config_facts_with_profile;
 #[cfg(test)]

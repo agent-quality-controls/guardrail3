@@ -10,3 +10,4 @@ workspace = true
 guardrail3_adapters_outbound_fs = { package = "guardrail3-adapters-outbound-fs", path = "../../../../../adapters/outbound/fs" }
 guardrail3_app_core = { package = "guardrail3-app-core", path = "../../../../core" }
 guardrail3_domain_project_tree = { package = "guardrail3-domain-project-tree", path = "../../../../../domain/project-tree" }
+guardrail3_shared_fs = { package = "guardrail3-shared-fs", path = "../../../../../shared/fs" }

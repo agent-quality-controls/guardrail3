@@ -98,17 +98,11 @@ pub fn find_public_result_error_types(ast: &syn::File) -> Vec<PublicResultErrorI
     attrs::find_public_result_error_types(ast)
 }
 
-pub fn find_forbidden_macros(
-    ast: &syn::File,
-    file_is_test_root: bool,
-) -> Vec<ForbiddenMacroInfo> {
+pub fn find_forbidden_macros(ast: &syn::File, file_is_test_root: bool) -> Vec<ForbiddenMacroInfo> {
     visitors::find_forbidden_macros(ast, file_is_test_root)
 }
 
-pub fn find_test_expect_calls(
-    ast: &syn::File,
-    file_is_test_root: bool,
-) -> Vec<TestExpectCallInfo> {
+pub fn find_test_expect_calls(ast: &syn::File, file_is_test_root: bool) -> Vec<TestExpectCallInfo> {
     visitors::find_test_expect_calls(ast, file_is_test_root)
 }
 

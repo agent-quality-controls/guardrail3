@@ -13,24 +13,24 @@ name = "example"
 api = { workspace = true }
 "#,
     )
-    .expect("valid crate manifest");
+    .expect("failed to parse release test crate manifest");
     let workspace_manifest: toml::Value = toml::from_str(
         r#"
 [workspace.dependencies]
 api = { path = "../api", version = "^2.0.0" }
 "#,
     )
-    .expect("valid workspace manifest");
+    .expect("failed to parse release test workspace manifest");
     let workspace_dependencies = workspace_manifest
         .get("workspace")
         .and_then(|workspace| workspace.get("dependencies"))
         .and_then(toml::Value::as_table)
         .cloned()
-        .expect("workspace dependencies");
+        .expect("failed to extract release workspace dependencies");
     let edge = dependency_edges(&parsed, &workspace_dependencies)
         .into_iter()
         .find(|edge| edge.dep_name == "api")
-        .expect("api edge");
+        .expect("failed to locate release dependency edge named api");
     assert!(edge.has_path);
     assert_eq!(edge.version_req.as_deref(), Some("^2.0.0"));
 

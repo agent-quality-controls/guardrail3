@@ -3,7 +3,9 @@ use guardrail3_app_rs_family_hexarch_assertions::rs_hexarch_08_app_cargo_is_work
 
 fn rewrite_as_package_manifest(app_name: &str, original: &str) -> String {
     let parsed = toml::from_str::<toml::Value>(original).expect("parse original workspace cargo");
-    let workspace = parsed.get("workspace").expect("workspace table");
+    let workspace = parsed
+        .get("workspace")
+        .expect("expected app Cargo.toml to contain [workspace]");
     let workspace_package = workspace
         .get("package")
         .expect("workspace.package table for fixture");
@@ -11,15 +13,15 @@ fn rewrite_as_package_manifest(app_name: &str, original: &str) -> String {
     let version = workspace_package
         .get("version")
         .and_then(toml::Value::as_str)
-        .expect("workspace.package.version");
+        .expect("expected workspace.package.version to be present");
     let edition = workspace_package
         .get("edition")
         .and_then(toml::Value::as_str)
-        .expect("workspace.package.edition");
+        .expect("expected workspace.package.edition to be present");
     let publish = workspace_package
         .get("publish")
         .and_then(toml::Value::as_bool)
-        .expect("workspace.package.publish");
+        .expect("expected workspace.package.publish to be present");
 
     let mut manifest = format!(
         "[package]\nname = \"{app_name}\"\nversion = \"{version}\"\nedition = \"{edition}\"\npublish = {publish}\n"

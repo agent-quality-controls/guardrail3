@@ -34,7 +34,6 @@ pub(crate) fn run_check(deny_toml: &str) -> Vec<CheckResult> {
     crate::run_config_rule_for_test(deny_toml, None, check)
 }
 
-
 #[cfg(test)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_root(root)
@@ -52,5 +51,4 @@ pub(crate) fn parse_feature_entries_for_test(
 }
 #[cfg(test)]
 #[path = "rs_deny_22_extra_feature_bans_inventory_tests/mod.rs"] // reason: test-only sidecar module wiring
-// reason: test-only sidecar module wiring
 mod rs_deny_22_extra_feature_bans_inventory_tests;

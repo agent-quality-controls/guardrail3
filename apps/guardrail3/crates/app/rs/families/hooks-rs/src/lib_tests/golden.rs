@@ -1,6 +1,6 @@
+use super::super::run_case;
 use guardrail3_app_rs_family_hooks_rs_assertions::hook_rs_14_guardrail_binary_available as hook_rs_14_assertions;
 use guardrail3_app_rs_family_hooks_rs_assertions::hook_rs_15_cargo_dupes_installed as hook_rs_15_assertions;
-use super::super::run_case;
 
 #[test]
 fn orchestrator_skips_hook_rs_14_when_guardrail_validation_is_not_expected() {
@@ -28,7 +28,10 @@ fn orchestrator_marks_hook_rs_15_present_for_path_qualified_cargo_dupes() {
 
 #[test]
 fn orchestrator_marks_hook_rs_15_present_for_wrapped_path_qualified_cargo_dupes() {
-    let results = run_case("exec /usr/local/bin/cargo-dupes check --exclude-tests\n", &[]);
+    let results = run_case(
+        "exec /usr/local/bin/cargo-dupes check --exclude-tests\n",
+        &[],
+    );
     hook_rs_15_assertions::assert_present(&results);
 }
 

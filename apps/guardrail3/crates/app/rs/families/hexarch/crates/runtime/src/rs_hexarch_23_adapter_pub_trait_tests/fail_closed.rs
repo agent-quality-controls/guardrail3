@@ -9,7 +9,7 @@ fn unparsable_adapter_source_errors_in_family_run() {
             .join("apps/backend/crates/adapters/outbound/postgres/src/lib.rs"),
         "pub trait Broken {\n",
     )
-    .expect("write broken adapter source");
+    .expect("failed to write broken adapter source into hexarch fixture");
 
     let results = super::run_family(tmp.path());
     assertions::assert_error_file_single(
@@ -28,7 +28,7 @@ fn parse_failure_takes_precedence_over_public_trait_violation() {
             .join("apps/backend/crates/adapters/outbound/postgres/src/lib.rs"),
         "mod extra;\npub trait Broken {\n",
     )
-    .expect("write broken adapter source");
+    .expect("failed to write broken adapter source into hexarch fixture");
     std::fs::write(
         tmp.path()
             .join("apps/backend/crates/adapters/outbound/postgres/src/extra.rs"),

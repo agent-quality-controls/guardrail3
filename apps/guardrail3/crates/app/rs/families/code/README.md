@@ -57,39 +57,41 @@ That split is intentional:
 
 ## Current Status
 
-This family is now in the same self-hosted stabilized tier as:
-
-- `RS-TEST`
-- `RS-ARCH`
-- `RS-HEXARCH`
-- `RS-CARGO`
-
 Current implementation state:
 
-- the family root is a workspace
+- the family root is a documentation/config container, not a Cargo workspace root
 - production and tests live under [crates/runtime/src](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/code/crates/runtime/src)
 - sibling crates are live and used:
   - [crates/assertions](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/code/crates/assertions)
   - [test_support](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/code/test_support)
 - the family consumes `RsCodeRoute` in [lib.rs](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/code/crates/runtime/src/lib.rs)
-- the family passes `RS-ARCH`
-- the family passes `RS-TEST`
-- the family passes `RS-CODE`
-- the family unit-test suite is green from the moved runtime crate
+- recent correctness work has focused on shared parser/model fixes captured in [FIXES.md](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/code/FIXES.md)
+- this README does not claim the family root is currently clean for `RS-ARCH`, `RS-TEST`, or live repo-root `RS-CODE` without a fresh verification pass
 
-The next work is no longer migration. It is adversarial auditing:
+The highest-value audit fixes already landed:
 
-- attack the implemented rules for false-greens and false-positives
-- tighten fail-closed behavior on any remaining unreadable active inputs
+- shared test-context detection now feeds the rules that need it instead of path heuristics drifting apart
+- same-line `// reason:` parsing is token-aware and exact
+- `cfg_attr` truth is conservative and recursive instead of fail-open
+- `#[expect(...)]` is owned with `#[allow(...)]`
+- `garde(skip)` exemptions are explicit rather than suffix-based
+- `RS-CODE-25` measures reachable public API rather than raw `pub` tokens
+- `RS-CODE-23` still allows legitimate `OUT_DIR` includes but no longer blesses upward traversal
+
+The next work is still a mix of real repo debt cleanup and adversarial auditing:
+
+- reduce live repo-root `RS-CODE` findings in real project files
+- keep attacking implemented rules for false-greens and false-positives
 - compare live repo findings against the intended rule inventory
 
-## Target Workspace Shape
+## Live Package Shape
 
-The target shape is the same self-hosted family layout already used by `test`, `arch`, `hexarch`, and `cargo`:
+The live shape is a family-owned package group:
 
 ```text
 apps/guardrail3/crates/app/rs/families/code/
-  Cargo.toml
+  README.md
+  FIXES.md
   crates/
     runtime/
       Cargo.toml
@@ -169,25 +171,10 @@ Must not own:
 - reusable result-shape assertions
 - direct mapper/placement logic once the family is fully migrated
 
-## Stabilization Sequence
+## Current Documentation Boundaries
 
-The practical migration order is:
+This README is intentionally conservative:
 
-1. add this family README and a current stabilization plan
-2. split the family into `crates/runtime`, `crates/assertions`, and `test_support`
-3. move the existing `src/*` runtime implementation into `crates/runtime/src/`
-4. replace runtime-local `test_support.rs` with the sibling `test_support` crate
-5. extract proof-bearing rule assertions out of runtime sidecars
-6. make the family pass `RS-TEST`
-7. attack `RS-CODE` itself the same way `RS-TEST` and `RS-HEXARCH` were attacked
-
-## Done Means
-
-`RS-CODE` is only in the stabilized tier when it:
-
-- has the self-hosted workspace shape above
-- passes `RS-ARCH`
-- passes `RS-TEST`
-- has family-local docs aligned with the live code
-- keeps mapper/placement wiring out of the production runtime surface
-- is ready for a deeper adversarial rule-family audit
+- it describes the live package layout and ownership split
+- it points at the active fix backlog in [FIXES.md](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/code/FIXES.md)
+- it does not treat older stabilization-plan wording about a family-root workspace as current truth

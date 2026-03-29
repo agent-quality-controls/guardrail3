@@ -144,7 +144,10 @@ impl TestContextAware for InlineStdFsVisitor {
 
 impl InlineStdFsVisitor {
     fn path_is_std_fs_call(path: &syn::Path, std_aliases: &BTreeSet<String>) -> bool {
-        let mut segments = path.segments.iter().map(|segment| segment.ident.to_string());
+        let mut segments = path
+            .segments
+            .iter()
+            .map(|segment| segment.ident.to_string());
         matches!(
             (
                 segments.next().as_deref(),

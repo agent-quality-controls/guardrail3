@@ -1,8 +1,8 @@
-# RS-CODE — Rust code file checker (30 implemented rules + 5 next-wave planned rules)
+# RS-CODE — Rust code file checker (29 implemented rules + 5 next-wave planned rules)
 
 **Input:** *.rs files (syn AST parsed)
 **Parser:** syn crate (Rust AST)
-**Current code:** `source_scan.rs` (orchestrator), `allow_checks.rs`, `structure_checks.rs`, `code_quality_checks.rs`
+**Current code:** `apps/guardrail3/crates/app/rs/families/code/crates/runtime/src/` with family orchestration in `lib.rs`, routed discovery in `discover.rs`, normalized family facts in `facts.rs`, typed rule inputs in `inputs.rs`, and shared parsing under `parse/`
 
 ## Suppression rules (allow_checks.rs)
 
@@ -17,16 +17,16 @@
 | RS-CODE-07 | R36 | Info | EXCEPTION comments in config files (audit trail inventory) | Implemented |
 | RS-CODE-08 | R37 | Info | `#[cfg_attr(..., allow(...))]` with genuinely conditional predicate (inventory) | Implemented |
 
-## Structure rules (structure_checks.rs)
+## Structure rules
 
 | New ID | Old ID | Severity | What | Status |
 |--------|--------|----------|------|--------|
-| RS-CODE-09 | R38 | Error | File >500 effective (non-comment) lines. Test files exempt. | Implemented |
+| RS-CODE-09 | R38 | Error | File >500 effective code-bearing lines. Comment-only lines and string-literal payload-only lines do not count. Test files exempt. | Implemented |
 | RS-CODE-10 | R40 | Error | >20 use-imports (AST-counted). Test files exempt. | Implemented |
 | RS-CODE-11 | R41 | Warn | 16-20 use-imports (warning threshold). Test files exempt. | Implemented |
 | RS-CODE-12 | R53 | Error/Info | unsafe_code lint level in workspace lints (Info if forbid, Error if deny) | Implemented |
 
-## Quality rules (code_quality_checks.rs)
+## Quality rules
 
 | New ID | Old ID | Severity | What | Status |
 |--------|--------|----------|------|--------|
@@ -42,7 +42,7 @@
 | RS-CODE-18 | Error | Always-true `cfg_attr` bypass. Currently only detects `all()` with empty args. Must also detect `any(unix, windows)`, `not(nonexistent_target)`. Disguised unconditional allows. | Implemented |
 | RS-CODE-19 | Info | Large struct (>15 fields) or enum (>20 variants). Architectural smell inventory. Not error, just visibility. | Implemented |
 | RS-CODE-20 | Error | `#[allow]` on `extern "C"` blocks. `item_attrs` returns `&[]` for ForeignMod — one-line fix to add `ForeignMod(f) => &f.attrs`. | Implemented |
-| RS-CODE-21 | Error | `use std::fs::*` glob import bypass. Glob brings all std::fs functions into scope, bypassing clippy's disallowed_methods. Variant of the clippy hole that RS-CODE-15 exists for. | Implemented |
+| RS-CODE-21 | Error | `use std::fs::*` glob import bypass, including std-alias forms such as `use std as s; use s::fs::*;`. Variant of the filesystem hole that `RS-CODE-15` covers for direct imports/calls. | Implemented |
 
 ## New rules from audit round 2
 

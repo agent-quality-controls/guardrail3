@@ -9,7 +9,7 @@ fn symlink_leaf_is_not_owned_by_rule_06() {
         tmp.path().join("apps/devctl/crates/domain/types"),
         tmp.path().join("apps/devctl/crates/app/link_leaf"),
     )
-    .expect("symlink");
+    .expect("failed to create symlink fixture for hexarch test");
 
     let results = super::run_family(tmp.path());
     assertions::assert_no_error_file_contains(&results, "apps/devctl/crates/app/link_leaf");
@@ -23,7 +23,7 @@ fn dangling_symlink_leaf_is_not_owned_by_rule_06() {
         "/nonexistent/leaf-target",
         tmp.path().join("apps/devctl/crates/app/dangling_leaf"),
     )
-    .expect("symlink");
+    .expect("failed to create symlink fixture for hexarch test");
 
     let results = super::run_family(tmp.path());
     assertions::assert_no_error_file_contains(&results, "apps/devctl/crates/app/dangling_leaf");

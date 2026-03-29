@@ -30,9 +30,8 @@ fn passes_when_plain_test_command_exists() {
 
 #[test]
 fn passes_when_wrapped_test_command_exists() {
-    let results = run_case(
-        "if ! (cd \"$RUST_WORKSPACE\" && cargo test --workspace); then\n    exit 1\nfi\n",
-    );
+    let results =
+        run_case("if ! (cd \"$RUST_WORKSPACE\" && cargo test --workspace); then\n    exit 1\nfi\n");
     assertions::assert_present(&results);
 }
 

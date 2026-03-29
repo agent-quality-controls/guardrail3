@@ -6,7 +6,12 @@ fn skips_primitive_only_struct_boundary_without_validate() {
     let root = temp_root("rs-garde-05-primitive-only");
     let source_abs = root.join("src/input.rs");
     let clippy_toml = super::super::canonical_clippy_toml();
-    std::fs::create_dir_all(source_abs.parent().expect("fixture source path must have a parent directory")).expect("failed to create fixture source directory");
+    std::fs::create_dir_all(
+        source_abs
+            .parent()
+            .expect("fixture source path must have a parent directory"),
+    )
+    .expect("failed to create fixture source directory");
     std::fs::write(
         &source_abs,
         r#"
@@ -57,7 +62,12 @@ fn skips_primitive_array_struct_boundary_without_validate() {
     let root = temp_root("rs-garde-05-primitive-array");
     let source_abs = root.join("src/input.rs");
     let clippy_toml = super::super::canonical_clippy_toml();
-    std::fs::create_dir_all(source_abs.parent().expect("fixture source path must have a parent directory")).expect("failed to create fixture source directory");
+    std::fs::create_dir_all(
+        source_abs
+            .parent()
+            .expect("fixture source path must have a parent directory"),
+    )
+    .expect("failed to create fixture source directory");
     std::fs::write(
         &source_abs,
         r#"

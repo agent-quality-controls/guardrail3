@@ -9,15 +9,21 @@ fn unreadable_valid_leaf_currently_degrades_into_missing_cargo_toml() {
     let tmp = copy_fixture();
     let leaf = tmp.path().join("apps/devctl/crates/domain/types");
 
-    let mut perms = std::fs::metadata(&leaf).expect("metadata").permissions();
+    let mut perms = std::fs::metadata(&leaf)
+        .expect("failed to read metadata for permission-edge fixture")
+        .permissions();
     perms.set_mode(0o000);
-    std::fs::set_permissions(&leaf, perms).expect("chmod 000");
+    std::fs::set_permissions(&leaf, perms)
+        .expect("remove read permissions from permission-edge fixture leaf");
 
     let results = super::run_family(tmp.path());
 
-    let mut restore = std::fs::metadata(&leaf).expect("metadata").permissions();
+    let mut restore = std::fs::metadata(&leaf)
+        .expect("failed to read metadata for permission-edge fixture")
+        .permissions();
     restore.set_mode(0o755);
-    std::fs::set_permissions(&leaf, restore).expect("restore perms");
+    std::fs::set_permissions(&leaf, restore)
+        .expect("restore readable permissions on permission-edge fixture leaf");
 
     assertions::assert_expected_rule_results(
         &results,

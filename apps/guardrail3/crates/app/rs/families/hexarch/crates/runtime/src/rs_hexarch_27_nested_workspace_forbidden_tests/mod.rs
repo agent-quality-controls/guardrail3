@@ -17,21 +17,24 @@ fn fixture_root() -> PathBuf {
 }
 
 pub(super) fn copy_fixture() -> tempfile::TempDir {
-    let tmp = tempfile::tempdir().expect("create tempdir");
+    let tmp =
+        tempfile::tempdir().expect("failed to create temporary directory for hexarch fixture copy");
     copy_dir_recursive(&fixture_root(), tmp.path());
     tmp
 }
 
 fn copy_dir_recursive(src: &Path, dst: &Path) {
-    for entry in std::fs::read_dir(src).expect("read fixture dir") {
-        let entry = entry.expect("read entry");
+    for entry in std::fs::read_dir(src).expect("failed to read source hexarch fixture directory") {
+        let entry = entry.expect("failed to read entry from source hexarch fixture directory");
         let src_path = entry.path();
         let dst_path = dst.join(entry.file_name());
         if src_path.is_dir() {
-            std::fs::create_dir_all(&dst_path).expect("create dst dir");
+            std::fs::create_dir_all(&dst_path)
+                .expect("failed to create destination directory in copied hexarch fixture");
             copy_dir_recursive(&src_path, &dst_path);
         } else {
-            let _ = std::fs::copy(&src_path, &dst_path).expect("copy fixture file");
+            let _ = std::fs::copy(&src_path, &dst_path)
+                .expect("failed to copy file into temporary hexarch fixture");
         }
     }
 }

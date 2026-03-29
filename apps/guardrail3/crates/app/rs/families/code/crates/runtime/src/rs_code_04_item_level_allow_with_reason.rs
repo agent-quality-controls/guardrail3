@@ -19,7 +19,11 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
             } else {
                 "item-level expect with reason".to_owned()
             },
-            message: format!("#[{}({})] reason: {reason}", info.kind.attr_name(), info.lint),
+            message: format!(
+                "#[{}({})] reason: {reason}",
+                info.kind.attr_name(),
+                info.lint
+            ),
             file: Some(input.rel_path.to_owned()),
             line: Some(line),
             inventory: true,
@@ -39,5 +43,4 @@ pub(crate) fn copy_fixture() -> test_support::TempDir {
 
 #[cfg(test)]
 #[path = "rs_code_04_item_level_allow_with_reason_tests/mod.rs"] // reason: test-only sidecar module wiring
-// reason: test-only sidecar module wiring
 mod rs_code_04_item_level_allow_with_reason_tests;

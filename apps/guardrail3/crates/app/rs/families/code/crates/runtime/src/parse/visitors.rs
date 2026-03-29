@@ -1,4 +1,6 @@
-use super::helpers::{attrs_enter_test_context, path_to_string, path_to_string_from_use_tree, span_line};
+use super::helpers::{
+    attrs_enter_test_context, path_to_string, path_to_string_from_use_tree, span_line,
+};
 use super::types::{
     FacadeBodyItemInfo, ForbiddenMacroInfo, LargeTypeItem as LargeTypeFact, TestExpectCallInfo,
     TraitMethodCountInfo,
@@ -7,10 +9,7 @@ use syn::parse::Parser;
 use syn::spanned::Spanned;
 use syn::visit::Visit;
 
-pub fn find_forbidden_macros(
-    ast: &syn::File,
-    file_is_test_root: bool,
-) -> Vec<ForbiddenMacroInfo> {
+pub fn find_forbidden_macros(ast: &syn::File, file_is_test_root: bool) -> Vec<ForbiddenMacroInfo> {
     let mut visitor = ForbiddenMacroVisitor {
         out: Vec::new(),
         in_test_context: file_is_test_root,
@@ -19,10 +18,7 @@ pub fn find_forbidden_macros(
     visitor.out
 }
 
-pub fn find_test_expect_calls(
-    ast: &syn::File,
-    file_is_test_root: bool,
-) -> Vec<TestExpectCallInfo> {
+pub fn find_test_expect_calls(ast: &syn::File, file_is_test_root: bool) -> Vec<TestExpectCallInfo> {
     let mut visitor = TestExpectVisitor {
         out: Vec::new(),
         in_test_context: file_is_test_root,

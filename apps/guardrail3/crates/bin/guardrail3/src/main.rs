@@ -1,21 +1,27 @@
 use clap::{CommandFactory, FromArgMatches};
 use garde::Validate;
-use guardrail3_adapters_inbound_cli::{
-    self as commands,
-    cli::{Cli, Commands, RsCommands, RsValidateArgs, TsCommands, TsValidateArgs},
-    help_gen,
-};
+use guardrail3_adapters_inbound_cli::{self as commands, cli::Cli};
 use guardrail3_adapters_outbound_fs::RealFileSystem;
 use guardrail3_adapters_outbound_report as report;
 use guardrail3_adapters_outbound_tool_runner::RealToolChecker;
-use guardrail3_app_commands::messages::GUIDE_CONTENT;
-use guardrail3_app_core::{crawl, discover, project_walker};
-use guardrail3_app_hooks as hooks;
-use guardrail3_app_rs_runtime as rs;
-use guardrail3_app_ts as ts;
-use guardrail3_domain_config::types::GuardrailConfig;
-use guardrail3_domain_report::{Report, TsCheckCategories, ValidateDomains};
-use guardrail3_outbound_traits::FileSystem;
+
+mod app_deps {
+    pub(super) use guardrail3_app_core::{crawl, discover, project_walker};
+    pub(super) use guardrail3_app_hooks as hooks;
+    pub(super) use guardrail3_app_rs_runtime as rs;
+    pub(super) use guardrail3_app_ts as ts;
+}
+
+mod cli_types {
+    pub(super) use guardrail3_adapters_inbound_cli::cli::{
+        Commands, RsCommands, RsValidateArgs, TsCommands, TsValidateArgs,
+    };
+}
+
+mod domain_types {
+    pub(super) use guardrail3_domain_config::types::GuardrailConfig;
+    pub(super) use guardrail3_domain_report::{Report, TsCheckCategories, ValidateDomains};
+}
 
 struct CoverageSelection {
     clippy: bool,
@@ -50,7 +56,7 @@ impl CoverageSelection {
 #[allow(clippy::print_stderr)] // reason: CLI entry point — stderr for error output
 #[allow(clippy::disallowed_methods)] // reason: CLI entry point — process::exit for error codes
 fn main() {
-    let cmd = help_gen::inject_help(Cli::command());
+    let cmd = guardrail3_adapters_inbound_cli::help_gen::inject_help(Cli::command());
     let matches = match cmd.try_get_matches() {
         Ok(m) => m,
         Err(e) => e.exit(),
@@ -64,9 +70,9 @@ fn main() {
     };
 
     match cli.command {
-        Commands::Rs { command } => handle_rs(command),
-        Commands::Ts { command } => handle_ts(command),
-        Commands::DumpGuide => match handle_guide() {
+        cli_types::Commands::Rs { command } => handle_rs(command),
+        cli_types::Commands::Ts { command } => handle_ts(command),
+        cli_types::Commands::DumpGuide => match handle_guide() {
             Ok(lines) => {
                 for line in lines {
                     print_stdout(&line);
@@ -74,11 +80,11 @@ fn main() {
             }
             Err(message) => exit_with_error(&message, 1),
         },
-        Commands::DumpTree { path } => match handle_dump_tree(&path) {
+        cli_types::Commands::DumpTree { path } => match handle_dump_tree(&path) {
             Ok(json) => print_stdout(&json),
             Err(message) => exit_with_error(&message, 1),
         },
-        Commands::Map {
+        cli_types::Commands::Map {
             path,
             clippy,
             deny,
@@ -113,7 +119,7 @@ fn main() {
 fn handle_map_command(path: &str, selection: &CoverageSelection) {
     if selection.any() {
         let project_path = std::path::Path::new(path);
-        let crawl_result = crawl::crawl(project_path);
+        let crawl_result = app_deps::crawl::crawl(project_path);
         run_coverage_maps(project_path, &crawl_result, selection);
     } else {
         commands::map::run(path);
@@ -122,7 +128,7 @@ fn handle_map_command(path: &str, selection: &CoverageSelection) {
 
 fn run_coverage_maps(
     project_path: &std::path::Path,
-    crawl_result: &crawl::CrawlResult,
+    crawl_result: &app_deps::crawl::CrawlResult,
     selection: &CoverageSelection,
 ) {
     use commands::coverage;
@@ -170,13 +176,13 @@ fn resolve_path_for_dump(path_str: &str) -> Result<std::path::PathBuf, String> {
 fn handle_dump_tree(path_str: &str) -> Result<String, String> {
     let resolved = resolve_path_for_dump(path_str)?;
     let fs = RealFileSystem;
-    let tree = project_walker::walk_project(&fs, &resolved);
+    let tree = app_deps::project_walker::walk_project(&fs, &resolved);
     serde_json::to_string_pretty(&tree).map_err(|error| format!("Error serializing tree: {error}"))
 }
 
 fn handle_guide() -> Result<Vec<String>, String> {
     let path = std::path::Path::new("GUARDRAIL3_GUIDE.md");
-    guardrail3_shared_fs::write_file(path, GUIDE_CONTENT)
+    guardrail3_shared_fs::write_file(path, guardrail3_app_commands::messages::GUIDE_CONTENT)
         .map_err(|error| format!("Error writing GUARDRAIL3_GUIDE.md: {error}"))?;
     Ok(vec![
         format!("Generated: {}", path.display()),
@@ -185,9 +191,9 @@ fn handle_guide() -> Result<Vec<String>, String> {
 }
 
 #[allow(clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI dispatch
-fn handle_rs(command: RsCommands) {
+fn handle_rs(command: cli_types::RsCommands) {
     match command {
-        RsCommands::Init {
+        cli_types::RsCommands::Init {
             profile,
             path,
             force,
@@ -195,7 +201,7 @@ fn handle_rs(command: RsCommands) {
         } => {
             commands::init::run_rs(&profile, &path, force, dry_run);
         }
-        RsCommands::Generate(args) => {
+        cli_types::RsCommands::Generate(args) => {
             validate_or_exit(&args);
             if args.dry_run {
                 commands::diff::run(&args.path, args.dump_dir.as_deref());
@@ -203,23 +209,23 @@ fn handle_rs(command: RsCommands) {
                 commands::generate::run_rs(&args);
             }
         }
-        RsCommands::Validate(args) => {
+        cli_types::RsCommands::Validate(args) => {
             validate_or_exit(&args);
             let report = run_rs_validate(&args);
             print_report(&args.format, args.inventory, args.verbose, &report);
         }
-        RsCommands::Check(args) => {
+        cli_types::RsCommands::Check(args) => {
             validate_or_exit(&args);
             commands::check::run(&args.path);
         }
-        RsCommands::HooksInstall(args) => {
+        cli_types::RsCommands::HooksInstall(args) => {
             validate_or_exit(&args);
             commands::generate::run_rs_hooks(&args);
         }
-        RsCommands::ListModules => {
+        cli_types::RsCommands::ListModules => {
             print_stdout(&commands::modules_cmd::list_modules());
         }
-        RsCommands::ShowModule(args) => {
+        cli_types::RsCommands::ShowModule(args) => {
             validate_or_exit(&args);
             match commands::modules_cmd::show_module(&args.name) {
                 Ok(output) => print_stdout(&output),
@@ -230,16 +236,16 @@ fn handle_rs(command: RsCommands) {
 }
 
 #[allow(clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI dispatch
-fn handle_ts(command: TsCommands) {
+fn handle_ts(command: cli_types::TsCommands) {
     match command {
-        TsCommands::Init {
+        cli_types::TsCommands::Init {
             path,
             force,
             dry_run,
         } => {
             commands::init::run_ts(&path, force, dry_run);
         }
-        TsCommands::Generate(args) => {
+        cli_types::TsCommands::Generate(args) => {
             validate_or_exit(&args);
             if args.dry_run {
                 commands::diff::run_ts(&args.path, args.dump_dir.as_deref());
@@ -247,15 +253,15 @@ fn handle_ts(command: TsCommands) {
                 commands::generate::run_ts(&args);
             }
         }
-        TsCommands::Validate(args) => {
+        cli_types::TsCommands::Validate(args) => {
             validate_or_exit(&args);
             let path = resolve_path(&args.path);
             let fs = RealFileSystem;
             let cfg = load_config(&fs, &path);
             let categories = build_ts_categories(&args, &fs, &path);
-            let crawl = crawl::crawl(&path);
+            let crawl = app_deps::crawl::crawl(&path);
             let scoped_files = commands::validate::resolve_scoped_files_pub(&args, &path);
-            let report = ts::validate::run(
+            let report = app_deps::ts::validate::run(
                 &fs,
                 &path,
                 scoped_files.as_deref(),
@@ -265,19 +271,19 @@ fn handle_ts(command: TsCommands) {
             );
             print_report(&args.format, args.inventory, args.verbose, &report);
         }
-        TsCommands::HooksInstall(args) => {
+        cli_types::TsCommands::HooksInstall(args) => {
             validate_or_exit(&args);
             commands::generate::run_hooks(&args);
         }
-        TsCommands::HooksValidate(args) => {
+        cli_types::TsCommands::HooksValidate(args) => {
             validate_or_exit(&args);
             let path = resolve_path(&args.path);
             let fs = RealFileSystem;
             let tc = RealToolChecker;
             let domains = domains_from_args(&args);
-            let project = discover::detect_project(&fs, &path);
-            let crawl = crawl::crawl(&path);
-            let report = hooks::validate::run(
+            let project = app_deps::discover::detect_project(&fs, &path);
+            let crawl = app_deps::crawl::crawl(&path);
+            let report = app_deps::hooks::validate::run(
                 &fs,
                 &path,
                 false,
@@ -291,7 +297,7 @@ fn handle_ts(command: TsCommands) {
     }
 }
 
-fn run_rs_validate(args: &RsValidateArgs) -> Report {
+fn run_rs_validate(args: &cli_types::RsValidateArgs) -> domain_types::Report {
     let path = resolve_path(&args.path);
     let fs = RealFileSystem;
     let tc = RealToolChecker;
@@ -299,7 +305,7 @@ fn run_rs_validate(args: &RsValidateArgs) -> Report {
     let scoped_files = commands::validate::resolve_scoped_files_pub(args, &path);
     let normalized_scope =
         commands::validate::normalize_scoped_files(&path, scoped_files.as_deref());
-    match rs::run(
+    match app_deps::rs::run(
         &fs,
         &path,
         normalized_scope.as_ref(),
@@ -316,7 +322,7 @@ fn run_rs_validate(args: &RsValidateArgs) -> Report {
 }
 
 #[allow(clippy::disallowed_methods)] // reason: CLI — process::exit
-fn print_report(format: &str, inventory: bool, verbose: bool, report: &Report) {
+fn print_report(format: &str, inventory: bool, verbose: bool, report: &domain_types::Report) {
     match format {
         "json" => report::json::print_report(report, inventory),
         "md" | "markdown" => report::markdown::print_report(report, inventory, verbose),
@@ -358,8 +364,8 @@ fn resolve_path(path_str: &str) -> std::path::PathBuf {
     }
 }
 
-const fn domains_from_args(_args: &TsValidateArgs) -> ValidateDomains {
-    ValidateDomains {
+const fn domains_from_args(_args: &cli_types::TsValidateArgs) -> domain_types::ValidateDomains {
+    domain_types::ValidateDomains {
         code: true,
         architecture: true,
         release: true,
@@ -368,25 +374,28 @@ const fn domains_from_args(_args: &TsValidateArgs) -> ValidateDomains {
 }
 
 /// Load guardrail3.toml config, if present.
-fn load_config(fs: &RealFileSystem, path: &std::path::Path) -> Option<GuardrailConfig> {
+fn load_config(
+    fs: &RealFileSystem,
+    path: &std::path::Path,
+) -> Option<domain_types::GuardrailConfig> {
     let config_path = path.join("guardrail3.toml");
-    let content = fs.read_file(&config_path)?;
+    let content = guardrail3_outbound_traits::FileSystem::read_file(fs, &config_path)?;
     toml::from_str(&content).ok()
 }
 
 /// Build `TsCheckCategories` by merging config defaults with CLI flags.
 fn build_ts_categories(
-    _args: &TsValidateArgs,
+    _args: &cli_types::TsValidateArgs,
     fs: &RealFileSystem,
     path: &std::path::Path,
-) -> TsCheckCategories {
+) -> domain_types::TsCheckCategories {
     let cfg = load_config(fs, path);
     let checks = cfg
         .as_ref()
         .and_then(|c| c.typescript.as_ref())
         .and_then(|t| t.checks.as_ref());
 
-    let ts_defaults = TsCheckCategories::default();
+    let ts_defaults = domain_types::TsCheckCategories::default();
     let cfg_arch = checks
         .and_then(|c| c.architecture)
         .unwrap_or(ts_defaults.architecture);
@@ -395,7 +404,7 @@ fn build_ts_categories(
         .unwrap_or(ts_defaults.content);
     let cfg_tests = checks.and_then(|c| c.tests).unwrap_or(ts_defaults.tests);
 
-    TsCheckCategories {
+    domain_types::TsCheckCategories {
         architecture: cfg_arch,
         content: cfg_content,
         tests: cfg_tests,

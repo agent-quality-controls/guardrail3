@@ -80,7 +80,7 @@ fn actual_guardrail3_repo_no_longer_has_nested_family_workspaces() {
     let repo_root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("../../../../../../../../..")
         .canonicalize()
-        .expect("resolve repo root");
+        .expect("failed to resolve repository root for nested-workspace ownership test");
 
     let results = super::run_family(&repo_root);
     assertions::assert_no_error(&results);

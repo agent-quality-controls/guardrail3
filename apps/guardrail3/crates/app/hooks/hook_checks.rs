@@ -2,15 +2,18 @@ use guardrail3_outbound_traits::ToolChecker;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
-use super::hook_script_checks::{
-    check_audit_hook, check_conflict_marker_hook, check_cspell_hook, check_dispatcher_pattern,
-    check_local_scripts, check_lockfile_hook, check_modular_scripts, check_monolithic_patterns,
-    check_prettier_hook, check_set_e_safety, check_stylelint_hook, emit_script_stats,
-    inventory_scripts,
-};
-use super::tool_checks::{check_duplication_tools, check_required_tools};
 use guardrail3_domain_report::{CheckResult, Severity};
 use guardrail3_outbound_traits::FileSystem;
+
+mod checks {
+    pub(super) use super::super::hook_script_checks::{
+        check_audit_hook, check_conflict_marker_hook, check_cspell_hook, check_dispatcher_pattern,
+        check_local_scripts, check_lockfile_hook, check_modular_scripts, check_monolithic_patterns,
+        check_prettier_hook, check_set_e_safety, check_stylelint_hook, emit_script_stats,
+        inventory_scripts,
+    };
+    pub(super) use super::super::tool_checks::{check_duplication_tools, check_required_tools};
+}
 
 pub fn check_hooks(
     fs: &dyn FileSystem,
@@ -90,7 +93,7 @@ fn check_pre_commit_exists(
             inventory: false,
         });
         check_hooks_path(path, results);
-        check_required_tools(tc, results);
+        checks::check_required_tools(tc, results);
         false
     }
 }
@@ -134,7 +137,7 @@ fn check_hook_structure(
     }
 
     // H4: Dispatcher script
-    check_dispatcher_pattern(
+    checks::check_dispatcher_pattern(
         ctx.pre_commit_path,
         ctx.is_modular,
         ctx.pre_commit_content,
@@ -143,9 +146,9 @@ fn check_hook_structure(
 
     // H5: Expected scripts/patterns present
     if ctx.is_modular {
-        check_modular_scripts(fs, ctx.pre_commit_d, has_rust, has_typescript, results);
+        checks::check_modular_scripts(fs, ctx.pre_commit_d, has_rust, has_typescript, results);
     } else {
-        check_monolithic_patterns(
+        checks::check_monolithic_patterns(
             ctx.pre_commit_content,
             ctx.pre_commit_path,
             has_rust,
@@ -155,7 +158,7 @@ fn check_hook_structure(
     }
 
     // H12: Duplication tool checks
-    check_duplication_tools(
+    checks::check_duplication_tools(
         ctx.pre_commit_content,
         ctx.pre_commit_path,
         has_rust,
@@ -165,23 +168,23 @@ fn check_hook_structure(
 
     // H-CSS-01: Stylelint in pre-commit (only relevant for web/TS projects)
     if has_typescript {
-        check_stylelint_hook(ctx.pre_commit_content, results);
+        checks::check_stylelint_hook(ctx.pre_commit_content, results);
     }
 
     // H-SAFE-01: Shell error handling (all projects)
-    check_set_e_safety(ctx.pre_commit_content, results);
+    checks::check_set_e_safety(ctx.pre_commit_content, results);
 
     // H-TOOL-02: Conflict marker check (all projects)
-    check_conflict_marker_hook(ctx.pre_commit_content, results);
+    checks::check_conflict_marker_hook(ctx.pre_commit_content, results);
 
     // H-TOOL-03: Lockfile integrity (all projects)
-    check_lockfile_hook(ctx.pre_commit_content, results);
+    checks::check_lockfile_hook(ctx.pre_commit_content, results);
 
     // H-TOOL-01, H-TOOL-04, H-TOOL-05: TS-specific tool checks
     if has_typescript {
-        check_cspell_hook(ctx.pre_commit_content, results);
-        check_prettier_hook(ctx.pre_commit_content, results);
-        check_audit_hook(ctx.pre_commit_content, results);
+        checks::check_cspell_hook(ctx.pre_commit_content, results);
+        checks::check_prettier_hook(ctx.pre_commit_content, results);
+        checks::check_audit_hook(ctx.pre_commit_content, results);
     }
 }
 
@@ -194,17 +197,17 @@ fn check_hook_stats_and_tools(
     results: &mut Vec<CheckResult>,
 ) {
     let (_line_count, size) =
-        emit_script_stats(fs, ctx.pre_commit_path, ctx.pre_commit_content, results);
+        checks::emit_script_stats(fs, ctx.pre_commit_path, ctx.pre_commit_content, results);
 
     // H7: Script permissions
     check_permissions(fs, ctx.pre_commit_path, results);
 
     // H8: Required tools installed
-    check_required_tools(tc, results);
+    checks::check_required_tools(tc, results);
 
     // H9: Extra scripts in pre-commit.d/
     if ctx.is_modular {
-        inventory_scripts(
+        checks::inventory_scripts(
             fs,
             ctx.pre_commit_d,
             "H9",
@@ -228,7 +231,7 @@ fn check_hook_stats_and_tools(
     );
 
     // H11: Local pre-commit scripts
-    check_local_scripts(fs, path, results);
+    checks::check_local_scripts(fs, path, results);
 }
 
 fn check_hooks_path(path: &Path, results: &mut Vec<CheckResult>) {

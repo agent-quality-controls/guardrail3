@@ -55,5 +55,4 @@ pub(crate) fn check_source(rel_path: &str, content: &str, is_test_root: bool) ->
 
 #[cfg(test)]
 #[path = "rs_code_18_always_true_cfg_attr_bypass_tests/mod.rs"] // reason: test-only sidecar module wiring
-// reason: test-only sidecar module wiring
 mod rs_code_18_always_true_cfg_attr_bypass_tests;

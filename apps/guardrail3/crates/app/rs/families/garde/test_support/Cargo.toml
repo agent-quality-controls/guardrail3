@@ -11,3 +11,4 @@ name = "test_support"
 
 [dependencies]
 guardrail3_domain_project_tree = { package = "guardrail3-domain-project-tree", path = "../../../../../domain/project-tree" }
+guardrail3_shared_fs = { package = "guardrail3-shared-fs", path = "../../../../../shared/fs" }

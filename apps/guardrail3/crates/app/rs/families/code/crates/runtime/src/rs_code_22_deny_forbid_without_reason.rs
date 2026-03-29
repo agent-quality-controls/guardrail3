@@ -72,5 +72,4 @@ pub(crate) fn check_source(rel_path: &str, content: &str, is_test_root: bool) ->
 
 #[cfg(test)]
 #[path = "rs_code_22_deny_forbid_without_reason_tests/mod.rs"] // reason: test-only sidecar module wiring
-// reason: test-only sidecar module wiring
 mod rs_code_22_deny_forbid_without_reason_tests;

@@ -458,15 +458,15 @@ pub fn set_allow_registries(deny_toml: &str, entries: &[&str]) -> String {
 }
 
 fn copy_dir_recursive(src: &Path, dst: &Path) {
-    for entry in std::fs::read_dir(src).expect("read fixture dir") {
-        let entry = entry.expect("read entry");
+    for entry in guardrail3_shared_fs::list_dir(src) {
         let src_path = entry.path();
         let dst_path = dst.join(entry.file_name());
         if src_path.is_dir() {
             create_dir_all(&dst_path);
             copy_dir_recursive(&src_path, &dst_path);
         } else {
-            let _ = std::fs::copy(&src_path, &dst_path).expect("copy fixture file");
+            let _ = guardrail3_shared_fs::copy_file(&src_path, &dst_path)
+                .expect("copy deny fixture file");
         }
     }
 }

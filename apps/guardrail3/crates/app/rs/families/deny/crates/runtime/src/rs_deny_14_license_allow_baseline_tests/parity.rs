@@ -5,7 +5,9 @@ use super::super::expected_licenses_for_test;
 fn generated_license_baseline_contains_exact_expected_allow_list_and_private_ignore() {
     let parsed = toml::from_str::<toml::Value>(&build_fixture_deny_toml("service"))
         .expect("valid deny TOML");
-    let licenses = parsed.get("licenses").expect("licenses section");
+    let licenses = parsed
+        .get("licenses")
+        .expect("expected generated deny TOML to contain [licenses]");
 
     let actual_allow = licenses
         .get("allow")

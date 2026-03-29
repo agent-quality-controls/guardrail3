@@ -32,9 +32,6 @@ mod rs_code_29_large_trait_inventory;
 mod rs_code_30_input_failures;
 mod rs_code_32_test_expect_message_quality;
 
-use guardrail3_app_rs_family_mapper::RsCodeRoute;
-use guardrail3_domain_project_tree::ProjectTree;
-use guardrail3_domain_report::CheckResult;
 use {
     glob as _, guardrail3_domain_config as _, guardrail3_domain_modules as _,
     guardrail3_outbound_traits as _, quote as _, semver as _, serde_yaml as _,
@@ -51,13 +48,14 @@ use guardrail3_adapters_outbound_fs::RealFileSystem;
 use guardrail3_app_core::project_walker::walk_project;
 #[cfg(test)]
 use guardrail3_app_rs_family_code_assertions as _;
-#[cfg(test)]
-use guardrail3_domain_config::types::GuardrailConfig;
 
 #[cfg(test)]
 const GOLDEN_REL: &str = "../../../../../../../tests/fixtures/r_arch_01/golden";
 
-pub fn check(tree: &ProjectTree, route: &RsCodeRoute) -> Vec<CheckResult> {
+pub fn check(
+    tree: &guardrail3_domain_project_tree::ProjectTree,
+    route: &guardrail3_app_rs_family_mapper::RsCodeRoute,
+) -> Vec<guardrail3_domain_report::CheckResult> {
     let facts = collect(tree, route);
     let mut results = Vec::new();
 
@@ -143,19 +141,25 @@ pub fn check(tree: &ProjectTree, route: &RsCodeRoute) -> Vec<CheckResult> {
 
 #[cfg(test)]
 #[must_use]
-pub(crate) fn check_test_root(root: &std::path::Path) -> Vec<CheckResult> {
+pub(crate) fn check_test_root(
+    root: &std::path::Path,
+) -> Vec<guardrail3_domain_report::CheckResult> {
     let tree = walk_project(&RealFileSystem, root);
     check_test_tree(&tree)
 }
 
 #[cfg(test)]
 #[must_use]
-pub(crate) fn check_test_tree(tree: &ProjectTree) -> Vec<CheckResult> {
+pub(crate) fn check_test_tree(
+    tree: &guardrail3_domain_project_tree::ProjectTree,
+) -> Vec<guardrail3_domain_report::CheckResult> {
     check(tree, &family_route_for_tests(tree))
 }
 
 #[cfg(test)]
-fn family_route_for_tests(tree: &ProjectTree) -> RsCodeRoute {
+fn family_route_for_tests(
+    tree: &guardrail3_domain_project_tree::ProjectTree,
+) -> guardrail3_app_rs_family_mapper::RsCodeRoute {
     let scope = guardrail3_app_rs_placement::collect(tree);
     let config = parse_guardrail_config(tree);
     let selected =
@@ -173,9 +177,11 @@ fn family_route_for_tests(tree: &ProjectTree) -> RsCodeRoute {
 }
 
 #[cfg(test)]
-fn parse_guardrail_config(tree: &ProjectTree) -> Option<GuardrailConfig> {
+fn parse_guardrail_config(
+    tree: &guardrail3_domain_project_tree::ProjectTree,
+) -> Option<guardrail3_domain_config::types::GuardrailConfig> {
     tree.file_content("guardrail3.toml")
-        .and_then(|content| toml::from_str::<GuardrailConfig>(content).ok())
+        .and_then(|content| toml::from_str::<guardrail3_domain_config::types::GuardrailConfig>(content).ok())
 }
 
 #[cfg(test)]

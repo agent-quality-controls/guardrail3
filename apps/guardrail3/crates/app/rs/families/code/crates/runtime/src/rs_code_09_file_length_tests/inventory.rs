@@ -26,7 +26,7 @@ fn attacks_file_length_using_real_owned_file_surface() {
         &[RuleFinding {
             severity: Severity::Error,
             title: "file too long",
-            message: "538 effective lines (max 500). Long files are hard to review and maintain.",
+            message: "538 effective code-bearing lines (max 500). Long files are hard to review and maintain.",
             file: Some(rel),
             line: None,
             inventory: false,

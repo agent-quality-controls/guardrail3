@@ -28,15 +28,17 @@ readme = "README.md"
 
     let readme_path = tmp.path().join("packages/shared-types/README.md");
     let original_permissions = std::fs::metadata(&readme_path)
-        .expect("README metadata")
+        .expect("failed to read release README metadata")
         .permissions();
     let mut unreadable = original_permissions.clone();
     unreadable.set_mode(0o000);
-    std::fs::set_permissions(&readme_path, unreadable).expect("chmod 000");
+    std::fs::set_permissions(&readme_path, unreadable)
+        .expect("failed to make release README unreadable");
 
     let results = run_family(tmp.path(), false);
 
-    std::fs::set_permissions(&readme_path, original_permissions).expect("restore permissions");
+    std::fs::set_permissions(&readme_path, original_permissions)
+        .expect("failed to restore release README permissions");
 
     assert!(!assertions::findings(&results).is_empty());
     assertions::assert_rule_results(
@@ -78,15 +80,17 @@ readme = "README.md"
 
     let readme_path = tmp.path().join("packages/shared-types/README.md");
     let original_permissions = std::fs::metadata(&readme_path)
-        .expect("README metadata")
+        .expect("failed to read release README metadata")
         .permissions();
     let mut unreadable = original_permissions.clone();
     unreadable.set_mode(0o000);
-    std::fs::set_permissions(&readme_path, unreadable).expect("chmod 000");
+    std::fs::set_permissions(&readme_path, unreadable)
+        .expect("failed to make release README unreadable");
 
     let results = run_family(tmp.path(), false);
 
-    std::fs::set_permissions(&readme_path, original_permissions).expect("restore permissions");
+    std::fs::set_permissions(&readme_path, original_permissions)
+        .expect("failed to restore release README permissions");
 
     assert!(assertions::findings(&results).is_empty());
     assertions::assert_rule_quiet(&results);
@@ -130,15 +134,17 @@ readme.workspace = true
 
     let readme_path = tmp.path().join("README.md");
     let original_permissions = std::fs::metadata(&readme_path)
-        .expect("README metadata")
+        .expect("failed to read release README metadata")
         .permissions();
     let mut unreadable = original_permissions.clone();
     unreadable.set_mode(0o000);
-    std::fs::set_permissions(&readme_path, unreadable).expect("chmod 000");
+    std::fs::set_permissions(&readme_path, unreadable)
+        .expect("failed to make release README unreadable");
 
     let results = run_family(tmp.path(), false);
 
-    std::fs::set_permissions(&readme_path, original_permissions).expect("restore permissions");
+    std::fs::set_permissions(&readme_path, original_permissions)
+        .expect("failed to restore release README permissions");
 
     assert!(!assertions::findings(&results).is_empty());
     assertions::assert_rule_results(

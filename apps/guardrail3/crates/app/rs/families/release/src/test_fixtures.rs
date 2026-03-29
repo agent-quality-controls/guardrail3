@@ -11,6 +11,7 @@ use guardrail3_app_rs_family_mapper::{FamilyMapper, RsReleaseRoute};
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::CheckResult;
 use guardrail3_outbound_traits::ToolChecker;
+use guardrail3_shared_fs::{copy_file, create_dir_all, list_dir};
 use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
 use crate::facts::{PublishableCrateFacts, ReleaseEdgeFacts, RepoReleaseFacts, WorkflowFacts};
@@ -24,7 +25,7 @@ pub(crate) fn fixture_root() -> PathBuf {
 }
 
 pub(crate) fn copy_fixture() -> tempfile::TempDir {
-    let tmp = tempfile::tempdir().expect("create tempdir");
+    let tmp = tempfile::tempdir().expect("failed to create release fixture tempdir");
     copy_dir_recursive(&fixture_root(), tmp.path());
     tmp
 }
@@ -65,7 +66,8 @@ pub(crate) fn repo_facts() -> RepoReleaseFacts {
 }
 
 pub(crate) fn workflow_from_yaml(rel_path: &str, yaml: &str) -> WorkflowFacts {
-    let parsed: YamlValue = serde_yaml::from_str(yaml).expect("valid workflow yaml");
+    let parsed: YamlValue =
+        serde_yaml::from_str(yaml).expect("failed to parse release workflow fixture yaml");
     let analysis = extract_workflow_analysis(&parsed);
     WorkflowFacts {
         rel_path: rel_path.to_owned(),
@@ -137,15 +139,15 @@ pub(crate) fn family_route(tree: &ProjectTree) -> RsReleaseRoute {
 }
 
 fn copy_dir_recursive(src: &Path, dst: &Path) {
-    for entry in std::fs::read_dir(src).expect("read fixture dir") {
-        let entry = entry.expect("read entry");
+    for entry in list_dir(src) {
         let src_path = entry.path();
         let dst_path = dst.join(entry.file_name());
         if src_path.is_dir() {
-            std::fs::create_dir_all(&dst_path).expect("create dst dir");
+            create_dir_all(&dst_path)
+                .expect("failed to create release fixture destination directory");
             copy_dir_recursive(&src_path, &dst_path);
         } else {
-            let _ = std::fs::copy(&src_path, &dst_path).expect("copy fixture file");
+            let _ = copy_file(&src_path, &dst_path).expect("failed to copy release fixture file");
         }
     }
 }

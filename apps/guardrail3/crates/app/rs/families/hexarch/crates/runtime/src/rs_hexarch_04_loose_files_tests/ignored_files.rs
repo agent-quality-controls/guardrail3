@@ -29,7 +29,7 @@ fn ignored_symlink_loose_files_still_hit_rule_04() {
         tmp.path().join("apps/devctl/Cargo.toml"),
         tmp.path().join("apps/devctl/crates/app/.env"),
     )
-    .expect("symlink");
+    .expect("failed to create symlink fixture for hexarch test");
 
     let results = super::run_family(tmp.path());
     assertions::assert_error_count_matching_file(
@@ -53,7 +53,7 @@ fn ignored_broken_symlink_loose_files_still_hit_rule_04() {
         tmp.path().join("missing-target"),
         tmp.path().join("apps/devctl/crates/app/.env"),
     )
-    .expect("symlink");
+    .expect("failed to create symlink fixture for hexarch test");
 
     let results = super::run_family(tmp.path());
     assertions::assert_error_count_matching_file(

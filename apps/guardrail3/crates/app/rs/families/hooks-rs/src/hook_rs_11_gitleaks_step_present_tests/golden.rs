@@ -66,9 +66,8 @@ fn passes_when_exec_wrapper_runs_gitleaks() {
 
 #[test]
 fn passes_when_called_function_runs_gitleaks() {
-    let results = run_case(
-        "run_gitleaks() {\n    gitleaks protect --staged --no-banner\n}\nrun_gitleaks\n",
-    );
+    let results =
+        run_case("run_gitleaks() {\n    gitleaks protect --staged --no-banner\n}\nrun_gitleaks\n");
     assertions::assert_present(&results);
 }
 

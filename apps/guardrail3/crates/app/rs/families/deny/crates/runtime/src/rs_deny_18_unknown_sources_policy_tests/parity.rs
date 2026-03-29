@@ -5,7 +5,9 @@ use super::super::expected_sources_for_test;
 fn generated_sources_baseline_contains_exact_expected_unknown_source_policy() {
     let parsed = toml::from_str::<toml::Value>(&build_fixture_deny_toml("service"))
         .expect("valid deny TOML");
-    let sources = parsed.get("sources").expect("sources section");
+    let sources = parsed
+        .get("sources")
+        .expect("expected generated deny TOML to contain [sources]");
     let (expected_registries, expected_unknown_registry, expected_unknown_git) =
         expected_sources_for_test();
 

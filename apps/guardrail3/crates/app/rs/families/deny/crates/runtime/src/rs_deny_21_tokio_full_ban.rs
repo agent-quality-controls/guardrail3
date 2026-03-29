@@ -65,7 +65,6 @@ pub(crate) fn run_check(deny_toml: &str) -> Vec<CheckResult> {
     crate::run_config_rule_for_test(deny_toml, None, check)
 }
 
-
 #[cfg(test)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_root(root)

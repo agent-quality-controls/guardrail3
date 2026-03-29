@@ -18,7 +18,11 @@ fn load() {
         ("vendor/tool/src/db.rs", "fn load() {}\n"),
     ] {
         let abs = root.join(rel);
-        std::fs::create_dir_all(abs.parent().expect("fixture source path must have a parent directory")).expect("failed to create fixture source directory");
+        std::fs::create_dir_all(
+            abs.parent()
+                .expect("fixture source path must have a parent directory"),
+        )
+        .expect("failed to create fixture source directory");
         std::fs::write(abs, source).expect("failed to write fixture source");
     }
 

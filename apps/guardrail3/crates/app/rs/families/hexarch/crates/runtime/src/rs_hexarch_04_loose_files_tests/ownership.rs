@@ -115,7 +115,7 @@ fn symlink_only_container_hits_rule_04_and_rule_05() {
         tmp.path().join("apps/devctl/Cargo.toml"),
         tmp.path().join("apps/devctl/crates/domain/README.md"),
     )
-    .expect("symlink");
+    .expect("failed to create symlink fixture for hexarch test");
 
     let results = super::run_family(tmp.path());
     assertions::assert_error_count_matching_file(
