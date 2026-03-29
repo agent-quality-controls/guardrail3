@@ -49,7 +49,7 @@ fn generated_service_type_ban_set_matches_rule_baseline() {
 fn generated_library_type_ban_set_matches_rule_baseline() {
     let parsed =
         toml::from_str::<toml::Value>(&build_fixture_clippy_toml("library", false, true, "", ""))
-        .expect("valid clippy TOML");
+            .expect("valid clippy TOML");
     let actual = parsed
         .get("disallowed-types")
         .and_then(toml::Value::as_array)
