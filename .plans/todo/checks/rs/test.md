@@ -1,5 +1,8 @@
 # RS-TEST — Rust test quality checker (18 rules)
 
+> Superseded as the primary family plan by [`.plans/by_family/rs/test.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/by_family/rs/test.md).
+> Keep this file as a detailed ledger; the family README remains the strongest behavioral source of truth.
+
 **Input:** owned-root `Cargo.toml` + optional `.cargo/mutants.toml` + optional `.config/nextest.toml` + Rust source/test files + active hook surfaces
 **Parser:** TOML + `syn` AST + executable-line shell parsing
 **Current code:** `apps/guardrail3/crates/app/rs/families/test/**`

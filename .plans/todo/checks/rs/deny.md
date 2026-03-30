@@ -1,5 +1,8 @@
 # RS-DENY — `deny.toml` checker
 
+> Superseded as the primary family plan by [`.plans/by_family/rs/deny.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/by_family/rs/deny.md).
+> Keep this file as a detailed rule ledger and migration/history reference.
+
 **Input:** effective cargo-deny config coverage over Rust validation roots
 
 Accepted config filenames:

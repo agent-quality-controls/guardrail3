@@ -1,5 +1,8 @@
 # RS-DEPS — Tool + dependency policy checker (11 rules + 1 planned hard cap)
 
+> Superseded as the primary family plan by [`.plans/by_family/rs/deps.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/by_family/rs/deps.md).
+> Keep this file as a detailed rule ledger and migration/history reference.
+
 **Input:** Tool PATH checks + Cargo.lock + .gitignore + guardrail3.toml allowlists + Cargo.toml dependency tables
 **Current code:** `apps/guardrail3/crates/app/rs/checks/rs/deps/`
 

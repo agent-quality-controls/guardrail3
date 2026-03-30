@@ -1,5 +1,8 @@
 # RS-CARGO — Cargo.toml lint policy checker
 
+> Superseded as the primary family plan by [`.plans/by_family/rs/cargo.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/by_family/rs/cargo.md).
+> Keep this file as a detailed rule ledger and migration/history reference.
+
 **Input:** Cargo.toml at owned Rust policy roots plus member Cargo.toml files
 **Parser:** TOML
 **Current code:** `crates/app/rs/checks/rs/cargo/**` (multi-root policy-root model implemented)

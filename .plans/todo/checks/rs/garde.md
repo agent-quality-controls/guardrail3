@@ -1,5 +1,8 @@
 # RS-GARDE — Garde boundary validation checker (13 rules)
 
+> Superseded as the primary family plan by [`.plans/by_family/rs/garde.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/by_family/rs/garde.md).
+> Keep this file as a detailed rule ledger and migration/history reference.
+
 **Input:** Cargo.toml + clippy.toml + *.rs files
 **Parser:** TOML + syn AST
 **Current code:** `crates/app/rs/checks/rs/garde/**` (old `garde_checks.rs` is legacy seed material only)

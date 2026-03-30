@@ -1,5 +1,8 @@
 # RS-TOOLCHAIN — rust-toolchain.toml checker (4 rules)
 
+> Superseded as the primary family plan by [`.plans/by_family/rs/toolchain.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/by_family/rs/toolchain.md).
+> Keep this file as a detailed rule ledger and migration/history reference.
+
 **Input:** rust-toolchain.toml / rust-toolchain at repository root
 **Parser:** TOML
 **Current code:** `crates/app/rs/checks/rs/toolchain/**` (old `config_files.rs` / `toolchain_check.rs` are legacy seed material only)

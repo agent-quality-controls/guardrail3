@@ -1,5 +1,8 @@
 # RS-CLIPPY — clippy.toml checker (25 rules)
 
+> Superseded as the primary family plan by [`.plans/by_family/rs/clippy.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/by_family/rs/clippy.md).
+> Keep this file as a detailed rule ledger and migration/history reference.
+
 **Input:** `clippy.toml` / `.clippy.toml` at allowed Rust policy roots
 **Parser:** TOML (`toml::Value`)
 **Current code:** `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/**` + `apps/guardrail3/crates/app/rs/families/clippy/crates/assertions/**` + `apps/guardrail3/crates/app/rs/families/clippy/test_support/**` + `apps/guardrail3/crates/domain/modules/clippy/**`

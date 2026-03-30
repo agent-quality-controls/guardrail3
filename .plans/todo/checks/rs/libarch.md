@@ -1,5 +1,8 @@
 # RS-LIBARCH — Rust library architecture checker
 
+> Superseded as the primary family plan by [`.plans/by_family/rs/libarch.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/by_family/rs/libarch.md).
+> Keep this file as the detailed design/history ledger until the family exists in code.
+
 **Input:** package roots + Cargo.toml files + workspace membership + crate directory structure + crate dependency edges
 **Parser:** TOML + directory structure
 **Current code:** none yet
