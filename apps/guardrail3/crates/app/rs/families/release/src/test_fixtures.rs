@@ -1,27 +1,9 @@
 #![cfg(test)]
 
-use std::collections::BTreeSet;
-use std::path::{Path, PathBuf};
-
-use serde_yaml::Value as YamlValue;
-
-use guardrail3_adapters_outbound_tool_runner::RealToolChecker;
-use guardrail3_app_core::project_walker::walk_project;
-use guardrail3_app_rs_family_mapper::{FamilyMapper, RsReleaseRoute};
-use guardrail3_domain_project_tree::ProjectTree;
-use guardrail3_domain_report::CheckResult;
-use guardrail3_outbound_traits::ToolChecker;
-use guardrail3_shared_fs::{copy_file, create_dir_all, list_dir};
-use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
-
-use crate::facts::{PublishableCrateFacts, ReleaseEdgeFacts, RepoReleaseFacts, WorkflowFacts};
-use crate::inputs::{PublishableCrateReleaseInput, ReleaseEdgeInput, RepoReleaseInput};
-use crate::release_support::extract_workflow_analysis;
-
 const GOLDEN_REL: &str = "../../../../../tests/fixtures/r_arch_01/golden";
 
-pub(crate) fn fixture_root() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(GOLDEN_REL)
+pub(crate) fn fixture_root() -> std::path::PathBuf {
+    std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(GOLDEN_REL)
 }
 
 pub(crate) fn copy_fixture() -> tempfile::TempDir {
@@ -30,33 +12,43 @@ pub(crate) fn copy_fixture() -> tempfile::TempDir {
     tmp
 }
 
-pub(crate) fn run_family(root: &Path, thorough: bool) -> Vec<CheckResult> {
-    let tree = walk_project(&guardrail3_adapters_outbound_fs::RealFileSystem, root);
-    run_tree(&tree, &RealToolChecker, thorough)
+pub(crate) fn run_family(
+    root: &std::path::Path,
+    thorough: bool,
+) -> Vec<guardrail3_domain_report::CheckResult> {
+    let tree = guardrail3_app_core::project_walker::walk_project(
+        &guardrail3_adapters_outbound_fs::RealFileSystem,
+        root,
+    );
+    run_tree(
+        &tree,
+        &guardrail3_adapters_outbound_tool_runner::RealToolChecker,
+        thorough,
+    )
 }
 
 pub(crate) fn run_tree(
-    tree: &ProjectTree,
-    tc: &dyn ToolChecker,
+    tree: &guardrail3_domain_project_tree::ProjectTree,
+    tc: &dyn guardrail3_outbound_traits::ToolChecker,
     thorough: bool,
-) -> Vec<CheckResult> {
+) -> Vec<guardrail3_domain_report::CheckResult> {
     crate::check(tree, &family_route(tree), tc, thorough)
 }
 
-pub(crate) fn repo_facts() -> RepoReleaseFacts {
-    RepoReleaseFacts {
+pub(crate) fn repo_facts() -> crate::facts::RepoReleaseFacts {
+    crate::facts::RepoReleaseFacts {
         cargo_rel_path: "Cargo.toml".to_owned(),
         license_rel_path: None,
         release_plz_rel_path: "release-plz.toml".to_owned(),
         release_plz_exists: false,
         release_plz_parsed: None,
-        release_plz_package_names: BTreeSet::new(),
+        release_plz_package_names: std::collections::BTreeSet::new(),
         cliff_rel_path: "cliff.toml".to_owned(),
         cliff_exists: false,
         cliff_parsed: None,
         workflows: Vec::new(),
-        publishable_crate_names: BTreeSet::new(),
-        publishable_binary_crate_names: BTreeSet::new(),
+        publishable_crate_names: std::collections::BTreeSet::new(),
+        publishable_binary_crate_names: std::collections::BTreeSet::new(),
         publishable_count: 0,
         non_publishable_count: 0,
         semver_checks_installed: false,
@@ -65,20 +57,20 @@ pub(crate) fn repo_facts() -> RepoReleaseFacts {
     }
 }
 
-pub(crate) fn workflow_from_yaml(rel_path: &str, yaml: &str) -> WorkflowFacts {
-    let parsed: YamlValue =
+pub(crate) fn workflow_from_yaml(rel_path: &str, yaml: &str) -> crate::facts::WorkflowFacts {
+    let parsed: serde_yaml::Value =
         serde_yaml::from_str(yaml).expect("failed to parse release workflow fixture yaml");
-    let analysis = extract_workflow_analysis(&parsed);
-    WorkflowFacts {
+    let analysis = crate::release_support::workflows::extract_workflow_analysis(&parsed);
+    crate::facts::WorkflowFacts {
         rel_path: rel_path.to_owned(),
         analysis,
     }
 }
 
-pub(crate) fn crate_facts(name: &str) -> PublishableCrateFacts {
-    let mut binary_target_names = BTreeSet::new();
+pub(crate) fn crate_facts(name: &str) -> crate::facts::PublishableCrateFacts {
+    let mut binary_target_names = std::collections::BTreeSet::new();
     let _ = binary_target_names.insert(name.to_owned());
-    PublishableCrateFacts {
+    crate::facts::PublishableCrateFacts {
         name: name.to_owned(),
         cargo_rel_path: "crates/example/Cargo.toml".to_owned(),
         binary_target_names,
@@ -104,8 +96,8 @@ pub(crate) fn crate_facts(name: &str) -> PublishableCrateFacts {
     }
 }
 
-pub(crate) fn edge_facts() -> ReleaseEdgeFacts {
-    ReleaseEdgeFacts {
+pub(crate) fn edge_facts() -> crate::facts::ReleaseEdgeFacts {
+    crate::facts::ReleaseEdgeFacts {
         crate_name: "example".to_owned(),
         cargo_rel_path: "crates/example/Cargo.toml".to_owned(),
         dep_name: "dep".to_owned(),
@@ -120,34 +112,47 @@ pub(crate) fn edge_facts() -> ReleaseEdgeFacts {
     }
 }
 
-pub(crate) fn repo_input(repo: &RepoReleaseFacts) -> RepoReleaseInput<'_> {
-    RepoReleaseInput::new(repo)
+pub(crate) fn repo_input(
+    repo: &crate::facts::RepoReleaseFacts,
+) -> crate::inputs::RepoReleaseInput<'_> {
+    crate::inputs::RepoReleaseInput::new(repo)
 }
 
-pub(crate) fn crate_input(krate: &PublishableCrateFacts) -> PublishableCrateReleaseInput<'_> {
-    PublishableCrateReleaseInput::new(krate)
+pub(crate) fn crate_input(
+    krate: &crate::facts::PublishableCrateFacts,
+) -> crate::inputs::PublishableCrateReleaseInput<'_> {
+    crate::inputs::PublishableCrateReleaseInput::new(krate)
 }
 
-pub(crate) fn edge_input(edge: &ReleaseEdgeFacts) -> ReleaseEdgeInput<'_> {
-    ReleaseEdgeInput::new(edge)
+pub(crate) fn edge_input(
+    edge: &crate::facts::ReleaseEdgeFacts,
+) -> crate::inputs::ReleaseEdgeInput<'_> {
+    crate::inputs::ReleaseEdgeInput::new(edge)
 }
 
-pub(crate) fn family_route(tree: &ProjectTree) -> RsReleaseRoute {
+pub(crate) fn family_route(
+    tree: &guardrail3_domain_project_tree::ProjectTree,
+) -> guardrail3_app_rs_family_mapper::RsReleaseRoute {
     let scope = guardrail3_app_rs_placement::collect(tree);
-    let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Release]));
-    FamilyMapper::new(tree, &scope, None, &selected, None).map_rs_release()
+    let selected =
+        guardrail3_validation_model::RustFamilySelection::new(std::collections::BTreeSet::from([
+            guardrail3_validation_model::RustValidateFamily::Release,
+        ]));
+    guardrail3_app_rs_family_mapper::FamilyMapper::new(tree, &scope, None, &selected, None)
+        .map_rs_release()
 }
 
-fn copy_dir_recursive(src: &Path, dst: &Path) {
-    for entry in list_dir(src) {
+fn copy_dir_recursive(src: &std::path::Path, dst: &std::path::Path) {
+    for entry in guardrail3_shared_fs::list_dir(src) {
         let src_path = entry.path();
         let dst_path = dst.join(entry.file_name());
         if src_path.is_dir() {
-            create_dir_all(&dst_path)
+            guardrail3_shared_fs::create_dir_all(&dst_path)
                 .expect("failed to create release fixture destination directory");
             copy_dir_recursive(&src_path, &dst_path);
         } else {
-            let _ = copy_file(&src_path, &dst_path).expect("failed to copy release fixture file");
+            let _ = guardrail3_shared_fs::copy_file(&src_path, &dst_path)
+                .expect("failed to copy release fixture file");
         }
     }
 }

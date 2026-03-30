@@ -134,5 +134,6 @@ pub(crate) use ::test_support::{
     set_feature_entries,
 };
 #[cfg(test)]
+#[cfg(test)]
 #[path = "rs_deny_27_duplicate_entries_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_deny_27_duplicate_entries_tests;

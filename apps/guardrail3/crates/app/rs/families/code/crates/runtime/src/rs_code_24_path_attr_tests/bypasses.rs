@@ -23,7 +23,8 @@ fn errors_on_cfg_attr_parent_escaping_double_dot_filename_segment() {
 
 #[test]
 fn errors_on_cfg_attr_with_forged_reason_spelling() {
-    let content = "#[cfg_attr(test, path = \"generated.rs\")] // REASON: generated seam\nmod generated;";
+    let content =
+        "#[cfg_attr(test, path = \"generated.rs\")] // REASON: generated seam\nmod generated;";
     let results = check_source("src/lib.rs", content, false);
 
     assert_findings(

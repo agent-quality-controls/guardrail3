@@ -1,7 +1,7 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::inventory::push_success;
-use crate::MemberConfigHexarchInput;
+use crate::inputs::MemberConfigHexarchInput;
 
 const ID: &str = "RS-HEXARCH-15";
 

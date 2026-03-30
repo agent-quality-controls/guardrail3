@@ -45,5 +45,6 @@ pub(crate) fn run_check(deny_toml: &str) -> Vec<CheckResult> {
 #[cfg(test)]
 pub(crate) use ::test_support::{build_fixture_deny_toml, set_allow_git_sources};
 #[cfg(test)]
+#[cfg(test)]
 #[path = "rs_deny_20_allow_git_inventory_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_deny_20_allow_git_inventory_tests;

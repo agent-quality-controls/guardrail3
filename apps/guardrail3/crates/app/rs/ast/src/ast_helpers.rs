@@ -4,15 +4,7 @@
 //! structurally — no grep, no false positives from strings/comments.
 
 use proc_macro2 as _; // reason: span-locations feature needed for syn span.start()
-use syn::spanned::Spanned;
-use syn::visit::Visit;
-
-use super::ast_visitors::{
-    CfgAttrAllowVisitor, DeriveVisitor, ForbiddenMacroVisitor, GardeSkipTypedVisitor,
-    GardeSkipVisitor, ItemAllowVisitor, PubFnVisitor, TestAttrVisitor, TestCountVisitor,
-    UnsafeVisitor, UnwrapExpectVisitor,
-};
-use super::extra_visitors::{IgnoreVisitor, InlineStdFsVisitor};
+use super::{ast_visitors, extra_visitors};
 
 pub use super::ast_visitors::{
     GardeSkipInfo, struct_has_non_exempt_fields, struct_has_non_primitive_fields,
@@ -120,8 +112,8 @@ fn collect_mod_inner_allows(item_mod: &syn::ItemMod, path: &str, out: &mut Vec<I
 
 /// Find `#[allow(...)]` item-level attributes. Returns `(line, lint_name)`.
 pub fn find_item_allows(file: &syn::File) -> Vec<Located> {
-    let mut v = ItemAllowVisitor { out: Vec::new() };
-    v.visit_file(file);
+    let mut v = ast_visitors::ItemAllowVisitor { out: Vec::new() };
+    syn::visit::Visit::visit_file(&mut v, file);
     v.out
 }
 
@@ -132,36 +124,36 @@ pub fn find_cfg_attr_allows(file: &syn::File) -> Vec<CfgAttrAllowInfo> {
     for attr in &file.attrs {
         extract_cfg_attr_allow_lints(attr, &mut out);
     }
-    let mut v = CfgAttrAllowVisitor { out: &mut out };
-    v.visit_file(file);
+    let mut v = ast_visitors::CfgAttrAllowVisitor { out: &mut out };
+    syn::visit::Visit::visit_file(&mut v, file);
     out
 }
 
 /// Find lines with `#[garde(skip)]`.
 pub fn find_garde_skips(file: &syn::File) -> Vec<usize> {
-    let mut v = GardeSkipVisitor { out: Vec::new() };
-    v.visit_file(file);
+    let mut v = ast_visitors::GardeSkipVisitor { out: Vec::new() };
+    syn::visit::Visit::visit_file(&mut v, file);
     v.out
 }
 
 /// Find `#[garde(skip)]` fields/types with explicit exemption classification.
 pub fn find_garde_skips_with_types(file: &syn::File) -> Vec<GardeSkipInfo> {
-    let mut v = GardeSkipTypedVisitor { out: Vec::new() };
-    v.visit_file(file);
+    let mut v = ast_visitors::GardeSkipTypedVisitor { out: Vec::new() };
+    syn::visit::Visit::visit_file(&mut v, file);
     v.out
 }
 
 /// Find lines with `unsafe` blocks or `unsafe fn` declarations.
 pub fn find_unsafe_usage(file: &syn::File) -> Vec<usize> {
-    let mut v = UnsafeVisitor { out: Vec::new() };
-    v.visit_file(file);
+    let mut v = ast_visitors::UnsafeVisitor { out: Vec::new() };
+    syn::visit::Visit::visit_file(&mut v, file);
     v.out
 }
 
 /// Find `todo!()`, `unimplemented!()`, `panic!()`. Returns `(line, macro_name)`.
 pub fn find_forbidden_macros(file: &syn::File) -> Vec<Located> {
-    let mut v = ForbiddenMacroVisitor { out: Vec::new() };
-    v.visit_file(file);
+    let mut v = ast_visitors::ForbiddenMacroVisitor { out: Vec::new() };
+    syn::visit::Visit::visit_file(&mut v, file);
     v.out
 }
 
@@ -169,16 +161,16 @@ pub fn find_forbidden_macros(file: &syn::File) -> Vec<Located> {
 /// Skips calls in functions/modules annotated with `#[allow(clippy::unwrap_used)]`
 /// or `#[allow(clippy::expect_used)]`.
 pub fn find_unwrap_expect(file: &syn::File) -> Vec<Located> {
-    let mut v = UnwrapExpectVisitor::default();
-    v.visit_file(file);
+    let mut v = ast_visitors::UnwrapExpectVisitor::default();
+    syn::visit::Visit::visit_file(&mut v, file);
     v.out
 }
 
 /// Find all `#[derive(...)]` attributes in a parsed file.
 /// Returns one `DeriveInfo` per derive attribute found, with its line and macro names.
 pub fn find_derive_attributes(file: &syn::File) -> Vec<DeriveInfo> {
-    let mut v = DeriveVisitor { out: Vec::new() };
-    v.visit_file(file);
+    let mut v = ast_visitors::DeriveVisitor { out: Vec::new() };
+    syn::visit::Visit::visit_file(&mut v, file);
     v.out
 }
 
@@ -193,7 +185,7 @@ pub fn find_std_fs_imports(file: &syn::File) -> Vec<usize> {
                     return None;
                 }
                 if use_tree_matches_std_fs(&u.tree) {
-                    return Some(u.span().start().line);
+                    return Some(syn::spanned::Spanned::span(u).start().line);
                 }
             }
             None
@@ -206,33 +198,33 @@ pub fn find_std_fs_imports(file: &syn::File) -> Vec<usize> {
 /// Skips calls inside `#[cfg(test)]` functions/modules and functions/modules
 /// annotated with `#[allow(clippy::disallowed_methods)]`.
 pub fn find_inline_std_fs_calls(file: &syn::File) -> Vec<usize> {
-    let mut v = InlineStdFsVisitor {
+    let mut v = extra_visitors::InlineStdFsVisitor {
         out: Vec::new(),
         in_cfg_test: false,
         in_allowed_scope: false,
     };
-    v.visit_file(file);
+    syn::visit::Visit::visit_file(&mut v, file);
     v.out
 }
 
 /// Check if the file contains at least one `#[test]` or `#[tokio::test]` attribute.
 pub fn has_test_attribute(file: &syn::File) -> bool {
-    let mut v = TestAttrVisitor { found: false };
-    v.visit_file(file);
+    let mut v = ast_visitors::TestAttrVisitor { found: false };
+    syn::visit::Visit::visit_file(&mut v, file);
     v.found
 }
 
 /// Count `pub fn` declarations (including in impl blocks and traits).
 pub fn count_pub_fn_decls(file: &syn::File) -> usize {
-    let mut v = PubFnVisitor { count: 0 };
-    v.visit_file(file);
+    let mut v = ast_visitors::PubFnVisitor { count: 0 };
+    syn::visit::Visit::visit_file(&mut v, file);
     v.count
 }
 
 /// Count `#[test]` and `#[tokio::test]` attributes.
 pub fn count_test_attrs(file: &syn::File) -> usize {
-    let mut v = TestCountVisitor { count: 0 };
-    v.visit_file(file);
+    let mut v = ast_visitors::TestCountVisitor { count: 0 };
+    syn::visit::Visit::visit_file(&mut v, file);
     v.count
 }
 
@@ -240,11 +232,11 @@ pub fn count_test_attrs(file: &syn::File) -> usize {
 /// Returns 1-based line numbers of violations.
 /// Requires the original source to check for reason comments.
 pub fn find_ignore_without_reason(file: &syn::File, source: &str) -> Vec<usize> {
-    let mut v = IgnoreVisitor {
+    let mut v = extra_visitors::IgnoreVisitor {
         lines: source.lines().collect(),
         violations: Vec::new(),
     };
-    v.visit_file(file);
+    syn::visit::Visit::visit_file(&mut v, file);
     v.violations
 }
 
@@ -300,7 +292,7 @@ pub(super) fn extract_allow_lints(attr: &syn::Attribute, out: &mut Vec<Located>)
     if !attr.path().is_ident("allow") {
         return;
     }
-    let line = span_line(attr.span());
+    let line = span_line(syn::spanned::Spanned::span(attr));
     if let Ok(nested) = attr
         .parse_args_with(syn::punctuated::Punctuated::<syn::Path, syn::Token![,]>::parse_terminated)
     {
@@ -314,7 +306,7 @@ pub(super) fn extract_cfg_attr_allow_lints(attr: &syn::Attribute, out: &mut Vec<
     if !attr.path().is_ident("cfg_attr") {
         return;
     }
-    let line = span_line(attr.span());
+    let line = span_line(syn::spanned::Spanned::span(attr));
     let syn::Meta::List(meta_list) = &attr.meta else {
         return;
     };

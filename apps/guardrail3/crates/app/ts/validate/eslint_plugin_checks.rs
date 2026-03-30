@@ -564,5 +564,4 @@ fn check_tailwind_ban(config: &EslintConfig, eslint_path: &Path, results: &mut V
 }
 
 #[cfg(test)]
-#[path = "eslint_plugin_checks_tests.rs"] // reason: colocated eslint plugin tests
-mod tests;
+mod eslint_plugin_checks_tests;

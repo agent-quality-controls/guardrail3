@@ -1,8 +1,4 @@
-#[path = "golden.rs"] // reason: test matrix sidecar split by scenario
 mod golden;
-#[path = "multi_root_local_override.rs"] // reason: test matrix sidecar split by scenario
 mod multi_root_local_override;
-#[path = "multiple_entries.rs"] // reason: test matrix sidecar split by scenario
 mod multiple_entries;
-#[path = "whitespace_reason.rs"] // reason: test matrix sidecar split by scenario
 mod whitespace_reason;

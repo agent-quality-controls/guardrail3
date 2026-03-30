@@ -220,5 +220,6 @@ pub(crate) use ::test_support::{
     set_feature_entries, set_license_exceptions, write_file,
 };
 #[cfg(test)]
+#[cfg(test)]
 #[path = "rs_deny_28_unknown_keys_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_deny_28_unknown_keys_tests;

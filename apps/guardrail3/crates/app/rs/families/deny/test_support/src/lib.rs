@@ -56,19 +56,18 @@ pub fn copy_fixture(rel_from_manifest: &str) -> TempDir {
     let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let stripped = rel_from_manifest.trim_start_matches("../");
 
-    for base in manifest_dir.ancestors() {
-        for candidate in [
-            base.join(rel_from_manifest),
-            base.join(stripped),
-            base.join("apps/guardrail3").join(stripped),
-        ] {
-            if candidate.exists() {
-                return copy_tree(&candidate);
-            }
-        }
-    }
-
-    panic!("fixture not found from `{}`", manifest_dir.display());
+    let candidate = manifest_dir
+        .ancestors()
+        .flat_map(|base| {
+            [
+                base.join(rel_from_manifest),
+                base.join(stripped),
+                base.join("apps/guardrail3").join(stripped),
+            ]
+        })
+        .find(|candidate| candidate.exists())
+        .expect("fixture not found from manifest directory");
+    copy_tree(&candidate)
 }
 
 pub fn dir_entry(dirs: &[&str], files: &[&str]) -> DirEntry {

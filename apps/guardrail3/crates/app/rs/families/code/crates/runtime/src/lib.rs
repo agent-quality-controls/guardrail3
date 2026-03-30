@@ -180,8 +180,9 @@ fn family_route_for_tests(
 fn parse_guardrail_config(
     tree: &guardrail3_domain_project_tree::ProjectTree,
 ) -> Option<guardrail3_domain_config::types::GuardrailConfig> {
-    tree.file_content("guardrail3.toml")
-        .and_then(|content| toml::from_str::<guardrail3_domain_config::types::GuardrailConfig>(content).ok())
+    tree.file_content("guardrail3.toml").and_then(|content| {
+        toml::from_str::<guardrail3_domain_config::types::GuardrailConfig>(content).ok()
+    })
 }
 
 #[cfg(test)]

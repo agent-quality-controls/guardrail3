@@ -45,5 +45,6 @@ pub(crate) use ::test_support::{
 };
 #[cfg(test)]
 #[cfg(test)]
+#[cfg(test)]
 #[path = "rs_deny_13_wildcards_inventory_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_deny_13_wildcards_inventory_tests;

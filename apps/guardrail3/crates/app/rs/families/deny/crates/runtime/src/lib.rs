@@ -1,5 +1,6 @@
 mod deny_support;
 pub mod facts;
+mod facts_support;
 mod inputs;
 mod rs_deny_01_coverage;
 mod rs_deny_02_allowed_locations;

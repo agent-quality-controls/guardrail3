@@ -52,8 +52,8 @@ pub(super) fn edge_input(
 pub(super) fn dependency_edges(
     parsed: &toml::Value,
     workspace_dependencies: &toml::map::Map<String, toml::Value>,
-) -> Vec<crate::release_support::DependencyEdgeFacts> {
-    crate::release_support::dependency_edges(parsed, workspace_dependencies)
+) -> Vec<crate::release_support::dependencies::DependencyEdgeFacts> {
+    crate::release_support::dependencies::dependency_edges(parsed, workspace_dependencies)
 }
 
 #[cfg(test)]

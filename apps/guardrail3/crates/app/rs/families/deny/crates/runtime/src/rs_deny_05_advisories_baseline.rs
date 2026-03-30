@@ -87,5 +87,6 @@ pub(crate) use ::test_support::{
     write_file,
 };
 #[cfg(test)]
+#[cfg(test)]
 #[path = "rs_deny_05_advisories_baseline_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_deny_05_advisories_baseline_tests;

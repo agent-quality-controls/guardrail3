@@ -1,3 +1,4 @@
+use super::expected_finding;
 use guardrail3_app_rs_family_test::CheckResult;
 pub use guardrail3_app_rs_family_test::Severity;
 
@@ -14,10 +15,7 @@ pub fn rule_files(results: &[CheckResult], _rule_id: &str) -> Vec<String> {
 }
 
 pub fn finding<'a>(results: &'a [CheckResult], _rule_id: &str) -> &'a CheckResult {
-    results
-        .iter()
-        .find(|result| result.id == RULE_ID)
-        .unwrap_or_else(|| panic!("expected {RULE_ID} finding"))
+    expected_finding(results, RULE_ID)
 }
 
 pub fn assert_rule_files(results: &[CheckResult], expected: Vec<String>) {

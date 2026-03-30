@@ -1,12 +1,12 @@
 use std::collections::{BTreeMap, BTreeSet};
 
+mod helpers;
+
 use crate::{CheckResult, Severity};
 
 use super::AnalyzedFile;
-use super::discover::{parent_dir, path_is_under};
 use super::facts::{RuntimeAssertionsViolation, TestFileKind, TestRootFacts};
 use super::inputs::RuntimeAssertionsViolationInput;
-use super::parse::{ModuleInfo, UseBinding};
 
 const ID: &str = "RS-TEST-03";
 pub(crate) fn collect(
@@ -71,9 +71,9 @@ fn collect_violations(
         if !harnesses_exist {
             continue;
         }
-        let allowed_external_packages = allowed_external_harness_packages(component);
-        let allowed_sidecar_packages = allowed_sidecar_packages(component);
-        let allowed_assertions_packages = allowed_assertions_packages(component);
+        let allowed_external_packages = helpers::allowed_external_harness_packages(component);
+        let allowed_sidecar_packages = helpers::allowed_sidecar_packages(component);
+        let allowed_assertions_packages = helpers::allowed_assertions_packages(component);
         let assertions_package_name = component.assertions_package_name.as_deref();
 
         if !component.assertions_exists {
@@ -137,7 +137,7 @@ fn collect_violations(
             if scoped_files.is_some_and(|paths| !paths.contains(&sidecar.mod_rel_path)) {
                 continue;
             }
-            if !root_has_file(files, &sidecar.assertions_module_rel_path) {
+            if !helpers::root_has_file(files, &sidecar.assertions_module_rel_path) {
                 violations.push(RuntimeAssertionsViolation {
                     rel_path: sidecar.mod_rel_path.clone(),
                     line: None,
@@ -159,7 +159,7 @@ fn collect_violations(
             };
 
             for binding in &file.parsed.imports {
-                if import_uses_external_runtime_boundary(binding) {
+                if helpers::import_uses_external_runtime_boundary(binding) {
                     violations.push(RuntimeAssertionsViolation {
                         rel_path: external_harness.clone(),
                         line: Some(binding.line),
@@ -167,7 +167,7 @@ fn collect_violations(
                         message: "External runtime harnesses must stay black-box and must not import `crate::` or `super::`.".to_owned(),
                     });
                 }
-                if let Some(local_root) = first_disallowed_local_package(
+                if let Some(local_root) = helpers::first_disallowed_local_package(
                     &binding.path_segments,
                     local_package_names,
                     &allowed_external_packages,
@@ -184,7 +184,7 @@ fn collect_violations(
             }
 
             for module in &file.parsed.modules {
-                if module_path_includes_runtime_src(
+                if helpers::module_path_includes_runtime_src(
                     module,
                     external_harness,
                     &component.runtime_rel_dir,
@@ -199,7 +199,7 @@ fn collect_violations(
             }
 
             if let Some(local_root) = file.parsed.file_call_paths.iter().find_map(|path| {
-                first_disallowed_local_package(
+                helpers::first_disallowed_local_package(
                     path,
                     local_package_names,
                     &allowed_external_packages,
@@ -240,7 +240,7 @@ fn collect_violations(
                 .filter_map(|candidate| candidate.facts.owner_module_name.clone())
                 .collect::<BTreeSet<_>>();
             for binding in &file.parsed.imports {
-                if let Some(target) = disallowed_sidecar_local_boundary_target(
+                if let Some(target) = helpers::disallowed_sidecar_local_boundary_target(
                     &binding.path_segments,
                     &file.facts.kind,
                     owner_module_name,
@@ -255,7 +255,7 @@ fn collect_violations(
                         ),
                     });
                 }
-                if import_hits_sibling_module(binding, owner_module_name, &local_module_names) {
+                if helpers::import_hits_sibling_module(binding, owner_module_name, &local_module_names) {
                     violations.push(RuntimeAssertionsViolation {
                         rel_path: file.facts.rel_path.clone(),
                         line: Some(binding.line),
@@ -263,7 +263,7 @@ fn collect_violations(
                         message: "Internal sidecar harnesses may reach only their owned production module subtree, not sibling production modules.".to_owned(),
                     });
                 }
-                if let Some(local_root) = first_disallowed_local_package(
+                if let Some(local_root) = helpers::first_disallowed_local_package(
                     &binding.path_segments,
                     local_package_names,
                     &allowed_sidecar_packages,
@@ -277,7 +277,7 @@ fn collect_violations(
                         ),
                     });
                 }
-                if let Some(target_module) = foreign_assertions_module_target(
+                if let Some(target_module) = helpers::foreign_assertions_module_target(
                     &binding.path_segments,
                     assertions_package_name,
                     owner_module_name,
@@ -293,7 +293,7 @@ fn collect_violations(
                 }
             }
             if let Some(target) = file.parsed.file_call_paths.iter().find_map(|path| {
-                disallowed_sidecar_local_boundary_target(
+                helpers::disallowed_sidecar_local_boundary_target(
                     path,
                     &file.facts.kind,
                     owner_module_name,
@@ -310,7 +310,7 @@ fn collect_violations(
                 });
             }
             if let Some(target_module) = file.parsed.file_call_paths.iter().find_map(|path| {
-                sibling_module_target(path, owner_module_name, &local_module_names)
+                helpers::sibling_module_target(path, owner_module_name, &local_module_names)
             }) {
                 violations.push(RuntimeAssertionsViolation {
                     rel_path: file.facts.rel_path.clone(),
@@ -322,7 +322,11 @@ fn collect_violations(
                 });
             }
             if let Some(local_root) = file.parsed.file_call_paths.iter().find_map(|path| {
-                first_disallowed_local_package(path, local_package_names, &allowed_sidecar_packages)
+                helpers::first_disallowed_local_package(
+                    path,
+                    local_package_names,
+                    &allowed_sidecar_packages,
+                )
                     .map(str::to_owned)
             }) {
                 violations.push(RuntimeAssertionsViolation {
@@ -336,7 +340,11 @@ fn collect_violations(
                 });
             }
             if let Some(target_module) = file.parsed.file_call_paths.iter().find_map(|path| {
-                foreign_assertions_module_target(path, assertions_package_name, owner_module_name)
+                helpers::foreign_assertions_module_target(
+                    path,
+                    assertions_package_name,
+                    owner_module_name,
+                )
             }) {
                 violations.push(RuntimeAssertionsViolation {
                     rel_path: file.facts.rel_path.clone(),
@@ -357,7 +365,7 @@ fn collect_violations(
                 continue;
             }
             for binding in &file.parsed.imports {
-                if import_uses_local_boundary(binding) {
+                if helpers::import_uses_local_boundary(binding) {
                     violations.push(RuntimeAssertionsViolation {
                         rel_path: file.facts.rel_path.clone(),
                         line: Some(binding.line),
@@ -365,7 +373,7 @@ fn collect_violations(
                         message: "Assertions modules must import runtime public API or helper crates, not local `crate::`, `self::`, or `super::` paths.".to_owned(),
                     });
                 }
-                if let Some(local_root) = first_disallowed_local_package(
+                if let Some(local_root) = helpers::first_disallowed_local_package(
                     &binding.path_segments,
                     local_package_names,
                     &allowed_assertions_packages,
@@ -396,7 +404,7 @@ fn collect_violations(
                 }
             }
             if let Some(local_root) = file.parsed.file_call_paths.iter().find_map(|path| {
-                first_disallowed_local_package(
+                helpers::first_disallowed_local_package(
                     path,
                     local_package_names,
                     &allowed_assertions_packages,
@@ -426,7 +434,7 @@ fn collect_violations(
                     message: "Assertions modules must stay reusable semantic proof helpers and must not construct routed family inputs through `FamilyMapper`.".to_owned(),
                 });
             }
-            if assertions_call_runtime_check_test_tree(
+            if helpers::assertions_call_runtime_check_test_tree(
                 &file.parsed.imports,
                 &file.parsed.file_call_paths,
                 component.runtime_package_name.as_deref(),
@@ -465,251 +473,6 @@ fn non_component_harness_violations(
             message: "Test harnesses must live under a discovered `runtime` crate with a sibling `assertions` crate; plain root-local sidecars and external harnesses are not allowed.".to_owned(),
         })
         .collect()
-}
-
-fn root_has_file(files: &[AnalyzedFile], rel_path: &str) -> bool {
-    files.iter().any(|file| file.facts.rel_path == rel_path)
-}
-
-fn import_uses_external_runtime_boundary(binding: &UseBinding) -> bool {
-    binding
-        .path_segments
-        .first()
-        .is_some_and(|segment| matches!(segment.as_str(), "crate" | "super"))
-}
-
-fn import_uses_local_boundary(binding: &UseBinding) -> bool {
-    binding
-        .path_segments
-        .first()
-        .is_some_and(|segment| matches!(segment.as_str(), "crate" | "self" | "super"))
-}
-
-fn assertions_call_runtime_check_test_tree(
-    imports: &[UseBinding],
-    call_paths: &[Vec<String>],
-    runtime_package_name: Option<&str>,
-) -> bool {
-    let Some(runtime_package_name) = runtime_package_name else {
-        return false;
-    };
-    let mut runtime_roots = BTreeSet::from([
-        runtime_package_name.to_owned(),
-        runtime_package_name.replace('-', "_"),
-    ]);
-    let mut imported_check_test_tree = BTreeSet::new();
-
-    for binding in imports {
-        if binding
-            .path_segments
-            .first()
-            .is_none_or(|first| !runtime_roots.contains(first))
-        {
-            continue;
-        }
-        if let Some(local_name) = binding.local_name.as_ref() {
-            if binding.path_segments.len() == 1 {
-                let _ = runtime_roots.insert(local_name.clone());
-            } else if binding
-                .path_segments
-                .last()
-                .is_some_and(|segment| segment == "check_test_tree")
-            {
-                let _ = imported_check_test_tree.insert(local_name.clone());
-            }
-        }
-    }
-
-    call_paths.iter().any(|path| match path.as_slice() {
-        [single] => imported_check_test_tree.contains(single),
-        [first, second, ..] => runtime_roots.contains(first) && second == "check_test_tree",
-        _ => false,
-    })
-}
-
-fn import_hits_sibling_module(
-    binding: &UseBinding,
-    owner_module_name: &str,
-    local_module_names: &BTreeSet<String>,
-) -> bool {
-    sibling_module_target(
-        &binding.path_segments,
-        owner_module_name,
-        local_module_names,
-    )
-    .is_some()
-}
-
-fn sibling_module_target<'a>(
-    path_segments: &'a [String],
-    owner_module_name: &str,
-    local_module_names: &BTreeSet<String>,
-) -> Option<&'a str> {
-    let imported = first_local_module_target(path_segments)?;
-    if !local_module_names.contains(imported) {
-        return None;
-    }
-    let owner_tests_module_name = format!("{owner_module_name}_tests");
-    if imported == owner_module_name || imported == owner_tests_module_name {
-        return None;
-    }
-    Some(imported)
-}
-
-fn disallowed_sidecar_local_boundary_target(
-    path_segments: &[String],
-    file_kind: &TestFileKind,
-    owner_module_name: &str,
-    local_module_names: &BTreeSet<String>,
-) -> Option<String> {
-    let Some(first) = path_segments.first() else {
-        return None;
-    };
-    let owner_tests_module_name = format!("{owner_module_name}_tests");
-    match first.as_str() {
-        "crate" => {
-            let target = path_segments.get(1)?;
-            if target == owner_module_name
-                || target == &owner_tests_module_name
-                || local_module_names.contains(target)
-            {
-                None
-            } else {
-                Some(target.clone())
-            }
-        }
-        "self" | "super" => {
-            let boundary_depth = path_segments
-                .iter()
-                .take_while(|segment| matches!(segment.as_str(), "self" | "super"))
-                .count();
-            let max_depth = match file_kind {
-                TestFileKind::InternalSidecarMod => 1,
-                TestFileKind::InternalSidecarSupport => 2,
-                _ => 0,
-            };
-            (boundary_depth > max_depth).then(|| {
-                path_segments
-                    .get(boundary_depth)
-                    .cloned()
-                    .unwrap_or_else(|| "<crate-root>".to_owned())
-            })
-        }
-        _ => None,
-    }
-}
-
-fn first_local_module_target(path_segments: &[String]) -> Option<&str> {
-    let first = path_segments.first()?;
-    match first.as_str() {
-        "crate" => path_segments.get(1).map(String::as_str),
-        "self" | "super" => path_segments
-            .iter()
-            .skip(1)
-            .find(|segment| !matches!(segment.as_str(), "self" | "super"))
-            .map(String::as_str),
-        _ => None,
-    }
-}
-
-fn allowed_external_harness_packages(
-    component: &super::facts::TestComponentFacts,
-) -> BTreeSet<String> {
-    let mut allowed = BTreeSet::from(["test_support".to_owned()]);
-    if let Some(runtime_package_name) = component.runtime_package_name.as_ref() {
-        let _ = allowed.insert(runtime_package_name.clone());
-    }
-    if let Some(assertions_package_name) = component.assertions_package_name.as_ref() {
-        let _ = allowed.insert(assertions_package_name.clone());
-    }
-    allowed
-}
-
-fn allowed_sidecar_packages(component: &super::facts::TestComponentFacts) -> BTreeSet<String> {
-    let mut allowed = BTreeSet::from(["test_support".to_owned()]);
-    if let Some(assertions_package_name) = component.assertions_package_name.as_ref() {
-        let _ = allowed.insert(assertions_package_name.clone());
-    }
-    allowed
-}
-
-fn allowed_assertions_packages(component: &super::facts::TestComponentFacts) -> BTreeSet<String> {
-    let mut allowed = BTreeSet::from([
-        "test_support".to_owned(),
-        // Assertions prove over the runtime's public CheckResult surface, so the shared
-        // report model is part of their allowed semantic dependency set.
-        "guardrail3_domain_report".to_owned(),
-    ]);
-    if let Some(runtime_package_name) = component.runtime_package_name.as_ref() {
-        let _ = allowed.insert(runtime_package_name.clone());
-    }
-    if let Some(assertions_package_name) = component.assertions_package_name.as_ref() {
-        let _ = allowed.insert(format!("{assertions_package_name}_common"));
-    }
-    allowed
-}
-
-fn first_disallowed_local_package<'a>(
-    path: &'a [String],
-    local_package_names: &'a BTreeSet<String>,
-    allowed_local_packages: &'a BTreeSet<String>,
-) -> Option<&'a str> {
-    let root = path.first()?;
-    if !local_package_names.contains(root) || allowed_local_packages.contains(root) {
-        return None;
-    }
-    Some(root.as_str())
-}
-
-fn foreign_assertions_module_target<'a>(
-    path_segments: &'a [String],
-    assertions_package_name: Option<&str>,
-    owner_module_name: &str,
-) -> Option<&'a str> {
-    let assertions_package_name = assertions_package_name?;
-    let [first, second, ..] = path_segments else {
-        return None;
-    };
-    if first != assertions_package_name
-        || second == owner_module_name
-        || (owner_module_name == "lib" && path_segments.len() == 2)
-    {
-        return None;
-    }
-    Some(second.as_str())
-}
-
-fn module_path_includes_runtime_src(
-    module: &ModuleInfo,
-    file_rel_path: &str,
-    runtime_rel_dir: &str,
-) -> bool {
-    let Some(path_attr) = module.path_attr.as_deref() else {
-        return false;
-    };
-    let file_dir = parent_dir(file_rel_path);
-    let Some(resolved) = resolve_relative_path(file_dir, path_attr) else {
-        return false;
-    };
-    path_is_under(&resolved, &format!("{runtime_rel_dir}/src"))
-}
-
-fn resolve_relative_path(base_dir: &str, rel_path: &str) -> Option<String> {
-    let mut parts = if base_dir.is_empty() {
-        Vec::new()
-    } else {
-        base_dir.split('/').map(str::to_owned).collect::<Vec<_>>()
-    };
-    for part in rel_path.split('/') {
-        match part {
-            "" | "." => {}
-            ".." => {
-                let _ = parts.pop()?;
-            }
-            value => parts.push(value.to_owned()),
-        }
-    }
-    Some(parts.join("/"))
 }
 
 #[cfg(test)]

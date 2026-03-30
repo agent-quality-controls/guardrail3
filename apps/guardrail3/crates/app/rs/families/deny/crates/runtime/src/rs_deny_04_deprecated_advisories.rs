@@ -46,5 +46,6 @@ pub(crate) use ::test_support::{
     build_fixture_deny_toml, copy_fixture, set_section_string, write_file,
 };
 #[cfg(test)]
+#[cfg(test)]
 #[path = "rs_deny_04_deprecated_advisories_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_deny_04_deprecated_advisories_tests;

@@ -89,5 +89,6 @@ pub(crate) fn parse_feature_entries_for_test(
     super::deny_support::parse_feature_entries_in_config(parsed)
 }
 #[cfg(test)]
+#[cfg(test)]
 #[path = "rs_deny_21_tokio_full_ban_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_deny_21_tokio_full_ban_tests;
