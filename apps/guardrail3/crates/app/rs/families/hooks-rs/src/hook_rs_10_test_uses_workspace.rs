@@ -396,7 +396,7 @@ fn split_command_segments(raw: &str) -> Vec<CommandSegment> {
                     (index + 1 == pieces.len())
                         .then_some(trailing_operator)
                         .flatten()
-                )),
+                }),
             }
         })
         .filter(|segment| !segment.text.is_empty())

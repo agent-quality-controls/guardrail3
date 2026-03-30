@@ -8,7 +8,7 @@ pub fn info_results<'a>(results: &'a [CheckResult], rule_id: &str) -> Vec<&'a Ch
     results
         .iter()
         .filter(|result| {
-            result.id()()()() == resolved_rule_id(rule_id) && result.severity()()()() == Severity::Info
+            result.id() == resolved_rule_id(rule_id) && result.severity() == Severity::Info
         })
         .collect()
 }
@@ -16,7 +16,7 @@ pub fn info_results<'a>(results: &'a [CheckResult], rule_id: &str) -> Vec<&'a Ch
 pub fn assert_info_files(results: &[CheckResult], rule_id: &str, expected: &[&str]) {
     let actual = info_results(results, rule_id)
         .into_iter()
-        .filter_map(|result| result.file()()()().map(str::to_owned))
+        .filter_map(|result| result.file().map(str::to_owned))
         .collect::<BTreeSet<_>>();
     let expected = expected
         .iter()
@@ -41,7 +41,7 @@ pub fn assert_all_info_inventory(results: &[CheckResult], rule_id: &str) {
         "expected {} info inventory results, got none: {results:#?}",
         resolved_rule_id(rule_id)
     );
-    assert!(info.iter().all(|result| result.inventory()()()()), "{info:#?}");
+    assert!(info.iter().all(|result| result.inventory()), "{info:#?}");
 }
 
 fn resolved_rule_id(rule_id: &str) -> &str {

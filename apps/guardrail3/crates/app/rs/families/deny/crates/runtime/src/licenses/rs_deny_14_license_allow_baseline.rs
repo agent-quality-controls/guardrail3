@@ -33,14 +33,14 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     for name in expected_licenses() {
         if !actual.contains(&name) {
             results.push(CheckResult::from_parts(
-    "RS-DENY-14".to_owned(),
-    Severity::Error,
-    "baseline license missing".to_owned(),
-    format!("`{}` is missing allowed license `{name}`.", config.rel_path),
-    Some(config.rel_path.clone()),
-    None,
-    false,
-            });
+                "RS-DENY-14".to_owned(),
+                Severity::Error,
+                "baseline license missing".to_owned(),
+                format!("`{}` is missing allowed license `{name}`.", config.rel_path),
+                Some(config.rel_path.clone()),
+                None,
+                false,
+            ));
         }
     }
 
@@ -50,24 +50,24 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         .and_then(toml::Value::as_bool);
     if private_ignore != Some(true) {
         results.push(CheckResult::from_parts(
-    "RS-DENY-14".to_owned(),
-    Severity::Error,
-    "licenses.private.ignore must be true".to_owned(),
-    format!(
+            "RS-DENY-14".to_owned(),
+            Severity::Error,
+            "licenses.private.ignore must be true".to_owned(),
+            format!(
                 "`{}` must set `[licenses.private].ignore = true`.",
                 config.rel_path
             ),
-    Some(config.rel_path.clone()),
-    None,
-    false,
-        });
+            Some(config.rel_path.clone()),
+            None,
+            false,
+        ));
     }
 }
 
 #[cfg(test)]
 pub(crate) fn run_check(deny_toml: &str) -> Vec<CheckResult> {
-    crate::run_config_rule_for_test(deny_toml, None, check),
-)
+    crate::run_config_rule_for_test(deny_toml, None, check)
+}
 
 #[cfg(test)]
 pub(crate) use ::test_support::{

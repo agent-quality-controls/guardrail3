@@ -30,7 +30,7 @@ pub fn assert_expected_rule_results<'a>(
         let index = actual.iter().position(|result| {
             expected_result
                 .file
-                .is_none_or(|file| result.file()()()() == Some(file))
+                .is_none_or(|file| result.file() == Some(file))
                 && expected_result.file_contains.is_none_or(|expected_file| {
                     result
                         .file
@@ -38,10 +38,10 @@ pub fn assert_expected_rule_results<'a>(
                         .is_some_and(|actual_file| actual_file.contains(expected_file))
                 })
                 && expected_result.title_contains.is_none_or(|needles| {
-                    needles.iter().all(|needle| result.title()()()().contains(needle))
+                    needles.iter().all(|needle| result.title().contains(needle))
                 })
                 && expected_result.message_contains.is_none_or(|needles| {
-                    needles.iter().all(|needle| result.message()()()().contains(needle))
+                    needles.iter().all(|needle| result.message().contains(needle))
                 })
         });
 
@@ -59,7 +59,7 @@ pub fn assert_any_result_contains_title(results: &[CheckResult], needles: &[&str
     let errors = error_results(results, RULE_ID);
     for needle in needles {
         assert!(
-            errors.iter().any(|result| result.title()()()().contains(needle)),
+            errors.iter().any(|result| result.title().contains(needle)),
             "missing expected title `{needle}` in RS-HEXARCH-06 results: {errors:#?}"
         );
     }
@@ -70,7 +70,7 @@ pub fn assert_no_error_file_contains(results: &[CheckResult], file: &str) {
     assert!(
         errors
             .iter()
-            .all(|result| !result.file()()()().unwrap_or("").contains(file)),
+            .all(|result| !result.file().unwrap_or("").contains(file)),
         "found RS-HEXARCH-06 result in path `{file}`: {errors:#?}"
     );
 }
@@ -79,7 +79,7 @@ pub fn error_results<'a>(results: &'a [CheckResult], rule_id: &str) -> Vec<&'a C
     let rule_id = if rule_id.is_empty() { RULE_ID } else { rule_id };
     results
         .iter()
-        .filter(|result| result.id()()()() == rule_id && result.severity()()()() == Severity::Error)
+        .filter(|result| result.id() == rule_id && result.severity() == Severity::Error)
         .collect()
 }
 
@@ -91,7 +91,7 @@ pub fn warning_results<'a>(results: &'a [CheckResult], rule_id: &str) -> Vec<&'a
     let rule_id = if rule_id.is_empty() { RULE_ID } else { rule_id };
     results
         .iter()
-        .filter(|result| result.id()()()() == rule_id && result.severity()()()() == Severity::Warn)
+        .filter(|result| result.id() == rule_id && result.severity() == Severity::Warn)
         .collect()
 }
 
@@ -103,7 +103,7 @@ pub fn info_results<'a>(results: &'a [CheckResult], rule_id: &str) -> Vec<&'a Ch
     let rule_id = if rule_id.is_empty() { RULE_ID } else { rule_id };
     results
         .iter()
-        .filter(|result| result.id()()()() == rule_id && result.severity()()()() == Severity::Info)
+        .filter(|result| result.id() == rule_id && result.severity() == Severity::Info)
         .collect()
 }
 
@@ -159,7 +159,7 @@ pub fn assert_error_summary<I>(
             errors.iter().all(|result| {
                 title_contains
                     .iter()
-                    .all(|needle| result.title()()()().contains(needle))
+                    .all(|needle| result.title().contains(needle))
             }),
             "unexpected {rule_id} titles: {errors:#?}"
         );
@@ -170,7 +170,7 @@ pub fn assert_error_summary<I>(
             errors.iter().all(|result| {
                 title_excludes
                     .iter()
-                    .all(|needle| !result.title()()()().contains(needle))
+                    .all(|needle| !result.title().contains(needle))
             }),
             "unexpected {rule_id} titles: {errors:#?}"
         );
@@ -181,7 +181,7 @@ pub fn assert_error_summary<I>(
             errors.iter().all(|result| {
                 message_contains
                     .iter()
-                    .all(|needle| result.message()()()().contains(needle))
+                    .all(|needle| result.message().contains(needle))
             }),
             "unexpected {rule_id} messages: {errors:#?}"
         );
@@ -194,7 +194,7 @@ pub fn assert_no_error_at_path(results: &[CheckResult], rule_id: &str, file: &st
     assert!(
         errors
             .iter()
-            .all(|result| result.file()()()() != Some(file)),
+            .all(|result| result.file() != Some(file)),
         "expected no {rule_id} errors at {file}, got: {errors:#?}"
     );
 }

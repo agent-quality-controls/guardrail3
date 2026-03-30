@@ -39,15 +39,15 @@ fn severity_rank(severity: Severity) -> u8 {
 pub fn assert_inventory(results: &[CheckResult], file: &str) {
     assert_eq!(results.len(), 1);
     let result = &results[0];
-    assert_eq!(result.id()()()(), ID);
-    assert!(result.inventory()()()());
-    assert_eq!(result.severity()()()(), Severity::Info);
-    assert_eq!(result.title()()()(), "clippy test relaxation policy exact");
+    assert_eq!(result.id(), ID);
+    assert!(result.inventory());
+    assert_eq!(result.severity(), Severity::Info);
+    assert_eq!(result.title(), "clippy test relaxation policy exact");
     assert_eq!(
-        result.message()()()(),
+        result.message(),
         "Managed test relaxation keys match the expected clippy policy."
     );
-    assert_eq!(result.file()()()(), Some(file));
+    assert_eq!(result.file(), Some(file));
 }
 
 pub fn assert_service_relaxations_exact(parsed: &toml::Value) {
@@ -133,9 +133,9 @@ pub fn assert_messages(results: &[CheckResult], expected: &[(Severity, &str, &st
         .iter()
         .map(|result| {
             (
-                result.severity()()()(),
-                result.title()()()().clone(),
-                result.message()()()().clone(),
+                result.severity(),
+                result.title().clone(),
+                result.message().clone(),
             )
         })
         .collect::<Vec<_>>();
@@ -159,6 +159,6 @@ pub fn assert_messages(results: &[CheckResult], expected: &[(Severity, &str, &st
 
     assert_eq!(actual_messages, expected_messages);
     assert!(results.iter().all(|result| {
-        result.id()()()() == ID && !result.inventory()()()() && result.file()()()() == Some(file)
+        result.id() == ID && !result.inventory() && result.file() == Some(file)
     }));
 }

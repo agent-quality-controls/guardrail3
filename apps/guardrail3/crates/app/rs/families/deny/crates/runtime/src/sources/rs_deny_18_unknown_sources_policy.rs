@@ -25,17 +25,17 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         match sources.get(key).and_then(toml::Value::as_str) {
             Some(value) if value == expected => {}
             _ => results.push(CheckResult::from_parts(
-    "RS-DENY-18".to_owned(),
-    Severity::Error,
-    format!("sources `{key}` has wrong value"),
-    format!(
+                "RS-DENY-18".to_owned(),
+                Severity::Error,
+                format!("sources `{key}` has wrong value"),
+                format!(
                     "`{}` must set `[sources].{key} = \"{expected}\"`.",
                     config.rel_path
                 ),
-    Some(config.rel_path.clone()),
-    None,
-    false,
-            }),
+                Some(config.rel_path.clone()),
+                None,
+                false,
+            )),
         }
     }
 }

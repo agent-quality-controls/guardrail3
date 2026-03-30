@@ -17,7 +17,7 @@ pub fn assert_result_summary<I>(
 
     let actual_files = results
         .iter()
-        .filter_map(|result| result.file()()()())
+        .filter_map(|result| result.file())
         .map(str::to_owned)
         .collect::<BTreeSet<_>>();
     let expected_files = expected_files
@@ -35,7 +35,7 @@ pub fn assert_result_summary<I>(
         assert!(
             results
                 .iter()
-                .all(|result| result.title()()()().contains(title_contains)),
+                .all(|result| result.title().contains(title_contains)),
             "{results:#?}"
         );
     }
@@ -44,7 +44,7 @@ pub fn assert_result_summary<I>(
         assert!(
             results
                 .iter()
-                .all(|result| result.message()()()().contains(message_contains)),
+                .all(|result| result.message().contains(message_contains)),
             "{results:#?}"
         );
     }
@@ -57,7 +57,7 @@ where
 {
     let actual_titles = results
         .iter()
-        .map(|result| result.title()()()())
+        .map(|result| result.title())
         .collect::<BTreeSet<_>>();
     let expected_titles = expected_titles
         .into_iter()
@@ -74,7 +74,7 @@ pub fn assert_result_titles_excluding(results: &[&CheckResult], forbidden_substr
     assert!(
         results
             .iter()
-            .all(|result| !result.title()()()().contains(forbidden_substring)),
+            .all(|result| !result.title().contains(forbidden_substring)),
         "{results:#?}"
     );
 }
@@ -86,7 +86,7 @@ where
 {
     let actual_messages = results
         .iter()
-        .map(|result| result.message()()()())
+        .map(|result| result.message())
         .collect::<BTreeSet<_>>();
     let expected_messages = expected_messages
         .into_iter()
@@ -101,7 +101,7 @@ where
 
 pub fn assert_all_inventory(results: &[&CheckResult]) {
     assert!(
-        results.iter().all(|result| result.inventory()()()()),
+        results.iter().all(|result| result.inventory()),
         "{results:#?}"
     );
 }
@@ -111,7 +111,7 @@ pub fn assert_all_titles_contain(results: &[&CheckResult], required_substrings: 
         results.iter().all(|result| {
             required_substrings
                 .iter()
-                .all(|needle| result.title()()()().contains(needle))
+                .all(|needle| result.title().contains(needle))
         }),
         "{results:#?}"
     );
@@ -126,7 +126,7 @@ pub fn count_titles_containing_all(
         .filter(|result| {
             required_substrings
                 .iter()
-                .all(|needle| result.title()()()().contains(needle))
+                .all(|needle| result.title().contains(needle))
         })
         .count()
 }

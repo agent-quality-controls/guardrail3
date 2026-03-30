@@ -11,20 +11,20 @@ pub fn check(input: &DirectDependencyCapDepsInput<'_>, results: &mut Vec<CheckRe
     }
 
     results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    "too many direct dependencies".to_owned(),
-    format!(
+        ID.to_owned(),
+        Severity::Error,
+        "too many direct dependencies".to_owned(),
+        format!(
             "Crate `{}` has {} unique direct dependencies (max {}).",
             input.cap.crate_name,
             input.cap.unique_direct_dependency_count,
             MAX_UNIQUE_DIRECT_DEPENDENCIES
         ),
-    Some(input.cap.cargo_rel_path.clone()),
-    None,
-    false,
+        Some(input.cap.cargo_rel_path.clone()),
+        None,
+        false,
     ));
-)
+}
 
 #[cfg(test)]
 fn family_route(

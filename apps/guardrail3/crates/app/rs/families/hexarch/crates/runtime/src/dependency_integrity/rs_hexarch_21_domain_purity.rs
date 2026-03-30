@@ -12,15 +12,7 @@ use super::inputs::MemberDependencyHexarchInput;
 use super::inventory::push_success;
 
 const ID: &str = "RS-HEXARCH-21";
-const BUILTIN_ALLOWED: &[&str] = &[
-    "serde",
-    "serde_json",
-    "thiserror",
-    "chrono",
-    "uuid",
-    "time",
-    "bytes",
-];
+const BUILTIN_ALLOWED: &[&str] = &["serde", "serde_json", "thiserror", "chrono", "uuid", "time", "bytes"];
 
 pub fn check(input: &MemberDependencyHexarchInput<'_>, results: &mut Vec<CheckResult>) {
     let member = input.member;
@@ -43,8 +35,7 @@ pub fn check(input: &MemberDependencyHexarchInput<'_>, results: &mut Vec<CheckRe
             continue;
         }
         if let Some(target_layer) = edge.target_layer {
-            if edge.resolved_target_is_member
-                && matches!(target_layer, Layer::Domain | Layer::Ports)
+            if edge.resolved_target_is_member && matches!(target_layer, Layer::Domain | Layer::Ports)
             {
                 continue;
             }
@@ -52,19 +43,19 @@ pub fn check(input: &MemberDependencyHexarchInput<'_>, results: &mut Vec<CheckRe
                 && !matches!(target_layer, Layer::Domain | Layer::Ports)
             {
                 results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    format!("domain crate `{}` depends on non-pure layer", member.name),
-    format!(
+                    ID.to_owned(),
+                    Severity::Error,
+                    format!("domain crate `{}` depends on non-pure layer", member.name),
+                    format!(
                         "Domain crate `{}` depends on {} layer `{}` via `{}`.",
                         member.name,
                         target_layer.label(),
                         edge.dep_package_name,
                         edge.section_label
                     ),
-    Some(member.cargo_rel_path.clone()),
-    None,
-    false,
+                    Some(member.cargo_rel_path.clone()),
+                    None,
+                    false,
                 ));
                 continue;
             }
@@ -72,43 +63,43 @@ pub fn check(input: &MemberDependencyHexarchInput<'_>, results: &mut Vec<CheckRe
                 && matches!(target_layer, Layer::Domain | Layer::Ports)
             {
                 results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    format!(
+                    ID.to_owned(),
+                    Severity::Error,
+                    format!(
                         "domain crate `{}` depends on non-workspace pure-layer crate",
                         member.name
                     ),
-    format!(
+                    format!(
                         "Domain crate `{}` depends on {}-layer path `{}` via `{}`, but that target is not a discovered workspace member.",
                         member.name,
                         target_layer.label(),
                         edge.dep_package_name,
                         edge.section_label
                     ),
-    Some(member.cargo_rel_path.clone()),
-    None,
-    false,
-                });
+                    Some(member.cargo_rel_path.clone()),
+                    None,
+                    false,
+                ));
             }
             continue;
         }
 
         if !allowed.contains(&edge.dep_package_name) {
             results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    format!(
+                ID.to_owned(),
+                Severity::Error,
+                format!(
                     "domain crate `{}` depends on disallowed external crate `{}`",
                     member.name, edge.dep_package_name
                 ),
-    format!(
+                format!(
                     "Domain crate `{}` may only use pure allowlisted external crates. `{}` is not in the built-in allowlist or `allowed_deps`.",
                     member.name, edge.dep_package_name
                 ),
-    Some(member.cargo_rel_path.clone()),
-    None,
-    false,
-            });
+                Some(member.cargo_rel_path.clone()),
+                None,
+                false,
+            ));
         }
     }
 
@@ -134,7 +125,7 @@ pub(crate) enum DomainPurityEdgeKindForTest {
     BuildDependency,
     TargetDependency,
     TargetBuildDependency,
-)
+}
 
 #[cfg(test)]
 pub(crate) fn run_domain_purity_case(
@@ -155,30 +146,19 @@ pub(crate) fn run_domain_purity_case(
             edge.source_rel_dir == member.rel_dir
                 && matches!(
                     (edge_kind, edge.kind),
-                    (
-                        DomainPurityEdgeKindForTest::Dependency,
-                        EdgeKind::Dependency
-                    ) | (
-                        DomainPurityEdgeKindForTest::DevDependency,
-                        EdgeKind::DevDependency
-                    ) | (
-                        DomainPurityEdgeKindForTest::BuildDependency,
-                        EdgeKind::BuildDependency
-                    ) | (
-                        DomainPurityEdgeKindForTest::TargetDependency,
-                        EdgeKind::TargetDependency
-                    ) | (
-                        DomainPurityEdgeKindForTest::TargetBuildDependency,
-                        EdgeKind::TargetBuildDependency
-                    )
+                    (DomainPurityEdgeKindForTest::Dependency, EdgeKind::Dependency)
+                        | (DomainPurityEdgeKindForTest::DevDependency, EdgeKind::DevDependency)
+                        | (DomainPurityEdgeKindForTest::BuildDependency, EdgeKind::BuildDependency)
+                        | (DomainPurityEdgeKindForTest::TargetDependency, EdgeKind::TargetDependency)
+                        | (
+                            DomainPurityEdgeKindForTest::TargetBuildDependency,
+                            EdgeKind::TargetBuildDependency
+                        )
                 )
         })
         .collect();
     let mut results = Vec::new();
-    check(
-        &MemberDependencyHexarchInput::new(member, edges),
-        &mut results,
-    );
+    check(&MemberDependencyHexarchInput::new(member, edges), &mut results);
     results
 }
 
@@ -186,6 +166,7 @@ pub(crate) fn run_domain_purity_case(
 pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_tree(&test_support::walk(root))
 }
+
 #[cfg(test)]
 #[path = "rs_hexarch_21_domain_purity_tests/mod.rs"]
 mod rs_hexarch_21_domain_purity_tests;

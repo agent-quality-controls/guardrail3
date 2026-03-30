@@ -34,38 +34,38 @@ pub fn check(input: &SourceCrateHexarchInput<'_>, results: &mut Vec<CheckResult>
 
     if source.public_free_fn_count > 0 {
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    format!(
+            ID.to_owned(),
+            Severity::Warn,
+            format!(
                 "ports crate `{}` exposes public free functions",
                 source.crate_name
             ),
-    format!(
+            format!(
                 "Ports crate `{}` exposes {} public free function(s) outside trait definitions. Ports should keep public behavior in traits or passive types, not free functions.",
                 source.crate_name, source.public_free_fn_count
             ),
-    Some(source.rel_dir.clone()),
-    None,
-    false,
-        });
+            Some(source.rel_dir.clone()),
+            None,
+            false,
+        ));
     }
 
     if source.public_inherent_method_count > 0 {
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    format!(
+            ID.to_owned(),
+            Severity::Warn,
+            format!(
                 "ports crate `{}` exposes public inherent methods",
                 source.crate_name
             ),
-    format!(
+            format!(
                 "Ports crate `{}` exposes {} public inherent method(s) on concrete types. Ports should keep public behavior in traits or passive types, not on concrete types.",
                 source.crate_name, source.public_inherent_method_count
             ),
-    Some(source.rel_dir.clone()),
-    None,
-    false,
-        });
+            Some(source.rel_dir.clone()),
+            None,
+            false,
+        ));
     }
 
     if source.public_free_fn_count == 0 && source.public_inherent_method_count == 0 {
@@ -90,7 +90,7 @@ pub fn check(input: &SourceCrateHexarchInput<'_>, results: &mut Vec<CheckResult>
 pub(crate) enum SourceCrateLayerForTest {
     Ports,
     Adapters,
-)
+}
 
 #[cfg(test)]
 pub(crate) fn run_source_case(
@@ -107,8 +107,8 @@ pub(crate) fn run_source_case(
         crate_name: crate_name.to_owned(),
         rel_dir: rel_dir.to_owned(),
         layer: Some(match layer {
-        SourceCrateLayerForTest::Ports => Layer::Ports,
-        SourceCrateLayerForTest::Adapters => Layer::Adapters,
+            SourceCrateLayerForTest::Ports => Layer::Ports,
+            SourceCrateLayerForTest::Adapters => Layer::Adapters,
         }),
         pub_trait_count,
         public_free_fn_count,

@@ -43,16 +43,17 @@ pub fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<CheckResult>) {
         );
     } else {
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "cargo clippy deny-warnings step missing".to_owned(),
-    "Hook does not execute `cargo clippy` with `-D warnings` or equivalent."
+            ID.to_owned(),
+            Severity::Warn,
+            "cargo clippy deny-warnings step missing".to_owned(),
+            "Hook does not execute `cargo clippy` with `-D warnings` or equivalent."
                 .to_owned(),
-    Some(input.rel_path.to_owned()),
-    None,
-    false,
+            Some(input.rel_path.to_owned()),
+            None,
+            false,
         ));
     }
+}
 
 fn script_contains_clippy_deny(parsed: &ParsedShellScript<'_>) -> bool {
     execute_script_for_clippy(parsed, parsed, &mut EnvState::default(), &mut Vec::new())

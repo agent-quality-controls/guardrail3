@@ -15,13 +15,13 @@ const ID: &str = "RS-FMT-07";
 pub fn findings(results: &[CheckResult]) -> Vec<Finding<'_>> {
     results
         .iter()
-        .filter(|result| result.id()()()() == ID)
+        .filter(|result| result.id() == ID)
         .map(|result| Finding {
-            severity: result.severity()()()(),
-            title: result.title()()()().as_str(),
-            message: result.message()()()().as_str(),
-            file: result.file()()()(),
-            inventory: result.inventory()()()(),
+            severity: result.severity(),
+            title: result.title(),
+            message: result.message(),
+            file: result.file(),
+            inventory: result.inventory(),
         })
         .collect()
 }
@@ -42,9 +42,9 @@ pub fn assert_ignore_escape_hatch(results: &[CheckResult], message: &str, file: 
         "unexpected RS-FMT-07 findings: {findings:#?}"
     );
     let finding = &findings[0];
-    assert_eq!(finding.severity()()()(), Severity::Warn);
-    assert_eq!(finding.title()()()(), "rustfmt ignore escape hatch");
-    assert_eq!(finding.message()()()(), message);
-    assert_eq!(finding.file()()()(), Some(file));
-    assert!(!finding.inventory()()()());
+    assert_eq!(finding.severity, Severity::Warn);
+    assert_eq!(finding.title, "rustfmt ignore escape hatch");
+    assert_eq!(finding.message, message);
+    assert_eq!(finding.file, Some(file));
+    assert!(!finding.inventory);
 }

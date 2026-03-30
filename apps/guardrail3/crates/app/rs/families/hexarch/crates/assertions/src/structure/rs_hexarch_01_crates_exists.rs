@@ -12,7 +12,7 @@ pub fn error_results<'a>(results: &'a [CheckResult], rule_id: &str) -> Vec<&'a C
     let rule_id = if rule_id.is_empty() { RULE_ID } else { rule_id };
     results
         .iter()
-        .filter(|result| result.id()()()() == rule_id && result.severity()()()() == Severity::Error)
+        .filter(|result| result.id() == rule_id && result.severity() == Severity::Error)
         .collect()
 }
 
@@ -24,7 +24,7 @@ pub fn warning_results<'a>(results: &'a [CheckResult], rule_id: &str) -> Vec<&'a
     let rule_id = if rule_id.is_empty() { RULE_ID } else { rule_id };
     results
         .iter()
-        .filter(|result| result.id()()()() == rule_id && result.severity()()()() == Severity::Warn)
+        .filter(|result| result.id() == rule_id && result.severity() == Severity::Warn)
         .collect()
 }
 
@@ -36,7 +36,7 @@ pub fn info_results<'a>(results: &'a [CheckResult], rule_id: &str) -> Vec<&'a Ch
     let rule_id = if rule_id.is_empty() { RULE_ID } else { rule_id };
     results
         .iter()
-        .filter(|result| result.id()()()() == rule_id && result.severity()()()() == Severity::Info)
+        .filter(|result| result.id() == rule_id && result.severity() == Severity::Info)
         .collect()
 }
 
@@ -78,7 +78,7 @@ pub fn assert_error_file_set(
     );
     let actual_files = errors
         .iter()
-        .filter_map(|result| result.file()()()())
+        .filter_map(|result| result.file())
         .collect::<BTreeSet<_>>();
     let expected_files = expected_files.iter().copied().collect::<BTreeSet<_>>();
     assert_eq!(
@@ -116,7 +116,7 @@ pub fn assert_error_summary<I>(
             errors.iter().all(|result| {
                 title_contains
                     .iter()
-                    .all(|needle| result.title()()()().contains(needle))
+                    .all(|needle| result.title().contains(needle))
             }),
             "unexpected {rule_id} titles: {errors:#?}"
         );
@@ -127,7 +127,7 @@ pub fn assert_error_summary<I>(
             errors.iter().all(|result| {
                 title_excludes
                     .iter()
-                    .all(|needle| !result.title()()()().contains(needle))
+                    .all(|needle| !result.title().contains(needle))
             }),
             "unexpected {rule_id} titles: {errors:#?}"
         );
@@ -138,7 +138,7 @@ pub fn assert_error_summary<I>(
             errors.iter().all(|result| {
                 message_contains
                     .iter()
-                    .all(|needle| result.message()()()().contains(needle))
+                    .all(|needle| result.message().contains(needle))
             }),
             "unexpected {rule_id} messages: {errors:#?}"
         );
@@ -151,7 +151,7 @@ pub fn assert_no_error_at_path(results: &[CheckResult], rule_id: &str, file: &st
     assert!(
         errors
             .iter()
-            .all(|result| result.file()()()() != Some(file)),
+            .all(|result| result.file() != Some(file)),
         "expected no {rule_id} errors at {file}, got: {errors:#?}"
     );
 }

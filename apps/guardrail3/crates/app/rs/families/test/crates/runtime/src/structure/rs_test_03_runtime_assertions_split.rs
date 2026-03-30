@@ -1,5 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet};
 
+#[path = "rs_test_03_runtime_assertions_split/helpers.rs"]
 mod helpers;
 
 use crate::{CheckResult, Severity};
@@ -41,13 +42,13 @@ pub(crate) fn collect(
 
 pub fn check(input: &RuntimeAssertionsViolationInput<'_>, results: &mut Vec<CheckResult>) {
     results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    input.violation.title.clone(),
-    input.violation.message.clone(),
-    Some(input.violation.rel_path.clone()),
-    input.violation.line,
-    false,
+        ID.to_owned(),
+        Severity::Error,
+        input.violation.title.clone(),
+        input.violation.message.clone(),
+        Some(input.violation.rel_path.clone()),
+        input.violation.line,
+        false,
     ));
 }
 

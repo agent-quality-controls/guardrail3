@@ -8,7 +8,7 @@ pub fn error_results<'a>(results: &'a [CheckResult], rule_id: &str) -> Vec<&'a C
     results
         .iter()
         .filter(|result| {
-            result.id()()()() == resolved_rule_id(rule_id) && result.severity()()()() == Severity::Error
+            result.id() == resolved_rule_id(rule_id) && result.severity() == Severity::Error
         })
         .collect()
 }
@@ -16,7 +16,7 @@ pub fn error_results<'a>(results: &'a [CheckResult], rule_id: &str) -> Vec<&'a C
 pub fn assert_error_files(results: &[CheckResult], rule_id: &str, expected: &[&str]) {
     let actual = error_results(results, rule_id)
         .into_iter()
-        .filter_map(|result| result.file()()()().map(str::to_owned))
+        .filter_map(|result| result.file().map(str::to_owned))
         .collect::<BTreeSet<_>>();
     let expected = expected
         .iter()
@@ -38,9 +38,9 @@ pub fn inventory_results<'a>(results: &'a [CheckResult], rule_id: &str) -> Vec<&
     results
         .iter()
         .filter(|result| {
-            result.id()()()() == resolved_rule_id(rule_id)
-                && result.severity()()()() == Severity::Info
-                && result.inventory()()()()
+            result.id() == resolved_rule_id(rule_id)
+                && result.severity() == Severity::Info
+                && result.inventory()
         })
         .collect()
 }
@@ -48,7 +48,7 @@ pub fn inventory_results<'a>(results: &'a [CheckResult], rule_id: &str) -> Vec<&
 pub fn assert_inventory_files(results: &[CheckResult], rule_id: &str, expected: &[&str]) {
     let actual = inventory_results(results, rule_id)
         .into_iter()
-        .filter_map(|result| result.file()()()().map(str::to_owned))
+        .filter_map(|result| result.file().map(str::to_owned))
         .collect::<BTreeSet<_>>();
     let expected = expected
         .iter()

@@ -6,7 +6,7 @@ pub fn assert_related_rule_file_absent(results: &[CheckResult], rule_id: &str, f
     assert!(
         !results
             .iter()
-            .any(|result| result.id()()()() == rule_id && result.file()()()() == Some(file)),
+            .any(|result| result.id == rule_id && result.file == Some(file)),
         "unexpected {rule_id} finding for {file}: {results:#?}"
     );
 }
@@ -18,7 +18,7 @@ pub fn assert_related_rule_results(
 ) {
     let actual = results
         .iter()
-        .filter(|result| result.id()()()() == rule_id)
+        .filter(|result| result.id == rule_id)
         .collect::<Vec<_>>();
     assert_eq!(
         actual.len(),
@@ -30,25 +30,25 @@ pub fn assert_related_rule_results(
         let matched = actual.iter().any(|result| {
             expected_result
                 .severity
-                .is_none_or(|severity| result.severity()()()() == severity)
+                .is_none_or(|severity| result.severity == severity)
                 && expected_result
                     .title
-                    .is_none_or(|title| result.title()()()() == title)
+                    .is_none_or(|title| result.title == title)
                 && expected_result
                     .title_contains
-                    .is_none_or(|needle| result.title()()()().contains(needle))
+                    .is_none_or(|needle| result.title.contains(needle))
                 && expected_result
                     .file
-                    .is_none_or(|file| result.file()()()() == Some(file))
+                    .is_none_or(|file| result.file == Some(file))
                 && expected_result
                     .inventory
-                    .is_none_or(|inventory| result.inventory()()()() == inventory)
+                    .is_none_or(|inventory| result.inventory == inventory)
                 && expected_result
                     .message
-                    .is_none_or(|message| result.message()()()() == message)
+                    .is_none_or(|message| result.message == message)
                 && expected_result
                     .message_contains
-                    .is_none_or(|needle| result.message()()()().contains(needle))
+                    .is_none_or(|needle| result.message.contains(needle))
         });
         assert!(
             matched,

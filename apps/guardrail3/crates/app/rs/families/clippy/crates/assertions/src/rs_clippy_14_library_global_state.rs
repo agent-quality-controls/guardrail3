@@ -18,15 +18,15 @@ pub fn assert_no_results(results: &[CheckResult]) {
 pub fn assert_inventory(results: &[CheckResult], file: &str) {
     assert_eq!(results.len(), 1);
     let result = &results[0];
-    assert_eq!(result.id()()()(), ID);
-    assert!(result.inventory()()()());
-    assert_eq!(result.severity()()()(), Severity::Info);
-    assert_eq!(result.title()()()(), "library global-state bans present");
+    assert_eq!(result.id(), ID);
+    assert!(result.inventory());
+    assert_eq!(result.severity(), Severity::Info);
+    assert_eq!(result.title(), "library global-state bans present");
     assert_eq!(
-        result.message()()()(),
+        result.message(),
         "Library profile includes all managed global-state type bans."
     );
-    assert_eq!(result.file()()()(), Some(file));
+    assert_eq!(result.file(), Some(file));
 }
 
 pub fn assert_library_type_bans(results: &[CheckResult], file: &str) {
@@ -36,23 +36,23 @@ pub fn assert_library_type_bans(results: &[CheckResult], file: &str) {
         .collect::<Vec<_>>();
     let actual_messages = results
         .iter()
-        .map(|result| result.message()()()().as_str())
+        .map(|result| result.message())
         .collect::<Vec<_>>();
 
     assert_eq!(actual_messages, expected_messages);
     assert!(results.iter().all(|result| {
-        result.id()()()() == ID
-            && result.inventory()()()()
-            && result.severity()()()() == Severity::Info
-            && result.title()()()() == "library global-state bans present"
-            && result.file()()()() == Some(file)
+        result.id() == ID
+            && result.inventory()
+            && result.severity() == Severity::Info
+            && result.title() == "library global-state bans present"
+            && result.file() == Some(file)
     }));
 }
 
 pub fn assert_missing_messages(results: &[CheckResult], expected: &[&str], file: &str) {
     let actual_messages = results
         .iter()
-        .map(|result| result.message()()()().clone())
+        .map(|result| result.message().clone())
         .collect::<BTreeSet<_>>();
     let expected_messages = expected
         .iter()
@@ -62,10 +62,10 @@ pub fn assert_missing_messages(results: &[CheckResult], expected: &[&str], file:
     assert_eq!(actual_messages, expected_messages);
     assert_eq!(results.len(), expected_messages.len());
     assert!(results.iter().all(|result| {
-        result.id()()()() == ID
-            && !result.inventory()()()()
-            && result.severity()()()() == Severity::Error
-            && result.title()()()() == "library clippy.toml missing global-state type ban"
-            && result.file()()()() == Some(file)
+        result.id() == ID
+            && !result.inventory()
+            && result.severity() == Severity::Error
+            && result.title() == "library clippy.toml missing global-state type ban"
+            && result.file() == Some(file)
     }));
 }

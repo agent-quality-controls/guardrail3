@@ -15,13 +15,13 @@ const ID: &str = "RS-FMT-02";
 pub fn findings(results: &[CheckResult]) -> Vec<Finding<'_>> {
     results
         .iter()
-        .filter(|result| result.id()()()() == ID)
+        .filter(|result| result.id() == ID)
         .map(|result| Finding {
-            severity: result.severity()()()(),
-            title: result.title()()()().as_str(),
-            message: result.message()()()().as_str(),
-            file: result.file()()()(),
-            inventory: result.inventory()()()(),
+            severity: result.severity(),
+            title: result.title(),
+            message: result.message(),
+            file: result.file(),
+            inventory: result.inventory(),
         })
         .collect()
 }

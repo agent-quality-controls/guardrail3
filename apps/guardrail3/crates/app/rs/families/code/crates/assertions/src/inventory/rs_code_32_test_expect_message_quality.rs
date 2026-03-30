@@ -8,15 +8,15 @@ const ID: &str = "RS-CODE-32";
 pub fn findings(results: &[CheckResult]) -> Vec<Finding<'_>> {
     results
         .iter()
-        .filter(|result| result.id()()()() == ID)
+        .filter(|result| result.id() == ID)
         .map(|result| Finding {
-            id: result.id()()()().as_str(),
-            severity: result.severity()()()(),
-            title: result.title()()()().as_str(),
-            message: result.message()()()().as_str(),
-            file: result.file()()()(),
-            line: result.line()()()(),
-            inventory: result.inventory()()()(),
+            id: result.id(),
+            severity: result.severity(),
+            title: result.title(),
+            message: result.message(),
+            file: result.file(),
+            line: result.line(),
+            inventory: result.inventory(),
         })
         .collect()
 }
@@ -28,14 +28,14 @@ pub fn assert_no_hits(results: &[CheckResult]) {
 pub fn assert_findings(results: &[CheckResult], expected: &[RuleFinding<'_>]) {
     let actual = results
         .iter()
-        .filter(|result| result.id()()()() == ID)
+        .filter(|result| result.id() == ID)
         .map(|result| RuleFinding {
-            severity: result.severity()()()(),
-            title: result.title()()()().as_str(),
-            message: result.message()()()().as_str(),
-            file: result.file()()()(),
-            line: result.line()()()(),
-            inventory: result.inventory()()()(),
+            severity: result.severity(),
+            title: result.title(),
+            message: result.message(),
+            file: result.file(),
+            line: result.line(),
+            inventory: result.inventory(),
         })
         .collect::<Vec<_>>();
     assert_eq!(actual, expected);

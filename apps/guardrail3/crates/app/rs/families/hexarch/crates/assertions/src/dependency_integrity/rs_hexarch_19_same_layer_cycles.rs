@@ -12,7 +12,7 @@ pub fn error_results<'a>(results: &'a [CheckResult], rule_id: &str) -> Vec<&'a C
     let rule_id = if rule_id.is_empty() { RULE_ID } else { rule_id };
     results
         .iter()
-        .filter(|result| result.id()()()() == rule_id && result.severity()()()() == Severity::Error)
+        .filter(|result| result.id() == rule_id && result.severity() == Severity::Error)
         .collect()
 }
 
@@ -24,7 +24,7 @@ pub fn warning_results<'a>(results: &'a [CheckResult], rule_id: &str) -> Vec<&'a
     let rule_id = if rule_id.is_empty() { RULE_ID } else { rule_id };
     results
         .iter()
-        .filter(|result| result.id()()()() == rule_id && result.severity()()()() == Severity::Warn)
+        .filter(|result| result.id() == rule_id && result.severity() == Severity::Warn)
         .collect()
 }
 
@@ -36,7 +36,7 @@ pub fn info_results<'a>(results: &'a [CheckResult], rule_id: &str) -> Vec<&'a Ch
     let rule_id = if rule_id.is_empty() { RULE_ID } else { rule_id };
     results
         .iter()
-        .filter(|result| result.id()()()() == rule_id && result.severity()()()() == Severity::Info)
+        .filter(|result| result.id() == rule_id && result.severity() == Severity::Info)
         .collect()
 }
 
@@ -131,7 +131,7 @@ pub fn assert_error_title_contains(
     assert_eq!(errors.len(), 1, "{errors:#?}");
     for substring in required_substrings {
         assert!(
-            errors.iter().all(|result| result.title()()()().contains(substring)),
+            errors.iter().all(|result| result.title().contains(substring)),
             "expected title to contain {substring}: {errors:#?}"
         );
     }
@@ -148,7 +148,7 @@ pub fn assert_error_message_contains(
         assert!(
             errors
                 .iter()
-                .all(|result| result.message()()()().contains(substring)),
+                .all(|result| result.message().contains(substring)),
             "expected message to contain {substring}: {errors:#?}"
         );
     }

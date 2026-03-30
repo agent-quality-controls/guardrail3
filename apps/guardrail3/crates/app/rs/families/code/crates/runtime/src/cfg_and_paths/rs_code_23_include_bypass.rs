@@ -10,14 +10,14 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
         match info.macro_name.as_str() {
             "include" if info.build_script_pattern && info.path_traversal => {
                 results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "include path traversal".to_owned(),
-    "`include!()` build-script pattern appends a path containing `..`."
+                    ID.to_owned(),
+                    Severity::Warn,
+                    "include path traversal".to_owned(),
+                    "`include!()` build-script pattern appends a path containing `..`."
                         .to_owned(),
-    Some(input.rel_path.to_owned()),
-    Some(info.line),
-    false,
+                    Some(input.rel_path.to_owned()),
+                    Some(info.line),
+                    false,
                 ));
             }
             "include" if info.build_script_pattern && !info.path_traversal => results.push(
@@ -33,22 +33,22 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
                 .as_inventory(),
             ),
             "include" => results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    "include! bypass".to_owned(),
-    "`include!()` pulls in Rust code outside the scanned file boundary.".to_owned(),
-    Some(input.rel_path.to_owned()),
-    Some(info.line),
-    false,
+                ID.to_owned(),
+                Severity::Error,
+                "include! bypass".to_owned(),
+                "`include!()` pulls in Rust code outside the scanned file boundary.".to_owned(),
+                Some(input.rel_path.to_owned()),
+                Some(info.line),
+                false,
             )),
             "include_str" | "include_bytes" if info.path_traversal => results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "include path traversal".to_owned(),
-    format!("`{}!()` uses a path containing `..`.", info.macro_name),
-    Some(input.rel_path.to_owned()),
-    Some(info.line),
-    false,
+                ID.to_owned(),
+                Severity::Warn,
+                "include path traversal".to_owned(),
+                format!("`{}!()` uses a path containing `..`.", info.macro_name),
+                Some(input.rel_path.to_owned()),
+                Some(info.line),
+                false,
             )),
             _ => {}
         }
@@ -57,8 +57,8 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
 
 #[cfg(test)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
-    crate::check_test_root(root),
-)
+    crate::check_test_root(root)
+}
 
 #[cfg(test)]
 pub(crate) fn copy_fixture() -> test_support::TempDir {

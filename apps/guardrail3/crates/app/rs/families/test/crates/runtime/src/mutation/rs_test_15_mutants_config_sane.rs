@@ -19,16 +19,16 @@ pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
         {
             pushed = true;
             results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "mutants config excludes everything".to_owned(),
-    format!(
+                ID.to_owned(),
+                Severity::Warn,
+                "mutants config excludes everything".to_owned(),
+                format!(
                     "`{}` contains an `exclude_re` pattern that matches everything.",
                     input.root.mutants_rel_path
                 ),
-    Some(input.root.mutants_rel_path.clone()),
-    None,
-    false,
+                Some(input.root.mutants_rel_path.clone()),
+                None,
+                false,
             ));
         }
     }
@@ -40,17 +40,17 @@ pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
         if timeout_multiplier < 1.0 {
             pushed = true;
             results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "mutants timeout multiplier too low".to_owned(),
-    format!(
+                ID.to_owned(),
+                Severity::Warn,
+                "mutants timeout multiplier too low".to_owned(),
+                format!(
                     "`{}` sets `timeout_multiplier = {timeout_multiplier}`.",
                     input.root.mutants_rel_path
                 ),
-    Some(input.root.mutants_rel_path.clone()),
-    None,
-    false,
-            });
+                Some(input.root.mutants_rel_path.clone()),
+                None,
+                false,
+            ));
         }
     }
 

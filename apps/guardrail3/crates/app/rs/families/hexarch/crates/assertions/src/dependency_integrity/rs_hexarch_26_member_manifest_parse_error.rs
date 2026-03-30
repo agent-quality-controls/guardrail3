@@ -11,7 +11,7 @@ pub fn error_results<'a>(results: &'a [CheckResult], rule_id: &str) -> Vec<&'a C
     let rule_id = if rule_id.is_empty() { RULE_ID } else { rule_id };
     results
         .iter()
-        .filter(|result| result.id()()()() == rule_id && result.severity()()()() == Severity::Error)
+        .filter(|result| result.id() == rule_id && result.severity() == Severity::Error)
         .collect()
 }
 
@@ -31,7 +31,7 @@ pub fn assert_error_summary(
 
     let actual_files = errors
         .iter()
-        .filter_map(|result| result.file()()()())
+        .filter_map(|result| result.file())
         .collect::<std::collections::BTreeSet<_>>();
     let expected_files = expected_files
         .iter()
@@ -43,7 +43,7 @@ pub fn assert_error_summary(
         assert!(
             errors
                 .iter()
-                .all(|result| result.message()()()().contains(message_contains)),
+                .all(|result| result.message().contains(message_contains)),
             "{errors:#?}"
         );
     }

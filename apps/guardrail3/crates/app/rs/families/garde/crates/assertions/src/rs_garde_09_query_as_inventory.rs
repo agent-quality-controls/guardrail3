@@ -9,7 +9,7 @@ pub fn assert_inventory_hit(
     let findings = findings(results);
     let matching = findings
         .into_iter()
-        .filter(|result| result.file()()()() == Some(file) && result.line()()()() == Some(line))
+        .filter(|result| result.file() == Some(file) && result.line() == Some(line))
         .collect::<Vec<_>>();
     assert_eq!(
         matching.len(),

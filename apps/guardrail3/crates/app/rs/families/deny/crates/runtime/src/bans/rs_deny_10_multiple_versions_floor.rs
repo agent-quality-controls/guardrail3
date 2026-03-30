@@ -21,36 +21,36 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     match bans.get("multiple-versions").and_then(toml::Value::as_str) {
         Some("deny") => {}
         Some(other) => results.push(CheckResult::from_parts(
-    "RS-DENY-10".to_owned(),
-    Severity::Warn,
-    "multiple-versions weaker than baseline".to_owned(),
-    format!(
+            "RS-DENY-10".to_owned(),
+            Severity::Warn,
+            "multiple-versions weaker than baseline".to_owned(),
+            format!(
                 "`{}` sets `[bans].multiple-versions = \"{other}\"`.",
                 config.rel_path
             ),
-    Some(config.rel_path.clone()),
-    None,
-    false,
-        }),
+            Some(config.rel_path.clone()),
+            None,
+            false,
+        )),
         None => results.push(CheckResult::from_parts(
-    "RS-DENY-10".to_owned(),
-    Severity::Warn,
-    "multiple-versions missing".to_owned(),
-    format!(
+            "RS-DENY-10".to_owned(),
+            Severity::Warn,
+            "multiple-versions missing".to_owned(),
+            format!(
                 "`{}` does not set `[bans].multiple-versions`.",
                 config.rel_path
             ),
-    Some(config.rel_path.clone()),
-    None,
-    false,
-        }),
+            Some(config.rel_path.clone()),
+            None,
+            false,
+        )),
     }
 }
 
 #[cfg(test)]
 pub(crate) fn run_check(deny_toml: &str) -> Vec<CheckResult> {
-    crate::run_config_rule_for_test(deny_toml, None, check),
-)
+    crate::run_config_rule_for_test(deny_toml, None, check)
+}
 
 #[cfg(test)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {

@@ -6,8 +6,8 @@ const RULE_ID: &str = "RS-TEST-16";
 pub fn rule_files(results: &[CheckResult], _rule_id: &str) -> Vec<String> {
     let mut files = results
         .iter()
-        .filter(|result| result.id()()()() == RULE_ID)
-        .filter_map(|result| result.file()()()().map(str::to_owned))
+        .filter(|result| result.id() == RULE_ID)
+        .filter_map(|result| result.file().map(str::to_owned))
         .collect::<Vec<_>>();
     files.sort();
     files
@@ -16,7 +16,7 @@ pub fn rule_files(results: &[CheckResult], _rule_id: &str) -> Vec<String> {
 pub fn finding<'a>(results: &'a [CheckResult], _rule_id: &str) -> &'a CheckResult {
     results
         .iter()
-        .find(|result| result.id()()()() == RULE_ID)
+        .find(|result| result.id() == RULE_ID)
         .unwrap_or_else(|| std::panic::panic_any(format!("expected {RULE_ID} finding")))
 }
 
@@ -43,21 +43,21 @@ pub fn assert_reported(
     title: &str,
 ) {
     let finding = finding(results, RULE_ID);
-    assert_eq!(finding.severity()()()(), severity);
-    assert_eq!(finding.title()()()(), title);
-    assert_eq!(finding.file()()()(), Some(file));
-    assert_eq!(finding.line()()()(), line);
+    assert_eq!(finding.severity, severity);
+    assert_eq!(finding.title, title);
+    assert_eq!(finding.file, Some(file));
+    assert_eq!(finding.line, line);
 }
 
 pub fn assert_inventory(results: &[CheckResult], expected: bool) {
     let finding = finding(results, RULE_ID);
-    assert_eq!(finding.inventory()()()(), expected);
+    assert_eq!(finding.inventory, expected);
 }
 
 pub fn assert_reported_file(results: &[CheckResult], severity: Severity, file: &str) {
     let finding = finding(results, RULE_ID);
-    assert_eq!(finding.severity()()()(), severity);
-    assert_eq!(finding.file()()()(), Some(file));
+    assert_eq!(finding.severity, severity);
+    assert_eq!(finding.file, Some(file));
 }
 
 pub fn assert_has_finding(
@@ -68,10 +68,10 @@ pub fn assert_has_finding(
 ) {
     assert!(
         results.iter().any(|result| {
-            result.id()()()() == RULE_ID
-                && result.file()()()() == Some(file)
-                && result.severity()()()() == severity
-                && result.inventory()()()() == inventory
+            result.id() == RULE_ID
+                && result.file() == Some(file)
+                && result.severity() == severity
+                && result.inventory() == inventory
         }),
         "expected {RULE_ID} finding for {file} with severity={severity:?} inventory={inventory}, got: {results:#?}"
     );
@@ -80,11 +80,11 @@ pub fn assert_has_finding(
 pub fn assert_error_results_are_error(results: &[CheckResult], rule_id: &str) {
     let errors = results
         .iter()
-        .filter(|result| result.id()()()() == rule_id)
+        .filter(|result| result.id() == rule_id)
         .collect::<Vec<_>>();
     assert!(
         errors
             .iter()
-            .all(|result| result.severity()()()() == Severity::Error)
+            .all(|result| result.severity() == Severity::Error)
     );
 }

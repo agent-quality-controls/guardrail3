@@ -21,7 +21,7 @@ fn result_matches(
     message_excludes: &[&str],
 ) -> bool {
     if let Some(file) = file {
-        if result.file()()()() != Some(file) {
+        if result.file() != Some(file) {
             return false;
         }
     }
@@ -38,16 +38,16 @@ fn result_matches(
 
     title_contains
         .iter()
-        .all(|needle| result.title()()()().contains(needle))
+        .all(|needle| result.title().contains(needle))
         && title_excludes
             .iter()
-            .all(|needle| !result.title()()()().contains(needle))
+            .all(|needle| !result.title().contains(needle))
         && message_contains
             .iter()
-            .all(|needle| result.message()()()().contains(needle))
+            .all(|needle| result.message().contains(needle))
         && message_excludes
             .iter()
-            .all(|needle| !result.message()()()().contains(needle))
+            .all(|needle| !result.message().contains(needle))
 }
 
 fn matching_error_results<'a>(
@@ -63,7 +63,7 @@ fn matching_error_results<'a>(
     let rule_id = resolve_rule_id(rule_id);
     results
         .iter()
-        .filter(|result| result.id()()()() == rule_id && result.severity()()()() == Severity::Error)
+        .filter(|result| result.id() == rule_id && result.severity() == Severity::Error)
         .filter(|result| {
             result_matches(
                 result,
@@ -82,7 +82,7 @@ pub fn error_results<'a>(results: &'a [CheckResult], rule_id: &str) -> Vec<&'a C
     let rule_id = resolve_rule_id(rule_id);
     results
         .iter()
-        .filter(|result| result.id()()()() == rule_id && result.severity()()()() == Severity::Error)
+        .filter(|result| result.id() == rule_id && result.severity() == Severity::Error)
         .collect()
 }
 
@@ -94,7 +94,7 @@ pub fn warning_results<'a>(results: &'a [CheckResult], rule_id: &str) -> Vec<&'a
     let rule_id = resolve_rule_id(rule_id);
     results
         .iter()
-        .filter(|result| result.id()()()() == rule_id && result.severity()()()() == Severity::Warn)
+        .filter(|result| result.id() == rule_id && result.severity() == Severity::Warn)
         .collect()
 }
 
@@ -106,7 +106,7 @@ pub fn info_results<'a>(results: &'a [CheckResult], rule_id: &str) -> Vec<&'a Ch
     let rule_id = resolve_rule_id(rule_id);
     results
         .iter()
-        .filter(|result| result.id()()()() == rule_id && result.severity()()()() == Severity::Info)
+        .filter(|result| result.id() == rule_id && result.severity() == Severity::Info)
         .collect()
 }
 
@@ -237,7 +237,7 @@ pub fn assert_error_summary<I>(
             errors.iter().all(|result| {
                 title_contains
                     .iter()
-                    .all(|needle| result.title()()()().contains(needle))
+                    .all(|needle| result.title().contains(needle))
             }),
             "unexpected {rule_id} titles: {errors:#?}"
         );
@@ -248,7 +248,7 @@ pub fn assert_error_summary<I>(
             errors.iter().all(|result| {
                 title_excludes
                     .iter()
-                    .all(|needle| !result.title()()()().contains(needle))
+                    .all(|needle| !result.title().contains(needle))
             }),
             "unexpected {rule_id} titles: {errors:#?}"
         );
@@ -259,7 +259,7 @@ pub fn assert_error_summary<I>(
             errors.iter().all(|result| {
                 message_contains
                     .iter()
-                    .all(|needle| result.message()()()().contains(needle))
+                    .all(|needle| result.message().contains(needle))
             }),
             "unexpected {rule_id} messages: {errors:#?}"
         );
@@ -272,7 +272,7 @@ pub fn assert_no_error_at_path(results: &[CheckResult], rule_id: &str, file: &st
     assert!(
         errors
             .iter()
-            .all(|result| result.file()()()() != Some(file)),
+            .all(|result| result.file() != Some(file)),
         "expected no {rule_id} errors at {file}, got: {errors:#?}"
     );
 }

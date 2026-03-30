@@ -20,16 +20,18 @@ pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
         );
     } else {
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "cargo-mutants missing".to_owned(),
-    "`cargo-mutants` was not found on PATH for an active mutation-testing setup."
+            ID.to_owned(),
+            Severity::Warn,
+            "cargo-mutants missing".to_owned(),
+            "`cargo-mutants` was not found on PATH for an active mutation-testing setup."
                 .to_owned(),
-    Some(input.root.cargo_rel_path.clone()),
-    None,
-    false,
+            Some(input.root.cargo_rel_path.clone()),
+            None,
+            false,
         ));
     }
+}
+
 #[cfg(test)]
 pub(crate) fn run_family_with_tool(
     root: &std::path::Path,

@@ -14,7 +14,7 @@ const RULE_ID: &str = "RS-CARGO-04";
 pub fn rule_results<'a>(results: &'a [CheckResult], _rule_id: &str) -> Vec<&'a CheckResult> {
     results
         .iter()
-        .filter(|result| result.id()()()() == RULE_ID)
+        .filter(|result| result.id() == RULE_ID)
         .collect()
 }
 
@@ -30,13 +30,13 @@ pub fn assert_rule_results(results: &[CheckResult], expected: &[ExpectedRuleResu
         let matched = actual.iter().any(|result| {
             expected_result
                 .file
-                .is_none_or(|file| result.file()()()() == Some(file))
+                .is_none_or(|file| result.file() == Some(file))
                 && expected_result
                     .title
-                    .is_none_or(|title| result.title()()()() == title)
+                    .is_none_or(|title| result.title() == title)
                 && expected_result
                     .inventory
-                    .is_none_or(|inventory| result.inventory()()()() == inventory)
+                    .is_none_or(|inventory| result.inventory() == inventory)
         });
         assert!(
             matched,

@@ -41,35 +41,35 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
             .as_inventory(),
         ),
         BoolSetting::Value(true) => results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "avoid-breaking-exported-api enabled".to_owned(),
-    "`avoid-breaking-exported-api = true` suppresses useful lints. Prefer `false`.".to_owned(),
-    Some(input.config.rel_path.clone()),
-    None,
-    false,
+            ID.to_owned(),
+            Severity::Warn,
+            "avoid-breaking-exported-api enabled".to_owned(),
+            "`avoid-breaking-exported-api = true` suppresses useful lints. Prefer `false`.".to_owned(),
+            Some(input.config.rel_path.clone()),
+            None,
+            false,
         )),
         BoolSetting::WrongType(value) => results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "avoid-breaking-exported-api wrong type".to_owned(),
-    format!(
+            ID.to_owned(),
+            Severity::Warn,
+            "avoid-breaking-exported-api wrong type".to_owned(),
+            format!(
                 "`avoid-breaking-exported-api` must be a bool, found {}.",
                 value_kind(value)
             ),
-    Some(input.config.rel_path.clone()),
-    None,
-    false,
+            Some(input.config.rel_path.clone()),
+            None,
+            false,
         )),
         BoolSetting::Missing => results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "avoid-breaking-exported-api not set".to_owned(),
-    "Set `avoid-breaking-exported-api = false` explicitly unless this is a published library.".to_owned(),
-    Some(input.config.rel_path.clone()),
-    None,
-    false,
-        }),
+            ID.to_owned(),
+            Severity::Warn,
+            "avoid-breaking-exported-api not set".to_owned(),
+            "Set `avoid-breaking-exported-api = false` explicitly unless this is a published library.".to_owned(),
+            Some(input.config.rel_path.clone()),
+            None,
+            false,
+        )),
     }
 }
 
@@ -81,8 +81,8 @@ pub(crate) fn run_for_tests(tree: &ProjectTree, rel_path: &str) -> Vec<CheckResu
         &super::facts::config_input_for_tests(&facts, rel_path),
         &mut results,
     );
-    results,
-)
+    results
+}
 
 #[cfg(test)]
 #[path = "rs_clippy_16_avoid_breaking_exported_api_tests/mod.rs"] // reason: test-only sidecar module wiring

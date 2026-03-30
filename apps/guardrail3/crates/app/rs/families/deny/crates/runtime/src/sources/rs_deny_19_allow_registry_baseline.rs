@@ -30,7 +30,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     let has_crates_io = allow_registry.iter().any(|registry| {
         *registry == "https://github.com/rust-lang/crates.io-index"
             || *registry == "sparse+https://index.crates.io/"
-    ));
+    });
     if !has_crates_io {
         results.push(CheckResult::from_parts(
             "RS-DENY-19".to_owned(),

@@ -19,37 +19,37 @@ pub fn check(input: &RustfmtRootInput, results: &mut Vec<CheckResult>) {
     match &input.cargo_edition {
         CargoEditionState::Present(cargo_edition) if rustfmt_edition != cargo_edition => {
             results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "rustfmt edition differs from Cargo edition".to_owned(),
-    format!(
+                ID.to_owned(),
+                Severity::Warn,
+                "rustfmt edition differs from Cargo edition".to_owned(),
+                format!(
                     "rustfmt edition `{rustfmt_edition}` differs from Cargo edition `{cargo_edition}`."
                 ),
-    Some(rel.to_owned()),
-    None,
-    false,
-            });
+                Some(rel.to_owned()),
+                None,
+                false,
+            ));
         }
         CargoEditionState::Present(_) => {}
         CargoEditionState::MissingManifest => results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    "Cargo.toml missing".to_owned(),
-    "rustfmt edition checks require a root Cargo.toml with workspace or package edition."
-                    .to_owned(),
-    Some("Cargo.toml".to_owned()),
-    None,
-    false,
-        }),
+            ID.to_owned(),
+            Severity::Error,
+            "Cargo.toml missing".to_owned(),
+            "rustfmt edition checks require a root Cargo.toml with workspace or package edition."
+                .to_owned(),
+            Some("Cargo.toml".to_owned()),
+            None,
+            false,
+        )),
         CargoEditionState::ParseError => results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    "Cargo.toml parse error".to_owned(),
-    "rustfmt edition checks require a parseable root Cargo.toml.".to_owned(),
-    Some("Cargo.toml".to_owned()),
-    None,
-    false,
-        }),
+            ID.to_owned(),
+            Severity::Error,
+            "Cargo.toml parse error".to_owned(),
+            "rustfmt edition checks require a parseable root Cargo.toml.".to_owned(),
+            Some("Cargo.toml".to_owned()),
+            None,
+            false,
+        )),
         CargoEditionState::MissingEdition => results.push(CheckResult {
             id: ID.to_owned(),
             severity: Severity::Error,
@@ -67,7 +67,7 @@ pub fn check(input: &RustfmtRootInput, results: &mut Vec<CheckResult>) {
 #[cfg(test)]
 pub(crate) enum TestCargoEditionState {
     Edition(&'static str),
-)
+}
 
 #[cfg(test)]
 pub(crate) fn run_check(
@@ -90,8 +90,8 @@ pub(crate) fn run_check(
     };
     let mut results = Vec::new();
     check(&input, &mut results);
-    results,
-)
+    results
+}
 
 #[cfg(test)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {

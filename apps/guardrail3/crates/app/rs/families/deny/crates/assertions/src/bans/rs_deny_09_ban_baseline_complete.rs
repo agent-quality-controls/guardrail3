@@ -6,7 +6,7 @@ pub fn assert_no_findings_for_file(
 ) {
     let matching = findings(results)
         .into_iter()
-        .filter(|finding| finding.file()()()() == Some(file))
+        .filter(|finding| finding.file == Some(file))
         .collect::<Vec<_>>();
     assert!(
         matching.is_empty(),
