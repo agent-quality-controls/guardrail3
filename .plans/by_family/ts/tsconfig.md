@@ -18,70 +18,63 @@ Current state:
 
 Rule inventory:
 
-- `T9` — TypeScript config exists, parses, and carries the core strict baseline.
-  What it should do: require `tsconfig.base.json` or `tsconfig.json`, require valid JSON, and require the core strict options:
-  - `strict`
-  - `noImplicitReturns`
-  - `noUnusedLocals`
-  - `noUnusedParameters`
-  - `forceConsistentCasingInFileNames`
-  What it is for: establish the minimum compiler strictness floor and fail fast on missing/broken TS compiler policy.
-- `T52` — `noUncheckedIndexedAccess` is enabled.
-  What it should do: require `noUncheckedIndexedAccess = true`.
-  What it is for: force explicit handling of possibly-missing indexed access.
-- `T53` — `exactOptionalPropertyTypes` is enabled.
-  What it should do: require `exactOptionalPropertyTypes = true`.
-  What it is for: avoid silent confusion between omitted and explicitly-undefined optional fields.
-- `T54` — `isolatedModules` is enabled.
-  What it should do: require `isolatedModules = true`.
-  What it is for: keep transpilation safe for single-file transforms and modern bundler pipelines.
-- `T-TSC-60` — `noPropertyAccessFromIndexSignature` is enabled.
-  What it should do: require `noPropertyAccessFromIndexSignature = true`.
-  What it is for: make index-signature access explicit instead of pretending arbitrary properties are definitely present.
-- `T-TSC-61` — `noImplicitOverride` is enabled.
-  What it should do: require `noImplicitOverride = true`.
-  What it is for: prevent accidental shadowing in class hierarchies.
-- `T62` — `noFallthroughCasesInSwitch` is enabled.
-  What it should do: require `noFallthroughCasesInSwitch = true`.
-  What it is for: catch accidental fallthrough in control flow.
-- `T63` — `allowUnreachableCode` is false.
-  What it should do: require `allowUnreachableCode = false`.
-  What it is for: surface dead code instead of silently permitting it.
-- `T64` — `allowUnusedLabels` is false.
-  What it should do: require `allowUnusedLabels = false`.
-  What it is for: catch dead or accidental labels.
-- `T65` — `target` is `es2022`.
-  What it should do: require `compilerOptions.target = "es2022"`.
-  What it is for: pin emitted language/runtime assumptions to the approved modern baseline.
-- `T66` — `module` is `esnext`.
-  What it should do: require `compilerOptions.module = "esnext"`.
-  What it is for: keep module semantics aligned with the modern ESM toolchain.
-- `T67` — `moduleResolution` is `bundler`.
-  What it should do: require `compilerOptions.moduleResolution = "bundler"`.
-  What it is for: align TypeScript’s resolution behavior with the expected modern bundler/runtime model.
-- `T68` — `esModuleInterop` is enabled.
-  What it should do: require `esModuleInterop = true`.
-  What it is for: avoid common interop hazards between CommonJS and ESM dependencies.
-- `T10` — extra compiler options are inventoried.
-  What it should do: emit inventory/info for compiler options outside the baseline allowlist.
-  What it is for: make local compiler-policy drift visible without automatically forbidding every additional option.
+- `T9` config existence, parseability, and core strictness baseline
+  - Should require a TS config file and enforce the core strictness settings currently bundled under `T9`: `strict`, `noImplicitReturns`, `noUnusedLocals`, `noUnusedParameters`, and `forceConsistentCasingInFileNames`.
+  - It is for making sure the compiler baseline exists and catches the most important type-safety and code-hygiene failures.
+- `T52` `noUncheckedIndexedAccess`
+  - Should require `noUncheckedIndexedAccess = true`.
+  - It is for forcing callers to handle `undefined` on dynamic lookups instead of assuming happy-path access.
+- `T53` `exactOptionalPropertyTypes`
+  - Should require `exactOptionalPropertyTypes = true`.
+  - It is for preventing the common confusion between missing and explicitly undefined properties.
+- `T54` `isolatedModules`
+  - Should require `isolatedModules = true`.
+  - It is for keeping the project compatible with fast one-file-at-a-time transpilers.
+- `T-TSC-60` `noPropertyAccessFromIndexSignature`
+  - Should require `noPropertyAccessFromIndexSignature = true`.
+  - It is for making uncertain index-signature access visually explicit.
+- `T-TSC-61` `noImplicitOverride`
+  - Should require `noImplicitOverride = true`.
+  - It is for preventing accidental method shadowing in inheritance hierarchies.
+- `T62` `noFallthroughCasesInSwitch`
+  - Should require `noFallthroughCasesInSwitch = true`.
+  - It is for catching switch fallthrough bugs.
+- `T63` `allowUnreachableCode = false`
+  - Should require unreachable code to stay disallowed.
+  - It is for preventing dead-code drift.
+- `T64` `allowUnusedLabels = false`
+  - Should require unused labels to stay disallowed.
+  - It is for preventing misleading legacy/control-flow leftovers.
+- `T65` `target = es2022`
+  - Should require the target baseline string value.
+  - It is for standardizing emitted JS expectations.
+- `T66` `module = esnext`
+  - Should require the module baseline string value.
+  - It is for standardizing module semantics across the toolchain.
+- `T67` `moduleResolution = bundler`
+  - Should require bundler-style module resolution.
+  - It is for aligning TypeScript with the intended runtime/build tooling.
+- `T68` `esModuleInterop = true`
+  - Should require `esModuleInterop = true`.
+  - It is for predictable CommonJS/ESM interop behavior.
+- `T10` extra compiler option inventory
+  - Should inventory compiler options outside the known baseline set.
+  - It is for surfacing local deviations and framework-specific add-ons without immediately banning them.
 
-Current code mapping:
+Current implementation mapping:
 
-- `apps/guardrail3/crates/app/ts/validate/tsconfig_check.rs`
-  - `check_tsconfig(...)` selects config roots and handles missing-config `T9`
-  - `parse_tsconfig_json(...)` handles parse failure under `T9`
-  - `check_single_tsconfig(...)` fans out the full rule set
-  - `emit_required_true_bool_checks(...)` carries `T9`, `T52`, `T53`, `T54`, `T-TSC-60`, `T-TSC-61`, `T62`, `T68`
-  - `emit_required_false_bool_checks(...)` carries `T63`, `T64`
-  - `emit_required_string_checks(...)` carries `T65`, `T66`, `T67`
-  - the extra-key scan at the end carries `T10`
+- `check_tsconfig(...)` selects config roots and owns family orchestration
+- `parse_tsconfig_json(...)` covers the existence/parseability half of `T9`
+- `emit_required_true_bool_checks(...)` covers `T9`, `T52`, `T53`, `T54`, `T-TSC-60`, `T-TSC-61`, `T62`, and `T68`
+- `emit_required_false_bool_checks(...)` covers `T63` and `T64`
+- `emit_required_string_checks(...)` covers `T65`, `T66`, and `T67`
+- extra option inventory is emitted as `T10`
 
-Current doc/code reconciliation notes:
+Known reconciliation notes:
 
-- the old ledger in `.plans/todo/checks/ts/tsconfig.md` is directionally correct but under-specified; it collapses many concrete check IDs into broad categories
-- `T9` is overloaded today: file existence, parseability, and several core strictness settings all share one id
-- the live code already has a rich compiler-policy surface; this family mainly needs reconciliation and later architectural migration, not rule invention
+- `T9` is overloaded: it currently covers file existence, JSON parseability, and several core strictness settings
+- the design docs discuss per-app `tsconfig` presence and `extends` relationships, but current code only checks the selected root/base config files
+- there is no current per-app rule for "app tsconfig exists" or "app tsconfig extends base vs standalone by explicit choice"
 
 Historical/supplemental references:
 
@@ -90,6 +83,5 @@ Historical/supplemental references:
 
 Next planning focus:
 
-- reconcile nearest-config ownership and root inheritance against real TS project shapes
-- decide whether `T9` should be split into existence/parseability versus core strictness rules during the eventual TS family migration
-- verify whether the current `tsconfig.base.json` vs local `tsconfig.json` precedence matches the intended TS family ownership model before demoting the old ledger
+- split the overloaded `T9` contract into clearer family-scoped rule surfaces
+- reconcile base-config versus per-app-config ownership against the real TS project shapes
