@@ -16,11 +16,11 @@ fn inventories_whitespace_only_reason_as_missing() {
 
     assertions::assert_findings(
         &results,
-        &[assertions::info(
+        &[assertions::error(
             "ban entry missing reason",
             "`deny.toml` ban entry `json5` has no `reason`.",
             "deny.toml",
-            true,
+            false,
         )],
     );
 }

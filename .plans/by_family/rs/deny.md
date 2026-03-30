@@ -17,6 +17,38 @@ Current state:
 - owns cargo-deny config coverage, placement, shadowing, and deny-policy semantics
 - malformed `guardrail3.toml` now fails closed for deny profile selection instead of degrading to service defaults
 - by-file deny docs remain research on tool behavior, not the family contract
+- current root model still allows validation-root and standalone-package-root deny coverage
+- upcoming workspace-only transition should narrow that on purpose, but the structural rule
+  for "no standalone package roots under a workspace tree" belongs to cargo/placement rather
+  than deny
+
+Scope model:
+
+- routed policy-root family
+- should compute allowed configs, forbidden configs, and coverage over routed
+  roots rather than rediscovering repo-global policy roots inside the family
+
+Agent handoff focus:
+
+- audit production path first:
+  - `apps/guardrail3/crates/app/rs/runtime/src/runners.rs`
+  - `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/lib.rs`
+  - `apps/guardrail3/crates/app/rs/families/deny/crates/runtime/src/facts.rs`
+  - `apps/guardrail3/crates/app/rs/family_mapper/src/rs.rs`
+- prove allowed-location, shadowing, and uncovered-root behavior are limited to
+  routed roots after the whole-project walker change
+- add subtree tests for sibling-root non-bleed and malformed-input fail-closed
+
+Known current risk:
+
+- no confirmed production routing bug yet, but this family has several mixed
+  config-placement surfaces and not enough subtree proof coverage
+
+Done means:
+
+- subtree tests prove sibling deny roots do not leak into nested-path runs
+- malformed routed manifests and profile-map inputs still fail closed
+- production facts stay route-bounded
 
 Historical/supplemental references:
 

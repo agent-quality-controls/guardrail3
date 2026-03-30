@@ -13,8 +13,18 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     let Some(bans) = section(config, "bans") else {
         return;
     };
-    let allow_entries = bans.get("allow").and_then(toml::Value::as_array);
-    let Some(allow_entries) = allow_entries else {
+    let Some(allow_value) = bans.get("allow") else {
+        return;
+    };
+    let Some(allow_entries) = allow_value.as_array() else {
+        push_malformed_allow_error(
+            config,
+            format!(
+                "`{}` must keep `[bans].allow` as an array of crate entries.",
+                config.rel_path
+            ),
+            results,
+        );
         return;
     };
     let expected = expected_bans(config.profile_name.as_deref());
@@ -27,6 +37,16 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         .iter()
         .filter_map(ban_name)
         .collect::<BTreeSet<_>>();
+    if allow_names.len() != allow_entries.len() {
+        push_malformed_allow_error(
+            config,
+            format!(
+                "`{}` has malformed `[bans].allow` entries that cannot be matched to crate names.",
+                config.rel_path
+            ),
+            results,
+        );
+    }
     if !allow_names.is_empty() {
         results.push(CheckResult::from_parts(
             "RS-DENY-25".to_owned(),
@@ -60,6 +80,22 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     }
 }
 
+fn push_malformed_allow_error(
+    config: &super::facts::DenyConfigFacts,
+    message: String,
+    results: &mut Vec<CheckResult>,
+) {
+    results.push(CheckResult::from_parts(
+        "RS-DENY-25".to_owned(),
+        Severity::Error,
+        "bans allow-list malformed".to_owned(),
+        message,
+        Some(config.rel_path.clone()),
+        None,
+        false,
+    ));
+}
+
 #[cfg(test)]
 pub(crate) fn run_check(deny_toml: &str) -> Vec<CheckResult> {
     crate::run_config_rule_for_test(deny_toml, None, check)
@@ -75,5 +111,6 @@ pub(crate) use ::test_support::{
     build_fixture_deny_toml, copy_fixture, set_bans_allow_entries, write_file,
 };
 #[cfg(test)]
-#[path = "rs_deny_25_allow_override_channel_tests/mod.rs"] // reason: test-only sidecar module wiring
+#[path = "rs_deny_25_allow_override_channel_tests/mod.rs"]
+// reason: test-only sidecar module wiring
 mod rs_deny_25_allow_override_channel_tests;

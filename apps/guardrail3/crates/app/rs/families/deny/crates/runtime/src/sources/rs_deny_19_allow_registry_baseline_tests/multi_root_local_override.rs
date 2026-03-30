@@ -9,18 +9,29 @@ fn local_registry_drift_only_errors_for_the_owned_local_root() {
     write_file(
         tmp.path(),
         "apps/devctl/deny.toml",
-        &set_allow_registries(&build_fixture_deny_toml("service"), &[]),
+        &set_allow_registries(
+            &build_fixture_deny_toml("service"),
+            &["https://github.com/rust-lang/crates.io-index"],
+        ),
     );
 
     let results = super::super::run_family(tmp.path());
     assert!(!results.is_empty());
     assertions::assert_findings(
         &results,
-        &[assertions::error(
-            "crates.io registry not allowed",
-            "`apps/devctl/deny.toml` must include crates.io in `[sources].allow-registry`.",
-            "apps/devctl/deny.toml",
-            false,
-        )],
+        &[
+            assertions::error(
+                "canonical crates.io registry not allowed",
+                "`apps/devctl/deny.toml` must allow only `sparse+https://index.crates.io/` in `[sources].allow-registry`.",
+                "apps/devctl/deny.toml",
+                false,
+            ),
+            assertions::error(
+                "unexpected registry allowed",
+                "`apps/devctl/deny.toml` allows unexpected registries: https://github.com/rust-lang/crates.io-index.",
+                "apps/devctl/deny.toml",
+                false,
+            ),
+        ],
     );
 }

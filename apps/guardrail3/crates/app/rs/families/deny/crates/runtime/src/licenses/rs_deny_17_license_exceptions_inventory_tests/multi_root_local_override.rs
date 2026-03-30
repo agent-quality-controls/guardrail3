@@ -20,6 +20,10 @@ fn local_license_exception_only_inventories_for_the_owned_local_root() {
                     "allow".to_owned(),
                     toml::Value::Array(vec![toml::Value::String("Zlib".to_owned())]),
                 ),
+                (
+                    "reason".to_owned(),
+                    toml::Value::String("good enough reason text".to_owned()),
+                ),
             ]))],
         ),
     );

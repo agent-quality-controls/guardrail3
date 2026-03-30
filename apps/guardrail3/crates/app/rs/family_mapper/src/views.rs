@@ -244,25 +244,65 @@ pub type RsGardeRoute = RsScopedSourceRoute;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RsCargoRoute {
     roots: Vec<RsRootView>,
+    validation_scope: Option<String>,
 }
 
 impl RsCargoRoute {
     #[must_use]
     pub fn new(roots: Vec<RsRootView>) -> Self {
-        Self { roots }
+        Self {
+            roots,
+            validation_scope: None,
+        }
+    }
+
+    #[must_use]
+    pub fn with_validation_scope(mut self, validation_scope: Option<String>) -> Self {
+        self.validation_scope = validation_scope;
+        self
     }
 
     #[must_use]
     pub fn roots(&self) -> &[RsRootView] {
         &self.roots
     }
+
+    #[must_use]
+    pub fn validation_scope(&self) -> Option<&str> {
+        self.validation_scope.as_deref()
+    }
 }
 
 pub type RsClippyRoute = RsCargoRoute;
 pub type RsDepsRoute = RsCargoRoute;
-pub type RsDenyRoute = RsCargoRoute;
 pub type RsLibarchRoute = RsCargoRoute;
 pub type RsToolchainRoute = RsCargoRoute;
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RsDenyRoute {
+    roots: Vec<RsRootView>,
+    validation_scope: Option<String>,
+}
+
+impl RsDenyRoute {
+    #[must_use]
+    pub fn new(roots: Vec<RsRootView>, validation_scope: Option<String>) -> Self {
+        Self {
+            roots,
+            validation_scope,
+        }
+    }
+
+    #[must_use]
+    pub fn roots(&self) -> &[RsRootView] {
+        &self.roots
+    }
+
+    #[must_use]
+    pub fn validation_scope(&self) -> Option<&str> {
+        self.validation_scope.as_deref()
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RsReleaseRoute {

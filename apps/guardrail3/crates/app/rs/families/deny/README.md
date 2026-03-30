@@ -82,7 +82,7 @@ The family-level test suite is currently green from the app workspace:
 
 Recent hardening that is now part of the real contract:
 
-- `RS-DENY-19` is intentionally strict: `[sources].allow-registry` must allow only the accepted crates.io forms, and extra registries are errors
+- `RS-DENY-19` is intentionally strict: `[sources].allow-registry` must contain exactly one canonical crates.io entry, `sparse+https://index.crates.io/`
 - `RS-DENY-28` now warns on unsupported schema in critical deny sections instead of silently skipping wrong-type containers
 
 So `deny` is no longer missing its rule corpus or family structure. The remaining work is semantic hardening and fail-closed cleanup, not basic migration.

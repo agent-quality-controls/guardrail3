@@ -21,18 +21,15 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
             .and_then(toml::Value::as_str)
             .unwrap_or("");
         if reason.trim().is_empty() {
-            results.push(
-                CheckResult::from_parts(
-                    "RS-DENY-26".to_owned(),
-                    Severity::Info,
-                    "ban entry missing reason".to_owned(),
-                    format!("`{}` ban entry `{name}` has no `reason`.", config.rel_path),
-                    Some(config.rel_path.clone()),
-                    None,
-                    false,
-                )
-                .as_inventory(),
-            );
+            results.push(CheckResult::from_parts(
+                "RS-DENY-26".to_owned(),
+                Severity::Error,
+                "ban entry missing reason".to_owned(),
+                format!("`{}` ban entry `{name}` has no `reason`.", config.rel_path),
+                Some(config.rel_path.clone()),
+                None,
+                false,
+            ));
         }
     }
 }
