@@ -1,21 +1,11 @@
 use test_support::root_workspace_tree;
 
 use super::super::run_for_tests;
+use guardrail3_app_rs_family_clippy_assertions::rs_clippy_05_missing_type_ban as assertions;
 
 #[test]
 fn reports_malformed_type_sections_instead_of_clean_inventory() {
     let tree = root_workspace_tree("disallowed-types = {}\n");
     let results = run_for_tests(&tree, "clippy.toml");
-
-    assert!(
-        results.iter().any(|result| {
-            result.title == "disallowed-types section malformed"
-                && result.message == "`disallowed-types` must be an array, found table."
-        }),
-        "expected malformed section error: {results:#?}"
-    );
-    assert!(
-        results.iter().all(|result| !result.inventory),
-        "malformed sections must not produce clean inventory: {results:#?}"
-    );
+    assertions::assert_malformed_section(&results, "clippy.toml");
 }

@@ -8,12 +8,12 @@ use std::collections::{BTreeMap, BTreeSet};
 use guardrail3_app_rs_family_mapper::RsGardeRoute;
 use guardrail3_domain_project_tree::ProjectTree;
 
-use super::discover::{is_test_path, rust_file_rels};
-use super::parse::{BoundaryKind, analyze, parse_rust_file};
 use self::cargo_roots::collect_cargo_roots;
 use self::clippy::{collect_clippy_configs, owning_root_dir, push_root_facts};
 use self::policy::read_policy_map;
 use self::validation::resolve_validation_state;
+use super::discover::{is_test_path, rust_file_rels};
+use super::parse::{BoundaryKind, GuardrailConfigParseKind, analyze, parse_rust_file};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PolicyRootKind {
@@ -32,72 +32,80 @@ impl PolicyRootKind {
 
 #[derive(Debug, Clone)]
 pub struct GardeRootFacts {
-    pub rel_dir: String,
-    pub cargo_rel_path: String,
-    pub kind: PolicyRootKind,
-    pub garde_dependency_present: bool,
-    pub clippy_rel_path: Option<String>,
-    pub clippy_parsed: Option<toml::Value>,
-    pub clippy_parse_error: Option<String>,
+    pub(crate) rel_dir: String,
+    pub(crate) cargo_rel_path: String,
+    pub(crate) kind: PolicyRootKind,
+    pub(crate) garde_dependency_present: bool,
+    pub(crate) clippy_rel_path: Option<String>,
+    pub(crate) clippy_parsed: Option<toml::Value>,
+    pub(crate) clippy_parse_error: Option<String>,
 }
 
 #[derive(Debug, Clone)]
 pub struct DerivedBoundaryTypeFacts {
-    pub rel_path: String,
-    pub line: usize,
-    pub name: String,
-    pub boundary_kind: BoundaryKind,
-    pub boundary_macros: Vec<String>,
-    pub has_validate: bool,
+    pub(crate) rel_path: String,
+    pub(crate) line: usize,
+    pub(crate) name: String,
+    pub(crate) boundary_kind: BoundaryKind,
+    pub(crate) boundary_macros: Vec<String>,
+    pub(crate) has_validate: bool,
 }
 
 #[derive(Debug, Clone)]
 pub struct ManualDeserializeImplFacts {
-    pub rel_path: String,
-    pub line: usize,
-    pub type_name: String,
-    pub needs_validate: bool,
-    pub has_validate: bool,
+    pub(crate) rel_path: String,
+    pub(crate) line: usize,
+    pub(crate) type_name: String,
+    pub(crate) needs_validate: bool,
+    pub(crate) has_validate: bool,
 }
 
 #[derive(Debug, Clone)]
 pub struct QueryAsMacroFacts {
-    pub rel_path: String,
-    pub line: usize,
-    pub macro_name: String,
+    pub(crate) rel_path: String,
+    pub(crate) line: usize,
+    pub(crate) macro_name: String,
 }
 
 #[derive(Debug, Clone)]
 pub struct BoundaryFieldFacts {
-    pub rel_path: String,
-    pub line: usize,
-    pub boundary_name: String,
-    pub field_name: String,
-    pub field_type: String,
-    pub requires_field_validation: bool,
-    pub nested_validated: bool,
-    pub has_garde_skip: bool,
-    pub has_garde_dive: bool,
-    pub has_meaningful_garde_rule: bool,
-    pub uses_context: bool,
-    pub boundary_has_context: bool,
+    pub(crate) rel_path: String,
+    pub(crate) line: usize,
+    pub(crate) boundary_name: String,
+    pub(crate) field_name: String,
+    pub(crate) field_type: String,
+    pub(crate) requires_field_validation: bool,
+    pub(crate) nested_validated: bool,
+    pub(crate) has_garde_skip: bool,
+    pub(crate) has_garde_dive: bool,
+    pub(crate) has_meaningful_garde_rule: bool,
+    pub(crate) uses_context: bool,
+    pub(crate) boundary_has_context: bool,
 }
 
 #[derive(Debug, Clone)]
 pub struct GardeInputFailureFacts {
-    pub rel_path: String,
-    pub message: String,
+    pub(crate) rel_path: String,
+    pub(crate) message: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct GuardrailConfigValidationFacts {
+    pub(crate) rel_path: String,
+    pub(crate) line: usize,
+    pub(crate) parse_kind: GuardrailConfigParseKind,
 }
 
 #[derive(Debug, Clone, Default)]
 pub struct GardeFacts {
-    pub roots: Vec<GardeRootFacts>,
-    pub struct_targets: Vec<DerivedBoundaryTypeFacts>,
-    pub enum_targets: Vec<DerivedBoundaryTypeFacts>,
-    pub manual_deserialize_impls: Vec<ManualDeserializeImplFacts>,
-    pub boundary_fields: Vec<BoundaryFieldFacts>,
-    pub query_as_macros: Vec<QueryAsMacroFacts>,
-    pub input_failures: Vec<GardeInputFailureFacts>,
+    pub(crate) roots: Vec<GardeRootFacts>,
+    pub(crate) struct_targets: Vec<DerivedBoundaryTypeFacts>,
+    pub(crate) enum_targets: Vec<DerivedBoundaryTypeFacts>,
+    pub(crate) manual_deserialize_impls: Vec<ManualDeserializeImplFacts>,
+    pub(crate) boundary_fields: Vec<BoundaryFieldFacts>,
+    pub(crate) query_as_macros: Vec<QueryAsMacroFacts>,
+    pub(crate) input_failures: Vec<GardeInputFailureFacts>,
+    pub(crate) guardrail_config_validation_sites: Vec<GuardrailConfigValidationFacts>,
 }
 
 #[derive(Debug, Clone)]
@@ -185,6 +193,7 @@ pub fn collect(tree: &ProjectTree, route: &RsGardeRoute) -> GardeFacts {
     let mut manual_deserialize_impls = Vec::new();
     let mut boundary_fields = Vec::new();
     let mut query_as_macros = Vec::new();
+    let mut guardrail_config_validation_sites = Vec::new();
     let mut global_type_validation_map = BTreeMap::<String, (bool, bool)>::new();
     let mut simple_type_validation_map = BTreeMap::<String, Vec<(bool, bool)>>::new();
     let mut parsed_files = Vec::new();
@@ -341,6 +350,14 @@ pub fn collect(tree: &ProjectTree, route: &RsGardeRoute) -> GardeFacts {
                 macro_name: macro_use.macro_name,
             });
         }
+
+        for site in parsed.guardrail_config_validation_sites {
+            guardrail_config_validation_sites.push(GuardrailConfigValidationFacts {
+                rel_path: rel_path.clone(),
+                line: site.line,
+                parse_kind: site.parse_kind,
+            });
+        }
     }
 
     roots.sort_by(|a, b| a.rel_dir.cmp(&b.rel_dir));
@@ -350,6 +367,8 @@ pub fn collect(tree: &ProjectTree, route: &RsGardeRoute) -> GardeFacts {
     boundary_fields.sort_by(|a, b| a.rel_path.cmp(&b.rel_path).then(a.line.cmp(&b.line)));
     query_as_macros.sort_by(|a, b| a.rel_path.cmp(&b.rel_path).then(a.line.cmp(&b.line)));
     input_failures.sort_by(|a, b| a.rel_path.cmp(&b.rel_path).then(a.message.cmp(&b.message)));
+    guardrail_config_validation_sites
+        .sort_by(|a, b| a.rel_path.cmp(&b.rel_path).then(a.line.cmp(&b.line)));
 
     GardeFacts {
         roots,
@@ -359,6 +378,7 @@ pub fn collect(tree: &ProjectTree, route: &RsGardeRoute) -> GardeFacts {
         boundary_fields,
         query_as_macros,
         input_failures,
+        guardrail_config_validation_sites,
     }
 }
 

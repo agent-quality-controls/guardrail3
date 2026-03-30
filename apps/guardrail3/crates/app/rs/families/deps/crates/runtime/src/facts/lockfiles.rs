@@ -2,8 +2,8 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use guardrail3_domain_project_tree::ProjectTree;
 
-use super::{InputFailureFacts, LockfileFacts, MemberFacts, ParsedGuardrail, WorkspaceFacts};
 use super::dependency_entries::policy_for_member;
+use super::{InputFailureFacts, LockfileFacts, MemberFacts, ParsedGuardrail, WorkspaceFacts};
 
 pub(super) fn collect_lockfiles(
     tree: &ProjectTree,

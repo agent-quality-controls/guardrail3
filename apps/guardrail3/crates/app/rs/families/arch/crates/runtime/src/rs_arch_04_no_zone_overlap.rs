@@ -27,18 +27,18 @@ pub fn check(input: &ZoneOverlapInput<'_>, results: &mut Vec<CheckResult>) {
         )
     };
 
-    results.push(CheckResult {
-        id: ID.to_owned(),
-        severity: Severity::Error,
-        title: "app and package architecture zones overlap illegally".to_owned(),
-        message: format!(
+    results.push(CheckResult::from_parts(
+        ID.to_owned(),
+        Severity::Error,
+        "app and package architecture zones overlap illegally".to_owned(),
+        format!(
             "{nesting_message}. app Cargo root: `{}`; package Cargo root: `{}`. App/package architecture zones must not overlap or nest.",
             input.overlap.app_cargo_rel_path, input.overlap.package_cargo_rel_path
         ),
-        file: Some(file),
-        line: None,
-        inventory: false,
-    });
+        Some(file),
+        None,
+        false,
+    ));
 }
 
 pub fn check_success(has_overlaps: bool, results: &mut Vec<CheckResult>) {
@@ -47,16 +47,16 @@ pub fn check_success(has_overlaps: bool, results: &mut Vec<CheckResult>) {
     }
 
     results.push(
-        CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Info,
-            title: "No illegal app/package zone overlap found".to_owned(),
-            message: "App and package architecture zones do not overlap or nest illegally."
+        CheckResult::from_parts(
+            ID.to_owned(),
+            Severity::Info,
+            "No illegal app/package zone overlap found".to_owned(),
+            "App and package architecture zones do not overlap or nest illegally."
                 .to_owned(),
-            file: None,
-            line: None,
-            inventory: false,
-        }
+            None,
+            None,
+            false,
+        )
         .as_inventory(),
     );
 }

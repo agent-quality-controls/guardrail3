@@ -7,9 +7,9 @@ const ID: &str = "HOOK-RS-01";
 pub fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<CheckResult>) {
     let found = input
         .parsed
-        .executable_lines
+        .executable_lines()
         .iter()
-        .any(|line| is_cargo_fmt_check_command(line.command_text));
+        .any(|line| is_cargo_fmt_check_command(line.command_text()));
 
     push_presence_result(
         found,
@@ -33,27 +33,27 @@ fn push_presence_result(
 ) {
     if found {
         results.push(
-            CheckResult {
-                id: ID.to_owned(),
-                severity: Severity::Warn,
-                title: ok_title.to_owned(),
-                message: ok_message.to_owned(),
-                file: Some(rel_path.to_owned()),
-                line: None,
-                inventory: false,
-            }
+            CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Warn,
+                ok_title.to_owned(),
+                ok_message.to_owned(),
+                Some(rel_path.to_owned()),
+                None,
+                false,
+            )
             .as_inventory(),
         );
     } else {
-        results.push(CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Warn,
-            title: missing_title.to_owned(),
-            message: missing_message.to_owned(),
-            file: Some(rel_path.to_owned()),
-            line: None,
-            inventory: false,
-        });
+        results.push(CheckResult::from_parts(
+            ID.to_owned(),
+            Severity::Warn,
+            missing_title.to_owned(),
+            missing_message.to_owned(),
+            Some(rel_path.to_owned()),
+            None,
+            false,
+        ));
     }
 }
 
@@ -210,5 +210,5 @@ pub(super) fn run_case(content: &str) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-#[path = "hook_rs_01_fmt_step_present_tests/mod.rs"]
+#[path = "tests/steps/hook_rs_01_fmt_step_present_tests/mod.rs"]
 mod hook_rs_01_fmt_step_present_tests;

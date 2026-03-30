@@ -360,9 +360,99 @@ fn errors_when_channel_is_pinned_nightly() {
 }
 
 #[test]
+fn errors_when_stable_channel_contains_nightly_suffix() {
+    let parsed = parse_toolchain_policy_toml(
+        "[toolchain]\nchannel = \"stable-nightly\"\ncomponents = [\"clippy\", \"rustfmt\"]",
+    );
+    let input = test_input(
+        Some("rust-toolchain.toml"),
+        None,
+        Some(&parsed),
+        None,
+        Some("1.85"),
+        None,
+    );
+    let mut results = Vec::new();
+
+    check(&input, &mut results);
+
+    assert_rule_results(
+        &results,
+        &[
+            ExpectedRuleResult {
+                severity: Severity::Error,
+                inventory: false,
+                title: "toolchain channel is nightly",
+                message: "Use `channel = \"stable\"` or a pinned stable version.",
+                file: Some("rust-toolchain.toml"),
+            },
+            ExpectedRuleResult {
+                severity: Severity::Info,
+                inventory: true,
+                title: "toolchain component `clippy` present",
+                message: "`clippy` is listed in `components`.",
+                file: Some("rust-toolchain.toml"),
+            },
+            ExpectedRuleResult {
+                severity: Severity::Info,
+                inventory: true,
+                title: "toolchain component `rustfmt` present",
+                message: "`rustfmt` is listed in `components`.",
+                file: Some("rust-toolchain.toml"),
+            },
+        ],
+    );
+}
+
+#[test]
 fn errors_when_version_like_channel_contains_nightly_suffix() {
     let parsed = parse_toolchain_policy_toml(
         "[toolchain]\nchannel = \"1.85.0-nightly\"\ncomponents = [\"clippy\", \"rustfmt\"]",
+    );
+    let input = test_input(
+        Some("rust-toolchain.toml"),
+        None,
+        Some(&parsed),
+        None,
+        Some("1.85"),
+        None,
+    );
+    let mut results = Vec::new();
+
+    check(&input, &mut results);
+
+    assert_rule_results(
+        &results,
+        &[
+            ExpectedRuleResult {
+                severity: Severity::Error,
+                inventory: false,
+                title: "toolchain channel is nightly",
+                message: "Use `channel = \"stable\"` or a pinned stable version.",
+                file: Some("rust-toolchain.toml"),
+            },
+            ExpectedRuleResult {
+                severity: Severity::Info,
+                inventory: true,
+                title: "toolchain component `clippy` present",
+                message: "`clippy` is listed in `components`.",
+                file: Some("rust-toolchain.toml"),
+            },
+            ExpectedRuleResult {
+                severity: Severity::Info,
+                inventory: true,
+                title: "toolchain component `rustfmt` present",
+                message: "`rustfmt` is listed in `components`.",
+                file: Some("rust-toolchain.toml"),
+            },
+        ],
+    );
+}
+
+#[test]
+fn errors_when_version_like_channel_contains_nightly_suffix_after_host_triple() {
+    let parsed = parse_toolchain_policy_toml(
+        "[toolchain]\nchannel = \"1.85.0-x86_64-unknown-linux-gnu-nightly\"\ncomponents = [\"clippy\", \"rustfmt\"]",
     );
     let input = test_input(
         Some("rust-toolchain.toml"),
@@ -450,6 +540,51 @@ fn errors_when_channel_is_beta() {
 }
 
 #[test]
+fn errors_when_stable_channel_contains_beta_suffix() {
+    let parsed = parse_toolchain_policy_toml(
+        "[toolchain]\nchannel = \"stable-beta\"\ncomponents = [\"clippy\", \"rustfmt\"]",
+    );
+    let input = test_input(
+        Some("rust-toolchain.toml"),
+        None,
+        Some(&parsed),
+        None,
+        Some("1.85"),
+        None,
+    );
+    let mut results = Vec::new();
+
+    check(&input, &mut results);
+
+    assert_rule_results(
+        &results,
+        &[
+            ExpectedRuleResult {
+                severity: Severity::Error,
+                inventory: false,
+                title: "toolchain channel is beta",
+                message: "Use `channel = \"stable\"` or a pinned stable version.",
+                file: Some("rust-toolchain.toml"),
+            },
+            ExpectedRuleResult {
+                severity: Severity::Info,
+                inventory: true,
+                title: "toolchain component `clippy` present",
+                message: "`clippy` is listed in `components`.",
+                file: Some("rust-toolchain.toml"),
+            },
+            ExpectedRuleResult {
+                severity: Severity::Info,
+                inventory: true,
+                title: "toolchain component `rustfmt` present",
+                message: "`rustfmt` is listed in `components`.",
+                file: Some("rust-toolchain.toml"),
+            },
+        ],
+    );
+}
+
+#[test]
 fn errors_when_version_like_channel_contains_beta_suffix() {
     let parsed = parse_toolchain_policy_toml(
         "[toolchain]\nchannel = \"1.85.0-beta\"\ncomponents = [\"clippy\", \"rustfmt\"]",
@@ -473,6 +608,51 @@ fn errors_when_version_like_channel_contains_beta_suffix() {
                 severity: Severity::Error,
                 inventory: false,
                 title: "toolchain channel is beta",
+                message: "Use `channel = \"stable\"` or a pinned stable version.",
+                file: Some("rust-toolchain.toml"),
+            },
+            ExpectedRuleResult {
+                severity: Severity::Info,
+                inventory: true,
+                title: "toolchain component `clippy` present",
+                message: "`clippy` is listed in `components`.",
+                file: Some("rust-toolchain.toml"),
+            },
+            ExpectedRuleResult {
+                severity: Severity::Info,
+                inventory: true,
+                title: "toolchain component `rustfmt` present",
+                message: "`rustfmt` is listed in `components`.",
+                file: Some("rust-toolchain.toml"),
+            },
+        ],
+    );
+}
+
+#[test]
+fn errors_when_channel_is_unsupported() {
+    let parsed = parse_toolchain_policy_toml(
+        "[toolchain]\nchannel = \"dev\"\ncomponents = [\"clippy\", \"rustfmt\"]",
+    );
+    let input = test_input(
+        Some("rust-toolchain.toml"),
+        None,
+        Some(&parsed),
+        None,
+        Some("1.85"),
+        None,
+    );
+    let mut results = Vec::new();
+
+    check(&input, &mut results);
+
+    assert_rule_results(
+        &results,
+        &[
+            ExpectedRuleResult {
+                severity: Severity::Error,
+                inventory: false,
+                title: "toolchain channel is unsupported",
                 message: "Use `channel = \"stable\"` or a pinned stable version.",
                 file: Some("rust-toolchain.toml"),
             },
@@ -578,6 +758,43 @@ fn inventories_when_channel_is_pinned_stable_version() {
                 inventory: true,
                 title: "toolchain component `rustfmt` present",
                 message: "`rustfmt` is listed in `components`.",
+                file: Some("rust-toolchain.toml"),
+            },
+        ],
+    );
+}
+
+#[test]
+fn errors_when_components_is_not_an_array() {
+    let parsed =
+        parse_toolchain_policy_toml("[toolchain]\nchannel = \"stable\"\ncomponents = \"clippy\"");
+    let input = test_input(
+        Some("rust-toolchain.toml"),
+        None,
+        Some(&parsed),
+        None,
+        Some("1.85"),
+        None,
+    );
+    let mut results = Vec::new();
+
+    check(&input, &mut results);
+
+    assert_rule_results(
+        &results,
+        &[
+            ExpectedRuleResult {
+                severity: Severity::Info,
+                inventory: true,
+                title: "toolchain channel is stable",
+                message: "channel = \"stable\".",
+                file: Some("rust-toolchain.toml"),
+            },
+            ExpectedRuleResult {
+                severity: Severity::Error,
+                inventory: false,
+                title: "toolchain components are invalid",
+                message: "`[toolchain].components` must be an array of strings.",
                 file: Some("rust-toolchain.toml"),
             },
         ],

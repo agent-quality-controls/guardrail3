@@ -60,7 +60,7 @@ pub(crate) fn repo_facts() -> crate::facts::RepoReleaseFacts {
 pub(crate) fn workflow_from_yaml(rel_path: &str, yaml: &str) -> crate::facts::WorkflowFacts {
     let parsed: serde_yaml::Value =
         serde_yaml::from_str(yaml).expect("failed to parse release workflow fixture yaml");
-    let analysis = crate::release_support::workflows::extract_workflow_analysis(&parsed);
+    let analysis = crate::release_support::extract_workflow_analysis(&parsed);
     crate::facts::WorkflowFacts {
         rel_path: rel_path.to_owned(),
         analysis,

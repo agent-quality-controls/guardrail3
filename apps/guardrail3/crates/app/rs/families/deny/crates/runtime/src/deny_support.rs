@@ -6,7 +6,7 @@ use guardrail3_domain_modules::deny::{
 
 #[derive(Debug, Clone)]
 pub struct BanExpectation {
-    pub wrappers: BTreeSet<String>,
+    pub(crate) wrappers: BTreeSet<String>,
 }
 
 pub fn parsed_table(
@@ -51,7 +51,7 @@ pub fn expected_bans(profile: Option<&str>) -> BTreeMap<String, BanExpectation> 
 
     let mut map = BTreeMap::new();
     for module in modules {
-        for (name, wrappers) in parse_ban_entries(module.content) {
+        for (name, wrappers) in parse_ban_entries(module.content()) {
             let _ = map.insert(name, BanExpectation { wrappers });
         }
     }
@@ -63,7 +63,7 @@ pub fn expected_ban_names(profile: Option<&str>) -> BTreeSet<String> {
 }
 
 pub fn expected_licenses() -> BTreeSet<String> {
-    let parsed = toml::from_str::<toml::Value>(DENY_LICENSES.content).ok();
+    let parsed = toml::from_str::<toml::Value>(DENY_LICENSES.content()).ok();
     parsed
         .as_ref()
         .and_then(|value| value.get("licenses"))
@@ -84,7 +84,7 @@ pub fn expected_confidence_threshold() -> f64 {
 }
 
 pub fn expected_advisory_baseline() -> (String, String) {
-    let parsed = toml::from_str::<toml::Value>(DENY_ADVISORIES.content).ok();
+    let parsed = toml::from_str::<toml::Value>(DENY_ADVISORIES.content()).ok();
     let advisories = parsed.as_ref().and_then(|value| value.get("advisories"));
     let unmaintained = advisories
         .and_then(|value| value.get("unmaintained"))
@@ -98,7 +98,7 @@ pub fn expected_advisory_baseline() -> (String, String) {
 }
 
 pub fn expected_sources() -> (BTreeSet<String>, String, String) {
-    let parsed = toml::from_str::<toml::Value>(DENY_SOURCES.content).ok();
+    let parsed = toml::from_str::<toml::Value>(DENY_SOURCES.content()).ok();
     let sources = parsed.as_ref().and_then(|value| value.get("sources"));
     let registries = sources
         .and_then(|value| value.get("allow-registry"))
@@ -127,7 +127,7 @@ pub fn expected_sources() -> (BTreeSet<String>, String, String) {
 }
 
 pub fn expected_graph() -> (bool, bool) {
-    let parsed = toml::from_str::<toml::Value>(deny::DENY_GRAPH.content).ok();
+    let parsed = toml::from_str::<toml::Value>(deny::DENY_GRAPH.content()).ok();
     let graph = parsed.as_ref().and_then(|value| value.get("graph"));
     let all_features = graph
         .and_then(|value| value.get("all-features"))
@@ -141,7 +141,7 @@ pub fn expected_graph() -> (bool, bool) {
 }
 
 pub fn expected_bans_settings() -> (Option<String>, bool, Option<String>) {
-    let parsed = toml::from_str::<toml::Value>(DENY_BANS_BASE.content).ok();
+    let parsed = toml::from_str::<toml::Value>(DENY_BANS_BASE.content()).ok();
     let bans = parsed.as_ref().and_then(|value| value.get("bans"));
     let wildcards = bans
         .and_then(|value| value.get("wildcards"))
@@ -161,10 +161,10 @@ pub fn expected_bans_settings() -> (Option<String>, bool, Option<String>) {
 }
 
 pub struct FeatureConfigEntry {
-    pub name: String,
-    pub deny: BTreeSet<String>,
-    pub allow: BTreeSet<String>,
-    pub unknown_keys: Vec<String>,
+    pub(crate) name: String,
+    pub(crate) deny: BTreeSet<String>,
+    pub(crate) allow: BTreeSet<String>,
+    pub(crate) unknown_keys: Vec<String>,
 }
 
 pub fn string_array(value: Option<&toml::Value>) -> BTreeSet<String> {
@@ -214,7 +214,7 @@ pub fn parse_feature_entries_in_config(parsed: &toml::Value) -> Vec<FeatureConfi
 }
 
 pub fn expected_tokio_allowed_features() -> BTreeSet<String> {
-    let parsed = toml::from_str::<toml::Value>(deny::DENY_FEATURE_BANS_TOKIO.content).ok();
+    let parsed = toml::from_str::<toml::Value>(deny::DENY_FEATURE_BANS_TOKIO.content()).ok();
     parsed
         .as_ref()
         .and_then(|value| value.get("bans"))

@@ -33,7 +33,6 @@ Those belong to:
 
 ```text
 apps/guardrail3/crates/app/rs/families/deny/
-  Cargo.toml
   README.md
   rustfmt.toml
   rust-toolchain.toml
@@ -67,7 +66,7 @@ apps/guardrail3/crates/app/rs/families/deny/
 
 This family is now in the same stabilized shape as `RS-FMT`:
 
-- workspace root plus `crates/runtime`, `crates/assertions`, and `test_support`
+- split family root plus `crates/runtime`, `crates/assertions`, and `test_support`
 - one production rule file per `RS-DENY-*`
 - one rule-specific sidecar directory per rule
 - owned assertions modules for reusable result-shape proofs
@@ -75,9 +74,11 @@ This family is now in the same stabilized shape as `RS-FMT`:
 - family-local `rustfmt.toml` and `rust-toolchain.toml`
 - no live family-root `deny.toml`; app-root deny policy remains the single allowed live config for this repo shape
 
-The family-level test suite is currently green from the nested workspace:
+The family-level test suite is currently green from the app workspace:
 
-- `cargo test --manifest-path apps/guardrail3/crates/app/rs/families/deny/Cargo.toml --workspace`
+- `cargo test --manifest-path apps/guardrail3/Cargo.toml -p guardrail3-app-rs-family-deny --lib`
+- `cargo test --manifest-path apps/guardrail3/Cargo.toml -p guardrail3-app-rs-family-deny-assertions --lib`
+- `cargo test --manifest-path apps/guardrail3/Cargo.toml -p guardrail3-app-rs-family-deny-test-support --lib`
 
 Recent hardening that is now part of the real contract:
 
@@ -92,10 +93,6 @@ This README should track real current defects, not the target state.
 
 Known remaining problems:
 
-- malformed `guardrail3.toml` still fails open for deny profile selection
-  - `facts.rs` falls back to the default/empty profile map when `guardrail3.toml` cannot be parsed
-  - profile-sensitive rules then degrade to service defaults instead of surfacing a deny-family input failure
-  - this can silently skip library-only deny expectations such as library ban/wrapper policy
 - the deny hardening matrix is not closed yet
   - several rules still have explicit adversarial backlog in `.plans/todo/check_review/test_hardening/14-clippy-deny-coverage-matrix.md`
   - the open work is mostly broader mixed-root/profile attacks, parity framing, and false-positive controls rather than missing rule files
@@ -105,6 +102,9 @@ Known remaining problems:
 
 Resolved recent drift:
 
+- malformed `guardrail3.toml` no longer fails open for deny profile selection
+  - deny now emits an explicit `guardrail3.toml` policy-context error instead of silently degrading profile-sensitive rules to service defaults
+  - profile-sensitive rules (`RS-DENY-09`, `RS-DENY-25`, `RS-DENY-30`) now stand down when deny cannot trust the active profile context
 - the old `RS-DENY-19` plan/code mismatch is gone; the plan now matches the stricter runtime behavior
 - the old `RS-DENY-28` unsupported-schema gap is closed for critical section/container shapes
 
@@ -112,8 +112,7 @@ Resolved recent drift:
 
 The next deny work should stay narrow:
 
-1. fix the malformed-`guardrail3.toml` profile fail-open path
-2. add the missing adversarial coverage from the deny hardening matrix
-3. improve end-to-end generator/root parity evidence
+1. add the missing adversarial coverage from the deny hardening matrix
+2. improve end-to-end generator/root parity evidence
 
 Do not broaden the deny policy surface until those are closed.

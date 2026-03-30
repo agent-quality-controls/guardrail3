@@ -5,36 +5,36 @@ use super::facts::{
 };
 
 pub struct RootClassificationInput<'a> {
-    pub root: &'a ArchRootFacts,
+    pub(crate) root: &'a ArchRootFacts,
 }
 
 pub struct MisplacedRootInput<'a> {
-    pub root: &'a ArchRootFacts,
-    pub reporting_enabled: bool,
+    pub(crate) root: &'a ArchRootFacts,
+    pub(crate) reporting_enabled: bool,
 }
 
 pub struct AuxiliaryRootInput<'a> {
-    pub root: &'a ArchRootFacts,
+    pub(crate) root: &'a ArchRootFacts,
 }
 
 pub struct DualOwnershipInput<'a> {
-    pub root: &'a ArchRootFacts,
+    pub(crate) root: &'a ArchRootFacts,
 }
 
 pub struct ZoneOverlapInput<'a> {
-    pub overlap: &'a ZoneOverlapFacts,
+    pub(crate) overlap: &'a ZoneOverlapFacts,
 }
 
 pub struct ScopedArchConfigInput<'a> {
-    pub failure: &'a ArchInputFailureFacts,
+    pub(crate) failure: &'a ArchInputFailureFacts,
 }
 
 pub struct OwnerFamilyCoherenceInput<'a> {
-    pub root: &'a GovernedRootFacts,
+    pub(crate) root: &'a GovernedRootFacts,
 }
 
 pub struct RequiredInputFailureInput<'a> {
-    pub failure: &'a ArchInputFailureFacts,
+    pub(crate) failure: &'a ArchInputFailureFacts,
 }
 
 impl<'a> RootClassificationInput<'a> {

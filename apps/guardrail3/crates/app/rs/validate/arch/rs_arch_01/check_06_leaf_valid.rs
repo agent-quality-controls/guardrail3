@@ -34,20 +34,20 @@ pub fn check(
             .is_some_and(|m| m.is_dir());
 
         if has_crates && has_cargo {
-            results.push(CheckResult {
-                id: "R-ARCH-01".to_owned(),
-                severity: Severity::Error,
-                title: format!(
+            results.push(CheckResult::from_parts(
+    "R-ARCH-01".to_owned(),
+    Severity::Error,
+    format!(
                     "Service `{name}` subdirectory {label}/{subdir}/ has both Cargo.toml and crates/"
                 ),
-                message: format!(
+    format!(
                     "Service `{name}` has `{label}/{subdir}/` with both `Cargo.toml` and `crates/`. \
                      A subdirectory must be either a crate (Cargo.toml) or a hex-in-hex (crates/), not both."
                 ),
-                file: Some(sub_path.display().to_string()),
-                line: None,
-                inventory: false,
-            });
+    Some(sub_path.display().to_string()),
+    None,
+    false,
+            ));
         } else if has_crates {
             let inner_label = format!("{label}/{subdir}/crates");
             recurse(fs, name, &sub_path, &inner_label, results);
@@ -74,5 +74,5 @@ pub fn check(
                 inventory: false,
             });
         }
-    }
-}
+    },
+)

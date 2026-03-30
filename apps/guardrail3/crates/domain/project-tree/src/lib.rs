@@ -22,20 +22,20 @@ use serde::{Deserialize, Serialize};
 pub struct ProjectTree {
     /// Absolute path to the project root.
     #[garde(skip)] // reason: walker-owned absolute path, not user-provided boundary data
-    pub root: PathBuf,
+    root: PathBuf,
 
     /// Directory structure: every dir visited -> its immediate children.
     /// Keys are relative paths from root. `""` = the root directory itself.
     /// Sorted by path (BTreeMap).
     #[garde(skip)]
     // reason: walker-owned structural map, validated by project walker construction
-    pub structure: BTreeMap<String, DirEntry>,
+    structure: BTreeMap<String, DirEntry>,
 
     /// Cached config file contents, keyed by relative path from root.
     /// Contains every config file we check — NOT source code (.rs/.ts/.tsx).
     /// Sorted by path (BTreeMap).
     #[garde(skip)] // reason: walker-owned config cache, not direct external boundary input
-    pub content: BTreeMap<String, String>,
+    content: BTreeMap<String, String>,
 }
 
 /// A single directory's immediate children.
@@ -43,21 +43,53 @@ pub struct ProjectTree {
 pub struct DirEntry {
     /// Child directory names (just the name, not the full path).
     #[garde(skip)] // reason: walker-owned directory listing
-    pub dirs: Vec<String>,
+    dirs: Vec<String>,
     /// Child file names (just the name, not the full path).
     #[garde(skip)] // reason: walker-owned file listing
-    pub files: Vec<String>,
+    files: Vec<String>,
     /// Child directory names that are symlinks.
     #[serde(default)]
     #[garde(skip)] // reason: walker-owned symlinked directory listing
-    pub symlink_dirs: Vec<String>,
+    symlink_dirs: Vec<String>,
     /// Child file names that are symlinks or unusable symlink-like entries.
     #[serde(default)]
     #[garde(skip)] // reason: walker-owned symlinked file listing
-    pub symlink_files: Vec<String>,
+    symlink_files: Vec<String>,
 }
 
 impl ProjectTree {
+    /// Create a project tree from walker-owned data.
+    #[must_use]
+    pub fn new(
+        root: PathBuf,
+        structure: BTreeMap<String, DirEntry>,
+        content: BTreeMap<String, String>,
+    ) -> Self {
+        Self {
+            root,
+            structure,
+            content,
+        }
+    }
+
+    /// Absolute path to the project root.
+    #[must_use]
+    pub fn root(&self) -> &PathBuf {
+        &self.root
+    }
+
+    /// Directory structure map.
+    #[must_use]
+    pub fn structure(&self) -> &BTreeMap<String, DirEntry> {
+        &self.structure
+    }
+
+    /// Cached config content map.
+    #[must_use]
+    pub fn content(&self) -> &BTreeMap<String, String> {
+        &self.content
+    }
+
     /// Check if a directory exists in the tree.
     #[must_use]
     pub fn dir_exists(&self, rel: &str) -> bool {
@@ -146,6 +178,46 @@ impl ProjectTree {
 }
 
 impl DirEntry {
+    /// Create a directory entry from walker-owned child sets.
+    #[must_use]
+    pub fn new(
+        dirs: Vec<String>,
+        files: Vec<String>,
+        symlink_dirs: Vec<String>,
+        symlink_files: Vec<String>,
+    ) -> Self {
+        Self {
+            dirs,
+            files,
+            symlink_dirs,
+            symlink_files,
+        }
+    }
+
+    /// Child directory names.
+    #[must_use]
+    pub fn dirs(&self) -> &[String] {
+        &self.dirs
+    }
+
+    /// Child file names.
+    #[must_use]
+    pub fn files(&self) -> &[String] {
+        &self.files
+    }
+
+    /// Child directory names that are symlinks.
+    #[must_use]
+    pub fn symlink_dirs(&self) -> &[String] {
+        &self.symlink_dirs
+    }
+
+    /// Child file names that are symlinks or unusable symlink-like entries.
+    #[must_use]
+    pub fn symlink_files(&self) -> &[String] {
+        &self.symlink_files
+    }
+
     /// Check if this directory has a child file with the given name.
     #[must_use]
     pub fn has_file(&self, name: &str) -> bool {

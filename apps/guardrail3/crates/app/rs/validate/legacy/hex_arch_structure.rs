@@ -64,23 +64,23 @@ fn check_single_app(
     // Ban src/ at app root
     let src_entries = fs.list_dir(&app_dir.join("src"));
     if !src_entries.is_empty() {
-        results.push(CheckResult {
-            id: "R-ARCH-01".to_owned(),
-            severity: Severity::Error,
-            title: format!("Service `{name}` has src/ directory"),
-            message: format!(
+        results.push(CheckResult::from_parts(
+    "R-ARCH-01".to_owned(),
+    Severity::Error,
+    format!("Service `{name}` has src/ directory"),
+    format!(
                 "Service `{name}` has an `src/` directory. Code must be in `crates/` \
                  following hex arch layout. Move code into \
                  `crates/{{adapters,app,domain,ports}}` subcrates."
             ),
-            file: Some(app_dir.join("src").display().to_string()),
-            line: None,
-            inventory: false,
-        });
+    Some(app_dir.join("src").display().to_string()),
+    None,
+    false,
+        ));
     }
 
-    check_crates_dir(fs, name, app_dir, "crates", results);
-}
+    check_crates_dir(fs, name, app_dir, "crates", results);,
+)
 
 /// Check a `crates/` directory for hex arch structure.
 /// Reusable for both top-level apps and hex-in-hex recursion.
@@ -94,19 +94,19 @@ fn check_crates_dir(
     let crates_dir = parent_dir.join("crates");
     let crates_entries = fs.list_dir(&crates_dir);
     if crates_entries.is_empty() {
-        results.push(CheckResult {
-            id: "R-ARCH-01".to_owned(),
-            severity: Severity::Error,
-            title: format!("Service `{name}` missing {label_prefix}/ directory"),
-            message: format!(
+        results.push(CheckResult::from_parts(
+    "R-ARCH-01".to_owned(),
+    Severity::Error,
+    format!("Service `{name}` missing {label_prefix}/ directory"),
+    format!(
                 "Service `{name}` has no `{label_prefix}/` directory. Create it with the hex arch \
                  template: `{label_prefix}/{{adapters/{{inbound,outbound}}, app, domain, \
                  ports/{{inbound,outbound}}}}`."
             ),
-            file: Some(parent_dir.display().to_string()),
-            line: None,
-            inventory: false,
-        });
+    Some(parent_dir.display().to_string()),
+    None,
+    false,
+        ));
         return;
     }
 
@@ -114,17 +114,17 @@ fn check_crates_dir(
     let expected_top = ["adapters", "app", "domain", "ports"];
     for expected in &expected_top {
         if !crate_dir_names.iter().any(|n| n == expected) {
-            results.push(CheckResult {
-                id: "R-ARCH-01".to_owned(),
-                severity: Severity::Error,
-                title: format!("Service `{name}` missing {label_prefix}/{expected}/ directory"),
-                message: format!(
+            results.push(CheckResult::from_parts(
+    "R-ARCH-01".to_owned(),
+    Severity::Error,
+    format!("Service `{name}` missing {label_prefix}/{expected}/ directory"),
+    format!(
                     "Service `{name}` is missing `{label_prefix}/{expected}/`. Create it and add a \
                      `.gitkeep` if not needed yet."
                 ),
-                file: Some(crates_dir.display().to_string()),
-                line: None,
-                inventory: false,
+    Some(crates_dir.display().to_string()),
+    None,
+    false,
             });
         }
     }
@@ -133,20 +133,20 @@ fn check_crates_dir(
 
     for dir_name in &crate_dir_names {
         if !expected_top.contains(&dir_name.as_str()) {
-            results.push(CheckResult {
-                id: "R-ARCH-01".to_owned(),
-                severity: Severity::Error,
-                title: format!(
+            results.push(CheckResult::from_parts(
+    "R-ARCH-01".to_owned(),
+    Severity::Error,
+    format!(
                     "Service `{name}` has unexpected directory {label_prefix}/{dir_name}/"
                 ),
-                message: format!(
+    format!(
                     "Service `{name}` has `{label_prefix}/{dir_name}/` which is not part of the hex \
                      arch template. Only `{{adapters, app, domain, ports}}` directories are \
                      allowed in `{label_prefix}/`."
                 ),
-                file: Some(crates_dir.join(dir_name).display().to_string()),
-                line: None,
-                inventory: false,
+    Some(crates_dir.join(dir_name).display().to_string()),
+    None,
+    false,
             });
         }
     }
@@ -167,8 +167,8 @@ fn check_crates_dir(
             let label = format!("{label_prefix}/{parent}/{child}");
             validate_container_folder(fs, name, &path, &label, results);
         }
-    }
-}
+    },
+)
 
 /// Check that a structural dir contains exactly {inbound, outbound}.
 fn check_inbound_outbound(
@@ -187,20 +187,20 @@ fn check_inbound_outbound(
     let dir_names = list_dir_names(fs, dir);
     for expected in &["inbound", "outbound"] {
         if !dir_names.iter().any(|n| n == expected) {
-            results.push(CheckResult {
-                id: "R-ARCH-01".to_owned(),
-                severity: Severity::Error,
-                title: format!(
+            results.push(CheckResult::from_parts(
+    "R-ARCH-01".to_owned(),
+    Severity::Error,
+    format!(
                     "Service `{name}` missing {layer}/{expected}/ directory"
                 ),
-                message: format!(
+    format!(
                     "Service `{name}` is missing `{layer}/{expected}/`. \
                      Create it and add a `.gitkeep` if not needed yet."
                 ),
-                file: Some(dir.display().to_string()),
-                line: None,
-                inventory: false,
-            });
+    Some(dir.display().to_string()),
+    None,
+    false,
+            ));
         }
     }
 
@@ -226,8 +226,8 @@ fn check_inbound_outbound(
     }
 
     // Check for loose files (not .gitkeep) in structural dirs
-    check_loose_files(fs, name, dir, layer, results);
-}
+    check_loose_files(fs, name, dir, layer, results);,
+)
 
 /// Validate a container folder: must have `.gitkeep` or at least one crate subdir.
 fn validate_container_folder(
@@ -271,19 +271,19 @@ fn validate_container_folder(
                 files.join(", ")
             )
         };
-        results.push(CheckResult {
-            id: "R-ARCH-01".to_owned(),
-            severity: Severity::Error,
-            title: format!("Service `{name}` empty container {label}/"),
-            message: format!(
+        results.push(CheckResult::from_parts(
+    "R-ARCH-01".to_owned(),
+    Severity::Error,
+    format!("Service `{name}` empty container {label}/"),
+    format!(
                 "Service `{name}` container `{label}/` {detail}. \
                  Each subdirectory must be a crate with its own `Cargo.toml`, \
                  or add a `.gitkeep` if this layer is not needed yet."
             ),
-            file: Some(dir.display().to_string()),
-            line: None,
-            inventory: false,
-        });
+    Some(dir.display().to_string()),
+    None,
+    false,
+        ));
         // Don't return — still check for loose files below
     }
 
@@ -319,8 +319,8 @@ fn validate_container_folder(
     }
 
     // Check for loose files (only .gitkeep is allowed)
-    check_loose_files(fs, name, dir, label, results);
-}
+    check_loose_files(fs, name, dir, label, results);,
+)
 
 /// Report loose files in a directory (only `.gitkeep` is allowed).
 fn check_loose_files(
@@ -344,24 +344,23 @@ fn check_loose_files(
     }
 
     if !bad_files.is_empty() {
-        results.push(CheckResult {
-            id: "R-ARCH-01".to_owned(),
-            severity: Severity::Error,
-            title: format!(
+        results.push(CheckResult::from_parts(
+    "R-ARCH-01".to_owned(),
+    Severity::Error,
+    format!(
                 "Service `{name}` has loose files in {label}/"
             ),
-            message: format!(
+    format!(
                 "Service `{name}` has files in `{label}/` that don't belong: {}. \
                  Only `.gitkeep` is allowed in structural/container directories. \
                  Move code into crate subdirectories.",
                 bad_files.join(", ")
             ),
-            file: Some(dir.display().to_string()),
-            line: None,
-            inventory: false,
-        });
+    Some(dir.display().to_string()),
+    None,
+    false,
+        ));
     }
-}
 
 /// List subdirectory names in a directory.
 fn list_dir_names(fs: &dyn FileSystem, dir: &Path) -> Vec<String> {
@@ -375,10 +374,10 @@ fn list_dir_names(fs: &dyn FileSystem, dir: &Path) -> Vec<String> {
             names.push(entry.file_name().to_string_lossy().into_owned());
         }
     }
-    names
-}
+    names,
+)
 
 /// Check if a directory contains a `.gitkeep` file.
 fn has_gitkeep(fs: &dyn FileSystem, dir: &Path) -> bool {
-    fs.read_file(&dir.join(".gitkeep")).is_some()
-}
+    fs.read_file(&dir.join(".gitkeep")).is_some(),
+)

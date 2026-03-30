@@ -24,15 +24,15 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
     let mut malformed_count = 0usize;
     for malformed in &section.malformed_messages {
         malformed_count += 1;
-        results.push(CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Error,
-            title: "disallowed-types section malformed".to_owned(),
-            message: malformed.clone(),
-            file: Some(input.config.rel_path.clone()),
-            line: None,
-            inventory: false,
-        });
+        results.push(CheckResult::from_parts(
+            ID.to_owned(),
+            Severity::Error,
+            "disallowed-types section malformed".to_owned(),
+            malformed.clone(),
+            Some(input.config.rel_path.clone()),
+            None,
+            false,
+        ));
     }
 
     let found: BTreeSet<_> = section
@@ -44,29 +44,29 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
     for expected in EXPECTED_LIBRARY_GLOBAL_STATE_TYPES {
         if !found.contains(*expected) {
             missing_count += 1;
-            results.push(CheckResult {
-                id: ID.to_owned(),
-                severity: Severity::Error,
-                title: "library clippy.toml missing global-state type ban".to_owned(),
-                message: format!("Library profile must ban `{expected}` in `disallowed-types`."),
-                file: Some(input.config.rel_path.clone()),
-                line: None,
-                inventory: false,
-            });
+            results.push(CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Error,
+                "library clippy.toml missing global-state type ban".to_owned(),
+                format!("Library profile must ban `{expected}` in `disallowed-types`."),
+                Some(input.config.rel_path.clone()),
+                None,
+                false,
+            ));
         }
     }
 
     if malformed_count == 0 && missing_count == 0 {
         results.push(
-            CheckResult {
-                id: ID.to_owned(),
-                severity: Severity::Info,
-                title: "library global-state bans present".to_owned(),
-                message: "Library profile includes all managed global-state type bans.".to_owned(),
-                file: Some(input.config.rel_path.clone()),
-                line: None,
-                inventory: false,
-            }
+            CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Info,
+                "library global-state bans present".to_owned(),
+                "Library profile includes all managed global-state type bans.".to_owned(),
+                Some(input.config.rel_path.clone()),
+                None,
+                false,
+            )
             .as_inventory(),
         );
     }

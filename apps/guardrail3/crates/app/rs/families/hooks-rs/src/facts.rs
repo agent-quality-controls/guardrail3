@@ -2,8 +2,8 @@ use guardrail3_domain_project_tree::ProjectTree;
 
 #[derive(Debug, Clone)]
 pub struct RustHookFacts {
-    pub pre_commit_rel_path: Option<String>,
-    pub pre_commit_content: Option<String>,
+    pub(crate) pre_commit_rel_path: Option<String>,
+    pub(crate) pre_commit_content: Option<String>,
 }
 
 pub fn collect(tree: &ProjectTree) -> RustHookFacts {

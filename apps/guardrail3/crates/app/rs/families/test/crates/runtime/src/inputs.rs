@@ -7,11 +7,11 @@ use super::facts::{
 use super::parse::{CfgTestModuleInfo, ParsedTestFile, TestFunctionInfo};
 
 pub struct RootTestInput<'a> {
-    pub root: &'a TestRootFacts,
-    pub has_tests: bool,
-    pub has_tokio_tests: bool,
-    pub cargo_mutants_installed: bool,
-    pub mutation_hook_files: &'a [String],
+    pub(crate) root: &'a TestRootFacts,
+    pub(crate) has_tests: bool,
+    pub(crate) has_tokio_tests: bool,
+    pub(crate) cargo_mutants_installed: bool,
+    pub(crate) mutation_hook_files: &'a [String],
 }
 
 impl<'a> RootTestInput<'a> {
@@ -33,8 +33,8 @@ impl<'a> RootTestInput<'a> {
 }
 
 pub struct TestFileInput<'a> {
-    pub file: &'a DiscoveredTestFile,
-    pub parsed: &'a ParsedTestFile,
+    pub(crate) file: &'a DiscoveredTestFile,
+    pub(crate) parsed: &'a ParsedTestFile,
 }
 
 impl<'a> TestFileInput<'a> {
@@ -44,10 +44,10 @@ impl<'a> TestFileInput<'a> {
 }
 
 pub struct TestFunctionInput<'a> {
-    pub file: &'a DiscoveredTestFile,
-    pub parsed: &'a ParsedTestFile,
-    pub function: &'a TestFunctionInfo,
-    pub proof_bearing_assertion_functions: Option<&'a BTreeSet<String>>,
+    pub(crate) file: &'a DiscoveredTestFile,
+    pub(crate) parsed: &'a ParsedTestFile,
+    pub(crate) function: &'a TestFunctionInfo,
+    pub(crate) proof_bearing_assertion_functions: Option<&'a BTreeSet<String>>,
 }
 
 impl<'a> TestFunctionInput<'a> {
@@ -67,8 +67,8 @@ impl<'a> TestFunctionInput<'a> {
 }
 
 pub struct CfgTestModuleInput<'a> {
-    pub file: &'a DiscoveredTestFile,
-    pub module: &'a CfgTestModuleInfo,
+    pub(crate) file: &'a DiscoveredTestFile,
+    pub(crate) module: &'a CfgTestModuleInfo,
 }
 
 impl<'a> CfgTestModuleInput<'a> {
@@ -78,7 +78,7 @@ impl<'a> CfgTestModuleInput<'a> {
 }
 
 pub struct InputFailureTestInput<'a> {
-    pub failure: &'a InputFailureFacts,
+    pub(crate) failure: &'a InputFailureFacts,
 }
 
 impl<'a> InputFailureTestInput<'a> {
@@ -88,7 +88,7 @@ impl<'a> InputFailureTestInput<'a> {
 }
 
 pub struct SidecarViolationInput<'a> {
-    pub violation: &'a SidecarViolation,
+    pub(crate) violation: &'a SidecarViolation,
 }
 
 impl<'a> SidecarViolationInput<'a> {
@@ -98,7 +98,7 @@ impl<'a> SidecarViolationInput<'a> {
 }
 
 pub struct RuntimeAssertionsViolationInput<'a> {
-    pub violation: &'a RuntimeAssertionsViolation,
+    pub(crate) violation: &'a RuntimeAssertionsViolation,
 }
 
 impl<'a> RuntimeAssertionsViolationInput<'a> {
@@ -108,9 +108,9 @@ impl<'a> RuntimeAssertionsViolationInput<'a> {
 }
 
 pub struct AssertionsModuleInput<'a> {
-    pub file: &'a DiscoveredTestFile,
-    pub parsed: &'a ParsedTestFile,
-    pub proof_bearing_exported_functions: &'a BTreeSet<String>,
+    pub(crate) file: &'a DiscoveredTestFile,
+    pub(crate) parsed: &'a ParsedTestFile,
+    pub(crate) proof_bearing_exported_functions: &'a BTreeSet<String>,
 }
 
 impl<'a> AssertionsModuleInput<'a> {
@@ -128,10 +128,10 @@ impl<'a> AssertionsModuleInput<'a> {
 }
 
 pub struct TestSupportFileInput<'a> {
-    pub file: &'a DiscoveredTestFile,
-    pub parsed: &'a ParsedTestFile,
-    pub local_runtime_packages: &'a BTreeSet<String>,
-    pub local_assertions_packages: &'a BTreeSet<String>,
+    pub(crate) file: &'a DiscoveredTestFile,
+    pub(crate) parsed: &'a ParsedTestFile,
+    pub(crate) local_runtime_packages: &'a BTreeSet<String>,
+    pub(crate) local_assertions_packages: &'a BTreeSet<String>,
 }
 
 impl<'a> TestSupportFileInput<'a> {

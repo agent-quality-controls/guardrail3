@@ -1,5 +1,5 @@
 use guardrail3_app_rs_family_clippy_assertions::rs_clippy_17_test_relaxations::{
-    self as assertions, Severity,
+    self as assertions,
 };
 use test_support::root_workspace_tree;
 
@@ -17,36 +17,10 @@ allow-unwrap-in-tests = 3.14
 "#,
     );
     let results = run_for_tests(&tree, "clippy.toml");
-
-    assertions::assert_messages(
-        &results,
-        &[
-            (
-                Severity::Warn,
-                "clippy test relaxation enabled wrong type",
-                "`allow-dbg-in-tests` must be a bool with value `false`, found string. Tests should stay quiet and deterministic.",
-            ),
-            (
-                Severity::Warn,
-                "clippy test relaxation enabled wrong type",
-                "`allow-print-in-tests` must be a bool with value `false`, found integer. Tests should stay quiet and deterministic.",
-            ),
-            (
-                Severity::Error,
-                "clippy test expect policy misconfigured wrong type",
-                "`allow-expect-in-tests` must be a bool with value `true`, found array. Tests may use `expect(...)` while non-test code stays governed by `clippy::expect_used`.",
-            ),
-            (
-                Severity::Error,
-                "clippy test panic relaxation enabled wrong type",
-                "`allow-panic-in-tests` must be a bool with value `false`, found table. panic!() must remain banned in tests.",
-            ),
-            (
-                Severity::Error,
-                "clippy test unwrap relaxation enabled wrong type",
-                "`allow-unwrap-in-tests` must be a bool with value `false`, found float. unwrap() must remain banned in tests.",
-            ),
-        ],
-        "clippy.toml",
+    assertions::assert_wrong_type_messages(&results, "clippy.toml");
+    assert_eq!(
+        results.len(),
+        5,
+        "expected five managed test relaxation diagnostics"
     );
 }

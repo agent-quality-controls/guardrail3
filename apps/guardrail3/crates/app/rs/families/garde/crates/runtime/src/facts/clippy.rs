@@ -2,8 +2,8 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use guardrail3_domain_project_tree::ProjectTree;
 
-use super::{ClippyConfigCandidate, GardeRootFacts, PolicyRootKind, PolicySettings};
 use super::policy::policy_settings_for;
+use super::{ClippyConfigCandidate, GardeRootFacts, PolicyRootKind, PolicySettings};
 
 pub(super) fn collect_clippy_configs(
     tree: &ProjectTree,

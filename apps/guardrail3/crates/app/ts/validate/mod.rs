@@ -1,22 +1,42 @@
+#[path = "source/ast_helpers.rs"]
 pub mod ast_helpers;
+#[path = "packages/config_files.rs"]
 pub mod config_files;
+#[path = "eslint/eslint_audit.rs"]
 pub mod eslint_audit;
+#[path = "eslint/eslint_check.rs"]
 mod eslint_check;
+#[path = "eslint/eslint_parser.rs"]
 pub mod eslint_parser;
+#[path = "eslint/eslint_plugin_checks.rs"]
 mod eslint_plugin_checks;
+#[path = "eslint/eslint_rule_infra.rs"]
 mod eslint_rule_infra;
+#[path = "packages/i18n_check.rs"]
 pub mod i18n_check;
+#[path = "packages/jscpd_check.rs"]
 mod jscpd_check;
+#[path = "packages/npmrc_check.rs"]
 mod npmrc_check;
+#[path = "packages/package_check.rs"]
 mod package_check;
+#[path = "packages/package_deps.rs"]
 mod package_deps;
+#[path = "source/source_scan.rs"]
 pub mod source_scan;
+#[path = "packages/stylelint_check.rs"]
 mod stylelint_check;
+#[path = "source/test_checks.rs"]
 pub mod test_checks;
+#[path = "packages/tool_config_checks.rs"]
 mod tool_config_checks;
+#[path = "architecture/ts_arch_checks.rs"]
 pub mod ts_arch_checks;
+#[path = "source/ts_code_analysis.rs"]
 pub mod ts_code_analysis;
+#[path = "source/ts_comment_checks.rs"]
 pub mod ts_comment_checks;
+#[path = "packages/tsconfig_check.rs"]
 mod tsconfig_check;
 
 use std::path::Path;
@@ -39,10 +59,7 @@ pub fn run(
 
     // Config file checks
     let config_results = config_files::check(fs, path, crawl);
-    report.add_section(Section {
-        name: "TS config files".to_owned(),
-        results: config_results,
-    });
+    report.add_section(Section::new("TS config files".to_owned(), config_results));
 
     // ESLint plugin configuration (core — always run)
     // Parse the first eslint config once and reuse for all plugin checks
@@ -57,10 +74,10 @@ pub fn run(
     if let Some((ref eslint_path, ref eslint_cfg)) = parsed_eslint {
         let mut plugin_results = Vec::new();
         eslint_plugin_checks::check_core_plugins(eslint_cfg, eslint_path, &mut plugin_results);
-        report.add_section(Section {
-            name: "ESLint plugin configuration".to_owned(),
-            results: plugin_results,
-        });
+        report.add_section(Section::new(
+            "ESLint plugin configuration".to_owned(),
+            plugin_results,
+        ));
     }
 
     // Plugin packages in devDependencies
@@ -74,10 +91,7 @@ pub fn run(
         &mut plug_results,
     );
     if !plug_results.is_empty() {
-        report.add_section(Section {
-            name: "Lint plugin packages".to_owned(),
-            results: plug_results,
-        });
+        report.add_section(Section::new("Lint plugin packages".to_owned(), plug_results));
     }
 
     // Additional tool packages (T-TOOL-01..06)
@@ -90,20 +104,17 @@ pub fn run(
         &mut tool_pkg_results,
     );
     if !tool_pkg_results.is_empty() {
-        report.add_section(Section {
-            name: "Additional tool packages".to_owned(),
-            results: tool_pkg_results,
-        });
+        report.add_section(Section::new(
+            "Additional tool packages".to_owned(),
+            tool_pkg_results,
+        ));
     }
 
     // Tool configurations and scripts (T-TOOL-07..11)
     let mut tool_cfg_results = Vec::new();
     tool_config_checks::check_tool_configs(fs, path, content_enabled, &mut tool_cfg_results);
     if !tool_cfg_results.is_empty() {
-        report.add_section(Section {
-            name: "Tool configuration".to_owned(),
-            results: tool_cfg_results,
-        });
+        report.add_section(Section::new("Tool configuration".to_owned(), tool_cfg_results));
     }
 
     // Content-profile checks (only if project has content-type apps)
@@ -116,48 +127,42 @@ pub fn run(
                 eslint_path,
                 &mut content_plugin_results,
             );
-            report.add_section(Section {
-                name: "Content profile: ESLint accessibility".to_owned(),
-                results: content_plugin_results,
-            });
+            report.add_section(Section::new(
+                "Content profile: ESLint accessibility".to_owned(),
+                content_plugin_results,
+            ));
         }
 
         // Stylelint (T-STYL-01..05)
         let mut styl_results = Vec::new();
         stylelint_check::check_stylelint(fs, path, &mut styl_results);
-        report.add_section(Section {
-            name: "Content profile: Stylelint + a11y".to_owned(),
-            results: styl_results,
-        });
+        report.add_section(Section::new(
+            "Content profile: Stylelint + a11y".to_owned(),
+            styl_results,
+        ));
 
         // i18n completeness (T-TOOL-12) — content profile
         let mut i18n_results = Vec::new();
         i18n_check::check_i18n(fs, path, &mut i18n_results);
         if !i18n_results.is_empty() {
-            report.add_section(Section {
-                name: "Content profile: i18n completeness".to_owned(),
-                results: i18n_results,
-            });
+            report.add_section(Section::new(
+                "Content profile: i18n completeness".to_owned(),
+                i18n_results,
+            ));
         }
     }
 
     // Source code scan (respects scope flags)
     let source_results = source_scan::check(fs, path, scoped_files);
-    report.add_section(Section {
-        name: "TS source code scan".to_owned(),
-        results: source_results,
-    });
+    report.add_section(Section::new("TS source code scan".to_owned(), source_results));
 
-    if categories.architecture {
+    if categories.architecture() {
         // Discover apps and resolve per-app context
         let app_contexts = resolve_app_contexts(fs, path, categories, config);
 
         // ESLint boundary audit (global, not per-app)
         let eslint_results = eslint_audit::check(fs, path);
-        report.add_section(Section {
-            name: "ESLint boundary audit".to_owned(),
-            results: eslint_results,
-        });
+        report.add_section(Section::new("ESLint boundary audit".to_owned(), eslint_results));
 
         // Per-app arch checks (only on service-type apps)
         let arch_structure = ts_arch_checks::check_hex_arch_structure_for_apps(fs, &app_contexts);
@@ -165,20 +170,14 @@ pub fn run(
         let mut arch_results = arch_structure;
         arch_results.extend(arch_imports);
         if !arch_results.is_empty() {
-            report.add_section(Section {
-                name: "TS architecture".to_owned(),
-                results: arch_results,
-            });
+            report.add_section(Section::new("TS architecture".to_owned(), arch_results));
         }
     }
 
-    if categories.tests {
+    if categories.tests() {
         // Test quality checks
         let test_results = test_checks::check(fs, path);
-        report.add_section(Section {
-            name: "TS test quality".to_owned(),
-            results: test_results,
-        });
+        report.add_section(Section::new("TS test quality".to_owned(), test_results));
     }
 
     report
@@ -189,18 +188,18 @@ pub fn run(
 /// finds content signals in any discovered app.
 fn has_content_app(fs: &dyn FileSystem, root: &Path, config: Option<&GuardrailConfig>) -> bool {
     // Check explicit config first
-    if let Some(ts) = config.and_then(|c| c.typescript.as_ref()) {
+    if let Some(ts) = config.and_then(GuardrailConfig::typescript) {
         // Check global content setting
-        if let Some(checks) = &ts.checks {
-            if checks.content == Some(true) {
+        if let Some(checks) = ts.checks() {
+            if checks.content() == Some(true) {
                 return true;
             }
         }
 
         // Check per-app types
-        if let Some(apps) = &ts.apps {
+        if let Some(apps) = ts.apps() {
             for app_cfg in apps.values() {
-                if let Some(t) = &app_cfg.type_ {
+                if let Some(t) = app_cfg.type_() {
                     if t.eq_ignore_ascii_case("content") {
                         return true;
                     }
@@ -299,8 +298,8 @@ fn resolve_app_contexts(
 ) -> Vec<TsAppContext> {
     let discovered = ts_arch_checks::discover_ts_apps(fs, root);
     let app_configs = config
-        .and_then(|c| c.typescript.as_ref())
-        .and_then(|t| t.apps.as_ref());
+        .and_then(GuardrailConfig::typescript)
+        .and_then(|typescript| typescript.apps());
 
     discovered
         .into_iter()
@@ -316,29 +315,24 @@ fn resolve_app_contexts(
 
             // Resolve type: config > auto-detect > default (service)
             let app_type = app_cfg
-                .and_then(|c| c.type_.as_deref())
+                .and_then(|config| config.type_())
                 .map(TsAppType::from_str_or_default)
                 .or_else(|| auto_detect_app_type(fs, &app_path))
                 .unwrap_or(TsAppType::Service);
 
             // Resolve categories: type defaults > per-app overrides
             let type_defaults = app_type.default_categories();
-            let categories = if let Some(checks) = app_cfg.and_then(|c| c.checks.as_ref()) {
-                TsCheckCategories {
-                    architecture: checks.architecture.unwrap_or(type_defaults.architecture),
-                    content: checks.content.unwrap_or(type_defaults.content),
-                    tests: checks.tests.unwrap_or(type_defaults.tests),
-                }
+            let categories = if let Some(checks) = app_cfg.and_then(|config| config.checks()) {
+                TsCheckCategories::new(
+                    checks.architecture().unwrap_or(type_defaults.architecture()),
+                    checks.content().unwrap_or(type_defaults.content()),
+                    checks.tests().unwrap_or(type_defaults.tests()),
+                )
             } else {
                 type_defaults
             };
 
-            TsAppContext {
-                name,
-                path: app_path,
-                app_type,
-                categories,
-            }
+            TsAppContext::new(name, app_path, app_type, categories)
         })
         .collect()
 }

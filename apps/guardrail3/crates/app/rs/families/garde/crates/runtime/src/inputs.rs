@@ -1,30 +1,34 @@
 use super::facts::{
     BoundaryFieldFacts, DerivedBoundaryTypeFacts, GardeInputFailureFacts, GardeRootFacts,
-    ManualDeserializeImplFacts, QueryAsMacroFacts,
+    GuardrailConfigValidationFacts, ManualDeserializeImplFacts, QueryAsMacroFacts,
 };
 
 pub struct GardeRootInput<'a> {
-    pub root: &'a GardeRootFacts,
+    pub(crate) root: &'a GardeRootFacts,
 }
 
 pub struct DerivedBoundaryTypeInput<'a> {
-    pub target: &'a DerivedBoundaryTypeFacts,
+    pub(crate) target: &'a DerivedBoundaryTypeFacts,
 }
 
 pub struct ManualDeserializeImplInput<'a> {
-    pub target: &'a ManualDeserializeImplFacts,
+    pub(crate) target: &'a ManualDeserializeImplFacts,
 }
 
 pub struct QueryAsMacroInput<'a> {
-    pub macro_use: &'a QueryAsMacroFacts,
+    pub(crate) macro_use: &'a QueryAsMacroFacts,
 }
 
 pub struct BoundaryFieldInput<'a> {
-    pub field: &'a BoundaryFieldFacts,
+    pub(crate) field: &'a BoundaryFieldFacts,
 }
 
 pub struct GardeInputFailureInput<'a> {
-    pub failure: &'a GardeInputFailureFacts,
+    pub(crate) failure: &'a GardeInputFailureFacts,
+}
+
+pub struct GuardrailConfigValidationInput<'a> {
+    pub(crate) site: &'a GuardrailConfigValidationFacts,
 }
 
 impl<'a> GardeRootInput<'a> {
@@ -60,5 +64,11 @@ impl<'a> BoundaryFieldInput<'a> {
 impl<'a> GardeInputFailureInput<'a> {
     pub const fn new(failure: &'a GardeInputFailureFacts) -> Self {
         Self { failure }
+    }
+}
+
+impl<'a> GuardrailConfigValidationInput<'a> {
+    pub const fn new(site: &'a GuardrailConfigValidationFacts) -> Self {
+        Self { site }
     }
 }

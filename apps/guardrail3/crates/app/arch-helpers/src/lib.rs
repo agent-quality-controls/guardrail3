@@ -81,22 +81,21 @@ pub fn check_loose_files(
     }
 
     if !bad_files.is_empty() {
-        results.push(CheckResult {
-            id: id.to_owned(),
-            severity: Severity::Error,
-            title: format!("{entity} `{name}` has loose files in {label}/"),
-            message: format!(
+        results.push(CheckResult::from_parts(
+    id.to_owned(),
+    Severity::Error,
+    format!("{entity} `{name}` has loose files in {label}/"),
+    format!(
                 "{entity} `{name}` has files in `{label}/` that don't belong: {}. \
                  Only `.gitkeep` is allowed in structural/container directories. \
                  Move code into module subdirectories.",
                 bad_files.join(", ")
             ),
-            file: Some(dir.display().to_string()),
-            line: None,
-            inventory: false,
-        });
+    Some(dir.display().to_string()),
+    None,
+    false,
+        ));
     }
-}
 
 /// Check that a structural directory contains exactly the expected subdirectories.
 ///
@@ -115,18 +114,18 @@ pub fn check_exact_subdirs(
 
     for exp in expected {
         if !dir_names.iter().any(|n| n == exp) {
-            results.push(CheckResult {
-                id: id.to_owned(),
-                severity: Severity::Error,
-                title: format!("{entity} `{name}` missing {label}/{exp}/ directory"),
-                message: format!(
+            results.push(CheckResult::from_parts(
+    id.to_owned(),
+    Severity::Error,
+    format!("{entity} `{name}` missing {label}/{exp}/ directory"),
+    format!(
                     "{entity} `{name}` is missing `{label}/{exp}/`. \
                      Create it and add a `.gitkeep` if not needed yet."
                 ),
-                file: Some(dir.display().to_string()),
-                line: None,
-                inventory: false,
-            });
+    Some(dir.display().to_string()),
+    None,
+    false,
+            ));
         }
     }
 
@@ -148,8 +147,8 @@ pub fn check_exact_subdirs(
         }
     }
 
-    check_loose_files(fs, name, dir, label, id, entity, results);
-}
+    check_loose_files(fs, name, dir, label, id, entity, results);,
+)
 
 /// Check that a container is not empty (must have subdirs or .gitkeep).
 /// Also calls `check_loose_files` on the container when it has subdirs.
@@ -186,20 +185,20 @@ pub fn check_container_not_empty(
                 files.join(", ")
             )
         };
-        results.push(CheckResult {
-            id: id.to_owned(),
-            severity: Severity::Error,
-            title: format!("{entity} `{name}` empty container {label}/"),
-            message: format!(
+        results.push(CheckResult::from_parts(
+    id.to_owned(),
+    Severity::Error,
+    format!("{entity} `{name}` empty container {label}/"),
+    format!(
                 "{entity} `{name}` container `{label}/` {detail}. \
                  Add module subdirectories or a `.gitkeep` if this layer is not needed yet."
             ),
-            file: Some(dir.display().to_string()),
-            line: None,
-            inventory: false,
-        });
+    Some(dir.display().to_string()),
+    None,
+    false,
+        ));
         return;
     }
 
-    check_loose_files(fs, name, dir, label, id, entity, results);
-}
+    check_loose_files(fs, name, dir, label, id, entity, results);,
+)

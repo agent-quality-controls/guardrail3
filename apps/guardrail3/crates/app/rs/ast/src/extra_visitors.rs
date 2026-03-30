@@ -20,10 +20,15 @@ impl InlineStdFsVisitor {
     /// or `std::fs::File::open`. Accepts ALL paths with 3+ segments starting with
     /// `std::fs`. Type-path concerns are moot because `visit_expr_path` and
     /// `visit_expr_call` only fire on expression paths, not type paths.
-    #[allow(clippy::indexing_slicing)] // reason: length checked >= 3 before indexing [0], [1]
     fn path_is_std_fs_call(path: &syn::Path) -> bool {
-        let segs: Vec<_> = path.segments.iter().map(|s| s.ident.to_string()).collect();
-        segs.len() >= 3 && segs[0] == "std" && segs[1] == "fs"
+        let mut segs = path
+            .segments
+            .iter()
+            .map(|segment| segment.ident.to_string());
+        matches!(
+            (segs.next().as_deref(), segs.next().as_deref(), segs.next()),
+            (Some("std"), Some("fs"), Some(_))
+        )
     }
 }
 

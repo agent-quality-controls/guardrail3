@@ -1,4 +1,4 @@
-mod clippy_support;
+pub mod clippy_support;
 mod facts;
 mod inputs;
 mod rs_clippy_01_coverage;
@@ -36,8 +36,6 @@ use self::inputs::{
     CargoConfigOverrideInput, CargoRootFailureInput, ConfigClippyInput, CoveredRustUnitInput,
     PolicyContextFailureInput, UncoveredRustUnitInput,
 };
-
-pub use self::clippy_support::{EXPECTED_METHOD_BANS, EXPECTED_TYPE_BANS};
 
 #[cfg(test)]
 use guardrail3_app_rs_family_clippy_assertions as _;

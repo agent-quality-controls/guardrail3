@@ -79,6 +79,7 @@ RUST VALIDATION FAMILIES
   cargo
   code
   hexarch
+  libarch
   deps
   garde
   test
@@ -106,6 +107,7 @@ CONFIG
   cargo = true
   code = true
   hexarch = true
+  libarch = true
   deps = true
   garde = true
   test = true
@@ -184,6 +186,7 @@ deny
 cargo
 code
 hexarch
+libarch
 deps
 garde
 test

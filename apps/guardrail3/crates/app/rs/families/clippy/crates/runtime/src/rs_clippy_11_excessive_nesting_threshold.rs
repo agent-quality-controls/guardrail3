@@ -16,47 +16,47 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
 
     match integer_setting(parsed, KEY) {
         IntegerSetting::Value(actual) if actual == EXCESSIVE_NESTING_THRESHOLD => results.push(
-            CheckResult {
-                id: ID.to_owned(),
-                severity: Severity::Info,
-                title: format!("{KEY} correct"),
-                message: format!("{KEY} = {EXCESSIVE_NESTING_THRESHOLD}"),
-                file: Some(input.config.rel_path.clone()),
-                line: None,
-                inventory: false,
-            }
+            CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Info,
+                format!("{KEY} correct"),
+                format!("{KEY} = {EXCESSIVE_NESTING_THRESHOLD}"),
+                Some(input.config.rel_path.clone()),
+                None,
+                false,
+            )
             .as_inventory(),
         ),
-        IntegerSetting::Value(actual) => results.push(CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Error,
-            title: format!("{KEY} wrong value"),
-            message: format!("Expected {EXCESSIVE_NESTING_THRESHOLD}, got {actual}."),
-            file: Some(input.config.rel_path.clone()),
-            line: None,
-            inventory: false,
-        }),
-        IntegerSetting::WrongType(value) => results.push(CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Error,
-            title: format!("{KEY} wrong type"),
-            message: format!(
+        IntegerSetting::Value(actual) => results.push(CheckResult::from_parts(
+            ID.to_owned(),
+            Severity::Error,
+            format!("{KEY} wrong value"),
+            format!("Expected {EXCESSIVE_NESTING_THRESHOLD}, got {actual}."),
+            Some(input.config.rel_path.clone()),
+            None,
+            false,
+        )),
+        IntegerSetting::WrongType(value) => results.push(CheckResult::from_parts(
+            ID.to_owned(),
+            Severity::Error,
+            format!("{KEY} wrong type"),
+            format!(
                 "Expected integer `{KEY} = {EXCESSIVE_NESTING_THRESHOLD}`, found {}.",
                 value_kind(value)
             ),
-            file: Some(input.config.rel_path.clone()),
-            line: None,
-            inventory: false,
-        }),
-        IntegerSetting::Missing => results.push(CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Error,
-            title: format!("{KEY} missing"),
-            message: format!("Expected {KEY} = {EXCESSIVE_NESTING_THRESHOLD}."),
-            file: Some(input.config.rel_path.clone()),
-            line: None,
-            inventory: false,
-        }),
+            Some(input.config.rel_path.clone()),
+            None,
+            false,
+        )),
+        IntegerSetting::Missing => results.push(CheckResult::from_parts(
+            ID.to_owned(),
+            Severity::Error,
+            format!("{KEY} missing"),
+            format!("Expected {KEY} = {EXCESSIVE_NESTING_THRESHOLD}."),
+            Some(input.config.rel_path.clone()),
+            None,
+            false,
+        )),
     }
 }
 

@@ -41,42 +41,40 @@ pub fn check(input: &RustfmtRootInput, results: &mut Vec<CheckResult>) {
     match &input.toolchain_channel {
         ToolchainChannelState::Present(channel) if channel == "stable" => {
             for key in nightly_keys {
-                results.push(CheckResult {
-                    id: ID.to_owned(),
-                    severity: Severity::Warn,
-                    title: format!("nightly-only rustfmt setting `{key}` on stable"),
-                    message: format!(
+                results.push(CheckResult::from_parts(
+                    ID.to_owned(),
+                    Severity::Warn,
+                    format!("nightly-only rustfmt setting `{key}` on stable"),
+                    format!(
                         "`{key}` is nightly-only, but rust-toolchain.toml uses `stable`."
                     ),
-                    file: Some(rel.to_owned()),
-                    line: None,
-                    inventory: false,
-                });
+                    Some(rel.to_owned()),
+                    None,
+                    false,
+                ));
             }
         }
         ToolchainChannelState::Present(_) => {}
-        ToolchainChannelState::MissingManifest => results.push(CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Error,
-            title: "rust-toolchain.toml missing".to_owned(),
-            message:
-                "Nightly-only rustfmt settings require a root rust-toolchain.toml to prove the channel."
-                    .to_owned(),
-            file: Some("rust-toolchain.toml".to_owned()),
-            line: None,
-            inventory: false,
-        }),
-        ToolchainChannelState::ParseError => results.push(CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Error,
-            title: "rust-toolchain.toml parse error".to_owned(),
-            message:
-                "Nightly-only rustfmt settings require a parseable root rust-toolchain.toml."
-                    .to_owned(),
-            file: Some("rust-toolchain.toml".to_owned()),
-            line: None,
-            inventory: false,
-        }),
+        ToolchainChannelState::MissingManifest => results.push(CheckResult::from_parts(
+            ID.to_owned(),
+            Severity::Error,
+            "rust-toolchain.toml missing".to_owned(),
+            "Nightly-only rustfmt settings require a root rust-toolchain.toml to prove the channel."
+                .to_owned(),
+            Some("rust-toolchain.toml".to_owned()),
+            None,
+            false,
+        )),
+        ToolchainChannelState::ParseError => results.push(CheckResult::from_parts(
+            ID.to_owned(),
+            Severity::Error,
+            "rust-toolchain.toml parse error".to_owned(),
+            "Nightly-only rustfmt settings require a parseable root rust-toolchain.toml."
+                .to_owned(),
+            Some("rust-toolchain.toml".to_owned()),
+            None,
+            false,
+        )),
         ToolchainChannelState::MissingChannel => results.push(CheckResult {
             id: ID.to_owned(),
             severity: Severity::Error,

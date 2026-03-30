@@ -31,7 +31,11 @@ pub fn collect(tree: &ProjectTree, routed_roots: &[RsRootView], tc: &dyn ToolChe
     let root_dirs: Vec<String> = roots.iter().map(|root| root.rel_dir.clone()).collect();
     let local_package_names = cargo_roots
         .values()
-        .filter_map(|root| root.parsed.as_ref().and_then(components::manifest_package_name))
+        .filter_map(|root| {
+            root.parsed
+                .as_ref()
+                .and_then(components::manifest_package_name)
+        })
         .collect();
     let files = rust_file_rels(tree)
         .into_iter()
@@ -55,15 +59,15 @@ pub fn collect(tree: &ProjectTree, routed_roots: &[RsRootView], tc: &dyn ToolChe
 
 pub fn rust_file_rels(tree: &ProjectTree) -> Vec<String> {
     let mut rels: Vec<String> = tree
-        .structure
+        .structure()
         .iter()
         .flat_map(|(dir_rel, entry)| {
-            entry.files.iter().filter_map(|file_name| {
+            entry.files().iter().filter_map(|file_name| {
                 if !file_name.ends_with(".rs") {
                     return None;
                 }
                 let rel = ProjectTree::join_rel(dir_rel, file_name);
-                if is_fixture_path(&rel) {
+                if is_fixture_path(&rel) || is_generated_path(&rel) {
                     None
                 } else {
                     Some(rel)
@@ -77,6 +81,10 @@ pub fn rust_file_rels(tree: &ProjectTree) -> Vec<String> {
 
 pub fn is_fixture_path(rel_path: &str) -> bool {
     rel_path.contains("/tests/fixtures/") || rel_path.starts_with("tests/fixtures/")
+}
+
+fn is_generated_path(rel_path: &str) -> bool {
+    rel_path == "target" || rel_path.starts_with("target/") || rel_path.contains("/target/")
 }
 
 pub fn root_relative<'a>(rel_path: &'a str, root_rel_dir: &str) -> &'a str {
@@ -124,8 +132,8 @@ fn collect_cargo_roots(
     routed_roots
         .iter()
         .map(|root| {
-            let rel_dir = root.rel_dir.clone();
-            let cargo_rel_path = root.cargo_rel_path.clone();
+            let rel_dir = root.rel_dir().to_owned();
+            let cargo_rel_path = root.cargo_rel_path().to_owned();
             let parsed = match read_cached_or_fs(tree, &cargo_rel_path) {
                 Ok(Some(content)) => match toml::from_str::<toml::Value>(&content) {
                     Ok(parsed) => Some(parsed),
@@ -470,8 +478,6 @@ fn root_has_test_support_file(root: &TestRootFacts, rel_path: &str) -> bool {
         rel_path == test_support_src || path_is_under(rel_path, &test_support_src)
     })
 }
-
-
 
 fn read_cached_or_fs(tree: &ProjectTree, rel_path: &str) -> Result<Option<String>, std::io::Error> {
     if let Some(content) = tree.file_content(rel_path) {

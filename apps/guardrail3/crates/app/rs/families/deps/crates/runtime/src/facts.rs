@@ -10,25 +10,25 @@ use guardrail3_domain_config::types::CrateConfig;
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_outbound_traits::ToolChecker;
 
-use self::dependency_entries::{collect_dependency_entries, discover_members};
+use self::dependency_entries::{collect_dependency_facts, discover_members};
 use self::guardrail::parse_guardrail;
 use self::lockfiles::collect_lockfiles;
 use self::workspaces::{discover_workspaces, workspace_by_member};
 
 #[derive(Debug, Clone)]
 pub struct ToolFacts {
-    pub tool_name: String,
-    pub installed: bool,
+    pub(crate) tool_name: String,
+    pub(crate) installed: bool,
 }
 
 #[derive(Debug, Clone, Default)]
 pub struct LockfileFacts {
-    pub root_rel_dir: String,
-    pub cargo_lock_rel_path: String,
-    pub cargo_lock_exists: bool,
-    pub cargo_lock_ignored: bool,
-    pub gitignore_rel_path: Option<String>,
-    pub profile_name: Option<String>,
+    pub(crate) root_rel_dir: String,
+    pub(crate) cargo_lock_rel_path: String,
+    pub(crate) cargo_lock_exists: bool,
+    pub(crate) cargo_lock_ignored: bool,
+    pub(crate) gitignore_rel_path: Option<String>,
+    pub(crate) profile_name: Option<String>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -38,49 +38,45 @@ pub enum DependencySectionKind {
     DevDependencies,
 }
 
-impl DependencySectionKind {
-    #[must_use]
-    pub const fn label(self) -> &'static str {
-        match self {
-            Self::Dependencies => "dependencies",
-            Self::BuildDependencies => "build-dependencies",
-            Self::DevDependencies => "dev-dependencies",
-        }
-    }
-}
-
 #[derive(Debug, Clone)]
 pub struct DependencyEntryFacts {
-    pub crate_name: String,
-    pub cargo_rel_path: String,
-    pub section_kind: DependencySectionKind,
-    pub dep_alias: String,
-    pub dep_package_name: String,
-    pub allowlist_present: bool,
-    pub allowlisted: bool,
+    pub(crate) crate_name: String,
+    pub(crate) cargo_rel_path: String,
+    pub(crate) section_kind: DependencySectionKind,
+    pub(crate) dep_package_name: String,
+    pub(crate) allowlist_present: bool,
+    pub(crate) allowlisted: bool,
 }
 
 #[derive(Debug, Clone)]
 pub struct AllowlistCoverageFacts {
-    pub crate_name: String,
-    pub cargo_rel_path: String,
-    pub profile_name: Option<String>,
-    pub has_allowlist: bool,
+    pub(crate) crate_name: String,
+    pub(crate) cargo_rel_path: String,
+    pub(crate) profile_name: Option<String>,
+    pub(crate) has_allowlist: bool,
+}
+
+#[derive(Debug, Clone)]
+pub struct DirectDependencyCapFacts {
+    pub(crate) crate_name: String,
+    pub(crate) cargo_rel_path: String,
+    pub(crate) unique_direct_dependency_count: usize,
 }
 
 #[derive(Debug, Clone)]
 pub struct InputFailureFacts {
-    pub rel_path: String,
-    pub message: String,
+    pub(crate) rel_path: String,
+    pub(crate) message: String,
 }
 
 #[derive(Debug, Clone, Default)]
 pub struct DepsFacts {
-    pub tools: Vec<ToolFacts>,
-    pub lockfiles: Vec<LockfileFacts>,
-    pub dependency_entries: Vec<DependencyEntryFacts>,
-    pub allowlist_coverage: Vec<AllowlistCoverageFacts>,
-    pub input_failures: Vec<InputFailureFacts>,
+    pub(crate) tools: Vec<ToolFacts>,
+    pub(crate) lockfiles: Vec<LockfileFacts>,
+    pub(crate) dependency_entries: Vec<DependencyEntryFacts>,
+    pub(crate) allowlist_coverage: Vec<AllowlistCoverageFacts>,
+    pub(crate) direct_dependency_caps: Vec<DirectDependencyCapFacts>,
+    pub(crate) input_failures: Vec<InputFailureFacts>,
 }
 
 pub fn collect(tree: &ProjectTree, route: &RsDepsRoute, tc: &dyn ToolChecker) -> DepsFacts {
@@ -96,9 +92,9 @@ pub fn collect(tree: &ProjectTree, route: &RsDepsRoute, tc: &dyn ToolChecker) ->
         })
         .unwrap_or_default();
     let routed_root_rels = route
-        .roots
+        .roots()
         .iter()
-        .map(|root| root.rel_dir.clone())
+        .map(|root| root.rel_dir().to_owned())
         .collect::<BTreeSet<_>>();
     let workspaces = discover_workspaces(tree, route, &mut input_failures);
     let workspace_by_member = workspace_by_member(&workspaces);
@@ -111,8 +107,8 @@ pub fn collect(tree: &ProjectTree, route: &RsDepsRoute, tc: &dyn ToolChecker) ->
         &mut input_failures,
     );
 
-    let dependency_entries =
-        collect_dependency_entries(tree, &members, &workspaces, &mut input_failures);
+    let (dependency_entries, direct_dependency_caps) =
+        collect_dependency_facts(tree, &members, &workspaces, &mut input_failures);
     let lockfiles = collect_lockfiles(
         tree,
         &workspaces,
@@ -129,6 +125,10 @@ pub fn collect(tree: &ProjectTree, route: &RsDepsRoute, tc: &dyn ToolChecker) ->
             has_allowlist: member.allowed_deps.is_some(),
         })
         .collect();
+    let mut seen_input_failures = BTreeSet::new();
+    input_failures.retain(|failure| {
+        seen_input_failures.insert((failure.rel_path.clone(), failure.message.clone()))
+    });
 
     DepsFacts {
         tools: vec![
@@ -152,6 +152,7 @@ pub fn collect(tree: &ProjectTree, route: &RsDepsRoute, tc: &dyn ToolChecker) ->
         lockfiles,
         dependency_entries,
         allowlist_coverage,
+        direct_dependency_caps,
         input_failures,
     }
 }

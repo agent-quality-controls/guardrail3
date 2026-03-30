@@ -16,49 +16,45 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
 
     let section = parse_ban_section(parsed, "disallowed-macros");
     for malformed in &section.malformed_messages {
-        results.push(CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Error,
-            title: "disallowed-macros section malformed".to_owned(),
-            message: malformed.clone(),
-            file: Some(input.config.rel_path.clone()),
-            line: None,
-            inventory: false,
-        });
+        results.push(CheckResult::from_parts(
+            ID.to_owned(),
+            Severity::Error,
+            "disallowed-macros section malformed".to_owned(),
+            malformed.clone(),
+            Some(input.config.rel_path.clone()),
+            None,
+            false,
+        ));
     }
 
-    let found: BTreeSet<_> = section
-        .entries
-        .into_iter()
-        .map(|entry| entry.path)
-        .collect();
+    let found: BTreeSet<_> = section.entries.into_iter().map(|entry| entry.path).collect();
     for expected in EXPECTED_MACRO_BANS {
         if found.contains(*expected) {
             results.push(
-                CheckResult {
-                    id: ID.to_owned(),
-                    severity: Severity::Info,
-                    title: "macro ban present".to_owned(),
-                    message: format!("`{}!` is banned.", display_macro_name(expected)),
-                    file: Some(input.config.rel_path.clone()),
-                    line: None,
-                    inventory: false,
-                }
+                CheckResult::from_parts(
+                    ID.to_owned(),
+                    Severity::Info,
+                    "macro ban present".to_owned(),
+                    format!("`{}!` is banned.", display_macro_name(expected)),
+                    Some(input.config.rel_path.clone()),
+                    None,
+                    false,
+                )
                 .as_inventory(),
             );
         } else {
-            results.push(CheckResult {
-                id: ID.to_owned(),
-                severity: Severity::Error,
-                title: "missing macro ban".to_owned(),
-                message: format!(
+            results.push(CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Error,
+                "missing macro ban".to_owned(),
+                format!(
                     "`{}!` is not present in `disallowed-macros`.",
                     display_macro_name(expected)
                 ),
-                file: Some(input.config.rel_path.clone()),
-                line: None,
-                inventory: false,
-            });
+                Some(input.config.rel_path.clone()),
+                None,
+                false,
+            ));
         }
     }
 }

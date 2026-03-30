@@ -15,13 +15,13 @@ const ID: &str = "RS-FMT-02";
 pub fn findings(results: &[CheckResult]) -> Vec<Finding<'_>> {
     results
         .iter()
-        .filter(|result| result.id == ID)
+        .filter(|result| result.id()()()() == ID)
         .map(|result| Finding {
-            severity: result.severity,
-            title: result.title.as_str(),
-            message: result.message.as_str(),
-            file: result.file.as_deref(),
-            inventory: result.inventory,
+            severity: result.severity()()()(),
+            title: result.title()()()().as_str(),
+            message: result.message()()()().as_str(),
+            file: result.file()()()(),
+            inventory: result.inventory()()()(),
         })
         .collect()
 }
@@ -44,7 +44,7 @@ pub fn assert_parse_error(results: &[CheckResult], file: &str) {
         Finding {
             severity: Severity::Error,
             title: "rustfmt config parse error",
-            message: "rustfmt config exists but could not be parsed as TOML",
+            message: "rustfmt config exists but could not be parsed as a TOML table",
             file: Some(file),
             inventory: false,
         },

@@ -17,12 +17,12 @@ pub fn write_file(root: &Path, rel: &str, content: &str) {
 }
 
 pub fn dir_entry(dirs: &[&str], files: &[&str]) -> DirEntry {
-    DirEntry {
-        dirs: dirs.iter().map(|value| (*value).to_owned()).collect(),
-        files: files.iter().map(|value| (*value).to_owned()).collect(),
-        symlink_dirs: Vec::new(),
-        symlink_files: Vec::new(),
-    }
+    DirEntry::new(
+        dirs.iter().map(|value| (*value).to_owned()).collect(),
+        files.iter().map(|value| (*value).to_owned()).collect(),
+        Vec::new(),
+        Vec::new(),
+    )
 }
 
 pub fn project_tree(
@@ -37,7 +37,7 @@ pub fn project_tree(
             root.join(rel)
         };
         create_dir_all(&abs_dir).expect("failed to create release project directory");
-        for dir in &entry.dirs {
+        for dir in entry.dirs() {
             create_dir_all(&abs_dir.join(dir)).expect("failed to create release child directory");
         }
     }
@@ -46,17 +46,17 @@ pub fn project_tree(
         write_file_at(&abs_path, body).expect("failed to write release project file");
     }
 
-    ProjectTree {
+    ProjectTree::new(
         root,
-        structure: structure
+        structure
             .into_iter()
             .map(|(rel, entry)| (rel.to_owned(), entry))
             .collect::<BTreeMap<_, _>>(),
-        content: content
+        content
             .into_iter()
             .map(|(rel, body)| (rel.to_owned(), body.to_owned()))
             .collect::<BTreeMap<_, _>>(),
-    }
+    )
 }
 
 pub fn temp_root(slug: &str) -> PathBuf {

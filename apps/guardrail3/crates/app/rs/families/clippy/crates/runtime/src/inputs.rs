@@ -4,33 +4,33 @@ use super::facts::{
 };
 
 pub struct ConfigClippyInput<'a> {
-    pub config: &'a ClippyConfigFacts,
+    pub(crate) config: &'a ClippyConfigFacts,
 }
 
 pub struct CoveredRustUnitInput<'a> {
-    pub rel_dir: &'a str,
-    pub kind: PolicyRootKind,
-    pub covering_config_rel: &'a str,
+    pub(crate) rel_dir: &'a str,
+    pub(crate) kind: PolicyRootKind,
+    pub(crate) covering_config_rel: &'a str,
 }
 
 pub struct UncoveredRustUnitInput<'a> {
-    pub rel_dir: &'a str,
-    pub kind: PolicyRootKind,
+    pub(crate) rel_dir: &'a str,
+    pub(crate) kind: PolicyRootKind,
 }
 
 pub struct PolicyContextFailureInput<'a> {
-    pub parse_error: &'a str,
+    pub(crate) parse_error: &'a str,
 }
 
 pub struct CargoConfigOverrideInput<'a> {
-    pub rel_path: &'a str,
-    pub parse_error: Option<&'a str>,
+    pub(crate) rel_path: &'a str,
+    pub(crate) parse_error: Option<&'a str>,
 }
 
 pub struct CargoRootFailureInput<'a> {
-    pub rel_dir: &'a str,
-    pub cargo_rel_path: &'a str,
-    pub parse_error: &'a str,
+    pub(crate) rel_dir: &'a str,
+    pub(crate) cargo_rel_path: &'a str,
+    pub(crate) parse_error: &'a str,
 }
 
 impl<'a> ConfigClippyInput<'a> {

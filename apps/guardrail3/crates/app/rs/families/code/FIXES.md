@@ -134,6 +134,10 @@ The main theme from the audit was simple:
   - track enclosing type visibility and reachability
   - only report weak error contracts that are actually externally reachable
   - add regression tests for public methods on private types, private modules, and true public API
+- `Implemented outcome`:
+  - reachable-public-API classification landed in the shared parser
+  - broader weak public error-form ownership now fires only through `RS-CODE-33`
+  - legacy `RS-CODE-25` stays silent so one weak public error case has one finding path
 
 ### 7. Fix `RS-CODE-24` path-escape detection to use path semantics, not substring matching
 

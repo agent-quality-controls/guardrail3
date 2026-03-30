@@ -12,15 +12,15 @@ pub fn check(input: &RustfmtRootInput, results: &mut Vec<CheckResult>) {
         return;
     };
     let Some(parsed) = input.parsed.as_ref() else {
-        results.push(CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Error,
-            title: "rustfmt config parse error".to_owned(),
-            message: "rustfmt config exists but could not be parsed as TOML".to_owned(),
-            file: Some(rel.to_owned()),
-            line: None,
-            inventory: false,
-        });
+        results.push(CheckResult::from_parts(
+            ID.to_owned(),
+            Severity::Error,
+            "rustfmt config parse error".to_owned(),
+            "rustfmt config exists but could not be parsed as TOML".to_owned(),
+            Some(rel.to_owned()),
+            None,
+            false,
+        ));
         return;
     };
 
@@ -93,27 +93,27 @@ fn push_wrong(
     expected: impl Display,
     results: &mut Vec<CheckResult>,
 ) {
-    results.push(CheckResult {
-        id: ID.to_owned(),
-        severity: Severity::Warn,
-        title: format!("rustfmt {key} wrong"),
-        message: format!("{key} = {actual} but expected {expected}"),
-        file: Some(rel.to_owned()),
-        line: None,
-        inventory: false,
-    });
+    results.push(CheckResult::from_parts(
+        ID.to_owned(),
+        Severity::Warn,
+        format!("rustfmt {key} wrong"),
+        format!("{key} = {actual} but expected {expected}"),
+        Some(rel.to_owned()),
+        None,
+        false,
+    ));
 }
 
 fn push_missing(rel: &str, key: &str, expected: impl Display, results: &mut Vec<CheckResult>) {
-    results.push(CheckResult {
-        id: ID.to_owned(),
-        severity: Severity::Warn,
-        title: format!("rustfmt {key} missing"),
-        message: format!("{key} must be set to {expected}"),
-        file: Some(rel.to_owned()),
-        line: None,
-        inventory: false,
-    });
+    results.push(CheckResult::from_parts(
+        ID.to_owned(),
+        Severity::Warn,
+        format!("rustfmt {key} missing"),
+        format!("{key} must be set to {expected}"),
+        Some(rel.to_owned()),
+        None,
+        false,
+    ));
 }
 
 #[cfg(test)]

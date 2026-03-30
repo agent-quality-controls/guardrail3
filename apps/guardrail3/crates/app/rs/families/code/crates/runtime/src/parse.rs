@@ -16,13 +16,16 @@ pub type DenyForbidInfo = types::DenyForbidInfo;
 pub type FacadeBodyItemInfo = types::FacadeBodyItemInfo;
 pub type ForbiddenMacroInfo = types::ForbiddenMacroInfo;
 pub type ForeignModAllowInfo = types::ForeignModAllowInfo;
+pub type GenericParameterCapInfo = types::GenericParameterCapInfo;
 pub type ImplAllowInfo = types::ImplAllowInfo;
 pub type IncludeMacroInfo = types::IncludeMacroInfo;
 pub type LargeTypeItem = types::LargeTypeItem;
 pub type LintPolicyInfo = types::LintPolicyInfo;
 pub type PathAttrInfo = types::PathAttrInfo;
+pub type PublicStructFieldBagInfo = types::PublicStructFieldBagInfo;
 pub type PublicResultErrorInfo = types::PublicResultErrorInfo;
 pub type PublicResultErrorKind = types::PublicResultErrorKind;
+pub type StringDispatchInfo = types::StringDispatchInfo;
 pub type TestExpectCallInfo = types::TestExpectCallInfo;
 pub type TraitMethodCountInfo = types::TraitMethodCountInfo;
 
@@ -98,6 +101,10 @@ pub fn find_public_result_error_types(ast: &syn::File) -> Vec<PublicResultErrorI
     attrs::find_public_result_error_types(ast)
 }
 
+pub fn find_public_struct_field_bags(ast: &syn::File) -> Vec<PublicStructFieldBagInfo> {
+    attrs::find_public_struct_field_bags(ast)
+}
+
 pub fn find_forbidden_macros(ast: &syn::File, file_is_test_root: bool) -> Vec<ForbiddenMacroInfo> {
     visitors::find_forbidden_macros(ast, file_is_test_root)
 }
@@ -132,4 +139,15 @@ pub fn find_large_type_items(ast: &syn::File) -> Vec<LargeTypeItem> {
 
 pub fn find_large_traits(ast: &syn::File) -> Vec<TraitMethodCountInfo> {
     visitors::find_large_traits(ast)
+}
+
+pub fn find_generic_parameter_caps(ast: &syn::File) -> Vec<GenericParameterCapInfo> {
+    visitors::find_generic_parameter_caps(ast)
+}
+
+pub fn find_string_dispatch_sites(
+    ast: &syn::File,
+    file_is_test_root: bool,
+) -> Vec<StringDispatchInfo> {
+    visitors::find_string_dispatch_sites(ast, file_is_test_root)
 }

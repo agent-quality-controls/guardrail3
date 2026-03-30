@@ -7,35 +7,34 @@ const ID: &str = "HOOK-RS-05";
 pub fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<CheckResult>) {
     let found = input
         .parsed
-        .executable_lines
+        .executable_lines()
         .iter()
-        .any(|line| is_cargo_machete_command(line.command_text));
+        .any(|line| is_cargo_machete_command(line.command_text()));
 
     if found {
         results.push(
-            CheckResult {
-                id: ID.to_owned(),
-                severity: Severity::Warn,
-                title: "cargo-machete step present".to_owned(),
-                message: "Hook runs cargo-machete.".to_owned(),
-                file: Some(input.rel_path.to_owned()),
-                line: None,
-                inventory: false,
-            }
+            CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Warn,
+                "cargo-machete step present".to_owned(),
+                "Hook runs cargo-machete.".to_owned(),
+                Some(input.rel_path.to_owned()),
+                None,
+                false,
+            )
             .as_inventory(),
         );
     } else {
-        results.push(CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Warn,
-            title: "cargo-machete step missing".to_owned(),
-            message: "Hook does not execute cargo-machete.".to_owned(),
-            file: Some(input.rel_path.to_owned()),
-            line: None,
-            inventory: false,
-        });
+        results.push(CheckResult::from_parts(
+    ID.to_owned(),
+    Severity::Warn,
+    "cargo-machete step missing".to_owned(),
+    "Hook does not execute cargo-machete.".to_owned(),
+    Some(input.rel_path.to_owned()),
+    None,
+    false,
+        ));
     }
-}
 
 fn is_cargo_machete_command(command_text: &str) -> bool {
     let tokens = shell_words(command_text);
@@ -175,5 +174,5 @@ pub(super) fn run_case(content: &str) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-#[path = "hook_rs_05_cargo_machete_step_present_tests/mod.rs"]
+#[path = "tests/steps/hook_rs_05_cargo_machete_step_present_tests/mod.rs"]
 mod hook_rs_05_cargo_machete_step_present_tests;

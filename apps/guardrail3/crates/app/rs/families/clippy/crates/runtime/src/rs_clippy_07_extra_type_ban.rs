@@ -21,15 +21,15 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
     let mut malformed_count = 0usize;
     for malformed in &section.malformed_messages {
         malformed_count += 1;
-        results.push(CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Error,
-            title: "disallowed-types section malformed".to_owned(),
-            message: malformed.clone(),
-            file: Some(input.config.rel_path.clone()),
-            line: None,
-            inventory: false,
-        });
+        results.push(CheckResult::from_parts(
+    ID.to_owned(),
+    Severity::Error,
+    "disallowed-types section malformed".to_owned(),
+    malformed.clone(),
+    Some(input.config.rel_path.clone()),
+    None,
+    false,
+        ));
     }
 
     let expected: BTreeSet<_> = expected_type_bans(input.profile_name(), input.garde_enabled())
@@ -40,15 +40,15 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
         if !expected.contains(found.as_str()) {
             extra_count += 1;
             results.push(
-                CheckResult {
-                    id: ID.to_owned(),
-                    severity: Severity::Info,
-                    title: "extra type ban".to_owned(),
-                    message: format!("Additional type ban `{found}` beyond baseline."),
-                    file: Some(input.config.rel_path.clone()),
-                    line: None,
-                    inventory: false,
-                }
+                CheckResult::from_parts(
+                    ID.to_owned(),
+                    Severity::Info,
+                    "extra type ban".to_owned(),
+                    format!("Additional type ban `{found}` beyond baseline."),
+                    Some(input.config.rel_path.clone()),
+                    None,
+                    false,
+                )
                 .as_inventory(),
             );
         }
@@ -56,15 +56,15 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
 
     if malformed_count == 0 && extra_count == 0 {
         results.push(
-            CheckResult {
-                id: ID.to_owned(),
-                severity: Severity::Info,
-                title: "no extra type bans".to_owned(),
-                message: "No additional type bans beyond the managed baseline.".to_owned(),
-                file: Some(input.config.rel_path.clone()),
-                line: None,
-                inventory: false,
-            }
+            CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Info,
+                "no extra type bans".to_owned(),
+                "No additional type bans beyond the managed baseline.".to_owned(),
+                Some(input.config.rel_path.clone()),
+                None,
+                false,
+            )
             .as_inventory(),
         );
     }

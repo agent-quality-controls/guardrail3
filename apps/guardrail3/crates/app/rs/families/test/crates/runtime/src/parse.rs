@@ -209,7 +209,8 @@ fn maybe_push_test_function(
         string_literals: function.string_literals.clone(),
         shadowed_idents: function.shadowed_idents.clone(),
         should_panic_line: should_panic_attr.map(|attr| helpers::span_line(attr.span())),
-        should_panic_has_expected: should_panic_attr.is_some_and(helpers::should_panic_has_expected),
+        should_panic_has_expected: should_panic_attr
+            .is_some_and(helpers::should_panic_has_expected),
         tautological_assert_lines: body_visitor.tautological_assert_lines,
         weak_matches_lines: body_visitor.weak_matches_lines,
     });
@@ -333,7 +334,8 @@ impl<'ast> Visit<'ast> for TestBodyVisitor {
                 "assert_eq" | "assert_ne" | "debug_assert_eq" | "debug_assert_ne"
             ) && helpers::macro_has_literal_comparison(mac)
             {
-                self.tautological_assert_lines.push(helpers::span_line(mac.span()));
+                self.tautological_assert_lines
+                    .push(helpers::span_line(mac.span()));
             }
             if matches!(name.as_str(), "assert" | "debug_assert")
                 && helpers::macro_has_weak_matches(mac)

@@ -34,7 +34,6 @@ Those belong to:
 
 ```text
 apps/guardrail3/crates/app/rs/families/fmt/
-  Cargo.toml
   README.md
   rustfmt.toml
   rust-toolchain.toml
@@ -77,10 +76,11 @@ apps/guardrail3/crates/app/rs/families/fmt/
 
 This family is now self-hosted in the same stabilized shape as the other migrated Rust families:
 
-- workspace root plus `crates/runtime`, `crates/assertions`, and `test_support`
+- family root plus direct `crates/runtime`, `crates/assertions`, and `test_support`
 - one production rule file per `RS-FMT-*`
 - one rule-specific sidecar test directory per rule
 - family-local assertions crate for reusable result-shape checks
 - fail-closed coverage for required root Cargo/toolchain inputs used by `RS-FMT-04` and `RS-FMT-06`
+- quiet success on `RS-FMT-01`; missing root config is the only finding path for that rule
 
 The next work on `fmt` should stay in the attack-review lane: compare live behavior against `.plans/todo/checks/rs/fmt.md`, add regressions for any concrete detector drift, and avoid treating repo-wide formatting debt as a detector bug.

@@ -4,6 +4,7 @@ use crate::cli::GenerateArgs;
 #[cfg(feature = "product-rs-generate")]
 use guardrail3_app_commands::command_ids::{RS_INIT, RS_SHOW_MODULE};
 use guardrail3_domain_config as config;
+#[cfg(feature = "product-ts")]
 use guardrail3_domain_modules::{canonical, cspell, eslint, stylelint};
 
 #[cfg(feature = "product-rs-generate")]
@@ -15,6 +16,18 @@ type GeneratedPair = (String, String);
 struct GeneratedFile {
     path: String,
     content: String,
+}
+
+impl GeneratedFile {
+    #[must_use]
+    fn path(&self) -> &str {
+        &self.path
+    }
+
+    #[must_use]
+    fn content(&self) -> &str {
+        &self.content
+    }
 }
 
 /// Load guardrail3.toml configuration from a project path.
@@ -32,7 +45,7 @@ fn load_config(path: &Path) -> Result<Option<config::types::GuardrailConfig>, St
 /// Main generate command -- generates all config files from guardrail3.toml.
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and process::exit for error codes
 pub fn run(args: &GenerateArgs) {
-    let project_path = Path::new(&args.path);
+    let project_path = Path::new(args.path());
     let cfg = match load_config(project_path) {
         Ok(Some(cfg)) => cfg,
         Ok(None) => {
@@ -51,28 +64,27 @@ pub fn run(args: &GenerateArgs) {
     };
 
     let profile = cfg
-        .profile
-        .as_ref()
-        .map_or("service", |p| p.name.as_str())
+        .profile()
+        .map_or("service", |p| p.name())
         .to_owned();
 
     let files = generate_all_files(project_path, &cfg, &profile);
 
     let mut written = 0usize;
     for gf in &files {
-        let target = project_path.join(&gf.path);
+        let target = project_path.join(gf.path());
         if let Some(parent) = target.parent() {
             if let Err(e) = guardrail3_shared_fs::create_dir_all(parent) {
                 eprintln!("Error creating directory {}: {e}", parent.display());
                 continue;
             }
         }
-        warn_if_overwriting(&target, &gf.path, &gf.content);
-        if let Err(e) = guardrail3_shared_fs::write_file(&target, &gf.content) {
-            eprintln!("Error writing {}: {e}", gf.path);
+        warn_if_overwriting(&target, gf.path(), gf.content());
+        if let Err(e) = guardrail3_shared_fs::write_file(&target, gf.content()) {
+            eprintln!("Error writing {}: {e}", gf.path());
             continue;
         }
-        println!("  wrote: {}", gf.path);
+        println!("  wrote: {}", gf.path());
         written = written.saturating_add(1);
     }
 
@@ -80,7 +92,7 @@ pub fn run(args: &GenerateArgs) {
     println!("Generated {written} files (profile: {profile}).");
 
     // Print cargo-lints reference
-    if cfg.rust.is_some() {
+    if cfg.rust().is_some() {
         println!();
         println!("NOTE: Add these workspace lints to your Cargo.toml manually");
         println!("(guardrail3 does not modify Cargo.toml):");
@@ -92,7 +104,7 @@ pub fn run(args: &GenerateArgs) {
 /// Generate only Rust config files.
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
 pub fn run_rs(args: &GenerateArgs) {
-    let project_path = Path::new(&args.path);
+    let project_path = Path::new(args.path());
     let cfg = match load_config(project_path) {
         Ok(Some(cfg)) => cfg,
         Ok(None) => {
@@ -111,16 +123,16 @@ pub fn run_rs(args: &GenerateArgs) {
     let files = rs_generate::generate_rust_owned_artifacts(project_path, &cfg);
 
     for gf in &files {
-        let target = project_path.join(&gf.path);
+        let target = project_path.join(gf.path());
         if let Some(parent) = target.parent() {
             let _ = guardrail3_shared_fs::create_dir_all(parent);
         }
-        warn_if_overwriting(&target, &gf.path, &gf.content);
-        if let Err(e) = guardrail3_shared_fs::write_file(&target, &gf.content) {
-            eprintln!("Error writing {}: {e}", gf.path);
+        warn_if_overwriting(&target, gf.path(), gf.content());
+        if let Err(e) = guardrail3_shared_fs::write_file(&target, gf.content()) {
+            eprintln!("Error writing {}: {e}", gf.path());
             continue;
         }
-        println!("  wrote: {}", gf.path);
+        println!("  wrote: {}", gf.path());
     }
 }
 
@@ -128,7 +140,7 @@ pub fn run_rs(args: &GenerateArgs) {
 /// Generate only TypeScript config files.
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
 pub fn run_ts(args: &GenerateArgs) {
-    let project_path = Path::new(&args.path);
+    let project_path = Path::new(args.path());
     let cfg = match load_config(project_path) {
         Ok(Some(cfg)) => cfg,
         Ok(None) => {
@@ -172,11 +184,12 @@ pub fn run_ts(args: &GenerateArgs) {
     println!("Generated {written} TypeScript config files.");
 
     // Also generate pre-commit hook
-    let has_rust = cfg.rust.is_some();
+    let has_rust = cfg.rust().is_some();
     let hook_content = build_hook_content(Some(&cfg), has_rust, true);
     generate_and_install_hooks(project_path, &hook_content);
 }
 
+#[cfg(feature = "product-ts")]
 /// Generate and install a pre-commit hook.
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI output
 fn generate_and_install_hooks(project_path: &Path, hook_content: &str) {
@@ -209,7 +222,7 @@ fn generate_and_install_hooks(project_path: &Path, hook_content: &str) {
 /// Install pre-commit hooks (standalone command).
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
 pub fn run_rs_hooks(args: &GenerateArgs) {
-    let project_path = Path::new(&args.path);
+    let project_path = Path::new(args.path());
     let cfg = match load_config(project_path) {
         Ok(cfg) => cfg,
         Err(error) => {
@@ -226,7 +239,7 @@ pub fn run_rs_hooks(args: &GenerateArgs) {
     }
 
     let hook_path = hooks_dir.join("pre-commit");
-    if let Err(e) = guardrail3_shared_fs::write_file(&hook_path, &hook.content) {
+    if let Err(e) = guardrail3_shared_fs::write_file(&hook_path, hook.content()) {
         eprintln!("Error writing pre-commit hook: {e}");
         std::process::exit(1);
     }
@@ -252,7 +265,7 @@ pub fn run_rs_hooks(args: &GenerateArgs) {
 /// Install mixed-stack pre-commit hooks for the current project config.
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
 pub fn run_hooks(args: &GenerateArgs) {
-    let project_path = Path::new(&args.path);
+    let project_path = Path::new(args.path());
     let cfg = match load_config(project_path) {
         Ok(cfg) => cfg,
         Err(error) => {
@@ -262,11 +275,11 @@ pub fn run_hooks(args: &GenerateArgs) {
     };
     let has_rust = cfg
         .as_ref()
-        .and_then(|config| config.rust.as_ref())
+        .and_then(config::types::GuardrailConfig::rust)
         .is_some();
     let has_typescript = cfg
         .as_ref()
-        .and_then(|config| config.typescript.as_ref())
+        .and_then(config::types::GuardrailConfig::typescript)
         .is_some();
     let hook_content = build_hook_content(cfg.as_ref(), has_rust, has_typescript);
 
@@ -319,19 +332,19 @@ fn generate_all_files(
     let mut files = Vec::new();
 
     #[cfg(feature = "product-rs-generate")]
-    if cfg.rust.is_some() {
+    if cfg.rust().is_some() {
         files.extend(
             rs_generate::generate_rust_owned_artifacts(project_path, cfg)
                 .into_iter()
                 .map(|file| GeneratedFile {
-                    path: file.path,
-                    content: file.content,
+                    path: file.path().to_owned(),
+                    content: file.content().to_owned(),
                 }),
         );
     }
 
     #[cfg(feature = "product-ts")]
-    if cfg.typescript.is_some() {
+    if cfg.typescript().is_some() {
         let ts_files = generate_ts_files(cfg);
         files.extend(ts_files);
     }
@@ -343,39 +356,45 @@ fn generate_all_files(
 fn generate_ts_files(cfg: &config::types::GuardrailConfig) -> Vec<GeneratedFile> {
     let mut files = Vec::new();
 
-    let Some(ts_cfg) = cfg.typescript.as_ref() else {
+    let Some(ts_cfg) = cfg.typescript() else {
         return files;
     };
 
-    let canonical_cfg = ts_cfg.canonical.as_ref();
+    let canonical_cfg = ts_cfg.canonical();
 
     // Determine app types from config
     let (has_content_app, has_service_app) = detect_ts_app_types(ts_cfg);
 
     // .npmrc -- generate unless explicitly disabled
-    let gen_npmrc = canonical_cfg.and_then(|c| c.npmrc).unwrap_or(true);
+    let gen_npmrc = canonical_cfg
+        .and_then(config::types::CanonicalConfig::npmrc)
+        .unwrap_or(true);
     if gen_npmrc {
         files.push(GeneratedFile {
             path: ".npmrc".to_owned(),
-            content: canonical::NPMRC.content.to_owned(),
+            content: canonical::NPMRC.content().to_owned(),
         });
     }
 
     // tsconfig.base.json -- generate unless explicitly disabled
-    let gen_tsconfig = canonical_cfg.and_then(|c| c.tsconfig_base).unwrap_or(true);
+    let gen_tsconfig = canonical_cfg
+        .and_then(config::types::CanonicalConfig::tsconfig_base)
+        .unwrap_or(true);
     if gen_tsconfig {
         files.push(GeneratedFile {
             path: "tsconfig.base.json".to_owned(),
-            content: canonical::TSCONFIG_BASE.content.to_owned(),
+            content: canonical::TSCONFIG_BASE.content().to_owned(),
         });
     }
 
     // .jscpd.json -- generate unless explicitly disabled
-    let gen_jscpd = canonical_cfg.and_then(|c| c.jscpd).unwrap_or(true);
+    let gen_jscpd = canonical_cfg
+        .and_then(config::types::CanonicalConfig::jscpd)
+        .unwrap_or(true);
     if gen_jscpd {
         files.push(GeneratedFile {
             path: ".jscpd.json".to_owned(),
-            content: canonical::JSCPD.content.to_owned(),
+            content: canonical::JSCPD.content().to_owned(),
         });
     }
 
@@ -415,7 +434,7 @@ pub fn generate_expected_ts(project_path: &Path) -> Option<Vec<GeneratedPair>> {
     let mut pairs: Vec<GeneratedPair> = files.into_iter().map(|gf| (gf.path, gf.content)).collect();
 
     // Include pre-commit hook (same as run_ts)
-    let has_rust = cfg.rust.is_some();
+    let has_rust = cfg.rust().is_some();
     let hook_content = build_hook_content(Some(&cfg), has_rust, true);
     pairs.push((".githooks/pre-commit".to_owned(), hook_content));
 
@@ -426,9 +445,8 @@ pub fn generate_expected_ts(project_path: &Path) -> Option<Vec<GeneratedPair>> {
 pub fn generate_expected(project_path: &Path) -> Option<Vec<GeneratedPair>> {
     let cfg = load_config(project_path).ok()??;
     let profile = cfg
-        .profile
-        .as_ref()
-        .map_or("service", |p| p.name.as_str())
+        .profile()
+        .map_or("service", |p| p.name())
         .to_owned();
 
     let files = generate_all_files(project_path, &cfg, &profile);
@@ -438,7 +456,7 @@ pub fn generate_expected(project_path: &Path) -> Option<Vec<GeneratedPair>> {
 #[cfg(feature = "product-ts")]
 /// Determine which app types exist in the TypeScript config.
 fn detect_ts_app_types(ts_cfg: &config::types::TypeScriptConfig) -> (bool, bool) {
-    let Some(apps) = ts_cfg.apps.as_ref() else {
+    let Some(apps) = ts_cfg.apps() else {
         return (false, true);
     };
 
@@ -450,7 +468,7 @@ fn detect_ts_app_types(ts_cfg: &config::types::TypeScriptConfig) -> (bool, bool)
     let mut has_service = false;
 
     for app_cfg in apps.values() {
-        match app_cfg.type_.as_deref() {
+        match app_cfg.type_() {
             Some(t) if t.eq_ignore_ascii_case("content") => has_content = true,
             Some(t) if t.eq_ignore_ascii_case("service") => has_service = true,
             Some(t) if t.eq_ignore_ascii_case("library") => {}
@@ -474,9 +492,8 @@ fn build_hook_content(
         || ".".to_owned(),
         |config| {
             config
-                .rust
-                .as_ref()
-                .and_then(|rust| rust.workspace_root.as_deref())
+                .rust()
+                .and_then(|rust| rust.workspace_root())
                 .unwrap_or(".")
                 .to_owned()
         },

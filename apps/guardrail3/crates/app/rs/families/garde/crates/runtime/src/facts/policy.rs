@@ -30,9 +30,9 @@ pub(super) fn read_policy_map(
 
     let default_garde = parsed
         .as_ref()
-        .and_then(|config| config.rust.as_ref())
-        .and_then(|rust| rust.checks.as_ref())
-        .and_then(|checks| checks.garde)
+        .and_then(GuardrailConfig::rust)
+        .and_then(|rust| rust.checks())
+        .and_then(RustChecksConfig::garde)
         .unwrap_or(true);
 
     let app_paths = resolve_app_paths_from_member_dirs(
@@ -52,23 +52,23 @@ pub(super) fn read_policy_map(
     for (app_name, app_dir) in &app_paths {
         let app_cfg = parsed
             .as_ref()
-            .and_then(|config| config.rust.as_ref())
-            .and_then(|rust| rust.apps.as_ref())
+            .and_then(GuardrailConfig::rust)
+            .and_then(|rust| rust.apps())
             .and_then(|apps| apps.get(app_name));
         let garde_enabled = app_cfg
             .and_then(crate_checks)
-            .and_then(|checks| checks.garde)
+            .and_then(RustChecksConfig::garde)
             .unwrap_or(default_garde);
         let _ = map.insert(app_dir.clone(), PolicySettings { garde_enabled });
     }
 
     if let Some(packages_cfg) = parsed
         .as_ref()
-        .and_then(|config| config.rust.as_ref())
-        .and_then(|rust| rust.packages.as_ref())
+        .and_then(GuardrailConfig::rust)
+        .and_then(|rust| rust.packages())
     {
         let garde_enabled = crate_checks(packages_cfg)
-            .and_then(|checks| checks.garde)
+            .and_then(RustChecksConfig::garde)
             .unwrap_or(default_garde);
         if !app_paths_include_root {
             let _ = map.insert(String::new(), PolicySettings { garde_enabled });
@@ -82,7 +82,7 @@ pub(super) fn read_policy_map(
 }
 
 fn crate_checks(config: &CrateConfig) -> Option<&RustChecksConfig> {
-    config.checks.as_ref()
+    config.checks()
 }
 
 pub(super) fn policy_settings_for(

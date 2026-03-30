@@ -3,19 +3,34 @@ mod facts;
 mod garde_support;
 mod inputs;
 mod parse;
+#[path = "root_policy/rs_garde_01_dependency_present.rs"]
 mod rs_garde_01_dependency_present;
+#[path = "root_policy/rs_garde_02_core_method_bans.rs"]
 mod rs_garde_02_core_method_bans;
+#[path = "root_policy/rs_garde_03_extractor_type_bans.rs"]
 mod rs_garde_03_extractor_type_bans;
+#[path = "root_policy/rs_garde_04_reqwest_json_ban.rs"]
 mod rs_garde_04_reqwest_json_ban;
+#[path = "derive_checks/rs_garde_05_struct_derive_validate.rs"]
 mod rs_garde_05_struct_derive_validate;
+#[path = "root_policy/rs_garde_06_additional_method_bans.rs"]
 mod rs_garde_06_additional_method_bans;
+#[path = "derive_checks/rs_garde_07_manual_deserialize_impl.rs"]
 mod rs_garde_07_manual_deserialize_impl;
+#[path = "derive_checks/rs_garde_08_enum_derive_validate.rs"]
 mod rs_garde_08_enum_derive_validate;
+#[path = "inventory/rs_garde_09_query_as_inventory.rs"]
 mod rs_garde_09_query_as_inventory;
+#[path = "root_policy/rs_garde_10_input_failures.rs"]
 mod rs_garde_10_input_failures;
+#[path = "derive_checks/rs_garde_11_field_level_constraints.rs"]
 mod rs_garde_11_field_level_constraints;
+#[path = "derive_checks/rs_garde_12_nested_validation_dive.rs"]
 mod rs_garde_12_nested_validation_dive;
+#[path = "derive_checks/rs_garde_13_context_validation_surface.rs"]
 mod rs_garde_13_context_validation_surface;
+#[path = "derive_checks/rs_garde_14_guardrail_config_validate_call.rs"]
+mod rs_garde_14_guardrail_config_validate_call;
 
 use glob as _;
 use guardrail3_app_core as _;
@@ -57,8 +72,7 @@ pub fn check(tree: &ProjectTree, route: &RsGardeRoute) -> Vec<CheckResult> {
 
     for target in &facts.struct_targets {
         if route
-            .scoped_files
-            .as_ref()
+            .scoped_files()
             .is_some_and(|files| !files.contains(&target.rel_path))
         {
             continue;
@@ -71,8 +85,7 @@ pub fn check(tree: &ProjectTree, route: &RsGardeRoute) -> Vec<CheckResult> {
 
     for target in &facts.manual_deserialize_impls {
         if route
-            .scoped_files
-            .as_ref()
+            .scoped_files()
             .is_some_and(|files| !files.contains(&target.rel_path))
         {
             continue;
@@ -85,8 +98,7 @@ pub fn check(tree: &ProjectTree, route: &RsGardeRoute) -> Vec<CheckResult> {
 
     for target in &facts.enum_targets {
         if route
-            .scoped_files
-            .as_ref()
+            .scoped_files()
             .is_some_and(|files| !files.contains(&target.rel_path))
         {
             continue;
@@ -99,8 +111,7 @@ pub fn check(tree: &ProjectTree, route: &RsGardeRoute) -> Vec<CheckResult> {
 
     for macro_use in &facts.query_as_macros {
         if route
-            .scoped_files
-            .as_ref()
+            .scoped_files()
             .is_some_and(|files| !files.contains(&macro_use.rel_path))
         {
             continue;
@@ -113,8 +124,7 @@ pub fn check(tree: &ProjectTree, route: &RsGardeRoute) -> Vec<CheckResult> {
 
     for field in &facts.boundary_fields {
         if route
-            .scoped_files
-            .as_ref()
+            .scoped_files()
             .is_some_and(|files| !files.contains(&field.rel_path))
         {
             continue;
@@ -123,6 +133,19 @@ pub fn check(tree: &ProjectTree, route: &RsGardeRoute) -> Vec<CheckResult> {
         rs_garde_11_field_level_constraints::check(&input, &mut results);
         rs_garde_12_nested_validation_dive::check(&input, &mut results);
         rs_garde_13_context_validation_surface::check(&input, &mut results);
+    }
+
+    for site in &facts.guardrail_config_validation_sites {
+        if route
+            .scoped_files()
+            .is_some_and(|files| !files.contains(&site.rel_path))
+        {
+            continue;
+        }
+        rs_garde_14_guardrail_config_validate_call::check(
+            &inputs::GuardrailConfigValidationInput::new(site),
+            &mut results,
+        );
     }
 
     results

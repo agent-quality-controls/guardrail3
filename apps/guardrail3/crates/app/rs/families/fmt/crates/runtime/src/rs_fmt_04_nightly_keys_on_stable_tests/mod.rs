@@ -18,85 +18,70 @@ fn ignores_nightly_keys_when_toolchain_is_not_stable() {
 
 #[test]
 fn fails_closed_when_nightly_keys_have_no_toolchain_file() {
-    let fixture =
-        tempfile::tempdir().expect("RS-FMT-04 fixture setup should create a temporary directory");
+    let fixture = tempfile::tempdir().expect("fixture setup should create a temporary directory");
     let root = fixture.path();
 
     std::fs::write(
         root.join("Cargo.toml"),
         "[workspace]\nmembers = []\nresolver = \"2\"\n\n[workspace.package]\nedition = \"2024\"\n",
     )
-    .expect("RS-FMT-04 fixture setup should write Cargo.toml");
+    .expect("fixture setup should write Cargo.toml");
     std::fs::write(
         root.join("rustfmt.toml"),
         "edition = \"2024\"\nmax_width = 100\ntab_spaces = 4\nuse_field_init_shorthand = true\nuse_try_shorthand = true\nreorder_imports = true\nreorder_modules = true\ngroup_imports = \"StdExternalCrate\"\n",
     )
-    .expect("RS-FMT-04 fixture setup should write rustfmt.toml");
+    .expect("fixture setup should write rustfmt.toml");
 
     let results = run_family(root);
 
-    assertions::assert_error(
-        &results,
-        "rust-toolchain.toml missing",
-        "Nightly-only rustfmt settings require a root rust-toolchain.toml to prove the channel.",
-    );
+    assertions::assert_missing_toolchain_file_error(&results);
 }
 
 #[test]
 fn fails_closed_when_toolchain_file_is_malformed() {
-    let fixture =
-        tempfile::tempdir().expect("RS-FMT-04 fixture setup should create a temporary directory");
+    let fixture = tempfile::tempdir().expect("fixture setup should create a temporary directory");
     let root = fixture.path();
 
     std::fs::write(
         root.join("Cargo.toml"),
         "[workspace]\nmembers = []\nresolver = \"2\"\n\n[workspace.package]\nedition = \"2024\"\n",
     )
-    .expect("RS-FMT-04 fixture setup should write Cargo.toml");
+    .expect("fixture setup should write Cargo.toml");
     std::fs::write(
         root.join("rustfmt.toml"),
         "edition = \"2024\"\nmax_width = 100\ntab_spaces = 4\nuse_field_init_shorthand = true\nuse_try_shorthand = true\nreorder_imports = true\nreorder_modules = true\ngroup_imports = \"StdExternalCrate\"\n",
     )
-    .expect("RS-FMT-04 fixture setup should write rustfmt.toml");
+    .expect("fixture setup should write rustfmt.toml");
     std::fs::write(root.join("rust-toolchain.toml"), "[toolchain")
-        .expect("RS-FMT-04 fixture setup should write malformed rust-toolchain.toml");
+        .expect("fixture setup should write malformed rust-toolchain.toml");
 
     let results = run_family(root);
 
-    assertions::assert_error(
-        &results,
-        "rust-toolchain.toml parse error",
-        "Nightly-only rustfmt settings require a parseable root rust-toolchain.toml.",
-    );
+    assertions::assert_malformed_toolchain_file_error(&results);
 }
 
 #[test]
 fn fails_closed_when_toolchain_channel_is_missing() {
-    let fixture =
-        tempfile::tempdir().expect("RS-FMT-04 fixture setup should create a temporary directory");
+    let fixture = tempfile::tempdir().expect("fixture setup should create a temporary directory");
     let root = fixture.path();
 
     std::fs::write(
         root.join("Cargo.toml"),
         "[workspace]\nmembers = []\nresolver = \"2\"\n\n[workspace.package]\nedition = \"2024\"\n",
     )
-    .expect("RS-FMT-04 fixture setup should write Cargo.toml");
+    .expect("fixture setup should write Cargo.toml");
     std::fs::write(
         root.join("rustfmt.toml"),
         "edition = \"2024\"\nmax_width = 100\ntab_spaces = 4\nuse_field_init_shorthand = true\nuse_try_shorthand = true\nreorder_imports = true\nreorder_modules = true\ngroup_imports = \"StdExternalCrate\"\n",
     )
-    .expect("RS-FMT-04 fixture setup should write rustfmt.toml");
+    .expect("fixture setup should write rustfmt.toml");
     std::fs::write(
         root.join("rust-toolchain.toml"),
         "[toolchain]\ncomponents = [\"rustfmt\"]\n",
     )
-    .expect("RS-FMT-04 fixture setup should write rust-toolchain.toml without channel");
+    .expect("fixture setup should write rust-toolchain.toml without channel");
 
     let results = run_family(root);
 
-    assertions::assert_error(
-        &results,
-        "rust-toolchain channel missing",
-        "Nightly-only rustfmt settings require `[toolchain].channel` in root rust-toolchain.toml.",
-    );
+    assertions::assert_missing_toolchain_channel_error(&results);
 }

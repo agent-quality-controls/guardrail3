@@ -9,7 +9,7 @@ use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
 use guardrail3_app_core::crawl::CrawlResult;
-use guardrail3_app_rs_family_clippy::{EXPECTED_METHOD_BANS, EXPECTED_TYPE_BANS};
+use guardrail3_app_rs_family_clippy::clippy_support::{EXPECTED_METHOD_BANS, EXPECTED_TYPE_BANS};
 
 use super::engine::{self, CoverageTool};
 

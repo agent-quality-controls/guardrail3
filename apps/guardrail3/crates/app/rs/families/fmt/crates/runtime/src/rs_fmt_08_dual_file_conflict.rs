@@ -12,15 +12,15 @@ pub fn check(input: &RustfmtDualConflictInput, results: &mut Vec<CheckResult>) {
         ProjectTree::join_rel(&input.dir_rel, "rustfmt.toml")
     };
 
-    results.push(CheckResult {
-        id: ID.to_owned(),
-        severity: Severity::Warn,
-        title: "Conflicting rustfmt config files".to_owned(),
-        message: "Both rustfmt.toml and .rustfmt.toml exist in the same directory".to_owned(),
-        file: Some(file),
-        line: None,
-        inventory: false,
-    });
+    results.push(CheckResult::from_parts(
+    ID.to_owned(),
+    Severity::Warn,
+    "Conflicting rustfmt config files".to_owned(),
+    "Both rustfmt.toml and .rustfmt.toml exist in the same directory".to_owned(),
+    Some(file),
+    None,
+    false,
+    ));
 }
 
 #[cfg(test)]

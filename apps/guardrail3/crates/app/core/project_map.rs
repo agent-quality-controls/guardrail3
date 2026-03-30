@@ -15,21 +15,21 @@ use crate::crawl::CrawlResult;
 /// Complete project structure derived from crawl.
 #[derive(Debug)]
 pub struct ProjectMap {
-    pub root: PathBuf,
-    pub rust_scopes: Vec<RustScope>,
-    pub ts_scopes: Vec<TsScope>,
-    pub root_configs: RootConfigs,
+    root: PathBuf,
+    rust_scopes: Vec<RustScope>,
+    ts_scopes: Vec<TsScope>,
+    root_configs: RootConfigs,
     /// Walk-up config files that shadow a scope's config (enforcement gaps).
-    pub shadows: Vec<ShadowWarning>,
+    shadows: Vec<ShadowWarning>,
 }
 
 /// A Rust compilation scope — workspace or standalone crate.
 #[derive(Debug)]
 pub struct RustScope {
-    pub root: PathBuf,
-    pub kind: RustScopeKind,
-    pub members: Vec<RustMember>,
-    pub configs: RustScopeConfigs,
+    root: PathBuf,
+    kind: RustScopeKind,
+    members: Vec<RustMember>,
+    configs: RustScopeConfigs,
 }
 
 #[derive(Debug)]
@@ -40,28 +40,28 @@ pub enum RustScopeKind {
 
 #[derive(Debug)]
 pub struct RustMember {
-    pub name: String,
-    pub dir: PathBuf,
+    name: String,
+    dir: PathBuf,
 }
 
 /// Which guardrail config files exist at this scope's root.
 #[derive(Debug, Default)]
 pub struct RustScopeConfigs {
-    pub clippy_toml: Option<PathBuf>,
-    pub deny_toml: Option<PathBuf>,
-    pub rustfmt_toml: Option<PathBuf>,
-    pub cargo_lock: Option<PathBuf>,
-    pub rust_toolchains: Vec<PathBuf>,
-    pub jscpd_config: Option<PathBuf>,
+    clippy_toml: Option<PathBuf>,
+    deny_toml: Option<PathBuf>,
+    rustfmt_toml: Option<PathBuf>,
+    cargo_lock: Option<PathBuf>,
+    rust_toolchains: Vec<PathBuf>,
+    jscpd_config: Option<PathBuf>,
 }
 
 /// A TypeScript scope — app, package, or tool.
 #[derive(Debug)]
 pub struct TsScope {
-    pub path: PathBuf,
-    pub kind: TsScopeKind,
-    pub name: String,
-    pub configs: TsScopeConfigs,
+    path: PathBuf,
+    kind: TsScopeKind,
+    name: String,
+    configs: TsScopeConfigs,
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -74,44 +74,256 @@ pub enum TsScopeKind {
 /// Which config files exist at this TS scope's path.
 #[derive(Debug, Default)]
 pub struct TsScopeConfigs {
-    pub package_json: Option<PathBuf>,
-    pub tsconfig: Option<PathBuf>,
-    pub eslint_config: Option<PathBuf>,
-    pub stylelint_config: Option<PathBuf>,
-    pub velite_config: Option<PathBuf>,
-    pub next_config: Option<PathBuf>,
+    package_json: Option<PathBuf>,
+    tsconfig: Option<PathBuf>,
+    eslint_config: Option<PathBuf>,
+    stylelint_config: Option<PathBuf>,
+    velite_config: Option<PathBuf>,
+    next_config: Option<PathBuf>,
 }
 
 /// Root-level configs (shared across all scopes).
 #[derive(Debug, Default)]
 pub struct RootConfigs {
-    pub guardrail3_tomls: Vec<PathBuf>,
-    pub package_json: Option<PathBuf>,
-    pub pnpm_workspaces: Vec<PathBuf>,
-    pub eslint_config: Option<PathBuf>,
-    pub stylelint_config: Option<PathBuf>,
-    pub tsconfig_base: Option<PathBuf>,
-    pub npmrc: Option<PathBuf>,
-    pub jscpd_config: Option<PathBuf>,
-    pub cspell_config: Option<PathBuf>,
-    pub prettier_config: Option<PathBuf>,
-    pub rust_toolchains: Vec<PathBuf>,
-    pub release_plz_tomls: Vec<PathBuf>,
-    pub cliff_tomls: Vec<PathBuf>,
-    pub pre_commit_hooks: Vec<PathBuf>,
-    pub license_files: Vec<PathBuf>,
-    pub claude_mds: Vec<PathBuf>,
-    pub cargo_mutants_tomls: Vec<PathBuf>,
-    pub github_workflows: Vec<PathBuf>,
+    guardrail3_tomls: Vec<PathBuf>,
+    package_json: Option<PathBuf>,
+    pnpm_workspaces: Vec<PathBuf>,
+    eslint_config: Option<PathBuf>,
+    stylelint_config: Option<PathBuf>,
+    tsconfig_base: Option<PathBuf>,
+    npmrc: Option<PathBuf>,
+    jscpd_config: Option<PathBuf>,
+    cspell_config: Option<PathBuf>,
+    prettier_config: Option<PathBuf>,
+    rust_toolchains: Vec<PathBuf>,
+    release_plz_tomls: Vec<PathBuf>,
+    cliff_tomls: Vec<PathBuf>,
+    pre_commit_hooks: Vec<PathBuf>,
+    license_files: Vec<PathBuf>,
+    claude_mds: Vec<PathBuf>,
+    cargo_mutants_tomls: Vec<PathBuf>,
+    github_workflows: Vec<PathBuf>,
 }
 
 /// A config file that shadows a scope's config via walk-up resolution.
 #[derive(Debug)]
 pub struct ShadowWarning {
-    pub shadow_file: PathBuf,
-    pub scope_root: PathBuf,
-    pub affected_member: PathBuf,
-    pub file_type: &'static str,
+    shadow_file: PathBuf,
+    scope_root: PathBuf,
+    affected_member: PathBuf,
+    file_type: &'static str,
+}
+
+impl ProjectMap {
+    pub fn root(&self) -> &Path {
+        &self.root
+    }
+
+    pub fn rust_scopes(&self) -> &[RustScope] {
+        &self.rust_scopes
+    }
+
+    pub fn ts_scopes(&self) -> &[TsScope] {
+        &self.ts_scopes
+    }
+
+    pub fn root_configs(&self) -> &RootConfigs {
+        &self.root_configs
+    }
+
+    pub fn shadows(&self) -> &[ShadowWarning] {
+        &self.shadows
+    }
+}
+
+impl RustScope {
+    pub fn root(&self) -> &Path {
+        &self.root
+    }
+
+    pub fn kind(&self) -> &RustScopeKind {
+        &self.kind
+    }
+
+    pub fn members(&self) -> &[RustMember] {
+        &self.members
+    }
+
+    pub fn configs(&self) -> &RustScopeConfigs {
+        &self.configs
+    }
+}
+
+impl RustMember {
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
+    pub fn dir(&self) -> &Path {
+        &self.dir
+    }
+}
+
+impl RustScopeConfigs {
+    pub fn clippy_toml(&self) -> Option<&Path> {
+        self.clippy_toml.as_deref()
+    }
+
+    pub fn deny_toml(&self) -> Option<&Path> {
+        self.deny_toml.as_deref()
+    }
+
+    pub fn rustfmt_toml(&self) -> Option<&Path> {
+        self.rustfmt_toml.as_deref()
+    }
+
+    pub fn cargo_lock(&self) -> Option<&Path> {
+        self.cargo_lock.as_deref()
+    }
+
+    pub fn rust_toolchains(&self) -> &[PathBuf] {
+        &self.rust_toolchains
+    }
+
+    pub fn jscpd_config(&self) -> Option<&Path> {
+        self.jscpd_config.as_deref()
+    }
+}
+
+impl TsScope {
+    pub fn path(&self) -> &Path {
+        &self.path
+    }
+
+    pub fn kind(&self) -> &TsScopeKind {
+        &self.kind
+    }
+
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
+    pub fn configs(&self) -> &TsScopeConfigs {
+        &self.configs
+    }
+}
+
+impl TsScopeConfigs {
+    pub fn package_json(&self) -> Option<&Path> {
+        self.package_json.as_deref()
+    }
+
+    pub fn tsconfig(&self) -> Option<&Path> {
+        self.tsconfig.as_deref()
+    }
+
+    pub fn eslint_config(&self) -> Option<&Path> {
+        self.eslint_config.as_deref()
+    }
+
+    pub fn stylelint_config(&self) -> Option<&Path> {
+        self.stylelint_config.as_deref()
+    }
+
+    pub fn velite_config(&self) -> Option<&Path> {
+        self.velite_config.as_deref()
+    }
+
+    pub fn next_config(&self) -> Option<&Path> {
+        self.next_config.as_deref()
+    }
+}
+
+impl RootConfigs {
+    pub fn guardrail3_tomls(&self) -> &[PathBuf] {
+        &self.guardrail3_tomls
+    }
+
+    pub fn package_json(&self) -> Option<&Path> {
+        self.package_json.as_deref()
+    }
+
+    pub fn pnpm_workspaces(&self) -> &[PathBuf] {
+        &self.pnpm_workspaces
+    }
+
+    pub fn eslint_config(&self) -> Option<&Path> {
+        self.eslint_config.as_deref()
+    }
+
+    pub fn stylelint_config(&self) -> Option<&Path> {
+        self.stylelint_config.as_deref()
+    }
+
+    pub fn tsconfig_base(&self) -> Option<&Path> {
+        self.tsconfig_base.as_deref()
+    }
+
+    pub fn npmrc(&self) -> Option<&Path> {
+        self.npmrc.as_deref()
+    }
+
+    pub fn jscpd_config(&self) -> Option<&Path> {
+        self.jscpd_config.as_deref()
+    }
+
+    pub fn cspell_config(&self) -> Option<&Path> {
+        self.cspell_config.as_deref()
+    }
+
+    pub fn prettier_config(&self) -> Option<&Path> {
+        self.prettier_config.as_deref()
+    }
+
+    pub fn rust_toolchains(&self) -> &[PathBuf] {
+        &self.rust_toolchains
+    }
+
+    pub fn release_plz_tomls(&self) -> &[PathBuf] {
+        &self.release_plz_tomls
+    }
+
+    pub fn cliff_tomls(&self) -> &[PathBuf] {
+        &self.cliff_tomls
+    }
+
+    pub fn pre_commit_hooks(&self) -> &[PathBuf] {
+        &self.pre_commit_hooks
+    }
+
+    pub fn license_files(&self) -> &[PathBuf] {
+        &self.license_files
+    }
+
+    pub fn claude_mds(&self) -> &[PathBuf] {
+        &self.claude_mds
+    }
+
+    pub fn cargo_mutants_tomls(&self) -> &[PathBuf] {
+        &self.cargo_mutants_tomls
+    }
+
+    pub fn github_workflows(&self) -> &[PathBuf] {
+        &self.github_workflows
+    }
+}
+
+impl ShadowWarning {
+    pub fn shadow_file(&self) -> &Path {
+        &self.shadow_file
+    }
+
+    pub fn scope_root(&self) -> &Path {
+        &self.scope_root
+    }
+
+    pub fn affected_member(&self) -> &Path {
+        &self.affected_member
+    }
+
+    pub const fn file_type(&self) -> &'static str {
+        self.file_type
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -394,12 +606,13 @@ fn build_ts_scopes(root: &Path, crawl: &CrawlResult) -> Vec<TsScope> {
     scopes
 }
 
-#[allow(clippy::disallowed_methods)] // reason: serde_json::from_str for package.json inspection — internal tool, not user input
 fn read_package_name(path: &Path) -> String {
+    use std::str::FromStr as _;
+
     let Some(content) = guardrail3_shared_fs::read_file(path) else {
         return "unknown".to_owned();
     };
-    let Ok(json) = serde_json::from_str::<serde_json::Value>(&content) else {
+    let Ok(json) = serde_json::Value::from_str(&content) else {
         return "unknown".to_owned();
     };
     json.get("name")
@@ -501,6 +714,10 @@ fn detect_shadows(
         }
 
         let scope_abs = root.join(&scope.root);
+        let context = ShadowCheckContext {
+            project_root: root,
+            scope_root_rel: &scope.root,
+        };
 
         for member in &scope.members {
             let member_abs = root.join(&member.dir);
@@ -512,8 +729,7 @@ fn detect_shadows(
                 &scope_abs,
                 &crawl.clippy_tomls,
                 "clippy.toml",
-                root,
-                &scope.root,
+                &context,
                 &member.dir,
                 &mut warnings,
             );
@@ -522,8 +738,7 @@ fn detect_shadows(
                 &scope_abs,
                 &crawl.rustfmt_tomls,
                 "rustfmt.toml",
-                root,
-                &scope.root,
+                &context,
                 &member.dir,
                 &mut warnings,
             );
@@ -535,14 +750,12 @@ fn detect_shadows(
 
 /// Check if any file in `all_files` sits between `from` (crate dir) and `to` (scope root),
 /// exclusive of `to` itself (the scope root config is expected).
-#[allow(clippy::too_many_arguments)] // reason: shadow detection needs from/to/files/type/root/scope/member/warnings context
 fn check_shadow_between(
     from: &Path,
     to: &Path,
     all_files: &[PathBuf],
     file_type: &'static str,
-    project_root: &Path,
-    scope_root: &Path,
+    context: &ShadowCheckContext<'_>,
     member_dir: &Path,
     warnings: &mut Vec<ShadowWarning>,
 ) {
@@ -560,13 +773,18 @@ fn check_shadow_between(
         // (i.e., it's BETWEEN the crate and the workspace root)
         if from.starts_with(file_dir) && file_dir.starts_with(to) {
             warnings.push(ShadowWarning {
-                shadow_file: relative_to(project_root, file),
-                scope_root: scope_root.to_path_buf(),
+                shadow_file: relative_to(context.project_root, file),
+                scope_root: context.scope_root_rel.to_path_buf(),
                 affected_member: member_dir.to_path_buf(),
                 file_type,
             });
         }
     }
+}
+
+struct ShadowCheckContext<'a> {
+    project_root: &'a Path,
+    scope_root_rel: &'a Path,
 }
 
 // ---------------------------------------------------------------------------

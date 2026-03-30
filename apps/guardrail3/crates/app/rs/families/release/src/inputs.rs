@@ -2,8 +2,9 @@ use super::facts::{
     PublishableCrateFacts, ReleaseEdgeFacts, ReleaseInputFailureFacts, RepoReleaseFacts,
 };
 
+#[derive(Debug)]
 pub struct RepoReleaseInput<'a> {
-    pub repo: &'a RepoReleaseFacts,
+    pub(crate) repo: &'a RepoReleaseFacts,
 }
 
 impl<'a> RepoReleaseInput<'a> {
@@ -12,8 +13,9 @@ impl<'a> RepoReleaseInput<'a> {
     }
 }
 
+#[derive(Debug)]
 pub struct PublishableCrateReleaseInput<'a> {
-    pub krate: &'a PublishableCrateFacts,
+    pub(crate) krate: &'a PublishableCrateFacts,
 }
 
 impl<'a> PublishableCrateReleaseInput<'a> {
@@ -22,8 +24,9 @@ impl<'a> PublishableCrateReleaseInput<'a> {
     }
 }
 
+#[derive(Debug)]
 pub struct ReleaseEdgeInput<'a> {
-    pub edge: &'a ReleaseEdgeFacts,
+    pub(crate) edge: &'a ReleaseEdgeFacts,
 }
 
 impl<'a> ReleaseEdgeInput<'a> {
@@ -32,8 +35,9 @@ impl<'a> ReleaseEdgeInput<'a> {
     }
 }
 
+#[derive(Debug)]
 pub struct ReleaseInputFailureInput<'a> {
-    pub failure: &'a ReleaseInputFailureFacts,
+    pub(crate) failure: &'a ReleaseInputFailureFacts,
 }
 
 impl<'a> ReleaseInputFailureInput<'a> {

@@ -5,15 +5,15 @@ use super::inputs::ScopedArchConfigInput;
 const ID: &str = "RS-ARCH-05";
 
 pub fn check(input: &ScopedArchConfigInput<'_>, results: &mut Vec<CheckResult>) {
-    results.push(CheckResult {
-        id: ID.to_owned(),
-        severity: Severity::Error,
-        title: "Scoped `arch` config is forbidden".to_owned(),
-        message: input.failure.message.clone(),
-        file: Some(input.failure.rel_path.clone()),
-        line: None,
-        inventory: false,
-    });
+    results.push(CheckResult::from_parts(
+        ID.to_owned(),
+        Severity::Error,
+        "Scoped `arch` config is forbidden".to_owned(),
+        input.failure.message.clone(),
+        Some(input.failure.rel_path.clone()),
+        None,
+        false,
+    ));
 }
 
 pub fn check_success(
@@ -26,17 +26,16 @@ pub fn check_success(
     }
 
     results.push(
-        CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Info,
-            title: "arch config remains global-only".to_owned(),
-            message:
-                "No forbidden scoped `arch` configuration was found under app or package sections."
-                    .to_owned(),
-            file: None,
-            line: None,
-            inventory: false,
-        }
+        CheckResult::from_parts(
+            ID.to_owned(),
+            Severity::Info,
+            "arch config remains global-only".to_owned(),
+            "No forbidden scoped `arch` configuration was found under app or package sections."
+                .to_owned(),
+            None,
+            None,
+            false,
+        )
         .as_inventory(),
     );
 }

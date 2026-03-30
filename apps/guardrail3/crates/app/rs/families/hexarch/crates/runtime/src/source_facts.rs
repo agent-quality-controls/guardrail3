@@ -5,7 +5,7 @@ use guardrail3_domain_project_tree::ProjectTree;
 use super::dependency_facts::MemberDependencyFacts;
 
 #[derive(Debug, Clone)]
-pub struct SourceCrateFacts {
+pub(crate) struct SourceCrateFacts {
     pub crate_name: String,
     pub rel_dir: String,
     pub layer: Option<super::dependency_facts::Layer>,

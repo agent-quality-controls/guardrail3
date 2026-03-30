@@ -10,6 +10,7 @@
 
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
+use std::str::FromStr as _;
 
 use guardrail3_app_core::crawl::CrawlResult;
 
@@ -41,8 +42,7 @@ impl CoverageTool for CspellCoverage {
             return serde_json::json!({});
         };
         // Try to parse as JSON to get word count
-        #[allow(clippy::disallowed_methods)] // reason: parsing config file, not untrusted input
-        if let Ok(json) = serde_json::from_str::<serde_json::Value>(&content) {
+        if let Ok(json) = serde_json::Value::from_str(&content) {
             let words = json
                 .get("words")
                 .and_then(|w| w.as_array())

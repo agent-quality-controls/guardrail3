@@ -1,0 +1,12 @@
+[package]
+name = "guardrail3-app-rs-family-libarch-assertions"
+version = "0.0.0"
+edition = "2024"
+
+[lints]
+workspace = true
+
+[dependencies]
+guardrail3_app_rs_family_libarch = { package = "guardrail3-app-rs-family-libarch", path = "../runtime" }
+guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../../../../../domain/report" }
+

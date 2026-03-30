@@ -11,15 +11,15 @@ pub fn check(input: &RustfmtExtraConfigInput, results: &mut Vec<CheckResult>) {
         RustfmtConfigKind::DotRustfmtToml => ".rustfmt.toml",
     };
 
-    results.push(CheckResult {
-        id: ID.to_owned(),
-        severity: Severity::Warn,
-        title: "Per-crate rustfmt override".to_owned(),
-        message: format!("{kind} below workspace root overrides root formatting policy"),
-        file: Some(input.config_rel.clone()),
-        line: None,
-        inventory: false,
-    });
+    results.push(CheckResult::from_parts(
+    ID.to_owned(),
+    Severity::Warn,
+    "Per-crate rustfmt override".to_owned(),
+    format!("{kind} below workspace root overrides root formatting policy"),
+    Some(input.config_rel.clone()),
+    None,
+    false,
+    ));
 }
 
 #[cfg(test)]

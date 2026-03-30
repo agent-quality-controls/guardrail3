@@ -1,10 +1,10 @@
 use super::*;
+use std::str::FromStr as _;
 
 #[test]
-#[allow(clippy::disallowed_methods)] // reason: test — parsing generated JSON to verify structure
 fn cspell_config_is_valid_json() {
     let json = build_cspell_config();
-    let parsed = serde_json::from_str::<serde_json::Value>(&json);
+    let parsed = serde_json::Value::from_str(&json);
     assert!(
         parsed.is_ok(),
         "cspell config must be valid JSON: {parsed:?}"
@@ -39,5 +39,5 @@ fn cspell_config_is_valid_json() {
 
 #[test]
 fn cspell_module_matches_builder() {
-    assert_eq!(CSPELL_CONFIG.content, build_cspell_config());
+    assert_eq!(CSPELL_CONFIG.content(), build_cspell_config());
 }

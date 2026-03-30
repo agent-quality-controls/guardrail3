@@ -4,23 +4,23 @@ use super::facts::{
 };
 
 pub struct ConfigDenyInput<'a> {
-    pub config: &'a DenyConfigFacts,
+    pub(crate) config: &'a DenyConfigFacts,
 }
 
 pub struct CoveredRustUnitInput<'a> {
-    pub covered: &'a CoveredRustUnitFacts,
+    pub(crate) covered: &'a CoveredRustUnitFacts,
 }
 
 pub struct ForbiddenDenyConfigInput<'a> {
-    pub forbidden: &'a ForbiddenDenyConfigFacts,
+    pub(crate) forbidden: &'a ForbiddenDenyConfigFacts,
 }
 
 pub struct SameRootConflictInput<'a> {
-    pub conflict: &'a SameRootConflictFacts,
+    pub(crate) conflict: &'a SameRootConflictFacts,
 }
 
 pub struct UncoveredRustUnitInput<'a> {
-    pub uncovered: &'a UncoveredRustUnitFacts,
+    pub(crate) uncovered: &'a UncoveredRustUnitFacts,
 }
 
 impl<'a> ConfigDenyInput<'a> {

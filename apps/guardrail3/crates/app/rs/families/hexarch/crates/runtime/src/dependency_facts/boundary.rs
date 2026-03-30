@@ -64,13 +64,12 @@ pub(super) fn parse_guardrail_config(
     match toml::from_str::<GuardrailConfig>(content) {
         Ok(config) => GuardrailConfigSnapshot {
             parsed: Some(ParsedGuardrailConfig {
-                root_profile_name: config.profile.map(|profile| profile.name),
+                root_profile_name: config.profile().map(|profile| profile.name().to_owned()),
                 app_configs: config
-                    .rust
-                    .as_ref()
-                    .and_then(|rust| rust.apps.clone())
+                    .rust()
+                    .and_then(|rust| rust.apps().cloned())
                     .unwrap_or_default(),
-                packages_config: config.rust.and_then(|rust| rust.packages),
+                packages_config: config.rust().and_then(|rust| rust.packages().cloned()),
             }),
             parse_error: None,
             app_config_names: raw_app_config_names,

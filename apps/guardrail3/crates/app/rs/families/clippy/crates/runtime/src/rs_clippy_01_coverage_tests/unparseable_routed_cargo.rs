@@ -1,4 +1,4 @@
-use guardrail3_domain_report::Severity;
+use guardrail3_app_rs_family_clippy_assertions::rs_clippy_01_coverage as assertions;
 use test_support::{build_fixture_clippy_toml, create_dir_all, create_temp_dir, write_file};
 
 use super::super::run_for_tests;
@@ -24,30 +24,5 @@ fn errors_when_a_routed_cargo_root_cannot_be_parsed() {
     );
 
     let results = run_for_tests(tmp.path());
-    let failures = results
-        .iter()
-        .filter(|result| {
-            result.id == "RS-CLIPPY-01"
-                && result.severity == Severity::Error
-                && result.title == "Rust unit coverage could not be determined"
-        })
-        .collect::<Vec<_>>();
-
-    assert_eq!(failures.len(), 1);
-    let result = failures[0];
-    assert_eq!(result.title, "Rust unit coverage could not be determined");
-    assert_eq!(result.file.as_deref(), Some("apps/backend/Cargo.toml"));
-    assert!(
-        result
-            .message
-            .contains("routed Cargo root `apps/backend` could not be parsed"),
-        "expected routed-root parse failure message: {result:#?}"
-    );
-    assert!(
-        result
-            .message
-            .contains("while resolving clippy coverage and policy roots"),
-        "expected coverage/root-resolution context: {result:#?}"
-    );
-    assert!(!result.inventory);
+    assertions::assert_unparseable_routed_cargo_root(&results, "apps/backend/Cargo.toml");
 }

@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use guardrail3_app_rs_family_mapper::{FamilyMapper, RsTestRoute};
+use guardrail3_app_rs_family_mapper::RsTestRoute;
 pub use guardrail3_domain_report::{CheckResult, Severity};
 
 mod analysis;
@@ -8,34 +8,55 @@ mod discover;
 mod facts;
 mod inputs;
 mod parse;
+#[path = "structure/rs_test_01_inline_test_bodies.rs"]
 mod rs_test_01_inline_test_bodies;
+#[path = "structure/rs_test_02_owned_sidecar_shape.rs"]
 mod rs_test_02_owned_sidecar_shape;
+#[path = "structure/rs_test_03_runtime_assertions_split.rs"]
 mod rs_test_03_runtime_assertions_split;
+#[path = "assertion_quality/rs_test_04_ignore_reason.rs"]
 mod rs_test_04_ignore_reason;
+#[path = "assertion_quality/rs_test_05_should_panic_expected.rs"]
 mod rs_test_05_should_panic_expected;
+#[path = "assertion_quality/rs_test_06_tautological_assertions.rs"]
 mod rs_test_06_tautological_assertions;
+#[path = "assertion_quality/rs_test_07_real_proof_site.rs"]
 mod rs_test_07_real_proof_site;
+#[path = "assertion_quality/rs_test_08_weak_matches_assert.rs"]
 mod rs_test_08_weak_matches_assert;
+#[path = "mutation/rs_test_09_nextest_timeouts.rs"]
 mod rs_test_09_nextest_timeouts;
+#[path = "mutation/rs_test_10_input_failures.rs"]
 mod rs_test_10_input_failures;
+#[path = "mutation/rs_test_11_cargo_mutants_installed.rs"]
 mod rs_test_11_cargo_mutants_installed;
+#[path = "mutation/rs_test_12_mutants_toml_exists.rs"]
 mod rs_test_12_mutants_toml_exists;
+#[path = "mutation/rs_test_13_mutants_profile_present.rs"]
 mod rs_test_13_mutants_profile_present;
+#[path = "mutation/rs_test_14_mutation_hook_present.rs"]
 mod rs_test_14_mutation_hook_present;
+#[path = "mutation/rs_test_15_mutants_config_sane.rs"]
 mod rs_test_15_mutants_config_sane;
+#[path = "structure/rs_test_16_assertions_modules_prove.rs"]
 mod rs_test_16_assertions_modules_prove;
+#[path = "structure/rs_test_17_external_harnesses_use_assertions.rs"]
 mod rs_test_17_external_harnesses_use_assertions;
+#[path = "structure/rs_test_18_test_support_generic.rs"]
 mod rs_test_18_test_support_generic;
 
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_outbound_traits::ToolChecker;
+
+#[cfg(test)]
+use guardrail3_app_rs_family_mapper::FamilyMapper;
+#[cfg(test)]
 use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
-pub(crate) use self::analysis::AnalyzedFile;
 use self::facts::TestFileKind;
 
 pub fn check(tree: &ProjectTree, route: &RsTestRoute, tc: &dyn ToolChecker) -> Vec<CheckResult> {
-    let facts = discover::collect(tree, &route.roots, tc);
+    let facts = discover::collect(tree, route.roots(), tc);
     let mut results = Vec::new();
     let discovered_root_dirs = facts
         .roots
@@ -49,11 +70,14 @@ pub fn check(tree: &ProjectTree, route: &RsTestRoute, tc: &dyn ToolChecker) -> V
         .filter(|failure| failure.rel_path.ends_with("Cargo.toml"))
         .filter(|failure| !discovered_root_dirs.contains(failure.root_rel_dir.as_str()))
     {
-        rs_test_10_input_failures::check(&inputs::InputFailureTestInput::new(failure), &mut results);
+        rs_test_10_input_failures::check(
+            &inputs::InputFailureTestInput::new(failure),
+            &mut results,
+        );
     }
 
     for root in &facts.roots {
-        let analysis = analysis::analyze_root(tree, root, &facts, route.scoped_files.as_ref());
+        let analysis = analysis::analyze_root(tree, root, &facts, route.scoped_files());
         let mutation_active =
             root.mutants_exists || root.has_mutants_profile || !root.mutation_hook_files.is_empty();
         let mut had_root_input_failures = false;
@@ -65,9 +89,13 @@ pub fn check(tree: &ProjectTree, route: &RsTestRoute, tc: &dyn ToolChecker) -> V
             &root.mutation_hook_files,
         );
 
-        for failure in analysis::active_failures_for_root(&facts, root, &analysis, mutation_active) {
+        for failure in analysis::active_failures_for_root(&facts, root, &analysis, mutation_active)
+        {
             had_root_input_failures = true;
-            rs_test_10_input_failures::check(&inputs::InputFailureTestInput::new(failure), &mut results);
+            rs_test_10_input_failures::check(
+                &inputs::InputFailureTestInput::new(failure),
+                &mut results,
+            );
         }
 
         if analysis.has_tests {
@@ -75,14 +103,14 @@ pub fn check(tree: &ProjectTree, route: &RsTestRoute, tc: &dyn ToolChecker) -> V
                 tree,
                 root,
                 &analysis.files,
-                route.scoped_files.as_ref(),
+                route.scoped_files(),
                 &mut results,
             );
 
             rs_test_03_runtime_assertions_split::collect(
                 root,
                 &analysis.files,
-                route.scoped_files.as_ref(),
+                route.scoped_files(),
                 &facts.local_package_names,
                 &mut results,
             );
@@ -179,6 +207,7 @@ pub fn check(tree: &ProjectTree, route: &RsTestRoute, tc: &dyn ToolChecker) -> V
     results
 }
 
+#[cfg(test)]
 pub fn check_test_tree(tree: &ProjectTree, tc: &dyn ToolChecker) -> Vec<CheckResult> {
     let scope = guardrail3_app_rs_placement::collect(tree);
     let selection = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Test]));

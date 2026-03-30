@@ -75,8 +75,16 @@ The highest-value audit fixes already landed:
 - `cfg_attr` truth is conservative and recursive instead of fail-open
 - `#[expect(...)]` is owned with `#[allow(...)]`
 - `garde(skip)` exemptions are explicit rather than suffix-based
-- `RS-CODE-25` measures reachable public API rather than raw `pub` tokens
+- `RS-CODE-33` is the sole firing path for weak public error forms, and legacy `RS-CODE-25` stays non-firing to avoid overlap
 - `RS-CODE-23` still allows legitimate `OUT_DIR` includes but no longer blesses upward traversal
+
+Recent inventory completion also landed:
+
+- `RS-CODE-31` forbids reachable public structs with named `pub` fields
+- `RS-CODE-33` owns weak public error forms across `String`, `&str`, `anyhow::Error`, and `Box<dyn Error>`
+- `RS-CODE-34` caps type/const generic parameter count at 6
+- `RS-CODE-35` enforces per-root structural caps
+- `RS-CODE-36` caps large string-dispatch sites in non-test code
 
 The next work is still a mix of real repo debt cleanup and adversarial auditing:
 
@@ -105,8 +113,8 @@ apps/guardrail3/crates/app/rs/families/code/
         rs_code_01_*_tests/
           mod.rs
         ...
-        rs_code_30_*.rs
-        rs_code_30_*_tests/
+        rs_code_36_*.rs
+        rs_code_36_*_tests/
           mod.rs
     assertions/
       Cargo.toml

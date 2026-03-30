@@ -20,15 +20,15 @@ pub fn check(input: &ToolchainRootInput<'_>, results: &mut Vec<CheckResult>) {
 
     let Some(parsed) = input.parsed else {
         if let Some(parse_error) = input.parse_error {
-            results.push(CheckResult {
-                id: ID.to_owned(),
-                severity: Severity::Error,
-                title: "rust-toolchain.toml parse error".to_owned(),
-                message: format!("Invalid TOML: {parse_error}"),
-                file: Some(rel.to_owned()),
-                line: None,
-                inventory: false,
-            });
+            results.push(CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Error,
+                "rust-toolchain.toml parse error".to_owned(),
+                format!("Invalid TOML: {parse_error}"),
+                Some(rel.to_owned()),
+                None,
+                false,
+            ));
         }
         return;
     };
@@ -49,27 +49,27 @@ fn toolchain_table<'a>(
     match parsed.get("toolchain") {
         Some(toml::Value::Table(toolchain)) => Some(toolchain),
         Some(_) => {
-            results.push(CheckResult {
-                id: ID.to_owned(),
-                severity: Severity::Error,
-                title: "toolchain table is invalid".to_owned(),
-                message: "`rust-toolchain.toml` must define `[toolchain]` as a table.".to_owned(),
-                file: Some(rel.to_owned()),
-                line: None,
-                inventory: false,
-            });
+            results.push(CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Error,
+                "toolchain table is invalid".to_owned(),
+                "`rust-toolchain.toml` must define `[toolchain]` as a table.".to_owned(),
+                Some(rel.to_owned()),
+                None,
+                false,
+            ));
             None
         }
         None => {
-            results.push(CheckResult {
-                id: ID.to_owned(),
-                severity: Severity::Error,
-                title: "toolchain table missing".to_owned(),
-                message: "Add a `[toolchain]` table with `channel` and `components`.".to_owned(),
-                file: Some(rel.to_owned()),
-                line: None,
-                inventory: false,
-            });
+            results.push(CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Error,
+                "toolchain table missing".to_owned(),
+                "Add a `[toolchain]` table with `channel` and `components`.".to_owned(),
+                Some(rel.to_owned()),
+                None,
+                false,
+            ));
             None
         }
     }
@@ -81,35 +81,35 @@ fn check_channel(toolchain: &toml::value::Table, rel: &str, results: &mut Vec<Ch
     match channel_value {
         Some(toml::Value::String(channel)) => match classify_channel(channel) {
             ChannelKind::Stable => results.push(
-                CheckResult {
-                    id: ID.to_owned(),
-                    severity: Severity::Info,
-                    title: "toolchain channel is stable".to_owned(),
-                    message: "channel = \"stable\".".to_owned(),
-                    file: Some(rel.to_owned()),
-                    line: None,
-                    inventory: false,
-                }
+                CheckResult::from_parts(
+                    ID.to_owned(),
+                    Severity::Info,
+                    "toolchain channel is stable".to_owned(),
+                    "channel = \"stable\".".to_owned(),
+                    Some(rel.to_owned()),
+                    None,
+                    false,
+                )
                 .as_inventory(),
             ),
-            ChannelKind::Nightly => results.push(CheckResult {
-                id: ID.to_owned(),
-                severity: Severity::Error,
-                title: "toolchain channel is nightly".to_owned(),
-                message: "Use `channel = \"stable\"` or a pinned stable version.".to_owned(),
-                file: Some(rel.to_owned()),
-                line: None,
-                inventory: false,
-            }),
-            ChannelKind::Beta => results.push(CheckResult {
-                id: ID.to_owned(),
-                severity: Severity::Error,
-                title: "toolchain channel is beta".to_owned(),
-                message: "Use `channel = \"stable\"` or a pinned stable version.".to_owned(),
-                file: Some(rel.to_owned()),
-                line: None,
-                inventory: false,
-            }),
+            ChannelKind::Nightly => results.push(CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Error,
+                "toolchain channel is nightly".to_owned(),
+                "Use `channel = \"stable\"` or a pinned stable version.".to_owned(),
+                Some(rel.to_owned()),
+                None,
+                false,
+            )),
+            ChannelKind::Beta => results.push(CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Error,
+                "toolchain channel is beta".to_owned(),
+                "Use `channel = \"stable\"` or a pinned stable version.".to_owned(),
+                Some(rel.to_owned()),
+                None,
+                false,
+            )),
             ChannelKind::PinnedStable => results.push(
                 CheckResult {
                     id: ID.to_owned(),
@@ -218,15 +218,15 @@ fn check_components(toolchain: &toml::value::Table, rel: &str, results: &mut Vec
                 .iter()
                 .all(|component| component.as_str().is_some())
             {
-                results.push(CheckResult {
-                    id: ID.to_owned(),
-                    severity: Severity::Error,
-                    title: "toolchain components are invalid".to_owned(),
-                    message: "`[toolchain].components` must be an array of strings.".to_owned(),
-                    file: Some(rel.to_owned()),
-                    line: None,
-                    inventory: false,
-                });
+                results.push(CheckResult::from_parts(
+                    ID.to_owned(),
+                    Severity::Error,
+                    "toolchain components are invalid".to_owned(),
+                    "`[toolchain].components` must be an array of strings.".to_owned(),
+                    Some(rel.to_owned()),
+                    None,
+                    false,
+                ));
                 return;
             }
 
@@ -234,27 +234,27 @@ fn check_components(toolchain: &toml::value::Table, rel: &str, results: &mut Vec
             for expected in ["clippy", "rustfmt"] {
                 if names.contains(&expected) {
                     results.push(
-                        CheckResult {
-                            id: ID.to_owned(),
-                            severity: Severity::Info,
-                            title: format!("toolchain component `{expected}` present"),
-                            message: format!("`{expected}` is listed in `components`."),
-                            file: Some(rel.to_owned()),
-                            line: None,
-                            inventory: false,
-                        }
+                        CheckResult::from_parts(
+                            ID.to_owned(),
+                            Severity::Info,
+                            format!("toolchain component `{expected}` present"),
+                            format!("`{expected}` is listed in `components`."),
+                            Some(rel.to_owned()),
+                            None,
+                            false,
+                        )
                         .as_inventory(),
                     );
                 } else {
-                    results.push(CheckResult {
-                        id: ID.to_owned(),
-                        severity: Severity::Warn,
-                        title: format!("toolchain component `{expected}` missing"),
-                        message: format!("Add `{expected}` to `[toolchain].components`."),
-                        file: Some(rel.to_owned()),
-                        line: None,
-                        inventory: false,
-                    });
+                    results.push(CheckResult::from_parts(
+                        ID.to_owned(),
+                        Severity::Warn,
+                        format!("toolchain component `{expected}` missing"),
+                        format!("Add `{expected}` to `[toolchain].components`."),
+                        Some(rel.to_owned()),
+                        None,
+                        false,
+                    ));
                 }
             }
         }

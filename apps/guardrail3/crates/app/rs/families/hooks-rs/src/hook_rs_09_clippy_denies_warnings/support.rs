@@ -68,57 +68,20 @@ fn lint_effect_from_tokens(tokens: &[&str]) -> LintEffect {
     let mut i = 0usize;
 
     while i < tokens.len() {
-        match tokens[i] {
-            "-D" | "--deny" => {
-                if tokens.get(i + 1) == Some(&"warnings") {
-                    warnings_level = Some("deny");
-                    i += 1;
-                }
-            }
-            "-A" | "--allow" => {
-                if tokens.get(i + 1) == Some(&"warnings") {
-                    warnings_level = Some("allow");
-                    i += 1;
-                }
-            }
-            "-W" | "--warn" => {
-                if tokens.get(i + 1) == Some(&"warnings") {
-                    warnings_level = Some("warn");
-                    i += 1;
-                }
-            }
-            "--force-warn" => {
-                if tokens.get(i + 1) == Some(&"warnings") {
-                    effect.softened = true;
-                    i += 1;
-                }
-            }
-            "-F" | "--forbid" => {
-                if tokens.get(i + 1) == Some(&"warnings") {
-                    warnings_level = Some("forbid");
-                    i += 1;
-                }
-            }
-            "--cap-lints" => {
-                if let Some(value) = tokens.get(i + 1) {
-                    if !matches!(*value, "deny" | "forbid") {
-                        effect.softened = true;
-                    }
-                    i += 1;
-                }
-            }
-            "-Dwarnings" | "--deny=warnings" => warnings_level = Some("deny"),
-            "-Awarnings" | "--allow=warnings" => warnings_level = Some("allow"),
-            "-Wwarnings" | "--warn=warnings" => warnings_level = Some("warn"),
-            "--force-warn=warnings" => effect.softened = true,
-            "-Fwarnings" | "--forbid=warnings" => warnings_level = Some("forbid"),
-            token if token.starts_with("--cap-lints=") => {
-                let value = token.trim_start_matches("--cap-lints=");
-                if !matches!(value, "deny" | "forbid") {
-                    effect.softened = true;
-                }
-            }
-            _ => {}
+        let token = tokens[i];
+        if let Some(level) = split_warning_level(token, tokens.get(i + 1).copied()) {
+            warnings_level = Some(level);
+            i += 1;
+        } else if split_force_warn(token, tokens.get(i + 1).copied()) {
+            effect.softened = true;
+            i += 1;
+        } else if soften_from_split_cap_lints(token, tokens.get(i + 1).copied()) {
+            effect.softened = true;
+            i += 1;
+        } else if let Some(level) = inline_warning_level(token) {
+            warnings_level = Some(level);
+        } else if inline_force_warn(token) || soften_from_inline_cap_lints(token) {
+            effect.softened = true;
         }
         i += 1;
     }
@@ -130,6 +93,45 @@ fn lint_effect_from_tokens(tokens: &[&str]) -> LintEffect {
     }
 
     effect
+}
+
+fn split_warning_level(token: &str, next: Option<&str>) -> Option<&'static str> {
+    let level = match token {
+        "-D" | "--deny" => "deny",
+        "-A" | "--allow" => "allow",
+        "-W" | "--warn" => "warn",
+        "-F" | "--forbid" => "forbid",
+        _ => return None,
+    };
+    (next == Some("warnings")).then_some(level)
+}
+
+fn split_force_warn(token: &str, next: Option<&str>) -> bool {
+    token == "--force-warn" && next == Some("warnings")
+}
+
+fn soften_from_split_cap_lints(token: &str, next: Option<&str>) -> bool {
+    token == "--cap-lints" && next.is_some_and(|value| !matches!(value, "deny" | "forbid"))
+}
+
+fn inline_warning_level(token: &str) -> Option<&'static str> {
+    match token {
+        "-Dwarnings" | "--deny=warnings" => Some("deny"),
+        "-Awarnings" | "--allow=warnings" => Some("allow"),
+        "-Wwarnings" | "--warn=warnings" => Some("warn"),
+        "-Fwarnings" | "--forbid=warnings" => Some("forbid"),
+        _ => None,
+    }
+}
+
+fn inline_force_warn(token: &str) -> bool {
+    token == "--force-warn=warnings"
+}
+
+fn soften_from_inline_cap_lints(token: &str) -> bool {
+    token
+        .strip_prefix("--cap-lints=")
+        .is_some_and(|value| !matches!(value, "deny" | "forbid"))
 }
 
 pub(super) fn apply_inline_assignment(token: &str, env_state: &mut EnvState) {

@@ -10,6 +10,7 @@
 
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
+use std::str::FromStr as _;
 
 use guardrail3_app_core::crawl::CrawlResult;
 
@@ -40,8 +41,7 @@ impl CoverageTool for JscpdCoverage {
         let Some(content) = guardrail3_shared_fs::read_file(config_path) else {
             return serde_json::json!({});
         };
-        #[allow(clippy::disallowed_methods)] // reason: parsing config file
-        if let Ok(json) = serde_json::from_str::<serde_json::Value>(&content) {
+        if let Ok(json) = serde_json::Value::from_str(&content) {
             let threshold = json
                 .get("threshold")
                 .and_then(serde_json::Value::as_u64)

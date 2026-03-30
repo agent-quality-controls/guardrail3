@@ -7,43 +7,43 @@ const ID: &str = "RS-ARCH-01";
 
 pub fn check(input: &RootClassificationInput<'_>, results: &mut Vec<CheckResult>) {
     if input.root.classification == RustRootClassification::Ambiguous {
-        results.push(CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Error,
-            title: format!(
+        results.push(CheckResult::from_parts(
+            ID.to_owned(),
+            Severity::Error,
+            format!(
                 "Rust root `{}` has ambiguous architecture classification",
                 display_dir(&input.root.rel_dir)
             ),
-            message: format!(
+            format!(
                 "`{}` matches multiple architecture zones. app candidates: [{}]; package candidates: [{}]. Each discovered Rust root must classify as exactly one of app, package, or other.",
                 input.root.cargo_rel_path,
                 input.root.app_zone_candidates.join(", "),
                 input.root.package_zone_candidates.join(", "),
             ),
-            file: Some(input.root.cargo_rel_path.clone()),
-            line: None,
-            inventory: false,
-        });
+            Some(input.root.cargo_rel_path.clone()),
+            None,
+            false,
+        ));
         return;
     }
 
     results.push(
-        CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Info,
-            title: format!(
+        CheckResult::from_parts(
+            ID.to_owned(),
+            Severity::Info,
+            format!(
                 "Rust root `{}` classification is unambiguous",
                 display_dir(&input.root.rel_dir)
             ),
-            message: format!(
+            format!(
                 "`{}` classifies cleanly as `{}`.",
                 input.root.cargo_rel_path,
                 classification_label(input.root.classification),
             ),
-            file: Some(input.root.cargo_rel_path.clone()),
-            line: None,
-            inventory: false,
-        }
+            Some(input.root.cargo_rel_path.clone()),
+            None,
+            false,
+        )
         .as_inventory(),
     );
 }

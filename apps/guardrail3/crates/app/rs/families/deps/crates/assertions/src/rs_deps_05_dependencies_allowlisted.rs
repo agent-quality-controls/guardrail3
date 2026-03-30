@@ -5,7 +5,7 @@ pub fn assert_broad_dependency_attack_summary(results: &[guardrail3_domain_repor
         .iter()
         .filter(|result| {
             matches!(
-                result.id.as_str(),
+                result.id()()()().as_str(),
                 "RS-DEPS-05" | "RS-DEPS-06" | "RS-DEPS-07"
             )
         })

@@ -3,8 +3,8 @@
 //! These functions parse Rust source into an AST and inspect it
 //! structurally — no grep, no false positives from strings/comments.
 
-use proc_macro2 as _; // reason: span-locations feature needed for syn span.start()
 use super::{ast_visitors, extra_visitors};
+use proc_macro2 as _; // reason: span-locations feature needed for syn span.start()
 
 pub use super::ast_visitors::{
     GardeSkipInfo, struct_has_non_exempt_fields, struct_has_non_primitive_fields,
@@ -127,6 +127,18 @@ pub fn find_cfg_attr_allows(file: &syn::File) -> Vec<CfgAttrAllowInfo> {
     let mut v = ast_visitors::CfgAttrAllowVisitor { out: &mut out };
     syn::visit::Visit::visit_file(&mut v, file);
     out
+}
+
+/// Snapshot the first cfg_attr allow into plain values for test assertions.
+pub fn cfg_attr_allow_snapshot(
+    allows: &[CfgAttrAllowInfo],
+) -> (usize, Option<(usize, String, bool)>) {
+    (
+        allows.len(),
+        allows
+            .first()
+            .map(|allow| (allow.line, allow.lint.clone(), allow.is_always_true)),
+    )
 }
 
 /// Find lines with `#[garde(skip)]`.
@@ -414,7 +426,6 @@ pub fn is_cfg_test_attr(attr: &syn::Attribute) -> bool {
 }
 
 /// Extract the identifier (name) from a syn Item, if it has one.
-#[allow(clippy::wildcard_enum_match_arm)] // reason: syn Item has many variants, exhaustive match is impractical
 pub(super) const fn item_ident(item: &syn::Item) -> Option<&syn::Ident> {
     match item {
         syn::Item::Fn(f) => Some(&f.sig.ident),
@@ -425,11 +436,18 @@ pub(super) const fn item_ident(item: &syn::Item) -> Option<&syn::Ident> {
         syn::Item::Type(t) => Some(&t.ident),
         syn::Item::Const(c) => Some(&c.ident),
         syn::Item::Static(s) => Some(&s.ident),
+        syn::Item::ExternCrate(e) => Some(&e.ident),
+        syn::Item::TraitAlias(t) => Some(&t.ident),
+        syn::Item::Union(u) => Some(&u.ident),
+        syn::Item::ForeignMod(_)
+        | syn::Item::Impl(_)
+        | syn::Item::Macro(_)
+        | syn::Item::Use(_)
+        | syn::Item::Verbatim(_) => None,
         _ => None,
     }
 }
 
-#[allow(clippy::wildcard_enum_match_arm)] // reason: syn Item has many variants, exhaustive match is impractical
 pub(super) fn item_attrs(item: &syn::Item) -> &[syn::Attribute] {
     match item {
         syn::Item::Fn(f) => &f.attrs,
@@ -443,22 +461,27 @@ pub(super) fn item_attrs(item: &syn::Item) -> &[syn::Attribute] {
         syn::Item::Static(s) => &s.attrs,
         syn::Item::Use(u) => &u.attrs,
         syn::Item::ForeignMod(f) => &f.attrs,
+        syn::Item::ExternCrate(e) => &e.attrs,
+        syn::Item::Macro(m) => &m.attrs,
+        syn::Item::TraitAlias(t) => &t.attrs,
+        syn::Item::Union(u) => &u.attrs,
+        syn::Item::Verbatim(_) => &[],
         _ => &[],
     }
 }
 
-#[allow(clippy::wildcard_enum_match_arm)] // reason: syn ImplItem has many variants, exhaustive match is impractical
 pub(super) fn impl_item_attrs(item: &syn::ImplItem) -> &[syn::Attribute] {
     match item {
         syn::ImplItem::Fn(f) => &f.attrs,
         syn::ImplItem::Type(t) => &t.attrs,
         syn::ImplItem::Const(c) => &c.attrs,
+        syn::ImplItem::Macro(m) => &m.attrs,
+        syn::ImplItem::Verbatim(_) => &[],
         _ => &[],
     }
 }
 
 /// Extract attributes from an expression (if the variant carries them).
-#[allow(clippy::wildcard_enum_match_arm)] // reason: syn Expr has many variants, exhaustive match is impractical
 pub(super) fn expr_attrs(expr: &syn::Expr) -> &[syn::Attribute] {
     match expr {
         syn::Expr::Array(e) => &e.attrs,
@@ -496,8 +519,10 @@ pub(super) fn expr_attrs(expr: &syn::Expr) -> &[syn::Attribute] {
         syn::Expr::Tuple(e) => &e.attrs,
         syn::Expr::Unary(e) => &e.attrs,
         syn::Expr::Unsafe(e) => &e.attrs,
+        syn::Expr::Verbatim(_) => &[],
         syn::Expr::While(e) => &e.attrs,
         syn::Expr::Yield(e) => &e.attrs,
+        syn::Expr::Infer(e) => &e.attrs,
         _ => &[],
     }
 }

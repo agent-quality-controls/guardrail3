@@ -6,12 +6,12 @@ use guardrail3_adapters_outbound_report as report;
 use guardrail3_adapters_outbound_tool_runner::RealToolChecker;
 
 mod app_deps {
-    pub(super) use guardrail3_app_core::{crawl, project_walker};
     #[cfg(feature = "product-hooks")]
     pub(super) use guardrail3_app_core::discover;
-    pub(super) use guardrail3_app_rs_runtime as rs;
+    pub(super) use guardrail3_app_core::{crawl, project_walker, validation_target};
     #[cfg(feature = "product-hooks")]
     pub(super) use guardrail3_app_hooks as hooks;
+    pub(super) use guardrail3_app_rs_runtime as rs;
     #[cfg(feature = "product-ts")]
     pub(super) use guardrail3_app_ts as ts;
 }
@@ -23,9 +23,9 @@ mod cli_types {
 }
 
 mod domain_types {
-    pub(super) use guardrail3_domain_report::Report;
     #[cfg(feature = "product-ts")]
     pub(super) use guardrail3_domain_config::types::GuardrailConfig;
+    pub(super) use guardrail3_domain_report::Report;
     #[cfg(feature = "product-ts")]
     pub(super) use guardrail3_domain_report::{TsCheckCategories, ValidateDomains};
 }
@@ -76,7 +76,7 @@ fn main() {
         }
     };
 
-    match cli.command {
+    match cli.into_command() {
         cli_types::Commands::Rs { command } => handle_rs(command),
         #[cfg(feature = "product-ts")]
         cli_types::Commands::Ts { command } => handle_ts(command),
@@ -181,16 +181,13 @@ fn run_coverage_maps(
     }
 }
 
-fn resolve_path_for_dump(path_str: &str) -> Result<std::path::PathBuf, String> {
-    let path = std::path::Path::new(path_str);
-    path.canonicalize()
-        .map_err(|error| format!("Error: cannot resolve path '{path_str}': {error}"))
-}
-
 fn handle_dump_tree(path_str: &str) -> Result<String, String> {
-    let resolved = resolve_path_for_dump(path_str)?;
+    let resolved = app_deps::validation_target::resolve_validation_target(std::path::Path::new(
+        path_str,
+    ))
+    .map_err(|error| error.to_string())?;
     let fs = RealFileSystem;
-    let tree = app_deps::project_walker::walk_project(&fs, &resolved);
+    let tree = app_deps::project_walker::walk_project(&fs, resolved.project_root());
     serde_json::to_string_pretty(&tree).map_err(|error| format!("Error serializing tree: {error}"))
 }
 
@@ -218,8 +215,8 @@ fn handle_rs(command: cli_types::RsCommands) {
         #[cfg(feature = "product-rs-generate")]
         cli_types::RsCommands::Generate(args) => {
             validate_or_exit(&args);
-            if args.dry_run {
-                commands::diff::run(&args.path, args.dump_dir.as_deref());
+            if args.dry_run() {
+                commands::diff::run(args.path(), args.dump_dir());
             } else {
                 commands::generate::run_rs(&args);
             }
@@ -227,12 +224,12 @@ fn handle_rs(command: cli_types::RsCommands) {
         cli_types::RsCommands::Validate(args) => {
             validate_or_exit(&args);
             let report = run_rs_validate(&args);
-            print_report(&args.format, args.inventory, args.verbose, &report);
+            print_report(args.format(), args.inventory(), args.verbose(), &report);
         }
         #[cfg(feature = "product-rs-generate")]
         cli_types::RsCommands::Check(args) => {
             validate_or_exit(&args);
-            commands::check::run(&args.path);
+            commands::check::run(args.path());
         }
         #[cfg(feature = "product-rs-generate")]
         cli_types::RsCommands::HooksInstall(args) => {
@@ -244,9 +241,9 @@ fn handle_rs(command: cli_types::RsCommands) {
         }
         cli_types::RsCommands::ShowModule(args) => {
             validate_or_exit(&args);
-            match commands::modules_cmd::show_module(&args.name) {
+            match commands::modules_cmd::show_module(args.name()) {
                 Ok(output) => print_stdout(&output),
-                Err(message) => exit_with_error(&message, 1),
+                Err(error) => exit_with_error(&error.to_string(), 1),
             }
         }
     }
@@ -265,15 +262,15 @@ fn handle_ts(command: cli_types::TsCommands) {
         }
         cli_types::TsCommands::Generate(args) => {
             validate_or_exit(&args);
-            if args.dry_run {
-                commands::diff::run_ts(&args.path, args.dump_dir.as_deref());
+            if args.dry_run() {
+                commands::diff::run_ts(args.path(), args.dump_dir());
             } else {
                 commands::generate::run_ts(&args);
             }
         }
         cli_types::TsCommands::Validate(args) => {
             validate_or_exit(&args);
-            let path = resolve_path(&args.path);
+            let path = resolve_path(args.path());
             let fs = RealFileSystem;
             let cfg = load_config(&fs, &path);
             let categories = build_ts_categories(&args, &fs, &path);
@@ -287,7 +284,7 @@ fn handle_ts(command: cli_types::TsCommands) {
                 cfg.as_ref(),
                 &crawl,
             );
-            print_report(&args.format, args.inventory, args.verbose, &report);
+            print_report(args.format(), args.inventory(), args.verbose(), &report);
         }
         cli_types::TsCommands::HooksInstall(args) => {
             validate_or_exit(&args);
@@ -296,7 +293,7 @@ fn handle_ts(command: cli_types::TsCommands) {
         #[cfg(feature = "product-hooks")]
         cli_types::TsCommands::HooksValidate(args) => {
             validate_or_exit(&args);
-            let path = resolve_path(&args.path);
+            let path = resolve_path(args.path());
             let fs = RealFileSystem;
             let tc = RealToolChecker;
             let domains = domains_from_args(&args);
@@ -306,30 +303,42 @@ fn handle_ts(command: cli_types::TsCommands) {
                 &fs,
                 &path,
                 false,
-                project.has_typescript,
+                project.has_typescript(),
                 &domains,
                 &tc,
                 &crawl,
             );
-            print_report(&args.format, args.inventory, args.verbose, &report);
+            print_report(args.format(), args.inventory(), args.verbose(), &report);
         }
     }
 }
 
 fn run_rs_validate(args: &cli_types::RsValidateArgs) -> domain_types::Report {
-    let path = resolve_path(&args.path);
+    let target = match app_deps::validation_target::resolve_validation_target(std::path::Path::new(
+        args.path(),
+    )) {
+        Ok(target) => target,
+        Err(error) => {
+            eprintln!("{error}");
+            std::process::exit(1);
+        }
+    };
     let fs = RealFileSystem;
     let tc = RealToolChecker;
-    let families: Vec<_> = args.families.iter().copied().map(Into::into).collect();
-    let scoped_files = commands::validate::resolve_scoped_files_pub(args, &path);
-    let normalized_scope =
-        commands::validate::normalize_scoped_files(&path, scoped_files.as_deref());
+    let families: Vec<_> = args.families().iter().copied().map(Into::into).collect();
+    let scoped_files = commands::validate::resolve_scoped_files_pub(args, target.project_root());
+    let normalized_scope = commands::validate::normalize_scoped_files(
+        target.project_root(),
+        target.requested_path(),
+        scoped_files.as_deref(),
+    );
     match app_deps::rs::run(
         &fs,
-        &path,
+        target.project_root(),
+        target.scope_rel(),
         normalized_scope.as_ref(),
         &families,
-        args.thorough,
+        args.thorough(),
         &tc,
     ) {
         Ok(report) => report,
@@ -371,26 +380,9 @@ fn exit_with_error(message: &str, code: i32) -> ! {
     std::process::exit(code);
 }
 
-#[allow(clippy::disallowed_methods, clippy::print_stderr)] // reason: CLI — process::exit + error output
-fn resolve_path(path_str: &str) -> std::path::PathBuf {
-    let path = std::path::Path::new(path_str);
-    match path.canonicalize() {
-        Ok(p) => p,
-        Err(_) => {
-            eprintln!("Error: cannot resolve path '{path_str}'");
-            std::process::exit(1);
-        }
-    }
-}
-
 #[cfg(feature = "product-ts")]
 const fn domains_from_args(_args: &cli_types::TsValidateArgs) -> domain_types::ValidateDomains {
-    domain_types::ValidateDomains {
-        code: true,
-        architecture: true,
-        release: true,
-        tests: true,
-    }
+    domain_types::ValidateDomains::new(true, true, true, true)
 }
 
 /// Load guardrail3.toml config, if present.
@@ -414,21 +406,19 @@ fn build_ts_categories(
     let cfg = load_config(fs, path);
     let checks = cfg
         .as_ref()
-        .and_then(|c| c.typescript.as_ref())
-        .and_then(|t| t.checks.as_ref());
+        .and_then(|config| config.typescript())
+        .and_then(|typescript| typescript.checks());
 
     let ts_defaults = domain_types::TsCheckCategories::default();
     let cfg_arch = checks
-        .and_then(|c| c.architecture)
-        .unwrap_or(ts_defaults.architecture);
+        .and_then(|check_set| check_set.architecture())
+        .unwrap_or(ts_defaults.architecture());
     let cfg_content = checks
-        .and_then(|c| c.content)
-        .unwrap_or(ts_defaults.content);
-    let cfg_tests = checks.and_then(|c| c.tests).unwrap_or(ts_defaults.tests);
+        .and_then(|check_set| check_set.content())
+        .unwrap_or(ts_defaults.content());
+    let cfg_tests = checks
+        .and_then(|check_set| check_set.tests())
+        .unwrap_or(ts_defaults.tests());
 
-    domain_types::TsCheckCategories {
-        architecture: cfg_arch,
-        content: cfg_content,
-        tests: cfg_tests,
-    }
+    domain_types::TsCheckCategories::new(cfg_arch, cfg_content, cfg_tests)
 }

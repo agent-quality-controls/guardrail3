@@ -36,7 +36,7 @@ fn script_contains_guardrail_step_matching(
     parsed: &ParsedShellScript<'_>,
     predicate: fn(&str) -> bool,
 ) -> bool {
-    parsed.executable_lines.iter().any(|line| {
+    parsed.executable_lines().iter().any(|line| {
         executable_line_or_called_function_contains_guardrail(
             line,
             parsed,
@@ -54,11 +54,11 @@ fn executable_line_or_called_function_contains_guardrail(
     visiting: &mut Vec<String>,
     predicate: fn(&str) -> bool,
 ) -> bool {
-    if line_contains_command(line.raw, line.command_text, predicate) {
+    if line_contains_command(line.raw(), line.command_text(), predicate) {
         return true;
     }
 
-    called_function_contains_guardrail(line.command_name, root, visiting, predicate)
+    called_function_contains_guardrail(line.command_name(), root, visiting, predicate)
 }
 
 fn called_function_contains_guardrail(
@@ -68,19 +68,19 @@ fn called_function_contains_guardrail(
     predicate: fn(&str) -> bool,
 ) -> bool {
     let Some(function) = root
-        .functions
+        .functions()
         .iter()
-        .find(|function| function.name == command_name)
+        .find(|function| function.name() == command_name)
     else {
         return false;
     };
-    if visiting.iter().any(|name| name == &function.name) {
+    if visiting.iter().any(|name| name == &function.name()) {
         return false;
     }
 
-    visiting.push(function.name.clone());
-    let body_parsed = parse_script(&function.body);
-    let found = body_parsed.executable_lines.iter().any(|line| {
+    visiting.push(function.name().to_owned());
+    let body_parsed = parse_script(&function.body());
+    let found = body_parsed.executable_lines().iter().any(|line| {
         executable_line_or_called_function_contains_guardrail(
             line,
             &body_parsed,
@@ -104,27 +104,27 @@ fn push_presence_result(
 ) {
     if found {
         results.push(
-            CheckResult {
-                id: ID.to_owned(),
-                severity: Severity::Info,
-                title: ok_title.to_owned(),
-                message: ok_message.to_owned(),
-                file: Some(rel_path.to_owned()),
-                line: None,
-                inventory: false,
-            }
+            CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Info,
+                ok_title.to_owned(),
+                ok_message.to_owned(),
+                Some(rel_path.to_owned()),
+                None,
+                false,
+            )
             .as_inventory(),
         );
     } else {
-        results.push(CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Warn,
-            title: missing_title.to_owned(),
-            message: missing_message.to_owned(),
-            file: Some(rel_path.to_owned()),
-            line: None,
-            inventory: false,
-        });
+        results.push(CheckResult::from_parts(
+            ID.to_owned(),
+            Severity::Warn,
+            missing_title.to_owned(),
+            missing_message.to_owned(),
+            Some(rel_path.to_owned()),
+            None,
+            false,
+        ));
     }
 }
 
@@ -203,7 +203,7 @@ fn split_command_segments(raw: &str) -> Vec<CommandSegment> {
                     (index + 1 == pieces.len())
                         .then_some(trailing_operator)
                         .flatten()
-                }),
+                )),
             }
         })
         .filter(|segment| !segment.text.is_empty())
@@ -819,5 +819,5 @@ pub(super) fn run_case(content: &str) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-#[path = "hook_rs_08_guardrail_validate_staged_present_tests/mod.rs"]
+#[path = "tests/steps/hook_rs_08_guardrail_validate_staged_present_tests/mod.rs"]
 mod hook_rs_08_guardrail_validate_staged_present_tests;

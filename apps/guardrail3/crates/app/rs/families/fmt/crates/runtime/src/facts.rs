@@ -26,12 +26,12 @@ pub enum ToolchainChannelState {
 
 #[derive(Debug, Clone)]
 pub struct RustfmtFacts {
-    pub root_config_rel: Option<String>,
-    pub root_parsed: Option<toml::Value>,
-    pub extra_config_rels: Vec<String>,
-    pub dual_file_conflict_dirs: Vec<String>,
-    pub cargo_edition: CargoEditionState,
-    pub toolchain_channel: ToolchainChannelState,
+    pub(crate) root_config_rel: Option<String>,
+    pub(crate) root_parsed: Option<toml::Value>,
+    pub(crate) extra_config_rels: Vec<String>,
+    pub(crate) dual_file_conflict_dirs: Vec<String>,
+    pub(crate) cargo_edition: CargoEditionState,
+    pub(crate) toolchain_channel: ToolchainChannelState,
 }
 
 pub fn collect(tree: &ProjectTree) -> RustfmtFacts {
@@ -40,7 +40,7 @@ pub fn collect(tree: &ProjectTree) -> RustfmtFacts {
     let mut extra_config_rels = Vec::new();
     let mut dual_file_conflict_dirs = Vec::new();
 
-    for (dir_rel, entry) in &tree.structure {
+    for (dir_rel, entry) in tree.structure() {
         let has_rustfmt = entry.has_file("rustfmt.toml");
         let has_dot_rustfmt = entry.has_file(".rustfmt.toml");
 
@@ -70,7 +70,8 @@ pub fn collect(tree: &ProjectTree) -> RustfmtFacts {
     if let Some(rel) = &root_config_rel {
         root_parsed = tree
             .file_content(rel)
-            .and_then(|content| toml::from_str::<toml::Value>(content).ok());
+            .and_then(|content| toml::from_str::<toml::Value>(content).ok())
+            .filter(toml::Value::is_table);
     }
 
     RustfmtFacts {

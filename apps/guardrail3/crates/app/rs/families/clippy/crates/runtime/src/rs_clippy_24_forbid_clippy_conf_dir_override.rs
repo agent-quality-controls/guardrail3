@@ -8,15 +8,15 @@ const ID: &str = "RS-CLIPPY-24";
 
 pub fn check_clean(results: &mut Vec<CheckResult>) {
     results.push(
-        CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Info,
-            title: "no clippy config dir overrides found".to_owned(),
-            message: "No applicable cargo config surfaces set `CLIPPY_CONF_DIR`.".to_owned(),
-            file: None,
-            line: None,
-            inventory: false,
-        }
+        CheckResult::from_parts(
+            ID.to_owned(),
+            Severity::Info,
+            "no clippy config dir overrides found".to_owned(),
+            "No applicable cargo config surfaces set `CLIPPY_CONF_DIR`.".to_owned(),
+            None,
+            None,
+            false,
+        )
         .as_inventory(),
     );
 }

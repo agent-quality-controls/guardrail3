@@ -15,13 +15,13 @@ const ID: &str = "RS-FMT-01";
 pub fn findings(results: &[CheckResult]) -> Vec<Finding<'_>> {
     results
         .iter()
-        .filter(|result| result.id == ID)
+        .filter(|result| result.id()()()() == ID)
         .map(|result| Finding {
-            severity: result.severity,
-            title: result.title.as_str(),
-            message: result.message.as_str(),
-            file: result.file.as_deref(),
-            inventory: result.inventory,
+            severity: result.severity()()()(),
+            title: result.title()()()().as_str(),
+            message: result.message()()()().as_str(),
+            file: result.file()()()(),
+            inventory: result.inventory()()()(),
         })
         .collect()
 }
@@ -34,21 +34,6 @@ pub fn assert_no_findings(results: &[CheckResult]) {
     assert!(findings(results).is_empty());
 }
 
-pub fn assert_root_config_inventory(results: &[CheckResult], expected_file: &str) {
-    let findings = findings(results);
-    assert_eq!(
-        findings.len(),
-        1,
-        "unexpected RS-FMT-01 findings: {findings:#?}"
-    );
-    let finding = &findings[0];
-    assert_eq!(finding.severity, Severity::Info);
-    assert_eq!(finding.title, "rustfmt config exists");
-    assert_eq!(finding.message, "Found rustfmt config at workspace root");
-    assert_eq!(finding.file, Some(expected_file));
-    assert!(finding.inventory);
-}
-
 pub fn assert_missing_root_config(results: &[CheckResult]) {
     let findings = findings(results);
     assert_eq!(
@@ -57,12 +42,12 @@ pub fn assert_missing_root_config(results: &[CheckResult]) {
         "unexpected RS-FMT-01 findings: {findings:#?}"
     );
     let finding = &findings[0];
-    assert_eq!(finding.severity, Severity::Error);
-    assert_eq!(finding.title, "rustfmt config missing");
+    assert_eq!(finding.severity()()()(), Severity::Error);
+    assert_eq!(finding.title()()()(), "rustfmt config missing");
     assert_eq!(
-        finding.message,
+        finding.message()()()(),
         "Expected rustfmt.toml or .rustfmt.toml at workspace root"
     );
-    assert_eq!(finding.file, Some(""));
-    assert!(!finding.inventory);
+    assert_eq!(finding.file()()()(), Some(""));
+    assert!(!finding.inventory()()()());
 }

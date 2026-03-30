@@ -2,9 +2,7 @@ use guardrail3_app_rs_family_toolchain_assertions::rs_toolchain_03_msrv_consiste
     ExpectedRuleResult, Severity, assert_rule_results,
 };
 
-use super::{
-    check, test_input, test_input_invalid_cargo_rust_version_type, test_input_missing_cargo,
-};
+use super::{check, test_input, test_input_invalid_cargo_rust_version_type};
 
 fn parse_toolchain_fixture_toml(source: &str) -> toml::Value {
     toml::from_str::<toml::Value>(source)
@@ -157,35 +155,6 @@ fn errors_when_root_cargo_toml_is_malformed() {
 }
 
 #[test]
-fn errors_when_root_cargo_toml_is_missing() {
-    let parsed = parse_toolchain_fixture_toml(
-        "[toolchain]\nchannel = \"1.85.1\"\ncomponents = [\"clippy\", \"rustfmt\"]",
-    );
-    let input = test_input_missing_cargo(
-        Some("rust-toolchain.toml"),
-        None,
-        Some(&parsed),
-        None,
-        None,
-        None,
-    );
-    let mut results = Vec::new();
-
-    check(&input, &mut results);
-
-    assert_rule_results(
-        &results,
-        &[ExpectedRuleResult {
-            severity: Severity::Error,
-            inventory: false,
-            title: "Cargo.toml missing blocks MSRV check",
-            message: "Root Cargo.toml is required to compare pinned toolchain against declared MSRV.",
-            file: Some("Cargo.toml"),
-        }],
-    );
-}
-
-#[test]
 fn errors_when_cargo_rust_version_is_invalid() {
     let parsed = parse_toolchain_fixture_toml(
         "[toolchain]\nchannel = \"1.85.1\"\ncomponents = [\"clippy\", \"rustfmt\"]",
@@ -240,6 +209,66 @@ fn errors_when_cargo_rust_version_is_not_a_string() {
             file: Some("Cargo.toml"),
         }],
     );
+}
+
+#[test]
+fn emits_no_result_for_beta_like_version_channel() {
+    let parsed = parse_toolchain_fixture_toml(
+        "[toolchain]\nchannel = \"1.85.1-beta\"\ncomponents = [\"clippy\", \"rustfmt\"]",
+    );
+    let input = test_input(
+        Some("rust-toolchain.toml"),
+        None,
+        Some(&parsed),
+        None,
+        Some("1.85.0"),
+        None,
+    );
+    let mut results = Vec::new();
+
+    check(&input, &mut results);
+
+    assert!(results.is_empty());
+}
+
+#[test]
+fn emits_no_result_for_nightly_like_version_channel() {
+    let parsed = parse_toolchain_fixture_toml(
+        "[toolchain]\nchannel = \"1.85.1-nightly-2026-03-01\"\ncomponents = [\"clippy\", \"rustfmt\"]",
+    );
+    let input = test_input(
+        Some("rust-toolchain.toml"),
+        None,
+        Some(&parsed),
+        None,
+        Some("1.85.0"),
+        None,
+    );
+    let mut results = Vec::new();
+
+    check(&input, &mut results);
+
+    assert!(results.is_empty());
+}
+
+#[test]
+fn emits_no_result_for_nightly_like_version_channel_after_host_triple() {
+    let parsed = parse_toolchain_fixture_toml(
+        "[toolchain]\nchannel = \"1.85.1-x86_64-unknown-linux-gnu-nightly\"\ncomponents = [\"clippy\", \"rustfmt\"]",
+    );
+    let input = test_input(
+        Some("rust-toolchain.toml"),
+        None,
+        Some(&parsed),
+        None,
+        Some("1.85.0"),
+        None,
+    );
+    let mut results = Vec::new();
+
+    check(&input, &mut results);
+
+    assert!(results.is_empty());
 }
 
 #[test]

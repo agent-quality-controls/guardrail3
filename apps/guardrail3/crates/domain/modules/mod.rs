@@ -10,9 +10,35 @@ pub mod stylelint;
 
 #[derive(Debug)]
 pub struct Module {
-    pub name: &'static str,
-    pub description: &'static str,
-    pub content: &'static str,
+    name: &'static str,
+    description: &'static str,
+    content: &'static str,
+}
+
+impl Module {
+    #[must_use]
+    pub const fn new(name: &'static str, description: &'static str, content: &'static str) -> Self {
+        Self {
+            name,
+            description,
+            content,
+        }
+    }
+
+    #[must_use]
+    pub const fn name(&self) -> &'static str {
+        self.name
+    }
+
+    #[must_use]
+    pub const fn description(&self) -> &'static str {
+        self.description
+    }
+
+    #[must_use]
+    pub const fn content(&self) -> &'static str {
+        self.content
+    }
 }
 
 /// Returns all registered modules across all categories.
@@ -73,7 +99,7 @@ pub fn all_modules() -> Vec<&'static Module> {
 
 /// Find a module by name.
 pub fn find_module(name: &str) -> Option<&'static Module> {
-    all_modules().into_iter().find(|m| m.name == name)
+    all_modules().into_iter().find(|m| m.name() == name)
 }
 
 /// Remove override entries that already exist in the base content.

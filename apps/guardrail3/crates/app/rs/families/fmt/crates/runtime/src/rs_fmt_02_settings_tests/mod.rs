@@ -1,6 +1,6 @@
 use guardrail3_app_rs_family_fmt_assertions::rs_fmt_02_settings as assertions;
 
-use super::run_check;
+use super::{run_check, run_family};
 
 fn parse_rustfmt_settings_fixture(source: &str) -> toml::Value {
     toml::from_str::<toml::Value>(source).expect("RS-FMT-02 test fixture rustfmt TOML should parse")
@@ -9,6 +9,30 @@ fn parse_rustfmt_settings_fixture(source: &str) -> toml::Value {
 #[test]
 fn reports_parse_errors_directly() {
     let results = run_check(None);
+
+    assertions::assert_count(&results, 1);
+    assertions::assert_parse_error(&results, "rustfmt.toml");
+}
+
+#[test]
+fn reports_non_table_root_configs_as_parse_errors() {
+    let fixture = tempfile::tempdir().expect("fixture setup should create a temporary directory");
+    let root = fixture.path();
+
+    std::fs::write(root.join("rustfmt.toml"), "\"2024\"\n")
+        .expect("fixture setup should write scalar rustfmt.toml");
+    std::fs::write(
+        root.join("Cargo.toml"),
+        "[workspace]\nmembers = []\nresolver = \"2\"\n\n[workspace.package]\nedition = \"2024\"\n",
+    )
+    .expect("fixture setup should write Cargo.toml");
+    std::fs::write(
+        root.join("rust-toolchain.toml"),
+        "[toolchain]\nchannel = \"stable\"\n",
+    )
+    .expect("fixture setup should write rust-toolchain.toml");
+
+    let results = run_family(root);
 
     assertions::assert_count(&results, 1);
     assertions::assert_parse_error(&results, "rustfmt.toml");

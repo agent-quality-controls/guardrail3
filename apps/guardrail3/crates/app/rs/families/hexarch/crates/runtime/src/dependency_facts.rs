@@ -85,92 +85,90 @@ impl EdgeKind {
 
 #[derive(Debug, Clone)]
 pub struct WorkspaceFacts {
-    pub root_rel_dir: String,
-    pub member_dirs: Vec<String>,
-    pub workspace_dependencies: toml::map::Map<String, toml::Value>,
-    pub patch_entries: Vec<PatchEntryFacts>,
+    pub(crate) root_rel_dir: String,
+    pub(crate) member_dirs: Vec<String>,
+    pub(crate) workspace_dependencies: toml::map::Map<String, toml::Value>,
+    pub(crate) patch_entries: Vec<PatchEntryFacts>,
 }
 
 #[derive(Debug, Clone)]
 pub struct PatchEntryFacts {
-    pub cargo_rel_path: String,
-    pub key: String,
-    pub resolved_rel_dir: String,
-    pub target_layer: Option<Layer>,
+    pub(crate) cargo_rel_path: String,
+    pub(crate) key: String,
+    pub(crate) resolved_rel_dir: String,
+    pub(crate) target_layer: Option<Layer>,
 }
 
 #[derive(Debug, Clone)]
 pub struct MemberDependencyFacts {
-    pub name: String,
-    pub rel_dir: String,
-    pub cargo_rel_path: String,
-    pub cargo_parse_error: Option<String>,
-    pub workspace_root_rel_dir: Option<String>,
-    pub app_root_rel_dir: Option<String>,
-    pub layer: Option<Layer>,
-    pub allowed_deps: BTreeSet<String>,
+    pub(crate) name: String,
+    pub(crate) rel_dir: String,
+    pub(crate) cargo_rel_path: String,
+    pub(crate) cargo_parse_error: Option<String>,
+    pub(crate) workspace_root_rel_dir: Option<String>,
+    pub(crate) app_root_rel_dir: Option<String>,
+    pub(crate) layer: Option<Layer>,
+    pub(crate) allowed_deps: BTreeSet<String>,
 }
 
 #[derive(Debug, Clone)]
 pub struct MemberManifestFailureFacts {
-    pub name: String,
-    pub rel_dir: String,
-    pub cargo_rel_path: String,
-    pub app_root_rel_dir: Option<String>,
-    pub layer: Option<Layer>,
-    pub parse_error: String,
+    pub(crate) name: String,
+    pub(crate) rel_dir: String,
+    pub(crate) cargo_rel_path: String,
+    pub(crate) parse_error: String,
 }
 
 #[derive(Debug, Clone)]
 pub struct DependencyEdgeFacts {
-    pub source_name: String,
-    pub source_rel_dir: String,
-    pub source_cargo_rel_path: String,
-    pub source_layer: Option<Layer>,
-    pub source_app_root_rel_dir: Option<String>,
-    pub dep_alias: String,
-    pub dep_package_name: String,
-    pub kind: EdgeKind,
-    pub section_label: String,
-    pub resolved_target_rel_dir: Option<String>,
-    pub resolved_target_exists: bool,
-    pub resolved_target_is_member: bool,
-    pub target_layer: Option<Layer>,
-    pub target_app_root_rel_dir: Option<String>,
-    pub is_workspace_inherited: bool,
+    pub(crate) source_name: String,
+    pub(crate) source_rel_dir: String,
+    pub(crate) source_cargo_rel_path: String,
+    pub(crate) source_layer: Option<Layer>,
+    pub(crate) source_app_root_rel_dir: Option<String>,
+    pub(crate) dep_alias: String,
+    pub(crate) dep_package_name: String,
+    pub(crate) kind: EdgeKind,
+    pub(crate) section_label: String,
+    pub(crate) resolved_target_rel_dir: Option<String>,
+    pub(crate) resolved_target_exists: bool,
+    pub(crate) resolved_target_is_member: bool,
+    pub(crate) target_layer: Option<Layer>,
+    pub(crate) target_app_root_rel_dir: Option<String>,
+    pub(crate) is_workspace_inherited: bool,
 }
 
 #[derive(Debug, Clone)]
 pub struct BoundaryConfigFacts {
-    pub rel_dir: String,
-    pub has_config_entry: bool,
-    pub is_app_boundary: bool,
-    pub parse_error: Option<String>,
+    pub(crate) rel_dir: String,
+    pub(crate) has_config_entry: bool,
+    pub(crate) is_app_boundary: bool,
+    pub(crate) parse_error: Option<String>,
 }
 
 #[derive(Debug, Clone)]
 pub struct CycleFacts {
-    pub layer: Layer,
-    pub members: Vec<String>,
+    pub(crate) layer: Layer,
+    pub(crate) members: Vec<String>,
 }
 
 #[derive(Debug, Clone, Default)]
 pub struct DependencyFamilyFacts {
-    pub workspaces: Vec<WorkspaceFacts>,
-    pub members: Vec<MemberDependencyFacts>,
-    pub member_manifest_failures: Vec<MemberManifestFailureFacts>,
-    pub edges: Vec<DependencyEdgeFacts>,
-    pub boundary_configs: Vec<BoundaryConfigFacts>,
-    pub cycles: Vec<CycleFacts>,
+    pub(crate) workspaces: Vec<WorkspaceFacts>,
+    pub(crate) members: Vec<MemberDependencyFacts>,
+    pub(crate) member_manifest_failures: Vec<MemberManifestFailureFacts>,
+    pub(crate) edges: Vec<DependencyEdgeFacts>,
+    pub(crate) boundary_configs: Vec<BoundaryConfigFacts>,
+    pub(crate) cycles: Vec<CycleFacts>,
 }
 
 pub fn collect(tree: &ProjectTree, route: &RsHexarchRoute) -> DependencyFamilyFacts {
     let owned_app_roots = owned_app_roots(route);
-    let guardrail_config = parse_guardrail_config(tree, route.guardrail_config_rel_path.as_deref());
+    let guardrail_config = parse_guardrail_config(tree, route.guardrail_config_rel_path());
     let workspaces = discover_workspaces(
         tree,
         &owned_app_roots,
-        route.repo_root_cargo_rel_path.is_some(),
+        route.repo_root_cargo_rel_path().is_some(),
     );
     let workspace_for_member = best_workspace_for_member(&workspaces);
     let (members, member_manifest_failures) = collect_members(
@@ -206,14 +204,14 @@ pub(crate) fn collect_for_test_tree(tree: &ProjectTree) -> DependencyFamilyFacts
 
 fn owned_app_roots(route: &RsHexarchRoute) -> BTreeSet<String> {
     route
-        .roots
+        .roots()
         .iter()
         .filter_map(|root| {
-            let app_name = root.rel_dir.strip_prefix("apps/")?;
+            let app_name = root.rel_dir().strip_prefix("apps/")?;
             if app_name.contains('/') {
                 return None;
             }
-            Some(root.rel_dir.clone())
+            Some(root.rel_dir().to_owned())
         })
         .collect()
 }

@@ -19,6 +19,75 @@ pub struct CheckResult {
 }
 
 impl CheckResult {
+    #[must_use]
+    pub fn new(id: String, severity: Severity, title: String, message: String) -> Self {
+        Self {
+            id,
+            severity,
+            title,
+            message,
+            file: None,
+            line: None,
+            inventory: false,
+        }
+    }
+
+    #[must_use]
+    pub fn from_parts(
+        id: String,
+        severity: Severity,
+        title: String,
+        message: String,
+        file: Option<String>,
+        line: Option<usize>,
+        inventory: bool,
+    ) -> Self {
+        Self {
+            id,
+            severity,
+            title,
+            message,
+            file,
+            line,
+            inventory,
+        }
+    }
+
+    #[must_use]
+    pub fn with_file(mut self, file: String) -> Self {
+        self.file = Some(file);
+        self
+    }
+
+    #[must_use]
+    pub const fn with_line(mut self, line: usize) -> Self {
+        self.line = Some(line);
+        self
+    }
+
+    #[must_use]
+    pub fn with_optional_file(mut self, file: Option<String>) -> Self {
+        self.file = file;
+        self
+    }
+
+    #[must_use]
+    pub const fn with_optional_line(mut self, line: Option<usize>) -> Self {
+        self.line = line;
+        self
+    }
+
+    #[must_use]
+    pub fn with_optional_location(self, file: Option<String>, line: Option<usize>) -> Self {
+        self.with_optional_file(file).with_optional_line(line)
+    }
+
+    #[must_use]
+    pub const fn with_inventory(mut self, inventory: bool) -> Self {
+        self.inventory = inventory;
+        self
+    }
+
     /// Mark this result as inventory (hidden unless `--inventory` flag is set).
     /// Only use for passing/confirmation Info results — never for problems or audit trails.
     #[must_use]
@@ -26,29 +95,113 @@ impl CheckResult {
         self.inventory = true;
         self
     }
+
+    #[must_use]
+    pub fn id(&self) -> &str {
+        &self.id
+    }
+
+    #[must_use]
+    pub const fn severity(&self) -> Severity {
+        self.severity
+    }
+
+    #[must_use]
+    pub fn title(&self) -> &str {
+        &self.title
+    }
+
+    #[must_use]
+    pub fn message(&self) -> &str {
+        &self.message
+    }
+
+    #[must_use]
+    pub fn file(&self) -> Option<&str> {
+        self.file.as_deref()
+    }
+
+    #[must_use]
+    pub const fn line(&self) -> Option<usize> {
+        self.line
+    }
+
+    #[must_use]
+    pub const fn inventory(&self) -> bool {
+        self.inventory
+    }
 }
 
 #[derive(Debug, Clone)]
 pub struct Section {
-    pub name: String,
-    pub results: Vec<CheckResult>,
+    name: String,
+    results: Vec<CheckResult>,
+}
+
+impl Section {
+    #[must_use]
+    pub fn new(name: String, results: Vec<CheckResult>) -> Self {
+        Self { name, results }
+    }
+
+    #[must_use]
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
+    #[must_use]
+    pub fn results(&self) -> &[CheckResult] {
+        &self.results
+    }
 }
 
 #[derive(Debug)]
 pub struct Report {
-    pub project_path: String,
-    pub stacks: Vec<String>,
-    pub sections: Vec<Section>,
+    project_path: String,
+    stacks: Vec<String>,
+    sections: Vec<Section>,
 }
 
 /// Controls which validation domains are active.
 #[derive(Debug, Clone)]
 #[allow(clippy::struct_excessive_bools)] // reason: domain flags are independent toggles, not a state machine
 pub struct ValidateDomains {
-    pub code: bool,
-    pub architecture: bool,
-    pub release: bool,
-    pub tests: bool,
+    code: bool,
+    architecture: bool,
+    release: bool,
+    tests: bool,
+}
+
+impl ValidateDomains {
+    #[must_use]
+    pub const fn new(code: bool, architecture: bool, release: bool, tests: bool) -> Self {
+        Self {
+            code,
+            architecture,
+            release,
+            tests,
+        }
+    }
+
+    #[must_use]
+    pub const fn code(&self) -> bool {
+        self.code
+    }
+
+    #[must_use]
+    pub const fn architecture(&self) -> bool {
+        self.architecture
+    }
+
+    #[must_use]
+    pub const fn release(&self) -> bool {
+        self.release
+    }
+
+    #[must_use]
+    pub const fn tests(&self) -> bool {
+        self.tests
+    }
 }
 
 /// Resolved check categories for Rust validation.
@@ -56,11 +209,55 @@ pub struct ValidateDomains {
 #[derive(Debug, Clone)]
 #[allow(clippy::struct_excessive_bools)] // reason: check category flags are independent toggles, not a state machine
 pub struct RustCheckCategories {
-    pub architecture: bool,
-    pub garde: bool,
-    pub hooks: bool,
-    pub tests: bool,
-    pub release: bool,
+    architecture: bool,
+    garde: bool,
+    hooks: bool,
+    tests: bool,
+    release: bool,
+}
+
+impl RustCheckCategories {
+    #[must_use]
+    pub const fn new(
+        architecture: bool,
+        garde: bool,
+        hooks: bool,
+        tests: bool,
+        release: bool,
+    ) -> Self {
+        Self {
+            architecture,
+            garde,
+            hooks,
+            tests,
+            release,
+        }
+    }
+
+    #[must_use]
+    pub const fn architecture(&self) -> bool {
+        self.architecture
+    }
+
+    #[must_use]
+    pub const fn garde(&self) -> bool {
+        self.garde
+    }
+
+    #[must_use]
+    pub const fn hooks(&self) -> bool {
+        self.hooks
+    }
+
+    #[must_use]
+    pub const fn tests(&self) -> bool {
+        self.tests
+    }
+
+    #[must_use]
+    pub const fn release(&self) -> bool {
+        self.release
+    }
 }
 
 impl Default for RustCheckCategories {
@@ -86,6 +283,7 @@ pub const fn rust_validate_family_cli_name(family: RustValidateFamily) -> &'stat
         RustValidateFamily::Cargo => "cargo",
         RustValidateFamily::Code => "code",
         RustValidateFamily::Hexarch => "hexarch",
+        RustValidateFamily::Libarch => "libarch",
         RustValidateFamily::Deps => "deps",
         RustValidateFamily::Garde => "garde",
         RustValidateFamily::Test => "test",
@@ -106,6 +304,7 @@ pub const fn rust_validate_family_config_key(family: RustValidateFamily) -> &'st
         RustValidateFamily::Cargo => "cargo",
         RustValidateFamily::Code => "code",
         RustValidateFamily::Hexarch => "hexarch",
+        RustValidateFamily::Libarch => "libarch",
         RustValidateFamily::Deps => "deps",
         RustValidateFamily::Garde => "garde",
         RustValidateFamily::Test => "test",
@@ -124,18 +323,40 @@ pub const fn rust_validate_family_section_name(family: RustValidateFamily) -> &'
 /// Built by merging guardrail3.toml [typescript.checks] with CLI flags.
 #[derive(Debug, Clone)]
 pub struct TsCheckCategories {
-    pub architecture: bool,
-    pub content: bool,
-    pub tests: bool,
+    architecture: bool,
+    content: bool,
+    tests: bool,
+}
+
+impl TsCheckCategories {
+    #[must_use]
+    pub const fn new(architecture: bool, content: bool, tests: bool) -> Self {
+        Self {
+            architecture,
+            content,
+            tests,
+        }
+    }
+
+    #[must_use]
+    pub const fn architecture(&self) -> bool {
+        self.architecture
+    }
+
+    #[must_use]
+    pub const fn content(&self) -> bool {
+        self.content
+    }
+
+    #[must_use]
+    pub const fn tests(&self) -> bool {
+        self.tests
+    }
 }
 
 impl Default for TsCheckCategories {
     fn default() -> Self {
-        Self {
-            architecture: true,
-            content: true,
-            tests: true,
-        }
+        Self::new(true, true, true)
     }
 }
 
@@ -186,10 +407,47 @@ impl TsAppType {
 /// Resolved per-app context for TypeScript validation.
 #[derive(Debug, Clone)]
 pub struct TsAppContext {
-    pub name: String,
-    pub path: std::path::PathBuf,
-    pub app_type: TsAppType,
-    pub categories: TsCheckCategories,
+    name: String,
+    path: std::path::PathBuf,
+    app_type: TsAppType,
+    categories: TsCheckCategories,
+}
+
+impl TsAppContext {
+    #[must_use]
+    pub fn new(
+        name: String,
+        path: std::path::PathBuf,
+        app_type: TsAppType,
+        categories: TsCheckCategories,
+    ) -> Self {
+        Self {
+            name,
+            path,
+            app_type,
+            categories,
+        }
+    }
+
+    #[must_use]
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
+    #[must_use]
+    pub fn path(&self) -> &std::path::Path {
+        &self.path
+    }
+
+    #[must_use]
+    pub const fn app_type(&self) -> TsAppType {
+        self.app_type
+    }
+
+    #[must_use]
+    pub const fn categories(&self) -> &TsCheckCategories {
+        &self.categories
+    }
 }
 
 impl Report {
@@ -205,11 +463,26 @@ impl Report {
         self.sections.push(section);
     }
 
+    #[must_use]
+    pub fn project_path(&self) -> &str {
+        &self.project_path
+    }
+
+    #[must_use]
+    pub fn stacks(&self) -> &[String] {
+        &self.stacks
+    }
+
+    #[must_use]
+    pub fn sections(&self) -> &[Section] {
+        &self.sections
+    }
+
     fn count_by_severity(&self, severity: Severity) -> usize {
         self.sections
             .iter()
             .flat_map(|s| &s.results)
-            .filter(|r| r.severity == severity)
+            .filter(|r| r.severity() == severity)
             .count()
     }
 
@@ -217,7 +490,7 @@ impl Report {
         self.sections
             .iter()
             .flat_map(|s| &s.results)
-            .filter(|r| r.inventory)
+            .filter(|r| r.inventory())
             .count()
     }
 }

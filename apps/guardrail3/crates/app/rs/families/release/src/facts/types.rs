@@ -6,85 +6,84 @@ use crate::release_support::workflows::WorkflowAnalysis;
 
 #[derive(Debug, Clone)]
 pub struct RepoReleaseFacts {
-    pub cargo_rel_path: String,
-    pub license_rel_path: Option<String>,
-    pub release_plz_rel_path: String,
-    pub release_plz_exists: bool,
-    pub release_plz_parsed: Option<toml::Value>,
-    pub release_plz_package_names: BTreeSet<String>,
-    pub cliff_rel_path: String,
-    pub cliff_exists: bool,
-    pub cliff_parsed: Option<toml::Value>,
-    pub workflows: Vec<WorkflowFacts>,
-    pub publishable_crate_names: BTreeSet<String>,
-    pub publishable_binary_crate_names: BTreeSet<String>,
-    pub publishable_count: usize,
-    pub non_publishable_count: usize,
-    pub semver_checks_installed: bool,
-    pub publish_setting: Option<String>,
-    pub release_profile_settings: Vec<String>,
+    pub(crate) cargo_rel_path: String,
+    pub(crate) license_rel_path: Option<String>,
+    pub(crate) release_plz_rel_path: String,
+    pub(crate) release_plz_exists: bool,
+    pub(crate) release_plz_parsed: Option<toml::Value>,
+    pub(crate) release_plz_package_names: BTreeSet<String>,
+    pub(crate) cliff_rel_path: String,
+    pub(crate) cliff_exists: bool,
+    pub(crate) cliff_parsed: Option<toml::Value>,
+    pub(crate) workflows: Vec<WorkflowFacts>,
+    pub(crate) publishable_crate_names: BTreeSet<String>,
+    pub(crate) publishable_binary_crate_names: BTreeSet<String>,
+    pub(crate) publishable_count: usize,
+    pub(crate) non_publishable_count: usize,
+    pub(crate) semver_checks_installed: bool,
+    pub(crate) publish_setting: Option<String>,
+    pub(crate) release_profile_settings: Vec<String>,
 }
 
 #[derive(Debug, Clone)]
 pub struct WorkflowFacts {
-    pub rel_path: String,
-    pub analysis: WorkflowAnalysis,
+    pub(crate) rel_path: String,
+    pub(crate) analysis: WorkflowAnalysis,
 }
 
 #[derive(Debug, Clone)]
 pub struct PublishableCrateFacts {
-    pub name: String,
-    pub cargo_rel_path: String,
-    pub binary_target_names: BTreeSet<String>,
-    pub publishable: bool,
-    pub is_binary: bool,
-    pub is_library: bool,
-    pub description_present: bool,
-    pub license_present: bool,
-    pub repository_present: bool,
-    pub readme_declared_false: bool,
-    pub readme_rel_path: String,
-    pub readme_exists: bool,
-    pub readme_content: Option<String>,
-    pub keywords_count: Option<usize>,
-    pub categories_count: Option<usize>,
-    pub version_string: Option<String>,
-    pub workspace_version: bool,
-    pub version_valid: bool,
-    pub docs_rs_present: bool,
-    pub include_exclude_present: bool,
-    pub has_binstall_metadata: bool,
-    pub dry_run: Option<CommandRunResult>,
+    pub(crate) name: String,
+    pub(crate) cargo_rel_path: String,
+    pub(crate) binary_target_names: BTreeSet<String>,
+    pub(crate) publishable: bool,
+    pub(crate) is_binary: bool,
+    pub(crate) is_library: bool,
+    pub(crate) description_present: bool,
+    pub(crate) license_present: bool,
+    pub(crate) repository_present: bool,
+    pub(crate) readme_declared_false: bool,
+    pub(crate) readme_rel_path: String,
+    pub(crate) readme_exists: bool,
+    pub(crate) readme_content: Option<String>,
+    pub(crate) keywords_count: Option<usize>,
+    pub(crate) categories_count: Option<usize>,
+    pub(crate) version_string: Option<String>,
+    pub(crate) workspace_version: bool,
+    pub(crate) version_valid: bool,
+    pub(crate) docs_rs_present: bool,
+    pub(crate) include_exclude_present: bool,
+    pub(crate) has_binstall_metadata: bool,
+    pub(crate) dry_run: Option<CommandRunResult>,
 }
 
 #[derive(Debug, Clone)]
 pub struct ReleaseEdgeFacts {
-    pub crate_name: String,
-    pub cargo_rel_path: String,
-    pub dep_name: String,
-    #[allow(dead_code)]
-    pub dep_package_name: String,
-    pub section_label: String,
-    pub target_label: Option<String>,
-    pub has_path: bool,
-    pub dep_publishable: bool,
-    pub version_req: Option<String>,
-    pub actual_version: Option<String>,
-    pub version_satisfied: Option<bool>,
+    pub(crate) crate_name: String,
+    pub(crate) cargo_rel_path: String,
+    pub(crate) dep_name: String,
+    pub(crate) dep_package_name: String,
+    pub(crate) section_label: String,
+    pub(crate) target_label: Option<String>,
+    pub(crate) has_path: bool,
+    pub(crate) dep_publishable: bool,
+    pub(crate) version_req: Option<String>,
+    pub(crate) actual_version: Option<String>,
+    pub(crate) version_satisfied: Option<bool>,
 }
 
 #[derive(Debug, Clone)]
 pub struct ReleaseInputFailureFacts {
-    pub rel_path: String,
-    pub message: String,
+    pub(crate) rel_path: String,
+    pub(crate) message: String,
 }
 
 #[derive(Debug, Clone, Default)]
 pub struct ReleaseFacts {
-    pub repo: Vec<RepoReleaseFacts>,
-    pub crates: Vec<PublishableCrateFacts>,
-    pub edges: Vec<ReleaseEdgeFacts>,
-    pub input_failures: Vec<ReleaseInputFailureFacts>,
+    pub(crate) repo: Vec<RepoReleaseFacts>,
+    pub(crate) crates: Vec<PublishableCrateFacts>,
+    pub(crate) edges: Vec<ReleaseEdgeFacts>,
+    pub(crate) input_failures: Vec<ReleaseInputFailureFacts>,
 }
 
 #[derive(Debug, Clone)]

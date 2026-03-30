@@ -1,30 +1,42 @@
+mod comments;
+mod policy;
+
 use std::collections::{BTreeMap, BTreeSet};
 
 use guardrail3_app_rs_family_mapper::RsCodeRoute;
-use guardrail3_domain_config::types::GuardrailConfig;
 use guardrail3_domain_project_tree::ProjectTree;
 
 use super::discover::{is_test_root_path, rust_file_rels};
 
 #[derive(Debug, Clone)]
 pub struct RustCodeFileFacts {
-    pub rel_path: String,
-    pub is_test_root: bool,
-    pub profile_name: Option<String>,
+    pub(crate) rel_path: String,
+    pub(crate) is_test_root: bool,
+    pub(crate) profile_name: Option<String>,
 }
 
 #[derive(Debug, Clone)]
 pub struct UnsafeCodeLintFacts {
-    pub cargo_rel_path: String,
-    pub lint_level: Option<String>,
+    pub(crate) cargo_rel_path: String,
+    pub(crate) lint_level: Option<String>,
 }
 
 #[derive(Debug, Clone)]
 pub struct CodeFacts {
-    pub files: Vec<RustCodeFileFacts>,
-    pub unsafe_code_lints: Vec<UnsafeCodeLintFacts>,
-    pub exception_comments: Vec<ExceptionCommentFacts>,
-    pub input_failures: Vec<CodeInputFailureFacts>,
+    pub(crate) files: Vec<RustCodeFileFacts>,
+    pub(crate) structural_caps: Vec<StructuralCapFacts>,
+    pub(crate) unsafe_code_lints: Vec<UnsafeCodeLintFacts>,
+    pub(crate) exception_comments: Vec<ExceptionCommentFacts>,
+    pub(crate) input_failures: Vec<CodeInputFailureFacts>,
+}
+
+#[derive(Debug, Clone)]
+pub struct StructuralCapFacts {
+    pub(crate) root_rel_dir: String,
+    pub(crate) cargo_rel_path: String,
+    pub(crate) max_module_depth: usize,
+    pub(crate) max_sibling_dirs: usize,
+    pub(crate) max_sibling_rs_files: usize,
 }
 
 pub fn collect(tree: &ProjectTree, route: &RsCodeRoute) -> CodeFacts {
@@ -32,16 +44,21 @@ pub fn collect(tree: &ProjectTree, route: &RsCodeRoute) -> CodeFacts {
     let active_root_dirs = active_root_dirs(route);
     let cargo_roots = collect_cargo_roots(tree, route, &active_root_dirs, &mut input_failures);
     let root_dirs = cargo_roots.keys().cloned().collect::<Vec<_>>();
-    let policy_map = read_policy_map(tree, &cargo_roots, &mut input_failures);
+    let policy_map = policy::read_policy_map(tree, &cargo_roots, &mut input_failures);
 
     let files = rust_file_rels(tree)
         .into_iter()
         .filter(|rel_path| owning_root_dir(rel_path, &root_dirs).is_some())
         .map(|rel_path| RustCodeFileFacts {
-            profile_name: policy_settings_for(file_parent_rel(&rel_path), &policy_map).profile_name,
+            profile_name: policy::policy_settings_for(file_parent_rel(&rel_path), &policy_map)
+                .profile_name,
             is_test_root: is_test_root_path(&rel_path),
             rel_path,
         })
+        .collect();
+    let structural_caps = cargo_roots
+        .values()
+        .map(|root| measure_root_structure(tree, &root.rel_dir, &root.cargo_rel_path))
         .collect();
 
     let mut unsafe_code_lints = Vec::new();
@@ -76,10 +93,11 @@ pub fn collect(tree: &ProjectTree, route: &RsCodeRoute) -> CodeFacts {
         });
     }
 
-    let exception_comments = collect_exception_comments(tree, &root_dirs);
+    let exception_comments = comments::collect_exception_comments(tree, &root_dirs);
 
     CodeFacts {
         files,
+        structural_caps,
         unsafe_code_lints,
         exception_comments,
         input_failures,
@@ -102,49 +120,15 @@ struct PolicySettings {
 
 #[derive(Debug, Clone)]
 pub struct ExceptionCommentFacts {
-    pub rel_path: String,
-    pub line: usize,
-    pub line_text: String,
+    pub(crate) rel_path: String,
+    pub(crate) line: usize,
+    pub(crate) line_text: String,
 }
 
 #[derive(Debug, Clone)]
 pub struct CodeInputFailureFacts {
-    pub rel_path: String,
-    pub message: String,
-}
-
-fn collect_exception_comments(
-    tree: &ProjectTree,
-    root_dirs: &[String],
-) -> Vec<ExceptionCommentFacts> {
-    let mut comments = Vec::new();
-
-    for rel_path in config_comment_rels(tree) {
-        if owning_root_dir(&rel_path, root_dirs).is_none() {
-            continue;
-        }
-        let Some(content) = tree.file_content(&rel_path) else {
-            continue;
-        };
-        for (index, line) in content.lines().enumerate() {
-            let Some(comment_text) = extract_exception_comment(line) else {
-                continue;
-            };
-            let normalized = comment_text
-                .trim_start_matches('#')
-                .trim_start_matches('/')
-                .trim_start();
-            if normalized.to_ascii_uppercase().starts_with("EXCEPTION:") {
-                comments.push(ExceptionCommentFacts {
-                    rel_path: rel_path.clone(),
-                    line: index.saturating_add(1),
-                    line_text: comment_text.to_owned(),
-                });
-            }
-        }
-    }
-
-    comments
+    pub(crate) rel_path: String,
+    pub(crate) message: String,
 }
 
 fn parse_lint_level(value: &toml::Value) -> Option<String> {
@@ -157,79 +141,6 @@ fn parse_lint_level(value: &toml::Value) -> Option<String> {
     })
 }
 
-fn extract_exception_comment(line: &str) -> Option<&str> {
-    #[derive(Clone, Copy)]
-    enum State {
-        Normal,
-        DoubleQuoted { escaped: bool },
-        SingleQuoted,
-    }
-
-    let bytes = line.as_bytes();
-    let mut index = 0usize;
-    let mut state = State::Normal;
-
-    while index < bytes.len() {
-        match state {
-            State::Normal => {
-                if bytes[index] == b'#' {
-                    return line.get(index..).map(str::trim_start);
-                }
-                if bytes[index] == b'/' && bytes.get(index.saturating_add(1)) == Some(&b'/') {
-                    return line.get(index..).map(str::trim_start);
-                }
-                if bytes[index] == b'"' {
-                    state = State::DoubleQuoted { escaped: false };
-                } else if bytes[index] == b'\'' {
-                    state = State::SingleQuoted;
-                }
-            }
-            State::DoubleQuoted { escaped } => {
-                if escaped {
-                    state = State::DoubleQuoted { escaped: false };
-                } else if bytes[index] == b'\\' {
-                    state = State::DoubleQuoted { escaped: true };
-                } else if bytes[index] == b'"' {
-                    state = State::Normal;
-                }
-            }
-            State::SingleQuoted => {
-                if bytes[index] == b'\'' {
-                    state = State::Normal;
-                }
-            }
-        }
-        index = index.saturating_add(1);
-    }
-
-    None
-}
-
-fn config_comment_rels(tree: &ProjectTree) -> Vec<String> {
-    let config_names = [
-        "guardrail3.toml",
-        "clippy.toml",
-        ".clippy.toml",
-        "deny.toml",
-        ".deny.toml",
-        "Cargo.toml",
-        "rustfmt.toml",
-        "rust-toolchain.toml",
-        "rust-toolchain",
-    ];
-    let mut rels = BTreeSet::new();
-
-    for (dir_rel, entry) in &tree.structure {
-        for file_name in &entry.files {
-            if config_names.contains(&file_name.as_str()) {
-                let _ = rels.insert(ProjectTree::join_rel(dir_rel, file_name));
-            }
-        }
-    }
-
-    rels.into_iter().collect()
-}
-
 fn collect_cargo_roots(
     tree: &ProjectTree,
     route: &RsCodeRoute,
@@ -237,12 +148,12 @@ fn collect_cargo_roots(
     input_failures: &mut Vec<CodeInputFailureFacts>,
 ) -> BTreeMap<String, CargoRootFacts> {
     route
-        .roots
+        .roots()
         .iter()
-        .filter(|root| active_root_dirs.contains(&root.root.rel_dir))
+        .filter(|root| active_root_dirs.contains(root.root().rel_dir()))
         .map(|root| {
-            let rel_dir = root.root.rel_dir.clone();
-            let rel_path = root.root.cargo_rel_path.clone();
+            let rel_dir = root.root().rel_dir().to_owned();
+            let rel_path = root.root().cargo_rel_path().to_owned();
             if tree.file_exists(&rel_path) && tree.file_content(&rel_path).is_none() {
                 input_failures.push(CodeInputFailureFacts {
                     rel_path: rel_path.clone(),
@@ -289,20 +200,20 @@ fn collect_cargo_roots(
 
 fn active_root_dirs(route: &RsCodeRoute) -> BTreeSet<String> {
     let routed_roots = route
-        .roots
+        .roots()
         .iter()
-        .map(|root| root.root.clone())
+        .map(|root| root.root().clone())
         .collect::<Vec<_>>();
 
-    match route.scoped_files.as_ref() {
+    match route.scoped_files() {
         None => routed_roots
             .into_iter()
-            .map(|root| root.rel_dir)
+            .map(|root| root.rel_dir().to_owned())
             .collect::<BTreeSet<_>>(),
         Some(scoped_files) => scoped_files
             .iter()
             .filter_map(|rel_path| owning_routed_root(rel_path, &routed_roots))
-            .map(|root| root.rel_dir.clone())
+            .map(|root| root.rel_dir().to_owned())
             .collect(),
     }
 }
@@ -314,18 +225,18 @@ fn owning_routed_root<'a>(
     routed_roots
         .iter()
         .filter(|root| path_belongs_to_root(rel_path, root))
-        .max_by_key(|root| root.rel_dir.len())
+        .max_by_key(|root| root.rel_dir().len())
 }
 
 fn path_belongs_to_root(
     rel_path: &str,
     root: &guardrail3_app_rs_family_mapper::RsRootView,
 ) -> bool {
-    rel_path == root.cargo_rel_path
-        || rel_path == root.rel_dir
-        || root.rel_dir.is_empty()
+    rel_path == root.cargo_rel_path()
+        || rel_path == root.rel_dir()
+        || root.rel_dir().is_empty()
         || rel_path
-            .strip_prefix(root.rel_dir.as_str())
+            .strip_prefix(root.rel_dir())
             .is_some_and(|suffix| suffix.starts_with('/'))
 }
 
@@ -363,155 +274,6 @@ fn expand_member_pattern(tree: &ProjectTree, workspace_rel: &str, member: &str) 
     }
 }
 
-fn read_policy_map(
-    tree: &ProjectTree,
-    cargo_roots: &BTreeMap<String, CargoRootFacts>,
-    input_failures: &mut Vec<CodeInputFailureFacts>,
-) -> BTreeMap<String, PolicySettings> {
-    let mut map = BTreeMap::new();
-    let parsed = match tree.file_content("guardrail3.toml") {
-        Some(content) => match toml::from_str::<GuardrailConfig>(content) {
-            Ok(_) => match toml::from_str::<toml::Value>(content) {
-                Ok(parsed) => Some(parsed),
-                Err(parse_error) => {
-                    input_failures.push(CodeInputFailureFacts {
-                        rel_path: "guardrail3.toml".to_owned(),
-                        message: format!("Failed to parse guardrail3.toml for code-family policy resolution: {parse_error}"),
-                    });
-                    None
-                }
-            },
-            Err(parse_error) => {
-                input_failures.push(CodeInputFailureFacts {
-                    rel_path: "guardrail3.toml".to_owned(),
-                    message: format!("Failed to parse guardrail3.toml for code-family policy resolution: {parse_error}"),
-                });
-                None
-            }
-        },
-        None if tree.file_exists("guardrail3.toml") => {
-            input_failures.push(CodeInputFailureFacts {
-                rel_path: "guardrail3.toml".to_owned(),
-                message: "Failed to read guardrail3.toml for code-family policy resolution."
-                    .to_owned(),
-            });
-            None
-        }
-        None => None,
-    };
-    let default_profile = parsed
-        .as_ref()
-        .and_then(|parsed| parsed.get("profile"))
-        .and_then(|value| value.get("name"))
-        .and_then(toml::Value::as_str)
-        .map(str::to_owned);
-    let _ = map.insert(
-        String::new(),
-        PolicySettings {
-            profile_name: default_profile.clone(),
-        },
-    );
-
-    let Some(parsed) = parsed.as_ref() else {
-        return map;
-    };
-    let rust = parsed.get("rust");
-
-    let resolved_app_paths = resolve_app_paths(cargo_roots);
-    let mut configured_app_roots = BTreeSet::new();
-    if let Some(apps) = rust
-        .and_then(|value| value.get("apps"))
-        .and_then(toml::Value::as_table)
-    {
-        for (app_name, app_cfg) in apps {
-            let profile_name = app_cfg
-                .get("type")
-                .or_else(|| app_cfg.get("profile"))
-                .and_then(toml::Value::as_str)
-                .map(str::to_owned)
-                .or_else(|| default_profile.clone());
-            if let Some(rel_dir) = resolved_app_paths.get(app_name) {
-                let _ = configured_app_roots.insert(rel_dir.clone());
-                let _ = map.insert(
-                    rel_dir.clone(),
-                    PolicySettings {
-                        profile_name: profile_name.clone(),
-                    },
-                );
-            }
-        }
-    }
-
-    let package_roots: BTreeSet<_> = cargo_roots
-        .values()
-        .filter(|facts| {
-            facts.has_package
-                && !configured_app_roots
-                    .iter()
-                    .any(|app_root| rel_is_same_or_descendant(&facts.rel_dir, app_root))
-        })
-        .map(|facts| facts.rel_dir.clone())
-        .collect();
-
-    if let Some(packages) = rust.and_then(|value| value.get("packages")) {
-        let profile_name = packages
-            .get("type")
-            .or_else(|| packages.get("profile"))
-            .and_then(toml::Value::as_str)
-            .map(str::to_owned)
-            .or_else(|| Some("library".to_owned()))
-            .or_else(|| default_profile.clone());
-        for rel_dir in &package_roots {
-            let _ = map.insert(
-                rel_dir.clone(),
-                PolicySettings {
-                    profile_name: profile_name.clone(),
-                },
-            );
-        }
-    }
-
-    map
-}
-
-fn resolve_app_paths(cargo_roots: &BTreeMap<String, CargoRootFacts>) -> BTreeMap<String, String> {
-    guardrail3_app_core::discover::resolve_app_paths_from_member_dirs(
-        cargo_roots
-            .values()
-            .filter(|facts| facts.has_workspace)
-            .flat_map(|workspace| workspace.workspace_members.iter().cloned())
-            .collect::<Vec<_>>(),
-    )
-}
-
-fn policy_settings_for(
-    rel_dir: &str,
-    policy_map: &BTreeMap<String, PolicySettings>,
-) -> PolicySettings {
-    if rel_dir.is_empty() {
-        return policy_map
-            .get("")
-            .cloned()
-            .unwrap_or(PolicySettings { profile_name: None });
-    }
-
-    let mut current = rel_dir;
-    loop {
-        if let Some(settings) = policy_map.get(current) {
-            return settings.clone();
-        }
-        let Some((parent, _)) = current.rsplit_once('/') else {
-            break;
-        };
-        current = parent;
-    }
-
-    policy_map
-        .get("")
-        .cloned()
-        .unwrap_or(PolicySettings { profile_name: None })
-}
-
 fn file_parent_rel(rel_path: &str) -> &str {
     rel_path.rsplit_once('/').map_or("", |(parent, _)| parent)
 }
@@ -537,4 +299,100 @@ fn owning_root_dir<'a>(rel_path: &str, root_dirs: &'a [String]) -> Option<&'a st
         })
         .max_by_key(|root| root.len())
         .map(String::as_str)
+}
+
+fn measure_root_structure(
+    tree: &ProjectTree,
+    root_rel_dir: &str,
+    cargo_rel_path: &str,
+) -> StructuralCapFacts {
+    let rust_related_dirs = collect_rust_related_dirs(tree, root_rel_dir);
+    let mut max_module_depth = 0usize;
+    let mut max_sibling_dirs = 0usize;
+    let mut max_sibling_rs_files = 0usize;
+
+    for dir_rel in &rust_related_dirs {
+        let Some(entry) = tree.structure().get(dir_rel) else {
+            continue;
+        };
+        let sibling_dirs = entry
+            .dirs()
+            .iter()
+            .filter(|dir_name| {
+                rust_related_dirs.contains(&ProjectTree::join_rel(dir_rel, dir_name))
+            })
+            .count();
+        max_sibling_dirs = max_sibling_dirs.max(sibling_dirs);
+
+        let rs_file_count = entry
+            .files()
+            .iter()
+            .filter(|file_name| file_name.ends_with(".rs"))
+            .count();
+        max_sibling_rs_files = max_sibling_rs_files.max(rs_file_count);
+    }
+
+    for rel_path in rust_file_rels(tree).into_iter().filter(|rel_path| {
+        owning_root_dir(rel_path, &[root_rel_dir.to_owned()]).is_some()
+            && !is_generated_path(rel_path)
+    }) {
+        max_module_depth = max_module_depth.max(module_depth(root_rel_dir, &rel_path));
+    }
+
+    StructuralCapFacts {
+        root_rel_dir: root_rel_dir.to_owned(),
+        cargo_rel_path: cargo_rel_path.to_owned(),
+        max_module_depth,
+        max_sibling_dirs,
+        max_sibling_rs_files,
+    }
+}
+
+fn collect_rust_related_dirs(tree: &ProjectTree, root_rel_dir: &str) -> BTreeSet<String> {
+    let mut dirs = BTreeSet::new();
+    for rel_path in rust_file_rels(tree).into_iter().filter(|rel_path| {
+        owning_root_dir(rel_path, &[root_rel_dir.to_owned()]).is_some()
+            && !is_generated_path(rel_path)
+    }) {
+        let mut current = file_parent_rel(&rel_path).to_owned();
+        loop {
+            let _ = dirs.insert(current.clone());
+            if current == root_rel_dir || current.is_empty() {
+                break;
+            }
+            let Some((parent, _)) = current.rsplit_once('/') else {
+                current.clear();
+                continue;
+            };
+            current = parent.to_owned();
+        }
+    }
+    dirs
+}
+
+fn is_generated_path(rel_path: &str) -> bool {
+    rel_path == "target" || rel_path.starts_with("target/") || rel_path.contains("/target/")
+}
+
+fn module_depth(root_rel_dir: &str, rel_path: &str) -> usize {
+    let root_segments = path_segments(root_rel_dir);
+    let path_segments = path_segments(rel_path);
+    if path_segments.len() <= root_segments.len() {
+        return 0;
+    }
+    let relative = &path_segments[root_segments.len()..];
+    let file_name = *relative.last().unwrap_or(&"");
+    let dir_depth = relative.len().saturating_sub(1);
+    if matches!(file_name, "lib.rs" | "main.rs" | "mod.rs") {
+        dir_depth
+    } else {
+        dir_depth.saturating_add(1)
+    }
+}
+
+fn path_segments(rel_path: &str) -> Vec<&str> {
+    rel_path
+        .split('/')
+        .filter(|segment| !segment.is_empty())
+        .collect()
 }

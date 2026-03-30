@@ -17,86 +17,97 @@ fn emits_no_result_when_editions_match() {
 }
 
 #[test]
-fn fails_closed_when_root_cargo_manifest_is_malformed() {
-    let fixture =
-        tempfile::tempdir().expect("RS-FMT-06 fixture setup should create a temporary directory");
+fn reads_package_edition_when_workspace_package_edition_is_absent() {
+    let fixture = tempfile::tempdir().expect("fixture setup should create a temporary directory");
     let root = fixture.path();
 
-    std::fs::write(root.join("Cargo.toml"), "[workspace")
-        .expect("RS-FMT-06 fixture setup should write malformed Cargo.toml");
+    std::fs::write(
+        root.join("Cargo.toml"),
+        "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2021\"\n",
+    )
+    .expect("fixture setup should write package Cargo.toml");
     std::fs::write(
         root.join("rustfmt.toml"),
         "edition = \"2024\"\nmax_width = 100\ntab_spaces = 4\nuse_field_init_shorthand = true\nuse_try_shorthand = true\nreorder_imports = true\nreorder_modules = true\n",
     )
-    .expect("RS-FMT-06 fixture setup should write rustfmt.toml");
+    .expect("fixture setup should write rustfmt.toml");
     std::fs::write(
         root.join("rust-toolchain.toml"),
         "[toolchain]\nchannel = \"stable\"\n",
     )
-    .expect("RS-FMT-06 fixture setup should write rust-toolchain.toml");
+    .expect("fixture setup should write rust-toolchain.toml");
 
     let results = run_family(root);
 
-    assertions::assert_error(
-        &results,
-        "Cargo.toml parse error",
-        "rustfmt edition checks require a parseable root Cargo.toml.",
-    );
+    assertions::assert_mismatch(&results, "2024", "2021");
+}
+
+#[test]
+fn fails_closed_when_root_cargo_manifest_is_malformed() {
+    let fixture = tempfile::tempdir().expect("fixture setup should create a temporary directory");
+    let root = fixture.path();
+
+    std::fs::write(root.join("Cargo.toml"), "[workspace")
+        .expect("fixture setup should write malformed Cargo.toml");
+    std::fs::write(
+        root.join("rustfmt.toml"),
+        "edition = \"2024\"\nmax_width = 100\ntab_spaces = 4\nuse_field_init_shorthand = true\nuse_try_shorthand = true\nreorder_imports = true\nreorder_modules = true\n",
+    )
+    .expect("fixture setup should write rustfmt.toml");
+    std::fs::write(
+        root.join("rust-toolchain.toml"),
+        "[toolchain]\nchannel = \"stable\"\n",
+    )
+    .expect("fixture setup should write rust-toolchain.toml");
+
+    let results = run_family(root);
+
+    assertions::assert_malformed_root_manifest_error(&results);
 }
 
 #[test]
 fn fails_closed_when_root_cargo_manifest_has_no_edition() {
-    let fixture =
-        tempfile::tempdir().expect("RS-FMT-06 fixture setup should create a temporary directory");
+    let fixture = tempfile::tempdir().expect("fixture setup should create a temporary directory");
     let root = fixture.path();
 
     std::fs::write(
         root.join("Cargo.toml"),
         "[workspace]\nmembers = []\nresolver = \"2\"\n",
     )
-    .expect("RS-FMT-06 fixture setup should write Cargo.toml without edition");
+    .expect("fixture setup should write Cargo.toml without edition");
     std::fs::write(
         root.join("rustfmt.toml"),
         "edition = \"2024\"\nmax_width = 100\ntab_spaces = 4\nuse_field_init_shorthand = true\nuse_try_shorthand = true\nreorder_imports = true\nreorder_modules = true\n",
     )
-    .expect("RS-FMT-06 fixture setup should write rustfmt.toml");
+    .expect("fixture setup should write rustfmt.toml");
     std::fs::write(
         root.join("rust-toolchain.toml"),
         "[toolchain]\nchannel = \"stable\"\n",
     )
-    .expect("RS-FMT-06 fixture setup should write rust-toolchain.toml");
+    .expect("fixture setup should write rust-toolchain.toml");
 
     let results = run_family(root);
 
-    assertions::assert_error(
-        &results,
-        "Cargo.toml edition missing",
-        "rustfmt edition checks require `[workspace.package].edition` or `[package].edition` in root Cargo.toml.",
-    );
+    assertions::assert_missing_root_edition_error(&results);
 }
 
 #[test]
 fn fails_closed_when_root_cargo_manifest_is_missing() {
-    let fixture =
-        tempfile::tempdir().expect("RS-FMT-06 fixture setup should create a temporary directory");
+    let fixture = tempfile::tempdir().expect("fixture setup should create a temporary directory");
     let root = fixture.path();
 
     std::fs::write(
         root.join("rustfmt.toml"),
         "edition = \"2024\"\nmax_width = 100\ntab_spaces = 4\nuse_field_init_shorthand = true\nuse_try_shorthand = true\nreorder_imports = true\nreorder_modules = true\n",
     )
-    .expect("RS-FMT-06 fixture setup should write rustfmt.toml");
+    .expect("fixture setup should write rustfmt.toml");
     std::fs::write(
         root.join("rust-toolchain.toml"),
         "[toolchain]\nchannel = \"stable\"\n",
     )
-    .expect("RS-FMT-06 fixture setup should write rust-toolchain.toml");
+    .expect("fixture setup should write rust-toolchain.toml");
 
     let results = run_family(root);
 
-    assertions::assert_error(
-        &results,
-        "Cargo.toml missing",
-        "rustfmt edition checks require a root Cargo.toml with workspace or package edition.",
-    );
+    assertions::assert_missing_root_manifest_error(&results);
 }

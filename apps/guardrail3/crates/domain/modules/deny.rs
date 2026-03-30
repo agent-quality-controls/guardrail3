@@ -251,7 +251,7 @@ pub fn build_deny_toml(
     build_deny_toml_with_entries(
         profile,
         &ban_entries,
-        Some(DENY_FEATURE_BANS_TOKIO.content),
+        Some(DENY_FEATURE_BANS_TOKIO.content()),
         extra_bans,
         extra_skip,
         extra_feature_bans,
@@ -282,14 +282,14 @@ pub fn build_deny_toml_with_entries(
     );
 
     // Graph
-    out.push_str(DENY_GRAPH.content);
+    out.push_str(DENY_GRAPH.content());
     out.push_str("\n\n");
 
     // Bans section
     out.push_str("# ============================================================\n");
     out.push_str("# DEPENDENCY BANS\n");
     out.push_str("# ============================================================\n");
-    out.push_str(DENY_BANS_BASE.content);
+    out.push_str(DENY_BANS_BASE.content());
     out.push_str("\n\n");
 
     // Skip entries
@@ -332,30 +332,30 @@ pub fn build_deny_toml_with_entries(
     out.push_str("# ============================================================\n");
     out.push_str("# LICENSE CHECKING\n");
     out.push_str("# ============================================================\n");
-    out.push_str(DENY_LICENSES.content);
+    out.push_str(DENY_LICENSES.content());
     out.push_str("\n\n");
 
     // Advisories
     out.push_str("# ============================================================\n");
     out.push_str("# SECURITY ADVISORY CHECKING\n");
     out.push_str("# ============================================================\n");
-    out.push_str(DENY_ADVISORIES.content);
+    out.push_str(DENY_ADVISORIES.content());
     out.push_str("\n\n");
 
     // Sources
     out.push_str("# ============================================================\n");
     out.push_str("# SOURCE RESTRICTIONS\n");
     out.push_str("# ============================================================\n");
-    out.push_str(DENY_SOURCES.content);
+    out.push_str(DENY_SOURCES.content());
     out.push('\n');
 
     out
 }
 
 fn ban_module_content_with_reasons(module: &Module) -> String {
-    let reason = module.description.replace('\"', "\\\"");
+    let reason = module.description().replace('\"', "\\\"");
     module
-        .content
+        .content()
         .lines()
         .map(|line| {
             let trimmed = line.trim_start();

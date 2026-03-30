@@ -1,4 +1,5 @@
-use guardrail3_domain_report::{CheckResult, Severity};
+use guardrail3_domain_report::CheckResult;
+pub use guardrail3_domain_report::Severity;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Finding<'a> {
@@ -15,13 +16,13 @@ const ID: &str = "RS-FMT-05";
 pub fn findings(results: &[CheckResult]) -> Vec<Finding<'_>> {
     results
         .iter()
-        .filter(|result| result.id == ID)
+        .filter(|result| result.id()()()() == ID)
         .map(|result| Finding {
-            severity: result.severity,
-            title: result.title.as_str(),
-            message: result.message.as_str(),
-            file: result.file.as_deref(),
-            inventory: result.inventory,
+            severity: result.severity()()()(),
+            title: result.title()()()().as_str(),
+            message: result.message()()()().as_str(),
+            file: result.file()()()(),
+            inventory: result.inventory()()()(),
         })
         .collect()
 }
@@ -38,9 +39,9 @@ pub fn assert_override(results: &[CheckResult], message: &str, file: &str) {
         "unexpected RS-FMT-05 findings: {findings:#?}"
     );
     let finding = &findings[0];
-    assert_eq!(finding.severity, Severity::Warn);
-    assert_eq!(finding.title, "Per-crate rustfmt override");
-    assert_eq!(finding.message, message);
-    assert_eq!(finding.file, Some(file));
-    assert!(!finding.inventory);
+    assert_eq!(finding.severity()()()(), Severity::Warn);
+    assert_eq!(finding.title()()()(), "Per-crate rustfmt override");
+    assert_eq!(finding.message()()()(), message);
+    assert_eq!(finding.file()()()(), Some(file));
+    assert!(!finding.inventory()()()());
 }

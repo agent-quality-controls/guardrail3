@@ -15,9 +15,9 @@ pub(super) fn collect_cargo_roots(
     input_failures: &mut Vec<ReleaseInputFailureFacts>,
 ) -> BTreeMap<String, CargoRootFacts> {
     route
-        .roots
+        .roots()
         .iter()
-        .map(|root| root.rel_dir.clone())
+        .map(|root| root.rel_dir().to_owned())
         .filter_map(|rel_dir| {
             let cargo_rel_path = if rel_dir.is_empty() {
                 "Cargo.toml".to_owned()

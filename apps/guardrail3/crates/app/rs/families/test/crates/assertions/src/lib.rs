@@ -1,7 +1,5 @@
 use guardrail3_app_rs_family_test as _;
 
-use guardrail3_app_rs_family_test::CheckResult;
-
 pub mod rs_test_01_inline_test_bodies;
 pub mod rs_test_02_owned_sidecar_shape;
 pub mod rs_test_03_runtime_assertions_split;
@@ -20,10 +18,3 @@ pub mod rs_test_15_mutants_config_sane;
 pub mod rs_test_16_assertions_modules_prove;
 pub mod rs_test_17_external_harnesses_use_assertions;
 pub mod rs_test_18_test_support_generic;
-
-pub(crate) fn expected_finding<'a>(results: &'a [CheckResult], rule_id: &str) -> &'a CheckResult {
-    results
-        .iter()
-        .find(|result| result.id == rule_id)
-        .unwrap_or_else(|| std::panic::panic_any(format!("expected {rule_id} finding")))
-}

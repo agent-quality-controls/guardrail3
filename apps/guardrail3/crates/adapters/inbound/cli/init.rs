@@ -318,9 +318,9 @@ fn discover_rust_app_groups(
     let mut seen_apps = std::collections::BTreeSet::new();
     let mut has_packages = false;
 
-    for ws in &project.workspaces {
-        for member in &ws.members {
-            let dir = &member.dir;
+    for ws in project.workspaces() {
+        for member in ws.members() {
+            let dir = member.dir();
             if dir.starts_with("packages/") || dir.contains("/packages/") {
                 has_packages = true;
                 continue;
@@ -329,9 +329,9 @@ fn discover_rust_app_groups(
             let app_name = if dir.starts_with("apps/") {
                 dir.strip_prefix("apps/")
                     .and_then(|rest: &str| rest.split('/').next())
-                    .unwrap_or(&member.name)
+                    .unwrap_or(member.name())
             } else {
-                &member.name
+                member.name()
             };
             let _ = seen_apps.insert(app_name.to_owned());
         }

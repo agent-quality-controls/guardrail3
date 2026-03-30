@@ -11,8 +11,30 @@ use crate::overrides::{LocalOverrides, load_local_overrides};
 /// One generated artifact owned by Rust generation.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GeneratedFile {
-    pub path: String,
-    pub content: String,
+    path: String,
+    content: String,
+}
+
+impl GeneratedFile {
+    #[must_use]
+    pub const fn new(path: String, content: String) -> Self {
+        Self { path, content }
+    }
+
+    #[must_use]
+    pub fn path(&self) -> &str {
+        &self.path
+    }
+
+    #[must_use]
+    pub fn content(&self) -> &str {
+        &self.content
+    }
+
+    #[must_use]
+    pub fn into_pair(self) -> GeneratedPair {
+        (self.path, self.content)
+    }
 }
 
 /// A (`relative_path`, `content`) pair for dry-run/check output.
@@ -30,10 +52,7 @@ pub fn generate_rust_owned_artifacts(
 
 /// Generate the standalone Rust pre-commit hook artifact.
 pub fn generate_rust_hook_artifact(cfg: Option<&GuardrailConfig>) -> GeneratedFile {
-    GeneratedFile {
-        path: ".githooks/pre-commit".to_owned(),
-        content: build_rust_hook_content(cfg),
-    }
+    GeneratedFile::new(".githooks/pre-commit".to_owned(), build_rust_hook_content(cfg))
 }
 
 /// Generate expected Rust-owned files without writing them.
@@ -42,7 +61,7 @@ pub fn generate_rust_expected(project_path: &Path) -> Option<Vec<GeneratedPair>>
     Some(
         generate_rust_owned_artifacts(project_path, &cfg)
             .into_iter()
-            .map(|file| (file.path, file.content))
+            .map(GeneratedFile::into_pair)
             .collect(),
     )
 }
@@ -55,9 +74,8 @@ fn load_config(path: &Path) -> Option<GuardrailConfig> {
 
 fn generate_rust_config_files(project_path: &Path, cfg: &GuardrailConfig) -> Vec<GeneratedFile> {
     let profile = cfg
-        .profile
-        .as_ref()
-        .map_or("service", |profile| profile.name.as_str());
+        .profile()
+        .map_or("service", |profile| profile.name());
     let local = load_local_overrides(project_path);
     generate_rust_files(project_path, cfg, profile, &local)
 }
@@ -65,9 +83,8 @@ fn generate_rust_config_files(project_path: &Path, cfg: &GuardrailConfig) -> Vec
 #[allow(clippy::print_stderr)] // reason: invalid workspace_root should produce direct CLI-visible guidance
 fn resolve_rust_root(cfg: &GuardrailConfig) -> String {
     let root = cfg
-        .rust
-        .as_ref()
-        .and_then(|rust| rust.workspace_root.as_deref())
+        .rust()
+        .and_then(|rust| rust.workspace_root())
         .unwrap_or(".");
 
     if root.contains("..") {
@@ -82,10 +99,10 @@ fn resolve_rust_root(cfg: &GuardrailConfig) -> String {
 
 fn resolve_app_paths(project_path: &Path, cfg: &GuardrailConfig) -> BTreeMap<String, String> {
     let mut map = BTreeMap::new();
-    let Some(rust_cfg) = cfg.rust.as_ref() else {
+    let Some(rust_cfg) = cfg.rust() else {
         return map;
     };
-    let Some(apps) = rust_cfg.apps.as_ref() else {
+    let Some(apps) = rust_cfg.apps() else {
         return map;
     };
 
@@ -121,7 +138,6 @@ fn build_deny_for_profile(
     }
 }
 
-#[allow(clippy::too_many_lines)] // reason: the Rust write set is one ownership boundary and is easier to audit as one artifact list
 fn generate_rust_files(
     project_path: &Path,
     cfg: &GuardrailConfig,
@@ -130,12 +146,10 @@ fn generate_rust_files(
 ) -> Vec<GeneratedFile> {
     let mut files = Vec::new();
     let app_path_map = resolve_app_paths(project_path, cfg);
-    let root_is_pure = profile == "library";
 
     let crate_configs: BTreeMap<String, &CrateConfig> = cfg
-        .rust
-        .as_ref()
-        .and_then(|rust| rust.apps.as_ref())
+        .rust()
+        .and_then(|rust| rust.apps())
         .map(|apps| {
             apps.iter()
                 .map(|(name, config)| (name.clone(), config))
@@ -145,161 +159,181 @@ fn generate_rust_files(
 
     let mut generated_dirs = BTreeSet::new();
 
-    for (app_name, crate_cfg) in &crate_configs {
+    add_app_owned_rust_files(
+        &mut files,
+        &mut generated_dirs,
+        &crate_configs,
+        &app_path_map,
+        cfg,
+        profile,
+        local,
+    );
+    add_root_owned_rust_files(
+        &mut files,
+        &generated_dirs,
+        &crate_configs,
+        cfg,
+        profile,
+        local,
+    );
+    add_shared_rust_files(&mut files, profile);
+
+    files
+}
+
+fn add_app_owned_rust_files(
+    files: &mut Vec<GeneratedFile>,
+    generated_dirs: &mut BTreeSet<String>,
+    crate_configs: &BTreeMap<String, &CrateConfig>,
+    app_path_map: &BTreeMap<String, String>,
+    cfg: &GuardrailConfig,
+    profile: &str,
+    local: &LocalOverrides,
+) {
+    for (app_name, crate_cfg) in crate_configs {
         let app_dir = app_path_map
             .get(app_name.as_str())
             .map_or_else(|| app_name.clone(), Clone::clone);
-
-        let effective_profile = crate_cfg
-            .type_
-            .as_deref()
-            .or(crate_cfg.profile.as_deref())
-            .unwrap_or(profile);
-        let effective_garde = crate_cfg
-            .checks
-            .as_ref()
-            .and_then(|checks| checks.garde)
-            .or_else(|| {
-                cfg.rust
-                    .as_ref()
-                    .and_then(|rust| rust.checks.as_ref())
-                    .and_then(|checks| checks.garde)
-            })
-            .unwrap_or(true);
-
-        let is_pure = effective_profile == "library"
-            || crate_cfg
-                .layer
-                .as_deref()
-                .is_some_and(|layer| layer == "pure");
+        let effective_profile = crate_effective_profile(crate_cfg, profile);
+        let effective_garde = crate_effective_garde(cfg, Some(*crate_cfg));
+        let is_pure = crate_is_pure(crate_cfg, effective_profile);
         let prefix = format!("{app_dir}/");
 
-        files.push(GeneratedFile {
-            path: format!("{prefix}clippy.toml"),
-            content: clippy::build_clippy_toml(
-                effective_profile,
-                is_pure,
-                effective_garde,
-                &local.clippy_methods,
-                &local.clippy_types,
-            ),
-        });
-        files.push(GeneratedFile {
-            path: format!("{prefix}deny.toml"),
-            content: build_deny_for_profile(
-                effective_profile,
-                &local.deny_bans,
-                &local.deny_skip,
-                &local.deny_feature_bans,
-            ),
-        });
-        files.push(GeneratedFile {
-            path: format!("{prefix}rustfmt.toml"),
-            content: canonical::RUSTFMT.content.to_owned(),
-        });
-
+        push_standard_rust_files(
+            files,
+            &prefix,
+            effective_profile,
+            is_pure,
+            effective_garde,
+            local,
+        );
         let _ = generated_dirs.insert(app_dir);
     }
+}
 
+fn add_root_owned_rust_files(
+    files: &mut Vec<GeneratedFile>,
+    generated_dirs: &BTreeSet<String>,
+    crate_configs: &BTreeMap<String, &CrateConfig>,
+    cfg: &GuardrailConfig,
+    profile: &str,
+    local: &LocalOverrides,
+) {
     let has_packages = cfg
-        .rust
-        .as_ref()
-        .and_then(|rust| rust.packages.as_ref())
+        .rust()
+        .and_then(|rust| rust.packages())
         .is_some();
-    if has_packages && !generated_dirs.contains(".") {
-        let pkg_cfg = cfg.rust.as_ref().and_then(|rust| rust.packages.as_ref());
-        let pkg_profile = pkg_cfg
-            .and_then(|config| config.type_.as_deref().or(config.profile.as_deref()))
-            .unwrap_or("library");
-        let pkg_garde = pkg_cfg
-            .and_then(|config| config.checks.as_ref())
-            .and_then(|checks| checks.garde)
-            .or_else(|| {
-                cfg.rust
-                    .as_ref()
-                    .and_then(|rust| rust.checks.as_ref())
-                    .and_then(|checks| checks.garde)
-            })
-            .unwrap_or(true);
-        let pkg_is_pure = pkg_profile == "library";
 
-        files.push(GeneratedFile {
-            path: "clippy.toml".to_owned(),
-            content: clippy::build_clippy_toml(
-                pkg_profile,
-                pkg_is_pure,
-                pkg_garde,
-                &local.clippy_methods,
-                &local.clippy_types,
-            ),
-        });
-        files.push(GeneratedFile {
-            path: "deny.toml".to_owned(),
-            content: build_deny_for_profile(
-                pkg_profile,
-                &local.deny_bans,
-                &local.deny_skip,
-                &local.deny_feature_bans,
-            ),
-        });
-        files.push(GeneratedFile {
-            path: "rustfmt.toml".to_owned(),
-            content: canonical::RUSTFMT.content.to_owned(),
-        });
-    } else if crate_configs.is_empty() {
+    if has_packages && !generated_dirs.contains(".") {
+        let pkg_cfg = cfg.rust().and_then(|rust| rust.packages());
+        let pkg_profile = pkg_cfg
+            .and_then(|config| config.type_().or(config.profile()))
+            .unwrap_or("library");
+        let pkg_garde = crate_effective_garde(cfg, pkg_cfg);
+        push_standard_rust_files(
+            files,
+            "",
+            pkg_profile,
+            pkg_profile == "library",
+            pkg_garde,
+            local,
+        );
+        return;
+    }
+
+    if crate_configs.is_empty() {
         let rust_root = resolve_rust_root(cfg);
         let prefix = if rust_root == "." {
             String::new()
         } else {
             format!("{rust_root}/")
         };
-
-        files.push(GeneratedFile {
-            path: format!("{prefix}clippy.toml"),
-            content: clippy::build_clippy_toml(
-                profile,
-                root_is_pure,
-                cfg.rust
-                    .as_ref()
-                    .and_then(|rust| rust.checks.as_ref())
-                    .and_then(|checks| checks.garde)
-                    .unwrap_or(true),
-                &local.clippy_methods,
-                &local.clippy_types,
-            ),
-        });
-        files.push(GeneratedFile {
-            path: format!("{prefix}deny.toml"),
-            content: build_deny_for_profile(
-                profile,
-                &local.deny_bans,
-                &local.deny_skip,
-                &local.deny_feature_bans,
-            ),
-        });
-        files.push(GeneratedFile {
-            path: format!("{prefix}rustfmt.toml"),
-            content: canonical::RUSTFMT.content.to_owned(),
-        });
+        push_standard_rust_files(
+            files,
+            &prefix,
+            profile,
+            profile == "library",
+            crate_effective_garde(cfg, None),
+            local,
+        );
     }
+}
 
-    files.push(GeneratedFile {
-        path: "rust-toolchain.toml".to_owned(),
-        content: canonical::RUST_TOOLCHAIN.content.to_owned(),
-    });
+fn add_shared_rust_files(files: &mut Vec<GeneratedFile>, profile: &str) {
+    files.push(GeneratedFile::new(
+        "rust-toolchain.toml".to_owned(),
+        canonical::RUST_TOOLCHAIN.content().to_owned(),
+    ));
 
     if profile == "service" {
-        files.push(GeneratedFile {
-            path: "release-plz.toml".to_owned(),
-            content: release::RELEASE_PLZ_TOML.content.to_owned(),
-        });
-        files.push(GeneratedFile {
-            path: "cliff.toml".to_owned(),
-            content: release::CLIFF_TOML.content.to_owned(),
-        });
+        files.push(GeneratedFile::new(
+            "release-plz.toml".to_owned(),
+            release::RELEASE_PLZ_TOML.content().to_owned(),
+        ));
+        files.push(GeneratedFile::new(
+            "cliff.toml".to_owned(),
+            release::CLIFF_TOML.content().to_owned(),
+        ));
     }
+}
 
-    files
+fn push_standard_rust_files(
+    files: &mut Vec<GeneratedFile>,
+    prefix: &str,
+    profile: &str,
+    is_pure: bool,
+    garde_enabled: bool,
+    local: &LocalOverrides,
+) {
+    files.push(GeneratedFile::new(
+        format!("{prefix}clippy.toml"),
+        clippy::build_clippy_toml(
+            profile,
+            is_pure,
+            garde_enabled,
+            &local.clippy_methods,
+            &local.clippy_types,
+        ),
+    ));
+    files.push(GeneratedFile::new(
+        format!("{prefix}deny.toml"),
+        build_deny_for_profile(
+            profile,
+            &local.deny_bans,
+            &local.deny_skip,
+            &local.deny_feature_bans,
+        ),
+    ));
+    files.push(GeneratedFile::new(
+        format!("{prefix}rustfmt.toml"),
+        canonical::RUSTFMT.content().to_owned(),
+    ));
+}
+
+fn crate_effective_profile<'a>(crate_cfg: &'a CrateConfig, fallback: &'a str) -> &'a str {
+    crate_cfg
+        .type_()
+        .or(crate_cfg.profile())
+        .unwrap_or(fallback)
+}
+
+fn crate_effective_garde(cfg: &GuardrailConfig, crate_cfg: Option<&CrateConfig>) -> bool {
+    crate_cfg
+        .and_then(|config| config.checks())
+        .and_then(|checks| checks.garde())
+        .or_else(|| {
+            cfg.rust()
+                .and_then(|rust| rust.checks())
+                .and_then(|checks| checks.garde())
+        })
+        .unwrap_or(true)
+}
+
+fn crate_is_pure(crate_cfg: &CrateConfig, effective_profile: &str) -> bool {
+    effective_profile == "library"
+        || crate_cfg
+            .layer()
+            .is_some_and(|layer| layer == "pure")
 }
 
 fn build_rust_hook_content(cfg: Option<&GuardrailConfig>) -> String {

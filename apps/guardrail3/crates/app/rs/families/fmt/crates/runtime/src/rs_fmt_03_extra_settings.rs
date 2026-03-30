@@ -21,15 +21,15 @@ pub fn check(input: &RustfmtRootInput, results: &mut Vec<CheckResult>) {
     for key in table.keys() {
         if !expected.contains(key.as_str()) {
             results.push(
-                CheckResult {
-                    id: ID.to_owned(),
-                    severity: Severity::Info,
-                    title: format!("rustfmt extra setting: {key}"),
-                    message: "Non-baseline rustfmt setting present".to_owned(),
-                    file: Some(rel.to_owned()),
-                    line: None,
-                    inventory: false,
-                }
+                CheckResult::from_parts(
+                    ID.to_owned(),
+                    Severity::Info,
+                    format!("rustfmt extra setting: {key}"),
+                    "Non-baseline rustfmt setting present".to_owned(),
+                    Some(rel.to_owned()),
+                    None,
+                    false,
+                )
                 .as_inventory(),
             );
         }

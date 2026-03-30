@@ -44,42 +44,135 @@ pub trait CoverageTool {
 
 #[derive(Debug, Serialize)]
 pub struct CoverageMap {
-    pub tool: String,
-    pub resolution: String,
-    pub project: String,
-    pub configs: Vec<ConfigInstance>,
-    pub uncovered: Vec<String>,
-    pub summary: Summary,
+    tool: String,
+    resolution: String,
+    project: String,
+    configs: Vec<ConfigInstance>,
+    uncovered: Vec<String>,
+    summary: Summary,
+}
+
+impl CoverageMap {
+    #[must_use]
+    pub fn tool(&self) -> &str {
+        &self.tool
+    }
+
+    #[must_use]
+    pub fn resolution(&self) -> &str {
+        &self.resolution
+    }
+
+    #[must_use]
+    pub fn project(&self) -> &str {
+        &self.project
+    }
+
+    #[must_use]
+    pub fn configs(&self) -> &[ConfigInstance] {
+        &self.configs
+    }
+
+    #[must_use]
+    pub fn uncovered(&self) -> &[String] {
+        &self.uncovered
+    }
+
+    #[must_use]
+    pub const fn summary(&self) -> &Summary {
+        &self.summary
+    }
 }
 
 #[derive(Debug, Serialize)]
 pub struct ConfigInstance {
-    pub path: String,
-    pub details: serde_json::Value,
+    path: String,
+    details: serde_json::Value,
     /// Top-level directories covered by this config (collapsed).
-    pub covers: Vec<String>,
+    covers: Vec<String>,
     /// If this config is a shadow — it intercepts coverage from a parent config.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub is_shadow: Option<bool>,
+    is_shadow: Option<bool>,
     /// Which parent config this shadows (if `is_shadow` is true).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub shadows: Option<String>,
+    shadows: Option<String>,
     /// Configs below this one that steal part of its coverage.
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub shadowed_by: Vec<ShadowedBy>,
+    shadowed_by: Vec<ShadowedBy>,
+}
+
+impl ConfigInstance {
+    #[must_use]
+    pub fn path(&self) -> &str {
+        &self.path
+    }
+
+    #[must_use]
+    pub const fn details(&self) -> &serde_json::Value {
+        &self.details
+    }
+
+    #[must_use]
+    pub fn covers(&self) -> &[String] {
+        &self.covers
+    }
+
+    #[must_use]
+    pub const fn is_shadow(&self) -> Option<bool> {
+        self.is_shadow
+    }
+
+    #[must_use]
+    pub fn shadows(&self) -> Option<&str> {
+        self.shadows.as_deref()
+    }
+
+    #[must_use]
+    pub fn shadowed_by(&self) -> &[ShadowedBy] {
+        &self.shadowed_by
+    }
 }
 
 #[derive(Debug, Serialize)]
 pub struct ShadowedBy {
-    pub path: String,
-    pub steals: Vec<String>,
+    path: String,
+    steals: Vec<String>,
+}
+
+impl ShadowedBy {
+    #[must_use]
+    pub fn path(&self) -> &str {
+        &self.path
+    }
+
+    #[must_use]
+    pub fn steals(&self) -> &[String] {
+        &self.steals
+    }
 }
 
 #[derive(Debug, Serialize)]
 pub struct Summary {
-    pub total_dirs: u32,
-    pub covered_dirs: u32,
-    pub uncovered_dirs: u32,
+    total_dirs: u32,
+    covered_dirs: u32,
+    uncovered_dirs: u32,
+}
+
+impl Summary {
+    #[must_use]
+    pub const fn total_dirs(&self) -> u32 {
+        self.total_dirs
+    }
+
+    #[must_use]
+    pub const fn covered_dirs(&self) -> u32 {
+        self.covered_dirs
+    }
+
+    #[must_use]
+    pub const fn uncovered_dirs(&self) -> u32 {
+        self.uncovered_dirs
+    }
 }
 
 // ---------------------------------------------------------------------------

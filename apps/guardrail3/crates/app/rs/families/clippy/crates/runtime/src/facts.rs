@@ -37,14 +37,14 @@ impl PolicyRootKind {
 
 #[derive(Debug, Clone)]
 pub struct ClippyConfigFacts {
-    pub rel_dir: String,
-    pub rel_path: String,
-    pub parsed: Option<toml::Value>,
-    pub parse_error: Option<String>,
-    pub policy_context_parse_error: Option<String>,
-    pub profile_name: Option<String>,
-    pub garde_enabled: bool,
-    pub published_library_policy: bool,
+    pub(crate) rel_dir: String,
+    pub(crate) rel_path: String,
+    pub(crate) parsed: Option<toml::Value>,
+    pub(crate) parse_error: Option<String>,
+    pub(crate) policy_context_parse_error: Option<String>,
+    pub(crate) profile_name: Option<String>,
+    pub(crate) garde_enabled: bool,
+    pub(crate) published_library_policy: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -61,45 +61,45 @@ pub enum ForbiddenConfigReason {
 
 #[derive(Debug, Clone)]
 pub struct ForbiddenConfigFacts {
-    pub config: ClippyConfigFacts,
-    pub reason: ForbiddenConfigReason,
+    pub(crate) config: ClippyConfigFacts,
+    pub(crate) reason: ForbiddenConfigReason,
 }
 
 #[derive(Debug, Clone)]
 pub struct CoveredRustUnitFacts {
-    pub rel_dir: String,
-    pub kind: PolicyRootKind,
-    pub covering_config_rel: String,
+    pub(crate) rel_dir: String,
+    pub(crate) kind: PolicyRootKind,
+    pub(crate) covering_config_rel: String,
 }
 
 #[derive(Debug, Clone)]
 pub struct UncoveredRustUnitFacts {
-    pub rel_dir: String,
-    pub kind: PolicyRootKind,
+    pub(crate) rel_dir: String,
+    pub(crate) kind: PolicyRootKind,
 }
 
 #[derive(Debug, Clone)]
 pub struct ClippyFacts {
-    pub policy_context_parse_error: Option<String>,
-    pub allowed_configs: Vec<ClippyConfigFacts>,
-    pub forbidden_configs: Vec<ForbiddenConfigFacts>,
-    pub cargo_config_overrides: Vec<CargoConfigOverrideFacts>,
-    pub cargo_root_failures: Vec<CargoRootFailureFacts>,
-    pub covered_units: Vec<CoveredRustUnitFacts>,
-    pub uncovered_units: Vec<UncoveredRustUnitFacts>,
+    pub(crate) policy_context_parse_error: Option<String>,
+    pub(crate) allowed_configs: Vec<ClippyConfigFacts>,
+    pub(crate) forbidden_configs: Vec<ForbiddenConfigFacts>,
+    pub(crate) cargo_config_overrides: Vec<CargoConfigOverrideFacts>,
+    pub(crate) cargo_root_failures: Vec<CargoRootFailureFacts>,
+    pub(crate) covered_units: Vec<CoveredRustUnitFacts>,
+    pub(crate) uncovered_units: Vec<UncoveredRustUnitFacts>,
 }
 
 #[derive(Debug, Clone)]
 pub struct CargoConfigOverrideFacts {
-    pub rel_path: String,
-    pub parse_error: Option<String>,
+    pub(crate) rel_path: String,
+    pub(crate) parse_error: Option<String>,
 }
 
 #[derive(Debug, Clone)]
 pub struct CargoRootFailureFacts {
-    pub rel_dir: String,
-    pub cargo_rel_path: String,
-    pub parse_error: String,
+    pub(crate) rel_dir: String,
+    pub(crate) cargo_rel_path: String,
+    pub(crate) parse_error: String,
 }
 
 #[derive(Debug, Clone)]
@@ -135,9 +135,9 @@ struct ResolvedPolicyMap {
 pub fn collect(tree: &ProjectTree, route: &RsClippyRoute) -> ClippyFacts {
     let cargo_roots = collect_cargo_roots(tree, route);
     let routed_root_rels = route
-        .roots
+        .roots()
         .iter()
-        .map(|root| root.rel_dir.clone())
+        .map(|root| root.rel_dir().to_owned())
         .collect::<BTreeSet<_>>();
     let workspace_roots: BTreeSet<_> = cargo_roots
         .values()

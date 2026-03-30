@@ -3,8 +3,8 @@ mod support;
 use guardrail3_app_rs_family_hooks_shared::hook_shell::{ParsedShellScript, parse_script};
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::RustHookCommandInput;
 use self::support::*;
+use super::inputs::RustHookCommandInput;
 
 const ID: &str = "HOOK-RS-12";
 
@@ -13,42 +13,41 @@ pub fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<CheckResult>) {
 
     if found {
         results.push(
-            CheckResult {
-                id: ID.to_owned(),
-                severity: Severity::Warn,
-                title: "cargo-dupes step present".to_owned(),
-                message: "Hook runs cargo-dupes as an executable command.".to_owned(),
-                file: Some(input.rel_path.to_owned()),
-                line: None,
-                inventory: false,
-            }
+            CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Warn,
+                "cargo-dupes step present".to_owned(),
+                "Hook runs cargo-dupes as an executable command.".to_owned(),
+                Some(input.rel_path.to_owned()),
+                None,
+                false,
+            )
             .as_inventory(),
         );
     } else {
-        results.push(CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Warn,
-            title: "cargo-dupes step missing".to_owned(),
-            message: "Hook does not execute cargo-dupes.".to_owned(),
-            file: Some(input.rel_path.to_owned()),
-            line: None,
-            inventory: false,
-        });
+        results.push(CheckResult::from_parts(
+    ID.to_owned(),
+    Severity::Warn,
+    "cargo-dupes step missing".to_owned(),
+    "Hook does not execute cargo-dupes.".to_owned(),
+    Some(input.rel_path.to_owned()),
+    None,
+    false,
+        ));
     }
-}
 
 pub(crate) fn script_contains_cargo_dupes(parsed: &ParsedShellScript<'_>) -> bool {
     parsed
-        .executable_lines
+        .executable_lines()
         .iter()
-        .any(|line| line_contains_cargo_dupes(line.raw, parsed, &mut Vec::new()))
+        .any(|line| line_contains_cargo_dupes(line.raw(), parsed, &mut Vec::new()))
 }
 
 pub(crate) fn script_contains_path_qualified_cargo_dupes(parsed: &ParsedShellScript<'_>) -> bool {
     parsed
-        .executable_lines
+        .executable_lines()
         .iter()
-        .any(|line| line_contains_path_qualified_cargo_dupes(line.raw, parsed, &mut Vec::new()))
+        .any(|line| line_contains_path_qualified_cargo_dupes(line.raw(), parsed, &mut Vec::new()))
 }
 
 fn line_contains_cargo_dupes(
@@ -191,22 +190,22 @@ fn called_function_contains_cargo_dupes(
     visiting: &mut Vec<String>,
 ) -> bool {
     let Some(function) = root
-        .functions
+        .functions()
         .iter()
-        .find(|function| function.name == command_name)
+        .find(|function| function.name() == command_name)
     else {
         return false;
     };
-    if visiting.iter().any(|name| name == &function.name) {
+    if visiting.iter().any(|name| name == &function.name()) {
         return false;
     }
 
-    visiting.push(function.name.clone());
-    let body_parsed = parse_script(&function.body);
+    visiting.push(function.name().to_owned());
+    let body_parsed = parse_script(&function.body());
     let found = body_parsed
-        .executable_lines
+        .executable_lines()
         .iter()
-        .any(|line| line_contains_cargo_dupes(line.raw, root, visiting));
+        .any(|line| line_contains_cargo_dupes(line.raw(), root, visiting));
     let _ = visiting.pop();
     found
 }
@@ -217,22 +216,22 @@ fn called_function_contains_path_qualified_cargo_dupes(
     visiting: &mut Vec<String>,
 ) -> bool {
     let Some(function) = root
-        .functions
+        .functions()
         .iter()
-        .find(|function| function.name == command_name)
+        .find(|function| function.name() == command_name)
     else {
         return false;
     };
-    if visiting.iter().any(|name| name == &function.name) {
+    if visiting.iter().any(|name| name == &function.name()) {
         return false;
     }
 
-    visiting.push(function.name.clone());
-    let body_parsed = parse_script(&function.body);
+    visiting.push(function.name().to_owned());
+    let body_parsed = parse_script(&function.body());
     let found = body_parsed
-        .executable_lines
+        .executable_lines()
         .iter()
-        .any(|line| line_contains_path_qualified_cargo_dupes(line.raw, root, visiting));
+        .any(|line| line_contains_path_qualified_cargo_dupes(line.raw(), root, visiting));
     let _ = visiting.pop();
     found
 }
@@ -486,5 +485,5 @@ pub(super) fn run_case(content: &str) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-#[path = "hook_rs_12_cargo_dupes_step_present_tests/mod.rs"]
+#[path = "tests/steps/hook_rs_12_cargo_dupes_step_present_tests/mod.rs"]
 mod hook_rs_12_cargo_dupes_step_present_tests;

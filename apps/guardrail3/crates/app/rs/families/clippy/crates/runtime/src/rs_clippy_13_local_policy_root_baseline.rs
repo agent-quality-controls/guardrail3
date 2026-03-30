@@ -70,18 +70,18 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
     }
     if missing_sections.is_empty() {
         results.push(
-            CheckResult {
-                id: ID.to_owned(),
-                severity: Severity::Info,
-                title: "local clippy policy root is self-contained".to_owned(),
-                message: format!(
+            CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Info,
+                "local clippy policy root is self-contained".to_owned(),
+                format!(
                     "`{}` contains the full managed clippy baseline for its subtree.",
                     input.config.rel_path
                 ),
-                file: Some(input.config.rel_path.clone()),
-                line: None,
-                inventory: false,
-            }
+                Some(input.config.rel_path.clone()),
+                None,
+                false,
+            )
             .as_inventory(),
         );
         return;
@@ -90,19 +90,19 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
     missing_sections.sort();
     missing_sections.dedup();
 
-    results.push(CheckResult {
-        id: ID.to_owned(),
-        severity: Severity::Error,
-        title: "local clippy policy root drops managed baseline".to_owned(),
-        message: format!(
+    results.push(CheckResult::from_parts(
+        ID.to_owned(),
+        Severity::Error,
+        "local clippy policy root drops managed baseline".to_owned(),
+        format!(
             "`{}` replaces inherited clippy policy but is incomplete. Missing or wrong managed sections: {}.",
             input.config.rel_path,
             missing_sections.join(", ")
         ),
-        file: Some(input.config.rel_path.clone()),
-        line: None,
-        inventory: false,
-    });
+        Some(input.config.rel_path.clone()),
+        None,
+        false,
+    ));
 }
 
 #[cfg(test)]

@@ -9,13 +9,13 @@ use super::facts::{
 use super::source_facts::SourceCrateFacts;
 
 pub struct AppHexarchInput<'a> {
-    pub app_name: &'a str,
-    pub app_rel_dir: &'a str,
-    pub cargo_rel_path: &'a str,
-    pub cargo_parse_error: Option<&'a str>,
-    pub is_workspace: bool,
-    pub top_level_crates_entry_count: usize,
-    pub src_dir_exists: bool,
+    pub(crate) app_name: &'a str,
+    pub(crate) app_rel_dir: &'a str,
+    pub(crate) cargo_rel_path: &'a str,
+    pub(crate) cargo_parse_error: Option<&'a str>,
+    pub(crate) is_workspace: bool,
+    pub(crate) top_level_crates_entry_count: usize,
+    pub(crate) src_dir_exists: bool,
 }
 
 impl<'a> AppHexarchInput<'a> {
@@ -33,13 +33,13 @@ impl<'a> AppHexarchInput<'a> {
 }
 
 pub struct HexRootInput<'a> {
-    pub app_name: &'a str,
-    pub app_rel_dir: &'a str,
-    pub crates_rel_dir: &'a str,
-    pub dirs: &'a [String],
-    pub files: &'a [String],
-    pub symlink_dirs: &'a [String],
-    pub symlink_files: &'a [String],
+    pub(crate) app_name: &'a str,
+    pub(crate) app_rel_dir: &'a str,
+    pub(crate) crates_rel_dir: &'a str,
+    pub(crate) dirs: &'a [String],
+    pub(crate) files: &'a [String],
+    pub(crate) symlink_dirs: &'a [String],
+    pub(crate) symlink_files: &'a [String],
 }
 
 impl<'a> HexRootInput<'a> {
@@ -57,11 +57,11 @@ impl<'a> HexRootInput<'a> {
 }
 
 pub struct DirectionalContainerHexarchInput<'a> {
-    pub app_name: &'a str,
-    pub rel_path: &'a str,
-    pub label: &'a str,
-    pub dirs: &'a [String],
-    pub symlink_dirs: &'a [String],
+    pub(crate) app_name: &'a str,
+    pub(crate) rel_path: &'a str,
+    pub(crate) label: &'a str,
+    pub(crate) dirs: &'a [String],
+    pub(crate) symlink_dirs: &'a [String],
 }
 
 impl<'a> DirectionalContainerHexarchInput<'a> {
@@ -77,14 +77,14 @@ impl<'a> DirectionalContainerHexarchInput<'a> {
 }
 
 pub struct ContainerHexarchInput<'a> {
-    pub app_name: &'a str,
-    pub rel_path: &'a str,
-    pub label: &'a str,
-    pub dirs: &'a [String],
-    pub symlink_dirs: &'a [String],
-    pub files: &'a [String],
-    pub symlink_files: &'a [String],
-    pub has_gitkeep: bool,
+    pub(crate) app_name: &'a str,
+    pub(crate) rel_path: &'a str,
+    pub(crate) label: &'a str,
+    pub(crate) dirs: &'a [String],
+    pub(crate) symlink_dirs: &'a [String],
+    pub(crate) files: &'a [String],
+    pub(crate) symlink_files: &'a [String],
+    pub(crate) has_gitkeep: bool,
 }
 
 impl<'a> ContainerHexarchInput<'a> {
@@ -103,12 +103,12 @@ impl<'a> ContainerHexarchInput<'a> {
 }
 
 pub struct LeafHexarchInput<'a> {
-    pub app_name: &'a str,
-    pub rel_path: &'a str,
-    pub label: &'a str,
-    pub has_cargo: bool,
-    pub has_crates_dir: bool,
-    pub gitkeep_only: bool,
+    pub(crate) app_name: &'a str,
+    pub(crate) rel_path: &'a str,
+    pub(crate) label: &'a str,
+    pub(crate) has_cargo: bool,
+    pub(crate) has_crates_dir: bool,
+    pub(crate) gitkeep_only: bool,
 }
 
 impl<'a> LeafHexarchInput<'a> {
@@ -125,12 +125,12 @@ impl<'a> LeafHexarchInput<'a> {
 }
 
 pub struct WorkspaceCoverageHexarchInput<'a> {
-    pub app_name: &'a str,
-    pub app_rel_dir: &'a str,
-    pub cargo_parse_error: Option<&'a str>,
-    pub is_workspace: bool,
-    pub workspace_members: Vec<WorkspaceMemberHexarchInput<'a>>,
-    pub app_local_cargo_roots: Vec<AppLocalCargoRootHexarchInput<'a>>,
+    pub(crate) app_name: &'a str,
+    pub(crate) app_rel_dir: &'a str,
+    pub(crate) cargo_parse_error: Option<&'a str>,
+    pub(crate) is_workspace: bool,
+    pub(crate) workspace_members: Vec<WorkspaceMemberHexarchInput<'a>>,
+    pub(crate) app_local_cargo_roots: Vec<AppLocalCargoRootHexarchInput<'a>>,
 }
 
 impl<'a> WorkspaceCoverageHexarchInput<'a> {
@@ -155,10 +155,10 @@ impl<'a> WorkspaceCoverageHexarchInput<'a> {
 }
 
 pub struct AppLocalCargoRootHexarchInput<'a> {
-    pub rel_dir: &'a str,
-    pub cargo_rel_path: &'a str,
-    pub cargo_parse_error: Option<&'a str>,
-    pub is_workspace: bool,
+    pub(crate) rel_dir: &'a str,
+    pub(crate) cargo_rel_path: &'a str,
+    pub(crate) cargo_parse_error: Option<&'a str>,
+    pub(crate) is_workspace: bool,
 }
 
 impl<'a> AppLocalCargoRootHexarchInput<'a> {
@@ -173,9 +173,9 @@ impl<'a> AppLocalCargoRootHexarchInput<'a> {
 }
 
 pub struct WorkspaceMemberHexarchInput<'a> {
-    pub raw: &'a str,
-    pub resolved_dirs: &'a [String],
-    pub within_app_boundary: bool,
+    pub(crate) raw: &'a str,
+    pub(crate) resolved_dirs: &'a [String],
+    pub(crate) within_app_boundary: bool,
 }
 
 impl<'a> WorkspaceMemberHexarchInput<'a> {
@@ -199,9 +199,9 @@ impl<'a> WorkspaceMemberHexarchInput<'a> {
 }
 
 pub struct RootWorkspaceHexarchInput<'a> {
-    pub cargo_parse_error: Option<&'a str>,
-    pub workspace_members: Vec<RootWorkspaceMemberHexarchInput<'a>>,
-    pub rust_app_roots: &'a [String],
+    pub(crate) cargo_parse_error: Option<&'a str>,
+    pub(crate) workspace_members: Vec<RootWorkspaceMemberHexarchInput<'a>>,
+    pub(crate) rust_app_roots: &'a [String],
 }
 
 impl<'a> RootWorkspaceHexarchInput<'a> {
@@ -219,8 +219,8 @@ impl<'a> RootWorkspaceHexarchInput<'a> {
 }
 
 pub struct RootWorkspaceMemberHexarchInput<'a> {
-    pub raw: &'a str,
-    pub resolved_dirs: &'a [String],
+    pub(crate) raw: &'a str,
+    pub(crate) resolved_dirs: &'a [String],
 }
 
 impl<'a> RootWorkspaceMemberHexarchInput<'a> {
@@ -239,7 +239,7 @@ impl<'a> RootWorkspaceMemberHexarchInput<'a> {
 }
 
 pub struct DependencyEdgeHexarchInput<'a> {
-    pub edge: &'a DependencyEdgeFacts,
+    pub(crate) edge: &'a DependencyEdgeFacts,
 }
 
 impl<'a> DependencyEdgeHexarchInput<'a> {
@@ -249,7 +249,7 @@ impl<'a> DependencyEdgeHexarchInput<'a> {
 }
 
 pub struct PatchHexarchInput<'a> {
-    pub patch: &'a PatchEntryFacts,
+    pub(crate) patch: &'a PatchEntryFacts,
 }
 
 impl<'a> PatchHexarchInput<'a> {
@@ -258,7 +258,7 @@ impl<'a> PatchHexarchInput<'a> {
     }
 }
 
-pub struct MemberConfigHexarchInput<'a> {
+pub(crate) struct MemberConfigHexarchInput<'a> {
     pub member: &'a BoundaryConfigFacts,
 }
 
@@ -268,7 +268,7 @@ impl<'a> MemberConfigHexarchInput<'a> {
     }
 }
 
-pub struct MemberDependencyHexarchInput<'a> {
+pub(crate) struct MemberDependencyHexarchInput<'a> {
     pub member: &'a MemberDependencyFacts,
     pub edges: Vec<&'a DependencyEdgeFacts>,
 }
@@ -279,7 +279,7 @@ impl<'a> MemberDependencyHexarchInput<'a> {
     }
 }
 
-pub struct CycleHexarchInput<'a> {
+pub(crate) struct CycleHexarchInput<'a> {
     pub cycle: &'a CycleFacts,
 }
 
@@ -289,7 +289,7 @@ impl<'a> CycleHexarchInput<'a> {
     }
 }
 
-pub struct MemberManifestFailureHexarchInput<'a> {
+pub(crate) struct MemberManifestFailureHexarchInput<'a> {
     pub failure: &'a MemberManifestFailureFacts,
 }
 
@@ -299,7 +299,7 @@ impl<'a> MemberManifestFailureHexarchInput<'a> {
     }
 }
 
-pub struct SourceCrateHexarchInput<'a> {
+pub(crate) struct SourceCrateHexarchInput<'a> {
     pub source: &'a SourceCrateFacts,
 }
 

@@ -1,11 +1,11 @@
 #[derive(Debug, Clone)]
 pub struct DependencyEdgeFacts {
-    pub dep_name: String,
-    pub dep_package_name: String,
-    pub section_label: String,
-    pub target_label: Option<String>,
-    pub has_path: bool,
-    pub version_req: Option<String>,
+    pub(crate) dep_name: String,
+    pub(crate) dep_package_name: String,
+    pub(crate) section_label: String,
+    pub(crate) target_label: Option<String>,
+    pub(crate) has_path: bool,
+    pub(crate) version_req: Option<String>,
 }
 
 pub fn dependency_edges(

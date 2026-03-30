@@ -7,51 +7,49 @@ const ID: &str = "HOOK-RS-07";
 pub fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<CheckResult>) {
     let has_cargo_dupes = input
         .parsed
-        .executable_lines
+        .executable_lines()
         .iter()
-        .any(|line| line_contains_command(line.raw, line.command_text, is_cargo_dupes_command));
+        .any(|line| line_contains_command(line.raw(), line.command_text(), is_cargo_dupes_command));
     let has_jscpd = input
         .parsed
-        .executable_lines
+        .executable_lines()
         .iter()
-        .any(|line| line_contains_command(line.raw, line.command_text, is_jscpd_command));
+        .any(|line| line_contains_command(line.raw(), line.command_text(), is_jscpd_command));
 
     if has_jscpd && !has_cargo_dupes {
-        results.push(CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Warn,
-            title: "wrong Rust duplication tool".to_owned(),
-            message: "Hook uses jscpd for Rust duplication checks instead of cargo-dupes."
+        results.push(CheckResult::from_parts(
+    ID.to_owned(),
+    Severity::Warn,
+    "wrong Rust duplication tool".to_owned(),
+    "Hook uses jscpd for Rust duplication checks instead of cargo-dupes."
                 .to_owned(),
-            file: Some(input.rel_path.to_owned()),
-            line: None,
-            inventory: false,
-        });
+    Some(input.rel_path.to_owned()),
+    None,
+    false,
+        ));
     } else if has_cargo_dupes {
-        results.push(
-            CheckResult {
-                id: ID.to_owned(),
-                severity: Severity::Warn,
-                title: "cargo-dupes selected for Rust duplication checks".to_owned(),
-                message: "Hook uses cargo-dupes for Rust duplication checks.".to_owned(),
-                file: Some(input.rel_path.to_owned()),
-                line: None,
-                inventory: false,
+        results.push(CheckResult::from_parts(
+    ID.to_owned(),
+    Severity::Warn,
+    "cargo-dupes selected for Rust duplication checks".to_owned(),
+    "Hook uses cargo-dupes for Rust duplication checks.".to_owned(),
+    Some(input.rel_path.to_owned()),
+    None,
+    false,
             }
             .as_inventory(),
         );
     } else {
-        results.push(CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Warn,
-            title: "Rust duplication tool missing".to_owned(),
-            message: "Hook does not show a Rust duplication-check command.".to_owned(),
-            file: Some(input.rel_path.to_owned()),
-            line: None,
-            inventory: false,
+        results.push(CheckResult::from_parts(
+    ID.to_owned(),
+    Severity::Warn,
+    "Rust duplication tool missing".to_owned(),
+    "Hook does not show a Rust duplication-check command.".to_owned(),
+    Some(input.rel_path.to_owned()),
+    None,
+    false,
         });
     }
-}
 
 fn line_contains_command(raw: &str, command_text: &str, predicate: fn(&str) -> bool) -> bool {
     let mut segments = split_command_segments(raw);
@@ -64,8 +62,8 @@ fn line_contains_command(raw: &str, command_text: &str, predicate: fn(&str) -> b
         segments.push(command_text.to_owned());
     }
     segments.extend(recovered_substitutions);
-    segments.iter().any(|segment| predicate(segment))
-}
+    segments.iter().any(|segment| predicate(segment)),
+)
 
 fn split_command_segments(raw: &str) -> Vec<String> {
     let mut line = raw.trim();
@@ -90,8 +88,8 @@ fn split_command_segments(raw: &str) -> Vec<String> {
                 .to_owned()
         })
         .filter(|segment| !segment.is_empty())
-        .collect()
-}
+        .collect(),
+)
 
 fn split_unquoted_commands(line: &str) -> Vec<&str> {
     let mut segments = Vec::new();
@@ -371,5 +369,5 @@ pub(super) fn run_case(content: &str) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-#[path = "hook_rs_07_duplication_tool_is_cargo_dupes_tests/mod.rs"]
+#[path = "tests/tools/hook_rs_07_duplication_tool_is_cargo_dupes_tests/mod.rs"]
 mod hook_rs_07_duplication_tool_is_cargo_dupes_tests;

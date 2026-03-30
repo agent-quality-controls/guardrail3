@@ -8,33 +8,33 @@ const ID: &str = "RS-CLIPPY-23";
 
 pub fn check_parseable(results: &mut Vec<CheckResult>) {
     results.push(
-        CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Info,
-            title: "clippy policy context parseable".to_owned(),
-            message: "Active `guardrail3.toml` parsed successfully for clippy policy context."
+        CheckResult::from_parts(
+            ID.to_owned(),
+            Severity::Info,
+            "clippy policy context parseable".to_owned(),
+            "Active `guardrail3.toml` parsed successfully for clippy policy context."
                 .to_owned(),
-            file: Some("guardrail3.toml".to_owned()),
-            line: None,
-            inventory: false,
-        }
+            Some("guardrail3.toml".to_owned()),
+            None,
+            false,
+        )
         .as_inventory(),
     );
 }
 
 pub fn check(input: &PolicyContextFailureInput<'_>, results: &mut Vec<CheckResult>) {
-    results.push(CheckResult {
-        id: ID.to_owned(),
-        severity: Severity::Error,
-        title: "clippy policy context is not parseable".to_owned(),
-        message: format!(
+    results.push(CheckResult::from_parts(
+    ID.to_owned(),
+    Severity::Error,
+    "clippy policy context is not parseable".to_owned(),
+    format!(
             "Failed to parse active `guardrail3.toml` used for clippy profile and garde policy: {}",
             input.parse_error
         ),
-        file: Some("guardrail3.toml".to_owned()),
-        line: None,
-        inventory: false,
-    });
+    Some("guardrail3.toml".to_owned()),
+    None,
+    false,
+    ));
 }
 
 #[cfg(test)]

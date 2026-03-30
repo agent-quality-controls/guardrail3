@@ -1,9 +1,11 @@
+mod string_dispatch;
+
 use super::helpers::{
     attrs_enter_test_context, path_to_string, path_to_string_from_use_tree, span_line,
 };
 use super::types::{
-    FacadeBodyItemInfo, ForbiddenMacroInfo, LargeTypeItem as LargeTypeFact, TestExpectCallInfo,
-    TraitMethodCountInfo,
+    FacadeBodyItemInfo, ForbiddenMacroInfo, GenericParameterCapInfo,
+    LargeTypeItem as LargeTypeFact, StringDispatchInfo, TestExpectCallInfo, TraitMethodCountInfo,
 };
 use syn::parse::Parser;
 use syn::spanned::Spanned;
@@ -128,6 +130,19 @@ pub fn find_large_traits(ast: &syn::File) -> Vec<TraitMethodCountInfo> {
     visitor.out
 }
 
+pub fn find_generic_parameter_caps(ast: &syn::File) -> Vec<GenericParameterCapInfo> {
+    let mut visitor = GenericParameterCapVisitor { out: Vec::new() };
+    visitor.visit_file(ast);
+    visitor.out
+}
+
+pub fn find_string_dispatch_sites(
+    ast: &syn::File,
+    file_is_test_root: bool,
+) -> Vec<StringDispatchInfo> {
+    string_dispatch::find_string_dispatch_sites(ast, file_is_test_root)
+}
+
 struct ForbiddenMacroVisitor {
     out: Vec<ForbiddenMacroInfo>,
     in_test_context: bool,
@@ -144,6 +159,10 @@ struct LargeTypeVisitor {
 
 struct LargeTraitVisitor {
     out: Vec<TraitMethodCountInfo>,
+}
+
+struct GenericParameterCapVisitor {
+    out: Vec<GenericParameterCapInfo>,
 }
 
 trait TestContextAware {
@@ -340,5 +359,71 @@ impl<'ast> Visit<'ast> for LargeTraitVisitor {
             });
         }
         syn::visit::visit_item_trait(self, item_trait);
+    }
+}
+
+impl GenericParameterCapVisitor {
+    fn push_if_over_cap(
+        &mut self,
+        line: usize,
+        item_kind: &'static str,
+        item_name: String,
+        generics: &syn::Generics,
+    ) {
+        let type_const_param_count = generics
+            .params
+            .iter()
+            .filter(|param| !matches!(param, syn::GenericParam::Lifetime(_)))
+            .count();
+        if type_const_param_count > 6 {
+            self.out.push(GenericParameterCapInfo {
+                line,
+                item_kind,
+                item_name,
+                type_const_param_count,
+            });
+        }
+    }
+}
+
+impl<'ast> Visit<'ast> for GenericParameterCapVisitor {
+    fn visit_item_struct(&mut self, item_struct: &'ast syn::ItemStruct) {
+        self.push_if_over_cap(
+            span_line(item_struct.ident.span()),
+            "struct",
+            item_struct.ident.to_string(),
+            &item_struct.generics,
+        );
+        syn::visit::visit_item_struct(self, item_struct);
+    }
+
+    fn visit_item_enum(&mut self, item_enum: &'ast syn::ItemEnum) {
+        self.push_if_over_cap(
+            span_line(item_enum.ident.span()),
+            "enum",
+            item_enum.ident.to_string(),
+            &item_enum.generics,
+        );
+        syn::visit::visit_item_enum(self, item_enum);
+    }
+
+    fn visit_item_trait(&mut self, item_trait: &'ast syn::ItemTrait) {
+        self.push_if_over_cap(
+            span_line(item_trait.ident.span()),
+            "trait",
+            item_trait.ident.to_string(),
+            &item_trait.generics,
+        );
+        syn::visit::visit_item_trait(self, item_trait);
+    }
+
+    fn visit_item_fn(&mut self, item_fn: &'ast syn::ItemFn) {
+        self.push_if_over_cap(
+            span_line(item_fn.sig.ident.span()),
+            "function",
+            item_fn.sig.ident.to_string(),
+            &item_fn.sig.generics,
+        );
+        syn::visit::visit_item_fn(self, item_fn);
     }
 }

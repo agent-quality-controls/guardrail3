@@ -116,7 +116,7 @@ The items below are policy decisions.
 
 ### 12. RS-CODE-25: Apply weak-public-error checks outside library profile
 
-- `Current policy`: `RS-CODE-25` is library-profile only.
+- `Current policy`: `RS-CODE-33` now owns weak public error forms across routed Rust roots, so this expansion is effectively closed.
 - `Suggested expansion`: also check app crates and other public-facing roots.
 - `Reasoning`: app-level public APIs can also leak weak error contracts.
 - `Recommendation`: `Optional`
@@ -124,11 +124,11 @@ The items below are policy decisions.
 
 ### 13. RS-CODE-25: Add `anyhow::Error`, `eyre::Report`, and similar weak public error types
 
-- `Current policy`: the rule catches `Result<_, String>` and `Result<_, Box<dyn Error>>`.
+- `Current policy`: this landed as `RS-CODE-33`, which now catches `Result<_, String>`, `Result<_, &str>`, `Result<_, anyhow::Error>`, and `Result<_, Box<dyn Error>>`.
 - `Suggested expansion`: include erased public error forms such as `anyhow::Error` and `eyre::Report`.
 - `Reasoning`: those are often just as weak as `String` for public contracts.
 - `Recommendation`: `Recommended`
-- `Design note`: if adopted, this may be better framed as the successor to `RS-CODE-25`, consistent with the planned broader public-error rule direction.
+- `Design note`: `RS-CODE-33` is now the explicit successor surface. Preserve one finding path per weak public error case.
 
 ### 14. RS-CODE-26: Raise glob reexports from `Warn` to `Error`
 

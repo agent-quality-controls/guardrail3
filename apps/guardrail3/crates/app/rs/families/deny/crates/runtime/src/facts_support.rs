@@ -7,6 +7,11 @@ use crate::facts::{
     UncoveredRustUnitFacts,
 };
 
+pub(crate) struct ProfileMapFacts {
+    pub(crate) map: BTreeMap<String, Option<String>>,
+    pub(crate) parse_error: Option<String>,
+}
+
 pub(crate) fn collect_same_root_conflicts(
     allowed_configs: &[DenyConfigFacts],
 ) -> Vec<SameRootConflictFacts> {
@@ -68,18 +73,45 @@ pub(crate) fn read_profile_map(
     tree: &ProjectTree,
     cargo_roots: &BTreeMap<String, CargoRootFacts>,
     standalone_package_roots: &BTreeSet<String>,
-) -> BTreeMap<String, Option<String>> {
+) -> ProfileMapFacts {
     let mut map = BTreeMap::new();
-    let default_profile = read_default_profile(tree);
-    let _ = map.insert(String::new(), default_profile.clone());
+    let _ = map.insert(String::new(), None);
     let resolved_app_paths = resolve_app_paths(cargo_roots);
 
+    if !tree.file_exists("guardrail3.toml") {
+        return ProfileMapFacts {
+            map,
+            parse_error: None,
+        };
+    };
+
     let Some(content) = tree.file_content("guardrail3.toml") else {
-        return map;
+        return ProfileMapFacts {
+            map,
+            parse_error: Some("guardrail3.toml content missing from ProjectTree".to_owned()),
+        };
     };
-    let Ok(parsed) = toml::from_str::<toml::Value>(content) else {
-        return map;
+    let parsed = match toml::from_str::<toml::Value>(content) {
+        Ok(parsed) => parsed,
+        Err(err) => {
+            return ProfileMapFacts {
+                map,
+                parse_error: Some(format!("TOML parse error in active `guardrail3.toml`: {err}")),
+            };
+        }
     };
+    if let Err(err) = validate_guardrail_policy_shape(&parsed) {
+        return ProfileMapFacts {
+            map,
+            parse_error: Some(err),
+        };
+    }
+    let default_profile = parsed
+        .get("profile")
+        .and_then(|value| value.get("name"))
+        .and_then(toml::Value::as_str)
+        .map(str::to_owned);
+    let _ = map.insert(String::new(), default_profile.clone());
     let rust = parsed.get("rust");
 
     if let Some(apps) = rust
@@ -118,27 +150,82 @@ pub(crate) fn read_profile_map(
         }
     }
 
-    map
+    ProfileMapFacts {
+        map,
+        parse_error: None,
+    }
 }
 
 fn resolve_app_paths(cargo_roots: &BTreeMap<String, CargoRootFacts>) -> BTreeMap<String, String> {
-    guardrail3_app_core::discover::resolve_app_paths_from_member_dirs(
+    let mut resolved = guardrail3_app_core::discover::resolve_app_paths_from_member_dirs(
         cargo_roots
             .values()
             .filter(|facts| facts.has_workspace)
             .flat_map(|workspace| workspace.workspace_members.iter().cloned())
             .collect::<Vec<_>>(),
-    )
+    );
+
+    for rel_dir in cargo_roots.keys() {
+        let mut parts = rel_dir.split('/');
+        if let (Some("apps"), Some(app_name), None) = (parts.next(), parts.next(), parts.next()) {
+            let _ = resolved
+                .entry(app_name.to_owned())
+                .or_insert_with(|| rel_dir.clone());
+        }
+    }
+
+    resolved
 }
 
-fn read_default_profile(tree: &ProjectTree) -> Option<String> {
-    let content = tree.file_content("guardrail3.toml")?;
-    let parsed = toml::from_str::<toml::Value>(content).ok()?;
-    parsed
-        .get("profile")
-        .and_then(|value| value.get("name"))
-        .and_then(toml::Value::as_str)
-        .map(str::to_owned)
+fn validate_guardrail_policy_shape(parsed: &toml::Value) -> Result<(), String> {
+    if let Some(profile) = parsed.get("profile") {
+        let table = profile
+            .as_table()
+            .ok_or_else(|| "`profile` must be a table in active `guardrail3.toml`.".to_owned())?;
+        if let Some(name) = table.get("name") {
+            if !name.is_str() {
+                return Err(
+                    "`profile.name` must be a string in active `guardrail3.toml`.".to_owned(),
+                );
+            }
+        }
+    }
+
+    let Some(rust) = parsed.get("rust") else {
+        return Ok(());
+    };
+    let rust_table = rust
+        .as_table()
+        .ok_or_else(|| "`rust` must be a table in active `guardrail3.toml`.".to_owned())?;
+
+    if let Some(apps) = rust_table.get("apps") {
+        let apps_table = apps
+            .as_table()
+            .ok_or_else(|| "`rust.apps` must be a table in active `guardrail3.toml`.".to_owned())?;
+        for (app_name, app_cfg) in apps_table {
+            validate_profile_block(app_cfg, &format!("`rust.apps.{app_name}`"))?;
+        }
+    }
+
+    if let Some(packages) = rust_table.get("packages") {
+        validate_profile_block(packages, "`rust.packages`")?;
+    }
+
+    Ok(())
+}
+
+fn validate_profile_block(value: &toml::Value, context: &str) -> Result<(), String> {
+    let table = value
+        .as_table()
+        .ok_or_else(|| format!("{context} must be a table in active `guardrail3.toml`."))?;
+    if let Some(profile_name) = table.get("type").or_else(|| table.get("profile")) {
+        if !profile_name.is_str() {
+            return Err(format!(
+                "{context}.type/profile must be a string in active `guardrail3.toml`."
+            ));
+        }
+    }
+    Ok(())
 }
 
 pub(crate) fn profile_for(
@@ -175,7 +262,7 @@ pub(crate) fn push_coverage_facts(
 }
 
 fn is_self_hosted_family_root(tree: &ProjectTree) -> bool {
-    let Some(root) = tree.structure.get("") else {
+    let Some(root) = tree.structure().get("") else {
         return false;
     };
     if !root.has_file("Cargo.toml")
