@@ -19,35 +19,38 @@ Current state:
 
 Rule inventory:
 
-- `T-TOOL-04` formatter package presence
-  - Should require `prettier` at the owning package root.
-  - It is for ensuring the formatter tool is installed at all.
-- `TS-FMT-02` formatter config exists
-  - Should require a formatter config surface at the nearest owning config root.
-  - It is for making formatting policy explicit instead of relying only on package presence.
-- `TS-FMT-03` formatter config parseability
-  - Should parse and validate the formatter config surface.
-  - It is for preventing dead config files and broken formatter setup.
-- `TS-FMT-04` format script presence
-  - Should require a stable formatting script entrypoint where the contract expects one.
-  - It is for CI and developer ergonomics.
-- `TS-FMT-05` formatter policy wiring
-  - Should verify that the formatter config, script, and package surface line up coherently.
-  - It is for preventing half-installed or half-configured formatting setups.
+- `T-TOOL-04` — prettier package presence.
+  What it should do: require `prettier` in the root/package-manager `devDependencies`.
+  What it is for: make formatter tooling explicit and installable in CI and local development.
+- planned: prettier config existence and parseability.
+  What it should do: require the canonical prettier config surface and validate that it parses.
+  What it is for: prevent “formatter installed but effectively unconfigured” drift.
+- planned: formatting script presence where required.
+  What it should do: require a canonical formatting script at roots that are expected to expose one.
+  What it is for: standardize formatter invocation in CI and local workflows.
+- planned: formatter policy wiring.
+  What it should do: ensure the repo actually wires Prettier into the expected TS toolchain rather than leaving it as an unused dependency.
+  What it is for: make formatting an enforced tool surface rather than a nominal dependency.
 
 Current implementation mapping:
 
-- `package_deps.rs`
-  - `CORE_TOOLS` contains `("T-TOOL-04", "prettier")`
-  - `check_additional_tools(...)` currently implements the package-presence part of the family
-- `tool_config_checks.rs`
-  - currently does not implement prettier config existence, parseability, or format-script checks
+- `apps/guardrail3/crates/app/ts/validate/package_deps.rs`
+  - `CORE_TOOLS` currently contains `("T-TOOL-04", "prettier")`, so package presence is enforced there.
+- `apps/guardrail3/crates/app/ts/validate/tool_config_checks.rs`
+  - currently does not implement prettier config existence, parseability, or format-script checks.
 
-Known reconciliation notes:
+Implementation status:
 
-- the old family contract is already more specific than the current code: only package presence is implemented today
-- the placeholder's "nearest config root" ownership is not reflected in current code, which still behaves like a root-level grouped validator
-- formatter config file names and precedence are not yet codified in the current TS family surface
+- `T-TOOL-04` package presence: implemented
+- formatter config existence/parseability: planned only
+- formatting script presence: planned only
+- formatter policy wiring: planned only
+
+Current doc/code reconciliation notes:
+
+- the old ledger describes the intended family, not the fully implemented current one
+- live code currently covers only prettier package presence; the rest of the family is still planned
+- this family is one of the clearer examples where the TS grouped validator has less enforcement than the planning surface implies
 
 Historical/supplemental references:
 
@@ -55,5 +58,6 @@ Historical/supplemental references:
 
 Next planning focus:
 
-- define canonical prettier config surfaces and precedence
-- add dedicated config/script rules so this family becomes more than a package-presence check
+- define canonical formatter config surfaces and root ownership
+- map the old contract onto actual config filenames and script names before demoting the old TS ledger
+- add the missing config/script/wiring checks before demoting the old TS fmt ledger
