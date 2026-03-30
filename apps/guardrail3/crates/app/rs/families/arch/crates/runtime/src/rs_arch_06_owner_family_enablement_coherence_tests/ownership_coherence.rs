@@ -31,10 +31,7 @@ fn app_scoped_hexarch_override_false_beats_global_true() {
             ("apps", entry(&["backend"], &[])),
             ("apps/backend", entry(&["crates"], &["Cargo.toml"])),
             ("apps/backend/crates", entry(&["worker"], &[])),
-            (
-                "apps/backend/crates/worker",
-                entry(&[], &["Cargo.toml"]),
-            ),
+            ("apps/backend/crates/worker", entry(&[], &["Cargo.toml"])),
         ],
         &[
             ("guardrail3.toml", config),
@@ -68,10 +65,7 @@ fn app_scoped_hexarch_override_true_beats_global_false() {
             ("apps", entry(&["backend"], &[])),
             ("apps/backend", entry(&["crates"], &["Cargo.toml"])),
             ("apps/backend/crates", entry(&["worker"], &[])),
-            (
-                "apps/backend/crates/worker",
-                entry(&[], &["Cargo.toml"]),
-            ),
+            ("apps/backend/crates/worker", entry(&[], &["Cargo.toml"])),
         ],
         &[
             ("guardrail3.toml", config),

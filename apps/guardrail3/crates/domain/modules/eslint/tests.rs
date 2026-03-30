@@ -77,16 +77,12 @@ fn config_has_global_ignores() {
 #[test]
 fn config_has_plugin_rules() {
     let result = build_eslint_config(false, false);
-    // Unicorn
     assert!(result.contains(r#""unicorn/no-null": "off""#));
     assert!(result.contains(r#""unicorn/no-anonymous-default-export": "error""#));
-    // Regexp
     assert!(result.contains(r#""regexp/require-unicode-regexp": "error""#));
     assert!(result.contains(r#""regexp/no-misleading-capturing-group": "error""#));
-    // Sonarjs
     assert!(result.contains(r#""sonarjs/cognitive-complexity": "error""#));
     assert!(result.contains(r#""sonarjs/no-useless-react-setstate": "error""#));
-    // React
     assert!(result.contains(r#""react/no-unstable-nested-components": "error""#));
     assert!(result.contains("validStrategies"));
 }

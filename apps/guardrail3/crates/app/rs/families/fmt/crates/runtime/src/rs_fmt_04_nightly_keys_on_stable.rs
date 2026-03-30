@@ -118,7 +118,7 @@ reorder_modules = true
 group_imports = "StdExternalCrate"
 "#,
             )
-            .expect("valid TOML"),
+            .expect("RS-FMT-04 in-memory rustfmt TOML fixture should parse"),
         ),
         cargo_edition: super::facts::CargoEditionState::Present("2024".to_owned()),
         toolchain_channel,
