@@ -1,10 +1,13 @@
 use std::path::Path;
 
 use crate::cli::GenerateArgs;
+#[cfg(feature = "product-rs-generate")]
 use guardrail3_app_commands::command_ids::{RS_INIT, RS_SHOW_MODULE};
-use guardrail3_app_rs_generate as rs_generate;
 use guardrail3_domain_config as config;
 use guardrail3_domain_modules::{canonical, cspell, eslint, stylelint};
+
+#[cfg(feature = "product-rs-generate")]
+use guardrail3_app_rs_generate as rs_generate;
 
 /// A (`relative_path`, `content`) pair for a generated file.
 type GeneratedPair = (String, String);
@@ -25,6 +28,7 @@ fn load_config(path: &Path) -> Result<Option<config::types::GuardrailConfig>, St
         .map_err(|error| format!("Error parsing guardrail3.toml: {error}"))
 }
 
+#[cfg(feature = "product-rs-generate")]
 /// Main generate command -- generates all config files from guardrail3.toml.
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and process::exit for error codes
 pub fn run(args: &GenerateArgs) {
@@ -84,6 +88,7 @@ pub fn run(args: &GenerateArgs) {
     }
 }
 
+#[cfg(feature = "product-rs-generate")]
 /// Generate only Rust config files.
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
 pub fn run_rs(args: &GenerateArgs) {
@@ -119,6 +124,7 @@ pub fn run_rs(args: &GenerateArgs) {
     }
 }
 
+#[cfg(feature = "product-ts")]
 /// Generate only TypeScript config files.
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
 pub fn run_ts(args: &GenerateArgs) {
@@ -199,6 +205,7 @@ fn generate_and_install_hooks(project_path: &Path, hook_content: &str) {
         .output();
 }
 
+#[cfg(feature = "product-rs-generate")]
 /// Install pre-commit hooks (standalone command).
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
 pub fn run_rs_hooks(args: &GenerateArgs) {
@@ -311,6 +318,7 @@ fn generate_all_files(
 ) -> Vec<GeneratedFile> {
     let mut files = Vec::new();
 
+    #[cfg(feature = "product-rs-generate")]
     if cfg.rust.is_some() {
         files.extend(
             rs_generate::generate_rust_owned_artifacts(project_path, cfg)
@@ -322,6 +330,7 @@ fn generate_all_files(
         );
     }
 
+    #[cfg(feature = "product-ts")]
     if cfg.typescript.is_some() {
         let ts_files = generate_ts_files(cfg);
         files.extend(ts_files);
@@ -330,6 +339,7 @@ fn generate_all_files(
     files
 }
 
+#[cfg(feature = "product-ts")]
 fn generate_ts_files(cfg: &config::types::GuardrailConfig) -> Vec<GeneratedFile> {
     let mut files = Vec::new();
 
@@ -392,6 +402,7 @@ fn generate_ts_files(cfg: &config::types::GuardrailConfig) -> Vec<GeneratedFile>
     files
 }
 
+#[cfg(feature = "product-ts")]
 /// Generate expected TS file contents without writing -- used by ts diff.
 pub fn generate_expected_ts(project_path: &Path) -> Option<Vec<GeneratedPair>> {
     let cfg = load_config(project_path).ok()??;
@@ -424,6 +435,7 @@ pub fn generate_expected(project_path: &Path) -> Option<Vec<GeneratedPair>> {
     Some(files.into_iter().map(|gf| (gf.path, gf.content)).collect())
 }
 
+#[cfg(feature = "product-ts")]
 /// Determine which app types exist in the TypeScript config.
 fn detect_ts_app_types(ts_cfg: &config::types::TypeScriptConfig) -> (bool, bool) {
     let Some(apps) = ts_cfg.apps.as_ref() else {

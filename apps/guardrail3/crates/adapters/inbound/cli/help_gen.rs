@@ -2,16 +2,20 @@
 
 use clap::Command;
 use guardrail3_app_commands::messages::{
-    RS_HELP, RS_INIT_HELP, RS_VALIDATE_HELP, TOP_LEVEL_HELP, TS_HELP, TS_INIT_HELP,
-    TS_VALIDATE_HELP,
+    RS_HELP, RS_INIT_HELP, RS_VALIDATE_HELP, TOP_LEVEL_HELP,
 };
+#[cfg(feature = "product-ts")]
+use guardrail3_app_commands::messages::{TS_HELP, TS_INIT_HELP, TS_VALIDATE_HELP};
 
 /// Inject comprehensive help text into every relevant subcommand.
 pub fn inject_help(cmd: Command) -> Command {
     let cmd = cmd
         .after_help(TOP_LEVEL_HELP)
         .after_long_help(TOP_LEVEL_HELP);
-    inject_ts_help(inject_rs_help(cmd))
+    let cmd = inject_rs_help(cmd);
+    #[cfg(feature = "product-ts")]
+    let cmd = inject_ts_help(cmd);
+    cmd
 }
 
 fn inject_rs_help(cmd: Command) -> Command {
@@ -28,6 +32,7 @@ fn inject_rs_help(cmd: Command) -> Command {
     })
 }
 
+#[cfg(feature = "product-ts")]
 fn inject_ts_help(cmd: Command) -> Command {
     cmd.mut_subcommand("ts", |ts| {
         ts.after_help(TS_HELP)
