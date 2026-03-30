@@ -1,5 +1,8 @@
 # RS-CODE Family Stabilization Plan
 
+> Superseded as the primary family plan by [`.plans/by_family/rs/code.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/by_family/rs/code.md).
+> Keep this file as tactical stabilization history only.
+
 Historical note: this file still tracks the family-stabilization lane, but earlier wording about a family-root `code/Cargo.toml` workspace is obsolete. The live family shape is the package group described in [code/README.md](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/code/README.md): `crates/runtime`, `crates/assertions`, and `test_support` under a non-package family root.
 
 This plan is about stabilizing the `RS-CODE` family itself as a self-hosted Rust family.

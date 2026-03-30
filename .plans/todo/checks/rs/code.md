@@ -1,5 +1,8 @@
 # RS-CODE — Rust code file checker (29 implemented rules + 5 next-wave planned rules)
 
+> Superseded as the primary family plan by [`.plans/by_family/rs/code.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/by_family/rs/code.md).
+> Keep this file as a detailed rule ledger and migration/history reference.
+
 **Input:** *.rs files (syn AST parsed)
 **Parser:** syn crate (Rust AST)
 **Current code:** `apps/guardrail3/crates/app/rs/families/code/crates/runtime/src/` with family orchestration in `lib.rs`, routed discovery in `discover.rs`, normalized family facts in `facts.rs`, typed rule inputs in `inputs.rs`, and shared parsing under `parse/`

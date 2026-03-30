@@ -1,5 +1,8 @@
 # RS-FMT — rustfmt.toml checker (8 rules)
 
+> Superseded as the primary family plan by [`.plans/by_family/rs/fmt.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/by_family/rs/fmt.md).
+> Keep this file as a detailed rule ledger and migration/history reference.
+
 **Input:** effective repository rustfmt policy file plus any nested override files
 **Parser:** TOML
 **Current code:** `crates/app/rs/checks/rs/fmt/**` (old `config_files.rs` / `rustfmt_check.rs` are legacy seed material only)

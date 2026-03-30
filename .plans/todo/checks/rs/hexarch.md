@@ -1,5 +1,8 @@
 # RS-HEXARCH — Hex arch structure + dependency direction checker (27 rules)
 
+> Superseded as the primary family plan by [`.plans/by_family/rs/hexarch.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/by_family/rs/hexarch.md).
+> Keep this file as a detailed rule ledger and migration/history reference.
+
 **Input:** Directory structure + Cargo.toml files (workspace + per-crate) + *.rs files (for ports/adapter content checks)
 **Parser:** TOML + filesystem + syn AST
 **Current code:** `arch/rs_arch_01/`, `hex_arch_checks.rs`

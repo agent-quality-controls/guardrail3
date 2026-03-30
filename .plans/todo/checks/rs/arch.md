@@ -1,5 +1,8 @@
 # RS-ARCH — Rust root placement and architecture ownership checker
 
+> Superseded as the primary family plan by [`.plans/by_family/rs/arch.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/by_family/rs/arch.md).
+> Keep this file as a detailed rule ledger and migration/history reference.
+
 **Input:** all discovered Rust `Cargo.toml` roots + guardrail config + owned workspace/package classification
 **Parser:** TOML + directory structure
 **Current code:** `apps/guardrail3/crates/app/rs/families/arch/`, `apps/guardrail3/crates/app/rs/placement/`
