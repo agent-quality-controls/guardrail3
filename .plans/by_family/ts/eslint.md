@@ -18,128 +18,7 @@ Current source of truth:
 Current state:
 
 - ESLint logic is substantial but still grouped under the old validator layout
-
-Rule inventory:
-
-- `T1` — ESLint config exists.
-  - What it should do: require an `eslint.config.*` file at the owning root.
-  - What it is for: this is the base lint policy surface; nothing else matters if the config is missing.
-- `T2` — `max-lines` is configured to the required baseline.
-  - What it should do: require `max-lines` at the expected value.
-  - What it is for: keep file-size pressure explicit in the lint layer.
-- `T3` — `max-lines-per-function` is configured to the required baseline.
-  - What it should do: require `max-lines-per-function` at the expected value.
-  - What it is for: keep function complexity pressure explicit in the lint layer.
-- `T4` — `complexity` is configured to the required baseline.
-  - What it should do: require the baseline complexity rule/value.
-  - What it is for: catch excessive branching and local complexity.
-- `T5` — `no-restricted-imports` is present.
-  - What it should do: require restricted-import policy in ESLint config.
-  - What it is for: this is a generic lint-level import restriction surface, separate from TS hexarch zone ownership.
-- `T6` — boundary enforcement is configured.
-  - What it should do: detect whether `eslint-plugin-boundaries` or equivalent boundary enforcement is active.
-  - What it is for: this is the lint-layer prerequisite for import-zone enforcement, even though the actual zone semantics belong with `ts/hexarch`.
-- `T7` — non-test relaxed rules are inventoried.
-  - What it should do: inventory non-test rules set to `off` or `warn`.
-  - What it is for: surface local lint relaxations and make them reviewable.
-- `T8` — file-specific overrides are inventoried.
-  - What it should do: inventory `files:` / override blocks.
-  - What it is for: scoped lint exceptions need visibility because they often hide the real policy surface.
-- `T40`..`T48` — required baseline rules are present.
-  - What they should do: require the current core rule set:
-    - `no-floating-promises`
-    - `no-explicit-any`
-    - `no-console`
-    - `eqeqeq`
-    - `no-restricted-globals`
-    - `no-cycle`
-    - `max-dependencies`
-    - `explicit-function-return-type`
-    - `strict-boolean-expressions`
-  - What they are for: define the minimum generic ESLint/TypeScript rule baseline.
-- `T49` — test-file relaxations are inventoried.
-  - What it should do: inventory test-specific override sections.
-  - What it is for: test relaxations are legitimate but should stay narrow and visible.
-- `T50` — route wrapper enforcement exists.
-  - What it should do: require lint-level enforcement of canonical route-wrapper usage where that is part of the app contract.
-  - What it is for: this keeps route entrypoints consistent and auditable.
-- `T51` — direct `process.env` access is banned at the lint layer.
-  - What it should do: require ESLint restrictions against direct `process.env`.
-  - What it is for: configuration access should go through a central audited surface.
-- `T60`..`T83` — advanced baseline rules are present.
-  - What they should do: require the broader modern TS/ESLint baseline, including rules such as `no-misused-promises`, `await-thenable`, `consistent-type-imports`, `no-non-null-assertion`, `no-unused-vars`, `no-unsafe-*`, `explicit-module-boundary-types`, `promise-function-async`, `prefer-nullish-coalescing`, `prefer-optional-chain`, and related safety/style rules.
-  - What they are for: these carry the deeper lint contract beyond the small top-level baseline.
-- `T-ESLP-01` — unicorn preset import exists.
-  - What it should do: require the unicorn flat-config import.
-  - What it is for: this keeps the unicorn rule family actually wired, not just installed.
-- `T-ESLP-02` — required unicorn disabled-rules set is present.
-  - What it should do: require the expected explicit unicorn rule disables.
-  - What it is for: this encodes the project’s chosen exception surface against the unicorn preset.
-- `T-ESLP-03` — required unicorn extra rules are present.
-  - What it should do: require the project’s extra unicorn rules beyond the preset.
-  - What it is for: this captures the intentional stronger lint surface.
-- `T-ESLP-04` — regexp preset import exists.
-  - What it should do: require the regexp flat-config import.
-  - What it is for: this wires regexp lint policy rather than relying on package presence alone.
-- `T-ESLP-05` — regexp extra rules are present.
-  - What it should do: require the extra regexp rules beyond the preset.
-  - What it is for: this strengthens the parser/validation safety surface.
-- `T-ESLP-06` — required sonarjs rules are present.
-  - What it should do: require the curated sonarjs rule set.
-  - What it is for: this carries cognitive-complexity and logic-smell pressure into ESLint.
-- `T-ESLP-07` — jsx-a11y strict config exists for content-profile roots.
-  - What it should do: require strict jsx-a11y configuration where content/web UI surfaces are in scope.
-  - What it is for: this makes accessibility linting part of the frontend/content contract.
-- `T-ESLP-08` — `jsx-a11y/control-has-associated-label` is present.
-  - What it should do: require the explicit control-label rule.
-  - What it is for: this carries a specific high-value accessibility guarantee.
-- `T-ESLP-09` — required React extra rules are present.
-  - What it should do: require the curated React rule set.
-  - What it is for: this encodes project-specific React quality expectations.
-- `T-ESLP-10` — required built-in ESLint/TS rules are present and sufficiently configured.
-  - What it should do: require the curated built-in rule group and warn when crucial option shapes are missing.
-  - What it is for: some rules are only meaningful with the right option structure, not just the rule name.
-- `T-ESLP-11` — test relaxation section exists and carries the expected test-rule set.
-  - What it should do: require a real test override section and the expected disabled test rules.
-  - What it is for: this makes test-only lint relaxation explicit instead of accidental.
-- `T-ESLP-12` — tailwind-ban plugin and deny list exist where content-profile rules require them.
-  - What it should do: require the plugin and its deny-list configuration.
-  - What it is for: this enforces semantic design-token usage over arbitrary Tailwind escape hatches.
-- `T-ESLP-13` — `strictTypeChecked` preset exists.
-  - What it should do: require `tseslint.configs.strictTypeChecked`.
-  - What it is for: this is the deep type-aware lint baseline.
-- `T-ESLP-14` — `stylisticTypeChecked` preset exists.
-  - What it should do: require `tseslint.configs.stylisticTypeChecked`.
-  - What it is for: this carries the style-oriented type-aware lint baseline.
-- `T-ESLP-15` — RegExp is banned appropriately.
-  - What it should do: require lint bans on raw RegExp usage where the project expects structured parsing/validation instead.
-  - What it is for: this enforces the “no ad hoc regex parsing” policy at the lint layer.
-
-Current code mapping:
-
-- `apps/guardrail3/crates/app/ts/validate/eslint_check.rs`
-  - owns `T1`, `T2`..`T8`, `T40`..`T51`, `T60`..`T83`, and `T-ESLP-13`..`T-ESLP-15`
-- `apps/guardrail3/crates/app/ts/validate/eslint_plugin_checks.rs`
-  - owns `T-ESLP-01`..`T-ESLP-12`
-- `apps/guardrail3/crates/app/ts/validate/eslint_parser.rs`
-  - parses the flat config into `EslintConfig`
-- `apps/guardrail3/crates/app/ts/validate/eslint_rule_infra.rs`
-  - provides rule presence/value checking infrastructure
-- mixed package-presence surfaces currently live in `apps/guardrail3/crates/app/ts/validate/package_deps.rs`
-  - genuinely ESLint-owned package presence includes at least `eslint`, `typescript-eslint`, `eslint-plugin-unicorn`, `eslint-plugin-regexp`, `eslint-plugin-sonarjs`, `eslint-plugin-import-x`, `eslint-import-resolver-typescript`, `eslint-plugin-boundaries`, and content-profile plugins like `eslint-plugin-jsx-a11y`
-  - but `knip`, `jscpd`, and `only-allow` are current mixed spillover and should not silently become part of the long-term TS-ESLINT contract
-
-Current doc/code reconciliation notes:
-
-- the old ledger in `.plans/todo/checks/ts/eslint.md` is directionally right but under-specifies the real live rule inventory
-- the current implementation is split across config parsing, config rule checks, plugin group checks, and package presence checks; this file should keep those boundaries explicit instead of pretending the family is already cleanly separated
-- `T6` is the main intentional boundary ambiguity: it is an ESLint-owned config-surface rule that exists to support `ts/hexarch`, but it should not absorb actual architecture semantics
 - the live rule surface is much richer than the old ledger; this family is one of the main places where the by-family plan must be code-led rather than doc-led
-
-Historical/supplemental references:
-
-- `.plans/todo/checks/ts/eslint.md`
-- `.plans/by_file/ts/eslint-config-mjs.md`
 
 Rule inventory:
 
@@ -235,96 +114,96 @@ Rule inventory:
   What it is for: stop unsound property access on untyped values.
 - `T70` — `no-unsafe-call` required.
   What it should do: require the rule at error severity.
-  What it is for: stop untyped/dangerous calls.
+  What it is for: stop unsound invocation of untyped values.
 - `T71` — `no-unsafe-return` required.
   What it should do: require the rule at error severity.
-  What it is for: prevent unsound values escaping function boundaries.
+  What it is for: stop unsafe values escaping function boundaries.
 - `T72` — `no-unsafe-argument` required.
   What it should do: require the rule at error severity.
-  What it is for: prevent passing unsound values into typed APIs.
+  What it is for: stop unsafe values from flowing into typed APIs.
 - `T73` — `explicit-module-boundary-types` required.
   What it should do: require the rule at error severity.
-  What it is for: keep module entry/exit types explicit.
+  What it is for: keep exported/module boundary types explicit.
 - `T74` — `promise-function-async` required.
   What it should do: require the rule at error severity.
-  What it is for: align promise-returning functions with explicit async semantics.
+  What it is for: keep promise-returning functions explicitly async.
 - `T75` — `consistent-type-exports` required.
   What it should do: require the rule at error severity.
-  What it is for: keep type-only exports explicit and consistent.
+  What it is for: normalize type-only export style.
 - `T76` — `consistent-type-definitions` required.
   What it should do: require the rule at error severity.
-  What it is for: keep type-definition style consistent.
+  What it is for: keep TS type declaration style consistent.
 - `T77` — `no-unnecessary-condition` required.
   What it should do: require the rule at error severity.
-  What it is for: catch defensive branches that are never meaningful.
+  What it is for: catch dead or redundant conditionals.
 - `T78` — `prefer-nullish-coalescing` required.
   What it should do: require the rule at error severity.
-  What it is for: favor safer defaulting semantics over `||`.
+  What it is for: prefer semantically precise fallback behavior.
 - `T79` — `prefer-optional-chain` required.
   What it should do: require the rule at error severity.
-  What it is for: prefer clear null-safe access patterns.
+  What it is for: prefer concise and safe nullable property access.
 - `T80` — `no-deprecated` required.
   What it should do: require the rule at error severity.
-  What it is for: keep deprecated APIs from creeping back in.
+  What it is for: stop drift onto deprecated APIs.
 - `T81` — `restrict-template-expressions` required.
   What it should do: require the rule at error severity.
-  What it is for: prevent accidental stringification of unsafe values.
+  What it is for: prevent unsafe or sloppy string interpolation.
 - `T82` — `no-throw-literal` required.
   What it should do: require the rule at error severity.
-  What it is for: keep thrown values structured and debuggable.
+  What it is for: force throwable error objects instead of bare literals.
 - `T83` — `no-empty` required.
   What it should do: require the rule at error severity.
-  What it is for: block silent empty blocks.
-- `T-ESLP-01` — unicorn flat config import exists.
-  What it should do: require the unicorn plugin/config import wiring.
-  What it is for: make the unicorn rule surface structurally present.
-- `T-ESLP-02` — baseline unicorn disabled-rule set exists.
-  What it should do: require the expected `unicorn/*` rules to be explicitly disabled.
-  What it is for: codify the project’s chosen exceptions to the unicorn baseline.
-- `T-ESLP-03` — additional unicorn rules exist.
-  What it should do: require the expected extra unicorn rules.
-  What it is for: keep the preferred stricter unicorn policy intact.
-- `T-ESLP-04` — regexp config import exists.
-  What it should do: require regexp plugin/config import wiring.
-  What it is for: make regex safety/style enforcement structurally present.
-- `T-ESLP-05` — extra regexp rules exist.
-  What it should do: require the expected regexp rule set.
-  What it is for: strengthen regex correctness beyond the base import.
-- `T-ESLP-06` — selected sonarjs rules exist.
-  What it should do: require the chosen `sonarjs/*` rule subset.
-  What it is for: cover complexity and suspicious-pattern checks not owned elsewhere.
-- `T-ESLP-07` — jsx-a11y strict config exists for content profile.
-  What it should do: require strict jsx-a11y config wiring when content-profile checks are in scope.
-  What it is for: enforce frontend accessibility linting.
-- `T-ESLP-08` — `jsx-a11y/control-has-associated-label` exists.
-  What it should do: require that concrete accessibility rule.
-  What it is for: catch unlabeled interactive controls.
-- `T-ESLP-09` — extra React rules exist.
-  What it should do: require the chosen `react/*` rule subset.
-  What it is for: enforce the project’s stricter React/JSX hygiene policy.
-- `T-ESLP-10` — baseline built-in ESLint/TS rules exist, plus required option shapes.
-  What it should do: require the built-in/core rules listed in the current runtime and warn when key options like naming-convention selectors or jsx-no-leaked-render strategies are missing.
-  What it is for: keep the baseline lint bundle complete and not just nominally present.
-- `T-ESLP-11` — test-file relaxation section exists and covers the expected rules.
-  What it should do: require a test-override section and require the expected relaxed rules there.
-  What it is for: make test relaxations explicit, narrow, and consistent.
-- `T-ESLP-12` — tailwind-ban plugin/rule exists for content profile.
-  What it should do: require the tailwind-ban plugin and warn if its deny-list policy is absent.
-  What it is for: enforce semantic design-token use over arbitrary utility sprawl.
-- `T-ESLP-13` — `tseslint.configs.strictTypeChecked` exists.
-  What it should do: require the strict type-checked preset.
-  What it is for: make type-aware linting part of the baseline.
-- `T-ESLP-14` — `tseslint.configs.stylisticTypeChecked` exists.
-  What it should do: require the stylistic type-checked preset.
-  What it is for: keep stylistic TS rules aligned with the type-aware preset baseline.
-- `T-ESLP-15` — RegExp is banned or tightly restricted in ESLint.
-  What it should do: require the config patterns that ban or restrict unsafe regex use.
-  What it is for: push parsing/validation toward structured approaches instead of ad hoc regex.
+  What it is for: catch swallowed/empty control-flow blocks.
+- `T-ESLP-01` — unicorn config import present.
+  What it should do: ensure the unicorn flat config is imported/configured.
+  What it is for: establish the unicorn ruleset baseline.
+- `T-ESLP-02` — expected unicorn-disabled rule set is present.
+  What it should do: ensure the approved set of unicorn rule relaxations is explicit.
+  What it is for: document intentional deviations from the plugin baseline.
+- `T-ESLP-03` — expected extra unicorn rules are present.
+  What it should do: ensure the chosen extra unicorn hardening rules are enabled.
+  What it is for: strengthen code hygiene beyond the default preset.
+- `T-ESLP-04` — regexp config import present.
+  What it should do: ensure regexp plugin config is imported.
+  What it is for: make regex policy enforceable at all.
+- `T-ESLP-05` — expected extra regexp rules are present.
+  What it should do: ensure the chosen regexp hardening rules are enabled.
+  What it is for: steer regex usage toward safer structured patterns.
+- `T-ESLP-06` — expected sonarjs rules are present.
+  What it should do: ensure the chosen sonarjs complexity/duplication rules are enabled.
+  What it is for: add high-signal code-smell coverage.
+- `T-ESLP-07` — jsx-a11y strict config present.
+  What it should do: ensure the strict accessibility preset is configured when the content/frontend profile needs it.
+  What it is for: make accessibility baseline explicit.
+- `T-ESLP-08` — `jsx-a11y/control-has-associated-label` present.
+  What it should do: ensure a key accessibility rule is enabled.
+  What it is for: protect labeled-control accessibility.
+- `T-ESLP-09` — expected extra React rules are present.
+  What it should do: ensure the chosen React rule bundle is enabled.
+  What it is for: tighten UI correctness beyond the default React preset.
+- `T-ESLP-10` — expected built-in ESLint/TS rule bundle is present.
+  What it should do: ensure a curated set of built-in rules is present.
+  What it is for: maintain a minimum baseline independent of plugin presets.
+- `T-ESLP-11` — expected test-file relaxation section is present.
+  What it should do: ensure the approved rules are relaxed in test overrides and only there.
+  What it is for: keep test deviations explicit and controlled.
+- `T-ESLP-12` — tailwind-ban plugin and rule present.
+  What it should do: ensure tailwind-ban is installed/configured when needed.
+  What it is for: enforce CSS architecture/content policy around Tailwind use.
+- `T-ESLP-13` — `strictTypeChecked` preset present.
+  What it should do: ensure `tseslint.configs.strictTypeChecked` is configured.
+  What it is for: make the type-aware strict baseline mandatory.
+- `T-ESLP-14` — `stylisticTypeChecked` preset present.
+  What it should do: ensure `tseslint.configs.stylisticTypeChecked` is configured.
+  What it is for: make the stylistic TS baseline mandatory.
+- `T-ESLP-15` — RegExp bans present.
+  What it should do: ensure regex/RegExp use is banned or tightly restricted via ESLint.
+  What it is for: push validation/parsing toward structured tools.
 
-Current code mapping:
+Current implementation mapping:
 
 - `apps/guardrail3/crates/app/ts/validate/eslint_check.rs`
-  - owns `T1`, `T2`-`T8`, `T40`-`T51`, `T60`-`T83`, `T-ESLP-13`, `T-ESLP-14`, `T-ESLP-15`.
+  - owns `T1` through `T8`, `T40` through `T51`, and `T60` through `T83`.
 - `apps/guardrail3/crates/app/ts/validate/eslint_plugin_checks.rs`
   - owns `T-ESLP-01` through `T-ESLP-12`.
 - `apps/guardrail3/crates/app/ts/validate/eslint_parser.rs`
@@ -334,6 +213,10 @@ Current code mapping:
 - `apps/guardrail3/crates/app/ts/validate/package_deps.rs`
   - still owns package presence for some ESLint-related plugins; that mixed ownership needs later cleanup.
 
+Implementation status:
+
+- all listed rule ids above are implemented in some form today
+
 Current doc/code reconciliation notes:
 
 - the old ledger in `.plans/todo/checks/ts/eslint.md` captures family scope correctly, but it massively understates the live rule inventory
@@ -341,8 +224,13 @@ Current doc/code reconciliation notes:
 - the current code still mixes generic ESLint baseline ownership with some architecture-adjacent checks like `T6` and route-wrapper enforcement; that split must be clarified against `ts/hexarch`
 - content-profile checks (`T-ESLP-07`, `T-ESLP-08`, `T-ESLP-12`) are conditional and should stay explicit in the family summary
 
+Historical/supplemental references:
+
+- `.plans/todo/checks/ts/eslint.md`
+- `.plans/by_file/ts/eslint-config-mjs.md`
+
 Next planning focus:
 
 - separate baseline ESLint ownership from TS hexarch boundary policy
-- split package-presence spillover cleanly out of `package_deps.rs` so TS-ESLINT owns only the ESLint/plugin package surface it actually needs
 - decide exactly which current checks stay in `ts/eslint` versus move to `ts/hexarch` during the future TS family split
+- eventually split plugin package presence from config-file rule enforcement so this family can migrate cleanly into a dedicated TS family runtime
