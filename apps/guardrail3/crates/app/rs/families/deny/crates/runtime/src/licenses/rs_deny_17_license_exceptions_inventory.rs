@@ -30,6 +30,9 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                 .get("name")
                 .or_else(|| table.get("crate"))
                 .and_then(toml::Value::as_str)
+                .map(str::trim)
+                .filter(|value| !value.is_empty())
+                .map(str::to_owned)
             else {
                 results.push(CheckResult::from_parts(
                     "RS-DENY-17".to_owned(),
@@ -45,6 +48,31 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                 ));
                 continue;
             };
+
+            if table
+                .get("allow")
+                .and_then(toml::Value::as_array)
+                .is_some_and(|entries| {
+                    entries
+                        .iter()
+                        .filter_map(toml::Value::as_str)
+                        .any(|entry| entry.trim().is_empty())
+                })
+            {
+                results.push(CheckResult::from_parts(
+                    "RS-DENY-17".to_owned(),
+                    Severity::Error,
+                    "malformed license exception entry".to_owned(),
+                    format!(
+                        "`{}` has `[[licenses.exceptions]]` entry `{name}` with blank allowed license name.",
+                        config.rel_path
+                    ),
+                    Some(config.rel_path.clone()),
+                    None,
+                    false,
+                ));
+                continue;
+            }
 
             let reason_value = table.get("reason");
             let reason = reason_value.and_then(toml::Value::as_str);

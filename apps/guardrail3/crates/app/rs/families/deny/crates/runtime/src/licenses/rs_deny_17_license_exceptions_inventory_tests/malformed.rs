@@ -33,6 +33,34 @@ fn errors_for_malformed_missing_reason_and_non_string_reason_exception_entries()
                 ),
             ]),
             exception_entry([
+                ("crate", toml::Value::String("   ".to_owned())),
+                (
+                    "allow",
+                    toml::Value::Array(vec![toml::Value::String("MIT".to_owned())]),
+                ),
+                (
+                    "reason",
+                    toml::Value::String("good enough reason text".to_owned()),
+                ),
+            ]),
+            exception_entry([
+                (
+                    "crate",
+                    toml::Value::String("demo-blank-license".to_owned()),
+                ),
+                (
+                    "allow",
+                    toml::Value::Array(vec![
+                        toml::Value::String("".to_owned()),
+                        toml::Value::String("MIT".to_owned()),
+                    ]),
+                ),
+                (
+                    "reason",
+                    toml::Value::String("good enough reason text".to_owned()),
+                ),
+            ]),
+            exception_entry([
                 ("crate", toml::Value::String("demo-legacy".to_owned())),
                 (
                     "allow",
@@ -56,6 +84,18 @@ fn errors_for_malformed_missing_reason_and_non_string_reason_exception_entries()
             assertions::error(
                 "license exception missing reason",
                 "`deny.toml` has license exception `demo` without a `reason`.",
+                "deny.toml",
+                false,
+            ),
+            assertions::error(
+                "malformed license exception entry",
+                "`deny.toml` has `[[licenses.exceptions]]` entry without a valid crate identifier.",
+                "deny.toml",
+                false,
+            ),
+            assertions::error(
+                "malformed license exception entry",
+                "`deny.toml` has `[[licenses.exceptions]]` entry `demo-blank-license` with blank allowed license name.",
                 "deny.toml",
                 false,
             ),

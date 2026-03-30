@@ -18,6 +18,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         return;
     };
 
+    let expected = expected_licenses();
     let actual: std::collections::BTreeSet<String> = licenses
         .get("allow")
         .and_then(toml::Value::as_array)
@@ -30,8 +31,8 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         })
         .unwrap_or_default();
 
-    for name in expected_licenses() {
-        if !actual.contains(&name) {
+    for name in &expected {
+        if !actual.contains(name.as_str()) {
             results.push(CheckResult::from_parts(
                 "RS-DENY-14".to_owned(),
                 Severity::Error,
@@ -42,6 +43,18 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                 false,
             ));
         }
+    }
+
+    for name in actual.difference(&expected) {
+        results.push(CheckResult::from_parts(
+            "RS-DENY-14".to_owned(),
+            Severity::Error,
+            "unexpected allowed license".to_owned(),
+            format!("`{}` allows unexpected license `{name}`.", config.rel_path),
+            Some(config.rel_path.clone()),
+            None,
+            false,
+        ));
     }
 
     let private_ignore = licenses
@@ -71,12 +84,14 @@ pub(crate) fn run_check(deny_toml: &str) -> Vec<CheckResult> {
 
 #[cfg(test)]
 pub(crate) use ::test_support::{
-    build_fixture_deny_toml, remove_allowed_license, remove_section, set_private_ignore,
+    add_allowed_license, build_fixture_deny_toml, remove_allowed_license, remove_section,
+    set_private_ignore,
 };
 #[cfg(test)]
 pub(crate) fn expected_licenses_for_test() -> std::collections::BTreeSet<String> {
     super::deny_support::expected_licenses()
 }
 #[cfg(test)]
-#[path = "rs_deny_14_license_allow_baseline_tests/mod.rs"] // reason: test-only sidecar module wiring
+#[path = "rs_deny_14_license_allow_baseline_tests/mod.rs"]
+// reason: test-only sidecar module wiring
 mod rs_deny_14_license_allow_baseline_tests;

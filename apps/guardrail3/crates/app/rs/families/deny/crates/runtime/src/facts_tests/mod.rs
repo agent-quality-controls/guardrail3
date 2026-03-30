@@ -84,6 +84,40 @@ fn standalone_app_root_uses_rust_apps_profile_policy() {
 }
 
 #[test]
+fn standalone_app_profile_beats_packages_profile_for_same_root() {
+    let tree = project_tree(
+        vec![
+            ("", dir_entry(&["apps"], &["guardrail3.toml", "deny.toml"])),
+            ("apps", dir_entry(&["libsite"], &[])),
+            ("apps/libsite", dir_entry(&[], &["Cargo.toml", "deny.toml"])),
+        ],
+        vec![
+            (
+                "guardrail3.toml",
+                "[profile]\nname = \"service\"\n[rust.apps.libsite]\ntype = \"service\"\n[rust.packages]\ntype = \"library\"\n"
+                    .to_owned(),
+            ),
+            ("deny.toml", build_fixture_deny_toml("service")),
+            (
+                "apps/libsite/Cargo.toml",
+                "[package]\nname = \"libsite\"\n".to_owned(),
+            ),
+            ("apps/libsite/deny.toml", build_fixture_deny_toml("service")),
+        ],
+    );
+
+    let facts = collect_for_test(&tree);
+    let local = facts
+        .allowed_configs
+        .iter()
+        .find(|config| config.rel_path == "apps/libsite/deny.toml")
+        .expect("expected standalone app deny.toml facts");
+
+    assert_eq!(local.profile_name.as_deref(), Some("service"));
+    assert!(local.policy_context_valid);
+}
+
+#[test]
 fn malformed_guardrail_policy_is_recorded_as_policy_context_error() {
     let tree = project_tree(
         vec![(
