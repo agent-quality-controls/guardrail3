@@ -1,0 +1,243 @@
+use std::collections::{BTreeMap, BTreeSet};
+
+use guardrail3_domain_project_tree::ProjectTree;
+
+use super::policy::{policy_settings_for, published_library_policy};
+use super::{
+    CargoConfigOverrideFacts, CargoRootFacts, ClippyConfigFacts, CoveredRustUnitFacts,
+    PolicyRootKind, ResolvedPolicyMap, UncoveredRustUnitFacts,
+};
+
+pub(super) fn config_precedence(rel_path: &str) -> usize {
+    if rel_path.ends_with(".clippy.toml") {
+        return 0;
+    }
+    if rel_path.ends_with("clippy.toml") && !rel_path.ends_with(".clippy.toml") {
+        return 1;
+    }
+    2
+}
+
+pub(super) fn collect_configs(
+    tree: &ProjectTree,
+    cargo_roots: &BTreeMap<String, CargoRootFacts>,
+    policy_map: &ResolvedPolicyMap,
+    routed_root_rels: &BTreeSet<String>,
+) -> Vec<ClippyConfigFacts> {
+    let mut paths = Vec::new();
+    for file_name in ["clippy.toml", ".clippy.toml"] {
+        if tree.file_exists(file_name) {
+            paths.push(("".to_owned(), file_name.to_owned()));
+        }
+        paths.extend(
+            tree.dirs_with_file(file_name)
+                .into_iter()
+                .filter(|rel_dir| is_under_routed_root(rel_dir, routed_root_rels))
+                .map(|rel_dir| {
+                    let rel_path = ProjectTree::join_rel(&rel_dir, file_name);
+                    (rel_dir, rel_path)
+                }),
+        );
+    }
+
+    paths
+        .into_iter()
+        .map(|(rel_dir, rel_path)| {
+            let settings = policy_settings_for(rel_dir.as_str(), &policy_map.map);
+            let published_library_policy = published_library_policy(
+                tree,
+                cargo_roots,
+                rel_dir.as_str(),
+                settings.profile_name.as_deref(),
+            );
+            parse_config(
+                tree,
+                &rel_dir,
+                &rel_path,
+                policy_map.parse_error.clone(),
+                settings.profile_name,
+                settings.garde_enabled,
+                published_library_policy,
+            )
+        })
+        .collect()
+}
+
+pub(super) fn collect_cargo_config_overrides(
+    tree: &ProjectTree,
+    routed_root_rels: &BTreeSet<String>,
+    cargo_roots: &BTreeMap<String, CargoRootFacts>,
+) -> Vec<CargoConfigOverrideFacts> {
+    let mut rel_paths = Vec::new();
+
+    for rel_path in [".cargo/config.toml", ".cargo/config"] {
+        if tree.file_exists(rel_path) {
+            rel_paths.push(rel_path.to_owned());
+        }
+    }
+
+    rel_paths.extend(
+        tree.dirs_with_file("config.toml")
+            .into_iter()
+            .filter(|rel_dir| rel_dir.ends_with("/.cargo"))
+            .filter(|rel_dir| {
+                cargo_config_applies_to_routed_roots(rel_dir, routed_root_rels, cargo_roots)
+            })
+            .map(|rel_dir| ProjectTree::join_rel(&rel_dir, "config.toml")),
+    );
+    rel_paths.extend(
+        tree.dirs_with_file("config")
+            .into_iter()
+            .filter(|rel_dir| rel_dir.ends_with("/.cargo"))
+            .filter(|rel_dir| {
+                cargo_config_applies_to_routed_roots(rel_dir, routed_root_rels, cargo_roots)
+            })
+            .map(|rel_dir| ProjectTree::join_rel(&rel_dir, "config")),
+    );
+
+    rel_paths
+        .into_iter()
+        .filter_map(|rel_path| {
+            let parsed = match tree.file_content(&rel_path) {
+                Some(content) => toml::from_str::<toml::Value>(content)
+                    .map(Some)
+                    .map_err(|err| err.to_string()),
+                None => Err("cargo config content missing from ProjectTree".to_owned()),
+            };
+            match parsed {
+                Ok(Some(parsed)) => {
+                    let Some(env) = parsed.get("env") else {
+                        return None;
+                    };
+                    let Some(env_table) = env.as_table() else {
+                        return Some(CargoConfigOverrideFacts {
+                            rel_path,
+                            parse_error: Some(format!(
+                                "invalid cargo config shape: `env` must be a table, found {}",
+                                match env {
+                                    toml::Value::String(_) => "string",
+                                    toml::Value::Integer(_) => "integer",
+                                    toml::Value::Float(_) => "float",
+                                    toml::Value::Boolean(_) => "bool",
+                                    toml::Value::Datetime(_) => "datetime",
+                                    toml::Value::Array(_) => "array",
+                                    toml::Value::Table(_) => "table",
+                                }
+                            )),
+                        });
+                    };
+                    env_table
+                        .get("CLIPPY_CONF_DIR")
+                        .map(|_| CargoConfigOverrideFacts {
+                            rel_path,
+                            parse_error: None,
+                        })
+                }
+                Ok(None) => None,
+                Err(parse_error) => Some(CargoConfigOverrideFacts {
+                    rel_path,
+                    parse_error: Some(parse_error),
+                }),
+            }
+        })
+        .collect()
+}
+
+pub(super) fn push_coverage_facts(
+    rel_dir: &str,
+    kind: PolicyRootKind,
+    allowed_configs: &[ClippyConfigFacts],
+    covered_units: &mut Vec<CoveredRustUnitFacts>,
+    uncovered_units: &mut Vec<UncoveredRustUnitFacts>,
+) {
+    if let Some(covering_config_rel) = nearest_covering_config(rel_dir, allowed_configs) {
+        covered_units.push(CoveredRustUnitFacts {
+            rel_dir: rel_dir.to_owned(),
+            kind,
+            covering_config_rel,
+        });
+    } else {
+        uncovered_units.push(UncoveredRustUnitFacts {
+            rel_dir: rel_dir.to_owned(),
+            kind,
+        });
+    }
+}
+
+fn cargo_config_applies_to_routed_roots(
+    rel_dir: &str,
+    routed_root_rels: &BTreeSet<String>,
+    cargo_roots: &BTreeMap<String, CargoRootFacts>,
+) -> bool {
+    let owner_rel = rel_dir.strip_suffix("/.cargo").unwrap_or(rel_dir);
+    owner_rel.is_empty()
+        || cargo_roots.keys().any(|cargo_root_rel| {
+            is_under_routed_root(cargo_root_rel, routed_root_rels)
+                && (cargo_root_rel == owner_rel
+                    || cargo_root_rel.starts_with(&format!("{owner_rel}/")))
+        })
+}
+
+fn is_under_routed_root(rel_dir: &str, routed_root_rels: &BTreeSet<String>) -> bool {
+    routed_root_rels.iter().any(|root_rel| {
+        root_rel.is_empty() || rel_dir == root_rel || rel_dir.starts_with(&format!("{root_rel}/"))
+    })
+}
+
+fn parse_config(
+    tree: &ProjectTree,
+    rel_dir: &str,
+    rel_path: &str,
+    policy_context_parse_error: Option<String>,
+    profile_name: Option<String>,
+    garde_enabled: bool,
+    published_library_policy: bool,
+) -> ClippyConfigFacts {
+    match tree
+        .file_content(rel_path)
+        .map(toml::from_str::<toml::Value>)
+    {
+        Some(Ok(parsed)) => ClippyConfigFacts {
+            rel_dir: rel_dir.to_owned(),
+            rel_path: rel_path.to_owned(),
+            parsed: Some(parsed),
+            parse_error: None,
+            policy_context_parse_error,
+            profile_name,
+            garde_enabled,
+            published_library_policy,
+        },
+        Some(Err(err)) => ClippyConfigFacts {
+            rel_dir: rel_dir.to_owned(),
+            rel_path: rel_path.to_owned(),
+            parsed: None,
+            parse_error: Some(err.to_string()),
+            policy_context_parse_error,
+            profile_name,
+            garde_enabled,
+            published_library_policy,
+        },
+        None => ClippyConfigFacts {
+            rel_dir: rel_dir.to_owned(),
+            rel_path: rel_path.to_owned(),
+            parsed: None,
+            parse_error: Some("clippy.toml content missing from ProjectTree".to_owned()),
+            policy_context_parse_error,
+            profile_name,
+            garde_enabled,
+            published_library_policy,
+        },
+    }
+}
+
+fn nearest_covering_config(rel_dir: &str, allowed_configs: &[ClippyConfigFacts]) -> Option<String> {
+    allowed_configs
+        .iter()
+        .filter(|config| is_ancestor_dir(&config.rel_dir, rel_dir))
+        .max_by_key(|config| config.rel_dir.len())
+        .map(|config| config.rel_path.clone())
+}
+
+fn is_ancestor_dir(ancestor: &str, rel_dir: &str) -> bool {
+    ancestor.is_empty() || ancestor == rel_dir || rel_dir.starts_with(&format!("{ancestor}/"))
+}

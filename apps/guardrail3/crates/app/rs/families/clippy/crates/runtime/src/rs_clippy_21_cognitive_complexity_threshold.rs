@@ -72,5 +72,6 @@ pub(crate) fn run_for_tests(tree: &ProjectTree, rel_path: &str) -> Vec<CheckResu
 }
 
 #[cfg(test)]
-#[path = "rs_clippy_21_cognitive_complexity_threshold_tests/mod.rs"] // reason: test-only sidecar module wiring
+#[path = "rs_clippy_21_cognitive_complexity_threshold_tests/mod.rs"]
+// reason: test-only sidecar module wiring
 mod rs_clippy_21_cognitive_complexity_threshold_tests;
