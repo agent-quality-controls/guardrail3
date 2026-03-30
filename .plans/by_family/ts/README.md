@@ -1,18 +1,47 @@
 # TypeScript Family Plan Surface
 
-This directory is reserved for the TypeScript family cutover.
+This directory is the start of the TypeScript family cutover.
 
-It does not replace the existing TypeScript planning surface yet.
-Right now, current TypeScript family material is still split across:
+It does not replace the older TypeScript ledgers yet.
+Right now, detailed TypeScript family material is still split across:
 
 - `.plans/todo/checks/ts/`
 - `.plans/by_file/ts/`
 - `.plans/by_file/tools/`
 - `.plans/per-app-config-design/`
 
-The intended end state is the same as Rust:
+Current authority order for TypeScript in this transition state:
+
+1. live code under `apps/guardrail3/crates/app/ts/`
+2. this directory for family-level indexing and reconciliation
+3. `.plans/todo/checks/ts/*.md` as the detailed family ledgers
+4. `.plans/by_file/**` and `.plans/per-app-config-design/**` as supporting research/design material
+
+Canonical TypeScript families:
+
+- `arch`
+- `eslint`
+- `tsconfig`
+- `npmrc`
+- `package`
+- `fmt`
+- `spelling`
+- `typecov`
+- `size`
+- `jscpd`
+- `css`
+- `code`
+- `hexarch`
+- `libarch`
+- `content`
+- `i18n`
+- `seo`
+- `tests`
+
+The intended end state is the same shape as Rust:
 
 - one family-indexed current planning surface here
 - old plan/research docs re-labeled as tactical or historical
 
-This pass starts with Rust only.
+For this first TS pass, each family gets a placeholder status file here.
+Those files point back to the older detailed ledgers until each family is reconciled properly.
