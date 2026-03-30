@@ -1,7 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use guardrail3_app_rs_family_mapper::RsCargoRoute;
-use guardrail3_domain_config::types::GuardrailConfig;
+use guardrail3_domain_config::types::{EscapeHatchConfig, GuardrailConfig};
 use guardrail3_domain_project_tree::ProjectTree;
 
 use super::facts::{
@@ -18,15 +18,26 @@ struct CargoSnapshot {
     has_workspace: bool,
     has_package: bool,
     edition: Option<String>,
+    edition_invalid: bool,
     rust_version: Option<String>,
+    rust_version_invalid: bool,
     resolver: Option<String>,
+    resolver_invalid: bool,
     declared_members: Vec<String>,
+    members_parse_error: Option<String>,
 }
 
 #[derive(Debug, Clone, Default)]
 struct GuardrailSnapshot {
     profile_name: Option<String>,
+    escape_hatches: Vec<EscapeHatchConfig>,
     parse_error: Option<String>,
+}
+
+#[derive(Debug, Clone, Default)]
+struct StringFieldSnapshot {
+    value: Option<String>,
+    invalid: bool,
 }
 
 pub fn collect(tree: &ProjectTree, route: &RsCargoRoute) -> CargoFamilyFacts {
@@ -41,6 +52,11 @@ pub fn collect(tree: &ProjectTree, route: &RsCargoRoute) -> CargoFamilyFacts {
         .filter(|snapshot| snapshot.has_workspace)
         .flat_map(|snapshot| snapshot.declared_members.iter().cloned())
         .collect();
+    let invalid_workspace_member_roots: BTreeSet<_> = snapshots
+        .values()
+        .filter(|snapshot| snapshot.members_parse_error.is_some())
+        .map(|snapshot| snapshot.rel_dir.clone())
+        .collect();
 
     let mut policy_roots = Vec::new();
     let mut member_facts = Vec::new();
@@ -51,6 +67,14 @@ pub fn collect(tree: &ProjectTree, route: &RsCargoRoute) -> CargoFamilyFacts {
         let Some(workspace_snapshot) = snapshots.get(workspace_root_rel) else {
             continue;
         };
+        if let Some(parse_error) = &workspace_snapshot.members_parse_error {
+            input_failures.push(InputFailureFacts {
+                rel_path: workspace_snapshot.cargo_rel_path.clone(),
+                message: format!(
+                    "Failed to parse `[workspace].members` for cargo workspace membership checks: {parse_error}"
+                ),
+            });
+        }
         push_policy_root(
             workspace_snapshot,
             PolicyRootKind::WorkspaceRoot,
@@ -60,8 +84,14 @@ pub fn collect(tree: &ProjectTree, route: &RsCargoRoute) -> CargoFamilyFacts {
         );
 
         for member_rel in &workspace_snapshot.declared_members {
-            if let Some(member_snapshot) = snapshots.get(member_rel) {
-                member_facts.push(build_member_facts(workspace_snapshot, member_snapshot));
+            let member_snapshot = snapshots.get(member_rel).cloned().or_else(|| {
+                let member_cargo_rel_path = rel_path(member_rel, "Cargo.toml");
+                tree.file_exists(&member_cargo_rel_path)
+                    .then(|| snapshot_for(tree, member_rel, &member_cargo_rel_path))
+            });
+
+            if let Some(member_snapshot) = member_snapshot {
+                member_facts.push(build_member_facts(workspace_snapshot, &member_snapshot));
                 if let Some(parse_error) = &member_snapshot.parse_error {
                     input_failures.push(InputFailureFacts {
                         rel_path: member_snapshot.cargo_rel_path.clone(),
@@ -85,6 +115,12 @@ pub fn collect(tree: &ProjectTree, route: &RsCargoRoute) -> CargoFamilyFacts {
             continue;
         }
         if workspace_members.contains(&snapshot.rel_dir) {
+            continue;
+        }
+        if invalid_workspace_member_roots
+            .iter()
+            .any(|workspace_root| is_descendant_of(&snapshot.rel_dir, workspace_root))
+        {
             continue;
         }
         if snapshot.has_package || snapshot.parse_error.is_some() {
@@ -146,15 +182,30 @@ fn snapshot_for(tree: &ProjectTree, rel_dir: &str, cargo_rel_path: &str) -> Carg
             has_workspace: false,
             has_package: false,
             edition: None,
+            edition_invalid: false,
             rust_version: None,
+            rust_version_invalid: false,
             resolver: None,
+            resolver_invalid: false,
             declared_members: Vec::new(),
+            members_parse_error: None,
         };
     };
 
     match toml::from_str::<toml::Value>(content) {
         Ok(parsed) => {
             let has_workspace = parsed.get("workspace").is_some();
+            let edition = root_package_field(&parsed, has_workspace, "edition");
+            let rust_version = root_package_field(&parsed, has_workspace, "rust-version");
+            let resolver = workspace_field(&parsed, "resolver");
+            let (declared_members, members_parse_error) = if has_workspace {
+                match parse_workspace_members(tree, rel_dir, &parsed) {
+                    Ok(members) => (members, None),
+                    Err(parse_error) => (Vec::new(), Some(parse_error)),
+                }
+            } else {
+                (Vec::new(), None)
+            };
             CargoSnapshot {
                 rel_dir: rel_dir.to_owned(),
                 cargo_rel_path: cargo_rel_path.to_owned(),
@@ -162,18 +213,14 @@ fn snapshot_for(tree: &ProjectTree, rel_dir: &str, cargo_rel_path: &str) -> Carg
                 parse_error: None,
                 has_workspace,
                 has_package: parsed.get("package").is_some(),
-                edition: root_package_field(&parsed, has_workspace, "edition"),
-                rust_version: root_package_field(&parsed, has_workspace, "rust-version"),
-                resolver: parsed
-                    .get("workspace")
-                    .and_then(|value| value.get("resolver"))
-                    .and_then(toml::Value::as_str)
-                    .map(str::to_owned),
-                declared_members: if has_workspace {
-                    parse_workspace_members(tree, rel_dir, &parsed)
-                } else {
-                    Vec::new()
-                },
+                edition: edition.value,
+                edition_invalid: edition.invalid,
+                rust_version: rust_version.value,
+                rust_version_invalid: rust_version.invalid,
+                resolver: resolver.value,
+                resolver_invalid: resolver.invalid,
+                declared_members,
+                members_parse_error,
             }
         }
         Err(parse_error) => CargoSnapshot {
@@ -184,9 +231,13 @@ fn snapshot_for(tree: &ProjectTree, rel_dir: &str, cargo_rel_path: &str) -> Carg
             has_workspace: false,
             has_package: false,
             edition: None,
+            edition_invalid: false,
             rust_version: None,
+            rust_version_invalid: false,
             resolver: None,
+            resolver_invalid: false,
             declared_members: Vec::new(),
+            members_parse_error: None,
         },
     }
 }
@@ -223,10 +274,16 @@ fn push_policy_root(
         cargo_rel_path: snapshot.cargo_rel_path.clone(),
         parsed: snapshot.parsed.clone(),
         parse_error: snapshot.parse_error.clone(),
+        guardrail_parse_error: guardrail.parse_error.is_some(),
+        members_parse_error: snapshot.members_parse_error.is_some(),
         edition: snapshot.edition.clone(),
+        edition_invalid: snapshot.edition_invalid,
         rust_version: snapshot.rust_version.clone(),
+        rust_version_invalid: snapshot.rust_version_invalid,
         resolver: snapshot.resolver.clone(),
+        resolver_invalid: snapshot.resolver_invalid,
         profile_name: guardrail.profile_name,
+        escape_hatches: guardrail.escape_hatches,
     });
 }
 
@@ -245,11 +302,8 @@ fn build_member_facts(
             .and_then(|value| value.get("name"))
             .and_then(toml::Value::as_str)
             .map(str::to_owned),
-        edition: parsed
-            .and_then(|value| value.get("package"))
-            .and_then(|value| value.get("edition"))
-            .and_then(toml::Value::as_str)
-            .map(str::to_owned),
+        edition: package_field(parsed, "edition").value,
+        edition_invalid: package_field(parsed, "edition").invalid,
         lint_workspace_true: parsed
             .and_then(|value| value.get("lints"))
             .and_then(|value| value.get("workspace"))
@@ -263,29 +317,36 @@ fn parse_workspace_members(
     tree: &ProjectTree,
     workspace_rel: &str,
     parsed: &toml::Value,
-) -> Vec<String> {
+) -> Result<Vec<String>, String> {
+    let Some(raw_members) = parsed
+        .get("workspace")
+        .and_then(|value| value.get("members"))
+    else {
+        return Ok(Vec::new());
+    };
+    let Some(raw_members) = raw_members.as_array() else {
+        return Err("`[workspace].members` must be an array of strings.".to_owned());
+    };
+
     let mut members = BTreeSet::new();
-    for pattern in raw_member_patterns(parsed) {
+    for pattern in raw_member_patterns(raw_members)? {
         for member_rel in expand_member_pattern(tree, workspace_rel, &pattern) {
             let _ = members.insert(member_rel);
         }
     }
-    members.into_iter().collect()
+    Ok(members.into_iter().collect())
 }
 
-fn raw_member_patterns(parsed: &toml::Value) -> Vec<String> {
-    parsed
-        .get("workspace")
-        .and_then(|value| value.get("members"))
-        .and_then(toml::Value::as_array)
-        .map(|members| {
-            members
-                .iter()
-                .filter_map(toml::Value::as_str)
+fn raw_member_patterns(members: &[toml::Value]) -> Result<Vec<String>, String> {
+    members
+        .iter()
+        .map(|value| {
+            value
+                .as_str()
                 .map(str::to_owned)
-                .collect()
+                .ok_or_else(|| "`[workspace].members` must contain only string entries.".to_owned())
         })
-        .unwrap_or_default()
+        .collect()
 }
 
 fn expand_member_pattern(tree: &ProjectTree, workspace_rel: &str, pattern: &str) -> Vec<String> {
@@ -319,6 +380,15 @@ fn normalize_member_rel(pattern: &str) -> String {
         .to_owned()
 }
 
+fn is_descendant_of(rel: &str, ancestor: &str) -> bool {
+    if ancestor.is_empty() {
+        return !rel.is_empty();
+    }
+
+    rel.strip_prefix(ancestor)
+        .is_some_and(|suffix| suffix.starts_with('/'))
+}
+
 fn guardrail_snapshot(tree: &ProjectTree, rel_path: &str) -> GuardrailSnapshot {
     let Some(content) = tree.file_content(rel_path) else {
         return GuardrailSnapshot::default();
@@ -326,10 +396,12 @@ fn guardrail_snapshot(tree: &ProjectTree, rel_path: &str) -> GuardrailSnapshot {
     match toml::from_str::<GuardrailConfig>(content) {
         Ok(parsed) => GuardrailSnapshot {
             profile_name: parsed.profile().map(|profile| profile.name().to_owned()),
+            escape_hatches: parsed.escape_hatches().to_vec(),
             parse_error: None,
         },
         Err(parse_error) => GuardrailSnapshot {
             profile_name: None,
+            escape_hatches: Vec::new(),
             parse_error: Some(parse_error.to_string()),
         },
     }
@@ -339,27 +411,46 @@ fn root_package_field(
     parsed: &toml::Value,
     is_workspace_root: bool,
     field: &str,
-) -> Option<String> {
+) -> StringFieldSnapshot {
     if is_workspace_root {
-        parsed
-            .get("workspace")
-            .and_then(|value| value.get("package"))
-            .and_then(|value| value.get(field))
-            .and_then(toml::Value::as_str)
-            .map(str::to_owned)
-            .or_else(|| {
-                parsed
-                    .get("package")
-                    .and_then(|value| value.get(field))
-                    .and_then(toml::Value::as_str)
-                    .map(str::to_owned)
-            })
+        let workspace_package = string_field(
+            parsed
+                .get("workspace")
+                .and_then(|value| value.get("package")),
+            field,
+        );
+        if workspace_package.value.is_some() || workspace_package.invalid {
+            workspace_package
+        } else {
+            package_field(Some(parsed), field)
+        }
     } else {
-        parsed
-            .get("package")
-            .and_then(|value| value.get(field))
-            .and_then(toml::Value::as_str)
-            .map(str::to_owned)
+        package_field(Some(parsed), field)
+    }
+}
+
+fn workspace_field(parsed: &toml::Value, field: &str) -> StringFieldSnapshot {
+    string_field(parsed.get("workspace"), field)
+}
+
+fn package_field(parsed: Option<&toml::Value>, field: &str) -> StringFieldSnapshot {
+    string_field(parsed.and_then(|value| value.get("package")), field)
+}
+
+fn string_field(table: Option<&toml::Value>, field: &str) -> StringFieldSnapshot {
+    let Some(value) = table.and_then(|table| table.get(field)) else {
+        return StringFieldSnapshot::default();
+    };
+
+    match value.as_str() {
+        Some(field_value) => StringFieldSnapshot {
+            value: Some(field_value.to_owned()),
+            invalid: false,
+        },
+        None => StringFieldSnapshot {
+            value: None,
+            invalid: true,
+        },
     }
 }
 

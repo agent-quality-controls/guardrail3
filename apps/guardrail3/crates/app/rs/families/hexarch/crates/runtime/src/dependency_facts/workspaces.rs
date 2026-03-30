@@ -120,6 +120,7 @@ fn parse_patch_entries(
                         key: key.clone(),
                         target_layer,
                         resolved_rel_dir: resolved,
+                        escape_hatch_reason: None,
                     });
                 }
             }
@@ -139,6 +140,7 @@ fn parse_patch_entries(
                     key: key.clone(),
                     target_layer,
                     resolved_rel_dir: resolved,
+                    escape_hatch_reason: None,
                 });
             }
         }

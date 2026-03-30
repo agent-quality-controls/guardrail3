@@ -34,5 +34,10 @@ pub(crate) fn run_check(config_rel: &str, config_kind: RustfmtConfigKind) -> Vec
 }
 
 #[cfg(test)]
+pub(crate) fn run_family_check(root: &std::path::Path) -> Vec<CheckResult> {
+    crate::check_test_root(root)
+}
+
+#[cfg(test)]
 #[path = "rs_fmt_05_per_crate_override_tests/mod.rs"]
 mod rs_fmt_05_per_crate_override_tests;

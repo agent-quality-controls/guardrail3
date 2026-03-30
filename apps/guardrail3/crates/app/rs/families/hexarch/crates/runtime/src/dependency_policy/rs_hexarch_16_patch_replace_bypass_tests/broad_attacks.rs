@@ -15,8 +15,8 @@ fn fixture_backed_patch_and_replace_only_error_for_layered_targets() {
         &results,
         "",
         &[
-            "patch/replace entry `backend-domain-types` bypasses hexarch dependency checks",
-            "patch/replace entry `backend-domain-engine:0.1.0` bypasses hexarch dependency checks",
+            "patch/replace entry `backend-domain-types` missing reason",
+            "patch/replace entry `backend-domain-engine:0.1.0` missing reason",
         ],
     );
 }

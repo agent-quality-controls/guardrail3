@@ -36,15 +36,27 @@ pub fn assert_no_findings(results: &[CheckResult]) {
 
 pub fn assert_ignore_escape_hatch(results: &[CheckResult], message: &str, file: &str) {
     let findings = findings(results);
-    assert_eq!(
-        findings.len(),
-        1,
-        "unexpected RS-FMT-07 findings: {findings:#?}"
-    );
-    let finding = &findings[0];
+    let finding = findings
+        .iter()
+        .find(|finding| finding.title == "rustfmt ignore escape hatch")
+        .expect("missing rustfmt ignore escape hatch finding");
     assert_eq!(finding.severity, Severity::Warn);
     assert_eq!(finding.title, "rustfmt ignore escape hatch");
     assert_eq!(finding.message, message);
     assert_eq!(finding.file, Some(file));
     assert!(!finding.inventory);
+}
+
+pub fn assert_count_warning(results: &[CheckResult], message: &str) {
+    let findings = findings(results);
+    assert!(
+        findings.iter().any(|finding| {
+            finding.severity == Severity::Warn
+                && finding.title == "rustfmt ignore count"
+                && finding.message == message
+                && finding.file.is_none()
+                && !finding.inventory
+        }),
+        "missing RS-FMT-07 count warning: {findings:#?}"
+    );
 }

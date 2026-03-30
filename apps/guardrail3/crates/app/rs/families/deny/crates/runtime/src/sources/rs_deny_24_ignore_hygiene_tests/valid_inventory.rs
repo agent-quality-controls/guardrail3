@@ -5,7 +5,7 @@ fn ignore_toml(ignore: &str) -> String {
 }
 
 #[test]
-fn inventories_only_documented_ignore_entries() {
+fn warns_for_documented_ignore_entries() {
     let results = super::super::run_check(&ignore_toml(
         r#"[{ id = "RUSTSEC-2026-0001", reason = "good enough reason text" }]"#,
     ));
@@ -13,11 +13,18 @@ fn inventories_only_documented_ignore_entries() {
 
     assertions::assert_findings(
         &results,
-        &[assertions::info(
-            "advisory ignore entry",
-            "`deny.toml` ignores advisory `RUSTSEC-2026-0001`.",
-            "deny.toml",
-            true,
-        )],
+        &[
+            assertions::warn(
+                "advisory ignore entry",
+                "`deny.toml` has documented advisory ignore `RUSTSEC-2026-0001`.",
+                "deny.toml",
+                false,
+            ),
+            assertions::warn_no_file(
+                "advisory ignore count",
+                "`deny.toml` has 1 advisory ignores (1 documented, 0 missing or invalid reasons, 0 weak reasons).",
+                false,
+            ),
+        ],
     );
 }

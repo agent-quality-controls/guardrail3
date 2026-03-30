@@ -1,5 +1,6 @@
 use std::path::Path;
 
+use guardrail3_domain_config::types::EscapeHatchConfig;
 use guardrail3_domain_project_tree::ProjectTree;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -28,6 +29,7 @@ pub enum ToolchainChannelState {
 pub struct RustfmtFacts {
     pub(crate) root_config_rel: Option<String>,
     pub(crate) root_parsed: Option<toml::Value>,
+    pub(crate) escape_hatches: Vec<EscapeHatchConfig>,
     pub(crate) extra_config_rels: Vec<String>,
     pub(crate) dual_file_conflict_dirs: Vec<String>,
     pub(crate) cargo_edition: CargoEditionState,
@@ -74,9 +76,16 @@ pub fn collect(tree: &ProjectTree) -> RustfmtFacts {
             .filter(toml::Value::is_table);
     }
 
+    let escape_hatches = tree
+        .file_content("guardrail3.toml")
+        .and_then(|content| toml::from_str::<guardrail3_domain_config::types::GuardrailConfig>(content).ok())
+        .map(|config| config.escape_hatches().to_vec())
+        .unwrap_or_default();
+
     RustfmtFacts {
         root_config_rel,
         root_parsed,
+        escape_hatches,
         extra_config_rels,
         dual_file_conflict_dirs,
         cargo_edition: read_workspace_edition(tree),

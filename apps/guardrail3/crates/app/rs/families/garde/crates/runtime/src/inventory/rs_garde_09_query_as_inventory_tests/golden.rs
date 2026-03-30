@@ -24,7 +24,26 @@ garde = { version = "0.22", features = ["derive"] }
 "#,
             ),
             ("clippy.toml", clippy_toml.as_str()),
-            ("guardrail3.toml", "[profile]\nname = \"service\"\n"),
+            (
+                "guardrail3.toml",
+                r#"[profile]
+name = "service"
+
+[[escape_hatches]]
+family = "garde"
+file = "src/db.rs"
+kind = "sqlx_query_as"
+selector = "sqlx::query_as@L5"
+reason = "Temporary SQLx row mapping until validated DTO extraction lands."
+
+[[escape_hatches]]
+family = "garde"
+file = "src/db.rs"
+kind = "sqlx_query_as"
+selector = "qa@L6"
+reason = "Temporary SQLx row mapping until validated DTO extraction lands."
+"#,
+            ),
             ("src/main.rs", "fn main() {}"),
             (
                 "src/db.rs",
@@ -43,23 +62,20 @@ fn load() {
 
     let results = super::super::run_family(&tree);
     let findings = assertions::findings(&results);
-    assert_eq!(
-        findings.len(),
-        2,
-        "unexpected RS-GARDE-09 findings: {findings:#?}"
-    );
-    assertions::assert_inventory_hit(
+    assert_eq!(findings.len(), 3, "unexpected RS-GARDE-09 findings: {findings:#?}");
+    assertions::assert_documented_hit(
         &results,
         "src/db.rs",
         5,
-        "`sqlx::query_as` bypasses derive-based garde boundary checks. Review the target type and ensure validated input handling is explicit.",
+        "`sqlx::query_as` bypasses derive-based garde boundary checks",
     );
-    assertions::assert_inventory_hit(
+    assertions::assert_documented_hit(
         &results,
         "src/db.rs",
         6,
-        "`qa` bypasses derive-based garde boundary checks. Review the target type and ensure validated input handling is explicit.",
+        "`qa` bypasses derive-based garde boundary checks",
     );
+    assertions::assert_count_summary(&results, "`src/db.rs` has 2 sqlx query_as escape hatches.");
 
     std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");
 }
@@ -87,7 +103,26 @@ garde = { version = "0.22", features = ["derive"] }
 "#,
             ),
             ("clippy.toml", clippy_toml.as_str()),
-            ("guardrail3.toml", "[profile]\nname = \"service\"\n"),
+            (
+                "guardrail3.toml",
+                r#"[profile]
+name = "service"
+
+[[escape_hatches]]
+family = "garde"
+file = "src/db.rs"
+kind = "sqlx_query_as"
+selector = "sqlx::query_as_unchecked@L5"
+reason = "Temporary unchecked SQLx row mapping until validated DTO extraction lands."
+
+[[escape_hatches]]
+family = "garde"
+file = "src/db.rs"
+kind = "sqlx_query_as"
+selector = "qau@L6"
+reason = "Temporary unchecked SQLx row mapping until validated DTO extraction lands."
+"#,
+            ),
             ("src/main.rs", "fn main() {}"),
             (
                 "src/db.rs",
@@ -106,23 +141,85 @@ fn load() {
 
     let results = super::super::run_family(&tree);
     let findings = assertions::findings(&results);
-    assert_eq!(
-        findings.len(),
-        2,
-        "unexpected RS-GARDE-09 findings: {findings:#?}"
-    );
-    assertions::assert_inventory_hit(
+    assert_eq!(findings.len(), 3, "unexpected RS-GARDE-09 findings: {findings:#?}");
+    assertions::assert_documented_hit(
         &results,
         "src/db.rs",
         5,
-        "`sqlx::query_as_unchecked` bypasses derive-based garde boundary checks. Review the target type and ensure validated input handling is explicit.",
+        "`sqlx::query_as_unchecked` bypasses derive-based garde boundary checks",
     );
-    assertions::assert_inventory_hit(
+    assertions::assert_documented_hit(
         &results,
         "src/db.rs",
         6,
-        "`qau` bypasses derive-based garde boundary checks. Review the target type and ensure validated input handling is explicit.",
+        "`qau` bypasses derive-based garde boundary checks",
     );
+    assertions::assert_count_summary(&results, "`src/db.rs` has 2 sqlx query_as escape hatches.");
+
+    std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");
+}
+
+#[test]
+fn inventories_module_aliased_query_as_usage() {
+    let root = temp_root("rs-garde-09-module-aliased");
+    let clippy_toml = super::super::canonical_clippy_toml();
+
+    let tree = project_tree(
+        vec![
+            (
+                "",
+                dir_entry(&["src"], &["Cargo.toml", "clippy.toml", "guardrail3.toml"]),
+            ),
+            ("src", dir_entry(&[], &["main.rs", "db.rs"])),
+        ],
+        vec![
+            (
+                "Cargo.toml",
+                r#"[workspace]
+members = []
+[workspace.dependencies]
+garde = { version = "0.22", features = ["derive"] }
+"#,
+            ),
+            ("clippy.toml", clippy_toml.as_str()),
+            (
+                "guardrail3.toml",
+                r#"[profile]
+name = "service"
+
+[[escape_hatches]]
+family = "garde"
+file = "src/db.rs"
+kind = "sqlx_query_as"
+selector = "sq::query_as@L5"
+reason = "Temporary SQLx row mapping until validated DTO extraction lands."
+"#,
+            ),
+            ("src/main.rs", "fn main() {}"),
+            (
+                "src/db.rs",
+                r#"
+use sqlx as sq;
+
+fn load() {
+    let _row = sq::query_as!(User, "select 1");
+}
+"#,
+            ),
+        ],
+        root.clone(),
+    );
+
+    let results = super::super::run_family(&tree);
+    let findings = assertions::findings(&results);
+    assert_eq!(findings.len(), 2, "unexpected RS-GARDE-09 findings: {findings:#?}");
+    assertions::assert_documented_hit(
+        &results,
+        "src/db.rs",
+        5,
+        "`sq::query_as` bypasses derive-based garde boundary checks",
+    );
+    assertions::assert_count_summary(&results, "`src/db.rs` has 1 sqlx query_as escape hatches.");
 
     std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");
 }

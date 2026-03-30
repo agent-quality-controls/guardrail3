@@ -1,4 +1,5 @@
 use guardrail3_domain_report::{CheckResult, Severity};
+use guardrail3_reason_policy::validate_reason_text;
 
 use super::deny_support::section;
 use super::inputs::ConfigDenyInput;
@@ -9,6 +10,9 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         return;
     };
     if let Some(exceptions) = licenses.get("exceptions").and_then(toml::Value::as_array) {
+        let mut documented_count = 0usize;
+        let mut missing_or_invalid_reason_count = 0usize;
+        let mut weak_reason_count = 0usize;
         for entry in exceptions {
             let Some(table) = entry.as_table() else {
                 results.push(CheckResult::from_parts(
@@ -77,6 +81,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
             let reason_value = table.get("reason");
             let reason = reason_value.and_then(toml::Value::as_str);
             if reason_value.is_some() && reason.is_none() {
+                missing_or_invalid_reason_count += 1;
                 results.push(CheckResult::from_parts(
                     "RS-DENY-17".to_owned(),
                     Severity::Error,
@@ -91,7 +96,8 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                 ));
                 continue;
             }
-            if reason.unwrap_or("").trim().is_empty() {
+            let Some(reason) = reason else {
+                missing_or_invalid_reason_count += 1;
                 results.push(CheckResult::from_parts(
                     "RS-DENY-17".to_owned(),
                     Severity::Error,
@@ -105,20 +111,58 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                     false,
                 ));
                 continue;
+            };
+            match validate_reason_text(reason) {
+                Ok(()) => {
+                    documented_count += 1;
+                }
+                Err(issue) => {
+                    weak_reason_count += 1;
+                    results.push(CheckResult::from_parts(
+                        "RS-DENY-17".to_owned(),
+                        Severity::Error,
+                        "license exception reason too weak".to_owned(),
+                        format!(
+                            "`{}` has license exception `{name}` with a weak `reason`: {}.",
+                            config.rel_path,
+                            issue.message()
+                        ),
+                        Some(config.rel_path.clone()),
+                        None,
+                        false,
+                    ));
+                    continue;
+                }
             }
 
-            results.push(
-                CheckResult::from_parts(
-                    "RS-DENY-17".to_owned(),
-                    Severity::Info,
-                    "license exception entry".to_owned(),
-                    format!("`{}` has license exception for `{name}`.", config.rel_path),
-                    Some(config.rel_path.clone()),
-                    None,
-                    false,
-                )
-                .as_inventory(),
-            );
+            results.push(CheckResult::from_parts(
+                "RS-DENY-17".to_owned(),
+                Severity::Warn,
+                "license exception entry".to_owned(),
+                format!(
+                    "`{}` has documented license exception for `{name}`.",
+                    config.rel_path
+                ),
+                Some(config.rel_path.clone()),
+                None,
+                false,
+            ));
+        }
+
+        let total = documented_count + missing_or_invalid_reason_count + weak_reason_count;
+        if total > 0 {
+            results.push(CheckResult::from_parts(
+                "RS-DENY-17".to_owned(),
+                Severity::Warn,
+                "license exception count".to_owned(),
+                format!(
+                    "`{}` has {total} license exceptions ({documented_count} documented, {missing_or_invalid_reason_count} missing or invalid reasons, {weak_reason_count} weak reasons).",
+                    config.rel_path
+                ),
+                None,
+                None,
+                false,
+            ));
         }
     }
 }

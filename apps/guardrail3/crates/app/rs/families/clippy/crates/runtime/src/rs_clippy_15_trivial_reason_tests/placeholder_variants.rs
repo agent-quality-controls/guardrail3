@@ -22,16 +22,20 @@ disallowed-macros = [
 "#,
     );
     let results = run_for_tests(&tree, "clippy.toml");
-    assertions::assert_placeholder_messages(
+    assertions::assert_weak_reason_messages(
         &results,
         &[
-            "`macro::dots` in `disallowed-macros` has a trivial or placeholder `reason`.",
-            "`method::empty` in `disallowed-methods` has a trivial or placeholder `reason`.",
-            "`method::fixme` in `disallowed-methods` has a trivial or placeholder `reason`.",
-            "`method::space` in `disallowed-methods` has a trivial or placeholder `reason`.",
-            "`type::later` in `disallowed-types` has a trivial or placeholder `reason`.",
-            "`type::tbd` in `disallowed-types` has a trivial or placeholder `reason`.",
+            "`macro::dots` in `disallowed-macros` has a weak `reason`: reason must not be a placeholder.",
+            "`method::empty` in `disallowed-methods` has a weak `reason`: reason must not be empty.",
+            "`method::fixme` in `disallowed-methods` has a weak `reason`: reason must not be a placeholder.",
+            "`method::space` in `disallowed-methods` has a weak `reason`: reason must not be empty.",
+            "`type::later` in `disallowed-types` has a weak `reason`: reason must not be a placeholder.",
+            "`type::tbd` in `disallowed-types` has a weak `reason`: reason must not be a placeholder.",
         ],
         "clippy.toml",
+    );
+    assertions::assert_count_summary(
+        &results,
+        "`clippy.toml` has 6 clippy ban entries (0 documented, 0 missing reasons, 6 weak reasons).",
     );
 }

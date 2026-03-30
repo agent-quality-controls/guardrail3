@@ -3,7 +3,7 @@ use guardrail3_app_rs_family_deny_assertions::rs_deny_24_ignore_hygiene as asser
 use super::super::{build_fixture_deny_toml, copy_fixture, set_advisory_ignores, write_file};
 
 #[test]
-fn local_advisory_ignore_inventory_only_hits_the_owned_local_root() {
+fn local_advisory_ignore_warning_only_hits_the_owned_local_root() {
     let tmp = copy_fixture("../../../../../../../tests/fixtures/r_arch_01/golden");
     write_file(tmp.path(), "deny.toml", &build_fixture_deny_toml("service"));
     write_file(
@@ -28,11 +28,18 @@ fn local_advisory_ignore_inventory_only_hits_the_owned_local_root() {
     assert!(!results.is_empty());
     assertions::assert_findings(
         &results,
-        &[assertions::info(
-            "advisory ignore entry",
-            "`apps/devctl/deny.toml` ignores advisory `RUSTSEC-2026-0000`.",
-            "apps/devctl/deny.toml",
-            true,
-        )],
+        &[
+            assertions::warn(
+                "advisory ignore entry",
+                "`apps/devctl/deny.toml` has documented advisory ignore `RUSTSEC-2026-0000`.",
+                "apps/devctl/deny.toml",
+                false,
+            ),
+            assertions::warn_no_file(
+                "advisory ignore count",
+                "`apps/devctl/deny.toml` has 1 advisory ignores (1 documented, 0 missing or invalid reasons, 0 weak reasons).",
+                false,
+            ),
+        ],
     );
 }

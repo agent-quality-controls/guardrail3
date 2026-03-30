@@ -1,3 +1,5 @@
+use guardrail3_domain_config::types::EscapeHatchConfig;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PolicyRootKind {
     WorkspaceRoot,
@@ -20,10 +22,16 @@ pub struct PolicyRootCargoFacts {
     pub(crate) cargo_rel_path: String,
     pub(crate) parsed: Option<toml::Value>,
     pub(crate) parse_error: Option<String>,
+    pub(crate) guardrail_parse_error: bool,
+    pub(crate) members_parse_error: bool,
     pub(crate) edition: Option<String>,
+    pub(crate) edition_invalid: bool,
     pub(crate) rust_version: Option<String>,
+    pub(crate) rust_version_invalid: bool,
     pub(crate) resolver: Option<String>,
+    pub(crate) resolver_invalid: bool,
     pub(crate) profile_name: Option<String>,
+    pub(crate) escape_hatches: Vec<EscapeHatchConfig>,
 }
 
 #[derive(Debug, Clone)]
@@ -34,6 +42,7 @@ pub struct WorkspaceMemberCargoFacts {
     pub(crate) parsed: Option<toml::Value>,
     pub(crate) package_name: Option<String>,
     pub(crate) edition: Option<String>,
+    pub(crate) edition_invalid: bool,
     pub(crate) lint_workspace_true: bool,
     pub(crate) parse_error: Option<String>,
 }

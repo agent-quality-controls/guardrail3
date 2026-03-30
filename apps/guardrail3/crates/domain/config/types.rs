@@ -21,6 +21,8 @@ pub struct GuardrailConfig {
     typescript: Option<TypeScriptConfig>,
     #[garde(dive)] // reason: recursively validate nested HooksConfig
     hooks: Option<HooksConfig>,
+    #[garde(dive)] // reason: each shared escape hatch entry must validate independently
+    escape_hatches: Option<Vec<EscapeHatchConfig>>,
 }
 
 impl GuardrailConfig {
@@ -38,6 +40,7 @@ impl GuardrailConfig {
             rust,
             typescript,
             hooks,
+            escape_hatches: None,
         }
     }
 
@@ -64,6 +67,88 @@ impl GuardrailConfig {
     #[must_use]
     pub const fn hooks(&self) -> Option<&HooksConfig> {
         self.hooks.as_ref()
+    }
+
+    #[must_use]
+    pub fn escape_hatches(&self) -> &[EscapeHatchConfig] {
+        self.escape_hatches.as_deref().unwrap_or(&[])
+    }
+
+    #[must_use]
+    pub fn escape_hatch_reason(
+        &self,
+        family: &str,
+        file: &str,
+        kind: &str,
+        selector: &str,
+    ) -> Option<&str> {
+        self.escape_hatches()
+            .iter()
+            .find(|entry| {
+                entry.family() == family
+                    && entry.file() == file
+                    && entry.kind() == kind
+                    && entry.selector() == selector
+            })
+            .map(EscapeHatchConfig::reason)
+    }
+}
+
+#[derive(Debug, Clone, Deserialize, garde::Validate)]
+pub struct EscapeHatchConfig {
+    #[garde(length(min = 1))] // reason: family discriminator must be non-empty
+    family: String,
+    #[garde(length(min = 1))] // reason: file selector must be non-empty
+    file: String,
+    #[garde(length(min = 1))] // reason: escape hatch kind must be non-empty
+    kind: String,
+    #[garde(length(min = 1))] // reason: selector key must be non-empty
+    selector: String,
+    #[garde(length(min = 1))] // reason: reason text must be present before policy validation
+    reason: String,
+}
+
+impl EscapeHatchConfig {
+    #[must_use]
+    pub const fn new(
+        family: String,
+        file: String,
+        kind: String,
+        selector: String,
+        reason: String,
+    ) -> Self {
+        Self {
+            family,
+            file,
+            kind,
+            selector,
+            reason,
+        }
+    }
+
+    #[must_use]
+    pub fn family(&self) -> &str {
+        &self.family
+    }
+
+    #[must_use]
+    pub fn file(&self) -> &str {
+        &self.file
+    }
+
+    #[must_use]
+    pub fn kind(&self) -> &str {
+        &self.kind
+    }
+
+    #[must_use]
+    pub fn selector(&self) -> &str {
+        &self.selector
+    }
+
+    #[must_use]
+    pub fn reason(&self) -> &str {
+        &self.reason
     }
 }
 

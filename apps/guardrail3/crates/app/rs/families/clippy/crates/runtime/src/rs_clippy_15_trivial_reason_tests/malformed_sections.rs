@@ -4,7 +4,7 @@ use test_support::root_workspace_tree;
 use super::super::run_for_tests;
 
 #[test]
-fn warns_for_malformed_managed_ban_sections() {
+fn inventories_when_no_documented_ban_entries_can_be_parsed() {
     let tree = root_workspace_tree(
         r#"
 disallowed-methods = {}
@@ -19,15 +19,5 @@ disallowed-macros = [
 "#,
     );
     let results = run_for_tests(&tree, "clippy.toml");
-    assertions::assert_malformed_messages(
-        &results,
-        &[
-            "`disallowed-macros[0].reason` must be a string when present, found array.",
-            "`disallowed-methods` must be an array, found table.",
-            "`disallowed-types[0]` must be a string or table, found integer.",
-            "`disallowed-types[1]` must contain a string `path` field.",
-            "`disallowed-types[2].path` must be a string, found integer.",
-        ],
-        "clippy.toml",
-    );
+    assertions::assert_inventory(&results, "clippy.toml");
 }

@@ -179,6 +179,13 @@ pub fn check(
         let input = inputs::PatchHexarchInput::new(patch);
         rs_hexarch_16_patch_replace_bypass::check(&input, &mut results);
     }
+    rs_hexarch_16_patch_replace_bypass::check_count(
+        dependency_facts
+            .workspaces
+            .iter()
+            .flat_map(|workspace| workspace.patch_entries.iter()),
+        &mut results,
+    );
 
     for edge in &dependency_facts.edges {
         let input = inputs::DependencyEdgeHexarchInput::new(edge);

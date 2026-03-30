@@ -1,4 +1,5 @@
 use guardrail3_domain_report::{CheckResult, Severity};
+use guardrail3_reason_policy::validate_reason_text;
 
 use super::deny_support::section;
 use super::inputs::ConfigDenyInput;
@@ -26,6 +27,9 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         ));
         return;
     };
+    let mut documented_count = 0usize;
+    let mut missing_or_invalid_reason_count = 0usize;
+    let mut weak_reason_count = 0usize;
     for entry in ignore_entries {
         let Some(table) = entry.as_table() else {
             if let Some(id) = entry.as_str() {
@@ -77,6 +81,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         let reason_value = table.get("reason");
         let reason = reason_value.and_then(toml::Value::as_str);
         if reason_value.is_some() && reason.is_none() {
+            missing_or_invalid_reason_count += 1;
             results.push(CheckResult::from_parts(
                 "RS-DENY-24".to_owned(),
                 Severity::Error,
@@ -92,7 +97,8 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
             continue;
         }
 
-        if reason.unwrap_or("").trim().is_empty() {
+        let Some(reason) = reason else {
+            missing_or_invalid_reason_count += 1;
             results.push(CheckResult::from_parts(
                 "RS-DENY-24".to_owned(),
                 Severity::Error,
@@ -106,20 +112,55 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                 false,
             ));
             continue;
+        };
+        match validate_reason_text(reason) {
+            Ok(()) => {
+                documented_count += 1;
+            }
+            Err(issue) => {
+                weak_reason_count += 1;
+                results.push(CheckResult::from_parts(
+                    "RS-DENY-24".to_owned(),
+                    Severity::Error,
+                    "advisory ignore reason too weak".to_owned(),
+                    format!(
+                        "`{}` ignores advisory `{id}` with a weak `reason`: {}.",
+                        config.rel_path,
+                        issue.message()
+                    ),
+                    Some(config.rel_path.clone()),
+                    None,
+                    false,
+                ));
+                continue;
+            }
         }
 
-        results.push(
-            CheckResult {
-                id: "RS-DENY-24".to_owned(),
-                severity: Severity::Info,
-                title: "advisory ignore entry".to_owned(),
-                message: format!("`{}` ignores advisory `{id}`.", config.rel_path),
-                file: Some(config.rel_path.clone()),
-                line: None,
-                inventory: false,
-            }
-            .as_inventory(),
-        );
+        results.push(CheckResult {
+            id: "RS-DENY-24".to_owned(),
+            severity: Severity::Warn,
+            title: "advisory ignore entry".to_owned(),
+            message: format!("`{}` has documented advisory ignore `{id}`.", config.rel_path),
+            file: Some(config.rel_path.clone()),
+            line: None,
+            inventory: false,
+        });
+    }
+
+    let total = documented_count + missing_or_invalid_reason_count + weak_reason_count;
+    if total > 0 {
+        results.push(CheckResult::from_parts(
+            "RS-DENY-24".to_owned(),
+            Severity::Warn,
+            "advisory ignore count".to_owned(),
+            format!(
+                "`{}` has {total} advisory ignores ({documented_count} documented, {missing_or_invalid_reason_count} missing or invalid reasons, {weak_reason_count} weak reasons).",
+                config.rel_path
+            ),
+            None,
+            None,
+            false,
+        ));
     }
 }
 

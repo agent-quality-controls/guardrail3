@@ -14,13 +14,19 @@ fn local_missing_ban_reason_only_errors_for_the_owned_local_root() {
 
     let results = super::super::run_family(tmp.path());
     assert!(!results.is_empty());
-    assertions::assert_findings(
-        &results,
-        &[assertions::error(
+    assert!(
+        assertions::findings(&results).contains(&assertions::error(
             "ban entry missing reason",
             "`apps/devctl/deny.toml` ban entry `json5` has no `reason`.",
             "apps/devctl/deny.toml",
             false,
-        )],
+        )),
+        "expected local missing-reason error: {results:#?}"
+    );
+    assert!(
+        assertions::findings(&results)
+            .iter()
+            .any(|finding| finding.title == "ban entry count" && finding.file.is_none()),
+        "expected count summaries to remain visible: {results:#?}"
     );
 }

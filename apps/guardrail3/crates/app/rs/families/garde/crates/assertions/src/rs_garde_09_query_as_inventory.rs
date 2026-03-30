@@ -1,5 +1,38 @@
 crate::define_rule_assertions!("RS-GARDE-09");
 
+pub fn assert_documented_hit(
+    results: &[guardrail3_domain_report::CheckResult],
+    file: &str,
+    line: usize,
+    message_contains: &str,
+) {
+    let findings = findings(results);
+    assert!(
+        findings.iter().any(|result| {
+            result.severity() == Severity::Warn
+                && result.file() == Some(file)
+                && result.line() == Some(line)
+                && !result.inventory()
+                && result.message().contains(message_contains)
+        }),
+        "missing documented RS-GARDE-09 hit for {file}:{line}: {findings:#?}"
+    );
+}
+
+pub fn assert_count_summary(results: &[guardrail3_domain_report::CheckResult], message: &str) {
+    let findings = findings(results);
+    assert!(
+        findings.iter().any(|result| {
+            result.severity() == Severity::Warn
+                && result.title() == "sqlx query_as count"
+                && result.file().is_none()
+                && !result.inventory()
+                && result.message() == message
+        }),
+        "missing RS-GARDE-09 count summary: {findings:#?}"
+    );
+}
+
 pub fn assert_inventory_hit(
     results: &[guardrail3_domain_report::CheckResult],
     file: &str,

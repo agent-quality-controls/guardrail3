@@ -316,16 +316,6 @@ pub fn managed_non_threshold_keys() -> Vec<&'static str> {
     ]
 }
 
-pub fn is_placeholder_reason(reason: &str) -> bool {
-    let normalized = reason.trim().to_ascii_lowercase();
-    normalized.is_empty()
-        || normalized.len() < 10
-        || matches!(
-            normalized.as_str(),
-            "todo" | "fixme" | "fix later" | "tbd" | "..." | "reason"
-        )
-}
-
 pub fn normalized_key_distance(a: &str, b: &str) -> usize {
     let a = a.replace(['-', '_'], "");
     let b = b.replace(['-', '_'], "");

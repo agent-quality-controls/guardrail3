@@ -17,7 +17,7 @@ fn exception_entry(key: &str, value: &str) -> toml::Value {
 }
 
 #[test]
-fn inventories_each_named_license_exception_entry() {
+fn warns_for_each_named_documented_license_exception_entry() {
     let deny = set_license_exceptions(
         &build_fixture_deny_toml("service"),
         vec![
@@ -31,17 +31,22 @@ fn inventories_each_named_license_exception_entry() {
     assertions::assert_findings(
         &results,
         &[
-            assertions::info(
+            assertions::warn(
                 "license exception entry",
-                "`deny.toml` has license exception for `demo`.",
+                "`deny.toml` has documented license exception for `demo`.",
                 "deny.toml",
-                true,
+                false,
             ),
-            assertions::info(
+            assertions::warn(
                 "license exception entry",
-                "`deny.toml` has license exception for `demo-legacy`.",
+                "`deny.toml` has documented license exception for `demo-legacy`.",
                 "deny.toml",
-                true,
+                false,
+            ),
+            assertions::warn_no_file(
+                "license exception count",
+                "`deny.toml` has 2 license exceptions (2 documented, 0 missing or invalid reasons, 0 weak reasons).",
+                false,
             ),
         ],
     );

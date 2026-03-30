@@ -1,7 +1,8 @@
 use guardrail3_domain_report::{CheckResult, Severity};
+use guardrail3_reason_policy::validate_reason_text;
 
 use super::inputs::PolicyRootCargoInput;
-use super::lint_support::{EXPECTED_CLIPPY_ALLOW, lint_level, policy_lints};
+use super::lint_support::{allow_selector, escape_hatch_reason, explicit_allow_entries, policy_lints};
 
 const ID: &str = "RS-CARGO-03";
 
@@ -13,26 +14,88 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
     let Some(clippy_lints) = policy_lints(root, "clippy") else {
         return;
     };
+    if clippy_lints.as_table().is_none() {
+        return;
+    }
 
-    for lint_name in EXPECTED_CLIPPY_ALLOW {
-        let message = match lint_level(clippy_lints, lint_name).as_deref() {
-            Some("allow") => format!("`{lint_name}` is explicitly allowed."),
-            Some(other) => format!("`{lint_name}` is set to `{other}` instead of `allow`."),
-            None => format!("`{lint_name}` is not configured and falls back to group policy."),
+    let mut documented_count = 0usize;
+    let mut missing_reason_count = 0usize;
+    let mut weak_reason_count = 0usize;
+
+    for lint_name in explicit_allow_entries(Some(clippy_lints)) {
+        let selector = allow_selector("clippy", &lint_name);
+        let Some(reason) = escape_hatch_reason(
+            &root.escape_hatches,
+            "cargo",
+            &root.cargo_rel_path,
+            "lint_allow",
+            &selector,
+        ) else {
+            missing_reason_count += 1;
+            results.push(CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Error,
+                "approved allow entry missing reason".to_owned(),
+                format!(
+                    "`{}` explicitly allows `{lint_name}` in `clippy` without a matching escape-hatch reason.",
+                    root.cargo_rel_path
+                ),
+                Some(root.cargo_rel_path.clone()),
+                None,
+                false,
+            ));
+            continue;
         };
 
-        results.push(
-            CheckResult {
-                id: ID.to_owned(),
-                severity: Severity::Info,
-                title: format!("allow inventory: `{lint_name}`"),
-                message,
-                file: Some(root.cargo_rel_path.clone()),
-                line: None,
-                inventory: false,
+        match validate_reason_text(reason) {
+            Ok(()) => {
+                documented_count += 1;
+                results.push(CheckResult::from_parts(
+                    ID.to_owned(),
+                    Severity::Warn,
+                    "approved allow entry".to_owned(),
+                    format!(
+                        "`{}` explicitly allows `{lint_name}` in `clippy` with documented reason `{reason}`.",
+                        root.cargo_rel_path
+                    ),
+                    Some(root.cargo_rel_path.clone()),
+                    None,
+                    false,
+                ));
             }
-            .as_inventory(),
-        );
+            Err(issue) => {
+                weak_reason_count += 1;
+                results.push(CheckResult::from_parts(
+                    ID.to_owned(),
+                    Severity::Error,
+                    "approved allow entry reason too weak".to_owned(),
+                    format!(
+                        "`{}` explicitly allows `{lint_name}` in `clippy` with a weak reason: {}.",
+                        root.cargo_rel_path,
+                        issue.message()
+                    ),
+                    Some(root.cargo_rel_path.clone()),
+                    None,
+                    false,
+                ));
+            }
+        }
+    }
+
+    let total = documented_count + missing_reason_count + weak_reason_count;
+    if total > 0 {
+        results.push(CheckResult::from_parts(
+            ID.to_owned(),
+            Severity::Warn,
+            "approved allow count".to_owned(),
+            format!(
+                "`{}` has {total} approved manifest allow entries ({documented_count} documented, {missing_reason_count} missing reasons, {weak_reason_count} weak reasons).",
+                root.cargo_rel_path
+            ),
+            None,
+            None,
+            false,
+        ));
     }
 }
 

@@ -5,7 +5,7 @@ fn skip_toml(skip: &str) -> String {
 }
 
 #[test]
-fn inventories_only_documented_skip_entries() {
+fn warns_for_documented_skip_entries() {
     let results = super::super::run_check(&skip_toml(
         r#"[{ crate = "serde@1.0.0", reason = "good enough reason text" }, { name = "windows-sys", version = "0.60.2", reason = "good enough reason text" }]"#,
     ));
@@ -14,17 +14,22 @@ fn inventories_only_documented_skip_entries() {
     assertions::assert_findings(
         &results,
         &[
-            assertions::info(
+            assertions::warn(
                 "skip entry",
-                "`deny.toml` has skip entry `serde`.",
+                "`deny.toml` has documented skip entry `serde`.",
                 "deny.toml",
-                true,
+                false,
             ),
-            assertions::info(
+            assertions::warn(
                 "skip entry",
-                "`deny.toml` has skip entry `windows-sys`.",
+                "`deny.toml` has documented skip entry `windows-sys`.",
                 "deny.toml",
-                true,
+                false,
+            ),
+            assertions::warn_no_file(
+                "skip entry count",
+                "`deny.toml` has 2 skip entries (2 documented, 0 missing or invalid reasons, 0 weak reasons).",
+                false,
             ),
         ],
     );

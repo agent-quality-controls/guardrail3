@@ -6,6 +6,7 @@ mod validation;
 use std::collections::{BTreeMap, BTreeSet};
 
 use guardrail3_app_rs_family_mapper::RsGardeRoute;
+use guardrail3_domain_config::types::GuardrailConfig;
 use guardrail3_domain_project_tree::ProjectTree;
 
 use self::cargo_roots::collect_cargo_roots;
@@ -13,7 +14,7 @@ use self::clippy::{collect_clippy_configs, owning_root_dir, push_root_facts};
 use self::policy::read_policy_map;
 use self::validation::resolve_validation_state;
 use super::discover::{is_test_path, rust_file_rels};
-use super::parse::{BoundaryKind, GuardrailConfigParseKind, analyze, parse_rust_file};
+use super::parse::{BoundaryKind, GuardrailConfigParseKind, ParsedGardeFile, analyze, parse_rust_file};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PolicyRootKind {
@@ -36,6 +37,7 @@ pub struct GardeRootFacts {
     pub(crate) cargo_rel_path: String,
     pub(crate) kind: PolicyRootKind,
     pub(crate) garde_dependency_present: bool,
+    pub(crate) garde_applicable: bool,
     pub(crate) clippy_rel_path: Option<String>,
     pub(crate) clippy_parsed: Option<toml::Value>,
     pub(crate) clippy_parse_error: Option<String>,
@@ -65,6 +67,7 @@ pub struct QueryAsMacroFacts {
     pub(crate) rel_path: String,
     pub(crate) line: usize,
     pub(crate) macro_name: String,
+    pub(crate) escape_hatch_reason: Option<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -182,11 +185,23 @@ pub fn collect(tree: &ProjectTree, route: &RsGardeRoute) -> GardeFacts {
         );
     }
 
-    let active_root_dirs: Vec<_> = roots
+    let routed_root_dirs: Vec<_> = roots.iter().map(|root| root.rel_dir.clone()).collect();
+    let root_escape_hatches = routed_root_dirs
         .iter()
-        .filter(|root| root.garde_dependency_present)
-        .map(|root| root.rel_dir.clone())
-        .collect();
+        .map(|root_rel_dir| {
+            let guardrail_rel = if root_rel_dir.is_empty() {
+                "guardrail3.toml".to_owned()
+            } else {
+                ProjectTree::join_rel(root_rel_dir, "guardrail3.toml")
+            };
+            let escape_hatches = tree
+                .file_content(&guardrail_rel)
+                .and_then(|content| toml::from_str::<GuardrailConfig>(content).ok())
+                .map(|config| config.escape_hatches().to_vec())
+                .unwrap_or_default();
+            (root_rel_dir.clone(), escape_hatches)
+        })
+        .collect::<BTreeMap<_, _>>();
 
     let mut struct_targets = Vec::new();
     let mut enum_targets = Vec::new();
@@ -197,12 +212,19 @@ pub fn collect(tree: &ProjectTree, route: &RsGardeRoute) -> GardeFacts {
     let mut global_type_validation_map = BTreeMap::<String, (bool, bool)>::new();
     let mut simple_type_validation_map = BTreeMap::<String, Vec<(bool, bool)>>::new();
     let mut parsed_files = Vec::new();
+    let mut root_garde_adoption = BTreeSet::new();
 
     for rel_path in rust_file_rels(tree) {
         if is_test_path(&rel_path) {
             continue;
         }
-        let Some(_root_rel_dir) = owning_root_dir(&rel_path, &active_root_dirs) else {
+        if route
+            .scoped_files()
+            .is_some_and(|files| !files.contains(&rel_path))
+        {
+            continue;
+        }
+        let Some(root_rel_dir) = owning_root_dir(&rel_path, &routed_root_dirs) else {
             continue;
         };
         let abs_path = tree.abs_path(&rel_path);
@@ -231,6 +253,27 @@ pub fn collect(tree: &ProjectTree, route: &RsGardeRoute) -> GardeFacts {
             }
         };
         let parsed = analyze(&ast);
+        if parsed_file_shows_garde_adoption(&parsed) {
+            let _ = root_garde_adoption.insert(root_rel_dir.to_owned());
+        }
+        parsed_files.push((root_rel_dir.to_owned(), rel_path, parsed));
+    }
+
+    for root in &mut roots {
+        root.garde_applicable =
+            root.garde_dependency_present || root_garde_adoption.contains(&root.rel_dir);
+    }
+
+    let active_root_dirs: BTreeSet<_> = roots
+        .iter()
+        .filter(|root| root.garde_applicable)
+        .map(|root| root.rel_dir.clone())
+        .collect();
+
+    for (root_rel_dir, _rel_path, parsed) in &parsed_files {
+        if !active_root_dirs.contains(root_rel_dir) {
+            continue;
+        }
         for (type_name, state) in &parsed.type_validation_map {
             let _ = global_type_validation_map.insert(type_name.clone(), *state);
             let simple_name = type_name
@@ -243,12 +286,11 @@ pub fn collect(tree: &ProjectTree, route: &RsGardeRoute) -> GardeFacts {
                 .or_default()
                 .push(*state);
         }
-        parsed_files.push((rel_path, parsed));
     }
 
     let global_manual_validate_types: BTreeSet<_> = parsed_files
         .iter()
-        .flat_map(|(_, parsed)| parsed.manual_validate_impls.iter().cloned())
+        .flat_map(|(_, _, parsed)| parsed.manual_validate_impls.iter().cloned())
         .collect();
     let mut simple_manual_validate_counts = BTreeMap::<String, usize>::new();
     for type_name in &global_manual_validate_types {
@@ -262,7 +304,10 @@ pub fn collect(tree: &ProjectTree, route: &RsGardeRoute) -> GardeFacts {
             .or_insert(0) += 1;
     }
 
-    for (rel_path, parsed) in parsed_files {
+    for (root_rel_dir, rel_path, parsed) in parsed_files {
+        if !active_root_dirs.contains(&root_rel_dir) {
+            continue;
+        }
         for target in parsed.derived_types {
             let fact = DerivedBoundaryTypeFacts {
                 rel_path: rel_path.clone(),
@@ -344,10 +389,22 @@ pub fn collect(tree: &ProjectTree, route: &RsGardeRoute) -> GardeFacts {
         }
 
         for macro_use in parsed.query_as_macros {
+            let selector = format!("{}@L{}", macro_use.macro_name, macro_use.line);
             query_as_macros.push(QueryAsMacroFacts {
                 rel_path: rel_path.clone(),
                 line: macro_use.line,
                 macro_name: macro_use.macro_name,
+                escape_hatch_reason: root_escape_hatches
+                    .get(&root_rel_dir)
+                    .into_iter()
+                    .flatten()
+                    .find(|entry| {
+                        entry.family() == "garde"
+                            && entry.file() == rel_path
+                            && entry.kind() == "sqlx_query_as"
+                            && entry.selector() == selector
+                    })
+                    .map(|entry| entry.reason().to_owned()),
             });
         }
 
@@ -380,6 +437,16 @@ pub fn collect(tree: &ProjectTree, route: &RsGardeRoute) -> GardeFacts {
         input_failures,
         guardrail_config_validation_sites,
     }
+}
+
+fn parsed_file_shows_garde_adoption(parsed: &ParsedGardeFile) -> bool {
+    !parsed.derived_types.is_empty()
+        || !parsed.manual_deserialize_impls.is_empty()
+        || !parsed.manual_validate_impls.is_empty()
+        || parsed
+            .type_validation_map
+            .values()
+            .any(|(_has_non_primitive_fields, has_validate)| *has_validate)
 }
 
 #[cfg(test)]

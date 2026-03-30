@@ -3,7 +3,7 @@ use guardrail3_app_rs_family_deny_assertions::rs_deny_17_license_exceptions_inve
 use super::super::{build_fixture_deny_toml, copy_fixture, set_license_exceptions, write_file};
 
 #[test]
-fn local_license_exception_only_inventories_for_the_owned_local_root() {
+fn local_license_exception_only_warns_for_the_owned_local_root() {
     let tmp = copy_fixture("../../../../../../../tests/fixtures/r_arch_01/golden");
     write_file(tmp.path(), "deny.toml", &build_fixture_deny_toml("service"));
     write_file(
@@ -32,11 +32,18 @@ fn local_license_exception_only_inventories_for_the_owned_local_root() {
     assert!(!results.is_empty());
     assertions::assert_findings(
         &results,
-        &[assertions::info(
-            "license exception entry",
-            "`apps/devctl/deny.toml` has license exception for `windows-sys`.",
-            "apps/devctl/deny.toml",
-            true,
-        )],
+        &[
+            assertions::warn(
+                "license exception entry",
+                "`apps/devctl/deny.toml` has documented license exception for `windows-sys`.",
+                "apps/devctl/deny.toml",
+                false,
+            ),
+            assertions::warn_no_file(
+                "license exception count",
+                "`apps/devctl/deny.toml` has 1 license exceptions (1 documented, 0 missing or invalid reasons, 0 weak reasons).",
+                false,
+            ),
+        ],
     );
 }

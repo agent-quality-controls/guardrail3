@@ -105,6 +105,11 @@ fn errors_for_malformed_missing_reason_and_non_string_reason_exception_entries()
                 "deny.toml",
                 false,
             ),
+            assertions::warn_no_file(
+                "license exception count",
+                "`deny.toml` has 2 license exceptions (0 documented, 2 missing or invalid reasons, 0 weak reasons).",
+                false,
+            ),
         ],
     );
 }
