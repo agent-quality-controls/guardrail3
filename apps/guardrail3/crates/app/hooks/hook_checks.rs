@@ -61,6 +61,16 @@ struct HookContext<'a> {
     pre_commit_content: &'a str,
 }
 
+fn hook_result(
+    id: &str,
+    severity: Severity,
+    title: String,
+    message: String,
+    file: Option<String>,
+) -> CheckResult {
+    CheckResult::new(id.to_owned(), severity, title, message).with_optional_file(file)
+}
+
 /// H1: check pre-commit exists. Returns false if missing (caller should return early).
 fn check_pre_commit_exists(
     pre_commit_path: &Path,
@@ -70,28 +80,24 @@ fn check_pre_commit_exists(
 ) -> bool {
     if pre_commit_path.exists() {
         results.push(
-            CheckResult {
-                id: "H1".to_owned(),
-                severity: Severity::Info,
-                title: ".githooks/pre-commit exists".to_owned(),
-                message: "Found".to_owned(),
-                file: Some(pre_commit_path.display().to_string()),
-                line: None,
-                inventory: false,
-            }
+            hook_result(
+                "H1",
+                Severity::Info,
+                ".githooks/pre-commit exists".to_owned(),
+                "Found".to_owned(),
+                Some(pre_commit_path.display().to_string()),
+            )
             .as_inventory(),
         );
         true
     } else {
-        results.push(CheckResult {
-            id: "H1".to_owned(),
-            severity: Severity::Error,
-            title: ".githooks/pre-commit missing".to_owned(),
-            message: "No pre-commit hook found".to_owned(),
-            file: Some(path.join(".githooks").display().to_string()),
-            line: None,
-            inventory: false,
-        });
+        results.push(hook_result(
+            "H1",
+            Severity::Error,
+            ".githooks/pre-commit missing".to_owned(),
+            "No pre-commit hook found".to_owned(),
+            Some(path.join(".githooks").display().to_string()),
+        ));
         check_hooks_path(path, results);
         checks::check_required_tools(tc, results);
         false
@@ -110,28 +116,24 @@ fn check_hook_structure(
     // H3: pre-commit.d/ directory
     if ctx.is_modular {
         results.push(
-            CheckResult {
-                id: "H3".to_owned(),
-                severity: Severity::Info,
-                title: "pre-commit.d/ exists".to_owned(),
-                message: "Using modular hook scripts".to_owned(),
-                file: Some(ctx.pre_commit_d.display().to_string()),
-                line: None,
-                inventory: false,
-            }
+            hook_result(
+                "H3",
+                Severity::Info,
+                "pre-commit.d/ exists".to_owned(),
+                "Using modular hook scripts".to_owned(),
+                Some(ctx.pre_commit_d.display().to_string()),
+            )
             .as_inventory(),
         );
     } else {
         results.push(
-            CheckResult {
-                id: "H3".to_owned(),
-                severity: Severity::Info,
-                title: "No pre-commit.d/ directory".to_owned(),
-                message: "Using monolithic pre-commit script".to_owned(),
-                file: Some(path.join(".githooks").display().to_string()),
-                line: None,
-                inventory: false,
-            }
+            hook_result(
+                "H3",
+                Severity::Info,
+                "No pre-commit.d/ directory".to_owned(),
+                "Using monolithic pre-commit script".to_owned(),
+                Some(path.join(".githooks").display().to_string()),
+            )
             .as_inventory(),
         );
     }
@@ -218,15 +220,13 @@ fn check_hook_stats_and_tools(
 
     // H10: Script modifications
     results.push(
-        CheckResult {
-            id: "H10".to_owned(),
-            severity: Severity::Info,
-            title: "Pre-commit file size".to_owned(),
-            message: format!("{size} bytes"),
-            file: Some(ctx.pre_commit_path.display().to_string()),
-            line: None,
-            inventory: false,
-        }
+        hook_result(
+            "H10",
+            Severity::Info,
+            "Pre-commit file size".to_owned(),
+            format!("{size} bytes"),
+            Some(ctx.pre_commit_path.display().to_string()),
+        )
         .as_inventory(),
     );
 
@@ -246,39 +246,39 @@ fn check_hooks_path(path: &Path, results: &mut Vec<CheckResult>) {
             let val = String::from_utf8_lossy(&o.stdout).trim().to_owned();
             if val == ".githooks" {
                 results.push(
-                    CheckResult {
-                        id: "H2".to_owned(),
-                        severity: Severity::Info,
-                        title: "core.hooksPath configured".to_owned(),
-                        message: "core.hooksPath = .githooks".to_owned(),
-                        file: None,
-                        line: None,
-                        inventory: false,
-                    }
+                    hook_result(
+                        "H2",
+                        Severity::Info,
+                        "core.hooksPath configured".to_owned(),
+                        "core.hooksPath = .githooks".to_owned(),
+                        None,
+                    )
                     .as_inventory(),
                 );
             } else {
-                results.push(CheckResult {
-                    id: "H2".to_owned(),
-                    severity: Severity::Error,
-                    title: "core.hooksPath wrong value".to_owned(),
-                    message: format!("Expected .githooks, got \"{val}\""),
-                    file: None,
-                    line: None,
-                    inventory: false,
-                });
+                results.push(
+                    CheckResult::new(
+                        "H2".to_owned(),
+                        Severity::Error,
+                        "core.hooksPath wrong value".to_owned(),
+                        format!("Expected .githooks, got \"{val}\""),
+                    )
+                    .with_optional_location(None, None)
+                    .with_inventory(false),
+                );
             }
         }
         _ => {
-            results.push(CheckResult {
-                id: "H2".to_owned(),
-                severity: Severity::Error,
-                title: "core.hooksPath not configured".to_owned(),
-                message: "Run: git config core.hooksPath .githooks".to_owned(),
-                file: None,
-                line: None,
-                inventory: false,
-            });
+            results.push(
+                CheckResult::new(
+                    "H2".to_owned(),
+                    Severity::Error,
+                    "core.hooksPath not configured".to_owned(),
+                    "Run: git config core.hooksPath .githooks".to_owned(),
+                )
+                .with_optional_location(None, None)
+                .with_inventory(false),
+            );
         }
     }
 }
@@ -292,39 +292,40 @@ fn check_permissions(fs: &dyn FileSystem, file_path: &Path, results: &mut Vec<Ch
                 let is_executable = mode & 0o111 != 0;
                 if is_executable {
                     results.push(
-                        CheckResult {
-                            id: "H7".to_owned(),
-                            severity: Severity::Info,
-                            title: "Pre-commit is executable".to_owned(),
-                            message: format!("mode: {mode:o}"),
-                            file: Some(file_path.display().to_string()),
-                            line: None,
-                            inventory: false,
-                        }
+                        CheckResult::new(
+                            "H7".to_owned(),
+                            Severity::Info,
+                            "Pre-commit is executable".to_owned(),
+                            format!("mode: {mode:o}"),
+                        )
+                        .with_optional_location(Some(file_path.display().to_string()), None)
+                        .with_inventory(false)
                         .as_inventory(),
                     );
                 } else {
-                    results.push(CheckResult {
-                        id: "H7".to_owned(),
-                        severity: Severity::Error,
-                        title: "Pre-commit is NOT executable".to_owned(),
-                        message: format!("mode: {mode:o} — run: chmod +x {}", file_path.display()),
-                        file: Some(file_path.display().to_string()),
-                        line: None,
-                        inventory: false,
-                    });
+                    results.push(
+                        CheckResult::new(
+                            "H7".to_owned(),
+                            Severity::Error,
+                            "Pre-commit is NOT executable".to_owned(),
+                            format!("mode: {mode:o} — run: chmod +x {}", file_path.display()),
+                        )
+                        .with_optional_location(Some(file_path.display().to_string()), None)
+                        .with_inventory(false),
+                    );
                 }
             }
             None => {
-                results.push(CheckResult {
-                    id: "H7".to_owned(),
-                    severity: Severity::Error,
-                    title: "Cannot read pre-commit permissions".to_owned(),
-                    message: "Failed to read file metadata".to_owned(),
-                    file: Some(file_path.display().to_string()),
-                    line: None,
-                    inventory: false,
-                });
+                results.push(
+                    CheckResult::new(
+                        "H7".to_owned(),
+                        Severity::Error,
+                        "Cannot read pre-commit permissions".to_owned(),
+                        "Failed to read file metadata".to_owned(),
+                    )
+                    .with_optional_location(Some(file_path.display().to_string()), None)
+                    .with_inventory(false),
+                );
             }
         }
     }
@@ -332,15 +333,14 @@ fn check_permissions(fs: &dyn FileSystem, file_path: &Path, results: &mut Vec<Ch
     #[cfg(not(unix))]
     {
         results.push(
-            CheckResult {
-                id: "H7".to_owned(),
-                severity: Severity::Info,
-                title: "Permission check skipped".to_owned(),
-                message: "Not on Unix — cannot check executable bit".to_owned(),
-                file: Some(file_path.display().to_string()),
-                line: None,
-                inventory: false,
-            }
+            CheckResult::new(
+                "H7".to_owned(),
+                Severity::Info,
+                "Permission check skipped".to_owned(),
+                "Not on Unix — cannot check executable bit".to_owned(),
+            )
+            .with_optional_location(Some(file_path.display().to_string()), None)
+            .with_inventory(false)
             .as_inventory(),
         );
     }

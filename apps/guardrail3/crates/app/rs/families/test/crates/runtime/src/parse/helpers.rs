@@ -262,10 +262,8 @@ trait Pipe: Sized {
 impl<T> Pipe for T {}
 
 struct MatchesArgs {
-    #[allow(dead_code)] // reason: only the pattern matters for this rule
-    expr: syn::Expr,
-    #[allow(dead_code)] // reason: optional guard is accepted but not inspected
-    guard: Option<syn::Expr>,
+    _expr: syn::Expr,
+    _guard: Option<syn::Expr>,
     pattern: syn::Pat,
 }
 
@@ -281,8 +279,8 @@ impl Parse for MatchesArgs {
             None
         };
         Ok(Self {
-            expr,
-            guard,
+            _expr: expr,
+            _guard: guard,
             pattern,
         })
     }

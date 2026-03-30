@@ -1,5 +1,7 @@
 use crate::ast_helpers::*;
-use guardrail3_app_rs_ast_assertions::ast_helpers::assert_single_cfg_attr_allow;
+use guardrail3_app_rs_ast_assertions::ast_helpers::{
+    assert_dead_code_cfg_attr, assert_forbidden_macro_name, assert_unwrap_expect_name,
+};
 
 fn must_parse(source: &str) -> syn::File {
     match parse_file(source) {
@@ -15,32 +17,6 @@ fn only_item_allow<'a>(allows: &'a [(usize, String)], expected_lint: &str) -> &'
     };
     assert_eq!(lint, expected_lint);
     lint
-}
-
-fn only_cfg_attr_allow<'a>(allows: &'a [CfgAttrAllowInfo]) -> &'a CfgAttrAllowInfo {
-    assert_eq!(allows.len(), 1, "should find exactly one cfg_attr allow");
-    let Some(allow) = allows.first() else {
-        panic!("expected exactly one cfg_attr allow");
-    };
-    allow
-}
-
-fn only_macro_name<'a>(macros: &'a [(usize, String)], expected_name: &str) -> &'a str {
-    assert_eq!(macros.len(), 1, "should find exactly one forbidden macro");
-    let Some((_, name)) = macros.first() else {
-        panic!("expected exactly one forbidden macro");
-    };
-    assert_eq!(name, expected_name);
-    name
-}
-
-fn only_unwrap_expect<'a>(items: &'a [(usize, String)], expected_name: &str) -> &'a str {
-    assert_eq!(items.len(), 1, "should find exactly one unwrap/expect call");
-    let Some((_, name)) = items.first() else {
-        panic!("expected exactly one unwrap/expect call");
-    };
-    assert_eq!(name, expected_name);
-    name
 }
 
 #[test]
@@ -80,6 +56,7 @@ fn item_allow_found() {
     let attr = ["#[allow(", "clippy::unwrap_used)]"].concat();
     let src = format!("{attr}\nfn foo() {{}}");
     let allows = find_item_allows(&must_parse(&src));
+    assert_eq!(allows.len(), 1, "should find exactly one item-level allow");
     let _ = only_item_allow(&allows, "clippy::unwrap_used");
 }
 
@@ -98,6 +75,7 @@ fn item_allow_on_impl_method() {
     let attr = ["#[allow(", "dead_code)]"].concat();
     let src = format!("struct S;\nimpl S {{\n    {attr}\n    fn method(&self) {{}}\n}}");
     let allows = find_item_allows(&must_parse(&src));
+    assert_eq!(allows.len(), 1, "should find exactly one item-level allow");
     let _ = only_item_allow(&allows, "dead_code");
 }
 
@@ -106,16 +84,11 @@ fn cfg_attr_allow_found() {
     let allows = find_cfg_attr_allows(&must_parse(
         "#[cfg_attr(test, allow(dead_code))]\nfn foo() {}",
     ));
-    let allow = only_cfg_attr_allow(&allows);
-    assert_single_cfg_attr_allow(
-        allows.len(),
-        allow.line,
-        &allow.lint,
-        allow.is_always_true,
-        1,
-        "dead_code",
-        false,
-    );
+    let (count, first) = cfg_attr_allow_snapshot(&allows);
+    let Some((line, lint, is_always_true)) = first else {
+        panic!("expected exactly one cfg_attr allow");
+    };
+    assert_dead_code_cfg_attr(count, line, &lint, is_always_true, 1, false);
 }
 
 #[test]
@@ -133,16 +106,11 @@ fn cfg_attr_all_empty_is_always_true() {
     let allows = find_cfg_attr_allows(&must_parse(
         "#[cfg_attr(all(), allow(dead_code))]\nfn foo() {}",
     ));
-    let allow = only_cfg_attr_allow(&allows);
-    assert_single_cfg_attr_allow(
-        allows.len(),
-        allow.line,
-        &allow.lint,
-        allow.is_always_true,
-        1,
-        "dead_code",
-        true,
-    );
+    let (count, first) = cfg_attr_allow_snapshot(&allows);
+    let Some((line, lint, is_always_true)) = first else {
+        panic!("expected exactly one cfg_attr allow");
+    };
+    assert_dead_code_cfg_attr(count, line, &lint, is_always_true, 1, true);
 }
 
 #[test]
@@ -150,16 +118,11 @@ fn cfg_attr_all_with_args_is_not_always_true() {
     let allows = find_cfg_attr_allows(&must_parse(
         "#[cfg_attr(all(unix), allow(dead_code))]\nfn foo() {}",
     ));
-    let allow = only_cfg_attr_allow(&allows);
-    assert_single_cfg_attr_allow(
-        allows.len(),
-        allow.line,
-        &allow.lint,
-        allow.is_always_true,
-        1,
-        "dead_code",
-        false,
-    );
+    let (count, first) = cfg_attr_allow_snapshot(&allows);
+    let Some((line, lint, is_always_true)) = first else {
+        panic!("expected exactly one cfg_attr allow");
+    };
+    assert_dead_code_cfg_attr(count, line, &lint, is_always_true, 1, false);
 }
 
 #[test]
@@ -179,16 +142,11 @@ fn cfg_attr_allow_found_on_trait_item() {
     let allows = find_cfg_attr_allows(&must_parse(
         "trait Api {\n    #[cfg_attr(test, allow(dead_code))]\n    fn run();\n}",
     ));
-    let allow = only_cfg_attr_allow(&allows);
-    assert_single_cfg_attr_allow(
-        allows.len(),
-        allow.line,
-        &allow.lint,
-        allow.is_always_true,
-        2,
-        "dead_code",
-        false,
-    );
+    let (count, first) = cfg_attr_allow_snapshot(&allows);
+    let Some((line, lint, is_always_true)) = first else {
+        panic!("expected exactly one cfg_attr allow");
+    };
+    assert_dead_code_cfg_attr(count, line, &lint, is_always_true, 2, false);
 }
 
 #[test]
@@ -196,16 +154,11 @@ fn nested_cfg_attr_allow_found() {
     let allows = find_cfg_attr_allows(&must_parse(
         "#[cfg_attr(test, cfg_attr(unix, allow(dead_code)))]\nunsafe extern \"C\" { fn puts(s: *const i8); }",
     ));
-    let allow = only_cfg_attr_allow(&allows);
-    assert_single_cfg_attr_allow(
-        allows.len(),
-        allow.line,
-        &allow.lint,
-        allow.is_always_true,
-        1,
-        "dead_code",
-        false,
-    );
+    let (count, first) = cfg_attr_allow_snapshot(&allows);
+    let Some((line, lint, is_always_true)) = first else {
+        panic!("expected exactly one cfg_attr allow");
+    };
+    assert_dead_code_cfg_attr(count, line, &lint, is_always_true, 1, false);
 }
 
 #[test]
@@ -338,11 +291,11 @@ fn unsafe_in_string_not_found() {
 #[test]
 fn forbidden_macros_found() {
     let m1 = find_forbidden_macros(&must_parse("fn f() { todo!(); }"));
-    let _ = only_macro_name(&m1, "todo");
+    assert_forbidden_macro_name(&m1, "todo");
     let m2 = find_forbidden_macros(&must_parse("fn f() { unimplemented!(); }"));
-    let _ = only_macro_name(&m2, "unimplemented");
+    assert_forbidden_macro_name(&m2, "unimplemented");
     let m3 = find_forbidden_macros(&must_parse("fn f() { panic!(\"oh\"); }"));
-    let _ = only_macro_name(&m3, "panic");
+    assert_forbidden_macro_name(&m3, "panic");
 }
 
 #[test]
@@ -357,9 +310,9 @@ fn todo_in_string_not_found() {
 #[test]
 fn unwrap_expect_found() {
     let u = find_unwrap_expect(&must_parse("fn f() { Some(1).unwrap(); }"));
-    let _ = only_unwrap_expect(&u, "unwrap");
+    assert_unwrap_expect_name(&u, "unwrap");
     let e = find_unwrap_expect(&must_parse("fn f() { Some(1).expect(\"m\"); }"));
-    let _ = only_unwrap_expect(&e, "expect");
+    assert_unwrap_expect_name(&e, "expect");
 }
 
 #[test]

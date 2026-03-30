@@ -1,0 +1,47 @@
+use guardrail3_domain_report::{CheckResult, Severity};
+
+use super::inputs::PatchHexarchInput;
+use super::inventory::push_success;
+
+const ID: &str = "RS-HEXARCH-16";
+
+pub fn check(input: &PatchHexarchInput<'_>, results: &mut Vec<CheckResult>) {
+    let patch = input.patch;
+    if patch.target_layer.is_none() {
+        push_success(
+            results,
+            ID,
+            format!(
+                "patch/replace entry `{}` stays outside the layered tree",
+                patch.key
+            ),
+            format!(
+                "`{}` resolves to `{}` outside the owned layered Rust tree, so it does not bypass hexarch layer enforcement.",
+                patch.key, patch.resolved_rel_dir
+            ),
+            Some(patch.cargo_rel_path.clone()),
+        );
+        return;
+    }
+
+    results.push(CheckResult::from_parts(
+    ID.to_owned(),
+    Severity::Error,
+    format!("patch/replace entry `{}` bypasses hexarch dependency checks", patch.key),
+    format!(
+            "`{}` resolves to `{}` inside the layered Rust tree. `patch`/`replace` path overrides bypass normal dependency-direction checks and are forbidden here.",
+            patch.key, patch.resolved_rel_dir
+        ),
+    Some(patch.cargo_rel_path.clone()),
+    None,
+    false,
+    ));
+}
+
+#[cfg(test)]
+pub(super) fn results_for_test_root(root: &std::path::Path) -> Vec<CheckResult> {
+    crate::check_test_tree(&test_support::walk(root))
+}
+#[cfg(test)]
+#[path = "rs_hexarch_16_patch_replace_bypass_tests/mod.rs"]
+mod rs_hexarch_16_patch_replace_bypass_tests;

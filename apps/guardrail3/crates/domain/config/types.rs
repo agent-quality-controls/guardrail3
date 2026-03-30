@@ -12,89 +12,271 @@ type TsAppMap = BTreeMap<String, TsAppConfig>;
 #[derive(Debug, Deserialize, garde::Validate)]
 pub struct GuardrailConfig {
     #[garde(inner(length(min = 1)))] // reason: version string must be non-empty when present
-    pub version: Option<String>,
+    version: Option<String>,
     #[garde(dive)] // reason: recursively validate nested ProfileConfig
-    pub profile: Option<ProfileConfig>,
+    profile: Option<ProfileConfig>,
     #[garde(dive)] // reason: recursively validate nested RustConfig
-    pub rust: Option<RustConfig>,
+    rust: Option<RustConfig>,
     #[garde(dive)] // reason: recursively validate nested TypeScriptConfig
-    pub typescript: Option<TypeScriptConfig>,
+    typescript: Option<TypeScriptConfig>,
     #[garde(dive)] // reason: recursively validate nested HooksConfig
-    pub hooks: Option<HooksConfig>,
+    hooks: Option<HooksConfig>,
+}
+
+impl GuardrailConfig {
+    #[must_use]
+    pub const fn new(
+        version: Option<String>,
+        profile: Option<ProfileConfig>,
+        rust: Option<RustConfig>,
+        typescript: Option<TypeScriptConfig>,
+        hooks: Option<HooksConfig>,
+    ) -> Self {
+        Self {
+            version,
+            profile,
+            rust,
+            typescript,
+            hooks,
+        }
+    }
+
+    #[must_use]
+    pub fn version(&self) -> Option<&str> {
+        self.version.as_deref()
+    }
+
+    #[must_use]
+    pub const fn profile(&self) -> Option<&ProfileConfig> {
+        self.profile.as_ref()
+    }
+
+    #[must_use]
+    pub const fn rust(&self) -> Option<&RustConfig> {
+        self.rust.as_ref()
+    }
+
+    #[must_use]
+    pub const fn typescript(&self) -> Option<&TypeScriptConfig> {
+        self.typescript.as_ref()
+    }
+
+    #[must_use]
+    pub const fn hooks(&self) -> Option<&HooksConfig> {
+        self.hooks.as_ref()
+    }
 }
 
 #[derive(Debug, Deserialize, garde::Validate)]
 pub struct ProfileConfig {
     #[garde(length(min = 1))] // reason: profile name must be non-empty
-    pub name: String,
+    name: String,
+}
+
+impl ProfileConfig {
+    #[must_use]
+    pub fn new(name: String) -> Self {
+        Self { name }
+    }
+
+    #[must_use]
+    pub fn name(&self) -> &str {
+        &self.name
+    }
 }
 
 #[derive(Debug, Deserialize, garde::Validate)]
 pub struct RustConfig {
     #[garde(inner(length(min = 1)))] // reason: workspace root path must be non-empty when present
-    pub workspace_root: Option<String>,
+    workspace_root: Option<String>,
     #[garde(inner(inner(length(min = 1))))] // reason: each workspace path must be non-empty
-    pub workspaces: Option<Vec<String>>,
+    workspaces: Option<Vec<String>>,
     #[garde(skip)] // reason: map values are validated by layer_from_config
-    pub apps: Option<CrateMap>,
+    apps: Option<CrateMap>,
     #[garde(dive)] // reason: recursively validate nested CrateConfig for packages
-    pub packages: Option<CrateConfig>,
+    packages: Option<CrateConfig>,
     #[garde(dive)] // reason: recursively validate nested RustChecksConfig
-    pub checks: Option<RustChecksConfig>,
+    checks: Option<RustChecksConfig>,
+}
+
+impl RustConfig {
+    #[must_use]
+    pub const fn new(
+        workspace_root: Option<String>,
+        workspaces: Option<Vec<String>>,
+        apps: Option<CrateMap>,
+        packages: Option<CrateConfig>,
+        checks: Option<RustChecksConfig>,
+    ) -> Self {
+        Self {
+            workspace_root,
+            workspaces,
+            apps,
+            packages,
+            checks,
+        }
+    }
+
+    #[must_use]
+    pub fn workspace_root(&self) -> Option<&str> {
+        self.workspace_root.as_deref()
+    }
+
+    #[must_use]
+    pub fn workspaces(&self) -> Option<&[String]> {
+        self.workspaces.as_deref()
+    }
+
+    #[must_use]
+    pub const fn apps(&self) -> Option<&BTreeMap<String, CrateConfig>> {
+        self.apps.as_ref()
+    }
+
+    #[must_use]
+    pub const fn packages(&self) -> Option<&CrateConfig> {
+        self.packages.as_ref()
+    }
+
+    #[must_use]
+    pub const fn checks(&self) -> Option<&RustChecksConfig> {
+        self.checks.as_ref()
+    }
 }
 
 #[derive(Debug, Clone, Deserialize, garde::Validate)]
 pub struct CrateConfig {
     #[garde(inner(length(min = 1)))] // reason: layer name must be non-empty when present
-    pub layer: Option<String>,
+    layer: Option<String>,
     #[garde(inner(length(min = 1)))] // reason: profile name must be non-empty when present
-    pub profile: Option<String>,
+    profile: Option<String>,
     /// App type — unified alias for `profile` (matches TS convention)
     #[serde(rename = "type")]
     #[garde(inner(length(min = 1)))] // reason: type name must be non-empty when present
-    pub type_: Option<String>,
+    type_: Option<String>,
     #[garde(inner(inner(length(min = 1))))] // reason: each allowed dep name must be non-empty
-    pub allowed_deps: Option<Vec<String>>,
+    allowed_deps: Option<Vec<String>>,
     #[garde(dive)] // reason: recursively validate nested RustChecksConfig
-    pub checks: Option<RustChecksConfig>,
+    checks: Option<RustChecksConfig>,
+}
+
+impl CrateConfig {
+    #[must_use]
+    pub const fn new(
+        layer: Option<String>,
+        profile: Option<String>,
+        type_: Option<String>,
+        allowed_deps: Option<Vec<String>>,
+        checks: Option<RustChecksConfig>,
+    ) -> Self {
+        Self {
+            layer,
+            profile,
+            type_,
+            allowed_deps,
+            checks,
+        }
+    }
+
+    #[must_use]
+    pub fn layer(&self) -> Option<&str> {
+        self.layer.as_deref()
+    }
+
+    #[must_use]
+    pub fn profile(&self) -> Option<&str> {
+        self.profile.as_deref()
+    }
+
+    #[must_use]
+    pub fn type_(&self) -> Option<&str> {
+        self.type_.as_deref()
+    }
+
+    #[must_use]
+    pub fn allowed_deps(&self) -> Option<&[String]> {
+        self.allowed_deps.as_deref()
+    }
+
+    #[must_use]
+    pub const fn checks(&self) -> Option<&RustChecksConfig> {
+        self.checks.as_ref()
+    }
 }
 
 #[derive(Debug, Clone, Deserialize, garde::Validate)]
 #[serde(deny_unknown_fields)]
 pub struct RustChecksConfig {
     #[garde(skip)] // reason: Option<bool> — inherently valid
-    pub arch: Option<bool>,
+    arch: Option<bool>,
     #[garde(skip)] // reason: Option<bool> — inherently valid
-    pub fmt: Option<bool>,
+    fmt: Option<bool>,
     #[garde(skip)] // reason: Option<bool> — inherently valid
-    pub toolchain: Option<bool>,
+    toolchain: Option<bool>,
     #[garde(skip)] // reason: Option<bool> — inherently valid
-    pub clippy: Option<bool>,
+    clippy: Option<bool>,
     #[garde(skip)] // reason: Option<bool> — inherently valid
-    pub deny: Option<bool>,
+    deny: Option<bool>,
     #[garde(skip)] // reason: Option<bool> — inherently valid
-    pub cargo: Option<bool>,
+    cargo: Option<bool>,
     #[garde(skip)] // reason: Option<bool> — inherently valid
-    pub code: Option<bool>,
+    code: Option<bool>,
     #[garde(skip)] // reason: Option<bool> — inherently valid
-    pub hexarch: Option<bool>,
+    hexarch: Option<bool>,
     #[garde(skip)] // reason: Option<bool> — inherently valid
-    pub libarch: Option<bool>,
+    libarch: Option<bool>,
     #[garde(skip)] // reason: Option<bool> — inherently valid
-    pub deps: Option<bool>,
+    deps: Option<bool>,
     #[garde(skip)] // reason: Option<bool> — inherently valid
-    pub garde: Option<bool>,
+    garde: Option<bool>,
     #[garde(skip)] // reason: Option<bool> — inherently valid
-    pub test: Option<bool>,
+    test: Option<bool>,
     #[garde(skip)] // reason: Option<bool> — inherently valid
-    pub release: Option<bool>,
+    release: Option<bool>,
     #[garde(skip)] // reason: Option<bool> — inherently valid
-    pub hooks_shared: Option<bool>,
+    hooks_shared: Option<bool>,
     #[garde(skip)] // reason: Option<bool> — inherently valid
-    pub hooks_rs: Option<bool>,
+    hooks_rs: Option<bool>,
 }
 
 impl RustChecksConfig {
+    #[must_use]
+    #[allow(clippy::too_many_arguments)] // reason: config value object mirrors serialized family toggle set
+    pub const fn new(
+        arch: Option<bool>,
+        fmt: Option<bool>,
+        toolchain: Option<bool>,
+        clippy: Option<bool>,
+        deny: Option<bool>,
+        cargo: Option<bool>,
+        code: Option<bool>,
+        hexarch: Option<bool>,
+        libarch: Option<bool>,
+        deps: Option<bool>,
+        garde: Option<bool>,
+        test: Option<bool>,
+        release: Option<bool>,
+        hooks_shared: Option<bool>,
+        hooks_rs: Option<bool>,
+    ) -> Self {
+        Self {
+            arch,
+            fmt,
+            toolchain,
+            clippy,
+            deny,
+            cargo,
+            code,
+            hexarch,
+            libarch,
+            deps,
+            garde,
+            test,
+            release,
+            hooks_shared,
+            hooks_rs,
+        }
+    }
+
     #[must_use]
     pub const fn family_enabled(&self, family: RustValidateFamily) -> Option<bool> {
         match family {
@@ -106,6 +288,7 @@ impl RustChecksConfig {
             RustValidateFamily::Cargo => self.cargo,
             RustValidateFamily::Code => self.code,
             RustValidateFamily::Hexarch => self.hexarch,
+            RustValidateFamily::Libarch => self.libarch,
             RustValidateFamily::Deps => self.deps,
             RustValidateFamily::Garde => self.garde,
             RustValidateFamily::Test => self.test,
@@ -114,16 +297,121 @@ impl RustChecksConfig {
             RustValidateFamily::HooksRs => self.hooks_rs,
         }
     }
+
+    #[must_use]
+    pub const fn arch(&self) -> Option<bool> {
+        self.arch
+    }
+
+    #[must_use]
+    pub const fn fmt(&self) -> Option<bool> {
+        self.fmt
+    }
+
+    #[must_use]
+    pub const fn toolchain(&self) -> Option<bool> {
+        self.toolchain
+    }
+
+    #[must_use]
+    pub const fn clippy(&self) -> Option<bool> {
+        self.clippy
+    }
+
+    #[must_use]
+    pub const fn deny(&self) -> Option<bool> {
+        self.deny
+    }
+
+    #[must_use]
+    pub const fn cargo(&self) -> Option<bool> {
+        self.cargo
+    }
+
+    #[must_use]
+    pub const fn code(&self) -> Option<bool> {
+        self.code
+    }
+
+    #[must_use]
+    pub const fn hexarch(&self) -> Option<bool> {
+        self.hexarch
+    }
+
+    #[must_use]
+    pub const fn libarch(&self) -> Option<bool> {
+        self.libarch
+    }
+
+    #[must_use]
+    pub const fn deps(&self) -> Option<bool> {
+        self.deps
+    }
+
+    #[must_use]
+    pub const fn garde(&self) -> Option<bool> {
+        self.garde
+    }
+
+    #[must_use]
+    pub const fn test(&self) -> Option<bool> {
+        self.test
+    }
+
+    #[must_use]
+    pub const fn release(&self) -> Option<bool> {
+        self.release
+    }
+
+    #[must_use]
+    pub const fn hooks_shared(&self) -> Option<bool> {
+        self.hooks_shared
+    }
+
+    #[must_use]
+    pub const fn hooks_rs(&self) -> Option<bool> {
+        self.hooks_rs
+    }
 }
 
 #[derive(Debug, Deserialize, garde::Validate)]
 pub struct TsChecksConfig {
     #[garde(skip)] // reason: Option<bool> — inherently valid
-    pub architecture: Option<bool>,
+    architecture: Option<bool>,
     #[garde(skip)] // reason: Option<bool> — inherently valid
-    pub content: Option<bool>,
+    content: Option<bool>,
     #[garde(skip)] // reason: Option<bool> — inherently valid
-    pub tests: Option<bool>,
+    tests: Option<bool>,
+}
+
+impl TsChecksConfig {
+    #[must_use]
+    pub const fn new(
+        architecture: Option<bool>,
+        content: Option<bool>,
+        tests: Option<bool>,
+    ) -> Self {
+        Self {
+            architecture,
+            content,
+            tests,
+        }
+    }
+
+    #[must_use]
+    pub const fn architecture(&self) -> Option<bool> {
+        self.architecture
+    }
+
+    #[must_use]
+    pub const fn content(&self) -> Option<bool> {
+        self.content
+    }
+
+    #[must_use]
+    pub const fn tests(&self) -> Option<bool> {
+        self.tests
+    }
 }
 
 #[derive(Debug, Deserialize, garde::Validate)]
@@ -131,43 +419,154 @@ pub struct TsAppConfig {
     /// App type: "service", "content", or "library"
     #[serde(rename = "type")]
     #[garde(inner(length(min = 1)))] // reason: type name must be non-empty when present
-    pub type_: Option<String>,
+    type_: Option<String>,
     #[garde(dive)] // reason: recursively validate nested TsChecksConfig
-    pub checks: Option<TsChecksConfig>,
+    checks: Option<TsChecksConfig>,
+}
+
+impl TsAppConfig {
+    #[must_use]
+    pub const fn new(type_: Option<String>, checks: Option<TsChecksConfig>) -> Self {
+        Self { type_, checks }
+    }
+
+    #[must_use]
+    pub fn type_(&self) -> Option<&str> {
+        self.type_.as_deref()
+    }
+
+    #[must_use]
+    pub const fn checks(&self) -> Option<&TsChecksConfig> {
+        self.checks.as_ref()
+    }
 }
 
 #[derive(Debug, Deserialize, garde::Validate)]
 pub struct TypeScriptConfig {
     #[garde(skip)] // reason: map values are validated by type resolution
-    pub apps: Option<TsAppMap>,
+    apps: Option<TsAppMap>,
     #[garde(inner(length(min = 1)))] // reason: migrations path must be non-empty when present
-    pub migrations: Option<String>,
+    migrations: Option<String>,
     #[garde(dive)] // reason: recursively validate nested EslintConfig
-    pub eslint: Option<EslintConfig>,
+    eslint: Option<EslintConfig>,
     #[garde(dive)] // reason: recursively validate nested CanonicalConfig
-    pub canonical: Option<CanonicalConfig>,
+    canonical: Option<CanonicalConfig>,
     #[garde(dive)] // reason: recursively validate nested TsChecksConfig
-    pub checks: Option<TsChecksConfig>,
+    checks: Option<TsChecksConfig>,
+}
+
+impl TypeScriptConfig {
+    #[must_use]
+    pub const fn new(
+        apps: Option<TsAppMap>,
+        migrations: Option<String>,
+        eslint: Option<EslintConfig>,
+        canonical: Option<CanonicalConfig>,
+        checks: Option<TsChecksConfig>,
+    ) -> Self {
+        Self {
+            apps,
+            migrations,
+            eslint,
+            canonical,
+            checks,
+        }
+    }
+
+    #[must_use]
+    pub const fn apps(&self) -> Option<&BTreeMap<String, TsAppConfig>> {
+        self.apps.as_ref()
+    }
+
+    #[must_use]
+    pub fn migrations(&self) -> Option<&str> {
+        self.migrations.as_deref()
+    }
+
+    #[must_use]
+    pub const fn eslint(&self) -> Option<&EslintConfig> {
+        self.eslint.as_ref()
+    }
+
+    #[must_use]
+    pub const fn canonical(&self) -> Option<&CanonicalConfig> {
+        self.canonical.as_ref()
+    }
+
+    #[must_use]
+    pub const fn checks(&self) -> Option<&TsChecksConfig> {
+        self.checks.as_ref()
+    }
 }
 
 #[derive(Debug, Deserialize, garde::Validate)]
 pub struct EslintConfig {
     #[garde(inner(length(min = 1)))] // reason: eslint mode must be non-empty when present
-    pub mode: Option<String>,
+    mode: Option<String>,
+}
+
+impl EslintConfig {
+    #[must_use]
+    pub const fn new(mode: Option<String>) -> Self {
+        Self { mode }
+    }
+
+    #[must_use]
+    pub fn mode(&self) -> Option<&str> {
+        self.mode.as_deref()
+    }
 }
 
 #[derive(Debug, Deserialize, garde::Validate)]
 pub struct CanonicalConfig {
     #[garde(skip)] // reason: Option<bool> — inherently valid, no string validation needed
-    pub npmrc: Option<bool>,
+    npmrc: Option<bool>,
     #[garde(skip)] // reason: Option<bool> — inherently valid, no string validation needed
-    pub tsconfig_base: Option<bool>,
+    tsconfig_base: Option<bool>,
     #[garde(skip)] // reason: Option<bool> — inherently valid, no string validation needed
-    pub jscpd: Option<bool>,
+    jscpd: Option<bool>,
+}
+
+impl CanonicalConfig {
+    #[must_use]
+    pub const fn new(npmrc: Option<bool>, tsconfig_base: Option<bool>, jscpd: Option<bool>) -> Self {
+        Self {
+            npmrc,
+            tsconfig_base,
+            jscpd,
+        }
+    }
+
+    #[must_use]
+    pub const fn npmrc(&self) -> Option<bool> {
+        self.npmrc
+    }
+
+    #[must_use]
+    pub const fn tsconfig_base(&self) -> Option<bool> {
+        self.tsconfig_base
+    }
+
+    #[must_use]
+    pub const fn jscpd(&self) -> Option<bool> {
+        self.jscpd
+    }
 }
 
 #[derive(Debug, Deserialize, garde::Validate)]
 pub struct HooksConfig {
     #[garde(inner(length(min = 1)))] // reason: extra_dir path must be non-empty when present
-    pub extra_dir: Option<String>,
+    extra_dir: Option<String>,
+}
+
+impl HooksConfig {
+    #[must_use]
+    pub const fn new(extra_dir: Option<String>) -> Self {
+        Self { extra_dir }
+    }
+
+    #[must_use]
+    pub fn extra_dir(&self) -> Option<&str> {
+        self.extra_dir.as_deref()
+    }
 }

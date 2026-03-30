@@ -25,13 +25,71 @@ pub enum RustRootClassification {
 
 #[derive(Debug, Clone)]
 pub struct RustRootPlacementRootFacts {
-    pub rel_dir: String,
-    pub cargo_rel_path: String,
-    pub classification: RustRootClassification,
-    pub arch_role: Option<RustArchRole>,
-    pub app_zone_candidates: Vec<String>,
-    pub package_zone_candidates: Vec<String>,
-    pub owner_families: Vec<RustArchitectureOwner>,
+    rel_dir: String,
+    cargo_rel_path: String,
+    classification: RustRootClassification,
+    arch_role: Option<RustArchRole>,
+    app_zone_candidates: Vec<String>,
+    package_zone_candidates: Vec<String>,
+    owner_families: Vec<RustArchitectureOwner>,
+}
+
+impl RustRootPlacementRootFacts {
+    #[must_use]
+    pub fn new(
+        rel_dir: String,
+        cargo_rel_path: String,
+        classification: RustRootClassification,
+        arch_role: Option<RustArchRole>,
+        app_zone_candidates: Vec<String>,
+        package_zone_candidates: Vec<String>,
+        owner_families: Vec<RustArchitectureOwner>,
+    ) -> Self {
+        Self {
+            rel_dir,
+            cargo_rel_path,
+            classification,
+            arch_role,
+            app_zone_candidates,
+            package_zone_candidates,
+            owner_families,
+        }
+    }
+
+    #[must_use]
+    pub fn rel_dir(&self) -> &str {
+        &self.rel_dir
+    }
+
+    #[must_use]
+    pub fn cargo_rel_path(&self) -> &str {
+        &self.cargo_rel_path
+    }
+
+    #[must_use]
+    pub const fn classification(&self) -> RustRootClassification {
+        self.classification
+    }
+
+    #[must_use]
+    pub const fn arch_role(&self) -> Option<RustArchRole> {
+        self.arch_role
+    }
+
+    #[must_use]
+    pub fn app_zone_candidates(&self) -> &[String] {
+        &self.app_zone_candidates
+    }
+
+    #[must_use]
+    pub fn package_zone_candidates(&self) -> &[String] {
+        &self.package_zone_candidates
+    }
+
+    #[must_use]
+    pub fn owner_families(&self) -> &[RustArchitectureOwner] {
+        &self.owner_families
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -74,7 +132,7 @@ pub fn classify_root(
         owner_families.push(RustArchitectureOwner::Libarch);
     }
 
-    RustRootPlacementRootFacts {
+    RustRootPlacementRootFacts::new(
         rel_dir,
         cargo_rel_path,
         classification,
@@ -82,7 +140,7 @@ pub fn classify_root(
         app_zone_candidates,
         package_zone_candidates,
         owner_families,
-    }
+    )
 }
 
 fn zone_candidates(rel_dir: &str, zone_dir: &str) -> Vec<String> {

@@ -1,6 +1,7 @@
 use std::collections::BTreeSet;
 use std::path::Path;
 
+#[cfg(feature = "product-ts")]
 use crate::generate;
 #[cfg(feature = "product-rs-generate")]
 use guardrail3_app_rs_generate::generate_rust_expected;

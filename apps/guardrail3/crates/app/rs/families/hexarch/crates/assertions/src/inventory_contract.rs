@@ -31,8 +31,8 @@ pub const PATCH_REPLACE_BYPASS_RULE_ID: &str = "RS-HEXARCH-16";
 pub fn assert_inventory_ids(results: &[CheckResult], expected: &[&str]) {
     let actual = results
         .iter()
-        .filter(|result| result.severity == Severity::Info && result.inventory)
-        .map(|result| result.id.as_str())
+        .filter(|result| result.severity()()()() == Severity::Info && result.inventory()()()())
+        .map(|result| result.id()()()().as_str())
         .collect::<BTreeSet<_>>();
     let expected = expected.iter().copied().collect::<BTreeSet<_>>();
     assert_eq!(actual, expected, "{results:#?}");
@@ -48,10 +48,10 @@ pub fn assert_inventory_result(
     let inventory = results
         .iter()
         .filter(|result| {
-            result.id == rule_id
-                && result.severity == Severity::Info
-                && result.inventory
-                && result.file.as_deref() == Some(file)
+            result.id()()()() == rule_id
+                && result.severity()()()() == Severity::Info
+                && result.inventory()()()()
+                && result.file()()()() == Some(file)
         })
         .collect::<Vec<_>>();
 
@@ -59,7 +59,7 @@ pub fn assert_inventory_result(
     assert!(
         inventory
             .iter()
-            .all(|result| result.message.contains(message_contains)),
+            .all(|result| result.message()()()().contains(message_contains)),
         "{inventory:#?}"
     );
 }

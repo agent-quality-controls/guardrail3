@@ -4,66 +4,51 @@ use std::path::PathBuf;
 use super::{DirEntry, ProjectTree};
 
 fn sample_tree() -> ProjectTree {
-    ProjectTree {
-        root: PathBuf::from("/tmp/project"),
-        structure: BTreeMap::from([
+    ProjectTree::new(
+        PathBuf::from("/tmp/project"),
+        BTreeMap::from([
             (
                 "".to_owned(),
-                DirEntry {
-                    dirs: vec!["crates".to_owned(), "apps".to_owned()],
-                    files: vec!["Cargo.toml".to_owned(), "rust-toolchain.toml".to_owned()],
-                    symlink_dirs: vec![],
-                    symlink_files: vec![],
-                },
+                DirEntry::new(
+                    vec!["crates".to_owned(), "apps".to_owned()],
+                    vec!["Cargo.toml".to_owned(), "rust-toolchain.toml".to_owned()],
+                    vec![],
+                    vec![],
+                ),
             ),
             (
                 "crates".to_owned(),
-                DirEntry {
-                    dirs: vec!["api".to_owned(), "missing".to_owned()],
-                    files: vec![],
-                    symlink_dirs: vec![],
-                    symlink_files: vec![],
-                },
+                DirEntry::new(
+                    vec!["api".to_owned(), "missing".to_owned()],
+                    vec![],
+                    vec![],
+                    vec![],
+                ),
             ),
             (
                 "crates/api".to_owned(),
-                DirEntry {
-                    dirs: vec![],
-                    files: vec!["Cargo.toml".to_owned(), ".rustfmt.toml".to_owned()],
-                    symlink_dirs: vec![],
-                    symlink_files: vec![],
-                },
+                DirEntry::new(
+                    vec![],
+                    vec!["Cargo.toml".to_owned(), ".rustfmt.toml".to_owned()],
+                    vec![],
+                    vec![],
+                ),
             ),
             (
                 "crates/missing".to_owned(),
-                DirEntry {
-                    dirs: vec![],
-                    files: vec![],
-                    symlink_dirs: vec![],
-                    symlink_files: vec![],
-                },
+                DirEntry::new(vec![], vec![], vec![], vec![]),
             ),
             (
                 "apps".to_owned(),
-                DirEntry {
-                    dirs: vec!["cli".to_owned()],
-                    files: vec![],
-                    symlink_dirs: vec![],
-                    symlink_files: vec![],
-                },
+                DirEntry::new(vec!["cli".to_owned()], vec![], vec![], vec![]),
             ),
             (
                 "apps/cli".to_owned(),
-                DirEntry {
-                    dirs: vec![],
-                    files: vec!["Cargo.toml".to_owned()],
-                    symlink_dirs: vec![],
-                    symlink_files: vec![],
-                },
+                DirEntry::new(vec![], vec!["Cargo.toml".to_owned()], vec![], vec![]),
             ),
         ]),
-        content: BTreeMap::new(),
-    }
+        BTreeMap::new(),
+    )
 }
 
 #[test]

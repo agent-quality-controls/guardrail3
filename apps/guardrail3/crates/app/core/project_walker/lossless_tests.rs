@@ -3,8 +3,6 @@
 //! Tests construct adversarial temp directories and verify the walker handles
 //! each case correctly. The golden fixture lossless test is kept as an
 //! integration sanity check but the real coverage comes from the adversarial tests.
-#![allow(clippy::expect_used)] // reason: test assertions
-
 use std::collections::BTreeSet;
 use std::path::Path;
 
@@ -21,7 +19,6 @@ fn golden_path() -> std::path::PathBuf {
 /// in the tree, and nothing in the tree is phantom.
 /// Uses walkdir (independent code path) as ground truth.
 /// Only valid for directories WITHOUT .gitignore (walker uses `ignore` crate).
-#[allow(dead_code)] // reason: used by golden fixture tests + available for ad-hoc verification
 fn assert_lossless_structure(root: &Path, tree: &ProjectTree) {
     let mut expected_dirs: BTreeSet<String> = BTreeSet::new();
     let mut expected_files: BTreeSet<String> = BTreeSet::new();
@@ -29,7 +26,7 @@ fn assert_lossless_structure(root: &Path, tree: &ProjectTree) {
         let rel = entry
             .path()
             .strip_prefix(root)
-            .expect("walkdir entry should remain under the golden root")
+            .unwrap_or_else(|_| panic!("walkdir entry should remain under the golden root"))
             .to_string_lossy()
             .into_owned();
         if entry.file_type().is_dir() {
@@ -39,7 +36,7 @@ fn assert_lossless_structure(root: &Path, tree: &ProjectTree) {
         }
     }
 
-    let actual_dirs: BTreeSet<String> = tree.structure.keys().cloned().collect();
+    let actual_dirs: BTreeSet<String> = tree.structure().keys().cloned().collect();
     let missing_dirs: Vec<_> = expected_dirs.difference(&actual_dirs).collect();
     let extra_dirs: Vec<_> = actual_dirs.difference(&expected_dirs).collect();
     assert!(
@@ -52,8 +49,8 @@ fn assert_lossless_structure(root: &Path, tree: &ProjectTree) {
     );
 
     let mut actual_files: BTreeSet<String> = BTreeSet::new();
-    for (dir_rel, entry) in &tree.structure {
-        for file in &entry.files {
+    for (dir_rel, entry) in tree.structure() {
+        for file in entry.files() {
             let _ = actual_files.insert(ProjectTree::join_rel(dir_rel, file));
         }
     }
@@ -68,7 +65,7 @@ fn assert_lossless_structure(root: &Path, tree: &ProjectTree) {
         "Walker has phantom files:\n{extra_files:#?}"
     );
 
-    for (dir_rel, entry) in &tree.structure {
+    for (dir_rel, entry) in tree.structure() {
         let abs = tree.abs_path(dir_rel);
         let mut exp_d: Vec<String> = Vec::new();
         let mut exp_f: Vec<String> = Vec::new();
@@ -79,7 +76,9 @@ fn assert_lossless_structure(root: &Path, tree: &ProjectTree) {
             let name = child.file_name().to_string_lossy().into_owned();
             if child
                 .file_type()
-                .expect("failed to read child file type while verifying golden fixture")
+                .unwrap_or_else(|e| {
+                    panic!("failed to read child file type while verifying golden fixture: {e}")
+                })
                 .is_dir()
             {
                 exp_d.push(name);
@@ -89,8 +88,8 @@ fn assert_lossless_structure(root: &Path, tree: &ProjectTree) {
         }
         exp_d.sort();
         exp_f.sort();
-        assert_eq!(entry.dirs, exp_d, "dirs mismatch for '{dir_rel}'");
-        assert_eq!(entry.files, exp_f, "files mismatch for '{dir_rel}'");
+        assert_eq!(entry.dirs(), exp_d, "dirs mismatch for '{dir_rel}'");
+        assert_eq!(entry.files(), exp_f, "files mismatch for '{dir_rel}'");
     }
 }
 
@@ -105,13 +104,13 @@ fn lossless_golden_fixture_dirs() {
             let rel = entry
                 .path()
                 .strip_prefix(&root)
-                .expect("walkdir entry should remain under the golden root")
+                .unwrap_or_else(|_| panic!("walkdir entry should remain under the golden root"))
                 .to_string_lossy()
                 .into_owned();
             let _ = expected.insert(rel);
         }
     }
-    let actual: BTreeSet<String> = tree.structure.keys().cloned().collect();
+    let actual: BTreeSet<String> = tree.structure().keys().cloned().collect();
 
     let missing: Vec<_> = expected.difference(&actual).collect();
     let extra: Vec<_> = actual.difference(&expected).collect();
@@ -130,7 +129,7 @@ fn lossless_golden_fixture_files() {
             let rel = entry
                 .path()
                 .strip_prefix(&root)
-                .expect("walkdir entry should remain under the golden root")
+                .unwrap_or_else(|_| panic!("walkdir entry should remain under the golden root"))
                 .to_string_lossy()
                 .into_owned();
             let _ = expected.insert(rel);
@@ -138,8 +137,8 @@ fn lossless_golden_fixture_files() {
     }
 
     let mut actual: BTreeSet<String> = BTreeSet::new();
-    for (dir_rel, entry) in &tree.structure {
-        for f in &entry.files {
+    for (dir_rel, entry) in tree.structure() {
+        for f in entry.files() {
             let _ = actual.insert(ProjectTree::join_rel(dir_rel, f));
         }
     }
@@ -155,7 +154,7 @@ fn lossless_golden_fixture_per_dir_children() {
     let root = golden_path();
     let tree = walk_project(&RealFileSystem, &root);
 
-    for (dir_rel, entry) in &tree.structure {
+    for (dir_rel, entry) in tree.structure() {
         let abs = tree.abs_path(dir_rel);
         let mut expected_dirs: Vec<String> = Vec::new();
         let mut expected_files: Vec<String> = Vec::new();
@@ -166,7 +165,9 @@ fn lossless_golden_fixture_per_dir_children() {
             let name = child.file_name().to_string_lossy().into_owned();
             if child
                 .file_type()
-                .expect("failed to read child file type while verifying golden fixture")
+                .unwrap_or_else(|e| {
+                    panic!("failed to read child file type while verifying golden fixture: {e}")
+                })
                 .is_dir()
             {
                 expected_dirs.push(name);
@@ -177,9 +178,10 @@ fn lossless_golden_fixture_per_dir_children() {
         expected_dirs.sort();
         expected_files.sort();
 
-        assert_eq!(entry.dirs, expected_dirs, "dirs mismatch for '{dir_rel}'");
+        assert_eq!(entry.dirs(), expected_dirs, "dirs mismatch for '{dir_rel}'");
         assert_eq!(
-            entry.files, expected_files,
+            entry.files(),
+            expected_files,
             "files mismatch for '{dir_rel}'"
         );
     }
@@ -190,9 +192,21 @@ fn lossless_golden_fixture_content_matches_disk() {
     let root = golden_path();
     let tree = walk_project(&RealFileSystem, &root);
 
-    for (rel, cached) in &tree.content {
+    for (rel, cached) in tree.content() {
         let disk =
             std::fs::read_to_string(root.join(rel)).unwrap_or_else(|e| panic!("read '{rel}': {e}"));
         assert_eq!(cached, &disk, "content mismatch for '{rel}'");
     }
+}
+
+#[test]
+fn lossless_golden_fixture_helper_matches_disk_and_structure() {
+    let root = golden_path();
+    let tree = walk_project(&RealFileSystem, &root);
+
+    assert!(
+        !tree.structure().is_empty(),
+        "golden fixture should produce a non-empty project tree"
+    );
+    assert_lossless_structure(&root, &tree);
 }

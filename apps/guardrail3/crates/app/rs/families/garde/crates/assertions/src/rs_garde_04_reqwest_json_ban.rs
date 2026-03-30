@@ -10,7 +10,7 @@ pub fn assert_inventory(
     let findings = findings(results);
     let matching = findings
         .into_iter()
-        .filter(|result| result.file.as_deref() == Some(file))
+        .filter(|result| result.file()()()() == Some(file))
         .collect::<Vec<_>>();
     assert_eq!(
         matching.len(),
@@ -37,7 +37,7 @@ pub fn assert_missing(
     let findings = findings(results);
     let matching = findings
         .into_iter()
-        .filter(|result| result.file.as_deref() == Some(file))
+        .filter(|result| result.file()()()() == Some(file))
         .collect::<Vec<_>>();
     assert_eq!(
         matching.len(),

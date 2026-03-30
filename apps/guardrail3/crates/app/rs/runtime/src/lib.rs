@@ -8,20 +8,45 @@ mod runners;
 use guardrail3_domain_config::types::{GuardrailConfig, RustChecksConfig, RustConfig};
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::{
-    CheckResult, Report, Section, rust_validate_family_cli_name, rust_validate_family_section_name,
+    rust_validate_family_cli_name, rust_validate_family_section_name, CheckResult, Report, Section,
 };
 use guardrail3_outbound_traits::{FileSystem, ToolChecker};
 use guardrail3_validation_model::RustValidateFamily;
 
 mod runtime_deps {
     pub(super) use guardrail3_app_core::project_walker;
-    pub(super) use guardrail3_app_rs_family_mapper::FamilyMapper;
     pub(super) use guardrail3_app_rs_family_selection as family_selection;
+
+    #[cfg(feature = "routing")]
     pub(super) use guardrail3_app_rs_placement as placement;
+
+    #[cfg(feature = "routing")]
+    pub(super) use guardrail3_app_rs_family_mapper::FamilyMapper;
 }
 
 use self::context::RustRunContext;
 use self::registry::runner_for;
+
+#[derive(Debug)]
+pub enum RustRunError {
+    ConfigParse(toml::de::Error),
+    FamilyNotCompiled(RustValidateFamily),
+}
+
+impl std::fmt::Display for RustRunError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::ConfigParse(error) => write!(f, "Error parsing guardrail3.toml: {error}"),
+            Self::FamilyNotCompiled(family) => write!(
+                f,
+                "Rust family `{}` is not compiled into this build.",
+                rust_validate_family_cli_name(*family)
+            ),
+        }
+    }
+}
+
+impl std::error::Error for RustRunError {}
 
 #[derive(Debug, Clone)]
 struct RustFamilyApplicability {
@@ -39,53 +64,65 @@ enum RustResultScope {
 
 pub fn run(
     fs: &dyn FileSystem,
-    path: &Path,
+    project_root: &Path,
+    validation_scope: Option<&str>,
     scoped_files: Option<&BTreeSet<String>>,
     requested_families: &[RustValidateFamily],
-    thorough: bool,
-    tc: &dyn ToolChecker,
-) -> Result<Report, String> {
-    let tree = runtime_deps::project_walker::walk_project(fs, path);
+    _thorough: bool,
+    _tc: &dyn ToolChecker,
+) -> Result<Report, RustRunError> {
+    let tree = runtime_deps::project_walker::walk_project(fs, project_root);
     let config = match load_config(&tree) {
         Ok(config) => config,
         Err(_error) if requested_families_allow_config_parse_failure(requested_families) => None,
         Err(error) => return Err(error),
     };
-    let scope = runtime_deps::placement::collect(&tree);
     let selected =
         runtime_deps::family_selection::resolve(&tree, config.as_ref(), requested_families);
     let applicability = collect_family_applicability(config.as_ref());
+    #[cfg(feature = "routing")]
+    let scope = runtime_deps::placement::collect(&tree);
+    #[cfg(feature = "routing")]
     let mapper =
-        runtime_deps::FamilyMapper::new(&tree, &scope, config.as_ref(), &selected, scoped_files);
+        runtime_deps::FamilyMapper::new(&tree, &scope, config.as_ref(), &selected, scoped_files)
+            .with_validation_scope(validation_scope);
+    #[cfg(not(feature = "routing"))]
+    let _ = (scoped_files, validation_scope);
     let ctx = RustRunContext {
         #[cfg(feature = "family-hooks-shared")]
         fs,
         #[cfg(feature = "family-hooks-shared")]
-        path,
+        path: project_root,
         tree: &tree,
+        #[cfg(feature = "routing")]
         mapper: &mapper,
-        tc,
-        thorough,
+        #[cfg(any(
+            feature = "family-deps",
+            feature = "family-test",
+            feature = "family-release",
+            feature = "family-hooks-shared",
+            feature = "family-hooks-rs",
+        ))]
+        tc: _tc,
+        #[cfg(feature = "family-release")]
+        thorough: _thorough,
     };
 
-    let mut report = Report::new(path.display().to_string(), vec!["Rust".to_owned()]);
+    let mut report = Report::new(project_root.display().to_string(), vec!["Rust".to_owned()]);
 
     for family in selected.iter() {
         let Some(runner) = runner_for(family) else {
-            return Err(format!(
-                "Rust family `{}` is not compiled into this build.",
-                rust_validate_family_cli_name(family)
-            ));
+            return Err(RustRunError::FamilyNotCompiled(family));
         };
         let results = (runner.run)(&ctx);
         let results = match applicability.get(&family) {
-            Some(value) => filter_results_for_applicability(path, value, results),
+            Some(value) => filter_results_for_applicability(project_root, value, results),
             None => results,
         };
-        report.add_section(Section {
-            name: rust_validate_family_section_name(family).to_owned(),
+        report.add_section(Section::new(
+            rust_validate_family_section_name(family).to_owned(),
             results,
-        });
+        ));
     }
 
     Ok(report)
@@ -115,7 +152,7 @@ fn collect_family_applicability(
         .map(|family| {
             (
                 family,
-                family_applicability(family, config.and_then(|value| value.rust.as_ref())),
+                family_applicability(family, config.and_then(GuardrailConfig::rust)),
             )
         })
         .collect()
@@ -127,7 +164,7 @@ fn family_applicability(
 ) -> RustFamilyApplicability {
     let global_only = family_uses_global_only(family);
     let global_enabled = rust
-        .and_then(|value| value.checks.as_ref())
+        .and_then(RustConfig::checks)
         .and_then(|checks| checks.family_enabled(family))
         .unwrap_or(true);
 
@@ -141,22 +178,22 @@ fn family_applicability(
     }
 
     let app_enabled = rust
-        .and_then(|value| value.apps.as_ref())
+        .and_then(RustConfig::apps)
         .map(|apps| {
             apps.iter()
                 .map(|(name, cfg)| {
                     (
                         format!("apps/{name}"),
-                        effective_family_flag(cfg.checks.as_ref(), family, global_enabled),
+                        effective_family_flag(cfg.checks(), family, global_enabled),
                     )
                 })
-                .collect()
+                .collect::<BTreeMap<_, _>>()
         })
         .unwrap_or_default();
 
     let packages_enabled = rust
-        .and_then(|value| value.packages.as_ref())
-        .map(|cfg| effective_family_flag(cfg.checks.as_ref(), family, global_enabled));
+        .and_then(RustConfig::packages)
+        .map(|cfg| effective_family_flag(cfg.checks(), family, global_enabled));
 
     RustFamilyApplicability {
         global_enabled,
@@ -186,7 +223,7 @@ fn applicability_allows_result(
     applicability: &RustFamilyApplicability,
     result: &CheckResult,
 ) -> bool {
-    let Some(file) = result.file.as_deref() else {
+    let Some(file) = result.file()()()() else {
         return true;
     };
     let Some(rel_path) = normalize_result_path(project_root, file) else {
@@ -227,13 +264,13 @@ fn scope_for_result_path(rel_path: &str) -> RustResultScope {
     }
 }
 
-fn load_config(tree: &ProjectTree) -> Result<Option<GuardrailConfig>, String> {
+fn load_config(tree: &ProjectTree) -> Result<Option<GuardrailConfig>, RustRunError> {
     let Some(content) = tree.file_content("guardrail3.toml") else {
         return Ok(None);
     };
     toml::from_str::<GuardrailConfig>(content)
         .map(Some)
-        .map_err(|error| format!("Error parsing guardrail3.toml: {error}"))
+        .map_err(RustRunError::ConfigParse)
 }
 
 fn family_uses_global_only(family: RustValidateFamily) -> bool {
@@ -258,15 +295,13 @@ fn effective_family_flag(
 
 #[cfg(test)]
 pub(crate) fn result_for_tests(file: Option<&str>) -> guardrail3_domain_report::CheckResult {
-    guardrail3_domain_report::CheckResult {
-        id: "TEST".to_owned(),
-        severity: guardrail3_domain_report::Severity::Error,
-        title: "test".to_owned(),
-        message: "test".to_owned(),
-        file: file.map(str::to_owned),
-        line: None,
-        inventory: false,
-    }
+    guardrail3_domain_report::CheckResult::new(
+        "TEST".to_owned(),
+        guardrail3_domain_report::Severity::Error,
+        "test".to_owned(),
+        "test".to_owned(),
+    )
+    .with_optional_file(file.map(str::to_owned))
 }
 
 #[cfg(test)]
@@ -306,27 +341,22 @@ pub(crate) struct LocalFsTest;
 #[cfg(test)]
 impl guardrail3_outbound_traits::FileSystem for LocalFsTest {
     fn read_file(&self, path: &std::path::Path) -> Option<String> {
-        std::fs::read_to_string(path).ok()
+        guardrail3_shared_fs::read_file(path)
     }
 
     fn read_file_err(&self, path: &std::path::Path) -> Result<String, std::io::Error> {
-        std::fs::read_to_string(path)
+        guardrail3_shared_fs::read_file_err(path)
     }
 
     fn list_dir(&self, path: &std::path::Path) -> Vec<guardrail3_outbound_traits::FsDirEntry> {
-        std::fs::read_dir(path)
-            .ok()
+        guardrail3_shared_fs::list_dir(path)
             .into_iter()
-            .flatten()
-            .flatten()
             .map(guardrail3_outbound_traits::FsDirEntry::from_std)
             .collect()
     }
 
     fn metadata(&self, path: &std::path::Path) -> Option<guardrail3_outbound_traits::FsMetadata> {
-        std::fs::metadata(path)
-            .ok()
-            .map(guardrail3_outbound_traits::FsMetadata::from_std)
+        guardrail3_shared_fs::metadata(path).map(guardrail3_outbound_traits::FsMetadata::from_std)
     }
 }
 
@@ -353,9 +383,9 @@ pub(crate) fn temp_root_for_tests(label: &str) -> std::path::PathBuf {
         .duration_since(std::time::UNIX_EPOCH)
         .expect("system time before UNIX_EPOCH")
         .as_nanos();
-    let root = std::env::temp_dir()
-        .join(format!("guardrail3-{label}-{}-{nonce}", std::process::id()));
-    std::fs::create_dir_all(&root).expect("create temp root");
+    let root =
+        std::env::temp_dir().join(format!("guardrail3-{label}-{}-{nonce}", std::process::id()));
+    guardrail3_shared_fs::create_dir_all(&root).expect("create temp root");
     root
 }
 
@@ -363,9 +393,9 @@ pub(crate) fn temp_root_for_tests(label: &str) -> std::path::PathBuf {
 pub(crate) fn write_file_for_tests(root: &std::path::Path, rel: &str, body: &str) {
     let path = root.join(rel);
     if let Some(parent) = path.parent() {
-        std::fs::create_dir_all(parent).expect("create parent dirs");
+        guardrail3_shared_fs::create_dir_all(parent).expect("create parent dirs");
     }
-    std::fs::write(path, body).expect("write runtime test fixture file");
+    guardrail3_shared_fs::write_file(&path, body).expect("write runtime test fixture file");
 }
 
 #[cfg(test)]
@@ -374,9 +404,75 @@ pub(crate) fn run_for_tests(
     root: &std::path::Path,
     families: &[RustValidateFamily],
 ) -> guardrail3_app_core::Result<guardrail3_domain_report::Report> {
-    run(fs, root, None, families, false, &StubToolCheckerTest)
+    run(fs, root, None, None, families, false, &StubToolCheckerTest)
 }
 
 #[cfg(test)]
-#[path = "runtime_tests/mod.rs"] // reason: test-only sidecar module wiring
-mod runtime_tests;
+pub(crate) fn run_arch_for_tests(
+    fs: &dyn guardrail3_outbound_traits::FileSystem,
+    root: &std::path::Path,
+) -> guardrail3_app_core::Result<guardrail3_domain_report::Report> {
+    run_for_tests(fs, root, &[RustValidateFamily::Arch])
+}
+
+#[cfg(test)]
+pub(crate) fn run_hexarch_for_tests(
+    fs: &dyn guardrail3_outbound_traits::FileSystem,
+    root: &std::path::Path,
+) -> guardrail3_app_core::Result<guardrail3_domain_report::Report> {
+    run_for_tests(fs, root, &[RustValidateFamily::Hexarch])
+}
+
+#[cfg(test)]
+pub(crate) fn run_code_for_tests(
+    fs: &dyn guardrail3_outbound_traits::FileSystem,
+    root: &std::path::Path,
+) -> guardrail3_app_core::Result<guardrail3_domain_report::Report> {
+    run_for_tests(fs, root, &[RustValidateFamily::Code])
+}
+
+#[cfg(test)]
+pub(crate) fn run_toolchain_for_tests(
+    fs: &dyn guardrail3_outbound_traits::FileSystem,
+    root: &std::path::Path,
+) -> guardrail3_app_core::Result<guardrail3_domain_report::Report> {
+    run_for_tests(fs, root, &[RustValidateFamily::Toolchain])
+}
+
+#[cfg(test)]
+pub(crate) fn run_code_with_scoped_files_for_tests(
+    fs: &dyn guardrail3_outbound_traits::FileSystem,
+    root: &std::path::Path,
+    scoped_files: Vec<String>,
+) -> guardrail3_app_core::Result<guardrail3_domain_report::Report> {
+    run(
+        fs,
+        root,
+        None,
+        Some(scoped_files),
+        &[RustValidateFamily::Code],
+        false,
+        &StubToolCheckerTest,
+    )
+}
+
+#[cfg(test)]
+pub(crate) fn run_code_with_validation_scope_for_tests(
+    fs: &dyn guardrail3_outbound_traits::FileSystem,
+    root: &std::path::Path,
+    validation_scope: &str,
+) -> guardrail3_app_core::Result<guardrail3_domain_report::Report> {
+    run(
+        fs,
+        root,
+        Some(validation_scope),
+        None,
+        &[RustValidateFamily::Code],
+        false,
+        &StubToolCheckerTest,
+    )
+}
+
+#[cfg(test)]
+#[path = "lib_tests/mod.rs"] // reason: test-only sidecar module wiring
+mod lib_tests;

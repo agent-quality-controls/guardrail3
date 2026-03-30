@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use guardrail3_domain_modules::clippy::THRESHOLD_VALUES;
+use guardrail3_app_rs_family_clippy_assertions::rs_clippy_19_unknown_keys as assertions;
 use test_support::build_fixture_clippy_toml;
 
 #[test]
@@ -9,21 +9,7 @@ fn generated_top_level_keys_are_all_known_managed_keys() {
         toml::from_str::<toml::Value>(&build_fixture_clippy_toml("service", false, true, "", ""))
             .expect("valid clippy TOML");
     let table = parsed.as_table().expect("top-level clippy table");
-    let known: BTreeSet<_> = THRESHOLD_VALUES
-        .iter()
-        .map(|(key, _)| *key)
-        .chain([
-            "avoid-breaking-exported-api",
-            "allow-dbg-in-tests",
-            "allow-expect-in-tests",
-            "allow-panic-in-tests",
-            "allow-print-in-tests",
-            "allow-unwrap-in-tests",
-            "disallowed-methods",
-            "disallowed-types",
-            "disallowed-macros",
-        ])
-        .collect();
+    let known: BTreeSet<_> = assertions::managed_top_level_keys();
 
     for key in table.keys() {
         assert!(

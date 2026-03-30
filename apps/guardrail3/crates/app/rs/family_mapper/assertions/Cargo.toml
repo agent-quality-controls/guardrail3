@@ -1,0 +1,10 @@
+[package]
+name = "guardrail3-app-rs-family-mapper-assertions"
+version = "0.0.0"
+edition = "2024"
+
+[lints]
+workspace = true
+
+[dependencies]
+guardrail3_app_rs_family_mapper = { package = "guardrail3-app-rs-family-mapper", path = ".." }

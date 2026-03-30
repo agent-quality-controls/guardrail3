@@ -3,8 +3,8 @@ use std::collections::{BTreeMap, BTreeSet};
 use guardrail3_app_rs_family_mapper::RsDepsRoute;
 use guardrail3_domain_project_tree::ProjectTree;
 
-use super::{InputFailureFacts, WorkspaceFacts};
 use super::guardrail::validate_workspace_manifest_shape;
+use super::{InputFailureFacts, WorkspaceFacts};
 
 pub(super) fn discover_workspaces(
     tree: &ProjectTree,
@@ -12,9 +12,9 @@ pub(super) fn discover_workspaces(
     input_failures: &mut Vec<InputFailureFacts>,
 ) -> Vec<WorkspaceFacts> {
     let mut roots = route
-        .roots
+        .roots()
         .iter()
-        .map(|root| root.rel_dir.clone())
+        .map(|root| root.rel_dir().to_owned())
         .collect::<Vec<_>>();
     roots.sort();
     roots.dedup();

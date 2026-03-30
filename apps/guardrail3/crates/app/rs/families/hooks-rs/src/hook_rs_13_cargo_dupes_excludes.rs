@@ -3,13 +3,13 @@ mod support;
 use guardrail3_app_rs_family_hooks_shared::hook_shell::{ParsedShellScript, parse_script};
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::RustHookCommandInput;
-use self::support::*;
 use self::support::helpers::{
     constant_exit_status, extract_command_substitutions, is_terminal_exit,
-    looks_like_env_assignment, normalize_command_token, shell_words,
-    split_command_segments, token_is_shadowed_function,
+    looks_like_env_assignment, normalize_command_token, shell_words, split_command_segments,
+    token_is_shadowed_function,
 };
+use self::support::*;
+use super::inputs::RustHookCommandInput;
 
 const ID: &str = "HOOK-RS-13";
 
@@ -18,53 +18,52 @@ pub fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<CheckResult>) {
 
     if found {
         results.push(
-            CheckResult {
-                id: ID.to_owned(),
-                severity: Severity::Info,
-                title: "cargo-dupes excludes tests".to_owned(),
-                message: "Hook runs cargo-dupes with `--exclude-tests`.".to_owned(),
-                file: Some(input.rel_path.to_owned()),
-                line: None,
-                inventory: false,
-            }
+            CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Info,
+                "cargo-dupes excludes tests".to_owned(),
+                "Hook runs cargo-dupes with `--exclude-tests`.".to_owned(),
+                Some(input.rel_path.to_owned()),
+                None,
+                false,
+            )
             .as_inventory(),
         );
     } else {
-        results.push(CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Info,
-            title: "cargo-dupes exclude-tests flag missing".to_owned(),
-            message: "Hook does not execute cargo-dupes with `--exclude-tests`.".to_owned(),
-            file: Some(input.rel_path.to_owned()),
-            line: None,
-            inventory: false,
-        });
+        results.push(CheckResult::from_parts(
+    ID.to_owned(),
+    Severity::Info,
+    "cargo-dupes exclude-tests flag missing".to_owned(),
+    "Hook does not execute cargo-dupes with `--exclude-tests`.".to_owned(),
+    Some(input.rel_path.to_owned()),
+    None,
+    false,
+        ));
     }
-}
 
 fn script_contains_cargo_dupes_with_exclude_tests(parsed: &ParsedShellScript<'_>) -> bool {
     script_contains_cargo_dupes(parsed, true) && !script_contains_cargo_dupes(parsed, false)
 }
 
 fn script_contains_cargo_dupes(parsed: &ParsedShellScript<'_>, want_exclude_tests: bool) -> bool {
-    parsed.executable_lines.iter().any(|line| {
+    parsed.executable_lines().iter().any(|line| {
         let mut visiting = Vec::new();
         segment_contains_cargo_dupes(
-            line.command_text,
+            line.command_text(),
             parsed,
             parsed,
             &mut visiting,
             want_exclude_tests,
-            line.line_no,
-            line.line_no,
+            line.line_no(),
+            line.line_no(),
         ) || line_contains_cargo_dupes(
-            line.raw,
+            line.raw(),
             parsed,
             parsed,
             &mut visiting,
             want_exclude_tests,
-            line.line_no,
-            line.line_no,
+            line.line_no(),
+            line.line_no(),
         )
     })
 }
@@ -240,34 +239,34 @@ fn called_function_contains_cargo_dupes(
     root_cutoff: usize,
 ) -> bool {
     let Some(function) = current
-        .functions
+        .functions()
         .iter()
-        .find(|function| function.name == command_name && function.line_no <= current_cutoff)
+        .find(|function| function.name() == command_name && function.line_no() <= current_cutoff)
         .or_else(|| {
-            root.functions
+            root.functions()
                 .iter()
-                .find(|function| function.name == command_name && function.line_no <= root_cutoff)
+                .find(|function| function.name() == command_name && function.line_no() <= root_cutoff)
         })
     else {
         return false;
     };
-    if visiting.iter().any(|name| name == &function.name) {
+    if visiting.iter().any(|name| name == &function.name()) {
         return false;
     }
 
-    visiting.push(function.name.clone());
-    let body_parsed = parse_script(&function.body);
-    let found = body_parsed.executable_lines.iter().any(|line| {
+    visiting.push(function.name().to_owned());
+    let body_parsed = parse_script(&function.body());
+    let found = body_parsed.executable_lines().iter().any(|line| {
         line_contains_cargo_dupes(
-            line.raw,
+            line.raw(),
             &body_parsed,
             root,
             visiting,
             want_exclude_tests,
-            line.line_no,
+            line.line_no(),
             root_cutoff,
         )
-    });
+    ));
     let _ = visiting.pop();
     found
 }
@@ -285,5 +284,5 @@ pub(super) fn run_case(content: &str) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-#[path = "hook_rs_13_cargo_dupes_excludes_tests/mod.rs"]
+#[path = "tests/tools/hook_rs_13_cargo_dupes_excludes_tests/mod.rs"]
 mod hook_rs_13_cargo_dupes_excludes_tests;

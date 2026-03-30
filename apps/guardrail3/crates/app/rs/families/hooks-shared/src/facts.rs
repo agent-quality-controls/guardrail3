@@ -11,21 +11,21 @@ pub enum HookScriptKind {
 
 #[derive(Debug, Clone)]
 pub struct HookScriptFacts {
-    pub rel_path: String,
-    pub kind: HookScriptKind,
-    pub content: String,
+    pub(crate) rel_path: String,
+    pub(crate) kind: HookScriptKind,
+    pub(crate) content: String,
 }
 
 #[derive(Debug, Default)]
 pub struct SharedHookFacts {
-    pub pre_commit: Option<HookScriptFacts>,
-    pub modular_scripts: Vec<HookScriptFacts>,
-    pub has_modular_dir: bool,
-    pub local_override_scripts: Vec<String>,
-    pub hooks_path: Option<String>,
-    pub pre_commit_executable: Option<bool>,
-    pub modular_executable: Vec<(String, bool)>,
-    pub trust_risks: Vec<String>,
+    pub(crate) pre_commit: Option<HookScriptFacts>,
+    pub(crate) modular_scripts: Vec<HookScriptFacts>,
+    pub(crate) has_modular_dir: bool,
+    pub(crate) local_override_scripts: Vec<String>,
+    pub(crate) hooks_path: Option<String>,
+    pub(crate) pre_commit_executable: Option<bool>,
+    pub(crate) modular_executable: Vec<(String, bool)>,
+    pub(crate) trust_risks: Vec<String>,
 }
 
 pub fn collect(fs: &dyn FileSystem, root: &Path, tree: &ProjectTree) -> SharedHookFacts {
@@ -42,7 +42,7 @@ pub fn collect(fs: &dyn FileSystem, root: &Path, tree: &ProjectTree) -> SharedHo
     let mut modular_scripts = Vec::new();
     let has_modular_dir = tree.dir_exists(".githooks/pre-commit.d");
     if let Some(dir) = tree.dir_contents(".githooks/pre-commit.d") {
-        for file_name in &dir.files {
+        for file_name in dir.files() {
             let rel_path = ProjectTree::join_rel(".githooks/pre-commit.d", file_name);
             let content =
                 guardrail3_shared_fs::read_file_err(&tree.abs_path(&rel_path)).unwrap_or_default();
@@ -57,7 +57,7 @@ pub fn collect(fs: &dyn FileSystem, root: &Path, tree: &ProjectTree) -> SharedHo
 
     let mut local_override_scripts = Vec::new();
     if let Some(dir) = tree.dir_contents(".guardrail3/overrides/pre-commit.d") {
-        local_override_scripts.extend(dir.files.iter().cloned());
+        local_override_scripts.extend(dir.files().iter().cloned());
         local_override_scripts.sort();
     }
 

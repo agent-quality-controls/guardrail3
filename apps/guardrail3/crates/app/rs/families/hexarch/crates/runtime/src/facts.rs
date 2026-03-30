@@ -5,104 +5,104 @@ use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
 
 #[derive(Debug, Clone)]
 pub struct HexAppFacts {
-    pub app_name: String,
-    pub app_rel_dir: String,
-    pub cargo_rel_path: String,
-    pub cargo_parse_error: Option<String>,
-    pub is_workspace: bool,
-    pub top_level_crates_entry_count: usize,
-    pub src_dir_exists: bool,
+    pub(crate) app_name: String,
+    pub(crate) app_rel_dir: String,
+    pub(crate) cargo_rel_path: String,
+    pub(crate) cargo_parse_error: Option<String>,
+    pub(crate) is_workspace: bool,
+    pub(crate) top_level_crates_entry_count: usize,
+    pub(crate) src_dir_exists: bool,
 }
 
 #[derive(Debug, Clone)]
 pub struct HexRootFacts {
-    pub app_name: String,
-    pub app_rel_dir: String,
-    pub crates_rel_dir: String,
-    pub dirs: Vec<String>,
-    pub files: Vec<String>,
-    pub symlink_dirs: Vec<String>,
-    pub symlink_files: Vec<String>,
+    pub(crate) app_name: String,
+    pub(crate) app_rel_dir: String,
+    pub(crate) crates_rel_dir: String,
+    pub(crate) dirs: Vec<String>,
+    pub(crate) files: Vec<String>,
+    pub(crate) symlink_dirs: Vec<String>,
+    pub(crate) symlink_files: Vec<String>,
 }
 
 #[derive(Debug, Clone)]
 pub struct DirectionalContainerFacts {
-    pub app_name: String,
-    pub rel_path: String,
-    pub label: String,
-    pub dirs: Vec<String>,
-    pub symlink_dirs: Vec<String>,
+    pub(crate) app_name: String,
+    pub(crate) rel_path: String,
+    pub(crate) label: String,
+    pub(crate) dirs: Vec<String>,
+    pub(crate) symlink_dirs: Vec<String>,
 }
 
 #[derive(Debug, Clone)]
 pub struct ContainerFacts {
-    pub app_name: String,
-    pub rel_path: String,
-    pub label: String,
-    pub dirs: Vec<String>,
-    pub symlink_dirs: Vec<String>,
-    pub files: Vec<String>,
-    pub symlink_files: Vec<String>,
-    pub has_gitkeep: bool,
+    pub(crate) app_name: String,
+    pub(crate) rel_path: String,
+    pub(crate) label: String,
+    pub(crate) dirs: Vec<String>,
+    pub(crate) symlink_dirs: Vec<String>,
+    pub(crate) files: Vec<String>,
+    pub(crate) symlink_files: Vec<String>,
+    pub(crate) has_gitkeep: bool,
 }
 
 #[derive(Debug, Clone)]
 pub struct LeafFacts {
-    pub app_name: String,
-    pub rel_path: String,
-    pub label: String,
-    pub has_cargo: bool,
-    pub has_crates_dir: bool,
-    pub gitkeep_only: bool,
+    pub(crate) app_name: String,
+    pub(crate) rel_path: String,
+    pub(crate) label: String,
+    pub(crate) has_cargo: bool,
+    pub(crate) has_crates_dir: bool,
+    pub(crate) gitkeep_only: bool,
 }
 
 #[derive(Debug, Clone)]
 pub struct WorkspaceCoverageFacts {
-    pub app_name: String,
-    pub app_rel_dir: String,
-    pub cargo_parse_error: Option<String>,
-    pub is_workspace: bool,
-    pub workspace_members: Vec<WorkspaceMemberFact>,
-    pub app_local_cargo_roots: Vec<AppLocalCargoRootFact>,
+    pub(crate) app_name: String,
+    pub(crate) app_rel_dir: String,
+    pub(crate) cargo_parse_error: Option<String>,
+    pub(crate) is_workspace: bool,
+    pub(crate) workspace_members: Vec<WorkspaceMemberFact>,
+    pub(crate) app_local_cargo_roots: Vec<AppLocalCargoRootFact>,
 }
 
 #[derive(Debug, Clone)]
 pub struct AppLocalCargoRootFact {
-    pub rel_dir: String,
-    pub cargo_rel_path: String,
-    pub cargo_parse_error: Option<String>,
-    pub is_workspace: bool,
+    pub(crate) rel_dir: String,
+    pub(crate) cargo_rel_path: String,
+    pub(crate) cargo_parse_error: Option<String>,
+    pub(crate) is_workspace: bool,
 }
 
 #[derive(Debug, Clone)]
 pub struct WorkspaceMemberFact {
-    pub raw: String,
-    pub resolved_dirs: Vec<String>,
-    pub within_app_boundary: bool,
+    pub(crate) raw: String,
+    pub(crate) resolved_dirs: Vec<String>,
+    pub(crate) within_app_boundary: bool,
 }
 
 #[derive(Debug, Clone)]
 pub struct RootWorkspaceMemberFact {
-    pub raw: String,
-    pub resolved_dirs: Vec<String>,
+    pub(crate) raw: String,
+    pub(crate) resolved_dirs: Vec<String>,
 }
 
 #[derive(Debug, Clone, Default)]
 pub struct RootWorkspaceFacts {
-    pub cargo_parse_error: Option<String>,
-    pub workspace_members: Vec<RootWorkspaceMemberFact>,
-    pub rust_app_roots: Vec<String>,
+    pub(crate) cargo_parse_error: Option<String>,
+    pub(crate) workspace_members: Vec<RootWorkspaceMemberFact>,
+    pub(crate) rust_app_roots: Vec<String>,
 }
 
 #[derive(Debug, Clone, Default)]
 pub struct HexarchFacts {
-    pub apps: Vec<HexAppFacts>,
-    pub hex_roots: Vec<HexRootFacts>,
-    pub directional_containers: Vec<DirectionalContainerFacts>,
-    pub containers: Vec<ContainerFacts>,
-    pub leaves: Vec<LeafFacts>,
-    pub workspace_coverage: Vec<WorkspaceCoverageFacts>,
-    pub root_workspace: RootWorkspaceFacts,
+    pub(crate) apps: Vec<HexAppFacts>,
+    pub(crate) hex_roots: Vec<HexRootFacts>,
+    pub(crate) directional_containers: Vec<DirectionalContainerFacts>,
+    pub(crate) containers: Vec<ContainerFacts>,
+    pub(crate) leaves: Vec<LeafFacts>,
+    pub(crate) workspace_coverage: Vec<WorkspaceCoverageFacts>,
+    pub(crate) root_workspace: RootWorkspaceFacts,
 }
 
 pub fn collect(tree: &ProjectTree, route: &RsHexarchRoute) -> HexarchFacts {
@@ -129,19 +129,22 @@ pub fn collect(tree: &ProjectTree, route: &RsHexarchRoute) -> HexarchFacts {
         let top_level_crates_rel = ProjectTree::join_rel(app_rel_dir, "crates");
         let top_level_crates_entry_count = tree
             .dir_contents(&top_level_crates_rel)
-            .map(|entry| entry.dirs.len() + entry.files.len())
+            .map(|entry| entry.dirs().len() + entry.files().len())
             .unwrap_or(0);
 
         let src_rel = ProjectTree::join_rel(app_rel_dir, "src");
+        let mut outputs = HexRootOutputs {
+            hex_roots: &mut facts.hex_roots,
+            directional_containers: &mut facts.directional_containers,
+            containers: &mut facts.containers,
+            leaves: &mut facts.leaves,
+        };
         collect_hex_roots(
             tree,
             app_name,
             app_rel_dir,
             &top_level_crates_rel,
-            &mut facts.hex_roots,
-            &mut facts.directional_containers,
-            &mut facts.containers,
-            &mut facts.leaves,
+            &mut outputs,
         );
 
         let workspace_members = build_workspace_member_facts(tree, app_rel_dir, &workspace_members);
@@ -170,7 +173,7 @@ pub fn collect(tree: &ProjectTree, route: &RsHexarchRoute) -> HexarchFacts {
         });
     }
 
-    let (root_snapshot, root_workspace_members) = match route.repo_root_cargo_rel_path.as_deref() {
+    let (root_snapshot, root_workspace_members) = match route.repo_root_cargo_rel_path() {
         Some(root_cargo_rel_path) => {
             let snapshot = parse_cargo_value(tree, root_cargo_rel_path);
             let members = snapshot
@@ -222,14 +225,14 @@ fn parse_cargo_value(tree: &ProjectTree, rel_path: &str) -> CargoSnapshot {
 
 fn routed_app_roots(route: &RsHexarchRoute) -> Vec<(String, String)> {
     let mut roots = route
-        .roots
+        .roots()
         .iter()
         .filter_map(|root| {
-            let app_name = root.rel_dir.strip_prefix("apps/")?;
+            let app_name = root.rel_dir().strip_prefix("apps/")?;
             if app_name.contains('/') {
                 return None;
             }
-            Some((app_name.to_owned(), root.rel_dir.clone()))
+            Some((app_name.to_owned(), root.rel_dir().to_owned()))
         })
         .collect::<Vec<_>>();
     roots.sort();
@@ -396,7 +399,7 @@ fn insert_root_workspace_member(resolved: &mut BTreeSet<String>, repo_rel: &str)
 fn absolute_member_to_repo_rel(tree: &ProjectTree, member: &str) -> Option<String> {
     let absolute = std::path::Path::new(member);
     absolute
-        .strip_prefix(&tree.root)
+        .strip_prefix(tree.root())
         .ok()
         .map(|rel| rel.to_string_lossy().replace('\\', "/"))
 }
@@ -428,29 +431,32 @@ fn is_within_app_boundary(app_rel_dir: &str, repo_pattern: &str) -> bool {
     repo_pattern == crates_root || repo_pattern.starts_with(&format!("{crates_root}/"))
 }
 
-#[allow(clippy::too_many_arguments)] // reason: recursive collector threads family-local outputs
+struct HexRootOutputs<'a> {
+    hex_roots: &'a mut Vec<HexRootFacts>,
+    directional_containers: &'a mut Vec<DirectionalContainerFacts>,
+    containers: &'a mut Vec<ContainerFacts>,
+    leaves: &'a mut Vec<LeafFacts>,
+}
+
 fn collect_hex_roots(
     tree: &ProjectTree,
     app_name: &str,
     app_rel_dir: &str,
     crates_rel_dir: &str,
-    hex_roots: &mut Vec<HexRootFacts>,
-    directional_containers: &mut Vec<DirectionalContainerFacts>,
-    containers: &mut Vec<ContainerFacts>,
-    leaves: &mut Vec<LeafFacts>,
+    outputs: &mut HexRootOutputs<'_>,
 ) {
     let Some(crates_entry) = tree.dir_contents(crates_rel_dir) else {
         return;
     };
 
-    hex_roots.push(HexRootFacts {
+    outputs.hex_roots.push(HexRootFacts {
         app_name: app_name.to_owned(),
         app_rel_dir: app_rel_dir.to_owned(),
         crates_rel_dir: crates_rel_dir.to_owned(),
-        dirs: crates_entry.dirs.clone(),
-        files: crates_entry.files.clone(),
-        symlink_dirs: crates_entry.symlink_dirs.clone(),
-        symlink_files: crates_entry.symlink_files.clone(),
+        dirs: crates_entry.dirs().to_vec(),
+        files: crates_entry.files().to_vec(),
+        symlink_dirs: crates_entry.symlink_dirs().to_vec(),
+        symlink_files: crates_entry.symlink_files().to_vec(),
     });
 
     for group in ["adapters", "ports"] {
@@ -459,13 +465,15 @@ fn collect_hex_roots(
             continue;
         }
         let snapshot = dir_snapshot(tree, &rel_path);
-        directional_containers.push(DirectionalContainerFacts {
-            app_name: app_name.to_owned(),
-            rel_path: rel_path.clone(),
-            label: relative_hex_label(app_rel_dir, &rel_path),
-            dirs: snapshot.dirs,
-            symlink_dirs: snapshot.symlink_dirs,
-        });
+        outputs
+            .directional_containers
+            .push(DirectionalContainerFacts {
+                app_name: app_name.to_owned(),
+                rel_path: rel_path.clone(),
+                label: relative_hex_label(app_rel_dir, &rel_path),
+                dirs: snapshot.dirs().to_vec(),
+                symlink_dirs: snapshot.symlink_dirs().to_vec(),
+            });
     }
 
     for suffix in [
@@ -478,31 +486,31 @@ fn collect_hex_roots(
     ] {
         let rel_path = ProjectTree::join_rel(crates_rel_dir, suffix);
         let snapshot = dir_snapshot(tree, &rel_path);
-        containers.push(ContainerFacts {
+        outputs.containers.push(ContainerFacts {
             app_name: app_name.to_owned(),
             rel_path: rel_path.clone(),
             label: relative_hex_label(app_rel_dir, &rel_path),
-            has_gitkeep: snapshot.files.iter().any(|file| file == ".gitkeep")
-                && !snapshot.symlink_files.iter().any(|file| file == ".gitkeep"),
-            dirs: snapshot.dirs.clone(),
-            symlink_dirs: snapshot.symlink_dirs.clone(),
-            files: snapshot.files.clone(),
-            symlink_files: snapshot.symlink_files.clone(),
+            has_gitkeep: snapshot.files().iter().any(|file| file == ".gitkeep")
+                && !snapshot.symlink_files().iter().any(|file| file == ".gitkeep"),
+            dirs: snapshot.dirs().to_vec(),
+            symlink_dirs: snapshot.symlink_dirs().to_vec(),
+            files: snapshot.files().to_vec(),
+            symlink_files: snapshot.symlink_files().to_vec(),
         });
 
-        for subdir in &snapshot.dirs {
-            if snapshot.symlink_dirs.iter().any(|dir| dir == subdir) {
+        for subdir in snapshot.dirs() {
+            if snapshot.symlink_dirs().iter().any(|dir| dir == subdir) {
                 continue;
             }
             let leaf_rel = ProjectTree::join_rel(&rel_path, subdir);
             let leaf_snapshot = dir_snapshot(tree, &leaf_rel);
-            let has_cargo = leaf_snapshot.files.iter().any(|file| file == "Cargo.toml");
-            let has_crates_dir = leaf_snapshot.dirs.iter().any(|dir| dir == "crates");
-            let gitkeep_only = leaf_snapshot.dirs.is_empty()
-                && leaf_snapshot.files.len() == 1
-                && leaf_snapshot.files[0] == ".gitkeep";
+            let has_cargo = leaf_snapshot.files().iter().any(|file| file == "Cargo.toml");
+            let has_crates_dir = leaf_snapshot.dirs().iter().any(|dir| dir == "crates");
+            let gitkeep_only = leaf_snapshot.dirs().is_empty()
+                && leaf_snapshot.files().len() == 1
+                && leaf_snapshot.files()[0] == ".gitkeep";
 
-            leaves.push(LeafFacts {
+            outputs.leaves.push(LeafFacts {
                 app_name: app_name.to_owned(),
                 rel_path: leaf_rel.clone(),
                 label: relative_hex_label(app_rel_dir, &leaf_rel),
@@ -513,28 +521,16 @@ fn collect_hex_roots(
 
             if has_crates_dir && !has_cargo {
                 let nested_crates_rel = ProjectTree::join_rel(&leaf_rel, "crates");
-                collect_hex_roots(
-                    tree,
-                    app_name,
-                    app_rel_dir,
-                    &nested_crates_rel,
-                    hex_roots,
-                    directional_containers,
-                    containers,
-                    leaves,
-                );
+                collect_hex_roots(tree, app_name, app_rel_dir, &nested_crates_rel, outputs);
             }
         }
     }
 }
 
 fn dir_snapshot(tree: &ProjectTree, rel_path: &str) -> DirEntry {
-    tree.dir_contents(rel_path).cloned().unwrap_or(DirEntry {
-        dirs: Vec::new(),
-        files: Vec::new(),
-        symlink_dirs: Vec::new(),
-        symlink_files: Vec::new(),
-    })
+    tree.dir_contents(rel_path)
+        .cloned()
+        .unwrap_or_else(|| DirEntry::new(Vec::new(), Vec::new(), Vec::new(), Vec::new()))
 }
 
 fn relative_hex_label(app_rel_dir: &str, rel_path: &str) -> String {

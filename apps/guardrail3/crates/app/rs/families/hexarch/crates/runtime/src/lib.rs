@@ -2,39 +2,63 @@ mod dependency_facts;
 mod facts;
 mod inputs;
 mod inventory;
+#[path = "structure/rs_hexarch_01_crates_exists.rs"]
 mod rs_hexarch_01_crates_exists;
+#[path = "structure/rs_hexarch_02_exact_contents.rs"]
 mod rs_hexarch_02_exact_contents;
+#[path = "structure/rs_hexarch_03_inbound_outbound.rs"]
 mod rs_hexarch_03_inbound_outbound;
+#[path = "structure/rs_hexarch_04_loose_files.rs"]
 mod rs_hexarch_04_loose_files;
+#[path = "structure/rs_hexarch_05_container_not_empty.rs"]
 mod rs_hexarch_05_container_not_empty;
+#[path = "structure/rs_hexarch_06_leaf_valid.rs"]
 mod rs_hexarch_06_leaf_valid;
+#[path = "workspace_policy/rs_hexarch_07_workspace_members_match_crate_dirs.rs"]
 mod rs_hexarch_07_workspace_members_match_crate_dirs;
+#[path = "workspace_policy/rs_hexarch_08_app_cargo_is_workspace.rs"]
 mod rs_hexarch_08_app_cargo_is_workspace;
+#[path = "workspace_policy/rs_hexarch_09_no_extra_workspace_members.rs"]
 mod rs_hexarch_09_no_extra_workspace_members;
+#[path = "workspace_policy/rs_hexarch_10_members_within_app_boundary.rs"]
 mod rs_hexarch_10_members_within_app_boundary;
+#[path = "workspace_policy/rs_hexarch_11_root_workspace_doesnt_include_apps.rs"]
 mod rs_hexarch_11_root_workspace_doesnt_include_apps;
+#[path = "workspace_policy/rs_hexarch_12_src_banned.rs"]
 mod rs_hexarch_12_src_banned;
+#[path = "dependency_policy/rs_hexarch_13_dependency_direction.rs"]
 mod rs_hexarch_13_dependency_direction;
+#[path = "dependency_policy/rs_hexarch_14_dependency_inventory.rs"]
 mod rs_hexarch_14_dependency_inventory;
+#[path = "dependency_policy/rs_hexarch_15_boundary_config.rs"]
 mod rs_hexarch_15_boundary_config;
+#[path = "dependency_policy/rs_hexarch_16_patch_replace_bypass.rs"]
 mod rs_hexarch_16_patch_replace_bypass;
+#[path = "dependency_policy/rs_hexarch_17_workspace_inherited_direction.rs"]
 mod rs_hexarch_17_workspace_inherited_direction;
+#[path = "dependency_policy/rs_hexarch_18_renamed_dependency_direction.rs"]
 mod rs_hexarch_18_renamed_dependency_direction;
+#[path = "dependency_integrity/rs_hexarch_19_same_layer_cycles.rs"]
 mod rs_hexarch_19_same_layer_cycles;
+#[path = "dependency_integrity/rs_hexarch_20_dev_dependency_direction.rs"]
 mod rs_hexarch_20_dev_dependency_direction;
+#[path = "dependency_integrity/rs_hexarch_21_domain_purity.rs"]
 mod rs_hexarch_21_domain_purity;
+#[path = "dependency_integrity/rs_hexarch_22_ports_trait_dominance.rs"]
 mod rs_hexarch_22_ports_trait_dominance;
+#[path = "dependency_integrity/rs_hexarch_23_adapter_pub_trait.rs"]
 mod rs_hexarch_23_adapter_pub_trait;
+#[path = "dependency_integrity/rs_hexarch_24_cross_app_boundary.rs"]
 mod rs_hexarch_24_cross_app_boundary;
+#[path = "dependency_integrity/rs_hexarch_25_target_dependency_direction.rs"]
 mod rs_hexarch_25_target_dependency_direction;
+#[path = "dependency_integrity/rs_hexarch_26_member_manifest_parse_error.rs"]
 mod rs_hexarch_26_member_manifest_parse_error;
+#[path = "dependency_integrity/rs_hexarch_27_nested_workspace_forbidden.rs"]
 mod rs_hexarch_27_nested_workspace_forbidden;
 mod source_facts;
 
-use std::collections::BTreeSet;
-
 extern crate glob as _;
-extern crate guardrail3_app_core as _;
 extern crate guardrail3_domain_modules as _;
 extern crate guardrail3_outbound_traits as _;
 extern crate proc_macro2 as _;
@@ -42,10 +66,14 @@ extern crate quote as _;
 extern crate semver as _;
 extern crate serde_yaml as _;
 
+#[cfg(test)]
+use std::collections::BTreeSet;
+
 #[doc(hidden)]
 pub use self::dependency_facts::DependencyFamilyFacts;
 
 #[doc(hidden)]
+#[cfg(test)]
 pub fn collect_dependency_facts_for_tests(
     tree: &guardrail3_domain_project_tree::ProjectTree,
     route: &guardrail3_app_rs_family_mapper::RsHexarchRoute,
@@ -53,15 +81,14 @@ pub fn collect_dependency_facts_for_tests(
     dependency_facts::collect(tree, route)
 }
 
+#[cfg(test)]
 pub fn family_route_for_tests(
     tree: &guardrail3_domain_project_tree::ProjectTree,
 ) -> guardrail3_app_rs_family_mapper::RsHexarchRoute {
     let scope = guardrail3_app_rs_placement::collect(tree);
-    let config = tree
-        .file_content("guardrail3.toml")
-        .and_then(|content| {
-            toml::from_str::<guardrail3_domain_config::types::GuardrailConfig>(content).ok()
-        });
+    let config = tree.file_content("guardrail3.toml").and_then(|content| {
+        toml::from_str::<guardrail3_domain_config::types::GuardrailConfig>(content).ok()
+    });
     let selection = guardrail3_validation_model::RustFamilySelection::new(BTreeSet::from([
         guardrail3_validation_model::RustValidateFamily::Hexarch,
     ]));
@@ -75,6 +102,7 @@ pub fn family_route_for_tests(
     .map_rs_hexarch()
 }
 
+#[cfg(test)]
 pub fn check_test_tree(
     tree: &guardrail3_domain_project_tree::ProjectTree,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
@@ -82,6 +110,7 @@ pub fn check_test_tree(
     check(tree, &route)
 }
 
+#[cfg(test)]
 pub fn collect_dependency_facts_from_tree_for_tests(
     tree: &guardrail3_domain_project_tree::ProjectTree,
 ) -> DependencyFamilyFacts {

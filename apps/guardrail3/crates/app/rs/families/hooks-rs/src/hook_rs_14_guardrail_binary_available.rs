@@ -16,29 +16,28 @@ pub fn check(
 
     if guardrail_validation_path_qualified || tc.is_installed("guardrail3") {
         results.push(
-            CheckResult {
-                id: ID.to_owned(),
-                severity: Severity::Error,
-                title: "guardrail3 binary available".to_owned(),
-                message: "guardrail3 is available for fail-closed Rust hook validation.".to_owned(),
-                file: Some(rel_path.to_owned()),
-                line: None,
-                inventory: false,
-            }
+            CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Error,
+                "guardrail3 binary available".to_owned(),
+                "guardrail3 is available for fail-closed Rust hook validation.".to_owned(),
+                Some(rel_path.to_owned()),
+                None,
+                false,
+            )
             .as_inventory(),
         );
     } else {
-        results.push(CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Error,
-            title: "guardrail3 binary missing".to_owned(),
-            message: "Hook requires guardrail3, but it is not available on PATH.".to_owned(),
-            file: Some(rel_path.to_owned()),
-            line: None,
-            inventory: false,
-        });
+        results.push(CheckResult::from_parts(
+    ID.to_owned(),
+    Severity::Error,
+    "guardrail3 binary missing".to_owned(),
+    "Hook requires guardrail3, but it is not available on PATH.".to_owned(),
+    Some(rel_path.to_owned()),
+    None,
+    false,
+        ));
     }
-}
 
 #[cfg(test)]
 pub(super) fn run_case(
@@ -58,5 +57,5 @@ pub(super) fn run_case(
 }
 
 #[cfg(test)]
-#[path = "hook_rs_14_guardrail_binary_available_tests/mod.rs"]
+#[path = "tests/tools/hook_rs_14_guardrail_binary_available_tests/mod.rs"]
 mod hook_rs_14_guardrail_binary_available_tests;

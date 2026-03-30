@@ -26,3 +26,4 @@ pub mod rs_clippy_21_cognitive_complexity_threshold;
 pub mod rs_clippy_22_type_complexity_threshold;
 pub mod rs_clippy_23_policy_context_parseable;
 pub mod rs_clippy_24_forbid_clippy_conf_dir_override;
+pub mod rs_clippy_25_config_parseable;

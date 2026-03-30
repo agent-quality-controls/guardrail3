@@ -1,27 +1,35 @@
 # RS-TOOLCHAIN
 
-Repository-root Rust toolchain contract family.
+Routed Rust toolchain contract family.
 
-This family is intentionally root-level. It does not discover per-workspace or
-per-package toolchain files. The owned contract is:
+This family owns the same Rust policy roots as `RS-CARGO`:
 
-- one root `rust-toolchain.toml`
-- optional legacy root `rust-toolchain`
-- one root `Cargo.toml` source for MSRV comparison
+- each routed workspace root
+- each routed standalone package root that is not claimed as a workspace member
+
+For each owned root, the contract is:
+
+- one local `rust-toolchain.toml`
+- optional local legacy `rust-toolchain`
+- one local `Cargo.toml` source for MSRV comparison
 
 ## What This Family Enforces
 
-- `RS-TOOLCHAIN-01`: `rust-toolchain.toml` exists at the family/repository root
+- `RS-TOOLCHAIN-01`: `rust-toolchain.toml` exists at each owned policy root
 - `RS-TOOLCHAIN-02`: channel and component policy
-- `RS-TOOLCHAIN-03`: pinned stable toolchain vs `Cargo.toml` `rust-version`
+- `RS-TOOLCHAIN-03`: pinned stable toolchain vs owned-root `Cargo.toml`
+  `rust-version`
 - `RS-TOOLCHAIN-04`: legacy `rust-toolchain` migration and coexistence warning
 
 ### Current Rule Behavior
 
 #### `RS-TOOLCHAIN-01`
 
-- inventories when root `rust-toolchain.toml` exists
-- errors when the modern file is missing, even if legacy `rust-toolchain` exists
+- inventories when the owned-root `rust-toolchain.toml` exists
+- errors when the owned-root modern file is missing, even if a local legacy
+  `rust-toolchain` exists
+- a parent/repo-root toolchain file does not satisfy a governed app/package
+  root
 
 #### `RS-TOOLCHAIN-02`
 
@@ -54,11 +62,12 @@ Input integrity:
 #### `RS-TOOLCHAIN-03`
 
 - activates only for pinned stable toolchain forms
-- warns when pinned toolchain is older than `Cargo.toml` `rust-version`
+- warns when pinned toolchain is older than the owned-root `Cargo.toml`
+  `rust-version`
 - inventories when pinned toolchain satisfies declared MSRV
 - inventories when `rust-version` is absent
-- errors when root `Cargo.toml` is missing
-- errors when root `Cargo.toml` is malformed
+- errors when owned-root `Cargo.toml` is missing
+- errors when owned-root `Cargo.toml` is malformed
 - errors when `rust-version` exists but is not a string
 - errors when `rust-version` string is not a valid version
 
@@ -71,7 +80,6 @@ Input integrity:
 
 ```text
 toolchain/
-  Cargo.toml                # family workspace root
   README.md
   rust-toolchain.toml       # self-hosted family toolchain contract
   crates/
@@ -107,7 +115,7 @@ toolchain/
 ## Self-Hosting Notes
 
 The family carries its own root `rust-toolchain.toml` so validating the family
-directory exercises the same root-level contract it enforces elsewhere.
+directory exercises the same policy-root contract it enforces elsewhere.
 
 Under `--inventory`, a clean self-hosted family still reports positive info
 inventory for:
@@ -127,14 +135,17 @@ not literal zero inventory output.
 
 As of the latest attack-hardening pass:
 
-- the family is in the stabilized workspace shape
+- the family is routed through placement/family-mapper instead of assuming the
+  validation root is the policy root
 - rule-side coverage includes malformed active inputs and suffix-bypass attacks
-- direct family workspace tests pass:
+- runtime coverage proves repo-root validation targets the configured app
+  workspace root instead of a stray repo-root toolchain file
+- direct family package tests pass:
 
 ```bash
-cargo test --manifest-path apps/guardrail3/crates/app/rs/families/toolchain/Cargo.toml --workspace --lib
+cargo test --manifest-path apps/guardrail3/Cargo.toml -p guardrail3-app-rs-family-toolchain --lib
 ```
 
-This local family workspace also carries its own `workspace.lints` so it can be
-tested directly even when unrelated top-level workspace issues exist elsewhere
-in the repo.
+The runtime and assertions crates live inside the top-level
+`apps/guardrail3/Cargo.toml` workspace rather than a family-local workspace
+manifest.

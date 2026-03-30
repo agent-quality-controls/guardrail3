@@ -16,12 +16,13 @@ use super::ast_helpers::{
 // Visitor-only helpers
 // ---------------------------------------------------------------------------
 
-#[allow(clippy::wildcard_enum_match_arm)] // reason: syn TraitItem has many variants, exhaustive match is impractical
 fn trait_item_attrs(item: &syn::TraitItem) -> &[syn::Attribute] {
     match item {
         syn::TraitItem::Fn(f) => &f.attrs,
         syn::TraitItem::Type(t) => &t.attrs,
         syn::TraitItem::Const(c) => &c.attrs,
+        syn::TraitItem::Macro(m) => &m.attrs,
+        syn::TraitItem::Verbatim(_) => &[],
         _ => &[],
     }
 }
@@ -177,7 +178,6 @@ pub struct GardeSkipInfo {
 ///
 /// This is intentionally syntax-driven. Only concrete known-safe roots are
 /// exempt; suffix heuristics like `*Map` / `*Set` are not.
-#[allow(clippy::wildcard_enum_match_arm)] // reason: syn Type has many variants
 fn type_is_garde_skip_exempt(ty: &syn::Type) -> bool {
     match ty {
         syn::Type::Path(tp) => {
@@ -213,6 +213,18 @@ fn type_is_garde_skip_exempt(ty: &syn::Type) -> bool {
         }
         // Trait objects and references are not meaningfully garde-validateable.
         syn::Type::TraitObject(_) | syn::Type::Reference(_) => true,
+        syn::Type::Array(_)
+        | syn::Type::BareFn(_)
+        | syn::Type::Group(_)
+        | syn::Type::ImplTrait(_)
+        | syn::Type::Infer(_)
+        | syn::Type::Macro(_)
+        | syn::Type::Never(_)
+        | syn::Type::Paren(_)
+        | syn::Type::Ptr(_)
+        | syn::Type::Slice(_)
+        | syn::Type::Tuple(_)
+        | syn::Type::Verbatim(_) => false,
         _ => false,
     }
 }

@@ -23,16 +23,13 @@ pub fn run(
         let tree = walk_project(fs, path);
         let hook_results = check(fs, path, &tree, tc);
         let mut report = Report::new(path.display().to_string(), vec!["Rust".to_owned()]);
-        report.add_section(Section {
-            name: "Hook checks".to_owned(),
-            results: hook_results,
-        });
+        report.add_section(Section::new("Hook checks".to_owned(), hook_results));
         return report;
     }
 
     let mut report = Report::new(path.display().to_string(), vec!["Hooks".to_owned()]);
 
-    if domains.code {
+    if domains.code() {
         let mut hook_results = Vec::new();
         hook_checks::check_hooks(
             fs,
@@ -43,10 +40,7 @@ pub fn run(
             &crawl.pre_commit_hooks,
             &mut hook_results,
         );
-        report.add_section(Section {
-            name: "Hook checks".to_owned(),
-            results: hook_results,
-        });
+        report.add_section(Section::new("Hook checks".to_owned(), hook_results));
 
         // D1-D5 only run if the project has deployment configs
         let has_railpack = has_railpack_files(fs, path);
@@ -54,10 +48,7 @@ pub fn run(
         if has_railpack || has_apps_dir {
             let mut deploy_results = Vec::new();
             deploy_checks::check_deployment(fs, path, &mut deploy_results);
-            report.add_section(Section {
-                name: "Deployment checks".to_owned(),
-                results: deploy_results,
-            });
+            report.add_section(Section::new("Deployment checks".to_owned(), deploy_results));
         }
     }
 

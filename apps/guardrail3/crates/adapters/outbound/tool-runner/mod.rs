@@ -26,9 +26,9 @@ impl ToolChecker for RealToolChecker {
             .current_dir(path)
             .output()
             .ok()?;
-        Some(CommandRunResult {
-            success: output.status.success(),
-            stderr: String::from_utf8_lossy(&output.stderr).to_string(),
-        })
+        Some(CommandRunResult::new(
+            output.status.success(),
+            String::from_utf8_lossy(&output.stderr).to_string(),
+        ))
     }
 }

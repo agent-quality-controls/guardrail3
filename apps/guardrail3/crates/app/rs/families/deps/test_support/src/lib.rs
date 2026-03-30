@@ -5,26 +5,26 @@ use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
 use guardrail3_outbound_traits::{CommandRunResult, ToolChecker};
 
 pub fn dir_entry(dirs: &[&str], files: &[&str]) -> DirEntry {
-    DirEntry {
-        dirs: dirs.iter().map(|value| (*value).to_owned()).collect(),
-        files: files.iter().map(|value| (*value).to_owned()).collect(),
-        symlink_dirs: Vec::new(),
-        symlink_files: Vec::new(),
-    }
+    DirEntry::new(
+        dirs.iter().map(|value| (*value).to_owned()).collect(),
+        files.iter().map(|value| (*value).to_owned()).collect(),
+        Vec::new(),
+        Vec::new(),
+    )
 }
 
 pub fn project_tree(structure: Vec<(&str, DirEntry)>, content: Vec<(&str, &str)>) -> ProjectTree {
-    ProjectTree {
-        root: PathBuf::from("/tmp/project"),
-        structure: structure
+    ProjectTree::new(
+        PathBuf::from("/tmp/project"),
+        structure
             .into_iter()
             .map(|(rel, entry)| (rel.to_owned(), entry))
             .collect::<BTreeMap<_, _>>(),
-        content: content
+        content
             .into_iter()
             .map(|(rel, body)| (rel.to_owned(), body.to_owned()))
             .collect::<BTreeMap<_, _>>(),
-    }
+    )
 }
 
 #[derive(Debug)]

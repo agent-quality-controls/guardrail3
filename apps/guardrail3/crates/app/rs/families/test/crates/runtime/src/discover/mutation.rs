@@ -9,7 +9,7 @@ pub(super) fn collect_mutation_hook_files(tree: &ProjectTree, root_rel_dir: &str
     ] {
         if let Some(content) = tree.file_content(&rel_path) {
             if parse_script(content)
-                .executable_lines
+                .executable_lines()
                 .iter()
                 .any(executable_line_has_mutation_hook)
             {
@@ -19,13 +19,13 @@ pub(super) fn collect_mutation_hook_files(tree: &ProjectTree, root_rel_dir: &str
     }
     let hook_dir_rel = super::join_under_root(root_rel_dir, ".githooks/pre-commit.d");
     if let Some(dir) = tree.dir_contents(&hook_dir_rel) {
-        for file_name in &dir.files {
+        for file_name in dir.files() {
             let rel_path = ProjectTree::join_rel(&hook_dir_rel, file_name);
             let Ok(content) = guardrail3_shared_fs::read_file_err(&tree.abs_path(&rel_path)) else {
                 continue;
             };
             if parse_script(&content)
-                .executable_lines
+                .executable_lines()
                 .iter()
                 .any(executable_line_has_mutation_hook)
             {
@@ -38,7 +38,7 @@ pub(super) fn collect_mutation_hook_files(tree: &ProjectTree, root_rel_dir: &str
 }
 
 fn executable_line_has_mutation_hook(line: &ExecutableLine<'_>) -> bool {
-    is_cargo_mutants_command(line.command_text)
+    is_cargo_mutants_command(line.command_text())
 }
 
 fn is_cargo_mutants_command(command_text: &str) -> bool {

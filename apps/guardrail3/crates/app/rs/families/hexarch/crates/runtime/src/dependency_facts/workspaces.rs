@@ -3,8 +3,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use guardrail3_domain_project_tree::ProjectTree;
 
 use super::{
-    PatchEntryFacts, WorkspaceFacts, dir_is_within_owned_hex_scope, layer_from_path,
-    normalize_path,
+    PatchEntryFacts, WorkspaceFacts, dir_is_within_owned_hex_scope, layer_from_path, normalize_path,
 };
 
 pub(super) fn discover_workspaces(
@@ -15,7 +14,9 @@ pub(super) fn discover_workspaces(
     let mut workspaces = Vec::new();
     let mut seen = BTreeSet::new();
 
-    let root_dirs = include_repo_root_workspace.then_some(String::new()).into_iter();
+    let root_dirs = include_repo_root_workspace
+        .then_some(String::new())
+        .into_iter();
     for dir in root_dirs.chain(tree.dirs_with_file("Cargo.toml")) {
         if !seen.insert(dir.clone()) {
             continue;

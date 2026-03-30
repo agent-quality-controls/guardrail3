@@ -10,15 +10,62 @@ use crate::overlap::{RustZoneOverlapFacts, collect_overlaps};
 
 #[derive(Debug, Clone)]
 pub struct RustRootPlacementInputFailureFacts {
-    pub rel_path: String,
-    pub message: String,
+    rel_path: String,
+    message: String,
+}
+
+impl RustRootPlacementInputFailureFacts {
+    #[must_use]
+    pub fn new(rel_path: String, message: String) -> Self {
+        Self { rel_path, message }
+    }
+
+    #[must_use]
+    pub fn rel_path(&self) -> &str {
+        &self.rel_path
+    }
+
+    #[must_use]
+    pub fn message(&self) -> &str {
+        &self.message
+    }
 }
 
 #[derive(Debug, Clone, Default)]
 pub struct RustRootPlacementFacts {
-    pub roots: Vec<RustRootPlacementRootFacts>,
-    pub overlaps: Vec<RustZoneOverlapFacts>,
-    pub input_failures: Vec<RustRootPlacementInputFailureFacts>,
+    roots: Vec<RustRootPlacementRootFacts>,
+    overlaps: Vec<RustZoneOverlapFacts>,
+    input_failures: Vec<RustRootPlacementInputFailureFacts>,
+}
+
+impl RustRootPlacementFacts {
+    #[must_use]
+    pub fn new(
+        roots: Vec<RustRootPlacementRootFacts>,
+        overlaps: Vec<RustZoneOverlapFacts>,
+        input_failures: Vec<RustRootPlacementInputFailureFacts>,
+    ) -> Self {
+        Self {
+            roots,
+            overlaps,
+            input_failures,
+        }
+    }
+
+    #[must_use]
+    pub fn roots(&self) -> &[RustRootPlacementRootFacts] {
+        &self.roots
+    }
+
+    #[must_use]
+    pub fn overlaps(&self) -> &[RustZoneOverlapFacts] {
+        &self.overlaps
+    }
+
+    #[must_use]
+    pub fn input_failures(&self) -> &[RustRootPlacementInputFailureFacts] {
+        &self.input_failures
+    }
 }
 
 #[must_use]
@@ -48,12 +95,11 @@ pub fn collect(tree: &ProjectTree) -> RustRootPlacementFacts {
             ProjectTree::join_rel(&rel_dir, "Cargo.toml")
         };
         if tree.file_exists(&cargo_rel_path) && tree.file_content(&cargo_rel_path).is_none() {
-            input_failures.push(RustRootPlacementInputFailureFacts {
-                rel_path: cargo_rel_path.clone(),
-                message:
-                    "Failed to read eligible live Cargo.toml for Rust root placement discovery."
-                        .to_owned(),
-            });
+            input_failures.push(RustRootPlacementInputFailureFacts::new(
+                cargo_rel_path.clone(),
+                "Failed to read eligible live Cargo.toml for Rust root placement discovery."
+                    .to_owned(),
+            ));
         }
 
         let placement_rel_dir = contextual_rel_dir(zone_context_prefix.as_deref(), &rel_dir);
@@ -61,10 +107,10 @@ pub fn collect(tree: &ProjectTree) -> RustRootPlacementFacts {
         let arch_role = if has_governed_zone_candidate(&placement_rel_dir) {
             if let Some(parsed) = parsed.as_ref() {
                 if declares_arch_role(parsed) {
-                    input_failures.push(RustRootPlacementInputFailureFacts {
-                        rel_path: cargo_rel_path.clone(),
-                        message: "Governed Rust roots under `apps/*` or `packages/*` must not declare `arch_role` in Cargo metadata. The only supported `arch_role` value is `auxiliary`, and it is valid only for roots outside governed architecture zones.".to_owned(),
-                    });
+                    input_failures.push(RustRootPlacementInputFailureFacts::new(
+                        cargo_rel_path.clone(),
+                        "Governed Rust roots under `apps/*` or `packages/*` must not declare `arch_role` in Cargo metadata. The only supported `arch_role` value is `auxiliary`, and it is valid only for roots outside governed architecture zones.".to_owned(),
+                    ));
                 }
             }
             None
@@ -79,14 +125,14 @@ pub fn collect(tree: &ProjectTree) -> RustRootPlacementFacts {
         ));
     }
 
-    roots.sort_by(|left, right| left.cargo_rel_path.cmp(&right.cargo_rel_path));
+    roots.sort_by(|left, right| left.cargo_rel_path().cmp(right.cargo_rel_path()));
     let overlaps = collect_overlaps(&roots);
 
-    RustRootPlacementFacts {
+    RustRootPlacementFacts::new(
         roots,
         overlaps,
         input_failures,
-    }
+    )
 }
 
 #[must_use]
@@ -95,7 +141,7 @@ pub fn is_excluded_live_root_dir(rel_dir: &str) -> bool {
 }
 
 fn is_excluded_validation_root(tree: &ProjectTree) -> bool {
-    is_excluded_path(&tree.root.to_string_lossy().replace('\\', "/"))
+    is_excluded_path(&tree.root().to_string_lossy().replace('\\', "/"))
 }
 
 fn is_excluded_path(path: &str) -> bool {
@@ -136,10 +182,10 @@ fn resolve_arch_role(
     match arch_role_from_toml(parsed) {
         Ok(role) => role,
         Err(message) => {
-            input_failures.push(RustRootPlacementInputFailureFacts {
-                rel_path: cargo_rel_path.to_owned(),
+            input_failures.push(RustRootPlacementInputFailureFacts::new(
+                cargo_rel_path.to_owned(),
                 message,
-            });
+            ));
             None
         }
     }
@@ -157,12 +203,12 @@ fn parse_live_cargo_toml(
     match toml::from_str::<Value>(content) {
         Ok(parsed) => Some(parsed),
         Err(parse_error) => {
-            input_failures.push(RustRootPlacementInputFailureFacts {
-                rel_path: cargo_rel_path.to_owned(),
-                message: format!(
+            input_failures.push(RustRootPlacementInputFailureFacts::new(
+                cargo_rel_path.to_owned(),
+                format!(
                     "Failed to parse eligible live Cargo.toml for Rust root placement discovery: {parse_error}"
                 ),
-            });
+            ));
             None
         }
     }
@@ -209,7 +255,7 @@ fn arch_role_value(parsed: &Value) -> Option<&Value> {
 
 fn zone_context_prefix(tree: &ProjectTree) -> Option<String> {
     let segments: Vec<_> = tree
-        .root
+        .root()
         .iter()
         .filter_map(|segment| segment.to_str())
         .collect();

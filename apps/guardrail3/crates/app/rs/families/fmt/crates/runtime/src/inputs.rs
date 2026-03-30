@@ -1,19 +1,19 @@
 use super::facts::{CargoEditionState, RustfmtConfigKind, RustfmtFacts, ToolchainChannelState};
 
 pub struct RustfmtRootInput {
-    pub config_rel: Option<String>,
-    pub parsed: Option<toml::Value>,
-    pub cargo_edition: CargoEditionState,
-    pub toolchain_channel: ToolchainChannelState,
+    pub(crate) config_rel: Option<String>,
+    pub(crate) parsed: Option<toml::Value>,
+    pub(crate) cargo_edition: CargoEditionState,
+    pub(crate) toolchain_channel: ToolchainChannelState,
 }
 
 pub struct RustfmtExtraConfigInput {
-    pub config_rel: String,
-    pub config_kind: RustfmtConfigKind,
+    pub(crate) config_rel: String,
+    pub(crate) config_kind: RustfmtConfigKind,
 }
 
 pub struct RustfmtDualConflictInput {
-    pub dir_rel: String,
+    pub(crate) dir_rel: String,
 }
 
 impl RustfmtRootInput {

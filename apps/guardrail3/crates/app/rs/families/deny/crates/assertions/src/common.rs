@@ -13,13 +13,13 @@ pub struct Finding<'a> {
 pub fn findings<'a>(results: &'a [CheckResult], id: &str) -> Vec<Finding<'a>> {
     let mut findings = results
         .iter()
-        .filter(|result| result.id == id)
+        .filter(|result| result.id()()()() == id)
         .map(|result| Finding {
-            severity: result.severity,
-            title: result.title.as_str(),
-            message: result.message.as_str(),
-            file: result.file.as_deref(),
-            inventory: result.inventory,
+            severity: result.severity()()()(),
+            title: result.title()()()().as_str(),
+            message: result.message()()()().as_str(),
+            file: result.file()()()(),
+            inventory: result.inventory()()()(),
         })
         .collect::<Vec<_>>();
     findings.sort_by(|left, right| {

@@ -211,7 +211,7 @@ fn collect_external_harnesses(tree: &ProjectTree, runtime_rel_dir: &str) -> Vec<
     };
 
     let mut files = tests_dir
-        .files
+        .files()
         .iter()
         .filter(|file_name| file_name.ends_with(".rs"))
         .map(|file_name| ProjectTree::join_rel(&tests_rel_dir, file_name))

@@ -1,33 +1,31 @@
-use guardrail3_domain_modules::clippy::{
-    BASE_TYPE_PATHS, COGNITIVE_COMPLEXITY_THRESHOLD, EXCESSIVE_NESTING_THRESHOLD,
-    LIBRARY_EXTRA_TYPE_PATHS, MAX_FN_PARAMS_BOOLS, MAX_STRUCT_BOOLS, SERVICE_METHOD_PATHS,
-    THRESHOLD_VALUES, TOO_MANY_ARGUMENTS_THRESHOLD, TOO_MANY_LINES_THRESHOLD,
-    TYPE_COMPLEXITY_THRESHOLD,
-};
+use guardrail3_domain_modules::clippy as policy;
+#[derive(Debug)]
 pub struct ThresholdExpectation {
-    pub key: &'static str,
-    pub expected: i64,
+    pub(crate) key: &'static str,
+    pub(crate) expected: i64,
 }
 
 #[derive(Debug, Clone)]
 pub struct BanEntry {
-    pub path: String,
-    pub reason: Option<String>,
-    pub is_plain_string: bool,
+    pub(crate) path: String,
+    pub(crate) reason: Option<String>,
+    pub(crate) is_plain_string: bool,
 }
 
 #[derive(Debug, Clone)]
 pub struct BanSectionFacts {
-    pub entries: Vec<BanEntry>,
-    pub malformed_messages: Vec<String>,
+    pub(crate) entries: Vec<BanEntry>,
+    pub(crate) malformed_messages: Vec<String>,
 }
 
+#[derive(Debug)]
 pub enum IntegerSetting<'a> {
     Missing,
     WrongType(&'a toml::Value),
     Value(i64),
 }
 
+#[derive(Debug)]
 pub enum BoolSetting<'a> {
     Missing,
     WrongType(&'a toml::Value),
@@ -35,41 +33,70 @@ pub enum BoolSetting<'a> {
 }
 
 pub const EXPECTED_MACRO_BANS: &[&str] = guardrail3_domain_modules::clippy::EXPECTED_MACRO_BANS;
+pub const ALLOW_DBG_IN_TESTS: bool = policy::ALLOW_DBG_IN_TESTS;
+pub const ALLOW_EXPECT_IN_TESTS: bool = policy::ALLOW_EXPECT_IN_TESTS;
+pub const ALLOW_PANIC_IN_TESTS: bool = policy::ALLOW_PANIC_IN_TESTS;
+pub const ALLOW_PRINT_IN_TESTS: bool = policy::ALLOW_PRINT_IN_TESTS;
+pub const ALLOW_UNWRAP_IN_TESTS: bool = policy::ALLOW_UNWRAP_IN_TESTS;
 
 pub const THRESHOLD_EXPECTATIONS: &[ThresholdExpectation] = &[
     ThresholdExpectation {
         key: "max-struct-bools",
-        expected: MAX_STRUCT_BOOLS,
+        expected: policy::MAX_STRUCT_BOOLS,
     },
     ThresholdExpectation {
         key: "max-fn-params-bools",
-        expected: MAX_FN_PARAMS_BOOLS,
+        expected: policy::MAX_FN_PARAMS_BOOLS,
     },
     ThresholdExpectation {
         key: "too-many-lines-threshold",
-        expected: TOO_MANY_LINES_THRESHOLD,
+        expected: policy::TOO_MANY_LINES_THRESHOLD,
     },
     ThresholdExpectation {
         key: "too-many-arguments-threshold",
-        expected: TOO_MANY_ARGUMENTS_THRESHOLD,
+        expected: policy::TOO_MANY_ARGUMENTS_THRESHOLD,
     },
     ThresholdExpectation {
         key: "excessive-nesting-threshold",
-        expected: EXCESSIVE_NESTING_THRESHOLD,
+        expected: policy::EXCESSIVE_NESTING_THRESHOLD,
     },
     ThresholdExpectation {
         key: "cognitive-complexity-threshold",
-        expected: COGNITIVE_COMPLEXITY_THRESHOLD,
+        expected: policy::COGNITIVE_COMPLEXITY_THRESHOLD,
     },
     ThresholdExpectation {
         key: "type-complexity-threshold",
-        expected: TYPE_COMPLEXITY_THRESHOLD,
+        expected: policy::TYPE_COMPLEXITY_THRESHOLD,
     },
 ];
 
-pub const EXPECTED_METHOD_BANS: &[&str] = SERVICE_METHOD_PATHS;
-pub const EXPECTED_TYPE_BANS: &[&str] = BASE_TYPE_PATHS;
-pub const EXPECTED_LIBRARY_GLOBAL_STATE_TYPES: &[&str] = LIBRARY_EXTRA_TYPE_PATHS;
+pub const EXPECTED_METHOD_BANS: &[&str] = policy::SERVICE_METHOD_PATHS;
+pub const EXPECTED_TYPE_BANS: &[&str] = policy::BASE_TYPE_PATHS;
+pub const EXPECTED_LIBRARY_GLOBAL_STATE_TYPES: &[&str] = policy::LIBRARY_EXTRA_TYPE_PATHS;
+
+pub fn build_clippy_toml(
+    profile: &str,
+    allow_global_state: bool,
+    garde_enabled: bool,
+    extra_method_bans: &str,
+    extra_type_bans: &str,
+) -> String {
+    policy::build_clippy_toml(
+        profile,
+        allow_global_state,
+        garde_enabled,
+        extra_method_bans,
+        extra_type_bans,
+    )
+}
+
+pub fn library_profile_type_paths() -> Vec<&'static str> {
+    policy::library_profile_type_paths()
+}
+
+pub fn service_profile_type_paths() -> Vec<&'static str> {
+    policy::service_profile_type_paths()
+}
 
 const GARDE_METHOD_BANS: &[&str] = &[
     "serde_json::from_str",
@@ -269,7 +296,10 @@ pub fn display_macro_name(path: &str) -> &str {
 }
 
 pub fn known_top_level_keys() -> Vec<&'static str> {
-    THRESHOLD_VALUES.iter().map(|(key, _)| *key).collect()
+    policy::THRESHOLD_VALUES
+        .iter()
+        .map(|(key, _)| *key)
+        .collect()
 }
 
 pub fn managed_non_threshold_keys() -> Vec<&'static str> {

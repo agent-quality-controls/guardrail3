@@ -7,26 +7,27 @@ use super::ParsedGuardrail;
 
 pub(super) fn parse_guardrail(tree: &ProjectTree) -> Option<ParsedGuardrail> {
     let Some(content) = tree.file_content("guardrail3.toml") else {
-        return tree.file_exists("guardrail3.toml").then(|| ParsedGuardrail {
-            root_profile_name: None,
-            apps: BTreeMap::new(),
-            packages: None,
-            parse_error: Some(
-                "Failed to read guardrail3.toml for dependency policy resolution.".to_owned(),
-            ),
-        });
+        return tree
+            .file_exists("guardrail3.toml")
+            .then(|| ParsedGuardrail {
+                root_profile_name: None,
+                apps: BTreeMap::new(),
+                packages: None,
+                parse_error: Some(
+                    "Failed to read guardrail3.toml for dependency policy resolution.".to_owned(),
+                ),
+            });
     };
     match toml::from_str::<toml::Value>(content) {
         Ok(parsed) => match validate_deps_guardrail_shape(&parsed) {
             Ok(()) => match parsed.clone().try_into::<GuardrailConfig>() {
                 Ok(config) => Some(ParsedGuardrail {
-                    root_profile_name: config.profile.map(|profile| profile.name),
+                    root_profile_name: config.profile().map(|profile| profile.name().to_owned()),
                     apps: config
-                        .rust
-                        .as_ref()
-                        .and_then(|rust| rust.apps.clone())
+                        .rust()
+                        .and_then(|rust| rust.apps().cloned())
                         .unwrap_or_default(),
-                    packages: config.rust.and_then(|rust| rust.packages),
+                    packages: config.rust().and_then(|rust| rust.packages().cloned()),
                     parse_error: None,
                 }),
                 Err(parse_error) => Some(parse_error_snapshot(parse_error.to_string())),
@@ -231,6 +232,34 @@ pub(super) fn validate_dependency_manifest_shape(parsed: &toml::Value) -> Result
         };
         for (alias, value) in section {
             validate_dependency_spec_shape(section_key, alias, value)?;
+        }
+    }
+
+    if let Some(target) = parsed.get("target") {
+        let Some(target) = target.as_table() else {
+            return Err("`[target]` must be a table.".to_owned());
+        };
+        for (target_name, target_value) in target {
+            let Some(target_table) = target_value.as_table() else {
+                return Err(format!("`[target.{target_name}]` must be a table."));
+            };
+            for section_key in ["dependencies", "build-dependencies", "dev-dependencies"] {
+                let Some(section) = target_table.get(section_key) else {
+                    continue;
+                };
+                let Some(section) = section.as_table() else {
+                    return Err(format!(
+                        "`[target.{target_name}.{section_key}]` must be a table."
+                    ));
+                };
+                for (alias, value) in section {
+                    validate_dependency_spec_shape(
+                        &format!("target.{target_name}.{section_key}"),
+                        alias,
+                        value,
+                    )?;
+                }
+            }
         }
     }
 

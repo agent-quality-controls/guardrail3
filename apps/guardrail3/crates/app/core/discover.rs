@@ -4,23 +4,23 @@ use std::path::{Path, PathBuf};
 
 #[derive(Debug, Clone)]
 pub struct WorkspaceMember {
-    pub name: String,
+    name: String,
     /// Relative to project root
-    pub dir: String,
+    dir: String,
 }
 
 #[derive(Debug, Clone)]
 pub struct RustWorkspace {
-    pub root: PathBuf,
-    pub members: Vec<WorkspaceMember>,
+    root: PathBuf,
+    members: Vec<WorkspaceMember>,
 }
 
 #[derive(Debug)]
 pub struct ProjectInfo {
-    pub has_rust: bool,
-    pub has_typescript: bool,
-    pub workspaces: Vec<RustWorkspace>,
-    pub package_json_path: Option<PathBuf>,
+    has_rust: bool,
+    has_typescript: bool,
+    workspaces: Vec<RustWorkspace>,
+    package_json_path: Option<PathBuf>,
 }
 
 pub fn resolve_app_paths_from_member_dirs(
@@ -51,6 +51,22 @@ pub fn resolve_app_paths_from_member_dirs(
 }
 
 impl ProjectInfo {
+    pub const fn has_rust(&self) -> bool {
+        self.has_rust
+    }
+
+    pub const fn has_typescript(&self) -> bool {
+        self.has_typescript
+    }
+
+    pub fn workspaces(&self) -> &[RustWorkspace] {
+        &self.workspaces
+    }
+
+    pub fn package_json_path(&self) -> Option<&Path> {
+        self.package_json_path.as_deref()
+    }
+
     /// All workspace member dirs across all workspaces (for source scanning)
     pub fn all_member_dirs(&self) -> Vec<String> {
         self.workspaces
@@ -70,6 +86,26 @@ impl ProjectInfo {
     /// First workspace root (for backward compat with config checks)
     pub fn primary_workspace_root(&self) -> Option<&Path> {
         self.workspaces.first().map(|ws| ws.root.as_path())
+    }
+}
+
+impl WorkspaceMember {
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
+    pub fn dir(&self) -> &str {
+        &self.dir
+    }
+}
+
+impl RustWorkspace {
+    pub fn root(&self) -> &Path {
+        &self.root
+    }
+
+    pub fn members(&self) -> &[WorkspaceMember] {
+        &self.members
     }
 }
 
@@ -397,6 +433,8 @@ fn detect_typescript(fs: &dyn FileSystem, path: &Path, info: &mut ProjectInfo) {
 /// Check for TypeScript signals beyond just having a package.json.
 /// Returns true if tsconfig.json exists OR typescript is in dependencies/devDependencies.
 fn has_typescript_signals(fs: &dyn FileSystem, dir: &Path, pkg_json_path: &Path) -> bool {
+    use std::str::FromStr as _;
+
     // Signal 1: tsconfig.json exists
     if dir.join("tsconfig.json").exists() {
         return true;
@@ -404,8 +442,7 @@ fn has_typescript_signals(fs: &dyn FileSystem, dir: &Path, pkg_json_path: &Path)
 
     // Signal 2: typescript in dependencies or devDependencies
     if let Some(content) = fs.read_file(pkg_json_path) {
-        #[allow(clippy::disallowed_methods)] // reason: parsing package.json for TS detection signal
-        if let Ok(json) = serde_json::from_str::<serde_json::Value>(&content) {
+        if let Ok(json) = serde_json::Value::from_str(&content) {
             for section in &["dependencies", "devDependencies"] {
                 if json
                     .get(section)

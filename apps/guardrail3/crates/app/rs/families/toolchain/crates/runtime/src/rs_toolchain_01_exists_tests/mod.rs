@@ -4,7 +4,10 @@ use guardrail3_app_rs_family_toolchain_assertions::rs_toolchain_01_exists::{
     assert_rule_results,
 };
 
-use super::{check, run_family_check, test_input, test_tree};
+use super::{
+    check, nested_workspace_root_tree, run_family_check, standalone_package_input, test_input,
+    test_tree,
+};
 
 #[test]
 fn inventories_when_toolchain_toml_exists() {
@@ -46,14 +49,14 @@ fn errors_when_no_supported_toolchain_file_exists() {
             inventory: false,
             title: "rust-toolchain.toml missing",
             message: "Expected rust-toolchain.toml at workspace root.",
-            file: Some(""),
+            file: Some("rust-toolchain.toml"),
         }],
     );
 }
 
 #[test]
 fn family_reports_legacy_only_as_missing_modern_toolchain() {
-    let tree = test_tree(&["rust-toolchain"], &[]);
+    let tree = test_tree(&["Cargo.toml", "rust-toolchain"], &[("Cargo.toml", "[workspace]\n")]);
 
     let results = run_family_check(&tree);
 
@@ -63,8 +66,8 @@ fn family_reports_legacy_only_as_missing_modern_toolchain() {
 #[test]
 fn family_reports_malformed_modern_toolchain_and_legacy_ambiguity() {
     let tree = test_tree(
-        &["rust-toolchain.toml", "rust-toolchain"],
-        &[("rust-toolchain.toml", "toolchain = [")],
+        &["Cargo.toml", "rust-toolchain.toml", "rust-toolchain"],
+        &[("Cargo.toml", "[workspace]\n"), ("rust-toolchain.toml", "toolchain = [")],
     );
 
     let results = run_family_check(&tree);
@@ -91,4 +94,40 @@ fn family_propagates_invalid_root_cargo_rust_version_type() {
     let results = run_family_check(&tree);
 
     assert_invalid_root_cargo_rust_version_type(&results);
+}
+
+#[test]
+fn family_targets_nested_workspace_root_instead_of_validation_root() {
+    let tree = nested_workspace_root_tree();
+    let results = run_family_check(&tree);
+
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            severity: Severity::Error,
+            inventory: false,
+            title: "rust-toolchain.toml missing",
+            message: "Expected rust-toolchain.toml at workspace root.",
+            file: Some("apps/guardrail3/rust-toolchain.toml"),
+        }],
+    );
+}
+
+#[test]
+fn standalone_package_root_uses_package_root_wording() {
+    let input = standalone_package_input(Some("packages/lib/rust-toolchain.toml"));
+    let mut results = Vec::new();
+
+    check(&input, &mut results);
+
+    assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            severity: Severity::Info,
+            inventory: true,
+            title: "rust-toolchain.toml exists",
+            message: "Found rust-toolchain.toml at standalone package root.",
+            file: Some("packages/lib/rust-toolchain.toml"),
+        }],
+    );
 }

@@ -7,20 +7,20 @@ use guardrail3_domain_project_tree::ProjectTree;
 
 #[derive(Debug, Clone)]
 pub struct ArchRootFacts {
-    pub rel_dir: String,
-    pub cargo_rel_path: String,
-    pub classification: RustRootClassification,
-    pub app_zone_candidates: Vec<String>,
-    pub package_zone_candidates: Vec<String>,
-    pub owner_families: Vec<RustArchitectureOwner>,
+    pub(crate) rel_dir: String,
+    pub(crate) cargo_rel_path: String,
+    pub(crate) classification: RustRootClassification,
+    pub(crate) app_zone_candidates: Vec<String>,
+    pub(crate) package_zone_candidates: Vec<String>,
+    pub(crate) owner_families: Vec<RustArchitectureOwner>,
 }
 
 #[derive(Debug, Clone)]
 pub struct ZoneOverlapFacts {
-    pub app_root_rel: String,
-    pub app_cargo_rel_path: String,
-    pub package_root_rel: String,
-    pub package_cargo_rel_path: String,
+    pub(crate) app_root_rel: String,
+    pub(crate) app_cargo_rel_path: String,
+    pub(crate) package_root_rel: String,
+    pub(crate) package_cargo_rel_path: String,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -31,27 +31,27 @@ pub enum ArchInputFailureKind {
 
 #[derive(Debug, Clone)]
 pub struct GovernedRootFacts {
-    pub rel_dir: String,
-    pub cargo_rel_path: String,
-    pub owner: RustArchitectureOwner,
-    pub owner_root_rel: String,
-    pub effective_enabled: bool,
+    pub(crate) rel_dir: String,
+    pub(crate) cargo_rel_path: String,
+    pub(crate) owner: RustArchitectureOwner,
+    pub(crate) owner_root_rel: String,
+    pub(crate) effective_enabled: bool,
 }
 
 #[derive(Debug, Clone)]
 pub struct ArchInputFailureFacts {
-    pub rel_path: String,
-    pub message: String,
-    pub kind: ArchInputFailureKind,
+    pub(crate) rel_path: String,
+    pub(crate) message: String,
+    pub(crate) kind: ArchInputFailureKind,
 }
 
 #[derive(Debug, Clone, Default)]
 pub struct ArchFacts {
-    pub roots: Vec<ArchRootFacts>,
-    pub overlaps: Vec<ZoneOverlapFacts>,
-    pub governed_roots: Vec<GovernedRootFacts>,
-    pub input_failures: Vec<ArchInputFailureFacts>,
-    pub misplaced_root_reporting_enabled: bool,
+    pub(crate) roots: Vec<ArchRootFacts>,
+    pub(crate) overlaps: Vec<ZoneOverlapFacts>,
+    pub(crate) governed_roots: Vec<GovernedRootFacts>,
+    pub(crate) input_failures: Vec<ArchInputFailureFacts>,
+    pub(crate) misplaced_root_reporting_enabled: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -67,25 +67,25 @@ pub fn collect(tree: &ProjectTree, route: &RsArchRoute) -> ArchFacts {
     let config = resolve_config(tree);
 
     let mut input_failures: Vec<_> = route
-        .input_failures
+        .input_failures()
         .iter()
         .map(|failure| ArchInputFailureFacts {
-            rel_path: failure.rel_path.clone(),
-            message: failure.message.clone(),
+            rel_path: failure.rel_path().to_owned(),
+            message: failure.message().to_owned(),
             kind: ArchInputFailureKind::RequiredInput,
         })
         .collect();
     input_failures.extend(config.failures.iter().cloned());
 
-    let roots = route.roots.iter().map(root_from_route).collect::<Vec<_>>();
+    let roots = route.roots().iter().map(root_from_route).collect::<Vec<_>>();
     let overlaps = route
-        .overlaps
+        .overlaps()
         .iter()
         .map(|overlap| ZoneOverlapFacts {
-            app_root_rel: overlap.app_root_rel.clone(),
-            app_cargo_rel_path: overlap.app_cargo_rel_path.clone(),
-            package_root_rel: overlap.package_root_rel.clone(),
-            package_cargo_rel_path: overlap.package_cargo_rel_path.clone(),
+            app_root_rel: overlap.app_root_rel().to_owned(),
+            app_cargo_rel_path: overlap.app_cargo_rel_path().to_owned(),
+            package_root_rel: overlap.package_root_rel().to_owned(),
+            package_cargo_rel_path: overlap.package_cargo_rel_path().to_owned(),
         })
         .collect::<Vec<_>>();
 
@@ -132,29 +132,28 @@ fn resolve_config(tree: &ProjectTree) -> ConfigResolution {
 
     match toml::from_str::<GuardrailConfig>(content) {
         Ok(config) => {
-            let rust = config.rust.as_ref();
+            let rust = config.rust();
             let arch_enabled = rust
-                .and_then(|value| value.checks.as_ref())
-                .and_then(|checks| checks.arch)
+                .and_then(guardrail3_domain_config::types::RustConfig::checks)
+                .and_then(guardrail3_domain_config::types::RustChecksConfig::arch)
                 .unwrap_or(true);
             let global_hexarch_enabled = rust
-                .and_then(|value| value.checks.as_ref())
-                .and_then(|checks| checks.hexarch)
+                .and_then(guardrail3_domain_config::types::RustConfig::checks)
+                .and_then(guardrail3_domain_config::types::RustChecksConfig::hexarch)
                 .unwrap_or(true);
             let global_libarch_enabled = rust
-                .and_then(|value| value.checks.as_ref())
-                .and_then(|checks| checks.libarch)
+                .and_then(guardrail3_domain_config::types::RustConfig::checks)
+                .and_then(guardrail3_domain_config::types::RustChecksConfig::libarch)
                 .unwrap_or(true);
             let app_hexarch_enabled = rust
-                .and_then(|value| value.apps.as_ref())
+                .and_then(guardrail3_domain_config::types::RustConfig::apps)
                 .map(|apps| {
                     apps.iter()
                         .map(|(name, app)| {
                             (
                                 name.clone(),
-                                app.checks
-                                    .as_ref()
-                                    .and_then(|checks| checks.hexarch)
+                                app.checks()
+                                    .and_then(guardrail3_domain_config::types::RustChecksConfig::hexarch)
                                     .unwrap_or(global_hexarch_enabled),
                             )
                         })
@@ -162,9 +161,9 @@ fn resolve_config(tree: &ProjectTree) -> ConfigResolution {
                 })
                 .unwrap_or_default();
             let packages_libarch_enabled = rust
-                .and_then(|value| value.packages.as_ref())
-                .and_then(|packages| packages.checks.as_ref())
-                .and_then(|checks| checks.libarch)
+                .and_then(guardrail3_domain_config::types::RustConfig::packages)
+                .and_then(guardrail3_domain_config::types::CrateConfig::checks)
+                .and_then(guardrail3_domain_config::types::RustChecksConfig::libarch)
                 .unwrap_or(global_libarch_enabled);
 
             let mut failures = scoped_arch_failures(&config);
@@ -207,13 +206,17 @@ fn misplaced_root_reporting_enabled(config: &ConfigResolution) -> bool {
 
 fn scoped_arch_failures(config: &GuardrailConfig) -> Vec<ArchInputFailureFacts> {
     let mut failures = Vec::new();
-    let Some(rust) = config.rust.as_ref() else {
+    let Some(rust) = config.rust() else {
         return failures;
     };
 
-    if let Some(apps) = rust.apps.as_ref() {
+    if let Some(apps) = rust.apps() {
         for (app_name, app) in apps {
-            if app.checks.as_ref().and_then(|checks| checks.arch).is_some() {
+            if app
+                .checks()
+                .and_then(guardrail3_domain_config::types::RustChecksConfig::arch)
+                .is_some()
+            {
                 failures.push(ArchInputFailureFacts {
                     rel_path: "guardrail3.toml".to_owned(),
                     message: format!(
@@ -226,10 +229,9 @@ fn scoped_arch_failures(config: &GuardrailConfig) -> Vec<ArchInputFailureFacts> 
     }
 
     if rust
-        .packages
-        .as_ref()
-        .and_then(|packages| packages.checks.as_ref())
-        .and_then(|checks| checks.arch)
+        .packages()
+        .and_then(guardrail3_domain_config::types::CrateConfig::checks)
+        .and_then(guardrail3_domain_config::types::RustChecksConfig::arch)
         .is_some()
     {
         failures.push(ArchInputFailureFacts {
@@ -277,19 +279,19 @@ fn governed_root(root: &ArchRootFacts, config: &ConfigResolution) -> Option<Gove
 
 fn root_from_route(root: &RsArchRootView) -> ArchRootFacts {
     let mut owner_families = Vec::new();
-    if !root.app_zone_candidates.is_empty() {
+    if !root.app_zone_candidates().is_empty() {
         owner_families.push(RustArchitectureOwner::Hexarch);
     }
-    if !root.package_zone_candidates.is_empty() {
+    if !root.package_zone_candidates().is_empty() {
         owner_families.push(RustArchitectureOwner::Libarch);
     }
 
     ArchRootFacts {
-        rel_dir: root.root.rel_dir.clone(),
-        cargo_rel_path: root.root.cargo_rel_path.clone(),
-        classification: root.classification,
-        app_zone_candidates: root.app_zone_candidates.clone(),
-        package_zone_candidates: root.package_zone_candidates.clone(),
+        rel_dir: root.root().rel_dir().to_owned(),
+        cargo_rel_path: root.root().cargo_rel_path().to_owned(),
+        classification: root.classification(),
+        app_zone_candidates: root.app_zone_candidates().to_vec(),
+        package_zone_candidates: root.package_zone_candidates().to_vec(),
         owner_families,
     }
 }

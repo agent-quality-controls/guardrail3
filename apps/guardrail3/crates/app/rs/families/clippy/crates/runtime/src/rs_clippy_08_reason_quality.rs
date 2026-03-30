@@ -22,47 +22,47 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
         let section = parse_ban_section(parsed, key);
         for malformed in &section.malformed_messages {
             issue_count += 1;
-            results.push(CheckResult {
-                id: ID.to_owned(),
-                severity: Severity::Warn,
-                title: "ban section malformed".to_owned(),
-                message: malformed.clone(),
-                file: Some(input.config.rel_path.clone()),
-                line: None,
-                inventory: false,
-            });
+            results.push(CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Warn,
+                "ban section malformed".to_owned(),
+                malformed.clone(),
+                Some(input.config.rel_path.clone()),
+                None,
+                false,
+            ));
         }
         for entry in section.entries {
             if entry.is_plain_string || entry.reason.as_deref().is_none() {
                 issue_count += 1;
-                results.push(CheckResult {
-                    id: ID.to_owned(),
-                    severity: Severity::Warn,
-                    title: "ban entry missing reason".to_owned(),
-                    message: format!(
+                results.push(CheckResult::from_parts(
+                    ID.to_owned(),
+                    Severity::Warn,
+                    "ban entry missing reason".to_owned(),
+                    format!(
                         "`{}` in `{key}` must use table format with a `reason` field.",
                         entry.path
                     ),
-                    file: Some(input.config.rel_path.clone()),
-                    line: None,
-                    inventory: false,
-                });
+                    Some(input.config.rel_path.clone()),
+                    None,
+                    false,
+                ));
             }
         }
     }
 
     if issue_count == 0 {
         results.push(
-            CheckResult {
-                id: ID.to_owned(),
-                severity: Severity::Info,
-                title: "ban entries use reasoned table format".to_owned(),
-                message: "All managed ban entries use table format with a `reason` field."
+            CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Info,
+                "ban entries use reasoned table format".to_owned(),
+                "All managed ban entries use table format with a `reason` field."
                     .to_owned(),
-                file: Some(input.config.rel_path.clone()),
-                line: None,
-                inventory: false,
-            }
+                Some(input.config.rel_path.clone()),
+                None,
+                false,
+            )
             .as_inventory(),
         );
     }

@@ -18,7 +18,14 @@ fn validate_format(value: &str, _ctx: &()) -> garde::Result {
 pub struct Cli {
     #[command(subcommand)]
     #[garde(skip)] // reason: subcommand validated by clap
-    pub command: Commands,
+    command: Commands,
+}
+
+impl Cli {
+    #[must_use]
+    pub fn into_command(self) -> Commands {
+        self.command
+    }
 }
 
 #[derive(Subcommand, Debug)]
@@ -153,52 +160,104 @@ pub struct RsValidateArgs {
     /// Output format
     #[arg(long, default_value = "text")]
     #[garde(custom(validate_format))]
-    pub format: String,
+    format: String,
 
     /// Only check staged files (git diff --cached)
     #[arg(long, group = "scope")]
     #[garde(skip)] // reason: boolean flag, inherently valid
-    pub staged: bool,
+    staged: bool,
 
     /// Only check dirty files (staged + unstaged)
     #[arg(long, group = "scope")]
     #[garde(skip)] // reason: boolean flag, inherently valid
-    pub dirty: bool,
+    dirty: bool,
 
     /// Only check files changed in last N commits
     #[arg(long, group = "scope")]
     #[garde(skip)] // reason: type-validated by clap
-    pub commits: Option<usize>,
+    commits: Option<usize>,
 
     /// Specific files to check
     #[arg(long, group = "scope")]
     #[garde(inner(length(min = 1)))] // reason: each file path must be non-empty
-    pub files: Vec<String>,
+    files: Vec<String>,
 
     /// Project path (defaults to current directory)
     #[arg(default_value = ".")]
     #[garde(length(min = 1))] // reason: path must be non-empty
-    pub path: String,
+    path: String,
 
     /// Restrict Rust validation to the selected family. Repeatable.
     #[arg(long = "family", value_enum)]
     #[garde(skip)] // reason: clap validates enum values
-    pub families: Vec<RustValidateFamilyArg>,
+    families: Vec<RustValidateFamilyArg>,
 
     /// Run slow checks (cargo publish --dry-run, etc.)
     #[arg(long)]
     #[garde(skip)] // reason: boolean flag, inherently valid
-    pub thorough: bool,
+    thorough: bool,
 
     /// Show passing confirmation checks (e.g., 'clippy.toml exists', 'lint X correct'). These are hidden by default because they require no action.
     #[arg(long)]
     #[garde(skip)] // reason: boolean flag, inherently valid
-    pub inventory: bool,
+    inventory: bool,
 
     /// Show all individual items for summarized checks (e.g., list each #[allow] instead of showing count). Without this, checks with more than 5 items are summarized to a single line.
     #[arg(long)]
     #[garde(skip)] // reason: boolean flag, inherently valid
-    pub verbose: bool,
+    verbose: bool,
+}
+
+impl RsValidateArgs {
+    #[must_use]
+    pub fn format(&self) -> &str {
+        &self.format
+    }
+
+    #[must_use]
+    pub const fn staged(&self) -> bool {
+        self.staged
+    }
+
+    #[must_use]
+    pub const fn dirty(&self) -> bool {
+        self.dirty
+    }
+
+    #[must_use]
+    pub const fn commits(&self) -> Option<usize> {
+        self.commits
+    }
+
+    #[must_use]
+    pub fn files(&self) -> &[String] {
+        &self.files
+    }
+
+    #[must_use]
+    pub fn path(&self) -> &str {
+        &self.path
+    }
+
+    #[must_use]
+    pub fn families(&self) -> &[RustValidateFamilyArg] {
+        &self.families
+    }
+
+    #[must_use]
+    pub const fn thorough(&self) -> bool {
+        self.thorough
+    }
+
+    #[must_use]
+    pub const fn inventory(&self) -> bool {
+        self.inventory
+    }
+
+    #[must_use]
+    pub const fn verbose(&self) -> bool {
+        self.verbose
+    }
 }
 
 #[derive(clap::ValueEnum, Debug, Clone, Copy, PartialEq, Eq)]
@@ -211,6 +270,7 @@ pub enum RustValidateFamilyArg {
     Cargo,
     Code,
     Hexarch,
+    Libarch,
     Deps,
     Garde,
     Test,
@@ -230,6 +290,7 @@ impl From<RustValidateFamilyArg> for RustValidateFamily {
             RustValidateFamilyArg::Cargo => Self::Cargo,
             RustValidateFamilyArg::Code => Self::Code,
             RustValidateFamilyArg::Hexarch => Self::Hexarch,
+            RustValidateFamilyArg::Libarch => Self::Libarch,
             RustValidateFamilyArg::Deps => Self::Deps,
             RustValidateFamilyArg::Garde => Self::Garde,
             RustValidateFamilyArg::Test => Self::Test,
@@ -246,42 +307,84 @@ pub struct TsValidateArgs {
     /// Output format
     #[arg(long, default_value = "text")]
     #[garde(custom(validate_format))]
-    pub format: String,
+    format: String,
 
     /// Only check staged files (git diff --cached)
     #[arg(long, group = "scope")]
     #[garde(skip)] // reason: boolean flag, inherently valid
-    pub staged: bool,
+    staged: bool,
 
     /// Only check dirty files (staged + unstaged)
     #[arg(long, group = "scope")]
     #[garde(skip)] // reason: boolean flag, inherently valid
-    pub dirty: bool,
+    dirty: bool,
 
     /// Only check files changed in last N commits
     #[arg(long, group = "scope")]
     #[garde(skip)] // reason: type-validated by clap
-    pub commits: Option<usize>,
+    commits: Option<usize>,
 
     /// Specific files to check
     #[arg(long, group = "scope")]
     #[garde(inner(length(min = 1)))] // reason: each file path must be non-empty
-    pub files: Vec<String>,
+    files: Vec<String>,
 
     /// Project path (defaults to current directory)
     #[arg(default_value = ".")]
     #[garde(length(min = 1))] // reason: path must be non-empty
-    pub path: String,
+    path: String,
 
     /// Show passing confirmation checks (e.g., 'config exists'). These are hidden by default because they require no action.
     #[arg(long)]
     #[garde(skip)] // reason: boolean flag, inherently valid
-    pub inventory: bool,
+    inventory: bool,
 
     /// Show all individual items for summarized checks instead of a single summary line.
     #[arg(long)]
     #[garde(skip)] // reason: boolean flag, inherently valid
-    pub verbose: bool,
+    verbose: bool,
+}
+
+impl TsValidateArgs {
+    #[must_use]
+    pub fn format(&self) -> &str {
+        &self.format
+    }
+
+    #[must_use]
+    pub const fn staged(&self) -> bool {
+        self.staged
+    }
+
+    #[must_use]
+    pub const fn dirty(&self) -> bool {
+        self.dirty
+    }
+
+    #[must_use]
+    pub const fn commits(&self) -> Option<usize> {
+        self.commits
+    }
+
+    #[must_use]
+    pub fn files(&self) -> &[String] {
+        &self.files
+    }
+
+    #[must_use]
+    pub fn path(&self) -> &str {
+        &self.path
+    }
+
+    #[must_use]
+    pub const fn inventory(&self) -> bool {
+        self.inventory
+    }
+
+    #[must_use]
+    pub const fn verbose(&self) -> bool {
+        self.verbose
+    }
 }
 
 #[derive(Parser, Debug, garde::Validate)]
@@ -289,17 +392,34 @@ pub struct GenerateArgs {
     /// Project path
     #[arg(default_value = ".")]
     #[garde(length(min = 1))] // reason: path must be non-empty
-    pub path: String,
+    path: String,
 
     /// Show what would change without writing (dry run)
     #[arg(long)]
     #[garde(skip)] // reason: boolean flag, inherently valid
-    pub dry_run: bool,
+    dry_run: bool,
 
     /// Dump generated files to this directory instead of just showing summary (requires --dry-run)
     #[arg(long)]
     #[garde(inner(length(min = 1)))] // reason: if provided, path must be non-empty
-    pub dump_dir: Option<String>,
+    dump_dir: Option<String>,
+}
+
+impl GenerateArgs {
+    #[must_use]
+    pub fn path(&self) -> &str {
+        &self.path
+    }
+
+    #[must_use]
+    pub const fn dry_run(&self) -> bool {
+        self.dry_run
+    }
+
+    #[must_use]
+    pub fn dump_dir(&self) -> Option<&str> {
+        self.dump_dir.as_deref()
+    }
 }
 
 #[derive(Parser, Debug, garde::Validate)]
@@ -307,12 +427,26 @@ pub struct PathArg {
     /// Project path
     #[arg(default_value = ".")]
     #[garde(length(min = 1))] // reason: path must be non-empty
-    pub path: String,
+    path: String,
+}
+
+impl PathArg {
+    #[must_use]
+    pub fn path(&self) -> &str {
+        &self.path
+    }
 }
 
 #[derive(Parser, Debug, garde::Validate)]
 pub struct ShowModuleArgs {
     /// Module name
     #[garde(length(min = 1))] // reason: module name must be non-empty
-    pub name: String,
+    name: String,
+}
+
+impl ShowModuleArgs {
+    #[must_use]
+    pub fn name(&self) -> &str {
+        &self.name
+    }
 }

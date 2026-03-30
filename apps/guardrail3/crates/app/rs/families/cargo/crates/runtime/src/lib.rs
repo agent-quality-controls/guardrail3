@@ -2,28 +2,48 @@ mod discover;
 mod facts;
 mod inputs;
 mod lint_support;
+#[path = "workspace_policy/rs_cargo_01_workspace_lints.rs"]
 mod rs_cargo_01_workspace_lints;
+#[path = "workspace_policy/rs_cargo_02_lint_levels.rs"]
 mod rs_cargo_02_lint_levels;
+#[path = "workspace_policy/rs_cargo_03_allow_inventory.rs"]
 mod rs_cargo_03_allow_inventory;
+#[path = "member_policy/rs_cargo_04_lint_inheritance.rs"]
 mod rs_cargo_04_lint_inheritance;
+#[path = "workspace_policy/rs_cargo_05_workspace_metadata.rs"]
 mod rs_cargo_05_workspace_metadata;
+#[path = "member_policy/rs_cargo_06_no_weakened_overrides.rs"]
 mod rs_cargo_06_no_weakened_overrides;
+#[path = "workspace_policy/rs_cargo_07_priority_order.rs"]
 mod rs_cargo_07_priority_order;
+#[path = "workspace_policy/rs_cargo_08_resolver.rs"]
 mod rs_cargo_08_resolver;
+#[path = "member_policy/rs_cargo_09_member_edition_drift.rs"]
 mod rs_cargo_09_member_edition_drift;
+#[path = "member_policy/rs_cargo_10_missing_member_cargo.rs"]
 mod rs_cargo_10_missing_member_cargo;
+#[path = "workspace_policy/rs_cargo_11_disallowed_macros_deny.rs"]
 mod rs_cargo_11_disallowed_macros_deny;
+#[path = "workspace_policy/rs_cargo_12_unapproved_allow_entries.rs"]
 mod rs_cargo_12_unapproved_allow_entries;
+#[path = "member_policy/rs_cargo_13_member_local_allows_forbidden.rs"]
 mod rs_cargo_13_member_local_allows_forbidden;
+#[path = "member_policy/rs_cargo_14_input_failures.rs"]
 mod rs_cargo_14_input_failures;
+#[path = "workspace_policy/rs_cargo_15_rust_version_policy.rs"]
 mod rs_cargo_15_rust_version_policy;
 
-use std::collections::BTreeSet;
-
-use guardrail3_app_rs_family_mapper::{FamilyMapper, RsCargoRoute};
-use guardrail3_domain_config::types::GuardrailConfig;
+use guardrail3_app_rs_family_mapper::RsCargoRoute;
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::CheckResult;
+
+#[cfg(test)]
+use std::collections::BTreeSet;
+#[cfg(test)]
+use guardrail3_app_rs_family_mapper::FamilyMapper;
+#[cfg(test)]
+use guardrail3_domain_config::types::GuardrailConfig;
+#[cfg(test)]
 use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
 use self::discover::collect;
@@ -72,6 +92,7 @@ pub fn check(tree: &ProjectTree, route: &RsCargoRoute) -> Vec<CheckResult> {
     results
 }
 
+#[cfg(test)]
 pub fn check_test_tree(tree: &ProjectTree) -> Vec<CheckResult> {
     let scope = guardrail3_app_rs_placement::collect(tree);
     let config = tree

@@ -13,15 +13,15 @@ pub fn check(input: &RustfmtRootInput, results: &mut Vec<CheckResult>) {
     };
 
     if let Some(ignore) = parsed.get("ignore") {
-        results.push(CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Warn,
-            title: "rustfmt ignore escape hatch".to_owned(),
-            message: format!("`ignore` excludes paths from formatting: {ignore}"),
-            file: Some(rel.to_owned()),
-            line: None,
-            inventory: false,
-        });
+        results.push(CheckResult::from_parts(
+            ID.to_owned(),
+            Severity::Warn,
+            "rustfmt ignore escape hatch".to_owned(),
+            format!("`ignore` excludes paths from formatting: {ignore}"),
+            Some(rel.to_owned()),
+            None,
+            false,
+        ));
     }
 }
 

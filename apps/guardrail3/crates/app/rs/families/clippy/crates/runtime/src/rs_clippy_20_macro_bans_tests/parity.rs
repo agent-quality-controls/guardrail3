@@ -1,4 +1,4 @@
-use guardrail3_domain_modules::clippy::EXPECTED_MACRO_BANS;
+use guardrail3_app_rs_family_clippy_assertions::rs_clippy_20_macro_bans as assertions;
 use test_support::build_fixture_clippy_toml;
 
 #[test]
@@ -13,7 +13,7 @@ fn generated_macro_ban_set_matches_rule_baseline() {
         .flatten()
         .filter_map(|entry| entry.get("path").and_then(toml::Value::as_str))
         .collect::<Vec<_>>();
-    let expected = EXPECTED_MACRO_BANS.to_vec();
+    let expected = assertions::macro_bans();
 
     assert_eq!(actual, expected);
 }

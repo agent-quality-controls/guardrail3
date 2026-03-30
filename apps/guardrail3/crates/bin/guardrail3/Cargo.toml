@@ -20,8 +20,6 @@ workspace = true
 [features]
 default = [
     "families-all",
-    "product-ts",
-    "product-hooks",
     "product-rs-generate",
     "product-coverage-clippy",
     "product-coverage-deny",

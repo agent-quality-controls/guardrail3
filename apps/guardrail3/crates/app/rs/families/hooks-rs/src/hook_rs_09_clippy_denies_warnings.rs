@@ -3,8 +3,8 @@ mod support;
 use guardrail3_app_rs_family_hooks_shared::hook_shell::{ParsedShellScript, parse_script};
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::RustHookCommandInput;
 use self::support::*;
+use super::inputs::RustHookCommandInput;
 
 const ID: &str = "HOOK-RS-09";
 
@@ -30,30 +30,29 @@ pub fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<CheckResult>) {
 
     if found {
         results.push(
-            CheckResult {
-                id: ID.to_owned(),
-                severity: Severity::Warn,
-                title: "cargo clippy denies warnings".to_owned(),
-                message: "Hook runs clippy in a deny-warnings mode.".to_owned(),
-                file: Some(input.rel_path.to_owned()),
-                line: None,
-                inventory: false,
-            }
+            CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Warn,
+                "cargo clippy denies warnings".to_owned(),
+                "Hook runs clippy in a deny-warnings mode.".to_owned(),
+                Some(input.rel_path.to_owned()),
+                None,
+                false,
+            )
             .as_inventory(),
         );
     } else {
-        results.push(CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Warn,
-            title: "cargo clippy deny-warnings step missing".to_owned(),
-            message: "Hook does not execute `cargo clippy` with `-D warnings` or equivalent."
+        results.push(CheckResult::from_parts(
+    ID.to_owned(),
+    Severity::Warn,
+    "cargo clippy deny-warnings step missing".to_owned(),
+    "Hook does not execute `cargo clippy` with `-D warnings` or equivalent."
                 .to_owned(),
-            file: Some(input.rel_path.to_owned()),
-            line: None,
-            inventory: false,
-        });
+    Some(input.rel_path.to_owned()),
+    None,
+    false,
+        ));
     }
-}
 
 fn script_contains_clippy_deny(parsed: &ParsedShellScript<'_>) -> bool {
     execute_script_for_clippy(parsed, parsed, &mut EnvState::default(), &mut Vec::new())
@@ -65,8 +64,8 @@ fn execute_script_for_clippy(
     env_state: &mut EnvState,
     visiting: &mut Vec<String>,
 ) -> bool {
-    for line in &parsed.executable_lines {
-        if line_contains_clippy_deny(line.raw, root, env_state, visiting) {
+    for line in parsed.executable_lines() {
+        if line_contains_clippy_deny(line.raw(), root, env_state, visiting) {
             return true;
         }
     }
@@ -213,18 +212,18 @@ fn called_function_contains_clippy_deny(
     visiting: &mut Vec<String>,
 ) -> bool {
     let Some(function) = root
-        .functions
+        .functions()
         .iter()
-        .find(|function| function.name == command_name)
+        .find(|function| function.name() == command_name)
     else {
         return false;
     };
-    if visiting.iter().any(|name| name == &function.name) {
+    if visiting.iter().any(|name| name == &function.name()) {
         return false;
     }
 
-    visiting.push(function.name.clone());
-    let body_parsed = parse_script(&function.body);
+    visiting.push(function.name().to_owned());
+    let body_parsed = parse_script(&function.body());
     let found = execute_script_for_clippy(&body_parsed, root, env_state, visiting);
     let _ = visiting.pop();
     found
@@ -433,5 +432,5 @@ pub(super) fn run_case(content: &str) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-#[path = "hook_rs_09_clippy_denies_warnings_tests/mod.rs"]
+#[path = "tests/tools/hook_rs_09_clippy_denies_warnings_tests/mod.rs"]
 mod hook_rs_09_clippy_denies_warnings_tests;

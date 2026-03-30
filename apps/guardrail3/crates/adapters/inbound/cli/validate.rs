@@ -10,37 +10,37 @@ pub trait ScopedValidateArgs {
 
 impl ScopedValidateArgs for crate::cli::RsValidateArgs {
     fn staged(&self) -> bool {
-        self.staged
+        self.staged()
     }
 
     fn dirty(&self) -> bool {
-        self.dirty
+        self.dirty()
     }
 
     fn commits(&self) -> Option<usize> {
-        self.commits
+        self.commits()
     }
 
     fn files(&self) -> &[String] {
-        &self.files
+        self.files()
     }
 }
 
 impl ScopedValidateArgs for crate::cli::TsValidateArgs {
     fn staged(&self) -> bool {
-        self.staged
+        self.staged()
     }
 
     fn dirty(&self) -> bool {
-        self.dirty
+        self.dirty()
     }
 
     fn commits(&self) -> Option<usize> {
-        self.commits
+        self.commits()
     }
 
     fn files(&self) -> &[String] {
-        &self.files
+        self.files()
     }
 }
 
@@ -58,17 +58,22 @@ pub fn resolve_scoped_files_pub<T: ScopedValidateArgs>(
 
 pub fn normalize_scoped_files(
     project_path: &Path,
+    requested_path: &Path,
     scoped_files: Option<&[String]>,
 ) -> Option<BTreeSet<String>> {
     scoped_files.map(|files| {
         files
             .iter()
-            .filter_map(|path| normalize_one_scoped_file(project_path, path))
+            .filter_map(|path| normalize_one_scoped_file(project_path, requested_path, path))
             .collect()
     })
 }
 
-fn normalize_one_scoped_file(project_path: &Path, path: &str) -> Option<String> {
+fn normalize_one_scoped_file(
+    project_path: &Path,
+    requested_path: &Path,
+    path: &str,
+) -> Option<String> {
     let candidate = Path::new(path);
     if candidate.is_absolute() {
         candidate
@@ -76,7 +81,16 @@ fn normalize_one_scoped_file(project_path: &Path, path: &str) -> Option<String> 
             .ok()
             .map(|rel| rel.to_string_lossy().trim_start_matches("./").to_owned())
     } else {
-        Some(path.trim_start_matches("./").to_owned())
+        let requested_base = if requested_path.is_dir() {
+            requested_path
+        } else {
+            requested_path.parent().unwrap_or(requested_path)
+        };
+        requested_base
+            .join(candidate)
+            .strip_prefix(project_path)
+            .ok()
+            .map(|rel| rel.to_string_lossy().trim_start_matches("./").to_owned())
     }
 }
 

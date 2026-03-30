@@ -1,9 +1,7 @@
 //! Runtime help injection for the CLI.
 
 use clap::Command;
-use guardrail3_app_commands::messages::{
-    RS_HELP, RS_INIT_HELP, RS_VALIDATE_HELP, TOP_LEVEL_HELP,
-};
+use guardrail3_app_commands::messages::{RS_HELP, RS_INIT_HELP, RS_VALIDATE_HELP, TOP_LEVEL_HELP};
 #[cfg(feature = "product-ts")]
 use guardrail3_app_commands::messages::{TS_HELP, TS_INIT_HELP, TS_VALIDATE_HELP};
 

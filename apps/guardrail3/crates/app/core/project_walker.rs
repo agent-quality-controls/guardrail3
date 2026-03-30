@@ -1,12 +1,15 @@
 //! Project walker — builds a [`ProjectTree`] from the filesystem.
 //!
 //! Single walk using the `ignore` crate (respects `.gitignore`) plus a
-//! `git ls-files` patch for tracked-but-gitignored files.
+//! `git ls-files` patch for tracked-but-gitignored files and a targeted
+//! recovery pass for ignored-but-relevant files.
 //!
 //! The `ignore` crate skips ALL files matching `.gitignore` patterns — even
 //! tracked ones. But tracked files are part of the project (they ship to other
 //! developers on `git pull`). So after the initial walk, we run `git ls-files`
-//! to find any tracked files the walker missed and add them back.
+//! to find any tracked files the walker missed and add them back. We also
+//! recover ignored files that still matter to validation, such as manifests,
+//! config files, and Rust/TypeScript source files.
 //!
 //! Source files (.rs, .ts, .tsx) appear in the structure but their content
 //! is NOT cached. Config files get their content cached.
@@ -17,6 +20,7 @@ use std::path::Path;
 use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
 #[allow(clippy::disallowed_methods)] // reason: git ls-files requires Command::new
 use guardrail3_outbound_traits::FileSystem;
+use walkdir::WalkDir;
 
 type ChildSets = (
     BTreeSet<String>,
@@ -75,6 +79,9 @@ const CACHED_PREFIX: &[&str] = &[
     "jest.config.",
 ];
 
+const RECOVERED_SOURCE_EXTENSIONS: &[&str] =
+    &["rs", "ts", "tsx", "js", "jsx", "mts", "cts", "mjs", "cjs"];
+
 /// Check if a file name should have its content cached.
 fn should_cache(name: &str, rel_path: &str) -> bool {
     if CACHED_EXACT.contains(&name) {
@@ -112,12 +119,25 @@ fn should_cache(name: &str, rel_path: &str) -> bool {
     false
 }
 
+fn should_recover_ignored(name: &str, rel_path: &str) -> bool {
+    if should_cache(name, rel_path) {
+        return true;
+    }
+
+    Path::new(name)
+        .extension()
+        .and_then(|ext| ext.to_str())
+        .is_some_and(|ext| RECOVERED_SOURCE_EXTENSIONS.contains(&ext))
+}
+
 /// Build a [`ProjectTree`] by walking the filesystem from `root`.
 ///
 /// 1. Walk with `ignore` crate (respects `.gitignore`, skips `.git/`)
 /// 2. If in a git repo, run `git ls-files` to find tracked-but-gitignored files
 ///    and add them back — tracked files are part of the project regardless of
 ///    `.gitignore` patterns.
+/// 3. Recover ignored-but-relevant files (manifests, config, source) so
+///    validation still sees them even when they are untracked.
 pub fn walk_project(fs: &dyn FileSystem, root: &Path) -> ProjectTree {
     let mut dir_children: BTreeMap<String, ChildSets> = BTreeMap::new();
     let mut content: BTreeMap<String, String> = BTreeMap::new();
@@ -199,9 +219,12 @@ pub fn walk_project(fs: &dyn FileSystem, root: &Path) -> ProjectTree {
         patch_tracked_files(fs, root, &mut dir_children, &mut content);
     }
 
-    // Phase 3: Preserve immediate filesystem children that the ignore walk may omit.
+    // Phase 3: Recover ignored-but-relevant files anywhere under the root.
+    patch_relevant_ignored_files(fs, root, &mut dir_children, &mut content);
+
+    // Phase 4: Preserve immediate filesystem children that the ignore walk may omit.
     // This keeps structural rules fail-closed for ignored loose files and broken
-    // symlinks without abandoning the main ignore-based traversal.
+    // symlinks without broad recursive recovery of all ignored directories.
     patch_immediate_children(fs, root, &mut dir_children, &mut content);
 
     // Convert to DirEntry structs
@@ -209,22 +232,18 @@ pub fn walk_project(fs: &dyn FileSystem, root: &Path) -> ProjectTree {
         .into_iter()
         .map(
             |(dir_rel, (child_dirs, child_files, symlink_dirs, symlink_files))| {
-                let entry = DirEntry {
-                    dirs: child_dirs.into_iter().collect(),
-                    files: child_files.into_iter().collect(),
-                    symlink_dirs: symlink_dirs.into_iter().collect(),
-                    symlink_files: symlink_files.into_iter().collect(),
-                };
+                let entry = DirEntry::new(
+                    child_dirs.into_iter().collect(),
+                    child_files.into_iter().collect(),
+                    symlink_dirs.into_iter().collect(),
+                    symlink_files.into_iter().collect(),
+                );
                 (dir_rel, entry)
             },
         )
         .collect();
 
-    ProjectTree {
-        root: root.to_owned(),
-        structure,
-        content,
-    }
+    ProjectTree::new(root.to_owned(), structure, content)
 }
 
 /// Find tracked files that the `ignore` crate skipped (because they match
@@ -299,25 +318,79 @@ fn patch_tracked_files(
     }
 }
 
+fn patch_relevant_ignored_files(
+    fs: &dyn FileSystem,
+    root: &Path,
+    dir_children: &mut BTreeMap<String, ChildSets>,
+    content: &mut BTreeMap<String, String>,
+) {
+    let mut existing_files = BTreeSet::new();
+    for (dir_rel, (_, files, _, _)) in dir_children.iter() {
+        for file in files {
+            let _ = existing_files.insert(ProjectTree::join_rel(dir_rel, file));
+        }
+    }
+
+    for entry in WalkDir::new(root)
+        .follow_links(true)
+        .into_iter()
+        .filter_entry(|entry| entry.file_name().to_str().is_none_or(|name| name != ".git"))
+        .flatten()
+    {
+        if !(entry.file_type().is_file() || entry.file_type().is_symlink()) {
+            continue;
+        }
+
+        let Ok(rel_path) = entry.path().strip_prefix(root) else {
+            continue;
+        };
+        let rel_path = rel_path.to_string_lossy().into_owned();
+        if rel_path.is_empty() || existing_files.contains(&rel_path) {
+            continue;
+        }
+
+        let name = entry.file_name().to_string_lossy().into_owned();
+        if !should_recover_ignored(&name, &rel_path) {
+            continue;
+        }
+
+        let Some((parent_rel, file_name)) = split_parent_child(&rel_path) else {
+            continue;
+        };
+        ensure_parents(dir_children, &parent_rel);
+
+        let parent = dir_children
+            .entry(parent_rel)
+            .or_insert_with(empty_child_sets);
+        let _ = parent.1.insert(file_name.clone());
+        if entry.path_is_symlink() {
+            let _ = parent.3.insert(file_name);
+        }
+
+        if should_cache(&name, &rel_path) {
+            if let Some(file_content) = fs.read_file(entry.path()) {
+                let _ = content.insert(rel_path.clone(), file_content);
+            }
+        }
+
+        let _ = existing_files.insert(rel_path);
+    }
+}
+
 fn patch_immediate_children(
     fs: &dyn FileSystem,
     root: &Path,
     dir_children: &mut BTreeMap<String, ChildSets>,
     content: &mut BTreeMap<String, String>,
 ) {
-    let mut pending = dir_children.keys().cloned().collect::<Vec<_>>();
-    let mut scanned = BTreeSet::new();
+    let discovered_dirs = dir_children.keys().cloned().collect::<Vec<_>>();
 
-    while let Some(dir_rel) = pending.pop() {
-        if !scanned.insert(dir_rel.clone()) {
-            continue;
-        }
+    for dir_rel in discovered_dirs {
         let abs_dir = if dir_rel.is_empty() {
             root.to_path_buf()
         } else {
             root.join(&dir_rel)
         };
-        let mut child_dirs_to_add = Vec::new();
 
         for entry in fs.list_dir(&abs_dir) {
             let Ok(file_type) = entry.file_type() else {
@@ -355,16 +428,9 @@ fn patch_immediate_children(
             if file_type.is_dir() {
                 let child_rel = ProjectTree::join_rel(&dir_rel, &name);
                 let _ = parent.0.insert(name);
-                child_dirs_to_add.push(child_rel);
-            }
-        }
-
-        for child_rel in child_dirs_to_add {
-            if !dir_children.contains_key(&child_rel) {
                 let _ = dir_children
-                    .entry(child_rel.clone())
+                    .entry(child_rel)
                     .or_insert_with(empty_child_sets);
-                pending.push(child_rel);
             }
         }
     }

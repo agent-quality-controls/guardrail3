@@ -69,7 +69,6 @@ pub struct CrawlResult {
 ///
 /// Respects .gitignore — `node_modules`/, target/, dist/ etc. are skipped automatically
 /// if they're in .gitignore (which they should be in any sane project).
-#[allow(clippy::too_many_lines)] // reason: single match on filename — splitting would obscure the classification
 pub fn crawl(root: &Path) -> CrawlResult {
     let mut result = CrawlResult::default();
 
@@ -81,76 +80,103 @@ pub fn crawl(root: &Path) -> CrawlResult {
         .build();
 
     for entry in walker.flatten() {
-        if !entry.file_type().is_some_and(|ft| ft.is_file()) {
-            continue;
-        }
-        let path = entry.into_path();
-        let Some(name) = path.file_name().and_then(|n| n.to_str()).map(str::to_owned) else {
-            continue;
-        };
-
-        // Config files inside test directories are test data, not project configs.
-        // Source files still get tracked for dirs_with_rs/dirs_with_ts coverage.
-        if is_test_directory(&path) {
-            track_source_dir(&path, &mut result);
-            continue;
-        }
-
-        match name.as_str() {
-            // ── Rust structure ──
-            "Cargo.toml" => result.cargo_tomls.push(path),
-            "Cargo.lock" => result.cargo_locks.push(path),
-
-            // ── Rust guardrail configs ──
-            "clippy.toml" | ".clippy.toml" => result.clippy_tomls.push(path),
-            "deny.toml" | ".deny.toml" => result.deny_tomls.push(path),
-            "rustfmt.toml" | ".rustfmt.toml" => result.rustfmt_tomls.push(path),
-            "rust-toolchain.toml" => result.rust_toolchains.push(path),
-
-            // ── TypeScript structure ──
-            "package.json" => result.package_jsons.push(path),
-            "pnpm-workspace.yaml" => result.pnpm_workspaces.push(path),
-
-            // ── TypeScript guardrail configs ──
-            "tsconfig.json" => result.tsconfigs.push(path),
-            "tsconfig.base.json" => result.tsconfig_bases.push(path),
-            ".npmrc" => result.npmrcs.push(path),
-            ".jscpd.json" => result.jscpd_configs.push(path),
-
-            // ── Release ──
-            "release-plz.toml" | ".release-plz.toml" => result.release_plz_tomls.push(path),
-            "cliff.toml" => result.cliff_tomls.push(path),
-
-            // ── Repo-level files ──
-            "CLAUDE.md" => result.claude_mds.push(path),
-            "LICENSE" | "LICENSE-MIT" | "LICENSE-APACHE" | "LICENSE.md" => {
-                result.license_files.push(path);
-            }
-            "mutants.toml" => {
-                // Only if inside .cargo/
-                if path
-                    .parent()
-                    .and_then(|p| p.file_name())
-                    .and_then(|n| n.to_str())
-                    == Some(".cargo")
-                {
-                    result.cargo_mutants_tomls.push(path);
-                }
-            }
-
-            // ── guardrail3 ──
-            "guardrail3.toml" => result.guardrail3_tomls.push(path),
-
-            // ── Multi-name configs — check prefix/suffix ──
-            _ => {
-                // Track source file directories for coverage maps
-                track_source_dir(&path, &mut result);
-                classify_by_pattern(&name, path, &mut result);
-            }
-        }
+        handle_walk_entry(entry, &mut result);
     }
 
-    // Sort all vectors for deterministic output
+    sort_result(&mut result);
+    result
+}
+
+fn handle_walk_entry(entry: ignore::DirEntry, result: &mut CrawlResult) {
+    if !entry.file_type().is_some_and(|ft| ft.is_file()) {
+        return;
+    }
+
+    let path = entry.into_path();
+    let Some(name) = path.file_name().and_then(|n| n.to_str()).map(str::to_owned) else {
+        return;
+    };
+
+    if is_test_directory(&path) {
+        track_source_dir(&path, result);
+        return;
+    }
+
+    if classify_exact_name(&name, &path, result) {
+        return;
+    }
+
+    track_source_dir(&path, result);
+    classify_by_pattern(&name, path, result);
+}
+
+fn classify_exact_name(name: &str, path: &Path, result: &mut CrawlResult) -> bool {
+    classify_rust_exact_name(name, path, result)
+        || classify_ts_exact_name(name, path, result)
+        || classify_release_exact_name(name, path, result)
+        || classify_repo_exact_name(name, path, result)
+}
+
+fn classify_rust_exact_name(name: &str, path: &Path, result: &mut CrawlResult) -> bool {
+    match name {
+        "Cargo.toml" => result.cargo_tomls.push(path.to_path_buf()),
+        "Cargo.lock" => result.cargo_locks.push(path.to_path_buf()),
+        "clippy.toml" | ".clippy.toml" => result.clippy_tomls.push(path.to_path_buf()),
+        "deny.toml" | ".deny.toml" => result.deny_tomls.push(path.to_path_buf()),
+        "rustfmt.toml" | ".rustfmt.toml" => result.rustfmt_tomls.push(path.to_path_buf()),
+        "rust-toolchain.toml" => result.rust_toolchains.push(path.to_path_buf()),
+        "mutants.toml" if is_cargo_mutants_path(path) => {
+            result.cargo_mutants_tomls.push(path.to_path_buf());
+        }
+        _ => return false,
+    }
+    true
+}
+
+fn classify_ts_exact_name(name: &str, path: &Path, result: &mut CrawlResult) -> bool {
+    match name {
+        "package.json" => result.package_jsons.push(path.to_path_buf()),
+        "pnpm-workspace.yaml" => result.pnpm_workspaces.push(path.to_path_buf()),
+        "tsconfig.json" => result.tsconfigs.push(path.to_path_buf()),
+        "tsconfig.base.json" => result.tsconfig_bases.push(path.to_path_buf()),
+        ".npmrc" => result.npmrcs.push(path.to_path_buf()),
+        ".jscpd.json" => result.jscpd_configs.push(path.to_path_buf()),
+        _ => return false,
+    }
+    true
+}
+
+fn classify_release_exact_name(name: &str, path: &Path, result: &mut CrawlResult) -> bool {
+    match name {
+        "release-plz.toml" | ".release-plz.toml" => {
+            result.release_plz_tomls.push(path.to_path_buf());
+        }
+        "cliff.toml" => result.cliff_tomls.push(path.to_path_buf()),
+        _ => return false,
+    }
+    true
+}
+
+fn classify_repo_exact_name(name: &str, path: &Path, result: &mut CrawlResult) -> bool {
+    match name {
+        "CLAUDE.md" => result.claude_mds.push(path.to_path_buf()),
+        "LICENSE" | "LICENSE-MIT" | "LICENSE-APACHE" | "LICENSE.md" => {
+            result.license_files.push(path.to_path_buf());
+        }
+        "guardrail3.toml" => result.guardrail3_tomls.push(path.to_path_buf()),
+        _ => return false,
+    }
+    true
+}
+
+fn is_cargo_mutants_path(path: &Path) -> bool {
+    path.parent()
+        .and_then(|p| p.file_name())
+        .and_then(|n| n.to_str())
+        == Some(".cargo")
+}
+
+fn sort_result(result: &mut CrawlResult) {
     result.cargo_tomls.sort();
     result.cargo_locks.sort();
     result.clippy_tomls.sort();
@@ -178,8 +204,6 @@ pub fn crawl(root: &Path) -> CrawlResult {
     result.cargo_mutants_tomls.sort();
     result.guardrail3_tomls.sort();
     result.guardrail3_overrides.sort();
-
-    result
 }
 
 /// Classify files that have variable names (eslint.config.*, .stylelintrc.*, cspell.config.*, etc.)

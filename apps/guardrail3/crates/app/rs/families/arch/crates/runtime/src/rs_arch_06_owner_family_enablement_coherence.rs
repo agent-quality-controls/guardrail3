@@ -11,23 +11,23 @@ pub fn check(input: &OwnerFamilyCoherenceInput<'_>, results: &mut Vec<CheckResul
             RustArchitectureOwner::Hexarch => "hexarch",
             RustArchitectureOwner::Libarch => "libarch",
         };
-        results.push(CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Error,
-            title: format!(
+        results.push(CheckResult::from_parts(
+            ID.to_owned(),
+            Severity::Error,
+            format!(
                 "Rust {} root `{}` is not governed by {}",
                 input.root.owner.label(),
                 display_dir(&input.root.rel_dir),
                 family_label
             ),
-            message: format!(
+            format!(
                 "`{}` classifies under `{}`, but effective `{}` enablement resolves to false. Governed Rust roots must stay coherent with their owning architecture family.",
                 input.root.cargo_rel_path, input.root.owner_root_rel, family_label
             ),
-            file: Some(input.root.cargo_rel_path.clone()),
-            line: None,
-            inventory: false,
-        });
+            Some(input.root.cargo_rel_path.clone()),
+            None,
+            false,
+        ));
         return;
     }
 
@@ -36,23 +36,23 @@ pub fn check(input: &OwnerFamilyCoherenceInput<'_>, results: &mut Vec<CheckResul
         RustArchitectureOwner::Libarch => "libarch",
     };
     results.push(
-        CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Info,
-            title: format!(
+        CheckResult::from_parts(
+            ID.to_owned(),
+            Severity::Info,
+            format!(
                 "Rust {} root `{}` stays coherent with {}",
                 input.root.owner.label(),
                 display_dir(&input.root.rel_dir),
                 family_label
             ),
-            message: format!(
+            format!(
                 "`{}` classifies under `{}`, and effective `{}` enablement resolves to true.",
                 input.root.cargo_rel_path, input.root.owner_root_rel, family_label
             ),
-            file: Some(input.root.cargo_rel_path.clone()),
-            line: None,
-            inventory: false,
-        }
+            Some(input.root.cargo_rel_path.clone()),
+            None,
+            false,
+        )
         .as_inventory(),
     );
 }

@@ -11,11 +11,11 @@ pub(super) fn collect_cargo_roots(
     input_failures: &mut Vec<GardeInputFailureFacts>,
 ) -> BTreeMap<String, CargoRootFacts> {
     route
-        .roots
+        .roots()
         .iter()
         .map(|root| {
-            let rel_dir = root.root.rel_dir.clone();
-            let rel_path = root.root.cargo_rel_path.clone();
+            let rel_dir = root.root().rel_dir().to_owned();
+            let rel_path = root.root().cargo_rel_path().to_owned();
             let parsed = tree
                 .file_content(&rel_path)
                 .map(|content| toml::from_str::<toml::Value>(content));

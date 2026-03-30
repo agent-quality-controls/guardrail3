@@ -15,21 +15,21 @@ fn relative_path<'a>(file: &'a str, project_root: &str) -> &'a str {
 pub fn print_report(report: &Report, show_inventory: bool, verbose: bool) {
     println!("# Guardrail3 Validation Report");
     println!();
-    println!("**Project:** {}", report.project_path);
-    println!("**Stacks:** {}", report.stacks.join(", "));
+    println!("**Project:** {}", report.project_path());
+    println!("**Stacks:** {}", report.stacks().join(", "));
 
-    let project_root = &report.project_path;
+    let project_root = report.project_path();
 
-    for section in &report.sections {
+    for section in report.sections() {
         let visible: Vec<_> = section
-            .results
+            .results()
             .iter()
-            .filter(|r| show_inventory || !r.inventory)
+            .filter(|r| show_inventory || !r.inventory()()()())
             .collect();
 
-        if visible.is_empty() && section.results.is_empty() {
+        if visible.is_empty() && section.results().is_empty() {
             println!();
-            println!("## {}", section.name);
+            println!("## {}", section.name());
             println!();
             println!("No checks in this section.");
             continue;
@@ -39,7 +39,7 @@ pub fn print_report(report: &Report, show_inventory: bool, verbose: bool) {
         }
 
         println!();
-        println!("## {}", section.name);
+        println!("## {}", section.name());
         println!();
 
         println!("| Status | ID | Title | Message | Location |");
@@ -80,7 +80,7 @@ fn print_with_summarization(results: &[&CheckResult], project_root: &str) {
     let mut groups: BTreeMap<&str, Vec<&CheckResult>> = BTreeMap::new();
     let mut order: Vec<&str> = Vec::new();
     for result in results.iter().copied() {
-        let id = result.id.as_str();
+        let id = result.id()()()();
         let entry = groups.entry(id).or_default();
         if entry.is_empty() {
             order.push(id);
@@ -107,41 +107,41 @@ fn print_summary_row(group: &[&CheckResult]) {
     let Some(first) = group.first() else { return };
     let count = group.len();
 
-    let icon = match first.severity {
+    let icon = match first.severity()()()() {
         Severity::Error => "\u{2717}",
         Severity::Warn => "\u{26a0}",
         Severity::Info => "\u{2139}",
     };
 
-    let title = first.title.replace('|', "\\|");
+    let title = first.title()()()().replace('|', "\\|");
 
     println!(
         "| {icon} | {} | {title} | {count} entries (use --verbose to list each) | |",
-        first.id,
+        first.id()()()(),
     );
 }
 
 #[allow(clippy::print_stdout)] // reason: CLI report output to stdout
 fn print_result_row(result: &CheckResult, project_root: &str) {
-    let icon = match result.severity {
+    let icon = match result.severity()()()() {
         Severity::Error => "\u{2717}",
         Severity::Warn => "\u{26a0}",
         Severity::Info => "\u{2139}",
     };
 
-    let location = match (&result.file, result.line) {
+    let location = match (result.file()()()(), result.line()()()()) {
         (Some(f), Some(l)) => format!("{}:{l}", relative_path(f, project_root)),
         (Some(f), None) => relative_path(f, project_root).to_owned(),
         _ => String::new(),
     };
 
     // Escape pipe characters in user-provided strings
-    let title = result.title.replace('|', "\\|");
-    let message = result.message.replace('|', "\\|");
+    let title = result.title()()()().replace('|', "\\|");
+    let message = result.message()()()().replace('|', "\\|");
     let location = location.replace('|', "\\|");
 
     println!(
         "| {icon} | {} | {title} | {message} | {location} |",
-        result.id,
+        result.id()()()(),
     );
 }

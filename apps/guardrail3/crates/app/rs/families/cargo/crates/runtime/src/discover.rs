@@ -125,11 +125,11 @@ fn collect_cargo_snapshots(
     route: &RsCargoRoute,
 ) -> BTreeMap<String, CargoSnapshot> {
     route
-        .roots
+        .roots()
         .iter()
         .map(|root| {
-            let rel_dir = root.rel_dir.clone();
-            let cargo_rel_path = root.cargo_rel_path.clone();
+            let rel_dir = normalize_member_rel(root.rel_dir());
+            let cargo_rel_path = root.cargo_rel_path().to_owned();
             let snapshot = snapshot_for(tree, &rel_dir, &cargo_rel_path);
             (rel_dir, snapshot)
         })
@@ -298,8 +298,11 @@ fn expand_member_pattern(tree: &ProjectTree, workspace_rel: &str, pattern: &str)
 
     if looks_like_glob(&normalized) {
         tree.matching_dir_rels(&rel_pattern)
+            .into_iter()
+            .map(|rel| normalize_member_rel(&rel))
+            .collect()
     } else {
-        vec![rel_pattern]
+        vec![normalize_member_rel(&rel_pattern)]
     }
 }
 
@@ -308,7 +311,12 @@ fn looks_like_glob(pattern: &str) -> bool {
 }
 
 fn normalize_member_rel(pattern: &str) -> String {
-    pattern.trim_matches('/').to_owned()
+    pattern
+        .trim_matches('/')
+        .strip_prefix("./")
+        .unwrap_or(pattern.trim_matches('/'))
+        .trim_matches('/')
+        .to_owned()
 }
 
 fn guardrail_snapshot(tree: &ProjectTree, rel_path: &str) -> GuardrailSnapshot {
@@ -317,7 +325,7 @@ fn guardrail_snapshot(tree: &ProjectTree, rel_path: &str) -> GuardrailSnapshot {
     };
     match toml::from_str::<GuardrailConfig>(content) {
         Ok(parsed) => GuardrailSnapshot {
-            profile_name: parsed.profile.map(|profile| profile.name),
+            profile_name: parsed.profile().map(|profile| profile.name().to_owned()),
             parse_error: None,
         },
         Err(parse_error) => GuardrailSnapshot {

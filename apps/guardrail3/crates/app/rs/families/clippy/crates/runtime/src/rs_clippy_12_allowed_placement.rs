@@ -8,18 +8,18 @@ const ID: &str = "RS-CLIPPY-12";
 
 pub fn check_allowed(config: &ClippyConfigFacts, results: &mut Vec<CheckResult>) {
     results.push(
-        CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Info,
-            title: "clippy.toml placement allowed".to_owned(),
-            message: format!(
+        CheckResult::from_parts(
+            ID.to_owned(),
+            Severity::Info,
+            "clippy.toml placement allowed".to_owned(),
+            format!(
                 "`{}` is placed at an allowed clippy policy root.",
                 config.rel_path
             ),
-            file: Some(config.rel_path.clone()),
-            line: None,
-            inventory: false,
-        }
+            Some(config.rel_path.clone()),
+            None,
+            false,
+        )
         .as_inventory(),
     );
 }

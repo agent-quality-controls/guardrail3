@@ -13,15 +13,15 @@ pub fn check_covered(input: &CoveredRustUnitInput<'_>, results: &mut Vec<CheckRe
         format!("{} `{}`", input.kind.label(), input.rel_dir)
     };
     results.push(
-        CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Info,
-            title: "Rust unit covered by clippy.toml".to_owned(),
-            message: format!("{scope} is covered by `{}`.", input.covering_config_rel),
-            file: Some(input.covering_config_rel.to_owned()),
-            line: None,
-            inventory: false,
-        }
+        CheckResult::from_parts(
+            ID.to_owned(),
+            Severity::Info,
+            "Rust unit covered by clippy.toml".to_owned(),
+            format!("{scope} is covered by `{}`.", input.covering_config_rel),
+            Some(input.covering_config_rel.to_owned()),
+            None,
+            false,
+        )
         .as_inventory(),
     );
 }
@@ -32,18 +32,18 @@ pub fn check_root_failure(input: &CargoRootFailureInput<'_>, results: &mut Vec<C
     } else {
         format!("routed Cargo root `{}`", input.rel_dir)
     };
-    results.push(CheckResult {
-        id: ID.to_owned(),
-        severity: Severity::Error,
-        title: "Rust unit coverage could not be determined".to_owned(),
-        message: format!(
+    results.push(CheckResult::from_parts(
+        ID.to_owned(),
+        Severity::Error,
+        "Rust unit coverage could not be determined".to_owned(),
+        format!(
             "{scope} could not be parsed from `{}` while resolving clippy coverage and policy roots: {}",
             input.cargo_rel_path, input.parse_error
         ),
-        file: Some(input.cargo_rel_path.to_owned()),
-        line: None,
-        inventory: false,
-    });
+        Some(input.cargo_rel_path.to_owned()),
+        None,
+        false,
+    ));
 }
 
 pub fn check_uncovered(input: &UncoveredRustUnitInput<'_>, results: &mut Vec<CheckResult>) {
@@ -52,17 +52,17 @@ pub fn check_uncovered(input: &UncoveredRustUnitInput<'_>, results: &mut Vec<Che
     } else {
         format!("{} `{}`", input.kind.label(), input.rel_dir)
     };
-    results.push(CheckResult {
-        id: ID.to_owned(),
-        severity: Severity::Error,
-        title: "Rust unit uncovered by clippy.toml".to_owned(),
-        message: format!(
+    results.push(CheckResult::from_parts(
+        ID.to_owned(),
+        Severity::Error,
+        "Rust unit uncovered by clippy.toml".to_owned(),
+        format!(
             "{scope} is not covered by any allowed clippy.toml at the validation root, a workspace root, or a standalone package root."
         ),
-        file: Some(input.rel_dir.to_owned()),
-        line: None,
-        inventory: false,
-    });
+        Some(input.rel_dir.to_owned()),
+        None,
+        false,
+    ));
 }
 
 #[cfg(test)]

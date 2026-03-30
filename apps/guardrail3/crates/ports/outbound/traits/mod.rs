@@ -31,8 +31,30 @@ pub trait FileSystem: Send + Sync {
 /// Tool/command runner abstraction.
 #[derive(Debug, Clone)]
 pub struct CommandRunResult {
-    pub success: bool,
-    pub stderr: String,
+    success: bool,
+    stderr: String,
+}
+
+impl CommandRunResult {
+    #[must_use]
+    pub const fn new(success: bool, stderr: String) -> Self {
+        Self { success, stderr }
+    }
+
+    #[must_use]
+    pub const fn success(&self) -> bool {
+        self.success
+    }
+
+    #[must_use]
+    pub fn stderr(&self) -> &str {
+        &self.stderr
+    }
+
+    #[must_use]
+    pub fn into_stderr(self) -> String {
+        self.stderr
+    }
 }
 
 pub trait ToolChecker: Send + Sync {
@@ -46,6 +68,6 @@ pub trait ToolChecker: Send + Sync {
     /// Legacy stderr-only view for existing callers.
     fn run_cargo_publish_dry_run(&self, path: &Path) -> Option<String> {
         self.run_cargo_publish_dry_run_outcome(path)
-            .map(|result| result.stderr)
+            .map(CommandRunResult::into_stderr)
     }
 }

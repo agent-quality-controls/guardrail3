@@ -1,12 +1,12 @@
 use super::facts::{PolicyRootCargoFacts, PolicyRootKind};
 
-pub struct LintExpectation {
+pub(crate) struct LintExpectation {
     pub name: &'static str,
     pub expected_level: &'static str,
     pub priority: Option<i64>,
 }
 
-pub const EXPECTED_RUST_LINTS: &[LintExpectation] = &[
+pub(crate) const EXPECTED_RUST_LINTS: &[LintExpectation] = &[
     LintExpectation {
         name: "warnings",
         expected_level: "deny",
@@ -39,13 +39,13 @@ pub const EXPECTED_RUST_LINTS: &[LintExpectation] = &[
     },
 ];
 
-pub const EXPECTED_LIBRARY_RUST_LINTS: &[LintExpectation] = &[LintExpectation {
+pub(crate) const EXPECTED_LIBRARY_RUST_LINTS: &[LintExpectation] = &[LintExpectation {
     name: "unreachable_pub",
     expected_level: "deny",
     priority: None,
 }];
 
-pub const EXPECTED_CLIPPY_GROUPS: &[LintExpectation] = &[
+pub(crate) const EXPECTED_CLIPPY_GROUPS: &[LintExpectation] = &[
     LintExpectation {
         name: "all",
         expected_level: "deny",
@@ -68,7 +68,7 @@ pub const EXPECTED_CLIPPY_GROUPS: &[LintExpectation] = &[
     },
 ];
 
-pub const EXPECTED_CLIPPY_DENY: &[&str] = &[
+pub(crate) const EXPECTED_CLIPPY_DENY: &[&str] = &[
     "unwrap_used",
     "expect_used",
     "panic",
@@ -102,7 +102,7 @@ pub const EXPECTED_CLIPPY_DENY: &[&str] = &[
     "verbose_file_reads",
 ];
 
-pub const EXPECTED_CLIPPY_ALLOW: &[&str] = &[
+pub(crate) const EXPECTED_CLIPPY_ALLOW: &[&str] = &[
     "missing_docs_in_private_items",
     "module_name_repetitions",
     "must_use_candidate",

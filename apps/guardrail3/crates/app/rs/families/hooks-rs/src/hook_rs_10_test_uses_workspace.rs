@@ -10,35 +10,34 @@ pub fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<CheckResult>) {
 
     if found {
         results.push(
-            CheckResult {
-                id: ID.to_owned(),
-                severity: Severity::Info,
-                title: "cargo test uses workspace scope".to_owned(),
-                message: "Hook runs cargo test with `--workspace`.".to_owned(),
-                file: Some(input.rel_path.to_owned()),
-                line: None,
-                inventory: false,
-            }
+            CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Info,
+                "cargo test uses workspace scope".to_owned(),
+                "Hook runs cargo test with `--workspace`.".to_owned(),
+                Some(input.rel_path.to_owned()),
+                None,
+                false,
+            )
             .as_inventory(),
         );
     } else {
-        results.push(CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Info,
-            title: "cargo test workspace scope missing".to_owned(),
-            message: "Hook does not execute `cargo test --workspace`.".to_owned(),
-            file: Some(input.rel_path.to_owned()),
-            line: None,
-            inventory: false,
-        });
+        results.push(CheckResult::from_parts(
+    ID.to_owned(),
+    Severity::Info,
+    "cargo test workspace scope missing".to_owned(),
+    "Hook does not execute `cargo test --workspace`.".to_owned(),
+    Some(input.rel_path.to_owned()),
+    None,
+    false,
+        ));
     }
-}
 
 fn script_contains_workspace_test(parsed: &ParsedShellScript<'_>) -> bool {
     parsed
-        .executable_lines
+        .executable_lines()
         .iter()
-        .any(|line| line_contains_workspace_test(line.raw, parsed, &mut Vec::new()))
+        .any(|line| line_contains_workspace_test(line.raw(), parsed, &mut Vec::new()))
 }
 
 fn line_contains_workspace_test(
@@ -112,18 +111,18 @@ fn called_function_contains_workspace_test(
     visiting: &mut Vec<String>,
 ) -> bool {
     let Some(function) = root
-        .functions
+        .functions()
         .iter()
-        .find(|function| function.name == command_name)
+        .find(|function| function.name() == command_name)
     else {
         return false;
     };
-    if visiting.iter().any(|name| name == &function.name) {
+    if visiting.iter().any(|name| name == &function.name()) {
         return false;
     }
 
-    visiting.push(function.name.clone());
-    let body_parsed = parse_script(&function.body);
+    visiting.push(function.name().to_owned());
+    let body_parsed = parse_script(&function.body());
     let found = script_contains_workspace_test_with_root(&body_parsed, root, visiting);
     let _ = visiting.pop();
     found
@@ -135,9 +134,9 @@ fn script_contains_workspace_test_with_root(
     visiting: &mut Vec<String>,
 ) -> bool {
     parsed
-        .executable_lines
+        .executable_lines()
         .iter()
-        .any(|line| line_contains_workspace_test(line.raw, root, visiting))
+        .any(|line| line_contains_workspace_test(line.raw(), root, visiting))
 }
 
 fn env_wrapper_contains_workspace_test<'a, I>(
@@ -397,7 +396,7 @@ fn split_command_segments(raw: &str) -> Vec<CommandSegment> {
                     (index + 1 == pieces.len())
                         .then_some(trailing_operator)
                         .flatten()
-                }),
+                )),
             }
         })
         .filter(|segment| !segment.text.is_empty())
@@ -682,5 +681,5 @@ pub(super) fn run_case(content: &str) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-#[path = "hook_rs_10_test_uses_workspace_tests/mod.rs"]
+#[path = "tests/steps/hook_rs_10_test_uses_workspace_tests/mod.rs"]
 mod hook_rs_10_test_uses_workspace_tests;

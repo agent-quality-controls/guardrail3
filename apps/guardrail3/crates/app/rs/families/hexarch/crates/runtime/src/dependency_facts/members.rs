@@ -57,8 +57,6 @@ pub(super) fn collect_members(
                 name: name.clone(),
                 rel_dir: rel_dir.clone(),
                 cargo_rel_path: cargo_rel_path.clone(),
-                app_root_rel_dir: app_root_rel_dir.clone(),
-                layer,
                 parse_error: parse_error.clone(),
             });
         }
@@ -80,10 +78,7 @@ pub(super) fn collect_members(
     (members, failures)
 }
 
-pub(super) fn dir_is_within_owned_app(
-    rel_dir: &str,
-    owned_app_roots: &BTreeSet<String>,
-) -> bool {
+pub(super) fn dir_is_within_owned_app(rel_dir: &str, owned_app_roots: &BTreeSet<String>) -> bool {
     owned_app_roots.iter().any(|app_root| {
         rel_dir == app_root
             || rel_dir
@@ -116,13 +111,14 @@ fn profile_and_allowed_deps_for_member(
         let app_name = app_root.rsplit('/').next().unwrap_or(&app_root);
         if let Some(config) = guardrail.app_configs.get(app_name) {
             return (
-                config.profile.clone().or(config.type_.clone()),
                 config
-                    .allowed_deps
-                    .clone()
-                    .unwrap_or_default()
-                    .into_iter()
-                    .collect(),
+                    .profile()
+                    .map(str::to_owned)
+                    .or_else(|| config.type_().map(str::to_owned)),
+                config
+                    .allowed_deps()
+                    .map(|deps| deps.iter().cloned().collect())
+                    .unwrap_or_default(),
             );
         }
     }
@@ -130,13 +126,14 @@ fn profile_and_allowed_deps_for_member(
     if rel_dir.starts_with("packages/") {
         if let Some(config) = &guardrail.packages_config {
             return (
-                config.profile.clone().or(config.type_.clone()),
                 config
-                    .allowed_deps
-                    .clone()
-                    .unwrap_or_default()
-                    .into_iter()
-                    .collect(),
+                    .profile()
+                    .map(str::to_owned)
+                    .or_else(|| config.type_().map(str::to_owned)),
+                config
+                    .allowed_deps()
+                    .map(|deps| deps.iter().cloned().collect())
+                    .unwrap_or_default(),
             );
         }
     }
@@ -149,7 +146,7 @@ fn layer_for_member(rel_dir: &str, guardrail: Option<&ParsedGuardrailConfig>) ->
         if rel_dir.starts_with("packages/") {
             guardrail
                 .and_then(|guardrail| guardrail.packages_config.as_ref())
-                .and_then(|config| config.layer.as_deref())
+                .and_then(|config| config.layer())
                 .and_then(layer_from_config)
         } else {
             None

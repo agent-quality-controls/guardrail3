@@ -28,7 +28,7 @@ pub fn build_clippy_toml(
         _ => service_profile_methods(),
     };
     if !garde_enabled {
-        methods.retain(|module| module.name != METHOD_GARDE_DESERIALIZATION.name);
+        methods.retain(|module| module.name() != METHOD_GARDE_DESERIALIZATION.name());
     }
 
     let mut types = match profile {
@@ -36,7 +36,7 @@ pub fn build_clippy_toml(
         _ => service_profile_types(),
     };
     if !garde_enabled {
-        types.retain(|module| module.name != TYPE_GARDE_EXTRACTORS.name);
+        types.retain(|module| module.name() != TYPE_GARDE_EXTRACTORS.name());
     }
 
     let mut out = String::new();
@@ -99,8 +99,8 @@ fn render_module_array(
     out.push_str(key);
     out.push_str(" = [\n");
     for module in modules {
-        let _ = writeln!(out, "    # --- {} ---", module.description);
-        out.push_str(module.content);
+        let _ = writeln!(out, "    # --- {} ---", module.description());
+        out.push_str(module.content());
         out.push('\n');
     }
     let deduped = crate::deduplicated_override(out, extra_entries);

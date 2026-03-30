@@ -7,15 +7,24 @@ pub fn filter_for_roots(
     tree: &ProjectTree,
     scoped_files: Option<&BTreeSet<String>>,
     root_rels: &[String],
+    validation_scope: Option<&str>,
 ) -> Option<BTreeSet<String>> {
-    scoped_files.map(|files| {
+    let explicit = scoped_files.map(|files| {
         files
             .iter()
             .filter(|path| scoped_path_is_live(tree, path))
             .filter(|path| root_rels.iter().any(|root| path_is_under_root(path, root)))
             .cloned()
-            .collect()
-    })
+            .collect::<BTreeSet<_>>()
+    });
+    let derived = validation_scope.map(|scope| collect_scope_files(tree, scope, root_rels));
+
+    match (explicit, derived) {
+        (Some(explicit), Some(derived)) => Some(explicit.intersection(&derived).cloned().collect()),
+        (Some(explicit), None) => Some(explicit),
+        (None, Some(derived)) => Some(derived),
+        (None, None) => None,
+    }
 }
 
 fn scoped_path_is_live(tree: &ProjectTree, rel_path: &str) -> bool {
@@ -28,4 +37,29 @@ fn path_is_under_root(rel_path: &str, root_rel: &str) -> bool {
         || rel_path
             .strip_prefix(root_rel)
             .is_some_and(|rest| rest.starts_with('/'))
+}
+
+fn collect_scope_files(tree: &ProjectTree, scope_rel: &str, root_rels: &[String]) -> BTreeSet<String> {
+    let mut files = BTreeSet::new();
+
+    if tree.file_exists(scope_rel) {
+        if root_rels.iter().any(|root| path_is_under_root(scope_rel, root)) {
+            let _ = files.insert(scope_rel.to_owned());
+        }
+        return files;
+    }
+
+    for (dir_rel, entry) in tree.structure() {
+        if !(dir_rel == scope_rel || path_is_under_root(dir_rel, scope_rel)) {
+            continue;
+        }
+        for file in entry.files() {
+            let rel_path = ProjectTree::join_rel(dir_rel, file);
+            if root_rels.iter().any(|root| path_is_under_root(&rel_path, root)) {
+                let _ = files.insert(rel_path);
+            }
+        }
+    }
+
+    files
 }

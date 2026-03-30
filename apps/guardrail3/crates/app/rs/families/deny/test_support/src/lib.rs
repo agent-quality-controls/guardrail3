@@ -71,26 +71,26 @@ pub fn copy_fixture(rel_from_manifest: &str) -> TempDir {
 }
 
 pub fn dir_entry(dirs: &[&str], files: &[&str]) -> DirEntry {
-    DirEntry {
-        dirs: dirs.iter().map(|dir| (*dir).to_owned()).collect(),
-        files: files.iter().map(|file| (*file).to_owned()).collect(),
-        symlink_dirs: Vec::new(),
-        symlink_files: Vec::new(),
-    }
+    DirEntry::new(
+        dirs.iter().map(|dir| (*dir).to_owned()).collect(),
+        files.iter().map(|file| (*file).to_owned()).collect(),
+        Vec::new(),
+        Vec::new(),
+    )
 }
 
 pub fn project_tree(structure: Vec<(&str, DirEntry)>, content: Vec<(&str, String)>) -> ProjectTree {
-    ProjectTree {
-        root: PathBuf::from("/tmp/project"),
-        structure: structure
+    ProjectTree::new(
+        PathBuf::from("/tmp/project"),
+        structure
             .into_iter()
             .map(|(rel, entry)| (rel.to_owned(), entry))
             .collect::<BTreeMap<_, _>>(),
-        content: content
+        content
             .into_iter()
             .map(|(rel, content)| (rel.to_owned(), content))
             .collect::<BTreeMap<_, _>>(),
-    }
+    )
 }
 
 #[must_use]

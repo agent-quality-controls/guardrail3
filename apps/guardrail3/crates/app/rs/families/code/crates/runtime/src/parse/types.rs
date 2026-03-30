@@ -13,77 +13,101 @@ pub enum LargeTypeItem {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PublicStructFieldBagInfo {
+    pub(crate) line: usize,
+    pub(crate) struct_name: String,
+    pub(crate) public_field_count: usize,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ImplAllowInfo {
-    pub line: usize,
-    pub lint: String,
-    pub kind: LintPolicyKind,
-    pub method_count: usize,
+    pub(crate) line: usize,
+    pub(crate) lint: String,
+    pub(crate) kind: LintPolicyKind,
+    pub(crate) method_count: usize,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DenyForbidInfo {
-    pub line: usize,
-    pub lint: String,
-    pub level: String,
-    pub crate_level_inner: bool,
-    pub cfg_truth: CfgPredicateTruth,
+    pub(crate) line: usize,
+    pub(crate) lint: String,
+    pub(crate) level: String,
+    pub(crate) crate_level_inner: bool,
+    pub(crate) cfg_truth: CfgPredicateTruth,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct IncludeMacroInfo {
-    pub line: usize,
-    pub macro_name: String,
-    pub build_script_pattern: bool,
-    pub path_traversal: bool,
+    pub(crate) line: usize,
+    pub(crate) macro_name: String,
+    pub(crate) build_script_pattern: bool,
+    pub(crate) path_traversal: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PathAttrInfo {
-    pub line: usize,
-    pub path: String,
-    pub via_cfg_attr: bool,
-    pub cfg_truth: CfgPredicateTruth,
+    pub(crate) line: usize,
+    pub(crate) path: String,
+    pub(crate) via_cfg_attr: bool,
+    pub(crate) cfg_truth: CfgPredicateTruth,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum PublicResultErrorKind {
     String,
+    StrRef,
+    AnyhowError,
     BoxDynError,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PublicResultErrorInfo {
-    pub line: usize,
-    pub fn_name: String,
-    pub kind: PublicResultErrorKind,
+    pub(crate) line: usize,
+    pub(crate) fn_name: String,
+    pub(crate) kind: PublicResultErrorKind,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GenericParameterCapInfo {
+    pub(crate) line: usize,
+    pub(crate) item_kind: &'static str,
+    pub(crate) item_name: String,
+    pub(crate) type_const_param_count: usize,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FacadeBodyItemInfo {
-    pub line: usize,
-    pub kind: &'static str,
-    pub name: String,
+    pub(crate) line: usize,
+    pub(crate) kind: &'static str,
+    pub(crate) name: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TraitMethodCountInfo {
-    pub line: usize,
-    pub trait_name: String,
-    pub method_count: usize,
+    pub(crate) line: usize,
+    pub(crate) trait_name: String,
+    pub(crate) method_count: usize,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct StringDispatchInfo {
+    pub(crate) line: usize,
+    pub(crate) site_kind: &'static str,
+    pub(crate) string_literal_branch_count: usize,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ForeignModAllowInfo {
-    pub line: usize,
-    pub lint: String,
-    pub kind: LintPolicyKind,
-    pub via_cfg_attr: bool,
+    pub(crate) line: usize,
+    pub(crate) lint: String,
+    pub(crate) kind: LintPolicyKind,
+    pub(crate) via_cfg_attr: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TestExpectCallInfo {
-    pub line: usize,
-    pub message: Option<String>,
+    pub(crate) line: usize,
+    pub(crate) message: Option<String>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -110,22 +134,22 @@ pub enum CfgPredicateTruth {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LintPolicyInfo {
-    pub line: usize,
-    pub lint: String,
-    pub kind: LintPolicyKind,
+    pub(crate) line: usize,
+    pub(crate) lint: String,
+    pub(crate) kind: LintPolicyKind,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CfgAttrLintInfo {
-    pub line: usize,
-    pub lint: String,
-    pub kind: LintPolicyKind,
-    pub truth: CfgPredicateTruth,
+    pub(crate) line: usize,
+    pub(crate) lint: String,
+    pub(crate) kind: LintPolicyKind,
+    pub(crate) truth: CfgPredicateTruth,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ForbiddenMacroInfo {
-    pub line: usize,
-    pub macro_name: String,
-    pub in_test_context: bool,
+    pub(crate) line: usize,
+    pub(crate) macro_name: String,
+    pub(crate) in_test_context: bool,
 }

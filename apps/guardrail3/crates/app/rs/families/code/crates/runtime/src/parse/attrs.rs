@@ -14,6 +14,7 @@ type IncludeMacroInfo = types::IncludeMacroInfo;
 type LintPolicyInfo = types::LintPolicyInfo;
 type PathAttrInfo = types::PathAttrInfo;
 type PublicResultErrorInfo = types::PublicResultErrorInfo;
+type PublicStructFieldBagInfo = types::PublicStructFieldBagInfo;
 
 pub fn find_item_lint_policies(ast: &syn::File) -> Vec<LintPolicyInfo> {
     let mut visitor = ItemOnlyPolicyVisitor { out: Vec::new() };
@@ -77,6 +78,15 @@ pub fn find_public_result_error_types(ast: &syn::File) -> Vec<PublicResultErrorI
     visitor.out
 }
 
+pub fn find_public_struct_field_bags(ast: &syn::File) -> Vec<PublicStructFieldBagInfo> {
+    let mut visitor = PublicStructFieldBagVisitor {
+        out: Vec::new(),
+        public_module_stack: vec![true],
+    };
+    visitor.visit_file(ast);
+    visitor.out
+}
+
 struct ItemOnlyPolicyVisitor {
     out: Vec<LintPolicyInfo>,
 }
@@ -110,6 +120,11 @@ struct PublicResultErrorVisitor {
     public_module_stack: Vec<bool>,
     module_path: Vec<String>,
     reachable_types: BTreeSet<String>,
+}
+
+struct PublicStructFieldBagVisitor {
+    out: Vec<PublicStructFieldBagInfo>,
+    public_module_stack: Vec<bool>,
 }
 
 impl<'ast> Visit<'ast> for ItemOnlyPolicyVisitor {
@@ -278,6 +293,20 @@ impl PublicResultErrorVisitor {
     }
 }
 
+impl PublicStructFieldBagVisitor {
+    fn current_module_public(&self) -> bool {
+        self.public_module_stack.last().copied().unwrap_or(true)
+    }
+
+    fn with_nested_module(&mut self, item_mod: &syn::ItemMod, visit: impl FnOnce(&mut Self)) {
+        let next =
+            self.current_module_public() && matches!(item_mod.vis, syn::Visibility::Public(_));
+        self.public_module_stack.push(next);
+        visit(self);
+        let _ = self.public_module_stack.pop();
+    }
+}
+
 impl<'ast> Visit<'ast> for PublicResultErrorVisitor {
     fn visit_item_mod(&mut self, item_mod: &'ast syn::ItemMod) {
         self.with_nested_module(item_mod, |visitor| {
@@ -349,6 +378,38 @@ impl<'ast> Visit<'ast> for PublicResultErrorVisitor {
             }
         }
         syn::visit::visit_item_trait(self, item_trait);
+    }
+}
+
+impl<'ast> Visit<'ast> for PublicStructFieldBagVisitor {
+    fn visit_item_mod(&mut self, item_mod: &'ast syn::ItemMod) {
+        self.with_nested_module(item_mod, |visitor| {
+            syn::visit::visit_item_mod(visitor, item_mod);
+        });
+    }
+
+    fn visit_item_struct(&mut self, item_struct: &'ast syn::ItemStruct) {
+        if self.current_module_public()
+            && matches!(item_struct.vis, syn::Visibility::Public(_))
+            && matches!(item_struct.fields, syn::Fields::Named(_))
+        {
+            let public_field_count = match &item_struct.fields {
+                syn::Fields::Named(fields) => fields
+                    .named
+                    .iter()
+                    .filter(|field| matches!(field.vis, syn::Visibility::Public(_)))
+                    .count(),
+                _ => 0,
+            };
+            if public_field_count > 0 {
+                self.out.push(PublicStructFieldBagInfo {
+                    line: helpers::span_line(item_struct.ident.span()),
+                    struct_name: item_struct.ident.to_string(),
+                    public_field_count,
+                });
+            }
+        }
+        syn::visit::visit_item_struct(self, item_struct);
     }
 }
 

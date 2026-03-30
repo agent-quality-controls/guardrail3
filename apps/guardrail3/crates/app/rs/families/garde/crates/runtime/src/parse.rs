@@ -1,5 +1,8 @@
 mod aliases;
 mod fields;
+mod guardrail_config;
+
+use guardrail_config::collect_unvalidated_guardrail_sites;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BoundaryKind {
@@ -9,50 +12,72 @@ pub enum BoundaryKind {
 
 #[derive(Debug, Clone)]
 pub struct DerivedBoundaryType {
-    pub line: usize,
-    pub name: String,
-    pub boundary_kind: BoundaryKind,
-    pub boundary_macros: Vec<String>,
-    pub has_validate_derive: bool,
-    pub has_non_primitive_fields: bool,
+    pub(crate) line: usize,
+    pub(crate) name: String,
+    pub(crate) boundary_kind: BoundaryKind,
+    pub(crate) boundary_macros: Vec<String>,
+    pub(crate) has_validate_derive: bool,
+    pub(crate) has_non_primitive_fields: bool,
 }
 
 #[derive(Debug, Clone)]
 pub struct ManualImpl {
-    pub line: usize,
-    pub type_name: String,
+    pub(crate) line: usize,
+    pub(crate) type_name: String,
 }
 
 #[derive(Debug, Clone)]
 pub struct QueryAsMacro {
-    pub line: usize,
-    pub macro_name: String,
+    pub(crate) line: usize,
+    pub(crate) macro_name: String,
 }
 
 #[derive(Debug, Clone)]
 pub struct BoundaryField {
-    pub line: usize,
-    pub boundary_name: String,
-    pub field_name: String,
-    pub field_type: String,
-    pub candidate_type_names: Vec<String>,
-    pub boundary_has_validate_derive: bool,
-    pub boundary_has_context: bool,
-    pub requires_field_validation: bool,
-    pub has_garde_skip: bool,
-    pub has_garde_dive: bool,
-    pub has_meaningful_garde_rule: bool,
-    pub uses_context: bool,
+    pub(crate) line: usize,
+    pub(crate) boundary_name: String,
+    pub(crate) field_name: String,
+    pub(crate) field_type: String,
+    pub(crate) candidate_type_names: Vec<String>,
+    pub(crate) boundary_has_validate_derive: bool,
+    pub(crate) boundary_has_context: bool,
+    pub(crate) requires_field_validation: bool,
+    pub(crate) has_garde_skip: bool,
+    pub(crate) has_garde_dive: bool,
+    pub(crate) has_meaningful_garde_rule: bool,
+    pub(crate) uses_context: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum GuardrailConfigParseKind {
+    TomlFromStr,
+    TryInto,
+}
+
+impl GuardrailConfigParseKind {
+    pub const fn label(self) -> &'static str {
+        match self {
+            Self::TomlFromStr => "`toml::from_str`",
+            Self::TryInto => "`try_into::<GuardrailConfig>()`",
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct GuardrailConfigValidationSite {
+    pub(crate) line: usize,
+    pub(crate) parse_kind: GuardrailConfigParseKind,
 }
 
 #[derive(Debug, Clone, Default)]
 pub struct ParsedGardeFile {
-    pub derived_types: Vec<DerivedBoundaryType>,
-    pub manual_deserialize_impls: Vec<ManualImpl>,
-    pub manual_validate_impls: std::collections::BTreeSet<String>,
-    pub type_validation_map: std::collections::BTreeMap<String, (bool, bool)>,
-    pub boundary_fields: Vec<BoundaryField>,
-    pub query_as_macros: Vec<QueryAsMacro>,
+    pub(crate) derived_types: Vec<DerivedBoundaryType>,
+    pub(crate) manual_deserialize_impls: Vec<ManualImpl>,
+    pub(crate) manual_validate_impls: std::collections::BTreeSet<String>,
+    pub(crate) type_validation_map: std::collections::BTreeMap<String, (bool, bool)>,
+    pub(crate) boundary_fields: Vec<BoundaryField>,
+    pub(crate) query_as_macros: Vec<QueryAsMacro>,
+    pub(crate) guardrail_config_validation_sites: Vec<GuardrailConfigValidationSite>,
 }
 
 pub fn parse_rust_file(content: &str) -> Result<syn::File, syn::Error> {
@@ -74,10 +99,12 @@ struct GardeVisitor {
     boundary_fields: Vec<BoundaryField>,
     query_as_macros: Vec<QueryAsMacro>,
     module_stack: Vec<String>,
+    guardrail_config_validation_sites: Vec<GuardrailConfigValidationSite>,
     boundary_derive_aliases: std::collections::BTreeSet<String>,
     deserialize_aliases: std::collections::BTreeSet<String>,
     validate_aliases: std::collections::BTreeSet<String>,
     query_as_aliases: std::collections::BTreeSet<String>,
+    cfg_test_depth: usize,
 }
 
 impl GardeVisitor {
@@ -89,6 +116,7 @@ impl GardeVisitor {
             type_validation_map: self.type_validation_map,
             boundary_fields: self.boundary_fields,
             query_as_macros: self.query_as_macros,
+            guardrail_config_validation_sites: self.guardrail_config_validation_sites,
         }
     }
 
@@ -115,6 +143,10 @@ impl GardeVisitor {
     fn is_validate_derive(&self, macro_name: &str) -> bool {
         is_validate_derive(macro_name) || self.validate_aliases.contains(macro_name)
     }
+
+    fn should_analyze_guardrail_validation(&self, attrs: &[syn::Attribute]) -> bool {
+        self.cfg_test_depth == 0 && !attrs_contain_cfg_test(attrs)
+    }
 }
 
 impl<'ast> syn::visit::Visit<'ast> for GardeVisitor {
@@ -131,14 +163,43 @@ impl<'ast> syn::visit::Visit<'ast> for GardeVisitor {
 
     fn visit_item_mod(&mut self, item: &'ast syn::ItemMod) {
         if let Some((_, items)) = &item.content {
+            let entered_cfg_test = attrs_contain_cfg_test(&item.attrs);
+            if entered_cfg_test {
+                self.cfg_test_depth += 1;
+            }
             self.module_stack.push(item.ident.to_string());
             for inner in items {
                 self.visit_item(inner);
             }
             let _ = self.module_stack.pop();
+            if entered_cfg_test {
+                self.cfg_test_depth = self.cfg_test_depth.saturating_sub(1);
+            }
             return;
         }
         syn::visit::visit_item_mod(self, item);
+    }
+
+    fn visit_item_fn(&mut self, item: &'ast syn::ItemFn) {
+        if self.should_analyze_guardrail_validation(&item.attrs) {
+            self.guardrail_config_validation_sites
+                .extend(collect_unvalidated_guardrail_sites(
+                    &item.block,
+                    &item.sig.output,
+                ));
+        }
+        syn::visit::visit_item_fn(self, item);
+    }
+
+    fn visit_impl_item_fn(&mut self, item: &'ast syn::ImplItemFn) {
+        if self.should_analyze_guardrail_validation(&item.attrs) {
+            self.guardrail_config_validation_sites
+                .extend(collect_unvalidated_guardrail_sites(
+                    &item.block,
+                    &item.sig.output,
+                ));
+        }
+        syn::visit::visit_impl_item_fn(self, item);
     }
 
     fn visit_item_struct(&mut self, item: &'ast syn::ItemStruct) {
@@ -165,12 +226,13 @@ impl<'ast> syn::visit::Visit<'ast> for GardeVisitor {
                 has_validate_derive: has_validate,
                 has_non_primitive_fields,
             });
-            self.boundary_fields.extend(fields::collect_struct_boundary_fields(
-                item,
-                &name,
-                has_validate,
-                has_context,
-            ));
+            self.boundary_fields
+                .extend(fields::collect_struct_boundary_fields(
+                    item,
+                    &name,
+                    has_validate,
+                    has_context,
+                ));
         }
 
         let _ = self
@@ -204,12 +266,13 @@ impl<'ast> syn::visit::Visit<'ast> for GardeVisitor {
                 has_validate_derive: has_validate,
                 has_non_primitive_fields,
             });
-            self.boundary_fields.extend(fields::collect_enum_boundary_fields(
-                item,
-                &name,
-                has_validate,
-                has_context,
-            ));
+            self.boundary_fields
+                .extend(fields::collect_enum_boundary_fields(
+                    item,
+                    &name,
+                    has_validate,
+                    has_context,
+                ));
         }
 
         let _ = self
@@ -298,4 +361,22 @@ fn is_validate_derive(macro_name: &str) -> bool {
         macro_name.trim_start_matches(':'),
         "Validate" | "garde::Validate"
     )
+}
+
+fn attrs_contain_cfg_test(attrs: &[syn::Attribute]) -> bool {
+    attrs
+        .iter()
+        .filter(|attr| attr.path().is_ident("cfg"))
+        .any(|attr| meta_contains_test(&attr.meta))
+}
+
+fn meta_contains_test(meta: &syn::Meta) -> bool {
+    match meta {
+        syn::Meta::Path(path) => path.is_ident("test"),
+        syn::Meta::List(list) => list
+            .parse_args_with(syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated)
+            .map(|items| items.iter().any(meta_contains_test))
+            .unwrap_or(false),
+        syn::Meta::NameValue(_) => false,
+    }
 }

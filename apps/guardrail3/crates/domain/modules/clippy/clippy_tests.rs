@@ -11,7 +11,7 @@ fn profile_method_sets_stay_stable() {
 
     assert_eq!(service.len(), 7);
     assert_eq!(library.len(), service.len());
-    assert_eq!(service[0].name, METHOD_ENV_VARS.name);
+    assert_eq!(service[0].name(), METHOD_ENV_VARS.name());
 }
 
 #[test]
@@ -23,17 +23,17 @@ fn library_profile_types_include_global_state_and_service_does_not() {
     assert!(
         service
             .iter()
-            .any(|module| module.name == TYPE_DYNAMIC.name)
+            .any(|module| module.name() == TYPE_DYNAMIC.name())
     );
     assert!(
         library
             .iter()
-            .any(|module| module.name == TYPE_GLOBAL_STATE.name)
+            .any(|module| module.name() == TYPE_GLOBAL_STATE.name())
     );
     assert!(
         !service
             .iter()
-            .any(|module| module.name == TYPE_GLOBAL_STATE.name)
+            .any(|module| module.name() == TYPE_GLOBAL_STATE.name())
     );
 }
 

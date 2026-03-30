@@ -6,21 +6,21 @@ const ID: &str = "RS-ARCH-08";
 
 pub fn check(input: &AuxiliaryRootInput<'_>, results: &mut Vec<CheckResult>) {
     results.push(
-        CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Info,
-            title: format!(
+        CheckResult::from_parts(
+            ID.to_owned(),
+            Severity::Info,
+            format!(
                 "Rust root `{}` is declared auxiliary",
                 display_dir(&input.root.rel_dir)
             ),
-            message: format!(
+            format!(
                 "`{}` is outside `apps/*` and `packages/*`, but is explicitly marked with `arch_role = \"auxiliary\"` in Cargo metadata.",
                 input.root.cargo_rel_path
             ),
-            file: Some(input.root.cargo_rel_path.clone()),
-            line: None,
-            inventory: false,
-        }
+            Some(input.root.cargo_rel_path.clone()),
+            None,
+            false,
+        )
         .as_inventory(),
     );
 }

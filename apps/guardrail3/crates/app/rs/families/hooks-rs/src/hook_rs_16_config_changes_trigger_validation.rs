@@ -30,30 +30,29 @@ pub fn check(content: &str, input: &RustHookCommandInput<'_>, results: &mut Vec<
 
     if covered {
         results.push(
-            CheckResult {
-                id: ID.to_owned(),
-                severity: Severity::Warn,
-                title: "Rust config changes trigger hook validation".to_owned(),
-                message: "Hook trigger logic covers Rust guardrail config files.".to_owned(),
-                file: Some(input.rel_path.to_owned()),
-                line: None,
-                inventory: false,
-            }
+            CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Warn,
+                "Rust config changes trigger hook validation".to_owned(),
+                "Hook trigger logic covers Rust guardrail config files.".to_owned(),
+                Some(input.rel_path.to_owned()),
+                None,
+                false,
+            )
             .as_inventory(),
         );
     } else {
-        results.push(CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Warn,
-            title: "Rust config-change trigger coverage incomplete".to_owned(),
-            message: "Hook trigger logic does not clearly include all Rust guardrail config files."
+        results.push(CheckResult::from_parts(
+    ID.to_owned(),
+    Severity::Warn,
+    "Rust config-change trigger coverage incomplete".to_owned(),
+    "Hook trigger logic does not clearly include all Rust guardrail config files."
                 .to_owned(),
-            file: Some(input.rel_path.to_owned()),
-            line: None,
-            inventory: false,
-        });
+    Some(input.rel_path.to_owned()),
+    None,
+    false,
+        ));
     }
-}
 
 fn conditional_blocks(content: &str) -> Vec<String> {
     let mut blocks = Vec::new();
@@ -605,5 +604,5 @@ pub(super) fn run_case(content: &str) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-#[path = "hook_rs_16_config_changes_trigger_validation_tests/mod.rs"]
+#[path = "tests/steps/hook_rs_16_config_changes_trigger_validation_tests/mod.rs"]
 mod hook_rs_16_config_changes_trigger_validation_tests;

@@ -74,7 +74,9 @@ families/garde/
 
 `RS-GARDE` depends on the `RS-CLIPPY` contract for covering-config resolution and canonical ban surfaces.
 
-The active family contract is:
+Source-of-truth order for this family:
 
-- [`.plans/todo/checks/rs/garde.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/todo/checks/rs/garde.md)
-- [`.plans/todo/checks/rs/clippy.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/todo/checks/rs/clippy.md)
+- [`.plans/by_family/rs/garde.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/by_family/rs/garde.md) for current family status and implementation routing
+- this README for family-local behavior and crate layout
+- [`.plans/todo/checks/rs/garde.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/todo/checks/rs/garde.md) for detailed rule history and migration notes
+- [`.plans/todo/checks/rs/clippy.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/todo/checks/rs/clippy.md) for the cross-family clippy contract this family relies on

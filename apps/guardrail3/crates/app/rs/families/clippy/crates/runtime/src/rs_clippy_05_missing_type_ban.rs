@@ -19,46 +19,42 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
 
     let section = parse_ban_section(parsed, "disallowed-types");
     for malformed in &section.malformed_messages {
-        results.push(CheckResult {
-            id: ID.to_owned(),
-            severity: Severity::Error,
-            title: "disallowed-types section malformed".to_owned(),
-            message: malformed.clone(),
-            file: Some(input.config.rel_path.clone()),
-            line: None,
-            inventory: false,
-        });
+        results.push(CheckResult::from_parts(
+            ID.to_owned(),
+            Severity::Error,
+            "disallowed-types section malformed".to_owned(),
+            malformed.clone(),
+            Some(input.config.rel_path.clone()),
+            None,
+            false,
+        ));
     }
 
-    let found: BTreeSet<_> = section
-        .entries
-        .into_iter()
-        .map(|entry| entry.path)
-        .collect();
+    let found: BTreeSet<_> = section.entries.into_iter().map(|entry| entry.path).collect();
     for expected in expected_required_type_bans(input.garde_enabled()) {
         if found.contains(expected) {
             results.push(
-                CheckResult {
-                    id: ID.to_owned(),
-                    severity: Severity::Info,
-                    title: "type ban present".to_owned(),
-                    message: format!("`{expected}` is banned."),
-                    file: Some(input.config.rel_path.clone()),
-                    line: None,
-                    inventory: false,
-                }
+                CheckResult::from_parts(
+                    ID.to_owned(),
+                    Severity::Info,
+                    "type ban present".to_owned(),
+                    format!("`{expected}` is banned."),
+                    Some(input.config.rel_path.clone()),
+                    None,
+                    false,
+                )
                 .as_inventory(),
             );
         } else {
-            results.push(CheckResult {
-                id: ID.to_owned(),
-                severity: Severity::Error,
-                title: "missing type ban".to_owned(),
-                message: format!("`{expected}` is not present in `disallowed-types`."),
-                file: Some(input.config.rel_path.clone()),
-                line: None,
-                inventory: false,
-            });
+            results.push(CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Error,
+                "missing type ban".to_owned(),
+                format!("`{expected}` is not present in `disallowed-types`."),
+                Some(input.config.rel_path.clone()),
+                None,
+                false,
+            ));
         }
     }
 }

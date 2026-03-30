@@ -1,0 +1,56 @@
+use guardrail3_domain_report::{CheckResult, Severity};
+
+use super::deny_support::{ban_name, section};
+use super::inputs::ConfigDenyInput;
+
+pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
+    let config = input.config;
+    let Some(bans) = section(config, "bans") else {
+        return;
+    };
+    let Some(deny_entries) = bans.get("deny").and_then(toml::Value::as_array) else {
+        return;
+    };
+    for entry in deny_entries {
+        let Some(name) = ban_name(entry) else {
+            continue;
+        };
+        let reason = entry
+            .as_table()
+            .and_then(|table| table.get("reason"))
+            .and_then(toml::Value::as_str)
+            .unwrap_or("");
+        if reason.trim().is_empty() {
+            results.push(
+                CheckResult::from_parts(
+                    "RS-DENY-26".to_owned(),
+                    Severity::Info,
+                    "ban entry missing reason".to_owned(),
+                    format!("`{}` ban entry `{name}` has no `reason`.", config.rel_path),
+                    Some(config.rel_path.clone()),
+                    None,
+                    false,
+                )
+                .as_inventory(),
+            );
+        }
+    }
+}
+
+#[cfg(test)]
+pub(crate) fn run_check(deny_toml: &str) -> Vec<CheckResult> {
+    crate::run_config_rule_for_test(deny_toml, None, check)
+}
+
+#[cfg(test)]
+pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
+    crate::check_test_root(root)
+}
+
+#[cfg(test)]
+pub(crate) use ::test_support::{
+    add_deny_ban_entry, build_fixture_deny_toml, copy_fixture, remove_deny_ban_reason, write_file,
+};
+#[cfg(test)]
+#[path = "rs_deny_26_ban_reason_inventory_tests/mod.rs"] // reason: test-only sidecar module wiring
+mod rs_deny_26_ban_reason_inventory_tests;

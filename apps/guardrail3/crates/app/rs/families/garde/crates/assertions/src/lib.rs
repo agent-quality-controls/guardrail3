@@ -16,3 +16,4 @@ pub mod rs_garde_10_input_failures;
 pub mod rs_garde_11_field_level_constraints;
 pub mod rs_garde_12_nested_validation_dive;
 pub mod rs_garde_13_context_validation_surface;
+pub mod rs_garde_14_guardrail_config_validate_call;

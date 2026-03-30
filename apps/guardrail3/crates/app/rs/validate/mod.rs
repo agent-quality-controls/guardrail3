@@ -1,51 +1,80 @@
+#[path = "source/allow_checks.rs"]
 pub mod allow_checks;
 pub mod arch;
+#[path = "source/ast_helpers.rs"]
 pub mod ast_helpers;
+#[path = "source/ast_visitors.rs"]
 pub mod ast_visitors;
+#[path = "config/cargo_lints.rs"]
 pub mod cargo_lints;
+#[path = "config/clippy_coverage.rs"]
 pub mod clippy_coverage;
+#[path = "source/code_quality_checks.rs"]
 pub mod code_quality_checks;
+#[path = "config/config_files.rs"]
 pub mod config_files;
+#[path = "config/deny_audit.rs"]
 pub mod deny_audit;
+#[path = "config/deny_bans.rs"]
 mod deny_bans;
+#[path = "config/deny_inventory.rs"]
 pub mod deny_inventory;
+#[path = "config/deny_licenses.rs"]
 mod deny_licenses;
+#[path = "architecture/dependency_allowlist.rs"]
 pub mod dependency_allowlist;
+#[path = "architecture/dependency_scan.rs"]
 pub mod dependency_scan;
+#[path = "source/extra_visitors.rs"]
 pub mod extra_visitors;
+#[path = "architecture/garde_checks.rs"]
 pub mod garde_checks;
+#[path = "architecture/hex_arch_checks.rs"]
 pub mod hex_arch_checks;
+#[path = "architecture/hex_arch_structure.rs"]
 pub mod hex_arch_structure;
+#[path = "release/release_bin_checks.rs"]
 pub mod release_bin_checks;
+#[path = "release/release_checks.rs"]
 pub mod release_checks;
+#[path = "release/release_crate_checks.rs"]
 pub mod release_crate_checks;
+#[path = "release/release_crate_deps.rs"]
 pub mod release_crate_deps;
+#[path = "release/release_repo_checks.rs"]
 pub mod release_repo_checks;
+#[path = "config/rustfmt_check.rs"]
 mod rustfmt_check;
+#[path = "source/source_scan.rs"]
 pub mod source_scan;
+#[path = "source/structure_checks.rs"]
 pub mod structure_checks;
+#[path = "tests/test_checks.rs"]
 pub mod test_checks;
+#[path = "tests/test_quality_checks.rs"]
 pub mod test_quality_checks;
+#[path = "config/toolchain_check.rs"]
 mod toolchain_check;
+#[path = "config/workspace_metadata.rs"]
 mod workspace_metadata;
 
 use std::path::{Path, PathBuf};
 
 use guardrail3_app_core::crawl::CrawlResult;
 use guardrail3_app_core::discover::ProjectInfo;
-use guardrail3_domain_config::types::GuardrailConfig;
+use guardrail3_domain_config::types::{GuardrailConfig, RustConfig};
 use guardrail3_domain_report::{Report, RustCheckCategories, Section};
 use guardrail3_outbound_traits::{FileSystem, ToolChecker};
 
 pub struct RunInput<'a> {
-    pub fs: &'a dyn FileSystem,
-    pub path: &'a Path,
-    pub project: &'a ProjectInfo,
-    pub scoped_files: Option<&'a [String]>,
-    pub categories: &'a RustCheckCategories,
-    pub thorough: bool,
-    pub tc: &'a dyn ToolChecker,
-    pub crawl: &'a CrawlResult,
+    pub(crate) fs: &'a dyn FileSystem,
+    pub(crate) path: &'a Path,
+    pub(crate) project: &'a ProjectInfo,
+    pub(crate) scoped_files: Option<&'a [String]>,
+    pub(crate) categories: &'a RustCheckCategories,
+    pub(crate) thorough: bool,
+    pub(crate) tc: &'a dyn ToolChecker,
+    pub(crate) crawl: &'a CrawlResult,
 }
 
 struct CodeCheckInput<'a> {
@@ -72,7 +101,7 @@ fn load_guardrail_config(fs: &dyn FileSystem, path: &Path) -> Option<GuardrailCo
 
 /// Extract profile name from the loaded config.
 fn extract_profile(cfg: &GuardrailConfig) -> Option<String> {
-    cfg.profile.as_ref().map(|p| p.name.clone())
+    cfg.profile().map(|p| p.name().to_owned())
 }
 
 pub fn run(input: RunInput<'_>) -> Report {
@@ -98,7 +127,7 @@ pub fn run(input: RunInput<'_>) -> Report {
             project: input.project,
             scoped_files: input.scoped_files,
             profile_ref: profile.as_deref(),
-            garde_enabled: input.categories.garde,
+            garde_enabled: input.categories.garde(),
             clippy_tomls: &ws_clippy_tomls,
             rustfmt_tomls: &ws_rustfmt_tomls,
             rust_toolchains: &ws_rust_toolchains,
@@ -108,7 +137,7 @@ pub fn run(input: RunInput<'_>) -> Report {
         &mut report,
     );
 
-    if input.categories.architecture {
+    if input.categories.architecture() {
         run_architecture_checks(
             input.fs,
             workspace_root,
@@ -119,32 +148,26 @@ pub fn run(input: RunInput<'_>) -> Report {
         );
     }
 
-    if input.categories.garde {
+    if input.categories.garde() {
         let garde_results = garde_checks::check(input.fs, workspace_root);
-        report.add_section(Section {
-            name: "Garde boundary validation".to_owned(),
-            results: garde_results,
-        });
+        report.add_section(Section::new(
+            "Garde boundary validation".to_owned(),
+            garde_results,
+        ));
     }
 
-    if input.categories.hooks {
+    if input.categories.hooks() {
         let tree = guardrail3_app_core::project_walker::walk_project(input.fs, input.path);
         let hook_results = guardrail3_app_hooks::check(input.fs, input.path, &tree, input.tc);
-        report.add_section(Section {
-            name: "Hook checks".to_owned(),
-            results: hook_results,
-        });
+        report.add_section(Section::new("Hook checks".to_owned(), hook_results));
     }
 
-    if input.categories.tests {
+    if input.categories.tests() {
         let test_results = test_checks::check(input.fs, input.tc, workspace_root);
-        report.add_section(Section {
-            name: "Test quality".to_owned(),
-            results: test_results,
-        });
+        report.add_section(Section::new("Test quality".to_owned(), test_results));
     }
 
-    if input.categories.release {
+    if input.categories.release() {
         let release_results = release_checks::check(
             input.fs,
             input.tc,
@@ -152,10 +175,10 @@ pub fn run(input: RunInput<'_>) -> Report {
             input.project,
             input.thorough,
         );
-        report.add_section(Section {
-            name: "Release readiness".to_owned(),
-            results: release_results,
-        });
+        report.add_section(Section::new(
+            "Release readiness".to_owned(),
+            release_results,
+        ));
     }
 
     report
@@ -165,10 +188,7 @@ pub fn run_hook_report(fs: &dyn FileSystem, path: &Path, tc: &dyn ToolChecker) -
     let tree = guardrail3_app_core::project_walker::walk_project(fs, path);
     let hook_results = guardrail3_app_hooks::check(fs, path, &tree, tc);
     let mut report = Report::new(path.display().to_string(), vec!["Rust".to_owned()]);
-    report.add_section(Section {
-        name: "Hook checks".to_owned(),
-        results: hook_results,
-    });
+    report.add_section(Section::new("Hook checks".to_owned(), hook_results));
     report
 }
 
@@ -198,10 +218,10 @@ fn run_code_checks(input: CodeCheckInput<'_>, report: &mut Report) {
     );
     let mut config_section_results = config_results;
     config_section_results.extend(per_crate_results);
-    report.add_section(Section {
-        name: "Config files".to_owned(),
-        results: config_section_results,
-    });
+    report.add_section(Section::new(
+        "Config files".to_owned(),
+        config_section_results,
+    ));
 
     let clippy_results = clippy_coverage::check(
         input.fs,
@@ -209,10 +229,10 @@ fn run_code_checks(input: CodeCheckInput<'_>, report: &mut Report) {
         input.profile_ref,
         input.clippy_tomls,
     );
-    report.add_section(Section {
-        name: "Clippy ban coverage".to_owned(),
-        results: clippy_results,
-    });
+    report.add_section(Section::new(
+        "Clippy ban coverage".to_owned(),
+        clippy_results,
+    ));
 
     let deny_results = deny_audit::check(
         input.fs,
@@ -220,20 +240,17 @@ fn run_code_checks(input: CodeCheckInput<'_>, report: &mut Report) {
         input.profile_ref,
         input.deny_tomls,
     );
-    report.add_section(Section {
-        name: "deny.toml audit".to_owned(),
-        results: deny_results,
-    });
+    report.add_section(Section::new("deny.toml audit".to_owned(), deny_results));
 
     let lint_results = cargo_lints::check(input.fs, input.workspace_root, input.cargo_tomls);
     let inheritance_results =
         cargo_lints::check_workspace_inheritance(input.fs, input.workspace_root, &member_dirs);
     let mut lint_section = lint_results;
     lint_section.extend(inheritance_results);
-    report.add_section(Section {
-        name: "Cargo workspace lints".to_owned(),
-        results: lint_section,
-    });
+    report.add_section(Section::new(
+        "Cargo workspace lints".to_owned(),
+        lint_section,
+    ));
 
     let source_results = source_scan::check(
         input.fs,
@@ -241,16 +258,13 @@ fn run_code_checks(input: CodeCheckInput<'_>, report: &mut Report) {
         input.scoped_files,
         input.garde_enabled,
     );
-    report.add_section(Section {
-        name: "Source code scan".to_owned(),
-        results: source_results,
-    });
+    report.add_section(Section::new("Source code scan".to_owned(), source_results));
 
     let dep_results = dependency_scan::check(input.tc);
-    report.add_section(Section {
-        name: "Dependency & tool checks".to_owned(),
-        results: dep_results,
-    });
+    report.add_section(Section::new(
+        "Dependency & tool checks".to_owned(),
+        dep_results,
+    ));
 }
 
 fn run_architecture_checks(
@@ -291,10 +305,7 @@ fn run_architecture_checks(
 
     run_dependency_allowlist_checks(fs, workspace_root, &crate_configs, &mut arch_results);
 
-    report.add_section(Section {
-        name: "Architecture checks".to_owned(),
-        results: arch_results,
-    });
+    report.add_section(Section::new("Architecture checks".to_owned(), arch_results));
 }
 
 fn merged_crate_configs(
@@ -303,23 +314,23 @@ fn merged_crate_configs(
 ) -> std::collections::BTreeMap<String, guardrail3_domain_config::types::RustAppConfig> {
     let empty = std::collections::BTreeMap::new();
     let app_configs = guardrail_cfg
-        .and_then(|c| c.rust.as_ref())
-        .and_then(|r| r.apps.as_ref())
+        .and_then(GuardrailConfig::rust)
+        .and_then(RustConfig::apps)
         .unwrap_or(&empty);
 
     let mut crate_configs = app_configs.clone();
 
     if let Some(pkg_cfg) = guardrail_cfg
-        .and_then(|c| c.rust.as_ref())
-        .and_then(|r| r.packages.as_ref())
+        .and_then(GuardrailConfig::rust)
+        .and_then(RustConfig::packages)
     {
-        for ws in &project.workspaces {
-            for member in &ws.members {
-                if (member.dir.starts_with("packages/") || member.dir.contains("/packages/"))
-                    && !crate_configs.contains_key(member.name.as_str())
-                    && !crate_configs.contains_key(member.dir.as_str())
+        for ws in project.workspaces() {
+            for member in ws.members() {
+                if (member.dir().starts_with("packages/") || member.dir().contains("/packages/"))
+                    && !crate_configs.contains_key(member.name())
+                    && !crate_configs.contains_key(member.dir())
                 {
-                    let _ = crate_configs.insert(member.name.clone(), pkg_cfg.clone());
+                    let _ = crate_configs.insert(member.name().to_owned(), pkg_cfg.clone());
                 }
             }
         }

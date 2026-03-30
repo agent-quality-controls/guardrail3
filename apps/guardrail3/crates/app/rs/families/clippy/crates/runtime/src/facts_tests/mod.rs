@@ -1,3 +1,4 @@
+use guardrail3_app_rs_family_clippy_assertions::facts as assertions;
 use test_support::{dir_entry, project_tree};
 
 use super::collect_for_tests;
@@ -40,9 +41,10 @@ fn root_config_uses_packages_profile_when_packages_policy_exists() {
         .iter()
         .find(|config| config.rel_path == "clippy.toml")
         .expect("expected root clippy.toml facts");
-
-    assert_eq!(root.profile_name.as_deref(), Some("library"));
-    assert!(!root.garde_enabled);
+    assertions::assert_root_config_uses_packages_profile_when_packages_policy_exists(
+        root.profile_name.as_deref(),
+        root.garde_enabled,
+    );
 }
 
 #[test]
@@ -75,12 +77,11 @@ fn validation_root_clippy_is_collected_without_root_cargo() {
 
     let facts = collect_for_tests(&tree);
 
-    assert!(
+    assertions::assert_validation_root_clippy_is_collected_without_root_cargo(
         facts
             .allowed_configs
             .iter()
             .any(|config| config.rel_path == "clippy.toml"),
-        "expected validation-root clippy.toml to be collected even when the validation root is not a Rust root: {facts:#?}"
     );
 }
 
@@ -118,9 +119,10 @@ fn standalone_app_root_uses_rust_apps_profile_policy() {
         .iter()
         .find(|config| config.rel_path == "apps/libsite/clippy.toml")
         .expect("expected app-local clippy.toml facts");
-
-    assert_eq!(local.profile_name.as_deref(), Some("library"));
-    assert!(!local.garde_enabled);
+    assertions::assert_standalone_app_root_uses_rust_apps_profile_policy(
+        local.profile_name.as_deref(),
+        local.garde_enabled,
+    );
 }
 
 #[test]
@@ -143,19 +145,15 @@ fn malformed_guardrail_policy_is_recorded_as_policy_context_error() {
     );
 
     let facts = collect_for_tests(&tree);
-    assert!(
+    assertions::assert_malformed_guardrail_policy_is_recorded_as_policy_context_error(
         facts
             .policy_context_parse_error
             .as_deref()
             .is_some_and(|message| message.contains("TOML parse error")),
-        "expected malformed guardrail3.toml to be recorded: {facts:#?}"
-    );
-    assert!(
         facts
             .allowed_configs
             .iter()
             .all(|config| config.policy_context_parse_error.is_some()),
-        "expected malformed policy context to propagate to routed clippy configs: {facts:#?}"
     );
 }
 
@@ -209,7 +207,8 @@ fn package_workspace_root_uses_rust_packages_profile_policy() {
         .iter()
         .find(|config| config.rel_path == "packages/shared-types/clippy.toml")
         .expect("expected package-workspace clippy.toml facts");
-
-    assert_eq!(local.profile_name.as_deref(), Some("library"));
-    assert!(!local.garde_enabled);
+    assertions::assert_package_workspace_root_uses_rust_packages_profile_policy(
+        local.profile_name.as_deref(),
+        local.garde_enabled,
+    );
 }

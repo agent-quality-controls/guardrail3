@@ -22,49 +22,49 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
         let section = parse_ban_section(parsed, key);
         for malformed in &section.malformed_messages {
             issue_count += 1;
-            results.push(CheckResult {
-                id: ID.to_owned(),
-                severity: Severity::Warn,
-                title: "ban section malformed".to_owned(),
-                message: malformed.clone(),
-                file: Some(input.config.rel_path.clone()),
-                line: None,
-                inventory: false,
-            });
+            results.push(CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Warn,
+                "ban section malformed".to_owned(),
+                malformed.clone(),
+                Some(input.config.rel_path.clone()),
+                None,
+                false,
+            ));
         }
         for entry in section.entries {
             if let Some(reason) = entry.reason.as_deref()
                 && is_placeholder_reason(reason)
             {
                 issue_count += 1;
-                results.push(CheckResult {
-                    id: ID.to_owned(),
-                    severity: Severity::Warn,
-                    title: "ban entry has placeholder reason".to_owned(),
-                    message: format!(
+                results.push(CheckResult::from_parts(
+                    ID.to_owned(),
+                    Severity::Warn,
+                    "ban entry has placeholder reason".to_owned(),
+                    format!(
                         "`{}` in `{key}` has a trivial or placeholder `reason`.",
                         entry.path
                     ),
-                    file: Some(input.config.rel_path.clone()),
-                    line: None,
-                    inventory: false,
-                });
+                    Some(input.config.rel_path.clone()),
+                    None,
+                    false,
+                ));
             }
         }
     }
 
     if issue_count == 0 {
         results.push(
-            CheckResult {
-                id: ID.to_owned(),
-                severity: Severity::Info,
-                title: "ban reasons are substantive".to_owned(),
-                message: "All managed ban entries use substantive non-placeholder `reason` text."
+            CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Info,
+                "ban reasons are substantive".to_owned(),
+                "All managed ban entries use substantive non-placeholder `reason` text."
                     .to_owned(),
-                file: Some(input.config.rel_path.clone()),
-                line: None,
-                inventory: false,
-            }
+                Some(input.config.rel_path.clone()),
+                None,
+                false,
+            )
             .as_inventory(),
         );
     }

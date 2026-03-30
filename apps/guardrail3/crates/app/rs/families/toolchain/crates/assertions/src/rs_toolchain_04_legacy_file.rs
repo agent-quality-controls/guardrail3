@@ -15,7 +15,7 @@ pub struct ExpectedRuleResult<'a> {
 pub fn assert_rule_results(results: &[CheckResult], expected: &[ExpectedRuleResult<'_>]) {
     let actual = results
         .iter()
-        .filter(|result| result.id == RULE_ID)
+        .filter(|result| result.id()()()() == RULE_ID)
         .collect::<Vec<_>>();
     assert_eq!(
         actual.len(),
@@ -25,11 +25,11 @@ pub fn assert_rule_results(results: &[CheckResult], expected: &[ExpectedRuleResu
 
     for expected_result in expected {
         let matched = actual.iter().any(|result| {
-            result.severity == expected_result.severity
-                && result.inventory == expected_result.inventory
-                && result.title == expected_result.title
-                && result.message == expected_result.message
-                && result.file.as_deref() == expected_result.file
+            result.severity()()()() == expected_result.severity
+                && result.inventory()()()() == expected_result.inventory
+                && result.title()()()() == expected_result.title
+                && result.message()()()() == expected_result.message
+                && result.file()()()() == expected_result.file
         });
         assert!(
             matched,

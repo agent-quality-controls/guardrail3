@@ -23,50 +23,52 @@ impl PolicyRootKind {
 
 #[derive(Debug, Clone)]
 pub struct DenyConfigFacts {
-    pub policy_root_rel: String,
-    pub rel_path: String,
-    pub file_kind: String,
-    pub parsed: Option<toml::Value>,
-    pub parse_error: Option<String>,
-    pub profile_name: Option<String>,
+    pub(crate) policy_root_rel: String,
+    pub(crate) rel_path: String,
+    pub(crate) file_kind: String,
+    pub(crate) parsed: Option<toml::Value>,
+    pub(crate) parse_error: Option<String>,
+    pub(crate) profile_name: Option<String>,
+    pub(crate) policy_context_valid: bool,
 }
 
 #[derive(Debug, Clone)]
 pub struct ForbiddenDenyConfigFacts {
-    pub policy_root_rel: String,
-    pub rel_path: String,
-    pub file_kind: String,
-    pub parse_error: Option<String>,
-    pub shadowed_root_rel: Option<String>,
+    pub(crate) policy_root_rel: String,
+    pub(crate) rel_path: String,
+    pub(crate) file_kind: String,
+    pub(crate) parse_error: Option<String>,
+    pub(crate) shadowed_root_rel: Option<String>,
 }
 
 #[derive(Debug, Clone)]
 pub struct CoveredRustUnitFacts {
-    pub rel_dir: String,
-    pub kind: PolicyRootKind,
-    pub covering_config_rel: String,
-    pub quiet_if_self_hosted: bool,
+    pub(crate) rel_dir: String,
+    pub(crate) kind: PolicyRootKind,
+    pub(crate) covering_config_rel: String,
+    pub(crate) quiet_if_self_hosted: bool,
 }
 
 #[derive(Debug, Clone)]
 pub struct UncoveredRustUnitFacts {
-    pub rel_dir: String,
-    pub kind: PolicyRootKind,
+    pub(crate) rel_dir: String,
+    pub(crate) kind: PolicyRootKind,
 }
 
 #[derive(Debug, Clone)]
 pub struct DenyFacts {
-    pub allowed_configs: Vec<DenyConfigFacts>,
-    pub forbidden_configs: Vec<ForbiddenDenyConfigFacts>,
-    pub same_root_conflicts: Vec<SameRootConflictFacts>,
-    pub covered_units: Vec<CoveredRustUnitFacts>,
-    pub uncovered_units: Vec<UncoveredRustUnitFacts>,
+    pub(crate) policy_context_parse_error: Option<String>,
+    pub(crate) allowed_configs: Vec<DenyConfigFacts>,
+    pub(crate) forbidden_configs: Vec<ForbiddenDenyConfigFacts>,
+    pub(crate) same_root_conflicts: Vec<SameRootConflictFacts>,
+    pub(crate) covered_units: Vec<CoveredRustUnitFacts>,
+    pub(crate) uncovered_units: Vec<UncoveredRustUnitFacts>,
 }
 
 #[derive(Debug, Clone)]
 pub struct SameRootConflictFacts {
-    pub policy_root_rel: String,
-    pub rel_paths: Vec<String>,
+    pub(crate) policy_root_rel: String,
+    pub(crate) rel_paths: Vec<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -80,9 +82,9 @@ pub(crate) struct CargoRootFacts {
 pub fn collect(tree: &ProjectTree, route: &RsDenyRoute) -> DenyFacts {
     let cargo_roots = collect_cargo_roots(tree, route);
     let routed_root_rels = route
-        .roots
+        .roots()
         .iter()
-        .map(|root| root.rel_dir.clone())
+        .map(|root| root.rel_dir().to_owned())
         .collect::<BTreeSet<_>>();
     let workspace_roots: BTreeSet<_> = cargo_roots
         .values()
@@ -106,10 +108,16 @@ pub fn collect(tree: &ProjectTree, route: &RsDenyRoute) -> DenyFacts {
     allowed_policy_roots.extend(workspace_roots.iter().cloned());
     allowed_policy_roots.extend(standalone_package_roots.iter().cloned());
 
-    let profile_map =
+    let profile_map_facts =
         facts_support::read_profile_map(tree, &cargo_roots, &standalone_package_roots);
+    let policy_context_valid = profile_map_facts.parse_error.is_none();
 
-    let configs = collect_configs(tree, &profile_map, &routed_root_rels);
+    let configs = collect_configs(
+        tree,
+        &profile_map_facts.map,
+        &routed_root_rels,
+        policy_context_valid,
+    );
     let mut allowed_configs = Vec::new();
     let mut forbidden_configs = Vec::new();
     for config in configs {
@@ -171,6 +179,7 @@ pub fn collect(tree: &ProjectTree, route: &RsDenyRoute) -> DenyFacts {
     uncovered_units.sort_by(|a, b| a.rel_dir.cmp(&b.rel_dir));
 
     DenyFacts {
+        policy_context_parse_error: profile_map_facts.parse_error,
         allowed_configs,
         forbidden_configs,
         same_root_conflicts,
@@ -184,9 +193,9 @@ fn collect_cargo_roots(
     route: &RsDenyRoute,
 ) -> BTreeMap<String, CargoRootFacts> {
     route
-        .roots
+        .roots()
         .iter()
-        .map(|root| root.rel_dir.clone())
+        .map(|root| root.rel_dir().to_owned())
         .map(|rel_dir| {
             let rel_path = if rel_dir.is_empty() {
                 "Cargo.toml".to_owned()
@@ -252,6 +261,7 @@ fn collect_configs(
     tree: &ProjectTree,
     profile_map: &BTreeMap<String, Option<String>>,
     routed_root_rels: &BTreeSet<String>,
+    policy_context_valid: bool,
 ) -> Vec<DenyConfigFacts> {
     let mut configs = Vec::new();
     let mut seen_paths = BTreeSet::new();
@@ -262,6 +272,7 @@ fn collect_configs(
             "deny.toml",
             "deny.toml",
             profile_map,
+            policy_context_valid,
             &mut seen_paths,
             &mut configs,
         );
@@ -271,6 +282,7 @@ fn collect_configs(
             ".deny.toml",
             ".deny.toml",
             profile_map,
+            policy_context_valid,
             &mut seen_paths,
             &mut configs,
         );
@@ -280,6 +292,7 @@ fn collect_configs(
             ".cargo/deny.toml",
             ".cargo/deny.toml",
             profile_map,
+            policy_context_valid,
             &mut seen_paths,
             &mut configs,
         );
@@ -299,6 +312,7 @@ fn collect_configs(
                 &rel_path,
                 ".cargo/deny.toml",
                 profile_map,
+                policy_context_valid,
                 &mut seen_paths,
                 &mut configs,
             );
@@ -310,6 +324,7 @@ fn collect_configs(
                 &rel_path,
                 "deny.toml",
                 profile_map,
+                policy_context_valid,
                 &mut seen_paths,
                 &mut configs,
             );
@@ -328,6 +343,7 @@ fn collect_configs(
             &rel_path,
             ".deny.toml",
             profile_map,
+            policy_context_valid,
             &mut seen_paths,
             &mut configs,
         );
@@ -348,6 +364,7 @@ fn push_config_if_present(
     rel_path: &str,
     file_kind: &str,
     profile_map: &BTreeMap<String, Option<String>>,
+    policy_context_valid: bool,
     seen_paths: &mut BTreeSet<String>,
     configs: &mut Vec<DenyConfigFacts>,
 ) {
@@ -366,6 +383,7 @@ fn push_config_if_present(
             parsed: Some(parsed),
             parse_error: None,
             profile_name,
+            policy_context_valid,
         }),
         Err(err) => configs.push(DenyConfigFacts {
             policy_root_rel: policy_root_rel.to_owned(),
@@ -374,6 +392,7 @@ fn push_config_if_present(
             parsed: None,
             parse_error: Some(err.to_string()),
             profile_name,
+            policy_context_valid,
         }),
     }
 }

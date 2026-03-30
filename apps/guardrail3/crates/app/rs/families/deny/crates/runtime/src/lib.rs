@@ -2,35 +2,65 @@ mod deny_support;
 pub mod facts;
 mod facts_support;
 mod inputs;
+#[path = "coverage/rs_deny_01_coverage.rs"]
 mod rs_deny_01_coverage;
+#[path = "coverage/rs_deny_02_allowed_locations.rs"]
 mod rs_deny_02_allowed_locations;
+#[path = "coverage/rs_deny_03_shadowing.rs"]
 mod rs_deny_03_shadowing;
+#[path = "advisories/rs_deny_04_deprecated_advisories.rs"]
 mod rs_deny_04_deprecated_advisories;
+#[path = "advisories/rs_deny_05_advisories_baseline.rs"]
 mod rs_deny_05_advisories_baseline;
+#[path = "advisories/rs_deny_06_stricter_advisories_inventory.rs"]
 mod rs_deny_06_stricter_advisories_inventory;
+#[path = "advisories/rs_deny_07_graph_all_features.rs"]
 mod rs_deny_07_graph_all_features;
+#[path = "advisories/rs_deny_08_graph_no_default_features.rs"]
 mod rs_deny_08_graph_no_default_features;
+#[path = "bans/rs_deny_09_ban_baseline_complete.rs"]
 mod rs_deny_09_ban_baseline_complete;
+#[path = "bans/rs_deny_10_multiple_versions_floor.rs"]
 mod rs_deny_10_multiple_versions_floor;
+#[path = "bans/rs_deny_11_highlight_inventory.rs"]
 mod rs_deny_11_highlight_inventory;
+#[path = "bans/rs_deny_12_allow_wildcard_paths.rs"]
 mod rs_deny_12_allow_wildcard_paths;
+#[path = "bans/rs_deny_13_wildcards_inventory.rs"]
 mod rs_deny_13_wildcards_inventory;
+#[path = "licenses/rs_deny_14_license_allow_baseline.rs"]
 mod rs_deny_14_license_allow_baseline;
+#[path = "licenses/rs_deny_15_confidence_threshold.rs"]
 mod rs_deny_15_confidence_threshold;
+#[path = "licenses/rs_deny_16_copyleft_allowlist.rs"]
 mod rs_deny_16_copyleft_allowlist;
+#[path = "licenses/rs_deny_17_license_exceptions_inventory.rs"]
 mod rs_deny_17_license_exceptions_inventory;
+#[path = "sources/rs_deny_18_unknown_sources_policy.rs"]
 mod rs_deny_18_unknown_sources_policy;
+#[path = "sources/rs_deny_19_allow_registry_baseline.rs"]
 mod rs_deny_19_allow_registry_baseline;
+#[path = "sources/rs_deny_20_allow_git_inventory.rs"]
 mod rs_deny_20_allow_git_inventory;
+#[path = "bans/rs_deny_21_tokio_full_ban.rs"]
 mod rs_deny_21_tokio_full_ban;
+#[path = "bans/rs_deny_22_extra_feature_bans_inventory.rs"]
 mod rs_deny_22_extra_feature_bans_inventory;
+#[path = "sources/rs_deny_23_skip_hygiene.rs"]
 mod rs_deny_23_skip_hygiene;
+#[path = "sources/rs_deny_24_ignore_hygiene.rs"]
 mod rs_deny_24_ignore_hygiene;
+#[path = "sources/rs_deny_25_allow_override_channel.rs"]
 mod rs_deny_25_allow_override_channel;
+#[path = "bans/rs_deny_26_ban_reason_inventory.rs"]
 mod rs_deny_26_ban_reason_inventory;
+#[path = "bans/rs_deny_27_duplicate_entries.rs"]
 mod rs_deny_27_duplicate_entries;
+#[path = "sources/rs_deny_28_unknown_keys.rs"]
 mod rs_deny_28_unknown_keys;
+#[path = "sources/rs_deny_29_ignore_accumulation.rs"]
 mod rs_deny_29_ignore_accumulation;
+#[path = "sources/rs_deny_30_wrappers.rs"]
 mod rs_deny_30_wrappers;
 
 use guardrail3_app_rs_family_mapper::RsDenyRoute;
@@ -51,6 +81,10 @@ pub use self::deny_support::expected_ban_names;
 pub fn check(tree: &ProjectTree, route: &RsDenyRoute) -> Vec<CheckResult> {
     let facts = collect(tree, route);
     let mut results = Vec::new();
+
+    if let Some(parse_error) = facts.policy_context_parse_error.as_deref() {
+        rs_deny_01_coverage::check_policy_context_error(parse_error, &mut results);
+    }
 
     for covered in &facts.covered_units {
         rs_deny_01_coverage::check_covered(&CoveredRustUnitInput::new(covered), &mut results);
@@ -185,6 +219,7 @@ pub(crate) fn config_facts_for_test(
         parsed,
         parse_error,
         profile_name: Some(profile_name.unwrap_or("service").to_owned()),
+        policy_context_valid: true,
     }
 }
 

@@ -2,10 +2,10 @@ use guardrail3_domain_project_tree::ProjectTree;
 
 pub fn rust_file_rels(tree: &ProjectTree) -> Vec<String> {
     let mut rels: Vec<String> = tree
-        .structure
+        .structure()
         .iter()
         .flat_map(|(dir_rel, entry)| {
-            entry.files.iter().filter_map(|file_name| {
+            entry.files().iter().filter_map(|file_name| {
                 if !file_name.ends_with(".rs") {
                     return None;
                 }

@@ -10,9 +10,9 @@ pub(super) fn collect_cargo_roots(
     route: &RsClippyRoute,
 ) -> BTreeMap<String, CargoRootFacts> {
     route
-        .roots
+        .roots()
         .iter()
-        .map(|root| (root.rel_dir.clone(), root.cargo_rel_path.clone()))
+        .map(|root| (root.rel_dir().to_owned(), root.cargo_rel_path().to_owned()))
         .map(|(rel_dir, cargo_rel_path)| {
             let facts = match tree.file_content(&cargo_rel_path) {
                 Some(content) => match toml::from_str::<toml::Value>(content) {

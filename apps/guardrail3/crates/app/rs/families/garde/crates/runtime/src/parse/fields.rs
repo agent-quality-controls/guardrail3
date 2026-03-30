@@ -1,8 +1,8 @@
 use quote::ToTokens;
 use syn::spanned::Spanned;
 
-use super::aliases::{path_to_string, token_stream_uses_ctx_variable};
 use super::BoundaryField;
+use super::aliases::{path_to_string, token_stream_uses_ctx_variable};
 
 #[derive(Default)]
 struct GardeAttrSummary {

@@ -4,30 +4,30 @@ use super::facts::{
 };
 
 pub struct PolicyRootCargoInput<'a> {
-    pub root: &'a PolicyRootCargoFacts,
+    pub(crate) root: &'a PolicyRootCargoFacts,
 }
 
 pub struct WorkspaceMemberCargoInput<'a> {
-    pub workspace: &'a PolicyRootCargoFacts,
-    pub member: &'a WorkspaceMemberCargoFacts,
+    pub(crate) workspace: &'a PolicyRootCargoFacts,
+    pub(crate) member: &'a WorkspaceMemberCargoFacts,
 }
 
 pub struct MissingMemberCargoInput<'a> {
-    pub missing: &'a MissingMemberCargoFacts,
+    pub(crate) missing: &'a MissingMemberCargoFacts,
 }
 
 pub struct MissingMemberInventoryCargoInput<'a> {
-    pub workspace: &'a PolicyRootCargoFacts,
-    pub has_missing_members: bool,
+    pub(crate) workspace: &'a PolicyRootCargoFacts,
+    pub(crate) has_missing_members: bool,
 }
 
 pub struct InputFailureCargoInput<'a> {
-    pub failure: &'a InputFailureFacts,
+    pub(crate) failure: &'a InputFailureFacts,
 }
 
 pub struct InputFailureInventoryCargoInput<'a> {
-    pub root: &'a PolicyRootCargoFacts,
-    pub has_input_failures: bool,
+    pub(crate) root: &'a PolicyRootCargoFacts,
+    pub(crate) has_input_failures: bool,
 }
 
 impl<'a> PolicyRootCargoInput<'a> {

@@ -3,11 +3,11 @@ use std::path::{Component, Path};
 
 use guardrail3_domain_project_tree::ProjectTree;
 
-use super::{
-    DependencyEntryFacts, DependencySectionKind, InputFailureFacts, MemberFacts, ParsedGuardrail,
-    WorkspaceFacts,
-};
 use super::guardrail::validate_dependency_manifest_shape;
+use super::{
+    DependencyEntryFacts, DependencySectionKind, DirectDependencyCapFacts, InputFailureFacts,
+    MemberFacts, ParsedGuardrail, WorkspaceFacts,
+};
 
 pub(super) fn discover_members(
     tree: &ProjectTree,
@@ -119,11 +119,13 @@ pub(super) fn policy_for_member(
         if let Some(app_name) = rel_dir.split('/').nth(1) {
             if let Some(config) = parsed_guardrail.apps.get(app_name) {
                 return (
-                    config.profile.clone().or(config.type_.clone()),
                     config
-                        .allowed_deps
-                        .clone()
-                        .map(|deps| deps.into_iter().collect::<BTreeSet<_>>()),
+                        .profile()
+                        .map(str::to_owned)
+                        .or_else(|| config.type_().map(str::to_owned)),
+                    config
+                        .allowed_deps()
+                        .map(|deps| deps.iter().cloned().collect::<BTreeSet<_>>()),
                 );
             }
         }
@@ -132,11 +134,13 @@ pub(super) fn policy_for_member(
     if rel_dir.starts_with("packages/") {
         if let Some(config) = &parsed_guardrail.packages {
             return (
-                config.profile.clone().or(config.type_.clone()),
                 config
-                    .allowed_deps
-                    .clone()
-                    .map(|deps| deps.into_iter().collect::<BTreeSet<_>>()),
+                    .profile()
+                    .map(str::to_owned)
+                    .or_else(|| config.type_().map(str::to_owned)),
+                config
+                    .allowed_deps()
+                    .map(|deps| deps.iter().cloned().collect::<BTreeSet<_>>()),
             );
         }
     }
@@ -144,17 +148,18 @@ pub(super) fn policy_for_member(
     (parsed_guardrail.root_profile_name.clone(), None)
 }
 
-pub(super) fn collect_dependency_entries(
+pub(super) fn collect_dependency_facts(
     tree: &ProjectTree,
     members: &[MemberFacts],
     workspaces: &[WorkspaceFacts],
     input_failures: &mut Vec<InputFailureFacts>,
-) -> Vec<DependencyEntryFacts> {
+) -> (Vec<DependencyEntryFacts>, Vec<DirectDependencyCapFacts>) {
     let workspaces_by_root = workspaces
         .iter()
         .map(|workspace| (workspace.root_rel_dir.clone(), workspace))
         .collect::<BTreeMap<_, _>>();
     let mut entries = Vec::new();
+    let mut direct_dependency_caps = Vec::new();
 
     for member in members {
         let Some(content) = tree.file_content(&member.cargo_rel_path) else {
@@ -186,42 +191,140 @@ pub(super) fn collect_dependency_entries(
             continue;
         }
 
-        for (section_key, section_kind) in [
-            ("dependencies", DependencySectionKind::Dependencies),
-            (
-                "build-dependencies",
-                DependencySectionKind::BuildDependencies,
-            ),
-            ("dev-dependencies", DependencySectionKind::DevDependencies),
-        ] {
-            let Some(table) = parsed.get(section_key).and_then(toml::Value::as_table) else {
-                continue;
-            };
-            for (alias, value) in table {
-                match external_dep_name(member, alias, value, &workspaces_by_root) {
-                    Ok(Some(dep_package_name)) => entries.push(DependencyEntryFacts {
+        let mut unique_direct_dependency_names = BTreeSet::new();
+        let mut saw_error = collect_top_level_dependency_entries(
+            member,
+            &parsed,
+            &workspaces_by_root,
+            input_failures,
+            &mut entries,
+            &mut unique_direct_dependency_names,
+        );
+        saw_error |= collect_target_direct_dependency_names(
+            member,
+            &parsed,
+            &workspaces_by_root,
+            input_failures,
+            &mut unique_direct_dependency_names,
+        );
+        if !saw_error {
+            direct_dependency_caps.push(DirectDependencyCapFacts {
+                crate_name: member.crate_name.clone(),
+                cargo_rel_path: member.cargo_rel_path.clone(),
+                unique_direct_dependency_count: unique_direct_dependency_names.len(),
+            });
+        }
+    }
+
+    (entries, direct_dependency_caps)
+}
+
+fn collect_top_level_dependency_entries(
+    member: &MemberFacts,
+    parsed: &toml::Value,
+    workspaces_by_root: &BTreeMap<String, &WorkspaceFacts>,
+    input_failures: &mut Vec<InputFailureFacts>,
+    entries: &mut Vec<DependencyEntryFacts>,
+    direct_dependency_names: &mut BTreeSet<String>,
+) -> bool {
+    let mut saw_error = false;
+    for (section_key, section_kind) in [
+        ("dependencies", DependencySectionKind::Dependencies),
+        (
+            "build-dependencies",
+            DependencySectionKind::BuildDependencies,
+        ),
+        ("dev-dependencies", DependencySectionKind::DevDependencies),
+    ] {
+        let Some(table) = parsed.get(section_key).and_then(toml::Value::as_table) else {
+            continue;
+        };
+        for (alias, value) in table {
+            match external_dep_name(member, alias, value, workspaces_by_root) {
+                Ok(Some(dep_package_name)) => {
+                    let _ = direct_dependency_names.insert(dep_package_name.clone());
+                    entries.push(DependencyEntryFacts {
                         crate_name: member.crate_name.clone(),
                         cargo_rel_path: member.cargo_rel_path.clone(),
                         section_kind,
-                        dep_alias: alias.clone(),
                         allowlisted: member
                             .allowed_deps
                             .as_ref()
                             .is_some_and(|allowed| allowed.contains(&dep_package_name)),
                         allowlist_present: member.allowed_deps.is_some(),
                         dep_package_name,
-                    }),
-                    Ok(None) => {}
-                    Err(message) => input_failures.push(InputFailureFacts {
+                    });
+                }
+                Ok(None) => {}
+                Err(message) => {
+                    input_failures.push(InputFailureFacts {
                         rel_path: member.cargo_rel_path.clone(),
                         message,
-                    }),
+                    });
+                    saw_error = true;
                 }
             }
         }
     }
+    saw_error
+}
 
-    entries
+fn collect_target_direct_dependency_names(
+    member: &MemberFacts,
+    parsed: &toml::Value,
+    workspaces_by_root: &BTreeMap<String, &WorkspaceFacts>,
+    input_failures: &mut Vec<InputFailureFacts>,
+    names: &mut BTreeSet<String>,
+) -> bool {
+    let mut saw_error = false;
+
+    if let Some(targets) = parsed.get("target").and_then(toml::Value::as_table) {
+        for target_table in targets.values().filter_map(toml::Value::as_table) {
+            for section_key in ["dependencies", "build-dependencies", "dev-dependencies"] {
+                let Some(table) = target_table
+                    .get(section_key)
+                    .and_then(toml::Value::as_table)
+                else {
+                    continue;
+                };
+                saw_error |= collect_external_dependency_names_from_table(
+                    member,
+                    table,
+                    workspaces_by_root,
+                    input_failures,
+                    names,
+                );
+            }
+        }
+    }
+
+    saw_error
+}
+
+fn collect_external_dependency_names_from_table(
+    member: &MemberFacts,
+    table: &toml::map::Map<String, toml::Value>,
+    workspaces_by_root: &BTreeMap<String, &WorkspaceFacts>,
+    input_failures: &mut Vec<InputFailureFacts>,
+    names: &mut BTreeSet<String>,
+) -> bool {
+    let mut saw_error = false;
+    for (alias, value) in table {
+        match external_dep_name(member, alias, value, workspaces_by_root) {
+            Ok(Some(dep_package_name)) => {
+                let _ = names.insert(dep_package_name);
+            }
+            Ok(None) => {}
+            Err(message) => {
+                input_failures.push(InputFailureFacts {
+                    rel_path: member.cargo_rel_path.clone(),
+                    message,
+                });
+                saw_error = true;
+            }
+        }
+    }
+    saw_error
 }
 
 fn external_dep_name(

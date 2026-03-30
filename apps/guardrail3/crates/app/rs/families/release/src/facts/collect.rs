@@ -366,10 +366,10 @@ fn collect_workflows(
     input_failures: &mut Vec<types::ReleaseInputFailureFacts>,
 ) -> Vec<types::WorkflowFacts> {
     let mut workflow_paths = tree
-        .structure
+        .structure()
         .iter()
         .flat_map(|(dir_rel, entry)| {
-            entry.files.iter().filter_map(move |file_name| {
+            entry.files().iter().filter_map(move |file_name| {
                 let rel_path =
                     guardrail3_domain_project_tree::ProjectTree::join_rel(dir_rel, file_name);
                 let is_workflow = rel_path.starts_with(".github/workflows/")

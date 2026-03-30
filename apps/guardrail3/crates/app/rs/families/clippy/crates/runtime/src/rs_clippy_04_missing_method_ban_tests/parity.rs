@@ -1,4 +1,4 @@
-use guardrail3_domain_modules::clippy::SERVICE_METHOD_PATHS;
+use guardrail3_app_rs_family_clippy_assertions::rs_clippy_04_missing_method_ban as assertions;
 use test_support::build_fixture_clippy_toml;
 
 #[test]
@@ -13,7 +13,7 @@ fn generated_service_method_ban_set_matches_rule_baseline() {
         .flatten()
         .filter_map(|entry| entry.get("path").and_then(toml::Value::as_str))
         .collect::<Vec<_>>();
-    let expected = SERVICE_METHOD_PATHS.to_vec();
+    let expected = assertions::service_method_bans();
 
     assert_eq!(actual, expected);
 }

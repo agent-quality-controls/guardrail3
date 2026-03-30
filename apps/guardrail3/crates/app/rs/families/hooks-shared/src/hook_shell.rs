@@ -11,27 +11,98 @@ pub enum FailOpenWrapper<'a> {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ExecutableLine<'a> {
-    pub line_no: usize,
-    pub raw: &'a str,
-    pub command_text: &'a str,
-    pub command_name: &'a str,
-    pub softened_by: Option<FailOpenWrapper<'a>>,
-    pub is_dispatcher_syntax: bool,
-    pub is_exit_zero: bool,
+    pub(crate) line_no: usize,
+    pub(crate) raw: &'a str,
+    pub(crate) command_text: &'a str,
+    pub(crate) command_name: &'a str,
+    pub(crate) softened_by: Option<FailOpenWrapper<'a>>,
+    pub(crate) is_dispatcher_syntax: bool,
+    pub(crate) is_exit_zero: bool,
+}
+
+impl<'a> ExecutableLine<'a> {
+    #[must_use]
+    pub fn line_no(&self) -> usize {
+        self.line_no
+    }
+
+    #[must_use]
+    pub fn raw(&self) -> &'a str {
+        self.raw
+    }
+
+    #[must_use]
+    pub fn command_text(&self) -> &'a str {
+        self.command_text
+    }
+
+    #[must_use]
+    pub fn command_name(&self) -> &'a str {
+        self.command_name
+    }
+
+    #[must_use]
+    pub fn softened_by(&self) -> Option<FailOpenWrapper<'a>> {
+        self.softened_by
+    }
+
+    #[must_use]
+    pub fn is_dispatcher_syntax(&self) -> bool {
+        self.is_dispatcher_syntax
+    }
+
+    #[must_use]
+    pub fn is_exit_zero(&self) -> bool {
+        self.is_exit_zero
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ParsedShellScript<'a> {
-    pub shebang: Option<&'a str>,
-    pub executable_lines: Vec<ExecutableLine<'a>>,
-    pub functions: Vec<ShellFunction>,
+    pub(crate) shebang: Option<&'a str>,
+    pub(crate) executable_lines: Vec<ExecutableLine<'a>>,
+    pub(crate) functions: Vec<ShellFunction>,
+}
+
+impl<'a> ParsedShellScript<'a> {
+    #[must_use]
+    pub fn shebang(&self) -> Option<&'a str> {
+        self.shebang
+    }
+
+    #[must_use]
+    pub fn executable_lines(&self) -> &[ExecutableLine<'a>] {
+        self.executable_lines.as_slice()
+    }
+
+    #[must_use]
+    pub fn functions(&self) -> &[ShellFunction] {
+        self.functions.as_slice()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ShellFunction {
-    pub name: String,
-    pub line_no: usize,
-    pub body: String,
+    pub(crate) name: String,
+    pub(crate) line_no: usize,
+    pub(crate) body: String,
+}
+
+impl ShellFunction {
+    #[must_use]
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
+    #[must_use]
+    pub fn line_no(&self) -> usize {
+        self.line_no
+    }
+
+    #[must_use]
+    pub fn body(&self) -> &str {
+        &self.body
+    }
 }
 
 #[must_use]

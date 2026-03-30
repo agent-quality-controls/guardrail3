@@ -18,39 +18,38 @@ pub(super) fn check_dispatcher_pattern(
                 || pre_commit_content.contains("run-parts"));
         if has_dispatcher {
             results.push(
-                CheckResult {
-                    id: "H4".to_owned(),
-                    severity: Severity::Info,
-                    title: "Dispatcher pattern found".to_owned(),
-                    message: "pre-commit sources scripts from pre-commit.d/".to_owned(),
-                    file: Some(pre_commit_path.display().to_string()),
-                    line: None,
-                    inventory: false,
-                }
+                CheckResult::new(
+                    "H4".to_owned(),
+                    Severity::Info,
+                    "Dispatcher pattern found".to_owned(),
+                    "pre-commit sources scripts from pre-commit.d/".to_owned(),
+                )
+                .with_optional_location(Some(pre_commit_path.display().to_string()), None)
+                .with_inventory(false)
                 .as_inventory(),
             );
         } else {
-            results.push(CheckResult {
-                id: "H4".to_owned(),
-                severity: Severity::Error,
-                title: "Dispatcher pattern missing".to_owned(),
-                message: "pre-commit.d/ exists but pre-commit doesn't dispatch to it".to_owned(),
-                file: Some(pre_commit_path.display().to_string()),
-                line: None,
-                inventory: false,
-            });
+            results.push(
+                CheckResult::new(
+                    "H4".to_owned(),
+                    Severity::Error,
+                    "Dispatcher pattern missing".to_owned(),
+                    "pre-commit.d/ exists but pre-commit doesn't dispatch to it".to_owned(),
+                )
+                .with_optional_location(Some(pre_commit_path.display().to_string()), None)
+                .with_inventory(false),
+            );
         }
     } else {
         results.push(
-            CheckResult {
-                id: "H4".to_owned(),
-                severity: Severity::Info,
-                title: "Monolithic script (no dispatcher needed)".to_owned(),
-                message: "No pre-commit.d/, so no dispatcher check".to_owned(),
-                file: Some(pre_commit_path.display().to_string()),
-                line: None,
-                inventory: false,
-            }
+            CheckResult::new(
+                "H4".to_owned(),
+                Severity::Info,
+                "Monolithic script (no dispatcher needed)".to_owned(),
+                "No pre-commit.d/, so no dispatcher check".to_owned(),
+            )
+            .with_optional_location(Some(pre_commit_path.display().to_string()), None)
+            .with_inventory(false)
             .as_inventory(),
         );
     }
@@ -76,18 +75,17 @@ pub(super) fn emit_script_stats(
     };
 
     results.push(
-        CheckResult {
-            id: "H6".to_owned(),
-            severity: Severity::Info,
-            title: "Pre-commit script stats".to_owned(),
-            message: format!(
+        CheckResult::new(
+            "H6".to_owned(),
+            Severity::Info,
+            "Pre-commit script stats".to_owned(),
+            format!(
                 "{line_count} lines, {size} bytes{}",
                 modified.map_or(String::new(), |t| format!(", mtime unix {t}"))
             ),
-            file: Some(pre_commit_path.display().to_string()),
-            line: None,
-            inventory: false,
-        }
+        )
+        .with_optional_location(Some(pre_commit_path.display().to_string()), None)
+        .with_inventory(false)
         .as_inventory(),
     );
 
@@ -104,15 +102,14 @@ pub(super) fn check_local_scripts(
         inventory_scripts(fs, &overrides_d, "H11", "Local pre-commit scripts", results);
     } else {
         results.push(
-            CheckResult {
-                id: "H11".to_owned(),
-                severity: Severity::Info,
-                title: "No .guardrail3/overrides/pre-commit.d/ directory".to_owned(),
-                message: "No local hook overrides found".to_owned(),
-                file: None,
-                line: None,
-                inventory: false,
-            }
+            CheckResult::new(
+                "H11".to_owned(),
+                Severity::Info,
+                "No .guardrail3/overrides/pre-commit.d/ directory".to_owned(),
+                "No local hook overrides found".to_owned(),
+            )
+            .with_optional_location(None, None)
+            .with_inventory(false)
             .as_inventory(),
         );
     }
@@ -216,25 +213,27 @@ pub(super) fn check_monolithic_patterns(
 
         let found = check.pattern.iter().any(|p| content.contains(p));
         if found {
-            results.push(CheckResult {
-                id: "H5".to_owned(),
-                severity: Severity::Info,
-                title: format!("{} found in pre-commit", check.label),
-                message: "Pattern present in monolithic script".to_owned(),
-                file: Some(file_path.display().to_string()),
-                line: None,
-                inventory: false,
-            });
+            results.push(
+                CheckResult::new(
+                    "H5".to_owned(),
+                    Severity::Info,
+                    format!("{} found in pre-commit", check.label),
+                    "Pattern present in monolithic script".to_owned(),
+                )
+                .with_optional_location(Some(file_path.display().to_string()), None)
+                .with_inventory(false),
+            );
         } else {
-            results.push(CheckResult {
-                id: "H5".to_owned(),
-                severity: check.severity_if_missing,
-                title: format!("{} not found in pre-commit", check.label),
-                message: "Pattern missing from monolithic script".to_owned(),
-                file: Some(file_path.display().to_string()),
-                line: None,
-                inventory: false,
-            });
+            results.push(
+                CheckResult::new(
+                    "H5".to_owned(),
+                    check.severity_if_missing,
+                    format!("{} not found in pre-commit", check.label),
+                    "Pattern missing from monolithic script".to_owned(),
+                )
+                .with_optional_location(Some(file_path.display().to_string()), None)
+                .with_inventory(false),
+            );
         }
     }
 }
@@ -272,27 +271,11 @@ pub(super) fn check_stylelint_hook(pre_commit_content: &str, results: &mut Vec<C
 
     if has_stylelint && has_css_detection {
         results.push(
-            CheckResult {
-                id: "H-CSS-01".to_owned(),
-                severity: Severity::Info,
-                title: "Stylelint configured in pre-commit hook".to_owned(),
-                message: "Pre-commit hook runs stylelint on staged CSS files for quality and accessibility checking.".to_owned(),
-                file: None,
-                line: None,
-                inventory: false,
-            }
+            CheckResult::new("H-CSS-01".to_owned(), Severity::Info, "Stylelint configured in pre-commit hook".to_owned(), "Pre-commit hook runs stylelint on staged CSS files for quality and accessibility checking.".to_owned()).with_optional_location(None, None).with_inventory(false)
             .as_inventory(),
         );
     } else {
-        results.push(CheckResult {
-            id: "H-CSS-01".to_owned(),
-            severity: Severity::Warn,
-            title: "No stylelint in pre-commit hook".to_owned(),
-            message: "Pre-commit hook does not run stylelint on CSS files. CSS quality and accessibility issues won't be caught before commit. Add a stylelint step to .githooks/pre-commit that runs on staged .css files.".to_owned(),
-            file: None,
-            line: None,
-            inventory: false,
-        });
+        results.push(CheckResult::new("H-CSS-01".to_owned(), Severity::Warn, "No stylelint in pre-commit hook".to_owned(), "Pre-commit hook does not run stylelint on CSS files. CSS quality and accessibility issues won't be caught before commit. Add a stylelint step to .githooks/pre-commit that runs on staged .css files.".to_owned()).with_optional_location(None, None).with_inventory(false));
     }
 }
 
@@ -300,27 +283,27 @@ pub(super) fn check_stylelint_hook(pre_commit_content: &str, results: &mut Vec<C
 pub(super) fn check_cspell_hook(content: &str, results: &mut Vec<CheckResult>) {
     if content.contains("cspell") {
         results.push(
-            CheckResult {
-                id: "H-TOOL-01".to_owned(),
-                severity: Severity::Info,
-                title: "cspell configured in hook".to_owned(),
-                message: "Pre-commit hook runs cspell.".to_owned(),
-                file: None,
-                line: None,
-                inventory: false,
-            }
+            CheckResult::new(
+                "H-TOOL-01".to_owned(),
+                Severity::Info,
+                "cspell configured in hook".to_owned(),
+                "Pre-commit hook runs cspell.".to_owned(),
+            )
+            .with_optional_location(None, None)
+            .with_inventory(false)
             .as_inventory(),
         );
     } else {
-        results.push(CheckResult {
-            id: "H-TOOL-01".to_owned(),
-            severity: Severity::Warn,
-            title: "No cspell in hook".to_owned(),
-            message: "Pre-commit hook does not run cspell. Add spell checking step.".to_owned(),
-            file: None,
-            line: None,
-            inventory: false,
-        });
+        results.push(
+            CheckResult::new(
+                "H-TOOL-01".to_owned(),
+                Severity::Warn,
+                "No cspell in hook".to_owned(),
+                "Pre-commit hook does not run cspell. Add spell checking step.".to_owned(),
+            )
+            .with_optional_location(None, None)
+            .with_inventory(false),
+        );
     }
 }
 
@@ -328,27 +311,18 @@ pub(super) fn check_cspell_hook(content: &str, results: &mut Vec<CheckResult>) {
 pub(super) fn check_conflict_marker_hook(content: &str, results: &mut Vec<CheckResult>) {
     if content.contains("conflict marker") || content.contains("<{7}") || content.contains("<<<") {
         results.push(
-            CheckResult {
-                id: "H-TOOL-02".to_owned(),
-                severity: Severity::Info,
-                title: "Conflict marker check in hook".to_owned(),
-                message: "Pre-commit hook checks for merge conflict markers.".to_owned(),
-                file: None,
-                line: None,
-                inventory: false,
-            }
+            CheckResult::new(
+                "H-TOOL-02".to_owned(),
+                Severity::Info,
+                "Conflict marker check in hook".to_owned(),
+                "Pre-commit hook checks for merge conflict markers.".to_owned(),
+            )
+            .with_optional_location(None, None)
+            .with_inventory(false)
             .as_inventory(),
         );
     } else {
-        results.push(CheckResult {
-            id: "H-TOOL-02".to_owned(),
-            severity: Severity::Warn,
-            title: "No conflict marker check in hook".to_owned(),
-            message: "Pre-commit hook does not check for merge conflict markers. Add grep for <<<<<<< ======= >>>>>>>.".to_owned(),
-            file: None,
-            line: None,
-            inventory: false,
-        });
+        results.push(CheckResult::new("H-TOOL-02".to_owned(), Severity::Warn, "No conflict marker check in hook".to_owned(), "Pre-commit hook does not check for merge conflict markers. Add grep for <<<<<<< ======= >>>>>>>.".to_owned()).with_optional_location(None, None).with_inventory(false));
     }
 }
 
@@ -356,27 +330,18 @@ pub(super) fn check_conflict_marker_hook(content: &str, results: &mut Vec<CheckR
 pub(super) fn check_lockfile_hook(content: &str, results: &mut Vec<CheckResult>) {
     if content.contains("frozen-lockfile") || content.contains("lockfile") {
         results.push(
-            CheckResult {
-                id: "H-TOOL-03".to_owned(),
-                severity: Severity::Info,
-                title: "Lockfile integrity check in hook".to_owned(),
-                message: "Pre-commit hook verifies lockfile integrity.".to_owned(),
-                file: None,
-                line: None,
-                inventory: false,
-            }
+            CheckResult::new(
+                "H-TOOL-03".to_owned(),
+                Severity::Info,
+                "Lockfile integrity check in hook".to_owned(),
+                "Pre-commit hook verifies lockfile integrity.".to_owned(),
+            )
+            .with_optional_location(None, None)
+            .with_inventory(false)
             .as_inventory(),
         );
     } else {
-        results.push(CheckResult {
-            id: "H-TOOL-03".to_owned(),
-            severity: Severity::Warn,
-            title: "No lockfile check in hook".to_owned(),
-            message: "Pre-commit hook does not check lockfile integrity. Add pnpm install --frozen-lockfile.".to_owned(),
-            file: None,
-            line: None,
-            inventory: false,
-        });
+        results.push(CheckResult::new("H-TOOL-03".to_owned(), Severity::Warn, "No lockfile check in hook".to_owned(), "Pre-commit hook does not check lockfile integrity. Add pnpm install --frozen-lockfile.".to_owned()).with_optional_location(None, None).with_inventory(false));
     }
 }
 
@@ -384,28 +349,28 @@ pub(super) fn check_lockfile_hook(content: &str, results: &mut Vec<CheckResult>)
 pub(super) fn check_prettier_hook(content: &str, results: &mut Vec<CheckResult>) {
     if content.contains("prettier") && content.contains("--check") {
         results.push(
-            CheckResult {
-                id: "H-TOOL-04".to_owned(),
-                severity: Severity::Info,
-                title: "Prettier format check in hook".to_owned(),
-                message: "Pre-commit hook runs prettier --check.".to_owned(),
-                file: None,
-                line: None,
-                inventory: false,
-            }
+            CheckResult::new(
+                "H-TOOL-04".to_owned(),
+                Severity::Info,
+                "Prettier format check in hook".to_owned(),
+                "Pre-commit hook runs prettier --check.".to_owned(),
+            )
+            .with_optional_location(None, None)
+            .with_inventory(false)
             .as_inventory(),
         );
     } else {
-        results.push(CheckResult {
-            id: "H-TOOL-04".to_owned(),
-            severity: Severity::Warn,
-            title: "No prettier in hook".to_owned(),
-            message: "Pre-commit hook does not run prettier --check. Add formatting verification."
-                .to_owned(),
-            file: None,
-            line: None,
-            inventory: false,
-        });
+        results.push(
+            CheckResult::new(
+                "H-TOOL-04".to_owned(),
+                Severity::Warn,
+                "No prettier in hook".to_owned(),
+                "Pre-commit hook does not run prettier --check. Add formatting verification."
+                    .to_owned(),
+            )
+            .with_optional_location(None, None)
+            .with_inventory(false),
+        );
     }
 }
 
@@ -413,27 +378,18 @@ pub(super) fn check_prettier_hook(content: &str, results: &mut Vec<CheckResult>)
 pub(super) fn check_audit_hook(content: &str, results: &mut Vec<CheckResult>) {
     if content.contains("pnpm audit") {
         results.push(
-            CheckResult {
-                id: "H-TOOL-05".to_owned(),
-                severity: Severity::Info,
-                title: "Dependency audit in hook".to_owned(),
-                message: "Pre-commit hook runs pnpm audit.".to_owned(),
-                file: None,
-                line: None,
-                inventory: false,
-            }
+            CheckResult::new(
+                "H-TOOL-05".to_owned(),
+                Severity::Info,
+                "Dependency audit in hook".to_owned(),
+                "Pre-commit hook runs pnpm audit.".to_owned(),
+            )
+            .with_optional_location(None, None)
+            .with_inventory(false)
             .as_inventory(),
         );
     } else {
-        results.push(CheckResult {
-            id: "H-TOOL-05".to_owned(),
-            severity: Severity::Warn,
-            title: "No dependency audit in hook".to_owned(),
-            message: "Pre-commit hook does not run pnpm audit. Add informational dependency vulnerability scan.".to_owned(),
-            file: None,
-            line: None,
-            inventory: false,
-        });
+        results.push(CheckResult::new("H-TOOL-05".to_owned(), Severity::Warn, "No dependency audit in hook".to_owned(), "Pre-commit hook does not run pnpm audit. Add informational dependency vulnerability scan.".to_owned()).with_optional_location(None, None).with_inventory(false));
     }
 }
 
@@ -441,30 +397,29 @@ pub(super) fn check_audit_hook(content: &str, results: &mut Vec<CheckResult>) {
 pub(super) fn check_set_e_safety(content: &str, results: &mut Vec<CheckResult>) {
     if content.contains("set -e") || content.contains("set -euo pipefail") {
         results.push(
-            CheckResult {
-                id: "H-SAFE-01".to_owned(),
-                severity: Severity::Info,
-                title: "Pre-commit hook has shell error handling".to_owned(),
-                message: "Hook script uses `set -e` or `set -euo pipefail`.".to_owned(),
-                file: None,
-                line: None,
-                inventory: false,
-            }
+            CheckResult::new(
+                "H-SAFE-01".to_owned(),
+                Severity::Info,
+                "Pre-commit hook has shell error handling".to_owned(),
+                "Hook script uses `set -e` or `set -euo pipefail`.".to_owned(),
+            )
+            .with_optional_location(None, None)
+            .with_inventory(false)
             .as_inventory(),
         );
     } else {
-        results.push(CheckResult {
-            id: "H-SAFE-01".to_owned(),
-            severity: Severity::Warn,
-            title: "Pre-commit hook missing shell error handling".to_owned(),
-            message:
+        results.push(
+            CheckResult::new(
+                "H-SAFE-01".to_owned(),
+                Severity::Warn,
+                "Pre-commit hook missing shell error handling".to_owned(),
                 "Pre-commit hook missing `set -e` or `set -euo pipefail` \u{2014} commands that \
                       fail may not abort the hook."
                     .to_owned(),
-            file: None,
-            line: None,
-            inventory: false,
-        });
+            )
+            .with_optional_location(None, None)
+            .with_inventory(false),
+        );
     }
 }
 
@@ -476,15 +431,16 @@ pub(super) fn inventory_scripts(
     results: &mut Vec<CheckResult>,
 ) {
     if !dir.exists() {
-        results.push(CheckResult {
-            id: id.to_owned(),
-            severity: Severity::Warn,
-            title: format!("{title_prefix}: unreadable"),
-            message: "Directory does not exist".to_owned(),
-            file: Some(dir.display().to_string()),
-            line: None,
-            inventory: false,
-        });
+        results.push(
+            CheckResult::new(
+                id.to_owned(),
+                Severity::Warn,
+                format!("{title_prefix}: unreadable"),
+                "Directory does not exist".to_owned(),
+            )
+            .with_optional_location(Some(dir.display().to_string()), None)
+            .with_inventory(false),
+        );
         return;
     }
 
@@ -499,28 +455,26 @@ pub(super) fn inventory_scripts(
 
     if names.is_empty() {
         results.push(
-            CheckResult {
-                id: id.to_owned(),
-                severity: Severity::Info,
-                title: format!("{title_prefix}: empty"),
-                message: "No scripts found".to_owned(),
-                file: Some(dir.display().to_string()),
-                line: None,
-                inventory: false,
-            }
+            CheckResult::new(
+                id.to_owned(),
+                Severity::Info,
+                format!("{title_prefix}: empty"),
+                "No scripts found".to_owned(),
+            )
+            .with_optional_location(Some(dir.display().to_string()), None)
+            .with_inventory(false)
             .as_inventory(),
         );
     } else {
         results.push(
-            CheckResult {
-                id: id.to_owned(),
-                severity: Severity::Info,
-                title: format!("{title_prefix}: {} scripts", names.len()),
-                message: names.join(", "),
-                file: Some(dir.display().to_string()),
-                line: None,
-                inventory: false,
-            }
+            CheckResult::new(
+                id.to_owned(),
+                Severity::Info,
+                format!("{title_prefix}: {} scripts", names.len()),
+                names.join(", "),
+            )
+            .with_optional_location(Some(dir.display().to_string()), None)
+            .with_inventory(false)
             .as_inventory(),
         );
     }

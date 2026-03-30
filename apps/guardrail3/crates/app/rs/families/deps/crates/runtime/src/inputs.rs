@@ -1,9 +1,10 @@
 use super::facts::{
-    AllowlistCoverageFacts, DependencyEntryFacts, InputFailureFacts, LockfileFacts, ToolFacts,
+    AllowlistCoverageFacts, DependencyEntryFacts, DirectDependencyCapFacts, InputFailureFacts,
+    LockfileFacts, ToolFacts,
 };
 
 pub struct ToolDepsInput<'a> {
-    pub tool: &'a ToolFacts,
+    pub(crate) tool: &'a ToolFacts,
 }
 
 impl<'a> ToolDepsInput<'a> {
@@ -13,7 +14,7 @@ impl<'a> ToolDepsInput<'a> {
 }
 
 pub struct DependencyEntryDepsInput<'a> {
-    pub entry: &'a DependencyEntryFacts,
+    pub(crate) entry: &'a DependencyEntryFacts,
 }
 
 impl<'a> DependencyEntryDepsInput<'a> {
@@ -22,8 +23,18 @@ impl<'a> DependencyEntryDepsInput<'a> {
     }
 }
 
+pub struct DirectDependencyCapDepsInput<'a> {
+    pub(crate) cap: &'a DirectDependencyCapFacts,
+}
+
+impl<'a> DirectDependencyCapDepsInput<'a> {
+    pub fn new(cap: &'a DirectDependencyCapFacts) -> Self {
+        Self { cap }
+    }
+}
+
 pub struct AllowlistCoverageDepsInput<'a> {
-    pub coverage: &'a AllowlistCoverageFacts,
+    pub(crate) coverage: &'a AllowlistCoverageFacts,
 }
 
 impl<'a> AllowlistCoverageDepsInput<'a> {
@@ -33,7 +44,7 @@ impl<'a> AllowlistCoverageDepsInput<'a> {
 }
 
 pub struct LockfileDepsInput<'a> {
-    pub lockfile: &'a LockfileFacts,
+    pub(crate) lockfile: &'a LockfileFacts,
 }
 
 impl<'a> LockfileDepsInput<'a> {
@@ -43,7 +54,7 @@ impl<'a> LockfileDepsInput<'a> {
 }
 
 pub struct InputFailureDepsInput<'a> {
-    pub failure: &'a InputFailureFacts,
+    pub(crate) failure: &'a InputFailureFacts,
 }
 
 impl<'a> InputFailureDepsInput<'a> {

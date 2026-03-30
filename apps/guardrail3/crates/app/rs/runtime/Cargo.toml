@@ -11,6 +11,10 @@ workspace = true
 
 [features]
 default = ["families-all"]
+routing = [
+    "dep:guardrail3_app_rs_family_mapper",
+    "dep:guardrail3_app_rs_placement",
+]
 families-all = [
     "family-arch",
     "family-fmt",
@@ -28,19 +32,19 @@ families-all = [
     "family-hooks-shared",
     "family-hooks-rs",
 ]
-family-arch = ["dep:guardrail3_app_rs_family_arch"]
+family-arch = ["dep:guardrail3_app_rs_family_arch", "routing"]
 family-fmt = ["dep:guardrail3_app_rs_family_fmt"]
-family-toolchain = ["dep:guardrail3_app_rs_family_toolchain"]
-family-clippy = ["dep:guardrail3_app_rs_family_clippy"]
-family-deny = ["dep:guardrail3_app_rs_family_deny"]
-family-cargo = ["dep:guardrail3_app_rs_family_cargo"]
-family-code = ["dep:guardrail3_app_rs_family_code"]
-family-hexarch = ["dep:guardrail3_app_rs_family_hexarch"]
-family-libarch = ["dep:guardrail3_app_rs_family_libarch"]
-family-deps = ["dep:guardrail3_app_rs_family_deps"]
-family-garde = ["dep:guardrail3_app_rs_family_garde"]
-family-test = ["dep:guardrail3_app_rs_family_test"]
-family-release = ["dep:guardrail3_app_rs_family_release"]
+family-toolchain = ["dep:guardrail3_app_rs_family_toolchain", "routing"]
+family-clippy = ["dep:guardrail3_app_rs_family_clippy", "routing"]
+family-deny = ["dep:guardrail3_app_rs_family_deny", "routing"]
+family-cargo = ["dep:guardrail3_app_rs_family_cargo", "routing"]
+family-code = ["dep:guardrail3_app_rs_family_code", "routing"]
+family-hexarch = ["dep:guardrail3_app_rs_family_hexarch", "routing"]
+family-libarch = ["dep:guardrail3_app_rs_family_libarch", "routing"]
+family-deps = ["dep:guardrail3_app_rs_family_deps", "routing"]
+family-garde = ["dep:guardrail3_app_rs_family_garde", "routing"]
+family-test = ["dep:guardrail3_app_rs_family_test", "routing"]
+family-release = ["dep:guardrail3_app_rs_family_release", "routing"]
 family-hooks-shared = ["dep:guardrail3_app_rs_family_hooks_shared"]
 family-hooks-rs = ["dep:guardrail3_app_rs_family_hooks_rs"]
 
@@ -66,9 +70,9 @@ guardrail3_app_rs_family_libarch = { package = "guardrail3-app-rs-family-libarch
 guardrail3_app_rs_family_release = { package = "guardrail3-app-rs-family-release", path = "../families/release", optional = true }
 guardrail3_app_rs_family_test = { package = "guardrail3-app-rs-family-test", path = "../families/test/crates/runtime", optional = true }
 guardrail3_app_rs_family_toolchain = { package = "guardrail3-app-rs-family-toolchain", path = "../families/toolchain/crates/runtime", optional = true }
-guardrail3_app_rs_family_mapper = { package = "guardrail3-app-rs-family-mapper", path = "../family_mapper" }
+guardrail3_app_rs_family_mapper = { package = "guardrail3-app-rs-family-mapper", path = "../family_mapper", optional = true }
 guardrail3_app_rs_family_selection = { package = "guardrail3-app-rs-family-selection", path = "../family_selection" }
-guardrail3_app_rs_placement = { package = "guardrail3-app-rs-placement", path = "../placement" }
+guardrail3_app_rs_placement = { package = "guardrail3-app-rs-placement", path = "../placement", optional = true }
 toml = "0.8"
 
 [dev-dependencies]

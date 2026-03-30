@@ -1,3 +1,4 @@
+use guardrail3_app_rs_family_clippy_assertions::rs_clippy_16_avoid_breaking_exported_api as assertions;
 use test_support::root_workspace_tree_with_guardrail;
 
 use super::super::run_for_tests;
@@ -6,10 +7,7 @@ use super::super::run_for_tests;
 fn yields_no_result_when_policy_context_is_malformed() {
     let tree = root_workspace_tree_with_guardrail("avoid-breaking-exported-api = true", "[");
     let results = run_for_tests(&tree, "clippy.toml");
-    assert!(
-        results.is_empty(),
-        "policy-context failure should own this case: {results:#?}"
-    );
+    assertions::assert_no_result_when_policy_context_is_malformed(&results);
 }
 
 #[test]
@@ -19,8 +17,5 @@ fn yields_no_result_when_policy_context_shape_is_invalid() {
         "[profile]\nname = 7\n",
     );
     let results = run_for_tests(&tree, "clippy.toml");
-    assert!(
-        results.is_empty(),
-        "policy-context failure should own invalid guardrail field types too: {results:#?}"
-    );
+    assertions::assert_no_result_when_policy_context_is_malformed(&results);
 }

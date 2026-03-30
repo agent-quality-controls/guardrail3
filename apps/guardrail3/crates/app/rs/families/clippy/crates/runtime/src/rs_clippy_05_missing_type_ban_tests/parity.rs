@@ -1,4 +1,4 @@
-use guardrail3_domain_modules::clippy::{LIBRARY_EXTRA_TYPE_PATHS, service_profile_type_paths};
+use guardrail3_app_rs_family_clippy_assertions::rs_clippy_05_missing_type_ban as assertions;
 use test_support::build_fixture_clippy_toml;
 
 #[test]
@@ -13,7 +13,7 @@ fn generated_service_type_ban_list_matches_rule_baseline() {
         .flatten()
         .filter_map(|entry| entry.get("path").and_then(toml::Value::as_str))
         .collect::<Vec<_>>();
-    let expected = service_profile_type_paths();
+    let expected = assertions::service_type_bans();
 
     assert_eq!(actual, expected);
 }
@@ -29,9 +29,8 @@ fn generated_library_type_ban_list_matches_rule_baseline() {
         .into_iter()
         .flatten()
         .filter_map(|entry| entry.get("path").and_then(toml::Value::as_str))
-        .filter(|path| !LIBRARY_EXTRA_TYPE_PATHS.contains(path))
         .collect::<Vec<_>>();
-    let expected = service_profile_type_paths();
+    let expected = assertions::library_type_bans();
 
     assert_eq!(actual, expected);
 }

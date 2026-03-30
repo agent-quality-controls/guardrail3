@@ -9,12 +9,17 @@ mod rs_arch_06_owner_family_enablement_coherence;
 mod rs_arch_07_required_inputs_fail_closed;
 mod rs_arch_08_auxiliary_roots_declared;
 
-use std::collections::BTreeSet;
-
-use guardrail3_app_rs_family_mapper::{FamilyMapper, RsArchRoute};
-use guardrail3_domain_config::types::GuardrailConfig;
+use guardrail3_app_rs_family_mapper::RsArchRoute;
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::CheckResult;
+
+#[cfg(test)]
+use std::collections::BTreeSet;
+#[cfg(test)]
+use guardrail3_app_rs_family_mapper::FamilyMapper;
+#[cfg(test)]
+use guardrail3_domain_config::types::GuardrailConfig;
+#[cfg(test)]
 use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
 pub fn check(tree: &ProjectTree, route: &RsArchRoute) -> Vec<CheckResult> {
@@ -88,6 +93,7 @@ pub fn check(tree: &ProjectTree, route: &RsArchRoute) -> Vec<CheckResult> {
     results
 }
 
+#[cfg(test)]
 pub fn check_test_tree(tree: &ProjectTree) -> Vec<CheckResult> {
     let scope = guardrail3_app_rs_placement::collect(tree);
     let config = tree
