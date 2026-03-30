@@ -62,7 +62,7 @@ fn attacks_crate_and_nested_module_wide_allows_across_real_owned_files() {
         .into_iter()
         .filter(|result| {
             matches!(
-                result.file()()()(),
+                result.file(),
                 Some(path)
                     if [
                         crate_rel,

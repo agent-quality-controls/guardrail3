@@ -1,10 +1,12 @@
 use super::super::copy_fixture;
 use super::super::run_family;
-use guardrail3_app_rs_family_code_assertions::rs_code_06_garde_skip_with_comment::assert_no_hits;
+use guardrail3_app_rs_family_code_assertions::rs_code_06_garde_skip_with_comment::{
+    RuleFinding, Severity, assert_findings,
+};
 use test_support::write_file;
 
 #[test]
-fn skips_reasoned_explicitly_exempt_and_missing_comment_garde_skip_surfaces() {
+fn reports_reasoned_non_exempt_and_skips_exempt_garde_skip_surfaces() {
     let fixture = copy_fixture();
     let root = fixture.path();
 
@@ -32,27 +34,18 @@ fn skips_reasoned_explicitly_exempt_and_missing_comment_garde_skip_surfaces() {
     let subcommand_content = test_support::read_file(root, subcommand_rel);
     let reasoned_type_content = test_support::read_file(root, reasoned_type_rel);
 
-    write_file(
-        root,
-        reasoned_field_rel,
-        &format!(
-            "{reasoned_field_content}\nstruct ReasonedSkipProbe {{\n    #[garde(skip)] // reason: validated in outer workflow\n    field: String,\n}}\n"
-        ),
+    let reasoned_field_new = format!(
+        "{reasoned_field_content}\nstruct ReasonedSkipProbe {{\n    #[garde(skip)] // reason: validated in outer workflow\n    field: String,\n}}\n"
     );
-    write_file(
-        root,
-        uppercase_reason_rel,
-        &format!(
-            "{uppercase_reason_content}\nstruct UppercaseReasonSkipProbe {{\n    #[garde(skip)] // reason: compatibility boundary\n    field: String,\n}}\n"
-        ),
+    let uppercase_reason_new = format!(
+        "{uppercase_reason_content}\nstruct UppercaseReasonSkipProbe {{\n    #[garde(skip)] // reason: compatibility boundary\n    field: String,\n}}\n"
     );
-    write_file(
-        root,
-        tight_reason_rel,
-        &format!(
-            "{tight_reason_content}\nstruct TightReasonSkipProbe {{\n    #[garde(skip)] // reason: compatibility boundary\n    field: String,\n}}\n"
-        ),
+    let tight_reason_new = format!(
+        "{tight_reason_content}\nstruct TightReasonSkipProbe {{\n    #[garde(skip)] // reason: compatibility boundary\n    field: String,\n}}\n"
     );
+    write_file(root, reasoned_field_rel, &reasoned_field_new);
+    write_file(root, uppercase_reason_rel, &uppercase_reason_new);
+    write_file(root, tight_reason_rel, &tight_reason_new);
     let missing_comment_new = format!(
         "{missing_comment_content}\nstruct MissingCommentSkipProbe {{\n    #[garde(skip)]\n    field: String,\n}}\n"
     );
@@ -99,21 +92,67 @@ fn skips_reasoned_explicitly_exempt_and_missing_comment_garde_skip_surfaces() {
             "{subcommand_content}\nenum CommandMode {{\n    Sync,\n}}\nstruct SubcommandCommentSkipProbe {{\n    #[command(subcommand)]\n    #[garde(skip)] // temporary bypass\n    mode: CommandMode,\n}}\n"
         ),
     );
-    write_file(
-        root,
-        reasoned_type_rel,
-        &format!(
-            "{reasoned_type_content}\n#[garde(skip)] // reason: external validation envelope\nstruct ReasonedWholeTypeSkipProbe {{\n    payload: String,\n}}\n#[garde(skip)]\nstruct PrimitiveWholeTypeSkipProbe {{\n    count: usize,\n    enabled: bool,\n}}\n#[garde(skip)] // temporary bypass\nstruct PrimitiveWholeTypeCommentProbe {{\n    count: usize,\n    enabled: bool,\n}}\n#[garde(skip)] // temporary bypass\nstruct UnvalidatableWholeTypeCommentProbe {{\n    tags: std::collections::HashMap<String, String>,\n}}\n"
-        ),
+    let reasoned_type_new = format!(
+        "{reasoned_type_content}\n#[garde(skip)] // reason: external validation envelope\nstruct ReasonedWholeTypeSkipProbe {{\n    payload: String,\n}}\n#[garde(skip)]\nstruct PrimitiveWholeTypeSkipProbe {{\n    count: usize,\n    enabled: bool,\n}}\n#[garde(skip)] // temporary bypass\nstruct PrimitiveWholeTypeCommentProbe {{\n    count: usize,\n    enabled: bool,\n}}\n#[garde(skip)] // temporary bypass\nstruct UnvalidatableWholeTypeCommentProbe {{\n    tags: std::collections::HashMap<String, String>,\n}}\n"
     );
-    let missing_comment_line = missing_comment_new
+    write_file(root, reasoned_type_rel, &reasoned_type_new);
+
+    let reasoned_field_line = reasoned_field_new
         .lines()
-        .position(|line| line.contains("#[garde(skip)]"))
+        .position(|line| line.contains("#[garde(skip)] // reason: validated in outer workflow"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
+    let uppercase_reason_line = uppercase_reason_new
+        .lines()
+        .position(|line| line.contains("#[garde(skip)] // reason: compatibility boundary"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
+    let tight_reason_line = tight_reason_new
+        .lines()
+        .position(|line| line.contains("#[garde(skip)] // reason: compatibility boundary"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
+    let reasoned_type_line = reasoned_type_new
+        .lines()
+        .position(|line| line.contains("#[garde(skip)] // reason: external validation envelope"))
         .map(|index| index + 1)
         .unwrap_or_default();
 
-    let results = run_family(root);
-
-    let _ = missing_comment_line;
-    assert_no_hits(&results);
+    assert_findings(
+        &run_family(root),
+        &[
+            RuleFinding::new(
+                Severity::Warn,
+                "garde(skip) with reason",
+                "`#[garde(skip)]` on non-exempt field `field: String` reason: validated in outer workflow",
+                Some(reasoned_field_rel),
+                Some(reasoned_field_line),
+                false,
+            ),
+            RuleFinding::new(
+                Severity::Warn,
+                "garde(skip) with reason",
+                "`#[garde(skip)]` on non-exempt field `field: String` reason: compatibility boundary",
+                Some(uppercase_reason_rel),
+                Some(uppercase_reason_line),
+                false,
+            ),
+            RuleFinding::new(
+                Severity::Warn,
+                "garde(skip) with reason",
+                "`#[garde(skip)]` on non-exempt field `field: String` reason: compatibility boundary",
+                Some(tight_reason_rel),
+                Some(tight_reason_line),
+                false,
+            ),
+            RuleFinding::new(
+                Severity::Warn,
+                "garde(skip) with reason",
+                "`#[garde(skip)]` on non-exempt type `ReasonedWholeTypeSkipProbe` reason: external validation envelope",
+                Some(reasoned_type_rel),
+                Some(reasoned_type_line),
+                false,
+            ),
+        ],
+    );
 }

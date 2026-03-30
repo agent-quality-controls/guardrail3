@@ -72,8 +72,12 @@ The highest-value audit fixes already landed:
 
 - shared test-context detection now feeds the rules that need it instead of path heuristics drifting apart
 - same-line `// reason:` parsing is token-aware and exact
+- bypass reasons must be nontrivial; weak placeholders still fail as errors
 - `cfg_attr` truth is conservative and recursive instead of fail-open
 - `#[expect(...)]` is owned with `#[allow(...)]`
+- documented local bypasses stay visible instead of disappearing into inventory:
+  - item-level `#[allow(...)]` / `#[expect(...)]` with `// reason:` are warnings
+  - non-exempt `#[garde(skip)]` with `// reason:` is also a warning
 - `garde(skip)` exemptions are explicit rather than suffix-based
 - `RS-CODE-33` is the sole firing path for weak public error forms, and legacy `RS-CODE-25` stays non-firing to avoid overlap
 - `RS-CODE-23` still allows legitimate `OUT_DIR` includes but no longer blesses upward traversal

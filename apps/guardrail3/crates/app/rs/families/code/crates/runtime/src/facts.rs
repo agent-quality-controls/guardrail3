@@ -42,6 +42,15 @@ pub struct StructuralCapFacts {
 pub fn collect(tree: &ProjectTree, route: &RsCodeRoute) -> CodeFacts {
     let mut input_failures = Vec::new();
     let active_root_dirs = active_root_dirs(route);
+    if active_root_dirs.is_empty() {
+        return CodeFacts {
+            files: Vec::new(),
+            structural_caps: Vec::new(),
+            unsafe_code_lints: Vec::new(),
+            exception_comments: Vec::new(),
+            input_failures,
+        };
+    }
     let cargo_roots = collect_cargo_roots(tree, route, &active_root_dirs, &mut input_failures);
     let root_dirs = cargo_roots.keys().cloned().collect::<Vec<_>>();
     let policy_map = policy::read_policy_map(tree, &cargo_roots, &mut input_failures);
@@ -56,10 +65,14 @@ pub fn collect(tree: &ProjectTree, route: &RsCodeRoute) -> CodeFacts {
             rel_path,
         })
         .collect();
-    let structural_caps = cargo_roots
-        .values()
-        .map(|root| measure_root_structure(tree, &root.rel_dir, &root.cargo_rel_path))
-        .collect();
+    let structural_caps = if route.scoped_files().is_none() {
+        cargo_roots
+            .values()
+            .map(|root| measure_root_structure(tree, &root.rel_dir, &root.cargo_rel_path))
+            .collect()
+    } else {
+        Vec::new()
+    };
 
     let mut unsafe_code_lints = Vec::new();
     for root in cargo_roots.values().filter(|root| root.has_workspace) {
@@ -93,7 +106,8 @@ pub fn collect(tree: &ProjectTree, route: &RsCodeRoute) -> CodeFacts {
         });
     }
 
-    let exception_comments = comments::collect_exception_comments(tree, &root_dirs);
+    let exception_comments =
+        comments::collect_exception_comments(tree, &root_dirs, &mut input_failures);
 
     CodeFacts {
         files,

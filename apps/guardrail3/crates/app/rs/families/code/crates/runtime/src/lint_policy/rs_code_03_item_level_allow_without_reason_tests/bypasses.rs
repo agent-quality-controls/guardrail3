@@ -88,7 +88,7 @@ fn detects_undocumented_item_level_allows_across_real_owned_files() {
         .into_iter()
         .filter(|result| {
             matches!(
-                result.file()()()(),
+                result.file(),
                 Some(path)
                     if [
                         top_level_rel,
@@ -225,7 +225,7 @@ fn detects_undocumented_item_level_expects_across_real_owned_files() {
         .into_iter()
         .filter(|result| {
             matches!(
-                result.file()()()(),
+                result.file(),
                 Some(path) if [top_level_rel, grouped_rel, module_rel].contains(&path)
             )
         })

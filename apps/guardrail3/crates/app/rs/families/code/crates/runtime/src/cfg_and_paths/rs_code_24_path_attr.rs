@@ -1,4 +1,5 @@
 use guardrail3_domain_report::{CheckResult, Severity};
+use guardrail3_reason_policy::reason_text_is_useful;
 
 use super::inputs::RustCodeFileInput;
 use super::parse::{
@@ -71,6 +72,21 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
             ));
             continue;
         };
+        if !reason_text_is_useful(&reason) {
+            results.push(CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Error,
+                "#[path] reason too weak".to_owned(),
+                format!(
+                    "`#[path = \"{}\"]` reason must be specific and at least two words. Weak reason `{reason}` found.",
+                    info.path
+                ),
+                Some(input.rel_path.to_owned()),
+                Some(info.line),
+                false,
+            ));
+            continue;
+        }
 
         results.push(CheckResult::from_parts(
             ID.to_owned(),

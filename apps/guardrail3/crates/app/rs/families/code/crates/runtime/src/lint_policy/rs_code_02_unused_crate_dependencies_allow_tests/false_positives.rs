@@ -2,7 +2,9 @@ use std::collections::BTreeSet;
 
 use super::super::copy_fixture;
 use super::super::run_family;
-use guardrail3_app_rs_family_code_assertions::rs_code_02_unused_crate_dependencies_allow::assert_files;
+use guardrail3_app_rs_family_code_assertions::rs_code_02_unused_crate_dependencies_allow::{
+    RuleFinding, Severity, assert_files, assert_findings,
+};
 use test_support::write_file;
 
 #[test]
@@ -66,7 +68,7 @@ fn skips_other_allow_names_inline_modules_and_item_level_near_misses() {
         .into_iter()
         .filter(|result| {
             matches!(
-                result.file()()()(),
+                result.file(),
                 Some(path)
                     if [
                         other_allow_rel,
@@ -79,9 +81,25 @@ fn skips_other_allow_names_inline_modules_and_item_level_near_misses() {
             )
         })
         .collect::<Vec<_>>();
+    let expected_line = test_support::read_file(root, inline_exempt_rel)
+        .lines()
+        .position(|line| line.contains("#![allow(unused_crate_dependencies)]"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
 
     assert_files(
         &relevant_results,
         BTreeSet::from([inline_exempt_rel.to_owned()]),
+    );
+    assert_findings(
+        &relevant_results,
+        &[RuleFinding::new(
+            Severity::Info,
+            "unused_crate_dependencies exemption",
+            "unused_crate_dependencies is an approved universal exemption.",
+            Some(inline_exempt_rel),
+            Some(expected_line),
+            false,
+        )],
     );
 }

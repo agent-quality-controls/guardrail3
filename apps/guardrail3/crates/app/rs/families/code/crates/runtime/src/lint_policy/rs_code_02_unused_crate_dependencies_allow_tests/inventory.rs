@@ -40,7 +40,7 @@ fn inventories_unused_crate_dependencies_allow_across_real_owned_files() {
         .into_iter()
         .filter(|result| {
             matches!(
-                result.file()()()(),
+                result.file(),
                 Some(path) if [backend_rel, worker_rel, test_rel].contains(&path)
             )
         })
@@ -150,7 +150,7 @@ fn inventories_each_repeated_crate_level_unused_crate_dependencies_exemption() {
     let results = run_family(root);
     let relevant_results = results
         .into_iter()
-        .filter(|result| result.file()()()() == Some(rel))
+        .filter(|result| result.file() == Some(rel))
         .collect::<Vec<_>>();
 
     assert_findings(

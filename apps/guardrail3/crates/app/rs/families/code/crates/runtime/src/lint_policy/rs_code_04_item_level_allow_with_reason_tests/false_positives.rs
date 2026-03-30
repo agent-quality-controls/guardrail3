@@ -14,11 +14,13 @@ fn skips_undocumented_and_malformed_reason_near_misses() {
     let empty_reason_rel = "apps/worker/crates/ports/outbound/queue/src/lib.rs";
     let wrong_key_rel = "apps/devctl/crates/ports/outbound/traits/src/lib.rs";
     let block_comment_rel = "apps/backend/crates/adapters/outbound/queue/src/lib.rs";
+    let weak_reason_rel = "apps/backend/crates/app/queries/src/lib.rs";
 
     let undocumented_content = test_support::read_file(root, undocumented_rel);
     let empty_reason_content = test_support::read_file(root, empty_reason_rel);
     let wrong_key_content = test_support::read_file(root, wrong_key_rel);
     let block_comment_content = test_support::read_file(root, block_comment_rel);
+    let weak_reason_content = test_support::read_file(root, weak_reason_rel);
 
     write_file(
         root,
@@ -48,6 +50,13 @@ fn skips_undocumented_and_malformed_reason_near_misses() {
             "{block_comment_content}\n#[allow(clippy::unwrap_used)] /* reason: block comment */\npub fn block_comment_probe() {{}}\n"
         ),
     );
+    write_file(
+        root,
+        weak_reason_rel,
+        &format!(
+            "{weak_reason_content}\n#[allow(clippy::panic)] // reason: temp\npub fn weak_reason_probe() {{}}\n"
+        ),
+    );
 
     let results = run_family(root);
 
@@ -55,7 +64,7 @@ fn skips_undocumented_and_malformed_reason_near_misses() {
 }
 
 #[test]
-fn inventories_exact_reason_syntax_and_other_item_kinds() {
+fn reports_exact_reason_syntax_and_other_item_kinds() {
     let fixture = copy_fixture();
     let root = fixture.path();
 
@@ -105,35 +114,35 @@ fn inventories_exact_reason_syntax_and_other_item_kinds() {
         &run_family(root),
         &[
             RuleFinding::new(
-                Severity::Info,
+                Severity::Warn,
                 "item-level allow with reason",
                 "#[allow(clippy::unwrap_used)] reason: exact syntax accepted",
                 Some(function_rel),
                 Some(function_line),
-                true,
+                false,
             ),
             RuleFinding::new(
-                Severity::Info,
+                Severity::Warn,
                 "item-level allow with reason",
                 "#[allow(clippy::expect_used)] reason: module boundary shim",
                 Some(mod_rel),
                 Some(mod_line),
-                true,
+                false,
             ),
             RuleFinding::new(
-                Severity::Info,
+                Severity::Warn,
                 "item-level allow with reason",
                 "#[allow(clippy::panic)] reason: adapter boundary shim",
                 Some(adapter_rel),
                 Some(adapter_line),
-                true,
+                false,
             ),
         ],
     );
 }
 
 #[test]
-fn inventories_only_documented_allows_in_mixed_same_file_case() {
+fn reports_only_documented_allows_in_mixed_same_file_case() {
     let fixture = copy_fixture();
     let root = fixture.path();
 
@@ -156,12 +165,12 @@ fn inventories_only_documented_allows_in_mixed_same_file_case() {
     assert_findings(
         &run_family(root),
         &[RuleFinding::new(
-            Severity::Info,
+            Severity::Warn,
             "item-level allow with reason",
             "#[allow(clippy::unwrap_used)] reason: documented surface",
             Some(rel),
             Some(documented_line),
-            true,
+            false,
         )],
     );
 }
@@ -192,18 +201,18 @@ fn preserves_reason_text_with_url_like_content() {
     assert_findings(
         &run_family(root),
         &[RuleFinding::new(
-            Severity::Info,
+            Severity::Warn,
             "item-level allow with reason",
             "#[allow(clippy::unwrap_used)] reason: compatibility note see https://example.com/policy",
             Some(rel),
             Some(line),
-            true,
+            false,
         )],
     );
 }
 
 #[test]
-fn inventories_multiline_allow_with_reason_on_closing_line() {
+fn reports_multiline_allow_with_reason_on_closing_line() {
     let fixture = copy_fixture();
     let root = fixture.path();
 
@@ -225,20 +234,20 @@ fn inventories_multiline_allow_with_reason_on_closing_line() {
         &run_family(root),
         &[
             RuleFinding::new(
-                Severity::Info,
+                Severity::Warn,
                 "item-level allow with reason",
                 "#[allow(clippy::expect_used)] reason: multiline adapter seam",
                 Some(rel),
                 Some(line),
-                true,
+                false,
             ),
             RuleFinding::new(
-                Severity::Info,
+                Severity::Warn,
                 "item-level allow with reason",
                 "#[allow(clippy::unwrap_used)] reason: multiline adapter seam",
                 Some(rel),
                 Some(line),
-                true,
+                false,
             ),
         ],
     );

@@ -7,6 +7,7 @@ edition = "2024"
 workspace = true
 
 [dependencies]
+guardrail3_reason_policy = { package = "guardrail3-reason-policy", path = "../../../../../../../../../packages/reason-policy/crates/reason-policy" }
 guardrail3_app_core = { package = "guardrail3-app-core", path = "../../../../../core" }
 guardrail3_app_rs_family_mapper = { package = "guardrail3-app-rs-family-mapper", path = "../../../../family_mapper" }
 guardrail3_app_rs_ast = { package = "guardrail3-app-rs-ast", path = "../../../../ast" }

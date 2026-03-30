@@ -1,0 +1,6 @@
+[workspace]
+members = ["crates/reason-policy"]
+resolver = "2"
+
+[workspace.package]
+edition = "2024"

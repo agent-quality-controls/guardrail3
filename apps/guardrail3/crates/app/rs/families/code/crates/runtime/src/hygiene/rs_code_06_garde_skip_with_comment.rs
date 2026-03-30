@@ -1,4 +1,5 @@
 use guardrail3_domain_report::{CheckResult, Severity};
+use guardrail3_reason_policy::reason_text_is_useful;
 
 use super::inputs::RustCodeFileInput;
 use super::parse::{
@@ -13,8 +14,37 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
             continue;
         }
         let has_comment = same_line_has_comment(input.content, info.line);
-        let has_reason = same_line_reason(input.content, info.line).is_some();
-        if !has_comment || has_reason {
+        if !has_comment {
+            continue;
+        }
+        if let Some(reason) = same_line_reason(input.content, info.line) {
+            if !reason_text_is_useful(&reason) {
+                results.push(CheckResult::from_parts(
+                    ID.to_owned(),
+                    Severity::Error,
+                    "garde(skip) reason too weak".to_owned(),
+                    format!(
+                        "`#[garde(skip)]` on non-exempt {} reason must be specific and at least two words. Weak reason `{reason}` found.",
+                        target_label(&info)
+                    ),
+                    Some(input.rel_path.to_owned()),
+                    Some(info.line),
+                    false,
+                ));
+                continue;
+            }
+            results.push(CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Warn,
+                "garde(skip) with reason".to_owned(),
+                format!(
+                    "`#[garde(skip)]` on non-exempt {} reason: {reason}",
+                    target_label(&info)
+                ),
+                Some(input.rel_path.to_owned()),
+                Some(info.line),
+                false,
+            ));
             continue;
         }
         results.push(CheckResult::from_parts(

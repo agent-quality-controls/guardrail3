@@ -119,6 +119,24 @@ fn empty_or_wrong_key_reason_comments_do_not_suppress() {
 }
 
 #[test]
+fn rejects_weak_reason_comments() {
+    let content = "#[deny(clippy::panic)] // reason: temp\nfn one() {}";
+    let results = check_source("src/lib.rs", content, false);
+
+    assert_findings(
+        &results,
+        &[RuleFinding::new(
+            guardrail3_domain_report::Severity::Error,
+            "#[deny]/#[forbid] reason too weak",
+            "`#[deny(clippy::panic)]` reason must be specific and at least two words. Weak reason `temp` found.",
+            Some("src/lib.rs"),
+            Some(1),
+            false,
+        )],
+    );
+}
+
+#[test]
 fn ignores_tests_fixture_files_even_with_undocumented_policy_attrs() {
     let fixture = copy_fixture();
     let root = fixture.path();
