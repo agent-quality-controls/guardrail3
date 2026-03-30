@@ -19,14 +19,13 @@ pub fn check(input: &UnsafeCodeLintInput<'_>, results: &mut Vec<CheckResult>) {
             .as_inventory(),
         ),
         Some("deny") => results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    "unsafe_code should be forbid".to_owned(),
-    "unsafe_code = deny can be overridden; use forbid in workspace lints."
-                .to_owned(),
-    Some(input.cargo_rel_path.to_owned()),
-    None,
-    false,
+            ID.to_owned(),
+            Severity::Error,
+            "unsafe_code should be forbid".to_owned(),
+            "unsafe_code = deny can be overridden; use forbid in workspace lints.".to_owned(),
+            Some(input.cargo_rel_path.to_owned()),
+            None,
+            false,
         )),
         _ => {}
     }

@@ -189,3 +189,34 @@ fn skips_multiline_documented_allow_with_reason_on_closing_line() {
     let results = run_family(root);
     assert_no_hits(&results);
 }
+
+#[test]
+fn rejects_weak_same_line_reasons() {
+    let fixture = copy_fixture();
+    let root = fixture.path();
+
+    let rel = "apps/backend/crates/ports/inbound/api/src/lib.rs";
+    let content = test_support::read_file(root, rel);
+    let new_content = format!(
+        "{content}\n#[allow(clippy::unwrap_used)] // reason: temp\npub fn weak_reason_probe() {{}}\n"
+    );
+    write_file(root, rel, &new_content);
+
+    let line = new_content
+        .lines()
+        .position(|source| source.contains("#[allow(clippy::unwrap_used)] // reason: temp"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
+
+    assert_findings(
+        &run_family(root),
+        &[RuleFinding::new(
+            Severity::Error,
+            "item-level allow reason too weak",
+            "`#[allow(clippy::unwrap_used)]` reason must be specific and at least two words. Weak reason `temp` found.",
+            Some(rel),
+            Some(line),
+            false,
+        )],
+    );
+}

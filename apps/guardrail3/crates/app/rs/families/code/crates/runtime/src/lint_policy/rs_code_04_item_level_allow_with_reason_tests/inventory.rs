@@ -6,7 +6,7 @@ use guardrail3_app_rs_family_code_assertions::rs_code_04_item_level_allow_with_r
 use test_support::write_file;
 
 #[test]
-fn inventories_documented_item_level_allows_across_real_owned_files() {
+fn reports_documented_item_level_allows_across_real_owned_files() {
     let fixture = copy_fixture();
     let root = fixture.path();
 
@@ -89,60 +89,60 @@ fn inventories_documented_item_level_allows_across_real_owned_files() {
         &run_family(root),
         &[
             RuleFinding::new(
-                Severity::Info,
+                Severity::Warn,
                 "item-level allow with reason",
                 "#[allow(clippy::panic)] reason: adapter glue seam",
                 Some(impl_rel),
                 Some(impl_line),
-                true,
+                false,
             ),
             RuleFinding::new(
-                Severity::Info,
+                Severity::Warn,
                 "item-level allow with reason",
                 "#[allow(clippy::unwrap_used)] reason: compatibility shim",
                 Some(top_level_rel),
                 Some(top_level_line),
-                true,
+                false,
             ),
             RuleFinding::new(
-                Severity::Info,
+                Severity::Warn,
                 "item-level allow with reason",
                 "#[allow(clippy::expect_used)] reason: documented module seam",
                 Some(module_rel),
                 Some(module_line),
-                true,
+                false,
             ),
             RuleFinding::new(
-                Severity::Info,
+                Severity::Warn,
                 "item-level allow with reason",
                 "#[allow(clippy::unwrap_used)] reason: trait shim contract",
                 Some(trait_rel),
                 Some(trait_line),
-                true,
+                false,
             ),
             RuleFinding::new(
-                Severity::Info,
+                Severity::Warn,
                 "item-level allow with reason",
                 "#[allow(clippy::expect_used)] reason: grouped adapter allowance",
                 Some(grouped_rel),
                 Some(grouped_line),
-                true,
+                false,
             ),
             RuleFinding::new(
-                Severity::Info,
+                Severity::Warn,
                 "item-level allow with reason",
                 "#[allow(clippy::unwrap_used)] reason: grouped adapter allowance",
                 Some(grouped_rel),
                 Some(grouped_line),
-                true,
+                false,
             ),
             RuleFinding::new(
-                Severity::Info,
+                Severity::Warn,
                 "item-level allow with reason",
                 "#[allow(clippy::panic)] reason: queue adapter probe",
                 Some(nested_rel),
                 Some(nested_line),
-                true,
+                false,
             ),
         ],
     );

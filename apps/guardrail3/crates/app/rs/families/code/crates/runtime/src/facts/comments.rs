@@ -2,16 +2,30 @@ use std::collections::BTreeSet;
 
 use guardrail3_domain_project_tree::ProjectTree;
 
-use super::{ExceptionCommentFacts, owning_root_dir};
+use super::{CodeInputFailureFacts, ExceptionCommentFacts, owning_root_dir};
 
 pub(super) fn collect_exception_comments(
     tree: &ProjectTree,
     root_dirs: &[String],
+    input_failures: &mut Vec<CodeInputFailureFacts>,
 ) -> Vec<ExceptionCommentFacts> {
     let mut comments = Vec::new();
 
     for rel_path in config_comment_rels(tree) {
         if !config_comment_owned(&rel_path, root_dirs) {
+            continue;
+        }
+        if tree.file_exists(&rel_path) && tree.file_content(&rel_path).is_none() {
+            if !input_failures
+                .iter()
+                .any(|failure| failure.rel_path == rel_path)
+            {
+                input_failures.push(CodeInputFailureFacts {
+                    rel_path: rel_path.clone(),
+                    message: "Failed to read config file for exception-comment discovery."
+                        .to_owned(),
+                });
+            }
             continue;
         }
         let Some(content) = tree.file_content(&rel_path) else {
@@ -39,11 +53,7 @@ pub(super) fn collect_exception_comments(
 }
 
 fn config_comment_owned(rel_path: &str, root_dirs: &[String]) -> bool {
-    if owning_root_dir(rel_path, root_dirs).is_some() {
-        return true;
-    }
-
-    super::file_parent_rel(rel_path).is_empty() && !root_dirs.is_empty()
+    owning_root_dir(rel_path, root_dirs).is_some()
 }
 
 fn extract_exception_comment(line: &str) -> Option<&str> {

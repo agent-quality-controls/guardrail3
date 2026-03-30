@@ -13,10 +13,10 @@
 |--------|--------|----------|------|--------|
 | RS-CODE-01 | R30 | Error (Info for test files) | Crate-level `#![allow(...)]` — suppresses lint for entire crate. Also flags inline module `#![allow]`. | Implemented |
 | RS-CODE-02 | R31 | Info | Justified `#![allow(unused_crate_dependencies)]` — universally exempted | Implemented |
-| RS-CODE-03 | R32 | Error | Item-level `#[allow(...)]` without `// reason:` comment. | Implemented |
-| RS-CODE-04 | R33 | Info | Item-level `#[allow(...)]` WITH documented reason (audit trail inventory) | Implemented |
+| RS-CODE-03 | R32 | Error | Item-level `#[allow(...)]` or `#[expect(...)]` without a useful same-line `// reason:` comment. Weak one-word placeholders still fail. | Implemented |
+| RS-CODE-04 | R33 | Warn | Item-level `#[allow(...)]` or `#[expect(...)]` WITH a useful documented reason. Still suspicious; shown in normal output, not inventory. | Implemented |
 | RS-CODE-05 | R34 | Error | `#[garde(skip)]` on non-primitive WITHOUT comment | Implemented |
-| RS-CODE-06 | R35 | Error | `#[garde(skip)]` on non-primitive WITH comment but no `// reason:` | Implemented |
+| RS-CODE-06 | R35 | Warn/Error | Non-exempt `#[garde(skip)]` WITH same-line comment. Error if the comment lacks exact `// reason:` or if the reason is too weak; Warn if a useful reason is present, because documented validation bypasses stay visible. | Implemented |
 | RS-CODE-07 | R36 | Info | EXCEPTION comments in config files (audit trail inventory) | Implemented |
 | RS-CODE-08 | R37 | Info | `#[cfg_attr(..., allow(...))]` with genuinely conditional predicate (inventory) | Implemented |
 
@@ -42,7 +42,7 @@
 |--------|----------|------|--------|
 | RS-CODE-16 | Warn | `panic!` macro in non-test code. Detected by AST walker but currently silently dropped (catch-all `_ => {}`). Strictly worse than `todo!` — crashes in production. Clippy has no lint for this. | Implemented |
 | RS-CODE-17 | Error | Blanket `#[allow]` on `impl` block covering >3 methods. No legitimate use case — always apply `#[allow]` to individual methods. Invisible blast radius otherwise. | Implemented |
-| RS-CODE-18 | Error | Always-true `cfg_attr` bypass. Currently only detects `all()` with empty args. Must also detect `any(unix, windows)`, `not(nonexistent_target)`. Disguised unconditional allows. | Implemented |
+| RS-CODE-18 | Error | Always-true `cfg_attr` bypass. Own only demonstrably unconditional predicates such as `all()` or `not(any())`; keep unknown/platform-specific predicates conservative instead of guessing they are exhaustive. | Implemented |
 | RS-CODE-19 | Info | Large struct (>15 fields) or enum (>20 variants). Architectural smell inventory. Not error, just visibility. | Implemented |
 | RS-CODE-20 | Error | `#[allow]` on `extern "C"` blocks. `item_attrs` returns `&[]` for ForeignMod — one-line fix to add `ForeignMod(f) => &f.attrs`. | Implemented |
 | RS-CODE-21 | Error | `use std::fs::*` glob import bypass, including std-alias forms such as `use std as s; use s::fs::*;`. Variant of the filesystem hole that `RS-CODE-15` covers for direct imports/calls. | Implemented |
@@ -51,10 +51,10 @@
 
 | New ID | Severity | What | Status |
 |--------|----------|------|--------|
-| RS-CODE-22 | Error | `#[deny]`/`#[forbid]` attributes without `// reason:`. Undocumented lint level overrides — same class as `#[allow]`. `#![deny(warnings)]` is an anti-pattern. Exception: `#![forbid(unsafe_code)]` is Info (strengthens safety). | Implemented |
+| RS-CODE-22 | Error | `#[deny]`/`#[forbid]` attributes without a useful `// reason:`. Undocumented or weakly documented lint level overrides are the same class as `#[allow]`. `#![deny(warnings)]` is an anti-pattern. Exception: `#![forbid(unsafe_code)]` is Info (strengthens safety). | Implemented |
 | RS-CODE-23 | Error | `include!()` pulls in unscanned code. Direct bypass of all code scanning. Exception: `include!(concat!(env!("OUT_DIR"), ...))` is Info (build-script pattern). Warn for `include_str!()`/`include_bytes!()` with path traversal (`..`). | Implemented |
-| RS-CODE-24 | Error/Warn | `#[path = "..."]` redirects module paths. Error if path contains `..` (escaping directory). Warn for any `#[path]` usage (breaks standard file layout). Require `// reason:` for Warn case. Canonical `#[cfg(test)]` sidecar wiring to `<rule>_tests/mod.rs` is exempt. | Implemented |
-| RS-CODE-25 | Warn | `Result<T, String>` or `Result<T, Box<dyn Error>>` in `pub fn` return types. Poor error discipline — forces callers to parse strings. **Library profile only.** | Implemented |
+| RS-CODE-24 | Error/Warn | `#[path = "..."]` redirects module paths. Error if path contains `..` (escaping directory), or if the same-line `// reason:` is missing or too weak. Warn for any `#[path]` usage with a useful reason (breaks standard file layout). Canonical `#[cfg(test)]` sidecar wiring to `<rule>_tests/mod.rs` is exempt. | Implemented |
+| RS-CODE-25 | Warn | Legacy placeholder for weak public `Result` error forms. Live enforcement ownership moved to `RS-CODE-33`; `RS-CODE-25` stays intentionally non-firing to avoid overlap. **Library profile only.** | Implemented (legacy silent) |
 | RS-CODE-26 | Warn | `pub use foo::*` glob re-export in lib.rs. Unpredictable API surface — any change to inner module changes library API. **Library profile only.** | Implemented |
 | RS-CODE-27 | Error | Facade-only lib.rs: should contain only `mod`, `pub use`, doc comments, type/const definitions. No inline module bodies, no function bodies, no impl blocks. **Library profile only.** | Implemented |
 | RS-CODE-29 | Warn/Error | Trait with >8 methods (Warn) or >12 methods (Error). Nearly unimplementable traits. **Library profile only.** | Implemented |
@@ -141,8 +141,8 @@ pub struct UserId(pub String);
 - `Error`
 
 **Relationship to existing rule**
-- likely replaces or broadens `RS-CODE-25`
-- implementation should avoid leaving overlapping partially-duplicated public-error rules
+- replaces the original intended firing surface of `RS-CODE-25`
+- implementation should keep `RS-CODE-25` silent so one weak public error case has one finding path
 
 **Examples**
 

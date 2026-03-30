@@ -36,7 +36,7 @@ fn uses_info_severity_for_real_test_paths() {
         .into_iter()
         .filter(|result| {
             matches!(
-                result.file()()()(),
+                result.file(),
                 Some(path) if [crate_test_rel, inline_test_rel, sidecar_test_rel].contains(&path)
             )
         })

@@ -540,6 +540,7 @@ dependencies = [
  "guardrail3-domain-report",
  "guardrail3-domain-validation-model",
  "guardrail3-ports-outbound-traits",
+ "guardrail3-reason-policy",
  "guardrail3-shared-fs",
  "proc-macro2",
  "quote",
@@ -610,7 +611,6 @@ dependencies = [
  "guardrail3-app-rs-family-deps-test-support",
  "guardrail3-app-rs-family-mapper",
  "guardrail3-app-rs-placement",
- "guardrail3-domain-config",
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
  "guardrail3-domain-validation-model",
@@ -942,13 +942,17 @@ dependencies = [
 name = "guardrail3-app-rs-family-toolchain"
 version = "0.0.0"
 dependencies = [
+ "guardrail3-adapters-outbound-fs",
+ "guardrail3-app-core",
  "guardrail3-app-rs-family-mapper",
  "guardrail3-app-rs-placement",
  "guardrail3-domain-config",
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
  "guardrail3-domain-validation-model",
+ "guardrail3-shared-fs",
  "guardrail3_app_rs_family_toolchain_assertions",
+ "tempfile",
  "toml",
 ]
 
@@ -1010,6 +1014,7 @@ dependencies = [
  "guardrail3-domain-report",
  "guardrail3-domain-validation-model",
  "guardrail3-ports-outbound-traits",
+ "guardrail3-shared-fs",
  "toml",
 ]
 
@@ -1083,6 +1088,10 @@ version = "0.0.0"
 
 [[package]]
 name = "guardrail3-ports-outbound-traits"
+version = "0.0.0"
+
+[[package]]
+name = "guardrail3-reason-policy"
 version = "0.0.0"
 
 [[package]]

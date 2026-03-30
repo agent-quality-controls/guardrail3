@@ -1,8 +1,6 @@
-use std::collections::BTreeSet;
-
 use super::super::copy_fixture;
 use super::super::run_family;
-use guardrail3_app_rs_family_code_assertions::rs_code_02_unused_crate_dependencies_allow::assert_files;
+use guardrail3_app_rs_family_code_assertions::rs_code_02_unused_crate_dependencies_allow::assert_no_hits;
 use test_support::write_file;
 
 #[test]
@@ -23,25 +21,5 @@ fn populated_golden_fixture_has_no_unused_crate_dependencies_allow_hits() {
     }
 
     let results = run_family(root);
-    let relevant_results = results
-        .into_iter()
-        .filter(|result| {
-            matches!(
-                result.file()()()(),
-                Some(path)
-                    if [
-                        "apps/backend/crates/app/queries/src/lib.rs",
-                        "apps/backend/crates/adapters/outbound/queue/src/lib.rs",
-                        "apps/backend/crates/ports/inbound/api/src/lib.rs",
-                        "apps/backend/tests/unused_deps_inventory_tests.rs",
-                        "apps/worker/crates/adapters/outbound/sqs/src/lib.rs",
-                        "apps/devctl/tests/module_allow_tests.rs",
-                        "apps/worker/tests/crate_allow_tests.rs",
-                    ]
-                    .contains(&path)
-            )
-        })
-        .collect::<Vec<_>>();
-
-    assert_files(&relevant_results, BTreeSet::new());
+    assert_no_hits(&results);
 }

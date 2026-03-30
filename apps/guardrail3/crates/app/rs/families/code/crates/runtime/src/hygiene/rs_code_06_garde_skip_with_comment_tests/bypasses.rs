@@ -19,6 +19,7 @@ fn detects_non_exempt_garde_skips_with_plain_comments_across_real_owned_files() 
     let vec_rel = "apps/devctl/crates/app/core/src/lib.rs";
     let alias_rel = "apps/worker/crates/adapters/outbound/slack/src/lib.rs";
     let option_alias_rel = "apps/backend/crates/app/commands/src/lib.rs";
+    let weak_reason_rel = "apps/backend/crates/ports/inbound/api/src/lib.rs";
 
     let type_content = test_support::read_file(root, type_rel);
     let field_content = test_support::read_file(root, field_rel);
@@ -27,6 +28,7 @@ fn detects_non_exempt_garde_skips_with_plain_comments_across_real_owned_files() 
     let vec_content = test_support::read_file(root, vec_rel);
     let alias_content = test_support::read_file(root, alias_rel);
     let option_alias_content = test_support::read_file(root, option_alias_rel);
+    let weak_reason_content = test_support::read_file(root, weak_reason_rel);
 
     let type_new = format!(
         "{type_content}\n#[garde(skip)] // validated elsewhere\nstruct WholeTypeCommentProbe {{\n    plan: String,\n}}\n"
@@ -49,6 +51,9 @@ fn detects_non_exempt_garde_skips_with_plain_comments_across_real_owned_files() 
     let option_alias_new = format!(
         "{option_alias_content}\nstruct UserMap;\nstruct OptionAliasCommentProbe {{\n    #[garde(skip)] // temporary bypass\n    field: Option<UserMap>,\n}}\n"
     );
+    let weak_reason_new = format!(
+        "{weak_reason_content}\nstruct WeakReasonSkipProbe {{\n    #[garde(skip)] // reason: temp\n    field: String,\n}}\n"
+    );
 
     write_file(root, type_rel, &type_new);
     write_file(root, field_rel, &field_new);
@@ -57,6 +62,7 @@ fn detects_non_exempt_garde_skips_with_plain_comments_across_real_owned_files() 
     write_file(root, vec_rel, &vec_new);
     write_file(root, alias_rel, &alias_new);
     write_file(root, option_alias_rel, &option_alias_new);
+    write_file(root, weak_reason_rel, &weak_reason_new);
 
     let type_line = type_new
         .lines()
@@ -93,6 +99,11 @@ fn detects_non_exempt_garde_skips_with_plain_comments_across_real_owned_files() 
         .position(|line| line.contains("#[garde(skip)] // temporary bypass"))
         .map(|index| index + 1)
         .unwrap_or_default();
+    let weak_reason_line = weak_reason_new
+        .lines()
+        .position(|line| line.contains("#[garde(skip)] // reason: temp"))
+        .map(|index| index + 1)
+        .unwrap_or_default();
 
     let results = run_family(root);
 
@@ -106,6 +117,7 @@ fn detects_non_exempt_garde_skips_with_plain_comments_across_real_owned_files() 
             vec_rel.to_owned(),
             alias_rel.to_owned(),
             option_alias_rel.to_owned(),
+            weak_reason_rel.to_owned(),
         ]),
     );
     assert_findings(
@@ -165,6 +177,14 @@ fn detects_non_exempt_garde_skips_with_plain_comments_across_real_owned_files() 
                 "`#[garde(skip)]` on non-exempt field `field: Option<UserMap>` needs `// reason:`.",
                 Some(option_alias_rel),
                 Some(option_alias_line),
+                false,
+            ),
+            RuleFinding::new(
+                Severity::Error,
+                "garde(skip) reason too weak",
+                "`#[garde(skip)]` on non-exempt field `field: String` reason must be specific and at least two words. Weak reason `temp` found.",
+                Some(weak_reason_rel),
+                Some(weak_reason_line),
                 false,
             ),
         ],

@@ -43,6 +43,24 @@ fn warns_on_path_attr_with_reason() {
 }
 
 #[test]
+fn errors_on_path_attr_with_weak_reason() {
+    let content = "#[path = \"generated.rs\"] // reason: temp\nmod generated;";
+    let results = check_source("src/lib.rs", content, false);
+
+    assert_findings(
+        &results,
+        &[RuleFinding::new(
+            guardrail3_domain_report::Severity::Error,
+            "#[path] reason too weak",
+            "`#[path = \"generated.rs\"]` reason must be specific and at least two words. Weak reason `temp` found.",
+            Some("src/lib.rs"),
+            Some(1),
+            false,
+        )],
+    );
+}
+
+#[test]
 fn errors_on_noncanonical_reason_spellings() {
     let content = "#[path = \"generated.rs\"] // REASON: generated facade shim\nmod generated;\n#[path = \"generated_inline.rs\"] //reason: generated request DTO shim\nmod generated_inline;";
     let results = check_source("src/lib.rs", content, false);

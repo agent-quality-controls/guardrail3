@@ -6,7 +6,7 @@ use guardrail3_app_rs_family_code_assertions::rs_code_04_item_level_allow_with_r
 use test_support::write_file;
 
 #[test]
-fn inventories_documented_item_level_expects_across_real_owned_files() {
+fn reports_documented_item_level_expects_across_real_owned_files() {
     let fixture = copy_fixture();
     let root = fixture.path();
 
@@ -60,36 +60,36 @@ fn inventories_documented_item_level_expects_across_real_owned_files() {
         &run_family(root),
         &[
             RuleFinding::new(
-                Severity::Info,
+                Severity::Warn,
                 "item-level expect with reason",
                 "#[expect(clippy::unwrap_used)] reason: compatibility probe",
                 Some(top_level_rel),
                 Some(top_level_line),
-                true,
+                false,
             ),
             RuleFinding::new(
-                Severity::Info,
+                Severity::Warn,
                 "item-level expect with reason",
                 "#[expect(clippy::expect_used)] reason: grouped expectation surface",
                 Some(grouped_rel),
                 Some(grouped_line),
-                true,
+                false,
             ),
             RuleFinding::new(
-                Severity::Info,
+                Severity::Warn,
                 "item-level expect with reason",
                 "#[expect(clippy::unwrap_used)] reason: grouped expectation surface",
                 Some(grouped_rel),
                 Some(grouped_line),
-                true,
+                false,
             ),
             RuleFinding::new(
-                Severity::Info,
+                Severity::Warn,
                 "item-level expect with reason",
                 "#[expect(clippy::panic)] reason: documented extern-facing probe",
                 Some(module_rel),
                 Some(module_line),
-                true,
+                false,
             ),
         ],
     );

@@ -70,6 +70,12 @@ Replace structurally:
 - the current gap is no longer placeholder content; it is the remaining work to broaden later-rule bypass vectors and exact owned-hit assertions across the populated golden tree
 - targeted `cargo test` execution can still be blocked by unrelated dirty-tree compile failures outside `rs/code`; when that happens, use `cargo check -p guardrail3 --lib` to keep verifying the `rs/code` slice and document the external blocker explicitly
 
+Current note:
+
+- the `guardrail3-app-rs-family-code` package test suite is green again, including the `RS-CODE-30` fail-closed harness on current `ProjectTree::new(...)` / `DirEntry::new(...)` APIs
+- unreadable active config files scanned for exception-comment inventory now fail closed through `RS-CODE-30` instead of being silently skipped
+- `RS-CODE-25` should be treated as a legacy non-firing compatibility rule; active weak public error-form ownership is `RS-CODE-33`
+
 ## Coverage Matrix
 
 Legend:
@@ -85,9 +91,9 @@ Legend:
 | `RS-CODE-01` | `direct`, `exact` | golden, broad attack vector, exact owned hit set, exact owned non-hit set, inline/nested module breadth | reuse severity split idea, rebuild around multi-file allow placements |
 | `RS-CODE-02` | `direct`, `exact` | golden, broad attack vector, owned hit/non-hit sets, false-positive controls | keep inventory branch idea, broaden to crate-wide exemption ownership |
 | `RS-CODE-03` | `direct`, `exact` | golden, broad attack vector, grouped/aliased attrs, nested placements, owned hit/non-hit sets | high-risk because of `same_line_reason()` and helper dependence |
-| `RS-CODE-04` | `direct`, `exact` | golden, broad inventory attack, malformed-reason controls, owned hit/non-hit sets | pair with `RS-CODE-03` migration |
+| `RS-CODE-04` | `direct`, `exact` | golden, broad documented-bypass attack, malformed-reason controls, owned hit/non-hit sets | pair with `RS-CODE-03` migration |
 | `RS-CODE-05` | `direct`, `exact` | golden, broad attack vector, whole-type ownership, false-positive controls, owned hit/non-hit sets | likely semantic bug surface |
-| `RS-CODE-06` | `direct`, `exact` | golden, broad attack vector, whole-type ownership, comment-shape controls, owned hit/non-hit sets | likely semantic bug surface |
+| `RS-CODE-06` | `direct`, `exact` | golden, broad attack vector, whole-type ownership, reasoned-warning coverage, owned hit/non-hit sets | likely semantic bug surface |
 | `RS-CODE-07` | `direct`, `family`, `exact` | golden config tree, broad multi-file inventory mutation, exact owned hit/non-hit sets, false-positive controls | preserve nested config collection coverage |
 | `RS-CODE-08` | `direct`, `exact` | golden, broad attack vector, grouped/aliased cfg attr forms, separation from `RS-CODE-18`, owned hit/non-hit sets | helper-backed, migrate with `RS-CODE-18` |
 | `RS-CODE-09` | `direct`, `fp`, `exact` | golden, broad multi-file mutation, exact owned hit set, comment-count false positives | keep test-file exemption branch |

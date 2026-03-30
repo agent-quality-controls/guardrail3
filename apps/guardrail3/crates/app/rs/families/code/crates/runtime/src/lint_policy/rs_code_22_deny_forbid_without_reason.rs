@@ -1,4 +1,5 @@
 use guardrail3_domain_report::{CheckResult, Severity};
+use guardrail3_reason_policy::reason_text_is_useful;
 
 use super::inputs::RustCodeFileInput;
 use super::parse::{CfgPredicateTruth, find_deny_forbid_attrs, same_line_reason};
@@ -16,8 +17,7 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
                     ID.to_owned(),
                     Severity::Info,
                     "forbid(unsafe_code)".to_owned(),
-                    "`forbid(unsafe_code)` strengthens the local safety boundary."
-                        .to_owned(),
+                    "`forbid(unsafe_code)` strengthens the local safety boundary.".to_owned(),
                     Some(input.rel_path.to_owned()),
                     Some(info.line),
                     false,
@@ -26,7 +26,22 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
             );
             continue;
         }
-        if same_line_reason(input.content, info.line).is_some() {
+        if let Some(reason) = same_line_reason(input.content, info.line) {
+            if reason_text_is_useful(&reason) {
+                continue;
+            }
+            results.push(CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Error,
+                "#[deny]/#[forbid] reason too weak".to_owned(),
+                format!(
+                    "`#[{}({})]` reason must be specific and at least two words. Weak reason `{reason}` found.",
+                    info.level, info.lint
+                ),
+                Some(input.rel_path.to_owned()),
+                Some(info.line),
+                false,
+            ));
             continue;
         }
         results.push(CheckResult::from_parts(

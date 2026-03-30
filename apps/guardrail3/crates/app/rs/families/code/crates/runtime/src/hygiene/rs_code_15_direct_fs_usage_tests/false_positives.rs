@@ -64,7 +64,7 @@ fn skips_test_boundaries_cfg_test_src_fs_and_text_only_near_misses() {
         .into_iter()
         .filter(|result| {
             matches!(
-                result.file()()()(),
+                result.file(),
                 Some(path)
                     if [
                         "apps/backend/crates/app/queries/tests/fs_usage_tests.rs",

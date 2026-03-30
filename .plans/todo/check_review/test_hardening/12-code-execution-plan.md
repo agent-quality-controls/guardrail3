@@ -185,9 +185,9 @@ Status:
 ### `RS-CODE-04` item-level `#[allow(...)]` with reason
 
 1. Add golden coverage.
-2. Add inventory attacks proving the documented cases are surfaced exactly where expected.
+2. Add documented-bypass attacks proving the cases are surfaced exactly where expected in normal output.
 3. Add false-positive controls for malformed or empty reasons.
-4. Assert exact info severity and hit set.
+4. Assert exact warning severity and hit set.
 
 ### `RS-CODE-05` non-primitive `#[garde(skip)]` without comment
 
@@ -200,12 +200,13 @@ Status:
 4. If the implementation misses whole-type cases, fix the rule or parser support.
 5. Add false-positive controls for primitive fields and legal cases.
 
-### `RS-CODE-06` non-primitive `#[garde(skip)]` with comment but no `reason:`
+### `RS-CODE-06` non-primitive `#[garde(skip)]` with comment
 
 1. Add golden coverage.
 2. Add attacks for comment forms that look documented but do not satisfy the contract.
-3. Include whole-type and nested placements.
-4. Add exact severity and hit-set assertions.
+3. Add attacks for exact `// reason:` cases that should remain visible as warnings.
+4. Include whole-type and nested placements.
+5. Add exact severity and hit-set assertions for both error and warning branches.
 
 ### `RS-CODE-07` exception comment inventory
 

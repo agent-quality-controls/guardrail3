@@ -1,8 +1,8 @@
-use std::collections::BTreeSet;
-
 use super::super::copy_fixture;
 use super::super::run_family;
-use guardrail3_app_rs_family_code_assertions::rs_code_01_crate_level_allow::assert_files;
+use guardrail3_app_rs_family_code_assertions::rs_code_01_crate_level_allow::{
+    RuleFinding, Severity, assert_findings,
+};
 use test_support::write_file;
 
 #[test]
@@ -45,11 +45,15 @@ fn skips_item_level_and_file_backed_module_near_misses() {
     );
 
     let results = run_family(root);
-
-    assert_files(
+    assert_findings(
         &results,
-        BTreeSet::from([
-            "apps/backend/crates/ports/outbound/events/src/file_backed_child.rs".to_owned(),
-        ]),
+        &[RuleFinding::new(
+            Severity::Error,
+            "crate-level allow",
+            "Crate/module-wide `allow(clippy::panic)` suppresses the lint too broadly.",
+            Some("apps/backend/crates/ports/outbound/events/src/file_backed_child.rs"),
+            Some(1),
+            false,
+        )],
     );
 }

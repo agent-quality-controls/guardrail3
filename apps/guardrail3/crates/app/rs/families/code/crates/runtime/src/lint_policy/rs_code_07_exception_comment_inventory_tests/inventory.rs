@@ -26,11 +26,6 @@ fn inventories_exception_comments_across_real_config_roots_with_exact_owned_hit_
     let worker_cargo = test_support::read_file(root, worker_cargo_rel);
     let nested_cargo = test_support::read_file(root, nested_cargo_rel);
 
-    let root_line = root_guardrail.lines().count() + 2;
-    let rustfmt_first_line = root_rustfmt.lines().count() + 1;
-    let rustfmt_second_line = root_rustfmt.lines().count() + 2;
-    let rustfmt_inline_line = root_rustfmt.lines().count() + 3;
-    let toolchain_line = root_toolchain.lines().count() + 1;
     let backend_line = backend_cargo.lines().count() + 2;
     let worker_line = worker_cargo.lines().count() + 2;
     let nested_line = nested_cargo.lines().count() + 2;
@@ -73,9 +68,6 @@ fn inventories_exception_comments_across_real_config_roots_with_exact_owned_hit_
     assert_files(
         &results,
         BTreeSet::from([
-            root_guardrail_rel.to_owned(),
-            root_rustfmt_rel.to_owned(),
-            root_toolchain_rel.to_owned(),
             backend_cargo_rel.to_owned(),
             worker_cargo_rel.to_owned(),
             nested_cargo_rel.to_owned(),
@@ -106,46 +98,6 @@ fn inventories_exception_comments_across_real_config_roots_with_exact_owned_hit_
                 "Config exception comment: # EXCEPTION: worker rollout inventory",
                 Some(worker_cargo_rel),
                 Some(worker_line),
-                true,
-            ),
-            RuleFinding::new(
-                Severity::Info,
-                "EXCEPTION comment inventory",
-                "Config exception comment: # EXCEPTION: fixture root policy note",
-                Some(root_guardrail_rel),
-                Some(root_line),
-                true,
-            ),
-            RuleFinding::new(
-                Severity::Info,
-                "EXCEPTION comment inventory",
-                "Config exception comment: // EXCEPTION: toolchain rollout inventory",
-                Some(root_toolchain_rel),
-                Some(toolchain_line),
-                true,
-            ),
-            RuleFinding::new(
-                Severity::Info,
-                "EXCEPTION comment inventory",
-                "Config exception comment: # EXCEPTION: rustfmt policy inventory",
-                Some(root_rustfmt_rel),
-                Some(rustfmt_first_line),
-                true,
-            ),
-            RuleFinding::new(
-                Severity::Info,
-                "EXCEPTION comment inventory",
-                "Config exception comment: # EXCEPTION: rustfmt repeated inventory",
-                Some(root_rustfmt_rel),
-                Some(rustfmt_second_line),
-                true,
-            ),
-            RuleFinding::new(
-                Severity::Info,
-                "EXCEPTION comment inventory",
-                "Config exception comment: # EXCEPTION: rustfmt inline inventory",
-                Some(root_rustfmt_rel),
-                Some(rustfmt_inline_line),
                 true,
             ),
         ],
