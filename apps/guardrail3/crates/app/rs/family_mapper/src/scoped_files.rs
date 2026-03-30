@@ -39,11 +39,18 @@ fn path_is_under_root(rel_path: &str, root_rel: &str) -> bool {
             .is_some_and(|rest| rest.starts_with('/'))
 }
 
-fn collect_scope_files(tree: &ProjectTree, scope_rel: &str, root_rels: &[String]) -> BTreeSet<String> {
+fn collect_scope_files(
+    tree: &ProjectTree,
+    scope_rel: &str,
+    root_rels: &[String],
+) -> BTreeSet<String> {
     let mut files = BTreeSet::new();
 
     if tree.file_exists(scope_rel) {
-        if root_rels.iter().any(|root| path_is_under_root(scope_rel, root)) {
+        if root_rels
+            .iter()
+            .any(|root| path_is_under_root(scope_rel, root))
+        {
             let _ = files.insert(scope_rel.to_owned());
         }
         return files;
@@ -55,7 +62,10 @@ fn collect_scope_files(tree: &ProjectTree, scope_rel: &str, root_rels: &[String]
         }
         for file in entry.files() {
             let rel_path = ProjectTree::join_rel(dir_rel, file);
-            if root_rels.iter().any(|root| path_is_under_root(&rel_path, root)) {
+            if root_rels
+                .iter()
+                .any(|root| path_is_under_root(&rel_path, root))
+            {
                 let _ = files.insert(rel_path);
             }
         }

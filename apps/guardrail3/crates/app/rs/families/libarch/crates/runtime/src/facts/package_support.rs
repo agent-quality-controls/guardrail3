@@ -146,7 +146,11 @@ pub(super) fn fallback_name(rel_dir: &str) -> String {
     rel_dir.rsplit('/').next().unwrap_or(rel_dir).to_owned()
 }
 
-fn resolve_member_pattern(tree: &ProjectTree, workspace_root_rel_dir: &str, member: &str) -> Vec<String> {
+fn resolve_member_pattern(
+    tree: &ProjectTree,
+    workspace_root_rel_dir: &str,
+    member: &str,
+) -> Vec<String> {
     let pattern = normalize_path(workspace_root_rel_dir, member);
     let mut matches = tree
         .matching_dir_rels(&pattern)

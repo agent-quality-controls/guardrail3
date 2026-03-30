@@ -25,8 +25,7 @@ pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckRe
             ID.to_owned(),
             Severity::Info,
             format!("{}: include/exclude missing", krate.name),
-            "Publishable crates should consider `include` or `exclude` patterns."
-                .to_owned(),
+            "Publishable crates should consider `include` or `exclude` patterns.".to_owned(),
             Some(krate.cargo_rel_path.clone()),
             None,
             false,

@@ -44,7 +44,7 @@ pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckRe
             Severity::Error,
             format!("{}: invalid semver", krate.name),
             "Publishable crates must set a valid semver version or `version.workspace = true`."
-                    .to_owned(),
+                .to_owned(),
             Some(krate.cargo_rel_path.clone()),
             None,
             false,

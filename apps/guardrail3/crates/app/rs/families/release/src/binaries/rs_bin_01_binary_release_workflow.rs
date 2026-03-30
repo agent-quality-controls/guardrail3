@@ -48,7 +48,7 @@ pub fn check(
                 Severity::Info,
                 format!("{}: no binary release workflow", krate.name),
                 "No workflow builds a release binary and publishes it via GitHub Releases."
-                        .to_owned(),
+                    .to_owned(),
                 Some(krate.cargo_rel_path.clone()),
                 None,
                 false,

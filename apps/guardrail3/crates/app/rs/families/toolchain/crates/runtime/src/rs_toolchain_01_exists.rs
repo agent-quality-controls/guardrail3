@@ -179,7 +179,10 @@ pub(crate) fn nested_workspace_root_tree() -> guardrail3_domain_project_tree::Pr
             "rust-toolchain.toml".to_owned(),
             "[toolchain]\nchannel = \"stable\"\ncomponents = [\"clippy\", \"rustfmt\"]".to_owned(),
         ),
-        ("apps/guardrail3/Cargo.toml".to_owned(), "[workspace]\n".to_owned()),
+        (
+            "apps/guardrail3/Cargo.toml".to_owned(),
+            "[workspace]\n".to_owned(),
+        ),
     ]);
     ProjectTree {
         root: PathBuf::from("/tmp/toolchain-family-nested-root"),
@@ -201,15 +204,16 @@ pub(crate) fn test_route(
         ));
     }
 
-    roots.extend(tree.dirs_with_file("Cargo.toml").into_iter().map(|rel_dir| {
-        guardrail3_app_rs_family_mapper::RsRootView::new(
-            rel_dir.clone(),
-            guardrail3_domain_project_tree::ProjectTree::join_rel(
-                &rel_dir,
-                "Cargo.toml",
-            ),
-        )
-    }));
+    roots.extend(
+        tree.dirs_with_file("Cargo.toml")
+            .into_iter()
+            .map(|rel_dir| {
+                guardrail3_app_rs_family_mapper::RsRootView::new(
+                    rel_dir.clone(),
+                    guardrail3_domain_project_tree::ProjectTree::join_rel(&rel_dir, "Cargo.toml"),
+                )
+            }),
+    );
     roots.sort_by(|left, right| left.cargo_rel_path().cmp(right.cargo_rel_path()));
 
     guardrail3_app_rs_family_mapper::RsToolchainRoute::new(roots)

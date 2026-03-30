@@ -6,7 +6,7 @@ pub fn assert_related_rule_file_absent(results: &[CheckResult], rule_id: &str, f
     assert!(
         !results
             .iter()
-            .any(|result| result.id == rule_id && result.file == Some(file)),
+            .any(|result| result.id == rule_id && result.file.as_deref() == Some(file)),
         "unexpected {rule_id} finding for {file}: {results:#?}"
     );
 }
@@ -39,7 +39,7 @@ pub fn assert_related_rule_results(
                     .is_none_or(|needle| result.title.contains(needle))
                 && expected_result
                     .file
-                    .is_none_or(|file| result.file == Some(file))
+                    .is_none_or(|file| result.file.as_deref() == Some(file))
                 && expected_result
                     .inventory
                     .is_none_or(|inventory| result.inventory == inventory)

@@ -12,8 +12,7 @@ pub fn check_parseable(results: &mut Vec<CheckResult>) {
             ID.to_owned(),
             Severity::Info,
             "clippy policy context parseable".to_owned(),
-            "Active `guardrail3.toml` parsed successfully for clippy policy context."
-                .to_owned(),
+            "Active `guardrail3.toml` parsed successfully for clippy policy context.".to_owned(),
             Some("guardrail3.toml".to_owned()),
             None,
             false,
@@ -24,16 +23,16 @@ pub fn check_parseable(results: &mut Vec<CheckResult>) {
 
 pub fn check(input: &PolicyContextFailureInput<'_>, results: &mut Vec<CheckResult>) {
     results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    "clippy policy context is not parseable".to_owned(),
-    format!(
+        ID.to_owned(),
+        Severity::Error,
+        "clippy policy context is not parseable".to_owned(),
+        format!(
             "Failed to parse active `guardrail3.toml` used for clippy profile and garde policy: {}",
             input.parse_error
         ),
-    Some("guardrail3.toml".to_owned()),
-    None,
-    false,
+        Some("guardrail3.toml".to_owned()),
+        None,
+        false,
     ));
 }
 
@@ -50,5 +49,6 @@ pub(crate) fn run_for_tests(tree: &ProjectTree) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-#[path = "rs_clippy_23_policy_context_parseable_tests/mod.rs"] // reason: test-only sidecar module wiring
+#[path = "rs_clippy_23_policy_context_parseable_tests/mod.rs"]
+// reason: test-only sidecar module wiring
 mod rs_clippy_23_policy_context_parseable_tests;

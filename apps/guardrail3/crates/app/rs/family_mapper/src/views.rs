@@ -221,7 +221,10 @@ pub struct RsScopedSourceRoute {
 impl RsScopedSourceRoute {
     #[must_use]
     pub fn new(roots: Vec<RsScopedRootView>, scoped_files: Option<BTreeSet<String>>) -> Self {
-        Self { roots, scoped_files }
+        Self {
+            roots,
+            scoped_files,
+        }
     }
 
     #[must_use]
@@ -332,7 +335,10 @@ pub struct RsTestRoute {
 impl RsTestRoute {
     #[must_use]
     pub fn new(roots: Vec<RsRootView>, scoped_files: Option<BTreeSet<String>>) -> Self {
-        Self { roots, scoped_files }
+        Self {
+            roots,
+            scoped_files,
+        }
     }
 
     #[must_use]

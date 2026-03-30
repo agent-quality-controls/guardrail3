@@ -7,14 +7,13 @@ const ID: &str = "RS-TEST-14";
 pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
     if input.mutation_hook_files.is_empty() {
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "mutation hook step missing".to_owned(),
-    "Active hook surfaces do not contain an executable `cargo mutants` step."
-                .to_owned(),
-    Some(input.root.cargo_rel_path.clone()),
-    None,
-    false,
+            ID.to_owned(),
+            Severity::Warn,
+            "mutation hook step missing".to_owned(),
+            "Active hook surfaces do not contain an executable `cargo mutants` step.".to_owned(),
+            Some(input.root.cargo_rel_path.clone()),
+            None,
+            false,
         ));
     } else {
         for rel_path in input.mutation_hook_files {
@@ -23,9 +22,7 @@ pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
                     ID.to_owned(),
                     Severity::Info,
                     "mutation hook step present".to_owned(),
-                    format!(
-                        "`{rel_path}` contains an executable mutation-testing command."
-                    ),
+                    format!("`{rel_path}` contains an executable mutation-testing command."),
                     Some(rel_path.clone()),
                     None,
                     false,

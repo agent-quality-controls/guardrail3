@@ -79,20 +79,21 @@ fn check_block_eslint_disable(
         );
     } else {
         results.push(CheckResult::from_parts(
-    "T23".to_owned(),
-    Severity::Error,
-    "Block eslint-disable without reason".to_owned(),
-    format!(
+            "T23".to_owned(),
+            Severity::Error,
+            "Block eslint-disable without reason".to_owned(),
+            format!(
                 "Block-level `eslint-disable` missing reason: `{text}`. \
                  Disabling ESLint rules hides potential bugs. Every suppression must document WHY \
                  the rule doesn't apply. Add `-- <reason>` after the rule name, e.g., \
                  `/* eslint-disable no-console -- CLI tool needs console output */`."
             ),
-    Some(path.display().to_string()),
-    Some(line_number),
-    false,
+            Some(path.display().to_string()),
+            Some(line_number),
+            false,
         ));
     }
+}
 
 /// T25/T26: eslint-disable-next-line.
 fn check_next_line_eslint_disable(
@@ -145,19 +146,20 @@ fn emit_line_suppression_result(
         );
     } else {
         results.push(CheckResult::from_parts(
-    "T25".to_owned(),
-    Severity::Error,
-    format!("{kind} eslint-disable without reason"),
-    format!(
+            "T25".to_owned(),
+            Severity::Error,
+            format!("{kind} eslint-disable without reason"),
+            format!(
                 "{kind} ESLint suppression missing reason: `{text}`. \
                  Every suppression must explain WHY the rule doesn't apply here. \
                  Add `-- <reason>` after the rule name."
             ),
-    Some(path.display().to_string()),
-    Some(line_number),
-    false,
+            Some(path.display().to_string()),
+            Some(line_number),
+            false,
         ));
     }
+}
 
 // T27-T29: @ts-ignore / @ts-expect-error (AST-only)
 pub fn check_ts_ignore(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
@@ -181,18 +183,18 @@ fn check_ts_ignore_from_comments(
         // T27: @ts-ignore
         if text.contains("@ts-ignore") {
             results.push(CheckResult::from_parts(
-    "T27".to_owned(),
-    Severity::Error,
-    "`@ts-ignore` suppresses type checking".to_owned(),
-    format!(
+                "T27".to_owned(),
+                Severity::Error,
+                "`@ts-ignore` suppresses type checking".to_owned(),
+                format!(
                     "`@ts-ignore` found: `{text}`. This suppresses TypeScript type checking on the next line \
                      without explanation, hiding type errors that indicate real bugs. Unlike `@ts-expect-error`, \
                      it stays silent even after the underlying error is fixed, leaving dead suppressions. \
                      Replace with `@ts-expect-error: <reason>` which documents why and fails if the error is resolved."
                 ),
-    Some(path.display().to_string()),
-    Some(line_number),
-    false,
+                Some(path.display().to_string()),
+                Some(line_number),
+                false,
             ));
         }
 
@@ -202,35 +204,38 @@ fn check_ts_ignore_from_comments(
                 #[allow(clippy::string_slice)] // reason: ASCII offset safe
                 let after = text.get(pos.saturating_add(16)..).unwrap_or("").trim();
                 if after.is_empty() || after == "*/" {
-                    results.push(CheckResult {
-                        id: "T28".to_owned(),
-                        severity: Severity::Warn,
-                        title: "`@ts-expect-error` without explanation".to_owned(),
-                        message: format!(
+                    results.push(CheckResult::from_parts(
+                        "T28".to_owned(),
+                        Severity::Warn,
+                        "`@ts-expect-error` without explanation".to_owned(),
+                        format!(
                             "`@ts-expect-error` without explanation: `{text}`. While better than `@ts-ignore` \
                              (it fails when the error is fixed), it still needs a reason so reviewers understand \
                              why the type error is expected. Add an explanation after the directive: \
                              `// @ts-expect-error: <reason>`."
                         ),
-                        file: Some(path.display().to_string()),
-                        line: Some(line_number),
-                        inventory: false,
-                    });
+                        Some(path.display().to_string()),
+                        Some(line_number),
+                        false,
+                    ));
                 } else {
-                    results.push(CheckResult {
-                        id: "T29".to_owned(),
-                        severity: Severity::Info,
-                        title: "`@ts-expect-error` with explanation".to_owned(),
-                        message: format!(
+                    results.push(
+                        CheckResult::from_parts(
+                            "T29".to_owned(),
+                            Severity::Info,
+                            "`@ts-expect-error` with explanation".to_owned(),
+                            format!(
                             "Documented type suppression: `{text}`. This will fail if the underlying \
                              type error is fixed, ensuring the suppression doesn't outlive its need. Tracked for audit."
-                        ),
-                        file: Some(path.display().to_string()),
-                        line: Some(line_number),
-                        inventory: false,
-                    }.as_inventory());
+                            ),
+                            Some(path.display().to_string()),
+                            Some(line_number),
+                            false,
+                        )
+                        .as_inventory(),
+                    );
                 }
             }
         }
-    },
-)
+    }
+}

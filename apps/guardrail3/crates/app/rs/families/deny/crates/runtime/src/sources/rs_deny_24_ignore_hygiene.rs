@@ -13,16 +13,16 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     };
     let Some(ignore_entries) = ignore_value.as_array() else {
         results.push(CheckResult::from_parts(
-    "RS-DENY-24".to_owned(),
-    Severity::Warn,
-    "malformed advisory ignore container".to_owned(),
-    format!(
+            "RS-DENY-24".to_owned(),
+            Severity::Warn,
+            "malformed advisory ignore container".to_owned(),
+            format!(
                 "`{}` must use an array for `[advisories].ignore` entries.",
                 config.rel_path
             ),
-    Some(config.rel_path.clone()),
-    None,
-    false,
+            Some(config.rel_path.clone()),
+            None,
+            false,
         ));
         return;
     };
@@ -50,44 +50,44 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
 
         if malformed {
             results.push(CheckResult::from_parts(
-    "RS-DENY-24".to_owned(),
-    Severity::Warn,
-    "malformed advisory ignore entry".to_owned(),
-    format!(
+                "RS-DENY-24".to_owned(),
+                Severity::Warn,
+                "malformed advisory ignore entry".to_owned(),
+                format!(
                     "`{}` has an `[advisories].ignore` entry without a valid advisory id.",
                     config.rel_path
                 ),
-    Some(config.rel_path.clone()),
-    None,
-    false,
-            });
+                Some(config.rel_path.clone()),
+                None,
+                false,
+            ));
         }
         if non_string_reason {
             results.push(CheckResult::from_parts(
-    "RS-DENY-24".to_owned(),
-    Severity::Warn,
-    "advisory ignore reason must be a string".to_owned(),
-    format!(
+                "RS-DENY-24".to_owned(),
+                Severity::Warn,
+                "advisory ignore reason must be a string".to_owned(),
+                format!(
                     "`{}` has `[advisories].ignore` entry `{id}` with a non-string `reason`.",
                     config.rel_path
                 ),
-    Some(config.rel_path.clone()),
-    None,
-    false,
-            });
+                Some(config.rel_path.clone()),
+                None,
+                false,
+            ));
         } else if !plain_string_entry && reason.as_deref().unwrap_or("").trim().is_empty() {
             results.push(CheckResult::from_parts(
-    "RS-DENY-24".to_owned(),
-    Severity::Warn,
-    "advisory ignore missing reason".to_owned(),
-    format!(
+                "RS-DENY-24".to_owned(),
+                Severity::Warn,
+                "advisory ignore missing reason".to_owned(),
+                format!(
                     "`{}` ignores advisory `{id}` without a `reason`.",
                     config.rel_path
                 ),
-    Some(config.rel_path.clone()),
-    None,
-    false,
-            });
+                Some(config.rel_path.clone()),
+                None,
+                false,
+            ));
         }
         if !malformed
             && !non_string_reason
@@ -111,13 +111,13 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
 
 #[cfg(test)]
 pub(crate) fn run_check(deny_toml: &str) -> Vec<CheckResult> {
-    crate::run_config_rule_for_test(deny_toml, None, check),
-)
+    crate::run_config_rule_for_test(deny_toml, None, check)
+}
 
 #[cfg(test)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
-    crate::check_test_root(root),
-)
+    crate::check_test_root(root)
+}
 
 #[cfg(test)]
 pub(crate) use ::test_support::{

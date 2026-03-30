@@ -12,7 +12,15 @@ use super::inputs::MemberDependencyHexarchInput;
 use super::inventory::push_success;
 
 const ID: &str = "RS-HEXARCH-21";
-const BUILTIN_ALLOWED: &[&str] = &["serde", "serde_json", "thiserror", "chrono", "uuid", "time", "bytes"];
+const BUILTIN_ALLOWED: &[&str] = &[
+    "serde",
+    "serde_json",
+    "thiserror",
+    "chrono",
+    "uuid",
+    "time",
+    "bytes",
+];
 
 pub fn check(input: &MemberDependencyHexarchInput<'_>, results: &mut Vec<CheckResult>) {
     let member = input.member;
@@ -35,7 +43,8 @@ pub fn check(input: &MemberDependencyHexarchInput<'_>, results: &mut Vec<CheckRe
             continue;
         }
         if let Some(target_layer) = edge.target_layer {
-            if edge.resolved_target_is_member && matches!(target_layer, Layer::Domain | Layer::Ports)
+            if edge.resolved_target_is_member
+                && matches!(target_layer, Layer::Domain | Layer::Ports)
             {
                 continue;
             }
@@ -146,19 +155,30 @@ pub(crate) fn run_domain_purity_case(
             edge.source_rel_dir == member.rel_dir
                 && matches!(
                     (edge_kind, edge.kind),
-                    (DomainPurityEdgeKindForTest::Dependency, EdgeKind::Dependency)
-                        | (DomainPurityEdgeKindForTest::DevDependency, EdgeKind::DevDependency)
-                        | (DomainPurityEdgeKindForTest::BuildDependency, EdgeKind::BuildDependency)
-                        | (DomainPurityEdgeKindForTest::TargetDependency, EdgeKind::TargetDependency)
-                        | (
-                            DomainPurityEdgeKindForTest::TargetBuildDependency,
-                            EdgeKind::TargetBuildDependency
-                        )
+                    (
+                        DomainPurityEdgeKindForTest::Dependency,
+                        EdgeKind::Dependency
+                    ) | (
+                        DomainPurityEdgeKindForTest::DevDependency,
+                        EdgeKind::DevDependency
+                    ) | (
+                        DomainPurityEdgeKindForTest::BuildDependency,
+                        EdgeKind::BuildDependency
+                    ) | (
+                        DomainPurityEdgeKindForTest::TargetDependency,
+                        EdgeKind::TargetDependency
+                    ) | (
+                        DomainPurityEdgeKindForTest::TargetBuildDependency,
+                        EdgeKind::TargetBuildDependency
+                    )
                 )
         })
         .collect();
     let mut results = Vec::new();
-    check(&MemberDependencyHexarchInput::new(member, edges), &mut results);
+    check(
+        &MemberDependencyHexarchInput::new(member, edges),
+        &mut results,
+    );
     results
 }
 

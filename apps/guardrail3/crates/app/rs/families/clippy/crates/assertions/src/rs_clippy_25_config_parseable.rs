@@ -75,9 +75,9 @@ pub fn assert_single_owner(results: &[CheckResult], file: &str) {
         "RS-CLIPPY-22",
     ];
     assert!(
-        results.iter().all(|result| {
-            !(duplicate_parse_ids.contains(&result.id()) && !result.inventory())
-        }),
+        results
+            .iter()
+            .all(|result| { !(duplicate_parse_ids.contains(&result.id()) && !result.inventory()) }),
         "malformed clippy.toml must not fan out into dependent-rule errors: {results:#?}"
     );
 }

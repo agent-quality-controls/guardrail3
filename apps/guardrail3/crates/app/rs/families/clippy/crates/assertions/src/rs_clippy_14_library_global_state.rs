@@ -36,7 +36,7 @@ pub fn assert_library_type_bans(results: &[CheckResult], file: &str) {
         .collect::<Vec<_>>();
     let actual_messages = results
         .iter()
-        .map(|result| result.message())
+        .map(|result| result.message().to_owned())
         .collect::<Vec<_>>();
 
     assert_eq!(actual_messages, expected_messages);
@@ -52,7 +52,7 @@ pub fn assert_library_type_bans(results: &[CheckResult], file: &str) {
 pub fn assert_missing_messages(results: &[CheckResult], expected: &[&str], file: &str) {
     let actual_messages = results
         .iter()
-        .map(|result| result.message().clone())
+        .map(|result| result.message().to_owned())
         .collect::<BTreeSet<_>>();
     let expected_messages = expected
         .iter()

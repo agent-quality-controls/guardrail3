@@ -149,16 +149,16 @@ pub fn check_eslint_rule(
 
     let Some(rule) = rule_entry else {
         results.push(CheckResult::from_parts(
-    id.to_owned(),
-    missing_severity,
-    format!("ESLint rule `{rule_name}` not configured"),
-    format!(
+            id.to_owned(),
+            missing_severity,
+            format!("ESLint rule `{rule_name}` not configured"),
+            format!(
                 "ESLint rule `{rule_name}` not found in config.{rule_explanation} \
                  Add it to `eslint.config.mjs` in the rules section."
             ),
-    Some(eslint_path.display().to_string()),
-    None,
-    false,
+            Some(eslint_path.display().to_string()),
+            None,
+            false,
         ));
         return;
     };
@@ -181,17 +181,17 @@ pub fn check_eslint_rule(
             );
         } else {
             results.push(CheckResult::from_parts(
-    id.to_owned(),
-    missing_severity,
-    format!("ESLint rule `{rule_name}` value mismatch"),
-    format!(
+                id.to_owned(),
+                missing_severity,
+                format!("ESLint rule `{rule_name}` value mismatch"),
+                format!(
                     "`{rule_name}` found but expected value {val} (or stricter) not detected.{rule_explanation} \
                      Update the rule value in `eslint.config.mjs`."
                 ),
-    Some(eslint_path.display().to_string()),
-    None,
-    false,
-            });
+                Some(eslint_path.display().to_string()),
+                None,
+                false,
+            ));
         }
     } else {
         results.push(
@@ -206,8 +206,8 @@ pub fn check_eslint_rule(
             )
             .as_inventory(),
         );
-    },
-)
+    }
+}
 
 /// Check that an `ESLint` rule is present and set to "error" severity.
 ///
@@ -244,33 +244,34 @@ pub fn check_eslint_rule_presence(
             );
         } else {
             results.push(CheckResult::from_parts(
-    id.to_owned(),
-    missing_severity,
-    format!("ESLint rule `{rule_name}` not set to error"),
-    format!(
+                id.to_owned(),
+                missing_severity,
+                format!("ESLint rule `{rule_name}` not set to error"),
+                format!(
                     "`{rule_name}` found but severity is `{}`, expected `error`.{explanation} \
                      Update the severity in `eslint.config.mjs`.",
                     rule.severity()
                 ),
-    Some(eslint_path.display().to_string()),
-    None,
-    false,
+                Some(eslint_path.display().to_string()),
+                None,
+                false,
             ));
         }
     } else {
         results.push(CheckResult::from_parts(
-    id.to_owned(),
-    missing_severity,
-    format!("ESLint rule `{rule_name}` missing"),
-    format!(
+            id.to_owned(),
+            missing_severity,
+            format!("ESLint rule `{rule_name}` missing"),
+            format!(
                 "`{rule_name}` not found in ESLint config.{explanation} \
                  Add it to `eslint.config.mjs` in the rules section."
             ),
-    Some(eslint_path.display().to_string()),
-    None,
-    false,
+            Some(eslint_path.display().to_string()),
+            None,
+            false,
         ));
     }
+}
 
 /// Find a rule in the parsed config, trying the exact name first,
 /// then common prefixed variants (`@typescript-eslint/`, `import/`).
@@ -297,8 +298,8 @@ fn find_rule<'a>(
     if let Some(r) = config.rules().get(&import_prefixed) {
         return Some(r);
     }
-    None,
-)
+    None
+}
 
 /// Check if a rule's configured value matches or is stricter than the expected value.
 ///
@@ -315,5 +316,5 @@ fn check_rule_value(rule: &super::eslint_parser::RuleConfig, expected_value: &st
     }
 
     // Non-numeric: check if the severity matches the expected value
-    rule.severity() == expected_value,
-)
+    rule.severity() == expected_value
+}

@@ -37,7 +37,8 @@ impl<'a> ToolchainPolicyRootInput<'a> {
 pub type ToolchainRootInput<'a> = ToolchainPolicyRootInput<'a>;
 
 pub fn all_from_facts(facts: &ToolchainFamilyFacts) -> Vec<ToolchainPolicyRootInput<'_>> {
-    facts.policy_roots
+    facts
+        .policy_roots
         .iter()
         .map(ToolchainPolicyRootInput::from_facts)
         .collect()

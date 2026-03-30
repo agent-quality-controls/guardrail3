@@ -101,11 +101,11 @@ pub fn assert_populated_golden_fixture_inventories_workspace_forbid_lints(
         .into_iter()
         .map(|result| {
             (
-                result.file().unwrap_or_default(),
-                result.severity(),
-                result.title(),
-                result.message(),
-                result.inventory(),
+                result.file.unwrap_or_default(),
+                result.severity,
+                result.title,
+                result.message,
+                result.inventory,
             )
         })
         .collect::<Vec<_>>();
@@ -150,11 +150,11 @@ pub fn assert_inventories_workspace_forbid_lints(
         .into_iter()
         .map(|result| {
             (
-                result.file().unwrap_or_default(),
-                result.severity(),
-                result.title(),
-                result.message(),
-                result.inventory(),
+                result.file.unwrap_or_default(),
+                result.severity,
+                result.title,
+                result.message,
+                result.inventory,
             )
         })
         .collect::<Vec<_>>();

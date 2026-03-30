@@ -56,8 +56,7 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
                 ID.to_owned(),
                 Severity::Warn,
                 "release-plz.toml missing git_release_enable = true".to_owned(),
-                "`release-plz.toml` should set `[workspace].git_release_enable = true`."
-                    .to_owned(),
+                "`release-plz.toml` should set `[workspace].git_release_enable = true`.".to_owned(),
                 Some(repo.release_plz_rel_path.clone()),
                 None,
                 false,
@@ -72,8 +71,7 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
                 ID.to_owned(),
                 Severity::Warn,
                 "release-plz.toml missing release_always = false".to_owned(),
-                "`release-plz.toml` should set `[workspace].release_always = false`."
-                    .to_owned(),
+                "`release-plz.toml` should set `[workspace].release_always = false`.".to_owned(),
                 Some(repo.release_plz_rel_path.clone()),
                 None,
                 false,

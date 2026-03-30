@@ -14,13 +14,13 @@ use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::CheckResult;
 
 #[cfg(test)]
-use std::collections::BTreeSet;
-#[cfg(test)]
 use guardrail3_app_rs_family_mapper::FamilyMapper;
 #[cfg(test)]
 use guardrail3_domain_config::types::GuardrailConfig;
 #[cfg(test)]
 use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
+#[cfg(test)]
+use std::collections::BTreeSet;
 
 pub fn check(tree: &ProjectTree, route: &RsArchRoute) -> Vec<CheckResult> {
     let facts = facts::collect(tree, route);

@@ -30,7 +30,11 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
         ));
     }
 
-    let found: BTreeSet<_> = section.entries.into_iter().map(|entry| entry.path).collect();
+    let found: BTreeSet<_> = section
+        .entries
+        .into_iter()
+        .map(|entry| entry.path)
+        .collect();
     for expected in expected_required_type_bans(input.garde_enabled()) {
         if found.contains(expected) {
             results.push(

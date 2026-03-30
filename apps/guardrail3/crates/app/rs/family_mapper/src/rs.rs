@@ -50,8 +50,7 @@ impl<'a> FamilyMapper<'a> {
         }
 
         views::RsArchRoute::new(
-            self
-                .scope
+            self.scope
                 .roots()
                 .iter()
                 .filter(|root| self.root_matches_validation_scope(root.rel_dir()))
@@ -65,8 +64,7 @@ impl<'a> FamilyMapper<'a> {
                     )
                 })
                 .collect(),
-            self
-                .scope
+            self.scope
                 .overlaps()
                 .iter()
                 .filter(|overlap| {
@@ -82,8 +80,7 @@ impl<'a> FamilyMapper<'a> {
                     )
                 })
                 .collect(),
-            self
-                .scope
+            self.scope
                 .input_failures()
                 .iter()
                 .map(|failure| {
@@ -119,12 +116,10 @@ impl<'a> FamilyMapper<'a> {
                 &root_rels,
                 self.validation_scope,
             ),
-            self
-                .tree
+            self.tree
                 .file_exists("Cargo.toml")
                 .then(|| "Cargo.toml".to_owned()),
-            self
-                .tree
+            self.tree
                 .file_exists("guardrail3.toml")
                 .then(|| "guardrail3.toml".to_owned()),
         )
@@ -147,10 +142,9 @@ impl<'a> FamilyMapper<'a> {
 
     #[must_use]
     pub fn map_rs_toolchain(&self) -> views::RsToolchainRoute {
-        views::RsToolchainRoute::new(self.map_roots_for_family(
-            RustValidateFamily::Toolchain,
-            |_| true,
-        ))
+        views::RsToolchainRoute::new(
+            self.map_roots_for_family(RustValidateFamily::Toolchain, |_| true),
+        )
     }
 
     #[must_use]
@@ -160,13 +154,15 @@ impl<'a> FamilyMapper<'a> {
 
     #[must_use]
     pub fn map_rs_libarch(&self) -> views::RsLibarchRoute {
-        views::RsLibarchRoute::new(self.map_roots_for_family(RustValidateFamily::Libarch, |root| {
+        views::RsLibarchRoute::new(
+            self.map_roots_for_family(RustValidateFamily::Libarch, |root| {
                 root.classification() == RustRootClassification::Package
                     && root
                         .package_zone_candidates()
                         .first()
                         .is_some_and(|candidate| candidate == root.rel_dir())
-            }))
+            }),
+        )
     }
 
     #[must_use]
@@ -176,10 +172,7 @@ impl<'a> FamilyMapper<'a> {
 
     #[must_use]
     pub fn map_rs_release(&self) -> views::RsReleaseRoute {
-        views::RsReleaseRoute::new(self.map_roots_for_family(
-            RustValidateFamily::Release,
-            |_| true,
-        ))
+        views::RsReleaseRoute::new(self.map_roots_for_family(RustValidateFamily::Release, |_| true))
     }
 
     #[must_use]
@@ -288,10 +281,7 @@ fn path_is_under(rel_path: &str, parent_rel: &str) -> bool {
 }
 
 fn root_view(root: &RustRootPlacementRootFacts) -> views::RsRootView {
-    views::RsRootView::new(
-        root.rel_dir().to_owned(),
-        root.cargo_rel_path().to_owned(),
-    )
+    views::RsRootView::new(root.rel_dir().to_owned(), root.cargo_rel_path().to_owned())
 }
 
 fn root_enabled_for_family(
@@ -307,9 +297,7 @@ fn root_enabled_for_family(
         .checks()
         .and_then(|checks| checks.family_enabled(family))
         .unwrap_or(true);
-    let app_count = rust
-        .apps()
-        .map_or(0, std::collections::BTreeMap::len);
+    let app_count = rust.apps().map_or(0, std::collections::BTreeMap::len);
     let has_packages_scope = rust.packages().is_some();
 
     match root_scope(root.rel_dir()) {
@@ -377,7 +365,9 @@ pub(crate) fn root_enabled_for_toolchain_test(
 
 #[cfg(test)]
 pub(crate) fn app_scoped_config_test() -> guardrail3_domain_config::types::GuardrailConfig {
-    use guardrail3_domain_config::types::{CrateConfig, GuardrailConfig, RustChecksConfig, RustConfig};
+    use guardrail3_domain_config::types::{
+        CrateConfig, GuardrailConfig, RustChecksConfig, RustConfig,
+    };
 
     GuardrailConfig::new(
         None,
@@ -414,7 +404,8 @@ pub(crate) fn app_scoped_config_test() -> guardrail3_domain_config::types::Guard
 }
 
 #[cfg(test)]
-pub(crate) fn global_toolchain_enabled_config_test() -> guardrail3_domain_config::types::GuardrailConfig {
+pub(crate) fn global_toolchain_enabled_config_test()
+-> guardrail3_domain_config::types::GuardrailConfig {
     use guardrail3_domain_config::types::{GuardrailConfig, RustChecksConfig, RustConfig};
 
     GuardrailConfig::new(

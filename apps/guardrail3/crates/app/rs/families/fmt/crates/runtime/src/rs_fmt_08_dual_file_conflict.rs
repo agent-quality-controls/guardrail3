@@ -13,13 +13,13 @@ pub fn check(input: &RustfmtDualConflictInput, results: &mut Vec<CheckResult>) {
     };
 
     results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "Conflicting rustfmt config files".to_owned(),
-    "Both rustfmt.toml and .rustfmt.toml exist in the same directory".to_owned(),
-    Some(file),
-    None,
-    false,
+        ID.to_owned(),
+        Severity::Warn,
+        "Conflicting rustfmt config files".to_owned(),
+        "Both rustfmt.toml and .rustfmt.toml exist in the same directory".to_owned(),
+        Some(file),
+        None,
+        false,
     ));
 }
 

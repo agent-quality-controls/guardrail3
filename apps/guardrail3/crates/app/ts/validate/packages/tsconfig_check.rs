@@ -80,24 +80,24 @@ fn parse_tsconfig_json(
         Ok(json) => Some(json),
         Err(error) => {
             results.push(CheckResult::from_parts(
-    "T9".to_owned(),
-    Severity::Error,
-    "TypeScript config has invalid JSON".to_owned(),
-    format!(
+                "T9".to_owned(),
+                Severity::Error,
+                "TypeScript config has invalid JSON".to_owned(),
+                format!(
                     "Failed to parse tsconfig as JSON: {error}. The TypeScript compiler cannot read this file. \
                      Fix the JSON syntax error — common causes are trailing commas, missing quotes, or comments \
                      (use `jsonc` format if comments are needed)."
                 ),
-    Some(tsconfig_path.display().to_string()),
-    None,
-    false,
+                Some(tsconfig_path.display().to_string()),
+                None,
+                false,
             ));
             None
         }
-    },
-)
+    }
+}
 
-fn compiler_options<'a>(json: &'a serde_json::Value) -> Option<&'a serde_json::Value> {
+fn compiler_options(json: &serde_json::Value) -> Option<&serde_json::Value> {
     json.get("compilerOptions")
 }
 
@@ -134,35 +134,35 @@ fn emit_required_true_bool_checks(
             }
             Some(false) => {
                 results.push(CheckResult::from_parts(
-    (*id).to_owned(),
-    Severity::Error,
-    format!("`{key}` disabled in tsconfig"),
-    format!(
+                    (*id).to_owned(),
+                    Severity::Error,
+                    format!("`{key}` disabled in tsconfig"),
+                    format!(
                         "`{key}` is set to `false` but should be `true`.{explanation} \
                          Set `\"{key}\": true` in compilerOptions."
                     ),
-    Some(tsconfig_path.display().to_string()),
-    None,
-    false,
+                    Some(tsconfig_path.display().to_string()),
+                    None,
+                    false,
                 ));
             }
             None => {
-                results.push(CheckResult {
-                    id: (*id).to_owned(),
-                    severity: Severity::Error,
-                    title: format!("`{key}` missing from tsconfig"),
-                    message: format!(
+                results.push(CheckResult::from_parts(
+                    (*id).to_owned(),
+                    Severity::Error,
+                    format!("`{key}` missing from tsconfig"),
+                    format!(
                         "`{key}` not set in compilerOptions.{explanation} \
                          Add `\"{key}\": true` to compilerOptions in tsconfig."
                     ),
-                    file: Some(tsconfig_path.display().to_string()),
-                    line: None,
-                    inventory: false,
-                });
+                    Some(tsconfig_path.display().to_string()),
+                    None,
+                    false,
+                ));
             }
         }
-    },
-)
+    }
+}
 
 fn emit_warn_bool_checks(
     tsconfig_path: &Path,
@@ -191,21 +191,21 @@ fn emit_warn_bool_checks(
             }
             _ => {
                 results.push(CheckResult::from_parts(
-    (*id).to_owned(),
-    Severity::Warn,
-    format!("`{key}` not enabled in tsconfig"),
-    format!(
+                    (*id).to_owned(),
+                    Severity::Warn,
+                    format!("`{key}` not enabled in tsconfig"),
+                    format!(
                         "`{key}` is not set to `true`.{explanation} \
                          Add `\"{key}\": true` to compilerOptions in tsconfig."
                     ),
-    Some(tsconfig_path.display().to_string()),
-    None,
-    false,
+                    Some(tsconfig_path.display().to_string()),
+                    None,
+                    false,
                 ));
             }
         }
-    },
-)
+    }
+}
 
 fn emit_required_false_bool_checks(
     tsconfig_path: &Path,
@@ -234,35 +234,35 @@ fn emit_required_false_bool_checks(
             }
             Some(true) => {
                 results.push(CheckResult::from_parts(
-    (*id).to_owned(),
-    Severity::Error,
-    format!("`{key}` incorrectly set to true"),
-    format!(
+                    (*id).to_owned(),
+                    Severity::Error,
+                    format!("`{key}` incorrectly set to true"),
+                    format!(
                         "`{key}` is set to `true` but should be `false`.{explanation} \
                          Set `\"{key}\": false` in compilerOptions."
                     ),
-    Some(tsconfig_path.display().to_string()),
-    None,
-    false,
+                    Some(tsconfig_path.display().to_string()),
+                    None,
+                    false,
                 ));
             }
             None => {
-                results.push(CheckResult {
-                    id: (*id).to_owned(),
-                    severity: Severity::Error,
-                    title: format!("`{key}` missing from tsconfig"),
-                    message: format!(
+                results.push(CheckResult::from_parts(
+                    (*id).to_owned(),
+                    Severity::Error,
+                    format!("`{key}` missing from tsconfig"),
+                    format!(
                         "`{key}` not set in compilerOptions.{explanation} \
                          Add `\"{key}\": false` to compilerOptions in tsconfig."
                     ),
-                    file: Some(tsconfig_path.display().to_string()),
-                    line: None,
-                    inventory: false,
-                });
+                    Some(tsconfig_path.display().to_string()),
+                    None,
+                    false,
+                ));
             }
         }
-    },
-)
+    }
+}
 
 fn emit_required_string_checks(
     tsconfig_path: &Path,
@@ -292,35 +292,35 @@ fn emit_required_string_checks(
             }
             Some(actual) => {
                 results.push(CheckResult::from_parts(
-    id.to_owned(),
-    Severity::Error,
-    format!("`{key}` has wrong value in tsconfig"),
-    format!(
+                    id.to_owned(),
+                    Severity::Error,
+                    format!("`{key}` has wrong value in tsconfig"),
+                    format!(
                         "`{key}` is set to `\"{actual}\"` but should be `\"{expected}\"`. \
                          Set `\"{key}\": \"{expected}\"` in compilerOptions."
                     ),
-    Some(tsconfig_path.display().to_string()),
-    None,
-    false,
+                    Some(tsconfig_path.display().to_string()),
+                    None,
+                    false,
                 ));
             }
             None => {
-                results.push(CheckResult {
-                    id: id.to_owned(),
-                    severity: Severity::Error,
-                    title: format!("`{key}` missing from tsconfig"),
-                    message: format!(
+                results.push(CheckResult::from_parts(
+                    id.to_owned(),
+                    Severity::Error,
+                    format!("`{key}` missing from tsconfig"),
+                    format!(
                         "`{key}` not set in compilerOptions. \
                          Add `\"{key}\": \"{expected}\"` to compilerOptions in tsconfig."
                     ),
-                    file: Some(tsconfig_path.display().to_string()),
-                    line: None,
-                    inventory: false,
-                });
+                    Some(tsconfig_path.display().to_string()),
+                    None,
+                    false,
+                ));
             }
         }
-    },
-)
+    }
+}
 
 pub fn check_tsconfig(
     fs: &dyn FileSystem,
@@ -333,25 +333,25 @@ pub fn check_tsconfig(
 
     if configs_to_check.is_empty() {
         results.push(CheckResult::from_parts(
-    "T9".to_owned(),
-    Severity::Error,
-    "TypeScript config file not found".to_owned(),
-    "No `tsconfig.base.json` or `tsconfig.json` found. The TypeScript compiler config \
-                     controls type checking strictness, module resolution, and output settings. Without it, \
-                     TypeScript uses permissive defaults that miss real bugs. Create `tsconfig.json` with \
-                     `strict: true` and other guardrail settings, or run `guardrail3 ts generate`."
+            "T9".to_owned(),
+            Severity::Error,
+            "TypeScript config file not found".to_owned(),
+            "No `tsconfig.base.json` or `tsconfig.json` found. The TypeScript compiler config \
+             controls type checking strictness, module resolution, and output settings. Without it, \
+             TypeScript uses permissive defaults that miss real bugs. Create `tsconfig.json` with \
+             `strict: true` and other guardrail settings, or run `guardrail3 ts generate`."
                 .to_owned(),
-    Some(root.display().to_string()),
-    None,
-    false,
+            Some(root.display().to_string()),
+            None,
+            false,
         ));
         return;
     }
 
     for tsconfig_path in configs_to_check {
         check_single_tsconfig(fs, tsconfig_path, results);
-    },
-)
+    }
+}
 
 fn check_single_tsconfig(
     fs: &dyn FileSystem,
@@ -389,7 +389,6 @@ fn check_single_tsconfig(
         ("forceConsistentCasingInFileNames", "T9"),
     ];
 
-    // Settings that must be true
     let additional_required_bools: &[TsConfigBool] = &[
         ("noPropertyAccessFromIndexSignature", "T-TSC-60"),
         ("noImplicitOverride", "T-TSC-61"),
@@ -398,11 +397,8 @@ fn check_single_tsconfig(
         ("esModuleInterop", "T68"),
     ];
 
-    // Settings that must be false
-    let required_false_bools: &[TsConfigBool] = &[
-        ("allowUnreachableCode", "T63"),
-        ("allowUnusedLabels", "T64"),
-    ];
+    let required_false_bools: &[TsConfigBool] =
+        &[("allowUnreachableCode", "T63"), ("allowUnusedLabels", "T64")];
 
     let warn_bools: &[TsConfigBool] = &[];
 
@@ -421,7 +417,6 @@ fn check_single_tsconfig(
         results,
     );
 
-    // T65-T67: Required string values for target, module, moduleResolution
     let required_strings: &[TsConfigString] = &[
         ("target", "es2022", "T65"),
         ("module", "esnext", "T66"),
@@ -430,7 +425,6 @@ fn check_single_tsconfig(
 
     emit_required_string_checks(tsconfig_path, compiler_options, required_strings, results);
 
-    // T10: Extra compiler options — Info inventory
     let known_keys: &[&str] = &[
         "strict",
         "noImplicitReturns",
@@ -445,7 +439,6 @@ fn check_single_tsconfig(
         "noFallthroughCasesInSwitch",
         "allowUnreachableCode",
         "allowUnusedLabels",
-        // Common standard options (not flagged as "extra")
         "target",
         "module",
         "moduleResolution",
@@ -459,7 +452,6 @@ fn check_single_tsconfig(
         "declarationMap",
         "sourceMap",
         "esModuleInterop",
-        // strict: true expansion (TypeScript resolves these automatically)
         "noImplicitAny",
         "noImplicitThis",
         "strictNullChecks",
@@ -469,7 +461,6 @@ fn check_single_tsconfig(
         "strictBuiltinIteratorReturn",
         "alwaysStrict",
         "useUnknownInCatchVariables",
-        // Other resolved/reasonable defaults
         "allowSyntheticDefaultImports",
         "resolvePackageJsonExports",
         "resolvePackageJsonImports",
@@ -487,24 +478,27 @@ fn check_single_tsconfig(
         "verbatimModuleSyntax",
     ];
 
-    if let Some(co) = compiler_options.and_then(|co| co.as_object()) {
+    if let Some(co) = compiler_options.and_then(serde_json::Value::as_object) {
         for key in co.keys() {
             if !known_keys.contains(&key.as_str()) {
-                results.push(CheckResult::from_parts(
-    "T10".to_owned(),
-    Severity::Info,
-    format!("Extra tsconfig compilerOption: `{key}`"),
-    format!(
-                        "Non-standard compilerOption `{key}` = {}. This setting is not in the guardrail baseline. \
-                         Verify it is intentional and document why it's needed.",
-                        co.get(key)
-                            .map_or_else(|| "?".to_owned(), std::string::ToString::to_string)
-                    ),
-    Some(tsconfig_path.display().to_string()),
-    None,
-    false,
-                }.as_inventory());
+                results.push(
+                    CheckResult::from_parts(
+                        "T10".to_owned(),
+                        Severity::Info,
+                        format!("Extra tsconfig compilerOption: `{key}`"),
+                        format!(
+                            "Non-standard compilerOption `{key}` = {}. This setting is not in the guardrail baseline. \
+                             Verify it is intentional and document why it's needed.",
+                            co.get(key)
+                                .map_or_else(|| "?".to_owned(), std::string::ToString::to_string)
+                        ),
+                        Some(tsconfig_path.display().to_string()),
+                        None,
+                        false,
+                    )
+                    .as_inventory(),
+                );
             }
         }
-    },
-)
+    }
+}

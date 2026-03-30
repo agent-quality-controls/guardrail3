@@ -8,7 +8,10 @@ pub fn assert_explicit_false(results: &[CheckResult], file: &str) {
     assert_eq!(result.id(), ID);
     assert!(result.inventory());
     assert_eq!(result.severity(), Severity::Info);
-    assert_eq!(result.title(), "avoid-breaking-exported-api explicitly false");
+    assert_eq!(
+        result.title(),
+        "avoid-breaking-exported-api explicitly false"
+    );
     assert_eq!(
         result.message(),
         "`avoid-breaking-exported-api = false` is set."

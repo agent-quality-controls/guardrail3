@@ -374,7 +374,9 @@ fn meta_contains_test(meta: &syn::Meta) -> bool {
     match meta {
         syn::Meta::Path(path) => path.is_ident("test"),
         syn::Meta::List(list) => list
-            .parse_args_with(syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated)
+            .parse_args_with(
+                syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated,
+            )
             .map(|items| items.iter().any(meta_contains_test))
             .unwrap_or(false),
         syn::Meta::NameValue(_) => false,

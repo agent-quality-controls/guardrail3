@@ -40,9 +40,7 @@ pub fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec<CheckR
             ID.to_owned(),
             Severity::Error,
             "required hook step appears only in inert text".to_owned(),
-            format!(
-                "`{step}` appears in {kind} text but not on any executable command line."
-            ),
+            format!("`{step}` appears in {kind} text but not on any executable command line."),
             Some(input.rel_path.to_owned()),
             Some(line_no),
             false,

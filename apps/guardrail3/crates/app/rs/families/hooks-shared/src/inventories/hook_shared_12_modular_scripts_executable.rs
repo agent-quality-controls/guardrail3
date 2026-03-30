@@ -23,14 +23,13 @@ pub fn check(modular_executable: &[(String, bool)], results: &mut Vec<CheckResul
             );
         } else {
             results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "modular hook script is not executable".to_owned(),
-    "Modular hook script exists but does not have the executable bit set."
-                    .to_owned(),
-    Some(rel_path.clone()),
-    None,
-    false,
+                ID.to_owned(),
+                Severity::Warn,
+                "modular hook script is not executable".to_owned(),
+                "Modular hook script exists but does not have the executable bit set.".to_owned(),
+                Some(rel_path.clone()),
+                None,
+                false,
             ));
         }
     }

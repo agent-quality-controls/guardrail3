@@ -22,13 +22,13 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
         return;
     }
     results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "release-plz.toml missing".to_owned(),
-    "Repo root is missing `release-plz.toml`.".to_owned(),
-    Some(repo.release_plz_rel_path.clone()),
-    None,
-    false,
+        ID.to_owned(),
+        Severity::Warn,
+        "release-plz.toml missing".to_owned(),
+        "Repo root is missing `release-plz.toml`.".to_owned(),
+        Some(repo.release_plz_rel_path.clone()),
+        None,
+        false,
     ));
 }
 

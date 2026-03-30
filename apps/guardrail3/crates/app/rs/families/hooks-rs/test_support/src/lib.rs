@@ -12,19 +12,19 @@ pub fn parsed_hook(content: &str) -> ParsedShellScript<'_> {
 }
 
 pub fn hook_tree(pre_commit: &str) -> ProjectTree {
-    ProjectTree {
-        root: PathBuf::from("/tmp/project"),
-        structure: BTreeMap::from([(
+    ProjectTree::new(
+        PathBuf::from("/tmp/project"),
+        BTreeMap::from([(
             ".githooks".to_owned(),
-            DirEntry {
-                dirs: Vec::new(),
-                files: vec!["pre-commit".to_owned()],
-                symlink_dirs: Vec::new(),
-                symlink_files: Vec::new(),
-            },
+            DirEntry::new(
+                Vec::new(),
+                vec!["pre-commit".to_owned()],
+                Vec::new(),
+                Vec::new(),
+            ),
         )]),
-        content: BTreeMap::from([(".githooks/pre-commit".to_owned(), pre_commit.to_owned())]),
-    }
+        BTreeMap::from([(".githooks/pre-commit".to_owned(), pre_commit.to_owned())]),
+    )
 }
 
 #[derive(Debug)]

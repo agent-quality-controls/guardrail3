@@ -59,17 +59,18 @@ fn push_private_field_result(
         );
     } else {
         results.push(CheckResult::from_parts(
-    "T-PKG-01".to_owned(),
-    Severity::Error,
-    "`private` field missing or not `true` in `package.json`".to_owned(),
-    "Root `package.json` must have `\"private\": true` to prevent accidental publication to npm. \
+            "T-PKG-01".to_owned(),
+            Severity::Error,
+            "`private` field missing or not `true` in `package.json`".to_owned(),
+            "Root `package.json` must have `\"private\": true` to prevent accidental publication to npm. \
                      Add `\"private\": true` to `package.json`."
                 .to_owned(),
-    Some(pkg_path.display().to_string()),
-    None,
-    false,
+            Some(pkg_path.display().to_string()),
+            None,
+            false,
         ));
     }
+}
 
 fn push_pnpm_override_results(
     json: &serde_json::Value,
@@ -87,31 +88,31 @@ fn push_pnpm_override_results(
 
             if !has_zod {
                 results.push(CheckResult::from_parts(
-    "T15".to_owned(),
-    Severity::Error,
-    "`pnpm.overrides` missing `zod` pin".to_owned(),
-    "No `zod` override in `pnpm.overrides`. Overrides pin transitive dependency \
+                    "T15".to_owned(),
+                    Severity::Error,
+                    "`pnpm.overrides` missing `zod` pin".to_owned(),
+                    "No `zod` override in `pnpm.overrides`. Overrides pin transitive dependency \
                              versions to a single copy, preventing version conflicts and reducing bundle size. \
                              Add `\"zod\": \"<version>\"` to `pnpm.overrides` in `package.json`."
                         .to_owned(),
-    Some(pkg_path.display().to_string()),
-    None,
-    false,
+                    Some(pkg_path.display().to_string()),
+                    None,
+                    false,
                 ));
             }
             if !has_eslint_js {
                 results.push(CheckResult::from_parts(
-    "T15".to_owned(),
-    Severity::Error,
-    "`pnpm.overrides` missing `@eslint/js` pin".to_owned(),
-    "No `@eslint/js` override in `pnpm.overrides`. Overrides pin transitive dependency \
+                    "T15".to_owned(),
+                    Severity::Error,
+                    "`pnpm.overrides` missing `@eslint/js` pin".to_owned(),
+                    "No `@eslint/js` override in `pnpm.overrides`. Overrides pin transitive dependency \
                              versions to a single copy. Add `\"@eslint/js\": \"<version>\"` to `pnpm.overrides` \
                              in `package.json`."
                         .to_owned(),
-    Some(pkg_path.display().to_string()),
-    None,
-    false,
-                });
+                    Some(pkg_path.display().to_string()),
+                    None,
+                    false,
+                ));
             }
 
             for key in ov_obj.keys() {
@@ -139,20 +140,20 @@ fn push_pnpm_override_results(
         }
         _ => {
             results.push(CheckResult::from_parts(
-    "T15".to_owned(),
-    Severity::Error,
-    "`pnpm.overrides` section missing from `package.json`".to_owned(),
-    "No `pnpm.overrides` section in `package.json`. Overrides pin transitive dependency \
+                "T15".to_owned(),
+                Severity::Error,
+                "`pnpm.overrides` section missing from `package.json`".to_owned(),
+                "No `pnpm.overrides` section in `package.json`. Overrides pin transitive dependency \
                          versions to prevent duplicate packages and version conflicts. Add a `pnpm.overrides` \
                          section with at least `zod` and `@eslint/js` pinned to workspace versions."
                     .to_owned(),
-    Some(pkg_path.display().to_string()),
-    None,
-    false,
-            });
+                Some(pkg_path.display().to_string()),
+                None,
+                false,
+            ));
         }
-    },
-)
+    }
+}
 
 fn push_banned_dependency_results(
     json: &serde_json::Value,
@@ -169,23 +170,23 @@ fn push_banned_dependency_results(
 
                 if is_banned {
                     results.push(CheckResult::from_parts(
-    "T17".to_owned(),
-    Severity::Error,
-    format!("Banned dependency `{dep_name}` in `{section_name}`"),
-    format!(
+                        "T17".to_owned(),
+                        Severity::Error,
+                        format!("Banned dependency `{dep_name}` in `{section_name}`"),
+                        format!(
                             "`{dep_name}` found in `{section_name}`. This package is banned because a preferred \
                              alternative exists (e.g., native fetch over axios, date-fns over moment, \
                              crypto.randomUUID over uuid). Remove it and switch to the approved alternative."
                         ),
-    Some(pkg_path.display().to_string()),
-    None,
-    false,
+                        Some(pkg_path.display().to_string()),
+                        None,
+                        false,
                     ));
                 }
             }
         }
-    },
-)
+    }
+}
 
 fn push_package_manager_results(
     json: &serde_json::Value,
@@ -193,20 +194,23 @@ fn push_package_manager_results(
     results: &mut Vec<CheckResult>,
 ) {
     if json.get("packageManager").is_some() {
-        results.push(CheckResult::from_parts(
-    "T18".to_owned(),
-    Severity::Info,
-    "`packageManager` field set in `package.json`".to_owned(),
-    format!(
+        results.push(
+            CheckResult::from_parts(
+                "T18".to_owned(),
+                Severity::Info,
+                "`packageManager` field set in `package.json`".to_owned(),
+                format!(
                 "`packageManager` = {}. This field pins the package manager version via corepack, \
                  ensuring all developers and CI use the same pnpm version.",
                 json.get("packageManager")
                     .map_or_else(|| "?".to_owned(), std::string::ToString::to_string)
             ),
-    Some(pkg_path.display().to_string()),
-    None,
-    false,
-        }.as_inventory());
+                Some(pkg_path.display().to_string()),
+                None,
+                false,
+            )
+            .as_inventory(),
+        );
     } else {
         results.push(CheckResult {
             id: "T18".to_owned(),
@@ -219,8 +223,9 @@ fn push_package_manager_results(
             file: Some(pkg_path.display().to_string()),
             line: None,
             inventory: false,
-        ));
+        });
     }
+}
 
 fn push_script_results(json: &serde_json::Value, pkg_path: &Path, results: &mut Vec<CheckResult>) {
     let preinstall = json
@@ -247,16 +252,16 @@ fn push_script_results(json: &serde_json::Value, pkg_path: &Path, results: &mut 
         }
         _ => {
             results.push(CheckResult::from_parts(
-    "T55".to_owned(),
-    Severity::Error,
-    "`preinstall` script missing pnpm enforcement".to_owned(),
-    "No `preinstall` script with `only-allow pnpm`. Without this, running `npm install` \
+                "T55".to_owned(),
+                Severity::Error,
+                "`preinstall` script missing pnpm enforcement".to_owned(),
+                "No `preinstall` script with `only-allow pnpm`. Without this, running `npm install` \
                          or `yarn install` would create a conflicting lockfile. Add \
                          `\"preinstall\": \"npx only-allow pnpm\"` to scripts in `package.json`."
                     .to_owned(),
-    Some(pkg_path.display().to_string()),
-    None,
-    false,
+                Some(pkg_path.display().to_string()),
+                None,
+                false,
             ));
         }
     }
@@ -296,8 +301,8 @@ fn push_script_results(json: &serde_json::Value, pkg_path: &Path, results: &mut 
         "`typecheck` script missing",
         "package.json must have a `typecheck` script for CI type checking (e.g., `tsc --noEmit`).",
         results,
-    );,
-)
+    );
+}
 
 fn push_script_presence_result(
     json: &serde_json::Value,
@@ -330,32 +335,36 @@ fn push_script_presence_result(
         );
     } else {
         results.push(CheckResult::from_parts(
-    id.to_owned(),
-    missing_severity,
-    missing_title.to_owned(),
-    missing_message.to_owned(),
-    Some(pkg_path.display().to_string()),
-    None,
-    false,
+            id.to_owned(),
+            missing_severity,
+            missing_title.to_owned(),
+            missing_message.to_owned(),
+            Some(pkg_path.display().to_string()),
+            None,
+            false,
         ));
     }
+}
 
 fn push_engine_results(json: &serde_json::Value, pkg_path: &Path, results: &mut Vec<CheckResult>) {
     if json.get("engines").is_some() {
-        results.push(CheckResult::from_parts(
-    "T57".to_owned(),
-    Severity::Info,
-    "`engines` field set in `package.json`".to_owned(),
-    format!(
+        results.push(
+            CheckResult::from_parts(
+                "T57".to_owned(),
+                Severity::Info,
+                "`engines` field set in `package.json`".to_owned(),
+                format!(
                 "`engines` = {}. This specifies the minimum Node.js version required, preventing \
                  deployment to incompatible runtimes.",
                 json.get("engines")
                     .map_or_else(|| "?".to_owned(), std::string::ToString::to_string)
             ),
-    Some(pkg_path.display().to_string()),
-    None,
-    false,
-        }.as_inventory());
+                Some(pkg_path.display().to_string()),
+                None,
+                false,
+            )
+            .as_inventory(),
+        );
     } else {
         results.push(CheckResult {
             id: "T57".to_owned(),
@@ -368,7 +377,7 @@ fn push_engine_results(json: &serde_json::Value, pkg_path: &Path, results: &mut 
             file: Some(pkg_path.display().to_string()),
             line: None,
             inventory: false,
-        ));
+        });
     }
 
     let has_pnpm_engine = json
@@ -399,8 +408,9 @@ fn push_engine_results(json: &serde_json::Value, pkg_path: &Path, results: &mut 
             file: Some(pkg_path.display().to_string()),
             line: None,
             inventory: false,
-        ));
+        });
     }
+}
 
 fn push_only_built_dependencies_result(
     json: &serde_json::Value,
@@ -411,20 +421,23 @@ fn push_only_built_dependencies_result(
         .get("pnpm")
         .and_then(|pnpm| pnpm.get("onlyBuiltDependencies"))
     {
-        results.push(CheckResult::from_parts(
-    "T58".to_owned(),
-    Severity::Info,
-    "`onlyBuiltDependencies` configured in pnpm".to_owned(),
-    format!(
+        results.push(
+            CheckResult::from_parts(
+                "T58".to_owned(),
+                Severity::Info,
+                "`onlyBuiltDependencies` configured in pnpm".to_owned(),
+                format!(
                 "`onlyBuiltDependencies` = {only_built_dependencies}. This restricts which packages can run post-install scripts, \
                  reducing supply chain attack surface by blocking arbitrary code execution from dependencies."
             ),
-    Some(pkg_path.display().to_string()),
-    None,
-    false,
-        }.as_inventory());
-    },
-)
+                Some(pkg_path.display().to_string()),
+                None,
+                false,
+            )
+            .as_inventory(),
+        );
+    }
+}
 
 pub fn check_package_json(
     fs: &dyn FileSystem,
@@ -460,8 +473,8 @@ pub fn check_package_json(
             continue; // skip root — already checked above
         }
         check_banned_deps_in_package(fs, app_pkg, results);
-    },
-)
+    }
+}
 
 /// Check banned dependencies in a single package.json (T17 only).
 fn check_banned_deps_in_package(
@@ -473,5 +486,5 @@ fn check_banned_deps_in_package(
         return;
     };
 
-    push_banned_dependency_results(&json, pkg_path, results);,
-)
+    push_banned_dependency_results(&json, pkg_path, results);
+}

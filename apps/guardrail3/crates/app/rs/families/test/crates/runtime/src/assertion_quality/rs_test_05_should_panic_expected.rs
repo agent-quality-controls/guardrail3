@@ -28,16 +28,16 @@ pub fn check(input: &TestFunctionInput<'_>, results: &mut Vec<CheckResult>) {
     }
 
     results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "should_panic missing expected string".to_owned(),
-    format!(
+        ID.to_owned(),
+        Severity::Warn,
+        "should_panic missing expected string".to_owned(),
+        format!(
             "Test `{}` uses `#[should_panic]` without `expected = \"...\"`.",
             input.function.name
         ),
-    Some(input.file.rel_path.clone()),
-    Some(line),
-    false,
+        Some(input.file.rel_path.clone()),
+        Some(line),
+        false,
     ));
 }
 

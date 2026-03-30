@@ -9,7 +9,7 @@ const ID: &str = "RS-TEST-07";
 
 pub fn check(input: &TestFunctionInput<'_>, results: &mut Vec<CheckResult>) {
     if input.function.has_assertion_macro
-        || function_has_owned_assertion_proof(
+        || has_owned_assertion_proof(
             input.function,
             &input.parsed.imports,
             &input.parsed.file_function_names,
@@ -49,7 +49,7 @@ pub fn check(input: &TestFunctionInput<'_>, results: &mut Vec<CheckResult>) {
     ));
 }
 
-fn function_has_owned_assertion_proof(
+pub(crate) fn has_owned_assertion_proof(
     function: &TestFunctionInfo,
     imports: &[UseBinding],
     file_function_names: &BTreeSet<String>,

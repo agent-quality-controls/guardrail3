@@ -25,19 +25,19 @@ pub fn check(input: &StructuralCapInput<'_>, results: &mut Vec<CheckResult>) {
         return;
     }
     results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    "crate source tree exceeds structural caps".to_owned(),
-    format!(
+        ID.to_owned(),
+        Severity::Error,
+        "crate source tree exceeds structural caps".to_owned(),
+        format!(
             "Rust root `{}` exceeds structural caps: {}.",
             input.root_rel_dir,
             exceeded.join(", ")
         ),
-    Some(input.cargo_rel_path.to_owned()),
-    None,
-    false,
+        Some(input.cargo_rel_path.to_owned()),
+        None,
+        false,
     ));
-)
+}
 
 #[cfg(test)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {

@@ -6,8 +6,8 @@ pub fn assert_message_contains(results: &[guardrail3_domain_report::CheckResult]
         .next()
         .expect("expected HOOK-SHARED-09 finding");
     assert!(
-        finding.message()()()().contains(needle),
+        finding.message().contains(needle),
         "expected HOOK-SHARED-09 message to contain `{needle}`, got `{}`",
-        finding.message()()()()
+        finding.message()
     );
 }

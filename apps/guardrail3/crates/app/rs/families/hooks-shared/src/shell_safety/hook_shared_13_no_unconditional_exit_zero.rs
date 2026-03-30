@@ -12,13 +12,13 @@ pub fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec<CheckR
         .find(|line| line.is_exit_zero())
     {
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "unconditional exit 0 bypass present".to_owned(),
-    "Hook contains an executable `exit 0`, which can mask failures.".to_owned(),
-    Some(input.rel_path.to_owned()),
-    Some(line.line_no()),
-    false,
+            ID.to_owned(),
+            Severity::Warn,
+            "unconditional exit 0 bypass present".to_owned(),
+            "Hook contains an executable `exit 0`, which can mask failures.".to_owned(),
+            Some(input.rel_path.to_owned()),
+            Some(line.line_no()),
+            false,
         ));
     } else {
         results.push(

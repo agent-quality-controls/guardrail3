@@ -1,4 +1,4 @@
-use serde_json::{json, Map, Number, Value};
+use serde_json::{Map, Number, Value, json};
 
 use guardrail3_domain_report::{Report, Severity};
 

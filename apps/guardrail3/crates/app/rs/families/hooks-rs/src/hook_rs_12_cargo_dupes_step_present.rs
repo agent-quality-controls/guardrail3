@@ -26,15 +26,16 @@ pub fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<CheckResult>) {
         );
     } else {
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "cargo-dupes step missing".to_owned(),
-    "Hook does not execute cargo-dupes.".to_owned(),
-    Some(input.rel_path.to_owned()),
-    None,
-    false,
+            ID.to_owned(),
+            Severity::Warn,
+            "cargo-dupes step missing".to_owned(),
+            "Hook does not execute cargo-dupes.".to_owned(),
+            Some(input.rel_path.to_owned()),
+            None,
+            false,
         ));
     }
+}
 
 pub(crate) fn script_contains_cargo_dupes(parsed: &ParsedShellScript<'_>) -> bool {
     parsed

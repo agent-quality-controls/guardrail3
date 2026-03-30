@@ -529,7 +529,11 @@ pub struct CanonicalConfig {
 
 impl CanonicalConfig {
     #[must_use]
-    pub const fn new(npmrc: Option<bool>, tsconfig_base: Option<bool>, jscpd: Option<bool>) -> Self {
+    pub const fn new(
+        npmrc: Option<bool>,
+        tsconfig_base: Option<bool>,
+        jscpd: Option<bool>,
+    ) -> Self {
         Self {
             npmrc,
             tsconfig_base,

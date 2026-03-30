@@ -45,7 +45,7 @@ pub fn assert_reported(
     let finding = finding(results, RULE_ID);
     assert_eq!(finding.severity, severity);
     assert_eq!(finding.title, title);
-    assert_eq!(finding.file, Some(file));
+    assert_eq!(finding.file.as_deref(), Some(file));
     assert_eq!(finding.line, line);
 }
 
@@ -57,7 +57,7 @@ pub fn assert_inventory(results: &[CheckResult], expected: bool) {
 pub fn assert_reported_file(results: &[CheckResult], severity: Severity, file: &str) {
     let finding = finding(results, RULE_ID);
     assert_eq!(finding.severity, severity);
-    assert_eq!(finding.file, Some(file));
+    assert_eq!(finding.file.as_deref(), Some(file));
 }
 
 pub fn assert_has_finding(

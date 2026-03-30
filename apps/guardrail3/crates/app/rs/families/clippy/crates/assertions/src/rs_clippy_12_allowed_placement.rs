@@ -83,7 +83,10 @@ pub fn assert_cargo_root_parse_error(results: &[CheckResult], config_file: &str,
     let result = error_results[0];
     assert_eq!(result.id(), ID);
     assert_eq!(result.severity(), Severity::Error);
-    assert_eq!(result.title(), "clippy.toml placement could not be resolved");
+    assert_eq!(
+        result.title(),
+        "clippy.toml placement could not be resolved"
+    );
     assert_eq!(result.file(), Some(config_file));
     assert!(
         result.message().contains(cargo_file),
@@ -104,7 +107,10 @@ pub fn assert_unparseable_cargo_root(results: &[CheckResult], file: &str, cargo_
     let result = error_results[0];
     assert_eq!(result.id(), ID);
     assert_eq!(result.severity(), Severity::Error);
-    assert_eq!(result.title(), "clippy.toml placement could not be resolved");
+    assert_eq!(
+        result.title(),
+        "clippy.toml placement could not be resolved"
+    );
     assert_eq!(result.file(), Some(file));
     assert!(
         result.message().contains(cargo_rel),

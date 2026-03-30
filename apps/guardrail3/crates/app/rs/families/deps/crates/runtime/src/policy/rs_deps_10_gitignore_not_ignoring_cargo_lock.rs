@@ -7,10 +7,10 @@ const ID: &str = "RS-DEPS-10";
 pub fn check(input: &LockfileDepsInput<'_>, results: &mut Vec<CheckResult>) {
     if input.lockfile.cargo_lock_ignored {
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    "Cargo.lock ignored in gitignore".to_owned(),
-    format!(
+            ID.to_owned(),
+            Severity::Error,
+            "Cargo.lock ignored in gitignore".to_owned(),
+            format!(
                 "`{}` ignores `{}` for Rust root `{}`.",
                 input
                     .lockfile
@@ -20,9 +20,9 @@ pub fn check(input: &LockfileDepsInput<'_>, results: &mut Vec<CheckResult>) {
                 input.lockfile.cargo_lock_rel_path,
                 rel_label(&input.lockfile.root_rel_dir)
             ),
-    input.lockfile.gitignore_rel_path.clone(),
-    None,
-    false,
+            input.lockfile.gitignore_rel_path.clone(),
+            None,
+            false,
         ));
     } else {
         results.push(

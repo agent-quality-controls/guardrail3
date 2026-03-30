@@ -182,10 +182,9 @@ fn run_coverage_maps(
 }
 
 fn handle_dump_tree(path_str: &str) -> Result<String, String> {
-    let resolved = app_deps::validation_target::resolve_validation_target(std::path::Path::new(
-        path_str,
-    ))
-    .map_err(|error| error.to_string())?;
+    let resolved =
+        app_deps::validation_target::resolve_validation_target(std::path::Path::new(path_str))
+            .map_err(|error| error.to_string())?;
     let fs = RealFileSystem;
     let tree = app_deps::project_walker::walk_project(&fs, resolved.project_root());
     serde_json::to_string_pretty(&tree).map_err(|error| format!("Error serializing tree: {error}"))

@@ -179,7 +179,10 @@ pub fn check_container_not_empty(
         let detail = if files.is_empty() {
             "is empty".to_owned()
         } else {
-            format!("contains files ({}) but no subdirectories", files.join(", "))
+            format!(
+                "contains files ({}) but no subdirectories",
+                files.join(", ")
+            )
         };
         results.push(CheckResult::from_parts(
             id.to_owned(),

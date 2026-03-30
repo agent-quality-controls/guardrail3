@@ -53,8 +53,8 @@ pub fn check_npmrc(
         check_duplicate_keys(&settings, npmrc_path, results);
         check_expected_settings(&settings, npmrc_path, results);
         check_extra_settings(&settings, npmrc_path, results);
-    },
-)
+    }
+}
 
 /// Parse key=value pairs from .npmrc content, skipping comments and blank lines.
 #[allow(clippy::string_slice)] // reason: parsing known ASCII key=value pairs
@@ -95,20 +95,20 @@ fn check_duplicate_keys(
     for (key, count) in &counts {
         if *count > 1 {
             results.push(CheckResult::from_parts(
-    "T-NPMRC-01".to_owned(),
-    Severity::Error,
-    format!("Duplicate key `{key}` in `.npmrc`"),
-    format!(
+                "T-NPMRC-01".to_owned(),
+                Severity::Error,
+                format!("Duplicate key `{key}` in `.npmrc`"),
+                format!(
                     "Duplicate key `{key}` in .npmrc \u{2014} pnpm uses the last value, \
                      which may differ from earlier entries."
                 ),
-    Some(npmrc_path.display().to_string()),
-    None,
-    false,
+                Some(npmrc_path.display().to_string()),
+                None,
+                false,
             ));
         }
-    },
-)
+    }
+}
 
 /// T12/T13: Check each expected .npmrc setting is present with correct value.
 fn check_expected_settings(
@@ -142,17 +142,17 @@ fn check_expected_settings(
             Some((_, val)) => {
                 // T13: Weaker value
                 results.push(CheckResult::from_parts(
-    "T13".to_owned(),
-    Severity::Error,
-    format!("`.npmrc` setting `{key}` has wrong value"),
-    format!(
+                    "T13".to_owned(),
+                    Severity::Error,
+                    format!("`.npmrc` setting `{key}` has wrong value"),
+                    format!(
                         "`{key}` is set to `{val}` but should be `{expected_val}`. \
                          This setting controls pnpm strictness — a weaker value reduces protection against \
                          dependency conflicts or supply chain issues. Update `.npmrc` to set `{key}={expected_val}`."
                     ),
-    Some(npmrc_path.display().to_string()),
-    None,
-    false,
+                    Some(npmrc_path.display().to_string()),
+                    None,
+                    false,
                 ));
             }
             None => {
@@ -170,8 +170,8 @@ fn check_expected_settings(
                 });
             }
         }
-    },
-)
+    }
+}
 
 /// T14: Extra settings not in expected list.
 fn check_extra_settings(
@@ -197,18 +197,21 @@ fn check_extra_settings(
 
     for (key, val) in settings {
         if !expected_keys.contains(&key.as_str()) {
-            results.push(CheckResult::from_parts(
-    "T14".to_owned(),
-    Severity::Info,
-    format!("Extra `.npmrc` setting: `{key}`"),
-    format!(
+            results.push(
+                CheckResult::from_parts(
+                    "T14".to_owned(),
+                    Severity::Info,
+                    format!("Extra `.npmrc` setting: `{key}`"),
+                    format!(
                     "Non-baseline `.npmrc` setting `{key}={val}`. This setting is not in the guardrail baseline. \
                      Verify it is intentional and document why it's needed."
                 ),
-    Some(npmrc_path.display().to_string()),
-    None,
-    false,
-            }.as_inventory());
+                    Some(npmrc_path.display().to_string()),
+                    None,
+                    false,
+                )
+                .as_inventory(),
+            );
         }
-    },
-)
+    }
+}

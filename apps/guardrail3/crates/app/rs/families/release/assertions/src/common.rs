@@ -38,7 +38,7 @@ pub fn assert_rule_count(results: &[CheckResult], rule_id: &str, expected: usize
 pub fn assert_rule_files(results: &[CheckResult], rule_id: &str, expected: &[&str]) {
     let mut files = rule_results(results, rule_id)
         .into_iter()
-        .filter_map(|result| result.file.map(str::to_owned))
+        .filter_map(|result| result.file.as_deref().map(str::to_owned))
         .collect::<Vec<_>>();
     files.sort();
     assert_eq!(
@@ -75,7 +75,7 @@ pub fn assert_rule_results(
                     .is_none_or(|needle| result.title.contains(needle))
                 && expected_result
                     .file
-                    .is_none_or(|file| result.file == Some(file))
+                    .is_none_or(|file| result.file.as_deref() == Some(file))
                 && expected_result
                     .inventory
                     .is_none_or(|inventory| result.inventory == inventory)

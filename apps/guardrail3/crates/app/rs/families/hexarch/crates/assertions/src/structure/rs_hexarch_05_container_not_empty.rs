@@ -43,7 +43,9 @@ pub fn assert_expected_rule_results<'a>(
                     needles.iter().all(|needle| result.title().contains(needle))
                 })
                 && expected_result.message_contains.is_none_or(|needles| {
-                    needles.iter().all(|needle| result.message().contains(needle))
+                    needles
+                        .iter()
+                        .all(|needle| result.message().contains(needle))
                 })
         });
 
@@ -196,9 +198,7 @@ pub fn assert_no_error_at_path(results: &[CheckResult], rule_id: &str, file: &st
     let rule_id = if rule_id.is_empty() { RULE_ID } else { rule_id };
     let errors = error_results(results, rule_id);
     assert!(
-        errors
-            .iter()
-            .all(|result| result.file() != Some(file)),
+        errors.iter().all(|result| result.file() != Some(file)),
         "expected no {rule_id} errors at {file}, got: {errors:#?}"
     );
 }

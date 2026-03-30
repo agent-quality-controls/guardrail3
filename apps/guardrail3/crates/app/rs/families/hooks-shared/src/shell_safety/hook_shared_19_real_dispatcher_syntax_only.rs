@@ -21,8 +21,7 @@ pub fn check(input: &DispatcherSyntaxInput<'_>, results: &mut Vec<CheckResult>) 
                 ID.to_owned(),
                 Severity::Info,
                 "dispatcher uses real executable syntax".to_owned(),
-                "pre-commit.d/ is dispatched by a real executable shell command."
-                    .to_owned(),
+                "pre-commit.d/ is dispatched by a real executable shell command.".to_owned(),
                 Some(input.rel_path.to_owned()),
                 None,
                 false,

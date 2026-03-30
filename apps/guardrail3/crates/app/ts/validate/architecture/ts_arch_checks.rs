@@ -117,23 +117,23 @@ pub fn check_single_app_structure(
     // src/modules/ must exist
     if fs.metadata(&modules_dir).is_none() {
         results.push(CheckResult::from_parts(
-    "T-ARCH-01".to_owned(),
-    Severity::Warn,
-    format!("TS app `{app_name}` missing src/modules/ directory"),
-    format!(
+            "T-ARCH-01".to_owned(),
+            Severity::Warn,
+            format!("TS app `{app_name}` missing src/modules/ directory"),
+            format!(
                 "App `{app_name}` has no `src/modules/` directory. Create it with the hex arch \
                  template: `src/modules/{{domain, ports/{{inbound,outbound}}, application, \
                  adapters/{{inbound,outbound}}}}`."
             ),
-    Some(app_dir.display().to_string()),
-    None,
-    false,
+            Some(app_dir.display().to_string()),
+            None,
+            false,
         ));
         return;
     }
 
-    check_ts_modules_dir(fs, app_name, &modules_dir, "src/modules", results);,
-)
+    check_ts_modules_dir(fs, app_name, &modules_dir, "src/modules", results);
+}
 
 /// Check a `modules/` directory for TS hex arch structure.
 /// Reusable for both top-level apps and hex-in-hex recursion.
@@ -251,23 +251,23 @@ fn validate_ts_container(
             && fs.read_file(&sub_path.join(".gitkeep")).is_none()
         {
             results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    format!(
+                ID.to_owned(),
+                Severity::Error,
+                format!(
                     "{ENTITY} `{name}` subdirectory {label}/{subdir}/ has no .ts/.tsx files"
                 ),
-    format!(
+                format!(
                     "{ENTITY} `{name}` has `{label}/{subdir}/` but it contains no TypeScript files. \
                      Every subdirectory in a container folder must be a module with .ts/.tsx files, \
                      a hex-in-hex with its own `modules/` structure, or have a `.gitkeep` placeholder."
                 ),
-    Some(sub_path.display().to_string()),
-    None,
-    false,
+                Some(sub_path.display().to_string()),
+                None,
+                false,
             ));
         }
-    },
-)
+    }
+}
 
 /// Check if a directory contains any .ts or .tsx files (recursively).
 fn has_ts_source_files(dir: &Path) -> bool {
@@ -523,10 +523,10 @@ pub fn check_file_imports(file_path: &Path, content: &str, results: &mut Vec<Che
         if forbidden.contains(&target_layer) {
             let line_number = line_idx.saturating_add(1);
             results.push(CheckResult::from_parts(
-    "T-ARCH-02".to_owned(),
-    Severity::Error,
-    "Hexagonal architecture import boundary violation".to_owned(),
-    format!(
+                "T-ARCH-02".to_owned(),
+                Severity::Error,
+                "Hexagonal architecture import boundary violation".to_owned(),
+                format!(
                     "The `{}` layer imports from the `{}` layer: `{import_path}`. In hexagonal architecture, \
                      imports must flow inward (adapters -> application -> ports -> domain). The `{}` layer \
                      must not depend on `{}`. Move shared types to a common layer, or invert the dependency \
@@ -536,10 +536,10 @@ pub fn check_file_imports(file_path: &Path, content: &str, results: &mut Vec<Che
                     source_layer.label(),
                     target_layer.label(),
                 ),
-    Some(file_path.display().to_string()),
-    Some(line_number),
-    false,
+                Some(file_path.display().to_string()),
+                Some(line_number),
+                false,
             ));
         }
-    },
-)
+    }
+}

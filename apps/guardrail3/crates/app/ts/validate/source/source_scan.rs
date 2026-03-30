@@ -188,13 +188,13 @@ fn check_process_env_ast(
         };
 
         results.push(CheckResult::from_parts(
-    "T30".to_owned(),
+            "T30".to_owned(),
             severity,
-            title: "Direct process.env access".to_owned(),
+            "Direct process.env access".to_owned(),
             message,
-            file: Some(path.display().to_string()),
-            line: Some(line_number),
-            inventory: false,
+            Some(path.display().to_string()),
+            Some(line_number),
+            false,
         ));
     }
 }
@@ -223,18 +223,19 @@ fn check_any_types_ast(
         let trimmed = lines.get(line_idx).unwrap_or(&"").trim();
         results.push(CheckResult {
             id: "T31".to_owned(),
-    Severity::Info,
-    "`any` type usage".to_owned(),
-    format!(
+            severity: Severity::Info,
+            title: "`any` type usage".to_owned(),
+            message: format!(
                 "`any` type found: `{trimmed}`. The `any` type disables TypeScript's type checker for this value, \
                  allowing type errors to propagate silently at runtime. Replace with a specific type, `unknown` \
                  (forces runtime checks), or a generic type parameter."
             ),
-    Some(path.display().to_string()),
-    Some(line_number),
-    false,
-        ));
+            file: Some(path.display().to_string()),
+            line: Some(line_number),
+            inventory: false,
+        });
     }
+}
 
 // T32: File line count
 pub fn check_file_length(path: &Path, content: &str, results: &mut Vec<CheckResult>) {
@@ -248,19 +249,20 @@ pub fn check_file_length(path: &Path, content: &str, results: &mut Vec<CheckResu
 
     if effective_lines > 400 {
         results.push(CheckResult::from_parts(
-    "T32".to_owned(),
-    Severity::Error,
-    "File exceeds 400 effective lines".to_owned(),
-    format!(
+            "T32".to_owned(),
+            Severity::Error,
+            "File exceeds 400 effective lines".to_owned(),
+            format!(
                 "{effective_lines} effective lines (blank/comment lines excluded). \
                  Large files are harder for agents and humans to reason about, increasing bug risk. \
                  Split into focused modules — extract related functions into separate files with clear boundaries."
             ),
-    Some(path.display().to_string()),
-    None,
-    false,
+            Some(path.display().to_string()),
+            None,
+            false,
         ));
     }
+}
 
 /// Scan **comment nodes only** for patterns and emit an info-level `CheckResult` for each match.
 ///
@@ -355,18 +357,18 @@ fn check_banned_in_node_modules(fs: &dyn FileSystem, path: &Path, results: &mut 
         let dep_path = nm_path.join(dep);
         if dep_path.exists() {
             results.push(CheckResult::from_parts(
-    "T59".to_owned(),
-    Severity::Error,
-    format!("Banned package `{dep}` in node_modules"),
-    format!(
+                "T59".to_owned(),
+                Severity::Error,
+                format!("Banned package `{dep}` in node_modules"),
+                format!(
                     "`{dep}` found in node_modules. Banned packages have preferred alternatives \
                      (e.g., native fetch over axios, date-fns over moment, crypto.randomUUID over uuid). \
                      If this is a transitive dependency, add a pnpm override to replace it. \
                      If direct, remove from package.json and switch to the approved alternative."
                 ),
-    Some(dep_path.display().to_string()),
-    None,
-    false,
+                Some(dep_path.display().to_string()),
+                None,
+                false,
             ));
         }
     }
@@ -389,5 +391,5 @@ fn check_banned_in_node_modules(fs: &dyn FileSystem, path: &Path, results: &mut 
                 inventory: false,
             });
         }
-    },
-)
+    }
+}

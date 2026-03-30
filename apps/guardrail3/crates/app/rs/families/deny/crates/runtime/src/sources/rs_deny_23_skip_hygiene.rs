@@ -15,16 +15,16 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     };
     let Some(skip_entries) = skip_value.as_array() else {
         results.push(CheckResult::from_parts(
-    "RS-DENY-23".to_owned(),
-    Severity::Warn,
-    "malformed skip container".to_owned(),
-    format!(
+            "RS-DENY-23".to_owned(),
+            Severity::Warn,
+            "malformed skip container".to_owned(),
+            format!(
                 "`{}` must use an array for `[bans].skip` entries.",
                 config.rel_path
             ),
-    Some(config.rel_path.clone()),
-    None,
-    false,
+            Some(config.rel_path.clone()),
+            None,
+            false,
         ));
         return;
     };
@@ -72,41 +72,41 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
 
         if malformed {
             results.push(CheckResult::from_parts(
-    "RS-DENY-23".to_owned(),
-    Severity::Warn,
-    "malformed skip entry".to_owned(),
-    format!(
+                "RS-DENY-23".to_owned(),
+                Severity::Warn,
+                "malformed skip entry".to_owned(),
+                format!(
                     "`{}` has `[bans.skip]` entry without a valid crate identifier.",
                     config.rel_path
                 ),
-    Some(config.rel_path.clone()),
-    None,
-    false,
-            });
+                Some(config.rel_path.clone()),
+                None,
+                false,
+            ));
         }
         if non_string_reason {
             results.push(CheckResult::from_parts(
-    "RS-DENY-23".to_owned(),
-    Severity::Warn,
-    "skip reason must be a string".to_owned(),
-    format!(
+                "RS-DENY-23".to_owned(),
+                Severity::Warn,
+                "skip reason must be a string".to_owned(),
+                format!(
                     "`{}` has `[bans.skip]` entry `{name}` with a non-string `reason`.",
                     config.rel_path
                 ),
-    Some(config.rel_path.clone()),
-    None,
-    false,
-            });
+                Some(config.rel_path.clone()),
+                None,
+                false,
+            ));
         } else if !plain_string_entry && reason.as_deref().unwrap_or("").trim().is_empty() {
             results.push(CheckResult::from_parts(
-    "RS-DENY-23".to_owned(),
-    Severity::Warn,
-    "skip entry missing reason".to_owned(),
-    format!("`{}` skips `{name}` without a `reason`.", config.rel_path),
-    Some(config.rel_path.clone()),
-    None,
-    false,
-            });
+                "RS-DENY-23".to_owned(),
+                Severity::Warn,
+                "skip entry missing reason".to_owned(),
+                format!("`{}` skips `{name}` without a `reason`.", config.rel_path),
+                Some(config.rel_path.clone()),
+                None,
+                false,
+            ));
         }
 
         if !malformed
@@ -131,13 +131,13 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
 
 #[cfg(test)]
 pub(crate) fn run_check(deny_toml: &str) -> Vec<CheckResult> {
-    crate::run_config_rule_for_test(deny_toml, None, check),
-)
+    crate::run_config_rule_for_test(deny_toml, None, check)
+}
 
 #[cfg(test)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
-    crate::check_test_root(root),
-)
+    crate::check_test_root(root)
+}
 
 #[cfg(test)]
 pub(crate) use ::test_support::{

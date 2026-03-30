@@ -33,16 +33,16 @@ pub fn check(input: &DependencyEntryDepsInput<'_>, results: &mut Vec<CheckResult
     }
 
     results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "unauthorized dev dependency".to_owned(),
-    format!(
+        ID.to_owned(),
+        Severity::Warn,
+        "unauthorized dev dependency".to_owned(),
+        format!(
             "Dependency `{}` in `[dev-dependencies]` is not allowlisted for crate `{}`.",
             input.entry.dep_package_name, input.entry.crate_name
         ),
-    Some(input.entry.cargo_rel_path.clone()),
-    None,
-    false,
+        Some(input.entry.cargo_rel_path.clone()),
+        None,
+        false,
     ));
 }
 

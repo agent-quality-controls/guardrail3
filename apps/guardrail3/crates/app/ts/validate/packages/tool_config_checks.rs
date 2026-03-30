@@ -93,8 +93,8 @@ pub fn check_tool_configs(
                 }
             }
         }
-    },
-)
+    }
+}
 
 fn check_cspell_config(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResult>) {
     for filename in CSPELL_CONFIG_FILES {
@@ -116,15 +116,15 @@ fn check_cspell_config(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Check
         }
     }
     results.push(CheckResult::from_parts(
-    "T-TOOL-07".to_owned(),
-    Severity::Error,
-    "cspell config missing".to_owned(),
-    "No cspell config file found. Create cspell.json with language, ignorePaths, and project-specific words for spell checking.".to_owned(),
-    Some(path.display().to_string()),
-    None,
-    false,
-    ));,
-)
+        "T-TOOL-07".to_owned(),
+        Severity::Error,
+        "cspell config missing".to_owned(),
+        "No cspell config file found. Create cspell.json with language, ignorePaths, and project-specific words for spell checking.".to_owned(),
+        Some(path.display().to_string()),
+        None,
+        false,
+    ));
+}
 
 /// Type alias for JSON object map.
 type JsonMap = serde_json::Map<String, serde_json::Value>;
@@ -154,14 +154,15 @@ fn check_script(
         );
     } else {
         results.push(CheckResult::from_parts(
-    check_id.to_owned(),
-    missing_severity,
-    format!("\"{script_name}\" script missing"),
-    format!(
+            check_id.to_owned(),
+            missing_severity,
+            format!("\"{script_name}\" script missing"),
+            format!(
                 "No \"{script_name}\" script in package.json. Add: \"{script_name}\": \"{example}\""
             ),
-    Some(pkg_path.display().to_string()),
-    None,
-    false,
+            Some(pkg_path.display().to_string()),
+            None,
+            false,
         ));
     }
+}

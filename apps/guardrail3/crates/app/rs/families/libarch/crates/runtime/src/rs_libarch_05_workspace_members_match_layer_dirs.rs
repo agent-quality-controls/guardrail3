@@ -64,5 +64,6 @@ pub(super) fn run_family_check(root: &std::path::Path) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-#[path = "rs_libarch_05_workspace_members_match_layer_dirs_tests/mod.rs"] // reason: test-only sidecar module wiring
+#[path = "rs_libarch_05_workspace_members_match_layer_dirs_tests/mod.rs"]
+// reason: test-only sidecar module wiring
 mod rs_libarch_05_workspace_members_match_layer_dirs_tests;

@@ -151,9 +151,7 @@ fn family_enabled_for_runtime(
         return global;
     }
 
-    let app_count = rust
-        .apps()
-        .map_or(0, std::collections::BTreeMap::len);
+    let app_count = rust.apps().map_or(0, std::collections::BTreeMap::len);
     let has_packages_scope = rust.packages().is_some();
 
     if app_count == 0 && !has_packages_scope {

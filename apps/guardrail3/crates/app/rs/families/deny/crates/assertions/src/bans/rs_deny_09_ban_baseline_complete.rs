@@ -1,9 +1,6 @@
 crate::define_result_assertions!("RS-DENY-09");
 
-pub fn assert_no_findings_for_file(
-    results: &[guardrail3_domain_report::CheckResult],
-    file: &str,
-) {
+pub fn assert_no_findings_for_file(results: &[guardrail3_domain_report::CheckResult], file: &str) {
     let matching = findings(results)
         .into_iter()
         .filter(|finding| finding.file == Some(file))

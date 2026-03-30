@@ -141,18 +141,19 @@ fn rule_group_result(
     } else {
         let list = missing.join("`, `");
         results.push(CheckResult::from_parts(
-    id.to_owned(),
-    Severity::Error,
-    format!("{group_name} rules incomplete"),
-    format!(
+            id.to_owned(),
+            Severity::Error,
+            format!("{group_name} rules incomplete"),
+            format!(
                 "Missing {group_name} rules in ESLint config: `{list}`. \
                  Add them to `eslint.config.mjs`."
             ),
-    Some(eslint_path.display().to_string()),
-    None,
-    false,
+            Some(eslint_path.display().to_string()),
+            None,
+            false,
         ));
     }
+}
 
 /// Check that raw content contains an import/config pattern.
 /// Uses `raw_content` because import patterns are not extracted into rules.
@@ -187,18 +188,19 @@ fn check_config_import(
             .collect::<Vec<_>>()
             .join(", ");
         results.push(CheckResult::from_parts(
-    id.to_owned(),
-    Severity::Error,
-    format!("{plugin_name} config import missing"),
-    format!(
+            id.to_owned(),
+            Severity::Error,
+            format!("{plugin_name} config import missing"),
+            format!(
                 "{plugin_name} config import not found. Expected patterns: {list}. \
                  Add the {plugin_name} flat config to `eslint.config.mjs`."
             ),
-    Some(eslint_path.display().to_string()),
-    None,
-    false,
+            Some(eslint_path.display().to_string()),
+            None,
+            false,
         ));
     }
+}
 
 // ---------------------------------------------------------------------------
 // Core plugin checks (always-on)
@@ -310,22 +312,22 @@ pub fn check_core_plugins(
         && !content.contains("validStrategies")
     {
         results.push(CheckResult::from_parts(
-    "T-ESLP-10".to_owned(),
-    Severity::Warn,
-    "jsx-no-leaked-render missing validStrategies".to_owned(),
-    "react/jsx-no-leaked-render is present but validStrategies option not \
+            "T-ESLP-10".to_owned(),
+            Severity::Warn,
+            "jsx-no-leaked-render missing validStrategies".to_owned(),
+            "react/jsx-no-leaked-render is present but validStrategies option not \
                      found. Without it, the rule may flag valid ternary/coerce patterns. \
                      Add `{ validStrategies: ['ternary', 'coerce'] }`."
                 .to_owned(),
-    Some(eslint_path.display().to_string()),
-    None,
-    false,
-        });
+            Some(eslint_path.display().to_string()),
+            None,
+            false,
+        ));
     }
 
     // T-ESLP-11: test file relaxations
-    check_test_relaxations(config, eslint_path, results);,
-)
+    check_test_relaxations(config, eslint_path, results);
+}
 
 /// T-ESLP-01: Check unicorn config import — `unicorn` + (`flat/recommended` or `configs.recommended`).
 fn check_unicorn_import(config: &EslintConfig, eslint_path: &Path, results: &mut Vec<CheckResult>) {
@@ -356,19 +358,20 @@ fn check_unicorn_import(config: &EslintConfig, eslint_path: &Path, results: &mut
             missing_parts.push("`flat/recommended` or `configs.recommended`");
         }
         results.push(CheckResult::from_parts(
-    "T-ESLP-01".to_owned(),
-    Severity::Error,
-    "unicorn config import missing".to_owned(),
-    format!(
+            "T-ESLP-01".to_owned(),
+            Severity::Error,
+            "unicorn config import missing".to_owned(),
+            format!(
                 "unicorn config import not found. Missing: {}. \
                  Add the eslint-plugin-unicorn flat config to `eslint.config.mjs`.",
                 missing_parts.join(", ")
             ),
-    Some(eslint_path.display().to_string()),
-    None,
-    false,
+            Some(eslint_path.display().to_string()),
+            None,
+            false,
         ));
     }
+}
 
 /// T-ESLP-11: Check that test file overrides disable the expected relaxation rules.
 fn check_test_relaxations(
@@ -381,7 +384,7 @@ fn check_test_relaxations(
         let t = line.trim();
         (t.contains(".test.") || t.contains(".spec.") || t.contains("__tests__"))
             && (t.contains("files") || t.contains("overrides"))
-    ));
+    });
 
     if !has_test_override {
         results.push(CheckResult::from_parts(
@@ -406,8 +409,8 @@ fn check_test_relaxations(
         &missing,
         eslint_path,
         results,
-    );,
-)
+    );
+}
 
 // ---------------------------------------------------------------------------
 // Content-profile plugin checks
@@ -426,8 +429,8 @@ pub fn check_content_plugins(
     check_a11y_control_label(config, eslint_path, results);
 
     // T-ESLP-12: tailwind-ban plugin and rule
-    check_tailwind_ban(config, eslint_path, results);,
-)
+    check_tailwind_ban(config, eslint_path, results);
+}
 
 /// T-ESLP-07: Check jsx-a11y strict config (look for `jsxA11y` or `jsx-a11y` and `strict`).
 fn check_jsx_a11y_strict(
@@ -461,19 +464,20 @@ fn check_jsx_a11y_strict(
             missing_parts.push("`strict` config");
         }
         results.push(CheckResult::from_parts(
-    "T-ESLP-07".to_owned(),
-    Severity::Error,
-    "jsx-a11y strict config missing".to_owned(),
-    format!(
+            "T-ESLP-07".to_owned(),
+            Severity::Error,
+            "jsx-a11y strict config missing".to_owned(),
+            format!(
                 "jsx-a11y strict configuration not found. Missing: {}. \
                  Add `eslint-plugin-jsx-a11y` with `flatConfigs.strict` to `eslint.config.mjs`.",
                 missing_parts.join(", ")
             ),
-    Some(eslint_path.display().to_string()),
-    None,
-    false,
+            Some(eslint_path.display().to_string()),
+            None,
+            false,
         ));
     }
+}
 
 /// T-ESLP-08: Check `jsx-a11y/control-has-associated-label` rule.
 fn check_a11y_control_label(
@@ -497,18 +501,19 @@ fn check_a11y_control_label(
         );
     } else {
         results.push(CheckResult::from_parts(
-    "T-ESLP-08".to_owned(),
-    Severity::Error,
-    format!("ESLint rule `{rule}` missing"),
-    format!(
+            "T-ESLP-08".to_owned(),
+            Severity::Error,
+            format!("ESLint rule `{rule}` missing"),
+            format!(
                 "`{rule}` not found in ESLint config. This rule ensures interactive \
                  controls have an accessible label. Add it to `eslint.config.mjs`."
             ),
-    Some(eslint_path.display().to_string()),
-    None,
-    false,
+            Some(eslint_path.display().to_string()),
+            None,
+            false,
         ));
     }
+}
 
 /// T-ESLP-12: Check tailwind-ban plugin and rule.
 fn check_tailwind_ban(config: &EslintConfig, eslint_path: &Path, results: &mut Vec<CheckResult>) {
@@ -530,16 +535,16 @@ fn check_tailwind_ban(config: &EslintConfig, eslint_path: &Path, results: &mut V
         // Also verify denyList is configured
         if !content.contains("denyList") && !content.contains("deny-list") {
             results.push(CheckResult::from_parts(
-    "T-ESLP-12".to_owned(),
-    Severity::Warn,
-    "tailwind-ban missing denyList".to_owned(),
-    "eslint-plugin-tailwind-ban is configured but no denyList found. \
+                "T-ESLP-12".to_owned(),
+                Severity::Warn,
+                "tailwind-ban missing denyList".to_owned(),
+                "eslint-plugin-tailwind-ban is configured but no denyList found. \
                          Without a denyList, the plugin has nothing to enforce. Add a denyList \
                          with banned Tailwind tokens that have semantic design token replacements."
                     .to_owned(),
-    Some(eslint_path.display().to_string()),
-    None,
-    false,
+                Some(eslint_path.display().to_string()),
+                None,
+                false,
             ));
         }
     } else {
@@ -554,8 +559,9 @@ fn check_tailwind_ban(config: &EslintConfig, eslint_path: &Path, results: &mut V
             file: Some(eslint_path.display().to_string()),
             line: None,
             inventory: false,
-        ));
+        });
     }
+}
 
 #[cfg(test)]
 mod eslint_plugin_checks_tests;

@@ -305,14 +305,14 @@ fn semantic_helper_names<'a>(functions: &'a [super::parse::FunctionInfo]) -> BTr
         }
     }
 
-    semantic_helpers,
-)
+    semantic_helpers
+}
 
 #[cfg(test)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
     let tree = test_support::walk(root);
-    super::check_test_tree(&tree, &test_support::StubToolChecker::default()),
-)
+    super::check_test_tree(&tree, &test_support::StubToolChecker::default())
+}
 #[cfg(test)]
 #[path = "rs_test_18_test_support_generic_tests/mod.rs"]
 mod rs_test_18_test_support_generic_tests;

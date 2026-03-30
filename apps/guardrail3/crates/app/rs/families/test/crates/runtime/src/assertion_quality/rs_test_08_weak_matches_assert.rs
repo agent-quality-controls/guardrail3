@@ -7,16 +7,16 @@ const ID: &str = "RS-TEST-08";
 pub fn check(input: &TestFunctionInput<'_>, results: &mut Vec<CheckResult>) {
     for line in &input.function.weak_matches_lines {
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "weak matches assertion".to_owned(),
-    format!(
+            ID.to_owned(),
+            Severity::Warn,
+            "weak matches assertion".to_owned(),
+            format!(
                 "Test `{}` uses `assert!(matches!(...))` with `_` wildcards in payload positions.",
                 input.function.name
             ),
-    Some(input.file.rel_path.clone()),
-    Some(*line),
-    false,
+            Some(input.file.rel_path.clone()),
+            Some(*line),
+            false,
         ));
     }
     if input.function.weak_matches_lines.is_empty() {

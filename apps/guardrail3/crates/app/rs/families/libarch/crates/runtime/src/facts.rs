@@ -71,7 +71,9 @@ impl LibraryPackageFacts {
 
     #[must_use]
     pub fn layer_member(&self, layer: LayerName) -> Option<&LayerMemberFacts> {
-        self.member_manifests.iter().find(|member| member.layer == Some(layer))
+        self.member_manifests
+            .iter()
+            .find(|member| member.layer == Some(layer))
     }
 
     #[must_use]
@@ -128,7 +130,11 @@ pub fn collect(tree: &ProjectTree, route: &RsLibarchRoute) -> LibarchFacts {
     LibarchFacts { packages }
 }
 
-fn collect_package(tree: &ProjectTree, package_rel_dir: &str, cargo_rel_path: &str) -> LibraryPackageFacts {
+fn collect_package(
+    tree: &ProjectTree,
+    package_rel_dir: &str,
+    cargo_rel_path: &str,
+) -> LibraryPackageFacts {
     let cargo = parse_cargo_snapshot(tree, cargo_rel_path);
     let parsed = cargo.value.as_ref();
     let _package_name = parsed
@@ -138,7 +144,8 @@ fn collect_package(tree: &ProjectTree, package_rel_dir: &str, cargo_rel_path: &s
     let lib_rel_path = parsed.and_then(|value| library_rel_path(package_rel_dir, value));
     let default_lib_rel_path = ProjectTree::join_rel(package_rel_dir, "src/lib.rs");
     let has_default_lib = tree.file_exists(&default_lib_rel_path);
-    let is_library = has_package && (parsed.is_some_and(|value| value.get("lib").is_some()) || has_default_lib);
+    let is_library =
+        has_package && (parsed.is_some_and(|value| value.get("lib").is_some()) || has_default_lib);
 
     let lib_rel_path = if is_library {
         Some(lib_rel_path.unwrap_or(default_lib_rel_path))
@@ -146,8 +153,19 @@ fn collect_package(tree: &ProjectTree, package_rel_dir: &str, cargo_rel_path: &s
         None
     };
 
-    let (measurement_error, _dependency_count, _max_module_depth, _max_sibling_dirs, _max_sibling_rs_files, threshold_reasons) =
-        collect_measurements(tree, parsed, lib_rel_path.as_deref(), cargo.parse_error.as_deref());
+    let (
+        measurement_error,
+        _dependency_count,
+        _max_module_depth,
+        _max_sibling_dirs,
+        _max_sibling_rs_files,
+        threshold_reasons,
+    ) = collect_measurements(
+        tree,
+        parsed,
+        lib_rel_path.as_deref(),
+        cargo.parse_error.as_deref(),
+    );
     let escalation_required = !threshold_reasons.is_empty();
 
     let is_workspace = parsed.is_some_and(|value| value.get("workspace").is_some());
@@ -178,8 +196,10 @@ fn collect_package(tree: &ProjectTree, package_rel_dir: &str, cargo_rel_path: &s
             dirs
         })
         .unwrap_or_default();
-    let uses_layered_mode =
-        is_workspace || crates_dir_exists || !workspace_members.is_empty() || !layer_dirs.is_empty();
+    let uses_layered_mode = is_workspace
+        || crates_dir_exists
+        || !workspace_members.is_empty()
+        || !layer_dirs.is_empty();
 
     let facade_exports = collect_facade_exports(tree, lib_rel_path.as_deref());
     let facade_source_error = facade_source_error(tree, lib_rel_path.as_deref());
@@ -244,7 +264,8 @@ fn collect_member_manifests(
             .unwrap_or_else(|| package_name.replace('-', "_"));
         let direct_dependencies = parsed
             .map(|value| {
-                let mut deps = dependency_names(value.get("dependencies"), Some(workspace_dependencies));
+                let mut deps =
+                    dependency_names(value.get("dependencies"), Some(workspace_dependencies));
                 deps.extend(dependency_names(
                     value.get("build-dependencies"),
                     Some(workspace_dependencies),
@@ -275,7 +296,8 @@ fn dependency_names(
     let Some(table) = section.and_then(toml::Value::as_table) else {
         return BTreeSet::new();
     };
-    table.iter()
+    table
+        .iter()
         .map(|(alias, value)| dependency_package_name(alias, value, workspace_dependencies))
         .collect()
 }

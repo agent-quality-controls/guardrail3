@@ -23,13 +23,13 @@ pub fn check(input: &PublishableCrateReleaseInput<'_>, results: &mut Vec<CheckRe
             .as_inventory(),
         ),
         _ => results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    format!("{}: categories missing", krate.name),
-    "Publishable crates should set non-empty `[package].categories`.".to_owned(),
-    Some(krate.cargo_rel_path.clone()),
-    None,
-    false,
+            ID.to_owned(),
+            Severity::Warn,
+            format!("{}: categories missing", krate.name),
+            "Publishable crates should set non-empty `[package].categories`.".to_owned(),
+            Some(krate.cargo_rel_path.clone()),
+            None,
+            false,
         )),
     }
 }

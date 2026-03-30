@@ -12,17 +12,17 @@ pub fn check_jscpd(
 ) {
     if jscpd_configs.is_empty() {
         results.push(CheckResult::from_parts(
-    "T19".to_owned(),
-    Severity::Warn,
-    "Copy-paste detection config `.jscpd.json` not found".to_owned(),
-    "No `.jscpd.json` found at project root. jscpd detects copy-pasted code blocks that should \
+            "T19".to_owned(),
+            Severity::Warn,
+            "Copy-paste detection config `.jscpd.json` not found".to_owned(),
+            "No `.jscpd.json` found at project root. jscpd detects copy-pasted code blocks that should \
                      be extracted into shared functions. Without config, jscpd uses defaults that may miss \
                      duplicates or produce false positives. Create `.jscpd.json` with `threshold: 0` and \
                      appropriate ignore patterns, or run `guardrail3 ts generate`."
                 .to_owned(),
-    Some(root.display().to_string()),
-    None,
-    false,
+            Some(root.display().to_string()),
+            None,
+            false,
         ));
         return;
     }
@@ -54,16 +54,16 @@ pub fn check_jscpd(
             Ok(v) => v,
             Err(e) => {
                 results.push(CheckResult::from_parts(
-    "T19".to_owned(),
-    Severity::Error,
-    "`.jscpd.json` has invalid JSON".to_owned(),
-    format!(
+                    "T19".to_owned(),
+                    Severity::Error,
+                    "`.jscpd.json` has invalid JSON".to_owned(),
+                    format!(
                         "Failed to parse `.jscpd.json`: {e}. Fix the JSON syntax error so jscpd can read its config."
                     ),
-    Some(jscpd_path.display().to_string()),
-    None,
-    false,
-                });
+                    Some(jscpd_path.display().to_string()),
+                    None,
+                    false,
+                ));
                 continue;
             }
         };
@@ -74,44 +74,45 @@ pub fn check_jscpd(
                 let val = n.as_f64().unwrap_or(1.0);
                 if val == 0.0 {
                     results.push(CheckResult {
-                    id: "T20".to_owned(),
-                    severity: Severity::Info,
-                    title: "jscpd threshold correctly set to 0".to_owned(),
-                    message: "`threshold` = 0. Zero tolerance for copy-paste duplication — any detected \
+                        id: "T20".to_owned(),
+                        severity: Severity::Info,
+                        title: "jscpd threshold correctly set to 0".to_owned(),
+                        message: "`threshold` = 0. Zero tolerance for copy-paste duplication — any detected \
                              duplicate block is reported."
-                        .to_owned(),
-                    file: Some(jscpd_path.display().to_string()),
-                    line: None,
-                    inventory: false,
-                }.as_inventory());
+                            .to_owned(),
+                        file: Some(jscpd_path.display().to_string()),
+                        line: None,
+                        inventory: false,
+                    }
+                    .as_inventory());
                 } else {
                     results.push(CheckResult {
-                    id: "T20".to_owned(),
-                    severity: Severity::Error,
-                    title: "jscpd threshold is not 0".to_owned(),
-                    message: format!(
-                        "`threshold` = {n}, expected 0. A non-zero threshold allows a percentage of \
+                        id: "T20".to_owned(),
+                        severity: Severity::Error,
+                        title: "jscpd threshold is not 0".to_owned(),
+                        message: format!(
+                            "`threshold` = {n}, expected 0. A non-zero threshold allows a percentage of \
                          duplication before reporting, hiding copy-paste problems. Set `\"threshold\": 0` \
                          in `.jscpd.json` for zero tolerance."
-                    ),
-                    file: Some(jscpd_path.display().to_string()),
-                    line: None,
-                    inventory: false,
-                });
+                        ),
+                        file: Some(jscpd_path.display().to_string()),
+                        line: None,
+                        inventory: false,
+                    });
                 }
             }
             _ => {
                 results.push(CheckResult {
-                id: "T20".to_owned(),
-                severity: Severity::Error,
-                title: "jscpd `threshold` field missing".to_owned(),
-                message: "No `threshold` field in `.jscpd.json`. Without this, jscpd uses a default threshold \
+                    id: "T20".to_owned(),
+                    severity: Severity::Error,
+                    title: "jscpd `threshold` field missing".to_owned(),
+                    message: "No `threshold` field in `.jscpd.json`. Without this, jscpd uses a default threshold \
                          that allows some duplication. Set `\"threshold\": 0` for zero tolerance."
-                    .to_owned(),
-                file: Some(jscpd_path.display().to_string()),
-                line: None,
-                inventory: false,
-            });
+                        .to_owned(),
+                    file: Some(jscpd_path.display().to_string()),
+                    line: None,
+                    inventory: false,
+                });
             }
         }
 
@@ -120,18 +121,19 @@ pub fn check_jscpd(
             let val = n.as_u64().unwrap_or(0);
             if val != 50 {
                 results.push(CheckResult {
-                id: "T21".to_owned(),
-                severity: Severity::Info,
-                title: "jscpd `minTokens` set to non-default value".to_owned(),
-                message: format!(
-                    "`minTokens` = {val} (default is 50). This controls the minimum duplicate block size — \
+                    id: "T21".to_owned(),
+                    severity: Severity::Info,
+                    title: "jscpd `minTokens` set to non-default value".to_owned(),
+                    message: format!(
+                        "`minTokens` = {val} (default is 50). This controls the minimum duplicate block size — \
                      lower values catch smaller duplicates but may produce false positives. \
                      Verify this value is appropriate for the project."
-                ),
-                file: Some(jscpd_path.display().to_string()),
-                line: None,
-                inventory: false,
-            }.as_inventory());
+                    ),
+                    file: Some(jscpd_path.display().to_string()),
+                    line: None,
+                    inventory: false,
+                }
+                .as_inventory());
             }
         }
 
@@ -140,20 +142,20 @@ pub fn check_jscpd(
             for pattern in ignore {
                 if let Some(p) = pattern.as_str() {
                     results.push(
-                    CheckResult::from_parts(
-                        "T22".to_owned(),
-                        Severity::Info,
-                        "jscpd ignore pattern configured".to_owned(),
-                        format!(
-                            "Ignore pattern: `{p}`. Files matching this pattern are excluded from \
+                        CheckResult::from_parts(
+                            "T22".to_owned(),
+                            Severity::Info,
+                            "jscpd ignore pattern configured".to_owned(),
+                            format!(
+                                "Ignore pattern: `{p}`. Files matching this pattern are excluded from \
                          copy-paste detection. Verify this exclusion is justified."
-                        ),
-                        Some(jscpd_path.display().to_string()),
-                        None,
-                        false,
-                    )
-                    .as_inventory(),
-                );
+                            ),
+                            Some(jscpd_path.display().to_string()),
+                            None,
+                            false,
+                        )
+                        .as_inventory(),
+                    );
                 }
             }
         }
@@ -161,17 +163,17 @@ pub fn check_jscpd(
         // T-JSCPD-01: minTokens field missing
         if json.get("minTokens").is_none() {
             results.push(CheckResult {
-            id: "T-JSCPD-01".to_owned(),
-            severity: Severity::Warn,
-            title: "jscpd `minTokens` field missing".to_owned(),
-            message: "No `minTokens` field in `.jscpd.json`. Without this, jscpd uses its default minimum \
+                id: "T-JSCPD-01".to_owned(),
+                severity: Severity::Warn,
+                title: "jscpd `minTokens` field missing".to_owned(),
+                message: "No `minTokens` field in `.jscpd.json`. Without this, jscpd uses its default minimum \
                      token count for duplicate detection, which may not be appropriate for the project. \
                      Set `\"minTokens\": 50` explicitly (or adjust to the desired threshold)."
-                .to_owned(),
-            file: Some(jscpd_path.display().to_string()),
-            line: None,
-            inventory: false,
-        });
+                    .to_owned(),
+                file: Some(jscpd_path.display().to_string()),
+                line: None,
+                inventory: false,
+            });
         }
 
         // T-JSCPD-02: absolute field missing or not true
@@ -179,15 +181,15 @@ pub fn check_jscpd(
             Some(serde_json::Value::Bool(true)) => {}
             _ => {
                 results.push(CheckResult {
-                id: "T-JSCPD-02".to_owned(),
-                severity: Severity::Warn,
-                title: "jscpd config missing `absolute: true`".to_owned(),
-                message: "jscpd config missing `absolute: true` — needed for meaningful paths in monorepo output"
-                    .to_owned(),
-                file: Some(jscpd_path.display().to_string()),
-                line: None,
-                inventory: false,
-            });
+                    id: "T-JSCPD-02".to_owned(),
+                    severity: Severity::Warn,
+                    title: "jscpd config missing `absolute: true`".to_owned(),
+                    message: "jscpd config missing `absolute: true` — needed for meaningful paths in monorepo output"
+                        .to_owned(),
+                    file: Some(jscpd_path.display().to_string()),
+                    line: None,
+                    inventory: false,
+                });
             }
         }
 
@@ -209,17 +211,17 @@ pub fn check_jscpd(
         for required in required_patterns {
             if !configured_ignores.iter().any(|p| p == required) {
                 results.push(CheckResult {
-                id: "T-JSCPD-03".to_owned(),
-                severity: Severity::Warn,
-                title: "jscpd missing required ignore pattern".to_owned(),
-                message: format!(
-                    "Required ignore pattern `{required}` not found in `.jscpd.json` `ignore` array. \
+                    id: "T-JSCPD-03".to_owned(),
+                    severity: Severity::Warn,
+                    title: "jscpd missing required ignore pattern".to_owned(),
+                    message: format!(
+                        "Required ignore pattern `{required}` not found in `.jscpd.json` `ignore` array. \
                      Add it to prevent false-positive duplication reports from generated or vendored files."
-                ),
-                file: Some(jscpd_path.display().to_string()),
-                line: None,
-                inventory: false,
-            });
+                    ),
+                    file: Some(jscpd_path.display().to_string()),
+                    line: None,
+                    inventory: false,
+                });
             }
         }
 
@@ -238,8 +240,8 @@ pub fn check_jscpd(
                 inventory: false,
             });
         }
-    } // end for jscpd_path,
-)
+    } // end for jscpd_path
+}
 
 // T60: Content import restriction
 pub fn check_content_import_restriction(
@@ -265,16 +267,17 @@ pub fn check_content_import_restriction(
 
     if content.contains("content/") || content.contains("content/**") {
         results.push(CheckResult::from_parts(
-    "T60".to_owned(),
-    Severity::Info,
-    "Content directory import restriction configured".to_owned(),
-    "Content import restriction pattern found in ESLint config. This prevents application \
+            "T60".to_owned(),
+            Severity::Info,
+            "Content directory import restriction configured".to_owned(),
+            "Content import restriction pattern found in ESLint config. This prevents application \
                      code from importing raw content files directly, enforcing access through the content API."
                 .to_owned(),
-    Some(eslint_path.display().to_string()),
-    None,
-    false,
-        }.as_inventory());
+            Some(eslint_path.display().to_string()),
+            None,
+            false,
+        )
+        .as_inventory());
     } else {
         results.push(CheckResult {
             id: "T60".to_owned(),
@@ -287,8 +290,9 @@ pub fn check_content_import_restriction(
             file: Some(eslint_path.display().to_string()),
             line: None,
             inventory: false,
-        ));
+        });
     }
+}
 
 // T61: Velite config exists
 pub fn check_velite_config(velite_configs: &[PathBuf], results: &mut Vec<CheckResult>) {
@@ -309,5 +313,5 @@ pub fn check_velite_config(velite_configs: &[PathBuf], results: &mut Vec<CheckRe
             )
             .as_inventory(),
         );
-    },
-)
+    }
+}

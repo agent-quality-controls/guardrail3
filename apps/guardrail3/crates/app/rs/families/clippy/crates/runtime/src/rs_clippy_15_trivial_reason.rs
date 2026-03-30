@@ -59,8 +59,7 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
                 ID.to_owned(),
                 Severity::Info,
                 "ban reasons are substantive".to_owned(),
-                "All managed ban entries use substantive non-placeholder `reason` text."
-                    .to_owned(),
+                "All managed ban entries use substantive non-placeholder `reason` text.".to_owned(),
                 Some(input.config.rel_path.clone()),
                 None,
                 false,

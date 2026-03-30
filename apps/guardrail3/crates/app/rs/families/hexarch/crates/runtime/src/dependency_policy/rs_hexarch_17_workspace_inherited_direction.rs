@@ -41,10 +41,10 @@ pub fn check(input: &DependencyEdgeHexarchInput<'_>, results: &mut Vec<CheckResu
     }
 
     results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    "workspace dependency direction violation".to_owned(),
-    format!(
+        ID.to_owned(),
+        Severity::Error,
+        "workspace dependency direction violation".to_owned(),
+        format!(
             "{} crate `{}` inherits workspace dependency `{}` which resolves to {} crate `{}`.",
             source_layer.label(),
             edge.source_name,
@@ -52,9 +52,9 @@ pub fn check(input: &DependencyEdgeHexarchInput<'_>, results: &mut Vec<CheckResu
             target_layer.label(),
             edge.dep_package_name
         ),
-    Some(edge.source_cargo_rel_path.clone()),
-    None,
-    false,
+        Some(edge.source_cargo_rel_path.clone()),
+        None,
+        false,
     ));
 }
 
