@@ -4,7 +4,7 @@ use test_support::{build_fixture_clippy_toml, write_file};
 use super::super::{copy_fixture_for_tests, run_for_tests};
 
 #[test]
-fn errors_only_for_roots_without_an_allowed_covering_config() {
+fn errors_only_for_the_top_workspace_root_when_nested_workspaces_exist() {
     let tmp = copy_fixture_for_tests();
     write_file(
         tmp.path(),
@@ -20,12 +20,7 @@ fn errors_only_for_roots_without_an_allowed_covering_config() {
     let results = run_for_tests(tmp.path());
     assertions::assert_selective_uncovered(
         &results,
-        &[
-            "workspace root `apps/backend` is not covered by any allowed clippy.toml at the validation root, a workspace root, or a standalone package root.",
-            "workspace root `apps/devctl` is covered by `apps/devctl/clippy.toml`.",
-            "workspace root `apps/worker` is not covered by any allowed clippy.toml at the validation root, a workspace root, or a standalone package root.",
-            "workspace root is not covered by any allowed clippy.toml at the validation root, a workspace root, or a standalone package root.",
-        ],
-        &["", "apps/backend", "apps/worker"],
+        &["workspace root is not covered by any allowed clippy.toml at a workspace root."],
+        &[""],
     );
 }

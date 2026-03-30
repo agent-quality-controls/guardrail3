@@ -80,7 +80,9 @@ pub fn check(tree: &ProjectTree, route: &RsClippyRoute) -> Vec<CheckResult> {
         } else if tree.file_exists("guardrail3.toml") {
             rs_clippy_23_policy_context_parseable::check_parseable(&mut results);
         }
+    }
 
+    if has_routed_roots || !facts.cargo_config_overrides.is_empty() {
         if facts.cargo_config_overrides.is_empty() {
             rs_clippy_24_forbid_clippy_conf_dir_override::check_clean(&mut results);
         } else {

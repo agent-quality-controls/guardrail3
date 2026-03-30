@@ -3,12 +3,33 @@ mod full_tree_policy;
 use std::path::{Path, PathBuf};
 
 use guardrail3_adapters_outbound_fs::RealFileSystem;
+use guardrail3_domain_config::types::GuardrailConfig;
+use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
 const GOLDEN_REL: &str = "../../../../../../../tests/fixtures/r_arch_01/golden";
 
 pub(super) fn run_family(root: &Path) -> Vec<guardrail3_domain_report::CheckResult> {
     let tree = guardrail3_app_core::project_walker::walk_project(&RealFileSystem, root);
     super::check_test_tree(&tree)
+}
+
+pub(super) fn route_family(root: &Path) -> guardrail3_app_rs_family_mapper::RsToolchainRoute {
+    let tree = guardrail3_app_core::project_walker::walk_project(&RealFileSystem, root);
+    let scope = guardrail3_app_rs_placement::collect(&tree);
+    let config = tree
+        .file_content("guardrail3.toml")
+        .and_then(|content| toml::from_str::<GuardrailConfig>(content).ok());
+    let selected = RustFamilySelection::new(std::collections::BTreeSet::from([
+        RustValidateFamily::Toolchain,
+    ]));
+    guardrail3_app_rs_family_mapper::FamilyMapper::new(
+        &tree,
+        &scope,
+        config.as_ref(),
+        &selected,
+        None,
+    )
+    .map_rs_toolchain()
 }
 
 fn fixture_root() -> PathBuf {

@@ -48,7 +48,7 @@ fn root_config_uses_packages_profile_when_packages_policy_exists() {
 }
 
 #[test]
-fn validation_root_clippy_is_collected_without_root_cargo() {
+fn validation_root_clippy_without_root_cargo_is_not_allowed() {
     let tree = project_tree(
         vec![
             ("", dir_entry(&["apps"], &["clippy.toml"])),
@@ -77,11 +77,16 @@ fn validation_root_clippy_is_collected_without_root_cargo() {
 
     let facts = collect_for_tests(&tree);
 
-    assertions::assert_validation_root_clippy_is_collected_without_root_cargo(
+    assert!(
+        facts.allowed_configs.iter().all(|config| config.rel_path != "clippy.toml"),
+        "repo-root clippy.toml should not be treated as an allowed policy root without a workspace Cargo.toml"
+    );
+    assert!(
         facts
-            .allowed_configs
+            .forbidden_configs
             .iter()
-            .any(|config| config.rel_path == "clippy.toml"),
+            .any(|config| config.config.rel_path == "clippy.toml"),
+        "repo-root clippy.toml should surface as forbidden when repo root is not a workspace root"
     );
 }
 
@@ -104,7 +109,7 @@ fn standalone_app_root_uses_rust_apps_profile_policy() {
             ),
             (
                 "apps/libsite/Cargo.toml",
-                "[package]\nname = \"libsite\"\n".to_owned(),
+                "[workspace]\nmembers = []\n[package]\nname = \"libsite\"\n".to_owned(),
             ),
             (
                 "apps/libsite/clippy.toml",

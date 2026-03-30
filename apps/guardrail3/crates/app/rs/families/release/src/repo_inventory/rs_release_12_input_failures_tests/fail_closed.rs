@@ -22,6 +22,9 @@ fn emits_exact_fail_closed_hits_for_malformed_release_configs_and_workflow_yaml(
             (
                 "Cargo.toml",
                 r#"
+[workspace]
+resolver = "2"
+
 [package]
 name = "example"
 version = "0.1.0"
@@ -89,13 +92,22 @@ fn cargo_parse_failure_is_reported_without_suppressing_other_repo_results() {
         vec![
             (
                 "",
-                dir_entry(&[".github"], &["Cargo.toml", "release-plz.toml"]),
+                dir_entry(&[".github", "crates"], &["Cargo.toml", "release-plz.toml"]),
             ),
             (".github", dir_entry(&["workflows"], &[])),
             (".github/workflows", dir_entry(&[], &["release.yml"])),
+            ("crates", dir_entry(&["example"], &[])),
+            ("crates/example", dir_entry(&[], &["Cargo.toml"])),
         ],
         vec![
-            ("Cargo.toml", "[package"),
+            (
+                "Cargo.toml",
+                r#"
+[workspace]
+members = ["crates/example"]
+resolver = "2"
+"#,
+            ),
             (
                 "release-plz.toml",
                 r#"
@@ -103,6 +115,7 @@ fn cargo_parse_failure_is_reported_without_suppressing_other_repo_results() {
 changelog_config = "cliff.toml"
 "#,
             ),
+            ("crates/example/Cargo.toml", "[package"),
             (
                 ".github/workflows/release.yml",
                 r#"
@@ -122,7 +135,7 @@ jobs:
     assertions::assert_rule_results(
         &results,
         &[ExpectedRuleResult {
-            file: Some("Cargo.toml"),
+            file: Some("crates/example/Cargo.toml"),
             ..ExpectedRuleResult::default()
         }],
     );

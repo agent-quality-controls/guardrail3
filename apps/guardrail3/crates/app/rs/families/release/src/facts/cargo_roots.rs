@@ -14,59 +14,143 @@ pub(super) fn collect_cargo_roots(
     route: &RsReleaseRoute,
     input_failures: &mut Vec<ReleaseInputFailureFacts>,
 ) -> BTreeMap<String, CargoRootFacts> {
-    let mut attempted_rel_dirs = route
-        .roots()
-        .iter()
-        .map(|root| root.rel_dir().to_owned())
-        .collect::<BTreeSet<_>>();
-    let mut cargo_roots = attempted_rel_dirs
-        .iter()
-        .cloned()
-        .filter_map(|rel_dir| {
-            parse_root(tree, &rel_dir, input_failures).map(|root| (rel_dir, root))
-        })
-        .collect::<BTreeMap<_, _>>();
-
-    let candidate_dirs = tree
-        .structure()
-        .iter()
-        .filter_map(|(dir_rel, entry)| {
-            entry
-                .files()
-                .iter()
-                .any(|file| file == "Cargo.toml")
-                .then_some(dir_rel.clone())
-        })
+    let mut attempted_rel_dirs = BTreeSet::new();
+    let mut cargo_roots = BTreeMap::new();
+    let mut pending_rel_dirs = cargo_manifest_owner_dirs(tree, route)
+        .into_iter()
         .collect::<Vec<_>>();
 
-    loop {
-        let mut added = false;
-        let workspace_roots = cargo_roots
-            .values()
-            .filter(|root| root.has_workspace)
-            .cloned()
-            .collect::<Vec<_>>();
-
-        for workspace_root in workspace_roots {
-            for candidate_rel_dir in &candidate_dirs {
-                if attempted_rel_dirs.contains(candidate_rel_dir) {
-                    continue;
-                }
-                if !workspace_candidate_rel_dir_matches(&workspace_root, candidate_rel_dir) {
-                    continue;
-                }
-                let _ = attempted_rel_dirs.insert(candidate_rel_dir.clone());
-                if let Some(root) = parse_root(tree, candidate_rel_dir, input_failures) {
-                    let _ = cargo_roots.insert(candidate_rel_dir.clone(), root);
-                    added = true;
+    while let Some(candidate_rel_dir) = pending_rel_dirs.pop() {
+        if !attempted_rel_dirs.insert(candidate_rel_dir.clone()) {
+            continue;
+        }
+        if let Some(root) = parse_root(tree, &candidate_rel_dir, input_failures) {
+            for member_rel in expanded_workspace_members(tree, &root) {
+                if !attempted_rel_dirs.contains(&member_rel) {
+                    pending_rel_dirs.push(member_rel);
                 }
             }
-        }
-
-        if !added {
-            return cargo_roots;
+            let _ = cargo_roots.insert(candidate_rel_dir, root);
         }
     }
+
+    for claimed_rel_dir in claimed_workspace_packages(tree, cargo_roots.values()) {
+        if attempted_rel_dirs.insert(claimed_rel_dir.clone()) {
+            if let Some(root) = parse_root(tree, &claimed_rel_dir, input_failures) {
+                let _ = cargo_roots.insert(claimed_rel_dir, root);
+            }
+        }
+    }
+
+    cargo_roots
+}
+
+fn cargo_manifest_owner_dirs(tree: &ProjectTree, route: &RsReleaseRoute) -> BTreeSet<String> {
+    let mut owner_dirs = BTreeSet::new();
+
+    for root in route.roots() {
+        let root_rel = root.rel_dir();
+        let _ = owner_dirs.insert(root_rel.to_owned());
+
+        for dir_rel in tree.structure().keys() {
+            if dir_rel.is_empty() {
+                continue;
+            }
+            if !path_is_under(dir_rel, root_rel) {
+                continue;
+            }
+            if tree.file_exists(&join_under_root(dir_rel, "Cargo.toml")) {
+                let _ = owner_dirs.insert(dir_rel.to_owned());
+            }
+        }
+    }
+
+    owner_dirs
+}
+
+fn expanded_workspace_members(tree: &ProjectTree, root: &CargoRootFacts) -> Vec<String> {
+    root.workspace_members
+        .iter()
+        .flat_map(|pattern| expand_member_pattern(tree, &root.rel_dir, pattern))
+        .collect()
+}
+
+fn expand_member_pattern(tree: &ProjectTree, workspace_rel: &str, pattern: &str) -> Vec<String> {
+    let normalized = normalize_rel_dir(join_rel_dir("", pattern));
+    let rel_pattern = if workspace_rel.is_empty() {
+        normalized.clone()
+    } else {
+        normalize_rel_dir(join_rel_dir(workspace_rel, &normalized))
+    };
+
+    if looks_like_glob(&normalized) {
+        tree.matching_dir_rels(&rel_pattern)
+            .into_iter()
+            .filter(|rel| tree.file_exists(&join_under_root(rel, "Cargo.toml")))
+            .map(|rel| normalize_rel_dir(join_rel_dir("", &rel)))
+            .collect()
+    } else if tree.file_exists(&join_under_root(&rel_pattern, "Cargo.toml")) {
+        vec![rel_pattern]
+    } else {
+        Vec::new()
+    }
+}
+
+fn looks_like_glob(pattern: &str) -> bool {
+    pattern.contains('*') || pattern.contains('?') || pattern.contains('[')
+}
+
+fn claimed_workspace_packages<'a>(
+    tree: &ProjectTree,
+    workspace_roots: impl Iterator<Item = &'a CargoRootFacts>,
+) -> Vec<String> {
+    let workspace_dirs = workspace_roots
+        .filter(|root| root.has_workspace)
+        .map(|root| root.rel_dir.clone())
+        .collect::<BTreeSet<_>>();
+
+    if workspace_dirs.is_empty() {
+        return Vec::new();
+    }
+
+    let mut claimed = BTreeSet::new();
+    if tree.file_exists("Cargo.toml") {
+        let _ = maybe_collect_claimed_workspace_root(tree, "", &workspace_dirs, &mut claimed);
+    }
+    for dir in tree.dirs_with_file("Cargo.toml") {
+        let _ = maybe_collect_claimed_workspace_root(tree, &dir, &workspace_dirs, &mut claimed);
+    }
+
+    claimed.into_iter().collect()
+}
+
+fn maybe_collect_claimed_workspace_root(
+    tree: &ProjectTree,
+    rel_dir: &str,
+    workspace_dirs: &BTreeSet<String>,
+    claimed: &mut BTreeSet<String>,
+) -> Option<()> {
+    if workspace_dirs.contains(rel_dir) {
+        return Some(());
+    }
+
+    let cargo_rel_path = if rel_dir.is_empty() {
+        "Cargo.toml".to_owned()
+    } else {
+        join_under_root(rel_dir, "Cargo.toml")
+    };
+    let content = tree.file_content(&cargo_rel_path)?;
+    let parsed = toml::from_str::<toml::Value>(content).ok()?;
+    let package_workspace = parsed
+        .get("package")
+        .and_then(|package| package.get("workspace"))
+        .and_then(toml::Value::as_str)?;
+    let workspace_rel = normalize_rel_dir(join_rel_dir(rel_dir, package_workspace));
+    if workspace_dirs.contains(&workspace_rel) {
+        let _ = claimed.insert(rel_dir.to_owned());
+    }
+
+    Some(())
 }
 
 pub(super) fn workspace_root_for_package<'a>(
@@ -112,26 +196,6 @@ fn workspace_member_pattern_matches(
     Pattern::new(&repo_pattern)
         .map(|pattern| pattern.matches(package_rel_dir))
         .unwrap_or(false)
-}
-
-fn workspace_candidate_rel_dir_matches(
-    workspace_root: &CargoRootFacts,
-    candidate_rel_dir: &str,
-) -> bool {
-    if candidate_rel_dir == workspace_root.rel_dir {
-        return true;
-    }
-    if workspace_root
-        .workspace_exclude
-        .iter()
-        .any(|pattern| workspace_member_pattern_matches(workspace_root, pattern, candidate_rel_dir))
-    {
-        return false;
-    }
-    workspace_root
-        .workspace_members
-        .iter()
-        .any(|pattern| workspace_member_pattern_matches(workspace_root, pattern, candidate_rel_dir))
 }
 
 fn parse_root(
@@ -233,4 +297,12 @@ fn normalize_rel_dir(path: PathBuf) -> String {
         }
     }
     parts.join("/")
+}
+
+fn path_is_under(rel_path: &str, parent_rel: &str) -> bool {
+    parent_rel.is_empty()
+        || rel_path == parent_rel
+        || rel_path
+            .strip_prefix(parent_rel)
+            .is_some_and(|rest| rest.starts_with('/'))
 }

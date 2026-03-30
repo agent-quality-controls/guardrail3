@@ -4,7 +4,7 @@ use test_support::{build_fixture_clippy_toml, dir_entry, project_tree};
 use super::super::run_with_validation_scope_for_tests;
 
 #[test]
-fn ignores_sibling_policy_roots_when_validation_scope_targets_one_app() {
+fn rejects_nested_workspace_policy_roots_when_validation_scope_targets_one_app() {
     let tree = project_tree(
         vec![
             ("", dir_entry(&["apps"], &["Cargo.toml", "clippy.toml"])),
@@ -63,6 +63,5 @@ fn ignores_sibling_policy_roots_when_validation_scope_targets_one_app() {
     );
 
     let results = run_with_validation_scope_for_tests(&tree, "apps/backend");
-    assertions::assert_allowed_files(&results, &["clippy.toml", "apps/backend/clippy.toml"]);
-    assertions::assert_no_forbidden_results(&results);
+    assertions::assert_allowed_files(&results, &["clippy.toml"]);
 }

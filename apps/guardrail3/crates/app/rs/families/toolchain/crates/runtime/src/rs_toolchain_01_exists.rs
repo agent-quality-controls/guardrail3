@@ -174,28 +174,13 @@ pub(crate) fn nested_workspace_root_tree() -> guardrail3_domain_project_tree::Pr
 pub(crate) fn test_route(
     tree: &guardrail3_domain_project_tree::ProjectTree,
 ) -> guardrail3_app_rs_family_mapper::RsToolchainRoute {
-    let mut roots = Vec::new();
-
-    if tree.file_exists("Cargo.toml") {
-        roots.push(guardrail3_app_rs_family_mapper::RsRootView::new(
-            String::new(),
-            "Cargo.toml".to_owned(),
-        ));
-    }
-
-    roots.extend(
-        tree.dirs_with_file("Cargo.toml")
-            .into_iter()
-            .map(|rel_dir| {
-                guardrail3_app_rs_family_mapper::RsRootView::new(
-                    rel_dir.clone(),
-                    guardrail3_domain_project_tree::ProjectTree::join_rel(&rel_dir, "Cargo.toml"),
-                )
-            }),
-    );
-    roots.sort_by(|left, right| left.cargo_rel_path().cmp(right.cargo_rel_path()));
-
-    guardrail3_app_rs_family_mapper::RsToolchainRoute::new(roots)
+    let scope = guardrail3_app_rs_placement::collect(tree);
+    let selected =
+        guardrail3_validation_model::RustFamilySelection::new(std::collections::BTreeSet::from([
+            guardrail3_validation_model::RustValidateFamily::Toolchain,
+        ]));
+    guardrail3_app_rs_family_mapper::FamilyMapper::new(tree, &scope, None, &selected, None)
+        .map_rs_toolchain()
 }
 
 fn expected_toolchain_rel(rel_dir: &str) -> String {

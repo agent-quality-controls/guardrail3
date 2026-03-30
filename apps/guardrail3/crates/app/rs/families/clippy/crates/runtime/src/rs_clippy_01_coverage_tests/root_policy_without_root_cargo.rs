@@ -4,7 +4,7 @@ use test_support::{build_fixture_clippy_toml, create_dir_all, create_temp_dir, w
 use super::super::run_for_tests;
 
 #[test]
-fn validation_root_clippy_covers_descendant_workspace_without_root_cargo() {
+fn repo_root_clippy_does_not_cover_descendant_workspace_without_root_cargo() {
     let tmp = create_temp_dir("root-policy-without-root-cargo");
     create_dir_all(&tmp.path().join("apps/backend/crates/core"));
     write_file(
@@ -27,11 +27,11 @@ fn validation_root_clippy_covers_descendant_workspace_without_root_cargo() {
     assertions::assert_multi_root_coverage(
         &results,
         &[(
-            "workspace root `apps/backend` is covered by `clippy.toml`.",
-            assertions::Severity::Info,
-            true,
-            Some("clippy.toml"),
-            "Rust unit covered by clippy.toml",
+            "workspace root `apps/backend` is not covered by any allowed clippy.toml at a workspace root.",
+            assertions::Severity::Error,
+            false,
+            Some("apps/backend"),
+            "Rust unit uncovered by clippy.toml",
         )],
     );
 }

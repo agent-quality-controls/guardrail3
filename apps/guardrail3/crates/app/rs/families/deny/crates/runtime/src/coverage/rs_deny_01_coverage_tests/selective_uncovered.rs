@@ -3,7 +3,7 @@ use guardrail3_app_rs_family_deny_assertions::rs_deny_01_coverage as assertions;
 use super::super::{build_fixture_deny_toml, copy_fixture, write_file};
 
 #[test]
-fn errors_only_for_effective_roots_without_a_covering_deny_config() {
+fn errors_only_for_the_top_workspace_root_when_nested_workspaces_exist() {
     let tmp = copy_fixture("../../../../../../../tests/fixtures/r_arch_01/golden");
     write_file(
         tmp.path(),
@@ -23,28 +23,7 @@ fn errors_only_for_effective_roots_without_a_covering_deny_config() {
         &[
             assertions::error_no_file(
                 "Rust root uncovered by deny config",
-                "validation root `.` is not covered by any allowed deny config.",
-                false,
-            ),
-            assertions::error_no_file(
-                "Rust root uncovered by deny config",
                 "workspace root `.` is not covered by any allowed deny config.",
-                false,
-            ),
-            assertions::error_no_file(
-                "Rust root uncovered by deny config",
-                "workspace root `apps/backend` is not covered by any allowed deny config.",
-                false,
-            ),
-            assertions::info(
-                "Rust root covered by deny config",
-                "workspace root `apps/devctl` is covered by `apps/devctl/deny.toml`.",
-                "apps/devctl/deny.toml",
-                true,
-            ),
-            assertions::error_no_file(
-                "Rust root uncovered by deny config",
-                "workspace root `apps/worker` is not covered by any allowed deny config.",
                 false,
             ),
         ],

@@ -1,6 +1,6 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::{copy_fixture, run_family, write_file};
+use super::{copy_fixture, route_family, run_family, write_file};
 
 #[test]
 fn full_tree_fixture_enforces_workspace_only_toolchain_policy() {
@@ -44,6 +44,19 @@ fn full_tree_fixture_enforces_workspace_only_toolchain_policy() {
     );
 
     let results = run_family(tmp.path());
+    let route = route_family(tmp.path());
+
+    let routed_files = route
+        .family_files()
+        .iter()
+        .map(|file| file.rel_path())
+        .collect::<Vec<_>>();
+    assert!(
+        routed_files.contains(&"apps/admin/rust-toolchain.toml")
+            && routed_files.contains(&"packages/ui-kit/rust-toolchain")
+            && routed_files.contains(&"rust-toolchain.toml"),
+        "routed toolchain file surface lost illegal placements: {routed_files:#?}"
+    );
 
     assert_result(
         &results,

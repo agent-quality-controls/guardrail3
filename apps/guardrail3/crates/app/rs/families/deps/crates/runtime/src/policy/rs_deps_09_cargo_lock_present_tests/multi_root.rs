@@ -5,10 +5,7 @@ use guardrail3_app_rs_family_deps_assertions::rs_deps_09_cargo_lock_present as a
 fn missing_lockfiles_across_multiple_roots_keep_exact_severities() {
     let tree = project_tree(
         vec![
-            (
-                "",
-                dir_entry(&["apps", "packages"], &["Cargo.toml", "guardrail3.toml"]),
-            ),
+            ("", dir_entry(&["apps", "packages"], &["guardrail3.toml"])),
             ("apps", dir_entry(&["api"], &[])),
             ("apps/api", dir_entry(&[], &["Cargo.toml"])),
             ("packages", dir_entry(&["core"], &[])),
@@ -29,13 +26,6 @@ fn missing_lockfiles_across_multiple_roots_keep_exact_severities() {
                 "#,
             ),
             (
-                "Cargo.toml",
-                r#"
-                    [workspace]
-                    members = []
-                "#,
-            ),
-            (
                 "apps/api/Cargo.toml",
                 r#"
                     [workspace]
@@ -45,8 +35,8 @@ fn missing_lockfiles_across_multiple_roots_keep_exact_severities() {
             (
                 "packages/core/Cargo.toml",
                 r#"
-                    [package]
-                    name = "core"
+                    [workspace]
+                    members = []
                 "#,
             ),
         ],
@@ -57,16 +47,18 @@ fn missing_lockfiles_across_multiple_roots_keep_exact_severities() {
         &results,
         &[
             assertions::ExpectedRuleResult {
-                file: Some("Cargo.lock"),
+                file: Some("apps/api/Cargo.lock"),
                 severity: Some(assertions::Severity::Error),
-                message: Some("Non-library Rust root `.` is missing `Cargo.lock`."),
+                message: Some("Non-library Rust root `apps/api` is missing `apps/api/Cargo.lock`."),
                 inventory: Some(false),
                 ..Default::default()
             },
             assertions::ExpectedRuleResult {
-                file: Some("apps/api/Cargo.lock"),
-                severity: Some(assertions::Severity::Error),
-                message: Some("Non-library Rust root `apps/api` is missing `apps/api/Cargo.lock`."),
+                file: Some("packages/core/Cargo.lock"),
+                severity: Some(assertions::Severity::Info),
+                message: Some(
+                    "Library-profile Rust root `packages/core` is missing `packages/core/Cargo.lock`.",
+                ),
                 inventory: Some(false),
                 ..Default::default()
             },
@@ -100,8 +92,8 @@ fn nested_package_root_uses_library_lockfile_severity() {
             (
                 "tools/packages/core/Cargo.toml",
                 r#"
-                    [package]
-                    name = "core"
+                    [workspace]
+                    members = []
                 "#,
             ),
         ],

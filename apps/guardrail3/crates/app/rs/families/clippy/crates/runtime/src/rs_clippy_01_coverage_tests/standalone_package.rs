@@ -4,7 +4,7 @@ use test_support::{build_fixture_clippy_toml, create_dir_all, create_temp_dir, w
 use super::super::run_for_tests;
 
 #[test]
-fn inventories_local_clippy_coverage_for_a_standalone_package_root() {
+fn ignores_non_workspace_package_roots() {
     let tmp = create_temp_dir("rs-clippy-01-standalone-package");
     create_dir_all(&tmp.path().join("tools/helper"));
     write_file(
@@ -19,14 +19,5 @@ fn inventories_local_clippy_coverage_for_a_standalone_package_root() {
     );
 
     let results = run_for_tests(tmp.path());
-    assertions::assert_multi_root_coverage(
-        &results,
-        &[(
-            "standalone package root `tools/helper` is covered by `tools/helper/clippy.toml`.",
-            assertions::Severity::Info,
-            true,
-            Some("tools/helper/clippy.toml"),
-            "Rust unit covered by clippy.toml",
-        )],
-    );
+    assertions::assert_multi_root_coverage(&results, &[]);
 }

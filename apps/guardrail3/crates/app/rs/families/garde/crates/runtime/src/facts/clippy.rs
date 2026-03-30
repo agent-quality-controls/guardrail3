@@ -1,5 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
+use guardrail3_app_rs_family_mapper::RsGardeRoute;
+use guardrail3_app_rs_ownership::RustFamilyFileKind;
 use guardrail3_domain_project_tree::ProjectTree;
 
 use super::policy::policy_settings_for;
@@ -7,30 +9,28 @@ use super::{ClippyConfigCandidate, GardeRootFacts, PolicyRootKind, PolicySetting
 
 pub(super) fn collect_clippy_configs(
     tree: &ProjectTree,
+    route: &RsGardeRoute,
     workspace_roots: &BTreeSet<String>,
-    standalone_package_roots: &BTreeSet<String>,
     input_failures: &mut Vec<super::GardeInputFailureFacts>,
 ) -> Vec<ClippyConfigCandidate> {
-    let mut allowed_policy_roots = BTreeSet::from([String::new()]);
+    let mut allowed_policy_roots = BTreeSet::new();
     allowed_policy_roots.extend(workspace_roots.iter().cloned());
-    allowed_policy_roots.extend(standalone_package_roots.iter().cloned());
 
-    let mut candidates = Vec::new();
-    for file_name in ["clippy.toml", ".clippy.toml"] {
-        if tree.file_exists(file_name) && allowed_policy_roots.contains("") {
-            candidates.push(parse_clippy_candidate(tree, "", file_name, input_failures));
-        }
-        for rel_dir in tree.dirs_with_file(file_name) {
-            if allowed_policy_roots.contains(&rel_dir) {
-                candidates.push(parse_clippy_candidate(
-                    tree,
-                    &rel_dir,
-                    file_name,
-                    input_failures,
-                ));
-            }
-        }
-    }
+    let candidates = route
+        .family_files()
+        .iter()
+        .filter_map(|file| match file.kind() {
+            RustFamilyFileKind::ClippyToml | RustFamilyFileKind::ClippyDotToml => Some((
+                file.logical_owner_rel().to_owned(),
+                file.rel_path().to_owned(),
+            )),
+            _ => None,
+        })
+        .filter(|(rel_dir, _)| allowed_policy_roots.contains(rel_dir))
+        .map(|(rel_dir, rel_path)| {
+            parse_clippy_candidate(tree, &rel_dir, &rel_path, input_failures)
+        })
+        .collect::<Vec<_>>();
 
     let mut by_dir = BTreeMap::<String, Vec<ClippyConfigCandidate>>::new();
     for candidate in candidates {
@@ -53,10 +53,9 @@ pub(super) fn collect_clippy_configs(
 fn parse_clippy_candidate(
     tree: &ProjectTree,
     rel_dir: &str,
-    file_name: &str,
+    rel_path: &str,
     input_failures: &mut Vec<super::GardeInputFailureFacts>,
 ) -> ClippyConfigCandidate {
-    let rel_path = ProjectTree::join_rel(rel_dir, file_name);
     let (parsed, parse_error) = match tree.file_content(&rel_path) {
         Some(content) => match toml::from_str::<toml::Value>(content) {
             Ok(parsed) => (Some(parsed), None),
@@ -65,7 +64,7 @@ fn parse_clippy_candidate(
                     "Failed to parse `{rel_path}` for garde clippy-ban validation: {parse_error}"
                 );
                 input_failures.push(super::GardeInputFailureFacts {
-                    rel_path: rel_path.clone(),
+                    rel_path: rel_path.to_owned(),
                     message: message.clone(),
                 });
                 (None, Some(message))
@@ -76,7 +75,7 @@ fn parse_clippy_candidate(
 
     ClippyConfigCandidate {
         rel_dir: rel_dir.to_owned(),
-        rel_path,
+        rel_path: rel_path.to_owned(),
         parsed,
         parse_error,
     }

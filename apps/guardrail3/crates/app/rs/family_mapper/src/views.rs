@@ -1,5 +1,6 @@
 use std::collections::BTreeSet;
 
+use guardrail3_app_rs_ownership::{RustFamilyFileAttachment, RustFamilyFileKind};
 use guardrail3_app_rs_placement::{RustArchRole, RustRootClassification};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -239,19 +240,158 @@ impl RsScopedSourceRoute {
 }
 
 pub type RsCodeRoute = RsScopedSourceRoute;
-pub type RsGardeRoute = RsScopedSourceRoute;
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RsFamilyFileView {
+    rel_path: String,
+    kind: RustFamilyFileKind,
+    attachment: RsFamilyFileAttachmentView,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum RsFamilyFileAttachmentView {
+    ExactRoot {
+        root_rel: String,
+    },
+    NestedUnderRoot {
+        root_rel: String,
+        owner_rel: String,
+    },
+    AncestorOfRoots {
+        root_rels: Vec<String>,
+        owner_rel: String,
+    },
+    OutsideRoots {
+        owner_rel: String,
+    },
+}
+
+impl RsFamilyFileView {
+    #[must_use]
+    pub fn new(
+        rel_path: String,
+        kind: RustFamilyFileKind,
+        attachment: RsFamilyFileAttachmentView,
+    ) -> Self {
+        Self {
+            rel_path,
+            kind,
+            attachment,
+        }
+    }
+
+    #[must_use]
+    pub fn rel_path(&self) -> &str {
+        &self.rel_path
+    }
+
+    #[must_use]
+    pub const fn kind(&self) -> RustFamilyFileKind {
+        self.kind
+    }
+
+    #[must_use]
+    pub fn attachment(&self) -> &RsFamilyFileAttachmentView {
+        &self.attachment
+    }
+
+    #[must_use]
+    pub fn logical_owner_rel(&self) -> &str {
+        self.attachment.logical_owner_rel()
+    }
+
+    #[must_use]
+    pub fn nearest_rust_root_rel(&self) -> Option<&str> {
+        self.attachment.nearest_rust_root_rel()
+    }
+
+    #[must_use]
+    pub fn ancestor_rust_root_rels(&self) -> Option<&[String]> {
+        self.attachment.ancestor_rust_root_rels()
+    }
+
+    #[must_use]
+    pub fn exact_rust_root_owner(&self) -> bool {
+        self.attachment.exact_rust_root_owner()
+    }
+}
+
+impl RsFamilyFileAttachmentView {
+    #[must_use]
+    pub fn from_attachment(attachment: &RustFamilyFileAttachment) -> Self {
+        match attachment {
+            RustFamilyFileAttachment::ExactRoot { root_rel } => Self::ExactRoot {
+                root_rel: root_rel.clone(),
+            },
+            RustFamilyFileAttachment::NestedUnderRoot {
+                root_rel,
+                owner_rel,
+            } => Self::NestedUnderRoot {
+                root_rel: root_rel.clone(),
+                owner_rel: owner_rel.clone(),
+            },
+            RustFamilyFileAttachment::AncestorOfRoots {
+                root_rels,
+                owner_rel,
+            } => Self::AncestorOfRoots {
+                root_rels: root_rels.clone(),
+                owner_rel: owner_rel.clone(),
+            },
+            RustFamilyFileAttachment::OutsideRoots { owner_rel } => Self::OutsideRoots {
+                owner_rel: owner_rel.clone(),
+            },
+        }
+    }
+
+    #[must_use]
+    pub fn logical_owner_rel(&self) -> &str {
+        match self {
+            Self::ExactRoot { root_rel } => root_rel,
+            Self::NestedUnderRoot { owner_rel, .. }
+            | Self::AncestorOfRoots { owner_rel, .. }
+            | Self::OutsideRoots { owner_rel } => owner_rel,
+        }
+    }
+
+    #[must_use]
+    pub fn nearest_rust_root_rel(&self) -> Option<&str> {
+        match self {
+            Self::ExactRoot { root_rel } | Self::NestedUnderRoot { root_rel, .. } => {
+                Some(root_rel.as_str())
+            }
+            Self::AncestorOfRoots { .. } | Self::OutsideRoots { .. } => None,
+        }
+    }
+
+    #[must_use]
+    pub fn ancestor_rust_root_rels(&self) -> Option<&[String]> {
+        match self {
+            Self::AncestorOfRoots { root_rels, .. } => Some(root_rels.as_slice()),
+            Self::ExactRoot { .. } | Self::NestedUnderRoot { .. } | Self::OutsideRoots { .. } => {
+                None
+            }
+        }
+    }
+
+    #[must_use]
+    pub fn exact_rust_root_owner(&self) -> bool {
+        matches!(self, Self::ExactRoot { .. })
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RsCargoRoute {
     roots: Vec<RsRootView>,
+    family_files: Vec<RsFamilyFileView>,
     validation_scope: Option<String>,
 }
 
 impl RsCargoRoute {
     #[must_use]
-    pub fn new(roots: Vec<RsRootView>) -> Self {
+    pub fn new(roots: Vec<RsRootView>, family_files: Vec<RsFamilyFileView>) -> Self {
         Self {
             roots,
+            family_files,
             validation_scope: None,
         }
     }
@@ -268,6 +408,11 @@ impl RsCargoRoute {
     }
 
     #[must_use]
+    pub fn family_files(&self) -> &[RsFamilyFileView] {
+        &self.family_files
+    }
+
+    #[must_use]
     pub fn validation_scope(&self) -> Option<&str> {
         self.validation_scope.as_deref()
     }
@@ -281,14 +426,20 @@ pub type RsToolchainRoute = RsCargoRoute;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RsDenyRoute {
     roots: Vec<RsRootView>,
+    family_files: Vec<RsFamilyFileView>,
     validation_scope: Option<String>,
 }
 
 impl RsDenyRoute {
     #[must_use]
-    pub fn new(roots: Vec<RsRootView>, validation_scope: Option<String>) -> Self {
+    pub fn new(
+        roots: Vec<RsRootView>,
+        family_files: Vec<RsFamilyFileView>,
+        validation_scope: Option<String>,
+    ) -> Self {
         Self {
             roots,
+            family_files,
             validation_scope,
         }
     }
@@ -296,6 +447,11 @@ impl RsDenyRoute {
     #[must_use]
     pub fn roots(&self) -> &[RsRootView] {
         &self.roots
+    }
+
+    #[must_use]
+    pub fn family_files(&self) -> &[RsFamilyFileView] {
+        &self.family_files
     }
 
     #[must_use]
@@ -307,17 +463,45 @@ impl RsDenyRoute {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RsReleaseRoute {
     roots: Vec<RsRootView>,
+    family_files: Vec<RsFamilyFileView>,
+    validation_scope: Option<String>,
 }
 
 impl RsReleaseRoute {
     #[must_use]
     pub fn new(roots: Vec<RsRootView>) -> Self {
-        Self { roots }
+        Self {
+            roots,
+            family_files: Vec::new(),
+            validation_scope: None,
+        }
+    }
+
+    #[must_use]
+    pub fn with_family_files(mut self, family_files: Vec<RsFamilyFileView>) -> Self {
+        self.family_files = family_files;
+        self
+    }
+
+    #[must_use]
+    pub fn with_validation_scope(mut self, validation_scope: Option<String>) -> Self {
+        self.validation_scope = validation_scope;
+        self
     }
 
     #[must_use]
     pub fn roots(&self) -> &[RsRootView] {
         &self.roots
+    }
+
+    #[must_use]
+    pub fn family_files(&self) -> &[RsFamilyFileView] {
+        &self.family_files
+    }
+
+    #[must_use]
+    pub fn validation_scope(&self) -> Option<&str> {
+        self.validation_scope.as_deref()
     }
 }
 
@@ -363,6 +547,43 @@ impl RsHexarchRoute {
     #[must_use]
     pub fn guardrail_config_rel_path(&self) -> Option<&str> {
         self.guardrail_config_rel_path.as_deref()
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RsGardeRoute {
+    roots: Vec<RsScopedRootView>,
+    scoped_files: Option<BTreeSet<String>>,
+    family_files: Vec<RsFamilyFileView>,
+}
+
+impl RsGardeRoute {
+    #[must_use]
+    pub fn new(
+        roots: Vec<RsScopedRootView>,
+        scoped_files: Option<BTreeSet<String>>,
+        family_files: Vec<RsFamilyFileView>,
+    ) -> Self {
+        Self {
+            roots,
+            scoped_files,
+            family_files,
+        }
+    }
+
+    #[must_use]
+    pub fn roots(&self) -> &[RsScopedRootView] {
+        &self.roots
+    }
+
+    #[must_use]
+    pub fn scoped_files(&self) -> Option<&BTreeSet<String>> {
+        self.scoped_files.as_ref()
+    }
+
+    #[must_use]
+    pub fn family_files(&self) -> &[RsFamilyFileView] {
+        &self.family_files
     }
 }
 

@@ -3,19 +3,21 @@ use guardrail3_app_rs_family_garde_assertions::rs_garde_01_dependency_present as
 use test_support::{dir_entry, project_tree, temp_root};
 
 #[test]
-fn evaluates_workspace_and_standalone_package_roots() {
+fn evaluates_sibling_workspace_roots() {
     let root = temp_root("rs-garde-01-multi");
 
     let tree = project_tree(
         vec![
             (
                 "",
-                dir_entry(
-                    &["src", "vendor"],
-                    &["Cargo.toml", "clippy.toml", "guardrail3.toml"],
-                ),
+                dir_entry(&["apps", "vendor"], &["guardrail3.toml"]),
             ),
-            ("src", dir_entry(&[], &["main.rs"])),
+            ("apps", dir_entry(&["root"], &[])),
+            (
+                "apps/root",
+                dir_entry(&["src"], &["Cargo.toml", "clippy.toml"]),
+            ),
+            ("apps/root/src", dir_entry(&[], &["main.rs"])),
             ("vendor", dir_entry(&["lib", "tool"], &[])),
             (
                 "vendor/lib",
@@ -29,21 +31,24 @@ fn evaluates_workspace_and_standalone_package_roots() {
             ("vendor/tool/src", dir_entry(&[], &["main.rs"])),
         ],
         vec![
+            ("guardrail3.toml", "[profile]\nname = \"service\"\n"),
             (
-                "Cargo.toml",
+                "apps/root/Cargo.toml",
                 r#"[workspace]
 members = []
+[package]
+name = "root"
+version = "0.1.0"
 [workspace.dependencies]
 serde = { version = "1", features = ["derive"] }
 "#,
             ),
             (
-                "clippy.toml",
+                "apps/root/clippy.toml",
                 "disallowed-methods = []\ndisallowed-types = []\n",
             ),
-            ("guardrail3.toml", "[profile]\nname = \"service\"\n"),
             (
-                "src/main.rs",
+                "apps/root/src/main.rs",
                 r#"
 use serde::Deserialize;
 
@@ -55,7 +60,9 @@ struct RootBoundary {
             ),
             (
                 "vendor/lib/Cargo.toml",
-                r#"[package]
+                r#"[workspace]
+members = []
+[package]
 name = "lib"
 version = "0.1.0"
 [dependencies]
@@ -69,7 +76,9 @@ garde = "0.22"
             ("vendor/lib/src/lib.rs", "pub fn ok() {}"),
             (
                 "vendor/tool/Cargo.toml",
-                r#"[package]
+                r#"[workspace]
+members = []
+[package]
 name = "tool"
 version = "0.1.0"
 [dependencies]
@@ -104,7 +113,7 @@ fn main() {}
         &[
             assertions::ExpectedRuleResult {
                 severity: Some(assertions::Severity::Error),
-                file: Some("Cargo.toml"),
+                file: Some("apps/root/Cargo.toml"),
                 inventory: Some(false),
                 title: Some("garde dependency missing"),
                 message_contains: Some("workspace root"),
@@ -122,7 +131,7 @@ fn main() {}
                 file: Some("vendor/tool/Cargo.toml"),
                 inventory: Some(false),
                 title: Some("garde dependency missing"),
-                message_contains: Some("standalone package root"),
+                message_contains: Some("workspace root"),
                 ..Default::default()
             },
         ],

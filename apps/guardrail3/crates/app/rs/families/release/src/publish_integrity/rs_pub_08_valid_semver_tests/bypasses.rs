@@ -159,17 +159,16 @@ fn inventories_when_workspace_version_is_inherited_via_package_workspace_referen
     let root = temp_root("release-workspace-version-package-workspace");
     let tree = project_tree(
         vec![
-            ("", dir_entry(&["ws", "packages"], &[])),
-            ("ws", dir_entry(&[], &["Cargo.toml"])),
+            ("", dir_entry(&["packages"], &["Cargo.toml"])),
             ("packages", dir_entry(&["pub"], &[])),
             ("packages/pub", dir_entry(&[], &["Cargo.toml"])),
         ],
         vec![
             (
-                "ws/Cargo.toml",
+                "Cargo.toml",
                 r#"
 [workspace]
-members = ["../packages/pub"]
+members = ["packages/pub"]
 resolver = "2"
 
 [workspace.package]
@@ -184,7 +183,7 @@ repository = "https://example.com/repo"
                 r#"
 [package]
 name = "pub"
-workspace = "../../ws"
+workspace = "../.."
 version.workspace = true
 edition = "2024"
 description.workspace = true
@@ -216,18 +215,17 @@ fn errors_when_package_workspace_reference_does_not_include_crate() {
     let root = temp_root("release-workspace-version-package-workspace-orphan");
     let tree = project_tree(
         vec![
-            ("", dir_entry(&["ws", "packages"], &[])),
-            ("ws", dir_entry(&[], &["Cargo.toml"])),
+            ("", dir_entry(&["packages"], &["Cargo.toml"])),
             ("packages", dir_entry(&["member", "orphan"], &[])),
             ("packages/member", dir_entry(&[], &["Cargo.toml"])),
             ("packages/orphan", dir_entry(&[], &["Cargo.toml"])),
         ],
         vec![
             (
-                "ws/Cargo.toml",
+                "Cargo.toml",
                 r#"
 [workspace]
-members = ["../packages/member"]
+members = ["packages/member"]
 resolver = "2"
 
 [workspace.package]
@@ -252,7 +250,7 @@ publish = false
                 r#"
 [package]
 name = "orphan"
-workspace = "../../ws"
+workspace = "../.."
 version.workspace = true
 edition = "2024"
 description.workspace = true

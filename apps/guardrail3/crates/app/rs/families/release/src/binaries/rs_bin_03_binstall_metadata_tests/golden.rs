@@ -37,6 +37,9 @@ fn inventories_binstall_metadata_from_manifest() {
             (
                 "Cargo.toml",
                 r#"
+[workspace]
+resolver = "2"
+
 [package]
 name = "bin"
 version = "0.1.0"
@@ -82,6 +85,9 @@ fn inventories_binstall_metadata_for_autodiscovered_src_bin_manifest() {
             (
                 "Cargo.toml",
                 r#"
+[workspace]
+resolver = "2"
+
 [package]
 name = "bin"
 version = "0.1.0"
@@ -126,6 +132,9 @@ fn inventories_binstall_metadata_for_explicit_bin_when_autobins_disabled() {
             (
                 "Cargo.toml",
                 r#"
+[workspace]
+resolver = "2"
+
 [package]
 name = "bin"
 version = "0.1.0"

@@ -29,7 +29,7 @@ pub fn check(forbidden: &ForbiddenConfigFacts, results: &mut Vec<CheckResult>) {
         ForbiddenConfigReason::NotAllowedRoot => (
             "clippy.toml in forbidden location".to_owned(),
             format!(
-                "`{}` is not an allowed clippy policy root. clippy.toml is allowed only at the validation root, workspace roots, and standalone package roots that are not workspace members.",
+                "`{}` is not an allowed clippy policy root. clippy.toml is allowed only at workspace roots.",
                 forbidden.config.rel_path
             ),
         ),

@@ -3,40 +3,12 @@ use std::collections::{BTreeMap, BTreeSet};
 use guardrail3_domain_project_tree::ProjectTree;
 
 use crate::facts::{
-    CargoRootFacts, CoveredRustUnitFacts, DenyConfigFacts, PolicyRootKind, SameRootConflictFacts,
-    UncoveredRustUnitFacts,
+    CargoRootFacts, CoveredRustUnitFacts, DenyConfigFacts, PolicyRootKind, UncoveredRustUnitFacts,
 };
 
 pub(crate) struct ProfileMapFacts {
     pub(crate) map: BTreeMap<String, Option<String>>,
     pub(crate) parse_error: Option<String>,
-}
-
-pub(crate) fn collect_same_root_conflicts(
-    allowed_configs: &[DenyConfigFacts],
-) -> Vec<SameRootConflictFacts> {
-    let mut grouped = BTreeMap::<String, Vec<String>>::new();
-    for config in allowed_configs {
-        grouped
-            .entry(config.policy_root_rel.clone())
-            .or_default()
-            .push(config.rel_path.clone());
-    }
-
-    grouped
-        .into_iter()
-        .filter_map(|(policy_root_rel, mut rel_paths)| {
-            if rel_paths.len() <= 1 {
-                None
-            } else {
-                rel_paths.sort();
-                Some(SameRootConflictFacts {
-                    policy_root_rel,
-                    rel_paths,
-                })
-            }
-        })
-        .collect()
 }
 
 pub(crate) fn nearest_allowed_ancestor(
@@ -54,12 +26,6 @@ fn is_ancestor_dir(ancestor: &str, rel_dir: &str) -> bool {
     ancestor.is_empty() || ancestor == rel_dir || rel_dir.starts_with(&format!("{ancestor}/"))
 }
 
-pub(crate) fn parent_dir(rel_dir: &str) -> String {
-    rel_dir
-        .rsplit_once('/')
-        .map_or_else(String::new, |(parent, _)| parent.to_owned())
-}
-
 fn config_precedence(file_kind: &str) -> usize {
     match file_kind {
         "deny.toml" => 3,
@@ -72,7 +38,6 @@ fn config_precedence(file_kind: &str) -> usize {
 pub(crate) fn read_profile_map(
     tree: &ProjectTree,
     cargo_roots: &BTreeMap<String, CargoRootFacts>,
-    standalone_package_roots: &BTreeSet<String>,
 ) -> ProfileMapFacts {
     let mut map = BTreeMap::new();
     let _ = map.insert(String::new(), None);
@@ -147,8 +112,16 @@ pub(crate) fn read_profile_map(
         {
             let _ = map.insert(String::new(), profile_name.clone());
         }
-        for rel_dir in standalone_package_roots {
-            let _ = map.entry(rel_dir.clone()).or_insert(profile_name.clone());
+        for rel_dir in cargo_roots
+            .values()
+            .filter(|facts| facts.has_workspace)
+            .map(|facts| facts.rel_dir.as_str())
+            .filter(|rel_dir| !rel_dir.is_empty())
+            .filter(|rel_dir| !resolved_app_paths.values().any(|app_rel| app_rel == *rel_dir))
+        {
+            let _ = map
+                .entry(rel_dir.to_owned())
+                .or_insert(profile_name.clone());
         }
     }
 

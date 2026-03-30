@@ -153,7 +153,10 @@ pub fn same_root_conflict_tree() -> ProjectTree {
             (".cargo", dir_entry(&[], &["deny.toml"])),
         ],
         vec![
-            ("Cargo.toml", "[package]\nname=\"crate\"\n".to_owned()),
+            (
+                "Cargo.toml",
+                "[workspace]\nmembers=[]\n[package]\nname=\"crate\"\n".to_owned(),
+            ),
             ("deny.toml", build_fixture_deny_toml("service")),
             (".deny.toml", build_fixture_deny_toml("service")),
             (".cargo/deny.toml", build_fixture_deny_toml("service")),

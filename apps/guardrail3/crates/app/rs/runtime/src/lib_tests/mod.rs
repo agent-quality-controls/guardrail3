@@ -18,7 +18,7 @@ fn filters_disabled_app_results_by_path() {
 
     assertions::assert_filtered_files(
         &filtered,
-        &["apps/enabled/Cargo.toml", "packages/lib/Cargo.toml"],
+        &["apps/enabled/Cargo.toml", "packages/lib/Cargo.toml", "Cargo.toml"],
     );
 }
 
@@ -636,7 +636,7 @@ fn deps_runtime_scoped_opt_in_does_not_emit_global_tool_results() {
 }
 
 #[test]
-fn deps_runtime_repo_workspace_root_stays_live_when_app_scope_enables_deps() {
+fn deps_runtime_ignores_repo_workspace_root_when_enabled_descendant_app_is_not_a_workspace() {
     let root = super::temp_root_for_tests("deps-runtime-repo-workspace-root");
     super::write_file_for_tests(
         &root,
@@ -671,15 +671,7 @@ fn deps_runtime_repo_workspace_root_stays_live_when_app_scope_enables_deps() {
 
     assert_eq!(report.sections().len(), 1, "{report:#?}");
     assert_eq!(report.sections()[0].name(), "deps");
-    assertions::assert_result_present(
-        &report,
-        "deps",
-        "RS-DEPS-09",
-        Some("Cargo.lock"),
-        Some(true),
-        Some("Rust root `.` has `Cargo.lock` committed."),
-    );
-    assertions::assert_absent_file(&report, "deps", "apps/api/Cargo.lock");
+    assertions::assert_clean_section(&report, "deps");
 
     std::fs::remove_dir_all(&root).expect("cleanup temp root");
 }

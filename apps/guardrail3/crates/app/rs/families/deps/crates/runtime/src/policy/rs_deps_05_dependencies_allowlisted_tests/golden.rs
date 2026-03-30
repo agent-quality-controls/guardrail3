@@ -40,6 +40,9 @@ fn renamed_dependency_uses_package_name_for_allowlist() {
             (
                 "apps/api/Cargo.toml",
                 r#"
+                    [workspace]
+                    members = []
+
                     [package]
                     name = "api"
 

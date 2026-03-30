@@ -14,7 +14,7 @@ fn standalone_app_root_uses_rust_apps_library_profile_for_allow_override_checks(
     write_file(
         tmp.path(),
         "apps/libsite/Cargo.toml",
-        "[package]\nname = \"libsite\"\nversion = \"0.1.0\"\nedition = \"2021\"\n",
+        "[workspace]\nmembers = []\n[package]\nname = \"libsite\"\nversion = \"0.1.0\"\nedition = \"2021\"\n",
     );
     write_file(
         tmp.path(),

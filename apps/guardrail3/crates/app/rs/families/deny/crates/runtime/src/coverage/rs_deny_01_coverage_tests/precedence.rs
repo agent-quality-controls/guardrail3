@@ -33,26 +33,8 @@ fn coverage_uses_highest_precedence_config_at_each_policy_root() {
         &results,
         assertions::info(
             "Rust root covered by deny config",
-            "validation root `.` is covered by `deny.toml`.",
-            "deny.toml",
-            true,
-        ),
-    );
-    assertions::assert_contains(
-        &results,
-        assertions::info(
-            "Rust root covered by deny config",
             "workspace root `.` is covered by `deny.toml`.",
             "deny.toml",
-            true,
-        ),
-    );
-    assertions::assert_contains(
-        &results,
-        assertions::info(
-            "Rust root covered by deny config",
-            "workspace root `apps/devctl` is covered by `apps/devctl/deny.toml`.",
-            "apps/devctl/deny.toml",
             true,
         ),
     );

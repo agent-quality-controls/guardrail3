@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 
 use guardrail3_app_rs_family_mapper::RsGardeRoute;
+use guardrail3_app_rs_ownership::RustFamilyFileKind;
 use guardrail3_domain_project_tree::ProjectTree;
 
 use super::{CargoRootFacts, GardeInputFailureFacts};
@@ -11,11 +12,12 @@ pub(super) fn collect_cargo_roots(
     input_failures: &mut Vec<GardeInputFailureFacts>,
 ) -> BTreeMap<String, CargoRootFacts> {
     route
-        .roots()
+        .family_files()
         .iter()
-        .map(|root| {
-            let rel_dir = root.root().rel_dir().to_owned();
-            let rel_path = root.root().cargo_rel_path().to_owned();
+        .filter(|file| file.kind() == RustFamilyFileKind::CargoToml)
+        .map(|file| {
+            let rel_dir = file.logical_owner_rel().to_owned();
+            let rel_path = file.rel_path().to_owned();
             let parsed = tree
                 .file_content(&rel_path)
                 .map(|content| toml::from_str::<toml::Value>(content));
@@ -23,7 +25,6 @@ pub(super) fn collect_cargo_roots(
                 Some(Ok(parsed)) => CargoRootFacts {
                     rel_dir: rel_dir.clone(),
                     has_workspace: parsed.get("workspace").is_some(),
-                    has_package: parsed.get("package").is_some(),
                     workspace_members: parse_workspace_members(tree, &rel_dir, &parsed),
                 },
                 Some(Err(parse_error)) => {
@@ -36,14 +37,12 @@ pub(super) fn collect_cargo_roots(
                     CargoRootFacts {
                         rel_dir: rel_dir.clone(),
                         has_workspace: false,
-                        has_package: false,
                         workspace_members: Vec::new(),
                     }
                 }
                 None => CargoRootFacts {
                     rel_dir: rel_dir.clone(),
                     has_workspace: false,
-                    has_package: false,
                     workspace_members: Vec::new(),
                 },
             };

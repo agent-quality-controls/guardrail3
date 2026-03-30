@@ -173,17 +173,16 @@ fn should_support_categories_inheritance_via_package_workspace_reference() {
     let root = temp_root("release-workspace-categories-package-workspace");
     let tree = project_tree(
         vec![
-            ("", dir_entry(&["ws", "packages"], &[])),
-            ("ws", dir_entry(&[], &["Cargo.toml"])),
+            ("", dir_entry(&["packages"], &["Cargo.toml"])),
             ("packages", dir_entry(&["pub"], &[])),
             ("packages/pub", dir_entry(&[], &["Cargo.toml"])),
         ],
         vec![
             (
-                "ws/Cargo.toml",
+                "Cargo.toml",
                 r#"
 [workspace]
-members = ["../packages/pub"]
+members = ["packages/pub"]
 resolver = "2"
 
 [workspace.package]
@@ -198,7 +197,7 @@ categories = ["command-line-utilities", "development-tools"]
 name = "pub"
 version = "0.1.0"
 edition = "2024"
-workspace = "../../ws"
+workspace = "../.."
 categories.workspace = true
 "#,
             ),

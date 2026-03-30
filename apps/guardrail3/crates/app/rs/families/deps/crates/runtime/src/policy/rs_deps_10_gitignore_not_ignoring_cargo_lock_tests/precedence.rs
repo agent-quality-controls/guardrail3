@@ -5,13 +5,7 @@ use guardrail3_app_rs_family_deps_assertions::rs_deps_10_gitignore_not_ignoring_
 fn reports_exact_gitignore_sources_across_roots() {
     let tree = project_tree(
         vec![
-            (
-                "",
-                dir_entry(
-                    &["apps", "packages"],
-                    &[".gitignore", "Cargo.toml", "Cargo.lock", "guardrail3.toml"],
-                ),
-            ),
+            ("", dir_entry(&["apps", "packages"], &[".gitignore", "guardrail3.toml"])),
             ("apps", dir_entry(&["api"], &[])),
             (
                 "apps/api",
@@ -38,13 +32,6 @@ fn reports_exact_gitignore_sources_across_roots() {
                 "#,
             ),
             (
-                "Cargo.toml",
-                r#"
-                    [workspace]
-                    members = []
-                "#,
-            ),
-            (
                 "apps/api/Cargo.toml",
                 r#"
                     [workspace]
@@ -54,8 +41,8 @@ fn reports_exact_gitignore_sources_across_roots() {
             (
                 "packages/core/Cargo.toml",
                 r#"
-                    [package]
-                    name = "core"
+                    [workspace]
+                    members = []
                 "#,
             ),
             (".gitignore", "packages/core/Cargo.lock"),
@@ -81,16 +68,16 @@ fn reports_exact_gitignore_sources_across_roots() {
         summary,
         vec![
             (
-                Some("Cargo.lock"),
-                assertions::Severity::Info,
-                true,
-                "No relevant `.gitignore` masks `Cargo.lock` for Rust root `.`.",
-            ),
-            (
                 Some("apps/api/.gitignore"),
                 assertions::Severity::Error,
                 false,
                 "`apps/api/.gitignore` ignores `apps/api/Cargo.lock` for Rust root `apps/api`.",
+            ),
+            (
+                Some(".gitignore"),
+                assertions::Severity::Error,
+                false,
+                "`.gitignore` ignores `packages/core/Cargo.lock` for Rust root `packages/core`.",
             ),
         ],
     );
@@ -156,13 +143,7 @@ fn nested_unignore_overrides_ancestor_ignore() {
 fn anchored_root_cargo_lock_pattern_does_not_collapse_to_nested_roots() {
     let tree = project_tree(
         vec![
-            (
-                "",
-                dir_entry(
-                    &["apps"],
-                    &[".gitignore", "Cargo.toml", "Cargo.lock", "guardrail3.toml"],
-                ),
-            ),
+            ("", dir_entry(&["apps"], &[".gitignore", "guardrail3.toml"])),
             ("apps", dir_entry(&["api"], &[])),
             ("apps/api", dir_entry(&[], &["Cargo.toml", "Cargo.lock"])),
         ],
@@ -175,13 +156,6 @@ fn anchored_root_cargo_lock_pattern_does_not_collapse_to_nested_roots() {
 
                     [rust.apps.api]
                     profile = "service"
-                "#,
-            ),
-            (
-                "Cargo.toml",
-                r#"
-                    [workspace]
-                    members = []
                 "#,
             ),
             (
@@ -211,20 +185,12 @@ fn anchored_root_cargo_lock_pattern_does_not_collapse_to_nested_roots() {
 
     assertions::assert_summary(
         summary,
-        vec![
-            (
-                Some(".gitignore"),
-                assertions::Severity::Error,
-                false,
-                "`.gitignore` ignores `Cargo.lock` for Rust root `.`.",
-            ),
-            (
-                Some("apps/api/Cargo.lock"),
-                assertions::Severity::Info,
-                true,
-                "No relevant `.gitignore` masks `apps/api/Cargo.lock` for Rust root `apps/api`.",
-            ),
-        ],
+        vec![(
+            Some("apps/api/Cargo.lock"),
+            assertions::Severity::Info,
+            true,
+            "No relevant `.gitignore` masks `apps/api/Cargo.lock` for Rust root `apps/api`.",
+        )],
     );
 }
 
@@ -232,13 +198,7 @@ fn anchored_root_cargo_lock_pattern_does_not_collapse_to_nested_roots() {
 fn anchored_root_cargo_glob_pattern_stays_anchored() {
     let tree = project_tree(
         vec![
-            (
-                "",
-                dir_entry(
-                    &["apps"],
-                    &[".gitignore", "Cargo.toml", "Cargo.lock", "guardrail3.toml"],
-                ),
-            ),
+            ("", dir_entry(&["apps"], &[".gitignore", "guardrail3.toml"])),
             ("apps", dir_entry(&["api"], &[])),
             ("apps/api", dir_entry(&[], &["Cargo.toml", "Cargo.lock"])),
         ],
@@ -251,13 +211,6 @@ fn anchored_root_cargo_glob_pattern_stays_anchored() {
 
                     [rust.apps.api]
                     profile = "service"
-                "#,
-            ),
-            (
-                "Cargo.toml",
-                r#"
-                    [workspace]
-                    members = []
                 "#,
             ),
             (
@@ -287,20 +240,12 @@ fn anchored_root_cargo_glob_pattern_stays_anchored() {
 
     assertions::assert_summary(
         summary,
-        vec![
-            (
-                Some(".gitignore"),
-                assertions::Severity::Error,
-                false,
-                "`.gitignore` ignores `Cargo.lock` for Rust root `.`.",
-            ),
-            (
-                Some("apps/api/Cargo.lock"),
-                assertions::Severity::Info,
-                true,
-                "No relevant `.gitignore` masks `apps/api/Cargo.lock` for Rust root `apps/api`.",
-            ),
-        ],
+        vec![(
+            Some("apps/api/Cargo.lock"),
+            assertions::Severity::Info,
+            true,
+            "No relevant `.gitignore` masks `apps/api/Cargo.lock` for Rust root `apps/api`.",
+        )],
     );
 }
 

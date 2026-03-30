@@ -3,7 +3,7 @@ use guardrail3_app_rs_family_deny_assertions::rs_deny_01_coverage as assertions;
 use super::super::{build_fixture_deny_toml, copy_fixture, write_file};
 
 #[test]
-fn nearest_local_cargo_deny_variant_still_owns_its_workspace_root() {
+fn nested_local_cargo_deny_variant_does_not_create_another_covered_workspace_root() {
     let tmp = copy_fixture("../../../../../../../tests/fixtures/r_arch_01/golden");
     write_file(tmp.path(), "deny.toml", &build_fixture_deny_toml("service"));
     write_file(
@@ -18,16 +18,7 @@ fn nearest_local_cargo_deny_variant_still_owns_its_workspace_root() {
         &results,
         assertions::info(
             "Rust root covered by deny config",
-            "workspace root `apps/devctl` is covered by `apps/devctl/.cargo/deny.toml`.",
-            "apps/devctl/.cargo/deny.toml",
-            true,
-        ),
-    );
-    assertions::assert_contains(
-        &results,
-        assertions::info(
-            "Rust root covered by deny config",
-            "workspace root `apps/backend` is covered by `deny.toml`.",
+            "workspace root `.` is covered by `deny.toml`.",
             "deny.toml",
             true,
         ),

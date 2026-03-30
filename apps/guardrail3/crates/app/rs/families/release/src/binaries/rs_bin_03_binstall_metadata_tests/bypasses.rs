@@ -65,6 +65,9 @@ fn warns_when_binstall_metadata_is_the_wrong_shape() {
             (
                 "Cargo.toml",
                 r#"
+[workspace]
+resolver = "2"
+
 [package]
 name = "bin"
 version = "0.1.0"
@@ -108,6 +111,9 @@ fn warns_for_autodiscovered_src_bin_manifest_without_binstall_metadata() {
             (
                 "Cargo.toml",
                 r#"
+[workspace]
+resolver = "2"
+
 [package]
 name = "bin"
 version = "0.1.0"
@@ -148,6 +154,9 @@ fn inventories_when_binstall_table_is_empty() {
             (
                 "Cargo.toml",
                 r#"
+[workspace]
+resolver = "2"
+
 [package]
 name = "bin"
 version = "0.1.0"
@@ -191,6 +200,9 @@ fn warns_for_explicit_bin_manifest_without_binstall_metadata() {
             (
                 "Cargo.toml",
                 r#"
+[workspace]
+resolver = "2"
+
 [package]
 name = "my-package"
 version = "0.1.0"

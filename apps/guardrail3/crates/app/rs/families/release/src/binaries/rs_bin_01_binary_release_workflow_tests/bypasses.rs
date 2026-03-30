@@ -458,6 +458,9 @@ fn reports_absence_when_explicit_bin_manifest_targets_different_bin_name() {
             (
                 "Cargo.toml",
                 r#"
+[workspace]
+resolver = "2"
+
 [package]
 name = "my-package"
 version = "0.1.0"

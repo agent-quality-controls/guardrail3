@@ -66,7 +66,7 @@ fn standalone_app_root_uses_rust_apps_profile_policy() {
             ("deny.toml", build_fixture_deny_toml("service")),
             (
                 "apps/libsite/Cargo.toml",
-                "[package]\nname = \"libsite\"\n".to_owned(),
+                "[workspace]\nmembers = []\n[package]\nname = \"libsite\"\n".to_owned(),
             ),
             ("apps/libsite/deny.toml", build_fixture_deny_toml("library")),
         ],
@@ -100,7 +100,7 @@ fn standalone_app_profile_beats_packages_profile_for_same_root() {
             ("deny.toml", build_fixture_deny_toml("service")),
             (
                 "apps/libsite/Cargo.toml",
-                "[package]\nname = \"libsite\"\n".to_owned(),
+                "[workspace]\nmembers = []\n[package]\nname = \"libsite\"\n".to_owned(),
             ),
             ("apps/libsite/deny.toml", build_fixture_deny_toml("service")),
         ],
@@ -293,12 +293,9 @@ fn scoped_deny_facts_do_not_collect_sibling_root_configs() {
         .map(|unit| unit.rel_dir.as_str())
         .collect::<Vec<_>>();
 
-    assert_eq!(allowed, vec!["apps/devctl/deny.toml", "deny.toml"]);
-    assert!(
-        forbidden.is_empty(),
-        "unexpected forbidden configs: {forbidden:#?}"
-    );
-    assert_eq!(covered, vec!["", "", "apps/devctl"]);
+    assert_eq!(allowed, vec!["deny.toml"]);
+    assert_eq!(forbidden, vec!["apps/devctl/deny.toml"]);
+    assert_eq!(covered, vec![""]);
 }
 
 #[test]
@@ -330,22 +327,34 @@ fn scoped_deny_facts_still_collect_owned_nested_shadowing_configs() {
         .map(|config| config.rel_path.as_str())
         .collect::<Vec<_>>();
 
-    assert_eq!(forbidden, vec!["apps/devctl/crates/domain/types/deny.toml"]);
+    assert_eq!(
+        forbidden,
+        vec![
+            "apps/devctl/crates/domain/types/deny.toml",
+            "apps/devctl/deny.toml",
+        ]
+    );
 }
 
 #[test]
-fn validation_root_deny_config_still_covers_routed_roots_without_root_cargo() {
+fn repo_root_deny_does_not_cover_descendant_workspace_without_root_cargo() {
     let tree = project_tree(
         vec![
-            ("", dir_entry(&["packages"], &["deny.toml"])),
-            ("packages", dir_entry(&["shared-types"], &[])),
-            ("packages/shared-types", dir_entry(&[], &["Cargo.toml"])),
+            ("", dir_entry(&["apps"], &["deny.toml"])),
+            ("apps", dir_entry(&["backend"], &[])),
+            ("apps/backend", dir_entry(&["crates"], &["Cargo.toml"])),
+            ("apps/backend/crates", dir_entry(&["core"], &[])),
+            ("apps/backend/crates/core", dir_entry(&[], &["Cargo.toml"])),
         ],
         vec![
             ("deny.toml", build_fixture_deny_toml("library")),
             (
-                "packages/shared-types/Cargo.toml",
-                "[package]\nname = \"shared-types\"\n".to_owned(),
+                "apps/backend/Cargo.toml",
+                "[workspace]\nmembers = [\"crates/*\"]\n".to_owned(),
+            ),
+            (
+                "apps/backend/crates/core/Cargo.toml",
+                "[package]\nname = \"core\"\n".to_owned(),
             ),
         ],
     );
@@ -360,16 +369,24 @@ fn validation_root_deny_config_still_covers_routed_roots_without_root_cargo() {
         .iter()
         .map(|config| config.rel_path.as_str())
         .collect::<Vec<_>>();
+    let forbidden = facts
+        .forbidden_configs
+        .iter()
+        .map(|config| config.rel_path.as_str())
+        .collect::<Vec<_>>();
     let covered = facts
         .covered_units
         .iter()
         .map(|unit| (unit.rel_dir.as_str(), unit.covering_config_rel.as_str()))
         .collect::<Vec<_>>();
+    let uncovered = facts
+        .uncovered_units
+        .iter()
+        .map(|unit| unit.rel_dir.as_str())
+        .collect::<Vec<_>>();
 
-    assert_eq!(allowed, vec!["deny.toml"]);
-    assert_eq!(
-        covered,
-        vec![("", "deny.toml"), ("packages/shared-types", "deny.toml")]
-    );
-    assert!(facts.uncovered_units.is_empty());
+    assert!(allowed.is_empty(), "unexpected allowed configs: {allowed:#?}");
+    assert_eq!(forbidden, vec!["deny.toml"]);
+    assert!(covered.is_empty(), "unexpected covered units: {covered:#?}");
+    assert_eq!(uncovered, vec!["apps/backend"]);
 }

@@ -101,3 +101,43 @@ fn stays_silent_when_validation_scope_contains_no_routed_rust_roots() {
         "expected no clippy results outside routed scope: {results:#?}"
     );
 }
+
+#[test]
+fn errors_when_scoped_override_exists_outside_all_rust_workspaces() {
+    let tree = project_tree(
+        vec![
+            ("", dir_entry(&["apps", "docs"], &[])),
+            ("apps", dir_entry(&["backend"], &[])),
+            (
+                "apps/backend",
+                dir_entry(&["crates"], &["Cargo.toml", "clippy.toml"]),
+            ),
+            ("apps/backend/crates", dir_entry(&["core"], &[])),
+            ("apps/backend/crates/core", dir_entry(&[], &["Cargo.toml"])),
+            ("docs", dir_entry(&["guide"], &[])),
+            ("docs/guide", dir_entry(&[".cargo"], &[])),
+            ("docs/guide/.cargo", dir_entry(&[], &["config.toml"])),
+        ],
+        vec![
+            (
+                "apps/backend/Cargo.toml",
+                "[workspace]\nmembers = [\"crates/*\"]\n".to_owned(),
+            ),
+            (
+                "apps/backend/clippy.toml",
+                build_fixture_clippy_toml("service", false, true, "", ""),
+            ),
+            (
+                "apps/backend/crates/core/Cargo.toml",
+                "[package]\nname = \"core\"\n".to_owned(),
+            ),
+            (
+                "docs/guide/.cargo/config.toml",
+                "[env]\nCLIPPY_CONF_DIR = \".\"\n".to_owned(),
+            ),
+        ],
+    );
+
+    let results = run_family_with_validation_scope_for_tests(&tree, "docs/guide");
+    assertions::assert_override_error(&results, "docs/guide/.cargo/config.toml");
+}

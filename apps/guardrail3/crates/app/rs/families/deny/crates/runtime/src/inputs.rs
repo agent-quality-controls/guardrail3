@@ -26,7 +26,7 @@ pub struct UncoveredRustUnitInput<'a> {
 impl<'a> ConfigDenyInput<'a> {
     pub fn from_facts(facts: &'a DenyFacts) -> Vec<Self> {
         facts
-            .allowed_configs
+            .linted_configs
             .iter()
             .map(|config| Self { config })
             .collect()

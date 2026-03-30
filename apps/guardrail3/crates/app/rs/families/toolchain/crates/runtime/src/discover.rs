@@ -1,12 +1,12 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use guardrail3_app_rs_family_mapper::RsToolchainRoute;
-use guardrail3_app_rs_placement::is_excluded_live_root_dir;
+use guardrail3_app_rs_ownership::RustFamilyFileKind;
 use guardrail3_domain_project_tree::ProjectTree;
 
 use super::facts::{
-    AncestorToolchainFacts, DescendantToolchainFacts, ToolchainFamilyFacts, ToolchainPolicyRootFacts,
-    UnownedToolchainFacts,
+    AncestorToolchainFacts, DescendantToolchainFacts, ToolchainFamilyFacts,
+    ToolchainPolicyRootFacts, UnownedToolchainFacts,
 };
 
 #[derive(Debug, Clone)]
@@ -32,12 +32,12 @@ pub fn collect(tree: &ProjectTree, route: &RsToolchainRoute) -> ToolchainFamilyF
         let Some(snapshot) = snapshots.get(workspace_root_rel) else {
             continue;
         };
-        policy_roots.push(build_policy_root(tree, snapshot));
+        policy_roots.push(build_policy_root(tree, route, snapshot));
     }
 
     policy_roots.sort_by(|a, b| a.cargo_rel_path.cmp(&b.cargo_rel_path));
 
-    let unowned_toolchains = unowned_toolchains(&policy_roots, tree);
+    let unowned_toolchains = unowned_toolchains(&policy_roots, route);
 
     ToolchainFamilyFacts {
         policy_roots,
@@ -97,44 +97,53 @@ fn cargo_snapshot(tree: &ProjectTree, rel_dir: &str, cargo_rel_path: &str) -> Ca
 
 fn build_policy_root(
     tree: &ProjectTree,
+    route: &RsToolchainRoute,
     snapshot: &CargoSnapshot,
 ) -> ToolchainPolicyRootFacts {
-    let toolchain_toml_rel = rel_path(&snapshot.rel_dir, "rust-toolchain.toml");
-    let legacy_toolchain_rel = rel_path(&snapshot.rel_dir, "rust-toolchain");
-    let has_legacy_toolchain = tree.file_exists(&legacy_toolchain_rel);
+    let modern_toolchain_rel = route.family_files().iter().find_map(|file| {
+        (file.logical_owner_rel() == snapshot.rel_dir
+            && file.exact_rust_root_owner()
+            && file.kind() == RustFamilyFileKind::RustToolchainToml)
+            .then(|| file.rel_path().to_owned())
+    });
+    let legacy_toolchain_rel = route.family_files().iter().find_map(|file| {
+        (file.logical_owner_rel() == snapshot.rel_dir
+            && file.exact_rust_root_owner()
+            && file.kind() == RustFamilyFileKind::RustToolchainLegacy)
+            .then(|| file.rel_path().to_owned())
+    });
 
-    let modern_toolchain = if tree.file_exists(&toolchain_toml_rel) {
-        match tree.file_content(&toolchain_toml_rel) {
+    let modern_toolchain = match modern_toolchain_rel.as_deref() {
+        Some(toolchain_toml_rel) => match tree.file_content(toolchain_toml_rel) {
             Some(content) => match toml::from_str::<toml::Value>(content) {
-                Ok(parsed) => (Some(toolchain_toml_rel.clone()), Some(parsed), None),
+                Ok(parsed) => (Some(toolchain_toml_rel.to_owned()), Some(parsed), None),
                 Err(parse_error) => (
-                    Some(toolchain_toml_rel.clone()),
+                    Some(toolchain_toml_rel.to_owned()),
                     None,
                     Some(parse_error.to_string()),
                 ),
             },
             None => (
-                Some(toolchain_toml_rel.clone()),
+                Some(toolchain_toml_rel.to_owned()),
                 None,
                 Some("rust-toolchain.toml content missing from ProjectTree".to_owned()),
             ),
-        }
-    } else {
-        (None, None, None)
+        },
+        None => (None, None, None),
     };
 
     ToolchainPolicyRootFacts {
         rel_dir: snapshot.rel_dir.clone(),
         cargo_rel_path: snapshot.cargo_rel_path.clone(),
         toolchain_toml_rel: modern_toolchain.0,
-        legacy_toolchain_rel: has_legacy_toolchain.then_some(legacy_toolchain_rel),
+        legacy_toolchain_rel,
         parsed: modern_toolchain.1,
         parse_error: modern_toolchain.2,
         cargo_rust_version: snapshot.rust_version.clone(),
         cargo_rust_version_invalid: snapshot.rust_version_invalid,
         cargo_parse_error: snapshot.parse_error.clone(),
-        ancestor_toolchain: nearest_ancestor_toolchain(tree, &snapshot.rel_dir),
-        descendant_toolchains: descendant_toolchains(tree, &snapshot.rel_dir),
+        ancestor_toolchain: nearest_ancestor_toolchain(tree, route, &snapshot.rel_dir),
+        descendant_toolchains: descendant_toolchains(route, &snapshot.rel_dir),
     }
 }
 
@@ -173,14 +182,6 @@ fn extract_rust_version(parsed: &toml::Value, is_workspace_root: bool) -> RustVe
     }
 }
 
-fn rel_path(rel_dir: &str, file_name: &str) -> String {
-    if rel_dir.is_empty() {
-        file_name.to_owned()
-    } else {
-        ProjectTree::join_rel(rel_dir, file_name)
-    }
-}
-
 fn is_nested_beneath(rel_dir: &str, parent_rel: &str) -> bool {
     if parent_rel.is_empty() {
         return !rel_dir.is_empty();
@@ -191,45 +192,55 @@ fn is_nested_beneath(rel_dir: &str, parent_rel: &str) -> bool {
         .is_some_and(|suffix| suffix.starts_with('/'))
 }
 
-fn nearest_ancestor_toolchain(tree: &ProjectTree, rel_dir: &str) -> Option<AncestorToolchainFacts> {
+fn nearest_ancestor_toolchain(
+    tree: &ProjectTree,
+    route: &RsToolchainRoute,
+    rel_dir: &str,
+) -> Option<AncestorToolchainFacts> {
     for ancestor_rel in ancestor_rel_dirs(rel_dir) {
-        let legacy_rel = rel_path(&ancestor_rel, "rust-toolchain");
-        if tree.file_exists(&legacy_rel) {
+        if let Some(file) = route.family_files().iter().find(|file| {
+            file.logical_owner_rel() == ancestor_rel
+                && file.kind() == RustFamilyFileKind::RustToolchainLegacy
+        }) {
             return Some(AncestorToolchainFacts {
-                rel_path: legacy_rel,
+                rel_path: file.rel_path().to_owned(),
                 is_legacy: true,
                 parsed: None,
                 parse_error: None,
             });
         }
 
-        let modern_rel = rel_path(&ancestor_rel, "rust-toolchain.toml");
-        if tree.file_exists(&modern_rel) {
-            return Some(match tree.file_content(&modern_rel) {
-                Some(content) => match toml::from_str::<toml::Value>(content) {
-                    Ok(parsed) => AncestorToolchainFacts {
-                        rel_path: modern_rel,
-                        is_legacy: false,
-                        parsed: Some(parsed),
-                        parse_error: None,
-                    },
-                    Err(parse_error) => AncestorToolchainFacts {
-                        rel_path: modern_rel,
-                        is_legacy: false,
-                        parsed: None,
-                        parse_error: Some(parse_error.to_string()),
-                    },
+        let Some(file) = route.family_files().iter().find(|file| {
+            file.logical_owner_rel() == ancestor_rel
+                && file.kind() == RustFamilyFileKind::RustToolchainToml
+        }) else {
+            continue;
+        };
+
+        return Some(match tree.file_content(file.rel_path()) {
+            Some(content) => match toml::from_str::<toml::Value>(content) {
+                Ok(parsed) => AncestorToolchainFacts {
+                    rel_path: file.rel_path().to_owned(),
+                    is_legacy: false,
+                    parsed: Some(parsed),
+                    parse_error: None,
                 },
-                None => AncestorToolchainFacts {
-                    rel_path: modern_rel,
+                Err(parse_error) => AncestorToolchainFacts {
+                    rel_path: file.rel_path().to_owned(),
                     is_legacy: false,
                     parsed: None,
-                    parse_error: Some(
-                        "ancestor rust-toolchain.toml content missing from ProjectTree".to_owned(),
-                    ),
+                    parse_error: Some(parse_error.to_string()),
                 },
-            });
-        }
+            },
+            None => AncestorToolchainFacts {
+                rel_path: file.rel_path().to_owned(),
+                is_legacy: false,
+                parsed: None,
+                parse_error: Some(
+                    "ancestor rust-toolchain.toml content missing from ProjectTree".to_owned(),
+                ),
+            },
+        });
     }
 
     None
@@ -250,26 +261,23 @@ fn ancestor_rel_dirs(rel_dir: &str) -> Vec<String> {
     ancestors
 }
 
-fn descendant_toolchains(tree: &ProjectTree, rel_dir: &str) -> Vec<DescendantToolchainFacts> {
-    let mut descendants = tree
-        .dirs_with_file("rust-toolchain.toml")
-        .into_iter()
-        .filter(|dir| is_nested_beneath(dir, rel_dir))
-        .map(|dir| DescendantToolchainFacts {
-            rel_path: rel_path(&dir, "rust-toolchain.toml"),
-            is_legacy: false,
-        })
-        .collect::<Vec<_>>();
-
-    descendants.extend(
-        tree.dirs_with_file("rust-toolchain")
-            .into_iter()
-            .filter(|dir| is_nested_beneath(dir, rel_dir))
-            .map(|dir| DescendantToolchainFacts {
-                rel_path: rel_path(&dir, "rust-toolchain"),
+fn descendant_toolchains(route: &RsToolchainRoute, rel_dir: &str) -> Vec<DescendantToolchainFacts> {
+    let mut descendants = route
+        .family_files()
+        .iter()
+        .filter(|file| is_nested_beneath(file.logical_owner_rel(), rel_dir))
+        .filter_map(|file| match file.kind() {
+            RustFamilyFileKind::RustToolchainToml => Some(DescendantToolchainFacts {
+                rel_path: file.rel_path().to_owned(),
+                is_legacy: false,
+            }),
+            RustFamilyFileKind::RustToolchainLegacy => Some(DescendantToolchainFacts {
+                rel_path: file.rel_path().to_owned(),
                 is_legacy: true,
             }),
-    );
+            _ => None,
+        })
+        .collect::<Vec<_>>();
 
     descendants.sort_by(|left, right| left.rel_path.cmp(&right.rel_path));
     descendants
@@ -277,14 +285,14 @@ fn descendant_toolchains(tree: &ProjectTree, rel_dir: &str) -> Vec<DescendantToo
 
 fn unowned_toolchains(
     policy_roots: &[ToolchainPolicyRootFacts],
-    tree: &ProjectTree,
+    route: &RsToolchainRoute,
 ) -> Vec<UnownedToolchainFacts> {
     let allowed_roots = policy_roots
         .iter()
         .map(|root| root.rel_dir.clone())
         .collect::<BTreeSet<_>>();
 
-    let mut toolchains = all_toolchain_files(tree)
+    let mut toolchains = all_toolchain_files(route)
         .into_iter()
         .filter(|toolchain| {
             let rel_dir = toolchain
@@ -303,40 +311,20 @@ fn unowned_toolchains(
     toolchains
 }
 
-fn all_toolchain_files(tree: &ProjectTree) -> Vec<UnownedToolchainFacts> {
-    let mut toolchains = Vec::new();
-
-    if tree.file_exists("rust-toolchain.toml") && !is_excluded_live_root_dir("") {
-        toolchains.push(UnownedToolchainFacts {
-            rel_path: "rust-toolchain.toml".to_owned(),
-            is_legacy: false,
-        });
-    }
-    if tree.file_exists("rust-toolchain") && !is_excluded_live_root_dir("") {
-        toolchains.push(UnownedToolchainFacts {
-            rel_path: "rust-toolchain".to_owned(),
-            is_legacy: true,
-        });
-    }
-
-    toolchains.extend(
-        tree.dirs_with_file("rust-toolchain.toml")
-            .into_iter()
-            .filter(|dir| !is_excluded_live_root_dir(dir))
-            .map(|dir| UnownedToolchainFacts {
-                rel_path: rel_path(&dir, "rust-toolchain.toml"),
+fn all_toolchain_files(route: &RsToolchainRoute) -> Vec<UnownedToolchainFacts> {
+    route
+        .family_files()
+        .iter()
+        .filter_map(|file| match file.kind() {
+            RustFamilyFileKind::RustToolchainToml => Some(UnownedToolchainFacts {
+                rel_path: file.rel_path().to_owned(),
                 is_legacy: false,
             }),
-    );
-    toolchains.extend(
-        tree.dirs_with_file("rust-toolchain")
-            .into_iter()
-            .filter(|dir| !is_excluded_live_root_dir(dir))
-            .map(|dir| UnownedToolchainFacts {
-                rel_path: rel_path(&dir, "rust-toolchain"),
+            RustFamilyFileKind::RustToolchainLegacy => Some(UnownedToolchainFacts {
+                rel_path: file.rel_path().to_owned(),
                 is_legacy: true,
             }),
-    );
-
-    toolchains
+            _ => None,
+        })
+        .collect()
 }

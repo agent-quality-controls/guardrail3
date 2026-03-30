@@ -13,56 +13,15 @@ use super::{
 
 pub(super) fn discover_members(
     tree: &ProjectTree,
-    routed_root_rels: &BTreeSet<String>,
     workspaces: &[WorkspaceFacts],
     workspace_by_member: &BTreeMap<String, String>,
     parsed_guardrail: &Option<ParsedGuardrail>,
-    input_failures: &mut Vec<InputFailureFacts>,
 ) -> Vec<MemberFacts> {
-    let mut member_dirs = workspaces
+    let member_dirs = workspaces
         .iter()
-        .flat_map(|workspace| workspace.member_dirs.iter())
-        .filter(|member_dir| routed_root_rels.contains(*member_dir))
+        .flat_map(|workspace| workspace.workspace_package_dirs.iter())
         .cloned()
         .collect::<BTreeSet<_>>();
-
-    for root_rel_dir in routed_root_rels.iter().cloned() {
-        if workspace_by_member.contains_key(&root_rel_dir) {
-            continue;
-        }
-        if is_nested_beneath_workspace_root(&root_rel_dir, workspaces) {
-            continue;
-        }
-        let cargo_rel_path = if root_rel_dir.is_empty() {
-            "Cargo.toml".to_owned()
-        } else {
-            format!("{root_rel_dir}/Cargo.toml")
-        };
-        let Some(content) = tree.file_content(&cargo_rel_path) else {
-            if tree.file_exists(&cargo_rel_path) {
-                input_failures.push(InputFailureFacts {
-                    rel_path: cargo_rel_path.clone(),
-                    message: "Failed to read Cargo.toml for dependency root discovery.".to_owned(),
-                });
-            }
-            continue;
-        };
-        let parsed = match toml::from_str::<toml::Value>(content) {
-            Ok(parsed) => parsed,
-            Err(parse_error) => {
-                input_failures.push(InputFailureFacts {
-                    rel_path: cargo_rel_path.clone(),
-                    message: format!(
-                        "Failed to parse Cargo.toml for dependency root discovery: {parse_error}"
-                    ),
-                });
-                continue;
-            }
-        };
-        if parsed.get("package").is_some() {
-            let _ = member_dirs.insert(root_rel_dir);
-        }
-    }
 
     let mut members = Vec::new();
     for rel_dir in member_dirs {
@@ -112,6 +71,14 @@ pub(super) fn discover_members(
     }
     members.sort_by(|left, right| left.rel_dir.cmp(&right.rel_dir));
     members
+}
+
+fn path_is_under(rel_path: &str, parent_rel: &str) -> bool {
+    parent_rel.is_empty()
+        || rel_path == parent_rel
+        || rel_path
+            .strip_prefix(parent_rel)
+            .is_some_and(|rest| rest.starts_with('/'))
 }
 
 pub(super) fn policy_for_member(
@@ -264,21 +231,6 @@ pub(super) fn collect_dependency_facts(
     }
 
     (entries, direct_dependency_caps)
-}
-
-fn is_nested_beneath_workspace_root(root_rel_dir: &str, workspaces: &[WorkspaceFacts]) -> bool {
-    workspaces.iter().any(|workspace| {
-        let workspace_root = workspace.root_rel_dir.as_str();
-        workspace_root != root_rel_dir && path_is_under(root_rel_dir, workspace_root)
-    })
-}
-
-fn path_is_under(rel_path: &str, parent_rel: &str) -> bool {
-    parent_rel.is_empty()
-        || rel_path == parent_rel
-        || rel_path
-            .strip_prefix(parent_rel)
-            .is_some_and(|rest| rest.starts_with('/'))
 }
 
 fn collect_top_level_dependency_entries(
