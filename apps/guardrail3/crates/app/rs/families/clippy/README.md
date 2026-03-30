@@ -87,6 +87,10 @@ apps/guardrail3/crates/app/rs/families/clippy/
       src/
         lib.rs
         facts.rs
+        facts/
+          cargo.rs
+          configs.rs
+          policy.rs
         inputs.rs
         clippy_support.rs
         rs_clippy_01_*.rs
@@ -104,14 +108,19 @@ apps/guardrail3/crates/app/rs/families/clippy/
     Cargo.toml
     src/
       lib.rs
+      fixtures.rs
+      fs.rs
+      mutations.rs
+      tree.rs
 ```
 
 This means:
 
 - the family container is not a nested workspace root
 - the runtime crate builds and the family is green under `RS-ARCH` and `RS-CLIPPY`
+- the facts layer is split into `facts.rs` plus narrow helper modules under `facts/` so the family stays under repo-root file-length guardrails without weakening rule ownership
 - rule sidecars now prove behavior through sibling assertions modules instead of runtime-local helper plumbing
-- generic fixture setup now lives in the sibling `test_support` crate rather than a private runtime shim
+- generic fixture setup now lives in the sibling `test_support` crate rather than a private runtime shim, and that crate is split into small helper modules for filesystem, tree-building, fixture scenarios, and TOML edits
 - fresh top-level `RS-TEST` validation now depends on the app-root workspace only
 
 ## Target Shape
@@ -126,6 +135,10 @@ apps/guardrail3/crates/app/rs/families/clippy/
       src/
         lib.rs
         facts.rs
+        facts/
+          cargo.rs
+          configs.rs
+          policy.rs
         inputs.rs
         clippy_support.rs
         rs_clippy_01_*.rs
@@ -142,6 +155,10 @@ apps/guardrail3/crates/app/rs/families/clippy/
     Cargo.toml
     src/
       lib.rs
+      fixtures.rs
+      fs.rs
+      mutations.rs
+      tree.rs
 ```
 
 ## Ownership Boundaries
