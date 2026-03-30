@@ -1,6 +1,6 @@
 # TS-NPMRC
 
-Status: current family contract, legacy-grouped implementation.
+Status: current family contract, legacy-grouped implementation, already fairly cohesive.
 
 Implementation roots:
 
@@ -15,6 +15,7 @@ Current state:
 
 - package-manager root `.npmrc` policy already has a distinct validator file
 - the current implementation already emits a compact, family-shaped rule surface
+- compared with the other early TS families, this one is closest to the Rust style of a narrow config family
 
 Rule inventory:
 
@@ -47,13 +48,17 @@ Known reconciliation notes:
 - IDs are partly still generic (`T11`-`T14`) rather than fully family-scoped
 - current code assumes the project root and package-manager root are the same surface
 - current code has no separate rule for unreadable `.npmrc`; read failures simply short-circuit after existence is reported
+- compared with `RS-CARGO` / `RS-DENY`, the main remaining gap is fail-closed input handling rather than rule-boundary confusion
 
 Historical/supplemental references:
 
 - `.plans/todo/checks/ts/npmrc.md`
 - `.plans/by_file/ts/npmrc.md`
+- `.plans/by_family/rs/cargo.md`
+- `.plans/by_family/rs/deny.md`
 
 Next planning focus:
 
-- decide whether `.npmrc` read failures should be their own fail-closed rule
+- add a family-owned fail-closed rule for unreadable or malformed required `.npmrc`
 - make package-manager-root ownership explicit once TS root discovery is reconciled
+- consider renaming the generic `T11`-`T14` ids to fully family-scoped ids when the TS family cutover becomes implementation work
