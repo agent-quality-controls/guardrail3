@@ -63,3 +63,18 @@ Current reconciliation state:
   - `eslint`: strong rule surface but too much mixed ownership
   - `tsconfig`: materially under-split versus Rust `toolchain` plus `cargo`
   - `arch`: clearly behind Rust and still missing the shared root/placement contract
+- the second Rust-vs-TS design comparison pass is complete for:
+  - `hexarch`
+  - `code`
+  - `content`
+  - `libarch`
+  - `tests`
+  - `i18n`
+  - `seo`
+- current conclusions from that second pass:
+  - `hexarch`: useful, but still split awkwardly between true architecture semantics and ESLint prerequisite checks
+  - `code`: real family, but much narrower than `RS-CODE` and still carrying one dependency-style rule that does not fit
+  - `content`: still planning-led and should depend on `TS-ARCH` for root ownership
+  - `libarch`: still too vague and needs a concrete input model before implementation
+  - `tests`: useful test-quality family, but explicitly not a counterpart to `RS-TEST`
+  - `i18n` and `seo`: capability families, not owner families

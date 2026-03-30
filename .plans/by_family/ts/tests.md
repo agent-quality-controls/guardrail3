@@ -1,6 +1,6 @@
 # TS-TESTS
 
-Status: current family contract, legacy-grouped implementation.
+Status: current family contract, legacy-grouped implementation, but not a TS analogue to `RS-TEST`.
 
 Implementation roots:
 
@@ -15,6 +15,7 @@ Current state:
 
 - test-quality logic already exists, but still lives under the grouped TS validator layout
 - this family is already cohesive in code and mostly needs plan reconciliation rather than a new implementation split
+- compared with Rust, this family is about test-quality policy, not test-architecture enforcement or self-host hardening
 
 Historical/supplemental references:
 
@@ -60,8 +61,19 @@ Current doc/code reconciliation notes:
   - `test.todo()` or equivalent unfinished-test inventory
   - minimum assertion-bearing test surface
 - that makes `ts/tests` another family where the intended contract is broader than the current runtime
+- compared with `RS-TEST`:
+  - this family should not try to become a validator self-hosting or test-boundary meta-family
+  - its strongest analogue is only the “test quality policy” slice, not the Rust family-splitting architecture
+  - package/config presence checks should stay explicit if they remain here, otherwise they should move toward `TS-PACKAGE`
+- the biggest likely missing rule class is “assertion-bearing test surface”; test files existing is much weaker than tests actually exercising assertions or expectations
+- anti-bypass coverage is still thin; `.skip()` and `.only()` are not enough by themselves for a hardened family
 
 Next planning focus:
 
 - separate package/tool presence checks from direct test-source quality rules
 - decide which of the old planned test-quality rules are real contract requirements versus future expansion ideas before demoting the old ledger
+- explicitly state that `TS-TESTS` is a product test-quality family, not a TS counterpart to the Rust family-hardening/test-ownership system
+- decide whether to add explicit rules for:
+  - assertion-bearing test surface
+  - unfinished tests such as `todo`
+  - malformed/unreadable test config fail-closed behavior

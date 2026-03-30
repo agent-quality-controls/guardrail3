@@ -1,6 +1,6 @@
 # TS-SEO
 
-Status: planned family contract, no cohesive family runtime yet.
+Status: planned family contract, no cohesive family runtime yet, still strongly planning-led.
 
 Implementation roots:
 
@@ -14,6 +14,7 @@ Current source of truth:
 Current state:
 
 - SEO/static-route checks remain primarily a planning lane
+- this family looks like a capability family layered on top of public-web/content roots, not a standalone owner family
 
 Rule inventory:
 
@@ -41,12 +42,20 @@ Current doc/code reconciliation notes:
 
 - this family is still purely planning-led
 - the old ledger is the detailed source, but it remains broad and product-shape-dependent
+- SEO applicability should not be discovered here; it should be routed from `TS-ARCH` and possibly narrowed by `TS-CONTENT`
+- the family still needs a clearer split between universal public-web requirements and optional product-shape-specific policy
+- unlike the Rust owner families, this family currently has no fail-closed or rooted-input model at all because it lacks a runtime and a routed root contract
+- until those rooted inputs exist, this is better understood as a capability/subdomain family than as a peer owner family
 
 Historical/supplemental references:
 
 - `.plans/todo/checks/ts/seo.md`
+- `.plans/by_family/rs/arch.md`
+- `.plans/by_family/rs/code.md`
 
 Next planning focus:
 
 - define which public web/content apps are in scope and what route/metadata artifacts are authoritative
 - decide which SEO surfaces are universal vs only required for content/public-web roots
+- make explicit that SEO is a capability family depending on stronger owner families rather than a peer root-owner family
+- do not treat this family as implementation-ready until a routed-root applicability model exists

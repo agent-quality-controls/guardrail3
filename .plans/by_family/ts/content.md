@@ -1,6 +1,6 @@
 # TS-CONTENT
 
-Status: planned family contract, partial legacy implementation only.
+Status: planned family contract, partial legacy implementation only, still very under-specified.
 
 Implementation roots:
 
@@ -16,11 +16,12 @@ Current state:
 
 - content-specific ideas exist in planning and some mixed runtime logic
 - no cohesive family runtime exists yet
+- compared with Rust family discipline, this family is currently mixing root discovery, pipeline/tooling, schema ownership, and content-specific architecture in one early plan
 
 Rule inventory:
 
 - `TS-CONTENT-01` — content apps are identified explicitly.
-  - What it should do: detect content-app roots from config or explicit root typing.
+  - What it should do: consume content-root classification from the shared TS architecture layer, or verify explicit content-root typing if that stays a family-owned contract.
   - What it is for: content-specific rules should not fire on unrelated service/library roots.
 - `TS-CONTENT-02` — a content pipeline is configured.
   - What it should do: require a configured content system such as Velite or Contentlayer when the root is a content app.
@@ -48,12 +49,23 @@ Current doc/code reconciliation notes:
 - this family is still mostly planning-led
 - the clearest live content checks are currently stuck in the wrong runtime file (`jscpd_check.rs`)
 - content ownership still overlaps with `ts/i18n` and `ts/seo`, so the family boundary should be kept explicit while reconciling
+- compared with Rust design standards:
+  - root discovery should not stay here long term; it belongs in `TS-ARCH`
+  - content-pipeline config should not stay trapped in duplication tooling
+  - this family needs an explicit statement of what `i18n` and `seo` own versus what stays in `content`
 
 Historical/supplemental references:
 
 - `.plans/todo/checks/ts/content.md`
+- `.plans/by_family/rs/arch.md`
+- `.plans/by_family/rs/hexarch.md`
+- `.plans/by_family/rs/code.md`
 
 Next planning focus:
 
 - separate content-pipeline rules from duplication and generic site checks
-- decide whether content app discovery belongs here or in the future shared TS arch layer
+- move content app discovery to the future shared TS arch layer
+- define the content-family boundary explicitly against:
+  - `ts/i18n`
+  - `ts/seo`
+  - `ts/code`
