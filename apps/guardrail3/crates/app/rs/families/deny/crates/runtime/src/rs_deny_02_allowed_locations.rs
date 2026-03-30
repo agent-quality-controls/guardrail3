@@ -52,5 +52,6 @@ pub(crate) use ::test_support::{
     build_fixture_deny_toml, copy_fixture, nested_member_shadow_tree, write_file,
 };
 #[cfg(test)]
+#[cfg(test)]
 #[path = "rs_deny_02_allowed_locations_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_deny_02_allowed_locations_tests;

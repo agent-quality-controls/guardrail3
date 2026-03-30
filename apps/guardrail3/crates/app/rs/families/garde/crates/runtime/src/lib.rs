@@ -29,21 +29,20 @@ use semver as _;
 use serde_yaml as _;
 
 use self::facts::collect;
-use self::inputs::{
-    BoundaryFieldInput, DerivedBoundaryTypeInput, GardeInputFailureInput, GardeRootInput,
-    ManualDeserializeImplInput, QueryAsMacroInput,
-};
 
 pub fn check(tree: &ProjectTree, route: &RsGardeRoute) -> Vec<CheckResult> {
     let facts = collect(tree, route);
     let mut results = Vec::new();
 
     for failure in &facts.input_failures {
-        rs_garde_10_input_failures::check(&GardeInputFailureInput::new(failure), &mut results);
+        rs_garde_10_input_failures::check(
+            &inputs::GardeInputFailureInput::new(failure),
+            &mut results,
+        );
     }
 
     for root in &facts.roots {
-        let input = GardeRootInput::new(root);
+        let input = inputs::GardeRootInput::new(root);
         rs_garde_01_dependency_present::check(&input, &mut results);
 
         if !root.garde_dependency_present {
@@ -65,7 +64,7 @@ pub fn check(tree: &ProjectTree, route: &RsGardeRoute) -> Vec<CheckResult> {
             continue;
         }
         rs_garde_05_struct_derive_validate::check(
-            &DerivedBoundaryTypeInput::new(target),
+            &inputs::DerivedBoundaryTypeInput::new(target),
             &mut results,
         );
     }
@@ -79,7 +78,7 @@ pub fn check(tree: &ProjectTree, route: &RsGardeRoute) -> Vec<CheckResult> {
             continue;
         }
         rs_garde_07_manual_deserialize_impl::check(
-            &ManualDeserializeImplInput::new(target),
+            &inputs::ManualDeserializeImplInput::new(target),
             &mut results,
         );
     }
@@ -93,7 +92,7 @@ pub fn check(tree: &ProjectTree, route: &RsGardeRoute) -> Vec<CheckResult> {
             continue;
         }
         rs_garde_08_enum_derive_validate::check(
-            &DerivedBoundaryTypeInput::new(target),
+            &inputs::DerivedBoundaryTypeInput::new(target),
             &mut results,
         );
     }
@@ -106,7 +105,10 @@ pub fn check(tree: &ProjectTree, route: &RsGardeRoute) -> Vec<CheckResult> {
         {
             continue;
         }
-        rs_garde_09_query_as_inventory::check(&QueryAsMacroInput::new(macro_use), &mut results);
+        rs_garde_09_query_as_inventory::check(
+            &inputs::QueryAsMacroInput::new(macro_use),
+            &mut results,
+        );
     }
 
     for field in &facts.boundary_fields {
@@ -117,7 +119,7 @@ pub fn check(tree: &ProjectTree, route: &RsGardeRoute) -> Vec<CheckResult> {
         {
             continue;
         }
-        let input = BoundaryFieldInput::new(field);
+        let input = inputs::BoundaryFieldInput::new(field);
         rs_garde_11_field_level_constraints::check(&input, &mut results);
         rs_garde_12_nested_validation_dive::check(&input, &mut results);
         rs_garde_13_context_validation_surface::check(&input, &mut results);

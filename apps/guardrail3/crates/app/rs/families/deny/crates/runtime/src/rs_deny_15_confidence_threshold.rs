@@ -101,5 +101,6 @@ pub(crate) use ::test_support::{
 };
 #[cfg(test)]
 #[cfg(test)]
+#[cfg(test)]
 #[path = "rs_deny_15_confidence_threshold_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_deny_15_confidence_threshold_tests;

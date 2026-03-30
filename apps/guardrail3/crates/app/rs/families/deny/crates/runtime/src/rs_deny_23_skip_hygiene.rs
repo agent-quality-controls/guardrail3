@@ -144,5 +144,6 @@ pub(crate) use ::test_support::{
     add_skip_entry, build_fixture_deny_toml, copy_fixture, write_file,
 };
 #[cfg(test)]
+#[cfg(test)]
 #[path = "rs_deny_23_skip_hygiene_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_deny_23_skip_hygiene_tests;

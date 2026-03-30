@@ -91,5 +91,4 @@ fn check_family(
 }
 
 #[cfg(test)]
-#[path = "rs_cargo_06_no_weakened_overrides_tests/mod.rs"] // reason: test-only sidecar module wiring
-mod rs_cargo_06_no_weakened_overrides_tests;
+mod tests;

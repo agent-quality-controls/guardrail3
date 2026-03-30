@@ -50,5 +50,6 @@ pub(crate) use ::test_support::{
     build_fixture_deny_toml, copy_fixture, set_license_exceptions, write_file,
 };
 #[cfg(test)]
+#[cfg(test)]
 #[path = "rs_deny_17_license_exceptions_inventory_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_deny_17_license_exceptions_inventory_tests;

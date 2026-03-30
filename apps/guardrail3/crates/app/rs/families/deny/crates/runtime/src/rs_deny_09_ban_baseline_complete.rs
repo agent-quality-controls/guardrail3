@@ -97,5 +97,6 @@ pub(crate) fn expected_ban_names_for_test(
         .collect()
 }
 #[cfg(test)]
+#[cfg(test)]
 #[path = "rs_deny_09_ban_baseline_complete_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_deny_09_ban_baseline_complete_tests;

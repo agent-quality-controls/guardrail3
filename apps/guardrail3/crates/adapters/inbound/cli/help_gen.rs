@@ -43,5 +43,4 @@ fn inject_ts_help(cmd: Command) -> Command {
 }
 
 #[cfg(test)]
-#[path = "help_gen_tests.rs"] // reason: colocated unit tests for help text generation
 mod tests;

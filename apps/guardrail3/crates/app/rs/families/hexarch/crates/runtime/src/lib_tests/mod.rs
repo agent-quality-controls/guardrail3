@@ -2,11 +2,13 @@ mod inventory_contract;
 
 use std::path::{Path, PathBuf};
 
+use guardrail3_domain_report::CheckResult;
+
 pub(super) use test_support::write_file;
 
 const GOLDEN_REL: &str = "../../../../../../../tests/fixtures/r_arch_01/golden";
 
-pub(super) fn run_family(root: &Path) -> Vec<super::CheckResult> {
+pub(super) fn run_family(root: &Path) -> Vec<CheckResult> {
     super::check_test_tree(&test_support::walk(root))
 }
 

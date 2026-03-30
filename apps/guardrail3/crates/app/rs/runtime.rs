@@ -266,5 +266,4 @@ fn effective_family_flag(
 }
 
 #[cfg(test)]
-#[path = "runtime_tests.rs"] // reason: colocated runtime orchestration tests
-mod tests;
+mod runtime_tests;

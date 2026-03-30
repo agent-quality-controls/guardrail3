@@ -31,7 +31,7 @@ mod rs_release_10_release_profile_inventory;
 mod rs_release_11_accidentally_publishable_internal_crates;
 mod rs_release_12_input_failures;
 
-#[path = "test_fixtures.rs"] // reason: colocated release fixtures
+#[cfg(test)]
 mod test_fixtures;
 
 use guardrail3_app_core as _;

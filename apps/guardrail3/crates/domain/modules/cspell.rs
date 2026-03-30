@@ -36,5 +36,4 @@ pub fn build_cspell_config() -> String {
 }
 
 #[cfg(test)]
-#[path = "cspell_tests.rs"] // reason: colocated cspell module tests
 mod cspell_tests;

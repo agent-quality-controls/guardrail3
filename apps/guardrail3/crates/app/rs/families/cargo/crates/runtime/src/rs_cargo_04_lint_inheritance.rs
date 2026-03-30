@@ -42,5 +42,4 @@ pub fn check(input: &WorkspaceMemberCargoInput<'_>, results: &mut Vec<CheckResul
 }
 
 #[cfg(test)]
-#[path = "rs_cargo_04_lint_inheritance_tests/mod.rs"] // reason: test-only sidecar module wiring
-mod rs_cargo_04_lint_inheritance_tests;
+mod tests;

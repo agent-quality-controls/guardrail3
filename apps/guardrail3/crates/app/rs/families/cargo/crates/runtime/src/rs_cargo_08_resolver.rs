@@ -51,5 +51,4 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-#[path = "rs_cargo_08_resolver_tests/mod.rs"] // reason: test-only sidecar module wiring
-mod rs_cargo_08_resolver_tests;
+mod tests;

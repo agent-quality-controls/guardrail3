@@ -3,8 +3,19 @@ mod scoped_files;
 mod views;
 
 pub use rs::FamilyMapper;
-pub use views::{
-    RsArchOverlapView, RsArchRootView, RsArchRoute, RsCargoRoute, RsClippyRoute, RsCodeRoute,
-    RsDenyRoute, RsDepsRoute, RsGardeRoute, RsHexarchRoute, RsReleaseRoute, RsRootInputFailureView,
-    RsRootView, RsScopedRootView, RsScopedSourceRoute, RsTestRoute,
-};
+pub type RsArchOverlapView = views::RsArchOverlapView;
+pub type RsArchRootView = views::RsArchRootView;
+pub type RsArchRoute = views::RsArchRoute;
+pub type RsCargoRoute = views::RsCargoRoute;
+pub type RsClippyRoute = views::RsClippyRoute;
+pub type RsCodeRoute = views::RsCodeRoute;
+pub type RsDenyRoute = views::RsDenyRoute;
+pub type RsDepsRoute = views::RsDepsRoute;
+pub type RsGardeRoute = views::RsGardeRoute;
+pub type RsHexarchRoute = views::RsHexarchRoute;
+pub type RsReleaseRoute = views::RsReleaseRoute;
+pub type RsRootInputFailureView = views::RsRootInputFailureView;
+pub type RsRootView = views::RsRootView;
+pub type RsScopedRootView = views::RsScopedRootView;
+pub type RsScopedSourceRoute = views::RsScopedSourceRoute;
+pub type RsTestRoute = views::RsTestRoute;

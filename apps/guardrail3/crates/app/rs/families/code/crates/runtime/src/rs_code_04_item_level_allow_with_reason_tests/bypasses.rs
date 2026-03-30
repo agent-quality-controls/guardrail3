@@ -34,7 +34,9 @@ fn inventories_documented_item_level_expects_across_real_owned_files() {
 
     let top_level_line = top_level_new
         .lines()
-        .position(|line| line.contains("#[expect(clippy::unwrap_used)] // reason: compatibility probe"))
+        .position(|line| {
+            line.contains("#[expect(clippy::unwrap_used)] // reason: compatibility probe")
+        })
         .map(|index| index + 1)
         .unwrap_or_default();
     let grouped_line = grouped_new
@@ -49,9 +51,7 @@ fn inventories_documented_item_level_expects_across_real_owned_files() {
     let module_line = module_new
         .lines()
         .position(|line| {
-            line.contains(
-                "#[expect(clippy::panic)] // reason: documented extern-facing probe",
-            )
+            line.contains("#[expect(clippy::panic)] // reason: documented extern-facing probe")
         })
         .map(|index| index + 1)
         .unwrap_or_default();

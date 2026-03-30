@@ -1,11 +1,11 @@
 use super::super::check_source;
 use guardrail3_app_rs_family_code_assertions::rs_code_20_extern_allow::{
-    RuleFinding, assert_errors_on_allow_attr_on_extern_block, assert_findings,
+    RuleFinding, assert_errors_on_allow_attr_on_extern_block,
     assert_errors_on_cfg_attr_allow_covers_an_extern_block,
     assert_errors_on_mixed_allow_and_cfg_attr_on_the_same_extern_block,
     assert_errors_on_multiple_lints_from_one_cfg_attr_allow_on_extern_block,
     assert_errors_on_multiple_lints_from_one_extern_block_allow_attribute,
-    assert_errors_when_stacked_allow_attrs_cover_the_same_extern_block,
+    assert_errors_when_stacked_allow_attrs_cover_the_same_extern_block, assert_findings,
 };
 
 #[test]

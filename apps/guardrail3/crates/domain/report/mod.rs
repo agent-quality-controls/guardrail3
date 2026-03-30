@@ -238,5 +238,4 @@ severity_counter!(warn_count, Warn);
 severity_counter!(info_count, Info);
 
 #[cfg(test)]
-#[path = "report_tests.rs"] // reason: colocated report tests
-mod tests;
+mod report_tests;
