@@ -51,3 +51,15 @@ Current reconciliation state:
 - every canonical TS family now has a by-family file with a rule inventory
 - the old files under `.plans/todo/checks/ts/*.md` still remain the detailed ledgers
 - the next cleanup step is to add superseded banners to those old TS ledgers one family at a time, after each family summary is considered stable enough
+- the first Rust-vs-TS design comparison pass is complete for:
+  - `arch`
+  - `eslint`
+  - `tsconfig`
+  - `npmrc`
+  - `package`
+- current trust ordering for those first five families is:
+  - `npmrc`: closest to a clean narrow family
+  - `package`: useful but still boundary-mixed
+  - `eslint`: strong rule surface but too much mixed ownership
+  - `tsconfig`: materially under-split versus Rust `toolchain` plus `cargo`
+  - `arch`: clearly behind Rust and still missing the shared root/placement contract

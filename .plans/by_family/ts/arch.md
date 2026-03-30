@@ -1,6 +1,6 @@
 # TS-ARCH
 
-Status: planned family contract, no dedicated family runtime yet.
+Status: planned family contract, under-specified relative to `RS-ARCH`, no dedicated family runtime yet.
 
 Implementation roots:
 
@@ -16,6 +16,7 @@ Current state:
 
 - owns repo-global TypeScript root placement and architecture ownership in planning
 - still missing a dedicated runtime/orchestrator surface in code
+- compared with `RS-ARCH`, this family is still missing explicit fail-closed, scoped-config, and exempt-root semantics
 
 Rule inventory:
 
@@ -37,6 +38,15 @@ Rule inventory:
 - `TS-ARCH-06` config vs auto-detection mismatch
   - Should inventory or warn when explicit app/root typing disagrees with strong auto-detection signals.
   - It is for surfacing stale metadata before it turns into false ownership or misrouted family checks.
+- `TS-ARCH-07` global-only arch config
+  - Should forbid scoped `ts.arch` policy under app/package-local config roots.
+  - It is for keeping root placement and ownership as a repo-global contract, not a local escape hatch.
+- `TS-ARCH-08` required inputs fail closed
+  - Should error when required governed inputs for architecture ownership are unreadable or malformed.
+  - It is for preventing TS architecture from going silent on broken manifests/config.
+- `TS-ARCH-09` declared exempt roots surfaced explicitly
+  - Should inventory intentionally out-of-zone or non-governed TS roots using an explicit exemption model.
+  - It is for avoiding silent “other” roots while still allowing narrow, declared exceptions.
 
 Current implementation mapping:
 
@@ -52,13 +62,27 @@ Known reconciliation notes:
 - the planning contract is clear that `TS-ARCH` should exist, but current code has no cohesive family owner for repo-global TS placement
 - current grouped runtime defaults untyped apps to `service`, which is too opinionated to serve as a final `TS-ARCH` ownership decision
 - current code knows about `service` and `content` auto-detection, but not a full explicit repo-global root inventory with overlap and misplaced-root findings
+- compared with `RS-ARCH`, TS still lacks:
+  - an explicit governed-root universe
+  - a fail-closed rule for malformed governed inputs
+  - a global-only config rule
+  - an explicit exempt-root model
+- `TS-ARCH-05` is too broad today because it mixes owner-family coherence with optional capability-family implications such as `i18n` and `seo`
 
 Historical/supplemental references:
 
 - `.plans/todo/checks/ts/arch.md`
 - `.plans/per-app-config-design/02-typescript-config-scoping.md`
+- `.plans/by_family/rs/arch.md`
 
 Next planning focus:
 
-- define the shared TS root/owner model against actual current code discovery
+- define the shared TS root/owner model against actual current code discovery before any family-local implementation work
+- split owner-family coherence from optional capability implications so `TS-ARCH-05` stops being a bucket rule
+- add explicit design sections for:
+  - governed TS roots
+  - excluded roots
+  - exempt roots
+  - global-only `ts.arch` ownership
+  - fail-closed required inputs
 - decide whether `TS-ARCH-06` is a real user-facing rule or just internal reconciliation support

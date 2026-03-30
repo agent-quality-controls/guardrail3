@@ -1,6 +1,6 @@
 # TS-ESLINT
 
-Status: current family contract, legacy-grouped implementation.
+Status: current family contract, legacy-grouped implementation, broader and less disciplined than `RS-CLIPPY`.
 
 Implementation roots:
 
@@ -19,6 +19,7 @@ Current state:
 
 - ESLint logic is substantial but still grouped under the old validator layout
 - the live rule surface is much richer than the old ledger; this family is one of the main places where the by-family plan must be code-led rather than doc-led
+- compared with Rust, this family currently mixes lint-config baseline, plugin/package ownership, and some architecture-adjacent enforcement in one place
 
 Rule inventory:
 
@@ -223,14 +224,27 @@ Current doc/code reconciliation notes:
 - several current rule IDs (`T40`-`T51`, `T60`-`T83`, `T-ESLP-*`) are only discoverable from code today, not from the old family doc
 - the current code still mixes generic ESLint baseline ownership with some architecture-adjacent checks like `T6` and route-wrapper enforcement; that split must be clarified against `ts/hexarch`
 - content-profile checks (`T-ESLP-07`, `T-ESLP-08`, `T-ESLP-12`) are conditional and should stay explicit in the family summary
+- package/plugin presence still leaks through `package_deps.rs`, which is closer to `TS-PACKAGE` ownership than to pure ESLint config enforcement
+- compared with Rust:
+  - config-file lint policy belongs here, analogous to `RS-CLIPPY`
+  - package-manager dependency presence should not remain mixed here long term
+  - architecture-boundary linting must be justified explicitly if it stays here instead of moving to `TS-HEXARCH`
 
 Historical/supplemental references:
 
 - `.plans/todo/checks/ts/eslint.md`
 - `.plans/by_file/ts/eslint-config-mjs.md`
+- `.plans/by_family/rs/clippy.md`
+- `.plans/by_family/rs/cargo.md`
 
 Next planning focus:
 
 - separate baseline ESLint ownership from TS hexarch boundary policy
 - decide exactly which current checks stay in `ts/eslint` versus move to `ts/hexarch` during the future TS family split
-- eventually split plugin package presence from config-file rule enforcement so this family can migrate cleanly into a dedicated TS family runtime
+- move plugin/package presence out of this family contract and into `TS-PACKAGE`, even before code moves
+- group the rule inventory explicitly into:
+  - core lint baseline
+  - relaxation inventory
+  - plugin/preset presence
+  - architecture-adjacent enforcement
+  - content/frontend profile enforcement
