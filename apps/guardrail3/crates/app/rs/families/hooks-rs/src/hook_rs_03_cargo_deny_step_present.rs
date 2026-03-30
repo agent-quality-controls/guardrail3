@@ -16,8 +16,8 @@ pub fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<CheckResult>) {
             CheckResult::from_parts(
                 ID.to_owned(),
                 Severity::Warn,
-                "cargo-deny step present".to_owned(),
-                "Hook runs cargo-deny.".to_owned(),
+                "cargo deny check step present".to_owned(),
+                "Hook runs cargo deny check.".to_owned(),
                 Some(input.rel_path.to_owned()),
                 None,
                 false,
@@ -28,8 +28,8 @@ pub fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<CheckResult>) {
         results.push(CheckResult::from_parts(
             ID.to_owned(),
             Severity::Warn,
-            "cargo-deny step missing".to_owned(),
-            "Hook does not execute cargo-deny.".to_owned(),
+            "cargo deny check step missing".to_owned(),
+            "Hook does not execute cargo deny check.".to_owned(),
             Some(input.rel_path.to_owned()),
             None,
             false,

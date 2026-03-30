@@ -1,3 +1,6 @@
+use guardrail3_app_rs_family_hooks_shared::hook_shell::command_query::{
+    ResolvedCommand, any_resolved_command,
+};
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::inputs::RustHookCommandInput;
@@ -5,16 +8,8 @@ use super::inputs::RustHookCommandInput;
 const ID: &str = "HOOK-RS-07";
 
 pub fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<CheckResult>) {
-    let has_cargo_dupes = input
-        .parsed
-        .executable_lines()
-        .iter()
-        .any(|line| line_contains_command(line.raw(), line.command_text(), is_cargo_dupes_command));
-    let has_jscpd = input
-        .parsed
-        .executable_lines()
-        .iter()
-        .any(|line| line_contains_command(line.raw(), line.command_text(), is_jscpd_command));
+    let has_cargo_dupes = any_resolved_command(input.parsed, is_cargo_dupes_command);
+    let has_jscpd = any_resolved_command(input.parsed, is_jscpd_command);
 
     if has_jscpd && !has_cargo_dupes {
         results.push(CheckResult::from_parts(
@@ -28,14 +23,15 @@ pub fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<CheckResult>) {
             false,
         ));
     } else if has_cargo_dupes {
-        results.push(CheckResult::from_parts(
-            ID.to_owned(),
-            Severity::Warn,
-            "cargo-dupes selected for Rust duplication checks".to_owned(),
-            "Hook uses cargo-dupes for Rust duplication checks.".to_owned(),
-            Some(input.rel_path.to_owned()),
-            None,
-            false,
+        results.push(
+            CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Warn,
+                "cargo-dupes selected for Rust duplication checks".to_owned(),
+                "Hook uses cargo-dupes for Rust duplication checks.".to_owned(),
+                Some(input.rel_path.to_owned()),
+                None,
+                false,
             )
             .as_inventory(),
         );
@@ -52,309 +48,77 @@ pub fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<CheckResult>) {
     }
 }
 
-fn line_contains_command(raw: &str, command_text: &str, predicate: fn(&str) -> bool) -> bool {
-    let mut segments = split_command_segments(raw);
-    let recovered_substitutions: Vec<String> = segments
-        .iter()
-        .filter_map(|segment| inline_command_substitution(segment))
-        .map(str::to_owned)
-        .collect();
-    if !segments.iter().any(|segment| segment == command_text) {
-        segments.push(command_text.to_owned());
-    }
-    segments.extend(recovered_substitutions);
-    segments.iter().any(|segment| predicate(segment))
-}
-
-fn split_command_segments(raw: &str) -> Vec<String> {
-    let mut line = raw.trim();
-
-    if let Some(stripped) = line.strip_prefix("if ") {
-        line = stripped.trim();
-    }
-    if let Some(stripped) = line.strip_prefix('!') {
-        line = stripped.trim();
-    }
-    line = line.strip_suffix("; then").unwrap_or(line).trim();
-    line = line.strip_suffix("then").unwrap_or(line).trim();
-
-    split_unquoted_commands(line)
-        .into_iter()
-        .map(|segment| {
-            segment
-                .trim_matches(|c: char| {
-                    c == '(' || c == ')' || c == '{' || c == '}' || c == ';' || c == '&' || c == '|'
-                })
-                .trim()
-                .to_owned()
-        })
-        .filter(|segment| !segment.is_empty())
-        .collect()
-}
-
-fn split_unquoted_commands(line: &str) -> Vec<&str> {
-    let mut segments = Vec::new();
-    let mut single_quoted = false;
-    let mut double_quoted = false;
-    let mut start = 0usize;
-    let chars: Vec<(usize, char)> = line.char_indices().collect();
-    let mut i = 0usize;
-
-    while i < chars.len() {
-        let (idx, ch) = chars[i];
-        match ch {
-            '\'' if !double_quoted => single_quoted = !single_quoted,
-            '"' if !single_quoted => double_quoted = !double_quoted,
-            ';' if !single_quoted && !double_quoted => {
-                if start < idx {
-                    segments.push(line[start..idx].trim());
-                }
-                start = idx + ch.len_utf8();
-            }
-            '&' if !single_quoted && !double_quoted => {
-                let next_is_ampersand = chars.get(i + 1).is_some_and(|(_, next)| *next == '&');
-                if next_is_ampersand {
-                    if start < idx {
-                        segments.push(line[start..idx].trim());
-                    }
-                    let next_idx = chars[i + 1].0;
-                    start = next_idx + 1;
-                    i += 1;
-                }
-            }
-            '|' if !single_quoted && !double_quoted => {
-                let next_is_pipe = chars.get(i + 1).is_some_and(|(_, next)| *next == '|');
-                if next_is_pipe {
-                    if start < idx {
-                        segments.push(line[start..idx].trim());
-                    }
-                    let next_idx = chars[i + 1].0;
-                    start = next_idx + 1;
-                    i += 1;
-                }
-            }
-            _ => {}
-        }
-        i += 1;
-    }
-
-    if start < line.len() {
-        segments.push(line[start..].trim());
-    }
-
-    segments
-}
-
-fn is_cargo_dupes_command(command_text: &str) -> bool {
-    let tokens = shell_words(command_text);
-    let mut parts = tokens.iter().map(String::as_str).peekable();
-
-    while matches!(parts.peek(), Some(token) if looks_like_env_assignment(token)) {
-        let _ = parts.next();
-    }
-
-    let Some(first) = parts.next() else {
-        return false;
-    };
-
-    let first = normalize_command_token(first);
-    if first == "env" {
-        let Some(next) = unwrap_env_command(&mut parts) else {
-            return false;
-        };
-        if next.contains(char::is_whitespace) {
-            return is_cargo_dupes_command(next);
-        }
-        return match normalize_command_token(next) {
-            "cargo" => is_cargo_dupes_invocation(&mut parts),
-            "cargo-dupes" => !parts.any(is_help_or_version_flag),
-            _ => false,
-        };
-    }
-
-    match first {
-        "cargo" => is_cargo_dupes_invocation(&mut parts),
-        "cargo-dupes" => !parts.any(is_help_or_version_flag),
+fn is_cargo_dupes_command(command: &ResolvedCommand) -> bool {
+    match command.command_name() {
+        "cargo-dupes" => !command.args().iter().any(|arg| is_help_or_version_flag(arg)),
+        "cargo" => cargo_dupes_subcommand_invocation(command.args()),
         _ => false,
     }
 }
 
-fn is_jscpd_command(command_text: &str) -> bool {
-    let tokens = shell_words(command_text);
-    let mut parts = tokens.iter().map(String::as_str).peekable();
+fn cargo_dupes_subcommand_invocation(args: &[String]) -> bool {
+    let mut index = 0usize;
 
-    while matches!(parts.peek(), Some(token) if looks_like_env_assignment(token)) {
-        let _ = parts.next();
+    if args.get(index).is_some_and(|token| token.starts_with('+')) {
+        index += 1;
     }
 
-    let Some(first) = parts.next() else {
-        return false;
-    };
-
-    let first = normalize_command_token(first);
-    if first == "env" {
-        let Some(next) = unwrap_env_command(&mut parts) else {
-            return false;
-        };
-        if next.contains(char::is_whitespace) {
-            return is_jscpd_command(next);
+    while let Some(token) = args.get(index).map(String::as_str) {
+        if !token.starts_with('-') {
+            break;
         }
-        return normalize_command_token(next) == "jscpd" && !parts.any(is_help_or_version_flag);
-    }
 
-    first == "jscpd" && !parts.any(is_help_or_version_flag)
-}
-
-fn unwrap_env_command<'a, I>(parts: &mut std::iter::Peekable<I>) -> Option<&'a str>
-where
-    I: Iterator<Item = &'a str>,
-{
-    while let Some(token) = parts.peek().copied() {
-        if looks_like_env_assignment(token) {
-            let _ = parts.next();
+        if is_help_or_version_flag(token) {
+            return false;
+        }
+        if let Some((flag_name, _)) = token.split_once('=')
+            && cargo_global_flag_takes_value(flag_name)
+        {
+            index += 1;
             continue;
         }
-        if !token.starts_with('-') {
-            break;
+        if matches!(token.strip_prefix("-j"), Some(value) if !value.is_empty()) {
+            index += 1;
+            continue;
+        }
+        if cargo_global_flag_takes_value(token) {
+            index += 2;
+            continue;
         }
 
-        let flag = parts.next().unwrap_or_default();
-        if is_help_or_version_flag(flag) {
-            return None;
-        }
-        if matches!(flag, "-S" | "--split-string") {
-            let split_command = parts.next()?;
-            if split_string_is_assignment_only(split_command) {
-                continue;
-            }
-            return Some(split_command);
-        }
-        if env_flag_takes_value(flag) {
-            let _ = parts.next();
-        }
+        index += 1;
     }
 
-    while matches!(parts.peek(), Some(token) if looks_like_env_assignment(token)) {
-        let _ = parts.next();
-    }
-
-    parts.next()
+    args.get(index).map(String::as_str) == Some("dupes")
+        && !args
+            .get(index + 1..)
+            .unwrap_or(&[])
+            .iter()
+            .any(|arg| is_help_or_version_flag(arg))
 }
 
-fn split_string_is_assignment_only(payload: &str) -> bool {
-    let tokens = shell_words(payload);
-    let Some(first) = tokens.first() else {
-        return false;
-    };
-    looks_like_env_assignment(first)
-        && !tokens.iter().any(|token| {
-            matches!(
-                normalize_command_token(token),
-                "cargo" | "cargo-dupes" | "jscpd" | "env"
-            )
-        })
-}
-
-fn inline_command_substitution(segment: &str) -> Option<&str> {
-    let start = segment.find("$(")?;
-    let inner = segment.get(start + 2..)?;
-    let inner = inner.strip_suffix(')')?.trim();
-    if inner.is_empty() { None } else { Some(inner) }
-}
-
-fn env_flag_takes_value(flag: &str) -> bool {
-    matches!(
-        flag,
-        "-u" | "--unset" | "-C" | "--chdir" | "-S" | "--split-string"
-    )
-}
-
-fn is_cargo_dupes_invocation<'a, I>(parts: &mut std::iter::Peekable<I>) -> bool
-where
-    I: Iterator<Item = &'a str>,
-{
-    if matches!(parts.peek(), Some(token) if token.starts_with('+')) {
-        let _ = parts.next();
-    }
-
-    while let Some(token) = parts.peek().copied() {
-        if !token.starts_with('-') {
-            break;
-        }
-
-        let flag = parts.next().unwrap_or_default();
-        if is_help_or_version_flag(flag) {
-            return false;
-        }
-        if cargo_global_flag_takes_value(flag) {
-            let _ = parts.next();
-        }
-    }
-
-    parts.next() == Some("dupes") && !parts.any(is_help_or_version_flag)
+fn is_jscpd_command(command: &ResolvedCommand) -> bool {
+    command.command_name() == "jscpd"
+        && !command.args().iter().any(|arg| is_help_or_version_flag(arg))
 }
 
 fn cargo_global_flag_takes_value(flag: &str) -> bool {
     matches!(
         flag,
-        "--config" | "-Z" | "--manifest-path" | "--color" | "--target" | "--target-dir" | "--jobs"
+        "--config"
+            | "-Z"
+            | "--manifest-path"
+            | "--color"
+            | "--target"
+            | "--target-dir"
+            | "--jobs"
+            | "-j"
+            | "-C"
     )
 }
 
 fn is_help_or_version_flag(token: &str) -> bool {
     matches!(token, "-h" | "--help" | "-V" | "--version")
-}
-
-fn normalize_command_token(token: &str) -> &str {
-    token.rsplit('/').next().unwrap_or(token)
-}
-
-fn looks_like_env_assignment(token: &str) -> bool {
-    let Some((name, _value)) = token.split_once('=') else {
-        return false;
-    };
-    let mut chars = name.chars();
-    let Some(first) = chars.next() else {
-        return false;
-    };
-    (first.is_ascii_alphabetic() || first == '_')
-        && chars.all(|c| c.is_ascii_alphanumeric() || c == '_')
-}
-
-fn shell_words(command_text: &str) -> Vec<String> {
-    let mut words = Vec::new();
-    let mut current = String::new();
-    let mut chars = command_text.chars().peekable();
-    let mut single_quoted = false;
-    let mut double_quoted = false;
-
-    while let Some(ch) = chars.next() {
-        match ch {
-            '\'' if !double_quoted => {
-                single_quoted = !single_quoted;
-            }
-            '"' if !single_quoted => {
-                double_quoted = !double_quoted;
-            }
-            '\\' if double_quoted => {
-                if let Some(next) = chars.next() {
-                    current.push(next);
-                }
-            }
-            ch if ch.is_whitespace() && !single_quoted && !double_quoted => {
-                if !current.is_empty() {
-                    words.push(std::mem::take(&mut current));
-                }
-            }
-            _ => current.push(ch),
-        }
-    }
-
-    if !current.is_empty() {
-        words.push(current);
-    }
-
-    words
 }
 
 #[cfg(test)]
