@@ -1,6 +1,6 @@
 # TS-SIZE
 
-Status: current family contract, partial legacy implementation only.
+Status: current family contract, partial legacy implementation only, still bucket-shaped.
 
 Implementation roots:
 
@@ -16,6 +16,7 @@ Current state:
 
 - bundle/size-budget enforcement exists only as mixed tool/package logic
 - the current runtime implements package presence and one content-profile config check, but not the full size-budget family contract yet
+- compared with Rust family standards, this family is still too close to a bag of “size-related things” rather than one clean policy surface
 
 Rule inventory:
 
@@ -47,12 +48,19 @@ Known reconciliation notes:
 
 - this family is currently content-profile-biased in code, while the old ledger frames it more generally as a size-budget family
 - the runtime currently checks only for package/config presence, not concrete budgets
+- the main unresolved design question is whether this is:
+  - a content/public-web capability family
+  - or a general app/package budget family
+- until that is decided, root ownership and applicability will remain too fuzzy for a stable implementation split
 
 Historical/supplemental references:
 
 - `.plans/todo/checks/ts/size.md`
+- `.plans/by_family/rs/code.md`
+- `.plans/by_family/rs/arch.md`
 
 Next planning focus:
 
 - define the exact size-budget config surface and profile gating
 - decide whether `ts/size` should stay content-profile-only or grow a more general app/package budget model
+- if it stays content-profile-only, make that capability-family dependency explicit in the plan

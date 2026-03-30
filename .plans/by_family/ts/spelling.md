@@ -1,6 +1,6 @@
 # TS-SPELLING
 
-Status: current family contract, partial legacy implementation only.
+Status: current family contract, partial legacy implementation only, currently a narrow tool family rather than a hardened policy family.
 
 Implementation roots:
 
@@ -16,6 +16,7 @@ Current state:
 
 - spelling enforcement exists only as mixed tool/package logic
 - the current runtime implements package presence and config existence, but not the full old ledger yet
+- this family currently looks coherent as a small capability/tool family, but it still lacks explicit root ownership and fail-closed semantics
 
 Rule inventory:
 
@@ -43,13 +44,20 @@ Known reconciliation notes:
 
 - this family is partially real already, but still shares its implementation with generic tool buckets
 - the old ledger promises more than the runtime currently enforces
+- compared with Rust family standards, the main missing pieces are:
+  - nearest-config/root applicability
+  - malformed-config fail-closed behavior
+  - a clear split between tool presence, config presence, and actual enforced spelling policy
 
 Historical/supplemental references:
 
 - `.plans/todo/checks/ts/spelling.md`
 - `.plans/by_file/ts/cspell-json.md`
+- `.plans/by_family/rs/code.md`
+- `.plans/by_family/rs/test.md`
 
 Next planning focus:
 
 - define nearest-config ownership and script/package split
 - map accepted cspell config filenames and script names into explicit family rules before demoting the old TS ledger
+- decide whether this family remains a narrow tool/config family or grows into broader content/text-policy enforcement

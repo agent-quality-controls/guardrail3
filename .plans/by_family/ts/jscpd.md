@@ -1,6 +1,6 @@
 # TS-JSCPD
 
-Status: current family contract, legacy-grouped implementation.
+Status: current family contract, legacy-grouped implementation, mostly coherent once content spillover is removed.
 
 Implementation roots:
 
@@ -14,6 +14,7 @@ Current source of truth:
 Current state:
 
 - duplication-policy logic exists, but older notes say it still mixes some content-site concerns
+- compared with several other TS families, the pure duplication core here is already fairly well formed
 
 Rule inventory:
 
@@ -60,13 +61,17 @@ Current doc/code reconciliation notes:
 
 - the old ledger already warned that this file mixes `ts/jscpd` and content-site logic; that warning is still correct
 - the actual duplication family is narrower and cleaner than the mixed runtime file suggests
+- the main remaining design work is not the duplication core itself; it is removing content-family spillover and deciding how strict inventory-only rules like `T21`/`T22` should remain
+- this family should eventually grow explicit fail-closed behavior for malformed required jscpd config, because right now parseability is described but broader input-integrity expectations are still implicit
 
 Historical/supplemental references:
 
 - `.plans/todo/checks/ts/jscpd.md`
 - `.plans/by_file/ts/jscpd-json.md`
+- `.plans/by_family/rs/code.md`
 
 Next planning focus:
 
 - split pure duplication policy from content-specific site checks
 - decide whether `T21` and `T22` remain inventory-only in the final family contract
+- keep the family narrow; do not let generic content/code policy grow back into the duplication contract

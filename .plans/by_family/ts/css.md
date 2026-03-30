@@ -1,6 +1,6 @@
 # TS-CSS
 
-Status: current family contract, legacy-grouped implementation.
+Status: current family contract, legacy-grouped implementation, reasonably coherent but still mixed at the package boundary.
 
 Implementation roots:
 
@@ -15,6 +15,7 @@ Current source of truth:
 Current state:
 
 - stylelint/CSS policy exists, but is still mixed with other TS tool checks
+- compared with the stronger TS owner families, this one already looks like a real config/policy family, but it still needs cleaner applicability and package/config ownership
 
 Rule inventory:
 
@@ -57,13 +58,20 @@ Current doc/code reconciliation notes:
 
 - the old ledger is close to the current runtime for the config/rule half of the family
 - package presence and config semantics are still split across two files and should be reconciled under one family contract later
+- the main unresolved design questions are:
+  - which roots actually own CSS policy
+  - whether Tailwind-specific bridge rules stay here or remain split with `TS-ESLINT`
+  - whether malformed required stylelint config should fail closed as a family-owned error
 
 Historical/supplemental references:
 
 - `.plans/todo/checks/ts/css.md`
 - `.plans/by_file/ts/stylelintrc-mjs.md`
+- `.plans/by_family/rs/code.md`
+- `.plans/by_family/rs/arch.md`
 
 Next planning focus:
 
 - define exact CSS root ownership and package/config split
 - decide whether `tailwind-ban` belongs in `ts/css` or stays with `ts/eslint` as a lint-side CSS/design-token bridge rule
+- add explicit fail-closed expectations for required stylelint config once root ownership is settled
