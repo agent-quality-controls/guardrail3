@@ -1,215 +1,116 @@
 # RS-CLIPPY Fixes
 
-Companion repair list for [`../clippy.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/todo/checks/rs/clippy.md).
+Companion status record for [`../clippy.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/todo/checks/rs/clippy.md).
 
-This file is the concrete follow-up list from the RS-CLIPPY attack audit. It is intentionally more operational than `clippy.md`:
-
-- `clippy.md` is the family contract
-- `FIXES.md` is the concrete bug, hardening, and cleanup backlog
+The original RS-CLIPPY attack backlog from the hardening sweep is closed. This file now records the implemented outcomes and the architectural decisions that replaced the old open backlog.
 
 Primary implementation roots:
 
 - [`README.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/clippy/README.md)
 - [`facts.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/facts.rs)
+- [`facts/cargo.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/facts/cargo.rs)
+- [`facts/configs.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/facts/configs.rs)
+- [`facts/policy.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/facts/policy.rs)
 - [`clippy_support.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/clippy_support.rs)
-- [`lib.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/lib.rs)
 - [`domain/modules/clippy`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/domain/modules/clippy)
 
-## Status Labels
+## Closed Fixes
 
-- `FIX NOW` = unambiguous improvement: stricter guardrails, cleaner architecture, lower drift
-- `DECIDE` = real issue, but the repair shape needs an ownership or policy decision first
-- `TEST GAP` = existing behavior is not pinned tightly enough
-- `DOC DRIFT` = written contract and live code disagree
+### 1. `RS-CLIPPY-24` wrong-shape `.cargo/config*` now fails closed
 
-## FIX NOW
+- parseable but malformed `env` data now produces explicit `RS-CLIPPY-24` failures
+- missing-content and syntax-error paths stay fail-closed
+- sidecars cover syntax, shape, nested applicability, and missing-content branches
 
-### 1. Fail closed on wrong-shape `.cargo/config*` data for `RS-CLIPPY-24`
+### 2. Malformed ban entries no longer disappear silently
 
-- **Problem:** `RS-CLIPPY-24` only errors on TOML syntax failure or missing content. Parseable but invalid shape such as `env = []` is treated as clean.
-- **Why this is clearly better:** the rule exists to prevent `CLIPPY_CONF_DIR` discovery bypasses. Treating malformed override surfaces as clean is a direct fail-open.
-- **Current code:** [`facts.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/facts.rs#L401)
-- **Acceptance bar:**
-  - malformed `env` shape produces an `RS-CLIPPY-24` error
-  - missing-content path remains an error
-  - sidecars cover syntax error, shape error, and missing-content error
+- shared ban parsing now records malformed section shapes and malformed entries explicitly
+- ban-driven rules do not emit clean inventory when a managed section is structurally invalid
+- malformed-shape coverage exists across completeness, extra-ban, quality, duplicate, and macro rules
 
-### 2. Stop silently dropping malformed ban entries
+### 3. Assertion exactness is hardened
 
-- **Problem:** `parse_ban_entries()` ignores non-string entries, tables without string `path`, and other malformed shapes. Ban-driven rules then emit clean inventory as if nothing was wrong.
-- **Why this is clearly better:** silent normalization is a guardrail bypass. Structural invalidity should surface as an error or at minimum a warning owned by the family.
-- **Current code:** [`clippy_support.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/clippy_support.rs#L145)
-- **Affected rules:** `RS-CLIPPY-04/05/06/07/08/15/18/20`
-- **Acceptance bar:**
-  - malformed ban entries are surfaced explicitly
-  - clean inventory is impossible when a managed ban section has malformed entries
-  - sidecars cover non-array section, bad array element type, missing `path`, non-string `path`
+- the clippy assertion layer no longer relies on set-collapse where exact result counts matter
+- parity and golden tests now prove exact count or exact-path expectations where the scenario implies them
 
-### 3. Replace `BTreeSet`-based assertion helpers with exact-result assertions
+### 4. Parity tests use canonical domain exports
 
-- **Problem:** several assertion helpers collapse findings into sets and do not prove multiplicity or exact counts.
-- **Why this is clearly better:** duplicate emissions, over-reporting, and accidental extra findings can currently slip through green tests.
-- **Examples:**
-  - [`rs_clippy_08_reason_quality.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/clippy/crates/assertions/src/rs_clippy_08_reason_quality.rs#L21)
-  - [`rs_clippy_15_trivial_reason.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/clippy/crates/assertions/src/rs_clippy_15_trivial_reason.rs#L21)
-  - [`rs_clippy_18_duplicate_bans.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/clippy/crates/assertions/src/rs_clippy_18_duplicate_bans.rs#L21)
-- **Acceptance bar:**
-  - helpers assert exact count where the scenario implies exact count
-  - helpers assert no unexpected findings
-  - repeated identical diagnostics fail tests unless explicitly expected
+- copied inventory tables were replaced with imports from [`domain/modules/clippy`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/domain/modules/clippy)
+- generator/runtime parity is now pinned against the canonical policy surface instead of duplicated local lists
 
-### 4. Import canonical domain-module exports in parity tests
+### 5. Wrong-type vs missing-value diagnostics are distinct
 
-- **Problem:** parity tests hardcode copied method/type/macro inventories instead of importing canonical exports from `domain/modules/clippy`.
-- **Why this is clearly better:** one source of truth is cleaner architecture and removes easy drift.
-- **Examples:**
-  - [`rs_clippy_04_missing_method_ban_tests/parity.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_04_missing_method_ban_tests/parity.rs#L5)
-  - [`rs_clippy_05_missing_type_ban_tests/parity.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_05_missing_type_ban_tests/parity.rs#L18)
-  - [`rs_clippy_20_macro_bans_tests/parity.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_20_macro_bans_tests/parity.rs#L5)
-- **Acceptance bar:**
-  - parity tests derive expected inventories from canonical exports
-  - no copied full inventory tables remain in rule sidecars
+- thresholds distinguish missing from malformed non-integer values
+- `RS-CLIPPY-16` distinguishes missing from non-bool `avoid-breaking-exported-api`
+- `RS-CLIPPY-17` distinguishes missing from wrong-type managed test-relaxation keys
 
-### 5. Distinguish missing values from wrong-type values for managed scalar keys
+### 6. `RS-CLIPPY-04/05` completeness proofs are exact
 
-- **Problem:** wrong-type values degrade into weaker or misleading diagnostics.
-- **Cases:**
-  - thresholds: non-integer becomes “missing”
-  - `RS-CLIPPY-16`: non-bool `avoid-breaking-exported-api` becomes “not set”
-  - `RS-CLIPPY-17`: absent/non-bool keys can produce messages claiming ``= true``
-- **Current code:**
-  - [`clippy_support.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/clippy_support.rs#L183)
-  - [`rs_clippy_16_avoid_breaking_exported_api.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_16_avoid_breaking_exported_api.rs#L17)
-  - [`rs_clippy_17_test_relaxations.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_17_test_relaxations.rs#L16)
-- **Why this is clearly better:** explicit malformed config should not be hidden behind weaker diagnostics.
-- **Acceptance bar:**
-  - wrong-type inputs produce distinct diagnostics
-  - missing inputs produce missing diagnostics
-  - sidecars cover both branches for all managed scalar keys
+- golden tests prove exact canonical count
+- emitted managed paths are matched against the canonical set, not spot-checked
 
-### 6. Tighten `RS-CLIPPY-04/05` end-to-end output proofs
+### 7. The previously missing fail-closed sidecars were added
 
-- **Problem:** the “golden” tests do not prove that the runtime emits the full expected inventory; they only sample a couple of messages.
-- **Examples:**
-  - [`rs_clippy_04_missing_method_ban_tests/golden.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_04_missing_method_ban_tests/golden.rs#L6)
-  - [`rs_clippy_05_missing_type_ban_tests/golden.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_05_missing_type_ban_tests/golden.rs#L6)
-- **Why this is clearly better:** these are baseline completeness rules. Sample-based tests are too weak.
-- **Acceptance bar:**
-  - rule output count matches expected canonical count
-  - emitted paths match the expected canonical set exactly
+- standalone coverage
+- same-root precedence
+- missing-content branches
+- negative published-library classification
+- malformed policy-context short-circuit ownership
+- plain-string completeness-vs-quality cross-rule behavior
 
-### 7. Add missing fail-closed and branch sidecars where behavior is already intended
+## Closed Decisions
 
-- **Needed cases:**
-  - `RS-CLIPPY-24` missing-content branch
-  - `RS-CLIPPY-01` standalone-package coverage branch
-  - `RS-CLIPPY-12` same-root precedence at workspace roots and standalone package roots
-  - `RS-CLIPPY-16` negative published-library classification cases
-  - `RS-CLIPPY-15` empty/whitespace, `fixme`, `fix later`, `tbd`, `...`
-  - clean-path user-added bans with real reasons
-  - plain-string ban entries that are present for completeness but still bad for reason quality
-- **Why this is clearly better:** these are straightforward test-hardening additions with no downside.
+### 8. Malformed routed `Cargo.toml` stays fail-closed inside RS-CLIPPY
 
-## DECIDE
+- coverage ownership stays with `RS-CLIPPY-01`
+- attached-config placement ownership stays with `RS-CLIPPY-12`
+- the family facts layer records routed Cargo-root parse failures once and dependent rules consume that fact
 
-### 8. Fix fail-open handling for malformed routed `Cargo.toml`
+### 9. Pure-layer service roots do not get library-only global-state bans
 
-- **Problem:** malformed routed manifests can stop being treated as workspace/package roots, suppress `RS-CLIPPY-01`, and distort `RS-CLIPPY-12` and `RS-CLIPPY-16`.
-- **Current code:** [`facts.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/facts.rs#L254), [`facts.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/facts.rs#L830)
-- **Decision needed:** should fail-closed classification of routed Cargo roots live inside RS-CLIPPY, or should placement/family-mapper produce stronger root facts so clippy never reparses ownership-critical semantics itself?
-- **Desired end state:** malformed routed manifests do not silently erase policy roots.
+- canonical clippy generation was aligned to runtime expectations
+- pure-layer service semantics remain owned by architecture checks, not the clippy baseline
 
-### 9. Reconcile pure-layer service baseline vs library-only runtime expectations
+### 10. Malformed allowed `clippy.toml` is single-owned by `RS-CLIPPY-25`
 
-- **Problem:** canonical clippy generation still adds global-state bans for service pure-layer roots, but runtime expects those bans only for `profile == "library"`.
-- **Current code:**
-  - generator: [`render.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/domain/modules/clippy/render.rs#L17)
-  - runtime: [`clippy_support.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/clippy_support.rs#L121)
-- **Decision needed:** should pure-layer service roots really require those global-state bans, or should canonical generation stop emitting them?
-- **Desired end state:** generator, runtime expectations, and plan text agree.
+- threshold rules no longer fan out duplicate parse errors for one malformed config
+- parseability is owned once at family orchestration time
 
-### 10. Collapse duplicate threshold parse errors into one coherent malformed-config result
+### 11. `RS-CLIPPY-13` defers malformed policy-context ownership to `RS-CLIPPY-23`
 
-- **Problem:** one malformed `clippy.toml` produces seven separate threshold parse errors.
-- **Current code:** [`lib.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/lib.rs#L87)
-- **Decision needed:** should malformed `clippy.toml` be owned by one family-level parseability rule, one per-config error, or remain per-rule by design?
-- **Desired end state:** malformed config is reported once in a way that is strict without being noisy.
+- local-policy-root baseline checks do not invent a second malformed-policy owner
+- sidecars prove that malformed policy context is single-owned by `RS-CLIPPY-23`
 
-### 11. Decide whether `RS-CLIPPY-13` should suppress itself when `RS-CLIPPY-23` owns policy-context failure
+### 12. `RS-CLIPPY-06/07` emit positive clean inventory
 
-- **Problem:** `RS-CLIPPY-13` returns early on `policy_context_parse_error`.
-- **Current code:** [`rs_clippy_13_local_policy_root_baseline.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_13_local_policy_root_baseline.rs#L15)
-- **Decision needed:** is this proper single-owner fail-closed behavior via `RS-CLIPPY-23`, or should local policy roots also emit an error about incomplete/unresolvable baseline?
-- **Desired end state:** explicit single-owner behavior with sidecars proving it.
+- the extra-ban inventory rules now emit explicit clean-path info results when the managed section is parseable and contains no extras
+- broken inputs still short-circuit to the owning malformed-input rule instead of inventing clean inventory
 
-### 12. Decide the clean-path inventory contract for `RS-CLIPPY-06/07`
+### 13. `RS-CLIPPY-19` keeps the typo heuristic with boundary proofs
 
-- **Problem:** `RS-CLIPPY-06` and `RS-CLIPPY-07` emit nothing when clean, which appears to conflict with the broader family inventory contract.
-- **Current code:**
-  - [`rs_clippy_06_extra_method_ban.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_06_extra_method_ban.rs#L12)
-  - [`rs_clippy_07_extra_type_ban.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_07_extra_type_ban.rs#L12)
-- **Decision needed:** should inventory-only extra-ban rules produce positive clean inventory or intentionally stay silent?
-- **Desired end state:** one consistent rule-family inventory contract.
+- the heuristic was kept
+- boundary sidecars were added so the managed-key typo surface is pinned against realistic false-positive boundaries
 
-### 13. Revisit the typo heuristic for `RS-CLIPPY-19`
+## Closed Test Gaps
 
-- **Problem:** normalized Levenshtein `<= 2` may over-warn on borderline unknown keys.
-- **Current code:** [`rs_clippy_19_unknown_keys.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_19_unknown_keys.rs#L27)
-- **Decision needed:** keep the heuristic and just pin more boundary cases, or narrow the detection rule.
-- **Desired end state:** typo detection catches realistic managed-key mistakes without noisy false positives.
+The missing sidecar gaps identified by the attack pass are closed for:
 
-## TEST GAP
+- malformed policy-context short-circuit ownership
+- malformed managed ban-section shapes
+- published-library positive and negative boundaries
+- wrong-type scalar branches
+- string-form completeness-vs-quality interactions
+- clean-path user-added bans with real reasons
 
-### 14. Add malformed policy-context short-circuit coverage for profile-sensitive rules
+## Closed Doc Drift
 
-- **Missing coverage:** `RS-CLIPPY-04/05/06/07/14` currently short-circuit when `RS-CLIPPY-23` owns malformed `guardrail3.toml`, but sidecars do not prove that contract.
-- **Current code examples:**
-  - [`rs_clippy_04_missing_method_ban.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_04_missing_method_ban.rs#L13)
-  - [`rs_clippy_14_library_global_state.rs`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/rs_clippy_14_library_global_state.rs#L13)
+- [`clippy.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/todo/checks/rs/clippy.md) now describes the live managed baseline, malformed-input ownership model, clean inventory contract, and pure-layer policy decision
+- [`README.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/clippy/README.md) now matches the live family shape and ownership split
 
-### 15. Add malformed ban-shape coverage to ban-quality rules
+## Verification Snapshot
 
-- **Missing coverage:** `RS-CLIPPY-08/15/18` only test valid-array-but-bad-content scenarios.
-- **Needed cases:** non-array section, mixed arrays, bad table shape, non-string `path`.
+At the close of this sweep:
 
-### 16. Add exact boundary tests for published-library classification
-
-- **Missing coverage:** only positive published-library cases are pinned.
-- **Needed cases:** `publish = false`, malformed `publish`, non-publishable packages/workspaces.
-
-### 17. Add wrong-type managed-key sidecars across the threshold and policy-bool cluster
-
-- **Missing coverage:** wrong-type threshold values, non-bool `avoid-breaking-exported-api`, non-bool test-relaxation keys.
-
-### 18. Add cross-rule tests for “present but low-quality” string-form ban entries
-
-- **Missing coverage:** prove that a plain string ban entry still counts for completeness/extra-inventory while `RS-CLIPPY-08` warns about missing `reason`.
-
-## DOC DRIFT
-
-### 19. Update the plan text to match live rule reality
-
-- `RS-CLIPPY-05` still describes “10 base types” while the live baseline is larger.
-- `RS-CLIPPY-14` still says the `_profile` parameter is ignored, but the rule explicitly gates on `profile_name == "library"`.
-- **File:** [`clippy.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/todo/checks/rs/clippy.md#L213)
-
-### 20. Document the chosen single-owner malformed-input model
-
-- If malformed `guardrail3.toml`, malformed `clippy.toml`, malformed `Cargo.toml`, and malformed `.cargo/config*` are intentionally owned by different rule IDs, the family README and plan should say that explicitly.
-- **Files:**
-  - [`README.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/clippy/README.md)
-  - [`clippy.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/todo/checks/rs/clippy.md)
-
-## Recommended Execution Order
-
-1. Fix wrong-shape `.cargo/config*` fail-closed behavior for `RS-CLIPPY-24`.
-2. Fix malformed ban-entry handling at the shared parser layer.
-3. Harden assertion helpers and `RS-CLIPPY-04/05` exact-output tests.
-4. Replace copied parity inventories with canonical exports.
-5. Fix wrong-type scalar diagnostics for thresholds, `RS-CLIPPY-16`, and `RS-CLIPPY-17`.
-6. Decide and repair routed `Cargo.toml` fail-open ownership.
-7. Decide and reconcile pure-layer service baseline semantics.
-8. Decide malformed-config aggregation behavior for threshold rules.
-9. Decide `RS-CLIPPY-13` ownership when `RS-CLIPPY-23` fires.
-10. Decide whether `RS-CLIPPY-06/07` should inventory positively on clean paths.
-11. Update `clippy.md` and `README.md` so the written contract matches the chosen behavior.
+- `cargo test --manifest-path apps/guardrail3/Cargo.toml -p guardrail3-app-rs-family-clippy --lib` passes
+- `cargo run --quiet --manifest-path apps/guardrail3/Cargo.toml -p guardrail3 -- rs validate apps/guardrail3 --family clippy --format json` reports `0 errors`, `0 warnings`
+- `cargo run --quiet --manifest-path apps/guardrail3/Cargo.toml -p guardrail3 -- rs validate apps/guardrail3 --family code --format json` reports no error/warn findings in clippy-owned files

@@ -50,6 +50,5 @@ pub(crate) fn run_for_tests(tree: &ProjectTree) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-#[path = "rs_clippy_23_policy_context_parseable_tests/mod.rs"]
-// reason: test-only sidecar module wiring
+#[path = "rs_clippy_23_policy_context_parseable_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_clippy_23_policy_context_parseable_tests;
