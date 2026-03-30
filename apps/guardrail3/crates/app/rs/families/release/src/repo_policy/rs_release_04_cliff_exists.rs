@@ -18,13 +18,13 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
     let repo = input.repo;
     if !repo.cliff_exists {
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "cliff.toml missing".to_owned(),
-    "Repo root is missing `cliff.toml`.".to_owned(),
-    Some(repo.cliff_rel_path.clone()),
-    None,
-    false,
+            ID.to_owned(),
+            Severity::Warn,
+            "cliff.toml missing".to_owned(),
+            "Repo root is missing `cliff.toml`.".to_owned(),
+            Some(repo.cliff_rel_path.clone()),
+            None,
+            false,
         ));
         return;
     }
@@ -33,14 +33,14 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
     };
     let Some(git) = parsed.get("git").and_then(toml::Value::as_table) else {
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "cliff.toml missing [git]".to_owned(),
-    "`cliff.toml` should include a `[git]` section.".to_owned(),
-    Some(repo.cliff_rel_path.clone()),
-    None,
-    false,
-        });
+            ID.to_owned(),
+            Severity::Warn,
+            "cliff.toml missing [git]".to_owned(),
+            "`cliff.toml` should include a `[git]` section.".to_owned(),
+            Some(repo.cliff_rel_path.clone()),
+            None,
+            false,
+        ));
         return;
     };
     if git
@@ -49,14 +49,14 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
         != Some(true)
     {
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "cliff.toml missing conventional_commits = true".to_owned(),
-    "`cliff.toml` should set `[git].conventional_commits = true`.".to_owned(),
-    Some(repo.cliff_rel_path.clone()),
-    None,
-    false,
-        });
+            ID.to_owned(),
+            Severity::Warn,
+            "cliff.toml missing conventional_commits = true".to_owned(),
+            "`cliff.toml` should set `[git].conventional_commits = true`.".to_owned(),
+            Some(repo.cliff_rel_path.clone()),
+            None,
+            false,
+        ));
     }
     if git
         .get("filter_unconventional")
@@ -64,14 +64,14 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
         != Some(true)
     {
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "cliff.toml missing filter_unconventional = true".to_owned(),
-    "`cliff.toml` should set `[git].filter_unconventional = true`.".to_owned(),
-    Some(repo.cliff_rel_path.clone()),
-    None,
-    false,
-        });
+            ID.to_owned(),
+            Severity::Warn,
+            "cliff.toml missing filter_unconventional = true".to_owned(),
+            "`cliff.toml` should set `[git].filter_unconventional = true`.".to_owned(),
+            Some(repo.cliff_rel_path.clone()),
+            None,
+            false,
+        ));
     }
     let commit_parsers = git
         .get("commit_parsers")
@@ -101,7 +101,7 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
     }
     if !results
         .iter()
-        .any(|result| result.id()()()() == ID && !result.inventory()()()())
+        .any(|result| result.id() == ID && !result.inventory())
     {
         results.push(
             CheckResult {
@@ -118,17 +118,18 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
         );
     }
 }
+
 #[cfg(test)]
 pub(super) fn repo_facts() -> crate::facts::RepoReleaseFacts {
-    crate::test_fixtures::repo_facts(),
-)
+    crate::test_fixtures::repo_facts()
+}
 
 #[cfg(test)]
 pub(super) fn repo_input(
     repo: &crate::facts::RepoReleaseFacts,
 ) -> crate::inputs::RepoReleaseInput<'_> {
-    crate::test_fixtures::repo_input(repo),
-)
+    crate::test_fixtures::repo_input(repo)
+}
 
 #[cfg(test)]
 #[path = "rs_release_04_cliff_exists_tests/mod.rs"]
@@ -138,24 +139,10 @@ fn message_covers_prefix(message: &str, prefix: &str) -> bool {
     if message == prefix {
         return true;
     }
-    let bare = prefix.trim_start_matches('^');
-    let exact_head = format!("^{bare}");
-    if message.starts_with(&format!("{exact_head}("))
-        || message.starts_with(&format!("{exact_head}:"))
-        || message.starts_with(&format!("{exact_head}\\"))
-    {
-        return true;
-    }
-    let Some(grouped) = message.strip_prefix("^(") else {
+
+    let Some(stripped) = message.strip_prefix(prefix) else {
         return false;
     };
-    let Some(close_paren) = grouped.find(')') else {
-        return false;
-    };
-    let suffix = &grouped[close_paren + 1..];
-    let valid_continuation = suffix.is_empty()
-        || suffix.starts_with('(')
-        || suffix.starts_with(':')
-        || suffix.starts_with('\\');
-    valid_continuation && grouped[..close_paren].split('|').any(|entry| entry == bare)
+
+    stripped.starts_with(':') || (stripped.starts_with('(') && stripped.contains("):"))
 }

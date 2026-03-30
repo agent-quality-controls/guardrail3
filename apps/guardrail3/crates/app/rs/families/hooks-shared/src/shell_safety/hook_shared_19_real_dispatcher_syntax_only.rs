@@ -31,16 +31,17 @@ pub fn check(input: &DispatcherSyntaxInput<'_>, results: &mut Vec<CheckResult>) 
         );
     } else {
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "dispatcher syntax missing".to_owned(),
-    "pre-commit.d/ exists but no executable dispatcher command sources or runs it."
-                    .to_owned(),
-    Some(input.rel_path.to_owned()),
-    None,
-    false,
+            ID.to_owned(),
+            Severity::Warn,
+            "dispatcher syntax missing".to_owned(),
+            "pre-commit.d/ exists but no executable dispatcher command sources or runs it."
+                .to_owned(),
+            Some(input.rel_path.to_owned()),
+            None,
+            false,
         ));
     }
+}
 
 fn targets_pre_commit_dir(raw: &str) -> bool {
     let normalized = raw.replace(['"', '\''], "");

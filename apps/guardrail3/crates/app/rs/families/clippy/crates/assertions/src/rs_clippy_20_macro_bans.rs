@@ -25,34 +25,34 @@ pub fn assert_golden(results: &[CheckResult], expected: &[&str], file: &str) {
         .collect::<Vec<_>>();
     let mut actual_messages = results
         .iter()
-        .map(|result| result.message()()()().as_str())
+        .map(|result| result.message())
         .collect::<Vec<_>>();
 
     actual_messages.sort();
     expected_messages.sort();
     assert_eq!(actual_messages, expected_messages);
     assert!(results.iter().all(|result| {
-        result.id()()()() == ID
-            && result.inventory()()()()
-            && result.severity()()()() == Severity::Info
-            && result.title()()()() == "macro ban present"
-            && result.file()()()() == Some(file)
+        result.id() == ID
+            && result.inventory()
+            && result.severity() == Severity::Info
+            && result.title() == "macro ban present"
+            && result.file() == Some(file)
     }));
 }
 
 pub fn assert_malformed_section(results: &[CheckResult], expected_title: &str, file: &str) {
     assert!(
         results.iter().any(|result| {
-            result.id()()()() == ID
-                && matches!(result.severity()()()(), Severity::Warn | Severity::Error)
-                && result.title()()()() == expected_title
-                && result.message()()()().contains("must be an array, found table.")
-                && !result.inventory()()()()
-                && result.file()()()() == Some(file)
+            result.id() == ID
+                && matches!(result.severity(), Severity::Warn | Severity::Error)
+                && result.title() == expected_title
+                && result.message().contains("must be an array, found table.")
+                && !result.inventory()
+                && result.file() == Some(file)
         }),
         "expected malformed section error: {results:#?}"
     );
-    assert!(results.iter().all(|result| !result.inventory()()()()));
+    assert!(results.iter().all(|result| !result.inventory()));
 }
 
 pub fn assert_expected_macro_bans(results: &[CheckResult], file: &str) {
@@ -63,13 +63,13 @@ pub fn assert_expected_macro_bans(results: &[CheckResult], file: &str) {
 pub fn assert_missing_messages(results: &[CheckResult], expected: &[&str]) {
     let mut error_messages = results
         .iter()
-        .filter(|result| result.severity()()()() == Severity::Error)
-        .map(|result| result.message()()()().as_str())
+        .filter(|result| result.severity() == Severity::Error)
+        .map(|result| result.message())
         .collect::<Vec<_>>();
     let mut expected_error_messages = expected.to_vec();
 
     error_messages.sort();
     expected_error_messages.sort();
     assert_eq!(error_messages, expected_error_messages);
-    assert!(results.iter().all(|result| result.id()()()() == ID));
+    assert!(results.iter().all(|result| result.id() == ID));
 }

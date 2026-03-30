@@ -26,15 +26,16 @@ pub fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<CheckResult>) {
         );
     } else {
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "cargo clippy step missing".to_owned(),
-    "Hook does not execute cargo clippy.".to_owned(),
-    Some(input.rel_path.to_owned()),
-    None,
-    false,
+            ID.to_owned(),
+            Severity::Warn,
+            "cargo clippy step missing".to_owned(),
+            "Hook does not execute cargo clippy.".to_owned(),
+            Some(input.rel_path.to_owned()),
+            None,
+            false,
         ));
     }
+}
 
 fn is_cargo_clippy_command(command_text: &str) -> bool {
     let tokens = shell_words(command_text);

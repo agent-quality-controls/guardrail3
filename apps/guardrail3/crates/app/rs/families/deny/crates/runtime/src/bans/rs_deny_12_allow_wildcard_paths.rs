@@ -24,17 +24,17 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     {
         Some(value) if value == expected => {}
         _ => results.push(CheckResult::from_parts(
-    "RS-DENY-12".to_owned(),
-    Severity::Error,
-    "allow-wildcard-paths must be true".to_owned(),
-    format!(
+            "RS-DENY-12".to_owned(),
+            Severity::Error,
+            "allow-wildcard-paths must be true".to_owned(),
+            format!(
                 "`{}` must set `[bans].allow-wildcard-paths = true`.",
                 config.rel_path
             ),
-    Some(config.rel_path.clone()),
-    None,
-    false,
-        }),
+            Some(config.rel_path.clone()),
+            None,
+            false,
+        )),
     }
 }
 

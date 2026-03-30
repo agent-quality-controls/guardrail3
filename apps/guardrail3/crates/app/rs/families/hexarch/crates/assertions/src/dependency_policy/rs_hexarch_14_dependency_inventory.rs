@@ -12,7 +12,7 @@ pub fn error_results<'a>(results: &'a [CheckResult], rule_id: &str) -> Vec<&'a C
     let rule_id = if rule_id.is_empty() { RULE_ID } else { rule_id };
     results
         .iter()
-        .filter(|result| result.id()()()() == rule_id && result.severity()()()() == Severity::Error)
+        .filter(|result| result.id() == rule_id && result.severity() == Severity::Error)
         .collect()
 }
 
@@ -24,7 +24,7 @@ pub fn warning_results<'a>(results: &'a [CheckResult], rule_id: &str) -> Vec<&'a
     let rule_id = if rule_id.is_empty() { RULE_ID } else { rule_id };
     results
         .iter()
-        .filter(|result| result.id()()()() == rule_id && result.severity()()()() == Severity::Warn)
+        .filter(|result| result.id() == rule_id && result.severity() == Severity::Warn)
         .collect()
 }
 
@@ -36,7 +36,7 @@ pub fn info_results<'a>(results: &'a [CheckResult], rule_id: &str) -> Vec<&'a Ch
     let rule_id = if rule_id.is_empty() { RULE_ID } else { rule_id };
     results
         .iter()
-        .filter(|result| result.id()()()() == rule_id && result.severity()()()() == Severity::Info)
+        .filter(|result| result.id() == rule_id && result.severity() == Severity::Info)
         .collect()
 }
 
@@ -63,20 +63,20 @@ pub fn assert_inventory_results(
     let inventory = results
         .iter()
         .filter(|result| {
-            result.id()()()() == rule_id
-                && result.severity()()()() == Severity::Info
-                && result.inventory()()()()
-                && result.file()()()() == Some(file)
+            result.id() == rule_id
+                && result.severity() == Severity::Info
+                && result.inventory()
+                && result.file() == Some(file)
         })
         .collect::<Vec<_>>();
     assert_eq!(inventory.len(), expected_count, "{inventory:#?}");
     assert!(
-        inventory.iter().all(|result| result.inventory()()()()),
+        inventory.iter().all(|result| result.inventory()),
         "{inventory:#?}"
     );
     let actual_messages = inventory
         .iter()
-        .map(|result| result.message()()()().as_str())
+        .map(|result| result.message())
         .collect::<BTreeSet<_>>();
     let expected_messages = expected_messages.iter().copied().collect::<BTreeSet<_>>();
     assert_eq!(actual_messages, expected_messages, "{inventory:#?}");

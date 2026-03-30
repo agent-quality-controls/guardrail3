@@ -12,19 +12,19 @@ pub fn assert_multi_root_coverage(
 ) {
     let coverage = results
         .iter()
-        .filter(|result| result.id()()()() == ID)
+        .filter(|result| result.id() == ID)
         .collect::<Vec<_>>();
 
     let actual = coverage
         .iter()
         .map(|result| {
             (
-                result.message()()()().clone(),
+                result.message().clone(),
                 (
-                    result.severity()()()(),
-                    result.inventory()()()(),
-                    result.file()()()().map(str::to_owned),
-                    result.title()()()().clone(),
+                    result.severity(),
+                    result.inventory(),
+                    result.file().map(str::to_owned),
+                    result.title().clone(),
                 ),
             )
         })
@@ -50,8 +50,8 @@ pub fn assert_multi_root_coverage(
 pub fn assert_excludes_non_rust_roots(results: &[CheckResult]) {
     let coverage_messages = results
         .iter()
-        .filter(|result| result.id()()()() == ID)
-        .map(|result| result.message()()()().as_str())
+        .filter(|result| result.id() == ID)
+        .map(|result| result.message())
         .collect::<Vec<_>>();
 
     assert!(
@@ -69,11 +69,11 @@ pub fn assert_selective_uncovered(
 ) {
     let coverage = results
         .iter()
-        .filter(|result| result.id()()()() == ID)
+        .filter(|result| result.id() == ID)
         .collect::<Vec<_>>();
     let actual_messages = coverage
         .iter()
-        .map(|result| result.message()()()().clone())
+        .map(|result| result.message().clone())
         .collect::<BTreeSet<_>>();
     let expected_messages = expected_messages
         .iter()
@@ -84,18 +84,18 @@ pub fn assert_selective_uncovered(
 
     let errors = coverage
         .iter()
-        .filter(|result| result.severity()()()() == Severity::Error)
+        .filter(|result| result.severity() == Severity::Error)
         .collect::<Vec<_>>();
     assert_eq!(
         errors.len(),
         expected_error_files.len(),
         "expected exactly the uncovered roots to error: {errors:#?}"
     );
-    assert!(errors.iter().all(|result| !result.inventory()()()()));
+    assert!(errors.iter().all(|result| !result.inventory()));
     assert_eq!(
         errors
             .iter()
-            .filter_map(|result| result.file()()()())
+            .filter_map(|result| result.file())
             .collect::<BTreeSet<_>>(),
         expected_error_files
             .iter()
@@ -107,57 +107,57 @@ pub fn assert_selective_uncovered(
 pub fn assert_root_failure(results: &[CheckResult], cargo_rel_path: &str, root_label: &str) {
     let coverage = results
         .iter()
-        .filter(|result| result.id()()()() == ID)
+        .filter(|result| result.id() == ID)
         .collect::<Vec<_>>();
     assert_eq!(coverage.len(), 1);
     let result = coverage[0];
-    assert_eq!(result.severity()()()(), Severity::Error);
-    assert_eq!(result.title()()()(), "Rust unit coverage could not be determined");
-    assert_eq!(result.file()()()(), Some(cargo_rel_path));
+    assert_eq!(result.severity(), Severity::Error);
+    assert_eq!(result.title(), "Rust unit coverage could not be determined");
+    assert_eq!(result.file(), Some(cargo_rel_path));
     assert!(
-        result.message()()()().contains(root_label),
+        result.message().contains(root_label),
         "expected root label in message: {result:#?}"
     );
     assert!(
-        result.message()()()().contains(cargo_rel_path),
+        result.message().contains(cargo_rel_path),
         "expected cargo path in message: {result:#?}"
     );
-    assert!(!result.inventory()()()());
+    assert!(!result.inventory());
 }
 
 pub fn assert_uncovered_standalone_package_root(results: &[CheckResult], file: &str) {
     let coverage = results
         .iter()
         .filter(|result| {
-            result.id()()()() == ID
-                && result.severity()()()() == Severity::Error
-                && result.title()()()() == "Rust unit uncovered by clippy.toml"
+            result.id() == ID
+                && result.severity() == Severity::Error
+                && result.title() == "Rust unit uncovered by clippy.toml"
         })
         .collect::<Vec<_>>();
 
     assert_eq!(coverage.len(), 1);
     let result = coverage[0];
-    assert_eq!(result.file()()()(), Some(file));
+    assert_eq!(result.file(), Some(file));
     assert_eq!(
-        result.message()()()(),
+        result.message(),
         "standalone package root `packages/shared-types` is not covered by any allowed clippy.toml at the validation root, a workspace root, or a standalone package root."
     );
-    assert!(!result.inventory()()()());
+    assert!(!result.inventory());
 }
 
 pub fn assert_unparseable_routed_cargo_root(results: &[CheckResult], cargo_rel_path: &str) {
     let failures = results
         .iter()
         .filter(|result| {
-            result.id()()()() == ID
-                && result.severity()()()() == Severity::Error
-                && result.title()()()() == "Rust unit coverage could not be determined"
+            result.id() == ID
+                && result.severity() == Severity::Error
+                && result.title() == "Rust unit coverage could not be determined"
         })
         .collect::<Vec<_>>();
 
     assert_eq!(failures.len(), 1);
     let result = failures[0];
-    assert_eq!(result.file()()()(), Some(cargo_rel_path));
+    assert_eq!(result.file(), Some(cargo_rel_path));
     assert!(
         result
             .message
@@ -170,5 +170,5 @@ pub fn assert_unparseable_routed_cargo_root(results: &[CheckResult], cargo_rel_p
             .contains("while resolving clippy coverage and policy roots"),
         "expected coverage/root-resolution context: {result:#?}"
     );
-    assert!(!result.inventory()()()());
+    assert!(!result.inventory());
 }

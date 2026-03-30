@@ -11,7 +11,7 @@ pub fn error_results<'a>(results: &'a [CheckResult], rule_id: &str) -> Vec<&'a C
     let rule_id = if rule_id.is_empty() { RULE_ID } else { rule_id };
     results
         .iter()
-        .filter(|result| result.id()()()() == rule_id && result.severity()()()() == Severity::Error)
+        .filter(|result| result.id() == rule_id && result.severity() == Severity::Error)
         .collect()
 }
 
@@ -23,7 +23,7 @@ pub fn warning_results<'a>(results: &'a [CheckResult], rule_id: &str) -> Vec<&'a
     let rule_id = if rule_id.is_empty() { RULE_ID } else { rule_id };
     results
         .iter()
-        .filter(|result| result.id()()()() == rule_id && result.severity()()()() == Severity::Warn)
+        .filter(|result| result.id() == rule_id && result.severity() == Severity::Warn)
         .collect()
 }
 
@@ -35,7 +35,7 @@ pub fn info_results<'a>(results: &'a [CheckResult], rule_id: &str) -> Vec<&'a Ch
     let rule_id = if rule_id.is_empty() { RULE_ID } else { rule_id };
     results
         .iter()
-        .filter(|result| result.id()()()() == rule_id && result.severity()()()() == Severity::Info)
+        .filter(|result| result.id() == rule_id && result.severity() == Severity::Info)
         .collect()
 }
 

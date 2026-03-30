@@ -13,7 +13,7 @@ pub struct ExpectedRuleResult<'a> {
 pub fn rule_results<'a>(results: &'a [CheckResult], rule_id: &str) -> Vec<&'a CheckResult> {
     results
         .iter()
-        .filter(|result| result.id()()()() == rule_id)
+        .filter(|result| result.id() == rule_id)
         .collect()
 }
 
@@ -33,22 +33,22 @@ pub fn assert_rule_results(
         let matched = actual.iter().any(|result| {
             expected_result
                 .severity
-                .is_none_or(|severity| result.severity()()()() == severity)
+                .is_none_or(|severity| result.severity() == severity)
                 && expected_result
                     .title
-                    .is_none_or(|title| result.title()()()() == title)
+                    .is_none_or(|title| result.title() == title)
                 && expected_result
                     .file
-                    .is_none_or(|file| result.file()()()() == Some(file))
+                    .is_none_or(|file| result.file() == Some(file))
                 && expected_result
                     .inventory
-                    .is_none_or(|inventory| result.inventory()()()() == inventory)
+                    .is_none_or(|inventory| result.inventory() == inventory)
                 && expected_result
                     .message
-                    .is_none_or(|message| result.message()()()() == message)
+                    .is_none_or(|message| result.message() == message)
                 && expected_result
                     .message_contains
-                    .is_none_or(|needle| result.message()()()().contains(needle))
+                    .is_none_or(|needle| result.message().contains(needle))
         });
         assert!(
             matched,

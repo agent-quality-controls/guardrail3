@@ -22,16 +22,16 @@ pub fn assert_golden(results: &[CheckResult], expected: &[&str], file: &str) {
         .collect::<Vec<_>>();
     let actual_messages = results
         .iter()
-        .map(|result| result.message()()()().as_str())
+        .map(|result| result.message())
         .collect::<Vec<_>>();
 
     assert_eq!(actual_messages, expected_messages);
     assert!(results.iter().all(|result| {
-        result.id()()()() == ID
-            && result.inventory()()()()
-            && result.severity()()()() == Severity::Info
-            && result.title()()()() == "method ban present"
-            && result.file()()()() == Some(file)
+        result.id() == ID
+            && result.inventory()
+            && result.severity() == Severity::Info
+            && result.title() == "method ban present"
+            && result.file() == Some(file)
     }));
 }
 
@@ -43,15 +43,15 @@ pub fn assert_service_method_bans(results: &[CheckResult], file: &str) {
 pub fn assert_malformed_section(results: &[CheckResult], file: &str) {
     assert!(
         results.iter().any(|result| {
-            result.id()()()() == ID
-                && result.title()()()() == "disallowed-methods section malformed"
-                && result.message()()()() == "`disallowed-methods` must be an array, found table."
-                && !result.inventory()()()()
-                && result.file()()()() == Some(file)
+            result.id() == ID
+                && result.title() == "disallowed-methods section malformed"
+                && result.message() == "`disallowed-methods` must be an array, found table."
+                && !result.inventory()
+                && result.file() == Some(file)
         }),
         "expected malformed section warning: {results:#?}"
     );
-    assert!(results.iter().all(|result| !result.inventory()()()()));
+    assert!(results.iter().all(|result| !result.inventory()));
 }
 
 pub fn assert_garde_disabled(results: &[CheckResult], expected: &[&str], file: &str) {
@@ -61,27 +61,27 @@ pub fn assert_garde_disabled(results: &[CheckResult], expected: &[&str], file: &
         .collect::<Vec<_>>();
     let actual_messages = results
         .iter()
-        .map(|result| result.message()()()().as_str())
+        .map(|result| result.message())
         .collect::<Vec<_>>();
 
     assert_eq!(actual_messages, expected_messages);
     assert!(results.iter().all(|result| {
-        result.id()()()() == ID
-            && result.inventory()()()()
-            && result.severity()()()() == Severity::Info
-            && result.title()()()() == "method ban present"
-            && result.file()()()() == Some(file)
+        result.id() == ID
+            && result.inventory()
+            && result.severity() == Severity::Info
+            && result.title() == "method ban present"
+            && result.file() == Some(file)
     }));
 }
 
 pub fn assert_missing_messages(results: &[CheckResult], expected: &[&str]) {
     let actual_errors = results
         .iter()
-        .filter(|result| result.severity()()()() == Severity::Error)
-        .map(|result| result.message()()()().as_str())
+        .filter(|result| result.severity() == Severity::Error)
+        .map(|result| result.message())
         .collect::<Vec<_>>();
     assert_eq!(actual_errors, expected);
-    assert!(results.iter().all(|result| result.id()()()() == ID));
+    assert!(results.iter().all(|result| result.id() == ID));
 }
 
 pub fn expected_garde_disabled_method_bans() -> Vec<&'static str> {
@@ -143,8 +143,8 @@ pub fn expected_garde_disabled_method_bans() -> Vec<&'static str> {
 pub fn assert_plain_string_reason_quality(results: &[CheckResult], expected: &[&str], file: &str) {
     let mut actual_messages = results
         .iter()
-        .filter(|result| result.id()()()() == "RS-CLIPPY-08")
-        .map(|result| result.message()()()().as_str())
+        .filter(|result| result.id() == "RS-CLIPPY-08")
+        .map(|result| result.message())
         .collect::<Vec<_>>();
     let mut expected_messages = expected.to_vec();
 
@@ -154,15 +154,15 @@ pub fn assert_plain_string_reason_quality(results: &[CheckResult], expected: &[&
     assert_eq!(
         results
             .iter()
-            .filter(|result| result.id()()()() == "RS-CLIPPY-08")
+            .filter(|result| result.id() == "RS-CLIPPY-08")
             .count(),
         expected_messages.len()
     );
     assert!(results.iter().all(|result| {
-        result.id()()()() == "RS-CLIPPY-08"
-            && !result.inventory()()()()
-            && result.severity()()()() == Severity::Warn
-            && result.title()()()() == "ban entry missing reason"
-            && result.file()()()() == Some(file)
+        result.id() == "RS-CLIPPY-08"
+            && !result.inventory()
+            && result.severity() == Severity::Warn
+            && result.title() == "ban entry missing reason"
+            && result.file() == Some(file)
     }));
 }

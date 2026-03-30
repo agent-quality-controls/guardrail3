@@ -34,15 +34,15 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
                 continue;
             }
             results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    "test_support imports local component crate".to_owned(),
-    format!(
+                ID.to_owned(),
+                Severity::Error,
+                "test_support imports local component crate".to_owned(),
+                format!(
                     "Shared `test_support` must stay generic and must not import local runtime/assertions crate `{first}`."
                 ),
-    Some(input.file.rel_path.clone()),
-    Some(binding.line),
-    false,
+                Some(input.file.rel_path.clone()),
+                Some(binding.line),
+                false,
             ));
             reported = true;
         }
@@ -59,15 +59,15 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
             continue;
         }
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    "test_support imports route construction infrastructure".to_owned(),
-    "Shared `test_support` must stay generic and must not import route-construction infrastructure."
-                    .to_owned(),
-    Some(input.file.rel_path.clone()),
-    Some(binding.line),
-    false,
-        });
+            ID.to_owned(),
+            Severity::Error,
+            "test_support imports route construction infrastructure".to_owned(),
+            "Shared `test_support` must stay generic and must not import route-construction infrastructure."
+                .to_owned(),
+            Some(input.file.rel_path.clone()),
+            Some(binding.line),
+            false,
+        ));
         reported = true;
     }
 
@@ -81,16 +81,16 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
                 continue;
             }
             results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    "test_support calls local component crate".to_owned(),
-    format!(
+                ID.to_owned(),
+                Severity::Error,
+                "test_support calls local component crate".to_owned(),
+                format!(
                     "Shared `test_support` must stay generic and must not call local runtime/assertions crate `{first}` directly."
                 ),
-    Some(input.file.rel_path.clone()),
-    None,
-    false,
-            });
+                Some(input.file.rel_path.clone()),
+                None,
+                false,
+            ));
             reported = true;
         }
     }
@@ -102,14 +102,14 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
         .any(|call_path| call_path.iter().any(|segment| segment == "FamilyMapper"))
     {
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    "test_support builds routed family input".to_owned(),
-    "Shared `test_support` must stay generic and must not construct routed family inputs through `FamilyMapper`.".to_owned(),
-    Some(input.file.rel_path.clone()),
-    None,
-    false,
-        });
+            ID.to_owned(),
+            Severity::Error,
+            "test_support builds routed family input".to_owned(),
+            "Shared `test_support` must stay generic and must not construct routed family inputs through `FamilyMapper`.".to_owned(),
+            Some(input.file.rel_path.clone()),
+            None,
+            false,
+        ));
         reported = true;
     }
 

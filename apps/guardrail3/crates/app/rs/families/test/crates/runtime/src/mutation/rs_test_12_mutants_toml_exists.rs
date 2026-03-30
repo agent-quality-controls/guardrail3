@@ -20,19 +20,20 @@ pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
         );
     } else {
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "mutants config missing".to_owned(),
-    format!(
+            ID.to_owned(),
+            Severity::Warn,
+            "mutants config missing".to_owned(),
+            format!(
                 "{} is missing required mutation config `{}`.",
                 display_root(&input.root.rel_dir),
                 input.root.mutants_rel_path
             ),
-    Some(input.root.mutants_rel_path.clone()),
-    None,
-    false,
+            Some(input.root.mutants_rel_path.clone()),
+            None,
+            false,
         ));
     }
+}
 
 fn display_root(rel_dir: &str) -> String {
     if rel_dir.is_empty() {

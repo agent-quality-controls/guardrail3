@@ -28,17 +28,17 @@ pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
 
     if !input.root.nextest_exists {
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "nextest config missing".to_owned(),
-    format!(
+            ID.to_owned(),
+            Severity::Warn,
+            "nextest config missing".to_owned(),
+            format!(
                 "{} requires `{}` with timeout settings for async tests.",
                 display_root(&input.root.rel_dir),
                 input.root.nextest_rel_path
             ),
-    Some(input.root.nextest_rel_path.clone()),
-    None,
-    false,
+            Some(input.root.nextest_rel_path.clone()),
+            None,
+            false,
         ));
         return;
     }
@@ -56,34 +56,36 @@ pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
         .and_then(|profile| profile.get("leak-timeout"))
         .is_some();
     if has_slow_timeout && has_leak_timeout {
-        results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Info,
-    "nextest timeouts configured".to_owned(),
-    format!(
+        results.push(
+            CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Info,
+                "nextest timeouts configured".to_owned(),
+                format!(
                     "`{}` defines both `slow-timeout` and `leak-timeout`.",
                     input.root.nextest_rel_path
                 ),
-    Some(input.root.nextest_rel_path.clone()),
-    None,
-    false,
-            }
+                Some(input.root.nextest_rel_path.clone()),
+                None,
+                false,
+            )
             .as_inventory(),
         );
     } else {
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "nextest timeouts incomplete".to_owned(),
-    format!(
+            ID.to_owned(),
+            Severity::Warn,
+            "nextest timeouts incomplete".to_owned(),
+            format!(
                 "`{}` must define both `[profile.default].slow-timeout` and `[profile.default].leak-timeout`.",
                 input.root.nextest_rel_path
             ),
-    Some(input.root.nextest_rel_path.clone()),
-    None,
-    false,
-        });
+            Some(input.root.nextest_rel_path.clone()),
+            None,
+            false,
+        ));
     }
+}
 
 fn display_root(rel_dir: &str) -> String {
     if rel_dir.is_empty() {
@@ -96,8 +98,9 @@ fn display_root(rel_dir: &str) -> String {
 #[cfg(test)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
     let tree = test_support::walk(root);
-    super::check_test_tree(&tree, &test_support::StubToolChecker::default()),
-)
+    super::check_test_tree(&tree, &test_support::StubToolChecker::default())
+}
+
 #[cfg(test)]
 #[path = "rs_test_09_nextest_timeouts_tests/mod.rs"]
 mod rs_test_09_nextest_timeouts_tests;

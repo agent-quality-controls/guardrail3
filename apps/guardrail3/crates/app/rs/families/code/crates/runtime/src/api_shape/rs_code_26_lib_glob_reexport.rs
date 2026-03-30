@@ -12,15 +12,16 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
 
     for (line, target) in find_pub_use_glob_reexports(input.ast) {
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "glob re-export in lib.rs".to_owned(),
-    format!("`pub use {target}` creates an unstable API surface."),
-    Some(input.rel_path.to_owned()),
-    Some(line),
-    false,
+            ID.to_owned(),
+            Severity::Warn,
+            "glob re-export in lib.rs".to_owned(),
+            format!("`pub use {target}` creates an unstable API surface."),
+            Some(input.rel_path.to_owned()),
+            Some(line),
+            false,
         ));
     }
+}
 
 fn is_lib_rs(rel_path: &str) -> bool {
     rel_path

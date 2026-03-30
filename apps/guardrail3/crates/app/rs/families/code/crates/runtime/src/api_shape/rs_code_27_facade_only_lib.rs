@@ -12,18 +12,19 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
 
     for item in find_facade_body_items(input.ast) {
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    "lib.rs should stay facade-only".to_owned(),
-    format!(
+            ID.to_owned(),
+            Severity::Error,
+            "lib.rs should stay facade-only".to_owned(),
+            format!(
                 "lib.rs contains {} `{}`. Keep lib.rs limited to facade declarations and type/const definitions.",
                 item.kind, item.name
             ),
-    Some(input.rel_path.to_owned()),
-    Some(item.line),
-    false,
+            Some(input.rel_path.to_owned()),
+            Some(item.line),
+            false,
         ));
     }
+}
 
 fn is_lib_rs(rel_path: &str) -> bool {
     rel_path

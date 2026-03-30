@@ -31,16 +31,16 @@ pub fn assert_golden(results: &[CheckResult], expected: &[&str], file: &str) {
         .collect::<Vec<_>>();
     let actual_messages = results
         .iter()
-        .map(|result| result.message()()()().as_str())
+        .map(|result| result.message())
         .collect::<Vec<_>>();
 
     assert_eq!(actual_messages, expected_messages);
     assert!(results.iter().all(|result| {
-        result.id()()()() == ID
-            && result.inventory()()()()
-            && result.severity()()()() == Severity::Info
-            && result.title()()()() == "type ban present"
-            && result.file()()()() == Some(file)
+        result.id() == ID
+            && result.inventory()
+            && result.severity() == Severity::Info
+            && result.title() == "type ban present"
+            && result.file() == Some(file)
     }));
 }
 
@@ -52,15 +52,15 @@ pub fn assert_service_type_bans(results: &[CheckResult], file: &str) {
 pub fn assert_malformed_section(results: &[CheckResult], file: &str) {
     assert!(
         results.iter().any(|result| {
-            result.id()()()() == ID
-                && result.title()()()() == "disallowed-types section malformed"
-                && result.message()()()() == "`disallowed-types` must be an array, found table."
-                && !result.inventory()()()()
-                && result.file()()()() == Some(file)
+            result.id() == ID
+                && result.title() == "disallowed-types section malformed"
+                && result.message() == "`disallowed-types` must be an array, found table."
+                && !result.inventory()
+                && result.file() == Some(file)
         }),
         "expected malformed section warning: {results:#?}"
     );
-    assert!(results.iter().all(|result| !result.inventory()()()()));
+    assert!(results.iter().all(|result| !result.inventory()));
 }
 
 pub fn assert_garde_disabled(results: &[CheckResult], expected: &[&str], file: &str) {
@@ -70,37 +70,37 @@ pub fn assert_garde_disabled(results: &[CheckResult], expected: &[&str], file: &
         .collect::<Vec<_>>();
     let actual_messages = results
         .iter()
-        .map(|result| result.message()()()().as_str())
+        .map(|result| result.message())
         .collect::<Vec<_>>();
 
     assert_eq!(actual_messages, expected_messages);
     assert!(results.iter().all(|result| {
-        result.id()()()() == ID
-            && result.inventory()()()()
-            && result.severity()()()() == Severity::Info
-            && result.title()()()() == "type ban present"
-            && result.file()()()() == Some(file)
+        result.id() == ID
+            && result.inventory()
+            && result.severity() == Severity::Info
+            && result.title() == "type ban present"
+            && result.file() == Some(file)
     }));
 }
 
 pub fn assert_excludes_library_global_state(results: &[CheckResult]) {
-    assert!(results.iter().all(|result| result.id()()()() == ID));
+    assert!(results.iter().all(|result| result.id() == ID));
     assert!(!results.iter().any(|result| {
-        result.message()()()().contains("std::sync::LazyLock")
-            || result.message()()()().contains("std::sync::OnceLock")
-            || result.message()()()().contains("once_cell::sync::Lazy")
-            || result.message()()()().contains("once_cell::sync::OnceCell")
+        result.message().contains("std::sync::LazyLock")
+            || result.message().contains("std::sync::OnceLock")
+            || result.message().contains("once_cell::sync::Lazy")
+            || result.message().contains("once_cell::sync::OnceCell")
     }));
 }
 
 pub fn assert_missing_messages(results: &[CheckResult], expected: &[&str]) {
     let actual_errors = results
         .iter()
-        .filter(|result| result.severity()()()() == Severity::Error)
-        .map(|result| result.message()()()().as_str())
+        .filter(|result| result.severity() == Severity::Error)
+        .map(|result| result.message())
         .collect::<Vec<_>>();
     assert_eq!(actual_errors, expected);
-    assert!(results.iter().all(|result| result.id()()()() == ID));
+    assert!(results.iter().all(|result| result.id() == ID));
 }
 
 pub fn expected_garde_disabled_type_bans() -> Vec<&'static str> {

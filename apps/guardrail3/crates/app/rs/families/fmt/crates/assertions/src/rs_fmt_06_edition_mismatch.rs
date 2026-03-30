@@ -15,13 +15,13 @@ const ID: &str = "RS-FMT-06";
 pub fn findings(results: &[CheckResult]) -> Vec<Finding<'_>> {
     results
         .iter()
-        .filter(|result| result.id()()()() == ID)
+        .filter(|result| result.id() == ID)
         .map(|result| Finding {
-            severity: result.severity()()()(),
-            title: result.title()()()().as_str(),
-            message: result.message()()()().as_str(),
-            file: result.file()()()(),
-            inventory: result.inventory()()()(),
+            severity: result.severity(),
+            title: result.title(),
+            message: result.message(),
+            file: result.file(),
+            inventory: result.inventory(),
         })
         .collect()
 }
@@ -42,16 +42,16 @@ pub fn assert_mismatch(results: &[CheckResult], rustfmt_edition: &str, cargo_edi
         "unexpected RS-FMT-06 findings: {findings:#?}"
     );
     let finding = &findings[0];
-    assert_eq!(finding.severity()()()(), Severity::Warn);
-    assert_eq!(finding.title()()()(), "rustfmt edition differs from Cargo edition");
+    assert_eq!(finding.severity, Severity::Warn);
+    assert_eq!(finding.title, "rustfmt edition differs from Cargo edition");
     assert_eq!(
-        finding.message()()()(),
+        finding.message,
         format!(
             "rustfmt edition `{rustfmt_edition}` differs from Cargo edition `{cargo_edition}`."
         )
     );
-    assert_eq!(finding.file()()()(), Some("rustfmt.toml"));
-    assert!(!finding.inventory()()()());
+    assert_eq!(finding.file, Some("rustfmt.toml"));
+    assert!(!finding.inventory);
 }
 
 pub fn assert_error(results: &[CheckResult], title: &str, message: &str) {
@@ -62,11 +62,11 @@ pub fn assert_error(results: &[CheckResult], title: &str, message: &str) {
         "unexpected RS-FMT-06 findings: {findings:#?}"
     );
     let finding = &findings[0];
-    assert_eq!(finding.severity()()()(), Severity::Error);
-    assert_eq!(finding.title()()()(), title);
-    assert_eq!(finding.message()()()(), message);
-    assert_eq!(finding.file()()()(), Some("Cargo.toml"));
-    assert!(!finding.inventory()()()());
+    assert_eq!(finding.severity, Severity::Error);
+    assert_eq!(finding.title, title);
+    assert_eq!(finding.message, message);
+    assert_eq!(finding.file, Some("Cargo.toml"));
+    assert!(!finding.inventory);
 }
 
 pub fn assert_malformed_root_manifest_error(results: &[CheckResult]) {

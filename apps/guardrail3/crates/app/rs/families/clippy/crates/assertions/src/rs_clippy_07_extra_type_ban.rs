@@ -23,12 +23,12 @@ pub fn assert_generated_library_type_bans(actual: &[&str]) {
 pub fn assert_no_results(results: &[CheckResult]) {
     assert_eq!(results.len(), 1);
     let result = &results[0];
-    assert_eq!(result.id()()()(), ID);
-    assert!(result.inventory()()()());
-    assert_eq!(result.severity()()()(), Severity::Info);
-    assert_eq!(result.title()()()(), "no extra type bans");
+    assert_eq!(result.id(), ID);
+    assert!(result.inventory());
+    assert_eq!(result.severity(), Severity::Info);
+    assert_eq!(result.title(), "no extra type bans");
     assert_eq!(
-        result.message()()()(),
+        result.message(),
         "No additional type bans beyond the managed baseline."
     );
 }
@@ -40,7 +40,7 @@ pub fn assert_service_type_bans(results: &[CheckResult], file: &str) {
         .collect::<Vec<_>>();
     let mut actual_messages = results
         .iter()
-        .map(|result| result.message()()()().as_str())
+        .map(|result| result.message())
         .collect::<Vec<_>>();
     let mut expected_messages = expected;
 
@@ -48,10 +48,10 @@ pub fn assert_service_type_bans(results: &[CheckResult], file: &str) {
     expected_messages.sort();
     assert_eq!(actual_messages, expected_messages);
     assert!(results.iter().all(|result| {
-        result.id()()()() == ID
-            && result.inventory()()()()
-            && result.severity()()()() == Severity::Info
-            && result.file()()()() == Some(file)
+        result.id() == ID
+            && result.inventory()
+            && result.severity() == Severity::Info
+            && result.file() == Some(file)
     }));
 }
 
@@ -62,7 +62,7 @@ pub fn assert_library_type_bans(results: &[CheckResult], file: &str) {
         .collect::<Vec<_>>();
     let mut actual_messages = results
         .iter()
-        .map(|result| result.message()()()().as_str())
+        .map(|result| result.message())
         .collect::<Vec<_>>();
     let mut expected_messages = expected;
 
@@ -70,17 +70,17 @@ pub fn assert_library_type_bans(results: &[CheckResult], file: &str) {
     expected_messages.sort();
     assert_eq!(actual_messages, expected_messages);
     assert!(results.iter().all(|result| {
-        result.id()()()() == ID
-            && result.inventory()()()()
-            && result.severity()()()() == Severity::Info
-            && result.file()()()() == Some(file)
+        result.id() == ID
+            && result.inventory()
+            && result.severity() == Severity::Info
+            && result.file() == Some(file)
     }));
 }
 
 pub fn assert_messages(results: &[CheckResult], expected: &[&str], file: &str) {
     let mut actual_messages = results
         .iter()
-        .map(|result| result.message()()()().as_str())
+        .map(|result| result.message())
         .collect::<Vec<_>>();
     let mut expected_messages = expected.to_vec();
 
@@ -88,22 +88,22 @@ pub fn assert_messages(results: &[CheckResult], expected: &[&str], file: &str) {
     expected_messages.sort();
     assert_eq!(actual_messages, expected_messages);
     assert!(results.iter().all(|result| {
-        result.id()()()() == ID
-            && result.inventory()()()()
-            && result.severity()()()() == Severity::Info
-            && result.file()()()() == Some(file)
+        result.id() == ID
+            && result.inventory()
+            && result.severity() == Severity::Info
+            && result.file() == Some(file)
     }));
 }
 
 pub fn assert_project_specific(results: &[CheckResult], path: &str) {
     assert_eq!(results.len(), 1);
     let result = &results[0];
-    assert_eq!(result.id()()()(), ID);
-    assert!(result.inventory()()()());
-    assert_eq!(result.severity()()()(), Severity::Info);
-    assert_eq!(result.title()()()(), "extra type ban");
+    assert_eq!(result.id(), ID);
+    assert!(result.inventory());
+    assert_eq!(result.severity(), Severity::Info);
+    assert_eq!(result.title(), "extra type ban");
     assert_eq!(
-        result.message()()()(),
+        result.message(),
         format!("Additional type ban `{path}` beyond baseline.")
     );
 }
@@ -111,13 +111,13 @@ pub fn assert_project_specific(results: &[CheckResult], path: &str) {
 pub fn assert_malformed_section(results: &[CheckResult], file: &str) {
     assert!(
         results.iter().any(|result| {
-            result.id()()()() == ID
-                && result.title()()()() == "disallowed-types section malformed"
-                && result.message()()()() == "`disallowed-types` must be an array, found table."
-                && !result.inventory()()()()
-                && result.file()()()() == Some(file)
+            result.id() == ID
+                && result.title() == "disallowed-types section malformed"
+                && result.message() == "`disallowed-types` must be an array, found table."
+                && !result.inventory()
+                && result.file() == Some(file)
         }),
         "expected malformed section warning: {results:#?}"
     );
-    assert!(results.iter().all(|result| !result.inventory()()()()));
+    assert!(results.iter().all(|result| !result.inventory()));
 }

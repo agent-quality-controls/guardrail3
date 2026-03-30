@@ -30,18 +30,19 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
             continue;
         }
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    "#[deny]/#[forbid] without reason".to_owned(),
-    format!(
+            ID.to_owned(),
+            Severity::Error,
+            "#[deny]/#[forbid] without reason".to_owned(),
+            format!(
                 "`#[{}({})]` changes local lint policy without documenting why. Add `// reason:` on the same line.",
                 info.level, info.lint
             ),
-    Some(input.rel_path.to_owned()),
-    Some(info.line),
-    false,
+            Some(input.rel_path.to_owned()),
+            Some(info.line),
+            false,
         ));
     }
+}
 
 #[cfg(test)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {

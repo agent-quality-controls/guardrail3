@@ -11,18 +11,19 @@ pub fn check(input: &FailOpenWrapperInput<'_>, results: &mut Vec<CheckResult>) {
         }
 
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "critical hook command is fail-open".to_owned(),
-    format!(
+            ID.to_owned(),
+            Severity::Warn,
+            "critical hook command is fail-open".to_owned(),
+            format!(
                 "Critical hook command `{}` is softened by a fail-open wrapper.",
                 line.command_text()
             ),
-    Some(input.rel_path.to_owned()),
-    Some(line.line_no()),
-    false,
+            Some(input.rel_path.to_owned()),
+            Some(line.line_no()),
+            false,
         ));
     }
+}
 
 fn is_guardrail_critical(command_text: &str) -> bool {
     let command_name = command_text.split_whitespace().next().unwrap_or_default();

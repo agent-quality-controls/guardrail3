@@ -34,14 +34,12 @@ pub fn check(input: &PackageLibarchInput<'_>, results: &mut Vec<CheckResult>) {
         .facade_exports
         .iter()
         .any(|export| export.crate_name == api.lib_crate_name);
-    let exports_core = package
-        .layer_member(LayerName::Core)
-        .is_some_and(|core| {
-            package
-                .facade_exports
-                .iter()
-                .any(|export| export.crate_name == core.lib_crate_name)
-        ));
+    let exports_core = package.layer_member(LayerName::Core).is_some_and(|core| {
+        package
+            .facade_exports
+            .iter()
+            .any(|export| export.crate_name == core.lib_crate_name)
+    });
 
     if !exports_api || exports_core {
         let mut parts = Vec::new();

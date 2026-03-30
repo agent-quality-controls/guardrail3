@@ -18,38 +18,39 @@ pub fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<CheckResult>) {
 
     if has_jscpd && !has_cargo_dupes {
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "wrong Rust duplication tool".to_owned(),
-    "Hook uses jscpd for Rust duplication checks instead of cargo-dupes."
+            ID.to_owned(),
+            Severity::Warn,
+            "wrong Rust duplication tool".to_owned(),
+            "Hook uses jscpd for Rust duplication checks instead of cargo-dupes."
                 .to_owned(),
-    Some(input.rel_path.to_owned()),
-    None,
-    false,
+            Some(input.rel_path.to_owned()),
+            None,
+            false,
         ));
     } else if has_cargo_dupes {
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "cargo-dupes selected for Rust duplication checks".to_owned(),
-    "Hook uses cargo-dupes for Rust duplication checks.".to_owned(),
-    Some(input.rel_path.to_owned()),
-    None,
-    false,
-            }
+            ID.to_owned(),
+            Severity::Warn,
+            "cargo-dupes selected for Rust duplication checks".to_owned(),
+            "Hook uses cargo-dupes for Rust duplication checks.".to_owned(),
+            Some(input.rel_path.to_owned()),
+            None,
+            false,
+            )
             .as_inventory(),
         );
     } else {
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "Rust duplication tool missing".to_owned(),
-    "Hook does not show a Rust duplication-check command.".to_owned(),
-    Some(input.rel_path.to_owned()),
-    None,
-    false,
-        });
+            ID.to_owned(),
+            Severity::Warn,
+            "Rust duplication tool missing".to_owned(),
+            "Hook does not show a Rust duplication-check command.".to_owned(),
+            Some(input.rel_path.to_owned()),
+            None,
+            false,
+        ));
     }
+}
 
 fn line_contains_command(raw: &str, command_text: &str, predicate: fn(&str) -> bool) -> bool {
     let mut segments = split_command_segments(raw);
@@ -62,8 +63,8 @@ fn line_contains_command(raw: &str, command_text: &str, predicate: fn(&str) -> b
         segments.push(command_text.to_owned());
     }
     segments.extend(recovered_substitutions);
-    segments.iter().any(|segment| predicate(segment)),
-)
+    segments.iter().any(|segment| predicate(segment))
+}
 
 fn split_command_segments(raw: &str) -> Vec<String> {
     let mut line = raw.trim();
@@ -88,8 +89,8 @@ fn split_command_segments(raw: &str) -> Vec<String> {
                 .to_owned()
         })
         .filter(|segment| !segment.is_empty())
-        .collect(),
-)
+        .collect()
+}
 
 fn split_unquoted_commands(line: &str) -> Vec<&str> {
     let mut segments = Vec::new();

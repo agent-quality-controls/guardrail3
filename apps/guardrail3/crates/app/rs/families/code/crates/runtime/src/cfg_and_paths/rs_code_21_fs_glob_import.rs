@@ -18,15 +18,16 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
 
     for line in find_std_fs_glob_import_lines(input.ast) {
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    "std::fs glob import".to_owned(),
-    "Direct `use std::fs::*` glob import bypasses clippy method bans.".to_owned(),
-    Some(input.rel_path.to_owned()),
-    Some(line),
-    false,
+            ID.to_owned(),
+            Severity::Error,
+            "std::fs glob import".to_owned(),
+            "Direct `use std::fs::*` glob import bypasses clippy method bans.".to_owned(),
+            Some(input.rel_path.to_owned()),
+            Some(line),
+            false,
         ));
     }
+}
 
 #[cfg(test)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {

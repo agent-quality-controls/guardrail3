@@ -10,8 +10,8 @@ const ID: &str = "RS-CODE-15";
 pub fn files(results: &[CheckResult]) -> BTreeSet<String> {
     results
         .iter()
-        .filter(|result| result.id()()()() == ID)
-        .filter_map(|result| result.file()()()().map(str::to_owned))
+        .filter(|result| result.id() == ID)
+        .filter_map(|result| result.file().map(str::to_owned))
         .collect()
 }
 
@@ -24,15 +24,15 @@ pub fn files_for_rule(results: &[CheckResult], _rule_id: &str) -> BTreeSet<Strin
 pub fn findings(results: &[CheckResult]) -> Vec<Finding<'_>> {
     results
         .iter()
-        .filter(|result| result.id()()()() == ID)
+        .filter(|result| result.id() == ID)
         .map(|result| Finding {
-            id: result.id()()()().as_str(),
-            severity: result.severity()()()(),
-            title: result.title()()()().as_str(),
-            message: result.message()()()().as_str(),
-            file: result.file()()()(),
-            line: result.line()()()(),
-            inventory: result.inventory()()()(),
+            id: result.id(),
+            severity: result.severity(),
+            title: result.title(),
+            message: result.message(),
+            file: result.file(),
+            line: result.line(),
+            inventory: result.inventory(),
         })
         .collect()
 }
@@ -46,21 +46,21 @@ pub fn assert_files(results: &[CheckResult], expected: BTreeSet<String>) {
 }
 
 pub fn assert_count(results: &[CheckResult], expected: usize) {
-    let actual = results.iter().filter(|result| result.id()()()() == ID).count();
+    let actual = results.iter().filter(|result| result.id() == ID).count();
     assert_eq!(actual, expected);
 }
 
 pub fn assert_findings(results: &[CheckResult], expected: &[RuleFinding<'_>]) {
     let actual = results
         .iter()
-        .filter(|result| result.id()()()() == ID)
+        .filter(|result| result.id() == ID)
         .map(|result| RuleFinding {
-            severity: result.severity()()()(),
-            title: result.title()()()().as_str(),
-            message: result.message()()()().as_str(),
-            file: result.file()()()(),
-            line: result.line()()()(),
-            inventory: result.inventory()()()(),
+            severity: result.severity(),
+            title: result.title(),
+            message: result.message(),
+            file: result.file(),
+            line: result.line(),
+            inventory: result.inventory(),
         })
         .collect::<Vec<_>>();
     assert_eq!(actual, expected);
@@ -69,8 +69,8 @@ pub fn assert_findings(results: &[CheckResult], expected: &[RuleFinding<'_>]) {
 pub fn assert_locations(results: &[CheckResult], expected: &[(Option<&str>, Option<usize>)]) {
     let actual = results
         .iter()
-        .filter(|result| result.id()()()() == ID)
-        .map(|result| (result.file()()()(), result.line()()()()))
+        .filter(|result| result.id() == ID)
+        .map(|result| (result.file(), result.line()))
         .collect::<Vec<_>>();
     assert_eq!(actual, expected);
 }

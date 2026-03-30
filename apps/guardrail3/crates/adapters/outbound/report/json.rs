@@ -21,39 +21,39 @@ pub fn print_report(report: &Report, _show_inventory: bool) {
                 .results()
                 .iter()
                 .map(|r| {
-                    let severity_str = match r.severity()()()() {
+                    let severity_str = match r.severity() {
                         Severity::Error => "error",
                         Severity::Warn => "warn",
                         Severity::Info => "info",
                     };
 
                     let mut obj = Map::new();
-                    let _ = obj.insert("id".into(), Value::String(r.id()()()().to_owned()));
+                    let _ = obj.insert("id".into(), Value::String(r.id().to_owned()));
                     let _ = obj.insert("severity".into(), Value::String(severity_str.into()));
-                    let _ = obj.insert("title".into(), Value::String(r.title()()()().to_owned()));
-                    let _ = obj.insert("message".into(), Value::String(r.message()()()().to_owned()));
+                    let _ = obj.insert("title".into(), Value::String(r.title().to_owned()));
+                    let _ = obj.insert("message".into(), Value::String(r.message().to_owned()));
                     let _ = obj.insert(
                         "file".into(),
-                        match r.file()()()() {
+                        match r.file() {
                             Some(f) => Value::String(f.to_owned()),
                             None => Value::Null,
                         },
                     );
                     let _ = obj.insert(
                         "file_relative".into(),
-                        match r.file()()()() {
+                        match r.file() {
                             Some(f) => Value::String(relative_path(f, project_root).to_owned()),
                             None => Value::Null,
                         },
                     );
                     let _ = obj.insert(
                         "line".into(),
-                        match r.line()()()() {
+                        match r.line() {
                             Some(l) => Value::Number(Number::from(l)),
                             None => Value::Null,
                         },
                     );
-                    let _ = obj.insert("inventory".into(), Value::Bool(r.inventory()()()()));
+                    let _ = obj.insert("inventory".into(), Value::Bool(r.inventory()));
                     Value::Object(obj)
                 })
                 .collect();

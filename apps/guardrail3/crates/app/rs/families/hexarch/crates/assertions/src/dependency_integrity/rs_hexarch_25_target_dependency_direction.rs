@@ -13,7 +13,7 @@ pub fn error_results<'a>(results: &'a [CheckResult], rule_id: &str) -> Vec<&'a C
     let rule_id = if rule_id.is_empty() { RULE_ID } else { rule_id };
     results
         .iter()
-        .filter(|result| result.id()()()() == rule_id && result.severity()()()() == Severity::Error)
+        .filter(|result| result.id() == rule_id && result.severity() == Severity::Error)
         .collect()
 }
 
@@ -25,7 +25,7 @@ pub fn warning_results<'a>(results: &'a [CheckResult], rule_id: &str) -> Vec<&'a
     let rule_id = if rule_id.is_empty() { RULE_ID } else { rule_id };
     results
         .iter()
-        .filter(|result| result.id()()()() == rule_id && result.severity()()()() == Severity::Warn)
+        .filter(|result| result.id() == rule_id && result.severity() == Severity::Warn)
         .collect()
 }
 
@@ -37,7 +37,7 @@ pub fn info_results<'a>(results: &'a [CheckResult], rule_id: &str) -> Vec<&'a Ch
     let rule_id = if rule_id.is_empty() { RULE_ID } else { rule_id };
     results
         .iter()
-        .filter(|result| result.id()()()() == rule_id && result.severity()()()() == Severity::Info)
+        .filter(|result| result.id() == rule_id && result.severity() == Severity::Info)
         .collect()
 }
 
@@ -65,13 +65,13 @@ pub fn assert_error_results(
     assert_eq!(errors.len(), expected_count, "{errors:#?}");
     let actual_files = errors
         .iter()
-        .filter_map(|result| result.file()()()())
+        .filter_map(|result| result.file())
         .collect::<BTreeSet<_>>();
     let expected_files = expected_files.iter().copied().collect::<BTreeSet<_>>();
     assert_eq!(actual_files, expected_files, "{errors:#?}");
     let actual_titles = errors
         .iter()
-        .map(|result| result.title()()()().as_str())
+        .map(|result| result.title())
         .collect::<BTreeSet<_>>();
     let expected_titles = expected_titles.iter().copied().collect::<BTreeSet<_>>();
     assert_eq!(actual_titles, expected_titles, "{errors:#?}");
@@ -92,7 +92,7 @@ pub fn assert_error_file_set(
     assert_eq!(errors.len(), expected_count, "{errors:#?}");
     let actual_files = errors
         .iter()
-        .filter_map(|result| result.file()()()())
+        .filter_map(|result| result.file())
         .collect::<BTreeSet<_>>();
     let expected_files = expected_files.iter().copied().collect::<BTreeSet<_>>();
     assert_eq!(actual_files, expected_files, "{errors:#?}");

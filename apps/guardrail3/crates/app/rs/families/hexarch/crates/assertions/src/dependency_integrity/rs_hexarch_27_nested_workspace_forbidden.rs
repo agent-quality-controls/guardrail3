@@ -26,7 +26,7 @@ pub fn assert_expected_rule_results<'a>(
         let index = actual.iter().position(|result| {
             expected_result
                 .file
-                .is_none_or(|file| result.file()()()() == Some(file))
+                .is_none_or(|file| result.file() == Some(file))
                 && expected_result.file_contains.is_none_or(|expected_file| {
                     result
                         .file
@@ -34,10 +34,10 @@ pub fn assert_expected_rule_results<'a>(
                         .is_some_and(|actual_file| actual_file.contains(expected_file))
                 })
                 && expected_result.title_contains.is_none_or(|needles| {
-                    needles.iter().all(|needle| result.title()()()().contains(needle))
+                    needles.iter().all(|needle| result.title().contains(needle))
                 })
                 && expected_result.message_contains.is_none_or(|needles| {
-                    needles.iter().all(|needle| result.message()()()().contains(needle))
+                    needles.iter().all(|needle| result.message().contains(needle))
                 })
         });
 
@@ -63,8 +63,8 @@ pub fn assert_no_workspace_members_error_with_file_prefix(results: &[CheckResult
     let errors = results
         .iter()
         .filter(|result| {
-            result.id()()()() == WORKSPACE_MEMBERS_RULE_ID
-                && result.severity()()()() == Severity::Error
+            result.id() == WORKSPACE_MEMBERS_RULE_ID
+                && result.severity() == Severity::Error
                 && result
                     .file
                     .as_deref()
@@ -87,7 +87,7 @@ pub fn assert_workspace_members_error_summary(
     let errors = results
         .iter()
         .filter(|result| {
-            result.id()()()() == WORKSPACE_MEMBERS_RULE_ID && result.severity()()()() == Severity::Error
+            result.id() == WORKSPACE_MEMBERS_RULE_ID && result.severity() == Severity::Error
         })
         .collect::<Vec<_>>();
     assert_eq!(
@@ -96,17 +96,17 @@ pub fn assert_workspace_members_error_summary(
         "unexpected {WORKSPACE_MEMBERS_RULE_ID} error count: {errors:#?}"
     );
     for result in &errors {
-        assert_eq!(result.file()()()(), Some(expected_file), "{errors:#?}");
+        assert_eq!(result.file(), Some(expected_file), "{errors:#?}");
         assert!(
             title_contains
                 .iter()
-                .all(|needle| result.title()()()().contains(needle)),
+                .all(|needle| result.title().contains(needle)),
             "{errors:#?}"
         );
         assert!(
             message_contains
                 .iter()
-                .all(|needle| result.message()()()().contains(needle)),
+                .all(|needle| result.message().contains(needle)),
             "{errors:#?}"
         );
     }
@@ -125,7 +125,7 @@ pub fn assert_any_result_contains_title(results: &[CheckResult], needles: &[&str
     let errors = error_results(results);
     for needle in needles {
         assert!(
-            errors.iter().any(|result| result.title()()()().contains(needle)),
+            errors.iter().any(|result| result.title().contains(needle)),
             "missing expected title `{needle}` in RS-HEXARCH-27 results: {errors:#?}"
         );
     }
@@ -134,6 +134,6 @@ pub fn assert_any_result_contains_title(results: &[CheckResult], needles: &[&str
 fn error_results(results: &[CheckResult]) -> Vec<&CheckResult> {
     results
         .iter()
-        .filter(|result| result.id()()()() == RULE_ID && result.severity()()()() == Severity::Error)
+        .filter(|result| result.id() == RULE_ID && result.severity() == Severity::Error)
         .collect()
 }

@@ -15,7 +15,7 @@ pub struct ExpectedRuleResult<'a> {
 pub fn assert_rule_results(results: &[CheckResult], expected: &[ExpectedRuleResult<'_>]) {
     let actual = results
         .iter()
-        .filter(|result| result.id()()()() == RULE_ID)
+        .filter(|result| result.id() == RULE_ID)
         .collect::<Vec<_>>();
     assert_eq!(
         actual.len(),
@@ -25,11 +25,11 @@ pub fn assert_rule_results(results: &[CheckResult], expected: &[ExpectedRuleResu
 
     for expected_result in expected {
         let matched = actual.iter().any(|result| {
-            result.severity()()()() == expected_result.severity
-                && result.inventory()()()() == expected_result.inventory
-                && result.title()()()() == expected_result.title
-                && result.message()()()() == expected_result.message
-                && result.file()()()() == expected_result.file
+            result.severity() == expected_result.severity
+                && result.inventory() == expected_result.inventory
+                && result.title() == expected_result.title
+                && result.message() == expected_result.message
+                && result.file() == expected_result.file
         });
         assert!(
             matched,
@@ -51,13 +51,13 @@ pub fn assert_legacy_only_family_results(results: &[CheckResult]) {
     );
     assert!(
         results.iter().any(|result| {
-            result.id()()()() == "RS-TOOLCHAIN-04"
-                && result.severity()()()() == Severity::Warn
-                && !result.inventory()()()()
-                && result.title()()()() == "legacy rust-toolchain file present"
-                && result.message()()()()
+            result.id() == "RS-TOOLCHAIN-04"
+                && result.severity() == Severity::Warn
+                && !result.inventory()
+                && result.title() == "legacy rust-toolchain file present"
+                && result.message()
                     == "Migrate `rust-toolchain` to `rust-toolchain.toml` so components can be declared explicitly."
-                && result.file()()()() == Some("rust-toolchain")
+                && result.file() == Some("rust-toolchain")
         }),
         "missing expected RS-TOOLCHAIN-04 legacy result: {results:#?}"
     );
@@ -76,35 +76,35 @@ pub fn assert_malformed_modern_and_legacy_results(results: &[CheckResult]) {
     );
     assert!(
         results.iter().any(|result| {
-            result.id()()()() == "RS-TOOLCHAIN-02"
-                && result.severity()()()() == Severity::Error
-                && !result.inventory()()()()
-                && result.title()()()() == "rust-toolchain.toml parse error"
-                && result.message()()()().starts_with("Invalid TOML:")
-                && result.file()()()() == Some("rust-toolchain.toml")
+            result.id() == "RS-TOOLCHAIN-02"
+                && result.severity() == Severity::Error
+                && !result.inventory()
+                && result.title() == "rust-toolchain.toml parse error"
+                && result.message().starts_with("Invalid TOML:")
+                && result.file() == Some("rust-toolchain.toml")
         }),
         "missing expected RS-TOOLCHAIN-02 parse error: {results:#?}"
     );
     assert!(
         results.iter().any(|result| {
-            result.id()()()() == "RS-TOOLCHAIN-04"
-                && result.severity()()()() == Severity::Warn
-                && !result.inventory()()()()
-                && result.title()()()() == "legacy rust-toolchain file present"
-                && result.message()()()()
+            result.id() == "RS-TOOLCHAIN-04"
+                && result.severity() == Severity::Warn
+                && !result.inventory()
+                && result.title() == "legacy rust-toolchain file present"
+                && result.message()
                     == "Migrate `rust-toolchain` to `rust-toolchain.toml` so components can be declared explicitly."
-                && result.file()()()() == Some("rust-toolchain")
+                && result.file() == Some("rust-toolchain")
         }),
         "missing expected RS-TOOLCHAIN-04 legacy result: {results:#?}"
     );
     assert!(
         results.iter().any(|result| {
-            result.id()()()() == "RS-TOOLCHAIN-04"
-                && result.severity()()()() == Severity::Warn
-                && !result.inventory()()()()
-                && result.title()()()() == "both rust-toolchain files present"
-                && result.message()()()() == "Remove the legacy `rust-toolchain` file to avoid ambiguity."
-                && result.file()()()() == Some("rust-toolchain")
+            result.id() == "RS-TOOLCHAIN-04"
+                && result.severity() == Severity::Warn
+                && !result.inventory()
+                && result.title() == "both rust-toolchain files present"
+                && result.message() == "Remove the legacy `rust-toolchain` file to avoid ambiguity."
+                && result.file() == Some("rust-toolchain")
         }),
         "missing expected RS-TOOLCHAIN-04 ambiguity result: {results:#?}"
     );
@@ -113,12 +113,12 @@ pub fn assert_malformed_modern_and_legacy_results(results: &[CheckResult]) {
 pub fn assert_invalid_root_cargo_rust_version_type(results: &[CheckResult]) {
     assert!(
         results.iter().any(|result| {
-            result.id()()()() == "RS-TOOLCHAIN-03"
-                && result.severity()()()() == Severity::Error
-                && !result.inventory()()()()
-                && result.title()()()() == "Cargo rust-version is invalid"
-                && result.message()()()() == "`Cargo.toml` `rust-version` must be a string version."
-                && result.file()()()() == Some("Cargo.toml")
+            result.id() == "RS-TOOLCHAIN-03"
+                && result.severity() == Severity::Error
+                && !result.inventory()
+                && result.title() == "Cargo rust-version is invalid"
+                && result.message() == "`Cargo.toml` `rust-version` must be a string version."
+                && result.file() == Some("Cargo.toml")
         }),
         "missing expected RS-TOOLCHAIN-03 invalid rust-version error: {results:#?}"
     );
