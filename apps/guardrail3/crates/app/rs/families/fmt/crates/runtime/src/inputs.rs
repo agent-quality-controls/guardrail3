@@ -1,8 +1,11 @@
+use guardrail3_domain_config::types::EscapeHatchConfig;
+
 use super::facts::{CargoEditionState, RustfmtConfigKind, RustfmtFacts, ToolchainChannelState};
 
 pub struct RustfmtRootInput {
     pub(crate) config_rel: Option<String>,
     pub(crate) parsed: Option<toml::Value>,
+    pub(crate) escape_hatches: Vec<EscapeHatchConfig>,
     pub(crate) cargo_edition: CargoEditionState,
     pub(crate) toolchain_channel: ToolchainChannelState,
 }
@@ -21,6 +24,7 @@ impl RustfmtRootInput {
         Self {
             config_rel: facts.root_config_rel.clone(),
             parsed: facts.root_parsed.clone(),
+            escape_hatches: facts.escape_hatches.clone(),
             cargo_edition: facts.cargo_edition.clone(),
             toolchain_channel: facts.toolchain_channel.clone(),
         }

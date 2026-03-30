@@ -14,6 +14,7 @@ guardrail3_domain_project_tree = { package = "guardrail3-domain-project-tree", p
 guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../../../../../domain/report" }
 guardrail3_outbound_traits = { package = "guardrail3-ports-outbound-traits", path = "../../../../../../ports/outbound/traits" }
 guardrail3_shared_fs = { package = "guardrail3-shared-fs", path = "../../../../../../shared/fs" }
+guardrail3_reason_policy = { package = "guardrail3-reason-policy", path = "../../../../../../../../../packages/reason-policy/crates/reason-policy" }
 proc-macro2 = { version = "1", features = ["span-locations"] }
 syn = { version = "2", features = ["full", "parsing", "visit"] }
 toml = "0.8"

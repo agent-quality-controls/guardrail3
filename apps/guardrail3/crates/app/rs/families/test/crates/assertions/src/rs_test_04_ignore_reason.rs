@@ -16,7 +16,7 @@ pub fn rule_files(results: &[CheckResult], _rule_id: &str) -> Vec<String> {
 pub fn finding<'a>(results: &'a [CheckResult], _rule_id: &str) -> &'a CheckResult {
     results
         .iter()
-        .find(|result| result.id() == RULE_ID)
+        .find(|result| result.id() == RULE_ID && result.file.is_some())
         .unwrap_or_else(|| std::panic::panic_any(format!("expected {RULE_ID} finding")))
 }
 
@@ -52,4 +52,15 @@ pub fn assert_reported(
 pub fn assert_inventory(results: &[CheckResult], expected: bool) {
     let finding = finding(results, RULE_ID);
     assert_eq!(finding.inventory, expected);
+}
+
+pub fn assert_count_summary(results: &[CheckResult], expected_message: &str) {
+    let finding = results
+        .iter()
+        .find(|result| result.id() == RULE_ID && result.title == "ignored test count")
+        .unwrap_or_else(|| std::panic::panic_any(format!("expected {RULE_ID} count summary")));
+    assert_eq!(finding.severity, Severity::Warn);
+    assert_eq!(finding.message, expected_message);
+    assert_eq!(finding.file, None);
+    assert_eq!(finding.line, None);
 }

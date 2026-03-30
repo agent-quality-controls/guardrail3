@@ -7,7 +7,7 @@ mod workspaces;
 use std::collections::{BTreeMap, BTreeSet};
 
 use guardrail3_app_rs_family_mapper::RsHexarchRoute;
-use guardrail3_domain_config::types::CrateConfig;
+use guardrail3_domain_config::types::{CrateConfig, EscapeHatchConfig};
 use guardrail3_domain_project_tree::ProjectTree;
 
 use self::boundary::{collect_boundary_configs, parse_guardrail_config};
@@ -97,6 +97,7 @@ pub struct PatchEntryFacts {
     pub(crate) key: String,
     pub(crate) resolved_rel_dir: String,
     pub(crate) target_layer: Option<Layer>,
+    pub(crate) escape_hatch_reason: Option<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -165,11 +166,28 @@ pub struct DependencyFamilyFacts {
 pub fn collect(tree: &ProjectTree, route: &RsHexarchRoute) -> DependencyFamilyFacts {
     let owned_app_roots = owned_app_roots(route);
     let guardrail_config = parse_guardrail_config(tree, route.guardrail_config_rel_path());
-    let workspaces = discover_workspaces(
+    let mut workspaces = discover_workspaces(
         tree,
         &owned_app_roots,
         route.repo_root_cargo_rel_path().is_some(),
     );
+    if let Some(parsed_guardrail) = guardrail_config.parsed.as_ref() {
+        for workspace in &mut workspaces {
+            for patch in &mut workspace.patch_entries {
+                let selector = format!("{}@{}", patch.key, patch.resolved_rel_dir);
+                patch.escape_hatch_reason = parsed_guardrail
+                    .escape_hatches
+                    .iter()
+                    .find(|entry| {
+                        entry.family() == "hexarch"
+                            && entry.file() == patch.cargo_rel_path
+                            && entry.kind() == "patch_replace"
+                            && entry.selector() == selector
+                    })
+                    .map(|entry| entry.reason().to_owned());
+            }
+        }
+    }
     let workspace_for_member = best_workspace_for_member(&workspaces);
     let (members, member_manifest_failures) = collect_members(
         tree,
@@ -221,6 +239,7 @@ struct ParsedGuardrailConfig {
     root_profile_name: Option<String>,
     app_configs: BTreeMap<String, CrateConfig>,
     packages_config: Option<CrateConfig>,
+    escape_hatches: Vec<EscapeHatchConfig>,
 }
 
 #[derive(Debug, Clone, Default)]

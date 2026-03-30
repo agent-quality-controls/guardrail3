@@ -60,6 +60,35 @@ const STANDALONE_CLIPPY_LINTS: &str = r#"
     multiple_crate_versions = "allow"
 "#;
 
+const APPROVED_ALLOWS: &[&str] = &[
+    "missing_docs_in_private_items",
+    "module_name_repetitions",
+    "must_use_candidate",
+    "option_if_let_else",
+    "empty_line_after_doc_comments",
+    "single_match_else",
+    "ref_option_ref",
+    "trivially_copy_pass_by_ref",
+    "multiple_crate_versions",
+];
+
+fn approved_allow_guardrail(rel_path: &str) -> String {
+    let mut toml = String::new();
+    for lint in APPROVED_ALLOWS {
+        toml.push_str(&format!(
+            r#"[[escape_hatches]]
+family = "cargo"
+file = "{rel_path}"
+kind = "lint_allow"
+selector = "clippy:{lint}"
+reason = "Legacy lint suppression while API cleanup lands."
+
+"#
+        ));
+    }
+    toml
+}
+
 #[test]
 fn inventories_every_approved_allow_entry() {
     let manifest = format!(
@@ -72,11 +101,146 @@ fn inventories_every_approved_allow_entry() {
             {STANDALONE_CLIPPY_LINTS}
         "#
     );
+    let guardrail = approved_allow_guardrail("pkg/Cargo.toml");
+
+    let results = check_results(&tree(
+        &[("pkg", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
+        &[("pkg/Cargo.toml", &manifest), ("pkg/guardrail3.toml", &guardrail)],
+    ));
+
+    let rs_cargo_03: Vec<_> = results.iter().filter(|result| result.id() == "RS-CARGO-03").collect();
+    assert_eq!(rs_cargo_03.len(), 10, "unexpected RS-CARGO-03 results: {results:#?}");
+    for lint in APPROVED_ALLOWS {
+        let expected_message = format!(
+            "`pkg/Cargo.toml` explicitly allows `{lint}` in `clippy` with documented reason `Legacy lint suppression while API cleanup lands.`."
+        );
+        assert!(
+            rs_cargo_03.iter().any(|result| {
+                result.title() == "approved allow entry"
+                    && result.message() == expected_message
+                    && result.file() == Some("pkg/Cargo.toml")
+                    && !result.inventory()
+            }),
+            "missing documented RS-CARGO-03 result for {lint}: {results:#?}"
+        );
+    }
+    assert!(rs_cargo_03.iter().any(|result| {
+        result.title() == "approved allow count"
+            && result.message()
+                == "`pkg/Cargo.toml` has 9 approved manifest allow entries (9 documented, 0 missing reasons, 0 weak reasons)."
+            && result.file().is_none()
+            && !result.inventory()
+    }));
+}
+
+#[test]
+fn invalid_allow_entry_value_is_inventoried_accurately() {
+    let manifest = format!(
+        r#"
+            [package]
+            name = "helper"
+            edition = "2024"
+
+            {STANDALONE_RUST_LINTS}
+            {STANDALONE_CLIPPY_LINTS}
+        "#
+    )
+    .replace(
+        r#"module_name_repetitions = "allow""#,
+        r#"module_name_repetitions = "banana""#,
+    );
+    let guardrail = approved_allow_guardrail("pkg/Cargo.toml");
+
+    let results = check_results(&tree(
+        &[("pkg", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
+        &[("pkg/Cargo.toml", &manifest), ("pkg/guardrail3.toml", &guardrail)],
+    ));
+
+    let rs_cargo_03: Vec<_> = results.iter().filter(|result| result.id() == "RS-CARGO-03").collect();
+    assert_eq!(rs_cargo_03.len(), 9, "unexpected RS-CARGO-03 results: {results:#?}");
+    assert!(
+        rs_cargo_03.iter().all(|result| !result.message().contains("module_name_repetitions")),
+        "RS-CARGO-03 should ignore malformed allow entries owned by other rules: {results:#?}"
+    );
+    let count = results
+        .iter()
+        .find(|result| {
+            result.id() == "RS-CARGO-03"
+                && result.title() == "approved allow count"
+        })
+        .expect("expected RS-CARGO-03 count summary");
+    assert_eq!(
+        count.message(),
+        "`pkg/Cargo.toml` has 8 approved manifest allow entries (8 documented, 0 missing reasons, 0 weak reasons)."
+    );
+}
+
+#[test]
+fn invalid_clippy_table_shape_emits_no_allow_inventory() {
+    let manifest = format!(
+        r#"
+            [package]
+            name = "helper"
+            edition = "2024"
+
+            {STANDALONE_RUST_LINTS}
+
+            [lints]
+            clippy = "deny"
+        "#
+    );
 
     let results = check_results(&tree(
         &[("pkg", entry(&[], &["Cargo.toml"]))],
         &[("pkg/Cargo.toml", &manifest)],
     ));
 
-    guardrail3_app_rs_family_cargo_assertions::rs_cargo_03_allow_inventory::assert_expected_inventory(&results);
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_03_allow_inventory::assert_rule_results(
+        &results,
+        &[],
+    );
+}
+
+#[test]
+fn invalid_allow_priority_is_inventoried_accurately() {
+    let manifest = format!(
+        r#"
+            [package]
+            name = "helper"
+            edition = "2024"
+
+            {STANDALONE_RUST_LINTS}
+            {STANDALONE_CLIPPY_LINTS}
+        "#
+    )
+    .replace(
+        r#"module_name_repetitions = "allow""#,
+        r#"module_name_repetitions = { level = "allow", priority = "banana" }"#,
+    );
+    let guardrail = approved_allow_guardrail("pkg/Cargo.toml");
+
+    let results = check_results(&tree(
+        &[("pkg", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
+        &[("pkg/Cargo.toml", &manifest), ("pkg/guardrail3.toml", &guardrail)],
+    ));
+
+    let rs_cargo_03: Vec<_> = results.iter().filter(|result| result.id() == "RS-CARGO-03").collect();
+    assert_eq!(rs_cargo_03.len(), 10, "unexpected RS-CARGO-03 results: {results:#?}");
+    assert!(
+        rs_cargo_03
+            .iter()
+            .any(|result| result.message().contains("`module_name_repetitions`")),
+        "RS-CARGO-03 should still inventory allow-shaped entries even when RS-CARGO-02 owns the malformed priority: {results:#?}"
+    );
+    let count = results
+        .iter()
+        .find(|result| {
+            result.id() == "RS-CARGO-03"
+                && result.title() == "approved allow count"
+        })
+        .expect("expected RS-CARGO-03 count summary");
+    assert_eq!(
+        count.message(),
+        "`pkg/Cargo.toml` has 9 approved manifest allow entries (9 documented, 0 missing reasons, 0 weak reasons)."
+    );
 }

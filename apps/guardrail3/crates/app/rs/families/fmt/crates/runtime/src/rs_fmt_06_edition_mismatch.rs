@@ -85,6 +85,7 @@ pub(crate) fn run_check(
             ))
             .expect("RS-FMT-06 in-memory rustfmt TOML fixture should parse"),
         ),
+        escape_hatches: Vec::new(),
         cargo_edition,
         toolchain_channel: super::facts::ToolchainChannelState::Present("stable".to_owned()),
     };

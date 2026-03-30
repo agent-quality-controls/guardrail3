@@ -57,6 +57,9 @@ pub fn check(tree: &ProjectTree, route: &RsGardeRoute) -> Vec<CheckResult> {
     }
 
     for root in &facts.roots {
+        if !root.garde_applicable {
+            continue;
+        }
         let input = inputs::GardeRootInput::new(root);
         rs_garde_01_dependency_present::check(&input, &mut results);
 
@@ -121,6 +124,14 @@ pub fn check(tree: &ProjectTree, route: &RsGardeRoute) -> Vec<CheckResult> {
             &mut results,
         );
     }
+    rs_garde_09_query_as_inventory::check_count(
+        facts.query_as_macros.iter().filter(|macro_use| {
+            route
+                .scoped_files()
+                .is_none_or(|files| files.contains(&macro_use.rel_path))
+        }),
+        &mut results,
+    );
 
     for field in &facts.boundary_fields {
         if route

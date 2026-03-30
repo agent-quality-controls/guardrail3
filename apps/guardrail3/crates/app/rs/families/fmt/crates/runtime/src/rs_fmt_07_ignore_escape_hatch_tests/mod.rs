@@ -1,6 +1,8 @@
+use guardrail3_domain_config::types::EscapeHatchConfig;
+
 use guardrail3_app_rs_family_fmt_assertions::rs_fmt_07_ignore_escape_hatch as assertions;
 
-use super::run_check;
+use super::{run_check, run_check_with_escape_hatches};
 
 fn parse_rustfmt_ignore_fixture(source: &str) -> toml::Value {
     toml::from_str::<toml::Value>(source).expect("RS-FMT-07 test fixture rustfmt TOML should parse")
@@ -8,6 +10,41 @@ fn parse_rustfmt_ignore_fixture(source: &str) -> toml::Value {
 
 #[test]
 fn reports_ignore_escape_hatches() {
+    let results = run_check_with_escape_hatches(
+        parse_rustfmt_ignore_fixture(
+            r#"
+edition = "2024"
+max_width = 100
+tab_spaces = 4
+use_field_init_shorthand = true
+use_try_shorthand = true
+reorder_imports = true
+reorder_modules = true
+ignore = ["generated/**"]
+"#,
+        ),
+        vec![EscapeHatchConfig::new(
+            "fmt".to_owned(),
+            "rustfmt.toml".to_owned(),
+            "ignore".to_owned(),
+            "ignore".to_owned(),
+            "Generated code rewrites break formatter stability.".to_owned(),
+        )],
+    );
+
+    assertions::assert_ignore_escape_hatch(
+        &results,
+        "`rustfmt.toml` excludes paths from formatting with documented reason `Generated code rewrites break formatter stability.`: [\"generated/**\"]",
+        "rustfmt.toml",
+    );
+    assertions::assert_count_warning(
+        &results,
+        "`rustfmt.toml` has 1 rustfmt ignore escape hatch.",
+    );
+}
+
+#[test]
+fn reports_missing_reason_for_ignore_escape_hatches() {
     let results = run_check(parse_rustfmt_ignore_fixture(
         r#"
 edition = "2024"
@@ -21,10 +58,25 @@ ignore = ["generated/**"]
 "#,
     ));
 
-    assertions::assert_ignore_escape_hatch(
+    assertions::assert_findings(
         &results,
-        "`ignore` excludes paths from formatting: [\"generated/**\"]",
-        "rustfmt.toml",
+        &[
+            assertions::Finding {
+                severity: guardrail3_domain_report::Severity::Error,
+                title: "rustfmt ignore missing reason",
+                message:
+                    "`rustfmt.toml` uses `ignore = [\"generated/**\"]` without a matching escape-hatch reason.",
+                file: Some("rustfmt.toml"),
+                inventory: false,
+            },
+            assertions::Finding {
+                severity: guardrail3_domain_report::Severity::Warn,
+                title: "rustfmt ignore count",
+                message: "`rustfmt.toml` has 1 rustfmt ignore escape hatch.",
+                file: None,
+                inventory: false,
+            },
+        ],
     );
 }
 

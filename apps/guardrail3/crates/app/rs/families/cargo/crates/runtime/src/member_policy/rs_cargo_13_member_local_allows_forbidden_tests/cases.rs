@@ -153,10 +153,159 @@ fn member_local_allow_is_error_even_without_matching_workspace_entry() {
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_13_member_local_allows_forbidden::assert_rule_results(
         &results,
-        &[ExpectedRuleResult {
-            file: None,
-            title: Some("member-local allow entry forbidden"),
-            inventory: None,
-        }],
+        &[
+            ExpectedRuleResult {
+                file: None,
+                title: Some("member-local allow entry missing reason"),
+                inventory: Some(false),
+            },
+            ExpectedRuleResult {
+                file: None,
+                title: Some("member-local allow count"),
+                inventory: Some(false),
+            },
+        ],
+    );
+}
+
+#[test]
+fn standalone_package_root_emits_no_member_results() {
+    let manifest = r#"
+        [package]
+        name = "helper"
+        edition = "2024"
+    "#;
+
+    let results = check_results(&tree(
+        &[("pkg", entry(&[], &["Cargo.toml"]))],
+        &[("pkg/Cargo.toml", manifest)],
+    ));
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_13_member_local_allows_forbidden::assert_rule_results(
+        &results,
+        &[],
+    );
+}
+
+#[test]
+fn malformed_workspace_member_manifest_is_owned_by_input_failures_rule() {
+    let workspace_manifest = format!(
+        r#"
+            [workspace]
+            members = ["crates/api"]
+            resolver = "2"
+
+            [workspace.package]
+            edition = "2024"
+            rust-version = "1.85"
+
+            {WORKSPACE_RUST_LINTS}
+            {WORKSPACE_CLIPPY_LINTS}
+        "#
+    );
+
+    let results = check_results(&tree(
+        &[
+            ("", entry(&["crates"], &["Cargo.toml"])),
+            ("crates", entry(&["api"], &[])),
+            ("crates/api", entry(&[], &["Cargo.toml"])),
+        ],
+        &[
+            ("Cargo.toml", &workspace_manifest),
+            ("crates/api/Cargo.toml", "[package"),
+        ],
+    ));
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_13_member_local_allows_forbidden::assert_rule_results(
+        &results,
+        &[],
+    );
+}
+
+#[test]
+fn missing_workspace_lint_tables_do_not_emit_false_inventory() {
+    let workspace_manifest = r#"
+        [workspace]
+        members = ["crates/api"]
+        resolver = "2"
+
+        [workspace.package]
+        edition = "2024"
+        rust-version = "1.85"
+    "#;
+
+    let results = check_results(&tree(
+        &[
+            ("", entry(&["crates"], &["Cargo.toml"])),
+            ("crates", entry(&["api"], &[])),
+            ("crates/api", entry(&[], &["Cargo.toml"])),
+        ],
+        &[
+            ("Cargo.toml", workspace_manifest),
+            (
+                "crates/api/Cargo.toml",
+                r#"
+                    [package]
+                    name = "api"
+                    edition = "2024"
+
+                    [lints]
+                    workspace = true
+                "#,
+            ),
+        ],
+    ));
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_13_member_local_allows_forbidden::assert_rule_results(
+        &results,
+        &[],
+    );
+}
+
+#[test]
+fn invalid_member_override_shape_does_not_emit_clean_inventory() {
+    let workspace_manifest = format!(
+        r#"
+            [workspace]
+            members = ["crates/api"]
+            resolver = "2"
+
+            [workspace.package]
+            edition = "2024"
+            rust-version = "1.85"
+
+            {WORKSPACE_RUST_LINTS}
+            {WORKSPACE_CLIPPY_LINTS}
+        "#
+    );
+
+    let results = check_results(&tree(
+        &[
+            ("", entry(&["crates"], &["Cargo.toml"])),
+            ("crates", entry(&["api"], &[])),
+            ("crates/api", entry(&[], &["Cargo.toml"])),
+        ],
+        &[
+            ("Cargo.toml", &workspace_manifest),
+            (
+                "crates/api/Cargo.toml",
+                r#"
+                    [package]
+                    name = "api"
+                    edition = "2024"
+
+                    [lints]
+                    workspace = true
+
+                    [lints.clippy]
+                    unwrap_used = "banana"
+                "#,
+            ),
+        ],
+    ));
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_13_member_local_allows_forbidden::assert_rule_results(
+        &results,
+        &[],
     );
 }

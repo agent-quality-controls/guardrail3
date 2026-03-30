@@ -10,7 +10,7 @@ fn deny_entry_without_reason(name: &str) -> toml::Value {
 }
 
 #[test]
-fn inventories_each_ban_entry_without_reason() {
+fn errors_for_each_ban_entry_without_reason_and_counts_them() {
     let deny = add_deny_ban_entry(
         &add_deny_ban_entry(
             "[bans]\ndeny = []\n",
@@ -34,6 +34,11 @@ fn inventories_each_ban_entry_without_reason() {
                 "ban entry missing reason",
                 "`deny.toml` ban entry `lazy_static` has no `reason`.",
                 "deny.toml",
+                false,
+            ),
+            assertions::warn_no_file(
+                "ban entry count",
+                "`deny.toml` has 2 deny ban entries (0 documented, 2 missing reasons, 0 weak reasons).",
                 false,
             ),
         ],

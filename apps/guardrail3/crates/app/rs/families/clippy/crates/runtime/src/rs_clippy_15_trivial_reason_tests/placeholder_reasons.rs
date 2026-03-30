@@ -19,13 +19,17 @@ disallowed-macros = [
 "#,
     );
     let results = run_for_tests(&tree, "clippy.toml");
-    assertions::assert_placeholder_messages(
+    assertions::assert_weak_reason_messages(
         &results,
         &[
-            "`std::println` in `disallowed-macros` has a trivial or placeholder `reason`.",
-            "`std::collections::HashMap` in `disallowed-types` has a trivial or placeholder `reason`.",
-            "`std::env::var` in `disallowed-methods` has a trivial or placeholder `reason`.",
+            "`std::println` in `disallowed-macros` has a weak `reason`: reason must be at least 12 characters; found 5.",
+            "`std::collections::HashMap` in `disallowed-types` has a weak `reason`: reason must not be a placeholder.",
+            "`std::env::var` in `disallowed-methods` has a weak `reason`: reason must not be a placeholder.",
         ],
         "clippy.toml",
+    );
+    assertions::assert_count_summary(
+        &results,
+        "`clippy.toml` has 3 clippy ban entries (0 documented, 0 missing reasons, 3 weak reasons).",
     );
 }

@@ -54,7 +54,16 @@ garde = { version = "0.22", features = ["derive"] }
             ("vendor/lib/clippy.toml", clippy_toml.as_str()),
             (
                 "vendor/lib/guardrail3.toml",
-                "[profile]\nname = \"service\"\n",
+                r#"[profile]
+name = "service"
+
+[[escape_hatches]]
+family = "garde"
+file = "vendor/lib/src/db.rs"
+kind = "sqlx_query_as"
+selector = "sqlx::query_as@L3"
+reason = "Temporary SQLx row mapping until validated DTO extraction lands."
+"#,
             ),
             (
                 "vendor/tool/Cargo.toml",
@@ -76,15 +85,27 @@ garde = { version = "0.22", features = ["derive"] }
     let results = super::super::run_family(&tree);
 
     let findings = assertions::findings(&results);
-    assert_eq!(findings.len(), 1);
+    assert_eq!(findings.len(), 2);
     assertions::assert_rule_results(
         &results,
-        &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::Severity::Info),
-            file: Some("vendor/lib/src/db.rs"),
-            inventory: Some(true),
-            ..Default::default()
-        }],
+        &[
+            assertions::ExpectedRuleResult {
+                severity: Some(assertions::Severity::Warn),
+                file: Some("vendor/lib/src/db.rs"),
+                inventory: Some(false),
+                line: Some(3),
+                title: Some("sqlx query_as requires validation review"),
+                ..Default::default()
+            },
+            assertions::ExpectedRuleResult {
+                severity: Some(assertions::Severity::Warn),
+                file: None,
+                inventory: Some(false),
+                title: Some("sqlx query_as count"),
+                message: Some("`vendor/lib/src/db.rs` has 1 sqlx query_as escape hatches."),
+                ..Default::default()
+            },
+        ],
     );
 
     std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");

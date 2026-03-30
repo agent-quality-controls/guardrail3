@@ -34,5 +34,10 @@ pub(crate) fn run_check(dir_rel: &str) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
+pub(crate) fn run_family_check(root: &std::path::Path) -> Vec<CheckResult> {
+    crate::check_test_root(root)
+}
+
+#[cfg(test)]
 #[path = "rs_fmt_08_dual_file_conflict_tests/mod.rs"]
 mod rs_fmt_08_dual_file_conflict_tests;

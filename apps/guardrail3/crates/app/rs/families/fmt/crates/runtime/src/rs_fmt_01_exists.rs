@@ -24,6 +24,7 @@ pub(crate) fn run_check(config_rel: Option<&str>) -> Vec<CheckResult> {
     let input = RustfmtRootInput {
         config_rel: config_rel.map(str::to_owned),
         parsed: None,
+        escape_hatches: Vec::new(),
         cargo_edition: super::facts::CargoEditionState::Present("2024".to_owned()),
         toolchain_channel: super::facts::ToolchainChannelState::Present("stable".to_owned()),
     };

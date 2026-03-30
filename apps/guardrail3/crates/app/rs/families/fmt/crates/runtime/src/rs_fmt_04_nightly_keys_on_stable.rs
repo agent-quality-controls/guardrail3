@@ -118,6 +118,7 @@ group_imports = "StdExternalCrate"
             )
             .expect("RS-FMT-04 in-memory rustfmt TOML fixture should parse"),
         ),
+        escape_hatches: Vec::new(),
         cargo_edition: super::facts::CargoEditionState::Present("2024".to_owned()),
         toolchain_channel,
     };

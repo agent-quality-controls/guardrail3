@@ -16,7 +16,19 @@ pub fn check(input: &RustfmtRootInput, results: &mut Vec<CheckResult>) {
             ID.to_owned(),
             Severity::Error,
             "rustfmt config parse error".to_owned(),
-            "rustfmt config exists but could not be parsed as TOML".to_owned(),
+            "rustfmt config exists but could not be parsed as a TOML table".to_owned(),
+            Some(rel.to_owned()),
+            None,
+            false,
+        ));
+        return;
+    };
+    if !parsed.is_table() {
+        results.push(CheckResult::from_parts(
+            ID.to_owned(),
+            Severity::Error,
+            "rustfmt config parse error".to_owned(),
+            "rustfmt config exists but could not be parsed as a TOML table".to_owned(),
             Some(rel.to_owned()),
             None,
             false,
@@ -121,12 +133,18 @@ pub(crate) fn run_check(parsed: Option<toml::Value>) -> Vec<CheckResult> {
     let input = RustfmtRootInput {
         config_rel: Some("rustfmt.toml".to_owned()),
         parsed,
+        escape_hatches: Vec::new(),
         cargo_edition: CargoEditionState::Present("2024".to_owned()),
         toolchain_channel: super::facts::ToolchainChannelState::Present("stable".to_owned()),
     };
     let mut results = Vec::new();
     check(&input, &mut results);
     results
+}
+
+#[cfg(test)]
+pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
+    crate::check_test_root(root)
 }
 
 #[cfg(test)]

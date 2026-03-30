@@ -83,8 +83,15 @@ impl<'ast> Visit<'ast> for InlineStdFsVisitor {
 #[derive(Debug)]
 pub struct IgnoreVisitor<'s> {
     pub lines: Vec<&'s str>,
-    pub violations: Vec<usize>,
+    pub findings: Vec<IgnoreReasonInfo>,
 }
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct IgnoreReasonInfo {
+    pub line: usize,
+    pub reason: Option<String>,
+}
+
 impl<'ast> Visit<'ast> for IgnoreVisitor<'_> {
     fn visit_item_fn(&mut self, n: &'ast syn::ItemFn) {
         self.check_ignore_attrs(&n.attrs);
@@ -98,33 +105,101 @@ impl<'ast> Visit<'ast> for IgnoreVisitor<'_> {
 impl IgnoreVisitor<'_> {
     fn check_ignore_attrs(&mut self, attrs: &[syn::Attribute]) {
         for attr in attrs {
-            if !attr.path().is_ident("ignore") {
+            if attr.path().is_ident("ignore") {
+                self.record_ignore_meta(&attr.meta, span_line(attr.span()));
                 continue;
             }
-            // #[ignore = "reason"] (NameValue) and #[ignore(...)] (List) provide
-            // the reason inline — only bare #[ignore] (Path) needs a comment.
-            if !matches!(attr.meta, syn::Meta::Path(_)) {
+            if !attr.path().is_ident("cfg_attr") {
+                continue;
+            }
+            let syn::Meta::List(list) = &attr.meta else {
+                continue;
+            };
+            let Ok(args) = list.parse_args_with(
+                syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated,
+            ) else {
+                continue;
+            };
+            let mut iter = args.into_iter();
+            let Some(condition) = iter.next() else {
+                continue;
+            };
+            if !cfg_meta_contains_positive_test(&condition) {
                 continue;
             }
             let line = span_line(attr.span());
-            // 1-based to 0-based index
-            let idx = line.saturating_sub(1);
-            // Check same line for reason comment
-            if let Some(same_line) = self.lines.get(idx) {
-                if same_line.contains("// reason:") || same_line.contains("//reason:") {
-                    continue;
+            for meta in iter {
+                if meta.path().is_ident("ignore") {
+                    self.record_ignore_meta(&meta, line);
                 }
             }
-            // Check previous line for reason comment
-            if idx > 0 {
-                if let Some(prev_line) = self.lines.get(idx.saturating_sub(1)) {
-                    if prev_line.contains("// reason:") || prev_line.contains("//reason:") {
-                        continue;
-                    }
-                }
-            }
-            self.violations.push(line);
         }
+    }
+
+    fn record_ignore_meta(&mut self, meta: &syn::Meta, line: usize) {
+        if let Some(reason) = reason_from_ignore_meta(meta) {
+            self.findings.push(IgnoreReasonInfo { line, reason: Some(reason) });
+            return;
+        }
+
+        if !matches!(meta, syn::Meta::Path(_)) {
+            return;
+        }
+
+        let idx = line.saturating_sub(1);
+        if let Some(same_line) = self.lines.get(idx) {
+            if let Some(reason) = extract_comment_reason(same_line) {
+                self.findings.push(IgnoreReasonInfo { line, reason: Some(reason) });
+                return;
+            }
+        }
+        if idx > 0 {
+            if let Some(prev_line) = self.lines.get(idx.saturating_sub(1)) {
+                if let Some(reason) = extract_comment_reason(prev_line) {
+                    self.findings.push(IgnoreReasonInfo { line, reason: Some(reason) });
+                    return;
+                }
+            }
+        }
+
+        self.findings.push(IgnoreReasonInfo { line, reason: None });
+    }
+}
+
+fn reason_from_ignore_meta(meta: &syn::Meta) -> Option<String> {
+    match meta {
+        syn::Meta::NameValue(name_value) => match &name_value.value {
+            syn::Expr::Lit(expr_lit) => match &expr_lit.lit {
+                syn::Lit::Str(value) => Some(value.value()),
+                _ => None,
+            },
+            _ => None,
+        },
+        syn::Meta::List(_) | syn::Meta::Path(_) => None,
+    }
+}
+
+fn extract_comment_reason(line: &str) -> Option<String> {
+    const TOKENS: [&str; 2] = ["// reason:", "//reason:"];
+
+    TOKENS.iter().find_map(|token| {
+        line.find(token).map(|index| {
+            line[index + token.len()..].trim().to_owned()
+        })
+    })
+}
+
+fn cfg_meta_contains_positive_test(meta: &syn::Meta) -> bool {
+    match meta {
+        syn::Meta::Path(path) => path.is_ident("test"),
+        syn::Meta::NameValue(_) => false,
+        syn::Meta::List(list) if list.path.is_ident("not") => false,
+        syn::Meta::List(list) => list
+            .parse_args_with(
+                syn::punctuated::Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated,
+            )
+            .map(|items| items.iter().any(cfg_meta_contains_positive_test))
+            .unwrap_or(false),
     }
 }
 

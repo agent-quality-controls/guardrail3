@@ -1,4 +1,13 @@
+use guardrail3_domain_config::types::EscapeHatchConfig;
+
 use super::facts::{PolicyRootCargoFacts, PolicyRootKind};
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum LintEntryValidity {
+    Valid,
+    InvalidLevel,
+    InvalidPriority,
+}
 
 pub(crate) struct LintExpectation {
     pub name: &'static str,
@@ -149,6 +158,57 @@ pub fn lint_level(lints: &toml::Value, name: &str) -> Option<String> {
         .map(str::to_owned)
 }
 
+pub fn has_valid_lint_level(value: &toml::Value) -> bool {
+    lint_entry_validity(value) == LintEntryValidity::Valid
+}
+
+pub fn lint_entry_validity(value: &toml::Value) -> LintEntryValidity {
+    match value {
+        toml::Value::String(level) => {
+            if is_valid_lint_level(level) {
+                LintEntryValidity::Valid
+            } else {
+                LintEntryValidity::InvalidLevel
+            }
+        }
+        toml::Value::Table(table) => {
+            let Some(level) = table.get("level").and_then(toml::Value::as_str) else {
+                return LintEntryValidity::InvalidLevel;
+            };
+            if !is_valid_lint_level(level) {
+                return LintEntryValidity::InvalidLevel;
+            }
+            if table
+                .get("priority")
+                .is_some_and(|priority| priority.as_integer().is_none())
+            {
+                return LintEntryValidity::InvalidPriority;
+            }
+            LintEntryValidity::Valid
+        }
+        _ => LintEntryValidity::InvalidLevel,
+    }
+}
+
+pub fn is_valid_lint_level(level: &str) -> bool {
+    matches!(level, "allow" | "warn" | "deny" | "forbid")
+}
+
+pub fn lints_table_is_well_formed(lints: Option<&toml::Value>) -> bool {
+    let Some(lints) = lints else {
+        return false;
+    };
+    let Some(table) = lints.as_table() else {
+        return false;
+    };
+
+    table.values().all(has_valid_lint_level)
+}
+
+pub fn lint_entry_is_well_formed(lints: &toml::Value, name: &str) -> bool {
+    lints.get(name).is_some_and(has_valid_lint_level)
+}
+
 pub fn lint_priority(lints: &toml::Value, name: &str) -> Option<i64> {
     match lints.get(name) {
         Some(toml::Value::Table(table)) => table.get("priority").and_then(toml::Value::as_integer),
@@ -172,6 +232,28 @@ pub fn explicit_allow_entries(lints: Option<&toml::Value>) -> Vec<String> {
 
 pub fn is_approved_allow(name: &str) -> bool {
     EXPECTED_CLIPPY_ALLOW.contains(&name)
+}
+
+pub fn allow_selector(family: &str, lint_name: &str) -> String {
+    format!("{family}:{lint_name}")
+}
+
+pub fn escape_hatch_reason<'a>(
+    entries: &'a [EscapeHatchConfig],
+    family: &str,
+    file: &str,
+    kind: &str,
+    selector: &str,
+) -> Option<&'a str> {
+    entries
+        .iter()
+        .find(|entry| {
+            entry.family() == family
+                && entry.file() == file
+                && entry.kind() == kind
+                && entry.selector() == selector
+        })
+        .map(EscapeHatchConfig::reason)
 }
 
 pub fn level_rank(level: &str) -> usize {

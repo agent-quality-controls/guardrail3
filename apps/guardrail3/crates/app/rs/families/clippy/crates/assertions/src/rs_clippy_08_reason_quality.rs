@@ -30,7 +30,7 @@ pub fn assert_missing_reasons(results: &[CheckResult], expected: &[&str], file: 
     assert!(results.iter().all(|result| {
         result.id() == ID
             && !result.inventory()
-            && result.severity() == Severity::Warn
+            && result.severity() == Severity::Error
             && result.title() == "ban entry missing reason"
             && result.file() == Some(file)
     }));
@@ -50,7 +50,7 @@ pub fn assert_malformed_messages(results: &[CheckResult], expected: &[&str], fil
     assert!(results.iter().all(|result| {
         result.id() == ID
             && !result.inventory()
-            && result.severity() == Severity::Warn
+            && result.severity() == Severity::Error
             && result.title() == "ban section malformed"
             && result.file() == Some(file)
     }));

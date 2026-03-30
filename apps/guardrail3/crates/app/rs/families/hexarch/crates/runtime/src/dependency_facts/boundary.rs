@@ -70,6 +70,7 @@ pub(super) fn parse_guardrail_config(
                     .and_then(|rust| rust.apps().cloned())
                     .unwrap_or_default(),
                 packages_config: config.rust().and_then(|rust| rust.packages().cloned()),
+                escape_hatches: config.escape_hatches().to_vec(),
             }),
             parse_error: None,
             app_config_names: raw_app_config_names,

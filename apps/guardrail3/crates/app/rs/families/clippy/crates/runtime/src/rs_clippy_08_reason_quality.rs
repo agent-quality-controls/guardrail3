@@ -24,7 +24,7 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
             issue_count += 1;
             results.push(CheckResult::from_parts(
                 ID.to_owned(),
-                Severity::Warn,
+                Severity::Error,
                 "ban section malformed".to_owned(),
                 malformed.clone(),
                 Some(input.config.rel_path.clone()),
@@ -37,7 +37,7 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
                 issue_count += 1;
                 results.push(CheckResult::from_parts(
                     ID.to_owned(),
-                    Severity::Warn,
+                    Severity::Error,
                     "ban entry missing reason".to_owned(),
                     format!(
                         "`{}` in `{key}` must use table format with a `reason` field.",

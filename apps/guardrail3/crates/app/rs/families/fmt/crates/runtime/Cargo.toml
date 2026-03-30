@@ -7,8 +7,10 @@ edition = "2024"
 workspace = true
 
 [dependencies]
+guardrail3_domain_config = { package = "guardrail3-domain-config", path = "../../../../../../domain/config" }
 guardrail3_domain_project_tree = { package = "guardrail3-domain-project-tree", path = "../../../../../../domain/project-tree" }
 guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../../../../../domain/report" }
+guardrail3_reason_policy = { package = "guardrail3-reason-policy", path = "../../../../../../../../../packages/reason-policy/crates/reason-policy" }
 toml = "0.8"
 
 [dev-dependencies]
