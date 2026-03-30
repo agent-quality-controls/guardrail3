@@ -1,6 +1,6 @@
 # RS-CODE
 
-Status: current, implemented, self-hosted, still the main source-rule policy lane.
+Status: current, implemented, self-hosted, inventory-complete, still the main source-rule policy lane.
 
 Implementation root:
 
@@ -14,7 +14,8 @@ Current source of truth:
 Current state:
 
 - self-hosted with `crates/runtime`, `crates/assertions`, and `test_support`
-- current rule inventory and detailed semantics were historically tracked in `.plans/todo/checks/rs/code.md`
+- current rule inventory is live through `RS-CODE-36`
+- detailed semantics were historically tracked in `.plans/todo/checks/rs/code.md`
 - two companion docs remain current supplements, not primary contract:
   - `apps/guardrail3/crates/app/rs/families/code/FIXES.md`
   - `apps/guardrail3/crates/app/rs/families/code/EXPANSION.md`

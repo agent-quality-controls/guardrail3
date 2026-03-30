@@ -1,6 +1,6 @@
 # RS-RELEASE
 
-Status: current, implemented, self-hosted, README still missing.
+Status: current, implemented, self-hosted, family README present.
 
 Implementation root:
 
@@ -8,14 +8,15 @@ Implementation root:
 
 Current source of truth:
 
+- `apps/guardrail3/crates/app/rs/families/release/README.md` for family behavior/shape
 - this file for family planning/status
-- `.plans/todo/checks/rs/release.md` as the detailed current rule ledger until a family README exists
+- `.plans/todo/checks/rs/release.md` as the detailed rule ledger and migration/history reference
 
 Current state:
 
 - mixed-scope family for repo-level release artifacts, per-package publishability, and local release-edge checks
 - current code uses a self-hosted split with root crate, `assertions/`, and `test_support/`
-- this is the main Rust family still missing a family-local README, so the old ledger remains more important than it should be
+- family-local README now exists, so the old ledger can stay secondary the way the other Rust families do
 
 Historical/supplemental references:
 
@@ -25,5 +26,5 @@ Historical/supplemental references:
 
 Next planning focus:
 
-- add `apps/guardrail3/crates/app/rs/families/release/README.md`
-- after that, demote the old rule ledger to historical detail the way the other families now work
+- keep the new family README, this plan file, and the detailed ledger aligned when rule inventory or file shape changes
+- treat the old ledger as detailed history and rule-by-rule backstory rather than the primary family entry point

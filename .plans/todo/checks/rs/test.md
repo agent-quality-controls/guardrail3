@@ -122,12 +122,18 @@ Structural pressure such as file length and `use` count belongs to `RS-CODE`, in
 - `RS-TEST-16` must reject internal sidecars that still assert directly on result-shape semantics (`RS-*`, finding fields, `CheckResult`/`Severity`) when owned assertions exist.
 - `RS-TEST-03` may allow assertions crates to import the shared report/result model when that is the runtime public surface they are proving over; that exception must not widen to unrelated local production crates.
 
-## Current migration state
+## Current hardening state
 
 The live family crate has been rewritten onto the accepted 18-rule inventory and activation model.
 
-Still in progress:
+Family-local closure status:
 
-- refactor `rs/test`, `rs/arch`, `rs/cargo`, and `rs/hexarch` sidecars/assertions so they satisfy the stronger semantic-ownership interpretation of `RS-TEST-16`
-- remove assertions-owned family orchestration helpers that still route through runtime `check_test_tree(...)`
-- expand attack-vector coverage around proof-bearing assertion detection, semantic sidecar proof leaks, and `test_support` result-helper attacks
+- `rs/test` itself is closed on implementation and self-hosting
+- family-local tests cover proof-bearing assertion detection, semantic sidecar proof leaks, and `test_support` result-helper attacks
+- `RS-TEST-17` now only reports positive inventory when an external harness actually proves through owned assertions, rather than merely avoiding direct assertion macros
+- generated/cache Rust such as `target/**` is excluded from owned-root analysis
+
+Remaining follow-up is cross-family, not `rs/test` implementation work:
+
+- `rs/cargo` still contains assertions-owned runtime execution routing in `crates/assertions_common/src/lib.rs`
+- any other family that fails the stronger semantic-ownership interpretation should be fixed in that family's lane

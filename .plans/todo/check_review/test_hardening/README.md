@@ -38,6 +38,16 @@ The purpose is not to “add more tests”. The purpose is to make every rule ha
 - `28-rust-validation-cutover-agent-brief.md`
 - `29-arch-agent-brief.md`
   - droppable family/combined-lane agent packets
+- `37-code-remaining-agent-brief.md`
+  - current remaining-work packet for closing the planned `rs/code` backlog
+- `38-deps-remaining-agent-brief.md`
+  - current remaining-work packet for landing `RS-DEPS-12`
+- `39-hooks-rs-runtime-agent-brief.md`
+  - current operational cutover packet for wiring `hooks-rs` into the live runtime
+- `40-test-remaining-agent-brief.md`
+  - current closure packet for finishing `rs/test`
+- `41-libarch-implementation-agent-brief.md`
+  - current implementation packet for the not-yet-live `rs/libarch` family
 - `31-hexarch-layered-test-map.md`
   - concrete rule/facts/integration split for `rs/hexarch`
 - `32-hexarch-01-06-layered-migration-checklist.md`
