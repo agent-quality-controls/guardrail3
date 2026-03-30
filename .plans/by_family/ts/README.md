@@ -44,4 +44,10 @@ The intended end state is the same shape as Rust:
 - old plan/research docs re-labeled as tactical or historical
 
 For this first TS pass, each family gets a placeholder status file here.
-Those files point back to the older detailed ledgers until each family is reconciled properly.
+Those files now carry family-level rule inventories and current code mapping, while still pointing back to the older detailed ledgers for legacy detail.
+
+Current reconciliation state:
+
+- every canonical TS family now has a by-family file with a rule inventory
+- the old files under `.plans/todo/checks/ts/*.md` still remain the detailed ledgers
+- the next cleanup step is to add superseded banners to those old TS ledgers one family at a time, after each family summary is considered stable enough
