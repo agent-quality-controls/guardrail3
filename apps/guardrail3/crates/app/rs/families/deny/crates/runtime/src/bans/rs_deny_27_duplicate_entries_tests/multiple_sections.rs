@@ -30,6 +30,16 @@ fn skip_entry(name: &str) -> toml::Value {
     ]))
 }
 
+fn ignore_entry(id: &str) -> toml::Value {
+    toml::Value::Table(toml::map::Map::from_iter([
+        ("id".to_owned(), toml::Value::String(id.to_owned())),
+        (
+            "reason".to_owned(),
+            toml::Value::String("good enough reason text".to_owned()),
+        ),
+    ]))
+}
+
 fn feature_entry(name: &str) -> toml::Value {
     toml::Value::Table(toml::map::Map::from_iter([
         ("name".to_owned(), toml::Value::String(name.to_owned())),
@@ -61,8 +71,8 @@ fn warns_once_per_duplicated_entry_family() {
     let with_ignores = set_advisory_ignores(
         &with_skip,
         vec![
-            toml::Value::String("RUSTSEC-2020-0001".to_owned()),
-            toml::Value::String("RUSTSEC-2020-0001".to_owned()),
+            ignore_entry("RUSTSEC-2020-0001"),
+            ignore_entry("RUSTSEC-2020-0001"),
         ],
     );
     let deny = set_feature_entries(
@@ -95,7 +105,7 @@ fn warns_once_per_duplicated_entry_family() {
             ),
             assertions::warn(
                 "duplicate skip entry",
-                "`deny.toml` has duplicate skip entry `demo`.",
+                "`deny.toml` has duplicate skip entry `demo@1.0.0`.",
                 "deny.toml",
                 false,
             ),

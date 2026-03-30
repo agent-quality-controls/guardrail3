@@ -41,7 +41,7 @@ fn does_not_warn_for_distinct_near_duplicate_skip_ignore_and_feature_entries() {
             &build_fixture_deny_toml("service"),
             skip_entry("windows-sys", "0.59.0"),
         ),
-        skip_entry("windows-targets", "0.60.0"),
+        skip_entry("windows-sys", "0.60.0"),
     );
     let with_ignores = set_advisory_ignores(
         &with_skip,

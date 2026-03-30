@@ -148,7 +148,7 @@ pub(crate) fn read_profile_map(
             let _ = map.insert(String::new(), profile_name.clone());
         }
         for rel_dir in standalone_package_roots {
-            let _ = map.insert(rel_dir.clone(), profile_name.clone());
+            let _ = map.entry(rel_dir.clone()).or_insert(profile_name.clone());
         }
     }
 

@@ -5,6 +5,49 @@ use guardrail3_domain_report::{CheckResult, Severity};
 use super::deny_support::{ban_name, parse_feature_entries_in_config, section};
 use super::inputs::ConfigDenyInput;
 
+fn normalized_skip_identity(table: &toml::map::Map<String, toml::Value>) -> Option<String> {
+    if let Some(crate_field) = table.get("crate").and_then(toml::Value::as_str) {
+        let crate_field = crate_field.trim();
+        if crate_field.is_empty() {
+            return None;
+        }
+
+        if let Some((name, version)) = crate_field.split_once('@') {
+            let name = name.trim();
+            let version = version.trim();
+            if name.is_empty() || version.is_empty() {
+                return None;
+            }
+            return Some(format!("{name}@{version}"));
+        }
+
+        let version = table
+            .get("version")
+            .and_then(toml::Value::as_str)
+            .map(str::trim)
+            .filter(|value| !value.is_empty());
+        return Some(match version {
+            Some(version) => format!("{crate_field}@{version}"),
+            None => crate_field.to_owned(),
+        });
+    }
+
+    let name = table
+        .get("name")
+        .and_then(toml::Value::as_str)
+        .map(str::trim)
+        .filter(|value| !value.is_empty())?;
+    let version = table
+        .get("version")
+        .and_then(toml::Value::as_str)
+        .map(str::trim)
+        .filter(|value| !value.is_empty());
+    Some(match version {
+        Some(version) => format!("{name}@{version}"),
+        None => name.to_owned(),
+    })
+}
+
 pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     let config = input.config;
     let Some(parsed) = &config.parsed else {
@@ -23,13 +66,13 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         for (name, count) in deny_counts {
             if count > 1 {
                 results.push(CheckResult::from_parts(
-    "RS-DENY-27".to_owned(),
-    Severity::Warn,
-    "duplicate deny entry".to_owned(),
-    format!("`{}` has duplicate deny entry `{name}`.", config.rel_path),
-    Some(config.rel_path.clone()),
-    None,
-    false,
+                    "RS-DENY-27".to_owned(),
+                    Severity::Warn,
+                    "duplicate deny entry".to_owned(),
+                    format!("`{}` has duplicate deny entry `{name}`.", config.rel_path),
+                    Some(config.rel_path.clone()),
+                    None,
+                    false,
                 ));
             }
         }
@@ -37,20 +80,12 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         let mut skip_counts = BTreeMap::<String, usize>::new();
         if let Some(entries) = bans.get("skip").and_then(toml::Value::as_array) {
             for entry in entries {
-                let name =
-                    if let Some(crate_field) = entry.get("crate").and_then(toml::Value::as_str) {
-                        crate_field
-                            .split('@')
-                            .next()
-                            .unwrap_or(crate_field)
-                            .to_owned()
-                    } else if let Some(name) = entry.as_str() {
-                        name.to_owned()
-                    } else if let Some(name) = entry.get("name").and_then(toml::Value::as_str) {
-                        name.to_owned()
-                    } else {
-                        "unknown".to_owned()
-                    };
+                let Some(table) = entry.as_table() else {
+                    continue;
+                };
+                let Some(name) = normalized_skip_identity(table) else {
+                    continue;
+                };
                 *skip_counts.entry(name).or_default() += 1;
             }
         }
@@ -73,14 +108,18 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     if let Some(advisories) = section(config, "advisories") {
         if let Some(entries) = advisories.get("ignore").and_then(toml::Value::as_array) {
             for entry in entries {
-                let id = if let Some(id) = entry.as_str() {
-                    id.to_owned()
-                } else if let Some(id) = entry.get("id").and_then(toml::Value::as_str) {
-                    id.to_owned()
-                } else {
-                    "unknown".to_owned()
+                let Some(table) = entry.as_table() else {
+                    continue;
                 };
-                *ignore_counts.entry(id).or_default() += 1;
+                let Some(id) = table
+                    .get("id")
+                    .and_then(toml::Value::as_str)
+                    .map(str::trim)
+                    .filter(|value| !value.is_empty())
+                else {
+                    continue;
+                };
+                *ignore_counts.entry(id.to_owned()).or_default() += 1;
             }
         }
     }
