@@ -406,9 +406,17 @@ dependencies = [
 name = "guardrail3-app-rs-ast"
 version = "0.0.0"
 dependencies = [
+ "guardrail3-app-rs-ast-assertions",
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "guardrail3-app-rs-ast-assertions"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-app-rs-ast",
 ]
 
 [[package]]
@@ -647,6 +655,7 @@ dependencies = [
  "guardrail3-adapters-outbound-fs",
  "guardrail3-app-core",
  "guardrail3-domain-project-tree",
+ "guardrail3-shared-fs",
  "tempfile",
 ]
 
@@ -680,6 +689,7 @@ name = "guardrail3-app-rs-family-garde-test-support"
 version = "0.0.0"
 dependencies = [
  "guardrail3-domain-project-tree",
+ "guardrail3-shared-fs",
 ]
 
 [[package]]
@@ -714,6 +724,7 @@ version = "0.0.0"
 dependencies = [
  "guardrail3-app-rs-family-hexarch",
  "guardrail3-app-rs-family-hexarch-assertions-common",
+ "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
 ]
 
@@ -731,12 +742,15 @@ dependencies = [
  "guardrail3-adapters-outbound-fs",
  "guardrail3-app-core",
  "guardrail3-domain-project-tree",
+ "guardrail3-shared-fs",
 ]
 
 [[package]]
 name = "guardrail3-app-rs-family-hooks-rs"
 version = "0.0.0"
 dependencies = [
+ "guardrail3-app-rs-family-hooks-rs-assertions",
+ "guardrail3-app-rs-family-hooks-rs-test-support",
  "guardrail3-app-rs-family-hooks-shared",
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
@@ -744,13 +758,39 @@ dependencies = [
 ]
 
 [[package]]
+name = "guardrail3-app-rs-family-hooks-rs-assertions"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-app-rs-family-hooks-rs",
+ "guardrail3-domain-report",
+]
+
+[[package]]
+name = "guardrail3-app-rs-family-hooks-rs-test-support"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-app-rs-family-hooks-shared",
+ "guardrail3-domain-project-tree",
+ "guardrail3-ports-outbound-traits",
+]
+
+[[package]]
 name = "guardrail3-app-rs-family-hooks-shared"
 version = "0.0.0"
 dependencies = [
+ "guardrail3-app-rs-family-hooks-shared-assertions",
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
  "guardrail3-ports-outbound-traits",
  "guardrail3-shared-fs",
+]
+
+[[package]]
+name = "guardrail3-app-rs-family-hooks-shared-assertions"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-app-rs-family-hooks-shared",
+ "guardrail3-domain-report",
 ]
 
 [[package]]
@@ -807,6 +847,7 @@ dependencies = [
  "guardrail3-app-core",
  "guardrail3-domain-project-tree",
  "guardrail3-ports-outbound-traits",
+ "guardrail3-shared-fs",
 ]
 
 [[package]]
@@ -854,11 +895,19 @@ version = "0.0.0"
 dependencies = [
  "guardrail3-adapters-outbound-fs",
  "guardrail3-app-core",
+ "guardrail3-app-rs-generate-assertions",
  "guardrail3-domain-config",
  "guardrail3-domain-modules",
  "guardrail3-shared-fs",
  "tempfile",
  "toml",
+]
+
+[[package]]
+name = "guardrail3-app-rs-generate-assertions"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-app-rs-generate",
 ]
 
 [[package]]
@@ -944,6 +993,9 @@ dependencies = [
 [[package]]
 name = "guardrail3-domain-modules"
 version = "0.0.0"
+dependencies = [
+ "serde_json",
+]
 
 [[package]]
 name = "guardrail3-domain-project-tree"
@@ -951,7 +1003,15 @@ version = "0.0.0"
 dependencies = [
  "garde",
  "glob",
+ "guardrail3-domain-project-tree-assertions",
  "serde",
+]
+
+[[package]]
+name = "guardrail3-domain-project-tree-assertions"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-domain-project-tree",
 ]
 
 [[package]]
@@ -979,7 +1039,6 @@ version = "0.0.0"
 dependencies = [
  "guardrail3-app-rs-family-arch",
  "guardrail3-app-rs-family-arch-test-support",
- "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
 ]
 
@@ -1352,6 +1411,7 @@ dependencies = [
  "guardrail3-app-core",
  "guardrail3-domain-project-tree",
  "guardrail3-ports-outbound-traits",
+ "guardrail3-shared-fs",
  "tempfile",
 ]
 

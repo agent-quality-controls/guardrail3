@@ -356,4 +356,4 @@ pub fn build_eslint_config(has_content_app: bool, has_service_app: bool) -> Stri
 }
 
 #[cfg(test)]
-mod eslint_tests;
+mod tests;

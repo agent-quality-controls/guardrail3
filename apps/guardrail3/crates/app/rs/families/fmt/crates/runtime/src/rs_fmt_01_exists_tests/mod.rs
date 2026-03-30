@@ -11,20 +11,22 @@ fn inventories_when_root_rustfmt_config_exists() {
 
 #[test]
 fn accepts_root_dot_rustfmt_toml() {
-    let fixture = tempfile::tempdir().expect("create tempdir");
+    let fixture =
+        tempfile::tempdir().expect("RS-FMT-01 fixture setup should create a temporary directory");
     let root = fixture.path();
 
-    std::fs::write(root.join(".rustfmt.toml"), "edition = \"2024\"\n").expect("write rustfmt");
+    std::fs::write(root.join(".rustfmt.toml"), "edition = \"2024\"\n")
+        .expect("RS-FMT-01 fixture setup should write .rustfmt.toml");
     std::fs::write(
         root.join("Cargo.toml"),
         "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     )
-    .expect("write Cargo.toml");
+    .expect("RS-FMT-01 fixture setup should write Cargo.toml");
     std::fs::write(
         root.join("rust-toolchain.toml"),
         "[toolchain]\nchannel = \"stable\"\n",
     )
-    .expect("write rust-toolchain.toml");
+    .expect("RS-FMT-01 fixture setup should write rust-toolchain.toml");
 
     let results = run_family(root);
 

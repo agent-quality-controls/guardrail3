@@ -18,19 +18,20 @@ fn ignores_nightly_keys_when_toolchain_is_not_stable() {
 
 #[test]
 fn fails_closed_when_nightly_keys_have_no_toolchain_file() {
-    let fixture = tempfile::tempdir().expect("create tempdir");
+    let fixture =
+        tempfile::tempdir().expect("RS-FMT-04 fixture setup should create a temporary directory");
     let root = fixture.path();
 
     std::fs::write(
         root.join("Cargo.toml"),
         "[workspace]\nmembers = []\nresolver = \"2\"\n\n[workspace.package]\nedition = \"2024\"\n",
     )
-    .expect("write Cargo.toml");
+    .expect("RS-FMT-04 fixture setup should write Cargo.toml");
     std::fs::write(
         root.join("rustfmt.toml"),
         "edition = \"2024\"\nmax_width = 100\ntab_spaces = 4\nuse_field_init_shorthand = true\nuse_try_shorthand = true\nreorder_imports = true\nreorder_modules = true\ngroup_imports = \"StdExternalCrate\"\n",
     )
-    .expect("write rustfmt.toml");
+    .expect("RS-FMT-04 fixture setup should write rustfmt.toml");
 
     let results = run_family(root);
 
@@ -43,21 +44,22 @@ fn fails_closed_when_nightly_keys_have_no_toolchain_file() {
 
 #[test]
 fn fails_closed_when_toolchain_file_is_malformed() {
-    let fixture = tempfile::tempdir().expect("create tempdir");
+    let fixture =
+        tempfile::tempdir().expect("RS-FMT-04 fixture setup should create a temporary directory");
     let root = fixture.path();
 
     std::fs::write(
         root.join("Cargo.toml"),
         "[workspace]\nmembers = []\nresolver = \"2\"\n\n[workspace.package]\nedition = \"2024\"\n",
     )
-    .expect("write Cargo.toml");
+    .expect("RS-FMT-04 fixture setup should write Cargo.toml");
     std::fs::write(
         root.join("rustfmt.toml"),
         "edition = \"2024\"\nmax_width = 100\ntab_spaces = 4\nuse_field_init_shorthand = true\nuse_try_shorthand = true\nreorder_imports = true\nreorder_modules = true\ngroup_imports = \"StdExternalCrate\"\n",
     )
-    .expect("write rustfmt.toml");
+    .expect("RS-FMT-04 fixture setup should write rustfmt.toml");
     std::fs::write(root.join("rust-toolchain.toml"), "[toolchain")
-        .expect("write rust-toolchain.toml");
+        .expect("RS-FMT-04 fixture setup should write malformed rust-toolchain.toml");
 
     let results = run_family(root);
 
@@ -70,24 +72,25 @@ fn fails_closed_when_toolchain_file_is_malformed() {
 
 #[test]
 fn fails_closed_when_toolchain_channel_is_missing() {
-    let fixture = tempfile::tempdir().expect("create tempdir");
+    let fixture =
+        tempfile::tempdir().expect("RS-FMT-04 fixture setup should create a temporary directory");
     let root = fixture.path();
 
     std::fs::write(
         root.join("Cargo.toml"),
         "[workspace]\nmembers = []\nresolver = \"2\"\n\n[workspace.package]\nedition = \"2024\"\n",
     )
-    .expect("write Cargo.toml");
+    .expect("RS-FMT-04 fixture setup should write Cargo.toml");
     std::fs::write(
         root.join("rustfmt.toml"),
         "edition = \"2024\"\nmax_width = 100\ntab_spaces = 4\nuse_field_init_shorthand = true\nuse_try_shorthand = true\nreorder_imports = true\nreorder_modules = true\ngroup_imports = \"StdExternalCrate\"\n",
     )
-    .expect("write rustfmt.toml");
+    .expect("RS-FMT-04 fixture setup should write rustfmt.toml");
     std::fs::write(
         root.join("rust-toolchain.toml"),
         "[toolchain]\ncomponents = [\"rustfmt\"]\n",
     )
-    .expect("write rust-toolchain.toml");
+    .expect("RS-FMT-04 fixture setup should write rust-toolchain.toml without channel");
 
     let results = run_family(root);
 

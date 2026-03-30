@@ -36,4 +36,4 @@ pub fn build_cspell_config() -> String {
 }
 
 #[cfg(test)]
-mod cspell_tests;
+mod tests;
