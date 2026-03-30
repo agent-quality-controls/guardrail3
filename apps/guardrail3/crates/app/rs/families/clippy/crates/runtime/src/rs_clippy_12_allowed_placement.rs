@@ -77,5 +77,21 @@ pub(crate) fn run_for_tests(tree: &ProjectTree) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
+pub(crate) fn run_with_validation_scope_for_tests(
+    tree: &ProjectTree,
+    validation_scope: &str,
+) -> Vec<CheckResult> {
+    let facts = super::facts::collect_with_validation_scope_for_tests(tree, validation_scope);
+    let mut results = Vec::new();
+    for allowed in &facts.allowed_configs {
+        check_allowed(allowed, &mut results);
+    }
+    for forbidden in &facts.forbidden_configs {
+        check(forbidden, &mut results);
+    }
+    results
+}
+
+#[cfg(test)]
 #[path = "rs_clippy_12_allowed_placement_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_clippy_12_allowed_placement_tests;

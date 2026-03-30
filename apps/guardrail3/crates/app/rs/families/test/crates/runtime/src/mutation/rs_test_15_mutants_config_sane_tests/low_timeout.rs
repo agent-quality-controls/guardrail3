@@ -23,7 +23,7 @@ fn low_timeout_multiplier_is_reported() {
         &results,
         ".cargo/mutants.toml",
         None,
-        Severity::Warn,
+        Severity::Error,
         "mutants timeout multiplier too low",
     );
     assert_inventory(&results, false);

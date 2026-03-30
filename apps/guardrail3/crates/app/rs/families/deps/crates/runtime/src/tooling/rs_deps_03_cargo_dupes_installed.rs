@@ -91,6 +91,7 @@ pub(super) fn tool_facts(tool_name: &str, installed: bool) -> super::facts::Deps
         }],
         dependency_entries: Vec::new(),
         allowlist_coverage: Vec::new(),
+        direct_dependency_caps: Vec::new(),
         input_failures: Vec::new(),
     }
 }

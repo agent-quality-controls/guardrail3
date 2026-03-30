@@ -1,7 +1,9 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::inputs::WorkspaceMemberCargoInput;
-use super::lint_support::{is_weaker, lint_level, member_lints, policy_lints};
+use super::lint_support::{
+    has_valid_lint_level, is_valid_lint_level, is_weaker, lint_level, member_lints, policy_lints,
+};
 
 const ID: &str = "RS-CARGO-06";
 
@@ -13,24 +15,27 @@ pub fn check(input: &WorkspaceMemberCargoInput<'_>, results: &mut Vec<CheckResul
     let Some(member_parsed) = input.member.parsed.as_ref() else {
         return;
     };
+    let workspace_rust_lints = policy_lints(input.workspace, "rust");
+    let workspace_clippy_lints = policy_lints(input.workspace, "clippy");
+    let workspace_policy_complete = workspace_rust_lints.is_some() && workspace_clippy_lints.is_some();
 
     let mut violations = 0usize;
     violations += check_family(
         &input.member.cargo_rel_path,
         "rust",
-        policy_lints(input.workspace, "rust"),
+        workspace_rust_lints,
         member_lints(member_parsed, "rust"),
         results,
     );
     violations += check_family(
         &input.member.cargo_rel_path,
         "clippy",
-        policy_lints(input.workspace, "clippy"),
+        workspace_clippy_lints,
         member_lints(member_parsed, "clippy"),
         results,
     );
 
-    if violations == 0 {
+    if violations == 0 && workspace_policy_complete {
         results.push(
             CheckResult::from_parts(
                 ID.to_owned(),
@@ -59,16 +64,57 @@ fn check_family(
     let (Some(workspace_lints), Some(member_lints)) = (workspace_lints, member_lints) else {
         return 0;
     };
+    if member_lints.as_table().is_none() {
+        results.push(CheckResult::from_parts(
+            ID.to_owned(),
+            Severity::Error,
+            format!("invalid member {family} lint table"),
+            format!(
+                "`{file}` uses `[lints] workspace = true` but defines `[lints.{family}]` with an invalid shape."
+            ),
+            Some(file.to_owned()),
+            None,
+            false,
+        ));
+        return 1;
+    }
     let Some(member_table) = member_lints.as_table() else {
         return 0;
     };
 
     let mut violations = 0usize;
-    for lint_name in member_table.keys() {
-        let Some(workspace_level) = lint_level(workspace_lints, lint_name) else {
+    for (lint_name, member_value) in member_table {
+        let Some(member_level) = lint_level(member_lints, lint_name) else {
+            violations += 1;
+            results.push(CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Error,
+                format!("invalid member {family} override"),
+                format!(
+                    "`{lint_name}` in `{file}` must use a valid lint level (`allow`, `warn`, `deny`, or `forbid`)."
+                ),
+                Some(file.to_owned()),
+                None,
+                false,
+            ));
             continue;
         };
-        let Some(member_level) = lint_level(member_lints, lint_name) else {
+        if !has_valid_lint_level(member_value) || !is_valid_lint_level(member_level.as_str()) {
+            violations += 1;
+            results.push(CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Error,
+                format!("invalid member {family} override"),
+                format!(
+                    "`{lint_name}` in `{file}` must use a valid lint level (`allow`, `warn`, `deny`, or `forbid`)."
+                ),
+                Some(file.to_owned()),
+                None,
+                false,
+            ));
+            continue;
+        }
+        let Some(workspace_level) = lint_level(workspace_lints, lint_name) else {
             continue;
         };
 
@@ -91,5 +137,6 @@ fn check_family(
 }
 
 #[cfg(test)]
-#[path = "rs_cargo_06_no_weakened_overrides_tests/mod.rs"] // reason: test-only sidecar module wiring
+#[path = "rs_cargo_06_no_weakened_overrides_tests/mod.rs"]
+// reason: test-only sidecar module wiring
 mod rs_cargo_06_no_weakened_overrides_tests;

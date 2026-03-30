@@ -40,6 +40,16 @@ pub(super) fn run_tree(
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     crate::test_fixtures::run_tree(tree, tc, thorough)
 }
+
+#[cfg(test)]
+pub(super) fn run_tree_with_validation_scope(
+    tree: &guardrail3_domain_project_tree::ProjectTree,
+    tc: &dyn guardrail3_outbound_traits::ToolChecker,
+    thorough: bool,
+    validation_scope: &str,
+) -> Vec<guardrail3_domain_report::CheckResult> {
+    crate::test_fixtures::run_tree_with_validation_scope(tree, tc, thorough, validation_scope)
+}
 #[cfg(test)]
 pub(super) fn repo_facts() -> crate::facts::RepoReleaseFacts {
     crate::test_fixtures::repo_facts()

@@ -26,7 +26,7 @@ fn wildcard_payload_match_is_reported() {
         &results,
         "tests/matches.rs",
         Some(4),
-        Severity::Warn,
+        Severity::Error,
         "weak matches assertion",
     );
 }
@@ -52,7 +52,59 @@ fn debug_assert_wildcard_match_is_reported() {
         &results,
         "tests/matches.rs",
         Some(4),
-        Severity::Warn,
+        Severity::Error,
+        "weak matches assertion",
+    );
+}
+
+#[test]
+fn assert_matches_wildcard_payload_is_reported() {
+    let fixture = tempdir();
+    let root = fixture.path();
+
+    write_file(
+        root,
+        "Cargo.toml",
+        "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write_file(
+        root,
+        "tests/matches.rs",
+        "#[test]\nfn hides_the_payload() {\n    let value = Some(1);\n    assert_matches!(value, Some(_));\n}\n",
+    );
+
+    let results = run_family(root);
+    assert_reported(
+        &results,
+        "tests/matches.rs",
+        Some(4),
+        Severity::Error,
+        "weak matches assertion",
+    );
+}
+
+#[test]
+fn rest_pattern_payload_match_is_reported() {
+    let fixture = tempdir();
+    let root = fixture.path();
+
+    write_file(
+        root,
+        "Cargo.toml",
+        "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write_file(
+        root,
+        "tests/matches.rs",
+        "#[test]\nfn hides_the_payload() {\n    let value = Some((1, 2));\n    assert!(matches!(value, Some(..)));\n}\n",
+    );
+
+    let results = run_family(root);
+    assert_reported(
+        &results,
+        "tests/matches.rs",
+        Some(4),
+        Severity::Error,
         "weak matches assertion",
     );
 }

@@ -43,17 +43,17 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         };
         if !expected_ban.wrappers.is_empty() && actual_wrappers != expected_ban.wrappers {
             results.push(CheckResult::from_parts(
-    "RS-DENY-30".to_owned(),
-    Severity::Error,
-    "managed ban wrappers changed".to_owned(),
-    format!(
+                "RS-DENY-30".to_owned(),
+                Severity::Error,
+                "managed ban wrappers changed".to_owned(),
+                format!(
                     "`{}` ban `{name}` must keep wrappers `{}`.",
                     config.rel_path,
                     join_set(&expected_ban.wrappers)
                 ),
-    Some(config.rel_path.clone()),
-    None,
-    false,
+                Some(config.rel_path.clone()),
+                None,
+                false,
             ));
         } else if expected_ban.wrappers.is_empty() && !actual_wrappers.is_empty() {
             results.push(

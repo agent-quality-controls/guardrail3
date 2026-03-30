@@ -55,6 +55,26 @@ fn inventories_when_channel_and_components_match_policy() {
 }
 
 #[test]
+fn emits_no_results_when_legacy_toolchain_shadows_modern_policy_file() {
+    let parsed = parse_toolchain_policy_toml(
+        "[toolchain]\nchannel = \"stable\"\ncomponents = [\"clippy\", \"rustfmt\"]",
+    );
+    let input = test_input(
+        Some("rust-toolchain.toml"),
+        Some("rust-toolchain"),
+        Some(&parsed),
+        None,
+        Some("1.85"),
+        None,
+    );
+    let mut results = Vec::new();
+
+    check(&input, &mut results);
+
+    assert_rule_results(&results, &[]);
+}
+
+#[test]
 fn inventories_when_stable_channel_has_host_suffix() {
     let parsed = parse_toolchain_policy_toml(
         "[toolchain]\nchannel = \"stable-x86_64-unknown-linux-gnu\"\ncomponents = [\"clippy\", \"rustfmt\"]",
@@ -473,6 +493,51 @@ fn errors_when_version_like_channel_contains_nightly_suffix_after_host_triple() 
                 severity: Severity::Error,
                 inventory: false,
                 title: "toolchain channel is nightly",
+                message: "Use `channel = \"stable\"` or a pinned stable version.",
+                file: Some("rust-toolchain.toml"),
+            },
+            ExpectedRuleResult {
+                severity: Severity::Info,
+                inventory: true,
+                title: "toolchain component `clippy` present",
+                message: "`clippy` is listed in `components`.",
+                file: Some("rust-toolchain.toml"),
+            },
+            ExpectedRuleResult {
+                severity: Severity::Info,
+                inventory: true,
+                title: "toolchain component `rustfmt` present",
+                message: "`rustfmt` is listed in `components`.",
+                file: Some("rust-toolchain.toml"),
+            },
+        ],
+    );
+}
+
+#[test]
+fn errors_when_version_like_channel_contains_beta_suffix_after_host_triple() {
+    let parsed = parse_toolchain_policy_toml(
+        "[toolchain]\nchannel = \"1.85.0-x86_64-unknown-linux-gnu-beta\"\ncomponents = [\"clippy\", \"rustfmt\"]",
+    );
+    let input = test_input(
+        Some("rust-toolchain.toml"),
+        None,
+        Some(&parsed),
+        None,
+        Some("1.85"),
+        None,
+    );
+    let mut results = Vec::new();
+
+    check(&input, &mut results);
+
+    assert_rule_results(
+        &results,
+        &[
+            ExpectedRuleResult {
+                severity: Severity::Error,
+                inventory: false,
+                title: "toolchain channel is beta",
                 message: "Use `channel = \"stable\"` or a pinned stable version.",
                 file: Some("rust-toolchain.toml"),
             },

@@ -23,7 +23,7 @@ fn missing_mutants_profile_is_reported_when_mutation_is_adopted() {
         &results,
         "Cargo.toml",
         None,
-        Severity::Warn,
+        Severity::Error,
         "profile.mutants missing",
     );
     assert_inventory(&results, false);

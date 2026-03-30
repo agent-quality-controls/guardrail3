@@ -9,6 +9,24 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
     if root.parse_error.is_some() {
         return;
     }
+    if root.guardrail_parse_error {
+        return;
+    }
+    if root.rust_version_invalid {
+        results.push(CheckResult::from_parts(
+            ID.to_owned(),
+            Severity::Error,
+            "rust-version invalid".to_owned(),
+            format!(
+                "`{}` must declare `rust-version` as a string value when it is present.",
+                root.cargo_rel_path
+            ),
+            Some(root.cargo_rel_path.clone()),
+            None,
+            false,
+        ));
+        return;
+    }
 
     let is_library = root.profile_name.as_deref() == Some("library");
     match (is_library, root.rust_version.as_deref()) {

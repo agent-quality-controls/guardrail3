@@ -23,7 +23,7 @@ fn exclude_all_pattern_is_reported() {
         &results,
         ".cargo/mutants.toml",
         None,
-        Severity::Warn,
+        Severity::Error,
         "mutants config excludes everything",
     );
     assert_inventory(&results, false);

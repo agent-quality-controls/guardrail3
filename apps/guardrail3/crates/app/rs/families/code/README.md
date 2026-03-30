@@ -2,13 +2,13 @@
 
 Rust source-code policy family.
 
-This family enforces source-level Rust policy inside routed Rust roots. It does not own repo-global Rust root placement, app/package ownership, or hex-architecture boundaries.
+This family enforces source-level Rust policy over all non-excluded Rust source files in the repo. It does not own repo-global Rust root placement, app/package ownership, or hex-architecture boundaries.
 
 ## What This Family Owns
 
 `RS-CODE` owns:
 
-- source-file AST policy checks over routed `.rs` files
+- source-file AST policy checks over all owned `.rs` files
 - lint-suppression and exception-comment policy
 - source-structure thresholds and public-surface organization checks
 - code-quality and bypass checks such as `include!`, `#[path]`, `panic!`, and direct `std::fs`
@@ -34,16 +34,16 @@ Those belong to:
 
 ## Shared Placement And Routing
 
-This family must not decide which Rust roots are live.
+This family must not decide which Rust roots or Rust source files are owned.
 
 It consumes:
 
-- shared root scope from `placement`
-- routed roots and file scope from `FamilyMapper::map_rs_code()`
+- shared topology facts from `placement`
+- shared owned Rust source-file facts from the shared ownership layer
+- a repo-global `RsCodeRoute` from `FamilyMapper::map_rs_code()`
 
-Inside routed roots, the family may then do family-local discovery:
+Inside that owned source surface, the family may then do family-local work:
 
-- Rust source-file enumeration
 - source AST parsing
 - guardrail and Cargo policy input parsing needed for code rules
 - per-file and per-item normalization into rule inputs
@@ -51,9 +51,10 @@ Inside routed roots, the family may then do family-local discovery:
 
 That split is intentional:
 
-- `placement` decides what Rust roots exist
-- `FamilyMapper` decides which roots and scoped files reach `code`
-- `code` decides source-policy facts inside those routed roots
+- `placement` decides Rust topology
+- shared ownership decides which Rust source files are owned
+- `FamilyMapper` decides the typed global route that reaches `code`
+- `code` decides source-policy facts over that owned file surface
 
 ## Current Status
 
@@ -140,7 +141,7 @@ apps/guardrail3/crates/app/rs/families/code/
 Owns:
 
 - family orchestration
-- routed source-file discovery inside mapped roots
+- parse-once source-file fact collection over the mapped owned file surface
 - parse-once source and policy fact collection
 - rule execution
 - sidecar test scenario setup

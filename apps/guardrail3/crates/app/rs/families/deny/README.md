@@ -2,7 +2,11 @@
 
 Rust `cargo-deny` policy family.
 
-This family owns allowed deny config placement plus the generated `deny.toml` contract: graph settings, ban baselines, feature bans, license allowlists, advisory policy, source restrictions, and inventory-style visibility for local exceptions.
+This family owns allowed deny config placement plus the generated `deny.toml`
+contract: graph settings, ban baselines, feature bans, license allowlists,
+advisory policy, source restrictions, and inventory-style visibility for local
+exceptions. It is workspace-local over legal workspaces plus deny-relevant
+files.
 
 ## What This Family Owns
 
@@ -28,6 +32,29 @@ Those belong to:
 - `RS-CODE`
 - `RS-FMT`
 - `RS-TOOLCHAIN`
+
+## Shared Placement And Routing
+
+This family must not decide which Rust roots or deny-owned files are live.
+
+It consumes:
+
+- shared topology facts from `placement`
+- legal workspaces plus deny-relevant files from `FamilyMapper::map_rs_deny()`
+
+Inside that owned surface, the family may then do family-local work:
+
+- deny config discovery and parsing
+- profile-map and policy-context resolution
+- placement, shadowing, and uncovered-workspace analysis
+- fail-closed input collection
+- per-rule fan-out
+
+That split is intentional:
+
+- `placement` decides what Rust roots exist
+- `FamilyMapper` decides which legal workspaces and deny-relevant files reach `deny`
+- `deny` decides deny-policy facts over that workspace-local owned surface
 
 ## Current Workspace Shape
 

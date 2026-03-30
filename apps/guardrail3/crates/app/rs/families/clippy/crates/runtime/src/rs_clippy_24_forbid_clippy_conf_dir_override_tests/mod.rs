@@ -2,6 +2,8 @@ mod golden;
 mod ignored_unrelated_nested;
 mod legacy_config;
 mod malformed;
+mod malformed_shape;
 mod member_root;
 mod missing_content;
 mod nested_root;
+mod subtree_scope;

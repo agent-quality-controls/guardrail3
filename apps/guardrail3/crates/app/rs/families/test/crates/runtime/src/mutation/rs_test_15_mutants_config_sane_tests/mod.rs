@@ -5,5 +5,6 @@ mod exclude_all;
 mod golden;
 mod integer_timeout;
 mod low_timeout;
+mod malformed;
 mod mixed_roots;
 mod stacked_bad_settings;

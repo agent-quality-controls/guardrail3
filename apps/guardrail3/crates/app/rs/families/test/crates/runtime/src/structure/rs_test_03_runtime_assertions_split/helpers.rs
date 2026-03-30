@@ -1,12 +1,7 @@
 use std::collections::BTreeSet;
 
-use crate::discover::{parent_dir, path_is_under};
 use crate::facts::{TestComponentFacts, TestFileKind};
-use crate::parse::{ModuleInfo, UseBinding};
-
-pub(super) fn root_has_file(files: &[super::AnalyzedFile], rel_path: &str) -> bool {
-    files.iter().any(|file| file.facts.rel_path == rel_path)
-}
+use crate::parse::UseBinding;
 
 pub(super) fn import_uses_external_runtime_boundary(binding: &UseBinding) -> bool {
     binding
@@ -212,37 +207,4 @@ pub(super) fn foreign_assertions_module_target<'a>(
         return None;
     }
     Some(second.as_str())
-}
-
-pub(super) fn module_path_includes_runtime_src(
-    module: &ModuleInfo,
-    file_rel_path: &str,
-    runtime_rel_dir: &str,
-) -> bool {
-    let Some(path_attr) = module.path_attr.as_deref() else {
-        return false;
-    };
-    let file_dir = parent_dir(file_rel_path);
-    let Some(resolved) = resolve_relative_path(file_dir, path_attr) else {
-        return false;
-    };
-    path_is_under(&resolved, &format!("{runtime_rel_dir}/src"))
-}
-
-fn resolve_relative_path(base_dir: &str, rel_path: &str) -> Option<String> {
-    let mut parts = if base_dir.is_empty() {
-        Vec::new()
-    } else {
-        base_dir.split('/').map(str::to_owned).collect::<Vec<_>>()
-    };
-    for part in rel_path.split('/') {
-        match part {
-            "" | "." => {}
-            ".." => {
-                let _ = parts.pop()?;
-            }
-            value => parts.push(value.to_owned()),
-        }
-    }
-    Some(parts.join("/"))
 }

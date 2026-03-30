@@ -8,7 +8,7 @@ pub fn check(input: &TestFunctionInput<'_>, results: &mut Vec<CheckResult>) {
     for line in &input.function.weak_matches_lines {
         results.push(CheckResult::from_parts(
             ID.to_owned(),
-            Severity::Warn,
+            Severity::Error,
             "weak matches assertion".to_owned(),
             format!(
                 "Test `{}` uses `assert!(matches!(...))` with `_` wildcards in payload positions.",

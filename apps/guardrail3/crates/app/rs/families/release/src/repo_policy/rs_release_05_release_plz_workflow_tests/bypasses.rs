@@ -230,6 +230,36 @@ jobs:
 }
 
 #[test]
+fn should_not_count_remote_release_plz_lookalike_action() {
+    let mut facts = repo_facts();
+    facts.workflows.push(workflow_from_yaml(
+        ".github/workflows/lookalike-action.yml",
+        r#"
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: acme/release-plz-wrapper@v1
+"#,
+    ));
+    let input = repo_input(&facts);
+    let mut results = Vec::new();
+
+    check(&input, &mut results);
+
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Warn),
+            file: None,
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
+}
+
+#[test]
 fn should_not_count_release_plz_action_without_release_flow_command() {
     let mut facts = repo_facts();
     facts.workflows.push(workflow_from_yaml(

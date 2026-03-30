@@ -29,7 +29,7 @@ Owned local crates/packages are all discovered local `Cargo.toml` package roots.
 
 Owned Rust roots for lockfile policy are:
 - workspace roots
-- standalone package roots that are not members of a workspace
+- standalone package roots that are not members of a workspace and are outside any discovered workspace-root subtree
 
 The family must not collapse lockfile policy to repo-root-only behavior, and it must not confuse crate-local dependency policy with workspace-root lockfile ownership.
 
@@ -65,14 +65,15 @@ Allowlist semantics:
 - path dependencies are skipped only when they resolve to workspace package paths
 - `workspace = true` is **not** automatically skipped
 - if `workspace = true` resolves to an external workspace dependency, it must still be allowlisted
+- local path dependencies that resolve to a real Cargo package under a workspace root must be declared workspace members or they fail closed through `RS-DEPS-11`
 - renamed dependencies must be checked against the real `package` name when present
 
 Section ownership:
 - `RS-DEPS-05` owns `[dependencies]`
 - `RS-DEPS-06` owns `[build-dependencies]`
 - `RS-DEPS-07` owns `[dev-dependencies]`
+- `RS-DEPS-05..07` also own the matching `target.*` dependency tables
 - `RS-DEPS-12` owns the direct-dependency cap across both top-level and target-specific dependency tables
-- target-specific dependency tables are still outside the `RS-DEPS-05..07` allowlist contract
 
 ## Lockfile rules
 
@@ -122,6 +123,7 @@ Malformed required inputs must surface through `RS-DEPS-11` rather than silently
 - renamed dependencies count by real `package` name when present
 - `workspace = true` entries count when they resolve to external packages
 - non-workspace external path dependencies count
+- local path dependencies derive package identity from the target Cargo package when one exists
 
 **Do not count**
 - repeated occurrences of the same crate name across multiple sections/tables more than once
@@ -150,10 +152,17 @@ Malformed required inputs must surface through `RS-DEPS-11` rather than silently
 - `RS-DEPS-09` now has explicit multi-root severity coverage across service and library roots
 - `RS-DEPS-10` now evaluates ancestor `.gitignore` files with last-match precedence and nested unignore handling instead of returning on the first positive match
 - `RS-DEPS-11` now has explicit fail-closed coverage for malformed `guardrail3.toml`, malformed member manifests, and malformed workspace manifests needed for `workspace = true` resolution
+- `RS-DEPS-11` now ignores foreign `rust.*` and crate-policy keys when deps-owned fields remain valid
+- undeclared local Cargo packages under a workspace root now fail closed instead of being tolerated as ordinary external path dependencies
+- nested `apps/*` and `packages/*` zones now resolve deps policy and runtime applicability by zone segment, not only by top-level prefix
+- deps routing/runtime now preserve ancestor workspace roots needed for `Cargo.lock` policy when scoped app/package config enables the family
+- malformed `target.*` dependency tables now fail closed through `RS-DEPS-11` without suppressing `RS-DEPS-05..07`
+- subtree-scoped regressions now prove sibling crates do not leak into routed `RS-DEPS-05` and `RS-DEPS-12` findings
+- `RS-DEPS-09/10` now keep nested non-member helper crates under a workspace root subordinate to that workspace root instead of forcing separate `Cargo.lock` policy on them
 
 ### Remaining gaps
 
-- `target.*.{dependencies,build-dependencies,dev-dependencies}` tables are still not part of `RS-DEPS-05..07` allowlist discovery; only `RS-DEPS-12` owns them today
+- root-package allowlist policy is still weaker than app/package-scoped policy because the current config surface has no exact root-crate `allowed_deps` entry
 - malformed dependency inputs that affect direct-dependency counting are expected to surface through `RS-DEPS-11`, not partial `RS-DEPS-12` counts
 
 ### Policy questions

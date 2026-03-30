@@ -46,8 +46,7 @@ pub fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<CheckResult>) {
             ID.to_owned(),
             Severity::Warn,
             "cargo clippy deny-warnings step missing".to_owned(),
-            "Hook does not execute `cargo clippy` with `-D warnings` or equivalent."
-                .to_owned(),
+            "Hook does not execute `cargo clippy` with `-D warnings` or equivalent.".to_owned(),
             Some(input.rel_path.to_owned()),
             None,
             false,

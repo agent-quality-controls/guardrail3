@@ -5,10 +5,10 @@ use super::inputs::RootTestInput;
 const ID: &str = "RS-TEST-14";
 
 pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
-    if input.mutation_hook_files.is_empty() {
+    if !input.mutation_hook_active {
         results.push(CheckResult::from_parts(
             ID.to_owned(),
-            Severity::Warn,
+            Severity::Error,
             "mutation hook step missing".to_owned(),
             "Active hook surfaces do not contain an executable `cargo mutants` step.".to_owned(),
             Some(input.root.cargo_rel_path.clone()),

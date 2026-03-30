@@ -94,14 +94,14 @@ pub fn assert_exclude_all_and_low_timeout(results: &[CheckResult]) {
         results,
         &[
             ExpectedRuleFinding {
-                severity: Severity::Warn,
+                severity: Severity::Error,
                 title: "mutants config excludes everything",
                 file: ".cargo/mutants.toml",
                 line: None,
                 inventory: false,
             },
             ExpectedRuleFinding {
-                severity: Severity::Warn,
+                severity: Severity::Error,
                 title: "mutants timeout multiplier too low",
                 file: ".cargo/mutants.toml",
                 line: None,

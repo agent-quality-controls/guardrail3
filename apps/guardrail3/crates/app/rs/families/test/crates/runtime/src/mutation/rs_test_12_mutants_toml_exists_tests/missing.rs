@@ -22,7 +22,7 @@ fn missing_mutants_config_is_reported_when_mutation_is_adopted() {
         &results,
         ".cargo/mutants.toml",
         None,
-        Severity::Warn,
+        Severity::Error,
         "mutants config missing",
     );
     assert_inventory(&results, false);

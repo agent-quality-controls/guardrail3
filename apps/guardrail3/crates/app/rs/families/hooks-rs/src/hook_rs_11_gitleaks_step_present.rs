@@ -43,7 +43,10 @@ fn script_contains_gitleaks(parsed: &ParsedShellScript<'_>) -> bool {
 
 fn is_gitleaks_command(command: &ResolvedCommand) -> bool {
     command.command_name() == "gitleaks"
-        && !command.args().iter().any(|arg| is_help_or_version_flag(arg))
+        && !command
+            .args()
+            .iter()
+            .any(|arg| is_help_or_version_flag(arg))
 }
 
 fn is_help_or_version_flag(token: &str) -> bool {

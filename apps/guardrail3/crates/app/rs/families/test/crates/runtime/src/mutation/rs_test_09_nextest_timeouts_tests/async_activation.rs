@@ -27,7 +27,7 @@ fn tokio_root_without_nextest_timeouts_is_reported() {
         &results,
         ".config/nextest.toml",
         None,
-        Severity::Warn,
+        Severity::Error,
         "nextest config missing",
     );
 }

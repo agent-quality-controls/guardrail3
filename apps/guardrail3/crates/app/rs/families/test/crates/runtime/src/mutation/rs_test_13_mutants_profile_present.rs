@@ -24,7 +24,7 @@ pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
     } else {
         results.push(CheckResult::from_parts(
             ID.to_owned(),
-            Severity::Warn,
+            Severity::Error,
             "profile.mutants missing".to_owned(),
             format!(
                 "`{}` does not define `[profile.mutants]` for an active mutation-testing setup.",

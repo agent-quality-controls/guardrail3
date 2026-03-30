@@ -346,12 +346,12 @@ fn env_wrapper_matches(
     }
 
     if let Some(script) = split_string {
-        let mut split_tokens = if !cursor.remaining().is_empty() && looks_like_env_assignment(&script)
-        {
-            vec![script]
-        } else {
-            shell_words(&script)
-        };
+        let mut split_tokens =
+            if !cursor.remaining().is_empty() && looks_like_env_assignment(&script) {
+                vec![script]
+            } else {
+                shell_words(&script)
+            };
         split_tokens.extend(cursor.remaining().iter().cloned());
         return token_sequence_matches(split_tokens, root, visiting, predicate, line_no);
     }
@@ -539,7 +539,6 @@ fn split_command_segments(raw: &str) -> Vec<CommandSegment> {
         .filter(|segment| !segment.text.is_empty())
         .collect()
 }
-
 
 fn normalize_segment_text(segment: &str) -> String {
     let mut segment = segment
@@ -794,7 +793,10 @@ fn is_help_or_version_flag(token: &str) -> bool {
 }
 
 fn env_flag_takes_value(flag: &str) -> bool {
-    matches!(flag, "-u" | "--unset" | "-C" | "--chdir" | "-S" | "--split-string")
+    matches!(
+        flag,
+        "-u" | "--unset" | "-C" | "--chdir" | "-S" | "--split-string"
+    )
 }
 
 fn env_flag_without_value(flag: &str) -> bool {

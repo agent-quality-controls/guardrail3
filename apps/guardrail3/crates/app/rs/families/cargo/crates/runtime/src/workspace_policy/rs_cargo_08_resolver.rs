@@ -10,23 +10,40 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
     if root.kind != PolicyRootKind::WorkspaceRoot || root.parse_error.is_some() {
         return;
     }
+    if root.resolver_invalid {
+        results.push(CheckResult::from_parts(
+            ID.to_owned(),
+            Severity::Error,
+            "workspace resolver invalid".to_owned(),
+            "Every workspace root must set `resolver` to the string `\"2\"` or `\"3\"`.".to_owned(),
+            Some(root.cargo_rel_path.clone()),
+            None,
+            false,
+        ));
+        return;
+    }
 
     match root.resolver.as_deref() {
-        Some("2" | "3") => results.push(
-            CheckResult::from_parts(
-                ID.to_owned(),
-                Severity::Info,
-                "workspace resolver set".to_owned(),
-                format!(
-                    "Workspace resolver = `{}`",
-                    root.resolver.as_deref().unwrap_or_default()
-                ),
-                Some(root.cargo_rel_path.clone()),
-                None,
-                false,
+        Some("2" | "3") => {
+            if root.guardrail_parse_error {
+                return;
+            }
+            results.push(
+                CheckResult::from_parts(
+                    ID.to_owned(),
+                    Severity::Info,
+                    "workspace resolver set".to_owned(),
+                    format!(
+                        "Workspace resolver = `{}`",
+                        root.resolver.as_deref().unwrap_or_default()
+                    ),
+                    Some(root.cargo_rel_path.clone()),
+                    None,
+                    false,
+                )
+                .as_inventory(),
             )
-            .as_inventory(),
-        ),
+        }
         Some(other) => results.push(CheckResult::from_parts(
             ID.to_owned(),
             Severity::Error,

@@ -122,6 +122,7 @@ pub(super) fn push_root_facts(
         cargo_rel_path,
         kind,
         garde_dependency_present,
+        garde_applicable: garde_dependency_present,
         clippy_rel_path: covering_config.map(|config| config.rel_path.clone()),
         clippy_parsed: covering_config.and_then(|config| config.parsed.clone()),
         clippy_parse_error: covering_config.and_then(|config| config.parse_error.clone()),

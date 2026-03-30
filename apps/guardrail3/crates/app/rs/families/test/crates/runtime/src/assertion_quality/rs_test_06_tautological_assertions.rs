@@ -8,7 +8,7 @@ pub fn check(input: &TestFunctionInput<'_>, results: &mut Vec<CheckResult>) {
     for line in &input.function.tautological_assert_lines {
         results.push(CheckResult::from_parts(
             ID.to_owned(),
-            Severity::Warn,
+            Severity::Error,
             "tautological assertion".to_owned(),
             format!(
                 "Test `{}` compares only literals in an assertion and proves nothing.",

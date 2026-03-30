@@ -49,13 +49,13 @@ pub fn assert_reported(
     assert_eq!(finding.line, line);
 }
 
-pub fn assert_warning_reported(
+pub fn assert_error_reported(
     results: &[CheckResult],
     file: &str,
     line: Option<usize>,
     title: &str,
 ) {
-    assert_reported(results, file, line, Severity::Warn, title);
+    assert_reported(results, file, line, Severity::Error, title);
 }
 
 pub fn assert_inventory(results: &[CheckResult], expected: bool) {

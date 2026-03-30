@@ -27,7 +27,7 @@ fn tokio_dependency_only_root_without_nextest_is_reported() {
         &results,
         ".config/nextest.toml",
         None,
-        Severity::Warn,
+        Severity::Error,
         "nextest config missing",
     );
 }
@@ -55,7 +55,7 @@ fn tokio_attr_only_root_without_nextest_is_reported() {
         &results,
         ".config/nextest.toml",
         None,
-        Severity::Warn,
+        Severity::Error,
         "nextest config missing",
     );
 }
@@ -110,7 +110,7 @@ fn missing_slow_timeout_is_reported() {
         &results,
         ".config/nextest.toml",
         None,
-        Severity::Warn,
+        Severity::Error,
         "nextest timeouts incomplete",
     );
 }
@@ -143,7 +143,7 @@ fn missing_leak_timeout_is_reported() {
         &results,
         ".config/nextest.toml",
         None,
-        Severity::Warn,
+        Severity::Error,
         "nextest timeouts incomplete",
     );
 }

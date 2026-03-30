@@ -24,7 +24,7 @@ fn hook_only_mutation_adoption_requires_the_mutants_profile() {
         &results,
         "Cargo.toml",
         None,
-        Severity::Warn,
+        Severity::Error,
         "profile.mutants missing",
     );
     assert_inventory(&results, false);

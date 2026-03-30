@@ -54,7 +54,7 @@ pub fn assert_missing_mutation_hook(results: &[CheckResult]) {
         results,
         "Cargo.toml",
         None,
-        Severity::Warn,
+        Severity::Error,
         "mutation hook step missing",
     );
 }

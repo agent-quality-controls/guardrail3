@@ -1,7 +1,9 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::inputs::PolicyRootCargoInput;
-use super::lint_support::{EXPECTED_CLIPPY_DENY, lint_priority, policy_lints};
+use super::lint_support::{
+    EXPECTED_CLIPPY_DENY, lint_entry_is_well_formed, lint_priority, policy_lints,
+};
 
 const ID: &str = "RS-CARGO-07";
 
@@ -31,7 +33,11 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
         }
     }
 
-    if violations == 0 {
+    let targeted_entries_well_formed = EXPECTED_CLIPPY_DENY
+        .iter()
+        .all(|lint_name| lint_entry_is_well_formed(clippy_lints, lint_name));
+
+    if violations == 0 && targeted_entries_well_formed && !root.guardrail_parse_error {
         results.push(
             CheckResult::from_parts(
                 ID.to_owned(),

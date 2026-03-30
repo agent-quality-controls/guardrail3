@@ -5,4 +5,5 @@ mod root_policy_without_root_cargo;
 mod selective_uncovered;
 mod standalone_package;
 mod standalone_package_uncovered;
+mod subtree_scope;
 mod unparseable_routed_cargo;

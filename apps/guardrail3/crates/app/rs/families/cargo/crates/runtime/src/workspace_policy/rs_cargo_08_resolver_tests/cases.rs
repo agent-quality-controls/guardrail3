@@ -183,6 +183,68 @@ fn missing_workspace_resolver_is_error() {
 }
 
 #[test]
+fn unsupported_workspace_resolver_is_error() {
+    let workspace_manifest = format!(
+        r#"
+            [workspace]
+            members = []
+            resolver = "1"
+
+            [workspace.package]
+            edition = "2024"
+            rust-version = "1.85"
+
+            {WORKSPACE_RUST_LINTS}
+            {WORKSPACE_CLIPPY_LINTS}
+        "#
+    );
+    let results = check_results(&tree(
+        &[("", entry(&[], &["Cargo.toml"]))],
+        &[("Cargo.toml", &workspace_manifest)],
+    ));
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_08_resolver::assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: None,
+            title: Some("unsupported workspace resolver"),
+            inventory: None,
+        }],
+    );
+}
+
+#[test]
+fn invalid_workspace_resolver_type_is_error() {
+    let workspace_manifest = format!(
+        r#"
+            [workspace]
+            members = []
+            resolver = 2
+
+            [workspace.package]
+            edition = "2024"
+            rust-version = "1.85"
+
+            {WORKSPACE_RUST_LINTS}
+            {WORKSPACE_CLIPPY_LINTS}
+        "#
+    );
+    let results = check_results(&tree(
+        &[("", entry(&[], &["Cargo.toml"]))],
+        &[("Cargo.toml", &workspace_manifest)],
+    ));
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_08_resolver::assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: None,
+            title: Some("workspace resolver invalid"),
+            inventory: None,
+        }],
+    );
+}
+
+#[test]
 fn standalone_root_does_not_emit_workspace_only_rule() {
     let workspace_manifest = format!(
         r#"
@@ -227,6 +289,118 @@ fn standalone_root_does_not_emit_workspace_only_rule() {
             file: Some("Cargo.toml"),
             title: None,
             inventory: None,
+        }],
+    );
+}
+
+#[test]
+fn malformed_root_local_guardrail_suppresses_clean_inventory() {
+    let workspace_manifest = format!(
+        r#"
+            [workspace]
+            members = []
+            resolver = "2"
+
+            [workspace.package]
+            edition = "2024"
+            rust-version = "1.85"
+
+            {WORKSPACE_RUST_LINTS}
+            {WORKSPACE_CLIPPY_LINTS}
+        "#
+    );
+    let results = check_results(&tree(
+        &[("", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
+        &[
+            ("Cargo.toml", &workspace_manifest),
+            ("guardrail3.toml", "[profile"),
+        ],
+    ));
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_08_resolver::assert_rule_results(
+        &results,
+        &[],
+    );
+}
+
+#[test]
+fn scoped_run_excludes_sibling_workspace_root_results() {
+    let workspace_manifest = format!(
+        r#"
+            [workspace]
+            members = ["crates/api"]
+            resolver = "2"
+
+            [workspace.package]
+            edition = "2024"
+            rust-version = "1.85"
+
+            {WORKSPACE_RUST_LINTS}
+            {WORKSPACE_CLIPPY_LINTS}
+        "#
+    );
+    let sibling_workspace_manifest = format!(
+        r#"
+            [workspace]
+            members = ["crate"]
+            resolver = "2"
+
+            [workspace.package]
+            edition = "2024"
+            rust-version = "1.85"
+
+            {WORKSPACE_RUST_LINTS}
+            {WORKSPACE_CLIPPY_LINTS}
+        "#
+    );
+
+    let results = crate::check_test_tree_with_validation_scope(
+        &tree(
+            &[
+                ("", entry(&["crates", "tools"], &["Cargo.toml"])),
+                ("crates", entry(&["api"], &[])),
+                ("crates/api", entry(&["src"], &["Cargo.toml"])),
+                ("crates/api/src", entry(&[], &["lib.rs"])),
+                ("tools", entry(&["helper"], &[])),
+                ("tools/helper", entry(&["crate"], &["Cargo.toml"])),
+                ("tools/helper/crate", entry(&[], &["Cargo.toml"])),
+            ],
+            &[
+                ("Cargo.toml", &workspace_manifest),
+                (
+                    "crates/api/Cargo.toml",
+                    r#"
+                        [package]
+                        name = "api"
+                        edition = "2024"
+
+                        [lints]
+                        workspace = true
+                    "#,
+                ),
+                ("tools/helper/Cargo.toml", &sibling_workspace_manifest),
+                (
+                    "tools/helper/crate/Cargo.toml",
+                    r#"
+                        [package]
+                        name = "helper-crate"
+                        edition = "2024"
+
+                        [lints]
+                        workspace = true
+                    "#,
+                ),
+            ],
+        ),
+        "crates/api/src",
+    );
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_08_resolver::assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: Some("Cargo.toml"),
+            title: Some("workspace resolver set"),
+            inventory: Some(true),
         }],
     );
 }

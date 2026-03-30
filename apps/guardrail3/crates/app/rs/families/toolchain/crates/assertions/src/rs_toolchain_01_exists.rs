@@ -76,17 +76,6 @@ pub fn assert_malformed_modern_and_legacy_results(results: &[CheckResult]) {
     );
     assert!(
         results.iter().any(|result| {
-            result.id() == "RS-TOOLCHAIN-02"
-                && result.severity() == Severity::Error
-                && !result.inventory()
-                && result.title() == "rust-toolchain.toml parse error"
-                && result.message().starts_with("Invalid TOML:")
-                && result.file() == Some("rust-toolchain.toml")
-        }),
-        "missing expected RS-TOOLCHAIN-02 parse error: {results:#?}"
-    );
-    assert!(
-        results.iter().any(|result| {
             result.id() == "RS-TOOLCHAIN-04"
                 && result.severity() == Severity::Warn
                 && !result.inventory()
@@ -100,10 +89,10 @@ pub fn assert_malformed_modern_and_legacy_results(results: &[CheckResult]) {
     assert!(
         results.iter().any(|result| {
             result.id() == "RS-TOOLCHAIN-04"
-                && result.severity() == Severity::Warn
+                && result.severity() == Severity::Error
                 && !result.inventory()
                 && result.title() == "both rust-toolchain files present"
-                && result.message() == "Remove the legacy `rust-toolchain` file to avoid ambiguity."
+                && result.message() == "Remove the legacy `rust-toolchain` file. rustup prefers it over `rust-toolchain.toml`, so the modern contract is shadowed."
                 && result.file() == Some("rust-toolchain")
         }),
         "missing expected RS-TOOLCHAIN-04 ambiguity result: {results:#?}"

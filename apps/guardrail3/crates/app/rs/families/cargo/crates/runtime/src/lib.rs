@@ -38,13 +38,13 @@ use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::CheckResult;
 
 #[cfg(test)]
-use std::collections::BTreeSet;
-#[cfg(test)]
 use guardrail3_app_rs_family_mapper::FamilyMapper;
 #[cfg(test)]
 use guardrail3_domain_config::types::GuardrailConfig;
 #[cfg(test)]
 use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
+#[cfg(test)]
+use std::collections::BTreeSet;
 
 use self::discover::collect;
 use self::inputs::{
@@ -100,5 +100,21 @@ pub fn check_test_tree(tree: &ProjectTree) -> Vec<CheckResult> {
         .and_then(|content| toml::from_str::<GuardrailConfig>(content).ok());
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Cargo]));
     let route = FamilyMapper::new(tree, &scope, config.as_ref(), &selected, None).map_rs_cargo();
+    check(tree, &route)
+}
+
+#[cfg(test)]
+pub fn check_test_tree_with_validation_scope(
+    tree: &ProjectTree,
+    validation_scope: &str,
+) -> Vec<CheckResult> {
+    let scope = guardrail3_app_rs_placement::collect(tree);
+    let config = tree
+        .file_content("guardrail3.toml")
+        .and_then(|content| toml::from_str::<GuardrailConfig>(content).ok());
+    let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Cargo]));
+    let route = FamilyMapper::new(tree, &scope, config.as_ref(), &selected, None)
+        .with_validation_scope(Some(validation_scope))
+        .map_rs_cargo();
     check(tree, &route)
 }

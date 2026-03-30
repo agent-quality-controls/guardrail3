@@ -15,7 +15,6 @@ This family is conditional per owned Rust root:
 It owns:
 
 - Rust workspace roots
-- standalone package roots that are not members of a workspace
 
 Per owned root the runtime resolves:
 

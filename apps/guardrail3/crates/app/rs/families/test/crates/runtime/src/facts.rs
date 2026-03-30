@@ -12,6 +12,7 @@ pub struct TestRootFacts {
     pub(crate) nextest_parsed: Option<toml::Value>,
     pub(crate) tokio_dependency_present: bool,
     pub(crate) has_mutants_profile: bool,
+    pub(crate) mutation_hook_active: bool,
     pub(crate) mutation_hook_files: Vec<String>,
     pub(crate) components: Vec<TestComponentFacts>,
 }

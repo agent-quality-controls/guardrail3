@@ -133,5 +133,18 @@ pub(super) fn repo_input(
 }
 
 #[cfg(test)]
+pub(super) fn run_tree_with_validation_scope(
+    tree: &guardrail3_domain_project_tree::ProjectTree,
+    tc: &dyn guardrail3_outbound_traits::ToolChecker,
+    thorough: bool,
+    validation_scope: &str,
+) -> Vec<guardrail3_domain_report::CheckResult> {
+    crate::test_fixtures::run_tree_with_validation_scope(tree, tc, thorough, validation_scope)
+}
+
+#[cfg(test)]
+pub(super) use test_support::{StubToolChecker, dir_entry, project_tree, temp_root};
+
+#[cfg(test)]
 #[path = "rs_release_03_release_plz_coverage_tests/mod.rs"]
 mod rs_release_03_release_plz_coverage_tests;

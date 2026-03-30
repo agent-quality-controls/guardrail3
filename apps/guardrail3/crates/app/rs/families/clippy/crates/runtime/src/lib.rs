@@ -42,6 +42,7 @@ use guardrail3_app_rs_family_clippy_assertions as _;
 
 pub fn check(tree: &ProjectTree, route: &RsClippyRoute) -> Vec<CheckResult> {
     let facts = collect(tree, route);
+    let has_routed_roots = !route.roots().is_empty();
     let mut results = Vec::new();
 
     for failure in &facts.cargo_root_failures {
@@ -70,23 +71,25 @@ pub fn check(tree: &ProjectTree, route: &RsClippyRoute) -> Vec<CheckResult> {
         rs_clippy_12_allowed_placement::check(forbidden, &mut results);
     }
 
-    if let Some(parse_error) = facts.policy_context_parse_error.as_deref() {
-        rs_clippy_23_policy_context_parseable::check(
-            &PolicyContextFailureInput::new(parse_error),
-            &mut results,
-        );
-    } else if tree.file_exists("guardrail3.toml") {
-        rs_clippy_23_policy_context_parseable::check_parseable(&mut results);
-    }
-
-    if facts.cargo_config_overrides.is_empty() {
-        rs_clippy_24_forbid_clippy_conf_dir_override::check_clean(&mut results);
-    } else {
-        for override_facts in &facts.cargo_config_overrides {
-            rs_clippy_24_forbid_clippy_conf_dir_override::check(
-                &CargoConfigOverrideInput::new(override_facts),
+    if has_routed_roots {
+        if let Some(parse_error) = facts.policy_context_parse_error.as_deref() {
+            rs_clippy_23_policy_context_parseable::check(
+                &PolicyContextFailureInput::new(parse_error),
                 &mut results,
             );
+        } else if tree.file_exists("guardrail3.toml") {
+            rs_clippy_23_policy_context_parseable::check_parseable(&mut results);
+        }
+
+        if facts.cargo_config_overrides.is_empty() {
+            rs_clippy_24_forbid_clippy_conf_dir_override::check_clean(&mut results);
+        } else {
+            for override_facts in &facts.cargo_config_overrides {
+                rs_clippy_24_forbid_clippy_conf_dir_override::check(
+                    &CargoConfigOverrideInput::new(override_facts),
+                    &mut results,
+                );
+            }
         }
     }
 

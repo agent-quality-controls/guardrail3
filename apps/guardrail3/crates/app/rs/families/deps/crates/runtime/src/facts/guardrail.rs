@@ -1,9 +1,8 @@
 use std::collections::BTreeMap;
 
-use guardrail3_domain_config::types::GuardrailConfig;
 use guardrail3_domain_project_tree::ProjectTree;
 
-use super::ParsedGuardrail;
+use super::{DepsCratePolicy, ParsedGuardrail};
 
 pub(super) fn parse_guardrail(tree: &ProjectTree) -> Option<ParsedGuardrail> {
     let Some(content) = tree.file_content("guardrail3.toml") else {
@@ -20,22 +19,42 @@ pub(super) fn parse_guardrail(tree: &ProjectTree) -> Option<ParsedGuardrail> {
     };
     match toml::from_str::<toml::Value>(content) {
         Ok(parsed) => match validate_deps_guardrail_shape(&parsed) {
-            Ok(()) => match parsed.clone().try_into::<GuardrailConfig>() {
-                Ok(config) => Some(ParsedGuardrail {
-                    root_profile_name: config.profile().map(|profile| profile.name().to_owned()),
-                    apps: config
-                        .rust()
-                        .and_then(|rust| rust.apps().cloned())
-                        .unwrap_or_default(),
-                    packages: config.rust().and_then(|rust| rust.packages().cloned()),
-                    parse_error: None,
-                }),
-                Err(parse_error) => Some(parse_error_snapshot(parse_error.to_string())),
-            },
+            Ok(()) => build_parsed_guardrail(&parsed)
+                .map_or_else(|parse_error| Some(parse_error_snapshot(parse_error)), Some),
             Err(parse_error) => Some(parse_error_snapshot(parse_error)),
         },
         Err(parse_error) => Some(parse_error_snapshot(parse_error.to_string())),
     }
+}
+
+fn build_parsed_guardrail(parsed: &toml::Value) -> Result<ParsedGuardrail, String> {
+    let root_profile_name = parsed
+        .get("profile")
+        .and_then(toml::Value::as_table)
+        .and_then(|profile| profile.get("name"))
+        .and_then(toml::Value::as_str)
+        .map(str::to_owned);
+    let mut apps = BTreeMap::new();
+    let mut packages = None;
+
+    if let Some(rust) = parsed.get("rust").and_then(toml::Value::as_table) {
+        if let Some(app_tables) = rust.get("apps").and_then(toml::Value::as_table) {
+            for (app_name, app_value) in app_tables {
+                let policy = parse_crate_policy(app_value, &format!("rust.apps.{app_name}"))?;
+                let _ = apps.insert(app_name.clone(), policy);
+            }
+        }
+        if let Some(package_value) = rust.get("packages") {
+            packages = Some(parse_crate_policy(package_value, "rust.packages")?);
+        }
+    }
+
+    Ok(ParsedGuardrail {
+        root_profile_name,
+        apps,
+        packages,
+        parse_error: None,
+    })
 }
 
 fn parse_error_snapshot(parse_error: String) -> ParsedGuardrail {
@@ -75,15 +94,6 @@ fn validate_deps_guardrail_shape(parsed: &toml::Value) -> Result<(), String> {
         return Err("`rust` must be a table.".to_owned());
     };
 
-    for key in rust.keys() {
-        if !matches!(
-            key.as_str(),
-            "workspace_root" | "workspaces" | "apps" | "packages" | "checks"
-        ) {
-            return Err(format!("`rust` contains unsupported key `{key}`."));
-        }
-    }
-
     if let Some(apps) = rust.get("apps") {
         let Some(apps) = apps.as_table() else {
             return Err("`rust.apps` must be a table.".to_owned());
@@ -104,15 +114,6 @@ fn validate_crate_policy_table(value: &toml::Value, context: &str) -> Result<(),
     let Some(table) = value.as_table() else {
         return Err(format!("`{context}` must be a table."));
     };
-
-    for key in table.keys() {
-        if !matches!(
-            key.as_str(),
-            "layer" | "profile" | "type" | "allowed_deps" | "checks"
-        ) {
-            return Err(format!("`{context}` contains unsupported key `{key}`."));
-        }
-    }
 
     for key in ["layer", "profile", "type"] {
         if let Some(value) = table.get(key) {
@@ -146,6 +147,36 @@ fn validate_crate_policy_table(value: &toml::Value, context: &str) -> Result<(),
     }
 
     Ok(())
+}
+
+fn parse_crate_policy(value: &toml::Value, context: &str) -> Result<DepsCratePolicy, String> {
+    let Some(table) = value.as_table() else {
+        return Err(format!("`{context}` must be a table."));
+    };
+
+    let profile_name = table
+        .get("profile")
+        .and_then(toml::Value::as_str)
+        .map(str::to_owned);
+    let type_name = table
+        .get("type")
+        .and_then(toml::Value::as_str)
+        .map(str::to_owned);
+    let allowed_deps = table
+        .get("allowed_deps")
+        .and_then(toml::Value::as_array)
+        .map(|deps| {
+            deps.iter()
+                .filter_map(toml::Value::as_str)
+                .map(str::to_owned)
+                .collect()
+        });
+
+    Ok(DepsCratePolicy {
+        profile_name,
+        type_name,
+        allowed_deps,
+    })
 }
 
 pub(super) fn validate_workspace_manifest_shape(parsed: &toml::Value) -> Result<(), String> {
@@ -222,7 +253,9 @@ fn validate_workspace_dependency_shape(alias: &str, value: &toml::Value) -> Resu
     Ok(())
 }
 
-pub(super) fn validate_dependency_manifest_shape(parsed: &toml::Value) -> Result<(), String> {
+pub(super) fn validate_top_level_dependency_manifest_shape(
+    parsed: &toml::Value,
+) -> Result<(), String> {
     for section_key in ["dependencies", "build-dependencies", "dev-dependencies"] {
         let Some(section) = parsed.get(section_key) else {
             continue;
@@ -235,6 +268,12 @@ pub(super) fn validate_dependency_manifest_shape(parsed: &toml::Value) -> Result
         }
     }
 
+    Ok(())
+}
+
+pub(super) fn validate_target_dependency_manifest_shape(
+    parsed: &toml::Value,
+) -> Result<(), String> {
     if let Some(target) = parsed.get("target") {
         let Some(target) = target.as_table() else {
             return Err("`[target]` must be a table.".to_owned());

@@ -2,13 +2,14 @@
 
 Rust Clippy policy family.
 
-This family enforces `clippy.toml` policy inside routed Rust roots. It does not own repo-global Rust root discovery or routing.
+This family enforces `clippy.toml` policy inside legal workspaces. It does not
+own repo-global Rust root discovery or routing.
 
 ## What This Family Owns
 
 `RS-CLIPPY` owns:
 
-- allowed `clippy.toml` coverage for routed Rust units
+- allowed `clippy.toml` coverage for legal workspaces
 - allowed `clippy.toml` placement and shadowing rules
 - applicable cargo-config override surfaces that can redirect Clippy config discovery
 - exact managed threshold values
@@ -44,10 +45,10 @@ This family must not decide which Rust roots are live.
 
 It consumes:
 
-- shared root scope from `placement`
-- routed roots from `FamilyMapper::map_rs_clippy()`
+- shared topology facts from `placement`
+- legal workspaces plus Clippy-relevant files from `FamilyMapper::map_rs_clippy()`
 
-Inside a routed root, the family may then do family-local discovery:
+Inside a routed workspace, the family may then do family-local discovery:
 
 - allowed Clippy policy root selection
 - `clippy.toml` / `.clippy.toml` parsing
@@ -70,8 +71,8 @@ Positive inventory results are the normal "clean state" proof for this family. T
 That split is intentional:
 
 - `placement` decides what Rust roots exist
-- `FamilyMapper` decides which roots reach `clippy`
-- `clippy` decides Clippy-policy facts inside those routed roots
+- `FamilyMapper` decides which legal workspaces and Clippy-relevant files reach `clippy`
+- `clippy` decides Clippy-policy facts inside those routed workspaces
 
 The `CLIPPY_CONF_DIR` override stays here even though it lives in Cargo config files, because the semantic question is still Clippy-specific: whether Clippy config discovery has been redirected away from the routed policy-root model. Generic Cargo lint-table and manifest policy remains owned by `RS-CARGO`.
 

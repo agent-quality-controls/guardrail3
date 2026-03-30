@@ -2,6 +2,8 @@ use super::collect;
 use guardrail3_app_rs_family_garde_assertions::facts::assert_root_dirs_exclude;
 use test_support::{dir_entry, project_tree, temp_root};
 
+mod scoped_files;
+
 #[test]
 fn root_workspace_uses_packages_garde_policy_when_packages_config_owns_root() {
     let root = temp_root("rs-garde-facts-root-packages");

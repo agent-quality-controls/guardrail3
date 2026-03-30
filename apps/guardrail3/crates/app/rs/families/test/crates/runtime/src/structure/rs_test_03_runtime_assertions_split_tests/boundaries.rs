@@ -550,6 +550,52 @@ fn assertions_module_importing_route_infra_is_reported() {
 }
 
 #[test]
+fn assertions_module_importing_placement_route_infra_is_reported() {
+    let fixture = tempdir();
+    let root = fixture.path();
+
+    write_file(
+        root,
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"crates/runtime\", \"crates/assertions\"]\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/Cargo.toml",
+        "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = {path = \"../assertions\"}\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/src/lib.rs",
+        "pub fn value() -> u8 {1}\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/tests/public_surface.rs",
+        "use demo_assertions::assert_runtime;\n#[test]\nfn public_surface() {assert_runtime();}\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/Cargo.toml",
+        "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = {path = \"../runtime\"}\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/src/lib.rs",
+        "use guardrail3_app_rs_placement as placement;\npub fn assert_runtime() {let _ = placement::collect; assert_eq!(demo_runtime::value(), 1);}\n",
+    );
+
+    let results = run_family(root);
+    assert!(!results.is_empty());
+    assert_error_reported(
+        &results,
+        "crates/assertions/src/lib.rs",
+        Some(1),
+        "assertions module imports route construction infrastructure",
+    );
+}
+
+#[test]
 fn assertions_module_fully_qualified_family_mapper_call_is_reported() {
     let fixture = tempdir();
     let root = fixture.path();
@@ -583,6 +629,96 @@ fn assertions_module_fully_qualified_family_mapper_call_is_reported() {
         root,
         "crates/assertions/src/lib.rs",
         "pub fn prove_runtime() { let _ = guardrail3_app_rs_family_mapper::FamilyMapper::new(tree, scope, None, selected, None); assert_eq!(demo_runtime::value(), 1); }\n",
+    );
+
+    let results = run_family(root);
+    assert_error_reported(
+        &results,
+        "crates/assertions/src/lib.rs",
+        None,
+        "assertions module builds routed family input",
+    );
+}
+
+#[test]
+fn assertions_module_fully_qualified_placement_call_is_reported() {
+    let fixture = tempdir();
+    let root = fixture.path();
+
+    write_file(
+        root,
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"crates/runtime\", \"crates/assertions\"]\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/Cargo.toml",
+        "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = {path = \"../assertions\"}\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/src/lib.rs",
+        "pub fn value() -> u8 {1}\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/tests/public_surface.rs",
+        "use demo_assertions::prove_runtime;\n#[test]\nfn public_surface() {prove_runtime();}\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/Cargo.toml",
+        "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = {path = \"../runtime\"}\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/src/lib.rs",
+        "pub fn prove_runtime() { let _ = guardrail3_app_rs_placement::collect(todo!()); assert_eq!(demo_runtime::value(), 1); }\n",
+    );
+
+    let results = run_family(root);
+    assert_error_reported(
+        &results,
+        "crates/assertions/src/lib.rs",
+        None,
+        "assertions module builds routed family input",
+    );
+}
+
+#[test]
+fn assertions_module_family_mapper_function_pointer_is_reported() {
+    let fixture = tempdir();
+    let root = fixture.path();
+
+    write_file(
+        root,
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"crates/runtime\", \"crates/assertions\"]\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/Cargo.toml",
+        "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = {path = \"../assertions\"}\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/src/lib.rs",
+        "pub fn value() -> u8 {1}\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/tests/public_surface.rs",
+        "use demo_assertions::prove_runtime;\n#[test]\nfn public_surface() {prove_runtime();}\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/Cargo.toml",
+        "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = {path = \"../runtime\"}\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/src/lib.rs",
+        "pub fn prove_runtime() { let make = guardrail3_app_rs_family_mapper::FamilyMapper::new; let _ = make; assert_eq!(demo_runtime::value(), 1); }\n",
     );
 
     let results = run_family(root);
@@ -844,5 +980,50 @@ fn external_harness_super_boundary_is_reported() {
         "crates/runtime/tests/public_surface.rs",
         Some(1),
         "external harness reaches private runtime glue",
+    );
+}
+
+#[test]
+fn external_harness_path_attribute_is_reported() {
+    let fixture = tempdir();
+    let root = fixture.path();
+
+    write_file(
+        root,
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"crates/runtime\", \"crates/assertions\"]\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/Cargo.toml",
+        "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = {path = \"../assertions\"}\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/src/lib.rs",
+        "pub fn value() -> u8 {1}\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/tests/public_surface.rs",
+        "#[path = \"../src/lib.rs\"]\nmod private_runtime;\n#[test]\nfn public_surface() { let _ = private_runtime::value(); }\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/Cargo.toml",
+        "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = {path = \"../runtime\"}\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/src/lib.rs",
+        "pub fn prove_runtime() {assert_eq!(demo_runtime::value(), 1);}\n",
+    );
+
+    let results = run_family(root);
+    assert_error_reported(
+        &results,
+        "crates/runtime/tests/public_surface.rs",
+        Some(1),
+        "external harness path-includes local source",
     );
 }

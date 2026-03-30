@@ -11,10 +11,11 @@ fn evaluates_workspace_and_standalone_package_roots() {
             (
                 "",
                 dir_entry(
-                    &["vendor"],
+                    &["src", "vendor"],
                     &["Cargo.toml", "clippy.toml", "guardrail3.toml"],
                 ),
             ),
+            ("src", dir_entry(&[], &["main.rs"])),
             ("vendor", dir_entry(&["lib", "tool"], &[])),
             (
                 "vendor/lib",
@@ -42,6 +43,17 @@ serde = { version = "1", features = ["derive"] }
             ),
             ("guardrail3.toml", "[profile]\nname = \"service\"\n"),
             (
+                "src/main.rs",
+                r#"
+use serde::Deserialize;
+
+#[derive(Deserialize)]
+struct RootBoundary {
+    value: String,
+}
+"#,
+            ),
+            (
                 "vendor/lib/Cargo.toml",
                 r#"[package]
 name = "lib"
@@ -68,7 +80,19 @@ serde = "1"
                 "vendor/tool/clippy.toml",
                 "disallowed-methods = []\ndisallowed-types = []\n",
             ),
-            ("vendor/tool/src/main.rs", "fn main() {}"),
+            (
+                "vendor/tool/src/main.rs",
+                r#"
+use serde::Deserialize;
+
+#[derive(Deserialize)]
+struct ToolBoundary {
+    value: String,
+}
+
+fn main() {}
+"#,
+            ),
         ],
         root.clone(),
     );

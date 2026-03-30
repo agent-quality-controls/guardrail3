@@ -19,6 +19,7 @@ pub struct MissingMemberCargoInput<'a> {
 pub struct MissingMemberInventoryCargoInput<'a> {
     pub(crate) workspace: &'a PolicyRootCargoFacts,
     pub(crate) has_missing_members: bool,
+    pub(crate) has_members_parse_error: bool,
 }
 
 pub struct InputFailureCargoInput<'a> {
@@ -74,10 +75,15 @@ impl<'a> MissingMemberCargoInput<'a> {
 }
 
 impl<'a> MissingMemberInventoryCargoInput<'a> {
-    pub const fn new(workspace: &'a PolicyRootCargoFacts, has_missing_members: bool) -> Self {
+    pub const fn new(
+        workspace: &'a PolicyRootCargoFacts,
+        has_missing_members: bool,
+        has_members_parse_error: bool,
+    ) -> Self {
         Self {
             workspace,
             has_missing_members,
+            has_members_parse_error,
         }
     }
 
@@ -91,7 +97,7 @@ impl<'a> MissingMemberInventoryCargoInput<'a> {
                     .missing_members
                     .iter()
                     .any(|missing| missing.workspace_root_rel == workspace.rel_dir);
-                Self::new(workspace, has_missing_members)
+                Self::new(workspace, has_missing_members, workspace.members_parse_error)
             })
             .collect()
     }

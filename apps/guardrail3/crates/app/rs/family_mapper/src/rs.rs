@@ -174,7 +174,45 @@ impl<'a> FamilyMapper<'a> {
 
     #[must_use]
     pub fn map_rs_deps(&self) -> views::RsDepsRoute {
-        views::RsDepsRoute::new(self.map_roots_for_family(RustValidateFamily::Deps, |_| true))
+        if !self.selected_families.contains(RustValidateFamily::Deps) {
+            return views::RsDepsRoute::new(Vec::new())
+                .with_validation_scope(self.validation_scope.map(str::to_owned));
+        }
+
+        let routed_roots = self
+            .scope
+            .roots()
+            .iter()
+            .filter(|root| self.root_matches_validation_scope(root.rel_dir()))
+            .collect::<Vec<_>>();
+        let enabled_root_rels = routed_roots
+            .iter()
+            .filter(|root| root_enabled_for_family(root, RustValidateFamily::Deps, self.config))
+            .map(|root| root.rel_dir().to_owned())
+            .collect::<std::collections::BTreeSet<_>>();
+        let preserved_workspace_ancestor_rels = routed_roots
+            .iter()
+            .filter(|root| !enabled_root_rels.contains(root.rel_dir()))
+            .filter(|root| matches!(root_scope(root.rel_dir()), RootScope::Other))
+            .filter(|root| maybe_workspace_root_for_deps(self.tree, root.cargo_rel_path()))
+            .filter(|root| {
+                enabled_root_rels.iter().any(|enabled_rel| {
+                    enabled_rel != root.rel_dir() && path_is_under(enabled_rel, root.rel_dir())
+                })
+            })
+            .map(|root| root.rel_dir().to_owned())
+            .collect::<std::collections::BTreeSet<_>>();
+
+        views::RsDepsRoute::new(
+            routed_roots
+                .into_iter()
+                .filter(|root| {
+                    enabled_root_rels.contains(root.rel_dir())
+                        || preserved_workspace_ancestor_rels.contains(root.rel_dir())
+                })
+                .map(root_view)
+                .collect(),
+        )
             .with_validation_scope(self.validation_scope.map(str::to_owned))
     }
 
@@ -332,12 +370,37 @@ enum RootScope {
 }
 
 fn root_scope(rel_dir: &str) -> RootScope {
-    let mut segments = rel_dir.split('/').filter(|segment| !segment.is_empty());
-    match (segments.next(), segments.next()) {
-        (Some("apps"), Some(app_name)) => RootScope::App(format!("apps/{app_name}")),
-        (Some("packages"), _) => RootScope::Packages,
+    let segments = rel_dir
+        .split('/')
+        .filter(|segment| !segment.is_empty())
+        .collect::<Vec<_>>();
+    let mut app_paths = Vec::new();
+    let mut package_hits = 0usize;
+
+    for window in segments.windows(2) {
+        match window {
+            ["apps", app_name] => app_paths.push(format!("apps/{app_name}")),
+            ["packages", _] => package_hits += 1,
+            _ => {}
+        }
+    }
+
+    match (app_paths.len(), package_hits) {
+        (1, 0) => RootScope::App(app_paths.remove(0)),
+        (0, 1) => RootScope::Packages,
         _ => RootScope::Other,
     }
+}
+
+fn maybe_workspace_root_for_deps(tree: &ProjectTree, cargo_rel_path: &str) -> bool {
+    let Some(content) = tree.file_content(cargo_rel_path) else {
+        return true;
+    };
+
+    toml::from_str::<toml::Value>(content)
+        .ok()
+        .and_then(|parsed| parsed.get("workspace").cloned())
+        .is_some()
 }
 
 fn effective_family_flag(

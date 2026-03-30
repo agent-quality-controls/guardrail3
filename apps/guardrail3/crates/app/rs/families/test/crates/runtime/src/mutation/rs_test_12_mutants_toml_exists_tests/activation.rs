@@ -34,7 +34,7 @@ fn missing_config_is_ignored_without_adoption_and_required_for_hook_only_adoptio
         &adopted_results,
         ".cargo/mutants.toml",
         None,
-        Severity::Warn,
+        Severity::Error,
         "mutants config missing",
     );
     assert_inventory(&adopted_results, false);

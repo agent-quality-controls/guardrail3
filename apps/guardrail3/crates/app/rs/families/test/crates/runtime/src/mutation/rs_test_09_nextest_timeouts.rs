@@ -29,7 +29,7 @@ pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
     if !input.root.nextest_exists {
         results.push(CheckResult::from_parts(
             ID.to_owned(),
-            Severity::Warn,
+            Severity::Error,
             "nextest config missing".to_owned(),
             format!(
                 "{} requires `{}` with timeout settings for async tests.",
@@ -74,7 +74,7 @@ pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
     } else {
         results.push(CheckResult::from_parts(
             ID.to_owned(),
-            Severity::Warn,
+            Severity::Error,
             "nextest timeouts incomplete".to_owned(),
             format!(
                 "`{}` must define both `[profile.default].slow-timeout` and `[profile.default].leak-timeout`.",

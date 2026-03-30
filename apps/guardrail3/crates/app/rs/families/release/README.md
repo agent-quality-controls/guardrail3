@@ -2,19 +2,21 @@
 
 Rust release-readiness family.
 
-This family enforces release and publishability policy inside routed Rust roots plus repo-level release artifacts. It is intentionally mixed-scope: some rules are repo-global, some are per publishable crate, some are local release-edge checks, and some fail closed on broken active inputs.
+This family enforces release and publishability policy inside legal
+releaseable workspaces. It is workspace-local, not a repo-global release-unit
+family.
 
 ## What This Family Owns
 
 `RS-RELEASE` owns:
 
-- repo-level release artifacts and release workflow baselines
-- per-crate publish metadata for local publishable crates
-- local release-edge checks between publishable crates
+- per-crate publish metadata for publishable crates inside a releaseable
+  workspace
+- local release-edge checks between publishable crates in that workspace
 - binary-release workflow detection for publishable binary crates
 - release-family input-failure reporting when active manifests, release config, workflow YAML, or README content are unreadable or malformed
 
-That includes:
+That may include shared release inputs when a routed workspace owns them:
 
 - root license file presence
 - `release-plz.toml` existence and baseline coverage/content
@@ -43,14 +45,14 @@ Those belong to:
 
 ## Shared Placement And Routing
 
-This family must not decide which Rust roots are live.
+This family must not decide which Rust roots or release-owned files are live.
 
 It consumes:
 
-- shared root scope from `placement`
-- routed roots from `FamilyMapper::map_rs_release()`
+- shared topology facts from `placement`
+- legal workspaces plus release-owned files from `FamilyMapper::map_rs_release()`
 
-Inside routed roots, the family may then do family-local work:
+Inside routed workspaces, the family may then do family-local work:
 
 - Cargo root collection and workspace/member inheritance resolution
 - repo-level release config parsing
@@ -63,8 +65,8 @@ Inside routed roots, the family may then do family-local work:
 That split is intentional:
 
 - `placement` decides what Rust roots exist
-- `FamilyMapper` decides which roots reach `release`
-- `release` decides release-readiness facts inside that routed scope
+- `FamilyMapper` decides which legal workspaces and release-owned files reach `release`
+- `release` decides release-readiness facts inside that workspace-local scope
 
 ## Current Shape
 

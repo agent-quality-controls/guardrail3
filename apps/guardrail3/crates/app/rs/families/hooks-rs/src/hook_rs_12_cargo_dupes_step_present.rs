@@ -51,7 +51,10 @@ fn is_path_qualified_cargo_dupes_command(command: &ResolvedCommand) -> bool {
 
 fn is_cargo_dupes_command(command: &ResolvedCommand) -> bool {
     match command.command_name() {
-        "cargo-dupes" => !command.args().iter().any(|arg| is_help_or_version_flag(arg)),
+        "cargo-dupes" => !command
+            .args()
+            .iter()
+            .any(|arg| is_help_or_version_flag(arg)),
         "cargo" => cargo_dupes_subcommand_invocation(command.args()),
         _ => false,
     }

@@ -11,6 +11,7 @@ pub struct RootTestInput<'a> {
     pub(crate) has_tests: bool,
     pub(crate) has_tokio_tests: bool,
     pub(crate) cargo_mutants_installed: bool,
+    pub(crate) mutation_hook_active: bool,
     pub(crate) mutation_hook_files: &'a [String],
 }
 
@@ -20,6 +21,7 @@ impl<'a> RootTestInput<'a> {
         has_tests: bool,
         has_tokio_tests: bool,
         cargo_mutants_installed: bool,
+        mutation_hook_active: bool,
         mutation_hook_files: &'a [String],
     ) -> Self {
         Self {
@@ -27,6 +29,7 @@ impl<'a> RootTestInput<'a> {
             has_tests,
             has_tokio_tests,
             cargo_mutants_installed,
+            mutation_hook_active,
             mutation_hook_files,
         }
     }

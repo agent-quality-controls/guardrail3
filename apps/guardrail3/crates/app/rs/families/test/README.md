@@ -10,6 +10,10 @@ This family enforces a target state where Rust tests are:
 - fail-closed when inputs cannot be trusted
 - backed by real mutation and timeout tooling
 
+This family is global over all non-excluded owned Rust test surfaces in the repo.
+It still activates per owned crate/workspace, but its owned surface is not
+limited to routed workspace roots.
+
 This family is conditional:
 
 - if an owned crate has no tests, `RS-TEST` is inactive for that crate
@@ -25,15 +29,14 @@ This family is conditional:
 - fake mutation setups that exist only cosmetically
 - silent skips when source or config inputs are unreadable or unparsable
 
-## Owned Roots
+## Owned Surface
 
-`RS-TEST` is a multi-root family.
+`RS-TEST` is a global family.
 
-It evaluates:
+It evaluates owned test surfaces attached to Rust crates/workspaces across the
+whole non-excluded repo.
 
-- every directory containing `Cargo.toml`
-
-Per owned root it may inspect:
+Per owned crate/workspace it may inspect:
 
 - `Cargo.toml`
 - `.cargo/mutants.toml`
@@ -45,7 +48,9 @@ It also reads active validation-root hook surfaces for mutation-hook presence.
 
 ## Activation Model
 
-Judgment is per owned Rust crate/root with its own `Cargo.toml`.
+Judgment is still per owned Rust crate/root with its own `Cargo.toml`, but the
+shared route that reaches this family is repo-global rather than routed to one
+workspace at a time.
 
 ### Test activation
 
@@ -72,6 +77,17 @@ Detectable mutation markers:
 If none of those markers exist, mutation rules do nothing for that crate/root.
 
 If any one of those markers exists, the full mutation setup must be present and sane.
+
+## Severity Policy
+
+`RS-TEST` treats active rule violations as errors.
+
+This family uses non-error output only for:
+
+- passing inventory/confirmation results
+- documented, intentionally-owned escape-hatch inventory rather than silent bypass
+
+Missing reasons, weak proof, incomplete mutation setup, and similar active violations are not advisory in this family.
 
 ## What This Family Does Not Own
 
@@ -327,6 +343,7 @@ Detection:
   - `assertions` may depend on `runtime` and `test_support`
 - import boundary checks:
   - `runtime/tests/*.rs` must not import `super::` or `crate::`
+  - `runtime/tests/*.rs` must not use `#[path = ...]` to pull in local source files
   - `runtime/src/<module>_tests/**` must not import sibling production modules
   - `assertions/src/<module>.rs` must import only runtime public API, `test_support`, std, or third-party crates
   - `assertions/src/<module>.rs` must not import route-construction infrastructure such as mapper/placement crates or build routed family inputs through `FamilyMapper`
@@ -344,7 +361,7 @@ Prevents:
 Detection:
 
 - parse test item attributes with `syn`
-- when `#[ignore]` is present, accept exactly one of:
+- when `#[ignore]` is present directly or through test-gated `cfg_attr(...)`, accept exactly one of:
   - `#[ignore = "..."]`
   - same-line `// reason: ...`
   - previous-line `// reason: ...`
@@ -361,7 +378,7 @@ Prevents:
 Detection:
 
 - parse test item attributes with `syn`
-- when `#[should_panic]` is present, require meta containing:
+- when `#[should_panic]` is present directly or through test-gated `cfg_attr(...)`, require meta containing:
   - `expected = <string literal>`
 - plain `#[should_panic]` is a finding
 
@@ -416,7 +433,7 @@ Detection:
 
 #### `RS-TEST-08`
 
-Weak wildcard `matches!` assertions are forbidden.
+Weak wildcard match assertions are forbidden.
 
 Prevents:
 
@@ -424,9 +441,9 @@ Prevents:
 
 Detection:
 
-- inspect `assert!(matches!(...))` forms in test bodies
+- inspect weak match assertions in test bodies, including `assert!(matches!(...))` and `assert_matches!(...)`
 - parse the inner pattern
-- report when payload positions use `_` wildcards instead of concrete matching
+- report when payload positions use `_` wildcards or rest-pattern elision like `..` instead of concrete matching
 
 ### Runtime safety and fail-closed behavior
 
@@ -579,6 +596,7 @@ Detection:
 
 - inspect each `runtime/tests/*.rs` test function
 - report when the external harness contains direct assertion macros
+- report when the external harness proves through local helper indirection, including associated-function wrappers and bare function-pointer aliases to those wrappers
 - pair with `RS-TEST-07`, which still requires an actual proof site through owned assertions
 
 #### `RS-TEST-18`
@@ -595,7 +613,7 @@ Detection:
 - report public `const` / `static` exports
 - report public helpers returning canned path/string-like values when they expose file-local fixture constants or private canned path/string helpers
 - report zero-argument public helpers that wrap canned fixture path/string helpers into container-style fixture APIs
-- report public helpers that accept `CheckResult`-shaped inputs and select or inspect findings by rule semantics
+- report public helpers that accept `CheckResult`-shaped inputs, including local aliases to `CheckResult`, and select or inspect findings by rule semantics
 - report imports of sibling local `runtime` crates
 - report imports of sibling local `assertions` crates
 - report direct calls into those sibling local component crates

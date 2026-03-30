@@ -224,7 +224,7 @@ fn applicability_allows_result(
     result: &CheckResult,
 ) -> bool {
     let Some(file) = result.file() else {
-        return true;
+        return applicability.global_enabled;
     };
     let Some(rel_path) = normalize_result_path(project_root, file) else {
         return applicability.global_enabled;
@@ -239,7 +239,9 @@ fn applicability_allows_result(
         RustResultScope::Packages => applicability
             .packages_enabled
             .unwrap_or(applicability.global_enabled),
-        RustResultScope::Other => applicability.global_enabled,
+        RustResultScope::Other => {
+            applicability.global_enabled || applicability_has_any_scoped_enable(applicability)
+        }
     }
 }
 
@@ -256,12 +258,35 @@ fn normalize_result_path(project_root: &Path, file: &str) -> Option<String> {
 }
 
 fn scope_for_result_path(rel_path: &str) -> RustResultScope {
-    let mut segments = rel_path.split('/').filter(|segment| !segment.is_empty());
-    match (segments.next(), segments.next()) {
-        (Some("apps"), Some(app_name)) => RustResultScope::App(format!("apps/{app_name}")),
-        (Some("packages"), _) => RustResultScope::Packages,
+    let segments = rel_path
+        .split('/')
+        .filter(|segment| !segment.is_empty())
+        .collect::<Vec<_>>();
+    let mut app_paths = Vec::new();
+    let mut package_hits = 0usize;
+
+    for window in segments.windows(2) {
+        match window {
+            ["apps", app_name] => app_paths.push(format!("apps/{app_name}")),
+            ["packages", _] => package_hits += 1,
+            _ => {}
+        }
+    }
+
+    match (app_paths.len(), package_hits) {
+        (1, 0) => RustResultScope::App(app_paths.remove(0)),
+        (0, 1) => RustResultScope::Packages,
         _ => RustResultScope::Other,
     }
+}
+
+fn applicability_has_any_scoped_enable(applicability: &RustFamilyApplicability) -> bool {
+    applicability
+        .app_enabled
+        .values()
+        .copied()
+        .any(|enabled| enabled)
+        || applicability.packages_enabled == Some(true)
 }
 
 fn load_config(tree: &ProjectTree) -> Result<Option<GuardrailConfig>, RustRunError> {
@@ -403,7 +428,7 @@ pub(crate) fn run_for_tests(
     fs: &dyn guardrail3_outbound_traits::FileSystem,
     root: &std::path::Path,
     families: &[RustValidateFamily],
-) -> guardrail3_app_core::Result<guardrail3_domain_report::Report> {
+) -> Result<guardrail3_domain_report::Report, RustRunError> {
     run(fs, root, None, None, families, false, &StubToolCheckerTest)
 }
 
@@ -411,7 +436,7 @@ pub(crate) fn run_for_tests(
 pub(crate) fn run_arch_for_tests(
     fs: &dyn guardrail3_outbound_traits::FileSystem,
     root: &std::path::Path,
-) -> guardrail3_app_core::Result<guardrail3_domain_report::Report> {
+) -> Result<guardrail3_domain_report::Report, RustRunError> {
     run_for_tests(fs, root, &[RustValidateFamily::Arch])
 }
 
@@ -419,7 +444,7 @@ pub(crate) fn run_arch_for_tests(
 pub(crate) fn run_hexarch_for_tests(
     fs: &dyn guardrail3_outbound_traits::FileSystem,
     root: &std::path::Path,
-) -> guardrail3_app_core::Result<guardrail3_domain_report::Report> {
+) -> Result<guardrail3_domain_report::Report, RustRunError> {
     run_for_tests(fs, root, &[RustValidateFamily::Hexarch])
 }
 
@@ -427,7 +452,7 @@ pub(crate) fn run_hexarch_for_tests(
 pub(crate) fn run_code_for_tests(
     fs: &dyn guardrail3_outbound_traits::FileSystem,
     root: &std::path::Path,
-) -> guardrail3_app_core::Result<guardrail3_domain_report::Report> {
+) -> Result<guardrail3_domain_report::Report, RustRunError> {
     run_for_tests(fs, root, &[RustValidateFamily::Code])
 }
 
@@ -435,8 +460,58 @@ pub(crate) fn run_code_for_tests(
 pub(crate) fn run_toolchain_for_tests(
     fs: &dyn guardrail3_outbound_traits::FileSystem,
     root: &std::path::Path,
-) -> guardrail3_app_core::Result<guardrail3_domain_report::Report> {
+) -> Result<guardrail3_domain_report::Report, RustRunError> {
     run_for_tests(fs, root, &[RustValidateFamily::Toolchain])
+}
+
+#[cfg(test)]
+pub(crate) fn run_deps_for_tests(
+    fs: &dyn guardrail3_outbound_traits::FileSystem,
+    root: &std::path::Path,
+) -> Result<guardrail3_domain_report::Report, RustRunError> {
+    run_for_tests(fs, root, &[RustValidateFamily::Deps])
+}
+
+#[cfg(test)]
+pub(crate) fn run_cargo_for_tests(
+    fs: &dyn guardrail3_outbound_traits::FileSystem,
+    root: &std::path::Path,
+) -> Result<guardrail3_domain_report::Report, RustRunError> {
+    run_for_tests(fs, root, &[RustValidateFamily::Cargo])
+}
+
+#[cfg(test)]
+pub(crate) fn run_deps_with_validation_scope_for_tests(
+    fs: &dyn guardrail3_outbound_traits::FileSystem,
+    root: &std::path::Path,
+    validation_scope: &str,
+) -> Result<guardrail3_domain_report::Report, RustRunError> {
+    run(
+        fs,
+        root,
+        Some(validation_scope),
+        None,
+        &[RustValidateFamily::Deps],
+        false,
+        &StubToolCheckerTest,
+    )
+}
+
+#[cfg(test)]
+pub(crate) fn run_release_with_validation_scope_for_tests(
+    fs: &dyn guardrail3_outbound_traits::FileSystem,
+    root: &std::path::Path,
+    validation_scope: &str,
+) -> Result<guardrail3_domain_report::Report, RustRunError> {
+    run(
+        fs,
+        root,
+        Some(validation_scope),
+        None,
+        &[RustValidateFamily::Release],
+        false,
+        &StubToolCheckerTest,
+    )
 }
 
 #[cfg(test)]
@@ -444,12 +519,13 @@ pub(crate) fn run_code_with_scoped_files_for_tests(
     fs: &dyn guardrail3_outbound_traits::FileSystem,
     root: &std::path::Path,
     scoped_files: Vec<String>,
-) -> guardrail3_app_core::Result<guardrail3_domain_report::Report> {
+) -> Result<guardrail3_domain_report::Report, RustRunError> {
+    let scoped_files = scoped_files.into_iter().collect::<BTreeSet<_>>();
     run(
         fs,
         root,
         None,
-        Some(scoped_files),
+        Some(&scoped_files),
         &[RustValidateFamily::Code],
         false,
         &StubToolCheckerTest,
@@ -461,7 +537,7 @@ pub(crate) fn run_code_with_validation_scope_for_tests(
     fs: &dyn guardrail3_outbound_traits::FileSystem,
     root: &std::path::Path,
     validation_scope: &str,
-) -> guardrail3_app_core::Result<guardrail3_domain_report::Report> {
+) -> Result<guardrail3_domain_report::Report, RustRunError> {
     run(
         fs,
         root,

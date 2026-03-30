@@ -453,6 +453,7 @@ dependencies = [
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
  "guardrail3-domain-validation-model",
+ "guardrail3-reason-policy",
  "toml",
 ]
 
@@ -500,6 +501,7 @@ dependencies = [
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
  "guardrail3-domain-validation-model",
+ "guardrail3-reason-policy",
  "toml",
 ]
 
@@ -579,6 +581,7 @@ dependencies = [
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
  "guardrail3-domain-validation-model",
+ "guardrail3-reason-policy",
  "toml",
 ]
 
@@ -640,8 +643,10 @@ version = "0.0.0"
 dependencies = [
  "guardrail3-app-rs-family-fmt-assertions",
  "guardrail3-app-rs-family-fmt-test-support",
+ "guardrail3-domain-config",
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
+ "guardrail3-reason-policy",
  "tempfile",
  "toml",
 ]
@@ -680,6 +685,7 @@ dependencies = [
  "guardrail3-domain-report",
  "guardrail3-domain-validation-model",
  "guardrail3-ports-outbound-traits",
+ "guardrail3-reason-policy",
  "guardrail3-shared-fs",
  "guardrail3_app_rs_family_garde_assertions",
  "proc-macro2",
@@ -713,6 +719,7 @@ dependencies = [
  "guardrail3-domain-report",
  "guardrail3-domain-validation-model",
  "guardrail3-ports-outbound-traits",
+ "guardrail3-reason-policy",
  "guardrail3-shared-fs",
  "proc-macro2",
  "quote",
@@ -842,6 +849,7 @@ dependencies = [
  "guardrail3-domain-config",
  "guardrail3-domain-project-tree",
  "guardrail3-domain-validation-model",
+ "toml",
 ]
 
 [[package]]
@@ -930,6 +938,7 @@ dependencies = [
  "guardrail3-domain-report",
  "guardrail3-domain-validation-model",
  "guardrail3-ports-outbound-traits",
+ "guardrail3-reason-policy",
  "guardrail3-shared-fs",
  "guardrail3_app_rs_family_test_assertions",
  "proc-macro2",

@@ -11,12 +11,12 @@ fn collect_surfaces_guardrail_parse_failure() {
     let results = super::run_with_facts(&facts);
     let summary = results
         .iter()
-        .filter(|result| result.id()()()() == "RS-DEPS-11")
+        .filter(|result| result.id() == "RS-DEPS-11")
         .map(|result| {
             (
-                result.file()()()(),
-                result.severity()()()(),
-                result.message()()()().contains("Failed to parse guardrail3.toml"),
+                result.file(),
+                result.severity(),
+                result.message().contains("Failed to parse guardrail3.toml"),
             )
         })
         .collect::<Vec<_>>();
@@ -34,13 +34,13 @@ fn unreadable_guardrail_policy_surfaces_explicit_failure() {
     let results = super::run_with_facts(&facts);
     let summary = results
         .iter()
-        .filter(|result| result.id()()()() == "RS-DEPS-11")
+        .filter(|result| result.id() == "RS-DEPS-11")
         .map(|result| {
             (
-                result.file()()()(),
-                result.severity()()()(),
+                result.file(),
+                result.severity(),
                 result
-                    .message
+                    .message()
                     .contains("Failed to read guardrail3.toml for dependency policy resolution."),
             )
         })
@@ -53,7 +53,7 @@ fn unreadable_guardrail_policy_surfaces_explicit_failure() {
 }
 
 #[test]
-fn guardrail_policy_unknown_crate_key_surfaces_explicit_failure() {
+fn guardrail_policy_unknown_crate_key_is_ignored_when_owned_fields_are_valid() {
     let tree = project_tree(
         vec![
             ("", dir_entry(&["apps"], &["guardrail3.toml"])),
@@ -67,6 +67,7 @@ fn guardrail_policy_unknown_crate_key_surfaces_explicit_failure() {
                     [rust.apps.api]
                     profile = "service"
                     allowd_deps = ["serde"]
+                    allowed_deps = ["serde"]
                 "#,
             ),
             (
@@ -83,23 +84,25 @@ fn guardrail_policy_unknown_crate_key_surfaces_explicit_failure() {
     );
     let facts = collected_facts(&tree, &[]);
     let results = super::run_with_facts(&facts);
-    let summary = results
+    let failure_summary = results
         .iter()
-        .filter(|result| result.id()()()() == "RS-DEPS-11")
-        .map(|result| {
-            (
-                result.file()()()(),
-                result.severity()()()(),
-                result
-                    .message
-                    .contains("contains unsupported key `allowd_deps`"),
-            )
-        })
+        .filter(|result| result.id() == "RS-DEPS-11")
+        .map(|result| (result.file(), result.severity()))
         .collect::<Vec<_>>();
 
     assertions::assert_summary(
-        summary,
-        vec![(Some("guardrail3.toml"), assertions::Severity::Error, true)],
+        failure_summary,
+        Vec::<(Option<&str>, assertions::Severity)>::new(),
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "RS-DEPS-05"
+                && result.file() == Some("apps/api/Cargo.toml")
+                && result
+                    .message()
+                    .contains("Dependency `reqwest` in `[dependencies]` is not allowlisted")
+        }),
+        "expected allowlist rule to stay active: {results:#?}"
     );
 }
 
@@ -133,13 +136,13 @@ fn guardrail_policy_empty_allowed_dep_entry_surfaces_explicit_failure() {
     let results = super::run_with_facts(&facts);
     let summary = results
         .iter()
-        .filter(|result| result.id()()()() == "RS-DEPS-11")
+        .filter(|result| result.id() == "RS-DEPS-11")
         .map(|result| {
             (
-                result.file()()()(),
-                result.severity()()()(),
+                result.file(),
+                result.severity(),
                 result
-                    .message
+                    .message()
                     .contains("must not contain empty dependency names"),
             )
         })
@@ -152,7 +155,7 @@ fn guardrail_policy_empty_allowed_dep_entry_surfaces_explicit_failure() {
 }
 
 #[test]
-fn guardrail_policy_unknown_rust_key_surfaces_explicit_failure() {
+fn guardrail_policy_unknown_rust_key_is_ignored_when_owned_fields_are_valid() {
     let tree = project_tree(
         vec![
             ("", dir_entry(&["packages"], &["guardrail3.toml"])),
@@ -163,6 +166,10 @@ fn guardrail_policy_unknown_rust_key_surfaces_explicit_failure() {
             (
                 "guardrail3.toml",
                 r#"
+                    [rust.packages]
+                    profile = "library"
+                    allowed_deps = ["serde"]
+
                     [rust.packagess]
                     profile = "library"
                     allowed_deps = ["serde"]
@@ -179,23 +186,23 @@ fn guardrail_policy_unknown_rust_key_surfaces_explicit_failure() {
     );
     let facts = collected_facts(&tree, &[]);
     let results = super::run_with_facts(&facts);
-    let summary = results
+    let failure_summary = results
         .iter()
-        .filter(|result| result.id()()()() == "RS-DEPS-11")
-        .map(|result| {
-            (
-                result.file()()()(),
-                result.severity()()()(),
-                result
-                    .message
-                    .contains("`rust` contains unsupported key `packagess`"),
-            )
-        })
+        .filter(|result| result.id() == "RS-DEPS-11")
+        .map(|result| (result.file(), result.severity()))
         .collect::<Vec<_>>();
 
     assertions::assert_summary(
-        summary,
-        vec![(Some("guardrail3.toml"), assertions::Severity::Error, true)],
+        failure_summary,
+        Vec::<(Option<&str>, assertions::Severity)>::new(),
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "RS-DEPS-08"
+                && result.file() == Some("packages/core/Cargo.toml")
+                && result.inventory()
+        }),
+        "expected library allowlist coverage to stay active: {results:#?}"
     );
 }
 
@@ -242,13 +249,13 @@ fn workspace_members_with_non_string_entries_surface_explicit_failure() {
     let results = super::run_with_facts(&facts);
     let summary = results
         .iter()
-        .filter(|result| result.id()()()() == "RS-DEPS-11")
+        .filter(|result| result.id() == "RS-DEPS-11")
         .map(|result| {
             (
-                result.file()()()(),
-                result.severity()()()(),
+                result.file(),
+                result.severity(),
                 result
-                    .message
+                    .message()
                     .contains("`[workspace].members` must contain only strings"),
             )
         })
@@ -306,15 +313,15 @@ fn workspace_dependency_package_with_non_string_name_surfaces_explicit_failure()
     let results = super::run_with_facts(&facts);
     let summary = results
         .iter()
-        .filter(|result| result.id()()()() == "RS-DEPS-11")
+        .filter(|result| result.id() == "RS-DEPS-11")
         .map(|result| {
             (
-                result.file()()()(),
-                result.severity()()()(),
+                result.file(),
+                result.severity(),
                 result
-                    .message
+                    .message()
                     .contains("`[workspace.dependencies].reqwest.package` must be a string"),
-                result.message()()()().contains("workspace = true"),
+                result.message().contains("workspace = true"),
             )
         })
         .collect::<Vec<_>>();
@@ -366,13 +373,13 @@ fn dependency_workspace_flag_with_non_boolean_value_surfaces_explicit_failure() 
     let results = super::run_with_facts(&facts);
     let summary = results
         .iter()
-        .filter(|result| result.id()()()() == "RS-DEPS-11")
+        .filter(|result| result.id() == "RS-DEPS-11")
         .map(|result| {
             (
-                result.file()()()(),
-                result.severity()()()(),
+                result.file(),
+                result.severity(),
                 result
-                    .message
+                    .message()
                     .contains("`[dependencies].reqwest.workspace` must be a boolean"),
             )
         })
@@ -382,6 +389,69 @@ fn dependency_workspace_flag_with_non_boolean_value_surfaces_explicit_failure() 
         summary,
         vec![(
             Some("apps/api/Cargo.toml"),
+            assertions::Severity::Error,
+            true,
+        )],
+    );
+}
+
+#[test]
+fn workspace_true_without_workspace_dependency_entry_surfaces_explicit_failure() {
+    let tree = project_tree(
+        vec![
+            (
+                "",
+                dir_entry(&["packages"], &["Cargo.toml", "guardrail3.toml"]),
+            ),
+            ("packages", dir_entry(&["core"], &[])),
+            ("packages/core", dir_entry(&[], &["Cargo.toml"])),
+        ],
+        vec![
+            (
+                "guardrail3.toml",
+                r#"
+                    [rust.packages]
+                    profile = "library"
+                    allowed_deps = ["serde"]
+                "#,
+            ),
+            (
+                "Cargo.toml",
+                r#"
+                    [workspace]
+                    members = ["packages/*"]
+                "#,
+            ),
+            (
+                "packages/core/Cargo.toml",
+                r#"
+                    [package]
+                    name = "core"
+
+                    [dependencies]
+                    serde = { workspace = true }
+                "#,
+            ),
+        ],
+    );
+    let facts = collected_facts(&tree, &[]);
+    let results = super::run_with_facts(&facts);
+    let summary = results
+        .iter()
+        .filter(|result| result.id() == "RS-DEPS-11")
+        .map(|result| {
+            (
+                result.file(),
+                result.severity(),
+                result.message().contains("[workspace.dependencies].serde"),
+            )
+        })
+        .collect::<Vec<_>>();
+
+    assertions::assert_summary(
+        summary,
+        vec![(
+            Some("packages/core/Cargo.toml"),
             assertions::Severity::Error,
             true,
         )],
@@ -408,13 +478,13 @@ fn unreadable_member_manifest_surfaces_explicit_failure() {
     let results = super::run_with_facts(&facts);
     let summary = results
         .iter()
-        .filter(|result| result.id()()()() == "RS-DEPS-11")
+        .filter(|result| result.id() == "RS-DEPS-11")
         .map(|result| {
             (
-                result.file()()()(),
-                result.severity()()()(),
+                result.file(),
+                result.severity(),
                 result
-                    .message
+                    .message()
                     .contains("Failed to read Cargo.toml for dependency root discovery."),
             )
         })
@@ -446,13 +516,13 @@ fn unreadable_workspace_manifest_surfaces_explicit_failure() {
     let results = super::run_with_facts(&facts);
     let summary = results
         .iter()
-        .filter(|result| result.id()()()() == "RS-DEPS-11")
+        .filter(|result| result.id() == "RS-DEPS-11")
         .map(|result| {
             (
-                result.file()()()(),
-                result.severity()()()(),
+                result.file(),
+                result.severity(),
                 result
-                    .message
+                    .message()
                     .contains("Failed to read Cargo.toml for dependency root discovery."),
             )
         })
@@ -487,16 +557,16 @@ fn malformed_member_manifest_surfaces_explicit_failure() {
     let results = super::run_with_facts(&facts);
     let summary = results
         .iter()
-        .filter(|result| result.id()()()() == "RS-DEPS-11")
+        .filter(|result| result.id() == "RS-DEPS-11")
         .map(|result| {
             (
-                result.file()()()(),
-                result.severity()()()(),
+                result.file(),
+                result.severity(),
                 result
-                    .message
+                    .message()
                     .contains("Failed to parse workspace Cargo.toml"),
                 result
-                    .message
+                    .message()
                     .contains("Failed to parse Cargo.toml for dependency root discovery"),
             )
         })
@@ -555,18 +625,18 @@ fn malformed_workspace_manifest_does_not_fail_open_workspace_true_resolution() {
     let results = super::run_with_facts(&facts);
     let summary = results
         .iter()
-        .filter(|result| result.id()()()() == "RS-DEPS-11")
+        .filter(|result| result.id() == "RS-DEPS-11")
         .map(|result| {
             (
-                result.file()()()(),
-                result.severity()()()(),
+                result.file(),
+                result.severity(),
                 result
-                    .message
+                    .message()
                     .contains("Failed to parse workspace Cargo.toml"),
                 result
-                    .message
+                    .message()
                     .contains("Failed to parse Cargo.toml for dependency root discovery"),
-                result.message()()()().contains("workspace = true"),
+                result.message().contains("workspace = true"),
             )
         })
         .collect::<Vec<_>>();
@@ -627,13 +697,13 @@ fn unreadable_gitignore_surfaces_explicit_failure() {
     let results = super::run_with_facts(&facts);
     let summary = results
         .iter()
-        .filter(|result| result.id()()()() == "RS-DEPS-11")
+        .filter(|result| result.id() == "RS-DEPS-11")
         .map(|result| {
             (
-                result.file()()()(),
-                result.severity()()()(),
+                result.file(),
+                result.severity(),
                 result
-                    .message
+                    .message()
                     .contains("Failed to read `.gitignore` for Cargo.lock masking checks."),
             )
         })

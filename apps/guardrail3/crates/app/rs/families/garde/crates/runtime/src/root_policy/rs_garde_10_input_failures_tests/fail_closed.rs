@@ -55,6 +55,50 @@ garde = { version = "0.22", features = ["derive"] }
 }
 
 #[test]
+fn errors_on_unreadable_source_file() {
+    let root = temp_root("rs-garde-10-read-failure");
+    let clippy_toml = super::super::canonical_clippy_toml();
+
+    let tree = project_tree(
+        vec![
+            (
+                "",
+                dir_entry(&["src"], &["Cargo.toml", "clippy.toml", "guardrail3.toml"]),
+            ),
+            ("src", dir_entry(&[], &["input.rs"])),
+        ],
+        vec![
+            (
+                "Cargo.toml",
+                r#"[workspace]
+members = []
+[workspace.dependencies]
+garde = { version = "0.22", features = ["derive"] }
+"#,
+            ),
+            ("clippy.toml", clippy_toml.as_str()),
+            ("guardrail3.toml", "[profile]\nname = \"service\"\n"),
+        ],
+        root.clone(),
+    );
+
+    let results = super::super::run_family(&tree);
+    let findings = assertions::findings(&results);
+    assert_eq!(findings.len(), 1);
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Error),
+            file: Some("src/input.rs"),
+            message_contains: Some("Failed to read Rust source file for garde checks"),
+            ..Default::default()
+        }],
+    );
+
+    std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");
+}
+
+#[test]
 fn errors_on_cargo_toml_parse_failure() {
     let root = temp_root("rs-garde-10-cargo-failure");
     let source_rel = "src/input.rs";
@@ -92,6 +136,59 @@ fn errors_on_cargo_toml_parse_failure() {
         &[assertions::ExpectedRuleResult {
             severity: Some(assertions::Severity::Error),
             file: Some("Cargo.toml"),
+            ..Default::default()
+        }],
+    );
+
+    std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");
+}
+
+#[test]
+fn errors_on_guardrail_policy_parse_failure() {
+    let root = temp_root("rs-garde-10-guardrail-policy-failure");
+    let source_rel = "src/input.rs";
+    let source_abs = root.join(source_rel);
+    let clippy_toml = super::super::canonical_clippy_toml();
+    std::fs::create_dir_all(
+        source_abs
+            .parent()
+            .expect("fixture source path must have a parent directory"),
+    )
+    .expect("failed to create fixture source directory");
+    std::fs::write(&source_abs, "fn valid() {}").expect("failed to write fixture source");
+
+    let tree = project_tree(
+        vec![
+            (
+                "",
+                dir_entry(&["src"], &["Cargo.toml", "clippy.toml", "guardrail3.toml"]),
+            ),
+            ("src", dir_entry(&[], &["input.rs"])),
+        ],
+        vec![
+            (
+                "Cargo.toml",
+                r#"[workspace]
+members = []
+[workspace.dependencies]
+garde = { version = "0.22", features = ["derive"] }
+"#,
+            ),
+            ("clippy.toml", clippy_toml.as_str()),
+            ("guardrail3.toml", "[[invalid toml"),
+        ],
+        root.clone(),
+    );
+
+    let results = super::super::run_family(&tree);
+    let findings = assertions::findings(&results);
+    assert_eq!(findings.len(), 1);
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Error),
+            file: Some("guardrail3.toml"),
+            message_contains: Some("Failed to parse guardrail3.toml for garde policy resolution"),
             ..Default::default()
         }],
     );

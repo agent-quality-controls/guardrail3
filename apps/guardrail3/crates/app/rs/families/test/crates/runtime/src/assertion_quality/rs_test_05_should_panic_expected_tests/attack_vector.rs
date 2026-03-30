@@ -26,7 +26,7 @@ fn bare_should_panic_is_reported_on_the_test_file() {
         &results,
         "tests/panic.rs",
         Some(2),
-        Severity::Warn,
+        Severity::Error,
         "should_panic missing expected string",
     );
 }
@@ -52,7 +52,7 @@ fn empty_expected_string_is_reported() {
         &results,
         "tests/panic.rs",
         Some(2),
-        Severity::Warn,
+        Severity::Error,
         "should_panic missing expected string",
     );
 }
@@ -78,7 +78,33 @@ fn non_string_expected_is_reported() {
         &results,
         "tests/panic.rs",
         Some(2),
-        Severity::Warn,
+        Severity::Error,
+        "should_panic missing expected string",
+    );
+}
+
+#[test]
+fn cfg_attr_test_and_should_panic_are_still_checked() {
+    let fixture = tempdir();
+    let root = fixture.path();
+
+    write_file(
+        root,
+        "Cargo.toml",
+        "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write_file(
+        root,
+        "tests/panic.rs",
+        "#[cfg_attr(test, test)]\n#[cfg_attr(all(test, feature = \"slow\"), should_panic)]\nfn panics_without_expected_message() {panic!(\"boom\");}\n",
+    );
+
+    let results = run_family(root);
+    assert_reported(
+        &results,
+        "tests/panic.rs",
+        Some(2),
+        Severity::Error,
         "should_panic missing expected string",
     );
 }

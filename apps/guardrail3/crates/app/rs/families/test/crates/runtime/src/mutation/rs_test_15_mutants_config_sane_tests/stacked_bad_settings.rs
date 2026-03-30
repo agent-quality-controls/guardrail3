@@ -2,7 +2,7 @@ use guardrail3_app_rs_family_test_assertions::rs_test_15_mutants_config_sane::as
 
 use super::{run_family, tempdir, write_file};
 #[test]
-fn exclude_all_and_low_timeout_each_emit_a_warning() {
+fn exclude_all_and_low_timeout_each_emit_an_error() {
     let fixture = tempdir();
     let root = fixture.path();
 

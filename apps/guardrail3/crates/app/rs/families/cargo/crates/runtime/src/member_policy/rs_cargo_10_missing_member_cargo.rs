@@ -23,7 +23,7 @@ pub fn check_inventory(
     input: &MissingMemberInventoryCargoInput<'_>,
     results: &mut Vec<CheckResult>,
 ) {
-    if input.has_missing_members {
+    if input.has_missing_members || input.has_members_parse_error {
         return;
     }
 
@@ -45,4 +45,5 @@ pub fn check_inventory(
 }
 
 #[cfg(test)]
-mod tests;
+#[path = "rs_cargo_10_missing_member_cargo_tests/mod.rs"] // reason: test-only sidecar module wiring
+mod rs_cargo_10_missing_member_cargo_tests;
