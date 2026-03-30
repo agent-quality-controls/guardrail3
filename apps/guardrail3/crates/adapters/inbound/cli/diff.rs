@@ -2,6 +2,7 @@ use std::collections::BTreeSet;
 use std::path::Path;
 
 use crate::generate;
+#[cfg(feature = "product-rs-generate")]
 use guardrail3_app_rs_generate::generate_rust_expected;
 
 /// A (`relative_path`, `content`) pair for a generated file.
@@ -28,6 +29,7 @@ struct PendingUpdate<'a> {
     custom_entries: Vec<String>,
 }
 
+#[cfg(feature = "product-rs-generate")]
 /// Dry-run for rs generate — shows what would change per file.
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
 pub fn run(path: &str, dump_dir: Option<&str>) {
@@ -47,6 +49,7 @@ pub fn run(path: &str, dump_dir: Option<&str>) {
     }
 }
 
+#[cfg(feature = "product-ts")]
 /// Dry-run for ts generate — shows what would change per file.
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI command — user-facing output and exit codes
 pub fn run_ts(path: &str, dump_dir: Option<&str>) {

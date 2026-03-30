@@ -29,6 +29,7 @@ pub enum Commands {
         command: RsCommands,
     },
 
+    #[cfg(feature = "product-ts")]
     /// TypeScript guardrails
     Ts {
         #[command(subcommand)]
@@ -103,12 +104,15 @@ pub enum RsCommands {
         #[arg(long)]
         dry_run: bool,
     },
+    #[cfg(feature = "product-rs-generate")]
     /// Generate Rust config files (clippy.toml, deny.toml, etc.) from guardrail3.toml
     Generate(GenerateArgs),
     /// Validate Rust project guardrails
     Validate(RsValidateArgs),
+    #[cfg(feature = "product-rs-generate")]
     /// Verify generated Rust configs are current (for CI)
     Check(PathArg),
+    #[cfg(feature = "product-rs-generate")]
     /// Install Rust pre-commit hook
     HooksInstall(GenerateArgs),
     /// List embedded Rust config modules
@@ -117,6 +121,7 @@ pub enum RsCommands {
     ShowModule(ShowModuleArgs),
 }
 
+#[cfg(feature = "product-ts")]
 #[derive(Subcommand, Debug)]
 pub enum TsCommands {
     /// Initialize TypeScript guardrail3 configuration
@@ -137,6 +142,7 @@ pub enum TsCommands {
     Validate(TsValidateArgs),
     /// Install TypeScript pre-commit hook
     HooksInstall(GenerateArgs),
+    #[cfg(feature = "product-hooks")]
     /// Validate TypeScript pre-commit hook configuration
     HooksValidate(TsValidateArgs),
 }

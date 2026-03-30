@@ -16,7 +16,7 @@ members = [
     "crates/app/arch-helpers",
     "crates/app/commands",
     "crates/app/core",
-    "crates/app/rs",
+    "crates/app/rs/runtime",
     "crates/app/rs/placement",
     "crates/app/rs/family_selection",
     "crates/app/rs/family_mapper",

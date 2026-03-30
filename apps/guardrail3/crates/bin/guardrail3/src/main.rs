@@ -6,21 +6,28 @@ use guardrail3_adapters_outbound_report as report;
 use guardrail3_adapters_outbound_tool_runner::RealToolChecker;
 
 mod app_deps {
-    pub(super) use guardrail3_app_core::{crawl, discover, project_walker};
-    pub(super) use guardrail3_app_hooks as hooks;
+    pub(super) use guardrail3_app_core::{crawl, project_walker};
+    #[cfg(feature = "product-hooks")]
+    pub(super) use guardrail3_app_core::discover;
     pub(super) use guardrail3_app_rs_runtime as rs;
+    #[cfg(feature = "product-hooks")]
+    pub(super) use guardrail3_app_hooks as hooks;
+    #[cfg(feature = "product-ts")]
     pub(super) use guardrail3_app_ts as ts;
 }
 
 mod cli_types {
-    pub(super) use guardrail3_adapters_inbound_cli::cli::{
-        Commands, RsCommands, RsValidateArgs, TsCommands, TsValidateArgs,
-    };
+    pub(super) use guardrail3_adapters_inbound_cli::cli::{Commands, RsCommands, RsValidateArgs};
+    #[cfg(feature = "product-ts")]
+    pub(super) use guardrail3_adapters_inbound_cli::cli::{TsCommands, TsValidateArgs};
 }
 
 mod domain_types {
+    pub(super) use guardrail3_domain_report::Report;
+    #[cfg(feature = "product-ts")]
     pub(super) use guardrail3_domain_config::types::GuardrailConfig;
-    pub(super) use guardrail3_domain_report::{Report, TsCheckCategories, ValidateDomains};
+    #[cfg(feature = "product-ts")]
+    pub(super) use guardrail3_domain_report::{TsCheckCategories, ValidateDomains};
 }
 
 struct CoverageSelection {
@@ -71,6 +78,7 @@ fn main() {
 
     match cli.command {
         cli_types::Commands::Rs { command } => handle_rs(command),
+        #[cfg(feature = "product-ts")]
         cli_types::Commands::Ts { command } => handle_ts(command),
         cli_types::Commands::DumpGuide => match handle_guide() {
             Ok(lines) => {
@@ -133,10 +141,16 @@ fn run_coverage_maps(
 ) {
     use commands::coverage;
     if selection.clippy {
+        #[cfg(feature = "product-coverage-clippy")]
         coverage::clippy::print(project_path, crawl_result);
+        #[cfg(not(feature = "product-coverage-clippy"))]
+        exit_with_error("clippy coverage is not compiled into this build.", 1);
     }
     if selection.deny {
+        #[cfg(feature = "product-coverage-deny")]
         coverage::deny::print(project_path, crawl_result);
+        #[cfg(not(feature = "product-coverage-deny"))]
+        exit_with_error("deny coverage is not compiled into this build.", 1);
     }
     if selection.rustfmt {
         coverage::rustfmt::print(project_path, crawl_result);
@@ -201,6 +215,7 @@ fn handle_rs(command: cli_types::RsCommands) {
         } => {
             commands::init::run_rs(&profile, &path, force, dry_run);
         }
+        #[cfg(feature = "product-rs-generate")]
         cli_types::RsCommands::Generate(args) => {
             validate_or_exit(&args);
             if args.dry_run {
@@ -214,10 +229,12 @@ fn handle_rs(command: cli_types::RsCommands) {
             let report = run_rs_validate(&args);
             print_report(&args.format, args.inventory, args.verbose, &report);
         }
+        #[cfg(feature = "product-rs-generate")]
         cli_types::RsCommands::Check(args) => {
             validate_or_exit(&args);
             commands::check::run(&args.path);
         }
+        #[cfg(feature = "product-rs-generate")]
         cli_types::RsCommands::HooksInstall(args) => {
             validate_or_exit(&args);
             commands::generate::run_rs_hooks(&args);
@@ -235,6 +252,7 @@ fn handle_rs(command: cli_types::RsCommands) {
     }
 }
 
+#[cfg(feature = "product-ts")]
 #[allow(clippy::print_stderr, clippy::disallowed_methods)] // reason: CLI dispatch
 fn handle_ts(command: cli_types::TsCommands) {
     match command {
@@ -275,6 +293,7 @@ fn handle_ts(command: cli_types::TsCommands) {
             validate_or_exit(&args);
             commands::generate::run_hooks(&args);
         }
+        #[cfg(feature = "product-hooks")]
         cli_types::TsCommands::HooksValidate(args) => {
             validate_or_exit(&args);
             let path = resolve_path(&args.path);
@@ -364,6 +383,7 @@ fn resolve_path(path_str: &str) -> std::path::PathBuf {
     }
 }
 
+#[cfg(feature = "product-ts")]
 const fn domains_from_args(_args: &cli_types::TsValidateArgs) -> domain_types::ValidateDomains {
     domain_types::ValidateDomains {
         code: true,
@@ -374,6 +394,7 @@ const fn domains_from_args(_args: &cli_types::TsValidateArgs) -> domain_types::V
 }
 
 /// Load guardrail3.toml config, if present.
+#[cfg(feature = "product-ts")]
 fn load_config(
     fs: &RealFileSystem,
     path: &std::path::Path,
@@ -384,6 +405,7 @@ fn load_config(
 }
 
 /// Build `TsCheckCategories` by merging config defaults with CLI flags.
+#[cfg(feature = "product-ts")]
 fn build_ts_categories(
     _args: &cli_types::TsValidateArgs,
     fs: &RealFileSystem,

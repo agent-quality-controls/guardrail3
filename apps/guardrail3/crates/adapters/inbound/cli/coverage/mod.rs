@@ -3,8 +3,10 @@
 //! Each sub-module handles one config file type and documents the
 //! actual tool resolution rules for that file.
 
+#[cfg(feature = "product-coverage-clippy")]
 pub mod clippy;
 pub mod cspell;
+#[cfg(feature = "product-coverage-deny")]
 pub mod deny;
 pub mod engine;
 pub mod eslint;

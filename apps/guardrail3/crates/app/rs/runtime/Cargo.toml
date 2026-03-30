@@ -1,0 +1,75 @@
+[package]
+name = "guardrail3-app-rs-runtime"
+version = "0.0.0"
+edition = "2024"
+
+[lib]
+path = "src/lib.rs"
+
+[lints]
+workspace = true
+
+[features]
+default = ["families-all"]
+families-all = [
+    "family-arch",
+    "family-fmt",
+    "family-toolchain",
+    "family-clippy",
+    "family-deny",
+    "family-cargo",
+    "family-code",
+    "family-hexarch",
+    "family-libarch",
+    "family-deps",
+    "family-garde",
+    "family-test",
+    "family-release",
+    "family-hooks-shared",
+    "family-hooks-rs",
+]
+family-arch = ["dep:guardrail3_app_rs_family_arch"]
+family-fmt = ["dep:guardrail3_app_rs_family_fmt"]
+family-toolchain = ["dep:guardrail3_app_rs_family_toolchain"]
+family-clippy = ["dep:guardrail3_app_rs_family_clippy"]
+family-deny = ["dep:guardrail3_app_rs_family_deny"]
+family-cargo = ["dep:guardrail3_app_rs_family_cargo"]
+family-code = ["dep:guardrail3_app_rs_family_code"]
+family-hexarch = ["dep:guardrail3_app_rs_family_hexarch"]
+family-libarch = ["dep:guardrail3_app_rs_family_libarch"]
+family-deps = ["dep:guardrail3_app_rs_family_deps"]
+family-garde = ["dep:guardrail3_app_rs_family_garde"]
+family-test = ["dep:guardrail3_app_rs_family_test"]
+family-release = ["dep:guardrail3_app_rs_family_release"]
+family-hooks-shared = ["dep:guardrail3_app_rs_family_hooks_shared"]
+family-hooks-rs = ["dep:guardrail3_app_rs_family_hooks_rs"]
+
+[dependencies]
+guardrail3_app_core = { package = "guardrail3-app-core", path = "../../core" }
+guardrail3_domain_config = { package = "guardrail3-domain-config", path = "../../../domain/config" }
+guardrail3_domain_project_tree = { package = "guardrail3-domain-project-tree", path = "../../../domain/project-tree" }
+guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../../domain/report" }
+guardrail3_outbound_traits = { package = "guardrail3-ports-outbound-traits", path = "../../../ports/outbound/traits" }
+guardrail3_validation_model = { package = "guardrail3-domain-validation-model", path = "../../../domain/validation-model" }
+guardrail3_app_rs_family_arch = { package = "guardrail3-app-rs-family-arch", path = "../families/arch/crates/runtime", optional = true }
+guardrail3_app_rs_family_cargo = { package = "guardrail3-app-rs-family-cargo", path = "../families/cargo/crates/runtime", optional = true }
+guardrail3_app_rs_family_clippy = { package = "guardrail3-app-rs-family-clippy", path = "../families/clippy/crates/runtime", optional = true }
+guardrail3_app_rs_family_code = { package = "guardrail3-app-rs-family-code", path = "../families/code/crates/runtime", optional = true }
+guardrail3_app_rs_family_deny = { package = "guardrail3-app-rs-family-deny", path = "../families/deny/crates/runtime", optional = true }
+guardrail3_app_rs_family_deps = { package = "guardrail3-app-rs-family-deps", path = "../families/deps/crates/runtime", optional = true }
+guardrail3_app_rs_family_fmt = { package = "guardrail3-app-rs-family-fmt", path = "../families/fmt/crates/runtime", optional = true }
+guardrail3_app_rs_family_garde = { package = "guardrail3-app-rs-family-garde", path = "../families/garde/crates/runtime", optional = true }
+guardrail3_app_rs_family_hexarch = { package = "guardrail3-app-rs-family-hexarch", path = "../families/hexarch/crates/runtime", optional = true }
+guardrail3_app_rs_family_hooks_rs = { package = "guardrail3-app-rs-family-hooks-rs", path = "../families/hooks-rs", optional = true }
+guardrail3_app_rs_family_hooks_shared = { package = "guardrail3-app-rs-family-hooks-shared", path = "../families/hooks-shared", optional = true }
+guardrail3_app_rs_family_libarch = { package = "guardrail3-app-rs-family-libarch", path = "../families/libarch/crates/runtime", optional = true }
+guardrail3_app_rs_family_release = { package = "guardrail3-app-rs-family-release", path = "../families/release", optional = true }
+guardrail3_app_rs_family_test = { package = "guardrail3-app-rs-family-test", path = "../families/test/crates/runtime", optional = true }
+guardrail3_app_rs_family_toolchain = { package = "guardrail3-app-rs-family-toolchain", path = "../families/toolchain/crates/runtime", optional = true }
+guardrail3_app_rs_family_mapper = { package = "guardrail3-app-rs-family-mapper", path = "../family_mapper" }
+guardrail3_app_rs_family_selection = { package = "guardrail3-app-rs-family-selection", path = "../family_selection" }
+guardrail3_app_rs_placement = { package = "guardrail3-app-rs-placement", path = "../placement" }
+toml = "0.8"
+
+[dev-dependencies]
+guardrail3_app_rs_runtime_assertions = { package = "guardrail3-app-rs-runtime-assertions", path = "assertions" }

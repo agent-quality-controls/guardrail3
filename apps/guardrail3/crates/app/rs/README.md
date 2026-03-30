@@ -98,7 +98,13 @@ apps/guardrail3/crates/app/rs/
       views.rs                        # narrow family-facing route view types
       scoped_files.rs                 # resolves raw staged/path scope into mapped family subsets
 
-  runtime.rs                          # thin product entrypoint only
+  runtime/                            # thin product entrypoint crate only
+    Cargo.toml
+    src/
+      lib.rs
+      context.rs
+      registry.rs
+      runners.rs
 ```
 
 ## API Shape
@@ -280,9 +286,9 @@ Families must not:
 
 In concrete terms:
 
-1. `runtime.rs` should build shared Rust scope once.
-2. `runtime.rs` should resolve selected families once via `family_selection`.
-3. `runtime.rs` should build one external typed `FamilyMapper` once.
+1. `runtime/src/lib.rs` should build shared Rust scope once.
+2. `runtime/src/lib.rs` should resolve selected families once via `family_selection`.
+3. `runtime/src/lib.rs` should build one external typed `FamilyMapper` once.
 4. Families should receive injected typed family routes.
 5. `arch` should consume typed mapped route instead of collecting roots itself.
 6. `test` should consume typed mapped route instead of collecting roots itself.
@@ -319,7 +325,7 @@ The shared root-scope seed already exists in:
    It owns requested-family resolution, enabled-family filtering, and implied-family expansion.
 
 3. Define an external typed family-mapper layer under `family_mapper/`.
-   [runtime.rs](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/runtime.rs) should call it, not implement it inline.
+   [lib.rs](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/runtime/src/lib.rs) should call it, not implement it inline.
    It should map shared scoped roots to typed family orchestrator inputs using narrow owned route views.
    Families must not invent their own routed universe.
 
@@ -342,7 +348,7 @@ The shared root-scope seed already exists in:
 - Families must not decide which in-scope roots they are allowed to validate.
 - Rules must not decide root scope or root routing at all.
 - The external orchestrator may route different root sets to different families, but that routing policy must live outside the family crates.
-- `runtime.rs` should stay thin; if family mapping becomes nontrivial, it belongs in `family_mapper/`, not inline in runtime.
+- `runtime/src/lib.rs` should stay thin; if family mapping becomes nontrivial, it belongs in `family_mapper/`, not inline in runtime.
 - `family_selection/` and `family_mapper/` are separate because selecting a family set is not the same problem as routing roots into typed family routes.
 - Shared scope must not encode family semantics.
 - External family mapping may encode family ownership/routing policy, but not family-internal parsing semantics.

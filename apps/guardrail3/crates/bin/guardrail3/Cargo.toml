@@ -17,23 +17,67 @@ path = "src/main.rs"
 [lints]
 workspace = true
 
+[features]
+default = [
+    "families-all",
+    "product-ts",
+    "product-hooks",
+    "product-rs-generate",
+    "product-coverage-clippy",
+    "product-coverage-deny",
+]
+families-all = ["guardrail3_app_rs_runtime/families-all"]
+family-arch = ["guardrail3_app_rs_runtime/family-arch"]
+family-fmt = ["guardrail3_app_rs_runtime/family-fmt"]
+family-toolchain = ["guardrail3_app_rs_runtime/family-toolchain"]
+family-clippy = ["guardrail3_app_rs_runtime/family-clippy"]
+family-deny = ["guardrail3_app_rs_runtime/family-deny"]
+family-cargo = ["guardrail3_app_rs_runtime/family-cargo"]
+family-code = ["guardrail3_app_rs_runtime/family-code"]
+family-hexarch = ["guardrail3_app_rs_runtime/family-hexarch"]
+family-libarch = ["guardrail3_app_rs_runtime/family-libarch"]
+family-deps = ["guardrail3_app_rs_runtime/family-deps"]
+family-garde = ["guardrail3_app_rs_runtime/family-garde"]
+family-test = ["guardrail3_app_rs_runtime/family-test"]
+family-release = ["guardrail3_app_rs_runtime/family-release"]
+family-hooks-shared = ["guardrail3_app_rs_runtime/family-hooks-shared"]
+family-hooks-rs = ["guardrail3_app_rs_runtime/family-hooks-rs"]
+product-ts = [
+    "dep:guardrail3_app_ts",
+    "dep:guardrail3_domain_config",
+    "dep:guardrail3_outbound_traits",
+    "dep:toml",
+    "guardrail3_adapters_inbound_cli/product-ts",
+]
+product-hooks = [
+    "dep:guardrail3_app_hooks",
+    "guardrail3_adapters_inbound_cli/product-hooks",
+]
+product-rs-generate = ["guardrail3_adapters_inbound_cli/product-rs-generate"]
+product-coverage-clippy = [
+    "guardrail3_adapters_inbound_cli/product-coverage-clippy",
+]
+product-coverage-deny = [
+    "guardrail3_adapters_inbound_cli/product-coverage-deny",
+]
+
 [dependencies]
 clap = { version = "4", features = ["derive"] }
 garde = { workspace = true }
 serde_json = "1"
-toml = "0.8"
-guardrail3_adapters_inbound_cli = { package = "guardrail3-adapters-inbound-cli", path = "../../adapters/inbound/cli" }
+toml = { version = "0.8", optional = true }
+guardrail3_adapters_inbound_cli = { package = "guardrail3-adapters-inbound-cli", path = "../../adapters/inbound/cli", default-features = false }
 guardrail3_adapters_outbound_fs = { package = "guardrail3-adapters-outbound-fs", path = "../../adapters/outbound/fs" }
 guardrail3_adapters_outbound_report = { package = "guardrail3-adapters-outbound-report", path = "../../adapters/outbound/report" }
 guardrail3_adapters_outbound_tool_runner = { package = "guardrail3-adapters-outbound-tool-runner", path = "../../adapters/outbound/tool-runner" }
 guardrail3_app_commands = { package = "guardrail3-app-commands", path = "../../app/commands" }
 guardrail3_app_core = { package = "guardrail3-app-core", path = "../../app/core" }
-guardrail3_app_hooks = { package = "guardrail3-app-hooks", path = "../../app/hooks" }
-guardrail3_app_rs_runtime = { package = "guardrail3-app-rs-runtime", path = "../../app/rs" }
-guardrail3_app_ts = { package = "guardrail3-app-ts", path = "../../app/ts" }
-guardrail3_domain_config = { package = "guardrail3-domain-config", path = "../../domain/config" }
+guardrail3_app_hooks = { package = "guardrail3-app-hooks", path = "../../app/hooks", optional = true }
+guardrail3_app_rs_runtime = { package = "guardrail3-app-rs-runtime", path = "../../app/rs/runtime", default-features = false }
+guardrail3_app_ts = { package = "guardrail3-app-ts", path = "../../app/ts", optional = true }
+guardrail3_domain_config = { package = "guardrail3-domain-config", path = "../../domain/config", optional = true }
 guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../domain/report" }
-guardrail3_outbound_traits = { package = "guardrail3-ports-outbound-traits", path = "../../ports/outbound/traits" }
+guardrail3_outbound_traits = { package = "guardrail3-ports-outbound-traits", path = "../../ports/outbound/traits", optional = true }
 guardrail3_shared_fs = { package = "guardrail3-shared-fs", path = "../../shared/fs" }
 
 [package.metadata.binstall]

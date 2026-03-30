@@ -3,10 +3,15 @@ use std::path::Path;
 
 use guardrail3_adapters_outbound_fs::RealFileSystem;
 use guardrail3_app_core::discover::detect_project;
+#[cfg(feature = "product-ts")]
 use guardrail3_app_ts::validate::auto_detect_app_type;
+#[cfg(feature = "product-ts")]
 use guardrail3_app_ts::validate::ts_arch_checks::discover_ts_apps;
-use guardrail3_domain_report::TsAppType;
+#[cfg(feature = "product-ts")]
 use guardrail3_outbound_traits::FileSystem;
+
+#[cfg(feature = "product-ts")]
+use guardrail3_domain_report::TsAppType;
 
 /// Initialize Rust guardrail3 configuration: creates guardrail3.toml with discovered workspace
 /// members and per-crate config. Config files (clippy.toml, deny.toml, etc.) are created by `generate`.
@@ -65,6 +70,7 @@ fn scaffold_config(project_path: &Path, profile: &str, force: bool, created: &mu
     created.push(format!("guardrail3.toml (profile: {profile})"));
 }
 
+#[cfg(feature = "product-ts")]
 /// Initialize TypeScript guardrail3 configuration: appends [typescript] section to existing
 /// guardrail3.toml, or creates a minimal one with only [typescript] if none exists.
 #[allow(clippy::print_stdout)] // reason: CLI command — user-facing output
@@ -143,6 +149,7 @@ pub fn run_ts(path: &str, force: bool, dry_run: bool) {
     println!("  2. Run: guardrail3 ts generate");
 }
 
+#[cfg(feature = "product-ts")]
 /// Replace an existing [typescript] section in the config content.
 /// Collects lines before `[typescript]`, skips the old section, inserts the new one,
 /// then appends any lines from the next section onward.
@@ -333,6 +340,7 @@ fn discover_rust_app_groups(
     (seen_apps, has_packages)
 }
 
+#[cfg(feature = "product-ts")]
 /// Generate the `[typescript]` TOML section by discovering apps and auto-detecting their types.
 /// Each app gets explicit check flags based on its detected type. No global `[typescript.checks]`.
 fn generate_ts_section(fs: &dyn FileSystem, project_path: &Path) -> String {
@@ -462,6 +470,7 @@ mod tests {
 }
 
 /// Return a human-readable reason for the detected app type, used as a TOML comment.
+#[cfg(feature = "product-ts")]
 fn detect_reason(app_path: &Path, detected: Option<TsAppType>) -> &'static str {
     match detected {
         Some(TsAppType::Content) => {
