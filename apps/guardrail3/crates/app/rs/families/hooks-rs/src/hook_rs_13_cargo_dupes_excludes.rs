@@ -1,14 +1,9 @@
-mod support;
-
-use guardrail3_app_rs_family_hooks_shared::hook_shell::{ParsedShellScript, parse_script};
+use guardrail3_app_rs_family_hooks_shared::hook_shell::ParsedShellScript;
+use guardrail3_app_rs_family_hooks_shared::hook_shell::command_query::{
+    ResolvedCommand, any_resolved_command_relaxed,
+};
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use self::support::helpers::{
-    constant_exit_status, extract_command_substitutions, is_terminal_exit,
-    looks_like_env_assignment, normalize_command_token, shell_words, split_command_segments,
-    token_is_shadowed_function,
-};
-use self::support::*;
 use super::inputs::RustHookCommandInput;
 
 const ID: &str = "HOOK-RS-13";
@@ -33,8 +28,8 @@ pub fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<CheckResult>) {
         results.push(CheckResult::from_parts(
             ID.to_owned(),
             Severity::Info,
-            "cargo-dupes exclude-tests flag missing".to_owned(),
-            "Hook does not execute cargo-dupes with `--exclude-tests`.".to_owned(),
+            "cargo dupes step does not exclude tests".to_owned(),
+            "Hook does not execute cargo dupes with `--exclude-tests`.".to_owned(),
             Some(input.rel_path.to_owned()),
             None,
             false,
@@ -43,233 +38,144 @@ pub fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 fn script_contains_cargo_dupes_with_exclude_tests(parsed: &ParsedShellScript<'_>) -> bool {
-    script_contains_cargo_dupes(parsed, true) && !script_contains_cargo_dupes(parsed, false)
+    any_resolved_command_relaxed(parsed, cargo_dupes_with_exclude_tests)
+        && !any_resolved_command_relaxed(parsed, cargo_dupes_without_exclude_tests)
 }
 
-fn script_contains_cargo_dupes(parsed: &ParsedShellScript<'_>, want_exclude_tests: bool) -> bool {
-    parsed.executable_lines().iter().any(|line| {
-        let mut visiting = Vec::new();
-        segment_contains_cargo_dupes(
-            line.command_text(),
-            parsed,
-            parsed,
-            &mut visiting,
-            want_exclude_tests,
-            line.line_no(),
-            line.line_no(),
-        ) || line_contains_cargo_dupes(
-            line.raw(),
-            parsed,
-            parsed,
-            &mut visiting,
-            want_exclude_tests,
-            line.line_no(),
-            line.line_no(),
-        )
-    })
+fn cargo_dupes_with_exclude_tests(command: &ResolvedCommand) -> bool {
+    cargo_dupes_exclude_state(command) == Some(true)
 }
 
-fn line_contains_cargo_dupes(
-    raw: &str,
-    current: &ParsedShellScript<'_>,
-    root: &ParsedShellScript<'_>,
-    visiting: &mut Vec<String>,
-    want_exclude_tests: bool,
-    current_cutoff: usize,
-    root_cutoff: usize,
-) -> bool {
-    let segments = split_command_segments(raw);
-    if segments.is_empty() {
-        return segment_contains_cargo_dupes(
-            raw,
-            current,
-            root,
-            visiting,
-            want_exclude_tests,
-            current_cutoff,
-            root_cutoff,
-        );
+fn cargo_dupes_without_exclude_tests(command: &ResolvedCommand) -> bool {
+    cargo_dupes_exclude_state(command) == Some(false)
+}
+
+fn cargo_dupes_exclude_state(command: &ResolvedCommand) -> Option<bool> {
+    match command.command_name() {
+        "cargo-dupes" => cargo_dupes_binary_exclude_state(command.args()),
+        "cargo" => cargo_dupes_subcommand_exclude_state(command.args()),
+        _ => None,
+    }
+}
+
+fn cargo_dupes_binary_exclude_state(args: &[String]) -> Option<bool> {
+    let mut index = 0usize;
+    let Some(subcommand) = args.get(index).map(String::as_str) else {
+        return Some(false);
+    };
+    if subcommand.starts_with('-') || is_help_or_version_flag(subcommand) {
+        return Some(false);
+    }
+    index += 1;
+
+    dupes_flag_state(&args[index..])
+}
+
+fn cargo_dupes_subcommand_exclude_state(args: &[String]) -> Option<bool> {
+    let mut index = 0usize;
+
+    if args.get(index).is_some_and(|token| token.starts_with('+')) {
+        index += 1;
     }
 
-    let mut prefix_status = None;
-    for segment in segments {
-        let reachable = match (segment.operator_before, prefix_status) {
-            (Some("&&"), Some(true)) => true,
-            (Some("&&"), Some(false)) => false,
-            (Some("||"), Some(true)) => false,
-            (Some("||"), Some(false)) => true,
-            _ => true,
-        };
-
-        if reachable {
-            if segment_contains_cargo_dupes(
-                &segment.text,
-                current,
-                root,
-                visiting,
-                want_exclude_tests,
-                current_cutoff,
-                root_cutoff,
-            ) {
-                return true;
-            }
-            for substitution in extract_command_substitutions(&segment.text) {
-                if line_contains_cargo_dupes(
-                    &substitution,
-                    current,
-                    root,
-                    visiting,
-                    want_exclude_tests,
-                    current_cutoff,
-                    root_cutoff,
-                ) {
-                    return true;
-                }
-            }
+    while let Some(token) = args.get(index).map(String::as_str) {
+        if !token.starts_with('-') {
+            break;
         }
 
-        if reachable {
-            if is_terminal_exit(&segment.text) {
-                break;
-            }
-            prefix_status = constant_exit_status(&segment.text);
+        if is_help_or_version_flag(token) {
+            return None;
         }
+        if let Some((flag_name, _)) = token.split_once('=')
+            && cargo_global_flag_takes_value(flag_name)
+        {
+            index += 1;
+            continue;
+        }
+        if matches!(token.strip_prefix("-j"), Some(value) if !value.is_empty()) {
+            index += 1;
+            continue;
+        }
+        if cargo_global_flag_takes_value(token) {
+            index += 2;
+            continue;
+        }
+
+        return Some(false);
     }
 
-    false
+    if args.get(index).map(String::as_str) != Some("dupes") {
+        return None;
+    }
+
+    index += 1;
+    let Some(subcommand) = args.get(index).map(String::as_str) else {
+        return Some(false);
+    };
+    if subcommand.starts_with('-') || is_help_or_version_flag(subcommand) {
+        return Some(false);
+    }
+    index += 1;
+
+    dupes_flag_state(args.get(index..).unwrap_or(&[]))
 }
 
-fn segment_contains_cargo_dupes(
-    segment: &str,
-    current: &ParsedShellScript<'_>,
-    root: &ParsedShellScript<'_>,
-    visiting: &mut Vec<String>,
-    want_exclude_tests: bool,
-    current_cutoff: usize,
-    root_cutoff: usize,
-) -> bool {
-    let tokens = shell_words(segment);
-    let mut parts = tokens.iter().map(String::as_str).peekable();
+fn dupes_flag_state(args: &[String]) -> Option<bool> {
+    let mut index = 0usize;
+    let mut exclude_tests = false;
 
-    while matches!(parts.peek(), Some(token) if looks_like_env_assignment(token)) {
-        let _ = parts.next();
+    while let Some(token) = args.get(index).map(String::as_str) {
+        if token == "--" {
+            break;
+        }
+        if is_help_or_version_flag(token) {
+            return Some(false);
+        }
+        if token == "--exclude-tests" {
+            exclude_tests = true;
+            index += 1;
+            continue;
+        }
+        if let Some((flag_name, _)) = token.split_once('=')
+            && dupes_flag_takes_value(flag_name)
+        {
+            index += 1;
+            continue;
+        }
+        if dupes_flag_takes_value(token) {
+            index += 2;
+            continue;
+        }
+        if token.starts_with('-') {
+            return Some(false);
+        }
+        index += 1;
     }
 
-    let Some(first) = parts.next() else {
-        return false;
-    };
-
-    let command_name = normalize_command_token(first);
-    if token_is_shadowed_function(
-        first,
-        command_name,
-        current,
-        root,
-        current_cutoff,
-        root_cutoff,
-    ) {
-        return called_function_contains_cargo_dupes(
-            command_name,
-            current,
-            root,
-            visiting,
-            want_exclude_tests,
-            current_cutoff,
-            root_cutoff,
-        );
-    }
-
-    match command_name {
-        "env" => env_wrapper_contains_cargo_dupes(
-            parts,
-            current,
-            root,
-            visiting,
-            want_exclude_tests,
-            current_cutoff,
-            root_cutoff,
-        ),
-        "sh" | "bash" => shell_wrapper_contains_cargo_dupes(
-            parts,
-            current,
-            root,
-            visiting,
-            want_exclude_tests,
-            current_cutoff,
-            root_cutoff,
-        ),
-        "command" => command_wrapper_contains_cargo_dupes(
-            parts,
-            current,
-            root,
-            visiting,
-            want_exclude_tests,
-            current_cutoff,
-            root_cutoff,
-        ),
-        "exec" => exec_wrapper_contains_cargo_dupes(
-            parts,
-            current,
-            root,
-            visiting,
-            want_exclude_tests,
-            current_cutoff,
-            root_cutoff,
-        ),
-        "cargo" => cargo_dupes_subcommand_invocation(&mut parts, want_exclude_tests),
-        "cargo-dupes" => cargo_dupes_binary_invocation(&mut parts, want_exclude_tests),
-        command_name => called_function_contains_cargo_dupes(
-            command_name,
-            current,
-            root,
-            visiting,
-            want_exclude_tests,
-            current_cutoff,
-            root_cutoff,
-        ),
-    }
+    Some(exclude_tests)
 }
 
-fn called_function_contains_cargo_dupes(
-    command_name: &str,
-    current: &ParsedShellScript<'_>,
-    root: &ParsedShellScript<'_>,
-    visiting: &mut Vec<String>,
-    want_exclude_tests: bool,
-    current_cutoff: usize,
-    root_cutoff: usize,
-) -> bool {
-    let Some(function) = current
-        .functions()
-        .iter()
-        .find(|function| function.name() == command_name && function.line_no() <= current_cutoff)
-        .or_else(|| {
-            root.functions()
-                .iter()
-                .find(|function| function.name() == command_name && function.line_no() <= root_cutoff)
-        })
-    else {
-        return false;
-    };
-    if visiting.iter().any(|name| name == &function.name()) {
-        return false;
-    }
+fn cargo_global_flag_takes_value(flag: &str) -> bool {
+    matches!(
+        flag,
+        "--config"
+            | "-Z"
+            | "--manifest-path"
+            | "--color"
+            | "--target"
+            | "--target-dir"
+            | "--jobs"
+            | "-j"
+            | "-C"
+    )
+}
 
-    visiting.push(function.name().to_owned());
-    let body_parsed = parse_script(&function.body());
-    let found = body_parsed.executable_lines().iter().any(|line| {
-        line_contains_cargo_dupes(
-            line.raw(),
-            &body_parsed,
-            root,
-            visiting,
-            want_exclude_tests,
-            line.line_no(),
-            root_cutoff,
-        )
-    });
-    let _ = visiting.pop();
-    found
+fn is_help_or_version_flag(token: &str) -> bool {
+    matches!(token, "-h" | "--help" | "-V" | "--version")
+}
+
+fn dupes_flag_takes_value(flag: &str) -> bool {
+    matches!(flag, "--max-exact" | "--max-exact-percent")
 }
 
 #[cfg(test)]

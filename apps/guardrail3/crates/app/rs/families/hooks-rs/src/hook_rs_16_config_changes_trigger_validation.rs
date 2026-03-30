@@ -481,8 +481,9 @@ fn insert_newline_after_top_level_case_pattern_paren(line: &str) -> String {
             }
             ')' if !single_quoted && !double_quoted => {
                 result.push(')');
-                let next = line[index + ch.len_utf8()..].chars().next();
-                if next.is_some_and(|next| !next.is_whitespace() && next != ';') {
+                let rest = &line[index + ch.len_utf8()..];
+                let trimmed_rest = rest.trim_start();
+                if !trimmed_rest.is_empty() && !trimmed_rest.starts_with(';') {
                     result.push('\n');
                 }
                 index += ch.len_utf8();

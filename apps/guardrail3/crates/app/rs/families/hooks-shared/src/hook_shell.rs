@@ -1,4 +1,5 @@
 mod support;
+pub mod command_query;
 
 use self::support::*;
 

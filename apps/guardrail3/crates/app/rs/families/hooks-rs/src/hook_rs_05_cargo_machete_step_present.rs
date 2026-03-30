@@ -16,8 +16,8 @@ pub fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<CheckResult>) {
             CheckResult::from_parts(
                 ID.to_owned(),
                 Severity::Warn,
-                "cargo-machete step present".to_owned(),
-                "Hook runs cargo-machete.".to_owned(),
+                "cargo machete step present".to_owned(),
+                "Hook runs cargo machete.".to_owned(),
                 Some(input.rel_path.to_owned()),
                 None,
                 false,
@@ -28,8 +28,8 @@ pub fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<CheckResult>) {
         results.push(CheckResult::from_parts(
             ID.to_owned(),
             Severity::Warn,
-            "cargo-machete step missing".to_owned(),
-            "Hook does not execute cargo-machete.".to_owned(),
+            "cargo machete step missing".to_owned(),
+            "Hook does not execute cargo machete.".to_owned(),
             Some(input.rel_path.to_owned()),
             None,
             false,

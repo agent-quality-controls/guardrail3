@@ -1,17 +1,37 @@
 use super::{EnvState, LintEffect};
 
-pub(super) fn cargo_clippy_denies_warnings<'a, I>(
-    parts: &mut std::iter::Peekable<I>,
-    env_state: &EnvState,
-) -> bool
-where
-    I: Iterator<Item = &'a str>,
-{
+#[derive(Debug, Clone)]
+pub(super) struct TokenCursor<'a> {
+    tokens: &'a [String],
+    index: usize,
+}
+
+impl<'a> TokenCursor<'a> {
+    pub(super) fn new(tokens: &'a [String]) -> Self {
+        Self { tokens, index: 0 }
+    }
+
+    pub(super) fn peek(&self) -> Option<&'a str> {
+        self.tokens.get(self.index).map(String::as_str)
+    }
+
+    pub(super) fn next(&mut self) -> Option<&'a str> {
+        let token = self.peek()?;
+        self.index += 1;
+        Some(token)
+    }
+
+    pub(super) fn remaining(&self) -> &'a [String] {
+        self.tokens.get(self.index..).unwrap_or(&[])
+    }
+}
+
+pub(super) fn cargo_clippy_denies_warnings(parts: &mut TokenCursor<'_>, env_state: &EnvState) -> bool {
     if matches!(parts.peek(), Some(token) if token.starts_with('+')) {
         let _ = parts.next();
     }
 
-    while let Some(token) = parts.peek().copied() {
+    while let Some(token) = parts.peek() {
         if !token.starts_with('-') {
             break;
         }
@@ -48,7 +68,7 @@ where
             return false;
         }
         if token == "--" {
-            combined_tokens.extend(parts.by_ref().map(str::to_owned));
+            combined_tokens.extend(parts.remaining().iter().cloned());
             break;
         }
     }
@@ -143,11 +163,8 @@ pub(super) fn apply_inline_assignment(token: &str, env_state: &mut EnvState) {
     }
 }
 
-pub(super) fn apply_export_assignments<'a, I>(parts: &mut I, env_state: &mut EnvState)
-where
-    I: Iterator<Item = &'a str>,
-{
-    for token in parts {
+pub(super) fn apply_export_assignments(parts: &mut TokenCursor<'_>, env_state: &mut EnvState) {
+    while let Some(token) = parts.next() {
         if let Some((name, value)) = token.split_once('=')
             && name == "RUSTFLAGS"
         {
@@ -156,11 +173,8 @@ where
     }
 }
 
-pub(super) fn apply_unset_arguments<'a, I>(parts: &mut I, env_state: &mut EnvState)
-where
-    I: Iterator<Item = &'a str>,
-{
-    for token in parts {
+pub(super) fn apply_unset_arguments(parts: &mut TokenCursor<'_>, env_state: &mut EnvState) {
+    while let Some(token) = parts.next() {
         if token.starts_with('-') {
             continue;
         }

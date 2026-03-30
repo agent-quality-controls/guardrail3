@@ -128,7 +128,7 @@ fn segment_evaluation(
     visiting: &mut Vec<String>,
 ) -> SegmentEvaluation {
     let tokens = shell_words(segment);
-    let mut parts = tokens.iter().map(String::as_str).peekable();
+    let mut parts = TokenCursor::new(&tokens);
     let mut local_env = env_state.clone();
     let mut has_local_overlay = false;
 
@@ -161,19 +161,19 @@ fn segment_evaluation(
             }
         }
         "env" => SegmentEvaluation {
-            found: env_wrapper_contains_clippy_deny(parts, root, &mut local_env, visiting),
+            found: env_wrapper_contains_clippy_deny(&mut parts, root, &mut local_env, visiting),
             persist_env: false,
         },
         "sh" | "bash" => SegmentEvaluation {
-            found: shell_wrapper_contains_clippy_deny(parts, root, &mut local_env, visiting),
+            found: shell_wrapper_contains_clippy_deny(&mut parts, root, &mut local_env, visiting),
             persist_env: false,
         },
         "command" => SegmentEvaluation {
-            found: command_wrapper_contains_clippy_deny(parts, root, &mut local_env, visiting),
+            found: command_wrapper_contains_clippy_deny(&mut parts, root, &mut local_env, visiting),
             persist_env: false,
         },
         "exec" => SegmentEvaluation {
-            found: exec_wrapper_contains_clippy_deny(parts, root, &mut local_env, visiting),
+            found: exec_wrapper_contains_clippy_deny(&mut parts, root, &mut local_env, visiting),
             persist_env: false,
         },
         "cargo" => SegmentEvaluation {
@@ -230,15 +230,12 @@ fn called_function_contains_clippy_deny(
     found
 }
 
-fn env_wrapper_contains_clippy_deny<'a, I>(
-    mut parts: std::iter::Peekable<I>,
+fn env_wrapper_contains_clippy_deny(
+    parts: &mut TokenCursor<'_>,
     root: &ParsedShellScript<'_>,
     env_state: &mut EnvState,
     visiting: &mut Vec<String>,
-) -> bool
-where
-    I: Iterator<Item = &'a str>,
-{
+) -> bool {
     let mut split_string = None;
 
     while matches!(parts.peek(), Some(token) if token.starts_with('-')) {
@@ -280,10 +277,10 @@ where
 
     if let Some(script) = split_string {
         let mut nested = script;
-        let tail: Vec<_> = parts.map(str::to_owned).collect();
+        let tail = parts.remaining().join(" ");
         if !tail.is_empty() {
             nested.push(' ');
-            nested.push_str(&tail.join(" "));
+            nested.push_str(&tail);
         }
         return line_contains_clippy_deny(&nested, root, env_state, visiting);
     }
@@ -292,20 +289,16 @@ where
         return false;
     };
 
-    wrapper_or_command_contains_clippy_deny(next, &mut parts, root, env_state, visiting)
+    wrapper_or_command_contains_clippy_deny(next, parts, root, env_state, visiting)
 }
 
-fn shell_wrapper_contains_clippy_deny<'a, I>(
-    parts: std::iter::Peekable<I>,
+fn shell_wrapper_contains_clippy_deny(
+    parts: &mut TokenCursor<'_>,
     root: &ParsedShellScript<'_>,
     env_state: &mut EnvState,
     visiting: &mut Vec<String>,
-) -> bool
-where
-    I: Iterator<Item = &'a str>,
-{
-    let mut parts = parts;
-    while let Some(token) = parts.peek().copied() {
+) -> bool {
+    while let Some(token) = parts.peek() {
         if !token.starts_with('-') {
             break;
         }
@@ -330,16 +323,12 @@ where
     line_contains_clippy_deny(script, root, env_state, visiting)
 }
 
-fn command_wrapper_contains_clippy_deny<'a, I>(
-    parts: std::iter::Peekable<I>,
+fn command_wrapper_contains_clippy_deny(
+    parts: &mut TokenCursor<'_>,
     root: &ParsedShellScript<'_>,
     env_state: &mut EnvState,
     visiting: &mut Vec<String>,
-) -> bool
-where
-    I: Iterator<Item = &'a str>,
-{
-    let mut parts = parts;
+) -> bool {
     while matches!(parts.peek(), Some(token) if token.starts_with('-')) {
         let flag = parts.next().unwrap_or_default();
         if is_help_or_version_flag(flag) || matches!(flag, "-v" | "-V") {
@@ -357,19 +346,15 @@ where
         return false;
     };
 
-    wrapper_or_command_contains_clippy_deny(next, &mut parts, root, env_state, visiting)
+    wrapper_or_command_contains_clippy_deny(next, parts, root, env_state, visiting)
 }
 
-fn exec_wrapper_contains_clippy_deny<'a, I>(
-    parts: std::iter::Peekable<I>,
+fn exec_wrapper_contains_clippy_deny(
+    parts: &mut TokenCursor<'_>,
     root: &ParsedShellScript<'_>,
     env_state: &mut EnvState,
     visiting: &mut Vec<String>,
-) -> bool
-where
-    I: Iterator<Item = &'a str>,
-{
-    let mut parts = parts;
+) -> bool {
     while matches!(parts.peek(), Some(token) if token.starts_with('-')) {
         let flag = parts.next().unwrap_or_default();
         if is_help_or_version_flag(flag) {
@@ -384,36 +369,22 @@ where
         return false;
     };
 
-    wrapper_or_command_contains_clippy_deny(next, &mut parts, root, env_state, visiting)
+    wrapper_or_command_contains_clippy_deny(next, parts, root, env_state, visiting)
 }
 
-fn wrapper_or_command_contains_clippy_deny<'a, I>(
-    token: &'a str,
-    parts: &mut std::iter::Peekable<I>,
+fn wrapper_or_command_contains_clippy_deny(
+    token: &str,
+    parts: &mut TokenCursor<'_>,
     root: &ParsedShellScript<'_>,
     env_state: &mut EnvState,
     visiting: &mut Vec<String>,
-) -> bool
-where
-    I: Iterator<Item = &'a str>,
-{
+) -> bool {
     match normalize_command_token(token) {
         "cargo" => cargo_clippy_denies_warnings(parts, env_state),
-        "sh" | "bash" => {
-            shell_wrapper_contains_clippy_deny(parts.by_ref().peekable(), root, env_state, visiting)
-        }
-        "command" => command_wrapper_contains_clippy_deny(
-            parts.by_ref().peekable(),
-            root,
-            env_state,
-            visiting,
-        ),
-        "exec" => {
-            exec_wrapper_contains_clippy_deny(parts.by_ref().peekable(), root, env_state, visiting)
-        }
-        "env" => {
-            env_wrapper_contains_clippy_deny(parts.by_ref().peekable(), root, env_state, visiting)
-        }
+        "sh" | "bash" => shell_wrapper_contains_clippy_deny(parts, root, env_state, visiting),
+        "command" => command_wrapper_contains_clippy_deny(parts, root, env_state, visiting),
+        "exec" => exec_wrapper_contains_clippy_deny(parts, root, env_state, visiting),
+        "env" => env_wrapper_contains_clippy_deny(parts, root, env_state, visiting),
         command_name => {
             called_function_contains_clippy_deny(command_name, root, env_state, visiting)
         }

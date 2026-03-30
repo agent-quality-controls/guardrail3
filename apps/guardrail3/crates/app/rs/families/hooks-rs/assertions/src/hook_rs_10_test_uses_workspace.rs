@@ -17,7 +17,7 @@ pub fn assert_missing(results: &[guardrail3_domain_report::CheckResult]) {
         results,
         &[ExpectedRuleResult {
             severity: Some(Severity::Info),
-            title: Some("cargo test workspace scope missing"),
+            title: Some("cargo test missing --workspace"),
             inventory: Some(false),
             ..Default::default()
         }],

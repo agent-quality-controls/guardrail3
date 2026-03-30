@@ -17,7 +17,7 @@ pub fn assert_missing(results: &[guardrail3_domain_report::CheckResult]) {
         results,
         &[ExpectedRuleResult {
             severity: Some(Severity::Info),
-            title: Some("cargo-dupes exclude-tests flag missing"),
+            title: Some("cargo dupes step does not exclude tests"),
             inventory: Some(false),
             ..Default::default()
         }],

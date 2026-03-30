@@ -46,7 +46,10 @@ family-garde = ["dep:guardrail3_app_rs_family_garde", "routing"]
 family-test = ["dep:guardrail3_app_rs_family_test", "routing"]
 family-release = ["dep:guardrail3_app_rs_family_release", "routing"]
 family-hooks-shared = ["dep:guardrail3_app_rs_family_hooks_shared"]
-family-hooks-rs = ["dep:guardrail3_app_rs_family_hooks_rs"]
+family-hooks-rs = [
+    "dep:guardrail3_app_rs_family_hooks_rs",
+    "family-hooks-shared",
+]
 
 [dependencies]
 guardrail3_app_core = { package = "guardrail3-app-core", path = "../../core" }

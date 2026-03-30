@@ -85,7 +85,7 @@ pub fn check(tree: &ProjectTree, tc: &dyn ToolChecker) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-pub(super) fn run_case(pre_commit: &str, installed: &[&'static str]) -> Vec<CheckResult> {
+pub(crate) fn run_case(pre_commit: &str, installed: &[&'static str]) -> Vec<CheckResult> {
     let tree = test_support::hook_tree(pre_commit);
     check(&tree, &test_support::StubToolChecker::new(installed))
 }
