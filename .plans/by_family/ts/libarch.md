@@ -1,6 +1,6 @@
 # TS-LIBARCH
 
-Status: planned family contract, no cohesive family runtime yet.
+Status: planned family contract, no cohesive family runtime yet, still vague relative to Rust family discipline.
 
 Implementation roots:
 
@@ -17,6 +17,7 @@ Current source of truth:
 Current state:
 
 - library/package architecture is still a design lane, not a distinct runtime family
+- compared with Rust, this family has no direct analogue, so it must be extra explicit about what belongs here versus `TS-ARCH`, `TS-PACKAGE`, and `TS-CODE`
 
 Rule inventory:
 
@@ -48,12 +49,22 @@ Current doc/code reconciliation notes:
 
 - this family is still planning-led
 - the old ledger is the only detailed source today, but it still needs conversion from broad design bullets into a concrete rule set like the one above
+- `TS-LIBARCH-01` root identification should not remain a family-local discovery rule long term; it should consume library/package roots from `TS-ARCH`
+- `TS-LIBARCH-04` package dependency shape overlaps directly with `TS-PACKAGE`, so the plan must decide whether this family owns architectural dependency semantics while `TS-PACKAGE` owns manifest baseline
+- unlike Rust `hexarch`, this family still has no clear statement of its smallest enforceable unit: package root, entrypoint, import edge, or dependency declaration
 
 Historical/supplemental references:
 
 - `.plans/todo/checks/ts/libarch.md`
+- `.plans/by_family/rs/arch.md`
+- `.plans/by_family/rs/hexarch.md`
 
 Next planning focus:
 
-- define concrete library root detection and package-boundary architecture inputs
-- decide what the minimum viable first runtime for `ts/libarch` is, instead of letting package architecture stay scattered
+- move concrete library root detection to the future shared TS arch layer
+- define the minimum viable first runtime in terms of enforceable inputs such as:
+  - one library root
+  - one public entrypoint
+  - one import edge
+  - one dependency-shape assertion
+- decide exactly where package dependency-shape semantics split between `ts/libarch` and `ts/package`

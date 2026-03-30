@@ -1,6 +1,6 @@
 # TS-CODE
 
-Status: current family contract, legacy-grouped implementation.
+Status: current family contract, legacy-grouped implementation, narrower and less disciplined than `RS-CODE`.
 
 Implementation roots:
 
@@ -18,6 +18,7 @@ Current state:
 
 - source scanning exists, but still lives in the old grouped TS validator
 - no dedicated family workspace/README yet
+- compared with Rust, this family currently mixes source-policy scanning with one installed-dependency rule and leaves test-boundary semantics mostly implicit
 
 Rule inventory:
 
@@ -78,12 +79,23 @@ Current doc/code reconciliation notes:
 - the old ledger is broadly aligned with the live code
 - the family currently skips most source-quality checks for test files; that boundary should stay explicit when reconciling against `ts/tests`
 - `T59` blurs package-policy and source-scan ownership; the family currently owns it in code, but it should be re-evaluated against `ts/package`
+- compared with Rust:
+  - `TS-CODE` is much narrower than `RS-CODE`; it is primarily a suppression/directive family today, not a broad TS source-policy family
+  - the test-file exemption model is weaker and less explicit than the `RS-CODE` plus `RS-TEST` split
+  - `T59` does not belong comfortably in a source family and should probably move to `TS-PACKAGE` or a future dependency family
+- if AST parse failures currently degrade silently for `T30`/`T31`, that should eventually become explicit family-owned fail-closed behavior rather than an implementation detail
+- this family still has no explicit TS equivalent to Rust’s input-failure rule class; unreadable files and parse failures should eventually surface as owned findings instead of silent skips
 
 Historical/supplemental references:
 
 - `.plans/todo/checks/ts/code.md`
+- `.plans/by_family/rs/code.md`
+- `.plans/by_family/rs/test.md`
 
 Next planning focus:
 
 - separate generic TS source rules from architecture, tests, i18n, and content concerns
+- remove installed-package scanning from the family contract unless it is re-justified as source-policy
 - decide whether `T31` (`any` usage) stays inventory-only or becomes a stricter policy rule
+- define the test-boundary model explicitly with `TS-TESTS` instead of leaving test-file skipping as an implementation quirk
+- add a TS-code fail-closed/input-integrity rule so AST-driven checks do not fail open on unreadable or unparsable files
