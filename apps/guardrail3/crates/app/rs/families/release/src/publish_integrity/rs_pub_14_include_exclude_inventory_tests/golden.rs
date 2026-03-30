@@ -36,6 +36,9 @@ fn inventories_include_patterns_from_manifest() {
             (
                 "Cargo.toml",
                 r#"
+[workspace]
+resolver = "2"
+
 [package]
 name = "lib"
 version = "0.1.0"
@@ -80,6 +83,9 @@ fn inventories_exclude_patterns_from_manifest() {
             (
                 "Cargo.toml",
                 r#"
+[workspace]
+resolver = "2"
+
 [package]
 name = "lib"
 version = "0.1.0"

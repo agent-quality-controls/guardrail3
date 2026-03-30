@@ -61,6 +61,7 @@ mod rs_release_11_accidentally_publishable_internal_crates;
 mod rs_release_12_input_failures;
 
 use guardrail3_app_rs_family_mapper::RsReleaseRoute;
+use guardrail3_app_rs_ownership as _;
 use guardrail3_domain_config as _;
 use guardrail3_domain_modules as _;
 use guardrail3_domain_project_tree::ProjectTree;

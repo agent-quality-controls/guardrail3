@@ -3,7 +3,7 @@ use guardrail3_domain_modules::clippy::MAX_STRUCT_BOOLS;
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::clippy_support::{IntegerSetting, integer_setting, value_kind};
+use super::clippy_support::{integer_setting, value_kind, IntegerSetting};
 use super::inputs::ConfigClippyInput;
 
 const ID: &str = "RS-CLIPPY-02";

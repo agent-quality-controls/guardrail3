@@ -23,14 +23,12 @@ use self::policy::read_policy_map;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PolicyRootKind {
     WorkspaceRoot,
-    StandalonePackageRoot,
 }
 
 impl PolicyRootKind {
     pub const fn label(self) -> &'static str {
         match self {
             Self::WorkspaceRoot => "workspace root",
-            Self::StandalonePackageRoot => "standalone package root",
         }
     }
 }
@@ -108,7 +106,6 @@ struct CargoRootFacts {
     cargo_rel_path: String,
     parse_error: Option<String>,
     has_workspace: bool,
-    has_package: bool,
     workspace_members: Vec<String>,
 }
 
@@ -133,41 +130,35 @@ struct ResolvedPolicyMap {
 }
 
 pub fn collect(tree: &ProjectTree, route: &RsClippyRoute) -> ClippyFacts {
-    let cargo_roots = collect_cargo_roots(tree, route);
     let validation_scope = route.validation_scope();
+    let cargo_roots = collect_cargo_roots(tree, route, validation_scope);
     let routed_root_rels = route
         .roots()
         .iter()
         .map(|root| root.rel_dir().to_owned())
         .collect::<BTreeSet<_>>();
     let workspace_roots: BTreeSet<_> = cargo_roots
-        .values()
-        .filter(|facts| facts.parse_error.is_none())
-        .filter(|facts| facts.has_workspace)
-        .map(|facts| facts.rel_dir.clone())
+        .iter()
+        .filter(|(rel_dir, _facts)| routed_root_rels.contains(*rel_dir))
+        .filter(|(_rel_dir, facts)| facts.parse_error.is_none())
+        .filter(|(_rel_dir, facts)| facts.has_workspace)
+        .map(|(rel_dir, _facts)| rel_dir.clone())
         .collect();
-    let workspace_members: BTreeSet<_> = cargo_roots
-        .values()
-        .filter(|facts| facts.parse_error.is_none())
-        .flat_map(|facts| facts.workspace_members.iter().cloned())
-        .collect();
-    let standalone_package_roots: BTreeSet<_> = cargo_roots
-        .values()
-        .filter(|facts| facts.parse_error.is_none())
-        .filter(|facts| facts.has_package && !workspace_members.contains(&facts.rel_dir))
-        .map(|facts| facts.rel_dir.clone())
-        .collect();
-    let policy_map = read_policy_map(tree, &cargo_roots, &standalone_package_roots);
-    let mut cargo_config_overrides =
-        collect_cargo_config_overrides(tree, &routed_root_rels, &cargo_roots, validation_scope);
+    let policy_map = read_policy_map(tree, &cargo_roots);
+    let mut cargo_config_overrides = collect_cargo_config_overrides(
+        tree,
+        route,
+        &routed_root_rels,
+        &cargo_roots,
+        validation_scope,
+    );
 
     let mut allowed_policy_roots = BTreeSet::new();
-    let _ = allowed_policy_roots.insert(String::new());
     allowed_policy_roots.extend(workspace_roots.iter().cloned());
-    allowed_policy_roots.extend(standalone_package_roots.iter().cloned());
 
     let configs = collect_configs(
         tree,
+        route,
         &cargo_roots,
         &policy_map,
         &routed_root_rels,
@@ -176,21 +167,37 @@ pub fn collect(tree: &ProjectTree, route: &RsClippyRoute) -> ClippyFacts {
     let mut allowed_configs = Vec::new();
     let mut forbidden_configs = Vec::new();
     for config in configs {
+        let has_same_root_config = route.family_files().iter().any(|file| {
+            matches!(
+                file.kind(),
+                guardrail3_app_rs_ownership::RustFamilyFileKind::ClippyToml
+                    | guardrail3_app_rs_ownership::RustFamilyFileKind::ClippyDotToml
+            ) && file.logical_owner_rel() == config.rel_dir
+        });
+        let nested_under_routed_root = routed_root_rels
+            .iter()
+            .any(|root_rel| root_rel != &config.rel_dir && path_is_under(&config.rel_dir, root_rel));
         if let Some(cargo_root) = cargo_roots
             .get(&config.rel_dir)
-            .filter(|facts| !facts.rel_dir.is_empty())
             .filter(|facts| facts.parse_error.is_some())
         {
-            forbidden_configs.push(ForbiddenConfigFacts {
-                config,
-                reason: ForbiddenConfigReason::UnparseableCargoRoot {
-                    cargo_rel_path: cargo_root.cargo_rel_path.clone(),
-                    parse_error: cargo_root
-                        .parse_error
-                        .clone()
-                        .expect("cargo root parse error"),
-                },
-            });
+            if has_same_root_config && !nested_under_routed_root {
+                forbidden_configs.push(ForbiddenConfigFacts {
+                    config,
+                    reason: ForbiddenConfigReason::UnparseableCargoRoot {
+                        cargo_rel_path: cargo_root.cargo_rel_path.clone(),
+                        parse_error: cargo_root
+                            .parse_error
+                            .clone()
+                            .expect("cargo root parse error"),
+                    },
+                });
+            } else {
+                forbidden_configs.push(ForbiddenConfigFacts {
+                    config,
+                    reason: ForbiddenConfigReason::NotAllowedRoot,
+                });
+            }
             continue;
         }
         if allowed_policy_roots.contains(&config.rel_dir) {
@@ -232,10 +239,22 @@ pub fn collect(tree: &ProjectTree, route: &RsClippyRoute) -> ClippyFacts {
     let mut cargo_root_failures = cargo_roots
         .values()
         .filter_map(|facts| {
-            facts
-                .parse_error
-                .as_ref()
-                .map(|parse_error: &String| CargoRootFailureFacts {
+            let has_same_root_config = route.family_files().iter().any(|file| {
+                matches!(
+                    file.kind(),
+                    guardrail3_app_rs_ownership::RustFamilyFileKind::ClippyToml
+                        | guardrail3_app_rs_ownership::RustFamilyFileKind::ClippyDotToml
+                ) && file.logical_owner_rel() == facts.rel_dir
+            });
+            let nested_under_routed_root = routed_root_rels
+                .iter()
+                .any(|root_rel| root_rel != &facts.rel_dir && path_is_under(&facts.rel_dir, root_rel));
+            if !routed_root_rels.contains(&facts.rel_dir)
+                && (!has_same_root_config || nested_under_routed_root)
+            {
+                return None;
+            }
+            facts.parse_error.as_ref().map(|parse_error: &String| CargoRootFailureFacts {
                     rel_dir: facts.rel_dir.clone(),
                     cargo_rel_path: facts.cargo_rel_path.clone(),
                     parse_error: parse_error.clone(),
@@ -254,16 +273,6 @@ pub fn collect(tree: &ProjectTree, route: &RsClippyRoute) -> ClippyFacts {
             &mut uncovered_units,
         );
     }
-    for rel_dir in standalone_package_roots {
-        push_coverage_facts(
-            &rel_dir,
-            PolicyRootKind::StandalonePackageRoot,
-            &allowed_configs,
-            &mut covered_units,
-            &mut uncovered_units,
-        );
-    }
-
     covered_units.sort_by(|a, b| a.rel_dir.cmp(&b.rel_dir));
     uncovered_units.sort_by(|a, b| a.rel_dir.cmp(&b.rel_dir));
     allowed_configs.sort_by(|a, b| a.rel_path.cmp(&b.rel_path));
@@ -280,6 +289,14 @@ pub fn collect(tree: &ProjectTree, route: &RsClippyRoute) -> ClippyFacts {
         covered_units,
         uncovered_units,
     }
+}
+
+fn path_is_under(rel_path: &str, parent_rel: &str) -> bool {
+    parent_rel.is_empty()
+        || rel_path == parent_rel
+        || rel_path
+            .strip_prefix(parent_rel)
+            .is_some_and(|rest| rest.starts_with('/'))
 }
 
 #[cfg(test)]

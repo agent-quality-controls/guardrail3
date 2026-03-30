@@ -4,7 +4,7 @@ use test_support::{build_fixture_clippy_toml, write_file};
 use super::super::{copy_fixture_for_tests, run_for_tests};
 
 #[test]
-fn inventories_exact_covering_config_for_each_rust_root_in_multi_root_fixture() {
+fn inventories_only_the_top_workspace_root_when_nested_workspaces_exist() {
     let tmp = copy_fixture_for_tests();
     write_file(
         tmp.path(),
@@ -26,27 +26,6 @@ fn inventories_exact_covering_config_for_each_rust_root_in_multi_root_fixture() 
     assertions::assert_multi_root_coverage(
         &results,
         &[
-            (
-                "workspace root `apps/backend` is covered by `clippy.toml`.",
-                assertions::Severity::Info,
-                true,
-                Some("clippy.toml"),
-                "Rust unit covered by clippy.toml",
-            ),
-            (
-                "workspace root `apps/devctl` is covered by `apps/devctl/clippy.toml`.",
-                assertions::Severity::Info,
-                true,
-                Some("apps/devctl/clippy.toml"),
-                "Rust unit covered by clippy.toml",
-            ),
-            (
-                "workspace root `apps/worker` is covered by `clippy.toml`.",
-                assertions::Severity::Info,
-                true,
-                Some("clippy.toml"),
-                "Rust unit covered by clippy.toml",
-            ),
             (
                 "workspace root is covered by `clippy.toml`.",
                 assertions::Severity::Info,

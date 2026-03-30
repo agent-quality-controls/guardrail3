@@ -1,6 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use guardrail3_app_rs_family_mapper::RsCargoRoute;
+use guardrail3_app_rs_ownership::RustFamilyFileKind;
 use guardrail3_domain_config::types::{EscapeHatchConfig, GuardrailConfig};
 use guardrail3_domain_project_tree::ProjectTree;
 
@@ -40,13 +41,24 @@ struct StringFieldSnapshot {
     invalid: bool,
 }
 
+#[derive(Debug, Clone, Default)]
+struct RouteFileIndex {
+    cargo_by_owner: BTreeMap<String, String>,
+    guardrail_by_owner: BTreeMap<String, String>,
+}
+
 pub fn collect(tree: &ProjectTree, route: &RsCargoRoute) -> CargoFamilyFacts {
-    let snapshots = collect_cargo_snapshots(tree, route);
+    let route_files = collect_route_file_index(route);
+    let snapshots = collect_cargo_snapshots(tree, route, &route_files);
     let workspace_roots: Vec<_> = snapshots
         .values()
         .filter(|snapshot| snapshot.has_workspace)
         .map(|snapshot| snapshot.rel_dir.clone())
         .collect();
+    let mut policy_roots = Vec::new();
+    let mut member_facts = Vec::new();
+    let mut missing_members = Vec::new();
+    let mut input_failures = Vec::new();
     let workspace_members: BTreeSet<_> = snapshots
         .values()
         .filter(|snapshot| snapshot.has_workspace)
@@ -57,11 +69,6 @@ pub fn collect(tree: &ProjectTree, route: &RsCargoRoute) -> CargoFamilyFacts {
         .filter(|snapshot| snapshot.members_parse_error.is_some())
         .map(|snapshot| snapshot.rel_dir.clone())
         .collect();
-
-    let mut policy_roots = Vec::new();
-    let mut member_facts = Vec::new();
-    let mut missing_members = Vec::new();
-    let mut input_failures = Vec::new();
 
     for workspace_root_rel in &workspace_roots {
         let Some(workspace_snapshot) = snapshots.get(workspace_root_rel) else {
@@ -79,15 +86,23 @@ pub fn collect(tree: &ProjectTree, route: &RsCargoRoute) -> CargoFamilyFacts {
             workspace_snapshot,
             PolicyRootKind::WorkspaceRoot,
             tree,
+            &route_files,
             &mut policy_roots,
             &mut input_failures,
         );
 
         for member_rel in &workspace_snapshot.declared_members {
             let member_snapshot = snapshots.get(member_rel).cloned().or_else(|| {
-                let member_cargo_rel_path = rel_path(member_rel, "Cargo.toml");
-                tree.file_exists(&member_cargo_rel_path)
-                    .then(|| snapshot_for(tree, member_rel, &member_cargo_rel_path))
+                route_files
+                    .cargo_rel_path(member_rel)
+                    .map(|member_cargo_rel_path| {
+                        snapshot_for(tree, member_rel, member_cargo_rel_path)
+                    })
+                    .or_else(|| {
+                        let member_cargo_rel_path = rel_path(member_rel, "Cargo.toml");
+                        tree.file_exists(&member_cargo_rel_path)
+                            .then(|| snapshot_for(tree, member_rel, &member_cargo_rel_path))
+                    })
             });
 
             if let Some(member_snapshot) = member_snapshot {
@@ -128,6 +143,7 @@ pub fn collect(tree: &ProjectTree, route: &RsCargoRoute) -> CargoFamilyFacts {
                 snapshot,
                 PolicyRootKind::StandalonePackageRoot,
                 tree,
+                &route_files,
                 &mut policy_roots,
                 &mut input_failures,
             );
@@ -159,13 +175,21 @@ pub fn collect(tree: &ProjectTree, route: &RsCargoRoute) -> CargoFamilyFacts {
 fn collect_cargo_snapshots(
     tree: &ProjectTree,
     route: &RsCargoRoute,
+    route_files: &RouteFileIndex,
 ) -> BTreeMap<String, CargoSnapshot> {
-    route
+    let mut candidate_rels = route
         .roots()
         .iter()
-        .map(|root| {
-            let rel_dir = normalize_member_rel(root.rel_dir());
-            let cargo_rel_path = root.cargo_rel_path().to_owned();
+        .map(|root| normalize_member_rel(root.rel_dir()))
+        .collect::<BTreeSet<_>>();
+    candidate_rels.extend(route_files.cargo_by_owner.keys().cloned());
+
+    candidate_rels
+        .into_iter()
+        .map(|rel_dir| {
+            let cargo_rel_path = route_files
+                .cargo_rel_path(&rel_dir)
+                .map_or_else(|| rel_path(&rel_dir, "Cargo.toml"), ToOwned::to_owned);
             let snapshot = snapshot_for(tree, &rel_dir, &cargo_rel_path);
             (rel_dir, snapshot)
         })
@@ -246,11 +270,14 @@ fn push_policy_root(
     snapshot: &CargoSnapshot,
     kind: PolicyRootKind,
     tree: &ProjectTree,
+    route_files: &RouteFileIndex,
     policy_roots: &mut Vec<PolicyRootCargoFacts>,
     input_failures: &mut Vec<InputFailureFacts>,
 ) {
-    let guardrail_rel_path = rel_path(&snapshot.rel_dir, "guardrail3.toml");
-    let guardrail = guardrail_snapshot(tree, &guardrail_rel_path);
+    let guardrail_rel_path = route_files
+        .guardrail_rel_path(&snapshot.rel_dir)
+        .map(ToOwned::to_owned);
+    let guardrail = guardrail_snapshot(tree, guardrail_rel_path.as_deref());
     if let Some(parse_error) = &snapshot.parse_error {
         input_failures.push(InputFailureFacts {
             rel_path: snapshot.cargo_rel_path.clone(),
@@ -261,7 +288,9 @@ fn push_policy_root(
     }
     if let Some(parse_error) = &guardrail.parse_error {
         input_failures.push(InputFailureFacts {
-            rel_path: guardrail_rel_path.clone(),
+            rel_path: guardrail_rel_path
+                .clone()
+                .unwrap_or_else(|| rel_path(&snapshot.rel_dir, "guardrail3.toml")),
             message: format!(
                 "Failed to parse root-local guardrail3.toml for cargo profile resolution: {parse_error}"
             ),
@@ -380,16 +409,10 @@ fn normalize_member_rel(pattern: &str) -> String {
         .to_owned()
 }
 
-fn is_descendant_of(rel: &str, ancestor: &str) -> bool {
-    if ancestor.is_empty() {
-        return !rel.is_empty();
-    }
-
-    rel.strip_prefix(ancestor)
-        .is_some_and(|suffix| suffix.starts_with('/'))
-}
-
-fn guardrail_snapshot(tree: &ProjectTree, rel_path: &str) -> GuardrailSnapshot {
+fn guardrail_snapshot(tree: &ProjectTree, rel_path: Option<&str>) -> GuardrailSnapshot {
+    let Some(rel_path) = rel_path else {
+        return GuardrailSnapshot::default();
+    };
     let Some(content) = tree.file_content(rel_path) else {
         return GuardrailSnapshot::default();
     };
@@ -405,6 +428,15 @@ fn guardrail_snapshot(tree: &ProjectTree, rel_path: &str) -> GuardrailSnapshot {
             parse_error: Some(parse_error.to_string()),
         },
     }
+}
+
+fn is_descendant_of(rel: &str, ancestor: &str) -> bool {
+    if ancestor.is_empty() {
+        return !rel.is_empty();
+    }
+
+    rel.strip_prefix(ancestor)
+        .is_some_and(|suffix| suffix.starts_with('/'))
 }
 
 fn root_package_field(
@@ -459,5 +491,43 @@ fn rel_path(rel_dir: &str, file_name: &str) -> String {
         file_name.to_owned()
     } else {
         ProjectTree::join_rel(rel_dir, file_name)
+    }
+}
+
+fn collect_route_file_index(route: &RsCargoRoute) -> RouteFileIndex {
+    let mut cargo_by_owner = BTreeMap::new();
+    let mut guardrail_by_owner = BTreeMap::new();
+
+    for file in route.family_files() {
+        match file.kind() {
+            RustFamilyFileKind::CargoToml if file.exact_rust_root_owner() => {
+                let _ = cargo_by_owner.insert(
+                    file.logical_owner_rel().to_owned(),
+                    file.rel_path().to_owned(),
+                );
+            }
+            RustFamilyFileKind::GuardrailToml if file.exact_rust_root_owner() => {
+                let _ = guardrail_by_owner.insert(
+                    file.logical_owner_rel().to_owned(),
+                    file.rel_path().to_owned(),
+                );
+            }
+            _ => {}
+        }
+    }
+
+    RouteFileIndex {
+        cargo_by_owner,
+        guardrail_by_owner,
+    }
+}
+
+impl RouteFileIndex {
+    fn cargo_rel_path(&self, owner_rel: &str) -> Option<&str> {
+        self.cargo_by_owner.get(owner_rel).map(String::as_str)
+    }
+
+    fn guardrail_rel_path(&self, owner_rel: &str) -> Option<&str> {
+        self.guardrail_by_owner.get(owner_rel).map(String::as_str)
     }
 }

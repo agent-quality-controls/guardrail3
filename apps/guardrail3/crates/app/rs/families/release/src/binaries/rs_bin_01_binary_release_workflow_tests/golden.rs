@@ -478,6 +478,9 @@ fn inventories_when_manifest_has_autodiscovered_src_bin_binary() {
             (
                 "Cargo.toml",
                 r#"
+[workspace]
+resolver = "2"
+
 [package]
 name = "bin"
 version = "0.1.0"
@@ -536,6 +539,9 @@ fn inventories_when_manifest_has_nested_autodiscovered_src_bin_binary() {
             (
                 "Cargo.toml",
                 r#"
+[workspace]
+resolver = "2"
+
 [package]
 name = "bin"
 version = "0.1.0"
@@ -592,6 +598,9 @@ fn inventories_when_autobins_disabled_but_explicit_bin_exists() {
             (
                 "Cargo.toml",
                 r#"
+[workspace]
+resolver = "2"
+
 [package]
 name = "bin"
 version = "0.1.0"
@@ -652,6 +661,9 @@ fn inventories_when_explicit_bin_manifest_is_targeted_by_bin_name() {
             (
                 "Cargo.toml",
                 r#"
+[workspace]
+resolver = "2"
+
 [package]
 name = "my-package"
 version = "0.1.0"

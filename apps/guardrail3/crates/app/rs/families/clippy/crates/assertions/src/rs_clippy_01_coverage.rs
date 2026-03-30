@@ -125,24 +125,16 @@ pub fn assert_root_failure(results: &[CheckResult], cargo_rel_path: &str, root_l
     assert!(!result.inventory());
 }
 
-pub fn assert_uncovered_standalone_package_root(results: &[CheckResult], file: &str) {
+pub fn assert_no_coverage_results(results: &[CheckResult]) {
     let coverage = results
         .iter()
-        .filter(|result| {
-            result.id() == ID
-                && result.severity() == Severity::Error
-                && result.title() == "Rust unit uncovered by clippy.toml"
-        })
+        .filter(|result| result.id() == ID)
         .collect::<Vec<_>>();
 
-    assert_eq!(coverage.len(), 1);
-    let result = coverage[0];
-    assert_eq!(result.file(), Some(file));
-    assert_eq!(
-        result.message(),
-        "standalone package root `packages/shared-types` is not covered by any allowed clippy.toml at the validation root, a workspace root, or a standalone package root."
+    assert!(
+        coverage.is_empty(),
+        "expected no clippy coverage results: {coverage:#?}"
     );
-    assert!(!result.inventory());
 }
 
 pub fn assert_unparseable_routed_cargo_root(results: &[CheckResult], cargo_rel_path: &str) {

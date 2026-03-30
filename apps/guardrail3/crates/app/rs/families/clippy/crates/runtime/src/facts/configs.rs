@@ -1,5 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
+use guardrail3_app_rs_family_mapper::RsClippyRoute;
+use guardrail3_app_rs_ownership::RustFamilyFileKind;
 use guardrail3_domain_project_tree::ProjectTree;
 
 use super::policy::{policy_settings_for, published_library_policy};
@@ -20,30 +22,24 @@ pub(super) fn config_precedence(rel_path: &str) -> usize {
 
 pub(super) fn collect_configs(
     tree: &ProjectTree,
+    route: &RsClippyRoute,
     cargo_roots: &BTreeMap<String, CargoRootFacts>,
     policy_map: &ResolvedPolicyMap,
-    routed_root_rels: &BTreeSet<String>,
+    _routed_root_rels: &BTreeSet<String>,
     validation_scope: Option<&str>,
 ) -> Vec<ClippyConfigFacts> {
-    let mut paths = Vec::new();
-    for file_name in ["clippy.toml", ".clippy.toml"] {
-        if tree.file_exists(file_name)
-            && config_dir_is_relevant("", routed_root_rels, validation_scope)
-        {
-            paths.push(("".to_owned(), file_name.to_owned()));
-        }
-        paths.extend(
-            tree.dirs_with_file(file_name)
-                .into_iter()
-                .filter(|rel_dir| {
-                    config_dir_is_relevant(rel_dir, routed_root_rels, validation_scope)
-                })
-                .map(|rel_dir| {
-                    let rel_path = ProjectTree::join_rel(&rel_dir, file_name);
-                    (rel_dir, rel_path)
-                }),
-        );
-    }
+    let paths = route
+        .family_files()
+        .iter()
+        .filter_map(|file| match file.kind() {
+            RustFamilyFileKind::ClippyToml | RustFamilyFileKind::ClippyDotToml => Some((
+                file.logical_owner_rel().to_owned(),
+                file.rel_path().to_owned(),
+            )),
+            _ => None,
+        })
+        .filter(|(rel_dir, _)| config_dir_is_relevant(rel_dir, validation_scope))
+        .collect::<Vec<_>>();
 
     paths
         .into_iter()
@@ -70,48 +66,23 @@ pub(super) fn collect_configs(
 
 pub(super) fn collect_cargo_config_overrides(
     tree: &ProjectTree,
-    routed_root_rels: &BTreeSet<String>,
-    cargo_roots: &BTreeMap<String, CargoRootFacts>,
+    route: &RsClippyRoute,
+    _routed_root_rels: &BTreeSet<String>,
+    _cargo_roots: &BTreeMap<String, CargoRootFacts>,
     validation_scope: Option<&str>,
 ) -> Vec<CargoConfigOverrideFacts> {
-    let mut rel_paths = Vec::new();
-
-    for rel_path in [".cargo/config.toml", ".cargo/config"] {
-        if tree.file_exists(rel_path)
-            && cargo_config_owner_is_relevant("", routed_root_rels, cargo_roots, validation_scope)
-        {
-            rel_paths.push(rel_path.to_owned());
-        }
-    }
-
-    rel_paths.extend(
-        tree.dirs_with_file("config.toml")
-            .into_iter()
-            .filter(|rel_dir| rel_dir.ends_with("/.cargo"))
-            .filter(|rel_dir| {
-                cargo_config_owner_is_relevant(
-                    rel_dir.strip_suffix("/.cargo").unwrap_or(rel_dir),
-                    routed_root_rels,
-                    cargo_roots,
-                    validation_scope,
-                )
-            })
-            .map(|rel_dir| ProjectTree::join_rel(&rel_dir, "config.toml")),
-    );
-    rel_paths.extend(
-        tree.dirs_with_file("config")
-            .into_iter()
-            .filter(|rel_dir| rel_dir.ends_with("/.cargo"))
-            .filter(|rel_dir| {
-                cargo_config_owner_is_relevant(
-                    rel_dir.strip_suffix("/.cargo").unwrap_or(rel_dir),
-                    routed_root_rels,
-                    cargo_roots,
-                    validation_scope,
-                )
-            })
-            .map(|rel_dir| ProjectTree::join_rel(&rel_dir, "config")),
-    );
+    let rel_paths = route
+        .family_files()
+        .iter()
+        .filter_map(|file| match file.kind() {
+            RustFamilyFileKind::CargoConfigToml | RustFamilyFileKind::CargoConfigLegacy => {
+                Some((file.logical_owner_rel(), file.rel_path().to_owned()))
+            }
+            _ => None,
+        })
+        .filter(|(owner_rel, _)| cargo_config_owner_is_relevant(owner_rel, validation_scope))
+        .map(|(_, rel_path)| rel_path)
+        .collect::<Vec<_>>();
 
     rel_paths
         .into_iter()
@@ -182,35 +153,12 @@ pub(super) fn push_coverage_facts(
     }
 }
 
-fn cargo_config_owner_is_relevant(
-    owner_rel: &str,
-    routed_root_rels: &BTreeSet<String>,
-    cargo_roots: &BTreeMap<String, CargoRootFacts>,
-    validation_scope: Option<&str>,
-) -> bool {
-    config_dir_is_relevant(owner_rel, routed_root_rels, validation_scope)
-        && (owner_rel.is_empty()
-            || cargo_roots.keys().any(|cargo_root_rel| {
-                is_under_routed_root(cargo_root_rel, routed_root_rels)
-                    && (cargo_root_rel == owner_rel
-                        || cargo_root_rel.starts_with(&format!("{owner_rel}/")))
-            }))
+fn cargo_config_owner_is_relevant(owner_rel: &str, validation_scope: Option<&str>) -> bool {
+    config_dir_is_relevant(owner_rel, validation_scope)
 }
 
-fn config_dir_is_relevant(
-    rel_dir: &str,
-    routed_root_rels: &BTreeSet<String>,
-    validation_scope: Option<&str>,
-) -> bool {
-    (!routed_root_rels.is_empty() && rel_dir.is_empty()
-        || is_under_routed_root(rel_dir, routed_root_rels))
-        && validation_scope.is_none_or(|scope_rel| paths_intersect_scope(rel_dir, scope_rel))
-}
-
-fn is_under_routed_root(rel_dir: &str, routed_root_rels: &BTreeSet<String>) -> bool {
-    routed_root_rels.iter().any(|root_rel| {
-        root_rel.is_empty() || rel_dir == root_rel || rel_dir.starts_with(&format!("{root_rel}/"))
-    })
+fn config_dir_is_relevant(rel_dir: &str, validation_scope: Option<&str>) -> bool {
+    validation_scope.is_none_or(|scope_rel| paths_intersect_scope(rel_dir, scope_rel))
 }
 
 fn paths_intersect_scope(rel_dir: &str, scope_rel: &str) -> bool {

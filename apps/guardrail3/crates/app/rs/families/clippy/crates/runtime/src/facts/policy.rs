@@ -7,7 +7,6 @@ use super::{CargoRootFacts, GuardrailPolicyFacts, PolicySettings, ResolvedPolicy
 pub(super) fn read_policy_map(
     tree: &ProjectTree,
     cargo_roots: &BTreeMap<String, CargoRootFacts>,
-    standalone_package_roots: &BTreeSet<String>,
 ) -> ResolvedPolicyMap {
     let mut map = BTreeMap::new();
     let guardrail = read_guardrail_policy(tree);
@@ -93,15 +92,6 @@ pub(super) fn read_policy_map(
         {
             let _ = map.insert(
                 rel_dir.to_owned(),
-                PolicySettings {
-                    profile_name: profile_name.clone(),
-                    garde_enabled,
-                },
-            );
-        }
-        for rel_dir in standalone_package_roots {
-            let _ = map.insert(
-                rel_dir.clone(),
                 PolicySettings {
                     profile_name: profile_name.clone(),
                     garde_enabled,

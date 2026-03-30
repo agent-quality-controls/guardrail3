@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 
 use guardrail3_app_core::discover::resolve_app_paths_from_member_dirs;
 use guardrail3_domain_config::types::{CrateConfig, GuardrailConfig, RustChecksConfig};
@@ -9,15 +9,15 @@ use super::{CargoRootFacts, GardeInputFailureFacts, PolicySettings};
 pub(super) fn read_policy_map(
     tree: &ProjectTree,
     cargo_roots: &BTreeMap<String, CargoRootFacts>,
-    standalone_package_roots: &BTreeSet<String>,
+    guardrail_rel_path: Option<&str>,
     input_failures: &mut Vec<GardeInputFailureFacts>,
 ) -> BTreeMap<String, PolicySettings> {
-    let parsed = match tree.file_content("guardrail3.toml") {
+    let parsed = match guardrail_rel_path.and_then(|rel_path| tree.file_content(rel_path)) {
         Some(content) => match toml::from_str::<GuardrailConfig>(content) {
             Ok(parsed) => Some(parsed),
             Err(parse_error) => {
                 input_failures.push(GardeInputFailureFacts {
-                    rel_path: "guardrail3.toml".to_owned(),
+                    rel_path: guardrail_rel_path.unwrap_or("guardrail3.toml").to_owned(),
                     message: format!(
                         "Failed to parse guardrail3.toml for garde policy resolution: {parse_error}"
                     ),
@@ -73,8 +73,14 @@ pub(super) fn read_policy_map(
         if !app_paths_include_root {
             let _ = map.insert(String::new(), PolicySettings { garde_enabled });
         }
-        for package_dir in standalone_package_roots {
-            let _ = map.insert(package_dir.clone(), PolicySettings { garde_enabled });
+        for package_dir in cargo_roots
+            .values()
+            .filter(|facts| facts.has_workspace)
+            .map(|facts| facts.rel_dir.as_str())
+            .filter(|rel_dir| !rel_dir.is_empty())
+            .filter(|rel_dir| !app_paths.values().any(|app_rel| app_rel == *rel_dir))
+        {
+            let _ = map.insert(package_dir.to_owned(), PolicySettings { garde_enabled });
         }
     }
 

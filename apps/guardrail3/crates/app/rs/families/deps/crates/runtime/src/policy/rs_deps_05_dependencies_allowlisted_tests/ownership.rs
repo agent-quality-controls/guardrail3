@@ -21,6 +21,9 @@ fn broad_dependency_attack_assigns_each_section_to_its_own_rule() {
             (
                 "apps/api/Cargo.toml",
                 r#"
+                    [workspace]
+                    members = []
+
                     [package]
                     name = "api"
 

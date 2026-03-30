@@ -14,19 +14,19 @@ use self::clippy::{collect_clippy_configs, owning_root_dir, push_root_facts};
 use self::policy::read_policy_map;
 use self::validation::resolve_validation_state;
 use super::discover::{is_test_path, rust_file_rels};
-use super::parse::{BoundaryKind, GuardrailConfigParseKind, ParsedGardeFile, analyze, parse_rust_file};
+use super::parse::{
+    analyze, parse_rust_file, BoundaryKind, GuardrailConfigParseKind, ParsedGardeFile,
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PolicyRootKind {
     WorkspaceRoot,
-    StandalonePackageRoot,
 }
 
 impl PolicyRootKind {
     pub const fn label(self) -> &'static str {
         match self {
             Self::WorkspaceRoot => "workspace root",
-            Self::StandalonePackageRoot => "standalone package root",
         }
     }
 }
@@ -115,7 +115,6 @@ pub struct GardeFacts {
 struct CargoRootFacts {
     rel_dir: String,
     has_workspace: bool,
-    has_package: bool,
     workspace_members: Vec<String>,
 }
 
@@ -140,26 +139,16 @@ pub fn collect(tree: &ProjectTree, route: &RsGardeRoute) -> GardeFacts {
         .filter(|facts| facts.has_workspace)
         .map(|facts| facts.rel_dir.clone())
         .collect();
-    let workspace_members: BTreeSet<_> = cargo_roots
-        .values()
-        .flat_map(|facts| facts.workspace_members.iter().cloned())
-        .collect();
-    let standalone_package_roots: BTreeSet<_> = cargo_roots
-        .values()
-        .filter(|facts| facts.has_package && !workspace_members.contains(&facts.rel_dir))
-        .map(|facts| facts.rel_dir.clone())
-        .collect();
-
-    let policy_map = read_policy_map(
-        tree,
-        &cargo_roots,
-        &standalone_package_roots,
-        &mut input_failures,
-    );
+    let policy_guardrail_rel = route
+        .family_files()
+        .iter()
+        .find(|file| file.kind() == guardrail3_app_rs_ownership::RustFamilyFileKind::GuardrailToml)
+        .map(|file| file.rel_path().to_owned());
+    let policy_map = read_policy_map(tree, &cargo_roots, policy_guardrail_rel.as_deref(), &mut input_failures);
     let clippy_configs = collect_clippy_configs(
         tree,
+        route,
         &workspace_roots,
-        &standalone_package_roots,
         &mut input_failures,
     );
 
@@ -174,28 +163,21 @@ pub fn collect(tree: &ProjectTree, route: &RsGardeRoute) -> GardeFacts {
             &mut roots,
         );
     }
-    for rel_dir in standalone_package_roots {
-        push_root_facts(
-            tree,
-            &rel_dir,
-            PolicyRootKind::StandalonePackageRoot,
-            &policy_map,
-            &clippy_configs,
-            &mut roots,
-        );
-    }
-
     let routed_root_dirs: Vec<_> = roots.iter().map(|root| root.rel_dir.clone()).collect();
     let root_escape_hatches = routed_root_dirs
         .iter()
         .map(|root_rel_dir| {
-            let guardrail_rel = if root_rel_dir.is_empty() {
-                "guardrail3.toml".to_owned()
-            } else {
-                ProjectTree::join_rel(root_rel_dir, "guardrail3.toml")
-            };
+            let guardrail_rel = route
+                .family_files()
+                .iter()
+                .find(|file| {
+                    file.kind() == guardrail3_app_rs_ownership::RustFamilyFileKind::GuardrailToml
+                        && file.exact_rust_root_owner()
+                        && file.logical_owner_rel() == root_rel_dir
+                })
+                .map(|file| file.rel_path().to_owned());
             let escape_hatches = tree
-                .file_content(&guardrail_rel)
+                .file_content(guardrail_rel.as_deref().unwrap_or(""))
                 .and_then(|content| toml::from_str::<GuardrailConfig>(content).ok())
                 .map(|config| config.escape_hatches().to_vec())
                 .unwrap_or_default();

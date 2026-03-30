@@ -51,3 +51,48 @@ repository = "https://example.com/api"
         }],
     );
 }
+
+#[test]
+fn non_workspace_subtree_stays_silent() {
+    let root = temp_root("release-plz-non-workspace-scope");
+    let tree = project_tree(
+        vec![
+            ("", dir_entry(&["docs", "ws"], &[])),
+            ("docs", dir_entry(&["guide"], &[])),
+            ("docs/guide", dir_entry(&[], &["overview.md"])),
+            ("ws", dir_entry(&["crates"], &["Cargo.toml"])),
+            ("ws/crates", dir_entry(&["api"], &[])),
+            ("ws/crates/api", dir_entry(&["src"], &["Cargo.toml"])),
+            ("ws/crates/api/src", dir_entry(&[], &["lib.rs"])),
+        ],
+        vec![
+            (
+                "ws/Cargo.toml",
+                r#"
+[workspace]
+members = ["crates/api"]
+resolver = "2"
+"#,
+            ),
+            (
+                "ws/crates/api/Cargo.toml",
+                r#"
+[package]
+name = "api"
+version = "0.1.0"
+edition = "2024"
+description = "api"
+license = "MIT"
+repository = "https://example.com/api"
+"#,
+            ),
+            ("ws/crates/api/src/lib.rs", "pub fn api() {}\n"),
+            ("docs/guide/overview.md", "# Guide\n"),
+        ],
+        root,
+    );
+
+    let results = run_family(&tree, &StubToolChecker::new(true), false, "docs/guide");
+
+    assert!(results.is_empty(), "{results:#?}");
+}

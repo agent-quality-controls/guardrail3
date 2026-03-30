@@ -1,7 +1,6 @@
 use guardrail3_app_rs_family_toolchain_assertions::rs_toolchain_01_exists::{
-    ExpectedRuleResult, Severity, assert_invalid_root_cargo_rust_version_type,
-    assert_legacy_only_family_results, assert_malformed_modern_and_legacy_results,
-    assert_rule_results,
+    assert_invalid_root_cargo_rust_version_type, assert_legacy_only_family_results,
+    assert_malformed_modern_and_legacy_results, assert_rule_results, ExpectedRuleResult, Severity,
 };
 
 use super::{check, nested_workspace_root_tree, run_family_check, test_input, test_tree};
@@ -54,7 +53,8 @@ fn workspace_tree_with_nested_non_member_package() -> guardrail3_domain_project_
     )
 }
 
-fn workspace_tree_with_non_package_descendant_toolchain() -> guardrail3_domain_project_tree::ProjectTree {
+fn workspace_tree_with_non_package_descendant_toolchain(
+) -> guardrail3_domain_project_tree::ProjectTree {
     use std::collections::BTreeMap;
     use std::path::PathBuf;
 

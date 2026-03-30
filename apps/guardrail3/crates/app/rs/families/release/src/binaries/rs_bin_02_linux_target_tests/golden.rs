@@ -289,6 +289,9 @@ fn inventories_linux_target_for_manifest_with_autodiscovered_src_bin() {
             (
                 "Cargo.toml",
                 r#"
+[workspace]
+resolver = "2"
+
 [package]
 name = "bin"
 version = "0.1.0"
@@ -345,6 +348,9 @@ fn inventories_linux_target_when_autobins_disabled_but_explicit_bin_exists() {
             (
                 "Cargo.toml",
                 r#"
+[workspace]
+resolver = "2"
+
 [package]
 name = "bin"
 version = "0.1.0"

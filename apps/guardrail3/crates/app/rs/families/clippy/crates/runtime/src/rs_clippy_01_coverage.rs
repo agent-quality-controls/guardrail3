@@ -56,9 +56,7 @@ pub fn check_uncovered(input: &UncoveredRustUnitInput<'_>, results: &mut Vec<Che
         ID.to_owned(),
         Severity::Error,
         "Rust unit uncovered by clippy.toml".to_owned(),
-        format!(
-            "{scope} is not covered by any allowed clippy.toml at the validation root, a workspace root, or a standalone package root."
-        ),
+        format!("{scope} is not covered by any allowed clippy.toml at a workspace root."),
         Some(input.rel_dir.to_owned()),
         None,
         false,

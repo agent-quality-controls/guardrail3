@@ -6,6 +6,7 @@ mod workspaces;
 use std::collections::{BTreeMap, BTreeSet};
 
 use guardrail3_app_rs_family_mapper::RsDepsRoute;
+use guardrail3_app_rs_ownership::RustFamilyFileKind;
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_outbound_traits::ToolChecker;
 
@@ -87,32 +88,47 @@ struct DepsCratePolicy {
 }
 
 pub fn collect(tree: &ProjectTree, route: &RsDepsRoute, tc: &dyn ToolChecker) -> DepsFacts {
-    let parsed_guardrail = parse_guardrail(tree);
+    let exact_root_cargo_dirs = route
+        .family_files()
+        .iter()
+        .filter(|file| {
+            file.kind() == RustFamilyFileKind::CargoToml && file.exact_rust_root_owner()
+        })
+        .map(|file| file.logical_owner_rel().to_owned())
+        .collect::<BTreeSet<_>>();
+    let guardrail_rel_path = route
+        .family_files()
+        .iter()
+        .find(|file| file.kind() == RustFamilyFileKind::GuardrailToml)
+        .map(|file| file.rel_path().to_owned());
+    let parsed_guardrail = parse_guardrail(tree, guardrail_rel_path.as_deref());
     let mut input_failures = parsed_guardrail
         .as_ref()
         .and_then(|guardrail| guardrail.parse_error.clone())
         .map(|message| {
             vec![InputFailureFacts {
-                rel_path: "guardrail3.toml".to_owned(),
+                rel_path: guardrail_rel_path
+                    .clone()
+                    .unwrap_or_else(|| "guardrail3.toml".to_owned()),
                 message,
             }]
         })
         .unwrap_or_default();
-    let routed_root_rels = route
-        .roots()
-        .iter()
-        .map(|root| root.rel_dir().to_owned())
-        .collect::<BTreeSet<_>>();
-    let workspaces = discover_workspaces(tree, route, &mut input_failures);
+    let workspaces = discover_workspaces(tree, route, &exact_root_cargo_dirs, &mut input_failures);
     let workspace_by_member = workspace_by_member(&workspaces);
     let members = discover_members(
         tree,
-        &routed_root_rels,
         &workspaces,
         &workspace_by_member,
         &parsed_guardrail,
-        &mut input_failures,
-    );
+    )
+    .into_iter()
+    .filter(|member| {
+        route.validation_scope().is_none_or(|scope| {
+            rel_intersects_validation_scope(&member.rel_dir, scope)
+        })
+    })
+    .collect::<Vec<_>>();
 
     let (dependency_entries, direct_dependency_caps) =
         collect_dependency_facts(tree, &members, &workspaces, &mut input_failures);
@@ -162,6 +178,20 @@ pub fn collect(tree: &ProjectTree, route: &RsDepsRoute, tc: &dyn ToolChecker) ->
         direct_dependency_caps,
         input_failures,
     }
+}
+
+fn rel_intersects_validation_scope(rel_dir: &str, validation_scope: &str) -> bool {
+    if validation_scope.is_empty() || rel_dir.is_empty() {
+        return true;
+    }
+
+    rel_dir == validation_scope
+        || rel_dir
+            .strip_prefix(validation_scope)
+            .is_some_and(|rest| rest.starts_with('/'))
+        || validation_scope
+            .strip_prefix(rel_dir)
+            .is_some_and(|rest| rest.starts_with('/'))
 }
 
 #[derive(Debug, Clone)]

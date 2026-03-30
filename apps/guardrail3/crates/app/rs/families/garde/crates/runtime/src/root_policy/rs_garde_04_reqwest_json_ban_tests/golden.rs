@@ -10,7 +10,7 @@ fn inventories_when_all_bans_present() {
         vec![
             (
                 "Cargo.toml",
-                "[package]\nname = \"demo\"\nversion = \"0.1.0\"\n[dependencies]\ngarde = \"0.1\"\n",
+                "[workspace]\nmembers = []\n[package]\nname = \"demo\"\nversion = \"0.1.0\"\n[dependencies]\ngarde = \"0.1\"\n",
             ),
             ("clippy.toml", clippy_toml.as_str()),
         ],

@@ -448,6 +448,7 @@ dependencies = [
  "guardrail3-app-rs-family-cargo-assertions",
  "guardrail3-app-rs-family-cargo-test-support",
  "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-ownership",
  "guardrail3-app-rs-placement",
  "guardrail3-domain-config",
  "guardrail3-domain-project-tree",
@@ -496,6 +497,7 @@ dependencies = [
  "guardrail3-app-rs-family-clippy-assertions",
  "guardrail3-app-rs-family-clippy-test-support",
  "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-ownership",
  "guardrail3-app-rs-placement",
  "guardrail3-domain-modules",
  "guardrail3-domain-project-tree",
@@ -576,6 +578,7 @@ dependencies = [
  "guardrail3-app-rs-family-deny-assertions",
  "guardrail3-app-rs-family-deny-test-support",
  "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-ownership",
  "guardrail3-app-rs-placement",
  "guardrail3-domain-modules",
  "guardrail3-domain-project-tree",
@@ -613,6 +616,7 @@ dependencies = [
  "guardrail3-app-rs-family-deps-assertions",
  "guardrail3-app-rs-family-deps-test-support",
  "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-ownership",
  "guardrail3-app-rs-placement",
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
@@ -678,6 +682,7 @@ dependencies = [
  "guardrail3-app-core",
  "guardrail3-app-rs-family-garde-test-support",
  "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-ownership",
  "guardrail3-app-rs-placement",
  "guardrail3-domain-config",
  "guardrail3-domain-modules",
@@ -845,6 +850,7 @@ name = "guardrail3-app-rs-family-mapper"
 version = "0.0.0"
 dependencies = [
  "guardrail3-app-rs-family-mapper-assertions",
+ "guardrail3-app-rs-ownership",
  "guardrail3-app-rs-placement",
  "guardrail3-domain-config",
  "guardrail3-domain-project-tree",
@@ -870,6 +876,7 @@ dependencies = [
  "guardrail3-app-rs-family-mapper",
  "guardrail3-app-rs-family-release-assertions",
  "guardrail3-app-rs-family-release-test-support",
+ "guardrail3-app-rs-ownership",
  "guardrail3-app-rs-placement",
  "guardrail3-domain-config",
  "guardrail3-domain-modules",
@@ -954,6 +961,7 @@ dependencies = [
  "guardrail3-adapters-outbound-fs",
  "guardrail3-app-core",
  "guardrail3-app-rs-family-mapper",
+ "guardrail3-app-rs-ownership",
  "guardrail3-app-rs-placement",
  "guardrail3-domain-config",
  "guardrail3-domain-project-tree",
@@ -987,6 +995,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "guardrail3-app-rs-ownership"
+version = "0.0.0"
+dependencies = [
+ "guardrail3-app-rs-placement",
+ "guardrail3-domain-project-tree",
+ "guardrail3-domain-validation-model",
+]
+
+[[package]]
 name = "guardrail3-app-rs-placement"
 version = "0.0.0"
 dependencies = [
@@ -1016,6 +1033,7 @@ dependencies = [
  "guardrail3-app-rs-family-selection",
  "guardrail3-app-rs-family-test",
  "guardrail3-app-rs-family-toolchain",
+ "guardrail3-app-rs-ownership",
  "guardrail3-app-rs-placement",
  "guardrail3-app-rs-runtime-assertions",
  "guardrail3-domain-config",

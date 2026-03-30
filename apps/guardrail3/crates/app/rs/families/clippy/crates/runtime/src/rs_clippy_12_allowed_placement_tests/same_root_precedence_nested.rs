@@ -46,7 +46,7 @@ fn rejects_lower_precedence_same_root_sibling_config_at_workspace_roots() {
 }
 
 #[test]
-fn rejects_lower_precedence_same_root_sibling_config_at_standalone_package_roots() {
+fn forbids_same_root_sibling_configs_at_non_workspace_package_roots() {
     let tree = project_tree(
         vec![
             ("", dir_entry(&["packages"], &[])),
@@ -73,10 +73,9 @@ fn rejects_lower_precedence_same_root_sibling_config_at_standalone_package_roots
     );
 
     let results = run_for_tests(&tree);
-    assertions::assert_allowed_files(&results, &["packages/cli/.clippy.toml"]);
-    assertions::assert_same_root_conflict(
+    assertions::assert_allowed_files(&results, &[]);
+    assertions::assert_forbidden_files(
         &results,
-        "packages/cli/clippy.toml",
-        "packages/cli/.clippy.toml",
+        &["packages/cli/.clippy.toml", "packages/cli/clippy.toml"],
     );
 }

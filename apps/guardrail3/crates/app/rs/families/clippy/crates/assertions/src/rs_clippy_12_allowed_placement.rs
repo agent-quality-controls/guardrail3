@@ -63,7 +63,6 @@ pub fn assert_forbidden_files(results: &[CheckResult], expected_files: &[&str]) 
     assert!(error_results.iter().all(|result| {
         result.message().contains("allowed clippy policy root")
             && result.message().contains("workspace roots")
-            && result.message().contains("standalone package roots")
     }));
 }
 

@@ -2,21 +2,18 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use crate::facts_support;
 use guardrail3_app_rs_family_mapper::RsDenyRoute;
+use guardrail3_app_rs_ownership::RustFamilyFileKind;
 use guardrail3_domain_project_tree::ProjectTree;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PolicyRootKind {
-    ValidationRoot,
     WorkspaceRoot,
-    StandalonePackageRoot,
 }
 
 impl PolicyRootKind {
     pub const fn label(self) -> &'static str {
         match self {
-            Self::ValidationRoot => "validation root",
             Self::WorkspaceRoot => "workspace root",
-            Self::StandalonePackageRoot => "standalone package root",
         }
     }
 }
@@ -58,6 +55,8 @@ pub struct UncoveredRustUnitFacts {
 #[derive(Debug, Clone)]
 pub struct DenyFacts {
     pub(crate) policy_context_parse_error: Option<String>,
+    pub(crate) linted_configs: Vec<DenyConfigFacts>,
+    #[cfg_attr(not(test), allow(dead_code))]
     pub(crate) allowed_configs: Vec<DenyConfigFacts>,
     pub(crate) forbidden_configs: Vec<ForbiddenDenyConfigFacts>,
     pub(crate) same_root_conflicts: Vec<SameRootConflictFacts>,
@@ -75,7 +74,6 @@ pub struct SameRootConflictFacts {
 pub(crate) struct CargoRootFacts {
     pub(crate) rel_dir: String,
     pub(crate) has_workspace: bool,
-    pub(crate) has_package: bool,
     pub(crate) workspace_members: Vec<String>,
 }
 
@@ -87,38 +85,29 @@ pub fn collect(tree: &ProjectTree, route: &RsDenyRoute) -> DenyFacts {
         .map(|root| root.rel_dir().to_owned())
         .collect::<BTreeSet<_>>();
     let workspace_roots: BTreeSet<_> = cargo_roots
-        .values()
-        .filter(|facts| facts.has_workspace)
-        .map(|facts| facts.rel_dir.clone())
+        .iter()
+        .filter(|(rel_dir, _facts)| routed_root_rels.contains(*rel_dir))
+        .filter(|(_rel_dir, facts)| facts.has_workspace)
+        .map(|(rel_dir, _facts)| rel_dir.clone())
         .collect();
-    let workspace_members: BTreeSet<_> = cargo_roots
-        .values()
-        .flat_map(|facts| facts.workspace_members.iter().cloned())
-        .collect();
-    let standalone_package_roots: BTreeSet<_> = cargo_roots
-        .values()
-        .filter(|facts| facts.has_package && !workspace_members.contains(&facts.rel_dir))
-        .map(|facts| facts.rel_dir.clone())
-        .collect();
-
-    let mut allowed_policy_roots = BTreeSet::from([String::new()]);
+    let mut allowed_policy_roots = BTreeSet::new();
     allowed_policy_roots.extend(workspace_roots.iter().cloned());
-    allowed_policy_roots.extend(standalone_package_roots.iter().cloned());
-
-    let profile_map_facts =
-        facts_support::read_profile_map(tree, &cargo_roots, &standalone_package_roots);
+    let profile_map_facts = facts_support::read_profile_map(tree, &cargo_roots);
     let policy_context_valid = profile_map_facts.parse_error.is_none();
 
     let configs = collect_configs(
         tree,
+        route,
         &profile_map_facts.map,
         &routed_root_rels,
         route.validation_scope(),
         policy_context_valid,
     );
+    let mut linted_configs = Vec::new();
     let mut allowed_configs = Vec::new();
     let mut forbidden_configs = Vec::new();
     for config in configs {
+        linted_configs.push(config.clone());
         if allowed_policy_roots.contains(&config.policy_root_rel) {
             allowed_configs.push(config);
         } else {
@@ -135,18 +124,10 @@ pub fn collect(tree: &ProjectTree, route: &RsDenyRoute) -> DenyFacts {
             });
         }
     }
-    let mut same_root_conflicts = facts_support::collect_same_root_conflicts(&allowed_configs);
+    let mut same_root_conflicts = collect_same_root_conflicts(&allowed_configs);
 
     let mut covered_units = Vec::new();
     let mut uncovered_units = Vec::new();
-    facts_support::push_coverage_facts(
-        tree,
-        "",
-        PolicyRootKind::ValidationRoot,
-        &allowed_configs,
-        &mut covered_units,
-        &mut uncovered_units,
-    );
     for rel_dir in workspace_roots {
         facts_support::push_coverage_facts(
             tree,
@@ -157,17 +138,8 @@ pub fn collect(tree: &ProjectTree, route: &RsDenyRoute) -> DenyFacts {
             &mut uncovered_units,
         );
     }
-    for rel_dir in standalone_package_roots {
-        facts_support::push_coverage_facts(
-            tree,
-            &rel_dir,
-            PolicyRootKind::StandalonePackageRoot,
-            &allowed_configs,
-            &mut covered_units,
-            &mut uncovered_units,
-        );
-    }
 
+    linted_configs.sort_by(|a, b| a.rel_path.cmp(&b.rel_path));
     allowed_configs.sort_by(|a, b| a.rel_path.cmp(&b.rel_path));
     forbidden_configs.sort_by(|a, b| a.rel_path.cmp(&b.rel_path));
     same_root_conflicts.sort_by(|a, b| a.policy_root_rel.cmp(&b.policy_root_rel));
@@ -176,6 +148,7 @@ pub fn collect(tree: &ProjectTree, route: &RsDenyRoute) -> DenyFacts {
 
     DenyFacts {
         policy_context_parse_error: profile_map_facts.parse_error,
+        linted_configs,
         allowed_configs,
         forbidden_configs,
         same_root_conflicts,
@@ -188,10 +161,28 @@ fn collect_cargo_roots(
     tree: &ProjectTree,
     route: &RsDenyRoute,
 ) -> BTreeMap<String, CargoRootFacts> {
-    route
+    let routed_root_rels = route
         .roots()
         .iter()
-        .map(|root| root.rel_dir().to_owned())
+        .map(|root| root.rel_dir())
+        .collect::<BTreeSet<_>>();
+
+    route
+        .family_files()
+        .iter()
+        .filter(|file| file.kind() == RustFamilyFileKind::CargoToml && file.exact_rust_root_owner())
+        .filter(|file| {
+            routed_root_rels.contains(file.logical_owner_rel())
+                || route.family_files().iter().any(|candidate| {
+                    matches!(
+                        candidate.kind(),
+                        RustFamilyFileKind::DenyToml
+                            | RustFamilyFileKind::DenyDotToml
+                            | RustFamilyFileKind::CargoDenyToml
+                    ) && candidate.logical_owner_rel() == file.logical_owner_rel()
+                })
+        })
+        .map(|file| file.logical_owner_rel().to_owned())
         .map(|rel_dir| {
             let rel_path = if rel_dir.is_empty() {
                 "Cargo.toml".to_owned()
@@ -205,13 +196,11 @@ fn collect_cargo_roots(
                 || CargoRootFacts {
                     rel_dir: rel_dir.clone(),
                     has_workspace: false,
-                    has_package: false,
                     workspace_members: Vec::new(),
                 },
                 |parsed| CargoRootFacts {
                     rel_dir: rel_dir.clone(),
                     has_workspace: parsed.get("workspace").is_some(),
-                    has_package: parsed.get("package").is_some(),
                     workspace_members: parse_workspace_members(tree, &rel_dir, parsed),
                 },
             );
@@ -255,99 +244,29 @@ fn expand_member_pattern(tree: &ProjectTree, workspace_rel: &str, member: &str) 
 
 fn collect_configs(
     tree: &ProjectTree,
+    route: &RsDenyRoute,
     profile_map: &BTreeMap<String, Option<String>>,
-    routed_root_rels: &BTreeSet<String>,
+    _routed_root_rels: &BTreeSet<String>,
     validation_scope: Option<&str>,
     policy_context_valid: bool,
 ) -> Vec<DenyConfigFacts> {
     let mut configs = Vec::new();
     let mut seen_paths = BTreeSet::new();
-    if overlaps_validation_scope("", validation_scope) {
-        push_config_if_present(
-            tree,
-            "",
-            "deny.toml",
-            "deny.toml",
-            profile_map,
-            policy_context_valid,
-            &mut seen_paths,
-            &mut configs,
-        );
-        push_config_if_present(
-            tree,
-            "",
-            ".deny.toml",
-            ".deny.toml",
-            profile_map,
-            policy_context_valid,
-            &mut seen_paths,
-            &mut configs,
-        );
-        push_config_if_present(
-            tree,
-            "",
-            ".cargo/deny.toml",
-            ".cargo/deny.toml",
-            profile_map,
-            policy_context_valid,
-            &mut seen_paths,
-            &mut configs,
-        );
-    }
-
-    for rel_dir in tree
-        .dirs_with_file("deny.toml")
-        .into_iter()
-        .filter(|rel_dir| is_under_routed_root(rel_dir, routed_root_rels))
-    {
-        if rel_dir == ".cargo" || rel_dir.ends_with("/.cargo") {
-            let policy_root_rel = facts_support::parent_dir(&rel_dir);
-            if !overlaps_validation_scope(&policy_root_rel, validation_scope) {
-                continue;
-            }
-            let rel_path = ProjectTree::join_rel(&rel_dir, "deny.toml");
-            push_config_if_present(
-                tree,
-                &policy_root_rel,
-                &rel_path,
-                ".cargo/deny.toml",
-                profile_map,
-                policy_context_valid,
-                &mut seen_paths,
-                &mut configs,
-            );
-        } else {
-            if !overlaps_validation_scope(&rel_dir, validation_scope) {
-                continue;
-            }
-            let rel_path = ProjectTree::join_rel(&rel_dir, "deny.toml");
-            push_config_if_present(
-                tree,
-                &rel_dir,
-                &rel_path,
-                "deny.toml",
-                profile_map,
-                policy_context_valid,
-                &mut seen_paths,
-                &mut configs,
-            );
-        }
-    }
-
-    for rel_dir in tree
-        .dirs_with_file(".deny.toml")
-        .into_iter()
-        .filter(|rel_dir| is_under_routed_root(rel_dir, routed_root_rels))
-    {
-        if !overlaps_validation_scope(&rel_dir, validation_scope) {
+    for file in route.family_files() {
+        let (policy_root_rel, file_kind) = match file.kind() {
+            RustFamilyFileKind::DenyToml => (file.logical_owner_rel(), "deny.toml"),
+            RustFamilyFileKind::DenyDotToml => (file.logical_owner_rel(), ".deny.toml"),
+            RustFamilyFileKind::CargoDenyToml => (file.logical_owner_rel(), ".cargo/deny.toml"),
+            _ => continue,
+        };
+        if !overlaps_validation_scope(policy_root_rel, validation_scope) {
             continue;
         }
-        let rel_path = ProjectTree::join_rel(&rel_dir, ".deny.toml");
         push_config_if_present(
             tree,
-            &rel_dir,
-            &rel_path,
-            ".deny.toml",
+            policy_root_rel,
+            file.rel_path(),
+            file_kind,
             profile_map,
             policy_context_valid,
             &mut seen_paths,
@@ -358,10 +277,43 @@ fn collect_configs(
     configs
 }
 
+fn collect_same_root_conflicts(allowed_configs: &[DenyConfigFacts]) -> Vec<SameRootConflictFacts> {
+    let mut grouped = BTreeMap::<String, Vec<String>>::new();
+
+    for config in allowed_configs {
+        grouped
+            .entry(config.policy_root_rel.clone())
+            .or_default()
+            .push(config.rel_path.clone());
+    }
+
+    grouped
+        .into_iter()
+        .filter_map(|(policy_root_rel, mut rel_paths)| {
+            rel_paths.sort_by_key(|rel_path| deny_config_precedence(rel_path));
+            rel_paths.dedup();
+            (rel_paths.len() > 1).then_some(SameRootConflictFacts {
+                policy_root_rel,
+                rel_paths,
+            })
+        })
+        .collect()
+}
+
 fn overlaps_validation_scope(rel_path: &str, validation_scope: Option<&str>) -> bool {
     validation_scope.is_none_or(|scope_rel| {
         path_is_under(rel_path, scope_rel) || path_is_under(scope_rel, rel_path)
     })
+}
+
+fn deny_config_precedence(rel_path: &str) -> usize {
+    if rel_path.ends_with("/.cargo/deny.toml") || rel_path == ".cargo/deny.toml" {
+        0
+    } else if rel_path.ends_with("/.deny.toml") || rel_path == ".deny.toml" {
+        1
+    } else {
+        2
+    }
 }
 
 fn path_is_under(rel_path: &str, parent_rel: &str) -> bool {
@@ -370,12 +322,6 @@ fn path_is_under(rel_path: &str, parent_rel: &str) -> bool {
         || rel_path
             .strip_prefix(parent_rel)
             .is_some_and(|rest| rest.starts_with('/'))
-}
-
-fn is_under_routed_root(rel_dir: &str, routed_root_rels: &BTreeSet<String>) -> bool {
-    routed_root_rels.iter().any(|root_rel| {
-        root_rel.is_empty() || rel_dir == root_rel || rel_dir.starts_with(&format!("{root_rel}/"))
-    })
 }
 
 fn push_config_if_present(

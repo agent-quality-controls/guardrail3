@@ -25,6 +25,9 @@ fn warns_only_for_library_crates_without_allowlists() {
             (
                 "apps/api/Cargo.toml",
                 r#"
+                    [workspace]
+                    members = []
+
                     [package]
                     name = "api"
                 "#,
@@ -32,6 +35,9 @@ fn warns_only_for_library_crates_without_allowlists() {
             (
                 "packages/core/Cargo.toml",
                 r#"
+                    [workspace]
+                    members = []
+
                     [package]
                     name = "core"
                 "#,
@@ -76,6 +82,9 @@ fn nested_package_zone_uses_library_policy_anywhere_in_path() {
             (
                 "tools/packages/core/Cargo.toml",
                 r#"
+                    [workspace]
+                    members = ["support"]
+
                     [package]
                     name = "core"
                 "#,

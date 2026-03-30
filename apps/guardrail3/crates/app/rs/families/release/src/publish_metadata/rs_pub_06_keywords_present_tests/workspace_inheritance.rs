@@ -173,17 +173,16 @@ fn should_support_keywords_inheritance_via_package_workspace_reference() {
     let root = temp_root("release-workspace-keywords-package-workspace");
     let tree = project_tree(
         vec![
-            ("", dir_entry(&["ws", "packages"], &[])),
-            ("ws", dir_entry(&[], &["Cargo.toml"])),
+            ("", dir_entry(&["packages"], &["Cargo.toml"])),
             ("packages", dir_entry(&["pub"], &[])),
             ("packages/pub", dir_entry(&[], &["Cargo.toml"])),
         ],
         vec![
             (
-                "ws/Cargo.toml",
+                "Cargo.toml",
                 r#"
 [workspace]
-members = ["../packages/pub"]
+members = ["packages/pub"]
 resolver = "2"
 
 [workspace.package]
@@ -198,7 +197,7 @@ keywords = ["cli", "guardrail"]
 name = "pub"
 version = "0.1.0"
 edition = "2024"
-workspace = "../../ws"
+workspace = "../.."
 keywords.workspace = true
 "#,
             ),

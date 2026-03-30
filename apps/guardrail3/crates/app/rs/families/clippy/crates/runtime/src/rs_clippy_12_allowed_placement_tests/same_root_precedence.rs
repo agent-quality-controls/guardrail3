@@ -53,7 +53,7 @@ fn rejects_lower_precedence_same_root_sibling_config_at_a_workspace_root() {
 }
 
 #[test]
-fn rejects_lower_precedence_same_root_sibling_config_at_a_standalone_package_root() {
+fn forbids_both_same_root_sibling_configs_at_a_non_workspace_root() {
     let tree = project_tree(
         vec![
             ("", dir_entry(&["tools"], &[])),
@@ -80,10 +80,9 @@ fn rejects_lower_precedence_same_root_sibling_config_at_a_standalone_package_roo
     );
 
     let results = run_for_tests(&tree);
-    assertions::assert_allowed_files(&results, &["tools/helper/.clippy.toml"]);
-    assertions::assert_same_root_conflict(
+    assertions::assert_allowed_files(&results, &[]);
+    assertions::assert_forbidden_files(
         &results,
-        "tools/helper/clippy.toml",
-        "tools/helper/.clippy.toml",
+        &["tools/helper/.clippy.toml", "tools/helper/clippy.toml"],
     );
 }

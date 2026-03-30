@@ -4,7 +4,7 @@ use std::collections::BTreeSet;
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::clippy_support::{EXPECTED_MACRO_BANS, display_macro_name, parse_ban_section};
+use super::clippy_support::{display_macro_name, parse_ban_section, EXPECTED_MACRO_BANS};
 use super::inputs::ConfigClippyInput;
 
 const ID: &str = "RS-CLIPPY-20";

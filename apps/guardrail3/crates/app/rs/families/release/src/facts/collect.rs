@@ -12,22 +12,18 @@ pub fn collect(
 ) -> types::ReleaseFacts {
     let mut input_failures = Vec::new();
     let cargo_roots = cargo_roots::collect_cargo_roots(tree, route, &mut input_failures);
-    let routed_cargo_rel_paths = route
-        .roots()
+    let has_cargo_candidates = route
+        .family_files()
         .iter()
-        .map(|root| {
-            if root.rel_dir().is_empty() {
-                "Cargo.toml".to_owned()
-            } else {
-                release_support::binaries::join_under_root(root.rel_dir(), "Cargo.toml")
-            }
-        })
-        .collect::<BTreeSet<_>>();
+        .any(|file| file.kind() == guardrail3_app_rs_ownership::RustFamilyFileKind::CargoToml);
+    if cargo_roots.is_empty() && !has_cargo_candidates && input_failures.is_empty() {
+        return types::ReleaseFacts::default();
+    }
     let crate_index = collect_crate_index(tree, &cargo_roots);
     let mut crates = collect_crate_facts(
         tree,
         &cargo_roots,
-        &routed_cargo_rel_paths,
+        route.validation_scope(),
         tc,
         thorough,
         &mut input_failures,
@@ -45,7 +41,7 @@ pub fn collect(
     )];
     let edges = collect_release_edges(
         &cargo_roots,
-        &routed_cargo_rel_paths,
+        route.validation_scope(),
         &crate_index.version_map,
         &crate_index.publishable_names,
     );
@@ -127,17 +123,21 @@ fn collect_crate_index(
 fn collect_crate_facts(
     tree: &guardrail3_domain_project_tree::ProjectTree,
     cargo_roots: &BTreeMap<String, types::CargoRootFacts>,
-    routed_cargo_rel_paths: &BTreeSet<String>,
+    validation_scope: Option<&str>,
     tc: &dyn guardrail3_outbound_traits::ToolChecker,
     thorough: bool,
     input_failures: &mut Vec<types::ReleaseInputFailureFacts>,
 ) -> Vec<types::PublishableCrateFacts> {
     let mut crates = Vec::new();
 
-    for root in cargo_roots.values().filter(|root| root.has_package) {
-        if !routed_cargo_rel_paths.contains(&root.cargo_rel_path) {
-            continue;
-        }
+    for root in cargo_roots
+        .values()
+        .filter(|root| root.has_package)
+        .filter(|root| {
+            validation_scope
+                .is_none_or(|scope| rel_intersects_validation_scope(&root.rel_dir, scope))
+        })
+    {
         let package = release_support::binaries::package_table(&root.parsed);
         let workspace_root = cargo_roots::workspace_root_for_package(root, cargo_roots);
         let workspace_package = workspace_root
@@ -395,15 +395,19 @@ fn parse_optional_toml(
 
 fn collect_release_edges(
     cargo_roots: &BTreeMap<String, types::CargoRootFacts>,
-    routed_cargo_rel_paths: &BTreeSet<String>,
+    validation_scope: Option<&str>,
     version_map: &BTreeMap<String, String>,
     publishable_names: &BTreeSet<String>,
 ) -> Vec<types::ReleaseEdgeFacts> {
     let mut edges = Vec::new();
-    for root in cargo_roots.values().filter(|root| root.has_package) {
-        if !routed_cargo_rel_paths.contains(&root.cargo_rel_path) {
-            continue;
-        }
+    for root in cargo_roots
+        .values()
+        .filter(|root| root.has_package)
+        .filter(|root| {
+            validation_scope
+                .is_none_or(|scope| rel_intersects_validation_scope(&root.rel_dir, scope))
+        })
+    {
         let package = release_support::binaries::package_table(&root.parsed);
         let workspace_root = cargo_roots::workspace_root_for_package(root, cargo_roots);
         let workspace_package = workspace_root
@@ -449,6 +453,20 @@ fn collect_release_edges(
         }
     }
     edges
+}
+
+fn rel_intersects_validation_scope(rel_dir: &str, validation_scope: &str) -> bool {
+    if validation_scope.is_empty() || rel_dir.is_empty() {
+        return true;
+    }
+
+    rel_dir == validation_scope
+        || rel_dir
+            .strip_prefix(validation_scope)
+            .is_some_and(|rest| rest.starts_with('/'))
+        || validation_scope
+            .strip_prefix(rel_dir)
+            .is_some_and(|rest| rest.starts_with('/'))
 }
 
 fn collect_workflows(

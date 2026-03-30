@@ -4,7 +4,7 @@ use test_support::{build_fixture_clippy_toml, write_file};
 use super::super::{copy_fixture_for_tests, run_with_validation_scope_for_tests};
 
 #[test]
-fn ignores_sibling_policy_roots_when_validation_scope_targets_one_app() {
+fn ignores_nested_workspace_policy_roots_when_validation_scope_targets_one_app() {
     let tmp = copy_fixture_for_tests();
     write_file(
         tmp.path(),
@@ -21,13 +21,6 @@ fn ignores_sibling_policy_roots_when_validation_scope_targets_one_app() {
     assertions::assert_multi_root_coverage(
         &results,
         &[
-            (
-                "workspace root `apps/backend` is covered by `clippy.toml`.",
-                assertions::Severity::Info,
-                true,
-                Some("clippy.toml"),
-                "Rust unit covered by clippy.toml",
-            ),
             (
                 "workspace root is covered by `clippy.toml`.",
                 assertions::Severity::Info,

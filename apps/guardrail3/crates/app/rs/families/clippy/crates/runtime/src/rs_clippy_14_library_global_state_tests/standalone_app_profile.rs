@@ -27,7 +27,7 @@ fn standalone_app_root_uses_rust_apps_profile_policy() {
             ),
             (
                 "apps/libsite/Cargo.toml",
-                "[package]\nname = \"libsite\"\n".to_owned(),
+                "[workspace]\nmembers = []\n[package]\nname = \"libsite\"\n".to_owned(),
             ),
             ("apps/libsite/clippy.toml", clippy),
         ],

@@ -240,7 +240,8 @@ pub fn published_library_package_root_tree(local_clippy_toml: impl Into<String>)
         vec![
             (
                 "Cargo.toml",
-                "[package]\nname = \"libcrate\"\npublish = true\n".to_owned(),
+                "[workspace]\nmembers = []\n[package]\nname = \"libcrate\"\npublish = true\n"
+                    .to_owned(),
             ),
             (
                 "guardrail3.toml",

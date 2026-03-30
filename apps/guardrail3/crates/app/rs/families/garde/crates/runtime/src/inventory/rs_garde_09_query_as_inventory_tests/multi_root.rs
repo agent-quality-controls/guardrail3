@@ -28,7 +28,7 @@ fn load() {
 
     let tree = project_tree(
         vec![
-            ("", dir_entry(&["vendor"], &["Cargo.toml"])),
+            ("", dir_entry(&["vendor"], &[])),
             ("vendor", dir_entry(&["lib", "tool"], &[])),
             (
                 "vendor/lib",
@@ -42,10 +42,11 @@ fn load() {
             ("vendor/tool/src", dir_entry(&[], &["db.rs"])),
         ],
         vec![
-            ("Cargo.toml", "[workspace]\nmembers = []\n"),
             (
                 "vendor/lib/Cargo.toml",
-                r#"[package]
+                r#"[workspace]
+members = []
+[package]
 name = "lib"
 [dependencies]
 garde = { version = "0.22", features = ["derive"] }
@@ -67,7 +68,9 @@ reason = "Temporary SQLx row mapping until validated DTO extraction lands."
             ),
             (
                 "vendor/tool/Cargo.toml",
-                r#"[package]
+                r#"[workspace]
+members = []
+[package]
 name = "tool"
 [dependencies]
 garde = { version = "0.22", features = ["derive"] }

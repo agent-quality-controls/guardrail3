@@ -4,7 +4,7 @@ use test_support::{build_fixture_clippy_toml, dir_entry, project_tree};
 use super::super::run_for_tests;
 
 #[test]
-fn inventories_dotfile_at_validation_workspace_and_standalone_package_roots() {
+fn inventories_dotfile_only_at_the_top_workspace_root_when_nested_workspaces_exist() {
     let tree = project_tree(
         vec![
             (
@@ -38,7 +38,7 @@ fn inventories_dotfile_at_validation_workspace_and_standalone_package_roots() {
             ),
             (
                 "packages/shared-types/Cargo.toml",
-                "[package]\nname = \"shared-types\"\n".to_owned(),
+                "[workspace]\nmembers = []\n".to_owned(),
             ),
             (
                 "packages/shared-types/.clippy.toml",
@@ -48,12 +48,5 @@ fn inventories_dotfile_at_validation_workspace_and_standalone_package_roots() {
     );
 
     let results = run_for_tests(&tree);
-    assertions::assert_allowed_files(
-        &results,
-        &[
-            ".clippy.toml",
-            "apps/backend/.clippy.toml",
-            "packages/shared-types/.clippy.toml",
-        ],
-    );
+    assertions::assert_allowed_files(&results, &[".clippy.toml"]);
 }

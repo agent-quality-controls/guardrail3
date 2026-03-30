@@ -8,7 +8,7 @@ mod runners;
 use guardrail3_domain_config::types::{GuardrailConfig, RustChecksConfig, RustConfig};
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::{
-    CheckResult, Report, Section, rust_validate_family_cli_name, rust_validate_family_section_name,
+    rust_validate_family_cli_name, rust_validate_family_section_name, CheckResult, Report, Section,
 };
 use guardrail3_outbound_traits::{FileSystem, ToolChecker};
 use guardrail3_validation_model::RustValidateFamily;
@@ -16,6 +16,9 @@ use guardrail3_validation_model::RustValidateFamily;
 mod runtime_deps {
     pub(super) use guardrail3_app_core::project_walker;
     pub(super) use guardrail3_app_rs_family_selection as family_selection;
+
+    #[cfg(feature = "routing")]
+    pub(super) use guardrail3_app_rs_ownership as ownership;
 
     #[cfg(feature = "routing")]
     pub(super) use guardrail3_app_rs_placement as placement;
@@ -83,9 +86,17 @@ pub fn run(
     #[cfg(feature = "routing")]
     let scope = runtime_deps::placement::collect(&tree);
     #[cfg(feature = "routing")]
-    let mapper =
-        runtime_deps::FamilyMapper::new(&tree, &scope, config.as_ref(), &selected, scoped_files)
-            .with_validation_scope(validation_scope);
+    let owned_surface = runtime_deps::ownership::collect(&tree, &scope);
+    #[cfg(feature = "routing")]
+    let mapper = runtime_deps::FamilyMapper::with_owned_surface(
+        &tree,
+        &scope,
+        &owned_surface,
+        config.as_ref(),
+        &selected,
+        scoped_files,
+    )
+    .with_validation_scope(validation_scope);
     #[cfg(not(feature = "routing"))]
     let _ = (scoped_files, validation_scope);
     let ctx = RustRunContext {
@@ -303,6 +314,8 @@ fn family_uses_global_only(family: RustValidateFamily) -> bool {
         family,
         RustValidateFamily::Arch
             | RustValidateFamily::Fmt
+            | RustValidateFamily::Code
+            | RustValidateFamily::Test
             | RustValidateFamily::HooksShared
             | RustValidateFamily::HooksRs
     )

@@ -66,6 +66,9 @@ fn warns_when_docs_rs_table_is_empty() {
             (
                 "Cargo.toml",
                 r#"
+[workspace]
+resolver = "2"
+
 [package]
 name = "lib"
 version = "0.1.0"
@@ -111,6 +114,9 @@ fn emits_non_inventory_info_when_docs_rs_table_has_only_unrelated_keys() {
             (
                 "Cargo.toml",
                 r#"
+[workspace]
+resolver = "2"
+
 [package]
 name = "lib"
 version = "0.1.0"

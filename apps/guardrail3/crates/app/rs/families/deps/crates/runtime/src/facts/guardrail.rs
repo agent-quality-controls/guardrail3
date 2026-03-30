@@ -4,10 +4,16 @@ use guardrail3_domain_project_tree::ProjectTree;
 
 use super::{DepsCratePolicy, ParsedGuardrail};
 
-pub(super) fn parse_guardrail(tree: &ProjectTree) -> Option<ParsedGuardrail> {
-    let Some(content) = tree.file_content("guardrail3.toml") else {
+pub(super) fn parse_guardrail(
+    tree: &ProjectTree,
+    guardrail_rel_path: Option<&str>,
+) -> Option<ParsedGuardrail> {
+    let Some(guardrail_rel_path) = guardrail_rel_path else {
+        return None;
+    };
+    let Some(content) = tree.file_content(guardrail_rel_path) else {
         return tree
-            .file_exists("guardrail3.toml")
+            .file_exists(guardrail_rel_path)
             .then(|| ParsedGuardrail {
                 root_profile_name: None,
                 apps: BTreeMap::new(),

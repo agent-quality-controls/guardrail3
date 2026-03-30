@@ -35,6 +35,9 @@ fn inventories_nonempty_docs_rs_table_from_manifest() {
             (
                 "Cargo.toml",
                 r#"
+[workspace]
+resolver = "2"
+
 [package]
 name = "lib"
 version = "0.1.0"

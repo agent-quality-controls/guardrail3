@@ -13,7 +13,8 @@ fn warns_when_library_package_is_explicitly_not_publishable() {
         vec![
             (
                 "Cargo.toml",
-                "[package]\nname = \"libcrate\"\npublish = false\n".to_owned(),
+                "[workspace]\nmembers = []\n[package]\nname = \"libcrate\"\npublish = false\n"
+                    .to_owned(),
             ),
             (
                 "guardrail3.toml",
@@ -40,7 +41,8 @@ fn warns_when_library_package_publish_shape_is_malformed() {
         vec![
             (
                 "Cargo.toml",
-                "[package]\nname = \"libcrate\"\npublish = 7\n".to_owned(),
+                "[workspace]\nmembers = []\n[package]\nname = \"libcrate\"\npublish = 7\n"
+                    .to_owned(),
             ),
             (
                 "guardrail3.toml",

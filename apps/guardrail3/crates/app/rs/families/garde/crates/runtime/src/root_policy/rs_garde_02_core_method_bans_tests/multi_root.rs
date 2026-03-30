@@ -12,19 +12,24 @@ fn local_missing_core_ban_only_warns_for_owned_root() {
     );
     let tree = project_tree(
         vec![
-            ("", dir_entry(&["vendor"], &["Cargo.toml", "clippy.toml"])),
+            ("", dir_entry(&["apps", "vendor"], &[])),
+            ("apps", dir_entry(&["root"], &[])),
+            (
+                "apps/root",
+                dir_entry(&[], &["Cargo.toml", "clippy.toml"]),
+            ),
             ("vendor", dir_entry(&["lib"], &[])),
             ("vendor/lib", dir_entry(&[], &["Cargo.toml", "clippy.toml"])),
         ],
         vec![
             (
-                "Cargo.toml",
-                "[workspace]\nmembers = []\n[workspace.dependencies]\ngarde = \"0.1\"\n",
+                "apps/root/Cargo.toml",
+                "[workspace]\nmembers = []\n[package]\nname = \"root\"\nversion = \"0.1.0\"\n[dependencies]\ngarde = \"0.1\"\n",
             ),
-            ("clippy.toml", root_clippy.as_str()),
+            ("apps/root/clippy.toml", root_clippy.as_str()),
             (
                 "vendor/lib/Cargo.toml",
-                "[package]\nname = \"vendored\"\nversion = \"0.1.0\"\n[dependencies]\ngarde = \"0.1\"\n",
+                "[workspace]\nmembers = []\n[package]\nname = \"vendored\"\nversion = \"0.1.0\"\n[dependencies]\ngarde = \"0.1\"\n",
             ),
             ("vendor/lib/clippy.toml", local_clippy.as_str()),
         ],
@@ -39,7 +44,7 @@ fn local_missing_core_ban_only_warns_for_owned_root() {
     );
     assertions::assert_inventory(
         &results,
-        "clippy.toml",
+        "apps/root/clippy.toml",
         "All core serde/toml/yaml deserialization bans are present in the covering clippy configuration.",
     );
     assertions::assert_missing(

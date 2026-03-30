@@ -14,7 +14,7 @@ fn generated_library_baseline_passes_for_standalone_app_root() {
     write_file(
         tmp.path(),
         "apps/libsite/Cargo.toml",
-        "[package]\nname = \"libsite\"\nversion = \"0.1.0\"\nedition = \"2021\"\n",
+        "[workspace]\nmembers = []\n[package]\nname = \"libsite\"\nversion = \"0.1.0\"\nedition = \"2021\"\n",
     );
     write_file(
         tmp.path(),
@@ -39,7 +39,7 @@ fn standalone_app_profile_overrides_packages_profile_for_same_root() {
     write_file(
         tmp.path(),
         "apps/libsite/Cargo.toml",
-        "[package]\nname = \"libsite\"\nversion = \"0.1.0\"\nedition = \"2021\"\n",
+        "[workspace]\nmembers = []\n[package]\nname = \"libsite\"\nversion = \"0.1.0\"\nedition = \"2021\"\n",
     );
     write_file(
         tmp.path(),
@@ -64,7 +64,7 @@ fn local_library_override_does_not_rewrite_the_ancestor_service_root() {
     write_file(
         tmp.path(),
         "apps/libsite/Cargo.toml",
-        "[package]\nname = \"libsite\"\nversion = \"0.1.0\"\nedition = \"2021\"\n",
+        "[workspace]\nmembers = []\n[package]\nname = \"libsite\"\nversion = \"0.1.0\"\nedition = \"2021\"\n",
     );
     write_file(
         tmp.path(),
@@ -98,7 +98,7 @@ fn standalone_app_root_uses_rust_apps_library_profile_for_ban_baseline() {
     write_file(
         tmp.path(),
         "apps/libsite/Cargo.toml",
-        "[package]\nname = \"libsite\"\nversion = \"0.1.0\"\nedition = \"2021\"\n",
+        "[workspace]\nmembers = []\n[package]\nname = \"libsite\"\nversion = \"0.1.0\"\nedition = \"2021\"\n",
     );
     write_file(
         tmp.path(),
