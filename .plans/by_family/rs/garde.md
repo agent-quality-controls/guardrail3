@@ -17,6 +17,7 @@ Current state:
 - self-hosted with `crates/runtime`, `crates/assertions`, and `test_support`
 - depends on correct `RS-CLIPPY` root/config coverage behavior
 - owns garde-specific boundary enforcement, not generic clippy baseline hardening
+- owns a narrow runtime-usage rule for `GuardrailConfig` parse sites that skip `.validate()`
 
 Historical/supplemental references:
 
@@ -27,4 +28,5 @@ Historical/supplemental references:
 Next planning focus:
 
 - keep root-policy inheritance and clippy-coverage dependency explicit
+- generalize validate-call enforcement beyond `GuardrailConfig` only after the false-positive story is proven
 - add stronger family-local docs if source-rule boundaries expand

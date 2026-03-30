@@ -52,8 +52,8 @@ Status snapshot:
 | `fmt` | `apps/guardrail3/crates/app/rs/families/fmt/` | yes | current |
 | `garde` | `apps/guardrail3/crates/app/rs/families/garde/` | yes | current |
 | `hexarch` | `apps/guardrail3/crates/app/rs/families/hexarch/` | yes | current |
-| `libarch` | not implemented yet | no | planned |
-| `release` | `apps/guardrail3/crates/app/rs/families/release/` | no | current, README still needed |
+| `libarch` | `apps/guardrail3/crates/app/rs/families/libarch/` | yes | current |
+| `release` | `apps/guardrail3/crates/app/rs/families/release/` | yes | current |
 | `test` | `apps/guardrail3/crates/app/rs/families/test/` | yes | current |
 | `toolchain` | `apps/guardrail3/crates/app/rs/families/toolchain/` | yes | current |
 

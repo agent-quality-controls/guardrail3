@@ -1,11 +1,11 @@
 # RS-LIBARCH — Rust library architecture checker
 
 > Superseded as the primary family plan by [`.plans/by_family/rs/libarch.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/by_family/rs/libarch.md).
-> Keep this file as the detailed design/history ledger until the family exists in code.
+> Keep this file as the detailed rule ledger and implementation-history reference.
 
 **Input:** package roots + Cargo.toml files + workspace membership + crate directory structure + crate dependency edges
 **Parser:** TOML + directory structure
-**Current code:** none yet
+**Current code:** `apps/guardrail3/crates/app/rs/families/libarch/`
 
 ## Implementation mapping contract
 
@@ -136,17 +136,17 @@ Notes:
 
 | New ID | Severity | What | Status |
 |--------|----------|------|--------|
-| RS-LIBARCH-01 | Error | Library package exceeds any library-complexity threshold but is not a layered workspace | Planned |
-| RS-LIBARCH-02 | Error | Layered library package root Cargo.toml must be a workspace | Planned |
-| RS-LIBARCH-03 | Error | `crates/` must exist at layered library root | Planned |
-| RS-LIBARCH-04 | Error | Required layered crates are exactly `{api, core}` with optional `infra` | Planned |
-| RS-LIBARCH-05 | Error | Workspace members must match layered crate dirs | Planned |
-| RS-LIBARCH-06 | Error | No extra workspace members outside library boundary | Planned |
-| RS-LIBARCH-07 | Error | `core` must not depend on `api` | Planned |
-| RS-LIBARCH-08 | Error | `core` must not depend on `infra` | Planned |
-| RS-LIBARCH-09 | Error | `api` may depend only on `core` and allowed external deps, not on `infra` | Planned |
-| RS-LIBARCH-10 | Error | `infra` may depend on `core`, but must not be re-exported directly as public package surface | Planned |
-| RS-LIBARCH-11 | Error | Root package facade must export public surface from `api`, not directly from `core` / `infra` | Planned |
+| RS-LIBARCH-01 | Error | Library package exceeds any library-complexity threshold but is not a layered workspace | Implemented |
+| RS-LIBARCH-02 | Error | Layered library package root Cargo.toml must be a workspace | Implemented |
+| RS-LIBARCH-03 | Error | `crates/` must exist at layered library root | Implemented |
+| RS-LIBARCH-04 | Error | Required layered crates are exactly `{api, core}` with optional `infra` | Implemented |
+| RS-LIBARCH-05 | Error | Workspace members must match layered crate dirs | Implemented |
+| RS-LIBARCH-06 | Error | No extra workspace members outside library boundary | Implemented |
+| RS-LIBARCH-07 | Error | `core` must not depend on `api` | Implemented |
+| RS-LIBARCH-08 | Error | `core` must not depend on `infra` | Implemented |
+| RS-LIBARCH-09 | Error | `api` may depend only on `core` and allowed external deps, not on `infra` | Implemented |
+| RS-LIBARCH-10 | Error | `infra` may depend on `core`, but must not be re-exported directly as public package surface | Implemented |
+| RS-LIBARCH-11 | Error | Root package facade must export public surface from `api`, not directly from `core` / `infra` | Implemented |
 
 ## Rule intent
 

@@ -1,10 +1,12 @@
 # RS-RELEASE — Release readiness checker (29 rules)
 
 > Superseded as the primary family plan by [`.plans/by_family/rs/release.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/by_family/rs/release.md).
+> Family-local behavior and file shape now live in [`apps/guardrail3/crates/app/rs/families/release/README.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/release/README.md).
 > Keep this file as a detailed rule ledger and migration/history reference.
 
 **Input:** Cargo.toml + release-plz.toml + cliff.toml + .github/workflows/*.yml + README files
-**Current code:** `crates/app/rs/checks/rs/release/**` (old `release_checks.rs`, `release_repo_checks.rs`, `release_crate_checks.rs`, `release_crate_deps.rs`, `release_bin_checks.rs`, and `workspace_metadata.rs` are legacy seed material only)
+**Current code:** `apps/guardrail3/crates/app/rs/families/release/**` (old `validate/release_checks.rs`, `validate/release_repo_checks.rs`, `validate/release_crate_checks.rs`, `validate/release_crate_deps.rs`, `validate/release_bin_checks.rs`, and `validate/workspace_metadata.rs` are legacy seed material only)
+**Family README:** `apps/guardrail3/crates/app/rs/families/release/README.md`
 
 ## Implementation mapping contract
 

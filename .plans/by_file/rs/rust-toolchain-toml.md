@@ -1,5 +1,12 @@
 # rust-toolchain.toml
 
+> Historical research note: the current live `RS-TOOLCHAIN` family is a routed
+> policy-root family, not a validation-root family. See
+> [`.plans/by_family/rs/toolchain.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/by_family/rs/toolchain.md)
+> and
+> [`apps/guardrail3/crates/app/rs/families/toolchain/README.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/families/toolchain/README.md)
+> for the current contract.
+
 ## Location
 
 **Where Rust looks:** Walks UP from CWD toward filesystem root. Nearest `rust-toolchain.toml` or `rust-toolchain` wins. No merging.
@@ -11,14 +18,18 @@
 
 **Scoping question:** Should this be per-workspace or repo-root?
 
-Per-workspace means each app pins its own toolchain. This makes sense if different apps need different Rust versions (app-A needs nightly for a feature, app-B uses stable). But in practice, monorepos almost always use one Rust version everywhere — CI and developer machines have one toolchain.
+That question has since been resolved in favor of routed policy-root
+ownership. The current family validates one local `rust-toolchain.toml`,
+optional local legacy `rust-toolchain`, and one local `Cargo.toml` MSRV source
+for each owned workspace root or standalone package root.
 
-Repo-root means one file covers everything. Simpler, matches common practice.
-
-**Decision: per-workspace (same as clippy/rustfmt/deny).** Reasoning:
-- Extractability — if you pull an app out of the monorepo, it brings its toolchain spec
+The older reasoning below is preserved only as historical context for the
+pre-routing discussion:
+- Extractability — if you pull an app out of the monorepo, it brings its
+  toolchain spec
 - A workspace with rust-toolchain.toml is self-contained
-- If someone wants repo-root-only, they just put it at root and don't put per-app ones (rustup walks up, finds root)
+- If someone wants repo-root-only, they just put it at root and don't put
+  per-app ones (rustup walks up, finds root)
 
 ## Contents
 
@@ -68,7 +79,10 @@ None needed. User edits the file directly. guardrail3 only ensures clippy and ru
 
 1. **Legacy `rust-toolchain` file (no .toml):** Old format, just contains the channel string. Warn — recommend migrating to .toml format.
 2. **Nightly pinning:** Some projects use `channel = "nightly-2024-01-15"`. guardrail3 should leave this alone — it's a deliberate pin.
-3. **Per-crate rust-toolchain.toml:** Unlike clippy/deny, rustup resolves rust-toolchain.toml by walking up from CWD, not from crate manifest. So a per-crate file is unusual but not dangerous in the same way. Still, one per workspace is sufficient.
+3. **Per-crate rust-toolchain.toml:** Unlike clippy/deny, rustup resolves
+   rust-toolchain.toml by walking up from CWD, not from crate manifest. The
+   current guardrail family models ownership at routed policy roots rather than
+   raw rustup walk-up behavior.
 
 ## Parser
 

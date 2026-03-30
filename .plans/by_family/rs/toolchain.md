@@ -1,6 +1,6 @@
 # RS-TOOLCHAIN
 
-Status: current, implemented, self-hosted, repository-root family.
+Status: current, implemented, self-hosted, routed policy-root family.
 
 Implementation root:
 
@@ -13,9 +13,12 @@ Current source of truth:
 
 Current state:
 
-- root-level family for `rust-toolchain.toml` / `rust-toolchain`
+- routed family over Rust policy roots
 - self-hosted with `crates/runtime` and `crates/assertions`
-- deliberately not a per-workspace/per-package discovery family unless a future architecture decision changes that
+- owned roots are workspace roots plus standalone package roots that are not
+  claimed as workspace members
+- `guardrail3` repo reality: the governed workspace root is
+  `apps/guardrail3`, not the repo root
 
 Historical/supplemental references:
 
@@ -24,5 +27,5 @@ Historical/supplemental references:
 
 Next planning focus:
 
-- clean stale old-path references in the older ledger
+- keep docs/tests aligned with routed policy-root ownership
 - keep toolchain/MSRV overlap with `RS-CARGO` explicit rather than letting the two families drift

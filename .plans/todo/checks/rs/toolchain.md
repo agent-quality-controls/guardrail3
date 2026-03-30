@@ -3,9 +3,10 @@
 > Superseded as the primary family plan by [`.plans/by_family/rs/toolchain.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/by_family/rs/toolchain.md).
 > Keep this file as a detailed rule ledger and migration/history reference.
 
-**Input:** rust-toolchain.toml / rust-toolchain at repository root
+**Input:** local `rust-toolchain.toml` / `rust-toolchain` at each routed Rust
+policy root
 **Parser:** TOML
-**Current code:** `crates/app/rs/checks/rs/toolchain/**` (old `config_files.rs` / `toolchain_check.rs` are legacy seed material only)
+**Current code:** `apps/guardrail3/crates/app/rs/families/toolchain/**` (old `config_files.rs` / `toolchain_check.rs` are legacy seed material only)
 
 ## Implementation mapping contract
 
@@ -21,28 +22,32 @@ Forbidden:
 
 ## Scope decision
 
-`RS-TOOLCHAIN` is currently intentionally root-level, not a multi-root family.
+`RS-TOOLCHAIN` is a routed policy-root family.
 
-It validates the top-level Rust toolchain contract for the repository:
-- one effective root toolchain
-- one effective root MSRV/toolchain relationship
+It validates one local toolchain/MSRV contract for each owned Rust policy root:
+- workspace roots
+- standalone package roots not claimed as workspace members
 
-This plan should not silently drift into per-workspace/per-package toolchain discovery without an explicit architecture decision.
+The family should not silently drift back to “validation-root means policy
+root.” Root ownership comes from placement + family mapping.
 
 ## Discovery / ownership model
 
-- `rust-toolchain.toml` at repo root is the primary owned input
-- legacy `rust-toolchain` at repo root is a compatibility surface, not the preferred contract
-- if both files exist, the ambiguity is owned by `RS-TOOLCHAIN-04`
-- `RS-TOOLCHAIN` currently reads MSRV only from the root `Cargo.toml`
+- each owned policy root must carry its own local `rust-toolchain.toml`
+- local legacy `rust-toolchain` is a compatibility surface, not the preferred contract
+- if both local files exist, the ambiguity is owned by `RS-TOOLCHAIN-04`
+- `RS-TOOLCHAIN` reads MSRV from the owned root `Cargo.toml`
+- parent/repo-root toolchain files do not satisfy governed app/package roots
 
-The family is about one repository toolchain contract, not many local toolchain contracts.
+In this repo, that means repo-root validation must still enforce
+`apps/guardrail3/rust-toolchain.toml`, because Arch forbids a repo-root Rust
+workspace manifest.
 
 ## Rules
 
 | New ID | Old ID | Severity | What | Status |
 |--------|--------|----------|------|--------|
-| RS-TOOLCHAIN-01 | R24 | Error | rust-toolchain.toml exists at repository root | Implemented |
+| RS-TOOLCHAIN-01 | R24 | Error | rust-toolchain.toml exists at each owned policy root | Implemented |
 | RS-TOOLCHAIN-02 | R25 | Error/Warn/Info | Channel + components policy. `stable` is clean inventory; pinned stable versions are tolerated inventory; nightly, pinned-nightly, and beta are errors; missing channel/components are warnings. Components must include `clippy` + `rustfmt`. | Implemented |
 
 ## New rules from audit
@@ -55,12 +60,12 @@ The family is about one repository toolchain contract, not many local toolchain 
 ## Input integrity / fail-closed expectations
 
 The family depends on:
-- root `rust-toolchain.toml` when present
-- root `Cargo.toml` for MSRV comparison
+- local owned-root `rust-toolchain.toml` when present
+- local owned-root `Cargo.toml` for MSRV comparison
 
 Malformed inputs required for the rule should not silently weaken enforcement:
 - malformed `rust-toolchain.toml` must surface explicitly
-- malformed root `Cargo.toml` must not silently disable `RS-TOOLCHAIN-03`
+- malformed owned-root `Cargo.toml` must not silently disable `RS-TOOLCHAIN-03`
 
 ## Channel policy details
 
@@ -75,7 +80,8 @@ The stable contract is:
 
 `RS-TOOLCHAIN-03` and `RS-CARGO-15` deliberately touch the same MSRV space from different sides:
 - `RS-CARGO-15` checks whether the manifest declares the metadata
-- `RS-TOOLCHAIN-03` checks whether the chosen toolchain is compatible with that metadata
+- `RS-TOOLCHAIN-03` checks whether the chosen local policy-root toolchain is
+  compatible with that metadata
 
 That overlap is intentional and should stay explicit in the plan.
 

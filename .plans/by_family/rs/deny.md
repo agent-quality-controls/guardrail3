@@ -15,6 +15,7 @@ Current state:
 
 - self-hosted with `crates/runtime`, `crates/assertions`, and `test_support`
 - owns cargo-deny config coverage, placement, shadowing, and deny-policy semantics
+- malformed `guardrail3.toml` now fails closed for deny profile selection instead of degrading to service defaults
 - by-file deny docs remain research on tool behavior, not the family contract
 
 Historical/supplemental references:
@@ -25,5 +26,5 @@ Historical/supplemental references:
 
 Next planning focus:
 
-- finish the same doc cleanup done for `arch`/`clippy` if stale implementation pointers remain in the old ledger
-- add a stronger family-local README/source-of-truth note if deny grows more generator coupling
+- close the remaining deny hardening-matrix gaps, especially broader mixed-root/profile attacks and end-to-end parity evidence
+- finish the old-ledger cleanup if stale implementation pointers remain in the secondary docs

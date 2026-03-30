@@ -16,12 +16,13 @@ Read these in order:
 
 ## Primary Code
 
-- `apps/guardrail3/crates/app/rs/checks/rs/fmt/`
+- `apps/guardrail3/crates/app/rs/families/fmt/`
 
 Important family files:
-- `mod.rs`
-- `facts.rs`
-- `inputs.rs`
+- `README.md`
+- `crates/runtime/src/lib.rs`
+- `crates/runtime/src/facts.rs`
+- `crates/runtime/src/inputs.rs`
 
 Rules:
 - `rs_fmt_01_exists.rs`
@@ -74,22 +75,21 @@ Ownership split:
 
 ## Known Live Gaps
 
-The family is implemented but still structurally behind the test standard.
+The family is implemented and already uses the intended self-hosted directory shape.
 
 Highest-signal remaining gaps:
-- every rule still uses `*_tests.rs`, not `*_tests/`
 - root-vs-nested ownership needs harder exact-result testing
 - root dual-file ambiguity and nested override interactions need broader attack coverage
 - parse-failure ownership must stay rule-local and exact
 
 ## Current Test Shape
 
-The family still uses:
-- `rs_fmt_*_tests.rs`
+The family now uses:
+- `rs_fmt_*_tests/`
 
-This pass should move it to:
+Keep that shape:
 - one rule-specific `*_tests/` directory per rule
-- one test file per attack vector
+- split by attack vector inside the directory when coverage justifies another file
 
 ## Required Attack Classes
 
@@ -119,7 +119,7 @@ Harden `rs/fmt` only.
 
 Required outcomes:
 - verify root-only ownership against `fmt.md`
-- convert every rule to a rule-specific `*_tests/` directory
+- preserve the existing rule-specific `*_tests/` directories
 - add golden coverage for every rule
 - add at least one real attack-vector test for every rule
 - use exact owned hit/non-hit assertions
@@ -133,14 +133,14 @@ Required outcomes:
 
 - reinterpret the family as multi-root policy ownership
 - collapse parse failures into generic no-finding behavior
-- leave tests as `*_tests.rs`
+- regress tests back to `*_tests.rs`
 - reduce assertions to loose “rule appeared” checks
 
 ## Done Means
 
 The pass is not done until:
 
-- every fmt rule has a rule-specific `*_tests/` directory
+- every fmt rule keeps its rule-specific `*_tests/` directory
 - every fmt rule has golden coverage
 - every fmt rule has at least one real attack-vector test
 - exact-result assertions replace loose presence checks
@@ -151,7 +151,7 @@ The pass is not done until:
 
 1. read `fmt.md` and map all 8 rules to current files
 2. audit `mod.rs` / `facts.rs` / `inputs.rs` for root-only ownership
-3. convert all `rs_fmt_*_tests.rs` files to `*_tests/`
+3. audit the existing `rs_fmt_*_tests/` directories for missing attack vectors and exact-result gaps
 4. harden the highest-risk rules first:
    - `RS-FMT-02`
    - `RS-FMT-04`

@@ -15,6 +15,8 @@ Current state:
 
 - self-hosted with `crates/runtime`, `crates/assertions`, and `test_support`
 - the family README is the strongest live contract for rule semantics and family shape
+- the family-local closure pass is complete; current follow-up is cross-family enforcement, not more `rs/test` implementation
+- generated/cache Rust under `target/**` is outside owned-root analysis
 - old test-hardening briefs remain execution history, not primary authority
 
 Historical/supplemental references:
@@ -27,4 +29,6 @@ Historical/supplemental references:
 Next planning focus:
 
 - keep the README and live implementation aligned; this family already acts as the hardening baseline for the other Rust families
+- drive remaining semantic-ownership cleanup from the target families that still violate `RS-TEST`, starting with cargo's `crates/assertions_common/src/lib.rs`
 - avoid reintroducing flat test sidecars or local family-owned routing logic
+- keep attacking `RS-TEST-16/17/18` and discovery boundaries for new bypasses rather than assuming the closure pass was exhaustive

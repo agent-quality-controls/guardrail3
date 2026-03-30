@@ -25,5 +25,6 @@ Historical/supplemental references:
 
 Next planning focus:
 
-- clean stale old-path references in the older ledger
+- keep broadening exact-result attack coverage for nested override and dual-file-conflict discovery
+- keep older support docs aligned with the live `families/fmt` path and already-completed `*_tests/` directory migration
 - if TypeScript formatting planning is revived, keep it clearly separate from this root-level Rust family

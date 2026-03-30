@@ -145,6 +145,9 @@ Covered means:
 
 Uncovered Rust roots are errors.
 
+Malformed active `guardrail3.toml` policy context is also an error under this family entrypoint,
+because deny cannot safely choose the correct profile-sensitive baseline when profile routing is invalid.
+
 ### RS-DENY-02 / RS-DENY-03 — Placement and shadowing (Error)
 
 Deny configs are allowed only at:
@@ -247,6 +250,7 @@ Excessive advisory ignores warn once the count exceeds `5`, but this is a pressu
 Policy:
 - non-empty `allow` should be treated as a problem by default
 - any overlap with the deny baseline is an explicit error
+- mixed-profile local roots must compare against the effective routed profile, not an implicit service fallback
 
 ### RS-DENY-27 / RS-DENY-28 / RS-DENY-30 — Schema hardening
 
@@ -273,6 +277,7 @@ Adversarial tests should try to break the checker, not confirm the happy path.
 
 Must cover:
 - uncovered Rust roots
+- malformed `guardrail3.toml` policy context for profile-sensitive deny rules
 - nested shadow `deny.toml`
 - `.deny.toml` / `.cargo/deny.toml` precedence and conflicts
 - missing graph keys

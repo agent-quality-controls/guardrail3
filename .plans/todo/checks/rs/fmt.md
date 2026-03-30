@@ -5,7 +5,7 @@
 
 **Input:** effective repository rustfmt policy file plus any nested override files
 **Parser:** TOML
-**Current code:** `crates/app/rs/checks/rs/fmt/**` (old `config_files.rs` / `rustfmt_check.rs` are legacy seed material only)
+**Current code:** `apps/guardrail3/crates/app/rs/families/fmt/` (`crates/runtime`, `crates/assertions`, and `test_support`; old `checks/rs/fmt/**`, `config_files.rs`, and `rustfmt_check.rs` are legacy seed material only)
 
 ## Implementation mapping contract
 
@@ -17,15 +17,15 @@
 Forbidden:
 
 - grouped family test files such as `fmt_tests.rs`
-- single-file sidecars as the long-term target; each rule should move to a rule-specific test module directory split by attack vector
+- regressions back to single-file sidecars; each rule already uses a rule-specific test module directory and should keep splitting by attack vector inside that directory as coverage expands
 - helper files that hide multiple rule predicates behind one API
 
 ## Rules
 
 | New ID | Old ID | Severity | What | Status |
 |--------|--------|----------|------|--------|
-| RS-FMT-01 | R21 | Error | rustfmt.toml exists at repository root | Implemented |
-| RS-FMT-02 | R22 | Warn/Error | Baseline settings correctness. Owned keys are exactly: `edition`, `max_width`, `tab_spaces`, `use_field_init_shorthand`, `use_try_shorthand`, `reorder_imports`, `reorder_modules`. Wrong or missing value is Warn; unreadable/unparseable root config for this rule is Error. | Implemented |
+| RS-FMT-01 | R21 | Error | Root rustfmt config exists at repository root (`rustfmt.toml` or `.rustfmt.toml`). Success is intentionally quiet; missing root config is Error. | Implemented |
+| RS-FMT-02 | R22 | Warn/Error | Baseline settings correctness. Owned keys are exactly: `edition`, `max_width`, `tab_spaces`, `use_field_init_shorthand`, `use_try_shorthand`, `reorder_imports`, `reorder_modules`. Wrong or missing value is Warn; unreadable/unparseable or non-table root config for this rule is Error. | Implemented |
 | RS-FMT-03 | R23 | Info | Extra settings beyond expected baseline (inventory) | Implemented |
 
 ## New rules from audit
@@ -70,7 +70,7 @@ The family depends on:
 
 Malformed inputs that are required to evaluate a rule should not silently degrade the rule to “no finding”.
 In particular:
-- malformed root rustfmt config must surface explicitly through the rule that needs it
+- malformed root rustfmt config, including unsupported non-table top-level shapes, must surface explicitly through the rule that needs it
 - malformed root `Cargo.toml` or `rust-toolchain.toml` must not silently disable `RS-FMT-04` or `RS-FMT-06`
 
 For the current family shape:

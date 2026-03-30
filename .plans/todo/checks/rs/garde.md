@@ -1,11 +1,12 @@
-# RS-GARDE — Garde boundary validation checker (13 rules)
+# RS-GARDE — Garde boundary validation checker (14 rules)
 
 > Superseded as the primary family plan by [`.plans/by_family/rs/garde.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/by_family/rs/garde.md).
 > Keep this file as a detailed rule ledger and migration/history reference.
 
 **Input:** Cargo.toml + clippy.toml + *.rs files
 **Parser:** TOML + syn AST
-**Current code:** `crates/app/rs/checks/rs/garde/**` (old `garde_checks.rs` is legacy seed material only)
+**Current code:** `apps/guardrail3/crates/app/rs/families/garde/**`
+**Legacy seed material:** `apps/guardrail3/crates/app/rs/validate/garde_checks.rs`
 
 **Why separate from RS-CLIPPY:** RS-CLIPPY checks baseline bans (always required). RS-GARDE checks additional bans and source-level boundary enforcement that only make sense when the project uses garde for input validation boundaries. RS-GARDE-01 checks garde exists first — if it doesn't, the other rules are skipped.
 
@@ -110,6 +111,7 @@ Severity note:
 | RS-GARDE-11 | Error/Info | Validated boundary fields that require runtime validation must carry a meaningful field-level garde validator. Primitive-only fields, unvalidatable map/set/reference surfaces, and nested validated fields handled by `dive` are excluded. | Implemented |
 | RS-GARDE-12 | Error/Info | Nested validated fields must use `#[garde(dive)]` so recursive validation actually runs. Applies to validated nested types, not arbitrary custom types. | Implemented |
 | RS-GARDE-13 | Error/Info | If a field-level garde validator references `ctx`, the boundary type must declare `#[garde(context(...))]`. This makes context-driven validation explicit and prevents half-wired ctx usage. | Implemented |
+| RS-GARDE-14 | Error | `GuardrailConfig` parse sites must prove a same-function garde validation call before use. First pass targets explicit/inferred `toml::from_str` and `try_into::<GuardrailConfig>()` patterns and skips `#[cfg(test)]` bodies. | Implemented |
 
 ## Legacy carry-forward from archived GARDE_GUARDRAILS.md
 
@@ -133,6 +135,9 @@ The older top-level garde design note is being archived, but it still contains l
   - `RS-GARDE-11` checks meaningful field-level garde constraints
   - `RS-GARDE-12` checks nested validated fields use `#[garde(dive)]`
   - `RS-GARDE-13` checks explicit `#[garde(context(...))]` when field validators reference `ctx`
+- runtime validation execution is now partially enforced:
+  - `RS-GARDE-14` checks the live `GuardrailConfig` parse boundary, not just derive presence
+  - first-pass scope is intentionally narrow to avoid pretending we already have generic validate-call dataflow
 - expanded deserialization method coverage is now part of the canonical clippy baseline:
   - `RS-GARDE-06` and `RS-CLIPPY-04` parity tests now pin the expanded method set
   - service and library generated `clippy.toml` baselines now both include:

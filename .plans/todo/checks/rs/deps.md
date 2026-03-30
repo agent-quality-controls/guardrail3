@@ -1,10 +1,10 @@
-# RS-DEPS — Tool + dependency policy checker (11 rules + 1 planned hard cap)
+# RS-DEPS — Tool + dependency policy checker (12 implemented rules)
 
 > Superseded as the primary family plan by [`.plans/by_family/rs/deps.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/by_family/rs/deps.md).
 > Keep this file as a detailed rule ledger and migration/history reference.
 
 **Input:** Tool PATH checks + Cargo.lock + .gitignore + guardrail3.toml allowlists + Cargo.toml dependency tables
-**Current code:** `apps/guardrail3/crates/app/rs/checks/rs/deps/`
+**Current code:** `apps/guardrail3/crates/app/rs/families/deps/`
 
 This family owns:
 - required external Rust/tooling presence
@@ -71,7 +71,8 @@ Section ownership:
 - `RS-DEPS-05` owns `[dependencies]`
 - `RS-DEPS-06` owns `[build-dependencies]`
 - `RS-DEPS-07` owns `[dev-dependencies]`
-- target-specific dependency tables are not yet part of the implemented contract and remain an explicit remaining gap
+- `RS-DEPS-12` owns the direct-dependency cap across both top-level and target-specific dependency tables
+- target-specific dependency tables are still outside the `RS-DEPS-05..07` allowlist contract
 
 ## Lockfile rules
 
@@ -96,11 +97,11 @@ The family depends on:
 
 Malformed required inputs must surface through `RS-DEPS-11` rather than silently suppressing allowlist or lockfile findings.
 
-## Next-wave planned universal rule
+## Direct dependency cap rule
 
 | New ID | Severity | What | Status |
 |--------|----------|------|--------|
-| RS-DEPS-12 | Error | More than 25 unique direct dependency names on one crate across direct dependency sections/tables. | Planned |
+| RS-DEPS-12 | Error | More than 25 unique direct dependency package names on one crate across owned direct dependency sections/tables. | Implemented |
 
 ### RS-DEPS-12 — Direct dependency count cap
 
@@ -117,12 +118,14 @@ Malformed required inputs must surface through `RS-DEPS-11` rather than silently
   - `target.*.dev-dependencies`
 
 **Count**
-- unique crate names only
-- `workspace = true` entries count
-- path dependencies count
+- unique dependency package names only
+- renamed dependencies count by real `package` name when present
+- `workspace = true` entries count when they resolve to external packages
+- non-workspace external path dependencies count
 
 **Do not count**
 - repeated occurrences of the same crate name across multiple sections/tables more than once
+- internal workspace-path dependencies
 
 **Severity**
 - `Error`
@@ -150,8 +153,8 @@ Malformed required inputs must surface through `RS-DEPS-11` rather than silently
 
 ### Remaining gaps
 
-- `target.*.{dependencies,build-dependencies,dev-dependencies}` tables are still not part of `RS-DEPS-05..07` discovery
-- `RS-DEPS-12` is still planned only
+- `target.*.{dependencies,build-dependencies,dev-dependencies}` tables are still not part of `RS-DEPS-05..07` allowlist discovery; only `RS-DEPS-12` owns them today
+- malformed dependency inputs that affect direct-dependency counting are expected to surface through `RS-DEPS-11`, not partial `RS-DEPS-12` counts
 
 ### Policy questions
 

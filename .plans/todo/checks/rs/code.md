@@ -63,17 +63,17 @@
 
 `RS-CODE-28` was merged into `RS-CODE-27` once `lib.rs` facade policy was tightened to reject all inline module bodies, not just public ones.
 
-## Next-wave planned universal rules
+## Recently closed universal rules
 
-These are not implemented yet. They are the next `rs/code` candidates that are universal enough to define without project-specific architecture knowledge.
+These rules are now implemented in the live family. Keep the sections below as the detailed contract/history reference.
 
 | New ID | Severity | What | Status |
 |--------|----------|------|--------|
-| RS-CODE-31 | Error | `pub struct` with named `pub` fields. Public structs should not expose field bags as their default API shape. | Planned |
-| RS-CODE-33 | Error | Public function returning obviously untyped public error forms: `Result<_, String>`, `Result<_, &str>`, `Result<_, anyhow::Error>`, or `Result<_, Box<dyn Error>>`. | Planned |
-| RS-CODE-34 | Error | More than 6 type/const generic parameters on a `struct`, `enum`, `trait`, or `fn`. Lifetimes do not count. | Planned |
-| RS-CODE-35 | Error | Per-crate source tree exceeds structural caps: module depth >6, sibling subdirectories >12, or sibling `.rs` files >20 in one Rust source directory. | Planned |
-| RS-CODE-36 | Error | One string-dispatch site has more than 10 string-literal branches. Applies to `match` and `if/else if` chains on the same expression. Test files exempt. | Planned |
+| RS-CODE-31 | Error | `pub struct` with named `pub` fields. Public structs should not expose field bags as their default API shape. | Implemented |
+| RS-CODE-33 | Error | Public function returning obviously untyped public error forms: `Result<_, String>`, `Result<_, &str>`, `Result<_, anyhow::Error>`, or `Result<_, Box<dyn Error>>`. | Implemented |
+| RS-CODE-34 | Error | More than 6 type/const generic parameters on a `struct`, `enum`, `trait`, or `fn`. Lifetimes do not count. | Implemented |
+| RS-CODE-35 | Error | Per-crate source tree exceeds structural caps: module depth >6, sibling subdirectories >12, or sibling `.rs` files >20 in one Rust source directory. | Implemented |
+| RS-CODE-36 | Error | One string-dispatch site has more than 10 string-literal branches. Applies to `match` and `if/else if` chains on the same expression. Test files exempt. | Implemented |
 
 ### RS-CODE-31 — Public fields on public structs
 
