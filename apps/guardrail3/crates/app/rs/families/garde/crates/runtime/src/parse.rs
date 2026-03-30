@@ -104,6 +104,7 @@ struct GardeVisitor {
     deserialize_aliases: std::collections::BTreeSet<String>,
     validate_aliases: std::collections::BTreeSet<String>,
     query_as_aliases: std::collections::BTreeSet<String>,
+    module_path_aliases: std::collections::BTreeMap<String, String>,
     cfg_test_depth: usize,
 }
 
@@ -137,11 +138,13 @@ impl GardeVisitor {
     }
 
     fn is_input_boundary_derive(&self, macro_name: &str) -> bool {
-        is_input_boundary_derive(macro_name) || self.boundary_derive_aliases.contains(macro_name)
+        let resolved = aliases::resolve_path_string_aliases(macro_name, &self.module_path_aliases);
+        is_input_boundary_derive(&resolved) || self.boundary_derive_aliases.contains(macro_name)
     }
 
     fn is_validate_derive(&self, macro_name: &str) -> bool {
-        is_validate_derive(macro_name) || self.validate_aliases.contains(macro_name)
+        let resolved = aliases::resolve_path_string_aliases(macro_name, &self.module_path_aliases);
+        is_validate_derive(&resolved) || self.validate_aliases.contains(macro_name)
     }
 
     fn should_analyze_guardrail_validation(&self, attrs: &[syn::Attribute]) -> bool {
@@ -157,6 +160,7 @@ impl<'ast> syn::visit::Visit<'ast> for GardeVisitor {
             &mut self.deserialize_aliases,
             &mut self.validate_aliases,
             &mut self.query_as_aliases,
+            &mut self.module_path_aliases,
         );
         syn::visit::visit_item_use(self, item);
     }
@@ -292,13 +296,21 @@ impl<'ast> syn::visit::Visit<'ast> for GardeVisitor {
             return;
         };
         let type_name = self.qualify_type_name(&type_name);
-        if aliases::is_deserialize_trait_path(trait_path, &self.deserialize_aliases) {
+        if aliases::is_deserialize_trait_path(
+            trait_path,
+            &self.deserialize_aliases,
+            &self.module_path_aliases,
+        ) {
             self.manual_deserialize_impls.push(ManualImpl {
                 line: fields::span_line(syn::spanned::Spanned::span(item)),
                 type_name: type_name.clone(),
             });
         }
-        if aliases::is_validate_trait_path(trait_path, &self.validate_aliases) {
+        if aliases::is_validate_trait_path(
+            trait_path,
+            &self.validate_aliases,
+            &self.module_path_aliases,
+        ) {
             let _ = self.manual_validate_impls.insert(type_name);
         }
         syn::visit::visit_item_impl(self, item);
@@ -311,7 +323,8 @@ impl<'ast> syn::visit::Visit<'ast> for GardeVisitor {
             .segments
             .last()
             .map(|segment| segment.ident.to_string());
-        let is_sqlx_macro = aliases::is_sqlx_query_as_macro_path(&mac.path);
+        let is_sqlx_macro =
+            aliases::is_sqlx_query_as_macro_path(&mac.path, &self.module_path_aliases);
         let is_imported_sqlx_alias = tail
             .as_deref()
             .is_some_and(|name| self.query_as_aliases.contains(name));

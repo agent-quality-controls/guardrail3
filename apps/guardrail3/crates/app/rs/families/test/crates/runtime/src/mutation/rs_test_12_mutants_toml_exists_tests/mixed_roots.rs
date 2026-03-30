@@ -24,15 +24,22 @@ fn workspace_root_adoption_does_not_require_mutants_config_for_idle_standalone_r
         "standalone/idle/Cargo.toml",
         "[package]\nname = \"idle\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
+    write_file(root, ".githooks/pre-commit", "#!/bin/sh\ncargo mutants\n");
 
     let results = run_family(root);
 
-    assert_rule_files(&results, vec![".cargo/mutants.toml".to_owned()]);
+    assert_rule_files(
+        &results,
+        vec![
+            ".cargo/mutants.toml".to_owned(),
+            "crates/adopted/.cargo/mutants.toml".to_owned(),
+        ],
+    );
     assert_reported(
         &results,
         ".cargo/mutants.toml",
         None,
-        Severity::Warn,
+        Severity::Error,
         "mutants config missing",
     );
     assert_inventory(&results, false);

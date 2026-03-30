@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 
 use super::fields;
@@ -16,6 +17,7 @@ pub(super) fn collect_unvalidated_guardrail_sites(
     output: &syn::ReturnType,
 ) -> Vec<GuardrailConfigValidationSite> {
     let validated_names = collect_validate_call_receivers(block);
+    let non_validate_use_lines = collect_non_validate_use_lines(block);
     let function_returns_guardrail = return_type_contains_guardrail_config(output);
     let mut candidates = Vec::new();
     collect_guardrail_parse_candidates_from_block(
@@ -27,10 +29,14 @@ pub(super) fn collect_unvalidated_guardrail_sites(
         .into_iter()
         .filter(|candidate| {
             !candidate.inline_validated
-                && !candidate
-                    .binding_names
-                    .iter()
-                    .any(|name| validated_names.contains(name))
+                && !candidate.binding_names.iter().any(|name| {
+                    has_post_parse_validate_before_use(
+                        name,
+                        candidate.line,
+                        &validated_names,
+                        &non_validate_use_lines,
+                    )
+                })
         })
         .map(|candidate| GuardrailConfigValidationSite {
             line: candidate.line,
@@ -39,17 +45,20 @@ pub(super) fn collect_unvalidated_guardrail_sites(
         .collect()
 }
 
-fn collect_validate_call_receivers(block: &syn::Block) -> BTreeSet<String> {
+fn collect_validate_call_receivers(block: &syn::Block) -> BTreeMap<String, Vec<usize>> {
     #[derive(Default)]
     struct ValidateCallVisitor {
-        receivers: BTreeSet<String>,
+        receivers: BTreeMap<String, Vec<usize>>,
     }
 
     impl<'ast> syn::visit::Visit<'ast> for ValidateCallVisitor {
         fn visit_expr_method_call(&mut self, expr: &'ast syn::ExprMethodCall) {
             if expr.method == "validate" {
                 if let Some(name) = receiver_ident(&expr.receiver) {
-                    let _ = self.receivers.insert(name.to_owned());
+                    self.receivers
+                        .entry(name)
+                        .or_default()
+                        .push(fields::span_line(syn::spanned::Spanned::span(expr)));
                 }
             }
             syn::visit::visit_expr_method_call(self, expr);
@@ -63,6 +72,71 @@ fn collect_validate_call_receivers(block: &syn::Block) -> BTreeSet<String> {
     let mut visitor = ValidateCallVisitor::default();
     syn::visit::Visit::visit_block(&mut visitor, block);
     visitor.receivers
+}
+
+fn collect_non_validate_use_lines(block: &syn::Block) -> BTreeMap<String, Vec<usize>> {
+    #[derive(Default)]
+    struct NonValidateUseVisitor {
+        uses: BTreeMap<String, Vec<usize>>,
+    }
+
+    impl<'ast> syn::visit::Visit<'ast> for NonValidateUseVisitor {
+        fn visit_expr_path(&mut self, expr: &'ast syn::ExprPath) {
+            if let Some(name) = expr.path.get_ident() {
+                self.uses
+                    .entry(name.to_string())
+                    .or_default()
+                    .push(fields::span_line(syn::spanned::Spanned::span(expr)));
+            }
+            syn::visit::visit_expr_path(self, expr);
+        }
+
+        fn visit_expr_method_call(&mut self, expr: &'ast syn::ExprMethodCall) {
+            if expr.method == "validate" {
+                for argument in &expr.args {
+                    self.visit_expr(argument);
+                }
+                return;
+            }
+            syn::visit::visit_expr_method_call(self, expr);
+        }
+
+        fn visit_expr_assign(&mut self, expr: &'ast syn::ExprAssign) {
+            self.visit_expr(&expr.right);
+        }
+
+        fn visit_item_fn(&mut self, _item: &'ast syn::ItemFn) {}
+
+        fn visit_item_mod(&mut self, _item: &'ast syn::ItemMod) {}
+    }
+
+    let mut visitor = NonValidateUseVisitor::default();
+    syn::visit::Visit::visit_block(&mut visitor, block);
+    visitor.uses
+}
+
+fn has_post_parse_validate_before_use(
+    binding_name: &str,
+    parse_line: usize,
+    validated_names: &BTreeMap<String, Vec<usize>>,
+    non_validate_use_lines: &BTreeMap<String, Vec<usize>>,
+) -> bool {
+    let Some(validate_lines) = validated_names.get(binding_name) else {
+        return false;
+    };
+    let use_lines = non_validate_use_lines.get(binding_name);
+
+    validate_lines
+        .iter()
+        .copied()
+        .filter(|line| *line > parse_line)
+        .any(|validate_line| {
+            use_lines.is_none_or(|lines| {
+                !lines
+                    .iter()
+                    .any(|line| *line > parse_line && *line < validate_line)
+            })
+        })
 }
 
 fn collect_guardrail_parse_candidates_from_block(

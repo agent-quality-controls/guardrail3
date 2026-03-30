@@ -20,13 +20,13 @@ pub fn check(rel_path: &str, tc: &dyn ToolChecker, results: &mut Vec<CheckResult
             );
         } else {
             results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    format!("{tool} missing"),
-    format!("{tool} is required by the Rust hook but is not on PATH."),
-    Some(rel_path.to_owned()),
-    None,
-    false,
+                ID.to_owned(),
+                Severity::Error,
+                format!("{tool} missing"),
+                format!("{tool} is required by the Rust hook but is not on PATH."),
+                Some(rel_path.to_owned()),
+                None,
+                false,
             ));
         }
     }

@@ -2,7 +2,8 @@
 
 Rust Cargo policy family.
 
-This family enforces workspace-level and member-level Cargo policy inside routed Rust roots. It does not own repo-global root placement.
+This family enforces workspace-level and member-level Cargo policy inside legal
+workspaces. It does not own repo-global root placement.
 
 ## What This Family Owns
 
@@ -42,10 +43,10 @@ This family must not decide which Rust roots are live.
 
 It consumes:
 
-- shared root scope from `placement`
-- routed roots from `FamilyMapper::map_rs_cargo()`
+- shared topology facts from `placement`
+- legal workspaces plus Cargo-family file surfaces from `FamilyMapper::map_rs_cargo()`
 
-Inside a routed root, the family may then do family-local discovery:
+Inside a routed workspace, the family may then do family-local discovery:
 
 - workspace policy root selection
 - workspace/member manifest parsing
@@ -56,8 +57,8 @@ Inside a routed root, the family may then do family-local discovery:
 That split is intentional:
 
 - `placement` decides what Rust roots exist
-- `FamilyMapper` decides which roots reach `cargo`
-- `cargo` decides Cargo-policy facts inside those routed roots
+- `FamilyMapper` decides which legal workspaces and Cargo-family files reach `cargo`
+- `cargo` decides Cargo-policy facts inside those routed workspaces
 
 ## Current Workspace Shape
 

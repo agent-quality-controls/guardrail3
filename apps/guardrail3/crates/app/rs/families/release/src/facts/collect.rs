@@ -12,14 +12,134 @@ pub fn collect(
 ) -> types::ReleaseFacts {
     let mut input_failures = Vec::new();
     let cargo_roots = cargo_roots::collect_cargo_roots(tree, route, &mut input_failures);
-    let mut crates = Vec::new();
-    let mut version_map = BTreeMap::new();
+    let routed_cargo_rel_paths = route
+        .roots()
+        .iter()
+        .map(|root| {
+            if root.rel_dir().is_empty() {
+                "Cargo.toml".to_owned()
+            } else {
+                release_support::binaries::join_under_root(root.rel_dir(), "Cargo.toml")
+            }
+        })
+        .collect::<BTreeSet<_>>();
+    let crate_index = collect_crate_index(tree, &cargo_roots);
+    let mut crates = collect_crate_facts(
+        tree,
+        &cargo_roots,
+        &routed_cargo_rel_paths,
+        tc,
+        thorough,
+        &mut input_failures,
+    );
+
+    let repo = vec![collect_repo_facts(
+        tree,
+        tc,
+        &cargo_roots,
+        crate_index.publishable_names.clone(),
+        crate_index.publishable_binary_names.clone(),
+        crate_index.publishable_count,
+        crate_index.non_publishable_count,
+        &mut input_failures,
+    )];
+    let edges = collect_release_edges(
+        &cargo_roots,
+        &routed_cargo_rel_paths,
+        &crate_index.version_map,
+        &crate_index.publishable_names,
+    );
+
+    crates.sort_by(|a, b| a.cargo_rel_path.cmp(&b.cargo_rel_path));
+    let mut edges = edges;
+    edges.sort_by(|a, b| {
+        a.cargo_rel_path
+            .cmp(&b.cargo_rel_path)
+            .then(a.dep_name.cmp(&b.dep_name))
+            .then(a.section_label.cmp(&b.section_label))
+    });
+    input_failures.sort_by(|a, b| a.rel_path.cmp(&b.rel_path).then(a.message.cmp(&b.message)));
+
+    types::ReleaseFacts {
+        repo,
+        crates,
+        edges,
+        input_failures,
+    }
+}
+
+struct CrateIndex {
+    publishable_names: BTreeSet<String>,
+    publishable_binary_names: BTreeSet<String>,
+    publishable_count: usize,
+    non_publishable_count: usize,
+    version_map: BTreeMap<String, String>,
+}
+
+fn collect_crate_index(
+    tree: &guardrail3_domain_project_tree::ProjectTree,
+    cargo_roots: &BTreeMap<String, types::CargoRootFacts>,
+) -> CrateIndex {
     let mut publishable_names = BTreeSet::new();
     let mut publishable_binary_names = BTreeSet::new();
+    let mut publishable_count = 0usize;
+    let mut non_publishable_count = 0usize;
+    let mut version_map = BTreeMap::new();
 
     for root in cargo_roots.values().filter(|root| root.has_package) {
         let package = release_support::binaries::package_table(&root.parsed);
-        let workspace_root = cargo_roots::workspace_root_for_package(root, &cargo_roots);
+        let workspace_root = cargo_roots::workspace_root_for_package(root, cargo_roots);
+        let workspace_package = workspace_root
+            .and_then(|workspace_root| workspace_root.parsed.get("workspace"))
+            .and_then(|workspace| workspace.get("package"));
+        let publishable = inheritance::inherited_publishable(package, workspace_package);
+        if !publishable {
+            non_publishable_count += 1;
+            continue;
+        }
+
+        publishable_count += 1;
+        let is_binary =
+            release_support::binaries::is_binary_crate(tree, &root.rel_dir, &root.parsed);
+        let name = package
+            .and_then(|package| package.get("name"))
+            .and_then(toml::Value::as_str)
+            .unwrap_or("unknown")
+            .to_owned();
+        let _ = publishable_names.insert(name.clone());
+        if is_binary {
+            let _ = publishable_binary_names.insert(name.clone());
+        }
+        if let Some(version) = inheritance::inherited_version_string(package, workspace_package) {
+            let _ = version_map.insert(name, version);
+        }
+    }
+
+    CrateIndex {
+        publishable_names,
+        publishable_binary_names,
+        publishable_count,
+        non_publishable_count,
+        version_map,
+    }
+}
+
+fn collect_crate_facts(
+    tree: &guardrail3_domain_project_tree::ProjectTree,
+    cargo_roots: &BTreeMap<String, types::CargoRootFacts>,
+    routed_cargo_rel_paths: &BTreeSet<String>,
+    tc: &dyn guardrail3_outbound_traits::ToolChecker,
+    thorough: bool,
+    input_failures: &mut Vec<types::ReleaseInputFailureFacts>,
+) -> Vec<types::PublishableCrateFacts> {
+    let mut crates = Vec::new();
+
+    for root in cargo_roots.values().filter(|root| root.has_package) {
+        if !routed_cargo_rel_paths.contains(&root.cargo_rel_path) {
+            continue;
+        }
+        let package = release_support::binaries::package_table(&root.parsed);
+        let workspace_root = cargo_roots::workspace_root_for_package(root, cargo_roots);
         let workspace_package = workspace_root
             .and_then(|workspace_root| workspace_root.parsed.get("workspace"))
             .and_then(|workspace| workspace.get("package"));
@@ -75,8 +195,9 @@ pub fn collect(
             .unwrap_or(false);
         let version_string = inheritance::inherited_version_string(package, workspace_package);
         let version_valid = inheritance::version_is_valid(version_string.as_deref());
-        let facts = types::PublishableCrateFacts {
-            name: name.clone(),
+
+        crates.push(types::PublishableCrateFacts {
+            name,
             cargo_rel_path: root.cargo_rel_path.clone(),
             binary_target_names,
             publishable,
@@ -107,7 +228,7 @@ pub fn collect(
                 workspace_package,
                 "categories",
             ),
-            version_string: version_string.clone(),
+            version_string,
             workspace_version,
             version_valid,
             docs_rs_present: package
@@ -126,55 +247,20 @@ pub fn collect(
             } else {
                 None
             },
-        };
-        if publishable {
-            let _ = publishable_names.insert(name.clone());
-            if is_binary {
-                let _ = publishable_binary_names.insert(name.clone());
-            }
-            if let Some(version) = version_string.clone() {
-                let _ = version_map.insert(name.clone(), version);
-            }
-        }
-        crates.push(facts);
+        });
     }
 
-    let repo = vec![collect_repo_facts(
-        tree,
-        tc,
-        &cargo_roots,
-        &crates,
-        publishable_names.clone(),
-        publishable_binary_names.clone(),
-        &mut input_failures,
-    )];
-    let edges = collect_release_edges(&cargo_roots, &version_map, &publishable_names);
-
-    crates.sort_by(|a, b| a.cargo_rel_path.cmp(&b.cargo_rel_path));
-    let mut edges = edges;
-    edges.sort_by(|a, b| {
-        a.cargo_rel_path
-            .cmp(&b.cargo_rel_path)
-            .then(a.dep_name.cmp(&b.dep_name))
-            .then(a.section_label.cmp(&b.section_label))
-    });
-    input_failures.sort_by(|a, b| a.rel_path.cmp(&b.rel_path).then(a.message.cmp(&b.message)));
-
-    types::ReleaseFacts {
-        repo,
-        crates,
-        edges,
-        input_failures,
-    }
+    crates
 }
 
 fn collect_repo_facts(
     tree: &guardrail3_domain_project_tree::ProjectTree,
     tc: &dyn guardrail3_outbound_traits::ToolChecker,
     cargo_roots: &BTreeMap<String, types::CargoRootFacts>,
-    crates: &[types::PublishableCrateFacts],
     publishable_names: BTreeSet<String>,
     publishable_binary_names: BTreeSet<String>,
+    publishable_count: usize,
+    non_publishable_count: usize,
     input_failures: &mut Vec<types::ReleaseInputFailureFacts>,
 ) -> types::RepoReleaseFacts {
     let root_cargo_rel_path = "Cargo.toml".to_owned();
@@ -229,8 +315,8 @@ fn collect_repo_facts(
         workflows,
         publishable_crate_names: publishable_names,
         publishable_binary_crate_names: publishable_binary_names,
-        publishable_count: crates.iter().filter(|krate| krate.publishable).count(),
-        non_publishable_count: crates.iter().filter(|krate| !krate.publishable).count(),
+        publishable_count,
+        non_publishable_count,
         semver_checks_installed: tc.is_installed("cargo-semver-checks"),
         publish_setting,
         release_profile_settings,
@@ -309,11 +395,15 @@ fn parse_optional_toml(
 
 fn collect_release_edges(
     cargo_roots: &BTreeMap<String, types::CargoRootFacts>,
+    routed_cargo_rel_paths: &BTreeSet<String>,
     version_map: &BTreeMap<String, String>,
     publishable_names: &BTreeSet<String>,
 ) -> Vec<types::ReleaseEdgeFacts> {
     let mut edges = Vec::new();
     for root in cargo_roots.values().filter(|root| root.has_package) {
+        if !routed_cargo_rel_paths.contains(&root.cargo_rel_path) {
+            continue;
+        }
         let package = release_support::binaries::package_table(&root.parsed);
         let workspace_root = cargo_roots::workspace_root_for_package(root, cargo_roots);
         let workspace_package = workspace_root

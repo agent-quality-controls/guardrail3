@@ -122,3 +122,177 @@ fn weaker_levels_are_errors() {
         }],
     );
 }
+
+#[test]
+fn wrong_group_priority_is_error() {
+    let manifest = format!(
+        r#"
+            [package]
+            name = "helper"
+            edition = "2024"
+
+            {STANDALONE_RUST_LINTS}
+            {STANDALONE_CLIPPY_LINTS}
+        "#
+    )
+    .replace(
+        r#"all = { level = "deny", priority = -1 }"#,
+        r#"all = { level = "deny", priority = 0 }"#,
+    );
+
+    let results = check_results(&tree(
+        &[("pkg", entry(&[], &["Cargo.toml"]))],
+        &[("pkg/Cargo.toml", &manifest)],
+    ));
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_02_lint_levels::assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: None,
+            title: Some("lint `all` has wrong priority"),
+            inventory: None,
+        }],
+    );
+}
+
+#[test]
+fn malformed_root_local_guardrail_suppresses_clean_inventory() {
+    let manifest = format!(
+        r#"
+            [package]
+            name = "helper"
+            edition = "2024"
+
+            {STANDALONE_RUST_LINTS}
+            {STANDALONE_CLIPPY_LINTS}
+        "#
+    );
+
+    let results = check_results(&tree(
+        &[("pkg", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
+        &[
+            ("pkg/Cargo.toml", &manifest),
+            ("pkg/guardrail3.toml", "[profile"),
+        ],
+    ));
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_02_lint_levels::assert_rule_results(
+        &results,
+        &[],
+    );
+}
+
+#[test]
+fn missing_lint_tables_do_not_emit_false_inventory() {
+    let manifest = r#"
+        [package]
+        name = "helper"
+        edition = "2024"
+    "#;
+
+    let results = check_results(&tree(
+        &[("pkg", entry(&[], &["Cargo.toml"]))],
+        &[("pkg/Cargo.toml", manifest)],
+    ));
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_02_lint_levels::assert_rule_results(
+        &results,
+        &[],
+    );
+}
+
+#[test]
+fn invalid_root_lint_level_is_error() {
+    let manifest = format!(
+        r#"
+            [package]
+            name = "helper"
+            edition = "2024"
+
+            {STANDALONE_RUST_LINTS}
+            {STANDALONE_CLIPPY_LINTS}
+        "#
+    )
+    .replace(
+        r#"module_name_repetitions = "allow""#,
+        r#"module_name_repetitions = "banana""#,
+    );
+
+    let results = check_results(&tree(
+        &[("pkg", entry(&[], &["Cargo.toml"]))],
+        &[("pkg/Cargo.toml", &manifest)],
+    ));
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_02_lint_levels::assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: None,
+            title: Some("lint `module_name_repetitions` has invalid level"),
+            inventory: None,
+        }],
+    );
+}
+
+#[test]
+fn invalid_group_lint_shape_is_error() {
+    let manifest = format!(
+        r#"
+            [package]
+            name = "helper"
+            edition = "2024"
+
+            {STANDALONE_RUST_LINTS}
+            {STANDALONE_CLIPPY_LINTS}
+        "#
+    )
+    .replace(
+        r#"all = { level = "deny", priority = -1 }"#,
+        r#"all = { priority = -1 }"#,
+    );
+
+    let results = check_results(&tree(
+        &[("pkg", entry(&[], &["Cargo.toml"]))],
+        &[("pkg/Cargo.toml", &manifest)],
+    ));
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_02_lint_levels::assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: None,
+            title: Some("lint `all` has invalid level"),
+            inventory: None,
+        }],
+    );
+}
+
+#[test]
+fn invalid_group_priority_type_is_error() {
+    let manifest = format!(
+        r#"
+            [package]
+            name = "helper"
+            edition = "2024"
+
+            {STANDALONE_RUST_LINTS}
+            {STANDALONE_CLIPPY_LINTS}
+        "#
+    )
+    .replace(
+        r#"all = { level = "deny", priority = -1 }"#,
+        r#"all = { level = "deny", priority = "banana" }"#,
+    );
+
+    let results = check_results(&tree(
+        &[("pkg", entry(&[], &["Cargo.toml"]))],
+        &[("pkg/Cargo.toml", &manifest)],
+    ));
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_02_lint_levels::assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: None,
+            title: Some("lint `all` has invalid priority"),
+            inventory: None,
+        }],
+    );
+}

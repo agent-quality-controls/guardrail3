@@ -2,9 +2,6 @@ use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::inputs::ToolchainPolicyRootInput;
 
-#[cfg(test)]
-use super::facts::PolicyRootKind;
-
 const ID: &str = "RS-TOOLCHAIN-01";
 
 pub fn check(input: &ToolchainPolicyRootInput<'_>, results: &mut Vec<CheckResult>) {
@@ -14,7 +11,7 @@ pub fn check(input: &ToolchainPolicyRootInput<'_>, results: &mut Vec<CheckResult
                 ID.to_owned(),
                 Severity::Info,
                 "rust-toolchain.toml exists".to_owned(),
-                format!("Found rust-toolchain.toml at {}.", input.kind.label()),
+                "Found rust-toolchain.toml at workspace root.".to_owned(),
                 Some(rel.to_owned()),
                 None,
                 false,
@@ -25,7 +22,7 @@ pub fn check(input: &ToolchainPolicyRootInput<'_>, results: &mut Vec<CheckResult
             ID.to_owned(),
             Severity::Error,
             "rust-toolchain.toml missing".to_owned(),
-            format!("Expected rust-toolchain.toml at {}.", input.kind.label()),
+            "Expected rust-toolchain.toml at workspace root.".to_owned(),
             Some(expected_toolchain_rel(input.rel_dir)),
             None,
             false,
@@ -43,7 +40,6 @@ pub(crate) fn test_input<'a>(
     cargo_parse_error: Option<&'a str>,
 ) -> ToolchainPolicyRootInput<'a> {
     test_input_for_root(
-        PolicyRootKind::WorkspaceRoot,
         "",
         "Cargo.toml",
         toolchain_toml_rel,
@@ -57,7 +53,6 @@ pub(crate) fn test_input<'a>(
 
 #[cfg(test)]
 pub(crate) fn test_input_for_root<'a>(
-    kind: PolicyRootKind,
     rel_dir: &'a str,
     cargo_rel_path: &'a str,
     toolchain_toml_rel: Option<&'a str>,
@@ -68,7 +63,6 @@ pub(crate) fn test_input_for_root<'a>(
     cargo_parse_error: Option<&'a str>,
 ) -> ToolchainPolicyRootInput<'a> {
     ToolchainPolicyRootInput {
-        kind,
         rel_dir,
         cargo_rel_path,
         #[cfg(test)]
@@ -80,24 +74,9 @@ pub(crate) fn test_input_for_root<'a>(
         cargo_rust_version,
         cargo_rust_version_invalid: false,
         cargo_parse_error,
+        ancestor_toolchain: None,
+        descendant_toolchains: Vec::new(),
     }
-}
-
-#[cfg(test)]
-pub(crate) fn standalone_package_input(
-    toolchain_toml_rel: Option<&'static str>,
-) -> ToolchainPolicyRootInput<'static> {
-    test_input_for_root(
-        PolicyRootKind::StandalonePackageRoot,
-        "packages/lib",
-        "packages/lib/Cargo.toml",
-        toolchain_toml_rel,
-        None,
-        None,
-        None,
-        Some("1.85"),
-        None,
-    )
 }
 
 #[cfg(test)]
@@ -119,23 +98,23 @@ pub(crate) fn test_tree(
 
     let structure = BTreeMap::from([(
         String::new(),
-        DirEntry {
-            dirs: Vec::new(),
-            files: root_files.iter().map(|file| (*file).to_owned()).collect(),
-            symlink_dirs: Vec::new(),
-            symlink_files: Vec::new(),
-        },
+        DirEntry::new(
+            Vec::new(),
+            root_files.iter().map(|file| (*file).to_owned()).collect(),
+            Vec::new(),
+            Vec::new(),
+        ),
     )]);
     let content = content
         .iter()
         .map(|(path, file_content)| ((*path).to_owned(), (*file_content).to_owned()))
         .collect();
 
-    ProjectTree {
-        root: PathBuf::from("/tmp/toolchain-family-tests"),
+    ProjectTree::new(
+        PathBuf::from("/tmp/toolchain-family-tests"),
         structure,
         content,
-    }
+    )
 }
 
 #[cfg(test)]
@@ -148,30 +127,30 @@ pub(crate) fn nested_workspace_root_tree() -> guardrail3_domain_project_tree::Pr
     let structure = BTreeMap::from([
         (
             String::new(),
-            DirEntry {
-                dirs: vec!["apps".to_owned()],
-                files: vec!["rust-toolchain.toml".to_owned()],
-                symlink_dirs: Vec::new(),
-                symlink_files: Vec::new(),
-            },
+            DirEntry::new(
+                vec!["apps".to_owned()],
+                vec!["rust-toolchain.toml".to_owned()],
+                Vec::new(),
+                Vec::new(),
+            ),
         ),
         (
             "apps".to_owned(),
-            DirEntry {
-                dirs: vec!["guardrail3".to_owned()],
-                files: Vec::new(),
-                symlink_dirs: Vec::new(),
-                symlink_files: Vec::new(),
-            },
+            DirEntry::new(
+                vec!["guardrail3".to_owned()],
+                Vec::new(),
+                Vec::new(),
+                Vec::new(),
+            ),
         ),
         (
             "apps/guardrail3".to_owned(),
-            DirEntry {
-                dirs: Vec::new(),
-                files: vec!["Cargo.toml".to_owned()],
-                symlink_dirs: Vec::new(),
-                symlink_files: Vec::new(),
-            },
+            DirEntry::new(
+                Vec::new(),
+                vec!["Cargo.toml".to_owned()],
+                Vec::new(),
+                Vec::new(),
+            ),
         ),
     ]);
     let content = BTreeMap::from([
@@ -184,11 +163,11 @@ pub(crate) fn nested_workspace_root_tree() -> guardrail3_domain_project_tree::Pr
             "[workspace]\n".to_owned(),
         ),
     ]);
-    ProjectTree {
-        root: PathBuf::from("/tmp/toolchain-family-nested-root"),
+    ProjectTree::new(
+        PathBuf::from("/tmp/toolchain-family-nested-root"),
         structure,
         content,
-    }
+    )
 }
 
 #[cfg(test)]

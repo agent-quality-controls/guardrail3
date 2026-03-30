@@ -166,6 +166,30 @@ Recent hardening note:
 - source-level multi-root attacks for `RS-GARDE-05/07/08/09` should use workspace roots or standalone package roots only
 - workspace members are not owned garde roots and should not be used as the multi-root ownership model in tests
 
+Latest audit-hardening checkpoint:
+- routed `scoped_files` are now enforced during fact collection, not only during rule emission
+  - this closes the real subtree leak where out-of-scope Rust files could still trigger `RS-GARDE-10`
+    or influence source-rule state
+  - dedicated regressions now live in `facts_tests/scoped_files.rs`
+- alias-aware source detection now resolves renamed module imports for:
+  - `serde` / `Deserialize`
+  - `garde` / `Validate`
+  - `sqlx::query_as!` / `query_as_unchecked!`
+  - this closes bypasses for `RS-GARDE-05`, `RS-GARDE-07`, `RS-GARDE-08`, and `RS-GARDE-09`
+- `RS-GARDE-10` now has direct fail-closed tests for:
+  - unreadable Rust source files
+  - malformed `guardrail3.toml` during garde policy resolution
+- `RS-GARDE-14` is slightly stricter now:
+  - same-name `.validate()` calls only suppress a finding when they occur after the parse site
+  - this still is not full validate-before-use dataflow and should stay documented as a narrow first pass
+- `RS-GARDE-01` applicability is now intentionally narrower:
+  - roots with a real `garde` dependency are active as before
+  - roots without `garde` stay silent unless parsed source shows garde adoption markers such as
+    boundary derives or validate implementations
+  - plain infrastructure/assertions/test-support crates without garde markers no longer produce fake
+    dependency errors just because they are routed roots
+  - `GuardrailConfig` parse sites alone do not count as garde-adoption markers
+
 ## Full expected ban lists
 
 ### RS-GARDE-02: Serde deserialization method bans (disallowed-methods)

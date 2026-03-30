@@ -30,12 +30,21 @@ pub fn check(input: &DirectDependencyCapDepsInput<'_>, results: &mut Vec<CheckRe
 fn family_route(
     tree: &guardrail3_domain_project_tree::ProjectTree,
 ) -> guardrail3_app_rs_family_mapper::RsDepsRoute {
+    family_route_with_validation_scope(tree, None)
+}
+
+#[cfg(test)]
+fn family_route_with_validation_scope(
+    tree: &guardrail3_domain_project_tree::ProjectTree,
+    validation_scope: Option<&str>,
+) -> guardrail3_app_rs_family_mapper::RsDepsRoute {
     let scope = guardrail3_app_rs_placement::collect(tree);
     let selected =
         guardrail3_validation_model::RustFamilySelection::new(std::collections::BTreeSet::from([
             guardrail3_validation_model::RustValidateFamily::Deps,
         ]));
     guardrail3_app_rs_family_mapper::FamilyMapper::new(tree, &scope, None, &selected, None)
+        .with_validation_scope(validation_scope)
         .map_rs_deps()
 }
 
@@ -47,6 +56,19 @@ pub(super) fn collected_facts(
     super::facts::collect(
         tree,
         &family_route(tree),
+        &test_support::StubToolChecker::new(installed),
+    )
+}
+
+#[cfg(test)]
+pub(super) fn collected_facts_with_validation_scope(
+    tree: &guardrail3_domain_project_tree::ProjectTree,
+    installed: &[&str],
+    validation_scope: Option<&str>,
+) -> super::facts::DepsFacts {
+    super::facts::collect(
+        tree,
+        &family_route_with_validation_scope(tree, validation_scope),
         &test_support::StubToolChecker::new(installed),
     )
 }

@@ -20,7 +20,7 @@ pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
             pushed = true;
             results.push(CheckResult::from_parts(
                 ID.to_owned(),
-                Severity::Warn,
+                Severity::Error,
                 "mutants config excludes everything".to_owned(),
                 format!(
                     "`{}` contains an `exclude_re` pattern that matches everything.",
@@ -41,7 +41,7 @@ pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
             pushed = true;
             results.push(CheckResult::from_parts(
                 ID.to_owned(),
-                Severity::Warn,
+                Severity::Error,
                 "mutants timeout multiplier too low".to_owned(),
                 format!(
                     "`{}` sets `timeout_multiplier = {timeout_multiplier}`.",

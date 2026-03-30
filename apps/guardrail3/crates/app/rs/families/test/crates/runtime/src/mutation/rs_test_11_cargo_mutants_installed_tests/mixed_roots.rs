@@ -1,11 +1,9 @@
-use guardrail3_app_rs_family_test_assertions::rs_test_11_cargo_mutants_installed::{
-    Severity, assert_reported, assert_rule_files,
-};
+use guardrail3_app_rs_family_test_assertions::rs_test_11_cargo_mutants_installed::assert_rule_files;
 
 use super::{run_family_with_tool, tempdir, write_file};
 
 #[test]
-fn workspace_root_adoption_does_not_activate_idle_standalone_root() {
+fn workspace_root_hook_adoption_reaches_workspace_member_but_not_idle_standalone_root() {
     let fixture = tempdir();
     let root = fixture.path();
 
@@ -28,12 +26,8 @@ fn workspace_root_adoption_does_not_activate_idle_standalone_root() {
 
     let results = run_family_with_tool(root, false);
 
-    assert_rule_files(&results, vec!["Cargo.toml".to_owned()]);
-    assert_reported(
+    assert_rule_files(
         &results,
-        "Cargo.toml",
-        None,
-        Severity::Warn,
-        "cargo-mutants missing",
+        vec!["Cargo.toml".to_owned(), "crates/adopted/Cargo.toml".to_owned()],
     );
 }

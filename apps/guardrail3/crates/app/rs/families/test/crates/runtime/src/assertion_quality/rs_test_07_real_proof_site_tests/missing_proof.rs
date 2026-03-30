@@ -1,5 +1,5 @@
 use guardrail3_app_rs_family_test_assertions::rs_test_07_real_proof_site::{
-    assert_rule_files, assert_warning_reported,
+    assert_error_reported, assert_rule_files,
 };
 
 use super::{run_family, tempdir, write_file};
@@ -23,7 +23,7 @@ fn test_without_assertion_macro_or_owned_assertions_call_is_reported() {
     let results = run_family(root);
 
     assert_rule_files(&results, vec!["tests/proof.rs".to_owned()]);
-    assert_warning_reported(
+    assert_error_reported(
         &results,
         "tests/proof.rs",
         Some(3),
@@ -69,7 +69,7 @@ fn result_return_without_proof_is_reported() {
 
     let results = run_family(root);
     assert!(!results.is_empty());
-    assert_warning_reported(
+    assert_error_reported(
         &results,
         "crates/runtime/tests/public_surface.rs",
         Some(2),
@@ -115,7 +115,7 @@ fn shadowed_owned_assertions_call_is_reported() {
 
     let results = run_family(root);
     assert!(!results.is_empty());
-    assert_warning_reported(
+    assert_error_reported(
         &results,
         "crates/runtime/tests/public_surface.rs",
         Some(3),
@@ -161,7 +161,7 @@ fn name_heuristic_does_not_count_as_proof() {
 
     let results = run_family(root);
     assert!(!results.is_empty());
-    assert_warning_reported(
+    assert_error_reported(
         &results,
         "crates/runtime/tests/public_surface.rs",
         Some(2),

@@ -1,3 +1,5 @@
+use std::path::{Path, PathBuf};
+
 use tempfile::tempdir;
 
 use guardrail3_adapters_outbound_fs::RealFileSystem;
@@ -186,6 +188,79 @@ fn recovers_ignored_untracked_typescript_source_files_anywhere_under_root() {
 }
 
 #[test]
+fn finds_mutated_rust_toolchain_files_in_golden_fixture_tree() {
+    let tmp = copy_rust_golden_fixture();
+
+    write_fixture_file(
+        tmp.path(),
+        "rust-toolchain.toml",
+        "[toolchain]\nchannel = \"stable\"\ncomponents = [\"clippy\", \"rustfmt\"]\n",
+    );
+    write_fixture_file(
+        tmp.path(),
+        "apps/backend/rust-toolchain.toml",
+        "[toolchain]\nchannel = \"1.85.1\"\ncomponents = [\"clippy\", \"rustfmt\"]\n",
+    );
+    write_fixture_file(
+        tmp.path(),
+        "apps/backend/crates/domain/engine/rust-toolchain.toml",
+        "[toolchain]\nchannel = \"1.85.1\"\ncomponents = [\"clippy\", \"rustfmt\"]\n",
+    );
+    write_fixture_file(
+        tmp.path(),
+        "apps/admin/rust-toolchain.toml",
+        "[toolchain]\nchannel = \"stable\"\ncomponents = [\"clippy\", \"rustfmt\"]\n",
+    );
+    write_fixture_file(tmp.path(), "packages/ui-kit/rust-toolchain", "stable\n");
+
+    let tree = walk_project(&RealFileSystem, tmp.path());
+
+    for rel_path in [
+        "rust-toolchain.toml",
+        "apps/backend/rust-toolchain.toml",
+        "apps/backend/crates/domain/engine/rust-toolchain.toml",
+        "apps/admin/rust-toolchain.toml",
+        "packages/ui-kit/rust-toolchain",
+    ] {
+        assert!(
+            tree.file_exists(rel_path),
+            "ProjectTree should contain `{rel_path}` after golden-fixture mutation"
+        );
+    }
+
+    assert_eq!(
+        tree.file_content("rust-toolchain.toml"),
+        Some("[toolchain]\nchannel = \"stable\"\ncomponents = [\"clippy\", \"rustfmt\"]\n"),
+    );
+    assert_eq!(
+        tree.file_content("apps/backend/rust-toolchain.toml"),
+        Some("[toolchain]\nchannel = \"1.85.1\"\ncomponents = [\"clippy\", \"rustfmt\"]\n"),
+    );
+    assert_eq!(
+        tree.file_content("apps/backend/crates/domain/engine/rust-toolchain.toml"),
+        Some("[toolchain]\nchannel = \"1.85.1\"\ncomponents = [\"clippy\", \"rustfmt\"]\n"),
+    );
+    assert_eq!(
+        tree.file_content("apps/admin/rust-toolchain.toml"),
+        Some("[toolchain]\nchannel = \"stable\"\ncomponents = [\"clippy\", \"rustfmt\"]\n"),
+    );
+
+    let modern_dirs = tree.dirs_with_file("rust-toolchain.toml");
+    assert!(
+        modern_dirs.contains(&"apps/backend".to_owned())
+            && modern_dirs.contains(&"apps/backend/crates/domain/engine".to_owned())
+            && modern_dirs.contains(&"apps/admin".to_owned()),
+        "ProjectTree should index every non-root rust-toolchain.toml: {modern_dirs:#?}"
+    );
+
+    let legacy_dirs = tree.dirs_with_file("rust-toolchain");
+    assert!(
+        legacy_dirs.contains(&"packages/ui-kit".to_owned()),
+        "ProjectTree should index legacy rust-toolchain files too: {legacy_dirs:#?}"
+    );
+}
+
+#[test]
 #[cfg(unix)]
 fn preserves_immediate_ignored_symlink_file_children_in_discovered_dirs() {
     let tmp = tempdir().expect("failed to create temporary project root");
@@ -246,5 +321,107 @@ fn preserves_immediate_broken_symlink_children_in_discovered_dirs() {
         entry.files().iter().any(|file| file == ".env")
             && entry.symlink_files().iter().any(|file| file == ".env"),
         "broken immediate symlink child should stay visible as a symlink file: {entry:#?}"
+    );
+}
+
+fn rust_golden_fixture_root() -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../tests/fixtures/r_arch_01/golden")
+}
+
+fn copy_rust_golden_fixture() -> tempfile::TempDir {
+    let tmp = tempdir().expect("failed to create temporary directory for golden fixture copy");
+    copy_dir_recursive(&rust_golden_fixture_root(), tmp.path());
+    tmp
+}
+
+fn copy_dir_recursive(src: &Path, dst: &Path) {
+    for entry in std::fs::read_dir(src).expect("failed to read source fixture directory") {
+        let entry = entry.expect("failed to read source fixture entry");
+        let src_path = entry.path();
+        let dst_path = dst.join(entry.file_name());
+        if src_path.is_dir() {
+            std::fs::create_dir_all(&dst_path)
+                .expect("failed to create destination directory in fixture copy");
+            copy_dir_recursive(&src_path, &dst_path);
+        } else {
+            let _ = std::fs::copy(&src_path, &dst_path)
+                .expect("failed to copy file into temporary fixture");
+        }
+    }
+}
+
+fn write_fixture_file(root: &Path, rel_path: &str, content: &str) {
+    let abs_path = root.join(rel_path);
+    if let Some(parent) = abs_path.parent() {
+        guardrail3_shared_fs::create_dir_all(parent)
+            .expect("failed to create parent directories for fixture mutation");
+    }
+    guardrail3_shared_fs::write_file(&abs_path, content)
+        .expect("failed to write mutated fixture file");
+}
+
+#[test]
+fn recovers_tracked_ignored_files_when_git_marker_is_a_file() {
+    let tmp = tempdir().expect("failed to create temporary project root");
+    let root = tmp.path();
+
+    let status = std::process::Command::new("git")
+        .arg("init")
+        .arg("-q")
+        .current_dir(root)
+        .status()
+        .expect("run git init");
+    assert!(status.success(), "git init should succeed");
+
+    let status = std::process::Command::new("git")
+        .args(["config", "user.email", "guardrail3@example.test"])
+        .current_dir(root)
+        .status()
+        .expect("configure git user.email");
+    assert!(status.success(), "git config user.email should succeed");
+
+    let status = std::process::Command::new("git")
+        .args(["config", "user.name", "guardrail3"])
+        .current_dir(root)
+        .status()
+        .expect("configure git user.name");
+    assert!(status.success(), "git config user.name should succeed");
+
+    guardrail3_shared_fs::write_file(&root.join(".gitignore"), "tracked.env\n")
+        .expect("write project fixture .gitignore");
+    guardrail3_shared_fs::write_file(&root.join("tracked.env"), "SECRET=1\n")
+        .expect("write tracked ignored fixture");
+
+    let status = std::process::Command::new("git")
+        .args(["add", ".gitignore"])
+        .current_dir(root)
+        .status()
+        .expect("git add .gitignore");
+    assert!(status.success(), "git add .gitignore should succeed");
+
+    let status = std::process::Command::new("git")
+        .args(["add", "-f", "tracked.env"])
+        .current_dir(root)
+        .status()
+        .expect("git add tracked ignored fixture");
+    assert!(status.success(), "git add should succeed");
+
+    let status = std::process::Command::new("git")
+        .args(["commit", "-qm", "fixture"])
+        .current_dir(root)
+        .status()
+        .expect("git commit tracked fixture");
+    assert!(status.success(), "git commit should succeed");
+
+    std::fs::rename(root.join(".git"), root.join(".git-real"))
+        .expect("rename .git dir to simulated worktree gitdir");
+    guardrail3_shared_fs::write_file(&root.join(".git"), "gitdir: .git-real\n")
+        .expect("write simulated worktree .git file");
+
+    let tree = walk_project(&RealFileSystem, root);
+
+    assert!(
+        tree.file_exists("tracked.env"),
+        "tracked ignored file should still be visible when .git is a file"
     );
 }

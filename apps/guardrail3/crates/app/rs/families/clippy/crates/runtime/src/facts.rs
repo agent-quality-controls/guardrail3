@@ -134,6 +134,7 @@ struct ResolvedPolicyMap {
 
 pub fn collect(tree: &ProjectTree, route: &RsClippyRoute) -> ClippyFacts {
     let cargo_roots = collect_cargo_roots(tree, route);
+    let validation_scope = route.validation_scope();
     let routed_root_rels = route
         .roots()
         .iter()
@@ -158,14 +159,20 @@ pub fn collect(tree: &ProjectTree, route: &RsClippyRoute) -> ClippyFacts {
         .collect();
     let policy_map = read_policy_map(tree, &cargo_roots, &standalone_package_roots);
     let mut cargo_config_overrides =
-        collect_cargo_config_overrides(tree, &routed_root_rels, &cargo_roots);
+        collect_cargo_config_overrides(tree, &routed_root_rels, &cargo_roots, validation_scope);
 
     let mut allowed_policy_roots = BTreeSet::new();
     let _ = allowed_policy_roots.insert(String::new());
     allowed_policy_roots.extend(workspace_roots.iter().cloned());
     allowed_policy_roots.extend(standalone_package_roots.iter().cloned());
 
-    let configs = collect_configs(tree, &cargo_roots, &policy_map, &routed_root_rels);
+    let configs = collect_configs(
+        tree,
+        &cargo_roots,
+        &policy_map,
+        &routed_root_rels,
+        validation_scope,
+    );
     let mut allowed_configs = Vec::new();
     let mut forbidden_configs = Vec::new();
     for config in configs {
@@ -277,7 +284,15 @@ pub fn collect(tree: &ProjectTree, route: &RsClippyRoute) -> ClippyFacts {
 
 #[cfg(test)]
 pub(crate) fn collect_for_tests(tree: &ProjectTree) -> ClippyFacts {
-    collect(tree, &family_route_for_tests(tree))
+    collect(tree, &family_route_for_tests(tree, None))
+}
+
+#[cfg(test)]
+pub(crate) fn collect_with_validation_scope_for_tests(
+    tree: &ProjectTree,
+    validation_scope: &str,
+) -> ClippyFacts {
+    collect(tree, &family_route_for_tests(tree, Some(validation_scope)))
 }
 
 #[cfg(test)]
@@ -294,12 +309,14 @@ pub(crate) fn config_input_for_tests<'a>(
 }
 
 #[cfg(test)]
-fn family_route_for_tests(tree: &ProjectTree) -> RsClippyRoute {
+fn family_route_for_tests(tree: &ProjectTree, validation_scope: Option<&str>) -> RsClippyRoute {
     let scope = guardrail3_app_rs_placement::collect(tree);
     let selected = RustFamilySelection::new(std::collections::BTreeSet::from([
         RustValidateFamily::Clippy,
     ]));
-    FamilyMapper::new(tree, &scope, None, &selected, None).map_rs_clippy()
+    FamilyMapper::new(tree, &scope, None, &selected, None)
+        .with_validation_scope(validation_scope)
+        .map_rs_clippy()
 }
 
 #[cfg(test)]

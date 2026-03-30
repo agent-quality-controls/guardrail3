@@ -23,9 +23,10 @@ pub fn parse_rust_file(content: &str) -> Result<syn::File, syn::Error> {
 }
 
 pub fn analyze(ast: &syn::File, content: &str) -> ParsedTestFile {
+    let check_result_aliases = collect_check_result_aliases(ast);
     let mut visitor = TestVisitor {
         out: ParsedTestFile {
-            ignore_without_reason_lines: ast_helpers::find_ignore_without_reason(ast, content),
+            ignore_reasons: ast_helpers::find_ignore_reasons(ast, content),
             modules: Vec::new(),
             cfg_test_modules: Vec::new(),
             test_functions: Vec::new(),
@@ -33,6 +34,7 @@ pub fn analyze(ast: &syn::File, content: &str) -> ParsedTestFile {
             public_values: Vec::new(),
             file_value_names: BTreeSet::new(),
             file_function_names: BTreeSet::new(),
+            check_result_aliases,
             file_call_paths: Vec::new(),
             imports: Vec::new(),
             macro_defined_proof_functions: BTreeSet::new(),
@@ -69,7 +71,13 @@ impl<'ast> Visit<'ast> for TestVisitor {
             .out
             .file_function_names
             .insert(item.sig.ident.to_string());
-        let function = analyze_function(&item.attrs, &item.vis, &item.sig, &item.block);
+        let function = analyze_function(
+            &item.attrs,
+            &item.vis,
+            &item.sig,
+            &item.block,
+            &self.out.check_result_aliases,
+        );
         maybe_push_test_function(
             &item.attrs,
             &item.sig,
@@ -86,7 +94,13 @@ impl<'ast> Visit<'ast> for TestVisitor {
             .out
             .file_function_names
             .insert(item.sig.ident.to_string());
-        let function = analyze_function(&item.attrs, &item.vis, &item.sig, &item.block);
+        let function = analyze_function(
+            &item.attrs,
+            &item.vis,
+            &item.sig,
+            &item.block,
+            &self.out.check_result_aliases,
+        );
         maybe_push_test_function(
             &item.attrs,
             &item.sig,
@@ -191,9 +205,7 @@ fn maybe_push_test_function(
         return;
     }
     let uses_tokio_test_attr = attrs.iter().any(helpers::is_tokio_test_attr);
-    let should_panic_attr = attrs
-        .iter()
-        .find(|attr| attr.path().is_ident("should_panic"));
+    let should_panic_attr = attrs.iter().find(|attr| helpers::is_should_panic_attr(attr));
     let mut body_visitor = TestBodyVisitor::default();
     body_visitor.visit_block(block);
     out.push(TestFunctionInfo {
@@ -205,8 +217,9 @@ fn maybe_push_test_function(
         call_paths: function.call_paths.clone(),
         path_uses: function.path_uses.clone(),
         method_receiver_paths: body_visitor.method_receiver_paths,
+        method_names: function.method_names.clone(),
+        local_call_aliases: function.local_call_aliases.clone(),
         field_accesses: function.field_accesses.clone(),
-        string_literals: function.string_literals.clone(),
         shadowed_idents: function.shadowed_idents.clone(),
         should_panic_line: should_panic_attr.map(|attr| helpers::span_line(attr.span())),
         should_panic_has_expected: should_panic_attr
@@ -221,6 +234,7 @@ fn analyze_function(
     vis: &syn::Visibility,
     sig: &syn::Signature,
     block: &syn::Block,
+    check_result_aliases: &BTreeSet<String>,
 ) -> FunctionInfo {
     let mut body_visitor = TestBodyVisitor::default();
     body_visitor.visit_block(block);
@@ -228,7 +242,7 @@ fn analyze_function(
     let has_check_result_arg = sig.inputs.iter().any(|input| {
         if let syn::FnArg::Typed(typed) = input {
             helpers::collect_pat_idents(&typed.pat, &mut arg_names);
-            type_mentions_check_result(&typed.ty)
+            type_mentions_check_result(&typed.ty, check_result_aliases)
         } else {
             false
         }
@@ -246,6 +260,8 @@ fn analyze_function(
         has_failure_enforcement: body_visitor.has_failure_enforcement,
         call_paths: body_visitor.call_paths,
         path_uses: body_visitor.path_uses,
+        method_names: body_visitor.method_names,
+        local_call_aliases: body_visitor.local_call_aliases,
         field_accesses: body_visitor.field_accesses,
         string_literals: body_visitor.string_literals,
         shadowed_idents: body_visitor.shadowed_idents,
@@ -283,21 +299,48 @@ fn classify_type_kind(ty: &syn::Type) -> ReturnKind {
     }
 }
 
-fn type_mentions_check_result(ty: &syn::Type) -> bool {
+fn type_mentions_check_result(ty: &syn::Type, aliases: &BTreeSet<String>) -> bool {
     match ty {
         syn::Type::Path(type_path) => type_path
             .path
             .segments
             .iter()
-            .any(|segment| segment.ident == "CheckResult"),
-        syn::Type::Reference(reference) => type_mentions_check_result(&reference.elem),
-        syn::Type::Slice(slice) => type_mentions_check_result(&slice.elem),
-        syn::Type::Array(array) => type_mentions_check_result(&array.elem),
-        syn::Type::Tuple(tuple) => tuple.elems.iter().any(type_mentions_check_result),
-        syn::Type::Group(group) => type_mentions_check_result(&group.elem),
-        syn::Type::Paren(paren) => type_mentions_check_result(&paren.elem),
+            .any(|segment| segment.ident == "CheckResult" || aliases.contains(&segment.ident.to_string())),
+        syn::Type::Reference(reference) => type_mentions_check_result(&reference.elem, aliases),
+        syn::Type::Slice(slice) => type_mentions_check_result(&slice.elem, aliases),
+        syn::Type::Array(array) => type_mentions_check_result(&array.elem, aliases),
+        syn::Type::Tuple(tuple) => tuple
+            .elems
+            .iter()
+            .any(|element| type_mentions_check_result(element, aliases)),
+        syn::Type::Group(group) => type_mentions_check_result(&group.elem, aliases),
+        syn::Type::Paren(paren) => type_mentions_check_result(&paren.elem, aliases),
         _ => false,
     }
+}
+
+fn collect_check_result_aliases(ast: &syn::File) -> BTreeSet<String> {
+    let mut aliases = BTreeSet::new();
+
+    loop {
+        let mut changed = false;
+        for item in &ast.items {
+            let syn::Item::Type(item_type) = item else {
+                continue;
+            };
+            if aliases.contains(&item_type.ident.to_string()) {
+                continue;
+            }
+            if type_mentions_check_result(&item_type.ty, &aliases) {
+                changed |= aliases.insert(item_type.ident.to_string());
+            }
+        }
+        if !changed {
+            break;
+        }
+    }
+
+    aliases
 }
 
 #[derive(Default)]
@@ -307,6 +350,8 @@ struct TestBodyVisitor {
     call_paths: Vec<Vec<String>>,
     path_uses: Vec<Vec<String>>,
     method_receiver_paths: Vec<Vec<String>>,
+    method_names: Vec<String>,
+    local_call_aliases: std::collections::BTreeMap<String, Vec<String>>,
     field_accesses: Vec<FieldAccessInfo>,
     string_literals: Vec<String>,
     shadowed_idents: BTreeSet<String>,
@@ -340,6 +385,9 @@ impl<'ast> Visit<'ast> for TestBodyVisitor {
             if matches!(name.as_str(), "assert" | "debug_assert")
                 && helpers::macro_has_weak_matches(mac)
             {
+                self.weak_matches_lines.push(helpers::span_line(mac.span()));
+            }
+            if name == "assert_matches" && helpers::macro_has_weak_assert_matches(mac) {
                 self.weak_matches_lines.push(helpers::span_line(mac.span()));
             }
             if helpers::is_assertion_macro_name(&name) || name == "panic" {
@@ -380,6 +428,7 @@ impl<'ast> Visit<'ast> for TestBodyVisitor {
         if let Some(path) = helpers::call_path(&expr.receiver) {
             self.method_receiver_paths.push(path);
         }
+        self.method_names.push(expr.method.to_string());
         if matches!(
             expr.method.to_string().as_str(),
             "unwrap" | "expect" | "unwrap_err" | "expect_err"
@@ -396,6 +445,14 @@ impl<'ast> Visit<'ast> for TestBodyVisitor {
 
     fn visit_local(&mut self, local: &'ast syn::Local) {
         helpers::collect_pat_idents(&local.pat, &mut self.shadowed_idents);
+        if let (Some(init), Some(name)) = (
+            local.init.as_ref(),
+            helpers::single_pat_ident(&local.pat),
+        ) {
+            if let Some(path) = helpers::call_path(&init.expr) {
+                let _ = self.local_call_aliases.insert(name, path);
+            }
+        }
         syn::visit::visit_local(self, local);
     }
 }

@@ -145,3 +145,29 @@ struct Input {
         }],
     );
 }
+
+#[test]
+fn errors_when_module_aliased_deserialize_struct_lacks_validate() {
+    let results = run_struct_boundary(
+        r#"
+use serde as serde1;
+
+#[derive(serde1::Deserialize)]
+struct Input {
+    name: String,
+}
+"#,
+    );
+
+    let _ = assertions::findings(&results);
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Error),
+            message: Some(
+                "Struct `Input` derives serde1::Deserialize but does not derive `Validate`. Non-primitive input boundary structs must derive garde validation.",
+            ),
+            ..Default::default()
+        }],
+    );
+}

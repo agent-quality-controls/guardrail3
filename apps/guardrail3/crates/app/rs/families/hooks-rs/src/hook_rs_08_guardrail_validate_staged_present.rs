@@ -76,7 +76,9 @@ fn is_guardrail_validate_staged_command(command: &ResolvedCommand) -> bool {
         return false;
     }
 
-    args.iter().skip(index).all(|arg| !is_help_or_version_flag(arg))
+    args.iter()
+        .skip(index)
+        .all(|arg| !is_help_or_version_flag(arg))
         && args.iter().skip(index).any(|arg| arg == "--staged")
 }
 

@@ -26,9 +26,9 @@ Current state:
 
 Scope model:
 
-- routed roots plus routed scoped files
-- subtree validation should narrow both source-file scans and config-adjacent
-  reporting to the active routed root set
+- global family over all non-excluded Rust source files
+- subtree invocation must not narrow the owned source universe to one routed
+  workspace
 
 Agent handoff focus:
 
@@ -36,22 +36,22 @@ Agent handoff focus:
   - `apps/guardrail3/crates/app/rs/runtime/src/runners.rs`
   - `apps/guardrail3/crates/app/rs/families/code/crates/runtime/src/lib.rs`
   - `apps/guardrail3/crates/app/rs/families/code/crates/runtime/src/facts.rs`
-  - `apps/guardrail3/crates/app/rs/family_mapper/src/scoped_files.rs`
-- expand the current subtree/runtime proof set beyond the existing narrow
-  config-result tests
+  - `apps/guardrail3/crates/app/rs/family_mapper/src/views.rs`
+- migrate the family from routed-root thinking to repo-global owned-file
+  routing
 - verify file ownership, structural caps, and exception-comment discovery all
-  respect routed `scoped_files`
+  respect the shared owned source surface rather than routed roots
 
 Known current risk:
 
-- this family already has the best subtree coverage, but the shared runtime
-  subtree test harness is stale and needs repair
+- current docs/code still describe this family as routed-root scoped even
+  though the target contract is repo-global over all non-excluded Rust files
 
 Done means:
 
-- runtime subtree tests compile again
-- subtree tests prove file scans and config-side findings do not bleed across
-  sibling roots
+- repo-global route tests prove this family sees every owned Rust source file
+  outside exclusions
+- illegal or out-of-workspace Rust files do not disappear from `RS-CODE`
 - production facts stay route-driven instead of path-glob driven
 
 Historical/supplemental references:

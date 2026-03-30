@@ -14,6 +14,10 @@ enum ChannelKind {
 }
 
 pub fn check(input: &ToolchainRootInput<'_>, results: &mut Vec<CheckResult>) {
+    if input.legacy_toolchain_rel.is_some() {
+        return;
+    }
+
     let Some(rel) = input.toolchain_toml_rel else {
         return;
     };
@@ -76,9 +80,7 @@ fn toolchain_table<'a>(
 }
 
 fn check_channel(toolchain: &toml::value::Table, rel: &str, results: &mut Vec<CheckResult>) {
-    let channel_value = toolchain.get("channel");
-
-    match channel_value {
+    match toolchain.get("channel") {
         Some(toml::Value::String(channel)) => match classify_channel(channel) {
             ChannelKind::Stable => results.push(
                 CheckResult::from_parts(
@@ -90,6 +92,18 @@ fn check_channel(toolchain: &toml::value::Table, rel: &str, results: &mut Vec<Ch
                     None,
                     false,
                 )
+                .as_inventory(),
+            ),
+            ChannelKind::PinnedStable => results.push(
+                CheckResult {
+                    id: ID.to_owned(),
+                    severity: Severity::Info,
+                    title: "toolchain channel is pinned".to_owned(),
+                    message: format!("Pinned channel `{channel}` is acceptable."),
+                    file: Some(rel.to_owned()),
+                    line: None,
+                    inventory: false,
+                }
                 .as_inventory(),
             ),
             ChannelKind::Nightly => results.push(CheckResult::from_parts(
@@ -110,18 +124,6 @@ fn check_channel(toolchain: &toml::value::Table, rel: &str, results: &mut Vec<Ch
                 None,
                 false,
             )),
-            ChannelKind::PinnedStable => results.push(
-                CheckResult {
-                    id: ID.to_owned(),
-                    severity: Severity::Info,
-                    title: "toolchain channel is pinned".to_owned(),
-                    message: format!("Pinned channel `{channel}` is acceptable."),
-                    file: Some(rel.to_owned()),
-                    line: None,
-                    inventory: false,
-                }
-                .as_inventory(),
-            ),
             ChannelKind::Unsupported => results.push(CheckResult {
                 id: ID.to_owned(),
                 severity: Severity::Error,
@@ -156,33 +158,32 @@ fn check_channel(toolchain: &toml::value::Table, rel: &str, results: &mut Vec<Ch
 fn classify_channel(raw: &str) -> ChannelKind {
     let normalized = raw.trim().to_ascii_lowercase();
     let segments = normalized.split('-').collect::<Vec<_>>();
+    let first = segments.first().copied().unwrap_or("");
 
-    if segments.first() == Some(&"stable") {
+    if first.starts_with("nightly") {
+        return ChannelKind::Nightly;
+    }
+    if first.starts_with("beta") {
+        return ChannelKind::Beta;
+    }
+
+    if segments
+        .iter()
+        .skip(1)
+        .any(|segment| segment.starts_with("nightly"))
+    {
+        return ChannelKind::Nightly;
+    }
+    if segments
+        .iter()
+        .skip(1)
+        .any(|segment| segment.starts_with("beta"))
+    {
+        return ChannelKind::Beta;
+    }
+
+    if first == "stable" {
         return ChannelKind::Stable;
-    }
-    if segments
-        .first()
-        .is_some_and(|segment| segment.starts_with("nightly"))
-    {
-        return ChannelKind::Nightly;
-    }
-    if segments
-        .first()
-        .is_some_and(|segment| segment.starts_with("beta"))
-    {
-        return ChannelKind::Beta;
-    }
-    if segments
-        .get(1)
-        .is_some_and(|segment| segment.starts_with("nightly"))
-    {
-        return ChannelKind::Nightly;
-    }
-    if segments
-        .get(1)
-        .is_some_and(|segment| segment.starts_with("beta"))
-    {
-        return ChannelKind::Beta;
     }
     if parse_pinned_stable(raw).is_some() {
         return ChannelKind::PinnedStable;
@@ -210,9 +211,7 @@ fn parse_pinned_stable(raw: &str) -> Option<(u64, u64, u64)> {
 }
 
 fn check_components(toolchain: &toml::value::Table, rel: &str, results: &mut Vec<CheckResult>) {
-    let components_value = toolchain.get("components");
-
-    match components_value {
+    match toolchain.get("components") {
         Some(toml::Value::Array(components)) => {
             if !components
                 .iter()
@@ -230,7 +229,10 @@ fn check_components(toolchain: &toml::value::Table, rel: &str, results: &mut Vec
                 return;
             }
 
-            let names: Vec<&str> = components.iter().filter_map(toml::Value::as_str).collect();
+            let names = components
+                .iter()
+                .filter_map(toml::Value::as_str)
+                .collect::<Vec<_>>();
             for expected in ["clippy", "rustfmt"] {
                 if names.contains(&expected) {
                     results.push(
@@ -288,15 +290,42 @@ pub(crate) fn test_input<'a>(
     cargo_rust_version: Option<&'a str>,
     cargo_parse_error: Option<&'a str>,
 ) -> ToolchainRootInput<'a> {
-    ToolchainRootInput {
+    test_input_for_root(
+        "",
+        "Cargo.toml",
         toolchain_toml_rel,
         legacy_toolchain_rel,
         parsed,
         parse_error,
-        cargo_toml_rel: Some("Cargo.toml"),
+        cargo_rust_version,
+        cargo_parse_error,
+    )
+}
+
+#[cfg(test)]
+pub(crate) fn test_input_for_root<'a>(
+    rel_dir: &'a str,
+    cargo_rel_path: &'a str,
+    toolchain_toml_rel: Option<&'a str>,
+    legacy_toolchain_rel: Option<&'a str>,
+    parsed: Option<&'a toml::Value>,
+    parse_error: Option<&'a str>,
+    cargo_rust_version: Option<&'a str>,
+    cargo_parse_error: Option<&'a str>,
+) -> ToolchainRootInput<'a> {
+    ToolchainRootInput {
+        rel_dir,
+        cargo_rel_path,
+        cargo_toml_rel: Some(cargo_rel_path),
+        toolchain_toml_rel,
+        legacy_toolchain_rel,
+        parsed,
+        parse_error,
         cargo_rust_version,
         cargo_rust_version_invalid: false,
         cargo_parse_error,
+        ancestor_toolchain: None,
+        descendant_toolchains: Vec::new(),
     }
 }
 

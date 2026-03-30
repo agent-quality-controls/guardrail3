@@ -29,8 +29,7 @@ pub fn check_inventory(
             ID.to_owned(),
             Severity::Info,
             "cargo-family inputs parsed cleanly".to_owned(),
-            "Active Cargo policy inputs parsed without cargo-family input failures."
-                .to_owned(),
+            "Active Cargo policy inputs parsed without cargo-family input failures.".to_owned(),
             Some(input.root.cargo_rel_path.clone()),
             None,
             false,
@@ -40,4 +39,5 @@ pub fn check_inventory(
 }
 
 #[cfg(test)]
-mod tests;
+#[path = "rs_cargo_14_input_failures_tests/mod.rs"] // reason: test-only sidecar module wiring
+mod rs_cargo_14_input_failures_tests;

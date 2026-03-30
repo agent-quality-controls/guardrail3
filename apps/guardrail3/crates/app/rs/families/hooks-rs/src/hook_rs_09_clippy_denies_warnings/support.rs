@@ -26,7 +26,10 @@ impl<'a> TokenCursor<'a> {
     }
 }
 
-pub(super) fn cargo_clippy_denies_warnings(parts: &mut TokenCursor<'_>, env_state: &EnvState) -> bool {
+pub(super) fn cargo_clippy_denies_warnings(
+    parts: &mut TokenCursor<'_>,
+    env_state: &EnvState,
+) -> bool {
     if matches!(parts.peek(), Some(token) if token.starts_with('+')) {
         let _ = parts.next();
     }

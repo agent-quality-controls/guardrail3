@@ -23,16 +23,21 @@ pub(super) fn collect_configs(
     cargo_roots: &BTreeMap<String, CargoRootFacts>,
     policy_map: &ResolvedPolicyMap,
     routed_root_rels: &BTreeSet<String>,
+    validation_scope: Option<&str>,
 ) -> Vec<ClippyConfigFacts> {
     let mut paths = Vec::new();
     for file_name in ["clippy.toml", ".clippy.toml"] {
-        if tree.file_exists(file_name) {
+        if tree.file_exists(file_name)
+            && config_dir_is_relevant("", routed_root_rels, validation_scope)
+        {
             paths.push(("".to_owned(), file_name.to_owned()));
         }
         paths.extend(
             tree.dirs_with_file(file_name)
                 .into_iter()
-                .filter(|rel_dir| is_under_routed_root(rel_dir, routed_root_rels))
+                .filter(|rel_dir| {
+                    config_dir_is_relevant(rel_dir, routed_root_rels, validation_scope)
+                })
                 .map(|rel_dir| {
                     let rel_path = ProjectTree::join_rel(&rel_dir, file_name);
                     (rel_dir, rel_path)
@@ -67,11 +72,14 @@ pub(super) fn collect_cargo_config_overrides(
     tree: &ProjectTree,
     routed_root_rels: &BTreeSet<String>,
     cargo_roots: &BTreeMap<String, CargoRootFacts>,
+    validation_scope: Option<&str>,
 ) -> Vec<CargoConfigOverrideFacts> {
     let mut rel_paths = Vec::new();
 
     for rel_path in [".cargo/config.toml", ".cargo/config"] {
-        if tree.file_exists(rel_path) {
+        if tree.file_exists(rel_path)
+            && cargo_config_owner_is_relevant("", routed_root_rels, cargo_roots, validation_scope)
+        {
             rel_paths.push(rel_path.to_owned());
         }
     }
@@ -81,7 +89,12 @@ pub(super) fn collect_cargo_config_overrides(
             .into_iter()
             .filter(|rel_dir| rel_dir.ends_with("/.cargo"))
             .filter(|rel_dir| {
-                cargo_config_applies_to_routed_roots(rel_dir, routed_root_rels, cargo_roots)
+                cargo_config_owner_is_relevant(
+                    rel_dir.strip_suffix("/.cargo").unwrap_or(rel_dir),
+                    routed_root_rels,
+                    cargo_roots,
+                    validation_scope,
+                )
             })
             .map(|rel_dir| ProjectTree::join_rel(&rel_dir, "config.toml")),
     );
@@ -90,7 +103,12 @@ pub(super) fn collect_cargo_config_overrides(
             .into_iter()
             .filter(|rel_dir| rel_dir.ends_with("/.cargo"))
             .filter(|rel_dir| {
-                cargo_config_applies_to_routed_roots(rel_dir, routed_root_rels, cargo_roots)
+                cargo_config_owner_is_relevant(
+                    rel_dir.strip_suffix("/.cargo").unwrap_or(rel_dir),
+                    routed_root_rels,
+                    cargo_roots,
+                    validation_scope,
+                )
             })
             .map(|rel_dir| ProjectTree::join_rel(&rel_dir, "config")),
     );
@@ -164,24 +182,47 @@ pub(super) fn push_coverage_facts(
     }
 }
 
-fn cargo_config_applies_to_routed_roots(
-    rel_dir: &str,
+fn cargo_config_owner_is_relevant(
+    owner_rel: &str,
     routed_root_rels: &BTreeSet<String>,
     cargo_roots: &BTreeMap<String, CargoRootFacts>,
+    validation_scope: Option<&str>,
 ) -> bool {
-    let owner_rel = rel_dir.strip_suffix("/.cargo").unwrap_or(rel_dir);
-    owner_rel.is_empty()
-        || cargo_roots.keys().any(|cargo_root_rel| {
-            is_under_routed_root(cargo_root_rel, routed_root_rels)
-                && (cargo_root_rel == owner_rel
-                    || cargo_root_rel.starts_with(&format!("{owner_rel}/")))
-        })
+    config_dir_is_relevant(owner_rel, routed_root_rels, validation_scope)
+        && (owner_rel.is_empty()
+            || cargo_roots.keys().any(|cargo_root_rel| {
+                is_under_routed_root(cargo_root_rel, routed_root_rels)
+                    && (cargo_root_rel == owner_rel
+                        || cargo_root_rel.starts_with(&format!("{owner_rel}/")))
+            }))
+}
+
+fn config_dir_is_relevant(
+    rel_dir: &str,
+    routed_root_rels: &BTreeSet<String>,
+    validation_scope: Option<&str>,
+) -> bool {
+    (!routed_root_rels.is_empty() && rel_dir.is_empty()
+        || is_under_routed_root(rel_dir, routed_root_rels))
+        && validation_scope.is_none_or(|scope_rel| paths_intersect_scope(rel_dir, scope_rel))
 }
 
 fn is_under_routed_root(rel_dir: &str, routed_root_rels: &BTreeSet<String>) -> bool {
     routed_root_rels.iter().any(|root_rel| {
         root_rel.is_empty() || rel_dir == root_rel || rel_dir.starts_with(&format!("{root_rel}/"))
     })
+}
+
+fn paths_intersect_scope(rel_dir: &str, scope_rel: &str) -> bool {
+    path_is_under(rel_dir, scope_rel) || path_is_under(scope_rel, rel_dir)
+}
+
+fn path_is_under(rel_path: &str, parent_rel: &str) -> bool {
+    parent_rel.is_empty()
+        || rel_path == parent_rel
+        || rel_path
+            .strip_prefix(parent_rel)
+            .is_some_and(|rest| rest.starts_with('/'))
 }
 
 fn parse_config(

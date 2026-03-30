@@ -26,7 +26,7 @@ fn literal_vs_literal_assertion_is_reported() {
         &results,
         "tests/asserts.rs",
         Some(3),
-        Severity::Warn,
+        Severity::Error,
         "tautological assertion",
     );
 }
@@ -52,7 +52,7 @@ fn assert_ne_literal_vs_literal_is_reported() {
         &results,
         "tests/asserts.rs",
         Some(3),
-        Severity::Warn,
+        Severity::Error,
         "tautological assertion",
     );
 }
@@ -78,7 +78,7 @@ fn debug_assert_eq_parenthesized_literals_are_reported() {
         &results,
         "tests/asserts.rs",
         Some(3),
-        Severity::Warn,
+        Severity::Error,
         "tautological assertion",
     );
 }
@@ -104,7 +104,7 @@ fn debug_assert_ne_parenthesized_literals_are_reported() {
         &results,
         "tests/asserts.rs",
         Some(3),
-        Severity::Warn,
+        Severity::Error,
         "tautological assertion",
     );
 }

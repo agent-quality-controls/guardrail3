@@ -278,6 +278,62 @@ fn test_support_route_construction_imports_are_reported() {
 }
 
 #[test]
+fn test_support_importing_placement_route_infra_is_reported() {
+    let fixture = tempdir();
+    let root = fixture.path();
+
+    write_file(
+        root,
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"crates/runtime\", \"crates/assertions\", \"test_support\"]\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/Cargo.toml",
+        "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = {path = \"../assertions\"}\ntest_support = {path = \"../../test_support\"}\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/src/lib.rs",
+        "pub fn value() -> u8 {1}\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/tests/public_surface.rs",
+        "use demo_assertions::prove_runtime;\n#[test]\nfn public_surface() {prove_runtime();}\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/Cargo.toml",
+        "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = {path = \"../runtime\"}\ntest_support = {path = \"../../test_support\"}\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/src/lib.rs",
+        "pub fn prove_runtime() {assert_eq!(demo_runtime::value(), 1);}\n",
+    );
+    write_file(
+        root,
+        "test_support/Cargo.toml",
+        "[package]\nname = \"test_support\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write_file(
+        root,
+        "test_support/src/lib.rs",
+        "use guardrail3_app_rs_placement as placement;\npub fn cargo_route() { let _ = placement::collect; }\n",
+    );
+
+    let results = run_family(root);
+    assert_reported(
+        &results,
+        "test_support/src/lib.rs",
+        Some(1),
+        Severity::Error,
+        "test_support imports route construction infrastructure",
+    );
+}
+
+#[test]
 fn test_support_fully_qualified_family_mapper_call_is_reported() {
     let fixture = tempdir();
     let root = fixture.path();
@@ -321,6 +377,118 @@ fn test_support_fully_qualified_family_mapper_call_is_reported() {
         root,
         "test_support/src/lib.rs",
         "pub fn cargo_route() { let _ = guardrail3_app_rs_family_mapper::FamilyMapper::new(tree, scope, None, selected, None); }\n",
+    );
+
+    let results = run_family(root);
+    assert_reported(
+        &results,
+        "test_support/src/lib.rs",
+        None,
+        Severity::Error,
+        "test_support builds routed family input",
+    );
+}
+
+#[test]
+fn test_support_fully_qualified_placement_call_is_reported() {
+    let fixture = tempdir();
+    let root = fixture.path();
+
+    write_file(
+        root,
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"crates/runtime\", \"crates/assertions\", \"test_support\"]\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/Cargo.toml",
+        "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = {path = \"../assertions\"}\ntest_support = {path = \"../../test_support\"}\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/src/lib.rs",
+        "pub fn value() -> u8 {1}\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/tests/public_surface.rs",
+        "use demo_assertions::prove_runtime;\n#[test]\nfn public_surface() {prove_runtime();}\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/Cargo.toml",
+        "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = {path = \"../runtime\"}\ntest_support = {path = \"../../test_support\"}\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/src/lib.rs",
+        "pub fn prove_runtime() {assert_eq!(demo_runtime::value(), 1);}\n",
+    );
+    write_file(
+        root,
+        "test_support/Cargo.toml",
+        "[package]\nname = \"test_support\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write_file(
+        root,
+        "test_support/src/lib.rs",
+        "pub fn cargo_route() { let _ = guardrail3_app_rs_placement::collect(todo!()); }\n",
+    );
+
+    let results = run_family(root);
+    assert_reported(
+        &results,
+        "test_support/src/lib.rs",
+        None,
+        Severity::Error,
+        "test_support builds routed family input",
+    );
+}
+
+#[test]
+fn test_support_family_mapper_function_pointer_is_reported() {
+    let fixture = tempdir();
+    let root = fixture.path();
+
+    write_file(
+        root,
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"crates/runtime\", \"crates/assertions\", \"test_support\"]\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/Cargo.toml",
+        "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = {path = \"../assertions\"}\ntest_support = {path = \"../../test_support\"}\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/src/lib.rs",
+        "pub fn value() -> u8 {1}\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/tests/public_surface.rs",
+        "use demo_assertions::prove_runtime;\n#[test]\nfn public_surface() {prove_runtime();}\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/Cargo.toml",
+        "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = {path = \"../runtime\"}\ntest_support = {path = \"../../test_support\"}\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/src/lib.rs",
+        "pub fn prove_runtime() {assert_eq!(demo_runtime::value(), 1);}\n",
+    );
+    write_file(
+        root,
+        "test_support/Cargo.toml",
+        "[package]\nname = \"test_support\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+    write_file(
+        root,
+        "test_support/src/lib.rs",
+        "pub fn cargo_route() { let make = guardrail3_app_rs_family_mapper::FamilyMapper::new; let _ = make; }\n",
     );
 
     let results = run_family(root);
@@ -384,6 +552,170 @@ fn test_support_transitive_semantic_helper_is_reported() {
         &results,
         "test_support/src/lib.rs",
         Some(2),
+        Severity::Error,
+        "test_support exports semantic finding helper",
+    );
+}
+
+#[test]
+fn test_support_check_result_method_selector_is_reported() {
+    let fixture = tempdir();
+    let root = fixture.path();
+
+    write_file(
+        root,
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"crates/runtime\", \"crates/assertions\", \"test_support\"]\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/Cargo.toml",
+        "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = {path = \"../assertions\"}\ntest_support = {path = \"../../test_support\"}\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/src/lib.rs",
+        "pub fn value() -> u8 {1}\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/tests/public_surface.rs",
+        "use demo_assertions::prove_runtime;\n#[test]\nfn public_surface() {prove_runtime();}\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/Cargo.toml",
+        "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = {path = \"../runtime\"}\ntest_support = {path = \"../../test_support\"}\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/src/lib.rs",
+        "pub fn prove_runtime() {assert_eq!(demo_runtime::value(), 1);}\n",
+    );
+    write_file(
+        root,
+        "test_support/Cargo.toml",
+        "[package]\nname = \"test_support\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\nguardrail3_domain_report = {path = \"../../../../domain/report\"}\n",
+    );
+    write_file(
+        root,
+        "test_support/src/lib.rs",
+        "use guardrail3_domain_report::{CheckResult, Severity};\npub fn all_errors(results: &[CheckResult]) -> bool { results.iter().all(|result| result.severity() == Severity::Error) }\n",
+    );
+
+    let results = run_family(root);
+    assert_reported(
+        &results,
+        "test_support/src/lib.rs",
+        Some(2),
+        Severity::Error,
+        "test_support exports semantic finding helper",
+    );
+}
+
+#[test]
+fn test_support_check_result_type_alias_selector_is_reported() {
+    let fixture = tempdir();
+    let root = fixture.path();
+
+    write_file(
+        root,
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"crates/runtime\", \"crates/assertions\", \"test_support\"]\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/Cargo.toml",
+        "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = {path = \"../assertions\"}\ntest_support = {path = \"../../test_support\"}\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/src/lib.rs",
+        "pub fn value() -> u8 {1}\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/tests/public_surface.rs",
+        "use demo_assertions::prove_runtime;\n#[test]\nfn public_surface() {prove_runtime();}\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/Cargo.toml",
+        "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = {path = \"../runtime\"}\ntest_support = {path = \"../../test_support\"}\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/src/lib.rs",
+        "pub fn prove_runtime() {assert_eq!(demo_runtime::value(), 1);}\n",
+    );
+    write_file(
+        root,
+        "test_support/Cargo.toml",
+        "[package]\nname = \"test_support\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\nguardrail3_domain_report = {path = \"../../../../domain/report\"}\n",
+    );
+    write_file(
+        root,
+        "test_support/src/lib.rs",
+        "type Finding = guardrail3_domain_report::CheckResult;\nuse guardrail3_domain_report::Severity;\npub fn all_errors(results: &[Finding]) -> bool { results.iter().all(|result| result.severity() == Severity::Error) }\n",
+    );
+
+    let results = run_family(root);
+    assert_reported(
+        &results,
+        "test_support/src/lib.rs",
+        Some(3),
+        Severity::Error,
+        "test_support exports semantic finding helper",
+    );
+}
+
+#[test]
+fn test_support_transitive_method_selector_helper_is_reported() {
+    let fixture = tempdir();
+    let root = fixture.path();
+
+    write_file(
+        root,
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"crates/runtime\", \"crates/assertions\", \"test_support\"]\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/Cargo.toml",
+        "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = {path = \"../assertions\"}\ntest_support = {path = \"../../test_support\"}\n",
+    );
+    write_file(root, "crates/runtime/src/lib.rs", "pub fn value() -> u8 {1}\n");
+    write_file(
+        root,
+        "crates/runtime/tests/public_surface.rs",
+        "use demo_assertions::prove_runtime;\n#[test]\nfn public_surface() {prove_runtime();}\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/Cargo.toml",
+        "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = {path = \"../runtime\"}\ntest_support = {path = \"../../test_support\"}\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/src/lib.rs",
+        "pub fn prove_runtime() {assert_eq!(demo_runtime::value(), 1);}\n",
+    );
+    write_file(
+        root,
+        "test_support/Cargo.toml",
+        "[package]\nname = \"test_support\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\nguardrail3_domain_report = {path = \"../../../../domain/report\"}\n",
+    );
+    write_file(
+        root,
+        "test_support/src/lib.rs",
+        "use guardrail3_domain_report::{CheckResult, Severity};\nfn select_all_errors(results: &[CheckResult]) -> bool { results.iter().all(|result| result.severity() == Severity::Error) }\npub fn all_errors(results: &[CheckResult]) -> bool { select_all_errors(results) }\n",
+    );
+
+    let results = run_family(root);
+    assert_reported(
+        &results,
+        "test_support/src/lib.rs",
+        Some(3),
         Severity::Error,
         "test_support exports semantic finding helper",
     );

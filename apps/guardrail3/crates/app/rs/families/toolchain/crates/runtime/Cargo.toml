@@ -8,12 +8,16 @@ workspace = true
 
 [dependencies]
 guardrail3_app_rs_family_mapper = { package = "guardrail3-app-rs-family-mapper", path = "../../../../family_mapper" }
+guardrail3_app_rs_placement = { package = "guardrail3-app-rs-placement", path = "../../../../placement" }
 guardrail3_domain_project_tree = { package = "guardrail3-domain-project-tree", path = "../../../../../../domain/project-tree" }
 guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../../../../../domain/report" }
 toml = "0.8"
 
 [dev-dependencies]
-guardrail3_app_rs_placement = { package = "guardrail3-app-rs-placement", path = "../../../../placement" }
+guardrail3_app_core = { package = "guardrail3-app-core", path = "../../../../../core" }
+guardrail3_adapters_outbound_fs = { package = "guardrail3-adapters-outbound-fs", path = "../../../../../../adapters/outbound/fs" }
 guardrail3_app_rs_family_toolchain_assertions = { package = "guardrail3_app_rs_family_toolchain_assertions", path = "../assertions" }
 guardrail3_domain_config = { package = "guardrail3-domain-config", path = "../../../../../../domain/config" }
 guardrail3_validation_model = { package = "guardrail3-domain-validation-model", path = "../../../../../../domain/validation-model" }
+guardrail3_shared_fs = { package = "guardrail3-shared-fs", path = "../../../../../../shared/fs" }
+tempfile = "3"

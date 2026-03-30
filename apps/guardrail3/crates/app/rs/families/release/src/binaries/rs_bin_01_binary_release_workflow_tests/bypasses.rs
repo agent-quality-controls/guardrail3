@@ -155,6 +155,39 @@ jobs:
 }
 
 #[test]
+fn should_not_count_release_action_lookalike_repository() {
+    let mut krate = crate_facts("bin");
+    krate.is_binary = true;
+    let input = crate_input(&krate);
+    let mut repo = repo_facts();
+    repo.workflows.push(workflow_from_yaml(
+        ".github/workflows/lookalike-release-action.yml",
+        r#"
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - run: cargo build --release
+      - uses: acme/action-gh-release@v2
+"#,
+    ));
+    let mut results = Vec::new();
+
+    check(&input, &[repo.clone()], &mut results);
+
+    assert!(!assertions::findings(&results).is_empty());
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            title_contains: Some("no binary release workflow"),
+            file: Some("crates/example/Cargo.toml"),
+            inventory: Some(true),
+            ..Default::default()
+        }],
+    );
+}
+
+#[test]
 fn reports_absence_when_repo_has_no_workflows() {
     let mut krate = crate_facts("bin");
     krate.is_binary = true;

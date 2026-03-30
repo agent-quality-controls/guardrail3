@@ -24,13 +24,11 @@ It exists to enforce:
 - `Cargo.lock` presence and `.gitignore` masking policy
 - fail-closed reporting when dependency-policy inputs cannot be trusted
 
-It is intentionally mixed-scope:
+It is workspace-local:
 
-- tool checks are validation-root scoped
-- allowlist checks are crate-local
-- lockfile checks are Rust-root scoped
-
-That mixed-scope shape is the main thing this family must not lose.
+- universal dependency baseline rules should be enforced per workspace
+- local allowlist tightening should remain workspace-local
+- the family must not collapse to one repo-global weakest-common-denominator policy
 
 ## What It Does Not Own
 
@@ -61,8 +59,50 @@ Implemented and live:
 
 Current explicit gaps:
 
-- `target.*.{dependencies,build-dependencies,dev-dependencies}` are still outside `RS-DEPS-05..07`
-- the family still needs continued pressure on mixed-scope exactness and fail-closed behavior as adjacent families evolve
+- the family still needs continued pressure on workspace-local exactness and
+  fail-closed behavior as adjacent families evolve
+
+Recently hardened:
+
+- `RS-DEPS-11` now ignores foreign `rust.*` and crate-policy keys when deps-owned fields are valid
+- local path dependencies that point at undeclared Cargo packages under a workspace root now fail closed through `RS-DEPS-11`
+- malformed `target.*` dependency tables now fail closed through `RS-DEPS-11` without suppressing top-level `RS-DEPS-05..07` findings
+- `RS-DEPS-05..07` now explicitly cover both top-level and `target.*` dependency tables for their owned section kinds
+- subtree regressions now prove routed `RS-DEPS-05` and `RS-DEPS-12` findings do not leak into sibling crates
+- `RS-DEPS-09/10` no longer invent nested non-member helper crates under a workspace root as separate lockfile roots
+- deps routing/runtime now preserve ancestor workspace roots needed for lockfile policy when scoped app/package config enables the family
+
+## Scope Model
+
+- workspace-local family
+- universal baseline rules should apply to every routed legal workspace
+- local allowlist and dependency-cap rules stay workspace-local rather than
+  collapsing into one repo-global policy
+- lockfile checks bind to legal workspace roots rather than standalone package
+  escape hatches
+
+## Agent Handoff Focus
+
+- audit production path first:
+  - `apps/guardrail3/crates/app/rs/runtime/src/runners.rs`
+  - `apps/guardrail3/crates/app/rs/families/deps/crates/runtime/src/lib.rs`
+  - `apps/guardrail3/crates/app/rs/families/deps/crates/runtime/src/facts.rs`
+  - `apps/guardrail3/crates/app/rs/family_mapper/src/rs.rs`
+- prove the workspace-local contract survives the whole-project walker change
+- prove subtree runs do not overreach into unrelated workspaces for lockfile
+  and allowlist checks
+
+## Known Current Risk
+
+- no confirmed production bug yet, but this family still carries old mixed-scope
+  assumptions in docs/runtime and can drift silently if that cleanup stalls
+
+## Done Means
+
+- subtree tests prove baseline, lockfile, and allowlist findings all keep the
+  right workspace-local boundary
+- no ad hoc root rediscovery bypasses the route
+- target-table behavior remains explicit rather than silently broadened
 
 ## Recently Closed Inventory Gap
 
@@ -102,13 +142,10 @@ The family is now explicit about those choices in code, tests, and docs.
 `RS-DEPS` is only in a strong target state when all of the following are true:
 
 - `RS-DEPS-12` is implemented and stays fact-driven rather than reparsing manifests per rule
-- the mixed-scope contract remains explicit and visible in docs
+- the workspace-local contract remains explicit and visible in docs
 - dependency counting semantics are centralized instead of re-parsed ad hoc in each rule
 - `workspace = true`, renamed dependencies, and internal workspace-path exclusions behave consistently between allowlist ownership and dependency-count ownership
-- target-specific dependency tables are either:
-  - explicitly owned by a rule, or
-  - explicitly out of scope
-  - but never silently ignored
+- target-specific dependency tables are explicitly owned where enforced and never silently ignored
 - malformed manifests that are needed for owned dependency-policy behavior fail closed through `RS-DEPS-11`
 - tests prove exact ownership and edge behavior rather than just broad count changes
 
@@ -121,11 +158,12 @@ When extending this family:
 - do not collapse crate-local dependency policy into repo-root-only behavior
 - do not let target-table support leak silently from one rule into another
 - do not weaken the fail-closed model to avoid implementation work
+- do not let deps-owned config parsing reject adjacent-family `guardrail3.toml` growth
 
 Good future changes:
 
 - a new fact type for one new rule with clear ownership
-- better exactness tests for existing mixed-scope behavior
+- better exactness tests for existing workspace-local behavior
 - local README + plan updates in the same change as semantic shifts
 
 Bad future changes:
@@ -145,6 +183,7 @@ Any new deps work should actively pressure these cases:
   - external package
   - internal workspace path package
   - missing workspace dependency entry
+- local path dependencies that point at real Cargo packages under a workspace root without workspace membership
 - non-workspace path dependencies that point at vendored external crates
 - hybrid workspace roots that are also packages
 - target-specific dependency tables
@@ -158,8 +197,8 @@ Near-term priority:
 
 1. keep the counted universe for `RS-DEPS-12` explicit and minimal
 2. preserve the existing family boundary with `deny`, `hexarch`, and `release`
-3. decide deliberately, not accidentally, whether target-specific tables should ever expand into `RS-DEPS-05..07`
-4. continue adversarial pressure on mixed-scope and fail-closed cases
+3. keep target-specific allowlist ownership explicit and tested
+4. continue adversarial pressure on workspace-local and fail-closed cases
 
 This is not a broad “dependency cleanup” lane.
 It is now a family-hardening lane.
@@ -172,7 +211,7 @@ The current deps lane is in a good state when:
 - matching assertions and sidecar regressions stay in place
 - family tests keep passing
 - the deps ledger and local README stay aligned with the live contract
-- the remaining target-table limitation stays explicit: out of scope for `RS-DEPS-05..07`, in scope for `RS-DEPS-12`
+- target-table ownership stays explicit in both docs and tests
 
 ## Historical / Supplemental References
 

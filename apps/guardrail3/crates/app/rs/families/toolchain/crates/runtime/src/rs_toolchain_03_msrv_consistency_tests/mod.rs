@@ -39,6 +39,26 @@ fn warns_when_pinned_toolchain_is_older_than_msrv() {
 }
 
 #[test]
+fn emits_no_results_when_legacy_toolchain_shadows_modern_policy_file() {
+    let parsed = parse_toolchain_fixture_toml(
+        "[toolchain]\nchannel = \"1.85.1\"\ncomponents = [\"clippy\", \"rustfmt\"]",
+    );
+    let input = test_input(
+        Some("rust-toolchain.toml"),
+        Some("rust-toolchain"),
+        Some(&parsed),
+        None,
+        Some("1.85.0"),
+        None,
+    );
+    let mut results = Vec::new();
+
+    check(&input, &mut results);
+
+    assert_rule_results(&results, &[]);
+}
+
+#[test]
 fn inventories_when_pinned_toolchain_satisfies_msrv() {
     let parsed = parse_toolchain_fixture_toml(
         "[toolchain]\nchannel = \"1.85.1\"\ncomponents = [\"clippy\", \"rustfmt\"]",

@@ -1,17 +1,20 @@
 # RS-TOOLCHAIN
 
-Routed Rust toolchain contract family.
+Rust toolchain contract family.
 
-This family owns the same Rust policy roots as `RS-CARGO`:
-
-- each routed workspace root
-- each routed standalone package root that is not claimed as a workspace member
+This family is workspace-local. It owns legal workspaces plus all toolchain
+files relevant to those workspaces.
 
 For each owned root, the contract is:
 
 - one local `rust-toolchain.toml`
 - optional local legacy `rust-toolchain`
 - one local `Cargo.toml` source for MSRV comparison
+- no drifting ancestor toolchain that can shadow the local workspace contract
+
+Nested non-member packages inside an owned workspace subtree inherit the
+workspace toolchain by rustup walk-up. They are not required to carry their own
+local `rust-toolchain.toml`, and they are not allowed to define one.
 
 ## What This Family Enforces
 
@@ -19,7 +22,10 @@ For each owned root, the contract is:
 - `RS-TOOLCHAIN-02`: channel and component policy
 - `RS-TOOLCHAIN-03`: pinned stable toolchain vs owned-root `Cargo.toml`
   `rust-version`
-- `RS-TOOLCHAIN-04`: legacy `rust-toolchain` migration and coexistence warning
+- `RS-TOOLCHAIN-04`: legacy `rust-toolchain` migration and same-root shadowing
+- `RS-TOOLCHAIN-05`: ancestor shadow drift across legal workspace policy roots
+- `RS-TOOLCHAIN-06`: descendant workspace-shadowing toolchain files
+- `RS-TOOLCHAIN-07`: toolchain files outside every governed workspace root
 
 ### Current Rule Behavior
 
@@ -28,8 +34,7 @@ For each owned root, the contract is:
 - inventories when the owned-root `rust-toolchain.toml` exists
 - errors when the owned-root modern file is missing, even if a local legacy
   `rust-toolchain` exists
-- a parent/repo-root toolchain file does not satisfy a governed app/package
-  root
+- a parent/repo-root toolchain file does not satisfy a governed workspace root
 
 #### `RS-TOOLCHAIN-02`
 
@@ -74,14 +79,42 @@ Input integrity:
 #### `RS-TOOLCHAIN-04`
 
 - warns when legacy `rust-toolchain` exists
-- also warns when both legacy and modern files coexist
+- errors when both legacy and modern files coexist, because rustup prefers the
+  legacy file and shadows the modern contract
+
+#### `RS-TOOLCHAIN-05`
+
+- warns when an ancestor legacy `rust-toolchain` can shadow a local
+  `rust-toolchain.toml`
+- warns when an ancestor `rust-toolchain.toml` is malformed
+- warns when an ancestor `rust-toolchain.toml` differs from the local routed
+  policy-root contract
+- emits nothing when the nearest ancestor toolchain semantically matches the
+  local routed-root contract
+
+#### `RS-TOOLCHAIN-06`
+
+- errors when a governed workspace subtree contains a descendant
+  `rust-toolchain.toml`
+- errors when a governed workspace subtree contains a descendant legacy
+  `rust-toolchain`
+- treats any nested toolchain beneath a governed workspace root as a policy
+  escape hatch that destabilizes the workspace contract
+
+#### `RS-TOOLCHAIN-07`
+
+- errors when `rust-toolchain.toml` or `rust-toolchain` exists outside every
+  governed workspace root
+- respects shared Rust exclusions such as `target/`, `tests/fixtures/`,
+  `tests/snapshots/`, and `.claude/worktrees/`
+- catches repo-root toolchains in repos where the repo root is not itself a
+  governed Rust workspace
 
 ## Layout
 
 ```text
 toolchain/
   README.md
-  rust-toolchain.toml       # self-hosted family toolchain contract
   crates/
     runtime/
       Cargo.toml
@@ -109,27 +142,11 @@ toolchain/
 - rule-side tests prove local behavior
 - `assertions/` owns reusable result assertions so sidecars do not duplicate
   semantic checks
-- a small family-level `ProjectTree` smoke harness covers discovery and
-  cross-rule interaction, not just direct rule helpers
-
-## Self-Hosting Notes
-
-The family carries its own root `rust-toolchain.toml` so validating the family
-directory exercises the same policy-root contract it enforces elsewhere.
-
-Under `--inventory`, a clean self-hosted family still reports positive info
-inventory for:
-
-- `RS-TOOLCHAIN-01` modern file presence
-- `RS-TOOLCHAIN-02` accepted channel
-- `RS-TOOLCHAIN-02` required components present
-
-So the meaningful “green” target is:
-
-- `0 errors`
-- `0 warnings`
-
-not literal zero inventory output.
+- a family-level full-tree fixture harness proves:
+  - `ProjectTree` sees injected toolchain files
+  - owned workspace roots inventory cleanly
+  - nested descendant toolchains become `RS-TOOLCHAIN-06`
+  - out-of-workspace toolchains become `RS-TOOLCHAIN-07`
 
 ## Current State
 
@@ -138,8 +155,16 @@ As of the latest attack-hardening pass:
 - the family is routed through placement/family-mapper instead of assuming the
   validation root is the policy root
 - rule-side coverage includes malformed active inputs and suffix-bypass attacks
-- runtime coverage proves repo-root validation targets the configured app
-  workspace root instead of a stray repo-root toolchain file
+- same-directory legacy-shadow cases now suppress false modern-file inventory in
+  `RS-TOOLCHAIN-02` and `RS-TOOLCHAIN-03`
+- ancestor walk-up drift is enforced explicitly so repo-root toolchains cannot
+  silently diverge from governed workspace toolchain contracts
+- descendant toolchain files anywhere beneath a governed workspace root are now
+  rejected as workspace-policy shadowing
+- out-of-workspace toolchain files are now rejected, while `.claude/worktrees`
+  and the other shared Rust exclusions stay out of scope
+- full-tree golden-fixture tests prove the walker and the family agree on
+  toolchain-file visibility and ownership
 - direct family package tests pass:
 
 ```bash

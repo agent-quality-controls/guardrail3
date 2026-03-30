@@ -28,7 +28,19 @@ serde = { version = "1", features = ["derive"] }
                 "disallowed-methods = []\ndisallowed-types = []\n",
             ),
             ("guardrail3.toml", "[profile]\nname = \"service\"\n"),
-            ("src/main.rs", "fn main() {}"),
+            (
+                "src/main.rs",
+                r#"
+use serde::Deserialize;
+
+#[derive(Deserialize)]
+struct Boundary {
+    value: String,
+}
+
+fn main() {}
+"#,
+            ),
         ],
         root.clone(),
     );

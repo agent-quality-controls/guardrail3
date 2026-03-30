@@ -15,6 +15,24 @@ const REPORT_FIELDS: &[&str] = &[
     "severity",
     "title",
 ];
+const REPORT_METHODS: &[&str] = &[
+    "file",
+    "id",
+    "inventory",
+    "line",
+    "message",
+    "severity",
+    "title",
+];
+
+fn path_mentions_route_construction(path: &[String]) -> bool {
+    path.iter().any(|segment| {
+        matches!(
+            segment.as_str(),
+            "FamilyMapper" | "guardrail3_app_rs_placement"
+        )
+    })
+}
 
 pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
     let mut reported = false;
@@ -50,10 +68,7 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
 
     let mut reported_route_infra_imports = BTreeSet::new();
     for binding in &input.parsed.imports {
-        if !binding
-            .path_segments
-            .iter()
-            .any(|segment| segment == "FamilyMapper")
+        if !path_mentions_route_construction(&binding.path_segments)
             || !reported_route_infra_imports.insert(binding.line)
         {
             continue;
@@ -99,13 +114,19 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
         .parsed
         .file_call_paths
         .iter()
-        .any(|call_path| call_path.iter().any(|segment| segment == "FamilyMapper"))
+        .any(|call_path| path_mentions_route_construction(call_path))
+        || input
+            .parsed
+            .functions
+            .iter()
+            .flat_map(|function| function.path_uses.iter())
+            .any(|path| path_mentions_route_construction(path))
     {
         results.push(CheckResult::from_parts(
             ID.to_owned(),
             Severity::Error,
             "test_support builds routed family input".to_owned(),
-            "Shared `test_support` must stay generic and must not construct routed family inputs through `FamilyMapper`.".to_owned(),
+            "Shared `test_support` must stay generic and must not construct routed family inputs through mapper/placement wiring.".to_owned(),
             Some(input.file.rel_path.clone()),
             None,
             false,
@@ -214,6 +235,10 @@ pub fn check(input: &TestSupportFileInput<'_>, results: &mut Vec<CheckResult>) {
                     .iter()
                     .any(|field| REPORT_FIELDS.contains(&field.name.as_str()))
                 || function
+                    .method_names
+                    .iter()
+                    .any(|method| REPORT_METHODS.contains(&method.as_str()))
+                || function
                     .path_uses
                     .iter()
                     .any(|path| path.last().is_some_and(|segment| segment == "CheckResult"))
@@ -271,6 +296,10 @@ fn semantic_helper_names<'a>(functions: &'a [super::parse::FunctionInfo]) -> BTr
                         .field_accesses
                         .iter()
                         .any(|field| REPORT_FIELDS.contains(&field.name.as_str()))
+                    || function
+                        .method_names
+                        .iter()
+                        .any(|method| REPORT_METHODS.contains(&method.as_str()))
                     || function
                         .path_uses
                         .iter()

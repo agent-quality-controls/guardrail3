@@ -1,23 +1,36 @@
 use std::collections::{BTreeMap, BTreeSet};
 
+use guardrail3_domain_project_tree::ProjectTree;
+
 #[path = "rs_test_03_runtime_assertions_split/helpers.rs"]
 mod helpers;
 
-use crate::{CheckResult, Severity};
 use crate::analysis::AnalyzedFile;
+use crate::{CheckResult, Severity};
 
 use super::facts::{RuntimeAssertionsViolation, TestFileKind, TestRootFacts};
 use super::inputs::RuntimeAssertionsViolationInput;
 
 const ID: &str = "RS-TEST-03";
+
+fn path_mentions_route_construction(path: &[String]) -> bool {
+    path.iter().any(|segment| {
+        matches!(
+            segment.as_str(),
+            "FamilyMapper" | "guardrail3_app_rs_placement"
+        )
+    })
+}
+
 pub(crate) fn collect(
+    tree: &ProjectTree,
     root: &TestRootFacts,
     files: &[AnalyzedFile],
     scoped_files: Option<&BTreeSet<String>>,
     local_package_names: &BTreeSet<String>,
     results: &mut Vec<CheckResult>,
 ) {
-    let violations = collect_violations(root, files, scoped_files, local_package_names);
+    let violations = collect_violations(tree, root, files, scoped_files, local_package_names);
     if violations.is_empty() {
         results.push(
             CheckResult::from_parts(
@@ -53,6 +66,7 @@ pub fn check(input: &RuntimeAssertionsViolationInput<'_>, results: &mut Vec<Chec
 }
 
 fn collect_violations(
+    tree: &ProjectTree,
     root: &TestRootFacts,
     files: &[AnalyzedFile],
     scoped_files: Option<&BTreeSet<String>>,
@@ -138,7 +152,7 @@ fn collect_violations(
             if scoped_files.is_some_and(|paths| !paths.contains(&sidecar.mod_rel_path)) {
                 continue;
             }
-            if !helpers::root_has_file(files, &sidecar.assertions_module_rel_path) {
+            if !tree.file_exists(&sidecar.assertions_module_rel_path) {
                 violations.push(RuntimeAssertionsViolation {
                     rel_path: sidecar.mod_rel_path.clone(),
                     line: None,
@@ -185,16 +199,12 @@ fn collect_violations(
             }
 
             for module in &file.parsed.modules {
-                if helpers::module_path_includes_runtime_src(
-                    module,
-                    external_harness,
-                    &component.runtime_rel_dir,
-                ) {
+                if module.path_attr.is_some() {
                     violations.push(RuntimeAssertionsViolation {
                         rel_path: external_harness.clone(),
                         line: Some(module.line),
-                        title: "external harness path-includes runtime source".to_owned(),
-                        message: "External runtime harnesses must not path-include files from runtime `src/`.".to_owned(),
+                        title: "external harness path-includes local source".to_owned(),
+                        message: "External runtime harnesses must not use `#[path = ...]` to pull in local source files.".to_owned(),
                     });
                 }
             }
@@ -392,11 +402,7 @@ fn collect_violations(
                         ),
                     });
                 }
-                if binding
-                    .path_segments
-                    .iter()
-                    .any(|segment| segment == "FamilyMapper")
-                {
+                if path_mentions_route_construction(&binding.path_segments) {
                     violations.push(RuntimeAssertionsViolation {
                         rel_path: file.facts.rel_path.clone(),
                         line: Some(binding.line),
@@ -430,13 +436,19 @@ fn collect_violations(
                 .parsed
                 .file_call_paths
                 .iter()
-                .any(|call_path| call_path.iter().any(|segment| segment == "FamilyMapper"))
+                .any(|call_path| path_mentions_route_construction(call_path))
+                || file
+                    .parsed
+                    .functions
+                    .iter()
+                    .flat_map(|function| function.path_uses.iter())
+                    .any(|path| path_mentions_route_construction(path))
             {
                 violations.push(RuntimeAssertionsViolation {
                     rel_path: file.facts.rel_path.clone(),
                     line: None,
                     title: "assertions module builds routed family input".to_owned(),
-                    message: "Assertions modules must stay reusable semantic proof helpers and must not construct routed family inputs through `FamilyMapper`.".to_owned(),
+                    message: "Assertions modules must stay reusable semantic proof helpers and must not construct routed family inputs through mapper/placement wiring.".to_owned(),
                 });
             }
             if helpers::assertions_call_runtime_check_test_tree(

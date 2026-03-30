@@ -20,8 +20,8 @@ pub fn check(input: &DependencyEntryDepsInput<'_>, results: &mut Vec<CheckResult
                 Severity::Info,
                 "build dependency allowlisted".to_owned(),
                 format!(
-                    "Dependency `{}` in `[build-dependencies]` is allowlisted for crate `{}`.",
-                    input.entry.dep_package_name, input.entry.crate_name
+                    "Dependency `{}` in `{}` is allowlisted for crate `{}`.",
+                    input.entry.dep_package_name, input.entry.table_label, input.entry.crate_name
                 ),
                 Some(input.entry.cargo_rel_path.clone()),
                 None,
@@ -37,8 +37,8 @@ pub fn check(input: &DependencyEntryDepsInput<'_>, results: &mut Vec<CheckResult
         Severity::Error,
         "unauthorized build dependency".to_owned(),
         format!(
-            "Dependency `{}` in `[build-dependencies]` is not allowlisted for crate `{}`.",
-            input.entry.dep_package_name, input.entry.crate_name
+            "Dependency `{}` in `{}` is not allowlisted for crate `{}`.",
+            input.entry.dep_package_name, input.entry.table_label, input.entry.crate_name
         ),
         Some(input.entry.cargo_rel_path.clone()),
         None,
@@ -91,12 +91,13 @@ pub(super) fn dependency_facts(
             crate_name: "api".to_owned(),
             cargo_rel_path: "crates/api/Cargo.toml".to_owned(),
             section_kind: super::facts::DependencySectionKind::BuildDependencies,
-            dep_alias: dep_package_name.to_owned(),
+            table_label: "[build-dependencies]".to_owned(),
             dep_package_name: dep_package_name.to_owned(),
             allowlist_present,
             allowlisted,
         }],
         allowlist_coverage: Vec::new(),
+        direct_dependency_caps: Vec::new(),
         input_failures: Vec::new(),
     }
 }
@@ -117,6 +118,13 @@ pub(super) fn dependency_input<'a>(
         })
         .expect("expected dependency entry facts");
     super::inputs::DependencyEntryDepsInput::new(entry)
+}
+
+#[cfg(test)]
+pub(super) fn run_with_facts(
+    facts: &super::facts::DepsFacts,
+) -> Vec<guardrail3_domain_report::CheckResult> {
+    crate::run_with_facts(facts)
 }
 #[cfg(test)]
 #[path = "rs_deps_06_build_dependencies_allowlisted_tests/mod.rs"]

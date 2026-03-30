@@ -80,3 +80,4 @@ toml = "0.8"
 
 [dev-dependencies]
 guardrail3_app_rs_runtime_assertions = { package = "guardrail3-app-rs-runtime-assertions", path = "assertions" }
+guardrail3_shared_fs = { package = "guardrail3-shared-fs", path = "../../../shared/fs" }

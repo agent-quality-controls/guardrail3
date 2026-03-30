@@ -1,8 +1,10 @@
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
+
+use guardrail3_app_rs_ast::ast_helpers::IgnoreReasonInfo;
 
 #[derive(Debug, Clone, Default)]
 pub struct ParsedTestFile {
-    pub(crate) ignore_without_reason_lines: Vec<usize>,
+    pub(crate) ignore_reasons: Vec<IgnoreReasonInfo>,
     pub(crate) modules: Vec<ModuleInfo>,
     pub(crate) cfg_test_modules: Vec<CfgTestModuleInfo>,
     pub(crate) test_functions: Vec<TestFunctionInfo>,
@@ -10,6 +12,7 @@ pub struct ParsedTestFile {
     pub(crate) public_values: Vec<PublicValueInfo>,
     pub(crate) file_value_names: BTreeSet<String>,
     pub(crate) file_function_names: BTreeSet<String>,
+    pub(crate) check_result_aliases: BTreeSet<String>,
     pub(crate) file_call_paths: Vec<Vec<String>>,
     pub(crate) imports: Vec<UseBinding>,
     pub(crate) macro_defined_proof_functions: BTreeSet<String>,
@@ -39,8 +42,9 @@ pub struct TestFunctionInfo {
     pub(crate) call_paths: Vec<Vec<String>>,
     pub(crate) path_uses: Vec<Vec<String>>,
     pub(crate) method_receiver_paths: Vec<Vec<String>>,
+    pub(crate) method_names: Vec<String>,
+    pub(crate) local_call_aliases: BTreeMap<String, Vec<String>>,
     pub(crate) field_accesses: Vec<FieldAccessInfo>,
-    pub(crate) string_literals: Vec<String>,
     pub(crate) shadowed_idents: BTreeSet<String>,
     pub(crate) should_panic_line: Option<usize>,
     pub(crate) should_panic_has_expected: bool,
@@ -62,6 +66,8 @@ pub struct FunctionInfo {
     pub(crate) has_failure_enforcement: bool,
     pub(crate) call_paths: Vec<Vec<String>>,
     pub(crate) path_uses: Vec<Vec<String>>,
+    pub(crate) method_names: Vec<String>,
+    pub(crate) local_call_aliases: BTreeMap<String, Vec<String>>,
     pub(crate) field_accesses: Vec<FieldAccessInfo>,
     pub(crate) string_literals: Vec<String>,
     pub(crate) shadowed_idents: BTreeSet<String>,

@@ -109,6 +109,11 @@ fn declared_member_without_manifest_warns() {
             inventory: None,
         }],
     );
+    assert!(results.iter().any(|result| {
+        result.id() == "RS-CARGO-10"
+            && result.title() == "declared workspace member missing Cargo.toml"
+            && result.severity() == guardrail3_domain_report::Severity::Warn
+    }));
 }
 
 #[test]
@@ -156,5 +161,114 @@ fn complete_member_set_is_inventory() {
             title: Some("all declared workspace members have Cargo.toml"),
             inventory: Some(true),
         }],
+    );
+}
+
+#[test]
+fn scoped_workspace_run_does_not_warn_for_unrouted_sibling_member_manifest() {
+    let workspace_manifest = format!(
+        r#"
+            [workspace]
+            members = ["crates/api", "crates/other"]
+            resolver = "2"
+
+            [workspace.package]
+            edition = "2024"
+            rust-version = "1.85"
+
+            {WORKSPACE_RUST_LINTS}
+            {WORKSPACE_CLIPPY_LINTS}
+        "#
+    );
+    let results = crate::check_test_tree_with_validation_scope(
+        &tree(
+            &[
+                ("", entry(&["crates"], &["Cargo.toml"])),
+                ("crates", entry(&["api", "other"], &[])),
+                ("crates/api", entry(&["src"], &["Cargo.toml"])),
+                ("crates/api/src", entry(&[], &["lib.rs"])),
+                ("crates/other", entry(&[], &["Cargo.toml"])),
+            ],
+            &[
+                ("Cargo.toml", &workspace_manifest),
+                (
+                    "crates/api/Cargo.toml",
+                    r#"
+                        [package]
+                        name = "api"
+                        edition = "2024"
+
+                        [lints]
+                        workspace = true
+                    "#,
+                ),
+                (
+                    "crates/other/Cargo.toml",
+                    r#"
+                        [package]
+                        name = "other"
+                        edition = "2024"
+
+                        [lints]
+                        workspace = true
+                    "#,
+                ),
+            ],
+        ),
+        "crates/api/src",
+    );
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_10_missing_member_cargo::assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: Some("Cargo.toml"),
+            title: Some("all declared workspace members have Cargo.toml"),
+            inventory: Some(true),
+        }],
+    );
+}
+
+#[test]
+fn malformed_workspace_members_shape_does_not_emit_clean_inventory() {
+    let workspace_manifest = format!(
+        r#"
+            [workspace]
+            members = "crates/api"
+            resolver = "2"
+
+            [workspace.package]
+            edition = "2024"
+            rust-version = "1.85"
+
+            {WORKSPACE_RUST_LINTS}
+            {WORKSPACE_CLIPPY_LINTS}
+        "#
+    );
+
+    let results = check_results(&tree(
+        &[
+            ("", entry(&["crates"], &["Cargo.toml"])),
+            ("crates", entry(&["api"], &[])),
+            ("crates/api", entry(&[], &["Cargo.toml"])),
+        ],
+        &[
+            ("Cargo.toml", &workspace_manifest),
+            (
+                "crates/api/Cargo.toml",
+                r#"
+                    [package]
+                    name = "api"
+                    edition = "2024"
+
+                    [lints]
+                    workspace = true
+                "#,
+            ),
+        ],
+    ));
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_10_missing_member_cargo::assert_rule_results(
+        &results,
+        &[],
     );
 }

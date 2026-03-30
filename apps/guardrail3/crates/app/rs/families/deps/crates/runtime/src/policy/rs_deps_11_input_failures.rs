@@ -55,6 +55,7 @@ pub(super) fn failure_facts(rel_path: &str, message: &str) -> super::facts::Deps
         }],
         dependency_entries: Vec::new(),
         allowlist_coverage: Vec::new(),
+        direct_dependency_caps: Vec::new(),
         input_failures: vec![super::facts::InputFailureFacts {
             rel_path: rel_path.to_owned(),
             message: message.to_owned(),

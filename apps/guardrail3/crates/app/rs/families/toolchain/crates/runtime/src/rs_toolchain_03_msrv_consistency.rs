@@ -5,6 +5,10 @@ use super::inputs::ToolchainRootInput;
 const ID: &str = "RS-TOOLCHAIN-03";
 
 pub fn check(input: &ToolchainRootInput<'_>, results: &mut Vec<CheckResult>) {
+    if input.legacy_toolchain_rel.is_some() {
+        return;
+    }
+
     let Some(rel) = input.toolchain_toml_rel else {
         return;
     };
@@ -20,17 +24,17 @@ pub fn check(input: &ToolchainRootInput<'_>, results: &mut Vec<CheckResult>) {
     let Some(channel) = channel else {
         return;
     };
-    let Some(toolchain_version) = parse_version(channel) else {
+    let Some(toolchain_version) = parse_pinned_stable_version(channel) else {
         return;
     };
+
     if input.cargo_toml_rel.is_none() {
         results.push(CheckResult::from_parts(
             ID.to_owned(),
             Severity::Error,
             "Cargo.toml missing blocks MSRV check".to_owned(),
-            "Root Cargo.toml is required to compare pinned toolchain against declared MSRV."
-                .to_owned(),
-            Some("Cargo.toml".to_owned()),
+            "Cargo.toml is required to compare pinned toolchain against declared MSRV.".to_owned(),
+            Some(input.cargo_rel_path.to_owned()),
             None,
             false,
         ));
@@ -43,7 +47,7 @@ pub fn check(input: &ToolchainRootInput<'_>, results: &mut Vec<CheckResult>) {
             Severity::Error,
             "Cargo.toml parse error blocks MSRV check".to_owned(),
             format!("Invalid root Cargo.toml: {parse_error}"),
-            Some("Cargo.toml".to_owned()),
+            Some(input.cargo_rel_path.to_owned()),
             None,
             false,
         ));
@@ -56,7 +60,7 @@ pub fn check(input: &ToolchainRootInput<'_>, results: &mut Vec<CheckResult>) {
             Severity::Error,
             "Cargo rust-version is invalid".to_owned(),
             "`Cargo.toml` `rust-version` must be a string version.".to_owned(),
-            Some("Cargo.toml".to_owned()),
+            Some(input.cargo_rel_path.to_owned()),
             None,
             false,
         ));
@@ -72,7 +76,7 @@ pub fn check(input: &ToolchainRootInput<'_>, results: &mut Vec<CheckResult>) {
                 message:
                     "No `rust-version` found in Cargo.toml, so MSRV consistency cannot be checked."
                         .to_owned(),
-                file: Some("Cargo.toml".to_owned()),
+                file: Some(input.cargo_rel_path.to_owned()),
                 line: None,
                 inventory: false,
             }
@@ -81,7 +85,7 @@ pub fn check(input: &ToolchainRootInput<'_>, results: &mut Vec<CheckResult>) {
         return;
     };
 
-    let Some(msrv_version) = parse_version(cargo_msrv) else {
+    let Some(msrv_version) = parse_manifest_version(cargo_msrv) else {
         results.push(CheckResult {
             id: ID.to_owned(),
             severity: Severity::Error,
@@ -89,7 +93,7 @@ pub fn check(input: &ToolchainRootInput<'_>, results: &mut Vec<CheckResult>) {
             message: format!(
                 "Cannot compare pinned toolchain against invalid Cargo rust-version `{cargo_msrv}`."
             ),
-            file: Some("Cargo.toml".to_owned()),
+            file: Some(input.cargo_rel_path.to_owned()),
             line: None,
             inventory: false,
         });
@@ -126,22 +130,107 @@ pub fn check(input: &ToolchainRootInput<'_>, results: &mut Vec<CheckResult>) {
     }
 }
 
-fn parse_version(raw: &str) -> Option<(u64, u64, u64)> {
-    let normalized = raw.trim().trim_start_matches('v');
-    let version_part = normalized
-        .split_once('-')
-        .map_or(normalized, |(version_part, _)| version_part);
-    let mut parts = version_part.split('.');
-
-    let major = parts.next()?.parse().ok()?;
-    let minor = parts.next()?.parse().ok()?;
-    let patch = parts.next().unwrap_or("0").parse().ok()?;
-
-    if parts.next().is_some() {
+fn parse_pinned_stable_version(raw: &str) -> Option<(u64, u64, u64)> {
+    let normalized = raw.trim().to_ascii_lowercase();
+    let mut segments = normalized.split('-');
+    let version_part = segments.next()?;
+    if segments.any(|segment| segment.starts_with("nightly") || segment.starts_with("beta")) {
         return None;
     }
 
+    let version_part = version_part.trim_start_matches('v');
+    let mut parts = version_part.split('.');
+    let major = parts.next()?.parse().ok()?;
+    let minor = parts.next()?.parse().ok()?;
+    let patch = parts.next().unwrap_or("0").parse().ok()?;
+    if parts.next().is_some() {
+        return None;
+    }
     Some((major, minor, patch))
+}
+
+fn parse_manifest_version(raw: &str) -> Option<(u64, u64, u64)> {
+    let normalized = raw.trim().trim_start_matches('v');
+    let mut parts = normalized.split('.');
+    let major = parts.next()?.parse().ok()?;
+    let minor = parts.next()?.parse().ok()?;
+    let patch = parts.next().unwrap_or("0").parse().ok()?;
+    if parts.next().is_some() {
+        return None;
+    }
+    Some((major, minor, patch))
+}
+
+#[cfg(test)]
+pub(crate) fn test_input<'a>(
+    toolchain_toml_rel: Option<&'a str>,
+    legacy_toolchain_rel: Option<&'a str>,
+    parsed: Option<&'a toml::Value>,
+    parse_error: Option<&'a str>,
+    cargo_rust_version: Option<&'a str>,
+    cargo_parse_error: Option<&'a str>,
+) -> ToolchainRootInput<'a> {
+    test_input_for_root(
+        "",
+        "Cargo.toml",
+        toolchain_toml_rel,
+        legacy_toolchain_rel,
+        parsed,
+        parse_error,
+        cargo_rust_version,
+        cargo_parse_error,
+    )
+}
+
+#[cfg(test)]
+pub(crate) fn test_input_for_root<'a>(
+    rel_dir: &'a str,
+    cargo_rel_path: &'a str,
+    toolchain_toml_rel: Option<&'a str>,
+    legacy_toolchain_rel: Option<&'a str>,
+    parsed: Option<&'a toml::Value>,
+    parse_error: Option<&'a str>,
+    cargo_rust_version: Option<&'a str>,
+    cargo_parse_error: Option<&'a str>,
+) -> ToolchainRootInput<'a> {
+    ToolchainRootInput {
+        rel_dir,
+        cargo_rel_path,
+        cargo_toml_rel: Some(cargo_rel_path),
+        toolchain_toml_rel,
+        legacy_toolchain_rel,
+        parsed,
+        parse_error,
+        cargo_rust_version,
+        cargo_rust_version_invalid: false,
+        cargo_parse_error,
+        ancestor_toolchain: None,
+        descendant_toolchains: Vec::new(),
+    }
+}
+
+#[cfg(test)]
+pub(crate) fn test_input_invalid_cargo_rust_version_type<'a>(
+    toolchain_toml_rel: Option<&'a str>,
+    legacy_toolchain_rel: Option<&'a str>,
+    parsed: Option<&'a toml::Value>,
+    parse_error: Option<&'a str>,
+    cargo_parse_error: Option<&'a str>,
+) -> ToolchainRootInput<'a> {
+    ToolchainRootInput {
+        rel_dir: "",
+        cargo_rel_path: "Cargo.toml",
+        cargo_toml_rel: Some("Cargo.toml"),
+        toolchain_toml_rel,
+        legacy_toolchain_rel,
+        parsed,
+        parse_error,
+        cargo_rust_version: None,
+        cargo_rust_version_invalid: true,
+        cargo_parse_error,
+        ancestor_toolchain: None,
+        descendant_toolchains: Vec::new(),
+    }
 }
 
 #[cfg(test)]

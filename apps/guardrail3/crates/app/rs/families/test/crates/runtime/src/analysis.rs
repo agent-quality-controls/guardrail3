@@ -36,15 +36,6 @@ pub(crate) fn analyze_root(
         .iter()
         .filter(|file| file.root_rel_dir == root.rel_dir)
     {
-        if matches!(
-            file.kind,
-            TestFileKind::InternalSidecarMod
-                | TestFileKind::InternalSidecarSupport
-                | TestFileKind::ExternalHarness
-        ) {
-            analysis.has_tests = true;
-        }
-
         let content = match guardrail3_shared_fs::read_file_err(&tree.abs_path(&file.rel_path)) {
             Ok(content) => content,
             Err(read_error) => {
@@ -74,14 +65,14 @@ pub(crate) fn analyze_root(
         };
 
         let parsed = crate::parse::analyze(&ast, &content);
-        analysis.has_tests |= !parsed.test_functions.is_empty();
+        if scoped_files.is_some_and(|paths| !paths.contains(&file.rel_path)) {
+            continue;
+        }
+        analysis.has_tests |= file_activates_test_rules(root, file, &parsed);
         analysis.has_tokio_tests |= parsed
             .test_functions
             .iter()
             .any(|function| function.uses_tokio_test_attr);
-        if scoped_files.is_some_and(|paths| !paths.contains(&file.rel_path)) {
-            continue;
-        }
         analysis.files.push(AnalyzedFile {
             facts: file.clone(),
             parsed,
@@ -104,6 +95,22 @@ pub(crate) fn analyze_root(
     ) = collect_assertions_proof_catalog(&analysis.files);
 
     analysis
+}
+
+fn file_activates_test_rules(
+    root: &TestRootFacts,
+    file: &DiscoveredTestFile,
+    parsed: &ParsedTestFile,
+) -> bool {
+    matches!(
+        file.kind,
+        TestFileKind::InternalSidecarMod
+            | TestFileKind::InternalSidecarSupport
+            | TestFileKind::ExternalHarness
+            | TestFileKind::AssertionsModule
+    ) || is_test_support_file(root, &file.rel_path)
+        || !parsed.test_functions.is_empty()
+        || !parsed.cfg_test_modules.is_empty()
 }
 
 pub(crate) fn active_failures_for_root<'a>(
@@ -190,6 +197,13 @@ fn collect_assertions_proof_catalog(
         loop {
             let mut changed = false;
             for file in &package_files {
+                let local_proof_functions = file
+                    .parsed
+                    .functions
+                    .iter()
+                    .filter(|function| !function.is_test && function.has_assertion_macro)
+                    .map(|function| function.name.clone())
+                    .collect::<BTreeSet<_>>();
                 let candidates = file
                     .parsed
                     .functions
@@ -209,6 +223,7 @@ fn collect_assertions_proof_catalog(
                         &package_name,
                         &module_prefix,
                         &proof_bearing_names,
+                        &local_proof_functions,
                     ) {
                         changed |= proof_bearing_names.insert(qualified_name);
                     }
@@ -248,6 +263,7 @@ fn exported_assertion_function_calls_proof(
     package_name: &str,
     module_prefix: &[String],
     proof_bearing_names: &BTreeSet<String>,
+    local_proof_functions: &BTreeSet<String>,
 ) -> bool {
     let mut root_prefixes = BTreeMap::from([
         ("crate".to_owned(), Vec::new()),
@@ -290,8 +306,10 @@ fn exported_assertion_function_calls_proof(
             [name] => {
                 !function.shadowed_idents.contains(name)
                     && ((file_function_names.contains(name)
-                        && proof_bearing_names
-                            .contains(&qualified_assertion_name(module_prefix, name)))
+                        && local_proof_functions.contains(name))
+                        || (file_function_names.contains(name)
+                            && proof_bearing_names
+                                .contains(&qualified_assertion_name(module_prefix, name)))
                         || (!file_function_names.contains(name)
                             && (bare_imported_proofs
                                 .get(name)
@@ -299,7 +317,8 @@ fn exported_assertion_function_calls_proof(
                                 || glob_prefixes.iter().any(|prefix| {
                                     proof_bearing_names
                                         .contains(&qualified_assertion_name(prefix, name))
-                                }))))
+                                })))
+                )
             }
             [first, rest @ ..] => root_prefixes.get(first).is_some_and(|prefix| {
                 proof_bearing_names.contains(&qualified_assertion_name(prefix, &rest.join("::")))

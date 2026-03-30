@@ -28,7 +28,9 @@ pub(super) fn collect_lockfiles(
             .or_insert_with(|| policy_for_member(&workspace.root_rel_dir, parsed_guardrail).0);
     }
     for member in members {
-        if member.workspace_root_rel_dir.is_none() {
+        if member.workspace_root_rel_dir.is_none()
+            && !is_nested_under_any_workspace_root(&member.rel_dir, workspaces)
+        {
             let _ = root_rels.insert(member.rel_dir.clone());
         }
     }
@@ -58,6 +60,19 @@ pub(super) fn collect_lockfiles(
             }
         })
         .collect()
+}
+
+fn is_nested_under_any_workspace_root(rel_dir: &str, workspaces: &[WorkspaceFacts]) -> bool {
+    workspaces.iter().any(|workspace| {
+        let root_rel_dir = workspace.root_rel_dir.as_str();
+        if root_rel_dir.is_empty() {
+            !rel_dir.is_empty()
+        } else {
+            rel_dir
+                .strip_prefix(root_rel_dir)
+                .is_some_and(|rest| rest.starts_with('/'))
+        }
+    })
 }
 
 fn lockfile_ignore_status(

@@ -54,7 +54,7 @@ pub fn assert_missing_cargo_mutants(results: &[CheckResult]) {
         results,
         "Cargo.toml",
         None,
-        Severity::Warn,
+        Severity::Error,
         "cargo-mutants missing",
     );
 }

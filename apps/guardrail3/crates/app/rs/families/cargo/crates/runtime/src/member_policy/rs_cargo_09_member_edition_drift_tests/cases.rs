@@ -204,3 +204,197 @@ fn inherited_member_edition_inventories() {
         }],
     );
 }
+
+#[test]
+fn standalone_package_root_emits_no_member_results() {
+    let manifest = r#"
+        [package]
+        name = "helper"
+        edition = "2024"
+    "#;
+
+    let results = check_results(&tree(
+        &[("pkg", entry(&[], &["Cargo.toml"]))],
+        &[("pkg/Cargo.toml", manifest)],
+    ));
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_09_member_edition_drift::assert_rule_results(
+        &results,
+        &[],
+    );
+}
+
+#[test]
+fn malformed_workspace_member_manifest_is_owned_by_input_failures_rule() {
+    let workspace_manifest = format!(
+        r#"
+            [workspace]
+            members = ["crates/api"]
+            resolver = "2"
+
+            [workspace.package]
+            edition = "2024"
+            rust-version = "1.85"
+
+            {WORKSPACE_RUST_LINTS}
+            {WORKSPACE_CLIPPY_LINTS}
+        "#
+    );
+
+    let results = check_results(&tree(
+        &[
+            ("", entry(&["crates"], &["Cargo.toml"])),
+            ("crates", entry(&["api"], &[])),
+            ("crates/api", entry(&[], &["Cargo.toml"])),
+        ],
+        &[
+            ("Cargo.toml", &workspace_manifest),
+            ("crates/api/Cargo.toml", "[package"),
+        ],
+    ));
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_09_member_edition_drift::assert_rule_results(
+        &results,
+        &[],
+    );
+}
+
+#[test]
+fn unknown_member_edition_is_error() {
+    let workspace_manifest = format!(
+        r#"
+            [workspace]
+            members = ["crates/api"]
+            resolver = "2"
+
+            [workspace.package]
+            edition = "2024"
+            rust-version = "1.85"
+
+            {WORKSPACE_RUST_LINTS}
+            {WORKSPACE_CLIPPY_LINTS}
+        "#
+    );
+    let results = check_results(&tree(
+        &[
+            ("", entry(&["crates"], &["Cargo.toml"])),
+            ("crates", entry(&["api"], &[])),
+            ("crates/api", entry(&[], &["Cargo.toml"])),
+        ],
+        &[
+            ("Cargo.toml", &workspace_manifest),
+            (
+                "crates/api/Cargo.toml",
+                r#"
+                    [package]
+                    name = "api"
+                    edition = "2027"
+
+                    [lints]
+                    workspace = true
+                "#,
+            ),
+        ],
+    ));
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_09_member_edition_drift::assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: None,
+            title: Some("member edition unrecognized"),
+            inventory: None,
+        }],
+    );
+}
+
+#[test]
+fn invalid_member_edition_type_is_error() {
+    let workspace_manifest = format!(
+        r#"
+            [workspace]
+            members = ["crates/api"]
+            resolver = "2"
+
+            [workspace.package]
+            edition = "2024"
+            rust-version = "1.85"
+
+            {WORKSPACE_RUST_LINTS}
+            {WORKSPACE_CLIPPY_LINTS}
+        "#
+    );
+    let results = check_results(&tree(
+        &[
+            ("", entry(&["crates"], &["Cargo.toml"])),
+            ("crates", entry(&["api"], &[])),
+            ("crates/api", entry(&[], &["Cargo.toml"])),
+        ],
+        &[
+            ("Cargo.toml", &workspace_manifest),
+            (
+                "crates/api/Cargo.toml",
+                r#"
+                    [package]
+                    name = "api"
+                    edition = 2024
+
+                    [lints]
+                    workspace = true
+                "#,
+            ),
+        ],
+    ));
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_09_member_edition_drift::assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: None,
+            title: Some("member edition invalid"),
+            inventory: None,
+        }],
+    );
+}
+
+#[test]
+fn unknown_workspace_edition_suppresses_member_rule() {
+    let workspace_manifest = format!(
+        r#"
+            [workspace]
+            members = ["crates/api"]
+            resolver = "2"
+
+            [workspace.package]
+            edition = "2027"
+            rust-version = "1.85"
+
+            {WORKSPACE_RUST_LINTS}
+            {WORKSPACE_CLIPPY_LINTS}
+        "#
+    );
+    let results = check_results(&tree(
+        &[
+            ("", entry(&["crates"], &["Cargo.toml"])),
+            ("crates", entry(&["api"], &[])),
+            ("crates/api", entry(&[], &["Cargo.toml"])),
+        ],
+        &[
+            ("Cargo.toml", &workspace_manifest),
+            (
+                "crates/api/Cargo.toml",
+                r#"
+                    [package]
+                    name = "api"
+                    edition = "2024"
+
+                    [lints]
+                    workspace = true
+                "#,
+            ),
+        ],
+    ));
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_09_member_edition_drift::assert_rule_results(
+        &results,
+        &[],
+    );
+}

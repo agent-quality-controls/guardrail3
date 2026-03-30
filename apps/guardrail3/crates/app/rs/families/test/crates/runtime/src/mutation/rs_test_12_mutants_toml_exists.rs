@@ -5,7 +5,7 @@ use super::inputs::RootTestInput;
 const ID: &str = "RS-TEST-12";
 
 pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
-    if input.root.mutants_exists {
+    if input.root.mutants_exists && input.root.mutants_parsed.is_some() {
         results.push(
             CheckResult::from_parts(
                 ID.to_owned(),
@@ -18,10 +18,10 @@ pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
             )
             .as_inventory(),
         );
-    } else {
+    } else if !input.root.mutants_exists {
         results.push(CheckResult::from_parts(
             ID.to_owned(),
-            Severity::Warn,
+            Severity::Error,
             "mutants config missing".to_owned(),
             format!(
                 "{} is missing required mutation config `{}`.",

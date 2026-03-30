@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
-use crate::{CheckResult, Severity};
 use crate::analysis::AnalyzedFile;
+use crate::{CheckResult, Severity};
 use guardrail3_domain_project_tree::ProjectTree;
 
 use super::discover::{join_under_root, parent_dir, path_is_under};
@@ -72,6 +72,16 @@ fn collect_violations(
             .strip_prefix(src_root)
             .and_then(|rest| rest.strip_prefix('/'))
             .unwrap_or("");
+        let owner_module_rel_path = owned_sidecar_owner_rel_path(src_root, rel_after_src);
+        if scoped_files.is_some_and(|paths| {
+            !paths.iter().any(|path| path_is_under(path, &dir_rel))
+                && !paths.contains(&format!("{dir_rel}/mod.rs"))
+                && owner_module_rel_path
+                    .as_ref()
+                    .is_none_or(|owner_rel_path| !paths.contains(owner_rel_path))
+        }) {
+            continue;
+        }
         if rel_after_src == "tests" || rel_after_src.starts_with("tests/") {
             violations.push(SidecarViolation {
                 rel_path: dir_rel.clone(),
@@ -82,8 +92,7 @@ fn collect_violations(
             continue;
         }
 
-        let Some(owner_module_rel_path) = owned_sidecar_owner_rel_path(src_root, rel_after_src)
-        else {
+        let Some(owner_module_rel_path) = owner_module_rel_path else {
             continue;
         };
         let mod_rel_path = format!("{dir_rel}/mod.rs");

@@ -15,6 +15,7 @@ fn adopted_workspace_root_does_not_require_profile_for_idle_standalone_root() {
         "[workspace]\nmembers = [\"crates/adopted\"]\n",
     );
     write_file(root, ".cargo/mutants.toml", "timeout_multiplier = 2.0\n");
+    write_file(root, ".githooks/pre-commit", "#!/bin/sh\ncargo mutants\n");
     write_file(
         root,
         "crates/adopted/Cargo.toml",
@@ -28,12 +29,15 @@ fn adopted_workspace_root_does_not_require_profile_for_idle_standalone_root() {
 
     let results = run_family(root);
 
-    assert_rule_files(&results, vec!["Cargo.toml".to_owned()]);
+    assert_rule_files(
+        &results,
+        vec!["Cargo.toml".to_owned(), "crates/adopted/Cargo.toml".to_owned()],
+    );
     assert_reported(
         &results,
         "Cargo.toml",
         None,
-        Severity::Warn,
+        Severity::Error,
         "profile.mutants missing",
     );
 }

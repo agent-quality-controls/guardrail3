@@ -27,6 +27,18 @@ pub fn assert_allowed_files(results: &[CheckResult], expected_files: &[&str]) {
     }));
 }
 
+pub fn assert_no_forbidden_results(results: &[CheckResult]) {
+    let error_results = results
+        .iter()
+        .filter(|result| result.id() == ID && !result.inventory())
+        .collect::<Vec<_>>();
+
+    assert!(
+        error_results.is_empty(),
+        "expected no forbidden placement results: {error_results:#?}"
+    );
+}
+
 pub fn assert_forbidden_files(results: &[CheckResult], expected_files: &[&str]) {
     let error_results = results
         .iter()

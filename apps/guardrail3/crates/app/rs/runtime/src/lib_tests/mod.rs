@@ -1,6 +1,7 @@
 use std::path::Path;
 
 use guardrail3_app_rs_runtime_assertions::runtime as assertions;
+use guardrail3_validation_model::RustValidateFamily;
 
 #[test]
 fn filters_disabled_app_results_by_path() {
@@ -34,7 +35,7 @@ fn allows_absolute_paths_under_enabled_scope() {
 }
 
 #[test]
-fn keeps_rootless_results_for_now() {
+fn rootless_results_follow_global_enablement() {
     let result = super::result_for_tests(None);
     let allowed = super::applicability_allows_result_for_tests(
         Path::new("/repo"),
@@ -42,7 +43,7 @@ fn keeps_rootless_results_for_now() {
         &result,
     );
 
-    assertions::assert_allowed(allowed);
+    assert!(!allowed);
 }
 
 #[test]
@@ -259,6 +260,30 @@ fn hexarch_runtime_reports_fail_closed_results_for_malformed_guardrail_config() 
 }
 
 #[test]
+fn cargo_runtime_rejects_malformed_repo_root_guardrail_config() {
+    let root = super::temp_root_for_tests("cargo-runtime-malformed-config");
+    super::write_file_for_tests(
+        &root,
+        "guardrail3.toml",
+        "[rust.checks]\ncargo = \"nope\"\n",
+    );
+    super::write_file_for_tests(
+        &root,
+        "apps/guardrail3/Cargo.toml",
+        "[workspace]\nmembers = []\nresolver = \"2\"\n",
+    );
+
+    let result = super::run_cargo_for_tests(&super::LocalFsTest, &root);
+
+    assert!(
+        matches!(result, Err(super::RustRunError::ConfigParse(_))),
+        "expected config parse error, got: {result:#?}"
+    );
+
+    std::fs::remove_dir_all(&root).expect("cleanup temp root");
+}
+
+#[test]
 fn code_runtime_reports_fail_closed_results_for_malformed_guardrail_config() {
     let root = super::temp_root_for_tests("code-runtime-malformed-config");
     super::write_file_for_tests(&root, "guardrail3.toml", "[rust.checks]\ncode = \"nope\"\n");
@@ -301,6 +326,7 @@ fn code_runtime_scoped_files_limit_config_results_to_active_root() {
         "apps/other/rustfmt.toml",
         "max_width = 100 # EXCEPTION: other only\n",
     );
+    super::write_file_for_tests(&root, "apps/backend/src/lib.rs", "pub fn backend() {}\n");
 
     let report = super::run_code_with_scoped_files_for_tests(
         &super::LocalFsTest,
@@ -354,12 +380,12 @@ fn code_runtime_validation_scope_limits_config_results_to_active_root() {
 }
 
 #[test]
-fn toolchain_runtime_targets_configured_app_workspace_root_from_repo_root() {
-    let root = super::temp_root_for_tests("toolchain-runtime-configured-app-root");
+fn toolchain_runtime_accepts_local_nested_workspace_toolchain() {
+    let root = super::temp_root_for_tests("toolchain-runtime-local-nested-workspace");
     super::write_file_for_tests(
         &root,
         "guardrail3.toml",
-        "[rust]\nworkspace_root = \"apps/guardrail3\"\n[rust.checks]\ntoolchain = true\n",
+        "[rust.checks]\ntoolchain = true\n",
     );
     super::write_file_for_tests(
         &root,
@@ -368,7 +394,7 @@ fn toolchain_runtime_targets_configured_app_workspace_root_from_repo_root() {
     );
     super::write_file_for_tests(
         &root,
-        "rust-toolchain.toml",
+        "apps/guardrail3/rust-toolchain.toml",
         "[toolchain]\nchannel = \"1.87.0\"\ncomponents = [\"rustfmt\", \"clippy\"]\n",
     );
 
@@ -381,12 +407,12 @@ fn toolchain_runtime_targets_configured_app_workspace_root_from_repo_root() {
 }
 
 #[test]
-fn toolchain_runtime_requires_local_app_workspace_toolchain_even_when_repo_root_has_one() {
+fn toolchain_runtime_rejects_repo_root_toolchain_when_nested_workspace_owns_policy() {
     let root = super::temp_root_for_tests("toolchain-runtime-local-workspace");
     super::write_file_for_tests(
         &root,
         "guardrail3.toml",
-        "[rust]\nworkspace_root = \"apps/guardrail3\"\n[rust.checks]\ntoolchain = true\n",
+        "[rust.checks]\ntoolchain = true\n",
     );
     super::write_file_for_tests(
         &root,
@@ -402,7 +428,258 @@ fn toolchain_runtime_requires_local_app_workspace_toolchain_even_when_repo_root_
     let report = super::run_toolchain_for_tests(&super::LocalFsTest, &root)
         .expect("toolchain runtime report");
 
-    assertions::assert_toolchain_requires_local_workspace_toolchain(&report);
+    assertions::assert_toolchain_requires_local_workspace_toolchain_and_rejects_repo_root_toolchain(
+        &report,
+    );
+
+    std::fs::remove_dir_all(&root).expect("cleanup temp root");
+}
+
+#[test]
+fn deps_runtime_validation_scope_does_not_spill_into_sibling_workspace_members() {
+    let root = super::temp_root_for_tests("deps-runtime-validation-scope");
+    super::write_file_for_tests(
+        &root,
+        "guardrail3.toml",
+        r#"
+            [rust.checks]
+            deps = false
+
+            [rust.apps.backend]
+            profile = "service"
+            allowed_deps = ["serde"]
+
+            [rust.apps.backend.checks]
+            deps = true
+        "#,
+    );
+    super::write_file_for_tests(
+        &root,
+        "apps/backend/Cargo.toml",
+        "[workspace]\nmembers = [\"crates/*\"]\nresolver = \"2\"\n",
+    );
+    super::write_file_for_tests(&root, "apps/backend/Cargo.lock", "");
+    super::write_file_for_tests(
+        &root,
+        "apps/backend/crates/api/Cargo.toml",
+        "[package]\nname = \"api\"\n\n[dependencies]\nserde = \"1\"\n",
+    );
+    super::write_file_for_tests(
+        &root,
+        "apps/backend/crates/api/src/lib.rs",
+        "pub fn api() {}\n",
+    );
+    super::write_file_for_tests(
+        &root,
+        "apps/backend/crates/other/Cargo.toml",
+        "[package]\nname = \"other\"\n\n[dependencies]\ntokio = \"1\"\n",
+    );
+    super::write_file_for_tests(
+        &root,
+        "apps/backend/crates/other/src/lib.rs",
+        "pub fn other() {}\n",
+    );
+
+    let report = super::run_deps_with_validation_scope_for_tests(
+        &super::LocalFsTest,
+        &root,
+        "apps/backend/crates/api/src",
+    )
+    .expect("deps runtime report");
+
+    assert_eq!(report.sections().len(), 1, "{report:#?}");
+    assert_eq!(report.sections()[0].name(), "deps");
+    assert!(
+        !report.sections()[0]
+            .results()
+            .iter()
+            .any(|result| result.file() == Some("apps/backend/crates/other/Cargo.toml")),
+        "sibling workspace member leaked into subtree deps run: {report:#?}"
+    );
+
+    std::fs::remove_dir_all(&root).expect("cleanup temp root");
+}
+
+#[test]
+fn release_runtime_validation_scope_keeps_repo_policy_global_and_excludes_sibling_crates() {
+    let root = super::temp_root_for_tests("release-runtime-validation-scope");
+    super::write_file_for_tests(&root, "guardrail3.toml", "[rust.checks]\nrelease = true\n");
+    super::write_file_for_tests(
+        &root,
+        "apps/backend/Cargo.toml",
+        "[workspace]\nmembers = [\"crates/*\"]\nresolver = \"2\"\n",
+    );
+    super::write_file_for_tests(
+        &root,
+        "apps/backend/crates/api/Cargo.toml",
+        r#"
+            [package]
+            name = "api"
+            version = "0.1.0"
+            description = "api crate"
+            license = "MIT"
+            repository = "https://example.com/api"
+            readme = "README.md"
+            keywords = ["api"]
+            categories = ["development-tools"]
+        "#,
+    );
+    super::write_file_for_tests(
+        &root,
+        "apps/backend/crates/api/README.md",
+        &format!("# API\n\n{}\n", "x".repeat(240)),
+    );
+    super::write_file_for_tests(
+        &root,
+        "apps/backend/crates/api/src/lib.rs",
+        "pub fn api() {}\n",
+    );
+    super::write_file_for_tests(
+        &root,
+        "apps/backend/crates/other/Cargo.toml",
+        r#"
+            [package]
+            name = "other"
+            version = "0.1.0"
+        "#,
+    );
+    super::write_file_for_tests(
+        &root,
+        "apps/backend/crates/other/src/lib.rs",
+        "pub fn other() {}\n",
+    );
+
+    let report = super::run_release_with_validation_scope_for_tests(
+        &super::LocalFsTest,
+        &root,
+        "apps/backend/crates/api/src",
+    )
+    .expect("release runtime report");
+
+    assert_eq!(report.sections().len(), 1, "{report:#?}");
+    assert_eq!(report.sections()[0].name(), "release");
+    assertions::assert_absent_file(&report, "release", "apps/backend/crates/other/Cargo.toml");
+    assertions::assert_result_present(
+        &report,
+        "release",
+        "RS-RELEASE-02",
+        Some("release-plz.toml"),
+        Some(false),
+        None,
+    );
+
+    std::fs::remove_dir_all(&root).expect("cleanup temp root");
+}
+
+#[test]
+fn deps_runtime_scoped_opt_in_does_not_emit_global_tool_results() {
+    let root = super::temp_root_for_tests("deps-runtime-global-off-tools");
+    super::write_file_for_tests(
+        &root,
+        "guardrail3.toml",
+        r#"
+            [rust.checks]
+            deps = false
+
+            [rust.apps.backend]
+            profile = "service"
+            allowed_deps = ["serde"]
+
+            [rust.apps.backend.checks]
+            deps = true
+        "#,
+    );
+    super::write_file_for_tests(
+        &root,
+        "apps/backend/Cargo.toml",
+        "[workspace]\nmembers = []\nresolver = \"2\"\n",
+    );
+    super::write_file_for_tests(&root, "apps/backend/Cargo.lock", "");
+    super::write_file_for_tests(&root, "apps/backend/src/lib.rs", "pub fn backend() {}\n");
+    super::write_file_for_tests(
+        &root,
+        "apps/backend/src/deps_probe.rs",
+        "pub fn deps_probe() {}\n",
+    );
+    super::write_file_for_tests(
+        &root,
+        "apps/backend/Cargo.toml",
+        "[workspace]\nmembers = []\nresolver = \"2\"\n\n[package]\nname = \"backend\"\n\n[dependencies]\ntokio = \"1\"\n",
+    );
+
+    let report =
+        super::run_deps_for_tests(&super::LocalFsTest, &root).expect("deps runtime report");
+
+    assert_eq!(report.sections().len(), 1, "{report:#?}");
+    assert_eq!(report.sections()[0].name(), "deps");
+    let live_results = report.sections()[0]
+        .results()
+        .iter()
+        .filter(|result| !result.inventory())
+        .collect::<Vec<_>>();
+    assert!(
+        live_results.iter().any(|result| result.id() == "RS-DEPS-05"
+            && result.file() == Some("apps/backend/Cargo.toml")),
+        "expected crate-local allowlist violation: {report:#?}"
+    );
+    assert!(
+        !live_results.iter().any(|result| {
+            matches!(
+                result.id(),
+                "RS-DEPS-01" | "RS-DEPS-02" | "RS-DEPS-03" | "RS-DEPS-04"
+            )
+        }),
+        "global tool results leaked through scoped opt-in: {report:#?}"
+    );
+
+    std::fs::remove_dir_all(&root).expect("cleanup temp root");
+}
+
+#[test]
+fn deps_runtime_repo_workspace_root_stays_live_when_app_scope_enables_deps() {
+    let root = super::temp_root_for_tests("deps-runtime-repo-workspace-root");
+    super::write_file_for_tests(
+        &root,
+        "guardrail3.toml",
+        r#"
+            [rust.checks]
+            deps = false
+
+            [rust.apps.api]
+            profile = "service"
+            allowed_deps = ["serde"]
+
+            [rust.apps.api.checks]
+            deps = true
+        "#,
+    );
+    super::write_file_for_tests(
+        &root,
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"apps/*\"]\nresolver = \"2\"\n",
+    );
+    super::write_file_for_tests(&root, "Cargo.lock", "");
+    super::write_file_for_tests(
+        &root,
+        "apps/api/Cargo.toml",
+        "[package]\nname = \"api\"\n\n[dependencies]\nserde = \"1\"\n",
+    );
+    super::write_file_for_tests(&root, "apps/api/src/lib.rs", "pub fn api() {}\n");
+
+    let report =
+        super::run_deps_for_tests(&super::LocalFsTest, &root).expect("deps runtime report");
+
+    assert_eq!(report.sections().len(), 1, "{report:#?}");
+    assert_eq!(report.sections()[0].name(), "deps");
+    assertions::assert_result_present(
+        &report,
+        "deps",
+        "RS-DEPS-09",
+        Some("Cargo.lock"),
+        Some(true),
+        Some("Rust root `.` has `Cargo.lock` committed."),
+    );
+    assertions::assert_absent_file(&report, "deps", "apps/api/Cargo.lock");
 
     std::fs::remove_dir_all(&root).expect("cleanup temp root");
 }

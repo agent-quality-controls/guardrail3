@@ -478,19 +478,16 @@ fn cargo_target_is_linux(args: &[&str]) -> bool {
 }
 
 fn is_release_plz_action(uses: &str) -> bool {
-    !uses.starts_with("./") && !uses.starts_with("../") && uses.contains("release-plz/")
+    action_slug(uses).is_some_and(|slug| slug == "release-plz/action")
 }
 
 fn is_github_release_action(uses: &str) -> bool {
-    if uses.starts_with("./") || uses.starts_with("../") {
-        return false;
-    }
-    let action = uses.split('@').next().unwrap_or(uses).trim_matches('/');
-    let segments = action.split('/').collect::<Vec<_>>();
-    segments.len() >= 2
-        && segments
-            .last()
-            .is_some_and(|segment| matches!(*segment, "action-gh-release" | "release-action"))
+    action_slug(uses).is_some_and(|slug| {
+        matches!(
+            slug,
+            "softprops/action-gh-release" | "ncipollo/release-action"
+        )
+    })
 }
 
 fn release_plz_subcommand<'a>(args: &'a [&'a str]) -> Option<&'a str> {
@@ -544,4 +541,19 @@ fn normalize_rel_path(path: &str) -> String {
         })
         .collect::<Vec<_>>()
         .join("/")
+}
+
+fn action_slug(uses: &str) -> Option<&str> {
+    if uses.starts_with("./") || uses.starts_with("../") {
+        return None;
+    }
+    let slug = uses.split('@').next().unwrap_or(uses).trim_matches('/');
+    let mut segments = slug.split('/');
+    let owner = segments.next()?;
+    let repo = segments.next()?;
+    segments
+        .next()
+        .is_none()
+        .then_some(slug)
+        .filter(|_| !owner.is_empty() && !repo.is_empty())
 }

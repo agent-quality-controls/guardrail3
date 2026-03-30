@@ -35,6 +35,20 @@ pub(crate) fn run_tree(
     crate::check(tree, &family_route(tree), tc, thorough)
 }
 
+pub(crate) fn run_tree_with_validation_scope(
+    tree: &guardrail3_domain_project_tree::ProjectTree,
+    tc: &dyn guardrail3_outbound_traits::ToolChecker,
+    thorough: bool,
+    validation_scope: &str,
+) -> Vec<guardrail3_domain_report::CheckResult> {
+    crate::check(
+        tree,
+        &family_route_with_validation_scope(tree, validation_scope),
+        tc,
+        thorough,
+    )
+}
+
 pub(crate) fn repo_facts() -> crate::facts::RepoReleaseFacts {
     crate::facts::RepoReleaseFacts {
         cargo_rel_path: "Cargo.toml".to_owned(),
@@ -139,6 +153,20 @@ pub(crate) fn family_route(
             guardrail3_validation_model::RustValidateFamily::Release,
         ]));
     guardrail3_app_rs_family_mapper::FamilyMapper::new(tree, &scope, None, &selected, None)
+        .map_rs_release()
+}
+
+pub(crate) fn family_route_with_validation_scope(
+    tree: &guardrail3_domain_project_tree::ProjectTree,
+    validation_scope: &str,
+) -> guardrail3_app_rs_family_mapper::RsReleaseRoute {
+    let scope = guardrail3_app_rs_placement::collect(tree);
+    let selected =
+        guardrail3_validation_model::RustFamilySelection::new(std::collections::BTreeSet::from([
+            guardrail3_validation_model::RustValidateFamily::Release,
+        ]));
+    guardrail3_app_rs_family_mapper::FamilyMapper::new(tree, &scope, None, &selected, None)
+        .with_validation_scope(Some(validation_scope))
         .map_rs_release()
 }
 

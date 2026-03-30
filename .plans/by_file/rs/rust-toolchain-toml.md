@@ -9,7 +9,9 @@
 
 ## Location
 
-**Where Rust looks:** Walks UP from CWD toward filesystem root. Nearest `rust-toolchain.toml` or `rust-toolchain` wins. No merging.
+**Where Rust looks:** Walks UP from CWD toward filesystem root. Nearest
+`rust-toolchain.toml` or `rust-toolchain` wins. No merging. If both filenames
+exist in the same directory, `rust-toolchain` wins for backward compatibility.
 
 **In steady-parent:**
 - `apps/validator-rust/rust-toolchain.toml` — `channel = "stable"`, `components = ["rustfmt", "clippy"]`
@@ -21,7 +23,10 @@
 That question has since been resolved in favor of routed policy-root
 ownership. The current family validates one local `rust-toolchain.toml`,
 optional local legacy `rust-toolchain`, and one local `Cargo.toml` MSRV source
-for each owned workspace root or standalone package root.
+for each owned workspace root. Any nested toolchain beneath that workspace root
+and any toolchain outside all governed workspace roots is a violation. Shared
+Rust exclusions such as `target/`, `tests/fixtures/`, `tests/snapshots/`, and
+`.claude/worktrees/` stay out of that placement surface.
 
 The older reasoning below is preserved only as historical context for the
 pre-routing discussion:

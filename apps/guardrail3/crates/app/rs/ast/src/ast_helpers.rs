@@ -9,6 +9,7 @@ use proc_macro2 as _; // reason: span-locations feature needed for syn span.star
 pub use super::ast_visitors::{
     GardeSkipInfo, struct_has_non_exempt_fields, struct_has_non_primitive_fields,
 };
+pub use super::extra_visitors::IgnoreReasonInfo;
 
 /// A source location (1-based line number) paired with a descriptive string (lint name, method name, etc.).
 pub(super) type Located = (usize, String);
@@ -240,16 +241,25 @@ pub fn count_test_attrs(file: &syn::File) -> usize {
     v.count
 }
 
-/// Find `#[ignore]` attributes without a `// reason:` comment on same or previous line.
-/// Returns 1-based line numbers of violations.
-/// Requires the original source to check for reason comments.
-pub fn find_ignore_without_reason(file: &syn::File, source: &str) -> Vec<usize> {
+/// Find `#[ignore]` attributes and any associated reason text.
+/// Requires the original source to extract same-line and previous-line reason comments.
+pub fn find_ignore_reasons(file: &syn::File, source: &str) -> Vec<IgnoreReasonInfo> {
     let mut v = extra_visitors::IgnoreVisitor {
         lines: source.lines().collect(),
-        violations: Vec::new(),
+        findings: Vec::new(),
     };
     syn::visit::Visit::visit_file(&mut v, file);
-    v.violations
+    v.findings
+}
+
+/// Find `#[ignore]` attributes without a reason.
+/// Returns 1-based line numbers of violations.
+pub fn find_ignore_without_reason(file: &syn::File, source: &str) -> Vec<usize> {
+    find_ignore_reasons(file, source)
+        .into_iter()
+        .filter(|finding| finding.reason.is_none())
+        .map(|finding| finding.line)
+        .collect()
 }
 
 /// Count top-level `use` statements.

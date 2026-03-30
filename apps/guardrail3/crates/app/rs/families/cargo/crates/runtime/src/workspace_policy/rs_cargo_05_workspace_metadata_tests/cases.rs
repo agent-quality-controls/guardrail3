@@ -118,3 +118,126 @@ fn missing_edition_is_error() {
         }],
     );
 }
+
+#[test]
+fn edition_below_minimum_is_error() {
+    let manifest = format!(
+        r#"
+            [package]
+            name = "helper"
+            edition = "2018"
+            rust-version = "1.85"
+
+            {STANDALONE_RUST_LINTS}
+            {STANDALONE_CLIPPY_LINTS}
+        "#
+    );
+
+    let results = check_results(&tree(
+        &[("pkg", entry(&[], &["Cargo.toml"]))],
+        &[("pkg/Cargo.toml", &manifest)],
+    ));
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_05_workspace_metadata::assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: None,
+            title: Some("edition below minimum"),
+            inventory: None,
+        }],
+    );
+}
+
+#[test]
+fn unknown_edition_is_error() {
+    let manifest = format!(
+        r#"
+            [package]
+            name = "helper"
+            edition = "2027"
+            rust-version = "1.85"
+
+            {STANDALONE_RUST_LINTS}
+            {STANDALONE_CLIPPY_LINTS}
+        "#
+    );
+
+    let results = check_results(&tree(
+        &[("pkg", entry(&[], &["Cargo.toml"]))],
+        &[("pkg/Cargo.toml", &manifest)],
+    ));
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_05_workspace_metadata::assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: None,
+            title: Some("edition unrecognized"),
+            inventory: None,
+        }],
+    );
+}
+
+#[test]
+fn invalid_workspace_package_edition_does_not_fallback_to_local_package_value() {
+    let workspace_manifest = format!(
+        r#"
+            [workspace]
+            members = []
+            resolver = "2"
+
+            [workspace.package]
+            edition = 2024
+            rust-version = "1.85"
+
+            [package]
+            name = "helper"
+            edition = "2024"
+            rust-version = "1.85"
+
+            {STANDALONE_RUST_LINTS}
+            {STANDALONE_CLIPPY_LINTS}
+        "#
+    );
+
+    let results = check_results(&tree(
+        &[("", entry(&[], &["Cargo.toml"]))],
+        &[("Cargo.toml", &workspace_manifest)],
+    ));
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_05_workspace_metadata::assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: None,
+            title: Some("edition invalid"),
+            inventory: None,
+        }],
+    );
+}
+
+#[test]
+fn malformed_root_local_guardrail_suppresses_clean_inventory() {
+    let manifest = format!(
+        r#"
+            [package]
+            name = "helper"
+            edition = "2024"
+            rust-version = "1.85"
+
+            {STANDALONE_RUST_LINTS}
+            {STANDALONE_CLIPPY_LINTS}
+        "#
+    );
+
+    let results = check_results(&tree(
+        &[("pkg", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
+        &[
+            ("pkg/Cargo.toml", &manifest),
+            ("pkg/guardrail3.toml", "[profile"),
+        ],
+    ));
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_05_workspace_metadata::assert_rule_results(
+        &results,
+        &[],
+    );
+}

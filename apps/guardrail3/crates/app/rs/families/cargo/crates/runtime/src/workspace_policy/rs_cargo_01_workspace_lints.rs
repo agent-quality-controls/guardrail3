@@ -53,38 +53,113 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
     }
 
     if let Some(rust_lints) = rust_lints {
-        for expected in EXPECTED_RUST_LINTS {
-            if lint_level(rust_lints, expected.name).is_none() {
-                missing += 1;
-                results.push(CheckResult {
-                    id: ID.to_owned(),
-                    severity: Severity::Error,
-                    title: format!("missing rust lint `{}`", expected.name),
-                    message: format!(
-                        "`{}` must define `{}` in `{}`.",
-                        root.cargo_rel_path,
-                        expected.name,
-                        policy_lints_table_label(root.kind, "rust")
-                    ),
-                    file: Some(root.cargo_rel_path.clone()),
-                    line: None,
-                    inventory: false,
-                });
-            }
-        }
-
-        if root.profile_name.as_deref() == Some("library") {
-            for expected in EXPECTED_LIBRARY_RUST_LINTS {
+        if rust_lints.as_table().is_none() {
+            missing += 1;
+            results.push(CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Error,
+                "rust lint table has invalid shape".to_owned(),
+                format!(
+                    "`{}` must define `{}` as a table of lint entries.",
+                    root.cargo_rel_path,
+                    policy_lints_table_label(root.kind, "rust")
+                ),
+                Some(root.cargo_rel_path.clone()),
+                None,
+                false,
+            ));
+        } else {
+            for expected in EXPECTED_RUST_LINTS {
                 if lint_level(rust_lints, expected.name).is_none() {
                     missing += 1;
                     results.push(CheckResult {
                         id: ID.to_owned(),
                         severity: Severity::Error,
-                        title: format!("missing library rust lint `{}`", expected.name),
+                        title: format!("missing rust lint `{}`", expected.name),
                         message: format!(
-                            "Library profile requires `{}` in `{}`.",
+                            "`{}` must define `{}` in `{}`.",
+                            root.cargo_rel_path,
                             expected.name,
                             policy_lints_table_label(root.kind, "rust")
+                        ),
+                        file: Some(root.cargo_rel_path.clone()),
+                        line: None,
+                        inventory: false,
+                    });
+                }
+            }
+
+            if root.profile_name.as_deref() == Some("library") {
+                for expected in EXPECTED_LIBRARY_RUST_LINTS {
+                    if lint_level(rust_lints, expected.name).is_none() {
+                        missing += 1;
+                        results.push(CheckResult {
+                            id: ID.to_owned(),
+                            severity: Severity::Error,
+                            title: format!("missing library rust lint `{}`", expected.name),
+                            message: format!(
+                                "Library profile requires `{}` in `{}`.",
+                                expected.name,
+                                policy_lints_table_label(root.kind, "rust")
+                            ),
+                            file: Some(root.cargo_rel_path.clone()),
+                            line: None,
+                            inventory: false,
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    if let Some(clippy_lints) = clippy_lints {
+        if clippy_lints.as_table().is_none() {
+            missing += 1;
+            results.push(CheckResult::from_parts(
+                ID.to_owned(),
+                Severity::Error,
+                "clippy lint table has invalid shape".to_owned(),
+                format!(
+                    "`{}` must define `{}` as a table of lint entries.",
+                    root.cargo_rel_path,
+                    policy_lints_table_label(root.kind, "clippy")
+                ),
+                Some(root.cargo_rel_path.clone()),
+                None,
+                false,
+            ));
+        } else {
+            for expected in EXPECTED_CLIPPY_GROUPS {
+                if lint_level(clippy_lints, expected.name).is_none() {
+                    missing += 1;
+                    results.push(CheckResult {
+                        id: ID.to_owned(),
+                        severity: Severity::Error,
+                        title: format!("missing clippy lint group `{}`", expected.name),
+                        message: format!(
+                            "`{}` must define `{}` in `{}`.",
+                            root.cargo_rel_path,
+                            expected.name,
+                            policy_lints_table_label(root.kind, "clippy")
+                        ),
+                        file: Some(root.cargo_rel_path.clone()),
+                        line: None,
+                        inventory: false,
+                    });
+                }
+            }
+
+            for lint_name in EXPECTED_CLIPPY_DENY {
+                if lint_level(clippy_lints, lint_name).is_none() {
+                    missing += 1;
+                    results.push(CheckResult {
+                        id: ID.to_owned(),
+                        severity: Severity::Error,
+                        title: format!("missing clippy deny lint `{lint_name}`"),
+                        message: format!(
+                            "`{}` must define `{lint_name}` in `{}`.",
+                            root.cargo_rel_path,
+                            policy_lints_table_label(root.kind, "clippy")
                         ),
                         file: Some(root.cargo_rel_path.clone()),
                         line: None,
@@ -95,48 +170,7 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
         }
     }
 
-    if let Some(clippy_lints) = clippy_lints {
-        for expected in EXPECTED_CLIPPY_GROUPS {
-            if lint_level(clippy_lints, expected.name).is_none() {
-                missing += 1;
-                results.push(CheckResult {
-                    id: ID.to_owned(),
-                    severity: Severity::Error,
-                    title: format!("missing clippy lint group `{}`", expected.name),
-                    message: format!(
-                        "`{}` must define `{}` in `{}`.",
-                        root.cargo_rel_path,
-                        expected.name,
-                        policy_lints_table_label(root.kind, "clippy")
-                    ),
-                    file: Some(root.cargo_rel_path.clone()),
-                    line: None,
-                    inventory: false,
-                });
-            }
-        }
-
-        for lint_name in EXPECTED_CLIPPY_DENY {
-            if lint_level(clippy_lints, lint_name).is_none() {
-                missing += 1;
-                results.push(CheckResult {
-                    id: ID.to_owned(),
-                    severity: Severity::Error,
-                    title: format!("missing clippy deny lint `{lint_name}`"),
-                    message: format!(
-                        "`{}` must define `{lint_name}` in `{}`.",
-                        root.cargo_rel_path,
-                        policy_lints_table_label(root.kind, "clippy")
-                    ),
-                    file: Some(root.cargo_rel_path.clone()),
-                    line: None,
-                    inventory: false,
-                });
-            }
-        }
-    }
-
-    if missing == 0 {
+    if missing == 0 && !root.guardrail_parse_error {
         results.push(
             CheckResult::from_parts(
                 ID.to_owned(),
@@ -157,4 +191,5 @@ pub fn check(input: &PolicyRootCargoInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-mod tests;
+#[path = "rs_cargo_01_workspace_lints_tests/mod.rs"] // reason: test-only sidecar module wiring
+mod rs_cargo_01_workspace_lints_tests;

@@ -32,6 +32,9 @@ fn real_mutation_commands_count_in_common_shell_forms() {
         "#!/bin/sh\nCARGO_TERM_COLOR=always cargo mutants -- -p demo\n",
         "#!/bin/sh\nenv CARGO_TERM_COLOR=always cargo +nightly mutants -- -p demo\n",
         "#!/bin/sh\n./bin/cargo-mutants -- -p demo\n",
+        "#!/bin/sh\nexec cargo mutants\n",
+        "#!/bin/sh\ncommand cargo mutants\n",
+        "#!/bin/sh\nbash -lc 'cargo mutants'\n",
     ] {
         let fixture = tempdir();
         write_file(

@@ -1,34 +1,46 @@
 use std::collections::BTreeSet;
 
 use syn::parse::{Parse, Parser};
+use syn::punctuated::Punctuated;
 use syn::visit::Visit;
 
 use super::{TestBodyVisitor, UseBinding};
 
 pub(super) fn is_test_attr(attr: &syn::Attribute) -> bool {
-    let path = attr.path();
-    path.is_ident("test")
-        || path
-            .segments
-            .last()
-            .is_some_and(|segment| segment.ident == "test")
+    let predicate = cfg_predicate(attr);
+    path_is_test_attr(attr.path())
+        || cfg_attr_nested_metas(attr)
+            .into_iter()
+            .flatten()
+            .any(|meta| predicate.as_ref().is_some_and(cfg_meta_contains_positive_test) && meta_path_is_test(&meta))
 }
 
 pub(super) fn is_tokio_test_attr(attr: &syn::Attribute) -> bool {
-    let path = attr.path();
-    path.segments.len() == 2
-        && path.segments[0].ident == "tokio"
-        && path.segments[1].ident == "test"
+    let predicate = cfg_predicate(attr);
+    path_is_tokio_test_attr(attr.path())
+        || cfg_attr_nested_metas(attr)
+            .into_iter()
+            .flatten()
+            .any(|meta| predicate.as_ref().is_some_and(cfg_meta_contains_positive_test) && meta_path_is_tokio_test(&meta))
 }
 
 pub(super) fn is_cfg_test_attr(attr: &syn::Attribute) -> bool {
     if !attr.path().is_ident("cfg") {
         return false;
     }
-    match &attr.meta {
-        syn::Meta::List(list) => list.tokens.to_string().replace(' ', "") == "test",
-        _ => false,
-    }
+    cfg_predicate(attr).is_some_and(|meta| cfg_meta_requires_test(&meta))
+}
+
+pub(super) fn is_should_panic_attr(attr: &syn::Attribute) -> bool {
+    let predicate = cfg_predicate(attr);
+    attr.path().is_ident("should_panic")
+        || cfg_attr_nested_metas(attr)
+            .into_iter()
+            .flatten()
+            .any(|meta| {
+                predicate.as_ref().is_some_and(cfg_meta_contains_positive_test)
+                    && meta.path().is_ident("should_panic")
+            })
 }
 
 pub(super) fn is_assertion_macro_name(name: &str) -> bool {
@@ -94,6 +106,13 @@ pub(super) fn macro_has_weak_matches(mac: &syn::Macro) -> bool {
     pattern_contains_wild(&args.pattern)
 }
 
+pub(super) fn macro_has_weak_assert_matches(mac: &syn::Macro) -> bool {
+    let Ok(args) = syn::parse2::<MatchesArgs>(mac.tokens.clone()) else {
+        return false;
+    };
+    pattern_contains_wild(&args.pattern)
+}
+
 pub(super) fn visit_macro_expr_args(visitor: &mut TestBodyVisitor, mac: &syn::Macro) {
     let parser = syn::punctuated::Punctuated::<syn::Expr, syn::Token![,]>::parse_terminated;
     let Ok(args) = parser.parse2(mac.tokens.clone()) else {
@@ -107,12 +126,14 @@ pub(super) fn visit_macro_expr_args(visitor: &mut TestBodyVisitor, mac: &syn::Ma
 fn pattern_contains_wild(pattern: &syn::Pat) -> bool {
     match pattern {
         syn::Pat::Wild(_) => true,
+        syn::Pat::Rest(_) => true,
         syn::Pat::Tuple(tuple) => tuple.elems.iter().any(pattern_contains_wild),
         syn::Pat::TupleStruct(tuple) => tuple.elems.iter().any(pattern_contains_wild),
         syn::Pat::Struct(strct) => strct
             .fields
             .iter()
-            .any(|field| pattern_contains_wild(&field.pat)),
+            .any(|field| pattern_contains_wild(&field.pat))
+            || strct.rest.is_some(),
         syn::Pat::Slice(slice) => slice.elems.iter().any(pattern_contains_wild),
         syn::Pat::Reference(reference) => pattern_contains_wild(&reference.pat),
         syn::Pat::Or(or) => or.cases.iter().any(pattern_contains_wild),
@@ -123,8 +144,23 @@ fn pattern_contains_wild(pattern: &syn::Pat) -> bool {
 }
 
 pub(super) fn should_panic_has_expected(attr: &syn::Attribute) -> bool {
+    if attr.path().is_ident("should_panic") {
+        return meta_has_should_panic_expected(&attr.meta);
+    }
+    let predicate = cfg_predicate(attr);
+    cfg_attr_nested_metas(attr)
+        .into_iter()
+        .flatten()
+        .filter(|meta| meta.path().is_ident("should_panic"))
+        .any(|meta| {
+            predicate.as_ref().is_some_and(cfg_meta_contains_positive_test)
+                && meta_has_should_panic_expected(&meta)
+        })
+}
+
+fn meta_has_should_panic_expected(meta: &syn::Meta) -> bool {
     let mut has_expected = false;
-    let _ = attr.parse_nested_meta(|meta| {
+    let _ = parse_meta_nested(meta, |meta| {
         if meta.path.is_ident("expected") {
             let value: syn::LitStr = meta.value()?.parse()?;
             has_expected = !value.value().trim().is_empty();
@@ -208,6 +244,133 @@ fn expr_is_literal_like(expr: &syn::Expr) -> bool {
     }
 }
 
+fn path_is_test_attr(path: &syn::Path) -> bool {
+    path.is_ident("test")
+        || path
+            .segments
+            .last()
+            .is_some_and(|segment| segment.ident == "test")
+}
+
+fn meta_path_is_test(meta: &syn::Meta) -> bool {
+    path_is_test_attr(meta.path())
+}
+
+fn path_is_tokio_test_attr(path: &syn::Path) -> bool {
+    path.segments.len() == 2
+        && path.segments[0].ident == "tokio"
+        && path.segments[1].ident == "test"
+}
+
+fn meta_path_is_tokio_test(meta: &syn::Meta) -> bool {
+    path_is_tokio_test_attr(meta.path())
+}
+
+fn cfg_attr_nested_metas(attr: &syn::Attribute) -> Option<Vec<syn::Meta>> {
+    if !attr.path().is_ident("cfg_attr") {
+        return None;
+    }
+    let syn::Meta::List(list) = &attr.meta else {
+        return None;
+    };
+    let Ok(args) = list.parse_args_with(Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated)
+    else {
+        return None;
+    };
+    let mut iter = args.into_iter();
+    let _ = iter.next()?;
+    Some(iter.collect())
+}
+
+fn cfg_predicate(attr: &syn::Attribute) -> Option<syn::Meta> {
+    let syn::Meta::List(list) = &attr.meta else {
+        return None;
+    };
+    if attr.path().is_ident("cfg") {
+        return syn::parse2::<syn::Meta>(list.tokens.clone()).ok();
+    }
+    if !attr.path().is_ident("cfg_attr") {
+        return None;
+    }
+    list.parse_args_with(Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated)
+        .ok()?
+        .into_iter()
+        .next()
+}
+
+fn cfg_meta_requires_test(meta: &syn::Meta) -> bool {
+    cfg_meta_can_be_true(meta, true) && !cfg_meta_can_be_true(meta, false)
+}
+
+fn cfg_meta_contains_positive_test(meta: &syn::Meta) -> bool {
+    match meta {
+        syn::Meta::Path(path) => path.is_ident("test"),
+        syn::Meta::NameValue(_) => false,
+        syn::Meta::List(list) if list.path.is_ident("not") => false,
+        syn::Meta::List(list) => nested_cfg_meta_items(list)
+            .iter()
+            .any(cfg_meta_contains_positive_test),
+    }
+}
+
+fn cfg_meta_can_be_true(meta: &syn::Meta, test_enabled: bool) -> bool {
+    match meta {
+        syn::Meta::Path(path) => !path.is_ident("test") || test_enabled,
+        syn::Meta::NameValue(_) => true,
+        syn::Meta::List(list) if list.path.is_ident("all") => {
+            nested_cfg_meta_items(list)
+                .iter()
+                .all(|meta| cfg_meta_can_be_true(meta, test_enabled))
+        }
+        syn::Meta::List(list) if list.path.is_ident("any") => {
+            nested_cfg_meta_items(list)
+                .iter()
+                .any(|meta| cfg_meta_can_be_true(meta, test_enabled))
+        }
+        syn::Meta::List(list) if list.path.is_ident("not") => nested_cfg_meta_items(list)
+            .first()
+            .is_some_and(|meta| cfg_meta_can_be_false(meta, test_enabled)),
+        syn::Meta::List(_) => true,
+    }
+}
+
+fn cfg_meta_can_be_false(meta: &syn::Meta, test_enabled: bool) -> bool {
+    match meta {
+        syn::Meta::Path(path) => !path.is_ident("test") || !test_enabled,
+        syn::Meta::NameValue(_) => true,
+        syn::Meta::List(list) if list.path.is_ident("all") => {
+            nested_cfg_meta_items(list)
+                .iter()
+                .any(|meta| cfg_meta_can_be_false(meta, test_enabled))
+        }
+        syn::Meta::List(list) if list.path.is_ident("any") => {
+            nested_cfg_meta_items(list)
+                .iter()
+                .all(|meta| cfg_meta_can_be_false(meta, test_enabled))
+        }
+        syn::Meta::List(list) if list.path.is_ident("not") => nested_cfg_meta_items(list)
+            .first()
+            .is_some_and(|meta| cfg_meta_can_be_true(meta, test_enabled)),
+        syn::Meta::List(_) => true,
+    }
+}
+
+fn nested_cfg_meta_items(list: &syn::MetaList) -> Vec<syn::Meta> {
+    list.parse_args_with(Punctuated::<syn::Meta, syn::Token![,]>::parse_terminated)
+        .map(|items| items.into_iter().collect())
+        .unwrap_or_default()
+}
+
+fn parse_meta_nested(
+    meta: &syn::Meta,
+    logic: impl FnMut(syn::meta::ParseNestedMeta<'_>) -> syn::Result<()>,
+) -> syn::Result<()> {
+    match meta {
+        syn::Meta::List(list) => list.parse_nested_meta(logic),
+        _ => Ok(()),
+    }
+}
+
 fn peel_parens(expr: syn::Expr) -> syn::Expr {
     match expr {
         syn::Expr::Paren(paren) => peel_parens(*paren.expr),
@@ -250,6 +413,16 @@ pub(super) fn collect_pat_idents(pat: &syn::Pat, out: &mut BTreeSet<String>) {
         }
         syn::Pat::Paren(paren) => collect_pat_idents(&paren.pat, out),
         _ => {}
+    }
+}
+
+pub(super) fn single_pat_ident(pat: &syn::Pat) -> Option<String> {
+    match pat {
+        syn::Pat::Ident(ident) => Some(ident.ident.to_string()),
+        syn::Pat::Type(typed) => single_pat_ident(&typed.pat),
+        syn::Pat::Reference(reference) => single_pat_ident(&reference.pat),
+        syn::Pat::Paren(paren) => single_pat_ident(&paren.pat),
+        _ => None,
     }
 }
 

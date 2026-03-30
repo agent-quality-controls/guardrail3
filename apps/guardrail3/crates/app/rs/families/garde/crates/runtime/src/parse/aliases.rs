@@ -1,4 +1,4 @@
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 
 use quote::ToTokens;
 
@@ -23,6 +23,7 @@ pub(super) fn collect_use_aliases(
     deserialize_aliases: &mut BTreeSet<String>,
     validate_aliases: &mut BTreeSet<String>,
     query_as_aliases: &mut BTreeSet<String>,
+    module_path_aliases: &mut BTreeMap<String, String>,
 ) {
     collect_use_aliases_with_prefix(
         tree,
@@ -31,6 +32,7 @@ pub(super) fn collect_use_aliases(
         deserialize_aliases,
         validate_aliases,
         query_as_aliases,
+        module_path_aliases,
     );
 }
 
@@ -41,6 +43,7 @@ fn collect_use_aliases_with_prefix(
     deserialize_aliases: &mut BTreeSet<String>,
     validate_aliases: &mut BTreeSet<String>,
     query_as_aliases: &mut BTreeSet<String>,
+    module_path_aliases: &mut BTreeMap<String, String>,
 ) {
     match tree {
         syn::UseTree::Path(path) => {
@@ -53,6 +56,7 @@ fn collect_use_aliases_with_prefix(
                 deserialize_aliases,
                 validate_aliases,
                 query_as_aliases,
+                module_path_aliases,
             );
         }
         syn::UseTree::Name(name) => {
@@ -65,6 +69,7 @@ fn collect_use_aliases_with_prefix(
                 deserialize_aliases,
                 validate_aliases,
                 query_as_aliases,
+                module_path_aliases,
             );
         }
         syn::UseTree::Rename(rename) => {
@@ -78,6 +83,7 @@ fn collect_use_aliases_with_prefix(
                 deserialize_aliases,
                 validate_aliases,
                 query_as_aliases,
+                module_path_aliases,
             );
         }
         syn::UseTree::Group(group) => {
@@ -89,6 +95,7 @@ fn collect_use_aliases_with_prefix(
                     deserialize_aliases,
                     validate_aliases,
                     query_as_aliases,
+                    module_path_aliases,
                 );
             }
         }
@@ -104,8 +111,12 @@ fn register_canonical_alias(
     deserialize_aliases: &mut BTreeSet<String>,
     validate_aliases: &mut BTreeSet<String>,
     query_as_aliases: &mut BTreeSet<String>,
+    module_path_aliases: &mut BTreeMap<String, String>,
 ) {
     let path = qualified_use_target(prefix, target);
+    if alias != target {
+        let _ = module_path_aliases.insert(alias.to_owned(), path.clone());
+    }
     match path.as_str() {
         "serde::Deserialize" => {
             let _ = boundary_derive_aliases.insert(alias.to_owned());
@@ -132,21 +143,30 @@ fn qualified_use_target(prefix: &[String], target: &str) -> String {
     }
 }
 
-pub(super) fn is_deserialize_trait_path(path: &syn::Path, aliases: &BTreeSet<String>) -> bool {
-    is_canonical_or_aliased_path(path, aliases, "serde::Deserialize")
+pub(super) fn is_deserialize_trait_path(
+    path: &syn::Path,
+    aliases: &BTreeSet<String>,
+    module_path_aliases: &BTreeMap<String, String>,
+) -> bool {
+    is_canonical_or_aliased_path(path, aliases, module_path_aliases, "serde::Deserialize")
 }
 
-pub(super) fn is_validate_trait_path(path: &syn::Path, aliases: &BTreeSet<String>) -> bool {
-    is_canonical_or_aliased_path(path, aliases, "garde::Validate")
+pub(super) fn is_validate_trait_path(
+    path: &syn::Path,
+    aliases: &BTreeSet<String>,
+    module_path_aliases: &BTreeMap<String, String>,
+) -> bool {
+    is_canonical_or_aliased_path(path, aliases, module_path_aliases, "garde::Validate")
 }
 
 fn is_canonical_or_aliased_path(
     path: &syn::Path,
     aliases: &BTreeSet<String>,
+    module_path_aliases: &BTreeMap<String, String>,
     canonical: &str,
 ) -> bool {
-    let rendered = path_to_string(path);
-    if rendered.trim_start_matches(':') == canonical {
+    let normalized = normalized_path_idents(path, module_path_aliases).join("::");
+    if normalized == canonical {
         return true;
     }
     path.segments.len() == 1
@@ -156,15 +176,67 @@ fn is_canonical_or_aliased_path(
             .is_some_and(|segment| aliases.contains(&segment.ident.to_string()))
 }
 
-pub(super) fn is_sqlx_query_as_macro_path(path: &syn::Path) -> bool {
+pub(super) fn is_sqlx_query_as_macro_path(
+    path: &syn::Path,
+    module_path_aliases: &BTreeMap<String, String>,
+) -> bool {
     matches!(
-        path_to_string(path).trim_start_matches(':'),
+        normalized_path_idents(path, module_path_aliases)
+            .join("::")
+            .as_str(),
         "sqlx::query_as" | "sqlx::query_as_unchecked"
     )
 }
 
+pub(super) fn resolve_path_string_aliases(
+    path: &str,
+    module_path_aliases: &BTreeMap<String, String>,
+) -> String {
+    let mut segments = path
+        .trim_start_matches(':')
+        .split("::")
+        .map(ToOwned::to_owned)
+        .collect::<Vec<_>>();
+    let Some(first) = segments.first().cloned() else {
+        return path.trim_start_matches(':').to_owned();
+    };
+    let Some(target) = module_path_aliases.get(&first) else {
+        return path.trim_start_matches(':').to_owned();
+    };
+
+    let mut resolved = target
+        .split("::")
+        .map(ToOwned::to_owned)
+        .collect::<Vec<_>>();
+    resolved.extend(segments.drain(1..));
+    resolved.join("::")
+}
+
 pub(super) fn path_to_string(path: &syn::Path) -> String {
     path.to_token_stream().to_string().replace(' ', "")
+}
+
+fn normalized_path_idents(
+    path: &syn::Path,
+    module_path_aliases: &BTreeMap<String, String>,
+) -> Vec<String> {
+    let mut segments = path
+        .segments
+        .iter()
+        .map(|segment| segment.ident.to_string())
+        .collect::<Vec<_>>();
+    let Some(first) = segments.first().cloned() else {
+        return segments;
+    };
+    let Some(target) = module_path_aliases.get(&first) else {
+        return segments;
+    };
+    let mut resolved = target
+        .split("::")
+        .map(ToOwned::to_owned)
+        .collect::<Vec<_>>();
+    resolved.extend(segments.drain(1..));
+    resolved
 }
 
 pub(super) fn token_stream_uses_ctx_variable(stream: proc_macro2::TokenStream) -> bool {

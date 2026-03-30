@@ -3,7 +3,9 @@ use std::path::{Component, Path};
 
 use guardrail3_domain_project_tree::ProjectTree;
 
-use super::guardrail::validate_dependency_manifest_shape;
+use super::guardrail::{
+    validate_target_dependency_manifest_shape, validate_top_level_dependency_manifest_shape,
+};
 use super::{
     DependencyEntryFacts, DependencySectionKind, DirectDependencyCapFacts, InputFailureFacts,
     MemberFacts, ParsedGuardrail, WorkspaceFacts,
@@ -19,11 +21,16 @@ pub(super) fn discover_members(
 ) -> Vec<MemberFacts> {
     let mut member_dirs = workspaces
         .iter()
-        .flat_map(|workspace| workspace.member_dirs.iter().cloned())
+        .flat_map(|workspace| workspace.member_dirs.iter())
+        .filter(|member_dir| routed_root_rels.contains(*member_dir))
+        .cloned()
         .collect::<BTreeSet<_>>();
 
     for root_rel_dir in routed_root_rels.iter().cloned() {
         if workspace_by_member.contains_key(&root_rel_dir) {
+            continue;
+        }
+        if is_nested_beneath_workspace_root(&root_rel_dir, workspaces) {
             continue;
         }
         let cargo_rel_path = if root_rel_dir.is_empty() {
@@ -115,37 +122,64 @@ pub(super) fn policy_for_member(
         return (None, None);
     };
 
-    if rel_dir.starts_with("apps/") {
-        if let Some(app_name) = rel_dir.split('/').nth(1) {
+    match governed_zone_scope(rel_dir) {
+        Some(GovernedZoneScope::App(app_name)) => {
             if let Some(config) = parsed_guardrail.apps.get(app_name) {
                 return (
                     config
-                        .profile()
-                        .map(str::to_owned)
-                        .or_else(|| config.type_().map(str::to_owned)),
-                    config
-                        .allowed_deps()
-                        .map(|deps| deps.iter().cloned().collect::<BTreeSet<_>>()),
+                        .profile_name
+                        .clone()
+                        .or_else(|| config.type_name.clone()),
+                    config.allowed_deps.clone(),
                 );
             }
         }
-    }
-
-    if rel_dir.starts_with("packages/") {
-        if let Some(config) = &parsed_guardrail.packages {
-            return (
-                config
-                    .profile()
-                    .map(str::to_owned)
-                    .or_else(|| config.type_().map(str::to_owned)),
-                config
-                    .allowed_deps()
-                    .map(|deps| deps.iter().cloned().collect::<BTreeSet<_>>()),
-            );
+        Some(GovernedZoneScope::Packages) => {
+            if let Some(config) = &parsed_guardrail.packages {
+                return (
+                    config
+                        .profile_name
+                        .clone()
+                        .or_else(|| config.type_name.clone()),
+                    config.allowed_deps.clone(),
+                );
+            }
         }
+        None => {}
     }
 
     (parsed_guardrail.root_profile_name.clone(), None)
+}
+
+enum GovernedZoneScope<'a> {
+    App(&'a str),
+    Packages,
+}
+
+fn governed_zone_scope(rel_dir: &str) -> Option<GovernedZoneScope<'_>> {
+    let segments = rel_dir
+        .split('/')
+        .filter(|segment| !segment.is_empty())
+        .collect::<Vec<_>>();
+    if segments.len() < 2 {
+        return None;
+    }
+
+    let mut app_names = Vec::new();
+    let mut package_hits = 0usize;
+    for window in segments.windows(2) {
+        match window {
+            ["apps", app_name] => app_names.push(*app_name),
+            ["packages", _] => package_hits += 1,
+            _ => {}
+        }
+    }
+
+    match (app_names.len(), package_hits) {
+        (1, 0) => Some(GovernedZoneScope::App(app_names[0])),
+        (0, 1) => Some(GovernedZoneScope::Packages),
+        _ => None,
+    }
 }
 
 pub(super) fn collect_dependency_facts(
@@ -181,7 +215,7 @@ pub(super) fn collect_dependency_facts(
                 continue;
             }
         };
-        if let Err(parse_error) = validate_dependency_manifest_shape(&parsed) {
+        if let Err(parse_error) = validate_top_level_dependency_manifest_shape(&parsed) {
             input_failures.push(InputFailureFacts {
                 rel_path: member.cargo_rel_path.clone(),
                 message: format!(
@@ -193,6 +227,7 @@ pub(super) fn collect_dependency_facts(
 
         let mut unique_direct_dependency_names = BTreeSet::new();
         let mut saw_error = collect_top_level_dependency_entries(
+            tree,
             member,
             &parsed,
             &workspaces_by_root,
@@ -200,13 +235,25 @@ pub(super) fn collect_dependency_facts(
             &mut entries,
             &mut unique_direct_dependency_names,
         );
-        saw_error |= collect_target_direct_dependency_names(
-            member,
-            &parsed,
-            &workspaces_by_root,
-            input_failures,
-            &mut unique_direct_dependency_names,
-        );
+        if let Err(parse_error) = validate_target_dependency_manifest_shape(&parsed) {
+            input_failures.push(InputFailureFacts {
+                rel_path: member.cargo_rel_path.clone(),
+                message: format!(
+                    "Failed to parse Cargo.toml for dependency policy check: {parse_error}"
+                ),
+            });
+            saw_error = true;
+        } else {
+            saw_error |= collect_target_dependency_entries(
+                tree,
+                member,
+                &parsed,
+                &workspaces_by_root,
+                input_failures,
+                &mut entries,
+                &mut unique_direct_dependency_names,
+            );
+        }
         if !saw_error {
             direct_dependency_caps.push(DirectDependencyCapFacts {
                 crate_name: member.crate_name.clone(),
@@ -219,7 +266,23 @@ pub(super) fn collect_dependency_facts(
     (entries, direct_dependency_caps)
 }
 
+fn is_nested_beneath_workspace_root(root_rel_dir: &str, workspaces: &[WorkspaceFacts]) -> bool {
+    workspaces.iter().any(|workspace| {
+        let workspace_root = workspace.root_rel_dir.as_str();
+        workspace_root != root_rel_dir && path_is_under(root_rel_dir, workspace_root)
+    })
+}
+
+fn path_is_under(rel_path: &str, parent_rel: &str) -> bool {
+    parent_rel.is_empty()
+        || rel_path == parent_rel
+        || rel_path
+            .strip_prefix(parent_rel)
+            .is_some_and(|rest| rest.starts_with('/'))
+}
+
 fn collect_top_level_dependency_entries(
+    tree: &ProjectTree,
     member: &MemberFacts,
     parsed: &toml::Value,
     workspaces_by_root: &BTreeMap<String, &WorkspaceFacts>,
@@ -240,13 +303,14 @@ fn collect_top_level_dependency_entries(
             continue;
         };
         for (alias, value) in table {
-            match external_dep_name(member, alias, value, workspaces_by_root) {
+            match external_dep_name(tree, member, alias, value, workspaces_by_root) {
                 Ok(Some(dep_package_name)) => {
                     let _ = direct_dependency_names.insert(dep_package_name.clone());
                     entries.push(DependencyEntryFacts {
                         crate_name: member.crate_name.clone(),
                         cargo_rel_path: member.cargo_rel_path.clone(),
                         section_kind,
+                        table_label: format!("[{section_key}]"),
                         allowlisted: member
                             .allowed_deps
                             .as_ref()
@@ -269,29 +333,44 @@ fn collect_top_level_dependency_entries(
     saw_error
 }
 
-fn collect_target_direct_dependency_names(
+fn collect_target_dependency_entries(
+    tree: &ProjectTree,
     member: &MemberFacts,
     parsed: &toml::Value,
     workspaces_by_root: &BTreeMap<String, &WorkspaceFacts>,
     input_failures: &mut Vec<InputFailureFacts>,
+    entries: &mut Vec<DependencyEntryFacts>,
     names: &mut BTreeSet<String>,
 ) -> bool {
     let mut saw_error = false;
 
     if let Some(targets) = parsed.get("target").and_then(toml::Value::as_table) {
-        for target_table in targets.values().filter_map(toml::Value::as_table) {
-            for section_key in ["dependencies", "build-dependencies", "dev-dependencies"] {
+        for (target_key, target_value) in targets {
+            let Some(target_table) = target_value.as_table() else {
+                continue;
+            };
+            for (section_key, section_kind) in [
+                ("dependencies", DependencySectionKind::Dependencies),
+                (
+                    "build-dependencies",
+                    DependencySectionKind::BuildDependencies,
+                ),
+                ("dev-dependencies", DependencySectionKind::DevDependencies),
+            ] {
                 let Some(table) = target_table
                     .get(section_key)
                     .and_then(toml::Value::as_table)
                 else {
                     continue;
                 };
-                saw_error |= collect_external_dependency_names_from_table(
+                saw_error |= collect_dependency_entries_from_table(
+                    tree,
                     member,
                     table,
                     workspaces_by_root,
                     input_failures,
+                    Some((section_kind, format!("[target.'{target_key}'.{section_key}]"))),
+                    entries,
                     names,
                 );
             }
@@ -301,18 +380,35 @@ fn collect_target_direct_dependency_names(
     saw_error
 }
 
-fn collect_external_dependency_names_from_table(
+fn collect_dependency_entries_from_table(
+    tree: &ProjectTree,
     member: &MemberFacts,
     table: &toml::map::Map<String, toml::Value>,
     workspaces_by_root: &BTreeMap<String, &WorkspaceFacts>,
     input_failures: &mut Vec<InputFailureFacts>,
+    section_details: Option<(DependencySectionKind, String)>,
+    entries: &mut Vec<DependencyEntryFacts>,
     names: &mut BTreeSet<String>,
 ) -> bool {
     let mut saw_error = false;
     for (alias, value) in table {
-        match external_dep_name(member, alias, value, workspaces_by_root) {
+        match external_dep_name(tree, member, alias, value, workspaces_by_root) {
             Ok(Some(dep_package_name)) => {
-                let _ = names.insert(dep_package_name);
+                let _ = names.insert(dep_package_name.clone());
+                if let Some((section_kind, table_label)) = &section_details {
+                    entries.push(DependencyEntryFacts {
+                        crate_name: member.crate_name.clone(),
+                        cargo_rel_path: member.cargo_rel_path.clone(),
+                        section_kind: *section_kind,
+                        table_label: table_label.clone(),
+                        allowlisted: member
+                            .allowed_deps
+                            .as_ref()
+                            .is_some_and(|allowed| allowed.contains(&dep_package_name)),
+                        allowlist_present: member.allowed_deps.is_some(),
+                        dep_package_name,
+                    });
+                }
             }
             Ok(None) => {}
             Err(message) => {
@@ -328,6 +424,7 @@ fn collect_external_dependency_names_from_table(
 }
 
 fn external_dep_name(
+    tree: &ProjectTree,
     member: &MemberFacts,
     alias: &str,
     value: &toml::Value,
@@ -375,9 +472,15 @@ fn external_dep_name(
             .and_then(|table| table.get("path"))
             .and_then(toml::Value::as_str)
         {
-            if is_workspace_package_path(&workspace.root_rel_dir, dep_path, workspace) {
-                return Ok(None);
-            }
+            return resolve_path_dependency_identity(
+                tree,
+                alias,
+                &member.cargo_rel_path,
+                &workspace.root_rel_dir,
+                dep_path,
+                Some(workspace),
+                workspace_package,
+            );
         }
         return Ok(Some(workspace_package));
     }
@@ -388,23 +491,67 @@ fn external_dep_name(
     {
         if let Some(workspace_root) = &member.workspace_root_rel_dir {
             if let Some(workspace) = workspaces_by_root.get(workspace_root) {
-                if is_workspace_package_path(&member.rel_dir, dep_path, workspace) {
-                    return Ok(None);
-                }
+                return resolve_path_dependency_identity(
+                    tree,
+                    alias,
+                    &member.cargo_rel_path,
+                    &member.rel_dir,
+                    dep_path,
+                    Some(workspace),
+                    package_name,
+                );
             }
         }
+        return resolve_path_dependency_identity(
+            tree,
+            alias,
+            &member.cargo_rel_path,
+            &member.rel_dir,
+            dep_path,
+            None,
+            package_name,
+        );
     }
 
     Ok(Some(package_name))
 }
 
-fn is_workspace_package_path(
+fn resolve_path_dependency_identity(
+    tree: &ProjectTree,
+    alias: &str,
+    member_cargo_rel_path: &str,
     base_rel_dir: &str,
     dep_path: &str,
-    workspace: &WorkspaceFacts,
-) -> bool {
+    workspace: Option<&WorkspaceFacts>,
+    fallback_package_name: String,
+) -> Result<Option<String>, String> {
     let resolved = normalize_rel_path(base_rel_dir, dep_path);
-    workspace.workspace_package_dirs.contains(&resolved)
+
+    if workspace.is_some_and(|workspace| workspace.workspace_package_dirs.contains(&resolved)) {
+        return Ok(None);
+    }
+
+    let target_cargo_rel_path = if resolved.is_empty() {
+        "Cargo.toml".to_owned()
+    } else {
+        format!("{resolved}/Cargo.toml")
+    };
+    let target_is_local_cargo_package = tree.file_exists(&target_cargo_rel_path);
+
+    if let Some(workspace) = workspace {
+        if target_is_local_cargo_package && path_is_under(&resolved, &workspace.root_rel_dir) {
+            return Err(format!(
+                "`{alias}` in `{member_cargo_rel_path}` points to local Cargo package `{resolved}` under workspace root `{}` but that package is not declared in `[workspace].members`.",
+                workspace.root_rel_dir
+            ));
+        }
+    }
+
+    if target_is_local_cargo_package {
+        return read_local_package_name(tree, &target_cargo_rel_path).map(Some);
+    }
+
+    Ok(Some(fallback_package_name))
 }
 
 fn normalize_rel_path(base_rel_dir: &str, dep_path: &str) -> String {
@@ -431,4 +578,28 @@ fn normalize_rel_path(base_rel_dir: &str, dep_path: &str) -> String {
     }
 
     parts.join("/")
+}
+
+fn read_local_package_name(tree: &ProjectTree, cargo_rel_path: &str) -> Result<String, String> {
+    let Some(content) = tree.file_content(cargo_rel_path) else {
+        return Err(format!(
+            "Failed to read local path dependency manifest `{cargo_rel_path}` for dependency policy resolution."
+        ));
+    };
+    let parsed = toml::from_str::<toml::Value>(content).map_err(|parse_error| {
+        format!(
+            "Failed to parse local path dependency manifest `{cargo_rel_path}` for dependency policy resolution: {parse_error}"
+        )
+    })?;
+    parsed
+        .get("package")
+        .and_then(|package| package.get("name"))
+        .and_then(toml::Value::as_str)
+        .filter(|name| !name.is_empty())
+        .map(str::to_owned)
+        .ok_or_else(|| {
+            format!(
+                "Local path dependency manifest `{cargo_rel_path}` is missing `package.name` for dependency policy resolution."
+            )
+        })
 }

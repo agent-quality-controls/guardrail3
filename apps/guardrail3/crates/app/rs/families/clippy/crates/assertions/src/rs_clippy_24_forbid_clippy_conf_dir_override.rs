@@ -52,3 +52,24 @@ pub fn assert_parse_error(results: &[CheckResult], rel_path: &str) {
     );
     assert!(!result.inventory());
 }
+
+pub fn assert_invalid_env_shape(results: &[CheckResult], rel_path: &str) {
+    assert_eq!(results.len(), 1);
+    let result = &results[0];
+    assert_eq!(result.id(), ID);
+    assert_eq!(result.severity(), Severity::Error);
+    assert_eq!(
+        result.title(),
+        "cargo config override surface is not parseable"
+    );
+    assert_eq!(result.file(), Some(rel_path));
+    assert!(
+        result.message().contains("invalid cargo config shape"),
+        "expected invalid-shape message: {result:#?}"
+    );
+    assert!(
+        result.message().contains("`env` must be a table"),
+        "expected env-table guidance: {result:#?}"
+    );
+    assert!(!result.inventory());
+}

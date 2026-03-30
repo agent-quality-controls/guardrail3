@@ -77,15 +77,19 @@ pub fn check(tree: &ProjectTree, route: &RsTestRoute, tc: &dyn ToolChecker) -> V
     }
 
     for root in &facts.roots {
+        if !root_is_active_in_scope(root, &facts, route.scoped_files()) {
+            continue;
+        }
         let analysis = analysis::analyze_root(tree, root, &facts, route.scoped_files());
         let mutation_active =
-            root.mutants_exists || root.has_mutants_profile || !root.mutation_hook_files.is_empty();
+            root.mutants_exists || root.has_mutants_profile || root.mutation_hook_active;
         let mut had_root_input_failures = false;
         let root_input = inputs::RootTestInput::new(
             root,
             analysis.has_tests,
             analysis.has_tokio_tests,
             facts.cargo_mutants_installed,
+            root.mutation_hook_active,
             &root.mutation_hook_files,
         );
 
@@ -108,6 +112,7 @@ pub fn check(tree: &ProjectTree, route: &RsTestRoute, tc: &dyn ToolChecker) -> V
             );
 
             rs_test_03_runtime_assertions_split::collect(
+                tree,
                 root,
                 &analysis.files,
                 route.scoped_files(),
@@ -205,6 +210,29 @@ pub fn check(tree: &ProjectTree, route: &RsTestRoute, tc: &dyn ToolChecker) -> V
     }
 
     results
+}
+
+fn root_is_active_in_scope(
+    root: &facts::TestRootFacts,
+    facts: &facts::TestFacts,
+    scoped_files: Option<&BTreeSet<String>>,
+) -> bool {
+    let Some(scoped_files) = scoped_files else {
+        return true;
+    };
+
+    scoped_files.contains(&root.cargo_rel_path)
+        || scoped_files.contains(&root.mutants_rel_path)
+        || scoped_files.contains(&root.nextest_rel_path)
+        || root
+            .mutation_hook_files
+            .iter()
+            .any(|hook_rel_path| scoped_files.contains(hook_rel_path))
+        || facts
+            .files
+            .iter()
+            .filter(|file| file.root_rel_dir == root.rel_dir)
+            .any(|file| scoped_files.contains(&file.rel_path))
 }
 
 #[cfg(test)]

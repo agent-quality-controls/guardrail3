@@ -29,7 +29,7 @@ pub fn check(input: &TestFunctionInput<'_>, results: &mut Vec<CheckResult>) {
 
     results.push(CheckResult::from_parts(
         ID.to_owned(),
-        Severity::Warn,
+        Severity::Error,
         "should_panic missing expected string".to_owned(),
         format!(
             "Test `{}` uses `#[should_panic]` without `expected = \"...\"`.",

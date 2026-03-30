@@ -222,3 +222,60 @@ fn local_library_profile_requires_unreachable_pub() {
         }],
     );
 }
+
+#[test]
+fn malformed_root_local_guardrail_suppresses_clean_inventory() {
+    let standalone_manifest = format!(
+        r#"
+            [package]
+            name = "helper"
+            edition = "2024"
+
+            {STANDALONE_RUST_LINTS}
+            {STANDALONE_CLIPPY_LINTS}
+        "#
+    );
+
+    let results = check_results(&tree(
+        &[("pkg", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
+        &[
+            ("pkg/Cargo.toml", &standalone_manifest),
+            ("pkg/guardrail3.toml", "[profile"),
+        ],
+    ));
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_01_workspace_lints::assert_rule_results(
+        &results,
+        &[],
+    );
+}
+
+#[test]
+fn invalid_clippy_table_shape_is_explicit_error() {
+    let manifest = format!(
+        r#"
+            [package]
+            name = "helper"
+            edition = "2024"
+
+            {STANDALONE_RUST_LINTS}
+
+            [lints]
+            clippy = "deny"
+        "#
+    );
+
+    let results = check_results(&tree(
+        &[("pkg", entry(&[], &["Cargo.toml"]))],
+        &[("pkg/Cargo.toml", &manifest)],
+    ));
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_01_workspace_lints::assert_rule_results(
+        &results,
+        &[ExpectedRuleResult {
+            file: Some("pkg/Cargo.toml"),
+            title: Some("clippy lint table has invalid shape"),
+            inventory: Some(false),
+        }],
+    );
+}

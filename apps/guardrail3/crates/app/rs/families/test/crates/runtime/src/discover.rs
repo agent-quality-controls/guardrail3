@@ -7,7 +7,7 @@ use guardrail3_outbound_traits::ToolChecker;
 mod components;
 mod mutation;
 
-use self::mutation::collect_mutation_hook_files;
+use self::mutation::collect_mutation_hook_state;
 use super::facts::{InputFailureFacts, TestFacts, TestRootFacts};
 
 #[derive(Debug, Clone)]
@@ -80,7 +80,11 @@ pub fn rust_file_rels(tree: &ProjectTree) -> Vec<String> {
 }
 
 pub fn is_fixture_path(rel_path: &str) -> bool {
-    rel_path.contains("/tests/fixtures/") || rel_path.starts_with("tests/fixtures/")
+    rel_path.contains("/tests/fixtures/")
+        || rel_path.starts_with("tests/fixtures/")
+        || rel_path.contains("_tests/fixtures/")
+        || rel_path.contains("assertions/src/fixtures/")
+        || rel_path.contains("test_support/src/fixtures/")
 }
 
 fn is_generated_path(rel_path: &str) -> bool {
@@ -178,14 +182,18 @@ fn collect_cargo_roots(
 fn collect_test_root_dirs(cargo_roots: &BTreeMap<String, CargoRootFacts>) -> Vec<String> {
     let mut root_dirs = BTreeSet::new();
     for rel_dir in cargo_roots.keys() {
-        let _ =
-            root_dirs.insert(component_container_root(rel_dir).unwrap_or_else(|| rel_dir.clone()));
+        let _ = root_dirs.insert(
+            component_container_root(rel_dir, cargo_roots).unwrap_or_else(|| rel_dir.clone()),
+        );
     }
     root_dirs.into_iter().collect()
 }
 
-fn component_container_root(rel_dir: &str) -> Option<String> {
-    if matches!(
+fn component_container_root(
+    rel_dir: &str,
+    cargo_roots: &BTreeMap<String, CargoRootFacts>,
+) -> Option<String> {
+    let candidate = if matches!(
         rel_dir,
         "crates/runtime"
             | "crates/assertions"
@@ -194,16 +202,25 @@ fn component_container_root(rel_dir: &str) -> Option<String> {
             | "crates/test_support"
             | "test_support"
     ) {
-        return Some(String::new());
-    }
-    rel_dir
-        .strip_suffix("/crates/runtime")
-        .or_else(|| rel_dir.strip_suffix("/crates/assertions"))
-        .or_else(|| rel_dir.strip_suffix("/crates/assertions_common"))
-        .or_else(|| rel_dir.strip_suffix("/assertions"))
-        .or_else(|| rel_dir.strip_suffix("/crates/test_support"))
-        .or_else(|| rel_dir.strip_suffix("/test_support"))
-        .map(ToOwned::to_owned)
+        Some(String::new())
+    } else {
+        rel_dir
+            .strip_suffix("/crates/runtime")
+            .or_else(|| rel_dir.strip_suffix("/crates/assertions"))
+            .or_else(|| rel_dir.strip_suffix("/crates/assertions_common"))
+            .or_else(|| rel_dir.strip_suffix("/assertions"))
+            .or_else(|| rel_dir.strip_suffix("/crates/test_support"))
+            .or_else(|| rel_dir.strip_suffix("/test_support"))
+            .map(ToOwned::to_owned)
+    };
+
+    let candidate = candidate?;
+    let candidate_has_package = cargo_roots
+        .get(&candidate)
+        .is_some_and(|root| root.has_package);
+    let candidate_has_runtime =
+        cargo_roots.contains_key(&join_under_root(&candidate, "crates/runtime"));
+    (candidate_has_package || candidate_has_runtime).then_some(candidate)
 }
 
 fn parse_workspace_members(
@@ -262,6 +279,8 @@ fn build_root_facts(
         "nextest config",
         input_failures,
     );
+    let hook_state =
+        collect_mutation_hook_state(tree, rel_dir, &active_hook_root_dirs(rel_dir, cargo_roots), input_failures);
 
     TestRootFacts {
         rel_dir: rel_dir.to_owned(),
@@ -281,7 +300,8 @@ fn build_root_facts(
             .and_then(|parsed| parsed.get("profile"))
             .and_then(|profile| profile.get("mutants"))
             .is_some(),
-        mutation_hook_files: collect_mutation_hook_files(tree, rel_dir),
+        mutation_hook_active: hook_state.active,
+        mutation_hook_files: hook_state.files,
         components: components::collect_components(
             tree,
             rel_dir,
@@ -299,6 +319,25 @@ fn root_cargo_facts<'a>(
         let runtime_rel_dir = join_under_root(rel_dir, "crates/runtime");
         cargo_roots.get(&runtime_rel_dir)
     })
+}
+
+fn active_hook_root_dirs(
+    rel_dir: &str,
+    cargo_roots: &BTreeMap<String, CargoRootFacts>,
+) -> Vec<String> {
+    let mut roots = BTreeSet::new();
+    if rel_dir.is_empty() {
+        let _ = roots.insert(String::new());
+    }
+    for (workspace_rel, facts) in cargo_roots {
+        if !facts.has_workspace {
+            continue;
+        }
+        if workspace_rel == rel_dir || facts.workspace_members.iter().any(|member| member == rel_dir) {
+            let _ = roots.insert(workspace_rel.clone());
+        }
+    }
+    roots.into_iter().collect()
 }
 
 fn parse_optional_toml(

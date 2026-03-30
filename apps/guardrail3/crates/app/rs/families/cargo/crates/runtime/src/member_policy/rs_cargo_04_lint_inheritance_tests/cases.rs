@@ -156,3 +156,129 @@ fn member_missing_workspace_true_is_error() {
         }],
     );
 }
+
+#[test]
+fn standalone_package_root_emits_no_member_results() {
+    let manifest = r#"
+        [package]
+        name = "helper"
+        edition = "2024"
+    "#;
+
+    let results = check_results(&tree(
+        &[("pkg", entry(&[], &["Cargo.toml"]))],
+        &[("pkg/Cargo.toml", manifest)],
+    ));
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_04_lint_inheritance::assert_rule_results(
+        &results,
+        &[],
+    );
+}
+
+#[test]
+fn malformed_workspace_member_manifest_is_owned_by_input_failures_rule() {
+    let workspace_manifest = format!(
+        r#"
+            [workspace]
+            members = ["crates/api"]
+            resolver = "2"
+
+            [workspace.package]
+            edition = "2024"
+            rust-version = "1.85"
+
+            {WORKSPACE_RUST_LINTS}
+            {WORKSPACE_CLIPPY_LINTS}
+        "#
+    );
+
+    let results = check_results(&tree(
+        &[
+            ("", entry(&["crates"], &["Cargo.toml"])),
+            ("crates", entry(&["api"], &[])),
+            ("crates/api", entry(&[], &["Cargo.toml"])),
+        ],
+        &[
+            ("Cargo.toml", &workspace_manifest),
+            ("crates/api/Cargo.toml", "[package"),
+        ],
+    ));
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_04_lint_inheritance::assert_rule_results(
+        &results,
+        &[],
+    );
+}
+
+#[test]
+fn scoped_workspace_run_still_checks_all_members_of_the_routed_workspace() {
+    let workspace_manifest = format!(
+        r#"
+            [workspace]
+            members = ["crates/api", "crates/other"]
+            resolver = "2"
+
+            [workspace.package]
+            edition = "2024"
+            rust-version = "1.85"
+
+            {WORKSPACE_RUST_LINTS}
+            {WORKSPACE_CLIPPY_LINTS}
+        "#
+    );
+
+    let results = crate::check_test_tree_with_validation_scope(
+        &tree(
+            &[
+                ("", entry(&["crates"], &["Cargo.toml"])),
+                ("crates", entry(&["api", "other"], &[])),
+                ("crates/api", entry(&["src"], &["Cargo.toml"])),
+                ("crates/api/src", entry(&[], &["lib.rs"])),
+                ("crates/other", entry(&[], &["Cargo.toml"])),
+            ],
+            &[
+                ("Cargo.toml", &workspace_manifest),
+                (
+                    "crates/api/Cargo.toml",
+                    r#"
+                        [package]
+                        name = "api"
+                        edition = "2024"
+
+                        [lints]
+                        workspace = true
+                    "#,
+                ),
+                (
+                    "crates/other/Cargo.toml",
+                    r#"
+                        [package]
+                        name = "other"
+                        edition = "2024"
+
+                        [lints]
+                        workspace = true
+                    "#,
+                ),
+            ],
+        ),
+        "crates/api/src",
+    );
+
+    guardrail3_app_rs_family_cargo_assertions::rs_cargo_04_lint_inheritance::assert_rule_results(
+        &results,
+        &[
+            ExpectedRuleResult {
+                file: Some("crates/api/Cargo.toml"),
+                title: Some("workspace lints inherited"),
+                inventory: Some(true),
+            },
+            ExpectedRuleResult {
+                file: Some("crates/other/Cargo.toml"),
+                title: Some("workspace lints inherited"),
+                inventory: Some(true),
+            },
+        ],
+    );
+}

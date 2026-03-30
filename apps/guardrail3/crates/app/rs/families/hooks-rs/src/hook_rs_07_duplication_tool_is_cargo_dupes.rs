@@ -16,8 +16,7 @@ pub fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<CheckResult>) {
             ID.to_owned(),
             Severity::Warn,
             "wrong Rust duplication tool".to_owned(),
-            "Hook uses jscpd for Rust duplication checks instead of cargo-dupes."
-                .to_owned(),
+            "Hook uses jscpd for Rust duplication checks instead of cargo-dupes.".to_owned(),
             Some(input.rel_path.to_owned()),
             None,
             false,
@@ -50,7 +49,10 @@ pub fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<CheckResult>) {
 
 fn is_cargo_dupes_command(command: &ResolvedCommand) -> bool {
     match command.command_name() {
-        "cargo-dupes" => !command.args().iter().any(|arg| is_help_or_version_flag(arg)),
+        "cargo-dupes" => !command
+            .args()
+            .iter()
+            .any(|arg| is_help_or_version_flag(arg)),
         "cargo" => cargo_dupes_subcommand_invocation(command.args()),
         _ => false,
     }
@@ -99,7 +101,10 @@ fn cargo_dupes_subcommand_invocation(args: &[String]) -> bool {
 
 fn is_jscpd_command(command: &ResolvedCommand) -> bool {
     command.command_name() == "jscpd"
-        && !command.args().iter().any(|arg| is_help_or_version_flag(arg))
+        && !command
+            .args()
+            .iter()
+            .any(|arg| is_help_or_version_flag(arg))
 }
 
 fn cargo_global_flag_takes_value(flag: &str) -> bool {

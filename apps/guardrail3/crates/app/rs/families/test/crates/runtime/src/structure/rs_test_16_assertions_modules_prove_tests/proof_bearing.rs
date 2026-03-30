@@ -1,5 +1,6 @@
 use guardrail3_app_rs_family_test_assertions::rs_test_16_assertions_modules_prove::{
-    Severity, assert_error_results_are_error, assert_inventory, assert_reported, assert_rule_files,
+    Severity, assert_error_results_are_error, assert_has_finding, assert_inventory,
+    assert_reported, assert_rule_files,
 };
 
 use super::{run_family, tempdir, write_file};
@@ -216,4 +217,134 @@ fn sidecar_indexed_result_id_assertion_is_reported() {
 
     let results = run_family(root);
     assert_error_results_are_error(&results, "RS-DEMO-01");
+}
+
+#[test]
+fn sidecar_result_shape_helper_is_reported() {
+    let fixture = tempdir();
+    let root = fixture.path();
+
+    write_file(
+        root,
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"crates/runtime\", \"crates/assertions\"]\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/Cargo.toml",
+        "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = {path = \"../assertions\"}\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/src/lib.rs",
+        "#[cfg(test)]\n#[path = \"lib_tests/mod.rs\"]\nmod tests;\npub fn value() -> u8 {1}\n",
+    );
+    write_file(root, "crates/runtime/src/lib_tests/mod.rs", "mod cases;\n");
+    write_file(
+        root,
+        "crates/runtime/src/lib_tests/cases.rs",
+        "use demo_assertions::error_results;\nfn assert_result_shape(errors: &[guardrail3_domain_report::CheckResult]) { assert_eq!(errors[0].id(), \"RS-DEMO-01\"); }\n#[test]\nfn semantic_sidecar() { let results = vec![]; let errors = error_results(&results, \"RS-DEMO-01\"); assert_result_shape(&errors); }\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/Cargo.toml",
+        "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = {path = \"../runtime\"}\nguardrail3_domain_report = {path = \"../../../../domain/report\"}\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/src/lib.rs",
+        "pub fn error_results<'a>(_results: &'a [guardrail3_domain_report::CheckResult], _rule_id: &str) -> Vec<guardrail3_domain_report::CheckResult> {Vec::new()}\npub fn prove_runtime() {assert_eq!(demo_runtime::value(), 1);}\n",
+    );
+
+    let results = run_family(root);
+    assert_error_results_are_error(&results, "RS-DEMO-01");
+}
+
+#[test]
+fn sidecar_transitive_result_shape_helper_is_reported() {
+    let fixture = tempdir();
+    let root = fixture.path();
+
+    write_file(
+        root,
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"crates/runtime\", \"crates/assertions\"]\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/Cargo.toml",
+        "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = {path = \"../assertions\"}\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/src/lib.rs",
+        "#[cfg(test)]\n#[path = \"lib_tests/mod.rs\"]\nmod tests;\npub fn value() -> u8 {1}\n",
+    );
+    write_file(root, "crates/runtime/src/lib_tests/mod.rs", "mod cases;\n");
+    write_file(
+        root,
+        "crates/runtime/src/lib_tests/cases.rs",
+        "use demo_assertions::error_results;\nfn assert_result_shape(errors: &[guardrail3_domain_report::CheckResult]) { assert_eq!(errors[0].severity(), guardrail3_app_rs_family_test::Severity::Error); }\nfn assert_expected(errors: &[guardrail3_domain_report::CheckResult]) { assert_result_shape(errors); }\n#[test]\nfn semantic_sidecar() { let results = vec![]; let errors = error_results(&results, \"RS-DEMO-01\"); assert_expected(&errors); }\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/Cargo.toml",
+        "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = {path = \"../runtime\"}\nguardrail3_domain_report = {path = \"../../../../domain/report\"}\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/src/lib.rs",
+        "pub fn error_results<'a>(_results: &'a [guardrail3_domain_report::CheckResult], _rule_id: &str) -> Vec<guardrail3_domain_report::CheckResult> {Vec::new()}\npub fn prove_runtime() {assert_eq!(demo_runtime::value(), 1);}\n",
+    );
+
+    let results = run_family(root);
+    assert_error_results_are_error(&results, "RS-DEMO-01");
+}
+
+#[test]
+fn sidecar_owned_assertion_helper_with_rule_id_literal_is_allowed() {
+    let fixture = tempdir();
+    let root = fixture.path();
+
+    write_file(
+        root,
+        "Cargo.toml",
+        "[workspace]\nmembers = [\"crates/runtime\", \"crates/assertions\"]\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/Cargo.toml",
+        "[package]\nname = \"demo_runtime\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dev-dependencies]\ndemo_assertions = {path = \"../assertions\"}\n",
+    );
+    write_file(
+        root,
+        "crates/runtime/src/lib.rs",
+        "#[cfg(test)]\n#[path = \"lib_tests/mod.rs\"]\nmod tests;\npub fn value() -> u8 {1}\n",
+    );
+    write_file(root, "crates/runtime/src/lib_tests/mod.rs", "mod cases;\n");
+    write_file(
+        root,
+        "crates/runtime/src/lib_tests/cases.rs",
+        "use demo_assertions::assert_rule_quiet;\n#[test]\nfn semantic_sidecar() { let results = vec![]; assert_rule_quiet(&results, \"RS-DEMO-01\"); }\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/Cargo.toml",
+        "[package]\nname = \"demo_assertions\"\nversion = \"0.1.0\"\nedition = \"2024\"\n[dependencies]\ndemo_runtime = {path = \"../runtime\"}\nguardrail3_domain_report = {path = \"../../../../domain/report\"}\n",
+    );
+    write_file(
+        root,
+        "crates/assertions/src/lib.rs",
+        "pub fn assert_rule_quiet(_results: &[guardrail3_domain_report::CheckResult], _rule_id: &str) { assert_eq!(demo_runtime::value(), 1); }\n",
+    );
+
+    let results = run_family(root);
+
+    assert_has_finding(
+        &results,
+        "crates/assertions/src/lib.rs",
+        Severity::Info,
+        true,
+    );
+    assert_rule_files(&results, vec!["crates/assertions/src/lib.rs".to_owned()]);
 }

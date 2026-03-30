@@ -6,7 +6,6 @@ mod workspaces;
 use std::collections::{BTreeMap, BTreeSet};
 
 use guardrail3_app_rs_family_mapper::RsDepsRoute;
-use guardrail3_domain_config::types::CrateConfig;
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_outbound_traits::ToolChecker;
 
@@ -43,6 +42,7 @@ pub struct DependencyEntryFacts {
     pub(crate) crate_name: String,
     pub(crate) cargo_rel_path: String,
     pub(crate) section_kind: DependencySectionKind,
+    pub(crate) table_label: String,
     pub(crate) dep_package_name: String,
     pub(crate) allowlist_present: bool,
     pub(crate) allowlisted: bool,
@@ -77,6 +77,13 @@ pub struct DepsFacts {
     pub(crate) allowlist_coverage: Vec<AllowlistCoverageFacts>,
     pub(crate) direct_dependency_caps: Vec<DirectDependencyCapFacts>,
     pub(crate) input_failures: Vec<InputFailureFacts>,
+}
+
+#[derive(Debug, Clone)]
+struct DepsCratePolicy {
+    profile_name: Option<String>,
+    type_name: Option<String>,
+    allowed_deps: Option<BTreeSet<String>>,
 }
 
 pub fn collect(tree: &ProjectTree, route: &RsDepsRoute, tc: &dyn ToolChecker) -> DepsFacts {
@@ -160,8 +167,8 @@ pub fn collect(tree: &ProjectTree, route: &RsDepsRoute, tc: &dyn ToolChecker) ->
 #[derive(Debug, Clone)]
 struct ParsedGuardrail {
     root_profile_name: Option<String>,
-    apps: BTreeMap<String, CrateConfig>,
-    packages: Option<CrateConfig>,
+    apps: BTreeMap<String, DepsCratePolicy>,
+    packages: Option<DepsCratePolicy>,
     parse_error: Option<String>,
 }
 

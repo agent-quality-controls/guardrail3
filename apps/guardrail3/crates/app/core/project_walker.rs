@@ -214,8 +214,10 @@ pub fn walk_project(fs: &dyn FileSystem, root: &Path) -> ProjectTree {
         }
     }
 
-    // Phase 2: Add back tracked-but-gitignored files
-    if root.join(".git").is_dir() {
+    // Phase 2: Add back tracked-but-gitignored files.
+    // A git worktree uses a `.git` file instead of a `.git/` directory, but
+    // `git ls-files` still works and should still restore tracked ignored files.
+    if root.join(".git").exists() {
         patch_tracked_files(fs, root, &mut dir_children, &mut content);
     }
 

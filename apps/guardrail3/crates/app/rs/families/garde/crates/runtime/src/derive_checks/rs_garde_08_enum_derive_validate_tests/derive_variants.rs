@@ -149,3 +149,30 @@ enum Input {
         }],
     );
 }
+
+#[test]
+fn errors_when_module_aliased_deserialize_enum_lacks_validate() {
+    let results = run_enum_boundary(
+        r#"
+use serde as serde1;
+
+#[derive(serde1::Deserialize)]
+enum Input {
+    Variant(String),
+}
+"#,
+    );
+
+    let findings = assertions::findings(&results);
+    assert_eq!(findings.len(), 1);
+    assertions::assert_rule_results(
+        &results,
+        &[assertions::ExpectedRuleResult {
+            severity: Some(assertions::Severity::Error),
+            message: Some(
+                "Enum `Input` derives serde1::Deserialize and has non-primitive payload fields, but does not derive `Validate`.",
+            ),
+            ..Default::default()
+        }],
+    );
+}

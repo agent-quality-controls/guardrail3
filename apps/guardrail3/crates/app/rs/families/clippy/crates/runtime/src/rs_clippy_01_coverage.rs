@@ -94,5 +94,26 @@ pub(crate) fn run_for_tests(root: &Path) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
+pub(crate) fn run_with_validation_scope_for_tests(
+    root: &Path,
+    validation_scope: &str,
+) -> Vec<CheckResult> {
+    let tree = guardrail3_app_core::project_walker::walk_project(
+        &guardrail3_adapters_outbound_fs::RealFileSystem,
+        root,
+    );
+    let scope = guardrail3_app_rs_placement::collect(&tree);
+    let selected =
+        guardrail3_validation_model::RustFamilySelection::new(std::collections::BTreeSet::from([
+            guardrail3_validation_model::RustValidateFamily::Clippy,
+        ]));
+    let route =
+        guardrail3_app_rs_family_mapper::FamilyMapper::new(&tree, &scope, None, &selected, None)
+            .with_validation_scope(Some(validation_scope))
+            .map_rs_clippy();
+    crate::check(&tree, &route)
+}
+
+#[cfg(test)]
 #[path = "rs_clippy_01_coverage_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_clippy_01_coverage_tests;

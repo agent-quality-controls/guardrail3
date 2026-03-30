@@ -23,7 +23,7 @@ fn integer_timeout_multiplier_below_one_is_reported() {
         &results,
         ".cargo/mutants.toml",
         None,
-        Severity::Warn,
+        Severity::Error,
         "mutants timeout multiplier too low",
     );
 }

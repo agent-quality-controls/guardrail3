@@ -4,10 +4,103 @@ use guardrail3_app_rs_family_toolchain_assertions::rs_toolchain_01_exists::{
     assert_rule_results,
 };
 
-use super::{
-    check, nested_workspace_root_tree, run_family_check, standalone_package_input, test_input,
-    test_tree,
-};
+use super::{check, nested_workspace_root_tree, run_family_check, test_input, test_tree};
+
+fn workspace_tree_with_nested_non_member_package() -> guardrail3_domain_project_tree::ProjectTree {
+    use std::collections::BTreeMap;
+    use std::path::PathBuf;
+
+    use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
+
+    let structure = BTreeMap::from([
+        (
+            String::new(),
+            DirEntry::new(
+                vec!["nested".to_owned()],
+                vec!["Cargo.toml".to_owned(), "rust-toolchain.toml".to_owned()],
+                Vec::new(),
+                Vec::new(),
+            ),
+        ),
+        (
+            "nested".to_owned(),
+            DirEntry::new(
+                Vec::new(),
+                vec!["Cargo.toml".to_owned()],
+                Vec::new(),
+                Vec::new(),
+            ),
+        ),
+    ]);
+    let content = BTreeMap::from([
+        (
+            "Cargo.toml".to_owned(),
+            "[workspace]\nmembers = []\n".to_owned(),
+        ),
+        (
+            "rust-toolchain.toml".to_owned(),
+            "[toolchain]\nchannel = \"stable\"\ncomponents = [\"clippy\", \"rustfmt\"]".to_owned(),
+        ),
+        (
+            "nested/Cargo.toml".to_owned(),
+            "[package]\nname = \"nested\"\nversion = \"0.1.0\"\nedition = \"2024\"\n".to_owned(),
+        ),
+    ]);
+
+    ProjectTree::new(
+        PathBuf::from("/tmp/toolchain-nested-non-member-package"),
+        structure,
+        content,
+    )
+}
+
+fn workspace_tree_with_non_package_descendant_toolchain() -> guardrail3_domain_project_tree::ProjectTree {
+    use std::collections::BTreeMap;
+    use std::path::PathBuf;
+
+    use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
+
+    let structure = BTreeMap::from([
+        (
+            String::new(),
+            DirEntry::new(
+                vec!["docs".to_owned()],
+                vec!["Cargo.toml".to_owned(), "rust-toolchain.toml".to_owned()],
+                Vec::new(),
+                Vec::new(),
+            ),
+        ),
+        (
+            "docs".to_owned(),
+            DirEntry::new(
+                Vec::new(),
+                vec!["rust-toolchain.toml".to_owned()],
+                Vec::new(),
+                Vec::new(),
+            ),
+        ),
+    ]);
+    let content = BTreeMap::from([
+        (
+            "Cargo.toml".to_owned(),
+            "[workspace]\nmembers = []\n".to_owned(),
+        ),
+        (
+            "rust-toolchain.toml".to_owned(),
+            "[toolchain]\nchannel = \"stable\"\ncomponents = [\"clippy\", \"rustfmt\"]".to_owned(),
+        ),
+        (
+            "docs/rust-toolchain.toml".to_owned(),
+            "[toolchain]\nchannel = \"beta\"\ncomponents = [\"clippy\", \"rustfmt\"]".to_owned(),
+        ),
+    ]);
+
+    ProjectTree::new(
+        PathBuf::from("/tmp/toolchain-non-package-descendant"),
+        structure,
+        content,
+    )
+}
 
 #[test]
 fn inventories_when_toolchain_toml_exists() {
@@ -92,7 +185,7 @@ fn family_propagates_invalid_root_cargo_rust_version_type() {
             ),
             (
                 "Cargo.toml",
-                "[package]\nname = \"pkg\"\nedition = \"2024\"\nrust-version = 185",
+                "[workspace]\n[workspace.package]\nrust-version = 185\n",
             ),
         ],
     );
@@ -120,11 +213,9 @@ fn family_targets_nested_workspace_root_instead_of_validation_root() {
 }
 
 #[test]
-fn standalone_package_root_uses_package_root_wording() {
-    let input = standalone_package_input(Some("packages/lib/rust-toolchain.toml"));
-    let mut results = Vec::new();
-
-    check(&input, &mut results);
+fn family_does_not_require_local_toolchain_for_non_member_package_inside_workspace_tree() {
+    let tree = workspace_tree_with_nested_non_member_package();
+    let results = run_family_check(&tree);
 
     assert_rule_results(
         &results,
@@ -132,8 +223,32 @@ fn standalone_package_root_uses_package_root_wording() {
             severity: Severity::Info,
             inventory: true,
             title: "rust-toolchain.toml exists",
-            message: "Found rust-toolchain.toml at standalone package root.",
-            file: Some("packages/lib/rust-toolchain.toml"),
+            message: "Found rust-toolchain.toml at workspace root.",
+            file: Some("rust-toolchain.toml"),
         }],
+    );
+    assert!(
+        !results
+            .iter()
+            .any(|result| result.file() == Some("nested/rust-toolchain.toml")),
+        "nested non-member package should inherit workspace toolchain: {results:#?}"
+    );
+}
+
+#[test]
+fn family_reports_descendant_toolchain_without_nested_cargo_root() {
+    let tree = workspace_tree_with_non_package_descendant_toolchain();
+    let results = run_family_check(&tree);
+
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "RS-TOOLCHAIN-06"
+                && result.severity() == Severity::Error
+                && !result.inventory()
+                && result.title() == "descendant toolchain shadows workspace policy"
+                && result.message() == "Descendant `rust-toolchain.toml` at `docs/rust-toolchain.toml` can override the workspace-root toolchain contract. Keep toolchain policy at the workspace root only."
+                && result.file() == Some("docs/rust-toolchain.toml")
+        }),
+        "non-package descendant toolchain should trigger RS-TOOLCHAIN-06: {results:#?}"
     );
 }

@@ -21,6 +21,36 @@ Current state:
   - `.plans/todo/checks/rs/clippy/FIXES.md`
 - by-file clippy config research is no longer primary authority
 
+Scope model:
+
+- workspace-local family
+- it should receive all legal workspaces plus all Clippy-relevant files rather
+  than only routed policy roots
+
+Agent handoff focus:
+
+- audit production path first:
+  - `apps/guardrail3/crates/app/rs/runtime/src/runners.rs`
+  - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/lib.rs`
+  - `apps/guardrail3/crates/app/rs/families/clippy/crates/runtime/src/facts.rs`
+  - `apps/guardrail3/crates/app/rs/family_mapper/src/rs.rs`
+- prove allowed and forbidden `clippy.toml` placement is computed from legal
+  workspaces plus all Clippy-relevant files after the whole-project walker
+  change
+- prove subtree runs do not report unrelated sibling policy roots
+
+Known current risk:
+
+- no confirmed production bug yet, but subtree coverage and shadowing behavior
+  is not strongly pinned by runtime tests
+
+Done means:
+
+- subtree tests prove workspace-local routing for coverage and allowed-placement
+  rules while keeping misplaced `clippy.toml` files visible
+- malformed routed `Cargo.toml` still fails closed
+- no repo-global fallback path survives in production code
+
 Historical/supplemental references:
 
 - `.plans/todo/checks/rs/clippy.md`

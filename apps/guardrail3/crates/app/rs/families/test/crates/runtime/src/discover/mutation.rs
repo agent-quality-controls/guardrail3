@@ -1,40 +1,82 @@
 use guardrail3_app_rs_family_hooks_shared::hook_shell::{ExecutableLine, parse_script};
 use guardrail3_domain_project_tree::ProjectTree;
 
-pub(super) fn collect_mutation_hook_files(tree: &ProjectTree, root_rel_dir: &str) -> Vec<String> {
+use crate::facts::InputFailureFacts;
+
+pub(super) struct MutationHookState {
+    pub(super) active: bool,
+    pub(super) files: Vec<String>,
+}
+
+pub(super) fn collect_mutation_hook_state(
+    tree: &ProjectTree,
+    root_rel_dir: &str,
+    hook_root_rels: &[String],
+    input_failures: &mut Vec<InputFailureFacts>,
+) -> MutationHookState {
     let mut files = Vec::new();
-    for rel_path in [
-        super::join_under_root(root_rel_dir, ".githooks/pre-commit"),
-        super::join_under_root(root_rel_dir, "hooks/pre-commit"),
-    ] {
-        if let Some(content) = tree.file_content(&rel_path) {
-            if parse_script(content)
-                .executable_lines()
-                .iter()
-                .any(executable_line_has_mutation_hook)
-            {
-                files.push(rel_path.to_owned());
+    let mut active = false;
+
+    for hook_root_rel in hook_root_rels {
+        for rel_path in [
+            super::join_under_root(hook_root_rel, ".githooks/pre-commit"),
+            super::join_under_root(hook_root_rel, "hooks/pre-commit"),
+        ] {
+            match super::read_cached_or_fs(tree, &rel_path) {
+                Ok(Some(content)) => {
+                    if parse_script(&content)
+                        .executable_lines()
+                        .iter()
+                        .any(executable_line_has_mutation_hook)
+                    {
+                        active = true;
+                        if hook_root_rel == root_rel_dir {
+                            files.push(rel_path.to_owned());
+                        }
+                    }
+                }
+                Ok(None) => {}
+                Err(read_error) => input_failures.push(InputFailureFacts {
+                    root_rel_dir: root_rel_dir.to_owned(),
+                    rel_path: rel_path.clone(),
+                    message: format!(
+                        "Failed to read active hook surface for test-family mutation detection: {read_error}"
+                    ),
+                }),
             }
         }
-    }
-    let hook_dir_rel = super::join_under_root(root_rel_dir, ".githooks/pre-commit.d");
-    if let Some(dir) = tree.dir_contents(&hook_dir_rel) {
-        for file_name in dir.files() {
-            let rel_path = ProjectTree::join_rel(&hook_dir_rel, file_name);
-            let Ok(content) = guardrail3_shared_fs::read_file_err(&tree.abs_path(&rel_path)) else {
-                continue;
-            };
-            if parse_script(&content)
-                .executable_lines()
-                .iter()
-                .any(executable_line_has_mutation_hook)
-            {
-                files.push(rel_path);
+
+        let hook_dir_rel = super::join_under_root(hook_root_rel, ".githooks/pre-commit.d");
+        if let Some(dir) = tree.dir_contents(&hook_dir_rel) {
+            for file_name in dir.files() {
+                let rel_path = ProjectTree::join_rel(&hook_dir_rel, file_name);
+                match guardrail3_shared_fs::read_file_err(&tree.abs_path(&rel_path)) {
+                    Ok(content) => {
+                        if parse_script(&content)
+                            .executable_lines()
+                            .iter()
+                            .any(executable_line_has_mutation_hook)
+                        {
+                            active = true;
+                            if hook_root_rel == root_rel_dir {
+                                files.push(rel_path);
+                            }
+                        }
+                    }
+                    Err(read_error) => input_failures.push(InputFailureFacts {
+                        root_rel_dir: root_rel_dir.to_owned(),
+                        rel_path: rel_path.clone(),
+                        message: format!(
+                            "Failed to read active hook surface for test-family mutation detection: {read_error}"
+                        ),
+                    }),
+                }
             }
         }
     }
     files.sort();
-    files
+    files.dedup();
+    MutationHookState { active, files }
 }
 
 fn executable_line_has_mutation_hook(line: &ExecutableLine<'_>) -> bool {
@@ -54,6 +96,21 @@ fn is_cargo_mutants_command(command_text: &str) -> bool {
     };
 
     let first = normalize_command_token(first);
+    if matches!(first, "exec" | "command") {
+        while matches!(parts.peek(), Some(token) if token.starts_with('-')) {
+            let _ = parts.next();
+        }
+        let rest = parts.collect::<Vec<_>>();
+        return is_cargo_mutants_from_tokens(&rest);
+    }
+    if matches!(first, "bash" | "sh" | "zsh") {
+        while let Some(flag) = parts.next() {
+            if matches!(flag, "-c" | "-lc") {
+                return parts.next().is_some_and(is_cargo_mutants_command);
+            }
+        }
+        return false;
+    }
     if first == "env" {
         while matches!(parts.peek(), Some(token) if token.starts_with('-')) {
             let _ = parts.next();
@@ -61,16 +118,23 @@ fn is_cargo_mutants_command(command_text: &str) -> bool {
         while matches!(parts.peek(), Some(token) if looks_like_env_assignment(token)) {
             let _ = parts.next();
         }
-        let Some(next) = parts.next() else {
-            return false;
-        };
-        return match normalize_command_token(next) {
-            "cargo" => is_cargo_mutants_invocation(&mut parts),
-            "cargo-mutants" => !parts.any(is_help_or_version_flag),
-            _ => false,
-        };
+        let rest = parts.collect::<Vec<_>>();
+        return is_cargo_mutants_from_tokens(&rest);
     }
 
+    let rest = parts.collect::<Vec<_>>();
+    is_cargo_mutants_from_tokens_with_first(first, &rest)
+}
+
+fn is_cargo_mutants_from_tokens(tokens: &[&str]) -> bool {
+    let Some((first, rest)) = tokens.split_first() else {
+        return false;
+    };
+    is_cargo_mutants_from_tokens_with_first(normalize_command_token(first), rest)
+}
+
+fn is_cargo_mutants_from_tokens_with_first(first: &str, rest: &[&str]) -> bool {
+    let mut parts = rest.iter().copied().peekable();
     match first {
         "cargo" => is_cargo_mutants_invocation(&mut parts),
         "cargo-mutants" => !parts.any(is_help_or_version_flag),

@@ -27,7 +27,7 @@ fn hook_only_mutation_adoption_activates_the_rule() {
         &results,
         "Cargo.toml",
         None,
-        Severity::Warn,
+        Severity::Error,
         "cargo-mutants missing",
     );
     assert_inventory(&results, false);

@@ -21,7 +21,7 @@ pub fn check(input: &RootTestInput<'_>, results: &mut Vec<CheckResult>) {
     } else {
         results.push(CheckResult::from_parts(
             ID.to_owned(),
-            Severity::Warn,
+            Severity::Error,
             "cargo-mutants missing".to_owned(),
             "`cargo-mutants` was not found on PATH for an active mutation-testing setup."
                 .to_owned(),

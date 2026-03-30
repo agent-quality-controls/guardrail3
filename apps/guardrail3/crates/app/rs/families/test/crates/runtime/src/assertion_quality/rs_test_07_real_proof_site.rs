@@ -37,7 +37,7 @@ pub fn check(input: &TestFunctionInput<'_>, results: &mut Vec<CheckResult>) {
 
     results.push(CheckResult::from_parts(
     ID.to_owned(),
-    Severity::Warn,
+    Severity::Error,
     "test lacks real proof site".to_owned(),
     format!(
             "Test `{}` must contain an assertion macro or call into the owned assertions module/crate.",
@@ -86,8 +86,13 @@ pub(crate) fn has_owned_assertion_proof(
     }
 
     let bare_call_is_owned = |name: &str| {
-        !function.shadowed_idents.contains(name)
-            && !file_function_names.contains(name)
+        if function.shadowed_idents.contains(name) {
+            return function
+                .local_call_aliases
+                .get(name)
+                .is_some_and(|path| path_is_owned(path, &root_prefixes, &bare_imports, &glob_prefixes, proof_bearing_assertion_functions));
+        }
+        !file_function_names.contains(name)
             && (bare_imports
                 .get(name)
                 .is_some_and(|qualified| proof_bearing_assertion_functions.contains(qualified))
@@ -99,20 +104,26 @@ pub(crate) fn has_owned_assertion_proof(
 
     function.call_paths.iter().any(|path| match path.first() {
         Some(first) if path.len() == 1 => bare_call_is_owned(first),
-        Some(first) => root_prefixes.get(first).is_some_and(|prefix| {
-            proof_bearing_assertion_functions
-                .contains(&qualified_assertion_name(prefix, &path[1..].join("::")))
-        }),
+        Some(_) => path_is_owned(
+            path,
+            &root_prefixes,
+            &bare_imports,
+            &glob_prefixes,
+            proof_bearing_assertion_functions,
+        ),
         None => false,
     }) || function
         .method_receiver_paths
         .iter()
         .any(|path| match path.first() {
             Some(first) if path.len() == 1 => bare_call_is_owned(first),
-            Some(first) => root_prefixes.get(first).is_some_and(|prefix| {
-                proof_bearing_assertion_functions
-                    .contains(&qualified_assertion_name(prefix, &path[1..].join("::")))
-            }),
+            Some(_) => path_is_owned(
+                path,
+                &root_prefixes,
+                &bare_imports,
+                &glob_prefixes,
+                proof_bearing_assertion_functions,
+            ),
             None => false,
         })
 }
@@ -124,6 +135,29 @@ fn qualified_assertion_name(module_prefix: &[String], tail: &str) -> String {
         module_prefix.join("::")
     } else {
         format!("{}::{tail}", module_prefix.join("::"))
+    }
+}
+
+fn path_is_owned(
+    path: &[String],
+    root_prefixes: &BTreeMap<String, Vec<String>>,
+    bare_imports: &BTreeMap<String, String>,
+    glob_prefixes: &[Vec<String>],
+    proof_bearing_assertion_functions: &BTreeSet<String>,
+) -> bool {
+    match path.first() {
+        Some(first) if path.len() == 1 => bare_imports
+            .get(first)
+            .is_some_and(|qualified| proof_bearing_assertion_functions.contains(qualified))
+            || glob_prefixes.iter().any(|prefix| {
+                proof_bearing_assertion_functions
+                    .contains(&qualified_assertion_name(prefix, first))
+            }),
+        Some(first) => root_prefixes.get(first).is_some_and(|prefix| {
+            proof_bearing_assertion_functions
+                .contains(&qualified_assertion_name(prefix, &path[1..].join("::")))
+        }),
+        None => false,
     }
 }
 

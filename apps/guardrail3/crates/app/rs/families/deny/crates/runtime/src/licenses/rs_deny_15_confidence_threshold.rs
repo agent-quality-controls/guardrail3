@@ -15,7 +15,10 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                 "RS-DENY-15".to_owned(),
                 Severity::Warn,
                 "confidence-threshold weaker than baseline".to_owned(),
-                format!("`{}` sets `confidence-threshold = {value}`.", config.rel_path),
+                format!(
+                    "`{}` sets `confidence-threshold = {value}`.",
+                    config.rel_path
+                ),
                 Some(config.rel_path.clone()),
                 None,
                 false,
@@ -26,7 +29,10 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                 "RS-DENY-15".to_owned(),
                 Severity::Warn,
                 "confidence-threshold weaker than baseline".to_owned(),
-                format!("`{}` sets `confidence-threshold = {value}`.", config.rel_path),
+                format!(
+                    "`{}` sets `confidence-threshold = {value}`.",
+                    config.rel_path
+                ),
                 Some(config.rel_path.clone()),
                 None,
                 false,
@@ -38,7 +44,10 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                     "RS-DENY-15".to_owned(),
                     Severity::Info,
                     "confidence-threshold stricter than baseline".to_owned(),
-                    format!("`{}` sets `confidence-threshold = {value}`.", config.rel_path),
+                    format!(
+                        "`{}` sets `confidence-threshold = {value}`.",
+                        config.rel_path
+                    ),
                     Some(config.rel_path.clone()),
                     None,
                     false,
@@ -52,7 +61,10 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                     "RS-DENY-15".to_owned(),
                     Severity::Info,
                     "confidence-threshold stricter than baseline".to_owned(),
-                    format!("`{}` sets `confidence-threshold = {value}`.", config.rel_path),
+                    format!(
+                        "`{}` sets `confidence-threshold = {value}`.",
+                        config.rel_path
+                    ),
                     Some(config.rel_path.clone()),
                     None,
                     false,
@@ -66,7 +78,10 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                 "RS-DENY-15".to_owned(),
                 Severity::Warn,
                 "confidence-threshold missing or invalid".to_owned(),
-                format!("`{}` must set `confidence-threshold >= 0.8`.", config.rel_path),
+                format!(
+                    "`{}` must set `confidence-threshold >= 0.8`.",
+                    config.rel_path
+                ),
                 Some(config.rel_path.clone()),
                 None,
                 false,

@@ -65,6 +65,40 @@ pub(crate) fn run_for_tests(tree: &ProjectTree) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
+pub(crate) fn run_with_validation_scope_for_tests(
+    tree: &ProjectTree,
+    validation_scope: &str,
+) -> Vec<CheckResult> {
+    let facts = super::facts::collect_with_validation_scope_for_tests(tree, validation_scope);
+    let mut results = Vec::new();
+    if facts.cargo_config_overrides.is_empty() {
+        check_clean(&mut results);
+    } else {
+        for override_facts in &facts.cargo_config_overrides {
+            check(&CargoConfigOverrideInput::new(override_facts), &mut results);
+        }
+    }
+    results
+}
+
+#[cfg(test)]
+pub(crate) fn run_family_with_validation_scope_for_tests(
+    tree: &ProjectTree,
+    validation_scope: &str,
+) -> Vec<CheckResult> {
+    let scope = guardrail3_app_rs_placement::collect(tree);
+    let selected =
+        guardrail3_validation_model::RustFamilySelection::new(std::collections::BTreeSet::from([
+            guardrail3_validation_model::RustValidateFamily::Clippy,
+        ]));
+    let route =
+        guardrail3_app_rs_family_mapper::FamilyMapper::new(tree, &scope, None, &selected, None)
+            .with_validation_scope(Some(validation_scope))
+            .map_rs_clippy();
+    crate::check(tree, &route)
+}
+
+#[cfg(test)]
 #[path = "rs_clippy_24_forbid_clippy_conf_dir_override_tests/mod.rs"]
 // reason: test-only sidecar module wiring
 mod rs_clippy_24_forbid_clippy_conf_dir_override_tests;
