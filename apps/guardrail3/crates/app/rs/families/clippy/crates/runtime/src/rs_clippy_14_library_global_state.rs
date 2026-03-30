@@ -4,7 +4,7 @@ use std::collections::BTreeSet;
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::clippy_support::{EXPECTED_LIBRARY_GLOBAL_STATE_TYPES, ban_paths};
+use super::clippy_support::{EXPECTED_LIBRARY_GLOBAL_STATE_TYPES, parse_ban_section};
 use super::inputs::ConfigClippyInput;
 
 const ID: &str = "RS-CLIPPY-14";
@@ -20,7 +20,26 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
         return;
     };
 
-    let found: BTreeSet<_> = ban_paths(parsed, "disallowed-types").into_iter().collect();
+    let section = parse_ban_section(parsed, "disallowed-types");
+    let mut malformed_count = 0usize;
+    for malformed in &section.malformed_messages {
+        malformed_count += 1;
+        results.push(CheckResult {
+            id: ID.to_owned(),
+            severity: Severity::Error,
+            title: "disallowed-types section malformed".to_owned(),
+            message: malformed.clone(),
+            file: Some(input.config.rel_path.clone()),
+            line: None,
+            inventory: false,
+        });
+    }
+
+    let found: BTreeSet<_> = section
+        .entries
+        .into_iter()
+        .map(|entry| entry.path)
+        .collect();
     let mut missing_count = 0usize;
     for expected in EXPECTED_LIBRARY_GLOBAL_STATE_TYPES {
         if !found.contains(*expected) {
@@ -37,7 +56,7 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
         }
     }
 
-    if missing_count == 0 {
+    if malformed_count == 0 && missing_count == 0 {
         results.push(
             CheckResult {
                 id: ID.to_owned(),

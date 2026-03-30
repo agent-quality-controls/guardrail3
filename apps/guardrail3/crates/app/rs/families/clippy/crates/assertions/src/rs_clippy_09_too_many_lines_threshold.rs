@@ -19,11 +19,10 @@ pub fn assert_missing_value(results: &[CheckResult]) {
 }
 
 pub fn assert_parse_failure(results: &[CheckResult], file: &str) {
-    let result = single_result(results);
-    assert_eq!(result.severity, Severity::Error);
-    assert_eq!(result.title, "clippy.toml parse error");
-    assert!(result.message.starts_with("Failed to parse clippy.toml: "));
-    assert_eq!(result.file.as_deref(), Some(file));
+    assert!(
+        results.is_empty(),
+        "expected RS-CLIPPY-25 to own parse failure for {file}: {results:#?}"
+    );
 }
 
 pub fn assert_wrong_value(results: &[CheckResult]) {

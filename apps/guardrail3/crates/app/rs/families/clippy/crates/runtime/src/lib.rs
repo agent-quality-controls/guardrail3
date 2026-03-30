@@ -25,6 +25,7 @@ mod rs_clippy_21_cognitive_complexity_threshold;
 mod rs_clippy_22_type_complexity_threshold;
 mod rs_clippy_23_policy_context_parseable;
 mod rs_clippy_24_forbid_clippy_conf_dir_override;
+mod rs_clippy_25_config_parseable;
 
 use guardrail3_app_rs_family_mapper::RsClippyRoute;
 use guardrail3_domain_project_tree::ProjectTree;
@@ -32,8 +33,8 @@ use guardrail3_domain_report::CheckResult;
 
 use self::facts::collect;
 use self::inputs::{
-    CargoConfigOverrideInput, ConfigClippyInput, CoveredRustUnitInput, PolicyContextFailureInput,
-    UncoveredRustUnitInput,
+    CargoConfigOverrideInput, CargoRootFailureInput, ConfigClippyInput, CoveredRustUnitInput,
+    PolicyContextFailureInput, UncoveredRustUnitInput,
 };
 
 pub use self::clippy_support::{EXPECTED_METHOD_BANS, EXPECTED_TYPE_BANS};
@@ -44,6 +45,13 @@ use guardrail3_app_rs_family_clippy_assertions as _;
 pub fn check(tree: &ProjectTree, route: &RsClippyRoute) -> Vec<CheckResult> {
     let facts = collect(tree, route);
     let mut results = Vec::new();
+
+    for failure in &facts.cargo_root_failures {
+        rs_clippy_01_coverage::check_root_failure(
+            &CargoRootFailureInput::new(failure),
+            &mut results,
+        );
+    }
 
     for covered in &facts.covered_units {
         rs_clippy_01_coverage::check_covered(&CoveredRustUnitInput::new(covered), &mut results);
@@ -85,6 +93,7 @@ pub fn check(tree: &ProjectTree, route: &RsClippyRoute) -> Vec<CheckResult> {
     }
 
     for input in ConfigClippyInput::from_facts(&facts) {
+        rs_clippy_25_config_parseable::check(&input, &mut results);
         rs_clippy_02_max_struct_bools::check(&input, &mut results);
         rs_clippy_03_max_fn_params_bools::check(&input, &mut results);
         rs_clippy_04_missing_method_ban::check(&input, &mut results);

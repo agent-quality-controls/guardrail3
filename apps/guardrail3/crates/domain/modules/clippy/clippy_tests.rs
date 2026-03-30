@@ -1,7 +1,7 @@
 use super::{
     EXPECTED_MACRO_BANS, MAX_FN_PARAMS_BOOLS, METHOD_ENV_VARS, TYPE_DYNAMIC, TYPE_GLOBAL_STATE,
-    build_clippy_toml, library_profile_methods, library_profile_types, pure_layer_extra_types,
-    service_profile_methods, service_profile_types,
+    build_clippy_toml, library_profile_methods, library_profile_types, service_profile_methods,
+    service_profile_types,
 };
 
 #[test]
@@ -15,13 +15,11 @@ fn profile_method_sets_stay_stable() {
 }
 
 #[test]
-fn library_and_pure_layer_types_include_global_state() {
+fn library_profile_types_include_global_state_and_service_does_not() {
     let service = service_profile_types();
     let library = library_profile_types();
-    let pure = pure_layer_extra_types();
 
     assert_eq!(service.len(), 5);
-    assert_eq!(pure.len(), 1);
     assert!(
         service
             .iter()
@@ -29,6 +27,11 @@ fn library_and_pure_layer_types_include_global_state() {
     );
     assert!(
         library
+            .iter()
+            .any(|module| module.name == TYPE_GLOBAL_STATE.name)
+    );
+    assert!(
+        !service
             .iter()
             .any(|module| module.name == TYPE_GLOBAL_STATE.name)
     );

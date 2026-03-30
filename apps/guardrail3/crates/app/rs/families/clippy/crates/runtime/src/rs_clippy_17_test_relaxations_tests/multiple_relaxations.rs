@@ -21,27 +21,27 @@ allow-unwrap-in-tests = true
             (
                 assertions::Severity::Warn,
                 "clippy test relaxation enabled",
-                "`allow-dbg-in-tests = true` relaxes test output discipline.",
+                "`allow-dbg-in-tests` must be `false`; found `true`. Tests should stay quiet and deterministic.",
             ),
             (
                 assertions::Severity::Error,
                 "clippy test expect policy misconfigured",
-                "`allow-expect-in-tests` must be `true` so tests may use `expect(...)` while non-test code stays governed by `clippy::expect_used`.",
+                "`allow-expect-in-tests` must be `true`; found `false`. Tests may use `expect(...)` while non-test code stays governed by `clippy::expect_used`.",
             ),
             (
                 assertions::Severity::Error,
                 "clippy test panic relaxation enabled",
-                "`allow-panic-in-tests` must stay `false` so `panic!()` remains banned in tests.",
+                "`allow-panic-in-tests` must be `false`; found `true`. panic!() must remain banned in tests.",
             ),
             (
                 assertions::Severity::Warn,
                 "clippy test relaxation enabled",
-                "`allow-print-in-tests = true` relaxes test output discipline.",
+                "`allow-print-in-tests` must be `false`; found `true`. Tests should stay quiet and deterministic.",
             ),
             (
                 assertions::Severity::Error,
                 "clippy test unwrap relaxation enabled",
-                "`allow-unwrap-in-tests` must stay `false` so `unwrap()` remains banned in tests.",
+                "`allow-unwrap-in-tests` must be `false`; found `true`. unwrap() must remain banned in tests.",
             ),
         ],
         "clippy.toml",

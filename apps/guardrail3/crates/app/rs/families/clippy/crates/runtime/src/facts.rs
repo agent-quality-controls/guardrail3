@@ -40,7 +40,13 @@ pub struct ClippyConfigFacts {
 #[derive(Debug, Clone)]
 pub enum ForbiddenConfigReason {
     NotAllowedRoot,
-    ShadowedSameRoot { preferred_rel_path: String },
+    UnparseableCargoRoot {
+        cargo_rel_path: String,
+        parse_error: String,
+    },
+    ShadowedSameRoot {
+        preferred_rel_path: String,
+    },
 }
 
 #[derive(Debug, Clone)]
@@ -68,6 +74,7 @@ pub struct ClippyFacts {
     pub allowed_configs: Vec<ClippyConfigFacts>,
     pub forbidden_configs: Vec<ForbiddenConfigFacts>,
     pub cargo_config_overrides: Vec<CargoConfigOverrideFacts>,
+    pub cargo_root_failures: Vec<CargoRootFailureFacts>,
     pub covered_units: Vec<CoveredRustUnitFacts>,
     pub uncovered_units: Vec<UncoveredRustUnitFacts>,
 }
@@ -79,8 +86,17 @@ pub struct CargoConfigOverrideFacts {
 }
 
 #[derive(Debug, Clone)]
+pub struct CargoRootFailureFacts {
+    pub rel_dir: String,
+    pub cargo_rel_path: String,
+    pub parse_error: String,
+}
+
+#[derive(Debug, Clone)]
 struct CargoRootFacts {
     rel_dir: String,
+    cargo_rel_path: String,
+    parse_error: Option<String>,
     has_workspace: bool,
     has_package: bool,
     workspace_members: Vec<String>,
@@ -115,15 +131,18 @@ pub fn collect(tree: &ProjectTree, route: &RsClippyRoute) -> ClippyFacts {
         .collect::<BTreeSet<_>>();
     let workspace_roots: BTreeSet<_> = cargo_roots
         .values()
+        .filter(|facts| facts.parse_error.is_none())
         .filter(|facts| facts.has_workspace)
         .map(|facts| facts.rel_dir.clone())
         .collect();
     let workspace_members: BTreeSet<_> = cargo_roots
         .values()
+        .filter(|facts| facts.parse_error.is_none())
         .flat_map(|facts| facts.workspace_members.iter().cloned())
         .collect();
     let standalone_package_roots: BTreeSet<_> = cargo_roots
         .values()
+        .filter(|facts| facts.parse_error.is_none())
         .filter(|facts| facts.has_package && !workspace_members.contains(&facts.rel_dir))
         .map(|facts| facts.rel_dir.clone())
         .collect();
@@ -140,6 +159,23 @@ pub fn collect(tree: &ProjectTree, route: &RsClippyRoute) -> ClippyFacts {
     let mut allowed_configs = Vec::new();
     let mut forbidden_configs = Vec::new();
     for config in configs {
+        if let Some(cargo_root) = cargo_roots
+            .get(&config.rel_dir)
+            .filter(|facts| !facts.rel_dir.is_empty())
+            .filter(|facts| facts.parse_error.is_some())
+        {
+            forbidden_configs.push(ForbiddenConfigFacts {
+                config,
+                reason: ForbiddenConfigReason::UnparseableCargoRoot {
+                    cargo_rel_path: cargo_root.cargo_rel_path.clone(),
+                    parse_error: cargo_root
+                        .parse_error
+                        .clone()
+                        .expect("cargo root parse error"),
+                },
+            });
+            continue;
+        }
         if allowed_policy_roots.contains(&config.rel_dir) {
             allowed_configs.push(config);
         } else {
@@ -176,6 +212,19 @@ pub fn collect(tree: &ProjectTree, route: &RsClippyRoute) -> ClippyFacts {
         }
     }
     let mut allowed_configs = deduped_allowed;
+    let mut cargo_root_failures = cargo_roots
+        .values()
+        .filter_map(|facts| {
+            facts
+                .parse_error
+                .as_ref()
+                .map(|parse_error| CargoRootFailureFacts {
+                    rel_dir: facts.rel_dir.clone(),
+                    cargo_rel_path: facts.cargo_rel_path.clone(),
+                    parse_error: parse_error.clone(),
+                })
+        })
+        .collect::<Vec<_>>();
 
     let mut covered_units = Vec::new();
     let mut uncovered_units = Vec::new();
@@ -203,12 +252,14 @@ pub fn collect(tree: &ProjectTree, route: &RsClippyRoute) -> ClippyFacts {
     allowed_configs.sort_by(|a, b| a.rel_path.cmp(&b.rel_path));
     forbidden_configs.sort_by(|a, b| a.config.rel_path.cmp(&b.config.rel_path));
     cargo_config_overrides.sort_by(|a, b| a.rel_path.cmp(&b.rel_path));
+    cargo_root_failures.sort_by(|a, b| a.cargo_rel_path.cmp(&b.cargo_rel_path));
 
     ClippyFacts {
         policy_context_parse_error: policy_map.parse_error,
         allowed_configs,
         forbidden_configs,
         cargo_config_overrides,
+        cargo_root_failures,
         covered_units,
         uncovered_units,
     }
@@ -258,30 +309,36 @@ fn collect_cargo_roots(
     route
         .roots
         .iter()
-        .map(|root| root.rel_dir.clone())
-        .map(|rel_dir| {
-            let rel_path = if rel_dir.is_empty() {
-                "Cargo.toml".to_owned()
-            } else {
-                ProjectTree::join_rel(&rel_dir, "Cargo.toml")
-            };
-            let parsed = tree
-                .file_content(&rel_path)
-                .and_then(|content| toml::from_str::<toml::Value>(content).ok());
-            let facts = parsed.as_ref().map_or_else(
-                || CargoRootFacts {
+        .map(|root| (root.rel_dir.clone(), root.cargo_rel_path.clone()))
+        .map(|(rel_dir, cargo_rel_path)| {
+            let facts = match tree.file_content(&cargo_rel_path) {
+                Some(content) => match toml::from_str::<toml::Value>(content) {
+                    Ok(parsed) => CargoRootFacts {
+                        rel_dir: rel_dir.clone(),
+                        cargo_rel_path: cargo_rel_path.clone(),
+                        parse_error: None,
+                        has_workspace: parsed.get("workspace").is_some(),
+                        has_package: parsed.get("package").is_some(),
+                        workspace_members: parse_workspace_members(tree, &rel_dir, &parsed),
+                    },
+                    Err(err) => CargoRootFacts {
+                        rel_dir: rel_dir.clone(),
+                        cargo_rel_path: cargo_rel_path.clone(),
+                        parse_error: Some(err.to_string()),
+                        has_workspace: false,
+                        has_package: false,
+                        workspace_members: Vec::new(),
+                    },
+                },
+                None => CargoRootFacts {
                     rel_dir: rel_dir.clone(),
+                    cargo_rel_path: cargo_rel_path.clone(),
+                    parse_error: Some("Cargo.toml content missing from ProjectTree".to_owned()),
                     has_workspace: false,
                     has_package: false,
                     workspace_members: Vec::new(),
                 },
-                |parsed| CargoRootFacts {
-                    rel_dir: rel_dir.clone(),
-                    has_workspace: parsed.get("workspace").is_some(),
-                    has_package: parsed.get("package").is_some(),
-                    workspace_members: parse_workspace_members(tree, &rel_dir, parsed),
-                },
-            );
+            };
             (rel_dir, facts)
         })
         .collect()
@@ -408,14 +465,34 @@ fn collect_cargo_config_overrides(
                 None => Err("cargo config content missing from ProjectTree".to_owned()),
             };
             match parsed {
-                Ok(Some(parsed)) => parsed
-                    .get("env")
-                    .and_then(toml::Value::as_table)
-                    .and_then(|env| env.get("CLIPPY_CONF_DIR"))
-                    .map(|_| CargoConfigOverrideFacts {
-                        rel_path,
-                        parse_error: None,
-                    }),
+                Ok(Some(parsed)) => {
+                    let Some(env) = parsed.get("env") else {
+                        return None;
+                    };
+                    let Some(env_table) = env.as_table() else {
+                        return Some(CargoConfigOverrideFacts {
+                            rel_path,
+                            parse_error: Some(format!(
+                                "invalid cargo config shape: `env` must be a table, found {}",
+                                match env {
+                                    toml::Value::String(_) => "string",
+                                    toml::Value::Integer(_) => "integer",
+                                    toml::Value::Float(_) => "float",
+                                    toml::Value::Boolean(_) => "bool",
+                                    toml::Value::Datetime(_) => "datetime",
+                                    toml::Value::Array(_) => "array",
+                                    toml::Value::Table(_) => "table",
+                                }
+                            )),
+                        });
+                    };
+                    env_table
+                        .get("CLIPPY_CONF_DIR")
+                        .map(|_| CargoConfigOverrideFacts {
+                            rel_path,
+                            parse_error: None,
+                        })
+                }
                 Ok(None) => None,
                 Err(parse_error) => Some(CargoConfigOverrideFacts {
                     rel_path,
@@ -845,8 +922,10 @@ fn package_publishable(tree: &ProjectTree, rel_dir: &str) -> bool {
     match package.get("publish") {
         None => true,
         Some(toml::Value::Boolean(value)) => *value,
-        Some(toml::Value::Array(array)) => !array.is_empty(),
-        _ => true,
+        Some(toml::Value::Array(array)) => {
+            !array.is_empty() && array.iter().all(toml::Value::is_str)
+        }
+        _ => false,
     }
 }
 

@@ -4,7 +4,7 @@ use std::collections::BTreeSet;
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::clippy_support::{ban_paths, expected_required_type_bans};
+use super::clippy_support::{expected_required_type_bans, parse_ban_section};
 use super::inputs::ConfigClippyInput;
 
 const ID: &str = "RS-CLIPPY-05";
@@ -17,7 +17,24 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
         return;
     };
 
-    let found: BTreeSet<_> = ban_paths(parsed, "disallowed-types").into_iter().collect();
+    let section = parse_ban_section(parsed, "disallowed-types");
+    for malformed in &section.malformed_messages {
+        results.push(CheckResult {
+            id: ID.to_owned(),
+            severity: Severity::Error,
+            title: "disallowed-types section malformed".to_owned(),
+            message: malformed.clone(),
+            file: Some(input.config.rel_path.clone()),
+            line: None,
+            inventory: false,
+        });
+    }
+
+    let found: BTreeSet<_> = section
+        .entries
+        .into_iter()
+        .map(|entry| entry.path)
+        .collect();
     for expected in expected_required_type_bans(input.garde_enabled()) {
         if found.contains(expected) {
             results.push(

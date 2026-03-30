@@ -2,6 +2,7 @@
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::{CheckResult, Severity};
 
+use super::clippy_support::{BoolSetting, bool_setting, value_kind};
 use super::inputs::ConfigClippyInput;
 
 const ID: &str = "RS-CLIPPY-16";
@@ -14,8 +15,8 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
         return;
     };
 
-    match parsed.get("avoid-breaking-exported-api").and_then(toml::Value::as_bool) {
-        Some(false) => results.push(
+    match bool_setting(parsed, "avoid-breaking-exported-api") {
+        BoolSetting::Value(false) => results.push(
             CheckResult {
                 id: ID.to_owned(),
                 severity: Severity::Info,
@@ -27,7 +28,7 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
             }
             .as_inventory(),
         ),
-        Some(true) if input.published_library_policy() => results.push(
+        BoolSetting::Value(true) if input.published_library_policy() => results.push(
             CheckResult {
                 id: ID.to_owned(),
                 severity: Severity::Info,
@@ -39,7 +40,7 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
             }
             .as_inventory(),
         ),
-        Some(true) => results.push(CheckResult {
+        BoolSetting::Value(true) => results.push(CheckResult {
             id: ID.to_owned(),
             severity: Severity::Warn,
             title: "avoid-breaking-exported-api enabled".to_owned(),
@@ -48,7 +49,19 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
             line: None,
             inventory: false,
         }),
-        None => results.push(CheckResult {
+        BoolSetting::WrongType(value) => results.push(CheckResult {
+            id: ID.to_owned(),
+            severity: Severity::Warn,
+            title: "avoid-breaking-exported-api wrong type".to_owned(),
+            message: format!(
+                "`avoid-breaking-exported-api` must be a bool, found {}.",
+                value_kind(value)
+            ),
+            file: Some(input.config.rel_path.clone()),
+            line: None,
+            inventory: false,
+        }),
+        BoolSetting::Missing => results.push(CheckResult {
             id: ID.to_owned(),
             severity: Severity::Warn,
             title: "avoid-breaking-exported-api not set".to_owned(),

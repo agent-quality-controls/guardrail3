@@ -549,6 +549,28 @@ pub fn prepend_ban_path(clippy_toml: &str, key: &str, path: &str, reason: &str) 
     toml::to_string(&parsed).expect("serialize clippy TOML")
 }
 
+pub fn replace_ban_entry_with_string(clippy_toml: &str, key: &str, path: &str) -> String {
+    let mut parsed = toml::from_str::<toml::Value>(clippy_toml).expect("valid clippy TOML");
+    let entries = parsed
+        .get_mut(key)
+        .and_then(toml::Value::as_array_mut)
+        .expect("expected ban array");
+
+    let replacement_index = entries
+        .iter()
+        .position(|entry| {
+            entry
+                .get("path")
+                .and_then(toml::Value::as_str)
+                .or_else(|| entry.as_str())
+                == Some(path)
+        })
+        .expect("expected path in ban array");
+    entries[replacement_index] = toml::Value::String(path.to_owned());
+
+    toml::to_string(&parsed).expect("serialize clippy TOML")
+}
+
 fn copy_dir_recursive(src: &Path, dst: &Path) {
     for entry in guardrail3_shared_fs::list_dir(src) {
         let src_path = entry.path();

@@ -1,6 +1,6 @@
 use super::facts::{
-    CargoConfigOverrideFacts, ClippyConfigFacts, ClippyFacts, CoveredRustUnitFacts, PolicyRootKind,
-    UncoveredRustUnitFacts,
+    CargoConfigOverrideFacts, CargoRootFailureFacts, ClippyConfigFacts, ClippyFacts,
+    CoveredRustUnitFacts, PolicyRootKind, UncoveredRustUnitFacts,
 };
 
 pub struct ConfigClippyInput<'a> {
@@ -25,6 +25,12 @@ pub struct PolicyContextFailureInput<'a> {
 pub struct CargoConfigOverrideInput<'a> {
     pub rel_path: &'a str,
     pub parse_error: Option<&'a str>,
+}
+
+pub struct CargoRootFailureInput<'a> {
+    pub rel_dir: &'a str,
+    pub cargo_rel_path: &'a str,
+    pub parse_error: &'a str,
 }
 
 impl<'a> ConfigClippyInput<'a> {
@@ -64,6 +70,16 @@ impl<'a> CargoConfigOverrideInput<'a> {
         Self {
             rel_path: &facts.rel_path,
             parse_error: facts.parse_error.as_deref(),
+        }
+    }
+}
+
+impl<'a> CargoRootFailureInput<'a> {
+    pub fn new(facts: &'a CargoRootFailureFacts) -> Self {
+        Self {
+            rel_dir: &facts.rel_dir,
+            cargo_rel_path: &facts.cargo_rel_path,
+            parse_error: &facts.parse_error,
         }
     }
 }

@@ -21,20 +21,6 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
     }
 
     let Some(parsed) = input.config.parsed.as_ref() else {
-        if let Some(parse_error) = &input.config.parse_error {
-            results.push(CheckResult {
-                id: ID.to_owned(),
-                severity: Severity::Error,
-                title: "local clippy policy root is not parseable".to_owned(),
-                message: format!(
-                    "`{}` replaces inherited policy for its subtree but could not be parsed: {parse_error}",
-                    input.config.rel_path
-                ),
-                file: Some(input.config.rel_path.clone()),
-                line: None,
-                inventory: false,
-            });
-        }
         return;
     };
 

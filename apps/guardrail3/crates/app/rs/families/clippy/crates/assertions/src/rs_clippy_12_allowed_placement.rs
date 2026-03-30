@@ -73,3 +73,45 @@ pub fn assert_same_root_conflict(results: &[CheckResult], file: &str, preferred_
         )
     );
 }
+
+pub fn assert_cargo_root_parse_error(results: &[CheckResult], config_file: &str, cargo_file: &str) {
+    let error_results = results
+        .iter()
+        .filter(|result| !result.inventory)
+        .collect::<Vec<_>>();
+    assert_eq!(error_results.len(), 1);
+    let result = error_results[0];
+    assert_eq!(result.id, ID);
+    assert_eq!(result.severity, Severity::Error);
+    assert_eq!(result.title, "clippy.toml placement could not be resolved");
+    assert_eq!(result.file.as_deref(), Some(config_file));
+    assert!(
+        result.message.contains(cargo_file),
+        "expected cargo path in placement failure: {result:#?}"
+    );
+    assert!(
+        result.message.contains("could not be parsed"),
+        "expected parse failure context in placement failure: {result:#?}"
+    );
+}
+
+pub fn assert_unparseable_cargo_root(results: &[CheckResult], file: &str, cargo_rel: &str) {
+    let error_results = results
+        .iter()
+        .filter(|result| !result.inventory)
+        .collect::<Vec<_>>();
+    assert_eq!(error_results.len(), 1);
+    let result = error_results[0];
+    assert_eq!(result.id, ID);
+    assert_eq!(result.severity, Severity::Error);
+    assert_eq!(result.title, "clippy.toml placement could not be resolved");
+    assert_eq!(result.file.as_deref(), Some(file));
+    assert!(
+        result.message.contains(cargo_rel),
+        "expected Cargo.toml path in message: {result:#?}"
+    );
+    assert!(
+        result.message.contains("could not be parsed"),
+        "expected parse failure context in message: {result:#?}"
+    );
+}

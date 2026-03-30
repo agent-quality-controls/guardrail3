@@ -8,3 +8,9 @@ mod root_dotfile_without_root_cargo;
 mod root_policy_without_root_cargo;
 #[path = "selective_uncovered.rs"] // reason: test matrix sidecar split by scenario
 mod selective_uncovered;
+#[path = "standalone_package.rs"] // reason: test matrix sidecar split by scenario
+mod standalone_package;
+#[path = "standalone_package_uncovered.rs"] // reason: test matrix sidecar split by scenario
+mod standalone_package_uncovered;
+#[path = "unparseable_routed_cargo.rs"] // reason: test matrix sidecar split by scenario
+mod unparseable_routed_cargo;

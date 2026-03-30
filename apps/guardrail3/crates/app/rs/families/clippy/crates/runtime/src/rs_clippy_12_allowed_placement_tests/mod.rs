@@ -6,3 +6,7 @@ mod allowed_roots_dotfile;
 mod forbidden_locations;
 #[path = "same_root_precedence.rs"] // reason: test matrix sidecar split by scenario
 mod same_root_precedence;
+#[path = "same_root_precedence_nested.rs"] // reason: test matrix sidecar split by scenario
+mod same_root_precedence_nested;
+#[path = "unparseable_routed_root.rs"] // reason: test matrix sidecar split by scenario
+mod unparseable_routed_root;
