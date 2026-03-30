@@ -23,51 +23,51 @@ skip = [
 
 deny = [
     # --- JSON: standardize on serde_json ---
-    { name = "simd-json", wrappers = [] },
-    { name = "json5", wrappers = [] },
-    { name = "sonic-rs", wrappers = [] },
+    { name = "simd-json", wrappers = [], reason = "Ban competing JSON libraries (standardize on serde_json)" },
+    { name = "json5", wrappers = [], reason = "Ban competing JSON libraries (standardize on serde_json)" },
+    { name = "sonic-rs", wrappers = [], reason = "Ban competing JSON libraries (standardize on serde_json)" },
     # --- TLS: standardize on rustls (no OpenSSL) ---
-    { name = "openssl", wrappers = [] },
-    { name = "openssl-sys", wrappers = [] },
+    { name = "openssl", wrappers = [], reason = "Ban OpenSSL (standardize on rustls)" },
+    { name = "openssl-sys", wrappers = [], reason = "Ban OpenSSL (standardize on rustls)" },
     # --- HTTP: standardize on reqwest ---
-    { name = "ureq", wrappers = [] },
-    { name = "surf", wrappers = [] },
-    { name = "isahc", wrappers = [] },
+    { name = "ureq", wrappers = [], reason = "Ban competing HTTP clients (standardize on reqwest)" },
+    { name = "surf", wrappers = [], reason = "Ban competing HTTP clients (standardize on reqwest)" },
+    { name = "isahc", wrappers = [], reason = "Ban competing HTTP clients (standardize on reqwest)" },
     # --- Logging: standardize on tracing ---
-    { name = "log4rs", wrappers = [] },
-    { name = "env_logger", wrappers = [] },
-    { name = "simple_logger", wrappers = [] },
-    { name = "fern", wrappers = [] },
+    { name = "log4rs", wrappers = [], reason = "Ban competing logging frameworks (standardize on tracing)" },
+    { name = "env_logger", wrappers = [], reason = "Ban competing logging frameworks (standardize on tracing)" },
+    { name = "simple_logger", wrappers = [], reason = "Ban competing logging frameworks (standardize on tracing)" },
+    { name = "fern", wrappers = [], reason = "Ban competing logging frameworks (standardize on tracing)" },
     # --- Async runtime: standardize on tokio ---
-    { name = "async-std", wrappers = [] },
-    { name = "smol", wrappers = [] },
+    { name = "async-std", wrappers = [], reason = "Ban competing async runtimes (standardize on tokio)" },
+    { name = "smol", wrappers = [], reason = "Ban competing async runtimes (standardize on tokio)" },
     # --- Global state: use std lazy primitives instead of lazy_static ---
     { name = "lazy_static", wrappers = [], reason = "Ban lazy_static (standardize on std lazy primitives)" },
     # --- Error handling: standardize on thiserror ---
-    { name = "anyhow", wrappers = [] },
+    { name = "anyhow", wrappers = [], reason = "Ban anyhow (standardize on thiserror)" },
     # --- Web framework: standardize on axum ---
-    { name = "actix-web", wrappers = [] },
-    { name = "rocket", wrappers = [] },
-    { name = "warp", wrappers = [] },
-    { name = "poem", wrappers = [] },
+    { name = "actix-web", wrappers = [], reason = "Ban competing web frameworks (standardize on axum)" },
+    { name = "rocket", wrappers = [], reason = "Ban competing web frameworks (standardize on axum)" },
+    { name = "warp", wrappers = [], reason = "Ban competing web frameworks (standardize on axum)" },
+    { name = "poem", wrappers = [], reason = "Ban competing web frameworks (standardize on axum)" },
     # --- Datetime: standardize on time crate ---
-    { name = "chrono", wrappers = [] },
+    { name = "chrono", wrappers = [], reason = "Ban chrono (standardize on time crate)" },
     # --- ORM: standardize on sqlx ---
-    { name = "diesel", wrappers = [] },
-    { name = "sea-orm", wrappers = [] },
+    { name = "diesel", wrappers = [], reason = "Ban competing ORMs (standardize on sqlx)" },
+    { name = "sea-orm", wrappers = [], reason = "Ban competing ORMs (standardize on sqlx)" },
     # --- Serialization: no competing binary formats ---
-    { name = "bincode", wrappers = [] },
-    { name = "rmp-serde", wrappers = [] },
-    { name = "prost", wrappers = [] },
-    { name = "flatbuffers", wrappers = [] },
+    { name = "bincode", wrappers = [], reason = "Ban competing binary serialization formats" },
+    { name = "rmp-serde", wrappers = [], reason = "Ban competing binary serialization formats" },
+    { name = "prost", wrappers = [], reason = "Ban competing binary serialization formats" },
+    { name = "flatbuffers", wrappers = [], reason = "Ban competing binary serialization formats" },
     # --- Parsing: use structured parsers, never regex ---
-    { name = "regex", wrappers = ["tree-sitter", "globset", "ignore"] }, # EXCEPTION: transitive only
-    { name = "fancy-regex", wrappers = [] },
-    { name = "onig", wrappers = [] },
-    { name = "pcre2", wrappers = [] },
-    { name = "grep-cli", wrappers = [] },
-    { name = "grep-regex", wrappers = [] },
-    { name = "grep-matcher", wrappers = [] },
+    { name = "regex", wrappers = ["tree-sitter", "globset", "ignore"], reason = "Ban regex crates — use structured parsers (syn, tree-sitter, serde_json, toml)" }, # EXCEPTION: transitive only
+    { name = "fancy-regex", wrappers = [], reason = "Ban regex crates — use structured parsers (syn, tree-sitter, serde_json, toml)" },
+    { name = "onig", wrappers = [], reason = "Ban regex crates — use structured parsers (syn, tree-sitter, serde_json, toml)" },
+    { name = "pcre2", wrappers = [], reason = "Ban regex crates — use structured parsers (syn, tree-sitter, serde_json, toml)" },
+    { name = "grep-cli", wrappers = [], reason = "Ban regex crates — use structured parsers (syn, tree-sitter, serde_json, toml)" },
+    { name = "grep-regex", wrappers = [], reason = "Ban regex crates — use structured parsers (syn, tree-sitter, serde_json, toml)" },
+    { name = "grep-matcher", wrappers = [], reason = "Ban regex crates — use structured parsers (syn, tree-sitter, serde_json, toml)" },
 ]
 
 # Feature-level bans -- prevent agents from enabling kitchen-sink features
@@ -118,5 +118,5 @@ ignore = []
 [sources]
 unknown-registry = "deny"
 unknown-git = "deny"
-allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-registry = ["sparse+https://index.crates.io/"]
 allow-git = []

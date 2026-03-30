@@ -63,7 +63,7 @@ pub fn check_policy_context_error(parse_error: &str, results: &mut Vec<CheckResu
         "RS-DENY-01".to_owned(),
         Severity::Error,
         "deny policy context is not parseable".to_owned(),
-        format!("`guardrail3.toml` deny policy context could not be parsed: {parse_error}"),
+        format!("Failed to parse active `guardrail3.toml` used for deny profile selection: {parse_error}"),
         Some("guardrail3.toml".to_owned()),
         None,
         false,

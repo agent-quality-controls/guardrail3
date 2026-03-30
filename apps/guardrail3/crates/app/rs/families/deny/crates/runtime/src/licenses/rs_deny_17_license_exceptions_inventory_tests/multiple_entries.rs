@@ -9,6 +9,10 @@ fn exception_entry(key: &str, value: &str) -> toml::Value {
             "allow".to_owned(),
             toml::Value::Array(vec![toml::Value::String("MIT".to_owned())]),
         ),
+        (
+            "reason".to_owned(),
+            toml::Value::String("good enough reason text".to_owned()),
+        ),
     ]))
 }
 

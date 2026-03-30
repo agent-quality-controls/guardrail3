@@ -101,10 +101,7 @@ pub fn collect(tree: &ProjectTree, route: &RsDenyRoute) -> DenyFacts {
         .map(|facts| facts.rel_dir.clone())
         .collect();
 
-    let mut allowed_policy_roots = BTreeSet::new();
-    if routed_root_rels.contains("") {
-        let _ = allowed_policy_roots.insert(String::new());
-    }
+    let mut allowed_policy_roots = BTreeSet::from([String::new()]);
     allowed_policy_roots.extend(workspace_roots.iter().cloned());
     allowed_policy_roots.extend(standalone_package_roots.iter().cloned());
 
@@ -116,6 +113,7 @@ pub fn collect(tree: &ProjectTree, route: &RsDenyRoute) -> DenyFacts {
         tree,
         &profile_map_facts.map,
         &routed_root_rels,
+        route.validation_scope(),
         policy_context_valid,
     );
     let mut allowed_configs = Vec::new();
@@ -141,16 +139,14 @@ pub fn collect(tree: &ProjectTree, route: &RsDenyRoute) -> DenyFacts {
 
     let mut covered_units = Vec::new();
     let mut uncovered_units = Vec::new();
-    if routed_root_rels.contains("") {
-        facts_support::push_coverage_facts(
-            tree,
-            "",
-            PolicyRootKind::ValidationRoot,
-            &allowed_configs,
-            &mut covered_units,
-            &mut uncovered_units,
-        );
-    }
+    facts_support::push_coverage_facts(
+        tree,
+        "",
+        PolicyRootKind::ValidationRoot,
+        &allowed_configs,
+        &mut covered_units,
+        &mut uncovered_units,
+    );
     for rel_dir in workspace_roots {
         facts_support::push_coverage_facts(
             tree,
@@ -261,11 +257,12 @@ fn collect_configs(
     tree: &ProjectTree,
     profile_map: &BTreeMap<String, Option<String>>,
     routed_root_rels: &BTreeSet<String>,
+    validation_scope: Option<&str>,
     policy_context_valid: bool,
 ) -> Vec<DenyConfigFacts> {
     let mut configs = Vec::new();
     let mut seen_paths = BTreeSet::new();
-    if routed_root_rels.contains("") {
+    if overlaps_validation_scope("", validation_scope) {
         push_config_if_present(
             tree,
             "",
@@ -305,6 +302,9 @@ fn collect_configs(
     {
         if rel_dir == ".cargo" || rel_dir.ends_with("/.cargo") {
             let policy_root_rel = facts_support::parent_dir(&rel_dir);
+            if !overlaps_validation_scope(&policy_root_rel, validation_scope) {
+                continue;
+            }
             let rel_path = ProjectTree::join_rel(&rel_dir, "deny.toml");
             push_config_if_present(
                 tree,
@@ -317,6 +317,9 @@ fn collect_configs(
                 &mut configs,
             );
         } else {
+            if !overlaps_validation_scope(&rel_dir, validation_scope) {
+                continue;
+            }
             let rel_path = ProjectTree::join_rel(&rel_dir, "deny.toml");
             push_config_if_present(
                 tree,
@@ -336,6 +339,9 @@ fn collect_configs(
         .into_iter()
         .filter(|rel_dir| is_under_routed_root(rel_dir, routed_root_rels))
     {
+        if !overlaps_validation_scope(&rel_dir, validation_scope) {
+            continue;
+        }
         let rel_path = ProjectTree::join_rel(&rel_dir, ".deny.toml");
         push_config_if_present(
             tree,
@@ -350,6 +356,20 @@ fn collect_configs(
     }
 
     configs
+}
+
+fn overlaps_validation_scope(rel_path: &str, validation_scope: Option<&str>) -> bool {
+    validation_scope.is_none_or(|scope_rel| {
+        path_is_under(rel_path, scope_rel) || path_is_under(scope_rel, rel_path)
+    })
+}
+
+fn path_is_under(rel_path: &str, parent_rel: &str) -> bool {
+    parent_rel.is_empty()
+        || rel_path == parent_rel
+        || rel_path
+            .strip_prefix(parent_rel)
+            .is_some_and(|rest| rest.starts_with('/'))
 }
 
 fn is_under_routed_root(rel_dir: &str, routed_root_rels: &BTreeSet<String>) -> bool {

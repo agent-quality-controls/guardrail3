@@ -39,6 +39,43 @@ fn warn_unsupported_schema(
         inventory: false,
     });
 }
+
+fn warn_unsupported_entry_schema(
+    results: &mut Vec<CheckResult>,
+    rel_path: &str,
+    scope: &str,
+    index: usize,
+    expected: &str,
+) {
+    results.push(CheckResult {
+        id: "RS-DENY-28".to_owned(),
+        severity: Severity::Warn,
+        title: format!("unsupported {scope} entry schema"),
+        message: format!(
+            "`{rel_path}` uses unsupported schema for `{scope}` entry at index {index}; expected {expected}."
+        ),
+        file: Some(rel_path.to_owned()),
+        line: None,
+        inventory: false,
+    });
+}
+
+fn warn_string_array_members(
+    results: &mut Vec<CheckResult>,
+    rel_path: &str,
+    scope: &str,
+    value: &toml::Value,
+) {
+    let Some(entries) = value.as_array() else {
+        warn_unsupported_schema(results, rel_path, scope, "array");
+        return;
+    };
+    for (index, entry) in entries.iter().enumerate() {
+        if !entry.is_str() {
+            warn_unsupported_entry_schema(results, rel_path, scope, index, "string");
+        }
+    }
+}
 use super::inputs::ConfigDenyInput;
 
 pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
@@ -114,19 +151,44 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
             warn_unsupported_schema(results, &config.rel_path, "[licenses].exceptions", "array");
         } else if let Some(exceptions) = exceptions.as_array() {
             for (index, entry) in exceptions.iter().enumerate() {
-                if let Some(table) = entry.as_table() {
-                    for key in table.keys() {
-                        if !known_section_keys("exception").contains(key.as_str()) {
-                            warn_unknown_key(
-                                results,
-                                &config.rel_path,
-                                "unknown licenses.exceptions key".to_owned(),
-                                format!(
-                                    "`{}` uses unknown `[[licenses.exceptions]].{key}` at index {index}.",
-                                    config.rel_path
-                                ),
-                            );
-                        }
+                let Some(table) = entry.as_table() else {
+                    warn_unsupported_entry_schema(
+                        results,
+                        &config.rel_path,
+                        "[licenses].exceptions",
+                        index,
+                        "table",
+                    );
+                    continue;
+                };
+                if !table.contains_key("name") && !table.contains_key("crate") {
+                    warn_unsupported_entry_schema(
+                        results,
+                        &config.rel_path,
+                        "[licenses].exceptions",
+                        index,
+                        "table with `name` or `crate`",
+                    );
+                }
+                if let Some(allow) = table.get("allow") {
+                    warn_string_array_members(
+                        results,
+                        &config.rel_path,
+                        "[[licenses.exceptions]].allow",
+                        allow,
+                    );
+                }
+                for key in table.keys() {
+                    if !known_section_keys("exception").contains(key.as_str()) {
+                        warn_unknown_key(
+                            results,
+                            &config.rel_path,
+                            "unknown licenses.exceptions key".to_owned(),
+                            format!(
+                                "`{}` uses unknown `[[licenses.exceptions]].{key}` at index {index}.",
+                                config.rel_path
+                            ),
+                        );
                     }
                 }
             }
@@ -152,6 +214,45 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                             );
                         }
                     }
+                }
+            }
+        }
+    }
+
+    if let Some(deny_entries) = section(config, "bans").and_then(|value| value.get("deny")) {
+        if !deny_entries.is_array() {
+            warn_unsupported_schema(results, &config.rel_path, "[bans].deny", "array");
+        } else if let Some(deny_entries) = deny_entries.as_array() {
+            for (index, entry) in deny_entries.iter().enumerate() {
+                if entry.is_str() {
+                    continue;
+                }
+                let Some(table) = entry.as_table() else {
+                    warn_unsupported_entry_schema(
+                        results,
+                        &config.rel_path,
+                        "[bans].deny",
+                        index,
+                        "string or table",
+                    );
+                    continue;
+                };
+                if !table.contains_key("name") && !table.contains_key("crate") {
+                    warn_unsupported_entry_schema(
+                        results,
+                        &config.rel_path,
+                        "[bans].deny",
+                        index,
+                        "string or table with `name` or `crate`",
+                    );
+                }
+                if let Some(wrappers) = table.get("wrappers") {
+                    warn_string_array_members(
+                        results,
+                        &config.rel_path,
+                        "[[bans.deny]].wrappers",
+                        wrappers,
+                    );
                 }
             }
         }
@@ -186,7 +287,69 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     if let Some(feature_entries) = section(config, "bans").and_then(|value| value.get("features")) {
         if !feature_entries.is_array() {
             warn_unsupported_schema(results, &config.rel_path, "[bans].features", "array");
+        } else if let Some(feature_entries) = feature_entries.as_array() {
+            for (index, entry) in feature_entries.iter().enumerate() {
+                let Some(table) = entry.as_table() else {
+                    warn_unsupported_entry_schema(
+                        results,
+                        &config.rel_path,
+                        "[bans].features",
+                        index,
+                        "table",
+                    );
+                    continue;
+                };
+                if !table.contains_key("name") && !table.contains_key("crate") {
+                    warn_unsupported_entry_schema(
+                        results,
+                        &config.rel_path,
+                        "[bans].features",
+                        index,
+                        "table with `name` or `crate`",
+                    );
+                }
+                if let Some(deny) = table.get("deny") {
+                    warn_string_array_members(
+                        results,
+                        &config.rel_path,
+                        "[[bans.features]].deny",
+                        deny,
+                    );
+                }
+                if let Some(allow) = table.get("allow") {
+                    warn_string_array_members(
+                        results,
+                        &config.rel_path,
+                        "[[bans.features]].allow",
+                        allow,
+                    );
+                }
+            }
         }
+    }
+
+    if let Some(licenses_allow) = section(config, "licenses").and_then(|value| value.get("allow")) {
+        warn_string_array_members(
+            results,
+            &config.rel_path,
+            "[licenses].allow",
+            licenses_allow,
+        );
+    }
+
+    if let Some(allow_registry) =
+        section(config, "sources").and_then(|value| value.get("allow-registry"))
+    {
+        warn_string_array_members(
+            results,
+            &config.rel_path,
+            "[sources].allow-registry",
+            allow_registry,
+        );
+    }
+
+    if let Some(allow_git) = section(config, "sources").and_then(|value| value.get("allow-git")) {
+        warn_string_array_members(results, &config.rel_path, "[sources].allow-git", allow_git);
     }
 
     for entry in parse_feature_entries_in_config(parsed) {

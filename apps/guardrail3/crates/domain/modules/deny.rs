@@ -172,7 +172,7 @@ pub const DENY_SOURCES: Module = Module {
     content: r#"[sources]
 unknown-registry = "deny"
 unknown-git = "deny"
-allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-registry = ["sparse+https://index.crates.io/"]
 allow-git = []"#,
 };
 

@@ -11,7 +11,16 @@ fn local_skip_inventory_only_hits_the_owned_local_root() {
         "apps/devctl/deny.toml",
         &add_skip_entry(
             &build_fixture_deny_toml("service"),
-            toml::Value::String("plain-crate".to_owned()),
+            toml::Value::Table(toml::map::Map::from_iter([
+                (
+                    "crate".to_owned(),
+                    toml::Value::String("plain-crate".to_owned()),
+                ),
+                (
+                    "reason".to_owned(),
+                    toml::Value::String("good enough reason text".to_owned()),
+                ),
+            ])),
         ),
     );
 

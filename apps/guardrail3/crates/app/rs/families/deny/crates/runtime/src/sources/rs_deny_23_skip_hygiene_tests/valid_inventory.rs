@@ -5,21 +5,15 @@ fn skip_toml(skip: &str) -> String {
 }
 
 #[test]
-fn inventories_supported_skip_entry_shapes() {
+fn inventories_only_documented_skip_entries() {
     let results = super::super::run_check(&skip_toml(
-        r#"["plain-crate", { crate = "serde@1.0.0", reason = "good enough reason text" }, { name = "windows-sys", version = "0.60.2", reason = "good enough reason text" }]"#,
+        r#"[{ crate = "serde@1.0.0", reason = "good enough reason text" }, { name = "windows-sys", version = "0.60.2", reason = "good enough reason text" }]"#,
     ));
     assert!(!results.is_empty());
 
     assertions::assert_findings(
         &results,
         &[
-            assertions::info(
-                "skip entry",
-                "`deny.toml` has skip entry `plain-crate`.",
-                "deny.toml",
-                true,
-            ),
             assertions::info(
                 "skip entry",
                 "`deny.toml` has skip entry `serde`.",

@@ -14,7 +14,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     let Some(ignore_entries) = ignore_value.as_array() else {
         results.push(CheckResult::from_parts(
             "RS-DENY-24".to_owned(),
-            Severity::Warn,
+            Severity::Error,
             "malformed advisory ignore container".to_owned(),
             format!(
                 "`{}` must use an array for `[advisories].ignore` entries.",
@@ -27,31 +27,41 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         return;
     };
     for entry in ignore_entries {
-        let (id, reason, malformed, non_string_reason, plain_string_entry) =
+        let Some(table) = entry.as_table() else {
             if let Some(id) = entry.as_str() {
-                (id.to_owned(), None, false, false, true)
-            } else if let Some(table) = entry.as_table() {
-                let id = table.get("id").and_then(toml::Value::as_str);
-                let reason_value = table.get("reason");
-                let reason = reason_value
-                    .and_then(toml::Value::as_str)
-                    .map(str::to_owned);
-                let non_string_reason = reason_value.is_some() && reason.is_none();
-                (
-                    id.unwrap_or("unknown").to_owned(),
-                    reason,
-                    id.is_none(),
-                    non_string_reason,
+                results.push(CheckResult::from_parts(
+                    "RS-DENY-24".to_owned(),
+                    Severity::Error,
+                    "advisory ignore must use table form".to_owned(),
+                    format!(
+                        "`{}` has `[advisories].ignore` string entry `{id}`; use table form with a `reason`.",
+                        config.rel_path
+                    ),
+                    Some(config.rel_path.clone()),
+                    None,
                     false,
-                )
+                ));
             } else {
-                ("unknown".to_owned(), None, true, false, false)
-            };
+                results.push(CheckResult::from_parts(
+                    "RS-DENY-24".to_owned(),
+                    Severity::Error,
+                    "malformed advisory ignore entry".to_owned(),
+                    format!(
+                        "`{}` has an `[advisories].ignore` entry without a valid advisory id.",
+                        config.rel_path
+                    ),
+                    Some(config.rel_path.clone()),
+                    None,
+                    false,
+                ));
+            }
+            continue;
+        };
 
-        if malformed {
+        let Some(id) = table.get("id").and_then(toml::Value::as_str) else {
             results.push(CheckResult::from_parts(
                 "RS-DENY-24".to_owned(),
-                Severity::Warn,
+                Severity::Error,
                 "malformed advisory ignore entry".to_owned(),
                 format!(
                     "`{}` has an `[advisories].ignore` entry without a valid advisory id.",
@@ -61,11 +71,15 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                 None,
                 false,
             ));
-        }
-        if non_string_reason {
+            continue;
+        };
+
+        let reason_value = table.get("reason");
+        let reason = reason_value.and_then(toml::Value::as_str);
+        if reason_value.is_some() && reason.is_none() {
             results.push(CheckResult::from_parts(
                 "RS-DENY-24".to_owned(),
-                Severity::Warn,
+                Severity::Error,
                 "advisory ignore reason must be a string".to_owned(),
                 format!(
                     "`{}` has `[advisories].ignore` entry `{id}` with a non-string `reason`.",
@@ -75,10 +89,13 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                 None,
                 false,
             ));
-        } else if !plain_string_entry && reason.as_deref().unwrap_or("").trim().is_empty() {
+            continue;
+        }
+
+        if reason.unwrap_or("").trim().is_empty() {
             results.push(CheckResult::from_parts(
                 "RS-DENY-24".to_owned(),
-                Severity::Warn,
+                Severity::Error,
                 "advisory ignore missing reason".to_owned(),
                 format!(
                     "`{}` ignores advisory `{id}` without a `reason`.",
@@ -88,24 +105,21 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                 None,
                 false,
             ));
+            continue;
         }
-        if !malformed
-            && !non_string_reason
-            && (plain_string_entry || !reason.as_deref().unwrap_or("").trim().is_empty())
-        {
-            results.push(
-                CheckResult {
-                    id: "RS-DENY-24".to_owned(),
-                    severity: Severity::Info,
-                    title: "advisory ignore entry".to_owned(),
-                    message: format!("`{}` ignores advisory `{id}`.", config.rel_path),
-                    file: Some(config.rel_path.clone()),
-                    line: None,
-                    inventory: false,
-                }
-                .as_inventory(),
-            );
-        }
+
+        results.push(
+            CheckResult {
+                id: "RS-DENY-24".to_owned(),
+                severity: Severity::Info,
+                title: "advisory ignore entry".to_owned(),
+                message: format!("`{}` ignores advisory `{id}`.", config.rel_path),
+                file: Some(config.rel_path.clone()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
     }
 }
 

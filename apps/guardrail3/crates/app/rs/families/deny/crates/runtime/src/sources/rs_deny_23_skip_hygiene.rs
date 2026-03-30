@@ -1,5 +1,3 @@
-use std::collections::BTreeMap;
-
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::deny_support::section;
@@ -16,7 +14,7 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     let Some(skip_entries) = skip_value.as_array() else {
         results.push(CheckResult::from_parts(
             "RS-DENY-23".to_owned(),
-            Severity::Warn,
+            Severity::Error,
             "malformed skip container".to_owned(),
             format!(
                 "`{}` must use an array for `[bans].skip` entries.",
@@ -29,51 +27,50 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         return;
     };
 
-    let mut skip_counts = BTreeMap::<String, usize>::new();
     for entry in skip_entries {
-        let (name, malformed, non_string_reason, reason, plain_string_entry) =
-            if let Some(crate_field) = entry.get("crate").and_then(toml::Value::as_str) {
-                let reason_value = entry.get("reason");
-                let reason = reason_value
-                    .and_then(toml::Value::as_str)
-                    .map(str::to_owned);
-                let name = crate_field
-                    .split('@')
-                    .next()
-                    .unwrap_or(crate_field)
-                    .to_owned();
-                (
-                    name,
+        let Some(table) = entry.as_table() else {
+            if let Some(name) = entry.as_str() {
+                results.push(CheckResult::from_parts(
+                    "RS-DENY-23".to_owned(),
+                    Severity::Error,
+                    "skip entry must use table form".to_owned(),
+                    format!(
+                        "`{}` has `[bans.skip]` string entry `{name}`; use table form with a `reason`.",
+                        config.rel_path
+                    ),
+                    Some(config.rel_path.clone()),
+                    None,
                     false,
-                    reason_value.is_some() && reason.is_none(),
-                    reason,
-                    false,
-                )
-            } else if let Some(name) = entry.as_str() {
-                (name.to_owned(), false, false, None, true)
-            } else if let Some(table) = entry.as_table() {
-                let name = table.get("name").and_then(toml::Value::as_str);
-                let reason_value = table.get("reason");
-                let reason = reason_value
-                    .and_then(toml::Value::as_str)
-                    .map(str::to_owned);
-                (
-                    name.unwrap_or("unknown").to_owned(),
-                    name.is_none(),
-                    reason_value.is_some() && reason.is_none(),
-                    reason,
-                    false,
-                )
+                ));
             } else {
-                ("unknown".to_owned(), true, false, None, false)
-            };
+                results.push(CheckResult::from_parts(
+                    "RS-DENY-23".to_owned(),
+                    Severity::Error,
+                    "malformed skip entry".to_owned(),
+                    format!(
+                        "`{}` has `[bans.skip]` entry without a valid crate identifier.",
+                        config.rel_path
+                    ),
+                    Some(config.rel_path.clone()),
+                    None,
+                    false,
+                ));
+            }
+            continue;
+        };
 
-        *skip_counts.entry(name.clone()).or_default() += 1;
-
-        if malformed {
+        let name = if let Some(crate_field) = table.get("crate").and_then(toml::Value::as_str) {
+            crate_field
+                .split('@')
+                .next()
+                .unwrap_or(crate_field)
+                .to_owned()
+        } else if let Some(name) = table.get("name").and_then(toml::Value::as_str) {
+            name.to_owned()
+        } else {
             results.push(CheckResult::from_parts(
                 "RS-DENY-23".to_owned(),
-                Severity::Warn,
+                Severity::Error,
                 "malformed skip entry".to_owned(),
                 format!(
                     "`{}` has `[bans.skip]` entry without a valid crate identifier.",
@@ -83,11 +80,15 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                 None,
                 false,
             ));
-        }
-        if non_string_reason {
+            continue;
+        };
+
+        let reason_value = table.get("reason");
+        let reason = reason_value.and_then(toml::Value::as_str);
+        if reason_value.is_some() && reason.is_none() {
             results.push(CheckResult::from_parts(
                 "RS-DENY-23".to_owned(),
-                Severity::Warn,
+                Severity::Error,
                 "skip reason must be a string".to_owned(),
                 format!(
                     "`{}` has `[bans.skip]` entry `{name}` with a non-string `reason`.",
@@ -97,35 +98,34 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
                 None,
                 false,
             ));
-        } else if !plain_string_entry && reason.as_deref().unwrap_or("").trim().is_empty() {
+            continue;
+        }
+
+        if reason.unwrap_or("").trim().is_empty() {
             results.push(CheckResult::from_parts(
                 "RS-DENY-23".to_owned(),
-                Severity::Warn,
+                Severity::Error,
                 "skip entry missing reason".to_owned(),
                 format!("`{}` skips `{name}` without a `reason`.", config.rel_path),
                 Some(config.rel_path.clone()),
                 None,
                 false,
             ));
+            continue;
         }
 
-        if !malformed
-            && !non_string_reason
-            && (plain_string_entry || !reason.as_deref().unwrap_or("").trim().is_empty())
-        {
-            results.push(
-                CheckResult {
-                    id: "RS-DENY-23".to_owned(),
-                    severity: Severity::Info,
-                    title: "skip entry".to_owned(),
-                    message: format!("`{}` has skip entry `{name}`.", config.rel_path),
-                    file: Some(config.rel_path.clone()),
-                    line: None,
-                    inventory: false,
-                }
-                .as_inventory(),
-            );
-        }
+        results.push(
+            CheckResult {
+                id: "RS-DENY-23".to_owned(),
+                severity: Severity::Info,
+                title: "skip entry".to_owned(),
+                message: format!("`{}` has skip entry `{name}`.", config.rel_path),
+                file: Some(config.rel_path.clone()),
+                line: None,
+                inventory: false,
+            }
+            .as_inventory(),
+        );
     }
 }
 

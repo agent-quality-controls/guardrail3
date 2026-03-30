@@ -11,7 +11,16 @@ fn local_advisory_ignore_inventory_only_hits_the_owned_local_root() {
         "apps/devctl/deny.toml",
         &set_advisory_ignores(
             &build_fixture_deny_toml("service"),
-            vec![toml::Value::String("RUSTSEC-2026-0000".to_owned())],
+            vec![toml::Value::Table(toml::map::Map::from_iter([
+                (
+                    "id".to_owned(),
+                    toml::Value::String("RUSTSEC-2026-0000".to_owned()),
+                ),
+                (
+                    "reason".to_owned(),
+                    toml::Value::String("good enough reason text".to_owned()),
+                ),
+            ]))],
         ),
     );
 

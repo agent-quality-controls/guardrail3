@@ -96,7 +96,9 @@ pub(crate) fn read_profile_map(
         Err(err) => {
             return ProfileMapFacts {
                 map,
-                parse_error: Some(format!("TOML parse error in active `guardrail3.toml`: {err}")),
+                parse_error: Some(format!(
+                    "TOML parse error in active `guardrail3.toml`: {err}"
+                )),
             };
         }
     };
@@ -183,11 +185,12 @@ fn validate_guardrail_policy_shape(parsed: &toml::Value) -> Result<(), String> {
             .as_table()
             .ok_or_else(|| "`profile` must be a table in active `guardrail3.toml`.".to_owned())?;
         if let Some(name) = table.get("name") {
-            if !name.is_str() {
+            let Some(name) = name.as_str() else {
                 return Err(
                     "`profile.name` must be a string in active `guardrail3.toml`.".to_owned(),
                 );
-            }
+            };
+            validate_known_profile_name(name, "`profile.name`")?;
         }
     }
 
@@ -218,14 +221,41 @@ fn validate_profile_block(value: &toml::Value, context: &str) -> Result<(), Stri
     let table = value
         .as_table()
         .ok_or_else(|| format!("{context} must be a table in active `guardrail3.toml`."))?;
-    if let Some(profile_name) = table.get("type").or_else(|| table.get("profile")) {
-        if !profile_name.is_str() {
+    let type_name = table.get("type").map_or(Ok(None), |value| {
+        value.as_str().map(Some).ok_or_else(|| {
+            format!("{context}.type/profile must be a string in active `guardrail3.toml`.")
+        })
+    })?;
+    let profile_name = table.get("profile").map_or(Ok(None), |value| {
+        value.as_str().map(Some).ok_or_else(|| {
+            format!("{context}.type/profile must be a string in active `guardrail3.toml`.")
+        })
+    })?;
+
+    if let Some(name) = type_name {
+        validate_known_profile_name(name, &format!("{context}.type"))?;
+    }
+    if let Some(name) = profile_name {
+        validate_known_profile_name(name, &format!("{context}.profile"))?;
+    }
+    if let (Some(type_name), Some(profile_name)) = (type_name, profile_name) {
+        if type_name != profile_name {
             return Err(format!(
-                "{context}.type/profile must be a string in active `guardrail3.toml`."
+                "{context}.type and {context}.profile must match in active `guardrail3.toml`."
             ));
         }
     }
     Ok(())
+}
+
+fn validate_known_profile_name(profile_name: &str, context: &str) -> Result<(), String> {
+    if matches!(profile_name, "service" | "library") {
+        Ok(())
+    } else {
+        Err(format!(
+            "{context} must be `service` or `library` in active `guardrail3.toml`."
+        ))
+    }
 }
 
 pub(crate) fn profile_for(

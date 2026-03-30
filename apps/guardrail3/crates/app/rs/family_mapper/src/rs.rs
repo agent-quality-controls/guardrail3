@@ -133,11 +133,13 @@ impl<'a> FamilyMapper<'a> {
     #[must_use]
     pub fn map_rs_clippy(&self) -> views::RsClippyRoute {
         views::RsClippyRoute::new(self.map_roots_for_family(RustValidateFamily::Clippy, |_| true))
+            .with_validation_scope(self.validation_scope.map(str::to_owned))
     }
 
     #[must_use]
     pub fn map_rs_cargo(&self) -> views::RsCargoRoute {
         views::RsCargoRoute::new(self.map_roots_for_family(RustValidateFamily::Cargo, |_| true))
+            .with_validation_scope(self.validation_scope.map(str::to_owned))
     }
 
     #[must_use]
@@ -145,11 +147,15 @@ impl<'a> FamilyMapper<'a> {
         views::RsToolchainRoute::new(
             self.map_roots_for_family(RustValidateFamily::Toolchain, |_| true),
         )
+        .with_validation_scope(self.validation_scope.map(str::to_owned))
     }
 
     #[must_use]
     pub fn map_rs_deny(&self) -> views::RsDenyRoute {
-        views::RsDenyRoute::new(self.map_roots_for_family(RustValidateFamily::Deny, |_| true))
+        views::RsDenyRoute::new(
+            self.map_roots_for_family(RustValidateFamily::Deny, |_| true),
+            self.validation_scope.map(str::to_owned),
+        )
     }
 
     #[must_use]
@@ -163,11 +169,13 @@ impl<'a> FamilyMapper<'a> {
                         .is_some_and(|candidate| candidate == root.rel_dir())
             }),
         )
+        .with_validation_scope(self.validation_scope.map(str::to_owned))
     }
 
     #[must_use]
     pub fn map_rs_deps(&self) -> views::RsDepsRoute {
         views::RsDepsRoute::new(self.map_roots_for_family(RustValidateFamily::Deps, |_| true))
+            .with_validation_scope(self.validation_scope.map(str::to_owned))
     }
 
     #[must_use]

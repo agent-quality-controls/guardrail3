@@ -68,16 +68,16 @@ Forbidden:
 | RS-DENY-14 | R14 | Error | `[licenses]` must contain the baseline allow list and `[licenses.private].ignore = true` | Implemented |
 | RS-DENY-15 | R15 | Warn/Info | `confidence-threshold` must be `0.8` or stricter; stricter values are inventoried | Implemented |
 | RS-DENY-16 | — | Warn | `[licenses].allow` must not include copyleft licenses | Implemented |
-| RS-DENY-17 | — | Info | `[licenses].exceptions` entries are inventoried | Implemented |
+| RS-DENY-17 | — | Error/Info | `[licenses].exceptions` entries must be documented with reasons; valid entries are inventoried | Implemented |
 | RS-DENY-18 | R16 | Error | `[sources].unknown-registry = "deny"` and `unknown-git = "deny"` | Implemented |
-| RS-DENY-19 | R16 | Error | `[sources].allow-registry` must allow only crates.io (git or sparse URL) | Implemented |
+| RS-DENY-19 | R16 | Error | `[sources].allow-registry` must contain exactly one canonical crates.io sparse URL | Implemented |
 | RS-DENY-20 | — | Warn/Info | `[sources].allow-git` entries are warned and inventoried | Implemented |
 | RS-DENY-21 | R17 | Warn | `[[bans.features]]` must ban `tokio` feature `full` and keep the canonical tokio allow list | Implemented |
 | RS-DENY-22 | R18 | Info | Extra feature bans beyond tokio are inventoried | Implemented |
-| RS-DENY-23 | R19 | Warn/Info | `[bans.skip]` entries: malformed entry or missing/non-string reason warns; valid entries inventory | Implemented |
-| RS-DENY-24 | R20 | Warn/Info | `[advisories].ignore` entries: malformed entry or missing/non-string reason warns; valid entries inventory | Implemented |
+| RS-DENY-23 | R19 | Error/Info | `[bans.skip]` entries must use documented table form with a string `reason`; valid entries inventory | Implemented |
+| RS-DENY-24 | R20 | Error/Info | `[advisories].ignore` entries must use documented table form with a string `reason`; valid entries inventory | Implemented |
 | RS-DENY-25 | — | Error/Warn | `[bans].allow` is forbidden; overlap with deny baseline is an explicit error | Implemented |
-| RS-DENY-26 | — | Info | `[bans].deny` entries without `reason` are inventoried | Implemented |
+| RS-DENY-26 | — | Error | `[bans].deny` entries without `reason` are errors | Implemented |
 | RS-DENY-27 | — | Warn | Duplicate entries in `deny`, `skip`, `ignore`, or `[[bans.features]]` are warned | Implemented |
 | RS-DENY-28 | — | Warn | Unknown keys / unsupported schema in critical deny sections are warned | Implemented |
 | RS-DENY-29 | — | Warn | Advisory ignore accumulation over threshold `5` is warned | Implemented |
@@ -214,13 +214,13 @@ Warn / inventory:
 Guardrail-owned:
 - `unknown-registry = "deny"`
 - `unknown-git = "deny"`
-- `allow-registry` must allow only crates.io
+- `allow-registry` must contain exactly one canonical crates.io entry
 
-Accepted crates.io values:
-- `https://github.com/rust-lang/crates.io-index`
+Canonical crates.io value:
 - `sparse+https://index.crates.io/`
 
 Any extra registry is an error.
+The legacy GitHub crates.io index form is rejected to keep the policy exact.
 
 `allow-git` is not automatically forbidden by the plan, but it is risky enough to warn and inventory.
 
@@ -234,12 +234,13 @@ Extra feature bans are inventoried.
 
 ### RS-DENY-23 / RS-DENY-24 / RS-DENY-26 / RS-DENY-29 — Exception hygiene
 
-For `skip` and `ignore` entries:
-- malformed entry shape warns
-- missing or non-string `reason` warns
-- valid entries inventory
+For `licenses.exceptions`, `skip`, and `ignore` entries:
+- malformed entry shape errors
+- bare string shortcut forms are forbidden because they cannot carry justification
+- missing or non-string `reason` errors
+- valid documented entries inventory
 
-Ban entries without reasons are inventoried.
+Ban entries without reasons are errors.
 
 Excessive advisory ignores warn once the count exceeds `5`, but this is a pressure rule, not a core correctness rule.
 
