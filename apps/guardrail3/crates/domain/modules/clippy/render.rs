@@ -8,17 +8,17 @@ use super::methods::{
 };
 use super::settings::SETTINGS;
 use super::thresholds::THRESHOLDS;
-use super::types::{
-    TYPE_GARDE_EXTRACTORS, library_profile_types, pure_layer_extra_types, service_profile_types,
-};
+use super::types::{TYPE_GARDE_EXTRACTORS, library_profile_types, service_profile_types};
 
 /// Build the full clippy.toml content for a workspace root or crate.
 ///
-/// `is_pure_layer` adds global-state type bans (for service profiles with pure-layer crates).
+/// `_is_pure_layer` is accepted for generator call-site compatibility but does not
+/// change the managed clippy baseline. Pure-layer semantics belong to architecture
+/// checks rather than clippy profile generation.
 /// `extra_methods` and `extra_types` are appended from local override files.
 pub fn build_clippy_toml(
     profile: &str,
-    is_pure_layer: bool,
+    _is_pure_layer: bool,
     garde_enabled: bool,
     extra_methods: &str,
     extra_types: &str,
@@ -33,13 +33,7 @@ pub fn build_clippy_toml(
 
     let mut types = match profile {
         "library" => library_profile_types(),
-        _ => {
-            let mut profile_types = service_profile_types();
-            if is_pure_layer {
-                profile_types.extend(pure_layer_extra_types());
-            }
-            profile_types
-        }
+        _ => service_profile_types(),
     };
     if !garde_enabled {
         types.retain(|module| module.name != TYPE_GARDE_EXTRACTORS.name);

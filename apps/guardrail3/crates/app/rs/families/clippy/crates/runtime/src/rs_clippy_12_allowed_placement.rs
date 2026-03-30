@@ -33,6 +33,16 @@ pub fn check(forbidden: &ForbiddenConfigFacts, results: &mut Vec<CheckResult>) {
                 forbidden.config.rel_path
             ),
         ),
+        ForbiddenConfigReason::UnparseableCargoRoot {
+            cargo_rel_path,
+            parse_error,
+        } => (
+            "clippy.toml placement could not be resolved".to_owned(),
+            format!(
+                "`{}` is attached to routed Cargo root `{cargo_rel_path}`, but that Cargo.toml could not be parsed: {parse_error}",
+                forbidden.config.rel_path
+            ),
+        ),
         ForbiddenConfigReason::ShadowedSameRoot { preferred_rel_path } => (
             "same-root clippy config conflict".to_owned(),
             format!(

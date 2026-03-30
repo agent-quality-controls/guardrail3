@@ -2,7 +2,7 @@ use guardrail3_domain_report::{CheckResult, Severity};
 #[cfg(test)]
 use std::path::{Path, PathBuf};
 
-use super::inputs::{CoveredRustUnitInput, UncoveredRustUnitInput};
+use super::inputs::{CargoRootFailureInput, CoveredRustUnitInput, UncoveredRustUnitInput};
 
 const ID: &str = "RS-CLIPPY-01";
 
@@ -24,6 +24,26 @@ pub fn check_covered(input: &CoveredRustUnitInput<'_>, results: &mut Vec<CheckRe
         }
         .as_inventory(),
     );
+}
+
+pub fn check_root_failure(input: &CargoRootFailureInput<'_>, results: &mut Vec<CheckResult>) {
+    let scope = if input.rel_dir.is_empty() {
+        "validation-root Cargo.toml".to_owned()
+    } else {
+        format!("routed Cargo root `{}`", input.rel_dir)
+    };
+    results.push(CheckResult {
+        id: ID.to_owned(),
+        severity: Severity::Error,
+        title: "Rust unit coverage could not be determined".to_owned(),
+        message: format!(
+            "{scope} could not be parsed from `{}` while resolving clippy coverage and policy roots: {}",
+            input.cargo_rel_path, input.parse_error
+        ),
+        file: Some(input.cargo_rel_path.to_owned()),
+        line: None,
+        inventory: false,
+    });
 }
 
 pub fn check_uncovered(input: &UncoveredRustUnitInput<'_>, results: &mut Vec<CheckResult>) {

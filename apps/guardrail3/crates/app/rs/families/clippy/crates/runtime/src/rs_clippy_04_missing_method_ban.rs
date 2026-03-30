@@ -4,7 +4,7 @@ use std::collections::BTreeSet;
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::clippy_support::ban_paths;
+use super::clippy_support::{expected_method_bans, parse_ban_section};
 use super::inputs::ConfigClippyInput;
 
 const ID: &str = "RS-CLIPPY-04";
@@ -17,10 +17,25 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
         return;
     };
 
-    let found: BTreeSet<_> = ban_paths(parsed, "disallowed-methods")
+    let section = parse_ban_section(parsed, "disallowed-methods");
+    for malformed in &section.malformed_messages {
+        results.push(CheckResult {
+            id: ID.to_owned(),
+            severity: Severity::Error,
+            title: "disallowed-methods section malformed".to_owned(),
+            message: malformed.clone(),
+            file: Some(input.config.rel_path.clone()),
+            line: None,
+            inventory: false,
+        });
+    }
+
+    let found: BTreeSet<_> = section
+        .entries
         .into_iter()
+        .map(|entry| entry.path)
         .collect();
-    for expected in super::clippy_support::expected_method_bans(input.garde_enabled()) {
+    for expected in expected_method_bans(input.garde_enabled()) {
         if found.contains(expected) {
             results.push(
                 CheckResult {

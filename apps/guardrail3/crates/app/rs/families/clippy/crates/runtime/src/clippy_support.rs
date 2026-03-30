@@ -16,6 +16,24 @@ pub struct BanEntry {
     pub is_plain_string: bool,
 }
 
+#[derive(Debug, Clone)]
+pub struct BanSectionFacts {
+    pub entries: Vec<BanEntry>,
+    pub malformed_messages: Vec<String>,
+}
+
+pub enum IntegerSetting<'a> {
+    Missing,
+    WrongType(&'a toml::Value),
+    Value(i64),
+}
+
+pub enum BoolSetting<'a> {
+    Missing,
+    WrongType(&'a toml::Value),
+    Value(bool),
+}
+
 pub const EXPECTED_MACRO_BANS: &[&str] = guardrail3_domain_modules::clippy::EXPECTED_MACRO_BANS;
 
 pub const THRESHOLD_EXPECTATIONS: &[ThresholdExpectation] = &[
@@ -142,46 +160,108 @@ pub fn expected_method_bans(garde_enabled: bool) -> Vec<&'static str> {
     bans
 }
 
-pub fn parse_ban_entries(parsed: &toml::Value, key: &str) -> Vec<BanEntry> {
-    parsed
-        .get(key)
-        .and_then(toml::Value::as_array)
-        .map(|entries| {
-            entries
-                .iter()
-                .filter_map(|entry| match entry {
-                    toml::Value::String(path) => Some(BanEntry {
-                        path: path.clone(),
-                        reason: None,
-                        is_plain_string: true,
-                    }),
-                    toml::Value::Table(table) => table
-                        .get("path")
-                        .and_then(toml::Value::as_str)
-                        .map(|path| BanEntry {
-                            path: path.to_owned(),
-                            reason: table
-                                .get("reason")
-                                .and_then(toml::Value::as_str)
-                                .map(str::to_owned),
-                            is_plain_string: false,
-                        }),
-                    _ => None,
-                })
-                .collect()
-        })
-        .unwrap_or_default()
+pub fn parse_ban_section(parsed: &toml::Value, key: &str) -> BanSectionFacts {
+    let Some(value) = parsed.get(key) else {
+        return BanSectionFacts {
+            entries: Vec::new(),
+            malformed_messages: Vec::new(),
+        };
+    };
+
+    let Some(entries) = value.as_array() else {
+        return BanSectionFacts {
+            entries: Vec::new(),
+            malformed_messages: vec![format!(
+                "`{key}` must be an array, found {}.",
+                value_kind(value)
+            )],
+        };
+    };
+
+    let mut parsed_entries = Vec::new();
+    let mut malformed_messages = Vec::new();
+
+    for (index, entry) in entries.iter().enumerate() {
+        match entry {
+            toml::Value::String(path) => parsed_entries.push(BanEntry {
+                path: path.clone(),
+                reason: None,
+                is_plain_string: true,
+            }),
+            toml::Value::Table(table) => match table.get("path") {
+                Some(toml::Value::String(path)) => {
+                    if let Some(reason) = table.get("reason") {
+                        if !reason.is_str() {
+                            malformed_messages.push(format!(
+                                "`{key}[{index}].reason` must be a string when present, found {}.",
+                                value_kind(reason)
+                            ));
+                            continue;
+                        }
+                    }
+                    parsed_entries.push(BanEntry {
+                        path: path.to_owned(),
+                        reason: table
+                            .get("reason")
+                            .and_then(toml::Value::as_str)
+                            .map(str::to_owned),
+                        is_plain_string: false,
+                    });
+                }
+                Some(path) => malformed_messages.push(format!(
+                    "`{key}[{index}].path` must be a string, found {}.",
+                    value_kind(path)
+                )),
+                None => malformed_messages.push(format!(
+                    "`{key}[{index}]` must contain a string `path` field."
+                )),
+            },
+            other => malformed_messages.push(format!(
+                "`{key}[{index}]` must be a string or table, found {}.",
+                value_kind(other)
+            )),
+        }
+    }
+
+    BanSectionFacts {
+        entries: parsed_entries,
+        malformed_messages,
+    }
 }
 
 pub fn ban_paths(parsed: &toml::Value, key: &str) -> Vec<String> {
-    parse_ban_entries(parsed, key)
+    parse_ban_section(parsed, key)
+        .entries
         .into_iter()
         .map(|entry| entry.path)
         .collect()
 }
 
+pub fn integer_setting<'a>(parsed: &'a toml::Value, key: &str) -> IntegerSetting<'a> {
+    match parsed.get(key) {
+        None => IntegerSetting::Missing,
+        Some(value) => match value.as_integer() {
+            Some(actual) => IntegerSetting::Value(actual),
+            None => IntegerSetting::WrongType(value),
+        },
+    }
+}
+
+pub fn bool_setting<'a>(parsed: &'a toml::Value, key: &str) -> BoolSetting<'a> {
+    match parsed.get(key) {
+        None => BoolSetting::Missing,
+        Some(value) => match value.as_bool() {
+            Some(actual) => BoolSetting::Value(actual),
+            None => BoolSetting::WrongType(value),
+        },
+    }
+}
+
 pub fn threshold_value(parsed: &toml::Value, key: &str) -> Option<i64> {
-    parsed.get(key).and_then(toml::Value::as_integer)
+    match integer_setting(parsed, key) {
+        IntegerSetting::Value(value) => Some(value),
+        IntegerSetting::Missing | IntegerSetting::WrongType(_) => None,
+    }
 }
 
 pub fn display_macro_name(path: &str) -> &str {
@@ -243,4 +323,16 @@ pub fn levenshtein(a: &[u8], b: &[u8]) -> usize {
     }
 
     prev[b.len()]
+}
+
+pub fn value_kind(value: &toml::Value) -> &'static str {
+    match value {
+        toml::Value::String(_) => "string",
+        toml::Value::Integer(_) => "integer",
+        toml::Value::Float(_) => "float",
+        toml::Value::Boolean(_) => "bool",
+        toml::Value::Datetime(_) => "datetime",
+        toml::Value::Array(_) => "array",
+        toml::Value::Table(_) => "table",
+    }
 }

@@ -6,6 +6,7 @@ pub const BASE_TYPE_PATHS: &[&str] = &[
     "std::sync::Mutex",
     "std::sync::RwLock",
     "std::fs::File",
+    "std::any::Any",
     "axum::extract::Json",
     "axum::Json",
     "axum::extract::Query",
@@ -21,7 +22,6 @@ pub const BASE_TYPE_PATHS: &[&str] = &[
     "axum_extra::extract::Protobuf",
     "axum_extra::extract::Cbor",
     "axum_extra::extract::MsgPack",
-    "std::any::Any",
 ];
 
 pub const LIBRARY_EXTRA_TYPE_PATHS: &[&str] = &[
@@ -30,6 +30,40 @@ pub const LIBRARY_EXTRA_TYPE_PATHS: &[&str] = &[
     "once_cell::sync::Lazy",
     "once_cell::sync::OnceCell",
 ];
+
+pub fn service_profile_type_paths() -> Vec<&'static str> {
+    BASE_TYPE_PATHS.to_vec()
+}
+
+pub fn library_profile_type_paths() -> Vec<&'static str> {
+    vec![
+        "std::collections::HashMap",
+        "std::collections::HashSet",
+        "std::sync::Mutex",
+        "std::sync::RwLock",
+        "std::fs::File",
+        "std::any::Any",
+        "std::sync::LazyLock",
+        "std::sync::OnceLock",
+        "once_cell::sync::Lazy",
+        "once_cell::sync::OnceCell",
+        "axum::extract::Json",
+        "axum::Json",
+        "axum::extract::Query",
+        "axum::extract::Form",
+        "axum::extract::Path",
+        "axum::extract::Multipart",
+        "axum::extract::ConnectInfo",
+        "axum_extra::extract::CookieJar",
+        "axum_extra::extract::cookie::Cookie",
+        "axum_extra::extract::TypedHeader",
+        "axum_extra::extract::JsonDeserializer",
+        "axum_extra::extract::JsonLines",
+        "axum_extra::extract::Protobuf",
+        "axum_extra::extract::Cbor",
+        "axum_extra::extract::MsgPack",
+    ]
+}
 
 pub const TYPE_COLLECTIONS: Module = Module {
     name: "clippy/types/collections",
@@ -94,10 +128,6 @@ pub fn service_profile_types() -> Vec<&'static Module> {
         &TYPE_DYNAMIC,
         &TYPE_GARDE_EXTRACTORS,
     ]
-}
-
-pub fn pure_layer_extra_types() -> Vec<&'static Module> {
-    vec![&TYPE_GLOBAL_STATE]
 }
 
 pub fn library_profile_types() -> Vec<&'static Module> {

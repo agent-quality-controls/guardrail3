@@ -1,5 +1,6 @@
 use std::collections::BTreeSet;
 
+use guardrail3_domain_modules::clippy::THRESHOLD_VALUES;
 use test_support::build_fixture_clippy_toml;
 
 #[test]
@@ -8,28 +9,21 @@ fn generated_top_level_keys_are_all_known_managed_keys() {
         toml::from_str::<toml::Value>(&build_fixture_clippy_toml("service", false, true, "", ""))
             .expect("valid clippy TOML");
     let table = parsed.as_table().expect("top-level clippy table");
-    let known: BTreeSet<_> = [
-        "max-struct-bools",
-        "max-fn-params-bools",
-        "too-many-lines-threshold",
-        "too-many-arguments-threshold",
-        "excessive-nesting-threshold",
-        "cognitive-complexity-threshold",
-        "type-complexity-threshold",
-    ]
-    .into_iter()
-    .chain([
-        "avoid-breaking-exported-api",
-        "allow-dbg-in-tests",
-        "allow-expect-in-tests",
-        "allow-panic-in-tests",
-        "allow-print-in-tests",
-        "allow-unwrap-in-tests",
-        "disallowed-methods",
-        "disallowed-types",
-        "disallowed-macros",
-    ])
-    .collect();
+    let known: BTreeSet<_> = THRESHOLD_VALUES
+        .iter()
+        .map(|(key, _)| *key)
+        .chain([
+            "avoid-breaking-exported-api",
+            "allow-dbg-in-tests",
+            "allow-expect-in-tests",
+            "allow-panic-in-tests",
+            "allow-print-in-tests",
+            "allow-unwrap-in-tests",
+            "disallowed-methods",
+            "disallowed-types",
+            "disallowed-macros",
+        ])
+        .collect();
 
     for key in table.keys() {
         assert!(

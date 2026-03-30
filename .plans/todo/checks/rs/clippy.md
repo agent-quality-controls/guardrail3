@@ -1,4 +1,4 @@
-# RS-CLIPPY — clippy.toml checker (24 rules)
+# RS-CLIPPY — clippy.toml checker (25 rules)
 
 **Input:** `clippy.toml` / `.clippy.toml` at allowed Rust policy roots
 **Parser:** TOML (`toml::Value`)
@@ -28,6 +28,8 @@ These are the current contract decisions for the clippy family. They override ol
 - prefer enforcing upstream enforcement knobs rather than trusting source scans alone
 - every allow/ignore/removal escape hatch must carry a reason
 - the clippy checker is a hardening/configuration checker, not a style-preference checker
+- malformed active inputs must be owned by the rule that depends on them; do not fall back to defaults through broken policy
+- pure-layer service semantics belong to architecture checks, not clippy profile generation
 
 ### Allowed clippy.toml locations
 
@@ -54,6 +56,8 @@ Every Rust workspace root and every standalone package root must be covered by s
 - an allowed ancestor Clippy config file (for example the validation root)
 
 If a Rust unit is uncovered, that is an Error.
+
+If a routed `Cargo.toml` needed for coverage/root classification cannot be parsed, coverage fails closed through `RS-CLIPPY-01`.
 
 ### Shadowing rule
 
@@ -124,12 +128,24 @@ Every guardrail-managed ban entry must have a real `reason`.
 
 ### Profile policy
 
-- `library` profile adds global-state type bans
+- profile resolution comes from `guardrail3.toml` plus local `type` / `profile` selectors
+- `library` profile adds 4 global-state type bans on top of the base type set
+- pure-layer service semantics do NOT change the managed Clippy baseline; those constraints belong to architecture checks rather than Clippy profile generation
 - `avoid-breaking-exported-api` should be explicitly set
 - default hardened value is `false`
 - `true` may be informationally tolerated for published library policy roots, but is otherwise Warn
 - `allow-dbg-in-tests = true` and `allow-print-in-tests = true` are Warn
 - `allow-panic-in-tests = true` and `allow-unwrap-in-tests = true` are Error
+- managed thresholds must be integers, and managed booleans must be booleans; wrong types are malformed config, not “missing”
+
+### Malformed input ownership
+
+- `RS-CLIPPY-23` owns malformed or unreadable `guardrail3.toml` when profile/garde resolution depends on it
+- `RS-CLIPPY-25` owns parseability of allowed `clippy.toml` / `.clippy.toml` files
+- `RS-CLIPPY-24` owns malformed or unreadable applicable `.cargo/config.toml` / `.cargo/config` surfaces that can set `CLIPPY_CONF_DIR`
+- `RS-CLIPPY-01` fail-closes coverage when a routed `Cargo.toml` cannot be parsed
+- `RS-CLIPPY-12` fail-closes placement when a `clippy.toml` is attached to a routed Cargo root whose `Cargo.toml` cannot be parsed
+- dependent rule checks skip defaulting when their required input is broken; they do not re-parse or guess around it
 
 ### Source of truth after cleanup
 
@@ -210,21 +226,21 @@ The generator and checker must match exactly.
 ### RS-CLIPPY-05: missing type ban
 - **Old ID:** R5
 - **Severity:** Error
-- **What:** `disallowed-types` must contain all expected type bans (10 base types: HashMap, HashSet, Mutex, RwLock, File, axum::extract::Json, axum::Json, axum::extract::Query, axum::extract::Form, std::any::Any)
-- **Note:** `std::any::Any` added from source audit — `Box<dyn Any>` erases type safety, bypassing strongly-typed boundaries.
-- **Remaining hardening debt from archived GARDE_GUARDRAILS.md:** the canonical extractor/type baseline still needs to expand to cover additional raw boundary extractors such as `axum::extract::Path`, `Multipart`, `ConnectInfo`, and selected `axum_extra` extractor types.
+- **What:** `disallowed-types` must contain the full base type set used by the family baseline.
+- **Base set:** 21 paths covering collections, sync, file, dynamic, and the current `garde` extractor surface.
+- **Note:** `std::any::Any` stays in the base set because `Box<dyn Any>` erases type safety and bypasses strongly-typed boundaries.
 - **Status:** Implemented
 
 ### RS-CLIPPY-06: extra method ban (inventory)
 - **Old ID:** R6
 - **Severity:** Info
-- **What:** Report method bans not in expected baseline (user additions)
+- **What:** Inventory method bans not in the expected baseline (user additions). When no user additions exist and the section is parseable, emit a positive clean-inventory result.
 - **Status:** Implemented
 
 ### RS-CLIPPY-07: extra type ban (inventory)
 - **Old ID:** R7
 - **Severity:** Info
-- **What:** Report type bans not in expected baseline
+- **What:** Inventory type bans not in the expected baseline. When no user additions exist and the section is parseable, emit a positive clean-inventory result.
 - **Status:** Implemented
 
 ## Ban quality
@@ -271,6 +287,7 @@ The generator and checker must match exactly.
   - macro bans
 - **Why:** A local policy root replaces inherited config for everything below it.
 - **Profile interaction:** Library roots must include RS-CLIPPY-14 global-state bans too.
+- **Malformed input behavior:** parseability of the local policy root file is owned by `RS-CLIPPY-25`; this rule only evaluates parseable local policy roots.
 - **Status:** Implemented
 
 ## Profile-aware checks
@@ -278,13 +295,14 @@ The generator and checker must match exactly.
 ### RS-CLIPPY-14: library profile must have global-state bans
 - **Old ID:** NEW (from audit — HIGH)
 - **Severity:** Error
-- **What:** Library profile clippy.toml must have 4 additional global-state type bans: LazyLock, OnceLock, once_cell::sync::Lazy, once_cell::sync::OnceCell. The `_profile` param is currently ignored.
+- **What:** Library profile clippy.toml must have 4 additional global-state type bans: LazyLock, OnceLock, once_cell::sync::Lazy, once_cell::sync::OnceCell.
+- **Profile source:** the resolved profile comes from active policy context plus the local `type` / `profile` selector.
 - **Status:** Implemented
 
 ### RS-CLIPPY-16: avoid-breaking-exported-api setting
 - **Old ID:** NEW (from audit)
 - **Severity:** Warn
-- **What:** `avoid-breaking-exported-api` should be explicitly set to `false` (suppresses useful lints when `true`, which is the default). For published library policy roots, `true` is legitimate — info note instead.
+- **What:** `avoid-breaking-exported-api` should be explicitly set to `false` (suppresses useful lints when `true`, which is the default). For published library policy roots, `true` is legitimate and becomes an inventory info.
 - **Status:** Implemented
 
 ## Config hygiene
@@ -310,7 +328,7 @@ The generator and checker must match exactly.
 ### RS-CLIPPY-20: disallowed-macros validation
 - **Old ID:** NEW (from audit)
 - **Severity:** Error
-- **What:** `disallowed-macros` section must contain expected macro bans (println!, eprintln!, dbg!, todo!, unimplemented!) with reason fields. Defense in depth alongside cargo workspace lint config — provides per-macro ban reasons in compiler errors.
+- **What:** `disallowed-macros` section must contain expected macro bans (println!, eprintln!, dbg!, todo!, unimplemented!). Reason quality is owned separately by `RS-CLIPPY-08` and `RS-CLIPPY-15`.
 - **Status:** Implemented
 
 ### RS-CLIPPY-23: policy context is parseable
@@ -318,6 +336,7 @@ The generator and checker must match exactly.
 - **Severity:** Error
 - **What:** If active Clippy policy depends on `guardrail3.toml` profile/garde metadata and that file is unreadable or malformed, fail closed instead of silently falling back to default profile/garde behavior.
 - **Why:** Profile-sensitive rules must not guess when the policy context is broken.
+- **Malformed-input ownership:** this rule owns the policy-context parse failure; dependent rules skip rather than inventing defaults.
 - **Status:** Implemented
 
 ### RS-CLIPPY-24: cargo config must not override Clippy config discovery
@@ -326,6 +345,15 @@ The generator and checker must match exactly.
 - **What:** Any applicable `.cargo/config.toml` or legacy `.cargo/config` that sets `CLIPPY_CONF_DIR` is forbidden. If an applicable cargo config surface is unreadable or malformed, fail closed.
 - **Why:** `CLIPPY_CONF_DIR` bypasses the routed clippy policy-root model by forcing Clippy to start config discovery from an arbitrary directory.
 - **Applies to:** validation-root cargo config surfaces, routed workspace/package roots, and member/package-local cargo config surfaces that apply to in-scope Cargo roots.
+- **Malformed-input ownership:** this rule owns parse failure on applicable cargo-config override surfaces.
+- **Status:** Implemented
+
+### RS-CLIPPY-25: allowed clippy config is parseable
+- **Old ID:** NEW (from attack)
+- **Severity:** Error
+- **What:** Every allowed `clippy.toml` / `.clippy.toml` must parse cleanly. This rule emits one config-owned malformed-input result instead of letting threshold/baseline rules fan out duplicate parse errors.
+- **Why:** malformed Clippy policy must fail closed exactly once rather than degrade into silent defaulting or noisy duplicate parse failures.
+- **Malformed-input ownership:** this rule owns parseability for allowed active Clippy policy files; dependent rules skip when parsing failed.
 - **Status:** Implemented
 
 ## Explicitly rejected audit findings

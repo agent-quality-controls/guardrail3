@@ -17,8 +17,11 @@ This family enforces `clippy.toml` policy inside routed Rust roots. It does not 
 - duplicate ban detection
 - managed-key typo detection
 - profile-specific Clippy policy such as library global-state bans
+- positive inventory proof for clean policy state
 - fail-closed handling when active Clippy inputs are unreadable or malformed
   - including malformed `guardrail3.toml` policy context used to resolve profile/garde behavior
+  - including malformed allowed `clippy.toml` / `.clippy.toml`
+  - including malformed routed `Cargo.toml` when coverage or placement depends on it
 
 It does not own:
 
@@ -53,6 +56,16 @@ Inside a routed root, the family may then do family-local discovery:
 - per-root coverage and shadowing analysis
 - profile-aware baseline comparison
 - input failure collection
+- no pure-layer-specific Clippy baseline forks; pure-layer semantics stay owned by architecture checks
+
+Malformed inputs are owned at the point where the rule depends on them:
+
+- malformed allowed `clippy.toml` / `.clippy.toml` is owned by `RS-CLIPPY-25`
+- malformed `guardrail3.toml` is owned by the policy-context rule
+- malformed applicable `.cargo/config.toml` / `.cargo/config` override surfaces are owned by the Clippy override rule
+- malformed routed `Cargo.toml` is fail-closed by `RS-CLIPPY-01` for coverage and by `RS-CLIPPY-12` for placement of attached configs
+
+Positive inventory results are the normal "clean state" proof for this family. That includes the clean-path inventory emitted by `RS-CLIPPY-06` and `RS-CLIPPY-07` when there are no extra bans. They are not extra warnings and they are not emitted when the required input is broken.
 
 That split is intentional:
 
@@ -80,8 +93,8 @@ apps/guardrail3/crates/app/rs/families/clippy/
         rs_clippy_01_*_tests/
           mod.rs
         ...
-        rs_clippy_24_*.rs
-        rs_clippy_24_*_tests/
+        rs_clippy_25_*.rs
+        rs_clippy_25_*_tests/
           mod.rs
     assertions/
       Cargo.toml
@@ -189,14 +202,20 @@ At the current checkpoint:
 - the family unit tests pass
 - the family passes `RS-ARCH`
 - the family passes `RS-CLIPPY`
+- the family currently exposes 25 production `RS-CLIPPY-*` rules
 - the repo-owned policy root is [`apps/guardrail3/clippy.toml`](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/clippy.toml), and the family root no longer carries a local `clippy.toml`
+- parseability of active Clippy configs is owned once by `RS-CLIPPY-25`, so threshold/baseline rules no longer fan out duplicate parse errors
 - the family now fail-closes on applicable `CLIPPY_CONF_DIR` override surfaces in `.cargo/config.toml` / `.cargo/config`
+- routed Cargo-root parse failures now fail closed instead of silently erasing policy roots
 - the family no longer has a runtime-local `test_support.rs` shim
-- rule clusters `02..24` now use owner helpers plus sibling assertions modules
+- rule clusters `02..25` now use owner helpers plus sibling assertions modules
 - adversarial fixture configs that need a literal `clippy.toml` are now materialized in tempdirs during tests instead of living as active repo policy roots
+- base type coverage is 21 paths, and library profiles add 4 global-state paths on top of that base
+- pure-layer service roots do not change the managed Clippy baseline; those semantics are left to architecture checks
+- `allow-expect-in-tests = true` is the only test relaxation kept on by default; the other test relaxations stay off
 
-So the next work on `clippy` is not rule rescue first. It is:
+So the next work on `clippy` is maintenance, not rule rescue:
 
-1. rerun `RS-TEST` on the family once the outer workspace is healthy again and confirm the remaining buckets exactly
-2. fix any leftover structural fallout if the validator still finds it
-3. then attack-review the live `RS-CLIPPY` rules the way `RS-CODE` and `RS-TEST` were hardened
+1. rerun `RS-TEST` on the family when the outer workspace is healthy and keep the family self-hosted layout green
+2. keep `clippy.md`, `README.md`, and `domain/modules/clippy` aligned whenever the managed baseline changes
+3. attack-review future `RS-CLIPPY` edits before landing them so fail-open drift does not accumulate again

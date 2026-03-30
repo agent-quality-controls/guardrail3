@@ -1,11 +1,18 @@
-use std::collections::BTreeSet;
-
 use guardrail3_domain_report::{CheckResult, Severity};
 
 const ID: &str = "RS-CLIPPY-05";
 
-pub fn assert_golden(results: &[CheckResult], file: &str) {
-    assert!(!results.is_empty());
+pub fn assert_golden(results: &[CheckResult], expected: &[&str], file: &str) {
+    let expected_messages = expected
+        .iter()
+        .map(|path| format!("`{path}` is banned."))
+        .collect::<Vec<_>>();
+    let actual_messages = results
+        .iter()
+        .map(|result| result.message.as_str())
+        .collect::<Vec<_>>();
+
+    assert_eq!(actual_messages, expected_messages);
     assert!(results.iter().all(|result| {
         result.id == ID
             && result.inventory
@@ -13,35 +20,26 @@ pub fn assert_golden(results: &[CheckResult], file: &str) {
             && result.title == "type ban present"
             && result.file.as_deref() == Some(file)
     }));
-    assert!(
-        results
-            .iter()
-            .any(|result| result.message == "`std::collections::HashMap` is banned.")
-    );
-    assert!(
-        results
-            .iter()
-            .any(|result| result.message == "`std::any::Any` is banned.")
-    );
 }
 
-pub fn assert_garde_disabled(results: &[CheckResult], file: &str) {
+pub fn assert_garde_disabled(results: &[CheckResult], expected: &[&str], file: &str) {
+    let expected_messages = expected
+        .iter()
+        .map(|path| format!("`{path}` is banned."))
+        .collect::<Vec<_>>();
+    let actual_messages = results
+        .iter()
+        .map(|result| result.message.as_str())
+        .collect::<Vec<_>>();
+
+    assert_eq!(actual_messages, expected_messages);
     assert!(results.iter().all(|result| {
         result.id == ID
             && result.inventory
             && result.severity == Severity::Info
+            && result.title == "type ban present"
             && result.file.as_deref() == Some(file)
     }));
-    assert!(
-        !results
-            .iter()
-            .any(|result| result.message.contains("axum::extract::Json"))
-    );
-    assert!(
-        !results
-            .iter()
-            .any(|result| result.message.contains("axum::extract::Form"))
-    );
 }
 
 pub fn assert_excludes_library_global_state(results: &[CheckResult]) {
@@ -58,12 +56,8 @@ pub fn assert_missing_messages(results: &[CheckResult], expected: &[&str]) {
     let actual_errors = results
         .iter()
         .filter(|result| result.severity == Severity::Error)
-        .map(|result| result.message.clone())
-        .collect::<BTreeSet<_>>();
-    let expected_errors = expected
-        .iter()
-        .map(|message| (*message).to_owned())
-        .collect::<BTreeSet<_>>();
-    assert_eq!(actual_errors, expected_errors);
+        .map(|result| result.message.as_str())
+        .collect::<Vec<_>>();
+    assert_eq!(actual_errors, expected);
     assert!(results.iter().all(|result| result.id == ID));
 }

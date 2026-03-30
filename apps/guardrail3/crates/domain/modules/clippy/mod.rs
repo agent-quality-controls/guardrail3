@@ -23,8 +23,8 @@ pub use thresholds::{
 };
 pub use types::{
     BASE_TYPE_PATHS, LIBRARY_EXTRA_TYPE_PATHS, TYPE_COLLECTIONS, TYPE_DYNAMIC, TYPE_FILESYSTEM,
-    TYPE_GARDE_EXTRACTORS, TYPE_GLOBAL_STATE, TYPE_SYNC, library_profile_types,
-    pure_layer_extra_types, service_profile_types,
+    TYPE_GARDE_EXTRACTORS, TYPE_GLOBAL_STATE, TYPE_SYNC, library_profile_type_paths,
+    library_profile_types, service_profile_type_paths, service_profile_types,
 };
 
 #[cfg(test)]

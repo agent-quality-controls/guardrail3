@@ -3,7 +3,7 @@ use guardrail3_domain_modules::clippy::COGNITIVE_COMPLEXITY_THRESHOLD;
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::clippy_support::threshold_value;
+use super::clippy_support::{IntegerSetting, integer_setting, value_kind};
 use super::inputs::ConfigClippyInput;
 
 const ID: &str = "RS-CLIPPY-21";
@@ -11,22 +11,11 @@ const KEY: &str = "cognitive-complexity-threshold";
 
 pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
     let Some(parsed) = input.config.parsed.as_ref() else {
-        if let Some(parse_error) = &input.config.parse_error {
-            results.push(CheckResult {
-                id: ID.to_owned(),
-                severity: Severity::Error,
-                title: "clippy.toml parse error".to_owned(),
-                message: format!("Failed to parse clippy.toml: {parse_error}"),
-                file: Some(input.config.rel_path.clone()),
-                line: None,
-                inventory: false,
-            });
-        }
         return;
     };
 
-    match threshold_value(parsed, KEY) {
-        Some(actual) if actual == COGNITIVE_COMPLEXITY_THRESHOLD => results.push(
+    match integer_setting(parsed, KEY) {
+        IntegerSetting::Value(actual) if actual == COGNITIVE_COMPLEXITY_THRESHOLD => results.push(
             CheckResult {
                 id: ID.to_owned(),
                 severity: Severity::Info,
@@ -38,7 +27,7 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
             }
             .as_inventory(),
         ),
-        Some(actual) => results.push(CheckResult {
+        IntegerSetting::Value(actual) => results.push(CheckResult {
             id: ID.to_owned(),
             severity: Severity::Error,
             title: format!("{KEY} wrong value"),
@@ -47,7 +36,19 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
             line: None,
             inventory: false,
         }),
-        None => results.push(CheckResult {
+        IntegerSetting::WrongType(value) => results.push(CheckResult {
+            id: ID.to_owned(),
+            severity: Severity::Error,
+            title: format!("{KEY} wrong type"),
+            message: format!(
+                "Expected integer `{KEY} = {COGNITIVE_COMPLEXITY_THRESHOLD}`, found {}.",
+                value_kind(value)
+            ),
+            file: Some(input.config.rel_path.clone()),
+            line: None,
+            inventory: false,
+        }),
+        IntegerSetting::Missing => results.push(CheckResult {
             id: ID.to_owned(),
             severity: Severity::Error,
             title: format!("{KEY} missing"),

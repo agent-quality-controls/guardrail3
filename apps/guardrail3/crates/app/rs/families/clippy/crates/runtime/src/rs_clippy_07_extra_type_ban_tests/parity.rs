@@ -1,5 +1,4 @@
-use std::collections::BTreeSet;
-
+use guardrail3_domain_modules::clippy::{library_profile_type_paths, service_profile_type_paths};
 use test_support::build_fixture_clippy_toml;
 
 #[test]
@@ -13,34 +12,8 @@ fn generated_service_types_do_not_contain_project_specific_extras() {
         .into_iter()
         .flatten()
         .filter_map(|entry| entry.get("path").and_then(toml::Value::as_str))
-        .map(str::to_owned)
-        .collect::<BTreeSet<_>>();
-    let expected = [
-        "std::collections::HashMap",
-        "std::collections::HashSet",
-        "std::sync::Mutex",
-        "std::sync::RwLock",
-        "std::fs::File",
-        "axum::extract::Json",
-        "axum::Json",
-        "axum::extract::Query",
-        "axum::extract::Form",
-        "axum::extract::Path",
-        "axum::extract::Multipart",
-        "axum::extract::ConnectInfo",
-        "axum_extra::extract::CookieJar",
-        "axum_extra::extract::cookie::Cookie",
-        "axum_extra::extract::TypedHeader",
-        "axum_extra::extract::JsonDeserializer",
-        "axum_extra::extract::JsonLines",
-        "axum_extra::extract::Protobuf",
-        "axum_extra::extract::Cbor",
-        "axum_extra::extract::MsgPack",
-        "std::any::Any",
-    ]
-    .iter()
-    .map(|path| (*path).to_owned())
-    .collect::<BTreeSet<_>>();
+        .collect::<Vec<_>>();
+    let expected = service_profile_type_paths();
 
     assert_eq!(actual, expected);
 }
@@ -56,38 +29,8 @@ fn generated_library_types_do_not_misclassify_managed_global_state_entries_as_ex
         .into_iter()
         .flatten()
         .filter_map(|entry| entry.get("path").and_then(toml::Value::as_str))
-        .map(str::to_owned)
-        .collect::<BTreeSet<_>>();
-    let expected = [
-        "std::collections::HashMap",
-        "std::collections::HashSet",
-        "std::sync::Mutex",
-        "std::sync::RwLock",
-        "std::fs::File",
-        "axum::extract::Json",
-        "axum::Json",
-        "axum::extract::Query",
-        "axum::extract::Form",
-        "axum::extract::Path",
-        "axum::extract::Multipart",
-        "axum::extract::ConnectInfo",
-        "axum_extra::extract::CookieJar",
-        "axum_extra::extract::cookie::Cookie",
-        "axum_extra::extract::TypedHeader",
-        "axum_extra::extract::JsonDeserializer",
-        "axum_extra::extract::JsonLines",
-        "axum_extra::extract::Protobuf",
-        "axum_extra::extract::Cbor",
-        "axum_extra::extract::MsgPack",
-        "std::any::Any",
-        "std::sync::LazyLock",
-        "std::sync::OnceLock",
-        "once_cell::sync::Lazy",
-        "once_cell::sync::OnceCell",
-    ]
-    .iter()
-    .map(|path| (*path).to_owned())
-    .collect::<BTreeSet<_>>();
+        .collect::<Vec<_>>();
+    let expected = library_profile_type_paths();
 
     assert_eq!(actual, expected);
 }

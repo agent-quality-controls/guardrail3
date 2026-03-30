@@ -60,3 +60,17 @@ pub fn assert_warn_true(results: &[CheckResult], file: &str) {
     assert!(!result.inventory);
     assert_eq!(result.file.as_deref(), Some(file));
 }
+
+pub fn assert_wrong_type(results: &[CheckResult], file: &str, found: &str) {
+    assert_eq!(results.len(), 1);
+    let result = &results[0];
+    assert_eq!(result.id, ID);
+    assert_eq!(result.severity, Severity::Warn);
+    assert_eq!(result.title, "avoid-breaking-exported-api wrong type");
+    assert_eq!(
+        result.message,
+        format!("`avoid-breaking-exported-api` must be a bool, found {found}.")
+    );
+    assert!(!result.inventory);
+    assert_eq!(result.file.as_deref(), Some(file));
+}

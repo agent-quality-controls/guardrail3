@@ -103,3 +103,24 @@ pub fn assert_selective_uncovered(
             .collect::<BTreeSet<_>>(),
     );
 }
+
+pub fn assert_root_failure(results: &[CheckResult], cargo_rel_path: &str, root_label: &str) {
+    let coverage = results
+        .iter()
+        .filter(|result| result.id == ID)
+        .collect::<Vec<_>>();
+    assert_eq!(coverage.len(), 1);
+    let result = coverage[0];
+    assert_eq!(result.severity, Severity::Error);
+    assert_eq!(result.title, "Rust unit coverage could not be determined");
+    assert_eq!(result.file.as_deref(), Some(cargo_rel_path));
+    assert!(
+        result.message.contains(root_label),
+        "expected root label in message: {result:#?}"
+    );
+    assert!(
+        result.message.contains(cargo_rel_path),
+        "expected cargo path in message: {result:#?}"
+    );
+    assert!(!result.inventory);
+}

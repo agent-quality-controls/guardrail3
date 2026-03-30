@@ -38,12 +38,8 @@ pub fn assert_incomplete_baseline(results: &[CheckResult], file: &str, message: 
 }
 
 pub fn assert_parse_error(results: &[CheckResult], file: &str) {
-    assert_eq!(results.len(), 1);
-    let result = &results[0];
-    assert_eq!(result.id, ID);
-    assert_eq!(result.severity, Severity::Error);
-    assert_eq!(result.title, "local clippy policy root is not parseable");
-    assert_eq!(result.file.as_deref(), Some(file));
-    assert!(result.message.contains("replaces inherited policy"));
-    assert!(result.message.contains("could not be parsed"));
+    assert!(
+        results.is_empty(),
+        "expected RS-CLIPPY-23 / RS-CLIPPY-25 to own malformed policy inputs for {file}: {results:#?}"
+    );
 }
