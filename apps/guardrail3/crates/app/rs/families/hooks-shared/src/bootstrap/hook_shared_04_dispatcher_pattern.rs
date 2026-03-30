@@ -12,7 +12,7 @@ pub fn check(input: &DispatcherSyntaxInput<'_>, results: &mut Vec<CheckResult>) 
                 Severity::Error,
                 "monolithic hook mode".to_owned(),
                 "No modular `pre-commit.d` directory exists, so no dispatcher is required."
-                        .to_owned(),
+                    .to_owned(),
                 Some(input.rel_path.to_owned()),
                 None,
                 false,

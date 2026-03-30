@@ -10,9 +10,9 @@ pub fn assert_message_contains_all(
         .expect("expected HOOK-SHARED-07 finding");
     for needle in needles {
         assert!(
-            finding.message()()()().contains(needle),
+            finding.message().contains(needle),
             "expected HOOK-SHARED-07 message to contain `{needle}`, got `{}`",
-            finding.message()()()()
+            finding.message()
         );
     }
 }

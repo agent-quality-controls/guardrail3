@@ -68,17 +68,18 @@ fn check_dev_dep(
         );
     } else {
         results.push(CheckResult::from_parts(
-    id.to_owned(),
-    Severity::Error,
-    format!("{pkg} missing"),
-    format!(
+            id.to_owned(),
+            Severity::Error,
+            format!("{pkg} missing"),
+            format!(
                 "{pkg} not found in devDependencies. Install with: pnpm add -Dw {pkg}"
             ),
-    Some(pkg_path.display().to_string()),
-    None,
-    false,
+            Some(pkg_path.display().to_string()),
+            None,
+            false,
         ));
     }
+}
 
 fn load_root_package_json(
     fs: &dyn FileSystem,
@@ -144,17 +145,18 @@ pub fn check_lint_plugins(
         );
     } else {
         results.push(CheckResult::from_parts(
-    "T-PLUG-11".to_owned(),
-    Severity::Error,
-    "knip script missing".to_owned(),
-    "No \"knip\" script in package.json. Add `\"knip\": \"knip\"` to scripts \
+            "T-PLUG-11".to_owned(),
+            Severity::Error,
+            "knip script missing".to_owned(),
+            "No \"knip\" script in package.json. Add `\"knip\": \"knip\"` to scripts \
                      for dead code detection."
                 .to_owned(),
-    Some(pkg_path.display().to_string()),
-    None,
-    false,
+            Some(pkg_path.display().to_string()),
+            None,
+            false,
         ));
     }
+}
 
 /// Check additional tool packages in devDependencies (T-TOOL-01..06).
 pub fn check_additional_tools(

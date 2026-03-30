@@ -37,7 +37,9 @@ pub fn assert_expected_rule_results<'a>(
                     needles.iter().all(|needle| result.title().contains(needle))
                 })
                 && expected_result.message_contains.is_none_or(|needles| {
-                    needles.iter().all(|needle| result.message().contains(needle))
+                    needles
+                        .iter()
+                        .all(|needle| result.message().contains(needle))
                 })
         });
 

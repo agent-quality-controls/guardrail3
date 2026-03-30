@@ -491,7 +491,10 @@ fn collect_hex_roots(
             rel_path: rel_path.clone(),
             label: relative_hex_label(app_rel_dir, &rel_path),
             has_gitkeep: snapshot.files().iter().any(|file| file == ".gitkeep")
-                && !snapshot.symlink_files().iter().any(|file| file == ".gitkeep"),
+                && !snapshot
+                    .symlink_files()
+                    .iter()
+                    .any(|file| file == ".gitkeep"),
             dirs: snapshot.dirs().to_vec(),
             symlink_dirs: snapshot.symlink_dirs().to_vec(),
             files: snapshot.files().to_vec(),
@@ -504,7 +507,10 @@ fn collect_hex_roots(
             }
             let leaf_rel = ProjectTree::join_rel(&rel_path, subdir);
             let leaf_snapshot = dir_snapshot(tree, &leaf_rel);
-            let has_cargo = leaf_snapshot.files().iter().any(|file| file == "Cargo.toml");
+            let has_cargo = leaf_snapshot
+                .files()
+                .iter()
+                .any(|file| file == "Cargo.toml");
             let has_crates_dir = leaf_snapshot.dirs().iter().any(|dir| dir == "crates");
             let gitkeep_only = leaf_snapshot.dirs().is_empty()
                 && leaf_snapshot.files().len() == 1

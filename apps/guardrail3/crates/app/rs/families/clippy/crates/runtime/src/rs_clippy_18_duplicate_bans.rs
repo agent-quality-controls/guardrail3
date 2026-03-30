@@ -16,7 +16,11 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
 
     let mut issue_count = 0usize;
 
-    for key in ["disallowed-methods", "disallowed-types", "disallowed-macros"] {
+    for key in [
+        "disallowed-methods",
+        "disallowed-types",
+        "disallowed-macros",
+    ] {
         let section = parse_ban_section(parsed, key);
         for malformed in &section.malformed_messages {
             issue_count += 1;

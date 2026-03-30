@@ -4,8 +4,8 @@ use std::collections::{BTreeMap, BTreeSet};
 mod helpers;
 
 use crate::{CheckResult, Severity};
+use crate::analysis::AnalyzedFile;
 
-use super::AnalyzedFile;
 use super::facts::{RuntimeAssertionsViolation, TestFileKind, TestRootFacts};
 use super::inputs::RuntimeAssertionsViolationInput;
 
@@ -256,7 +256,11 @@ fn collect_violations(
                         ),
                     });
                 }
-                if helpers::import_hits_sibling_module(binding, owner_module_name, &local_module_names) {
+                if helpers::import_hits_sibling_module(
+                    binding,
+                    owner_module_name,
+                    &local_module_names,
+                ) {
                     violations.push(RuntimeAssertionsViolation {
                         rel_path: file.facts.rel_path.clone(),
                         line: Some(binding.line),
@@ -328,7 +332,7 @@ fn collect_violations(
                     local_package_names,
                     &allowed_sidecar_packages,
                 )
-                    .map(str::to_owned)
+                .map(str::to_owned)
             }) {
                 violations.push(RuntimeAssertionsViolation {
                     rel_path: file.facts.rel_path.clone(),

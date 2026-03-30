@@ -33,15 +33,15 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
         if looks_like_managed_typo {
             typo_count += 1;
             results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "unrecognized clippy.toml key".to_owned(),
-    format!(
+                ID.to_owned(),
+                Severity::Warn,
+                "unrecognized clippy.toml key".to_owned(),
+                format!(
                     "Top-level key `{key}` looks like a typo of a guardrail-managed clippy key."
                 ),
-    Some(input.config.rel_path.clone()),
-    None,
-    false,
+                Some(input.config.rel_path.clone()),
+                None,
+                false,
             ));
         }
     }
@@ -52,8 +52,7 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
                 ID.to_owned(),
                 Severity::Info,
                 "no suspicious managed-key typos".to_owned(),
-                "No top-level keys look like typos of guardrail-managed clippy keys."
-                    .to_owned(),
+                "No top-level keys look like typos of guardrail-managed clippy keys.".to_owned(),
                 Some(input.config.rel_path.clone()),
                 None,
                 false,

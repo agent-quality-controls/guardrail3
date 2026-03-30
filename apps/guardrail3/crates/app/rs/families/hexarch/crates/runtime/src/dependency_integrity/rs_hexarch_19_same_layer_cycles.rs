@@ -15,17 +15,17 @@ const ID: &str = "RS-HEXARCH-19";
 pub fn check(input: &CycleHexarchInput<'_>, results: &mut Vec<CheckResult>) {
     let cycle = input.cycle;
     results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    format!("same-layer {} dependency cycle", cycle.layer.label()),
-    format!(
+        ID.to_owned(),
+        Severity::Error,
+        format!("same-layer {} dependency cycle", cycle.layer.label()),
+        format!(
             "Found same-layer dependency cycle in `{}` layer: {}",
             cycle.layer.label(),
             cycle.members.join(" -> ")
         ),
-    None,
-    None,
-    false,
+        None,
+        None,
+        false,
     ));
 }
 

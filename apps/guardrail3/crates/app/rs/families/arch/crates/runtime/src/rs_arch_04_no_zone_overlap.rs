@@ -51,8 +51,7 @@ pub fn check_success(has_overlaps: bool, results: &mut Vec<CheckResult>) {
             ID.to_owned(),
             Severity::Info,
             "No illegal app/package zone overlap found".to_owned(),
-            "App and package architecture zones do not overlap or nest illegally."
-                .to_owned(),
+            "App and package architecture zones do not overlap or nest illegally.".to_owned(),
             None,
             None,
             false,

@@ -28,14 +28,13 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
             .as_inventory(),
         ),
         None => results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "CARGO_REGISTRY_TOKEN missing from workflows".to_owned(),
-    "No workflow structurally wires `CARGO_REGISTRY_TOKEN` into release steps."
-                .to_owned(),
-    None,
-    None,
-    false,
+            ID.to_owned(),
+            Severity::Warn,
+            "CARGO_REGISTRY_TOKEN missing from workflows".to_owned(),
+            "No workflow structurally wires `CARGO_REGISTRY_TOKEN` into release steps.".to_owned(),
+            None,
+            None,
+            false,
         )),
     }
 }

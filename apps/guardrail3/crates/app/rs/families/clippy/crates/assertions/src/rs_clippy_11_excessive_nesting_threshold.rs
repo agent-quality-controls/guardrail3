@@ -15,7 +15,10 @@ pub fn assert_missing_value(results: &[CheckResult]) {
     let result = single_result(results);
     assert_eq!(result.severity(), Severity::Error);
     assert_eq!(result.title(), "excessive-nesting-threshold missing");
-    assert_eq!(result.message(), "Expected excessive-nesting-threshold = 4.");
+    assert_eq!(
+        result.message(),
+        "Expected excessive-nesting-threshold = 4."
+    );
 }
 
 pub fn assert_parse_failure(results: &[CheckResult], file: &str) {

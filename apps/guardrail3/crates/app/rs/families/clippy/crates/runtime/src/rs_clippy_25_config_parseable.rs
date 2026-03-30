@@ -21,13 +21,13 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
             .as_inventory(),
         ),
         (None, Some(parse_error)) => results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    "clippy.toml parse error".to_owned(),
-    format!("Failed to parse `{}`: {parse_error}", input.config.rel_path),
-    Some(input.config.rel_path.clone()),
-    None,
-    false,
+            ID.to_owned(),
+            Severity::Error,
+            "clippy.toml parse error".to_owned(),
+            format!("Failed to parse `{}`: {parse_error}", input.config.rel_path),
+            Some(input.config.rel_path.clone()),
+            None,
+            false,
         )),
         (None, None) => {}
         (Some(_), Some(_)) => {}

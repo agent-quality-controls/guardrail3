@@ -27,14 +27,14 @@ pub fn check(input: &LockfileDepsInput<'_>, results: &mut Vec<CheckResult>) {
 
     let library_profile = input.lockfile.profile_name.as_deref() == Some("library");
     results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    if library_profile {
+        ID.to_owned(),
+        if library_profile {
             Severity::Info
         } else {
             Severity::Error
         },
-    "Cargo.lock missing".to_owned(),
-    if library_profile {
+        "Cargo.lock missing".to_owned(),
+        if library_profile {
             format!(
                 "Library-profile Rust root `{}` is missing `{}`.",
                 rel_label(&input.lockfile.root_rel_dir),
@@ -47,9 +47,9 @@ pub fn check(input: &LockfileDepsInput<'_>, results: &mut Vec<CheckResult>) {
                 input.lockfile.cargo_lock_rel_path
             )
         },
-    Some(input.lockfile.cargo_lock_rel_path.clone()),
-    None,
-    false,
+        Some(input.lockfile.cargo_lock_rel_path.clone()),
+        None,
+        false,
     ));
 }
 

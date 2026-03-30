@@ -57,14 +57,14 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         for (name, count) in skip_counts {
             if count > 1 {
                 results.push(CheckResult::from_parts(
-    "RS-DENY-27".to_owned(),
-    Severity::Warn,
-    "duplicate skip entry".to_owned(),
-    format!("`{}` has duplicate skip entry `{name}`.", config.rel_path),
-    Some(config.rel_path.clone()),
-    None,
-    false,
-                });
+                    "RS-DENY-27".to_owned(),
+                    Severity::Warn,
+                    "duplicate skip entry".to_owned(),
+                    format!("`{}` has duplicate skip entry `{name}`.", config.rel_path),
+                    Some(config.rel_path.clone()),
+                    None,
+                    false,
+                ));
             }
         }
     }
@@ -87,17 +87,17 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     for (id, count) in ignore_counts {
         if count > 1 {
             results.push(CheckResult::from_parts(
-    "RS-DENY-27".to_owned(),
-    Severity::Warn,
-    "duplicate advisory ignore entry".to_owned(),
-    format!(
+                "RS-DENY-27".to_owned(),
+                Severity::Warn,
+                "duplicate advisory ignore entry".to_owned(),
+                format!(
                     "`{}` has duplicate advisory ignore `{id}`.",
                     config.rel_path
                 ),
-    Some(config.rel_path.clone()),
-    None,
-    false,
-            });
+                Some(config.rel_path.clone()),
+                None,
+                false,
+            ));
         }
     }
 
@@ -108,31 +108,31 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     for (name, count) in feature_counts {
         if count > 1 {
             results.push(CheckResult::from_parts(
-    "RS-DENY-27".to_owned(),
-    Severity::Warn,
-    "duplicate feature-ban entry".to_owned(),
-    format!(
+                "RS-DENY-27".to_owned(),
+                Severity::Warn,
+                "duplicate feature-ban entry".to_owned(),
+                format!(
                     "`{}` has duplicate `[[bans.features]]` for `{name}`.",
                     config.rel_path
                 ),
-    Some(config.rel_path.clone()),
-    None,
-    false,
-            });
+                Some(config.rel_path.clone()),
+                None,
+                false,
+            ));
         }
     }
 }
 
 #[cfg(test)]
 pub(crate) fn run_check(deny_toml: &str) -> Vec<CheckResult> {
-    crate::run_config_rule_for_test(deny_toml, None, check),
-)
+    crate::run_config_rule_for_test(deny_toml, None, check)
+}
 
 #[cfg(test)]
 pub(crate) use ::test_support::{
     add_deny_ban_entry, add_skip_entry, build_fixture_deny_toml, set_advisory_ignores,
     set_feature_entries,
-);
+};
 #[cfg(test)]
 #[path = "rs_deny_27_duplicate_entries_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_deny_27_duplicate_entries_tests;

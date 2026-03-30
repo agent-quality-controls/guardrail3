@@ -63,10 +63,7 @@ pub fn run(args: &GenerateArgs) {
         }
     };
 
-    let profile = cfg
-        .profile()
-        .map_or("service", |p| p.name())
-        .to_owned();
+    let profile = cfg.profile().map_or("service", |p| p.name()).to_owned();
 
     let files = generate_all_files(project_path, &cfg, &profile);
 
@@ -444,10 +441,7 @@ pub fn generate_expected_ts(project_path: &Path) -> Option<Vec<GeneratedPair>> {
 /// Generate expected file contents without writing -- used by check and diff.
 pub fn generate_expected(project_path: &Path) -> Option<Vec<GeneratedPair>> {
     let cfg = load_config(project_path).ok()??;
-    let profile = cfg
-        .profile()
-        .map_or("service", |p| p.name())
-        .to_owned();
+    let profile = cfg.profile().map_or("service", |p| p.name()).to_owned();
 
     let files = generate_all_files(project_path, &cfg, &profile);
     Some(files.into_iter().map(|gf| (gf.path, gf.content)).collect())

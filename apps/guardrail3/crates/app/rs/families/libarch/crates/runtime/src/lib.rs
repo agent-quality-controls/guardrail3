@@ -19,13 +19,13 @@ use guardrail3_domain_report::CheckResult;
 use inputs::PackageLibarchInput;
 
 #[cfg(test)]
-use std::collections::BTreeSet;
-#[cfg(test)]
 use guardrail3_app_rs_family_libarch_assertions as _;
 #[cfg(test)]
 use guardrail3_app_rs_family_mapper::FamilyMapper;
 #[cfg(test)]
 use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
+#[cfg(test)]
+use std::collections::BTreeSet;
 #[cfg(test)]
 use test_support as _;
 

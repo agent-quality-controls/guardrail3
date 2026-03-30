@@ -47,7 +47,9 @@ impl std::error::Error for ResolveValidationTargetError {
     }
 }
 
-pub fn resolve_validation_target(path: &Path) -> Result<ValidationTarget, ResolveValidationTargetError> {
+pub fn resolve_validation_target(
+    path: &Path,
+) -> Result<ValidationTarget, ResolveValidationTargetError> {
     let requested_path = path
         .canonicalize()
         .map_err(|source| ResolveValidationTargetError {

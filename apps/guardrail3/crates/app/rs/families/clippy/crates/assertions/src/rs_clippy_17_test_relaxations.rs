@@ -134,8 +134,8 @@ pub fn assert_messages(results: &[CheckResult], expected: &[(Severity, &str, &st
         .map(|result| {
             (
                 result.severity(),
-                result.title().clone(),
-                result.message().clone(),
+                result.title().to_owned(),
+                result.message().to_owned(),
             )
         })
         .collect::<Vec<_>>();
@@ -158,7 +158,9 @@ pub fn assert_messages(results: &[CheckResult], expected: &[(Severity, &str, &st
     });
 
     assert_eq!(actual_messages, expected_messages);
-    assert!(results.iter().all(|result| {
-        result.id() == ID && !result.inventory() && result.file() == Some(file)
-    }));
+    assert!(
+        results.iter().all(|result| {
+            result.id() == ID && !result.inventory() && result.file() == Some(file)
+        })
+    );
 }

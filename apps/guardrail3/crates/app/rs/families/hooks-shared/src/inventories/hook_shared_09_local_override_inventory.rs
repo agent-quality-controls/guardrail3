@@ -10,7 +10,7 @@ pub fn check(local_override_scripts: &[String], results: &mut Vec<CheckResult>) 
                 Severity::Info,
                 "no local hook overrides".to_owned(),
                 "No cached override scripts found in `.guardrail3/overrides/pre-commit.d`."
-                        .to_owned(),
+                    .to_owned(),
                 Some(".guardrail3/overrides/pre-commit.d".to_owned()),
                 None,
                 false,

@@ -13,8 +13,7 @@ pub fn check(input: &ExecutableCommandContextInput<'_>, results: &mut Vec<CheckR
                 ID.to_owned(),
                 Severity::Warn,
                 "shell error handling present".to_owned(),
-                "Hook enables shell error handling with `set -e` or equivalent."
-                    .to_owned(),
+                "Hook enables shell error handling with `set -e` or equivalent.".to_owned(),
                 Some(input.rel_path.to_owned()),
                 None,
                 false,

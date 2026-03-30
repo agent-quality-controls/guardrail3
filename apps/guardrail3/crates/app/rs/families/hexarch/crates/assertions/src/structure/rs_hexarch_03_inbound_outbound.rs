@@ -270,9 +270,7 @@ pub fn assert_no_error_at_path(results: &[CheckResult], rule_id: &str, file: &st
     let rule_id = resolve_rule_id(rule_id);
     let errors = error_results(results, rule_id);
     assert!(
-        errors
-            .iter()
-            .all(|result| result.file() != Some(file)),
+        errors.iter().all(|result| result.file() != Some(file)),
         "expected no {rule_id} errors at {file}, got: {errors:#?}"
     );
 }

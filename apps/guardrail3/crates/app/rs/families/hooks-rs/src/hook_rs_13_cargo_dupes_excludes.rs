@@ -31,15 +31,16 @@ pub fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<CheckResult>) {
         );
     } else {
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Info,
-    "cargo-dupes exclude-tests flag missing".to_owned(),
-    "Hook does not execute cargo-dupes with `--exclude-tests`.".to_owned(),
-    Some(input.rel_path.to_owned()),
-    None,
-    false,
+            ID.to_owned(),
+            Severity::Info,
+            "cargo-dupes exclude-tests flag missing".to_owned(),
+            "Hook does not execute cargo-dupes with `--exclude-tests`.".to_owned(),
+            Some(input.rel_path.to_owned()),
+            None,
+            false,
         ));
     }
+}
 
 fn script_contains_cargo_dupes_with_exclude_tests(parsed: &ParsedShellScript<'_>) -> bool {
     script_contains_cargo_dupes(parsed, true) && !script_contains_cargo_dupes(parsed, false)
@@ -266,7 +267,7 @@ fn called_function_contains_cargo_dupes(
             line.line_no(),
             root_cutoff,
         )
-    ));
+    });
     let _ = visiting.pop();
     found
 }

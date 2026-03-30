@@ -11,13 +11,13 @@ fn warn_unknown_key(
     message: String,
 ) {
     results.push(CheckResult::from_parts(
-    "RS-DENY-28".to_owned(),
-    Severity::Warn,
+        "RS-DENY-28".to_owned(),
+        Severity::Warn,
         title,
         message,
-        file: Some(rel_path.to_owned()),
-        line: None,
-        inventory: false,
+        Some(rel_path.to_owned()),
+        None,
+        false,
     ));
 }
 
@@ -30,15 +30,15 @@ fn warn_unsupported_schema(
     results.push(CheckResult {
         id: "RS-DENY-28".to_owned(),
         severity: Severity::Warn,
-    format!("unsupported {scope} schema"),
-    format!(
+        title: format!("unsupported {scope} schema"),
+        message: format!(
             "`{rel_path}` uses unsupported schema for `{scope}`; expected {expected}."
         ),
-    Some(rel_path.to_owned()),
-    None,
-    false,
+        file: Some(rel_path.to_owned()),
+        line: None,
+        inventory: false,
     });
-)
+}
 use super::inputs::ConfigDenyInput;
 
 pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {

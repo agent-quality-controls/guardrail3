@@ -187,5 +187,6 @@ pub fn check_i18n(fs: &dyn FileSystem, path: &Path, results: &mut Vec<CheckResul
             file: Some(msg_dir.display().to_string()),
             line: None,
             inventory: false,
-        ));
+        });
     }
+}

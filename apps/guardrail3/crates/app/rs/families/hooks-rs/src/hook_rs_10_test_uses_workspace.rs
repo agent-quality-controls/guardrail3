@@ -23,15 +23,16 @@ pub fn check(input: &RustHookCommandInput<'_>, results: &mut Vec<CheckResult>) {
         );
     } else {
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Info,
-    "cargo test workspace scope missing".to_owned(),
-    "Hook does not execute `cargo test --workspace`.".to_owned(),
-    Some(input.rel_path.to_owned()),
-    None,
-    false,
+            ID.to_owned(),
+            Severity::Info,
+            "cargo test workspace scope missing".to_owned(),
+            "Hook does not execute `cargo test --workspace`.".to_owned(),
+            Some(input.rel_path.to_owned()),
+            None,
+            false,
         ));
     }
+}
 
 fn script_contains_workspace_test(parsed: &ParsedShellScript<'_>) -> bool {
     parsed

@@ -29,33 +29,33 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
         .collect::<BTreeSet<_>>();
     if !allow_names.is_empty() {
         results.push(CheckResult::from_parts(
-    "RS-DENY-25".to_owned(),
-    Severity::Error,
-    "bans allow-list present".to_owned(),
-    format!(
+            "RS-DENY-25".to_owned(),
+            Severity::Error,
+            "bans allow-list present".to_owned(),
+            format!(
                 "`{}` has non-empty `[bans].allow`: {}.",
                 config.rel_path,
                 join_set(&allow_names)
             ),
-    Some(config.rel_path.clone()),
-    None,
-    false,
+            Some(config.rel_path.clone()),
+            None,
+            false,
         ));
     }
     for name in allow_names {
         if expected.contains_key(&name) || actual_deny.contains(&name) {
             results.push(CheckResult::from_parts(
-    "RS-DENY-25".to_owned(),
-    Severity::Error,
-    "allow-list overrides deny-list".to_owned(),
-    format!(
+                "RS-DENY-25".to_owned(),
+                Severity::Error,
+                "allow-list overrides deny-list".to_owned(),
+                format!(
                     "`{}` allows `{name}` even though it is banned.",
                     config.rel_path
                 ),
-    Some(config.rel_path.clone()),
-    None,
-    false,
-            });
+                Some(config.rel_path.clone()),
+                None,
+                false,
+            ));
         }
     }
 }

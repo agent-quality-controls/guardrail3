@@ -13,7 +13,11 @@ pub fn check(input: &PackageLibarchInput<'_>, results: &mut Vec<CheckResult>) {
 
     let missing = ["api", "core"]
         .into_iter()
-        .filter(|name| package.layer_dir(LayerName::from_dir_name(name).unwrap()).is_none())
+        .filter(|name| {
+            package
+                .layer_dir(LayerName::from_dir_name(name).unwrap())
+                .is_none()
+        })
         .collect::<Vec<_>>();
     let unexpected = package
         .layer_dirs
@@ -46,5 +50,6 @@ pub(super) fn run_family_check(root: &std::path::Path) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-#[path = "rs_libarch_04_exact_layered_crate_set_tests/mod.rs"] // reason: test-only sidecar module wiring
+#[path = "rs_libarch_04_exact_layered_crate_set_tests/mod.rs"]
+// reason: test-only sidecar module wiring
 mod rs_libarch_04_exact_layered_crate_set_tests;

@@ -6,13 +6,13 @@ const ID: &str = "RS-ARCH-07";
 
 pub fn check(input: &RequiredInputFailureInput<'_>, results: &mut Vec<CheckResult>) {
     results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    "Rust architecture required input failed closed".to_owned(),
-    input.failure.message.clone(),
-    Some(input.failure.rel_path.clone()),
-    None,
-    false,
+        ID.to_owned(),
+        Severity::Error,
+        "Rust architecture required input failed closed".to_owned(),
+        input.failure.message.clone(),
+        Some(input.failure.rel_path.clone()),
+        None,
+        false,
     ));
 }
 

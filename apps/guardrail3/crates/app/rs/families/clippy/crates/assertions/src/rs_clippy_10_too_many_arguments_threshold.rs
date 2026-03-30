@@ -15,7 +15,10 @@ pub fn assert_missing_value(results: &[CheckResult]) {
     let result = single_result(results);
     assert_eq!(result.severity(), Severity::Error);
     assert_eq!(result.title(), "too-many-arguments-threshold missing");
-    assert_eq!(result.message(), "Expected too-many-arguments-threshold = 7.");
+    assert_eq!(
+        result.message(),
+        "Expected too-many-arguments-threshold = 7."
+    );
 }
 
 pub fn assert_parse_failure(results: &[CheckResult], file: &str) {

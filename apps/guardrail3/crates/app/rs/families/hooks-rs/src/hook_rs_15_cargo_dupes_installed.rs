@@ -29,15 +29,16 @@ pub fn check(
         );
     } else {
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    "cargo-dupes missing".to_owned(),
-    "Hook requires cargo-dupes, but it is not available on PATH.".to_owned(),
-    Some(rel_path.to_owned()),
-    None,
-    false,
+            ID.to_owned(),
+            Severity::Error,
+            "cargo-dupes missing".to_owned(),
+            "Hook requires cargo-dupes, but it is not available on PATH.".to_owned(),
+            Some(rel_path.to_owned()),
+            None,
+            false,
         ));
     }
+}
 
 #[cfg(test)]
 pub(super) fn run_case(

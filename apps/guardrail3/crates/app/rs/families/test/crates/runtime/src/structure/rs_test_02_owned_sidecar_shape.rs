@@ -1,12 +1,13 @@
 use std::collections::BTreeSet;
 
 use crate::{CheckResult, Severity};
+use crate::analysis::AnalyzedFile;
 use guardrail3_domain_project_tree::ProjectTree;
 
 use super::discover::{join_under_root, parent_dir, path_is_under};
 use super::facts::{SidecarViolation, TestFileKind, TestRootFacts};
 use super::inputs::SidecarViolationInput;
-use super::{AnalyzedFile, parse};
+use super::parse;
 
 const ID: &str = "RS-TEST-02";
 
@@ -42,13 +43,13 @@ pub(crate) fn collect(
 
 pub fn check(input: &SidecarViolationInput<'_>, results: &mut Vec<CheckResult>) {
     results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    input.violation.title.clone(),
-    input.violation.message.clone(),
-    Some(input.violation.rel_path.clone()),
-    input.violation.line,
-    false,
+        ID.to_owned(),
+        Severity::Error,
+        input.violation.title.clone(),
+        input.violation.message.clone(),
+        Some(input.violation.rel_path.clone()),
+        input.violation.line,
+        false,
     ));
 }
 

@@ -56,7 +56,10 @@ fn errors_when_no_supported_toolchain_file_exists() {
 
 #[test]
 fn family_reports_legacy_only_as_missing_modern_toolchain() {
-    let tree = test_tree(&["Cargo.toml", "rust-toolchain"], &[("Cargo.toml", "[workspace]\n")]);
+    let tree = test_tree(
+        &["Cargo.toml", "rust-toolchain"],
+        &[("Cargo.toml", "[workspace]\n")],
+    );
 
     let results = run_family_check(&tree);
 
@@ -67,7 +70,10 @@ fn family_reports_legacy_only_as_missing_modern_toolchain() {
 fn family_reports_malformed_modern_toolchain_and_legacy_ambiguity() {
     let tree = test_tree(
         &["Cargo.toml", "rust-toolchain.toml", "rust-toolchain"],
-        &[("Cargo.toml", "[workspace]\n"), ("rust-toolchain.toml", "toolchain = [")],
+        &[
+            ("Cargo.toml", "[workspace]\n"),
+            ("rust-toolchain.toml", "toolchain = ["),
+        ],
     );
 
     let results = run_family_check(&tree);

@@ -7,14 +7,13 @@ const ID: &str = "RS-TEST-04";
 pub fn check(input: &TestFileInput<'_>, results: &mut Vec<CheckResult>) {
     for line in &input.parsed.ignore_without_reason_lines {
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "ignored test lacks reason".to_owned(),
-    "`#[ignore]` requires an inline or previous-line `reason:` comment."
-                .to_owned(),
-    Some(input.file.rel_path.clone()),
-    Some(*line),
-    false,
+            ID.to_owned(),
+            Severity::Warn,
+            "ignored test lacks reason".to_owned(),
+            "`#[ignore]` requires an inline or previous-line `reason:` comment.".to_owned(),
+            Some(input.file.rel_path.clone()),
+            Some(*line),
+            false,
         ));
     }
     if input.parsed.ignore_without_reason_lines.is_empty() {
@@ -24,7 +23,7 @@ pub fn check(input: &TestFileInput<'_>, results: &mut Vec<CheckResult>) {
                 Severity::Info,
                 "ignored tests have reasons".to_owned(),
                 "Every `#[ignore]` in this file is paired with a reason comment or attribute."
-                        .to_owned(),
+                    .to_owned(),
                 Some(input.file.rel_path.clone()),
                 None,
                 false,

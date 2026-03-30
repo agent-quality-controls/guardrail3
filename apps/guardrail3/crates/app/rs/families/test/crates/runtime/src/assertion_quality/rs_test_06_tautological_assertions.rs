@@ -7,16 +7,16 @@ const ID: &str = "RS-TEST-06";
 pub fn check(input: &TestFunctionInput<'_>, results: &mut Vec<CheckResult>) {
     for line in &input.function.tautological_assert_lines {
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "tautological assertion".to_owned(),
-    format!(
+            ID.to_owned(),
+            Severity::Warn,
+            "tautological assertion".to_owned(),
+            format!(
                 "Test `{}` compares only literals in an assertion and proves nothing.",
                 input.function.name
             ),
-    Some(input.file.rel_path.clone()),
-    Some(*line),
-    false,
+            Some(input.file.rel_path.clone()),
+            Some(*line),
+            false,
         ));
     }
     if input.function.tautological_assert_lines.is_empty() {

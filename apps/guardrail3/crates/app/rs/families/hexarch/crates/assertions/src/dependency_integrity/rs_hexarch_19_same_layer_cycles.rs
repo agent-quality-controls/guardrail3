@@ -131,7 +131,9 @@ pub fn assert_error_title_contains(
     assert_eq!(errors.len(), 1, "{errors:#?}");
     for substring in required_substrings {
         assert!(
-            errors.iter().all(|result| result.title().contains(substring)),
+            errors
+                .iter()
+                .all(|result| result.title().contains(substring)),
             "expected title to contain {substring}: {errors:#?}"
         );
     }

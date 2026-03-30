@@ -54,7 +54,10 @@ pub fn check(input: &PackageLibarchInput<'_>, results: &mut Vec<CheckResult>) {
             ID.to_owned(),
             Severity::Info,
             "api does not depend on infra".to_owned(),
-            format!("Package `{}` keeps `api` free of `infra`.", package.package_rel_dir),
+            format!(
+                "Package `{}` keeps `api` free of `infra`.",
+                package.package_rel_dir
+            ),
             Some(api.cargo_rel_path.clone()),
             None,
             false,

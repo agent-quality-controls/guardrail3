@@ -4,7 +4,7 @@ pub fn assert_passed(results: &[CheckResult], file: &str, title: &str) {
     let actual = findings(results);
     assert!(
         actual.iter().any(|result| {
-            result.file == Some(file)
+            result.file.as_deref() == Some(file)
                 && result.inventory
                 && result.title == title
                 && result.message == "`cargo publish --dry-run` succeeded."
@@ -17,7 +17,7 @@ pub fn assert_missing(results: &[CheckResult], file: &str) {
     let actual = findings(results);
     assert!(
         actual.iter().any(|result| {
-            result.file == Some(file)
+            result.file.as_deref() == Some(file)
                 && result.title.contains("publish dry-run missing")
                 && result.message.contains("thorough mode")
         }),
@@ -29,7 +29,7 @@ pub fn assert_failed(results: &[CheckResult], file: &str, title: &str, message_c
     let actual = findings(results);
     assert!(
         actual.iter().any(|result| {
-            result.file == Some(file)
+            result.file.as_deref() == Some(file)
                 && result.title == title
                 && result.message.contains(message_contains)
         }),

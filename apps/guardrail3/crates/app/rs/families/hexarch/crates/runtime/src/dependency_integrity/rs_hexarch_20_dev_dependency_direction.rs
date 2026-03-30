@@ -38,10 +38,10 @@ pub fn check(input: &DependencyEdgeHexarchInput<'_>, results: &mut Vec<CheckResu
     }
 
     results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "dev-dependency direction violation".to_owned(),
-    format!(
+        ID.to_owned(),
+        Severity::Warn,
+        "dev-dependency direction violation".to_owned(),
+        format!(
             "{} crate `{}` dev-depends on {} crate `{}` via `{}`.",
             source_layer.label(),
             edge.source_name,
@@ -49,9 +49,9 @@ pub fn check(input: &DependencyEdgeHexarchInput<'_>, results: &mut Vec<CheckResu
             edge.dep_package_name,
             edge.section_label
         ),
-    Some(edge.source_cargo_rel_path.clone()),
-    None,
-    false,
+        Some(edge.source_cargo_rel_path.clone()),
+        None,
+        false,
     ));
 }
 

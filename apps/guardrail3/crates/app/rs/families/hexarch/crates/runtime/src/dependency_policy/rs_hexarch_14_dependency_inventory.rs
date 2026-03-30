@@ -14,19 +14,19 @@ pub fn check(input: &DependencyEdgeHexarchInput<'_>, results: &mut Vec<CheckResu
     };
 
     results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Info,
-    format!(
+        ID.to_owned(),
+        Severity::Info,
+        format!(
             "hexarch path dependency `{}` -> `{}`",
             edge.source_name, edge.dep_alias
         ),
-    format!(
+        format!(
             "`{}` depends on `{}` via `{}` resolved to `{}`.",
             edge.source_rel_dir, edge.dep_package_name, edge.section_label, target
         ),
-    Some(edge.source_cargo_rel_path.clone()),
-    None,
-    true,
+        Some(edge.source_cargo_rel_path.clone()),
+        None,
+        true,
     ));
 }
 

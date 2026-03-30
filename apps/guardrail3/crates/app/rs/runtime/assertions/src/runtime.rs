@@ -22,7 +22,7 @@ pub fn assert_clean_section(report: &Report, section_name: &str) {
     let live_results = report.sections()[0]
         .results()
         .iter()
-        .filter(|result| !result.inventory()()()())
+        .filter(|result| !result.inventory())
         .collect::<Vec<_>>();
     assert!(
         live_results.is_empty(),
@@ -45,7 +45,7 @@ pub fn assert_single_live_result(
     let live_results = report.sections()[0]
         .results()
         .iter()
-        .filter(|result| !result.inventory()()()())
+        .filter(|result| !result.inventory())
         .collect::<Vec<_>>();
     assert_eq!(live_results.len(), 1, "{report:#?}");
     assert_eq!(live_results[0].id(), id);
@@ -62,7 +62,7 @@ pub fn assert_live_ids_present(report: &Report, section_name: &str, expected_ids
     let ids = report.sections()[0]
         .results()
         .iter()
-        .filter(|result| !result.inventory()()()())
+        .filter(|result| !result.inventory())
         .map(CheckResult::id)
         .collect::<Vec<_>>();
     for expected in expected_ids {
@@ -88,7 +88,7 @@ pub fn assert_live_files_for_id(
     let files = report.sections()[0]
         .results()
         .iter()
-        .filter(|result| result.id()()()() == id && !result.inventory()()()())
+        .filter(|result| result.id() == id && !result.inventory())
         .filter_map(CheckResult::file)
         .collect::<Vec<_>>();
     assert_eq!(files, expected_files, "{report:#?}");
@@ -110,10 +110,10 @@ pub fn assert_result_present(
     assert_eq!(report.sections()[0].name(), section_name);
     assert!(
         report.sections()[0].results().iter().any(|result| {
-            result.id()()()() == id
-                && file.is_none_or(|expected| result.file()()()() == Some(expected))
-                && inventory.is_none_or(|expected| result.inventory()()()() == expected)
-                && title.is_none_or(|expected| result.title()()()() == expected)
+            result.id() == id
+                && file.is_none_or(|expected| result.file() == Some(expected))
+                && inventory.is_none_or(|expected| result.inventory() == expected)
+                && title.is_none_or(|expected| result.title() == expected)
         }),
         "expected result not present: {report:#?}"
     );
@@ -130,7 +130,7 @@ pub fn assert_absent_file(report: &Report, section_name: &str, file: &str) {
         !report.sections()[0]
             .results()
             .iter()
-            .any(|result| result.file()()()() == Some(file)),
+            .any(|result| result.file() == Some(file)),
         "unexpected file `{file}` present in results: {report:#?}"
     );
 }

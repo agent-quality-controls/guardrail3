@@ -203,8 +203,9 @@ pub fn check_stylelint(fs: &dyn FileSystem, path: &Path, results: &mut Vec<Check
             file: Some(file_display),
             line: None,
             inventory: false,
-        ));
+        });
     }
+}
 
 fn check_config_extends(
     content: &str,
@@ -228,15 +229,16 @@ fn check_config_extends(
         );
     } else {
         results.push(CheckResult::from_parts(
-    check_id.to_owned(),
-    Severity::Error,
-    format!("{expected} missing"),
-    format!(
+            check_id.to_owned(),
+            Severity::Error,
+            format!("{expected} missing"),
+            format!(
                 "{expected} not found in stylelint config extends. \
                  Add it for CSS quality checking."
             ),
-    Some(file.to_owned()),
-    None,
-    false,
+            Some(file.to_owned()),
+            None,
+            false,
         ));
     }
+}

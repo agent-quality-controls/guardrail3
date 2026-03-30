@@ -44,7 +44,10 @@ pub fn check(input: &PackageLibarchInput<'_>, results: &mut Vec<CheckResult>) {
     if !exports_api || exports_core {
         let mut parts = Vec::new();
         if !exports_api {
-            parts.push(format!("missing public re-export from api crate `{}`", api.lib_crate_name));
+            parts.push(format!(
+                "missing public re-export from api crate `{}`",
+                api.lib_crate_name
+            ));
         }
         if exports_core {
             parts.push("root facade re-exports directly from core".to_owned());
@@ -88,5 +91,6 @@ pub(super) fn run_family_check(root: &std::path::Path) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-#[path = "rs_libarch_11_root_facade_exports_api_tests/mod.rs"] // reason: test-only sidecar module wiring
+#[path = "rs_libarch_11_root_facade_exports_api_tests/mod.rs"]
+// reason: test-only sidecar module wiring
 mod rs_libarch_11_root_facade_exports_api_tests;

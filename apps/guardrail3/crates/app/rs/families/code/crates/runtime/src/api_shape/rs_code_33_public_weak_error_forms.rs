@@ -14,18 +14,19 @@ pub fn check(input: &RustCodeFileInput<'_>, results: &mut Vec<CheckResult>) {
             PublicResultErrorKind::BoxDynError => "Result<_, Box<dyn Error>>",
         };
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    "weak public error form".to_owned(),
-    format!(
+            ID.to_owned(),
+            Severity::Error,
+            "weak public error form".to_owned(),
+            format!(
                 "Public function `{}` returns `{problem}`. Use a typed public error instead.",
                 info.fn_name
             ),
-    Some(input.rel_path.to_owned()),
-    Some(info.line),
-    false,
+            Some(input.rel_path.to_owned()),
+            Some(info.line),
+            false,
         ));
     }
+}
 
 #[cfg(test)]
 pub(crate) fn check_source(rel_path: &str, content: &str, is_test_root: bool) -> Vec<CheckResult> {

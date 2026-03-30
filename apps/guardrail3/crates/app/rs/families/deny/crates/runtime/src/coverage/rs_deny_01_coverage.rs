@@ -58,6 +58,18 @@ pub fn check_parse_error(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckRes
     }
 }
 
+pub fn check_policy_context_error(parse_error: &str, results: &mut Vec<CheckResult>) {
+    results.push(CheckResult::from_parts(
+        "RS-DENY-01".to_owned(),
+        Severity::Error,
+        "deny policy context is not parseable".to_owned(),
+        format!("`guardrail3.toml` deny policy context could not be parsed: {parse_error}"),
+        Some("guardrail3.toml".to_owned()),
+        None,
+        false,
+    ));
+}
+
 fn rel_label(rel: &str) -> String {
     if rel.is_empty() {
         ".".to_owned()

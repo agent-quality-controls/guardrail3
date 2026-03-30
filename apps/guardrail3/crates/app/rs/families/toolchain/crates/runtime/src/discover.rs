@@ -36,7 +36,11 @@ pub fn collect(tree: &ProjectTree, route: &RsToolchainRoute) -> ToolchainFamilyF
         let Some(snapshot) = snapshots.get(workspace_root_rel) else {
             continue;
         };
-        policy_roots.push(build_policy_root(tree, snapshot, PolicyRootKind::WorkspaceRoot));
+        policy_roots.push(build_policy_root(
+            tree,
+            snapshot,
+            PolicyRootKind::WorkspaceRoot,
+        ));
     }
 
     for snapshot in snapshots.values() {
@@ -153,7 +157,9 @@ fn build_policy_root(
         rel_dir: snapshot.rel_dir.clone(),
         cargo_rel_path: snapshot.cargo_rel_path.clone(),
         toolchain_toml_rel: modern_toolchain.0,
-        legacy_toolchain_rel: tree.file_exists(&legacy_toolchain_rel).then_some(legacy_toolchain_rel),
+        legacy_toolchain_rel: tree
+            .file_exists(&legacy_toolchain_rel)
+            .then_some(legacy_toolchain_rel),
         parsed: modern_toolchain.1,
         parse_error: modern_toolchain.2,
         cargo_rust_version: snapshot.rust_version.clone(),

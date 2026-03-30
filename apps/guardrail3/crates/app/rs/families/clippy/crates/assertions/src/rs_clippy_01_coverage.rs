@@ -19,12 +19,12 @@ pub fn assert_multi_root_coverage(
         .iter()
         .map(|result| {
             (
-                result.message().clone(),
+                result.message().to_owned(),
                 (
                     result.severity(),
                     result.inventory(),
                     result.file().map(str::to_owned),
-                    result.title().clone(),
+                    result.title().to_owned(),
                 ),
             )
         })
@@ -73,7 +73,7 @@ pub fn assert_selective_uncovered(
         .collect::<Vec<_>>();
     let actual_messages = coverage
         .iter()
-        .map(|result| result.message().clone())
+        .map(|result| result.message().to_owned())
         .collect::<BTreeSet<_>>();
     let expected_messages = expected_messages
         .iter()
@@ -160,13 +160,13 @@ pub fn assert_unparseable_routed_cargo_root(results: &[CheckResult], cargo_rel_p
     assert_eq!(result.file(), Some(cargo_rel_path));
     assert!(
         result
-            .message
+            .message()
             .contains("routed Cargo root `apps/backend` could not be parsed"),
         "expected routed-root parse failure message: {result:#?}"
     );
     assert!(
         result
-            .message
+            .message()
             .contains("while resolving clippy coverage and policy roots"),
         "expected coverage/root-resolution context: {result:#?}"
     );

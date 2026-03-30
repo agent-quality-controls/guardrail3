@@ -22,13 +22,13 @@ pub fn check(input: &ConfigClippyInput<'_>, results: &mut Vec<CheckResult>) {
     for malformed in &section.malformed_messages {
         malformed_count += 1;
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    "disallowed-methods section malformed".to_owned(),
-    malformed.clone(),
-    Some(input.config.rel_path.clone()),
-    None,
-    false,
+            ID.to_owned(),
+            Severity::Error,
+            "disallowed-methods section malformed".to_owned(),
+            malformed.clone(),
+            Some(input.config.rel_path.clone()),
+            None,
+            false,
         ));
     }
 

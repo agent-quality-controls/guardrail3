@@ -122,7 +122,8 @@ fn dependency_names(
     let Some(table) = section.and_then(toml::Value::as_table) else {
         return std::collections::BTreeSet::new();
     };
-    table.iter()
+    table
+        .iter()
         .map(|(alias, value)| dependency_package_name(alias, value, workspace_dependencies))
         .collect()
 }
@@ -153,7 +154,10 @@ fn dependency_package_name(
 }
 
 fn target_segments(rel_path: &str) -> Vec<&str> {
-    rel_path.split('/').filter(|segment| !segment.is_empty()).collect()
+    rel_path
+        .split('/')
+        .filter(|segment| !segment.is_empty())
+        .collect()
 }
 
 fn measure_source_tree(tree: &ProjectTree, source_root: &str) -> SourceTreeMeasurements {
@@ -163,13 +167,18 @@ fn measure_source_tree(tree: &ProjectTree, source_root: &str) -> SourceTreeMeasu
             continue;
         }
         measurements.max_sibling_dirs = measurements.max_sibling_dirs.max(entry.dirs().len());
-        let rs_file_count = entry.files().iter().filter(|file| file.ends_with(".rs")).count();
+        let rs_file_count = entry
+            .files()
+            .iter()
+            .filter(|file| file.ends_with(".rs"))
+            .count();
         measurements.max_sibling_rs_files = measurements.max_sibling_rs_files.max(rs_file_count);
 
         for file_name in entry.files().iter().filter(|file| file.ends_with(".rs")) {
             let rel_path = ProjectTree::join_rel(dir_rel, file_name);
-            measurements.max_module_depth =
-                measurements.max_module_depth.max(module_depth(source_root, &rel_path));
+            measurements.max_module_depth = measurements
+                .max_module_depth
+                .max(module_depth(source_root, &rel_path));
         }
     }
     measurements

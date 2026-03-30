@@ -43,16 +43,17 @@ pub fn check(content: &str, input: &RustHookCommandInput<'_>, results: &mut Vec<
         );
     } else {
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "Rust config-change trigger coverage incomplete".to_owned(),
-    "Hook trigger logic does not clearly include all Rust guardrail config files."
+            ID.to_owned(),
+            Severity::Warn,
+            "Rust config-change trigger coverage incomplete".to_owned(),
+            "Hook trigger logic does not clearly include all Rust guardrail config files."
                 .to_owned(),
-    Some(input.rel_path.to_owned()),
-    None,
-    false,
+            Some(input.rel_path.to_owned()),
+            None,
+            false,
         ));
     }
+}
 
 fn conditional_blocks(content: &str) -> Vec<String> {
     let mut blocks = Vec::new();

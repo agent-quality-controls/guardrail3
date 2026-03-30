@@ -54,7 +54,10 @@ pub fn check(input: &PackageLibarchInput<'_>, results: &mut Vec<CheckResult>) {
             ID.to_owned(),
             Severity::Info,
             "core does not depend on api".to_owned(),
-            format!("Package `{}` keeps `core` free of `api`.", package.package_rel_dir),
+            format!(
+                "Package `{}` keeps `core` free of `api`.",
+                package.package_rel_dir
+            ),
             Some(core.cargo_rel_path.clone()),
             None,
             false,

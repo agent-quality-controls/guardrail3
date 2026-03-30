@@ -128,11 +128,7 @@ pub fn collect(tree: &ProjectTree) -> RustRootPlacementFacts {
     roots.sort_by(|left, right| left.cargo_rel_path().cmp(right.cargo_rel_path()));
     let overlaps = collect_overlaps(&roots);
 
-    RustRootPlacementFacts::new(
-        roots,
-        overlaps,
-        input_failures,
-    )
+    RustRootPlacementFacts::new(roots, overlaps, input_failures)
 }
 
 #[must_use]

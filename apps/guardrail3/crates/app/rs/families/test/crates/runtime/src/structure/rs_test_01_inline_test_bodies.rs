@@ -22,14 +22,14 @@ pub fn check(input: &CfgTestModuleInput<'_>, results: &mut Vec<CheckResult>) {
     }
 
     results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    "inline cfg(test) body in src".to_owned(),
-    "Production `src/` files must not contain inline `#[cfg(test)] mod ... { ... }` bodies."
-                .to_owned(),
-    Some(input.file.rel_path.clone()),
-    Some(input.module.line),
-    false,
+        ID.to_owned(),
+        Severity::Error,
+        "inline cfg(test) body in src".to_owned(),
+        "Production `src/` files must not contain inline `#[cfg(test)] mod ... { ... }` bodies."
+            .to_owned(),
+        Some(input.file.rel_path.clone()),
+        Some(input.module.line),
+        false,
     ));
 }
 

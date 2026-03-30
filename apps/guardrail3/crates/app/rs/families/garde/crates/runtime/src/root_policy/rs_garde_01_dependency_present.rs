@@ -47,9 +47,10 @@ pub(super) fn run_family(
     let config = tree.file_content("guardrail3.toml").and_then(|content| {
         toml::from_str::<guardrail3_domain_config::types::GuardrailConfig>(content).ok()
     });
-    let selected = guardrail3_validation_model::RustFamilySelection::new(
-        std::collections::BTreeSet::from([guardrail3_validation_model::RustValidateFamily::Garde]),
-    );
+    let selected =
+        guardrail3_validation_model::RustFamilySelection::new(std::collections::BTreeSet::from([
+            guardrail3_validation_model::RustValidateFamily::Garde,
+        ]));
     let route = guardrail3_app_rs_family_mapper::FamilyMapper::new(
         tree,
         &scope,

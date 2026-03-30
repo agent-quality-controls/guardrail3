@@ -45,7 +45,11 @@ pub fn list_modules() -> String {
             category.clone_into(&mut current_category);
         }
 
-        output.push_str(&format!("  {:<40} {}\n", module.name(), module.description()));
+        output.push_str(&format!(
+            "  {:<40} {}\n",
+            module.name(),
+            module.description()
+        ));
     }
 
     output
@@ -55,7 +59,9 @@ pub fn show_module(name: &str) -> Result<String, ShowModuleError> {
     match modules::find_module(name) {
         Some(module) => Ok(format!(
             "# Module: {}\n# {}\n\n{}",
-            module.name(), module.description(), module.content()
+            module.name(),
+            module.description(),
+            module.content()
         )),
         None => Err(ShowModuleError::missing(name)),
     }

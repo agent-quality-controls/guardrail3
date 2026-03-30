@@ -12,13 +12,13 @@ pub fn check(input: &RustfmtExtraConfigInput, results: &mut Vec<CheckResult>) {
     };
 
     results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "Per-crate rustfmt override".to_owned(),
-    format!("{kind} below workspace root overrides root formatting policy"),
-    Some(input.config_rel.clone()),
-    None,
-    false,
+        ID.to_owned(),
+        Severity::Warn,
+        "Per-crate rustfmt override".to_owned(),
+        format!("{kind} below workspace root overrides root formatting policy"),
+        Some(input.config_rel.clone()),
+        None,
+        false,
     ));
 }
 

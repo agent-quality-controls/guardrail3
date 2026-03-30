@@ -15,20 +15,21 @@ pub fn check(input: &ConfigDenyInput<'_>, results: &mut Vec<CheckResult>) {
     };
     if ignore_entries.len() > ADVISORY_IGNORE_THRESHOLD {
         results.push(CheckResult::from_parts(
-    "RS-DENY-29".to_owned(),
-    Severity::Warn,
-    "advisory ignore list is large".to_owned(),
-    format!(
+            "RS-DENY-29".to_owned(),
+            Severity::Warn,
+            "advisory ignore list is large".to_owned(),
+            format!(
                 "`{}` has {} `[advisories].ignore` entries (threshold: {}).",
                 config.rel_path,
                 ignore_entries.len(),
                 ADVISORY_IGNORE_THRESHOLD
             ),
-    Some(config.rel_path.clone()),
-    None,
-    false,
+            Some(config.rel_path.clone()),
+            None,
+            false,
         ));
     }
+}
 
 #[cfg(test)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {

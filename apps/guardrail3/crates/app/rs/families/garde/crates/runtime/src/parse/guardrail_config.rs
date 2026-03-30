@@ -18,7 +18,11 @@ pub(super) fn collect_unvalidated_guardrail_sites(
     let validated_names = collect_validate_call_receivers(block);
     let function_returns_guardrail = return_type_contains_guardrail_config(output);
     let mut candidates = Vec::new();
-    collect_guardrail_parse_candidates_from_block(block, function_returns_guardrail, &mut candidates);
+    collect_guardrail_parse_candidates_from_block(
+        block,
+        function_returns_guardrail,
+        &mut candidates,
+    );
     candidates
         .into_iter()
         .filter(|candidate| {
@@ -112,7 +116,9 @@ fn collect_guardrail_parse_candidates_from_expr(
 ) {
     match expr {
         syn::Expr::Call(call) => {
-            if let Some(parse_kind) = guardrail_parse_kind_for_call(call, function_returns_guardrail) {
+            if let Some(parse_kind) =
+                guardrail_parse_kind_for_call(call, function_returns_guardrail)
+            {
                 out.push(GuardrailConfigParseCandidate {
                     line: fields::span_line(syn::spanned::Spanned::span(call)),
                     binding_names: binding_names.clone(),
@@ -327,7 +333,10 @@ fn guardrail_parse_kind_for_try_into(
 
 fn path_is_toml_from_str(path: &syn::Path) -> bool {
     path.segments.len() == 2
-        && path.segments.first().is_some_and(|segment| segment.ident == "toml")
+        && path
+            .segments
+            .first()
+            .is_some_and(|segment| segment.ident == "toml")
         && path
             .segments
             .last()

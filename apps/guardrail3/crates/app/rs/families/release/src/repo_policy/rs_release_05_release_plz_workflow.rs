@@ -28,13 +28,13 @@ pub fn check(input: &RepoReleaseInput<'_>, results: &mut Vec<CheckResult>) {
             .as_inventory(),
         ),
         None => results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "Release-plz workflow missing".to_owned(),
-    "No workflow contains an actual release-plz execution step.".to_owned(),
-    None,
-    None,
-    false,
+            ID.to_owned(),
+            Severity::Warn,
+            "Release-plz workflow missing".to_owned(),
+            "No workflow contains an actual release-plz execution step.".to_owned(),
+            None,
+            None,
+            false,
         )),
     }
 }

@@ -77,7 +77,11 @@ pub fn collect(tree: &ProjectTree, route: &RsArchRoute) -> ArchFacts {
         .collect();
     input_failures.extend(config.failures.iter().cloned());
 
-    let roots = route.roots().iter().map(root_from_route).collect::<Vec<_>>();
+    let roots = route
+        .roots()
+        .iter()
+        .map(root_from_route)
+        .collect::<Vec<_>>();
     let overlaps = route
         .overlaps()
         .iter()
@@ -153,7 +157,9 @@ fn resolve_config(tree: &ProjectTree) -> ConfigResolution {
                             (
                                 name.clone(),
                                 app.checks()
-                                    .and_then(guardrail3_domain_config::types::RustChecksConfig::hexarch)
+                                    .and_then(
+                                        guardrail3_domain_config::types::RustChecksConfig::hexarch,
+                                    )
                                     .unwrap_or(global_hexarch_enabled),
                             )
                         })

@@ -17,21 +17,21 @@ pub fn check(input: &PackageLibarchInput<'_>, results: &mut Vec<CheckResult>) {
 
     if let Some(error) = package.facade_source_error.as_deref() {
         results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    "Root facade surface must stay readable".to_owned(),
-    format!(
+            ID.to_owned(),
+            Severity::Error,
+            "Root facade surface must stay readable".to_owned(),
+            format!(
                 "Cannot verify whether `{}` re-exports `infra`: {error}",
                 package.package_rel_dir
             ),
-    Some(
+            Some(
                 package
                     .lib_rel_path
                     .clone()
                     .unwrap_or_else(|| package.cargo_rel_path.clone()),
             ),
-    None,
-    false,
+            None,
+            false,
         ));
         return;
     }
@@ -44,21 +44,21 @@ pub fn check(input: &PackageLibarchInput<'_>, results: &mut Vec<CheckResult>) {
     }
 
     results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Error,
-    "Infra must not become public package surface".to_owned(),
-    format!(
+        ID.to_owned(),
+        Severity::Error,
+        "Infra must not become public package surface".to_owned(),
+        format!(
             "Layered library `{}` re-exports `infra` crate `{}` from the root facade.",
             package.package_rel_dir, infra.lib_crate_name
         ),
-    Some(
+        Some(
             package
                 .lib_rel_path
                 .clone()
                 .unwrap_or_else(|| package.cargo_rel_path.clone()),
         ),
-    None,
-    false,
+        None,
+        false,
     ));
 }
 
@@ -68,5 +68,6 @@ pub(super) fn run_family_check(root: &std::path::Path) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-#[path = "rs_libarch_10_infra_not_public_surface_tests/mod.rs"] // reason: test-only sidecar module wiring
+#[path = "rs_libarch_10_infra_not_public_surface_tests/mod.rs"]
+// reason: test-only sidecar module wiring
 mod rs_libarch_10_infra_not_public_surface_tests;

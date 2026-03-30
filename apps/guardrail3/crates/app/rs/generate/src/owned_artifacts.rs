@@ -52,7 +52,10 @@ pub fn generate_rust_owned_artifacts(
 
 /// Generate the standalone Rust pre-commit hook artifact.
 pub fn generate_rust_hook_artifact(cfg: Option<&GuardrailConfig>) -> GeneratedFile {
-    GeneratedFile::new(".githooks/pre-commit".to_owned(), build_rust_hook_content(cfg))
+    GeneratedFile::new(
+        ".githooks/pre-commit".to_owned(),
+        build_rust_hook_content(cfg),
+    )
 }
 
 /// Generate expected Rust-owned files without writing them.
@@ -73,9 +76,7 @@ fn load_config(path: &Path) -> Option<GuardrailConfig> {
 }
 
 fn generate_rust_config_files(project_path: &Path, cfg: &GuardrailConfig) -> Vec<GeneratedFile> {
-    let profile = cfg
-        .profile()
-        .map_or("service", |profile| profile.name());
+    let profile = cfg.profile().map_or("service", |profile| profile.name());
     let local = load_local_overrides(project_path);
     generate_rust_files(project_path, cfg, profile, &local)
 }
@@ -219,10 +220,7 @@ fn add_root_owned_rust_files(
     profile: &str,
     local: &LocalOverrides,
 ) {
-    let has_packages = cfg
-        .rust()
-        .and_then(|rust| rust.packages())
-        .is_some();
+    let has_packages = cfg.rust().and_then(|rust| rust.packages()).is_some();
 
     if has_packages && !generated_dirs.contains(".") {
         let pkg_cfg = cfg.rust().and_then(|rust| rust.packages());
@@ -330,10 +328,7 @@ fn crate_effective_garde(cfg: &GuardrailConfig, crate_cfg: Option<&CrateConfig>)
 }
 
 fn crate_is_pure(crate_cfg: &CrateConfig, effective_profile: &str) -> bool {
-    effective_profile == "library"
-        || crate_cfg
-            .layer()
-            .is_some_and(|layer| layer == "pure")
+    effective_profile == "library" || crate_cfg.layer().is_some_and(|layer| layer == "pure")
 }
 
 fn build_rust_hook_content(cfg: Option<&GuardrailConfig>) -> String {

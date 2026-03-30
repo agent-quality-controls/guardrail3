@@ -61,8 +61,8 @@ pub fn check_eslint_config(
         check_test_relaxations(&config, eslint_path, results);
         check_route_wrappers(&config, eslint_path, results);
         check_process_env_ban(&config, eslint_path, results);
-    },
-)
+    }
+}
 
 /// T2-T5: `ESLint` rules with expected values.
 fn check_eslint_value_rules(
@@ -115,32 +115,36 @@ fn check_boundary_enforcement(
     results: &mut Vec<CheckResult>,
 ) {
     if config.has_boundaries() {
-        results.push(CheckResult::from_parts(
-    "T6".to_owned(),
-    Severity::Info,
-    "Import boundary enforcement configured".to_owned(),
-    "`eslint-plugin-boundaries` found in config. This enforces hexagonal architecture \
+        results.push(
+            CheckResult::from_parts(
+                "T6".to_owned(),
+                Severity::Info,
+                "Import boundary enforcement configured".to_owned(),
+                "`eslint-plugin-boundaries` found in config. This enforces hexagonal architecture \
                      import rules — domain cannot import adapters, ports cannot import application, etc."
-                .to_owned(),
-    Some(eslint_path.display().to_string()),
-    None,
-    false,
-        }.as_inventory());
+                    .to_owned(),
+                Some(eslint_path.display().to_string()),
+                None,
+                false,
+            )
+            .as_inventory(),
+        );
     } else {
         results.push(CheckResult::from_parts(
-    "T6".to_owned(),
-    Severity::Warn,
-    "No import boundary enforcement".to_owned(),
-    "No `eslint-plugin-boundaries` found in ESLint config. Without boundary enforcement, \
+            "T6".to_owned(),
+            Severity::Warn,
+            "No import boundary enforcement".to_owned(),
+            "No `eslint-plugin-boundaries` found in ESLint config. Without boundary enforcement, \
                      domain code can accidentally import from adapters, creating tight coupling that makes \
                      the codebase harder to test and refactor. Install `eslint-plugin-boundaries` and configure \
                      zone definitions in `eslint.config.mjs`."
                 .to_owned(),
-    Some(eslint_path.display().to_string()),
-    None,
-    false,
+            Some(eslint_path.display().to_string()),
+            None,
+            false,
         ));
     }
+}
 
 /// T-ESLP-15: `RegExp` ban presence check.
 fn check_regex_ban(config: &EslintConfig, eslint_path: &Path, results: &mut Vec<CheckResult>) {
@@ -161,17 +165,18 @@ fn check_regex_ban(config: &EslintConfig, eslint_path: &Path, results: &mut Vec<
         );
     } else {
         results.push(CheckResult::from_parts(
-    "T-ESLP-15".to_owned(),
-    Severity::Error,
-    "RegExp not banned in ESLint config".to_owned(),
-    "ESLint config must ban RegExp via `no-restricted-globals` and regex literals \
+            "T-ESLP-15".to_owned(),
+            Severity::Error,
+            "RegExp not banned in ESLint config".to_owned(),
+            "ESLint config must ban RegExp via `no-restricted-globals` and regex literals \
                      via `no-restricted-syntax`. Use Zod for validation, structured parsers for parsing."
                 .to_owned(),
-    Some(eslint_path.display().to_string()),
-    None,
-    false,
+            Some(eslint_path.display().to_string()),
+            None,
+            false,
         ));
     }
+}
 
 /// T-ESLP-13, T-ESLP-14: `ESLint` tseslint preset presence checks.
 fn check_eslint_presets(config: &EslintConfig, eslint_path: &Path, results: &mut Vec<CheckResult>) {
@@ -196,15 +201,15 @@ fn check_eslint_presets(config: &EslintConfig, eslint_path: &Path, results: &mut
         );
     } else {
         results.push(CheckResult::from_parts(
-    "T-ESLP-13".to_owned(),
-    Severity::Error,
-    "ESLint strictTypeChecked preset missing".to_owned(),
-    "ESLint config must include `tseslint.configs.strictTypeChecked` — this preset \
+            "T-ESLP-13".to_owned(),
+            Severity::Error,
+            "ESLint strictTypeChecked preset missing".to_owned(),
+            "ESLint config must include `tseslint.configs.strictTypeChecked` — this preset \
                      provides 53+ type-aware lint rules."
-                    .to_owned(),
-    Some(eslint_path.display().to_string()),
-    None,
-    false,
+                .to_owned(),
+            Some(eslint_path.display().to_string()),
+            None,
+            false,
         ));
     }
 
@@ -239,8 +244,9 @@ fn check_eslint_presets(config: &EslintConfig, eslint_path: &Path, results: &mut
             file: Some(eslint_path.display().to_string()),
             line: None,
             inventory: false,
-        ));
+        });
     }
+}
 
 /// T7: Rules with severity "off" or "warn" (excluding test overrides).
 fn check_relaxed_rules(config: &EslintConfig, eslint_path: &Path, results: &mut Vec<CheckResult>) {
@@ -249,44 +255,50 @@ fn check_relaxed_rules(config: &EslintConfig, eslint_path: &Path, results: &mut 
             continue;
         }
         if rule.severity() == "off" || rule.severity() == "warn" {
-            results.push(CheckResult::from_parts(
-    "T7".to_owned(),
-    Severity::Info,
-    "ESLint rule relaxed to off/warn".to_owned(),
-    format!(
+            results.push(
+                CheckResult::from_parts(
+                    "T7".to_owned(),
+                    Severity::Info,
+                    "ESLint rule relaxed to off/warn".to_owned(),
+                    format!(
                     "Rule `{rule_name}` set to `{}`. Rules turned off disable protection entirely; \
                      rules set to `warn` allow the build to pass with violations. Review whether this relaxation \
                      is justified and add `// EXCEPTION: <reason>` if intentional.",
                     rule.severity()
-                ),
-    Some(eslint_path.display().to_string()),
-    None,
-    false,
-            }.as_inventory());
+                    ),
+                    Some(eslint_path.display().to_string()),
+                    None,
+                    false,
+                )
+                .as_inventory(),
+            );
         }
-    },
-)
+    }
+}
 
 /// T8: File-specific overrides (uses raw content for line-level reporting).
 fn check_file_overrides(config: &EslintConfig, eslint_path: &Path, results: &mut Vec<CheckResult>) {
     for (line_num, line) in config.raw_content().lines().enumerate() {
         let trimmed = line.trim();
         if trimmed.contains("files:") || trimmed.contains("files =") {
-            results.push(CheckResult::from_parts(
-    "T8".to_owned(),
-    Severity::Info,
-    "File-specific ESLint override".to_owned(),
-    format!(
+            results.push(
+                CheckResult::from_parts(
+                    "T8".to_owned(),
+                    Severity::Info,
+                    "File-specific ESLint override".to_owned(),
+                    format!(
                     "File-scoped rule override: `{trimmed}`. File overrides apply different rules to specific \
                      file patterns (e.g., relaxed rules for test files). Verify the scope is narrow and justified."
-                ),
-    Some(eslint_path.display().to_string()),
-    Some(line_num.saturating_add(1)),
-    false,
-            }.as_inventory());
+                    ),
+                    Some(eslint_path.display().to_string()),
+                    Some(line_num.saturating_add(1)),
+                    false,
+                )
+                .as_inventory(),
+            );
         }
-    },
-)
+    }
+}
 
 /// T40-T48: `ESLint` rule presence checks.
 fn check_rule_presence_t40_t48(
@@ -365,8 +377,8 @@ fn check_rule_presence_t40_t48(
         "strict-boolean-expressions",
         Severity::Error,
         results,
-    );,
-)
+    );
+}
 
 /// T49: Test file relaxations (uses raw content for line-level reporting).
 fn check_test_relaxations(
@@ -379,22 +391,25 @@ fn check_test_relaxations(
         if (trimmed.contains("test") || trimmed.contains("spec"))
             && (trimmed.contains("files") || trimmed.contains("overrides"))
         {
-            results.push(CheckResult::from_parts(
-    "T49".to_owned(),
-    Severity::Info,
-    "Test file ESLint relaxation".to_owned(),
-    format!(
+            results.push(
+                CheckResult::from_parts(
+                    "T49".to_owned(),
+                    Severity::Info,
+                    "Test file ESLint relaxation".to_owned(),
+                    format!(
                     "Test-specific rule override: `{trimmed}`. Test files often need relaxed rules \
                      (e.g., no-explicit-any for mocks, max-lines for integration tests). \
                      Verify relaxations are scoped only to test files."
-                ),
-    Some(eslint_path.display().to_string()),
-    Some(line_num.saturating_add(1)),
-    false,
-            }.as_inventory());
+                    ),
+                    Some(eslint_path.display().to_string()),
+                    Some(line_num.saturating_add(1)),
+                    false,
+                )
+                .as_inventory(),
+            );
         }
-    },
-)
+    }
+}
 
 /// T50: Route wrapper enforcement.
 fn check_route_wrappers(config: &EslintConfig, eslint_path: &Path, results: &mut Vec<CheckResult>) {
@@ -415,18 +430,19 @@ fn check_route_wrappers(config: &EslintConfig, eslint_path: &Path, results: &mut
         );
     } else {
         results.push(CheckResult::from_parts(
-    "T50".to_owned(),
-    Severity::Warn,
-    "No route wrapper enforcement in ESLint".to_owned(),
-    "No `withBody`/`withRoute` patterns found in ESLint config. Route wrappers ensure \
+            "T50".to_owned(),
+            Severity::Warn,
+            "No route wrapper enforcement in ESLint".to_owned(),
+            "No `withBody`/`withRoute` patterns found in ESLint config. Route wrappers ensure \
                      all API endpoints validate input and handle errors consistently. Add restricted import \
                      rules that require route handlers to use wrapper functions."
                 .to_owned(),
-    Some(eslint_path.display().to_string()),
-    None,
-    false,
+            Some(eslint_path.display().to_string()),
+            None,
+            false,
         ));
     }
+}
 
 /// T51: process.env ban.
 fn check_process_env_ban(
@@ -435,32 +451,36 @@ fn check_process_env_ban(
     results: &mut Vec<CheckResult>,
 ) {
     if config.has_process_env_ban() {
-        results.push(CheckResult::from_parts(
-    "T51".to_owned(),
-    Severity::Info,
-    "`process.env` restriction configured in ESLint".to_owned(),
-    "`process.env` ban found in ESLint config. This forces environment variable access \
+        results.push(
+            CheckResult::from_parts(
+                "T51".to_owned(),
+                Severity::Info,
+                "`process.env` restriction configured in ESLint".to_owned(),
+                "`process.env` ban found in ESLint config. This forces environment variable access \
                      through a centralized env module, making configuration auditable and validated."
-                .to_owned(),
-    Some(eslint_path.display().to_string()),
-    None,
-    false,
-        }.as_inventory());
+                    .to_owned(),
+                Some(eslint_path.display().to_string()),
+                None,
+                false,
+            )
+            .as_inventory(),
+        );
     } else {
         results.push(CheckResult::from_parts(
-    "T51".to_owned(),
-    Severity::Error,
-    "No `process.env` restriction in ESLint".to_owned(),
-    "No `process.env` restriction found in ESLint config. Without this, any file can read \
+            "T51".to_owned(),
+            Severity::Error,
+            "No `process.env` restriction in ESLint".to_owned(),
+            "No `process.env` restriction found in ESLint config. Without this, any file can read \
                      environment variables directly, scattering configuration across the codebase and making it \
                      impossible to audit what config a service needs. Add a `no-restricted-globals` or \
                      `no-restricted-properties` rule banning `process.env` in `eslint.config.mjs`."
                 .to_owned(),
-    Some(eslint_path.display().to_string()),
-    None,
-    false,
+            Some(eslint_path.display().to_string()),
+            None,
+            false,
         ));
     }
+}
 
 /// Check all expected `ESLint` rules from the template.
 /// Each rule is checked for presence in the parsed config with severity "error".
@@ -498,5 +518,5 @@ fn check_all_eslint_rules(
 
     for (id, rule_name, severity) in rules {
         check_eslint_rule_presence(config, eslint_path, id, rule_name, *severity, results);
-    },
-)
+    }
+}

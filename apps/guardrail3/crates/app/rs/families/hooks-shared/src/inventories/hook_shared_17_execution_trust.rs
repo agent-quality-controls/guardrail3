@@ -20,16 +20,16 @@ pub fn check(trust_risks: &[String], results: &mut Vec<CheckResult>) {
     }
 
     results.push(CheckResult::from_parts(
-    ID.to_owned(),
-    Severity::Warn,
-    "competing hook system detected".to_owned(),
-    format!(
+        ID.to_owned(),
+        Severity::Warn,
+        "competing hook system detected".to_owned(),
+        format!(
             "Found alternate hook surfaces that can shadow or confuse hook execution: {}",
             trust_risks.join(", ")
         ),
-    None,
-    None,
-    false,
+        None,
+        None,
+        false,
     ));
 }
 
