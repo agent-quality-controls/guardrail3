@@ -78,3 +78,15 @@ Current reconciliation state:
   - `libarch`: still too vague and needs a concrete input model before implementation
   - `tests`: useful test-quality family, but explicitly not a counterpart to `RS-TEST`
   - `i18n` and `seo`: capability families, not owner families
+- the third Rust-vs-TS design comparison pass is complete for:
+  - `fmt`
+  - `spelling`
+  - `size`
+  - `jscpd`
+  - `css`
+- current conclusions from that third pass:
+  - `fmt`: still mostly package-presence and far behind `RS-FMT`
+  - `spelling`: coherent as a narrow tool family, but still weak on ownership and fail-closed behavior
+  - `size`: still bucket-shaped and needs an explicit applicability decision
+  - `jscpd`: the duplication core is fairly clean; the main problem is content spillover
+  - `css`: reasonably coherent already, but still split at the package/config boundary and unclear on exact root ownership
