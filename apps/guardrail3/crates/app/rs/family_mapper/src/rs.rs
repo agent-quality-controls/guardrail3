@@ -305,37 +305,11 @@ impl<'a> FamilyMapper<'a> {
 
     #[must_use]
     pub fn map_rs_test(&self) -> views::RsTestRoute {
-        let roots = self.map_global_roots_for_family(RustValidateFamily::Test);
-        let root_rels = roots
-            .iter()
-            .map(|root| root.rel_dir().to_owned())
-            .collect::<Vec<_>>();
-        views::RsTestRoute::new(
-            roots,
-            filter_for_roots(
-                self.tree,
-                self.scoped_files,
-                &root_rels,
-                self.validation_scope,
-            ),
-        )
+        views::RsTestRoute::new(self.map_global_roots_for_family(RustValidateFamily::Test), None)
     }
 
     fn map_global_source_route(&self, family: RustValidateFamily) -> views::RsCodeRoute {
-        let roots = self.map_global_scoped_roots_for_family(family);
-        let root_rels = roots
-            .iter()
-            .map(|root| root.root().rel_dir().to_owned())
-            .collect::<Vec<_>>();
-        views::RsCodeRoute::new(
-            roots,
-            filter_for_roots(
-                self.tree,
-                self.scoped_files,
-                &root_rels,
-                self.validation_scope,
-            ),
-        )
+        views::RsCodeRoute::new(self.map_global_scoped_roots_for_family(family), None)
     }
 
     fn map_workspace_roots_for_family(&self, family: RustValidateFamily) -> Vec<views::RsRootView> {
