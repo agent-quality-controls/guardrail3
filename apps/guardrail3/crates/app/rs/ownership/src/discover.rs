@@ -184,6 +184,7 @@ fn collect_cargo_and_policy_files(
     out: &mut Vec<RustFamilyFileFact>,
 ) {
     for family in [
+        RustValidateFamily::Toolchain,
         RustValidateFamily::Clippy,
         RustValidateFamily::Deny,
         RustValidateFamily::Cargo,

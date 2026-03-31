@@ -122,7 +122,7 @@ const STANDALONE_CLIPPY_LINTS: &str = r#"
 "#;
 
 #[test]
-fn supports_workspace_and_standalone_policy_roots_in_one_repo() {
+fn nested_package_under_workspace_is_not_treated_as_a_second_policy_root() {
     let workspace_manifest = format!(
         r#"
             [workspace]
@@ -137,7 +137,7 @@ fn supports_workspace_and_standalone_policy_roots_in_one_repo() {
             {WORKSPACE_CLIPPY_LINTS}
         "#
     );
-    let standalone_manifest = format!(
+    let nested_manifest = format!(
         r#"
             [package]
             name = "helper"
@@ -170,24 +170,27 @@ fn supports_workspace_and_standalone_policy_roots_in_one_repo() {
                     workspace = true
                 "#,
             ),
-            ("tools/helper/Cargo.toml", &standalone_manifest),
+            ("tools/helper/Cargo.toml", &nested_manifest),
         ],
     ));
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_01_workspace_lints::assert_rule_results(
         &results,
-        &[
-            ExpectedRuleResult {
-                file: Some("Cargo.toml"),
-                title: None,
-                inventory: Some(true),
-            },
-            ExpectedRuleResult {
-                file: Some("tools/helper/Cargo.toml"),
-                title: None,
-                inventory: Some(true),
-            },
-        ],
+        &[ExpectedRuleResult {
+            file: Some("Cargo.toml"),
+            title: None,
+            inventory: Some(true),
+        }],
+    );
+    assert!(
+        results.iter().any(|result| {
+            result.id() == "RS-CARGO-14"
+                && result.file() == Some("tools/helper/Cargo.toml")
+                && result
+                    .message()
+                    .contains("must be declared in `[workspace].members`")
+        }),
+        "undeclared nested package should surface through RS-CARGO-14: {results:#?}"
     );
 }
 

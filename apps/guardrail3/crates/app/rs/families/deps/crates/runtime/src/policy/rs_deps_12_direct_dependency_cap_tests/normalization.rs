@@ -293,13 +293,22 @@ fn undeclared_workspace_path_dependency_fails_closed_without_cap_result() {
     assertions::assert_rule_quiet(&results);
     assertions::assert_input_failure_results(
         &results,
-        &[assertions::ExpectedInputFailureResult {
-            severity: Some(assertions::InputFailureSeverity::Error),
-            file: Some("crates/runtime/Cargo.toml"),
-            message_contains: Some("not declared in `[workspace].members`."),
-            inventory: Some(false),
-            ..Default::default()
-        }],
+        &[
+            assertions::ExpectedInputFailureResult {
+                severity: Some(assertions::InputFailureSeverity::Error),
+                file: Some("crates/runtime/assertions/Cargo.toml"),
+                message_contains: Some("not declared as a workspace package"),
+                inventory: Some(false),
+                ..Default::default()
+            },
+            assertions::ExpectedInputFailureResult {
+                severity: Some(assertions::InputFailureSeverity::Error),
+                file: Some("crates/runtime/Cargo.toml"),
+                message_contains: Some("not declared in `[workspace].members`."),
+                inventory: Some(false),
+                ..Default::default()
+            },
+        ],
     );
 }
 
@@ -413,4 +422,14 @@ fn nested_non_member_helper_crate_under_workspace_root_is_not_counted() {
     let results = run_with_facts(&facts);
 
     assertions::assert_rule_quiet(&results);
+    assertions::assert_input_failure_results(
+        &results,
+        &[assertions::ExpectedInputFailureResult {
+            severity: Some(assertions::InputFailureSeverity::Error),
+            file: Some("apps/api/assertions/Cargo.toml"),
+            message_contains: Some("not declared as a workspace package"),
+            inventory: Some(false),
+            ..Default::default()
+        }],
+    );
 }

@@ -1,3 +1,4 @@
+use guardrail3_app_rs_ownership::RustFamilyFileKind;
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::{copy_fixture, route_family, run_family, write_file};
@@ -49,6 +50,12 @@ fn full_tree_fixture_enforces_workspace_only_toolchain_policy() {
     let routed_files = route
         .family_files()
         .iter()
+        .filter(|file| {
+            matches!(
+                file.kind(),
+                RustFamilyFileKind::RustToolchainToml | RustFamilyFileKind::RustToolchainLegacy
+            )
+        })
         .map(|file| file.rel_path())
         .collect::<Vec<_>>();
     assert!(
@@ -56,6 +63,14 @@ fn full_tree_fixture_enforces_workspace_only_toolchain_policy() {
             && routed_files.contains(&"packages/ui-kit/rust-toolchain")
             && routed_files.contains(&"rust-toolchain.toml"),
         "routed toolchain file surface lost illegal placements: {routed_files:#?}"
+    );
+    assert!(
+        route.family_files().iter().any(|file| {
+            file.kind() == RustFamilyFileKind::CargoToml
+                && file.rel_path() == "apps/backend/Cargo.toml"
+        }),
+        "toolchain route should also see Cargo.toml ownership facts for workspace comparison: {:#?}",
+        route.family_files()
     );
 
     assert_result(

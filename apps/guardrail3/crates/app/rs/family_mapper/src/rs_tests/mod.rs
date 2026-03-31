@@ -113,7 +113,217 @@ fn deps_route_drops_repo_workspace_root_when_enabled_descendant_app_is_not_a_wor
         .iter()
         .map(|root| root.cargo_rel_path())
         .collect::<Vec<_>>();
-    assert!(cargo_paths.is_empty(), "{cargo_paths:#?}");
+    assert_eq!(cargo_paths, vec!["apps/api/Cargo.toml"]);
+}
+
+#[test]
+fn toolchain_route_keeps_non_workspace_roots_visible_for_family_judgment() {
+    let tree = single_other_root_tree(
+        &["Cargo.toml", "rust-toolchain.toml"],
+        &[("tools/helper/Cargo.toml", "[package]\nname = \"helper\"\n")],
+    );
+    let scope = guardrail3_app_rs_placement::collect(&tree);
+    let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Toolchain]));
+    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None).map_rs_toolchain();
+
+    let cargo_paths = route
+        .roots()
+        .iter()
+        .map(|root| root.cargo_rel_path().to_owned())
+        .collect::<Vec<_>>();
+    assert_eq!(cargo_paths, vec!["tools/helper/Cargo.toml".to_owned()]);
+    assert!(route
+        .family_files()
+        .iter()
+        .any(|file| file.rel_path() == "tools/helper/rust-toolchain.toml"));
+}
+
+#[test]
+fn clippy_route_keeps_non_workspace_roots_visible_for_family_judgment() {
+    let tree = single_other_root_tree(
+        &["Cargo.toml", "clippy.toml"],
+        &[
+            ("tools/helper/Cargo.toml", "[package]\nname = \"helper\"\n"),
+            ("tools/helper/clippy.toml", "msrv = \"1.85\"\n"),
+        ],
+    );
+    let scope = guardrail3_app_rs_placement::collect(&tree);
+    let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Clippy]));
+    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None).map_rs_clippy();
+
+    let cargo_paths = route
+        .roots()
+        .iter()
+        .map(|root| root.cargo_rel_path().to_owned())
+        .collect::<Vec<_>>();
+    assert_eq!(cargo_paths, vec!["tools/helper/Cargo.toml".to_owned()]);
+    assert_eq!(
+        route.family_files()
+            .iter()
+            .map(|file| file.rel_path().to_owned())
+            .collect::<Vec<_>>(),
+        vec![
+            "tools/helper/Cargo.toml".to_owned(),
+            "tools/helper/clippy.toml".to_owned(),
+        ]
+    );
+}
+
+#[test]
+fn deny_route_keeps_non_workspace_roots_visible_for_family_judgment() {
+    let tree = single_other_root_tree(
+        &["Cargo.toml", "deny.toml"],
+        &[
+            ("tools/helper/Cargo.toml", "[package]\nname = \"helper\"\n"),
+            ("tools/helper/deny.toml", "[bans]\nmultiple-versions = \"deny\"\n"),
+        ],
+    );
+    let scope = guardrail3_app_rs_placement::collect(&tree);
+    let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Deny]));
+    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None).map_rs_deny();
+
+    let cargo_paths = route
+        .roots()
+        .iter()
+        .map(|root| root.cargo_rel_path().to_owned())
+        .collect::<Vec<_>>();
+    assert_eq!(cargo_paths, vec!["tools/helper/Cargo.toml".to_owned()]);
+    assert_eq!(
+        route.family_files()
+            .iter()
+            .map(|file| file.rel_path().to_owned())
+            .collect::<Vec<_>>(),
+        vec![
+            "tools/helper/Cargo.toml".to_owned(),
+            "tools/helper/deny.toml".to_owned(),
+        ]
+    );
+}
+
+#[test]
+fn cargo_route_keeps_non_workspace_roots_visible_for_family_judgment() {
+    let tree = single_other_root_tree(
+        &["Cargo.toml", "guardrail3.toml"],
+        &[
+            ("tools/helper/Cargo.toml", "[package]\nname = \"helper\"\n"),
+            ("tools/helper/guardrail3.toml", "[profile]\nname = \"service\"\n"),
+        ],
+    );
+    let scope = guardrail3_app_rs_placement::collect(&tree);
+    let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Cargo]));
+    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None).map_rs_cargo();
+
+    let cargo_paths = route
+        .roots()
+        .iter()
+        .map(|root| root.cargo_rel_path().to_owned())
+        .collect::<Vec<_>>();
+    assert_eq!(cargo_paths, vec!["tools/helper/Cargo.toml".to_owned()]);
+    assert_eq!(
+        route.family_files()
+            .iter()
+            .map(|file| file.rel_path().to_owned())
+            .collect::<Vec<_>>(),
+        vec![
+            "tools/helper/Cargo.toml".to_owned(),
+            "tools/helper/guardrail3.toml".to_owned(),
+        ]
+    );
+}
+
+#[test]
+fn deps_route_keeps_non_workspace_roots_visible_for_family_judgment() {
+    let tree = single_other_root_tree(
+        &["Cargo.toml", "guardrail3.toml"],
+        &[
+            ("tools/helper/Cargo.toml", "[package]\nname = \"helper\"\n"),
+            ("tools/helper/guardrail3.toml", "[profile]\nname = \"service\"\n"),
+        ],
+    );
+    let scope = guardrail3_app_rs_placement::collect(&tree);
+    let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Deps]));
+    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None).map_rs_deps();
+
+    let cargo_paths = route
+        .roots()
+        .iter()
+        .map(|root| root.cargo_rel_path().to_owned())
+        .collect::<Vec<_>>();
+    assert_eq!(cargo_paths, vec!["tools/helper/Cargo.toml".to_owned()]);
+    assert_eq!(
+        route.family_files()
+            .iter()
+            .map(|file| file.rel_path().to_owned())
+            .collect::<Vec<_>>(),
+        vec![
+            "tools/helper/Cargo.toml".to_owned(),
+            "tools/helper/guardrail3.toml".to_owned(),
+        ]
+    );
+}
+
+#[test]
+fn garde_route_keeps_non_workspace_roots_visible_for_family_judgment() {
+    let tree = single_other_root_tree(
+        &["Cargo.toml", "clippy.toml", "guardrail3.toml"],
+        &[
+            ("tools/helper/Cargo.toml", "[package]\nname = \"helper\"\n"),
+            ("tools/helper/clippy.toml", "msrv = \"1.85\"\n"),
+            ("tools/helper/guardrail3.toml", "[profile]\nname = \"service\"\n"),
+        ],
+    );
+    let scope = guardrail3_app_rs_placement::collect(&tree);
+    let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Garde]));
+    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None).map_rs_garde();
+
+    let cargo_paths = route
+        .roots()
+        .iter()
+        .map(|root| root.root().cargo_rel_path().to_owned())
+        .collect::<Vec<_>>();
+    assert_eq!(cargo_paths, vec!["tools/helper/Cargo.toml".to_owned()]);
+    assert_eq!(
+        route.family_files()
+            .iter()
+            .map(|file| file.rel_path().to_owned())
+            .collect::<Vec<_>>(),
+        vec![
+            "tools/helper/Cargo.toml".to_owned(),
+            "tools/helper/clippy.toml".to_owned(),
+            "tools/helper/guardrail3.toml".to_owned(),
+        ]
+    );
+}
+
+#[test]
+fn release_route_keeps_non_workspace_roots_visible_for_family_judgment() {
+    let tree = single_other_root_tree(
+        &["Cargo.toml", "release-plz.toml"],
+        &[
+            ("tools/helper/Cargo.toml", "[package]\nname = \"helper\"\nversion = \"0.1.0\"\n"),
+            ("tools/helper/release-plz.toml", "[workspace]\n"),
+        ],
+    );
+    let scope = guardrail3_app_rs_placement::collect(&tree);
+    let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Release]));
+    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None).map_rs_release();
+
+    let cargo_paths = route
+        .roots()
+        .iter()
+        .map(|root| root.cargo_rel_path().to_owned())
+        .collect::<Vec<_>>();
+    assert_eq!(cargo_paths, vec!["tools/helper/Cargo.toml".to_owned()]);
+    assert_eq!(
+        route.family_files()
+            .iter()
+            .map(|file| file.rel_path().to_owned())
+            .collect::<Vec<_>>(),
+        vec![
+            "tools/helper/Cargo.toml".to_owned(),
+            "tools/helper/release-plz.toml".to_owned(),
+        ]
+    );
 }
 
 #[test]
@@ -348,6 +558,7 @@ fn toolchain_route_keeps_rootless_and_ancestor_toolchain_files_visible() {
     assert_eq!(
         toolchain_files,
         vec![
+            ("apps/backend/Cargo.toml".to_owned(), "apps/backend".to_owned()),
             ("rust-toolchain.toml".to_owned(), "".to_owned()),
             (
                 "tools/helper/rust-toolchain".to_owned(),
@@ -433,7 +644,13 @@ fn toolchain_route_drops_outside_root_candidates_when_scope_does_not_touch_them(
         .iter()
         .map(|file| file.rel_path().to_owned())
         .collect::<Vec<_>>();
-    assert_eq!(toolchain_files, vec!["rust-toolchain.toml".to_owned()]);
+    assert_eq!(
+        toolchain_files,
+        vec![
+            "apps/backend/Cargo.toml".to_owned(),
+            "rust-toolchain.toml".to_owned(),
+        ]
+    );
 }
 
 #[test]
@@ -853,4 +1070,211 @@ fn deny_route_keeps_outside_root_candidates_visible_in_full_tree_runs() {
             )
         ]
     );
+}
+
+#[test]
+fn cargo_route_keeps_outside_root_candidates_visible_in_full_tree_runs() {
+    let tree = ProjectTree::new(
+        PathBuf::from("/tmp/project"),
+        BTreeMap::from([
+            (
+                "".to_owned(),
+                DirEntry::new(
+                    vec!["apps".to_owned(), "tools".to_owned()],
+                    Vec::new(),
+                    Vec::new(),
+                    Vec::new(),
+                ),
+            ),
+            (
+                "apps".to_owned(),
+                DirEntry::new(
+                    vec!["backend".to_owned()],
+                    Vec::new(),
+                    Vec::new(),
+                    Vec::new(),
+                ),
+            ),
+            (
+                "apps/backend".to_owned(),
+                DirEntry::new(
+                    Vec::new(),
+                    vec!["Cargo.toml".to_owned()],
+                    Vec::new(),
+                    Vec::new(),
+                ),
+            ),
+            (
+                "tools".to_owned(),
+                DirEntry::new(
+                    vec!["helper".to_owned()],
+                    vec!["guardrail3.toml".to_owned()],
+                    Vec::new(),
+                    Vec::new(),
+                ),
+            ),
+            (
+                "tools/helper".to_owned(),
+                DirEntry::new(
+                    Vec::new(),
+                    vec!["Cargo.toml".to_owned()],
+                    Vec::new(),
+                    Vec::new(),
+                ),
+            ),
+        ]),
+        BTreeMap::from([
+            (
+                "apps/backend/Cargo.toml".to_owned(),
+                "[workspace]\nmembers = []\nresolver = \"2\"\n".to_owned(),
+            ),
+            (
+                "tools/helper/Cargo.toml".to_owned(),
+                "[package]\nname = \"helper\"\nversion = \"0.1.0\"\n".to_owned(),
+            ),
+            (
+                "tools/guardrail3.toml".to_owned(),
+                "[profile]\nname = \"library\"\n".to_owned(),
+            ),
+        ]),
+    );
+    let scope = guardrail3_app_rs_placement::collect(&tree);
+    let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Cargo]));
+    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None).map_rs_cargo();
+
+    let files = route
+        .family_files()
+        .iter()
+        .map(|file| file.rel_path().to_owned())
+        .collect::<Vec<_>>();
+    assert_eq!(
+        files,
+        vec![
+            "apps/backend/Cargo.toml".to_owned(),
+            "tools/guardrail3.toml".to_owned(),
+            "tools/helper/Cargo.toml".to_owned(),
+        ]
+    );
+}
+
+#[test]
+fn deps_route_keeps_outside_root_candidates_visible_in_full_tree_runs() {
+    let tree = ProjectTree::new(
+        PathBuf::from("/tmp/project"),
+        BTreeMap::from([
+            (
+                "".to_owned(),
+                DirEntry::new(
+                    vec!["apps".to_owned(), "tools".to_owned()],
+                    vec!["guardrail3.toml".to_owned()],
+                    Vec::new(),
+                    Vec::new(),
+                ),
+            ),
+            (
+                "apps".to_owned(),
+                DirEntry::new(
+                    vec!["backend".to_owned()],
+                    Vec::new(),
+                    Vec::new(),
+                    Vec::new(),
+                ),
+            ),
+            (
+                "apps/backend".to_owned(),
+                DirEntry::new(
+                    Vec::new(),
+                    vec!["Cargo.toml".to_owned()],
+                    Vec::new(),
+                    Vec::new(),
+                ),
+            ),
+            (
+                "tools".to_owned(),
+                DirEntry::new(
+                    vec!["helper".to_owned()],
+                    Vec::new(),
+                    Vec::new(),
+                    Vec::new(),
+                ),
+            ),
+            (
+                "tools/helper".to_owned(),
+                DirEntry::new(
+                    Vec::new(),
+                    vec!["Cargo.toml".to_owned()],
+                    Vec::new(),
+                    Vec::new(),
+                ),
+            ),
+        ]),
+        BTreeMap::from([
+            (
+                "apps/backend/Cargo.toml".to_owned(),
+                "[workspace]\nmembers = []\nresolver = \"2\"\n".to_owned(),
+            ),
+            (
+                "tools/helper/Cargo.toml".to_owned(),
+                "[package]\nname = \"helper\"\nversion = \"0.1.0\"\n".to_owned(),
+            ),
+            (
+                "guardrail3.toml".to_owned(),
+                "[profile]\nname = \"service\"\n".to_owned(),
+            ),
+        ]),
+    );
+    let scope = guardrail3_app_rs_placement::collect(&tree);
+    let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Deps]));
+    let route = super::FamilyMapper::new(&tree, &scope, None, &selected, None).map_rs_deps();
+
+    let files = route
+        .family_files()
+        .iter()
+        .map(|file| file.rel_path().to_owned())
+        .collect::<Vec<_>>();
+    assert_eq!(
+        files,
+        vec![
+            "apps/backend/Cargo.toml".to_owned(),
+            "guardrail3.toml".to_owned(),
+            "tools/helper/Cargo.toml".to_owned(),
+        ]
+    );
+}
+
+fn single_other_root_tree(
+    root_files: &[&str],
+    content: &[(&str, &str)],
+) -> ProjectTree {
+    ProjectTree::new(
+        PathBuf::from("/tmp/project"),
+        BTreeMap::from([
+            (
+                "".to_owned(),
+                DirEntry::new(vec!["tools".to_owned()], Vec::new(), Vec::new(), Vec::new()),
+            ),
+            (
+                "tools".to_owned(),
+                DirEntry::new(
+                    vec!["helper".to_owned()],
+                    Vec::new(),
+                    Vec::new(),
+                    Vec::new(),
+                ),
+            ),
+            (
+                "tools/helper".to_owned(),
+                DirEntry::new(
+                    Vec::new(),
+                    root_files.iter().map(|file| (*file).to_owned()).collect(),
+                    Vec::new(),
+                    Vec::new(),
+                ),
+            ),
+        ]),
+        content
+            .iter()
+            .map(|(path, value)| ((*path).to_owned(), (*value).to_owned()))
+            .collect(),
+    )
 }
