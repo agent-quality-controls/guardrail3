@@ -1,4 +1,4 @@
-//! Shared hex arch structural helpers used by both RS-ARCH-01 and TS-ARCH-01.
+//! Shared hex arch structural helpers used by both RS-TOPOLOGY-01 and TS-ARCH-01.
 //!
 //! These are language-agnostic utilities for checking directory structure.
 //! Language-specific concerns (app discovery, leaf validation, recursion markers)

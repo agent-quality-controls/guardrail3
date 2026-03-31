@@ -1,6 +1,6 @@
 #[path = "source/allow_checks.rs"]
 pub mod allow_checks;
-pub mod arch;
+pub mod topology;
 #[path = "source/ast_helpers.rs"]
 pub mod ast_helpers;
 #[path = "source/ast_visitors.rs"]

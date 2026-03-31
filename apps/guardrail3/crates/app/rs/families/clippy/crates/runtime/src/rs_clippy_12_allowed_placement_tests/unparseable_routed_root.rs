@@ -30,6 +30,6 @@ fn ignores_configs_attached_to_malformed_workspace_roots_because_arch_owns_root_
         results
             .iter()
             .all(|result| result.file() != Some("apps/backend/clippy.toml")),
-        "clippy should ignore configs attached to malformed workspace roots because arch owns root legality: {results:#?}"
+        "clippy should ignore configs attached to malformed workspace roots because topology owns root legality: {results:#?}"
     );
 }

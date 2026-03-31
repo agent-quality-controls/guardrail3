@@ -101,7 +101,7 @@ impl<'a> FamilyMapper<'a> {
                 .overlaps()
                 .iter()
                 .map(|overlap| {
-                    views::RsArchOverlapView::new(
+                    views::RsTopologyOverlapView::new(
                         overlap.app_root_rel().to_owned(),
                         overlap.app_cargo_rel_path().to_owned(),
                         overlap.package_root_rel().to_owned(),

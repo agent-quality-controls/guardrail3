@@ -16,7 +16,7 @@ fn check_results(
 }
 
 #[test]
-fn misplaced_workspace_local_file_is_reported_by_arch() {
+fn misplaced_workspace_local_file_is_reported_by_topology() {
     let tree = tree(
         &[
             ("", entry(&["apps", "tools"], &[])),

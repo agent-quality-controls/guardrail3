@@ -96,7 +96,7 @@ fn full_tree_fixture_enforces_workspace_only_toolchain_policy() {
         !results
             .iter()
             .any(|result| { matches!(result.id(), "RS-TOOLCHAIN-06" | "RS-TOOLCHAIN-07") }),
-        "toolchain placement findings now belong to arch and should not surface here: {results:#?}"
+        "toolchain placement findings now belong to topology and should not surface here: {results:#?}"
     );
 }
 

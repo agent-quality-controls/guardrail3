@@ -85,6 +85,6 @@ fn forbids_both_same_root_sibling_configs_at_a_non_workspace_root() {
             result.file() != Some("tools/helper/.clippy.toml")
                 && result.file() != Some("tools/helper/clippy.toml")
         }),
-        "clippy should ignore illegal non-workspace config placement because arch owns placement legality: {results:#?}"
+        "clippy should ignore illegal non-workspace config placement because topology owns placement legality: {results:#?}"
     );
 }

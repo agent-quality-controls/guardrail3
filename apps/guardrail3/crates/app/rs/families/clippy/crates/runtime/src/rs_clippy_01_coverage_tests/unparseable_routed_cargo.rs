@@ -27,6 +27,6 @@ fn ignores_malformed_workspace_roots_because_arch_owns_root_legality() {
         results
             .iter()
             .all(|result| result.file() != Some("apps/backend/Cargo.toml")),
-        "clippy should not report malformed workspace roots now that arch owns root legality: {results:#?}"
+        "clippy should not report malformed workspace roots now that topology owns root legality: {results:#?}"
     );
 }

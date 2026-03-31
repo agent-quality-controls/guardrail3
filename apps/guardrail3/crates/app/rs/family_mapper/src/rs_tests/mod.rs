@@ -284,7 +284,7 @@ fn release_route_keeps_non_workspace_roots_visible_for_family_judgment() {
 }
 
 #[test]
-fn arch_route_receives_illegal_family_files_and_topology_issues() {
+fn topology_route_receives_illegal_family_files_and_topology_issues() {
     let tree = ProjectTree::new(
         PathBuf::from("/tmp/project"),
         BTreeMap::from([

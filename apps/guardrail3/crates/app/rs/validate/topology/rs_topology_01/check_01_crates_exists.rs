@@ -16,7 +16,7 @@ pub fn check(
     let crates_entries = fs.list_dir(&crates_dir);
     if crates_entries.is_empty() {
         results.push(CheckResult::from_parts(
-    "R-ARCH-01".to_owned(),
+    "R-TOPOLOGY-01".to_owned(),
     Severity::Error,
     format!("Service `{name}` missing {label_prefix}/ directory"),
     format!(

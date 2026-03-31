@@ -1,7 +1,7 @@
-//! RS-ARCH-01: Hex arch structural enforcement.
+//! RS-TOPOLOGY-01: Hex topology structural enforcement.
 //!
 //! Auto-detects service apps from `apps/*/Cargo.toml` and enforces the
-//! canonical hex arch directory template.
+//! canonical hex topology directory template.
 
 mod check_01_crates_exists;
 mod check_02_exact_contents;
@@ -16,7 +16,7 @@ use std::path::Path;
 use guardrail3_domain_report::CheckResult;
 use guardrail3_outbound_traits::FileSystem;
 
-/// Run all RS-ARCH-01 structural checks.
+/// Run all RS-TOPOLOGY-01 structural checks.
 ///
 /// Auto-detects service apps by scanning `apps/*/Cargo.toml`.
 pub fn check_hex_arch_structure(fs: &dyn FileSystem, root: &Path, results: &mut Vec<CheckResult>) {
@@ -54,7 +54,7 @@ fn check_single_app(
     check_crates_dir(fs, name, app_dir, "crates", results);
 }
 
-/// Check a `crates/` directory for hex arch structure.
+/// Check a `crates/` directory for hex topology structure.
 /// Reusable for both top-level apps and hex-in-hex recursion.
 fn check_crates_dir(
     fs: &dyn FileSystem,

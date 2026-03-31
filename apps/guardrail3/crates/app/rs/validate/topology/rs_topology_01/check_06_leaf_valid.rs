@@ -35,7 +35,7 @@ pub fn check(
 
         if has_crates && has_cargo {
             results.push(CheckResult::from_parts(
-    "R-ARCH-01".to_owned(),
+    "R-TOPOLOGY-01".to_owned(),
     Severity::Error,
     format!(
                     "Service `{name}` subdirectory {label}/{subdir}/ has both Cargo.toml and crates/"
@@ -58,7 +58,7 @@ pub fn check(
                 continue;
             }
             results.push(CheckResult {
-                id: "R-ARCH-01".to_owned(),
+                id: "R-TOPOLOGY-01".to_owned(),
                 severity: Severity::Error,
                 title: format!(
                     "Service `{name}` subdirectory {label}/{subdir}/ missing Cargo.toml"
