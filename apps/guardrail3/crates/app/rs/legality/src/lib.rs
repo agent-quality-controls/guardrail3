@@ -5,7 +5,7 @@ use guardrail3_app_rs_ownership::{
 };
 use guardrail3_app_rs_placement::{RustRootClassification, RustRootPlacementFacts};
 use guardrail3_app_rs_structure::RustStructureFacts;
-use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_domain_project_tree::ProjectTreeView;
 use guardrail3_validation_model::RustValidateFamily;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -298,7 +298,7 @@ enum RootLegality {
 }
 
 #[must_use]
-pub fn collect(tree: &ProjectTree, structure: &RustStructureFacts) -> RustLegalityFacts {
+pub fn collect(tree: &dyn ProjectTreeView, structure: &RustStructureFacts) -> RustLegalityFacts {
     let placement = structure.placement();
     let owned_surface = structure.owned_surface();
     let snapshots = collect_snapshots(tree, placement);
@@ -497,7 +497,7 @@ pub fn collect(tree: &ProjectTree, structure: &RustStructureFacts) -> RustLegali
 }
 
 fn collect_snapshots(
-    tree: &ProjectTree,
+    tree: &dyn ProjectTreeView,
     placement: &RustRootPlacementFacts,
 ) -> BTreeMap<String, CargoRootSnapshot> {
     placement
@@ -516,7 +516,7 @@ fn collect_snapshots(
 }
 
 fn cargo_root_snapshot(
-    tree: &ProjectTree,
+    tree: &dyn ProjectTreeView,
     rel_dir: &str,
     cargo_rel_path: &str,
     classification: RustRootClassification,
@@ -565,7 +565,7 @@ fn cargo_root_snapshot(
 }
 
 fn parse_workspace_members(
-    tree: &ProjectTree,
+    tree: &dyn ProjectTreeView,
     workspace_rel: &str,
     parsed: &toml::Value,
 ) -> (Vec<String>, Vec<String>) {
@@ -595,12 +595,16 @@ fn parse_workspace_members(
     )
 }
 
-fn expand_member_pattern(tree: &ProjectTree, workspace_rel: &str, member: &str) -> Vec<String> {
+fn expand_member_pattern(
+    tree: &dyn ProjectTreeView,
+    workspace_rel: &str,
+    member: &str,
+) -> Vec<String> {
     let trimmed = member.trim_matches('/');
     let pattern = if workspace_rel.is_empty() {
         trimmed.to_owned()
     } else {
-        ProjectTree::join_rel(workspace_rel, trimmed)
+        join_rel(workspace_rel, trimmed)
     };
     if trimmed.contains('*') || trimmed.contains('?') || trimmed.contains('[') {
         tree.matching_dir_rels(&pattern)
@@ -611,6 +615,14 @@ fn expand_member_pattern(tree: &ProjectTree, workspace_rel: &str, member: &str) 
 
 fn member_pattern_escapes_root(member: &str) -> bool {
     member.split('/').any(|segment| segment == "..")
+}
+
+fn join_rel(parent: &str, child: &str) -> String {
+    if parent.is_empty() {
+        child.to_owned()
+    } else {
+        format!("{parent}/{child}")
+    }
 }
 
 fn top_level_workspace_candidates(

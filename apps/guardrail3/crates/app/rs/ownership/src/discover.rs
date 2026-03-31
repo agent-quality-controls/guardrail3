@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use guardrail3_app_rs_placement::{RustRootPlacementFacts, is_excluded_live_root_dir};
-use guardrail3_domain_project_tree::ProjectTree;
+use guardrail3_domain_project_tree::ProjectTreeView;
 use guardrail3_validation_model::RustValidateFamily;
 
 use crate::kinds::{
@@ -9,7 +9,7 @@ use crate::kinds::{
 };
 
 pub(super) fn collect(
-    tree: &ProjectTree,
+    tree: &dyn ProjectTreeView,
     placement: &RustRootPlacementFacts,
 ) -> RustOwnedSurfaceFacts {
     let root_rels = placement
@@ -38,7 +38,7 @@ pub(super) fn collect(
 }
 
 fn collect_fmt_files(
-    tree: &ProjectTree,
+    tree: &dyn ProjectTreeView,
     root_rels: &[String],
     seen: &mut BTreeSet<(RustValidateFamily, String)>,
     out: &mut Vec<RustFamilyFileFact>,
@@ -64,7 +64,7 @@ fn collect_fmt_files(
 }
 
 fn collect_toolchain_files(
-    tree: &ProjectTree,
+    tree: &dyn ProjectTreeView,
     root_rels: &[String],
     seen: &mut BTreeSet<(RustValidateFamily, String)>,
     out: &mut Vec<RustFamilyFileFact>,
@@ -90,7 +90,7 @@ fn collect_toolchain_files(
 }
 
 fn collect_clippy_files(
-    tree: &ProjectTree,
+    tree: &dyn ProjectTreeView,
     root_rels: &[String],
     seen: &mut BTreeSet<(RustValidateFamily, String)>,
     out: &mut Vec<RustFamilyFileFact>,
@@ -136,7 +136,7 @@ fn collect_clippy_files(
 }
 
 fn collect_deny_files(
-    tree: &ProjectTree,
+    tree: &dyn ProjectTreeView,
     root_rels: &[String],
     seen: &mut BTreeSet<(RustValidateFamily, String)>,
     out: &mut Vec<RustFamilyFileFact>,
@@ -157,7 +157,7 @@ fn collect_deny_files(
         .filter(|dir| !dir.ends_with("/.cargo") && dir != ".cargo")
         .filter(|dir| !is_excluded_live_root_dir(dir))
     {
-        let rel_path = ProjectTree::join_rel(&dir, "deny.toml");
+        let rel_path = join_rel(&dir, "deny.toml");
         push_file(
             root_rels,
             seen,
@@ -192,7 +192,7 @@ fn collect_deny_files(
         .filter(|dir| dir.ends_with("/.cargo"))
         .filter(|dir| !is_excluded_live_root_dir(dir.strip_suffix("/.cargo").unwrap_or(dir)))
     {
-        let rel_path = ProjectTree::join_rel(&dir, "deny.toml");
+        let rel_path = join_rel(&dir, "deny.toml");
         push_file(
             root_rels,
             seen,
@@ -205,7 +205,7 @@ fn collect_deny_files(
 }
 
 fn collect_cargo_and_policy_files(
-    tree: &ProjectTree,
+    tree: &dyn ProjectTreeView,
     root_rels: &[String],
     seen: &mut BTreeSet<(RustValidateFamily, String)>,
     out: &mut Vec<RustFamilyFileFact>,
@@ -249,7 +249,7 @@ fn collect_cargo_and_policy_files(
 }
 
 fn collect_release_files(
-    tree: &ProjectTree,
+    tree: &dyn ProjectTreeView,
     root_rels: &[String],
     seen: &mut BTreeSet<(RustValidateFamily, String)>,
     out: &mut Vec<RustFamilyFileFact>,
@@ -275,7 +275,7 @@ fn collect_release_files(
 }
 
 fn collect_root_and_dir_file(
-    tree: &ProjectTree,
+    tree: &dyn ProjectTreeView,
     root_rels: &[String],
     seen: &mut BTreeSet<(RustValidateFamily, String)>,
     out: &mut Vec<RustFamilyFileFact>,
@@ -292,13 +292,13 @@ fn collect_root_and_dir_file(
         .filter(|dir| !(file_name == "deny.toml" && (dir == ".cargo" || dir.ends_with("/.cargo"))))
         .filter(|dir| !is_excluded_live_root_dir(dir))
     {
-        let rel_path = ProjectTree::join_rel(&dir, file_name);
+        let rel_path = join_rel(&dir, file_name);
         push_file(root_rels, seen, out, family, &rel_path, kind);
     }
 }
 
 fn collect_cargo_dir_file(
-    tree: &ProjectTree,
+    tree: &dyn ProjectTreeView,
     root_rels: &[String],
     seen: &mut BTreeSet<(RustValidateFamily, String)>,
     out: &mut Vec<RustFamilyFileFact>,
@@ -316,7 +316,7 @@ fn collect_cargo_dir_file(
         .filter(|dir| dir.ends_with("/.cargo"))
         .filter(|dir| !is_excluded_live_root_dir(dir.strip_suffix("/.cargo").unwrap_or(dir)))
     {
-        let rel_path = ProjectTree::join_rel(&dir, file_name);
+        let rel_path = join_rel(&dir, file_name);
         push_file(root_rels, seen, out, family, &rel_path, kind);
     }
 }
@@ -421,6 +421,14 @@ fn path_is_under(rel_path: &str, parent_rel: &str) -> bool {
         || rel_path
             .strip_prefix(parent_rel)
             .is_some_and(|rest| rest.starts_with('/'))
+}
+
+fn join_rel(parent: &str, child: &str) -> String {
+    if parent.is_empty() {
+        child.to_owned()
+    } else {
+        format!("{parent}/{child}")
+    }
 }
 
 #[cfg(test)]

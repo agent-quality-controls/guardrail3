@@ -475,7 +475,6 @@ dependencies = [
  "guardrail3-app-rs-family-mapper",
  "guardrail3-app-rs-structure",
  "guardrail3-domain-config",
- "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
  "guardrail3-domain-validation-model",
  "toml",
@@ -739,7 +738,7 @@ version = "0.0.0"
 dependencies = [
  "guardrail3-app-rs-family-hexarch",
  "guardrail3-app-rs-family-hexarch-assertions-common",
- "guardrail3-domain-project-tree",
+ "guardrail3-app-rs-family-mapper",
  "guardrail3-domain-report",
 ]
 

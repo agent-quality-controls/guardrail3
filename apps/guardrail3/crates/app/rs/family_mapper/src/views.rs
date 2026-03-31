@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use guardrail3_app_rs_legality::{RustTopologyIssueFact, RustTopologyIssueKind};
 use guardrail3_app_rs_ownership::{RustFamilyFileAttachment, RustFamilyFileKind};
 use guardrail3_app_rs_placement::{RustArchRole, RustRootClassification};
-use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
+use guardrail3_domain_project_tree::{DirEntry, ProjectTree, ProjectTreeView};
 use guardrail3_validation_model::RustValidateFamily;
 
 #[derive(Debug, Clone)]
@@ -25,13 +25,17 @@ impl RsProjectSurface {
     }
 
     #[must_use]
-    pub fn from_tree(tree: &ProjectTree) -> Self {
-        Self { tree: tree.clone() }
+    pub fn from_tree(tree: &dyn ProjectTreeView) -> Self {
+        Self::new(
+            tree.root().clone(),
+            tree.structure().clone(),
+            tree.content().clone(),
+        )
     }
 
     #[must_use]
     pub fn from_route_scope(
-        tree: &ProjectTree,
+        tree: &dyn ProjectTreeView,
         root_rels: &[String],
         extra_file_rels: &[String],
         scoped_files: Option<&BTreeSet<String>>,
@@ -196,11 +200,49 @@ impl RsProjectSurface {
     }
 }
 
-impl std::ops::Deref for RsProjectSurface {
-    type Target = ProjectTree;
+impl ProjectTreeView for RsProjectSurface {
+    fn root(&self) -> &PathBuf {
+        RsProjectSurface::root(self)
+    }
 
-    fn deref(&self) -> &Self::Target {
-        &self.tree
+    fn structure(&self) -> &BTreeMap<String, DirEntry> {
+        RsProjectSurface::structure(self)
+    }
+
+    fn content(&self) -> &BTreeMap<String, String> {
+        RsProjectSurface::content(self)
+    }
+
+    fn dir_exists(&self, rel: &str) -> bool {
+        RsProjectSurface::dir_exists(self, rel)
+    }
+
+    fn dir_contents(&self, rel: &str) -> Option<&DirEntry> {
+        RsProjectSurface::dir_contents(self, rel)
+    }
+
+    fn file_content(&self, rel: &str) -> Option<&str> {
+        RsProjectSurface::file_content(self, rel)
+    }
+
+    fn file_exists(&self, rel: &str) -> bool {
+        RsProjectSurface::file_exists(self, rel)
+    }
+
+    fn all_dir_rels(&self) -> Vec<String> {
+        RsProjectSurface::all_dir_rels(self)
+    }
+
+    fn dirs_with_file(&self, name: &str) -> Vec<String> {
+        RsProjectSurface::dirs_with_file(self, name)
+    }
+
+    fn matching_dir_rels(&self, pattern: &str) -> Vec<String> {
+        RsProjectSurface::matching_dir_rels(self, pattern)
+    }
+
+    fn abs_path(&self, rel: &str) -> PathBuf {
+        RsProjectSurface::abs_path(self, rel)
     }
 }
 
