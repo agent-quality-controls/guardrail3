@@ -310,10 +310,7 @@ fn malformed_root_local_guardrail_suppresses_clean_inventory() {
 
     let results = check_results(&tree(
         &[("", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
-        &[
-            ("Cargo.toml", &manifest),
-            ("guardrail3.toml", "[profile"),
-        ],
+        &[("Cargo.toml", &manifest), ("guardrail3.toml", "[profile")],
     ));
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_11_disallowed_macros_deny::assert_rule_results(

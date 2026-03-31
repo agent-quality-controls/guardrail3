@@ -47,9 +47,7 @@ pub struct ClippyConfigFacts {
 
 #[derive(Debug, Clone)]
 pub enum ForbiddenConfigReason {
-    ShadowedSameRoot {
-        preferred_rel_path: String,
-    },
+    ShadowedSameRoot { preferred_rel_path: String },
 }
 
 #[derive(Debug, Clone)]

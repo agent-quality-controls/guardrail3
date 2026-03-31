@@ -82,9 +82,7 @@ pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-pub(crate) use ::test_support::{
-    build_fixture_deny_toml, set_feature_entries,
-};
+pub(crate) use ::test_support::{build_fixture_deny_toml, set_feature_entries};
 #[cfg(test)]
 pub(crate) fn expected_tokio_allowed_features_for_test() -> std::collections::BTreeSet<String> {
     super::deny_support::expected_tokio_allowed_features()

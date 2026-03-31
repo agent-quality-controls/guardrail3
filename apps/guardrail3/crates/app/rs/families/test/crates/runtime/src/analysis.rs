@@ -317,8 +317,7 @@ fn exported_assertion_function_calls_proof(
                                 || glob_prefixes.iter().any(|prefix| {
                                     proof_bearing_names
                                         .contains(&qualified_assertion_name(prefix, name))
-                                })))
-                )
+                                }))))
             }
             [first, rest @ ..] => root_prefixes.get(first).is_some_and(|prefix| {
                 proof_bearing_names.contains(&qualified_assertion_name(prefix, &rest.join("::")))

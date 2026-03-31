@@ -775,6 +775,7 @@ dependencies = [
  "guardrail3-app-rs-family-hooks-rs-assertions",
  "guardrail3-app-rs-family-hooks-rs-test-support",
  "guardrail3-app-rs-family-hooks-shared",
+ "guardrail3-app-rs-family-mapper",
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
  "guardrail3-ports-outbound-traits",
@@ -802,6 +803,7 @@ name = "guardrail3-app-rs-family-hooks-shared"
 version = "0.0.0"
 dependencies = [
  "guardrail3-app-rs-family-hooks-shared-assertions",
+ "guardrail3-app-rs-family-mapper",
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",
  "guardrail3-ports-outbound-traits",
@@ -948,7 +950,6 @@ dependencies = [
  "guardrail3-app-rs-ast",
  "guardrail3-app-rs-family-hooks-shared",
  "guardrail3-app-rs-family-mapper",
- "guardrail3-app-rs-placement",
  "guardrail3-app-rs-structure",
  "guardrail3-domain-project-tree",
  "guardrail3-domain-report",

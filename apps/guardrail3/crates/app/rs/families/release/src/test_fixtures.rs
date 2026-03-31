@@ -32,7 +32,12 @@ pub(crate) fn run_tree(
     tc: &dyn guardrail3_outbound_traits::ToolChecker,
     thorough: bool,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
-    crate::check(tree, &family_route(tree), tc, thorough)
+    crate::check(
+        &guardrail3_app_rs_family_mapper::RsProjectSurface::from_tree(tree),
+        &family_route(tree),
+        tc,
+        thorough,
+    )
 }
 
 pub(crate) fn run_tree_with_validation_scope(
@@ -42,7 +47,7 @@ pub(crate) fn run_tree_with_validation_scope(
     validation_scope: &str,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     crate::check(
-        tree,
+        &guardrail3_app_rs_family_mapper::RsProjectSurface::from_tree(tree),
         &family_route_with_validation_scope(tree, validation_scope),
         tc,
         thorough,

@@ -81,8 +81,7 @@ pub(super) fn discover_workspaces(
                 format!("{root_rel_dir}/{}", member.trim_matches('/'))
             };
             let direct_member = direct_member.trim_matches('/').to_owned();
-            if !direct_member.is_empty()
-                && tree.file_exists(&format!("{direct_member}/Cargo.toml"))
+            if !direct_member.is_empty() && tree.file_exists(&format!("{direct_member}/Cargo.toml"))
             {
                 let _ = member_dirs.insert(direct_member);
             }
@@ -121,7 +120,11 @@ pub(super) fn resolve_member_pattern(
     let matcher = Pattern::new(&pattern).ok();
     let mut matches = exact_root_cargo_dirs
         .iter()
-        .filter(|candidate| matcher.as_ref().is_some_and(|pattern| pattern.matches(candidate)))
+        .filter(|candidate| {
+            matcher
+                .as_ref()
+                .is_some_and(|pattern| pattern.matches(candidate))
+        })
         .cloned()
         .collect::<Vec<_>>();
     if matches.is_empty() && exact_root_cargo_dirs.contains(&pattern) {

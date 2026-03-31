@@ -5,7 +5,7 @@ use guardrail3_app_rs_placement::collect as collect_placement;
 use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
 use guardrail3_validation_model::RustValidateFamily;
 
-use crate::{collect, RustFamilyFileAttachment, RustFamilyFileKind};
+use crate::{RustFamilyFileAttachment, RustFamilyFileKind, collect};
 
 #[test]
 fn attaches_toolchain_file_to_exact_root() {

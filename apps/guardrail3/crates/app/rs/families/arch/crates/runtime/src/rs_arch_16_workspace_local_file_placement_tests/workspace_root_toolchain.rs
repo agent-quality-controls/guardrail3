@@ -14,8 +14,14 @@ fn allows_workspace_root_toolchain_file() {
             ),
         ],
         &[
-            ("guardrail3.toml", "[rust.checks]\narch = true\ntoolchain = true\n"),
-            ("apps/api/Cargo.toml", "[workspace]\nmembers = []\nresolver = \"2\"\n"),
+            (
+                "guardrail3.toml",
+                "[rust.checks]\narch = true\ntoolchain = true\n",
+            ),
+            (
+                "apps/api/Cargo.toml",
+                "[workspace]\nmembers = []\nresolver = \"2\"\n",
+            ),
             (
                 "apps/api/rust-toolchain.toml",
                 "[toolchain]\nchannel = \"1.87.0\"\ncomponents = [\"rustfmt\", \"clippy\"]\n",

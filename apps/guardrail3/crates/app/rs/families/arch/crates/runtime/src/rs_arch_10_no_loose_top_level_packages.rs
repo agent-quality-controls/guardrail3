@@ -6,7 +6,10 @@ use super::inputs::TopologyIssueInput;
 const ID: &str = "RS-ARCH-10";
 
 pub fn check(input: &TopologyIssueInput<'_>, results: &mut Vec<CheckResult>) {
-    if !matches!(input.issue.kind, ArchTopologyIssueKind::LooseTopLevelPackage) {
+    if !matches!(
+        input.issue.kind,
+        ArchTopologyIssueKind::LooseTopLevelPackage
+    ) {
         return;
     }
 

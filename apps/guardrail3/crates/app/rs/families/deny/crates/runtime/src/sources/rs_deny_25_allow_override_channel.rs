@@ -108,9 +108,7 @@ pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-pub(crate) use ::test_support::{
-    build_fixture_deny_toml, set_bans_allow_entries,
-};
+pub(crate) use ::test_support::{build_fixture_deny_toml, set_bans_allow_entries};
 #[cfg(test)]
 #[path = "rs_deny_25_allow_override_channel_tests/mod.rs"]
 // reason: test-only sidecar module wiring

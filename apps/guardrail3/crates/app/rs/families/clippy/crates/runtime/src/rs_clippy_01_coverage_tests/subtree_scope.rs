@@ -20,14 +20,12 @@ fn ignores_nested_workspace_policy_roots_when_validation_scope_targets_one_app()
     let results = run_with_validation_scope_for_tests(tmp.path(), "apps/backend");
     assertions::assert_multi_root_coverage(
         &results,
-        &[
-            (
-                "workspace root is covered by `clippy.toml`.",
-                assertions::Severity::Info,
-                true,
-                Some("clippy.toml"),
-                "Rust unit covered by clippy.toml",
-            ),
-        ],
+        &[(
+            "workspace root is covered by `clippy.toml`.",
+            assertions::Severity::Info,
+            true,
+            Some("clippy.toml"),
+            "Rust unit covered by clippy.toml",
+        )],
     );
 }

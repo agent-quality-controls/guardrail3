@@ -40,9 +40,7 @@ pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
 #[cfg(test)]
 pub(crate) use crate::config_facts;
 #[cfg(test)]
-pub(crate) use ::test_support::{
-    build_fixture_deny_toml, set_advisory_ignores,
-};
+pub(crate) use ::test_support::{build_fixture_deny_toml, set_advisory_ignores};
 #[cfg(test)]
 #[path = "rs_deny_29_ignore_accumulation_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_deny_29_ignore_accumulation_tests;

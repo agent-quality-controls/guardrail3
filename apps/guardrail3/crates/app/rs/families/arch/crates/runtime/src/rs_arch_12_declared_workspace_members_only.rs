@@ -6,9 +6,7 @@ use super::inputs::TopologyIssueInput;
 const ID: &str = "RS-ARCH-12";
 
 pub fn check(input: &TopologyIssueInput<'_>, results: &mut Vec<CheckResult>) {
-    let ArchTopologyIssueKind::UndeclaredWorkspaceMember {
-        workspace_root_rel,
-    } = &input.issue.kind
+    let ArchTopologyIssueKind::UndeclaredWorkspaceMember { workspace_root_rel } = &input.issue.kind
     else {
         return;
     };

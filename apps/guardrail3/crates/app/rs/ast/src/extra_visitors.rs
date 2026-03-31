@@ -138,7 +138,10 @@ impl IgnoreVisitor<'_> {
 
     fn record_ignore_meta(&mut self, meta: &syn::Meta, line: usize) {
         if let Some(reason) = reason_from_ignore_meta(meta) {
-            self.findings.push(IgnoreReasonInfo { line, reason: Some(reason) });
+            self.findings.push(IgnoreReasonInfo {
+                line,
+                reason: Some(reason),
+            });
             return;
         }
 
@@ -149,14 +152,20 @@ impl IgnoreVisitor<'_> {
         let idx = line.saturating_sub(1);
         if let Some(same_line) = self.lines.get(idx) {
             if let Some(reason) = extract_comment_reason(same_line) {
-                self.findings.push(IgnoreReasonInfo { line, reason: Some(reason) });
+                self.findings.push(IgnoreReasonInfo {
+                    line,
+                    reason: Some(reason),
+                });
                 return;
             }
         }
         if idx > 0 {
             if let Some(prev_line) = self.lines.get(idx.saturating_sub(1)) {
                 if let Some(reason) = extract_comment_reason(prev_line) {
-                    self.findings.push(IgnoreReasonInfo { line, reason: Some(reason) });
+                    self.findings.push(IgnoreReasonInfo {
+                        line,
+                        reason: Some(reason),
+                    });
                     return;
                 }
             }
@@ -183,9 +192,8 @@ fn extract_comment_reason(line: &str) -> Option<String> {
     const TOKENS: [&str; 2] = ["// reason:", "//reason:"];
 
     TOKENS.iter().find_map(|token| {
-        line.find(token).map(|index| {
-            line[index + token.len()..].trim().to_owned()
-        })
+        line.find(token)
+            .map(|index| line[index + token.len()..].trim().to_owned())
     })
 }
 

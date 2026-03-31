@@ -5,7 +5,10 @@ use guardrail3_app_rs_family_deps_assertions::rs_deps_10_gitignore_not_ignoring_
 fn reports_exact_gitignore_sources_across_roots() {
     let tree = project_tree(
         vec![
-            ("", dir_entry(&["apps", "packages"], &[".gitignore", "guardrail3.toml"])),
+            (
+                "",
+                dir_entry(&["apps", "packages"], &[".gitignore", "guardrail3.toml"]),
+            ),
             ("apps", dir_entry(&["api"], &[])),
             (
                 "apps/api",

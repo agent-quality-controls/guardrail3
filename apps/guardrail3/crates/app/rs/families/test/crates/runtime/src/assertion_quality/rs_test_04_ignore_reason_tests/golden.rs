@@ -110,7 +110,11 @@ fn file_without_ignored_tests_keeps_inventory_proof() {
         "Cargo.toml",
         "[package]\nname = \"demo\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
     );
-    write_file(root, "tests/slow.rs", "#[test]\nfn waits_for_service() {}\n");
+    write_file(
+        root,
+        "tests/slow.rs",
+        "#[test]\nfn waits_for_service() {}\n",
+    );
 
     let results = run_family(root);
 

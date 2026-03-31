@@ -88,10 +88,11 @@ use guardrail3_app_rs_family_code_assertions as _;
 const GOLDEN_REL: &str = "../../../../../../../tests/fixtures/r_arch_01/golden";
 
 pub fn check(
-    tree: &guardrail3_domain_project_tree::ProjectTree,
+    surface: &guardrail3_app_rs_family_mapper::RsProjectSurface,
     route: &guardrail3_app_rs_family_mapper::RsCodeRoute,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     mark_runtime_dependencies_used();
+    let tree = surface.tree();
     let facts = collect(tree, route);
     let mut results = Vec::new();
 
@@ -204,7 +205,10 @@ pub(crate) fn check_test_root(
 pub(crate) fn check_test_tree(
     tree: &guardrail3_domain_project_tree::ProjectTree,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
-    check(tree, &family_route_for_tests(tree))
+    check(
+        &guardrail3_app_rs_family_mapper::RsProjectSurface::from_tree(tree),
+        &family_route_for_tests(tree),
+    )
 }
 
 #[cfg(test)]

@@ -14,10 +14,16 @@ fn reports_nested_cargo_sidecar_under_workspace_member() {
                 "apps/api/crates/member",
                 entry(&[".cargo"], &["Cargo.toml"]),
             ),
-            ("apps/api/crates/member/.cargo", entry(&[], &["config.toml"])),
+            (
+                "apps/api/crates/member/.cargo",
+                entry(&[], &["config.toml"]),
+            ),
         ],
         &[
-            ("guardrail3.toml", "[rust.checks]\narch = true\nclippy = true\n"),
+            (
+                "guardrail3.toml",
+                "[rust.checks]\narch = true\nclippy = true\n",
+            ),
             (
                 "apps/api/Cargo.toml",
                 "[workspace]\nmembers = [\"crates/member\"]\nresolver = \"2\"\n",

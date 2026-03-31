@@ -62,14 +62,17 @@ fn warns_only_for_library_crates_without_allowlists() {
 fn nested_package_zone_uses_library_policy_anywhere_in_path() {
     let tree = project_tree(
         vec![
-            (
-                "",
-                dir_entry(&["tools"], &["guardrail3.toml"]),
-            ),
+            ("", dir_entry(&["tools"], &["guardrail3.toml"])),
             ("tools", dir_entry(&["packages"], &[])),
             ("tools/packages", dir_entry(&["core"], &[])),
-            ("tools/packages/core", dir_entry(&["support"], &["Cargo.toml"])),
-            ("tools/packages/core/support", dir_entry(&[], &["Cargo.toml"])),
+            (
+                "tools/packages/core",
+                dir_entry(&["support"], &["Cargo.toml"]),
+            ),
+            (
+                "tools/packages/core/support",
+                dir_entry(&[], &["Cargo.toml"]),
+            ),
         ],
         vec![
             (

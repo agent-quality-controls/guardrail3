@@ -6,9 +6,7 @@ use guardrail3_app_rs_structure::collect as collect_structure;
 use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
 use guardrail3_validation_model::RustValidateFamily;
 
-use crate::{
-    RustIllegalFamilyFileReason, RustTopologyIssueKind, collect as collect_legality,
-};
+use crate::{RustIllegalFamilyFileReason, RustTopologyIssueKind, collect as collect_legality};
 
 #[test]
 fn legal_workspace_root_and_member_cargo_are_kept_legal() {
@@ -77,7 +75,12 @@ fn top_level_package_toolchain_is_illegal_for_local_family_routing() {
             ),
             (
                 "tools".to_owned(),
-                DirEntry::new(vec!["helper".to_owned()], Vec::new(), Vec::new(), Vec::new()),
+                DirEntry::new(
+                    vec!["helper".to_owned()],
+                    Vec::new(),
+                    Vec::new(),
+                    Vec::new(),
+                ),
             ),
             (
                 "tools/helper".to_owned(),
@@ -138,7 +141,12 @@ fn fmt_root_file_is_legal() {
             ),
             (
                 "apps/api".to_owned(),
-                DirEntry::new(Vec::new(), vec!["Cargo.toml".to_owned()], Vec::new(), Vec::new()),
+                DirEntry::new(
+                    Vec::new(),
+                    vec!["Cargo.toml".to_owned()],
+                    Vec::new(),
+                    Vec::new(),
+                ),
             ),
         ]),
         BTreeMap::from([
@@ -230,7 +238,12 @@ fn workspace_tree() -> ProjectTree {
             ),
             (
                 "apps/api/crates".to_owned(),
-                DirEntry::new(vec!["member".to_owned()], Vec::new(), Vec::new(), Vec::new()),
+                DirEntry::new(
+                    vec!["member".to_owned()],
+                    Vec::new(),
+                    Vec::new(),
+                    Vec::new(),
+                ),
             ),
             (
                 "apps/api/crates/member".to_owned(),
@@ -251,7 +264,10 @@ fn workspace_tree() -> ProjectTree {
                 "apps/api/crates/member/Cargo.toml".to_owned(),
                 "[package]\nname = \"member\"\nversion = \"0.1.0\"\n".to_owned(),
             ),
-            ("apps/api/clippy.toml".to_owned(), "msrv = \"1.85\"\n".to_owned()),
+            (
+                "apps/api/clippy.toml".to_owned(),
+                "msrv = \"1.85\"\n".to_owned(),
+            ),
         ]),
     )
 }
@@ -300,7 +316,10 @@ fn nested_workspace_tree() -> ProjectTree {
                 "apps/api/crates/demo/Cargo.toml".to_owned(),
                 "[workspace]\nmembers = []\nresolver = \"2\"\n".to_owned(),
             ),
-            ("apps/api/crates/demo/clippy.toml".to_owned(), "msrv = \"1.85\"\n".to_owned()),
+            (
+                "apps/api/crates/demo/clippy.toml".to_owned(),
+                "msrv = \"1.85\"\n".to_owned(),
+            ),
         ]),
     )
 }

@@ -87,10 +87,15 @@ pub(crate) fn has_owned_assertion_proof(
 
     let bare_call_is_owned = |name: &str| {
         if function.shadowed_idents.contains(name) {
-            return function
-                .local_call_aliases
-                .get(name)
-                .is_some_and(|path| path_is_owned(path, &root_prefixes, &bare_imports, &glob_prefixes, proof_bearing_assertion_functions));
+            return function.local_call_aliases.get(name).is_some_and(|path| {
+                path_is_owned(
+                    path,
+                    &root_prefixes,
+                    &bare_imports,
+                    &glob_prefixes,
+                    proof_bearing_assertion_functions,
+                )
+            });
         }
         !file_function_names.contains(name)
             && (bare_imports
@@ -146,13 +151,15 @@ fn path_is_owned(
     proof_bearing_assertion_functions: &BTreeSet<String>,
 ) -> bool {
     match path.first() {
-        Some(first) if path.len() == 1 => bare_imports
-            .get(first)
-            .is_some_and(|qualified| proof_bearing_assertion_functions.contains(qualified))
-            || glob_prefixes.iter().any(|prefix| {
-                proof_bearing_assertion_functions
-                    .contains(&qualified_assertion_name(prefix, first))
-            }),
+        Some(first) if path.len() == 1 => {
+            bare_imports
+                .get(first)
+                .is_some_and(|qualified| proof_bearing_assertion_functions.contains(qualified))
+                || glob_prefixes.iter().any(|prefix| {
+                    proof_bearing_assertion_functions
+                        .contains(&qualified_assertion_name(prefix, first))
+                })
+        }
         Some(first) => root_prefixes.get(first).is_some_and(|prefix| {
             proof_bearing_assertion_functions
                 .contains(&qualified_assertion_name(prefix, &path[1..].join("::")))

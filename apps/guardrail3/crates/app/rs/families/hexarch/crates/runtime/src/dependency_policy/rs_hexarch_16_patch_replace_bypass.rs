@@ -72,7 +72,10 @@ pub fn check(input: &PatchHexarchInput<'_>, results: &mut Vec<CheckResult>) {
     }
 }
 
-pub fn check_count<'a>(patches: impl IntoIterator<Item = &'a PatchEntryFacts>, results: &mut Vec<CheckResult>) {
+pub fn check_count<'a>(
+    patches: impl IntoIterator<Item = &'a PatchEntryFacts>,
+    results: &mut Vec<CheckResult>,
+) {
     let mut counts = BTreeMap::<String, usize>::new();
     for patch in patches {
         if patch.target_layer.is_some() {

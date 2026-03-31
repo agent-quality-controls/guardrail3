@@ -69,7 +69,9 @@ pub fn collect(tree: &ProjectTree, route: &RsFmtRoute) -> RustfmtFacts {
 
     let escape_hatches = tree
         .file_content("guardrail3.toml")
-        .and_then(|content| toml::from_str::<guardrail3_domain_config::types::GuardrailConfig>(content).ok())
+        .and_then(|content| {
+            toml::from_str::<guardrail3_domain_config::types::GuardrailConfig>(content).ok()
+        })
         .map(|config| config.escape_hatches().to_vec())
         .unwrap_or_default();
 

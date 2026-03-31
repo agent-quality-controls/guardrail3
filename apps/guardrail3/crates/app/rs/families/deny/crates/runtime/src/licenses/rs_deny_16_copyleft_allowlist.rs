@@ -67,9 +67,7 @@ pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
-pub(crate) use ::test_support::{
-    add_allowed_license, build_fixture_deny_toml,
-};
+pub(crate) use ::test_support::{add_allowed_license, build_fixture_deny_toml};
 #[cfg(test)]
 #[path = "rs_deny_16_copyleft_allowlist_tests/mod.rs"] // reason: test-only sidecar module wiring
 mod rs_deny_16_copyleft_allowlist_tests;

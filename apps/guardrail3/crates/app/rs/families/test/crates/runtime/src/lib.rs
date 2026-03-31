@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use guardrail3_app_rs_family_mapper::RsTestRoute;
+use guardrail3_app_rs_family_mapper::{RsProjectSurface, RsTestRoute};
 pub use guardrail3_domain_report::{CheckResult, Severity};
 
 mod analysis;
@@ -45,6 +45,7 @@ mod rs_test_17_external_harnesses_use_assertions;
 #[path = "structure/rs_test_18_test_support_generic.rs"]
 mod rs_test_18_test_support_generic;
 
+#[cfg(test)]
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_outbound_traits::ToolChecker;
 
@@ -55,7 +56,12 @@ use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
 use self::facts::TestFileKind;
 
-pub fn check(tree: &ProjectTree, route: &RsTestRoute, tc: &dyn ToolChecker) -> Vec<CheckResult> {
+pub fn check(
+    surface: &RsProjectSurface,
+    route: &RsTestRoute,
+    tc: &dyn ToolChecker,
+) -> Vec<CheckResult> {
+    let tree = surface.tree();
     let facts = discover::collect(tree, route.roots(), tc);
     let mut results = Vec::new();
     let discovered_root_dirs = facts
@@ -240,5 +246,5 @@ pub fn check_test_tree(tree: &ProjectTree, tc: &dyn ToolChecker) -> Vec<CheckRes
     let scope = guardrail3_app_rs_structure::collect(tree);
     let selection = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Test]));
     let route = FamilyMapper::new(tree, &scope, None, &selection, None).map_rs_test();
-    check(tree, &route, tc)
+    check(&RsProjectSurface::from_tree(tree), &route, tc)
 }

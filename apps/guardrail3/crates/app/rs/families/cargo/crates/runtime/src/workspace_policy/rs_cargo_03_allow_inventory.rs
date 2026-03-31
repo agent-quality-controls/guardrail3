@@ -2,7 +2,9 @@ use guardrail3_domain_report::{CheckResult, Severity};
 use guardrail3_reason_policy::validate_reason_text;
 
 use super::inputs::PolicyRootCargoInput;
-use super::lint_support::{allow_selector, escape_hatch_reason, explicit_allow_entries, policy_lints};
+use super::lint_support::{
+    allow_selector, escape_hatch_reason, explicit_allow_entries, policy_lints,
+};
 
 const ID: &str = "RS-CARGO-03";
 

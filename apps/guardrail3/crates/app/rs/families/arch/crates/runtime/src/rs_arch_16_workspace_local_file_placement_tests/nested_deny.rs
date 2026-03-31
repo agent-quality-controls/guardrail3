@@ -16,7 +16,10 @@ fn reports_nested_deny_config_under_workspace_member() {
             ),
         ],
         &[
-            ("guardrail3.toml", "[rust.checks]\narch = true\ndeny = true\n"),
+            (
+                "guardrail3.toml",
+                "[rust.checks]\narch = true\ndeny = true\n",
+            ),
             (
                 "apps/api/Cargo.toml",
                 "[workspace]\nmembers = [\"crates/member\"]\nresolver = \"2\"\n",
@@ -25,10 +28,7 @@ fn reports_nested_deny_config_under_workspace_member() {
                 "apps/api/crates/member/Cargo.toml",
                 "[package]\nname = \"member\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
             ),
-            (
-                "apps/api/crates/member/deny.toml",
-                "[bans]\ndeny = []\n",
-            ),
+            ("apps/api/crates/member/deny.toml", "[bans]\ndeny = []\n"),
         ],
     );
 

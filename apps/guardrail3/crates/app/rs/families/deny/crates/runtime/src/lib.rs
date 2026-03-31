@@ -61,7 +61,8 @@ mod rs_deny_29_ignore_accumulation;
 #[path = "sources/rs_deny_30_wrappers.rs"]
 mod rs_deny_30_wrappers;
 
-use guardrail3_app_rs_family_mapper::RsDenyRoute;
+use guardrail3_app_rs_family_mapper::{RsDenyRoute, RsProjectSurface};
+#[cfg(test)]
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::CheckResult;
 
@@ -69,11 +70,14 @@ use guardrail3_domain_report::CheckResult;
 use guardrail3_app_rs_family_deny_assertions as _;
 
 use self::facts::collect;
-use self::inputs::{ConfigDenyInput, CoveredRustUnitInput, SameRootConflictInput, UncoveredRustUnitInput};
+use self::inputs::{
+    ConfigDenyInput, CoveredRustUnitInput, SameRootConflictInput, UncoveredRustUnitInput,
+};
 
 pub use self::deny_support::expected_ban_names;
 
-pub fn check(tree: &ProjectTree, route: &RsDenyRoute) -> Vec<CheckResult> {
+pub fn check(surface: &RsProjectSurface, route: &RsDenyRoute) -> Vec<CheckResult> {
+    let tree = surface.tree();
     let facts = collect(tree, route);
     let mut results = Vec::new();
 
@@ -172,7 +176,7 @@ pub(crate) fn check_test_root(root: &std::path::Path) -> Vec<CheckResult> {
     let selected =
         RustFamilySelection::new(std::collections::BTreeSet::from([RustValidateFamily::Deny]));
     let route = FamilyMapper::new(&tree, &scope, None, &selected, None).map_rs_deny();
-    check(&tree, &route)
+    check(&RsProjectSurface::from_tree(&tree), &route)
 }
 
 #[cfg(test)]

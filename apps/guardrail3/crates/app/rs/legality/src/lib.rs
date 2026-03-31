@@ -1,6 +1,8 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use guardrail3_app_rs_ownership::{RustFamilyFileAttachment, RustFamilyFileFact, RustFamilyFileKind};
+use guardrail3_app_rs_ownership::{
+    RustFamilyFileAttachment, RustFamilyFileFact, RustFamilyFileKind,
+};
 use guardrail3_app_rs_placement::{RustRootClassification, RustRootPlacementFacts};
 use guardrail3_app_rs_structure::RustStructureFacts;
 use guardrail3_domain_project_tree::ProjectTree;
@@ -15,7 +17,11 @@ pub struct RustLegalWorkspaceRoot {
 
 impl RustLegalWorkspaceRoot {
     #[must_use]
-    pub fn new(rel_dir: String, cargo_rel_path: String, classification: RustRootClassification) -> Self {
+    pub fn new(
+        rel_dir: String,
+        cargo_rel_path: String,
+        classification: RustRootClassification,
+    ) -> Self {
         Self {
             rel_dir,
             cargo_rel_path,
@@ -292,10 +298,7 @@ enum RootLegality {
 }
 
 #[must_use]
-pub fn collect(
-    tree: &ProjectTree,
-    structure: &RustStructureFacts,
-) -> RustLegalityFacts {
+pub fn collect(tree: &ProjectTree, structure: &RustStructureFacts) -> RustLegalityFacts {
     let placement = structure.placement();
     let owned_surface = structure.owned_surface();
     let snapshots = collect_snapshots(tree, placement);
@@ -307,7 +310,9 @@ pub fn collect(
 
     for snapshot in snapshots.values() {
         if snapshot.has_workspace {
-            if let Some(parent_workspace_rel) = nearest_ancestor_workspace(&snapshot.rel_dir, &top_level_workspaces) {
+            if let Some(parent_workspace_rel) =
+                nearest_ancestor_workspace(&snapshot.rel_dir, &top_level_workspaces)
+            {
                 topology_issues.push(RustTopologyIssueFact::new(
                     snapshot.rel_dir.clone(),
                     snapshot.cargo_rel_path.clone(),
@@ -332,7 +337,9 @@ pub fn collect(
                 ));
             }
 
-            if snapshot.classification == RustRootClassification::Auxiliary && !snapshot.has_workspace {
+            if snapshot.classification == RustRootClassification::Auxiliary
+                && !snapshot.has_workspace
+            {
                 topology_issues.push(RustTopologyIssueFact::new(
                     snapshot.rel_dir.clone(),
                     snapshot.cargo_rel_path.clone(),
@@ -353,14 +360,17 @@ pub fn collect(
                     snapshot.rel_dir.clone(),
                     snapshot.expanded_members.iter().cloned().collect(),
                 );
-                let _ = root_legality.insert(snapshot.rel_dir.clone(), RootLegality::LegalWorkspace);
+                let _ =
+                    root_legality.insert(snapshot.rel_dir.clone(), RootLegality::LegalWorkspace);
             } else {
                 let _ = root_legality.insert(snapshot.rel_dir.clone(), RootLegality::Illegal);
             }
             continue;
         }
 
-        if let Some(workspace_root_rel) = nearest_ancestor_workspace(&snapshot.rel_dir, &top_level_workspaces) {
+        if let Some(workspace_root_rel) =
+            nearest_ancestor_workspace(&snapshot.rel_dir, &top_level_workspaces)
+        {
             let declared = workspace_members
                 .get(&workspace_root_rel)
                 .is_some_and(|members| members.contains(&snapshot.rel_dir));
@@ -371,9 +381,7 @@ pub fn collect(
                     snapshot.rel_dir.clone(),
                     snapshot.cargo_rel_path.clone(),
                     snapshot.classification,
-                    RustTopologyIssueKind::UndeclaredWorkspaceMember {
-                        workspace_root_rel,
-                    },
+                    RustTopologyIssueKind::UndeclaredWorkspaceMember { workspace_root_rel },
                 ));
                 let _ = root_legality.insert(snapshot.rel_dir.clone(), RootLegality::Illegal);
             }
@@ -420,7 +428,9 @@ pub fn collect(
         .collect::<BTreeSet<_>>();
     let legal_member_rels = root_legality
         .iter()
-        .filter_map(|(rel, legality)| (*legality == RootLegality::LegalMember).then_some(rel.clone()))
+        .filter_map(|(rel, legality)| {
+            (*legality == RootLegality::LegalMember).then_some(rel.clone())
+        })
         .collect::<BTreeSet<_>>();
 
     let mut legal_family_files = Vec::new();
@@ -494,7 +504,12 @@ fn collect_snapshots(
         .roots()
         .iter()
         .map(|root| {
-            let snapshot = cargo_root_snapshot(tree, root.rel_dir(), root.cargo_rel_path(), root.classification());
+            let snapshot = cargo_root_snapshot(
+                tree,
+                root.rel_dir(),
+                root.cargo_rel_path(),
+                root.classification(),
+            );
             (snapshot.rel_dir.clone(), snapshot)
         })
         .collect()
@@ -595,9 +610,7 @@ fn expand_member_pattern(tree: &ProjectTree, workspace_rel: &str, member: &str) 
 }
 
 fn member_pattern_escapes_root(member: &str) -> bool {
-    member
-        .split('/')
-        .any(|segment| segment == "..")
+    member.split('/').any(|segment| segment == "..")
 }
 
 fn top_level_workspace_candidates(
@@ -610,10 +623,7 @@ fn top_level_workspace_candidates(
         .collect()
 }
 
-fn nearest_ancestor_workspace(
-    rel_dir: &str,
-    workspace_rels: &BTreeSet<String>,
-) -> Option<String> {
+fn nearest_ancestor_workspace(rel_dir: &str, workspace_rels: &BTreeSet<String>) -> Option<String> {
     workspace_rels
         .iter()
         .filter(|workspace_rel| *workspace_rel != rel_dir && path_is_under(rel_dir, workspace_rel))
@@ -692,7 +702,10 @@ fn legal_policy_file_workspace_owner(
                 })
             }
         }
-        RustFamilyFileAttachment::NestedUnderRoot { root_rel, owner_rel } => {
+        RustFamilyFileAttachment::NestedUnderRoot {
+            root_rel,
+            owner_rel,
+        } => {
             let workspace_root_rel = if legal_workspace_rels.contains(root_rel) {
                 root_rel.clone()
             } else {
@@ -708,10 +721,7 @@ fn legal_policy_file_workspace_owner(
                 owner_rel: owner_rel.clone(),
             })
         }
-        RustFamilyFileAttachment::AncestorOfRoots {
-            root_rels,
-            ..
-        } => {
+        RustFamilyFileAttachment::AncestorOfRoots { root_rels, .. } => {
             if fact.kind() == RustFamilyFileKind::GuardrailToml {
                 let legal_roots = root_rels
                     .iter()
@@ -770,18 +780,23 @@ fn legal_fmt_file_owner(fact: &RustFamilyFileFact) -> Result<String, RustIllegal
 
 fn issue_sort_key(kind: &RustTopologyIssueKind) -> (&'static str, String) {
     match kind {
-        RustTopologyIssueKind::TopLevelRootMustBeWorkspace => ("top-level-workspace", String::new()),
+        RustTopologyIssueKind::TopLevelRootMustBeWorkspace => {
+            ("top-level-workspace", String::new())
+        }
         RustTopologyIssueKind::LooseTopLevelPackage => ("loose-top-level-package", String::new()),
         RustTopologyIssueKind::NestedWorkspace {
             parent_workspace_rel,
         } => ("nested-workspace", parent_workspace_rel.clone()),
-        RustTopologyIssueKind::UndeclaredWorkspaceMember {
-            workspace_root_rel,
-        } => ("undeclared-member", workspace_root_rel.clone()),
+        RustTopologyIssueKind::UndeclaredWorkspaceMember { workspace_root_rel } => {
+            ("undeclared-member", workspace_root_rel.clone())
+        }
         RustTopologyIssueKind::WorkspaceMemberPathEscapesRoot {
             workspace_root_rel,
             member_pattern,
-        } => ("member-path-escape", format!("{workspace_root_rel}:{member_pattern}")),
+        } => (
+            "member-path-escape",
+            format!("{workspace_root_rel}:{member_pattern}"),
+        ),
         RustTopologyIssueKind::AuxiliaryTopLevelRootMustBeWorkspace => {
             ("auxiliary-top-level-workspace", String::new())
         }

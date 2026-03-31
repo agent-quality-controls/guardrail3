@@ -321,7 +321,10 @@ fn collect_target_dependency_entries(
                     table,
                     workspaces_by_root,
                     input_failures,
-                    Some((section_kind, format!("[target.'{target_key}'.{section_key}]"))),
+                    Some((
+                        section_kind,
+                        format!("[target.'{target_key}'.{section_key}]"),
+                    )),
                     entries,
                     names,
                 );

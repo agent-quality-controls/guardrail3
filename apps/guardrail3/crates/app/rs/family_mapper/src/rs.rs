@@ -32,7 +32,14 @@ impl<'a> FamilyMapper<'a> {
         scoped_files: Option<&'a std::collections::BTreeSet<String>>,
     ) -> Self {
         let legality = guardrail3_app_rs_legality::collect(tree, structure);
-        Self::with_legality(tree, structure, &legality, config, selected_families, scoped_files)
+        Self::with_legality(
+            tree,
+            structure,
+            &legality,
+            config,
+            selected_families,
+            scoped_files,
+        )
     }
 
     #[must_use]
@@ -243,7 +250,7 @@ impl<'a> FamilyMapper<'a> {
             roots,
             self.map_local_family_files(RustValidateFamily::Libarch, &root_rels),
         )
-            .with_validation_scope(self.validation_scope.map(str::to_owned))
+        .with_validation_scope(self.validation_scope.map(str::to_owned))
     }
 
     #[must_use]
@@ -334,10 +341,7 @@ impl<'a> FamilyMapper<'a> {
         self.legal_workspace_roots_for_family(family)
             .into_iter()
             .map(|root| {
-                views::RsRootView::new(
-                    root.rel_dir().to_owned(),
-                    root.cargo_rel_path().to_owned(),
-                )
+                views::RsRootView::new(root.rel_dir().to_owned(), root.cargo_rel_path().to_owned())
             })
             .collect()
     }
@@ -451,10 +455,9 @@ impl<'a> FamilyMapper<'a> {
             .filter(|fact| {
                 legal_root_rels.iter().any(|root_rel| {
                     root_rel == fact.workspace_root_rel()
-                        || fact
-                            .attachment()
-                            .ancestor_root_rels()
-                            .is_some_and(|roots| roots.iter().any(|candidate| candidate == root_rel))
+                        || fact.attachment().ancestor_root_rels().is_some_and(|roots| {
+                            roots.iter().any(|candidate| candidate == root_rel)
+                        })
                 })
             })
             .filter(|fact| self.legal_family_file_matches_scope(fact))
@@ -528,13 +531,19 @@ fn attachment_matches_scope(attachment: &RustFamilyFileAttachment, scope_rel: &s
         RustFamilyFileAttachment::ExactRoot { root_rel } => {
             path_is_under(root_rel, scope_rel) || path_is_under(scope_rel, root_rel)
         }
-        RustFamilyFileAttachment::NestedUnderRoot { root_rel, owner_rel } => {
+        RustFamilyFileAttachment::NestedUnderRoot {
+            root_rel,
+            owner_rel,
+        } => {
             path_is_under(owner_rel, scope_rel)
                 || path_is_under(scope_rel, owner_rel)
                 || path_is_under(root_rel, scope_rel)
                 || path_is_under(scope_rel, root_rel)
         }
-        RustFamilyFileAttachment::AncestorOfRoots { root_rels, owner_rel } => {
+        RustFamilyFileAttachment::AncestorOfRoots {
+            root_rels,
+            owner_rel,
+        } => {
             path_is_under(owner_rel, scope_rel)
                 || path_is_under(scope_rel, owner_rel)
                 || root_rels.iter().any(|root_rel| {
@@ -639,7 +648,10 @@ fn family_label(family: RustValidateFamily) -> &'static str {
     }
 }
 
-fn is_arch_tracked_family_file(family: RustValidateFamily, kind: RustValidateFamilyFileKind) -> bool {
+fn is_arch_tracked_family_file(
+    family: RustValidateFamily,
+    kind: RustValidateFamilyFileKind,
+) -> bool {
     matches!(
         family,
         RustValidateFamily::Toolchain
@@ -808,8 +820,8 @@ pub(crate) fn app_scoped_config_test() -> guardrail3_domain_config::types::Guard
 }
 
 #[cfg(test)]
-pub(crate) fn global_toolchain_enabled_config_test(
-) -> guardrail3_domain_config::types::GuardrailConfig {
+pub(crate) fn global_toolchain_enabled_config_test()
+-> guardrail3_domain_config::types::GuardrailConfig {
     use guardrail3_domain_config::types::{GuardrailConfig, RustChecksConfig, RustConfig};
 
     GuardrailConfig::new(

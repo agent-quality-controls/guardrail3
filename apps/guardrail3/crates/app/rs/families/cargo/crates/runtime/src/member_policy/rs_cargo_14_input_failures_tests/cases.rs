@@ -272,7 +272,9 @@ fn undeclared_nested_package_surfaces_explicit_failure() {
         }],
     );
     assert!(
-        results.iter().all(|result| result.file() != Some("tools/helper/Cargo.toml")),
+        results
+            .iter()
+            .all(|result| result.file() != Some("tools/helper/Cargo.toml")),
         "cargo family should ignore undeclared nested packages because placement legality belongs to arch: {results:#?}"
     );
 }
@@ -417,10 +419,14 @@ fn malformed_workspace_members_shape_blocks_descendant_standalone_reclassificati
         ],
     ));
 
-    assert!(results.iter().any(|result| {
-        result.id() == "RS-CARGO-14" && result.file() == Some("Cargo.toml")
-    }));
-    assert!(!results
-        .iter()
-        .any(|result| result.file() == Some("crates/api/Cargo.toml")));
+    assert!(
+        results
+            .iter()
+            .any(|result| { result.id() == "RS-CARGO-14" && result.file() == Some("Cargo.toml") })
+    );
+    assert!(
+        !results
+            .iter()
+            .any(|result| result.file() == Some("crates/api/Cargo.toml"))
+    );
 }

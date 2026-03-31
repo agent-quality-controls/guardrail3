@@ -1,8 +1,6 @@
 use std::collections::BTreeMap;
 
-use guardrail3_app_rs_family_mapper::{
-    RsArchRootView, RsArchRoute, RsArchTopologyIssueKindView,
-};
+use guardrail3_app_rs_family_mapper::{RsArchRootView, RsArchRoute, RsArchTopologyIssueKindView};
 use guardrail3_app_rs_placement::{RustArchitectureOwner, RustRootClassification};
 use guardrail3_domain_config::types::GuardrailConfig;
 use guardrail3_domain_project_tree::ProjectTree;
@@ -52,8 +50,12 @@ pub struct IllegalFamilyFileFacts {
 pub enum ArchTopologyIssueKind {
     TopLevelRootMustBeWorkspace,
     LooseTopLevelPackage,
-    NestedWorkspace { parent_workspace_rel: String },
-    UndeclaredWorkspaceMember { workspace_root_rel: String },
+    NestedWorkspace {
+        parent_workspace_rel: String,
+    },
+    UndeclaredWorkspaceMember {
+        workspace_root_rel: String,
+    },
     WorkspaceMemberPathEscapesRoot {
         workspace_root_rel: String,
         member_pattern: String,
@@ -147,11 +149,11 @@ pub fn collect(tree: &ProjectTree, route: &RsArchRoute) -> ArchFacts {
                 } => ArchTopologyIssueKind::NestedWorkspace {
                     parent_workspace_rel: parent_workspace_rel.clone(),
                 },
-                RsArchTopologyIssueKindView::UndeclaredWorkspaceMember {
-                    workspace_root_rel,
-                } => ArchTopologyIssueKind::UndeclaredWorkspaceMember {
-                    workspace_root_rel: workspace_root_rel.clone(),
-                },
+                RsArchTopologyIssueKindView::UndeclaredWorkspaceMember { workspace_root_rel } => {
+                    ArchTopologyIssueKind::UndeclaredWorkspaceMember {
+                        workspace_root_rel: workspace_root_rel.clone(),
+                    }
+                }
                 RsArchTopologyIssueKindView::WorkspaceMemberPathEscapesRoot {
                     workspace_root_rel,
                     member_pattern,

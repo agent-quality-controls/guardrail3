@@ -1,6 +1,5 @@
 use super::facts::{
-    CoveredRustUnitFacts, DenyConfigFacts, DenyFacts, SameRootConflictFacts,
-    UncoveredRustUnitFacts,
+    CoveredRustUnitFacts, DenyConfigFacts, DenyFacts, SameRootConflictFacts, UncoveredRustUnitFacts,
 };
 
 pub struct ConfigDenyInput<'a> {

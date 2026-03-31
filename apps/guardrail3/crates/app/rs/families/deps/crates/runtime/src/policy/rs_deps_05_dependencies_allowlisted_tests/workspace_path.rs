@@ -70,10 +70,7 @@ fn undeclared_workspace_path_dependency_fails_closed() {
         vec![
             (
                 "",
-                dir_entry(
-                    &["tools"],
-                    &["Cargo.toml", "Cargo.lock", "guardrail3.toml"],
-                ),
+                dir_entry(&["tools"], &["Cargo.toml", "Cargo.lock", "guardrail3.toml"]),
             ),
             ("tools", dir_entry(&["packages"], &[])),
             ("tools/packages", dir_entry(&["runtime"], &[])),
@@ -129,7 +126,9 @@ fn undeclared_workspace_path_dependency_fails_closed() {
         results.iter().any(|result| {
             result.id() == "RS-DEPS-11"
                 && result.file() == Some("tools/packages/runtime/Cargo.toml")
-                && result.message().contains("not declared in `[workspace].members`")
+                && result
+                    .message()
+                    .contains("not declared in `[workspace].members`")
         }),
         "expected undeclared local workspace package failure: {results:#?}"
     );
@@ -147,7 +146,10 @@ fn nested_app_zone_uses_app_policy_anywhere_in_path() {
             ("tools/apps", dir_entry(&["api"], &[])),
             ("tools/apps/api", dir_entry(&["crates"], &["Cargo.toml"])),
             ("tools/apps/api/crates", dir_entry(&["worker"], &[])),
-            ("tools/apps/api/crates/worker", dir_entry(&[], &["Cargo.toml"])),
+            (
+                "tools/apps/api/crates/worker",
+                dir_entry(&[], &["Cargo.toml"]),
+            ),
         ],
         vec![
             (

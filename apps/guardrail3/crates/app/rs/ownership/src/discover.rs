@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use guardrail3_app_rs_placement::{is_excluded_live_root_dir, RustRootPlacementFacts};
+use guardrail3_app_rs_placement::{RustRootPlacementFacts, is_excluded_live_root_dir};
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_validation_model::RustValidateFamily;
 

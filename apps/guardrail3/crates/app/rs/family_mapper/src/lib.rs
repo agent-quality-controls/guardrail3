@@ -20,6 +20,7 @@ pub type RsFmtRoute = views::RsFmtRoute;
 pub type RsGardeRoute = views::RsGardeRoute;
 pub type RsHexarchRoute = views::RsHexarchRoute;
 pub type RsLibarchRoute = views::RsLibarchRoute;
+pub type RsProjectSurface = views::RsProjectSurface;
 pub type RsReleaseRoute = views::RsReleaseRoute;
 pub type RsRootInputFailureView = views::RsRootInputFailureView;
 pub type RsRootView = views::RsRootView;

@@ -97,7 +97,11 @@ impl<'a> MissingMemberInventoryCargoInput<'a> {
                     .missing_members
                     .iter()
                     .any(|missing| missing.workspace_root_rel == workspace.rel_dir);
-                Self::new(workspace, has_missing_members, workspace.members_parse_error)
+                Self::new(
+                    workspace,
+                    has_missing_members,
+                    workspace.members_parse_error,
+                )
             })
             .collect()
     }

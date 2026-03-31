@@ -21,9 +21,7 @@ pub fn check(input: &DependencyEntryDepsInput<'_>, results: &mut Vec<CheckResult
                 "dependency allowlisted".to_owned(),
                 format!(
                     "Dependency `{}` in `{}` is allowlisted for crate `{}`.",
-                    input.entry.dep_package_name,
-                    input.entry.table_label,
-                    input.entry.crate_name
+                    input.entry.dep_package_name, input.entry.table_label, input.entry.crate_name
                 ),
                 Some(input.entry.cargo_rel_path.clone()),
                 None,

@@ -64,8 +64,7 @@ ignore = ["generated/**"]
             assertions::Finding {
                 severity: guardrail3_domain_report::Severity::Error,
                 title: "rustfmt ignore missing reason",
-                message:
-                    "`rustfmt.toml` uses `ignore = [\"generated/**\"]` without a matching escape-hatch reason.",
+                message: "`rustfmt.toml` uses `ignore = [\"generated/**\"]` without a matching escape-hatch reason.",
                 file: Some("rustfmt.toml"),
                 inventory: false,
             },

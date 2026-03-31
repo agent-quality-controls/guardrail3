@@ -6,29 +6,23 @@ use super::{check_results, entry, tree};
 fn reports_nested_clippy_config_under_workspace_member() {
     let tree = tree(
         &[
-            (
-                "",
-                entry(&["apps"], &["guardrail3.toml"]),
-            ),
-            (
-                "apps",
-                entry(&["api"], &[]),
-            ),
+            ("", entry(&["apps"], &["guardrail3.toml"])),
+            ("apps", entry(&["api"], &[])),
             (
                 "apps/api",
                 entry(&["crates"], &["Cargo.toml", "clippy.toml"]),
             ),
-            (
-                "apps/api/crates",
-                entry(&["member"], &[]),
-            ),
+            ("apps/api/crates", entry(&["member"], &[])),
             (
                 "apps/api/crates/member",
                 entry(&[], &["Cargo.toml", "clippy.toml"]),
             ),
         ],
         &[
-            ("guardrail3.toml", "[rust.checks]\narch = true\nclippy = true\n"),
+            (
+                "guardrail3.toml",
+                "[rust.checks]\narch = true\nclippy = true\n",
+            ),
             (
                 "apps/api/Cargo.toml",
                 "[workspace]\nmembers = [\"crates/member\"]\nresolver = \"2\"\n",

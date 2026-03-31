@@ -63,7 +63,10 @@ exclude = []
         let manifest = format!("[workspace]\nresolver = \"2\"\n\n{manifest}");
         let tree = project_tree(
             vec![("", dir_entry(&[], &["Cargo.toml", "README.md"]))],
-            vec![("Cargo.toml", manifest.as_str()), ("README.md", "# Readme\n\ncontent\n")],
+            vec![
+                ("Cargo.toml", manifest.as_str()),
+                ("README.md", "# Readme\n\ncontent\n"),
+            ],
             root,
         );
         let results = run_family(&tree, &StubToolChecker::new(true), false);

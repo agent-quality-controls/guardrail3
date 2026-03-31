@@ -53,7 +53,7 @@ pub(super) fn run_family(
             None,
         )
         .map_rs_garde();
-        super::check(tree, &route)
+        super::check_test_tree(tree, &route)
     }
 }
 

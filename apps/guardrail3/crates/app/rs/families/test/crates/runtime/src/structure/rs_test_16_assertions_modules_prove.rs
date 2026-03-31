@@ -1,8 +1,8 @@
 use crate::{CheckResult, Severity};
 
 use super::facts::TestFileKind;
-use super::parse::{FieldAccessInfo, FunctionInfo};
 use super::inputs::{AssertionsModuleInput, TestFunctionInput};
+use super::parse::{FieldAccessInfo, FunctionInfo};
 
 const ID: &str = "RS-TEST-16";
 const REPORT_FIELDS: &[&str] = &[
@@ -115,7 +115,9 @@ fn owns_sidecar_semantic_proof(input: &TestFunctionInput<'_>) -> bool {
         })
 }
 
-fn local_semantic_helper_names<'a>(functions: &'a [FunctionInfo]) -> std::collections::BTreeSet<&'a str> {
+fn local_semantic_helper_names<'a>(
+    functions: &'a [FunctionInfo],
+) -> std::collections::BTreeSet<&'a str> {
     let mut semantic_helpers = functions
         .iter()
         .filter(|function| !function.is_test)
@@ -167,7 +169,6 @@ fn owns_result_shape_assertion(
                 .is_some_and(|segment| matches!(segment.as_str(), "CheckResult" | "Severity"))
         })
 }
-
 
 #[cfg(test)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {

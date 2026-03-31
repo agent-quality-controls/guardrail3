@@ -12,7 +12,12 @@ pub(super) fn is_test_attr(attr: &syn::Attribute) -> bool {
         || cfg_attr_nested_metas(attr)
             .into_iter()
             .flatten()
-            .any(|meta| predicate.as_ref().is_some_and(cfg_meta_contains_positive_test) && meta_path_is_test(&meta))
+            .any(|meta| {
+                predicate
+                    .as_ref()
+                    .is_some_and(cfg_meta_contains_positive_test)
+                    && meta_path_is_test(&meta)
+            })
 }
 
 pub(super) fn is_tokio_test_attr(attr: &syn::Attribute) -> bool {
@@ -21,7 +26,12 @@ pub(super) fn is_tokio_test_attr(attr: &syn::Attribute) -> bool {
         || cfg_attr_nested_metas(attr)
             .into_iter()
             .flatten()
-            .any(|meta| predicate.as_ref().is_some_and(cfg_meta_contains_positive_test) && meta_path_is_tokio_test(&meta))
+            .any(|meta| {
+                predicate
+                    .as_ref()
+                    .is_some_and(cfg_meta_contains_positive_test)
+                    && meta_path_is_tokio_test(&meta)
+            })
 }
 
 pub(super) fn is_cfg_test_attr(attr: &syn::Attribute) -> bool {
@@ -38,7 +48,9 @@ pub(super) fn is_should_panic_attr(attr: &syn::Attribute) -> bool {
             .into_iter()
             .flatten()
             .any(|meta| {
-                predicate.as_ref().is_some_and(cfg_meta_contains_positive_test)
+                predicate
+                    .as_ref()
+                    .is_some_and(cfg_meta_contains_positive_test)
                     && meta.path().is_ident("should_panic")
             })
 }
@@ -129,11 +141,13 @@ fn pattern_contains_wild(pattern: &syn::Pat) -> bool {
         syn::Pat::Rest(_) => true,
         syn::Pat::Tuple(tuple) => tuple.elems.iter().any(pattern_contains_wild),
         syn::Pat::TupleStruct(tuple) => tuple.elems.iter().any(pattern_contains_wild),
-        syn::Pat::Struct(strct) => strct
-            .fields
-            .iter()
-            .any(|field| pattern_contains_wild(&field.pat))
-            || strct.rest.is_some(),
+        syn::Pat::Struct(strct) => {
+            strct
+                .fields
+                .iter()
+                .any(|field| pattern_contains_wild(&field.pat))
+                || strct.rest.is_some()
+        }
         syn::Pat::Slice(slice) => slice.elems.iter().any(pattern_contains_wild),
         syn::Pat::Reference(reference) => pattern_contains_wild(&reference.pat),
         syn::Pat::Or(or) => or.cases.iter().any(pattern_contains_wild),
@@ -153,7 +167,9 @@ pub(super) fn should_panic_has_expected(attr: &syn::Attribute) -> bool {
         .flatten()
         .filter(|meta| meta.path().is_ident("should_panic"))
         .any(|meta| {
-            predicate.as_ref().is_some_and(cfg_meta_contains_positive_test)
+            predicate
+                .as_ref()
+                .is_some_and(cfg_meta_contains_positive_test)
                 && meta_has_should_panic_expected(&meta)
         })
 }
@@ -317,16 +333,12 @@ fn cfg_meta_can_be_true(meta: &syn::Meta, test_enabled: bool) -> bool {
     match meta {
         syn::Meta::Path(path) => !path.is_ident("test") || test_enabled,
         syn::Meta::NameValue(_) => true,
-        syn::Meta::List(list) if list.path.is_ident("all") => {
-            nested_cfg_meta_items(list)
-                .iter()
-                .all(|meta| cfg_meta_can_be_true(meta, test_enabled))
-        }
-        syn::Meta::List(list) if list.path.is_ident("any") => {
-            nested_cfg_meta_items(list)
-                .iter()
-                .any(|meta| cfg_meta_can_be_true(meta, test_enabled))
-        }
+        syn::Meta::List(list) if list.path.is_ident("all") => nested_cfg_meta_items(list)
+            .iter()
+            .all(|meta| cfg_meta_can_be_true(meta, test_enabled)),
+        syn::Meta::List(list) if list.path.is_ident("any") => nested_cfg_meta_items(list)
+            .iter()
+            .any(|meta| cfg_meta_can_be_true(meta, test_enabled)),
         syn::Meta::List(list) if list.path.is_ident("not") => nested_cfg_meta_items(list)
             .first()
             .is_some_and(|meta| cfg_meta_can_be_false(meta, test_enabled)),
@@ -338,16 +350,12 @@ fn cfg_meta_can_be_false(meta: &syn::Meta, test_enabled: bool) -> bool {
     match meta {
         syn::Meta::Path(path) => !path.is_ident("test") || !test_enabled,
         syn::Meta::NameValue(_) => true,
-        syn::Meta::List(list) if list.path.is_ident("all") => {
-            nested_cfg_meta_items(list)
-                .iter()
-                .any(|meta| cfg_meta_can_be_false(meta, test_enabled))
-        }
-        syn::Meta::List(list) if list.path.is_ident("any") => {
-            nested_cfg_meta_items(list)
-                .iter()
-                .all(|meta| cfg_meta_can_be_false(meta, test_enabled))
-        }
+        syn::Meta::List(list) if list.path.is_ident("all") => nested_cfg_meta_items(list)
+            .iter()
+            .any(|meta| cfg_meta_can_be_false(meta, test_enabled)),
+        syn::Meta::List(list) if list.path.is_ident("any") => nested_cfg_meta_items(list)
+            .iter()
+            .all(|meta| cfg_meta_can_be_false(meta, test_enabled)),
         syn::Meta::List(list) if list.path.is_ident("not") => nested_cfg_meta_items(list)
             .first()
             .is_some_and(|meta| cfg_meta_can_be_true(meta, test_enabled)),

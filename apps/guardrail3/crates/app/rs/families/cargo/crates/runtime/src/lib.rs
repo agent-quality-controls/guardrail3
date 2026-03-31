@@ -33,7 +33,8 @@ mod rs_cargo_14_input_failures;
 #[path = "workspace_policy/rs_cargo_15_rust_version_policy.rs"]
 mod rs_cargo_15_rust_version_policy;
 
-use guardrail3_app_rs_family_mapper::RsCargoRoute;
+use guardrail3_app_rs_family_mapper::{RsCargoRoute, RsProjectSurface};
+#[cfg(test)]
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::CheckResult;
 
@@ -52,7 +53,8 @@ use self::inputs::{
     MissingMemberInventoryCargoInput, PolicyRootCargoInput, WorkspaceMemberCargoInput,
 };
 
-pub fn check(tree: &ProjectTree, route: &RsCargoRoute) -> Vec<CheckResult> {
+pub fn check(surface: &RsProjectSurface, route: &RsCargoRoute) -> Vec<CheckResult> {
+    let tree = surface.tree();
     let facts = collect(tree, route);
     let mut results = Vec::new();
 
@@ -94,7 +96,10 @@ pub fn check(tree: &ProjectTree, route: &RsCargoRoute) -> Vec<CheckResult> {
 
 #[cfg(test)]
 pub fn check_test_tree(tree: &ProjectTree) -> Vec<CheckResult> {
-    check(tree, &test_route_for_checks(tree, None))
+    check(
+        &RsProjectSurface::from_tree(tree),
+        &test_route_for_checks(tree, None),
+    )
 }
 
 #[cfg(test)]
@@ -102,14 +107,14 @@ pub fn check_test_tree_with_validation_scope(
     tree: &ProjectTree,
     validation_scope: &str,
 ) -> Vec<CheckResult> {
-    check(tree, &test_route_for_checks(tree, Some(validation_scope)))
+    check(
+        &RsProjectSurface::from_tree(tree),
+        &test_route_for_checks(tree, Some(validation_scope)),
+    )
 }
 
 #[cfg(test)]
-fn test_route_for_checks(
-    tree: &ProjectTree,
-    validation_scope: Option<&str>,
-) -> RsCargoRoute {
+fn test_route_for_checks(tree: &ProjectTree, validation_scope: Option<&str>) -> RsCargoRoute {
     let scope = guardrail3_app_rs_structure::collect(tree);
     let config = tree
         .file_content("guardrail3.toml")

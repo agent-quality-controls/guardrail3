@@ -21,13 +21,11 @@ fn inventories_only_the_top_workspace_root_when_nested_workspaces_exist() {
     assert!(!results.is_empty());
     assertions::assert_findings(
         &results,
-        &[
-            assertions::info(
-                "Rust root covered by deny config",
-                "workspace root `.` is covered by `deny.toml`.",
-                "deny.toml",
-                true,
-            ),
-        ],
+        &[assertions::info(
+            "Rust root covered by deny config",
+            "workspace root `.` is covered by `deny.toml`.",
+            "deny.toml",
+            true,
+        )],
     );
 }

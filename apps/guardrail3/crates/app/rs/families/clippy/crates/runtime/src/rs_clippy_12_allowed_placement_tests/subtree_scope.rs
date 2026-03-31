@@ -9,8 +9,14 @@ fn respects_validation_scope_across_sibling_legal_workspaces() {
         vec![
             ("", dir_entry(&["apps"], &[])),
             ("apps", dir_entry(&["backend", "devctl"], &[])),
-            ("apps/backend", dir_entry(&[], &["Cargo.toml", "clippy.toml"])),
-            ("apps/devctl", dir_entry(&[], &["Cargo.toml", "clippy.toml"])),
+            (
+                "apps/backend",
+                dir_entry(&[], &["Cargo.toml", "clippy.toml"]),
+            ),
+            (
+                "apps/devctl",
+                dir_entry(&[], &["Cargo.toml", "clippy.toml"]),
+            ),
         ],
         vec![
             (

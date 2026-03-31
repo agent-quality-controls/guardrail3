@@ -6,7 +6,8 @@ mod rs_toolchain_02_channel_and_components;
 mod rs_toolchain_03_msrv_consistency;
 mod rs_toolchain_04_legacy_file;
 
-use guardrail3_app_rs_family_mapper::RsToolchainRoute;
+use guardrail3_app_rs_family_mapper::{RsProjectSurface, RsToolchainRoute};
+#[cfg(test)]
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_domain_report::CheckResult;
 
@@ -22,7 +23,8 @@ use std::collections::BTreeSet;
 use self::discover::collect;
 use self::inputs::all_from_facts;
 
-pub fn check(tree: &ProjectTree, route: &RsToolchainRoute) -> Vec<CheckResult> {
+pub fn check(surface: &RsProjectSurface, route: &RsToolchainRoute) -> Vec<CheckResult> {
+    let tree = surface.tree();
     let facts = collect(tree, route);
     let mut results = Vec::new();
 
@@ -45,7 +47,7 @@ pub fn check_test_tree(tree: &ProjectTree) -> Vec<CheckResult> {
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Toolchain]));
     let route =
         FamilyMapper::new(tree, &scope, config.as_ref(), &selected, None).map_rs_toolchain();
-    check(tree, &route)
+    check(&RsProjectSurface::from_tree(tree), &route)
 }
 
 #[cfg(test)]

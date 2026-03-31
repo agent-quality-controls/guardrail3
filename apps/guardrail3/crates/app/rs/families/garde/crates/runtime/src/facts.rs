@@ -15,7 +15,7 @@ use self::policy::read_policy_map;
 use self::validation::resolve_validation_state;
 use super::discover::{is_test_path, rust_file_rels};
 use super::parse::{
-    analyze, parse_rust_file, BoundaryKind, GuardrailConfigParseKind, ParsedGardeFile,
+    BoundaryKind, GuardrailConfigParseKind, ParsedGardeFile, analyze, parse_rust_file,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -144,13 +144,13 @@ pub fn collect(tree: &ProjectTree, route: &RsGardeRoute) -> GardeFacts {
         .iter()
         .find(|file| file.kind() == guardrail3_app_rs_ownership::RustFamilyFileKind::GuardrailToml)
         .map(|file| file.rel_path().to_owned());
-    let policy_map = read_policy_map(tree, &cargo_roots, policy_guardrail_rel.as_deref(), &mut input_failures);
-    let clippy_configs = collect_clippy_configs(
+    let policy_map = read_policy_map(
         tree,
-        route,
-        &workspace_roots,
+        &cargo_roots,
+        policy_guardrail_rel.as_deref(),
         &mut input_failures,
     );
+    let clippy_configs = collect_clippy_configs(tree, route, &workspace_roots, &mut input_failures);
 
     let mut roots = Vec::new();
     for rel_dir in workspace_roots {

@@ -123,10 +123,7 @@ pub fn incomplete_workspace_policy_root_tree() -> ProjectTree {
     project_tree(
         vec![
             ("", dir_entry(&["apps"], &["clippy.toml"])),
-            (
-                "apps",
-                dir_entry(&["backend"], &[]),
-            ),
+            ("apps", dir_entry(&["backend"], &[])),
             (
                 "apps/backend",
                 dir_entry(&["crates"], &["Cargo.toml", "clippy.toml"]),

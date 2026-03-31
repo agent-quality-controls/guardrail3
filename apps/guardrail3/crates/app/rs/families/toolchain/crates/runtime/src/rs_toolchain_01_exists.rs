@@ -81,7 +81,10 @@ pub(crate) fn test_input_for_root<'a>(
 pub(crate) fn run_family_check(
     tree: &guardrail3_domain_project_tree::ProjectTree,
 ) -> Vec<CheckResult> {
-    crate::check(tree, &test_route(tree))
+    crate::check(
+        &guardrail3_app_rs_family_mapper::RsProjectSurface::from_tree(tree),
+        &test_route(tree),
+    )
 }
 
 #[cfg(test)]

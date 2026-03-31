@@ -6,11 +6,7 @@ use super::super::run_for_tests;
 #[test]
 fn reports_uncovered_legal_workspace_root_without_clippy_config() {
     let tmp = create_temp_dir("rs-clippy-01-uncovered-workspace");
-    write_file(
-        tmp.path(),
-        "Cargo.toml",
-        "[workspace]\nmembers = []\n",
-    );
+    write_file(tmp.path(), "Cargo.toml", "[workspace]\nmembers = []\n");
 
     let results = run_for_tests(tmp.path());
     assertions::assert_selective_uncovered(

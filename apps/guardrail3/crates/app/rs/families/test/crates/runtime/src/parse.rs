@@ -205,7 +205,9 @@ fn maybe_push_test_function(
         return;
     }
     let uses_tokio_test_attr = attrs.iter().any(helpers::is_tokio_test_attr);
-    let should_panic_attr = attrs.iter().find(|attr| helpers::is_should_panic_attr(attr));
+    let should_panic_attr = attrs
+        .iter()
+        .find(|attr| helpers::is_should_panic_attr(attr));
     let mut body_visitor = TestBodyVisitor::default();
     body_visitor.visit_block(block);
     out.push(TestFunctionInfo {
@@ -301,11 +303,9 @@ fn classify_type_kind(ty: &syn::Type) -> ReturnKind {
 
 fn type_mentions_check_result(ty: &syn::Type, aliases: &BTreeSet<String>) -> bool {
     match ty {
-        syn::Type::Path(type_path) => type_path
-            .path
-            .segments
-            .iter()
-            .any(|segment| segment.ident == "CheckResult" || aliases.contains(&segment.ident.to_string())),
+        syn::Type::Path(type_path) => type_path.path.segments.iter().any(|segment| {
+            segment.ident == "CheckResult" || aliases.contains(&segment.ident.to_string())
+        }),
         syn::Type::Reference(reference) => type_mentions_check_result(&reference.elem, aliases),
         syn::Type::Slice(slice) => type_mentions_check_result(&slice.elem, aliases),
         syn::Type::Array(array) => type_mentions_check_result(&array.elem, aliases),
@@ -445,10 +445,9 @@ impl<'ast> Visit<'ast> for TestBodyVisitor {
 
     fn visit_local(&mut self, local: &'ast syn::Local) {
         helpers::collect_pat_idents(&local.pat, &mut self.shadowed_idents);
-        if let (Some(init), Some(name)) = (
-            local.init.as_ref(),
-            helpers::single_pat_ident(&local.pat),
-        ) {
+        if let (Some(init), Some(name)) =
+            (local.init.as_ref(), helpers::single_pat_ident(&local.pat))
+        {
             if let Some(path) = helpers::call_path(&init.expr) {
                 let _ = self.local_call_aliases.insert(name, path);
             }
