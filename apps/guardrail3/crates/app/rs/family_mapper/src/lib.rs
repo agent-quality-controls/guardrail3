@@ -9,6 +9,7 @@ pub type RsTopologyRootView = views::RsTopologyRootView;
 pub type RsTopologyRoute = views::RsTopologyRoute;
 pub type RsTopologyIssueKindView = views::RsTopologyIssueKindView;
 pub type RsTopologyIssueView = views::RsTopologyIssueView;
+pub type RsArchRoute = views::RsArchRoute;
 pub type RsCargoRoute = views::RsCargoRoute;
 pub type RsClippyRoute = views::RsClippyRoute;
 pub type RsCodeRoute = views::RsCodeRoute;

@@ -78,6 +78,7 @@ pub fn config_for_explicit_topology_request_for_tests() -> GuardrailConfig {
                 None,
                 None,
                 None,
+                None,
                 Some(true),
                 Some(true),
                 None,
@@ -105,6 +106,7 @@ pub fn config_for_enabled_family_filtering_for_tests() -> GuardrailConfig {
             None,
             Some(RustChecksConfig::new(
                 Some(false),
+                None,
                 Some(true),
                 None,
                 None,

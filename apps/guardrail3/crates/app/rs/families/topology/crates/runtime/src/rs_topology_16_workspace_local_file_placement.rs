@@ -22,6 +22,7 @@ pub fn check(input: &IllegalFamilyFilePlacementInput<'_>, results: &mut Vec<Chec
 
 fn family_label(family: guardrail3_validation_model::RustValidateFamily) -> &'static str {
     match family {
+        guardrail3_validation_model::RustValidateFamily::Arch => "arch",
         guardrail3_validation_model::RustValidateFamily::Toolchain => "toolchain",
         guardrail3_validation_model::RustValidateFamily::Clippy => "clippy",
         guardrail3_validation_model::RustValidateFamily::Deny => "deny",

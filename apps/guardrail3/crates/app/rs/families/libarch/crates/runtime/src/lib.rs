@@ -1,8 +1,5 @@
 mod facts;
 mod inputs;
-mod rs_libarch_01_escalation_required;
-mod rs_libarch_02_layered_root_workspace_facade;
-mod rs_libarch_03_crates_dir_exists;
 mod rs_libarch_04_exact_layered_crate_set;
 mod rs_libarch_07_core_no_api_dep;
 mod rs_libarch_08_core_no_infra_dep;
@@ -37,9 +34,6 @@ pub(crate) fn run_with_facts(facts: &LibarchFacts) -> Vec<CheckResult> {
     let mut results = Vec::new();
     for package in &facts.packages {
         let input = PackageLibarchInput::new(package);
-        rs_libarch_01_escalation_required::check(&input, &mut results);
-        rs_libarch_02_layered_root_workspace_facade::check(&input, &mut results);
-        rs_libarch_03_crates_dir_exists::check(&input, &mut results);
         rs_libarch_04_exact_layered_crate_set::check(&input, &mut results);
         rs_libarch_07_core_no_api_dep::check(&input, &mut results);
         rs_libarch_08_core_no_infra_dep::check(&input, &mut results);

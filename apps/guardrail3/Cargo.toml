@@ -32,6 +32,7 @@ members = [
     "crates/app/rs/generate/assertions",
     "crates/app/hooks",
     "crates/app/ts",
+    "crates/app/rs/families/arch/crates/runtime",
     "crates/app/rs/families/topology/crates/runtime",
     "crates/app/rs/families/topology/crates/assertions",
     "crates/app/rs/families/topology/test_support",

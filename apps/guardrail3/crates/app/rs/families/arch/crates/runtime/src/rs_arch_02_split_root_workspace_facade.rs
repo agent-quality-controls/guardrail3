@@ -1,12 +1,12 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::PackageLibarchInput;
+use super::inputs::PackageArchInput;
 
-const ID: &str = "RS-LIBARCH-02";
+const ID: &str = "RS-ARCH-02";
 
-pub fn check(input: &PackageLibarchInput<'_>, results: &mut Vec<CheckResult>) {
+pub fn check(input: &PackageArchInput<'_>, results: &mut Vec<CheckResult>) {
     let package = input.package;
-    if !package.layered_rules_active() {
+    if !package.split_rules_active() {
         return;
     }
 
@@ -14,9 +14,9 @@ pub fn check(input: &PackageLibarchInput<'_>, results: &mut Vec<CheckResult>) {
         results.push(CheckResult::from_parts(
             ID.to_owned(),
             Severity::Error,
-            "layered library root must parse as workspace facade".to_owned(),
+            "split library root must parse as workspace facade".to_owned(),
             format!(
-                "Package `{}` cannot prove layered root semantics because `{}` could not be parsed: {error}",
+                "Library `{}` cannot prove split-root semantics because `{}` could not be parsed: {error}",
                 package.package_rel_dir, package.cargo_rel_path
             ),
             Some(package.cargo_rel_path.clone()),
@@ -30,9 +30,9 @@ pub fn check(input: &PackageLibarchInput<'_>, results: &mut Vec<CheckResult>) {
         results.push(CheckResult::from_parts(
             ID.to_owned(),
             Severity::Error,
-            "layered root must be workspace and facade package".to_owned(),
+            "split root must be workspace facade package".to_owned(),
             format!(
-                "Layered library root `{}` must keep both `[workspace]` and `[package]`, and it must remain a library facade package.",
+                "Split library root `{}` must keep both `[workspace]` and `[package]`, and it must remain a library facade package.",
                 package.package_rel_dir
             ),
             Some(package.cargo_rel_path.clone()),
@@ -46,9 +46,9 @@ pub fn check(input: &PackageLibarchInput<'_>, results: &mut Vec<CheckResult>) {
         CheckResult::from_parts(
             ID.to_owned(),
             Severity::Info,
-            "layered root is workspace facade".to_owned(),
+            "split root is workspace facade".to_owned(),
             format!(
-                "Layered library root `{}` is both a workspace root and a facade package.",
+                "Split library root `{}` is both a workspace root and a facade package.",
                 package.package_rel_dir
             ),
             Some(package.cargo_rel_path.clone()),
@@ -60,11 +60,5 @@ pub fn check(input: &PackageLibarchInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-pub(super) fn run_family_check(root: &std::path::Path) -> Vec<CheckResult> {
-    crate::check_test_root(root)
-}
-
-#[cfg(test)]
-#[path = "rs_libarch_02_layered_root_workspace_facade_tests/mod.rs"]
-// reason: test-only sidecar module wiring
-mod rs_libarch_02_layered_root_workspace_facade_tests;
+#[path = "rs_arch_02_split_root_workspace_facade_tests/mod.rs"]
+mod rs_arch_02_split_root_workspace_facade_tests;

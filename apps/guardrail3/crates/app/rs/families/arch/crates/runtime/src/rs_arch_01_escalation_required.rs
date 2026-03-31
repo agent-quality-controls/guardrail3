@@ -1,12 +1,12 @@
 use guardrail3_domain_report::{CheckResult, Severity};
 
-use super::inputs::PackageLibarchInput;
+use super::inputs::PackageArchInput;
 
-const ID: &str = "RS-LIBARCH-01";
+const ID: &str = "RS-ARCH-01";
 
-pub fn check(input: &PackageLibarchInput<'_>, results: &mut Vec<CheckResult>) {
+pub fn check(input: &PackageArchInput<'_>, results: &mut Vec<CheckResult>) {
     let package = input.package;
-    if !package.is_library || package.uses_layered_mode {
+    if !package.is_library || package.uses_split_mode {
         return;
     }
 
@@ -14,7 +14,7 @@ pub fn check(input: &PackageLibarchInput<'_>, results: &mut Vec<CheckResult>) {
         results.push(CheckResult::from_parts(
             ID.to_owned(),
             Severity::Error,
-            "Flat library escalation must fail closed".to_owned(),
+            "Flat library split requirement must fail closed".to_owned(),
             format!(
                 "Cannot verify whether `{}` may remain a flat library: {error}",
                 package.package_rel_dir
@@ -33,9 +33,9 @@ pub fn check(input: &PackageLibarchInput<'_>, results: &mut Vec<CheckResult>) {
     results.push(CheckResult::from_parts(
         ID.to_owned(),
         Severity::Error,
-        "Flat library must escalate into layered mode".to_owned(),
+        "Flat library must adopt split architecture".to_owned(),
         format!(
-            "Library `{}` exceeds the flat-library thresholds ({}) and must adopt a layered workspace with `crates/api`, `crates/core`, and optional `crates/infra`.",
+            "Library `{}` exceeds the flat-library thresholds ({}) and must adopt a split facade architecture with internal member crates.",
             package.package_rel_dir,
             package.threshold_reasons.join("; ")
         ),
@@ -46,11 +46,5 @@ pub fn check(input: &PackageLibarchInput<'_>, results: &mut Vec<CheckResult>) {
 }
 
 #[cfg(test)]
-pub(super) fn run_family_check(root: &std::path::Path) -> Vec<CheckResult> {
-    crate::check_test_root(root)
-}
-
-#[cfg(test)]
-#[path = "rs_libarch_01_escalation_required_tests/mod.rs"]
-// reason: test-only sidecar module wiring
-mod rs_libarch_01_escalation_required_tests;
+#[path = "rs_arch_01_escalation_required_tests/mod.rs"]
+mod rs_arch_01_escalation_required_tests;

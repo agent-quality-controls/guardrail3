@@ -21,6 +21,7 @@ guardrail3 rs show-module <NAME>
 Rust validate families:
 
 ```text
+arch
 topology
 fmt
 toolchain
@@ -43,6 +44,7 @@ Examples:
 
 ```text
 guardrail3 rs validate .
+guardrail3 rs validate . --family arch
 guardrail3 rs validate . --family topology
 guardrail3 rs validate . --family hexarch
 guardrail3 rs validate . --family code --family garde --staged
@@ -67,6 +69,7 @@ Only `generate` / `check` depend on `guardrail3.toml`. Rust validate also reads 
 
 ```toml
 [rust.checks]
+arch = true
 topology = true
 fmt = true
 toolchain = true
@@ -92,6 +95,7 @@ hexarch = true
 garde = false
 
 [rust.packages.checks]
+arch = true
 libarch = true
 code = true
 test = true

@@ -147,6 +147,7 @@ fn requested_families_allow_config_parse_failure(
             matches!(
                 family,
                 RustValidateFamily::Topology
+                    | RustValidateFamily::Arch
                     | RustValidateFamily::Hexarch
                     | RustValidateFamily::Libarch
                     | RustValidateFamily::Code

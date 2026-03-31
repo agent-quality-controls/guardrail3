@@ -1,6 +1,6 @@
 # RS-LIBARCH
 
-Status: current, implemented, self-hosted, newly live.
+Status: current, implemented, retiring.
 
 Implementation root:
 
@@ -19,7 +19,11 @@ Current state:
   - `crates/assertions`
   - `test_support`
 - runtime/model/config/reporting selection already know `libarch`
-- the family now owns layered-library escalation, layered crate-set shape, layer dependency direction, and root facade export policy for package-owned library roots
+- the family now owns only the remaining legacy layered-shape specifics:
+  - exact layered crate set once layered mode exists
+  - dependency direction between `api`, `core`, and `infra`
+  - old layered facade/export policy tied to that shape
+- generic split-library architecture now belongs to `RS-ARCH`
 - workspace-membership exactness now belongs to `RS-TOPOLOGY`, not `RS-LIBARCH`
 - the old detailed design ledger remains useful as history, but it is no longer describing a hypothetical family
 
@@ -42,14 +46,15 @@ Agent handoff focus:
 
 Known current risk:
 
-- no confirmed production bug yet, but this family is new enough that subtree
-  proof coverage is still thin
+- ownership is in motion while `arch` absorbs the generic split-library rules
+- subtree proof coverage is still thinner than the older families
 
 Done means:
 
 - nested-path tests prove only the owning routed package roots are active
-- escalation and layer-shape findings remain package-local
+- only legacy layered-shape findings remain package-local
 - no family-local package-root rediscovery bypasses the route
+- migrated generic split rules stay absent from runtime and lean CLI output
 
 Historical/supplemental references:
 
@@ -59,5 +64,5 @@ Historical/supplemental references:
 
 Next planning focus:
 
-- keep package architecture separate from generic Cargo policy and from repo-global `topology`
-- pressure fail-closed and dependency-direction edges as the package zone evolves
+- keep the remaining legacy layered-shape checks stable while `arch` takes over the generic facade/privacy contract
+- pressure fail-closed and dependency-direction edges until `libarch` can be removed entirely

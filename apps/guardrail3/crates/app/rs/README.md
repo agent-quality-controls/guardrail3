@@ -203,6 +203,7 @@ Examples:
 
 These govern legal workspace roots rather than the whole repo at once.
 
+- `RS-ARCH`
 - `RS-TOOLCHAIN`
 - `RS-CLIPPY`
 - `RS-DENY`
@@ -215,8 +216,9 @@ These govern legal workspace roots rather than the whole repo at once.
 
 Additional zoning still applies where relevant:
 
+- `arch` currently owns generic split-library architecture for package-scoped candidates and may report external direct dependencies that bypass facade packages
 - `hexarch` is local only to app workspaces under `apps/*`
-- `libarch` is local only to package workspaces under `packages/*`
+- `libarch` is local only to package workspaces under `packages/*` and is being retired as generic rules move into `arch`
 
 Workspace-local means:
 

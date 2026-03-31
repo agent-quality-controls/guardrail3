@@ -31,7 +31,8 @@ It exists to ensure:
 
 The Rust work currently includes:
 - config families: clippy, deny, fmt, toolchain, cargo
-- code families: code, hexarch, garde, test, deps, release
+- topology/architecture families: topology, arch, hexarch, libarch (retiring)
+- code families: code, garde, test, deps, release
 - shared hook architecture and Rust hook checks
 
 The Rust rule inventory lives under:

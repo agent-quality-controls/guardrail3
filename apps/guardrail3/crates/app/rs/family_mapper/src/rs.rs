@@ -129,6 +129,12 @@ impl<'a> FamilyMapper<'a> {
     }
 
     #[must_use]
+    pub fn map_rs_arch(&self) -> views::RsArchRoute {
+        views::RsArchRoute::new(self.map_global_roots_for_family(RustValidateFamily::Arch), Vec::new())
+            .with_validation_scope(self.validation_scope.map(str::to_owned))
+    }
+
+    #[must_use]
     pub fn map_rs_hexarch(&self) -> views::RsHexarchRoute {
         if !self.selected_families.contains(RustValidateFamily::Hexarch) {
             return views::RsHexarchRoute::new(Vec::new(), None, None, None);
@@ -590,6 +596,7 @@ fn illegal_file_reason_text(fact: &RustIllegalFamilyFileFact) -> String {
 
 fn family_label(family: RustValidateFamily) -> &'static str {
     match family {
+        RustValidateFamily::Arch => "arch",
         RustValidateFamily::Toolchain => "toolchain",
         RustValidateFamily::Clippy => "clippy",
         RustValidateFamily::Deny => "deny",
@@ -756,6 +763,7 @@ pub(crate) fn app_scoped_config_test() -> guardrail3_domain_config::types::Guard
             Some(RustChecksConfig::new(
                 None,
                 None,
+                None,
                 Some(true),
                 None,
                 None,
@@ -790,6 +798,7 @@ pub(crate) fn global_toolchain_enabled_config_test()
             None,
             None,
             Some(RustChecksConfig::new(
+                None,
                 None,
                 None,
                 Some(true),
