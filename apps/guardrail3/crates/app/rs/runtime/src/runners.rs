@@ -454,6 +454,7 @@ fn scoped_route_root_cargo_files(roots: &[RsScopedRootView]) -> Vec<String> {
 }
 
 #[cfg(any(
+    feature = "family-arch",
     feature = "family-fmt",
     feature = "family-topology",
     feature = "family-toolchain",

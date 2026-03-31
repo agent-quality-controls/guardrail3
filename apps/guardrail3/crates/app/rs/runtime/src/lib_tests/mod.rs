@@ -219,8 +219,8 @@ fn topology_runtime_reports_governed_auxiliary_metadata_as_fail_closed() {
 }
 
 #[test]
-fn topology_runtime_runs_even_when_only_other_family_is_requested() {
-    let root = super::temp_root_for_tests("topology-runtime-always-on");
+fn topology_runtime_stays_absent_when_only_other_family_is_requested() {
+    let root = super::temp_root_for_tests("topology-runtime-not-auto-selected");
     super::write_file_for_tests(
         &root,
         "guardrail3.toml",
@@ -245,30 +245,14 @@ fn topology_runtime_runs_even_when_only_other_family_is_requested() {
     let report = super::run_for_tests(&super::LocalFsTest, &root, &[RustValidateFamily::Toolchain])
         .expect("toolchain runtime report");
 
-    assert!(
-        report
-            .sections()
-            .iter()
-            .any(|section| section.name() == "topology"),
-        "topology section should always be present: {report:#?}"
-    );
-    assert!(
-        report.sections().iter().any(|section| {
-            section.name() == "topology"
-                && section.results().iter().any(|result| {
-                    result.id() == "RS-TOPOLOGY-02"
-                        && result.file() == Some("tools/worker/Cargo.toml")
-                        && !result.inventory()
-                })
-        }),
-        "topology should still report misplaced roots when only another family was requested: {report:#?}"
-    );
+    assertions::assert_section_absent(&report, "topology");
+    assertions::assert_ids_absent(&report, &["RS-TOPOLOGY-02"]);
 
     std::fs::remove_dir_all(&root).expect("cleanup temp root");
 }
 
 #[test]
-fn hextopology_runtime_reports_fail_closed_results_for_malformed_guardrail_config() {
+fn hexarch_runtime_reports_fail_closed_results_for_malformed_guardrail_config() {
     let root = super::temp_root_for_tests("hexarch-runtime-malformed-config");
     super::write_file_for_tests(
         &root,
@@ -300,7 +284,7 @@ fn hextopology_runtime_reports_fail_closed_results_for_malformed_guardrail_confi
 }
 
 #[test]
-fn hextopology_runtime_runs_each_legal_workspace_once() {
+fn hexarch_runtime_runs_each_legal_workspace_once() {
     let root = super::temp_root_for_tests("hexarch-runtime-multi-workspace");
     super::write_file_for_tests(
         &root,
@@ -359,7 +343,7 @@ fn hextopology_runtime_runs_each_legal_workspace_once() {
 }
 
 #[test]
-fn hextopology_runtime_validation_scope_stays_inside_owning_workspace() {
+fn hexarch_runtime_validation_scope_stays_inside_owning_workspace() {
     let root = super::temp_root_for_tests("hexarch-runtime-validation-scope");
     super::write_file_for_tests(
         &root,
@@ -420,8 +404,8 @@ fn hextopology_runtime_validation_scope_stays_inside_owning_workspace() {
 }
 
 #[test]
-fn hextopology_runtime_uses_topology_for_workspace_membership_exactness() {
-    let root = super::temp_root_for_tests("hexarch-runtime-topology-exactness");
+fn hexarch_runtime_stays_decoupled_from_topology_exactness() {
+    let root = super::temp_root_for_tests("hexarch-runtime-decoupled-topology-exactness");
     super::write_file_for_tests(
         &root,
         "guardrail3.toml",
@@ -441,17 +425,11 @@ fn hextopology_runtime_uses_topology_for_workspace_membership_exactness() {
     let report =
         super::run_hexarch_for_tests(&super::LocalFsTest, &root).expect("hexarch runtime report");
 
-    assertions::assert_result_present(
-        &report,
-        "topology",
-        "RS-TOPOLOGY-12",
-        Some("apps/backend/crates/app/Cargo.toml"),
-        None,
-        None,
-    );
+    assertions::assert_section_absent(&report, "topology");
     assertions::assert_ids_absent(
         &report,
         &[
+            "RS-TOPOLOGY-12",
             "RS-HEXARCH-07",
             "RS-HEXARCH-09",
             "RS-LIBARCH-05",
@@ -1656,7 +1634,7 @@ fn release_runtime_runs_each_legal_workspace_once() {
 }
 
 #[test]
-fn libtopology_runtime_runs_each_legal_workspace_once() {
+fn libarch_runtime_runs_each_legal_workspace_once() {
     let root = super::temp_root_for_tests("libarch-runtime-multi-workspace");
     super::write_file_for_tests(
         &root,
@@ -1761,7 +1739,7 @@ fn libtopology_runtime_runs_each_legal_workspace_once() {
 }
 
 #[test]
-fn libtopology_runtime_validation_scope_stays_inside_owning_workspace() {
+fn libarch_runtime_validation_scope_stays_inside_owning_workspace() {
     let root = super::temp_root_for_tests("libarch-runtime-validation-scope");
     super::write_file_for_tests(
         &root,
@@ -1852,8 +1830,8 @@ fn libtopology_runtime_validation_scope_stays_inside_owning_workspace() {
 }
 
 #[test]
-fn libtopology_runtime_uses_topology_for_workspace_membership_exactness() {
-    let root = super::temp_root_for_tests("libarch-runtime-topology-exactness");
+fn libarch_runtime_stays_decoupled_from_topology_exactness() {
+    let root = super::temp_root_for_tests("libarch-runtime-decoupled-topology-exactness");
     super::write_file_for_tests(
         &root,
         "guardrail3.toml",
@@ -1873,17 +1851,11 @@ fn libtopology_runtime_uses_topology_for_workspace_membership_exactness() {
     let report =
         super::run_libarch_for_tests(&super::LocalFsTest, &root).expect("libarch runtime report");
 
-    assertions::assert_result_present(
-        &report,
-        "topology",
-        "RS-TOPOLOGY-12",
-        Some("packages/reason-policy/Cargo.toml"),
-        None,
-        None,
-    );
+    assertions::assert_section_absent(&report, "topology");
     assertions::assert_ids_absent(
         &report,
         &[
+            "RS-TOPOLOGY-12",
             "RS-HEXARCH-07",
             "RS-HEXARCH-09",
             "RS-LIBARCH-05",

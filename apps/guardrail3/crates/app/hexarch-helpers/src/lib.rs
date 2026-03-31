@@ -1,4 +1,4 @@
-//! Shared hexarch structural helpers used by both RS-TOPOLOGY-01 and TS-TOPOLOGY-01.
+//! Shared hexarch structural helpers used by legacy RS-TOPOLOGY-01 and TS-TOPOLOGY-01.
 //!
 //! These are language-agnostic utilities for checking directory structure.
 //! Language-specific concerns (app discovery, leaf validation, recursion markers)
