@@ -62,15 +62,15 @@ trivially_copy_pass_by_ref = "allow"
 multiple_crate_versions = "allow"
 
 [dependencies]
-guardrail3_app_hexarch_helpers = { package = "guardrail3-app-hexarch-helpers", path = "../../hexarch-helpers" }
-guardrail3_app_core = { package = "guardrail3-app-core", path = "../../core" }
-guardrail3_app_hooks = { package = "guardrail3-app-hooks", path = "../../hooks" }
-guardrail3_app_rs_ast = { package = "guardrail3-app-rs-ast", path = "../ast" }
-guardrail3_app_rs_family_clippy = { package = "guardrail3-app-rs-family-clippy", path = "../families/clippy/crates/runtime" }
-guardrail3_app_rs_family_deny = { package = "guardrail3-app-rs-family-deny", path = "../families/deny/crates/runtime" }
-guardrail3_domain_config = { package = "guardrail3-domain-config", path = "../../../domain/config" }
-guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../../domain/report" }
-guardrail3_outbound_traits = { package = "guardrail3-ports-outbound-traits", path = "../../../ports/outbound/traits" }
+guardrail3_app_hexarch_helpers = { package = "guardrail3-app-hexarch-helpers", path = "../../../hexarch-helpers" }
+guardrail3_app_core = { package = "guardrail3-app-core", path = "../../../core" }
+guardrail3_app_hooks = { package = "guardrail3-app-hooks", path = "../../../hooks" }
+guardrail3_app_rs_ast = { package = "guardrail3-app-rs-ast", path = "../../ast" }
+guardrail3_app_rs_family_clippy = { package = "guardrail3-app-rs-family-clippy", path = "../../families/clippy/crates/runtime" }
+guardrail3_app_rs_family_deny = { package = "guardrail3-app-rs-family-deny", path = "../../families/deny/crates/runtime" }
+guardrail3_domain_config = { package = "guardrail3-domain-config", path = "../../../../domain/config" }
+guardrail3_domain_report = { package = "guardrail3-domain-report", path = "../../../../domain/report" }
+guardrail3_outbound_traits = { package = "guardrail3-ports-outbound-traits", path = "../../../../ports/outbound/traits" }
 syn = { version = "2", features = ["full", "parsing", "visit"] }
 toml = "0.8"
 walkdir = "2"
