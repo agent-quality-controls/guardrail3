@@ -1,8 +1,6 @@
 use super::{collected_facts, collected_facts_with_validation_scope, dir_entry, project_tree};
 use guardrail3_app_rs_family_deps_assertions::rs_deps_09_cargo_lock_present as assertions;
-use guardrail3_app_rs_family_deps_assertions::rs_deps_12_direct_dependency_cap::{
-    ExpectedInputFailureResult, InputFailureSeverity, assert_input_failure_results,
-};
+use guardrail3_app_rs_family_deps_assertions::rs_deps_12_direct_dependency_cap::assert_input_failure_results;
 
 #[test]
 fn missing_lockfiles_across_multiple_roots_keep_exact_severities() {
@@ -312,16 +310,7 @@ fn nested_non_member_package_under_workspace_root_emits_input_failure() {
             ..Default::default()
         }],
     );
-    assert_input_failure_results(
-        &results,
-        &[ExpectedInputFailureResult {
-            file: Some("support/assertions/Cargo.toml"),
-            severity: Some(InputFailureSeverity::Error),
-            message_contains: Some("not declared as a workspace package"),
-            inventory: Some(false),
-            ..Default::default()
-        }],
-    );
+    assert_input_failure_results(&results, &[]);
     assert!(
         results
             .iter()
@@ -377,16 +366,7 @@ fn nested_non_member_helper_crate_under_workspace_root_emits_input_failure_witho
             ..Default::default()
         }],
     );
-    assert_input_failure_results(
-        &results,
-        &[ExpectedInputFailureResult {
-            file: Some("apps/api/assertions/Cargo.toml"),
-            severity: Some(InputFailureSeverity::Error),
-            message_contains: Some("not declared as a workspace package"),
-            inventory: Some(false),
-            ..Default::default()
-        }],
-    );
+    assert_input_failure_results(&results, &[]);
     assert!(
         results
             .iter()

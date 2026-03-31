@@ -76,6 +76,7 @@ use self::inputs::{
     PublishableCrateReleaseInput, ReleaseEdgeInput, ReleaseInputFailureInput, RepoReleaseInput,
 };
 
+#[cfg(test)]
 mod test_fixtures;
 
 pub fn check(

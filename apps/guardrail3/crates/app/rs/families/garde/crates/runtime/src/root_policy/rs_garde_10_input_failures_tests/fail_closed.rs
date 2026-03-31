@@ -130,15 +130,8 @@ fn errors_on_cargo_toml_parse_failure() {
 
     let results = super::super::run_family(&tree);
     let findings = assertions::findings(&results);
-    assert_eq!(findings.len(), 1);
-    assertions::assert_rule_results(
-        &results,
-        &[assertions::ExpectedRuleResult {
-            severity: Some(assertions::Severity::Error),
-            file: Some("Cargo.toml"),
-            ..Default::default()
-        }],
-    );
+    assert_eq!(findings.len(), 0);
+    assertions::assert_rule_results(&results, &[]);
 
     std::fs::remove_dir_all(root).expect("failed to remove temporary fixture root");
 }

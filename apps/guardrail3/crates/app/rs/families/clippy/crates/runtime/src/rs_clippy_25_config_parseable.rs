@@ -47,7 +47,7 @@ pub(crate) fn run_for_tests(tree: &ProjectTree, rel_path: &str) -> Vec<CheckResu
 
 #[cfg(test)]
 pub(crate) fn run_family_for_tests(tree: &ProjectTree) -> Vec<CheckResult> {
-    let scope = guardrail3_app_rs_placement::collect(tree);
+    let scope = guardrail3_app_rs_structure::collect(tree);
     let selected =
         guardrail3_validation_model::RustFamilySelection::new(std::collections::BTreeSet::from([
             guardrail3_validation_model::RustValidateFamily::Clippy,

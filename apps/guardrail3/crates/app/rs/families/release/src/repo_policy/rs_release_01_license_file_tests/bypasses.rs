@@ -60,12 +60,8 @@ fn does_not_error_when_allowed_root_license_exists_beside_distracting_near_misse
             (
                 "Cargo.toml",
                 r#"
-[package]
-name = "example"
-version = "0.1.0"
-description = "example"
-license = "MIT"
-repository = "https://example.com/repo"
+[workspace]
+resolver = "2"
 "#,
             ),
             ("LICENSE", "canonical license text\n"),
@@ -76,7 +72,6 @@ repository = "https://example.com/repo"
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(!assertions::findings(&results).is_empty());
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {

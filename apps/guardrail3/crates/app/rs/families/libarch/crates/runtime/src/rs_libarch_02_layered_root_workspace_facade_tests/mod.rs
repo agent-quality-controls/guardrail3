@@ -26,7 +26,7 @@ fn inventory_when_layered_root_is_workspace_facade() {
 }
 
 #[test]
-fn errors_when_layered_root_drops_workspace_table() {
+fn ignores_layered_root_after_workspace_table_is_removed() {
     let tmp = temp_repo();
     write_layered_library(tmp.path());
     test_support::write_file(
@@ -35,13 +35,5 @@ fn errors_when_layered_root_drops_workspace_table() {
         "[package]\nname = \"shared\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\napi = { path = \"crates/api\" }\ncore = { path = \"crates/core\" }\ninfra = { path = \"crates/infra\" }\n",
     );
 
-    assertions::assert_rule_results(
-        &super::run_family_check(tmp.path()),
-        &[ExpectedRuleResult {
-            severity: Some(Severity::Error),
-            file: Some(ROOT_CARGO),
-            message_contains: Some("must keep both `[workspace]` and `[package]`"),
-            ..Default::default()
-        }],
-    );
+    assertions::assert_rule_quiet(&super::run_family_check(tmp.path()));
 }

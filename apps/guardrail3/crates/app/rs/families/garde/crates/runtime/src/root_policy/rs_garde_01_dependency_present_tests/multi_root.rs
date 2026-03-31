@@ -8,27 +8,23 @@ fn evaluates_sibling_workspace_roots() {
 
     let tree = project_tree(
         vec![
-            (
-                "",
-                dir_entry(&["apps", "vendor"], &["guardrail3.toml"]),
-            ),
-            ("apps", dir_entry(&["root"], &[])),
+            ("", dir_entry(&["apps"], &["guardrail3.toml"])),
+            ("apps", dir_entry(&["root", "lib", "tool"], &[])),
             (
                 "apps/root",
                 dir_entry(&["src"], &["Cargo.toml", "clippy.toml"]),
             ),
             ("apps/root/src", dir_entry(&[], &["main.rs"])),
-            ("vendor", dir_entry(&["lib", "tool"], &[])),
             (
-                "vendor/lib",
+                "apps/lib",
                 dir_entry(&["src"], &["Cargo.toml", "clippy.toml"]),
             ),
-            ("vendor/lib/src", dir_entry(&[], &["lib.rs"])),
+            ("apps/lib/src", dir_entry(&[], &["lib.rs"])),
             (
-                "vendor/tool",
+                "apps/tool",
                 dir_entry(&["src"], &["Cargo.toml", "clippy.toml"]),
             ),
-            ("vendor/tool/src", dir_entry(&[], &["main.rs"])),
+            ("apps/tool/src", dir_entry(&[], &["main.rs"])),
         ],
         vec![
             ("guardrail3.toml", "[profile]\nname = \"service\"\n"),
@@ -59,7 +55,7 @@ struct RootBoundary {
 "#,
             ),
             (
-                "vendor/lib/Cargo.toml",
+                "apps/lib/Cargo.toml",
                 r#"[workspace]
 members = []
 [package]
@@ -70,12 +66,12 @@ garde = "0.22"
 "#,
             ),
             (
-                "vendor/lib/clippy.toml",
+                "apps/lib/clippy.toml",
                 "disallowed-methods = []\ndisallowed-types = []\n",
             ),
-            ("vendor/lib/src/lib.rs", "pub fn ok() {}"),
+            ("apps/lib/src/lib.rs", "pub fn ok() {}"),
             (
-                "vendor/tool/Cargo.toml",
+                "apps/tool/Cargo.toml",
                 r#"[workspace]
 members = []
 [package]
@@ -86,11 +82,11 @@ serde = "1"
 "#,
             ),
             (
-                "vendor/tool/clippy.toml",
+                "apps/tool/clippy.toml",
                 "disallowed-methods = []\ndisallowed-types = []\n",
             ),
             (
-                "vendor/tool/src/main.rs",
+                "apps/tool/src/main.rs",
                 r#"
 use serde::Deserialize;
 
@@ -121,14 +117,14 @@ fn main() {}
             },
             assertions::ExpectedRuleResult {
                 severity: Some(assertions::Severity::Info),
-                file: Some("vendor/lib/Cargo.toml"),
+                file: Some("apps/lib/Cargo.toml"),
                 inventory: Some(true),
                 title: Some("garde dependency found"),
                 ..Default::default()
             },
             assertions::ExpectedRuleResult {
                 severity: Some(assertions::Severity::Error),
-                file: Some("vendor/tool/Cargo.toml"),
+                file: Some("apps/tool/Cargo.toml"),
                 inventory: Some(false),
                 title: Some("garde dependency missing"),
                 message_contains: Some("workspace root"),

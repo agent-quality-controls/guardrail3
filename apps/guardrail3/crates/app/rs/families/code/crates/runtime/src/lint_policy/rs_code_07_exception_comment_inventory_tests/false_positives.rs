@@ -65,7 +65,7 @@ fn does_not_inventory_repo_root_exception_comments_in_backend_scoped_run() {
     );
 
     let tree = walk_project(&RealFileSystem, root);
-    let scope = guardrail3_app_rs_placement::collect(&tree);
+    let scope = guardrail3_app_rs_structure::collect(&tree);
     let config = tree.file_content("guardrail3.toml").and_then(|content| {
         toml::from_str::<guardrail3_domain_config::types::GuardrailConfig>(content).ok()
     });

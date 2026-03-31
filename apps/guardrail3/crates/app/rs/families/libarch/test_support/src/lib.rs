@@ -142,7 +142,7 @@ pub fn write_flat_library(root: &Path, dependency_count: usize) {
         root,
         ROOT_CARGO,
         &format!(
-            "[package]\nname = \"shared\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\n{dependencies}"
+            "[package]\nname = \"shared\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[workspace]\nresolver = \"2\"\n\n[dependencies]\n{dependencies}"
         ),
     );
     write_file(root, ROOT_LIB, "pub fn facade() -> u8 { 1 }\n");

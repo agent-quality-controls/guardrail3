@@ -164,7 +164,7 @@ pub(crate) fn check_test_root(root: &std::path::Path) -> Vec<CheckResult> {
     use guardrail3_adapters_outbound_fs::RealFileSystem;
     use guardrail3_app_core::project_walker::walk_project;
     use guardrail3_app_rs_family_mapper::FamilyMapper;
-    use guardrail3_app_rs_placement::collect as collect_scope;
+    use guardrail3_app_rs_structure::collect as collect_scope;
     use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
     let tree = walk_project(&RealFileSystem, root);
@@ -211,7 +211,7 @@ pub(crate) fn run_config_rule_for_test(
 #[cfg(test)]
 pub(crate) fn collect_facts_for_test(tree: &ProjectTree) -> facts::DenyFacts {
     use guardrail3_app_rs_family_mapper::FamilyMapper;
-    use guardrail3_app_rs_placement::collect as collect_scope;
+    use guardrail3_app_rs_structure::collect as collect_scope;
     use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
 
     let scope = collect_scope(tree);

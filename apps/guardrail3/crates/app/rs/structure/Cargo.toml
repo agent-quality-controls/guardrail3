@@ -1,5 +1,5 @@
 [package]
-name = "guardrail3-app-rs-legality"
+name = "guardrail3-app-rs-structure"
 version = "0.0.0"
 edition = "2024"
 
@@ -9,7 +9,4 @@ workspace = true
 [dependencies]
 guardrail3_app_rs_ownership = { package = "guardrail3-app-rs-ownership", path = "../ownership" }
 guardrail3_app_rs_placement = { package = "guardrail3-app-rs-placement", path = "../placement" }
-guardrail3_app_rs_structure = { package = "guardrail3-app-rs-structure", path = "../structure" }
 guardrail3_domain_project_tree = { package = "guardrail3-domain-project-tree", path = "../../../domain/project-tree" }
-guardrail3_validation_model = { package = "guardrail3-domain-validation-model", path = "../../../domain/validation-model" }
-toml = "0.8"

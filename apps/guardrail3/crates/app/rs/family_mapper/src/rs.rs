@@ -1,8 +1,9 @@
 use guardrail3_app_rs_legality::{
     RustIllegalFamilyFileFact, RustLegalFamilyFileFact, RustLegalityFacts,
 };
-use guardrail3_app_rs_ownership::{RustFamilyFileAttachment, RustOwnedSurfaceFacts};
-use guardrail3_app_rs_placement::{RustRootPlacementFacts, RustRootPlacementRootFacts};
+use guardrail3_app_rs_ownership::RustFamilyFileAttachment;
+use guardrail3_app_rs_placement::RustRootPlacementRootFacts;
+use guardrail3_app_rs_structure::RustStructureFacts;
 use guardrail3_domain_config::types::{GuardrailConfig, RustChecksConfig};
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_validation_model::{RustFamilySelection, RustValidateFamily};
@@ -13,7 +14,7 @@ use crate::views;
 #[derive(Debug)]
 pub struct FamilyMapper<'a> {
     tree: &'a ProjectTree,
-    scope: &'a RustRootPlacementFacts,
+    structure: &'a RustStructureFacts,
     legality: RustLegalityFacts,
     config: Option<&'a GuardrailConfig>,
     selected_families: &'a RustFamilySelection,
@@ -25,33 +26,19 @@ impl<'a> FamilyMapper<'a> {
     #[must_use]
     pub fn new(
         tree: &'a ProjectTree,
-        scope: &'a RustRootPlacementFacts,
+        structure: &'a RustStructureFacts,
         config: Option<&'a GuardrailConfig>,
         selected_families: &'a RustFamilySelection,
         scoped_files: Option<&'a std::collections::BTreeSet<String>>,
     ) -> Self {
-        let owned_surface = guardrail3_app_rs_ownership::collect(tree, scope);
-        let legality = guardrail3_app_rs_legality::collect(tree, scope, &owned_surface);
-        Self::with_legality(tree, scope, &legality, config, selected_families, scoped_files)
-    }
-
-    #[must_use]
-    pub fn with_owned_surface(
-        tree: &'a ProjectTree,
-        scope: &'a RustRootPlacementFacts,
-        owned_surface: &RustOwnedSurfaceFacts,
-        config: Option<&'a GuardrailConfig>,
-        selected_families: &'a RustFamilySelection,
-        scoped_files: Option<&'a std::collections::BTreeSet<String>>,
-    ) -> Self {
-        let legality = guardrail3_app_rs_legality::collect(tree, scope, owned_surface);
-        Self::with_legality(tree, scope, &legality, config, selected_families, scoped_files)
+        let legality = guardrail3_app_rs_legality::collect(tree, structure);
+        Self::with_legality(tree, structure, &legality, config, selected_families, scoped_files)
     }
 
     #[must_use]
     pub fn with_legality(
         tree: &'a ProjectTree,
-        scope: &'a RustRootPlacementFacts,
+        structure: &'a RustStructureFacts,
         legality: &RustLegalityFacts,
         config: Option<&'a GuardrailConfig>,
         selected_families: &'a RustFamilySelection,
@@ -59,7 +46,7 @@ impl<'a> FamilyMapper<'a> {
     ) -> Self {
         Self {
             tree,
-            scope,
+            structure,
             legality: legality.clone(),
             config,
             selected_families,
@@ -87,7 +74,7 @@ impl<'a> FamilyMapper<'a> {
         }
 
         views::RsArchRoute::new(
-            self.scope
+            self.structure
                 .roots()
                 .iter()
                 .map(|root| {
@@ -100,7 +87,7 @@ impl<'a> FamilyMapper<'a> {
                     )
                 })
                 .collect(),
-            self.scope
+            self.structure
                 .overlaps()
                 .iter()
                 .map(|overlap| {
@@ -112,7 +99,7 @@ impl<'a> FamilyMapper<'a> {
                     )
                 })
                 .collect(),
-            self.scope
+            self.structure
                 .input_failures()
                 .iter()
                 .map(|failure| {
@@ -229,7 +216,7 @@ impl<'a> FamilyMapper<'a> {
     #[must_use]
     pub fn map_rs_libarch(&self) -> views::RsLibarchRoute {
         let roots = self
-            .map_workspace_roots_for_family(RustValidateFamily::Libarch)
+            .map_manifest_roots_for_family(RustValidateFamily::Libarch)
             .into_iter()
             .filter(|root| matches!(root_scope(root.rel_dir()), RootScope::Packages))
             .collect::<Vec<_>>();
@@ -340,6 +327,35 @@ impl<'a> FamilyMapper<'a> {
             .collect()
     }
 
+    fn map_manifest_roots_for_family(&self, family: RustValidateFamily) -> Vec<views::RsRootView> {
+        if !self.selected_families.contains(family) {
+            return Vec::new();
+        }
+
+        let root_rels = self
+            .legality
+            .legal_family_files()
+            .iter()
+            .filter(|fact| fact.family() == family)
+            .filter(|fact| fact.kind() == RustValidateFamilyFileKind::CargoToml)
+            .filter(|fact| self.legal_family_file_matches_scope(fact))
+            .filter_map(|fact| match fact.attachment() {
+                RustFamilyFileAttachment::ExactRoot { root_rel } => Some(root_rel.clone()),
+                RustFamilyFileAttachment::NestedUnderRoot { .. }
+                | RustFamilyFileAttachment::AncestorOfRoots { .. }
+                | RustFamilyFileAttachment::OutsideRoots { .. } => None,
+            })
+            .collect::<std::collections::BTreeSet<_>>();
+
+        self.structure
+            .roots()
+            .iter()
+            .filter(|root| root_rels.contains(root.rel_dir()))
+            .filter(|root| root_enabled_for_family(root, family, self.config))
+            .map(root_view)
+            .collect()
+    }
+
     fn map_scoped_workspace_roots_for_family(
         &self,
         family: RustValidateFamily,
@@ -370,7 +386,7 @@ impl<'a> FamilyMapper<'a> {
             return Vec::new();
         }
 
-        self.scope
+        self.structure
             .roots()
             .iter()
             .filter(|root| self.root_matches_validation_scope(root.rel_dir()))
@@ -392,7 +408,7 @@ impl<'a> FamilyMapper<'a> {
             return Vec::new();
         }
 
-        self.scope
+        self.structure
             .roots()
             .iter()
             .filter(|root| self.root_matches_validation_scope(root.rel_dir()))
@@ -454,7 +470,7 @@ impl<'a> FamilyMapper<'a> {
             .iter()
             .filter(|root| self.root_matches_validation_scope(root.rel_dir()))
             .filter(|root| {
-                self.scope
+                self.structure
                     .roots()
                     .iter()
                     .find(|candidate| candidate.rel_dir() == root.rel_dir())

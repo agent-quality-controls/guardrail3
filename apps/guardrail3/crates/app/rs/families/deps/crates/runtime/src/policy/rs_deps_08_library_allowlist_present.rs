@@ -45,7 +45,7 @@ pub fn check(input: &AllowlistCoverageDepsInput<'_>, results: &mut Vec<CheckResu
 fn family_route(
     tree: &guardrail3_domain_project_tree::ProjectTree,
 ) -> guardrail3_app_rs_family_mapper::RsDepsRoute {
-    let scope = guardrail3_app_rs_placement::collect(tree);
+    let scope = guardrail3_app_rs_structure::collect(tree);
     let selected =
         guardrail3_validation_model::RustFamilySelection::new(std::collections::BTreeSet::from([
             guardrail3_validation_model::RustValidateFamily::Deps,

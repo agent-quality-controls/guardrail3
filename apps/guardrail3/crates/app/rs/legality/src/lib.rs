@@ -1,9 +1,8 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use guardrail3_app_rs_ownership::{
-    RustFamilyFileAttachment, RustFamilyFileFact, RustFamilyFileKind, RustOwnedSurfaceFacts,
-};
+use guardrail3_app_rs_ownership::{RustFamilyFileAttachment, RustFamilyFileFact, RustFamilyFileKind};
 use guardrail3_app_rs_placement::{RustRootClassification, RustRootPlacementFacts};
+use guardrail3_app_rs_structure::RustStructureFacts;
 use guardrail3_domain_project_tree::ProjectTree;
 use guardrail3_validation_model::RustValidateFamily;
 
@@ -294,9 +293,10 @@ enum RootLegality {
 #[must_use]
 pub fn collect(
     tree: &ProjectTree,
-    placement: &RustRootPlacementFacts,
-    owned_surface: &RustOwnedSurfaceFacts,
+    structure: &RustStructureFacts,
 ) -> RustLegalityFacts {
+    let placement = structure.placement();
+    let owned_surface = structure.owned_surface();
     let snapshots = collect_snapshots(tree, placement);
     let top_level_workspaces = top_level_workspace_candidates(&snapshots);
     let mut legal_workspace_roots = Vec::new();

@@ -176,7 +176,26 @@ fn unreadable_cached_release_files_fail_closed_when_structure_exists_without_con
             ("crates", dir_entry(&["example"], &[])),
             ("crates/example", dir_entry(&[], &["Cargo.toml"])),
         ],
-        vec![],
+        vec![
+            (
+                "Cargo.toml",
+                r#"
+[workspace]
+members = ["crates/example"]
+resolver = "2"
+"#,
+            ),
+            (
+                "crates/example/Cargo.toml",
+                r#"
+[package]
+name = "example"
+version = "0.1.0"
+edition = "2024"
+publish = false
+"#,
+            ),
+        ],
         root,
     );
     let tool_checker = StubToolChecker::new(true);

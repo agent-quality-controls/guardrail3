@@ -15,7 +15,7 @@ pub(super) fn run_family(root: &Path) -> Vec<guardrail3_domain_report::CheckResu
 
 pub(super) fn route_family(root: &Path) -> guardrail3_app_rs_family_mapper::RsToolchainRoute {
     let tree = guardrail3_app_core::project_walker::walk_project(&RealFileSystem, root);
-    let scope = guardrail3_app_rs_placement::collect(&tree);
+    let scope = guardrail3_app_rs_structure::collect(&tree);
     let config = tree
         .file_content("guardrail3.toml")
         .and_then(|content| toml::from_str::<GuardrailConfig>(content).ok());

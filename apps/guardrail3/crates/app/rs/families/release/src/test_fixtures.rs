@@ -147,7 +147,7 @@ pub(crate) fn edge_input(
 pub(crate) fn family_route(
     tree: &guardrail3_domain_project_tree::ProjectTree,
 ) -> guardrail3_app_rs_family_mapper::RsReleaseRoute {
-    let scope = guardrail3_app_rs_placement::collect(tree);
+    let scope = guardrail3_app_rs_structure::collect(tree);
     let selected =
         guardrail3_validation_model::RustFamilySelection::new(std::collections::BTreeSet::from([
             guardrail3_validation_model::RustValidateFamily::Release,
@@ -160,7 +160,7 @@ pub(crate) fn family_route_with_validation_scope(
     tree: &guardrail3_domain_project_tree::ProjectTree,
     validation_scope: &str,
 ) -> guardrail3_app_rs_family_mapper::RsReleaseRoute {
-    let scope = guardrail3_app_rs_placement::collect(tree);
+    let scope = guardrail3_app_rs_structure::collect(tree);
     let selected =
         guardrail3_validation_model::RustFamilySelection::new(std::collections::BTreeSet::from([
             guardrail3_validation_model::RustValidateFamily::Release,

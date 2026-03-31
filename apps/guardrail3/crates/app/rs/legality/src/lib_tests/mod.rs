@@ -1,8 +1,8 @@
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
-use guardrail3_app_rs_ownership::{RustFamilyFileKind, collect as collect_owned_surface};
-use guardrail3_app_rs_placement::collect as collect_placement;
+use guardrail3_app_rs_ownership::RustFamilyFileKind;
+use guardrail3_app_rs_structure::collect as collect_structure;
 use guardrail3_domain_project_tree::{DirEntry, ProjectTree};
 use guardrail3_validation_model::RustValidateFamily;
 
@@ -13,9 +13,8 @@ use crate::{
 #[test]
 fn legal_workspace_root_and_member_cargo_are_kept_legal() {
     let tree = workspace_tree();
-    let placement = collect_placement(&tree);
-    let owned = collect_owned_surface(&tree, &placement);
-    let legality = collect_legality(&tree, &placement, &owned);
+    let structure = collect_structure(&tree);
+    let legality = collect_legality(&tree, &structure);
 
     let legal_roots = legality
         .legal_workspace_roots()
@@ -45,9 +44,8 @@ fn legal_workspace_root_and_member_cargo_are_kept_legal() {
 #[test]
 fn nested_workspace_and_nested_clippy_are_illegal() {
     let tree = nested_workspace_tree();
-    let placement = collect_placement(&tree);
-    let owned = collect_owned_surface(&tree, &placement);
-    let legality = collect_legality(&tree, &placement, &owned);
+    let structure = collect_structure(&tree);
+    let legality = collect_legality(&tree, &structure);
 
     assert!(legality.topology_issues().iter().any(|issue| {
         issue.rel_dir() == "apps/api/crates/demo"
@@ -102,9 +100,8 @@ fn top_level_package_toolchain_is_illegal_for_local_family_routing() {
             ),
         ]),
     );
-    let placement = collect_placement(&tree);
-    let owned = collect_owned_surface(&tree, &placement);
-    let legality = collect_legality(&tree, &placement, &owned);
+    let structure = collect_structure(&tree);
+    let legality = collect_legality(&tree, &structure);
 
     assert!(legality.topology_issues().iter().any(|issue| {
         issue.rel_dir() == "tools/helper"

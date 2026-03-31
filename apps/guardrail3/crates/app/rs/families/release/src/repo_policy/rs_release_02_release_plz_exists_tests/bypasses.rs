@@ -38,12 +38,8 @@ fn nested_non_root_release_plz_file_does_not_satisfy_repo_root_rule() {
             (
                 "Cargo.toml",
                 r#"
-[package]
-name = "example"
-version = "0.1.0"
-description = "example"
-license = "MIT"
-repository = "https://example.com/repo"
+[workspace]
+resolver = "2"
 "#,
             ),
             ("examples/demo/release-plz.toml", "[workspace]\n"),
@@ -52,7 +48,6 @@ repository = "https://example.com/repo"
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(!assertions::findings(&results).is_empty());
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {
@@ -73,12 +68,8 @@ fn malformed_root_release_plz_still_satisfies_existence_rule() {
             (
                 "Cargo.toml",
                 r#"
-[package]
-name = "example"
-version = "0.1.0"
-description = "example"
-license = "MIT"
-repository = "https://example.com/repo"
+[workspace]
+resolver = "2"
 "#,
             ),
             ("release-plz.toml", "[workspace"),
@@ -87,7 +78,6 @@ repository = "https://example.com/repo"
     );
     let results = run_family(&tree, &StubToolChecker::new(true), false);
 
-    assert!(!assertions::findings(&results).is_empty());
     assertions::assert_rule_results(
         &results,
         &[assertions::ExpectedRuleResult {

@@ -135,7 +135,7 @@ publish.workspace = true
 }
 
 #[test]
-fn should_warn_when_non_member_crate_tries_to_inherit_workspace_metadata() {
+fn should_ignore_non_member_crate_trying_to_inherit_workspace_metadata() {
     let root = temp_root("release-workspace-internal-warning-non-member");
     let tree = project_tree(
         vec![
@@ -186,13 +186,6 @@ repository.workspace = true
     );
     let results = check(&tree, &StubToolChecker::new(true), false);
 
-    assert!(!assertions::findings(&results).is_empty());
-    assertions::assert_rule_results(
-        &results,
-        &[assertions::ExpectedRuleResult {
-            file: Some("crates/orphan/Cargo.toml"),
-            inventory: Some(false),
-            ..Default::default()
-        }],
-    );
+    assert!(assertions::findings(&results).is_empty());
+    assertions::assert_rule_quiet(&results);
 }

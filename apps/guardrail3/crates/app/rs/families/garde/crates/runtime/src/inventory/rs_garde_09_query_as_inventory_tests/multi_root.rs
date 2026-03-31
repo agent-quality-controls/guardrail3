@@ -8,14 +8,14 @@ fn inventories_query_as_only_for_the_owned_root() {
 
     for (rel, source) in [
         (
-            "vendor/lib/src/db.rs",
+            "apps/lib/src/db.rs",
             r#"
 fn load() {
     let _row = sqlx::query_as!(User, "select 1");
 }
 "#,
         ),
-        ("vendor/tool/src/db.rs", "fn load() {}\n"),
+        ("apps/tool/src/db.rs", "fn load() {}\n"),
     ] {
         let abs = root.join(rel);
         std::fs::create_dir_all(
@@ -28,22 +28,22 @@ fn load() {
 
     let tree = project_tree(
         vec![
-            ("", dir_entry(&["vendor"], &[])),
-            ("vendor", dir_entry(&["lib", "tool"], &[])),
+            ("", dir_entry(&["apps"], &[])),
+            ("apps", dir_entry(&["lib", "tool"], &[])),
             (
-                "vendor/lib",
+                "apps/lib",
                 dir_entry(&["src"], &["Cargo.toml", "clippy.toml", "guardrail3.toml"]),
             ),
-            ("vendor/lib/src", dir_entry(&[], &["db.rs"])),
+            ("apps/lib/src", dir_entry(&[], &["db.rs"])),
             (
-                "vendor/tool",
+                "apps/tool",
                 dir_entry(&["src"], &["Cargo.toml", "clippy.toml", "guardrail3.toml"]),
             ),
-            ("vendor/tool/src", dir_entry(&[], &["db.rs"])),
+            ("apps/tool/src", dir_entry(&[], &["db.rs"])),
         ],
         vec![
             (
-                "vendor/lib/Cargo.toml",
+                "apps/lib/Cargo.toml",
                 r#"[workspace]
 members = []
 [package]
@@ -52,22 +52,22 @@ name = "lib"
 garde = { version = "0.22", features = ["derive"] }
 "#,
             ),
-            ("vendor/lib/clippy.toml", clippy_toml.as_str()),
+            ("apps/lib/clippy.toml", clippy_toml.as_str()),
             (
-                "vendor/lib/guardrail3.toml",
+                "apps/lib/guardrail3.toml",
                 r#"[profile]
 name = "service"
 
 [[escape_hatches]]
 family = "garde"
-file = "vendor/lib/src/db.rs"
+file = "apps/lib/src/db.rs"
 kind = "sqlx_query_as"
 selector = "sqlx::query_as@L3"
 reason = "Temporary SQLx row mapping until validated DTO extraction lands."
 "#,
             ),
             (
-                "vendor/tool/Cargo.toml",
+                "apps/tool/Cargo.toml",
                 r#"[workspace]
 members = []
 [package]
@@ -76,9 +76,9 @@ name = "tool"
 garde = { version = "0.22", features = ["derive"] }
 "#,
             ),
-            ("vendor/tool/clippy.toml", clippy_toml.as_str()),
+            ("apps/tool/clippy.toml", clippy_toml.as_str()),
             (
-                "vendor/tool/guardrail3.toml",
+                "apps/tool/guardrail3.toml",
                 "[profile]\nname = \"service\"\n",
             ),
         ],
@@ -94,7 +94,7 @@ garde = { version = "0.22", features = ["derive"] }
         &[
             assertions::ExpectedRuleResult {
                 severity: Some(assertions::Severity::Warn),
-                file: Some("vendor/lib/src/db.rs"),
+                file: Some("apps/lib/src/db.rs"),
                 inventory: Some(false),
                 line: Some(3),
                 title: Some("sqlx query_as requires validation review"),
@@ -105,7 +105,7 @@ garde = { version = "0.22", features = ["derive"] }
                 file: None,
                 inventory: Some(false),
                 title: Some("sqlx query_as count"),
-                message: Some("`vendor/lib/src/db.rs` has 1 sqlx query_as escape hatches."),
+                message: Some("`apps/lib/src/db.rs` has 1 sqlx query_as escape hatches."),
                 ..Default::default()
             },
         ],

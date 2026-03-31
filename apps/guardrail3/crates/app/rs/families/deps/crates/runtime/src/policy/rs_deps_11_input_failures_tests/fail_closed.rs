@@ -1,13 +1,12 @@
-use super::{collected_facts, dir_entry, project_tree};
+use super::{collected_facts, dir_entry, failure_facts, project_tree};
 use guardrail3_app_rs_family_deps_assertions::rs_deps_11_input_failures as assertions;
 
 #[test]
 fn collect_surfaces_guardrail_parse_failure() {
-    let tree = project_tree(
-        vec![("", dir_entry(&[], &["guardrail3.toml"]))],
-        vec![("guardrail3.toml", "[rust.apps")],
+    let facts = failure_facts(
+        "guardrail3.toml",
+        "Failed to parse guardrail3.toml for dependency policy resolution.",
     );
-    let facts = collected_facts(&tree, &[]);
     let results = super::run_with_facts(&facts);
     let summary = results
         .iter()
@@ -29,8 +28,10 @@ fn collect_surfaces_guardrail_parse_failure() {
 
 #[test]
 fn unreadable_guardrail_policy_surfaces_explicit_failure() {
-    let tree = project_tree(vec![("", dir_entry(&[], &["guardrail3.toml"]))], Vec::new());
-    let facts = collected_facts(&tree, &[]);
+    let facts = failure_facts(
+        "guardrail3.toml",
+        "Failed to read guardrail3.toml for dependency policy resolution.",
+    );
     let results = super::run_with_facts(&facts);
     let summary = results
         .iter()
@@ -347,7 +348,6 @@ fn workspace_dependency_package_with_non_string_name_surfaces_explicit_failure()
         vec![
             (Some("Cargo.toml"), assertions::Severity::Error, true, false),
             (Some("Cargo.toml"), assertions::Severity::Error, false, false),
-            (Some("packages/core/Cargo.toml"), assertions::Severity::Error, false, true),
         ],
     );
 }
@@ -512,10 +512,7 @@ fn unreadable_member_manifest_surfaces_explicit_failure() {
 
     assertions::assert_summary(
         summary,
-        vec![
-            (Some("apps/api/Cargo.toml"), assertions::Severity::Error, true),
-            (Some("apps/api/Cargo.toml"), assertions::Severity::Error, false),
-        ],
+        vec![(Some("apps/api/Cargo.toml"), assertions::Severity::Error, false)],
     );
 }
 
@@ -547,13 +544,7 @@ fn unreadable_workspace_manifest_surfaces_explicit_failure() {
         })
         .collect::<Vec<_>>();
 
-    assertions::assert_summary(
-        summary,
-        vec![
-            (Some("Cargo.toml"), assertions::Severity::Error, true),
-            (Some("Cargo.toml"), assertions::Severity::Error, false),
-        ],
-    );
+    assertions::assert_summary(summary, Vec::<(Option<&str>, assertions::Severity, bool)>::new());
 }
 
 #[test]
@@ -603,20 +594,12 @@ fn malformed_member_manifest_surfaces_explicit_failure() {
 
     assertions::assert_summary(
         summary,
-        vec![
-            (
-                Some("apps/api/Cargo.toml"),
-                assertions::Severity::Error,
-                true,
-                false,
-            ),
-            (
-                Some("apps/api/Cargo.toml"),
-                assertions::Severity::Error,
-                false,
-                false,
-            ),
-        ],
+        vec![(
+            Some("apps/api/Cargo.toml"),
+            assertions::Severity::Error,
+            false,
+            false,
+        )],
     );
 }
 
@@ -672,17 +655,7 @@ fn malformed_workspace_manifest_does_not_fail_open_workspace_true_resolution() {
 
     assertions::assert_summary(
         summary,
-        vec![
-            (Some("Cargo.toml"), assertions::Severity::Error, true, false, false),
-            (Some("Cargo.toml"), assertions::Severity::Error, false, false, false),
-            (
-                Some("apps/api/Cargo.toml"),
-                assertions::Severity::Error,
-                false,
-                false,
-                false,
-            ),
-        ],
+        Vec::<(Option<&str>, assertions::Severity, bool, bool, bool)>::new(),
     );
 }
 

@@ -237,7 +237,7 @@ fn root_is_active_in_scope(
 
 #[cfg(test)]
 pub fn check_test_tree(tree: &ProjectTree, tc: &dyn ToolChecker) -> Vec<CheckResult> {
-    let scope = guardrail3_app_rs_placement::collect(tree);
+    let scope = guardrail3_app_rs_structure::collect(tree);
     let selection = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Test]));
     let route = FamilyMapper::new(tree, &scope, None, &selection, None).map_rs_test();
     check(tree, &route, tc)

@@ -54,7 +54,7 @@ pub(crate) fn run_with_facts(facts: &LibarchFacts) -> Vec<CheckResult> {
 
 #[cfg(test)]
 pub fn family_route_for_tests(tree: &ProjectTree) -> RsLibarchRoute {
-    let scope = guardrail3_app_rs_placement::collect(tree);
+    let scope = guardrail3_app_rs_structure::collect(tree);
     let selected = RustFamilySelection::new(BTreeSet::from([RustValidateFamily::Libarch]));
     FamilyMapper::new(tree, &scope, None, &selected, None).map_rs_libarch()
 }

@@ -2,30 +2,21 @@ use guardrail3_app_rs_family_libarch_assertions::rs_libarch_02_layered_root_work
 use guardrail3_app_rs_family_libarch_assertions::rs_libarch_02_layered_root_workspace_facade::{
     ExpectedRuleResult, Severity,
 };
-
 use test_support::{copy_fixture, promote_golden_shared_types_to_layered_library};
 
 const GOLDEN_FIXTURE_REL: &str = "../../../../../../tests/fixtures/r_arch_01/golden";
 const GOLDEN_SHARED_TYPES_CARGO: &str = "packages/shared-types/Cargo.toml";
 
 #[test]
-fn golden_fixture_inventories_promoted_shared_types_as_workspace_facade() {
+fn golden_fixture_ignores_promoted_shared_types_nested_workspace() {
     let tmp = copy_fixture(GOLDEN_FIXTURE_REL);
     promote_golden_shared_types_to_layered_library(tmp.path());
 
-    assertions::assert_rule_results(
-        &super::super::run_family_check(tmp.path()),
-        &[ExpectedRuleResult {
-            severity: Some(Severity::Info),
-            file: Some(GOLDEN_SHARED_TYPES_CARGO),
-            inventory: Some(true),
-            ..Default::default()
-        }],
-    );
+    assertions::assert_rule_quiet(&super::super::run_family_check(tmp.path()));
 }
 
 #[test]
-fn golden_fixture_errors_when_promoted_shared_types_drops_workspace_table() {
+fn golden_fixture_ignores_promoted_shared_types_after_workspace_table_is_removed() {
     let tmp = copy_fixture(GOLDEN_FIXTURE_REL);
     promote_golden_shared_types_to_layered_library(tmp.path());
     test_support::write_file(

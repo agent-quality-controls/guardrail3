@@ -110,7 +110,7 @@ fn test_route_for_checks(
     tree: &ProjectTree,
     validation_scope: Option<&str>,
 ) -> RsCargoRoute {
-    let scope = guardrail3_app_rs_placement::collect(tree);
+    let scope = guardrail3_app_rs_structure::collect(tree);
     let config = tree
         .file_content("guardrail3.toml")
         .and_then(|content| toml::from_str::<GuardrailConfig>(content).ok());
