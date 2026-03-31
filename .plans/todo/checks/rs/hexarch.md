@@ -5,7 +5,7 @@
 
 **Input:** Directory structure + Cargo.toml files (workspace + per-crate) + *.rs files (for ports/adapter content checks)
 **Parser:** TOML + filesystem + syn AST
-**Current code:** `topology/rs_arch_01/`, `hex_arch_checks.rs`
+**Current code:** `topology/rs_topology_01/`, `hex_arch_checks.rs`
 
 ## Structure rules (from old RS-TOPOLOGY-01 sub-rules — now individual rules)
 
@@ -24,7 +24,7 @@
 | RS-HEXARCH-27 | Error | Nested workspace forbidden under app root | Implemented |
 
 Current migrated structural coverage:
-- the old `rs_arch_01` golden fixture is now exercised by the new family
+- the old `rs_topology_01` golden fixture is now exercised by the new family
 - rule-specific test modules preserve the old sharp edge cases for `01..12`
 - total current family coverage is 47 `hexarch` tests in the new architecture
 

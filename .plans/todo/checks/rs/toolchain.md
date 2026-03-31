@@ -46,7 +46,7 @@ root.” Root ownership comes from placement + family mapping.
 
 In this repo, that means repo-root validation must still enforce
 `apps/guardrail3/rust-toolchain.toml`, and the repo-root
-`rust-toolchain.toml` is a placement violation because Arch forbids a repo-root
+`rust-toolchain.toml` is a placement violation because topology forbids a repo-root
 Rust workspace manifest.
 
 ## Rules

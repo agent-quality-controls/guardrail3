@@ -1,4 +1,4 @@
-//! RS-ARCH-01 helpers — re-exports shared arch utilities with RS-specific defaults.
+//! RS-TOPOLOGY-01 helpers — re-exports shared topology utilities with RS-specific defaults.
 
 use std::path::Path;
 
@@ -6,7 +6,7 @@ use guardrail3_app_arch_helpers as arch_helpers;
 use guardrail3_domain_report::CheckResult;
 use guardrail3_outbound_traits::FileSystem;
 
-const ID: &str = "R-ARCH-01";
+const ID: &str = "R-TOPOLOGY-01";
 const ENTITY: &str = "Service";
 
 pub fn list_dir_names(fs: &dyn FileSystem, dir: &Path) -> Vec<String> {

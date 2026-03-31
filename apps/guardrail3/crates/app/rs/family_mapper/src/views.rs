@@ -300,14 +300,14 @@ impl RsRootView {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct RsArchOverlapView {
+pub struct RsTopologyOverlapView {
     app_root_rel: String,
     app_cargo_rel_path: String,
     package_root_rel: String,
     package_cargo_rel_path: String,
 }
 
-impl RsArchOverlapView {
+impl RsTopologyOverlapView {
     #[must_use]
     pub fn new(
         app_root_rel: String,
@@ -423,7 +423,7 @@ impl RsTopologyRootView {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RsTopologyRoute {
     roots: Vec<RsTopologyRootView>,
-    overlaps: Vec<RsArchOverlapView>,
+    overlaps: Vec<RsTopologyOverlapView>,
     input_failures: Vec<RsRootInputFailureView>,
     topology_issues: Vec<RsTopologyIssueView>,
     family_files: Vec<RsFamilyFileView>,
@@ -433,7 +433,7 @@ impl RsTopologyRoute {
     #[must_use]
     pub fn new(
         roots: Vec<RsTopologyRootView>,
-        overlaps: Vec<RsArchOverlapView>,
+        overlaps: Vec<RsTopologyOverlapView>,
         input_failures: Vec<RsRootInputFailureView>,
         topology_issues: Vec<RsTopologyIssueView>,
         family_files: Vec<RsFamilyFileView>,
@@ -453,7 +453,7 @@ impl RsTopologyRoute {
     }
 
     #[must_use]
-    pub fn overlaps(&self) -> &[RsArchOverlapView] {
+    pub fn overlaps(&self) -> &[RsTopologyOverlapView] {
         &self.overlaps
     }
 

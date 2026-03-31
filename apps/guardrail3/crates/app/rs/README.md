@@ -369,7 +369,7 @@ pub struct RsRootView {
     pub cargo_rel_path: String,
 }
 
-pub struct RsArchOverlapView {
+pub struct RsTopologyOverlapView {
     pub app_root_rel: String,
     pub app_cargo_rel_path: String,
     pub package_root_rel: String,
@@ -381,7 +381,7 @@ pub struct RsRootInputFailureView {
     pub message: String,
 }
 
-pub struct RsArchRootView {
+pub struct RsTopologyRootView {
     pub root: RsRootView,
     pub classification: RustRootClassification,
     pub arch_role: Option<RustArchRole>,
@@ -389,9 +389,9 @@ pub struct RsArchRootView {
     pub package_zone_candidates: Vec<String>,
 }
 
-pub struct RsArchRoute {
-    pub roots: Vec<RsArchRootView>,
-    pub overlaps: Vec<RsArchOverlapView>,
+pub struct RsTopologyRoute {
+    pub roots: Vec<RsTopologyRootView>,
+    pub overlaps: Vec<RsTopologyOverlapView>,
     pub input_failures: Vec<RsRootInputFailureView>,
 }
 
@@ -440,7 +440,7 @@ impl<'a> FamilyMapper<'a> {
         selected_families: &'a RustFamilySelection,
     ) -> Self;
 
-    pub fn map_rs_arch(&self) -> RsArchRoute;
+    pub fn map_rs_topology(&self) -> RsTopologyRoute;
     pub fn map_rs_fmt(&self) -> RsFmtRoute;
     pub fn map_rs_code(&self) -> RsCodeRoute;
     pub fn map_rs_hexarch(&self) -> RsHexarchRoute;
@@ -569,7 +569,7 @@ Target shape:
 ```rust
 pub fn check(
     tree: &ProjectTree,
-    route: &RsArchRoute,
+    route: &RsTopologyRoute,
 ) -> Vec<CheckResult>
 pub fn check(
     tree: &ProjectTree,

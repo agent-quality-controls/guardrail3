@@ -61,7 +61,7 @@ fn misplaced_roots_do_not_fire_when_both_architecture_families_are_disabled() {
 }
 
 #[test]
-fn misplaced_roots_still_fire_when_arch_is_globally_disabled() {
+fn misplaced_roots_still_fire_when_topology_is_globally_disabled() {
     let config = "[rust.checks]\ntopology = false\nhexarch = true\nlibarch = true\n";
     let results = check_results(&tree(
         &[

@@ -4,7 +4,7 @@ mod views;
 
 pub use guardrail3_domain_project_tree::DirEntry;
 pub use rs::FamilyMapper;
-pub type RsArchOverlapView = views::RsArchOverlapView;
+pub type RsTopologyOverlapView = views::RsTopologyOverlapView;
 pub type RsTopologyRootView = views::RsTopologyRootView;
 pub type RsTopologyRoute = views::RsTopologyRoute;
 pub type RsTopologyIssueKindView = views::RsTopologyIssueKindView;

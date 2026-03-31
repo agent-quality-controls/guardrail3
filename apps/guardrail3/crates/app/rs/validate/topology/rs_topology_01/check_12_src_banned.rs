@@ -17,7 +17,7 @@ pub fn check(fs: &dyn FileSystem, name: &str, app_dir: &Path, results: &mut Vec<
     let is_dir = !src_entries.is_empty() || src_dir.is_dir();
     if is_dir {
         results.push(CheckResult::from_parts(
-    "R-ARCH-01".to_owned(),
+    "R-TOPOLOGY-01".to_owned(),
     Severity::Error,
     format!("Service `{name}` has src/ directory"),
     format!(

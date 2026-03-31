@@ -275,7 +275,7 @@ fn undeclared_nested_package_surfaces_explicit_failure() {
         results
             .iter()
             .all(|result| result.file() != Some("tools/helper/Cargo.toml")),
-        "cargo family should ignore undeclared nested packages because placement legality belongs to arch: {results:#?}"
+        "cargo family should ignore undeclared nested packages because placement legality belongs to topology: {results:#?}"
     );
 }
 

@@ -164,7 +164,7 @@ pub fn run(
         let eslint_results = eslint_audit::check(fs, path);
         report.add_section(Section::new("ESLint boundary audit".to_owned(), eslint_results));
 
-        // Per-app arch checks (only on service-type apps)
+        // Per-app topology checks (only on service-type apps)
         let arch_structure = ts_arch_checks::check_hex_arch_structure_for_apps(fs, &app_contexts);
         let arch_imports = ts_arch_checks::check_import_boundaries_for_apps(fs, &app_contexts);
         let mut arch_results = arch_structure;
