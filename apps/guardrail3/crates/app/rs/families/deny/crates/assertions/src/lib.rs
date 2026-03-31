@@ -5,8 +5,6 @@ mod common;
 pub mod facts;
 #[path = "coverage/rs_deny_01_coverage.rs"]
 pub mod rs_deny_01_coverage;
-#[path = "coverage/rs_deny_02_allowed_locations.rs"]
-pub mod rs_deny_02_allowed_locations;
 #[path = "coverage/rs_deny_03_shadowing.rs"]
 pub mod rs_deny_03_shadowing;
 #[path = "advisories/rs_deny_04_deprecated_advisories.rs"]

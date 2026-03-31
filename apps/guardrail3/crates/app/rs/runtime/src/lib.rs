@@ -18,6 +18,9 @@ mod runtime_deps {
     pub(super) use guardrail3_app_rs_family_selection as family_selection;
 
     #[cfg(feature = "routing")]
+    pub(super) use guardrail3_app_rs_legality as legality;
+
+    #[cfg(feature = "routing")]
     pub(super) use guardrail3_app_rs_ownership as ownership;
 
     #[cfg(feature = "routing")]
@@ -88,10 +91,12 @@ pub fn run(
     #[cfg(feature = "routing")]
     let owned_surface = runtime_deps::ownership::collect(&tree, &scope);
     #[cfg(feature = "routing")]
-    let mapper = runtime_deps::FamilyMapper::with_owned_surface(
+    let legality = runtime_deps::legality::collect(&tree, &scope, &owned_surface);
+    #[cfg(feature = "routing")]
+    let mapper = runtime_deps::FamilyMapper::with_legality(
         &tree,
         &scope,
-        &owned_surface,
+        &legality,
         config.as_ref(),
         &selected,
         scoped_files,

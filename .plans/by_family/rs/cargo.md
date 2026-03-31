@@ -40,12 +40,19 @@ Known current risk:
 - no confirmed production routing bug, but subtree behavior is under-tested
 - easy false-green shape: family still looks right on full-repo runs while
   overreaching on nested-path runs
+- older cargo tests still lean on illegal standalone-root fixture shapes that
+  are no longer valid under the workspace-local contract
 
 Done means:
 
 - nested-path runtime tests prove only the owning routed policy roots are active
 - malformed routed manifests still fail closed
 - no family-local root discovery escapes the route
+- no cargo test helper rebuilds fake routed surfaces when the real mapper
+  returns no legal workspaces
+- routed cargo tests use legal workspace fixtures only
+- pure cargo rule semantics are covered by direct typed-input sidecar tests
+- illegal root or placement expectations live under `arch`, not cargo
 
 Historical/supplemental references:
 
@@ -56,3 +63,7 @@ Next planning focus:
 
 - keep the README and this file aligned if lint ownership moves between cargo/clippy/code
 - avoid letting old `checks/rs/cargo/**` path references drift back into active docs
+- rewrite the remaining `pkg/` standalone-root tests into:
+  - legal workspace-root routed tests
+  - direct rule-input tests for pure lint semantics
+  - `arch` tests where the old assertion was really about illegal root shape

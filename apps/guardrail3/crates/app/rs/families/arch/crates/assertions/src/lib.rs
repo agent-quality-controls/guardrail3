@@ -9,3 +9,4 @@ pub mod rs_arch_05_scoped_arch_config_forbidden;
 pub mod rs_arch_06_owner_family_enablement_coherence;
 pub mod rs_arch_07_required_inputs_fail_closed;
 pub mod rs_arch_08_auxiliary_roots_declared;
+pub mod rs_arch_16_workspace_local_file_placement;

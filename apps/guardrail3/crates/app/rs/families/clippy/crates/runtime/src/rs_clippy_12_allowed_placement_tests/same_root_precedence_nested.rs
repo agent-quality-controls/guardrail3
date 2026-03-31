@@ -46,36 +46,42 @@ fn rejects_lower_precedence_same_root_sibling_config_at_workspace_roots() {
 }
 
 #[test]
-fn forbids_same_root_sibling_configs_at_non_workspace_package_roots() {
+fn rejects_lower_precedence_same_root_sibling_config_at_a_legal_workspace_root() {
     let tree = project_tree(
         vec![
-            ("", dir_entry(&["packages"], &[])),
-            ("packages", dir_entry(&["cli"], &[])),
+            ("", dir_entry(&["apps"], &["guardrail3.toml"])),
+            ("apps", dir_entry(&["libsite"], &[])),
             (
-                "packages/cli",
+                "apps/libsite",
                 dir_entry(&[], &["Cargo.toml", "clippy.toml", ".clippy.toml"]),
             ),
         ],
         vec![
             (
-                "packages/cli/Cargo.toml",
-                "[package]\nname = \"cli\"".to_owned(),
+                "guardrail3.toml",
+                "[profile]\nname = \"service\"\n[rust.apps.libsite]\ntype = \"library\"\n"
+                    .to_owned(),
             ),
             (
-                "packages/cli/clippy.toml",
+                "apps/libsite/Cargo.toml",
+                "[workspace]\nmembers = []\n".to_owned(),
+            ),
+            (
+                "apps/libsite/clippy.toml",
                 "max-struct-bools = 3".to_owned(),
             ),
             (
-                "packages/cli/.clippy.toml",
+                "apps/libsite/.clippy.toml",
                 "max-struct-bools = 4".to_owned(),
             ),
         ],
     );
 
     let results = run_for_tests(&tree);
-    assertions::assert_allowed_files(&results, &[]);
-    assertions::assert_forbidden_files(
+    assertions::assert_allowed_files(&results, &["apps/libsite/.clippy.toml"]);
+    assertions::assert_same_root_conflict(
         &results,
-        &["packages/cli/.clippy.toml", "packages/cli/clippy.toml"],
+        "apps/libsite/clippy.toml",
+        "apps/libsite/.clippy.toml",
     );
 }

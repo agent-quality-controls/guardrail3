@@ -1,13 +1,13 @@
 # Rust Validation Scope Plan
 
-This directory needs one shared Rust-topology layer, one shared owned-surface layer, and one external typed family-mapper layer.
+This directory needs one shared Rust structure pass, one shared Rust legality pass, one external typed family mapper, and one family runner/orchestrator layer.
 
 The problem:
 
-- `arch` and `test` currently make their own decisions about which `Cargo.toml` roots are live
-- families still have too much freedom to decide which discovered roots they validate
-- exclusions and ownership rules can drift between families
-- root-discovery bugs get reimplemented family by family
+- Rust topology discovery and Rust file attachment are still split awkwardly
+- `arch` reports legality today, but legality is not yet a shared pre-family fact set
+- family mapping and family invocation are still easy to confuse
+- workspace-local families still risk seeing either too much or too little
 
 That boundary is wrong.
 
@@ -19,26 +19,28 @@ There should be exactly one shared answer to:
 - which roots are excluded
 - how overlapping roots are classified structurally
 - which root-level input failures happened during root discovery
+- which family-owned Rust files exist in the non-excluded tree
+- how those files attach to nearby Rust topology
+- which ancestor/descendant relations matter for walk-up or shadowing behavior
 
-There should also be exactly one shared answer to:
+There should then be exactly one shared answer to:
 
-- which non-excluded files belong to each Rust family's owned surface
-- which workspace, if any, owns each such file
-- which files are outside every legal workspace
-- which files sit in illegal nested locations beneath a workspace
+- which discovered roots are legal
+- which attached family-owned files are legally placed
+- which topology/file relations are illegal but must stay visible
 
-There should also be exactly one external answer to:
+There should then be exactly one external answer to:
 
-- which topology and owned-surface facts are routed to which family
+- which legal topology and owned-surface facts are routed to which family
 - which global families receive repo-global owned surfaces
-- which workspace-local families receive all legal workspaces plus all files relevant to them
+- which workspace-local families receive one legal workspace-local family surface at a time
 
 Those answers should come from shared layers under:
 
-- [placement](/Users/tartakovsky/Projects/websmasher/guardrail3/apps/guardrail3/crates/app/rs/placement)
-- a new shared owned-surface / file-ownership layer under `apps/guardrail3/crates/app/rs/`
+- one shared Rust structure pass under `apps/guardrail3/crates/app/rs/`
+- one shared Rust legality pass reported through `RS-ARCH`
 
-Families should then consume shared topology and owned-surface facts and only do family-specific work.
+Families should then consume legality-aware routed surfaces and only do family-specific work.
 
 The shared layers must not hand families their own mini filesystem snapshots.
 
@@ -50,42 +52,127 @@ Instead:
 
 ## Responsibility Split
 
-Shared Rust scope must own:
+Shared Rust structure pass must own:
 
 - live `Cargo.toml` root discovery
 - exclusions like `target/`, fixtures, and worktrees
 - structural root classification and overlap facts
 - root-discovery input failures
-- any shared root metadata needed by multiple families
-
-Shared owned-surface discovery must own:
-
 - non-excluded family-relevant file discovery
 - file-to-workspace attachment facts
-- file placement facts such as:
-  - owned by workspace root
-  - nested beneath workspace
-  - outside every workspace
-  - nested beneath an illegal workspace
+- attachment/relation facts such as:
+  - exact root
+  - nested beneath root
+  - ancestor of roots
+  - outside roots
+  - walk-up / shadow candidates where relevant
 - any shared file metadata needed by multiple families
+
+Shared Rust legality pass must own:
+
+- repo-global Rust topology legality
+- repo-global placement legality for workspace-local family artifacts
+- the legal/illegal verdicts other families rely on before routing
 
 External typed family mapping must own:
 
-- per-family topology routing from the shared layers
-- mapper-resolved file scoping for any family that needs it
-- mapping shared topology and owned-surface facts into typed family orchestrator inputs
+- per-family legal-surface routing from the shared passes
+- building each family's eligibility surface
+- mapping shared structure and legality facts into typed family-owned views
+
+Family runner/orchestrator must own:
+
+- turning a family surface into one or more invocation units
+- for workspace-local families: one invocation per legal workspace
+- for global families: the repo-global invocation surface
+- family-local parsing and rule fan-out inside one invocation
 
 Families must not own:
 
 - deciding which `Cargo.toml` roots are live
-- deciding which in-scope roots they are allowed to validate
 - deciding from raw paths which workspace, if any, owns a family-relevant file
+- deciding global placement legality for workspace-local family artifacts
 
 Families must own only:
 
-- family-specific parsing and normalization inside already-routed owned surfaces
-- family-specific component discovery inside already-routed owned surfaces
+- family-specific parsing and normalization inside already-routed legal invocation surfaces
+- family-specific component discovery inside already-routed legal invocation surfaces
 - per-rule input fan-out
+
+## Test Architecture
+
+The test split must follow the production split.
+
+There are three different kinds of tests, and they must not be blurred together:
+
+### Rule tests
+
+Rule tests exist to prove one pure rule over one minimal typed input.
+
+They must:
+
+- live in the rule's sidecar test directory
+- construct the rule's typed input directly
+- test only that rule's logic
+
+They must not:
+
+- go through `ProjectTree`
+- go through shared structure or legality
+- go through mapper or runner
+- depend on whether a fixture root shape is globally legal
+
+If a rule test needs a whole repo tree to work, it is usually not a rule test.
+
+### Family/orchestrator tests
+
+Family tests exist to prove:
+
+- family-local fact collection
+- family-local parsing
+- fan-out from family facts into rule inputs
+- family-local behavior on one legal routed invocation surface
+
+They may use `ProjectTree`, mapper routes, and family-local fixtures.
+
+But they must use legal routed shapes for workspace-local families.
+
+That means:
+
+- if the test is proving routed workspace-local family behavior, the fixture must contain a legal workspace root
+- if the fixture shape is illegal, the test belongs in `arch` instead
+
+### Shared legality / routing tests
+
+Shared legality and mapper tests exist to prove:
+
+- illegal topology is classified and reported
+- illegal family-file placement is classified and reported
+- legal routed workspace-local surfaces are sliced correctly
+- subtree routing does not bleed across siblings
+
+These tests belong under shared crates and `arch`, not under workspace-local
+families.
+
+### Hard rule
+
+Workspace-local family tests must not reintroduce fake routed surfaces when the
+real mapper would return no legal workspace roots.
+
+That means:
+
+- no synthetic test route that rebuilds illegal ownership behind the mapper's back
+- no test-only bypass that makes a family see files production would never route
+- no preserving standalone-package or misplaced-root fixtures just because older tests used them
+
+When production would not route an illegal root or misplaced file to a
+workspace-local family, tests must respect that.
+
+So the migration rule is:
+
+- illegal root or illegal placement expectations move to `arch`
+- legal workspace-local content expectations stay in the local family
+- pure content-rule semantics use direct typed inputs
 
 ## Governance Classes
 
@@ -129,30 +216,22 @@ Additional zoning still applies where relevant:
 - `hexarch` is local only to app workspaces under `apps/*`
 - `libarch` is local only to package workspaces under `packages/*`
 
-Workspace-local does not mean families may ignore misplaced family-owned files outside legal workspaces.
-It means:
+Workspace-local means:
 
-- shared topology determines which workspace roots are legal
-- the route supplies those legal workspace roots
-- the route also supplies candidate family-owned files needed to catch illegal placement outside or beneath those roots
-
-Example:
-
-- `clippy` should receive legal workspace roots plus `clippy.toml` and relevant Cargo override candidates
-- `toolchain` should receive legal workspace roots plus all `rust-toolchain*` candidates
-- `deny` should receive legal workspace roots plus all `deny.toml` candidates
-
-That keeps illegal family-owned files visible without letting each family rediscover legal Rust roots on its own.
+- the shared legality pass decides which workspace-local artifacts are legally placed
+- the mapper builds a legal family surface for that family
+- the family runner invokes the family once per legal workspace
+- misplaced or illegally placed family-owned files are not judged by the local family; they are judged by the shared legality pass and reported through `RS-ARCH`
 
 ## Intended Flow
 
 ```text
 project walker
   -> ProjectTree
-  -> shared Rust topology facts
-  -> shared owned-surface facts
+  -> shared Rust structure facts
+  -> shared Rust legality facts
   -> external typed family mapper
-  -> family orchestrator
+  -> family runner / orchestrator
   -> typed rule inputs
   -> pure rules
 ```
@@ -161,25 +240,17 @@ project walker
 
 ```text
 apps/guardrail3/crates/app/rs/
-  placement/                          # shared Rust root scope only
+  placement/                          # shared Rust structure facts
     Cargo.toml
     src/
       lib.rs
-      ids.rs                          # stable root ids / shared root references
+      ids.rs                          # stable root ids / shared references
       roots.rs                        # eligible live Cargo root discovery
       exclusions.rs                   # target/, fixtures, snapshots, worktrees
       classification.rs               # app/package/auxiliary/other/ambiguous
       overlap.rs                      # overlap / dual-ownership support facts
-
-  ownership/                          # shared family-relevant file discovery + attachment
-    Cargo.toml
-    src/
-      lib.rs
-      kinds.rs                        # family-owned file kinds
-      discover.rs                     # non-excluded relevant file discovery
-      attachment.rs                   # attach files to legal workspaces / illegal locations
-      rust_sources.rs                 # shared Rust source-file surface for global families
-      configs.rs                      # shared config-file surface for local families
+      attachment.rs                   # attach family-owned files to Rust structure
+      relations.rs                    # ancestor/descendant/walk-up/shadow facts
 
   family_selection/                   # shared family-set selection only
     Cargo.toml
@@ -187,11 +258,19 @@ apps/guardrail3/crates/app/rs/
       lib.rs
       selection.rs                    # requested-family resolution + enabled-family/implied-family filtering
 
+  legality/                           # shared Rust legality derivation
+    Cargo.toml
+    src/
+      lib.rs
+      topology.rs                     # legal/illegal Cargo-root topology
+      placement.rs                    # legal/illegal family-file placement
+      views.rs                        # legality facts consumed by arch and mapper
+
   family_mapper/                      # shared typed family mapping only
     Cargo.toml
     src/
       lib.rs
-      rs.rs                           # map_rs_* typed Rust family inputs
+      rs.rs                           # build per-family legal surfaces
       views.rs                        # narrow family-facing route view types
       scoped_files.rs                 # resolves raw staged/path scope into mapped family subsets
 
@@ -201,14 +280,14 @@ apps/guardrail3/crates/app/rs/
       lib.rs
       context.rs
       registry.rs
-      runners.rs
+      runners.rs                      # turns family surfaces into invocation units
 ```
 
 ## API Shape
 
-### Placement
+### Structure
 
-`placement` should expose one shared scope model:
+The shared Rust structure pass should expose one shared scope model:
 
 ```rust
 pub struct RustRootScope {
@@ -228,61 +307,49 @@ pub struct RustRootFact {
 }
 ```
 
-`placement` owns:
+The structure pass owns:
 
 - which Rust roots exist
 - which roots are excluded
 - how roots classify structurally
 - overlap facts
 - root-discovery input failures
+- family-owned file discovery
+- file attachment facts
+- ancestor/descendant relation facts relevant to tool behavior
 
-`placement` must not own:
+The structure pass must not own:
 
-- which family gets which roots
+- which family gets which legal roots or files
+- whether a root or file placement is legal
 - family enable/disable policy
 - family-local parsing
 - rule semantics
 
-### Ownership
+### Legality
 
-`ownership` should expose one shared owned-surface model:
+The shared Rust legality pass should expose one shared legality model:
 
 ```rust
-pub struct RustOwnedSurfaceFacts {
-    pub family_files: Vec<RustFamilyFileFact>,
-}
-
-pub struct RustFamilyFileFact {
-    pub family: RustValidateFamily,
-    pub rel_path: String,
-    pub kind: RustFamilyFileKind,
-    pub attachment: WorkspaceAttachment,
-}
-
-pub enum WorkspaceAttachment {
-    OwnedByWorkspaceRoot { workspace_rel: String },
-    NestedBeneathWorkspace { workspace_rel: String, rel_dir: String },
-    OutsideEveryWorkspace,
-    BeneathIllegalWorkspace { workspace_rel: String, rel_dir: String },
+pub struct RustLegalityFacts {
+    pub legal_roots: Vec<LegalRustRoot>,
+    pub illegal_roots: Vec<IllegalRustRoot>,
+    pub legal_family_files: Vec<LegalRustFamilyFile>,
+    pub illegal_family_files: Vec<IllegalRustFamilyFile>,
 }
 ```
 
-`ownership` owns facts only, not policy judgments.
+The legality pass owns:
 
-It answers:
+- whether a discovered root is a legal workspace root, illegal top-level package, illegal nested workspace, illegal non-member crate, or another illegal topology shape
+- whether a discovered family-owned file is legally placed
+- which legal roots/files local families may actually receive
 
-- where the file is
-- which legal workspace, if any, covers it
-- whether it sits below a workspace rather than at the root
-- whether no workspace owns it
+The legality pass does not own:
 
-It does not answer:
-
-- whether that placement is allowed for `clippy`
-- whether that placement is allowed for `toolchain`
-- whether the enclosing workspace topology is legal overall
-
-That judgment remains with `arch` and the target family.
+- family-specific config parsing
+- family-specific content validation
+- requested-family selection
 
 ### Family Selection
 
@@ -370,7 +437,7 @@ impl<'a> FamilyMapper<'a> {
     pub fn new(
         tree: &'a ProjectTree,
         scope: &'a RustRootScope,
-        ownership: &'a RustOwnedSurfaceFacts,
+        legality: &'a RustLegalityFacts,
         config: Option<&'a GuardrailConfig>,
         selected_families: &'a RustFamilySelection,
     ) -> Self;
@@ -385,11 +452,11 @@ impl<'a> FamilyMapper<'a> {
 
 `family_mapper` owns:
 
-- per-family routing of topology facts
-- per-family routing of owned-file facts
-- per-family route projection into narrow owned views
+- per-family legal-surface routing
+- building one eligibility surface per family
+- per-family route projection into narrow legal views
 - keeping global families global
-- keeping workspace-local families visible to misplaced relevant files
+- keeping workspace-local families local
 
 `family_mapper` must not own:
 
@@ -397,24 +464,58 @@ impl<'a> FamilyMapper<'a> {
 - root classification
 - family-relevant file discovery
 - file attachment facts
+- legality derivation
 - family enable/disable policy
 - family-local parsing
 - rule semantics
 
-## Route Shape
+## Surface vs Invocation
 
-Routes should describe owned surfaces, not hand families a private reduced tree.
+There are two different slices in the system and they must stay separate.
 
-The general contract is:
+### Family surface
 
-- global families receive repo-global owned surfaces
-- workspace-local families receive all legal workspaces plus all family-relevant files
-- all routes are derived from shared discovery/topology layers
+The mapper builds one legal family surface.
 
 Examples:
 
 - `arch`
-  - all live non-excluded Rust root/topology facts
+  - repo-global legal and illegal Rust topology + placement facts
+- `fmt`
+  - repo-global legal formatting surface
+- `code`
+  - repo-global Rust source surface
+- `clippy`
+  - all legal workspace-local Clippy surfaces, grouped by workspace
+
+This is not yet one run of the family.
+
+### Family invocation
+
+The family runner/orchestrator turns a family surface into actual invocations.
+
+Examples:
+
+- global family
+  - usually one invocation over the repo-global surface
+- workspace-local family
+  - one invocation per legal workspace
+
+So:
+
+- mapper slices by family ownership and legality
+- runner slices by execution unit
+
+The general contract is:
+
+- global families receive repo-global owned surfaces
+- workspace-local families receive legal workspace-local surfaces only
+- all routes are derived from the shared structure and legality passes
+
+Examples:
+
+- `arch`
+  - all live non-excluded Rust root/topology facts plus legality results
 - `fmt`
   - all non-excluded formatting config candidates
 - `code`
@@ -422,24 +523,25 @@ Examples:
 - `test`
   - all non-excluded owned Rust test surfaces plus owned config/hook surfaces
 - `clippy`
-  - all legal workspaces plus all Clippy-relevant files
+  - legal Clippy surfaces grouped by workspace
 - `toolchain`
-  - all legal workspaces plus all toolchain-relevant files
+  - legal toolchain surfaces grouped by workspace
 - `deny`
-  - all legal workspaces plus all deny-relevant files
+  - legal deny surfaces grouped by workspace
 - `cargo`
-  - all legal workspaces plus the manifests and lockfiles required for Cargo policy
+  - legal Cargo policy surfaces grouped by workspace
 
 The route boundary exists so:
 
 - global families cannot silently narrow to a single routed workspace
-- workspace-local families cannot silently hide misplaced family-owned files
+- workspace-local families do not need to judge misplaced global files
 - no family needs to rediscover legal ownership from raw tree shape
 
 ## Fact vs Judgment
 
-The shared layers compute facts.
-Families and `arch` compute legality.
+The shared structure pass computes facts.
+The shared legality pass computes legal/illegal judgments.
+Families compute family-local content judgments.
 
 Examples of shared facts:
 
@@ -448,16 +550,21 @@ Examples of shared facts:
 - file `deny.toml` is outside every workspace
 - file `src/lib.rs` is a non-excluded Rust source file beneath illegal nested workspace `apps/foo/crates/demo`
 
-Examples of judgments:
+Examples of legality judgments:
 
-- `arch`: nested workspace `apps/foo/crates/demo` is illegal
-- `clippy`: `clippy.toml` nested under a member crate is illegal
-- `deny`: `deny.toml` outside every workspace is illegal
-- `code`: `src/lib.rs` is still governed even though its enclosing workspace is illegal
+- nested workspace `apps/foo/crates/demo` is illegal
+- `clippy.toml` nested under a member crate is illegally placed
+- `deny.toml` outside every workspace is illegally placed
+
+Examples of family-local judgments:
+
+- `clippy`: the legal workspace-root `clippy.toml` content is too weak
+- `toolchain`: the legal workspace-root `rust-toolchain.toml` channel is wrong
+- `code`: `src/lib.rs` violates a source rule even though the file is structurally governed
 
 ## Family Check Signatures
 
-Families should consume injected typed family route.
+Families should consume injected typed family invocation.
 
 Target shape:
 
@@ -479,11 +586,10 @@ pub fn check(
 
 Families may:
 
-- parse files supplied through routed owned surfaces
-- discover family-local components inside routed owned surfaces when the family contract allows it
+- parse files supplied through routed legal invocation surfaces
+- discover family-local components inside routed legal invocation surfaces when the family contract allows it
 - normalize family facts
 - fan out per-rule inputs
-- inspect candidate family-owned files supplied by the route when misplaced placement is part of the family contract
 
 Allowed family input contents:
 
@@ -500,19 +606,52 @@ Families must not:
 - decide which routed roots they validate
 - rerun root routing locally
 - receive the whole shared scope just because it is convenient
-- invent a weaker visibility universe that makes illegal family-owned files disappear
+- judge misplaced global file placement that should already have been decided by the legality pass
 
 In concrete terms:
 
-1. `runtime/src/lib.rs` should build shared Rust topology facts once.
-2. `runtime/src/lib.rs` should build shared owned-surface facts once.
+1. `runtime/src/lib.rs` should build shared Rust structure facts once.
+2. `runtime/src/lib.rs` should build shared Rust legality facts once.
 3. `runtime/src/lib.rs` should resolve selected families once via `family_selection`.
 4. `runtime/src/lib.rs` should build one external typed `FamilyMapper` once.
-5. Families should receive injected typed family routes.
-6. `arch` should consume typed mapped route instead of collecting roots itself.
-7. `code`, `fmt`, and `test` should consume repo-global owned surfaces from the mapper rather than narrowing to routed roots.
-8. Workspace-local families should receive all legal workspaces plus all relevant files for that family.
-9. No family should infer workspace attachment from raw paths.
+5. `runtime/src/runners.rs` should turn family surfaces into invocation units.
+6. `arch` should report shared legality facts rather than rediscovering topology.
+7. `code`, `fmt`, and `test` should consume repo-global legal surfaces from the mapper.
+8. Workspace-local families should receive one legal workspace-local invocation at a time.
+9. No family should infer workspace attachment or placement legality from raw paths.
+
+## Actual Work Surface
+
+This is the concrete implementation surface required to reach the target model.
+
+1. Merge `placement` and `ownership` conceptually into one shared Rust structure stage.
+2. Add a shared Rust legality stage that consumes structure facts and produces legal/illegal root and file placement facts.
+3. Recast `RS-ARCH` as the reporting surface over that legality stage instead of the only place where legality exists.
+4. Change `family_mapper` to map legal family surfaces rather than raw discovered files.
+5. Change `runtime/src/runners.rs` so it owns invocation fan-out:
+   - global families: repo-global invocation
+   - workspace-local families: one invocation per legal workspace
+6. Remove placement judgment from workspace-local families:
+   - `toolchain`
+   - `clippy`
+   - `deny`
+   - `cargo`
+   - `garde`
+   - `deps`
+   - `release`
+7. Keep only content validation in workspace-local families.
+8. Keep global families repo-global:
+   - `arch`
+   - `fmt`
+   - `code`
+   - `test`
+
+The work is done only when:
+
+- legality exists as shared pre-family data
+- mapper routes legal family surfaces
+- runners fan those surfaces out into concrete invocations
+- workspace-local families no longer judge repo-global placement
 
 Concrete flow:
 

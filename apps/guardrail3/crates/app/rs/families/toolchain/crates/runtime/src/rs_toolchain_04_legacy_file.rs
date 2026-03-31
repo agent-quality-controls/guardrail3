@@ -76,8 +76,6 @@ pub(crate) fn test_input_for_root<'a>(
         cargo_rust_version,
         cargo_rust_version_invalid: false,
         cargo_parse_error,
-        ancestor_toolchain: None,
-        descendant_toolchains: Vec::new(),
     }
 }
 

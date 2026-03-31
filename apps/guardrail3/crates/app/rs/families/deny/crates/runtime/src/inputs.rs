@@ -1,6 +1,6 @@
 use super::facts::{
-    CoveredRustUnitFacts, DenyConfigFacts, DenyFacts, ForbiddenDenyConfigFacts,
-    SameRootConflictFacts, UncoveredRustUnitFacts,
+    CoveredRustUnitFacts, DenyConfigFacts, DenyFacts, SameRootConflictFacts,
+    UncoveredRustUnitFacts,
 };
 
 pub struct ConfigDenyInput<'a> {
@@ -9,10 +9,6 @@ pub struct ConfigDenyInput<'a> {
 
 pub struct CoveredRustUnitInput<'a> {
     pub(crate) covered: &'a CoveredRustUnitFacts,
-}
-
-pub struct ForbiddenDenyConfigInput<'a> {
-    pub(crate) forbidden: &'a ForbiddenDenyConfigFacts,
 }
 
 pub struct SameRootConflictInput<'a> {
@@ -36,12 +32,6 @@ impl<'a> ConfigDenyInput<'a> {
 impl<'a> CoveredRustUnitInput<'a> {
     pub const fn new(covered: &'a CoveredRustUnitFacts) -> Self {
         Self { covered }
-    }
-}
-
-impl<'a> ForbiddenDenyConfigInput<'a> {
-    pub const fn new(forbidden: &'a ForbiddenDenyConfigFacts) -> Self {
-        Self { forbidden }
     }
 }
 

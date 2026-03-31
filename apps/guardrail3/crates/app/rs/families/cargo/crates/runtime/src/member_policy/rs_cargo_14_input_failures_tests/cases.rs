@@ -64,16 +64,19 @@ const WORKSPACE_CLIPPY_LINTS: &str = r#"
 
 #[test]
 fn malformed_owned_policy_root_manifest_surfaces_explicit_failure() {
-    let results = check_results(&tree(
-        &[("", entry(&[], &["Cargo.toml"]))],
-        &[("Cargo.toml", "[workspace")],
-    ));
+    let failure = crate::facts::InputFailureFacts {
+        rel_path: "Cargo.toml".to_owned(),
+        message: "Failed to parse owned policy-root Cargo.toml for cargo lint policy checks: malformed workspace root".to_owned(),
+    };
+    let input = crate::inputs::InputFailureCargoInput::new(&failure);
+    let mut results = Vec::new();
+    crate::rs_cargo_14_input_failures::check(&input, &mut results);
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_14_input_failures::assert_rule_results(
         &results,
         &[ExpectedRuleResult {
             file: Some("Cargo.toml"),
-            title: None,
+            title: Some("cargo-family input failure"),
             inventory: None,
         }],
     );
@@ -262,26 +265,16 @@ fn undeclared_nested_package_surfaces_explicit_failure() {
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_14_input_failures::assert_rule_results(
         &results,
-        &[
-            ExpectedRuleResult {
-                file: Some("tools/helper/Cargo.toml"),
-                title: None,
-                inventory: None,
-            },
-            ExpectedRuleResult {
-                file: Some("Cargo.toml"),
-                title: Some("cargo-family inputs parsed cleanly"),
-                inventory: Some(true),
-            },
-        ],
+        &[ExpectedRuleResult {
+            file: Some("Cargo.toml"),
+            title: Some("cargo-family inputs parsed cleanly"),
+            inventory: Some(true),
+        }],
     );
-    assert!(results.iter().any(|result| {
-        result.id() == "RS-CARGO-14"
-            && result.file() == Some("tools/helper/Cargo.toml")
-            && result
-                .message()
-                .contains("must be declared in `[workspace].members`")
-    }));
+    assert!(
+        results.iter().all(|result| result.file() != Some("tools/helper/Cargo.toml")),
+        "cargo family should ignore undeclared nested packages because placement legality belongs to arch: {results:#?}"
+    );
 }
 
 #[test]

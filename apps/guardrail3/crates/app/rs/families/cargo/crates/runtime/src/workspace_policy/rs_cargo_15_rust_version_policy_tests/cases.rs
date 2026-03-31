@@ -4,7 +4,7 @@ use guardrail3_app_rs_family_cargo_assertions::rs_cargo_15_rust_version_policy::
 use test_support::{entry, tree};
 
 const STANDALONE_RUST_LINTS: &str = r#"
-    [lints.rust]
+    [workspace.lints.rust]
     warnings = "deny"
     unsafe_code = "forbid"
     dead_code = "deny"
@@ -14,7 +14,7 @@ const STANDALONE_RUST_LINTS: &str = r#"
 "#;
 
 const STANDALONE_CLIPPY_LINTS: &str = r#"
-    [lints.clippy]
+    [workspace.lints.clippy]
     all = { level = "deny", priority = -1 }
     pedantic = { level = "deny", priority = -1 }
     cargo = { level = "deny", priority = -1 }
@@ -62,9 +62,21 @@ const STANDALONE_CLIPPY_LINTS: &str = r#"
     multiple_crate_versions = "allow"
 "#;
 
+fn workspace_root_manifest(body: &str) -> String {
+    format!(
+        r#"
+            [workspace]
+            members = []
+            resolver = "2"
+
+            {body}
+        "#
+    )
+}
+
 #[test]
 fn library_profile_missing_rust_version_is_error() {
-    let manifest = format!(
+    let manifest = workspace_root_manifest(&format!(
         r#"
             [package]
             name = "helper"
@@ -73,12 +85,12 @@ fn library_profile_missing_rust_version_is_error() {
             {STANDALONE_RUST_LINTS}
             {STANDALONE_CLIPPY_LINTS}
         "#
-    );
+    ));
     let results = check_results(&tree(
-        &[("pkg", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
+        &[("", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
         &[
-            ("pkg/Cargo.toml", &manifest),
-            ("pkg/guardrail3.toml", "[profile]\nname = \"library\"\n"),
+            ("Cargo.toml", &manifest),
+            ("guardrail3.toml", "[profile]\nname = \"library\"\n"),
         ],
     ));
 
@@ -94,7 +106,7 @@ fn library_profile_missing_rust_version_is_error() {
 
 #[test]
 fn non_library_missing_rust_version_is_inventory_only() {
-    let manifest = format!(
+    let manifest = workspace_root_manifest(&format!(
         r#"
             [package]
             name = "helper"
@@ -103,10 +115,10 @@ fn non_library_missing_rust_version_is_inventory_only() {
             {STANDALONE_RUST_LINTS}
             {STANDALONE_CLIPPY_LINTS}
         "#
-    );
+    ));
     let results = check_results(&tree(
-        &[("pkg", entry(&[], &["Cargo.toml"]))],
-        &[("pkg/Cargo.toml", &manifest)],
+        &[("", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
+        &[("Cargo.toml", &manifest)],
     ));
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_15_rust_version_policy::assert_rule_results(
@@ -121,7 +133,7 @@ fn non_library_missing_rust_version_is_inventory_only() {
 
 #[test]
 fn library_profile_with_rust_version_is_inventory() {
-    let manifest = format!(
+    let manifest = workspace_root_manifest(&format!(
         r#"
             [package]
             name = "helper"
@@ -131,12 +143,12 @@ fn library_profile_with_rust_version_is_inventory() {
             {STANDALONE_RUST_LINTS}
             {STANDALONE_CLIPPY_LINTS}
         "#
-    );
+    ));
     let results = check_results(&tree(
-        &[("pkg", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
+        &[("", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
         &[
-            ("pkg/Cargo.toml", &manifest),
-            ("pkg/guardrail3.toml", "[profile]\nname = \"library\"\n"),
+            ("Cargo.toml", &manifest),
+            ("guardrail3.toml", "[profile]\nname = \"library\"\n"),
         ],
     ));
 
@@ -152,7 +164,7 @@ fn library_profile_with_rust_version_is_inventory() {
 
 #[test]
 fn malformed_root_local_guardrail_does_not_downgrade_missing_rust_version() {
-    let manifest = format!(
+    let manifest = workspace_root_manifest(&format!(
         r#"
             [package]
             name = "helper"
@@ -161,13 +173,13 @@ fn malformed_root_local_guardrail_does_not_downgrade_missing_rust_version() {
             {STANDALONE_RUST_LINTS}
             {STANDALONE_CLIPPY_LINTS}
         "#
-    );
+    ));
 
     let results = check_results(&tree(
-        &[("pkg", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
+        &[("", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
         &[
-            ("pkg/Cargo.toml", &manifest),
-            ("pkg/guardrail3.toml", "[profile"),
+            ("Cargo.toml", &manifest),
+            ("guardrail3.toml", "[profile"),
         ],
     ));
 
@@ -290,10 +302,10 @@ fn invalid_rust_version_type_is_error() {
         "#
     );
     let results = check_results(&tree(
-        &[("pkg", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
+        &[("", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
         &[
-            ("pkg/Cargo.toml", &manifest),
-            ("pkg/guardrail3.toml", "[profile]\nname = \"library\"\n"),
+            ("Cargo.toml", &manifest),
+            ("guardrail3.toml", "[profile]\nname = \"library\"\n"),
         ],
     ));
 

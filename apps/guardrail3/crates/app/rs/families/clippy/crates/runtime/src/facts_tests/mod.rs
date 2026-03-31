@@ -48,50 +48,7 @@ fn root_config_uses_packages_profile_when_packages_policy_exists() {
 }
 
 #[test]
-fn validation_root_clippy_without_root_cargo_is_not_allowed() {
-    let tree = project_tree(
-        vec![
-            ("", dir_entry(&["apps"], &["clippy.toml"])),
-            ("apps", dir_entry(&["backend"], &[])),
-            ("apps/backend", dir_entry(&["crates"], &["Cargo.toml"])),
-            ("apps/backend/crates", dir_entry(&["core"], &[])),
-            ("apps/backend/crates/core", dir_entry(&[], &["Cargo.toml"])),
-        ],
-        vec![
-            (
-                "clippy.toml",
-                guardrail3_domain_modules::clippy::build_clippy_toml(
-                    "service", false, true, "", "",
-                ),
-            ),
-            (
-                "apps/backend/Cargo.toml",
-                "[workspace]\nmembers = [\"crates/*\"]\n".to_owned(),
-            ),
-            (
-                "apps/backend/crates/core/Cargo.toml",
-                "[package]\nname = \"core\"\n".to_owned(),
-            ),
-        ],
-    );
-
-    let facts = collect_for_tests(&tree);
-
-    assert!(
-        facts.allowed_configs.iter().all(|config| config.rel_path != "clippy.toml"),
-        "repo-root clippy.toml should not be treated as an allowed policy root without a workspace Cargo.toml"
-    );
-    assert!(
-        facts
-            .forbidden_configs
-            .iter()
-            .any(|config| config.config.rel_path == "clippy.toml"),
-        "repo-root clippy.toml should surface as forbidden when repo root is not a workspace root"
-    );
-}
-
-#[test]
-fn standalone_app_root_uses_rust_apps_profile_policy() {
+fn workspace_local_app_root_uses_rust_apps_profile_policy() {
     let tree = project_tree(
         vec![
             ("", dir_entry(&["apps"], &["guardrail3.toml"])),
@@ -124,7 +81,7 @@ fn standalone_app_root_uses_rust_apps_profile_policy() {
         .iter()
         .find(|config| config.rel_path == "apps/libsite/clippy.toml")
         .expect("expected app-local clippy.toml facts");
-    assertions::assert_standalone_app_root_uses_rust_apps_profile_policy(
+    assertions::assert_workspace_local_app_root_uses_rust_apps_profile_policy(
         local.profile_name.as_deref(),
         local.garde_enabled,
     );

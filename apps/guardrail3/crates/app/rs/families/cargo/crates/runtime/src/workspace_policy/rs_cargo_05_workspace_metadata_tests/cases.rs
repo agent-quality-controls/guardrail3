@@ -62,9 +62,21 @@ const STANDALONE_CLIPPY_LINTS: &str = r#"
     multiple_crate_versions = "allow"
 "#;
 
+fn workspace_root_manifest(body: &str) -> String {
+    format!(
+        r#"
+            [workspace]
+            members = []
+            resolver = "2"
+
+            {body}
+        "#
+    )
+}
+
 #[test]
 fn compliant_edition_is_inventory() {
-    let manifest = format!(
+    let manifest = workspace_root_manifest(&format!(
         r#"
             [package]
             name = "helper"
@@ -74,11 +86,11 @@ fn compliant_edition_is_inventory() {
             {STANDALONE_RUST_LINTS}
             {STANDALONE_CLIPPY_LINTS}
         "#
-    );
+    ));
 
     let results = check_results(&tree(
-        &[("pkg", entry(&[], &["Cargo.toml"]))],
-        &[("pkg/Cargo.toml", &manifest)],
+        &[("", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
+        &[("Cargo.toml", &manifest)],
     ));
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_05_workspace_metadata::assert_rule_results(
@@ -93,7 +105,7 @@ fn compliant_edition_is_inventory() {
 
 #[test]
 fn missing_edition_is_error() {
-    let manifest = format!(
+    let manifest = workspace_root_manifest(&format!(
         r#"
             [package]
             name = "helper"
@@ -102,11 +114,11 @@ fn missing_edition_is_error() {
             {STANDALONE_RUST_LINTS}
             {STANDALONE_CLIPPY_LINTS}
         "#
-    );
+    ));
 
     let results = check_results(&tree(
-        &[("pkg", entry(&[], &["Cargo.toml"]))],
-        &[("pkg/Cargo.toml", &manifest)],
+        &[("", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
+        &[("Cargo.toml", &manifest)],
     ));
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_05_workspace_metadata::assert_rule_results(
@@ -121,7 +133,7 @@ fn missing_edition_is_error() {
 
 #[test]
 fn edition_below_minimum_is_error() {
-    let manifest = format!(
+    let manifest = workspace_root_manifest(&format!(
         r#"
             [package]
             name = "helper"
@@ -131,11 +143,11 @@ fn edition_below_minimum_is_error() {
             {STANDALONE_RUST_LINTS}
             {STANDALONE_CLIPPY_LINTS}
         "#
-    );
+    ));
 
     let results = check_results(&tree(
-        &[("pkg", entry(&[], &["Cargo.toml"]))],
-        &[("pkg/Cargo.toml", &manifest)],
+        &[("", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
+        &[("Cargo.toml", &manifest)],
     ));
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_05_workspace_metadata::assert_rule_results(
@@ -150,7 +162,7 @@ fn edition_below_minimum_is_error() {
 
 #[test]
 fn unknown_edition_is_error() {
-    let manifest = format!(
+    let manifest = workspace_root_manifest(&format!(
         r#"
             [package]
             name = "helper"
@@ -160,11 +172,11 @@ fn unknown_edition_is_error() {
             {STANDALONE_RUST_LINTS}
             {STANDALONE_CLIPPY_LINTS}
         "#
-    );
+    ));
 
     let results = check_results(&tree(
-        &[("pkg", entry(&[], &["Cargo.toml"]))],
-        &[("pkg/Cargo.toml", &manifest)],
+        &[("", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
+        &[("Cargo.toml", &manifest)],
     ));
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_05_workspace_metadata::assert_rule_results(
@@ -216,7 +228,7 @@ fn invalid_workspace_package_edition_does_not_fallback_to_local_package_value() 
 
 #[test]
 fn malformed_root_local_guardrail_suppresses_clean_inventory() {
-    let manifest = format!(
+    let manifest = workspace_root_manifest(&format!(
         r#"
             [package]
             name = "helper"
@@ -226,13 +238,13 @@ fn malformed_root_local_guardrail_suppresses_clean_inventory() {
             {STANDALONE_RUST_LINTS}
             {STANDALONE_CLIPPY_LINTS}
         "#
-    );
+    ));
 
     let results = check_results(&tree(
-        &[("pkg", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
+        &[("", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
         &[
-            ("pkg/Cargo.toml", &manifest),
-            ("pkg/guardrail3.toml", "[profile"),
+            ("Cargo.toml", &manifest),
+            ("guardrail3.toml", "[profile"),
         ],
     ));
 

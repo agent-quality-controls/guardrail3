@@ -30,15 +30,6 @@ pub struct DenyConfigFacts {
 }
 
 #[derive(Debug, Clone)]
-pub struct ForbiddenDenyConfigFacts {
-    pub(crate) policy_root_rel: String,
-    pub(crate) rel_path: String,
-    pub(crate) file_kind: String,
-    pub(crate) parse_error: Option<String>,
-    pub(crate) shadowed_root_rel: Option<String>,
-}
-
-#[derive(Debug, Clone)]
 pub struct CoveredRustUnitFacts {
     pub(crate) rel_dir: String,
     pub(crate) kind: PolicyRootKind,
@@ -58,7 +49,6 @@ pub struct DenyFacts {
     pub(crate) linted_configs: Vec<DenyConfigFacts>,
     #[cfg_attr(not(test), allow(dead_code))]
     pub(crate) allowed_configs: Vec<DenyConfigFacts>,
-    pub(crate) forbidden_configs: Vec<ForbiddenDenyConfigFacts>,
     pub(crate) same_root_conflicts: Vec<SameRootConflictFacts>,
     pub(crate) covered_units: Vec<CoveredRustUnitFacts>,
     pub(crate) uncovered_units: Vec<UncoveredRustUnitFacts>,
@@ -79,46 +69,24 @@ pub(crate) struct CargoRootFacts {
 
 pub fn collect(tree: &ProjectTree, route: &RsDenyRoute) -> DenyFacts {
     let cargo_roots = collect_cargo_roots(tree, route);
-    let routed_root_rels = route
+    let workspace_roots = route
         .roots()
         .iter()
         .map(|root| root.rel_dir().to_owned())
         .collect::<BTreeSet<_>>();
-    let workspace_roots = top_level_workspace_roots(&cargo_roots);
-    let mut allowed_policy_roots = BTreeSet::new();
-    allowed_policy_roots.extend(workspace_roots.iter().cloned());
     let profile_map_facts = facts_support::read_profile_map(tree, &cargo_roots);
     let policy_context_valid = profile_map_facts.parse_error.is_none();
 
-    let configs = collect_configs(
+    let mut configs = collect_configs(
         tree,
         route,
         &profile_map_facts.map,
-        &routed_root_rels,
         route.validation_scope(),
         policy_context_valid,
     );
-    let mut linted_configs = Vec::new();
-    let mut allowed_configs = Vec::new();
-    let mut forbidden_configs = Vec::new();
-    for config in configs {
-        linted_configs.push(config.clone());
-        if allowed_policy_roots.contains(&config.policy_root_rel) {
-            allowed_configs.push(config);
-        } else {
-            let shadowed_root_rel = facts_support::nearest_allowed_ancestor(
-                &config.policy_root_rel,
-                &allowed_policy_roots,
-            );
-            forbidden_configs.push(ForbiddenDenyConfigFacts {
-                policy_root_rel: config.policy_root_rel,
-                rel_path: config.rel_path,
-                file_kind: config.file_kind,
-                parse_error: config.parse_error,
-                shadowed_root_rel,
-            });
-        }
-    }
+    configs.sort_by(|a, b| a.rel_path.cmp(&b.rel_path));
+    let linted_configs = configs.clone();
+    let allowed_configs = configs;
     let mut same_root_conflicts = collect_same_root_conflicts(&allowed_configs);
 
     let mut covered_units = Vec::new();
@@ -134,9 +102,6 @@ pub fn collect(tree: &ProjectTree, route: &RsDenyRoute) -> DenyFacts {
         );
     }
 
-    linted_configs.sort_by(|a, b| a.rel_path.cmp(&b.rel_path));
-    allowed_configs.sort_by(|a, b| a.rel_path.cmp(&b.rel_path));
-    forbidden_configs.sort_by(|a, b| a.rel_path.cmp(&b.rel_path));
     same_root_conflicts.sort_by(|a, b| a.policy_root_rel.cmp(&b.policy_root_rel));
     covered_units.sort_by(|a, b| a.rel_dir.cmp(&b.rel_dir));
     uncovered_units.sort_by(|a, b| a.rel_dir.cmp(&b.rel_dir));
@@ -145,7 +110,6 @@ pub fn collect(tree: &ProjectTree, route: &RsDenyRoute) -> DenyFacts {
         policy_context_parse_error: profile_map_facts.parse_error,
         linted_configs,
         allowed_configs,
-        forbidden_configs,
         same_root_conflicts,
         covered_units,
         uncovered_units,
@@ -241,7 +205,6 @@ fn collect_configs(
     tree: &ProjectTree,
     route: &RsDenyRoute,
     profile_map: &BTreeMap<String, Option<String>>,
-    _routed_root_rels: &BTreeSet<String>,
     validation_scope: Option<&str>,
     policy_context_valid: bool,
 ) -> Vec<DenyConfigFacts> {
@@ -270,24 +233,6 @@ fn collect_configs(
     }
 
     configs
-}
-
-fn top_level_workspace_roots(cargo_roots: &BTreeMap<String, CargoRootFacts>) -> BTreeSet<String> {
-    let all_workspace_roots = cargo_roots
-        .iter()
-        .filter(|(_rel_dir, facts)| facts.has_workspace)
-        .map(|(rel_dir, _facts)| rel_dir.clone())
-        .collect::<BTreeSet<_>>();
-
-    all_workspace_roots
-        .iter()
-        .filter(|rel_dir| {
-            !all_workspace_roots
-                .iter()
-                .any(|other| other != *rel_dir && path_is_under(rel_dir, other))
-        })
-        .cloned()
-        .collect()
 }
 
 fn collect_same_root_conflicts(allowed_configs: &[DenyConfigFacts]) -> Vec<SameRootConflictFacts> {

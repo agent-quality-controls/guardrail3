@@ -6,14 +6,7 @@ pub fn assert_root_config_uses_packages_profile_when_packages_policy_exists(
     assert!(!garde_enabled);
 }
 
-pub fn assert_validation_root_clippy_is_collected_without_root_cargo(collected: bool) {
-    assert!(
-        collected,
-        "expected validation-root clippy.toml to be collected"
-    );
-}
-
-pub fn assert_standalone_app_root_uses_rust_apps_profile_policy(
+pub fn assert_workspace_local_app_root_uses_rust_apps_profile_policy(
     profile_name: Option<&str>,
     garde_enabled: bool,
 ) {

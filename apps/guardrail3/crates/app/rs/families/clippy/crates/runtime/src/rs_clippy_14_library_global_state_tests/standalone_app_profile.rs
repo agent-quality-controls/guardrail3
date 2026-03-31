@@ -4,7 +4,7 @@ use test_support::{build_fixture_clippy_toml, dir_entry, project_tree, remove_ba
 use super::super::run_for_tests;
 
 #[test]
-fn standalone_app_root_uses_rust_apps_profile_policy() {
+fn workspace_local_app_root_uses_rust_apps_profile_policy() {
     let clippy = remove_ban_path(
         &build_fixture_clippy_toml("library", false, true, "", ""),
         "disallowed-types",

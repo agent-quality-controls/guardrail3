@@ -4,7 +4,7 @@ use guardrail3_app_rs_family_cargo_assertions::rs_cargo_11_disallowed_macros_den
 use test_support::{entry, tree};
 
 const STANDALONE_RUST_LINTS: &str = r#"
-    [lints.rust]
+    [workspace.lints.rust]
     warnings = "deny"
     unsafe_code = "forbid"
     dead_code = "deny"
@@ -14,7 +14,7 @@ const STANDALONE_RUST_LINTS: &str = r#"
 "#;
 
 const STANDALONE_CLIPPY_LINTS: &str = r#"
-    [lints.clippy]
+    [workspace.lints.clippy]
     all = { level = "deny", priority = -1 }
     pedantic = { level = "deny", priority = -1 }
     cargo = { level = "deny", priority = -1 }
@@ -62,9 +62,21 @@ const STANDALONE_CLIPPY_LINTS: &str = r#"
     multiple_crate_versions = "allow"
 "#;
 
+fn workspace_root_manifest(body: &str) -> String {
+    format!(
+        r#"
+            [workspace]
+            members = []
+            resolver = "2"
+
+            {body}
+        "#
+    )
+}
+
 #[test]
 fn disallowed_macros_deny_is_inventory() {
-    let manifest = format!(
+    let manifest = workspace_root_manifest(&format!(
         r#"
             [package]
             name = "helper"
@@ -74,10 +86,10 @@ fn disallowed_macros_deny_is_inventory() {
             {STANDALONE_RUST_LINTS}
             {STANDALONE_CLIPPY_LINTS}
         "#
-    );
+    ));
     let results = check_results(&tree(
-        &[("pkg", entry(&[], &["Cargo.toml"]))],
-        &[("pkg/Cargo.toml", &manifest)],
+        &[("", entry(&[], &["Cargo.toml"]))],
+        &[("Cargo.toml", &manifest)],
     ));
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_11_disallowed_macros_deny::assert_rule_results(
@@ -92,7 +104,7 @@ fn disallowed_macros_deny_is_inventory() {
 
 #[test]
 fn missing_disallowed_macros_is_error() {
-    let manifest = format!(
+    let manifest = workspace_root_manifest(&format!(
         r#"
             [package]
             name = "helper"
@@ -102,11 +114,11 @@ fn missing_disallowed_macros_is_error() {
             {STANDALONE_RUST_LINTS}
             {STANDALONE_CLIPPY_LINTS}
         "#
-    )
+    ))
     .replace("    disallowed_macros = \"deny\"\n", "");
     let results = check_results(&tree(
-        &[("pkg", entry(&[], &["Cargo.toml"]))],
-        &[("pkg/Cargo.toml", &manifest)],
+        &[("", entry(&[], &["Cargo.toml"]))],
+        &[("Cargo.toml", &manifest)],
     ));
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_11_disallowed_macros_deny::assert_rule_results(
@@ -121,7 +133,7 @@ fn missing_disallowed_macros_is_error() {
 
 #[test]
 fn weakened_disallowed_macros_level_is_error() {
-    let manifest = format!(
+    let manifest = workspace_root_manifest(&format!(
         r#"
             [package]
             name = "helper"
@@ -131,15 +143,15 @@ fn weakened_disallowed_macros_level_is_error() {
             {STANDALONE_RUST_LINTS}
             {STANDALONE_CLIPPY_LINTS}
         "#
-    )
+    ))
     .replace(
         r#"disallowed_macros = "deny""#,
         r#"disallowed_macros = "warn""#,
     );
 
     let results = check_results(&tree(
-        &[("pkg", entry(&[], &["Cargo.toml"]))],
-        &[("pkg/Cargo.toml", &manifest)],
+        &[("", entry(&[], &["Cargo.toml"]))],
+        &[("Cargo.toml", &manifest)],
     ));
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_11_disallowed_macros_deny::assert_rule_results(
@@ -252,7 +264,7 @@ fn workspace_root_missing_disallowed_macros_is_error() {
 
 #[test]
 fn invalid_disallowed_macros_level_is_explicit_error() {
-    let manifest = format!(
+    let manifest = workspace_root_manifest(&format!(
         r#"
             [package]
             name = "helper"
@@ -262,15 +274,15 @@ fn invalid_disallowed_macros_level_is_explicit_error() {
             {STANDALONE_RUST_LINTS}
             {STANDALONE_CLIPPY_LINTS}
         "#
-    )
+    ))
     .replace(
         r#"disallowed_macros = "deny""#,
         r#"disallowed_macros = "banana""#,
     );
 
     let results = check_results(&tree(
-        &[("pkg", entry(&[], &["Cargo.toml"]))],
-        &[("pkg/Cargo.toml", &manifest)],
+        &[("", entry(&[], &["Cargo.toml"]))],
+        &[("Cargo.toml", &manifest)],
     ));
 
     guardrail3_app_rs_family_cargo_assertions::rs_cargo_11_disallowed_macros_deny::assert_rule_results(
@@ -285,7 +297,7 @@ fn invalid_disallowed_macros_level_is_explicit_error() {
 
 #[test]
 fn malformed_root_local_guardrail_suppresses_clean_inventory() {
-    let manifest = format!(
+    let manifest = workspace_root_manifest(&format!(
         r#"
             [package]
             name = "helper"
@@ -294,13 +306,13 @@ fn malformed_root_local_guardrail_suppresses_clean_inventory() {
             {STANDALONE_RUST_LINTS}
             {STANDALONE_CLIPPY_LINTS}
         "#
-    );
+    ));
 
     let results = check_results(&tree(
-        &[("pkg", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
+        &[("", entry(&[], &["Cargo.toml", "guardrail3.toml"]))],
         &[
-            ("pkg/Cargo.toml", &manifest),
-            ("pkg/guardrail3.toml", "[profile"),
+            ("Cargo.toml", &manifest),
+            ("guardrail3.toml", "[profile"),
         ],
     ));
 

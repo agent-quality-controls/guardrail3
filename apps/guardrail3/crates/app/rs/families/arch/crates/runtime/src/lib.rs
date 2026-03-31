@@ -8,6 +8,13 @@ mod rs_arch_05_scoped_arch_config_forbidden;
 mod rs_arch_06_owner_family_enablement_coherence;
 mod rs_arch_07_required_inputs_fail_closed;
 mod rs_arch_08_auxiliary_roots_declared;
+mod rs_arch_09_top_level_root_workspace;
+mod rs_arch_10_no_loose_top_level_packages;
+mod rs_arch_11_no_nested_workspaces;
+mod rs_arch_12_declared_workspace_members_only;
+mod rs_arch_13_member_paths_must_not_escape_root;
+mod rs_arch_14_auxiliary_root_workspace;
+mod rs_arch_16_workspace_local_file_placement;
 
 use guardrail3_app_rs_family_mapper::RsArchRoute;
 use guardrail3_domain_project_tree::ProjectTree;
@@ -89,6 +96,19 @@ pub fn check(tree: &ProjectTree, route: &RsArchRoute) -> Vec<CheckResult> {
         }),
         &mut results,
     );
+
+    for input in inputs::TopologyIssueInput::from_facts(&facts) {
+        rs_arch_09_top_level_root_workspace::check(&input, &mut results);
+        rs_arch_10_no_loose_top_level_packages::check(&input, &mut results);
+        rs_arch_11_no_nested_workspaces::check(&input, &mut results);
+        rs_arch_12_declared_workspace_members_only::check(&input, &mut results);
+        rs_arch_13_member_paths_must_not_escape_root::check(&input, &mut results);
+        rs_arch_14_auxiliary_root_workspace::check(&input, &mut results);
+    }
+
+    for input in inputs::IllegalFamilyFilePlacementInput::from_facts(&facts) {
+        rs_arch_16_workspace_local_file_placement::check(&input, &mut results);
+    }
 
     results
 }

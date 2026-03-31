@@ -31,7 +31,7 @@ Older handoffs are historical only.
 
 ## Scope
 
-This family is deliberately narrow.
+This family is deliberately global and structural.
 
 It owns only:
 - Rust root discovery/classification
@@ -39,14 +39,50 @@ It owns only:
 - root-to-family ownership
 - overlap/nesting legality between architecture zones
 - repo-global Rust root topology policy
+- repo-global placement legality for workspace-local family artifacts
 
 It does **not** own:
 - app-internal hex structure
 - library-internal layered structure
 - workspace-member semantics inside an app or package boundary
 - generic Cargo manifest policy
+- family-local config content validation
 
 Those remain in `RS-HEXARCH`, `RS-LIBARCH`, and `RS-CARGO`.
+
+Important architecture split:
+
+- shared Rust structure facts are computed before families
+- shared Rust legality is then derived before family slicing
+- `RS-ARCH` is the reporting surface for that legality stage
+- workspace-local families consume only legal local surfaces after that stage
+
+So `arch` should not be modeled as "a family that must run first."
+It should be modeled as the visible report surface for legality facts the mapper and runners also rely on.
+
+## Test split required by this architecture
+
+The legality-first architecture implies a strict test split.
+
+What must be true:
+
+- `arch` owns tests for illegal topology
+- `arch` owns tests for illegal workspace-local family-file placement
+- workspace-local family routed tests use legal workspace fixtures only
+- pure rule logic is tested against the rule's typed input directly
+
+What must stop:
+
+- workspace-local family test helpers rebuilding fake routes when legality-aware routing returns no legal workspaces
+- local family tests using illegal standalone roots or illegal nested roots just to reach content rules
+- local family tests asserting placement/topology findings that now belong to `arch`
+
+So for the remaining migration work:
+
+- illegal root-shape fixtures must move to `arch` or shared legality tests
+- workspace-local family tests must be rewritten to legal app/package workspace fixtures
+- rule sidecar tests must be preferred for pure semantic checks over direct typed inputs
+- no test-only routing bypass is allowed as a permanent architecture compromise
 
 ## Target topology policy
 
@@ -103,30 +139,49 @@ The topology policy above is orthogonal to zone ownership:
 
 ## Ownership model
 
-This family owns repo-global placement findings.
+This family owns repo-global topology and placement findings.
 
 That means:
 - `RS-HEXARCH` must not emit “Cargo root misplaced globally”
 - `RS-LIBARCH` must not emit it either
-- `RS-ARCH` emits it once
+- workspace-local families must not emit repo-global misplaced-file findings either
+- `RS-ARCH` emits those structural failures once
 
 This avoids:
 - double signaling
 - drift between `hexarch` and `libarch`
 - hidden policy duplication
+- workspace-local families re-growing global placement logic
+
+The intended split is:
+
+- shared structure pass: discovers roots/files and attaches files to Rust structure
+- shared legality pass: decides whether each root/file placement is legal
+- `RS-ARCH`: reports those legality failures
+- family mapper: routes only legal local surfaces to workspace-local families
+- family runners: invoke workspace-local families once per legal workspace
 
 ## Discovery / classification model
 
-The family must discover every Rust `Cargo.toml` root in the repo and classify each root by zone.
+The shared structure pass must discover every Rust `Cargo.toml` root in the repo and classify each root by zone.
 
 Classification is path-based:
 - roots under `apps/<name>/...` belong to the `app` zone
 - roots under `packages/<name>/...` belong to the `package` zone
 - everything else is `other`
 
-The family must also detect illegal overlap:
+The shared structure pass must also detect illegal overlap candidates:
 - one Rust root must not be simultaneously treated as both app-owned and package-owned
 - illegal nesting between architecture roots must be surfaced explicitly
+
+`RS-ARCH` then consumes those shared facts and turns them into legality results.
+
+The same model should eventually apply to workspace-local family artifacts:
+
+- shared structure discovers the file and attaches it to nearby Rust structure
+- shared legality determines whether that placement is allowed
+- `RS-ARCH` reports the illegal placement if not
+- the local family never sees the illegal placement as one of its legal invocation inputs
 
 ## Conditional applicability
 
@@ -175,6 +230,7 @@ Malformed required placement/config inputs must not silently suppress misplaced-
 | RS-ARCH-13 | Error | Workspace member paths must not escape the workspace root | Planned |
 | RS-ARCH-14 | Error | Auxiliary top-level Rust roots must obey the same top-level workspace rule | Planned |
 | RS-ARCH-15 | Policy | Hybrid top-level workspace roots need an explicit allow/forbid decision | Planned |
+| RS-ARCH-16 | Error | Workspace-local family-owned files must be legally placed before local family validation | Planned |
 
 ## Rule intent
 
@@ -226,6 +282,17 @@ The family should surface impossible or contradictory ownership states explicitl
 Unreadable-present or malformed required `arch` inputs must surface explicit errors instead of silently degrading into absence.
 
 That includes:
+
+## Active migration note
+
+The current cargo/deny/clippy cleanup must follow the test split above.
+
+Specifically:
+
+- `RS-CARGO` and `RS-DENY` still contain older routed-family tests built around illegal fixture shapes
+- those tests must be rewritten, not masked with synthetic routes
+- when a historical test is really about illegal placement or illegal topology, it must move to `RS-ARCH`
+- when a historical test is really about rule semantics, it should become a direct typed-input sidecar test
 - malformed governed app/package `Cargo.toml`
 - governed roots that declare `arch_role`
 - malformed auxiliary metadata on out-of-zone roots
@@ -294,6 +361,20 @@ Options:
 
 Do not leave this implicit in parser behavior or in downstream family assumptions.
 
+### RS-ARCH-16 — Workspace-local family files are globally placement-checked before local validation
+
+Workspace-local family-owned files must be judged globally before local families run.
+
+That means:
+
+- shared structure attaches `clippy.toml`, `rust-toolchain*`, `deny.toml`, workspace-local Cargo policy files, and similar artifacts to Rust topology
+- shared legality decides whether those files are legally placed
+- illegal placement is reported through `RS-ARCH`
+- local families only receive legal local files when they are invoked per workspace
+
+This rule is not "local family placement by another name."
+It is the global architectural assertion that placement legality is settled before local family content validation begins.
+
 ## Relationship to other families
 
 ### RS-HEXARCH
@@ -333,6 +414,8 @@ This family should introduce shared architecture-placement facts that other arch
 - root zone classification
 - zone ownership
 - overlap/nesting facts
+- attached workspace-local family artifacts
+- legality facts for root and workspace-local file placement
 
 Those shared facts may later be consumed by:
 - `RS-HEXARCH`
@@ -398,6 +481,12 @@ apps/guardrail3/crates/app/rs/placement/
   - governed app/package roots that declare `arch_role`
 - The next `arch` hardening pass should move "workspace only at the top, packages only below" into explicit root-topology rules here rather than leaving it split across `hexarch`, `libarch`, and `cargo`.
 - Nested-workspace prohibition must be repo-global, not only app-local. `hexarch` already forbids nested workspaces inside app roots, but the harsher contract belongs at the shared placement/topology layer.
+- The next architectural pass should stop thinking in terms of "run `arch` first as a family."
+  Instead:
+  - shared structure is built once
+  - shared legality is derived once
+  - `RS-ARCH` reports that legality
+  - mapper/runners consume the same legality to build legal family surfaces and per-workspace invocations
 
 ## Gaps closed
 
@@ -468,3 +557,15 @@ Migration notes:
   - nested workspace detection
   - workspace-member path escape
 - after migration, `hexarch` should consume the accepted app workspace boundary from `arch` instead of re-owning generic workspace legality
+
+## Implementation surface
+
+The concrete work surface for the next migration pass is:
+
+1. merge the current root/file discovery concepts into one shared Rust structure stage
+2. add a shared Rust legality stage before family mapping
+3. make `family_mapper` legality-aware so it maps legal family surfaces rather than raw discovered files
+4. make `runtime/src/runners.rs` own invocation fan-out:
+   - one invocation for global families
+   - one invocation per legal workspace for workspace-local families
+5. remove repo-global placement judgment from workspace-local families and leave them with content-only local validation

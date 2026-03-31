@@ -13,6 +13,7 @@ workspace = true
 default = ["families-all"]
 routing = [
     "dep:guardrail3_app_rs_family_mapper",
+    "dep:guardrail3_app_rs_legality",
     "dep:guardrail3_app_rs_ownership",
     "dep:guardrail3_app_rs_placement",
 ]
@@ -76,6 +77,7 @@ guardrail3_app_rs_family_test = { package = "guardrail3-app-rs-family-test", pat
 guardrail3_app_rs_family_toolchain = { package = "guardrail3-app-rs-family-toolchain", path = "../families/toolchain/crates/runtime", optional = true }
 guardrail3_app_rs_family_mapper = { package = "guardrail3-app-rs-family-mapper", path = "../family_mapper", optional = true }
 guardrail3_app_rs_family_selection = { package = "guardrail3-app-rs-family-selection", path = "../family_selection" }
+guardrail3_app_rs_legality = { package = "guardrail3-app-rs-legality", path = "../legality", optional = true }
 guardrail3_app_rs_ownership = { package = "guardrail3-app-rs-ownership", path = "../ownership", optional = true }
 guardrail3_app_rs_placement = { package = "guardrail3-app-rs-placement", path = "../placement", optional = true }
 toml = "0.8"

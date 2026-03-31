@@ -4,6 +4,3 @@ pub mod rs_toolchain_01_exists;
 pub mod rs_toolchain_02_channel_and_components;
 pub mod rs_toolchain_03_msrv_consistency;
 pub mod rs_toolchain_04_legacy_file;
-pub mod rs_toolchain_05_ancestor_shadow_drift;
-pub mod rs_toolchain_06_descendant_shadowing;
-pub mod rs_toolchain_07_illegal_placement;

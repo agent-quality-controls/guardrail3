@@ -58,14 +58,13 @@ pub(crate) fn run_check(deny_toml: &str) -> Vec<CheckResult> {
 }
 
 #[cfg(test)]
+#[allow(dead_code)]
 pub(crate) fn run_family(root: &std::path::Path) -> Vec<CheckResult> {
     crate::check_test_root(root)
 }
 
 #[cfg(test)]
-pub(crate) use ::test_support::{
-    build_fixture_deny_toml, copy_fixture, set_section_string, write_file,
-};
+pub(crate) use ::test_support::{build_fixture_deny_toml, set_section_string};
 #[cfg(test)]
 #[path = "rs_deny_06_stricter_advisories_inventory_tests/mod.rs"]
 // reason: test-only sidecar module wiring

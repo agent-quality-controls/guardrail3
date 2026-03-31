@@ -103,7 +103,7 @@ fn stays_silent_when_validation_scope_contains_no_routed_rust_roots() {
 }
 
 #[test]
-fn errors_when_scoped_override_exists_outside_all_rust_workspaces() {
+fn stays_silent_when_scoped_override_exists_outside_all_rust_workspaces() {
     let tree = project_tree(
         vec![
             ("", dir_entry(&["apps", "docs"], &[])),
@@ -139,5 +139,8 @@ fn errors_when_scoped_override_exists_outside_all_rust_workspaces() {
     );
 
     let results = run_family_with_validation_scope_for_tests(&tree, "docs/guide");
-    assertions::assert_override_error(&results, "docs/guide/.cargo/config.toml");
+    assert!(
+        results.is_empty(),
+        "expected no clippy results outside routed rust workspaces: {results:#?}"
+    );
 }
