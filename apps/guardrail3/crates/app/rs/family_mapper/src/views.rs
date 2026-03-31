@@ -40,6 +40,17 @@ impl RsProjectSurface {
         extra_file_rels: &[String],
         scoped_files: Option<&BTreeSet<String>>,
     ) -> Self {
+        Self::from_route_scope_with_dirs(tree, root_rels, extra_file_rels, &[], scoped_files)
+    }
+
+    #[must_use]
+    pub fn from_route_scope_with_dirs(
+        tree: &dyn ProjectTreeView,
+        root_rels: &[String],
+        extra_file_rels: &[String],
+        extra_dir_rels: &[String],
+        scoped_files: Option<&BTreeSet<String>>,
+    ) -> Self {
         let mut allowed_files = BTreeSet::new();
         let mut allowed_dirs = BTreeSet::new();
 
@@ -58,6 +69,10 @@ impl RsProjectSurface {
 
         for rel_path in extra_file_rels {
             let _ = allowed_files.insert(rel_path.clone());
+        }
+
+        for dir_rel in extra_dir_rels {
+            let _ = allowed_dirs.insert(dir_rel.clone());
         }
 
         if let Some(scoped) = scoped_files {

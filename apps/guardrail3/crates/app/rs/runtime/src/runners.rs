@@ -244,17 +244,14 @@ fn run_release(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
 
 #[cfg(feature = "family-hooks-shared")]
 fn run_hooks_shared(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
-    guardrail3_app_rs_family_hooks_shared::check(
-        ctx.fs,
-        ctx.path,
-        &RsProjectSurface::from_tree(ctx.tree),
-        ctx.tc,
-    )
+    let surface = hooks_surface(ctx.tree);
+    guardrail3_app_rs_family_hooks_shared::check(ctx.fs, ctx.path, &surface, ctx.tc)
 }
 
 #[cfg(feature = "family-hooks-rs")]
 fn run_hooks_rs(ctx: &RustRunContext<'_>) -> Vec<CheckResult> {
-    guardrail3_app_rs_family_hooks_rs::check(&RsProjectSurface::from_tree(ctx.tree), ctx.tc)
+    let surface = hooks_surface(ctx.tree);
+    guardrail3_app_rs_family_hooks_rs::check(&surface, ctx.tc)
 }
 
 #[cfg(feature = "family-arch")]
@@ -268,6 +265,9 @@ fn arch_surface(
         .map(|root| root.root().cargo_rel_path().to_owned())
         .collect::<Vec<_>>();
     extra_file_rels.extend(family_file_rels(route.family_files()));
+    if tree.file_exists("guardrail3.toml") {
+        extra_file_rels.push("guardrail3.toml".to_owned());
+    }
     RsProjectSurface::from_route_scope(tree, &arch_root_rels(route.roots()), &extra_file_rels, None)
 }
 
@@ -330,17 +330,12 @@ fn code_surface(
     tree: &ProjectTree,
     route: &guardrail3_app_rs_family_mapper::RsCodeRoute,
 ) -> RsProjectSurface {
-    let mut extra_file_rels = route
-        .roots()
-        .iter()
-        .map(|root| root.root().cargo_rel_path().to_owned())
-        .collect::<Vec<_>>();
-    extra_file_rels.extend(root_level_code_context_files(tree));
+    let extra_file_rels = code_surface_file_rels(tree, route);
     RsProjectSurface::from_route_scope(
         tree,
         &scoped_route_root_rels(route.roots()),
         &extra_file_rels,
-        route.scoped_files(),
+        None,
     )
 }
 
@@ -363,6 +358,17 @@ fn test_surface(
         &route_root_rels(route.roots()),
         &route_root_cargo_files(route.roots()),
         route.scoped_files(),
+    )
+}
+
+#[cfg(any(feature = "family-hooks-shared", feature = "family-hooks-rs"))]
+fn hooks_surface(tree: &ProjectTree) -> RsProjectSurface {
+    RsProjectSurface::from_route_scope_with_dirs(
+        tree,
+        &[],
+        &hook_file_rels(tree),
+        &hook_dir_rels(tree),
+        None,
     )
 }
 
@@ -444,22 +450,84 @@ fn family_file_rels(family_files: &[RsFamilyFileView]) -> Vec<String> {
 }
 
 #[cfg(feature = "family-code")]
-fn root_level_code_context_files(tree: &ProjectTree) -> Vec<String> {
-    [
-        "guardrail3.toml",
-        "clippy.toml",
-        ".clippy.toml",
-        "deny.toml",
-        ".deny.toml",
-        "rustfmt.toml",
-        ".rustfmt.toml",
-        "rust-toolchain.toml",
-        "rust-toolchain",
+fn code_surface_file_rels(
+    tree: &ProjectTree,
+    route: &guardrail3_app_rs_family_mapper::RsCodeRoute,
+) -> Vec<String> {
+    let mut rels = route
+        .roots()
+        .iter()
+        .map(|root| root.root().cargo_rel_path().to_owned())
+        .collect::<std::collections::BTreeSet<_>>();
+
+    for (dir_rel, entry) in tree.structure() {
+        for file_name in entry.files() {
+            let include = file_name.ends_with(".rs")
+                || matches!(
+                    file_name.as_str(),
+                    "guardrail3.toml"
+                        | "clippy.toml"
+                        | ".clippy.toml"
+                        | "deny.toml"
+                        | ".deny.toml"
+                        | "Cargo.toml"
+                        | "rustfmt.toml"
+                        | ".rustfmt.toml"
+                        | "rust-toolchain.toml"
+                        | "rust-toolchain"
+                );
+            if include {
+                let _ = rels.insert(ProjectTree::join_rel(dir_rel, file_name));
+            }
+        }
+    }
+
+    rels.into_iter().collect()
+}
+
+#[cfg(any(feature = "family-hooks-shared", feature = "family-hooks-rs"))]
+fn hook_file_rels(tree: &ProjectTree) -> Vec<String> {
+    let mut rels = [
+        ".githooks/pre-commit",
+        "hooks/pre-commit",
+        ".husky/pre-commit",
+        "lefthook.yml",
+        "lefthook.yaml",
+        ".lefthook.yml",
+        ".lefthook.yaml",
     ]
     .into_iter()
     .filter(|rel_path| tree.file_exists(rel_path))
     .map(str::to_owned)
+    .collect::<Vec<_>>();
+
+    rels.extend(dir_file_rels(tree, ".githooks/pre-commit.d"));
+    rels.extend(dir_file_rels(tree, ".guardrail3/overrides/pre-commit.d"));
+    rels
+}
+
+#[cfg(any(feature = "family-hooks-shared", feature = "family-hooks-rs"))]
+fn hook_dir_rels(tree: &ProjectTree) -> Vec<String> {
+    [
+        ".githooks/pre-commit.d",
+        ".guardrail3/overrides/pre-commit.d",
+    ]
+    .into_iter()
+    .filter(|rel_path| tree.dir_exists(rel_path))
+    .map(str::to_owned)
     .collect()
+}
+
+#[cfg(any(feature = "family-hooks-shared", feature = "family-hooks-rs"))]
+fn dir_file_rels(tree: &ProjectTree, dir_rel: &str) -> Vec<String> {
+    tree.dir_contents(dir_rel)
+        .map(|entry| {
+            entry.files()
+                .iter()
+                .map(|file_name| ProjectTree::join_rel(dir_rel, file_name))
+                .collect()
+        })
+        .unwrap_or_default()
 }
 
 
