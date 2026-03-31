@@ -3,7 +3,7 @@ use std::path::Path;
 use walkdir::WalkDir;
 
 use super::source_scan::is_excluded_ts_dir;
-use guardrail3_app_topology_helpers as topology_helpers;
+use guardrail3_app_hexarch_helpers as hexarch_helpers;
 use guardrail3_domain_report::{CheckResult, Severity, TsAppContext};
 use guardrail3_outbound_traits::FileSystem;
 
@@ -11,12 +11,12 @@ const ID: &str = "T-TOPOLOGY-01";
 const ENTITY: &str = "TS app";
 
 // -----------------------------------------------------------------------
-// T-TOPOLOGY-01: TS service missing hex topology structure
+// T-TOPOLOGY-01: TS service missing hexarch structure
 // -----------------------------------------------------------------------
 
 /// Scan `apps/` for TypeScript apps and check that each has
 /// `src/modules/domain/` and `src/modules/adapters/` subdirectories.
-pub fn check_hex_topology_structure(fs: &dyn FileSystem, root: &Path) -> Vec<CheckResult> {
+pub fn check_hexarch_structure(fs: &dyn FileSystem, root: &Path) -> Vec<CheckResult> {
     let mut results = Vec::new();
     let apps = discover_ts_apps(fs, root);
     for app_dir in &apps {
@@ -51,8 +51,8 @@ pub fn discover_ts_apps(fs: &dyn FileSystem, root: &Path) -> Vec<std::path::Path
     found
 }
 
-/// Run hex topology structure checks only on service-type apps.
-pub fn check_hex_topology_structure_for_apps(
+/// Run hexarch structure checks only on service-type apps.
+pub fn check_hexarch_structure_for_apps(
     fs: &dyn FileSystem,
     app_contexts: &[TsAppContext],
 ) -> Vec<CheckResult> {
@@ -101,7 +101,7 @@ fn has_ts_files(dir: &Path) -> bool {
         })
 }
 
-/// Check a single TS app for hex topology structure.
+/// Check a single TS app for hexarch structure.
 pub fn check_single_app_structure(
     fs: &dyn FileSystem,
     app_dir: &Path,
@@ -121,7 +121,7 @@ pub fn check_single_app_structure(
             Severity::Warn,
             format!("TS app `{app_name}` missing src/modules/ directory"),
             format!(
-                "App `{app_name}` has no `src/modules/` directory. Create it with the hex topology \
+                "App `{app_name}` has no `src/modules/` directory. Create it with the hexarch \
                  template: `src/modules/{{domain, ports/{{inbound,outbound}}, application, \
                  adapters/{{inbound,outbound}}}}`."
             ),
@@ -135,7 +135,7 @@ pub fn check_single_app_structure(
     check_ts_modules_dir(fs, app_name, &modules_dir, "src/modules", results);
 }
 
-/// Check a `modules/` directory for TS hex topology structure.
+/// Check a `modules/` directory for TS hexarch structure.
 /// Reusable for both top-level apps and hex-in-hex recursion.
 fn check_ts_modules_dir(
     fs: &dyn FileSystem,
@@ -146,7 +146,7 @@ fn check_ts_modules_dir(
 ) {
     // modules/ must contain exactly {adapters, application, domain, ports}
     let expected_top = ["adapters", "application", "domain", "ports"];
-    topology_helpers::check_exact_subdirs(
+    hexarch_helpers::check_exact_subdirs(
         fs,
         name,
         modules_dir,
@@ -207,7 +207,7 @@ fn check_ts_inbound_outbound(
         return; // missing dir already reported
     }
 
-    topology_helpers::check_exact_subdirs(
+    hexarch_helpers::check_exact_subdirs(
         fs,
         name,
         dir,
@@ -220,7 +220,7 @@ fn check_ts_inbound_outbound(
 }
 
 /// Validate a TS container folder: must have `.gitkeep` or at least one subdir.
-/// Also checks for loose files (via topology_helpers::check_container_not_empty)
+/// Also checks for loose files (via hexarch_helpers::check_container_not_empty)
 /// and validates each subdir has .ts/.tsx files or is a hex-in-hex.
 fn validate_ts_container(
     fs: &dyn FileSystem,
@@ -234,11 +234,11 @@ fn validate_ts_container(
     }
 
     // Empty check + loose file detection (shared helper)
-    topology_helpers::check_container_not_empty(fs, name, dir, label, ID, ENTITY, results);
+    hexarch_helpers::check_container_not_empty(fs, name, dir, label, ID, ENTITY, results);
 
     // TS-specific leaf validation: each subdir must have .ts/.tsx files,
     // .gitkeep, or a modules/ dir (hex-in-hex)
-    let dirs = topology_helpers::list_dir_names(fs, dir);
+    let dirs = hexarch_helpers::list_dir_names(fs, dir);
     for subdir in &dirs {
         let sub_path = dir.join(subdir);
         let has_modules = fs.metadata(&sub_path.join("modules")).is_some();
@@ -525,9 +525,9 @@ pub fn check_file_imports(file_path: &Path, content: &str, results: &mut Vec<Che
             results.push(CheckResult::from_parts(
                 "T-TOPOLOGY-02".to_owned(),
                 Severity::Error,
-                "Hexagonal topology import boundary violation".to_owned(),
+                "Hexarch import boundary violation".to_owned(),
                 format!(
-                    "The `{}` layer imports from the `{}` layer: `{import_path}`. In hexagonal topology, \
+                    "The `{}` layer imports from the `{}` layer: `{import_path}`. In hexarch, \
                      imports must flow inward (adapters -> application -> ports -> domain). The `{}` layer \
                      must not depend on `{}`. Move shared types to a common layer, or invert the dependency \
                      using an interface/port.",

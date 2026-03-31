@@ -29,10 +29,10 @@ pub mod dependency_scan;
 pub mod extra_visitors;
 #[path = "topology/garde_checks.rs"]
 pub mod garde_checks;
-#[path = "topology/hex_topology_checks.rs"]
-pub mod hex_topology_checks;
-#[path = "topology/hex_topology_structure.rs"]
-pub mod hex_topology_structure;
+#[path = "topology/hexarch_checks.rs"]
+pub mod hexarch_checks;
+#[path = "topology/hexarch_structure.rs"]
+pub mod hexarch_structure;
 #[path = "release/release_bin_checks.rs"]
 pub mod release_bin_checks;
 #[path = "release/release_checks.rs"]
@@ -278,22 +278,22 @@ fn run_topology_checks(
     let mut topology_results = Vec::new();
     let crate_configs = merged_crate_configs(project, guardrail_cfg);
     {
-        hex_topology_structure::check_hex_topology_structure(fs, workspace_root, &mut topology_results);
-        hex_topology_checks::check_dependency_flow(
+        hexarch_structure::check_hexarch_structure(fs, workspace_root, &mut topology_results);
+        hexarch_checks::check_dependency_flow(
             fs,
             workspace_root,
             project,
             &crate_configs,
             &mut topology_results,
         );
-        hex_topology_checks::check_library_service_boundary(
+        hexarch_checks::check_library_service_boundary(
             fs,
             workspace_root,
             project,
             &crate_configs,
             &mut topology_results,
         );
-        hex_topology_checks::check_unconfigured_members(
+        hexarch_checks::check_unconfigured_members(
             fs,
             workspace_root,
             project,

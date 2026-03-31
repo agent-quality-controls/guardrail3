@@ -1,4 +1,4 @@
-//! Shared hex topology structural helpers used by both RS-TOPOLOGY-01 and TS-TOPOLOGY-01.
+//! Shared hexarch structural helpers used by both RS-TOPOLOGY-01 and TS-TOPOLOGY-01.
 //!
 //! These are language-agnostic utilities for checking directory structure.
 //! Language-specific concerns (app discovery, leaf validation, recursion markers)
@@ -138,7 +138,7 @@ pub fn check_exact_subdirs(
                 format!("{entity} `{name}` has unexpected directory {label}/{dir_name}/"),
                 format!(
                     "{entity} `{name}` has `{label}/{dir_name}/` which is not part of \
-                     the hex topology template. Only `{{{}}}` directories are allowed in `{label}/`.",
+                     the hexarch template. Only `{{{}}}` directories are allowed in `{label}/`.",
                     expected.join(", ")
                 ),
                 Some(dir.join(dir_name).display().to_string()),

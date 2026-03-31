@@ -54,7 +54,7 @@ pub fn check(input: &HexRootInput<'_>, results: &mut Vec<CheckResult>) {
                 dir
             ),
             format!(
-                "Service `{}` has `{}/{}/` which is not part of the hex topology template. Required directories are `{{adapters, app, domain, ports}}`; optional `macros` is also allowed in `{}/`.",
+                "Service `{}` has `{}/{}/` which is not part of the hexarch template. Required directories are `{{adapters, app, domain, ports}}`; optional `macros` is also allowed in `{}/`.",
                 input.app_name,
                 label(input),
                 dir,
