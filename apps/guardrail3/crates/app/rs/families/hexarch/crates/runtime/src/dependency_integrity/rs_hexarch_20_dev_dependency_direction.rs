@@ -1,5 +1,3 @@
-#[cfg(test)]
-use guardrail3_app_rs_family_mapper::RsProjectSurface;
 use guardrail3_domain_report::{CheckResult, Severity};
 
 use super::dependency_facts::EdgeKind;
@@ -61,8 +59,7 @@ pub fn check(input: &DependencyEdgeHexarchInput<'_>, results: &mut Vec<CheckResu
 pub(crate) fn check_for_test_tree(
     tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
 ) -> Vec<CheckResult> {
-    let route = super::family_route_for_tests(tree);
-    super::check(&RsProjectSurface::from_tree(tree), &route)
+    crate::check_test_tree(tree)
 }
 
 #[cfg(test)]

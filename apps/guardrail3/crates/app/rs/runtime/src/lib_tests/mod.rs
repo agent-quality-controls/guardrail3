@@ -420,6 +420,49 @@ fn hexarch_runtime_validation_scope_stays_inside_owning_workspace() {
 }
 
 #[test]
+fn hexarch_runtime_uses_arch_for_workspace_membership_exactness() {
+    let root = super::temp_root_for_tests("hexarch-runtime-arch-exactness");
+    super::write_file_for_tests(
+        &root,
+        "guardrail3.toml",
+        "[rust.checks]\narch = true\nhexarch = true\nlibarch = true\n",
+    );
+    super::write_file_for_tests(
+        &root,
+        "apps/backend/Cargo.toml",
+        "[workspace]\nmembers = []\nresolver = \"2\"\n",
+    );
+    super::write_file_for_tests(
+        &root,
+        "apps/backend/crates/app/Cargo.toml",
+        "[package]\nname = \"backend-app\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+
+    let report =
+        super::run_hexarch_for_tests(&super::LocalFsTest, &root).expect("hexarch runtime report");
+
+    assertions::assert_result_present(
+        &report,
+        "arch",
+        "RS-ARCH-12",
+        Some("apps/backend/crates/app/Cargo.toml"),
+        None,
+        None,
+    );
+    assertions::assert_ids_absent(
+        &report,
+        &[
+            "RS-HEXARCH-07",
+            "RS-HEXARCH-09",
+            "RS-LIBARCH-05",
+            "RS-LIBARCH-06",
+        ],
+    );
+
+    std::fs::remove_dir_all(&root).expect("cleanup temp root");
+}
+
+#[test]
 fn cargo_runtime_rejects_malformed_repo_root_guardrail_config() {
     let root = super::temp_root_for_tests("cargo-runtime-malformed-config");
     super::write_file_for_tests(
@@ -1803,6 +1846,49 @@ fn libarch_runtime_validation_scope_stays_inside_owning_workspace() {
             .filter_map(|result| result.file())
             .any(|file| file.starts_with("packages/other")),
         "scoped libarch run leaked into sibling package root: {report:#?}"
+    );
+
+    std::fs::remove_dir_all(&root).expect("cleanup temp root");
+}
+
+#[test]
+fn libarch_runtime_uses_arch_for_workspace_membership_exactness() {
+    let root = super::temp_root_for_tests("libarch-runtime-arch-exactness");
+    super::write_file_for_tests(
+        &root,
+        "guardrail3.toml",
+        "[rust.checks]\narch = true\nhexarch = true\nlibarch = true\n",
+    );
+    super::write_file_for_tests(
+        &root,
+        "packages/reason-policy/Cargo.toml",
+        "[workspace]\nmembers = [\"crates/api\", \"crates/ghost\"]\nresolver = \"2\"\n",
+    );
+    super::write_file_for_tests(
+        &root,
+        "packages/reason-policy/crates/api/Cargo.toml",
+        "[package]\nname = \"reason-policy-api\"\nversion = \"0.1.0\"\nedition = \"2024\"\n",
+    );
+
+    let report =
+        super::run_libarch_for_tests(&super::LocalFsTest, &root).expect("libarch runtime report");
+
+    assertions::assert_result_present(
+        &report,
+        "arch",
+        "RS-ARCH-12",
+        Some("packages/reason-policy/Cargo.toml"),
+        None,
+        None,
+    );
+    assertions::assert_ids_absent(
+        &report,
+        &[
+            "RS-HEXARCH-07",
+            "RS-HEXARCH-09",
+            "RS-LIBARCH-05",
+            "RS-LIBARCH-06",
+        ],
     );
 
     std::fs::remove_dir_all(&root).expect("cleanup temp root");

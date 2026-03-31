@@ -99,14 +99,41 @@ pub fn family_route_for_tests(
 }
 
 #[cfg(test)]
+fn routed_surface_for_tests(
+    tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
+    route: &guardrail3_app_rs_family_mapper::RsHexarchRoute,
+) -> guardrail3_app_rs_family_mapper::RsProjectSurface {
+    let mut extra_file_rels = route
+        .roots()
+        .iter()
+        .map(|root| root.cargo_rel_path().to_owned())
+        .collect::<Vec<_>>();
+    if let Some(repo_root_cargo) = route.repo_root_cargo_rel_path() {
+        extra_file_rels.push(repo_root_cargo.to_owned());
+    }
+    if let Some(guardrail_rel) = route.guardrail_config_rel_path() {
+        extra_file_rels.push(guardrail_rel.to_owned());
+    }
+    let root_rels = route
+        .roots()
+        .iter()
+        .map(|root| root.rel_dir().to_owned())
+        .collect::<Vec<_>>();
+    guardrail3_app_rs_family_mapper::RsProjectSurface::from_route_scope(
+        tree,
+        &root_rels,
+        &extra_file_rels,
+        None,
+    )
+}
+
+#[cfg(test)]
 pub fn check_test_tree(
     tree: &guardrail3_app_rs_family_mapper::RsProjectSurface,
 ) -> Vec<guardrail3_domain_report::CheckResult> {
     let route = family_route_for_tests(tree);
-    check(
-        &guardrail3_app_rs_family_mapper::RsProjectSurface::from_tree(tree),
-        &route,
-    )
+    let surface = routed_surface_for_tests(tree, &route);
+    check(&surface, &route)
 }
 
 #[cfg(test)]
