@@ -68,6 +68,73 @@ fn extra_workspace_member_is_reported() {
 }
 
 #[test]
+fn undeclared_package_workspace_child_is_reported() {
+    let tree = tree(
+        &[
+            ("", entry(&["packages"], &[])),
+            ("packages", entry(&["reason-policy"], &[])),
+            ("packages/reason-policy", entry(&["crates"], &["Cargo.toml"])),
+            ("packages/reason-policy/crates", entry(&["api"], &[])),
+            ("packages/reason-policy/crates/api", entry(&[], &["Cargo.toml"])),
+        ],
+        &[
+            (
+                "packages/reason-policy/Cargo.toml",
+                "[workspace]\nmembers = []\nresolver = \"2\"\n",
+            ),
+            (
+                "packages/reason-policy/crates/api/Cargo.toml",
+                "[package]\nname = \"reason-policy-api\"\n",
+            ),
+        ],
+    );
+
+    let result = crate::check_test_tree(&tree)
+        .into_iter()
+        .find(|result| {
+            result.id() == "RS-ARCH-12"
+                && result.file() == Some("packages/reason-policy/crates/api/Cargo.toml")
+        })
+        .expect("expected package missing-child RS-ARCH-12 result");
+
+    assert!(result.title().contains("Workspace child"));
+}
+
+#[test]
+fn extra_package_workspace_member_is_reported() {
+    let tree = tree(
+        &[
+            ("", entry(&["packages"], &[])),
+            ("packages", entry(&["reason-policy"], &[])),
+            ("packages/reason-policy", entry(&["crates"], &["Cargo.toml"])),
+            ("packages/reason-policy/crates", entry(&["api"], &[])),
+            ("packages/reason-policy/crates/api", entry(&[], &["Cargo.toml"])),
+        ],
+        &[
+            (
+                "packages/reason-policy/Cargo.toml",
+                "[workspace]\nmembers = [\"crates/api\", \"crates/ghost\"]\nresolver = \"2\"\n",
+            ),
+            (
+                "packages/reason-policy/crates/api/Cargo.toml",
+                "[package]\nname = \"reason-policy-api\"\n",
+            ),
+        ],
+    );
+
+    let result = crate::check_test_tree(&tree)
+        .into_iter()
+        .find(|result| {
+            result.id() == "RS-ARCH-12"
+                && result.file() == Some("packages/reason-policy/Cargo.toml")
+        })
+        .expect("expected package extra-member RS-ARCH-12 result");
+
+    assert!(result.title().contains("extra member"));
+    assert!(result.message().contains("crates/ghost"));
+}
+
+#[test]
 fn exact_match_stays_clean() {
     let tree = tree(
         &[

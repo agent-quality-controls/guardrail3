@@ -6,8 +6,6 @@ pub mod rs_libarch_01_escalation_required;
 pub mod rs_libarch_02_layered_root_workspace_facade;
 pub mod rs_libarch_03_crates_dir_exists;
 pub mod rs_libarch_04_exact_layered_crate_set;
-pub mod rs_libarch_05_workspace_members_match_layer_dirs;
-pub mod rs_libarch_06_no_extra_workspace_members;
 pub mod rs_libarch_07_core_no_api_dep;
 pub mod rs_libarch_08_core_no_infra_dep;
 pub mod rs_libarch_09_api_no_infra_dep;

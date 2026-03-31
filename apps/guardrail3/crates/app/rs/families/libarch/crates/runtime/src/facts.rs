@@ -9,7 +9,7 @@ use guardrail3_app_rs_family_mapper::RsProjectSurface as ProjectTree;
 use self::measurements::collect_measurements;
 use self::package_support::{
     collect_facade_exports, facade_source_error, fallback_name, library_crate_name,
-    library_rel_path, package_name, parse_workspace_members,
+    library_rel_path, package_name,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -49,8 +49,6 @@ pub(crate) struct LibraryPackageFacts {
     pub escalation_required: bool,
     pub threshold_reasons: Vec<String>,
     pub is_workspace: bool,
-    pub workspace_members: Vec<WorkspaceMemberFacts>,
-    pub workspace_members_parse_error: Option<String>,
     pub crates_dir_exists: bool,
     pub layer_dirs: Vec<LayerDirFacts>,
     pub uses_layered_mode: bool,
@@ -75,20 +73,6 @@ impl LibraryPackageFacts {
             .iter()
             .find(|member| member.layer == Some(layer))
     }
-
-    #[must_use]
-    pub fn expected_layer_dir_rels(&self) -> Vec<String> {
-        self.layer_dirs
-            .iter()
-            .filter(|dir| dir.layer.is_some())
-            .map(|dir| dir.rel_dir.clone())
-            .collect()
-    }
-}
-
-#[derive(Debug, Clone)]
-pub(crate) struct WorkspaceMemberFacts {
-    pub resolved_dirs: Vec<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -169,8 +153,6 @@ fn collect_package(
     let escalation_required = !threshold_reasons.is_empty();
 
     let is_workspace = parsed.is_some_and(|value| value.get("workspace").is_some());
-    let (workspace_members, workspace_members_parse_error) =
-        parse_workspace_members(tree, package_rel_dir, parsed, cargo.parse_error.as_deref());
     let workspace_dependencies = parsed
         .and_then(|value| value.get("workspace"))
         .and_then(|value| value.get("dependencies"))
@@ -196,10 +178,7 @@ fn collect_package(
             dirs
         })
         .unwrap_or_default();
-    let uses_layered_mode = is_workspace
-        || crates_dir_exists
-        || !workspace_members.is_empty()
-        || !layer_dirs.is_empty();
+    let uses_layered_mode = is_workspace || crates_dir_exists || !layer_dirs.is_empty();
 
     let facade_exports = collect_facade_exports(tree, lib_rel_path.as_deref());
     let facade_source_error = facade_source_error(tree, lib_rel_path.as_deref());
@@ -217,8 +196,6 @@ fn collect_package(
         escalation_required,
         threshold_reasons,
         is_workspace,
-        workspace_members,
-        workspace_members_parse_error,
         crates_dir_exists,
         layer_dirs,
         uses_layered_mode,

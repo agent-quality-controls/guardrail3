@@ -21,8 +21,6 @@ fn flat_package() -> crate::facts::LibraryPackageFacts {
         escalation_required: false,
         threshold_reasons: Vec::new(),
         is_workspace: false,
-        workspace_members: Vec::new(),
-        workspace_members_parse_error: None,
         crates_dir_exists: false,
         layer_dirs: Vec::new(),
         uses_layered_mode: false,

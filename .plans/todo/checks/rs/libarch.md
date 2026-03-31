@@ -3,7 +3,7 @@
 > Superseded as the primary family plan by [`.plans/by_family/rs/libarch.md`](/Users/tartakovsky/Projects/websmasher/guardrail3/.plans/by_family/rs/libarch.md).
 > Keep this file as the detailed rule ledger and implementation-history reference.
 
-**Input:** package roots + Cargo.toml files + workspace membership + crate directory structure + crate dependency edges
+**Input:** package roots + Cargo.toml files + crate directory structure + crate dependency edges
 **Parser:** TOML + directory structure
 **Current code:** `apps/guardrail3/crates/app/rs/families/libarch/`
 
@@ -140,8 +140,6 @@ Notes:
 | RS-LIBARCH-02 | Error | Layered library package root Cargo.toml must be a workspace | Implemented |
 | RS-LIBARCH-03 | Error | `crates/` must exist at layered library root | Implemented |
 | RS-LIBARCH-04 | Error | Required layered crates are exactly `{api, core}` with optional `infra` | Implemented |
-| RS-LIBARCH-05 | Error | Workspace members must match layered crate dirs | Implemented |
-| RS-LIBARCH-06 | Error | No extra workspace members outside library boundary | Implemented |
 | RS-LIBARCH-07 | Error | `core` must not depend on `api` | Implemented |
 | RS-LIBARCH-08 | Error | `core` must not depend on `infra` | Implemented |
 | RS-LIBARCH-09 | Error | `api` may depend only on `core` and allowed external deps, not on `infra` | Implemented |
@@ -175,14 +173,6 @@ Inside `crates/`:
 - `core` is required
 - `infra` is optional
 - no other layer crate dirs are allowed
-
-### RS-LIBARCH-05 — Workspace members match layered crate dirs
-
-Workspace members must exactly include the layered crate dirs that actually exist under `crates/`.
-
-### RS-LIBARCH-06 — No extra workspace members outside the layered boundary
-
-The layered library workspace must not include unrelated member crates outside the library boundary.
 
 ### RS-LIBARCH-07 — `core` must not depend on `api`
 
@@ -221,6 +211,7 @@ The root facade package must export public surface from `api`, not directly from
 - zone classification (`apps/*`, `packages/*`, `other`)
 - misplaced-root reporting
 - overlap/ownership legality between app/package zones
+- workspace-membership exactness for governed workspaces
 
 `RS-LIBARCH` does not emit repo-global misplaced-root findings.
 It assumes `RS-ARCH` has already answered whether a Rust root belongs in the package zone at all.
@@ -277,7 +268,6 @@ Suggested facts:
 - package roots classified as libraries
 - package complexity facts reused from `RS-CODE` / `RS-DEPS`
 - layered crate dirs
-- workspace members
 - inter-crate dependency edges
 
 This probably wants the same style of dependency-edge resolution already built for `RS-HEXARCH`.
@@ -334,7 +324,6 @@ Forbidden:
   - sibling directory count
   - sibling `.rs` file count
 - layered crate directories present at one package root
-- workspace members
 - inter-crate dependency edges
 - root facade export targets
 
@@ -342,7 +331,6 @@ Forbidden:
 
 - one package root with complexity facts
 - one layered-workspace root
-- one workspace-membership comparison
 - one inter-crate dependency edge
 - one root-facade export surface
 
